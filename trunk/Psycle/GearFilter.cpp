@@ -154,7 +154,7 @@ void CGearfilter::UpdateStatus()
 		rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 
 	// cutoff
-	tmp.Format("%d (%dHz)",_pMachine->_cutoff, (int)((Global::pConfig->_pOutputDriver->_samplesPerSec * asin( CValueMapper::Map_255_1(_pMachine->_cutoff))) / 3.1415926f));
+	tmp.Format("%d (%dHz)",_pMachine->_cutoff, (int)((rate * asin( CValueMapper::Map_255_1(_pMachine->_cutoff))) / 3.1415926f));
 	m_ParamInf2.SetWindowText(tmp);
 
 	// resonance
@@ -162,7 +162,7 @@ void CGearfilter::UpdateStatus()
 	m_ParamInf3.SetWindowText(tmp);
 	
 	// LFO
-	tmp.Format("%d (%.2fHz)",_pMachine->_lfoSpeed,_pMachine->_lfoSpeed * 0.00000003f*Global::pConfig->_pOutputDriver->_samplesPerSec / 6.283185f);
+	tmp.Format("%d (%.2fHz)",_pMachine->_lfoSpeed,_pMachine->_lfoSpeed * 0.00000003f*rate / 6.283185f);
 	m_ParamInf4.SetWindowText(tmp);
 
 	// LFO amp

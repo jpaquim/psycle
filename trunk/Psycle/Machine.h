@@ -324,6 +324,11 @@ public:
 	virtual void Tick(int channel, PatternEntry *pData);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		Update();
+		return true;
+	}
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
@@ -477,6 +482,11 @@ public:
 	virtual void Tick(int channel,PatternEntry* pData);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		Update(_timeL,_timeR,_feedbackL,_feedbackR);
+		return true;
+	}
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
@@ -554,6 +564,11 @@ public:
 	virtual void Tick(int channel, PatternEntry *pData);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		Update();
+		return true;
+	}
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
@@ -640,6 +655,11 @@ public:
 	virtual void Tick(int channel, PatternEntry *pData);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		Update();
+		return true;
+	}
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
