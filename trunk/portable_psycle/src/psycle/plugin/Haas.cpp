@@ -48,11 +48,11 @@ public:
 			Information::Parameter("early reflection"),
 			Information::Parameter::exponential("delay", .0005, .01, .045),
 			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
+			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan amount", 0, 0, 1),
 			Information::Parameter("late reflection"),
 			Information::Parameter::exponential("delay", .015, .04, .100),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
+			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter(),
 			Information::Parameter::discrete("channel mix", normal, mono)
@@ -66,8 +66,13 @@ public:
 		switch(parameter)
 		{
 		case direct_delay_stereo_delta:
-		case early_reflection_delay:
 		case early_reflection_delay_stereo_delta:
+			if(std::fabs((*this)(parameter)) < 1e-6)
+			{
+				out << 0;
+				break;
+			}
+		case early_reflection_delay:
 		case late_reflection_delay:
 			out << (*this)(parameter) * 1000 << " ms";
 			break;
@@ -93,15 +98,39 @@ public:
 				out << "???";
 			}
 			break;
+		case late_reflection_pan:
+			if(std::fabs((*this)(parameter)) < 2e-5)
+			{
+				out << 0;
+				break;
+			}
 		case direct_pan_amount:
 		case early_reflection_pan_amount:
-		case late_reflection_pan:
 		default:
 			Plugin::describe(out, parameter);
 		}
 	};
 
-	Haas() : Plugin(information()) {}
+	Haas() :
+		Plugin(information()),
+		direct_delay_stereo_delta_abs(0),
+		direct_delay_stereo_delta_positive(false),
+		direct_delay_stereo_delta_negative(false),
+		direct_left(direct_first),
+		direct_right(direct_first),
+		direct_gain_left(1),
+		direct_gain_right(1),
+		early_reflection_delay_stereo_delta_abs(0),
+		early_reflection_delay_stereo_delta_positive(false),
+		early_reflection_delay_stereo_delta_negative(false),
+		early_reflection_left(direct_first),
+		early_reflection_right(direct_first),
+		early_reflection_gain_left(1),
+		early_reflection_gain_right(1),
+		late_reflection_gain_left(1),
+		late_reflection_gain_right(1)
+		{
+		}
 	virtual void init();
 	virtual void process(Sample l [], Sample r [], int samples, int);
 	virtual void parameter(const int &);
@@ -133,6 +162,16 @@ PSYCLE__PLUGIN__INSTANCIATOR(Haas);
 void Haas::init()
 {
 	resize(Real(0)); // resizes the buffer not to 0, but to 1, the smallest length possible for the algorithm to work
+	direct_left = direct_first;
+	direct_right = direct_first;
+	direct_gain_left = 1;
+	direct_gain_right = 1;
+	early_reflection_left = direct_first;
+	early_reflection_right = direct_first;
+	early_reflection_gain_left = 1;
+	early_reflection_gain_right = 1;
+	late_reflection_gain_left = 1;
+	late_reflection_gain_right = 1;
 }
 
 void Haas::parameter(const int & parameter)
