@@ -63,6 +63,8 @@ public:
 	CSkinDlg();
 	~CSkinDlg();
 
+	char _skinPathBuf[MAX_PATH];
+
 	HWND m_hWnd;
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)

@@ -90,11 +90,7 @@ ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
 ON_BN_CLICKED(IDC_SEQSRT, OnSeqsort)
 ON_CBN_SELCHANGE(IDC_BAR_GENFX, OnSelchangeBarGenfx)
 ON_CBN_CLOSEUP(IDC_BAR_GENFX, OnCloseupBarGenfx)
-ON_BN_CLICKED(IDC_WRAP, OnWrap)
-ON_COMMAND(ID_CONFIGURATION_KEYBOARD, OnConfigurationKeyboard)
 ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
-ON_BN_CLICKED(IDC_CENTERCURSOR, OnCentercursor)
-ON_BN_CLICKED(IDC_CURSORDOWN, OnCursordown)
 ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
 ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
 ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
@@ -311,15 +307,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// set multichannel audition checkbox status
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MULTICHANNEL_AUDITION);
 	cb->SetCheck(Global::pInputHandler->bMultiKey?1:0);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_WRAP);
-	cb->SetCheck(Global::pConfig->_wrapAround?1:0);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_CENTERCURSOR);
-	cb->SetCheck(Global::pConfig->_centerCursor?1:0);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_CURSORDOWN);
-	cb->SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
 	cb->SetCheck(Global::pConfig->_RecordNoteoff?1:0);
@@ -1296,11 +1283,6 @@ void CMainFrame::UpdateEnvInfo()
 	m_wndInfo.UpdateInfo();
 }
 
-void CMainFrame::OnConfigurationKeyboard() 
-{
-    CKeyConfigDlg dlg;
-    dlg.DoModal();
-}
 
 void CMainFrame::OnPsyhelp() 
 {
@@ -2032,28 +2014,6 @@ void CMainFrame::OnDeclen()
 void CMainFrame::OnMultichannelAudition() 
 {
 	Global::pInputHandler->bMultiKey = !Global::pInputHandler->bMultiKey;
-	m_wndView.SetFocus();
-}
-
-void CMainFrame::OnWrap() 
-{
-	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_WRAP))->GetCheck() ) Global::pConfig->_wrapAround=true;
-	else Global::pConfig->_wrapAround=false;
-	m_wndView.SetFocus();
-}
-
-void CMainFrame::OnCentercursor() 
-{
-	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_CENTERCURSOR))->GetCheck() ) Global::pConfig->_centerCursor=true;
-	else Global::pConfig->_centerCursor=false;
-	m_wndView.Repaint(DMCursor);
-	m_wndView.SetFocus();
-}
-
-void CMainFrame::OnCursordown() 
-{
-	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_CURSORDOWN))->GetCheck() ) Global::pConfig->_cursorAlwaysDown=true;
-	else Global::pConfig->_cursorAlwaysDown=false;
 	m_wndView.SetFocus();
 }
 

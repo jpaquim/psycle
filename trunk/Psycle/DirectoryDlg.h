@@ -24,6 +24,8 @@ public:
 	char _pluginPathBuf[MAX_PATH];
 	bool _vstPathChanged;
 	char _vstPathBuf[MAX_PATH];
+	bool _skinPathChanged;
+	char _skinPathBuf[MAX_PATH];
 
 	CDirectoryDlg();
 	~CDirectoryDlg();
@@ -35,6 +37,7 @@ public:
 	CEdit	m_pluginEdit;
 	CEdit	m_songEdit;
 	CEdit	m_instEdit;
+	CEdit	m_skinEdit;
 	//}}AFX_DATA
 
 
@@ -60,6 +63,8 @@ protected:
 	afx_msg void OnChangeInstedit();
 	afx_msg void OnChangePluginedit();
 	afx_msg void OnChangeVstedit();
+	afx_msg void OnBrowseSkin();
+	afx_msg void OnChangeSkinedit();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
