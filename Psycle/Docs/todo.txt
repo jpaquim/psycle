@@ -60,6 +60,8 @@ feature: First, I'd like to see the Generator or Effect name in one of these pla
 	release note, then release mouse.
 * preview check box in preset dialog stopped working?
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
+* dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
+	it is fine.  i think it has to do with cpu load.
 bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
 		 Fix:Basically, make ONLY .fxb for VST's.
 bug:	 JMDrum is buggy (Crashes sometimes)
@@ -76,7 +78,7 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 + ALK You may have coinsidered this already, making machines have a right click menu (from the 
 	machines view) with one of the items benig duplicate machine.
 + how about nice looking bmp windows for machine link and master machine dialogs?
-*: Saving all the missing settings to registry (like follow song, class of plugin..)
+*: Saving all the missing settings to registry (like class of plugin..)
 feature: Clone Machine Button
 feature: Replace Machine by another.
 feature: Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
@@ -136,8 +138,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	happens to native plugs)
 * Flanger feedback slider
 * Instrument filter envelope slider. (check differences with finetune slider)+ midi control commands learn
-* dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
-	it is fine.  i think it has to do with cpu load.
 ! Have exit warning on modified file
 ! should make it so clicking on colour boxes pops up menu
 ! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 

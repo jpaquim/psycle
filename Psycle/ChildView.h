@@ -218,7 +218,6 @@ public:
 	bool bEditMode;		// in edit mode?
 	int patStep;
 
-	bool _followSong;
 	int editPosition;	// Position in the Sequence!
 	
 	int updateMode;

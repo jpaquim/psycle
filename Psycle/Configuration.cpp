@@ -35,6 +35,8 @@ Configuration::Configuration()
 	useDoubleBuffer = true;
 	_linenumbers = true;
 	_showAboutAtStart = true;
+	_followSong = false;
+
 	mv_colour =	0x009a887c;
 	mv_wirecolour =	0x00000000;
 	mv_polycolour =	0x00ffffff;
@@ -324,6 +326,9 @@ Configuration::Read(
 	reg.QueryValue("WrapAround", &type, (BYTE*)&_wrapAround, &numData);
 	numData = sizeof(_centerCursor);
 	reg.QueryValue("CenterCursor", &type, (BYTE*)&_centerCursor, &numData);
+	numData = sizeof(_followSong);
+	reg.QueryValue("FollowSong", &type, (BYTE*)&_followSong, &numData);
+
 	numData = sizeof(_cursorAlwaysDown);
 	reg.QueryValue("CursorAlwaysDown", &type, (BYTE*)&_cursorAlwaysDown, &numData);
 	numData = sizeof(useDoubleBuffer);
@@ -790,6 +795,7 @@ Configuration::Write(
 	}
 	reg.SetValue("WrapAround", REG_BINARY, (BYTE*)&_wrapAround, sizeof(_wrapAround));
 	reg.SetValue("CenterCursor", REG_BINARY, (BYTE*)&_centerCursor, sizeof(_centerCursor));
+	reg.SetValue("FollowSong", REG_BINARY, (BYTE*)&_followSong, sizeof(_followSong));
 	reg.SetValue("CursorAlwaysDown", REG_BINARY, (BYTE*)&_cursorAlwaysDown, sizeof(_cursorAlwaysDown));
 	reg.SetValue("useDoubleBuffer", REG_BINARY, (BYTE*)&useDoubleBuffer, sizeof(useDoubleBuffer));
 	reg.SetValue("DisplayLineNumbers", REG_BINARY, (BYTE*)&_linenumbers, sizeof(_linenumbers));

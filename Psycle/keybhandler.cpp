@@ -8,7 +8,7 @@ void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	if (cmd.GetType() == CT_Note)
 	{
 		const int outnote = cmd.GetNote();
-		if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && _followSong && Global::pConfig->_RecordNoteoff)
+		if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
 		{ 
 			EnterNote(outnote,0,true);	// note end
 		}
@@ -27,7 +27,7 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 
 	if(viewMode == VMPattern && bEditMode)
 	{
-		if (!(Global::pPlayer->_playing && _followSong && bRepeat))
+		if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
 		{
 			bool success;
 			// add data
@@ -95,7 +95,7 @@ void CChildView::MidiPatternNote(int outnote, int velocity)
 			}
 			else
 			{
-				if(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && _followSong)
+				if(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong)
 				{
 					EnterNote(outnote,0,false);	// note end
 				}
@@ -123,7 +123,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
-		if (Global::pPlayer->_playing&&_followSong)
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
@@ -163,7 +163,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 		unsigned char * toffset = _toffset(ps);
 		
 		// realtime note entering
-		if (Global::pPlayer->_playing&&_followSong)
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			toffset = offset+(line*MULTIPLY);
 		}
@@ -229,7 +229,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 	if (value > 0xff) value = 0xff; // no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
-		if (Global::pPlayer->_playing&&_followSong)
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
@@ -269,7 +269,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 		unsigned char * toffset = _toffset(ps);
 		
 		// realtime note entering
-		if (Global::pPlayer->_playing&&_followSong)
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			toffset = offset+(line*MULTIPLY);
 		}
@@ -330,7 +330,7 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
-		if (Global::pPlayer->_playing&&_followSong)
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
@@ -348,7 +348,7 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 		unsigned char * toffset = _toffset(ps);
 		
 		// realtime note entering
-		if (Global::pPlayer->_playing&&_followSong)
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			toffset = offset+(line*MULTIPLY);
 		}
@@ -402,7 +402,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 	
 	// realtime note entering
-	if (Global::pPlayer->_playing&&_followSong)
+	if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 	{
 		if(_pSong->_trackArmedCount)
 		{
@@ -496,7 +496,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 //	drawLineEnd=editcur.line;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-	if (!(Global::pPlayer->_playing&&_followSong))
+	if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
 	{
 		if ( GetKeyState(VK_SHIFT)<0) 
 			AdvanceLine(-1,Global::pConfig->_wrapAround,false);
