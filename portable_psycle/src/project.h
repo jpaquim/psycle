@@ -421,7 +421,7 @@ typedef __int8 int8;
 		// * Use /EHa to specify the asynchronous exception handling model
 		//   (C++ exception handling with structured exception handling exceptions).
 		// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/vclrfExceptionSpecifications.asp
-		// function exception specification                      EHsc==GX   EHs        EHa        EHac
+		// function exception specification                      EHsc==GX   EHs EHsc-  EHa EHac-  EHac
 		// c function (no exception specification)               throw()    throw(...) throw(...) throw(...)
 		// c++ function with no exception specification          throw(...) throw(...) throw(...) throw(...)
 		// c++ function with throw() exception specification     throw()    throw()    throw(...) throw(...)
@@ -450,7 +450,7 @@ typedef __int8 int8;
 		// <obhan> there is a bug in msvc concerning synchronous exception handling model ... disable it locally where necessary
 		// <bohan> problems appears when using synchronous exception handling model...
 		// <bohan> on msvc 6, i had to use asynchronous exception handling
-		// <bohan> this is still not fixed in different with msvc 7.1 (it's only fixed with global optimization).
+		// <bohan> this is still not fixed in msvc 7.1 (it's only fixed with global optimization).
 		// <bohan> it hopefully generates a warning->error, otherwize, we would have a runtime bug
 		// <bohan> warning C4702: unreachable code
 		// <bohan> error C2220: warning treated as error - no object file generated
