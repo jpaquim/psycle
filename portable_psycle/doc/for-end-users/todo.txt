@@ -90,10 +90,6 @@ Hope this makes stuff clear.
 
 /////////////////
 
-*** When loading a stereo sample and reversing it in the wave editor (Psycle 1.74), a small artefact
-  is added to the beginning, and when I try to cut this Psycle crashes. This doesn't seem to happen
-  with monosamples.
-
 ! problem with directories http://psycle.pastnotecut.org/thread.php?threadid=1088&boardid=2&styleid=&page=1#5
 
 !! panning command does not refresh the panning graphic.
