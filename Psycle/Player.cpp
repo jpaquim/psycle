@@ -417,30 +417,43 @@ float * Player::Work(
 				float* pL = pSong->_pMachine[MASTER_INDEX]->_pSamplesL;
 				float* pR = pSong->_pMachine[MASTER_INDEX]->_pSamplesR;
 				int i;
+				
 				switch (Global::pConfig->_pOutputDriver->_channelmode)
 				{
 				case 0: // mono mix
 					for (i=0; i<amount; i++)
 					{
-						pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2);
+						if (pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS)
+						{
+							pThis->StopRecording(false);
+						}
 					}
 					break;
 				case 1: // mono L
 					for (i=0; i<amount; i++)
 					{
-						pThis->_outputWaveFile.WriteMonoSample((*pL++));
+						if (pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS)
+						{
+							pThis->StopRecording(false);
+						}
 					}
 					break;
 				case 2: // mono R
 					for (i=0; i<amount; i++)
 					{
-						pThis->_outputWaveFile.WriteMonoSample((*pR++));
+						if (pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS)
+						{
+							pThis->StopRecording(false);
+						}
 					}
 					break;
 				default: // stereo
 					for (i=0; i<amount; i++)
 					{
-						pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++));
+						if (pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS)
+						{
+							pThis->StopRecording(false);
+						}
 					}
 					break;
 				}
@@ -509,7 +522,7 @@ void Player::StartRecording(
 	}
 }
 
-void Player::StopRecording(void)
+void Player::StopRecording(bool bOk)
 {
 	if (_recording)
 	{
@@ -520,6 +533,10 @@ void Player::StopRecording(void)
 
 		_outputWaveFile.Close();
 		_recording = false;
+		if (!bOk)
+		{
+			MessageBox(NULL,"Wav recording failed.","ERROR",MB_OK);
+		}
 	}
 }
 #endif // ndef _WINAMP_PLUGIN_

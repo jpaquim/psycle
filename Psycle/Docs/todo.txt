@@ -24,12 +24,7 @@ aditional known vst bugs/buggy vsts: ~33
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
-++ undos for machine and wave edit? also track changes for file changed flag
-
-*** warnings for new and exit
-
-** need save file? reminder on open file
-*** save as wave should alert when it runs out of space
+++ undos for machine and wave edit? at least track changes for file changed flag
 
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
@@ -42,8 +37,6 @@ aditional known vst bugs/buggy vsts: ~33
 *** when you drag pan handle over transparency, it leaves trails.
 
 ++ an option to merge in another song...
-
-** gear rack stuff: exchange - is it backwards?
 
 ++ volume slide command
 

@@ -830,30 +830,34 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 
 void CChildView::OnFileLoadsong()
 {
-	OPENFILENAME ofn;       // common dialog box structure
-	char szFile[_MAX_PATH];       // buffer for file name
-	
-	szFile[0]='\0';
-	// Initialize OPENFILENAME
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = GetParent()->m_hWnd;
-	ofn.lpstrFile = szFile;
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-	
-	// Display the Open dialog box. 
-	
-	if (GetOpenFileName(&ofn)==TRUE)
+	if (CheckUnsavedSong("Load Song"))
 	{
-		OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
+
+		OPENFILENAME ofn;       // common dialog box structure
+		char szFile[_MAX_PATH];       // buffer for file name
+		
+		szFile[0]='\0';
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = GetParent()->m_hWnd;
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		
+		// Display the Open dialog box. 
+		
+		if (GetOpenFileName(&ofn)==TRUE)
+		{
+			OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
+		}
+		pParentMain->StatusBarIdle();
 	}
-	pParentMain->StatusBarIdle();
 }
 
 void CChildView::OnFileNew() 
@@ -914,7 +918,6 @@ void CChildView::OnFileSaveaudio()
 
 BOOL CChildView::CheckUnsavedSong(char* szTitle)
 {
-	return true;
 	// that method does not take machine changes into account
 	/*
 	BOOL bChecked = TRUE;
