@@ -49,6 +49,8 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
 	//{{AFX_MSG_MAP(CKeyConfigDlg)
 	ON_LBN_SELCHANGE(IDC_CMDLIST, OnSelchangeCmdlist)
+	ON_BN_CLICKED(IDC_IMPORTREG, OnImportreg)
+	ON_BN_CLICKED(IDC_EXPORTREG, OnExportreg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -214,4 +216,16 @@ void CKeyConfigDlg::OnOK()
 	Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
 
 	CDialog::OnOK();
+}
+
+void CKeyConfigDlg::OnImportreg() 
+{
+	// TODO: Add your control notification handler code here
+	
+}
+
+void CKeyConfigDlg::OnExportreg() 
+{
+	// TODO: Add your control notification handler code here
+	
 }

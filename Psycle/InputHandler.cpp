@@ -391,6 +391,10 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->patPaste();
 		break;
 
+	case cdefPatternTrackMute:
+		pChildView->patTrackMute();
+		break;
+
 	case cdefColumnNext:
 		pChildView->bScrollDetatch=false;
 		pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
@@ -1027,6 +1031,7 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefPatternCopy,VK_F4,MOD_C);
 	SetCmd(cdefPatternPaste,VK_F5,MOD_C);
 	SetCmd(cdefPatternMixPaste,VK_F5,MOD_C|MOD_S);
+	SetCmd(cdefPatternTrackMute,VK_F9,MOD_C);
 
 	SetCmd(cdefRowInsert,VK_INSERT,MOD_E);
 	SetCmd(cdefRowDelete,VK_BACK,0);
