@@ -168,6 +168,7 @@ public:
 			catch (...)
 			{
 				MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
+				size = sizeof(_program)+sizeof(count)+(sizeof(float)*count);
 			}
 		}
 
