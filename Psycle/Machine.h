@@ -100,6 +100,8 @@ public:
 	float _volumeMultiplier;				// Trick to avoid some extra multiplications.
 #if !defined(_WINAMP_PLUGIN_)
 	int _volumeCounter;						// output peak level.
+	int _volumeMaxCounter;					// output peak level.
+	int _volumeMaxCounterLife;				// output peak level.
 	unsigned long int _cpuCost;
 	unsigned long int _wireCost;
 #endif // ndef _WINAMP_PLUGIN_
@@ -145,7 +147,10 @@ protected:
 		{
 			_volumeCounter = newVolume;
 		}
-		_volumeCounter -= numSamples;
+		else
+		{
+			_volumeCounter -= numSamples;
+		}
 		if (_volumeCounter < 0)
 		{
 			_volumeCounter = 0;

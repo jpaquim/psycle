@@ -11,9 +11,23 @@ void CChildView::DrawMachineVumeters(CClientDC *devc)
 	{
 		if (_pSong->_machineActive[c])
 		{
+			if (_pSong->_pMachines[c]->_volumeCounter > _pSong->_pMachines[c]->_volumeMaxCounter)
+			{
+				_pSong->_pMachines[c]->_volumeMaxCounter = _pSong->_pMachines[c]->_volumeCounter;
+				_pSong->_pMachines[c]->_volumeMaxCounterLife = 96;
+			}
+			else
+			{
+				_pSong->_pMachines[c]->_volumeMaxCounterLife--;
+				if (_pSong->_pMachines[c]->_volumeMaxCounterLife <= 0)
+				{
+					_pSong->_pMachines[c]->_volumeMaxCounter=0;
+					_pSong->_pMachines[c]->_volumeMaxCounterLife=0;
+				}
+			}
 			DrawMachineVol(_pSong->_pMachines[c]->_x,
 						   _pSong->_pMachines[c]->_y,
-						   devc, _pSong->_pMachines[c]->_volumeCounter);
+						   devc, _pSong->_pMachines[c]->_volumeCounter, _pSong->_pMachines[c]->_volumeMaxCounter);
 		}
 	}
 }
@@ -97,23 +111,53 @@ void CChildView::DrawMachineEditor(CDC *devc)
 //////////////////////////////////////////////////////////////////////
 // Draws a single machine
 
-void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int volu)
+void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max)
 {
 	CDC memDC;
 	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(devc);
 	oldbmp=memDC.SelectObject(&stuffbmp);
+	int size = 0;
 
-	int size = volu/256;
-	
-	if (size > 96)
+//	int size = vol/256;
+	if (vol > 0)
 	{
-		size = 96;
+		size = f2i(fast_log2(float(vol))*78.0f*4/14.0f) - (78*3);// not 100% accurate, but looks as it sounds
+//		size = vol/292; // old linear method
+		if (size < 0)
+		{
+			size = 0;
+		}
+		if (size > 96)
+		{
+			size = 96;
+		}
+		size /= 6;// restrict to leds
+		size *= 6;
+	}
+	devc->BitBlt(x+8+size, y+3, 96-size, 5, &memDC, 8, 51, SRCCOPY);
+
+	if (max > 0)
+	{
+		int size2 = f2i(fast_log2(float(max))*78.0f*4/14.0f)-((78*3)+6);//not entirely accurate but looks as it sounds
+//		int size2 = (max/292)-6; // old linear method
+		if (size2 < 0)
+		{
+			size2 = 0;
+		}
+		if (size2 > 95)
+		{
+			size2 = 95;
+		}
+		size2 /= 6;// restrict to leds
+		size2 *= 6;
+		devc->BitBlt(x+8+size2, y+3, 6, 5, &memDC, 96, 96, SRCCOPY);
 	}
 
-	// BLIT [DESTX,DESTY,SIZEX,SIZEY,SOURBMPX,SOURBMPY)
-	devc->BitBlt(x+8, y+3, size, 5, &memDC, 0, 96, SRCCOPY);
-	devc->BitBlt(x+8+size, y+3, 96-size, 5, &memDC, 8, 51, SRCCOPY);
+	if (size)
+	{
+		devc->BitBlt(x+8, y+3, size, 5, &memDC, 0, 96, SRCCOPY);
+	}
 	memDC.SelectObject(oldbmp);
 	memDC.DeleteDC();
 }

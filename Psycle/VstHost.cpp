@@ -974,7 +974,10 @@ void VSTInstrument::Work(int numSamples)
 			{
 				_volumeCounter = newVolume;
 			}
-			_volumeCounter -= numSamples;
+			else
+			{
+				_volumeCounter -= numSamples;
+			}
 			if (_volumeCounter < 0)
 			{
 				_volumeCounter = 0;
@@ -1104,7 +1107,10 @@ void VSTFX::Work(int numSamples)
 			{
 				_volumeCounter = newVolume;
 			}
-			_volumeCounter -= numSamples;
+			else
+			{
+				_volumeCounter -= numSamples;
+			}
 			if (_volumeCounter < 0)
 			{
 				_volumeCounter = 0;

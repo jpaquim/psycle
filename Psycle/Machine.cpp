@@ -45,6 +45,8 @@ Machine::Machine()
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
 	_volumeCounter = 0;
+	_volumeMaxCounter = 0;
+	_volumeMaxCounterLife = 0;
 #endif // _WINAMP_PLUGIN_
 	_volumeMultiplier = 32768.0f;
 	_pSamplesL = new float[STREAM_SIZE];

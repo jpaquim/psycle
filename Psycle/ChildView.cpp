@@ -34,7 +34,7 @@
 #include "ConfigDlg.h"
 #include "SongpDlg.h"
 #include "inputhandler.h"
-
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
