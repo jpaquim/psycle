@@ -736,6 +736,7 @@ namespace psycle
 							<< std::endl
 							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################";
 						out.flush();
+						host::logger(host::logger::crash,"################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################");
 					}
 				}
 				out << std::endl;
