@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by Psycle.rc
 //
+#define IDCANCEL2                       3
 #define ID_INDICATOR_SEQPOS             52
 #define ID_INDICATOR_PATTERN            53
 #define ID_INDICATOR_LINE               54
@@ -10,6 +11,7 @@
 #define ID_INDICATOR_FOLLOW             57
 #define ID_INDICATOR_NOTEOFF            58
 #define ID_INDICATOR_TWEAKS             59
+#define ID_INDICATOR_OCTAVE             60
 #define IDR_MAINFRAME                   100
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
@@ -78,6 +80,9 @@
 #define IDB_MASTERBACK                  190
 #define IDB_MASTERNUMBERS               191
 #define IDB_MASTERSLIDER                192
+#define IDB_PATTERN_HEADER_SKIN         194
+#define IDB_MACHINE_SKIN                195
+#define IDD_GEAR_SCOPE                  196
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -111,7 +116,9 @@
 #define IDC_BROWSEPLUGIN                1030
 #define IDC_PLUGINEDIT                  1031
 #define IDC_FT2_HOME_END                1032
+#define IDC_SKINEDIT                    1032
 #define IDC_FT2DEL                      1033
+#define IDC_BROWSESKIN                  1033
 #define IDC_SHIFTARROWS                 1034
 #define IDC_PLAY_R_CTRL                 1035
 #define IDC_KEY0                        1036
@@ -129,8 +136,11 @@
 #define IDC_BUTTON25                    1047
 #define IDC_ABOUTBMP                    1048
 #define IDC_PATTERN_HEADER_SKIN2        1048
+#define IDC_MACHINE_SKIN                1048
 #define IDC_HEADER                      1049
+#define IDC_MACHINE_FONTFACE            1049
 #define IDC_HEADERDLG                   1050
+#define IDC_MACHINE_FONTFACE2           1050
 #define IDC_STEINBERGCOPY               1051
 #define IDC_EDIT5                       1052
 #define IDC_SHOWATSTARTUP               1053
@@ -558,18 +568,28 @@
 #define IDC_SLIDERM2                    1462
 #define IDC_PATTERN_FONT_POINT          1462
 #define IDC_SLIDERM3                    1463
+#define IDC_MACHINE_FONT_POINT          1463
 #define IDC_SLIDERM4                    1464
+#define IDC_MV_FONT_COLOUR              1464
 #define IDC_SLIDERM5                    1465
+#define IDC_MBG_MV_FONT                 1465
 #define IDC_SLIDERM6                    1466
+#define IDC_WIREAA                      1466
 #define IDC_SLIDERM7                    1467
+#define IDC_MACHINE_FONT_POINT2         1467
 #define IDC_SLIDERM8                    1468
+#define IDC_MV_FONT_COLOUR2             1468
 #define IDC_SLIDERM9                    1469
+#define IDC_MBG_MV_FONT2                1469
 #define IDC_SLIDERM10                   1470
 #define IDC_SLIDERM11                   1471
 #define IDC_SLIDERM12                   1472
 #define IDC_SEQCUT                      1473
 #define IDC_SEQCOPY                     1474
 #define IDC_SEQPASTE                    1475
+#define IDC_VERSION_INFO                1479
+#define IDC_BUTTON                      1481
+#define IDC_SLIDER                      1482
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -587,7 +607,6 @@
 #define ID_VIEW_INSTRUMENTEDITOR        32790
 #define ID_CONFIGURATION_FREEAUDIO      32792
 #define ID_CONFIGURATION_SETTINGS       32793
-#define ID_CONFIGURATION_KEYBOARD       32794
 #define ID_CPUPERFORMANCE               32796
 #define ID_MIDI_MONITOR                 32797
 #define ID_PSYHELP                      32799
@@ -648,9 +667,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        193
+#define _APS_NEXT_RESOURCE_VALUE        197
 #define _APS_NEXT_COMMAND_VALUE         32899
-#define _APS_NEXT_CONTROL_VALUE         1475
+#define _APS_NEXT_CONTROL_VALUE         1484
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif
