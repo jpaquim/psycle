@@ -11,27 +11,21 @@ class CMainFrame;
 
 class CWaveEdFrame : public CFrameWnd
 {
-	DECLARE_DYNCREATE(CWaveEdFrame)
-protected:
+public:
 	CWaveEdFrame();
-public:
-	CWaveEdFrame(Song*,CMainFrame*);
-
-	void Notify(void);
-
-private:
-	void AdjustStatusBar(int ins, int wav);
-	Song *_pSong;
-
-	CStatusBar statusbar;
-	CWaveEdChildView wavview;
-
+	CWaveEdFrame(Song* _sng,CMainFrame* pframe);
+protected: 
+	DECLARE_DYNAMIC(CWaveEdFrame)
 
 public:
+	virtual ~CWaveEdFrame();
 	
 //	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 	GenerateView();
-
+	void Notify(void);
+	Song *_pSong;
+	CMainFrame *_pFrame;
+	
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CWaveEdFrame)
@@ -39,11 +33,19 @@ public:
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	//}}AFX_VIRTUAL
+	//}}AFX_VIRTUAL	
+
+	
+private:
+	void AdjustStatusBar(int ins, int wav);
+
+	CStatusBar statusbar;
+	CWaveEdChildView wavview;
+
+
 
 // Implementation
 protected:
-	virtual ~CWaveEdFrame();
 	
 	// Generated message map functions
 	//{{AFX_MSG(CWaveEdFrame)

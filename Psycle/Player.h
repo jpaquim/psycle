@@ -2,7 +2,9 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
-#include "Riff.h"
+#if !defined(_WINAMP_PLUGIN_)
+	#include "Riff.h"
+#endif
 
 class Machine;
 

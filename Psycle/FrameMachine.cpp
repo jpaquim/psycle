@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
-#include "Song.h"
 #include "FrameMachine.h"
+#include "Childview.h"
 #include "NewVal.h"
 #include "PresetsDlg.h"
 #include "Plugin.h"

@@ -40,7 +40,6 @@ public:
 	COLORREF vu1;
 	COLORREF vu2;
 	COLORREF vu3;
-	int _keyboardMode; // Currently Not Used (was used for hardcoded keyb types)
 	bool mv_wireaa;
 	int mv_wirewidth;
 	bool _wrapAround;

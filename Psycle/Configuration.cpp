@@ -18,12 +18,13 @@ Configuration::Configuration()
 	_initialized = false;
 
 #if defined(_WINAMP_PLUGIN_)
+	_psInitialPluginDir = NULL;
 	_psPluginDir = NULL;
+	_psInitialVstDir = NULL;
 	_psVstDir = NULL;
 	_samplesPerSec = 44100;
 #else
 
-	_keyboardMode = 0; // Set to Standard
 	_wrapAround = true;
 	_centerCursor = false;
 	_cursorAlwaysDown = false;
@@ -296,8 +297,6 @@ Configuration::Read(
 		}
 	}
 #if !defined(_WINAMP_PLUGIN_)
-	numData = sizeof(_keyboardMode);
-	reg.QueryValue("KeyboardMode", &type, (BYTE*)&_keyboardMode, &numData);
 	numData = sizeof(_wrapAround);
 	reg.QueryValue("WrapAround", &type, (BYTE*)&_wrapAround, &numData);
 	numData = sizeof(_centerCursor);
@@ -724,7 +723,6 @@ Configuration::Write(
 			return;
 		}
 	}
-	reg.SetValue("KeyboardMode", REG_DWORD, (BYTE*)&_keyboardMode, sizeof(_keyboardMode));
 	reg.SetValue("WrapAround", REG_BINARY, (BYTE*)&_wrapAround, sizeof(_wrapAround));
 	reg.SetValue("CenterCursor", REG_BINARY, (BYTE*)&_centerCursor, sizeof(_centerCursor));
 	reg.SetValue("CursorAlwaysDown", REG_BINARY, (BYTE*)&_cursorAlwaysDown, sizeof(_cursorAlwaysDown));

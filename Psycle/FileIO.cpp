@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 #if defined(_WINAMP_PLUGIN_)
 	#include <afxwin.h>
 #endif // _WINAMP_PLUGIN_
@@ -245,5 +246,5 @@ ULONG OldPsyFile::Skip(
 bool OldPsyFile::Eof(
 	void)
 {
-	return (bool) feof(_file);
+	return feof(_file)?true:false;
 }

@@ -212,7 +212,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Wave Editor Window
 	m_pWndWed=new CWaveEdFrame(this->_pSong,this);
-	m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this, NULL);
+	m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
 	m_pWndWed->GenerateView();
 
 	// Init Bars Content.
@@ -364,7 +364,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	UpdateSequencer();
 	m_wndView.InitTimer();
-	OnSetFocus(NULL);
+//	m_wndView.Repaint();
+//	m_wndView.SetFocus();
+//	m_wndView.EnableSound();
 	
 	return 0;
 }
@@ -404,7 +406,7 @@ void CMainFrame::OnSetFocus(CWnd* pOldWnd)
 	// forward focus to the view window
 	m_wndView.Repaint();
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
+	m_wndView.EnableSound();
 }
 
 BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
@@ -430,13 +432,16 @@ void CMainFrame::OnClose()
 	if (MessageBox("Are you sure?","Quit Psycle",MB_YESNO) == IDYES)
 	{
 		m_wndView._outputActive = false;
+		Global::pPlayer->Stop();
 		Global::pConfig->_pOutputDriver->Enable(false);
 		// MIDI IMPLEMENTATION
 		Global::pConfig->_pMidiInput->Close();
 
+		if ( m_wndView.MasterMachineDialog ) m_wndView.MasterMachineDialog->DestroyWindow();
+
 		//Recent File List;
 		((CPsycleApp*)AfxGetApp())->SaveRecent(this);
-			
+		
 		CFrameWnd::OnClose();
 	}
 }
@@ -1171,6 +1176,14 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			{
 				m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
 				m_wndView.MasterMachineDialog->_pMachine = (Master*)Global::_pSong->_pMachines[tmac];
+				for (int i=0;i<MAX_CONNECTIONS; i++)
+				{
+					if ( _pSong->_pMachines[tmac]->_inputCon[i])
+					{
+						strcpy(m_wndView.MasterMachineDialog->macname[i],_pSong->_pMachines[_pSong->_pMachines[0]->_inputMachines[i]]->_editName);
+					}
+					
+				}
 				m_wndView.MasterMachineDialog->Create();
 				m_wndView.MasterMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 				m_wndView.MasterMachineDialog->SetActiveWindow();

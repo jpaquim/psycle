@@ -11,8 +11,8 @@
 
 #include "VstHost.h"
 #include "song.h"
-#include "Configuration.h"
 //#include "FileIO.h"
+#include "Configuration.h"
 #include "Player.h"
 
 #if !defined(_WINAMP_PLUGIN_)
@@ -26,7 +26,6 @@ VstTimeInfo VSTPlugin::_timeInfo;
 /////////////////////
 VSTPlugin::VSTPlugin()
 {
-	_volumeMultiplier = 1.0f;
 	memset(junk,0,STREAM_SIZE*sizeof(float));
 	for (int i=0;i<MAX_INOUTS;i++)
 	{
@@ -42,7 +41,7 @@ VSTPlugin::VSTPlugin()
 	_pEffect=NULL;
 	h_dll=NULL;
 	editorWnd=NULL;
-	instantiated=false;		// Constructin' with no instance
+	instantiated=false;
 	macindex = 0;
 
 	requiresProcess=false;
@@ -166,10 +165,11 @@ void VSTPlugin::Free() // Called also in destruction
 		instantiated=false;
 		TRACE("VST plugin : Free query 0x%.8X\n",(int)_pEffect);
 		_pEffect->user = NULL;
+		int mg = _pEffect->magic;
 		Dispatch( effMainsChanged, 0, 0, NULL, 0.0f);
 		Dispatch( effClose,        0, 0, NULL, 0.0f);
-		//delete _pEffect; // <-  Should check for the necessity of this command.
-		_pEffect=NULL;
+		
+		_pEffect=NULL;	
 		FreeLibrary(h_dll);
 	}
 }
@@ -391,20 +391,7 @@ bool VSTPlugin::Save(RiffFile* pFile)
 */
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if (_inputCon[i])
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST && type != MACH_VSTFX ) tmpvol[i]*=32768;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
@@ -999,7 +986,7 @@ void VSTInstrument::Work(int numSamples)
 						if (TriggerDelayCounter[i] == nextevent)
 						{
 							// do event
-							_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+							Tick(i,&TriggerDelay[i]);
 							TriggerDelay[i]._cmd = 0;
 						}
 						else
@@ -1012,7 +999,7 @@ void VSTInstrument::Work(int numSamples)
 						if (TriggerDelayCounter[i] == nextevent)
 						{
 							// do event
-							_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+							Tick(i,&TriggerDelay[i]);
 							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
 						}
 						else

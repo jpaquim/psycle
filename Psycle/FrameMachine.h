@@ -11,6 +11,7 @@
 //#include "ChildView.h"	// Added by ClassView
 
 class Song;
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CFrameMachine frame

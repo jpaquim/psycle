@@ -3,7 +3,7 @@
 
 #include "Machine.h"
 #include "Vst\AEffectx.h"
-#include "Song.h"
+#include "constants.h"
 #include "Helpers.h"
 
 #define MAX_EVENTS		64

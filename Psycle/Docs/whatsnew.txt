@@ -1,8 +1,8 @@
 V1.67
 -----
 ! Manually editing sample name didn't update the combobox.
-! When the "MIDI/Params/Waves" combobox was showing "Params", and the user tried to decrease the current
-  selected with the arrows, the position 0 was unreachable ( it stopped at 1 ).
+! When the "MIDI/Params/Waves" combobox was showing "Params", and the user tried to decrease the selected
+  one with the arrows, the position 0 was unreachable ( it stopped at 1 ).
 ! Using "Enter" key to get the generator and instrument/wave under cursor (In pattern editor) did
   not update the sample in the instrument editor, which in turn made the wave loader function to
   load over an incorrect position.
@@ -11,11 +11,12 @@ V1.67
   faster and added a 2nd bar which decreases slowly to show the peaks.
 * Changed default values for sound buffers (both DX and WO), set WO as default output
   (as opposed to silent) and disabled the DX "exclusive mode" by default.
-! Fixed the Song information message box (in song loading) not being Modal (say on top).
+! Fixed the Song information message box (in song loading) not being Modal (stay on top).
 + Added colour boxes to "Visual" configuration to show the actual configuration. (Updates when changing preset
   too)
-* Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize and "HostCanDo")
-! (Tried to) Fix several GDI Leaks.
+* Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize,
+   audioMasterAutomate and HostCanDo)
+! Fix several GDI Leaks (still missing a a few DC and bitmap ones).
 ! Fixed problem with saving songs (affected TPB) when using a Sample Rate different than 44100.
 ! "Couldn't Save file" error when trying to save "autosave.psy" doesn't pop up now.
 ! Fixed wave recording bug where it had an extra silent at the beggining and missing tick at the end.
@@ -45,7 +46,7 @@ V1.67
 ! Made Master Machine Dialog modeless, updates display if volume attenuated
 + VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
 + Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) for all generator types. (pooplog)
-
+! Fixed the crash bug happening when changing from waveout to Directound (and viceversa).
 
 V1.66
 -----

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "machineinterface.h"
+//#include "machineinterface.h"
 
 #if defined(_WINAMP_PLUGIN_)
 	#include "global.h"
@@ -130,7 +130,7 @@ void Player::ExecuteLine(void)
 					else /*Fx*/ mIndex = pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
 
 					if ( mIndex < MAX_MACHINES && pSong->_machineActive[mIndex] )
-						pSong->_pMachines[mIndex]->SetWireVolume(mIndex,pEntry->_inst,pEntry->_parameter);
+						pSong->_pMachines[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,pEntry->_parameter);
 				}
 				break;
 

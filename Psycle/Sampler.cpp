@@ -61,8 +61,8 @@ void Sampler::Work(
 {
 
 #if defined(_WINAMP_PLUGIN_)
-	for (int voice=0; voice<_numVoices; voice++)
-	{
+//	for (int voice=0; voice<_numVoices; voice++)
+//	{
 		int ns = numSamples;
 		while (ns)
 		{
@@ -134,7 +134,7 @@ void Sampler::Work(
 				}
 			}
 		}
-	}
+//	}
 	_worked = true;
 #else
 	CPUCOST_INIT(cost);
@@ -394,6 +394,10 @@ void Sampler::VoiceWork(int numsamples, int voice)
 
 	pVoice->_tickCounter += numsamples;
 
+#if defined(_WINAMP_PLUGIN_)
+	if ((pVoice->_triggerNoteDelay) && (pVoice->_tickCounter >= pVoice->_triggerNoteDelay))
+	{
+#else
 	if (Global::_pSong->Invalided)
 	{
 		pVoice->_envelope._stage = ENV_OFF;
@@ -401,6 +405,7 @@ void Sampler::VoiceWork(int numsamples, int voice)
 	}
 	else if ((pVoice->_triggerNoteDelay) && (pVoice->_tickCounter >= pVoice->_triggerNoteDelay))
 	{
+#endif
 		if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 		{
 			pVoice->_triggerNoteDelay = pVoice->_tickCounter+ pVoice->effVal;
@@ -669,7 +674,9 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 	int triggered = 0;
 	unsigned __int64 w_offset = 0;
 
+#if !defined(_WINAMP_PLUGIN_)
 	if (Global::_pSong->Invalided) return 0;
+#endif
 
 	pVoice->_tickCounter=0;
 	pVoice->effCmd=pEntry->_cmd;

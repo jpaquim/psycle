@@ -13,12 +13,13 @@
 #endif
 
 #include "resource.h"       // main symbols
-#include "MainFrm.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPsycleApp:
 // See Psycle.cpp for the implementation of this class
 //
+
+class CMainFrame;
 
 class CPsycleApp : public CWinApp
 {
@@ -30,6 +31,7 @@ public:
 	//{{AFX_VIRTUAL(CPsycleApp)
 	public:
 	virtual BOOL InitInstance();
+	virtual int ExitInstance();
 	//}}AFX_VIRTUAL
 
 // Implementation

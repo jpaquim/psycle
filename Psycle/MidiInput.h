@@ -6,9 +6,10 @@
 #ifndef	_MIDIINPUT_H
 #define	_MIDIINPUT_H
 
-#include "mmsystem.h"
-#include "song.h"
+#include <mmsystem.h>
 #include <assert.h>
+#include "constants.h"
+#include "songstructs.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Defines

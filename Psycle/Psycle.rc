@@ -244,43 +244,42 @@ BEGIN
                     125,119,20
 END
 
-IDD_INFO DIALOGEX 0, 0, 308, 239
+IDD_INFO DIALOGEX 0, 0, 316, 239
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle CPU/DSP Performance Monitor"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Core Info",IDC_STATIC,4,7,300,81
-    GROUPBOX        "Gear info and DSP CPU performance",IDC_STATIC,4,92,300,
+    GROUPBOX        "Core Info",IDC_STATIC,7,7,303,81
+    GROUPBOX        "Gear info and DSP CPU performance",IDC_STATIC,7,89,303,
                     143
-    LTEXT           "Machines",IDC_STATIC,8,104,32,9
     CONTROL         "List2",IDC_MACHINELIST,"SysListView32",LVS_REPORT | 
                     LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,8,116,292,115
-    GROUPBOX        "CPU Performance Monitor",IDC_STATIC,180,16,120,68
-    CTEXT           "Total",IDC_STATIC,188,44,32,8,SS_CENTERIMAGE
-    CTEXT           "",IDC_CPUIDLE_LABEL,228,44,40,10,SS_CENTERIMAGE | 
+                    WS_TABSTOP,12,101,293,130
+    GROUPBOX        "CPU Performance Monitor",IDC_STATIC,185,16,120,68
+    CTEXT           "Total",IDC_STATIC,192,44,32,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_CPUIDLE_LABEL,232,44,40,10,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    CTEXT           "Machines",IDC_STATIC,188,56,32,8,SS_CENTERIMAGE
-    CTEXT           "",IDC_MCPULABEL,228,56,40,10,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Processor",IDC_STATIC,188,28,32,12,SS_CENTERIMAGE
-    CTEXT           "",IDC_CPUL,228,28,40,12,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Routing",IDC_STATIC,188,68,32,8,SS_CENTERIMAGE
-    CTEXT           "",IDC_MCPULABEL2,228,68,40,10,SS_CENTERIMAGE | 
+    CTEXT           "Machines",IDC_STATIC,192,56,32,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MCPULABEL,232,56,40,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Processor",IDC_STATIC,192,28,32,12,SS_CENTERIMAGE
+    CTEXT           "",IDC_CPUL,232,28,40,12,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Routing",IDC_STATIC,192,68,32,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MCPULABEL2,232,68,40,10,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    CONTROL         137,IDC_STATIC,"Static",SS_BITMAP,272,28,24,18
-    GROUPBOX        "Memory status",IDC_STATIC,8,16,168,68
-    CTEXT           "Available resources",IDC_STATIC,12,28,76,12,
+    CONTROL         137,IDC_STATIC,"Static",SS_BITMAP,276,28,24,18
+    GROUPBOX        "Memory status",IDC_STATIC,13,16,168,68
+    CTEXT           "Available resources",IDC_STATIC,16,28,76,12,
                     SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO,92,28,80,12,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Physical memory status",IDC_STATIC,12,44,76,8,
+    CTEXT           "",IDC_MEM_RESO,96,28,80,12,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Physical memory status",IDC_STATIC,16,44,76,8,
                     SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO2,92,44,80,10,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Page file status",IDC_STATIC,12,56,76,8,SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO3,92,56,80,10,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Virtual memory status",IDC_STATIC,12,68,76,8,
+    CTEXT           "",IDC_MEM_RESO2,96,44,80,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Page file status",IDC_STATIC,16,56,76,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO3,96,56,80,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Virtual memory status",IDC_STATIC,16,68,76,8,
                     SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO4,92,68,80,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "",IDC_MEM_RESO4,96,68,80,10,SS_CENTERIMAGE | SS_SUNKEN
 END
 
 IDD_WIREDIALOG DIALOGEX 0, 0, 159, 71
@@ -762,31 +761,44 @@ BEGIN
     CONTROL         190,IDC_MIXERVIEW,"Static",SS_BITMAP | WS_BORDER,1,1,336,
                     106
     CONTROL         "Slider1",IDC_SLIDERMASTER,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,23,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,23,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM1,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,63,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,63,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM2,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,76,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,76,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM3,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,89,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,89,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM4,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,103,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,103,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM5,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,116,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,116,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM6,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,129,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,129,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM7,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,143,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,143,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM8,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,156,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,156,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM9,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,169,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,169,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM10,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,183,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,183,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM11,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,196,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,196,28,13,57,
+                    WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM12,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,209,28,13,57,WS_EX_TRANSPARENT
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,209,28,13,57,
+                    WS_EX_TRANSPARENT
     LTEXT           "Current Peak:",IDC_STATIC,254,111,48,10
     RTEXT           "-40.1dB",IDC_MASTERPEAK,304,109,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
@@ -807,7 +819,7 @@ END
 
 IDD_VSTRACK DIALOGEX 0, 0, 142, 203
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
                     16
@@ -978,7 +990,7 @@ IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "New Machine"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Gear Browser",IDC_STATIC,7,2,88,9
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
@@ -990,8 +1002,15 @@ BEGIN
     LTEXT           "",IDC_NAMELABEL,246,18,125,12,SS_SUNKEN
     LTEXT           "Description",IDC_STATIC,206,34,35,8
     LTEXT           "",IDC_DESCLABEL,246,30,125,19,SS_SUNKEN
+    LTEXT           "Dll Name",IDC_STATIC,212,54,30,8
+    LTEXT           "",IDC_DLLNAMELABEL,246,49,125,21,SS_SUNKEN
     LTEXT           "Version",IDC_STATIC,218,71,24,8
     LTEXT           "",IDC_VERSIONLABEL,246,70,125,12,SS_SUNKEN
+    GROUPBOX        "List Machines by",IDC_STATIC,201,94,176,47
+    CONTROL         "Library Name (Dll)",IDC_SHOWDLLNAME,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,216,108,88,12
+    CONTROL         "Plugin's Name",IDC_SHOWEFFNAME,"Button",
+                    BS_AUTORADIOBUTTON,216,124,88,10
     GROUPBOX        "Sort Machines",IDC_STATIC,201,146,176,48
     CONTROL         "By Type of Plugin",IDC_BYTYPE,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,216,160,85,10
@@ -1000,13 +1019,6 @@ BEGIN
     PUSHBUTTON      "Refresh",IDC_REFRESH,7,240,76,16
     DEFPUSHBUTTON   "OK",IDOK,217,240,76,16
     PUSHBUTTON      "Cancel",IDCANCEL,301,240,76,16
-    LTEXT           "Dll Name",IDC_STATIC,212,54,30,8
-    LTEXT           "",IDC_DLLNAMELABEL,246,49,125,21,SS_SUNKEN
-    GROUPBOX        "List Machines by",IDC_STATIC,201,94,176,47
-    CONTROL         "Library Name (Dll)",IDC_SHOWDLLNAME,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,216,108,88,12
-    CONTROL         "Plugin's Name",IDC_SHOWEFFNAME,"Button",
-                    BS_AUTORADIOBUTTON,216,124,88,10
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 233
@@ -1267,7 +1279,7 @@ BEGIN
     IDD_INFO, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 301
+        RIGHTMARGIN, 310
         TOPMARGIN, 7
         BOTTOMMARGIN, 232
     END

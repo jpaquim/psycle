@@ -18,13 +18,11 @@ class CWireDlg : public CDialog
 public:
 	CWireDlg(CWnd* pParent = NULL);   // standard constructor
 	int wireIndex;
-	Song* _pSong;
 	int isrcMac;
 	bool Inval;
 	Machine* _pSrcMachine;
 	Machine* _pDstMachine;
 	int _dstWireIndex;
-	char destName[32];
 // Dialog Data
 	//{{AFX_DATA(CWireDlg)
 	enum { IDD = IDD_WIREDIALOG };

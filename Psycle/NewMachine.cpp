@@ -18,7 +18,7 @@ bool CNewMachine::pluginName = 1;
 int CNewMachine::_numPlugins = -1;
 int CNewMachine::_numDirs = 0;
 PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
-char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
+//char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
 CMapStringToString CNewMachine::dllNames(64);
 
 
@@ -35,7 +35,7 @@ CNewMachine::CNewMachine(CWnd* pParent /*=NULL*/)
 	OutBus = false;
 	psOutputDll = NULL;
 //	pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
-//					it is initialized above.
+//					It is initialized above, where it is declared.
 }
 
 CNewMachine::~CNewMachine()
@@ -419,6 +419,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 				if (plug->Instance((char*)(const char*)finder.GetFilePath()))
 				{
 					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+					ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
 					strcpy(_pPlugsInfo[currentPlugsCount]->name,plug->GetName());
 					sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
 							(plug->IsSynth()) ? "Psycle instrument" : "Psycle effect",
@@ -472,7 +473,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 	}
 	finder.Close();
 
-	if ( tmpCount != currentPlugsCount ) // If a plugin has been found & loaded, add this directory.
+/*	if ( tmpCount != currentPlugsCount ) // If a plugin has been found & loaded, add this directory.
 	{
 		if ( _numDirs < 32 ) // Limit of dirs.
 		{
@@ -481,6 +482,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 			_numDirs++;
 		}
 	}
+*/
 }
 
 void CNewMachine::DestroyPluginInfo()
@@ -489,10 +491,10 @@ void CNewMachine::DestroyPluginInfo()
 	{
 		delete _pPlugsInfo[i];
 	}
-	for (i=0;i<_numDirs; i++)
+/*	for (i=0;i<_numDirs; i++)
 	{
 		delete _dirArray[i];
-	}
+	}*/
 	dllNames.RemoveAll();
 	_numPlugins = -1;
 	_numDirs=0;

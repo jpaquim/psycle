@@ -3,36 +3,15 @@
 #include "Song.h"
 #include "WaveEdFrame.h"
 #include "MainFrm.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
 
-static UINT indicators[] =
-{
-	ID_SEPARATOR,           // status line indicator
-	ID_INDICATOR_SIZE,
-	ID_INDICATOR_MODE
-};
 
-IMPLEMENT_DYNCREATE(CWaveEdFrame, CFrameWnd)
-
-CWaveEdFrame::CWaveEdFrame()
-{
-
-}
-CWaveEdFrame::CWaveEdFrame(Song* _sng,CMainFrame* pframe)
-{
-	this->_pSong=_sng;
-	wavview.SetSong(this->_pSong);
-	wavview.SetParent(pframe);
-}
-
-CWaveEdFrame::~CWaveEdFrame()
-{
-}
-
+IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
 //{{AFX_MSG_MAP(CWaveEdFrame)
@@ -43,6 +22,28 @@ ON_WM_CREATE()
 ON_UPDATE_COMMAND_UI ( ID_INDICATOR_MODE, OnUpdateStatusBar )
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+static UINT indicators[] =
+{
+	ID_SEPARATOR,           // status line indicator
+	ID_INDICATOR_SIZE,
+	ID_INDICATOR_MODE
+};
+
+CWaveEdFrame::CWaveEdFrame()
+{
+}
+CWaveEdFrame::CWaveEdFrame(Song* _sng,CMainFrame* pframe)
+{
+	this->_pSong=_sng;
+	wavview.SetSong(this->_pSong);
+	wavview.SetParent(pframe);
+}
+
+CWaveEdFrame::~CWaveEdFrame()
+{
+
+}
 
 void CWaveEdFrame::OnClose() 
 {
@@ -60,6 +61,8 @@ int CWaveEdFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	toolbar.LoadToolBar(IDR_WAVEBAR); */
 	
+//	wavview.SetSong(_pSong);
+//	wavview.SetParent(_pFrame);
 	statusbar.Create(this);
 	statusbar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 	statusbar.SetPaneStyle(0, SBPS_NORMAL);

@@ -10,7 +10,7 @@
 #include "VSTHost.h"
 #include "DefaultVstGui.h"
 
-
+class CChildView;
 /////////////////////////////////////////////////////////////////////////////
 // CVstEditorDlg frame
 

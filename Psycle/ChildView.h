@@ -115,7 +115,7 @@ public:
 
 	void InitTimer();
 	void ValidateParent();
-	void OnActivate();
+	void EnableSound();
 	void Repaint(int drawMode=DMAll);
 
 	void ShowPatternDlg(void);
@@ -210,11 +210,10 @@ public:
 	int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
 	int viewMode;
 
-	bool _outputActive;	// This variable is used to check if the output(sound) is active or not
-						// Its most important use is on preventing that the audio is set to "on" again when
-						// the application gets the focus ( CChildView::OnActivate() ).
-						// (would crash when getting the focus and one song being loaded)
-						// I don't know why it should be activated when it gets the focus anyway....
+	bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
+						// Its function is to prevent audio (and midi) operations while it is not
+						// initialized, or while song is being modified (New(),Load()..).
+						// 
 
 
 // Overrides

@@ -3,45 +3,44 @@
 <pre>
 <h1>Build Log</h1>
 <h3>
---------------------Configuration: Psycle Winamp Plugin - Win32 Release--------------------
+--------------------Configuration: Psycle Winamp Plugin - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP8B.tmp" with contents
+Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSPC8.tmp" with contents
 [
-/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PSYCLEWINAMPPLUGIN_EXPORTS" /D "_WINDLL" /D "_AFXDLL" /D "_WINAMP_PLUGIN_" /Fp"Release/Psycle Winamp Plugin.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+/nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PSYCLEWINAMPPLUGIN_EXPORTS" /D "_WINAMP_PLUGIN_" /Fp"Debug/Psycle Winamp Plugin.pch" /YX"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
 "D:\Documents and Settings\All Users\Documentos\Visual C++\Psycle\Song.cpp"
 ]
-Creating command line "cl.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP8B.tmp" 
-Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP8C.tmp" with contents
+Creating command line "cl.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSPC8.tmp" 
+Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSPC9.tmp" with contents
 [
-/nologo /dll /incremental:no /pdb:"Release/in_psycle.pdb" /machine:I386 /out:"Release/in_psycle.dll" /implib:"Release/in_psycle.lib" 
-".\Release\ConfigDlg.obj"
-".\Release\Configuration.obj"
-".\Release\Dsp.obj"
-".\Release\FileIO.obj"
-".\Release\Filter.obj"
-".\Release\Global.obj"
-".\Release\in_psycle.obj"
-".\Release\Machine.obj"
-".\Release\Player.obj"
-".\Release\Plugin.obj"
-".\Release\Registry.obj"
-".\Release\Sampler.obj"
-".\Release\Song.obj"
-".\Release\VstHost.obj"
-".\Release\in_psycle.res"
+/nologo /dll /incremental:yes /pdb:"Debug/in_psycle_d.pdb" /debug /machine:I386 /out:"D:\Archivos de programa\Winamp\Plugins\in_psycle_d.dll" /implib:"Debug/in_psycle_d.lib" /pdbtype:sept 
+".\Debug\ConfigDlg.obj"
+".\Debug\Configuration.obj"
+".\Debug\Dsp.obj"
+".\Debug\FileIO.obj"
+".\Debug\Filter.obj"
+".\Debug\Global.obj"
+".\Debug\in_psycle.obj"
+".\Debug\Machine.obj"
+".\Debug\Player.obj"
+".\Debug\Plugin.obj"
+".\Debug\Registry.obj"
+".\Debug\Sampler.obj"
+".\Debug\Song.obj"
+".\Debug\VstHost.obj"
+".\Debug\in_psycle.res"
 ]
-Creating command line "link.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP8C.tmp"
+Creating command line "link.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSPC9.tmp"
 <h3>Output Window</h3>
 Compiling...
 Song.cpp
 Linking...
-   Creating library Release/in_psycle.lib and object Release/in_psycle.exp
 
 
 
 <h3>Results</h3>
-in_psycle.dll - 0 error(s), 0 warning(s)
+in_psycle_d.dll - 0 error(s), 0 warning(s)
 </pre>
 </body>
 </html>

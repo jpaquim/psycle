@@ -189,10 +189,9 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 								{
 									CWireDlg dlg;
 									dlg.wireIndex = w;
-									dlg._pSong = Global::_pSong;
 									dlg.isrcMac = c;
 									dlg._pSrcMachine = tmac;
-									sprintf(dlg.destName,"%s", Global::_pSong->_pMachines[tmac->_outputMachines[w]]->_editName);
+									dlg._pDstMachine = Global::_pSong->_pMachines[tmac->_outputMachines[w]];
 									dlg.DoModal();
 //									Repaint();
 								}

@@ -3,9 +3,8 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
-#include "Song.h"
+#include "Machine.h"
 #include "WireDlg.h"
-#include <math.h>
 #include "Helpers.h"
 
 #ifdef _DEBUG
@@ -38,10 +37,10 @@ void CWireDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
-	//{{AFX_MSG_MAP(CWireDlg)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
-	ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
-	//}}AFX_MSG_MAP
+//{{AFX_MSG_MAP(CWireDlg)
+ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
+ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
+//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -50,50 +49,18 @@ END_MESSAGE_MAP()
 BOOL CWireDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-
+	
 	Inval = false;
 	m_volslider.SetRange(0,128,true);
 	m_volslider.SetTicFreq(16);
+	_dstWireIndex = _pSrcMachine->FindInputWire(_pDstMachine,isrcMac);
 
-/*
-** The following code has to be updated with the new "SetWireVolume".
-** (In fact, GetWireVolume, which is not done yet)
-**
-*/	
-	// Get number of wire destination machine
-	int idstMac = _pSrcMachine->_outputMachines[wireIndex];
-
-	// Get reference to the destination machine
-	_pDstMachine = Global::_pSong->_pMachines[idstMac];
-
-	for (int c=0; c<MAX_CONNECTIONS; c++)
-	{
-		if (_pDstMachine->_inputCon[c])
-		{
-			if (_pDstMachine->_inputMachines[c] == isrcMac)
-			{
-				_dstWireIndex = c;
-				break;
-			}
-		}
-	}
-	
-	if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX )
-	{
-		if (_pDstMachine->_type == MACH_VST || _pDstMachine->_type == MACH_VSTFX )
-		{
-			m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*128.0f));
-		}
-		else m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*0.00390625f));
-	}
-	else if ( _pDstMachine->_type == MACH_VST || _pDstMachine->_type == MACH_VSTFX )
-	{
-		m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*4194304.0f));
-	}
-	else m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*128.0f));
+	float val;
+	_pDstMachine->GetWireVolume(_dstWireIndex,val);
+	m_volslider.SetPos(f2i(val*128));
 
 	char buffer[64];
-	sprintf(buffer,"[%d] %s -> %s", wireIndex, _pSrcMachine->_editName, destName);
+	sprintf(buffer,"[%d] %s -> %s", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
 	SetWindowText(buffer);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -102,8 +69,6 @@ BOOL CWireDlg::OnInitDialog()
 
 void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-
-	*pResult = 0;
 	char buffer[32];
 	const float invol = m_volslider.GetPos()*0.0078125f;
 
@@ -112,20 +77,9 @@ void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 
 	m_volabel.SetWindowText(buffer);
 
-	if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX )
-	{
-		if (_pDstMachine->_type == MACH_VST || _pDstMachine->_type == MACH_VSTFX )
-		{
-			_pDstMachine->_inputConVol[_dstWireIndex] = invol;
-		}
-		else _pDstMachine->_inputConVol[_dstWireIndex] = invol*32768;
-	}
-	else if ( _pDstMachine->_type == MACH_VST || _pDstMachine->_type == MACH_VSTFX )
-	{
-		_pDstMachine->_inputConVol[_dstWireIndex] = invol*0.000030517578125f;
-	}
-	else _pDstMachine->_inputConVol[_dstWireIndex] = invol;
+	_pDstMachine->SetWireVolume(_dstWireIndex, invol );
 
+	*pResult = 0;
 }
 
 void CWireDlg::OnButton1() 

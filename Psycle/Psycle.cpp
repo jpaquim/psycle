@@ -1,14 +1,12 @@
 // Psycle.cpp : Defines the class behaviors for the application.
 //
 
-
-// this is a test.ignore this line
-
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "ConfigDlg.h"
 
 #include "MainFrm.h"
+#include "midiinput.h"
 #include "NewMachine.h"
 
 #ifdef _DEBUG
@@ -88,12 +86,15 @@ BOOL CPsycleApp::InitInstance()
 	}
 
 	// create and load the frame with its resources
+	// For some reason, there'a First-Chance exception when
+	// another pFrame member is called after this LoadFrame
+	// (for example, pFrame->ShowWindow(SW_MAXIMIZE);)
 	pFrame->LoadFrame(IDR_MAINFRAME,
 		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
 		NULL);
 
 	// The one and only window has been initialized, so show and update it.
-	pFrame->ShowWindow(SW_MAXIMIZE); // This call causes two "first-chance Exception". why?
+	pFrame->ShowWindow(SW_MAXIMIZE);
 	pFrame->UpdateWindow();
 	// Sets Icon
 	HICON tIcon;
@@ -118,6 +119,17 @@ BOOL CPsycleApp::InitInstance()
 /////////////////////////////////////////////////////////////////////////////
 // CPsycleApp message handlers
 
+
+int CPsycleApp::ExitInstance() 
+{
+	_global.pConfig->Write();
+	_global.pConfig->_pOutputDriver->Enable(false);
+	Sleep(LOCK_LATENCY);
+	_global.pConfig->_pMidiInput->Close();
+	CNewMachine::DestroyPluginInfo();
+	
+	return CWinApp::ExitInstance();
+}
 
 
 
