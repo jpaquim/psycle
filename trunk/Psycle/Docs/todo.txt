@@ -3,12 +3,6 @@
 +=addition
 
 + Mystic - import .mp3 format for samples
-* JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already sorted by the authors
-* JAL7OH- psycle crashes when i try to load a .fxb containing more patches than the maximum allowed number, load up crystal and try to import both of the banks available at greenoak.com
-* JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
-* JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded; 
-	docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
-	psycle crashes when i get the 'cpu overload' warning in reaktor
 ! JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
 * JAL7OH- JMdrum.dll crashes psycle when i use FBxx and/or FAxx, works fine with other machines and vsts
 * flanger clicks
@@ -154,6 +148,12 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 
 * Vsts:
 ------------
+* JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already sorted by the authors
+* JAL7OH- psycle crashes when i try to load a .fxb containing more patches than the maximum allowed number, load up crystal and try to import both of the banks available at greenoak.com
+* JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
+* JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded; 
+	docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
+	psycle crashes when i get the 'cpu overload' warning in reaktor
 * <_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all..... <pooplog> are you able to 
 	control 	the tweaks of it from the pattern? <_sue_> yes i am (in pro52)
 * many vsts freeze the childview from updating while Left mouse button is down, which makes it so pattern does

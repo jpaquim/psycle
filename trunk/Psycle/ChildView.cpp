@@ -200,6 +200,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
 	ON_COMMAND(ID_BARPLAY, OnBarplay)
+	ON_COMMAND(ID_BARREC, OnBarrec)
 	ON_COMMAND(ID_BARSTOP, OnBarstop)
 	ON_COMMAND(ID_RECORDB, OnRecordWav)
 	ON_WM_TIMER()
@@ -212,6 +213,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
 	ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
 	ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
+	ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
 	ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 	ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
 	ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
@@ -970,9 +972,34 @@ void CChildView::OnBarplay()
 	Global::pPlayer->Start(editPosition,0);
 	pParentMain->StatusBarIdle();
 }
+
 void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 {
 	if (Global::pPlayer->_playing)
+		pCmdUI->SetCheck(1);
+	else
+		pCmdUI->SetCheck(0);
+}
+
+void CChildView::OnBarrec() 
+{
+	if (Global::pConfig->_followSong && bEditMode)
+	{
+		bEditMode = FALSE;
+	}
+	else
+	{
+		Global::pConfig->_followSong = TRUE;
+		bEditMode = TRUE;
+		CButton*cb=(CButton*)pParentMain->m_wndSeq.GetDlgItem(IDC_FOLLOW);
+		cb->SetCheck(1);
+	}
+	pParentMain->StatusBarIdle();
+}
+
+void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
+{
+	if (Global::pConfig->_followSong && bEditMode)
 		pCmdUI->SetCheck(1);
 	else
 		pCmdUI->SetCheck(0);
