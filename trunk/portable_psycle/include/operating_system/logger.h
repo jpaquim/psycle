@@ -10,7 +10,7 @@
 ///\file
 ///\brief logger
 
-#define LOGGER__DEFAULT_THRESHOLD_LEVEL 0
+#define LOGGER__DEFAULT_THRESHOLD_LEVEL 1
 #undef LOGGER
 #if defined NDEBUG
 	#define LOGGER_TO(level, ostream) if (false) ostream

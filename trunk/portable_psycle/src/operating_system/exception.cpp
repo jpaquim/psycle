@@ -5,7 +5,8 @@
 #include <operating_system/logger.h>
 #include <iostream>
 #if defined OPERATING_SYSTEM__MICROSOFT
-#	include <windows.h>
+	#include <windows.h>
+	#include <fstream>
 #endif
 ///\file
 ///\brief implementation file for operating_system::exception
@@ -14,12 +15,30 @@ namespace operating_system
 
 	exception::exception(const std::string & what) throw() : std::runtime_error(what)
 	{
-		std::cerr << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl; 
-		{
-			std::ostringstream title; title << "exception: " << typeid(*this).name();
-			std::ostringstream message; message << typeid(*this).name() << std::endl << this->what();
-			::MessageBox(0, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
-		}
+		#if defined OPERATING_SYSTEM__MICROSOFT
+			std::ofstream out;
+			{
+				std::string module_directory;
+				{
+					char module_file_name[MAX_PATH];
+					::GetModuleFileName(0, module_file_name, sizeof module_file_name);
+					module_directory = module_file_name;
+					module_directory = module_directory.substr(0, module_directory.rfind('\\'));
+				}
+				// overwrites
+				out.open((module_directory + "/output.log.txt").c_str());
+			}
+			out << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
+			/* annoying popup
+			{
+				std::ostringstream title; title << "exception: " << typeid(*this).name();
+				std::ostringstream message; message << typeid(*this).name() << std::endl << this->what();
+				::MessageBox(0, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
+			}
+			*/
+		#else
+			std::cerr << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl; 
+		#endif
 	}
 
 	exception::operator const std::string() const throw()
@@ -64,6 +83,7 @@ namespace operating_system
 			}
 			void structured_exception_translator(unsigned int code, EXCEPTION_POINTERS *) throw(translated)
 			{
+				//if(code == EXCEPTION_BREAKPOINT) return;
 				throw translated(code);
 			}
 		}
