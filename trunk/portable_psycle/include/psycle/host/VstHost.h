@@ -18,11 +18,11 @@ namespace psycle
 		/// Dialog max ticks for parameters.
 		#define VST_QUANTIZATION 65535
 
+		#define VSTINSTANCE_NO_ERROR 0
 		#define VSTINSTANCE_ERR_NO_VALID_FILE -1
 		#define VSTINSTANCE_ERR_NO_VST_PLUGIN -2
 		#define VSTINSTANCE_ERR_REJECTED -3
 		#define VSTINSTANCE_ERR_EXCEPTION -4
-		#define VSTINSTANCE_NO_ERROR 0
 
 		typedef AEffect* (*PVSTMAIN)(audioMasterCallback audioMaster);
 
@@ -43,8 +43,8 @@ namespace psycle
 			// <bohan> any object of any class is disallowed to throw any exception from its destructor.
 			~VSTPlugin() throw();
 
-			void Free();
-			int Instance(char *dllname,bool overwriteName=true);
+			void Free() throw(...);
+			int Instance(const char dllname[], const bool overwriteName = true) throw(...);
 			//void Create(VSTPlugin *plug);
 			//virtual void Init(void);
 			virtual bool Load(RiffFile* pFile);
@@ -82,28 +82,32 @@ namespace psycle
 
 					size -= sizeof(_program)+sizeof(count)+(sizeof(float)*count);
 
-					if (size)
+					if(size)
 					{
 						if(_pEffect->flags & effFlagsProgramChunks)
 						{
-							char* pData = new char[size];
-							pFile->Read(pData, size); // Number of parameters
+							char * const data = new char[size];
+							pFile->Read(data, size); // Number of parameters
 							try 
 							{
-								Dispatch(effSetChunk,0, size, pData,0.0f);
-								delete pData;
+								Dispatch(effSetChunk, 0, size, data);
 							}
-							catch (...)
+							catch(...)
 							{
-								MessageBox(NULL,"Machine had an exception while loading it's chunk.\nIt has crashed and will be removed.",GetDllName(),NULL);
-								return FALSE;
+								std::ostringstream s; s
+									<< "Machine had an exception while loading its chunk:" << std::endl
+									<< "It has crashed and will be removed.";
+								::MessageBox(0, s.str().c_str(), GetDllName(), 0);
+								delete data;
+								return false;
 							}
+							delete data;
 						}
 						else
 						{
 							// there is a data chunk, but this machine does not want one.
 							pFile->Skip(size);
-							return FALSE;
+							return false;
 						}
 					}
 				}
@@ -113,53 +117,82 @@ namespace psycle
 			bool LoadDll(char* psFileName)
 			{
 				_strlwr(psFileName);
-				char sPath2[_MAX_PATH];
+				char sPath2[1 << 10];
 				CString sPath;
 				#if defined(_WINAMP_PLUGIN_)
 					sPath = Global::pConfig->GetVstDir();
-					if ( FindFileinDir(psFileName,sPath) )
+					if(FindFileinDir(psFileName, sPath))
 					{
-						strcpy(sPath2,sPath);
-						if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+						std::strcpy(sPath2, sPath);
+						try
 						{
-							char sError[128];
-							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
-							return FALSE;
+							Instance(sPath2, false);
 						}
-					}
-					else
-					{
-						char sError[128];
-						sprintf(sError,"Missing VST plug-in \"%s\" - replacing with Dummy.",psFileName);
-						::MessageBox(NULL,sError, "Loading Error", MB_OK);
-						return FALSE;
-					}
-				#else // if !_WINAMP_PLUGIN_
-					if ( CNewMachine::dllNames.Lookup(psFileName,sPath) )
-					{
-						strcpy(sPath2,sPath);
-						if ( !CNewMachine::TestFilename(sPath2) ) 
+						catch(const std::exception & e)
 						{
+							std::ostringstream s; s
+								<< "exception while instanciating:" << sPath2 << std::endl
+								<< "replacing with dummy." << std::endl
+								<< e.what();
+							::MessageBox(0, s.str().c_str(), "Loading Error", 0);
 							return false;
 						}
-						if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+						catch(...)
 						{
-							char sError[128];
-							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
-							return FALSE;
+							std::ostringstream s; s
+								<< "exception while instanciating:" << sPath2 << std::endl
+								<< "replacing with dummy." << std::endl
+								<< "unkown type";
+							::MessageBox(0, s.str().c_str(), "Loading Error", 0);
+							return false;
 						}
 					}
 					else
 					{
-						char sError[128];
-						sprintf(sError,"Missing VST plug-in \"%s\" - replacing with Dummy.",psFileName);
-						::MessageBox(NULL,sError, "Loading Error", MB_OK);
-						return FALSE;
+						std::ostringstream s; s
+							<< "missing:" << psFileName << std::endl
+							<< "replacing with dummy."
+						::MessageBox(0, s.str().c_str(), "Loading Error", 0);
+						return false;
+					}
+				#else // if !_WINAMP_PLUGIN_
+					if(CNewMachine::dllNames.Lookup(psFileName, sPath))
+					{
+						std::strcpy(sPath2, sPath);
+						if(!CNewMachine::TestFilename(sPath2)) return false;
+						try
+						{
+							Instance(sPath2, false);
+						}
+						catch(const std::exception & e)
+						{
+							std::ostringstream s; s
+								<< "exception while instanciating:" << sPath2 << std::endl
+								<< "replacing with dummy." << std::endl
+								<< e.what();
+							::MessageBox(0, s.str().c_str(), "Loading Error", 0);
+							return false;
+						}
+						catch(...)
+						{
+							std::ostringstream s; s
+								<< "exception while instanciating:" << sPath2 << std::endl
+								<< "replacing with dummy." << std::endl
+								<< "unkown type";
+							::MessageBox(0, s.str().c_str(), "Loading Error", 0);
+							return false;
+						}
+					}
+					else
+					{
+						std::ostringstream s; s
+							<< "missing:" << psFileName << std::endl
+							<< "replacing with dummy.";
+						::MessageBox(0, s.str().c_str(), "Loading Error", 0);
+						return false;
 					}
 				#endif // _WINAMP_PLUGIN_
-				return TRUE;
+				return true;
 			};
 
 			#if !defined(_WINAMP_PLUGIN_)
@@ -168,38 +201,35 @@ namespace psycle
 				{
 					UINT count = GetNumParams();
 					UINT size = sizeof(_program)+sizeof(count)+(sizeof(float)*count);
-					char* pData = NULL;
-
+					char * pData = 0;
 					if(_pEffect->flags & effFlagsProgramChunks)
 					{
 						try 
 						{
 							size += Dispatch( effGetChunk,0,0, &pData,0.0f);
 						}
-						catch (...)
+						catch(...)
 						{
-							MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
-							size = sizeof(_program)+sizeof(count)+(sizeof(float)*count);
+							std::ostringstream s; s
+								<< "Machine had an exception while saving its chunk:" << std::endl
+								<< "It has crashed and will probably take psycle down with it.";
+							::MessageBox(0, s.str().c_str(), GetDllName(), 0);
+							size = sizeof _program  + sizeof count  + sizeof(float) * count;
 						}
 					}
-
 					pFile->Write(&size,sizeof(size));
-
 					pFile->Write(&_program,sizeof(_program));
-
 					pFile->Write(&count,sizeof(count));
-					for (UINT i = 0; i < count; i++)
+					for(UINT i = 0; i < count; i++)
 					{
 						float temp = GetParameter(i);
 						pFile->Write(&temp,sizeof(temp));
 					}
-
 					size-=sizeof(_program)+sizeof(count)+(sizeof(float)*count);
-					if (size > 0)
+					if(size > 0)
 					{
 						pFile->Write(pData,size);
 					}
-
 				};
 
 				inline virtual void SaveDllName(RiffFile* pFile) 
@@ -254,9 +284,56 @@ namespace psycle
 			inline void SendMidi();
 
 			AEffect *_pEffect;
-			inline long Dispatch(long opCode, long index, long value, void *ptr, float opt)
+			inline long Dispatch(long opCode = 0, long index = 0, long value = 0, void * ptr = 0, float opt = 0.0f) throw(...)
 			{
-				return _pEffect->dispatcher(_pEffect, opCode, index, value, ptr, opt);
+				try
+				{
+					return _pEffect->dispatcher(_pEffect, opCode, index, value, ptr, opt);
+				}
+				catch(const std::exception & e)
+				{
+					std::ostringstream s; s
+						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< typeid(e).name() << std::endl
+						<< e.what();
+					::MessageBox(0, s.str().c_str(), _editName, 0);
+					throw std::runtime_error(s.str());
+				}
+				catch(const char e[])
+				{
+					std::ostringstream s; s
+						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< typeid(e).name() << std::endl
+						<< e;
+					::MessageBox(0, s.str().c_str(), _editName, 0);
+					throw std::runtime_error(s.str());
+				}
+				catch(const int & e)
+				{
+					std::ostringstream s; s
+						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< typeid(e).name() << std::endl
+						<< e;
+					::MessageBox(0, s.str().c_str(), _editName, 0);
+					throw std::runtime_error(s.str());
+				}
+				catch(const unsigned int & e)
+				{
+					std::ostringstream s; s
+						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< typeid(e).name() << std::endl
+						<< e;
+					::MessageBox(0, s.str().c_str(), _editName, 0);
+					throw std::runtime_error(s.str());
+				}
+				catch(...)
+				{
+					std::ostringstream s; s
+						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< "unkown type";
+					::MessageBox(0, s.str().c_str(), _editName, 0);
+					throw std::runtime_error(s.str());
+				}
 			}
 
 			static long AudioMaster(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);

@@ -15,7 +15,7 @@ public:
 
 	static const Information & information() throw()
 	{
-		static const Information information(Information::Type::effect, "Crasher", "Crasher", "bohan", 1, 0, 0);
+		static const Information information(Information::Type::effect, "crasher", "crasher", "bohan", 1, 0, 0);
 		return information;
 	}
 
@@ -34,10 +34,10 @@ protected:
 	{
 		// c++ exception:
 		//throw "crash on purpose!";
-		//throw std::runtime_error("crash on purpose!");
+		throw std::runtime_error("crash on purpose!");
 
 		// division by 0:
-		volatile int i(0); i = 0 / i; // trick so that the compiler does not remove the code when optimizing
+		//volatile int i(0); i = 0 / i; // trick so that the compiler does not remove the code when optimizing
 
 		// infinite loop so that we can test interruption signal:
 		//while(true);
