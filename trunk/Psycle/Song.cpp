@@ -248,30 +248,15 @@ void Song::DestroyAllMachines()
 
 void Song::DeleteLayer(int i,int c)
 {
-	sprintf(_instruments[i].waveName[c],"empty");
-	
-	if(_instruments[i].waveLength[c]>0)
-	{
-		delete _instruments[i].waveDataL[c];
-		if(_instruments[i].waveStereo[c])
-		{
-			delete _instruments[i].waveDataR[c];
-		}
-		_instruments[i].waveLength[c] = 0;
-	}
-	
-	_instruments[i].waveStereo[c]=false;
-	_instruments[i].waveLoopStart[c]=0;
-	_instruments[i].waveLoopEnd[c]=0;
-	_instruments[i].waveLoopType[c]=0;
-	_instruments[i].waveVolume[c]=100;
-	_instruments[i].waveFinetune[c]=0;
-	_instruments[i].waveTune[c]=0;
+	_instruments[i].DeleteLayer(c);
 }
 
 void Song::DeleteInstruments()
 {
-	for(int i=0;i<MAX_INSTRUMENTS;i++)DeleteInstrument(i);
+	for (int i=0;i<MAX_INSTRUMENTS;i++)
+	{
+		DeleteInstrument(i);
+	}
 }
 
 void Song::DeleteInstrument(int i)
@@ -279,41 +264,11 @@ void Song::DeleteInstrument(int i)
 #if !defined(_WINAMP_PLUGIN_)
 	Invalided=true;
 #endif
-	// Reset envelope
-	_instruments[i].ENV_AT = 1; // 16
-	_instruments[i].ENV_DT = 1; // 16386
-	_instruments[i].ENV_SL = 100; // 64
-	_instruments[i].ENV_RT = 16; // OVERLAPTIME
-	
-	_instruments[i].ENV_F_AT = 16;
-	_instruments[i].ENV_F_DT = 16384;
-	_instruments[i].ENV_F_SL = 64;
-	_instruments[i].ENV_F_RT = 16384;
-	
-	_instruments[i].ENV_F_CO = 64;
-	_instruments[i].ENV_F_RQ = 64;
-	_instruments[i].ENV_F_EA = 128;
-	_instruments[i].ENV_F_TP = 4;
-	
-	_instruments[i]._loop = false;
-	_instruments[i]._lines = 16;
-	
-	_instruments[i]._NNA = 0; // NNA set to Note Cut [Fast Release]
-	
-	_instruments[i]._pan = 128;
-	_instruments[i]._RPAN = false;
-	_instruments[i]._RCUT = false;
-	_instruments[i]._RRES = false;
-	
-	for (int c=0; c<MAX_WAVES; c++)
-	{
-		DeleteLayer(i,c);
-	}
-	
-	sprintf(_instruments[i]._sName,"empty");
+	_instruments[i].Delete();
 #if !defined(_WINAMP_PLUGIN_)
 	Invalided=false;
 #endif
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1128,8 +1083,7 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 }
 #endif // ndef _WINAMP_PLUGIN_
 
-bool Song::Load(
-				RiffFile* pFile)
+bool Song::Load(RiffFile* pFile)
 {
 	char Header[9];
 	pFile->Read(&Header, 8);
@@ -1137,29 +1091,33 @@ bool Song::Load(
 
 	if (strcmp(Header,"PSY3SONG")==0)
 	{
-		while(pFile->Eof()==FALSE)
+
+		UINT version = 0;
+		UINT size = 0;
+		UINT index = 0;
+		int temp;
+
+		Header[4]=0;
+		_machineLock = true;
+
+		pFile->Read(&version,sizeof(version));
+		pFile->Read(&size,sizeof(size));
+
+		if (version > CURRENT_FILE_VERSION)
 		{
-			pFile->Read(&Header, 4);
-			Header[4]=0;
-
-			UINT version = 0;
-			UINT size = 0;
-			int temp;
-
-			pFile->Read(&version,sizeof(version));
-			pFile->Read(&size,sizeof(size));
-			if (version > CURRENT_FILE_VERSION)
-			{
-				// there is an error, this file is newer than this build of psycle
+			// there is an error, this file is newer than this build of psycle
 //				MessageBox(NULL,"File is from a newer version of psycle!",NULL,NULL);
-				pFile->Skip(size);
-			}
-			/*
-			else
-			{
-				// there is currently no data in this segment
-			}
-			*/
+			pFile->Skip(size);
+		}
+		/*
+		else
+		{
+			// there is currently no data in this segment
+		}
+		*/
+
+		while(pFile->Read(&Header, 4))
+		{
 
 			// we should use the size to update the index, but for now we will skip it
 			if (strcmp(Header,"INFO")==0)
@@ -1191,15 +1149,15 @@ bool Song::Load(
 				}
 				else
 				{
-					pFile->Read(&temp,sizeof(int));  // # of tracks for whole song
+					pFile->Read(&temp,sizeof(temp));  // # of tracks for whole song
 					SONGTRACKS = temp;
-					pFile->Read(&temp,sizeof(int));  // bpm
+					pFile->Read(&temp,sizeof(temp));  // bpm
 					BeatsPerMin = temp;
-					pFile->Read(&temp,sizeof(int));  // tpb
+					pFile->Read(&temp,sizeof(temp));  // tpb
 					_ticksPerBeat = temp;
-					pFile->Read(&temp,sizeof(int));  // current octave
+					pFile->Read(&temp,sizeof(temp));  // current octave
 					currentOctave = temp;
-					pFile->Read(&temp,sizeof(int));  // sequence width, for multipattern
+					pFile->Read(&temp,sizeof(temp));  // sequence width, for multipattern
 				}
 			}
 			else if (strcmp(Header,"SEQD")==0)
@@ -1214,16 +1172,16 @@ bool Song::Load(
 				}
 				else
 				{
-					char pTemp[2];
-					pFile->Read(&temp,sizeof(int)); // index, for multipattern - for now always 0
-					pFile->Read(&temp,sizeof(int)); // play length for this sequence
+					char pTemp[256];
+					pFile->Read(&index,sizeof(index)); // index, for multipattern - for now always 0
+					pFile->Read(&temp,sizeof(temp)); // play length for this sequence
 					playLength = temp;
 
 					pFile->ReadString(pTemp,sizeof(pTemp)); // name, for multipattern, for now unused
 
 					for (int i = 0; i < playLength; i++)
 					{
-						pFile->Read(&temp,sizeof(int));
+						pFile->Read(&temp,sizeof(temp));
 						playOrder[i] = temp;
 					}
 				}
@@ -1240,19 +1198,18 @@ bool Song::Load(
 				}
 				else
 				{
-					pFile->Read(&temp,sizeof(int)); // index
-					int i = temp;
-					pFile->Read(&temp,sizeof(int)); // num lines
-					patternLines[i] = temp;
-					pFile->Read(&temp,sizeof(int)); // num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
+					pFile->Read(&index,sizeof(index)); // index
+					pFile->Read(&temp,sizeof(temp)); // num lines
+					RemovePattern(index); // clear it out if it already exists
+					patternLines[index] = temp;
+					pFile->Read(&temp,sizeof(temp)); // num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 
-					pFile->ReadString(patternName[i],sizeof(patternName[i]));
+					pFile->ReadString(patternName[index],sizeof(patternName[index]));
 
-					RemovePattern(i); // clear it out if it already exists
 
-					for (int y = 0; y < patternLines[i]; y++)
+					for (int y = 0; y < patternLines[index]; y++)
 					{
-						unsigned char* pData = _ppattern(i)+(y*MULTIPLY);
+						unsigned char* pData = _ppattern(index)+(y*MULTIPLY);
 						pFile->Read(pData,EVENT_SIZE*SONGTRACKS);
 					}
 
@@ -1270,6 +1227,10 @@ bool Song::Load(
 				}
 				else
 				{
+					pFile->Read(&index,sizeof(index));
+
+
+//					_pMachine[index]->LoadFileChunk(pFile,version);
 				}
 			}
 			else if (strcmp(Header,"INSD")==0)
@@ -1284,6 +1245,16 @@ bool Song::Load(
 				}
 				else
 				{
+					pFile->Read(&index,sizeof(index));
+					if (index < MAX_INSTRUMENTS)
+					{
+						_instruments[index].LoadFileChunk(pFile,version);
+					}
+					else
+					{
+//						MessageBox(NULL,"Instrument section of File is from a newer version of psycle!",NULL,NULL);
+						pFile->Skip(size-sizeof(index));
+					}
 				}
 			}
 			else 
@@ -1298,6 +1269,9 @@ bool Song::Load(
 
 		// calculate samples per tick
 		// connect all output machines, test all connections for invalid machines.
+
+		_machineLock = false;
+		return true;
 
 	}
 	else if (strcmp(Header,"PSY2SONG")==0)
@@ -1363,75 +1337,75 @@ bool Song::Load(
 		// Instruments
 		//
 		pFile->Read(&instSelected, sizeof(instSelected));
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._sName, sizeof(_instruments[0]._sName));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._NNA, sizeof(_instruments[0]._NNA));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_AT, sizeof(_instruments[0].ENV_AT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_DT, sizeof(_instruments[0].ENV_DT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_SL, sizeof(_instruments[0].ENV_SL));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_RT, sizeof(_instruments[0].ENV_RT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_AT, sizeof(_instruments[0].ENV_F_AT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_DT, sizeof(_instruments[0].ENV_F_DT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_SL, sizeof(_instruments[0].ENV_F_SL));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_RT, sizeof(_instruments[0].ENV_F_RT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_CO, sizeof(_instruments[0].ENV_F_CO));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_RQ, sizeof(_instruments[0].ENV_F_RQ));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_EA, sizeof(_instruments[0].ENV_F_EA));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i].ENV_F_TP, sizeof(_instruments[0].ENV_F_TP));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._pan, sizeof(_instruments[0]._pan));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._RPAN, sizeof(_instruments[0]._RPAN));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._RCUT, sizeof(_instruments[0]._RCUT));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._RRES, sizeof(_instruments[0]._RRES));
 		}
@@ -1440,9 +1414,9 @@ bool Song::Load(
 		//
 		pFile->Read(&waveSelected, sizeof(waveSelected));
 
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			for (int w=0; w<MAX_WAVES; w++)
+			for (int w=0; w<OLD_MAX_WAVES; w++)
 			{
 				pFile->Read(&_instruments[i].waveLength[w], sizeof(_instruments[0].waveLength[0]));
 				if (_instruments[i].waveLength[w] > 0)
@@ -1738,11 +1712,11 @@ bool Song::Load(
 			}
 		}
 
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._loop, sizeof(_instruments[0]._loop));
 		}
-		for (i=0; i<MAX_INSTRUMENTS; i++)
+		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._lines, sizeof(_instruments[0]._lines));
 		}
@@ -1772,7 +1746,6 @@ bool Song::Load(
 				}
 			}
 		}
-
 
 		bool chunkpresent=false;
 		pFile->Read(&chunkpresent,sizeof(chunkpresent)); // Patch 2: VST's Chunk.
@@ -1990,7 +1963,6 @@ bool Song::Load(
 		}
 
 		_machineLock = false;
-
 		return true;
 	}
 
@@ -2022,8 +1994,8 @@ bool Song::Save(
 	pFile->Write("PSY3SONG", 8);
 
 	UINT version = CURRENT_FILE_VERSION;
-;
 	UINT size = 0;
+	UINT index = 0;
 	int temp;
 
 	pFile->Write(&version,sizeof(version));
@@ -2048,13 +2020,13 @@ bool Song::Save(
 
 	pFile->Write("INFO",4);
 	version = CURRENT_FILE_VERSION_INFO;
-	size = strlen(Name)+strlen(Author)+strlen(Comment);
+	size = strlen(Name)+strlen(Author)+strlen(Comment)+3;
 	pFile->Write(&version,sizeof(version));
 	pFile->Write(&size,sizeof(size));
 
-	pFile->Write(&Name,strlen(Name));
-	pFile->Write(&Author,strlen(Author));
-	pFile->Write(&Comment,strlen(Comment));
+	pFile->Write(&Name,strlen(Name)+1);
+	pFile->Write(&Author,strlen(Author)+1);
+	pFile->Write(&Comment,strlen(Comment)+1);
 
 	/*
 	===================
@@ -2077,20 +2049,20 @@ bool Song::Save(
 
 	pFile->Write("SNGI",4);
 	version = CURRENT_FILE_VERSION_SNGI;
-	size = (5*sizeof(int));
+	size = (5*sizeof(temp));
 	pFile->Write(&version,sizeof(version));
 	pFile->Write(&size,sizeof(size));
 
 	temp = SONGTRACKS;
-	pFile->Write(&temp,sizeof(int));
+	pFile->Write(&temp,sizeof(temp));
 	temp = BeatsPerMin;
-	pFile->Write(&temp,sizeof(int));
+	pFile->Write(&temp,sizeof(temp));
 	temp = _ticksPerBeat;
-	pFile->Write(&temp,sizeof(int));
+	pFile->Write(&temp,sizeof(temp));
 	temp = currentOctave;
-	pFile->Write(&temp,sizeof(int));
+	pFile->Write(&temp,sizeof(temp));
 	temp = 1; // sequence width
-	pFile->Write(&temp,sizeof(int));
+	pFile->Write(&temp,sizeof(temp));
 
 	/*
 	===================
@@ -2112,21 +2084,21 @@ bool Song::Save(
 
 	pFile->Write("SEQD",4);
 	version = CURRENT_FILE_VERSION_SEQD;
-	size = ((playLength+2)*sizeof(int))+strlen(pSequenceName);
+	size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
 	pFile->Write(&version,sizeof(version));
 	pFile->Write(&size,sizeof(size));
 
-	temp = 0; // index
-	pFile->Write(&temp,sizeof(int));
+	index = 0; // index
+	pFile->Write(&index,sizeof(index));
 	temp = playLength;
-	pFile->Write(&temp,sizeof(int));
+	pFile->Write(&temp,sizeof(temp));
 
-	pFile->Write(&pSequenceName,strlen(pSequenceName));
+	pFile->Write(pSequenceName,strlen(pSequenceName)+1);
 
 	for (int i = 0; i < playLength; i++)
 	{
 		temp = playOrder[i];
-		pFile->Write(&temp,sizeof(int));
+		pFile->Write(&temp,sizeof(temp));
 	}
 
 	/*
@@ -2167,18 +2139,18 @@ bool Song::Save(
 
 			pFile->Write("PATD",4);
 			version = CURRENT_FILE_VERSION_PATD;
-			size = (3*sizeof(int))+(patternLines[i]*SONGTRACKS*EVENT_SIZE)+strlen(patternName[i]);
+			size = (3*sizeof(temp))+(patternLines[i]*SONGTRACKS*EVENT_SIZE)+strlen(patternName[i])+1;
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
-			temp = i; // index
-			pFile->Write(&temp,sizeof(int));
+			index = i; // index
+			pFile->Write(&index,sizeof(index));
 			temp = patternLines[i];
-			pFile->Write(&temp,sizeof(int));
+			pFile->Write(&temp,sizeof(temp));
 			temp = SONGTRACKS; // eventually this may be variable per pattern
-			pFile->Write(&temp,sizeof(int));
+			pFile->Write(&temp,sizeof(temp));
 
-			pFile->Write(&patternName[i],strlen(patternName[i]));
+			pFile->Write(&patternName[i],strlen(patternName[i])+1);
 
 			for (int y = 0; y < patternLines[i]; y++)
 			{
@@ -2194,8 +2166,23 @@ bool Song::Save(
 	{
 		if (_pMachine[i])
 		{
-//			pFile->Write("MACD",4);
+			pFile->Write("MACD",4);
+			version = CURRENT_FILE_VERSION_MACD;
+			pFile->Write(&version,sizeof(version));
+			long pos = pFile->GetPos();
+			size = 0;
+			pFile->Write(&size,sizeof(size));
+
+			index = i; // index
+			pFile->Write(&index,sizeof(index));
+
 //			_pMachine[i]->SaveFileChunk(pFile);
+
+			long pos2 = pFile->GetPos(); 
+			size = pos2-pos-sizeof(size);
+			pFile->Seek(pos);
+			pFile->Write(&size,sizeof(size));
+			pFile->Seek(pos2);
 		}
 	}
 
@@ -2203,320 +2190,26 @@ bool Song::Save(
 	{
 		if (!_instruments[i].Empty())
 		{
-//			pFile->Write("INSD",4);
-//			_instruments[i].SaveFileChunk(pFile);
+			pFile->Write("INSD",4);
+			version = CURRENT_FILE_VERSION_INSD;
+			pFile->Write(&version,sizeof(version));
+			long pos = pFile->GetPos();
+			size = 0;
+			pFile->Write(&size,sizeof(size));
+
+			index = i; // index
+			pFile->Write(&index,sizeof(index));
+
+			_instruments[i].SaveFileChunk(pFile);
+
+			long pos2 = pFile->GetPos(); 
+			size = pos2-pos-sizeof(size);
+			pFile->Seek(pos);
+			pFile->Write(&size,sizeof(size));
+			pFile->Seek(pos2);
 		}
 	}
-
-
 	return true;
-
-
-
-
-
-
-
-
-
-
-	/*
-	int i;
-	char junk[256];
-	memset(&junk, sizeof(junk), 0);
-
-	bool _machineActive[128];
-	unsigned char busEffect[64];
-	unsigned char busMachine[64];
-
-	// since this file format sucks, we need to prepare some legacy data
-	// in the future, this won't be necessary
-
-	_machineLock = true;
-
-	for (i = 0; i < 64; i++)
-	{
-		if (_pMachine[i])
-		{
-			_machineActive[i] = true;
-			busMachine[i] = i;
-		}
-		else
-		{
-			_machineActive[i] = false;
-			busMachine[i] = 255;
-		}
-	}
-
-	for (i = 64; i < 128; i++)
-	{
-		if (_pMachine[i])
-		{
-			_machineActive[i] = true;
-			busEffect[i-64] = i;
-		}
-		else
-		{
-			_machineActive[i] = false;
-			busEffect[i-64] = 255;
-		}
-	}
-
-	pFile->Write("PSY2SONG", 8);
-
-	pFile->Write(&Name, 32);
-	pFile->Write(&Author, 32);
-	pFile->Write(&Comment, 128);
-	
-	pFile->Write(&BeatsPerMin, sizeof(BeatsPerMin));
-	i = SamplesPerTick*44100/Global::pConfig->_pOutputDriver->_samplesPerSec;//*should save tbp instead of this
-	pFile->Write(&i, sizeof(SamplesPerTick));
-	pFile->Write(&currentOctave, sizeof(currentOctave));
-
-	pFile->Write(&busMachine[0], sizeof(busMachine));
-
-	pFile->Write(&playOrder, sizeof(playOrder));
-	pFile->Write(&playLength, sizeof(playLength));
-	pFile->Write(&SONGTRACKS, sizeof(SONGTRACKS));
-
-	// Patterns
-	//
-	i = GetNumPatternsUsed();
-	pFile->Write(&i, sizeof(i));
-	for (int p=0; p<i; p++)
-	{
-		if (ppPatternData[p])
-		{
-			pFile->Write(&patternLines[p], sizeof(patternLines[0]));
-			pFile->Write(&patternName[p][0], sizeof(patternName[0]));
-			pFile->Write(_ppattern(p), patternLines[p]*MAX_TRACKS*sizeof(PatternEntry));
-		}
-		else
-		{
-			int nnn = 0;
-			pFile->Write(&nnn, sizeof(patternLines[0]));
-			pFile->Write(&patternName[p][0], sizeof(patternName[0]));
-		}
-	}
-
-	// Instruments
-	//
-	pFile->Write(&instSelected, sizeof(instSelected));
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._sName, sizeof(_instruments[0]._sName));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._NNA, sizeof(_instruments[0]._NNA));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_AT, sizeof(_instruments[0].ENV_AT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_DT, sizeof(_instruments[0].ENV_DT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_SL, sizeof(_instruments[0].ENV_SL));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_RT, sizeof(_instruments[0].ENV_RT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_AT, sizeof(_instruments[0].ENV_F_AT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_DT, sizeof(_instruments[0].ENV_F_DT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_SL, sizeof(_instruments[0].ENV_F_SL));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_RT, sizeof(_instruments[0].ENV_F_RT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_CO, sizeof(_instruments[0].ENV_F_CO));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_RQ, sizeof(_instruments[0].ENV_F_RQ));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_EA, sizeof(_instruments[0].ENV_F_EA));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i].ENV_F_TP, sizeof(_instruments[0].ENV_F_TP));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._pan, sizeof(_instruments[0]._pan));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._RPAN, sizeof(_instruments[0]._RPAN));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._RCUT, sizeof(_instruments[0]._RCUT));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._RRES, sizeof(_instruments[0]._RRES));
-	}
-
-	// Waves
-	//
-	pFile->Write(&waveSelected, sizeof(waveSelected));
-
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		for (int w=0; w<MAX_WAVES; w++)
-		{
-			pFile->Write(&waveLength[i][w], sizeof(waveLength[0][0]));
-			if (waveLength[i][w] > 0)
-			{
-				pFile->Write(&waveName[i][w], sizeof(waveName[0][0]));
-				pFile->Write(&waveVolume[i][w], sizeof(waveVolume[0][0]));
-				pFile->Write(&waveFinetune[i][w], sizeof(short));
-				pFile->Write(&waveLoopStart[i][w], sizeof(waveLoopStart[0][0]));
-				pFile->Write(&waveLoopEnd[i][w], sizeof(waveLoopEnd[0][0]));
-				pFile->Write(&waveLoopType[i][w], sizeof(waveLoopType[0][0]));
-				pFile->Write(&waveStereo[i][w], sizeof(waveStereo[0][0]));
-				pFile->Write(waveDataL[i][w], waveLength[i][w]*sizeof(short));
-				if (waveStereo[i][w])
-				{
-					pFile->Write(waveDataR[i][w], waveLength[i][w]*sizeof(short));
-				}
-			}
-		}
-	}
-
-	// VST DLLs
-	int num = 0;
-	for (i=0; i<MAX_MACHINES; i++)
-	{
-		if (_machineActive[i] && (_pMachine[i]->_type == MACH_VST || _pMachine[i]->_type == MACH_VSTFX))
-		{
-			bool b = true;
-			pFile->Write(&b, sizeof(b));
-
-			CString str = ((VSTPlugin*)_pMachine[i])->GetDllName();
-			char str2[128];
-			strcpy(str2,str.Mid(str.ReverseFind('\\')+1));// if not found, -1+1 = 0 -> Starting letter
-			pFile->Write(&str2,sizeof(str2));
-
-			long numpar = ((VSTPlugin*)_pMachine[i])->NumParameters();
-			pFile->Write(&numpar, sizeof(int));
-			for (int c=0; c<numpar; c++)
-			{
-				float f = ((VSTPlugin*)_pMachine[i])->GetParameter(c);
-				pFile->Write(&f, sizeof(f));
-			}
-			((VSTPlugin*)_pMachine[i])->_instance = num;
-			num++;
-		}
-	}
-	for (; num<MAX_PLUGINS; num++)
-	{
-		bool b = false;
-		pFile->Write(&b, sizeof(b));
-	}
-
-	// Since the old file format stored volumes on each output
-	// rather than on each input, we must convert
-	//
-#if !defined(_WINAMP_PLUGIN_)
-	CSingleLock lock(&door,TRUE);
-#endif // #if !defined(_WINAMP_PLUGIN_)
-	
-	float volMatrix[MAX_MACHINES][MAX_CONNECTIONS];
-	for (i=0; i<MAX_MACHINES; i++)
-	{
-		if (_machineActive[i])
-		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				volMatrix[i][c] = _pMachine[i]->_inputConVol[c];
-			}
-		}
-	}
-	for (i=0; i<MAX_MACHINES; i++)
-	{
-		if (_machineActive[i])
-		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if (_pMachine[i]->_connection[c])
-				{
-					Machine* pDstMachine = _pMachine[_pMachine[i]->_outputMachines[c]];
-					int d = pDstMachine->FindInputWire(i);
-					_pMachine[i]->_inputConVol[c]=volMatrix[_pMachine[i]->_outputMachines[c]][d]*pDstMachine->_wireMultiplier[d];
-				}
-			}
-		}
-	}
-
-	// Machines
-	//
-	pFile->Write(&_machineActive[0], sizeof(_machineActive));
-	for (i=0; i<MAX_MACHINES; i++)
-	{
-		if (_machineActive[i])
-		{
-			_pMachine[i]->Save(pFile);
-		}
-	}
-
-	// Now convert back to the internal format
-	//
-	for (i=0; i<MAX_MACHINES; i++)
-	{
-		if (_machineActive[i])
-		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				_pMachine[i]->_inputConVol[c] = volMatrix[i][c];
-			}
-		}
-	}
-
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._loop, sizeof(_instruments[0]._loop));
-	}
-	for (i=0; i<MAX_INSTRUMENTS; i++)
-	{
-		pFile->Write(&_instruments[i]._lines, sizeof(_instruments[0]._lines));
-	}
-
-	pFile->Write(&busEffect[0], sizeof(busEffect)); // Patch 1: BusEffect ( twk );
-
-	bool isfirst=true;// Patch 2: VST's Chunk.
-	for ( i=0;i<MAX_MACHINES;i++ ) {
-		if (_machineActive[i])
-		{
-			if (( _pMachine[i]->_type == MACH_VST ) ||
-				( _pMachine[i]->_type == MACH_VSTFX))
-			{
-				((VSTPlugin*)_pMachine[i])->SaveChunk(pFile,isfirst);
-			}
-		}
-	}
-	_machineLock = false;
-
-	return true;
-	*/
 }
 
 void Song::PW_Play()

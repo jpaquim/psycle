@@ -19,7 +19,6 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
-*** change generator changes notes to d-0 instead of changeing generator
 *** psycle doesn't give an error message when save fails due to lack of space
 + humanizer
 + global volume fades
