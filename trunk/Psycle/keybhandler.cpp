@@ -1619,7 +1619,7 @@ void CChildView::DecPosition()
 	}
 }
 
-void CChildView::IncPosition()
+void CChildView::IncPosition(bool bRepeat)
 {
 //	case cdefPlaySkipAhead:
 	if (Global::pPlayer->_playing && Global::pConfig->_followSong)
@@ -1643,7 +1643,7 @@ void CChildView::IncPosition()
 		{
 			++editPosition;
 		}
-		else
+		else if (!bRepeat) // This prevents adding patterns when only trying to reach the end.
 		{
 //			editPosition = 0;
 			++editPosition;
@@ -1654,8 +1654,8 @@ void CChildView::IncPosition()
 			pParentMain->UpdateSequencer();
 		}
 
-		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-		_pSong->playOrderSel[editPosition]=true;
+//		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+//		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPattern);
