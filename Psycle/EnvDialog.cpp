@@ -59,7 +59,6 @@ void CEnvDialog::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CEnvDialog, CDialog)
 	//{{AFX_MSG_MAP(CEnvDialog)
-	ON_WM_PAINT()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnDrawAmpAttackSlider)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnDrawAmpDecaySlider)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER3, OnDrawAmpSustainSlider)
@@ -98,8 +97,7 @@ BOOL CEnvDialog::OnInitDialog()
 	m_cutoff_slider.SetRange(0,127);
 	m_q_slider.SetRange(0,127);
 	
-	m_envelope_slider.SetRange(-128,128);
-	m_envelope_slider.SetPos(_pSong->_instruments[si].ENV_F_EA);
+	m_envelope_slider.SetRange(0,256); // Don't use (-,+) range. It fucks up with the "0"
 	
 	m_filtercombo.AddString("LowPass");
 	m_filtercombo.AddString("HiPass");
@@ -122,13 +120,9 @@ BOOL CEnvDialog::OnInitDialog()
 	
 	m_cutoff_slider.SetPos(_pSong->_instruments[si].ENV_F_CO);
 	m_q_slider.SetPos(_pSong->_instruments[si].ENV_F_RQ);
-
+	m_envelope_slider.SetPos(_pSong->_instruments[si].ENV_F_EA+128);
+	
 	return TRUE;
-}
-
-void CEnvDialog::OnPaint() 
-{
-	CPaintDC dc(this); // device context for painting	
 }
 
 void CEnvDialog::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -396,7 +390,7 @@ void CEnvDialog::OnSelchangeCombo1()
 void CEnvDialog::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	int si=_pSong->instSelected;
-	_pSong->_instruments[si].ENV_F_EA = m_envelope_slider.GetPos();
+	_pSong->_instruments[si].ENV_F_EA = m_envelope_slider.GetPos()-128;
 	char buffer[12];
 	sprintf(buffer,"%.0f",(float)_pSong->_instruments[si].ENV_F_EA*0.78125f);
 	m_envelope_label.SetWindowText(buffer);

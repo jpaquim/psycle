@@ -61,7 +61,6 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 
 	if(h_dll==NULL)	return VSTINSTANCE_ERR_NO_VALID_FILE;
 
-
 	PVSTMAIN main = (PVSTMAIN)GetProcAddress(h_dll,"main");
 	if(!main)
 	{	

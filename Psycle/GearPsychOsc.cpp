@@ -120,10 +120,10 @@ BOOL CGearPsychOsc::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// Initialize ranges
-	m_oscspeed.SetRange(0, 128, true);
-	m_glidespeed.SetRange(0, 128, true);
-	m_lfofrequency.SetRange(0, 128, true);
-	m_lfoamplitude.SetRange(0, 128, true);
+	m_oscspeed.SetRange(0, 128);
+	m_glidespeed.SetRange(0, 128);
+	m_lfofrequency.SetRange(0, 128);
+	m_lfoamplitude.SetRange(0, 128);
 	m_oscspeed.SetTicFreq(16);
 	m_glidespeed.SetTicFreq(16);
 	m_lfofrequency.SetTicFreq(16);

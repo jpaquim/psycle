@@ -82,27 +82,27 @@ BOOL CGearDelay::OnInitDialog()
 	SetWindowText(buffer);
 
 	m_slidertime_l.SetTicFreq(4096);
-	m_slidertime_l.SetRange(1, MAX_DELAY_BUFFER-1, true);	
+	m_slidertime_l.SetRange(1, MAX_DELAY_BUFFER-1);	
 	m_slidertime_l.SetPos(_pMachine->_timeL);
 	
 	m_sliderfeedback_l.SetTicFreq(10);
-	m_sliderfeedback_l.SetRange(-100, 100, true);	
-	m_sliderfeedback_l.SetPos(_pMachine->_feedbackL);
+	m_sliderfeedback_l.SetRange(0, 200);	// Don't use (-,+) range. It fucks up with the "0"
+	m_sliderfeedback_l.SetPos(_pMachine->_feedbackL+100);
 	
 	m_slidertime_r.SetTicFreq(4096);
-	m_slidertime_r.SetRange(1,MAX_DELAY_BUFFER-1, true);	
+	m_slidertime_r.SetRange(1,MAX_DELAY_BUFFER-1);	
 	m_slidertime_r.SetPos(_pMachine->_timeR);
 	
 	m_sliderfeedback_r.SetTicFreq(10);
-	m_sliderfeedback_r.SetRange(-100, 100, true);	
-	m_sliderfeedback_r.SetPos(_pMachine->_feedbackR);
+	m_sliderfeedback_r.SetRange(0, 200);	
+	m_sliderfeedback_r.SetPos(_pMachine->_feedbackR+100);
 	
 	
-	m_dryslider.SetRange(-256, 256, true);	
-	m_dryslider.SetPos(_pMachine->_outDry);
+	m_dryslider.SetRange(0, 512);		// Don't use (-,+) range. It fucks up with the "0"
+	m_dryslider.SetPos(_pMachine->_outDry+256);
 	
-	m_wetslider.SetRange(-256,256, true);
-	m_wetslider.SetPos(_pMachine->_outWet);
+	m_wetslider.SetRange(0,512);		// Don't use (-,+) range. It fucks up with the "0"
+	m_wetslider.SetPos(_pMachine->_outWet+256);
 
 	doit = true;
 
@@ -148,7 +148,7 @@ void CGearDelay::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->Update(NULL, NULL, m_sliderfeedback_l.GetPos(), 0);
+		_pMachine->Update(NULL, NULL, m_sliderfeedback_l.GetPos()-100, 0);
 	}
 
 	char buffer[8];
@@ -161,7 +161,7 @@ void CGearDelay::OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->Update(NULL, NULL, 0, m_sliderfeedback_r.GetPos());
+		_pMachine->Update(NULL, NULL, 0, m_sliderfeedback_r.GetPos()-100);
 	}
 
 	char buffer[8];
@@ -255,7 +255,7 @@ void CGearDelay::OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->_outDry = m_dryslider.GetPos();
+		_pMachine->_outDry = m_dryslider.GetPos()-256;
 	}
 
 	char buffer[8];
@@ -269,7 +269,7 @@ void CGearDelay::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if(doit)
 	{
-		_pMachine->_outWet = m_wetslider.GetPos();
+		_pMachine->_outWet = m_wetslider.GetPos()-256;
 	}
 
 	char buffer[8];

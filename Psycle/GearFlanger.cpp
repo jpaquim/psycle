@@ -118,20 +118,20 @@ BOOL CGearFlanger::OnInitDialog()
 	m_speed_slider.SetRange(0, 32768);
 	m_speed_slider.SetPos(_pMachine->_lfoSpeed);
 
-	m_lf_slider.SetRange(-100,100);
-	m_lf_slider.SetPos(_pMachine->_feedbackL);
+	m_lf_slider.SetRange(0,200);		// Don't use (-,+) range. It fucks up with the "0"
+	m_lf_slider.SetPos(_pMachine->_feedbackL+100);
 
-	m_rf_slider.SetRange(-100,100);
-	m_rf_slider.SetPos(_pMachine->_feedbackR);
+	m_rf_slider.SetRange(0,200);		// Don't use (-,+) range. It fucks up with the "0"
+	m_rf_slider.SetPos(_pMachine->_feedbackR+100);
 
 	m_phase_slider.SetRange(0,256);
 	m_phase_slider.SetPos(_pMachine->_lfoPhase);
 
-	m_dry_slider.SetRange(-256,256);
-	m_dry_slider.SetPos(_pMachine->_outDry);
+	m_dry_slider.SetRange(0,512);	// Don't use (-,+) range. It fucks up with the "0"
+	m_dry_slider.SetPos(_pMachine->_outDry+256);
 
-	m_wet_slider.SetRange(-256,256);
-	m_wet_slider.SetPos(_pMachine->_outWet);
+	m_wet_slider.SetRange(0,512);	// Don't use (-,+) range. It fucks up with the "0"
+	m_wet_slider.SetPos(_pMachine->_outWet+256);
 
 	doit = true;
 
@@ -158,7 +158,7 @@ void CGearFlanger::OnCustomdrawLfSlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->_feedbackL=m_lf_slider.GetPos();
+		_pMachine->_feedbackL=m_lf_slider.GetPos()-100;
 	}
 	
 	char buffer[16];
@@ -172,7 +172,7 @@ void CGearFlanger::OnCustomdrawSliderFr(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->_feedbackR=m_rf_slider.GetPos();
+		_pMachine->_feedbackR=m_rf_slider.GetPos()-100;
 	}
 	
 	char buffer[16];
@@ -203,7 +203,7 @@ void CGearFlanger::OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->_outDry = m_dry_slider.GetPos();
+		_pMachine->_outDry = m_dry_slider.GetPos()-256;
 	}
 
 	char buffer[8];
@@ -217,7 +217,7 @@ void CGearFlanger::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (doit)
 	{
-		_pMachine->_outWet = m_wet_slider.GetPos();
+		_pMachine->_outWet = m_wet_slider.GetPos()-256;
 	}
 
 	char buffer[8];
@@ -237,9 +237,9 @@ void CGearFlanger::OnSelchangePresetcombo()
 	m_flanger_delay_slider.SetPos(_pMachine->_time);
 	m_amp_slider.SetPos(_pMachine->_lfoAmp);
 	m_speed_slider.SetPos(_pMachine->_lfoSpeed);
-	m_lf_slider.SetPos(_pMachine->_feedbackL);
-	m_rf_slider.SetPos(_pMachine->_feedbackR);
+	m_lf_slider.SetPos(_pMachine->_feedbackL+100);
+	m_rf_slider.SetPos(_pMachine->_feedbackR+100);
 	m_phase_slider.SetPos(_pMachine->_lfoPhase);
-	m_dry_slider.SetPos(_pMachine->_outDry);
-	m_wet_slider.SetPos(_pMachine->_outWet);
+	m_dry_slider.SetPos(_pMachine->_outDry+256);
+	m_wet_slider.SetPos(_pMachine->_outWet+256);
 }

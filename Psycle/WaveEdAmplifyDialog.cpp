@@ -44,7 +44,8 @@ BOOL CWaveEdAmplifyDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	m_slider.SetRange(-9600, 4800, TRUE);
+	m_slider.SetRange(0, 14400); 	// Don't use (-,+) range. It fucks up with the "0"
+	m_slider.SetPos(9600);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -54,7 +55,7 @@ void CWaveEdAmplifyDialog::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	char tmp[6];
 	float db;
-	db =  (float) (m_slider.GetPos()*0.01f);
+	db =  (float) (m_slider.GetPos()-9600)*0.01f;
 	_gcvt(db ,4 ,tmp);
 	if (tmp[strlen(tmp) -1] == '.') tmp[strlen(tmp) -1] = 0; //Remove dot if last.
 	
