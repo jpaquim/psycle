@@ -159,6 +159,9 @@ protected:
 	Real late_reflection_gain_left, late_reflection_gain_right;
 	inline void process(Sample & left, Sample & right);
 	inline void resize(const Real & delay);
+	inline void channel_mix_direct();
+	inline void channel_mix_early_reflection();
+	inline void channel_mix_late_reflection();
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(Haas);
@@ -176,11 +179,13 @@ void Haas::parameter(const int & parameter)
 		direct_delay_stereo_delta_positive = (*this)(direct_delay_stereo_delta) > 0;
 		direct_delay_stereo_delta_negative = !direct_delay_stereo_delta_positive && (*this)(direct_delay_stereo_delta) < 0;
 		direct_delay_stereo_delta_abs = std::fabs((*this)(direct_delay_stereo_delta));
+		channel_mix_direct();
 		goto resize_max;
 	case early_reflection_delay_stereo_delta:
-		early_reflection_delay_stereo_delta_positive = (*this)(direct_delay_stereo_delta) > 0;
-		early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive && (*this)(direct_delay_stereo_delta) < 0;
-		early_reflection_delay_stereo_delta_abs = std::fabs((*this)(direct_delay_stereo_delta));
+		early_reflection_delay_stereo_delta_positive = (*this)(early_reflection_delay_stereo_delta) > 0;
+		early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive && (*this)(early_reflection_delay_stereo_delta) < 0;
+		early_reflection_delay_stereo_delta_abs = std::fabs((*this)(early_reflection_delay_stereo_delta));
+		channel_mix_early_reflection();
 		goto resize_max;
 	case early_reflection_delay:
 	case late_reflection_delay:
@@ -194,57 +199,72 @@ void Haas::parameter(const int & parameter)
 		break;
 	case direct_gain:
 	case direct_pan_amount:
-		if(direct_delay_stereo_delta_positive)
-		{
-			direct_left = direct_last;
-			direct_right = direct_first;
-			direct_gain_left = (*this)(direct_gain) * (1 - (*this)(direct_pan_amount));
-			direct_gain_right = (*this)(direct_gain);
-		}
-		else if(direct_delay_stereo_delta_negative)
-		{
-			direct_left = direct_first;
-			direct_right = direct_last;
-			direct_gain_left = (*this)(direct_gain);
-			direct_gain_right = (*this)(direct_gain) * (1 - (*this)(direct_pan_amount));
-		}
-		else
-		{
-			direct_left = direct_first;
-			direct_right = direct_first;
-			direct_gain_left = (*this)(direct_gain);
-			direct_gain_right = (*this)(direct_gain);
-		}
+		channel_mix_direct();
 		break;
 	case early_reflection_gain:
 	case early_reflection_pan_amount:
-		if(early_reflection_delay_stereo_delta_positive)
-		{
-			early_reflection_left = direct_last;
-			early_reflection_right = direct_first;
-			early_reflection_gain_left = (*this)(early_reflection_gain) * (1 - (*this)(early_reflection_pan_amount));
-			early_reflection_gain_right = (*this)(early_reflection_gain);
-		}
-		else if(early_reflection_delay_stereo_delta_negative)
-		{
-			early_reflection_left = direct_first;
-			early_reflection_right = direct_last;
-			early_reflection_gain_left = (*this)(early_reflection_gain);
-			early_reflection_gain_right = (*this)(early_reflection_gain) * (1 - (*this)(early_reflection_pan_amount));
-		}
-		else
-		{
-			early_reflection_left = direct_first;
-			early_reflection_right = direct_first;
-			early_reflection_gain_left = (*this)(early_reflection_gain);
-			early_reflection_gain_right = (*this)(early_reflection_gain);
-		}
+		channel_mix_early_reflection();
 		break;
 	case late_reflection_gain:
 	case late_reflection_pan:
-		late_reflection_gain_left = (*this)(late_reflection_gain) * std::min(Real(1), (1 - (*this)(late_reflection_pan)));
-		late_reflection_gain_right = (*this)(late_reflection_gain) * std::min(Real(1), (1 + (*this)(late_reflection_pan)));
+		channel_mix_late_reflection();
 	}
+}
+
+inline void Haas::channel_mix_direct()
+{
+	if(direct_delay_stereo_delta_positive)
+	{
+		direct_left = direct_last;
+		direct_right = direct_first;
+		direct_gain_left = (*this)(direct_gain) * (1 - (*this)(direct_pan_amount));
+		direct_gain_right = (*this)(direct_gain);
+	}
+	else if(direct_delay_stereo_delta_negative)
+	{
+		direct_left = direct_first;
+		direct_right = direct_last;
+		direct_gain_left = (*this)(direct_gain);
+		direct_gain_right = (*this)(direct_gain) * (1 - (*this)(direct_pan_amount));
+	}
+	else
+	{
+		direct_left = direct_first;
+		direct_right = direct_first;
+		direct_gain_left = (*this)(direct_gain);
+		direct_gain_right = (*this)(direct_gain);
+	}
+}
+
+inline void Haas::channel_mix_early_reflection()
+{
+	if(early_reflection_delay_stereo_delta_positive)
+	{
+		early_reflection_left = direct_last;
+		early_reflection_right = direct_first;
+		early_reflection_gain_left = (*this)(early_reflection_gain) * (1 - (*this)(early_reflection_pan_amount));
+		early_reflection_gain_right = (*this)(early_reflection_gain);
+	}
+	else if(early_reflection_delay_stereo_delta_negative)
+	{
+		early_reflection_left = direct_first;
+		early_reflection_right = direct_last;
+		early_reflection_gain_left = (*this)(early_reflection_gain);
+		early_reflection_gain_right = (*this)(early_reflection_gain) * (1 - (*this)(early_reflection_pan_amount));
+	}
+	else
+	{
+		early_reflection_left = direct_first;
+		early_reflection_right = direct_first;
+		early_reflection_gain_left = (*this)(early_reflection_gain);
+		early_reflection_gain_right = (*this)(early_reflection_gain);
+	}
+}
+
+inline void Haas::channel_mix_late_reflection()
+{
+	late_reflection_gain_left = (*this)(late_reflection_gain) * std::min(Real(1), (1 - (*this)(late_reflection_pan)));
+	late_reflection_gain_right = (*this)(late_reflection_gain) * std::min(Real(1), (1 + (*this)(late_reflection_pan)));
 }
 
 inline void Haas::resize(const Real & delay)
