@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.21  2005/01/23 11:04:13  johan-boule
+new version scheme 1.7.24
+
 Revision 1.20  2005/01/23 11:02:06  johan-boule
 new version scheme 1.7.24
 
@@ -75,8 +78,8 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 ///			- if even, then it's a stable release.
 ///			- if odd, then it's a beta or release candidate for next major version number.
 /// - p = patch number:
-///			- if the major version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
-///			- if the major version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
+///			- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
+///			- if the minor version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
 
 /// Other files that need to be updated accordingly:
 /// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
