@@ -1222,7 +1222,7 @@ void CMainFrame::OnLoadwave()
 
 void CMainFrame::OnSavewave()
 {
-	int c=0;
+	unsigned int c=0;
 	WaveFile output;
 	static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 	
@@ -1234,7 +1234,7 @@ void CMainFrame::OnSavewave()
 			output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo[_pSong->waveSelected]) ? (2) : (1) );
 			if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo[_pSong->waveSelected])
 			{
-				for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected]; c++)
+				for (c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected]; c++)
 				{
 					output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL[_pSong->waveSelected] + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR[_pSong->waveSelected] + c) );
 				}
@@ -1967,13 +1967,13 @@ void CMainFrame::OnSeqduplicate()
 	int i,counter=0, selcount = cc->GetSelCount();
 	if ( _pSong->playLength+selcount >= MAX_SONG_POSITIONS)
 	{
-		MessageBox("Cannot clone the pattern(s). The maximum sequence length would be excessed.","Clone Patterns");
+		MessageBox("Cannot clone the pattern(s). The maximum sequence length would be exceeded.","Clone Patterns");
 		return;
 	}
 	litems = new int[selcount];
 	cc->GetSelItems(selcount,litems);
 	
-	for(i=(_pSong->playLength-1);i>=litems[0];i--)
+	for(i=(_pSong->playLength-1);i>=litems[selcount-1];i--)  // Moves all patterns after the selection, to make space.
 	{
 		_pSong->playOrder[i+selcount]=_pSong->playOrder[i];
 	}
@@ -1997,18 +1997,18 @@ void CMainFrame::OnSeqduplicate()
 			
 			++_pSong->playLength;
 
-			_pSong->playOrder[litems[i]]=newpat;
+			_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
 
 			counter++;
 		}
 		else 
 		{
-			_pSong->playOrder[litems[i]]=0;
+			_pSong->playOrder[litems[selcount-1]+i+1]=0;
 		}
 	}
 	if ( counter > 0)
 	{
-		m_wndView.editPosition++;
+		m_wndView.editPosition=litems[selcount-1]+1;
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 

@@ -1908,7 +1908,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
+								((Dummy*)pMac[i])->wasVST = true;
 							}
 						}
 						else
@@ -1921,7 +1921,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 							sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 							delete pOldMachine;
 							pMac[i]->_type = MACH_DUMMY;
-							pMac[i]->wasVST = true;
+							((Dummy*)pMac[i])->wasVST = true;
 						}
 	#else // if !_WINAMP_PLUGIN_
 						if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
@@ -1941,7 +1941,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
+								((Dummy*)pMac[i])->wasVST = true;
 							}
 							else if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
@@ -1957,7 +1957,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
+								((Dummy*)pMac[i])->wasVST = true;
 							}
 						}
 						else
@@ -1974,7 +1974,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 							sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 							delete pOldMachine;
 							pMac[i]->_type = MACH_DUMMY;
-							pMac[i]->wasVST = true;
+							((Dummy*)pMac[i])->wasVST = true;
 						}
 	#endif // _WINAMP_PLUGIN_
 					}
@@ -1988,7 +1988,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 						sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 						delete pOldMachine;
 						pMac[i]->_type = MACH_DUMMY;
-						pMac[i]->wasVST = true;
+						((Dummy*)pMac[i])->wasVST = true;
 					}
 					break;
 					}
@@ -2162,12 +2162,15 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
 			if (_machineActive[i])
 			{
-				if ( pMac[i]->wasVST && chunkpresent )
+				if ( pMac[i]->_type == MACH_DUMMY ) 
 				{
+					if (((Dummy*)pMac[i])->wasVST && chunkpresent )
+					{
 					// Since we don't know if the plugin saved it or not, 
 					// we're stuck on letting the loading crash/behave incorrectly.
 					// There should be a flag, like in the VST loading Section to be correct.
 					::MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
+					}
 				}
 				else if (( pMac[i]->_type == MACH_VST ) || 
 						( pMac[i]->_type == MACH_VSTFX))

@@ -571,13 +571,13 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 					default: strcpy(tmp2,"_"); break;
 				}
 				
-				if ( pSong->_pMachine[i]->wasVST )
+				if ( pSong->_pMachine[i]->_type == MACH_DUMMY )
 				{
-					sprintf(valstr,"%.02i:[*]  %s",i,pSong->_pMachine[i]->_editName);
-				}
-				else if ( pSong->_pMachine[i]->_type == MACH_DUMMY )
-				{
-					sprintf(valstr,"%.02i:[?]  %s",i,pSong->_pMachine[i]->_editName);
+					if ( ((Dummy*)pSong->_pMachine[i])->wasVST )
+					{
+						sprintf(valstr,"%.02i:[*]  %s",i,pSong->_pMachine[i]->_editName);
+					}
+					else sprintf(valstr,"%.02i:[?]  %s",i,pSong->_pMachine[i]->_editName);
 				}
 				else sprintf(valstr,"%.02i:[%s]  %s",i,tmp2,pSong->_pMachine[i]->_editName);
 				

@@ -293,7 +293,7 @@ void CEnvDialog::DrawADSR(int AX,int BX,int CX,int DX)
 	DX/=420;
 
 	int CH=100;
-	int CW=512;
+//	int CW=512;
 
 	CClientDC dc(&m_ampframe);
 	CPoint pol[5];
@@ -329,7 +329,7 @@ void CEnvDialog::DrawADSRFil(int AX,int BX,int CX,int DX)
 	DX/=420;
 
 	int CH=100;
-	int CW=512;
+//	int CW=512;
 
 	CClientDC dc(&m_filframe);
 	CPoint pol[5];
