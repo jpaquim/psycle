@@ -105,22 +105,22 @@ BOOL CEnvDialog::OnInitDialog()
 	m_filtercombo.AddString("NotchBand");
 	m_filtercombo.AddString("None");
 
-	m_filtercombo.SetCurSel(_pSong->_instruments[si].ENV_F_TP);
+	m_filtercombo.SetCurSel(_pSong->_pInstrument[si]->ENV_F_TP);
 
 	// Update sliders
-	m_a_attack_slider.SetPos(_pSong->_instruments[si].ENV_AT);
-	m_a_decay_slider.SetPos(_pSong->_instruments[si].ENV_DT);
-	m_a_sustain_slider.SetPos(_pSong->_instruments[si].ENV_SL);
-	m_a_release_slider.SetPos(_pSong->_instruments[si].ENV_RT);
+	m_a_attack_slider.SetPos(_pSong->_pInstrument[si]->ENV_AT);
+	m_a_decay_slider.SetPos(_pSong->_pInstrument[si]->ENV_DT);
+	m_a_sustain_slider.SetPos(_pSong->_pInstrument[si]->ENV_SL);
+	m_a_release_slider.SetPos(_pSong->_pInstrument[si]->ENV_RT);
 
-	m_f_attack_slider.SetPos(_pSong->_instruments[si].ENV_F_AT);
-	m_f_decay_slider.SetPos(_pSong->_instruments[si].ENV_F_DT);
-	m_f_sustain_slider.SetPos(_pSong->_instruments[si].ENV_F_SL);
-	m_f_release_slider.SetPos(_pSong->_instruments[si].ENV_F_RT);
+	m_f_attack_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_AT);
+	m_f_decay_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_DT);
+	m_f_sustain_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_SL);
+	m_f_release_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_RT);
 	
-	m_cutoff_slider.SetPos(_pSong->_instruments[si].ENV_F_CO);
-	m_q_slider.SetPos(_pSong->_instruments[si].ENV_F_RQ);
-	m_envelope_slider.SetPos(_pSong->_instruments[si].ENV_F_EA+128);
+	m_cutoff_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_CO);
+	m_q_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_RQ);
+	m_envelope_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_EA+128);
 	
 	return TRUE;
 }
@@ -129,18 +129,18 @@ void CEnvDialog::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si = _pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_AT = m_a_attack_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_AT = m_a_attack_slider.GetPos();
 	
 	char buffer[12];
-	sprintf(buffer,"%.2f ms.",(float)_pSong->_instruments[si].ENV_AT*0.0226757f);
+	sprintf(buffer,"%.2f ms.",(float)_pSong->_pInstrument[si]->ENV_AT*0.0226757f);
 	m_a_a_label.SetWindowText(buffer);
 
 	// Update ADSR
 	DrawADSR(
-		_pSong->_instruments[si].ENV_AT,
-		_pSong->_instruments[si].ENV_DT,
-		_pSong->_instruments[si].ENV_SL,
-		_pSong->_instruments[si].ENV_RT);
+		_pSong->_pInstrument[si]->ENV_AT,
+		_pSong->_pInstrument[si]->ENV_DT,
+		_pSong->_pInstrument[si]->ENV_SL,
+		_pSong->_pInstrument[si]->ENV_RT);
 
 	*pResult = 0;
 
@@ -150,18 +150,18 @@ void CEnvDialog::OnDrawAmpDecaySlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_DT = m_a_decay_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_DT = m_a_decay_slider.GetPos();
 	
 	char buffer[12];
-	sprintf(buffer,"%.2f ms.",(float)_pSong->_instruments[si].ENV_DT*0.0226757f);
+	sprintf(buffer,"%.2f ms.",(float)_pSong->_pInstrument[si]->ENV_DT*0.0226757f);
 	m_a_d_label.SetWindowText(buffer);
 
 	// Update ADSR
 	DrawADSR(
-		_pSong->_instruments[si].ENV_AT,
-		_pSong->_instruments[si].ENV_DT,
-		_pSong->_instruments[si].ENV_SL,
-		_pSong->_instruments[si].ENV_RT);
+		_pSong->_pInstrument[si]->ENV_AT,
+		_pSong->_pInstrument[si]->ENV_DT,
+		_pSong->_pInstrument[si]->ENV_SL,
+		_pSong->_pInstrument[si]->ENV_RT);
 
 	*pResult = 0;
 }
@@ -170,18 +170,18 @@ void CEnvDialog::OnDrawAmpSustainSlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_SL = m_a_sustain_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_SL = m_a_sustain_slider.GetPos();
 	
 	char buffer[12];
-	sprintf(buffer,"%d%%",_pSong->_instruments[si].ENV_SL);
+	sprintf(buffer,"%d%%",_pSong->_pInstrument[si]->ENV_SL);
 	m_a_s_label.SetWindowText(buffer);
 
 	// Update ADSR
 	DrawADSR(
-		_pSong->_instruments[si].ENV_AT,
-		_pSong->_instruments[si].ENV_DT,
-		_pSong->_instruments[si].ENV_SL,
-		_pSong->_instruments[si].ENV_RT);
+		_pSong->_pInstrument[si]->ENV_AT,
+		_pSong->_pInstrument[si]->ENV_DT,
+		_pSong->_pInstrument[si]->ENV_SL,
+		_pSong->_pInstrument[si]->ENV_RT);
 
 	*pResult = 0;
 }
@@ -190,18 +190,18 @@ void CEnvDialog::OnDrawAmpReleaseSlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_RT = m_a_release_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_RT = m_a_release_slider.GetPos();
 	
 	char buffer[12];
-	sprintf(buffer,"%.2f ms.",(float)_pSong->_instruments[si].ENV_RT*0.0226757f);
+	sprintf(buffer,"%.2f ms.",(float)_pSong->_pInstrument[si]->ENV_RT*0.0226757f);
 	m_a_r_label.SetWindowText(buffer);
 	
 	// Update ADSR
 	DrawADSR(
-			_pSong->_instruments[si].ENV_AT,
-			_pSong->_instruments[si].ENV_DT,
-			_pSong->_instruments[si].ENV_SL,
-			_pSong->_instruments[si].ENV_RT);
+			_pSong->_pInstrument[si]->ENV_AT,
+			_pSong->_pInstrument[si]->ENV_DT,
+			_pSong->_pInstrument[si]->ENV_SL,
+			_pSong->_pInstrument[si]->ENV_RT);
 
 	*pResult = 0;
 }
@@ -213,17 +213,17 @@ void CEnvDialog::OnCustomdrawFSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_F_AT = m_f_attack_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_F_AT = m_f_attack_slider.GetPos();
 	
 	char buffer[12];
-	sprintf(buffer,"%.2f ms.",(float)_pSong->_instruments[si].ENV_F_AT*0.0226757f);
+	sprintf(buffer,"%.2f ms.",(float)_pSong->_pInstrument[si]->ENV_F_AT*0.0226757f);
 	m_f_a_label.SetWindowText(buffer);
 
 	// Update filter ADSR
-	DrawADSRFil(_pSong->_instruments[si].ENV_F_AT,
-				_pSong->_instruments[si].ENV_F_DT,
-				_pSong->_instruments[si].ENV_F_SL,
-				_pSong->_instruments[si].ENV_F_RT);
+	DrawADSRFil(_pSong->_pInstrument[si]->ENV_F_AT,
+				_pSong->_pInstrument[si]->ENV_F_DT,
+				_pSong->_pInstrument[si]->ENV_F_SL,
+				_pSong->_pInstrument[si]->ENV_F_RT);
 
 	*pResult = 0;
 }
@@ -232,16 +232,16 @@ void CEnvDialog::OnCustomdrawFSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_F_DT=m_f_decay_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_F_DT=m_f_decay_slider.GetPos();
 	char buffer[12];
-	sprintf(buffer,"%.2f ms.",(float)_pSong->_instruments[si].ENV_F_DT*0.0226757f);
+	sprintf(buffer,"%.2f ms.",(float)_pSong->_pInstrument[si]->ENV_F_DT*0.0226757f);
 	m_f_d_label.SetWindowText(buffer);
 
 	// Update filter ADSR
-	DrawADSRFil(_pSong->_instruments[si].ENV_F_AT,
-				_pSong->_instruments[si].ENV_F_DT,
-				_pSong->_instruments[si].ENV_F_SL,
-				_pSong->_instruments[si].ENV_F_RT);
+	DrawADSRFil(_pSong->_pInstrument[si]->ENV_F_AT,
+				_pSong->_pInstrument[si]->ENV_F_DT,
+				_pSong->_pInstrument[si]->ENV_F_SL,
+				_pSong->_pInstrument[si]->ENV_F_RT);
 
 	*pResult = 0;
 }
@@ -251,15 +251,15 @@ void CEnvDialog::OnCustomdrawFSlider3(NMHDR* pNMHDR, LRESULT* pResult)
 	int si=_pSong->instSelected;
 
 	char buffer[12];
-	_pSong->_instruments[si].ENV_F_SL=m_f_sustain_slider.GetPos();
-	sprintf(buffer,"%.0f%%",_pSong->_instruments[si].ENV_F_SL*0.78125);
+	_pSong->_pInstrument[si]->ENV_F_SL=m_f_sustain_slider.GetPos();
+	sprintf(buffer,"%.0f%%",_pSong->_pInstrument[si]->ENV_F_SL*0.78125);
 	m_f_s_label.SetWindowText(buffer);
 
 	// Update filter ADSR
-	DrawADSRFil(_pSong->_instruments[si].ENV_F_AT,
-				_pSong->_instruments[si].ENV_F_DT,
-				_pSong->_instruments[si].ENV_F_SL,
-				_pSong->_instruments[si].ENV_F_RT);
+	DrawADSRFil(_pSong->_pInstrument[si]->ENV_F_AT,
+				_pSong->_pInstrument[si]->ENV_F_DT,
+				_pSong->_pInstrument[si]->ENV_F_SL,
+				_pSong->_pInstrument[si]->ENV_F_RT);
 
 	*pResult = 0;
 }
@@ -268,16 +268,16 @@ void CEnvDialog::OnCustomdrawFSlider4(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_F_RT = m_f_release_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_F_RT = m_f_release_slider.GetPos();
 	char buffer[12];
-	sprintf(buffer,"%.2f ms.",(float)_pSong->_instruments[si].ENV_F_RT*0.0226757f);
+	sprintf(buffer,"%.2f ms.",(float)_pSong->_pInstrument[si]->ENV_F_RT*0.0226757f);
 	m_f_r_label.SetWindowText(buffer);
 
 	// Update filter ADSR
-	DrawADSRFil(_pSong->_instruments[si].ENV_F_AT,
-				_pSong->_instruments[si].ENV_F_DT,
-				_pSong->_instruments[si].ENV_F_SL,
-				_pSong->_instruments[si].ENV_F_RT);
+	DrawADSRFil(_pSong->_pInstrument[si]->ENV_F_AT,
+				_pSong->_pInstrument[si]->ENV_F_DT,
+				_pSong->_pInstrument[si]->ENV_F_SL,
+				_pSong->_pInstrument[si]->ENV_F_RT);
 	
 	*pResult = 0;
 }
@@ -360,9 +360,9 @@ void CEnvDialog::OnCustomdrawSliderCutoff(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_F_CO = m_cutoff_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_F_CO = m_cutoff_slider.GetPos();
 	char buffer[12];
-	sprintf(buffer,"%d",_pSong->_instruments[si].ENV_F_CO);
+	sprintf(buffer,"%d",_pSong->_pInstrument[si]->ENV_F_CO);
 	m_cutoff_label.SetWindowText(buffer);
 
 	*pResult = 0;
@@ -372,10 +372,10 @@ void CEnvDialog::OnCustomdrawSliderQ(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_F_RQ = m_q_slider.GetPos();
+	_pSong->_pInstrument[si]->ENV_F_RQ = m_q_slider.GetPos();
 
 	char buffer[12];
-	sprintf(buffer,"%.0f%%",_pSong->_instruments[si].ENV_F_RQ*0.78740);
+	sprintf(buffer,"%.0f%%",_pSong->_pInstrument[si]->ENV_F_RQ*0.78740);
 	m_q_label.SetWindowText(buffer);
 
 	*pResult = 0;
@@ -384,15 +384,15 @@ void CEnvDialog::OnCustomdrawSliderQ(NMHDR* pNMHDR, LRESULT* pResult)
 void CEnvDialog::OnSelchangeCombo1() 
 {
 	int si=_pSong->instSelected;
-	_pSong->_instruments[si].ENV_F_TP = m_filtercombo.GetCurSel();	
+	_pSong->_pInstrument[si]->ENV_F_TP = m_filtercombo.GetCurSel();	
 }
 
 void CEnvDialog::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	int si=_pSong->instSelected;
-	_pSong->_instruments[si].ENV_F_EA = m_envelope_slider.GetPos()-128;
+	_pSong->_pInstrument[si]->ENV_F_EA = m_envelope_slider.GetPos()-128;
 	char buffer[12];
-	sprintf(buffer,"%.0f",(float)_pSong->_instruments[si].ENV_F_EA*0.78125f);
+	sprintf(buffer,"%.0f",(float)_pSong->_pInstrument[si]->ENV_F_EA*0.78125f);
 	m_envelope_label.SetWindowText(buffer);
 	
 	*pResult = 0;

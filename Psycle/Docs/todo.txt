@@ -15,7 +15,8 @@ X low priority
 
 
 
-rough bug count: ~60, many aren't really bugs though.
+rough bug count: ~45 (not all are bugs)
+aditional known vst bugs/buggy vsts: ~33
 
 * New and unsorted and untested
 -------------------------------

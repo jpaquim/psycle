@@ -171,7 +171,7 @@ void CGearRackDlg::RedrawList()
 		char buffer[64];
 		for (int b=0;b<PREV_WAV_INS;b++)
 		{
-			sprintf(buffer, "%.2X: %s", b, Global::_pSong->_instruments[b]._sName);
+			sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
 			m_list.AddString(buffer);
 		}
 		CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
@@ -660,11 +660,11 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 void CGearRackDlg::ExchangeIns(int one,int two)
 {
 	Song* pSong = Global::_pSong;
-	Instrument tmpins;
+	Instrument * tmpins;
 	
-	tmpins=pSong->_instruments[one];
-	pSong->_instruments[one]=pSong->_instruments[two];
-	pSong->_instruments[two]=tmpins;
+	tmpins=pSong->_pInstrument[one];
+	pSong->_pInstrument[one]=pSong->_pInstrument[two];
+	pSong->_pInstrument[two]=tmpins;
 	//The above works because we are not creating new objects, just swaping them.
 	//this means that no new data is generated/deleted,and the information is just
 	//copied. If not, we would have had to define the operator=() function and take
@@ -763,7 +763,7 @@ void CGearRackDlg::OnClonemachine()
 		{
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
-				if (Global::_pSong->_instruments[i].Empty())
+				if (Global::_pSong->_pInstrument[i]->Empty())
 				{
 					tmac2 = i;
 					break;

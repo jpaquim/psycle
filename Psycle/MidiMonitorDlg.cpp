@@ -381,8 +381,7 @@ void CMidiMonitorDlg::FillChannelMap( bool override )
 				// required? (instruments only apply for samplers)
 				if( pMachine->_type == MACH_SAMPLER )
 				{
-					Instrument * pInstrument = &Global::_pSong->_instruments[ instrument ];
-					sprintf( txtBuffer, "%03d: %s\0", instrument, pInstrument->_sName );
+					sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
 					m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 				}
 				else

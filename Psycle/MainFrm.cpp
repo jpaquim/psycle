@@ -1043,7 +1043,7 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 		{
 			for (int i=0;i<PREV_WAV_INS;i++)
 			{
-				sprintf(buffer, "%.2X: %s", i, _pSong->_instruments[i]._sName);
+				sprintf(buffer, "%.2X: %s", i, _pSong->_pInstrument[i]->_sName);
 				cc->AddString(buffer);
 				listlen++;
 			}
@@ -1166,7 +1166,7 @@ void CMainFrame::OnLoadwave()
 			Global::pConfig->SetInstrumentDir(str.Left(index));
 		}
 	}
-	if ( _pSong->_instruments[PREV_WAV_INS].waveLength[0] > 0)
+	if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength[0] > 0)
 	{
 		// Stopping wavepreview if not stopped.
 		if(_pSong->PW_Stage)
@@ -1189,22 +1189,22 @@ void CMainFrame::OnSavewave()
 	WaveFile output;
 	static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 	
-	if (_pSong->_instruments[_pSong->instSelected].waveLength[_pSong->waveSelected])
+	if (_pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected])
 	{
-		CFileDialog dlg(FALSE, "wav", _pSong->_instruments[_pSong->instSelected].waveName[_pSong->waveSelected], OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+		CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName[_pSong->waveSelected], OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 		if (dlg.DoModal() == IDOK)
 		{
-			output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_instruments[_pSong->instSelected].waveStereo[_pSong->waveSelected]) ? (2) : (1) );
-			if (_pSong->_instruments[_pSong->instSelected].waveStereo[_pSong->waveSelected])
+			output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo[_pSong->waveSelected]) ? (2) : (1) );
+			if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo[_pSong->waveSelected])
 			{
-				for ( unsigned int c=0; c < _pSong->_instruments[_pSong->instSelected].waveLength[_pSong->waveSelected]; c++)
+				for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected]; c++)
 				{
-					output.WriteStereoSample( *(_pSong->_instruments[_pSong->instSelected].waveDataL[_pSong->waveSelected] + c), *(_pSong->_instruments[_pSong->instSelected].waveDataR[_pSong->waveSelected] + c) );
+					output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL[_pSong->waveSelected] + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR[_pSong->waveSelected] + c) );
 				}
 			}
 			else
 			{
-				output.WriteData(_pSong->_instruments[_pSong->instSelected].waveDataL[_pSong->waveSelected], _pSong->_instruments[_pSong->instSelected].waveLength[_pSong->waveSelected]);
+				output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL[_pSong->waveSelected], _pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected]);
 			}
 
 			output.Close();
@@ -2520,9 +2520,9 @@ BOOL CMainFrame::StatusBarIdleText()
 				{
 					if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
 					{
-						if (_pSong->_instruments[toffset[1]]._sName[0])
+						if (_pSong->_pInstrument[toffset[1]]->_sName[0])
 						{
-							sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachine[machine]->_editName,_pSong->_instruments[toffset[1]]._sName);
+							sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachine[machine]->_editName,_pSong->_pInstrument[toffset[1]]->_sName);
 							return TRUE;
 						}
 						else 

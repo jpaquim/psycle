@@ -307,11 +307,11 @@ void Sampler::VoiceWork(int numsamples, int voice)
 			pVoice->_triggerNoteDelay = pVoice->_tickCounter+ pVoice->effVal;
 
 #if defined(_WINAMP_PLUGIN_)
-			pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
-			pVoice->_filterEnv._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
+			pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
+			pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
-			pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-			pVoice->_filterEnv._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+			pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+			pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 
 			pVoice->effretTicks--;
@@ -517,7 +517,7 @@ void Sampler::Tick(
 */
 	if ( data._note < 120 )	// Handle Note On.
 	{
-		if ( Global::_pSong->_instruments[data._inst].waveLength[0] == 0 ) return; // if no wave, return.
+		if ( Global::_pSong->_pInstrument[data._inst]->waveLength[0] == 0 ) return; // if no wave, return.
 
 		for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
 		{
@@ -544,7 +544,7 @@ void Sampler::Tick(
 		{
 			if ( _voices[voice]._channel == channel ) // NoteOff previous Notes in this channel.
 			{
-				switch (Global::_pSong->_instruments[_voices[voice]._instrument]._NNA)
+				switch (Global::_pSong->_pInstrument[_voices[voice]._instrument]->_NNA)
 				{
 				case 0:
 					NoteOffFast(voice);
@@ -622,7 +622,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 //  All this mess should be really changed with classes using the "operator=" to "copy" values.
 
 	int layer = 0; // Change this when adding working Layering code.
-	int twlength = Global::_pSong->_instruments[pEntry->_inst].waveLength[layer];
+	int twlength = Global::_pSong->_pInstrument[pEntry->_inst]->waveLength[layer];
 	
 	if (pEntry->_note < 120 && twlength > 0)
 	{
@@ -633,52 +633,52 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		//
 		pVoice->_filter.Init();
 
-		if (Global::_pSong->_instruments[pVoice->_instrument]._RCUT)
+		if (Global::_pSong->_pInstrument[pVoice->_instrument]->_RCUT)
 		{
-			pVoice->_cutoff = alteRand(Global::_pSong->_instruments[pVoice->_instrument].ENV_F_CO);
+			pVoice->_cutoff = alteRand(Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_CO);
 		}
 		else
 		{
-			pVoice->_cutoff = Global::_pSong->_instruments[pVoice->_instrument].ENV_F_CO;
+			pVoice->_cutoff = Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_CO;
 		}
 		
-		if (Global::_pSong->_instruments[pVoice->_instrument]._RRES)
+		if (Global::_pSong->_pInstrument[pVoice->_instrument]->_RRES)
 		{
-			pVoice->_filter._q = alteRand(Global::_pSong->_instruments[pVoice->_instrument].ENV_F_RQ);
+			pVoice->_filter._q = alteRand(Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RQ);
 		}
 		else
 		{
-			pVoice->_filter._q = Global::_pSong->_instruments[pVoice->_instrument].ENV_F_RQ;
+			pVoice->_filter._q = Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RQ;
 		}
 
-		pVoice->_filter._type = (FilterType)Global::_pSong->_instruments[pVoice->_instrument].ENV_F_TP;
-		pVoice->_coModify = (float)Global::_pSong->_instruments[pVoice->_instrument].ENV_F_EA;
-		pVoice->_filterEnv._sustain = (float)Global::_pSong->_instruments[pVoice->_instrument].ENV_F_SL*0.0078125f;
+		pVoice->_filter._type = (FilterType)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_TP;
+		pVoice->_coModify = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_EA;
+		pVoice->_filterEnv._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
 
 		if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
 		{
 			pVoice->_filterEnv._stage = ENV_ATTACK;
 		}
 #if defined(_WINAMP_PLUGIN_)
-		pVoice->_filterEnv._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
+		pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
-		pVoice->_filterEnv._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+		pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 		pVoice->_filterEnv._value = 0;
 		
 		// Init Wave
 		//
-		pVoice->_wave._pL = Global::_pSong->_instruments[pVoice->_instrument].waveDataL[layer];
-		pVoice->_wave._pR = Global::_pSong->_instruments[pVoice->_instrument].waveDataR[layer];
-		pVoice->_wave._stereo = Global::_pSong->_instruments[pVoice->_instrument].waveStereo[layer];
+		pVoice->_wave._pL = Global::_pSong->_pInstrument[pVoice->_instrument]->waveDataL[layer];
+		pVoice->_wave._pR = Global::_pSong->_pInstrument[pVoice->_instrument]->waveDataR[layer];
+		pVoice->_wave._stereo = Global::_pSong->_pInstrument[pVoice->_instrument]->waveStereo[layer];
 		pVoice->_wave._length = twlength;
 		
 		// Init loop
-		if (Global::_pSong->_instruments[pVoice->_instrument].waveLoopType[layer])
+		if (Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopType[layer])
 		{
 			pVoice->_wave._loop = true;
-			pVoice->_wave._loopStart = Global::_pSong->_instruments[pVoice->_instrument].waveLoopStart[layer];
-			pVoice->_wave._loopEnd = Global::_pSong->_instruments[pVoice->_instrument].waveLoopEnd[layer];
+			pVoice->_wave._loopStart = Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopStart[layer];
+			pVoice->_wave._loopEnd = Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopEnd[layer];
 		}
 		else
 		{
@@ -687,19 +687,19 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		
 		// Init Resampler
 		//
-		if (Global::_pSong->_instruments[pVoice->_instrument]._loop)
+		if (Global::_pSong->_pInstrument[pVoice->_instrument]->_loop)
 		{
-			double const totalsamples = double(Global::_pSong->SamplesPerTick*Global::_pSong->_instruments[pVoice->_instrument]._lines);
+			double const totalsamples = double(Global::_pSong->SamplesPerTick*Global::_pSong->_pInstrument[pVoice->_instrument]->_lines);
 //			pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 			pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 		}	
 		else
 		{
-			float const finetune = CValueMapper::Map_255_1(Global::_pSong->_instruments[pVoice->_instrument].waveFinetune[layer]);
+			float const finetune = CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune[layer]);
 #if defined(_WINAMP_PLUGIN_)
-			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_instruments[pVoice->_instrument].waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_samplesPerSec));
+			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_samplesPerSec));
 #else
-			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_instruments[pVoice->_instrument].waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec));
+			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec));
 #endif // _WINAMP_PLUGIN_
 		}
 		
@@ -718,7 +718,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 
 		// Calculating volume coef ---------------------------------------
 		//
-		pVoice->_wave._vol = (float)Global::_pSong->_instruments[pVoice->_instrument].waveVolume[layer]*0.01f;
+		pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume[layer]*0.01f;
 
 		if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
 		{
@@ -729,7 +729,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		//
 		float panFactor;
 		
-		if (Global::_pSong->_instruments[pVoice->_instrument]._RPAN)
+		if (Global::_pSong->_pInstrument[pVoice->_instrument]->_RPAN)
 		{
 			panFactor = (float)rand()*0.000030517578125f;
 		}
@@ -738,7 +738,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 			panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
 		}
 		else {
-			panFactor = CValueMapper::Map_255_1(Global::_pSong->_instruments[pVoice->_instrument]._pan);
+			panFactor = CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -759,12 +759,12 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		// Init Amplitude Envelope
 		//
 #if defined(_WINAMP_PLUGIN_)
-		pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
+		pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
-		pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+		pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN
 		pVoice->_envelope._value = 0.0f;
-		pVoice->_envelope._sustain = (float)Global::_pSong->_instruments[pVoice->_instrument].ENV_SL*0.01f;
+		pVoice->_envelope._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 		// This must be last, or the voice could be started by VoiceWork before all
 		// elements are initialized
 		//
@@ -817,7 +817,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 	{
 		// Calculating volume coef ---------------------------------------
 		//
-		pVoice->_wave._vol = (float)Global::_pSong->_instruments[pVoice->_instrument].waveVolume[layer]*0.01f;
+		pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume[layer]*0.01f;
 
 		if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
 		
@@ -825,7 +825,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		//
 		float panFactor;
 		
-		if (Global::_pSong->_instruments[pVoice->_instrument]._RPAN)
+		if (Global::_pSong->_pInstrument[pVoice->_instrument]->_RPAN)
 		{
 			panFactor = (float)rand()*0.000030517578125f;
 		}
@@ -835,7 +835,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		}
 		else
 		{
-			panFactor = CValueMapper::Map_255_1(Global::_pSong->_instruments[pVoice->_instrument]._pan);
+			panFactor = CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -872,9 +872,9 @@ void Sampler::TickFilterEnvelope(
 			pVoice->_filterEnv._stage = ENV_DECAY;
 			pVoice->_filterEnv._value = 1.0f;
 #if defined(_WINAMP_PLUGIN_)
-			pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_instruments[pVoice->_instrument].ENV_F_DT) * (44100.0f/Global::pConfig->_samplesPerSec);
+			pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pConfig->_samplesPerSec);
 #else
-			pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_instruments[pVoice->_instrument].ENV_F_DT) * (44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+			pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 		}
 		break;
@@ -912,9 +912,9 @@ void Sampler::TickEnvelope(
 			pVoice->_envelope._value = 1.0f;
 			pVoice->_envelope._stage = ENV_DECAY;
 #if defined(_WINAMP_PLUGIN_)
-			pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_instruments[pVoice->_instrument].ENV_DT)*(44100.0f/Global::pConfig->_samplesPerSec);
+			pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
-			pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_instruments[pVoice->_instrument].ENV_DT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+			pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 		}
 		break;
@@ -948,11 +948,11 @@ void Sampler::NoteOff(
 		pVoice->_envelope._stage = ENV_RELEASE;
 		pVoice->_filterEnv._stage = ENV_RELEASE;
 #if defined(_WINAMP_PLUGIN_)
-		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
-		pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
+		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
+		pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
-		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+		pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 	}
 }

@@ -245,13 +245,18 @@ Song::Song()
 	}
 	CreateNewPattern(0);
 
+	for (i=0;i<MAX_INSTRUMENTS;i++)
+	{
+		_pInstrument[i] = new Instrument;
+	}
+
 	Reset();
 }
 
 Song::~Song()
 {
 	DestroyAllMachines();
-	DeleteInstruments();
+	DestroyAllInstruments();
 	DeleteAllPatterns();
 }
 
@@ -289,23 +294,33 @@ void Song::DestroyAllMachines()
 
 void Song::DeleteLayer(int i,int c)
 {
-	_instruments[i].DeleteLayer(c);
+	_pInstrument[i]->DeleteLayer(c);
 }
 
 void Song::DeleteInstruments()
 {
+	// this actually just resets to a blank instrument
 	for (int i=0;i<MAX_INSTRUMENTS;i++)
 	{
 		DeleteInstrument(i);
 	}
 }
 
+void Song::DestroyAllInstruments()
+{
+	for (int i=0;i<MAX_INSTRUMENTS;i++)
+	{
+		delete _pInstrument[i];
+	}
+}
+
 void Song::DeleteInstrument(int i)
 {
+	// this actually just resets to a blank instrument
 #if !defined(_WINAMP_PLUGIN_)
 	Invalided=true;
 #endif
-	_instruments[i].Delete();
+	_pInstrument[i]->Delete();
 #if !defined(_WINAMP_PLUGIN_)
 	Invalided=false;
 #endif
@@ -327,7 +342,7 @@ void Song::Reset(void)
 	{
 		for (int c=0; c<MAX_WAVES; c++)
 		{
-			_instruments[i].waveLength[c]=0;
+			_pInstrument[i]->waveLength[c]=0;
 		}
 	}
 	for (i = 0; i<MAX_MACHINES;i++)
@@ -887,11 +902,11 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 
 	if ( hd._id == file.FourCC("NAME"))
 	{
-		file.Read(_instruments[instrument].waveName[layer],22); // should be hd._size instead of "22", but it is incorrectly read.
-		if ( strcmp(_instruments[instrument]._sName,"empty") == 0 )
+		file.Read(_pInstrument[instrument]->waveName[layer],22); // should be hd._size instead of "22", but it is incorrectly read.
+		if ( strcmp(_pInstrument[instrument]->_sName,"empty") == 0 )
 		{
-			strncpy(_instruments[instrument]._sName,str,31);
-			_instruments[instrument]._sName[31]='\0';
+			strncpy(_pInstrument[instrument]->_sName,str,31);
+			_pInstrument[instrument]->_sName[31]='\0';
 		}
 		file.Read(&hd,sizeof(RiffChunkHeader));
 	}
@@ -913,13 +928,13 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 		{
 			Datalen>>=1;		ls>>=1;		le>>=1;
 		}
-		_instruments[instrument].waveLength[layer]=Datalen;
+		_pInstrument[instrument]->waveLength[layer]=Datalen;
 
 		if ( ls != le )
 		{
-			_instruments[instrument].waveLoopStart[layer]=ls;
-			_instruments[instrument].waveLoopEnd[layer]=ls+le;
-			_instruments[instrument].waveLoopType[layer]=true;
+			_pInstrument[instrument]->waveLoopStart[layer]=ls;
+			_pInstrument[instrument]->waveLoopEnd[layer]=ls+le;
+			_pInstrument[instrument]->waveLoopType[layer]=true;
 		}
 		file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
 		file.Read(&hd,sizeof(RiffChunkHeader));
@@ -928,11 +943,11 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 	if ( hd._id == file.FourCC("BODY"))
 	{
 	    short *csamples;
-		const unsigned int Datalen = _instruments[instrument].waveLength[layer];
+		const unsigned int Datalen = _pInstrument[instrument]->waveLength[layer];
 
-		_instruments[instrument].waveStereo[layer]=false;
-		_instruments[instrument].waveDataL[layer]=new signed short[Datalen];
-		csamples=_instruments[instrument].waveDataL[layer];
+		_pInstrument[instrument]->waveStereo[layer]=false;
+		_pInstrument[instrument]->waveDataL[layer]=new signed short[Datalen];
+		csamples=_pInstrument[instrument]->waveDataL[layer];
 		
 		if ( bits == 16 )
 		{
@@ -971,24 +986,24 @@ int Song::WavAlloc(
 
 	if(bStereo)
 	{
-		_instruments[iInstr].waveDataL[iLayer]=new signed short[iSamplesPerChan];
-		_instruments[iInstr].waveDataR[iLayer]=new signed short[iSamplesPerChan];
-		_instruments[iInstr].waveStereo[iLayer]=true;
+		_pInstrument[iInstr]->waveDataL[iLayer]=new signed short[iSamplesPerChan];
+		_pInstrument[iInstr]->waveDataR[iLayer]=new signed short[iSamplesPerChan];
+		_pInstrument[iInstr]->waveStereo[iLayer]=true;
 	}
 	else
 	{
-		_instruments[iInstr].waveDataL[iLayer]=new signed short[iSamplesPerChan];
-		_instruments[iInstr].waveStereo[iLayer]=false;
+		_pInstrument[iInstr]->waveDataL[iLayer]=new signed short[iSamplesPerChan];
+		_pInstrument[iInstr]->waveStereo[iLayer]=false;
 	}
-	_instruments[iInstr].waveLength[iLayer]=iSamplesPerChan;
+	_pInstrument[iInstr]->waveLength[iLayer]=iSamplesPerChan;
 
-	strncpy(_instruments[iInstr].waveName[iLayer],sName,31);
-	_instruments[iInstr].waveName[iLayer][31]='\0';
+	strncpy(_pInstrument[iInstr]->waveName[iLayer],sName,31);
+	_pInstrument[iInstr]->waveName[iLayer][31]='\0';
 	
 	if(iLayer==0)
 	{
-		strncpy(_instruments[iInstr]._sName,sName,31);
-		_instruments[iInstr]._sName[31]='\0';
+		strncpy(_pInstrument[iInstr]->_sName,sName,31);
+		_pInstrument[iInstr]->_sName[31]='\0';
 	}
 
 	return true;
@@ -1026,7 +1041,7 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 // I don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 // I need to convert 8bits to 16bits, and stereo channels are in different arrays.
 	
-	short *sampL=_instruments[instrument].waveDataL[layer];
+	short *sampL=_pInstrument[instrument]->waveDataL[layer];
 	
 	long io;
 	if ( st_type == 1 ) // mono
@@ -1059,7 +1074,7 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 	}
 	else // stereo
 	{
-		short *sampR = _instruments[instrument].waveDataR[layer];
+		short *sampR = _pInstrument[instrument]->waveDataR[layer];
 
 		UINT8 smp8;
 		switch(bits)
@@ -1118,11 +1133,11 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 				unsigned int le=0;
 				file.Read((void*)&ls,4);
 				file.Read((void*)&le,4);
-				_instruments[instrument].waveLoopStart[layer]=ls;
-				_instruments[instrument].waveLoopEnd[layer]=le;
+				_pInstrument[instrument]->waveLoopStart[layer]=ls;
+				_pInstrument[instrument]->waveLoopEnd[layer]=le;
 //				if (!((ls <= 0) && (le >= Datalen-1))) // **** only for my bad sample collection
 				{
-					_instruments[instrument].waveLoopType[layer]=true;
+					_pInstrument[instrument]->waveLoopType[layer]=true;
 				}
 			}
 			file.Skip(9);
@@ -1401,7 +1416,7 @@ bool Song::Load(RiffFile* pFile)
 					pFile->Read(&index,sizeof(index));
 					if (index < MAX_INSTRUMENTS)
 					{
-						_instruments[index].LoadFileChunk(pFile,version);
+						_pInstrument[index]->LoadFileChunk(pFile,version);
 					}
 					else
 					{
@@ -1590,75 +1605,75 @@ bool Song::Load(RiffFile* pFile)
 		pFile->Read(&instSelected, sizeof(instSelected));
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._sName, sizeof(_instruments[0]._sName));
+			pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._NNA, sizeof(_instruments[0]._NNA));
+			pFile->Read(&_pInstrument[i]->_NNA, sizeof(_pInstrument[0]->_NNA));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_AT, sizeof(_instruments[0].ENV_AT));
+			pFile->Read(&_pInstrument[i]->ENV_AT, sizeof(_pInstrument[0]->ENV_AT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_DT, sizeof(_instruments[0].ENV_DT));
+			pFile->Read(&_pInstrument[i]->ENV_DT, sizeof(_pInstrument[0]->ENV_DT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_SL, sizeof(_instruments[0].ENV_SL));
+			pFile->Read(&_pInstrument[i]->ENV_SL, sizeof(_pInstrument[0]->ENV_SL));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_RT, sizeof(_instruments[0].ENV_RT));
+			pFile->Read(&_pInstrument[i]->ENV_RT, sizeof(_pInstrument[0]->ENV_RT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_AT, sizeof(_instruments[0].ENV_F_AT));
+			pFile->Read(&_pInstrument[i]->ENV_F_AT, sizeof(_pInstrument[0]->ENV_F_AT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_DT, sizeof(_instruments[0].ENV_F_DT));
+			pFile->Read(&_pInstrument[i]->ENV_F_DT, sizeof(_pInstrument[0]->ENV_F_DT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_SL, sizeof(_instruments[0].ENV_F_SL));
+			pFile->Read(&_pInstrument[i]->ENV_F_SL, sizeof(_pInstrument[0]->ENV_F_SL));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_RT, sizeof(_instruments[0].ENV_F_RT));
+			pFile->Read(&_pInstrument[i]->ENV_F_RT, sizeof(_pInstrument[0]->ENV_F_RT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_CO, sizeof(_instruments[0].ENV_F_CO));
+			pFile->Read(&_pInstrument[i]->ENV_F_CO, sizeof(_pInstrument[0]->ENV_F_CO));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_RQ, sizeof(_instruments[0].ENV_F_RQ));
+			pFile->Read(&_pInstrument[i]->ENV_F_RQ, sizeof(_pInstrument[0]->ENV_F_RQ));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_EA, sizeof(_instruments[0].ENV_F_EA));
+			pFile->Read(&_pInstrument[i]->ENV_F_EA, sizeof(_pInstrument[0]->ENV_F_EA));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i].ENV_F_TP, sizeof(_instruments[0].ENV_F_TP));
+			pFile->Read(&_pInstrument[i]->ENV_F_TP, sizeof(_pInstrument[0]->ENV_F_TP));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._pan, sizeof(_instruments[0]._pan));
+			pFile->Read(&_pInstrument[i]->_pan, sizeof(_pInstrument[0]->_pan));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._RPAN, sizeof(_instruments[0]._RPAN));
+			pFile->Read(&_pInstrument[i]->_RPAN, sizeof(_pInstrument[0]->_RPAN));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._RCUT, sizeof(_instruments[0]._RCUT));
+			pFile->Read(&_pInstrument[i]->_RCUT, sizeof(_pInstrument[0]->_RCUT));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._RRES, sizeof(_instruments[0]._RRES));
+			pFile->Read(&_pInstrument[i]->_RRES, sizeof(_pInstrument[0]->_RRES));
 		}
 #if !defined(_WINAMP_PLUGIN_)
 		
@@ -1673,24 +1688,24 @@ bool Song::Load(RiffFile* pFile)
 		{
 			for (int w=0; w<OLD_MAX_WAVES; w++)
 			{
-				pFile->Read(&_instruments[i].waveLength[w], sizeof(_instruments[0].waveLength[0]));
-				if (_instruments[i].waveLength[w] > 0)
+				pFile->Read(&_pInstrument[i]->waveLength[w], sizeof(_pInstrument[0]->waveLength[0]));
+				if (_pInstrument[i]->waveLength[w] > 0)
 				{
 					short tmpFineTune;
-					pFile->Read(&_instruments[i].waveName[w], sizeof(_instruments[0].waveName[0]));
-					pFile->Read(&_instruments[i].waveVolume[w], sizeof(_instruments[0].waveVolume[0]));
+					pFile->Read(&_pInstrument[i]->waveName[w], 32);
+					pFile->Read(&_pInstrument[i]->waveVolume[w], sizeof(_pInstrument[0]->waveVolume[0]));
 					pFile->Read(&tmpFineTune, sizeof(short));
-					_instruments[i].waveFinetune[w]=(int)tmpFineTune;
-					pFile->Read(&_instruments[i].waveLoopStart[w], sizeof(_instruments[0].waveLoopStart[0]));
-					pFile->Read(&_instruments[i].waveLoopEnd[w], sizeof(_instruments[0].waveLoopEnd[0]));
-					pFile->Read(&_instruments[i].waveLoopType[w], sizeof(_instruments[0].waveLoopType[0]));
-					pFile->Read(&_instruments[i].waveStereo[w], sizeof(_instruments[0].waveStereo[0]));
-					_instruments[i].waveDataL[w] = new signed short[_instruments[i].waveLength[w]];
-					pFile->Read(_instruments[i].waveDataL[w], _instruments[i].waveLength[w]*sizeof(short));
-					if (_instruments[i].waveStereo[w])
+					_pInstrument[i]->waveFinetune[w]=(int)tmpFineTune;
+					pFile->Read(&_pInstrument[i]->waveLoopStart[w], sizeof(_pInstrument[0]->waveLoopStart[0]));
+					pFile->Read(&_pInstrument[i]->waveLoopEnd[w], sizeof(_pInstrument[0]->waveLoopEnd[0]));
+					pFile->Read(&_pInstrument[i]->waveLoopType[w], sizeof(_pInstrument[0]->waveLoopType[0]));
+					pFile->Read(&_pInstrument[i]->waveStereo[w], sizeof(_pInstrument[0]->waveStereo[0]));
+					_pInstrument[i]->waveDataL[w] = new signed short[_pInstrument[i]->waveLength[w]];
+					pFile->Read(_pInstrument[i]->waveDataL[w], _pInstrument[i]->waveLength[w]*sizeof(short));
+					if (_pInstrument[i]->waveStereo[w])
 					{
-						_instruments[i].waveDataR[w] = new signed short[_instruments[i].waveLength[w]];
-						pFile->Read(_instruments[i].waveDataR[w], _instruments[i].waveLength[w]*sizeof(short));
+						_pInstrument[i]->waveDataR[w] = new signed short[_pInstrument[i]->waveLength[w]];
+						pFile->Read(_pInstrument[i]->waveDataR[w], _pInstrument[i]->waveLength[w]*sizeof(short));
 					}
 				}
 			}
@@ -2058,11 +2073,11 @@ bool Song::Load(RiffFile* pFile)
 #endif
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._loop, sizeof(_instruments[0]._loop));
+			pFile->Read(&_pInstrument[i]->_loop, sizeof(_pInstrument[0]->_loop));
 		}
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
-			pFile->Read(&_instruments[i]._lines, sizeof(_instruments[0]._lines));
+			pFile->Read(&_pInstrument[i]->_lines, sizeof(_pInstrument[0]->_lines));
 		}
 
 		if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false ) // Patch 1: BusEffects (twf)
@@ -2443,7 +2458,7 @@ bool Song::Save(RiffFile* pFile)
 
 	for (i = 0; i < MAX_INSTRUMENTS; i++)
 	{
-		if (!_instruments[i].Empty())
+		if (!_pInstrument[i]->Empty())
 		{
 			chunkcount++;
 		}
@@ -2710,7 +2725,7 @@ bool Song::Save(RiffFile* pFile)
 
 	for (i = 0; i < MAX_INSTRUMENTS; i++)
 	{
-		if (!_instruments[i].Empty())
+		if (!_pInstrument[i]->Empty())
 		{
 			pFile->Write("INSD",4);
 			version = CURRENT_FILE_VERSION_INSD;
@@ -2722,7 +2737,7 @@ bool Song::Save(RiffFile* pFile)
 			index = i; // index
 			pFile->Write(&index,sizeof(index));
 
-			_instruments[i].SaveFileChunk(pFile);
+			_pInstrument[i]->SaveFileChunk(pFile);
 
 			long pos2 = pFile->GetPos(); 
 			size = pos2-pos-sizeof(size);
@@ -2755,7 +2770,7 @@ void Song::PW_Play()
 {
 	if (PW_Stage==0)
 	{
-		PW_Length=_instruments[PREV_WAV_INS].waveLength[0];
+		PW_Length=_pInstrument[PREV_WAV_INS]->waveLength[0];
 		if (PW_Length>0 )
 		{
 			PW_Stage=1;
@@ -2771,9 +2786,9 @@ void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 	--pSamplesL;
 	--pSamplesR;
 	
-	signed short *wl=_instruments[PREV_WAV_INS].waveDataL[0];
-	signed short *wr=_instruments[PREV_WAV_INS].waveDataR[0];
-	bool const stereo=_instruments[PREV_WAV_INS].waveStereo[0];
+	signed short *wl=_pInstrument[PREV_WAV_INS]->waveDataL[0];
+	signed short *wr=_pInstrument[PREV_WAV_INS]->waveDataR[0];
+	bool const stereo=_pInstrument[PREV_WAV_INS]->waveStereo[0];
 	float ld=0;
 	float rd=0;
 		
@@ -2993,17 +3008,17 @@ bool Song::CloneMac(int src,int dst)
 bool Song::CloneIns(int src,int dst)
 {
 	// src has to be occupied and dst must be empty
-	if (!Global::_pSong->_instruments[src].Empty() && !Global::_pSong->_instruments[dst].Empty())
+	if (!Global::_pSong->_pInstrument[src]->Empty() && !Global::_pSong->_pInstrument[dst]->Empty())
 	{
 		return false;
 	}
-	if (!Global::_pSong->_instruments[dst].Empty())
+	if (!Global::_pSong->_pInstrument[dst]->Empty())
 	{
 		int temp = src;
 		src = dst;
 		dst = temp;
 	}
-	if (Global::_pSong->_instruments[src].Empty())
+	if (Global::_pSong->_pInstrument[src]->Empty())
 	{
 		return false;
 	}
@@ -3030,7 +3045,7 @@ bool Song::CloneIns(int src,int dst)
 	int index = dst; // index
 	file.Write(&index,sizeof(index));
 
-	_instruments[src].SaveFileChunk(&file);
+	_pInstrument[src]->SaveFileChunk(&file);
 
 	long pos2 = file.GetPos(); 
 	size = pos2-pos-sizeof(size);
@@ -3068,7 +3083,7 @@ bool Song::CloneIns(int src,int dst)
 			if (index < MAX_INSTRUMENTS)
 			{
 				// we had better load it
-				_instruments[index].LoadFileChunk(&file,version);
+				_pInstrument[index]->LoadFileChunk(&file,version);
 			}
 			else
 			{
