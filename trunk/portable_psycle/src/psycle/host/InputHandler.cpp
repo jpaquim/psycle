@@ -973,6 +973,8 @@ namespace psycle
 
 		void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 		{
+			assert(note>=0 && note < 128);
+
 			if(note<0)
 				return;
 
