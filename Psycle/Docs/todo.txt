@@ -3,9 +3,7 @@
 +=addition
 
 * psycle default theme sucks
-+ <[JAZ]> pooplog : btw... the "Gear Rack" button, if you want to do so (I am quite busy this week), it is 
-	just a dialog with the list of machines and their respective slots ( meaning, it lists from 0 i 
-	MAX_MACHINES), with some "Add","Remove","Swap" and such buttons
++ James says: how hard would it be to put nodes in the wires, so you can bend them?
 
 * Machines
 ------------
@@ -97,7 +95,7 @@ feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 * Taika-Kim - Whenever I have the red ! pressed and I set wave export it gets depressed and I get no sound 
 	from Psycle until I press it down again, or sometimes only one instrument is played until the button 
 	is pressed down again, etc.
-* <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
+* <Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
 * <sue> playbar should take latency into account - same as ^
 * song length calculation does not take ffxx/fexx commands into account
 * when changing octave, notes playing should be stopped (because if not, notes playing don't stop)
