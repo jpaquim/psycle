@@ -1285,7 +1285,16 @@ bool Song::Load(
 					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);
-						pVstPlugin->Instance(sPath2);
+						if !(pVstPlugin->Instance(sPath2))
+						{
+							Machine* pOldMachine = pMachine;
+							pMachine = new Dummy(*((Dummy*)pOldMachine));
+							pOldMachine->_pSamplesL = NULL;
+							pOldMachine->_pSamplesR = NULL;
+							delete pOldMachine;
+							pMachine->_type = MACH_DUMMY;
+							pMachine->wasVST = true;
+						}
 					}
 #else // if !_WINAMP_PLUGIN_
 					if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
@@ -1296,14 +1305,29 @@ bool Song::Load(
 							char sError[128];
 							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
 							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+
+							Machine* pOldMachine = pMachine;
+							pMachine = new Dummy(*((Dummy*)pOldMachine));
+							pOldMachine->_pSamplesL = NULL;
+							pOldMachine->_pSamplesR = NULL;
+							delete pOldMachine;
+							pMachine->_type = MACH_DUMMY;
+							pMachine->wasVST = true;
 						}
 					}
 					else
 					{
 						char sError[128];
-						sprintf(sError,"Missing VST plug-in \"%s\"",sPath2);
+						sprintf(sError,"Missing VST plug-in \"%s\"",vstL[pVstPlugin->_instance].dllName);
 						::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
+						Machine* pOldMachine = pMachine;
+						pMachine = new Dummy(*((Dummy*)pOldMachine));
+						pOldMachine->_pSamplesL = NULL;
+						pOldMachine->_pSamplesR = NULL;
+						delete pOldMachine;
+						pMachine->_type = MACH_DUMMY;
+						pMachine->wasVST = true;
 					}
 #endif // _WINAMP_PLUGIN_
 				}

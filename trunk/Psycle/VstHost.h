@@ -104,7 +104,7 @@ protected:
 
 	float * inputs[MAX_INOUTS];
 	float * outputs[MAX_INOUTS];
-	float junk[256];
+	float junk[STREAM_SIZE];
 
 	static VstTimeInfo _timeInfo;
 	VstMidiEvent midievent[MAX_EVENTS];
