@@ -1993,6 +1993,10 @@ bool Song::Load(RiffFile* pFile)
 					}
 				}
 			}
+			for (j; j < 64; j++)
+			{
+				busEffect[j] = 255;
+			}
 		}
 		// Patch 1.2: Fixes crash/inconsistence when deleting a machine which couldn't be loaded
 		// (.dll not found, or Load failed), which is, then, replaced by a DUMMY machine.
@@ -2049,15 +2053,8 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 
-		// ok so it's all loaded... except we don't use those stupid bus remaps any more, so 
-		// all we have to do is translate some stuff around to the _pMachine array
-
-		// it would be nice to do this as we loaded, but the old file format is in a rediculous 
-		// order that prevents this.
-
+		// move machines around to where they really should go
 		// now we have to remap all the inputs and outputs again... ouch
-
-		// this file format sucks
 
 		Progress.m_Progress.SetPos(8192+4096+2048+1024);
 		::Sleep(1);
@@ -2181,11 +2178,23 @@ bool Song::Load(RiffFile* pFile)
 			if (_pMachine[i])
 			{
 				_pMachine[i]->_macIndex = i;
+				for (j = i+1; j < MAX_MACHINES-1; j++)
+				{
+					if (_pMachine[i] == _pMachine[j])
+					{
+						// we have duplicate machines...
+						// this should NEVER happen
+						// delete the second one :(
+						_pMachine[j] = NULL;
+					}
+				}
 			}
 		}
 
 		Progress.m_Progress.SetPos(8192+4096+2048+1024+512);
 		::Sleep(1);
+
+		// test all connections
 
 		for (int c=0; c<MAX_CONNECTIONS; c++)
 		{
