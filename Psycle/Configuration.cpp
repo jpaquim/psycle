@@ -1320,8 +1320,8 @@ bool Configuration::CreatePsyFont(CFont &f, char * sFontFace, int HeightPx, bool
 
 void Configuration::CreateFonts()
 {	
-	bool bBold = pattern_font_flags&1;
-	bool bItalic = pattern_font_flags&2;
+	bool bBold = pattern_font_flags&1?true:false;
+	bool bItalic = pattern_font_flags&2?true:false;
 	if (!CreatePsyFont(seqFont,pattern_fontface,pattern_font_point,bBold,bItalic))
 	{
 		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
@@ -1331,7 +1331,7 @@ void Configuration::CreateFonts()
 	}
 
 	bBold = generator_font_flags&1;
-	bItalic = generator_font_flags&2;
+	bItalic = generator_font_flags&2?true:false;
 	if (!CreatePsyFont(generatorFont,generator_fontface,generator_font_point,bBold,bItalic))
 	{
 		MessageBox(NULL,generator_fontface,"Could not find this font!",0);
@@ -1342,7 +1342,7 @@ void Configuration::CreateFonts()
 
 
 	bBold = effect_font_flags&1;
-	bItalic = effect_font_flags&2;
+	bItalic = effect_font_flags&2?true:false;
 	if (!CreatePsyFont(effectFont,generator_fontface,effect_font_point,bBold,bItalic))
 	{
 		MessageBox(NULL,effect_fontface,"Could not find this font!",0);
