@@ -60,7 +60,8 @@ public:
 	enum { IDD = IDD_WIREDIALOG };
 	CSliderCtrl	m_slider;
 	CSliderCtrl	m_slider2;
-	CStatic	m_volabel;
+	CStatic	m_volabel_per;
+	CStatic	m_volabel_db;
 	CButton m_mode;
 	CSliderCtrl	m_volslider;
 	//}}AFX_DATA
@@ -105,6 +106,8 @@ protected:
 	afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnMode();
 	afx_msg void OnHold();
+	afx_msg void OnVolumeDb();
+	afx_msg void OnVolumePer();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

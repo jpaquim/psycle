@@ -43,11 +43,7 @@ void CGearRackDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CGearRackDlg, CDialog)
 	//{{AFX_MSG_MAP(CGearRackDlg)
 	ON_BN_CLICKED(IDC_CREATE, OnCreate)
-	ON_BN_CLICKED(IDC_NAME, OnName)
 	ON_BN_CLICKED(IDC_DELETE, OnDelete)
-	ON_BN_CLICKED(IDC_SWAP, OnSwap)
-	ON_BN_CLICKED(IDC_COPY, OnCopy)
-	ON_BN_CLICKED(IDC_PASTE, OnPaste)
 	ON_LBN_DBLCLK(IDC_GEARLIST, OnDblclkGearlist)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -151,12 +147,6 @@ void CGearRackDlg::OnCreate()
 //	m_pParent->Repaint(DMAllMacsRefresh);
 }
 
-void CGearRackDlg::OnName() 
-{
-	// TODO: Add your control notification handler code here
-	
-}
-
 void CGearRackDlg::OnDelete() 
 {
 	// TODO: Add your control notification handler code here
@@ -188,24 +178,6 @@ void CGearRackDlg::OnDelete()
 //			m_pParent->Repaint(DMAllMacsRefresh);
 		}
 	}
-}
-
-void CGearRackDlg::OnSwap() 
-{
-	// TODO: Add your control notification handler code here
-	
-}
-
-void CGearRackDlg::OnCopy() 
-{
-	// TODO: Add your control notification handler code here
-	
-}
-
-void CGearRackDlg::OnPaste() 
-{
-	// TODO: Add your control notification handler code here
-	
 }
 
 void CGearRackDlg::OnDblclkGearlist() 

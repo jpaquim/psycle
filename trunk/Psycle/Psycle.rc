@@ -288,10 +288,10 @@ END
 IDD_WIREDIALOG DIALOGEX 0, 0, 209, 161
 STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,140
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,135
     PUSHBUTTON      "Delete Connection",IDC_BUTTON1,2,120,169,38
     CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,96,138,11
@@ -299,7 +299,8 @@ BEGIN
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,108,138,11
     PUSHBUTTON      "Hold",IDC_BUTTON2,141,98,30,19
-    CTEXT           "",IDC_STATIC1,174,142,33,16,SS_SUNKEN
+    PUSHBUTTON      "db",IDC_VOLUME_DB,174,136,34,11
+    PUSHBUTTON      "%",IDC_VOLUME_PER,174,147,34,11
 END
 
 IDD_GEARDISTORT DIALOGEX 0, 0, 169, 177
@@ -2556,6 +2557,56 @@ BEGIN
 END
 
 #endif    // Neutral (Default) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NEW_VOLUME DIALOG DISCARDABLE  0, 0, 117, 62
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "New Volume"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,5,45,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,60,45,50,14
+    EDITTEXT        IDC_EDIT_DB,30,5,45,15,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PER,30,25,45,15,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "db",IDC_STATIC,80,5,15,15,SS_CENTERIMAGE
+    LTEXT           "%",IDC_STATIC,80,25,15,15,SS_CENTERIMAGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_NEW_VOLUME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 110
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
