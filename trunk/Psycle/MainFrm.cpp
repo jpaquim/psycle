@@ -782,12 +782,18 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	int line = -1;
 	char buffer[64];
 	
-	if ( _pSong == NULL ) return; // why should this happen?
+	if (_pSong == NULL) 
+	{
+		return; // why should this happen?
+	}
 	CComboBox *cb=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 	CComboBox *cb2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 	
 	macComboInitialized = false;
-	if (updatelist) cb->ResetContent();
+	if (updatelist) 
+	{
+		cb->ResetContent();
+	}
 	
 	for (int b=0; b<MAX_BUSES; b++) // Check Generators
 	{
@@ -799,12 +805,21 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[mac]->_editName);
 				cb->AddString(buffer);
 			}
-			if (!found) selected++;
-			if ( _pSong->seqBus == b) found = true;
+			if (!found) 
+			{
+				selected++;
+			}
+			if (_pSong->seqBus == b) 
+			{
+				found = true;
+			}
 			filled = true;
 		}
 	}
-	if ( updatelist) cb->AddString("-------------");
+	if ( updatelist) 
+	{
+		cb->AddString("-------------");
+	}
 	if (!found) 
 	{
 		selected++;
@@ -814,15 +829,21 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 	{
 		const int mac = _pSong->busEffect[b-MAX_BUSES];
-		if( mac != 255 && _pSong->_machineActive[mac])
+		if(mac != 255 && _pSong->_machineActive[mac])
 		{
 			if (updatelist)
 			{	
 				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[mac]->_editName);
 				cb->AddString(buffer);
 			}
-			if (!found) selected++;
-			if ( _pSong->seqBus == b) found = true;
+			if (!found) 
+			{
+				selected++;
+			}
+			if (_pSong->seqBus == b) 
+			{
+				found = true;
+			}
 			filled = true;
 		}
 	}
@@ -832,121 +853,57 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 		cb->AddString("No Machines Loaded");
 		selected = 0;
 	}
-	else if (!found) selected=line;
+	else if (!found) 
+	{
+		selected=line;
+	}
 	
 	cb->SetCurSel(selected);
 
-	if (found && selected < MAX_BUSES) // Generator
+	if (found)
 	{
-		// Select the appropiate Option in Aux Combobox.
-		if (_pSong->busMachine[selected] == 255 || !_pSong->_machineActive[_pSong->busMachine[selected]])
+		if (_pSong->seqBus < MAX_BUSES) // Generator
 		{
-			cb2->SetCurSel(2); // WAVES
-			_pSong->auxcolSelected = _pSong->instSelected;
-			UpdateComboIns();
-		}
-		else if (_pSong->_pMachines[_pSong->busMachine[selected]]->_type == MACH_SAMPLER)
-		{
-			if ( cb2->GetCurSel() != AUX_WAVES)
+			// Select the appropiate Option in Aux Combobox.
+			if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]])
 			{
-				cb2->SetCurSel(2); // WAVES
-				_pSong->auxcolSelected = _pSong->instSelected;
+				if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
+				{
+					if (cb2->GetCurSel() != AUX_WAVES)
+					{
+						cb2->SetCurSel(2); // WAVES
+						_pSong->auxcolSelected = _pSong->instSelected;
+						UpdateComboIns();
+					}
+				}
+				else
+				{
+					cb2->SetCurSel(1); // PARAMS
+					_pSong->auxcolSelected = 0;
+					UpdateComboIns();
+				}
+			}
+			else
+			{
+				cb2->SetCurSel(1); // PARAMS
+				_pSong->auxcolSelected = 0;
 				UpdateComboIns();
 			}
 		}
-		else
+		else 
 		{
 			cb2->SetCurSel(1); // PARAMS
+			_pSong->auxcolSelected = 0;
 			UpdateComboIns();
 		}
 	}
-	else if (updatelist) UpdateComboIns();
-	macComboInitialized = true;
-	
-/*
-
-  if ( _pSong == NULL ) return;
-	CComboBox *cc1=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
-	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
-	CComboBox *cc3=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-	
-	if (updatelist) cc2->ResetContent();
-	
-	macComboInitialized = false;
-
-	if ( _pSong->seqBus < MAX_BUSES ) { // Generators
-
-		if (cc1->GetCurSel() != 0 ) cc1->SetCurSel(0); // Set Combobox to "Generators"
-
-		char buffer[64];
-		if (updatelist) for (int b=0; b<MAX_BUSES; b++) // Update Machine Names.
-		{
-			
-			if(_pSong->busMachine[b] != 255 && _pSong->_machineActive[_pSong->busMachine[b]])
-			{
-				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[_pSong->busMachine[b]]->_editName);
-			}
-			else
-			{
-				sprintf(buffer,"%.2X:",b);
-			}
-			cc2->AddString(buffer);
-		}
-
-		cc2->SetCurSel(_pSong->seqBus);	// Select machine
-
-		// Select the appropiate Option in Aux Combobox.
-		if (_pSong->busMachine[_pSong->seqBus] == 255 || !_pSong->_machineActive[_pSong->busMachine[_pSong->seqBus]])
-		{
-			cc3->SetCurSel(2); // WAVES
-			_pSong->auxcolSelected = _pSong->instSelected;
-		}
-		else if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_VST)
-		{
-			if (cc3->GetCurSel() == AUX_WAVES)
-			{
-				cc3->SetCurSel(0); //MIDI
-				_pSong->auxcolSelected = _pSong->midiSelected;
-			}
-		}
-		else if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
-		{
-			if ( cc3->GetCurSel() != AUX_WAVES)
-			{
-			cc3->SetCurSel(2); // WAVES
-			_pSong->auxcolSelected = _pSong->instSelected;
-			}
-		}
-		else
-		{
-			cc3->SetCurSel(1); // PARAMS
-		}
+	else
+	{
+		cb2->SetCurSel(2); // WAVES
+		_pSong->auxcolSelected = _pSong->instSelected;
+		UpdateComboIns();
 	}
-	else {	// Effects
-
-		if (cc1->GetCurSel() != 1 ) cc1->SetCurSel(1); // Set Combobox to "Effects"
-
-		if (updatelist) for (int b=MAX_BUSES; b<MAX_BUSES*2; b++)	// Update Machine Names.
-		{
-			char buffer[64];
-			
-			if(_pSong->busEffect[(b & (MAX_BUSES-1))] != 255)
-			{
-				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[_pSong->busEffect[(b & (MAX_BUSES-1))]]->_editName);
-			}
-			else
-			{
-				sprintf(buffer,"%.2X:",b);
-			}
-			cc2->AddString(buffer);
-		}
-		cc2->SetCurSel((_pSong->seqBus & (MAX_BUSES-1)));	// Select machine
-	}
-
-	UpdateComboIns();
 	macComboInitialized = true;
-
-  */
 }
 
 void CMainFrame::OnSelchangeBarCombogen() 
@@ -961,18 +918,6 @@ void CMainFrame::OnSelchangeBarCombogen()
 			_pSong->seqBus=nsb;
 			UpdateComboGen(false);
 		}
-		
-/*		CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
-
-		int nsb=cc->GetCurSel();
-		if (cc2->GetCurSel() == 1 ) nsb+=MAX_BUSES;
-
-		if(_pSong->seqBus!=nsb)
-		{
-			_pSong->seqBus=nsb;
-			UpdateComboGen(false);
-		}
-*/
 	}
 }
 
@@ -1009,10 +954,13 @@ void CMainFrame::OnSelchangeAuxselect()
 	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
 	if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
+	{
 		_pSong->auxcolSelected=_pSong->midiSelected;
+	}
 	else if ( cc2->GetCurSel() == AUX_WAVES )	// WAVES
+	{
 		_pSong->auxcolSelected=_pSong->instSelected;
-
+	}
 	UpdateComboIns();
 }
 void CMainFrame::OnBDecwav() 
@@ -1031,52 +979,88 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 {
 	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+
+	int listlen = 0;
 	
-	if (updatelist) cc->ResetContent();
+	if (updatelist) 
+	{
+		cc->ResetContent();
+	}
 
 	int nmac;
-	if ( _pSong->seqBus < MAX_BUSES ) nmac = _pSong->busMachine[_pSong->seqBus];
-	else nmac = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-	if (!_pSong->_machineActive[nmac]) nmac = 255;
+	if ( _pSong->seqBus < MAX_BUSES ) 
+	{
+		nmac = _pSong->busMachine[_pSong->seqBus];
+	}
+	else 
+	{
+		nmac = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+	}
+	if (!_pSong->_machineActive[nmac]) 
+	{
+		nmac = 255;
+	}
 
 	if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
 	{
 		char buffer[64];
-		if (updatelist) for (int i=0;i<16;i++)
+		if (updatelist) 
 		{
-			sprintf(buffer, "%.2X: MIDI Channel %.2i", i,i+1);
-			cc->AddString(buffer);
+			for (int i=0;i<16;i++)
+			{
+				sprintf(buffer, "%.2X: MIDI Channel %.2i", i,i+1);
+				cc->AddString(buffer);
+			}
 		}
+		listlen = 16;
 //		_pSong->midiSelected=_pSong->auxcolSelected;
 	}
 	else if (( cc2->GetCurSel() == AUX_PARAMS) && (nmac != 255))	// Params
 	{
 		Machine *tmac = _pSong->_pMachines[nmac];
 		int i=0;
-		if (updatelist) for (i=0;i<tmac->GetNumParams();i++)
+		if (updatelist) 
 		{
-			char buffer[64],buffer2[64];
-			memset(buffer2,0,64);
-			tmac->GetParamName(i,buffer2);
-			sprintf(buffer, "%.2X:  %s", i, buffer2);
-			cc->AddString(buffer);
+			for (i=0;i<tmac->GetNumParams();i++)
+			{
+				char buffer[64],buffer2[64];
+				memset(buffer2,0,64);
+				tmac->GetParamName(i,buffer2);
+				sprintf(buffer, "%.2X:  %s", i, buffer2);
+				cc->AddString(buffer);
+				listlen++;
+			}
+		}
+		else
+		{
+			listlen = cc->GetCount();
 		}
 	}
 	else	// Waves
 	{
 		char buffer[64];
-		if (updatelist) for (int i=0;i<PREV_WAV_INS;i++)
+		if (updatelist) 
 		{
-			sprintf(buffer, "%.2X:  %s", i, _pSong->_instruments[i]._sName);
-			cc->AddString(buffer);
+			for (int i=0;i<PREV_WAV_INS;i++)
+			{
+				sprintf(buffer, "%.2X:  %s", i, _pSong->_instruments[i]._sName);
+				cc->AddString(buffer);
+				listlen++;
+			}
+		}
+		else
+		{
+			listlen = cc->GetCount();
 		}
 //		_pSong->instSelected=_pSong->auxcolSelected;
 //		WaveEditorBackUpdate();
 //		m_wndInst.WaveUpdate();
 	}
-
+	if (_pSong->auxcolSelected >= listlen)
+	{
+		_pSong->auxcolSelected = 0;
+	}
 	cc->SetCurSel(_pSong->auxcolSelected);
-
 }
 
 void CMainFrame::OnSelchangeBarComboins() 
@@ -1084,7 +1068,10 @@ void CMainFrame::OnSelchangeBarComboins()
 	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
-	if ( cc2->GetCurSel() == AUX_MIDI ) _pSong->midiSelected=cc->GetCurSel();
+	if ( cc2->GetCurSel() == AUX_MIDI ) 
+	{
+		_pSong->midiSelected=cc->GetCurSel();
+	}
 	else if ( cc2->GetCurSel() == AUX_WAVES ) 
 	{
 		_pSong->instSelected=cc->GetCurSel();
