@@ -1882,7 +1882,7 @@ void CChildView::AppendToRecent(char* fName)
 //	pRootMenuBar = this->GetParent()->GetMenu();
 //	hRootMenuBar = HMENU (*pRootMenuBar);
 	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	hRecentMenu = GetSubMenu(hFileMenu, 9);
+	hRecentMenu = GetSubMenu(hFileMenu, 10);
 
 	//Remove initial empty element, if present.
 	if (GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)

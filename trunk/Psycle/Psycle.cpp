@@ -327,7 +327,7 @@ void CPsycleApp::LoadRecent(CMainFrame* pFrame)
 
 	hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 9);
+	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
 
 	char key[72]=CONFIG_ROOT_KEY;
 	strcat(key,"\\RecentFiles");
@@ -377,7 +377,7 @@ void CPsycleApp::SaveRecent(CMainFrame* pFrame)
 	
 	hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 9);
+	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
 	
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, CONFIG_ROOT_KEY, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
 	{
