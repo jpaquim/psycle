@@ -340,7 +340,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 					else if ( _pSong->_pMachines[c]->_type == MACH_VST ||
 							_pSong->_pMachines[c]->_type == MACH_VSTFX )
 					{
-						((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh();
+						((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 					}
 /*					else
 					{

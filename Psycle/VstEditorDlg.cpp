@@ -146,7 +146,8 @@ void CVstEditorDlg::OnParametersShowpreset()
 	CPresetsDlg dlg;
 	dlg._pMachine=_pMachine;
 	dlg.DoModal();
-	Refresh();
+	pParamGui->UpdateOne();
+	if (!editorgui) pGui->Invalidate(false);
 	pGui->SetFocus();
 }
 
@@ -157,9 +158,10 @@ void CVstEditorDlg::OnSetFocus(CWnd* pOldWnd)
 	pGui->SetFocus();
 }
 
-void CVstEditorDlg::Refresh()
+void CVstEditorDlg::Refresh(int par,float value)
 {
-	pParamGui->UpdateOne();
+	if ( par == -1 ) pParamGui->UpdateOne();
+	else pParamGui->UpdateNew(par,value);
 	if (!editorgui) pGui->Invalidate(false);
 }
 

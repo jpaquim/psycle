@@ -34,7 +34,7 @@ public:
 // Operations
 public:
 	void Resize(int w,int h);
-	void Refresh();
+	void Refresh(int par,float val);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -11,7 +11,6 @@
 + store state of follow song toggle
 + Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
 	pattern data and other settings, this possible? (yes, but will require new song parser...)
-+ Vst hex values for parameters in gui
 ! should make it so clicking on colour boxes pops up menu
 * screen flashes switching from machine to pattern view (new)
 * dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
@@ -118,7 +117,6 @@
 	feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
 	feature: maybe: MultiPattern View (The code is not made in the best way)
 	feature: MORE Keyboard shortcuts 
-	feature: Live Parameter change Recording.
 	feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	feature: First, I'd like to see the Generator or Effect name in one of these places
 		 when I hover over a note in the Pattern Editor ( MrToast )
@@ -135,14 +133,6 @@
 		 Create a new "universal" MachineFrame class, for all plugins
 		 (Needs a few more changes in the class definitions)
 	feature: VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
-	feature: VST: support for plugin resize. (Problem: Needs to know the View Class!)
-	feature: VST param highlight when modifying.
-		 When changing a param with the Graphic VST GUI, select the corresponding param in
-		 the list (and update the bar as well). When,which, and to which value can be
-		 known using the audioMasterCallback (Problem: Needs to know the View Class!)
-	bug:	 VST: Changing a parameter, changing to another window, and returning to Psycle causes
-		 that parameter to get the old value again (Scrollbar problem. Solution: Update the scrollbar)
-	bug: 	 VST: Param value+1 when selecting (Scrollbar precision) ( int() bug? )
 	feature: Option to hide Parameters in VST GUI.
 	feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 	bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
