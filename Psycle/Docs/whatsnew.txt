@@ -26,15 +26,15 @@ V1.67
 + UNDO/REDO for pattern and sequence editing!!! (pooplog)
 ! slight reordering of interface due to user request for more intuitive use (pooplog)
 + Native Plugin realtime mouse tweak recording!!! (pooplog)
-+ value dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
++ Value Dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
 + Added "Xerox" button to seq editor (named that until someone suggests a good 5 letter word for duplicate) [Alk] (poolog)
 + Added Swing Fill command (pooplog)
 ! Increased max lines/pattern to 256 (pooplog) * pending further tests
-! Basic Mousewheel support for pattern edit mode (pooplog)
++ Basic Mousewheel support for pattern edit mode (pooplog)
 * Fixed song bpm being misreported to machines if they used FF command
 ! VU Meters are all nicer
-! Look of Machine Wires can be changed in the visual dialog (pooplog)
-
++ Look of Machine Wires can be changed in the visual dialog (pooplog)
+! Many Optimizations
 
 V1.66
 -----

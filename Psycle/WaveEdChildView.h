@@ -104,7 +104,6 @@ private:
 	unsigned long blStart;
 	unsigned long blLength;
 	bool blSelection;
-	bool dragging;
 	bool wdWave;
 
 	unsigned long selx, selx2;

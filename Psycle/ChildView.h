@@ -384,8 +384,11 @@ public:
 	afx_msg void OnFileImportItfile();
 	afx_msg void OnEditUndo();
 	afx_msg void OnEditRedo();
+	afx_msg void OnUpdateUndo(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateRedo(CCmdUI* pCmdUI);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnMButtonDown( UINT nFlags, CPoint point );
+	afx_msg void OnUpdatePatternCutCopyPaste(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

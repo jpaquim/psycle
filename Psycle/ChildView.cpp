@@ -232,7 +232,15 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
 	ON_COMMAND(ID_FILE_IMPORT_ITFILE, OnFileImportItfile)
 	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateUndo)
 	ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateRedo)
+	ON_COMMAND(ID_EDIT_CUT, patCut)
+	ON_COMMAND(ID_EDIT_COPY, patCopy)
+	ON_COMMAND(ID_EDIT_PASTE, patPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopyPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopyPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternCutCopyPaste)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_MBUTTONDOWN()
 	//}}AFX_MSG_MAP
@@ -1239,6 +1247,23 @@ void CChildView::OnPopTrackSwingfill()
 {
 	// fill track
 	ShowSwingFillDlg(TRUE);
+}
+
+void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
+{
+	if(pUndoList) pCmdUI->Enable(TRUE);
+	else pCmdUI->Enable(FALSE);
+}
+void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
+{
+	if(pRedoList) pCmdUI->Enable(TRUE);
+	else pCmdUI->Enable(FALSE);
+}
+
+void CChildView::OnUpdatePatternCutCopyPaste(CCmdUI* pCmdUI) 
+{
+	if(viewMode == VMPattern) pCmdUI->Enable(TRUE);
+	else pCmdUI->Enable(FALSE);
 }
 
 void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 

@@ -741,6 +741,14 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 	case cdefSongPosDec:
 		pChildView->DecPosition();
 		break;
+
+	case cdefUndo:
+		 pChildView->OnEditUndo();
+		 break;
+
+	case cdefRedo:
+		 pChildView->OnEditRedo();
+		 break;
 	}
 }
 
@@ -1052,6 +1060,10 @@ void InputHandler::BuildCmdLUT()
 	outnoteLUT['0']	= 27;	// D#
 	outnoteLUT['P']	= 28;	// E
 	*/
+
+	// undo/redo
+	SetCmd(cdefUndo,'Z',MOD_C);
+	SetCmd(cdefRedo,'Z',MOD_C|MOD_S);
 }
 
 
