@@ -728,10 +728,11 @@ Special:  Bit 0: On = song message attached.
 		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param)
 		{
 			switch(command){
-/*				case ITModule2::CMD::SET_SPEED:
-					pent._cmd=XMSampler::CMD::SETSPEED;
+				case ITModule2::CMD::SET_SPEED:
+					// This function will not always work.
+					pent._cmd=Player::CMD::EXTENDED;
+					pent._parameter = 24 / ((param == 0)?6:param);;
 					break;
-*/
 				case ITModule2::CMD::JUMP_TO_ORDER:
 					pent._cmd = Player::CMD::JUMP_TO_ORDER;
 					break;
@@ -784,23 +785,23 @@ Special:  Bit 0: On = song message attached.
 					pent._cmd = XMSampler::CMD::TREMOLO;
 					break;
 				case ITModule2::CMD::S:
-/*					switch(param & 0xf0){
+					switch(param & 0xf0){
 						case CMD_S::S_SET_FILTER:
 							break;
 						case CMD_S::S_SET_GLISSANDO_CONTROL:
-							pent._cmd = XMSampler::CMD::GRISSANDO;
+							pent._cmd = XMSampler::CMD_E::E_GLISSANDO_TYPE;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_FINETUNE:
-							pent._cmd = XMSampler::CMD::SET_FINE_TUNE;
+							pent._cmd = XMSampler::CMD_E::E_FINETUNE;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_SET_VIBRATO_WAVEFORM:
-							pent._cmd = XMSampler::CMD::VIBRATO_TYPE;
+							pent._cmd = XMSampler::CMD_E::E_VIBRATO_WAVE;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_SET_TREMOLO_WAVEFORM:
-							pent._cmd = XMSampler::CMD::TREMOLO_TYPE;
+							pent._cmd = XMSampler::CMD_E::E_TREMOLO_WAVE;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_SET_PANBRELLO_WAVEFORM: // IT
@@ -810,32 +811,32 @@ Special:  Bit 0: On = song message attached.
 						case CMD_S::S7: // IT
 							break;
 						case CMD_S::S_SET_PAN:
-							pent._cmd = XMSampler::CMD::SET_PANNING;
+							pent._cmd = XMSampler::CMD_E::E_SET_PAN;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S9: // IT
 							break;
 						case CMD_S::S_SET_HIGH_OFFSET: // IT
-							pent._cmd = XMSampler::CMD::SET_HIGH_OFFSET;
-							pent._parameter = param & 0xf;
+							//\todo : memorize high offset. and use it in offset command.
+							// param & 0xf;
 							break;
 						case CMD_S::S_PATTERN_LOOP:
 							pent._cmd = Player::CMD::PATTERN_LOOP;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_DELAYED_NOTE_CUT:
-							pent._cmd = XMSampler::CMD::NOTECUT;
+							pent._cmd = XMSampler::CMD_E::E_DELAYED_NOTECUT;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_NOTE_DELAY:
-							pent._cmd = XMSampler::CMD::NOTE_DELAY;
+							pent._cmd = XMSampler::CMD_E::E_NOTE_DELAY;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_PATTERN_DELAY:
 							pent._cmd = Player::CMD::PATTERN_DELAY;
 							pent._parameter = param & 0xf;
 							break;
-					}*/
+					}
 					break;
 				case CMD::SET_SONG_TEMPO:
 					pent._cmd = Player::CMD::SET_TEMPO;

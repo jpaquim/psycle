@@ -273,13 +273,13 @@ namespace psycle
 
 			m_TremoloSpeed=0;
 			m_TremoloDepth=0;
-			m_TremoloDelta =0.0f;
+			m_TremoloAmount =0.0f;
 			m_TremoloPos=0;
 
 			// Panbrello
 			m_PanbrelloSpeed=0;
 			m_PanbrelloDepth=0;
-			m_PanbrelloDelta=0.0f;
+			m_PanbrelloAmount=0.0f;
 			m_PanbrelloPos=0;
 			// Tremor
 			m_TremorOnTicks = 0;
@@ -392,15 +392,14 @@ namespace psycle
 				// Panning Envelope 
 				// (actually, the correct word for panning is panoramization. 
 				//  "panning" comes from the diminutive "pan")
-				float rvol;
+				float rvol =  m_PanFactor + m_PanbrelloAmount;
 				if(m_PanEnvelope.Envelope().IsEnabled()){
 					m_PanEnvelope.Work();
 
 					// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, pitchpan sep, and channel pan)
 					// PanRange() is a Range delimiter, which is set when at voice init and when a panning command comes in.
-					rvol = m_PanFactor + (m_PanEnvelope.ModulationAmount()*PanRange());
+					rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 				}
-				else rvol =  m_PanFactor;
 
 				float lvol = 1.0f - rvol;
 
@@ -470,6 +469,9 @@ namespace psycle
 		void XMSampler::Voice::NewLine()
 		{
 			m_bTremorMute = false;
+			m_VibratoAmount = 0;
+			UpdateSpeed();
+
 		}
 
 		void XMSampler::Voice::NoteOn(const compiler::uint8 note,const compiler::sint16 playvol,bool reset)
@@ -618,7 +620,7 @@ namespace psycle
 			int vdelta = GetDelta(rChannel().TremoloType(),m_TremoloPos);
 
 			vdelta = ((vdelta * m_TremoloDepth) >> 5);
-			m_TremoloDelta = vdelta / 127.0f;
+			m_TremoloAmount = vdelta / 255.0f;
 			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0x3F;
 
 
@@ -629,7 +631,7 @@ namespace psycle
 			int vdelta = GetDelta(rChannel().PanbrelloType(),m_PanbrelloPos);
 
 			vdelta = ((vdelta * m_PanbrelloDepth) >> 5);
-			m_PanbrelloDelta = vdelta / 127.0f;
+			m_PanbrelloAmount = vdelta / 255.0f;
 			m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0x3F;
 
 
@@ -637,6 +639,8 @@ namespace psycle
 
 		void XMSampler::Voice::Tremor()
 		{
+			//\todo: according to Impulse Tracker, this command uses its own counter, so being with
+			// speed 3, we can specify the command I41 ( x/y > speed), which, with the current implementation, doesn't work,
 			if ( pSampler()->CurrentTick() >= m_TremorTickChange ) 
 			{
 				if ( m_bTremorMute )
@@ -757,7 +761,7 @@ namespace psycle
 				int _note = rChannel().PeriodToNote(_period,rWave().Layer());
 				_period = rChannel().NoteToPeriod(_note,rWave().Layer());
 			}
-			rWave().Speed(PeriodToSpeed(_period + AutoVibratoAmount() + rChannel().VibratoAmount()));
+			rWave().Speed(PeriodToSpeed(_period + AutoVibratoAmount() + VibratoAmount()));
 		}
 
 		double XMSampler::Voice::PeriodToSpeed(int period)
@@ -1018,9 +1022,10 @@ namespace psycle
 						}
 						break;
 					case CMD_E::E_DELAYED_NOTECUT:
-						NoteCut(parameter);
+						NoteCut(parameter&0x0F);
 						break;
 					}
+					break;
 
 				// Class B Channel ( Just like Class A, but remember its old value if it is called again with  00 as parameter  )
 
@@ -1062,7 +1067,7 @@ namespace psycle
 				case CMD::RETRIG_OLD:
 					break;
 				case CMD::PANBRELLO:
-					Panbrello((parameter & 0x0F) << 2,(parameter>> 4) & 0x0F);
+					Panbrello((parameter & 0x0F) << 2,(parameter>> 5) & 0x0F);
 					break;
 				case CMD::ARPEGGIO:
 					// Set the arpeggio effect
@@ -1321,21 +1326,21 @@ Most of these commands are for XM volume column.
 			if ( (speed & 0x0F) == 0 ){ // Slide Up
 				speed = (speed & 0xF0)>>4;
 				m_EffectFlags |= EffectFlag::VOLUMESLIDE;
-				ForegroundVoice()->m_VolumeSlideSpeed = speed;
+				ForegroundVoice()->m_VolumeSlideSpeed = speed<<2;
 				if (speed == 0xF ) ForegroundVoice()->VolumeSlide();
 			}
 			else if ( (speed & 0xF0) == 0 )  { // Slide Down
 				speed = (speed & 0x0F);
 				m_EffectFlags |= EffectFlag::VOLUMESLIDE;
-				ForegroundVoice()->m_VolumeSlideSpeed = speed;
+				ForegroundVoice()->m_VolumeSlideSpeed = -(speed<<2);
 				if (speed == 0xF ) ForegroundVoice()->VolumeSlide();
 			}
 			else if ( (speed & 0x0F) == 0xF ) { // FineSlide Up
-				ForegroundVoice()->m_VolumeSlideSpeed = (speed & 0xF0)>>4;
+				ForegroundVoice()->m_VolumeSlideSpeed = (speed & 0xF0)>>2;
 				ForegroundVoice()->VolumeSlide();
 			} 
 			else if ( (speed & 0xF0) == 0xF ) { // FineSlide Down
-				ForegroundVoice()->m_VolumeSlideSpeed = (speed & 0x0F);
+				ForegroundVoice()->m_VolumeSlideSpeed = -((speed & 0x0F)<<2);
 				ForegroundVoice()->VolumeSlide();
 			}
 		};
@@ -1466,7 +1471,6 @@ Most of these commands are for XM volume column.
 			m_Volume += m_ChanVolSlideSpeed;
 			if(m_Volume < 0.0f){	m_Volume = 0.0f;}
 			else if(m_Volume > 1.0f){m_Volume = 1.0f;}
-			if (ForegroundVoice()) ForegroundVoice()->Volume(compiler::sint16(m_Volume*64));
 		}
 		void XMSampler::Channel::NoteCut()
 		{
@@ -1587,9 +1591,6 @@ Most of these commands are for XM volume column.
 		void XMSampler::Tick()
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
-			char tmp[50];
-			sprintf(tmp,"->%d\n",_sampleCounter);
-			TRACE(tmp);
 			SampleCounter(0);
 			m_TickCount=0;
 
@@ -1637,8 +1638,8 @@ Most of these commands are for XM volume column.
 
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
-//			currentVoice = GetCurrentVoice(channelNum);
-			currentVoice = thisChannel.ForegroundVoice();
+			currentVoice = GetCurrentVoice(channelNum);
+//			currentVoice = thisChannel.ForegroundVoice();
 			if ( currentVoice )
 			{
 				// Is a new note coming? Then apply the NNA to the playing one.
@@ -2005,9 +2006,6 @@ Most of these commands are for XM volume column.
 				// Do the Tick jump.
 				m_NextSampleTick += DeltaTick();
 				m_TickCount++;
-				char tmp[50];
-				sprintf(tmp,"%d",m_TickCount);
-				if ( m_TickCount < 5 ) TRACE(tmp);
 				for (int channel=0; channel<MAX_TRACKS; channel++)
 				{
 					rChannel(channel).PerformFx();

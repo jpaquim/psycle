@@ -213,7 +213,7 @@ XMSampler::Channel::PerformFX().
 				break;
 			case XMInstrument::WaveData::LoopType::DO_NOT:
 
-				if (curIntPos >= Length())
+				if (curIntPos >= Length()-1)
 				{
 					Playing(false);
 				}
@@ -501,10 +501,11 @@ XMSampler::Channel::PerformFX().
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); };
 		int Period() { return m_Period; }
 
+		double VibratoAmount() { return m_VibratoAmount; };
 
 	protected:
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-		const float RealVolume() { return (!m_bTremorMute)?m_RealVolume:0; };
+		const float RealVolume() { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; };
 		// Gets the delta between the points of the wavetables for tremolo/panbrello/vibrato
 		int GetDelta(int wavetype,int wavepos);	
 		float PanRange() { return m_PanRange; };
@@ -559,13 +560,13 @@ XMSampler::Channel::PerformFX().
 
 		int m_TremoloSpeed;
 		int m_TremoloDepth;
-		float m_TremoloDelta;
+		float m_TremoloAmount;
 		int m_TremoloPos;
 
 		// Panbrello
 		int m_PanbrelloSpeed;
 		int m_PanbrelloDepth;
-		float m_PanbrelloDelta;
+		float m_PanbrelloAmount;
 		int m_PanbrelloPos;
 
 		/// Tremor 
@@ -833,7 +834,7 @@ XMSampler::Channel::PerformFX().
 
 	virtual void Init(void);
 	
-	//This tick is "NewLine()". The API needs to be changed.
+	//This tick is "NewLine()". The API needs to be renamed.
 	void Tick();
 	/// numSamples
 	virtual void Work(int numSamples);
@@ -872,11 +873,11 @@ XMSampler::Channel::PerformFX().
 	void NumVoices(const int value){_numVoices = value;};
 
 	/// set resampler quality 
-	void XMSampler::ResamplerQuality(const dsp::ResamplerQuality value){
+	void ResamplerQuality(const dsp::ResamplerQuality value){
 		_resampler._quality = value;
 	}
 
-	const dsp::ResamplerQuality XMSampler::ResamplerQuality(){
+	const dsp::ResamplerQuality ResamplerQuality(){
 		return _resampler._quality;
 	}
 
