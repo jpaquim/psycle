@@ -21,6 +21,7 @@ X low priority
 -------------------------------
 *** when recording mouse tweaks, it puts the mac # of the currently selected machine instead of the machine you are tweaking
 *** psycle doesn't give an error message when save fails due to lack of space
+* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' button in the inst ed, and select some of the sample wav, the display goes blank
 
 + humanizer
 + global volume fades
