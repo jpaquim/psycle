@@ -107,6 +107,9 @@ public:
 	int _volumeMaxCounterLife;				// output peak level.
 	unsigned long int _cpuCost;
 	unsigned long int _wireCost;
+	int	_scopeBufferIndex;
+	float *_pScopeBufferL;
+	float *_pScopeBufferR;
 #endif // ndef _WINAMP_PLUGIN_
 
 	int _x;

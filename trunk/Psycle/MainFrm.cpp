@@ -21,6 +21,7 @@
 #include "FrameMachine.h"
 #include "VstEditorDlg.h"
 #include "Helpers.h"
+#include "WireDlg.h"
 
 #include "Player.h"
 #include "MidiInput.h"
@@ -1569,6 +1570,17 @@ void CMainFrame::CloseAllMacGuis()
 
 void CMainFrame::CloseMacGui(int mac)
 {
+	for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+	{
+		if (m_wndView.WireDialog[i])
+		{
+			if ((m_wndView.WireDialog[i]->_pSrcMachine == _pSong->_pMachines[mac]) ||
+				(m_wndView.WireDialog[i]->_pDstMachine == _pSong->_pMachines[mac]))
+			{
+				m_wndView.WireDialog[i]->OnCancel();
+			}
+		}
+	}
 	switch (_pSong->_pMachines[mac]->_type)
 	{
 		case MACH_MASTER:

@@ -67,29 +67,30 @@ BOOL CWireDlg::OnInitDialog()
 	scope_spec_rate = 25;
 
 	Inval = false;
-	m_volslider.SetRange(0,128);
+	m_volslider.SetRange(0,256);
 	m_volslider.SetTicFreq(16);
 	_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 
 	float val;
 	_pDstMachine->GetWireVolume(_dstWireIndex,val);
 	invol = val;
-	int t = (int)(val*128.0f);
-	m_volslider.SetPos(128-t);
+	int t = (int)sqrtf(val*32768);
+	m_volslider.SetPos(256-t);
 
-	char buffer[64];
-	sprintf(buffer,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
-	SetWindowText(buffer);
+	char buf[64];
+	sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
+	SetWindowText(buf);
 
 	hold = FALSE;
-
-	pos = 0;
 
 	for (int i = 0; i < MAX_SCOPE_BANDS; i++)
 	{
 		bar_heightsl[i]=256;
 		bar_heightsr[i]=256;
 	}
+
+	memset(pSamplesL,0,sizeof(pSamplesL));
+	memset(pSamplesR,0,sizeof(pSamplesR));
 
 	CClientDC dc(this);
 	rc.top = 2;
@@ -112,7 +113,7 @@ BOOL CWireDlg::OnInitDialog()
 	font.CreatePointFont(70,"Tahoma");
 
 	SetMode();
-//	_pSrcMachine->bBufferForScope = TRUE;
+	pos = 1;
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -125,7 +126,9 @@ BOOL CWireDlg::Create()
 
 void CWireDlg::OnCancel()
 {
-//	_pSrcMachine->bBufferForScope = FALSE;
+	_pSrcMachine->_pScopeBufferL = NULL;
+	_pSrcMachine->_pScopeBufferR = NULL;
+	_pSrcMachine->_scopeBufferIndex = 0;
 	font.DeleteObject();
 	m_pParent->WireDialog[this_index] = NULL;
 	KillTimer(2304+this_index);
@@ -137,10 +140,25 @@ void CWireDlg::OnCancel()
 void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	char buffer[32];
-	invol = (128-m_volslider.GetPos())*0.0078125f;
+//	invol = (128-m_volslider.GetPos())*0.0078125f;
+	invol = ((256-m_volslider.GetPos())*(256-m_volslider.GetPos()))/32768.0f;
 
-	if (invol > 0.0f){	sprintf(buffer,"%.1f dB",20.0f * log10(invol)); }
-	else {				sprintf(buffer,"-Inf. dB"); }
+	if (invol > 1.0f)
+	{	
+		sprintf(buffer,"+%.1f dB",20.0f * log10(invol)); 
+	}
+	else if (invol == 1.0f)
+	{	
+		sprintf(buffer,"0.0 dB"); 
+	}
+	else if (invol > 0.0f)
+	{	
+		sprintf(buffer,"%.1f dB",20.0f * log10(invol)); 
+	}
+	else 
+	{				
+		sprintf(buffer,"-Inf. dB"); 
+	}
 
 	m_volabel.SetWindowText(buffer);
 
@@ -168,8 +186,16 @@ inline int CWireDlg::GetY(float f)
 {
 	f*=(64.0f/32768.0f);
 	f=64-f;
-	if (f < 1) return 1;
-	else if (f > 126) return 126;
+	if (f < 1) 
+	{
+		clip = TRUE;
+		return 1;
+	}
+	else if (f > 126) 
+	{
+		clip = TRUE;
+		return 126;
+	}
 	return int(f);
 }
 
@@ -187,9 +213,21 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 		switch (scope_mode)
 		{
+		case 0: // off
+			{
+				char buf[64];
+				sprintf(buf,"Scope Off");
+
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x606060);
+				bufDC.TextOut(4, 128-14, buf);
+				bufDC.SelectObject(oldFont);
+				KillTimer(2304+this_index);
+			}
+			break;
 		case 1: // oscilloscope
 			{
-
 				int freq = scope_osc_freq*scope_osc_freq;
 
 				char buf[64];
@@ -201,53 +239,67 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.TextOut(4, 128-14, buf);
 				bufDC.SelectObject(oldFont);
 
-				CPen linepen1(PS_SOLID, 2, 0xc08080);
-				CPen linepen2(PS_SOLID, 2, 0x80c080);
-				CPen linepen3(PS_SOLID, 4, 0x00404040);
-				CPen linepen4(PS_SOLID, 8, 0x00202020);
+				CPen linepen(PS_SOLID, 8, 0x00202020);
 
-				CPen *oldpen = bufDC.SelectObject(&linepen4);
+				CPen *oldpen = bufDC.SelectObject(&linepen);
 
 				// now draw our scope
 
+				// red line if last frame was clipping
 				bufDC.MoveTo(0,64);
-				bufDC.LineTo(255,64);
-
-				bufDC.SelectObject(&linepen3);
+				if (clip)
+				{
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 8, 0x00101040);
+					bufDC.SelectObject(&linepen);
+					bufDC.LineTo(255,64);
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 4, 0x00101080);
+				}
+				// or grey line if fine
+				else
+				{
+					bufDC.LineTo(255,64);
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
+				}
+				bufDC.SelectObject(&linepen);
 				bufDC.LineTo(0,64);
 
-				bufDC.SelectObject(&linepen1);
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 2, 0xc08080);
+				bufDC.SelectObject(&linepen);
+				clip = FALSE;
+
+				// ok this is a little tricky - it chases the wrapping buffer, starting at the last sample 
+				// buffered and working backwards - it does it this way to minimize chances of drawing 
+				// erroneous data across the buffering point
 
 				float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
-				bufDC.MoveTo(0,GetY(_pSrcMachine->_pSamplesL[pos]*invol));
-				float n = float(pos)+add;
-				for (int x = 1; x < 256; x+=4)
+				float n = float(_pSrcMachine->_scopeBufferIndex-pos);
+				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+				for (int x = 256-4; x >= 0; x-=4)
 				{
-					bufDC.LineTo(x,GetY(_pSrcMachine->_pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
-					n += add;
+					n -= add;
+					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
 				}
 
-				bufDC.SelectObject(&linepen2);
-				bufDC.MoveTo(0,GetY(_pSrcMachine->_pSamplesR[pos]*invol));
-				n = float(pos)+add;
-				for (x = 1; x < 256; x+=4)
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 2, 0x80c080);
+				bufDC.SelectObject(&linepen);
+
+				n = float(_pSrcMachine->_scopeBufferIndex-pos);
+				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+				for (x = 256-4; x >= 0; x-=4)
 				{
-					bufDC.LineTo(x,GetY(_pSrcMachine->_pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
-					n += add;
+					n -= add;
+					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
 				}
 
 				bufDC.SelectObject(oldpen);
-				linepen1.DeleteObject();
-				linepen2.DeleteObject();
-				linepen3.DeleteObject();
-				linepen4.DeleteObject();
+				linepen.DeleteObject();
 
-				if (!hold)
-				{
-					pos = int(n);
-					pos&=(SCOPE_BUF_SIZE-1);
-				}
 			}
 			break;
 
@@ -264,28 +316,33 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			   memset (aar,0,sizeof(aar));
 			   memset (bbr,0,sizeof(bbr));
 
+			   // calculate our bands using same buffer chasing technique
+
+			   int index = _pSrcMachine->_scopeBufferIndex;
 			   for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
 			   { 
-				 float wl=(_pSrcMachine->_pSamplesL[i]*invol);///32768; 
-				 float wr=(_pSrcMachine->_pSamplesR[i]*invol);///32768; 
-				 int im = i-(SCOPE_SPEC_SAMPLES/2); 
-				 for(int h=0;h<scope_spec_bands;h++) 
-				 { 
-					float th=((F_PI/(SCOPE_SPEC_SAMPLES/2))*((float(h*h)/scope_spec_bands)+1.0f))*im; 
-					float cth = cosf(th);
-					float sth = sinf(th);
-					aal[h]+=wl*cth; 
-					bbl[h]+=wl*sth; 
-					aar[h]+=wr*cth; 
-					bbr[h]+=wr*sth; 
-				 } 
-			   } 
-			   for (int h=0;h<scope_spec_bands;h++) 
-			   {
-				   ampl[h]= sqrtf(aal[h]*aal[h]+bbl[h]*bbl[h])/(SCOPE_SPEC_SAMPLES/2); 
-				   ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])/(SCOPE_SPEC_SAMPLES/2); 
-			   }
-			   int width = 128/scope_spec_bands;
+					index--;
+					index&=(SCOPE_BUF_SIZE-1);
+					float wl=(pSamplesL[index]*invol);///32768; 
+					float wr=(pSamplesR[index]*invol);///32768; 
+					int im = i-(SCOPE_SPEC_SAMPLES/2); 
+					for(int h=0;h<scope_spec_bands;h++) 
+					{ 
+						float th=((F_PI/(SCOPE_SPEC_SAMPLES/2))*((float(h*h)/scope_spec_bands)+1.0f))*im; 
+						float cth = cosf(th);
+						float sth = sinf(th);
+						aal[h]+=wl*cth; 
+						bbl[h]+=wl*sth; 
+						aar[h]+=wr*cth; 
+						bbr[h]+=wr*sth; 
+					} 
+				} 
+				for (int h=0;h<scope_spec_bands;h++) 
+				{
+					ampl[h]= sqrtf(aal[h]*aal[h]+bbl[h]*bbl[h])/(SCOPE_SPEC_SAMPLES/2); 
+					ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])/(SCOPE_SPEC_SAMPLES/2); 
+				}
+				int width = 128/scope_spec_bands;
 				COLORREF cl = 0xb07070;
 				COLORREF cr = 0x70b070;
 				CPen linepen(PS_SOLID, width, cl);
@@ -294,6 +351,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				linepen.DeleteObject();
 				int x = (width/2);
+
+				// draw our bands
 
 				for (i = 0; i < scope_spec_bands; i++)
 				{
@@ -346,10 +405,12 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 					x+=width;
 
-					cl += 0x000002;
-					cl -= 0x020200;
-					cr += 0x000002;
-					cr -= 0x020200;
+					int add=0x000003*MAX_SCOPE_BANDS/scope_spec_bands;
+
+					cl += add;
+					cl -= add<<16|add<<8;
+					cr += add;
+					cr -= add<<16|add<<8;
 
 					bar_heightsl[i]+=scope_spec_rate/10;
 					if (bar_heightsl[i] > 128+width)
@@ -364,6 +425,19 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				}
 				bufDC.SelectObject(oldpen);
 				linepen.DeleteObject();
+			}
+			break;
+		case 3: // phase scope
+			{
+				char buf[64];
+				sprintf(buf,"Phase Scope");
+
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x606060);
+				bufDC.TextOut(4, 128-14, buf);
+				bufDC.SelectObject(oldFont);
+				KillTimer(2304+this_index);
 			}
 			break;
 		}
@@ -385,7 +459,7 @@ void CWireDlg::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult)
 		scope_osc_freq = m_slider.GetPos();
 		if (hold)
 		{
-			m_slider2.SetRange(0,int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+			m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
 		}
 		break;
 	case 2:
@@ -407,6 +481,7 @@ void CWireDlg::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 		else
 		{
+			pos = 1;
 			if (scope_osc_rate != m_slider2.GetPos())
 			{
 				scope_osc_rate = m_slider2.GetPos();
@@ -431,8 +506,6 @@ void CWireDlg::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 void CWireDlg::OnMode()
 {
 	scope_mode++;
-	hold = false;
-//	_pSrcMachine->bBufferForScope = TRUE;
 	if (scope_mode > 3)
 	{
 		scope_mode = 0;
@@ -443,21 +516,31 @@ void CWireDlg::OnMode()
 
 void CWireDlg::OnHold()
 {
-//	_pSrcMachine->bBufferForScope = hold;
 	hold = !hold;
+	pos = 1;
 	switch (scope_mode)
 	{
 	case 1:
 		if (hold)
 		{
-			m_slider2.SetRange(0,int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
-			m_slider2.SetPos(0);
+			m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+			m_slider2.SetPos(1);
 		}
 		else
 		{
 			m_slider2.SetRange(10,100);
 			m_slider2.SetPos(scope_osc_rate);
 		}
+	}
+	if (hold)
+	{
+		_pSrcMachine->_pScopeBufferL = NULL;
+		_pSrcMachine->_pScopeBufferR = NULL;
+	}
+	else
+	{
+		_pSrcMachine->_pScopeBufferL = pSamplesL;
+		_pSrcMachine->_pScopeBufferR = pSamplesR;
 	}
 	m_pParent->SetFocus();	
 }
@@ -468,29 +551,44 @@ void CWireDlg::SetMode()
 	switch (scope_mode)
 	{
 	case 0:
-		sprintf(buffer,"Scope Off",_pSrcMachine->_editName);
+		KillTimer(2304+this_index);
+		_pSrcMachine->_pScopeBufferL = NULL;
+		_pSrcMachine->_pScopeBufferR = NULL;
+		sprintf(buffer,"Scope Mode");
+		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
 	case 1:
+		KillTimer(2304+this_index);
 		m_slider.SetRange(1, 148);
 		m_slider.SetPos(scope_osc_freq);
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_osc_rate);
 		sprintf(buffer,"Oscilloscope");
-		KillTimer(2304+this_index);
+		_pSrcMachine->_pScopeBufferL = pSamplesL;
+		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
 	case 2:
+		KillTimer(2304+this_index);
 		m_slider.SetRange(4, MAX_SCOPE_BANDS);
 		m_slider.SetPos(scope_spec_bands);
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_spec_rate);
 		sprintf(buffer,"Spectrum Analyzer");
+		_pSrcMachine->_pScopeBufferL = pSamplesL;
+		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
-	default:
+	case 3:
+		KillTimer(2304+this_index);
+		_pSrcMachine->_pScopeBufferL = NULL;
+		_pSrcMachine->_pScopeBufferR = NULL;
 		sprintf(buffer,"Stereo Phase");
+		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
 	}
 	m_mode.SetWindowText(buffer);
+	hold = false;
+	pos = 1;
 }
 

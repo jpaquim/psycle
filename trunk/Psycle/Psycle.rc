@@ -315,7 +315,7 @@ BEGIN
     PUSHBUTTON      "Delete Connection",IDC_BUTTON1,2,120,205,19
     CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,96,138,11
-    PUSHBUTTON      "Mode",IDC_BUTTON,2,84,169,11
+    PUSHBUTTON      "Mode",IDC_BUTTON,2,83,169,12
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,108,138,11
     PUSHBUTTON      "Hold",IDC_BUTTON2,141,98,30,19
