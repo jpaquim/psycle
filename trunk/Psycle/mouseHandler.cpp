@@ -30,6 +30,56 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 			}
 //			Repaint();
 		}
+		else
+		{
+			for (int c=0; c<MAX_MACHINES; c++)
+			{
+				if (Global::_pSong->_machineActive[c])
+				{
+					Machine *tmac = Global::_pSong->_pMachines[c];
+					
+					for (int w = 0; w<MAX_CONNECTIONS; w++)
+					{
+						if (tmac->_connection[w])
+						{
+							int xt = tmac->_connectionPoint[w].x;
+							int yt = tmac->_connectionPoint[w].y;
+							
+							if ((point.x > xt) && (point.x < xt+20) && (point.y > yt) && (point.y < yt+20))
+							{
+								for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+								{
+									if (WireDialog[i])
+									{
+										if ((WireDialog[i]->_pSrcMachine == tmac) &&
+											(WireDialog[i]->_pDstMachine == Global::_pSong->_pMachines[tmac->_outputMachines[w]]))
+										{
+											return;
+										}
+									}
+								}
+								for (i = 0; i < MAX_WIRE_DIALOGS; i++)
+								{
+									if (!WireDialog[i])
+									{
+										WireDialog[i] = new CWireDlg(this);
+										WireDialog[i]->this_index = i;
+										WireDialog[i]->wireIndex = w;
+										WireDialog[i]->isrcMac = c;
+										WireDialog[i]->_pSrcMachine = tmac;
+										WireDialog[i]->_pDstMachine = Global::_pSong->_pMachines[tmac->_outputMachines[w]];
+										WireDialog[i]->Create();
+										WireDialog[i]->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+										WireDialog[i]->ShowWindow(SW_SHOW);
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	/*
 	else if (viewMode == VMPattern)
