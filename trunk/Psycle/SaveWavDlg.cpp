@@ -28,6 +28,7 @@ int CSaveWavDlg::rate = -1;
 int CSaveWavDlg::bits = -1;
 BOOL CSaveWavDlg::savewires = false;
 BOOL CSaveWavDlg::savetracks = false;
+BOOL CSaveWavDlg::savegens = false;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -51,6 +52,7 @@ void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SAVEWAVE, m_savewave);
 	DDX_Control(pDX, IDC_SAVEWIRESSEPARATED, m_savewires);
 	DDX_Control(pDX, IDC_SAVETRACKSSEPARATED, m_savetracks);
+	DDX_Control(pDX, IDC_SAVEGENERATORSEPARATED, m_savegens);
 	DDX_Control(pDX, IDC_RANGESTART, m_rangestart);
 	DDX_Control(pDX, IDC_RANGEEND, m_rangeend);
 	DDX_Control(pDX, IDC_PROGRESS, m_progress);
@@ -78,6 +80,7 @@ BEGIN_MESSAGE_MAP(CSaveWavDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_RATE, OnSelchangeComboRate)
 	ON_BN_CLICKED(IDC_SAVETRACKSSEPARATED, OnSavetracksseparated)
 	ON_BN_CLICKED(IDC_SAVEWIRESSEPARATED, OnSavewiresseparated)
+	ON_BN_CLICKED(IDC_SAVEGENERATORSEPARATED, OnSavegensseparated)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -193,6 +196,7 @@ BOOL CSaveWavDlg::OnInitDialog()
 	m_channelmode.SetCurSel(channelmode);
 
 	m_savetracks.SetCheck(savetracks);
+	m_savegens.SetCheck(savegens);
 	m_savewires.SetCheck(savewires);
 
 	m_text.SetWindowText("");
@@ -282,6 +286,7 @@ void CSaveWavDlg::OnSavewave()
 
 	m_filename.EnableWindow(FALSE);
 	m_savetracks.EnableWindow(FALSE);
+	m_savegens.EnableWindow(FALSE);
 	m_savewires.EnableWindow(FALSE);
 	m_rate.EnableWindow(FALSE);
 	m_bits.EnableWindow(FALSE);
@@ -363,6 +368,52 @@ void CSaveWavDlg::OnSavewave()
 				// now save the song
 				char filename[MAX_PATH];
 				sprintf(filename,"%s-wire %.2u %s.wav",rootname,i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+				return;
+			}
+		}
+		current = 256;
+		SaveEnd();
+	}
+	else if (m_savegens.GetCheck())
+	{
+		// this is tricky - sort of
+		// back up our connections first
+
+		for (int i = 0; i < MAX_BUSES; i++)
+		{
+			if (pSong->_pMachine[i])
+			{
+				_Muted[i] = pSong->_pMachine[i]->_mute;
+			}
+			else
+			{
+				_Muted[i] = TRUE;
+			}
+		}
+
+		for (i = 0; i < MAX_BUSES; i++)
+		{
+			if (!_Muted[i])
+			{
+				current = i;
+				for (int j = 0; j < MAX_BUSES; j++)
+				{
+					if (pSong->_pMachine[j])
+					{
+						if (j != i)
+						{
+							pSong->_pMachine[j]->_mute = TRUE;
+						}
+						else
+						{
+							pSong->_pMachine[j]->_mute = FALSE;
+						}
+					}
+				}
+				// now save the song
+				char filename[MAX_PATH];
+				sprintf(filename,"%s-generator %.2u %s.wav",rootname,i,pSong->_pMachine[i]->_editName);
 				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 				return;
 			}
@@ -601,6 +652,49 @@ void CSaveWavDlg::SaveEnd()
 		}
 	}
 
+	else if (m_savegens.GetCheck())
+	{
+		Song *pSong = Global::_pSong;
+
+		const int real_rate[]={8192,11025,22050,44100,48000,96000};
+		const int real_bits[]={8,16,24,32};
+
+		for (int i = current+1; i < MAX_BUSES; i++)
+		{
+			if (!_Muted[i])
+			{
+				current = i;
+				for (int j = 0; j < MAX_BUSES; j++)
+				{
+					if (pSong->_pMachine[j])
+					{
+						if (j != i)
+						{
+							pSong->_pMachine[j]->_mute = TRUE;
+						}
+						else
+						{
+							pSong->_pMachine[j]->_mute = FALSE;
+						}
+					}
+				}
+				// now save the song
+				char filename[MAX_PATH];
+				sprintf(filename,"%s-generator %.2u %s.wav",rootname,i,pSong->_pMachine[i]->_editName);
+				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+				return;
+			}
+		}
+
+		for (i = 0; i < MAX_BUSES; i++)
+		{
+			if (pSong->_pMachine[i])
+			{
+				pSong->_pMachine[i]->_mute = _Muted[i];
+			}
+		}
+	}
+
 	m_text.SetWindowText("");
 
 	GetDlgItem(IDC_RECSONG)->EnableWindow(TRUE);
@@ -611,6 +705,7 @@ void CSaveWavDlg::SaveEnd()
 
 	m_filename.EnableWindow(TRUE);
 	m_savetracks.EnableWindow(TRUE);
+	m_savegens.EnableWindow(TRUE);
 	m_savewires.EnableWindow(TRUE);
 	m_rate.EnableWindow(TRUE);
 	m_bits.EnableWindow(TRUE);
@@ -691,6 +786,8 @@ void CSaveWavDlg::OnSavetracksseparated()
 	{
 		m_savewires.SetCheck(FALSE);
 		savewires = FALSE;
+		m_savegens.SetCheck(FALSE);
+		savegens = FALSE;
 	}
 }
 
@@ -701,5 +798,19 @@ void CSaveWavDlg::OnSavewiresseparated()
 	{
 		m_savetracks.SetCheck(FALSE);
 		savetracks = FALSE;
+		m_savegens.SetCheck(FALSE);
+		savegens = FALSE;
+	}
+}
+
+void CSaveWavDlg::OnSavegensseparated() 
+{
+	// TODO: Add your control notification handler code here
+	if (savewires = m_savegens.GetCheck())
+	{
+		m_savetracks.SetCheck(FALSE);
+		savetracks = FALSE;
+		m_savewires.SetCheck(FALSE);
+		savewires = FALSE;
 	}
 }

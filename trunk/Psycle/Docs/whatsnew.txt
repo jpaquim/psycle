@@ -18,6 +18,7 @@ V1.7.3 (Final)
 ! fix for panning not being properly set on load (pooplog)
 ! fix for pasting out of range bug (pooplog)
 * changed so that 255 unique patterns can be stored, although only 127 can be sequenced (pooplog)
++ wave writer can write separate waves per generator now (pooplog)
 
 V1.7.3 RC2
 ----------
