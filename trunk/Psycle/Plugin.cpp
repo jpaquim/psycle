@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include "global.h"
+//	#include "global.h"
 	#include "Plugin.h"
 	#include "FileIO.h"
 #else
@@ -358,16 +358,17 @@ bool Plugin::Load(
 			strcpy(sDllName,"arguru synth 2f.dll");
 
 		char sPath2[_MAX_PATH];
+		CString sPath;
 #if defined(_WINAMP_PLUGIN_)
-		strcpy(sPath2,Global::pConfig->GetPluginDir());
+		sPath = Global::pConfig->GetPluginDir();
 
-		if ( FindFileinDir(sDllName,sPath2) )
+		if ( FindFileinDir(sDllName,sPath) )
 		{
+			strcpy(sPath2,sPath);
 			if (!Instance(sPath2)) result=false;
 		}
 		else result = false;
 #else
-		CString sPath;
 		if ( !CNewMachine::dllNames.Lookup(sDllName,sPath) ) 
 		{
 //			Check Compatibility Table.

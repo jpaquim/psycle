@@ -263,7 +263,8 @@ public:
 	void RecalcMetrics();
 	void LoadPatternHeaderSkin();
 	void LoadMachineSkin();
-
+	void KillWireDialogs();
+	
 public:
 
 //	char m_appdir[_MAX_PATH];

@@ -1,9 +1,9 @@
 #include "stdafx.h"
-
+/*
 #if defined(_WINAMP_PLUGIN_)
 	#include "global.h"
 #endif // _WINAMP_PLUGIN_
-
+*/
 #include "Filter.h"
 
 

@@ -15,8 +15,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define VERSION_NUMBER "1.66.5a"
-
 /////////////////////////////////////////////////////////////////////////////
 // CPsycleApp
 
@@ -89,7 +87,6 @@ BOOL CPsycleApp::InitInstance()
 		pFrame->m_wndView.RecalculateColourGrid();
 
 	}
-
 	// create and load the frame with its resources
 	// For some reason, there'a First-Chance exception when
 	// another pFrame member is called after this LoadFrame
@@ -98,18 +95,19 @@ BOOL CPsycleApp::InitInstance()
 		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
 		NULL);
 
+	// Sets Icon
+	HICON tIcon;
+	tIcon=LoadIcon(IDR_MAINFRAME);
+	pFrame->SetIcon(tIcon,false);
+	
 	// The one and only window has been initialized, so show and update it.
 	pFrame->ShowWindow(SW_MAXIMIZE);
 
 	// center master machine
 	pFrame->m_wndView._pSong->_pMachines[0]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 	pFrame->m_wndView._pSong->_pMachines[0]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-
+	
 	pFrame->UpdateWindow();
-	// Sets Icon
-	HICON tIcon;
-	tIcon=LoadIcon(IDR_MAINFRAME);
-	pFrame->SetIcon(tIcon,false);
 	
 	CNewMachine::LoadPluginInfo();
 	// Show splash screen

@@ -1,9 +1,9 @@
 #include "stdafx.h"
-
+/*
 #if defined(_WINAMP_PLUGIN_)
 	#include <windows.h>
 #endif // _WINAMP_PLUGIN_
-
+*/
 #include "Dsp.h"
 
 int Cubic::_resolution;

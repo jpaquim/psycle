@@ -1,17 +1,14 @@
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
 
+class Song;
+class Player;
+class Configuration;
+
 #if defined(_WINAMP_PLUGIN_)
 
-	#include <windows.h>
-	#include "WinampPlugin\resource.h"
-
-	class Song;
-	class Player;
-	class Configuration;
-
-	bool FindFileinDir(char *dllname,char* path);
-
+	bool FindFileinDir(char *dllname,CString &path);
+	
 	class Global
 	{
 	public:
@@ -20,19 +17,12 @@
 
 		static Song* _pSong;
 		static Player* pPlayer;
-		static int _lbc;
 		static Configuration* pConfig;
+		static int _lbc;
 	};
-
-	#define CPoint POINT
-	#define TRACE //
-
 
 #else
 
-	class Song;
-	class Player;
-	class Configuration;
 	class Resampler;
 	class InputHandler;
 
