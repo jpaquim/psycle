@@ -32,16 +32,16 @@ Configuration::Configuration()
 	autoStopMachines = false;
 	useDoubleBuffer = true;
 	_showAboutAtStart = true;
-	mv_colour =	0x00bfa880;
-	pvc_background = 0x00decaab;
-	pvc_row4beat = 0x00dec9ab;
-	pvc_rowbeat = 0x00ebddcb;
-	pvc_row = 0x00f3ebe0;
+	mv_colour =	0x009a887c;
+	pvc_background = 0x009a887c;
+	pvc_row4beat = 0x00d5ccc6;
+	pvc_rowbeat = 0x00c9beb8;
+	pvc_row = 0x00c1b5aa;
 	pvc_font = 0x00000000;
 	// If you change the initial colour values, change it also in "CSkinDlg::OnResetcolours()"
-	vu1 = 0x00d6c6a9;
-	vu2 = 0x00000000;
-	vu3 = 0x00d6c6a9;
+	vu1 = 0x00f1c992;
+	vu2 = 0x00403731;
+	vu3 = 0x00262bd7;
 
 	_numOutputDrivers = 3;
 	_outputDriverIndex = 0;

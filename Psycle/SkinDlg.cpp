@@ -30,6 +30,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSkinDlg)
+	DDX_Control(pDX, IDC_PRESETSCOMBO, m_cpresets);
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
 	//}}AFX_DATA_MAP
 }
@@ -46,8 +47,8 @@ ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_BN_CLICKED(IDC_FONTC, OnFontc)
 	ON_BN_CLICKED(IDC_BEATC, OnBeatc)
 	ON_BN_CLICKED(IDC_4BEAT, On4beat)
-	ON_BN_CLICKED(IDC_RESETCOLOURS, OnResetcolours)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
+	ON_CBN_SELENDOK(IDC_PRESETSCOMBO, OnSelendokPresetscombo)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -71,6 +72,7 @@ BOOL CSkinDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	m_gfxbuffer.SetCheck(_gfxbuffer);
+
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -166,21 +168,70 @@ void CSkinDlg::On4beat()
 	}	
 }
 
-void CSkinDlg::OnResetcolours() 
-{
-	_machineViewColor =	0x00bfa880;
-	_patternViewColor = 0x00decaab;
-	_4beatColor = 0xdec9ab;
-	_beatColor = 0x00ebddcb;
-	_rowColor = 0x00f3ebe0;
-	_fontColor = 0x00000000;
-
-	_vubColor = 0x00d6c6a9;
-	_vugColor = 0x00000000;
-	_vucColor = 0x00d6c6a9;
-}
-
 void CSkinDlg::OnDoublebuffer() 
 {
 	_gfxbuffer = m_gfxbuffer.GetCheck() >0?true:false;
+}
+
+void CSkinDlg::OnSelendokPresetscombo() 
+{
+	switch( m_cpresets.GetCurSel() )
+	{
+	case 0: // Old theme
+		{
+			_machineViewColor =	0x0077AA99;
+			_patternViewColor = 0x00AADDCC;
+			_4beatColor = 0x00CCCCCC;
+			_beatColor = 0x00BACBCA;
+			_rowColor = 0x00A9CAC8;
+			_fontColor = 0x00000000;
+
+			_vubColor = 0x0000FF00;
+			_vugColor = 0x00000000;
+			_vucColor = 0x000000FF;
+			break;
+		}
+	case 1: // Iced theme
+		{
+			_machineViewColor =	0x00bfa880;
+			_patternViewColor = 0x00decaab;
+			_4beatColor = 0x00dec9ab;
+			_beatColor = 0x00ebddcb;
+			_rowColor = 0x00f3ebe0;
+			_fontColor = 0x00000000;
+
+			_vubColor = 0x00d6c6a9;
+			_vugColor = 0x00000000;
+			_vucColor = 0x00d6c6a9;	
+			break;
+		}
+	case 2: //clarify
+		{
+			_machineViewColor =	0x00b0bdbd;
+			_patternViewColor = 0x009a8d7e;
+			_4beatColor = 0x00cbc5be;
+			_beatColor = 0x00d5d0ca;
+			_rowColor = 0x00c4cece;
+			_fontColor = 0x00000000;
+
+			_vubColor = 0x0025cd36;
+			_vugColor = 0x00332f28;
+			_vucColor = 0x000000c4;
+			break;
+		}
+	case 3: // bluegrey
+		{
+			_machineViewColor =	0x009a887c;
+			_patternViewColor = 0x009a887c;
+			_4beatColor = 0x00d5ccc6;
+			_beatColor = 0x00c9beb8;
+			_rowColor = 0x00c1b5aa;
+			_fontColor = 0x00000000;
+
+			_vubColor = 0x00f1c992;
+			_vugColor = 0x00403731;
+			_vucColor = 0x00262bd7;
+			break;
+		}
+	}
 }

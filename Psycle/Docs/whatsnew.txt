@@ -5,6 +5,8 @@ V1.66
 + VST host correctly does "idle" calls to VST's now. This supposedly makes AbSynth work.
 + VST host now replies to "GetParameterQuantization". Some plugins use this to round correctly.
 + Added Patch to make VSTi sc-101 from SC developers work. (Not an awesome plugin anyway, and crashes)
++ New machine graphics thanks to /\/\ark.
++ Added four colour themes selectable via a comboox in configuration-settings, "visual" folder.
 * Important change in the Song Loading routine to load better the VST Plugins.
   Also, now saves the program number, so VST's like "Triangle II", "Vivaldi" and "Ganymed" work!
   New Files wont load VST's in previous versions of Psycle. It's sort of a security for newer files.
@@ -16,8 +18,6 @@ V1.66
   Removed "setLen", since now it is a bit useless.
   Removed "Spread" and replaced by "Sort patterns".
 * Changed Wav loading routines to use RIFF loader. This allows to see SoundForge's loops settings.
-* Changed machine graphics thanks to /\/\ark. Default colours changed too (Go to configuration-
-  settings, "visual" folder and click "Reset All Colours" to see them.)
 * Pattern editor now hides the "0000" value in effects column (when it is not used as twk or mcm)
 * Cleaned up a bit the Instrument editor Dialog (No new functionality yet) and fixed little errors
   in the envelopes editor.

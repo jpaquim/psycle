@@ -1479,8 +1479,8 @@ bool Song::Load(
 					( _pMachines[i]->_type == MACH_VSTFX))
 			{
 				bool chunkread=false;
-				((VSTPlugin*)_pMachines[i])->SetCurrentProgram(((VSTPlugin*)_pMachines[i])->_program);
 				if( chunkpresent )	chunkread=((VSTPlugin*)_pMachines[i])->LoadChunk(pFile);
+				((VSTPlugin*)_pMachines[i])->SetCurrentProgram(((VSTPlugin*)_pMachines[i])->_program);
 				if ( !chunkpresent || !chunkread )
 				{
 					const int vi = ((VSTPlugin*)_pMachines[i])->_instance;

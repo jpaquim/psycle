@@ -33,6 +33,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
+	CComboBox	m_cpresets;
 	CButton	m_gfxbuffer;
 	//}}AFX_DATA
 
@@ -62,8 +63,8 @@ protected:
 	afx_msg void OnFontc();
 	afx_msg void OnBeatc();
 	afx_msg void On4beat();
-	afx_msg void OnResetcolours();
 	afx_msg void OnDoublebuffer();
+	afx_msg void OnSelendokPresetscombo();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
