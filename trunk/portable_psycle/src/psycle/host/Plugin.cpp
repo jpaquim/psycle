@@ -48,7 +48,7 @@ namespace psycle
 			if(!_dll)
 			{
 				std::ostringstream s; s
-					<< "could not load library:" << file_name << std::endl
+					<< "could not load library: " << file_name << std::endl
 					<< operating_system::exceptions::code_description();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
