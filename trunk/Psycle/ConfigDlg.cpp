@@ -81,6 +81,7 @@ void CConfigDlg::Init(
 	_skinDlg._vucColor = pConfig->vu3;
 	_skinDlg._gfxbuffer = pConfig->useDoubleBuffer;
 	_skinDlg._linenumbers = pConfig->_linenumbers;
+	_skinDlg._linenumbersHex = pConfig->_linenumbersHex;
 
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
@@ -162,6 +163,7 @@ int CConfigDlg::DoModal()
 
 		_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
 		_pConfig->_linenumbers = _skinDlg._linenumbers;
+		_pConfig->_linenumbersHex = _skinDlg._linenumbersHex;
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET = _pConfig->_linenumbers?LINE_XOFFSET:1;
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.VISTRACKS = (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET)/ROWWIDTH;
 
