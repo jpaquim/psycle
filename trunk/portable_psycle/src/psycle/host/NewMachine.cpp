@@ -574,7 +574,7 @@ namespace psycle
 							try
 							{
 								 plug.Instance(fileName);
-								 plug.Init(); // <bohan> hmm, this really isn't not object oriented. We should get rid of two-stepped constructions.
+								 plug.Init(); // <bohan> hmm, we should get rid of two-stepped constructions.
 							}
 							catch(const std::exception & e)
 							{
