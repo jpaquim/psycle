@@ -55,7 +55,7 @@ namespace psycle
 			float * pars;
 		};
 
-		bool Song::CreateMachine(MachineType type, int x, int y, char* psPluginDll, int index)
+		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index)
 		{
 			Machine* pMachine;
 			Master* pMaster;
@@ -1625,8 +1625,10 @@ namespace psycle
 									((Dummy*)pMac[i])->wasVST = true;
 								}
 			#else // if !_WINAMP_PLUGIN_
-								if(CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
+								std::string temp;
+								if(CNewMachine::lookupDllName(vstL[pVstPlugin->_instance].dllName,temp))
 								{
+									sPath=temp.c_str();
 									strcpy(sPath2,sPath);
 									if (!CNewMachine::TestFilename(sPath2))
 									{

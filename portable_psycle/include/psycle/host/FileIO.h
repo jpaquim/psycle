@@ -48,6 +48,7 @@ namespace psycle
 			virtual long Skip(long numBytes);
 			virtual bool Eof(void);
 			virtual long FileSize(void);
+			virtual bool ReadString(std::string &string);
 			virtual bool ReadString(char* pData, ULONG maxBytes);
 			virtual long GetPos(void);
 			virtual FILE* GetFile(void) { return NULL; };

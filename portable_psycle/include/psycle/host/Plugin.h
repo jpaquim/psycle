@@ -93,7 +93,7 @@ namespace psycle
 
 			void Instance(const char file_name[]) throw(...);
 			void Free() throw(...);
-			bool LoadDll(char* psFileName);
+			bool LoadDll(std::string psFileName);
 			inline char * GetShortName() throw() { return _psShortName; }
 			inline char * GetAuthor() throw() { return _psAuthor; }
 			inline const bool & IsSynth() const throw() { return _isSynth; }

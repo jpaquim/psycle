@@ -183,7 +183,7 @@ namespace psycle
 				void Instance(const char dllname[], const bool overwriteName = true) throw(...);
 				void Free() throw(...);
 				bool DescribeValue(int parameter, char * psTxt);
-				bool LoadDll(char* psFileName);
+				bool LoadDll(std::string psFileName);
 				///\todo To be removed when changing the fileformat.
 				bool LoadChunk(RiffFile* pFile);
 				inline const long int & GetVersion() const throw() { return _version; }

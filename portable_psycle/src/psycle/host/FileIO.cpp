@@ -119,6 +119,23 @@ namespace psycle
 			return end;
 		}
 
+		bool RiffFile::ReadString(std::string &result)
+		{
+			result="";
+			char c;
+			while(true)
+			{
+				if (Read(&c, sizeof(c)))
+				{
+					result+=c;
+					if(c == 0) {
+						return true;
+					}
+				}
+				else return false;
+			}
+		}
+
 		bool RiffFile::ReadString(char* pData, ULONG maxBytes)
 		{
 			if(maxBytes > 0)

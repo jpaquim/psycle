@@ -17,17 +17,15 @@ namespace psycle
 		class Song
 		{
 		public:
+			/// The file name this song was loaded from.
+			std::string fileName;
 			#if defined _WINAMP_PLUGIN_
-				/// The file name this song was loaded from.
-				char fileName[_MAX_PATH];
 				/// The size of the file this song was loaded from.
 				/// Why is it stored?
 				long filesize;
 			#else
 				/// The index of the machine which plays in solo.
 				int machineSoloed;
-				/// The file name this song was loaded from.
-				CString fileName;
 				/// ???
 				CPoint viewSize;
 			#endif
@@ -135,7 +133,7 @@ namespace psycle
 			/// the first free slot for a new machine.
 			int GetFreeMachine();
 			/// creates a new machine in this song.
-			bool CreateMachine(MachineType type, int x, int y, char* psPluginDll, int index);
+			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index);
 			/// destroy a machine of this song.
 			void DestroyMachine(int mac);
 			/// destroys all the machines of this song.

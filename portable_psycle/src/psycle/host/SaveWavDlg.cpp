@@ -84,12 +84,12 @@ namespace psycle
 			lastlinetick=0;
 			saving=false;
 
-			CString name = Global::pConfig->GetSongDir().c_str();
-			name+="\\";
+			std::string name = Global::pConfig->GetSongDir();
+			name+='\\';
 			name+=pSong->fileName;
-			name = name.Left(name.GetLength()-4);
+			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
 			name+=".wav";
-			m_filename.SetWindowText(name);
+			m_filename.SetWindowText(name.c_str());
 			
 			m_rangeend.EnableWindow(FALSE);
 			m_rangestart.EnableWindow(FALSE);

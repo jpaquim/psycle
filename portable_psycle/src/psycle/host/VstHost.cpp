@@ -9,6 +9,8 @@
 #include "Configuration.h"
 #include "Player.h"
 #include "InputHandler.h"
+#include <algorithm>
+#include <cctype>
 ///\file
 ///\brief implementation file for psycle::host::plugin
 namespace psycle
@@ -547,10 +549,10 @@ namespace psycle
 				}
 			};
 
-			bool plugin::LoadDll(char* psFileName)
+			bool plugin::LoadDll(std::string psFileName)
 			{
-				_strlwr(psFileName); ///\todo _strlwr can rot in hell, it's really not the standard way of converting case.
-				char sPath2[1 << 10];
+				std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
+				std::string sPath2;
 				::CString sPath;
 				#if defined _WINAMP_PLUGIN_
 					sPath = Global::pConfig->GetVstDir();
@@ -590,13 +592,12 @@ namespace psycle
 						return false;
 					}
 				#else
-					if(CNewMachine::dllNames.Lookup(psFileName, sPath))
+					if(CNewMachine::lookupDllName(psFileName, sPath2))
 					{
-						std::strcpy(sPath2, sPath);
 						if(!CNewMachine::TestFilename(sPath2)) return false;
 						try
 						{
-							Instance(sPath2, false);
+							Instance(sPath2.c_str(), false);
 						}
 						catch(const std::exception & e)
 						{
