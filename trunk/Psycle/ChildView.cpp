@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "MidiInput.h"
 #include "SwingFillDlg.h"
+#include "Helpers.h"
 
 //#include "Dsp.h"
 //#include "Filter.h"
@@ -1048,11 +1049,13 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 	static int sw = 2;
 	static float sv = 50.0f;
 	static float sp = 90.0f;
+	static BOOL of = true;
 	CSwingFillDlg dlg;
 	dlg.tempo = st;
 	dlg.width = sw;
 	dlg.variance = sv;
 	dlg.phase = sp;
+	dlg.offset = true;
 
 	dlg.DoModal();
 	if (dlg.bGo)
@@ -1061,6 +1064,7 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		sw = dlg.width;
 		sv = dlg.variance;
 		sp = dlg.phase;
+		of = dlg.offset;
 		float var = (sv/100.0f);
 
 		// time to do our fill
@@ -1069,6 +1073,7 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		float step = TWOPI_F/(sw);
 		float index = sp*TWOPI_F/360;
 
+		int l;
 		int x;
 		int y;
 		int ny;
@@ -1084,11 +1089,26 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 			y = blockSel.start.line;
 			ny = 1+blockSel.end.line-blockSel.start.line;
 		}
+
+		// remember we are at each speed for the length of time it takes to do one tick
+		// this approximately calculates the offset
+		float dcoffs = 0;
+		if (of)
+		{
+			float swing=0;
+			for (l=0;l<sw;l++)
+			{
+				float val = ((sinf(index)*var*st)+st);
+				swing += (val/st)*(val/st);
+				index+=step;
+			}
+			dcoffs = ((swing-sw)*st)/sw;
+		}
+
+		// now fill the pattern
 		AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
-
 		int displace=_ps()*MULTIPLY2;
-
-		for (int l=y;l<y+ny;l++)
+		for (l=y;l<y+ny;l++)
 		{
 			int const displace2=x*5+l*MULTIPLY;
 			
@@ -1096,10 +1116,10 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 			
 			PatternEntry *entry = (PatternEntry*) offset;
 			entry->_cmd = 0xff;
-			int val = int((sin(index)*var*st)+dlg.tempo);
-			if (val < 33)
+			int val = f2i(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+			if (val < 1)
 			{
-				val = 33;
+				val = 1;
 			}
 			else if (val > 255)
 			{

@@ -20,6 +20,7 @@ public:
 	int width;
 	float variance;
 	float phase;
+	BOOL offset;
 
 // Dialog Data
 	//{{AFX_DATA(CSwingFillDlg)
@@ -28,6 +29,7 @@ public:
 	CEdit	m_Width;
 	CEdit	m_Variance;
 	CEdit	m_Phase;
+	CButton m_Offset;
 		// NOTE: the ClassWizard will add data members here
 	//}}AFX_DATA
 

@@ -98,7 +98,7 @@ void Player::ExecuteLine(void)
 				case 0xFF:
 					if ( pEntry->_parameter != 0 )
 					{
-						bpm=pEntry->_parameter;
+						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 #if defined(_WINAMP_PLUGIN_)
 						Global::_pSong->SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb);
 #else

@@ -6,6 +6,7 @@
 #include "Song.h"
 #include "WireDlg.h"
 #include <math.h>
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -81,15 +82,15 @@ BOOL CWireDlg::OnInitDialog()
 	{
 		if (_pDstMachine->_type == MACH_VST || _pDstMachine->_type == MACH_VSTFX )
 		{
-			m_volslider.SetPos(int(_pDstMachine->_inputConVol[_dstWireIndex]*128.0f));
+			m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*128.0f));
 		}
-		else m_volslider.SetPos(int(_pDstMachine->_inputConVol[_dstWireIndex]*0.00390625f));
+		else m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*0.00390625f));
 	}
 	else if ( _pDstMachine->_type == MACH_VST || _pDstMachine->_type == MACH_VSTFX )
 	{
-		m_volslider.SetPos(int(_pDstMachine->_inputConVol[_dstWireIndex]*4194304.0f));
+		m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*4194304.0f));
 	}
-	else m_volslider.SetPos(int(_pDstMachine->_inputConVol[_dstWireIndex]*128.0f));
+	else m_volslider.SetPos(f2i(_pDstMachine->_inputConVol[_dstWireIndex]*128.0f));
 
 	char buffer[64];
 	sprintf(buffer,"[%d] %s -> %s", wireIndex, _pSrcMachine->_editName, destName);

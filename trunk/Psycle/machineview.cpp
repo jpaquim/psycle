@@ -119,7 +119,6 @@ void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max)
 	oldbmp=memDC.SelectObject(&stuffbmp);
 	int size = 0;
 
-//	int size = vol/256;
 	if (vol > 0)
 	{
 		size = f2i(fast_log2(float(vol))*78.0f*4/14.0f) - (78*3);// not 100% accurate, but looks as it sounds
