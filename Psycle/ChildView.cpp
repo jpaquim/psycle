@@ -144,6 +144,12 @@ CChildView::~CChildView()
 //	stuffbmp.DeleteObject(); // Not needed. the CBitmap destructor does it.
 	KillRedo();
 	KillUndo();
+	while (pPatternDraw)
+	{
+		SPatternDraw* temp = pPatternDraw->pPrev;
+		delete pPatternDraw;
+		pPatternDraw = temp;
+	}
 
 	if ( bmpDC != NULL )
 	{
