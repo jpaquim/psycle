@@ -45,6 +45,7 @@ Configuration::Configuration()
 	pattern_font_point = 85;
 	pattern_font_x = 9;
 	pattern_font_y = 12;
+	pattern_draw_empty_data = TRUE;
 	strcpy(generator_fontface,"Tahoma");
 	generator_font_point = 90;
 	strcpy(effect_fontface,"Tahoma");
@@ -733,6 +734,9 @@ Configuration::Read()
 	numData = sizeof(pattern_font_y);
 	reg.QueryValue("pattern_font_y", &type, (BYTE*)&pattern_font_y, &numData);
 
+	numData = sizeof(pattern_draw_empty_data);
+	reg.QueryValue("pattern_draw_empty_data", &type, (BYTE*)&pattern_draw_empty_data, &numData);
+
 	numData = sizeof(generator_fontface);
 	reg.QueryValue("generator_fontface", &type, (BYTE*)&generator_fontface, &numData);
 	numData = sizeof(generator_font_point);
@@ -1193,6 +1197,7 @@ Configuration::Write()
 	reg.SetValue("pattern_font_point", REG_DWORD, (BYTE*)&pattern_font_point, sizeof(pattern_font_point));	
 	reg.SetValue("pattern_font_x", REG_DWORD, (BYTE*)&pattern_font_x, sizeof(pattern_font_x));	
 	reg.SetValue("pattern_font_y", REG_DWORD, (BYTE*)&pattern_font_y, sizeof(pattern_font_y));	
+	reg.SetValue("pattern_draw_empty_data", REG_DWORD, (BYTE*)&pattern_draw_empty_data, sizeof(pattern_draw_empty_data));	
 
 	reg.SetValue("pattern_header_skin", REG_SZ, (BYTE*)pattern_header_skin, strlen(pattern_header_skin));
 

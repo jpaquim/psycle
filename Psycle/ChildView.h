@@ -417,6 +417,9 @@ private:
 	int rntOff;
 	int rnlOff;
 
+	char szBlankParam[2];
+	char szBlankNote[4];
+
 	CCursor iniSelec;
 	CSelection blockSel;
 	CCursor oldm;	// Indicates the previous track/line/col when selecting (used for mouse)
@@ -566,7 +569,7 @@ inline void CChildView::OutNote(CDC *devc,int x,int y,int note)
 	
 	switch(note)
 	{
-	case 255: TXTFLAT(devc,"---",x,y,srx,sry);break;
+	case 255: TXTFLAT(devc,szBlankNote,x,y,srx,sry);break;
 //	case 255: TXTFLAT(devc,"   ",x,y,srx,sry);break;
 	case 0:   TXTFLAT(devc,"C-0",x,y,srx,sry);break;
 	case 1:   TXTFLAT(devc,"C#0",x,y,srx,sry);break;
@@ -705,10 +708,10 @@ inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool t
 	
 	if (trflag)
 	{
-		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
+		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
 		Rect.left+=TEXTWIDTH; 
 		Rect.right+=TEXTWIDTH;
-		devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
+		devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
 
 //		Rect.right+=10;
 //		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"  ",FLATSIZES);
@@ -769,7 +772,7 @@ inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool 
 	
 	if (trflag)
 	{
-		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
+		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
 		return;
 	}
 	

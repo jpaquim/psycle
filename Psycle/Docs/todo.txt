@@ -12,27 +12,22 @@ X low priority
 [blah]  <- Notes written by developers
 
 * New and unsorted and untested
-* psycle was being weird with drivers
-
-<Druttis_> can you have background picture in psycle somehow?
-<alk_> The "revert to saved" dialog shuold say: "Warning! You will lose everything done since song 
-	was saved!"
+------------
 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 + option to show or not the dots "." and lines "---" in the pattern editor.
 	[Using a variable "char dot;" and another "char line[3];" is possibly the fastest approach]
-<alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
++ <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
 	[JAZ: And a third one for Instruments. Time to time]
-<angelus> In this threat I suggest an option to import a XM or IT file into differents 
-	Sampler-machines separating by instrument/sample.
 
 
-** <alk_> when Psycle is open hibernate does not work (windows crashes)
-*AF I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
++ <AF> I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
 	to allow the user to speficy a "different than default" fadeout.
 	[pooplog: OFF should be in the note column, but if you want a different than default fadeout perhaps it
 	 could be called CUT ]
+
+** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
 ------------
@@ -132,6 +127,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
 		<pooplog> sliders, switches, and owner draw controls i say?
 +	James says: how hard would it be to put nodes in the wires, so you can bend them?
++ <JAL7OH> is it possible to make arrows resizable?
++ <Druttis_> can you have background picture in psycle somehow?
 +?	<alk> make single click/drag move wire from one machine to another (preserving vol) 
 		[ This means changing the destination ]
 
@@ -301,6 +298,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	.mid import
 +	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
 		pattern data and other settings, this possible? (yes, but will require new song parser...)
++ <angelus> In this threat I suggest an option to import a XM or IT file into differents 
+	Sampler-machines separating by instrument/sample.
 
 * File Format:
 ------------

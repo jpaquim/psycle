@@ -66,6 +66,7 @@ public:
 	int _pattern_font_point;
 	int _pattern_font_x;
 	int _pattern_font_y;
+	bool _pattern_draw_empty_data;
 
 	char _machine_skin[64];
 	char _generator_fontface[64];
@@ -104,6 +105,7 @@ public:
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
 	CButton	m_linenumbersCursor;
+	CButton	m_pattern_draw_empty_data;
 	CComboBox	m_wireaa;
 	//}}AFX_DATA
 
@@ -178,6 +180,7 @@ protected:
 	afx_msg void OnSelchangeEffectFontPoint();
 	afx_msg void OnSelchangeEffectFontFace();
 	afx_msg void OnMVEffectFontColour();
+	afx_msg void OnDrawEmptyData();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

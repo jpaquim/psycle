@@ -54,42 +54,42 @@ Class42=CWavFileDlg
 Class43=CWireDlg
 
 <<<<<<< Psycle.clw
-ResourceCount=54
+ResourceCount=76
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 =======
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -97,78 +97,78 @@ Resource2=IDD_MIDI_INPUT (Neutral (Default))
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 =======
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
 >>>>>>> 1.52
 =======
-ResourceCount=54
+ResourceCount=76
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 =======
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -176,37 +176,37 @@ Resource2=IDD_MIDI_INPUT (Neutral (Default))
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 =======
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 =======
 <<<<<<< Psycle.clw
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 =======
-Resource1=IDD_VSTRACK (Neutral (Default))
-Resource2=IDD_MIDI_INPUT (Neutral (Default))
+Resource1=IDD_PSYBAR (Neutral (Default))
+Resource2=IDD_GEAR_FILTER (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -218,149 +218,149 @@ Resource3=IDR_VSTFRAME (Neutral (Default))
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -370,263 +370,263 @@ Resource11=IDD_NEWVAL (Neutral (Default))
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 =======
-Resource4=IDD_OUTPUT (Neutral (Default))
-Resource5=IDD_PRESETS (Neutral (Default))
-Resource6=IDD_DSOUNDCONFIG (Neutral (Default))
-Resource7=IDD_GEAR_RACK (Neutral (Default))
+Resource4=IDD_PATDLG (Neutral (Default))
+Resource5=IDD_PSYBAR2 (Neutral (Default))
+Resource6=IDD_MACPROP (Neutral (Default))
+Resource7=IDD_GEAR_GAINER (Neutral (Default))
 Resource8=IDD_SAVEWAVDLG
-Resource9=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource9=IDD_SONGPROP (Neutral (Default))
 Resource10=IDD_MIDI_LEARN (English (U.S.))
-Resource11=IDD_NEWVAL (Neutral (Default))
+Resource11=IDR_MACHINEFRAME (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
 >>>>>>> 1.52
 >>>>>>> 1.46
-Resource12=IDR_MACHINEFRAME (Neutral (Default))
+Resource12=IDD_SAVEWAVDLG (Unknown language: 0x3
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -646,141 +646,141 @@ Resource25=IDD_MIDI_LEARN
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -789,108 +789,108 @@ Resource41=IDD_NEW_VOLUME
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -910,141 +910,141 @@ Resource25=IDD_MIDI_LEARN
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -1055,108 +1055,108 @@ Resource41=IDD_NEW_VOLUME
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -1176,141 +1176,141 @@ Resource25=IDD_MIDI_LEARN
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -1319,108 +1319,108 @@ Resource41=IDD_NEW_VOLUME
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 =======
 Resource13=IDR_POPUPMENU (Neutral (Default))
-Resource14=IDD_SKIN (Neutral (Default))
-Resource15=IDD_PSYBAR (Neutral (Default))
-Resource16=IDD_SWINGFILL (Neutral (Default))
-Resource17=IDD_INST_EDITOR (Neutral (Default))
-Resource18=IDD_GEAR_FLANGER (Neutral (Default))
+Resource14=IDD_WAVEOUTCONFIG (Neutral (Default))
+Resource15=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource16=IDD_SKIN (Neutral (Default))
+Resource17=IDD_ENVDIALOG (Neutral (Default))
+Resource18=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource19=IDD_GEAR_SCOPE (Neutral (Default))
-Resource20=IDD_SONGPROP (Neutral (Default))
+Resource20=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource21=IDD_MIDI_INPUT
-Resource22=IDD_GEAR_TRACKER (Neutral (Default))
-Resource23=IDD_ABOUTBOX (Neutral (Default))
-Resource24=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource22=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource23=IDD_WIREDIALOG (Neutral (Default))
+Resource24=IDD_GEAR_DELAY (Neutral (Default))
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -1440,141 +1440,141 @@ Resource25=IDD_MIDI_LEARN
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource26=IDD_GEAR_GAINER (Neutral (Default))
+Resource26=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource27=IDD_NEW_VOLUME (English (U.S.))
-Resource28=IDD_DIRECTORIES (Neutral (Default))
-Resource29=IDR_WAVEFRAME (Neutral (Default))
-Resource30=IDD_WAVEOUTCONFIG (Neutral (Default))
-Resource31=IDD_PSYBAR2 (Neutral (Default))
-Resource32=IDD_MASTERDLG (Neutral (Default))
-Resource33=IDD_SEQUENCER (Neutral (Default))
-Resource34=IDD_WIREDIALOG (Neutral (Default))
+Resource28=IDD_INSTRUMENT (Neutral (Default))
+Resource29=IDD_NEW_VOLUME
+Resource30=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource31=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource32=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource33=IDD_GEARDISTORT (Neutral (Default))
+Resource34=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource35=IDD_SWINGFILL
-Resource36=IDD_GEAR_PSYCHOSC (Neutral (Default))
-Resource37=IDD_GEAR_FILTER (Neutral (Default))
+Resource36=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource37=IDD_SAVEWAVDLG (Unknown language: 0x3
 Resource38=IDD_SWINGFILL (English (U.S.))
-Resource39=IDD_GEARDISTORT (Neutral (Default))
-Resource40=IDD_KEYCONFIG (Neutral (Default))
-Resource41=IDD_NEW_VOLUME
+Resource39=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource40=IDD_GEAR_PSYCHOSC (Neutral (Default))
+Resource41=IDD_SAVEWAVDLG (Unknown language: 0x3
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -1585,69 +1585,69 @@ Class44=CSongInfoDlg
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
 <<<<<<< Psycle.clw
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 =======
-Resource42=IDD_GREETS (Neutral (Default))
-Resource43=IDD_MACPROP (Neutral (Default))
-Resource44=IDD_INFO (Neutral (Default))
+Resource42=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource43=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource44=IDD_SAVEWAVDLG (Unknown language: 0x3
 >>>>>>> 1.90
 >>>>>>> 1.70
 >>>>>>> 1.63
@@ -1657,18 +1657,40 @@ Resource45=IDD_MIDI_INPUT (English (U.S.))
 =======
 Resource45=IDD_MIDI_INPUT (English (U.S.))
 >>>>>>> 1.90
-Resource46=IDD_NEWMACHINE (Neutral (Default))
-Resource47=IDD_CONFIGURATION (Neutral (Default))
-Resource48=IDD_GEAR_DELAY (Neutral (Default))
-Resource49=IDD_PATDLG (Neutral (Default))
-Resource50=IDD_INSTRUMENT (Neutral (Default))
+Resource46=IDD_INFO (Neutral (Default))
+Resource47=IDD_GEAR_TRACKER (Neutral (Default))
+Resource48=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource49=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource50=IDD_SAVEWAVDLG (Unknown language: 0x3
 Class45=CGearRackDlg
-Resource51=IDD_MIDI_LEARN (Neutral (Default))
+Resource51=IDD_GREETS (Neutral (Default))
 Class46=CVolumeDlg
-Resource52=IDD_ENVDIALOG (Neutral (Default))
-Resource53=IDD_MIDI_MONITOR (Neutral (Default))
+Resource52=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource53=IDR_WAVEFRAME (Neutral (Default))
 Class47=CSaveWavDlg
-Resource54=IDR_MAINFRAME (Neutral (Default))
+Resource54=IDD_SAVEWAVDLG (Unknown language: 0x3
+Resource55=IDD_GEAR_FLANGER (Neutral (Default))
+Resource56=IDD_MASTERDLG (Neutral (Default))
+Resource57=IDD_NEWVAL (Neutral (Default))
+Resource58=IDD_VSTRACK (Neutral (Default))
+Resource59=IDD_PRESETS (Neutral (Default))
+Resource60=IDD_MIDI_MONITOR (Neutral (Default))
+Resource61=IDD_KEYCONFIG (Neutral (Default))
+Resource62=IDD_NEWMACHINE (Neutral (Default))
+Resource63=IDD_ABOUTBOX (Neutral (Default))
+Resource64=IDD_SEQUENCER (Neutral (Default))
+Resource65=IDD_DSOUNDCONFIG (Neutral (Default))
+Resource66=IDD_OUTPUT (Neutral (Default))
+Resource67=IDD_DIRECTORIES (Neutral (Default))
+Resource68=IDD_CONFIGURATION (Neutral (Default))
+Resource69=IDD_WAVED_AMPLIFY (Neutral (Default))
+Resource70=IDD_INST_EDITOR (Neutral (Default))
+Resource71=IDD_MIDI_INPUT (Neutral (Default))
+Resource72=IDD_MIDI_LEARN (Neutral (Default))
+Resource73=IDD_SWINGFILL (Neutral (Default))
+Resource74=IDD_PORTAUDIO_ASIO_CONFIG (Neutral (Default))
+Resource75=IDD_GEAR_RACK (Neutral (Default))
+Resource76=IDR_MAINFRAME (Neutral (Default))
 
 [CLS:CChildView]
 Type=0
@@ -2708,7 +2730,7 @@ Control4=IDOK,button,1342242817
 [DLG:IDD_SKIN (Neutral (Default))]
 Type=1
 Class=CSkinDlg
-ControlCount=99
+ControlCount=100
 Control1=IDC_STATIC,button,1342177287
 Control2=IDC_STATIC,static,1342308352
 Control3=IDC_PATTERN_FONTFACE,combobox,1344340226
@@ -2808,6 +2830,7 @@ Control96=IDC_DOUBLEBUFFER,button,1342242819
 Control97=IDC_STATIC,button,1342177287
 Control98=IDC_IMPORTREG,button,1342242816
 Control99=IDC_EXPORTREG,button,1342242816
+Control100=IDC_DRAW_EMPTY_DATA,button,1342242819
 
 [DLG:IDD_SONGPROP (Neutral (Default))]
 Type=1
@@ -3803,12 +3826,12 @@ VirtualFilter=dWC
 Type=1
 Class=CVolumeDlg
 ControlCount=6
-Control1=IDOK,button,1342242817
-Control2=IDCANCEL,button,1342242816
-Control3=IDC_EDIT_DB,edit,1350631554
-Control4=IDC_EDIT_PER,edit,1350631554
-Control5=IDC_STATIC,static,1342308864
-Control6=IDC_STATIC,static,1342308864
+Control1=IDC_EDIT_DB,edit,1350631554
+Control2=IDC_STATIC,static,1342308864
+Control3=IDC_EDIT_PER,edit,1350631554
+Control4=IDC_STATIC,static,1342308864
+Control5=IDOK,button,1342242817
+Control6=IDCANCEL,button,1342242816
 
 [CLS:CVolumeDlg]
 Type=0
@@ -3860,4 +3883,26 @@ BaseClass=CDialog
 Filter=D
 LastObject=IDC_RECSONG
 VirtualFilter=dWC
+
+[DLG:IDD_SAVEWAVDLG (Unknown language: 0x3, 0x1)]
+Type=1
+Class=?
+ControlCount=17
+Control1=IDC_STATIC,static,1342308352
+Control2=IDC_FILENAME,edit,1350631552
+Control3=IDC_FILEBROWSE,button,1342242816
+Control4=IDC_SAVEWIRESSEPARATED,button,1476468739
+Control5=IDC_STATIC,button,1342177287
+Control6=IDC_PATNUMBER,edit,1350631554
+Control7=IDC_STATIC,static,1342308352
+Control8=IDC_RANGESTART,edit,1350631554
+Control9=IDC_RANGEEND,edit,1350631554
+Control10=IDC_STATIC,static,1342308352
+Control11=IDC_STATIC,static,1342308352
+Control12=IDC_PROGRESS,msctls_progress32,1350565888
+Control13=IDC_SAVEWAVE,button,1342242817
+Control14=IDCANCEL,button,1342242816
+Control15=IDC_RECSONG,button,1342308361
+Control16=IDC_RECPATTERN,button,1342177289
+Control17=IDC_RECRANGE,button,1342177289
 

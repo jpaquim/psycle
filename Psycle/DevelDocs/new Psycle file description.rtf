@@ -10,8 +10,8 @@ Date:16-Dec-2003\par
 chunk header format:\par
 \par
 FOURCC id; // eg "PSY3"\par
-UINT\tab size; // size of chunk NOT including header\par
 UINT\tab version; // version of this chunk type\par
+UINT\tab size; // size of chunk NOT including header\par
 \par
 Here are the proposed changes to each chunk:\par
 \par
@@ -19,16 +19,16 @@ Here are the proposed changes to each chunk:\par
 FILE HEADER\par
 ===================\par
 id = "PSY3"; // PSY2 was 1.66\par
-size = 0;\par
 version = 0; // "total" version of all chunk versions\par
+size = 0;\par
 \par
 ===================\par
 SONG INFO TEXT\par
 ===================\par
 HEADER:\par
 id = "INFO"; \par
-size = strlen(Name)+strlen(Author)+strlen(Comment);\par
 version = 0;\par
+size = strlen(Name)+strlen(Author)+strlen(Comment);\par
 \par
 DATA:\par
 char name[]; // null terminated string\par
@@ -41,8 +41,8 @@ SEQUENCE INFO\par
 ===================\par
 HEADER:\par
 id = "SEQI"; \par
-size = (5*sizeof(int))+sizeof(byte);\par
 version = 0;\par
+size = (5*sizeof(int))+sizeof(byte);\par
 \par
 DATA:\par
 int sequenceLength; // length of sequence // Label: plgt - Desc : Contains the limit of the playable sequence. The number just \par
@@ -61,8 +61,8 @@ SEQUENCE DATA\par
 ===================\par
 HEADER:\par
 id = "SEQD"; \par
-size = (sequenceLength*sizeof(int));\par
 version = 0;\par
+size = (sequenceLength*sizeof(int));\par
 \par
 DATA:\par
 // int index; // * for multipattern stuff\par
@@ -76,8 +76,8 @@ PATTERN DATA\par
 ===================\par
 HEADER:\par
 id = "PATD"; \par
-size = (sequenceLength*sizeof(int));\par
 version = 0;\par
+size = (sequenceLength*sizeof(int));\par
 \par
 typedef struct PatternEntry\par
 \{\par
@@ -104,15 +104,16 @@ MACHINES INFO\par
 ===================\par
 HEADER:\par
 id = "MACI"; \par
-size = (sizeof(byte)*128)+(sizeof(bool)*128);\par
 version = 0;\par
+//size = (sizeof(byte)*128)+(sizeof(bool)*128);\par
+size = (sizeof(bool)*128);\par
 \par
 DATA:\par
-byte busmachine[64]; // mapping of generators to busses - Desc : Contains the values of the array that represent the machine\par
+//byte busmachine[64]; // mapping of generators to busses - Desc : Contains the values of the array that represent the machine\par
  \tab // assignations for Generators.  What this means is, which machine in the \ldblquote machines\rdblquote  array corresponds to the specified \par
 \tab // position (used in the pattern) if busmachine[3] = 5 , it means that the machine numbered 3 in the pattern, is the machine \par
 \tab // in machines[5] . (zero based) - Values: from 0 to 7F ( 127 )\par
-byte buseffect[64]; // mapping of effects to busses - as above\par
+//byte buseffect[64]; // mapping of effects to busses - as above\par
 bool macactive[128]; // Desc: The array indicates if the pointer in the \ldblquote machines\rdblquote  array is a valid machine, or not. Example if \par
 \tab // macactive[5] = false , then machines[5] is NOT a valid machine.\par
 \par
@@ -121,8 +122,8 @@ MACHINES DATA\par
 ===================\par
 HEADER:\par
 id = "MACD"; \par
-size = ...;\par
 version = 0;\par
+size = ...;\par
 \par
 typedef enum\par
 \{\par
@@ -149,25 +150,12 @@ int y; // y position of the machine in the machine view\par
 int type; // Desc: The type of machine that it is.\par
 int pan; // Desc: Indicates the value of the panning in the machine box. It affects all outputs.\par
 \tab // Values: 0 top left, 64center 128 top right.\par
-int inputmachines[12]; // Desc: The array that indicates the machines (in the machines array) that input sound to the current one. \par
-\tab // Verify the validity of the number with \ldblquote inputCon\rdblquote  *** instead of this, write -1 for invalid\par
+int inputmachines[MAX_CONNECTIONS]; // Desc: The array that indicates the machines (in the machines array) that input \par
+\tab // sound to the current one. *** -1 for no connection\par
 \tab // Values from 0 to 127\par
-int outputmachines[12]; // Desc: The array that indicates the machines (in the machines array) that this machine outputs sound to. \par
-\tab // Verify the validity of the number with \ldblquote Connection\rdblquote  *** instead of this, write -1 for invalid\par
-\tab // Values from 0 to 127\par
-float inputconvol[12]; // Desc: The array that indicates the volumes of each OUTPUT connection. If you look at psycle code, \par
-\tab // you\rquote ll see that it converts this value to be used in inputs. (that\rquote s why the variable is called inputconvol).\par
-\tab // There\rquote s a big mess in this, you should really use the code in the Song::Load function.\par
-\tab // **** should this big mess be cleared up or what?\par
-// bool connection[12]; // Desc: The array that indicates if an OUTPUT connection is valid or not. If connection[i] is false, \par
-\tab t// hen the value in \ldblquote outputmachines[i]\rdblquote  is not valid.  *** see above note\par
-// bool InputCon[12]; // Desc: The array that indicates if an INPUT connection is valid or not. If InputCon[i] is false, then the \par
-\tab // value in \ldblquote inputmachines[i]\rdblquote  is not valid.  *** see above note\par
-// conpoint; // Size: 12 Cpoint (bits? Don\rquote t know. Prosibly 32bits*2) *** goodbye\par
-// Desc: Array containing the \ldblquote point\rdblquote  where the connection is made. It\rquote s used to know where the \ldblquote wire triangle\rdblquote  is drawn. It \par
-// represents the upper left corner of a 20pixels square centered in the midde of the whire.\par
-// this is calculated by the wire drawing anyway, no need to save it.  It is dependant on things that are not able to be predicted, \par
-// such as skinning, so no need to save it anyway\par
+float inputconvol[MAX_CONNECTIONS]; // Desc: The array that indicates the volumes of each input connection.\par
+int outputmachines[MAX_CONNECTIONS]; // Desc: The array that indicates the machines (in the machines array) that this \par
+\tab // machine outputs sound to.  *** -1 for no connection\par
 char editname[]; // null terminated string, truncated to [16]\par
 uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain\par
 byte MachineSpecificData[datasize]; // data depends on type member\par
@@ -234,7 +222,7 @@ size: (strlen(dllname)+(2*sizeof(int))+(sizeof(UINT))+datasize);\par
 ===================\par
 char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). \par
 int numParams; // Desc: Indicates the number of parameters that are stored for this plugin.\par
-int paramete[numParams];\par
+int parameter[numParams];\par
 UINT datasize; // size of extra data chunk\par
 byte ExtraData[datasize]; // extra data chunk\par
 \par
@@ -242,13 +230,19 @@ byte ExtraData[datasize]; // extra data chunk\par
 MACHINE SPECIFIC DATA(MACH_VST)\par
 ===================\par
 char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). \par
-// incomplete\par
+int numParams; // Desc: Indicates the number of parameters that are stored for this plugin.\par
+float parameter[numParams];\par
+UINT datasize; // size of extra data chunk\par
+byte ExtraData[datasize]; // extra data chunk\par
 \par
 ===================\par
 MACHINE SPECIFIC DATA(MACH_VSTFX)\par
 ===================\par
 char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). \par
-// incomplete\par
+int numParams; // Desc: Indicates the number of parameters that are stored for this plugin.\par
+float parameter[numParams];\par
+UINT datasize; // size of extra data chunk\par
+byte ExtraData[datasize]; // extra data chunk\par
 \par
 ===================\par
 MACHINE SPECIFIC DATA(MACH_DXI)\par
@@ -499,51 +493,6 @@ Format is 16bits signed.\par
 \par
 \par
 \par
-\pard\keepn\sb240\sa60\b\f1\fs26 VST MODULES STRUCTURE\par
-\pard\b0\f0\fs24\par
-For each Module ( ALWAYS  256, from 0 to 255 ) you have to check \ldblquote v\rdblquote  (for valid). If it is true, then plugin data follows, if not, there\rquote s no data, and next \ldblquote v\rdblquote  follows.\par
-\par
-\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
-|?|v|n|a|m|e| | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| |n|u|m| |p|a|r|1|p|a|r|2| | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\par
-\par
-Label: v\par
-Size:  bool (whatever the size is defined in C++ )\par
-Desc: Indicates if there is a  VST plugin in this VST Rack position.\par
-This was used in the pre 1.1 Psycle version. In Psycle version from 1.1 and after, it is filled from 0 to the number of vst\rquote s used, and then, all the following have \ldblquote v\rdblquote  to false.\par
-\par
-Label: name\par
-Size:  128 chars\par
-Desc: Contains the file name of the dll (including the .\rdblquote dll\rdblquote  part), can be NOT NULL terminated.\par
-\par
-Label: num\par
-Size:  1 int (32bits)\par
-Desc: Indicates the number of parameters that are stored for this plugin.\par
-\par
-Label: par1 / par2 ....\par
-Size: 1 float (32bits)\par
-Desc: Each one of the parameters of the VST. VST parameter range goes from 0 to 1\par
-From code:\par
-\pard\li708 for (int c=0; c<num; c++)\par
-\{\par
-\tab float f;\par
-\tab pFile->Read(&f, sizeof(f));\par
-\tab //other things\par
-\}\par
-\pard\par
-Advise for correct loading:\par
-Load all this data to a structure array. Next, when finding the corresponding machine (in the next file part), create the machine structure, use the \ldblquote inst\rdblquote  value that you\rquote ll read to find this structure, and instantiate the VST plugin.\par
-Once you have it, read the chunk (if appropiate) from the file, send Program number and finally, send SetParameter for all the VST\rquote s that don\rquote t have chunk data. (The data is valid for all VST\rquote s, but plugins that use chunks don\rquote t need to use setParameter when loading. Anyway, sending it shouldn\rquote t cause problems)\par
-\par
 \pard\keepn\sb240\sa60\b\f1\fs26 MACHINES\par
 \pard\b0\f0\fs24\par
 \f2\par
@@ -702,30 +651,7 @@ Value:\par
 \par
 \b Done.. (yes... till here it was the things that all machines save/load).\par
 \par
-Now,  if MACH_VST or MACH_VSTFX:\par
-\par
-\par
-\b0\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
-|?|o|i|n|s|t|p| | | | | | | | | | |\par
-\par
-\f0 Label: o\par
-Size: 1 bool (whatever the size is)\par
-Desc: This value was used in pre 1.1 to indicate if the Machine instantiated a VST Plugin or not.(in other words, if \ldblquote inst\rdblquote  was a valid value or not).\par
-Between 1.0 and 1.6plus, the value was ignored (assumed true), and saved as true.\par
-Now, in 1.66 and forward, it helps to identify the fileformat. \b If you read \ldblquote true\rdblquote , assume it is 1.6plus or before. If you read false, assume it is 1.66 or newer.\par
-\b0 Why should you care about versions? Because of the value stored in \ldblquote p\rdblquote , being really a program or not (set program to 0 if \ldblquote old version\rdblquote , else, read it)\par
-\par
-Label: inst\par
-Size: 1 int (32 bits)\par
-Desc: Indicates the number of the VST Rack that this machine references to (which means, the vst that this machine is). The initial design was made to allow to have one vst and several machines that used it. This is not the current case.\par
-\par
-Label: p\par
-Size: 1 unsigned char (8bits)\par
-Desc: NEW IN 1.66: This value indicates the Program number. This value should be sent to the VST plugin after loading the chunk, but previous to setParameter(s).\par
-\lang1033 Advise: In version 1.1 and before, this value was a signed char that indicated t\lang1027 he MIDI Channel number (if not modified, it was 0). Later versions wrote always zero (0).\par
-\par
-\par
-\pard\keepn\sb240\sa60\b\f1\fs26 EXTRA DATA (ADDED AFTER)\par
+\pard\keepn\sb240\sa60\f1\fs26 EXTRA DATA (ADDED AFTER)\par
 \pard\b0\f0\fs24\par
 \par
 \f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
