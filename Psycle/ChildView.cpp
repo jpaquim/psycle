@@ -78,6 +78,15 @@ CChildView::CChildView()
 
 	viewMode=VMMachine;
 	MasterMachineDialog = NULL;
+	PsychMachineDialog = NULL;
+	DistortionMachineDialog = NULL;
+	SamplerMachineDialog = NULL;
+	DelayMachineDialog = NULL;
+	FilterMachineDialog = NULL;
+	GainerMachineDialog = NULL;
+	FlangerMachineDialog = NULL;
+	ScopeMachineDialog = NULL;
+
 	updateMode=0;
 	updatePar=0;
 //	multiPattern=true; // Long way till it can be finished!

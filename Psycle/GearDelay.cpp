@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
+#include "ChildView.h"
 #include "GearDelay.h"
 
 #ifdef _DEBUG
@@ -15,9 +16,10 @@ static char THIS_FILE[] = __FILE__;
 // CGearDelay dialog
 
 
-CGearDelay::CGearDelay(CWnd* pParent /*=NULL*/)
+CGearDelay::CGearDelay(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearDelay::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearDelay)
 	//}}AFX_DATA_INIT
 	doit=false;
@@ -277,4 +279,16 @@ void CGearDelay::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult)
 	m_wetlabel.SetWindowText(buffer);
 
 	*pResult = 0;
+}
+
+BOOL CGearDelay::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearDelay::OnCancel()
+{
+	m_pParent->DelayMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

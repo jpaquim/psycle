@@ -5,7 +5,6 @@
 pen alpha
 
 * psycle default theme sucks
-* <alk> there's a bug where when u alt-tab the icon is not correct
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> gear rack The description was : " a dialog with 
 	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
@@ -15,11 +14,8 @@ pen alpha
 	does not track changes yet)
 * <dilvie> is the "cannot write to file" issue on the todo list anywhere?  (trying to autosave in a directory 
 	that doesn't exist or no write access..)
-+ <pooplog> again i ask why the connection limit is 12 and not 16 or 24->should use linked lists instead of 
-	arrays!!!
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
-* <pooplog> it only seems to save/load the values for ONE wire for each machines
 
 * Machines
 ------------
@@ -123,6 +119,8 @@ bug:	 New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn
 ! remove waits from play when in export mode
 ! longer sequences (256) [file format,maybe others]
 ! more tracks (64) [file format]
++ <pooplog> again i ask why the connection limit is 12 and not 16 or 24->should use linked lists instead of 
+	arrays!!!
 + DirectX effects, intstruments
 + ALK tracker command to bypass an fx, mute command for machines
 + even if it isn't used specifically for volume, there should be a flag to allow machines to recieve command/instrument 
@@ -148,6 +146,8 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 
 * Interface:
 ------------
+* <alk> there's a bug where when u alt-tab the icon is not correct - i cannot find the reason, i checked 
+	old versions and they were all like this too...
 * <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
 * <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "GearPsychOsc.h"
+#include "ChildView.h"
 #include "Configuration.h"
 
 #ifdef _DEBUG
@@ -16,9 +17,10 @@ static char THIS_FILE[] = __FILE__;
 // CGearPsychOsc dialog
 
 
-CGearPsychOsc::CGearPsychOsc(CWnd* pParent /*=NULL*/)
+CGearPsychOsc::CGearPsychOsc(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearPsychOsc::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearPsychOsc)
 	//}}AFX_DATA_INIT
 	doit=false;
@@ -143,4 +145,16 @@ BOOL CGearPsychOsc::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+BOOL CGearPsychOsc::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearPsychOsc::OnCancel()
+{
+	m_pParent->PsychMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

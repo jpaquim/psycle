@@ -14,6 +14,14 @@
 #define MAX_DRAW_MESSAGES 32
 
 class CMasterDlg;
+class CGearPsychOsc;
+class CGearDistort;
+class CGearTracker;
+class CGearDelay;
+class CGearfilter;
+class CGearGainer;
+class CGearFlanger;
+class CGearScope;
 
 enum 
 {
@@ -268,6 +276,14 @@ public:
 	bool useDoubleBuffer;
 //	bool multiPattern;
 	CMasterDlg * MasterMachineDialog;
+	CGearPsychOsc * PsychMachineDialog;
+	CGearDistort * DistortionMachineDialog;
+	CGearTracker * SamplerMachineDialog;
+	CGearDelay * DelayMachineDialog;
+	CGearfilter * FilterMachineDialog;
+	CGearGainer * GainerMachineDialog;
+	CGearFlanger * FlangerMachineDialog;
+	CGearScope * ScopeMachineDialog;
 
 	bool blockSelected;
 	bool blockStart;

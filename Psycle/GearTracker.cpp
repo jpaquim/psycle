@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "GearTracker.h"
+#include "ChildView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,9 +16,10 @@ static char THIS_FILE[] = __FILE__;
 // CGearTracker dialog
 
 
-CGearTracker::CGearTracker(CWnd* pParent /*=NULL*/)
+CGearTracker::CGearTracker(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearTracker::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearTracker)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
@@ -99,4 +101,17 @@ void CGearTracker::OnSelchangeCombo1()
 	{
 		_pMachine->_resampler.SetQuality((ResamplerQuality)m_interpol.GetCurSel());
 	}
+}
+
+
+BOOL CGearTracker::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearTracker::OnCancel()
+{
+	m_pParent->SamplerMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "GearFlanger.h"
+#include "ChildView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,12 +16,13 @@ static char THIS_FILE[] = __FILE__;
 // CGearFlanger dialog
 
 
-CGearFlanger::CGearFlanger(CWnd* pParent /*=NULL*/)
+CGearFlanger::CGearFlanger(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearFlanger::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearFlanger)
 	//}}AFX_DATA_INIT
-doit=false;
+	doit=false;
 }
 
 
@@ -242,4 +244,16 @@ void CGearFlanger::OnSelchangePresetcombo()
 	m_phase_slider.SetPos(_pMachine->_lfoPhase);
 	m_dry_slider.SetPos(_pMachine->_outDry+256);
 	m_wet_slider.SetPos(_pMachine->_outWet+256);
+}
+
+BOOL CGearFlanger::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearFlanger::OnCancel()
+{
+	m_pParent->FlangerMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

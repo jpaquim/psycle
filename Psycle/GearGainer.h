@@ -8,6 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
+
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearGainer dialog
@@ -16,9 +19,10 @@ class CGearGainer : public CDialog
 {
 // Construction
 public:
-	CGearGainer(CWnd* pParent = NULL);   // standard constructor
+	CGearGainer(CChildView* pParent = NULL);   // standard constructor
 	Gainer* _pMachine;
 	bool doit;
+	BOOL Create();
 
 // Dialog Data
 	//{{AFX_DATA(CGearGainer)
@@ -37,11 +41,13 @@ public:
 
 // Implementation
 protected:
+	CChildView* m_pParent;
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearGainer)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

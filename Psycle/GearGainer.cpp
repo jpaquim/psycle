@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "GearGainer.h"
+#include "ChildView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,14 +16,14 @@ static char THIS_FILE[] = __FILE__;
 // CGearGainer dialog
 
 
-CGearGainer::CGearGainer(CWnd* pParent /*=NULL*/)
+CGearGainer::CGearGainer(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearGainer::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearGainer)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-
-doit=false;
+	doit=false;
 }
 
 
@@ -76,4 +77,17 @@ void CGearGainer::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	m_volabel.SetWindowText(buffer);
 
 	*pResult = 0;
+}
+
+
+BOOL CGearGainer::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearGainer::OnCancel()
+{
+	m_pParent->GainerMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

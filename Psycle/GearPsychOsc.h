@@ -8,6 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
+
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearPsychOsc dialog
@@ -16,9 +19,10 @@ class CGearPsychOsc : public CDialog
 {
 // Construction
 public:
-	CGearPsychOsc(CWnd* pParent = NULL);   // standard constructor
+	CGearPsychOsc(CChildView* pParent = NULL);   // standard constructor
 	Sine* _pMachine;
 	bool doit;
+	BOOL Create();
 
 	// Dialog Data
 	//{{AFX_DATA(CGearPsychOsc)
@@ -43,6 +47,7 @@ public:
 
 // Implementation
 protected:
+	CChildView* m_pParent;
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearPsychOsc)
@@ -51,6 +56,7 @@ protected:
 	afx_msg void OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSlider4(NMHDR* pNMHDR, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
+	afx_msg void OnCancel();
 	
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

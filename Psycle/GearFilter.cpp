@@ -4,7 +4,9 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "Gearfilter.h"
+#include "ChildView.h"
 #include "configuration.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -15,12 +17,13 @@ static char THIS_FILE[] = __FILE__;
 // CGearfilter dialog
 
 
-CGearfilter::CGearfilter(CWnd* pParent /*=NULL*/)
+CGearfilter::CGearfilter(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearfilter::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearfilter)
 	//}}AFX_DATA_INIT
-doit=false;
+	doit=false;
 }
 
 
@@ -185,4 +188,16 @@ void CGearfilter::UpdateStatus()
 	// LFO phase
 	tmp.Format("%d (%d deg)",_pMachine->_lfoPhase,(int)(_pMachine->_lfoPhase*0.703125f));
 	m_ParamInf6.SetWindowText(tmp);
+}
+
+BOOL CGearfilter::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearfilter::OnCancel()
+{
+	m_pParent->FilterMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

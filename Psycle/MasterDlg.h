@@ -19,11 +19,11 @@ class CMasterDlg : public CDialog
 // Construction
 public:
 	CMasterDlg(CChildView* pParent = NULL);   // standard constructor
+	BOOL Create();
 	void PaintNumbers(int val, int x, int y);
 	CBitmap m_numbers;
 	Master* _pMachine;
 	char macname[MAX_CONNECTIONS][15];
-	BOOL Create();
 
 // Dialog Data
 	//{{AFX_DATA(CMasterDlg)
@@ -57,7 +57,6 @@ public:
 // Implementation
 protected:
 	CChildView* m_pParent;
-	void OnCancel();
 
 	// Generated message map functions
 	//{{AFX_MSG(CMasterDlg)
@@ -77,6 +76,8 @@ protected:
 	afx_msg void OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnPaint();
+	afx_msg void OnCancel();
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

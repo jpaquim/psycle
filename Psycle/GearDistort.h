@@ -8,6 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
+
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearDistort dialog
@@ -16,9 +19,10 @@ class CGearDistort : public CDialog
 {
 // Construction
 public:
-	CGearDistort(CWnd* pParent = NULL);   // standard constructor
+	CGearDistort(CChildView* pParent = NULL);   // standard constructor
 	Distortion* _pMachine;
 	bool doit;
+	BOOL Create();
 
 // Dialog Data
 	//{{AFX_DATA(CGearDistort)
@@ -39,6 +43,7 @@ public:
 
 // Implementation
 protected:
+	CChildView* m_pParent;
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearDistort)
@@ -50,6 +55,7 @@ protected:
 	afx_msg void OnButton1();
 	afx_msg void OnButton3();
 	afx_msg void OnButton2();
+	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
