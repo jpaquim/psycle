@@ -1,8 +1,14 @@
-=====================
-description-bug-id 1.
-=====================
-status: fixed.
 
+
+==========================
+\bug \id 2 \status pending
+
+<bohan> there's a bug in the current source code of the flanger plugin (the bug is not present in the distributed binary).
+
+========================
+\bug \id 1 \status fixed
+
+<bohan>
 in DirectSound.cpp, DirectSound::Stop(), on line CSingleLock lock(&_lock, TRUE);
 the lock above is violating an assertion when i compile and run psycle on msvc7.1.
 this is triggered when i close psycle, and always happens.
