@@ -13,15 +13,16 @@ namespace psycle
 		CLoggingWindow::CLoggingWindow(CWnd * pParent) : CDialog(CLoggingWindow::IDD, pParent)
 		{
 			AfxInitRichEdit();
+			pParentMain=(CMainFrame*)pParent;
 			//{{AFX_DATA_INIT(CLoggingWindow)
 			//}}AFX_DATA_INIT
 		}
-
+/*
 		void CLoggingWindow::Validate()
 		{
 			pParentMain=(CMainFrame*)GetParentFrame();
 		}
-
+*/
 		void CLoggingWindow::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
@@ -32,8 +33,9 @@ namespace psycle
 
 		BEGIN_MESSAGE_MAP(CLoggingWindow, CDialog)
 			//{{AFX_MSG_MAP(CLoggingWindow)
-			//}}AFX_MSG_MAP
+			ON_WM_CLOSE()
 			ON_WM_SIZE()
+			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CLoggingWindow::OnInitDialog() 
@@ -102,6 +104,12 @@ namespace psycle
 		{
 			CDialog::OnSize(nType, cx, cy);
 			ResizeTextBox();
+		}
+
+		void CLoggingWindow::OnClose()
+		{
+			pParentMain->SetFocus();	
+			CDialog::OnClose();
 		}
 	}
 }

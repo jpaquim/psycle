@@ -42,12 +42,6 @@ namespace psycle
 
 		BOOL CPsycleApp::InitInstance()
 		{
-			// Error Logging window
-			Global::pLogWindow = new CLoggingWindow;
-			Global::pLogWindow->Create(IDD_ERRORLOGGER,0);
-			Global::pLogWindow->Validate();
-			host::loggers::info("alk's logger initialised ;p");
-
 			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
@@ -57,7 +51,13 @@ namespace psycle
 			
 			CMainFrame* pFrame = new CMainFrame;
 			m_pMainWnd = pFrame;
-			
+
+			// Error Logging window
+			Global::pLogWindow = new CLoggingWindow(pFrame);
+			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
+//			Global::pLogWindow->Validate();
+			host::loggers::info("alk's logger initialised ;p");
+
 			if (!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
 				Global::pConfig->_initialized = false;

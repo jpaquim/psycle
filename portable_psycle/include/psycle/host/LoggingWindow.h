@@ -31,7 +31,7 @@ namespace psycle
 
 		public:
 			CLoggingWindow(CWnd * pParent = 0);
-			void Validate();
+			//void Validate();
 			CMainFrame * pParentMain;
 			// Dialog Data
 			//{{AFX_DATA(CLoggingWindow)
@@ -47,8 +47,9 @@ namespace psycle
 		// Implementation
 		protected:
 			// Generated message map functions
-			//{{AFX_MSG(CInstrumentEditor)
+			//{{AFX_MSG(CLoggingWindow)
 			virtual BOOL OnInitDialog();
+			afx_msg void OnClose();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		public:
