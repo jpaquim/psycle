@@ -3,6 +3,8 @@
 +=addition
 
 * psycle default theme sucks
+* <_ksn_> i tried several exaplkles and all the times the wires volumes (if changed after the last 
+	save with older version) are not saved -> CHANGES TO WIRE VOLUMES ARE NOT SAVED <-
 
 * Other crap
 ------------
