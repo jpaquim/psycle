@@ -265,6 +265,8 @@ Configuration::Configuration()
 	_midiFrom15 = 0;
 	_midiTo15 = 0xff;
 
+	_midiRawMcm = TRUE;
+
 	defaultPatLines = 64;
 	bShowSongInfoOnLoad = true;
 	bFileSaveReminders = true;
@@ -654,8 +656,14 @@ Configuration::Read()
 	numData = sizeof(_midiTo15);
 	reg.QueryValue("MidiTo15", &type, (BYTE*)&_midiTo15, &numData);
 
+	numData = sizeof(_midiRawMcm);
+	reg.QueryValue("MidiRawMcm", &type, (BYTE*)&_midiRawMcm, &numData);
+
 	numData = sizeof(defaultPatLines);
 	reg.QueryValue("defaultPatLines", &type, (BYTE*)&defaultPatLines, &numData);
+
+	numData = sizeof(_midiRawMcm);
+	reg.QueryValue("MidiRawMcm", &type, (BYTE*)&_midiRawMcm, &numData);
 
 	for (int c=0; c<MAX_PATTERNS; c++)
 	{
@@ -1121,6 +1129,8 @@ Configuration::Write()
 	reg.SetValue("MidiCommand15", REG_DWORD, (BYTE*)&_midiCommand15, sizeof(_midiCommand15));	
 	reg.SetValue("MidiFrom15", REG_DWORD, (BYTE*)&_midiFrom15, sizeof(_midiFrom15));	
 	reg.SetValue("MidiTo15", REG_DWORD, (BYTE*)&_midiTo15, sizeof(_midiTo15));	
+
+	reg.SetValue("MidiRawMcm", REG_BINARY, (BYTE*)&_midiRawMcm, sizeof(_midiRawMcm));
 
 	reg.SetValue("defaultPatLines", REG_DWORD, (BYTE*)&defaultPatLines, sizeof(defaultPatLines));	
 

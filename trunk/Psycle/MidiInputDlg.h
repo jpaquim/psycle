@@ -130,6 +130,7 @@ public:
 	CEdit		m_midiCommand15Edit;
 	CEdit		m_midiFrom15Edit;
 	CEdit		m_midiTo15Edit;
+	CButton		m_midiRawMcm;
 	//}}AFX_DATA
 
 

@@ -142,6 +142,7 @@ void CMidiInputDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MIDI_COMMAND_15, m_midiCommand15Edit);
 	DDX_Control(pDX, IDC_MIDI_FROM_15, m_midiFrom15Edit);
 	DDX_Control(pDX, IDC_MIDI_TO_15, m_midiTo15Edit);
+	DDX_Control(pDX, IDC_MIDI_RAW, m_midiRawMcm);
 	//}}AFX_DATA_MAP
 }
 
@@ -443,6 +444,8 @@ BOOL CMidiInputDlg::OnInitDialog()
 	str.Format("%x", Global::pConfig->_midiTo15);
 	m_midiTo15Edit.SetWindowText(str);
 
+	m_midiRawMcm.SetCheck(Global::pConfig->_midiRawMcm?1:0);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -646,6 +649,9 @@ void CMidiInputDlg::OnOK()
 	Global::pConfig->_midiFrom15 = _httoi(str);
 	m_midiTo15Edit.GetWindowText(str,6);
 	Global::pConfig->_midiTo15 = _httoi(str);
+
+	Global::pConfig->_midiRawMcm = m_midiRawMcm.GetCheck()?true:false;
+	;
 
 	CPropertyPage::OnOK();
 }

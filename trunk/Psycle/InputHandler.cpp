@@ -36,8 +36,8 @@ InputHandler::InputHandler()
 	bDoingSelection = false;
 
 	// set up multi-channel playback
-	for(UINT i=0;i<256;i++)
-		notetrack[i]=-1;
+	for(UINT i=0;i<MAX_TRACKS;i++)
+		notetrack[i]=120;
 	outtrack=0;
 	bMultiKey=true;
 
@@ -925,10 +925,21 @@ void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 			note = 119;
 	}
 
+	if(pMachine==NULL)
+	{
+		int mgn = Global::_pSong->seqBus;
+
+		if (mgn < MAX_MACHINES)
+		{
+			pMachine = Global::_pSong->_pMachine[mgn];
+		}
+	}
+
 	for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
 	{
 		if(notetrack[i]==note)
 		{
+			notetrack[i]=120;
 			// build entry
 			PatternEntry entry;
 			entry._note = 120;
@@ -938,17 +949,7 @@ void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 			entry._parameter = 0;	
 
 			// play it
-			if(pMachine==NULL)
-			{
-				int mgn = Global::_pSong->seqBus;
 
-				if (mgn < MAX_MACHINES)
-				{
-					pMachine = Global::_pSong->_pMachine[mgn];
-				}
-			}
-
-			notetrack[i]=-1;
 			if (pMachine)
 			{
 				pMachine->Tick(i,&entry);
@@ -1026,9 +1027,36 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 	{
 		// pick a track to play it on	
 		if(bMultiKey)
-			outtrack++;
-		if(outtrack>=Global::_pSong->SONGTRACKS)
-			outtrack=0;
+		{
+			int i;
+			for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
+			{
+				if (notetrack[i] == 120)
+				{
+					break;
+				}
+			}
+			if (i >= Global::_pSong->SONGTRACKS)
+			{
+				for (i = 0; i <= outtrack; i++)
+				{
+					if (notetrack[i] == 120)
+					{
+						break;
+					}
+				}
+			}
+			outtrack = i;
+		}
+		else 
+		{
+			outtrack = 0;
+		}
+		// this should check to see if a note is playing on that track
+		if (notetrack[outtrack] < 120)
+		{
+			StopNote(notetrack[outtrack], bTranspose, pMachine);
+		}
 
 		// play
 		notetrack[outtrack]=note;

@@ -2424,7 +2424,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 			}
 		}
 
-#if defined(CONVERT_INTERNAL_MACHINES) 
+#ifdef CONVERT_INTERNAL_MACHINES
 		if ( fullopen ) converter.retweak(*this); // conversion
 #endif
 

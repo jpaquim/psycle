@@ -21,6 +21,12 @@ aditional known vst bugs/buggy vsts: ~33
 * New and unsorted and untested
 -------------------------------
 
+** jmr2@macs.hw.ac.uk: * when loading a song it doesnt move to first order
+* jmr2@macs.hw.ac.uk: * when playing a song and pressing sort causes it to play the wrong pattern 
+++ jmr2@macs.hw.ac.uk: * keypress for follow song - this would be useful so as to not have to go to the mouse often
+
+** MIDI clock sync - does it work, or is it unsupported?
+=======
 
 
 ///////////////////////
@@ -54,6 +60,7 @@ Hope this makes stuff clear.
 ! problem with directories http://psycle.pastnotecut.org/thread.php?threadid=1088&boardid=2&styleid=&page=1#5
 
 !! panning command does not refresh the panning graphic.
+
 
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)

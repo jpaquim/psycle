@@ -100,6 +100,15 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 		while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 	}
 	parspercol = numParameters/ncol;
+	if (parspercol>24)	
+	{
+		parspercol=24;
+		ncol=numParameters/24;
+		if (ncol*24 != numParameters)
+		{
+			ncol++;
+		}
+	}
 	if ( parspercol*ncol < numParameters) parspercol++;
 	
 	int const winh = parspercol*K_YSIZE;
@@ -265,8 +274,20 @@ void CFrameMachine::OnPaint()
 		int ncol = 1;
 		while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 
+		parspercol = numParameters/ncol;
+		if (parspercol>24)	
+		{
+			parspercol=24;
+			ncol=numParameters/24;
+			if (ncol*24 != numParameters)
+			{
+				ncol++;
+			}
+		}
+
 		exess = parspercol*ncol;
 	}
+
 	if ( exess > numParameters )
 	{
 		for (int c=numParameters; c<exess; c++)
