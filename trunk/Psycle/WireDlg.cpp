@@ -177,7 +177,13 @@ void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	m_volabel_per.SetWindowText(bufper);
 	m_volabel_db.SetWindowText(bufdb);
 
-	_pDstMachine->SetWireVolume(_dstWireIndex, invol );
+	float f;
+	_pDstMachine->GetWireVolume(_dstWireIndex, f);
+	if (f != invol)
+	{
+		m_pParent->AddMacViewUndo();
+		_pDstMachine->SetWireVolume(_dstWireIndex, invol );
+	}
 
 //	m_pParent->SetFocus();	
 	*pResult = 0;
@@ -185,12 +191,14 @@ void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CWireDlg::OnButton1() 
 {
+	m_pParent->AddMacViewUndo();
 	Inval = true;
 	_pSrcMachine->_connection[wireIndex] = false;
 	_pSrcMachine->_numOutputs--;
 	
 	_pDstMachine->_inputCon[_dstWireIndex] = false;
 	_pDstMachine->_numInputs--;
+
 
 	OnCancel();
 }
@@ -1185,6 +1193,8 @@ void CWireDlg::OnVolumeDb()
 	dlg.edit_type = 0;
 	if (dlg.DoModal() == IDOK)
 	{
+		m_pParent->AddMacViewUndo();
+
 		// update from dialog
 		int t = (int)sqrtf(dlg.volume*16384*4*4);
 		m_volslider.SetPos(256*4-t);
@@ -1199,6 +1209,7 @@ void CWireDlg::OnVolumePer()
 	dlg.edit_type = 1;
 	if (dlg.DoModal() == IDOK)
 	{
+		m_pParent->AddMacViewUndo();
 		// update from dialog
 		int t = (int)sqrtf(dlg.volume*16384*4*4);
 		m_volslider.SetPos(256*4-t);

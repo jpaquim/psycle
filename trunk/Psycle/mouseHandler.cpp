@@ -995,8 +995,6 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 									{
 										if (!WireDialog[i])
 										{
-											AddMacViewUndo();
-
 											WireDialog[i] = new CWireDlg(this);
 											WireDialog[i]->this_index = i;
 											WireDialog[i]->wireIndex = w;
