@@ -6,8 +6,8 @@
 ! should be able to pick cursor colour rather than have it invert background 
 ! lines between tracks should be definable, not black
 + midi control commands learn
-! longer sequences (256)
-! more tracks (64)
+! longer sequences (256) [file format,maybe others]
+! more tracks (64) [file format]
 + store state of follow song toggle
 + Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
 	pattern data and other settings, this possible? (yes, but will require new song parser...)
