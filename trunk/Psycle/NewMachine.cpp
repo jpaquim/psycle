@@ -426,6 +426,7 @@ void CNewMachine::OnRefresh()
 	LoadPluginInfo();
 	UpdateList();
 	m_browser.Invalidate();
+	SetFocus();
 }
 
 void CNewMachine::OnBytype() 
@@ -486,7 +487,14 @@ void CNewMachine::LoadPluginInfo()
 		fprintf(hfile,"[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)\n\n");
 		fprintf(hfile,"[Native Plugins]\n\n");
 		fclose(hfile);
-		FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetPluginDir()),MACH_PLUGIN);
+		if (bProgressOpen)
+		{
+			FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetPluginDir()),MACH_PLUGIN,&Progress);
+		}
+		else
+		{
+			FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetPluginDir()),MACH_PLUGIN);
+		}
 
 		if (bProgressOpen)
 		{
@@ -496,7 +504,14 @@ void CNewMachine::LoadPluginInfo()
 		hfile=fopen(logname,"a");  
 		fprintf(hfile,"\n[VST Plugins]\n\n");
 		fclose(hfile);
-		FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetVstDir()),MACH_VST);
+		if (bProgressOpen)
+		{
+			FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetVstDir()),MACH_VST,&Progress);
+		}
+		else
+		{
+			FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetVstDir()),MACH_VST);
+		}
 		_numPlugins = plugsCount;
 		_numBadPlugins = badPlugsCount;
 
@@ -516,13 +531,19 @@ void CNewMachine::LoadPluginInfo()
 	}
 }
 
-void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCount,CString findDir,MachineType type)
+void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCount,CString findDir,MachineType type,CProgressDialog * pProgress)
 {
 	CFileFind finder;
 
 	int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
 	while (loop) 
 	{								
+		if (pProgress)
+		{
+			pProgress->m_Progress.SetStep(16);
+			pProgress->m_Progress.StepIt();
+			::Sleep(1);
+		}
 		loop = finder.FindNextFile();
 		if (finder.IsDirectory() && !finder.IsDots())
 		{
@@ -542,6 +563,12 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 	loop = finder.FindFile(findDir + "\\*.dll"); // check if the directory is empty
 	while (loop)
 	{
+		if (pProgress)
+		{
+			pProgress->m_Progress.SetStep(32);
+			pProgress->m_Progress.StepIt();
+			::Sleep(1);
+		}
 		loop = finder.FindNextFile();
 
 		CString sDllName, tmpPath;

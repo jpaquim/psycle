@@ -64,7 +64,7 @@ BOOL CInfoDlg::OnInitDialog()
 	m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
 	m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 	
-	char buffer[64];
+	char buffer[128];
 	sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
 	m_processor_label.SetWindowText(buffer);
 	
@@ -85,7 +85,7 @@ void CInfoDlg::OnTimer(UINT nIDEvent)
 {
 	if(nIDEvent==1 && !_pSong->_machineLock )
 	{
-		char buffer[32];
+		char buffer[128];
 		
 		float totalCPU=0;
 		float machsCPU=0;
@@ -93,16 +93,15 @@ void CInfoDlg::OnTimer(UINT nIDEvent)
 
 		unsigned tempSampCount = _pSong->_sampCount;
 	    if( !tempSampCount ) tempSampCount=1;
-
 		
 		int n=0;
 		for (int c=0; c<MAX_MACHINES; c++)
 		{
-			if(_pSong->_pMachine[c])
+			Machine *tmac = _pSong->_pMachine[c];
+			if(tmac)
 			{
 				float machCPU=0;
 //				float masterCPU=0;
-				Machine *tmac = _pSong->_pMachine[c];
 //				machCPU = (float)tmac->_cpuCost*0.1f;
 //				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * 100;
 				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
@@ -117,6 +116,10 @@ void CInfoDlg::OnTimer(UINT nIDEvent)
 //				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz)*100;
 				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 			}
+		}
+		if (itemcount != n)
+		{
+			UpdateInfo();
 		}
 		
 //		totalCPU = _pSong->cpuIdle*0.1f+masterCPU;
@@ -164,7 +167,7 @@ void CInfoDlg::UpdateInfo()
 		Machine *tmac = _pSong->_pMachine[c];
 		if(tmac)
 		{
-			char buffer[64];
+			char buffer[128];
 			
 			// Name [Machine view editor custom name]
 			sprintf(buffer,"%.3d: %s",n+1,tmac->_editName);
@@ -193,4 +196,5 @@ void CInfoDlg::UpdateInfo()
 			n++;
 		}
 	}
+	itemcount = n;
 }

@@ -20,6 +20,7 @@ public:
 	CInfoDlg(CWnd* pParent = NULL);   // standard constructor
 	Song* _pSong;
 	void InitTimer();
+	int itemcount;
 	
 // Dialog Data
 	//{{AFX_DATA(CInfoDlg)
