@@ -2110,7 +2110,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Psycledelics"
-            VALUE "FileDescription", "Psycle Modular Music Creation Studio"
+            VALUE "FileDescription", "Psycle Modular Music Creation Studio Application"
             VALUE "FileVersion", "1, 7, 6, 0"
             VALUE "InternalName", "Psycle"
             VALUE "LegalCopyright", "Copyright (C) 2000-2004"
