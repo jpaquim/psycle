@@ -2098,8 +2098,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,7,7,0
- PRODUCTVERSION 1,7,7,0
+ FILEVERSION 1,7,7,65535
+ PRODUCTVERSION 1,7,7,65535
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -2116,12 +2116,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Psycledelics"
             VALUE "FileDescription", "Psycle Modular Music Creation Studio Application"
-            VALUE "FileVersion", "1, 7, 7, 0"
+            VALUE "FileVersion", "1.7.7.<read the patch number on the about dialog>"
             VALUE "InternalName", "Psycle"
             VALUE "LegalCopyright", "Copyright (C) 2000-2004 Psycledelics"
             VALUE "OriginalFilename", "psycle.exe"
             VALUE "ProductName", "Psycle Modular Music Creation Studio"
-            VALUE "ProductVersion", "1, 7, 7, 0"
+            VALUE "ProductVersion", "1.7.7.<read the patch number on the about dialog>"
             VALUE "SpecialBuild", "msvc 7.1"
         END
     END
