@@ -28,6 +28,7 @@ Configuration::Configuration()
 	_centerCursor = false;
 	_cursorAlwaysDown = false;
 	_RecordNoteoff = false;
+	_RecordTweaks = false;
 	_midiMachineViewSeqMode = false;
 	autoStopMachines = false;
 	useDoubleBuffer = true;
@@ -302,6 +303,8 @@ Configuration::Read(
 	reg.QueryValue("showAboutAtStart", &type, (BYTE*)&_showAboutAtStart, &numData);
 	numData = sizeof(_RecordNoteoff);
 	reg.QueryValue("RecordNoteoff", &type, (BYTE*)&_RecordNoteoff, &numData);
+	numData = sizeof(_RecordTweaks);
+	reg.QueryValue("RecordTweaks", &type, (BYTE*)&_RecordTweaks, &numData);
 	numData = sizeof(_midiMachineViewSeqMode);
 	reg.QueryValue("MidiMachineViewSeqMode", &type, (BYTE*)&_midiMachineViewSeqMode, &numData);
 
@@ -709,6 +712,7 @@ Configuration::Write(
 	reg.SetValue("useDoubleBuffer", REG_BINARY, (BYTE*)&useDoubleBuffer, sizeof(useDoubleBuffer));
 	reg.SetValue("showAboutAtStart", REG_BINARY, (BYTE*)&_showAboutAtStart, sizeof(_showAboutAtStart));
 	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
+	reg.SetValue("RecordTweaks", REG_BINARY, (BYTE*)&_RecordTweaks, sizeof(_RecordTweaks));
 	reg.SetValue("MidiMachineViewSeqMode", REG_BINARY, (BYTE*)&_midiMachineViewSeqMode, sizeof(_midiMachineViewSeqMode));
 	reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&_outputDriverIndex, sizeof(_outputDriverIndex));
 	reg.SetValue("MidiInputDriver", REG_DWORD, (BYTE*)&_midiDriverIndex, sizeof(_midiDriverIndex));	// MIDI IMPLEMENTATION
