@@ -162,8 +162,8 @@ public:
 
    DDCRET ReadSamples  ( INT32 num, WaveFileSample[] );
 
-   DDCRET WriteMonoSample    ( INT16 ChannelData );
-   DDCRET WriteStereoSample  ( INT16 LeftChannelData, INT16 RightChannelData );
+   DDCRET WriteMonoSample    ( float ChannelData );
+   DDCRET WriteStereoSample  ( float LeftChannelData, float RightChannelData );
 
    DDCRET ReadMonoSample ( INT16 *ChannelData );
    DDCRET ReadStereoSample ( INT16 *LeftSampleData, INT16 *RightSampleData );

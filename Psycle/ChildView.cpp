@@ -1161,8 +1161,14 @@ void CChildView::OnRecordWav()
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 		
 		CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
-		if ( dlg.DoModal() == IDOK ) Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
-		if ( Global::pConfig->autoStopMachines ) OnAutostop();
+		if ( dlg.DoModal() == IDOK ) 
+		{
+			Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
+		}
+		if ( Global::pConfig->autoStopMachines ) 
+		{
+			OnAutostop();
+		}
 	}
 	else
 	{

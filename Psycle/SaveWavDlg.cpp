@@ -21,6 +21,10 @@ static char THIS_FILE[] = __FILE__;
 
 DWORD WINAPI __stdcall RecordThread(void *b);
 
+int CSaveWavDlg::channelmode = -1;
+int CSaveWavDlg::rate = -1;
+int CSaveWavDlg::bits = -1;
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CSaveWavDlg dialog
@@ -47,6 +51,10 @@ void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PROGRESS, m_progress);
 	DDX_Control(pDX, IDC_PATNUMBER, m_patnumber);
 	DDX_Control(pDX, IDC_FILENAME, m_filename);
+	DDX_Control(pDX, IDC_COMBO_RATE, m_rate);
+	DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
+	DDX_Control(pDX, IDC_COMBO_CHANNELS, m_channelmode);
+
 	DDX_Radio(pDX, IDC_RECSONG, m_recmode);
 	//}}AFX_DATA_MAP
 }
@@ -59,6 +67,9 @@ BEGIN_MESSAGE_MAP(CSaveWavDlg, CDialog)
 	ON_BN_CLICKED(IDC_RECRANGE, OnSelRange)
 	ON_BN_CLICKED(IDC_RECPATTERN, OnSelPattern)
 	ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
+	ON_CBN_SELCHANGE(IDC_COMBO_BITS, OnSelchangeComboBits)
+	ON_CBN_SELCHANGE(IDC_COMBO_CHANNELS, OnSelchangeComboChannels)
+	ON_CBN_SELCHANGE(IDC_COMBO_RATE, OnSelchangeComboRate)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -97,6 +108,80 @@ BOOL CSaveWavDlg::OnInitDialog()
 	
 	m_progress.SetRange(0,1);
 	m_progress.SetPos(0);
+
+	if ((rate < 0) || (rate >5))
+	{
+		if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8192)
+		{
+			rate = 0;
+		}
+		else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 11025)
+		{
+			rate = 1;
+		}
+		else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
+		{
+			rate = 2;
+		}
+		else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
+		{
+			rate = 3;
+		}
+		else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+		{
+			rate = 4;
+		}
+		else 
+		{
+			rate = 5;
+		}
+	}
+
+	m_rate.AddString("8192 hz");
+	m_rate.AddString("11025 hz");
+	m_rate.AddString("22050 hz");
+	m_rate.AddString("44100 hz");
+	m_rate.AddString("48000 hz");
+	m_rate.AddString("96000 hz");
+	m_rate.SetCurSel(rate);
+
+	if ((bits < 0) || (bits > 3))
+	{
+		if (Global::pConfig->_pOutputDriver->_bitDepth <= 8)
+		{
+			bits = 0;
+		}
+		else if (Global::pConfig->_pOutputDriver->_bitDepth <= 16)
+		{
+			bits = 1;
+		}
+		else if (Global::pConfig->_pOutputDriver->_bitDepth <= 24)
+		{
+			bits = 2;
+		}
+		else if (Global::pConfig->_pOutputDriver->_bitDepth <= 32)
+		{
+			bits = 3;
+		}
+	}
+
+	m_bits.AddString("8 bit");
+	m_bits.AddString("16 bit");
+	m_bits.AddString("24 bit");
+	m_bits.AddString("32 bit");
+
+	m_bits.SetCurSel(bits);
+
+	m_channelmode.AddString("Mono (Mix)");
+	m_channelmode.AddString("Mono (Left)");
+	m_channelmode.AddString("Mono (Right)");
+	m_channelmode.AddString("Stereo");
+
+	if ((channelmode < 0) || (channelmode > 3))
+	{
+		channelmode = Global::pConfig->_pOutputDriver->_channelmode;
+	}
+	m_channelmode.SetCurSel(channelmode);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -175,7 +260,10 @@ void CSaveWavDlg::OnSavewave()
 //	pPlayer->SetSampleRate(val);
 //  int bitdepth = (m_bitdepth.GetCurSel()+1)*8;
 	m_filename.GetWindowText(name);
-	pPlayer->StartRecording(name.GetBuffer(4)/*,bitdepth*/);
+	const int real_rate[]={8192,11025,22050,44100,48000,96000};
+	const int real_bits[]={8,16,24,32};
+
+	pPlayer->StartRecording(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
 	int pstart;
 	kill_thread = 0;
 	tickcont=0;
@@ -279,7 +367,10 @@ void CSaveWavDlg::OnCancel()
 void CSaveWavDlg::SaveEnd()
 {
 	saving=false;
-	if ( autostop ) Global::pConfig->autoStopMachines=true;
+	if ( autostop ) 
+	{
+		Global::pConfig->autoStopMachines=true;
+	}
 	Global::pPlayer->_playBlock=playblock;
 	memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
 	Global::pConfig->_pOutputDriver->Enable(true);
@@ -307,4 +398,25 @@ void CSaveWavDlg::SaveTick()
 	lastpostick = pPlayer->_playPosition;
 
    if (!kill_thread ) m_progress.SetPos(tickcont);
+}
+
+void CSaveWavDlg::OnSelchangeComboBits() 
+{
+	// TODO: Add your control notification handler code here
+	bits = m_bits.GetCurSel();
+	
+}
+
+void CSaveWavDlg::OnSelchangeComboChannels() 
+{
+	// TODO: Add your control notification handler code here
+	channelmode = m_channelmode.GetCurSel();
+	
+}
+
+void CSaveWavDlg::OnSelchangeComboRate() 
+{
+	// TODO: Add your control notification handler code here
+	rate = m_rate.GetCurSel();
+	
 }

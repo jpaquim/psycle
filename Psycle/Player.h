@@ -41,10 +41,14 @@ public:
 	static float * Work(void* context, int& nsamples);
 #endif // _WINAMP_PLUGIN_
 
-	void StartRecording(char* psFilename,int bitdepth=16);
+	void StartRecording(char* psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
 	void StopRecording(void);
 protected:
 	int prevMachines[MAX_TRACKS];
+
+	int backup_rate;
+	int backup_bits;
+	int backup_channelmode;
 
 	float _pBuffer[MAX_DELAY_BUFFER];
 #if !defined(_WINAMP_PLUGIN_)
