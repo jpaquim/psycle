@@ -1,3 +1,7 @@
+*=bug
+!=change
++=addition
+
 *I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
 * remove waits from play when in export mode
 * <alk>I tried recordnig the wave out, the start gap is indeed fixed, but it seems the last line or two is
@@ -42,14 +46,26 @@
 	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
 + <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
 	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
-* when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
++ <sue> hotkeys for seq edit cut, copy, paste, etc?
+* <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
 	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
 	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
-* when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
+* <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
 	happens to native plugs)
-+ in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
++ <sue>in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
 	(many vsts use control + left mouse button to reset knobs/params....maybe any other alike key 
 	combination.... )
+* <bdzld> when you're in pattern edit and you maximise the window it blacks out -> sizing down too
++ <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
+	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
+	require a file format change though :(
+* <bdzld> when you put a machine on top of each other, the vus always pop to the top?
+! <[JAZ]> pooplog : btw... the leds should be improved still a bit. first, the decrease speed should be changed 
+	(the refresh rate is now the half) also, some improvements, like not having to recalc the "peak" (meaning, 
+	storing the pixel data, instead of the volume data)
++ pooplog - dragging files onto psycle window would be nice, hmm?
+* vu meters seem to sometimes draw wrong info - are they processing wrong data?
+* machine numbers in dialog headers should be in hex
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)

@@ -46,7 +46,8 @@ Machine::Machine()
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
 	_volumeCounter = 0;
-	_volumeMaxCounter = 0;
+	_volumeDisplay = 0;
+	_volumeMaxDisplay = 0;
 	_volumeMaxCounterLife = 0;
 #endif // _WINAMP_PLUGIN_
 	_volumeMultiplier = 32768.0f;
@@ -336,6 +337,7 @@ void Dummy::Work(int numSamples)
 		Machine::SetVolumeCounterAccurate(numSamples);
 		if (_volumeCounter < 8)	{
 			_volumeCounter = 0;
+			_volumeDisplay = 0;
 			_stopped = true;
 		}
 	}
@@ -501,6 +503,7 @@ void Gainer::Work(
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
@@ -660,6 +663,7 @@ void Sine::Work(
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
@@ -869,6 +873,7 @@ void Distortion::Work(
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
@@ -1179,6 +1184,7 @@ void Delay::Work(int numSamples)
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
@@ -1492,6 +1498,7 @@ void Flanger::Work(
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
@@ -1804,6 +1811,7 @@ void Filter2p::Work(
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}

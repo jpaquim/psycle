@@ -3,6 +3,7 @@
 
 #include "SongStructs.h"
 #include "Dsp.h"
+#include "Helpers.h"
 
 #define MAX_DELAY_BUFFER		65536 // Dalay Delay and Flanger
 #define OVERLAPTIME				128  // Sampler
@@ -100,7 +101,8 @@ public:
 	float _volumeMultiplier;				// Trick to avoid some extra multiplications.
 #if !defined(_WINAMP_PLUGIN_)
 	int _volumeCounter;						// output peak level.
-	int _volumeMaxCounter;					// output peak level.
+	int _volumeDisplay;						// output peak level.
+	int _volumeMaxDisplay;					// output peak level.
 	int _volumeMaxCounterLife;				// output peak level.
 	unsigned long int _cpuCost;
 	unsigned long int _wireCost;
@@ -143,18 +145,26 @@ protected:
 	inline void SetVolumeCounter(int numSamples)
 	{
 		int newVolume = Dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+		if (newVolume > 32768)
+		{
+			newVolume = 32768;
+		}
 		if (newVolume > _volumeCounter)
 		{
 			_volumeCounter = newVolume;
+			int temp = (f2i(fast_log2(float(newVolume))*78.0f*4*2/14.0f) - (78*3*2));//*2;// not 100% accurate, but looks as it sounds
+			// prevent downward jerkiness
+			if (temp > 97*2)
+			{
+				temp = 97*2;
+			}
+			if (temp > _volumeDisplay)
+			{
+				_volumeDisplay = temp;
+			}
 		}
-		else
-		{
-			_volumeCounter -= numSamples;
-		}
-		if (_volumeCounter < 0)
-		{
-			_volumeCounter = 0;
-		}
+		_volumeCounter-=numSamples/4;
+		_volumeDisplay--;
 	};
 	inline void SetVolumeCounterAccurate(int numSamples)
 	{

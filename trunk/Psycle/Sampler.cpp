@@ -81,6 +81,7 @@ void Sampler::Work(
 			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
+				_volumeDisplay = 0;
 				_stopped = true;
 			}
 			else _stopped=false;
