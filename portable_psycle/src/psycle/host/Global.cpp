@@ -57,7 +57,7 @@ namespace psycle
 
 
 
-		#if defined _WINAMP_PLUGIN_
+		#if defined _WINAMP_PLUGIN_ // <bohan> why???
 			bool FindFileinDir(/* const */ char name[], CString & path)
 			{
 				return find_file_in_dir_loose(name, path);
