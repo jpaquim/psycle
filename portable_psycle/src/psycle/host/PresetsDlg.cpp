@@ -32,8 +32,7 @@ namespace psycle
 			numPars =-1;
 			zapArray(data);
 			sizeData = 0;
-
-			memset(name,0,32);
+			std::memset(name,0,32);
 		}
 
 		void CPreset::Init(int num)
