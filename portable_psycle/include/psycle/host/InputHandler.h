@@ -388,6 +388,8 @@ namespace psycle
 				case cdefUndo:		return "Edit Undo";
 				case cdefRedo:		return "Edit Redo";
 
+				case cdefErrorLog:	return "Show Error Log";
+
 				default: assert(false); return "Invalid";
 				}
 			}
