@@ -295,10 +295,12 @@ void Machine::Work(int numSamples)
 #if defined( _WINAMP_PLUGIN_)
 				Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 				Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+				Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 #else
 				CPUCOST_INIT(wcost);
 				Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 				Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+				Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 				CPUCOST_CALC(wcost,numSamples);
 				_wireCost+=wcost;
 #endif // _WINAMP_PLUGIN_
