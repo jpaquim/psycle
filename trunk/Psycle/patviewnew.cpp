@@ -165,7 +165,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		}
 
 		////////////////////////////////////////////////////////////////////
-		// Determines if Scroll is needed or not.
+		// Determines if background Scroll is needed or not.
 		
 		scrollT=0;scrollL=0;
 

@@ -458,48 +458,41 @@ void CMainFrame::OnSelchangeTrackcombo()
 
 	m_wndView.Repaint();
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnCloseupTrackcombo() 
 {
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnBarButton1()  // OnBpmAddOne
 {
 	SetAppSongBpm(1);
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnBpmAddTen() 
 {
 	SetAppSongBpm(10);
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnBpmDecOne() 
 {
 	SetAppSongBpm(-1);
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnBpmDecTen() 
 {
 	SetAppSongBpm(-10);
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnDecTPB()
 {
 	SetAppSongTpb(-1);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 	m_wndView.Repaint(DMPatternChange);
 }
 
@@ -507,7 +500,6 @@ void CMainFrame::OnIncTPB()
 {
 	SetAppSongTpb(+1);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 	m_wndView.Repaint(DMPatternChange);
 }
 
@@ -557,7 +549,6 @@ void CMainFrame::OnClipbut()
 {
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::UpdateVumeters(int l, int r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
@@ -622,13 +613,11 @@ void CMainFrame::OnSelchangeSscombo2()  // OnChangePatternStep
 	int sel=cc->GetCurSel();
 	m_wndView.SetPatStep(sel);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnCloseupSscombo2()	// OnCloseupPatternStep
 {
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::EditQuantizeChange(int diff) // User Called (Hotkey)
@@ -654,7 +643,6 @@ void CMainFrame::OnSelchangeBarGenfx()
 void CMainFrame::OnCloseupBarGenfx() 
 {
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();	
 }
 
 void CMainFrame::OnBDecgen() 
@@ -662,7 +650,6 @@ void CMainFrame::OnBDecgen()
 	int si=_pSong->seqBus;
 	ChangeGen(si-1);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnBIncgen() 
@@ -670,7 +657,6 @@ void CMainFrame::OnBIncgen()
 	int si=_pSong->seqBus;
 	ChangeGen(si+1);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::UpdateComboGen(bool updatelist)
@@ -778,13 +764,11 @@ void CMainFrame::OnSelchangeBarCombogen()
 void CMainFrame::OnCloseupBarCombogen()
 {
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnCloseupAuxselect() 
 {
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnSelchangeAuxselect() 
@@ -820,14 +804,12 @@ void CMainFrame::OnBDecwav()
 {
 	ChangeIns(_pSong->auxcolSelected-1);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnBIncwav() 
 {
 	ChangeIns(_pSong->auxcolSelected+1);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::UpdateComboIns(bool updatelist)
@@ -900,7 +882,6 @@ void CMainFrame::OnSelchangeBarComboins()
 void CMainFrame::OnCloseupBarComboins()
 {
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::ChangeIns(int i)	// User Called (Hotkey)
@@ -993,7 +974,6 @@ void CMainFrame::OnLoadwave()
 		_pSong->Invalided=false;
 	}
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnSavewave()
@@ -1303,13 +1283,8 @@ void CMainFrame::OnSelchangeSeqlist()
 		{
 			m_wndView.Repaint(DMPatternChange);
 		}		
-		m_wndView.SetFocus();
-		m_wndView.OnActivate();
 	}
-	else {
-		m_wndView.SetFocus();
-		m_wndView.OnActivate();
-	}
+	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnDblclkSeqlist() 
@@ -1324,14 +1299,9 @@ void CMainFrame::OnDblclkSeqlist()
 		_pSong->playOrder[sep]=ep;
 		UpdatePlayOrder(true);
 		m_wndView.Repaint(DMPatternChange);
-		m_wndView.SetFocus();
-		m_wndView.OnActivate();
 	}
-	else {
-		
-		m_wndView.SetFocus();
-	}
-*/		
+	m_wndView.SetFocus();
+	*/		
 	m_wndView.OnPatternView();
 }
 
@@ -1353,10 +1323,8 @@ void CMainFrame::OnInclong()
 		_pSong->playOrder[pop]+=10;
 		UpdatePlayOrder(true);
 		m_wndView.Repaint(DMPatternChange);
-//		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnDeclong() 
@@ -1367,17 +1335,14 @@ void CMainFrame::OnDeclong()
 		_pSong->playOrder[pop]-=10;
 		UpdatePlayOrder(true);
 		m_wndView.Repaint(DMPatternChange);
-//		m_wndView.SetActiveWindow();
 	}
 	else if (_pSong->playOrder[pop]>0)
 	{
 		_pSong->playOrder[pop]=0;
 		UpdatePlayOrder(true);
 		m_wndView.Repaint(DMPatternChange);
-//		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();	
 }
 
 void CMainFrame::OnSeqnew() 
@@ -1408,7 +1373,6 @@ void CMainFrame::OnSeqnew()
 		m_wndView.Repaint(DMPatternChange);
 	}
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnSeqins() 
@@ -1434,7 +1398,6 @@ void CMainFrame::OnSeqins()
 		m_wndView.Repaint(DMPatternChange);
 	}
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnSeqdel() 
@@ -1454,9 +1417,8 @@ void CMainFrame::OnSeqdel()
 	}
 	UpdatePlayOrder(false);
 	UpdateSequencer();
-	m_wndView.Repaint();
+	m_wndView.Repaint(DMPatternChange);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnSeqclr() 
@@ -1472,7 +1434,6 @@ void CMainFrame::OnSeqclr()
 	UpdateSequencer();
 	m_wndView.Repaint(DMPatternChange);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 	
 }
 //// Changed to " Resort patterns "
@@ -1558,9 +1519,8 @@ void CMainFrame::OnSeqspr()
 // Part four. All the needed things.
 
 	UpdateSequencer();
-	m_wndView.Repaint();
+	m_wndView.Repaint(DMPatternChange);
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 */
 
@@ -1574,7 +1534,6 @@ void CMainFrame::OnIncpos2()
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnDecpos2() 
@@ -1587,7 +1546,6 @@ void CMainFrame::OnDecpos2()
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnIncpat2() 
@@ -1598,10 +1556,8 @@ void CMainFrame::OnIncpat2()
 		++_pSong->playOrder[pop];
 		UpdatePlayOrder(true);
 		m_wndView.Repaint(DMPatternChange);
-//		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnDecpat2() 
@@ -1612,10 +1568,8 @@ void CMainFrame::OnDecpat2()
 		--_pSong->playOrder[pop];
 		UpdatePlayOrder(true);
 		m_wndView.Repaint(DMPatternChange);
-//		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnInclen() 
@@ -1627,7 +1581,6 @@ void CMainFrame::OnInclen()
 		UpdateSequencer();
 	}
 	m_wndView.SetFocus();
-	m_wndView.OnActivate();
 }
 
 void CMainFrame::OnDeclen() 
@@ -1640,7 +1593,6 @@ void CMainFrame::OnDeclen()
 		UpdateSequencer();
 	}
 	m_wndView.SetFocus();	
-	m_wndView.OnActivate();
 }
 
 
@@ -1661,8 +1613,8 @@ void CMainFrame::OnCentercursor()
 {
 	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_CENTERCURSOR))->GetCheck() ) Global::pConfig->_centerCursor=true;
 	else Global::pConfig->_centerCursor=false;
-	m_wndView.SetFocus();
 	m_wndView.Repaint(DMCursorMove);
+	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnCursordown() 

@@ -28,7 +28,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 			}
-			Repaint();
+//			Repaint();
 		}
 	}
 	/*
@@ -59,7 +59,7 @@ void CChildView::OnContextMenu(CWnd* pWnd, CPoint point)
 		pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 		
 		menu.DestroyMenu();
-		Repaint(DMCursorMove);
+//		Repaint(DMCursorMove);
 	}
 }
 
@@ -139,7 +139,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
 						Global::_pSong->_pMachines[smac]->_volumeCounter=0;
 						updatePar = smac;
-						Repaint(1);
+						Repaint(DMMacRefresh);
 					}
 					else if ((mcd_y> 14) && (mcd_y < 27) &&  //Bypass
 						(Global::_pSong->_pMachines[smac]->_mode != MACHMODE_GENERATOR))
@@ -147,7 +147,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[smac]->_bypass = !Global::_pSong->_pMachines[smac]->_bypass;
 						Global::_pSong->_pMachines[smac]->_volumeCounter = 0;
 						updatePar = smac;
-						Repaint(1);
+						Repaint(DMMacRefresh);
 					}
 					else if ((mcd_y> 14) && (mcd_y < 23) &&  //Solo
 						(Global::_pSong->_pMachines[smac]->_mode == MACHMODE_GENERATOR))
@@ -177,7 +177,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							Global::_pSong->machineSoloed = smac;
 						}
 						updatePar = smac;
-						Repaint();
+						Repaint(DMAllMacsRefresh);
 					}
 				}
 			}
@@ -207,7 +207,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 									dlg._pSrcMachine = tmac;
 									sprintf(dlg.destName,"%s", Global::_pSong->_pMachines[tmac->_outputMachines[w]]->_editName);
 									dlg.DoModal();
-									Repaint();
+//									Repaint();
 								}
 							}
 						}
@@ -379,7 +379,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 				
 				pParentMain->StatusBarText(buffer);
 				updatePar = smac;
-				Repaint(1);
+				Repaint(DMMacRefresh);
 			}
 		}
 		
@@ -490,7 +490,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
 						Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
 						updatePar = tmac;
-						Repaint(1);
+						Repaint(DMMacRefresh);
 					}
 					else if ((mcd_y> 14) && (mcd_y < 27) &&  //Bypass
 						(Global::_pSong->_pMachines[tmac]->_mode != MACHMODE_GENERATOR))
@@ -498,7 +498,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
 						Global::_pSong->_pMachines[tmac]->_volumeCounter = 0;
 						updatePar = tmac;
-						Repaint(1);
+						Repaint(DMMacRefresh);
 					}
 					else if ((mcd_y> 14) && (mcd_y < 23) &&  //Solo
 						(Global::_pSong->_pMachines[tmac]->_mode == MACHMODE_GENERATOR))
@@ -528,13 +528,13 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							Global::_pSong->machineSoloed = tmac;
 						}
 						updatePar = tmac;
-						Repaint();
+						Repaint(DMAllMacsRefresh);
 					}
 				}
 				else
 				{
 					pParentMain->ShowMachineGui(tmac);
-					Repaint();
+//					Repaint();
 				}
 			}
 
@@ -587,7 +587,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						Global::pConfig->_pMidiInput->Open();
 					}
 				}
-				Repaint();
+//				Repaint();
 			}
 		
 			break;
