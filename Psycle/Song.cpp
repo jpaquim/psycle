@@ -788,28 +788,42 @@ int Song::GetBlankPatternUnused(int rval)
 		}
 		// now test to see if data is really blank
 		bTryAgain = FALSE;
-
-		unsigned char *offset_source=_ppattern(rval);
-		
-		for (int t=0;t<MULTIPLY2;t+=EVENT_SIZE)
+		if (rval < MAX_PATTERNS-1)
 		{
-			for (int i = 0; i < EVENT_SIZE; i++)
+			unsigned char *offset_source=_ppattern(rval);
+			
+			for (int t=0;t<MULTIPLY2;t+=EVENT_SIZE)
 			{
-				if (offset_source[i] != blank[i])
+				for (int i = 0; i < EVENT_SIZE; i++)
 				{
-					rval++;
-					bTryAgain = TRUE;
-					t=MULTIPLY2;
-					i=EVENT_SIZE;
+					if (offset_source[i] != blank[i])
+					{
+						rval++;
+						bTryAgain = TRUE;
+						t=MULTIPLY2;
+						i=EVENT_SIZE;
+					}
+					offset_source+=EVENT_SIZE;
 				}
-				offset_source+=EVENT_SIZE;
 			}
 		}
 	}
 
 	if (rval > MAX_PATTERNS-1)
 	{
-		rval = MAX_PATTERNS-1;
+		rval = 0;
+		for(int c=0;c<playLength;c++)
+		{
+			if(rval == playOrder[c]) 
+			{
+				rval++;
+				c=-1;
+			}
+		}
+		if (rval > MAX_PATTERNS-1)
+		{
+			rval = MAX_PATTERNS-1;
+		}
 	}
 	return rval;
 }

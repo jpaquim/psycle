@@ -12,6 +12,9 @@ V1.7.3 (Final)
 ! asio hard clips for the babies who don't leave any headroom (pooplog)
 ! some memory leaks and access violation [JAZ]
 ! cloning locates the new machine better and numbers it correctly (pooplog)
+! fix for trying to allocate patterns greater than 7F (pooplog)
+! fix for panning not being properly set on load (pooplog)
+* changed so that 255 unique patterns can be stored, although only 127 can be sequenced (pooplog)
 
 V1.7.3 RC2
 ----------
