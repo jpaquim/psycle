@@ -542,6 +542,7 @@ void Song::DestroyMachine(int mac)
 		}
 	}
 	
+	if ( mac == machineSoloed ) machineSoloed = 0;
 	_machineActive[mac] = false;
 	delete _pMachines[mac];	// If it's a (Vst)Plugin, the destructor calls to free the .dll
 	
