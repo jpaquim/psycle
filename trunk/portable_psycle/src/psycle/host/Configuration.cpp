@@ -26,6 +26,7 @@ namespace psycle
 			_RecordMouseTweaksSmooth = FALSE;
 			_RecordUnarmed = true;
 			_MoveCursorPaste = false;
+			_NavigationIgnoresStep = false;
 			_midiMachineViewSeqMode = false;
 			autoStopMachines = false;
 			useDoubleBuffer = true;
@@ -333,6 +334,8 @@ namespace psycle
 			reg.QueryValue("RecordUnarmed", &type, (BYTE*)&_RecordUnarmed, &numData);
 			numData = sizeof(_MoveCursorPaste);
 			reg.QueryValue("MoveCursorPaste", &type, (BYTE*)&_MoveCursorPaste, &numData);
+			numData = sizeof(_NavigationIgnoresStep);
+			reg.QueryValue("NavigationIgnoresStep", &type, (BYTE*)&_NavigationIgnoresStep, &numData);
 
 			numData = sizeof(_midiMachineViewSeqMode);
 			reg.QueryValue("MidiMachineViewSeqMode", &type, (BYTE*)&_midiMachineViewSeqMode, &numData);
@@ -831,6 +834,7 @@ namespace psycle
 			reg.SetValue("notesToEffects", REG_BINARY, (BYTE*)&_notesToEffects, sizeof(_notesToEffects));
 			reg.SetValue("RecordUnarmed", REG_BINARY, (BYTE*)&_RecordUnarmed, sizeof(_RecordUnarmed));
 			reg.SetValue("MoveCursorPaste", REG_BINARY, (BYTE*)&_MoveCursorPaste, sizeof(_MoveCursorPaste));
+			reg.SetValue("NavigationIgnoresStep", REG_BINARY, (BYTE*)&_NavigationIgnoresStep, sizeof(_NavigationIgnoresStep));
 			reg.SetValue("MidiMachineViewSeqMode", REG_BINARY, (BYTE*)&_midiMachineViewSeqMode, sizeof(_midiMachineViewSeqMode));
 			reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&_outputDriverIndex, sizeof(_outputDriverIndex));
 			reg.SetValue("MidiInputDriver", REG_DWORD, (BYTE*)&_midiDriverIndex, sizeof(_midiDriverIndex));

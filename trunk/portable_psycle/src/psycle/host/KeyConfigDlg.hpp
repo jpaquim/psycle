@@ -23,6 +23,7 @@ NAMESPACE__BEGIN(psycle)
 			CButton	m_tweak_smooth;
 			CButton	m_record_unarmed;
 			CButton m_move_cursor_paste;
+			CButton m_navigation_ignores_step;
 			CButton	m_show_info;
 			CButton	m_cmdShiftArrows;
 			CButton	m_cmdFT2Del;
