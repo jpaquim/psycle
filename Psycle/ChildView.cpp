@@ -1261,6 +1261,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 				{
 					x = Global::_pSong->_pMachines[Global::_pSong->busEffect[fb]]->_x;
 					y = Global::_pSong->_pMachines[Global::_pSong->busEffect[fb]]->_y;
+					pParentMain->CloseMacGui(Global::_pSong->busEffect[fb]);
 					Global::_pSong->DestroyMachine(Global::_pSong->busEffect[fb]);
 				}
 			}
@@ -1272,6 +1273,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 				// delete machine if it already exists
 				if (Global::_pSong->busMachine[fb] != 255)
 				{
+					pParentMain->CloseMacGui(Global::_pSong->busMachine[fb]);
 					x = Global::_pSong->_pMachines[Global::_pSong->busMachine[fb]]->_x;
 					y = Global::_pSong->_pMachines[Global::_pSong->busMachine[fb]]->_y;
 					Global::_pSong->DestroyMachine(Global::_pSong->busMachine[fb]);

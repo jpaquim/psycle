@@ -183,6 +183,7 @@ void CGearRackDlg::OnDelete()
 			tmac--;
 			if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
 			{
+				pParentMain->CloseMacGui(tmac-MAX_BUSES);
 				Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac-MAX_BUSES]);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
@@ -200,6 +201,7 @@ void CGearRackDlg::OnDelete()
 		{
 			if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
 			{
+				pParentMain->CloseMacGui(tmac);
 				Global::_pSong->DestroyMachine(Global::_pSong->busMachine[tmac]);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
