@@ -261,7 +261,7 @@ NAMESPACE__BEGIN(psycle)
 						"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
 						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n"
 						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
-						"Satoshi Fujiwara\t Initial code on the XM sampler support\r\n"
+						"Satoshi Fujiwara\t\t Initial code on the XM sampler support\r\n"
 						"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
 						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
