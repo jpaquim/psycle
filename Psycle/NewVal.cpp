@@ -79,16 +79,17 @@ void CNewVal::OnUpdateEdit1()
 	if (m_Value < min)
 	{
 		m_Value = min;
-		sprintf(buffer,"Below Range. Use this HEX value for twk: %x",m_Value-min);
+		sprintf(buffer,"Below Range. Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-min);
 	}
 	else if(m_Value > max)
 	{
 		m_Value = max;
-		sprintf(buffer,"Above Range. Use this HEX value for twk: %x",m_Value-min);
+		sprintf(buffer,"Above Range. Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-min);
 	}
 	else
 	{
-		sprintf(buffer,"Use this HEX value for twk: %x",m_Value-min);
+		sprintf(buffer,"Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-min);
 	}
 	m_text.SetWindowText(buffer);
 }
+

@@ -19,6 +19,8 @@ public:
 	char Title[1024];
 	int min;
 	int max;
+	int macindex;
+	int paramindex;
 
 // Dialog Data
 	//{{AFX_DATA(CNewVal)

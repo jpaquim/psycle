@@ -438,6 +438,8 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 				,max_v);
 			dlg.min = min_v;
 			dlg.max = max_v;
+			dlg.macindex = Global::_pSong->FindBusFromIndex(MachineIndex);
+			dlg.paramindex = tweakpar;
 
 			dlg.DoModal();
 			int nv = dlg.m_Value;

@@ -6,7 +6,7 @@
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
-! machine param enter dialog should show actual twk command and be modeless
+! machine param enter dialog should be modeless
 
 * Machines
 ------------
@@ -20,11 +20,13 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 * <mstr_> btw, the xExx command (note cut) has got an issue on your synths, prolly on others, too
 	when a value is not set ie 0E00, it mutes all notes
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
+* bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> Internals still miss mouse tweak, right?
 
 * Sampler Machine/Wave Ed:
 --------------------------
+* Sample loop not works - is it possible to fix it in next Psycle release?
 * {alk} fit sample to match 256 rows (in sampler) doesnt seem to work [JAZ] Are you sure? Code seems OK.
 * internal max of 2megs/channel is too small.
 bug: 	 portamento to note, slides too much. (can anyone test this for me?)
@@ -68,7 +70,8 @@ feature: maybe: MultiPattern View (The code is not made in the best way)
 	release note, then release mouse.
 * preview check box in preset dialog stopped working?
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
-* moving machines makes playback pop - machine interface takes too long to redraw
+* moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
+	on every frame
 bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
 		 Fix:Basically, make ONLY .fxb for VST's.
 ! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
@@ -121,7 +124,7 @@ feature: Maybe: New command "twc" which will send a machine command (like note d
 feature: pattern repeat (loop) and song repeat (asked by Vir|us)
 feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + new file format: (machines save custom data length, patterns stored according to # tracks, sequence length stored
-		according to length, vst multi-out, connections as linked lists, wire nodes, etc.)
+		according to length, vst multi-out, connections as linked lists, wire nodes, volume column, etc.)
 
 * Vsts:
 ------------
@@ -144,6 +147,7 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 * <[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
 	the info when new one.
 * new machine dialog should save preferred sorting method
+* should save wire dialog settings
 ! should make it so clicking on colour boxes pops up menu
 ! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
 	when you want.

@@ -104,71 +104,130 @@ BOOL CMasterDlg::OnInitDialog()
 		val = sqrtf(val*16384.0f);
 		m_sliderm1.SetPos(256-f2i(val));
 	}
+	else
+	{
+		m_sliderm1.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[1])
 	{
 		_pMachine->GetWireVolume(1,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm2.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm2.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[2])
 	{
 		_pMachine->GetWireVolume(2,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm3.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm3.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[3])
 	{
 		_pMachine->GetWireVolume(3,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm4.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm4.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[4])
 	{
 		_pMachine->GetWireVolume(4,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm5.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm5.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[5])
 	{
 		_pMachine->GetWireVolume(5,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm6.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm6.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[6])
 	{
 		_pMachine->GetWireVolume(6,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm7.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm7.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[7])
 	{
 		_pMachine->GetWireVolume(7,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm8.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm8.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[8])
 	{
 		_pMachine->GetWireVolume(8,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm9.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm9.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[9])
 	{
 		_pMachine->GetWireVolume(9,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm10.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm10.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[10])
 	{
 		_pMachine->GetWireVolume(10,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm11.SetPos(256-f2i(val*256));
 	}
+	else
+	{
+		m_sliderm11.SetPos(256);
+	}
+
 	if (_pMachine->_inputCon[11])
 	{
 		_pMachine->GetWireVolume(11,val);
 		val = sqrtf(val*16384.0f);
 		m_sliderm12.SetPos(256-f2i(val*256));
+	}
+	else
+	{
+		m_sliderm12.SetPos(256);
 	}
 	
 	if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
