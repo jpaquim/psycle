@@ -1189,7 +1189,7 @@ NAMESPACE__BEGIN(psycle)
 
 			const int nl = _pSong->patternLines[_ps()];
 
-			// <sampler> a bit recoded. It only is increased when needed, not increased, checked and then decreased.
+			// <sampler> a bit recoded. 
 			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
 				editcur.track+=1;
@@ -1209,6 +1209,7 @@ NAMESPACE__BEGIN(psycle)
 				else
 				{
 					if (editcur.line + x < nl) editcur.line = editcur.line + x;
+					else editcur.line = nl -1; //as it has worked always.
 				}
 				
 			}
