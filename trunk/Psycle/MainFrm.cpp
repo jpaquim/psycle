@@ -1308,10 +1308,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					
 				}
 				m_wndView.MasterMachineDialog->Create();
-				m_wndView.MasterMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.MasterMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
 				m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.MasterMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_SINE:
@@ -1323,9 +1321,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.PsychMachineDialog = new CGearPsychOsc(&m_wndView);
 					m_wndView.PsychMachineDialog->_pMachine = (Sine*)Global::_pSong->_pMachines[tmac];
 					m_wndView.PsychMachineDialog->Create();
-					m_wndView.PsychMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.PsychMachineDialog, point);
 					m_wndView.PsychMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.PsychMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1333,10 +1330,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.PsychMachineDialog = new CGearPsychOsc(&m_wndView);
 				m_wndView.PsychMachineDialog->_pMachine = (Sine*)Global::_pSong->_pMachines[tmac];
 				m_wndView.PsychMachineDialog->Create();
-				m_wndView.PsychMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.PsychMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.PsychMachineDialog, point);
 				m_wndView.PsychMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.PsychMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_DIST:
@@ -1348,9 +1343,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.DistortionMachineDialog = new CGearDistort(&m_wndView);
 					m_wndView.DistortionMachineDialog->_pMachine = (Distortion*)Global::_pSong->_pMachines[tmac];
 					m_wndView.DistortionMachineDialog->Create();
-					m_wndView.DistortionMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.DistortionMachineDialog, point);
 					m_wndView.DistortionMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.DistortionMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1358,10 +1352,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.DistortionMachineDialog = new CGearDistort(&m_wndView);
 				m_wndView.DistortionMachineDialog->_pMachine = (Distortion*)Global::_pSong->_pMachines[tmac];
 				m_wndView.DistortionMachineDialog->Create();
-				m_wndView.DistortionMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.DistortionMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.DistortionMachineDialog, point);
 				m_wndView.DistortionMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.DistortionMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_SAMPLER:
@@ -1373,9 +1365,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
 					m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)Global::_pSong->_pMachines[tmac];
 					m_wndView.SamplerMachineDialog->Create();
-					m_wndView.SamplerMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
 					m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.SamplerMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1383,10 +1374,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
 				m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)Global::_pSong->_pMachines[tmac];
 				m_wndView.SamplerMachineDialog->Create();
-				m_wndView.SamplerMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.SamplerMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
 				m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.SamplerMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_DELAY:
@@ -1399,9 +1388,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.DelayMachineDialog->_pMachine = (Delay*)Global::_pSong->_pMachines[tmac];
 					m_wndView.DelayMachineDialog->SPT = &Global::_pSong->SamplesPerTick;
 					m_wndView.DelayMachineDialog->Create();
-					m_wndView.DelayMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.DelayMachineDialog, point);
 					m_wndView.DelayMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.DelayMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1410,10 +1398,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.DelayMachineDialog->_pMachine = (Delay*)Global::_pSong->_pMachines[tmac];
 				m_wndView.DelayMachineDialog->SPT = &Global::_pSong->SamplesPerTick;
 				m_wndView.DelayMachineDialog->Create();
-				m_wndView.DelayMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.DelayMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.DelayMachineDialog, point);
 				m_wndView.DelayMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.DelayMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_2PFILTER:
@@ -1425,9 +1411,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.FilterMachineDialog = new CGearfilter(&m_wndView);
 					m_wndView.FilterMachineDialog->_pMachine = (Filter2p*)Global::_pSong->_pMachines[tmac];
 					m_wndView.FilterMachineDialog->Create();
-					m_wndView.FilterMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.FilterMachineDialog, point);
 					m_wndView.FilterMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.FilterMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1435,10 +1420,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.FilterMachineDialog = new CGearfilter(&m_wndView);
 				m_wndView.FilterMachineDialog->_pMachine = (Filter2p*)Global::_pSong->_pMachines[tmac];
 				m_wndView.FilterMachineDialog->Create();
-				m_wndView.FilterMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.FilterMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.FilterMachineDialog, point);
 				m_wndView.FilterMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.FilterMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_GAIN:
@@ -1450,9 +1433,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.GainerMachineDialog = new CGearGainer(&m_wndView);
 					m_wndView.GainerMachineDialog->_pMachine = (Gainer*)Global::_pSong->_pMachines[tmac];
 					m_wndView.GainerMachineDialog->Create();
-					m_wndView.GainerMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.GainerMachineDialog, point);
 					m_wndView.GainerMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.GainerMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1460,10 +1442,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.GainerMachineDialog = new CGearGainer(&m_wndView);
 				m_wndView.GainerMachineDialog->_pMachine = (Gainer*)Global::_pSong->_pMachines[tmac];
 				m_wndView.GainerMachineDialog->Create();
-				m_wndView.GainerMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.GainerMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.GainerMachineDialog, point);
 				m_wndView.GainerMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.GainerMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_FLANGER:
@@ -1475,9 +1455,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.FlangerMachineDialog = new CGearFlanger(&m_wndView);
 					m_wndView.FlangerMachineDialog->_pMachine = (Flanger*)Global::_pSong->_pMachines[tmac];
 					m_wndView.FlangerMachineDialog->Create();
-					m_wndView.FlangerMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+					CenterWindowOnPoint(m_wndView.FlangerMachineDialog, point);
 					m_wndView.FlangerMachineDialog->ShowWindow(SW_SHOW);
-//					m_wndView.FlangerMachineDialog->SetActiveWindow();
 				}
 			}
 			else
@@ -1485,10 +1464,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.FlangerMachineDialog = new CGearFlanger(&m_wndView);
 				m_wndView.FlangerMachineDialog->_pMachine = (Flanger*)Global::_pSong->_pMachines[tmac];
 				m_wndView.FlangerMachineDialog->Create();
-				m_wndView.FlangerMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-//				m_wndView.FlangerMachineDialog->CenterWindow();
+				CenterWindowOnPoint(m_wndView.FlangerMachineDialog, point);
 				m_wndView.FlangerMachineDialog->ShowWindow(SW_SHOW);
-//				m_wndView.FlangerMachineDialog->SetActiveWindow();
 			}
 			break;
 		case MACH_PLUGIN:
@@ -1509,6 +1486,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 										 ,Global::_pSong->_pMachines[tmac]->_editName);
 				((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 				isguiopen[tmac] = true;
+				CenterWindowOnPoint(m_pWndMac[tmac], point);
 			}
 			break;
 		case MACH_VST:
@@ -1532,12 +1510,65 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname);
 			((CVstEditorDlg*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
 			isguiopen[tmac] = true;
-			break;
+			CenterWindowOnPoint(m_pWndMac[tmac], point);
+		break;
 			}
 		}
 	}
 }
 
+void CMainFrame::CenterWindowOnPoint(CWnd* pWnd, POINT point)
+{
+	RECT r,rw;
+	WINDOWPLACEMENT w1;
+	pWnd->GetWindowRect(&r);
+	m_wndView.GetWindowPlacement(&w1);
+	/*
+	WINDOWPLACEMENT w2;
+	GetWindowPlacement(&w2);
+	if (w2.showCmd & SW_SHOWMAXIMIZED)
+	{
+	*/
+		rw.top = w1.rcNormalPosition.top;
+		rw.left = w1.rcNormalPosition.left;
+		rw.right = w1.rcNormalPosition.right;
+		rw.bottom = w1.rcNormalPosition.bottom+64;
+		/*
+	}
+	else
+	{
+		rw.top = w1.rcNormalPosition.top + w2.rcNormalPosition.top;
+		rw.left = w1.rcNormalPosition.left + w2.rcNormalPosition.left;
+		rw.bottom = w1.rcNormalPosition.bottom + w2.rcNormalPosition.top;
+		rw.right = w1.rcNormalPosition.right + w2.rcNormalPosition.left;
+	}
+	*/
+
+	int x = rw.left+point.x-((r.right-r.left)/2);
+	int y = rw.top+point.y-((r.bottom-r.top)/2);
+
+	if (x+(r.right-r.left) > (rw.right))
+	{
+		x = rw.right-(r.right-r.left);
+	}
+	// no else incase window is bigger than screen
+	if (x < rw.left)
+	{
+		x = rw.left;
+	}
+
+	if (y+(r.bottom-r.top) > (rw.bottom))
+	{
+		y = rw.bottom-(r.bottom-r.top);
+	}
+	// no else incase window is bigger than screen
+	if (y < rw.top)
+	{
+		y = rw.top;
+	}
+
+	pWnd->SetWindowPos(NULL,x,y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+}
 
 void CMainFrame::CloseAllMacGuis()
 {
