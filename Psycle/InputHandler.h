@@ -107,7 +107,7 @@ enum CmdSet
 
 	cdefPlayRowTrack,
 	cdefPlayRowPattern,
-	cdefPlayRepeat,
+	cdefPlayStart,
 	cdefPlaySong,
 	cdefPlayFromPos,
 	cdefPlayBlock,
@@ -356,10 +356,10 @@ struct CmdDef
 
 		case cdefPlayRowTrack:	return "Play Current Note";
 		case cdefPlayRowPattern:return "Play Current Row";
-		case cdefPlayRepeat:	return "Play Current Pattern";
+		case cdefPlayStart:		return "Play Song (from start)";
 		case cdefPlaySong:		return "Play Song (normal)";
 		case cdefPlayFromPos:	return "Play Song (from current row)";
-		case cdefPlayBlock:		return "Play Block";
+		case cdefPlayBlock:		return "Play Sel Pattern(s) Looped";
 		case cdefPlayStop:		return "Stop Playback";
 
 		case cdefInfoPattern:	return "Pattern Info";

@@ -2316,6 +2316,7 @@ BEGIN
     BUTTON      ID_EDIT_REDO
     BUTTON      ID_BARREC
     SEPARATOR
+    BUTTON      ID_BARPLAYFROMSTART
     BUTTON      ID_BARPLAY
     BUTTON      ID_BUTTONPLAYSEQBLOCK
     BUTTON      ID_BARSTOP
@@ -2460,9 +2461,10 @@ BEGIN
     ID_ABOUTPSYCLE          "Information and Logo\nLogo"
     ID_HELP_SALUDOS         "Greetings to People\nGreetings"
     ID_RECORDB              "Disk record\nRecord to .wav"
-    ID_BARPLAY              "Play song\nPlay"
-    ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
-    ID_BARSTOP              "Stop song\nStop"
+    ID_BARPLAY              "Play Song\nPlay"
+    ID_BARPLAYFROMSTART     "Play Song from Start\nPlay from Start"
+    ID_BUTTONPLAYSEQBLOCK   "Plays the Selected Pattern(s) in the Sequence Looped\nPlay Sel Patterns"
+    ID_BARSTOP              "Stop Song\nStop"
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
 END
 

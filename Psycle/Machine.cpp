@@ -752,7 +752,7 @@ void Master::Work(
 
 //	if (!_mute)
 //	{
-		float const mv = CValueMapper::Map_255_1(_outDry);
+		float mv = CValueMapper::Map_255_1(_outDry);
 		
 		float *pSamples = _pMasterSamples;
 		float *pSamplesL = _pSamplesL;
@@ -789,10 +789,14 @@ void Master::Work(
 				}
 				if (*pSamples > 32767.0f)
 				{
+					_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+					mv = CValueMapper::Map_255_1(_outDry);
 					*pSamples = *pSamplesL = 32767.0f; 
 				}
 				else if (*pSamples < -32767.0f)
 				{
+					_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+					mv = CValueMapper::Map_255_1(_outDry);
 					*pSamples = *pSamplesL = -32767.0f; 
 				}
 				pSamples++;
@@ -805,10 +809,14 @@ void Master::Work(
 				}
 				if (*pSamples > 32767.0f)
 				{
+					_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+					mv = CValueMapper::Map_255_1(_outDry);
 					*pSamples = *pSamplesR = 32767.0f; 
 				}
 				else if (*pSamples < -32767.0f)
 				{
+					_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+					mv = CValueMapper::Map_255_1(_outDry);
 					*pSamples = *pSamplesR = -32767.0f; 
 				}
 				pSamples++;
@@ -840,10 +848,6 @@ void Master::Work(
 		if (_lMax > 32767.0f)
 		{
 			_clip=true;
-			if (decreaseOnClip) 
-			{
-				_outDry = f2i((float)_outDry * 32767.0f / _lMax);
-			}
 			_lMax = 32767.0f; //_LMAX = 32768;
 		}
 		else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
@@ -852,10 +856,6 @@ void Master::Work(
 		if (_rMax > 32767.0f)
 		{
 			_clip=true;
-			if (decreaseOnClip) 
-			{
-				_outDry = f2i((float)_outDry * 32767.0f / _rMax);
-			}
 			_rMax = 32767.0f; //_RMAX = 32768;
 		}
 		else if (_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }

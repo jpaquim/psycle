@@ -202,6 +202,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
 	ON_COMMAND(ID_BARPLAY, OnBarplay)
+	ON_COMMAND(ID_BARPLAYFROMSTART, OnBarplayFromStart)
 	ON_COMMAND(ID_BARREC, OnBarrec)
 	ON_COMMAND(ID_BARSTOP, OnBarstop)
 	ON_COMMAND(ID_RECORDB, OnRecordWav)
@@ -216,6 +217,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
 	ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
 	ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
+	ON_UPDATE_COMMAND_UI(ID_BARPLAYFROMSTART, OnUpdateBarplayFromStart)
 	ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
 	ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 	ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
@@ -1049,12 +1051,28 @@ void CChildView::OnBarplay()
 	pParentMain->StatusBarIdle();
 }
 
+void CChildView::OnBarplayFromStart() 
+{
+	if (Global::pConfig->_followSong)
+	{
+		bScrollDetatch=false;
+	}
+	prevEditPosition=editPosition;
+	Global::pPlayer->Start(0,0);
+	pParentMain->StatusBarIdle();
+}
+
 void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 {
 	if (Global::pPlayer->_playing)
 		pCmdUI->SetCheck(1);
 	else
 		pCmdUI->SetCheck(0);
+}
+
+void CChildView::OnUpdateBarplayFromStart(CCmdUI* pCmdUI) 
+{
+	pCmdUI->SetCheck(0);
 }
 
 void CChildView::OnBarrec() 
@@ -1100,6 +1118,7 @@ void CChildView::OnButtonplayseqblock()
 	pParentMain->StatusBarIdle();
 	if ( viewMode == VMPattern ) Repaint(DMPattern);
 }
+
 void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 {
 	if ( Global::pPlayer->_playBlock == true ) pCmdUI->SetCheck(TRUE);

@@ -745,10 +745,8 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		PlayFromCur();
 		break;
 
-	case cdefPlayRepeat:
-		// TODO
-		TRACE("TODO\n");
-		PlaySong(); //FIXME
+	case cdefPlayStart:
+		pChildView->OnBarplayFromStart();
 		break;
 
 	case cdefPlayRowTrack:
@@ -1074,7 +1072,7 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefPlayRowTrack,'4',0);
 	SetCmd(cdefPlayRowPattern,'8',0);
 	
-	SetCmd(cdefPlayRepeat,17,MOD_S|MOD_E);
+	SetCmd(cdefPlayStart,VK_F5,MOD_S);
 	SetCmd(cdefPlaySong,VK_F5,0);
 	SetCmd(cdefPlayBlock,VK_F6,0);
 	SetCmd(cdefPlayFromPos,VK_F7,0);

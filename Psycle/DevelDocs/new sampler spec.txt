@@ -123,3 +123,5 @@ just use WAV format
 re: envelope gui:
 <_sue_> it would be very nice if you could set the size of the "place" where you draw the points.....like you could set it to 64 ticks/lines or something....
 <SCK|> just a though, it would be nice to have an ability to mix several sample streams. do some math operation between them , add sub mul ,
+RX style beatslicer mode
+

@@ -491,6 +491,7 @@ public:
 	afx_msg void OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 	afx_msg void OnKeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 	afx_msg void OnBarplay();
+	afx_msg void OnBarplayFromStart();
 	afx_msg void OnBarrec();
 	afx_msg void OnBarstop();
 	afx_msg void OnRecordWav();
@@ -505,6 +506,7 @@ public:
 	afx_msg void OnUpdatePatternView(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMachineview(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateBarplay(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateBarplayFromStart(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateBarrec(CCmdUI* pCmdUI);
 	afx_msg void OnFileSongproperties();
 	afx_msg void OnViewInstrumenteditor();
