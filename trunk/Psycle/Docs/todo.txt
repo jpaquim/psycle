@@ -4,11 +4,10 @@
 
 * <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
 * psycle default theme sucks
-* <sue> it recs the track where you have the cursor on.....is that what youre sayng ? <pooplog> yes
-	if you have 0 tracks armed
 + D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
 	drop that highlighted area?
 + .mid import
+* <necro> psycle crashes with a division error on boot on some 98 machines
 
 * Other crap
 ------------

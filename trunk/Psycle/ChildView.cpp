@@ -116,14 +116,6 @@ CChildView::CChildView()
 	ntOff=0;
 	nlOff=0;
 
-	XOFFSET = Global::pConfig->_linenumbers?33:1;
-	YOFFSET = 18;
-	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
-	TEXTHEIGHT = Global::pConfig->pattern_font_y;
-	ROWHEIGHT = TEXTHEIGHT+1;
-	TEXTWIDTH = 10;
-	ROWWIDTH = 111;
-
 	Global::pInputHandler->SetChildView(this);
 	Global::pResampler->SetQuality(RESAMPLE_LINEAR);
 	_outputActive = false;
