@@ -373,6 +373,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			nv=max_v;
 		}
 
+		wndView->AddMacViewUndo();
 		if ( _pMachine->_type == MACH_PLUGIN )
 		{
 			((Plugin*)_pMachine)->GetInterface()->ParameterTweak(tweakpar, (int)nv);
@@ -478,6 +479,7 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 			{
 				nv = max_v;
 			}
+			wndView->AddMacViewUndo();
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
 				((Plugin*)_pMachine)->GetInterface()->ParameterTweak(thispar, nv);
@@ -507,6 +509,7 @@ void CFrameMachine::OnParametersRandomparameters()
 
 		float roffset = randsem*(float)dif;
 
+		wndView->AddMacViewUndo();
 		((Plugin*)_pMachine)->GetInterface()->ParameterTweak(c, minran+int(roffset));
 	}
 
@@ -518,6 +521,7 @@ void CFrameMachine::OnParametersResetparameters()
 	for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
 	{
 		int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
+		wndView->AddMacViewUndo();
 		((Plugin*)_pMachine)->GetInterface()->ParameterTweak(c,dv);
 	}
 
