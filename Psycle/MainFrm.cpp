@@ -1721,6 +1721,7 @@ void CMainFrame::OnSelchangeSeqlist()
 			Global::pPlayer->_playBlock = b;
 		}
 		m_wndView.editPosition=ep;
+		m_wndView.prevEditPosition=ep;
 		UpdatePlayOrder(false);
 		
 		if(cpid!=_pSong->playOrder[ep])

@@ -13,6 +13,7 @@ X low priority
 * New and unsorted and untested
 ------------
 
+<Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 <lastfutur> no autosaving while recording/rendering
 <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
@@ -27,11 +28,6 @@ X low priority
 
 * Machines
 ------------
-**	<_sue_> the gainer machine doesnt work
-		[ getting stuck bug i have been able to recreate once but not debug-when i recreated it,
-		song was fucking up bad due to not enough buffers (and too small)]
-		[JAZ:Could this have happened due to the fixed but where psycle stopped machines
-		when having "autostop" enabled, and doing "Record (to wav)"?]
 **	cyanphase vibrasynth has an access violation bug
 		[ I need source to fix]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
