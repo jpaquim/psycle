@@ -144,7 +144,7 @@ namespace psycle
 					AEffect * effect(0);
 					try 
 					{
-						AEffect* effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
+						effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
 					}
 					catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
