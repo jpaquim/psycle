@@ -511,7 +511,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					_pSong->_pMachine[smac]->_x = point.x-mcd_x;
 					_pSong->_pMachine[smac]->_y = point.y-mcd_y;
 
-					char buf[80];
+					char buf[128];
 					sprintf(buf, "%s (%d,%d)", Global::_pSong->_pMachine[smac]->_editName, Global::_pSong->_pMachine[smac]->_x, Global::_pSong->_pMachine[smac]->_y);
 					pParentMain->StatusBarText(buf);
 					Repaint();
@@ -541,7 +541,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					Global::_pSong->_pMachine[smac]->SetPan(newpan);
 					newpan= Global::_pSong->_pMachine[smac]->_panning;
 					
-					char buf[80];
+					char buf[128];
 					if (newpan != 64)
 					{
 						sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);

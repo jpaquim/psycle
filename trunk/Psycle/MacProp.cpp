@@ -55,8 +55,8 @@ BOOL CMacProp::OnInitDialog()
 
 	deleted=false;
 
-	m_macname.SetLimitText(15);
-	char buffer[32];
+	m_macname.SetLimitText(31);
+	char buffer[64];
 	sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->_editName);
 	SetWindowText(buffer);
 
@@ -73,7 +73,7 @@ BOOL CMacProp::OnInitDialog()
 
 void CMacProp::OnChangeEdit1() 
 {
-	m_macname.GetWindowText(txt, 16);
+	m_macname.GetWindowText(txt, 32);
 }
 
 void CMacProp::OnButton1() 

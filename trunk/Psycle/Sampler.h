@@ -144,7 +144,6 @@ public:
 	};
 
 #if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
 		int temp;

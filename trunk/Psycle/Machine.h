@@ -67,8 +67,6 @@ public:
 	bool _stopped;
 	bool _worked;
 
-	int _outDry;
-	int _outWet;
 	float *_pSamplesL;						// left data
 	float *_pSamplesR;						// right data
 	float _lVol;							// left chan volume
@@ -88,7 +86,7 @@ public:
 
 	int _x;
 	int _y;
-	char _editName[16];
+	char _editName[32];
 	int _numPars;
 	int _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
 	int _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
@@ -141,7 +139,7 @@ public:
 	virtual bool SetParameter(int numparam,int value) { return false;}; 
 	virtual bool Load(RiffFile* pFile);
 	static Machine* LoadFileChunk(RiffFile* pFile, int index, int version);
-	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version) // versions can only be older than current or this won't get called 
 	{
 		UINT size;
 		pFile->Read(&size,sizeof(size)); // size of this part params to load
@@ -161,7 +159,6 @@ public:
 		return TRUE;
 	};
 #if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
 	void SaveFileChunk(RiffFile* pFile);
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
@@ -225,6 +222,7 @@ protected:
 class Master : public Machine
 {
 public:
+	int _outDry;
 	bool _clip;
 	bool decreaseOnClip;
 	static float* _pMasterSamples;
@@ -233,13 +231,8 @@ public:
 		UINT size;
 		pFile->Read(&size,sizeof(size)); // size of this part params to load
 
-		UINT count;
-
-		pFile->Read(&count,sizeof(count)); // num params to load
-		for (UINT i = 0; i < count; i++)
-		{
-			pFile->Read(&decreaseOnClip, sizeof(decreaseOnClip)); // numSubtracks
-		}
+		pFile->Read(&_outDry,sizeof(_outDry));
+		pFile->Read(&decreaseOnClip, sizeof(decreaseOnClip)); // numSubtracks
 
 		return TRUE;
 	};
@@ -255,11 +248,10 @@ public:
 
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
-		UINT count = 1;
-		UINT size = sizeof(count)+sizeof(decreaseOnClip);
+		UINT size = sizeof(_outDry)+sizeof(decreaseOnClip);
 		pFile->Write(&size,sizeof(size)); // size of this part params to load
 
-		pFile->Write(&count,sizeof(count));
+		pFile->Write(&_outDry,sizeof(_outDry));
 		pFile->Write(&decreaseOnClip, sizeof(decreaseOnClip)); 
 	};
 
@@ -281,6 +273,7 @@ class Gainer : public Machine
 public:
 	Gainer();
 
+	int _outWet;
 	virtual void Tick(int channel, PatternEntry *pData);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
@@ -359,9 +352,6 @@ public:
 		return true;
 	}
 	virtual bool Load(RiffFile* pFile);
-#if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
-#endif // ndef _WINAMP_PLUGIN_
 	virtual void GetParamName(int numparam,char* name)
 	{
 		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);
@@ -430,9 +420,6 @@ public:
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
 	virtual bool Load(RiffFile* pFile);
-#if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
-#endif // ndef _WINAMP_PLUGIN_
 	virtual void GetParamName(int numparam,char* name)
 	{
 		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);
@@ -503,6 +490,8 @@ public:
 	int _delayedCounterR;
 	int _feedbackL;
 	int _feedbackR;
+	int _outDry;
+	int _outWet;
 
 	Delay();
 	virtual ~Delay();
@@ -529,9 +518,6 @@ public:
 		return true;
 	}
 	virtual bool Load(RiffFile* pFile);
-#if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
-#endif // ndef _WINAMP_PLUGIN_
 	virtual void GetParamName(int numparam,char* name)
 	{
 		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);
@@ -596,6 +582,8 @@ public:
 	int _lfoSpeed;
 	int _lfoAmp;
 	int _lfoPhase;
+	int _outDry;
+	int _outWet;
 	bool useResample;
 
 	Flanger();
@@ -623,9 +611,6 @@ public:
 		return true;
 	}
 	virtual bool Load(RiffFile* pFile);
-#if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
-#endif // ndef _WINAMP_PLUGIN_
 	virtual void GetParamName(int numparam,char* name)
 	{
 		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);
@@ -727,9 +712,6 @@ public:
 		return true;
 	}
 	virtual bool Load(RiffFile* pFile);
-#if !defined(_WINAMP_PLUGIN_)
-	virtual bool Save(RiffFile* pFile);
-#endif // ndef _WINAMP_PLUGIN_
 	virtual void GetParamName(int numparam,char* name)
 	{
 		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);

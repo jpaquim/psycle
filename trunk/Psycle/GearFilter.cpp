@@ -63,9 +63,7 @@ BOOL CGearfilter::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	// Filter dialog initialization
-	char buffer[64];
-	sprintf(buffer,_pMachine->_editName);
-	SetWindowText(buffer);
+	SetWindowText(_pMachine->_editName);
 	
 	// Set slider boundaries
 	m_filter_cutoff_slider.SetRange(0, 256);

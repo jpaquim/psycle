@@ -49,9 +49,7 @@ BOOL CGearGainer::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	char buffer[64];
-	sprintf(buffer,_pMachine->_editName);
-	SetWindowText(buffer);
+	SetWindowText(_pMachine->_editName);
 
 	m_volslider.SetRange(0, 1024);
 	m_volslider.SetPos(1024-_pMachine->_outWet);

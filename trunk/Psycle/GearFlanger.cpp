@@ -100,9 +100,7 @@ BOOL CGearFlanger::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	char buffer[64];
-	sprintf(buffer, _pMachine->_editName);
-	SetWindowText(buffer);
+	SetWindowText(_pMachine->_editName);
 
 	m_presetcombo.AddString("Flanger Sweeper [Default]");
 	m_presetcombo.AddString("Chorus 1");

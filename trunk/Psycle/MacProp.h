@@ -24,7 +24,7 @@ public:
 	Machine *pMachine;
 	Song* pSong;
 	int thisMac;
-	char txt[16];
+	char txt[32];
 	bool deleted;
 
 // Dialog Data

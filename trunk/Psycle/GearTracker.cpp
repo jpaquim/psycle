@@ -57,9 +57,7 @@ BOOL CGearTracker::OnInitDialog()
 
 	m_interpol.SetCurSel(_pMachine->_resampler._quality);
 
-	char buffer[64];
-	sprintf(buffer,_pMachine->_editName);
-	SetWindowText(buffer);
+	SetWindowText(_pMachine->_editName);
 
 	m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 	m_polyslider.SetPos(_pMachine->_numVoices);

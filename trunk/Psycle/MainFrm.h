@@ -107,7 +107,7 @@ public:  // control bar embedded members
 	CDialogBar	m_wndControl2;
 	CDialogBar	m_wndSeq;
 	CReBar      m_wndReBar;
-	char		szStatusIdle[128];
+	char		szStatusIdle[192];
 	afx_msg void OnLoadwave();
 	
 	void EditQuantizeChange(int diff);

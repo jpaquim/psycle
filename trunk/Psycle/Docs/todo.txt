@@ -175,7 +175,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
 !?	alk - make wires square ended, like spec analyser
-+	Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 +	Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
 +	Internal Fx Gui to Native Gui Conversion (including wiredialog, or not...)
@@ -239,6 +238,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
 ** vst fm7 locks up psycle on parameter change midi command with gui open
+** ni pro53 sometimes crashes when loading a song that uses it.
 ** phatmatic crashes with an assertion error when you reopen the gui after loading a sample.
 ** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
 	it works fine?

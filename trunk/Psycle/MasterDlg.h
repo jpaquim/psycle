@@ -26,7 +26,7 @@ public:
 	CBitmap m_numbers;
 	CFont namesFont;
 	Master* _pMachine;
-	char macname[MAX_CONNECTIONS][16];
+	char macname[MAX_CONNECTIONS][32];
 	afx_msg void OnCancel();
 
 // Dialog Data
