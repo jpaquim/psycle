@@ -97,20 +97,27 @@ ASIOInterface::ASIOInterface(void)
 						{
 						case ASIOSTInt16LSB:
 						case ASIOSTInt32LSB16:		// 32 bit data with 18 bit alignment
+						case ASIOSTInt16MSB:
+						case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
 							strcat(szFullName[drivercount]," : 16 bit");
 							break;
 						case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
+						case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
 							strcat(szFullName[drivercount]," : 18 bit");
 							break;
 
 						case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
+						case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
 							strcat(szFullName[drivercount]," : 20 bit");
 							break;
-						case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
 						case ASIOSTInt24LSB:		// used for 20 bits as well
+						case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
+						case ASIOSTInt24MSB:		// used for 20 bits as well
+						case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
 							strcat(szFullName[drivercount]," : 24 bit");
 							break;
 						case ASIOSTInt32LSB:
+						case ASIOSTInt32MSB:
 							strcat(szFullName[drivercount],": 32 bit");
 							break;
 						case ASIOSTFloat32LSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
@@ -119,16 +126,9 @@ ASIOInterface::ASIOInterface(void)
 						case ASIOSTFloat64LSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
 							strcat(szFullName[drivercount],": 64 bit float");
 							break;
-						case ASIOSTInt16MSB:
-						case ASIOSTInt24MSB:		// used for 20 bits as well
-						case ASIOSTInt32MSB:
-						case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
-						case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
-						case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
 						case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 						case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
-						case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
-							strcat(szFullName[drivercount]," : unsupported MSB bitorder");
+							strcat(szFullName[drivercount]," : unsupported MSB float bitorder");
 							continue;
 							break;
 						}
@@ -520,6 +520,9 @@ void ASIOInterface::ControlPanel(int driverID)
 	#define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
 #endif
 
+#define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
+#define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
+
 ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 {	// the actual processing callback.
 	// Beware that this is normally in a seperate thread, hence be sure that you take care
@@ -654,6 +657,7 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 				*outr++ = f2i((*pBuf++)*16.0f);
 			}
 		}
+		break;
 	case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
 		{
 			DWORD* outl;
@@ -669,21 +673,115 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 		}
 		break;
 
-		// hey guess what? for now i don't like MSB drivers and just spit 0s
 	case ASIOSTInt16MSB:
-		memset (ASIObuffers[0][index], 0, _ASIObufferSize * 2);
-		memset (ASIObuffers[1][index], 0, _ASIObufferSize * 2);
+		{
+			WORD* outl;
+			WORD* outr;
+			outl = (WORD*)ASIObuffers[0][index];
+			outr = (WORD*)ASIObuffers[1][index];
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				*outl++ = SwapShort(f2i(*pBuf++));
+				*outr++ = SwapShort(f2i(*pBuf++));
+			}
+		}
 		break;
 	case ASIOSTInt24MSB:		// used for 20 bits as well
-		memset (ASIObuffers[0][index], 0, _ASIObufferSize * 3);
-		memset (ASIObuffers[1][index], 0, _ASIObufferSize * 3);
+		{
+			char* outl;
+			char* outr;
+			outl = (char*)ASIObuffers[0][index];
+			outr = (char*)ASIObuffers[1][index];
+			int t;
+			char* pt = (char*)&t;
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				t = SwapLong(f2i((*pBuf++)*256.0f));
+				*outl++ = pt[0];
+				*outl++ = pt[1];
+				*outl++ = pt[2];
+
+				t = SwapLong(f2i((*pBuf++)*256.0f));
+				*outr++ = pt[0];
+				*outr++ = pt[1];
+				*outr++ = pt[2];
+			}
+		}
 		break;
 	case ASIOSTInt32MSB:
-	case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
+		{
+			DWORD* outl;
+			DWORD* outr;
+			outl = (DWORD*)ASIObuffers[0][index];
+			outr = (DWORD*)ASIObuffers[1][index];
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				*outl++ = SwapLong(f2i((*pBuf++)*65536.0f));
+				*outr++ = SwapLong(f2i((*pBuf++)*65536.0f));
+			}
+		}
+		break;
 	case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
+		{
+			DWORD* outl;
+			DWORD* outr;
+			outl = (DWORD*)ASIObuffers[0][index];
+			outr = (DWORD*)ASIObuffers[1][index];
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				*outl++ = SwapLong(f2i(*pBuf++));
+				*outr++ = SwapLong(f2i(*pBuf++));
+			}
+		}
+		break;
 	case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
+		{
+			DWORD* outl;
+			DWORD* outr;
+			outl = (DWORD*)ASIObuffers[0][index];
+			outr = (DWORD*)ASIObuffers[1][index];
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				*outl++ = SwapLong(f2i((*pBuf++)*4.0f));
+				*outr++ = SwapLong(f2i((*pBuf++)*4.0f));
+			}
+		}
+		break;
 	case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
+		{
+			DWORD* outl;
+			DWORD* outr;
+			outl = (DWORD*)ASIObuffers[0][index];
+			outr = (DWORD*)ASIObuffers[1][index];
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				*outl++ = SwapLong(f2i((*pBuf++)*16.0f));
+				*outr++ = SwapLong(f2i((*pBuf++)*16.0f));
+			}
+		}
+		break;
+
 	case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
+		{
+			DWORD* outl;
+			DWORD* outr;
+			outl = (DWORD*)ASIObuffers[0][index];
+			outr = (DWORD*)ASIObuffers[1][index];
+
+			for (i = 0; i < _ASIObufferSize; i++)
+			{
+				*outl++ = SwapLong(f2i((*pBuf++)*256.0f));
+				*outr++ = SwapLong(f2i((*pBuf++)*256.0f));
+			}
+		}
+		break;
+	case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 		memset (ASIObuffers[0][index], 0, _ASIObufferSize * 4);
 		memset (ASIObuffers[1][index], 0, _ASIObufferSize * 4);
 		break;
