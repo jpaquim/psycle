@@ -17,7 +17,7 @@
 
 #include "in2.h"	// Winamp Input plugin header file
 
-#define WA_PLUGIN_VERSION "1.0 RC1"
+#define WA_PLUGIN_VERSION "1.0 RC2"
 
 // post this to the main window at end of file (after playback has stopped)
 #define WM_WA_PSY_EOF WM_USER+2
@@ -198,10 +198,13 @@ int infoDlg(char *fn, HWND hwnd)
 int isourfile(char *fn)
 {
 	OldPsyFile file;
-	if (!file.Open(fn) || !file.Expect("PSY2SONG", 8))
+	if (!file.Open(fn)) return 0;
+	if (!file.Expect("PSY2SONG", 8))
 	{
+		file.Close();
 		return 0;
 	}
+	file.Close();
 	return 1;
 }
 
