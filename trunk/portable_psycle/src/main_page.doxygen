@@ -1,0 +1,96 @@
+/** \mainpage Welcome to Psycle Design and Source Code Documentation
+
+	http://psycle.sourceforge.net
+
+	\section intro Introduction
+	
+		bohan, 2004, may, the 6th,
+		
+		I've cleaned a lot the source code and the documentation starts to be understandable.
+				
+	\section section__libraries Libraries
+
+		\ref libraries
+
+	\section todo Todo and Wishes
+
+		\ref todo
+
+	\section section__tasks Tasks
+
+		As you can see in the sections above, there's a lot of work to do, and few people: \ref tasks
+
+*/
+
+/*
+/// alias name for softsynth.
+namespace psycle = softsynth;
+
+/// alias name for namespace ::softsynth.
+namespace psycle { using namespace softsynth; }
+*/
+
+/** \page libraries Libraries
+
+	\section psycle psycle libraries
+		namespace ::softsynth (alias ::psycle)
+	
+		libraries that are directly related with psycle.
+		
+		\copydoc softsynth
+
+		\subsection softsynth__engine  core engine
+			namespace softsynth::engine
+	  
+			This library provides functionalities for both the plugins and the host.
+
+			It is important that the plugin api is not just a header with a dumb pure abstract class,
+			but a shared library reusable by every plugin.
+	  
+			\copydoc softsynth::engine
+
+		\subsection softsynth__host plugin host and sequence player
+			namespace softsynth::host
+	  
+			plugin host and sequence player.
+			
+			\copydoc softsynth::host
+
+		\subsection softsynth__gui gui frontend for the host
+			namespace softsynth::gui
+		
+			graphical frontend for the host.
+		
+			\copydoc softsynth::gui
+
+		\subsection softsynth__plugins plugins
+			namespace softsynth::plugins
+			
+			plugins, subclasses of softsynth::engine::node.
+			
+			\copydoc softsynth::plugins
+
+	\section generic generic libraries
+	
+		generic libraries are not directly related with psycle, but used by it:
+
+		\subsection thrid_party third party libraries
+		
+			We use the standard c++ library, and the nearly standard http://boost.org library.
+
+		\subsection operating_system operating_system
+			namespace operating_system
+
+			provides a unified interface for common functionalities of several operating systems, abstracting the specificities of each.
+
+			\copydoc operating_system
+			
+*/
+
+/**	\page tasks Tasks
+	\verbatim
+	
+		Who does what?
+	
+	\endverbatim
+*/
