@@ -1,10 +1,9 @@
 //////////////////////////////////////////////////////////////////////
 //// Sartorius SDelayer effect plugin for PSYCLE
-
+#include <project.h>
+#include <psycle/plugin/machineinterface.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
-#include "..\machineinterface.h"
 
 #define MAXIMUM_DELAY   30000
 
