@@ -172,6 +172,7 @@ public:
 	int GetFreeFxBus();
 	int FindBusFromIndex(int smac);
 	int GetNumPatternsUsed();
+	int GetBlankPatternUnused(int rval = 0);
 	bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
 #endif // ndef _WINAMP_PLUGIN_
 	void DeleteAllPatterns(void);
