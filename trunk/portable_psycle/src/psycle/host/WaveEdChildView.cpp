@@ -1003,10 +1003,9 @@ namespace psycle
 		void CWaveEdChildView::OnEditCrop()
 		{
 			unsigned long blStartTemp = blStart;
-			unsigned long blLengthTemp = blLength;
-
-			blStart += blLengthTemp;
-			blLength = (wdLength - blStartTemp);
+			
+			blStart += blLength;
+			blLength = (wdLength - blStart);
 			OnEditDelete();
 			
 			blSelection = true;
