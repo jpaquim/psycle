@@ -861,11 +861,11 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	
 	cb->SetCurSel(selected);
 
+	// Select the appropiate Option in Aux Combobox.
 	if (found)
 	{
 		if (_pSong->seqBus < MAX_BUSES) // Generator
 		{
-			// Select the appropiate Option in Aux Combobox.
 			if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]])
 			{
 				if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
@@ -1653,10 +1653,10 @@ void CMainFrame::OnSelchangeSeqlist()
 	if(m_wndView.editPosition<0) m_wndView.editPosition = 0; // DAN FIXME
 	int const cpid=_pSong->playOrder[m_wndView.editPosition];
 
+	memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 	for (int c=0;c<maxitems;c++) 
 	{
 		if ( cc->GetSel(c) != 0) _pSong->playOrderSel[c]=true;
-		else _pSong->playOrderSel[c]=false;
 	}
 	
 	if((ep!=m_wndView.editPosition))// && ( cc->GetSelCount() == 1))
@@ -2334,7 +2334,6 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	}
 
 	sprintf(buffer, "%02d:%02d", f2i(songLength / 60), f2i(songLength) % 60);
-
 	pLength->SetWindowText(buffer);
 
 // Update sequencer line
@@ -2344,14 +2343,11 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 		pls->DeleteString(ls);
 		sprintf(buffer,"%.2X: %.2X",ls,le);
 		pls->InsertString(ls,buffer);
-		// Update sequencer selection	
-		pls->SelItemRange(false,0,pls->GetCount()-1);
-		for (i=0; i<MAX_SONG_POSITIONS;i++)
-		{
-			_pSong->playOrderSel[i] = false;
-		}
 	}
+	// Update sequencer selection	
+	pls->SelItemRange(false,0,pls->GetCount()-1);
 	pls->SetSel(ls,true);
+	memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 	_pSong->playOrderSel[ls] = true;
 }
 

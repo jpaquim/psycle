@@ -328,7 +328,7 @@ bool CMidiInput::Close( void )
 // PARAMETERS     : CString nameString - identifier by name
 // RETURNS		  : int - device identifier found (or -1 if fail)
 
-UINT CMidiInput::FindDevByName( CString nameString )
+int CMidiInput::FindDevByName( CString nameString )
 {
 	MIDIINCAPS mic;
 	UINT numDevs;

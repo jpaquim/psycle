@@ -846,11 +846,11 @@ void CChildView::OnFileNew()
 		editPosition=0;
 		Global::_pSong->seqBus=0;
 		pParentMain->PsybarsUpdate(); // Updates all values of the bars
-		pParentMain->UpdatePlayOrder(false);
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->m_wndInst.WaveUpdate();
 		pParentMain->UpdateSequencer();
-		pParentMain->UpdateComboIns();
+		pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
+//		pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
 		RecalculateColourGrid();
 		Repaint();
 	}
@@ -884,17 +884,27 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 			bChecked = FALSE;
 		}
 	}
-
+	
 	if (!bChecked)
 	*/
 	{
 		char szText[128];
+		CString filepath = Global::pConfig->GetInitialSongDir();
+		filepath += "\\autosave.psy";
+		OldPsyFile file;
+		
 		sprintf(szText,"Save changes to %s?",Global::_pSong->fileName);
 		int result = MessageBox(szText,szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 		switch (result)
 		{
 		case IDYES:
-			return OnFileSave(0);
+			if (!file.Create(filepath.GetBuffer(1), true))
+			{
+				return FALSE;
+			}
+			_pSong->Save(&file);
+			file.Close();
+			return TRUE;
 			break;
 		case IDNO:
 			return TRUE;
@@ -1593,7 +1603,6 @@ void CChildView::OnFileImportXmfile()
 			,Global::_pSong->Author
 			,Global::_pSong->Comment);
 		MessageBox(buffer,"XM file imported",MB_OK);
-		Global::_pSong->_saved=true;
 
 		CString str = ofn.lpstrFile;
 		int index = str.ReverseFind('\\');
@@ -1691,7 +1700,6 @@ void CChildView::OnFileImportItfile()
 			,Global::_pSong->Author
 			,Global::_pSong->Comment);
 		MessageBox(buffer,"IT file imported",MB_OK);
-		Global::_pSong->_saved=true;
 
 		CString str = ofn.lpstrFile;
 		int index = str.ReverseFind('\\');
@@ -1878,7 +1886,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 			pParentMain->m_wndInst.WaveUpdate();
 			pParentMain->UpdateSequencer();
 			pParentMain->UpdatePlayOrder(false);
-			pParentMain->UpdateComboIns();
+//			pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
 			RecalculateColourGrid();
 			Repaint();
 			KillUndo();

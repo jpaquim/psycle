@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AudioDriver.h"
-#include "PortAudio.h"
+#include "portaudio.h"
 
 class PortAudioASIO : public AudioDriver
 {
