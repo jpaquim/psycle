@@ -368,8 +368,6 @@ float * Player::Work(
 			CSingleLock crit(&Global::_pSong->door, TRUE);
 			
 			CPUCOST_INIT(idletime);
-			// Reset all machines
-			//
 			if ( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec )
 			{
 				pSong->_sampCount =0;
@@ -382,7 +380,8 @@ float * Player::Work(
 					}
 				}
 			}
-
+			// Reset all machines
+			//
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
 				if (pSong->_pMachine[c])

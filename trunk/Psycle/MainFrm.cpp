@@ -118,9 +118,10 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SONGBAR, OnUpdateViewSongbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SEQUENCERBAR, OnUpdateViewSequencerbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
+	ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
 ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
-	ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_MASTERSLIDER, OnCustomdrawMasterslider)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -238,7 +239,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndToolBar.SetWindowText("Psycle tool bar");
 	m_wndControl.SetWindowText("Psycle control bar");
 	CButton *cb;
-
+	CSliderCtrl *cs;
+	
 	HBITMAP hi;
 	blessless.LoadMappedBitmap(IDB_LESSLESS,0);
 	bless.LoadMappedBitmap(IDB_LESS,0);
@@ -268,6 +270,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	cb=(CButton*)m_wndControl.GetDlgItem(IDC_INC_TPB);
 	hi = (HBITMAP)bmore; cb->SetBitmap(hi);
+	
+	cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
+	cs->SetRange(0,1024);
+	cs->SetPos(512);
+	cs->SetTicFreq(64);
 
 
 	m_wndControl2.SetWindowText("Psycle control bar 2");
@@ -608,9 +615,30 @@ void CMainFrame::ShiftOctave(int x)
 	_pSong->currentOctave += x;
 	if ( _pSong->currentOctave < 0 )	 { _pSong->currentOctave = 0; }
 	else if ( _pSong->currentOctave > 8 ){ _pSong->currentOctave = 8; }
-
+	
 	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
 	cc2->SetCurSel(_pSong->currentOctave);
+}
+void CMainFrame::UpdateMasterValue(int newvalue)
+{
+	CSliderCtrl *cs;
+	if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
+	{
+		cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
+		cs->SetPos(newvalue);
+	}
+}
+
+void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	CSliderCtrl *cs;
+	if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
+	{
+		cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
+		((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
+	}
+	
+	*pResult = 0;
 }
 
 void CMainFrame::OnClipbut() 
@@ -629,8 +657,8 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 		CStatic *lc=(CStatic *)m_wndControl.GetDlgItem(IDC_FRAMECLIP);
 		CClientDC clcanvasl(lc);
 		
-		if (clip) clcanvasl.FillSolidRect(0,0,9,16,vu3);
-		else  clcanvasl.FillSolidRect(0,0,9,16,vu2);
+		if (clip) clcanvasl.FillSolidRect(0,0,9,20,vu3);
+		else  clcanvasl.FillSolidRect(0,0,9,20,vu2);
 		
 	//	bool draw_l=true;
 	//	bool draw_r=true;
@@ -661,47 +689,51 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 
 		int log_l=f2i(100*log10f(l));
 		int log_r=f2i(100*log10f(r));
-		log_l=log_l-226;
+		log_l=log_l-225;
 		if ( log_l < 0 )log_l=0;
-		log_r=log_r-226;
+		log_r=log_r-225;
 		if ( log_r < 0 )log_r=0;
 		
 		if (log_l || vuprevL)
 		{
-			canvasl.FillSolidRect(0,0,log_l,5,vu1);
+//			canvasl.FillSolidRect(0,0,log_l,5,vu1);
+			canvasl.FillSolidRect(0,0,log_l,4,vu1);
 			if (vuprevL > log_l )
 			{
-				canvasl.FillSolidRect(log_l,0,vuprevL-log_l,5,vu3);
-				canvasl.FillSolidRect(vuprevL,0,226-vuprevL,5,vu2);
+				canvasl.FillSolidRect(log_l,0,vuprevL-log_l,4,vu3);
+				canvasl.FillSolidRect(vuprevL,0,225-vuprevL,4,vu2);
 				vuprevL-=2;
 			}
 			else 
 			{
-				canvasl.FillSolidRect(log_l,0,226-log_l,5,vu2);
+				canvasl.FillSolidRect(log_l,0,225-log_l,4,vu2);
 				vuprevL = log_l;
 			}
 		}
 		else
-			canvasl.FillSolidRect(0,0,226,5,vu2);
+//			canvasl.FillSolidRect(0,0,226,5,vu2);
+			canvasl.FillSolidRect(0,0,225,4,vu2);
 
 		if (log_r || vuprevR)
 		{
-			canvasr.FillSolidRect(0,0,log_r,5,vu1);
+//			canvasr.FillSolidRect(0,0,log_r,5,vu1);
+			canvasl.FillSolidRect(0,5,log_r,4,vu1);
+			
 			if (vuprevR > log_r )
 			{
-				canvasr.FillSolidRect(log_r,0,vuprevR-log_r,5,vu3);
-				canvasr.FillSolidRect(vuprevR,0,226-vuprevR,5,vu2);
+				canvasl.FillSolidRect(log_r,5,vuprevR-log_r,4,vu3);
+				canvasl.FillSolidRect(vuprevR,5,225-vuprevR,4,vu2);
 				vuprevR-=2;
 			}
 			else 
 			{
-				canvasr.FillSolidRect(log_r,0,226-log_r,5,vu2);
+				canvasl.FillSolidRect(log_r,5,225-log_r,4,vu2);
 				vuprevR = log_r;
 			}
 		}
 		else
-			canvasr.FillSolidRect(0,0,226,5,vu2);
-		
+			canvasl.FillSolidRect(0,5,225,4,vu2);
+
 	/*	if(draw_l)
 		{
 			canvasl.FillSolidRect(0,0,cl,5,vu1);
@@ -2665,3 +2697,4 @@ void CMainFrame::RedrawGearRackList()
 		pGearRackDialog->RedrawList();
 	}
 }
+

@@ -671,6 +671,7 @@
 #define IDC_INS_INCNOTE                 1533
 #define IDC_INS_INCOCTAVE               1534
 #define IDC_NOTETUNE                    1535
+#define IDC_MASTERSLIDER                1536
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -764,8 +765,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        205
-#define _APS_NEXT_COMMAND_VALUE         32923
-#define _APS_NEXT_CONTROL_VALUE         1536
+#define _APS_NEXT_COMMAND_VALUE         32924
+#define _APS_NEXT_CONTROL_VALUE         1537
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

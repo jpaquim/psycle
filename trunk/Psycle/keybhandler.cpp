@@ -40,7 +40,7 @@ void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 {
 	// undo code not required, enter not and msbput handle it
 	BOOL bRepeat = nFlags&0x4000;
-
+	
 	if(viewMode == VMPattern && bEditMode)
 	{
 		if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
@@ -48,12 +48,24 @@ void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 			bool success;
 			// add data
 			success = Global::pInputHandler->EnterData(nChar,nFlags);
-
+			
 			if ( success )
 			{
 				CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 				return;
 			}
+		}
+	}
+	else if (viewMode == VMSequence && bEditMode)
+	{
+		bool success;
+		// add data
+//		success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
+		success = false;
+		if ( success )
+		{
+			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+			return;
 		}
 	}
 	else
@@ -71,7 +83,7 @@ void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		{			
 			Global::pInputHandler->PerformCmd(cmd,bRepeat);
 		}
-		else if (cmd.GetType() == CT_Note )
+		else if (cmd.GetType() == CT_Note && viewMode != VMSequence)
 		{
 			if(!bRepeat) 
 			{	

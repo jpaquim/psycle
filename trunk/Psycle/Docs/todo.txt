@@ -21,6 +21,40 @@ aditional known vst bugs/buggy vsts: ~33
 * New and unsorted and untested
 -------------------------------
 
+
+
+///////////////////////
+
+ok: This is all pure "Waves + the b0rG" 100% VST nightmare. 
+
+I'll try to explain all of this with my lame english. 
+
+First of all, when you instance the scary Waveshell plugin, one of the first thing it will do is query your host audioMaster callback asking for a return value for dispatcher "audioMasterGetUniqueID" thing. 
+
+What your host should return. Well, just a "0" if WE DONT KNOW what of the waves goodies we'll instance from the pack (C1,Enigma,etc,etc), this usually is just when user wants to instance a new plug. 
+
+- If you dont return the 0 nor a one of the valids Waves plugin's IDs, waveshell will crash - 
+
+When the "0" is returned, Waves will open a popup menu for plugin selection, the plugin instances, and everything "should" work right. (just pray) 
+
+The funny thing starts now: when you save your song/project/whatever vst data, you must get the uniqueID again from this (Well, each) plugin wich will be not 0, depending what Waves goodie was instanced before, pre-write this value in your file/stream, so when user/host loads the song later, at the moment the Waves plugin ask for audioMasterGetUniqueID explained above, the host should return this value, so it will not popup the menu again asking for plugin selection, but it will load the plugin with the ID given below. 
+
+Hope this makes stuff clear.
+
+
+/////////////////
+
+
+
+
+*** When loading a stereo sample and reversing it in the wave editor (Psycle 1.74), a small artefact
+  is added to the beginning, and when I try to cut this Psycle crashes. This doesn't seem to happen
+  with monosamples.
+
+! problem with directories http://psycle.pastnotecut.org/thread.php?threadid=1088&boardid=2&styleid=&page=1#5
+
+!! panning command does not refresh the panning graphic.
+
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 

@@ -132,7 +132,7 @@ public:
 
 	bool Load(RiffFile* pFile, bool fullopen=true); // The "fullopen" attribute is used in context of the
 #if !defined(_WINAMP_PLUGIN_)						// winamp/foobar player plugins, where it allows to get
-	bool Save(RiffFile* pFile);						// the info of the file, without needing to open it completely.
+	bool Save(RiffFile* pFile,bool autosave=false);	// the info of the file, without needing to open it completely.
 	bool IsPatternUsed(int i);
 
 	// Previews waving

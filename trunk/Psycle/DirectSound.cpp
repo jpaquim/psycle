@@ -133,6 +133,7 @@ bool DirectSound::Start()
 		_dsBufferSize = caps.dwBufferBytes;
 		WriteConfig();
 	}
+	_pBuffer->Initialize(_pDs,&desc);
 
 	_lowMark = 0;
 	_highMark = _bufferSize;
