@@ -506,7 +506,6 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 		pFile->Read(&pMachine->_wireMultiplier[i],sizeof(pMachine->_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
 		pFile->Read(&pMachine->_connection[i],sizeof(pMachine->_connection[i]));      // Outgoing connections activated
 		pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
-//		pFile->Read(&pMachine->_connectionPoint[i],sizeof(pMachine->_connectionPoint[i]));// point for wire? 
 	}
 	pFile->ReadString(pMachine->_editName,sizeof(pMachine->_editName));
 
@@ -545,7 +544,6 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			p->_wireMultiplier[i]=pMachine->_wireMultiplier[i];
 			p->_connection[i]=pMachine->_connection[i];
 			p->_inputCon[i]=pMachine->_inputCon[i];
-	//		p->_connectionPoint[i]=pMachine->_connectionPoint[i];
 		}
 		strcpy(p->_editName,pMachine->_editName);
 		p->_numPars=0;

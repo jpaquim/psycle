@@ -16,6 +16,7 @@
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
+#include "DataCompression.h"
 
 
 #if !defined(_WINAMP_PLUGIN_)
@@ -1245,12 +1246,22 @@ bool Song::Load(RiffFile* pFile)
 
 						pFile->ReadString(patternName[index],sizeof(patternName[index]));
 
+						pFile->Read(&size,sizeof(size));
+						byte* pSource = new byte[size];
+						pFile->Read(pSource,size);
+						byte* pDest;
+
+						BEERZ77Decomp2(pSource, &pDest);
+						delete pSource;
+						pSource = pDest;
 
 						for (int y = 0; y < patternLines[index]; y++)
 						{
 							unsigned char* pData = _ppattern(index)+(y*MULTIPLY);
-							pFile->Read(pData,EVENT_SIZE*SONGTRACKS);
+							memcpy(pData,pSource,SONGTRACKS*EVENT_SIZE);
+							pSource+=SONGTRACKS*EVENT_SIZE;
 						}
+						delete pDest;
 					}
 					else
 					{
@@ -2251,10 +2262,22 @@ bool Song::Save(RiffFile* pFile)
 		if (ppPatternData[i])
 		{
 			// we could also check to see if pattern is unused AND blank, but for now, don't worry about it.
+			byte* pSource=new byte[SONGTRACKS*patternLines[i]*EVENT_SIZE];
+			byte* pCopy = pSource;
+
+			for (int y = 0; y < patternLines[i]; y++)
+			{
+				unsigned char* pData = ppPatternData[i]+(y*MULTIPLY);
+				memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
+				pCopy+=EVENT_SIZE*SONGTRACKS;
+			}
+
+			size = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE)+(3*sizeof(temp))+strlen(patternName[i])+1;
+			delete pSource;
 
 			pFile->Write("PATD",4);
 			version = CURRENT_FILE_VERSION_PATD;
-			size = (3*sizeof(temp))+(patternLines[i]*SONGTRACKS*EVENT_SIZE)+strlen(patternName[i])+1;
+
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
@@ -2267,11 +2290,10 @@ bool Song::Save(RiffFile* pFile)
 
 			pFile->Write(&patternName[i],strlen(patternName[i])+1);
 
-			for (int y = 0; y < patternLines[i]; y++)
-			{
-				unsigned char* pData = ppPatternData[i]+(y*MULTIPLY);
-				pFile->Write(pData,EVENT_SIZE*SONGTRACKS);
-			}
+			size -= (3*sizeof(temp))+strlen(patternName[i])+1;
+			pFile->Write(&size,sizeof(size));
+			pFile->Write(pCopy,size);
+			delete pCopy;
 		}
 	}
 
