@@ -76,6 +76,9 @@ public:
 	void PsybarsUpdate();
 	void UpdateVumeters(float l, float r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip);
 	LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
+	BOOL StatusBarIdleText();
+	void StatusBarIdle();
+
 	virtual ~CMainFrame();
 
 private:

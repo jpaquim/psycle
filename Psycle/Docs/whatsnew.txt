@@ -57,7 +57,7 @@ V1.67
 + Machine and Pattern Header Skinning (pooplog)
 + Wire Dialog contains some diagnostic tools, and has a more functional +12db->-inf range (pooplog)
 + in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
-
++ You can drag songs onto the window to load them now (pooplog)
 
 V1.66
 -----

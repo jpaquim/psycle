@@ -505,6 +505,7 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 
 			editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
 			Repaint(DMCursor);
+			pParentMain->StatusBarIdle();
 			if (!(nFlags & MK_SHIFT))
 			{
 				blockSelected=false;

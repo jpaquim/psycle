@@ -3,7 +3,7 @@
 +=addition
 
 * psycle default theme sucks
-* <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
+* <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
 
@@ -59,9 +59,6 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 + <bdzld> block delete
 feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
 feature: maybe: MultiPattern View (The code is not made in the best way)
-feature: MORE Keyboard shortcuts 
-feature: First, I'd like to see the Generator or Effect name in one of these places
-		 when I hover over a note in the Pattern Editor ( MrToast )
 
 * GUI (machines):
 -----------------
@@ -101,6 +98,7 @@ feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 * when changing octave, notes playing should be stopped (because if not, notes playing don't stop)
   Problem!!! All key processing is done by InputHandler, so machines don't know when it happens, and neither
              does Inputhandler know which machines are playing. Doing a "player::Stop()" would be a bit hardcore.
+			 I agree
 bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
 bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
@@ -122,7 +120,7 @@ feature: Maybe: New command "twc" which will send a machine command (like note d
 feature: pattern repeat (loop) and song repeat (asked by Vir|us)
 feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + new file format: (machines save custom data length, patterns stored according to # tracks, sequence length stored
-		according to length, vst multi-out, etc.)
+		according to length, vst multi-out, connections as linked lists, etc.)
 
 * Vsts:
 ------------
@@ -178,6 +176,7 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
 	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
 + <sue> hotkeys for seq edit cut, copy, paste, etc?
+feature: MORE Keyboard shortcuts 
 
 * Driver Issues:
 ------------
