@@ -25,7 +25,6 @@ X low priority
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
 	<bdzld> yep, or if the sample rate is invalid
 
-** save as - pick an existing song, and it doesn't ask if it is ok to overwrite
 *** sometimes psycle changes the length of a block for no reason
 * The play block feature doesn't work.
 * When 'cursor always down' is enabled u can't insert values on the last row
@@ -48,9 +47,6 @@ http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
 + I agree that final output should be limited
 
 + i was wondering if it is possible to make a header skin that indicates when a track creates an output?? (like those small vu meters at the headers in mp-tracker, or something)
-+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
-+ 'Free wave' button that sets driver to silent
-+ release audio when psycle looses focus option
 
 ?+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
 	[50MB to clipboard? ehem...]

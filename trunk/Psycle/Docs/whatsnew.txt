@@ -4,7 +4,10 @@ Legend :	+=addition		*=change	!=bug
 
 V1.7.3
 ------
-++ double clicking on pattern highlights that track (pooplog)
++ double clicking on pattern highlights that track (pooplog)
+! better memory management of pattern data (up to 10mb savings) (pooplog)
+! optimized machine indexing (pooplog)
+* save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
 
 
 V1.7.1
