@@ -19,21 +19,24 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MFC core and "standard" components.
+// mfc (aka afx)
 
-#include <afxwin.h>
-#include <afxext.h> // MFC extensions.
-#include <afxdtctl.h> // MFC support for Internet Explorer 4 Common Controls.
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
+#define _AFX_ALL_WARNINGS // turns off MFC's hiding of some common and often safely ignored warning messages
+#include <afxwin.h> // MFC core and standard components
+//#include <afxext.h> // MFC extensions
+//#include <afxdisp.h> // MFC Automation classes
+#include <afxdtctl.h> // MFC support for Internet Explorer 4 Common Controls
 #if !defined _AFX_NO_AFXCMN_SUPPORT
-	#include <afxcmn.h> // MFC support for Windows Common Controls.
+	#include <afxcmn.h> // MFC support for Windows Common Controls
 #endif
-#include <afxmt.h>
+#include <afxmt.h> // ???
 
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// GDI+.
+// gdi+.
 
 #include <gdiplus.h>				
 #pragma comment(lib, "gdiplus")
