@@ -46,6 +46,7 @@
 #include "inputhandler.h"
 #include "VstEditorDlg.h"
 #include "masterdlg.h"
+#include "SaveWavDlg.h"
 
 #include <math.h> // SwingFill
 
@@ -106,6 +107,7 @@ CChildView::CChildView()
 
 	patStep=1;
 	editPosition=0;
+	prevEditPosition=0;
 	bEditMode = true;
 
 	blockSelected=false;
@@ -876,7 +878,8 @@ void CChildView::OnFileSaveaudio()
 	MessageBox("Option not developed yet","Save to wav file",MB_OK);
 	// TODO: Add your command handler code here
 
-	
+	CSaveWavDlg dlg;
+	dlg.DoModal();
 
 	
 }
@@ -1077,21 +1080,27 @@ void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI)
 
 void CChildView::OnBarstop()
 {
+	bool pl = Global::pPlayer->_playing;
 	Global::pPlayer->Stop();
 	pParentMain->SetAppSongBpm(0);
 	pParentMain->SetAppSongTpb(0);
-	if ( Global::pConfig->_followSong )
+
+	if (pl)
 	{
-		editPosition=prevEditPosition;
-		pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
-		Repaint(DMPattern);
+		if ( Global::pConfig->_followSong )
+		{
+			editPosition=prevEditPosition;
+			pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
+			Repaint(DMPattern);
+		}
+		else
+		{
+			memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+			Global::_pSong->playOrderSel[editPosition] = true;
+			Repaint(DMCursor); 
+		}
 	}
-	else
-	{
-		memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-		Global::_pSong->playOrderSel[editPosition] = true;
-		Repaint(DMCursor);  
-}}
+}
 
 void CChildView::OnRecordWav() 
 {

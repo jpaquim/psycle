@@ -17,6 +17,7 @@ X low priority
 * alk: select the the first and last row of channel 2 to select the whole channel
 	move to channel 1, goto the last row, do select end of block
 	[ I don't know what alk is talking about ]
+	[ I do, but I don't see any bug. It is with using CTRL+B CTRL+E to select ]
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
@@ -60,8 +61,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 --------------------------
 ! alk: escape to close wave ed
 +++ <_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
-		[Problem: Needs a sampler Machine. The wave preview is not adecuated]
-		[<pooplog> Could preview just like the load dialog does...]
+		[Problem: Needs a sampler Machine. The wave preview is not adecuated
+		 it doesn't loop, and doesn't take note into consideration ]
 +	ALK waveed: remove silence from start and end of wave
 +	Mystic - import .mp3 format for samples
 +	Easier way to load Samples.

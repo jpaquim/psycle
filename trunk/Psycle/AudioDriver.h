@@ -51,14 +51,7 @@ public:
 		void) { return true; };
 	virtual AudioDriverInfo* GetInfo(
 		void) { return &_info; };
-
-public:
-	int _samplesPerSec;
-	int _flags;
-
-protected:
-	static AudioDriverInfo _info;
-
+	
 	static void QuantizeWithDither(
 		float *pin,
 		int *piout,
@@ -67,6 +60,15 @@ protected:
 		float *pin,
 		int *piout,
 		int c);
+
+public:
+	int _samplesPerSec;
+	int _flags;
+
+protected:
+	static AudioDriverInfo _info;
+
+
 };
 
 #endif
