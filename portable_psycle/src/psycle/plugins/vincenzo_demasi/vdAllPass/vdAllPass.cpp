@@ -21,7 +21,7 @@
 #include "vdAllPass.hpp"
 #include <stdio.h>
 
-PSYCLE__PLUGIN__INCTANCIATOR(mi, &MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {

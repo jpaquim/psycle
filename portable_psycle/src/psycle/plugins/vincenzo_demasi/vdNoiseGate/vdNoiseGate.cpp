@@ -21,7 +21,7 @@
 #include <math.h>
 #include "vdNoiseGate.hpp"
 
-PSYCLE__PLUGIN__INCTANCIATOR(mi, &MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {

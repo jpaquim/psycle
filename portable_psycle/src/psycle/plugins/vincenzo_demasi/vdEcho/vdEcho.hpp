@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <psycle/plugins_interface.hpp>
+#include <psycle/plugin_interface.hpp>
 #include "..\vdabout.hpp"
 #include "combfilter.hpp"
 
