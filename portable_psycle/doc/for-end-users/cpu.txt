@@ -21,7 +21,7 @@ You should copy everything contained in the directory that matches your cpu into
 Make sure you don't have duplicates of the same plugins:
 	the packs from psycledelics puts the plugins into subdirs of the plugins dir,
 	and this pack does have them all at the top of the plugins dir.
-Actually, I recommend you don't use subdirectories inside your plugins dir.
+	(Actually, it could happen in future plugins that subdirectories cause problems.)
 
 Currently, we don't distribute builds for older CPUs, G5: Intel Pentium I, AMD K6, K6-2, K6-III, 5x86, 6x86, etc.
 If you request us to add it, we'll add it.
