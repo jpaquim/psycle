@@ -8,16 +8,9 @@ void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	if (cmd.GetType() == CT_Note)
 	{
 		const int outnote = cmd.GetNote();
-		if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && _followSong)
+		if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && _followSong && Global::pConfig->_RecordNoteoff)
 		{ 
-			if(Global::pConfig->_RecordNoteoff)
-			{
-				EnterNote(outnote,0,true);	// note end
-			}
-			else
-			{
-				Global::pInputHandler->StopNote(outnote);
-			}
+			EnterNote(outnote,0,true);	// note end
 		}
 		else
 		{
@@ -30,20 +23,23 @@ void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 {
 	// undo code not required, enter not and msbput handle it
-	if(viewMode == VMPattern && bEditMode)
-	{
-		bool success;
-		// add data
-		success = Global::pInputHandler->EnterData(nChar,nFlags);
+	BOOL bRepeat = nFlags&0x4000;
 
-		if ( success )
+	if (!bRepeat)
+	{
+		if(viewMode == VMPattern && bEditMode)
 		{
-			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-			return;
+			bool success;
+			// add data
+			success = Global::pInputHandler->EnterData(nChar,nFlags);
+
+			if ( success )
+			{
+				CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+				return;
+			}
 		}
 	}
-
-	BOOL bRepeat = nFlags&0x4000;
 
 	// get command
 	CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
@@ -57,9 +53,12 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		}
 		else if (cmd.GetType() == CT_Note )
 		{
-			const int outnote = cmd.GetNote();
-			// play note
-			if(!bRepeat) {	Global::pInputHandler->PlayNote(outnote); }
+			if(!bRepeat) 
+			{	
+				const int outnote = cmd.GetNote();
+				// play note
+				Global::pInputHandler->PlayNote(outnote); 
+			}
 		}
 	}
 	
@@ -390,8 +389,8 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 {
 	// UNDO CODE ENTER NOTE
 	int ps = _ps();
-	unsigned char * offset = _offset(ps);
-	unsigned char * toffset = _toffset(ps);
+	unsigned char * offset; 
+	unsigned char * toffset;
 	
 	if (note < 0 || note > 123 ) return;
 
@@ -420,10 +419,11 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 						if (Global::pInputHandler->notetrack[i] == note)
 						{
 							editcur.track = i;
-							i = _pSong->SONGTRACKS+1;
+							break;
 						}
 					}
 				}
+				Global::pInputHandler->StopNote(note,false);
 				if (i == _pSong->SONGTRACKS)
 				{
 					return;
@@ -440,11 +440,15 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 				Global::pInputHandler->PlayNote(note,velocity,false);
 			else
 				Global::pInputHandler->StopNote(note,false);
-
 			return;
 		}
 		offset = _offset(ps);
 		toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+	}
+	else
+	{
+		offset = _offset(ps);
+		toffset = _toffset(ps);
 	}
 
 	// build entry
@@ -513,10 +517,13 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		drawTrackStart = 0;
 	}
 
-	if ( GetKeyState(VK_SHIFT)<0) 
-		AdvanceLine(-1,Global::pConfig->_wrapAround,false);
-	else
-		AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+	if (!(Global::pPlayer->_playing&&_followSong))
+	{
+		if ( GetKeyState(VK_SHIFT)<0) 
+			AdvanceLine(-1,Global::pConfig->_wrapAround,false);
+		else
+			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+	}
 
 	Repaint(DMDataChange);
 }

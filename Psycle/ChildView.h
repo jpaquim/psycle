@@ -200,7 +200,6 @@ public:
 	int patStep;
 
 	bool _followSong;
-	int _previousTicks;
 	int editPosition;	// Position in the Sequence!
 	
 	int updateMode;

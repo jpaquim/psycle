@@ -84,7 +84,6 @@ CChildView::CChildView()
 	bEditMode = true;
 
 	_followSong = true;
-	_previousTicks=0;
 	
 	blockSelected=false;
 	isBlockCopied=false;
@@ -347,17 +346,6 @@ void CChildView::OnTimer( UINT nIDEvent )
 					CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 					editcur.line=Global::pPlayer->_lineCounter;
 
-/*
-					// this was for the old messy multi track hack method
-
-					if ( _previousTicks-1 > editcur.track )
-					{
-						_previousTicks-=editcur.track+1;
-						editcur.track = _pSong->SONGTRACKS-1;
-					}
-					if (_previousTicks>1) 
-						editcur.track-= _previousTicks-1;
-*/
  					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
@@ -368,8 +356,6 @@ void CChildView::OnTimer( UINT nIDEvent )
 					else if( viewMode == VMPattern ) Repaint(DMPlayback);
 				}
 				else if ( viewMode == VMPattern ) Repaint(DMPlayback);
-
-				_previousTicks=0;
 			}
 		}
 	}
@@ -802,7 +788,6 @@ void CChildView::OnBarplay()
 
 	Global::pPlayer->_playPosition = editPosition;
 	Global::pPlayer->Start(0);
-	_previousTicks=0;
 }
 void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 {
