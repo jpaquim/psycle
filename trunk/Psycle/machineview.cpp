@@ -238,6 +238,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		}// Machine exist
 	}
 
+	// draw vumeters
+	DrawMachineVumeters((CClientDC*)devc);
+
 	if (wiresource != -1)
 	{
 		int prevROP = devc->SetROP2(R2_NOT);
