@@ -2,11 +2,7 @@
 !=change
 +=addition
 
-* <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
 * psycle default theme sucks
-+ D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
-	drop that highlighted area?
-+ .mid import
 
 * Other crap
 ------------
@@ -43,6 +39,8 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 	rec tweaks when you do a refresh.......like closing the plugs  gui... 
 ++ how about option to switch the instrument and machine columns?
 + D says: maybe have some of the effects in a drop down or available by right clicking
++ D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
+	drop that highlighted area?
 ! <_sue_> when on follow song mode play the shift + cursor right and shift + cursor left should work the same 
 	way (to navigate in the pattern sequencer).....like hapens on fast tracker 2 .....
 ! change CUT seq button to DELETE seq button, cut sucks
@@ -143,6 +141,7 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	happens to native plugs)
 * Flanger feedback slider
 * Instrument filter envelope slider. (check differences with finetune slider)+ midi control commands learn
+* <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
 ! Have exit warning on modified file
 ! should make it so clicking on colour boxes pops up menu
 ! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
@@ -183,6 +182,7 @@ bug: It doesn't add the machines necessary to play all notes.
 bug: if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
 feature: Add option for the user to create samplers for instruments
 feature: IT importing
++ .mid import
 + Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
 	pattern data and other settings, this possible? (yes, but will require new song parser...)
 

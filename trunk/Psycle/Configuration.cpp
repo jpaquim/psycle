@@ -673,9 +673,9 @@ Configuration::Read()
 		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
 		if (!seqFont.CreatePointFont(pattern_font_point,"Tahoma"))
 		{
-			if (!seqFont.CreatePointFont(pattern_font_point,"MS Sans Seriff"))
+			if (!seqFont.CreatePointFont(pattern_font_point,"Verdana"))
 			{
-				seqFont.CreatePointFont(pattern_font_point,"Verdana");
+				seqFont.CreatePointFont(pattern_font_point,"Arial Bold");
 			}
 		}
 	}
