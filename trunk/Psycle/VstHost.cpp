@@ -8,6 +8,8 @@
 #include "Configuration.h"
 #include "FileIO.h"
 #include "VstHost.h"
+#include "Player.h"
+#include "Song.h"
 
 VstTimeInfo VSTPlugin::_timeInfo;
 
@@ -43,7 +45,7 @@ VSTPlugin::~VSTPlugin()
 
 }
 
-int VSTPlugin::Instance(char *dllname)
+int VSTPlugin::Instance(char *dllname,bool overwriteName)
 {
 	h_dll=LoadLibrary(dllname);
 
@@ -94,14 +96,14 @@ int VSTPlugin::Instance(char *dllname)
 		strcpy(_sProductName,str1);
 
 	}
-	memcpy(_editName,_sProductName,15);
+	if ( overwriteName ) memcpy(_editName,_sProductName,15);
+	_editName[15]='\0';
 
 // Compatibility hacks
 	if ( strcmp(_sProductName,"sc-101") == 0 ) requiresRepl=true;
 
 //
 
-	_editName[15] ='\0';
 	if (!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName, 0.0f))
 	{
 		strcpy(_sVendorName, "Unknown vendor");
@@ -121,8 +123,8 @@ int VSTPlugin::Instance(char *dllname)
 
 	return VSTINSTANCE_NO_ERROR;
 }
-
-void VSTPlugin::Create(VSTPlugin *plug)
+/*
+void VSTPlugin::Create(VSTPlugin *plug)  // Old way of loading VST's from songs
 {
 	h_dll=plug->h_dll;
 	_pEffect=plug->_pEffect;
@@ -145,6 +147,7 @@ void VSTPlugin::Create(VSTPlugin *plug)
 	requiresProcess=plug->requiresProcess;
 	requiresRepl=plug->requiresRepl;
 }
+*/
 void VSTPlugin::Free() // Called also in destruction
 {
 	if(instantiated)
@@ -160,8 +163,8 @@ void VSTPlugin::Free() // Called also in destruction
 	}
 }
 
-void VSTPlugin::Init(void)
-{
+void VSTPlugin::Init(void) // Currently this function is unused!!! Some changes in the creation and
+{							// loading from song need to be done.
 	Machine::Init();
 
 	for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -628,10 +631,30 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		_timeInfo.sampleRate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 #endif // _WINAMP_PLUGIN_
 
+/*		if (value & kVstNanosValid)
+		{
+			_timeInfo.flags |= kVstNanosValid;
+			_timeInfo.nanoSeconds = ::timeGetTime();
+		}*/
+		if (value & kVstPpqPosValid)
+		{
+			_timeInfo.flags |= kVstPpqPosValid;
+
+			const float currentline = (float)(Global::pPlayer->_lineCounter%Global::pPlayer->tpb);
+			const float linestep = ((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining)*4.0f)/(Global::_pSong->SamplesPerTick*Global::pPlayer->tpb);
+			_timeInfo.ppqPos = currentline+linestep;
+			
+		}
 		if (value & kVstTempoValid)
 		{
 			_timeInfo.flags |= kVstTempoValid;
 			_timeInfo.tempo = Global::_pSong->BeatsPerMin;
+		}
+		if (value & kVstTimeSigValid)
+		{
+			_timeInfo.flags |= 	kVstTimeSigValid;
+			_timeInfo.timeSigNumerator = 4;
+			_timeInfo.timeSigDenominator = 4;
 		}
 		return (long)&_timeInfo;
 		
@@ -672,32 +695,32 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	case 	audioMasterGetParameterQuantization:	
 		return NUMTICKS+1; // because its from 0 to NUMTICKS
 		
-	case 	audioMasterSetTime:						TRACE("VST master dispatcher: Set Time");break;
-	case 	audioMasterGetNumAutomatableParameters:	TRACE("VST master dispatcher: GetNumAutPar");break;
-//	case 	audioMasterGetParameterQuantization:	TRACE("VST master dispatcher: ParamQuant");break;
-	case 	audioMasterIOChanged:					TRACE("VST master dispatcher: IOchanged");break;
-//	case 	audioMasterSizeWindow:					TRACE("VST master dispatcher: Size Window");break;
-	case 	audioMasterGetBlockSize:				TRACE("VST master dispatcher: GetBlockSize");break;
-	case 	audioMasterGetInputLatency:				TRACE("VST master dispatcher: GetInLatency");break;
-	case 	audioMasterGetOutputLatency:			TRACE("VST master dispatcher: GetOutLatency");break;
-	case 	audioMasterGetPreviousPlug:				TRACE("VST master dispatcher: PrevPlug");break;
-	case 	audioMasterGetNextPlug:					TRACE("VST master dispatcher: NextPlug");break;
-	case 	audioMasterWillReplaceOrAccumulate:		TRACE("VST master dispatcher: WillReplace");break;
-	case 	audioMasterGetCurrentProcessLevel:		TRACE("VST master dispatcher: GetProcessLevel");break;
-	case 	audioMasterGetAutomationState:			TRACE("VST master dispatcher: GetAutState");break;
-	case 	audioMasterOfflineStart:				TRACE("VST master dispatcher: Offlinestart");break;
-	case 	audioMasterOfflineRead:					TRACE("VST master dispatcher: Offlineread");break;
-	case 	audioMasterOfflineWrite:				TRACE("VST master dispatcher: Offlinewrite");break;
-	case 	audioMasterOfflineGetCurrentPass:		TRACE("VST master dispatcher: OfflineGetcurrentpass");break;
-	case 	audioMasterOfflineGetCurrentMetaPass:	TRACE("VST master dispatcher: GetGetCurrentMetapass");break;
-	case 	audioMasterSetOutputSampleRate:			TRACE("VST master dispatcher: Setsamplerate");break;
-	case 	audioMasterGetSpeakerArrangement:		TRACE("VST master dispatcher: Getspeaker");break;
-	case 	audioMasterSetIcon:						TRACE("VST master dispatcher: seticon");break;
-	case 	audioMasterCanDo:						TRACE("VST master dispatcher: Can Do");break;
-	case 	audioMasterOpenWindow:					TRACE("VST master dispatcher: OpenWindow");break;
-	case 	audioMasterCloseWindow:					TRACE("VST master dispatcher: CloseWindow");break;
-	case 	audioMasterGetDirectory:				TRACE("VST master dispatcher: GetDirectory");break;
-	default: TRACE("VST master dispatcher: undefed: %d",opcode)	;break;
+	case 	audioMasterSetTime:						TRACE("VST master dispatcher: Set Time\n");break;
+	case 	audioMasterGetNumAutomatableParameters:	TRACE("VST master dispatcher: GetNumAutPar\n");break;
+//	case 	audioMasterGetParameterQuantization:	TRACE("VST master dispatcher: ParamQuant\n");break;
+	case 	audioMasterIOChanged:					TRACE("VST master dispatcher: IOchanged\n");break;
+//	case 	audioMasterSizeWindow:					TRACE("VST master dispatcher: Size Window\n");break;
+	case 	audioMasterGetBlockSize:				TRACE("VST master dispatcher: GetBlockSize\n");break;
+	case 	audioMasterGetInputLatency:				TRACE("VST master dispatcher: GetInLatency\n");break;
+	case 	audioMasterGetOutputLatency:			TRACE("VST master dispatcher: GetOutLatency\n");break;
+	case 	audioMasterGetPreviousPlug:				TRACE("VST master dispatcher: PrevPlug\n");break;
+	case 	audioMasterGetNextPlug:					TRACE("VST master dispatcher: NextPlug\n");break;
+	case 	audioMasterWillReplaceOrAccumulate:		TRACE("VST master dispatcher: WillReplace\n");break;
+	case 	audioMasterGetCurrentProcessLevel:		TRACE("VST master dispatcher: GetProcessLevel\n");break;
+	case 	audioMasterGetAutomationState:			TRACE("VST master dispatcher: GetAutState\n");break;
+	case 	audioMasterOfflineStart:				TRACE("VST master dispatcher: Offlinestart\n");break;
+	case 	audioMasterOfflineRead:					TRACE("VST master dispatcher: Offlineread\n");break;
+	case 	audioMasterOfflineWrite:				TRACE("VST master dispatcher: Offlinewrite\n");break;
+	case 	audioMasterOfflineGetCurrentPass:		TRACE("VST master dispatcher: OfflineGetcurrentpass\n");break;
+	case 	audioMasterOfflineGetCurrentMetaPass:	TRACE("VST master dispatcher: OfflineGetCurrentMetapass\n");break;
+	case 	audioMasterSetOutputSampleRate:			TRACE("VST master dispatcher: SetOutputsamplerate\n");break;
+	case 	audioMasterGetSpeakerArrangement:		TRACE("VST master dispatcher: Getspeaker\n");break;
+	case 	audioMasterSetIcon:						TRACE("VST master dispatcher: SetIcon\n");break;
+	case 	audioMasterCanDo:						TRACE("VST master dispatcher: Can Do\n");break;
+	case 	audioMasterOpenWindow:					TRACE("VST master dispatcher: OpenWindow\n");break;
+	case 	audioMasterCloseWindow:					TRACE("VST master dispatcher: CloseWindow\n");break;
+	case 	audioMasterGetDirectory:				TRACE("VST master dispatcher: GetDirectory\n");break;
+	default: TRACE("VST master dispatcher: undefed: %d\n",opcode)	;break;
 	}	
 
 	
@@ -898,8 +921,8 @@ void VSTInstrument::Work(int numSamples)
 
 		SendMidi();
 
-		if (!requiresRepl ) _pEffect->process(_pEffect,NULL,outputs,numSamples);
-		else _pEffect->processReplacing(_pEffect,NULL,outputs,numSamples);
+		if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,numSamples);
+		else _pEffect->processReplacing(_pEffect,inputs,outputs,numSamples);
 		if ( _pEffect->numOutputs == 1)
 		{
 			Dsp::Add(outputs[0],outputs[1],numSamples,1);
@@ -942,6 +965,10 @@ void VSTInstrument::Work(int numSamples)
 
 VSTFX::VSTFX()
 {
+	for (int i=0; i<MAX_CONNECTIONS; i++)
+	{
+		_inputConVol[i] = 0.000030517578125f; // 1/32767 -> VST Plugins use the range -1.0..1.0
+	}
 	VSTPlugin::VSTPlugin();
 	_type = MACH_VSTFX;
 	_mode = MACHMODE_PLUGIN;

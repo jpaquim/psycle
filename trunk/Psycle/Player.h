@@ -20,6 +20,7 @@ public:
 	int _playTimem;
 	int bpm;
 	int tpb;
+	int _ticksRemaining;
 
 	Player();
 	~Player();
@@ -35,7 +36,6 @@ public:
 	void StartRecording(char* psFilename);
 	void StopRecording(void);
 protected:
-	int _ticksRemaining;
 	int prevMachines[/*MAX_TRACKS*/32];
 
 	float _pBuffer[65536];

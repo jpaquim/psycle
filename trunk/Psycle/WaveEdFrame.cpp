@@ -16,6 +16,12 @@ static UINT indicators[] =
 	ID_INDICATOR_MODE
 };
 
+IMPLEMENT_DYNCREATE(CWaveEdFrame, CFrameWnd)
+
+CWaveEdFrame::CWaveEdFrame()
+{
+
+}
 CWaveEdFrame::CWaveEdFrame(Song* _sng,CMainFrame* pframe)
 {
 	this->_pSong=_sng;
@@ -112,7 +118,7 @@ void CWaveEdFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 	CFrameWnd::OnShowWindow(bShow, nStatus);
 
 	Notify();
-	AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
+//	AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
 	UpdateWindow();
 }
 

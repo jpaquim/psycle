@@ -131,7 +131,7 @@ struct WaveFileSample
 };
 
 
-class WaveFile: public ExtRiffFile	// MODIFIED BY [JAZ]. It was private.
+class WaveFile: public ExtRiffFile	// MODIFIED BY [JAZ]. It was "private ExtRiffFile".
 {
    WaveFormat_Chunk   wave_format;
    ExtRiffChunkHeader    pcm_data;

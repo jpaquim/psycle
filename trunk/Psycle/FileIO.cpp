@@ -162,12 +162,11 @@ bool OldPsyFile::Create(
 	_file = fopen(psFileName, "rb");
 	if (_file != NULL)
 	{
+		fclose(_file);
 		if (!overwrite)
 		{
-			fclose(_file);
 			return false;
 		}
-		fclose(_file);
 	}
 
 	_file = fopen(psFileName, "wb");

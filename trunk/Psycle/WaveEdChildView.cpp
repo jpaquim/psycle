@@ -12,6 +12,10 @@ static char THIS_FILE[] = __FILE__;
 
 CWaveEdChildView::CWaveEdChildView()
 {
+	cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
+	cpen_me.CreatePen(PS_SOLID,0,0xCCCCCC);
+	cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
+
 	drawwave=true;
 	SelStart=0;
 	
@@ -246,9 +250,6 @@ BOOL CWaveEdChildView::PreCreateWindow(CREATESTRUCT& cs)
 void CWaveEdChildView::GenerateAndShow()
 {
 	blSelection=false;
-	cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
-	cpen_me.CreatePen(PS_SOLID,0,0xCCCCCC);
-	cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
 	UpdateWindow();
 }
 
@@ -256,7 +257,7 @@ void  CWaveEdChildView::SetViewData(int ins, int wav)
 {
 	int wl=_pSong->waveLength[ins][wav];
 
-	wsInstrument=ins;	// Do not put inside "if(wl)". Pasting needs this.
+	wsInstrument=ins;	// Do not put inside of "if(wl)". Pasting needs this.
 	wsWave=wav;
 
 	if(wl)
@@ -359,7 +360,7 @@ void CWaveEdChildView::OnRButtonDown(UINT nFlags, CPoint point)
 			}
 			_pSong->Invalided=false;
 			drawwave=true;
-			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			Invalidate();
 		}
 		else
@@ -398,7 +399,7 @@ void CWaveEdChildView::OnLButtonDown(UINT nFlags, CPoint point)
 				_pSong->waveLoopType[wsInstrument][wsWave]=true;
 			}
 			_pSong->Invalided=false;
-			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			drawwave=true;
 			Invalidate();
 		}

@@ -26,6 +26,7 @@ public:
 	void UpdateCombo();
 	Song* _pSong;
 	bool cando;
+	bool initializingDialog;
 	CMainFrame* pParentMain;
 
 

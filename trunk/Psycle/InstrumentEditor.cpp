@@ -120,8 +120,10 @@ void CInstrumentEditor::WaveUpdate()
 	sprintf(buffer, "%.2X", si);
 	m_instlabel.SetWindowText(buffer);
 
+	initializingDialog=true;
 	// Set instrument current selected name
 	m_instname.SetWindowText(_pSong->_instruments[si]._sName);
+	initializingDialog=false; // This prevents that "OnChangeInstname()", calls "UpdateComboIns()"
 
 	UpdateCombo();
 
@@ -217,6 +219,7 @@ void CInstrumentEditor::OnChangeInstname()
 {
 	int si = _pSong->instSelected;
 	m_instname.GetWindowText(_pSong->_instruments[si]._sName, 32);
+	if ( !initializingDialog ) pParentMain->UpdateComboIns();
 }
 
 

@@ -75,7 +75,7 @@ CChildView::CChildView()
 	viewMode=VMMachine;
 	updateMode=0;
 	updatePar=0;
-	multiPattern=false; // Long way till it can be finished!
+	multiPattern=true; // Long way till it can be finished!
 
 	patStep=1;
 	editPosition=0;
@@ -141,6 +141,7 @@ CChildView::~CChildView()
 	CNewMachine::DestroyPluginInfo();
 	Global::pInputHandler->SetChildView(NULL);
 	seqFont.DeleteObject();
+	stuffbmp.DeleteObject();
 
 	if ( bmpDC != NULL )
 	{
@@ -769,7 +770,7 @@ void CChildView::OnButtonplayseqblock()
 	Global::pPlayer->_playTimem = 0;
 	Global::pPlayer->_playPattern = Global::_pSong->playOrder[i];
 	Global::pPlayer->_playBlock=true;
-	Repaint(DMPatternChange);
+	if ( viewMode == VMPattern ) Repaint(DMPatternChange);
 }
 void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 {

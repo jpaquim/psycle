@@ -155,7 +155,7 @@ void CDefaultVstGui::OnSelchangeList1()
 void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	float value = ((float)(NUMTICKS - m_slider.GetPos()))/NUMTICKS;
-	_pMachine->SetParameter(nPar, value);
+//	_pMachine->SetParameter(nPar, value);
 	UpdateText();
 
 	*pResult = 0;

@@ -11,9 +11,11 @@ class CMainFrame;
 
 class CWaveEdFrame : public CFrameWnd
 {
+	DECLARE_DYNCREATE(CWaveEdFrame)
+protected:
+	CWaveEdFrame();
 public:
 	CWaveEdFrame(Song*,CMainFrame*);
-	virtual ~CWaveEdFrame();
 
 	void Notify(void);
 
@@ -41,6 +43,8 @@ public:
 
 // Implementation
 protected:
+	virtual ~CWaveEdFrame();
+	
 	// Generated message map functions
 	//{{AFX_MSG(CWaveEdFrame)
 	afx_msg void OnClose();

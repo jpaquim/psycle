@@ -26,7 +26,7 @@
 
 #include "Global.h"
 
-#include <htmlhelp.h>
+//#include <htmlhelp.h>
 
 //#endif // ndef _WINAMP_PLUGIN_
 
