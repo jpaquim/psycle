@@ -98,7 +98,7 @@ class Sampler : public Machine
 {
 public:
 	void Tick();
-	Sampler();
+	Sampler(int index);
 
 	virtual void Init(void);
 	virtual void Work(int numSamples);

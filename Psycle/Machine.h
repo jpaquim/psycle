@@ -57,6 +57,7 @@ class Machine
 {
 public:
 	bool wasVST;  // THIS NEVER EVER GETS RESET TO FALSE, SO WHAT DOES IT DO?  IT IS ALWAYS TRUE
+	int macIndex;
 
 	MachineType _type;
 	MachineMode _mode;
@@ -211,7 +212,7 @@ class Dummy : public Machine
 {
 public:
 	void Work(int numSamples);
-	Dummy();
+	Dummy(int index);
 	virtual char* GetName(void) { return _psName; };
 
 protected:
@@ -222,6 +223,7 @@ protected:
 class Master : public Machine
 {
 public:
+	Master(int index);
 	int _outDry;
 	bool _clip;
 	bool decreaseOnClip;
@@ -271,7 +273,7 @@ protected:
 class Gainer : public Machine
 {
 public:
-	Gainer();
+	Gainer(int index);
 
 	int _outWet;
 	virtual void Tick(int channel, PatternEntry *pData);
@@ -328,7 +330,7 @@ public:
 	unsigned char _sineLfoSpeed;
 	unsigned char _sineLfoAmp;
 
-	Sine();
+	Sine(int index);
 
 	virtual void Init(void);
 	virtual void Tick(int channel, PatternEntry *pData);
@@ -413,7 +415,7 @@ public:
 	int _negThreshold;
 	int _negClamp;
 
-	Distortion();
+	Distortion(int index);
 
 	virtual void Init(void);
 	virtual void Tick(int channel, PatternEntry *pData);
@@ -493,7 +495,7 @@ public:
 	int _outDry;
 	int _outWet;
 
-	Delay();
+	Delay(int index);
 	virtual ~Delay();
 
 	virtual void Init(void);
@@ -586,7 +588,7 @@ public:
 	int _outWet;
 	bool useResample;
 
-	Flanger();
+	Flanger(int index);
 	~Flanger();
 
 	virtual void Init(void);
@@ -687,7 +689,7 @@ public:
 	int _lfoPhase;
 	int _filterMode;
 
-	Filter2p();
+	Filter2p(int index);
 
 	virtual void Init(void);
 	virtual void Tick(int channel, PatternEntry *pData);

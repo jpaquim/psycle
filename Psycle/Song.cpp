@@ -76,60 +76,63 @@ bool Song::CreateMachine(
 		{
 			return false;
 		}
-		pMachine = pMaster = new Master;
+		pMachine = pMaster = new Master(index);
 		index = MASTER_INDEX;
 		break;
 	case MACH_SINE:
-		pMachine = pSine = new Sine;
+		pMachine = pSine = new Sine(index);
 		break;
 	case MACH_DIST:
-		pMachine = pDistortion = new Distortion;
+		pMachine = pDistortion = new Distortion(index);
 		break;
 	case MACH_SAMPLER:
-		pMachine = pSampler = new Sampler;
+		pMachine = pSampler = new Sampler(index);
 		break;
 	case MACH_DELAY:
-		pMachine = pDelay = new Delay;
+		pMachine = pDelay = new Delay(index);
 		break;
 	case MACH_2PFILTER:
-		pMachine = pFilter = new Filter2p;
+		pMachine = pFilter = new Filter2p(index);
 		break;
 	case MACH_GAIN:
-		pMachine = pGainer = new Gainer;
+		pMachine = pGainer = new Gainer(index);
 		break;
 	case MACH_FLANGER:
-		pMachine = pFlanger = new Flanger;
+		pMachine = pFlanger = new Flanger(index);
 		break;
 	case MACH_PLUGIN:
 		{
-		pMachine = pPlugin = new Plugin;
+		pMachine = pPlugin = new Plugin(index);
 		if (!pPlugin->Instance(psPluginDll))
 		{
-			delete pMachine; return false;
+			delete pMachine; 
+			return false;
 		}
 		break;
 		}
 	case MACH_VST:
 		{
-		pMachine = pVstPlugin = new VSTInstrument;
+		pMachine = pVstPlugin = new VSTInstrument(index);
 		if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
 		{
-			delete pMachine; return false;
+			delete pMachine; 
+			return false;
 		}
 		break;
 		}
 	case MACH_VSTFX:
 		{
-		pMachine = pVstPlugin = new VSTFX;
+		pMachine = pVstPlugin = new VSTFX(index);
 		if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
 		{
-			delete pMachine; return false;
+			delete pMachine; 
+			return false;
 		}
 		break;
 		}
 
 	case MACH_DUMMY:
-		pMachine = new Dummy;
+		pMachine = new Dummy(index);
 		break;
 	default:
 		return false;
@@ -1660,54 +1663,50 @@ bool Song::Load(RiffFile* pFile)
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_SINE:
-					pMachine[i] = pSine = new Sine;
+					pMachine[i] = pSine = new Sine(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_DIST:
-					pMachine[i] = pDistortion = new Distortion;
+					pMachine[i] = pDistortion = new Distortion(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_SAMPLER:
-					pMachine[i] = pSampler = new Sampler;
+					pMachine[i] = pSampler = new Sampler(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_DELAY:
-					pMachine[i] = pDelay = new Delay;
+					pMachine[i] = pDelay = new Delay(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_2PFILTER:
-					pMachine[i] = pFilter = new Filter2p;
+					pMachine[i] = pFilter = new Filter2p(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_GAIN:
-					pMachine[i] = pGainer = new Gainer;
+					pMachine[i] = pGainer = new Gainer(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
 				case MACH_FLANGER:
-					pMachine[i] = pFlanger = new Flanger;
+					pMachine[i] = pFlanger = new Flanger(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
-					break;
-				case MACH_SCOPE:
-					pMachine[i] = new Dummy;
-					pMachine[i]->Init();
-					pMachine[i]->Load(pFile);
-					sprintf(pMachine[i]->_editName,"Dummy");
 					break;
 				case MACH_PLUGIN:
 					{
-					pMachine[i] = pPlugin = new Plugin;
+					pMachine[i] = pPlugin = new Plugin(i);
 					// Should the "Init()" function go here? -> No. Needs to load the dll first.
 					if (!pMachine[i]->Load(pFile))
 					{
 						Machine* pOldMachine = pMachine[i];
 						pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
+						// dummy name goes here
+						sprintf(pMachine[i]->_editName,"X %s",pOldMachine->_editName);
 						pMachine[i]->_type = MACH_DUMMY;
 						pOldMachine->_pSamplesL = NULL;
 						pOldMachine->_pSamplesR = NULL;
@@ -1721,15 +1720,12 @@ bool Song::Load(RiffFile* pFile)
 					
 					if ( type == MACH_VST ) 
 					{
-						pMachine[i] = pVstPlugin = new VSTInstrument;
+						pMachine[i] = pVstPlugin = new VSTInstrument(i);
 					}
 					else if ( type == MACH_VSTFX ) 
 					{
-						pMachine[i] = pVstPlugin = new VSTFX;
+						pMachine[i] = pVstPlugin = new VSTFX(i);
 					}
-	#if  !defined(_WINAMP_PLUGIN_)
-					pVstPlugin->macindex = i;
-	#endif //  !defined(_WINAMP_PLUGIN_)
 					if ((pMachine[i]->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 					{
 						char sPath2[_MAX_PATH];
@@ -1745,6 +1741,8 @@ bool Song::Load(RiffFile* pFile)
 								pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
+								// dummy name goes here
+								sprintf(pMachine[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMachine[i]->_type = MACH_DUMMY;
 								pMachine[i]->wasVST = true;
@@ -1756,6 +1754,8 @@ bool Song::Load(RiffFile* pFile)
 							pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 							pOldMachine->_pSamplesL = NULL;
 							pOldMachine->_pSamplesR = NULL;
+							// dummy name goes here
+							sprintf(pMachine[i]->_editName,"X %s",pOldMachine->_editName);
 							delete pOldMachine;
 							pMachine[i]->_type = MACH_DUMMY;
 							pMachine[i]->wasVST = true;
@@ -1774,6 +1774,8 @@ bool Song::Load(RiffFile* pFile)
 								pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
+								// dummy name goes here
+								sprintf(pMachine[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMachine[i]->_type = MACH_DUMMY;
 								pMachine[i]->wasVST = true;
@@ -1789,6 +1791,8 @@ bool Song::Load(RiffFile* pFile)
 							pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 							pOldMachine->_pSamplesL = NULL;
 							pOldMachine->_pSamplesR = NULL;
+							// dummy name goes here
+							sprintf(pMachine[i]->_editName,"X %s",pOldMachine->_editName);
 							delete pOldMachine;
 							pMachine[i]->_type = MACH_DUMMY;
 							pMachine[i]->wasVST = true;
@@ -1801,14 +1805,17 @@ bool Song::Load(RiffFile* pFile)
 						pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 						pOldMachine->_pSamplesL = NULL;
 						pOldMachine->_pSamplesR = NULL;
+						// dummy name goes here
+						sprintf(pMachine[i]->_editName,"X %s",pOldMachine->_editName);
 						delete pOldMachine;
 						pMachine[i]->_type = MACH_DUMMY;
 						pMachine[i]->wasVST = true;
 					}
 					break;
 					}
+				case MACH_SCOPE:
 				case MACH_DUMMY:
-					pMachine[i] = new Dummy;
+					pMachine[i] = new Dummy(i);
 					pMachine[i]->Init();
 					pMachine[i]->Load(pFile);
 					break;
@@ -2094,17 +2101,13 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 
-		// fix vst machine #s
+		// fix machine #s
 
 		for (i = 0; i < MAX_MACHINES-1; i++)
 		{
 			if (_pMachine[i])
 			{
-				if (( _pMachine[i]->_type == MACH_VST ) || 
-					( _pMachine[i]->_type == MACH_VSTFX))
-				{
-					((VSTPlugin*)_pMachine[i])->macindex = i;
-				}
+				_pMachine[i]->macIndex = i;
 			}
 		}
 

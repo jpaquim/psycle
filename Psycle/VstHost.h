@@ -247,7 +247,6 @@ public:
 
 	bool requiresProcess;	// It needs to use Process
 	bool requiresRepl;		// It needs to use ProcessRepl
-	int macindex;
 
 #if !defined(_WINAMP_PLUGIN_)
 	CFrameWnd* editorWnd;
@@ -278,7 +277,7 @@ protected:
 class VSTInstrument : public VSTPlugin
 {
 public:
-	VSTInstrument();
+	VSTInstrument(int index);
 	virtual void Tick(int channel, PatternEntry* pEntry);
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
@@ -293,7 +292,7 @@ protected:
 class VSTFX : public VSTPlugin
 {
 public:
-	VSTFX();
+	VSTFX(int index);
 	~VSTFX();
 	virtual void Tick(int channel, PatternEntry* pEntry);
 	virtual void Work(int numSamples);

@@ -17,11 +17,12 @@ typedef CMachineInterface * (*CREATEMACHINE)(void);
 
 PluginFxCallback Plugin::_callback;
 
-Plugin::Plugin()
+Plugin::Plugin(int index)
 {
+	macIndex = index;
 	_type = MACH_PLUGIN;
 	_mode = MACHMODE_PLUGIN;
-	sprintf(_editName, "Plugin");
+	sprintf(_editName, "%.2X:Plugin",macIndex);
 	_dll = NULL;
 	_pInterface = NULL;
 	_psAuthor=NULL;
@@ -68,8 +69,7 @@ bool Plugin::Instance(char* psFileName)
 
 	strncpy(_psShortName,_pInfo->ShortName,15);
 	_psShortName[15]='\0';
-	strncpy(_editName, _pInfo->ShortName,31);
-	_editName[31]='\0';
+	sprintf(_editName, "%.2X:%s",macIndex,_pInfo->ShortName);
 
 	_psAuthor = new char[strlen(_pInfo->Author)+1];
 	strcpy(_psAuthor,_pInfo->Author);
