@@ -85,7 +85,8 @@ void Machine::Init(void)
 	// Standard gear initalization
 	//
 	_outDry = 256;
-	_outWet = 64;
+//	_outWet = 64;
+	_outWet = 256;
 #if !defined(_WINAMP_PLUGIN_)
 	_cpuCost = 0;
 	_wireCost = 0;

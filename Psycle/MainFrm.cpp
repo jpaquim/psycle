@@ -1562,7 +1562,6 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 
 void CMainFrame::CloseAllMacGuis()
 {
-	m_wndView->KillWireDialogs();
 	for (int c=0; c<MAX_MACHINES; c++)
 	{
 		if ( _pSong->_machineActive[c] ) CloseMacGui(c);

@@ -1454,7 +1454,7 @@ bool Song::Load(
 					int d = pOrigMachine->FindOutputWire(i);
 
 					float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-					if( val >= 2.000001f ) 
+					if( val >= 4.000001f ) 
 					{
 						val*=0.000030517578125f; // BugFix
 					}
