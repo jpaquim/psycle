@@ -5,6 +5,7 @@
 #include "midiinput.h"
 #include "NewMachine.h"
 #include <exception>
+#include <sstream>
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
 namespace psycle
@@ -272,15 +273,15 @@ namespace psycle
 
 			m_contrib.SetWindowText
 					(
-						"Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5" "\r\n"
-						"Jeremy Evers [pooplog]\t\tDeveloper since version 1.7" "\r\n"
-						"James Redfern [alk]\t\tDevelopper since version 1.7.6" "\r\n"
-						"Johan Boulé [bohan]\t\tDeveloper since version 1.7.3" "\r\n"
-						"Daniel Arena\t\t\tDeveloper in 1.5&1.6" "\r\n"
-						"Marcin Kowalski [FideLoop]\t\tDeveloper in 1.6" "\r\n"
+						"Josep Mª Antolín. [JAZ]\t\tDeveloper since release 1.5" "\r\n"
+						"Jeremy Evers [pooplog]\t\tDeveloper since release 1.7" "\r\n"
+						"James Redfern [alk]\t\tDeveloper since release 1.7.6" "\r\n"
+						"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
+						"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
+						"Marcin Kowalski [FideLoop]\t\tDeveloper in release 1.6" "\r\n"
 						"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
-						"Mats Höjlund\t\t\tMain developer until 1.5 (Internal Recoding)" "\r\n"
-						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until 1.0" "\r\n"
+						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n"
+						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
 						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
 						"frown\t\t\t\tAdditional Graphics" "\r\n"
@@ -292,9 +293,9 @@ namespace psycle
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
 
-			char buf[256];
-			sprintf(buf,"Version %s  [%s]",VERSION_NUMBER,__DATE__);
-			m_versioninfo.SetWindowText(buf);
+			std::ostringstream s;
+			s << VERSION_NUMBER " [built on " __DATE__ ")";
+			m_versioninfo.SetWindowText(s.str().c_str());
 
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
