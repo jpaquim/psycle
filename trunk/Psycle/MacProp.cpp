@@ -79,7 +79,7 @@ void CMacProp::OnChangeEdit1()
 void CMacProp::OnButton1() 
 {
 	// Delete MACHINE!
-	if (MessageBox("Are you sure?","Delete Machine", MB_YESNO) == IDYES)
+	if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 	{
 		deleted = true;
 		OnCancel();

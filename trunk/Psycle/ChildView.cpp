@@ -1335,6 +1335,10 @@ void CChildView::NewMachine(int x, int y, int mac)
 		*/
 	}
 	//	Repaint();
+	if (pParentMain->pGearRackDialog)
+	{
+		pParentMain->pGearRackDialog->RedrawList();
+	}
 }
 
 void CChildView::OnConfigurationSettings() 
@@ -3362,3 +3366,34 @@ void CChildView::patTrackRecord()
 	}
 }
 
+void CChildView::DoMacPropDialog(int propMac)
+{
+	CMacProp dlg;
+	dlg.m_view=this;
+	dlg.pMachine = Global::_pSong->_pMachines[propMac];
+	dlg.pSong = Global::_pSong;
+	dlg.thisMac = propMac;
+	
+	if (dlg.DoModal() == IDOK)
+	{
+		sprintf(dlg.pMachine->_editName, dlg.txt);
+		pParentMain->StatusBarText(dlg.txt);
+		pParentMain->UpdateEnvInfo();
+		pParentMain->UpdateComboGen();
+		if (pParentMain->pGearRackDialog)
+		{
+			pParentMain->pGearRackDialog->RedrawList();
+		}
+	}
+	if (dlg.deleted)
+	{
+		pParentMain->CloseMacGui(propMac);
+		Global::_pSong->DestroyMachine(propMac);
+		pParentMain->UpdateEnvInfo();
+		pParentMain->UpdateComboGen();
+		if (pParentMain->pGearRackDialog)
+		{
+			pParentMain->pGearRackDialog->RedrawList();
+		}
+	}
+}

@@ -1217,7 +1217,7 @@ void CMainFrame::OnGearRack()
 {
 	if (pGearRackDialog == NULL)
 	{
-		pGearRackDialog = new CGearRackDlg(&m_wndView);
+		pGearRackDialog = new CGearRackDlg(&m_wndView, this);
 		pGearRackDialog->Create();
 		pGearRackDialog->ShowWindow(SW_SHOW);
 	}

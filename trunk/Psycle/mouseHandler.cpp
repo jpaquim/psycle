@@ -8,27 +8,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		if (propMac > 0)
 		{
 			// Shows machine properties dialog
-			CMacProp dlg;
-			dlg.m_view=this;
-			dlg.pMachine = Global::_pSong->_pMachines[propMac];
-			dlg.pSong = Global::_pSong;
-			dlg.thisMac = propMac;
-			
-			if (dlg.DoModal() == IDOK)
-			{
-				sprintf(dlg.pMachine->_editName, dlg.txt);
-				pParentMain->StatusBarText(dlg.txt);
-				pParentMain->UpdateEnvInfo();
-				pParentMain->UpdateComboGen();
-			}
-			if (dlg.deleted)
-			{
-				pParentMain->CloseMacGui(propMac);
-				Global::_pSong->DestroyMachine(propMac);
-				pParentMain->UpdateEnvInfo();
-				pParentMain->UpdateComboGen();
-			}
-//			Repaint();
+			DoMacPropDialog(propMac);
 		}
 		else
 		{
@@ -787,7 +767,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		
 			tmac = GetMachine(point);
 
-			if(tmac!=-1)
+			if(tmac>-1)
 			{
 				switch (Global::_pSong->_pMachines[tmac]->_mode)
 				{
@@ -1153,3 +1133,4 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 	CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 }
+
