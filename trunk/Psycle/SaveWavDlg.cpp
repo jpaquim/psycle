@@ -256,6 +256,7 @@ DWORD WINAPI __stdcall RecordThread(void *b)
 	pPlayer->StopRecording();
 	((CSaveWavDlg*)b)->SaveEnd();
 	ExitThread(0);
+	return 0;
 }
 
 void CSaveWavDlg::OnCancel() 
