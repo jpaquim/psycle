@@ -4,7 +4,11 @@
 #pragma once
 #include "constants.hpp"
 #include "songstructs.hpp"
-#include <mmsystem.h>
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
 #include <cassert>
 namespace psycle
 {

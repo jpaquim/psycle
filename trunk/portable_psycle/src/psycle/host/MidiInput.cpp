@@ -3,8 +3,6 @@
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
 #include <project.private.hpp>
 #include <cassert>
-#include <mmsystem.h>
-#pragma comment(lib, "winmm")
 #include "MidiInput.hpp"
 #include "Psycle.hpp"
 #include "Song.hpp"
