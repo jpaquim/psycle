@@ -48,7 +48,7 @@ public:
 			description(description),
 			name(name),
 			author(author),
-			help_caption("help"),
+			help_caption("Help"),
 			columns(columns)
 		{
 			for(int i(0) ; i < parameter_count ; ++i) this->parameters[i] = &parameters[i];
