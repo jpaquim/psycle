@@ -17,6 +17,8 @@ int CNewMachine::pluginOrder = 1;
 bool CNewMachine::pluginName = 1;
 int CNewMachine::_numPlugins = -1;
 int CNewMachine::_numDirs = 0;
+int CNewMachine::LastType0=0;
+int CNewMachine::LastType1=0;
 PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
 //char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
 CMapStringToString CNewMachine::dllNames(64);
@@ -103,7 +105,7 @@ void CNewMachine::OnDestroy()
 	}
 }
 
-void CNewMachine::UpdateList()
+void CNewMachine::UpdateList(bool bInit)
 {
 	int nodeindex;
 
@@ -141,13 +143,29 @@ void CNewMachine::UpdateList()
 			HTREEITEM hitem;
 			if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) { imgindex = 2; hitem= hNodes[1]; }
-				else { imgindex = 4; hitem=hNodes[2]; }
+				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+				{ 
+					imgindex = 2; 
+					hitem= hNodes[1]; 
+				}
+				else 
+				{ 
+					imgindex = 4; 
+					hitem=hNodes[2]; 
+				}
 			}
 			else
 			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) { imgindex = 3; hitem= hNodes[1]; }
-				else { imgindex = 5; hitem=hNodes[2]; }
+				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+				{ 
+					imgindex = 3; 
+					hitem= hNodes[1];
+				}
+				else 
+				{ 
+					imgindex = 5; 
+					hitem=hNodes[2];
+				}
 			}
 			if (pluginName)
 				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
@@ -155,6 +173,15 @@ void CNewMachine::UpdateList()
 				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
 
 		}
+		hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
+		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
+		hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
+		hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
+		hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
+		hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
+		hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
+		hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+		m_browser.Select(hNodes[LastType0],TVGN_CARET);
 	}
 	else
 	{
@@ -168,13 +195,29 @@ void CNewMachine::UpdateList()
 			HTREEITEM hitem;
 			if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) { imgindex = 2; hitem= hNodes[0]; }
-				else { imgindex = 4; hitem=hNodes[0]; }
+				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+				{ 
+					imgindex = 2; 
+					hitem= hNodes[0]; 
+				}
+				else 
+				{ 
+					imgindex = 4; 
+					hitem=hNodes[0]; 
+				}
 			}
 			else
 			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) { imgindex = 3; hitem= hNodes[1]; }
-				else { imgindex = 5; hitem=hNodes[1]; }
+				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+				{ 
+					imgindex = 3; 
+					hitem= hNodes[1]; 
+				}
+				else 
+				{ 
+					imgindex = 5; 
+					hitem=hNodes[1]; 
+				}
 			}
 			if (pluginName)
 				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
@@ -182,18 +225,17 @@ void CNewMachine::UpdateList()
 				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
 
 		}
+		hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
+		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
+		hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
+		hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
+		hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
+		hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
+		hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
+		hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+		m_browser.Select(hNodes[LastType1],TVGN_CARET);
 	}
 
-	hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
-	hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
-	hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
-	hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
-	hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
-	hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
-	hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
-	hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
-
-	m_browser.Select(hNodes[0],TVGN_CARET);
 	Outputmachine = -1;
 
 }
@@ -215,6 +257,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_versionLabel.SetWindowText("V0.5b");
 		Outputmachine = MACH_SAMPLER;
 		OutBus = true;
+		LastType0 = 0;
+		LastType1 = 0;
 	}
 	
 	// Effects
@@ -225,6 +269,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.0");
 		Outputmachine = MACH_DIST;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 	
 	if (tHand == hInt[2])
@@ -234,6 +280,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V0.3b");
 		Outputmachine = MACH_SINE;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 	
 	if (tHand == hInt[3])
@@ -243,6 +291,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.1");
 		Outputmachine = MACH_DELAY;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 	
 	if (tHand == hInt[4])
@@ -252,6 +302,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.1");
 		Outputmachine = MACH_2PFILTER;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 	
 	if (tHand == hInt[5])
@@ -261,6 +313,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.0");
 		Outputmachine = MACH_GAIN;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 	
 	if (tHand == hInt[6])
@@ -270,6 +324,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.0");
 		Outputmachine = MACH_FLANGER;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 	
 	if (tHand == hInt[7])
@@ -279,6 +335,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.0");
 		Outputmachine = MACH_DUMMY;
+		LastType0 = 0;
+		LastType1 = 1;
 	}
 
 	for (int i=0; i<_numPlugins; i++)
@@ -295,19 +353,31 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 			if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
 			{
 				Outputmachine = MACH_PLUGIN;
+				LastType0 = 1;
 				if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+				{
 					OutBus = true;
-
+					LastType1 = 0;
+				}
+				else
+				{
+					LastType1 = 1;
+				}
 			}
 			else
 			{
+				LastType0 = 2;
 				if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 				{
 					Outputmachine = MACH_VST;
 					OutBus = true;
+					LastType1 = 0;
 				}
 				else
+				{
 					Outputmachine = MACH_VSTFX;
+					LastType1 = 1;
+				}
 			}
 
 			if (psOutputDll != NULL) delete psOutputDll;
@@ -321,11 +391,7 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CNewMachine::OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
-	{
-		OnOK();
-	}
-	
+	OnOK();	
 	*pResult = 0;
 }
 
@@ -583,4 +649,12 @@ bool CNewMachine::SaveCacheFile(int numPlugins)
 	}
 	file.Close();
 	return true;
+}
+
+void CNewMachine::OnOK() 
+{
+	if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
+	{
+		CDialog::OnOK();
+	}
 }
