@@ -108,17 +108,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 
 	TRACE("VST plugin : Instanced at (Effect*): %.8X\n",(int)_pEffect);
 
-	//init plugin (probably a call to "Init()" function should be done here)
-	_pEffect->user = this;
-	try
-	{
-		Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
-	}
-	catch (...)
-	{
-		_pEffect=NULL;
-		return VSTINSTANCE_ERR_EXCEPTION;
-	}
+//2 :     Host to Plug, setSampleRate ( 44100.000000 ) 
 
 	try
 	{
@@ -134,6 +124,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 
+// 3 :     Host to Plug, setBlockSize ( 512 ) 
 	try
 	{
 		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
@@ -143,6 +134,146 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
+
+
+//  4 :     Host to Plug, open
+
+	//init plugin (probably a call to "Init()" function should be done here)
+	_pEffect->user = this;
+	try
+	{
+		Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+
+
+// 5 :     Host to Plug, setSpeakerArrangement  returned : false 
+	VstSpeakerArrangement VSTsa;
+	VSTsa.type = kSpeakerArrStereo;
+	VSTsa.numChannels = 2;
+	VSTsa.speakers[0].type = kSpeakerL;
+	VSTsa.speakers[1].type = kSpeakerR;
+	try 
+	{
+		Dispatch(effSetSpeakerArrangement,0,(long)&VSTsa,&VSTsa,0);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+// 6 :     Host to Plug, setSampleRate ( 44100.000000 ) 
+
+	try
+	{
+#if defined(_WINAMP_PLUGIN_)
+		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
+#else
+		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
+#endif // _WINAMP_PLUGIN_
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+// 7 :     Host to Plug, setBlockSize ( 512 ) 
+
+	try
+	{
+		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+// 8 :     Host to Plug, setSpeakerArrangement  returned : false 
+	try 
+	{
+		Dispatch(effSetSpeakerArrangement,0,(long)&VSTsa,&VSTsa,0);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+// 9 :     Host to Plug, setSampleRate ( 44100.000000 ) 
+	try
+	{
+#if defined(_WINAMP_PLUGIN_)
+		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
+#else
+		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
+#endif // _WINAMP_PLUGIN_
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+// 10 :     Host to Plug, setBlockSize ( 512 ) 
+	try
+	{
+		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+	long program = 0;
+
+// 11 :     Host to Plug, getProgram  returned : 0 
+	try
+	{
+		program = Dispatch( effGetProgram  ,  0, 0, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+// 12 :     Host to Plug, getProgram  returned : 0 
+	try
+	{
+		program = Dispatch( effGetProgram  ,  0, 0, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+// 13 :     Host to Plug, getVstVersion  returned : 2300 
+
+	try
+	{
+		_version = Dispatch(effGetVstVersion , 0 , 0 , NULL, 0.0f);
+	}
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+	if ( _version == 0 ) 
+	{
+		_version=1;
+	}
+
+// 14 :     Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
 
 	try
 	{
@@ -186,12 +317,18 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 
 //
 
-	if (!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName, 0.0f))
+	try
 	{
-		strcpy(_sVendorName, "Unknown vendor");
+		if (!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName, 0.0f))
+		{
+			strcpy(_sVendorName, "Unknown vendor");
+		}
 	}
-	_version = _pEffect->dispatcher(_pEffect,effGetVstVersion , 0 , 0 , NULL, 0.0f);
-	if ( _version == 0 ) _version=1;
+	catch (...)
+	{
+		_pEffect=NULL;
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 
 	_isSynth = (_pEffect->flags & effFlagsIsSynth)?true:false;
 
@@ -238,31 +375,84 @@ void VSTPlugin::Free() // Called also in destruction
 		instantiated=false;
 		TRACE("VST plugin : Free query 0x%.8X\n",(int)_pEffect);
 		_pEffect->user = NULL;
-		Dispatch( effMainsChanged, 0, 0, NULL, 0.0f);
+		try
+		{
+			Dispatch( effMainsChanged, 0, 0, NULL, 0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
+		}
 		// this crashes that piece of shit native instruments spektral delay 1.0
-		Dispatch( effClose,        0, 0, NULL, 0.0f);
+		try
+		{
+			Dispatch( effClose,        0, 0, NULL, 0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effClose",_editName,NULL);
+		}
 		_pEffect=NULL;	
 		FreeLibrary(h_dll);
 	}
 }
 
+	/*
 void VSTPlugin::Init(void) // This is currently unused! Changes need to be done in Song::Load() and Instance()
 {
 	Machine::Init();
 
 //	Dispatch(effOpen        ,  0, 0, NULL, 0.f);
-	Dispatch(effMainsChanged,  0, 0, NULL, 0.f);
-	
-#if defined(_WINAMP_PLUGIN_)
-	Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_samplesPerSec);
-#else
-	Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
-#endif // _WINAMP_PLUGIN_
+	try 
+	{
+		Dispatch(effMainsChanged,  0, 0, NULL, 0.f);
+	}
+	catch (...)
+	{
+		MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
+	}
 
-	Dispatch(effSetBlockSize,  0, STREAM_SIZE, NULL, 0.f);
-	Dispatch(effSetProgram  ,  0, 0, NULL, 0.f);
-	Dispatch(effMainsChanged,  0, 1, NULL, 0.f);
+	try
+	{
+#if defined(_WINAMP_PLUGIN_)
+		Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_samplesPerSec);
+#else
+		Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
+#endif // _WINAMP_PLUGIN_
+	}
+	catch (...)
+	{
+		MessageBox(NULL,"Machine had an exception on effSetSampleRate",_editName,NULL);
+	}
+
+
+	try
+	{
+		Dispatch(effSetBlockSize,  0, STREAM_SIZE, NULL, 0.f);
+	}
+	catch (...)
+	{
+		MessageBox(NULL,"Machine had an exception on effSetBlockSize",_editName,NULL);
+	}
+	try
+	{
+		Dispatch(effSetProgram  ,  0, 0, NULL, 0.f);
+	}
+	catch (...)
+	{
+		MessageBox(NULL,"Machine had an exception on effSetProgram",_editName,NULL);
+	}
+	try
+	{
+		Dispatch(effMainsChanged,  0, 1, NULL, 0.f);
+	}
+	catch (...)
+	{
+		MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
+	}
+
 }
+	*/
 
 bool VSTPlugin::Load(RiffFile* pFile)
 {
@@ -435,8 +625,17 @@ bool VSTPlugin::LoadChunk(RiffFile *pFile)
 		// Read chunk
 		chunk=new char[chunk_size];	
 		pFile->Read(chunk,chunk_size);
-		Dispatch(effSetChunk,0, chunk_size, chunk ,0.0f);
-		delete chunk;
+		try
+		{
+			Dispatch(effSetChunk,0, chunk_size, chunk ,0.0f);
+			delete chunk;
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
+			return false;
+		}
+
 		return true;
 	}
 	return false;
@@ -453,8 +652,24 @@ bool VSTPlugin::DescribeValue(int parameter,char* psTxt)
 			char par_label[64]={0};
 
 //			Dispatch(effGetParamName,parameter,0,par_name,0.0f);
-			Dispatch(effGetParamDisplay,parameter,0,par_display,0.0f);
-			Dispatch(effGetParamLabel,parameter,0,par_label,0.0f);
+			try
+			{
+				Dispatch(effGetParamDisplay,parameter,0,par_display,0.0f);
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception on effGetParamDisplay",_editName,NULL);
+			}
+
+			try
+			{
+				Dispatch(effGetParamLabel,parameter,0,par_label,0.0f);
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception on effGetParamLabel",_editName,NULL);
+			}
+
 //			sprintf(psTxt,"%s:%s%s",par_name,par_display,par_label);
 			sprintf(psTxt,"%s(%s)",par_display,par_label);
 			return true;
@@ -488,15 +703,37 @@ bool VSTPlugin::SetParameter(int parameter, int value)
 int VSTPlugin::GetCurrentProgram()
 {
 	if(instantiated)
-		return Dispatch(effGetProgram,0,0,NULL,0.0f);
+	{
+		int ret;
+		try
+		{
+			ret = Dispatch(effGetProgram,0,0,NULL,0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effGetProgram",_editName,NULL);
+		}
+		return ret;
+	}
 	else
+	{
 		return 0;
+	}
 }
 
 void VSTPlugin::SetCurrentProgram(int prg)
 {
 	if(instantiated)
-		Dispatch(effSetProgram,0,prg,NULL,0.0f);
+	{
+		try
+		{
+			Dispatch(effSetProgram,0,prg,NULL,0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effSetProgram",_editName,NULL);
+		}
+	}
 }
 
 bool VSTPlugin::AddMIDI(unsigned char data0,unsigned char data1,unsigned char data2)
@@ -520,7 +757,14 @@ bool VSTPlugin::AddMIDI(unsigned char data0,unsigned char data1,unsigned char da
 		pevent->midiData[2] = data2;
 		pevent->midiData[3] = 0;
 
-		if ( queue_size < MAX_EVENTS ) queue_size++;
+		if ( queue_size < MAX_VST_EVENTS-1 ) 
+		{
+			queue_size++;
+		}
+		else
+		{
+			queue_size = MAX_VST_EVENTS-1;
+		}
 
 		return true;
 	}
@@ -530,18 +774,32 @@ bool VSTPlugin::AddMIDI(unsigned char data0,unsigned char data1,unsigned char da
 
 void VSTPlugin::SendMidi()
 {
-/*	if(instantiated && queue_size>0)
-	{*/
+	if(instantiated && queue_size>0)
+	{
 		// Prepare MIDI events and free queue dispatching all events
+		if ( queue_size > MAX_VST_EVENTS-1 ) 
+		{
+			queue_size = MAX_VST_EVENTS-1;
+		}
 		events.numEvents = queue_size;
 		events.reserved  = 0;
-		for(int q=0;q<queue_size;q++) events.events[q] = (VstEvent*)&midievent[q];
+		for(int q=0;q<queue_size;q++) 
+		{
+			events.events[q] = (VstEvent*)&midievent[q];
+		}
 
 		//Finally Send the events.
 
-		Dispatch(effProcessEvents, 0, 0, &events, 0.0f);
-		queue_size=0;
-//	}
+		try
+		{
+			Dispatch(effProcessEvents, 0, 0, &events, 0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effProcessEvents",_editName,NULL);
+		}
+	}
+	queue_size=0;
 }
 
 // Host callback dispatcher
@@ -583,7 +841,14 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		return 'AASH';	// returns the unique id of a plug that's currently loading
 
 	case audioMasterIdle:
-		effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+		try
+		{
+			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effEditIdle","unknown vst",NULL);
+		}
 		return 0;		// call application idle routine (this will call effEditIdle for all open editors too) 
 		
 	case audioMasterPinConnected:
@@ -679,7 +944,14 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	
 	case audioMasterUpdateDisplay:
 		// this crashes that piece of shit ni spektral delay 1.0
-		effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+		try
+		{
+			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+		}
+		catch (...)
+		{
+			MessageBox(NULL,"Machine had an exception on effEditIdle","unknown vst",NULL);
+		}
 
 		return 0;
 
@@ -944,7 +1216,14 @@ bool VSTInstrument::AddNoteOn(unsigned char channel, unsigned char note,unsigned
 		pevent->midiData[2] = speed;
 		pevent->midiData[3] = 0;
 
-		if ( queue_size < MAX_EVENTS ) queue_size++;
+		if ( queue_size < MAX_VST_EVENTS-1 ) 
+		{
+			queue_size++;
+		}
+		else
+		{
+			queue_size = MAX_VST_EVENTS-1;
+		}
 
 		VSTinote thisnote;
 		thisnote.note = note;
@@ -953,9 +1232,7 @@ bool VSTInstrument::AddNoteOn(unsigned char channel, unsigned char note,unsigned
 		trackNote[channel]=thisnote;
 		return true;
 	}
-	else	return false;
-
-
+	return false;
 }
 
 bool VSTInstrument::AddNoteOff(unsigned char channel,unsigned char midichannel,bool addatStart)
@@ -970,7 +1247,7 @@ bool VSTInstrument::AddNoteOff(unsigned char channel,unsigned char midichannel,b
 				//PATCH: When a new note enters, it adds a note-off for the previous note playing in
 				//		 the track (this is ok). But if you have like:  A-4 C-5 and in the next line
 				//		 C-5 E-5 , you will only hear E-5. Solution: Move the NoteOffs at the beginning.
-				for (int i=MAX_EVENTS-1;i>0;i--)
+				for (int i=MAX_VST_EVENTS-1;i>0;i--)
 				{
 					midievent[i]=midievent[i-1];
 				}
@@ -993,7 +1270,15 @@ bool VSTInstrument::AddNoteOff(unsigned char channel,unsigned char midichannel,b
 			pevent->midiData[2] = 0;
 			pevent->midiData[3] = 0;
 
-			if ( queue_size < MAX_EVENTS ) queue_size++;
+			if ( queue_size < MAX_VST_EVENTS-1 ) 
+			{
+				queue_size++;
+			}
+			else
+			{
+				queue_size = MAX_VST_EVENTS-1;
+			}
+
 			VSTinote thisnote;
 			thisnote.note = 255;
 			thisnote.midichan=0;
@@ -1034,7 +1319,17 @@ void VSTInstrument::Work(int numSamples)
 #endif // !defined(_WINAMP_PLUGIN_)	
 	if (!_mute && instantiated)
 	{
-		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
+		if ( wantidle ) 
+		{
+			try
+			{
+				Dispatch(effIdle, 0, 0, NULL, 0.0f);
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception on effEditIdle",_editName,NULL);
+			}
+		}
 
 		SendMidi();
 
@@ -1361,7 +1656,17 @@ void VSTFX::Work(int numSamples)
 	{
 		if (instantiated)
 		{
-			if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
+			if ( wantidle ) 
+			{
+				try
+				{
+					Dispatch(effIdle, 0, 0, NULL, 0.0f);
+				}
+				catch (...)
+				{
+					MessageBox(NULL,"Machine had an exception on effEditIdle",_editName,NULL);
+				}
+			}
 		
 			SendMidi();
 

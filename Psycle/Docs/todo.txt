@@ -233,6 +233,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[Fix:Basically, make ONLY .fxb for VST's.]
 **	The Winamp plugin shows a memory leak with modules that have VST's. I have overlooked but I
 	haven't found the cause yet. I will try later with a leak detector program.
+** BLOCKFISH crashes on connect 
 ** DashSynthesis daAlfa2k VSTi v1.28b - crashes with user breakpoints and access violation on instance in debug build
 ** ticky clav 1.1 causes random access violation crashes? - now i am not sure if it is ticky clav
 ** phatmatic causes crashes when you open the gui after loading a sample into it.
