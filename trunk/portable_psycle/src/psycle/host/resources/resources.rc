@@ -2336,6 +2336,7 @@ END
 //
 
 // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
+#if MICROSOFT_ARE_TEH_PWND
 VS_VERSION_INFO VERSIONINFO
 	PRODUCTVERSION PSYCLE__VERSION__MAJOR,PSYCLE__VERSION__MINOR,PSYCLE__VERSION__PATCH
 	FILEVERSION PSYCLE__VERSION__MAJOR,PSYCLE__VERSION__MINOR,PSYCLE__VERSION__PATCH
@@ -2373,6 +2374,37 @@ VS_VERSION_INFO VERSIONINFO
 		VALUE "Translation", 0x409, 1200 // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
 	}
 END
+#else
+VS_VERSION_INFO VERSIONINFO
+	PRODUCTVERSION 0,0,0,0
+	FILEVERSION 0,0,0,0
+	FILEFLAGSMASK VS_FF_DEBUG
+	#if defined NDEBUG
+		FILEFLAGS 0
+	#else
+		FILEFLAGS VS_FF_DEBUG
+	#endif
+	FILEOS VOS_NT
+	FILETYPE VFT_UNKNOWN
+	FILESUBTYPE VFT2_UNKNOWN
+	{
+		BLOCK "StringFileInfo"
+		{
+			BLOCK "040904b0" // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
+			{
+				VALUE "ProductName", "psycle"
+				VALUE "FileDescription", "Psycle Modular Music Creation Studio"
+				VALUE "CompanyName", "Psycledelics"
+				VALUE "LegalCopyright", "(public domain) Copyright (C) 2000-2005 Psycledelics"
+				VALUE "License", "none, public domain"
+			}
+	}
+	BLOCK "VarFileInfo"
+	{
+		VALUE "Translation", 0x409, 1200 // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
+	}
+END
+#endif
 
 
 #ifdef APSTUDIO_INVOKED
