@@ -18,7 +18,7 @@
 #define MAX_INSTRUMENTS			255
 #define PREV_WAV_INS			254
 #define LOCK_LATENCY			256
-#define MAX_PATTERNS			128		// MAX NUM OF PATTERNS
+#define MAX_PATTERNS			128		// MAX NUM OF PATTERNS - NOTE: this was used incorrectly in many places instead of MAX_SONG_POSITIONS
 #define MULTIPLY				MAX_TRACKS * 5				// you don't need to calc these by hand, 
 #define MULTIPLY2				MULTIPLY * MAX_LINES		// precompiler will do that for you
 #define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	// without any affect on the generated code

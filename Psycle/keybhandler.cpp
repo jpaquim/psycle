@@ -893,6 +893,43 @@ void CChildView::patPaste()
 	}
 }
 
+void CChildView::patMixPaste()
+{
+	// UNDO CODE PATT PASTE
+	if(patBufferCopy && viewMode == VMPattern)
+	{
+		const int ps = _ps();
+		unsigned char* offset_target = _pSong->pPatternData + (ps*MULTIPLY2);
+		unsigned char* offset_source = blockBufferData;
+		// **************** funky shit goin on here yo with the pattern resize or some shit
+		AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+		if ( patBufferLines != _pSong->patternLines[_ps()] )
+		{
+			AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+			_pSong->AllocNewPattern(_ps(),"",patBufferLines,false);
+		}
+		// **************** uhoh shit here
+
+		for (int i = 0; i < MAX_TRACKS*patBufferLines; i++)
+		{
+			if (*offset_target == 0xFF) *(offset_target)=*offset_source;
+			if (*(offset_target+1)== 0xFF) *(offset_target+1)=*(offset_source+1);
+			if (*(offset_target+2)== 0xFF) *(offset_target+2)=*(offset_source+2);
+			if (*(offset_target+3)== 0) *(offset_target+3)=*(offset_source+3);
+			if (*(offset_target+4)== 0) *(offset_target+4)=*(offset_source+4);
+			offset_target+= 5;
+			offset_source+= 5;
+		}
+		
+		drawTrackStart=0;
+		drawTrackEnd=_pSong->SONGTRACKS;
+		drawLineStart=0;
+		drawLineEnd=patBufferLines-1;
+		Repaint(DMDataChange);
+	}
+}
+
+
 void CChildView::patTranspose(int trp)
 {
 	// UNDO CODE PATT TRANSPOSE
@@ -1446,7 +1483,7 @@ void CChildView::DecPosition()
 		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 		_pSong->playOrderSel[editPosition]=true;
 
-		pParentMain->UpdatePlayOrder(false);
+		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPatternChange);
 //		Repaint(DMPatternSwitch); // new code
 		
@@ -1470,7 +1507,7 @@ void CChildView::IncPosition()
 		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 		_pSong->playOrderSel[editPosition]=true;
 
-		pParentMain->UpdatePlayOrder(false);
+		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPatternChange);
 //		Repaint(DMPatternSwitch); // new code
 		
