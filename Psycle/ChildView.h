@@ -19,6 +19,8 @@
 enum 
 {
 	DMAll = 0,		// Don't use this mode if it is not really necessary.
+	DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
+	DMMacRefresh,	// Used to refresh the image of one machine
 	DMPatternChange,// Use this when changing the props of the Pattern, or when changing the pattern shown
 	DMDataChange,	// Data has Changed. Which data to update is indicated with a CRect Struct:
 					// track/line start (left,top) and the track/line end (right,bottom).
@@ -90,7 +92,7 @@ public:
 	void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
 	void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
 	void EnterNote(int note, int velocity=127, bool bTranspose=true);
-	bool CChildView::MSBPut(int nChar);
+	bool MSBPut(int nChar);
 	void PrevTrack(int x,bool wrap,bool updateDisplay=true);
 	void AdvanceTrack(int x,bool wrap,bool updateDisplay=true);
 	void PrevCol(bool wrap,bool updateDisplay=true);
@@ -146,13 +148,13 @@ public:
 
 	bool blockSelected;
 	CCursor editcur;	// Edit Cursor Position in Pattern.
-	int editPosition;	// Position in the Sequence!
 	bool bEditMode;		// in edit mode?
 	int patStep;
 
 	bool _followSong;
 	int _previousTicks;
-
+	int editPosition;	// Position in the Sequence!
+	
 	int updateMode;
 	int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
 	int viewMode;

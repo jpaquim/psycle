@@ -712,7 +712,7 @@ void CChildView::patCopy()
 	
 	patBufferCopy=true;
 
-	Repaint(DMCursorMove);
+	Repaint(DMCursorMove); // Needed?
 }
 
 void CChildView::patPaste()

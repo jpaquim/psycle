@@ -91,9 +91,9 @@ CChildView::CChildView()
 	blockNTracks=0;
 	blockNLines=0;
 
-	editcur.track=0;
-	editcur.col=0;
-	editcur.line=0;
+//	editcur.track=0; // Not needed to initialize, since the class does it already.
+//	editcur.col=0;
+//	editcur.line=0;
 	playpos.bottom=0;
 	newplaypos.bottom=0; newplaypos.left=0; newplaypos.right=XOFFSET-2;
 	guipos.bottom=0;	guipos.top=0;	guipos.left=0;	guipos.right=0;
@@ -347,15 +347,12 @@ void CChildView::OnTimer( UINT nIDEvent )
 	}
 	if (nIDEvent == 159 )
 	{
-		if ( Global::_pSong->_saved ) 
-		{
-			CString filepath = Global::pConfig->GetInitialSongDir();
-			filepath += "\\autosave.psy";
-			CSaveDlg dlg;
-			dlg._pSong = Global::_pSong;
-			sprintf(dlg.szFile, filepath);
-			dlg.SaveSong();
-		}
+		CString filepath = Global::pConfig->GetInitialSongDir();
+		filepath += "\\autosave.psy";
+		CSaveDlg dlg;
+		dlg._pSong = Global::_pSong;
+		sprintf(dlg.szFile, filepath);
+		dlg.SaveSong(true); // true = don't report saving problems
 	}
 }
 
@@ -442,18 +439,25 @@ void CChildView::OnPaint()
 		{
 			switch (updateMode)
 			{
-			case 0:
+			case DMAll:
 				DrawMachineEditor(&bufDC);
 				break;
-			case 1:
+			case DMMacRefresh:
 				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
 				updateMode=0;
+				break;
+			case DMAllMacsRefresh:
+				for (int i=0;i<MAX_MACHINES;i++)
+				{
+					if (_pSong->_machineActive[i]) DrawMachine(Global::_pSong->_pMachines[i], i, &bufDC);
+				}
 				break;
 			}
 		}
 		else if (viewMode == VMPattern)	// Pattern view paint handler
 		{
-			if ( updateMode != DMNone ) DrawPatEditor(&bufDC);
+			//if ( updateMode != DMNone ) 
+			DrawPatEditor(&bufDC);
 		}
 		CRect rc;
 		GetClientRect(&rc);
@@ -467,12 +471,18 @@ void CChildView::OnPaint()
 		{
 			switch (updateMode)
 			{
-			case 0:
+			case DMAll:
 				DrawMachineEditor(&dc);
 				break;
-			case 1:
+			case DMMacRefresh:
 				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
 				updateMode=0;
+				break;
+			case DMAllMacsRefresh:
+				for (int i=0;i<MAX_MACHINES;i++)
+				{
+					if (_pSong->_machineActive[i]) DrawMachine(Global::_pSong->_pMachines[i], i, &dc);
+				}
 				break;
 			}
 		}
@@ -485,11 +495,17 @@ void CChildView::OnPaint()
 
 void CChildView::Repaint(int drawMode)
 {
-	if ( viewMode == VMPattern ) PreparePatternRefresh(drawMode);
-	else if ( viewMode == VMMachine )
+	if ( viewMode == VMMachine )
 	{
-		updateMode = drawMode;
-		Invalidate(false);
+		if ( drawMode <= DMMacRefresh )
+		{
+			updateMode = drawMode;
+			Invalidate(false);
+		}
+	}
+	else if ( viewMode == VMPattern )
+	{
+		if (drawMode >= DMPatternChange || drawMode == DMAll )	PreparePatternRefresh(drawMode);
 	}
 }
 
@@ -513,7 +529,7 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 	if (VISLINES < 1) { VISLINES = 1; }
 	if (VISTRACKS < 1) { VISTRACKS = 1; }
 
-	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // buffer size change
+	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 	{
 		bmpDC->DeleteObject();
 		delete bmpDC;
@@ -844,7 +860,7 @@ void CChildView::OnFileSongproperties()
 {	CSongpDlg dlg;
 	dlg._pSong=Global::_pSong;
 	dlg.DoModal();
-	Repaint();
+//	Repaint();
 }
 
 void CChildView::OnViewInstrumenteditor()
@@ -884,9 +900,13 @@ void CChildView::ShowPatternDlg(void)
 		if ( nlines != dlg.patLines )
 		{
 			_pSong->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
+			if ( strcmp(name,dlg.patName) != 0 )
+			{
+				strcpy(_pSong->patternName[patNum],dlg.patName);
+			}
 			Repaint(DMPatternChange);
 		}
-		if ( strcmp(name,dlg.patName) != 0 )
+		else if ( strcmp(name,dlg.patName) != 0 )
 		{
 			strcpy(_pSong->patternName[patNum],dlg.patName);
 			Repaint(DMPatternHeader);
@@ -942,7 +962,7 @@ void CChildView::OnNewmachine()
 			Global::pConfig->_pMidiInput->Open();
 		}
 	}
-	Repaint();
+//	Repaint();
 }
 
 void CChildView::OnConfigurationSettings() 
@@ -957,14 +977,14 @@ void CChildView::OnConfigurationSettings()
 		// MIDI IMPLEMENTATION
 		Global::pConfig->_pMidiInput->Open();
 	}
-	Repaint();
+//	Repaint();
 	
 }
 void CChildView::OnHelpSaludos() 
 {
 	CGreetDialog dlg;
 	dlg.DoModal();
-	Repaint();
+//	Repaint();
 }
 
 int CChildView::SongIncBpm(int x)
@@ -987,10 +1007,10 @@ int CChildView::SongIncBpm(int x)
 void CChildView::SetPatStep(int stp)
 {
 	patStep=stp;
-	if (viewMode == VMPattern)
+/*	if (viewMode == VMPattern) // why did I do this?
 	{
 		Repaint();
-	}
+	}*/
 }
 
 
@@ -1110,20 +1130,32 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				PrevLine(16,false);
 				break;
 			case SB_THUMBPOSITION:
-				nlOff=nPos;
-				if ((int)nPos != lOff )
+				if ((int)nPos > lOff )
 				{
-					AdvanceLine(nPos-lOff,false,false); // AdvanceLine does not accept Negative values
-					Repaint(DMScroll);					// in general, but here we can make an exception.
-				}						
+					nlOff=nPos;
+					AdvanceLine(nPos-lOff,false,false); 
+					Repaint(DMScroll);
+				}
+				else if ((int)nPos < lOff )
+				{
+					nlOff=nPos;
+					PrevLine(lOff-nPos,false,false);
+					Repaint(DMScroll);
+				}
 				break;
 			case SB_THUMBTRACK:
-				nlOff=nPos;
-				if ((int)nPos != lOff )
+				if ((int)nPos > lOff )
 				{
-					AdvanceLine(nPos-lOff,false,false); // AdvanceLine does not accept Negative values
-					Repaint(DMScroll);					// in general, but here we can make an exception.
-				}						
+					nlOff=nPos;
+					AdvanceLine(nPos-lOff,false,false); 
+					Repaint(DMScroll);
+				}
+				else if ((int)nPos < lOff )
+				{
+					nlOff=nPos;
+					PrevLine(lOff-nPos,false,false);
+					Repaint(DMScroll);
+				}
 				break;
 			default: break;
 		}
@@ -1164,19 +1196,32 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				PrevTrack(VISTRACKS,false);
 				break;
 			case SB_THUMBPOSITION:
-				ntOff=nPos;
-				if ((int)nPos != lOff )
+				if ((int)nPos > tOff )
 				{
-					AdvanceTrack(nPos-tOff,false,false);// AdvanceTrack does not accept Negative values
-					Repaint(DMScroll);					// in general, but here we can make an exception.
+					ntOff=nPos;
+					AdvanceTrack(nPos-tOff,false,false);
+					Repaint(DMScroll);
+				}
+				else if ((int)nPos < tOff )
+				{
+					ntOff=nPos;
+					PrevLine(tOff-nPos,false,false);
+					Repaint(DMScroll);
 				}
 				break;
 			case SB_THUMBTRACK:
 				ntOff=nPos;
-				if ((int)nPos != lOff )
+				if ((int)nPos > tOff )
 				{
-					AdvanceTrack(nPos-tOff,false,false);// AdvanceTrack does not accept Negative values
-					Repaint(DMScroll);					// in general, but here we can make an exception.
+					ntOff=nPos;
+					AdvanceTrack(nPos-tOff,false,false);
+					Repaint(DMScroll);
+				}
+				else if ((int)nPos < tOff )
+				{
+					ntOff=nPos;
+					PrevLine(tOff-nPos,false,false);
+					Repaint(DMScroll);
 				}
 				break;
 			default: break;
