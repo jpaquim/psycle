@@ -7,7 +7,7 @@ void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	if (cmd.GetType() == CT_Note)
 	{
 		const int outnote = cmd.GetNote();
-		if(viewMode == VMPattern && bEditMode)
+		if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && _followSong)
 		{ 
 			if(Global::pConfig->_RecordNoteoff)
 			{
@@ -93,7 +93,7 @@ void CChildView::MidiPatternNote(int outnote, int velocity)
 			}
 			else
 			{
-				if(Global::pConfig->_RecordNoteoff)
+				if(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && _followSong)
 				{
 					EnterNote(outnote,0,false);	// note end
 				}
@@ -299,6 +299,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 					if(++editcur.track >= _pSong->SONGTRACKS)
 						editcur.track=0;
 				}
+				editcur.col = 0;
 			}
 		}
 		else

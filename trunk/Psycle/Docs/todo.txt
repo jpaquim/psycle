@@ -1,7 +1,8 @@
-*Noteoffs on edit with keyboard
+*remove waits from play when in export mode
 -undo/redo
 -copy paste in edit menu
--more midi control commands
+-midi control commands learn
+-longer patterns
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
