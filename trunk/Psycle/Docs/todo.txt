@@ -24,7 +24,7 @@
 
 * Machines
 ------------
-* <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
+* <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)  <ksn> this happens only with moog alp and hp nd xstage phaser filters... 
 * <Alk^^> in pooplog filter tweak inertia doesnt work
 * cyanphase vibrasynth has an access violation bug
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....

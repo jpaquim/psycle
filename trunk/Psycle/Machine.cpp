@@ -12,7 +12,7 @@
 	#include "Song.h"
 //	#include "FileIO.h"
 	#include "Configuration.h"
-#include "WireDlg.h"
+	#include "WireDlg.h"
 
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_

@@ -6,6 +6,7 @@
 #include "MidiMonitorDlg.h"
 #include "MidiInput.h"
 #include "song.h"
+#include "machine.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

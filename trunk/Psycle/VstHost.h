@@ -92,7 +92,10 @@ public:
 	bool requiresProcess;	// It needs to use Process
 	bool requiresRepl;		// It needs to use ProcessRepl
 	int macindex;
+
+#if !defined(_WINAMP_PLUGIN_)
 	CFrameWnd* editorWnd;
+#endif // _WINAMP_PLUGIN_
 	
 protected:
 

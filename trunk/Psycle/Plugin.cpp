@@ -335,8 +335,6 @@ bool Plugin::Load(
 	char sDllName[256];
 	int numParameters;
 
-		CString sPath;
-		char sPath2[_MAX_PATH];
 
 		pFile->Read(sDllName, sizeof(sDllName)); // Plugin dll name
 		_strlwr(sDllName);
@@ -359,16 +357,17 @@ bool Plugin::Load(
 		if (strcmp(sDllName,"synth21.dll" ) == 0)
 			strcpy(sDllName,"arguru synth 2f.dll");
 
-#if defined(_WINAMP_PLUGIN_
-		sPath = Global::pConfig->GetPluginDir();
+		char sPath2[_MAX_PATH];
+#if defined(_WINAMP_PLUGIN_)
+		strcpy(sPath2,Global::pConfig->GetPluginDir());
 
-		if ( FindFileinDir(sDllName,sPath) )
+		if ( FindFileinDir(sDllName,sPath2) )
 		{
-			strcpy(sPath2,sPath);
 			if (!Instance(sPath2)) result=false;
 		}
 		else result = false;
 #else
+		CString sPath;
 		if ( !CNewMachine::dllNames.Lookup(sDllName,sPath) ) 
 		{
 //			Check Compatibility Table.

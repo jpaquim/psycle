@@ -282,8 +282,7 @@ protected:
 	char* _psInitialVstDir;
 	char* _psVstDir;
 
-	void Error(
-		char const* psMsg);
+	void Error(	char const* psMsg);
 
 };
 

@@ -2,15 +2,15 @@
 #define _SONG_H
 
 #if defined(_WINAMP_PLUGIN_)
-	#include <afxmt.h>
+//	#include <afxmt.h>
 #endif // _WINAMP_PLUGIN_
 
 #include "Constants.h"
-#include "Machine.h"
 #include "FileIO.h"
-//#include "SongStructs.h"
+#include "SongStructs.h"
 
 class CCriticalSection;
+class Machine;
 
 class Instrument
 {
@@ -70,7 +70,10 @@ public:
 
 	bool _saved;
 	int _trackSoloed;
+
+#if !defined(_WINAMP_PLUGIN_)
 	CCriticalSection door;
+#endif // !defined(_WINAMP_PLUGIN_)
 
 	Song();
 	~Song();

@@ -2,20 +2,15 @@
 #define _GLOBAL_H
 
 #if defined(_WINAMP_PLUGIN_)
-	#define WIN32_MEAN_AND_LEAN
 
-	#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-
-	#include <afxwin.h>
+	#include <windows.h>
 	#include "WinampPlugin\resource.h"
-	
+
 	class Song;
 	class Player;
 	class Configuration;
 
-	#define MAX_CONNECTIONS		12
-
-	bool FindFileinDir(char *dllname,CString &path);
+	bool FindFileinDir(char *dllname,char* path);
 
 	class Global
 	{
@@ -29,6 +24,10 @@
 		static Configuration* pConfig;
 	};
 
+	#define CPoint POINT
+	#define TRACE //
+
+
 #else
 
 	class Song;
@@ -36,8 +35,6 @@
 	class Configuration;
 	class Resampler;
 	class InputHandler;
-
-	#define MAX_CONNECTIONS		12
 
 	class Global
 	{
