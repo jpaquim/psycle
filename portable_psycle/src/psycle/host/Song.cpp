@@ -570,9 +570,9 @@ namespace psycle
 		void Song::SetBPM(int bpm, int tpb, int srate)
 		{
 			static int sr = 0;
-			BeatsPerMin = bpm;
+			m_BeatsPerMin = bpm;
 			_ticksPerBeat = tpb;
-			SamplesPerTick = (srate*15*4)/(bpm*tpb);
+			m_SamplesPerTick = (srate*15*4)/(bpm*tpb);
 			///\todo update the source code of the plugins... hey if our rate has changed, let everybody know!
 			if(sr != srate)
 			{
@@ -1043,7 +1043,7 @@ namespace psycle
 							SONGTRACKS = temp;
 							// bpm
 							pFile->Read(&temp, sizeof temp);
-							BeatsPerMin = temp;
+							m_BeatsPerMin = temp;
 							// tpb
 							pFile->Read(&temp, sizeof temp);
 							_ticksPerBeat = temp;
@@ -1075,14 +1075,14 @@ namespace psycle
 								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
-							Global::pPlayer->bpm = BeatsPerMin;
+							Global::pPlayer->bpm = m_BeatsPerMin;
 							Global::pPlayer->tpb = _ticksPerBeat;
 							// calculate samples per tick
 							///\todo there's a unified call for samples per seconds
 							#if defined _WINAMP_PLUGIN_
-								SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+								m_SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 							#else
-								SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+								m_SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 							#endif
 						}
 					}
@@ -1334,21 +1334,21 @@ namespace psycle
 				pFile->Read(&Name, 32);
 				pFile->Read(&Author, 32);
 				pFile->Read(&Comment, 128);
-				pFile->Read(&BeatsPerMin, sizeof BeatsPerMin);
-				pFile->Read(&SamplesPerTick, sizeof SamplesPerTick);
-				if( SamplesPerTick <= 0)
+				pFile->Read(&m_BeatsPerMin, sizeof m_BeatsPerMin);
+				pFile->Read(&m_SamplesPerTick, sizeof m_SamplesPerTick);
+				if( m_SamplesPerTick <= 0)
 				{
 					// Shouldn't happen but has happened.
-					_ticksPerBeat= 4; SamplesPerTick = 4315;
+					_ticksPerBeat= 4; m_SamplesPerTick = 4315;
 				}
-				else _ticksPerBeat = 44100 * 15 * 4 / (SamplesPerTick * BeatsPerMin);
-				Global::pPlayer->bpm = BeatsPerMin;
+				else _ticksPerBeat = 44100 * 15 * 4 / (m_SamplesPerTick * m_BeatsPerMin);
+				Global::pPlayer->bpm = m_BeatsPerMin;
 				Global::pPlayer->tpb = _ticksPerBeat;
 				// The old format assumes we output at 44100 samples/sec, so...
 				#if defined _WINAMP_PLUGIN_
-					SamplesPerTick = SamplesPerTick * Global::pConfig->_samplesPerSec / 44100;
+					m_SamplesPerTick = m_SamplesPerTick * Global::pConfig->_samplesPerSec / 44100;
 				#else
-					SamplesPerTick = SamplesPerTick * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100;
+					m_SamplesPerTick = m_SamplesPerTick * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100;
 				#endif
 				pFile->Read(&currentOctave, sizeof currentOctave);
 				pFile->Read(&busMachine[0], sizeof busMachine);
@@ -2288,7 +2288,7 @@ namespace psycle
 
 			temp = SONGTRACKS;
 			pFile->Write(&temp,sizeof(temp));
-			temp = BeatsPerMin;
+			temp = m_BeatsPerMin;
 			pFile->Write(&temp,sizeof(temp));
 			temp = _ticksPerBeat;
 			pFile->Write(&temp,sizeof(temp));

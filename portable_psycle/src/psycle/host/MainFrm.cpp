@@ -365,7 +365,7 @@ namespace psycle
 			UpdateSequencer();
 			m_wndView.InitTimer();
 		//	m_wndView.Repaint();
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
 			
 			return 0;
@@ -399,7 +399,7 @@ namespace psycle
 		{
 			// forward focus to the view window
 			m_wndView.Repaint();
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 			m_wndView.EnableSound();
 		}
 
@@ -487,49 +487,49 @@ namespace psycle
 
 			m_wndView.RecalculateColourGrid();
 			m_wndView.Repaint();
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnCloseupTrackcombo() 
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnBarButton1()  // OnBpmAddOne
 		{
 			SetAppSongBpm(1);
-			m_wndView.SetFocus();	
+			//m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmAddTen() 
 		{
 			SetAppSongBpm(10);
-			m_wndView.SetFocus();	
+			//m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmDecOne() 
 		{
 			SetAppSongBpm(-1);
-			m_wndView.SetFocus();	
+			//m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmDecTen() 
 		{
 			SetAppSongBpm(-10);
-			m_wndView.SetFocus();	
+			//m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnDecTPB()
 		{
 			SetAppSongTpb(-1);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 			m_wndView.Repaint();
 		}
 
 		void CMainFrame::OnIncTPB()
 		{
 			SetAppSongTpb(+1);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 			m_wndView.Repaint();
 		}
 
@@ -542,14 +542,14 @@ namespace psycle
 				else
 				{
 					Global::pPlayer->bpm+=x;
-					int const cur= m_wndView.SongIncBpm(Global::pPlayer->bpm - Global::_pSong->BeatsPerMin);
+					int const cur= m_wndView.SongIncBpm(Global::pPlayer->bpm - Global::_pSong->BeatsPerMin());
 					sprintf(buffer,"%d",cur);
 				}
 			}
 			else
 			{
 				if ( x != 0 ) m_wndView.SongIncBpm(x);
-				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin);
+				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin());
 			}
 			CStatic *tmplab=(CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL);
 			tmplab->SetWindowText(buffer);
@@ -566,7 +566,7 @@ namespace psycle
 				if (Global::_pSong->_ticksPerBeat < 1) 	Global::_pSong->_ticksPerBeat = 1;
 				else if (Global::_pSong->_ticksPerBeat > 32) Global::_pSong->_ticksPerBeat = 32;
 
-				Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+				Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 				Global::pPlayer->tpb=Global::_pSong->_ticksPerBeat;
 			}
 			
@@ -578,7 +578,7 @@ namespace psycle
 
 		void CMainFrame::OnCloseupCombooctave() 
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSelchangeCombooctave() 
@@ -587,7 +587,7 @@ namespace psycle
 			_pSong->currentOctave=cc2->GetCurSel();
 			
 			m_wndView.Repaint();
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		//////////////////////////////////////////////////////////////////////
@@ -620,7 +620,7 @@ namespace psycle
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				//((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
 				((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos();
-				m_wndView.SetFocus();
+				//m_wndView.SetFocus();
 			}
 			
 			*pResult = 0;
@@ -629,7 +629,7 @@ namespace psycle
 		void CMainFrame::OnClipbut() 
 		{
 			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		//l and r are the left and right vu meter values
@@ -748,12 +748,12 @@ namespace psycle
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
 			int sel=cc->GetCurSel();
 			m_wndView.patStep=sel;
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnCloseupSscombo2()	// OnCloseupPatternStep
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::EditQuantizeChange(int diff) // User Called (Hotkey)
@@ -778,7 +778,7 @@ namespace psycle
 
 		void CMainFrame::OnCloseupBarGenfx() 
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnBDecgen() 
@@ -788,7 +788,7 @@ namespace psycle
 			const int val = cc->GetCurSel();
 			if ( val > 0 ) cc->SetCurSel(val-1);
 			OnSelchangeBarCombogen();
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnBIncgen() 
@@ -798,7 +798,7 @@ namespace psycle
 			const int val = cc->GetCurSel();
 			if ( val < cc->GetCount()-1 ) cc->SetCurSel(val+1);
 			OnSelchangeBarCombogen();
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::UpdateComboGen(bool updatelist)
@@ -948,7 +948,7 @@ namespace psycle
 
 		void CMainFrame::OnCloseupBarCombogen()
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 
@@ -971,7 +971,7 @@ namespace psycle
 
 		void CMainFrame::OnCloseupAuxselect() 
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSelchangeAuxselect() 
@@ -991,13 +991,13 @@ namespace psycle
 		void CMainFrame::OnBDecwav() 
 		{
 			ChangeIns(_pSong->auxcolSelected-1);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnBIncwav() 
 		{
 			ChangeIns(_pSong->auxcolSelected+1);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::UpdateComboIns(bool updatelist)
@@ -1110,7 +1110,7 @@ namespace psycle
 
 		void CMainFrame::OnCloseupBarComboins()
 		{
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::ChangeIns(int i)	// User Called (Hotkey)
@@ -1206,7 +1206,7 @@ namespace psycle
 				_pSong->DeleteLayer(PREV_WAV_INS,0);
 				_pSong->Invalided=false;
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSavewave()
@@ -1630,7 +1630,7 @@ namespace psycle
 					}
 				}		
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnDblclkSeqlist() 
@@ -1646,7 +1646,7 @@ namespace psycle
 				UpdatePlayOrder(true);
 				m_wndView.Repaint(DMPattern);
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 			*/		
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const ep=cc->GetCurSel();
@@ -1683,7 +1683,7 @@ namespace psycle
 			UpdatePlayOrder(false);
 			UpdateSequencer();
 			m_wndView.Repaint(DMPattern);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnDecshort() 
@@ -1705,7 +1705,7 @@ namespace psycle
 			UpdatePlayOrder(false);
 			UpdateSequencer();
 			m_wndView.Repaint(DMPattern);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnInclong() 
@@ -1731,7 +1731,7 @@ namespace psycle
 			UpdatePlayOrder(false);
 			UpdateSequencer();
 			m_wndView.Repaint(DMPattern);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnDeclong() 
@@ -1757,7 +1757,7 @@ namespace psycle
 			UpdatePlayOrder(false);
 			UpdateSequencer();
 			m_wndView.Repaint(DMPattern);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSeqnew() 
@@ -1787,7 +1787,7 @@ namespace psycle
 
 				m_wndView.Repaint(DMPattern);
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSeqins() 
@@ -1809,7 +1809,7 @@ namespace psycle
 
 				m_wndView.Repaint(DMPattern);
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSeqduplicate() 
@@ -1867,7 +1867,7 @@ namespace psycle
 				m_wndView.Repaint(DMPattern);
 			}
 			zapArray(litems);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSeqcut() 
@@ -1926,7 +1926,7 @@ namespace psycle
 			UpdatePlayOrder(true);
 			UpdateSequencer(m_wndView.editPosition);
 			m_wndView.Repaint(DMPattern);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnSeqcopy() 
@@ -1990,7 +1990,7 @@ namespace psycle
 						}
 						UpdateSequencer(m_wndView.editPosition);
 						m_wndView.Repaint(DMPattern);
-						m_wndView.SetFocus();
+						//m_wndView.SetFocus();
 					}
 				}
 			}
@@ -2018,7 +2018,7 @@ namespace psycle
 				UpdateSequencer();
 				m_wndView.Repaint(DMPattern);
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 			
 		}
 		void CMainFrame::OnSeqsort()
@@ -2102,7 +2102,7 @@ namespace psycle
 			seqcopybufferlength = 0;
 			UpdateSequencer();
 			m_wndView.Repaint(DMPattern);
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 
@@ -2115,7 +2115,7 @@ namespace psycle
 				UpdatePlayOrder(false);
 				UpdateSequencer();
 			}
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnDeclen() 
@@ -2128,35 +2128,35 @@ namespace psycle
 				UpdatePlayOrder(false);
 				UpdateSequencer();
 			}
-			m_wndView.SetFocus();	
+			//m_wndView.SetFocus();	
 		}
 
 
 		void CMainFrame::OnMultichannelAudition() 
 		{
 			Global::pInputHandler->bMultiKey = !Global::pInputHandler->bMultiKey;
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnRecordNoteoff() 
 		{
 			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF))->GetCheck() ) Global::pConfig->_RecordNoteoff=true;
 			else Global::pConfig->_RecordNoteoff=false;
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnRecordTweaks() 
 		{
 			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS))->GetCheck() ) Global::pConfig->_RecordTweaks=true;
 			else Global::pConfig->_RecordTweaks=false;
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnNotestoeffects() 
 		{
 			if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_NOTESTOEFFECTS))->GetCheck() ) Global::pConfig->_notesToEffects=true;
 			else Global::pConfig->_notesToEffects=false;
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 			
 		}
 
@@ -2189,7 +2189,7 @@ namespace psycle
 				}
 			}
 
-			m_wndView.SetFocus();
+			//m_wndView.SetFocus();
 		}
 
 		void CMainFrame::UpdatePlayOrder(bool mode)
@@ -2214,7 +2214,7 @@ namespace psycle
 			{
 				int pattern = _pSong->playOrder[i];
 				// this should parse each line for ffxx commands if you want it to be truly accurate
-				songLength += (_pSong->patternLines[pattern] * 60/(_pSong->BeatsPerMin * _pSong->_ticksPerBeat));
+				songLength += (_pSong->patternLines[pattern] * 60/(_pSong->BeatsPerMin() * _pSong->_ticksPerBeat));
 			}
 
 			sprintf(buffer, "%02d:%02d", songLength / 60, songLength % 60);
@@ -2223,7 +2223,7 @@ namespace psycle
 			// take ff and fe commands into account
 
 			float songLength = 0;
-			int bpm = _pSong->BeatsPerMin;
+			int bpm = _pSong->BeatsPerMin();
 			int tpb = _pSong->_ticksPerBeat;
 			for (int i=0; i <ll; i++)
 			{

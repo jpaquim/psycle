@@ -294,7 +294,7 @@ namespace psycle
 							{
 							case left_delay:
 							case right_delay:
-								value *= Real(2 * 3 * 4 * 5 * 7) / Global::_pSong->SamplesPerTick;
+								value *= Real(2 * 3 * 4 * 5 * 7) / Global::_pSong->SamplesPerTick();
 								break;
 							case left_feedback:
 							case right_feedback:
@@ -349,7 +349,7 @@ namespace psycle
 								value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
 								break;
 							case modulation_sequencer_ticks:
-								value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::_pSong->SamplesPerTick);
+								value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::_pSong->SamplesPerTick());
 								break;
 							case resonance:
 							case modulation_amplitude:

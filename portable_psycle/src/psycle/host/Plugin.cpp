@@ -434,7 +434,7 @@ namespace psycle
 										catch(const std::exception &)
 										{
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
 									}
 									else
 									{
@@ -453,7 +453,7 @@ namespace psycle
 										catch(const std::exception &)
 										{
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
 										if (parameter < 9)
 										{
@@ -661,7 +661,7 @@ namespace psycle
 						catch(const std::exception &)
 						{
 						}
-						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick();
 						TWSSamples = 0;
 						TWSActive = TRUE;
 					}

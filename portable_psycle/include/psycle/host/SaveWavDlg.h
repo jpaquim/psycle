@@ -67,6 +67,7 @@ namespace psycle
 
 			bool autostop;
 			bool playblock;
+			bool loopsong;
 			bool sel[MAX_SONG_POSITIONS];
 			bool saving;
 

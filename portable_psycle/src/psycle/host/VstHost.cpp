@@ -999,7 +999,7 @@ namespace psycle
 						if((Global::pPlayer)->_playing) 
 						{
 							const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb * 4)) / Global::pPlayer->tpb;
-							const float linestep = (((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining)) / Global::_pSong->SamplesPerTick) / Global::pPlayer->tpb;
+							const float linestep = (((float)(Global::_pSong->SamplesPerTick()-Global::pPlayer->_ticksRemaining)) / Global::_pSong->SamplesPerTick) / Global::pPlayer->tpb;
 							_timeInfo.ppqPos = currentline+linestep;
 						}
 						else
@@ -1211,7 +1211,7 @@ namespace psycle
 							{
 								TWSCurrent[i] = 0;
 							}
-							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::_pSong->SamplesPerTick;
+							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::_pSong->SamplesPerTick();
 							TWSSamples = 0;
 							TWSActive = true;
 						}
@@ -1440,7 +1440,7 @@ namespace psycle
 									{
 										// do event
 										Tick(i, &TriggerDelay[i]);
-										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick) / 256;
+										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick()) / 256;
 									}
 									else TriggerDelayCounter[i] -= nextevent;
 								}
@@ -1450,7 +1450,7 @@ namespace psycle
 									{
 										// do event
 										Tick(i, &TriggerDelay[i]);
-										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick) / 256;
+										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick()) / 256;
 										int parameter(TriggerDelay[i]._parameter & 0x0f);
 										if(parameter < 9) RetriggerRate[i] += 4  *parameter;
 										else
@@ -1580,7 +1580,7 @@ namespace psycle
 							{
 								TWSCurrent[i] = 0;
 							}
-							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::_pSong->SamplesPerTick;
+							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::_pSong->SamplesPerTick();
 							TWSSamples = 0;
 							TWSActive = true;
 						}
@@ -1746,7 +1746,7 @@ namespace psycle
 										{
 											// do event
 											Tick(i, &TriggerDelay[i]);
-											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick) / 256;
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick()) / 256;
 										}
 										else TriggerDelayCounter[i] -= nextevent;
 									}
@@ -1756,7 +1756,7 @@ namespace psycle
 										{
 											// do event
 											Tick(i, &TriggerDelay[i]);
-											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick) / 256;
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::_pSong->SamplesPerTick()) / 256;
 											int parameter(TriggerDelay[i]._parameter & 0x0f);
 											if(parameter < 9) RetriggerRate[i] += 4 * parameter;
 											else

@@ -103,7 +103,7 @@ namespace psycle
 			s->SONGTRACKS = iNoChannels;
 			
 			// tempo
-			s->BeatsPerMin = 6*iTempoBPM/iTempoTicks;
+			s->BeatsPerMin(6*iTempoBPM/iTempoTicks);
 
 			// instr count
 			m_iInstrCnt = iNoInstruments;

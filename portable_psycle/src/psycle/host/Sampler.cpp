@@ -141,7 +141,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
 								}
 								else
 								{
@@ -154,7 +154,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
 									int parameter = TriggerDelay[i]._parameter&0x0f;
 									if (parameter < 9)
 									{
@@ -610,7 +610,7 @@ namespace psycle
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = (Global::_pSong->SamplesPerTick/6)*(pEntry->_parameter & 0x0f);
+						pVoice->_triggerNoteOff = (Global::_pSong->SamplesPerTick()/6)*(pEntry->_parameter & 0x0f);
 					}
 					else if (((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->_parameter & 0x0f) == 0 ))
 					{
@@ -696,7 +696,7 @@ namespace psycle
 				//
 				if (Global::_pSong->_pInstrument[pVoice->_instrument]->_loop)
 				{
-					double const totalsamples = double(Global::_pSong->SamplesPerTick*Global::_pSong->_pInstrument[pVoice->_instrument]->_lines);
+					double const totalsamples = double(Global::_pSong->SamplesPerTick()*Global::_pSong->_pInstrument[pVoice->_instrument]->_lines);
 		//			pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}	
@@ -777,7 +777,7 @@ namespace psycle
 				//
 				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = (Global::_pSong->SamplesPerTick/6)*(pEntry->_parameter & 0x0f);
+					pVoice->_triggerNoteDelay = (Global::_pSong->SamplesPerTick()/6)*(pEntry->_parameter & 0x0f);
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
@@ -785,8 +785,8 @@ namespace psycle
 					if (pEntry->_cmd == SAMPLER_CMD_RETRIG && (pEntry->_parameter&0x0f) > 0)
 					{
 						pVoice->effretTicks=(pEntry->_parameter&0x0f); // number of Ticks.
-						pVoice->effVal= (Global::_pSong->SamplesPerTick/(pVoice->effretTicks+1));
-			//			pVoice->retTime=(Global::_pSong->SamplesPerTick/pVoice->effVal); // Number of samples for each retrig.
+						pVoice->effVal= (Global::_pSong->SamplesPerTick()/(pVoice->effretTicks+1));
+			//			pVoice->retTime=(Global::_pSong->SamplesPerTick()/pVoice->effVal); // Number of samples for each retrig.
 						
 						int volmod = (pEntry->_parameter&0xf0)>>4; // Volume modifier.
 						switch (volmod) 

@@ -440,11 +440,11 @@ namespace psycle
 					Global::pConfig->_pOutputDriver->Configure();
 					if (Global::pPlayer->_playing)
 					{
-						Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+						Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 					}
 					else
 					{
-						Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+						Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 					}
 					_outputActive = true;
 				}
@@ -1508,17 +1508,17 @@ namespace psycle
 		int CChildView::SongIncBpm(int x)
 		{
 			AddMacViewUndo();
-			Global::_pSong->BeatsPerMin+=x;
-			if (Global::_pSong->BeatsPerMin < 33)
+			Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
+			if (Global::_pSong->BeatsPerMin() < 33)
 			{
-				Global::_pSong->BeatsPerMin = 33;
+				Global::_pSong->BeatsPerMin(33);
 			}
-			if (Global::_pSong->BeatsPerMin > 999)
+			if (Global::_pSong->BeatsPerMin() > 999)
 			{
-				Global::_pSong->BeatsPerMin=999;
+				Global::_pSong->BeatsPerMin(999);
 			}
- 			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-			return Global::_pSong->BeatsPerMin;
+ 			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+			return Global::_pSong->BeatsPerMin();
 		}
 
 		///\todo extemely toxic pollution
@@ -1526,7 +1526,7 @@ namespace psycle
 
 		void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		{
-			int st = Global::_pSong->BeatsPerMin;
+			int st = Global::_pSong->BeatsPerMin();
 			static int sw = 2;
 			static float sv = 13.0f;
 			static float sp = -90.0f;
@@ -2045,7 +2045,7 @@ namespace psycle
 			{
 				Global::_pSong->fileName = fName;
 			}
-			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 			_outputActive = true;
 			if (!Global::pConfig->_pOutputDriver->Enable(true))
 			{

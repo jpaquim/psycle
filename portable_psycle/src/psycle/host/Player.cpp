@@ -44,7 +44,7 @@ namespace psycle
 			_playPattern = Global::_pSong->playOrder[_playPosition];
 			_playTime = 0;
 			_playTimem = 0;
-			bpm=Global::_pSong->BeatsPerMin;
+			bpm=Global::_pSong->BeatsPerMin();
 			tpb=Global::_pSong->_ticksPerBeat;
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
@@ -66,9 +66,9 @@ namespace psycle
 			}
 			///\todo use the unified inlined function
 			#if defined(_WINAMP_PLUGIN_)
-				Global::_pSong->SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin*Global::_pSong->_ticksPerBeat);
+				Global::_pSong->SamplesPerTick((Global::pConfig->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin()*Global::_pSong->_ticksPerBeat));
 			#else
-				Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin*Global::_pSong->_ticksPerBeat);
+				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin()*Global::_pSong->_ticksPerBeat));
 			#endif
 		}
 
@@ -81,7 +81,7 @@ namespace psycle
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // Check for Global Command.
+				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
 				{
 					switch(pEntry->_cmd)
 					{
@@ -92,9 +92,9 @@ namespace psycle
 							bpm = pEntry->_parameter; //+0x20;
 							///\todo use the unified inlined function
 							#if defined _WINAMP_PLUGIN_
-								Global::_pSong->SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb);
+								Global::_pSong->SamplesPerTick((Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb));
 							#else
-								Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb);
+								Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb));
 							#endif
 						}
 						break;
@@ -104,9 +104,9 @@ namespace psycle
 							tpb=pEntry->_parameter;
 							///\todo use the unified inlined function
 							#if defined _WINAMP_PLUGIN_
-								Global::_pSong->SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb);
+								Global::_pSong->SamplesPerTick(((Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb)));
 							#else
-								Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb);
+								Global::_pSong->SamplesPerTick(((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb)));
 							#endif
 						}
 						break;
@@ -165,26 +165,23 @@ namespace psycle
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*5);
-				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255))
+				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
 				{
 					int mac = pEntry->_mach;
-					// used to be like this:
-					//if(( mac != 255 || prevMachines[track] != 255) && (pEntry->_note != 255 || pEntry->_cmd != 0x00))
-					// changed by alk in order to stop the note blasts when un muting vsts:
-					if(( mac != 255 || prevMachines[track] != 255) && (pEntry->_note != 255 || pEntry->_cmd != 0x00) && (mac == 255 || !(Global::_pSong->_pMachine[mac]->_mute)))
+					if(mac != 255) prevMachines[track] = mac;
+					else mac = prevMachines[track];
+					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
 					{
-						if(mac != 255) prevMachines[track] = mac;
-						else mac = prevMachines[track];
-						if(mac < MAX_MACHINES)
+						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{
 							Machine *pMachine = pSong->_pMachine[mac];
-							if(pMachine)
+							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
 								if(pEntry->_cmd == 0xfd)
 								{
 									// delay
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick)/256;
+									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick())/256;
 								}
 								else if(pEntry->_cmd == 0xfb)
 								{
@@ -210,7 +207,7 @@ namespace psycle
 					}
 				}
 			}
-			_ticksRemaining = pSong->SamplesPerTick;
+			_ticksRemaining = pSong->SamplesPerTick();
 		}	
 
 
@@ -388,7 +385,7 @@ namespace psycle
 					if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
 					int channels = 2;
 					if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
-					Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+					Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 					Stop();
 					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
 						_recording = true;
@@ -407,7 +404,7 @@ namespace psycle
 					Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
 					Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
 					Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
-					Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+					Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 					_outputWaveFile.Close();
 					_recording = false;
 					if(!bOk)
