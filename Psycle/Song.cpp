@@ -1565,9 +1565,10 @@ bool Song::Load(RiffFile* pFile)
 		_machineLock = true;
 
 		pFile->Read(&_machineActive[0], sizeof(_machineActive));
+		Machine* pMachine[128];
+		memset(pMachine,0,sizeof(pMachine));
 		for (i=0; i<128; i++)
 		{
-			Machine* pMachine;
 			Sine* pSine;
 			Distortion* pDistortion;
 			Sampler* pSampler;
@@ -1589,60 +1590,60 @@ bool Song::Load(RiffFile* pFile)
 				switch (type)
 				{
 				case MACH_MASTER:
-					pMachine = _pMachine[0] = _pMachine[MASTER_INDEX];
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = _pMachine[MASTER_INDEX];
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_SINE:
-					pMachine = pSine = new Sine;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pSine = new Sine;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_DIST:
-					pMachine = pDistortion = new Distortion;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pDistortion = new Distortion;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_SAMPLER:
-					pMachine = pSampler = new Sampler;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pSampler = new Sampler;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_DELAY:
-					pMachine = pDelay = new Delay;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pDelay = new Delay;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_2PFILTER:
-					pMachine = pFilter = new Filter2p;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pFilter = new Filter2p;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_GAIN:
-					pMachine = pGainer = new Gainer;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pGainer = new Gainer;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_FLANGER:
-					pMachine = pFlanger = new Flanger;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = pFlanger = new Flanger;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				case MACH_SCOPE:
-					pMachine = new Dummy;
-					pMachine->Init();
-					pMachine->Load(pFile);
-					sprintf(pMachine->_editName,"Dummy");
+					pMachine[i] = new Dummy;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
+					sprintf(pMachine[i]->_editName,"Dummy");
 					break;
 				case MACH_PLUGIN:
 					{
-					pMachine = pPlugin = new Plugin;
+					pMachine[i] = pPlugin = new Plugin;
 					// Should the "Init()" function go here? -> No. Needs to load the dll first.
-					if (!pMachine->Load(pFile))
+					if (!pMachine[i]->Load(pFile))
 					{
-						Machine* pOldMachine = pMachine;
-						pMachine = new Dummy(*((Dummy*)pOldMachine));
-						pMachine->_type = MACH_DUMMY;
+						Machine* pOldMachine = pMachine[i];
+						pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
+						pMachine[i]->_type = MACH_DUMMY;
 						pOldMachine->_pSamplesL = NULL;
 						pOldMachine->_pSamplesR = NULL;
 						delete pOldMachine;
@@ -1653,12 +1654,12 @@ bool Song::Load(RiffFile* pFile)
 				case MACH_VSTFX:
 					{
 					
-					if ( type == MACH_VST ) pMachine = pVstPlugin = new VSTInstrument;
-					else if ( type == MACH_VSTFX ) pMachine = pVstPlugin = new VSTFX;
+					if ( type == MACH_VST ) pMachine[i] = pVstPlugin = new VSTInstrument;
+					else if ( type == MACH_VSTFX ) pMachine[i] = pVstPlugin = new VSTFX;
 	#if  !defined(_WINAMP_PLUGIN_)
 					pVstPlugin->macindex = FindBusFromIndex(i);
 	#endif //  !defined(_WINAMP_PLUGIN_)
-					if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
+					if ((pMachine[i]->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 					{
 						char sPath2[_MAX_PATH];
 						CString sPath;
@@ -1669,24 +1670,24 @@ bool Song::Load(RiffFile* pFile)
 							strcpy(sPath2,sPath);
 							if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
-								Machine* pOldMachine = pMachine;
-								pMachine = new Dummy(*((Dummy*)pOldMachine));
+								Machine* pOldMachine = pMachine[i];
+								pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
 								delete pOldMachine;
-								pMachine->_type = MACH_DUMMY;
-								pMachine->wasVST = true;
+								pMachine[i]->_type = MACH_DUMMY;
+								pMachine[i]->wasVST = true;
 							}
 						}
 						else
 						{
-							Machine* pOldMachine = pMachine;
-							pMachine = new Dummy(*((Dummy*)pOldMachine));
+							Machine* pOldMachine = pMachine[i];
+							pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 							pOldMachine->_pSamplesL = NULL;
 							pOldMachine->_pSamplesR = NULL;
 							delete pOldMachine;
-							pMachine->_type = MACH_DUMMY;
-							pMachine->wasVST = true;
+							pMachine[i]->_type = MACH_DUMMY;
+							pMachine[i]->wasVST = true;
 						}
 	#else // if !_WINAMP_PLUGIN_
 						if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
@@ -1698,13 +1699,13 @@ bool Song::Load(RiffFile* pFile)
 								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
 								::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-								Machine* pOldMachine = pMachine;
-								pMachine = new Dummy(*((Dummy*)pOldMachine));
+								Machine* pOldMachine = pMachine[i];
+								pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
 								delete pOldMachine;
-								pMachine->_type = MACH_DUMMY;
-								pMachine->wasVST = true;
+								pMachine[i]->_type = MACH_DUMMY;
+								pMachine[i]->wasVST = true;
 							}
 						}
 						else
@@ -1713,39 +1714,37 @@ bool Song::Load(RiffFile* pFile)
 							sprintf(sError,"Missing VST plug-in \"%s\"",vstL[pVstPlugin->_instance].dllName);
 							::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-							Machine* pOldMachine = pMachine;
-							pMachine = new Dummy(*((Dummy*)pOldMachine));
+							Machine* pOldMachine = pMachine[i];
+							pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 							pOldMachine->_pSamplesL = NULL;
 							pOldMachine->_pSamplesR = NULL;
 							delete pOldMachine;
-							pMachine->_type = MACH_DUMMY;
-							pMachine->wasVST = true;
+							pMachine[i]->_type = MACH_DUMMY;
+							pMachine[i]->wasVST = true;
 						}
 	#endif // _WINAMP_PLUGIN_
 					}
 					else
 					{
-						Machine* pOldMachine = pMachine;
-						pMachine = new Dummy(*((Dummy*)pOldMachine));
+						Machine* pOldMachine = pMachine[i];
+						pMachine[i] = new Dummy(*((Dummy*)pOldMachine));
 						pOldMachine->_pSamplesL = NULL;
 						pOldMachine->_pSamplesR = NULL;
 						delete pOldMachine;
-						pMachine->_type = MACH_DUMMY;
-						pMachine->wasVST = true;
+						pMachine[i]->_type = MACH_DUMMY;
+						pMachine[i]->wasVST = true;
 					}
 					break;
 					}
 				case MACH_DUMMY:
-					pMachine = new Dummy;
-					pMachine->Init();
-					pMachine->Load(pFile);
+					pMachine[i] = new Dummy;
+					pMachine[i]->Init();
+					pMachine[i]->Load(pFile);
 					break;
 				}
 
-				_pMachine[i] = pMachine;
-
 	#if !defined(_WINAMP_PLUGIN_)
-				switch (_pMachine[i]->_mode)
+				switch (pMachine[i]->_mode)
 				{
 				case MACHMODE_GENERATOR:
 					if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
@@ -1764,8 +1763,8 @@ bool Song::Load(RiffFile* pFile)
 				}
 	#endif // _WINAMP_PLUGIN_
 
-				pMachine->_x = x;
-				pMachine->_y = y;
+				pMachine[i]->_x = x;
+				pMachine[i]->_y = y;
 			}
 		}
 
@@ -1775,11 +1774,23 @@ bool Song::Load(RiffFile* pFile)
 		float volMatrix[128][MAX_CONNECTIONS];
 		for (i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
 		{
-			if (_machineActive[i])
+			if (!_machineActive[i])
+			{
+				if (pMachine[i])
+				{
+					delete pMachine[i];
+					pMachine[i] = NULL;
+				}
+			}
+			else if (!pMachine[i])
+			{
+				_machineActive[i] = FALSE;
+			}
+			else 
 			{
 				for (int c=0; c<MAX_CONNECTIONS; c++)
 				{
-					volMatrix[i][c] = _pMachine[i]->_inputConVol[c];
+					volMatrix[i][c] = pMachine[i]->_inputConVol[c];
 				}
 			}
 		}
@@ -1789,12 +1800,12 @@ bool Song::Load(RiffFile* pFile)
 			{
 				for (int c=0; c<MAX_CONNECTIONS; c++) // all of its input connections.
 				{
-					if (_pMachine[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
+					if (pMachine[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
 					{
-						Machine* pOrigMachine = _pMachine[_pMachine[i]->_inputMachines[c]]; // We get that machine
+						Machine* pOrigMachine = pMachine[pMachine[i]->_inputMachines[c]]; // We get that machine
 						int d = pOrigMachine->FindOutputWire(i);
 
-						float val = volMatrix[_pMachine[i]->_inputMachines[c]][d];
+						float val = volMatrix[pMachine[i]->_inputMachines[c]][d];
 						if( val >= 4.000001f ) 
 						{
 							val*=0.000030517578125f; // BugFix
@@ -1804,7 +1815,7 @@ bool Song::Load(RiffFile* pFile)
 							val*=32768.0f; // BugFix
 						}
 
-						_pMachine[i]->InitWireVolume(pOrigMachine->_type,c,val);
+						pMachine[i]->InitWireVolume(pOrigMachine->_type,c,val);
 					}
 				}
 			}
@@ -1824,7 +1835,7 @@ bool Song::Load(RiffFile* pFile)
 			int j=0;
 			for ( i=0;i<128;i++ ) 
 			{
-				if (_machineActive[i] && _pMachine[i]->_mode != MACHMODE_GENERATOR )
+				if (_machineActive[i] && pMachine[i]->_mode != MACHMODE_GENERATOR )
 				{
 					busEffect[j]=i;	j++;
 				}
@@ -1836,8 +1847,9 @@ bool Song::Load(RiffFile* pFile)
 		for ( i=0;i<64;i++ ) 
 		{
 			if (busMachine[i] != 255 && _machineActive[busMachine[i]]) { // If there's a machine in the generators' bus that it is not a generator:
-				if (_pMachine[busMachine[i]]->_mode != MACHMODE_GENERATOR ) {
-					_pMachine[busMachine[i]]->_mode = MACHMODE_FX;
+				if (pMachine[busMachine[i]]->_mode != MACHMODE_GENERATOR ) 
+				{
+					pMachine[busMachine[i]]->_mode = MACHMODE_FX;
 					while (busEffect[j] != 255 && j<MAX_BUSES) j++;
 					busEffect[j]=busMachine[i];
 					busMachine[i]=255;
@@ -1852,25 +1864,25 @@ bool Song::Load(RiffFile* pFile)
 		{
 			if (_machineActive[i])
 			{
-				if ( _pMachine[i]->wasVST && chunkpresent )
+				if ( pMachine[i]->wasVST && chunkpresent )
 				{
 					// Since we don't know if the plugin saved it or not, 
 					// we're stuck on letting the loading crash/behave incorrectly.
 					// There should be a flag, like in the VST loading Section to be correct.
 				}
-				else if (( _pMachine[i]->_type == MACH_VST ) || 
-						( _pMachine[i]->_type == MACH_VSTFX))
+				else if (( pMachine[i]->_type == MACH_VST ) || 
+						( pMachine[i]->_type == MACH_VSTFX))
 				{
 					bool chunkread=false;
-					if( chunkpresent )	chunkread=((VSTPlugin*)_pMachine[i])->LoadChunk(pFile);
-					((VSTPlugin*)_pMachine[i])->SetCurrentProgram(((VSTPlugin*)_pMachine[i])->_program);
+					if( chunkpresent )	chunkread=((VSTPlugin*)pMachine[i])->LoadChunk(pFile);
+					((VSTPlugin*)pMachine[i])->SetCurrentProgram(((VSTPlugin*)pMachine[i])->_program);
 					if ( !chunkpresent || !chunkread )
 					{
-						const int vi = ((VSTPlugin*)_pMachine[i])->_instance;
+						const int vi = ((VSTPlugin*)pMachine[i])->_instance;
 						const int numpars=vstL[vi].numpars;
 						for (int c=0; c<numpars; c++)
 						{
-							((VSTPlugin*)_pMachine[i])->SetParameter(c, vstL[vi].pars[c]);
+							((VSTPlugin*)pMachine[i])->SetParameter(c, vstL[vi].pars[c]);
 						}
 					}
 				}
@@ -1894,24 +1906,6 @@ bool Song::Load(RiffFile* pFile)
 		// this file format sucks
 
 
-		Machine* pMachine[MAX_MACHINES];
-
-		_pMachine[0]=NULL;
-
-		for (i = 0; i < MAX_MACHINES-1; i++)
-		{
-			if (!_machineActive[i])
-			{
-				if (_pMachine[i])
-				{
-					delete _pMachine[i];
-					_pMachine[i] = NULL;
-				}
-			}
-			pMachine[i] = _pMachine[i];
-			_pMachine[i] = NULL;
-		}
-
 		for (i = 0; i < 64; i++)
 		{
 			if (busMachine[i] < MAX_MACHINES-1)
@@ -1928,10 +1922,12 @@ bool Song::Load(RiffFile* pFile)
 								if (_pMachine[i]->_inputMachines[c] == busMachine[x])
 								{
 									_pMachine[i]->_inputMachines[c] = x;
+									break;
 								}
 								else if (_pMachine[i]->_inputMachines[c] == busEffect[x])
 								{
 									_pMachine[i]->_inputMachines[c] = x+MAX_BUSES;
+									break;
 								}
 							}
 						}
@@ -1949,10 +1945,12 @@ bool Song::Load(RiffFile* pFile)
 									if (_pMachine[i]->_outputMachines[c] == busMachine[x])
 									{
 										_pMachine[i]->_outputMachines[c] = x;
+										break;
 									}
 									else if (_pMachine[i]->_outputMachines[c] == busEffect[x])
 									{
 										_pMachine[i]->_outputMachines[c] = x+MAX_BUSES;
+										break;
 									}
 								}
 							}
@@ -1974,10 +1972,12 @@ bool Song::Load(RiffFile* pFile)
 								if (_pMachine[i+MAX_BUSES]->_inputMachines[c] == busMachine[x])
 								{
 									_pMachine[i+MAX_BUSES]->_inputMachines[c] = x;
+									break;
 								}
 								else if (_pMachine[i+MAX_BUSES]->_inputMachines[c] == busEffect[x])
 								{
 									_pMachine[i+MAX_BUSES]->_inputMachines[c] = x+MAX_BUSES;
+									break;
 								}
 							}
 						}
@@ -1986,6 +1986,7 @@ bool Song::Load(RiffFile* pFile)
 							if (_pMachine[i+MAX_BUSES]->_outputMachines[c] == 0)
 							{
 								_pMachine[i+MAX_BUSES]->_outputMachines[c] = MASTER_INDEX;
+								break;
 							}
 							else
 							{
@@ -1994,10 +1995,12 @@ bool Song::Load(RiffFile* pFile)
 									if (_pMachine[i+MAX_BUSES]->_outputMachines[c] == busMachine[x])
 									{
 										_pMachine[i+MAX_BUSES]->_outputMachines[c] = x;
+										break;
 									}
 									else if (_pMachine[i+MAX_BUSES]->_outputMachines[c] == busEffect[x])
 									{
 										_pMachine[i+MAX_BUSES]->_outputMachines[c] = x+MAX_BUSES;
+										break;
 									}
 								}
 							}
@@ -2016,10 +2019,12 @@ bool Song::Load(RiffFile* pFile)
 					if (_pMachine[MASTER_INDEX]->_inputMachines[c] == busMachine[x])
 					{
 						_pMachine[MASTER_INDEX]->_inputMachines[c] = x;
+						break;
 					}
 					else if (_pMachine[MASTER_INDEX]->_inputMachines[c] == busEffect[x])
 					{
 						_pMachine[MASTER_INDEX]->_inputMachines[c] = x+MAX_BUSES;
+						break;
 					}
 				}
 			}
