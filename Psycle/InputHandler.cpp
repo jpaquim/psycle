@@ -13,6 +13,7 @@ static char THIS_FILE[]=__FILE__;
 #include "stdafx.h"
 #include "mainfrm.h"
 #include "InputHandler.h"
+#include "machine.h"
 #include "Player.h"
 #include "childview.h"
 

@@ -1,6 +1,9 @@
 #ifndef _FILEIO_H
 #define _FILEIO_H
 
+#if defined(_WINAMP_PLUGIN_)
+	#include <stdio.h>
+#endif // defined(_WINAMP_PLUGIN_)
 
 typedef struct TYPEULONGINV {
   unsigned char hihi;

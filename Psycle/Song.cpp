@@ -1,9 +1,14 @@
 #include "stdafx.h"
+
 #if defined(_WINAMP_PLUGIN_)
 	#include "global.h"
 #else
 	#include "psycle2.h"
 	#include "NewMachine.h"
+	#include "MainFrm.h"
+	#include "ChildView.h"
+
+	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
 
 #include "Song.h"
@@ -11,10 +16,7 @@
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
-#include "MainFrm.h"
-#include "ChildView.h"
 
-extern CPsycleApp theApp;
 
 #if !defined(_WINAMP_PLUGIN_)
 
@@ -356,9 +358,10 @@ void Song::Reset(void)
 
 void Song::New(void)
 {
+#if !defined(_WINAMP_PLUGIN_)
 	CSingleLock lock(&door,TRUE);
-
-	
+#endif // !defined(_WINAMP_PLUGIN_)
+		
 	for (int c=0;c<MAX_BUSES;c++)
 	{
 		busMachine[c]=255;
@@ -402,9 +405,9 @@ void Song::New(void)
 	_saved=false;
 #if defined(_WINAMP_PLUGIN_)
 	strcpy(fileName,"Untitled.psy");
+	CreateMachine(MACH_MASTER, 320, 200, NULL);
 #else
 	fileName ="Untitled.psy";
-#endif // _WINAMP_PLUGIN_
 	if ((CMainFrame *)theApp.m_pMainWnd)
 	{
 		CreateMachine(MACH_MASTER, 
@@ -419,6 +422,7 @@ void Song::New(void)
 			200, 
 			NULL);
 	}
+#endif // _WINAMP_PLUGIN_
 }
 
 int Song::GetFreeMachine(void)
@@ -512,8 +516,10 @@ bool Song::InsertConnection(int src,int dst)
 void Song::DestroyMachine(int mac)
 {
 	// Delete and destroy the MACHINE!
+#if !defined(_WINAMP_PLUGIN_)
 	CSingleLock lock(&door,TRUE);
-
+#endif // #if !defined(_WINAMP_PLUGIN_)
+	
 	Machine *iMac = _pMachines[mac];
 	Machine *iMac2;
 
@@ -1314,14 +1320,11 @@ bool Song::Load(
 #endif //  !defined(_WINAMP_PLUGIN_)
 				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 				{
-					CString sPath;
 					char sPath2[_MAX_PATH];
-
 #if defined(_WINAMP_PLUGIN_)
-					sPath = Global::pConfig->GetVstDir();
-					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
+					strcpy(sPath2,Global::pConfig->GetVstDir());
+					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath2) )
 					{
-						strcpy(sPath2,sPath);
 						if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 						{
 							Machine* pOldMachine = pMachine;
@@ -1344,6 +1347,7 @@ bool Song::Load(
 						pMachine->wasVST = true;
 					}
 #else // if !_WINAMP_PLUGIN_
+					CString sPath;
 					if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);

@@ -25,10 +25,11 @@
 		delete pPlayer;
 		delete pConfig;
 	}
-	bool FindFileinDir(char *dllname,CString &path)
+	bool FindFileinDir(char *dllname,char* path)
 	{
-		CFileFind finder;
-		int loop = finder.FindFile(path + "\\*.");	// check for subfolders.
+/*		CFileFind finder;
+		strcat(path,"\\*.");
+		int loop = finder.FindFile(path);	// check for subfolders.
 		while (loop) {								// Note: Subfolders with dots won't work.
 			loop = finder.FindNextFile();
 			if (finder.IsDirectory() && !finder.IsDots())
@@ -49,11 +50,12 @@
 			path= (path + "\\") + dllname;
 			return true;
 		}
-		finder.Close();
+		finder.Close();*/
 		return false;
 	}
 
 #else
+	#include "global.h"
 	#include "Song.h"
 	#include "Player.h"
 	#include "Configuration.h"

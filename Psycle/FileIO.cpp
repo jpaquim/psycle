@@ -2,7 +2,8 @@
 
 
 #if defined(_WINAMP_PLUGIN_)
-	#include <afxwin.h>
+#include <windows.h>
+#include <stdio.h>
 #endif // _WINAMP_PLUGIN_
 
 #include "FileIO.h"

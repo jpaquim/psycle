@@ -15,5 +15,7 @@
 #define MULTIPLY2				MULTIPLY * MAX_LINES		// precompiler will do that for you
 #define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	// without any affect on the generated code
 #define MAX_SONG_POSITIONS		128 // Note: changing this breaks file format
+#define MAX_CONNECTIONS		12
+
 
 #endif

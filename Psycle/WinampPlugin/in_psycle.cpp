@@ -11,6 +11,8 @@
 #include "..\configuration.h"
 #include "..\Song.h"
 #include "..\player.h"
+#include <math.h>
+#include "..\helpers.h"
 
 
 #include "in2.h"	// Winamp Input plugin header file

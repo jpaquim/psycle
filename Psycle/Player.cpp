@@ -335,9 +335,6 @@ float * Player::Work(
 		
 		if (amount > 0)
 		{
-
-			CSingleLock crit(&Global::_pSong->door, TRUE);
-
 #if defined(_WINAMP_PLUGIN_)
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
@@ -349,7 +346,8 @@ float * Player::Work(
 			pSong->_pMachines[0]->Work(amount);
 
 #else
-
+			CSingleLock crit(&Global::_pSong->door, TRUE);
+			
 			CPUCOST_INIT(idletime);
 			// Reset all machines
 			//

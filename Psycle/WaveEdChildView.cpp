@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "psycle2.h"
 #include <mmreg.h>
+#include <math.h>
 #include "WaveEdChildView.h"
 #include "MainFrm.h"
 //#include "Song.h" // included  in "MainFrm.h"
