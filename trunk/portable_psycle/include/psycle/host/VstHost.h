@@ -38,7 +38,10 @@ namespace psycle
 		{
 		public:
 			VSTPlugin();
-			~VSTPlugin();
+			// <bohan> I added throw() to the signature of the desctructor to make it clear.
+			// <bohan> It's just informative and is implicit because
+			// <bohan> any object of any class is disallowed to throw any exception from its destructor.
+			~VSTPlugin() throw();
 
 			void Free();
 			int Instance(char *dllname,bool overwriteName=true);

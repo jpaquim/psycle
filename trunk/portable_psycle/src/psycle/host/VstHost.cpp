@@ -78,15 +78,19 @@ namespace psycle
 			{
 				main = (PVSTMAIN)GetProcAddress(h_dll,"main");
 			}
-			catch (char *error)
+			catch(char *error)
 			{
 				sprintf(errtxt,"Exception in GetProcAddress: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 			if(!main)
 			{	
-				FreeLibrary(h_dll);
+				FreeLibrary(h_dll); /// <bohan> \todo shouldn't that be handled elsewhere?
 				return VSTINSTANCE_ERR_NO_VST_PLUGIN;
 			}
 
@@ -100,6 +104,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in call main: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 			
@@ -130,6 +138,10 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 
 		// 3 :     Host to Plug, setBlockSize ( 512 ) 
 			try
@@ -141,6 +153,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in SetBlockSize: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
@@ -158,6 +174,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in effOpen: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
@@ -179,6 +199,10 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 
 		// 6 :     Host to Plug, setSampleRate ( 44100.000000 ) 
 
@@ -197,6 +221,10 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 
 		// 7 :     Host to Plug, setBlockSize ( 512 ) 
 
@@ -211,6 +239,10 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 
 		// 8 :     Host to Plug, setSpeakerArrangement  returned : false 
 			try 
@@ -222,6 +254,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in SetSpeakerArrangement(2): %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
@@ -241,6 +277,11 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+
 		// 10 :     Host to Plug, setBlockSize ( 512 ) 
 			try
 			{
@@ -251,6 +292,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in SetBlockSize(3): %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
@@ -268,6 +313,10 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 
 		// 12 :     Host to Plug, getProgram  returned : 0 
 			try
@@ -279,6 +328,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in GetProgram: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
@@ -293,6 +346,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in GetVstVersion: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
@@ -314,6 +371,10 @@ namespace psycle
 				_pEffect=NULL;
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
+			catch(...)
+			{
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
 
 			try
 			{
@@ -324,6 +385,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in MainsChanged: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 			
@@ -361,6 +426,10 @@ namespace psycle
 				sprintf(errtxt,"Exception in GetVendorString: %s",error);
 				MessageBox(NULL,errtxt,dllname,NULL);
 				_pEffect=NULL;
+				return VSTINSTANCE_ERR_EXCEPTION;
+			}
+			catch(...)
+			{
 				return VSTINSTANCE_ERR_EXCEPTION;
 			}
 
