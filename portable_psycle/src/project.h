@@ -172,6 +172,11 @@
 #	define OPERATING_SYSTEM__POSIX
 #endif
 
+// x window (on the apple macosx operating system, we have to choose whether we want to use x window or not)
+#if !defined OPERATING_SYSTEM__MICROSOFT && (!defined OPERATING_SYSTEM__APPLE || defined OPERATING_SYSTEM__CROSSPLATFORM)
+#	define OPERATING_SYSTEM__X_WINDOW
+#endif
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,9 +258,9 @@
 ////////////////////////
 
 #if defined COMPILER__GNU
-#	define thread __thread
+#	define thread_local_storage __thread
 #elif defined COMPILER__MICROSOFT
-#	define thread attribute(thread)
+#	define thread_local_storage attribute(thread)
 #endif
 
 ////////////////////
@@ -452,6 +457,8 @@ typedef __int8 int8;
 		// <bohan> error C2220: warning treated as error - no object file generated
 		// <bohan> as of 2003-12-11 i decided not to make the compile treat the warning as an error...
 		// <bohan> yet, i don't know if the compiler actually puts the code in the binary or discard it badly :/
+		//
+		// <bohan> shit! warning C4535: calling _set_se_translator() requires /EHa; the command line options /EHc and /GX are insufficient
 #else
 #	error unkown compiler
 #endif
@@ -493,6 +500,15 @@ typedef __int8 int8;
 // shared dynamic-link library
 ///////////////////////////////
 
+#if defined OPERATING_SYSTEM__MICROSOFT
+	// the microsoft dll horror show system begins...
+#	define IMPORT attribute(dllimport)
+#	define EXPORT attribute(dllexport)
+#else
+	// everything is nice and simple
+#	define IMPORT
+#	define EXPORT
+#endif
 #define LIBRARY__IMPORT <operating_system/library/import.h>
 #define LIBRARY__EXPORT <operating_system/library/export.h>
 
@@ -572,6 +588,7 @@ typedef __int8 int8;
 	/////////
 	// style
 	/////////
+#	pragma warning(disable:4554) // check operator precedence for possible error; use parentheses to clarify precedence
 #	pragma warning(disable:4706) // assignment within conditional expression
 #	pragma warning(disable:4127) // conditional expression is constant
 #	pragma warning(disable:4100) // unreferenced formal parameter
@@ -722,6 +739,5 @@ namespace processor
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // end
-
 
 #endif
