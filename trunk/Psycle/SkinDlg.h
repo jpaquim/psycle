@@ -65,11 +65,18 @@ protected:
 	afx_msg void On4beat();
 	afx_msg void OnDoublebuffer();
 	afx_msg void OnSelendokPresetscombo();
+	afx_msg void OnClose();
+	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+private:
+	void RepaintAllCanvas();
+	void UpdateCanvasColour(int id,COLORREF col);
 };
 
+
+/////////////////////////////////////////////////////////////////////////////
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
