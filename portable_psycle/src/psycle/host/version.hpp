@@ -1,8 +1,11 @@
-#include <project.hpp>
+#include "../../project.hpp"
 
 #if 0
 /*
 $Log$
+Revision 1.2  2005/01/24 15:54:03  johan-boule
+path for resources.rc
+
 Revision 1.1  2005/01/24 14:53:49  johan-boule
 This commit is going to be annoying for other people.
 I have moved the header files whose implementation was in the src dir from the include dir to the src dir, along with their source, implementation files.

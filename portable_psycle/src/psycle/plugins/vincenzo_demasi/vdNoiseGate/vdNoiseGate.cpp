@@ -17,6 +17,7 @@
         Vincenzo Demasi. E-Mail: <v.demasi@tiscali.it>
 */
 
+#include <project.private.hpp>
 #include <stdio.h>
 #include <math.h>
 #include "vdNoiseGate.hpp"

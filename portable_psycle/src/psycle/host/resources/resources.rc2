@@ -1,5 +1,5 @@
 //
-// PSYCLE2.RC2 - resources Microsoft Visual C++ does not edit directly
+// resources.rc2 - resources Microsoft Visual C++ does not edit directly
 //
 
 #ifdef APSTUDIO_INVOKED
@@ -9,5 +9,3 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // Add manually edited resources in this file ...
-
-#include "../version.hpp"
