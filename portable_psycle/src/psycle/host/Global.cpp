@@ -7,9 +7,7 @@
 #include "Dsp.hpp"
 #include "Configuration.hpp"
 #include <operating_system/logger.hpp>
-#if !defined _WINAMP_PLUGIN_
-	#include "InputHandler.hpp"
-#endif
+#include "InputHandler.hpp"
 namespace psycle
 {
 	namespace host
@@ -19,10 +17,8 @@ namespace psycle
 		Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
 		CLoggingWindow * Global::pLogWindow(0);
-		#if !defined _WINAMP_PLUGIN_
-			unsigned int Global::_cpuHz;
-			InputHandler * Global::pInputHandler(0);
-		#endif
+		unsigned int Global::_cpuHz;
+		InputHandler * Global::pInputHandler(0);
 			
 		Global::Global()
 		{
@@ -34,9 +30,7 @@ namespace psycle
 			pConfig = new Configuration;
 			pResampler = new Cubic;
 			pResampler->SetQuality(RESAMPLE_LINEAR);
-			#if !defined _WINAMP_PLUGIN_
-				pInputHandler = new InputHandler;
-			#endif
+			pInputHandler = new InputHandler;
 		}
 
 		Global::~Global()
@@ -46,9 +40,7 @@ namespace psycle
 			zapObject(pResampler);
 			zapObject(pConfig);
 			zapObject(pLogWindow);
-			#if !defined _WINAMP_PLUGIN_
-				zapObject(pInputHandler);
-			#endif
+			zapObject(pInputHandler);
 			#ifndef NDEBUG
 				operating_system::console::close();
 			#endif
@@ -56,58 +48,7 @@ namespace psycle
 
 
 
-		#if defined _WINAMP_PLUGIN_ // <bohan> why???
-			bool FindFileinDir(/* const */ char name[], CString & path)
-			{
-				return find_file_in_dir_loose(name, path);
-			}
-			bool find_file_in_dir_loose(/* const */ char original_name[], CString & path)
-			{
-				if(find_file_in_dir_exact(original_name, path)) return true;
-				// <bohan> grrrr... i know the following code won't compile, but anyway, it's only used for winamp... why???
-				{
-					std::string string = original_name;
-					for(std::string::iterator i(string.begin()), i != string.end(), ++i) if(*i == ' ') *i = '-';
-					if(find_file_in_dir_exact(string.c_str(), path)) return true;
-				}
-				{
-					std::string string = original_name;
-					for(std::string::iterator i(string.begin()), i != string.end(), ++i) if(*i == ' ') *i = '_';
-					if(find_file_in_dir_exact(string.c_str(), path)) return true;
-				}
-				return false;
-
-			}
-			bool find_file_in_dir_exact(/* const */ char name[], CString & path)
-			{
-				CFileFind finder;
-				int loop = finder.FindFile(path + "\\*"); // check for subfolders.
-				while(loop) 
-				{						
-					loop = finder.FindNextFile();
-					if(finder.IsDirectory() && !finder.IsDots())
-					{
-						CString filepath = finder.GetFilePath();
-						if(FindFileinDir(name, filepath))
-						{
-							path = filepath;
-							return true;
-						}
-					}
-				}
-				finder.Close();
-				if(finder.FindFile(path + "\\" + name)) // not found in subdirectories, lets see if it's here
-				{
-					finder.Close();
-					path= (path + "\\") + name;
-					return true;
-				}
-				finder.Close();
-				return false;
-			}
-		#endif
-
-			
+		
 			
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////

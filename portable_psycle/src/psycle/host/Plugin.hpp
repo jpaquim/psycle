@@ -6,9 +6,7 @@
 #include "Configuration.hpp"
 #include "../plugin_interface.hpp"
 #include "Player.hpp"
-#if !defined(_WINAMP_PLUGIN_)
-	#include "NewMachine.hpp"
-#endif
+#include "NewMachine.hpp"
 namespace psycle
 {
 	namespace host
@@ -86,10 +84,8 @@ namespace psycle
 			virtual bool SetParameter(int numparam,int value);
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
-			#if !defined _WINAMP_PLUGIN_
-				virtual void SaveSpecificChunk(RiffFile * pFile);
-				virtual void SaveDllName(RiffFile * pFile);
-			#endif
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveDllName(RiffFile * pFile);
 
 			void Instance(std::string file_name) throw(...);
 			void Free() throw(...);

@@ -2,9 +2,7 @@
 ///\brief interface file for psycle::host::Player.
 #pragma once
 #include "constants.hpp"
-#if !defined _WINAMP_PLUGIN_
-	#include "Riff.hpp"
-#endif
+#include "Riff.hpp"
 namespace psycle
 {
 	namespace host
@@ -52,13 +50,8 @@ namespace psycle
 			bool _loopSong;
 			/// stops playing.
 			void Stop();
-			#if defined _WINAMP_PLUGIN_
-				/// work... why is that public?
-				float * Work(void* context, int& nsamples);
-			#else
-				/// work... why is that public?
-				static float * Work(void* context, int& nsamples);
-			#endif
+			/// work function. (Entrance for the callback function (audiodriver)
+			static float * Work(void* context, int& nsamples);
 			///\name secondary output device, write to a file
 			///\{
 			/// starts the recording output device.
@@ -81,10 +74,8 @@ namespace psycle
 			int backup_channelmode;
 			/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 			float _pBuffer[MAX_DELAY_BUFFER];
-			#if !defined _WINAMP_PLUGIN_
-				/// file to which to output signal.
-				WaveFile _outputWaveFile;
-			#endif
+			/// file to which to output signal.
+			WaveFile _outputWaveFile;
 		};
 	}
 }

@@ -1,11 +1,9 @@
 ///\file
 ///\brief implementation file for psycle::host::plugin
 #include <project.private.hpp>
-#if !defined _WINAMP_PLUGIN_
-	#include "psycle.hpp"
-	#include "MainFrm.hpp"
-	#include "VstEditorDlg.hpp"
-#endif
+#include "psycle.hpp"
+#include "MainFrm.hpp"
+#include "VstEditorDlg.hpp"
 #include "VstHost.hpp"
 #include "song.hpp"
 #include "Configuration.hpp"
@@ -17,9 +15,7 @@ namespace psycle
 {
 	namespace host
 	{
-		#if !defined _WINAMP_PLUGIN_
-			extern CPsycleApp theApp;
-		#endif
+		extern CPsycleApp theApp;
 
 		namespace vst
 		{
@@ -111,10 +107,7 @@ namespace psycle
 
 			plugin::plugin()
 				: queue_size(0), wantidle(false), _sDllName(""), h_dll(0), _program(0), instantiated(false), _instance(0)
-				, requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0)
-				#if !defined _WINAMP_PLUGIN_
-					, editorWnd(0)
-				#endif
+				, requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0), editorWnd(0)
 			{
 				proxy_ = new vst::proxy(*this);
 				std::memset(junk, 0, STREAM_SIZE * sizeof(float));
@@ -486,80 +479,41 @@ namespace psycle
 				std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
 				std::string sPath2;
 				::CString sPath;
-				#if defined _WINAMP_PLUGIN_
-					sPath = Global::pConfig->GetVstDir();
-					if(FindFileinDir(psFileName, sPath))
+				if(CNewMachine::lookupDllName(psFileName, sPath2))
+				{
+					if(!CNewMachine::TestFilename(sPath2)) return false;
+					try
 					{
-						std::strcpy(sPath2, sPath);
-						try
-						{
-							Instance(sPath2, false);
-						}
-						catch(const std::exception & e)
-						{
-							std::ostringstream s; s
-								<< "Exception while instanciating:" << sPath2 << std::endl
-								<< "Replacing with dummy." << std::endl
-								<< typeid(e).name() << std::endl
-								<< e.what();
-							::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-							return false;
-						}
-						catch(...)
-						{
-							std::ostringstream s; s
-								<< "Exception while instanciating:" << sPath2 << std::endl
-								<< "Replacing with dummy." << std::endl
-								<< "Unkown type of exception";
-							::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-							return false;
-						}
+						Instance(sPath2.c_str(), false);
 					}
-					else
+					catch(const std::exception & e)
 					{
 						std::ostringstream s; s
-							<< "Missing:" << psFileName << std::endl
-							<< "Replacing with dummy."
+							<< "Exception while instanciating:" << sPath2 << std::endl
+							<< "Replacing with dummy." << std::endl
+							<< typeid(e).name() << std::endl
+							<< e.what();
 						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
-				#else
-					if(CNewMachine::lookupDllName(psFileName, sPath2))
-					{
-						if(!CNewMachine::TestFilename(sPath2)) return false;
-						try
-						{
-							Instance(sPath2.c_str(), false);
-						}
-						catch(const std::exception & e)
-						{
-							std::ostringstream s; s
-								<< "Exception while instanciating:" << sPath2 << std::endl
-								<< "Replacing with dummy." << std::endl
-								<< typeid(e).name() << std::endl
-								<< e.what();
-							::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-							return false;
-						}
-						catch(...)
-						{
-							std::ostringstream s; s
-								<< "Exception while instanciating:" << sPath2 << std::endl
-								<< "Replacing with dummy." << std::endl
-								<< "Unkown type of exception";
-							::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-							return false;
-						}
-					}
-					else
+					catch(...)
 					{
 						std::ostringstream s; s
-							<< "Missing:" << psFileName << std::endl
-							<< "Replacing with dummy.";
+							<< "Exception while instanciating:" << sPath2 << std::endl
+							<< "Replacing with dummy." << std::endl
+							<< "Unkown type of exception";
 						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
-				#endif // _WINAMP_PLUGIN_
+				}
+				else
+				{
+					std::ostringstream s; s
+						<< "Missing:" << psFileName << std::endl
+						<< "Replacing with dummy.";
+					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					return false;
+				}
 				return true;
 			};
 
@@ -890,31 +844,28 @@ namespace psycle
 				switch(opcode)
 				{
 				case audioMasterAutomate:
-					#if !defined _WINAMP_PLUGIN_
-							Global::_pSong->Tweaker = true;
-							if(effect && host)
-							{
-								if(index<0 || index >= effect->numParams) {
-									host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
-								}
-								if(Global::pConfig->_RecordTweaks)  
-								{
-									if(Global::pConfig->_RecordMouseTweaksSmooth)
-										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->_macIndex, index, f2i(opt * vst::quantization));
-									else
-										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->_macIndex, index, f2i(opt * vst::quantization));
-								}
-								if(host->editorWnd)
-									((CVstEditorDlg *) host->editorWnd)->Refresh(index, opt);
-							}
-							
-					#endif
+					Global::_pSong->Tweaker = true;
+					if(effect && host)
+					{
+						if(index<0 || index >= effect->numParams) {
+							host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
+						}
+						if(Global::pConfig->_RecordTweaks)  
+						{
+							if(Global::pConfig->_RecordMouseTweaksSmooth)
+								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->_macIndex, index, f2i(opt * vst::quantization));
+							else
+								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->_macIndex, index, f2i(opt * vst::quantization));
+						}
+						if(host->editorWnd)
+							((CVstEditorDlg *) host->editorWnd)->Refresh(index, opt);
+					}
 					return 0; // index, value, returns 0
 				case audioMasterVersion:			
 					return 9; // vst version, currently 7 (0 for older)
 				case audioMasterCurrentId:			
 					break;
-				case audioMasterIdle:
+				case audioMasterIdle: // call application idle routine (this will call effEditIdle for all open editors too) 
 					if(effect && host)
 					{
 						try
@@ -926,7 +877,7 @@ namespace psycle
 							// o_O`
 						}
 					}
-					return 0; // call application idle routine (this will call effEditIdle for all open editors too) 
+					return 0; 
 				case audioMasterPinConnected:
 					if(value == 0) // input
 					{
@@ -1047,20 +998,18 @@ namespace psycle
 					}
 					return 1;
 				case audioMasterSizeWindow:
-					#if !defined _WINAMP_PLUGIN_
-							if(effect && host)
-							{
-								try
-								{
-									if(host->editorWnd)
-										reinterpret_cast<CVstEditorDlg *>(host->editorWnd)->Resize(index, value);
-								}
-								catch(const std::exception &)
-								{
-									// o_O`
-								}
-							}
-					#endif
+					if(effect && host)
+					{
+						try
+						{
+							if(host->editorWnd)
+								reinterpret_cast<CVstEditorDlg *>(host->editorWnd)->Resize(index, value);
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+					}
 					return 0;
 				case audioMasterGetSampleRate:
 					{
@@ -1186,9 +1135,7 @@ namespace psycle
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 						SetParameter(pData->_inst, value);
-						#if !defined _WINAMP_PLUGIN_
-							Global::_pSong->Tweaker = true;
-						#endif
+						Global::_pSong->Tweaker = true;
 					}
 					else if(note == cdefTweakS)
 					{
@@ -1221,9 +1168,7 @@ namespace psycle
 							const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 							SetParameter(pData->_inst, value);
 						}
-						#if !defined _WINAMP_PLUGIN_
-							Global::_pSong->Tweaker = true;
-						#endif
+						Global::_pSong->Tweaker = true;
 					}
 				}
 			}
@@ -1315,9 +1260,7 @@ namespace psycle
 
 			void instrument::Work(int numSamples)
 			{
-				#if !defined _WINAMP_PLUGIN_
-					CPUCOST_INIT(cost);
-				#endif
+				CPUCOST_INIT(cost);
 				if(!_mute && instantiated)
 				{
 					if(wantidle) 
@@ -1472,7 +1415,6 @@ namespace psycle
 					{
 						// o_O`
 					}
-					#if !defined _WINAMP_PLUGIN_
 					// volume "counter"
 					{
 						_volumeCounter = Dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR, numSamples) * 32768.0f;
@@ -1493,12 +1435,9 @@ namespace psycle
 							else _stopped = false;
 						}
 					}
-					#endif
 				}
-				#if !defined _WINAMP_PLUGIN_
-					CPUCOST_CALC(cost, numSamples);
-					_cpuCost += cost;
-				#endif
+				CPUCOST_CALC(cost, numSamples);
+				_cpuCost += cost;
 				_worked = true;
 			}
 
@@ -1555,9 +1494,7 @@ namespace psycle
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 						SetParameter(pData->_inst, value);
-						#if !defined _WINAMP_PLUGIN_
-							Global::_pSong->Tweaker = true;
-						#endif
+						Global::_pSong->Tweaker = true;
 					}
 					else if(pData->_note == cdefTweakS)
 					{
@@ -1590,9 +1527,7 @@ namespace psycle
 							const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 							SetParameter(pData->_inst, value);
 						}
-						#if !defined _WINAMP_PLUGIN_
-							Global::_pSong->Tweaker = true;
-						#endif
+						Global::_pSong->Tweaker = true;
 					}
 				}
 			}
@@ -1600,9 +1535,7 @@ namespace psycle
 			void fx::Work(int numSamples)
 			{
 				Machine::Work(numSamples);
-				#if !defined _WINAMP_PLUGIN_
-					CPUCOST_INIT(cost);
-				#endif
+				CPUCOST_INIT(cost);
 				if((!_mute) && (!_stopped) && (!_bypass))
 				{
 					if(instantiated)
@@ -1792,7 +1725,6 @@ namespace psycle
 						outputs[0] = tempSamplesL;
 						outputs[1] = tempSamplesR;
 					}
-					#if !defined _WINAMP_PLUGIN_
 					// volume "counter"
 					{
 						_volumeCounter = Dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
@@ -1813,12 +1745,9 @@ namespace psycle
 							else _stopped = false;
 						}
 					}
-					#endif
 				}
-				#if !defined _WINAMP_PLUGIN_
-					CPUCOST_CALC(cost, numSamples);
-					_cpuCost += cost;
-				#endif
+				CPUCOST_CALC(cost, numSamples);
+				_cpuCost += cost;
 				_worked = true;
 			}
 
@@ -1927,11 +1856,7 @@ namespace psycle
 				pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 				pFile->Read(&_connection[0], sizeof(_connection));
 				pFile->Read(&_inputCon[0], sizeof(_inputCon));
-				#if defined (_WINAMP_PLUGIN_)
-					pFile->Skip(96) ; // sizeof(CPoint) = 8.
-				#else
-					pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-				#endif
+				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
 				pFile->Read(&_numInputs, sizeof(_numInputs));
 				pFile->Read(&_numOutputs, sizeof(_numOutputs));
 

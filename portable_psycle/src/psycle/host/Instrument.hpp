@@ -3,9 +3,6 @@
 #pragma once
 #include "Constants.hpp"
 #include "FileIO.hpp"
-#if defined(_WINAMP_PLUGIN_)
-	//#include <afxmt.h>
-#endif
 namespace psycle
 {
 	namespace host

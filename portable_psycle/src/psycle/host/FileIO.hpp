@@ -1,9 +1,6 @@
 ///\file
 ///\brief interface file for psycle::host::RiffFile.
 #pragma once
-#if defined _WINAMP_PLUGIN_
-	#include <cstdio>
-#endif
 namespace psycle
 {
 	namespace host
