@@ -1,10 +1,15 @@
 #include <project.h>
 
 #if 0
+/*
 $Log$
+Revision 1.2  2005/01/01 20:05:49  johan-boule
+no message
+
 Revision 1.1  2004/12/22 22:43:41  johan-boule
 fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
 
+*/
 #endif
 		  
 ///\file
