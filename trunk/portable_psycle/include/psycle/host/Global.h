@@ -43,6 +43,7 @@ namespace psycle
 			{
 				trace,
 				info,
+				exception,
 				crash
 			};
 			logger(const int & level, const std::string & string) throw();

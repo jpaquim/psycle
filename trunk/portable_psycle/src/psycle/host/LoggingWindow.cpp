@@ -55,17 +55,20 @@ namespace psycle
 			LogVector.push_back(new LogEntry(level, string));
 			// puts a separator
 			{
-				defaultCF.crTextColor = RGB(0, 0, 0);
+				defaultCF.crTextColor = RGB(64, 64, 64);
 				m_ErrorTxt.SetSelectionCharFormat(defaultCF);
 				m_ErrorTxt.ReplaceSel("===\n");
 			}
 			switch(level)
 			{
 			case host::logger::trace: 
-				defaultCF.crTextColor = RGB(128, 128, 128);
+				defaultCF.crTextColor = RGB(160, 160, 160);
 				break;
 			case host::logger::info:
-				defaultCF.crTextColor = RGB(0, 64, 0);
+				defaultCF.crTextColor = RGB(0, 128, 0);
+				break;
+			case host::logger::exception:
+				defaultCF.crTextColor = RGB(200, 128, 0);
 				break;
 			case host::logger::crash:
 				defaultCF.crTextColor = RGB(255, 0, 0);

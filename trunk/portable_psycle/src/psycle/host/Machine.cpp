@@ -40,7 +40,7 @@ namespace psycle
 				<< _editName;
 			if(GetDllName()) title
 				<< ": " << GetDllName();
-			host::logger(host::logger::crash, title.str() + '\n' + e.what());
+			host::logger(host::logger::exception, title.str() + '\n' + e.what());
 			//::MessageBox(0, e.what(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 		}
 

@@ -20,7 +20,7 @@ namespace operating_system
 			{
 				std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << this->what();
 				TRACE("%s\n", s.str().c_str());
-				psycle::host::logger(psycle::host::logger::trace, s.str());
+				psycle::host::logger(psycle::host::logger::crash, s.str());
 			}
 			/*
 			{
