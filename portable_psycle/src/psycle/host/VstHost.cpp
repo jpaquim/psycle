@@ -141,6 +141,7 @@ namespace psycle
 				}
 				// 1: calls the "main" function and receives the pointer to the AEffect structure.
 				{
+					AEffect * effect(0);
 					try 
 					{
 						AEffect* effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
@@ -150,12 +151,13 @@ namespace psycle
 					catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
+					proxy()(effect);
 				}
-				proxy()(effect);
 				if(!proxy()() || proxy().magic() != kEffectMagic)
 				{
-					std::ostringstream s; s << "call to function 'main' returned a bad value";
-					if(proxy()()) s << std::endl << "returned value signature: " << proxy().magic();
+					std::ostringstream s; s << "call to function 'main' returned a bad value: ";
+					if(proxy()()) s << "returned value signature: " << proxy().magic();
+					else s << "returned value is a null pointer";
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
 				TRACE("VST plugin: instanciated.");
