@@ -2304,9 +2304,9 @@ void CChildView::FindMachineSkin(CString findDir, CString findName, BOOL *result
 {
 	CFileFind finder;
 
-	int loop = finder.FindFile(findDir + "\\*.");	// check for subfolders.
+	int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
 	while (loop) 
-	{								// Note: Subfolders with dots won't work.
+	{								
 		loop = finder.FindNextFile();
 		if (finder.IsDirectory() && !finder.IsDots())
 		{
@@ -2936,9 +2936,9 @@ void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *
 {
 	CFileFind finder;
 
-	int loop = finder.FindFile(findDir + "\\*.");	// check for subfolders.
+	int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
 	while (loop) 
-	{								// Note: Subfolders with dots won't work.
+	{		
 		loop = finder.FindNextFile();
 		if (finder.IsDirectory() && !finder.IsDots())
 		{

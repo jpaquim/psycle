@@ -471,8 +471,9 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 	VSTPlugin* vstPlug;
 	Plugin* plug;
 
-	int loop = finder.FindFile(findDir + "\\*.");	// check for subfolders.
-	while (loop) {								// Note: Subfolders with dots won't work.
+	int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
+	while (loop) 
+	{								
 		loop = finder.FindNextFile();
 		if (finder.IsDirectory() && !finder.IsDots())
 		{
@@ -550,8 +551,8 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 						strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug->GetName());
 						sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-								(vstPlug->IsSynth()) ? "VST2 instrument" : "VST2 effect",
-								vstPlug->GetVendorName());
+							(vstPlug->IsSynth()) ? "VST2 instrument" : "VST2 effect",
+							vstPlug->GetVendorName());
 						sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug->GetVersion());
 						_pPlugsInfo[currentPlugsCount]->version[15]='\0';
 						if ( vstPlug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
@@ -572,7 +573,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 					}
 					else
 					{
-						fprintf(hfile,"*** NOT PLUGIN ***");
+						fprintf(hfile,"*** NOT PLUGIN OR PLUGIN BUGGED ***");
 					}
 					delete vstPlug;
 				}

@@ -65,9 +65,20 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 {
 	h_dll=LoadLibrary(dllname);
 
-	if(h_dll==NULL)	return VSTINSTANCE_ERR_NO_VALID_FILE;
+	if(h_dll==NULL)	
+	{
+		return VSTINSTANCE_ERR_NO_VALID_FILE;
+	}
 
-	PVSTMAIN main = (PVSTMAIN)GetProcAddress(h_dll,"main");
+	PVSTMAIN main = NULL;
+	try 
+	{
+		main = (PVSTMAIN)GetProcAddress(h_dll,"main");
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 	if(!main)
 	{	
 		FreeLibrary(h_dll);
@@ -77,7 +88,14 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 
 	//This calls the "main" function and receives the pointer to the AEffect structure.
-	_pEffect=main((audioMasterCallback)&Master);
+	try 
+	{
+		_pEffect=main((audioMasterCallback)&Master);
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 	
 	if(!_pEffect || _pEffect->magic!=kEffectMagic)
 	{
@@ -92,18 +110,54 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 
 	//init plugin (probably a call to "Init()" function should be done here)
 	_pEffect->user = this;
-	Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
+	try
+	{
+		Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 
+	try
+	{
 #if defined(_WINAMP_PLUGIN_)
-	Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
+		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
 #else
-	Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
+		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 
-	Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
+	try
+	{
+		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 
-	Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
-	Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
+	try
+	{
+		Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
+
+	try
+	{
+		Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
+	}
+	catch (...)
+	{
+		return VSTINSTANCE_ERR_EXCEPTION;
+	}
 	
 	if (!Dispatch( effGetEffectName, 0, 0, &_sProductName, 0.0f))
 	{
@@ -117,7 +171,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	_editName[15]='\0';
 
 // Compatibility hacks
-	if ( strcmp(_sProductName,"sc-101") == 0 ) requiresRepl=true;
+	if ( strcmp(_sProductName,"sc-101") == 0 ) 
+	{
+		requiresRepl=true;
+	}
 
 //
 

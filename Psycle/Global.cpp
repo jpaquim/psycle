@@ -31,8 +31,9 @@
 	bool FindFileinDir(char *dllname,CString &path)
 	{
 		CFileFind finder;
-		int loop = finder.FindFile(path + "\\*.");	// check for subfolders.
-		while (loop) {								// Note: Subfolders with dots won't work.
+		int loop = finder.FindFile(path + "\\*");	// check for subfolders.
+		while (loop) 
+		{						
 			loop = finder.FindNextFile();
 			if (finder.IsDirectory() && !finder.IsDots())
 			{

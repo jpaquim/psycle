@@ -16,6 +16,7 @@
 #define VSTINSTANCE_ERR_NO_VALID_FILE -1
 #define VSTINSTANCE_ERR_NO_VST_PLUGIN -2
 #define VSTINSTANCE_ERR_REJECTED -3
+#define VSTINSTANCE_ERR_EXCEPTION -4
 #define VSTINSTANCE_NO_ERROR 0
 
 typedef AEffect* (*PVSTMAIN)(audioMasterCallback audioMaster);
