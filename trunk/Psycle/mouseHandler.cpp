@@ -136,7 +136,6 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
 					wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
 					break;
@@ -233,7 +232,6 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					}
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					panning = Global::_pSong->_pMachine[smac]->_panning*MachineCoords.dEffectPan.width;
 					panning /= 128;
 					if ((mcd_x >= panning+MachineCoords.dEffectPan.x) && 
@@ -411,7 +409,6 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 					}
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					if (point.x-mcd_x < 0 ) 
 					{ 
 						_pSong->_pMachine[smac]->_x = 0; 
@@ -529,7 +526,6 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 						}
 						break;
 					case MACHMODE_FX:
-					case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 						newpan = (point.x - Global::_pSong->_pMachine[smac]->_x - MachineCoords.dEffectPan.x - (MachineCoords.sEffectPan.width/2))*128;
 						if (MachineCoords.dEffectPan.width)
 						{
@@ -849,7 +845,6 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 					}
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					if ((mcd_x >= MachineCoords.dEffectPan.x) && 
 						(mcd_x < MachineCoords.dEffectPan.x+MachineCoords.dEffectPan.width) && 
 						(mcd_y >= MachineCoords.dEffectPan.y) && 

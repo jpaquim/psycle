@@ -180,7 +180,6 @@ void CInfoDlg::UpdateInfo()
 			case MACHMODE_GENERATOR: strcpy(buffer,"Generator");break;
 			case MACHMODE_FX: strcpy(buffer,"Effect");break;
 			case MACHMODE_MASTER: strcpy(buffer,"Master");break;
-			case MACHMODE_PLUGIN: strcpy(buffer, "Plug-in"); break;
 			}
 			m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
 			

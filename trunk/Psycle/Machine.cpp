@@ -501,8 +501,6 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	pMachine->Init();
 	pMachine->_type = type;
 
-	pFile->Read(&pMachine->_mode,sizeof(pMachine->_mode));
-
 	pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
 	pFile->Read(&pMachine->_mute,sizeof(pMachine->_mute));
 
@@ -560,9 +558,10 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		pMachine=p;
 	}
 
-	switch (pMachine->_mode)
+
+	if (index < MAX_BUSES)
 	{
-	case MACHMODE_GENERATOR:
+		pMachine->_mode = MACHMODE_GENERATOR;
 		if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) 
 		{
 			pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
@@ -571,9 +570,10 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		{
 			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 		}
-		break;
-	case MACHMODE_FX:
-	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+	}
+	else if (index < MAX_BUSES*2)
+	{
+		pMachine->_mode = MACHMODE_FX;
 		if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) 
 		{
 			pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
@@ -582,9 +582,10 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		{
 			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
 		}
-		break;
-
-	case MACHMODE_MASTER:
+	}
+	else
+	{
+		pMachine->_mode = MACHMODE_MASTER;
 		if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) 
 		{
 			pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
@@ -593,7 +594,6 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		{
 			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 		}
-		break;
 	}
 
 	return pMachine;
@@ -605,7 +605,7 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 {
 	pFile->Write(&_type,sizeof(_type));
 	SaveDllName(pFile);
-	pFile->Write(&_mode,sizeof(_mode));
+//	pFile->Write(&_mode,sizeof(_mode));
 	pFile->Write(&_bypass,sizeof(_bypass));
 	pFile->Write(&_mute,sizeof(_mute));
 

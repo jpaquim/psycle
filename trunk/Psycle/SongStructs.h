@@ -43,9 +43,8 @@ MachineType;
 typedef enum
 {
 	MACHMODE_GENERATOR = 0,
-		MACHMODE_FX = 1,
-		MACHMODE_MASTER = 2,
-		MACHMODE_PLUGIN = 3,
+	MACHMODE_FX = 1,
+	MACHMODE_MASTER = 2,
 }
 MachineMode;
 

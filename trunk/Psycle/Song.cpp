@@ -1887,7 +1887,6 @@ bool Song::Load(RiffFile* pFile)
 					if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
 					if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
 					break;
@@ -1983,14 +1982,8 @@ bool Song::Load(RiffFile* pFile)
 			{
 				if (_machineActive[i] && pMac[i]->_mode != MACHMODE_GENERATOR )
 				{
-					busEffect[j]=i;	j++;
-					for (int k = 0; k < 64; k++)
-					{
-						if (busMachine[k] == i)
-						{
-							busMachine[k] = 255;
-						}
-					}
+					busEffect[j]=i;	
+					j++;
 				}
 			}
 			for (j; j < 64; j++)
@@ -2003,14 +1996,25 @@ bool Song::Load(RiffFile* pFile)
 		int j=0;
 		for ( i=0;i<64;i++ ) 
 		{
-			if (busMachine[i] != 255 && _machineActive[busMachine[i]]) { // If there's a machine in the generators' bus that it is not a generator:
+			if (busMachine[i] != 255 && _machineActive[busMachine[i]]) 
+			{ // If there's a machine in the generators' bus that it is not a generator:
 				if (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR ) 
 				{
 					pMac[busMachine[i]]->_mode = MACHMODE_FX;
-					while (busEffect[j] != 255 && j<MAX_BUSES) j++;
+					while (busEffect[j] != 255 && j<MAX_BUSES) 
+					{
+						j++;
+					}
 					busEffect[j]=busMachine[i];
 					busMachine[i]=255;
 				}
+			}
+		}
+		for ( i=0;i<64;i++ ) 
+		{
+			if (busEffect[i] != 255 && _machineActive[busEffect[i]]) 
+			{
+				pMac[busEffect[i]]->_mode = MACHMODE_FX;
 			}
 		}
 
