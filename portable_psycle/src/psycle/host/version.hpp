@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.5  2005/01/27 09:03:15  johan-boule
+tagged the cvs HEAD revision set with release_1_7_27
+
 Revision 1.4  2005/01/24 17:36:59  johan-boule
 no message
 
@@ -111,7 +114,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 26 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 27 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
