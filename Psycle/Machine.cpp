@@ -488,22 +488,12 @@ void Master::Work(
 		float *pSamplesL = _pSamplesL;
 		float *pSamplesR = _pSamplesR;
 		
-		--pSamples;
-		--pSamplesL;
-		--pSamplesR;
-		
-
 #if defined(_WINAMP_PLUGIN_)
 		int i = numSamples;
 		do
 		{
-			++pSamples;
-			++pSamplesL;
-			++pSamplesR;
-
-			*pSamples = *pSamplesL * mv;
-			++pSamples;
-			*pSamples = *pSamplesR * mv;
+			*pSamples++ = *pSamplesL++ * mv;
+			*pSamples++ = *pSamplesR++ * mv;
 		}
 		while (--i);
 #else
@@ -516,20 +506,14 @@ void Master::Work(
 		int i = numSamples;
 		do
 		{
-			++pSamples;
-			++pSamplesL;
-			++pSamplesR;
-			
-
 			// Left channel
-			if (fabs( *pSamples = *pSamplesL * mv) > _lMax)
+			if (fabs( *pSamples++ = *pSamplesL++ * mv) > _lMax)
 			{
 				_lMax = fabsf(*pSamples);
 			}
 			
 			// Right channel
-			++pSamples;
-			if (fabs(*pSamples = *pSamplesR * mv) > _rMax)
+			if (fabs(*pSamples++ = *pSamplesR++ * mv) > _rMax)
 			{
 				_rMax = fabsf(*pSamples);
 			}
