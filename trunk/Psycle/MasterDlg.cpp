@@ -345,18 +345,18 @@ void CMasterDlg::PaintNames(char *name, int x, int y)
 
 void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	float val = ((256-m_sliderm1.GetPos())*(256-m_sliderm1.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm1.GetPos())*(256-m_sliderm1.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(0,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),92,142);
+	PaintNumbers(val,92,142);
 	
 	*pResult = 0;
 }
 
 void CMasterDlg::OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	float val = ((256-m_sliderm10.GetPos())*(256-m_sliderm10.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm10.GetPos())*(256-m_sliderm10.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(9,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),272,142);
+	PaintNumbers(val,272,142);
 	
 	*pResult = 0;
 }
@@ -365,9 +365,9 @@ void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	//	_pMachine->SetWireVolume(10,(256-m_sliderm11.GetPos())*0.00390625f);
 	//	PaintNumbers(256-m_sliderm11.GetPos(),292,142);
-	float val = ((256-m_sliderm11.GetPos())*(256-m_sliderm11.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm11.GetPos())*(256-m_sliderm11.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(10,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),292,142);
+	PaintNumbers(val,292,142);
 	
 	*pResult = 0;
 }
@@ -376,9 +376,9 @@ void CMasterDlg::OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	//	_pMachine->SetWireVolume(11,(256-m_sliderm12.GetPos())*0.00390625f);
 	//	PaintNumbers(256-m_sliderm12.GetPos(),312,142);
-	float val = ((256-m_sliderm12.GetPos())*(256-m_sliderm12.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm12.GetPos())*(256-m_sliderm12.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(11,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),312,142);
+	PaintNumbers(val,312,142);
 
 // I know the following is Ugly, but it is the only solution I've found, because first,
 // OnPaint is called, after the bitmap is drawn, and finally the sliders are redrawn.
@@ -407,9 +407,9 @@ void CMasterDlg::OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(1,(256-m_sliderm2.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm2.GetPos(),112,142);
-	float val = ((256-m_sliderm2.GetPos())*(256-m_sliderm2.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm2.GetPos())*(256-m_sliderm2.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(1,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),112,142);
+	PaintNumbers(val,112,142);
 	
 	*pResult = 0;
 }
@@ -418,9 +418,9 @@ void CMasterDlg::OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(2,(256-m_sliderm3.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm3.GetPos(),132,142);
-	float val = ((256-m_sliderm3.GetPos())*(256-m_sliderm3.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm3.GetPos())*(256-m_sliderm3.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(2,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),132,142);
+	PaintNumbers(val,132,142);
 	
 	*pResult = 0;
 }
@@ -429,9 +429,9 @@ void CMasterDlg::OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(3,(256-m_sliderm4.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm4.GetPos(),152,142);
-	float val = ((256-m_sliderm4.GetPos())*(256-m_sliderm4.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm4.GetPos())*(256-m_sliderm4.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(3,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),152,142);
+	PaintNumbers(val,152,142);
 	
 	*pResult = 0;
 }
@@ -440,9 +440,9 @@ void CMasterDlg::OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(4,(256-m_sliderm5.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm5.GetPos(),172,142);
-	float val = ((256-m_sliderm5.GetPos())*(256-m_sliderm5.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm5.GetPos())*(256-m_sliderm5.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(4,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),172,142);
+	PaintNumbers(val,172,142);
 	
 	*pResult = 0;
 }
@@ -451,9 +451,9 @@ void CMasterDlg::OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(5,(256-m_sliderm6.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm6.GetPos(),192,142);
-	float val = ((256-m_sliderm6.GetPos())*(256-m_sliderm6.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm6.GetPos())*(256-m_sliderm6.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(5,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),192,142);
+	PaintNumbers(val,192,142);
 	
 	*pResult = 0;
 }
@@ -462,9 +462,9 @@ void CMasterDlg::OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(6,(256-m_sliderm7.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm7.GetPos(),212,142);
-	float val = ((256-m_sliderm7.GetPos())*(256-m_sliderm7.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm7.GetPos())*(256-m_sliderm7.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(6,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),212,142);
+	PaintNumbers(val,212,142);
 	
 	*pResult = 0;
 }
@@ -473,9 +473,9 @@ void CMasterDlg::OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(7,(256-m_sliderm8.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm8.GetPos(),232,142);
-	float val = ((256-m_sliderm8.GetPos())*(256-m_sliderm8.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm8.GetPos())*(256-m_sliderm8.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(7,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),232,142);
+	PaintNumbers(val,232,142);
 	
 	*pResult = 0;
 }
@@ -484,9 +484,9 @@ void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult)
 {
 //	_pMachine->SetWireVolume(8,(256-m_sliderm9.GetPos())*0.00390625f);
 //	PaintNumbers(256-m_sliderm9.GetPos(),252,142);
-	float val = ((256-m_sliderm9.GetPos())*(256-m_sliderm9.GetPos()))/64.0f;
+	int val = f2i(((256-m_sliderm9.GetPos())*(256-m_sliderm9.GetPos()))/64.0f);
 	_pMachine->SetWireVolume(8,CValueMapper::Map_255_1(val));
-	PaintNumbers(f2i(val),252,142);
+	PaintNumbers(val,252,142);
 	
 	*pResult = 0;
 }
