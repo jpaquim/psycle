@@ -25,7 +25,7 @@ class CWireDlg : public CDialog
 
 // Construction
 public:
-	CWireDlg(CChildView* pParent = NULL);   // standard constructor
+	CWireDlg(CChildView* pParent);   // standard constructor
 	BOOL Create();
 	afx_msg void OnCancel();
 	UINT this_index;

@@ -70,15 +70,15 @@ BOOL CWireDlg::OnInitDialog()
 	scope_phase_rate = 20;
 
 	Inval = false;
-	m_volslider.SetRange(0,256);
-	m_volslider.SetTicFreq(16);
+	m_volslider.SetRange(0,256*4);
+	m_volslider.SetTicFreq(16*4);
 	_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 
 	float val;
 	_pDstMachine->GetWireVolume(_dstWireIndex,val);
 	invol = val;
-	int t = (int)sqrtf(val*16384);
-	m_volslider.SetPos(256-t);
+	int t = (int)sqrtf(val*16384*4*4);
+	m_volslider.SetPos(256*4-t);
 
 	char buf[64];
 	sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
@@ -144,7 +144,7 @@ void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	char buffer[32];
 //	invol = (128-m_volslider.GetPos())*0.0078125f;
-	invol = ((256-m_volslider.GetPos())*(256-m_volslider.GetPos()))/16384.0f;
+	invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
 
 	if (invol > 1.0f)
 	{	
@@ -1121,10 +1121,35 @@ void CWireDlg::SetMode()
 BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
 {
 	// TODO: Add your specialized code here and/or call the base class
-	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
+	if (pMsg->message == WM_KEYDOWN)
 	{
-		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+		if (pMsg->wParam == VK_UP)
+		{
+			int v = m_volslider.GetPos();
+			v--;
+			if (v < 0)
+			{
+				v = 0;
+			}
+			m_volslider.SetPos(v);
+		}
+		else if (pMsg->wParam == VK_DOWN)
+		{
+			int v = m_volslider.GetPos();
+			v++;
+			if (v > 256*4)
+			{
+				v = 256*4;
+			}
+			m_volslider.SetPos(v);
+		}
+		else
+		{
+			m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+		}
 	}
-
+	else if (pMsg->message == WM_KEYUP)
+	{
+	}
 	return CDialog::PreTranslateMessage(pMsg);
 }
