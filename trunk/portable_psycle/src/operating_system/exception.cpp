@@ -19,7 +19,7 @@ namespace operating_system
 	{
 		namespace
 		{
-			const std::string code_description(const unsigned int & code) throw()
+			const std::string code_description(unsigned int code) throw()
 			{
 				std::ostringstream s;
 				s << "microsoft nt structured exception (external cpu/os exception): 0x" << std::hex << code << ": ";
@@ -81,7 +81,7 @@ namespace operating_system
 			}
 		}
 
-		translated::translated(const unsigned int & code) throw() : exception(code_description(code))
+		translated::translated(unsigned int code) throw() : exception(code_description(code))
 		{
 			// This type of exception is usually likely followed by a bad crash of the whole program,
 			// because it is caused by really bad things like wrong memory access, etc...

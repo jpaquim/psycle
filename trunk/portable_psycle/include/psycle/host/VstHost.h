@@ -353,7 +353,7 @@ namespace psycle
 					<< " Value = " << value
 					<< " Ptr = " << ptr
 					<< " Opt = " << opt;
-					//host::loggers::trace(s.str());
+					host::loggers::trace(s.str());
 				}
 				
 #endif
