@@ -1018,10 +1018,10 @@ END
 IDD_SEQUENCER DIALOGEX 0, 0, 70, 362
 STYLE WS_CHILD
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,5,251,62,8
+    CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX,5,251,
+                    62,8
     LISTBOX         IDC_SEQLIST,2,5,38,188,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
                     LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_VSCROLL
     PUSHBUTTON      "+",IDC_INCSHORT,43,5,23,12,BS_BITMAP | BS_CENTER | 
@@ -1056,15 +1056,15 @@ BEGIN
     CTEXT           "00:00",IDC_LENGTH,35,237,31,12,SS_CENTERIMAGE | NOT 
                     WS_GROUP,WS_EX_STATICEDGE
     CONTROL         "Multichannel Audition",IDC_MULTICHANNEL_AUDITION,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | NOT WS_TABSTOP,5,262,62,15
-    CONTROL         "Wrap Around",IDC_WRAP,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,5,316,56,11
+                    BS_AUTOCHECKBOX | BS_MULTILINE,5,262,62,15
+    CONTROL         "Wrap Around",IDC_WRAP,"Button",BS_AUTOCHECKBOX,5,316,56,
+                    11
     CONTROL         "Center Cursor",IDC_CENTERCURSOR,"Button",
-                    BS_AUTOCHECKBOX | NOT WS_TABSTOP,5,328,62,10
+                    BS_AUTOCHECKBOX,5,328,62,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | NOT WS_TABSTOP,5,339,60,16
+                    BS_AUTOCHECKBOX | BS_MULTILINE,5,339,60,16
     CONTROL         "Record NoteOffs",IDC_RECORD_NOTEOFF,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | NOT WS_TABSTOP,5,280,60,15
+                    BS_AUTOCHECKBOX | BS_MULTILINE,5,280,60,15
     PUSHBUTTON      "++",IDC_INCLONG,43,37,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
     PUSHBUTTON      "-",IDC_DECLONG,43,53,23,12,BS_BITMAP | BS_CENTER | 
@@ -1072,7 +1072,7 @@ BEGIN
     PUSHBUTTON      "New",IDC_SEQNEW,43,69,23,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Sort",IDC_SEQSRT,43,181,23,12,0,WS_EX_STATICEDGE
     CONTROL         "Record Tweaks",IDC_RECORD_TWEAKS,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | NOT WS_TABSTOP,5,299,60,15
+                    BS_AUTOCHECKBOX | BS_MULTILINE,5,299,60,15
     PUSHBUTTON      "Xerox",IDC_SEQDUPLICATE,43,85,23,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Copy",IDC_SEQCOPY,43,133,23,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Paste",IDC_SEQPASTE,43,149,23,12,0,WS_EX_STATICEDGE
@@ -1825,16 +1825,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_INDICATOR_EXT        "EXT"
-    ID_INDICATOR_CAPS       "CAP"
-    ID_INDICATOR_NUM        "NUM"
-    ID_INDICATOR_SCRL       "SCRL"
-    ID_INDICATOR_OVR        "OVR"
-    ID_INDICATOR_REC        "REC"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
     AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
@@ -2243,6 +2233,24 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+	ID_INDICATOR_SEQPOS		"Pos: 00"
+	ID_INDICATOR_PATTERN	"Pat: 00"
+	ID_INDICATOR_LINE		"Line: 000"
+	ID_INDICATOR_TIME		"00:00:00.00"
+    ID_INDICATOR_EDIT		"Edit"
+    ID_INDICATOR_FOLLOW		"Follow"
+    ID_INDICATOR_NOTEOFF	"NoteOffs"
+    ID_INDICATOR_TWEAKS		"Tweaks"
+END
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

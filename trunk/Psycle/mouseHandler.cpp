@@ -342,29 +342,28 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 			{
 				_pSong->_pMachines[smac]->_x = point.x-mcd_x;
 				_pSong->_pMachines[smac]->_y = point.y-mcd_y;
-	
-				char buffer[64];
-				sprintf(buffer, "%s (%d,%d)", Global::_pSong->_pMachines[smac]->_editName, Global::_pSong->_pMachines[smac]->_x, Global::_pSong->_pMachines[smac]->_y);
-				pParentMain->StatusBarText(buffer);
+
+				char buf[80];
+				sprintf(buf, "%s (%d,%d)", Global::_pSong->_pMachines[smac]->_editName, Global::_pSong->_pMachines[smac]->_x, Global::_pSong->_pMachines[smac]->_y);
+				pParentMain->StatusBarText(buf);
 				Repaint();
 			}
 			else if ((smacmode == 1) && (Global::_pSong->_pMachines[smac]->_mode != MACHMODE_MASTER))
 			{
-				char buffer[64];
 				int newpan = point.x - Global::_pSong->_pMachines[smac]->_x - 9;
 				Global::_pSong->_pMachines[smac]->SetPan(newpan);
 				newpan= Global::_pSong->_pMachines[smac]->_panning;
 				
+				char buf[80];
 				if (newpan != 64)
 				{
-					sprintf(buffer, "%s pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachines[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachines[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
 				}
 				else
 				{
-					sprintf(buffer, "%s pan: Center", Global::_pSong->_pMachines[smac]->_editName);
+					sprintf(buf, "%s Pan: Center", Global::_pSong->_pMachines[smac]->_editName);
 				}
-				
-				pParentMain->StatusBarText(buffer);
+				pParentMain->StatusBarText(buf);
 				updatePar = smac;
 				Repaint(DMMacRefresh);
 			}

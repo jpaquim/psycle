@@ -328,16 +328,6 @@ void CChildView::OnTimer( UINT nIDEvent )
 			if (Global::pPlayer->_lineChanged)
 			{
 				Global::pPlayer->_lineChanged = false;
-				char buf[80];
-				sprintf(buf,"[Playing] Pos: %.2X   Pat: %.2X   Lin: %.2d ,   [Elapsed Time]: %.2d : %.2d : %.2f",
-					Global::pPlayer->_playPosition,
-					Global::pPlayer->_playPattern,
-					Global::pPlayer->_lineCounter,
-					Global::pPlayer->_playTimem / 60,
-					Global::pPlayer->_playTimem % 60,
-					Global::pPlayer->_playTime);
-				
-				pParentMain->StatusBarText(buf);
 				pParentMain->SetAppSongBpm(0);
 				pParentMain->SetAppSongTpb(0);
 

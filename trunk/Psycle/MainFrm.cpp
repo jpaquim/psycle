@@ -101,15 +101,28 @@ ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
 ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
 ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
 ON_BN_CLICKED(IDC_INCLONG, OnInclong)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_SEQPOS, OnUpdateIndicatorSeqPos)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_PATTERN, OnUpdateIndicatorPattern)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINE, OnUpdateIndicatorLine)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME, OnUpdateIndicatorTime)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_EDIT, OnUpdateIndicatorEdit)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_FOLLOW, OnUpdateIndicatorFollow)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_NOTEOFF, OnUpdateIndicatorNoteoff)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
-		ID_INDICATOR_CAPS,
-		ID_INDICATOR_NUM,
-		ID_INDICATOR_SCRL,
+	ID_INDICATOR_SEQPOS,
+	ID_INDICATOR_PATTERN,
+	ID_INDICATOR_LINE,
+	ID_INDICATOR_TIME,
+    ID_INDICATOR_EDIT,
+    ID_INDICATOR_FOLLOW,
+    ID_INDICATOR_NOTEOFF,
+    ID_INDICATOR_TWEAKS,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2002,5 +2015,109 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	}
 	pls->SetSel(ls,true);
 	_pSong->playOrderSel[ls] = true;
+}
+
+void CMainFrame::OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI) 
+{
+    pCmdUI->Enable(); 
+    CString str;
+	if (Global::pPlayer->_playing)
+	{
+	    str.Format("Pos: %.2X", Global::pPlayer->_playPosition); 
+	}
+	else
+	{
+	    str.Format("Pos: %.2X", m_wndView.editPosition); 
+	}
+    pCmdUI->SetText(str); 
+}
+
+void CMainFrame::OnUpdateIndicatorPattern(CCmdUI *pCmdUI) 
+{
+    pCmdUI->Enable(); 
+    CString str;
+	if (Global::pPlayer->_playing)
+	{
+	    str.Format("Pat: %.2X", Global::pPlayer->_playPattern); 
+	}
+	else
+	{
+	    str.Format("Pat: %.2X", Global::_pSong->playOrder[m_wndView.editPosition]); 
+	}
+    pCmdUI->SetText(str); 
+}
+
+void CMainFrame::OnUpdateIndicatorLine(CCmdUI *pCmdUI) 
+{
+    pCmdUI->Enable(); 
+    CString str;
+	if (Global::pPlayer->_playing)
+	{
+	    str.Format("Line: %3d", Global::pPlayer->_lineCounter); 
+	}
+	else
+	{
+	    str.Format("Line: %3d", m_wndView.editcur.line); 
+	}
+    pCmdUI->SetText(str); 
+}
+
+void CMainFrame::OnUpdateIndicatorTime(CCmdUI *pCmdUI) 
+{
+    pCmdUI->Enable(); 
+	if (Global::pPlayer->_playing)
+	{
+		CString str;
+	    str.Format( "%.2d:%.2d:%.2d.%.2d", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, f2i(Global::pPlayer->_playTime), f2i(Global::pPlayer->_playTime*100)-(f2i(Global::pPlayer->_playTime)*100)); 
+		pCmdUI->SetText(str); 
+	}
+}
+
+void CMainFrame::OnUpdateIndicatorEdit(CCmdUI *pCmdUI) 
+{
+	if (m_wndView.bEditMode)
+	{
+		pCmdUI->Enable(); 
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+void CMainFrame::OnUpdateIndicatorFollow(CCmdUI *pCmdUI) 
+{
+	if (m_wndView._followSong)
+	{
+		pCmdUI->Enable(); 
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+void CMainFrame::OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI) 
+{
+	if (Global::pConfig->_RecordNoteoff)
+	{
+		pCmdUI->Enable(); 
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI) 
+{
+	if (Global::pConfig->_RecordTweaks)
+	{
+		pCmdUI->Enable(); 
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
 }
 
