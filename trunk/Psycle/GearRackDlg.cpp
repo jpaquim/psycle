@@ -327,6 +327,7 @@ void CGearRackDlg::OnDelete()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
+	m_pParent->AddMacViewUndo();
 	switch (DisplayMode)
 	{
 	case 0:
@@ -494,6 +495,7 @@ void CGearRackDlg::OnExchange()
 		MessageBox("This option requires that you select two entries","Gear Rack Dialog");
 		return;
 	}
+
 	int sel[2],j=0;
 	sel[2] = 0;
 	const int maxitems=m_list.GetCount();
@@ -541,6 +543,7 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 
 	if (tmp1 && tmp2)
 	{
+		m_pParent->AddMacViewUndo();
 		Global::_pSong->_pMachine[one] = tmp2;
 		Global::_pSong->_pMachine[two] = tmp1;
 
@@ -597,6 +600,7 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 	}
 	if (tmp1)
 	{
+		m_pParent->AddMacViewUndo();
 		// ok we gotta swap this one for a null one
 		Global::_pSong->_pMachine[one] = NULL;
 		Global::_pSong->_pMachine[two] = tmp1;
@@ -627,6 +631,7 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 	}
 	if (tmp2)
 	{
+		m_pParent->AddMacViewUndo();
 		// ok we gotta swap this one for a null one
 		Global::_pSong->_pMachine[two] = NULL;
 		Global::_pSong->_pMachine[one] = tmp2;
@@ -661,6 +666,8 @@ void CGearRackDlg::ExchangeIns(int one,int two)
 {
 	Song* pSong = Global::_pSong;
 	Instrument * tmpins;
+
+	m_pParent->AddMacViewUndo();
 	
 	tmpins=pSong->_pInstrument[one];
 	pSong->_pInstrument[one]=pSong->_pInstrument[two];
@@ -718,6 +725,7 @@ void CGearRackDlg::OnClonemachine()
 			if (!Global::_pSong->CloneMac(tmac1,tmac2))
 			{
 				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
+				return;
 			}
 		}
 		pParentMain->UpdateComboGen(true);
@@ -749,6 +757,7 @@ void CGearRackDlg::OnClonemachine()
 			if (!Global::_pSong->CloneMac(tmac1,tmac2))
 			{
 				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
+				return;
 			}
 		}
 		pParentMain->UpdateComboGen(true);
@@ -775,6 +784,7 @@ void CGearRackDlg::OnClonemachine()
 			if (!Global::_pSong->CloneIns(tmac1,tmac2))
 			{
 				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
+				return;
 			}
 		}
 		

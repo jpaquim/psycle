@@ -91,6 +91,11 @@ void CMacProp::OnButton1()
 	// Delete MACHINE!
 	if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 	{
+		if ( m_view != NULL )
+		{
+			m_view->AddMacViewUndo();
+		}
+
 		deleted = true;
 		OnCancel();
 	}
@@ -103,6 +108,7 @@ void CMacProp::OnMute()
 	pMachine->_volumeDisplay = 0;
 	if ( m_view != NULL )
 	{
+		m_view->AddMacViewUndo();
 		m_view->updatePar=thisMac;
 		m_view->Repaint(DMMacRefresh);
 	}
@@ -112,6 +118,7 @@ void CMacProp::OnBypass()
 	pMachine->_bypass = (m_bypassCheck.GetCheck() == 1);
 	if ( m_view != NULL )
 	{
+		m_view->AddMacViewUndo();
 		m_view->updatePar=thisMac;
 		m_view->Repaint(DMMacRefresh);
 	}
@@ -119,6 +126,7 @@ void CMacProp::OnBypass()
 
 void CMacProp::OnSolo() 
 {
+	m_view->AddMacViewUndo();
 	 if (m_soloCheck.GetCheck() == 1)
 	 {
 		for ( int i=0;i<MAX_MACHINES;i++ )
@@ -188,7 +196,7 @@ void CMacProp::OnClone()
 	{
 		if (!Global::_pSong->CloneMac(src,dst))
 		{
-			MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
+			MessageBox("Cloning failed","Cloning failed");
 		}
 		if ( m_view != NULL )
 		{

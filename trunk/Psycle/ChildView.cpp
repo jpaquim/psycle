@@ -128,6 +128,9 @@ CChildView::CChildView()
 	UndoCounter=0;
 	UndoSaved=0;
 
+	UndoMacCounter=0;
+	UndoMacSaved=0;
+
 //	editcur.track=0; // Not needed to initialize, since the class does it already.
 //	editcur.col=0;
 //	editcur.line=0;
@@ -717,6 +720,7 @@ BOOL CChildView::OnFileSave(UINT id)
 				{
 					UndoSaved = 0;
 				}
+				UndoMacSaved = UndoMacCounter;
 				SetTitleBarText();
 			}				
 //			file.Close();  <- save handles this 
@@ -816,6 +820,7 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 				{
 					UndoSaved = 0;
 				}
+				UndoMacSaved = UndoMacCounter;
 				SetTitleBarText();
 			}
 //			file.Close(); <- save handles this
@@ -919,7 +924,6 @@ void CChildView::OnFileSaveaudio()
 BOOL CChildView::CheckUnsavedSong(char* szTitle)
 {
 	// that method does not take machine changes into account
-	/*
 	BOOL bChecked = TRUE;
 	if (pUndoList)
 	{
@@ -927,6 +931,10 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 		{
 			bChecked = FALSE;
 		}
+	}
+	else if (UndoMacSaved != UndoMacCounter)
+	{
+		bChecked = FALSE;
 	}
 	else
 	{
@@ -937,37 +945,38 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 	}
 	
 	if (!bChecked)
-	*/
-	if (Global::pConfig->bFileSaveReminders)
 	{
-		char szText[128];
-		CString filepath = Global::pConfig->GetSongDir();
-		filepath += "\\";
-		filepath += Global::_pSong->fileName;
-		OldPsyFile file;
-		
-		sprintf(szText,"Save changes to \"%s\"?",Global::_pSong->fileName);
-		int result = MessageBox(szText,szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
-		switch (result)
+		if (Global::pConfig->bFileSaveReminders)
 		{
-		case IDYES:
-			strcpy(szText,filepath);
-			if (!file.Create(szText, true))
+			char szText[128];
+			CString filepath = Global::pConfig->GetSongDir();
+			filepath += "\\";
+			filepath += Global::_pSong->fileName;
+			OldPsyFile file;
+			
+			sprintf(szText,"Save changes to \"%s\"?",Global::_pSong->fileName);
+			int result = MessageBox(szText,szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+			switch (result)
 			{
-				sprintf(szText,"Error writing to \"%s\"!!!",filepath);
-				MessageBox(szText,szTitle,MB_ICONEXCLAMATION);
+			case IDYES:
+				strcpy(szText,filepath);
+				if (!file.Create(szText, true))
+				{
+					sprintf(szText,"Error writing to \"%s\"!!!",filepath);
+					MessageBox(szText,szTitle,MB_ICONEXCLAMATION);
+					return FALSE;
+				}
+				_pSong->Save(&file);
+	//			file.Close(); <- save handles this
+				return TRUE;
+				break;
+			case IDNO:
+				return TRUE;
+				break;
+			case IDCANCEL:
 				return FALSE;
+				break;
 			}
-			_pSong->Save(&file);
-//			file.Close(); <- save handles this
-			return TRUE;
-			break;
-		case IDNO:
-			return TRUE;
-			break;
-		case IDCANCEL:
-			return FALSE;
-			break;
 		}
 	}
 	return TRUE;
@@ -1354,6 +1363,9 @@ void CChildView::NewMachine(int x, int y, int mac)
 				return;
 			}
 		}
+
+
+		AddMacViewUndo();
 
 		// random position
 		if ((x < 0) || (y < 0))
@@ -2110,6 +2122,10 @@ void CChildView::SetTitleBarText()
 		{
 			titlename+=" *";
 		}
+	}
+	else if (UndoMacSaved != UndoMacCounter)
+	{
+		titlename+=" *";
 	}
 	else
 	{

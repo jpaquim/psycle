@@ -2843,6 +2843,7 @@ bool Song::CloneMac(int src,int dst)
 	}
 
 	// save our file
+	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
 	CString filepath = Global::pConfig->GetInitialSongDir();
 	filepath += "\\psycle.tmp";
@@ -3023,6 +3024,8 @@ bool Song::CloneIns(int src,int dst)
 		return false;
 	}
 	// ok now we get down to business
+
+	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
 	// save our file
 

@@ -265,6 +265,9 @@ public:
 	void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
 	void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
 	void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
+
+	void AddMacViewUndo(); // place holder
+
 	void KillUndo();
 	void KillRedo();
 	void SelectNextTrack();  // for armed tracks recording
@@ -475,6 +478,9 @@ private:
 
 	int UndoCounter;
 	int UndoSaved;
+
+	int UndoMacCounter;
+	int UndoMacSaved;
 
 	int mcd_x;
 	int mcd_y;
