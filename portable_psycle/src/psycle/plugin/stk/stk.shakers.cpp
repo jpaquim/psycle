@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov stk Shakers plugin for PSYCLE
-// v0.2a
+// v0.3a
 //
 // Based on The Synthesis ToolKit in C++ (STK)
 // By Perry R. Cook and Gary P. Scavone, 1995-2004.
@@ -12,7 +12,7 @@
 #include <stk/psyShakers.h>
 #include <stdlib.h>
 
-#define MAX_ENV_TIME	250000
+
 #define MAX_TRACKS	32
 #define NUMPARAMETERS 6
 
@@ -96,9 +96,9 @@ CMachineInfo const MacInfo =
 	NUMPARAMETERS,							// numParameters
 	pParameters,							// Pointer to parameters
 #ifdef _DEBUG
-	"stk Shakers v.0.2 (Debug build)",		// name
+	"stk Shakers 0.3 (Debug build)",		// name
 #else
-	"stk Shakers v.0.2",						// name
+	"stk Shakers 0.3",						// name
 #endif
 	"Shakers",							// short name
 	"Sartorius, bohan and STK 4.2.0 developers",							// author
@@ -124,8 +124,7 @@ public:
 private:
 
 	Shakers track[MAX_TRACKS];
-
-
+	bool noteonoff[MAX_TRACKS];
 };
 
 DLL_EXPORTS		// To export DLL functions to host
@@ -146,12 +145,21 @@ void mi::Init()
 {
 // Initialize your stuff here
 	Stk::setSampleRate(44100);
+	for(int i=0;i<MAX_TRACKS;i++)
+	{
+		noteonoff[i]=false;
+	}
+
 }
 
 void mi::Stop()
 {
 	for(int c=0;c<MAX_TRACKS;c++)
+	{
 		track[c].noteOff(0.0f);
+		noteonoff[i]=false;
+	}
+
 }
 
 void mi::SequencerTick()
@@ -212,7 +220,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 	float const vol=(float)Vals[5];
 	for(int c=0;c<tracks;c++)
 	{
-
+		if(noteonoff[c])
+		{
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
 			--xpsamplesleft;
@@ -230,7 +239,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
-
+		}
 	}
 }
 
@@ -253,12 +262,16 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	if((note>=48) && (note<=71))
 	{
 	// 
-	track[channel].noteOn((StkFloat)(note-48),32767);
+		track[channel].noteOn((StkFloat)(note-48),32767);
+		noteonoff[channel]=true;
 	}
 
 	// Note off
 	if(note==120)
-	track[channel].noteOff(0.0);
+	{
+		track[channel].noteOff(0.0);
+		noteonoff[channel]=false;
+	}
 
 	track[channel].tick();
 
