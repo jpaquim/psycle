@@ -1406,11 +1406,16 @@ namespace psycle
 					AddNoteOff(i);
 				}
 				// Reset all controllers
+				// Reset all controllers
+				// **has been commented out because it crashes Z3ta+!!**
+				// and doesnt seem to be needed..
+/*
 				for (int i=0;i<16;i++)
 				{
 					AddMIDI(0xb0+i,0x7b);
 				}
 				SendMidi();
+*/
 				_pEffect->process(_pEffect,inputs,inputs,64);
 			}
 		}
