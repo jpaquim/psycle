@@ -11,6 +11,7 @@
 	#include "DirectSound.h"
 	#include "PortAudioASIO.h"
 	#include "MidiInput.h"
+#include "Song.h"
 #include "NewMachine.h"
 #endif //_WINAMP_PLUGIN_
 
@@ -243,6 +244,8 @@ Configuration::Configuration()
 	_midiCommand15 = 16;
 	_midiFrom15 = 0;
 	_midiTo15 = 0xff;
+
+	defaultPatLines = 64;
 
 #endif // _WINAMP_PLUGIN
 }
@@ -614,6 +617,15 @@ Configuration::Read()
 	reg.QueryValue("MidiFrom15", &type, (BYTE*)&_midiFrom15, &numData);
 	numData = sizeof(_midiTo15);
 	reg.QueryValue("MidiTo15", &type, (BYTE*)&_midiTo15, &numData);
+
+	numData = sizeof(defaultPatLines);
+	reg.QueryValue("defaultPatLines", &type, (BYTE*)&defaultPatLines, &numData);
+
+	for (int c=0; c<MAX_PATTERNS; c++)
+	{
+		// All pattern reset
+		Global::_pSong->patternLines[c]=defaultPatLines;
+	}
 
 	numData = sizeof(mv_colour);
 	reg.QueryValue("mv_colour", &type, (BYTE*)&mv_colour, &numData);
@@ -1070,6 +1082,8 @@ Configuration::Write()
 	reg.SetValue("MidiCommand15", REG_DWORD, (BYTE*)&_midiCommand15, sizeof(_midiCommand15));	
 	reg.SetValue("MidiFrom15", REG_DWORD, (BYTE*)&_midiFrom15, sizeof(_midiFrom15));	
 	reg.SetValue("MidiTo15", REG_DWORD, (BYTE*)&_midiTo15, sizeof(_midiTo15));	
+
+	reg.SetValue("defaultPatLines", REG_DWORD, (BYTE*)&defaultPatLines, sizeof(defaultPatLines));	
 
 	reg.SetValue("mv_colour", REG_DWORD, (BYTE*)&mv_colour, sizeof(mv_colour));	
 	reg.SetValue("mv_wirecolour", REG_DWORD, (BYTE*)&mv_wirecolour, sizeof(mv_wirecolour));	

@@ -1869,6 +1869,12 @@ void CMainFrame::OnSeqnew()
 			_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
 		}
 
+		if (Global::_pSong->patternLines[m_wndView.editPosition]!=Global::pConfig->defaultPatLines)
+		{
+			m_wndView.AddUndoLength(m_wndView.editPosition,_pSong->patternLines[m_wndView.editPosition],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			Global::_pSong->patternLines[m_wndView.editPosition]=Global::pConfig->defaultPatLines;
+		}
+
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 

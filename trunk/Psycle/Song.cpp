@@ -327,7 +327,14 @@ void Song::Reset(void)
 	for (c=0; c<MAX_PATTERNS; c++)
 	{
 		// All pattern reset
-		patternLines[c]=64;
+		if (Global::pConfig)
+		{
+			patternLines[c]=Global::pConfig->defaultPatLines;
+		}
+		else
+		{
+			patternLines[c]=64;
+		}
 		sprintf(patternName[c],"Untitled"); 
 	}
 	_trackArmedCount = 0;
