@@ -543,11 +543,6 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 	if (tmp1 && tmp2)
 	{
 		m_pParent->AddMacViewUndo();
-		Global::_pSong->_pMachine[one] = tmp2;
-		Global::_pSong->_pMachine[two] = tmp1;
-		
-		tmp1->_macIndex = two;
-		tmp2->_macIndex = one;
 		
 		// gotta exchange positions
 		
@@ -561,19 +556,21 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 		
 		// gotta exchange all connections
 		
-		temp = tmp1->_numOutputs;
-		tmp1->_numOutputs = tmp2->_numOutputs;
-		tmp2->_numOutputs = temp;
-		
-		temp = tmp1->_numInputs;
-		tmp1->_numInputs = tmp2->_numInputs;
-		tmp2->_numInputs = temp;
-		
-		
-		float tmp1vols[MAX_CONNECTIONS],tmp2vols[MAX_CONNECTIONS];
+		float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
 		
 		for (int i = 0; i < MAX_CONNECTIONS; i++)
 		{
+			if (tmp1->_connection[i])
+			{
+				tmp1->GetDestWireVolume(one,i,tmp1ovol[i]); //OutputConVol
+			}
+			if (tmp2->_connection[i])
+			{
+				tmp2->GetDestWireVolume(two,i,tmp2ovol[i]); //OutputConVol
+			}				
+			tmp1->GetWireVolume(i,tmp1ivol[i]); // InputConVol
+			tmp2->GetWireVolume(i,tmp2ivol[i]); // InputConVol
+
 			temp = tmp1->_outputMachines[i];
 			tmp1->_outputMachines[i] = tmp2->_outputMachines[i];
 			tmp2->_outputMachines[i] = temp;
@@ -590,30 +587,44 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 			tmp1->_inputCon[i] = tmp2->_inputCon[i];
 			tmp2->_inputCon[i] = btemp;
 			
-			tmp1->GetWireVolume(i,tmp1vols[i]);
-			tmp2->GetWireVolume(i,tmp2vols[i]);
 		}
+		
+		temp = tmp1->_numOutputs;
+		tmp1->_numOutputs = tmp2->_numOutputs;
+		tmp2->_numOutputs = temp;
+		
+		temp = tmp1->_numInputs;
+		tmp1->_numInputs = tmp2->_numInputs;
+		tmp2->_numInputs = temp;
+
+		Global::_pSong->_pMachine[one] = tmp2;
+		Global::_pSong->_pMachine[two] = tmp1;
+		
+		tmp1->_macIndex = two;
+		tmp2->_macIndex = one;
+
 		for (i = 0; i < MAX_CONNECTIONS; i++)
 		{
+			if (tmp1->_inputCon[i])
+			{
+				tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
+			}
+//			else tmp1->SetWireVolume(i,0);
+			if (tmp2->_inputCon[i])
+			{
+				tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
+			}
+//			else tmp2->SetWireVolume(i,0);
+
 			if (tmp1->_connection[i])
 			{
-				Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2vols[i]);
+				Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,tmp1->FindOutputWire(tmp1->_outputMachines[i]),tmp2ovol[i]);
 			}
 			if (tmp2->_connection[i])
 			{
-				Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1vols[i]);
+				Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,tmp2->FindOutputWire(tmp2->_outputMachines[i]),tmp1ovol[i]);
 			}
 			
-			if (tmp1->_inputCon[i])
-			{
-				tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2vols[i]);
-			}
-			else tmp1->SetWireVolume(i,0);
-			if (tmp2->_inputCon[i])
-			{
-				tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1vols[i]);
-			}
-			else tmp2->SetWireVolume(i,0);
 		}
 		return;
 	}

@@ -62,6 +62,7 @@ VSTPlugin::~VSTPlugin()
 
 int VSTPlugin::Instance(char *dllname,bool overwriteName)
 {
+	char errtxt[256];
 	_pEffect=NULL;
 	instantiated=false;
 
@@ -77,8 +78,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		main = (PVSTMAIN)GetProcAddress(h_dll,"main");
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in GetProcAddress: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 	if(!main)
@@ -92,8 +95,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		_pEffect=main((audioMasterCallback)&AudioMaster);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in call main: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -118,8 +123,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetSampleRate: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -129,8 +136,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetBlockSize: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -144,12 +153,13 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in effOpen: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
-
 
 
 // 5 :     Host to Plug, setSpeakerArrangement  returned : false 
@@ -162,8 +172,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch(effSetSpeakerArrangement,0,(long)&VSTsa,&VSTsa,0);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetSpeakerArrangement: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -178,8 +190,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetSampleRate(2): %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -190,8 +204,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetBlockSize(2): %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -201,8 +217,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch(effSetSpeakerArrangement,0,(long)&VSTsa,&VSTsa,0);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetSpeakerArrangement(2): %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -216,8 +234,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetSamplerate(3): %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -226,8 +246,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetBlockSize(3): %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -239,8 +261,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		program = Dispatch( effGetProgram  ,  0, 0, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in GetProgram: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -250,8 +274,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		program = Dispatch( effGetProgram  ,  0, 0, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in GetProgram: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -262,8 +288,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		_version = Dispatch(effGetVstVersion , 0 , 0 , NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in GetVstVersion: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -279,8 +307,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in SetProgram: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -289,8 +319,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in MainsChanged: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -324,8 +356,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 			strcpy(_sVendorName, "Unknown vendor");
 		}
 	}
-	catch (...)
+	catch (char *error)
 	{
+		sprintf(errtxt,"Exception in GetVendorString: %s",error);
+		MessageBox(NULL,errtxt,dllname,NULL);
 		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
@@ -876,13 +910,53 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 
 	case audioMasterGetTime:
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
+
+/*		kVstTransportChanged 		= 1,		// Indicates that Playing, Cycle or Recording has changed
+		kVstTransportPlaying 		= 1 << 1,
+		kVstTransportCycleActive	= 1 << 2,
+		kVstTransportRecording		= 1 << 3,
+
+		kVstAutomationWriting		= 1 << 6,
+		kVstAutomationReading		= 1 << 7,
+
+		// flags which indicate which of the fields in this VstTimeInfo
+		//  are valid; samplePos and sampleRate are always valid
+		kVstNanosValid  			= 1 << 8,
+			double nanoSeconds;			// system time
+		kVstPpqPosValid 			= 1 << 9,
+			double ppqPos;				// 1 ppq
+		kVstTempoValid				= 1 << 10,
+			double tempo;				// in bpm
+		kVstBarsValid				= 1 << 11,
+			double barStartPos;			// last bar start, in 1 ppq
+		kVstCyclePosValid			= 1 << 12,	// start and end
+			double cycleStartPos;		// 1 ppq
+			double cycleEndPos;			// 1 ppq
+		kVstTimeSigValid 			= 1 << 13,
+			long timeSigNumerator;		// time signature
+			long timeSigDenominator;
+		kVstSmpteValid				= 1 << 14,
+			long smpteOffset;
+			long smpteFrameRate;		// 0:24, 1:25, 2:29.97, 3:30, 4:29.97 df, 5:30 df
+		kVstClockValid 				= 1 << 15
+			long samplesToNextClock;	// midi clock resolution (24 ppq), can be negative
+*/
+
+		if ( (Global::pPlayer)->_playing) 
+		{
+			_timeInfo.flags |= kVstTransportPlaying;
+			if ( ((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount == 0)
+			{
+				_timeInfo.flags |= kVstTransportChanged;
+			}
+		}
+		
 		if ( Global::_pSong->_pMachine[MASTER_INDEX] ) // This happens on song loading with new fileformat.
 		{
 			_timeInfo.samplePos = ((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount;
 		}
 		else _timeInfo.samplePos = 0;
 		
-		if ( (Global::pPlayer)->_playing) _timeInfo.flags |= kVstTransportPlaying;
 		
 #if defined(_WINAMP_PLUGIN_)
 		_timeInfo.sampleRate = Global::pConfig->_samplesPerSec;
@@ -901,14 +975,17 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 		{
 			_timeInfo.flags |= kVstPpqPosValid;
 
-// commented code ensures correct beat indication, but doesn't work when stopped, as opposed to the other one.
-
-/*			const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb*4))/Global::pPlayer->tpb;
-			const float linestep = (((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining))/Global::_pSong->SamplesPerTick)/Global::pPlayer->tpb;
-			_timeInfo.ppqPos = currentline+linestep;
-*/
-			_timeInfo.ppqPos = (((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount / _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60 );
-			
+// Code in "else" should work always, but looks like it causes problems.
+			if ( (Global::pPlayer)->_playing) 
+			{
+				const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb*4))/Global::pPlayer->tpb;
+				const float linestep = (((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining))/Global::_pSong->SamplesPerTick)/Global::pPlayer->tpb;
+				_timeInfo.ppqPos = currentline+linestep;
+			}
+			else
+			{
+				_timeInfo.ppqPos = (((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount / _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60 );
+			}
 		}
 		if (value & kVstTempoValid)
 		{

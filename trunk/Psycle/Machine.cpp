@@ -214,7 +214,7 @@ int Machine::FindOutputWire(int macIndex)
 	return -1;
 }
 
-bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,int value)
+bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,float value)
 {
 	// Get reference to the destination machine
 	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
@@ -222,19 +222,19 @@ bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,int value)
 
 	if (_pDstMachine)
 	{
-		if ( value == 255 ) value =256; // FF = 255
-		const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
+//		if ( value == 255 ) value =256; // FF = 255
+//		const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
 		
 		int c;
 		if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 		{
-			_pDstMachine->SetWireVolume(c,invol);
+			_pDstMachine->SetWireVolume(c,value);
 			return true;
 		}
 	}
 	return false;
 }
-bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,int &value)
+bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,float &value)
 {
 	// Get reference to the destination machine
 	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
@@ -245,9 +245,9 @@ bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,int &value)
 		int c;
 		if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 		{
-			float val;
-			_pDstMachine->GetWireVolume(c,val);
-			value = f2i(val*256.0f);
+//			float val;
+			_pDstMachine->GetWireVolume(c,value);
+			//value = f2i(val*256.0f);
 			return true;
 		}
 	}
@@ -687,6 +687,7 @@ float* Master::_pMasterSamples = NULL;
 Master::Master(int index)
 {
 	_macIndex = index;
+	sampleCount = 0;
 	_numPars = 0;
 	_outDry = 256;
 	decreaseOnClip=false;

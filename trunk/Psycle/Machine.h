@@ -117,12 +117,12 @@ public:
 
 	virtual void Init(void);
 	virtual void SetPan(int newpan);
-	virtual bool SetDestWireVolume(int srcIndex, int WireIndex,int value);
+	virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
 	virtual void SetWireVolume(int wireIndex,float value)
 	{
 		_inputConVol[wireIndex] = value / _wireMultiplier[wireIndex];
 	}
-	virtual bool GetDestWireVolume(int srcIndex, int WireIndex,int &value);
+	virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
 	virtual void GetWireVolume(int wireIndex, float &value)
 	{
 		value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex];

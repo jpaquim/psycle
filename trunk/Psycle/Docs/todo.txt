@@ -129,6 +129,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	Mystic - import .mp3 format for samples
 +	Easier way to load Samples.
 +	Toolbar for the Wave Editor.
++       Wave-Editor Paste at the end (or any other part) of the current sample.
 
 * GUI (pattern):
 ----------------
