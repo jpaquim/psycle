@@ -2886,12 +2886,12 @@ bool Song::CloneMac(int src,int dst)
 		xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
 		ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 	}
+	x=_pMachine[dst]->_x+32;
+	y=_pMachine[dst]->_y+ys+8;
 
 	bool bCovered = TRUE;
 	while (bCovered)
 	{
-		x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
-		y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);
 		bCovered = FALSE;
 		for (int i=0; i < MAX_MACHINES; i++)
 		{
@@ -2904,6 +2904,8 @@ bool Song::CloneMac(int src,int dst)
 					{
 						bCovered = TRUE;
 						i = MAX_MACHINES;
+						x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
+						y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);
 					}
 				}
 			}
@@ -2935,6 +2937,21 @@ bool Song::CloneMac(int src,int dst)
 	int number = 1;
 	char buf[sizeof(_pMachine[dst]->_editName)+4];
 	strcpy (buf,_pMachine[dst]->_editName);
+	char* ps = strrchr(buf,' ');
+	if (ps)
+	{
+		number = atoi(ps);
+		if (number < 1)
+		{
+			number =1;
+		}
+		else
+		{
+			ps[0] = 0;
+			ps = strchr(_pMachine[dst]->_editName,' ');
+			ps[0] = 0;
+		}
+	}
 
 	for (i = 0; i < MAX_MACHINES-1; i++)
 	{
