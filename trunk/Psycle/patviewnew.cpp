@@ -2368,9 +2368,8 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 			}
 		}
 
-		unsigned char *patOffset = _pSong->pPatternData +
-									_pSong->playOrder[editPosition]*MULTIPLY2 +
-									(linecount*MULTIPLY) + 	(tstart+tOff)*5;
+		unsigned char *patOffset = _ppattern() +
+									(linecount*MULTIPLY) + 	(tstart+tOff)*EVENT_SIZE;
 
 		int xOffset= XOFFSET+(tstart*ROWWIDTH);
 

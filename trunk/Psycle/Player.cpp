@@ -89,12 +89,12 @@ void Player::ExecuteLine(void)
 
 	_lineChanged = true;
 
-	unsigned char* const plineOffset = pSong->pPatternData + _playPattern*MULTIPLY2+_lineCounter*MULTIPLY;
+	unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
 	// Initial Loop. Check for Tracker Commands.
 	for (int track=0; track<pSong->SONGTRACKS; track++)
 	{
-		PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*5);
+		PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
 		
 		if ( pEntry->_note < cdefTweakM || pEntry->_note == 255 ) // Check for Global Command.
 		{

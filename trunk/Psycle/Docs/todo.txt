@@ -19,8 +19,10 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
++ <bdzld> poop: can you make mcm interpolated?
 + the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
 
+*** sometimes psycle changes the length of a block for no reason
 * The play block feature doesn't work.
 * When 'cursor always down' is enabled u can't insert values on the last row
 
@@ -66,7 +68,7 @@ X low priority
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still
 	<YanniS> C:\Audio\Psycle\Skinss\
-	[ not recreated ]
+	[ not recreated * yannis says it is still happening]
 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 

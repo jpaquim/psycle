@@ -107,7 +107,7 @@ public:
 	unsigned char busMachine[MAX_BUSES];
 
 	// Pattern data
-	unsigned char pPatternData[MAX_PATTERN_BUFFER_LEN];
+	unsigned char * ppPatternData[MAX_PATTERNS];
 
 	int playLength;
 	unsigned char playOrder[MAX_SONG_POSITIONS];
@@ -195,10 +195,46 @@ public:
 	int PW_Phase;
 	int PW_Stage;
 	int PW_Length;
+
+	inline unsigned char * _ppattern(int ps);
+	inline unsigned char * _ptrack(int ps, int track);
+	inline unsigned char * _ptrackline(int ps, int track, int line);
+
+	unsigned char * CreateNewPattern(int ps);
+	void RemovePattern(int ps);
+
 #endif // ndef _WINAMP_PLUGIN_
 
 protected:
 
 };
+
+
+inline unsigned char * Song::_ppattern(int ps)
+{
+	if (!ppPatternData[ps])
+	{
+		return CreateNewPattern(ps);
+	}
+	return ppPatternData[ps];
+}
+
+inline unsigned char * Song::_ptrack(int ps, int track)
+{
+	if (!ppPatternData[ps])
+	{
+		return CreateNewPattern(ps);
+	}
+	return ppPatternData[ps] + (track*EVENT_SIZE);
+}	
+
+inline unsigned char * Song::_ptrackline(int ps, int track, int line)
+{
+	if (!ppPatternData[ps])
+	{
+		return CreateNewPattern(ps);
+	}
+	return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+}
 
 #endif

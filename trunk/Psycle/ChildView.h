@@ -386,11 +386,16 @@ private:
 	void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
 
 	inline int _ps();
-	inline unsigned char * _offset(int ps);
-	inline unsigned char * _offset(int ps, int track);
-	inline unsigned char * _toffset(int ps);
-	inline unsigned char * _toffset(int ps, int track, int line);
+	inline unsigned char * _ptrack(int ps, int track);
+	inline unsigned char * _ptrack(int ps);
+	inline unsigned char * _ptrack();
+	inline unsigned char * _ptrackline(int ps, int track, int line);
+	inline unsigned char * _ptrackline(int ps);
+	inline unsigned char * _ptrackline();
+	inline unsigned char * _ppattern(int ps);
+	inline unsigned char * _ppattern();
 	inline int _xtoCol(int pointpos);
+
 
 private:
 	// GDI Stuff
@@ -834,27 +839,56 @@ inline void CChildView::TXT(CDC *devc,char *txt, int x,int y,int w,int h)
 }
 
 // song data
+
 inline int CChildView::_ps()
 {
 	// retrieves the pattern index
 	return _pSong->playOrder[editPosition];
 }
-inline unsigned char * CChildView::_offset(int ps, int track)
+
+// ALWAYS USE THESE MACROS BECAUSE THEY TEST TO SEE IF THE PATTERN HAS BEEN ALLOCATED!
+// if you don't you might get an exception!
+
+inline unsigned char * CChildView::_ptrack(int ps, int track)
 {
-	return _pSong->pPatternData + (ps*MULTIPLY2) + (track*5);
+	return _pSong->_ptrack(ps,track);
 }	
-inline unsigned char * CChildView::_offset(int ps)
+
+inline unsigned char * CChildView::_ptrack(int ps)
 {
-	return _pSong->pPatternData + (ps*MULTIPLY2) + (editcur.track*5);
+	return _pSong->_ptrack(ps,editcur.track);
 }	
-inline unsigned char * CChildView::_toffset(int ps)
+
+inline unsigned char * CChildView::_ptrack()
 {
-	return _offset(ps) + (editcur.line*MULTIPLY);
-}
-inline unsigned char * CChildView::_toffset(int ps, int track, int line)
+	return _pSong->_ptrack(_ps(),editcur.track);
+}	
+
+inline unsigned char * CChildView::_ptrackline(int ps, int track, int line)
 {
-	return _offset(ps,track) + (line*MULTIPLY);
+	return _pSong->_ptrackline(ps,track,line);
 }
+
+inline unsigned char * CChildView::_ptrackline(int ps)
+{
+	return _pSong->_ptrackline(ps,editcur.track,editcur.line);
+}
+
+inline unsigned char * CChildView::_ptrackline()
+{
+	return _pSong->_ptrackline(_ps(),editcur.track,editcur.line);
+}
+
+inline unsigned char * CChildView::_ppattern(int ps)
+{
+	return _pSong->_ppattern(ps);
+}
+
+inline unsigned char * CChildView::_ppattern()
+{
+	return _pSong->_ppattern(_ps());
+}
+
 
 inline int CChildView::_xtoCol(int pointpos)
 {

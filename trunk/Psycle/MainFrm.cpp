@@ -1936,7 +1936,7 @@ void CMainFrame::OnSeqduplicate()
 		
 		// now we copy the data
 		m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		memcpy(&_pSong->pPatternData[MULTIPLY2*newpat],&_pSong->pPatternData[MULTIPLY2*oldpat],MULTIPLY2);
+		memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
 		// now we copy the length
 		if (_pSong->patternLines[newpat] != _pSong->patternLines[oldpat])
 		{
@@ -2090,13 +2090,10 @@ void CMainFrame::OnSeqclr()
 			_pSong->playOrder[c]=0;
 		}
 		// clear pattern data
-		unsigned char *soffset = _pSong->pPatternData;
-		unsigned char blank[5]={255,255,255,0,0};
-		for	(c=0; c<MAX_TRACKS*MAX_LINES*MAX_PATTERNS; c+=5)
-		{
-			memcpy(soffset,blank,sizeof(char)*5);
-			soffset+=5;
-		}
+		_pSong->DeleteAllPatterns();
+		// init a pattern for #0
+		_pSong->_ppattern(0);
+
 		m_wndView.editPosition=0;
 		_pSong->playLength=1;
 		UpdatePlayOrder(true);
@@ -2141,7 +2138,7 @@ void CMainFrame::OnSeqsort()
 
 	int patl; // first one is initial one, next one is temp one
 	char patn[32]; // ""
-	unsigned char pData[MULTIPLY2]; // ""
+	unsigned char * pData; // ""
 
 
 	int idx=0;
@@ -2150,7 +2147,7 @@ void CMainFrame::OnSeqsort()
 	{
 		if ( newtoold[i] != i ) // check if this place belongs to another pattern
 		{
-			memcpy(pData ,&_pSong->pPatternData[MULTIPLY2*i], MULTIPLY2); // Store pattern
+			pData = _pSong->ppPatternData[i];
 			memcpy(&patl,&_pSong->patternLines[i],sizeof(int));
 			memcpy(patn,&_pSong->patternName[i],sizeof(char)*32);
 
@@ -2159,7 +2156,7 @@ void CMainFrame::OnSeqsort()
 			{
 				idx2 = newtoold[idx]; // get pattern that goes here and move.
 
-				memcpy(&_pSong->pPatternData[MULTIPLY2*idx],&_pSong->pPatternData[MULTIPLY2*idx2],MULTIPLY2);
+				_pSong->ppPatternData[idx] = _pSong->ppPatternData[idx2];
 				memcpy(&_pSong->patternLines[idx],&_pSong->patternLines[idx2],sizeof(int));
 				memcpy(&_pSong->patternName[idx],&_pSong->patternName[idx2],sizeof(char)*32);
 				
@@ -2168,7 +2165,7 @@ void CMainFrame::OnSeqsort()
 			}
 
 			// Put pattern back.
-			memcpy(&_pSong->pPatternData[MULTIPLY2*idx],pData,MULTIPLY2);
+			_pSong->ppPatternData[idx] = pData;
 			memcpy(&_pSong->patternLines[idx],&patl,sizeof(int));
 			memcpy(_pSong->patternName[idx],patn,sizeof(char)*32);
 
@@ -2314,7 +2311,7 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	{
 		int pattern = _pSong->playOrder[i];
 		// this should parse each line for ffxx commands if you want it to be truly accurate
-		unsigned char* const plineOffset = _pSong->pPatternData + pattern*MULTIPLY2;
+		unsigned char* const plineOffset = _pSong->_ppattern(pattern);
 		for (int l = 0; l < _pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
 		{
 			for (int t = 0; t < _pSong->SONGTRACKS*5; t+=5)
@@ -2518,7 +2515,7 @@ BOOL CMainFrame::StatusBarIdleText()
 	{
 		if ((m_wndView.viewMode==VMPattern)	&& (!Global::pPlayer->_playing))
 		{
-			unsigned char *toffset=_pSong->pPatternData+(_pSong->playOrder[m_wndView.editPosition]*MULTIPLY2)+(m_wndView.editcur.line*MULTIPLY)+(m_wndView.editcur.track*5);
+			unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 			int machine = 255;
 			if (toffset[2]<MAX_BUSES)
 			{
