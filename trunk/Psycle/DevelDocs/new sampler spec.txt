@@ -1,4 +1,5 @@
 
+
 =================================
 
 Instrument - global params for entire instrument:
@@ -105,3 +106,6 @@ just use WAV format
 
 ===================================
 
+
+re: envelope gui:
+<_sue_> it would be very nice if you could set the size of the "place" where you draw the points.....like you could set it to 64 ticks/lines or something....

@@ -501,7 +501,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				for (i = 0; i < scope_spec_bands; i++)
 				{
 //					int aml = 128-f2i((sqrtf(ampr[i]*16384)));
-					int aml = 128-f2i(sqrtf(ampr[i]));
+					int aml = 128-f2i(sqrtf(ampl[i]));
 					if (aml < 0)
 					{
 						aml = 0;
