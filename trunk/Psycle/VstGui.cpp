@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CVstGui, CFrameWnd)
 	ON_WM_TIMER()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
+	ON_WM_LBUTTONDOWN()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -100,4 +101,11 @@ void CVstGui::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	const int outnote = cmd.GetNote();
 	Global::pInputHandler->StopNote(outnote,true,_pMachine);
 	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+void CVstGui::OnLButtonDown(UINT nFlags, CPoint point) 
+{
+	this->SetFocus();
+	
+	CFrameWnd::OnLButtonDown(nFlags, point);
 }
