@@ -227,6 +227,7 @@ public:
 	void patPaste();
 	void patMixPaste();
 	void patCut();
+	void patDelete();
 	void patTranspose(int trp);
 	void HalveLength();
 	void DoubleLength();
@@ -239,6 +240,7 @@ public:
 	void EndBlock(int track,int line, int col);
 	void CopyBlock(bool cutit);
 	void PasteBlock(int tx,int lx,bool mix);
+	void DeleteBlock();
 	void BlockUnmark(void);
     void SaveBlock(FILE* file);
 	void LoadBlock(FILE* file);
@@ -487,6 +489,8 @@ public:
 	afx_msg void OnUpdatePopPaste(CCmdUI* pCmdUI);
 	afx_msg void OnPopMixpaste();
 	afx_msg void OnUpdatePopMixpaste(CCmdUI* pCmdUI);
+	afx_msg void OnPopDelete();
+	afx_msg void OnUpdatePopDelete(CCmdUI* pCmdUI);
 	afx_msg void OnPopInterpolate();
 	afx_msg void OnUpdatePopInterpolate(CCmdUI* pCmdUI);
 	afx_msg void OnPopChangegenerator();

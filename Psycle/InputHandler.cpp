@@ -391,6 +391,10 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->patPaste();
 		break;
 
+	case cdefPatternDelete:
+		pChildView->patDelete();
+		break;
+
 	case cdefPatternTrackMute:
 		pChildView->patTrackMute();
 		break;
@@ -658,6 +662,10 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 	case cdefBlockMix:
 		pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,true);
+		break;
+
+	case cdefBlockDelete:
+		pChildView->DeleteBlock();
 		break;
 
 	case cdefBlockInterpolate:
@@ -1036,6 +1044,7 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefPatternPaste,VK_F5,MOD_C);
 	SetCmd(cdefPatternMixPaste,VK_F5,MOD_C|MOD_S);
 	SetCmd(cdefPatternTrackMute,VK_F9,MOD_C);
+	SetCmd(cdefPatternDelete,VK_F3,MOD_C|MOD_S);
 
 	SetCmd(cdefRowInsert,VK_INSERT,MOD_E);
 	SetCmd(cdefRowDelete,VK_BACK,0);
