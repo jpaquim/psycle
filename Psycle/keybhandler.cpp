@@ -493,7 +493,11 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		{
 			entry->_inst = _pSong->auxcolSelected;
 		}
-
+		if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+		{
+			entry->_inst = _pSong->auxcolSelected;
+		}
+		
 		if ( note < 120)
 		{
 			tmac->Tick(editcur.track, entry);

@@ -324,6 +324,7 @@ void Song::Reset(void)
 		_machineActive[c] = false; // All machines reset
 		_pMachines[c] = NULL;
 	}
+#if !defined(_WINAMP_PLUGIN_)
 	for (c=0; c<MAX_PATTERNS; c++)
 	{
 		// All pattern reset
@@ -337,6 +338,7 @@ void Song::Reset(void)
 		}
 		sprintf(patternName[c],"Untitled"); 
 	}
+#endif // _WINAMP_PLUGIN
 	_trackArmedCount = 0;
 	for(c=0; c<MAX_TRACKS; c++)
 	{
