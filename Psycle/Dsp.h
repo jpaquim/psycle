@@ -113,9 +113,9 @@ public:
 		return vol;
 	}
 	*/
-	static inline int GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+	static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		return f2i(GetMaxVSTVol(pSamplesL,pSamplesR,numSamples)); // F2I is for doubles, f2i is for floats
+		return GetMaxVSTVol(pSamplesL,pSamplesR,numSamples); // F2I is for doubles, f2i is for floats
 	}
 	static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 	{

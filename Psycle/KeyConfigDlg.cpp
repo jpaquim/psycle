@@ -33,6 +33,9 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CKeyConfigDlg)
+	DDX_Control(pDX, IDC_AUTOSAVE_MINS_SPIN, m_autosave_spin);
+	DDX_Control(pDX, IDC_AUTOSAVE_MINS, m_autosave_mins);
+	DDX_Control(pDX, IDC_AUTOSAVE_CURRENT_SONG, m_autosave);
 	DDX_Control(pDX, IDC_FILE_SAVE_REMINDERS, m_save_reminders);
 	DDX_Control(pDX, IDC_SHOW_INFO_ON_LOAD, m_show_info);
 	DDX_Control(pDX, IDC_SHIFTARROWS, m_cmdShiftArrows);
@@ -99,7 +102,8 @@ BOOL CKeyConfigDlg::OnInitDialog()
 
 	m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
 	m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
-
+	m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
+	
 	// prevent ALT in hotkey	
 
 //	TRACE("%d %d %d %d %d %d\n",HKCOMB_A,HKCOMB_C,HKCOMB_S,HKCOMB_CA,HKCOMB_SA,HKCOMB_SCA);
@@ -114,16 +118,19 @@ BOOL CKeyConfigDlg::OnInitDialog()
 	m_cursordown.SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
 
 	m_spinlines.SetRange(1,MAX_LINES);
-
+	m_autosave_spin.SetRange(1,60);
+	
 	char buffer[16];
 	itoa(Global::pConfig->defaultPatLines,buffer,10);
 	m_numlines.SetWindowText(buffer);
-
+	itoa(Global::pConfig->autosaveSongTime,buffer,10);
+	m_autosave_mins.SetWindowText(buffer);
+	
 	UDACCEL acc;
 	acc.nSec = 4;
 	acc.nInc = 16;
 	m_spinlines.SetAccel(1, &acc);
-
+	
 	bInit = TRUE;
 	OnUpdateNumLines();
 
@@ -242,7 +249,8 @@ void CKeyConfigDlg::OnOK()
 
 	Global::pConfig->bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
 	Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
-
+	Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
+	
 	char buffer[32];
 	m_numlines.GetWindowText(buffer,16);
 	
@@ -255,6 +263,14 @@ void CKeyConfigDlg::OnOK()
 
 	Global::pConfig->defaultPatLines=nlines;
 
+	m_autosave_mins.GetWindowText(buffer,16);
+	nlines = atoi(buffer);
+	if (nlines < 1)
+	{ nlines = 1; }
+	else if (nlines > 60)
+	{ nlines = 60; }
+	Global::pConfig->autosaveSongTime = nlines;
+	
 	CDialog::OnOK();
 }
 

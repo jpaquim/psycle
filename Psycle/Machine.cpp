@@ -50,7 +50,7 @@ Machine::Machine()
 	
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
-	_volumeCounter = 0;
+	_volumeCounter = 0.0f;
 	_volumeDisplay = 0;
 	_volumeMaxDisplay = 0;
 	_volumeMaxCounterLife = 0;
@@ -289,6 +289,15 @@ void Machine::Work(int numSamples)
 			if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 			{ 
 				pInMachine->Work(numSamples);
+/*				This could be a different Undenormalize funtion, using the already calculated
+				"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
+				correctly.
+				if ( pInMachine->_volumeCounter*_inputConVol[i] < 0.004f ) //this gives for 24bit depth.
+				{
+					memset(pInMachine->_pSamplesL,0,numSamples*sizeof(float));
+					memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
+				}
+*/
 				pInMachine->_waitingForSound=false;
 			}
 			if ( !pInMachine->_stopped ) _stopped=false;
@@ -307,7 +316,15 @@ void Machine::Work(int numSamples)
 			}
 		}
 	}
+#if defined( _WINAMP_PLUGIN_)
 	Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+#else
+	CPUCOST_INIT(wcost);
+	Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+	CPUCOST_CALC(wcost,numSamples);
+	_wireCost+=wcost;
+#endif // _WINAMP_PLUGIN_
+				
 }
 
 bool Machine::Load(
@@ -435,8 +452,8 @@ void Dummy::Work(int numSamples)
 	if ( Global::pConfig->autoStopMachines )
 	{
 //		Machine::SetVolumeCounterAccurate(numSamples);
-		if (_volumeCounter < 8)	{
-			_volumeCounter = 0;
+		if (_volumeCounter < 8.0f)	{
+			_volumeCounter = 0.0f;
 			_volumeDisplay = 0;
 			_stopped = true;
 		}
@@ -602,8 +619,8 @@ void Gainer::Work(
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
@@ -764,8 +781,8 @@ void Sine::Work(
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
@@ -962,8 +979,8 @@ void Distortion::Work(
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
@@ -1261,8 +1278,8 @@ void Delay::Work(int numSamples)
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
@@ -1630,8 +1647,8 @@ void Flanger::Work(
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
@@ -1935,8 +1952,8 @@ void Filter2p::Work(
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}

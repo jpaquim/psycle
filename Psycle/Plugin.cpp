@@ -255,9 +255,9 @@ void Plugin::Work(int numSamples)
 			Machine::SetVolumeCounter(numSamples);
 			if ( Global::pConfig->autoStopMachines )
 			{
-				if (_volumeCounter < 8)	
+				if (_volumeCounter < 8.0f)
 				{
-					_volumeCounter = 0;
+					_volumeCounter = 0.0f;
 					_volumeDisplay = 0;
 					_stopped = true;
 				}
