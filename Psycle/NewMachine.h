@@ -12,6 +12,7 @@
 
 #define MAX_BROWSER_NODES 72
 #define MAX_BROWSER_PLUGINS 512
+#define MAX_BAD_PLUGINS 256
 
 class PluginInfo
 {
@@ -22,6 +23,7 @@ public:
 	char name[64];
 	char desc[64];
 	char version[16];
+	FILETIME FileTime;
 
 	PluginInfo()
 	{
@@ -124,13 +126,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	static int _numPlugins;
+	static int _numBadPlugins;
+	static char *_BadPluginPath[MAX_BAD_PLUGINS];
+	static FILETIME _BadPluginFileTime[MAX_BAD_PLUGINS];
 	static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 	static int _numDirs;
 	static char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
 
-	static void FindPluginsInDir(int& currentPlugsCount,CString findDir,MachineType type);
-	static bool LoadCacheFile(int& currentPlugsCount);
-	static bool SaveCacheFile(int numPlugins);
+	static void FindPluginsInDir(int& currentPlugsCount,int &currentBadPlugsCount,CString findDir,MachineType type);
+	static bool LoadCacheFile(int& currentPlugsCount, int &currentBadPlugsCount);
+	static bool SaveCacheFile();
 	void UpdateList(bool bInit = false);
 };
 

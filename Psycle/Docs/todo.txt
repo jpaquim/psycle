@@ -23,6 +23,8 @@ rough bug count: ~60, many aren't really bugs though.
 
 + undos for machine and wave edit?
 
+** need save file? reminder on open file
+
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still
@@ -288,8 +290,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	[ DDE ? mmmm... ]
 **	<lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
 	combinations don't work either, like ctrl+pageup etc.
-**	<[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
-	the info when new one.
 **	should save wire dialog settings
 	[ are you sure? ]
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
