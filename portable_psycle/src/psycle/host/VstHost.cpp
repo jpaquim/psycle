@@ -27,130 +27,77 @@ namespace psycle
 			{
 				namespace dispatch_errors
 				{
-					std::string eff_opcode_to_string(long opcode) throw() {
-						#ifdef I
-							#error "macro clash"
-						#else
-							#define I(OPCODE) case eff##OPCODE: return "eff"#OPCODE;
-						
+					std::string eff_opcode_to_string(long opcode) throw()
+					{
 						switch(opcode)
 						{
+							#if defined $
+								#error "macro clash"
+							#endif
+							#define $(OPCODE) case eff##OPCODE: return "eff"#OPCODE;
+
 							// from AEffect.h
-							I(Open)
-							I(Close)
-							I(SetProgram)
-							I(GetProgram)
-							I(SetProgramName)
-							I(GetProgramName)
-							I(GetParamLabel)
-							I(GetParamDisplay)
-							I(GetParamName)
-							I(GetVu)
+							$(Open) $(Close)
+							$(SetProgram) $(GetProgram)
+							$(SetProgramName) $(GetProgramName)
+							$(GetParamLabel) $(GetParamDisplay) $(GetParamName)
+							$(GetVu)
 							
 							// system
-							I(SetSampleRate)
-							I(SetBlockSize)
-							I(MainsChanged)
+							$(SetSampleRate) $(SetBlockSize) $(MainsChanged)
 	
 							// editor
-							I(EditGetRect)
-							I(EditOpen)
-							I(EditClose)
-							I(EditDraw)
-							I(EditMouse)
-							I(EditKey)
-							I(EditIdle)
-							I(EditTop)
-							I(EditSleep)
+							$(EditGetRect) $(EditOpen) $(EditClose) $(EditDraw) $(EditMouse) $(EditKey) $(EditIdle) $(EditTop) $(EditSleep)
 	
 							// other
-							I(Identify)
-							I(GetChunk)
-							I(SetChunk)
+							$(Identify) $(GetChunk) $(SetChunk)
 
 							// from aeffectx.h
 
 							// VstEvents
-							I(ProcessEvents)
+							$(ProcessEvents)
 
 							// parameters and programs
-							I(CanBeAutomated)
-							I(String2Parameter)
-							I(GetNumProgramCategories)
-							I(GetProgramNameIndexed)
-							I(CopyProgram)
+							$(CanBeAutomated) $(String2Parameter) $(GetNumProgramCategories) $(GetProgramNameIndexed) $(CopyProgram)
 
 							// connections, configuration
-							I(ConnectInput)
-							I(ConnectOutput)
-							I(GetInputProperties)
-							I(GetOutputProperties)
-							I(GetPlugCategory)
+							$(ConnectInput) $(ConnectOutput) $(GetInputProperties) $(GetOutputProperties) $(GetPlugCategory)
 
 							// realtime
-							I(GetCurrentPosition)
-							I(GetDestinationBuffer)
+							$(GetCurrentPosition) $(GetDestinationBuffer)
 
 							// offline
-							I(OfflineNotify)
-							I(OfflinePrepare)
-							I(OfflineRun)
+							$(OfflineNotify) $(OfflinePrepare) $(OfflineRun)
 
 							// other
-							I(ProcessVarIo)
-							I(SetSpeakerArrangement)
-							I(SetBlockSizeAndSampleRate)
-							I(SetBypass)
-							I(GetEffectName)
-							I(GetErrorText)
-							I(GetVendorString)
-							I(GetProductString)
-							I(GetVendorVersion)
-							I(VendorSpecific)
-							I(CanDo)
-							I(GetTailSize)
-							I(Idle)
+							$(ProcessVarIo) $(SetSpeakerArrangement) $(SetBlockSizeAndSampleRate) $(SetBypass)
+							$(GetEffectName) $(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
+							$(CanDo) $(GetTailSize) $(Idle) $(GetErrorText)
 							
 							// gui
-							I(GetIcon)
-							I(SetViewPosition)
+							$(GetIcon) $(SetViewPosition)
 
 							// and...
-							I(GetParameterProperties)
-							I(KeysRequired)
-							I(GetVstVersion)
+							$(GetParameterProperties) $(KeysRequired) $(GetVstVersion)
 							
 							// vst 2.1
-							I(EditKeyDown)
-							I(EditKeyUp)
-							I(SetEditKnobMode)
-							I(GetMidiProgramName)
-							I(GetCurrentMidiProgram)
-							I(GetMidiProgramCategory)
-							I(HasMidiProgramsChanged)
-							I(GetMidiKeyName)
-							I(BeginSetProgram)
-							I(EndSetProgram)
+							$(EditKeyDown) $(EditKeyUp) $(SetEditKnobMode) $(GetMidiKeyName)
+							$(BeginSetProgram) $(EndSetProgram)
+							$(GetMidiProgramName) $(GetCurrentMidiProgram) $(GetMidiProgramCategory) $(HasMidiProgramsChanged)
 
 							// vst2.3
-							I(GetSpeakerArrangement)
-							I(ShellGetNextPlugin)
-							I(StartProcess)
-							I(StopProcess)
-							I(SetTotalSampleToProcess)
-							I(SetPanLaw)
-							I(BeginLoadBank)
-							I(BeginLoadProgram)
+							$(GetSpeakerArrangement) $(ShellGetNextPlugin) $(StartProcess) $(StopProcess)
+							$(SetTotalSampleToProcess) $(SetPanLaw) $(BeginLoadBank) $(BeginLoadProgram)
+
+							#undef $
 							
-						default:
+							default:
 							{
 								std::ostringstream s;
 								s << "unknown opcode " << opcode;
 								return s.str();
 							}
 						}
-						#undef I
-						#endif
 					}
 					const std::string operation_description(long code) throw()
 					{
@@ -163,18 +110,8 @@ namespace psycle
 			VstTimeInfo plugin::_timeInfo;
 
 			plugin::plugin()
-				: queue_size(0)
-				, wantidle(false)
-				, _sDllName("")
-				, h_dll(0)
-				, _program(0)
-				, instantiated(false)
-				, _instance(0)
-				, requiresProcess(false)
-				, requiresRepl(false)
-				, _version(0)
-				, _isSynth(false)
-				, proxy_(0)
+				: queue_size(0), wantidle(false), _sDllName(""), h_dll(0), _program(0), instantiated(false), _instance(0)
+				, requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0)
 				#if !defined _WINAMP_PLUGIN_
 					, editorWnd(0)
 				#endif
@@ -215,16 +152,16 @@ namespace psycle
 				instantiated = false;
 				if(!(h_dll = ::LoadLibrary(_sDllName.c_str())))
 				{
-					std::ostringstream s;
-					s	<< "could not load library: " << dllname << std::endl
+					std::ostringstream s; s
+						<< "could not load library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::loading_error(s.str());
 				}
 				PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
 				if(!main)
 				{	
-					std::ostringstream s;
-					s	<< "could not resolve symbol 'main' in library: " << dllname << std::endl
+					std::ostringstream s; s
+						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::symbol_resolving_error(s.str());
 				}
@@ -246,10 +183,8 @@ namespace psycle
 				{
 					std::ostringstream s;
 					s << "call to function 'main' returned a bad value: ";
-					if(proxy()())
-						s << "returned value signature: " << proxy().magic();
-					else
-						s << "returned value is a null pointer";
+					if(proxy()()) s << "returned value signature: " << proxy().magic();
+					else s << "returned value is a null pointer";
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
 				TRACE("VST plugin: instanciated.");
@@ -330,9 +265,7 @@ namespace psycle
 					else _sVendorName = "Unknown vendor";
 				}
 				_isSynth = proxy().flags() & effFlagsIsSynth;
-
 				instantiated = true;
-
 				TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
 			}
 
@@ -384,7 +317,7 @@ namespace psycle
 					catch(...)
 					{
 						h_dll = 0;
-						throw; // <bohan> magnus, does it cause any problem to rethrow?
+						throw; // [bohan] magnus, does it cause any problem to rethrow?
 					}
 					h_dll = 0;
 				}
@@ -428,8 +361,8 @@ namespace psycle
 					size -= sizeof _program + sizeof count + sizeof(float) * count;
 					if(size)
 					{
-						// <bohan> why don't we just call LoadChunk?
-						// <bohan> hmm, shit, LoadCunk actually reads the chunk size too.
+						// [bohan] why don't we just call LoadChunk?
+						// [bohan] hmm, shit, LoadCunk actually reads the chunk size too.
 						if(proxy().flags() & effFlagsProgramChunks)
 						{
 							char * data(new char[size]);
@@ -440,7 +373,7 @@ namespace psycle
 							}
 							catch(...)
 							{
-								// <bohan> hmm, so, data just gets lost?
+								// [bohan] hmm, so, data just gets lost?
 								zapArray(data);
 								return false;
 							}
@@ -481,7 +414,7 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
-					// <bohan> hmm, so, data just gets lost?
+					// [bohan] hmm, so, data just gets lost?
 					zapArray(chunk);
 					return false;
 				}
@@ -519,7 +452,7 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
-						// <bohan>
+						// [bohan]
 						// i think it's not necessary to set the size to the same value again.
 						// if an exception is thrown, size won't be changed.
 						size = sizeof _program  + sizeof count  + sizeof(float) * count;
@@ -639,7 +572,7 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
-					// <bohan>
+					// [bohan]
 					// exception blocked here for now,
 					// but we really should do something...
 					//throw;
@@ -670,7 +603,7 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
-							// <bohan>
+							// [bohan]
 							// exception blocked here for now,
 							// but we really should do something...
 							//throw;
@@ -682,7 +615,7 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
-							// <bohan>
+							// [bohan]
 							// exception blocked here for now,
 							// but we really should do something...
 							//throw;
@@ -693,7 +626,7 @@ namespace psycle
 					}
 					else std::sprintf(psTxt, "Invalid NumParams Value");
 				}
-				else std::sprintf(psTxt, "Not loaded"); // <bohan> wow.. can this fucked up situtation really happens?
+				else std::sprintf(psTxt, "Not loaded"); // [bohan] wow.. can this fucked up situtation really happens?
 				return false;
 			}
 
@@ -737,7 +670,7 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
-						return 0; // <bohan> well, what to return if it fails? 0 is wrong..
+						return 0; // [bohan] well, what to return if it fails? 0 is wrong..
 					}
 				}
 				else
@@ -1144,19 +1077,19 @@ namespace psycle
 					return STREAM_SIZE;
 				case audioMasterGetVendorString:
 					// Just fooling version string
-					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
+					// [bohan] why? do we have to fool some plugins to make them work with psycle's host?
 					std::strcpy((char *) ptr,"Steinberg");
 					//std::strcpy((char*)ptr,"Psycledelics");
 					return 1;
 				case audioMasterGetProductString:
 					// Just fooling product string
-					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
+					// [bohan] why? do we have to fool some plugins to make them work with psycle's host?
 					std::strcpy((char *) ptr, "Cubase VST");
 					//std::strcpy((char*) ptr, "Psycle");
 					return 1;
 				case audioMasterGetVendorVersion:	
 					return 5000; // HOST version 5000
-					// <bohan> is that a Cubase VST version?
+					// [bohan] is that a Cubase VST version?
 				case audioMasterUpdateDisplay:
 					if(effect && host)
 					{
