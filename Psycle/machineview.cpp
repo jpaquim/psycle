@@ -706,8 +706,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
-					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					//code to visually mark a machine as being selected
+					char name[sizeof(mac->_editName)+6+3];
+					if (macnum == _pSong->seqBus) {						
+						sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+					}
+					else {
+						sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					}
+
+
 					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
 				}
 				else
@@ -782,8 +790,15 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
-					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					//code to visually mark a machine as being selected
+					char name[sizeof(mac->_editName)+6+3];
+					if (macnum == _pSong->seqBus) {						
+						sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+					}
+					else {
+						sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					}
+
 					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
 				}
 				else
@@ -863,8 +878,17 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
-					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+
+					//code to visually mark a machine as being selected
+					char name[sizeof(mac->_editName)+6+3];
+					if (macnum == _pSong->seqBus) {						
+						sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+					}
+					else {
+						sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					}
+
+
 					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
 				}
 				else
@@ -926,8 +950,15 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
-					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					//code to visually mark a machine as being selected
+					char name[sizeof(mac->_editName)+6+3];
+					if (macnum == _pSong->seqBus) {						
+						sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+					}
+					else {
+						sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					}
+
 					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
 				}
 				else

@@ -122,6 +122,10 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 			}
 
 			_pSong->seqBus = _pSong->FindBusFromIndex(smac);
+
+			//Added by J.Redfern,
+			Repaint();
+
 			pParentMain->UpdateComboGen();
 		}
 		else if (nFlags & MK_SHIFT)
