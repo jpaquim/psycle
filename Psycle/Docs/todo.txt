@@ -397,7 +397,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
 *	DirectSound Output is a bit buggy.Crashes and bad sound reported.
 	[ still ? ]
-* <pooplog> 3) asio float MSB order unsupported
+* asio float MSB order unsupported
 
 * Importing:
 ------------
