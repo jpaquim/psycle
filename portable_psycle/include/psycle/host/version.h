@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.8  2005/01/19 23:11:11  johan-boule
+no message
+
 Revision 1.7  2005/01/14 22:34:42  johan-boule
 new version
 
@@ -23,7 +26,6 @@ no message
 
 Revision 1.1  2004/12/22 22:43:41  johan-boule
 fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
-
 */
 #endif
 		  
@@ -41,6 +43,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 /// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
 /// - doc/for-end-users/readme.txt
 /// - doc/for-end-users/whatsnew.txt
+/// [bohan] ... if only we were using a scriptable build system like autoconf.
 			
 #define PSYCLE__VERSION__CODEBASE 1
 #define PSYCLE__VERSION__MAJOR 7
