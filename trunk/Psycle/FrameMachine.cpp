@@ -163,7 +163,7 @@ void CFrameMachine::OnPaint()
 
 	for (int c=0; c<numParameters; c++)
 	{
-		char buffer[32];
+		char buffer[128];
 
 		BOOL bDrawKnob = TRUE;
 		int min_v;
@@ -192,7 +192,7 @@ void CFrameMachine::OnPaint()
 			min_v = 0;
 			max_v = VST_QUANTIZATION;
 			val_v = f2i(((VSTPlugin*)_pMachine)->GetParameter(c)*VST_QUANTIZATION);
-			memset(buffer,0,32);
+			memset(buffer,0,sizeof(buffer));
 
 			if (((VSTPlugin*)_pMachine)->DescribeValue(c,buffer) == false)
 			{

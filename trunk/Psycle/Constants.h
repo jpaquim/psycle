@@ -32,6 +32,7 @@
 #define OVERLAPTIME				128  // Sampler
 #define STREAM_SIZE				256	// If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, if needed.
 
+// we need to make a high/low version system that breaks the UINT into 2 numbers
 #define CURRENT_FILE_VERSION_INFO	0
 #define CURRENT_FILE_VERSION_SNGI	0
 #define CURRENT_FILE_VERSION_SEQD	0

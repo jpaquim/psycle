@@ -777,10 +777,10 @@ BEGIN
     PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE2,154,55,135,15
     CONTROL         "Draw Machine Indexes",IDC_DRAW_MAC_INDEX,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,203,8,88,12
-    PUSHBUTTON      "Bitmap",IDC_MACHINE_BITMAP,154,158,135,13
+    PUSHBUTTON      "Background Bitmap",IDC_MACHINE_BITMAP,154,158,135,13
     COMBOBOX        IDC_TRIANGLESIZE,222,123,24,104,CBS_DROPDOWN | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Triangle Size",IDC_STATIC,248,122,44,13,SS_CENTERIMAGE
+    LTEXT           "Polygon Size",IDC_STATIC,248,122,44,13,SS_CENTERIMAGE
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
@@ -2346,8 +2346,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,7,0,1
- PRODUCTVERSION 1,7,0,1
+ FILEVERSION 1,7,3,0
+ PRODUCTVERSION 1,7,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -2365,14 +2365,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "Psycledelics\0"
             VALUE "FileDescription", "Psycle Digital Audio Studio\0"
-            VALUE "FileVersion", "1, 7, 0, 1\0"
+            VALUE "FileVersion", "1, 7, 3, 0\0"
             VALUE "InternalName", "Psycle\0"
             VALUE "LegalCopyright", "Copyright (C) 2000-2002\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Psycle.EXE\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Psycle Application\0"
-            VALUE "ProductVersion", "1, 7, 0, 1\0"
+            VALUE "ProductVersion", "1, 7, 3, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END
