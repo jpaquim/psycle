@@ -42,6 +42,10 @@ public:
 	int scope_osc_rate;
 	int scope_spec_bands;
 	int scope_spec_rate;
+	int scope_phase_rate;
+
+	float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
+
 
 	float pSamplesL[SCOPE_BUF_SIZE];
 	float pSamplesR[SCOPE_BUF_SIZE];
