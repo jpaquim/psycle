@@ -164,7 +164,7 @@ namespace psycle
 			while(pThis->_timerActive)
 			{
 				pThis->DoBlocks();
-				::Sleep(10);
+				::Sleep(1);
 			}
 			_event.SetEvent();
 			::_endthread();

@@ -135,13 +135,6 @@ namespace psycle
 			}
 		}
 
-		ASIOInterface::~ASIOInterface() throw()
-		{
-			if(_initialized) Reset();
-			//ASIOExit();
-			asioDrivers.removeCurrentDriver();
-		}
-
 		void ASIOInterface::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context)
 		{
 			_pASIOcallbackContext = context;
@@ -151,86 +144,16 @@ namespace psycle
 			_initialized = true;
 		}
 
-		void ASIOInterface::ReadConfig()
+		void ASIOInterface::Reset()
 		{
-			bool configured;
-			DWORD type;
-			DWORD numData;
-			Registry reg;
-			// Default configuration
-			_samplesPerSec=44100;
-			_driverID=0;
-			_ASIObufferSize = 1024;
-			_channelmode = 3; // always stereo
-			_bitDepth = 16; // asio don't care about bit depth
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS) return;
-			if(reg.OpenKey("ASIOOut") != ERROR_SUCCESS) return;
-			configured = true;
-			numData = sizeof(_ASIObufferSize);
-			configured &= (reg.QueryValue("BufferSize", &type, (BYTE*)&_ASIObufferSize, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_driverID);
-			configured &= (reg.QueryValue("DriverID", &type, (BYTE*)&_driverID, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_samplesPerSec);
-			configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
-			reg.CloseKey();
-			reg.CloseRootKey();
-			_configured = configured;
-			currentSamples[_driverID]=_ASIObufferSize;
+			Stop();
 		}
 
-		void ASIOInterface::WriteConfig()
+		ASIOInterface::~ASIOInterface() throw()
 		{
-			Registry reg;
-			if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
-			{
-				Error("Unable to write configuration to the registry");
-				return;
-			}
-			if (reg.OpenKey("ASIOOut") != ERROR_SUCCESS)
-			{
-				if (reg.CreateKey("ASIOOut") != ERROR_SUCCESS)
-				{
-					Error("Unable to write configuration to the registry");
-					return;
-				}
-			}
-			reg.SetValue("BufferSize", REG_DWORD, (BYTE*)&_ASIObufferSize, sizeof(_ASIObufferSize));
-			reg.SetValue("DriverID", REG_DWORD, (BYTE*)&_driverID, sizeof(_driverID));
-			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
-			reg.CloseKey();
-			reg.CloseRootKey();
-		}
-
-		void ASIOInterface::Configure()
-		{
-			if(!_configured) ReadConfig();
-			CASIOConfig dlg;
-			dlg.pASIO = this;
-			dlg.m_bufferSize = _ASIObufferSize;
-			dlg.m_driverIndex = _driverID;
-			dlg.m_sampleRate = _samplesPerSec;
-			if(dlg.DoModal() != IDOK) return;
-			int oldbs = _ASIObufferSize;
-			int oldvid = _driverID;
-			int oldsps = _samplesPerSec;
-			if(_initialized) Stop();
-			_ASIObufferSize = dlg.m_bufferSize;
-			_driverID = dlg.m_driverIndex;
-			_samplesPerSec = dlg.m_sampleRate;
-			_configured = true;
-			if(_initialized)
-			{
-				if (Start()) WriteConfig();
-				else
-				{
-					_ASIObufferSize = oldbs;
-					_driverID = oldvid;
-					_samplesPerSec = oldsps;
-
-					Start();
-				}
-			}
-			else WriteConfig();
+			if(_initialized) Reset();
+			//ASIOExit();
+			asioDrivers.removeCurrentDriver();
 		}
 
 		bool ASIOInterface::Start()
@@ -339,9 +262,86 @@ namespace psycle
 			return true;
 		}
 
-		void ASIOInterface::Reset()
+		void ASIOInterface::ReadConfig()
 		{
-			Stop();
+			bool configured;
+			DWORD type;
+			DWORD numData;
+			Registry reg;
+			// Default configuration
+			_samplesPerSec=44100;
+			_driverID=0;
+			_ASIObufferSize = 1024;
+			_channelmode = 3; // always stereo
+			_bitDepth = 16; // asio don't care about bit depth
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS) return;
+			if(reg.OpenKey("ASIOOut") != ERROR_SUCCESS) return;
+			configured = true;
+			numData = sizeof(_ASIObufferSize);
+			configured &= (reg.QueryValue("BufferSize", &type, (BYTE*)&_ASIObufferSize, &numData) == ERROR_SUCCESS);
+			numData = sizeof(_driverID);
+			configured &= (reg.QueryValue("DriverID", &type, (BYTE*)&_driverID, &numData) == ERROR_SUCCESS);
+			numData = sizeof(_samplesPerSec);
+			configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
+			reg.CloseKey();
+			reg.CloseRootKey();
+			_configured = configured;
+			currentSamples[_driverID]=_ASIObufferSize;
+		}
+
+		void ASIOInterface::WriteConfig()
+		{
+			Registry reg;
+			if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			{
+				Error("Unable to write configuration to the registry");
+				return;
+			}
+			if (reg.OpenKey("ASIOOut") != ERROR_SUCCESS)
+			{
+				if (reg.CreateKey("ASIOOut") != ERROR_SUCCESS)
+				{
+					Error("Unable to write configuration to the registry");
+					return;
+				}
+			}
+			reg.SetValue("BufferSize", REG_DWORD, (BYTE*)&_ASIObufferSize, sizeof(_ASIObufferSize));
+			reg.SetValue("DriverID", REG_DWORD, (BYTE*)&_driverID, sizeof(_driverID));
+			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
+			reg.CloseKey();
+			reg.CloseRootKey();
+		}
+
+		void ASIOInterface::Configure()
+		{
+			if(!_configured) ReadConfig();
+			CASIOConfig dlg;
+			dlg.pASIO = this;
+			dlg.m_bufferSize = _ASIObufferSize;
+			dlg.m_driverIndex = _driverID;
+			dlg.m_sampleRate = _samplesPerSec;
+			if(dlg.DoModal() != IDOK) return;
+			int oldbs = _ASIObufferSize;
+			int oldvid = _driverID;
+			int oldsps = _samplesPerSec;
+			if(_initialized) Stop();
+			_ASIObufferSize = dlg.m_bufferSize;
+			_driverID = dlg.m_driverIndex;
+			_samplesPerSec = dlg.m_sampleRate;
+			_configured = true;
+			if(_initialized)
+			{
+				if (Start()) WriteConfig();
+				else
+				{
+					_ASIObufferSize = oldbs;
+					_driverID = oldvid;
+					_samplesPerSec = oldsps;
+
+					Start();
+				}
+			}
+			else WriteConfig();
 		}
 
 		bool ASIOInterface::Enable(bool e)
