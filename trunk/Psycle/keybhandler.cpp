@@ -1060,7 +1060,7 @@ void CChildView::DoubleLength()
 		et=blockSel.end.track+1;
 		sl=blockSel.start.line;			
 		nl=blockSel.end.line-sl+1;
-		el=sl+nl*2-1;
+		el=sl+(nl*2)-1;
 		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2-1,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	else 
@@ -1106,16 +1106,17 @@ void CChildView::HalveLength()
 		et=blockSel.end.track+1;
 		sl=blockSel.start.line;		
 		nl=blockSel.end.line-sl+1;
-		el=(blockSel.end.line-sl+1)/2;
-		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl/2,editcur.track,editcur.line,editcur.col,editPosition);
+		el=nl/2;
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	else 
 	{
-		st=0;	et=_pSong->SONGTRACKS;		
+		st=0;	
+		et=_pSong->SONGTRACKS;		
 		sl=0;
 		nl=_pSong->patternLines[displace];	
 		el=_pSong->patternLines[displace]/2;
-		AddUndo(_ps(),0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
+		AddUndo(_ps(),0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	
 	for (int t=st;t<et;t++)
@@ -1135,7 +1136,7 @@ void CChildView::HalveLength()
 	drawTrackStart=st;
 	drawTrackEnd=et;
 	drawLineStart=sl;
-	drawLineEnd=el;
+	drawLineEnd=nl+sl;
 	Repaint(DMDataChange);
 }
 
@@ -1287,6 +1288,7 @@ void CChildView::IncCurPattern()
 {
 	if(_pSong->playOrder[editPosition]<(MAX_PATTERNS-1))
 	{
+		AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 		++_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPatternChange);
@@ -1298,6 +1300,7 @@ void CChildView::DecCurPattern()
 {
 	if(_pSong->playOrder[editPosition]>0)
 	{
+		AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 		--_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPatternChange);
@@ -1325,6 +1328,7 @@ void CChildView::IncPosition()
 		++editPosition;
 		if ( editPosition >= _pSong->playLength )
 		{
+			AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition-1);
 			int const ep=_pSong->GetNumPatternsUsed();
 			_pSong->playLength=editPosition+1;
 			_pSong->playOrder[editPosition]=ep;
