@@ -35,6 +35,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
+#define WM_SETMESSAGESTRING 0x0362
+
 
 IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 
@@ -105,8 +107,11 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_EDIT, OnUpdateIndicatorEdit)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_FOLLOW, OnUpdateIndicatorFollow)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_NOTEOFF, OnUpdateIndicatorNoteoff)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
 	ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
+ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
+
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -117,6 +122,7 @@ static UINT indicators[] =
 	ID_INDICATOR_PATTERN,
 	ID_INDICATOR_LINE,
 	ID_INDICATOR_TIME,
+    ID_INDICATOR_OCTAVE,
     ID_INDICATOR_EDIT,
     ID_INDICATOR_FOLLOW,
     ID_INDICATOR_NOTEOFF,
@@ -2223,6 +2229,15 @@ void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI)
 	}
 }
 
+void CMainFrame::OnUpdateIndicatorOctave(CCmdUI *pCmdUI) 
+{
+	pCmdUI->Enable(); 
+    CString str;
+	str.Format("Oct %u", _pSong->currentOctave); 
+    pCmdUI->SetText(str); 
+
+}
+
 
 int CMainFrame::GetNumFromCombo(CComboBox *cb)
 {
@@ -2230,3 +2245,15 @@ int CMainFrame::GetNumFromCombo(CComboBox *cb)
 	cb->GetWindowText(str);
 	return _httoi(str.Left(2).GetBuffer(2));
 }
+
+LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == AFX_IDS_IDLEMESSAGE)
+	{
+		sprintf(szStatusIdle,"%s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
+		return CFrameWnd::OnSetMessageString (0,(LPARAM)szStatusIdle);
+	}
+	return CFrameWnd::OnSetMessageString (wParam, lParam);
+
+}
+

@@ -748,6 +748,7 @@ void CChildView::OnFileLoadsong()
 	{
 		OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
 	}
+	pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
 }
 
 void CChildView::OnFileNew() 
@@ -787,6 +788,7 @@ void CChildView::OnFileNew()
 		RecalculateColourGrid();
 		Repaint();
 	}
+	pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
 }
 
 
@@ -954,6 +956,7 @@ void CChildView::OnFileSongproperties()
 {	CSongpDlg dlg;
 	dlg._pSong=Global::_pSong;
 	dlg.DoModal();
+	pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
 //	Repaint();
 }
 
@@ -999,15 +1002,18 @@ void CChildView::ShowPatternDlg(void)
 			if ( strcmp(name,dlg.patName) != 0 )
 			{
 				strcpy(_pSong->patternName[patNum],dlg.patName);
+				pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
 			}
 			Repaint();
 		}
 		else if ( strcmp(name,dlg.patName) != 0 )
 		{
 			strcpy(_pSong->patternName[patNum],dlg.patName);
+			pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
 //			Repaint(DMPatternHeader);
 		}
 	}
+
 }
 
 void CChildView::OnNewmachine() 
