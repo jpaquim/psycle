@@ -17,6 +17,7 @@
 #include "Plugin.h"
 #include "VSTHost.h"
 #include "DataCompression.h"
+#include "ProgressDialog.h"
 
 
 #if !defined(_WINAMP_PLUGIN_)
@@ -1099,6 +1100,10 @@ bool Song::Load(RiffFile* pFile)
 	if (strcmp(Header,"PSY3SONG")==0)
 	{
 
+		CProgressDialog Progress;
+		Progress.Create();
+		Progress.ShowWindow(SW_SHOW);
+
 		UINT version = 0;
 		UINT size = 0;
 		UINT index = 0;
@@ -1107,6 +1112,8 @@ bool Song::Load(RiffFile* pFile)
 
 		Header[4]=0;
 		_machineLock = true;
+
+		long filesize = pFile->FileSize();
 
 		pFile->Read(&version,sizeof(version));
 		pFile->Read(&size,sizeof(size));
@@ -1136,6 +1143,8 @@ bool Song::Load(RiffFile* pFile)
 
 		while(pFile->Read(&Header, 4))
 		{
+			Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
+			::Sleep(1);
 
 			// we should use the size to update the index, but for now we will skip it
 			if (strcmp(Header,"INFO")==0)
@@ -1193,10 +1202,15 @@ bool Song::Load(RiffFile* pFile)
 
 					pFile->Read(&temp,sizeof(temp));  // sequence width, for multipattern
 
+					_trackArmedCount = 0;
 					for (int i = 0; i < SONGTRACKS; i++)
 					{
 						pFile->Read(&_trackMuted[i],sizeof(_trackMuted[i]));
 						pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
+						if (_trackArmed[i])
+						{
+							_trackArmedCount++;
+						}
 					}
 				}
 			}
@@ -1340,6 +1354,8 @@ bool Song::Load(RiffFile* pFile)
 		}
 		// now that we have loaded all the modules, time to prepare them.
 
+		Progress.m_Progress.SetPos(16384);
+
 		// test all connections for invalid machines. disconnect invalid machines.
 		for (int i = 0; i < MAX_MACHINES; i++)
 		{
@@ -1375,11 +1391,18 @@ bool Song::Load(RiffFile* pFile)
 		SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 		// allow stuff to work again
 		_machineLock = false;
+
+		Progress.OnCancel();
+
 		return true;
 
 	}
 	else if (strcmp(Header,"PSY2SONG")==0)
 	{
+
+		CProgressDialog Progress;
+		Progress.Create();
+		Progress.ShowWindow(SW_SHOW);
 
 		int i;
 		int num;
@@ -1441,6 +1464,9 @@ bool Song::Load(RiffFile* pFile)
 				RemovePattern(i);
 			}
 		}
+
+		Progress.m_Progress.SetPos(2048);
+		::Sleep(1);
 
 		// Instruments
 		//
@@ -1518,6 +1544,9 @@ bool Song::Load(RiffFile* pFile)
 			pFile->Read(&_instruments[i]._RRES, sizeof(_instruments[0]._RRES));
 		}
 
+		Progress.m_Progress.SetPos(4096);
+		::Sleep(1);
+
 		// Waves
 		//
 		pFile->Read(&waveSelected, sizeof(waveSelected));
@@ -1549,10 +1578,13 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 
+		Progress.m_Progress.SetPos(4096+2048);
+		::Sleep(1);
+
 		// VST DLLs
 		//
 
-		VSTLoader vstL[MAX_PLUGINS];
+		VSTLoader vstL[MAX_PLUGINS]; 
 		for (i=0; i<MAX_PLUGINS; i++)
 		{
 			pFile->Read(&vstL[i].valid,sizeof(bool));
@@ -1569,6 +1601,9 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
+
+		Progress.m_Progress.SetPos(8192);
+		::Sleep(1);
 
 		// Machines
 		//
@@ -1592,6 +1627,10 @@ bool Song::Load(RiffFile* pFile)
 			int x,y,type;
 			if (_machineActive[i])
 			{
+				Progress.m_Progress.SetPos(8192+i*(4096/128));
+				::Sleep(1);
+
+
 				pFile->Read(&x, sizeof(x));
 				pFile->Read(&y, sizeof(y));
 
@@ -1777,6 +1816,9 @@ bool Song::Load(RiffFile* pFile)
 				pMachine[i]->_y = y;
 			}
 		}
+		Progress.m_Progress.SetPos(8192+4096);
+		::Sleep(1);
+
 
 		// Since the old file format stored volumes on each output
 		// rather than on each input, we must convert
@@ -1804,6 +1846,10 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
+
+		Progress.m_Progress.SetPos(8192+4096+1024);
+		::Sleep(1);
+
 		for (i=0; i<128; i++) // Next, we go to fix this for each
 		{
 			if (_machineActive[i])		// valid machine (important, since we have to navigate!)
@@ -1830,6 +1876,9 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
+
+		Progress.m_Progress.SetPos(8192+4096+2048);
+		::Sleep(1);
 
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
@@ -1914,6 +1963,9 @@ bool Song::Load(RiffFile* pFile)
 		// now we have to remap all the inputs and outputs again... ouch
 
 		// this file format sucks
+
+		Progress.m_Progress.SetPos(8192+4096+2048+1024);
+		::Sleep(1);
 
 
 		for (i = 0; i < 64; i++)
@@ -2019,6 +2071,9 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 
+		Progress.m_Progress.SetPos(8192+4096+2048+1024+512);
+		::Sleep(1);
+
 		for (int c=0; c<MAX_CONNECTIONS; c++)
 		{
 			if (_pMachine[MASTER_INDEX]->_inputCon[c])
@@ -2038,6 +2093,8 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
+		Progress.m_Progress.SetPos(16384);
+		::Sleep(1);
 
 		// remove all invalid connections
 		for (i = 0; i < MAX_MACHINES; i++)
@@ -2077,6 +2134,7 @@ bool Song::Load(RiffFile* pFile)
 		_machineLock = false;
 		seqBus=0;
 
+		Progress.OnCancel();
 		return true;
 	}
 
@@ -2103,6 +2161,11 @@ bool Song::Save(RiffFile* pFile)
 	version = 0; // "total" version of all chunk versions
 	size = 0;
 	*/
+	CProgressDialog Progress;
+	Progress.Create();
+	Progress.m_Progress.SetRange(0,MAX_PATTERNS+MAX_MACHINES+MAX_INSTRUMENTS);
+	Progress.ShowWindow(SW_SHOW);
+
 
 	pFile->Write("PSY3SONG", 8);
 
@@ -2192,17 +2255,11 @@ bool Song::Save(RiffFile* pFile)
 	temp = 1; // sequence width
 	pFile->Write(&temp,sizeof(temp));
 
-	_trackArmedCount = 0;
 	for (int i = 0; i < SONGTRACKS; i++)
 	{
 		pFile->Write(&_trackMuted[i],sizeof(_trackMuted[i]));
 		pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
-		if (_trackArmed[i])
-		{
-			_trackArmedCount++;
-		}
 	}
-
 
 	/*
 	===================
@@ -2308,8 +2365,14 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(&size,sizeof(size));
 			pFile->Write(pCopy,size);
 			delete pCopy;
+
+			Progress.m_Progress.SetPos(i);
+			::Sleep(1);
 		}
 	}
+
+	Progress.m_Progress.SetPos(MAX_PATTERNS);
+	::Sleep(1);
 
 	// machine and instruments handle their save and load in their respective classes
 
@@ -2334,8 +2397,14 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Seek(pos);
 			pFile->Write(&size,sizeof(size));
 			pFile->Seek(pos2);
+
+			Progress.m_Progress.SetPos(MAX_PATTERNS+i);
+			::Sleep(1);
 		}
 	}
+
+	Progress.m_Progress.SetPos(MAX_PATTERNS+MAX_MACHINES);
+	::Sleep(1);
 
 	for (i = 0; i < MAX_INSTRUMENTS; i++)
 	{
@@ -2358,8 +2427,16 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Seek(pos);
 			pFile->Write(&size,sizeof(size));
 			pFile->Seek(pos2);
+
+			Progress.m_Progress.SetPos(MAX_PATTERNS+MAX_MACHINES+i);
+			::Sleep(1);
 		}
 	}
+
+	Progress.m_Progress.SetPos(MAX_PATTERNS+MAX_MACHINES+MAX_INSTRUMENTS);
+	::Sleep(1);
+
+	Progress.OnCancel();
 	return true;
 }
 
