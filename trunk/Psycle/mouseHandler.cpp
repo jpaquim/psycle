@@ -88,6 +88,12 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		if ( nFlags & MK_CONTROL)
 		{
 			smac=GetMachine(point);
+			if ( smac != -1 )
+			{
+				mcd_x = point.x - Global::_pSong->_pMachines[smac]->_x;
+				mcd_y = point.y - Global::_pSong->_pMachines[smac]->_y;
+			}
+
 			_pSong->seqBus = _pSong->FindBusFromIndex(smac);
 			pParentMain->UpdateComboGen();
 		}
@@ -517,7 +523,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 	switch (viewMode)
 	{
 	case VMMachine:
-		if (smac > -1 && (nFlags == MK_LBUTTON))
+		if (smac > -1 && (nFlags & MK_LBUTTON))
 		{
 			if (smacmode == 0)
 			{

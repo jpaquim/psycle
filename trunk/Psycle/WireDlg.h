@@ -11,7 +11,7 @@
 
 class CChildView;
 
-#define MAX_SCOPE_BANDS 32
+#define MAX_SCOPE_BANDS 64
 #define SCOPE_BUF_SIZE 4096
 #define SCOPE_SPEC_SAMPLES	256
 
@@ -38,11 +38,16 @@ public:
 	float invol;
 
 	int scope_mode;
+	int scope_peak_rate;
 	int scope_osc_freq;
 	int scope_osc_rate;
 	int scope_spec_bands;
 	int scope_spec_rate;
 	int scope_phase_rate;
+
+	float peakL,peakR;
+	float peak2L,peak2R;
+	int peakLifeL,peakLifeR;
 
 	float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
 

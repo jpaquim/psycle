@@ -68,9 +68,25 @@ void CGearGainer::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 		_pMachine->_outWet = 1024-m_volsider.GetPos();
 	}
 
-	float wet = (float)_pMachine->_outWet*0.390625f;
+	float wet = (float)_pMachine->_outWet*0.00390625f;
 	char buffer[32];
-	sprintf(buffer, "%.2f%%", wet);
+	if (wet > 1.0f)
+	{	
+		sprintf(buffer,"+%.1f dB\n%.2f%%",20.0f * log10(wet),wet*100); 
+	}
+	else if (wet == 1.0f)
+	{	
+		sprintf(buffer,"0.0 dB\n100.00%%"); 
+	}
+	else if (wet > 0.0f)
+	{	
+		sprintf(buffer,"%.1f dB\n%.2f%%",20.0f * log10(wet),wet*100); 
+	}
+	else 
+	{				
+		sprintf(buffer,"-Inf. dB\n0.00%%"); 
+	}
+
 	m_volabel.SetWindowText(buffer);
 
 	*pResult = 0;
