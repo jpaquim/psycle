@@ -347,7 +347,7 @@ namespace psycle
 					cmdDefn = cmd.GetName();
 					if(cmdDefn!="Invalid")
 					{
-						key.Format("n%d",i);
+						key.Format("n%03d",i);
 						cmddata= GetPrivateProfileInt(sect,key,-1,sDefaultCfgName);
 						modi=cmddata/256;
 						SetCmd(cmd.ID,cmddata%256,modi);
