@@ -26,6 +26,8 @@ X low priority
 * The play block feature doesn't work.
 * When 'cursor always down' is enabled u can't insert values on the last row
 
+http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
+
 * screen should be made so 800x600 works
 + <alk> some bastards want keyrepeat for notes back
 * <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
