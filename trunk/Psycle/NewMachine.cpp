@@ -572,7 +572,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 				{
 					if (type == MACH_PLUGIN )
 					{
-						Plugin plug;
+						Plugin plug(0);
 						if (plug.Instance((char*)(const char*)finder.GetFilePath()))
 						{
 							_pPlugsInfo[currentPlugsCount]= new PluginInfo;

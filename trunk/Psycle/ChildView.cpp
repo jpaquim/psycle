@@ -1385,18 +1385,6 @@ void CChildView::NewMachine(int x, int y, int mac)
 			{
 				Global::_pSong->seqBus = fb;
 			}
-			/*
-			else
-			{
-//				Global::_pSong->seqBus = fb+MAX_BUSES;
-
-			}
-			*/
-			if ( _pSong->_pMachine[fb]->_type == MACH_VST ||
-				_pSong->_pMachine[fb]->_type == MACH_VSTFX )
-			{
-				((VSTPlugin*)(_pSong->_pMachine[fb]))->macindex = fb;
-			}
 
 			// make sure that no 2 machines have the same name, because that is irritating
 

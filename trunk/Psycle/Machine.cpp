@@ -417,79 +417,85 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	switch (type)
 	{
 	case MACH_MASTER:
-		pMachine = new Master;
+		pMachine = new Master(index);
 		break;
 	case MACH_SINE:
-		pMachine = new Sine;
+		pMachine = new Sine(index);
 		break;
 	case MACH_DIST:
-		pMachine = new Distortion;
+		pMachine = new Distortion(index);
 		break;
 	case MACH_SAMPLER:
-		pMachine = new Sampler;
+		pMachine = new Sampler(index);
 		break;
 	case MACH_DELAY:
-		pMachine = new Delay;
+		pMachine = new Delay(index);
 		break;
 	case MACH_2PFILTER:
-		pMachine = new Filter2p;
+		pMachine = new Filter2p(index);
 		break;
 	case MACH_GAIN:
-		pMachine = new Gainer;
+		pMachine = new Gainer(index);
 		break;
 	case MACH_FLANGER:
-		pMachine = new Flanger;
+		pMachine = new Flanger(index);
 		break;
 	case MACH_PLUGIN:
 		{
 			Plugin * p;
-			pMachine = p = new Plugin;
+			pMachine = p = new Plugin(index);
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
 				sprintf(sError,"Missing or Corrupted native plug-in \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-				delete pMachine;
-				pMachine = new Dummy;
+				pMachine = new Dummy(index);
+				// dummy name goes here
+				sprintf(pMachine->_editName,"X %s",p->_editName);
 				type = MACH_DUMMY;
+				delete p;
 			}
 		}
 		break;
 	case MACH_VST:
 		{
 			VSTInstrument * p;
-			 pMachine = p = new VSTInstrument;
+			 pMachine = p = new VSTInstrument(index);
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
 				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
-				delete pMachine;
-				pMachine = new Dummy;
+
+				pMachine = new Dummy(index);
+				// dummy name goes here
+				sprintf(pMachine->_editName,"X %s",p->_editName);
 				type = MACH_DUMMY;
+				delete p;
 			}
-			p->macindex = index;
 		}
 		break;
 	case MACH_VSTFX:
 		{
 			VSTFX * p;
-			pMachine = p = new VSTFX;
+			pMachine = p = new VSTFX(index);
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
 				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
-				delete pMachine;
-				pMachine = new Dummy;
+
+				pMachine = new Dummy(index);
+				// dummy name goes here
+				sprintf(pMachine->_editName,"X %s",p->_editName);
 				type = MACH_DUMMY;
+				delete p;
 			}
-			p->macindex = index;
 		}
 		break;
 	default:
-		pMachine = new Dummy;
+		pMachine = new Dummy(index);
 		break;
 	}
 	pMachine->Init();
@@ -523,7 +529,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
 		::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-		Machine* p = new Dummy;
+		Machine* p = new Dummy(index);
 		p->Init();
 		p->_type=MACH_DUMMY;
 		p->_mode=pMachine->_mode;
@@ -546,7 +552,8 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 			p->_connection[i]=pMachine->_connection[i];
 			p->_inputCon[i]=pMachine->_inputCon[i];
 		}
-		strcpy(p->_editName,pMachine->_editName);
+		// dummy name goes here
+		sprintf(p->_editName,"X %s",pMachine->_editName);
 		p->_numPars=0;
 
 		delete pMachine;
@@ -625,12 +632,13 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 #endif // ndef _WINAMP_PLUGIN_
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-Dummy::Dummy()
+Dummy::Dummy(int index)
 {
+	macIndex = index;
 	_numPars = 0;
 	_type = MACH_DUMMY;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "Dummy");
+	sprintf(_editName, "%.2X:Dummy",macIndex);
 }
 void Dummy::Work(int numSamples)
 {
@@ -657,14 +665,15 @@ void Dummy::Work(int numSamples)
 //////////////////////////////////////////////////////////////////////
 float* Master::_pMasterSamples = NULL;
 
-Master::Master()
+Master::Master(int index)
 {
+	macIndex = index;
 	_numPars = 0;
 	_outDry = 256;
 	decreaseOnClip=false;
 	_type = MACH_MASTER;
 	_mode = MACHMODE_MASTER;
-	sprintf(_editName, "Master");
+	sprintf(_editName, "%.2X:Master",macIndex);
 }
 
 void Master::Init(void)
@@ -818,12 +827,13 @@ void Master::Work(
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Gainer::Gainer()
+Gainer::Gainer(int index)
 {
+	macIndex = index;
 	_numPars = 2;
 	_type = MACH_GAIN;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "Gainer");
+	sprintf(_editName, "%.2X:Gainer",macIndex);
 }
 
 void Gainer::Work(
@@ -881,12 +891,13 @@ void Gainer::Tick(int channel, PatternEntry *pData)
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Sine::Sine()
+Sine::Sine(int index)
 {
+	macIndex = index;
 	_numPars = 5;
 	_type = MACH_SINE;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "Psychosc");
+	sprintf(_editName, "%.2X:Psychosc",macIndex);
 }
 
 void Sine::Init(void)
@@ -1089,12 +1100,13 @@ bool Sine::Load(
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Distortion::Distortion()
+Distortion::Distortion(int index)
 {
+	macIndex = index;
 	_numPars = 5;
 	_type = MACH_DIST;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "Distortion");
+	sprintf(_editName, "%.2X:Distortion",macIndex);
 }
 
 void Distortion::Init(void)
@@ -1235,12 +1247,13 @@ bool Distortion::Load(
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Delay::Delay()
+Delay::Delay(int index)
 {
+	macIndex = index;
 	_numPars = 7;
 	_type = MACH_DELAY;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "Delay");
+	sprintf(_editName, "%.2X:Delay",macIndex);
 
 	_pBufferL = NULL;
 	_pBufferR = NULL;
@@ -1489,12 +1502,13 @@ void Delay::Tick(int channel, PatternEntry *pData)
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Flanger::Flanger()
+Flanger::Flanger(int index)
 {
+	macIndex = index;
 	_numPars = 9;
 	_type = MACH_FLANGER;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "Flanger");
+	sprintf(_editName, "%.2X:Flanger",macIndex);
 //	_resampler.SetQuality(RESAMPLE_LINEAR);// ADVISE!!!! Only linear resample can be done. SPLINE needs samples ahead
 	useResample=true;
 	
@@ -1880,12 +1894,13 @@ bool Flanger::Load(
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-Filter2p::Filter2p()
+Filter2p::Filter2p(int index)
 {
+	macIndex = index;
 	_numPars = 7;
 	_type = MACH_2PFILTER;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "2p Filter");
+	sprintf(_editName, "%.2X:2p Filter",macIndex);
 }
 
 void Filter2p::Init(void)

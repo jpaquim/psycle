@@ -173,7 +173,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
 	[ could try to set up some sort of clipping rect stack, at the cost of cpu... ]
 *	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
-	[ this is perhaps a flaw in the transparency blit algo? ]
+	[ this is perhaps a flaw in the transparency blit algo? - should port to ddraw ]
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]

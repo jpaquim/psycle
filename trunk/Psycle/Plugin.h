@@ -43,7 +43,7 @@ class Plugin : public Machine
 {
 public:
 
-	Plugin();
+	Plugin(int index);
 	virtual ~Plugin();
 
 	virtual void Init(void);
