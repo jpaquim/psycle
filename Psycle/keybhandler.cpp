@@ -514,7 +514,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 
 	if ( GetKeyState(VK_SHIFT)<0) 
-		AdvanceLine(0,Global::pConfig->_wrapAround,false);
+		AdvanceLine(-1,Global::pConfig->_wrapAround,false);
 	else
 		AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 
@@ -759,7 +759,7 @@ void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 {
 	const int nl = _pSong->patternLines[_ps()];
 
-	if ( x != 0)	editcur.line += x;
+	if ( x >= 0)	editcur.line += x;
 	else
 	{
 		editcur.track+=1;
