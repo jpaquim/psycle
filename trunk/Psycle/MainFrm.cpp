@@ -60,7 +60,6 @@ ON_BN_CLICKED(IDC_CLIPBUT, OnClipbut)
 ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
 ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
 ON_COMMAND(ID_PSYHELP, OnPsyhelp)
-ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
 ON_BN_CLICKED(IDC_EDITWAVE, OnEditwave)
 ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
@@ -74,11 +73,7 @@ ON_WM_CLOSE()
 ON_LBN_SELCHANGE(IDC_SEQLIST, OnSelchangeSeqlist)
 ON_LBN_DBLCLK(IDC_SEQLIST, OnDblclkSeqlist)
 ON_BN_CLICKED(IDC_DECLEN, OnDeclen)
-ON_BN_CLICKED(IDC_DECPAT2, OnDecpat2)
-ON_BN_CLICKED(IDC_DECPOS2, OnDecpos2)
 ON_BN_CLICKED(IDC_INCLEN, OnInclen)
-ON_BN_CLICKED(IDC_INCPAT2, OnIncpat2)
-ON_BN_CLICKED(IDC_INCPOS2, OnIncpos2)
 ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
 ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
@@ -121,6 +116,7 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SONGBAR, OnUpdateViewSongbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SEQUENCERBAR, OnUpdateViewSequencerbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
+ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -350,18 +346,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECLONG);
 	hi = (HBITMAP)bminusminus; cb->SetBitmap(hi);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECPOS2);
-	hi = (HBITMAP)bless; cb->SetBitmap(hi);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCPOS2);
-	hi = (HBITMAP)bmore; cb->SetBitmap(hi);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECPAT2);
-	hi = (HBITMAP)bless; cb->SetBitmap(hi);
-
-	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCPAT2);
-	hi = (HBITMAP)bmore; cb->SetBitmap(hi);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECLEN);
 	hi = (HBITMAP)bless; cb->SetBitmap(hi);
@@ -1313,7 +1297,7 @@ void CMainFrame::UpdateEnvInfo()
 
 void CMainFrame::OnPsyhelp() 
 {
-
+	MessageBox("No one has done the Help file yet, sorry","Psycle");
 //	HtmlHelp(NULL, "psycle.chm", HH_DISPLAY_TOPIC, 0);
 }
 
@@ -2202,57 +2186,6 @@ void CMainFrame::OnSeqsort()
 	m_wndView.SetFocus();
 }
 
-void CMainFrame::OnIncpos2() 
-{
-	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	if(m_wndView.editPosition<(_pSong->playLength-1))
-	{
-		++m_wndView.editPosition;
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPattern);
-		m_wndView.SetActiveWindow();
-	}
-	m_wndView.SetFocus();
-}
-
-void CMainFrame::OnDecpos2() 
-{
-	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	if(m_wndView.editPosition>0)
-	{
-		--m_wndView.editPosition;
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPattern);
-		m_wndView.SetActiveWindow();
-	}
-	m_wndView.SetFocus();
-}
-
-void CMainFrame::OnIncpat2() 
-{
-	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	int pop=m_wndView.editPosition;
-	if(_pSong->playOrder[pop]<(MAX_PATTERNS-1))
-	{
-		++_pSong->playOrder[pop];
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPattern);
-	}
-	m_wndView.SetFocus();	
-}
-
-void CMainFrame::OnDecpat2() 
-{
-	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	int pop=m_wndView.editPosition;
-	if(_pSong->playOrder[pop]>0)
-	{
-		--_pSong->playOrder[pop];
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPattern);
-	}
-	m_wndView.SetFocus();	
-}
 
 void CMainFrame::OnInclen() 
 {
@@ -2335,29 +2268,16 @@ void CMainFrame::OnFollowSong()
 void CMainFrame::UpdatePlayOrder(bool mode)
 {
 	
-	CStatic *ls_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ1);
-	CStatic *le_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ2);
 	CStatic *ll_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ3);
 	CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 	CStatic *pLength = (CStatic*)m_wndSeq.GetDlgItem(IDC_LENGTH);
 	
-
-	int ls = m_wndView.editPosition;
-	if(ls<0)
-		return; // CRASH FIX WHEN ls IS OUT OF RANGE
-	int le = _pSong->playOrder[ls];
 	int ll = _pSong->playLength;
 
 	char buffer[16];
 
 // Update Labels
 	
-	sprintf(buffer,"%.2X",ls);
-	ls_l->SetWindowText(buffer);
-
-	sprintf(buffer,"%.2X",le);
-	le_l->SetWindowText(buffer);
-
 	sprintf(buffer,"%.2X",ll);
 	ll_l->SetWindowText(buffer);
 
@@ -2396,7 +2316,7 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 					}
 					break;
-			
+					
 				case 0xFE:
 					if ( pEntry->_parameter != 0 )
 					{
@@ -2407,14 +2327,16 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 			songLength += (60.0f/(bpm * tpb));
 		}
 	}
-
+	
 	sprintf(buffer, "%02d:%02d", f2i(songLength / 60), f2i(songLength) % 60);
 	pLength->SetWindowText(buffer);
-
-// Update sequencer line
-
+	
+	// Update sequencer line
+	
 	if (mode)
 	{
+		const int ls=m_wndView.editPosition;
+		const int le=_pSong->playOrder[ls];
 		pls->DeleteString(ls);
 		sprintf(buffer,"%.2X: %.2X",ls,le);
 		pls->InsertString(ls,buffer);
