@@ -5,6 +5,8 @@
 #include "Psycle2.h"
 #include "DefaultVstGui.h"
 #include "Helpers.h"
+#include "ChildView.h"
+#include "configuration.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,8 +22,6 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 CDefaultVstGui::CDefaultVstGui()
 	: CFormView(CDefaultVstGui::IDD)
 {
-	canTweak=false;
-
 	//{{AFX_DATA_INIT(CDefaultVstGui)
 	//}}AFX_DATA_INIT
 }
@@ -173,10 +173,24 @@ void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (!updatingvalue)
 	{
-		float value = ((float)(VST_QUANTIZATION - m_slider.GetPos()))/VST_QUANTIZATION;
+		int val1 = VST_QUANTIZATION - m_slider.GetPos();
+		float value = (float)val1/VST_QUANTIZATION;
 
 		_pMachine->SetParameter(nPar, value);
 		UpdateText(value);
+		// well, this isn't so hard... just put the twk record here
+		if (Global::pConfig->_RecordTweaks)
+		{
+			ASSERT(mainView != NULL);
+			if (Global::pConfig->_RecordMouseTweaksSmooth)
+			{
+				childView->MousePatternTweakSlide(MachineIndex, nPar, val1);
+			}
+			else
+			{
+				childView->MousePatternTweak(MachineIndex, nPar, val1);
+			}
+		}
 	}
 	
 	*pResult = 0;

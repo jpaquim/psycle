@@ -8,7 +8,7 @@
 //
 
 #include "VSTHost.h"
-
+#include "ChildView.h"
 /////////////////////////////////////////////////////////////////////////////
 // CDefaultVstGui form view
 
@@ -30,13 +30,13 @@ public:
 	void UpdateText(float value);
 	void UpdateNew(int par,float value);
 
-	bool canTweak;
-	int nPlug;
+	int MachineIndex;
 	int nPar;
 	int previousProg;
 	VSTPlugin* _pMachine;
 	bool updatingvalue;
 	CWnd* mainView;
+	CChildView* childView;
 	
 	//{{AFX_DATA(CDefaultVstGui)
 	enum { IDD = IDD_VSTRACK };
