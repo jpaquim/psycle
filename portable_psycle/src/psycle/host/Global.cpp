@@ -58,7 +58,28 @@ namespace psycle
 
 
 		#if defined _WINAMP_PLUGIN_
-			bool FindFileinDir(char *dllname,CString &path)
+			bool FindFileinDir(/* const */ char name[], CString & path)
+			{
+				return find_file_in_dir_loose(name, path);
+			}
+			bool find_file_in_dir_loose(/* const */ char original_name[], CString & path)
+			{
+				if(find_file_in_dir_exact(original_name, path)) return true;
+				// <bohan> grrrr... i know the following code won't compile, but anyway, it's only used for winamp... why???
+				{
+					std::string string = original_name;
+					for(std::string::iterator i(string.begin()), i != string.end(), ++i) if(*i == ' ') *i = '-';
+					if(find_file_in_dir_exact(string.c_str(), path)) return true;
+				}
+				{
+					std::string string = original_name;
+					for(std::string::iterator i(string.begin()), i != string.end(), ++i) if(*i == ' ') *i = '_';
+					if(find_file_in_dir_exact(string.c_str(), path)) return true;
+				}
+				return false;
+
+			}
+			bool find_file_in_dir_exact(/* const */ char name[], CString & path)
 			{
 				CFileFind finder;
 				int loop = finder.FindFile(path + "\\*"); // check for subfolders.
@@ -68,7 +89,7 @@ namespace psycle
 					if(finder.IsDirectory() && !finder.IsDots())
 					{
 						CString filepath = finder.GetFilePath();
-						if(FindFileinDir(dllname,filepath))
+						if(FindFileinDir(name, filepath))
 						{
 							path = filepath;
 							return true;
@@ -76,10 +97,10 @@ namespace psycle
 					}
 				}
 				finder.Close();
-				if(finder.FindFile(path + "\\" + dllname)) // not found in subdirectories, lets see if it's here
+				if(finder.FindFile(path + "\\" + name)) // not found in subdirectories, lets see if it's here
 				{
 					finder.Close();
-					path= (path + "\\") + dllname;
+					path= (path + "\\") + name;
 					return true;
 				}
 				finder.Close();

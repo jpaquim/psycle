@@ -12,7 +12,7 @@ namespace psycle
 		class Resampler;
 
 		#if defined _WINAMP_PLUGIN_
-			bool FindFileinDir(char *dllname,CString &path);
+			bool FindFileinDir(/* const */ char name[], CString & path);
 		#endif
 
 		#if !defined _WINAMP_PLUGIN_
