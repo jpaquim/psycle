@@ -166,12 +166,12 @@
 // boost http://boost.org
 //////////////////////////
 
-#if defined OPERATING_SYSTEM__CROSSPLATFORM
+#if defined OPERATING_SYSTEM__CROSSPLATFORM || 1
 	#include <boost/thread/thread.hpp>
 	#include <boost/thread/mutex.hpp>
 	#include <boost/thread/recursive_mutex.hpp>
 	#include <boost/thread/condition.hpp>
-	#include <boost/spirit.hpp>
+	//#include <boost/spirit.hpp>
 	#if defined COMPILER__MICROSOFT
 		#if !defined LIBRARY__BOOST__PATH
 			//#define LIBRARY__BOOST__PATH "/usr/lib/boost/libs/"
