@@ -2,7 +2,8 @@
 !=change
 +=addition
 
-pen alpha
+* the scope machine will NOT remain as a machine, it is going to be a tool.  Bohan suggest activating it
+	by clicking on a machine's VU meter.  I was thinking of activating it from the wire dialog...
 
 * <[JAZ]> actually.. another thing in the "todo" should be "fixing" the cache.map file so that it can 
 	include dates of dll's and update automatically the info when new one.
@@ -18,6 +19,7 @@ pen alpha
 	and shield the user from the nastiness
 * <alk> my new skin, can u make it possible to change the fonts of the gen and fx separately?
 * <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
++ <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 
 * Machines
 ------------
