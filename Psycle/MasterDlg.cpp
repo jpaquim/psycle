@@ -546,3 +546,14 @@ void CMasterDlg::OnPaint()
 	}
 	// Do not call CDialog::OnPaint() for painting messages
 }
+
+BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) 
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
+	{
+		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+	}
+	
+	return CDialog::PreTranslateMessage(pMsg);
+}
