@@ -1185,7 +1185,6 @@ bool Song::Load(RiffFile* pFile)
 		int chunkcount;
 
 		Header[4]=0;
-		_machineLock = true;
 
 		long filesize = pFile->FileSize();
 
@@ -1205,14 +1204,8 @@ bool Song::Load(RiffFile* pFile)
 			// there is currently no data in this segment
 		}
 		*/
-		for(int c=0; c<MAX_MACHINES-1; c++)
-		{
-			if(_pMachine[c])
-			{
-				DestroyMachine(c);
-			}
-			_pMachine[c] = NULL;
-		}
+		DestroyAllMachines();
+		_machineLock = true;
 		DeleteInstruments();
 		DeleteAllPatterns();
 
@@ -1254,6 +1247,10 @@ bool Song::Load(RiffFile* pFile)
 				}
 				else
 				{
+					// why all these temps?  to make sure if someone changes the defs of
+					// any of these members, the rest of the file reads ok.  assume 
+					// everything is an int, when we write we do the same thing.
+
 					pFile->Read(&temp,sizeof(temp));  // # of tracks for whole song
 					SONGTRACKS = temp;
 					pFile->Read(&temp,sizeof(temp));  // bpm
@@ -1291,10 +1288,8 @@ bool Song::Load(RiffFile* pFile)
 						}
 					}
 
-
 					Global::pPlayer->bpm = BeatsPerMin;
 					Global::pPlayer->tpb = _ticksPerBeat;
-					Global::pPlayer->_playPosition= 0;
 					// calculate samples per tick
 		
 #if defined(_WINAMP_PLUGIN_)
@@ -1302,7 +1297,6 @@ bool Song::Load(RiffFile* pFile)
 #else
 					SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 #endif
-
 				}
 			}
 			else if (strcmp(Header,"SEQD")==0)
@@ -1563,8 +1557,9 @@ bool Song::Load(RiffFile* pFile)
 		}
 		else _ticksPerBeat = 44100*15*4/(SamplesPerTick*BeatsPerMin);
 
-		Global::pPlayer->_playPosition= 0;
-
+		Global::pPlayer->bpm = BeatsPerMin;
+		Global::pPlayer->tpb = _ticksPerBeat;
+		
 		// The old format assumes we output at 44100 samples/sec, so...
 		//
 	#if defined(_WINAMP_PLUGIN_)

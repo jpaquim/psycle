@@ -835,34 +835,30 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 
 void CChildView::OnFileLoadsong()
 {
-	if (CheckUnsavedSong("Load Song"))
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	
+	szFile[0]='\0';
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	
+	// Display the Open dialog box. 
+	
+	if (GetOpenFileName(&ofn)==TRUE)
 	{
-
-		OPENFILENAME ofn;       // common dialog box structure
-		char szFile[_MAX_PATH];       // buffer for file name
-		
-		szFile[0]='\0';
-		// Initialize OPENFILENAME
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = GetParent()->m_hWnd;
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
-		ofn.nFilterIndex = 1;
-		ofn.lpstrFileTitle = NULL;
-		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-		
-		// Display the Open dialog box. 
-		
-		if (GetOpenFileName(&ofn)==TRUE)
-		{
-			OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
-		}
-		pParentMain->StatusBarIdle();
+		OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
 	}
+	pParentMain->StatusBarIdle();
 }
 
 void CChildView::OnFileNew() 
@@ -1488,6 +1484,8 @@ void CChildView::OnHelpSaludos()
 
 int CChildView::SongIncBpm(int x)
 {
+	AddMacViewUndo();
+
 	Global::_pSong->BeatsPerMin+=x;
 	
 	if (Global::_pSong->BeatsPerMin < 33)
@@ -1498,7 +1496,8 @@ int CChildView::SongIncBpm(int x)
 	{
 		Global::_pSong->BeatsPerMin=999;
 	}
-	Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+
+ 	Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 	
 	return Global::_pSong->BeatsPerMin;
 }
@@ -2038,6 +2037,7 @@ void CChildView::FileLoadsongNamed(char* fName)
 		MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 		return;
 	}
+	editPosition = 0;
 	_pSong->Load(&file);
 //	file.Close(); <- load handles this
 	

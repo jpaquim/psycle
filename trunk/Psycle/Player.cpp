@@ -21,7 +21,10 @@ Player::Player()
 	_loopSong=true;
 	tpb=4;
 	bpm=125;
-	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
+	for (int i=0;i<MAX_TRACKS;i++) 
+	{
+		prevMachines[i]=255;
+	}
 }
 
 Player::~Player()

@@ -48,6 +48,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MACHINE_FONTFACE2, m_effect_fontface);
 	DDX_Control(pDX, IDC_MACHINE_FONT_POINT2, m_effect_font_point);
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
+	DDX_Control(pDX, IDC_CHECK_VUS, m_draw_vus);
 	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
 	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
 	DDX_Control(pDX, IDC_LINE_NUMBERS_CURSOR, m_linenumbersCursor);
@@ -91,6 +92,7 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_CURSORC, OnCursor)
 	ON_BN_CLICKED(IDC_CURSORC2, OnCursor2)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
+	ON_BN_CLICKED(IDC_CHECK_VUS, OnCheckVus)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_CURSOR, OnLineNumbersCursor)
@@ -140,6 +142,7 @@ BOOL CSkinDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	m_gfxbuffer.SetCheck(_gfxbuffer);
+	m_draw_vus.SetCheck(_draw_vus);
 	m_linenumbers.SetCheck(_linenumbers);
 	m_linenumbersHex.SetCheck(_linenumbersHex);
 	m_linenumbersCursor.SetCheck(_linenumbersCursor);
@@ -627,6 +630,11 @@ void CSkinDlg::OnPlaybar2()
 void CSkinDlg::OnDoublebuffer() 
 {
 	_gfxbuffer = m_gfxbuffer.GetCheck() >0?true:false;
+}
+
+void CSkinDlg::OnCheckVus() 
+{
+	_draw_vus = m_draw_vus.GetCheck() >0?true:false;
 }
 
 void CSkinDlg::OnLineNumbers() 

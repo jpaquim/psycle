@@ -10,6 +10,8 @@ V1.7.3 RC2
 ! whoops - loading a song moves to the top of the sequence again (pooplog)
 ! whoops - fixed the tempo not set before machines loaded bug- made crossdelay 
   have wrong tempo on tick mode (pooplog)
+! whoops - there were 2 warnings on loading a song (pooplog)
+* All-new high-performance ASIO implementation - MSB mode not done yet (pooplog)
 
 V1.7.3 RC1
 ----------
