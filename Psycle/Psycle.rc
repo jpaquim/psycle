@@ -1054,7 +1054,7 @@ BEGIN
     CONTROL         "HotKey1",IDC_KEY0,"msctls_hotkey32",WS_BORDER | 
                     WS_TABSTOP,29,255,95,15
     LTEXT           "Key:",IDC_STATIC,9,255,15,10
-    GROUPBOX        "Behaviour",IDC_STATIC,133,3,125,95
+    GROUPBOX        "Behaviour",IDC_STATIC,133,3,125,92
     CONTROL         "Right CTRL play / Space stop",IDC_PLAY_R_CTRL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,13,110,10
     CONTROL         "FT2 Style Home/End Behaviour",IDC_FT2_HOME_END,"Button",
@@ -1068,7 +1068,7 @@ BEGIN
     CONTROL         "Center Cursor",IDC_CENTERCURSOR,"Button",
                     BS_AUTOCHECKBOX,138,70,115,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE,138,83,115,10
+                    BS_AUTOCHECKBOX | BS_MULTILINE,138,82,115,10
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263

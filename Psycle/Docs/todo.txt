@@ -7,7 +7,6 @@
 + D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
 	drop that highlighted area?
 + .mid import
-* <necro> psycle crashes with a division error on boot on some 98 machines
 
 * Other crap
 ------------
