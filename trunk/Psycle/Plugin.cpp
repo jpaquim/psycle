@@ -162,7 +162,8 @@ void Plugin::Work(int numSamples)
 			while (ns)
 			{
 				int nextevent;
-				if (TWSDelta != 0)
+				nextevent = ns+1;
+				if (TWSActive)
 				{
 					nextevent = TWSSamples;
 				}
@@ -182,11 +183,11 @@ void Plugin::Work(int numSamples)
 				}
 				if (nextevent > ns)
 				{
-					if (TWSDelta != 0)
+					if (TWSActive)
 					{
 						TWSSamples -= ns;
 					}
-					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+					for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 					{
 						// come back to this
 						if (TriggerDelay[i]._cmd)
@@ -206,23 +207,35 @@ void Plugin::Work(int numSamples)
 						_pInterface->Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
 						us += nextevent;
 					}
-					if (TWSDelta != 0)
+					if (TWSActive)
 					{
 						if (TWSSamples == nextevent)
 						{
-							TWSCurrent += TWSDelta;
+							int activecount = 0;
+							TWSSamples = TWEAK_SLIDE_SAMPLES;
+							for (i = 0; i < MAX_TWS; i++)
+							{
+								if (TWSDelta[i] != 0)
+								{
+									TWSCurrent[i] += TWSDelta[i];
 
-							if (((TWSDelta > 0) && (TWSCurrent >= TWSDestination))
-								|| ((TWSDelta < 0) && (TWSCurrent <= TWSDestination)))
-							{
-								TWSCurrent = TWSDestination;
-								TWSDelta = 0;
+									if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i]))
+										|| ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i])))
+									{
+										TWSCurrent[i] = TWSDestination[i];
+										TWSDelta[i] = 0;
+									}
+									else
+									{
+										activecount++;
+									}
+									_pInterface->ParameterTweak(TWSInst[i],int(TWSCurrent[i]));
+								}
 							}
-							else
+							if (activecount == 0)
 							{
-								TWSSamples = TWEAK_SLIDE_SAMPLES;
+								TWSActive = FALSE;
 							}
-							_pInterface->ParameterTweak(TWSInst,int(TWSCurrent));
 						}
 					}
 					for (i=0; i < Global::_pSong->SONGTRACKS; i++)
@@ -346,19 +359,73 @@ void Plugin::Tick(
 	}
 	else if (pData->_note == cdefTweakS)
 	{
-		TWSDestination = float(pData->_cmd<<8)+pData->_parameter;
-		float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
-		float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
-
-		TWSDestination += min;
-		if (TWSDestination > max)
+		if (pData->_inst < _pInfo->numParameters)
 		{
-			TWSDestination = max;
+			int i;
+			if (TWSActive)
+			{
+				// see if a tweak slide for this parameter is already happening
+				for (i = 0; i < MAX_TWS; i++)
+				{
+					if ((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+					{
+						// yes
+						break;
+					}
+				}
+				if (i == MAX_TWS)
+				{
+					// nope, find an empty slot
+					for (i = 0; i < MAX_TWS; i++)
+					{
+						if (TWSDelta[i] == 0)
+						{
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				// wipe our array for safety
+				for (i = MAX_TWS-1; i > 0; i--)
+				{
+					TWSDelta[i] = 0;
+				}
+			}
+			if (i < MAX_TWS)
+			{
+				TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
+				float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
+				float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
+
+				TWSDestination[i] += min;
+				if (TWSDestination[i] > max)
+				{
+					TWSDestination[i] = max;
+				}
+				TWSInst[i] = pData->_inst;
+				TWSCurrent[i] = float(_pInterface->Vals[TWSInst[i]]);
+				TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+				TWSSamples = 0;
+				TWSActive = TRUE;
+			}
+			else
+			{
+				// we have used all our slots, just send a twk
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				int const min = _pInfo->Parameters[pData->_inst]->MinValue;
+				int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+
+				nv += min;
+				if (nv > max)
+				{
+					nv = max;
+				}
+
+				_pInterface->ParameterTweak(pData->_inst, nv);
+			}
 		}
-		TWSInst = pData->_inst;
-		TWSCurrent = float(_pInterface->Vals[TWSInst]);
-		TWSSamples = 0;
-		TWSDelta = float((TWSDestination-TWSCurrent)*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
 #if !defined(_WINAMP_PLUGIN_)
 			Global::_pSong->Tweaker = true;
 #endif // ndef _WINAMP_PLUGIN_

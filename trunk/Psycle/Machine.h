@@ -102,11 +102,12 @@ public:
 	int				TriggerDelayCounter[MAX_TRACKS];
 	int				RetriggerRate[MAX_TRACKS];
 
-	int TWSInst;
+	bool TWSActive;
+	int TWSInst[MAX_TWS];
 	int TWSSamples;
-	float TWSDelta;
-	float TWSCurrent;
-	float TWSDestination;
+	float TWSDelta[MAX_TWS];
+	float TWSCurrent[MAX_TWS];
+	float TWSDestination[MAX_TWS];
 	
 	Machine();
 	virtual ~Machine();
