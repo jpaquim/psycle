@@ -129,33 +129,6 @@ void CChildView::MidiPatternTweak(int command, int value)
 			{
 				SelectNextTrack();
 			}
-/*			else
-			{
-				// build entry
-				PatternEntry entry;
-				entry._mach = _pSong->seqBus;
-				entry._cmd = (value>>8)&255;
-				entry._parameter = value&255;
-				entry._inst = command;
-				entry._note = 121;
-
-				// play it
-				int mgn;
-				Machine* pMachine;
-				if ( Global::_pSong->seqBus < MAX_BUSES )
-					mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
-				else
-					mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
-
-				if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
-					pMachine = Global::_pSong->_pMachines[mgn];
-				else return;
-
-				// play
-				pMachine->Tick(0,&entry);
-				return;
-			}
-			*/
 		}
 		// write effect
 		int ps = _ps();
@@ -236,33 +209,6 @@ void CChildView::MidiPatternCommand(int command, int value)
 			{
 				SelectNextTrack();
 			}
-/*			else
-			{
-				// build entry
-				PatternEntry entry;
-				entry._mach = _pSong->seqBus;
-				entry._inst = _pSong->auxcolSelected;
-				entry._cmd = command;
-				entry._parameter = value;
-				entry._note = 255;
-
-				// play it
-				int mgn;
-				Machine* pMachine;
-				if ( Global::_pSong->seqBus < MAX_BUSES )
-					mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
-				else
-					mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
-
-				if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
-					pMachine = Global::_pSong->_pMachines[mgn];
-				else return;
-
-				// play
-				pMachine->Tick(0,&entry);
-				return;
-			}
-			*/
 		}
 		// write effect
 		int ps = _ps();
@@ -338,11 +284,6 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 			{
 				SelectNextTrack();
 			}
-/*			else
-			{
-				return;
-			}
-			*/
 		}
 		// write effect
 		int ps = _ps();
@@ -464,7 +405,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 	entry->_note = note;
 	entry->_mach = _pSong->seqBus;
-	entry->_inst = _pSong->auxcolSelected;
+
 	if ( note < 120)
 	{
 		if (Global::pConfig->_RecordTweaks)
@@ -473,25 +414,42 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			{
 				// command
 				entry->_cmd = Global::pConfig->_midiCommandVel;
-				entry->_parameter = Global::pConfig->_midiFromVel + 
+				int par = Global::pConfig->_midiFromVel + 
 									(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
-				if (entry->_parameter > 255) entry->_parameter = 255;
-				else if (entry->_parameter < 0) entry->_parameter = 0;
+				if (par > 255) 
+				{
+					par = 255;
+				}
+				else if (par < 0) 
+				{
+					par = 0;
+				}
+				entry->_parameter = par;
 			}
 		}
 	}
 
 	int mgn;
 	if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
-		mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-	else
-		mgn = _pSong->busMachine[_pSong->seqBus];
-
-	if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
 	{
+		mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+	}
+	else
+	{
+		mgn = _pSong->busMachine[_pSong->seqBus];
+	}
+
+	if (Global::_pSong->_machineActive[mgn])
+	{
+		Machine *tmac = Global::_pSong->_pMachines[mgn];
+
+		if (tmac->_type == MACH_SAMPLER)
+		{
+			entry->_inst = _pSong->auxcolSelected;
+		}
+
 		if ( note < 120)
 		{
-			Machine *tmac = Global::_pSong->_pMachines[mgn];
 			tmac->Tick(editcur.track, entry);
 		}
 	}

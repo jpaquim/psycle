@@ -9,10 +9,8 @@
 * why does it take so long to load a song?
 + make file dialogs remember preferences
 + shift + off inserts an off that does not specify machine
-* right click on machine should mention machine # in title
 + option to see waveform instead of notes in pattern editor for acid mode
 * clicking on a different block in sequencer should jump play position to it
-* machines other than sampler should NOT spam instrument column so new machines can use it as volume or whatever
 * psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
