@@ -1271,7 +1271,41 @@ void CSkinDlg::OnImportReg()
 					_machineViewEffectFontColor=_httoi(q+1);
 				}
 			}
-		}
+			// legacy...
+			else if (strstr(buf,"\"mv_fontcolour\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_machineViewGeneratorFontColor=_httoi(q+1);
+					_machineViewEffectFontColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"machine_fontface\"=\""))
+			{
+				char *q = strchr(buf,61); // =
+				if (q)
+				{
+					q+=2;
+					char *p = strrchr(q,34); // "
+					if (p)
+					{
+						p[0]=0;
+						strcpy(_generator_fontface,q);
+						strcpy(_effect_fontface,q);
+					}
+				}
+			}
+			else if (strstr(buf,"\"machine_font_point\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_generator_font_point=_httoi(q+1);
+					_effect_font_point=_httoi(q+1);
+				}
+			}
+}
 		fclose(hfile);
 //		m_linenumbers.SetCheck(_linenumbers);
 //		m_linenumbersHex.SetCheck(_linenumbersHex);
