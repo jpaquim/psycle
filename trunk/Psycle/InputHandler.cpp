@@ -849,7 +849,7 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		BOOL bRepeat = nFlags&0x4000;
 		if ( cmd.GetType() == CT_Note )
 		{
-			if (!bRepeat)
+			if ((!bRepeat) || (cmd.GetNote() == 121))
 			{
 				pChildView->EnterNote(cmd.GetNote());
 				return true;

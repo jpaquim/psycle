@@ -10,6 +10,57 @@ X low priority
 
 [blah]  <- Notes written by developers
 
+
+<alk_> I found a bug but couldnt reproduce it
+<alk_> it happened twice
+<alk_> I had selected a channel to record
+<alk_> did some recording, and selected edit on /off while it was playing (on follow mode of course)
+<alk_> then I presed stop
+<alk_> edit on
+<alk_> but it would not enter any notes
+<alk_> I changed edit off
+<alk_> and on again
+<alk_> but it wuold enter notes
+<alk_> I changed to another app
+<alk_> changed back 
+<alk_> and then could enter notes
+<alk_> I repeated it once, this time it coming back by not changing app, not quite sure how
+<alk_> sorry it's so vague..
+
+
+bugs --->
+
+hold down a note, change octave, let go (note stuck)
+
+**
+start new song
+add pooplog filter
+select pooplog filter and filter cutoff param
+solo a track
+record arm the same track
+go to start off track
+make sure follow song is on
+hit shift enter to bring up machine dialog
+hit f5
+tweak the VCF cutoff
+hit f8
+move cursor up to where there is a tweak
+
+PROBLEM-->
+try to delete (del key)
+try to select a block (ctrl-b ctrl-e)
+
+tab to another program
+tab back
+you are now able to delete and make a block
+**
+
+new ideas --->
+
+remove keypress for random parameters on a machine,
+at the moment it's ctrl-R (dangerous)
+
+
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
@@ -149,7 +200,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +++	option for record to take command FD into account like ft2
 +++FF	new file format: (machines save custom data length, patterns stored according to # tracks, sequence 
 		length stored according to length, vst multi-out, connections as linked lists, wire nodes, 
-		volume column, multiout info, etc.)
+		volume column, multiout info, direct x stuff, etc.)
 ++	ALK tracker command to bypass an fx, mute command for machines
 		[Currently machines are disconnected when doing so. If we do the commands, they should be just muted]
 ++	Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
