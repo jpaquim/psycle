@@ -227,6 +227,8 @@ public:
 	int _midiHeadroom;
 
 	int defaultPatLines;
+	bool bShowSongInfoOnLoad;
+	bool bFileSaveReminders;
 
 	AudioDriver** _ppOutputDrivers;
 	AudioDriver* _pOutputDriver;

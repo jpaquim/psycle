@@ -26,6 +26,8 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CKeyConfigDlg)
 	enum { IDD = IDD_KEYCONFIG };
+	CButton	m_save_reminders;
+	CButton	m_show_info;
 	CButton	m_cmdShiftArrows;
 	CButton	m_cmdFT2Del;
 	CButton	m_cmdNewHomeBehaviour;
@@ -38,7 +40,6 @@ public:
 	CEdit	m_numlines;
 	CSpinButtonCtrl	m_spinlines;
 	CStatic m_textlines;
-
 	//}}AFX_DATA
 
 

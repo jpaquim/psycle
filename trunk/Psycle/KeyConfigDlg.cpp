@@ -33,6 +33,8 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CKeyConfigDlg)
+	DDX_Control(pDX, IDC_FILE_SAVE_REMINDERS, m_save_reminders);
+	DDX_Control(pDX, IDC_SHOW_INFO_ON_LOAD, m_show_info);
 	DDX_Control(pDX, IDC_SHIFTARROWS, m_cmdShiftArrows);
 	DDX_Control(pDX, IDC_FT2DEL, m_cmdFT2Del);
 	DDX_Control(pDX, IDC_FT2_HOME_END, m_cmdNewHomeBehaviour);
@@ -94,6 +96,9 @@ BOOL CKeyConfigDlg::OnInitDialog()
 	m_cmdNewHomeBehaviour.SetCheck(Global::pInputHandler->bFT2HomeBehaviour?1:0);
 	m_cmdFT2Del.SetCheck(Global::pInputHandler->bFT2DelBehaviour?1:0);
 	m_cmdShiftArrows.SetCheck(Global::pInputHandler->bShiftArrowsDoSelect?1:0);
+
+	m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
+	m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
 
 	// prevent ALT in hotkey	
 
@@ -234,6 +239,9 @@ void CKeyConfigDlg::OnOK()
 	Global::pConfig->_wrapAround = m_wrap.GetCheck()?true:false;
 	Global::pConfig->_centerCursor = m_centercursor.GetCheck()?true:false;
 	Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
+
+	Global::pConfig->bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
+	Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
 
 	char buffer[32];
 	m_numlines.GetWindowText(buffer,16);

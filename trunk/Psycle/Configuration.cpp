@@ -246,6 +246,8 @@ Configuration::Configuration()
 	_midiTo15 = 0xff;
 
 	defaultPatLines = 64;
+	bShowSongInfoOnLoad = true;
+	bFileSaveReminders = true;
 
 #endif // _WINAMP_PLUGIN
 }
@@ -627,6 +629,11 @@ Configuration::Read()
 		Global::_pSong->patternLines[c]=defaultPatLines;
 	}
 
+	numData = sizeof(bShowSongInfoOnLoad);
+	reg.QueryValue("bShowSongInfoOnLoad", &type, (BYTE*)&bShowSongInfoOnLoad, &numData);
+	numData = sizeof(bFileSaveReminders);
+	reg.QueryValue("bFileSaveReminders", &type, (BYTE*)&bFileSaveReminders, &numData);
+	
 	numData = sizeof(mv_colour);
 	reg.QueryValue("mv_colour", &type, (BYTE*)&mv_colour, &numData);
 	numData = sizeof(mv_wirecolour);
@@ -1084,6 +1091,9 @@ Configuration::Write()
 	reg.SetValue("MidiTo15", REG_DWORD, (BYTE*)&_midiTo15, sizeof(_midiTo15));	
 
 	reg.SetValue("defaultPatLines", REG_DWORD, (BYTE*)&defaultPatLines, sizeof(defaultPatLines));	
+
+	reg.SetValue("bShowSongInfoOnLoad", REG_DWORD, (BYTE*)&bShowSongInfoOnLoad, sizeof(bShowSongInfoOnLoad));	
+	reg.SetValue("bFileSaveReminders", REG_DWORD, (BYTE*)&bFileSaveReminders, sizeof(bFileSaveReminders));	
 
 	reg.SetValue("mv_colour", REG_DWORD, (BYTE*)&mv_colour, sizeof(mv_colour));	
 	reg.SetValue("mv_wirecolour", REG_DWORD, (BYTE*)&mv_wirecolour, sizeof(mv_wirecolour));	

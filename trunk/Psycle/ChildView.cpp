@@ -900,6 +900,7 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 	
 	if (!bChecked)
 	*/
+	if (Global::pConfig->bFileSaveReminders)
 	{
 		char szText[128];
 		CString filepath = Global::pConfig->GetSongDir();
@@ -2025,13 +2026,16 @@ void CChildView::FileLoadsongNamed(char* fName)
 	KillRedo();
 	SetTitleBarText();
 
-	char buffer[512];
-	sprintf(buffer,"'%s'\n\n%s\n\n%s"
-		,_pSong->Name
-		,_pSong->Author
-		,_pSong->Comment);
-	
-	MessageBox(buffer,"Psycle song loaded",MB_OK);
+	if (Global::pConfig->bShowSongInfoOnLoad)
+	{
+		char buffer[512];
+		sprintf(buffer,"'%s'\n\n%s\n\n%s"
+			,_pSong->Name
+			,_pSong->Author
+			,_pSong->Comment);
+		
+		MessageBox(buffer,"Psycle song loaded",MB_OK);
+	}
 }
 
 void CChildView::CallOpenRecent(int pos)
