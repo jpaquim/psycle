@@ -2,7 +2,7 @@
 !=change
 +=addition
 
-*I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
+* I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
 * remove waits from play when in export mode
 * should be able to pick cursor colour rather than have it invert background 
 * lines between tracks should be definable, not black
@@ -59,12 +59,10 @@
 	require a file format change though :(
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
 + pooplog - dragging files onto psycle window would be nice, hmm?
-* machine numbers in dialog headers should be in hex
+! machine numbers in dialog headers should be in hex
 * switched a pattern length to 2 and the empty space was not cleared, it looped 0 1 0 1 0 1
 * trying to select past the visible area with the mouse sucks
 * preview check box in preset dialog stopped working?
-* noteffs didn't play when recording
-* keyrepeat on recording! what the fuck?!
 * did some transpose selection and display got fucking crazy i was very confused - undo did same.
 * moving machines makes playback pop
 * waveoutMME gets weird after a bit and start playing all crackly and doubletime
@@ -74,6 +72,8 @@
 	but labelled volume sliders for each of the machines connected to it? -> this would suck as you would get names
 	for only the effects
 + how about nice looking bmp windows for machine link and master machine dialogs?
++ how about option to switch the instrument and machine columns?
++ how about making instrument column data available to all machines?
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
