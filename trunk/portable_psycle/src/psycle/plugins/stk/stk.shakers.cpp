@@ -93,14 +93,14 @@ CMachineInfo const MacInfo =
 	NUMPARAMETERS,							// numParameters
 	pParameters,							// Pointer to parameters
 #ifdef _DEBUG
-	"stk Shakers 0.3 (Debug build)",		// name
+	"stk Shakers (Debug build)",		// name
 #else
-	"stk Shakers 0.3",						// name
+	"stk Shakers",						// name
 #endif
 	"Shakers",							// short name
 	"Sartorius, bohan and STK 4.2.0 developers",							// author
 	"Help",									// A command, that could be use for open an editor, etc...
-	4
+	1
 };
 
 class mi : public CMachineInterface

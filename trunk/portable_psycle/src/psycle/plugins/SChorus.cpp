@@ -110,7 +110,7 @@ CMachineInfo const MacInfo =
 	"SChorus",							// short name
 	"Sartorius, Alexey Smoli",							// author
 	"About",								// A command, that could be use for open an editor, etc...
-	3
+	4
 };
 
 

@@ -53,12 +53,12 @@ CMachineInfo const MacInfo =
 #ifdef _DEBUG
 	"stk Plucked (Debug build)",		// name
 #else
-	"stk Plucked ",						// name
+	"stk Plucked",						// name
 #endif
 	"stk Plucked",							// short name
 	"Sartorius, Bohan and STK 4.2.0 developers",							// author
 	"Help",									// A command, that could be use for open an editor, etc...
-	4
+	1
 };
 
 class mi : public CMachineInterface
