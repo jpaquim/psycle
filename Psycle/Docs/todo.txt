@@ -139,8 +139,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	old versions and they were all like this too...
 * <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
-* <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
-	happens to native plugs)
 * Flanger feedback slider
 * Instrument filter envelope slider. (check differences with finetune slider)+ midi control commands learn
 * <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
@@ -172,8 +170,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
 	pattern length parameter
 + <Alk^> I also think that the cursor movement after a paste should be optional to =)
-+ Alk* would be useful to put dialogs like wire vol into separate tasks (modeless) so psycle is not disabled 
-	when they are open
 + <_sue_> hey poop....can we have something like a right double click for inserting the first not used pattern
 	 (like instert button)?
 + <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
