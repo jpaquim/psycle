@@ -18,6 +18,8 @@ class CGearRackDlg : public CDialog
 public:
 	void ExchangeIns(int one,int two);
 	void ExchangeMacs(int one,int two);
+	void CloneMac(int src,int dst);
+	void CloneIns(int src,int dst);
 	CGearRackDlg(CChildView* pParent, CMainFrame* pMain);   // standard constructor
 	CChildView* m_pParent;
 	CMainFrame* pParentMain;

@@ -37,7 +37,8 @@ rough bug count: ~60, many aren't really bugs though.
 
 *** gear rack stuff:
 	1) cloning - trick it to save to ram, then make a new and load from ram * add to right click menu too
-	3) replacing """
+
+** parameter name lengths in plugs: http://psycle.pastnotecut.org/thread.php?threadid=938&boardid=2&styleid=1
 
 +++ bmps for background of machine view?
 +++ moving wires, preserving volume, dragging triangles with shift moves destination.
@@ -263,6 +264,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ** ni spektral delay 1.0 crashes on effClose or effEditIdle messages.  notice a trend with NI plugins yet?
 ** synth 1 1.05a crashes with exception error on instance in debug build.
 *	Many vsts randomly loose keyboard focus
+	[ alk says make an invisible topmost window that passes clicks and keys down to windows beneath it ]
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.
 		[ A "bypass" bug, if we do the above ^]
