@@ -25,11 +25,11 @@ namespace psycle
 			{
 				byte * pDestPos = *pDestination = new byte[(size*9/8)+5];//worst case
 				memset(pDestPos, 0, (size*9/8)+5);
-				*pDestPos++ = 0x04; // file version
-				*pDestPos++ = (byte)size & 0xff;
-				*pDestPos++ = (byte)(size>>8) & 0xff;
-				*pDestPos++ = (byte)(size>>16) & 0xff;
-				*pDestPos++ = (byte)(size>>24) & 0xff;
+				*pDestPos++ = (byte)0x04; // file version
+				*pDestPos++ = (byte)(size & 0xff);
+				*pDestPos++ = (byte)((size>>8) & 0xff);
+				*pDestPos++ = (byte)((size>>16) & 0xff);
+				*pDestPos++ = (byte)((size>>24) & 0xff);
 
 				// we will compress pSource into pDest
 				byte * pSlidingWindow = pSource;
