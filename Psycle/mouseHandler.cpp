@@ -369,27 +369,78 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		}
 		else if ( smacmode == 0 && smac != -1 )
 		{
-			if (point.x-mcd_x < 0 ) 
-			{ 
-				_pSong->_pMachines[smac]->_x = 0; 
-				Repaint(); 
+			switch(_pSong->_pMachines[smac]->_mode)
+			{
+				case MACHMODE_GENERATOR:
+					if (point.x-mcd_x < 0 ) 
+					{ 
+						_pSong->_pMachines[smac]->_x = 0; 
+						Repaint(); 
+					}
+					else if	(point.x-mcd_x+MachineCoords.sGenerator.width > CW) 
+					{ 
+						_pSong->_pMachines[smac]->_x = CW-MachineCoords.sGenerator.width; 
+						Repaint(); 
+					}
+					if (point.y-mcd_y < 0 ) 
+					{ 
+						_pSong->_pMachines[smac]->_y = 0; 
+						Repaint(); 
+					}
+					else if (point.y-mcd_y+MachineCoords.sGenerator.height > CH) 
+					{ 
+						_pSong->_pMachines[smac]->_y = CH-MachineCoords.sGenerator.height; 
+						Repaint(); 
+					}
+					break;
+				case MACHMODE_FX:
+				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+					if (point.x-mcd_x < 0 ) 
+					{ 
+						_pSong->_pMachines[smac]->_x = 0; 
+						Repaint(); 
+					}
+					else if	(point.x-mcd_x+MachineCoords.sEffect.width > CW) 
+					{ 
+						_pSong->_pMachines[smac]->_x = CW-MachineCoords.sEffect.width; 
+						Repaint(); 
+					}
+					if (point.y-mcd_y < 0 ) 
+					{ 
+						_pSong->_pMachines[smac]->_y = 0; 
+						Repaint(); 
+					}
+					else if (point.y-mcd_y+MachineCoords.sEffect.height > CH) 
+					{ 
+						_pSong->_pMachines[smac]->_y = CH-MachineCoords.sEffect.height; 
+						Repaint(); 
+					}
+					break;
+
+				case MACHMODE_MASTER:
+					if (point.x-mcd_x < 0 ) 
+					{ 
+						_pSong->_pMachines[smac]->_x = 0; 
+						Repaint(); 
+					}
+					else if	(point.x-mcd_x+MachineCoords.sMaster.width > CW) 
+					{ 
+						_pSong->_pMachines[smac]->_x = CW-MachineCoords.sMaster.width; 
+						Repaint(); 
+					}
+					if (point.y-mcd_y < 0 ) 
+					{ 
+						_pSong->_pMachines[smac]->_y = 0; 
+						Repaint(); 
+					}
+					else if (point.y-mcd_y+MachineCoords.sMaster.height > CH) 
+					{ 
+						_pSong->_pMachines[smac]->_y = CH-MachineCoords.sMaster.height; 
+						Repaint(); 
+					}
+					break;
 			}
-			else if 
-				(point.x-mcd_x+148 > CW) 
-			{ 
-				_pSong->_pMachines[smac]->_x = CW-148; 
-				Repaint(); 
-			}
-			if (point.y-mcd_y < 0 ) 
-			{ 
-				_pSong->_pMachines[smac]->_y = 0; 
-				Repaint(); 
-			}
-			else if (point.y-mcd_y+48 > CH) 
-			{ 
-				_pSong->_pMachines[smac]->_y = CH-48; 
-				Repaint(); 
-			}
+
 		}
 		smac = -1;
 		smacmode = 0;
