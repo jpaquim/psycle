@@ -368,6 +368,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	DragAcceptFiles(TRUE);
 
+	LoadFonts();
+
 	// Finally initializing timer
 	
 	UpdateSequencer();
@@ -2670,3 +2672,122 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 }
 
 
+void CMainFrame::LoadFonts()
+{
+
+	LOGFONT lf;
+
+	Global::pConfig->seqFont.DeleteObject();
+
+	memset(&lf, 0, sizeof(LOGFONT));
+
+	lf.lfHeight = Global::pConfig->pattern_font_point;//-MulDiv(Global::pConfig->pattern_font_point/10, ly, 72);
+	strcpy(lf.lfFaceName, Global::pConfig->pattern_fontface);
+	if (Global::pConfig->pattern_font_flags&1)
+	{
+		lf.lfWeight = FW_BOLD;
+	}
+	lf.lfItalic = (Global::pConfig->pattern_font_flags&2)?true:false;
+	
+	if (!Global::pConfig->seqFont.CreatePointFontIndirect(&lf))
+	{
+		strcpy(lf.lfFaceName,"Tahoma");
+		if (!Global::pConfig->seqFont.CreatePointFontIndirect(&lf))
+		{
+			strcpy(lf.lfFaceName,"tahoma");
+			if (!Global::pConfig->seqFont.CreatePointFontIndirect(&lf))
+			{
+				strcpy(lf.lfFaceName,"Verdana");
+				if (!Global::pConfig->seqFont.CreatePointFontIndirect(&lf))
+				{
+					strcpy(lf.lfFaceName,"verdana");
+					if (!Global::pConfig->seqFont.CreatePointFontIndirect(&lf))
+					{
+						strcpy(lf.lfFaceName,"Arial");
+						if (!Global::pConfig->seqFont.CreatePointFontIndirect(&lf))
+						{
+							strcpy(lf.lfFaceName,"arial");
+							Global::pConfig->seqFont.CreatePointFontIndirect(&lf);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	Global::pConfig->generatorFont.DeleteObject();
+
+	memset(&lf, 0, sizeof(LOGFONT));
+
+	lf.lfHeight = Global::pConfig->generator_font_point;//-MulDiv(Global::pConfig->generator_font_point/10, ly, 72);
+	strcpy(lf.lfFaceName, Global::pConfig->generator_fontface);
+	if (Global::pConfig->generator_font_flags&1)
+	{
+		lf.lfWeight = FW_BOLD;
+	}
+	lf.lfItalic = (Global::pConfig->generator_font_flags&2)?true:false;
+	
+	if (!Global::pConfig->generatorFont.CreatePointFontIndirect(&lf))
+	{
+		strcpy(lf.lfFaceName,"Tahoma");
+		if (!Global::pConfig->generatorFont.CreatePointFontIndirect(&lf))
+		{
+			strcpy(lf.lfFaceName,"tahoma");
+			if (!Global::pConfig->generatorFont.CreatePointFontIndirect(&lf))
+			{
+				strcpy(lf.lfFaceName,"Verdana");
+				if (!Global::pConfig->generatorFont.CreatePointFontIndirect(&lf))
+				{
+					strcpy(lf.lfFaceName,"verdana");
+					if (!Global::pConfig->generatorFont.CreatePointFontIndirect(&lf))
+					{
+						strcpy(lf.lfFaceName,"Arial");
+						if (!Global::pConfig->generatorFont.CreatePointFontIndirect(&lf))
+						{
+							strcpy(lf.lfFaceName,"arial");
+							Global::pConfig->generatorFont.CreatePointFontIndirect(&lf);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	Global::pConfig->effectFont.DeleteObject();
+
+	memset(&lf, 0, sizeof(LOGFONT));
+
+	lf.lfHeight = Global::pConfig->effect_font_point;//-MulDiv(Global::pConfig->effect_font_point/10, ly, 72);
+	strcpy(lf.lfFaceName, Global::pConfig->effect_fontface);
+	if (Global::pConfig->effect_font_flags&1)
+	{
+		lf.lfWeight = FW_BOLD;
+	}
+	lf.lfItalic = (Global::pConfig->effect_font_flags&2)?true:false;
+	
+	if (!Global::pConfig->effectFont.CreatePointFontIndirect(&lf))
+	{
+		strcpy(lf.lfFaceName,"Tahoma");
+		if (!Global::pConfig->effectFont.CreatePointFontIndirect(&lf))
+		{
+			strcpy(lf.lfFaceName,"tahoma");
+			if (!Global::pConfig->effectFont.CreatePointFontIndirect(&lf))
+			{
+				strcpy(lf.lfFaceName,"Verdana");
+				if (!Global::pConfig->effectFont.CreatePointFontIndirect(&lf))
+				{
+					strcpy(lf.lfFaceName,"verdana");
+					if (!Global::pConfig->effectFont.CreatePointFontIndirect(&lf))
+					{
+						strcpy(lf.lfFaceName,"Arial");
+						if (!Global::pConfig->effectFont.CreatePointFontIndirect(&lf))
+						{
+							strcpy(lf.lfFaceName,"arial");
+							Global::pConfig->effectFont.CreatePointFontIndirect(&lf);
+						}
+					}
+				}
+			}
+		}
+	}
+}

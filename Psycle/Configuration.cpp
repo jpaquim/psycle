@@ -51,6 +51,10 @@ Configuration::Configuration()
 	strcpy(effect_fontface,"Tahoma");
 	effect_font_point = 90;
 
+	pattern_font_flags = 0;
+	generator_font_flags = 0;
+	effect_font_flags = 0;
+
 	strcpy(machine_skin,DEFAULT_MACHINE_SKIN);
 
 	mv_colour =	0x009a887c;
@@ -733,6 +737,8 @@ Configuration::Read()
 	reg.QueryValue("pattern_font_x", &type, (BYTE*)&pattern_font_x, &numData);
 	numData = sizeof(pattern_font_y);
 	reg.QueryValue("pattern_font_y", &type, (BYTE*)&pattern_font_y, &numData);
+	numData = sizeof(pattern_font_flags);
+	reg.QueryValue("pattern_font_flags", &type, (BYTE*)&pattern_font_flags, &numData);
 
 	numData = sizeof(pattern_draw_empty_data);
 	reg.QueryValue("pattern_draw_empty_data", &type, (BYTE*)&pattern_draw_empty_data, &numData);
@@ -741,95 +747,18 @@ Configuration::Read()
 	reg.QueryValue("generator_fontface", &type, (BYTE*)&generator_fontface, &numData);
 	numData = sizeof(generator_font_point);
 	reg.QueryValue("generator_font_point", &type, (BYTE*)&generator_font_point, &numData);
+	numData = sizeof(generator_font_flags);
+	reg.QueryValue("generator_font_flags", &type, (BYTE*)&generator_font_flags, &numData);
 
 	numData = sizeof(effect_fontface);
 	reg.QueryValue("effect_fontface", &type, (BYTE*)&effect_fontface, &numData);
 	numData = sizeof(effect_font_point);
 	reg.QueryValue("effect_font_point", &type, (BYTE*)&effect_font_point, &numData);
+	numData = sizeof(effect_font_flags);
+	reg.QueryValue("effect_font_flags", &type, (BYTE*)&effect_font_flags, &numData);
 
 	numData = sizeof(machine_skin);
 	reg.QueryValue("machine_skin", &type, (BYTE*)&machine_skin, &numData);
-
-	if (!seqFont.CreatePointFont(pattern_font_point,pattern_fontface))
-	{
-		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
-		if (!seqFont.CreatePointFont(pattern_font_point,"Tahoma"))
-		{
-			if (!seqFont.CreatePointFont(pattern_font_point,"Verdana"))
-			{
-				if (!seqFont.CreatePointFont(pattern_font_point,"Arial Bold"))
-				{
-					if (!seqFont.CreatePointFont(pattern_font_point,"Arial"))
-					{
-						if (!seqFont.CreatePointFont(pattern_font_point,"tahoma"))
-						{
-							if (!seqFont.CreatePointFont(pattern_font_point,"verdana"))
-							{
-								if (!seqFont.CreatePointFont(pattern_font_point,"arial bold"))
-								{
-									seqFont.CreatePointFont(pattern_font_point,"arial");
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (!generatorFont.CreatePointFont(generator_font_point,generator_fontface))
-	{
-		MessageBox(NULL,generator_fontface,"Could not find this font!",0);
-		if (!generatorFont.CreatePointFont(generator_font_point,"Tahoma"))
-		{
-			if (!generatorFont.CreatePointFont(generator_font_point,"Verdana"))
-			{
-				if (!generatorFont.CreatePointFont(generator_font_point,"Arial Bold"))
-				{
-					if (!generatorFont.CreatePointFont(generator_font_point,"Arial"))
-					{
-						if (!generatorFont.CreatePointFont(generator_font_point,"tahoma"))
-						{
-							if (!generatorFont.CreatePointFont(generator_font_point,"verdana"))
-							{
-								if (!generatorFont.CreatePointFont(generator_font_point,"arial bold"))
-								{
-									generatorFont.CreatePointFont(generator_font_point,"arial");
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (!effectFont.CreatePointFont(effect_font_point,effect_fontface))
-	{
-		MessageBox(NULL,effect_fontface,"Could not find this font!",0);
-		if (!effectFont.CreatePointFont(effect_font_point,"Tahoma"))
-		{
-			if (!effectFont.CreatePointFont(effect_font_point,"Verdana"))
-			{
-				if (!effectFont.CreatePointFont(effect_font_point,"Arial Bold"))
-				{
-					if (!effectFont.CreatePointFont(effect_font_point,"Arial"))
-					{
-						if (!effectFont.CreatePointFont(effect_font_point,"tahoma"))
-						{
-							if (!effectFont.CreatePointFont(effect_font_point,"verdana"))
-							{
-								if (!effectFont.CreatePointFont(effect_font_point,"arial bold"))
-								{
-									effectFont.CreatePointFont(effect_font_point,"arial");
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 
 	numData = sizeof(output);
 	if (reg.QueryValue("OutputDriver", &type, (BYTE*)&output, &numData) == ERROR_SUCCESS)
@@ -1195,6 +1124,7 @@ Configuration::Write()
 
 	reg.SetValue("pattern_fontface", REG_SZ, (BYTE*)pattern_fontface, strlen(pattern_fontface));
 	reg.SetValue("pattern_font_point", REG_DWORD, (BYTE*)&pattern_font_point, sizeof(pattern_font_point));	
+	reg.SetValue("pattern_font_flags", REG_DWORD, (BYTE*)&pattern_font_flags, sizeof(pattern_font_flags));	
 	reg.SetValue("pattern_font_x", REG_DWORD, (BYTE*)&pattern_font_x, sizeof(pattern_font_x));	
 	reg.SetValue("pattern_font_y", REG_DWORD, (BYTE*)&pattern_font_y, sizeof(pattern_font_y));	
 	reg.SetValue("pattern_draw_empty_data", REG_DWORD, (BYTE*)&pattern_draw_empty_data, sizeof(pattern_draw_empty_data));	
@@ -1203,9 +1133,11 @@ Configuration::Write()
 
 	reg.SetValue("generator_fontface", REG_SZ, (BYTE*)generator_fontface, strlen(generator_fontface));
 	reg.SetValue("generator_font_point", REG_DWORD, (BYTE*)&generator_font_point, sizeof(generator_font_point));	
+	reg.SetValue("generator_font_flags", REG_DWORD, (BYTE*)&generator_font_flags, sizeof(generator_font_flags));	
 
 	reg.SetValue("effect_fontface", REG_SZ, (BYTE*)effect_fontface, strlen(effect_fontface));
 	reg.SetValue("effect_font_point", REG_DWORD, (BYTE*)&effect_font_point, sizeof(effect_font_point));	
+	reg.SetValue("effect_font_flags", REG_DWORD, (BYTE*)&effect_font_flags, sizeof(effect_font_flags));	
 
 	reg.SetValue("machine_skin", REG_SZ, (BYTE*)machine_skin, strlen(machine_skin));
 	
