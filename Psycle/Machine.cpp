@@ -363,13 +363,16 @@ bool Machine::Load(
 
 	pFile->Read(&_editName,16);
 	_editName[15] = 0;
-
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -857,7 +860,11 @@ bool Master::Load(
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 	
@@ -1131,7 +1138,11 @@ bool Sine::Load(
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -1280,7 +1291,11 @@ bool Distortion::Load(
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -1522,7 +1537,11 @@ bool Delay::Load(
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -1928,7 +1947,11 @@ bool Flanger::Load(
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -2185,7 +2208,11 @@ bool Filter2p::Load(
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 

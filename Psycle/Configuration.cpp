@@ -124,6 +124,7 @@ Configuration::Configuration()
 	if (((ASIOInterface*)(_ppOutputDrivers[3]))->drivercount <= 0)
 	{
 		_numOutputDrivers--;
+		delete _ppOutputDrivers[3];
 	}
 	_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 

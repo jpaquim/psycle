@@ -124,7 +124,7 @@ public:
 		else
 		{
 			char sError[128];
-			sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
+			sprintf(sError,"Missing VST plug-in \"%s\" - replacing with Dummy.",psFileName);
 			::MessageBox(NULL,sError, "Loading Error", MB_OK);
 			return FALSE;
 		}

@@ -17,7 +17,11 @@
 
 #if defined(_WINAMP_PLUGIN_)
 	#include <afxwin.h>         // MFC core and standard components
+#if defined(FOO_INPUT_STD_EXPORTS)
+	#include "FoobarPlugin\resource.h"
+#else
 	#include "WinampPlugin\resource.h"
+#endif
 #else
 	#include <afxwin.h>         // MFC core and standard components
 	#include <afxext.h>         // MFC extensions
