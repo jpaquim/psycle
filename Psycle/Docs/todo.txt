@@ -1,25 +1,30 @@
 *=bug
 !=change
 +=addition
+FF=requires file format update
+
+XXX very important, top priority
+XX important
+X low priority
+
 
 * psycle default theme sucks (cursor, selection, etc.)
 
 * Machines
 ------------
-* Flanger feedback slider
-* alk - gap in audio when add new machine?
-* <_sue_> the gainer machine doesnt work (getting stuck bug i have been able to recreate once but not 
+*** alk - gap in audio when add new machine?
+** <_sue_> the gainer machine doesnt work (getting stuck bug i have been able to recreate once but not 
 	debug-when i recreated it, song was fucking up bad due to not enough buffers (and too small))
-* JAL7OH- JMdrum.dll crashes psycle when i use FBxx and/or FAxx, works fine with other machines and vsts
-* flanger clicks
-* cyanphase vibrasynth has an access violation bug * I need source to fix
+** flanger clicks
+** JAL7OH- JMdrum.dll crashes psycle when i use FBxx and/or FAxx, works fine with other machines and vsts
+** cyanphase vibrasynth has an access violation bug * I need source to fix
+** JMDrum is buggy (Crashes sometimes)
+*? Flanger feedback slider
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
-* JMDrum is buggy (Crashes sometimes)
 * bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
 ! James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
-+? <alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
-+ <_sue_> it would be cool if you could give names to the channels in the minimixer
-+ <[JAZ]> Internals still miss mouse tweak, right?
+++ <[JAZ]> Internals still miss mouse tweak, right?
++ <alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
 + <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
 	<trylle> i mean that it records and plays back at the same time * record wave in too
 
@@ -47,27 +52,23 @@
 
 * GUI (pattern):
 ----------------
-* select with keyboard while playing and follow mode on sucks
-* <wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
+*** <alk> block select a channel. record some tweak to it live. before the end of the pattern press stop. 
+	then do ctrl-x. It does not cut. [not tested]
+*** <wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
 		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
 		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
 		next row in my start column?
-* <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
-	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
-	rec tweaks when you do a refresh.......like closing the plugs  gui... * the pattern client rect 
-	doesn't seem to update when you have the mouse button down on a vst dialog!  repaint messages are lost!!!!!
-* <alk> somehow I managed to get the row number highlighted in two places, could not reproduce it - will keep 
-	trying * to cause the bug of more than one line number highlighted:
+** <alk> somehow I managed to get the row number highlighted in two places, could not reproduce it - 
+	will keep trying * to cause the bug of more than one line number highlighted:
 	select a line.
 	then lower down click and drag to select a block. cause the window to scroll by making the block 
 	go off the ottom of the screen. (notice the previous highlight moving up) now click another place. 
 	[not tested]
-* <alk> block select a channel. record some tweak to it live. before the end of the pattern press stop. 
-	then do ctrl-x. It does not cut. [not tested]
-+ <_sue_> how about the line numbering cursor marker being optional? .....it missleds me lots of 
+** select with keyboard while playing and follow mode on sucks
++++ <_sue_> how about the line numbering cursor marker being optional? .....it missleds me lots of 
 	times....i confuse it with the cursor because it moves and its the same colour
-+ velocity should be able to store data to instrument column * so should other midi messages
-+ how about option to switch the instrument and machine columns?
+++ velocity should be able to store data to instrument column * so should other midi messages
+++ how about option to switch the instrument and machine columns?
 + option to see waveform instead of notes in pattern editor for acid mode
 + D says: maybe have some of the effects in a drop down or available by right clicking
 + D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
@@ -79,28 +80,25 @@
 
 * GUI (machines):
 -----------------
-* <alk> in felix.psy can't connect attack generator to the compressor effect (machine connect failed) 
-* <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
-* alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window, before releasing mouse button  
-	release note, then release mouse.
-* preview check box in preset dialog stopped working?
-* <bdzld> when you put a machine on top of each other, the vus always pop to the top?
-* moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
-	on every frame
-* Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
+*** <alk> in felix.psy can't connect attack generator to the compressor effect (machine connect failed) 
+*** preview check box in preset dialog stopped working?
+*** Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
 		 Fix:Basically, make ONLY .fxb for VST's.
-* alk - when opening master dialog [doesn't] centre on mouse?
-! machine param enter dialog should be modeless
+** alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window, before releasing mouse button  
+	release note, then release mouse.
+** alk - when opening master dialog [doesn't] centre on mouse?
+* moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
+	on every frame - make bigger buffers and more of them to prevent this from happening
+* <bdzld> when you put a machine on top of each other, the vus always pop to the top?
+* <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
+!! machine param enter dialog should be modeless
 ! alk - make wires square ended, like spec analyser?
-+? alk-make single click/drag move wire from one machine to another (preserving vol)
-+ <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
-	owner draw controls i say?
-+ <_sue_> (wire dialog) also i cant use the keyb to set the db level like before (cursor keys)
-+ James says: how hard would it be to put nodes in the wires, so you can bend them?
-+ Saving all the missing settings to registry (like class of plugin..)
-+ Replace Machine by another (right click menu? new button?).
-+ <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
-	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
++++ Replace Machine by another (right click menu? new button?). GEAR RACK DIALOG WILL DO THIS
++++ <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to 
+	the first not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
+	GEAR RACK DIALOG WILL DO THIS
++++ Saving all the missing settings to registry (like class of plugin..)
+++ <_sue_> (wire dialog) also i cant use the keyb to set the db level like before (cursor keys)
 + Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 + Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
@@ -110,39 +108,44 @@
 + VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
 + Option to hide Parameters in VST GUI.
 + Add Presets in a "tab" under Parameters (easy switching/testing)!
++ <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
+	owner draw controls i say?
++ James says: how hard would it be to put nodes in the wires, so you can bend them?
++? alk-make single click/drag move wire from one machine to another (preserving vol) (which connection 
+		gets moved alk, source or dest?)
 
 * Player Engine:
 ----------------
-* song speed alters if i alter sampling rate while playing
-* <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
-* Midiout is NOT solid...
-* <Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
-* <sue> playbar should take latency into account - same as ^
+*** Midiout is NOT solid...
+** <Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
+** <sue> playbar should take latency into account - same as ^
+** song speed alters if i alter sampling rate while playing
+** <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just 
+	playng
 * when changing octave, notes playing should be stopped (because if not, notes playing don't stop)
   Problem!!! All key processing is done by InputHandler, so machines don't know when it happens, and neither
              does Inputhandler know which machines are playing. Doing a "player::Stop()" would be a bit hardcore.
 			 I agree
-* "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
-*  plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
+* "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign" <- anyone know what
+	this is in here for?
+*FF  plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
-! remove waits from play when in export mode
-! longer sequences (256) [file format,maybe others]
-! more tracks (64) [file format]
-+ <pooplog> again i ask why the connection limit is 12 and not 16 or 24->should use linked lists instead of 
-	arrays!!!
-+ DirectX effects, intstruments
-+ ALK tracker command to bypass an fx, mute command for machines
-+ even if it isn't used specifically for volume, there should be a flag to allow machines to recieve command/instrument 
-	column data every tick with a SeqTick call (especially useful for effects, which are hurting with only being 
-	able to recieve tweaks)
-+ option for record to take command FD into account like ft2
-+ Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
+!!! longer sequences (256) [file format,maybe others]
+!!! more tracks (64) [file format]
++++ Finish SAVE as wave, have options for: sample rate, # channels, bitsize
++++FF? DirectX effects, intstruments
++++ option for record to take command FD into account like ft2
++++FF new file format: (machines save custom data length, patterns stored according to # tracks, sequence 
+		length stored according to length, vst multi-out, connections as linked lists, wire nodes, 
+		volume column, multiout info, etc.)
+++ ALK tracker command to bypass an fx, mute command for machines
+++ Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)
+++ tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + pattern repeat (loop) and song repeat (asked by Vir|us)
-+ tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
-+ new file format: (machines save custom data length, patterns stored according to # tracks, sequence length stored
-		according to length, vst multi-out, connections as linked lists, wire nodes, volume column, etc.)
++ <pooplog> again i ask why the connection limit is 12 and not 16 or 24->should use linked lists instead of 
+	arrays!!!
 
 * Vsts:
 ------------
@@ -163,91 +166,94 @@
 	-externalizer
 	-leveler
 	-tools one
-+ <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
+* <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
+	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
+	rec tweaks when you do a refresh.......like closing the plugs  gui... * the pattern client rect 
+	doesn't seem to update when you have the mouse button down on a vst dialog!  repaint messages are lost!!!!!
++++FF <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
 	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
 	require a file format change though :(
 ! DO NOT LOAD LIST VST list & database
 
 * Interface (contains pattern stuff too):
 ------------
-* <alk> with follow on: start playing song, wait for it to move to another order (maybe two or three on). press 
+*** <alk> with follow on: start playing song, wait for it to move to another order (maybe two or three on). press 
 	f8. then press f6 (you expect it to play the displayed/selected pattern, rather it plays the first 
 	order then some other patterns! (in my case orders 00, 01 and 05) [not tested]
+*** <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
+*** new machine dialog should save preferred sorting method
+** <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
+	psycle opens..
+** <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
+	combinations don't work either, like ctrl+pageup etc.
+** <[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
+	the info when new one.
+** should save wire dialog settings
 * why does it take so long to load a song?
-* <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 * <alk> there's a bug where when u alt-tab the icon is not correct - i cannot find the reason, i checked 
 	old versions and they were all like this too...
-* <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
-	psycle opens..
 * Instrument filter envelope slider. (check differences with finetune slider)
-* <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
-	combinations don't work either, like ctrl+pageup etc.
-* <[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
-	the info when new one.
-* new machine dialog should save preferred sorting method
-* should save wire dialog settings
-* <sue> make file dialogs remember preferences
-! <_sue_> hi...... all those loading/exit/save confirmations are anoying me a bit.....any chance to make 
+!! <_sue_> hi...... all those loading/exit/save confirmations are anoying me a bit.....any chance to make 
 	them optional in the configs menu? when i start psycle and load a track it even asks me if i want to 
 	save the old psy (wich i havent even changed)
 	<pooplog> so should the song info popup
-! should make it so clicking on colour boxes pops up menu
-! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
-	when you want.
-! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
+!! should make it so clicking on colour boxes pops up menu
+!! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or 
+	show it when you want.
+!! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
-+ <alk> another idea, a keypress to toggle follow song
-+ <alk_> alt-f5 - play song from start
-+ <alk_> another thought: "revert to saved" - filemenu 
-+ <wayfinder> it would be so much cooler if there were like macros
-				say, i have a chorus part that's pattern 4, 6, 4, 5
-				and i have that three times in the song or so
-				i'd love to define pattern macro A as "4, 6, 4, 5" and be able to enter macro A in the 
++++ <[JAZ]> gear rack The description was : " a dialog with 
+	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
+	exchange, and don't know if anything more... maybe some information (wires used... don't know)
+++ <alk> another idea, a keypress to toggle follow song
+++ <alk_> alt-f5 - play song from start
+++ <alk_> another thought: "revert to saved" - filemenu 
+++ <wayfinder> alk, i'm also missing keys for soloing channels (in IT it's alt-F10 for solo)
 				pattern sequencer
-+ <wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through 
-		9, change the row skip
-+ <wayfinder> alk, and it would be nice if the row skip would affect the cursor movement as well (or at 
-		least if the tracker could be configured to do so=)
-+ <wayfinder> alk, i'm also missing keys for soloing channels (in IT it's alt-F10 for solo)
-+ <wayfinder> like navigating in the sequence list with the cursor
-+ <wayfinder> numeric entering of pattern number
-+ <wayfinder> oh, i forgot one function of the IT pattern editor. when the cursor isnt following the 
-		pattern, or when the song isnt playing, hitting the G key on a number takes you to that pattern
-		* dear wayfinder, please remember that this is not IT damnit
+++ midi control commands learn
+++ <[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. (because machine view
+	does not track changes yet)
+++ <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
+	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
+++FF songs should save master decrease flag
+++ <sue> hotkeys for seq edit cut, copy, paste, etc?
+++ <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
+	pattern length parameter
 + <Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
 + <Alk> +alt to make the transposing only effect current machine/sample
 		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note
 		ctrl+alt+shift+f12 = transpose current gen/sample up 1 octave
-+ midi control commands learn
-+ pooplog-we should just make a new slider class that uses shift and ctrl like knobs
-+ <alk_> the 'Apply' button is not implemented in the config dialog
-+ <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
-+ <[JAZ]> gear rack The description was : " a dialog with 
-	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
-	exchange, and don't know if anything more... maybe some information (wires used... don't know)
-+ <[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. (because machine view
-	does not track changes yet)
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
 + James says: i have an idea for that actually... seeing as there are so many configurable 
 	keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight 
 	what was assigned to it
++ pooplog-we should just make a new slider class that uses shift and ctrl like knobs
++ <alk_> the 'Apply' button is not implemented in the config dialog
++ <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 + <alk> song properties (allow carriage returns, make box bigger?)
 + <_sue_> centering the open file menus....
 	and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
 	convenient for when you have folders with many files as you usually do with samples
-+ <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
-	pattern length parameter
 + <Alk^> I also think that the cursor movement after a paste should be optional to =)
-+ <_sue_> hey poop....can we have something like a right double click for inserting the first not used pattern
-	 (like instert button)?
-+ <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
-	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
-+ songs should save master decrease flag
++ <_sue_> hey poop....can we have something like a right double click for inserting the first not used 
+	pattern (like instert button)?
 + <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
 	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
-+ <sue> hotkeys for seq edit cut, copy, paste, etc?
++ <wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through 
+		9, change the row skip
++ <wayfinder> alk, and it would be nice if the row skip would affect the cursor movement as well (or at 
+		least if the tracker could be configured to do so=)
++ <wayfinder> like navigating in the sequence list with the cursor
++ <wayfinder> numeric entering of pattern number
++ <wayfinder> oh, i forgot one function of the IT pattern editor. when the cursor isnt following the 
+		pattern, or when the song isnt playing, hitting the G key on a number takes you to that pattern
+		* dear wayfinder, please remember that this is not IT damnit
++? <wayfinder> it would be so much cooler if there were like macros
+				say, i have a chorus part that's pattern 4, 6, 4, 5
+				and i have that three times in the song or so
+				i'd love to define pattern macro A as "4, 6, 4, 5" and be able to enter macro A in the 
 + MORE Keyboard shortcuts 
 
 * Driver Issues:
@@ -256,7 +262,7 @@
   <[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
    in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.
 * DirectSound Output is a bit buggy.Crashes and bad sound reported. 
-+ ASIO? LegoStar has it working....
++++ ASIO? LegoStar has it working....
 
 * Importing:
 ------------
