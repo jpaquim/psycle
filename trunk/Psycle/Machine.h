@@ -79,6 +79,8 @@ class RiffFile;
 class Machine
 {
 public:
+	bool wasVST;
+
 	MachineType _type;
 	MachineMode _mode;
 	bool _bypass;

@@ -56,6 +56,7 @@ public:
    DDCRET Write  ( const void *Data, unsigned NumBytes );
    DDCRET Read   (       void *Data, unsigned NumBytes );
    DDCRET Expect ( const void *Data, unsigned NumBytes );
+   DDCRET Skip   ( unsigned NumBytes );				///// Added by [JAZ]
    DDCRET Close();
 
    long    CurrentFilePosition() const;
@@ -130,7 +131,7 @@ struct WaveFileSample
 };
 
 
-class WaveFile: private ExtRiffFile
+class WaveFile: public ExtRiffFile	// MODIFIED BY [JAZ]. It was private.
 {
    WaveFormat_Chunk   wave_format;
    ExtRiffChunkHeader    pcm_data;

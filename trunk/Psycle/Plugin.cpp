@@ -64,8 +64,10 @@ bool Plugin::Instance(char* psFileName)
 	_isSynth = (_pInfo->Flags == 3 );
 	if (_isSynth )	_mode = MACHMODE_GENERATOR;
 
-	strcpy(_psShortName,_pInfo->ShortName);
-	strcpy(_editName, _pInfo->ShortName);
+	strncpy(_psShortName,_pInfo->ShortName,15);
+	_psShortName[15]='\0';
+	strncpy(_editName, _pInfo->ShortName,15);
+	_editName[15]='\0';
 
 	_psAuthor = new char[strlen(_pInfo->Author)+1];
 	strcpy(_psAuthor,_pInfo->Author);
@@ -312,7 +314,7 @@ bool Plugin::Load(
 			{
 				byte* pData = new byte[size];
 				pFile->Read(pData, size); // Number of parameters
-				_pInterface->PutData(pData); // Internal save
+				_pInterface->PutData(pData); // Internal load
 				delete pData;
 			}
 			

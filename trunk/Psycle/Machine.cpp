@@ -39,6 +39,9 @@ CIntMachParam Filter2p::pars[] = {{"Reserved",0,0},{"Filter Type",0,1},{"Filter 
 //////////////////////////////////////////////////////////
 Machine::Machine()
 {
+	wasVST = false;
+
+	
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
 	_volumeCounter = 0;

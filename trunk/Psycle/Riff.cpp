@@ -255,6 +255,24 @@ DDCRET ExtRiffFile::Expect ( const void *Data, unsigned NumBytes )
    return DDC_SUCCESS;
 }
 
+DDCRET ExtRiffFile::Skip ( unsigned NumBytes )
+{
+//  fflush ( file );
+
+   DDCRET rc;
+
+   if ( fseek ( file, NumBytes, SEEK_CUR ) )
+   {
+      rc = DDC_FILE_ERROR;
+   }
+   else
+   {
+      rc = DDC_SUCCESS;
+   }
+
+   return rc;
+}
+
 
 DDCRET ExtRiffFile::Read ( void *Data, unsigned NumBytes )
 {
@@ -307,16 +325,27 @@ DDCRET WaveFile::OpenForRead ( const char *Filename )
 
          if ( retcode == DDC_SUCCESS )
          {
-            pcm_data_offset = CurrentFilePosition();
-
             // Figure out number of samples from
             // file size, current file position, and
             // WAVE header.
 
-
-
+	        pcm_data_offset = CurrentFilePosition();
             retcode = Read ( &pcm_data, sizeof(pcm_data) );
-            num_samples = filelength(fileno(file)) - CurrentFilePosition();
+
+/// Modified by [JAZ]
+
+			while ( pcm_data.ckID != FourCC("data") )
+			{
+				Skip ( pcm_data.ckSize );
+		        pcm_data_offset = CurrentFilePosition();
+
+				retcode = Read ( &pcm_data, sizeof(pcm_data) );
+				if ( retcode != DDC_SUCCESS ) return retcode;
+			}
+
+			num_samples = pcm_data.ckSize;
+//            num_samples = filelength(fileno(file)) - CurrentFilePosition();
+///
             num_samples /= NumChannels();
             num_samples /= (BitsPerSample() / 8);
          }
