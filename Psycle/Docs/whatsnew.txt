@@ -2,6 +2,21 @@
 Legend :	+=addition		*=change	!=bug	
 ---------------------------------------------------
 
+V1.7RC6
+-------
+
++ Tweak Slide command. Slides a Tweak to make it smoother.
++ Psycle now creates a log of the loaded plugins at start, to help you know which one made it crash, if any.
++ Implemented "Exchange" button in Gear Rack and added Instruments as well.
+* Speeded up some of the internals thanks to Dan.
+! Fixed the Crashes reported by people when opening the Settings dialog (Happened in Win9X systems
+  with many fonts)
+! Fixed a problem with Tweak recording with VST's with Native GUI.
+! Fixed bug with some VST's not playing the first note.
+! Fixed bug where a few VST's became monophonic after pressing play (Wrong MIDI command sent)
+! Fixed Length (in time) counter error when FFxx or FExx values were present for Tweaks or mcm's
+
+
 V1.7RC1
 -------
 + added ASIO support through "PortAudio" library (in its version 18). (LegoStar)
