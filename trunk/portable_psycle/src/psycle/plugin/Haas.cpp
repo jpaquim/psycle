@@ -29,6 +29,7 @@ public:
 
 	enum Parameters
 	{
+		overall_gain,
 		overall_dry_wet,
 		separator_direct,
 		direct_gain, direct_pan, direct_delay_stereo_delta,
@@ -46,17 +47,17 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
-			//Information::Parameter::linear("dry / wet", -1, 1, 1),
+			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("dry / wet", 0, 1, 1),
 			Information::Parameter("direct"),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
+			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
-			Information::Parameter::linear("delay stereo delta", -.01, 0, +.01),
+			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter("early reflection"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter::exponential("delay", .0005, .01, .045),
-			Information::Parameter::linear("delay stereo delta", -.01, 0, +.01),
+			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter("late reflection"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
@@ -87,13 +88,12 @@ public:
 			out
 				<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
 				<< " ("
-				//<< std::setw(6) << 20 * std::log10(std::min(Real(1), (1 - (*this)(parameter))))
 				<< std::setw(6) << 20 * std::log10(1 - (*this)(parameter))
 				<< ", "
-				//<< 20 * std::log10(std::min(Real(1), (1 + (*this)(parameter))))
 				<< 20 * std::log10((*this)(parameter))
 				<< " dB)";
 			break;
+		case overall_gain:
 		case direct_gain:
 		case early_reflection_gain:
 		case late_reflection_gain:
@@ -239,11 +239,10 @@ void Haas::parameter(const int & parameter)
 			resize(max);
 		}
 		break;
+	case overall_gain:
 	case overall_dry_wet:
-		//overall_gain_dry = std::min(Real(1), (1 - (*this)(parameter)));
-		//overall_gain_wet = std::min(Real(1), (1 + (*this)(parameter)));
-		overall_gain_dry = 1 - (*this)(parameter);
-		overall_gain_wet = (*this)(parameter);
+		overall_gain_dry = (*this)(overall_gain) * (1 - (*this)(overall_dry_wet));
+		overall_gain_wet = (*this)(overall_gain) * (*this)(overall_dry_wet);
 		break;
 	case direct_gain:
 	case direct_pan:
