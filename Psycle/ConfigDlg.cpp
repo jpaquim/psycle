@@ -132,10 +132,13 @@ void CConfigDlg::Init(
 	{
 		sprintf(_dirDlg._skinPathBuf, ps);
 		sprintf(_skinDlg._skinPathBuf, ps);
+		sprintf(_keyDlg._skinPathBuf, ps);
 	}
 	else
 	{
+		_dirDlg._skinPathBuf[0] = 0;
 		_skinDlg._skinPathBuf[0] = 0;
+		_keyDlg._skinPathBuf[0] = 0;
 	}
 	
 	AddPage(&_skinDlg);
