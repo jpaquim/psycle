@@ -1,8 +1,8 @@
 #pragma once
 #include "ddc.h"
-///\file
-///\brief interface file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
 /**
+	\file
+	interface file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
 	\verbatim
 		===========================================================================
 

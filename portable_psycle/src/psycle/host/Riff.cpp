@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-///\file
-///\brief implementation file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
 /**
+	\file
+	implementation file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
 	\verbatim
 		==========================================================================
 
