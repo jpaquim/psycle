@@ -9,6 +9,7 @@ class Machine;
 class Player
 {
 public:
+	void AdvancePosition();
 	bool _playBlock;
 	bool _playing;
 	bool _recording;
