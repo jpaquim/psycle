@@ -180,6 +180,7 @@ public:
 	bool InsertConnection(int src,int dst);
 	int GetFreeBus();
 	int GetFreeFxBus();
+	int FindBusFromIndex(int smac);
 	int GetNumPatternsUsed();
 	bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
 #endif // ndef _WINAMP_PLUGIN_

@@ -369,6 +369,11 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
 			((VSTPlugin*)_pMachine)->SetParameter(tweakpar,(float)(nv/1000.0f));
+			// well, this isn't so hard... just put the twk record here
+			if (Global::pConfig->_RecordTweaks)
+			{
+				wndView->MousePatternTweak(index, tweakpar, (int)nv);
+			}
 		}
 
 		Invalidate(false);

@@ -750,17 +750,43 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,4,212,314,14
 END
 
-IDD_MASTERDLG DIALOGEX 0, 0, 268, 39
+IDD_MASTERDLG DIALOGEX 0, 0, 338, 123
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "Master"
+CAPTION "Psycle Master and Minimixer"
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,4,4,256,16,WS_EX_STATICEDGE
-    CTEXT           "",IDC_DBLEVEL,223,20,36,16,SS_CENTERIMAGE | SS_SUNKEN
-    CONTROL         "Decrease automatically when Clipping",IDC_AUTODEC,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,23,135,14
+    CONTROL         "Decrease Master Volume automatically when Clipping",
+                    IDC_AUTODEC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,108,
+                    135,14
+    CONTROL         190,IDC_MIXERVIEW,"Static",SS_BITMAP | WS_BORDER,1,1,336,
+                    106
+    CONTROL         "Slider1",IDC_SLIDERMASTER,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,23,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM1,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,63,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM2,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,76,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM3,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,89,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM4,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,102,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM5,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,116,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM6,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,129,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM7,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,142,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM8,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,156,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM9,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,169,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM10,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,183,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM11,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,196,28,13,57,WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM12,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,209,28,13,57,WS_EX_TRANSPARENT
 END
 
 IDD_NEWVAL DIALOGEX 0, 0, 264, 38
@@ -778,7 +804,7 @@ END
 
 IDD_VSTRACK DIALOGEX 0, 0, 142, 203
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
                     16
@@ -1354,9 +1380,10 @@ BEGIN
 
     IDD_MASTERDLG, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 152
-        TOPMARGIN, 7
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 337
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 122
     END
 
     IDD_NEWVAL, DIALOG
@@ -1932,6 +1959,27 @@ BEGIN
 END
 
 #endif    // Neutral (Default) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Unknown language: 0x3, 0x1 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
+#ifdef _WIN32
+LANGUAGE 0x3, 0x1
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_MASTERBACK          BITMAP  DISCARDABLE     "res\\MasterMachine\\masterbk.bmp"
+IDB_MASTERNUMBERS       BITMAP  DISCARDABLE     "res\\MasterMachine\\numbers.bmp"
+IDB_MASTERSLIDER        BITMAP  DISCARDABLE     "res\\MasterMachine\\slider.bmp"
+#endif    // Unknown language: 0x3, 0x1 resources
 /////////////////////////////////////////////////////////////////////////////
 
 

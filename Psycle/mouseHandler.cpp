@@ -88,7 +88,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		if ( nFlags & MK_CONTROL)
 		{
 			smac=GetMachine(point);
-			_pSong->seqBus = FindBusFromIndex(smac);
+			_pSong->seqBus = _pSong->FindBusFromIndex(smac);
 			pParentMain->UpdateComboGen();
 		}
 		else if (nFlags & MK_SHIFT)
@@ -103,7 +103,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 			else wiresource = -1; // wiresource=0 -> Master.
 		}// Shift
 		
-		else if (nFlags == MK_LBUTTON)
+		else if (nFlags & MK_LBUTTON)
 		{
 			smac=GetMachine(point);
 
@@ -644,27 +644,6 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 			break;
 
 	} // <-- End switch(viewMode)
-}
-
-int CChildView::FindBusFromIndex(int smac)
-{
-	int i; 	// Code to Update the Combobox when clicking on a machine.
-	if ( !_pSong->_machineActive[smac] ) return 255;
-	for (i=0;i<MAX_BUSES;i++)
-	{
-		if (_pSong->busMachine[i] == smac)
-		{
-			return i;
-		}
-	}
-	for (i=0;i<MAX_BUSES;i++)
-	{
-		if (_pSong->busEffect[i] == smac)
-		{
-			return i+MAX_BUSES;
-		}
-	}
-	return 255;
 }
 
 

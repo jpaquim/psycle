@@ -24,7 +24,6 @@ typedef struct {
 	unsigned char midichan;
 } VSTinote;
 
-
 class VSTPlugin : public Machine
 {
 public:
@@ -92,7 +91,9 @@ public:
 
 	bool requiresProcess;	// It needs to use Process
 	bool requiresRepl;		// It needs to use ProcessRepl
-
+	int macindex;
+	CFrameWnd* editorWnd;
+	
 protected:
 
 	HMODULE h_dll;

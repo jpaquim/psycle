@@ -23,9 +23,21 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CMasterDlg)
 	enum { IDD = IDD_MASTERDLG };
+	CSliderCtrl	m_slidermaster;
+	CSliderCtrl	m_sliderm9;
+	CSliderCtrl	m_sliderm8;
+	CSliderCtrl	m_sliderm7;
+	CSliderCtrl	m_sliderm6;
+	CSliderCtrl	m_sliderm5;
+	CSliderCtrl	m_sliderm4;
+	CSliderCtrl	m_sliderm3;
+	CSliderCtrl	m_sliderm2;
+	CSliderCtrl	m_sliderm12;
+	CSliderCtrl	m_sliderm11;
+	CSliderCtrl	m_sliderm10;
+	CSliderCtrl	m_sliderm1;
+	CStatic	m_mixerview;
 	CButton	m_autodec;
-	CStatic	m_dblevel;
-	CSliderCtrl	m_slider;
 	//}}AFX_DATA
 
 
@@ -44,8 +56,8 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CMasterDlg)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnAutodec();
+	afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -28,6 +28,7 @@ IMPLEMENT_DYNCREATE(CVstEditorDlg, CFrameWnd)
 
 CVstEditorDlg::CVstEditorDlg()
 {
+	editorgui = false;
 	_pMachine = NULL;
 }
 
@@ -55,8 +56,8 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 	int height=200;
 
 	_splitter.CreateStatic(this, 1, 2);
-	bool editor = (_pMachine->_pEffect->flags & effFlagsHasEditor);
-	if ( editor )
+	editorgui = (_pMachine->_pEffect->flags & effFlagsHasEditor);
+	if ( editorgui )
 	{
 		SIZE size={200,100};
 		_splitter.CreateView(0, VST_UI_PANE, RUNTIME_CLASS(CVstGui), size, pContext);
@@ -89,6 +90,8 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 
 		_splitter.CreateView(0, VST_UI_PANE, RUNTIME_CLASS(CFrameMachine), size, pContext);
 		pGui = (CFrameMachine*)_splitter.GetPane(0, VST_UI_PANE);
+		((CFrameMachine*)pGui)->wndView=wndView;
+		((CFrameMachine*)pGui)->index=index;
 		((CFrameMachine*)pGui)->Generate();
 		((CFrameMachine*)pGui)->SelectMachine(_pMachine);
 		((CFrameMachine*)pGui)->_pActive=NULL;
@@ -139,8 +142,7 @@ void CVstEditorDlg::OnParametersShowpreset()
 	CPresetsDlg dlg;
 	dlg._pMachine=_pMachine;
 	dlg.DoModal();
-	pParamGui->UpdateOne();
-	pGui->Invalidate(false);
+	Refresh();
 	pGui->SetFocus();
 }
 
@@ -149,4 +151,23 @@ void CVstEditorDlg::OnSetFocus(CWnd* pOldWnd)
 	CFrameWnd::OnSetFocus(pOldWnd);
 	
 	pGui->SetFocus();
+}
+
+void CVstEditorDlg::Refresh()
+{
+	pParamGui->UpdateOne();
+	if (!editorgui) pGui->Invalidate(false);
+}
+
+void CVstEditorDlg::Resize(int w,int h)
+{
+	int nw, nh;
+	nw = w + VST_PARAMETRIC_WIDTH + GetSystemMetrics(SM_CXEDGE)*3;
+	nh = h + VST_PARAMETRIC_HEIGHT + 9+GetSystemMetrics(SM_CYCAPTION) +
+		 GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE);
+
+	_splitter.SetColumnInfo(VST_UI_PANE,w,w);
+
+	SetWindowPos(this, 0, 0, nw, nh, SWP_NOMOVE | SWP_NOZORDER);
+	
 }

@@ -35,7 +35,7 @@
 #include "ConfigDlg.h"
 #include "SongpDlg.h"
 #include "inputhandler.h"
-#include "Helpers.h"
+#include "VstEditorDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -317,9 +317,22 @@ void CChildView::OnTimer( UINT nIDEvent )
 		{
 			for(int c=0; c<MAX_MACHINES; c++)
 			{
-				if (pParentMain->isguiopen[c] && _pSong->_pMachines[c]->_type != MACH_VST &&
-					_pSong->_pMachines[c]->_type != MACH_VSTFX) // VST do auto refresh.
-					pParentMain->m_pWndMac[c]->Invalidate(false);
+				if (pParentMain->isguiopen[c])
+				{
+					if ( _pSong->_pMachines[c]->_type == MACH_PLUGIN )
+					{
+						pParentMain->m_pWndMac[c]->Invalidate(false);
+					}
+					else if ( _pSong->_pMachines[c]->_type == MACH_VST ||
+							_pSong->_pMachines[c]->_type == MACH_VSTFX )
+					{
+						((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh();
+					}
+/*					else
+					{
+					}
+*/
+				}
 			}
 			Global::_pSong->Tweaker = false;
 		}
@@ -951,11 +964,24 @@ void CChildView::OnNewmachine()
 			{
 				Global::_pSong->seqBus = fb;
 				Global::_pSong->busMachine[fb] = Global::_lbc;
+
+				if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
+					_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
+				{
+					((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb;
+				}
 			}
 			else
 			{
 				Global::_pSong->busEffect[fb] = Global::_lbc;
+
+				if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
+					_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
+				{
+					((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb;
+				}
 			}
+			
 			pParentMain->UpdateComboGen();
 			updatePar = Global::_lbc;
 			Repaint(DMMacRefresh);
