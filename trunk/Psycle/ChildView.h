@@ -11,8 +11,8 @@
 #include "Song.h"
 #include "Configuration.h"
 
-#define YOFFSET 36
-#define XOFFSET 33
+#define YOFFSET 18
+#define LINE_XOFFSET 33
 #define ROWHEIGHT 13
 #define ROWWIDTH 111
 
@@ -25,20 +25,22 @@ enum
 	DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
 	DMMacRefresh,	// Used to refresh the image of one machine (mac num in "updatePar")
 
-	DMPatternSwitch,	// Use this when switching Patterns (changing from one to another)
-	DMDataChange,	// Data has Changed. Which data to update is indicated with DrawLineStart/End
+	DMPattern,		// Use this when switching Patterns (changing from one to another)
+	DMData,			// Data has Changed. Which data to update is indicated with DrawLineStart/End
 					// and DrawTrackStart/End
 					// Use it when editing and copy/pasting
-	DMScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
+	DMHScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
 					// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
+	DMVScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
+					// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+//	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
 	DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
 	DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
-	DMCursorMove,	// Indicates a movement of the cursor. update the values to "editcur" directly
+	DMCursor,		// Indicates a movement of the cursor. update the values to "editcur" directly
 					// and call this function.
 	DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
 	DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
-	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
+//	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
 	DMNone			// Do not use this one directly. It is used to detect refresh calls from the OS.
 
 	// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
@@ -52,7 +54,7 @@ enum
 	//						other cases, it still ends to wrong content being shown.
 };
 
-#define DMPatternChange DMPatternSwitch // Remove when finishing the graphics update.
+//#define DMPatternChange DMPatternSwitch // Remove when finishing the graphics update.
 
 enum
 {
@@ -103,6 +105,16 @@ enum {
 	UNDO_SEQUENCE,
 	UNDO_SONG,
 };
+
+struct SPatternDraw
+{
+	SPatternDraw* pPrev;
+	int drawTrackStart;
+	int drawTrackEnd;
+	int drawLineStart;
+	int drawLineEnd;
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CChildView window
 
@@ -183,6 +195,7 @@ public:
 	void KillRedo();
 	void SelectNextTrack();  // for armed tracks recording
 	void SetTitleBarText();
+	void RecalculateColourGrid();
 
 public:
 
@@ -195,7 +208,7 @@ public:
 	CFrameWnd* pParentFrame;
 	Song* _pSong;
 	bool useDoubleBuffer;
-	bool multiPattern;
+//	bool multiPattern;
 	CMasterDlg * MasterMachineDialog;
 
 	bool blockSelected;
@@ -209,6 +222,9 @@ public:
 	int updateMode;
 	int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
 	int viewMode;
+	int XOFFSET;
+	int VISTRACKS;
+	int CW;
 
 	bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 						// Its function is to prevent audio (and midi) operations while it is not
@@ -236,10 +252,11 @@ private:
 
 	void PreparePatternRefresh(int drawMode);
 	void DrawPatEditor(CDC *devc);
-	void DrawSinglePatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
-	void DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
+	void DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
+//	void DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
 	inline void OutNote(CDC *devc,int x,int y,int note);
 	inline void OutData(CDC *devc,int x,int y,unsigned char data,bool trflag);
+	inline void OutData4(CDC *devc,int x,int y,unsigned char data,bool trflag);
 	inline void TXT(CDC *devc,char *txt, int x,int y,int w,int h);
 	inline void TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h);
 	inline void BOX(CDC *devc,int x,int y, int w, int h);
@@ -250,6 +267,9 @@ private:
 	void DrawMachine(Machine* mac, int macnum, CDC *devc);
 	void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
 	int GetMachine(CPoint point);
+	void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
+	void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
+	COLORREF CChildView::ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
 
 	inline int _ps();
 	inline unsigned char * _offset(int ps);
@@ -264,31 +284,25 @@ private:
 	CBitmap stuffbmp;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];
-	int CW;
 	int CH;
-	int VISTRACKS;
 	int VISLINES;
 	
-	CRect playpos;		// Play Cursor Position in Screen
-	CRect newplaypos;	// Play Cursor Position in Screen that is gonna be drawn.
-	CRect guipos;		// Edit Cursor Position in Screen
-	CRect newguipos;	// Edit Cursor Position in Screen that is gonna be drawn.
+	int playpos;		// Play Cursor Position in Screen // left and right are unused
+	int newplaypos;		// Play Cursor Position in Screen that is gonna be drawn.
 	CRect selpos;		// Selection Block in Screen
 	CRect newselpos;	// Selection Block in Screen that is gonna be drawn.
+	CCursor editlast;	// Edit Cursor Position in Pattern.
 
-	int drawTrackStart;
-	int drawTrackEnd;
-	int drawLineStart;
-	int drawLineEnd;
+	SPatternDraw* pPatternDraw;
 
-	int scrollT;	// MultiPurpose Variables. (T)racks and (L)ines displaced when doing
-	int scrollL;	// a scroll, and number of them to update when no scroll (i.e. full update)
 	int maxt;		// num of tracks shown
 	int maxl;		// num of lines shown
 	int tOff;		// Track Offset (first track shown)
 	int lOff;		// Line Offset (first line shown)
 	int ntOff;		// These two variables are used for the DMScroll functino
 	int nlOff;
+	int rntOff;
+	int rnlOff;
 
 	CCursor iniSelec;
 	CSelection blockSel;
@@ -312,6 +326,22 @@ private:
 
 	int mcd_x;
 	int mcd_y;
+
+	COLORREF pvc_separator[MAX_TRACKS+1];
+	COLORREF pvc_background[MAX_TRACKS+1];
+	COLORREF pvc_row4beat[MAX_TRACKS+1];
+	COLORREF pvc_rowbeat[MAX_TRACKS+1];
+	COLORREF pvc_row[MAX_TRACKS+1];
+	COLORREF pvc_selection[MAX_TRACKS+1];
+	COLORREF pvc_playbar[MAX_TRACKS+1];
+	COLORREF pvc_cursor[MAX_TRACKS+1];
+	COLORREF pvc_font[MAX_TRACKS+1];
+	COLORREF pvc_fontPlay[MAX_TRACKS+1];
+	COLORREF pvc_fontCur[MAX_TRACKS+1];
+	COLORREF pvc_fontSel[MAX_TRACKS+1];
+	COLORREF pvc_selectionbeat[MAX_TRACKS+1];
+	COLORREF pvc_selection4beat[MAX_TRACKS+1];
+
 
 public:
 	void SelectMachineUnderCursor(void);
@@ -600,6 +630,41 @@ inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool t
 	case 0xD: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
 	case 0xE: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
 	case 0xF: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
+	}
+}
+
+inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool trflag)
+{
+	CRect Rect;
+	Rect.left=x;
+	Rect.top=y;
+	Rect.right=x+10;
+	Rect.bottom=y+12;
+	
+	if (trflag)
+	{
+		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
+		return;
+	}
+	
+	switch(data&0xf)
+	{
+	case 0x0: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
+	case 0x1: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
+	case 0x2: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
+	case 0x3: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
+	case 0x4: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
+	case 0x5: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
+	case 0x6: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
+	case 0x7: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
+	case 0x8: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
+	case 0x9: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
+	case 0xA: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
+	case 0xB: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
+	case 0xC: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
+	case 0xD: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
+	case 0xE: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
+	case 0xF: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
 	}
 }
 

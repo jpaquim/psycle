@@ -122,22 +122,49 @@ CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
 		if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0)
 		{
 			CmdDef cmdSel;
-			if ( nChar == VK_UP ) 
-			{	cmdSel.ID = cdefNavUp; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_LEFT )
-			{	cmdSel.ID = cdefNavLeft; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_DOWN )
-			{	cmdSel.ID = cdefNavDn; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_RIGHT)
-			{	cmdSel.ID = cdefNavRight; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_HOME)
-			{	cmdSel.ID = cdefNavTop; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_END)
-			{	cmdSel.ID = cdefNavBottom; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_PRIOR)
-			{	cmdSel.ID = cdefNavPageUp; bDoingSelection=true; return cmdSel; }
-			else if ( nChar == VK_NEXT)
-			{	cmdSel.ID = cdefNavPageDn; bDoingSelection=true; return cmdSel; }
+			switch (nChar)
+			{
+			case VK_UP:
+				cmdSel.ID = cdefNavUp; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_LEFT:
+				cmdSel.ID = cdefNavLeft; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_DOWN:
+				cmdSel.ID = cdefNavDn; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_RIGHT:
+				cmdSel.ID = cdefNavRight; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_HOME:
+				cmdSel.ID = cdefNavTop; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_END:
+				cmdSel.ID = cdefNavBottom; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_PRIOR:
+				cmdSel.ID = cdefNavPageUp; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			case VK_NEXT:
+				cmdSel.ID = cdefNavPageDn; 
+				bDoingSelection=true; 
+				return cmdSel; 
+				break;
+			}
 		}
 
 		// This comparison is to allow the "Shift+Note" (chord mode) to work.
@@ -485,7 +512,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		}
 		else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
-		pChildView->Repaint(DMCursorMove);
+		pChildView->Repaint(DMCursor);
 		break;
 	
 	case cdefNavBottom:
@@ -514,7 +541,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
 
-		pChildView->Repaint(DMCursorMove);
+		pChildView->Repaint(DMCursor);
 		break;
 	
 	case cdefRowInsert:
@@ -669,7 +696,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		
 		if(bCtrlPlay && GetKeyState(VK_RCONTROL)<0) Stop();
 		
-		pChildView->Repaint(DMPatternHeader);
+//		pChildView->Repaint(DMPatternHeader);
 		break;
 
 	case cdefPlayStop:
@@ -767,8 +794,7 @@ void InputHandler::Stop()
 	pMainFrame->SetAppSongBpm(0);
 	pMainFrame->SetAppSongTpb(0);
 	pMainFrame->UpdatePlayOrder(false); // <- This restores the selected block
-	pChildView->Repaint(DMCursorMove);  // Should be "playback", but this way we cause a simple
-										// refresh as well
+	pChildView->Repaint(DMCursor);  
 }
 
 void InputHandler::PlaySong() 

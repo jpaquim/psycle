@@ -4,12 +4,15 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "ConfigDlg.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+extern CPsycleApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CConfigDlg
@@ -42,11 +45,30 @@ void CConfigDlg::Init(
 	Configuration* pConfig) 
 {
 	_pConfig = pConfig;
+	_skinDlg._patternSeparatorColor = pConfig->pvc_separator;
+	_skinDlg._patternSeparatorColor2 = pConfig->pvc_separator2;
 	_skinDlg._patternViewColor = pConfig->pvc_background;
+	_skinDlg._patternViewColor2 = pConfig->pvc_background2;
 	_skinDlg._fontColor = pConfig->pvc_font;
+	_skinDlg._fontColor2 = pConfig->pvc_font2;
+	_skinDlg._fontColorPlay = pConfig->pvc_fontPlay;
+	_skinDlg._fontColorPlay2 = pConfig->pvc_fontPlay2;
+	_skinDlg._fontColorCur = pConfig->pvc_fontCur;
+	_skinDlg._fontColorCur2 = pConfig->pvc_fontCur2;
+	_skinDlg._fontColorSel = pConfig->pvc_fontSel;
+	_skinDlg._fontColorSel2 = pConfig->pvc_fontSel2;
 	_skinDlg._rowColor = pConfig->pvc_row;
+	_skinDlg._rowColor2 = pConfig->pvc_row2;
 	_skinDlg._beatColor = pConfig->pvc_rowbeat;
+	_skinDlg._beatColor2 = pConfig->pvc_rowbeat2;
 	_skinDlg._4beatColor = pConfig->pvc_row4beat;
+	_skinDlg._4beatColor2 = pConfig->pvc_row4beat2;
+	_skinDlg._selectionColor = pConfig->pvc_selection;
+	_skinDlg._selectionColor2 = pConfig->pvc_selection2;
+	_skinDlg._cursorColor = pConfig->pvc_cursor;
+	_skinDlg._cursorColor2 = pConfig->pvc_cursor2;
+	_skinDlg._playbarColor = pConfig->pvc_playbar;
+	_skinDlg._playbarColor2 = pConfig->pvc_playbar2;
 	
 	_skinDlg._machineViewColor = pConfig->mv_colour;
 	_skinDlg._machineViewWireColor = pConfig->mv_wirecolour;
@@ -58,6 +80,7 @@ void CConfigDlg::Init(
 	_skinDlg._vugColor = pConfig->vu2;
 	_skinDlg._vucColor = pConfig->vu3;
 	_skinDlg._gfxbuffer = pConfig->useDoubleBuffer;
+	_skinDlg._linenumbers = pConfig->_linenumbers;
 
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
@@ -103,12 +126,34 @@ int CConfigDlg::DoModal()
 		_pConfig->mv_wireaacolour = ((((_pConfig->mv_wirecolour&0x00ff0000) + ((_pConfig->mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
 									((((_pConfig->mv_wirecolour&0x00ff00) + ((_pConfig->mv_colour&0x00ff00)*2))/3)&0x00ff00) +
 									((((_pConfig->mv_wirecolour&0x00ff) + ((_pConfig->mv_colour&0x00ff)*2))/3)&0x00ff);
+
 		_pConfig->mv_polycolour = _skinDlg._machineViewPolyColor;
+
+		_pConfig->pvc_separator = _skinDlg._patternSeparatorColor;
+		_pConfig->pvc_separator2 = _skinDlg._patternSeparatorColor2;
 		_pConfig->pvc_background = _skinDlg._patternViewColor;
+		_pConfig->pvc_background2 = _skinDlg._patternViewColor2;
 		_pConfig->pvc_font = _skinDlg._fontColor;
+		_pConfig->pvc_font2 = _skinDlg._fontColor2;
+		_pConfig->pvc_fontPlay = _skinDlg._fontColorPlay;
+		_pConfig->pvc_fontPlay2 = _skinDlg._fontColorPlay2;
+		_pConfig->pvc_fontCur = _skinDlg._fontColorCur;
+		_pConfig->pvc_fontCur2 = _skinDlg._fontColorCur2;
+		_pConfig->pvc_fontSel = _skinDlg._fontColorSel;
+		_pConfig->pvc_fontSel2 = _skinDlg._fontColorSel2;
 		_pConfig->pvc_row = _skinDlg._rowColor;
+		_pConfig->pvc_row2 = _skinDlg._rowColor2;
 		_pConfig->pvc_rowbeat = _skinDlg._beatColor;
+		_pConfig->pvc_rowbeat2 = _skinDlg._beatColor2;
 		_pConfig->pvc_row4beat = _skinDlg._4beatColor;
+		_pConfig->pvc_row4beat2 = _skinDlg._4beatColor2;
+		_pConfig->pvc_selection = _skinDlg._selectionColor;
+		_pConfig->pvc_selection2 = _skinDlg._selectionColor2;
+		_pConfig->pvc_playbar = _skinDlg._playbarColor;
+		_pConfig->pvc_playbar2 = _skinDlg._playbarColor2;
+		_pConfig->pvc_cursor = _skinDlg._cursorColor;
+		_pConfig->pvc_cursor2 = _skinDlg._cursorColor2;
+
 		_pConfig->vu1 = _skinDlg._vubColor;
 		_pConfig->vu2 = _skinDlg._vugColor;
 		_pConfig->vu3 = _skinDlg._vucColor;
@@ -116,13 +161,15 @@ int CConfigDlg::DoModal()
 		_pConfig->mv_wirewidth = _skinDlg._wirewidth;
 
 		_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
+		_pConfig->_linenumbers = _skinDlg._linenumbers;
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET = _pConfig->_linenumbers?LINE_XOFFSET:1;
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.VISTRACKS = (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET)/ROWWIDTH;
 
 		_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
 		_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;	// MIDI IMPLEMENTATION
 		_pConfig->_syncDriverIndex = _outputDlg.m_syncDriverIndex;
 		_pConfig->_midiHeadroom = _outputDlg.m_midiHeadroom;
 		_pConfig->_pOutputDriver = _pConfig->_ppOutputDrivers[_pConfig->_outputDriverIndex];
-
 
 		if (_dirDlg._instPathChanged)
 		{
@@ -144,6 +191,8 @@ int CConfigDlg::DoModal()
 			_pConfig->SetInitialVstDir(_dirDlg._vstPathBuf);
 			_pConfig->SetVstDir(_dirDlg._vstPathBuf);
 		}
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 	}
 	return retVal;
 }

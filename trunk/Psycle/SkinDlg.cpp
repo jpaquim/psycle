@@ -32,6 +32,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CSkinDlg)
 	DDX_Control(pDX, IDC_PRESETSCOMBO, m_cpresets);
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
+	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
 	DDX_Control(pDX, IDC_AAWIRE, m_wireaa);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	//}}AFX_DATA_MAP
@@ -43,15 +44,35 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
 ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
 ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
-ON_BN_CLICKED(IDC_BUTTON3, OnButtonPattern)
 ON_BN_CLICKED(IDC_BUTTON23, OnVuBarColor)
 ON_BN_CLICKED(IDC_BUTTON24, OnVuBackColor)
 ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
+	ON_BN_CLICKED(IDC_PATTERNBACKC, OnButtonPattern)
+	ON_BN_CLICKED(IDC_PATTERNBACKC2, OnButtonPattern2)
+	ON_BN_CLICKED(IDC_PATSEPARATORC, OnButtonPatternSeparator)
+	ON_BN_CLICKED(IDC_PATSEPARATORC2, OnButtonPatternSeparator2)
 	ON_BN_CLICKED(IDC_ROWC, OnRowc)
+	ON_BN_CLICKED(IDC_ROWC2, OnRowc2)
 	ON_BN_CLICKED(IDC_FONTC, OnFontc)
+	ON_BN_CLICKED(IDC_FONTC2, OnFontc2)
+	ON_BN_CLICKED(IDC_FONTSELC, OnFontSelc)
+	ON_BN_CLICKED(IDC_FONTSELC2, OnFontSelc2)
+	ON_BN_CLICKED(IDC_FONTPLAYC, OnFontPlayc)
+	ON_BN_CLICKED(IDC_FONTPLAYC2, OnFontPlayc2)
+	ON_BN_CLICKED(IDC_FONTCURSORC, OnFontCursorc)
+	ON_BN_CLICKED(IDC_FONTCURSORC2, OnFontCursorc2)
 	ON_BN_CLICKED(IDC_BEATC, OnBeatc)
+	ON_BN_CLICKED(IDC_BEATC2, OnBeatc2)
 	ON_BN_CLICKED(IDC_4BEAT, On4beat)
+	ON_BN_CLICKED(IDC_4BEAT2, On4beat2)
+	ON_BN_CLICKED(IDC_CURSORC, OnCursor)
+	ON_BN_CLICKED(IDC_CURSORC2, OnCursor2)
+	ON_BN_CLICKED(IDC_PLAYBARC, OnPlaybar)
+	ON_BN_CLICKED(IDC_PLAYBARC2, OnPlaybar2)
+	ON_BN_CLICKED(IDC_SELECTIONC, OnSelection)
+	ON_BN_CLICKED(IDC_SELECTIONC2, OnSelection2)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
+	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 	ON_CBN_SELENDOK(IDC_PRESETSCOMBO, OnSelendokPresetscombo)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
@@ -80,6 +101,7 @@ BOOL CSkinDlg::OnInitDialog()
 
 	m_gfxbuffer.SetCheck(_gfxbuffer);
 	m_wireaa.SetCheck(_wireaa);
+	m_linenumbers.SetCheck(_linenumbers);
 	SetTimer(2345,50,0);
 
 	char s[4];
@@ -129,18 +151,6 @@ void CSkinDlg::OnColourPoly()
 	}
 }
 
-
-void CSkinDlg::OnButtonPattern() 
-{
-	CColorDialog dlg(_patternViewColor);
-
-	if(dlg.DoModal() == IDOK)
-	{
-		_patternViewColor = dlg.GetColor();
-		UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
-	}
-}
-
 void CSkinDlg::OnVuBarColor() 
 {
 	CColorDialog dlg(_vubColor);
@@ -174,6 +184,53 @@ void CSkinDlg::OnVuClipBar()
 	}
 }
 
+void CSkinDlg::OnButtonPattern() 
+{
+	CColorDialog dlg(_patternViewColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_patternViewColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
+	}
+}
+
+
+void CSkinDlg::OnButtonPattern2() 
+{
+	CColorDialog dlg(_patternViewColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_patternViewColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_PBG_CAN2,_patternViewColor2);
+	}
+}
+
+
+void CSkinDlg::OnButtonPatternSeparator() 
+{
+	CColorDialog dlg(_patternSeparatorColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_patternSeparatorColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_PBG_SEPARATOR,_patternSeparatorColor);
+	}
+}
+
+void CSkinDlg::OnButtonPatternSeparator2() 
+{
+	CColorDialog dlg(_patternSeparatorColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_patternSeparatorColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_PBG_SEPARATOR2,_patternSeparatorColor2);
+	}
+}
+
+
 void CSkinDlg::OnRowc() 
 {
 	CColorDialog dlg(_rowColor);
@@ -182,6 +239,17 @@ void CSkinDlg::OnRowc()
 	{
 		_rowColor = dlg.GetColor();
 		UpdateCanvasColour(IDC_ROW_CAN,_rowColor);
+	}
+}
+
+void CSkinDlg::OnRowc2() 
+{
+	CColorDialog dlg(_rowColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_rowColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_ROW_CAN2,_rowColor2);
 	}
 }
 
@@ -196,6 +264,83 @@ void CSkinDlg::OnFontc()
 	}
 }
 
+void CSkinDlg::OnFontc2() 
+{
+	CColorDialog dlg(_fontColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONT_CAN2,_fontColor2);
+	}
+}
+
+void CSkinDlg::OnFontPlayc() 
+{
+	CColorDialog dlg(_fontColorPlay);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColorPlay = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONTPLAY_CAN,_fontColorPlay);
+	}
+}
+
+void CSkinDlg::OnFontPlayc2() 
+{
+	CColorDialog dlg(_fontColorPlay2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColorPlay2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONTPLAY_CAN2,_fontColorPlay2);
+	}
+}
+
+void CSkinDlg::OnFontSelc() 
+{
+	CColorDialog dlg(_fontColorSel);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColorSel = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONTSEL_CAN,_fontColorSel);
+	}
+}
+
+void CSkinDlg::OnFontSelc2() 
+{
+	CColorDialog dlg(_fontColorSel2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColorSel2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONTSEL_CAN2,_fontColorSel2);
+	}
+}
+
+void CSkinDlg::OnFontCursorc() 
+{
+	CColorDialog dlg(_fontColorCur);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColorCur = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONTCURSOR_CAN,_fontColorCur);
+	}
+}
+
+void CSkinDlg::OnFontCursorc2() 
+{
+	CColorDialog dlg(_fontColorCur2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_fontColorCur2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONTCURSOR_CAN2,_fontColorCur2);
+	}
+}
+
 void CSkinDlg::OnBeatc() 
 {
 	CColorDialog dlg(_beatColor);
@@ -204,6 +349,17 @@ void CSkinDlg::OnBeatc()
 	{
 		_beatColor = dlg.GetColor();
 		UpdateCanvasColour(IDC_BEAT_CAN,_beatColor);
+	}	
+}
+
+void CSkinDlg::OnBeatc2() 
+{
+	CColorDialog dlg(_beatColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_beatColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_BEAT_CAN2,_beatColor2);
 	}	
 }
 
@@ -218,9 +374,91 @@ void CSkinDlg::On4beat()
 	}	
 }
 
+void CSkinDlg::On4beat2() 
+{
+	CColorDialog dlg(_4beatColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_4beatColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_4BEAT_CAN2,_4beatColor2);
+	}	
+}
+
+void CSkinDlg::OnSelection() 
+{
+	CColorDialog dlg(_selectionColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_selectionColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_SELECTION_CAN,_selectionColor);
+	}	
+}
+
+void CSkinDlg::OnSelection2() 
+{
+	CColorDialog dlg(_selectionColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_selectionColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_SELECTION_CAN2,_selectionColor2);
+	}	
+}
+
+void CSkinDlg::OnCursor() 
+{
+	CColorDialog dlg(_cursorColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_cursorColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_CURSOR_CAN,_cursorColor);
+	}	
+}
+
+void CSkinDlg::OnCursor2() 
+{
+	CColorDialog dlg(_cursorColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_cursorColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_CURSOR_CAN2,_cursorColor2);
+	}	
+}
+
+void CSkinDlg::OnPlaybar() 
+{
+	CColorDialog dlg(_playbarColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_playbarColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_PLAYBAR_CAN,_playbarColor);
+	}	
+}
+
+void CSkinDlg::OnPlaybar2() 
+{
+	CColorDialog dlg(_playbarColor2);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_playbarColor2 = dlg.GetColor();
+		UpdateCanvasColour(IDC_PLAYBAR_CAN2,_playbarColor2);
+	}	
+}
+
 void CSkinDlg::OnDoublebuffer() 
 {
 	_gfxbuffer = m_gfxbuffer.GetCheck() >0?true:false;
+}
+
+void CSkinDlg::OnLineNumbers() 
+{
+	_linenumbers = m_linenumbers.GetCheck() >0?true:false;
 }
 
 void CSkinDlg::OnSelendokPresetscombo() 
@@ -311,17 +549,38 @@ void CSkinDlg::OnSelendokPresetscombo()
 
 void CSkinDlg::RepaintAllCanvas()
 {
-	UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
 	UpdateCanvasColour(IDC_MBG_CAN,_machineViewColor);
 	UpdateCanvasColour(IDC_MWIRE_COL,_machineViewWireColor);
 	UpdateCanvasColour(IDC_MPOLY_COL,_machineViewPolyColor);
-	UpdateCanvasColour(IDC_4BEAT_CAN,_4beatColor);
-	UpdateCanvasColour(IDC_BEAT_CAN,_beatColor);
-	UpdateCanvasColour(IDC_ROW_CAN,_rowColor);
-	UpdateCanvasColour(IDC_FONT_CAN,_fontColor);
 	UpdateCanvasColour(IDC_VU1_CAN,_vubColor);
 	UpdateCanvasColour(IDC_VU2_CAN,_vugColor);
 	UpdateCanvasColour(IDC_VU3_CAN,_vucColor);
+
+	UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
+	UpdateCanvasColour(IDC_PBG_CAN2,_patternViewColor2);
+	UpdateCanvasColour(IDC_PBG_SEPARATOR,_patternSeparatorColor);
+	UpdateCanvasColour(IDC_PBG_SEPARATOR2,_patternSeparatorColor2);
+	UpdateCanvasColour(IDC_4BEAT_CAN,_4beatColor);
+	UpdateCanvasColour(IDC_4BEAT_CAN2,_4beatColor2);
+	UpdateCanvasColour(IDC_BEAT_CAN,_beatColor);
+	UpdateCanvasColour(IDC_BEAT_CAN2,_beatColor2);
+	UpdateCanvasColour(IDC_ROW_CAN,_rowColor);
+	UpdateCanvasColour(IDC_ROW_CAN2,_rowColor2);
+	UpdateCanvasColour(IDC_FONT_CAN,_fontColor);
+	UpdateCanvasColour(IDC_FONT_CAN2,_fontColor2);
+	UpdateCanvasColour(IDC_FONTPLAY_CAN,_fontColorPlay);
+	UpdateCanvasColour(IDC_FONTPLAY_CAN2,_fontColorPlay2);
+	UpdateCanvasColour(IDC_FONTCURSOR_CAN,_fontColorCur);
+	UpdateCanvasColour(IDC_FONTCURSOR_CAN2,_fontColorCur2);
+	UpdateCanvasColour(IDC_FONTSEL_CAN,_fontColorSel);
+	UpdateCanvasColour(IDC_FONTSEL_CAN2,_fontColorSel2);
+	UpdateCanvasColour(IDC_CURSOR_CAN,_cursorColor);
+	UpdateCanvasColour(IDC_CURSOR_CAN2,_cursorColor2);
+	UpdateCanvasColour(IDC_PLAYBAR_CAN,_playbarColor);
+	UpdateCanvasColour(IDC_PLAYBAR_CAN2,_playbarColor2);
+	UpdateCanvasColour(IDC_SELECTION_CAN,_selectionColor);
+	UpdateCanvasColour(IDC_SELECTION_CAN2,_selectionColor2);
+
 }
 
 void CSkinDlg::UpdateCanvasColour(int id,COLORREF col)

@@ -59,7 +59,7 @@ void CChildView::OnContextMenu(CWnd* pWnd, CPoint point)
 		pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 		
 		menu.DestroyMenu();
-//		Repaint(DMCursorMove);
+//		Repaint(DMCursor);
 	}
 }
 
@@ -212,7 +212,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		if ( ttm >= _pSong->SONGTRACKS ) ttm = _pSong->SONGTRACKS-1;
 		else if ( ttm < 0 ) ttm = 0;
 		
-		if (point.y >= 19 && point.y <= 37 ) // Mouse is in Track Header.
+		if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
 		{	
 			int pointpos= (point.x-XOFFSET)%ROWWIDTH;
 
@@ -297,10 +297,27 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		}
 		else if ( smacmode == 0 && smac != -1 )
 		{
-			if (point.x-mcd_x < 0 ) { _pSong->_pMachines[smac]->_x = 0; Repaint(); }
-			else if (point.x-mcd_x+148 > CW) { _pSong->_pMachines[smac]->_x = CW-148; Repaint(); }
-			if (point.y-mcd_y < 0 ) { _pSong->_pMachines[smac]->_y = 0; Repaint(); }
-			else if (point.y-mcd_y+48 > CH) { _pSong->_pMachines[smac]->_y = CH-48; Repaint(); }
+			if (point.x-mcd_x < 0 ) 
+			{ 
+				_pSong->_pMachines[smac]->_x = 0; 
+				Repaint(); 
+			}
+			else if 
+				(point.x-mcd_x+148 > CW) 
+			{ 
+				_pSong->_pMachines[smac]->_x = CW-148; 
+				Repaint(); 
+			}
+			if (point.y-mcd_y < 0 ) 
+			{ 
+				_pSong->_pMachines[smac]->_y = 0; 
+				Repaint(); 
+			}
+			else if (point.y-mcd_y+48 > CH) 
+			{ 
+				_pSong->_pMachines[smac]->_y = CH-48; 
+				Repaint(); 
+			}
 		}
 		smac = -1;
 		smacmode = 0;
@@ -324,7 +341,7 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 //			else if ( editcur.line < 0 ) editcur.line = 0;
 
 			editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
-			Repaint(DMCursorMove);
+			Repaint(DMCursor);
 		}
 		break;
 	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
@@ -392,18 +409,25 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 				if ( ttm < 0 ) { ttm = 0; } // Out of Range
 				// and Scroll
 				ntOff = ttm;
-				if (ntOff != tOff) Repaint(DMScroll);
+				if (ntOff != tOff) Repaint(DMHScroll);
 			}
 			else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 			{
 				ccm=8;
 				if ( ttm >= _pSong->SONGTRACKS ) // Out of Range
-				{	ttm = _pSong->SONGTRACKS-1;
-					if ( tOff != ttm-VISTRACKS ) { ntOff = ttm-VISTRACKS+1; Repaint(DMScroll); }
+				{	
+					ttm = _pSong->SONGTRACKS-1;
+					if ( tOff != ttm-VISTRACKS ) 
+					{ 
+						ntOff = ttm-VISTRACKS+1; 
+						Repaint(DMHScroll); 
+					}
 				}
 				else	//scroll
-				{	ntOff = ttm-VISTRACKS+1;
-					if ( ntOff != tOff ) Repaint(DMScroll);
+				{	
+					ntOff = ttm-VISTRACKS+1;
+					if ( ntOff != tOff ) 
+						Repaint(DMHScroll);
 				}
 			}
 			else // Not exceeded
@@ -418,23 +442,37 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 			if ( llm < lOff ) // Exceeded from top
 			{
 				if ( llm < 0 ) // Out of range
-				{	llm = 0;
-					if ( lOff != 0 ) { nlOff = 0; Repaint(DMScroll); }
+				{	
+					llm = 0;
+					if ( lOff != 0 ) 
+					{ 
+						nlOff = 0; 
+						Repaint(DMVScroll); 
+					}
 				}
 				else	//scroll
-				{	nlOff = llm;
-					if ( nlOff != lOff ) Repaint(DMScroll);
+				{	
+					nlOff = llm;
+					if ( nlOff != lOff ) 
+						Repaint(DMVScroll);
 				}
 			}
 			else if ( llm - lOff >= VISLINES ) // Exceeded from bottom
 			{
 				if ( llm >= plines ) //Out of Range
-				{	llm = plines-1;
-					if ( lOff != llm-VISLINES) { nlOff = llm-VISLINES+1; Repaint(DMScroll); }
+				{	
+					llm = plines-1;
+					if ( lOff != llm-VISLINES) 
+					{ 
+						nlOff = llm-VISLINES+1; 
+						Repaint(DMVScroll); 
+					}
 				}
 				else	//scroll
-				{	nlOff = llm-VISLINES+1;
-					if ( nlOff != lOff ) Repaint(DMScroll);
+				{	
+					nlOff = llm-VISLINES+1;
+					if ( nlOff != lOff ) 
+						Repaint(DMVScroll);
 				}
 			}
 			
@@ -452,10 +490,10 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		else if (nFlags == MK_MBUTTON)
 		{
 			// scrolling
-			if (abs(point.y - MBStart.y) > 13)
+			if (abs(point.y - MBStart.y) > ROWHEIGHT)
 			{
 				int nlines = _pSong->patternLines[_ps()];
-				int delta = (point.y - MBStart.y)/13;
+				int delta = (point.y - MBStart.y)/ROWHEIGHT;
 				int nPos = lOff - delta;
 				if (nPos > lOff )
 				{
@@ -466,7 +504,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					else
 						nlOff=nPos;
 					AdvanceLine(nPos-lOff,false,false); 
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				else if (nPos < lOff )
 				{
@@ -477,14 +515,14 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					else
 						nlOff=nPos;
 					PrevLine(lOff-nPos,false,false);
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
-				MBStart.y += delta*13;
+				MBStart.y += delta*ROWHEIGHT;
 			}
 			// switching tracks
-			if (abs(point.x - MBStart.x) > (111))
+			if (abs(point.x - MBStart.x) > (ROWWIDTH))
 			{
-				int delta = (point.x - MBStart.x)/(111);
+				int delta = (point.x - MBStart.x)/(ROWWIDTH);
 				int nPos = tOff - delta;
 				if (nPos > tOff)
 				{
@@ -495,7 +533,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					else
 						ntOff=nPos;
 					AdvanceTrack(nPos-tOff,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				else if (nPos < tOff)
 				{
@@ -506,9 +544,9 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					else
 						ntOff=nPos;
 					PrevTrack(tOff-nPos,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
-				MBStart.x += delta*111;
+				MBStart.x += delta*ROWWIDTH;
 			}
 		}
 		break;
@@ -675,7 +713,7 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 			else
 				nlOff=nPos;
 			AdvanceLine(nPos-lOff,false,false); 
-			Repaint(DMScroll);
+			Repaint(DMVScroll);
 		}
 		else if (nPos < lOff )
 		{
@@ -686,7 +724,7 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 			else
 				nlOff=nPos;
 			PrevLine(lOff-nPos,false,false);
-			Repaint(DMScroll);
+			Repaint(DMVScroll);
 		}
 	}
 	return CWnd ::OnMouseWheel(nFlags, zDelta, pt);

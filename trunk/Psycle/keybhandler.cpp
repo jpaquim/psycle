@@ -185,12 +185,12 @@ void CChildView::MidiPatternTweak(int command, int value)
 				entry->_inst = command;
 				entry->_note = 121;
 
-				drawTrackStart=editcur.track;
-				drawTrackEnd=editcur.track;
-				drawLineStart=editcur.line;
-				drawLineEnd=editcur.line;
-
-				Repaint(DMDataChange);
+//				drawTrackStart=editcur.track;
+//				drawTrackEnd=editcur.track;
+//				drawLineStart=editcur.line;
+//				drawLineEnd=editcur.line;
+				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				Repaint(DMData);
 			}
 		}
 	}
@@ -288,12 +288,12 @@ void CChildView::MidiPatternCommand(int command, int value)
 			entry->_cmd = command;
 			entry->_parameter = value;
 
-			drawTrackStart=editcur.track;
-			drawTrackEnd=editcur.track;
-			drawLineStart=editcur.line;
-			drawLineEnd=editcur.line;
-
-			Repaint(DMDataChange);
+//			drawTrackStart=editcur.track;
+//			drawTrackEnd=editcur.track;
+//			drawLineStart=editcur.line;
+//			drawLineEnd=editcur.line;
+			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+			Repaint(DMData);
 		}
 	}
 	else
@@ -370,12 +370,12 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 				entry->_inst = command;
 				entry->_note = 121;
 
-				drawTrackStart=editcur.track;
-				drawTrackEnd=editcur.track;
-				drawLineStart=editcur.line;
-				drawLineEnd=editcur.line;
-
-				Repaint(DMDataChange);
+//				drawTrackStart=editcur.track;
+//				drawTrackEnd=editcur.track;
+//				drawLineStart=editcur.line;
+//				drawLineEnd=editcur.line;
+				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				Repaint(DMData);
 			}
 		}
 	}
@@ -490,10 +490,11 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 	Global::pInputHandler->notetrack[editcur.track]=note;
 
-	drawTrackStart=editcur.track;
-	drawTrackEnd=editcur.track;
-	drawLineStart=editcur.line;
-	drawLineEnd=editcur.line;
+//	drawTrackStart=editcur.track;
+//	drawTrackEnd=editcur.track;
+//	drawLineStart=editcur.line;
+//	drawLineEnd=editcur.line;
+	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 	if (!(Global::pPlayer->_playing&&_followSong))
 	{
@@ -503,7 +504,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 	}
 
-	Repaint(DMDataChange);
+	Repaint(DMData);
 }
 
 bool CChildView::MSBPut(int nChar)
@@ -523,32 +524,53 @@ bool CChildView::MSBPut(int nChar)
 
 	if (editcur.col < 5 && oldValue == 255)	{ oldValue = 0; }
 
-	drawTrackStart=editcur.track;
-	drawTrackEnd=editcur.track;
-	drawLineStart=editcur.line;
-	drawLineEnd=editcur.line;
+//	drawTrackStart=editcur.track;
+//	drawTrackEnd=editcur.track;
+//	drawLineStart=editcur.line;
+//	drawLineEnd=editcur.line;
 
 	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 	switch ((editcur.col+1)%2)
 	{
-	case 0:	*toffset = (oldValue&0xF)+(sValue<<4); 
-			if (Global::pConfig->_cursorAlwaysDown)
-				AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
-			else
-				NextCol(false,false);
-
-			break;
+	case 0:	
+		*toffset = (oldValue&0xF)+(sValue<<4); 
+		break;
 	
-	case 1:	*toffset = (oldValue&0xF0)+(sValue); 
-			if (!Global::pConfig->_cursorAlwaysDown && editcur.col != 0)
-				PrevCol(false,false);
-			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
-
-			break;
+	case 1:	
+		*toffset = (oldValue&0xF0)+(sValue); 
+		break;
 	}
 
-	Repaint(DMDataChange);
+	if (Global::pConfig->_cursorAlwaysDown)
+	{
+		AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+	}
+	else
+	{
+		switch (editcur.col)
+		{
+		case 0:
+			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+			break;
+		case 1:
+		case 3:
+		case 5:
+		case 6:
+		case 7:
+			NextCol(false,false);
+			break;
+		case 8:
+			PrevCol(false,false);
+			PrevCol(false,false);
+		case 2:
+		case 4:
+			PrevCol(false,false);
+			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+			break;
+		}
+	}
+	Repaint(DMCursor);
 	return true;
 }
 
@@ -569,14 +591,15 @@ void CChildView::ClearCurr() // delete content at Cursor pos.
 	else if (editcur.col < 5 )	{	*(toffset+(editcur.col+1)/2)= 255; }
 	else						{	*(toffset+(editcur.col+1)/2)= 0; }
 
-	drawTrackStart=editcur.track;
-	drawTrackEnd=editcur.track;
-	drawLineStart=editcur.line;
-	drawLineEnd=editcur.line;
+//	drawTrackStart=editcur.track;
+//	drawTrackEnd=editcur.track;
+//	drawLineStart=editcur.line;
+//	drawLineEnd=editcur.line;
+	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 	AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 
-	Repaint(DMDataChange);
+	Repaint(DMData);
 }
 
 void CChildView::DeleteCurr()
@@ -602,12 +625,13 @@ void CChildView::DeleteCurr()
 	unsigned char blank[5]={255,255,255,0,0};
 	memcpy(offset+(i*MULTIPLY),blank,5*sizeof(char));
 
-	drawTrackStart=editcur.track;
-	drawTrackEnd=editcur.track;
-	drawLineStart=editcur.line;
-	drawLineEnd=patlines-1;
+//	drawTrackStart=editcur.track;
+//	drawTrackEnd=editcur.track;
+//	drawLineStart=editcur.line;
+//	drawLineEnd=patlines-1;
+	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
-	Repaint(DMDataChange);
+	Repaint(DMData);
 }
 
 void CChildView::InsertCurr()
@@ -625,12 +649,13 @@ void CChildView::InsertCurr()
 	unsigned char blank[5]={255,255,255,0,0};
 	memcpy(offset+(i*MULTIPLY),blank,5*sizeof(char));
 
-	drawTrackStart=editcur.track;
-	drawTrackEnd=editcur.track;
-	drawLineStart=editcur.line;
-	drawLineEnd=patlines-1;
+//	drawTrackStart=editcur.track;
+//	drawTrackEnd=editcur.track;
+//	drawLineStart=editcur.line;
+//	drawLineEnd=patlines-1;
+	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
-	Repaint(DMDataChange);
+	Repaint(DMData);
 }
 
 
@@ -705,7 +730,7 @@ void CChildView::PrevCol(bool wrap,bool updateDisplay)
 		else 
 			--editcur.track;
 	}
-	if (updateDisplay) Repaint(DMCursorMove);
+	if (updateDisplay) Repaint(DMCursor);
 }
 
 void CChildView::NextCol(bool wrap,bool updateDisplay)
@@ -723,7 +748,7 @@ void CChildView::NextCol(bool wrap,bool updateDisplay)
 		else 
 			++editcur.track;
 	}
-	if (updateDisplay) Repaint(DMCursorMove);
+	if (updateDisplay) Repaint(DMCursor);
 }
 
 void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
@@ -737,7 +762,7 @@ void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 		if(wrap){ editcur.line = nl + editcur.line % nl; }
 		else	{ editcur.line = 0;	}
 	}
-	if (updateDisplay) Repaint(DMCursorMove);
+	if (updateDisplay) Repaint(DMCursor);
 }
 
 void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
@@ -761,7 +786,7 @@ void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 		else	{ editcur.line = nl-1; }
 	}
 
-	if (updateDisplay) Repaint(DMCursorMove);
+	if (updateDisplay) Repaint(DMCursor);
 }
 
 void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
@@ -775,7 +800,7 @@ void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
 		else editcur.track=_pSong->SONGTRACKS-1;
 	}
 	
-	if (updateDisplay) Repaint(DMCursorMove);
+	if (updateDisplay) Repaint(DMCursor);
 }
 
 void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
@@ -789,7 +814,7 @@ void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
 		else editcur.track=0;
 	}
 	
-	if (updateDisplay) Repaint(DMCursorMove);
+	if (updateDisplay) Repaint(DMCursor);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -802,7 +827,7 @@ void CChildView::ShiftOctave(int x)
 	if ( _pSong->currentOctave < 0 )	 { _pSong->currentOctave = 0; }
 	else if ( _pSong->currentOctave > 8 ){ _pSong->currentOctave = 8; }
 
-	Repaint(DMPatternHeader);
+//	Repaint(DMPatternHeader);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -830,11 +855,12 @@ void CChildView::patCut()
 		}
 		patBufferCopy = true;
 
-		drawTrackStart=0;
-		drawTrackEnd=_pSong->SONGTRACKS;
-		drawLineStart=0;
-		drawLineEnd=patBufferLines-1;
-		Repaint(DMDataChange);
+//		drawTrackStart=0;
+//		drawTrackEnd=_pSong->SONGTRACKS;
+//		drawLineStart=0;
+//		drawLineEnd=patBufferLines-1;
+		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+		Repaint(DMData);
 	}
 }
 
@@ -870,11 +896,12 @@ void CChildView::patPaste()
 		}
 		memcpy(soffset,patBufferData,patBufferLines*5*MAX_TRACKS);
 		
-		drawTrackStart=0;
-		drawTrackEnd=_pSong->SONGTRACKS;
-		drawLineStart=0;
-		drawLineEnd=patBufferLines-1;
-		Repaint(DMDataChange);
+//		drawTrackStart=0;
+//		drawTrackEnd=_pSong->SONGTRACKS;
+//		drawLineStart=0;
+//		drawLineEnd=patBufferLines-1;
+		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+		Repaint(DMData);
 	}
 }
 
@@ -905,11 +932,12 @@ void CChildView::patMixPaste()
 			offset_source+= 5;
 		}
 		
-		drawTrackStart=0;
-		drawTrackEnd=_pSong->SONGTRACKS;
-		drawLineStart=0;
-		drawLineEnd=patBufferLines-1;
-		Repaint(DMDataChange);
+//		drawTrackStart=0;
+//		drawTrackEnd=_pSong->SONGTRACKS;
+//		drawLineStart=0;
+//		drawLineEnd=patBufferLines-1;
+		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+		Repaint(DMData);
 	}
 }
 
@@ -939,12 +967,13 @@ void CChildView::patTranspose(int trp)
 				soffset[c]=static_cast<unsigned char>(not);
 			}
 		}
-		drawTrackStart=0;
-		drawTrackEnd=_pSong->SONGTRACKS;
-		drawLineStart=editcur.line;
-		drawLineEnd=pLines-1;
+//		drawTrackStart=0;
+//		drawTrackEnd=_pSong->SONGTRACKS;
+//		drawLineStart=editcur.line;
+//		drawLineEnd=pLines-1;
+		NewPatternDraw(0,_pSong->SONGTRACKS,editcur.line,pLines-1);
 
-		Repaint(DMDataChange);
+		Repaint(DMData);
 	}
 }
 
@@ -1087,11 +1116,13 @@ void CChildView::CopyBlock(bool cutit)
 	
 	if(cutit)
 	{
-		drawTrackStart=blockSel.start.track;
-		drawTrackEnd=blockSel.end.track;
-		drawLineStart=blockSel.start.line;
-		drawLineEnd=blockSel.end.line;
-		Repaint(DMDataChange);
+//		drawTrackStart=blockSel.start.track;
+//		drawTrackEnd=blockSel.end.track;
+//		drawLineStart=blockSel.start.line;
+//		drawLineEnd=blockSel.end.line;
+		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+
+		Repaint(DMData);
 	}
 }
 
@@ -1143,11 +1174,12 @@ void CChildView::PasteBlock(int tx,int lx,bool mix)
 		if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 		else editcur.line = nl-1;
 
-		drawTrackStart=tx;
-		drawTrackEnd=tx+blockNTracks-1;
-		drawLineStart=lx;
-		drawLineEnd=lx+blockNLines-1;
-		Repaint(DMDataChange);
+//		drawTrackStart=tx;
+//		drawTrackEnd=tx+blockNTracks-1;
+//		drawLineStart=lx;
+//		drawLineEnd=lx+blockNLines-1;
+		NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
+		Repaint(DMData);
 	}
 	
 }
@@ -1233,11 +1265,12 @@ void CChildView::DoubleLength()
 		}
 	}
 
-	drawTrackStart=st;
-	drawTrackEnd=et;
-	drawLineStart=sl;
-	drawLineEnd=el;
-	Repaint(DMDataChange);
+//	drawTrackStart=st;
+//	drawTrackEnd=et;
+//	drawLineStart=sl;
+//	drawLineEnd=el;
+	NewPatternDraw(st,et,sl,el);
+	Repaint(DMData);
 }
 
 void CChildView::HalveLength()
@@ -1282,11 +1315,12 @@ void CChildView::HalveLength()
 		}
 	}
 
-	drawTrackStart=st;
-	drawTrackEnd=et;
-	drawLineStart=sl;
-	drawLineEnd=nl+sl;
-	Repaint(DMDataChange);
+//	drawTrackStart=st;
+//	drawTrackEnd=et;
+//	drawLineStart=sl;
+//	drawLineEnd=nl+sl;
+	NewPatternDraw(st,et,sl,nl+sl);
+	Repaint(DMData);
 }
 
 
@@ -1317,11 +1351,12 @@ void CChildView::BlockTranspose(int trp)
 				}
 			}
 		}
-		drawTrackStart=blockSel.start.track;
-		drawTrackEnd=blockSel.end.track;
-		drawLineStart=blockSel.start.line;
-		drawLineEnd=blockSel.end.line;
-		Repaint(DMDataChange);
+//		drawTrackStart=blockSel.start.track;
+//		drawTrackEnd=blockSel.end.track;
+//		drawLineStart=blockSel.start.line;
+//		drawLineEnd=blockSel.end.line;
+		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+		Repaint(DMData);
 	}
 }
 
@@ -1352,11 +1387,12 @@ void CChildView::BlockGenChange(int x)
 				}
 			}
 		}
-		drawTrackStart=blockSel.start.track;
-		drawTrackEnd=blockSel.end.track;
-		drawLineStart=blockSel.start.line;
-		drawLineEnd=blockSel.end.line;
-		Repaint(DMDataChange);
+//		drawTrackStart=blockSel.start.track;
+//		drawTrackEnd=blockSel.end.track;
+//		drawLineStart=blockSel.start.line;
+//		drawLineEnd=blockSel.end.line;
+		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+		Repaint(DMData);
 	}
 }
 
@@ -1387,11 +1423,12 @@ void CChildView::BlockInsChange(int x)
 				}
 			}
 		}
-		drawTrackStart=blockSel.start.track;
-		drawTrackEnd=blockSel.end.track;
-		drawLineStart=blockSel.start.line;
-		drawLineEnd=blockSel.end.line;
-		Repaint(DMDataChange);
+//		drawTrackStart=blockSel.start.track;
+//		drawTrackEnd=blockSel.end.track;
+//		drawLineStart=blockSel.start.line;
+//		drawLineEnd=blockSel.end.line;
+		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+		Repaint(DMData);
 	}
 }
 
@@ -1423,14 +1460,14 @@ void CChildView::BlockParamInterpolate()
 			toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
 			displace2+=MULTIPLY;
 		}
-		drawTrackStart=blockSel.start.track;
-		drawTrackEnd=blockSel.end.track;
-		drawLineStart=blockSel.start.line;
-		drawLineEnd=blockSel.end.line;
-		Repaint(DMDataChange);
+//		drawTrackStart=blockSel.start.track;
+//		drawTrackEnd=blockSel.end.track;
+//		drawLineStart=blockSel.start.line;
+//		drawLineEnd=blockSel.end.line;
+		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+		Repaint(DMData);
 	}
 }
-
 
 
 void CChildView::IncCurPattern()
@@ -1440,8 +1477,7 @@ void CChildView::IncCurPattern()
 		AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 		++_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternChange);
-//		Repaint(DMPatternSwitch); // new code
+		Repaint(DMPattern);
 	}
 }
 
@@ -1453,8 +1489,7 @@ void CChildView::DecCurPattern()
 		AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 		--_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternChange);
-//		Repaint(DMPatternSwitch); // new code
+		Repaint(DMPattern);
 	}
 }
 
@@ -1468,8 +1503,7 @@ void CChildView::DecPosition()
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternChange);
-//		Repaint(DMPatternSwitch); // new code
+		Repaint(DMPattern);
 		
 	}
 }
@@ -1492,9 +1526,7 @@ void CChildView::IncPosition()
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternChange);
-//		Repaint(DMPatternSwitch); // new code
-		
+		Repaint(DMPattern);
 	}
 }
 
@@ -1793,18 +1825,18 @@ void CChildView::OnEditUndo()
 				if (pUndoList->seqpos == editPosition)
 				{
 					// display changes
-					drawTrackStart=pUndoList->x;
-					drawTrackEnd=pUndoList->x+pUndoList->tracks;
-					drawLineStart=pUndoList->y;
-					drawLineEnd=pUndoList->y+pUndoList->lines;
-					Repaint(DMDataChange);
+//					drawTrackStart=pUndoList->x;
+//					drawTrackEnd=pUndoList->x+pUndoList->tracks;
+//					drawLineStart=pUndoList->y;
+//					drawLineEnd=pUndoList->y+pUndoList->lines;
+					NewPatternDraw(pUndoList->x,pUndoList->x+pUndoList->tracks,pUndoList->y,pUndoList->y+pUndoList->lines);
+					Repaint(DMData);
 				}
 				else
 				{
 					editPosition = pUndoList->seqpos;
 					pParentMain->UpdatePlayOrder(true);
-					Repaint(DMPatternChange);
-			//		Repaint(DMPatternSwitch); // new code
+					Repaint(DMPattern);
 					
 				}
 				// delete undo from list
@@ -1830,8 +1862,7 @@ void CChildView::OnEditUndo()
 					pParentMain->UpdatePlayOrder(true);
 				}
 				// display changes
-				Repaint(DMPatternChange);
-		//		Repaint(DMPatternSwitch); // new code
+				Repaint(DMPattern);
 				
 				// delete undo from list
 				SPatternUndo* pTemp = pUndoList->pPrev;
@@ -1853,8 +1884,7 @@ void CChildView::OnEditUndo()
 			pParentMain->UpdatePlayOrder(true);
 			pParentMain->UpdateSequencer();
 			// display changes
-			Repaint(DMPatternChange);
-	//		Repaint(DMPatternSwitch); // new code
+			Repaint(DMPattern);
 			
 			// delete undo from list
 			{
@@ -1878,8 +1908,7 @@ void CChildView::OnEditUndo()
 			pParentMain->UpdatePlayOrder(true);
 			pParentMain->UpdateSequencer();
 			// display changes
-			Repaint(DMPatternChange);
-	//		Repaint(DMPatternSwitch); // new code
+			Repaint(DMPattern);
 			
 			// delete undo from list
 			{
@@ -1930,18 +1959,18 @@ void CChildView::OnEditRedo()
 				if (pRedoList->seqpos == editPosition)
 				{
 					// display changes
-					drawTrackStart=pRedoList->x;
-					drawTrackEnd=pRedoList->x+pRedoList->tracks;
-					drawLineStart=pRedoList->y;
-					drawLineEnd=pRedoList->y+pRedoList->lines;
-					Repaint(DMDataChange);
+//					drawTrackStart=pRedoList->x;
+//					drawTrackEnd=pRedoList->x+pRedoList->tracks;
+//					drawLineStart=pRedoList->y;
+//					drawLineEnd=pRedoList->y+pRedoList->lines;
+					NewPatternDraw(pRedoList->x,pRedoList->x+pRedoList->tracks,pRedoList->y,pRedoList->y+pRedoList->lines);
+					Repaint(DMData);
 				}
 				else
 				{
 					editPosition = pRedoList->seqpos;
 					pParentMain->UpdatePlayOrder(true);
-					Repaint(DMPatternChange);
-			//		Repaint(DMPatternSwitch); // new code
+					Repaint(DMPattern);
 					
 				}
 				// delete redo from list
@@ -1967,8 +1996,7 @@ void CChildView::OnEditRedo()
 					pParentMain->UpdatePlayOrder(true);
 				}
 				// display changes
-				Repaint(DMPatternChange);
-		//		Repaint(DMPatternSwitch); // new code
+				Repaint(DMPattern);
 				
 				// delete redo from list
 				SPatternUndo* pTemp = pRedoList->pPrev;
@@ -1990,8 +2018,7 @@ void CChildView::OnEditRedo()
 			pParentMain->UpdatePlayOrder(true);
 			pParentMain->UpdateSequencer();
 			// display changes
-			Repaint(DMPatternChange);
-	//		Repaint(DMPatternSwitch); // new code
+			Repaint(DMPattern);
 			
 			{
 				// delete redo from list
@@ -2015,8 +2042,7 @@ void CChildView::OnEditRedo()
 			pParentMain->UpdatePlayOrder(true);
 			pParentMain->UpdateSequencer();
 			// display changes
-			Repaint(DMPatternChange);
-	//		Repaint(DMPatternSwitch); // new code
+			Repaint(DMPattern);
 			
 			{
 				// delete redo from list

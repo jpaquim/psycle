@@ -73,12 +73,12 @@ CChildView::CChildView()
 	seqFont.CreatePointFont(80,"Tahoma");
 	for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 	bmpDC = NULL;
-	
+
 	viewMode=VMMachine;
 	MasterMachineDialog = NULL;
 	updateMode=0;
 	updatePar=0;
-	multiPattern=true; // Long way till it can be finished!
+//	multiPattern=true; // Long way till it can be finished!
 
 	patStep=1;
 	editPosition=0;
@@ -101,20 +101,23 @@ CChildView::CChildView()
 //	editcur.track=0; // Not needed to initialize, since the class does it already.
 //	editcur.col=0;
 //	editcur.line=0;
-	playpos.bottom=0;
-	newplaypos.bottom=0; newplaypos.left=0; newplaypos.right=XOFFSET-2;
-	guipos.bottom=0;	guipos.top=0;	guipos.left=0;	guipos.right=0;
+	playpos=-1;
+	newplaypos=-1; 
 	selpos.bottom=0;
 	newselpos.bottom=0;
 
-	drawTrackStart=-1;
+	pPatternDraw=NULL;
+//	drawTrackStart=-1;
 
-	scrollT=0;
-	scrollL=0;
+//	scrollT=0;
+//	scrollL=0;
 	tOff=0;
 	lOff=0;
 	ntOff=0;
 	nlOff=0;
+
+	XOFFSET = Global::pConfig->_linenumbers?LINE_XOFFSET:1;
+	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
 
 	Global::pInputHandler->SetChildView(this);
 	Global::pResampler->SetQuality(RESAMPLE_LINEAR);
@@ -134,7 +137,6 @@ CChildView::CChildView()
 
 	// Show Machine view and init MIDI
 	OnMachineview();
-
 }
 
 CChildView::~CChildView()
@@ -361,7 +363,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 						editPosition=Global::pPlayer->_playPosition;
-						if ( viewMode == VMPattern ) Repaint(DMPatternSwitch);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+						if ( viewMode == VMPattern ) Repaint(DMPattern);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
 					}
 					else if( viewMode == VMPattern ) Repaint(DMPlayback);
 				}
@@ -483,7 +485,6 @@ void CChildView::OnPaint()
 		}
 		else if (viewMode == VMPattern)	// Pattern view paint handler
 		{
-			//if ( updateMode != DMNone ) 
 			DrawPatEditor(&bufDC);
 		}
 		CRect rc;
@@ -532,7 +533,10 @@ void CChildView::Repaint(int drawMode)
 	}
 	else if ( viewMode == VMPattern )
 	{
-		if (drawMode >= DMPatternSwitch || drawMode == DMAll )	PreparePatternRefresh(drawMode);
+		if (drawMode >= DMPattern || drawMode == DMAll )	
+		{
+			PreparePatternRefresh(drawMode);
+		}
 	}
 }
 
@@ -545,14 +549,19 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 	_pSong->viewSize.x=cx-148; // Hack to move machines boxes inside of the visible area.
 	_pSong->viewSize.y=cy-48;
 
-	newplaypos.right=CW;
 	const int oldvl = VISLINES;
 	const int oldvt = VISTRACKS;
 	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
 	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
 
-	if (VISLINES < 1) { VISLINES = 1; }
-	if (VISTRACKS < 1) { VISTRACKS = 1; }
+	if (VISLINES < 1) 
+	{ 
+		VISLINES = 1; 
+	}
+	if (VISTRACKS < 1) 
+	{ 
+		VISTRACKS = 1; 
+	}
 
 	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 	{
@@ -560,11 +569,18 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 		delete bmpDC;
 		bmpDC=NULL;
 	}
+	/*
 	if (viewMode == VMPattern)
 	{
-		if ( updateMode == DMNone || oldvl != VISLINES || oldvt != VISTRACKS ) Repaint(DMResize);
+//		if ( oldvl != VISLINES || oldvt != VISTRACKS )
+//		{
+//			Repaint(DMResize); // DMResize does not exist yet
+			Repaint();
+//		}
 	}
 	else if ( viewMode == VMMachine ) Repaint();
+	*/
+	Repaint();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -759,6 +775,7 @@ void CChildView::OnFileNew()
 		pParentMain->UpdatePlayOrder(false);
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->UpdateSequencer();
+		RecalculateColourGrid();
 		Repaint();
 	}
 }
@@ -796,6 +813,8 @@ void CChildView::OnPatternView()
 {
 	if (viewMode != VMPattern)
 	{
+		XOFFSET = Global::pConfig->_linenumbers?LINE_XOFFSET:1;
+		VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
 		viewMode = VMPattern;
 //		ShowScrollBar(SB_BOTH,FALSE);
 		
@@ -812,6 +831,7 @@ void CChildView::OnPatternView()
 		Repaint();
 	}
 }
+
 void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) 
 {
 	if (viewMode == VMPattern)
@@ -842,7 +862,7 @@ void CChildView::OnButtonplayseqblock()
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
 	Global::pPlayer->Start(i,0);
 	Global::pPlayer->_playBlock=true;
-	if ( viewMode == VMPattern ) Repaint(DMPatternSwitch);
+	if ( viewMode == VMPattern ) Repaint(DMPattern);
 }
 void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 {
@@ -961,7 +981,7 @@ void CChildView::ShowPatternDlg(void)
 		else if ( strcmp(name,dlg.patName) != 0 )
 		{
 			strcpy(_pSong->patternName[patNum],dlg.patName);
-			Repaint(DMPatternHeader);
+//			Repaint(DMPatternHeader);
 		}
 	}
 }
@@ -1168,12 +1188,12 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 			entry->_parameter = unsigned char (val);
 			index+=step;
 		}
-		drawTrackStart=x;
-		drawTrackEnd=x;
-		drawLineStart=y;
-		drawLineEnd=y+ny;
-
-		Repaint(DMDataChange);
+//		drawTrackStart=x;
+//		drawTrackEnd=x;
+//		drawLineStart=y;
+//		drawLineEnd=y+ny;
+		NewPatternDraw(x,x,y,y+ny);	
+		Repaint(DMData);
 	}
 }
 
@@ -1360,7 +1380,7 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					nlOff=lOff+1;
 					AdvanceLine(1,false,false);
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				else AdvanceLine(1,false);
 				break;
@@ -1369,7 +1389,7 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					nlOff=lOff-1;
 					PrevLine(1,false,false);
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				else PrevLine(1,false);
 				break;
@@ -1384,13 +1404,13 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					nlOff=nPos;
 					AdvanceLine(nPos-lOff,false,false); 
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				else if ((int)nPos < lOff )
 				{
 					nlOff=nPos;
 					PrevLine(lOff-nPos,false,false);
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				break;
 			case SB_THUMBTRACK:
@@ -1398,13 +1418,13 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					nlOff=nPos;
 					AdvanceLine(nPos-lOff,false,false); 
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				else if ((int)nPos < lOff )
 				{
 					nlOff=nPos;
 					PrevLine(lOff-nPos,false,false);
-					Repaint(DMScroll);
+					Repaint(DMVScroll);
 				}
 				break;
 			default: break;
@@ -1426,7 +1446,7 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					ntOff=tOff+1;
 					AdvanceTrack(1,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				else AdvanceTrack(1,false);
 				break;
@@ -1435,7 +1455,7 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					ntOff=tOff-1;
 					PrevTrack(1,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				else PrevTrack(1,false);
 				break;
@@ -1450,13 +1470,13 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					ntOff=nPos;
 					AdvanceTrack(nPos-tOff,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				else if ((int)nPos < tOff )
 				{
 					ntOff=nPos;
 					PrevTrack(tOff-nPos,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				break;
 			case SB_THUMBTRACK:
@@ -1464,13 +1484,13 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				{
 					ntOff=nPos;
 					AdvanceTrack(nPos-tOff,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				else if ((int)nPos < tOff )
 				{
 					ntOff=nPos;
 					PrevTrack(tOff-nPos,false,false);
-					Repaint(DMScroll);
+					Repaint(DMHScroll);
 				}
 				break;
 			default: break;
@@ -1567,11 +1587,12 @@ void CChildView::OnFileImportXmfile()
 			// MIDI IMPLEMENTATION
 			Global::pConfig->_pMidiInput->Open();
 		}
-		Repaint();
 		pParentMain->PsybarsUpdate();
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
+		RecalculateColourGrid();
+		Repaint();
 	}
 	SetTitleBarText();
 }
@@ -1826,6 +1847,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
+		RecalculateColourGrid();
 		Repaint();
 	}
 	KillUndo();
@@ -1868,3 +1890,5 @@ void CChildView::SetTitleBarText()
 	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
 	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
 }
+
+

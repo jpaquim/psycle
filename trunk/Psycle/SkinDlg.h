@@ -17,10 +17,29 @@ class CSkinDlg : public CPropertyPage
 // Construction
 public:
 	COLORREF _patternViewColor;
+	COLORREF _patternViewColor2;
+	COLORREF _patternSeparatorColor;
+	COLORREF _patternSeparatorColor2;
+	COLORREF _playbarColor;
+	COLORREF _playbarColor2;
+	COLORREF _selectionColor;
+	COLORREF _selectionColor2;
+	COLORREF _cursorColor;
+	COLORREF _cursorColor2;
 	COLORREF _fontColor;
+	COLORREF _fontColor2;
+	COLORREF _fontColorPlay;
+	COLORREF _fontColorPlay2;
+	COLORREF _fontColorCur;
+	COLORREF _fontColorCur2;
+	COLORREF _fontColorSel;
+	COLORREF _fontColorSel2;
 	COLORREF _rowColor;
+	COLORREF _rowColor2;
 	COLORREF _beatColor;
+	COLORREF _beatColor2;
 	COLORREF _4beatColor;
+	COLORREF _4beatColor2;
 	COLORREF _machineViewColor;
 	COLORREF _machineViewWireColor;
 	COLORREF _machineViewPolyColor;
@@ -29,6 +48,7 @@ public:
 	COLORREF _vucColor;
 	bool _gfxbuffer;
 	bool _wireaa;
+	bool _linenumbers;
 	int _wirewidth;
 
 	CSkinDlg();
@@ -40,6 +60,7 @@ public:
 	CComboBox	m_cpresets;
 	CComboBox	m_wirewidth;
 	CButton	m_gfxbuffer;
+	CButton	m_linenumbers;
 	CButton	m_wireaa;
 	//}}AFX_DATA
 
@@ -63,15 +84,35 @@ protected:
 	afx_msg void OnColourMachine();
 	afx_msg void OnColourWire();
 	afx_msg void OnColourPoly();
-	afx_msg void OnButtonPattern();
 	afx_msg void OnVuBarColor();
 	afx_msg void OnVuBackColor();
 	afx_msg void OnVuClipBar();
+	afx_msg void OnButtonPattern();
+	afx_msg void OnButtonPattern2();
+	afx_msg void OnButtonPatternSeparator();
+	afx_msg void OnButtonPatternSeparator2();
 	afx_msg void OnRowc();
+	afx_msg void OnRowc2();
 	afx_msg void OnFontc();
+	afx_msg void OnFontc2();
+	afx_msg void OnFontSelc();
+	afx_msg void OnFontSelc2();
+	afx_msg void OnFontPlayc();
+	afx_msg void OnFontPlayc2();
+	afx_msg void OnFontCursorc();
+	afx_msg void OnFontCursorc2();
 	afx_msg void OnBeatc();
+	afx_msg void OnBeatc2();
 	afx_msg void On4beat();
+	afx_msg void On4beat2();
+	afx_msg void OnPlaybar();
+	afx_msg void OnPlaybar2();
+	afx_msg void OnSelection();
+	afx_msg void OnSelection2();
+	afx_msg void OnCursor();
+	afx_msg void OnCursor2();
 	afx_msg void OnDoublebuffer();
+	afx_msg void OnLineNumbers();
 	afx_msg void OnSelendokPresetscombo();
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT nIDEvent);
