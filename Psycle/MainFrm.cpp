@@ -138,6 +138,7 @@ CMainFrame::CMainFrame()
 	vuprevR=0;
 	vuprevL=0;
 	seqcopybufferlength = 0;
+	_pSong=NULL;
 }
 
 CMainFrame::~CMainFrame()
@@ -2250,8 +2251,11 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == AFX_IDS_IDLEMESSAGE)
 	{
-		sprintf(szStatusIdle,"%s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
-		return CFrameWnd::OnSetMessageString (0,(LPARAM)szStatusIdle);
+		if (_pSong)
+		{
+			sprintf(szStatusIdle,"%s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
+			return CFrameWnd::OnSetMessageString (0,(LPARAM)szStatusIdle);
+		}
 	}
 	return CFrameWnd::OnSetMessageString (wParam, lParam);
 

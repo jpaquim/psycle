@@ -45,7 +45,8 @@ V1.67
 ! Cleaned up Status Bar (pooplog)
 ! Made Master Machine Dialog modeless, updates display if volume attenuated
 + VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
-+ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) for all generator types. (pooplog)
++ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) and FAxy for all generator 
+  types. (pooplog)
 ! Fixed the crash bug happening when changing from waveout to Directound (and viceversa).
 * Complete pattern display overhaul, including many new features and bugfixes (pooplog)
 ! Fixed two memory leaks when loading songs with plugins (native as well as VST)
