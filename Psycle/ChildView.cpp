@@ -3301,3 +3301,45 @@ void CChildView::patTrackMute()
 	}
 }
 
+void CChildView::patTrackSolo()
+{
+	if (viewMode == VMPattern)
+	{
+		if (_pSong->_trackSoloed == editcur.track)
+		{
+			for (int i = 0; i < MAX_TRACKS; i++)
+			{
+				_pSong->_trackMuted[i] = FALSE;
+			}
+			_pSong->_trackSoloed = -1;
+		}
+		else
+		{
+			for (int i = 0; i < MAX_TRACKS; i++)
+			{
+				_pSong->_trackMuted[i] = TRUE;
+			}
+			_pSong->_trackMuted[editcur.track] = FALSE;
+			_pSong->_trackSoloed = editcur.track;
+		}
+		Repaint(DMTrackHeader);
+	}
+}
+
+void CChildView::patTrackRecord()
+{
+	if (viewMode == VMPattern)
+	{
+		_pSong->_trackArmed[editcur.track] = !_pSong->_trackArmed[editcur.track];
+		_pSong->_trackArmedCount = 0;
+		for ( int i=0;i<MAX_TRACKS;i++ )
+		{
+			if (_pSong->_trackArmed[i])
+			{
+				_pSong->_trackArmedCount++;
+			}
+		}
+		Repaint(DMTrackHeader);
+	}
+}
+

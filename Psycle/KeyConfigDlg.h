@@ -62,6 +62,8 @@ protected:
 	virtual void OnOK();
 	afx_msg void OnImportreg();
 	afx_msg void OnExportreg();
+	afx_msg void OnDefaults();
+	afx_msg void OnNone();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

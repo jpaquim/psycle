@@ -51,6 +51,8 @@ BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
 	ON_LBN_SELCHANGE(IDC_CMDLIST, OnSelchangeCmdlist)
 	ON_BN_CLICKED(IDC_IMPORTREG, OnImportreg)
 	ON_BN_CLICKED(IDC_EXPORTREG, OnExportreg)
+	ON_BN_CLICKED(IDC_DEFAULTS, OnDefaults)
+	ON_BN_CLICKED(IDC_NONE, OnNone)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -290,7 +292,6 @@ void CKeyConfigDlg::OnImportreg()
 	m_prvIdx = m_lstCmds.GetCurSel();
 	FindKey(m_prvIdx,key,mods);
 	m_hotkey0.SetHotKey(key,mods);
-	return;
 }
 
 
@@ -345,5 +346,25 @@ void CKeyConfigDlg::OnExportreg()
 		}
 		fclose(hfile);
 	}
-	return;
+}
+
+void CKeyConfigDlg::OnDefaults() 
+{
+	// TODO: Add your control notification handler code here
+	Global::pInputHandler->BuildCmdLUT();
+
+	WORD key = 0;
+	WORD mods = 0;	
+	
+	// update display for new key
+	m_prvIdx = m_lstCmds.GetCurSel();
+	FindKey(m_prvIdx,key,mods);
+	m_hotkey0.SetHotKey(key,mods);
+}
+
+void CKeyConfigDlg::OnNone() 
+{
+	// TODO: Add your control notification handler code here
+	m_hotkey0.SetHotKey(0,0);
+	
 }
