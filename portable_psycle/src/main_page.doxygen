@@ -2,7 +2,7 @@
 
 	http://psycle.sourceforge.net
 
-	\section intro News
+	\section news News
 		bohan, 2004, July, the 16th,
 		
 		Past month (or was that two months ago?), there's been a coding frenesy on Psycle involving alk?, zealmange, me, and even JAZ at some point, to recode its internals and make it more stable.
@@ -27,7 +27,6 @@
 		\ref todo
 
 	\section section__tasks Tasks
-
 		As you can see in the sections above, there's a lot of work to do, and few people: \ref tasks
 
 */
