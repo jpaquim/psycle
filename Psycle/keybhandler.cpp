@@ -3,6 +3,7 @@
 
 void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
+	// undo code not required, enter note handles it
 	CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
 	if (cmd.GetType() == CT_Note)
 	{
@@ -28,6 +29,7 @@ void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 {
+	// undo code not required, enter not and msbput handle it
 	if(viewMode == VMPattern && bEditMode)
 	{
 		bool success;
@@ -79,6 +81,7 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 
 void CChildView::MidiPatternNote(int outnote, int velocity)
 {
+	// undo code not required, enter note handles it
 /*	if(outnote >= 0 && outnote <= 120)  // I really believe this is not necessary.
 	{									// outnote <= 120 is checked before calling this function
 										// and outnote CAN NOT be negative since it's taken from
@@ -116,6 +119,7 @@ void CChildView::MidiPatternNote(int outnote, int velocity)
 
 void CChildView::MidiPatternTweak(int command, int value)
 {
+	// UNDO CODE MIDI PATTERN TWEAK
 	if (value < 0) value = 0;
 	else if (value > 65535) value = 65535;
 	if(viewMode == VMPattern && bEditMode)
@@ -136,6 +140,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 		PatternEntry *entry = (PatternEntry*) toffset;
 		if (entry->_note >= 120)
 		{
+			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 			entry->_mach = _pSong->seqBus;
 			entry->_cmd = (value>>8)&255;
 			entry->_parameter = value&255;
@@ -185,6 +190,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 
 void CChildView::MidiPatternCommand(int command, int value)
 {
+	// UNDO CODE MIDI PATTERN
 	if (value < 0) value = 0;
 	else if (value > 255) value = 255;
 	if(viewMode == VMPattern && bEditMode)
@@ -201,6 +207,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
 		}
 
+		AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 		// build entry
 		PatternEntry *entry = (PatternEntry*) toffset;
 		entry->_mach = _pSong->seqBus;
@@ -250,6 +257,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 
 void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 {
+	// UNDO CODE ENTER NOTE
 	int ps = _ps();
 	unsigned char * offset = _offset(ps);
 	unsigned char * toffset = _toffset(ps);
@@ -325,6 +333,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		}
 		note = 120;
 	}
+	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 	entry->_note = note;
 	entry->_mach = _pSong->seqBus;
 	entry->_inst = _pSong->auxcolSelected;
@@ -390,8 +399,9 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 
 bool CChildView::MSBPut(int nChar)
 {
+	// UNDO CODE MSB PUT
 	// init
-	const unsigned char ps = _ps();
+	int ps = _ps();
 	unsigned char * toffset = _toffset(ps) + (editcur.col+1)/2;
 
 	int oldValue = *toffset;	
@@ -408,6 +418,8 @@ bool CChildView::MSBPut(int nChar)
 	drawTrackEnd=editcur.track;
 	drawLineStart=editcur.line;
 	drawLineEnd=editcur.line;
+
+	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 	switch ((editcur.col+1)%2)
 	{
@@ -433,9 +445,12 @@ bool CChildView::MSBPut(int nChar)
 
 void CChildView::ClearCurr() // delete content at Cursor pos.
 {
+	// UNDO CODE CLEAR
 	int ps = _ps();
 	unsigned char * offset = _offset(ps);
 	unsigned char * toffset = _toffset(ps);
+
+	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 	if ( editcur.col == 0 )
 	{
@@ -457,6 +472,7 @@ void CChildView::ClearCurr() // delete content at Cursor pos.
 
 void CChildView::DeleteCurr()
 {
+	// UNDO CODE DELETE
 	int ps = _ps();
 	unsigned char * offset = _offset(ps);
 	int patlines = _pSong->patternLines[ps];
@@ -468,6 +484,8 @@ void CChildView::DeleteCurr()
 		else
 			editcur.line--;
 	}
+
+	AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
 
 	for (int i=editcur.line; i < patlines-1; i++)
 		memcpy(offset+(i*MULTIPLY), offset+((i+1)*MULTIPLY), 5);
@@ -485,9 +503,12 @@ void CChildView::DeleteCurr()
 
 void CChildView::InsertCurr()
 {
+	// UNDO CODE INSERT
 	int ps = _ps();
 	unsigned char * offset = _offset(ps);
 	int patlines = _pSong->patternLines[ps];
+
+	AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
 
 	for (int i=patlines-1; i > editcur.line; i--)
 		memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), 5);
@@ -682,11 +703,14 @@ void CChildView::ShiftOctave(int x)
 
 void CChildView::patCut()
 {
+	// UNDO CODE PATT CUT
 	const int ps = _ps();
 	unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
 	unsigned char blank[5]={255,255,255,0,0};
-	
+
 	patBufferLines = _pSong->patternLines[ps];
+	AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+
 	int length = patBufferLines*5*MAX_TRACKS;
 	
 	memcpy(patBufferData,soffset,length);
@@ -719,13 +743,16 @@ void CChildView::patCopy()
 
 void CChildView::patPaste()
 {
+	// UNDO CODE PATT PASTE
 	if(patBufferCopy && viewMode == VMPattern)
 	{
 		const int ps = _ps();
 		unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
-
+		// **************** funky shit goin on here yo with the pattern resize or some shit
+		AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 		if ( patBufferLines != _pSong->patternLines[_ps()] )
 		{
+			AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 			_pSong->AllocNewPattern(_ps(),"",patBufferLines,false);
 		}
 		memcpy(soffset,patBufferData,patBufferLines*5*MAX_TRACKS);
@@ -740,6 +767,7 @@ void CChildView::patPaste()
 
 void CChildView::patTranspose(int trp)
 {
+	// UNDO CODE PATT TRANSPOSE
 	const int ps = _ps();
 	unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
 
@@ -747,7 +775,9 @@ void CChildView::patTranspose(int trp)
 	{
 		int pLines=_pSong->patternLines[ps];
 		int length=pLines*5*MAX_TRACKS;
-		
+
+		AddUndo(ps,0,0,MAX_TRACKS,pLines,editcur.track,editcur.line,editcur.col,editPosition);
+
 		for	(int c=editcur.line*5*MAX_TRACKS;c<length;c+=5)
 		{
 			int not=*(soffset+c);
@@ -866,6 +896,7 @@ void CChildView::BlockUnmark()
 
 void CChildView::CopyBlock(bool cutit)
 {
+	// UNDO CODE HERE CUT
 	if(blockSelected)
 	{
 		isBlockCopied=true;
@@ -878,7 +909,11 @@ void CChildView::CopyBlock(bool cutit)
 		int ls=0;
 		int ts=0;
 		unsigned char blank[5]={255,255,255,0,0};
-		
+
+		if (cutit)
+		{
+			AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+		}
 		for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 		{
 			ls=0;
@@ -913,10 +948,14 @@ void CChildView::CopyBlock(bool cutit)
 
 void CChildView::PasteBlock(int tx,int lx,bool mix)
 {
+	// UNDO CODE PASTE AND MIX PASTE
 	if(isBlockCopied)
 	{
 		int ps=_pSong->playOrder[editPosition];
 		const int nl = _pSong->patternLines[ps];
+
+		AddUndo(ps,tx,lx,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+
 		int displace=ps*MULTIPLY2;
 		
 		int ls=0;
@@ -1008,6 +1047,7 @@ void CChildView::LoadBlock(FILE* file)
 
 void CChildView::DoubleLength()
 {
+	// UNDO CODE DOUBLE LENGTH
 	const int displace=_pSong->playOrder[editPosition];
 	unsigned char *toffset;
 	unsigned char blank[5]={255,255,255,0,0};
@@ -1016,14 +1056,21 @@ void CChildView::DoubleLength()
 	if ( blockSelected )
 	{
 ///////////////////////////////////////////////////////// Add ROW
-		st=blockSel.start.track;		et=blockSel.end.track+1;
-		sl=blockSel.start.line;			nl=blockSel.end.line-sl+1;
+		st=blockSel.start.track;		
+		et=blockSel.end.track+1;
+		sl=blockSel.start.line;			
+		nl=blockSel.end.line-sl+1;
 		el=sl+nl*2-1;
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2-1,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	else 
 	{
-		st=0;		et=_pSong->SONGTRACKS;		sl=0;
-		nl= _pSong->patternLines[displace]/2;	el=_pSong->patternLines[displace]-1;
+		st=0;		
+		et=_pSong->SONGTRACKS;		
+		sl=0;
+		nl= _pSong->patternLines[displace]/2;	
+		el=_pSong->patternLines[displace]-1;
+		AddUndo(_ps(),0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 
 	for (int t=st;t<et;t++)
@@ -1046,6 +1093,7 @@ void CChildView::DoubleLength()
 
 void CChildView::HalveLength()
 {
+	// UNDO CODE HALF LENGTH
 	const int displace=_pSong->playOrder[editPosition];
 	unsigned char *toffset;
 	int st, et, sl, el,nl;
@@ -1054,14 +1102,20 @@ void CChildView::HalveLength()
 	if ( blockSelected )
 	{
 ///////////////////////////////////////////////////////// Add ROW
-		st=blockSel.start.track;	et=blockSel.end.track+1;
-		sl=blockSel.start.line;		nl=blockSel.end.line-sl+1;
+		st=blockSel.start.track;	
+		et=blockSel.end.track+1;
+		sl=blockSel.start.line;		
+		nl=blockSel.end.line-sl+1;
 		el=(blockSel.end.line-sl+1)/2;
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl/2,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	else 
 	{
-		st=0;	et=_pSong->SONGTRACKS;		sl=0;
-		nl=_pSong->patternLines[displace];	el=_pSong->patternLines[displace]/2;
+		st=0;	et=_pSong->SONGTRACKS;		
+		sl=0;
+		nl=_pSong->patternLines[displace];	
+		el=_pSong->patternLines[displace]/2;
+		AddUndo(_ps(),0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	
 	for (int t=st;t<et;t++)
@@ -1088,10 +1142,13 @@ void CChildView::HalveLength()
 
 void CChildView::BlockTranspose(int trp)
 {
-	if ( blockSelected == true ) {
-
+	// UNDO CODE TRANSPOSE
+	if ( blockSelected == true ) 
+	{
 		const int displace=_pSong->playOrder[editPosition]*MULTIPLY2;
 		unsigned char *toffset=_pSong->pPatternData+displace;
+
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 		for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 		{
@@ -1121,10 +1178,12 @@ void CChildView::BlockTranspose(int trp)
 
 void CChildView::BlockGenChange(int x)
 {
-	if ( blockSelected == true ) {
-
+	// UNDO CODE BLOCK GENERATOR CHANGE
+	if ( blockSelected == true ) 
+	{
 		const int displace=_pSong->playOrder[editPosition]*MULTIPLY2;
 		unsigned char *toffset=_pSong->pPatternData+displace;
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 		for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 		{
@@ -1153,10 +1212,13 @@ void CChildView::BlockGenChange(int x)
 
 void CChildView::BlockInsChange(int x)
 {
-	if ( blockSelected == true ) {
-
+	// UNDO CODE BLOCK INS CHANGE
+	if ( blockSelected == true ) 
+	{
 		const int displace=_pSong->playOrder[editPosition]*MULTIPLY2;
 		unsigned char *toffset=_pSong->pPatternData+displace;
+
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 		for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 		{
@@ -1185,12 +1247,15 @@ void CChildView::BlockInsChange(int x)
 
 void CChildView::BlockParamInterpolate()
 {
+	// UNDO CODE BLOCK INTERPOLATE
 	if (blockSelected)
 	{
 	///////////////////////////////////////////////////////// Add ROW
 		const int displace=_pSong->playOrder[editPosition]*MULTIPLY2;
 		unsigned char *toffset=_pSong->pPatternData+displace;
-		
+
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+	
 		const int initvalue = 
 			*(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3) * 0x100 +
 			*(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+4);
@@ -1224,7 +1289,7 @@ void CChildView::IncCurPattern()
 	{
 		++_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternSwitch);
+		Repaint(DMPatternChange);
 	}
 }
 
@@ -1235,7 +1300,7 @@ void CChildView::DecCurPattern()
 	{
 		--_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternSwitch);
+		Repaint(DMPatternChange);
 	}
 }
 
@@ -1249,7 +1314,7 @@ void CChildView::DecPosition()
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(false);
-		Repaint(DMPatternSwitch);
+		Repaint(DMPatternChange);
 	}
 }
 
@@ -1270,7 +1335,7 @@ void CChildView::IncPosition()
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(false);
-		Repaint(DMPatternSwitch);
+		Repaint(DMPatternChange);
 	}
 }
 
@@ -1288,3 +1353,375 @@ void CChildView::SelectMachineUnderCursor()
 	pParentMain->ChangeIns(_pSong->auxcolSelected);
 
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// undo/redo code
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void CChildView::AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pUndoList;
+	pUndoList = pNew;
+	// fill data
+	unsigned char* pData = new unsigned char[tracks*lines*5*sizeof(char)];
+	pNew->pData = pData;
+	pNew->pattern = pattern;
+	pNew->x = x;
+	pNew->y = y;
+	pNew->tracks = tracks;
+	pNew->lines = lines;
+	pNew->type = UNDO_PATTERN;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+
+	int displace=pattern*MULTIPLY2;
+
+	for (int t=x;t<x+tracks;t++)
+	{
+		for (int l=y;l<y+lines;l++)
+		{
+			int const displace2=t*5+l*MULTIPLY;
+			
+			unsigned char *offset_source=_pSong->pPatternData+displace+displace2;
+			
+			memcpy(pData,offset_source,5*sizeof(char));
+			pData+=5*sizeof(char);
+		}
+	}
+	if (bWipeRedo)
+	{
+		KillRedo();
+	}
+}
+
+void CChildView::AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pRedoList;
+	pRedoList = pNew;
+	// fill data
+	unsigned char* pData = new unsigned char[tracks*lines*5*sizeof(char)];
+	pNew->pData = pData;
+	pNew->pattern = pattern;
+	pNew->x = x;
+	pNew->y = y;
+	pNew->tracks = tracks;
+	pNew->lines = lines;
+	pNew->type = UNDO_PATTERN;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+
+	int displace=pattern*MULTIPLY2;
+
+	for (int t=x;t<x+tracks;t++)
+	{
+		for (int l=y;l<y+lines;l++)
+		{
+			int const displace2=t*5+l*MULTIPLY;
+			
+			unsigned char *offset_source=_pSong->pPatternData+displace+displace2;
+			
+			memcpy(pData,offset_source,5*sizeof(char));
+			pData+=5*sizeof(char);
+		}
+	}
+}
+
+void CChildView::AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pUndoList;
+	pUndoList = pNew;
+	// fill data
+	pNew->pData = NULL;
+	pNew->pattern = pattern;
+	pNew->x = 0;
+	pNew->y = 0;
+	pNew->tracks = 0;
+	pNew->lines = lines;
+	pNew->type = UNDO_LENGTH;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+
+	if (bWipeRedo)
+	{
+		KillRedo();
+	}
+}
+
+void CChildView::AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pRedoList;
+	pRedoList = pNew;
+	// fill data
+	pNew->pData = NULL;
+	pNew->pattern = pattern;
+	pNew->x = 0;
+	pNew->y = 0;
+	pNew->tracks = 0;
+	pNew->lines = lines;
+	pNew->type = UNDO_LENGTH;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+}
+
+void CChildView::AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pUndoList;
+	pUndoList = pNew;
+	// fill data
+	pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
+	memcpy(pNew->pData, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
+	pNew->pattern = 0;
+	pNew->x = 0;
+	pNew->y = 0;
+	pNew->tracks = 0;
+	pNew->lines = lines;
+	pNew->type = UNDO_SEQUENCE;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+
+	if (bWipeRedo)
+	{
+		KillRedo();
+	}
+}
+
+void CChildView::AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pRedoList;
+	pRedoList = pNew;
+	// fill data
+	pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
+	memcpy(pNew->pData, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
+	pNew->pattern = 0;
+	pNew->x = 0;
+	pNew->y = 0;
+	pNew->tracks = 0;
+	pNew->lines = lines;
+	pNew->type = UNDO_SEQUENCE;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+}
+
+void CChildView::OnEditUndo() 
+{
+	// TODO: Add your command handler code here
+	if (pUndoList)
+	{
+		switch (pUndoList->type)
+		{
+		case UNDO_PATTERN:
+			if(viewMode == VMPattern)// && bEditMode)
+			{
+				AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos);
+				// do undo
+				int displace=pUndoList->pattern*MULTIPLY2;
+				unsigned char* pData = pUndoList->pData;
+
+				for (int t=pUndoList->x;t<pUndoList->x+pUndoList->tracks;t++)
+				{
+					for (int l=pUndoList->y;l<pUndoList->y+pUndoList->lines;l++)
+					{
+						int const displace2=t*5+l*MULTIPLY;
+						
+						unsigned char *offset_source=_pSong->pPatternData+displace+displace2;
+						
+						memcpy(offset_source,pData,5*sizeof(char));
+						pData+=5*sizeof(char);
+					}
+				}
+				// set up cursor
+				editcur.track = pUndoList->edittrack;
+				editcur.line = pUndoList->editline;
+				editcur.col = pUndoList->editcol;
+				if (pUndoList->seqpos == editPosition)
+				{
+					// display changes
+					drawTrackStart=pUndoList->x;
+					drawTrackEnd=pUndoList->x+pUndoList->tracks;
+					drawLineStart=pUndoList->y;
+					drawLineEnd=pUndoList->y+pUndoList->lines;
+					Repaint(DMDataChange);
+				}
+				else
+				{
+					editPosition = pUndoList->seqpos;
+					pParentMain->UpdatePlayOrder(true);
+					Repaint(DMPatternChange);
+				}
+			}
+			break;
+		case UNDO_LENGTH:
+			if(viewMode == VMPattern)// && bEditMode)
+			{
+				AddRedoLength(pUndoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos);
+				// do undo
+				_pSong->patternLines[pUndoList->pattern]=pUndoList->lines;
+				// set up cursor
+				editcur.track = pUndoList->edittrack;
+				editcur.line = pUndoList->editline;
+				editcur.col = pUndoList->editcol;
+				if (pUndoList->seqpos != editPosition)
+				{
+					editPosition = pUndoList->seqpos;
+					pParentMain->UpdatePlayOrder(true);
+				}
+				// display changes
+				Repaint(DMPatternChange);
+				break;
+			}
+		case UNDO_SEQUENCE:
+			AddRedoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
+			// do undo
+			memcpy(_pSong->playOrder, pUndoList->pData, MAX_SONG_POSITIONS*sizeof(char));
+			_pSong->playLength = pUndoList->lines;
+			// set up cursor
+			editcur.track = pUndoList->edittrack;
+			editcur.line = pUndoList->editline;
+			editcur.col = pUndoList->editcol;
+			editPosition = pUndoList->seqpos;
+			pParentMain->UpdatePlayOrder(true);
+			pParentMain->UpdateSequencer();
+			// display changes
+			Repaint(DMPatternChange);
+			break;
+		}
+		// delete undo from list
+		SPatternUndo* pTemp = pUndoList->pPrev;
+		delete (pUndoList->pData);
+		delete (pUndoList);
+		pUndoList = pTemp;
+	}
+}
+
+
+void CChildView::OnEditRedo() 
+{
+	// TODO: Add your command handler code here
+	if (pRedoList)
+	{
+		switch (pRedoList->type)
+		{
+		case UNDO_PATTERN:
+			if(viewMode == VMPattern)// && bEditMode)
+			{
+				AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,FALSE);
+				// do redo
+				int displace=pRedoList->pattern*MULTIPLY2;
+				unsigned char* pData = pRedoList->pData;
+
+				for (int t=pRedoList->x;t<pRedoList->x+pRedoList->tracks;t++)
+				{
+					for (int l=pRedoList->y;l<pRedoList->y+pRedoList->lines;l++)
+					{
+						int const displace2=t*5+l*MULTIPLY;
+						
+						unsigned char *offset_source=_pSong->pPatternData+displace+displace2;
+						
+						memcpy(offset_source,pData,5*sizeof(char));
+						pData+=5*sizeof(char);
+					}
+				}
+				// set up cursor
+				editcur.track = pRedoList->edittrack;
+				editcur.line = pRedoList->editline;
+				editcur.col = pRedoList->editcol;
+				if (pRedoList->seqpos == editPosition)
+				{
+					// display changes
+					drawTrackStart=pRedoList->x;
+					drawTrackEnd=pRedoList->x+pRedoList->tracks;
+					drawLineStart=pRedoList->y;
+					drawLineEnd=pRedoList->y+pRedoList->lines;
+					Repaint(DMDataChange);
+				}
+				else
+				{
+					editPosition = pRedoList->seqpos;
+					pParentMain->UpdatePlayOrder(true);
+					Repaint(DMPatternChange);
+				}
+			}
+			break;
+		case UNDO_LENGTH:
+			if(viewMode == VMPattern)// && bEditMode)
+			{
+				AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,FALSE);
+				// do undo
+				_pSong->patternLines[pRedoList->pattern]=pRedoList->lines;
+				// set up cursor
+				editcur.track = pRedoList->edittrack;
+				editcur.line = pRedoList->editline;
+				editcur.col = pRedoList->editcol;
+				if (pRedoList->seqpos != editPosition)
+				{
+					editPosition = pRedoList->seqpos;
+					pParentMain->UpdatePlayOrder(true);
+				}
+				// display changes
+				Repaint(DMPatternChange);
+				break;
+			}
+		case UNDO_SEQUENCE:
+			AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,FALSE);
+			// do undo
+			memcpy(_pSong->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
+			_pSong->playLength = pRedoList->lines;
+			// set up cursor
+			editcur.track = pRedoList->edittrack;
+			editcur.line = pRedoList->editline;
+			editcur.col = pRedoList->editcol;
+			editPosition = pRedoList->seqpos;
+			pParentMain->UpdatePlayOrder(true);
+			pParentMain->UpdateSequencer();
+			// display changes
+			Repaint(DMPatternChange);
+			break;
+		}
+		// delete redo from list
+		SPatternUndo* pTemp = pRedoList->pPrev;
+		delete (pRedoList->pData);
+		delete (pRedoList);
+		pRedoList = pTemp;
+	}
+}
+
+void CChildView::KillRedo()
+{
+	while (pRedoList)
+	{
+		SPatternUndo* pTemp = pRedoList->pPrev;
+		delete (pRedoList->pData);
+		delete (pRedoList);
+		pRedoList = pTemp;
+	}
+}
+
+void CChildView::KillUndo()
+{
+	while (pUndoList)
+	{
+		SPatternUndo* pTemp = pUndoList->pPrev;
+		delete (pUndoList->pData);
+		delete (pUndoList);
+		pUndoList = pTemp;
+	}
+}
+

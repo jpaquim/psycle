@@ -300,6 +300,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
 	cb->SetCheck(Global::pConfig->_RecordNoteoff?1:0);
 
+	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW);
+	cb->SetCheck(m_wndView._followSong?1:0);
+
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCSHORT);
 	hi = (HBITMAP)bplus; cb->SetBitmap(hi);
 
@@ -1317,6 +1320,7 @@ void CMainFrame::OnDecshort()
 
 void CMainFrame::OnInclong() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	int pop=m_wndView.editPosition;
 	if(_pSong->playOrder[pop]<(MAX_PATTERNS-10))
 	{
@@ -1329,6 +1333,7 @@ void CMainFrame::OnInclong()
 
 void CMainFrame::OnDeclong() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	int pop=m_wndView.editPosition;
 	if(_pSong->playOrder[pop]>9)
 	{
@@ -1349,6 +1354,7 @@ void CMainFrame::OnSeqnew()
 {
 	if ( m_wndView.editPosition < MAX_PATTERNS )
 	{
+		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 		m_wndView.editPosition++;
 		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
@@ -1379,6 +1385,7 @@ void CMainFrame::OnSeqins()
 {
 	if ( m_wndView.editPosition < MAX_PATTERNS )
 	{
+		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 		m_wndView.editPosition++;
 		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
@@ -1402,6 +1409,7 @@ void CMainFrame::OnSeqins()
 
 void CMainFrame::OnSeqdel() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	int const pop=m_wndView.editPosition;
 
 	for(int c=pop;c<_pSong->playLength-1;c++)
@@ -1423,6 +1431,7 @@ void CMainFrame::OnSeqdel()
 
 void CMainFrame::OnSeqclr() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	for(int c=0;c<MAX_SONG_POSITIONS;c++)
 	{
 		_pSong->playOrder[c]=0;
@@ -1443,6 +1452,7 @@ void CMainFrame::OnSeqclr()
 /*
 void CMainFrame::OnSeqspr()
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	unsigned char oldtonew[MAX_PATTERNS];
 	unsigned char newtoold[MAX_PATTERNS];
 	memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
@@ -1526,6 +1536,7 @@ void CMainFrame::OnSeqspr()
 
 void CMainFrame::OnIncpos2() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	if(m_wndView.editPosition<(_pSong->playLength-1))
 	{
 		++m_wndView.editPosition;
@@ -1538,6 +1549,7 @@ void CMainFrame::OnIncpos2()
 
 void CMainFrame::OnDecpos2() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	if(m_wndView.editPosition>0)
 	{
 		--m_wndView.editPosition;
@@ -1550,6 +1562,7 @@ void CMainFrame::OnDecpos2()
 
 void CMainFrame::OnIncpat2() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	int pop=m_wndView.editPosition;
 	if(_pSong->playOrder[pop]<(MAX_PATTERNS-1))
 	{
@@ -1562,6 +1575,7 @@ void CMainFrame::OnIncpat2()
 
 void CMainFrame::OnDecpat2() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	int pop=m_wndView.editPosition;
 	if(_pSong->playOrder[pop]>0)
 	{
@@ -1574,6 +1588,7 @@ void CMainFrame::OnDecpat2()
 
 void CMainFrame::OnInclen() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 	{
 		++_pSong->playLength;
@@ -1585,6 +1600,7 @@ void CMainFrame::OnInclen()
 
 void CMainFrame::OnDeclen() 
 {
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	if(_pSong->playLength>1)
 	{
 		--_pSong->playLength;

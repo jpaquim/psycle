@@ -82,7 +82,7 @@ CChildView::CChildView()
 	editPosition=0;
 	bEditMode = false;
 
-	_followSong = false;
+	_followSong = true;
 	_previousTicks=0;
 	
 	blockSelected=false;
@@ -90,6 +90,9 @@ CChildView::CChildView()
 	patBufferCopy=false;
 	blockNTracks=0;
 	blockNLines=0;
+
+	pUndoList=NULL;
+	pRedoList=NULL;
 
 //	editcur.track=0; // Not needed to initialize, since the class does it already.
 //	editcur.col=0;
@@ -127,6 +130,7 @@ CChildView::CChildView()
 
 	// Show Machine view and init MIDI
 	OnMachineview();
+
 }
 
 CChildView::~CChildView()
@@ -143,6 +147,8 @@ CChildView::~CChildView()
 	Global::pInputHandler->SetChildView(NULL);
 	seqFont.DeleteObject();
 	stuffbmp.DeleteObject();
+	KillRedo();
+	KillUndo();
 
 	if ( bmpDC != NULL )
 	{
@@ -221,6 +227,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_FILE_RECENT_03, OnFileRecent_03)
 	ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
 	ON_COMMAND(ID_FILE_IMPORT_ITFILE, OnFileImportItfile)
+	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
+	ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -672,6 +680,8 @@ void CChildView::OnFileNew()
 {
 	if (MessageBox("Are you sure?","New song",MB_YESNO | MB_ICONWARNING)==IDYES)
 	{
+		KillUndo();
+		KillRedo();
 		pParentMain->CloseAllMacGuis();
 		Global::pPlayer->Stop();
 		Sleep(LOCK_LATENCY);
@@ -899,6 +909,8 @@ void CChildView::ShowPatternDlg(void)
 	{
 		if ( nlines != dlg.patLines )
 		{
+			AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+			AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 			_pSong->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
 			if ( strcmp(name,dlg.patName) != 0 )
 			{
@@ -1254,6 +1266,8 @@ void CChildView::OnFileImportXmfile()
 	
 	if (GetOpenFileName(&ofn)==TRUE)
 	{
+		KillUndo();
+		KillRedo();
 
 		pParentMain->CloseAllMacGuis();
 		Global::pPlayer->Stop();
@@ -1575,6 +1589,8 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	titlename+="] ";
 	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
 	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
+	KillUndo();
+	KillRedo();
 }
 
 void CChildView::CallOpenRecent(int pos)
@@ -1589,4 +1605,5 @@ void CChildView::CallOpenRecent(int pos)
 	OnFileLoadsongNamed(nameBuff, 1);
 	delete nameBuff;
 }
+
 
