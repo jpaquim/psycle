@@ -17,7 +17,9 @@
 
 
 
-#pragma message("parsing " __FILE__)
+#if defined COMPILER__MICROSOFT
+	#pragma message("parsing " __FILE__)
+#endif
 
 
 
@@ -234,7 +236,9 @@
 
 
 
-#pragma message("done parsing " __FILE__)
+#if defined COMPILER__MICROSOFT
+	#pragma message("done parsing " __FILE__)
+#endif
 
 
 
