@@ -50,9 +50,10 @@
 ////////////////
 
 #if defined COMPILER__MICROSOFT
-	#pragma warning(disable:4702) // unreachable code
-	#include <stdexcept>
-	#pragma warning(default:4702) // unreachable code
+	#pragma warning(push)
+		#pragma warning(disable:4702) // unreachable code
+		#include <stdexcept>
+	#pragma warning(pop)
 #endif
 
 // c++ headers

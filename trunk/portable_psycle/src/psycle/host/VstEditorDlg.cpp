@@ -55,19 +55,38 @@ namespace psycle
 
 			creatingwindow = true;
 			_splitter.CreateStatic(this, 1, 2);
-			editorgui = (_pMachine->_pEffect->flags & effFlagsHasEditor);
-			if ( editorgui )
+			try
+			{
+				editorgui = _pMachine->proxy().flags() & effFlagsHasEditor;
+			}
+			catch(const std::exception &)
+			{
+				editorgui = false;
+			}
+			if(editorgui)
 			{
 				SIZE size={200,100};
 				_splitter.CreateView(0, VST_UI_PANE, RUNTIME_CLASS(CVstGui), size, pContext);
 				pGui = _splitter.GetPane(0, VST_UI_PANE);
 				((CVstGui*)pGui)->_pMachine= _pMachine;
-				((CVstGui*)pGui)->effect = _pMachine->_pEffect;
-
-				_pMachine->Dispatch(effEditOpen, 0, 0, pGui->m_hWnd, 0.0f);
-			
+				((CVstGui*)pGui)->proxy = &_pMachine->proxy();
+				try
+				{
+					_pMachine->proxy().dispatcher(effEditOpen, 0, 0, pGui->m_hWnd);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 				ERect * er;
-				_pMachine->Dispatch(effEditGetRect, 0, 0, &er,0.0f);
+				try
+				{
+					_pMachine->proxy().dispatcher(effEditGetRect, 0, 0, &er);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 				width = er->right - er->left;
 				height = er->bottom - er->top;
 
@@ -77,7 +96,15 @@ namespace psycle
 			}
 			else
 			{
-				int numParameters = _pMachine->NumParameters();
+				int numParameters;
+				try
+				{
+					numParameters = _pMachine->proxy().numParams();
+				}
+				catch(const std::exception &)
+				{
+					numParameters = 0;
+				}
 				int ncol = 1;
 				while ( (numParameters/ncol)*28 > ncol*134) ncol++;
 				int parspercol = numParameters/ncol;
@@ -102,7 +129,7 @@ namespace psycle
 				((CFrameMachine*)pGui)->MachineIndex=MachineIndex;
 				((CFrameMachine*)pGui)->Generate();
 				((CFrameMachine*)pGui)->SelectMachine(_pMachine);
-				((CFrameMachine*)pGui)->_pActive=NULL;
+				((CFrameMachine*)pGui)->_pActive = 0;
 			}
 			size.cx = VST_PARAMETRIC_WIDTH;
 			size.cy = VST_PARAMETRIC_HEIGHT;
@@ -140,10 +167,34 @@ namespace psycle
 		void CVstEditorDlg::OnParametersRandomparameters() 
 		{
 			// Randomize controls
-			for(int c(0); c < reinterpret_cast<vst::plugin *>(_pMachine)->NumParameters() ; ++c)
+			int numParameters;
+			try
+			{
+				numParameters = reinterpret_cast<vst::plugin *>(_pMachine)->proxy().numParams();
+			}
+			catch(const std::exception &)
+			{
+				numParameters = 0;
+			}
+			catch(...) // reinterpret_cast sucks
+			{
+				numParameters = 0;
+			}
+			for(int c(0); c < numParameters ; ++c)
 			{
 				const float randsem(static_cast<float>(rand() * 0.000030517578125f));
-				reinterpret_cast<vst::plugin *>(_pMachine)->SetParameter(c, randsem);
+				try
+				{
+					reinterpret_cast<vst::plugin *>(_pMachine)->proxy().setParameter(c, randsem);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
+				}
 			}
 			pGui->Invalidate(false);
 		}

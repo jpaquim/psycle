@@ -190,31 +190,83 @@ namespace psycle
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
-				sizeDataStruct = ((Plugin *)_pMachine)->GetInterface()->GetDataSize();
+				try
+				{
+					sizeDataStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
+				}
+				catch(const std::exception &)
+				{
+					sizeDataStruct = 0;
+				}
 				if(sizeDataStruct > 0)
 				{
 					byte* pData = new byte[sizeDataStruct];
-					((Plugin *)_pMachine)->GetInterface()->GetData(pData); // Internal Save
-					iniPreset.Init(numParameters , "", ((Plugin*)_pMachine)->GetInterface()->Vals, sizeDataStruct,  pData);
+					try
+					{
+						reinterpret_cast<Plugin *>(_pMachine)->proxy().GetData(pData); // Internal Save
+						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), sizeDataStruct, pData);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
+					catch(...) // reinterpret_cast sucks
+					{
+						// o_O`
+					}
 					delete pData;
 				}
 				else
 				{
-					iniPreset.Init(numParameters , "", ((Plugin*)_pMachine)->GetInterface()->Vals, 0,  NULL);
+					
+					try
+					{
+						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), 0,  0);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
+					catch(...) // reinterpret_cast sucks
+					{
+						// o_O`
+					}
 				}
-				buffer = ((Plugin *)_pMachine)->GetDllName();
+				buffer = _pMachine->GetDllName();
 			}
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
-				numParameters = reinterpret_cast<vst::plugin *>(_pMachine)->NumParameters();
+				try
+				{
+					numParameters = reinterpret_cast<vst::plugin *>(_pMachine)->proxy().numParams();
+				}
+				catch(const std::exception &)
+				{
+					numParameters = 0;
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					numParameters = 0;
+				}
 				iniPreset.Init(numParameters);
 				int i(0);
 				while(i < numParameters)
 				{
-					iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * 65535));
+					try
+					{
+						iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->proxy().getParameter(i) * 65535));
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
+					catch(...) // reinterpret_cast sucks
+					{
+						// o_O`
+					}
 					++i;
 				}
-				buffer = reinterpret_cast<vst::plugin *>(_pMachine)->GetDllName();
+				buffer = _pMachine->GetDllName();
 			}
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
@@ -983,22 +1035,57 @@ namespace psycle
 		void CPresetsDlg::TweakMachine(CPreset &preset)
 		{
 			int num=preset.GetNumPars();
-			if ( _pMachine->_type == MACH_PLUGIN )
+			if(_pMachine->_type == MACH_PLUGIN)
 			{
-				for (int i=0;i<num;i++)
+				for(int i(0) ; i < num ; ++i)
 				{
-					((Plugin *)_pMachine)->GetInterface()->ParameterTweak(i,preset.GetParam(i));
+					try
+					{
+						reinterpret_cast<Plugin *>(_pMachine)->proxy().ParameterTweak(i, preset.GetParam(i));
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
+					catch(...) // reinterpret_cast sucks
+					{
+						// o_O`
+					}
 				}
-				if (preset.GetData())
+				if(preset.GetData())
 				{
-					((Plugin *)_pMachine)->GetInterface()->PutData(preset.GetData()); // Internal save
+					try
+					{
+						reinterpret_cast<Plugin *>(_pMachine)->proxy().PutData(preset.GetData()); // Internal save
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
+					catch(...) // reinterpret_cast sucks
+					{
+						// o_O`
+					}
 				}
 				m_wndFrame->Invalidate(false);
 			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			else if(_pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				for(int i(0) ; i < num ; ++i)
-					reinterpret_cast<vst::plugin *>(_pMachine)->SetParameter(i, preset.GetParam(i) / 65535.0f);
+				{
+					try
+					{
+						reinterpret_cast<vst::plugin *>(_pMachine)->proxy().setParameter(i, preset.GetParam(i) / 65535.0f);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
+					catch(...) // reinterpret_cast sucks
+					{
+						// o_O`
+					}
+				}
 			}
 			presetChanged = true;
 		}

@@ -83,8 +83,14 @@ namespace psycle
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				numParameters = ((vst::plugin*)_pMachine)->NumParameters();
-		//		ncol = 1;
+				try
+				{
+					numParameters = ((vst::plugin*)_pMachine)->proxy().numParams();
+				}
+				catch(const std::exception &)
+				{
+					numParameters = 0;
+				}
 				while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 			}
 			parspercol = numParameters/ncol;
@@ -172,33 +178,57 @@ namespace psycle
 					{
 						min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
 						max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
-						val_v = ((Plugin*)_pMachine)->GetInterface()->Vals[c];
-						if (((Plugin*)_pMachine)->GetInterface()->DescribeValue(buffer,c,val_v) == false)
+						try
 						{
-							sprintf(buffer,"%d",val_v);
+							val_v = ((Plugin*)_pMachine)->proxy().Vals()[c];
+						}
+						catch(const std::exception &)
+						{
+							val_v = 0; // hmm
+						}
+						try
+						{
+							if(!((Plugin*)_pMachine)->proxy().DescribeValue(buffer, c, val_v))
+								std::sprintf(buffer,"%d",val_v);
+						}
+						catch(const std::exception &)
+						{
+							std::strcpy(buffer,"fucked up");
 						}
 					}
 					else
 					{
 						bDrawKnob = FALSE;
 					}
-					strcpy(parName, ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->Name);
+					std::strcpy(parName, ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->Name);
 				}
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
 					min_v = 0;
 					max_v = vst::quantization;
-					val_v = f2i(((vst::plugin*)_pMachine)->GetParameter(c) * vst::quantization);
-					memset(buffer,0,sizeof(buffer));
-
-					if (((vst::plugin*)_pMachine)->DescribeValue(c,buffer) == false)
+					try
 					{
-						sprintf(buffer,"%d",val_v);
+						val_v = f2i(((vst::plugin*)_pMachine)->proxy().getParameter(c) * vst::quantization);
 					}
-					((vst::plugin*)_pMachine)->Dispatch(effGetParamName, c, 0, parName, 0);
+					catch(const std::exception &)
+					{
+						val_v = 0; // hmm
+					}
+					std::memset(buffer,0,sizeof(buffer));
+					if(!((vst::plugin*)_pMachine)->DescribeValue(c, buffer))
+					{
+						std::sprintf(buffer,"%d",val_v);
+					}
+					try
+					{
+						((vst::plugin*)_pMachine)->proxy().dispatcher(effGetParamName, c, 0, parName);
+					}
+					catch(const std::exception &)
+					{
+						std::strcpy(buffer,"fucked up");
+					}
 				}
-
-				if (bDrawKnob)
+				if(bDrawKnob)
 				{
 					int const amp_v = max_v - min_v;
 					int const rel_v = val_v - min_v;
@@ -304,11 +334,25 @@ namespace psycle
 
 				if ( _pMachine->_type == MACH_PLUGIN )
 				{
-					tweakbase = ((Plugin*)_pMachine)->GetInterface()->Vals[tweakpar];
+					try
+					{
+						tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
+					}
+					catch(const std::exception &)
+					{
+						tweakbase = 0;
+					}
 				}
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
-					tweakbase = int(((vst::plugin*)_pMachine)->GetParameter(tweakpar)*vst::quantization);
+					try
+					{
+						tweakbase = int(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
+					}
+					catch(const std::exception &)
+					{
+						tweakbase = 0;
+					}
 				}
 				istweak = true;
 				SetCapture();
@@ -342,11 +386,25 @@ namespace psycle
 				{
 					if ( _pMachine->_type == MACH_PLUGIN )
 					{
-						tweakbase=((Plugin*)_pMachine)->GetInterface()->Vals[tweakpar];
+						try
+						{
+							tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
+						}
+						catch(const std::exception &)
+						{
+							tweakbase = 0;
+						}
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
-						tweakbase=f2i(((vst::plugin*)_pMachine)->GetParameter(tweakpar)*vst::quantization);
+						try
+						{
+							tweakbase=f2i(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
+						}
+						catch(const std::exception &)
+						{
+							tweakbase = 0;
+						}
 					}
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
@@ -356,11 +414,25 @@ namespace psycle
 				{
 					if ( _pMachine->_type == MACH_PLUGIN )
 					{
-						tweakbase=((Plugin*)_pMachine)->GetInterface()->Vals[tweakpar];
+						try
+						{
+							tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
+						}
+						catch(const std::exception &)
+						{
+							tweakbase = 0;
+						}
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
-						tweakbase=f2i(((vst::plugin*)_pMachine)->GetParameter(tweakpar)*vst::quantization);
+						try
+						{
+							tweakbase=f2i(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
+						}
+						catch(const std::exception &)
+						{
+							tweakbase = 0;
+						}
 					}
 					sourcepoint=point.y;
 					finetweak=!finetweak;
@@ -385,7 +457,14 @@ namespace psycle
 				wndView->AddMacViewUndo();
 				if ( _pMachine->_type == MACH_PLUGIN )
 				{
-					((Plugin*)_pMachine)->GetInterface()->ParameterTweak(tweakpar, (int)nv);
+					try
+					{
+						((Plugin*)_pMachine)->proxy().ParameterTweak(tweakpar, (int) nv);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 					// well, this isn't so hard... just put the twk record here
 					if (Global::pConfig->_RecordTweaks)
 					{
@@ -401,7 +480,14 @@ namespace psycle
 				}
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
-					((vst::plugin*)_pMachine)->SetParameter(tweakpar,(float)(nv/(float)vst::quantization));
+					try
+					{
+						((vst::plugin*)_pMachine)->proxy().setParameter(tweakpar,(float)(nv/(float)vst::quantization));
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 					// well, this isn't so hard... just put the twk record here
 					if (Global::pConfig->_RecordTweaks)
 					{
@@ -457,27 +543,48 @@ namespace psycle
 						min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MinValue;
 						max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MaxValue;
 						strcpy(name ,((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->Name);
-						dlg.m_Value = ((Plugin*)_pMachine)->GetInterface()->Vals[thispar];
+						try
+						{
+							dlg.m_Value = ((Plugin*)_pMachine)->proxy().Vals()[thispar];
+						}
+						catch(const std::exception &)
+						{
+							dlg.m_Value = 0;
+						}
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
 						min_v = 0;
 						max_v = vst::quantization;
-						((vst::plugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
-						dlg.m_Value = f2i(((vst::plugin*)_pMachine)->GetParameter(thispar)*vst::quantization);
+						try
+						{
+							((vst::plugin*)_pMachine)->proxy().dispatcher(effGetParamName, thispar, 0, name);
+						}
+						catch(const std::exception &)
+						{
+							std::strcpy(name, "fucked up");
+						}
+						try
+						{
+							dlg.m_Value = f2i(((vst::plugin*)_pMachine)->proxy().getParameter(thispar) * vst::quantization);
+						}
+						catch(const std::exception &)
+						{
+							dlg.m_Value = 0;
+						}
 					}
-					
-					sprintf(
-						dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)\0"
-						,thispar
-						,name
-						,min_v
-						,max_v);
+					std::sprintf
+						(
+							dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)\0",
+							thispar,
+							name,
+							min_v,
+							max_v
+						);
 					dlg.min = min_v;
 					dlg.max = max_v;
 					dlg.macindex = MachineIndex;
 					dlg.paramindex = tweakpar;
-
 					dlg.DoModal();
 					int nv = dlg.m_Value;
 					if (nv < min_v)
@@ -491,11 +598,25 @@ namespace psycle
 					wndView->AddMacViewUndo();
 					if ( _pMachine->_type == MACH_PLUGIN )
 					{
-						((Plugin*)_pMachine)->GetInterface()->ParameterTweak(thispar, nv);
+						try
+						{
+							((Plugin*)_pMachine)->proxy().ParameterTweak(thispar, nv);
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
-						((vst::plugin*)_pMachine)->SetParameter(thispar,(float)(nv/(float)vst::quantization));
+						try
+						{
+							((vst::plugin*)_pMachine)->proxy().setParameter(thispar,(float)(nv/(float)vst::quantization));
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
 						SetFocus();
 					}
 					Invalidate(false);
@@ -519,7 +640,14 @@ namespace psycle
 				float roffset = randsem*(float)dif;
 
 				wndView->AddMacViewUndo();
-				((Plugin*)_pMachine)->GetInterface()->ParameterTweak(c, minran+int(roffset));
+				try
+				{
+					((Plugin*)_pMachine)->proxy().ParameterTweak(c, minran+int(roffset));
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 			}
 
 			Invalidate(false);
@@ -531,7 +659,14 @@ namespace psycle
 			{
 				int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
 				wndView->AddMacViewUndo();
-				((Plugin*)_pMachine)->GetInterface()->ParameterTweak(c,dv);
+				try
+				{
+					((Plugin*)_pMachine)->proxy().ParameterTweak(c,dv);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 			}
 
 			if (istweak)
@@ -544,7 +679,14 @@ namespace psycle
 		void CFrameMachine::OnParametersCommand() 
 		{
 			((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
-			((Plugin*)_pMachine)->GetInterface()->Command();
+			try
+			{
+				((Plugin*)_pMachine)->proxy().Command();
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
 		}
 
 		void CFrameMachine::OnMachineAboutthismachine() 
@@ -553,9 +695,10 @@ namespace psycle
 			{
 				istweak = false;
 			}
-			MessageBox(
-				"Machine coded by "+CString(((Plugin*)_pMachine)->GetInfo()->Author),
-				"About "+CString(((Plugin*)_pMachine)->GetInfo()->Name)
+			MessageBox
+				(
+					"Machine coded by "+CString(((Plugin*)_pMachine)->GetInfo()->Author),
+					"About "+CString(((Plugin*)_pMachine)->GetInfo()->Name)
 				);
 		}
 
@@ -582,10 +725,9 @@ namespace psycle
 					{
 						const int outnote = cmd.GetNote();
 						if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
-						{
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
-						}
-						else Global::pInputHandler->PlayNote(outnote,127,true,NULL);
+						else
+							Global::pInputHandler->PlayNote(outnote,127,true, 0);
 					}
 					break;
 
