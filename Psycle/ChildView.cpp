@@ -889,8 +889,9 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 	*/
 	{
 		char szText[128];
-		CString filepath = Global::pConfig->GetInitialSongDir();
-		filepath += "\\autosave.psy";
+		CString filepath = Global::pConfig->GetSongDir();
+		filepath += "\\";
+		filepath += Global::_pSong->fileName;
 		OldPsyFile file;
 		
 		sprintf(szText,"Save changes to %s?",Global::_pSong->fileName);
@@ -900,6 +901,8 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 		case IDYES:
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{
+				sprintf(szText,"Error writing to %s!",filepath);
+				MessageBox(szText,szTitle,MB_ICONEXCLAMATION);
 				return FALSE;
 			}
 			_pSong->Save(&file);
@@ -1616,7 +1619,6 @@ void CChildView::OnFileImportXmfile()
 			Global::_pSong->fileName = str+".psy";
 		}
 		
-		Global::_pSong->fileName =str+".psy";
 		//Global::_pSong->SetBPM(XM.default_BPM, XM.default_tempo, Global::pConfig->_pOutputDriver->_samplesPerSec);
 
 		_outputActive = true;
@@ -1713,7 +1715,6 @@ void CChildView::OnFileImportItfile()
 			Global::_pSong->fileName = str+".psy";
 		}
 		
-		Global::_pSong->fileName =str+".psy";
 		//Global::_pSong->SetBPM(XM.default_BPM, XM.default_tempo, Global::pConfig->_pOutputDriver->_samplesPerSec);
 		
 		_outputActive = true;

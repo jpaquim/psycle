@@ -120,7 +120,7 @@ CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
 	}
 	else
 	{
-		if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0)
+		if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->_playing&&Global::pConfig->_followSong))
 		{
 			CmdDef cmdSel;
 			switch (nChar)

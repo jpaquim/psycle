@@ -62,7 +62,6 @@ void init()
 		}
 	}
 	_global._pSong->fileName[0] = '\0';
-	_global._pSong->fileName[0] = '\0';
 	_global._pSong->New();
 }
 
