@@ -18,10 +18,10 @@ namespace operating_system
 	class LIBRARY exception : public std::runtime_error
 	{
 	public:
-		inline exception(const std::string & what) : std::runtime_error(what) {}
+		exception(const std::string & what) : std::runtime_error(what) {}
 		/// returns the message describing the cause of the exception.
 		/// same as what() but returns a std::string.
-		inline virtual operator const std::string() const throw();
+		virtual operator const std::string() const throw();
 	};
 
 	/// some subclasses of operating_system::exception.
