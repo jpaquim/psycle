@@ -2,8 +2,6 @@
 !=change
 +=addition
 
-* <sue> playbar should take latency into account
-
 * Other crap
 ------------
 <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
@@ -30,7 +28,7 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 * GUI (pattern):
 ----------------
 *  select with keyboard while playing and follow mode on sucks
-* <bdzld> block double should be contrained to block
+* <bdzld> block double should be constrained to block
 * <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
 	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
 	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
@@ -38,6 +36,7 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
 	rec tweaks when you do a refresh.......like closing the plugs  gui... 
 ++ how about option to switch the instrument and machine columns?
++ D says: maybe have some of the effects in a drop down or available by right clicking
 ! <_sue_> when on follow song mode play the shift + cursor right and shift + cursor left should work the same 
 	way (to navigate in the pattern sequencer).....like hapens on fast tracker 2 .....
 ! change CUT seq button to DELETE seq button, cut sucks
@@ -94,6 +93,7 @@ feature: Really good looking new Master Machine.(Graphics under res\MasterMachin
 * Player Engine:
 ----------------
 * <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
+* <sue> playbar should take latency into account - same as ^
 * song length calculation does not take ffxx/fexx commands into account
 * changing octave, make notes stop (because if not, notes playing don't stop)
 bug:	 In some rare cases, when opening a song, psycle produces noise. (See "fly to the moon [non vocal].psy")

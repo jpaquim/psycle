@@ -1195,6 +1195,7 @@ void CChildView::PasteBlock(int tx,int lx,bool mix)
 //		drawTrackEnd=tx+blockNTracks-1;
 //		drawLineStart=lx;
 //		drawLineEnd=lx+blockNLines-1;
+		bScrollDetatch=false;
 		NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
 		Repaint(DMData);
 	}
@@ -1257,9 +1258,9 @@ void CChildView::DoubleLength()
 		st=blockSel.start.track;		
 		et=blockSel.end.track+1;
 		sl=blockSel.start.line;			
-		nl=blockSel.end.line-sl+1;
-		el=sl+(nl*2)-1;
-		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2-1,editcur.track,editcur.line,editcur.col,editPosition);
+		nl=((blockSel.end.line-sl)/2)+1;
+		el=blockSel.end.line;
+		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
 	}
 	else 
 	{
