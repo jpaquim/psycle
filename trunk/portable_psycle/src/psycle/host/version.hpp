@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.13  2005/03/01 20:47:51  johan-boule
+increased version patch number and released alpha build
+
 Revision 1.12  2005/02/19 20:51:13  jaz001
 * fix bug in song.hpp "_ptrack" and "_ptrackline" functions where it didn't return the correct value
 * fix bug in XMSampler/XMInstrument where "&" and  "|" were being used erroneously in place of "&&"and "||".
@@ -79,7 +82,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 31 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 32 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
