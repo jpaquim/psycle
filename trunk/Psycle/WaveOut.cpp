@@ -243,8 +243,8 @@ void WaveOut::ReadConfig()
 	//
 	_samplesPerSec=44100;
 	_deviceID=0;
-	_numBlocks = 4;
-	_blockSize = 8192;
+	_numBlocks = 7;
+	_blockSize = 4096;
 	_pollSleep = 20;
 	_dither = 0;
 	_flags = ADF_STEREO;

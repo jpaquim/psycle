@@ -49,6 +49,8 @@ ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_BN_CLICKED(IDC_4BEAT, On4beat)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
 	ON_CBN_SELENDOK(IDC_PRESETSCOMBO, OnSelendokPresetscombo)
+	ON_WM_CLOSE()
+	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -72,8 +74,9 @@ BOOL CSkinDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	m_gfxbuffer.SetCheck(_gfxbuffer);
+	SetTimer(2345,50,0);
 
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -85,6 +88,7 @@ void CSkinDlg::OnColourMachine()
 	if(dlg.DoModal() == IDOK)
 	{
 		_machineViewColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_MBG_CAN,_machineViewColor);
 	}
 }
 
@@ -95,6 +99,7 @@ void CSkinDlg::OnButtonPattern()
 	if(dlg.DoModal() == IDOK)
 	{
 		_patternViewColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
 	}
 }
 
@@ -105,6 +110,7 @@ void CSkinDlg::OnVuBarColor()
 	if(dlg.DoModal() == IDOK)
 	{
 		_vubColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_VU1_CAN,_vubColor);
 	}
 }
 
@@ -115,6 +121,7 @@ void CSkinDlg::OnVuBackColor()
 	if(dlg.DoModal() == IDOK)
 	{
 		_vugColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_VU2_CAN,_vugColor);
 	}
 }
 
@@ -125,6 +132,7 @@ void CSkinDlg::OnVuClipBar()
 	if(dlg.DoModal() == IDOK)
 	{
 		_vucColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_VU3_CAN,_vucColor);
 	}
 }
 
@@ -135,6 +143,7 @@ void CSkinDlg::OnRowc()
 	if(dlg.DoModal() == IDOK)
 	{
 		_rowColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_ROW_CAN,_rowColor);
 	}
 }
 
@@ -145,6 +154,7 @@ void CSkinDlg::OnFontc()
 	if(dlg.DoModal() == IDOK)
 	{
 		_fontColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_FONT_CAN,_fontColor);
 	}
 }
 
@@ -155,6 +165,7 @@ void CSkinDlg::OnBeatc()
 	if(dlg.DoModal() == IDOK)
 	{
 		_beatColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_BEAT_CAN,_beatColor);
 	}	
 }
 
@@ -165,6 +176,7 @@ void CSkinDlg::On4beat()
 	if(dlg.DoModal() == IDOK)
 	{
 		_4beatColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_4BEAT_CAN,_4beatColor);
 	}	
 }
 
@@ -234,4 +246,41 @@ void CSkinDlg::OnSelendokPresetscombo()
 			break;
 		}
 	}
+}
+void CSkinDlg::RepaintAllCanvas()
+{
+	UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
+	UpdateCanvasColour(IDC_MBG_CAN,_machineViewColor);
+	UpdateCanvasColour(IDC_4BEAT_CAN,_4beatColor);
+	UpdateCanvasColour(IDC_BEAT_CAN,_beatColor);
+	UpdateCanvasColour(IDC_ROW_CAN,_rowColor);
+	UpdateCanvasColour(IDC_FONT_CAN,_fontColor);
+	UpdateCanvasColour(IDC_VU1_CAN,_vubColor);
+	UpdateCanvasColour(IDC_VU2_CAN,_vugColor);
+	UpdateCanvasColour(IDC_VU3_CAN,_vucColor);
+}
+
+void CSkinDlg::UpdateCanvasColour(int id,COLORREF col)
+{
+	CStatic *obj=(CStatic *)GetDlgItem(id);
+	CClientDC can(obj);
+	can.FillSolidRect(0,0,16,13,col);
+}
+
+
+void CSkinDlg::OnClose() 
+{
+	KillTimer(2345);
+	
+	CPropertyPage::OnClose();
+}
+
+void CSkinDlg::OnTimer(UINT nIDEvent) 
+{
+	if ( nIDEvent == 2345 )
+	{
+		RepaintAllCanvas();
+	}
+	
+	CPropertyPage::OnTimer(nIDEvent);
 }
