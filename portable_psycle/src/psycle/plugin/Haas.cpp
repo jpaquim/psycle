@@ -8,6 +8,8 @@ namespace psycle { namespace plugin {
 class Haas : public Plugin
 {
 public:
+	typedef double Real; ///< <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
+
 	virtual void help(std::ostream & out) const throw()
 	{
 		out << "Haas stereo time delay spatial localization" << std::endl;

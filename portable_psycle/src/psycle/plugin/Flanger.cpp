@@ -220,7 +220,7 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 				assert(read < static_cast<int>(buffer.size()));
 
 				const Real buffer_read(buffer[read]);
-				Real & input_sample = input[sample];
+				Sample & input_sample = input[sample];
 				buffer[write] = /*math::renormalized*/(input_sample + feedback * buffer_read);
 				++write %= size;
 				input_sample *= (*this)(dry);

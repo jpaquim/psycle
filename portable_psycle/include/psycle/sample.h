@@ -10,8 +10,8 @@
 namespace psycle
 {
 	
-	#define PSYCLE__MATH__REAL 4
-	typedef float Real;
+	#define PSYCLE__MATH__REAL 8
+	typedef double Real;
 	typedef float Sample;
 
 	namespace math
