@@ -27,6 +27,9 @@ namespace psycle
 			
 		Global::Global()
 		{
+			#ifndef NDEBUG
+			operating_system::console::open();
+			#endif
 			_pSong = new Song;
 			pPlayer = new Player;
 			pConfig = new Configuration;
@@ -46,6 +49,9 @@ namespace psycle
 			zapObject(pLogWindow);
 			#if !defined _WINAMP_PLUGIN_
 				zapObject(pInputHandler);
+			#endif
+			#ifndef NDEBUG
+				operating_system::console::close();
 			#endif
 		}
 
@@ -140,6 +146,7 @@ namespace psycle
 				{
 						ostream() << string;
 						ostream().flush();
+						operating_system::console::log(level,string);
 						if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string + '\n'); // hmm, nasty end-of-lines ;p we should clearly specify where it should be added
 				}
 			}

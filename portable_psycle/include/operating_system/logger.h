@@ -55,9 +55,13 @@ namespace operating_system
 	class LIBRARY console
 	{
 	public:
-		console() throw(exception);
-		virtual ~console() throw();
+		static void open() throw(exception);
+		static void close();
+		static void log(int level, const std::string & string);
 	private:
-		bool got_a_console_window_;
+		static bool got_a_console_window_;
+		console();
+		~console();
+		static console singleton;
 	};
 }
