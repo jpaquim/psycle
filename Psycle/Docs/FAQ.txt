@@ -5,20 +5,16 @@ List of Frequently Asked Questions about Psycle
 - Usability -
 -------------
 
-Q)	I have run Psycle and I get no sound coming from it. What happens?
-A)	Most probably you haven't configured anything. Psycle doesn't select a soundcard
-	by default. Go to Configuration Menu, settings option and there the "Input/output"
-	folder,  and select one.
-
 Q) 	When Psycle loses focus, the music stops. Why?
 A) 	The "Exclusive" mode is selected in the Directsound Configuration.
 	Go to Configuration Menu, settings option and there the "Input/output" folder, to
 	press the configure button.There you will see the option.
 
 Q)	I've put my xxx VST plugin in the "plugins" dir and Psycle doesn't show it. Why?
-A)	Psycle uses a different paths for Native plugins and VST plugins. By default,
-	Native Plugins go under "Plugins\" and VST's go under "Vst\". If you want to change
-	it, go to View-Settings and select your VST plugins' dir.
+A)	Psycle uses a different paths for Native plugins and VST plugins.
+	By default, Native Plugins go under "Plugins\" and VST's go under "Vst\".
+	If you want to change it, go to Configure-Settings, there the "Directories" tab,
+	and select your VST plugins' dir.
 
 Q)	Why doesn't/Can't/won't Psycle support buzz machines?
 A)	Oskari Tammelin, Buzz author, declined us the right to develop a Buzz Plugins' Host
@@ -31,8 +27,9 @@ A)	There are two Pro5 dll's, one called pro-52.dll and the other called pro-52fx
 	as an effect and it allows to use the Pro52 Effect engine separatedly from the synth
 
 Q)	I can't enter notes into the Pattern Editor. What happens?
-A)	By default the Edit Mode is Deactivated. You have to press the Space Bar once to
-	activate it.
+A)	The Edit Mode is Deactivated. The default key to switch it on/off is the "Space" key.
+	Also, now you have a Red Dot next to the "Undo/Redo" buttons, which allows you to change it
+	as well.
 
 
 (There are some more, but I forgot about them)
@@ -87,6 +84,6 @@ A)	"History" :
 	It was initially stated being coded by Majick_ / MJK, he had most of the core
 	ready, but left for work too. Dilvie, on the other hand, started working on the GUI,
 	trying Mozilla XUL language as a start. Unfortunately, he's busy with work too
-	(yep... another more). He hopes to have more free time over february 2003 to continue
+	(yep... one more). He hopes to have more free time over february 2003 to continue
 	on that. Let's hope so.
 	

@@ -20,19 +20,19 @@
 	When doing so, the word "twk" will appear.
 
 	\\\	The twk key differs from different keyboard languages, but you can Configure
-	///	it in the Keyboard Settings DialogBox (Configuration-Keyboard Configuration)
+	///	it in the Keyboard Settings DialogBox (Configuration-Settings, and there the
+		"Keyboard and Misc." tab)
 
 	 
 	On (2) , you define the Controller/Parameter you want to change. Later in this
  	document it is explained how you can know this number.
 
 	On (3) , you specify the number of the Machine, just like you do to enter notes.
-	To know the Number of an Effect, you need to change the Combobox that says
-	"Generators", to "Effects". Then, the Generators' list will be updated with
-	the Effects Machines.
+		This number is the one shown in the combobox, or in the machine's dialog.
+
 
 	Finally, on (4), you specify the Value that the parameter will take. There are
-	little differences in tweaking an Native Plugin and a VST plugin. Look further on
+	little differences between tweaking an Native Plugin and a VST plugin. Look further on
 	this document to know them.
 
 	Example:
@@ -40,7 +40,6 @@
 		twk 05 42 0067  05 Indicates Parameter 05
 				42 Indicates Effect Number 2
 				0067 Indicates the value
-
 
 
 - Knowing the Parameter number of a Machine
@@ -51,7 +50,7 @@
 	* The easiest one is selecting "Params" in the "MIDI/Params/Waves", combobox.
 	  This way, the next combobox will be updated with the parameter list of the current
 	  selected machine.
-	  The number will automatically be added to the pattern when doing twk.
+	  The selected number will automatically be added to the pattern when doing twk.
 
 	You could also know it by:
 	* With Native Machines:
@@ -59,6 +58,8 @@
 	  change.This will pop up the "Tweaking" dialog.
 	  On the titlebar of this dialog, you will see a number in HEX. This is the number
 	  of the parameter.
+	  Also, in this dialog, now you have a complete "twk" line that shows you the value
+	  that you'd use to set this parameter to the current value.
 
 	* With VST plugins:
 	  Opening the parameters' window, you can see a list of the parameters on the
@@ -72,15 +73,17 @@
 	There are differences between VST plugins, Psycle plugins and internal plugins:
 
 	* VST Plugins:
+
 	  They have a fixed range. 0 is the smallest value, and FFFF is the biggest.
 
 	* Psycle Native Plugins:
-	  They have a range defined by the knob's value. You need to move the knob to the
-	  desired position and right click over the parameter to open the "Tweaking" dialog.
-	  Then, the value of that knob in that position will be shown.
-	__Remember that you have to convert the given value to an hex value__
 
-	  Advise: If the knob's minimum value is not zero (Like, with the VCF Envmod), 
+	  They have a range defined by the knob. You need to move the knob to the
+	  desired position and right click over it to open the "Tweaking" dialog, which shows
+	  you an editbox to put a value manually, and also a complete "twk" line that
+	  you'd use to set this parameter to this value.
+
+	  Advise: As you'd see, if the knob's minimum value is not zero (Like, with the VCF Envmod), 
 	  0 = min value
 
 	* Psycle Internal machines: (The Mess)
@@ -103,17 +106,15 @@
 	Pattern Row : ---- .. .. ....
 
 	then, on (1) , you insert the Mcm command.
-	To do so, you should press SHIFT + TWK key. Of course, you can change this key to
-	another one in the Keyboard Configuation Dialog.
+	To do so, you should press Mcm key. Check and/or change its value in the Keyboard
+	Configuration dialog (Configuration-settings).
 
-	On (2) , you define the CC (Command number) that you want to send.
+	On (2) , you define the CC (Control Command number) that you want to send.
 	You might need to check some MIDI documents and/or the Plugin's help to know what
 	to write in here.
 
-	On (3) , you specify the number of the Machine, just like you do to enter notes.
-	To know the Number of an Effect, you need to change the Combobox that says
-	"Generators", to "Effects". Then, the Generators' list will be updated with
-	the Effects Machines.
+	On (3) , you specify the number of the Machine, just like you do with tweaks.
+		This number is the one shown in the combobox, or in the machine's dialog.
 
 	Finally, on (4), you specify the Value that the parameter will take.
 	

@@ -225,32 +225,21 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_POP_CUT, OnPopCut)
 	ON_UPDATE_COMMAND_UI(ID_POP_CUT, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_COPY, OnPopCopy)
-	ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_PASTE, OnPopPaste)
 	ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePaste)
 	ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
-	ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
 	ON_COMMAND(ID_POP_DELETE, OnPopDelete)
-	ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
-	ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_CHANGEGENERATOR, OnPopChangegenerator)
-	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEGENERATOR, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_CHANGEINSTRUMENT, OnPopChangeinstrument)
-	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEINSTRUMENT, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE1, OnPopTranspose1)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE1, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE12, OnPopTranspose12)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE12, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE_1, OnPopTranspose_1)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_1, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE_12, OnPopTranspose_12)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_12, OnUpdateCutCopy)
 	ON_COMMAND(ID_AUTOSTOP, OnAutostop)
 	ON_UPDATE_COMMAND_UI(ID_AUTOSTOP, OnUpdateAutostop)
 	ON_COMMAND(ID_POP_PATTENPROPERTIES, OnPopPattenproperties)
 	ON_COMMAND(ID_POP_BLOCK_SWINGFILL, OnPopBlockSwingfill)
-	ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRACK_SWINGFILL, OnPopTrackSwingfill)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
@@ -270,25 +259,31 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_MOUSEWHEEL()
 	ON_WM_MBUTTONDOWN()
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternPaste)
 	ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
 	ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
 	ON_COMMAND(ID_HELP_README, OnHelpReadme)
 	ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
 	ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
+	ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
+	ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEGENERATOR, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEINSTRUMENT, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE1, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE12, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_1, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_12, OnUpdateCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdateCutCopy)
 	ON_COMMAND(ID_EDIT_CUT, patCut)
 	ON_COMMAND(ID_EDIT_COPY, patCopy)
 	ON_COMMAND(ID_EDIT_PASTE, patPaste)
 	ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopy)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
 	ON_COMMAND(ID_EDIT_DELETE, patDelete)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
-	ON_COMMAND(ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG, OnConfigurationOpenonlydirectoriesconfig)
-	ON_COMMAND(ID_CONFIGURATION_OPENONLYINPUTOUTPUTCONFIG, OnConfigurationOpenonlyinputoutputconfig)
-	ON_COMMAND(ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG, OnConfigurationOpenonlykeyboardconfig)
-	ON_COMMAND(ID_CONFIGURATION_OPENONLYMIDIINPUTCONFIG, OnConfigurationOpenonlymidiinputconfig)
-	ON_COMMAND(ID_CONFIGURATION_OPENONLYVISUALCONFIG, OnConfigurationOpenonlyvisualconfig)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -3427,43 +3422,4 @@ void CChildView::DoMacPropDialog(int propMac)
 	}
 }
 
-void CChildView::OnConfigurationOpenonlydirectoriesconfig() 
-{
-	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
-	dlg.Init(Global::pConfig,3);
-
-	dlg.DoModal();
-}
-
-void CChildView::OnConfigurationOpenonlyinputoutputconfig() 
-{
-	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
-	dlg.Init(Global::pConfig,4);
-	
-	dlg.DoModal();
-}
-
-void CChildView::OnConfigurationOpenonlykeyboardconfig() 
-{
-	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
-	dlg.Init(Global::pConfig,2);
-		
-	dlg.DoModal();
-}
-
-void CChildView::OnConfigurationOpenonlymidiinputconfig() 
-{
-	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
-	dlg.Init(Global::pConfig,5);
-	
-	dlg.DoModal();
-}
-
-void CChildView::OnConfigurationOpenonlyvisualconfig() 
-{
-	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
-	dlg.Init(Global::pConfig,1);
-	
-	dlg.DoModal();
-}
 
