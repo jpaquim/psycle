@@ -33,6 +33,14 @@ New and unsorted and untested
 ##############################
 
 
+---------- nolwenn -------------
+
+I tested the "record midi raw data as mcm" in psycle 1.7.6.2 :
+Some hardware devices send continuous MIDI messages : midi cc FE "active sensing" , a cyclic midi test. So the pattern are continuously filled with mcmFE000000, preventing the insertion of normal cc tweaking .
+Psycle have to implement simple MIDI filtering input (i'm not into coding & i hope this is not difficult to do)
+About the MIDI CC : now that they are transmitted directly as MCM it could be nice to replace the old "midi controllers" setting windows and implement a MIDI learn (like in chainer standalone) for VSTs that are not cc mapped.
+
+--------------------------------
 
 + option to disable popup on save.
 
