@@ -305,7 +305,7 @@ BOOL CAboutDlg::OnInitDialog()
 				"Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5" "\r\n"
 				"Jeremy Evers [pooplog]\t\tDeveloper since version 1.7" "\r\n"
 				"James Redfern [alk]\t\tDevelopper since version 1.7.6" "\r\n"
-				"Johan Boulé [bohan]\t\tDeveloper since version 1.73" "\r\n"
+				"Johan Boulé [bohan]\t\tDeveloper since version 1.7.3" "\r\n"
 				"Daniel Arena\t\t\tDeveloper in 1.5&1.6" "\r\n"
 				"Marcin Kowalski [FideLoop]\t\tDeveloper in 1.6" "\r\n"
 				"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
