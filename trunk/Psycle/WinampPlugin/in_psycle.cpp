@@ -140,9 +140,9 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 			int bpm, tpb, spt, num, playLength, patternLines[MAX_PATTERNS];
 			unsigned char playOrder[MAX_SONG_POSITIONS];
 			
-			file.Read(Name, 32); Name[33]='\0';
-			file.Read(Author, 32); Author[33]='\0';
-			if (title) { sprintf(title,"%s - %s",Author,Name); }
+			file.Read(Name, 32); Name[32]='\0';
+			file.Read(Author, 32); Author[32]='\0';
+			if (title) { sprintf(title,"%s - %s\0",Author,Name); }
 
 			if (length_in_ms) { 
 				file.Skip(128); // Comment;

@@ -150,11 +150,11 @@ void Plugin::Work(int numSamples)
 		Machine::Work(numSamples);
 	}
 
-#ifndef _WINAMP_PLUGIN_
+#if !defined(_WINAMP_PLUGIN_)
 	CPUCOST_INIT(cost);
+#endif
 	if (!_mute) 
 	{
-#endif
 		if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
 		{
 			int ns = numSamples;
@@ -308,8 +308,8 @@ void Plugin::Work(int numSamples)
 				}
 				else _stopped = false;
 			}
-		}
 #endif
+		}
 	}
 #ifndef _WINAMP_PLUGIN_
 	CPUCOST_CALC(cost, numSamples);
