@@ -2150,7 +2150,7 @@ namespace psycle
 		{
 			char path[MAX_PATH];
 			sprintf(path,"%sdoc\\whatsnew.txt",Global::pConfig->appPath);
-			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
+			ShellExecute(pParentMain->m_hWnd,"open","doc/whatsnew.txt",NULL,"",SW_SHOW);
 		}
 
 		void CChildView::LoadMachineSkin()

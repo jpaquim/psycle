@@ -294,6 +294,7 @@ namespace psycle
 			DWORD type;
 			DWORD numData;
 			temp_array[0]='\0';
+			///\todo [bohan] should be ::GetModuleDirectory
 			::GetCurrentDirectory(sizeof(temp_array), temp_array);
 			appPath=temp_array; appPath+='\\';
 
