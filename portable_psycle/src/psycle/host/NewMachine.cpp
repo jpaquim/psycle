@@ -572,7 +572,7 @@ namespace psycle
 							try
 							{
 								 plug.Instance(fileName);
-								 plug.Init(); // <bohan> hmm, we should get rid of two-stepped constructions.
+								 plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
 							}
 							catch(const std::exception & e)
 							{
@@ -604,11 +604,14 @@ namespace psycle
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
 								_pPlugsInfo[currentPlugsCount]->name = plug.GetName();
-								std::ostringstream tmp;
-								tmp << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect")
-									<< " by " << plug.GetAuthor();
-								_pPlugsInfo[currentPlugsCount]->desc = tmp.str();
-								_pPlugsInfo[currentPlugsCount]->version = "could be any";
+								{
+									std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
+									_pPlugsInfo[currentPlugsCount]->desc = s.str();
+								}
+								{
+									std::ostringstream s; s << plug.GetInfo()->Version; // API VERSION
+									_pPlugsInfo[currentPlugsCount]->version = s.str();
+								}
 								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
 								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
@@ -616,11 +619,11 @@ namespace psycle
 								out.flush();
 							}
 							++currentPlugsCount;
-							// <bohan> plug is a stack object, so its destructor is called
-							// <bohan> at the end of its scope (this cope actually).
-							// <bohan> The problem with destructors of any object of any class is that
-							// <bohan> they are never allowed to throw any exception.
-							// <bohan> So, we catch exceptions here by calling plug.Free(); explicitly.
+							// [bohan] plug is a stack object, so its destructor is called
+							// [bohan] at the end of its scope (this cope actually).
+							// [bohan] The problem with destructors of any object of any class is that
+							// [bohan] they are never allowed to throw any exception.
+							// [bohan] So, we catch exceptions here by calling plug.Free(); explicitly.
 							try
 							{
 								plug.Free();
@@ -713,15 +716,15 @@ namespace psycle
 								out.flush();
 							}
 							++currentPlugsCount;
-							// <bohan> vstPlug is a stack object, so its destructor is called
-							// <bohan> at the end of its scope (this cope actually).
-							// <bohan> The problem with destructors of any object of any class is that
-							// <bohan> they are never allowed to throw any exception.
-							// <bohan> So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+							// [bohan] vstPlug is a stack object, so its destructor is called
+							// [bohan] at the end of its scope (this cope actually).
+							// [bohan] The problem with destructors of any object of any class is that
+							// [bohan] they are never allowed to throw any exception.
+							// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
 							try
 							{
 								vstPlug.Free();
-								// <bohan> phatmatik crashes here...
+								// [bohan] phatmatik crashes here...
 								// <magnus> so does PSP Easyverb, in FreeLibrary
 							}
 							catch(const std::exception & e)
