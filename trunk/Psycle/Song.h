@@ -138,14 +138,13 @@ public:
 	int PW_Stage;
 	int PW_Length;
 
+#endif // ndef _WINAMP_PLUGIN_
 	inline unsigned char * _ppattern(int ps);
 	inline unsigned char * _ptrack(int ps, int track);
 	inline unsigned char * _ptrackline(int ps, int track, int line);
 
 	unsigned char * CreateNewPattern(int ps);
 	void RemovePattern(int ps);
-
-#endif // ndef _WINAMP_PLUGIN_
 
 protected:
 
