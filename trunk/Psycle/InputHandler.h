@@ -445,7 +445,7 @@ public:
 	bool bDoingSelection;		// Indicates that Shift+Arrow is Selection.
 
 	// multi-key playback state stuff
-	int notetrack[MAX_TRACKS]; // should be MAX TRACKS instead of 256
+	int notetrack[MAX_TRACKS]; 
 	int outtrack;		// last track output to	
 
 	// LUT for command data

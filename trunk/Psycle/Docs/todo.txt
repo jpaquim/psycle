@@ -77,10 +77,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[cannot reproduce]
 **	Can't select with keyboard while follow song on, and playing.
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
-++	<wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
-		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
-		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
-		next row in my start column?
 +	how about option to switch the instrument and machine columns?
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking

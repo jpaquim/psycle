@@ -306,7 +306,10 @@ public:
 
 	int editPosition;	// Position in the Sequence!
 	int prevEditPosition;
-	
+
+	int ChordModeOffs;
+	int ChordModeLine;
+	int ChordModeTrack;
 	int updateMode;
 	int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
 	int viewMode;
@@ -377,7 +380,9 @@ private:
 
 	inline int _ps();
 	inline unsigned char * _offset(int ps);
+	inline unsigned char * _offset(int ps, int track);
 	inline unsigned char * _toffset(int ps);
+	inline unsigned char * _toffset(int ps, int track, int line);
 	inline int _xtoCol(int pointpos);
 
 private:
@@ -829,6 +834,10 @@ inline int CChildView::_ps()
 	// retrieves the pattern index
 	return _pSong->playOrder[editPosition];
 }
+inline unsigned char * CChildView::_offset(int ps, int track)
+{
+	return _pSong->pPatternData + (ps*MULTIPLY2) + (track*5);
+}	
 inline unsigned char * CChildView::_offset(int ps)
 {
 	return _pSong->pPatternData + (ps*MULTIPLY2) + (editcur.track*5);
@@ -837,6 +846,11 @@ inline unsigned char * CChildView::_toffset(int ps)
 {
 	return _offset(ps) + (editcur.line*MULTIPLY);
 }
+inline unsigned char * CChildView::_toffset(int ps, int track, int line)
+{
+	return _offset(ps,track) + (line*MULTIPLY);
+}
+
 inline int CChildView::_xtoCol(int pointpos)
 {
 	if ( pointpos < COLX[1] ) return 0;

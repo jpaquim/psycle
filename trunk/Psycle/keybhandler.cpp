@@ -17,6 +17,14 @@ void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 			Global::pInputHandler->StopNote(outnote);
 		}
 	}
+	else if ((nChar == 16) && (nFlags == 49194) && ChordModeOffs)
+	{
+		// shift is up, abort chord mode
+		editcur.line = ChordModeLine;
+		editcur.track = ChordModeTrack;
+		ChordModeOffs = 0;
+		AdvanceLine(patStep,Global::pConfig->_wrapAround,true);
+	}
 }
 
 void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -45,6 +53,10 @@ void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 				return;
 			}
 		}
+	}
+	else
+	{
+		ChordModeOffs = 0;
 	}
 
 	// get command
@@ -338,6 +350,8 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 
 void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 {
+	int line;
+
 	// UNDO CODE ENTER NOTE
 	int ps = _ps();
 	unsigned char * offset; 
@@ -384,22 +398,39 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 				SelectNextTrack();
 			}
 		}
-/*		else
-		{
-			if(velocity>0)
-				Global::pInputHandler->PlayNote(note,velocity,false);
-			else
-				Global::pInputHandler->StopNote(note,false);
-			return;
-		}
-		*/
+		line = Global::pPlayer->_lineCounter;
 		offset = _offset(ps);
-		toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+		toffset = offset+(line*MULTIPLY);
+		ChordModeOffs = 0;
 	}
-	else
+	else 
 	{
-		offset = _offset(ps);
-		toffset = _toffset(ps);
+		if ( GetKeyState(VK_SHIFT)<0) 
+		{
+			if (ChordModeOffs == 0)
+			{
+				ChordModeLine = editcur.line;
+				ChordModeTrack = editcur.track;
+			}
+			editcur.track = (ChordModeTrack+ChordModeOffs)%_pSong->SONGTRACKS;
+			editcur.line = line = ChordModeLine;
+			offset = _offset(ps);
+			toffset = _toffset(ps, editcur.track, line);
+			ChordModeOffs++;
+		}
+		else
+		{
+			if (ChordModeOffs) // this should never happen because the shift check should catch it... but..
+			{
+				editcur.line = ChordModeLine;
+				editcur.track = ChordModeTrack;
+				ChordModeOffs = 0;
+				AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+			}
+			line = editcur.line;
+			offset = _offset(ps);
+			toffset = _toffset(ps);
+		}
 	}
 
 	// build entry
@@ -412,7 +443,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		}
 		note = 120;
 	}
-	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+	AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
 	entry->_note = note;
 	entry->_mach = _pSong->seqBus;
 
@@ -468,20 +499,19 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			tmac->Tick(editcur.track, entry);
 		}
 	}
+
 	Global::pInputHandler->notetrack[editcur.track]=note;
-
-//	drawTrackStart=editcur.track;
-//	drawTrackEnd=editcur.track;
-//	drawLineStart=editcur.line;
-//	drawLineEnd=editcur.line;
-	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-
+	NewPatternDraw(editcur.track,editcur.track,line,line);
 	if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
 	{
-		if ( GetKeyState(VK_SHIFT)<0) 
+		if (ChordModeOffs)
+		{
 			AdvanceLine(-1,Global::pConfig->_wrapAround,false);
+		}
 		else
+		{
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+		}
 	}
 
 	bScrollDetatch=false;
@@ -628,6 +658,7 @@ void CChildView::ClearCurr() // delete content at Cursor pos.
 
 	AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 	Global::pInputHandler->bDoingSelection = false;
+	ChordModeOffs = 0;
 	bScrollDetatch=false;
 	Repaint(DMData);
 }
@@ -662,6 +693,7 @@ void CChildView::DeleteCurr()
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 	Global::pInputHandler->bDoingSelection = false;
+	ChordModeOffs = 0;
 	bScrollDetatch=false;
 	Repaint(DMData);
 }
@@ -688,6 +720,7 @@ void CChildView::InsertCurr()
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 	Global::pInputHandler->bDoingSelection = false;
+	ChordModeOffs = 0;
 	bScrollDetatch=false;
 	Repaint(DMData);
 }
@@ -772,7 +805,10 @@ void CChildView::PrevCol(bool wrap,bool updateDisplay)
 		else 
 			--editcur.track;
 	}
-	if (updateDisplay) Repaint(DMCursor);
+	if (updateDisplay) 
+	{
+		Repaint(DMCursor);
+	}
 }
 
 void CChildView::NextCol(bool wrap,bool updateDisplay)
@@ -790,7 +826,10 @@ void CChildView::NextCol(bool wrap,bool updateDisplay)
 		else 
 			++editcur.track;
 	}
-	if (updateDisplay) Repaint(DMCursor);
+	if (updateDisplay) 
+	{
+		Repaint(DMCursor);
+	}
 }
 
 void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
@@ -801,8 +840,14 @@ void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 
 	if(editcur.line<0)
 	{
-		if(wrap){ editcur.line = nl + editcur.line % nl; }
-		else	{ editcur.line = 0;	}
+		if(wrap)
+		{ 
+			editcur.line = nl + editcur.line % nl; 
+		}
+		else	
+		{ 
+			editcur.line = 0;	
+		}
 	}
 	pParentMain->StatusBarIdle();
 	if (updateDisplay) Repaint(DMCursor);
@@ -812,7 +857,10 @@ void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 {
 	const int nl = _pSong->patternLines[_ps()];
 
-	if ( x >= 0)	editcur.line += x;
+	if ( x >= 0)	
+	{
+		editcur.line += x;
+	}
 	else
 	{
 		editcur.track+=1;
