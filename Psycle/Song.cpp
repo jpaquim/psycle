@@ -1285,7 +1285,7 @@ bool Song::Load(
 					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);
-						if !(pVstPlugin->Instance(sPath2))
+						if (!pVstPlugin->Instance(sPath2))
 						{
 							Machine* pOldMachine = pMachine;
 							pMachine = new Dummy(*((Dummy*)pOldMachine));
