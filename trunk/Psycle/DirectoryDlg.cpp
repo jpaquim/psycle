@@ -179,7 +179,7 @@ void CDirectoryDlg::OnChangeInstedit()
 		_instPathChanged = true;
 		m_instEdit.GetWindowText(_instPathBuf,MAX_PATH);
 	}
-
+}
 void CDirectoryDlg::OnChangePluginedit() 
 {
 	if (!initializingDlg)
