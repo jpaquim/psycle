@@ -242,7 +242,7 @@ namespace psycle
 					{
 						std::ostringstream title; title << "VST Plugin: " << plugin._editName << ": " << plugin.GetDllName();
 						std::ostringstream s; s
-							<< title << std::endl
+							<< title.str() << std::endl
 							<< "VST plugin had an exception on dispatcher operation: " << operation_description(operation) << '.' << std::endl
 							<< typeid(*e).name() << std::endl
 							<< host::exceptions::function_errors::string(*e);
