@@ -3,7 +3,7 @@
 #include "XMSamplerUIGeneral.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
-#include "XMSamplerMixerPage.h"
+#include "XMSamplerMixerPage.hpp"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
