@@ -138,6 +138,8 @@ enum CmdSet
 	cdefNavBottom,	// end
 
 	cdefSelectMachine,	// Enter
+	cdefUndo,
+	cdefRedo,
 
 	cdefTransposeChannelInc = CS_EDT_START,	
 	cdefTransposeChannelDec,
@@ -174,8 +176,6 @@ enum CmdSet
 
 	cdefEditQuantizeDec,
 	cdefEditQuantizeInc,
-	cdefUndo,
-	cdefRedo,
 };
 
 

@@ -1507,19 +1507,51 @@ void CMainFrame::OnSeqduplicate()
 
 void CMainFrame::OnSeqdel() 
 {
+	int indexes[MAX_SONG_POSITIONS];
 	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	int const pop=m_wndView.editPosition;
 
-	for(int c=pop;c<_pSong->playLength-1;c++)
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int const num= cc->GetSelCount();
+	cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+	for (int i=0; i < num; i++)
 	{
-		_pSong->playOrder[c]=_pSong->playOrder[c+1];
+		for(int c=indexes[i];c<_pSong->playLength-1;c++)
+		{
+			_pSong->playOrder[c]=_pSong->playOrder[c+1];
+		}
+		_pSong->playOrder[c]=0;
+		_pSong->playLength--;
+		if (_pSong->playLength <= 0)
+		{
+			_pSong->playLength =1;
+		}
+		if (m_wndView.editPosition>indexes[i])
+		{
+			m_wndView.editPosition--;
+		}
+		for (int j=i+1;j<num;j++)
+		{
+			if (indexes[j] > indexes[i])
+			{
+				indexes[j]--;
+			}
+		}
 	}
-	_pSong->playOrder[_pSong->playLength-1]=0;
 
+	if (m_wndView.editPosition>_pSong->playLength)
+	{
+		m_wndView.editPosition=_pSong->playLength-1;
+	}
+	
+
+
+	/*
 	if((_pSong->playLength>pop+1) || ((_pSong->playLength==pop+1) && (pop>0)))
 	{
 		--_pSong->playLength;
 	}
+	*/
 
 	UpdatePlayOrder(false);
 	UpdateSequencer();

@@ -1251,13 +1251,56 @@ void CChildView::OnPopTrackSwingfill()
 
 void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 {
-	if(pUndoList) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
+	if(pUndoList) 
+	{
+		switch (pUndoList->type)
+		{
+		case UNDO_SEQUENCE:
+			pCmdUI->Enable(TRUE);
+			break;
+		default:
+			if(viewMode == VMPattern)// && bEditMode)
+			{
+				pCmdUI->Enable(TRUE);
+			}
+			else
+			{
+				pCmdUI->Enable(FALSE);
+			}
+			break;
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
 }
+
 void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 {
-	if(pRedoList) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
+	if(pRedoList) 
+	{
+		switch (pRedoList->type)
+		{
+		case UNDO_SEQUENCE:
+			pCmdUI->Enable(TRUE);
+			break;
+		default:
+			if(viewMode == VMPattern)// && bEditMode)
+			{
+				pCmdUI->Enable(TRUE);
+			}
+			else
+			{
+				pCmdUI->Enable(FALSE);
+			}
+			break;
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
 }
 
 void CChildView::OnUpdatePatternCutCopyPaste(CCmdUI* pCmdUI) 
