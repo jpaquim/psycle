@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.7  2005/01/29 16:10:44  johan-boule
+harcoded version info when APPSTUDIO is defined, and using defines from version.hpp otherwize
+
 Revision 1.6  2005/01/29 13:18:01  johan-boule
 disabled automatic version info in the resource file
 
@@ -156,7 +159,4 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 	// There's no reason this wouldn't work, it's weird.
 	// Anyway, all the version information is set via the above parameters,
 	// so that there's no need to change the resources.rc file.
-	///////////////////////////////////////////////////////////////////////////////////////////////////
-	// ACTUALLY MSCV's IDE RESOURCE EDITOR IS TOO SILLY TO HANDLE ANYTHING LIKE A PROPER PROGRAMMATION
-	///////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
