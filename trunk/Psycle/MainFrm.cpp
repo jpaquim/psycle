@@ -78,7 +78,6 @@ ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
 ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
 ON_BN_CLICKED(IDC_SEQDEL, OnSeqdel)
-ON_BN_CLICKED(IDC_SEQSPR, OnSeqspr)
 ON_WM_ACTIVATE()
 ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
 ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
@@ -1476,6 +1475,10 @@ void CMainFrame::OnSeqclr()
 	
 }
 //// Changed to " Resort patterns "
+// this trashes your whole sequence in one press of a button-> who wants that?
+// this is the stupidest function of all, bohan, pikari agree
+// removed for user sanity
+/*
 void CMainFrame::OnSeqspr()
 {
 	unsigned char oldtonew[MAX_PATTERNS];
@@ -1558,7 +1561,7 @@ void CMainFrame::OnSeqspr()
 	m_wndView.SetFocus();
 	m_wndView.OnActivate();
 }
-
+*/
 
 void CMainFrame::OnIncpos2() 
 {
