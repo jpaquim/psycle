@@ -616,12 +616,12 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,7,135,226,15
 END
 
-IDD_SKIN DIALOG DISCARDABLE  0, 0, 316, 249
+IDD_SKIN DIALOG DISCARDABLE  0, 0, 316, 263
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Visual"
 FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Pattern View ",IDC_STATIC,1,7,144,239
+    GROUPBOX        "Pattern View ",IDC_STATIC,1,7,144,254
     LTEXT           "Font Face",IDC_STATIC,7,18,45,10,WS_DISABLED
     COMBOBOX        IDC_FONTFACE,6,29,134,85,CBS_DROPDOWN | CBS_SORT | 
                     WS_DISABLED | WS_VSCROLL | WS_TABSTOP
@@ -631,27 +631,27 @@ BEGIN
     PUSHBUTTON      "Vu Bar",IDC_BUTTON23,261,35,32,12
     PUSHBUTTON      "BackGnd",IDC_BUTTON24,261,17,32,12
     PUSHBUTTON      "OnClip",IDC_BUTTON25,262,52,32,12
-    GROUPBOX        "Colours ",IDC_STATIC,5,45,134,197
-    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC,14,134,39,12
-    PUSHBUTTON      "Row",IDC_ROWC,14,149,39,12
-    PUSHBUTTON      "Beat",IDC_BEATC,14,164,39,12
-    PUSHBUTTON      "Font",IDC_FONTC,14,54,39,12
-    PUSHBUTTON      "4 Beats",IDC_4BEAT,14,179,39,12
+    GROUPBOX        "Colours ",IDC_STATIC,5,60,134,197
+    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC,14,149,39,12
+    PUSHBUTTON      "Row",IDC_ROWC,14,164,39,12
+    PUSHBUTTON      "Beat",IDC_BEATC,14,179,39,12
+    PUSHBUTTON      "Font",IDC_FONTC,14,69,39,12
+    PUSHBUTTON      "4 Beats",IDC_4BEAT,14,194,39,12
     GROUPBOX        "Global Options ",IDC_STATIC,150,74,164,81
     CONTROL         "Graphics Double Buffering",IDC_DOUBLEBUFFER,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,155,137,153,12
     LTEXT           "Theme Presets",IDC_STATIC,158,88,48,8
     COMBOBOX        IDC_PRESETSCOMBO,212,86,95,57,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_PBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,136,
+    CONTROL         "",IDC_PBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,151,
                     12,9
-    CONTROL         "",IDC_ROW_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,150,
+    CONTROL         "",IDC_ROW_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,165,
                     12,9
-    CONTROL         "",IDC_BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,166,
+    CONTROL         "",IDC_BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,181,
                     12,9
-    CONTROL         "",IDC_FONT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,56,
+    CONTROL         "",IDC_FONT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,71,
                     12,9
-    CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,181,
+    CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,196,
                     12,9
     CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,38,
                     12,9
@@ -673,64 +673,64 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Wdth",IDC_STATIC,230,35,17,13,SS_CENTERIMAGE
     CONTROL         "Display Line Numbers",IDC_LINE_NUMBERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,155,123,153,12
-    PUSHBUTTON      "Separator",IDC_PATSEPARATORC,14,118,39,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,46,133,12
+    PUSHBUTTON      "Separator",IDC_PATSEPARATORC,14,133,39,12
     CONTROL         "",IDC_PBG_SEPARATOR,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    120,12,9
-    PUSHBUTTON      "Row",IDC_ROWC2,92,149,39,12
-    CONTROL         "",IDC_ROW_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,150,
+                    135,12,9
+    PUSHBUTTON      "Row",IDC_ROWC2,92,164,39,12
+    CONTROL         "",IDC_ROW_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,165,
                     12,9
-    PUSHBUTTON      "Beat",IDC_BEATC2,92,164,39,12
-    CONTROL         "",IDC_BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,166,
+    PUSHBUTTON      "Beat",IDC_BEATC2,92,179,39,12
+    CONTROL         "",IDC_BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,181,
                     12,9
-    PUSHBUTTON      "4 Beats",IDC_4BEAT2,92,179,39,12
+    PUSHBUTTON      "4 Beats",IDC_4BEAT2,92,194,39,12
     CONTROL         "",IDC_4BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    181,12,9
-    PUSHBUTTON      "Playbar",IDC_PLAYBARC,14,194,39,12
+                    196,12,9
+    PUSHBUTTON      "Playbar",IDC_PLAYBARC,14,209,39,12
     CONTROL         "",IDC_PLAYBAR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,59,
-                    196,12,9
-    PUSHBUTTON      "Playbar",IDC_PLAYBARC2,92,194,39,12
-    CONTROL         "",IDC_PLAYBAR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    196,12,9
-    PUSHBUTTON      "Font Play",IDC_FONTPLAYC,14,70,39,12
-    CONTROL         "",IDC_FONTPLAY_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    72,12,9
-    PUSHBUTTON      "Selection",IDC_SELECTIONC,14,209,39,12
-    CONTROL         "",IDC_SELECTION_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
                     211,12,9
-    PUSHBUTTON      "Cursor",IDC_CURSORC,14,224,39,12
+    PUSHBUTTON      "Playbar",IDC_PLAYBARC2,92,209,39,12
+    CONTROL         "",IDC_PLAYBAR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
+                    211,12,9
+    PUSHBUTTON      "Font Play",IDC_FONTPLAYC,14,85,39,12
+    CONTROL         "",IDC_FONTPLAY_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    87,12,9
+    PUSHBUTTON      "Selection",IDC_SELECTIONC,14,224,39,12
+    CONTROL         "",IDC_SELECTION_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    226,12,9
+    PUSHBUTTON      "Cursor",IDC_CURSORC,14,239,39,12
     CONTROL         "",IDC_CURSOR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    226,12,9
-    PUSHBUTTON      "Selection",IDC_SELECTIONC2,92,209,39,12
+                    241,12,9
+    PUSHBUTTON      "Selection",IDC_SELECTIONC2,92,224,39,12
     CONTROL         "",IDC_SELECTION_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    74,211,12,9
-    PUSHBUTTON      "Cursor",IDC_CURSORC2,92,224,39,12
+                    74,226,12,9
+    PUSHBUTTON      "Cursor",IDC_CURSORC2,92,239,39,12
     CONTROL         "",IDC_CURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    226,12,9
-    PUSHBUTTON      "Font Sel",IDC_FONTSELC,14,86,39,12
+                    241,12,9
+    PUSHBUTTON      "Font Sel",IDC_FONTSELC,14,101,39,12
     CONTROL         "",IDC_FONTSEL_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    88,12,9
-    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC,14,102,39,12
+                    103,12,9
+    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC,14,117,39,12
     CONTROL         "",IDC_FONTCURSOR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    60,104,12,9
-    PUSHBUTTON      "Separator",IDC_PATSEPARATORC2,92,118,39,12
+                    60,119,12,9
+    PUSHBUTTON      "Separator",IDC_PATSEPARATORC2,92,133,39,12
     CONTROL         "",IDC_PBG_SEPARATOR2,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    74,120,12,9
-    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC2,92,134,39,12
-    CONTROL         "",IDC_PBG_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,136,
+                    74,135,12,9
+    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC2,92,149,39,12
+    CONTROL         "",IDC_PBG_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,151,
                     12,9
-    PUSHBUTTON      "Font",IDC_FONTC2,92,54,39,12
-    CONTROL         "",IDC_FONT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,56,
+    PUSHBUTTON      "Font",IDC_FONTC2,92,69,39,12
+    CONTROL         "",IDC_FONT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,71,
                     12,9
-    PUSHBUTTON      "Font Play",IDC_FONTPLAYC2,92,70,39,12
+    PUSHBUTTON      "Font Play",IDC_FONTPLAYC2,92,85,39,12
     CONTROL         "",IDC_FONTPLAY_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    72,12,9
-    PUSHBUTTON      "Font Sel",IDC_FONTSELC2,92,86,39,12
+                    87,12,9
+    PUSHBUTTON      "Font Sel",IDC_FONTSELC2,92,101,39,12
     CONTROL         "",IDC_FONTSEL_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    88,12,9
-    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC2,92,102,39,12
+                    103,12,9
+    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC2,92,117,39,12
     CONTROL         "",IDC_FONTCURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    74,104,12,9
+                    74,119,12,9
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
@@ -1117,7 +1117,7 @@ END
 IDD_SEQUENCER DIALOGEX 0, 0, 70, 362
 STYLE WS_CHILD
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX,5,251,
                     62,8
@@ -1434,7 +1434,7 @@ BEGIN
         LEFTMARGIN, 1
         RIGHTMARGIN, 314
         TOPMARGIN, 7
-        BOTTOMMARGIN, 247
+        BOTTOMMARGIN, 261
     END
 
     IDD_SONGPROP, DIALOG
@@ -2376,10 +2376,10 @@ BEGIN
     ID_INDICATOR_LINE       "Line:000"
     ID_INDICATOR_TIME       "00:00:00.00"
     ID_INDICATOR_EDIT       "Edit"
-    ID_INDICATOR_OCTAVE     "Oct 0"
     ID_INDICATOR_FOLLOW     "Follow"
     ID_INDICATOR_NOTEOFF    "NoteOffs"
     ID_INDICATOR_TWEAKS     "Tweaks"
+    ID_INDICATOR_OCTAVE     "Oct 0"
 END
 
 #endif    // English (U.S.) resources
