@@ -123,28 +123,44 @@ void CDefaultVstGui::UpdateParList()
 		}
 		m_parlist.AddString(buf);
 	}
-
+	
 	nPar=0;
 	m_parlist.SetCurSel(0);
 }
 
-void CDefaultVstGui::UpdateText()
+void CDefaultVstGui::UpdateText(float value)
 {
-	char str[512];
+	char str[512],str2[15];
 	_pMachine->DescribeValue(nPar,str);
+	sprintf(str2,"\t[Hex: %4X]",f2i(value*65535.0f));
+	strcat(str,str2);
 	m_text.SetWindowText(str);
 }
 
 void CDefaultVstGui::UpdateOne()
 {
-	UpdateText();
-
 	//update scroll bar with initial value
 	float value = _pMachine->GetParameter(nPar);
+	UpdateText(value);
 	value *= NUMTICKS;
+	updatingvalue =true;
 	m_slider.SetPos(NUMTICKS -(f2i(value)));
+	updatingvalue =false;
 }
 
+void CDefaultVstGui::UpdateNew(int par,float value)
+{
+	if (par != nPar )
+	{
+		nPar=par;
+		m_parlist.SetCurSel(par);
+	}
+	UpdateText(value);
+	value *= NUMTICKS;
+	updatingvalue=true;
+	m_slider.SetPos(NUMTICKS -(f2i(value)));
+	updatingvalue=false;
+}
 void CDefaultVstGui::OnSelchangeList1() 
 {
 	nPar=m_parlist.GetCurSel();
@@ -155,10 +171,13 @@ void CDefaultVstGui::OnSelchangeList1()
 
 void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	float value = ((float)(NUMTICKS - m_slider.GetPos()))/NUMTICKS;
-//	_pMachine->SetParameter(nPar, value);
-	UpdateText();
-
+	if (!updatingvalue)
+	{
+		float value = ((float)(NUMTICKS - m_slider.GetPos()))/NUMTICKS;
+		_pMachine->SetParameter(nPar, value);
+		UpdateText(value);
+	}
+	
 	*pResult = 0;
 }
 

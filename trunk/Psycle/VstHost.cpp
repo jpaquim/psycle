@@ -520,7 +520,7 @@ bool VSTPlugin::DescribeValue(int parameter,char* psTxt)
 			sprintf(psTxt,"%s%s",par_display,par_label);
 			return true;
 		}
-		else	sprintf(psTxt,"NumParams Exeeded");
+		else	sprintf(psTxt,"Invalid NumParams Value");
 	}
 	else		sprintf(psTxt,"Not loaded");
 
@@ -618,9 +618,13 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		Global::_pSong->Tweaker = true;
 
 		if ( effect->user ) { // ugly solution...
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, (int)(opt*65535));
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
 		}
-
+		if ( effect->user ) {
+			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
+				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Refresh(index,opt);
+		}
+		
 #endif // ndef _WINAMP_PLUGIN_
 		return 0;		// index, value, returns 0
 		

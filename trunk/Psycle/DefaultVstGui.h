@@ -27,13 +27,15 @@ public:
 	void Init();
 	void UpdateOne();
 	void UpdateParList();
-	void UpdateText();
+	void UpdateText(float value);
+	void UpdateNew(int par,float value);
 
 	bool canTweak;
 	int nPlug;
 	int nPar;
 	int previousProg;
 	VSTPlugin* _pMachine;
+	bool updatingvalue;
 	CWnd* mainView;
 	
 	//{{AFX_DATA(CDefaultVstGui)
