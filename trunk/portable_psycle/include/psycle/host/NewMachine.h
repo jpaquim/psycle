@@ -20,8 +20,8 @@ namespace psycle
 			inline PluginInfo() : dllname(0), error(0) {}
 			inline ~PluginInfo() throw()
 			{
-				if(dllname) delete dllname;
-				if(error) delete error;
+				zapArray(dllname);
+				zapObject(error);
 			}
 			char * dllname;
 			std::string * error;
@@ -40,8 +40,7 @@ namespace psycle
 				strcpy(version,newinfo.version);
 				strcpy(name,newinfo.name);
 				strcpy(desc,newinfo.desc);
-				if (dllname != NULL ) delete dllname;
-				dllname = new char[sizeof(newinfo.dllname)+1];
+				zapArray(dllname,new char[sizeof(newinfo.dllname)+1]);
 				strcpy(dllname,newinfo.dllname);
 			}
 			friend bool operator!=(PluginInfo& info1,PluginInfo& info2)

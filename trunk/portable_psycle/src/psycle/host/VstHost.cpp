@@ -102,16 +102,16 @@ namespace psycle
 				catch(...)
 				{
 					// wow.. cannot do anything in a destructor
+					assert(false);
 				}
-				delete _sDllName;
+				zapArray(_sDllName);
 			}
 
 			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
 			{
 				try
 				{
-					if(_sDllName) delete _sDllName;
-					_sDllName = new char[std::strlen(dllname) + 1];
+					zapArray(_sDllName,new char[std::strlen(dllname) + 1]);
 					std::strcpy(_sDllName, dllname);
 					TRACE("VST plugin: library file name: %s\n", _sDllName);
 					proxy()(0);
@@ -302,7 +302,7 @@ namespace psycle
 						// <bohan> hmm, shit, LoadCunk actually reads the chunk size too.
 						if(proxy().flags() & effFlagsProgramChunks)
 						{
-							char * const data(new char[size]);
+							char * data(new char[size]);
 							pFile->Read(data, size); // Number of parameters
 							try 
 							{
@@ -311,10 +311,10 @@ namespace psycle
 							catch(...)
 							{
 								// <bohan> hmm, so, data just gets lost?
-								delete data;
+								zapArray(data);
 								return false;
 							}
-							delete data;
+							zapArray(data);
 						}
 						else
 						{
@@ -352,10 +352,10 @@ namespace psycle
 				catch(const std::exception &)
 				{
 					// <bohan> hmm, so, data just gets lost?
-					delete chunk;
+					zapArray(chunk);
 					return false;
 				}
-				delete chunk;
+				zapArray(chunk);
 				return true;
 			}
 
@@ -1415,8 +1415,8 @@ namespace psycle
 
 			fx::~fx()
 			{
-				delete _pOutSamplesL;
-				delete _pOutSamplesR;
+				zapArray(_pOutSamplesL);
+				zapArray(_pOutSamplesR);
 			}
 
 			void fx::Tick(int channel, PatternEntry * pData)
@@ -1773,7 +1773,7 @@ namespace psycle
 						// Read chunk
 						char *chunk=new char[chunk_size];
 						pFile->Read(chunk,chunk_size);
-						delete chunk;
+						zapArray(chunk);
 					}
 				}
 				else 
@@ -1797,7 +1797,7 @@ namespace psycle
 						char *chunk=new char[chunk_size];	
 						pFile->Read(chunk,chunk_size);
 						Dispatch(effSetChunk,0,chunk_size, chunk ,0.0f);
-						delete chunk;
+						zapArray(chunk);
 					}
 
 				}

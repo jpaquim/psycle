@@ -291,7 +291,7 @@ namespace psycle
 				strncpy(tmpName, m_lpCmdLine+1, strlen(m_lpCmdLine+1) -1 );
 				tmpName[strlen(m_lpCmdLine+1) -1 ] = 0;
 				pFrame->m_wndView.OnFileLoadsongNamed(tmpName, 1);
-				delete tmpName;
+				zapArray(tmpName);
 			}
 		}
 

@@ -78,7 +78,7 @@ namespace psycle
 					#if !defined _WINAMP_PLUGIN_
 						if(!CNewMachine::TestFilename(psPluginDll))
 						{
-							delete pMachine; 
+							zapObject(pMachine);
 							return false;
 						}
 					#endif
@@ -88,7 +88,7 @@ namespace psycle
 					}
 					catch(...)
 					{
-						delete pMachine; 
+						zapObject(pMachine); 
 						return false;
 					}
 					break;
@@ -99,7 +99,7 @@ namespace psycle
 					#if !defined _WINAMP_PLUGIN_
 						if(!CNewMachine::TestFilename(psPluginDll)) 
 						{
-							delete pMachine; 
+							zapObject(pMachine);
 							return false;
 						}
 					#endif
@@ -109,7 +109,7 @@ namespace psycle
 					}
 					catch(...)
 					{
-						delete pMachine; 
+						zapObject(pMachine);
 						return false;
 					}
 					break;
@@ -120,7 +120,7 @@ namespace psycle
 					#if !defined _WINAMP_PLUGIN_
 						if(!CNewMachine::TestFilename(psPluginDll)) 
 						{
-							delete pMachine; 
+							zapObject(pMachine);
 							return false;
 						}
 					#endif
@@ -130,7 +130,7 @@ namespace psycle
 					}
 					catch(...)
 					{
-						delete pMachine; 
+						zapObject(pMachine);
 						return false;
 					}
 					break;
@@ -249,7 +249,7 @@ namespace psycle
 
 		void Song::DestroyAllInstruments()
 		{
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) delete _pInstrument[i];
+			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) zapObject(_pInstrument[i]);
 		}
 
 		void Song::DeleteInstrument(int i)
@@ -273,11 +273,7 @@ namespace psycle
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) for(int c(0) ; c < MAX_WAVES; ++c) _pInstrument[i]->waveLength[c]=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
-				if(_pMachine[i])
-				{
-					delete _pMachine[i];
-					_pMachine[i] = 0;
-				}
+					zapObject(_pMachine[i]);
 			}
 			#if !defined _WINAMP_PLUGIN_
 				for(int i(0) ; i < MAX_PATTERNS; ++i)
@@ -474,8 +470,7 @@ namespace psycle
 				if(mac == machineSoloed) machineSoloed = -1;
 			#endif
 			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-			delete _pMachine[mac];
-			_pMachine[mac] = NULL;
+			zapObject(_pMachine[mac]);
 		}
 
 		void Song::DeleteAllPatterns()
@@ -486,11 +481,7 @@ namespace psycle
 
 		void Song::RemovePattern(int ps)
 		{
-			if (ppPatternData[ps])
-			{
-				delete ppPatternData[ps];
-				ppPatternData[ps] = NULL;
-			}
+			zapObject(ppPatternData[ps]);
 		}
 
 		unsigned char * Song::CreateNewPattern(int ps)
@@ -1160,15 +1151,14 @@ namespace psycle
 								pFile->Read(pSource, size);
 								byte* pDest;
 								BEERZ77Decomp2(pSource, &pDest);
-								delete pSource;
-								pSource = pDest;
+								zapObject(pSource,pDest);
 								for(int y(0) ; y < patternLines[index] ; ++y)
 								{
 									unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
 									std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
 									pSource += SONGTRACKS * EVENT_SIZE;
 								}
-								delete pDest;
+								zapObject(pDest);
 							}
 							else
 							{
@@ -1583,7 +1573,7 @@ namespace psycle
 								pMac[i]->_type = MACH_DUMMY;
 								pOldMachine->_pSamplesL = NULL;
 								pOldMachine->_pSamplesR = NULL;
-								delete pOldMachine;
+								zapObject(pOldMachine);
 							}
 							break;
 							}
@@ -1617,7 +1607,7 @@ namespace psycle
 										pOldMachine->_pSamplesR = NULL;
 										// dummy name goes here
 										sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-										delete pOldMachine;
+										zapObject(pOldMachine);
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
 									}
@@ -1630,7 +1620,7 @@ namespace psycle
 									pOldMachine->_pSamplesR = NULL;
 									// dummy name goes here
 									sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-									delete pOldMachine;
+									zapObject(pOldMachine);
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
 								}
@@ -1650,7 +1640,7 @@ namespace psycle
 										pOldMachine->_pSamplesR = NULL;
 										// dummy name goes here
 										sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-										delete pOldMachine;
+										zapObject(pOldMachine);
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
 									}
@@ -1672,7 +1662,7 @@ namespace psycle
 											pOldMachine->_pSamplesR = NULL;
 											// dummy name goes here
 											sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-											delete pOldMachine;
+											zapObject(pOldMachine);
 											pMac[i]->_type = MACH_DUMMY;
 											((Dummy*)pMac[i])->wasVST = true;
 										}
@@ -1690,7 +1680,7 @@ namespace psycle
 									pOldMachine->_pSamplesR = NULL;
 									// dummy name goes here
 									sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-									delete pOldMachine;
+									zapObject(pOldMachine);
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
 								}
@@ -1704,7 +1694,7 @@ namespace psycle
 								pOldMachine->_pSamplesR = NULL;
 								// dummy name goes here
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-								delete pOldMachine;
+								zapObject(pOldMachine);
 								pMac[i]->_type = MACH_DUMMY;
 								((Dummy*)pMac[i])->wasVST = true;
 							}
@@ -1763,11 +1753,7 @@ namespace psycle
 				{
 					if (!_machineActive[i])
 					{
-						if (pMac[i])
-						{
-							delete pMac[i];
-							pMac[i] = NULL;
-						}
+						zapObject(pMac[i]);
 					}
 					else if (!pMac[i])
 					{
@@ -1928,7 +1914,7 @@ namespace psycle
 				{
 					if( vstL[i].valid )
 					{
-						delete vstL[i].pars;
+						zapObject(vstL[i].pars);
 					}
 				}
 
@@ -2064,6 +2050,7 @@ namespace psycle
 						{
 							if (_pMachine[i] == _pMachine[j])
 							{
+								assert(false);
 								// we have duplicate machines...
 								// this should NEVER happen
 								// delete the second one :(
@@ -2392,7 +2379,7 @@ namespace psycle
 					}
 
 					size = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE)+(3*sizeof(temp))+strlen(patternName[i])+1;
-					delete pSource;
+					zapObject(pSource);
 
 					pFile->Write("PATD",4);
 					version = CURRENT_FILE_VERSION_PATD;
@@ -2412,7 +2399,7 @@ namespace psycle
 					size -= (3*sizeof(temp))+strlen(patternName[i])+1;
 					pFile->Write(&size,sizeof(size));
 					pFile->Write(pCopy,size);
-					delete pCopy;
+					zapObject(pCopy);
 
 					if ( !autosave ) 
 					{

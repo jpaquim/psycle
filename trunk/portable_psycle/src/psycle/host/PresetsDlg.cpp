@@ -22,18 +22,15 @@ namespace psycle
 
 		CPreset::~CPreset()
 		{
-			if ( params != NULL ) delete params;
-			if ( data != NULL ) delete data;
+			zapArray(params);
+			zapArray(data);
 		}
 
 		void CPreset::Clear()
 		{
-			if ( params != NULL ) delete params;
-			params=NULL;
+			zapArray(params);
 			numPars =-1;
-
-			if ( data != NULL ) delete data;
-			data=NULL;
+			zapArray(data);
 			sizeData = 0;
 
 			memset(name,0,32);
@@ -41,19 +38,17 @@ namespace psycle
 
 		void CPreset::Init(int num)
 		{
-			if ( params != NULL ) delete params;
 			if ( num > 0 )
 			{
-				params= new int[num];
+				zapArray(params,new int[num]);
 				numPars=num;
 			}
 			else
 			{
-				params=NULL;
+				zapArray(params);
 				numPars =-1;
 			}
-			if ( data != NULL ) delete data;
-			data=NULL;
+			zapArray(data);
 			sizeData = 0;
 
 			memset(name,0,32);
@@ -61,29 +56,27 @@ namespace psycle
 
 		void CPreset::Init(int num,char* newname,int* parameters,int size, byte* newdata)
 		{
-			if ( params != NULL ) delete params;
 			if ( num > 0 )
 			{
-				params= new int[num];
+				zapArray(params,new int[num]);
 				numPars=num;
 				memcpy(params,parameters,numPars*sizeof(int));
 			}
 			else
 			{
-				params=NULL;
+				zapArray(params);
 				numPars=-1;
 			}
 
-			if ( data != NULL )	delete data;
 			if ( size > 0 )
 			{
-				data= new byte[size];
+				zapArray(data, new byte[size]);
 				memcpy(data,newdata,size);
 				sizeData = size;
 			}
 			else
 			{
-				data=NULL;
+				zapArray(data);
 				sizeData=0;
 			}
 			strcpy(name,newname);
@@ -91,21 +84,19 @@ namespace psycle
 
 		void CPreset::Init(int num,char* newname,float* parameters)
 		{
-			if ( params != NULL ) delete params;
 			if ( num > 0 )
 			{
-				params= new int[num];
+				zapArray(params,new int[num]);
 				numPars=num;
 				for(int x=0;x<num;x++) params[x]= f2i(parameters[x]*65535.0f);
 			}
 			else
 			{
-				params=NULL;
+				zapArray(params);
 				numPars=-1;
 			}
 
-			if ( data != NULL )	delete data;
-			data=NULL;
+			zapArray(data);
 			sizeData = 0;
 
 			strcpy(name,newname);
@@ -113,28 +104,27 @@ namespace psycle
 
 		void CPreset::operator=(CPreset& newpreset)
 		{
-			if ( params != NULL) delete params;
 			if ( newpreset.numPars > 0 )
 			{
+				zapArray(params, new int[numPars]);
 				numPars=newpreset.numPars;
-				params= new int[numPars];
 				memcpy(params,newpreset.params,numPars*sizeof(int));
 			}
 			else
 			{
-				params=NULL;
+				zapArray(params);
 				numPars=-1;
 			}
-			if ( data != NULL ) delete data;
+
 			if ( newpreset.sizeData > 0 )
 			{
+				zapArray(data,new byte[sizeData]);
 				sizeData = newpreset.sizeData;
-				data= new byte[sizeData];
 				memcpy(data,newpreset.data,sizeData);
 			}
 			else
 			{
-				data=NULL;
+				zapArray(data);
 				sizeData = 0;
 			}
 
@@ -214,7 +204,7 @@ namespace psycle
 					{
 						// o_O`
 					}
-					delete pData;
+					zapArray(pData);
 				}
 				else
 				{
@@ -423,11 +413,11 @@ namespace psycle
 									i++;
 								}
 							}
-							delete ibuf2;
+							zapArray(ibuf2);
 							*/
 						}
-						delete ibuf;
-						delete dbuf;
+						zapArray(ibuf);
+						zapArray(dbuf);
 					}
 					else
 					{
@@ -505,11 +495,11 @@ namespace psycle
 									i++;
 								}
 							}
-							delete ibuf2;
+							zapArray(ibuf2);
 							*/
 						}
-						delete ibuf;
-						delete dbuf;
+						zapArray(ibuf);
+						zapArray(dbuf);
 					}
 					fclose(hfile);
 				}
@@ -574,7 +564,7 @@ namespace psycle
 							AddPreset(cbuf,fbuf);
 							i++;
 						}
-						delete fbuf;
+						zapArray(fbuf);
 					}
 					fxb.Close();
 				}
@@ -683,7 +673,7 @@ namespace psycle
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
 
 					fclose(hfile);
-					delete ibuf;
+					zapArray(ibuf);
 				}
 				else
 				{
@@ -716,8 +706,8 @@ namespace psycle
 					if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
 
 					fclose(hfile);
-					delete ibuf;
-					delete dbuf;
+					zapArray(ibuf);
+					zapArray(dbuf);
 				}
 			}
 		}
@@ -815,7 +805,7 @@ namespace psycle
 						AddPreset(cbuf,ibuf,0);
 						i++;
 					}
-					delete ibuf;
+					zapArray(ibuf);
 				}
 				else
 				{
@@ -848,8 +838,8 @@ namespace psycle
 							AddPreset(cbuf,ibuf,dbuf);
 							i++;
 						}
-						delete ibuf;
-						delete dbuf;
+						zapArray(ibuf);
+						zapArray(dbuf);
 					}
 					else
 					{
@@ -953,7 +943,7 @@ namespace psycle
 						AddPreset(cbuf, fbuf);
 						++i;
 					}
-					delete fbuf;
+					zapArray(fbuf);
 				}
 				fxb.Close();
 			}
@@ -993,7 +983,7 @@ namespace psycle
 					i++;
 				}
 				fclose(hfile);
-				delete ibuf;
+				zapArray(ibuf);
 			}
 			else if (fileversion == 1)
 			{
@@ -1027,8 +1017,8 @@ namespace psycle
 					i++;
 				}
 				fclose(hfile);
-				delete ibuf;
-				delete dbuf;
+				zapArray(ibuf);
+				zapArray(dbuf);
 			}
 		}
 

@@ -121,11 +121,10 @@ namespace psycle
 				_ppOutputDrivers[1] = new WaveOut;
 				_ppOutputDrivers[2] = new DirectSound;
 				_ppOutputDrivers[3] = new ASIOInterface;
-			//	_ppOutputDrivers[0] = new ASIOInterface;
 				if(((ASIOInterface*)(_ppOutputDrivers[3]))->drivercount <= 0)
 				{
 					_numOutputDrivers--;
-					delete _ppOutputDrivers[3];
+					zapObject(_ppOutputDrivers[3]);
 				}
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
@@ -288,21 +287,21 @@ namespace psycle
 				if(_ppOutputDrivers != 0)
 				{
 					for(int i(0) ; i < _numOutputDrivers ; ++i)
-						if(_ppOutputDrivers[i] != 0) delete _ppOutputDrivers[i];
-					delete[] _ppOutputDrivers;
+						zapObject(_ppOutputDrivers[i]);
+					zapArray(_ppOutputDrivers);
 				}
-				if(_pMidiInput != 0) delete _pMidiInput;
-				if(_psInitialInstrumentDir != 0) delete _psInitialInstrumentDir;
-				if(_psInstrumentDir != 0) delete _psInstrumentDir;
-				if(_psInitialSongDir != 0) delete _psInitialSongDir;
-				if(_psSongDir != 0) delete _psSongDir;
-				if(_psInitialSkinDir != 0) delete _psInitialSkinDir;
-				if(_psSkinDir != 0) delete _psSkinDir;
+				zapObject(_pMidiInput);
+				zapArray(_psInitialInstrumentDir);
+				zapArray(_psInstrumentDir);
+				zapArray(_psInitialSongDir);
+				zapArray(_psSongDir);
+				zapArray(_psInitialSkinDir);
+				zapArray(_psSkinDir);
 			#endif
-			if(_psInitialPluginDir != 0) delete _psInitialPluginDir;
-			if(_psPluginDir != 0) delete _psPluginDir;
-			if(_psInitialVstDir != 0) delete _psInitialVstDir;
-			if(_psVstDir != 0) delete _psVstDir;
+			zapArray(_psInitialPluginDir);
+			zapArray(_psPluginDir);
+			zapArray(_psInitialVstDir);
+			zapArray(_psVstDir);
 		}
 
 		bool Configuration::Read()
@@ -789,11 +788,7 @@ namespace psycle
 					CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = midiHeadroom;
 				}
 
-				if(_psInitialInstrumentDir != 0)
-				{
-					delete _psInitialInstrumentDir;
-					_psInitialInstrumentDir = 0;
-				}
+				zapArray(_psInitialInstrumentDir);
 				numData = sizeof(string);
 				if(reg.QueryValue("InstrumentDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 				{
@@ -811,11 +806,7 @@ namespace psycle
 					SetInstrumentDir(_psInitialInstrumentDir);
 				}
 
-				if(_psInitialSongDir != 0)
-				{
-					delete _psInitialSongDir;
-					_psInitialSongDir = 0;
-				}
+				zapArray(_psInitialSongDir);
 				numData = sizeof(string);
 				if(reg.QueryValue("SongDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 				{
@@ -833,11 +824,7 @@ namespace psycle
 					SetSongDir(_psInitialSongDir);
 				}
 
-				if(_psInitialSkinDir != 0)
-				{
-					delete _psInitialSkinDir;
-					_psInitialSkinDir = 0;
-				}
+				zapArray(_psInitialSkinDir);
 				numData = sizeof(string);
 				if(reg.QueryValue("SkinDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 				{
@@ -855,11 +842,7 @@ namespace psycle
 					SetSkinDir(_psInitialSkinDir);
 				}
 			#endif
-			if(_psInitialPluginDir != 0)
-			{
-				delete _psInitialPluginDir;
-				_psInitialPluginDir = 0;
-			}
+			zapArray(_psInitialPluginDir);
 			numData = sizeof(string);
 			if(reg.QueryValue("PluginDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 			{
@@ -877,11 +860,7 @@ namespace psycle
 				SetPluginDir(_psInitialPluginDir);
 			}
 
-			if(_psInitialVstDir != 0)
-			{
-				delete _psInitialVstDir;
-				_psInitialVstDir = 0;
-			}
+			zapArray(_psInitialVstDir);
 			numData = sizeof(string);
 			if(reg.QueryValue("VstDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 			{
@@ -1154,45 +1133,39 @@ namespace psycle
 
 			void Configuration::SetInstrumentDir(const char* psDir)
 			{
-				if(_psInstrumentDir != 0) delete _psInstrumentDir;
-				_psInstrumentDir = new char[strlen(psDir)+1];
+				zapArray(_psInstrumentDir,new char[strlen(psDir)+1]);
 				std::strcpy(_psInstrumentDir, psDir);
 			}
 
 			void Configuration::SetInitialInstrumentDir(const char* psDir)
 			{
-				if(_psInitialInstrumentDir != 0) delete _psInitialInstrumentDir;
-				_psInitialInstrumentDir = new char[strlen(psDir)+1];
+				zapArray(_psInitialInstrumentDir,new char[strlen(psDir)+1]);
 				std::strcpy(_psInitialInstrumentDir, psDir);
 				SetInstrumentDir(psDir);
 			}
 
 			void Configuration::SetSongDir(const char* psDir)
 			{
-				if(_psSongDir != 0) delete _psSongDir;
-				_psSongDir = new char[strlen(psDir)+1];
+				zapArray(_psSongDir,new char[strlen(psDir)+1]);
 				std::strcpy(_psSongDir, psDir);
 			}
 
 			void Configuration::SetInitialSongDir(const char* psDir)
 			{
-				if(_psInitialSongDir != 0) delete _psInitialSongDir;
-				_psInitialSongDir = new char[strlen(psDir)+1];
+				zapArray(_psInitialSongDir, new char[strlen(psDir)+1]);
 				std::strcpy(_psInitialSongDir, psDir);
 				SetSongDir(psDir);
 			}
 
 			void Configuration::SetSkinDir(const char* psDir)
 			{
-				if(_psSkinDir != 0) delete _psSkinDir;
-				_psSkinDir = new char[strlen(psDir)+1];
+				zapArray(_psSkinDir,new char[strlen(psDir)+1]);
 				std::strcpy(_psSkinDir, psDir);
 			}
 
 			void Configuration::SetInitialSkinDir(const char* psDir)
 			{
-				if(_psInitialSkinDir != 0) delete _psInitialSkinDir;
-				_psInitialSkinDir = new char[strlen(psDir)+1];
+				zapArray(_psInitialSkinDir,new char[strlen(psDir)+1]);
 				std::strcpy(_psInitialSkinDir, psDir);
 				SetSkinDir(psDir);
 			}
@@ -1201,30 +1174,26 @@ namespace psycle
 
 		void Configuration::SetPluginDir(const char* psDir)
 		{
-			if(_psPluginDir != 0) delete _psPluginDir;
-			_psPluginDir = new char[strlen(psDir)+1];
+			zapArray(_psPluginDir,new char[strlen(psDir)+1]);
 			std::strcpy(_psPluginDir, psDir);
 		}
 
 		void Configuration::SetInitialPluginDir(const char* psDir)
 		{
-			if(_psInitialPluginDir != 0) delete _psInitialPluginDir;
-			_psInitialPluginDir = new char[strlen(psDir)+1];
+			zapArray(_psInitialPluginDir, new char[strlen(psDir)+1]);
 			std::strcpy(_psInitialPluginDir, psDir);
 			SetPluginDir(psDir);
 		}
 
 		void Configuration::SetVstDir(const char* psDir)
 		{
-			if(_psVstDir != 0) delete _psVstDir;
-			_psVstDir = new char[strlen(psDir)+1];
+			zapArray(_psVstDir, new char[strlen(psDir)+1]);
 			std::strcpy(_psVstDir, psDir);
 		}
 
 		void Configuration::SetInitialVstDir(const char* psDir)
 		{
-			if(_psInitialVstDir != 0) delete _psInitialVstDir;
-			_psInitialVstDir = new char[strlen(psDir)+1];
+			zapArray(_psInitialVstDir,new char[strlen(psDir)+1]);
 			std::strcpy(_psInitialVstDir, psDir);
 			SetVstDir(psDir);
 		}

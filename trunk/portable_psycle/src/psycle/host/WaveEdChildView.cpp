@@ -784,7 +784,7 @@ namespace psycle
 
 				_pSong->_pInstrument[wsInstrument]->waveStereo[wsWave] = false;
 				wdStereo = false;
-				delete _pSong->_pInstrument[wsInstrument]->waveDataR[wsWave];
+				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave]);
 				Invalidate(true);
 				_pSong->Invalided=false;
 			}
@@ -813,16 +813,13 @@ namespace psycle
 						pTmpR= new signed short[datalen];
 						CopyMemory(pTmpR, wdRight, blStart*sizeof(short));
 						CopyMemory( (pTmpR+blStart), (wdRight + blStart + blLength), (wdLength - blStart - blLength)*sizeof(short) );
-						delete _pSong->_pInstrument[wsInstrument]->waveDataR[wsWave];
-						_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave] = pTmpR;
+						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave],pTmpR);
 						wdRight = pTmpR;
 					}
 
 					CopyMemory( pTmp, wdLeft, blStart*sizeof(short) );
 					CopyMemory( (pTmp+blStart), (wdLeft + blStart + blLength), (wdLength - blStart - blLength)*sizeof(short) );
-					delete _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave];
-					
-					_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave] = pTmp;
+					zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave],pTmp);
 					wdLeft = pTmp;
 					_pSong->_pInstrument[wsInstrument]->waveLength[wsWave] = datalen;
 					wdLength = datalen;
@@ -1079,8 +1076,7 @@ namespace psycle
 						memcpy(pTmp + blStart, pData, lData);
 						memcpy((BYTE*)pTmp + blStart*2 + lData, wdLeft + blStart, 2*(wdLength - blStart));
 
-						delete _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave];
-						wdLeft = _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave] = pTmp;
+						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave],pTmp);
 						_pSong->_pInstrument[wsInstrument]->waveLength[wsWave] = wdLength + (DWORD)(lData*0.5);
 						wdLength = wdLength + (DWORD)(lData*0.5);
 					}
@@ -1099,10 +1095,8 @@ namespace psycle
 						memcpy((BYTE*)pTmp + blStart*2 + (unsigned long)(lData*0.5), wdLeft + blStart, 2*(wdLength - blStart));
 						memcpy((BYTE*)pTmpR+ blStart*2 + (unsigned long)(lData*0.5), wdRight + blStart, 2*(wdLength - blStart));
 
-						delete _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave];
-						wdLeft = _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave] = pTmp;
-						delete _pSong->_pInstrument[wsInstrument]->waveDataR[wsWave];
-						wdRight = _pSong->_pInstrument[wsInstrument]->waveDataR[wsWave] = pTmpR;
+						wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave], pTmp);
+						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave],pTmpR);
 						_pSong->_pInstrument[wsInstrument]->waveLength[wsWave] = wdLength + (DWORD)(lData*0.25);
 						wdLength = wdLength + (DWORD)(lData*0.25);
 					}

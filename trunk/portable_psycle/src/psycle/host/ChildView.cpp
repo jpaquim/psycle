@@ -144,7 +144,7 @@ namespace psycle
 				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
 				TRACE(buf);
 				bmpDC->DeleteObject();
-				delete bmpDC;
+				zapObject(bmpDC);
 			}
 			patternheader.DeleteObject();
 			DeleteObject(hbmPatHeader);
@@ -496,8 +496,7 @@ namespace psycle
 				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
 				TRACE(buf);
 				bmpDC->DeleteObject();
-				delete bmpDC;
-				bmpDC=NULL;
+				zapObject(bmpDC);
 			}
 			if ( Global::pConfig->useDoubleBuffer )
 			{
@@ -619,8 +618,7 @@ namespace psycle
 			{
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
 				bmpDC->DeleteObject();
-				delete bmpDC;
-				bmpDC=NULL;
+				zapObject(bmpDC);
 			}
 			if (viewMode == VMPattern)
 			{
@@ -2078,13 +2076,12 @@ namespace psycle
 
 		void CChildView::CallOpenRecent(int pos)
 		{
-			char* nameBuff;
 			UINT nameSize;
 			nameSize = GetMenuString(hRecentMenu, pos, 0, 0, MF_BYPOSITION) + 1;
-			nameBuff = new char[nameSize];
+			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
 			OnFileLoadsongNamed(nameBuff, 1);
-			delete nameBuff;
+			zapArray(nameBuff);
 		}
 
 		void CChildView::SetTitleBarText()

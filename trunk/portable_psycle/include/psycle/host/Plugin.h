@@ -119,8 +119,7 @@ namespace psycle
 		inline const bool proxy::operator()() const throw() { return plugin_; }
 		inline void proxy::operator()(CMachineInterface * plugin) throw(exceptions::function_error)
 		{
-			delete this->plugin_;
-			this->plugin_ = plugin;
+			zapObject(this->plugin_,plugin);
 			//if((*this)())
 			if(plugin)
 			{

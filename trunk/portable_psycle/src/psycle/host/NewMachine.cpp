@@ -38,7 +38,7 @@ namespace psycle
 
 		CNewMachine::~CNewMachine()
 		{
-			if(psOutputDll) delete psOutputDll;
+			zapArray(psOutputDll);
 		}
 
 		void CNewMachine::DoDataExchange(CDataExchange* pDX)
@@ -283,8 +283,7 @@ namespace psycle
 						}
 					}
 
-					if (psOutputDll != NULL) delete psOutputDll;
-					psOutputDll = new char[strlen(_pPlugsInfo[i]->dllname)+1];
+					zapArray(psOutputDll,new char[strlen(_pPlugsInfo[i]->dllname)+1]);
 					strcpy(psOutputDll,_pPlugsInfo[i]->dllname);
 
 					m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
@@ -752,7 +751,7 @@ namespace psycle
 		{
 			for (int i=0; i<_numPlugins; i++)
 			{
-				delete _pPlugsInfo[i];
+				zapObject(_pPlugsInfo[i]);
 			}
 			dllNames.RemoveAll();
 			_numPlugins = -1;

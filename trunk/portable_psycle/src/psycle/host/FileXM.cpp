@@ -59,9 +59,9 @@ namespace psycle
 
 
 			// cleanup
-			delete[] pID;
-			delete[] pTrackerName;
-			delete[] pTrackerVer;
+			zapArray(pID);
+			zapArray(pTrackerName);
+			zapArray(pTrackerVer);
 
 			return bIsValid;
 		}
@@ -76,7 +76,7 @@ namespace psycle
 			strcpy(s->Name,pSongName);	
 			strcpy(s->Author,"");
 			strcpy(s->Comment,"Imported from Fasttracker II module.");
-			delete[]pSongName;
+			zapArray(pSongName);
 
 			// get data
 			int iHeaderLen = ReadInt4(60);
@@ -143,7 +143,7 @@ namespace psycle
 			if(Read(pData,size))
 				return pData;
 
-			delete[] pData;
+			zapArray(pData);
 			return NULL;
 		}
 
@@ -314,7 +314,7 @@ namespace psycle
 
 			// store instrument name
 			strcpy(s->_pInstrument[idx]->_sName,sInstrName);
-			delete [] sInstrName;
+			zapArray(sInstrName);
 
 			int iSampleHeader = ReadInt4();
 			ASSERT(iSampleHeader==0x28);
@@ -367,7 +367,7 @@ namespace psycle
 				s->WavAlloc(iInstrIdx,iSampleIdx,false,iLen/2,sName);
 			else
 				s->WavAlloc(iInstrIdx,iSampleIdx,false,iLen,sName);
-			delete[] sName;
+			zapArray(sName);
 
 			if(bLoop)
 			{
@@ -435,7 +435,7 @@ namespace psycle
 			}
 
 			// cleanup
-			delete[]smpbuf;
+			zapArray(smpbuf);
 
 			// complete			
 			iStart += smpLen[iSampleIdx];
