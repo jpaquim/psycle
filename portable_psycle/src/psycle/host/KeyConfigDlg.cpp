@@ -28,6 +28,7 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_TWEAK_SMOOTH, m_tweak_smooth);
 			DDX_Control(pDX, IDC_RECORD_UNARMED, m_record_unarmed);
 			DDX_Control(pDX, IDC_MOVE_CURSOR_PASTE, m_move_cursor_paste);
+			DDX_Control(pDX, IDC_NAVIGATION_IGNORES_STEP, m_navigation_ignores_step);
 			DDX_Control(pDX, IDC_SHOW_INFO_ON_LOAD, m_show_info);
 			DDX_Control(pDX, IDC_SHIFTARROWS, m_cmdShiftArrows);
 			DDX_Control(pDX, IDC_FT2DEL, m_cmdFT2Del);
@@ -93,6 +94,7 @@ NAMESPACE__BEGIN(psycle)
 			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
 			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
 			m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
+			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
 			m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
 			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
 			
@@ -238,6 +240,7 @@ NAMESPACE__BEGIN(psycle)
 			Global::pConfig->_RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
 			Global::pConfig->_RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
 			Global::pConfig->_MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
+			Global::pConfig->_NavigationIgnoresStep = m_navigation_ignores_step.GetCheck()?true:false;
 			
 			Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
 			Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;

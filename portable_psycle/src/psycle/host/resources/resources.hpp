@@ -764,6 +764,8 @@
 #define IDC_XMTEMPO                     1547
 #define IDC_XMSPEED                     1548
 #define IDC_XMPOLYLABEL                 1549
+#define IDC_IGNORE_STEP_NAVIGATING      1550
+#define IDC_NAVIGATION_IGNORES_STEP     1550
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -864,7 +866,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        219
 #define _APS_NEXT_COMMAND_VALUE         32938
-#define _APS_NEXT_CONTROL_VALUE         1550
+#define _APS_NEXT_CONTROL_VALUE         1551
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

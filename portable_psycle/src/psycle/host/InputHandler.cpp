@@ -528,7 +528,11 @@ namespace psycle
 				if (pChildView->patStep == 0)
 					pChildView->PrevLine(1,Global::pConfig->_wrapAround);
 				else
-				pChildView->PrevLine(pChildView->patStep,Global::pConfig->_wrapAround);
+					//if added by sampler. New option.
+					if (!Global::pConfig->_NavigationIgnoresStep)
+						pChildView->PrevLine(pChildView->patStep,Global::pConfig->_wrapAround);//before
+					else
+						pChildView->PrevLine(1,Global::pConfig->_wrapAround);//new option
 				if ( bDoingSelection )
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -546,7 +550,11 @@ namespace psycle
 				if (pChildView->patStep == 0)
 					pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
 				else
-				pChildView->AdvanceLine(pChildView->patStep,Global::pConfig->_wrapAround);
+					//if added by sampler. New option.
+					if (!Global::pConfig->_NavigationIgnoresStep)
+						pChildView->AdvanceLine(pChildView->patStep,Global::pConfig->_wrapAround); //before
+					else
+						pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);//new option
 				if ( bDoingSelection )
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);

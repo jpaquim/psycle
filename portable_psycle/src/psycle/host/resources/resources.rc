@@ -929,6 +929,9 @@ BEGIN
                     138,104,172,10
     CONTROL         "Move cursor when pasting",IDC_MOVE_CURSOR_PASTE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,115,172,10
+    CONTROL         "Pattern navigation ignores step (Always jumps one)",
+                    IDC_NAVIGATION_IGNORES_STEP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,138,126,175,11
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 390, 303

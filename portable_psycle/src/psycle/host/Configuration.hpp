@@ -79,6 +79,7 @@ namespace psycle
 			bool _notesToEffects;
 			bool _RecordUnarmed;
 			bool _MoveCursorPaste;
+			bool _NavigationIgnoresStep;
 			bool _RecordMouseTweaksSmooth;
 			bool useDoubleBuffer;
 			bool _showAboutAtStart;
