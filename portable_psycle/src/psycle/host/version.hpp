@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.6  2005/01/29 13:18:01  johan-boule
+disabled automatic version info in the resource file
+
 Revision 1.5  2005/01/27 09:03:15  johan-boule
 tagged the cvs HEAD revision set with release_1_7_27
 
@@ -114,7 +117,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 27 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 28 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
@@ -153,4 +156,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 	// There's no reason this wouldn't work, it's weird.
 	// Anyway, all the version information is set via the above parameters,
 	// so that there's no need to change the resources.rc file.
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// ACTUALLY MSCV's IDE RESOURCE EDITOR IS TOO SILLY TO HANDLE ANYTHING LIKE A PROPER PROGRAMMATION
+	///////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
