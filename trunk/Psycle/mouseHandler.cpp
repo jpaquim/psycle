@@ -627,6 +627,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 int CChildView::FindBusFromIndex(int smac)
 {
 	int i; 	// Code to Update the Combobox when clicking on a machine.
+	if ( !_pSong->_machineActive[smac] ) return 255;
 	for (i=0;i<MAX_BUSES;i++)
 	{
 		if (_pSong->busMachine[i] == smac)

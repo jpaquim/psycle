@@ -736,7 +736,7 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 		if (updatelist) for (int b=0; b<MAX_BUSES; b++) // Update Machine Names.
 		{
 			
-			if(_pSong->busMachine[b] != 255)
+			if(_pSong->busMachine[b] != 255 && _pSong->_machineActive[_pSong->busMachine[b]])
 			{
 				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[_pSong->busMachine[b]]->_editName);
 			}
@@ -750,7 +750,7 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 		cc2->SetCurSel(_pSong->seqBus);	// Select machine
 
 		// Select the appropiate Option in Aux Combobox.
-		if (_pSong->busMachine[_pSong->seqBus] == 255)
+		if (_pSong->busMachine[_pSong->seqBus] == 255 || !_pSong->_machineActive[_pSong->busMachine[_pSong->seqBus]])
 		{
 			cc3->SetCurSel(2); // WAVES
 			_pSong->auxcolSelected = _pSong->instSelected;
@@ -880,6 +880,7 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 	int nmac;
 	if ( _pSong->seqBus < MAX_BUSES ) nmac = _pSong->busMachine[_pSong->seqBus];
 	else nmac = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+	if (!_pSong->_machineActive[nmac]) nmac = 255;
 
 	if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
 	{

@@ -9,7 +9,7 @@
 #include "FileIO.h"
 #include "VstHost.h"
 #include "Player.h"
-#include "Song.h"
+
 
 VstTimeInfo VSTPlugin::_timeInfo;
 

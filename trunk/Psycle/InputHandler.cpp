@@ -837,7 +837,8 @@ void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 				else
 					mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
 
-				if ( mgn != 255 ) pMachine = Global::_pSong->_pMachines[mgn];
+				if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
+					pMachine = Global::_pSong->_pMachines[mgn];
 				else return;
 			}
 
@@ -888,7 +889,8 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 		else
 			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
 
-		if ( mgn != 255 ) pMachine = Global::_pSong->_pMachines[mgn];
+		if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
+			pMachine = Global::_pSong->_pMachines[mgn];
 		else return;
 	}	
 
