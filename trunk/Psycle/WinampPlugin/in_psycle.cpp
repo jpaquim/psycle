@@ -17,7 +17,7 @@
 
 #include "in2.h"	// Winamp Input plugin header file
 
-#define WA_PLUGIN_VERSION "Beta 6"
+#define WA_PLUGIN_VERSION "1.0 RC1"
 
 // post this to the main window at end of file (after playback has stopped)
 #define WM_WA_PSY_EOF WM_USER+2

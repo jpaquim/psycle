@@ -899,11 +899,11 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		BOOL bRepeat = nFlags&0x4000;
 		if ( cmd.GetType() == CT_Note )
 		{
-			if ((!bRepeat) || (cmd.GetNote() == cdefTweakM) || (cmd.GetNote() == cdefTweakS) || (cmd.GetNote() == cdefMIDICC))
-			{
+//			if ((!bRepeat) || (cmd.GetNote() == cdefTweakM) || (cmd.GetNote() == cdefTweakS) || (cmd.GetNote() == cdefMIDICC))
+//			{
 				pChildView->EnterNote(cmd.GetNote());
 				return true;
-			}
+//			}
 		}
 		return false;
 	}
