@@ -333,7 +333,7 @@ NAMESPACE__BEGIN(psycle)
 				char cache[1 << 10];
 				GetModuleFileName(0, cache, sizeof cache);
 				char * last(std::strrchr(cache,'\\'));
-				std::strcpy(last, "\\plugin-scan.cache");
+				std::strcpy(last, "\\psycle.plugin-scan.cache");
 				DeleteFile(cache);
 			}
 			LoadPluginInfo();
@@ -440,7 +440,7 @@ NAMESPACE__BEGIN(psycle)
 						module_directory = module_file_name;
 						module_directory = module_directory.substr(0, module_directory.rfind('\\'));
 					}
-					out.open((module_directory + "/plugin-scan.log.txt").c_str());
+					out.open((module_directory + "/psycle.plugin-scan.log.txt").c_str());
 				}
 				out
 					<< "==========================================" << std::endl
@@ -806,7 +806,7 @@ NAMESPACE__BEGIN(psycle)
 			std::string::size_type pos=path.rfind('\\');
 			if(pos != std::string::npos)
 				path=path.substr(0,pos);
-			std::string cache=path + "\\plugin-scan.cache";
+			std::string cache=path + "\\psycle.plugin-scan.cache";
 
 			RiffFile file;
 			CFileFind finder;
@@ -912,7 +912,7 @@ NAMESPACE__BEGIN(psycle)
 			char cache[_MAX_PATH];
 			GetModuleFileName(NULL,cache,_MAX_PATH);
 			char * last = strrchr(cache,'\\');
-			strcpy(last,"\\plugin-scan.cache");
+			strcpy(last,"\\psycle.plugin-scan.cache");
 			DeleteFile(cache);
 			RiffFile file;
 			if (!file.Create(cache,true)) 

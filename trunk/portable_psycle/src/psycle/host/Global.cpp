@@ -176,7 +176,7 @@ namespace psycle
 							module_directory = module_directory.substr(0, module_directory.rfind('\\'));
 						}
 						// this overwrites the file if it already exists.
-						return *new std::ofstream((module_directory + "/output.log.txt").c_str());
+						return *new std::ofstream((module_directory + "/psycle.log.txt").c_str());
 					}
 				};
 
