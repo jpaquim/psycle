@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
+#include "ChildView.h"
 #include "GearDistort.h"
 
 #ifdef _DEBUG
@@ -15,14 +16,14 @@ static char THIS_FILE[] = __FILE__;
 // CGearDistort dialog
 
 
-CGearDistort::CGearDistort(CWnd* pParent /*=NULL*/)
+CGearDistort::CGearDistort(CChildView* pParent /*=NULL*/)
 	: CDialog(CGearDistort::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearDistort)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-
-doit=false;
+	doit=false;
 }
 
 
@@ -136,4 +137,16 @@ void CGearDistort::OnButton2()
 {
 	m_negc.SetPos(m_posc.GetPos());
 	m_negt.SetPos(m_post.GetPos());
+}
+
+BOOL CGearDistort::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CGearDistort::OnCancel()
+{
+	m_pParent->DistortionMachineDialog = NULL;
+	DestroyWindow();
+	delete this;
 }

@@ -8,6 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
+
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearDelay dialog
@@ -16,10 +19,11 @@ class CGearDelay : public CDialog
 {
 // Construction
 public:
-	CGearDelay(CWnd* pParent = NULL);   // standard constructor
+	CGearDelay(CChildView* pParent = NULL);   // standard constructor
 	Delay* _pMachine;
 	int* SPT;
 	bool doit;
+	BOOL Create();
 
 // Dialog Data
 	//{{AFX_DATA(CGearDelay)
@@ -50,6 +54,7 @@ public:
 
 // Implementation
 protected:
+	CChildView* m_pParent;
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearDelay)
@@ -72,6 +77,7 @@ protected:
 	afx_msg void OnButton22();
 	afx_msg void OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

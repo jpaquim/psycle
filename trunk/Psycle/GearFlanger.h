@@ -8,6 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
+
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearFlanger dialog
@@ -16,9 +19,10 @@ class CGearFlanger : public CDialog
 {
 // Construction
 public:
-	CGearFlanger(CWnd* pParent = NULL);   // standard constructor
+	CGearFlanger(CChildView* pParent = NULL);   // standard constructor
 	Flanger* _pMachine;
 	bool doit;
+	BOOL Create();
 
 
 // Dialog Data
@@ -53,6 +57,7 @@ public:
 
 // Implementation
 protected:
+	CChildView* m_pParent;
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearFlanger)
@@ -66,6 +71,7 @@ protected:
 	afx_msg void OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangePresetcombo();
+	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -1693,8 +1693,6 @@ bool Song::Save(
 					float val;
 					pDstMachine->GetWireVolume(d,val); //this gets automatically the value in 0.0..1.0 range
 					_pMachines[i]->_inputConVol[c]=val; // and we invert the volumes (input to output)
-
-//					break;
 				}
 			}
 		}

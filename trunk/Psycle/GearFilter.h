@@ -8,6 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
+
+class CChildView;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearfilter dialog
@@ -16,9 +19,10 @@ class CGearfilter : public CDialog
 {
 // Construction
 public:
-	CGearfilter(CWnd* pParent = NULL);   // standard constructor
+	CGearfilter(CChildView* pParent = NULL);   // standard constructor
 	Filter2p* _pMachine;
 	bool doit;
+	BOOL Create();
 
 // Dialog Data
 	//{{AFX_DATA(CGearfilter)
@@ -47,6 +51,7 @@ public:
 // Implementation
 protected:
 	void UpdateStatus();
+	CChildView* m_pParent;
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearfilter)
@@ -57,6 +62,7 @@ protected:
 	afx_msg void OnCustomdrawLAS(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderPhase(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeFilter();
+	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
