@@ -395,6 +395,17 @@ namespace psycle
 			inline AEffect & proxy::plugin() throw() { assert(plugin_); return *plugin_; }
 			inline const AEffect & proxy::plugin() const throw() { assert(plugin_); return *plugin_; }
 			inline const bool proxy::operator()() const throw() { return plugin_; }
+
+			#if defined $
+				#error "macro clash"
+			#endif
+			#define $(function) \
+				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+
 			inline void proxy::operator()(AEffect * const plugin) throw(host::exceptions::function_error)
 			{
 				if(this->plugin_)
@@ -408,7 +419,6 @@ namespace psycle
 				this->plugin_ = plugin;
 				if(plugin)
 				{
-					static const char function[] = "operator()(AEffect * const plugin)";
 					try
 					{
 						// AEffect's resvd2 data member is right after the resvd1 data member in memory,
@@ -421,37 +431,27 @@ namespace psycle
 						// Since those headers are under a restricted license by steinberg, only steinberg's employees are allowed to fix them.
 						*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
 					}
-					catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-					catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-					catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-					catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+					$("operator()(AEffect * const plugin)")
 				}
 			}
 
 			#pragma warning(push)
 			#pragma warning(disable:4702) // unreachable code
+
 			inline long int proxy::magic() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "magic";
 				try
 				{
 					return plugin().magic;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
-				return 0; // dummy return to avoid warning
+				$("magic")
 			}
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
 				#ifndef NDEBUG
 				{
-					std::ostringstream s;
-					s
+					std::ostringstream s; s
 						<< "VST plugin: call to plugin dispatcher: plugin address: " << &plugin()
 						<< ", opcode: " << exceptions::dispatch_errors::operation_description(operation)
 						<< ", index: " << index
@@ -466,176 +466,118 @@ namespace psycle
 				{
 					return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt);
 				}
-				catch(const std::exception & e) { exceptions::dispatch_errors::rethrow(host(), operation, &e); }
-				catch(const char e[]) { exceptions::dispatch_errors::rethrow(host(), operation, &e); }
-				catch(const long int & e) { exceptions::dispatch_errors::rethrow(host(), operation, &e); }
-				catch(const unsigned long int & e) { exceptions::dispatch_errors::rethrow(host(), operation, &e); }
-				catch(...) { exceptions::dispatch_errors::rethrow<void*>(host(), operation); }
+				$("dispatcher")
 				return 0; // dummy return to avoid warning
 			}
 			inline void proxy::process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "process";
 				try
 				{
 					plugin().process(&plugin(), inputs, outputs, sampleframes);
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("process")
 			}
 			inline void proxy::processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "processReplacing";
 				try
 				{
 					plugin().processReplacing(&plugin(), inputs, outputs, sampleframes);
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("processReplacing")
 			}
 			inline void proxy::setParameter(long int index, float parameter) throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "setParameter";
 				try
 				{
 					plugin().setParameter(&plugin(), index, parameter);
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("setParameter")
 			}
 			inline float proxy::getParameter(long int index) throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "getParameter";
 				try
 				{
 					return plugin().getParameter(&plugin(), index);
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("getParameter")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numPrograms() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "numPrograms";
 				try
 				{
 					return plugin().numPrograms;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("numPrograms")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numParams() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "numParams";
 				try
 				{
 					return plugin().numParams;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("numParams")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numInputs() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "numInputs";
 				try
 				{
 					return plugin().numInputs;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("numInputs")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numOutputs() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "numOutputs";
 				try
 				{
 					return plugin().numOutputs;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("numOutputs")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::flags() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "flags";
 				try
 				{
 					return plugin().flags;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("flags")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::uniqueId() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "uniqueId";
 				try
 				{
 					return plugin().uniqueID;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("uniqueId")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::version() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "version";
 				try
 				{
 					return plugin().version;
 				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				$("version")
 				return 0; // dummy return to avoid warning
 			}
 			#pragma warning(pop)
+			#undef $
 		}
 	}
 }
