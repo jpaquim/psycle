@@ -434,12 +434,7 @@ namespace psycle
 
 			inline long int proxy::magic() throw(host::exceptions::function_error)
 			{
-				assert((*this)());
-				try
-				{
-					return plugin().magic;
-				}
-				$catch$("magic")
+				assert((*this)()); try { return plugin().magic; } $catch$("magic")
 			}
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
@@ -455,121 +450,30 @@ namespace psycle
 					host::loggers::trace(s.str());
 				}
 				#endif
-				assert((*this)());
-				try
-				{
-					return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt);
-				}
-				$catch$("dispatcher")
-				return 0; // dummy return to avoid warning
+				assert((*this)()); try { return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt); } $catch$("dispatcher") return 0; /* dummy return to avoid warning */
 			}
 			inline void proxy::process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					plugin().process(&plugin(), inputs, outputs, sampleframes);
-				}
-				$catch$("process")
-			}
+			{	assert((*this)()); try { plugin().process(&plugin(), inputs, outputs, sampleframes); } $catch$("process") }
 			inline void proxy::processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					plugin().processReplacing(&plugin(), inputs, outputs, sampleframes);
-				}
-				$catch$("processReplacing")
-			}
+			{	assert((*this)()); try { plugin().processReplacing(&plugin(), inputs, outputs, sampleframes); } $catch$("processReplacing") }
 			inline void proxy::setParameter(long int index, float parameter) throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					plugin().setParameter(&plugin(), index, parameter);
-				}
-				$catch$("setParameter")
-			}
+			{	assert((*this)()); try { plugin().setParameter(&plugin(), index, parameter); } $catch$("setParameter") }
 			inline float proxy::getParameter(long int index) throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().getParameter(&plugin(), index);
-				}
-				$catch$("getParameter")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().getParameter(&plugin(), index); } $catch$("getParameter") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numPrograms() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().numPrograms;
-				}
-				$catch$("numPrograms")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().numPrograms; } $catch$("numPrograms") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numParams() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().numParams;
-				}
-				$catch$("numParams")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().numParams; } $catch$("numParams") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numInputs() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().numInputs;
-				}
-				$catch$("numInputs")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().numInputs; } $catch$("numInputs") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numOutputs() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().numOutputs;
-				}
-				$catch$("numOutputs")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().numOutputs; } $catch$("numOutputs") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::flags() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().flags;
-				}
-				$catch$("flags")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().flags; } $catch$("flags") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::uniqueId() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().uniqueID;
-				}
-				$catch$("uniqueId")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().uniqueID; } $catch$("uniqueId") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::version() throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				try
-				{
-					return plugin().version;
-				}
-				$catch$("version")
-				return 0; // dummy return to avoid warning
-			}
+			{	assert((*this)()); try { return plugin().version; } $catch$("version") return 0; /* dummy return to avoid warning */ }
 			#pragma warning(pop)
 			#undef $catch$
 		}
