@@ -2311,17 +2311,18 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 				switch (pEntry->_cmd)
 				{
 				case 0xFF:
-					if ( pEntry->_parameter != 0 )
+					if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
 					{
 						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 					}
 					break;
 					
 				case 0xFE:
-					if ( pEntry->_parameter != 0 )
+					if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
 					{
 						tpb=pEntry->_parameter;
 					}
+					break;
 				}
 			}
 			songLength += (60.0f/(bpm * tpb));

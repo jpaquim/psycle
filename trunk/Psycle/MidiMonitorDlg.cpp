@@ -180,24 +180,24 @@ void CMidiMonitorDlg::UpdateInfo( void )
 	// fill in the numeric stats
 	MIDI_STATS * pStats = CMidiInput::Instance()->GetStatsPtr();
 
-	sprintf( tmp, "%d", pStats->bufferCount );
+	sprintf( tmp, "%d\0", pStats->bufferCount );
 	m_bufferUsed.SetWindowText( tmp );
-	sprintf( tmp, "%d", pStats->bufferSize );
+	sprintf( tmp, "%d\0", pStats->bufferSize );
 	m_bufferCapacity.SetWindowText( tmp );
-	sprintf( tmp, "%d", pStats->eventsLost );
+	sprintf( tmp, "%d\0", pStats->eventsLost );
 	m_eventsLost.SetWindowText( tmp );
-	sprintf( tmp, "%d", pStats->syncEventLatency );
+	sprintf( tmp, "%d\0", pStats->syncEventLatency );
 	m_syncLatency.SetWindowText( tmp );
-	sprintf( tmp, "%d", pStats->syncAdjuster );
+	sprintf( tmp, "%d\0", pStats->syncAdjuster );
 	m_syncAdjust.SetWindowText( tmp );
-	sprintf( tmp, "%d", pStats->syncOffset );
+	sprintf( tmp, "%d\0", pStats->syncOffset );
 	m_syncOffset.SetWindowText( tmp );
 
 	// add the config
 	MIDI_CONFIG * pConfig = CMidiInput::Instance()->GetConfigPtr();
 
 	m_midiVersion.SetWindowText( pConfig->versionStr );
-	sprintf( tmp, "%d", pConfig->midiHeadroom );
+	sprintf( tmp, "%d\0", pConfig->midiHeadroom );
 	m_midiHeadroom.SetWindowText( tmp );
 
 	// fill in the flags
@@ -370,7 +370,7 @@ void CMidiMonitorDlg::FillChannelMap( bool override )
 		{
 			// machine
 			Machine * pMachine = Global::_pSong->_pMachines[ genFxIdx ];
-			sprintf( txtBuffer, "%02d: %s", genFxIdx, pMachine->_editName );
+			sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
 			m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 			// instrument
@@ -380,7 +380,7 @@ void CMidiMonitorDlg::FillChannelMap( bool override )
 			if( pMachine->_type == MACH_SAMPLER )
 			{
 				Instrument * pInstrument = &Global::_pSong->_instruments[ instrument ];
-				sprintf( txtBuffer, "%03d: %s", instrument, pInstrument->_sName );
+				sprintf( txtBuffer, "%03d: %s\0", instrument, pInstrument->_sName );
 				m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 			}
 			else
@@ -428,7 +428,7 @@ void CMidiMonitorDlg::CreateChannelMap( void )
 	// for all MIDI channels
 	for( int ch = 0; ch<MAX_MIDI_CHANNELS; ch++ )
 	{
-		sprintf( txtBuffer, "Ch %d", (ch+1) );
+		sprintf( txtBuffer, "Ch %d\0", (ch+1) );
 		m_channelMap.InsertItem( ch, txtBuffer, NULL );
 	}
 }

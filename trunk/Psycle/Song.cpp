@@ -267,7 +267,9 @@ void Song::DeleteInstruments()
 
 void Song::DeleteInstrument(int i)
 {
+#if !defined(_WINAMP_PLUGIN_)
 	Invalided=true;
+#endif
 	// Reset envelope
 	_instruments[i].ENV_AT = 1; // 16
 	_instruments[i].ENV_DT = 1; // 16386
@@ -300,7 +302,9 @@ void Song::DeleteInstrument(int i)
 	}
 	
 	sprintf(_instruments[i]._sName,"empty");
+#if !defined(_WINAMP_PLUGIN_)
 	Invalided=false;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -499,14 +499,14 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
                 break;
         case 4: // semi detune
                 if( value == 0x40)	 strcpy(txt,"±0 halfnotes");
-                else if( value > 0x40) sprintf( txt, "+%i halfnotes", value-0x40);
-                else			     sprintf( txt, "%i halfnotes", value-0x40);
+                else if( value > 0x40) sprintf( txt, "+%i halfnotes\0", value-0x40);
+                else			     sprintf( txt, "%i halfnotes\0", value-0x40);
 				return true;
                 break;
         case 5: // fine detune
                 if( value == 0x40)	 strcpy(txt,"±0 cents");
-                else if( value > 0x40) sprintf( txt, "+%i cents", (int)((value-0x40)*100.0/63));
-                else				 sprintf( txt, "%i cents", (int)((value-0x40)*100.0/63));
+                else if( value > 0x40) sprintf( txt, "+%i cents\0", (int)((value-0x40)*100.0/63));
+                else				 sprintf( txt, "%i cents\0", (int)((value-0x40)*100.0/63));
 				return true;
                 break;
 
@@ -550,13 +550,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
         case 22: // Filter Env
         case 23: // Filter Env
         case 24: // Filter Env
-                sprintf( txt, "%.4f sec", EnvTime( value)/1000);
+                sprintf( txt, "%.4f sec\0", EnvTime( value)/1000);
 				return true;
                 break;
 
         case 13: // PitchEnvMod
         case 25: // Filt ENvMod
-                sprintf( txt, "%i", value-0x40);
+                sprintf( txt, "%i\0", value-0x40);
 				return true;
                 break;
         case 19:
@@ -635,9 +635,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
         case 28: // LFO1Freq
         case 32: // LFO2Freq
                 if( value <= 116)
-                        sprintf( txt, "%.4f HZ", LFOFreq( value));
+                        sprintf( txt, "%.4f HZ\0", LFOFreq( value));
                 else
-                        sprintf( txt, "%u ticks", 1<<(value-117));
+                        sprintf( txt, "%u ticks\0", 1<<(value-117));
 				return true;
                 break;
     }
