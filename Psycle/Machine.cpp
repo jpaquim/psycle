@@ -22,6 +22,7 @@
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
+#include "MainFrm.h"
 
 #include "InputHandler.h"
 
@@ -410,9 +411,10 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 	// call setpan
 
 	Machine* pMachine;
-	MachineType type;
+	MachineType type;//,oldtype;
 	char dllName[256];
 	pFile->Read(&type,sizeof(type));
+//	oldtype=type;
 	pFile->ReadString(dllName,256);
 	switch (type)
 	{
@@ -451,20 +453,37 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 				type = MACH_DUMMY;
 			}
 		}
-		 break;
+		break;
 	case MACH_VST:
-		 pMachine = new VSTInstrument;
-		// read dll name and load dll
-		 break;
+		{
+			VSTInstrument * p;
+			 pMachine = p = new VSTInstrument;
+			if (!p->LoadDll(dllName))
+			{
+				delete pMachine;
+				pMachine = new Dummy;
+				type = MACH_DUMMY;
+			}
+		}
+		break;
 	case MACH_VSTFX:
-		 pMachine = new VSTFX;
-		// read dll name and load dll
-		 break;
+		{
+			VSTFX * p;
+			pMachine = p = new VSTFX;
+			if (!p->LoadDll(dllName))
+			{
+				delete pMachine;
+				pMachine = new Dummy;
+				type = MACH_DUMMY;
+			}
+		}
+		break;
 	default:
-		 pMachine = new Dummy;
-		 break;
+		pMachine = new Dummy;
+		break;
 	}
 	pMachine->Init();
+	pMachine->_type = type;
 
 	pFile->Read(&pMachine->_mode,sizeof(pMachine->_mode));
 
@@ -490,8 +509,10 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 //		pFile->Read(&pMachine->_connectionPoint[i],sizeof(pMachine->_connectionPoint[i]));// point for wire? 
 	}
 	pFile->ReadString(pMachine->_editName,sizeof(pMachine->_editName));
-	pFile->Read(&pMachine->_numPars,sizeof(pMachine->_numPars));
-	for (i = 0; i < pMachine->_numPars; i++)
+
+	int temp;
+	pFile->Read(&temp,sizeof(temp)); // num params to load
+	for (i = 0; i < temp; i++)
 	{
 		int temp;
 		pFile->Read(&temp,sizeof(temp));
@@ -533,6 +554,42 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 		pMachine=p;
 	}
 
+	switch (pMachine->_mode)
+	{
+	case MACHMODE_GENERATOR:
+		if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) 
+		{
+			pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+		}
+		if ( pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) 
+		{
+			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+		}
+		break;
+	case MACHMODE_FX:
+	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+		if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) 
+		{
+			pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+		}
+		if ( pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) 
+		{
+			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+		}
+		break;
+
+	case MACHMODE_MASTER:
+		if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) 
+		{
+			pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
+		}
+		if ( pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) 
+		{
+			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+		}
+		break;
+	}
+
 	return pMachine;
 }
 
@@ -565,8 +622,9 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 //		pFile->Write(&_connectionPoint[i],sizeof(_connectionPoint[i]));// point for wire? 
 	}
 	pFile->Write(_editName,strlen(_editName)+1);
-	pFile->Write(&_numPars,sizeof(_numPars));
-	for (i = 0; i < _numPars; i++)
+	int temp = GetNumParams();
+	pFile->Write(&temp,sizeof(temp));
+	for (i = 0; i < temp; i++)
 	{
 		int temp = GetParamValue(i);
 		pFile->Write(&temp,sizeof(temp));

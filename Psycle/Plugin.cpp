@@ -27,6 +27,7 @@ Plugin::Plugin()
 	_psAuthor=NULL;
 	_psDllName=NULL;
 	_psName=NULL;
+
 }
 
 Plugin::~Plugin()

@@ -145,6 +145,7 @@ public:
 	{
 		UINT size;
 		pFile->Read(&size,sizeof(size));
+		// skip any data, there should be none anyway
 		pFile->Skip(size);
 		return TRUE;
 	};

@@ -2013,7 +2013,6 @@ void CChildView::FileLoadsongNamed(char* fName)
 		Global::pConfig->_pMidiInput->Open();
 	}
 	editPosition=0;
-	Global::_pSong->seqBus=0;
 	pParentMain->PsybarsUpdate();
 	pParentMain->WaveEditorBackUpdate();
 	pParentMain->m_wndInst.WaveUpdate();

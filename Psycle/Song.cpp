@@ -1113,9 +1113,9 @@ bool Song::Load(RiffFile* pFile)
 		if (version > CURRENT_FILE_VERSION)
 		{
 			// there is an error, this file is newer than this build of psycle
-//				MessageBox(NULL,"File is from a newer version of psycle!",NULL,NULL);
-			pFile->Skip(size);
+			MessageBox(NULL,"File is from a newer version of psycle! You should get a new one immediately!",NULL,NULL);
 		}
+		pFile->Skip(size);
 		/*
 		else
 		{
@@ -1166,7 +1166,27 @@ bool Song::Load(RiffFile* pFile)
 					currentOctave = temp;
 					pFile->Read(&temp,sizeof(temp));  // machineSoloed
 					solo = temp;	// we need to buffer this because destroy machine will clear it
+
+					pFile->Read(&temp,sizeof(temp));  // machineSoloed
+					_trackSoloed=temp;
+
+					pFile->Read(&temp,sizeof(temp));  
+					seqBus=temp;
+
+					pFile->Read(&temp,sizeof(temp));  
+					midiSelected=temp;
+					pFile->Read(&temp,sizeof(temp));  
+					auxcolSelected=temp;
+					pFile->Read(&temp,sizeof(temp));  
+					instSelected=temp;
+
 					pFile->Read(&temp,sizeof(temp));  // sequence width, for multipattern
+
+					for (int i = 0; i < SONGTRACKS; i++)
+					{
+						pFile->Read(&_trackMuted[i],sizeof(_trackMuted[i]));
+						pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
+					}
 				}
 			}
 			else if (strcmp(Header,"SEQD")==0)
@@ -1299,10 +1319,40 @@ bool Song::Load(RiffFile* pFile)
 		}
 		// now that we have loaded all the modules, time to prepare them.
 
-		// calculate samples per tick
-		// connect all output machines, test all connections for invalid machines.
+		// test all connections for invalid machines. disconnect invalid machines.
+		for (int i = 0; i < MAX_MACHINES; i++)
+		{
+			if (_pMachine[i])
+			{
+				for (int c = 0; c < MAX_CONNECTIONS; c++)
+				{
+					if (_pMachine[i]->_connection[c])
+					{
+						if (!_pMachine[_pMachine[i]->_outputMachines[c]])
+						{
+							_pMachine[i]->_connection[c]=FALSE;
+						}
+					}
+					if (_pMachine[i]->_inputCon[c])
+					{
+						if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+						{
+							_pMachine[i]->_inputCon[c]=FALSE;
+						}
+					}
+				}
+			}
+		}
+
+		// translate any data that is required
 
 		machineSoloed = solo;
+		((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen();
+		// calculate samples per tick
+		Global::pPlayer->bpm = BeatsPerMin;
+		Global::pPlayer->tpb = _ticksPerBeat;
+		SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+		// allow stuff to work again
 		_machineLock = false;
 		return true;
 
@@ -1358,7 +1408,7 @@ bool Song::Load(RiffFile* pFile)
 			if (patternLines[i] > 0)
 			{
 				unsigned char * pData = CreateNewPattern(i);
-				pFile->Read((char*)pData, patternLines[i]*MAX_TRACKS*sizeof(PatternEntry));
+				pFile->Read((char*)pData, patternLines[i]*OLD_MAX_TRACKS*sizeof(PatternEntry));
 			}
 			else
 			{
@@ -1996,6 +2046,8 @@ bool Song::Load(RiffFile* pFile)
 		}
 
 		_machineLock = false;
+		seqBus=0;
+
 		return true;
 	}
 
@@ -2006,8 +2058,7 @@ bool Song::Load(RiffFile* pFile)
 
 
 #if !defined(_WINAMP_PLUGIN_)
-bool Song::Save(
-	RiffFile* pFile)
+bool Song::Save(RiffFile* pFile)
 {
 	// NEW FILE FORMAT!!!
 	// this is much more flexible, making maintenance a breeze compared to that old hell.
@@ -2096,8 +2147,33 @@ bool Song::Save(
 	pFile->Write(&temp,sizeof(temp));
 	temp = machineSoloed;
 	pFile->Write(&temp,sizeof(temp));
+	temp = _trackSoloed;
+	pFile->Write(&temp,sizeof(temp));
+
+	temp = seqBus;
+	pFile->Write(&temp,sizeof(temp));
+
+	temp = midiSelected;
+	pFile->Write(&temp,sizeof(temp));
+	temp = auxcolSelected;
+	pFile->Write(&temp,sizeof(temp));
+	temp = instSelected;
+	pFile->Write(&temp,sizeof(temp));
+
 	temp = 1; // sequence width
 	pFile->Write(&temp,sizeof(temp));
+
+	_trackArmedCount = 0;
+	for (int i = 0; i < SONGTRACKS; i++)
+	{
+		pFile->Write(&_trackMuted[i],sizeof(_trackMuted[i]));
+		pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
+		if (_trackArmed[i])
+		{
+			_trackArmedCount++;
+		}
+	}
+
 
 	/*
 	===================
@@ -2130,7 +2206,7 @@ bool Song::Save(
 
 	pFile->Write(pSequenceName,strlen(pSequenceName)+1);
 
-	for (int i = 0; i < playLength; i++)
+	for (i = 0; i < playLength; i++)
 	{
 		temp = playOrder[i];
 		pFile->Write(&temp,sizeof(temp));
