@@ -15,14 +15,16 @@
 #define MAX_DRAW_MESSAGES 32
 
 class CMasterDlg;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 class CGearPsychOsc;
 class CGearDistort;
-class CGearTracker;
 class CGearDelay;
 class CGearfilter;
 class CGearGainer;
 class CGearFlanger;
+#endif
 class CWireDlg;
+class CGearTracker;
 
 #define MAX_WIRE_DIALOGS 16
 
@@ -295,13 +297,15 @@ public:
 	bool useDoubleBuffer;
 //	bool multiPattern;
 	CMasterDlg * MasterMachineDialog;
+	CGearTracker * SamplerMachineDialog;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 	CGearPsychOsc * PsychMachineDialog;
 	CGearDistort * DistortionMachineDialog;
-	CGearTracker * SamplerMachineDialog;
 	CGearDelay * DelayMachineDialog;
 	CGearfilter * FilterMachineDialog;
 	CGearGainer * GainerMachineDialog;
 	CGearFlanger * FlangerMachineDialog;
+#endif
 	CWireDlg * WireDialog[MAX_WIRE_DIALOGS];
 
 	bool blockSelected;

@@ -1,6 +1,7 @@
 #ifndef _MACHINE_H
 #define _MACHINE_H
 
+
 #if defined(_WINAMP_PLUGIN_)
 	#include <stdio.h>
 #endif // defined(_WINAMP_PLUGIN_)
@@ -279,6 +280,8 @@ protected:
 
 };
 
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+
 class Gainer : public Machine
 {
 public:
@@ -326,7 +329,6 @@ protected:
 	static char* _psName;
 	static CIntMachParam pars[];
 };
-
 
 class CGearPsychOsc;
 
@@ -783,5 +785,7 @@ protected:
 	float WorkL(float input, float f, float q, float fa, float fb);
 	float WorkR(float input, float f, float q, float fa, float fb);
 };
+
+#endif
 
 #endif

@@ -11,13 +11,15 @@
 
 // Included dialogs
 #include "MasterDlg.h"
+#include "gearTracker.h"
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 #include "gearPsychosc.h"
 #include "gearDistort.h"
-#include "gearTracker.h"
 #include "gearDelay.h"
 #include "gearFilter.h"
 #include "gearGainer.h"
 #include "gearFlanger.h"
+#endif
 #include "FrameMachine.h"
 #include "VstEditorDlg.h"
 #include "Helpers.h"
@@ -1328,6 +1330,29 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
 				}
 				break;
+			case MACH_SAMPLER:
+				if (m_wndView.SamplerMachineDialog)
+				{
+					if (m_wndView.SamplerMachineDialog->_pMachine != (Sampler*)ma)
+					{
+						m_wndView.SamplerMachineDialog->OnCancel();
+						m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
+						m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
+						m_wndView.SamplerMachineDialog->Create();
+						CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
+						m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
+					}
+				}
+				else
+				{
+					m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
+					m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
+					m_wndView.SamplerMachineDialog->Create();
+					CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
+					m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
+				}
+				break;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 			case MACH_SINE:
 				if (m_wndView.PsychMachineDialog)
 				{
@@ -1370,28 +1395,6 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.DistortionMachineDialog->Create();
 					CenterWindowOnPoint(m_wndView.DistortionMachineDialog, point);
 					m_wndView.DistortionMachineDialog->ShowWindow(SW_SHOW);
-				}
-				break;
-			case MACH_SAMPLER:
-				if (m_wndView.SamplerMachineDialog)
-				{
-					if (m_wndView.SamplerMachineDialog->_pMachine != (Sampler*)ma)
-					{
-						m_wndView.SamplerMachineDialog->OnCancel();
-						m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
-						m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
-						m_wndView.SamplerMachineDialog->Create();
-						CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
-						m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
-					}
-				}
-				else
-				{
-					m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
-					m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
-					m_wndView.SamplerMachineDialog->Create();
-					CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
-					m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
 				}
 				break;
 			case MACH_DELAY:
@@ -1484,6 +1487,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.FlangerMachineDialog->ShowWindow(SW_SHOW);
 				}
 				break;
+#endif
 			case MACH_PLUGIN:
 				{
 					m_pWndMac[tmac] = new CFrameMachine(tmac);
@@ -1625,14 +1629,15 @@ void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
 			case MACH_MASTER:
 				if (m_wndView.MasterMachineDialog) m_wndView.MasterMachineDialog->OnCancel();
 				break;
+			case MACH_SAMPLER:
+				if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
+				break;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 			case MACH_SINE:
 				if (m_wndView.PsychMachineDialog) m_wndView.PsychMachineDialog->OnCancel();
 				break;
 			case MACH_DIST:
 				if (m_wndView.DistortionMachineDialog) m_wndView.DistortionMachineDialog->OnCancel();
-				break;
-			case MACH_SAMPLER:
-				if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
 				break;
 			case MACH_DELAY:
 				if (m_wndView.DelayMachineDialog) m_wndView.DelayMachineDialog->OnCancel();
@@ -1646,6 +1651,7 @@ void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
 			case MACH_FLANGER:
 				if (m_wndView.FlangerMachineDialog) m_wndView.FlangerMachineDialog->OnCancel();
 				break;
+#endif
 			case MACH_PLUGIN:
 			case MACH_VST:
 			case MACH_VSTFX:

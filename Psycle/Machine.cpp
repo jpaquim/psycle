@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+
 #if defined(_WINAMP_PLUGIN_)
 //	#include "global.h"
 	#include "Machine.h"
@@ -28,6 +29,8 @@
 
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
+
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 char* Gainer::_psName = "Gainer";
 CIntMachParam Gainer::pars[] = {{"Reserved",0,0},{"Gain",0,1024}};
 char* Sine::_psName = "PsychOsc AM";
@@ -47,6 +50,7 @@ char* Filter2p::_psName = "2p Filter";
 CIntMachParam Filter2p::pars[] = {{"Reserved",0,0},{"Filter Type",0,1},{"Filter Cuttoff",0,256}, \
 								{"Filter Ressonance",0,256},{"LFO Speed",0,32768},{"LFO Amplitude",0,256},{"LFO Phase",0,256}};
 
+#endif
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 Machine::Machine()
@@ -420,14 +424,16 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	case MACH_MASTER:
 		pMachine = new Master(index);
 		break;
+	case MACH_SAMPLER:
+		pMachine = new Sampler(index);
+		break;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+
 	case MACH_SINE:
 		pMachine = new Sine(index);
 		break;
 	case MACH_DIST:
 		pMachine = new Distortion(index);
-		break;
-	case MACH_SAMPLER:
-		pMachine = new Sampler(index);
 		break;
 	case MACH_DELAY:
 		pMachine = new Delay(index);
@@ -441,6 +447,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	case MACH_FLANGER:
 		pMachine = new Flanger(index);
 		break;
+#endif
 	case MACH_PLUGIN:
 		{
 			Plugin * p;
@@ -840,6 +847,7 @@ void Master::Work(
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 Gainer::Gainer(int index)
 {
 	_macIndex = index;
@@ -1818,7 +1826,7 @@ void Flanger::SetPreset(
 {
 	switch (preset)
 	{
-	case 0:	/* Default */
+	case 0:	// default
 		_time = 75;
 		_lfoAmp = 246;
 		_lfoSpeed = 3748;
@@ -1829,7 +1837,7 @@ void Flanger::SetPreset(
 		_outWet = 256;
 		break;
 		
-	case 1:	/* Chorus */
+	case 1:	// Chorus 
 		_time = 227;
 		_lfoAmp = 246;
 		_lfoSpeed = 23543;
@@ -1840,7 +1848,7 @@ void Flanger::SetPreset(
 		_outWet = 256;
 		break;
 		
-	case 2:	/* Chorus 2*/
+	case 2:	// Chorus 2
 		_time = 325;
 		_lfoAmp = 100;
 		_lfoSpeed = 12973;
@@ -2165,3 +2173,4 @@ bool Filter2p::Load(
 	return true;
 }
 
+#endif
