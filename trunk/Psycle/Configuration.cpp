@@ -767,6 +767,8 @@ Configuration::Read()
 	numData = sizeof(machine_skin);
 	reg.QueryValue("machine_skin", &type, (BYTE*)&machine_skin, &numData);
 
+	CreateFonts();	
+	
 	numData = sizeof(output);
 	if (reg.QueryValue("OutputDriver", &type, (BYTE*)&output, &numData) == ERROR_SUCCESS)
 	{
@@ -1286,3 +1288,67 @@ void Configuration::Error(const char* psMsg)
 	MessageBox(NULL,psMsg, "Psycle", MB_OK);
 }
 
+bool Configuration::CreatePsyFont(CFont &f, char * sFontFace, int HeightPx, bool bBold, bool bItalic)
+{
+	f.DeleteObject();
+	CString sFace(sFontFace);
+				
+	LOGFONT lf;
+	memset(&lf, 0, sizeof(LOGFONT));       // clear out structure.
+
+	if(bBold)
+		lf.lfWeight = FW_BOLD;
+	if(bItalic)
+		lf.lfItalic = true;
+	lf.lfHeight = HeightPx;
+	lf.lfQuality = NONANTIALIASED_QUALITY;
+	strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
+
+	if(!f.CreatePointFontIndirect(&lf))
+	{			
+		CString sFaceLowerCase = sFace;
+		sFaceLowerCase.MakeLower();
+		strncpy(lf.lfFaceName,(LPCTSTR)sFaceLowerCase,32);
+		
+		if(!f.CreatePointFontIndirect(&lf))
+			return false;
+	}
+
+	return true;
+}
+
+
+void Configuration::CreateFonts()
+{	
+	bool bBold = pattern_font_flags&1;
+	bool bItalic = pattern_font_flags&2;
+	if (!CreatePsyFont(seqFont,pattern_fontface,pattern_font_point,bBold,bItalic))
+	{
+		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
+		if (!CreatePsyFont(seqFont,"Tahoma",pattern_font_point,bBold,bItalic))
+			if (!CreatePsyFont(seqFont,"Verdana",pattern_font_point,bBold,bItalic))
+				CreatePsyFont(seqFont,"Arial",pattern_font_point,bBold,bItalic);
+	}
+
+	bBold = generator_font_flags&1;
+	bItalic = generator_font_flags&2;
+	if (!CreatePsyFont(generatorFont,generator_fontface,generator_font_point,bBold,bItalic))
+	{
+		MessageBox(NULL,generator_fontface,"Could not find this font!",0);
+		if (!CreatePsyFont(seqFont,"Tahoma",generator_font_point,bBold,bItalic))
+			if (!CreatePsyFont(seqFont,"Verdana",generator_font_point,bBold,bItalic))
+				CreatePsyFont(seqFont,"Arial",generator_font_point,bBold,bItalic);
+	}
+
+
+	bBold = effect_font_flags&1;
+	bItalic = effect_font_flags&2;
+	if (!CreatePsyFont(effectFont,generator_fontface,effect_font_point,bBold,bItalic))
+	{
+		MessageBox(NULL,effect_fontface,"Could not find this font!",0);
+		if (!CreatePsyFont(seqFont,"Tahoma",effect_font_point,bBold,bItalic))
+			if (!CreatePsyFont(seqFont,"Verdana",effect_font_point,bBold,bItalic))
+				CreatePsyFont(seqFont,"Arial",effect_font_point,bBold,bItalic);
+	}
+
+}

@@ -5,6 +5,35 @@
 
 int _httoi(const TCHAR *value);
 
+class CValueMapper
+{
+
+public:
+	CValueMapper();
+	~CValueMapper();
+
+
+	static inline float Map_255_1(int iByte)
+	{	
+		if(iByte>=0&&iByte<=256)
+			return CValueMapper::fMap_255_1[iByte];
+		else	
+			return iByte * 0.00390625f;
+	}
+
+	static inline float Map_255_100(int iByte)
+	{
+		if(iByte>=0&&iByte<=256)
+			return CValueMapper::fMap_255_100[iByte];
+		else	
+			return iByte*0.390625f;
+	}
+	static float fMap_255_1[257];
+	static float fMap_255_100[257];
+
+};
+
+
 inline float fast_log2(float f) 
 { 
 //  assert( f > 0. ); 
@@ -26,7 +55,6 @@ inline int f2i(float flt)
   } 
   return i;
 }
-
 
 
 #endif

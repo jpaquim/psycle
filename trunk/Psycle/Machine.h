@@ -228,7 +228,7 @@ public:
 		switch(numparam)
 		{
 			case 0: strcpy(parval,"None"); break;
-			case 1: sprintf(parval,"%.2f%%",(float)_outWet*0.390625f); break;
+			case 1: sprintf(parval,"%.2f%%",CValueMapper::Map_255_100(_outWet)); break;
 			default: strcpy(parval,"Out Of Range"); break;
 		}
 	}

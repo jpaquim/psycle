@@ -239,12 +239,14 @@ void CGearDelay::OnButton22()
 // Dry/Wet sliders control
 //
 
+
+
 void CGearDelay::OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	_pMachine->_outDry = m_dryslider.GetPos()-256;
 
 	char buffer[8];
-	sprintf(buffer, "%.1f%%", (float)_pMachine->_outDry*0.390625f);
+	sprintf(buffer, "%.1f%%", CValueMapper::Map_255_100(_pMachine->_outDry));
 	m_drylabel.SetWindowText(buffer);
 
 	*pResult = 0;
@@ -255,7 +257,7 @@ void CGearDelay::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult)
 	_pMachine->_outWet = m_wetslider.GetPos()-256;
 
 	char buffer[8];
-	sprintf(buffer, "%.1f%%", (float)_pMachine->_outWet*0.390625f);
+	sprintf(buffer, "%.1f%%", CValueMapper::Map_255_100(_pMachine->_outWet));
 	m_wetlabel.SetWindowText(buffer);
 
 	*pResult = 0;

@@ -246,6 +246,7 @@ void Player::ExecuteLine(void)
 
 void Player::AdvancePosition()
 {
+
 	Song* pSong = Global::_pSong;
 
 	_lineCounter++;
@@ -255,11 +256,13 @@ void Player::AdvancePosition()
 		_playTime-=60;
 		_playTimem++;
 	}
-	
+
 	if (_lineCounter >= pSong->patternLines[_playPattern])
 	{
 		_lineCounter = 0;
-		_playPosition++;
+
+		if(!_playBlock)
+			_playPosition++;
 		
 #if defined(_WINAMP_PLUGIN_)
 		if (_playPosition >= pSong->playLength)
@@ -267,11 +270,6 @@ void Player::AdvancePosition()
 			_playing= false;
 		}
 #else
-		if ( _playBlock )
-		{
-			while ((_playPosition< MAX_SONG_POSITIONS) && 
-				(!pSong->playOrderSel[_playPosition])) _playPosition++;
-		}
 		
 		if ((!_playBlock && _playPosition >= pSong->playLength) ||
 			(_playBlock && _playPosition == MAX_SONG_POSITIONS))

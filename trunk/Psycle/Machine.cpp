@@ -214,7 +214,7 @@ bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,int value)
 	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
 
 	if ( value == 255 ) value =256; // FF = 255
-	const float invol = value*0.00390625f; // Convert a 0..256 value to a 0..1.0 value
+	const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
 	
 	int c;
 	if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
@@ -511,7 +511,7 @@ void Master::Work(
 
 //	if (!_mute)
 //	{
-		float const mv = (float)_outDry*0.0039062f;
+		float const mv = CValueMapper::Map_255_1(_outDry);
 		
 		float *pSamples = _pMasterSamples;
 		float *pSamplesL = _pSamplesL;
@@ -610,7 +610,7 @@ void Gainer::Work(
 	
 	if ((!_mute) && (!_stopped) && (!_bypass))
 	{
-		float const wet = (float)_outWet*0.00390625f;
+		float const wet = CValueMapper::Map_255_1(_outWet);
 		float *pSamplesL = _pSamplesL;
 		float *pSamplesR = _pSamplesR;
 		int i = numSamples;
@@ -1180,10 +1180,10 @@ void Delay::GetParamValue(int numparam,char* parval)
 			sprintf(parval, "%d%%", _feedbackR);
 			break;
 		case 5:
-			sprintf(parval, "%d%%", _outDry*0.390625f);
+			sprintf(parval, "%d%%", CValueMapper::Map_255_100(_outDry));
 			break;
 		case 6:
-			sprintf(parval, "%d%%", _outWet*0.390625f);
+			sprintf(parval, "%d%%", CValueMapper::Map_255_100(_outWet));
 			break;
 		default: strcpy(parval,"Out Of Range"); break;
 	}
@@ -1239,8 +1239,8 @@ void Delay::Work(int numSamples)
 		
 		float fdbkL = (float)_feedbackL*0.01f;
 		float fdbkR = (float)_feedbackR*0.01f;
-		float dry = (float)_outDry*0.0039062f;
-		float wet = (float)_outWet*0.0039062f;
+		float dry = CValueMapper::Map_255_1(_outDry);
+		float wet = CValueMapper::Map_255_1(_outWet);
 		
 		float* pSamplesL = _pSamplesL;
 		float* pSamplesR = _pSamplesR;
@@ -1479,7 +1479,7 @@ void Flanger::GetParamValue(int numparam,char* parval)
 #endif // _WINAMP_PLUGIN_
 			break;
 		case 2:
-			sprintf(parval, "%d%%", _lfoAmp*0.390625f);
+			sprintf(parval, "%d%%", CValueMapper::Map_255_100(_lfoAmp));
 			break;
 		case 3:
 #if defined(_WINAMP_PLUGIN_)
@@ -1498,10 +1498,10 @@ void Flanger::GetParamValue(int numparam,char* parval)
 			sprintf(parval, "%d%%", _feedbackR);
 			break;
 		case 7:
-			sprintf(parval, "%.1f%%", _outDry*0.390625f);
+			sprintf(parval, "%.1f%%", CValueMapper::Map_255_100(_outDry));
 			break;
 		case 8:
-			sprintf(parval, "%.1f%%", _outWet*0.390625f);
+			sprintf(parval, "%.1f%%", CValueMapper::Map_255_100(_outWet));
 			break;
 		default: strcpy(parval,"Out Of Range"); break;
 	}
@@ -1521,8 +1521,8 @@ void Flanger::Work(
 	{
 		const float fdbkL =(float)_feedbackL*0.01f;
 		const float fdbkR =(float)_feedbackR*0.01f;
-		const float dry =(float)_outDry*0.00390625f;
-		const float wet =(float)_outWet*0.00390625f;
+		const float dry =CValueMapper::Map_255_1(_outDry);
+		const float wet =CValueMapper::Map_255_1(_outWet);
 		
 		float* pSamplesL = _pSamplesL;
 		float* pSamplesR = _pSamplesR;
@@ -1716,7 +1716,7 @@ void Flanger::Tick(int channel, PatternEntry *pData)
 void Flanger::Update(void)
 {
 	_dLfoSpeed = _lfoSpeed*0.000000003f;
-	_fLfoAmp = (float)_lfoAmp*0.00390625f*(float)(_time-1);
+	_fLfoAmp = CValueMapper::Map_255_1(_lfoAmp)*(float)(_time-1);
 	_fLfoPhase = (float)_lfoPhase*0.012271846f;
 }
 
@@ -2051,13 +2051,13 @@ void Filter2p::GetParamValue(int numparam,char* parval)
 #else
 		case 2: sprintf(parval,"%d (%d Hz)",_cutoff, Global::pConfig->_pOutputDriver->_samplesPerSec * asin( _fCutoff) / 3.1415926f); break;
 #endif // _WINAMP_PLUGIN_
-		case 3: sprintf(parval,"%d (%d%%)",_resonance,_resonance*0.390625f); break;
+		case 3: sprintf(parval,"%d (%d%%)",_resonance,CValueMapper::Map_255_100(_resonance)); break;
 #if defined(_WINAMP_PLUGIN_)
 		case 4: sprintf(parval,"%d (%.2f Hz)",_lfoSpeed,_fLfoSpeed*Global::pConfig->_samplesPerSec / 6.283185f); break;
 #else
 		case 4: sprintf(parval,"%d (%.2f Hz)",_lfoSpeed,_fLfoSpeed*Global::pConfig->_pOutputDriver->_samplesPerSec / 6.283185f); break;
 #endif // _WINAMP_PLUGIN_
-		case 5: sprintf(parval,"%%d (%d%%)",_lfoAmp,_lfoAmp*0.390625f); break;
+		case 5: sprintf(parval,"%%d (%d%%)",_lfoAmp,CValueMapper::Map_255_100(_lfoAmp)); break;
 		case 6: sprintf(parval,"%d (%d deg)",_lfoPhase,_lfoPhase*0.703125f); break;
 		default: strcpy(parval,"Out Of Range"); break;
 	}
@@ -2066,10 +2066,10 @@ void Filter2p::GetParamValue(int numparam,char* parval)
 
 void Filter2p::Update(void)
 {
-	_fCutoff = _cutoff * 0.00390625f;
-	_fResonance = _resonance * 0.00390625f;
+	_fCutoff = CValueMapper::Map_255_1(_cutoff);
+	_fResonance = CValueMapper::Map_255_1(_resonance );
 	_fLfoSpeed = _lfoSpeed * 0.00000003f;
-	_fLfoAmp = _lfoAmp * 0.00390625f;
+	_fLfoAmp = CValueMapper::Map_255_1(_lfoAmp);
 	_fLfoPhase = _lfoPhase * 0.0122718f;
 }
 

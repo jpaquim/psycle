@@ -85,7 +85,7 @@ void CGearFlanger::OnCustomdrawFlangerDelaySlider(NMHDR* pNMHDR, LRESULT* pResul
 void CGearFlanger::OnCustomdrawAmpSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 {	
 	char buffer[16];
-	sprintf(buffer,"%.2f%%",(float)_pMachine->_lfoAmp*0.390625f);
+	sprintf(buffer,"%.2f%%",CValueMapper::Map_255_100(_pMachine->_lfoAmp));
 	m_amp_label.SetWindowText(buffer);
 
 	_pMachine->Update();
@@ -192,7 +192,7 @@ void CGearFlanger::OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult)
 	_pMachine->_outDry = m_dry_slider.GetPos()-256;
 
 	char buffer[8];
-	sprintf(buffer, "%.1f%%", (float)_pMachine->_outDry*0.390625f);
+	sprintf(buffer, "%.1f%%", CValueMapper::Map_255_100(_pMachine->_outDry));
 	m_dry_label.SetWindowText(buffer);
 
 	*pResult = 0;
@@ -203,7 +203,7 @@ void CGearFlanger::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult)
 	_pMachine->_outWet = m_wet_slider.GetPos()-256;
 
 	char buffer[8];
-	sprintf(buffer,"%.1f%%",(float)_pMachine->_outWet*0.390625f);
+	sprintf(buffer,"%.1f%%",CValueMapper::Map_255_100(_pMachine->_outWet));
 	m_wet_label.SetWindowText(buffer);
 
 	*pResult = 0;

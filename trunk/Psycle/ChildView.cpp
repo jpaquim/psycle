@@ -1075,8 +1075,12 @@ void CChildView::OnButtonplayseqblock()
 	prevEditPosition=editPosition;
 	int i=0;
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
-	Global::pPlayer->Start(i,0);
-	Global::pPlayer->_playBlock=true;
+	
+	if(!Global::pPlayer->_playing)
+		Global::pPlayer->Start(i,0);
+
+	Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
+
 	pParentMain->StatusBarIdle();
 	if ( viewMode == VMPattern ) Repaint(DMPattern);
 }
@@ -3462,3 +3466,4 @@ void CChildView::OnConfigurationOpenonlyvisualconfig()
 	
 	dlg.DoModal();
 }
+

@@ -80,7 +80,7 @@ BOOL CPsycleApp::InitInstance()
 		{
 			pFrame->m_wndView._outputActive = true;
 		}
-		
+
 	// create and load the frame with its resources
 	// For some reason, there'a First-Chance exception when
 	// another pFrame member is called after this LoadFrame

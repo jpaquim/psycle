@@ -65,7 +65,7 @@ void CGearGainer::OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	_pMachine->_outWet = 1024-m_volslider.GetPos();
 
-	float wet = (float)_pMachine->_outWet*0.00390625f;
+	float wet = CValueMapper::Map_255_1(_pMachine->_outWet);
 	char buffer[32];
 	if (wet > 1.0f)
 	{	

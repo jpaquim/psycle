@@ -23,6 +23,9 @@
 class Configuration
 {
 public:
+	void CreateFonts();
+
+bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItalic);
 
 #if !defined(_WINAMP_PLUGIN_)
 

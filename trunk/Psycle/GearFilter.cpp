@@ -154,11 +154,11 @@ void CGearfilter::UpdateStatus()
 		rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 
 	// cutoff
-	tmp.Format("%d (%dHz)",_pMachine->_cutoff, (int)((Global::pConfig->_pOutputDriver->_samplesPerSec * asin( _pMachine->_cutoff * 0.00390625f)) / 3.1415926f));
+	tmp.Format("%d (%dHz)",_pMachine->_cutoff, (int)((Global::pConfig->_pOutputDriver->_samplesPerSec * asin( CValueMapper::Map_255_1(_pMachine->_cutoff))) / 3.1415926f));
 	m_ParamInf2.SetWindowText(tmp);
 
 	// resonance
-	tmp.Format("%d (%d%%)",_pMachine->_resonance,(int)(_pMachine->_resonance*0.390625f));
+	tmp.Format("%d (%d%%)",_pMachine->_resonance,(int)CValueMapper::Map_255_100(_pMachine->_resonance));
 	m_ParamInf3.SetWindowText(tmp);
 	
 	// LFO
@@ -166,7 +166,7 @@ void CGearfilter::UpdateStatus()
 	m_ParamInf4.SetWindowText(tmp);
 
 	// LFO amp
-	tmp.Format("%d (%d%%)",_pMachine->_lfoAmp,(int)(_pMachine->_lfoAmp*0.390625f));
+	tmp.Format("%d (%d%%)",_pMachine->_lfoAmp,(int)CValueMapper::Map_255_100(_pMachine->_lfoAmp));
 	m_ParamInf5.SetWindowText(tmp);
 
 	// LFO phase

@@ -738,7 +738,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		}	
 		else
 		{
-			float const finetune = Global::_pSong->waveFinetune[pVoice->_instrument][layer]*0.00390625f;
+			float const finetune = CValueMapper::Map_255_1(Global::_pSong->waveFinetune[pVoice->_instrument][layer]);
 #if defined(_WINAMP_PLUGIN_)
 			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->waveTune[pVoice->_instrument][layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_samplesPerSec));
 #else
@@ -765,7 +765,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 
 		if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
 		{
-			pVoice->_wave._vol *= (float)pEntry->_parameter*0.00390625f;
+			pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
 		}
 		
 		// Panning calculation -------------------------------------------
@@ -778,10 +778,10 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		}
 		else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
 		{
-			panFactor = (float)pEntry->_parameter*0.0039062f;
+			panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
 		}
 		else {
-			panFactor = (float)Global::_pSong->_instruments[pVoice->_instrument]._pan*0.0039062f;
+			panFactor = CValueMapper::Map_255_1(Global::_pSong->_instruments[pVoice->_instrument]._pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -862,7 +862,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		//
 		pVoice->_wave._vol = (float)Global::_pSong->waveVolume[pVoice->_instrument][layer]*0.01f;
 
-		if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= (float)pEntry->_parameter*0.00390625f;
+		if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
 		
 		// Panning calculation -------------------------------------------
 		//
@@ -874,11 +874,11 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		}
 		else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
 		{
-			panFactor = (float)pEntry->_parameter*0.0039062f;
+			panFactor = CValueMapper::Map_255_1(pEntry->_parameter);
 		}
 		else
 		{
-			panFactor = (float)Global::_pSong->_instruments[pVoice->_instrument]._pan*0.0039062f;
+			panFactor = CValueMapper::Map_255_1(Global::_pSong->_instruments[pVoice->_instrument]._pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
