@@ -453,19 +453,28 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 			// scrolling
 			if (abs(point.y - MBStart.y) > 13)
 			{
+				int nlines = _pSong->patternLines[_ps()];
 				int delta = (point.y - MBStart.y)/13;
 				int nPos = lOff - delta;
-				if (nPos < 0)
-					nPos = 0;
 				if (nPos > lOff )
 				{
-					nlOff=nPos;
+					if (nPos < 0)
+						nPos = 0;
+					else if (nPos > nlines-VISLINES)
+						nlOff = nlines-VISLINES;
+					else
+						nlOff=nPos;
 					AdvanceLine(nPos-lOff,false,false); 
 					Repaint(DMScroll);
 				}
 				else if (nPos < lOff )
 				{
-					nlOff=nPos;
+					if (nPos < 0)
+						nlOff = 0;
+					else if (nPos > nlines-VISLINES)
+						nlOff = nlines-VISLINES;
+					else
+						nlOff=nPos;
 					PrevLine(lOff-nPos,false,false);
 					Repaint(DMScroll);
 				}
@@ -652,18 +661,27 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// TODO: Add your message handler code here and/or call default
 	if ( viewMode == VMPattern )
 	{
+		int nlines = _pSong->patternLines[_ps()];
 		int nPos = lOff - (zDelta/30);
-		if (nPos < 0)
-			nPos = 0;
 		if (nPos > lOff )
 		{
-			nlOff=nPos;
+			if (nPos < 0)
+				nPos = 0;
+			else if (nPos > nlines-VISLINES)
+				nlOff = nlines-VISLINES;
+			else
+				nlOff=nPos;
 			AdvanceLine(nPos-lOff,false,false); 
 			Repaint(DMScroll);
 		}
 		else if (nPos < lOff )
 		{
-			nlOff=nPos;
+			if (nPos < 0)
+				nlOff = 0;
+			else if (nPos > nlines-VISLINES)
+				nlOff = nlines-VISLINES;
+			else
+				nlOff=nPos;
 			PrevLine(lOff-nPos,false,false);
 			Repaint(DMScroll);
 		}
