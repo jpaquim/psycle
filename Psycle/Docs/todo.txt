@@ -27,12 +27,8 @@
 * <_sue_> the gainer machine doesnt work and the sliders in the minimixer are set to -99
 * <_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
 	depending on the place where theyr box was placed...
-* James says: you have to click on delete connection twice? (in wire dialog)
-+ alk-make single click/drag move wire from one machine to another (preserving vol)
-+ alk-make wire vol slider more precise (bigger) (it has become less precise)
-	pooplog-we should just make a new slider class that uses shift and ctrl like knobs
-+ alk-highlight the current line on the linenumbers on the left (so that even if the curson is on the 
-	right you can see which line its on)
++? alk-make single click/drag move wire from one machine to another (preserving vol)
++ pooplog-we should just make a new slider class that uses shift and ctrl like knobs
 
 * Machines
 ------------

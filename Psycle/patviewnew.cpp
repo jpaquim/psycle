@@ -827,7 +827,28 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		NewPatternDraw(editcur.track, editcur.track, editcur.line, editcur.line);
 		updatePar |= DRAW_DATA;
 		InvalidateRect(rect,false);
-		if ((editcur.line != editlast.line) || (editcur.track != editlast.track))
+		if (editcur.line != editlast.line)
+		{
+			if (XOFFSET!=1)
+			{
+				rect.left = 0;
+				rect.right = XOFFSET;
+				InvalidateRect(rect,false);
+			}
+			rect.left = XOFFSET+(editlast.track-rntOff)*ROWWIDTH;
+			rect.right = rect.left+ROWWIDTH;
+			rect.top = YOFFSET+(editlast.line-rnlOff)*ROWHEIGHT;
+			rect.bottom = rect.top+ROWWIDTH;
+			NewPatternDraw(editlast.track, editlast.track, editlast.line, editlast.line);
+			InvalidateRect(rect,false);
+			if (XOFFSET!=1)
+			{
+				rect.left = 0;
+				rect.right = XOFFSET;
+				InvalidateRect(rect,false);
+			}
+		}
+		else if (editcur.track != editlast.track)
 		{
 			rect.left = XOFFSET+(editlast.track-rntOff)*ROWWIDTH;
 			rect.right = rect.left+ROWWIDTH;
@@ -2248,7 +2269,6 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 	char tBuf[16];
 
 	COLORREF* pBkg;
-	COLORREF* pTxt;
 	for (int i=lstart;i<lend;i++) // Lines
 	{
 		// break this up into several more general loops for speed
@@ -2263,11 +2283,15 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 		{
 			pBkg = pvc_row;
 		}
-		pTxt = pvc_font;
 
-		if ((XOFFSET!=1) && (tstart == 0))
+		if ((XOFFSET!=1))// && (tstart == 0))
 		{
-			if (linecount == newplaypos)
+			if (linecount == editcur.line)
+			{
+				devc->SetBkColor(pvc_cursor[0]);
+				devc->SetTextColor(pvc_fontCur[0]);
+			}
+			else if (linecount == newplaypos)
 			{
 				devc->SetBkColor(pvc_playbar[0]);
 				devc->SetTextColor(pvc_fontPlay[0]);
@@ -2275,7 +2299,7 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 			else 
 			{
 				devc->SetBkColor(pBkg[0]);
-				devc->SetTextColor(pTxt[0]);
+				devc->SetTextColor(pvc_font[0]);
 			}
 			if (Global::pConfig->_linenumbersHex)
 			{
@@ -2326,7 +2350,7 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 			else
 			{
 				devc->SetBkColor(pBkg[trackcount]);
-				devc->SetTextColor(pTxt[trackcount]);
+				devc->SetTextColor(pvc_font[trackcount]);
 			}
 			OutNote(devc,xOffset+COLX[0],yOffset,*patOffset);
 			if (*++patOffset == 255 )
