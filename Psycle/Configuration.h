@@ -275,8 +275,8 @@ public:
 	char* GetVstDir(void) { return _psVstDir; }
 	char* GetInitialVstDir(void) { return _psInitialVstDir; }
 
-protected:
 	bool _initialized;
+protected:
 
 #if !defined(_WINAMP_PLUGIN_)
 	char* _psInitialInstrumentDir;

@@ -36,7 +36,7 @@ public:
 
 // Operations
 public:
-	void Init(Configuration* pConfig);
+	void Init(Configuration* pConfig,int dlgnum=0);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

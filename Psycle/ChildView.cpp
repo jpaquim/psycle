@@ -273,6 +273,10 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_MBUTTONDOWN()
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopyPaste)
 	ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
+	ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
+	ON_COMMAND(ID_HELP_README, OnHelpReadme)
+	ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
+	ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
 	ON_COMMAND(ID_EDIT_CUT, patCut)
 	ON_COMMAND(ID_EDIT_COPY, patCopy)
 	ON_COMMAND(ID_EDIT_PASTE, patPaste)
@@ -282,10 +286,11 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternCutCopyPaste)
 	ON_COMMAND(ID_EDIT_DELETE, patDelete)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopyPaste)
-	ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
-	ON_COMMAND(ID_HELP_README, OnHelpReadme)
-	ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
-	ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
+	ON_COMMAND(ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG, OnConfigurationOpenonlydirectoriesconfig)
+	ON_COMMAND(ID_CONFIGURATION_OPENONLYINPUTOUTPUTCONFIG, OnConfigurationOpenonlyinputoutputconfig)
+	ON_COMMAND(ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG, OnConfigurationOpenonlykeyboardconfig)
+	ON_COMMAND(ID_CONFIGURATION_OPENONLYMIDIINPUTCONFIG, OnConfigurationOpenonlymidiinputconfig)
+	ON_COMMAND(ID_CONFIGURATION_OPENONLYVISUALCONFIG, OnConfigurationOpenonlyvisualconfig)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1350,8 +1355,9 @@ void CChildView::NewMachine(int x, int y, int mac)
 			}
 			
 			pParentMain->UpdateComboGen();
-			updatePar = Global::_lbc;
-			Repaint(DMMacRefresh);
+			Repaint(DMAllMacsRefresh);
+//			updatePar = Global::_lbc;
+//			Repaint(DMMacRefresh); // Seems that this doesn't always work (multiple calls to Repaint?)
 		}
 		
 		/*
@@ -3458,4 +3464,44 @@ void CChildView::DoMacPropDialog(int propMac)
 			pParentMain->pGearRackDialog->RedrawList();
 		}
 	}
+}
+
+void CChildView::OnConfigurationOpenonlydirectoriesconfig() 
+{
+	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
+	dlg.Init(Global::pConfig,3);
+
+	dlg.DoModal();
+}
+
+void CChildView::OnConfigurationOpenonlyinputoutputconfig() 
+{
+	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
+	dlg.Init(Global::pConfig,4);
+	
+	dlg.DoModal();
+}
+
+void CChildView::OnConfigurationOpenonlykeyboardconfig() 
+{
+	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
+	dlg.Init(Global::pConfig,2);
+		
+	dlg.DoModal();
+}
+
+void CChildView::OnConfigurationOpenonlymidiinputconfig() 
+{
+	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
+	dlg.Init(Global::pConfig,5);
+	
+	dlg.DoModal();
+}
+
+void CChildView::OnConfigurationOpenonlyvisualconfig() 
+{
+	CConfigDlg dlg("TEST DIALOG Config TEST DIALOG");
+	dlg.Init(Global::pConfig,1);
+	
+	dlg.DoModal();
 }

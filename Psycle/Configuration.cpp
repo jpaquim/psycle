@@ -99,7 +99,7 @@ Configuration::Configuration()
 	vu3 = 0x00262bd7;
 
 	_numOutputDrivers = 4;
-	_outputDriverIndex = 0;
+	_outputDriverIndex = 1;
 	_midiDriverIndex = 0;			// MIDI IMPLEMENTATION
 	_syncDriverIndex = 0;
 	_midiHeadroom = 100;

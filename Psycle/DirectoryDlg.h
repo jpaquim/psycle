@@ -26,6 +26,7 @@ public:
 	char _vstPathBuf[MAX_PATH];
 	bool _skinPathChanged;
 	char _skinPathBuf[MAX_PATH];
+	bool initializingDlg;
 
 	CDirectoryDlg();
 	~CDirectoryDlg();
