@@ -294,7 +294,8 @@ namespace psycle
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
 
 			std::ostringstream s;
-			s << "Version " VERSION_NUMBER ""
+			s << "Version " VERSION_NUMBER
+				//$Date$
 				//VERSION_NUMBER
 				" [built on " __DATE__ ", " __TIME__ "]";
 			m_versioninfo.SetWindowText(s.str().c_str());
