@@ -111,6 +111,7 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
 	ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
 ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
+	ON_WM_DROPFILES()
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -356,6 +357,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	UpdatePlayOrder(true);
 	
+	DragAcceptFiles(TRUE);
+
 	// Finally initializing timer
 	
 	UpdateSequencer();
@@ -2259,5 +2262,40 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 	}
 	return CFrameWnd::OnSetMessageString (wParam, lParam);
 
+}
+
+void CMainFrame::OnDropFiles(WPARAM wParam)
+{
+    char szFileName[MAX_PATH];
+	char * szExtension;
+
+	int iNumFiles = DragQueryFile((HDROP)  wParam,	// handle of structure for dropped files
+		0xFFFFFFFF, // this returns number of dropped files
+		NULL,
+		NULL);
+
+	for (int i = 0; i < iNumFiles; i++)
+	{
+		DragQueryFile((HDROP)  wParam,	// handle of structure for dropped files
+			i,	// index of file to query
+			szFileName,	// buffer for returned filename
+			MAX_PATH); 	// size of buffer for filename
+
+		// check for .bmp files only
+
+		if (szExtension = strrchr(szFileName, 46)) // point to everything past last "."
+		{
+			if (!strcmpi(szExtension, ".psy")) // compare to ".psy"
+			{
+				SetForegroundWindow();
+				m_wndView.OnFileLoadsongNamed(szFileName, 1);
+				DragFinish((HDROP)  wParam);	// handle of structure for dropped files
+				return;
+			}
+			// load waves and crap here
+		}
+	}
+	DragFinish((HDROP)  wParam);	// handle of structure for dropped files
+	SetForegroundWindow();
 }
 

@@ -196,6 +196,7 @@ protected:
 	afx_msg void OnUpdateIndicatorOctave(CCmdUI *pCmdUI);
 	afx_msg void OnCloseupCombooctave();
 	afx_msg void OnSelchangeCombooctave();
+	afx_msg void OnDropFiles(WPARAM wParam);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

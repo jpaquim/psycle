@@ -7,7 +7,11 @@
 + James says: i have an idea for that actually... seeing as there are so many configurable 
 	keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight 
 	what was assigned to it
-
+* waves list did not enum waves on song load
++ gear rack
+* <alk> there's a bug where when u alt-tab the icon is not correct
+* <alk> and the save as filename being picked up incorrecctly
++ song not saved dialog on load or exit
 
 * Machines
 ------------
@@ -135,9 +139,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 
 * Interface:
 ------------
-* <alk> "pattern step" bar, all widgets are misaligned (2 pixels to low) e.g. gear rack etc.. Alk likes to 
-	have things aligned and balanced =) (feng shui) , also the seq bar the things are offcentre (are closer 
-	to the left)
 * <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
 * <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
