@@ -265,10 +265,10 @@ private:
 		this->message(information.help_caption, message.str());
 	}
 protected:
-	class Exception : public std::exception
+	class Exception : public std::runtime_error
 	{
 	public:
-		Exception(const std::string & what) : std::exception(what.c_str()) {}
+		Exception(const std::string & what) : std::runtime_error(what.c_str()) {}
 	};
 };
 
