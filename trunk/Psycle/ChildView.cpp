@@ -96,6 +96,9 @@ CChildView::CChildView()
 	pUndoList=NULL;
 	pRedoList=NULL;
 
+	UndoCounter=0;
+	UndoSaved=0;
+
 //	editcur.track=0; // Not needed to initialize, since the class does it already.
 //	editcur.col=0;
 //	editcur.line=0;
@@ -317,7 +320,6 @@ void CChildView::OnTimer( UINT nIDEvent )
 				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachines[0])->_outDry);
 				((Master*)Global::_pSong->_pMachines[0])->peaktime=25;
 				((Master*)Global::_pSong->_pMachines[0])->currentpeak=0.0f;
-				
 			}
 		}
 		((Master*)Global::_pSong->_pMachines[0])->vuupdated = true;
@@ -597,11 +599,18 @@ void CChildView::OnFileSave()
 			sprintf(dlg.szFile, filepath);
 			dlg.SaveSong();
 	//		AfxMessageBox(IDS_SONG_SAVED,MB_ICONINFORMATION); <- Needed or not?
+			if (pUndoList)
+			{
+				UndoSaved = pUndoList->counter;
+			}
+			else
+			{
+				UndoSaved = 0;
+			}
+			SetTitleBarText();
 		}
-
 	}
 	else OnFileSavesong();
-	
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -666,11 +675,15 @@ void CChildView::OnFileSavesong()
 
 			AppendToRecent(dlg.szFile);
 		}
-		CString titlename = "[";
-		titlename+=Global::_pSong->fileName;
-		titlename+="] ";
-		titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
-		pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
+		if (pUndoList)
+		{
+			UndoSaved = pUndoList->counter;
+		}
+		else
+		{
+			UndoSaved = 0;
+		}
+		SetTitleBarText();
 	}
 //	Repaint();
 }
@@ -728,11 +741,7 @@ void CChildView::OnFileNew()
 			// MIDI IMPLEMENTATION
 			Global::pConfig->_pMidiInput->Open();
 		}
-		CString titlename = "[";
-		titlename+=Global::_pSong->fileName;
-		titlename+="] ";
-		titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
-		pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
+		SetTitleBarText();
 		editPosition=0;
 		Global::_pSong->seqBus=0;
 		pParentMain->PsybarsUpdate(); // Updates all values of the bars
@@ -1554,11 +1563,7 @@ void CChildView::OnFileImportXmfile()
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 	}
-	CString titlename = "[";
-	titlename+=Global::_pSong->fileName;
-	titlename+="] ";
-	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
-	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.	
+	SetTitleBarText();
 }
 
 void CChildView::OnFileImportItfile() 
@@ -1652,11 +1657,7 @@ void CChildView::OnFileImportItfile()
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 	}
-	CString titlename = "[";
-	titlename+=Global::_pSong->fileName;
-	titlename+="] ";
-	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
-	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.	
+	SetTitleBarText();
 */	
 }
 
@@ -1811,13 +1812,9 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 		pParentMain->UpdatePlayOrder(false);
 		Repaint();
 	}
-	CString titlename = "[";
-	titlename+=Global::_pSong->fileName;
-	titlename+="] ";
-	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
-	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
 	KillUndo();
 	KillRedo();
+	SetTitleBarText();
 }
 
 void CChildView::CallOpenRecent(int pos)
@@ -1833,4 +1830,25 @@ void CChildView::CallOpenRecent(int pos)
 	delete nameBuff;
 }
 
-
+void CChildView::SetTitleBarText()
+{
+	CString titlename = "[";
+	titlename+=Global::_pSong->fileName;
+	if (pUndoList)
+	{
+		if (UndoSaved != pUndoList->counter)
+		{
+			titlename+=" *";
+		}
+	}
+	else
+	{
+		if (UndoSaved != 0)
+		{
+			titlename+=" *";
+		}
+	}
+	titlename+="] ";
+	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
+	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
+}

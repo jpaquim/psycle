@@ -82,8 +82,8 @@
 	psycle opens..
 + ALK tracker command to bypass an fx, mute command for machines
 + ALK waveed: remove silence from start and end of wave
-* keyboard notes/noteoffs do not always seem to record
-
+* keyboard notes/noteoffs are not always displayed as they are recorded until you switch patterns back and forth
+! Have exit warning on modified file
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
