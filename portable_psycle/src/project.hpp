@@ -91,7 +91,11 @@
 ///\}
 ///\name operating systems
 ///\{
-	/// hurd kernel.
+	/// mach kernel.
+	#define OPERATING_SYSTEM__MACH
+	#undef OPERATING_SYSTEM__MACH // was just defined to insert documentation.   
+
+	/// hurd kernel, \see OPERATING_SYSTEM__MACH.
 	#define OPERATING_SYSTEM__HURD
 	#undef OPERATING_SYSTEM__HURD // was just defined to insert documentation.
 	
@@ -100,11 +104,15 @@
 	#define OPERATING_SYSTEM__LINUX
 	#undef OPERATING_SYSTEM__LINUX // was just defined to insert documentation.
 
-	/// bsd kernel.
+	/// bsd kernel, autodetected for apple's darwin/macos mach/bsd kernel via __STRICT_BSD__, \see OPERATING_SYSTEM__DARWIN.
 	#define OPERATING_SYSTEM__BSD
 	#undef OPERATING_SYSTEM__BSD // was just defined to insert documentation.
 
-	/// apple macos, or macosx bsd kernel.
+	/// darwin/mach kernel, \see OPERATING_SYSTEM__MACH and \see OPERATING_SYSTEM__BSD, and for apple's darwin/macos \see OPERATING_SYSTEM__APPLE.
+	#define OPERATING_SYSTEM__DARWIN
+	#undef OPERATING_SYSTEM__DARWIN // was just defined to insert documentation.   
+
+	/// apple's macosx darwin mach/bsd kernel, autodetected via __APPLE__ and __MACH__, \see OPERATING_SYSTEM__DARWIN.
 	/// version 10
 	#define OPERATING_SYSTEM__APPLE
 	#undef OPERATING_SYSTEM__APPLE // was just defined to insert documentation.
@@ -377,7 +385,21 @@
 	#define OPERATING_SYSTEM__LINUX
 	#define OPERATING_SYSTEM__VERSION__MAJOR 2
 	#define OPERATING_SYSTEM__VERSION__MINOR 6
-	#define OPERATING_SYSTEM__VERSION__PATCH 7
+	#define OPERATING_SYSTEM__VERSION__PATCH 8
+#elif defined __APPLE__ && defined __MACH__
+	#define OPERATING_SYSTEM
+	#define OPERATING_SYSTEM__MACH
+	#define OPERATING_SYSTEM__DARWIN
+	#define OPERATING_SYSTEM__VERSION__MAJOR 7
+	#define OPERATING_SYSTEM__VERSION__MINOR 7
+	#define OPERATING_SYSTEM__VERSION__PATCH 0
+	#define OPERATING_SYSTEM__APPLE
+	#define OPERATING_SYSTEM__VERSION__EXTRA_LAYER__MAJOR 10
+	#define OPERATING_SYSTEM__VERSION__EXTRA_LAYER__MINOR 3
+	#define OPERATING_SYSTEM__VERSION__EXTRA_LAYER__PATCH 3
+	#if defined __STRICT_BSD__
+		#define OPERATING_SYSTEM__BSD
+	#endif
 #elif defined __MINGW32__ || defined _WIN32 || defined _WIN64
 	#if defined _WIN64
 		#error "These sources have never been tested on the 64-bit version of microsoft's operating system ; nevertheless, you may edit the file where this error is triggered to force compilation and test if it works."
@@ -398,6 +420,8 @@
 			#if defined OPERATING_SYSTEM__VERSION__MICROSOFT__COMPATIBILITY
 				#define WINVER OPERATING_SYSTEM__VERSION__MICROSOFT__COMPATIBILITY
 				#define _WIN32_WINNT WINVER
+				#define _WIN32_WINDOWS WINVER
+				#define _WIN32_IE WINVER
 			#endif
 		#endif
 		/// microsoft's #define MAX_PATH has too low value for ntfs
@@ -414,12 +438,12 @@
 #endif
 
 // operating system kernels for gnu operating system applications
-#if defined OPERATING_SYSTEM__HURD || defined OPERATING_SYSTEM__LINUX || defined OPERATING_SYSTEM__BSD
+#if defined OPERATING_SYSTEM__HURD || defined OPERATING_SYSTEM__LINUX
 	#define OPERATING_SYSTEM__GNU
 #endif
 
 // operating systems following the posix standard
-#if defined OPERATING_SYSTEM__GNU
+#if defined OPERATING_SYSTEM__GNU || defined OPERATING_SYSTEM__BSD
 	#define OPERATING_SYSTEM__POSIX
 #endif
 
