@@ -267,6 +267,7 @@ void Song::DeleteInstruments()
 
 void Song::DeleteInstrument(int i)
 {
+	Invalided=true;
 	// Reset envelope
 	_instruments[i].ENV_AT = 1; // 16
 	_instruments[i].ENV_DT = 1; // 16386
@@ -299,6 +300,7 @@ void Song::DeleteInstrument(int i)
 	}
 	
 	sprintf(_instruments[i]._sName,"empty");
+	Invalided=false;
 }
 
 //////////////////////////////////////////////////////////////////////

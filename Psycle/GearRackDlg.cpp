@@ -33,6 +33,7 @@ void CGearRackDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGearRackDlg)
+	DDX_Control(pDX, IDC_PROPERTIES, m_props);
 	DDX_Control(pDX, IDC_RADIO_INS, m_radio_ins);
 	DDX_Control(pDX, IDC_RADIO_GEN, m_radio_gen);
 	DDX_Control(pDX, IDC_RADIO_EFX, m_radio_efx);
@@ -53,6 +54,7 @@ BEGIN_MESSAGE_MAP(CGearRackDlg, CDialog)
 	ON_BN_CLICKED(IDC_RADIO_EFX, OnRadioEfx)
 	ON_BN_CLICKED(IDC_RADIO_GEN, OnRadioGen)
 	ON_BN_CLICKED(IDC_RADIO_INS, OnRadioIns)
+	ON_BN_CLICKED(IDC_EXCHANGE, OnExchange)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -104,6 +106,7 @@ void CGearRackDlg::RedrawList()
 	{
 	case 0:
 		m_text.SetWindowText("Machines: Generators");
+		m_props.SetWindowText("Properties");
 		m_radio_gen.SetCheck(1);
 		m_radio_efx.SetCheck(0);
 		m_radio_ins.SetCheck(0);
@@ -130,7 +133,7 @@ void CGearRackDlg::RedrawList()
 		break;
 	case 1:
 		m_text.SetWindowText("Machines: Effects");
-
+		m_props.SetWindowText("Properties");
 		m_radio_gen.SetCheck(0);
 		m_radio_efx.SetCheck(1);
 		m_radio_ins.SetCheck(0);
@@ -161,7 +164,7 @@ void CGearRackDlg::RedrawList()
 		break;
 	case 2:
 		m_text.SetWindowText("Sample Instruments");
-
+		m_props.SetWindowText("Wave Editor");
 		m_radio_gen.SetCheck(0);
 		m_radio_efx.SetCheck(0);
 		m_radio_ins.SetCheck(1);
@@ -352,8 +355,9 @@ void CGearRackDlg::OnProperties()
 			pParentMain->UpdateComboIns(true);
 			pParentMain->m_wndInst.WaveUpdate();
 		}
-		pParentMain->ShowInstrumentEditor();
-		pParentMain->UpdateComboIns(true);
+
+		pParentMain->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
+		pParentMain->m_pWndWed->SetActiveWindow();
 		break;
 	}
 	RedrawList();
@@ -415,4 +419,113 @@ void CGearRackDlg::OnRadioIns()
 	DisplayMode = 2;
 	RedrawList();
 	
+}
+
+void CGearRackDlg::OnExchange() 
+{
+	if ( m_list.GetSelCount() != 2 )
+	{
+		MessageBox("This option requires that you select two entries","Gear Rack Dialog");
+		return;
+	}
+	int sel[2],j=0;
+	const int maxitems=m_list.GetCount();
+	for (int c=0;c<maxitems;c++) 
+	{
+		if ( m_list.GetSel(c) != 0) sel[j++]=c;
+	}
+	int tmp;
+	switch (DisplayMode) // should be necessary to rename opened parameter windows.
+	{
+	case 0:
+		tmp = Global::_pSong->busMachine[sel[0]];
+		Global::_pSong->busMachine[sel[0]] = Global::_pSong->busMachine[sel[1]];
+		Global::_pSong->busMachine[sel[1]] = tmp;
+		pParentMain->UpdateComboGen(true);
+		break;
+	case 1:
+		tmp = Global::_pSong->busEffect[sel[0]];
+		Global::_pSong->busEffect[sel[0]] = Global::_pSong->busEffect[sel[1]];
+		Global::_pSong->busEffect[sel[1]] = tmp;
+		pParentMain->UpdateComboGen(true);
+		break;
+	case 2:
+		Global::_pSong->Invalided=true;
+		ExchangeIns(sel[0],sel[1]);
+		
+		Global::_pSong->Invalided=false;
+		pParentMain->UpdateComboIns(true);
+		break;
+	}
+	
+	pParentMain->RedrawGearRackList();
+}
+
+void CGearRackDlg::ExchangeIns(int one,int two)
+{
+	Song* pSong = Global::_pSong;
+	Instrument tmpins;
+	
+	tmpins=pSong->_instruments[one];
+	pSong->_instruments[one]=pSong->_instruments[two];
+	pSong->_instruments[two]=tmpins;
+	//The above works because we are not creating new objects, just swaping them.
+	//this means that no new data is generated/deleted,and the information is just
+	//copied. If not, we would have had to define the operator=() function and take
+	//care of it.
+
+
+	char waveName[MAX_WAVES][32];
+	unsigned short waveVolume[MAX_WAVES];
+	signed short *waveDataL[MAX_WAVES];
+	signed short *waveDataR[MAX_WAVES];
+	unsigned int waveLength[MAX_WAVES];
+	unsigned int waveLoopStart[MAX_WAVES];
+	unsigned int waveLoopEnd[MAX_WAVES];
+	int waveTune[MAX_WAVES];
+	int waveFinetune[MAX_WAVES];	
+	bool waveLoopType[MAX_WAVES];
+	bool waveStereo[MAX_WAVES];
+
+	for(int i=0;i<MAX_WAVES;i++)
+	{
+		//one to tmp
+		strcpy(waveName[i],pSong->waveName[one][i]);
+		waveVolume[i]=pSong->waveVolume[one][i];
+		waveDataL[i]=pSong->waveDataL[one][i];
+		waveDataR[i]=pSong->waveDataR[one][i];
+		waveLength[i]=pSong->waveLength[one][i];
+		waveLoopStart[i]=pSong->waveLoopStart[one][i];
+		waveLoopEnd[i]=pSong->waveLoopEnd[one][i];
+		waveTune[i]=pSong->waveTune[one][i];
+		waveFinetune[i]=pSong->waveFinetune[one][i];
+		waveLoopType[i]=pSong->waveLoopType[one][i];
+		waveStereo[i]=pSong->waveStereo[one][i];
+
+		//two to one
+		strcpy(pSong->waveName[one][i],pSong->waveName[two][i]);
+		pSong->waveVolume[one][i]=pSong->waveVolume[two][i];
+		pSong->waveDataL[one][i]=pSong->waveDataL[two][i];
+		pSong->waveDataR[one][i]=pSong->waveDataR[two][i];
+		pSong->waveLength[one][i]=pSong->waveLength[two][i];
+		pSong->waveLoopStart[one][i]=pSong->waveLoopStart[two][i];
+		pSong->waveLoopEnd[one][i]=pSong->waveLoopEnd[two][i];
+		pSong->waveTune[one][i]=pSong->waveTune[two][i];
+		pSong->waveFinetune[one][i]=pSong->waveFinetune[two][i];
+		pSong->waveLoopType[one][i]=pSong->waveLoopType[two][i];
+		pSong->waveStereo[one][i]=pSong->waveStereo[two][i];
+
+		//tmp to two
+		strcpy(pSong->waveName[two][i],waveName[i]);
+		pSong->waveVolume[two][i]=waveVolume[i];
+		pSong->waveDataL[two][i]=waveDataL[i];
+		pSong->waveDataR[two][i]=waveDataR[i];
+		pSong->waveLength[two][i]=waveLength[i];
+		pSong->waveLoopStart[two][i]=waveLoopStart[i];
+		pSong->waveLoopEnd[two][i]=waveLoopEnd[i];
+		pSong->waveTune[two][i]=waveTune[i];
+		pSong->waveFinetune[two][i]=waveFinetune[i];
+		pSong->waveLoopType[two][i]=waveLoopType[i];
+		pSong->waveStereo[two][i]=waveStereo[i];
+	}
 }

@@ -16,6 +16,7 @@ class CGearRackDlg : public CDialog
 {
 // Construction
 public:
+	void ExchangeIns(int one,int two);
 	CGearRackDlg(CChildView* pParent, CMainFrame* pMain);   // standard constructor
 	CChildView* m_pParent;
 	CMainFrame* pParentMain;
@@ -27,6 +28,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CGearRackDlg)
 	enum { IDD = IDD_GEAR_RACK };
+	CButton	m_props;
 	CButton	m_radio_ins;
 	CButton	m_radio_gen;
 	CButton	m_radio_efx;
@@ -59,6 +61,7 @@ protected:
 	afx_msg void OnRadioEfx();
 	afx_msg void OnRadioGen();
 	afx_msg void OnRadioIns();
+	afx_msg void OnExchange();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
