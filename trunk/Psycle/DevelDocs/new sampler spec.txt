@@ -1,0 +1,107 @@
+
+=================================
+
+Instrument - global params for entire instrument:
+
+-volume
+-global tune
+-global fine tune
+-portamento speed
+-new note action type (note off, cut, continue, crossfade, etc.)
+-filter - type
+        - cutoff
+        - resonance
+        - cutoff "follow note" toggle (ie cutoff = note freq + cutoff param)
+-pan - main pan
+        - pitch pan toggle
+        - pan_pitch_1
+        - pan at pan_pitch_1
+        - pan_pitch_2
+        - pan at pan_pitch_2
+-lfo 1 - assignment (off, finetune, tune, vol, pan, cutoff, resonance, left offset, right offset, both offset)
+        - waveform (sine, square, saw, triangle, random)
+        - rate
+        - depth
+-lfo 2 - assignment (off, finetune, tune, vol, pan, cutoff, resonance, , left offset, right offset, both offset, lfo 1
+depth, lfo 1 rate, etc...)
+        - waveform (sine, square, saw, triangle, random)
+        - rate
+        - depth
+-lfo 3 - assignment (off, finetune, tune, vol, pan, cutoff, resonance, , left offset, right offset, both offset, lfo 1
+depth, lfo 1 rate, etc...)
+        - waveform (sine, square, saw, triangle, random)
+        - rate
+        - depth
+-lfo 4 - assignment (off, finetune, tune, vol, pan, cutoff, resonance, , left offset, right offset, both offset, lfo 1
+depth, lfo 1 rate, etc...)
+        - waveform (sine, square, saw, triangle, random)
+        - rate
+        - depth
+-volume envelope data
+-panning envelope data
+-pitch envelope data
+-filter envelope data
+-number of velocity splits (1-16)
+-number of samples (0-255)
+
+-velocity split data [0->number of splits, stored incrementally from lowest
+split to highest]
+-sample header data [0->number of samples]
+-sample data [0->number of samples]
+
+================================
+
+Envelope data
+
+-number of points (0 if no envelope)
+-loop point
+-loop to point
+-loop mode (off, repeat, sustain) - points can loop to selves, sustain point
+stops looping on noteoff
+-loop type (forward, reverse, pingpong)
+-point data [0->number of points], must be stored sorted by time, first
+point must be at time 0
+
+================================
+
+Envelope Point data
+-amplitude
+-time
+
+================================
+
+Velocity split - global params across velocity split
+-volume (applied across entire split to compensate for velocity)
+-max velocity (for this split)
+-sample keymap (array from c-0 to b-9 of sample indexes)
+
+================================
+
+Sample Header data
+-volume
+-panning
+-tune
+-finetune
+-number of beats in sample
+-left offset (into sample, msec)
+-right offset (into sample, msec)
+-stretch bpm for sample
+-stretch sample duration (msec)
+-duration stretch mode - (none, use stretch bpm and # beats, use song sync
+and # beats,  use stretch sample duration value, use original sample rate) -
+this is for loops, works like acid, requires a pitch shifter for most modes
+-pitch shift mode - (off, pitch algorithm selections) (only used if duration
+stretch mode is on)
+-sample loop start
+-sample loop end
+-loop mode (off, repeat, sustain) - points can loop to selves, sustain point
+stops looping on noteoff
+-loop type (forward, reverse, pingpong)
+
+===================================
+
+Sample Data
+just use WAV format
+
+===================================
+
