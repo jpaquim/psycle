@@ -1224,7 +1224,7 @@ namespace psycle
 
 			SetCmd(cdefSelectAll,'A',MOD_C);
 			SetCmd(cdefSelectCol,'R',MOD_C);
-			SetCmd(cdefSelectBar,'K',MOD_C);
+			SetCmd(cdefSelectBar,'D',MOD_C);
 
 			SetCmd(cdefEditQuantizeInc,221,0);    // lineskip + 1
 			SetCmd(cdefEditQuantizeDec,219,0);    // lineskip - 1
