@@ -1,8 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::CDSoundConfig.
 #pragma once
-#include <mmsystem.h>
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
 #include <dsound.h>
+#pragma comment(lib, "dsound")
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		/// direct sound config window.

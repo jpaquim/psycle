@@ -21,16 +21,18 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // mfc (aka afx)
 
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
-#define _AFX_ALL_WARNINGS // turns off MFC's hiding of some common and often safely ignored warning messages
-#include <afxwin.h> // MFC core and standard components
-#include <afxext.h> // MFC extensions
-//#include <afxdisp.h> // MFC Automation classes
-#include <afxdtctl.h> // MFC support for Internet Explorer 4 Common Controls
-#if !defined _AFX_NO_AFXCMN_SUPPORT
-	#include <afxcmn.h> // MFC support for Windows Common Controls
-#endif
-#include <afxmt.h> // ???
+#pragma warning(push) // don't let mfc mess around with our warning settings
+	#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
+	#define _AFX_ALL_WARNINGS // turns off mfc's hiding of some common and often safely ignored warning messages
+	#include <afxwin.h> // mfc core and standard components
+	#include <afxext.h> // mfc extensions
+	//#include <afxdisp.h> // mfc Automation classes
+	#include <afxdtctl.h> // mfc support for Internet Explorer 4 Common Controls
+	#if !defined _AFX_NO_AFXCMN_SUPPORT
+		#include <afxcmn.h> // mfc support for Windows Common Controls
+	#endif
+	#include <afxmt.h> // ???
+#pragma warning(pop)
 
 
 
@@ -38,8 +40,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // gdi+.
 
-#include <gdiplus.h>				
-#pragma comment(lib, "gdiplus")
+#pragma warning(push) // don't let gdi+ mess around with our warning settings
+	#include <gdiplus.h>				
+	#pragma comment(lib, "gdiplus")
+#pragma warning(pop)
 
 
 
