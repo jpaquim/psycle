@@ -16,6 +16,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define SPLASHSCREEN 1
+#define VERSION_NUMBER "1.66.2e"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPsycleApp
@@ -157,6 +158,8 @@ public:
 	CStatic	m_headercontrib;
 	CStatic	m_aboutbmp;
 	CEdit	m_contrib;
+	CStatic m_versioninfo;
+
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides
@@ -193,6 +196,8 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_HEADER, m_headercontrib);
 	DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
 	DDX_Control(pDX, IDC_EDIT1, m_contrib);
+	DDX_Control(pDX, IDC_VERSION_INFO, m_versioninfo);
+
 	//}}AFX_DATA_MAP
 }
 
@@ -263,6 +268,9 @@ Josep Mª Antolín. [JAZ]\t\tCurrent Main developer\
 	m_psycledelics.SetWindowText("http://psycle.pastnotecut.org/");
 	m_sourceforge.SetWindowText("http://sourceforge.net/projects/psycle/");
 
+	char buf[256];
+	sprintf(buf,"Version %s  [%s]",VERSION_NUMBER,__DATE__);
+	m_versioninfo.SetWindowText(buf);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
