@@ -60,19 +60,21 @@ BOOL CPsycleApp::InitInstance()
 
 	// Change the registry key under which our settings are stored.
 	SetRegistryKey(_T("AAS"));
-
+	
 	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
-
+	
 	// To create the main window, this code creates a new frame window
 	// object and then sets it as the application's main window object.
-
+	
 	CMainFrame* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
-
+	
 	if (!Global::pConfig->Initialized())
 	{
 		if (!Global::pConfig->Read())
 		{
+			MessageBox(pFrame->m_wndView,"Since this is your first time using Psycle, please take a moment to configure \
+the directories and the Input/Output configuration.","Psycle Configuration",MB_OK);
 			CConfigDlg dlg("Psycle configuration");
 			dlg.Init(Global::pConfig);
 			if (dlg.DoModal() == IDOK)
@@ -229,6 +231,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_contrib.SetWindowText("\
 Josep Mª Antolín. [JAZ]\t\tCurrent Main developer\
+\r\npooplog\t\t\t\tDeveloper in 1.6\
 \r\nDaniel Arena\t\t\tDeveloper in 1.5&1.6\
 \r\nMarcin Kowalski / FideLoop\t\tDeveloper in 1.6\
 \r\nMark McCormack\t\t\tMIDI (in) Support\
