@@ -271,6 +271,13 @@ void CSaveWavDlg::OnSavewave()
 	const int real_rate[]={8192,11025,22050,44100,48000,96000};
 	const int real_bits[]={8,16,24,32};
 
+	GetDlgItem(IDC_RECSONG)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RECPATTERN)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RECRANGE)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_FILEBROWSE)->EnableWindow(FALSE);
+
+	m_filename.EnableWindow(FALSE);
 	m_savetracks.EnableWindow(FALSE);
 	m_savewires.EnableWindow(FALSE);
 	m_rate.EnableWindow(FALSE);
@@ -595,6 +602,13 @@ void CSaveWavDlg::SaveEnd()
 
 	m_text.SetWindowText("");
 
+	GetDlgItem(IDC_RECSONG)->EnableWindow(TRUE);
+	GetDlgItem(IDC_RECPATTERN)->EnableWindow(TRUE);
+	GetDlgItem(IDC_RECRANGE)->EnableWindow(TRUE);
+
+	GetDlgItem(IDC_FILEBROWSE)->EnableWindow(TRUE);
+
+	m_filename.EnableWindow(TRUE);
 	m_savetracks.EnableWindow(TRUE);
 	m_savewires.EnableWindow(TRUE);
 	m_rate.EnableWindow(TRUE);
