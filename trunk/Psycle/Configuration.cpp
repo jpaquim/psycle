@@ -354,7 +354,6 @@ Configuration::Read()
 	DWORD type;
 	DWORD numData;
 
-	char appPath[_MAX_PATH];
 	GetCurrentDirectory(sizeof(appPath), &appPath[0]);
 	strcat(appPath, "\\");
 

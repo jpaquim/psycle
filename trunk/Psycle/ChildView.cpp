@@ -2142,22 +2142,30 @@ void CChildView::SetTitleBarText()
 
 void CChildView::OnHelpKeybtxt() 
 {
-	ShellExecute(pParentMain->m_hWnd,"open","Docs\\keys.txt",NULL,"",SW_SHOW);
+	char path[MAX_PATH];
+	sprintf(path,"%sDocs\\keys.txt",Global::pConfig->appPath);
+	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpReadme() 
 {
-	ShellExecute(pParentMain->m_hWnd,"open","Docs\\readme.txt",NULL,"",SW_SHOW);
+	char path[MAX_PATH];
+	sprintf(path,"%sDocs\\readme.txt",Global::pConfig->appPath);
+	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpTweaking() 
 {
-	ShellExecute(pParentMain->m_hWnd,"open","Docs\\tweaking.txt",NULL,"",SW_SHOW);
+	char path[MAX_PATH];
+	sprintf(path,"%sDocs\\tweaking.txt",Global::pConfig->appPath);
+	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpWhatsnew() 
 {
-	ShellExecute(pParentMain->m_hWnd,"open","Docs\\whatsnew.txt",NULL,"",SW_SHOW);
+	char path[MAX_PATH];
+	sprintf(path,"%sDocs\\whatsnew.txt",Global::pConfig->appPath);
+	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 //#define _UGLY_DEFAULT_SKIN_
