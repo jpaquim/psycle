@@ -1455,14 +1455,26 @@ void CChildView::DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart,
 
 void CChildView::NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd)
 {
-	// inserts pattern data to be drawn into the list
-	SPatternDraw* pNew = new SPatternDraw;
-	pNew->pPrev = pPatternDraw;
-	pPatternDraw = pNew;
-	pNew->drawTrackStart = drawTrackStart;
-	pNew->drawTrackEnd = drawTrackEnd;
-	pNew->drawLineStart = drawLineStart;
-	pNew->drawLineEnd = drawLineEnd;
+	if (viewMode == VMPattern)
+	{
+		// inserts pattern data to be drawn into the list
+		SPatternDraw* pNew = new SPatternDraw;
+		pNew->pPrev = pPatternDraw;
+		pPatternDraw = pNew;
+		pNew->drawTrackStart = drawTrackStart;
+		pNew->drawTrackEnd = drawTrackEnd;
+		pNew->drawLineStart = drawLineStart;
+		pNew->drawLineEnd = drawLineEnd;
+	}
+	else
+	{
+		while (pPatternDraw)
+		{
+			SPatternDraw* temp = pPatternDraw->pPrev;
+			delete pPatternDraw;
+			pPatternDraw = temp;
+		}
+	}
 }
 
 void CChildView::RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2)
