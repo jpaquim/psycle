@@ -7,7 +7,13 @@ V1.7.3 (Final)
 ! Crash with Linplug's VST's when loading songs with the
 ! small Memory leak fixed (had to do with new ASIO implementation)
 ! Bug with Machine exchange (wolumes where messed when the change was native for VST)
+! asio hard clips for the babies who don't leave any headroom (pooplog)
 
+
+V1.7.3 Final
+------------
+! some memory leaks and access violation [JAZ]
+! cloning locates the new machine better and numbers it correctly (pooplog)
 
 V1.7.3 RC2
 ----------

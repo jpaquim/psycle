@@ -541,8 +541,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = f2i(*pBuf++);
-				*outr++ = f2i(*pBuf++);
+				*outl++ = f2iclip16(*pBuf++);
+				*outr++ = f2iclip16(*pBuf++);
 			}
 		}
 		break;
@@ -557,12 +557,12 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				t = f2i((*pBuf++)*256.0f);
+				t = f2iclip24((*pBuf++)*256.0f);
 				*outl++ = pt[0];
 				*outl++ = pt[1];
 				*outl++ = pt[2];
 
-				t = f2i((*pBuf++)*256.0f);
+				t = f2iclip24((*pBuf++)*256.0f);
 				*outr++ = pt[0];
 				*outr++ = pt[1];
 				*outr++ = pt[2];
@@ -579,8 +579,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = f2i((*pBuf++)*65536.0f);
-				*outr++ = f2i((*pBuf++)*65536.0f);
+				*outl++ = f2iclip32((*pBuf++)*65536.0f);
+				*outr++ = f2iclip32((*pBuf++)*65536.0f);
 			}
 		}
 		break;
@@ -624,8 +624,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = f2i(*pBuf++);
-				*outr++ = f2i(*pBuf++);
+				*outl++ = f2iclip16(*pBuf++);
+				*outr++ = f2iclip16(*pBuf++);
 			}
 		}
 		break;
@@ -639,8 +639,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = f2i((*pBuf++)*4.0f);
-				*outr++ = f2i((*pBuf++)*4.0f);
+				*outl++ = f2iclip18((*pBuf++)*4.0f);
+				*outr++ = f2iclip18((*pBuf++)*4.0f);
 			}
 		}
 		break;
@@ -653,8 +653,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = f2i((*pBuf++)*16.0f);
-				*outr++ = f2i((*pBuf++)*16.0f);
+				*outl++ = f2iclip20((*pBuf++)*16.0f);
+				*outr++ = f2iclip20((*pBuf++)*16.0f);
 			}
 		}
 		break;
@@ -667,8 +667,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = f2i((*pBuf++)*256.0f);
-				*outr++ = f2i((*pBuf++)*256.0f);
+				*outl++ = f2iclip24((*pBuf++)*256.0f);
+				*outr++ = f2iclip24((*pBuf++)*256.0f);
 			}
 		}
 		break;
@@ -682,8 +682,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = SwapShort(f2i(*pBuf++));
-				*outr++ = SwapShort(f2i(*pBuf++));
+				*outl++ = SwapShort(f2iclip16(*pBuf++));
+				*outr++ = SwapShort(f2iclip16(*pBuf++));
 			}
 		}
 		break;
@@ -698,12 +698,12 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				t = f2i((*pBuf++)*256.0f);
+				t = f2iclip24((*pBuf++)*256.0f);
 				*outl++ = pt[2];
 				*outl++ = pt[1];
 				*outl++ = pt[0];
 
-				t = f2i((*pBuf++)*256.0f);
+				t = f2iclip24((*pBuf++)*256.0f);
 				*outr++ = pt[2];
 				*outr++ = pt[1];
 				*outr++ = pt[0];
@@ -719,8 +719,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = SwapLong(f2i((*pBuf++)*65536.0f));
-				*outr++ = SwapLong(f2i((*pBuf++)*65536.0f));
+				*outl++ = SwapLong(f2iclip32((*pBuf++)*65536.0f));
+				*outr++ = SwapLong(f2iclip32((*pBuf++)*65536.0f));
 			}
 		}
 		break;
@@ -733,8 +733,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = SwapLong(f2i(*pBuf++));
-				*outr++ = SwapLong(f2i(*pBuf++));
+				*outl++ = SwapLong(f2iclip16(*pBuf++));
+				*outr++ = SwapLong(f2iclip16(*pBuf++));
 			}
 		}
 		break;
@@ -747,8 +747,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = SwapLong(f2i((*pBuf++)*4.0f));
-				*outr++ = SwapLong(f2i((*pBuf++)*4.0f));
+				*outl++ = SwapLong(f2iclip18((*pBuf++)*4.0f));
+				*outr++ = SwapLong(f2iclip18((*pBuf++)*4.0f));
 			}
 		}
 		break;
@@ -761,8 +761,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = SwapLong(f2i((*pBuf++)*16.0f));
-				*outr++ = SwapLong(f2i((*pBuf++)*16.0f));
+				*outl++ = SwapLong(f2iclip20((*pBuf++)*16.0f));
+				*outr++ = SwapLong(f2iclip20((*pBuf++)*16.0f));
 			}
 		}
 		break;
@@ -776,8 +776,8 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				*outl++ = SwapLong(f2i((*pBuf++)*256.0f));
-				*outr++ = SwapLong(f2i((*pBuf++)*256.0f));
+				*outl++ = SwapLong(f2iclip24((*pBuf++)*256.0f));
+				*outr++ = SwapLong(f2iclip24((*pBuf++)*256.0f));
 			}
 		}
 		break;

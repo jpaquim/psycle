@@ -24,6 +24,7 @@ aditional known vst bugs/buggy vsts: ~33
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
++++ add a mode to dump each GENERATOR's signal path to wav
 
 ++ undos for machine and wave edit? 
 
