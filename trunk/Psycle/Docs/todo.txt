@@ -14,13 +14,19 @@ X low priority
 * New and unsorted and untested
 ------------
 
-**** Psycle crash on settings dialog
-	[ pooplog - i cannot recreate this ]
 *** Psycle is not writing blocks correctly when saving blocks
 	[ pooplog - it seems to write the same incorrect data always, regardless of song loaded ]
 *** Psycle is not loading blocks correctly when loading blocks, infact, it does nothing
 ** Some skins not getting enumerated?
 	[ pooplog - i cannot recreate this ]
+
++ <lastfutur> what i am missing: block cut copy and paste commands in the edit menu
+
+*** <YanniS> my settings directories always get corrupted somehow
+	<YanniS> psycle has a lisp
+	<YanniS> quit and restarted, and it's still
+	<YanniS> C:\Audio\Psycle\Skinss\
+
 * <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
