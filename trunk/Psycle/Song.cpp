@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+
+
 #if defined(_WINAMP_PLUGIN_)
 //	#include "global.h"
 #else
@@ -19,6 +21,10 @@
 #include "VSTHost.h"
 #include "DataCompression.h"
 
+
+#ifdef PSYCLE__CONVERT_INTERNAL_MACHINES
+	#include "convert_internal_machines.h" // conversion
+#endif
 
 #if !defined(_WINAMP_PLUGIN_)
 
@@ -59,13 +65,15 @@ bool Song::CreateMachine(
 
 	Machine* pMachine;
 	Master* pMaster;
-	Sine* pSine;
-	Distortion* pDistortion;
 	Sampler* pSampler;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 	Delay* pDelay;
 	Filter2p* pFilter;
 	Gainer* pGainer;
 	Flanger* pFlanger;
+	Sine* pSine;
+	Distortion* pDistortion;
+#endif
 	Plugin* pPlugin;
 	VSTPlugin* pVstPlugin;
 
@@ -79,14 +87,15 @@ bool Song::CreateMachine(
 		pMachine = pMaster = new Master(index);
 		index = MASTER_INDEX;
 		break;
+	case MACH_SAMPLER:
+		pMachine = pSampler = new Sampler(index);
+		break;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 	case MACH_SINE:
 		pMachine = pSine = new Sine(index);
 		break;
 	case MACH_DIST:
 		pMachine = pDistortion = new Distortion(index);
-		break;
-	case MACH_SAMPLER:
-		pMachine = pSampler = new Sampler(index);
 		break;
 	case MACH_DELAY:
 		pMachine = pDelay = new Delay(index);
@@ -100,6 +109,7 @@ bool Song::CreateMachine(
 	case MACH_FLANGER:
 		pMachine = pFlanger = new Flanger(index);
 		break;
+#endif
 	case MACH_PLUGIN:
 		{
 			pMachine = pPlugin = new Plugin(index);
@@ -1134,8 +1144,6 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 }
 #endif // ndef _WINAMP_PLUGIN_
 
-#include "convert_internal_machines.h" // conversion
-
 bool Song::Load(RiffFile* pFile)
 {
 	char Header[9];
@@ -1731,13 +1739,15 @@ bool Song::Load(RiffFile* pFile)
 
 		for (i=0; i<128; i++)
 		{
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 			Sine* pSine;
 			Distortion* pDistortion;
-			Sampler* pSampler;
 			Delay* pDelay;
 			Filter2p* pFilter;
 			Gainer* pGainer;
 			Flanger* pFlanger;
+#endif
+			Sampler* pSampler;
 			Plugin* pPlugin;
 			VSTPlugin* pVstPlugin;
 
@@ -1767,6 +1777,12 @@ bool Song::Load(RiffFile* pFile)
 					pMac[i]->Init();
 					pMac[i]->Load(pFile);
 					break;
+				case MACH_SAMPLER:
+					pMac[i] = pSampler = new Sampler(i);
+					pMac[i]->Init();
+					pMac[i]->Load(pFile);
+					break;
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 				case MACH_SINE:
 					pMac[i] = pSine = new Sine(i);
 					pMac[i]->Init();
@@ -1774,11 +1790,6 @@ bool Song::Load(RiffFile* pFile)
 					break;
 				case MACH_DIST:
 					pMac[i] = pDistortion = new Distortion(i);
-					pMac[i]->Init();
-					pMac[i]->Load(pFile);
-					break;
-				case MACH_SAMPLER:
-					pMac[i] = pSampler = new Sampler(i);
 					pMac[i]->Init();
 					pMac[i]->Load(pFile);
 					break;
@@ -1802,6 +1813,7 @@ bool Song::Load(RiffFile* pFile)
 					pMac[i]->Init();
 					pMac[i]->Load(pFile);
 					break;
+#endif
 				case MACH_PLUGIN:
 					{
 					pMac[i] = pPlugin = new Plugin(i);
@@ -3077,4 +3089,6 @@ bool Song::CloneIns(int src,int dst)
 	return true;
 }
 
+
 #endif // ndef _WINAMP_PLUGIN_
+

@@ -24,13 +24,15 @@
 #include "SwingFillDlg.h"
 #include "Helpers.h"
 #include "MasterDlg.h"
+#include "GearTracker.h"
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
 #include "GearPsychOsc.h"
 #include "GearDistort.h"
-#include "GearTracker.h"
 #include "GearDelay.h"
 #include "Gearfilter.h"
 #include "GearGainer.h"
 #include "GearFlanger.h"
+#endif
 
 //#include "Dsp.h"
 //#include "Filter.h"
@@ -88,13 +90,18 @@ CChildView::CChildView()
 
 	viewMode=VMMachine;
 	MasterMachineDialog = NULL;
+	SamplerMachineDialog = NULL;
+
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+
 	PsychMachineDialog = NULL;
 	DistortionMachineDialog = NULL;
-	SamplerMachineDialog = NULL;
+	
 	DelayMachineDialog = NULL;
 	FilterMachineDialog = NULL;
 	GainerMachineDialog = NULL;
 	FlangerMachineDialog = NULL;
+#endif
 	for (c = 0; c < MAX_WIRE_DIALOGS; c++)
 	{
 		WireDialog[c] = NULL;

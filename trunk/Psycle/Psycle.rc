@@ -38,13 +38,9 @@ IDR_MACHINEFRAME        ICON    DISCARDABLE     "res\\ico00001.ico"
 // Bitmap
 //
 
-IDB_PSYCHOSC            BITMAP  MOVEABLE PURE   "res\\bitmap1.bmp"
-IDB_DIST                BITMAP  MOVEABLE PURE   "res\\bmp00001.bmp"
 IDB_SAMPLER             BITMAP  MOVEABLE PURE   "res\\bmp00003.bmp"
-IDB_DALAYDELAY          BITMAP  MOVEABLE PURE   "res\\dalaydelay.bmp"
 IDB_SPEAKER             BITMAP  MOVEABLE PURE   "res\\bmp00004.bmp"
 IDB_CPU                 BITMAP  MOVEABLE PURE   "res\\bmp00005.bmp"
-IDB_FLANGER             BITMAP  MOVEABLE PURE   "res\\bmp00006.bmp"
 IDB_KNOB                BITMAP  MOVEABLE PURE   "res\\TbMainKnob.bmp"
 IDB_PLUS                BITMAP  MOVEABLE PURE   "res\\plus.bmp"
 IDB_LESSLESS            BITMAP  MOVEABLE PURE   "res\\lessless.bmp"
@@ -214,39 +210,6 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,219,7,50,14
 END
 
-IDD_GEAR_PSYCHOSC DIALOGEX 0, 0, 215, 145
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "PsychOsc"
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    GROUPBOX        "OSC",IDC_STATIC,7,7,99,112
-    LTEXT           "Frequency(1)",IDC_STATIC,13,20,46,11
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,19,29,28,74
-    LTEXT           "Glide Spd.(2)",IDC_STATIC,61,20,43,11
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,67,29,28,74
-    CTEXT           "",IDC_STATIC1,13,104,40,11,SS_CENTERIMAGE,
-                    WS_EX_STATICEDGE
-    CTEXT           "",IDC_STATIC2,60,104,40,11,SS_CENTERIMAGE,
-                    WS_EX_STATICEDGE
-    GROUPBOX        "LFO",IDC_STATIC,107,7,100,112
-    LTEXT           "Frequency(3)",IDC_STATIC,111,20,44,11
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,126,29,28,74
-    LTEXT           "Amplitude(4)",IDC_STATIC,162,20,40,11
-    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,168,29,28,74
-    CTEXT           "",IDC_STATIC3,119,104,40,11,SS_CENTERIMAGE,
-                    WS_EX_STATICEDGE
-    CTEXT           "",IDC_STATIC4,162,104,40,11,SS_CENTERIMAGE,
-                    WS_EX_STATICEDGE
-    CONTROL         160,IDC_STATIC,"Static",SS_BITMAP,7,122,72,22
-    CTEXT           "Analog theremin emulator/Ring modulator",IDC_STATIC,88,
-                    125,119,20
-END
-
 IDD_INFO DIALOGEX 0, 0, 316, 239
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
@@ -300,37 +263,6 @@ BEGIN
                     TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,135
     PUSHBUTTON      "db",IDC_VOLUME_DB,174,136,34,11,NOT WS_TABSTOP
     PUSHBUTTON      "%",IDC_VOLUME_PER,174,147,34,11,NOT WS_TABSTOP
-END
-
-IDD_GEARDISTORT DIALOGEX 0, 0, 169, 177
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    GROUPBOX        "Positive Field",IDC_STATIC,4,0,77,176
-    CTEXT           "Threshold(1)",IDC_STATIC,7,12,41,8
-    LTEXT           "Clamp(2)",IDC_STATIC,49,12,30,8
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,12,24,28,84
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,44,24,28,84
-    CTEXT           "",IDC_STATIC,11,112,32,12,0,WS_EX_STATICEDGE
-    CTEXT           "",IDC_STATIC,43,112,32,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Flat",IDC_BUTTON1,11,128,64,12
-    GROUPBOX        "Negative Field",IDC_STATIC,85,0,77,144
-    CTEXT           "Threshold(3)",IDC_STATIC,87,12,42,8
-    LTEXT           "Clamp(4)",IDC_STATIC,132,12,29,8
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,94,24,28,84
-    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,127,24,28,84
-    CTEXT           "",IDC_STATIC,92,112,32,12,0,WS_EX_STATICEDGE
-    CTEXT           "",IDC_STATIC,124,112,32,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Flat",IDC_BUTTON3,91,128,64,12
-    PUSHBUTTON      "Do Symmetric",IDC_BUTTON2,11,144,64,12
-    PUSHBUTTON      "Randomize",IDC_BUTTON4,11,160,64,12
-    CONTROL         162,IDC_STATIC,"Static",SS_BITMAP,98,144,47,19
-    CTEXT           "Digital Distortion v1.0",IDC_STATIC,86,164,76,8
 END
 
 IDD_MACPROP DIALOGEX 0, 0, 187, 60
@@ -453,69 +385,6 @@ BEGIN
     CTEXT           "- Professional -",IDC_STATIC,216,36,60,8,SS_CENTERIMAGE
 END
 
-IDD_GEAR_DELAY DIALOGEX 0, 0, 340, 210
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    CONTROL         166,IDC_STATIC,"Static",SS_BITMAP,4,0,221,17
-    GROUPBOX        "Left Channel Delay",IDC_STATIC,4,16,332,68
-    CTEXT           "Time(1)",IDC_STATIC,8,32,40,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER_TIME,"msctls_trackbar32",
-                    TBS_AUTOTICKS | TBS_TOP | WS_TABSTOP,52,28,184,20
-    LTEXT           "Samples",IDC_STATIC,240,24,28,8
-    LTEXT           "Milisecs",IDC_STATIC,268,24,28,8
-    CTEXT           "Time",IDC_LABEL_LTIME,240,36,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CTEXT           "Time",IDC_LABEL_MSL,268,36,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CTEXT           "FeedBack(2)",IDC_STATIC,12,64,40,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | WS_TABSTOP,52,60,184,20
-    CTEXT           "Amount",IDC_F_LABEL_L,240,64,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Ticks",IDC_STATIC,304,24,24,8
-    PUSHBUTTON      "x1",IDC_BUTTON1,300,36,16,12
-    PUSHBUTTON      "x2",IDC_BUTTON3,316,36,16,12
-    PUSHBUTTON      "x3",IDC_BUTTON14,300,52,16,12
-    PUSHBUTTON      "x4",IDC_BUTTON15,316,52,16,12
-    PUSHBUTTON      "x5",IDC_BUTTON16,300,68,16,12
-    PUSHBUTTON      "x6",IDC_BUTTON17,316,68,16,12
-    GROUPBOX        "Right Channel Delay",IDC_STATIC,4,88,332,68
-    CTEXT           "Time(3)",IDC_STATIC,8,104,40,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER_TIME2,"msctls_trackbar32",
-                    TBS_AUTOTICKS | TBS_TOP | WS_TABSTOP,52,100,184,20
-    LTEXT           "Samples",IDC_STATIC,240,96,28,8
-    LTEXT           "Milisecs",IDC_STATIC,268,96,28,8
-    CTEXT           "Time",IDC_LABEL_LTIME2,240,109,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CTEXT           "Time",IDC_LABEL_MSR,268,109,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CTEXT           "FeedBack(4)",IDC_STATIC,10,132,40,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | WS_TABSTOP,52,128,184,20
-    CTEXT           "Amount",IDC_F_LABEL_R,240,136,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Ticks",IDC_STATIC,304,96,24,8
-    PUSHBUTTON      "x1",IDC_BUTTON11,300,108,16,12
-    PUSHBUTTON      "x2",IDC_BUTTON18,316,108,16,12
-    PUSHBUTTON      "x3",IDC_BUTTON19,300,124,16,12
-    PUSHBUTTON      "x4",IDC_BUTTON20,316,124,16,12
-    PUSHBUTTON      "x5",IDC_BUTTON21,300,140,16,12
-    PUSHBUTTON      "x6",IDC_BUTTON22,316,140,16,12
-    GROUPBOX        "Output",IDC_STATIC,4,160,332,48
-    CTEXT           "Dry(5)",IDC_STATIC,13,172,23,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_DRYSLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,40,172,256,12
-    CTEXT           "Amount",IDC_DRYLABEL,300,172,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CTEXT           "Wet(6)",IDC_STATIC,11,188,27,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_WETSLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,40,188,256,12
-    CTEXT           "Amount",IDC_WETLABEL,300,188,28,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-END
-
 IDD_ENVDIALOG DIALOGEX 0, 0, 348, 327
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
@@ -577,38 +446,6 @@ BEGIN
     COMBOBOX        IDC_COMBO1,296,284,48,72,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,296,300,50,24
-END
-
-IDD_GEAR_FILTER DIALOGEX 0, 0, 292, 151
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    GROUPBOX        "Filter",IDC_STATIC,2,16,286,64
-    LTEXT           "Response(1)",IDC_STATIC,8,30,42,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_COMBO1,58,30,108,64,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
-    LTEXT           "Cutoff(2)",IDC_STATIC,8,45,36,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,54,45,177,12
-    LTEXT           "Resonance(3)",IDC_STATIC,8,60,45,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,54,60,177,12
-    GROUPBOX        "Lfo",IDC_STATIC,2,84,286,64
-    LTEXT           "Lfo Speed(4)",IDC_STATIC,8,96,48,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,54,95,177,12
-    LTEXT           "Amplitude(5)",IDC_STATIC,8,112,49,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,54,112,177,12
-    LTEXT           "Dephase(6)",IDC_STATIC,8,128,41,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,54,130,177,12
-    LTEXT           "0 (0Hz)",IDC_PARAM_INF_2,235,45,50,12
-    LTEXT           "0 (0%)",IDC_PARAM_INF_3,235,60,50,11
-    LTEXT           "0 (0Hz)",IDC_PARAM_INF_4,235,95,50,11
-    LTEXT           "0, 0Hz",IDC_PARAM_INF_6,235,130,50,14
-    LTEXT           "0 (0%)",IDC_PARAM_INF_5,235,113,50,12
 END
 
 IDD_GREETS DIALOG DISCARDABLE  0, 0, 240, 157
@@ -797,66 +634,6 @@ BEGIN
     EDITTEXT        IDC_EDIT4,4,72,188,40,ES_MULTILINE | ES_AUTOVSCROLL | 
                     WS_VSCROLL
     PUSHBUTTON      "Ok",IDC_BUTTON1,4,116,188,16,0,WS_EX_CLIENTEDGE
-END
-
-IDD_GEAR_GAINER DIALOGEX 0, 0, 40, 161
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    CONTROL         "Slider1",IDC_VOLSLIDER,"msctls_trackbar32",
-                    TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,6,0,27,
-                    140
-    CTEXT           "",IDC_VOLABEL,1,143,37,17,SS_SUNKEN
-END
-
-IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 227
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    CONTROL         170,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
-    LTEXT           "Preset",IDC_STATIC,228,4,21,8
-    COMBOBOX        IDC_PRESETCOMBO,228,12,88,92,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Left",IDC_STATIC,4,24,312,80
-    LTEXT           "Delay(1)",IDC_STATIC,9,36,28,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,36,240,12
-    CTEXT           "",IDC_LABEL1,280,36,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Ampl.(2)",IDC_STATIC,9,52,29,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,52,240,12
-    CTEXT           "",IDC_LABEL2,280,52,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Speed(3)",IDC_STATIC,7,68,31,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,68,240,12
-    CTEXT           "",IDC_LABEL3,280,68,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Fdbck(4)",IDC_STATIC,8,84,29,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,84,240,12
-    CTEXT           "",IDC_LABEL4,280,84,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    GROUPBOX        "Right",IDC_STATIC,4,108,312,48
-    LTEXT           "Phase(5)",IDC_STATIC,8,120,30,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER5,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,120,240,12
-    CTEXT           "",IDC_LABEL5,280,120,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Fdbck(6)",IDC_STATIC,8,136,30,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_SLIDER6,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,136,240,12
-    CTEXT           "",IDC_LABEL6,280,136,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    GROUPBOX        "Output",IDC_STATIC,4,160,312,48
-    CTEXT           "Dry(7)",IDC_STATIC,12,172,28,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_DRYSLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,172,240,12
-    CTEXT           "",IDC_DRYLABEL,280,172,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Wet(8)",IDC_STATIC,12,188,26,12,SS_CENTERIMAGE
-    CONTROL         "Slider1",IDC_WETSLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,36,188,240,12
-    CTEXT           "",IDC_WETLABEL,280,188,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    CONTROL         "Use Linear Interpolation (removes noise but uses more CPU)",
-                    IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,107,211,
-                    206,10
 END
 
 IDD_MASTERDLG DIALOGEX 0, 0, 338, 123
@@ -1725,14 +1502,6 @@ BEGIN
         BOTTOMMARGIN, 76
     END
 
-    IDD_GEAR_PSYCHOSC, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 207
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 143
-    END
-
     IDD_INFO, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1747,14 +1516,6 @@ BEGIN
         RIGHTMARGIN, 202
         TOPMARGIN, 7
         BOTTOMMARGIN, 154
-    END
-
-    IDD_GEARDISTORT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 162
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 170
     END
 
     IDD_MACPROP, DIALOG
@@ -1789,27 +1550,12 @@ BEGIN
         BOTTOMMARGIN, 64
     END
 
-    IDD_GEAR_DELAY, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 333
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 203
-    END
-
     IDD_ENVDIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 341
         TOPMARGIN, 7
         BOTTOMMARGIN, 320
-    END
-
-    IDD_GEAR_FILTER, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 210
-        TOPMARGIN, 7
     END
 
     IDD_GREETS, DIALOG
@@ -1833,20 +1579,6 @@ BEGIN
         RIGHTMARGIN, 189
         TOPMARGIN, 7
         BOTTOMMARGIN, 128
-    END
-
-    IDD_GEAR_GAINER, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        TOPMARGIN, 7
-    END
-
-    IDD_GEAR_FLANGER, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 313
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 221
     END
 
     IDD_MASTERDLG, DIALOG
