@@ -23,6 +23,7 @@ public:
 	Distortion* _pMachine;
 	bool doit;
 	BOOL Create();
+	afx_msg void OnCancel();
 
 // Dialog Data
 	//{{AFX_DATA(CGearDistort)
@@ -55,7 +56,6 @@ protected:
 	afx_msg void OnButton1();
 	afx_msg void OnButton3();
 	afx_msg void OnButton2();
-	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

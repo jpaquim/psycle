@@ -21,6 +21,15 @@
 #include "MidiInput.h"
 #include "SwingFillDlg.h"
 #include "Helpers.h"
+#include "MasterDlg.h"
+#include "GearPsychOsc.h"
+#include "GearDistort.h"
+#include "GearTracker.h"
+#include "GearDelay.h"
+#include "Gearfilter.h"
+#include "GearGainer.h"
+#include "GearFlanger.h"
+#include "GearScope.h"
 
 //#include "Dsp.h"
 //#include "Filter.h"
@@ -150,6 +159,7 @@ CChildView::CChildView()
 
 CChildView::~CChildView()
 {
+	KillModelessMachines();
 	Global::pInputHandler->SetChildView(NULL);
 	KillRedo();
 	KillUndo();
@@ -795,6 +805,7 @@ void CChildView::OnFileNew()
 {
 	if (CheckUnsavedSong("New Song"))
 	{
+		KillModelessMachines();
 		KillUndo();
 		KillRedo();
 		pParentMain->CloseAllMacGuis();
@@ -1763,6 +1774,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	{
 		if (CheckUnsavedSong("Load Song"))
 		{
+			KillModelessMachines();
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
 			Sleep(LOCK_LATENCY);
@@ -3005,4 +3017,40 @@ void CChildView::TransparentBlt(CDC* pDC,
    // Now, clean up.
    hdcMem.SelectObject(hbmT);
    hdcMem.DeleteDC();
+}
+
+void CChildView::KillModelessMachines()
+{
+	if (MasterMachineDialog)
+	{
+		MasterMachineDialog->OnCancel();
+	}
+	if (ScopeMachineDialog)
+	{
+		ScopeMachineDialog->OnCancel();
+	}
+	if (FlangerMachineDialog)
+	{
+		FlangerMachineDialog->OnCancel();
+	}
+	if (GainerMachineDialog)
+	{
+		GainerMachineDialog->OnCancel();
+	}
+	if (DelayMachineDialog)
+	{
+		DelayMachineDialog->OnCancel();
+	}
+	if (SamplerMachineDialog)
+	{
+		SamplerMachineDialog->OnCancel();
+	}
+	if (DistortionMachineDialog)
+	{
+		DistortionMachineDialog->OnCancel();
+	}
+	if (PsychMachineDialog)
+	{
+		PsychMachineDialog->OnCancel();
+	}
 }

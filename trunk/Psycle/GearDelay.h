@@ -24,6 +24,7 @@ public:
 	int* SPT;
 	bool doit;
 	BOOL Create();
+	afx_msg void OnCancel();
 
 // Dialog Data
 	//{{AFX_DATA(CGearDelay)
@@ -77,7 +78,6 @@ protected:
 	afx_msg void OnButton22();
 	afx_msg void OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

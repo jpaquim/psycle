@@ -122,6 +122,9 @@ bool Song::CreateMachine(
 	case MACH_DUMMY:
 		pMachine = new Dummy;
 		break;
+	case MACH_SCOPE:
+		pMachine = new Scope;
+		break;
 	default:
 		return false;
 	}

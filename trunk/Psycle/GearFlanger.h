@@ -23,6 +23,7 @@ public:
 	Flanger* _pMachine;
 	bool doit;
 	BOOL Create();
+	afx_msg void OnCancel();
 
 
 // Dialog Data
@@ -71,7 +72,6 @@ protected:
 	afx_msg void OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangePresetcombo();
-	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

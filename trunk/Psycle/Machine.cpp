@@ -37,6 +37,8 @@ CIntMachParam Flanger::pars[] = {{"Reserved",0,0},{"Left Delay",0,1024},{"Left A
 char* Filter2p::_psName = "2p Filter";
 CIntMachParam Filter2p::pars[] = {{"Reserved",0,0},{"Filter Type",0,1},{"Filter Cuttoff",0,256}, \
 								{"Filter Ressonance",0,256},{"LFO Speed",0,32768},{"LFO Amplitude",0,256},{"LFO Phase",0,256}};
+char* Scope::_psName = "Scope";
+CIntMachParam Scope::pars[] = {{"Reserved",0,0}};
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -606,6 +608,95 @@ void Gainer::Tick(int channel, PatternEntry *pData)
 		SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+Scope::Scope()
+{
+	_numPars = 0;
+	num = 0;
+	_type = MACH_SCOPE;
+	_mode = MACHMODE_FX;
+	sprintf(_editName, "Scope");
+	bCanDraw = FALSE;
+	memset(bufL,0,SCOPE_BUF_SIZE*sizeof(float));
+	memset(bufR,0,SCOPE_BUF_SIZE*sizeof(float));
+
+}
+
+void Scope::Work(
+	int numSamples)
+{
+	Machine::Work(numSamples);
+#if !defined(_WINAMP_PLUGIN_)
+	CPUCOST_INIT(cost);
+#endif // ndef _WINAMP_PLUGIN_
+
+	if (bCanDraw)
+	{
+		float *pSamplesL = _pSamplesL;
+		float *pSamplesR = _pSamplesR;
+		int i = numSamples;
+		while (i > 0)
+		{
+			if (i+num >= SCOPE_BUF_SIZE)
+			{
+				memcpy(&bufL[num],pSamplesL,(SCOPE_BUF_SIZE-(num))*sizeof(float));
+				memcpy(&bufR[num],pSamplesR,(SCOPE_BUF_SIZE-(num))*sizeof(float));
+				pSamplesL+=(SCOPE_BUF_SIZE-(num));
+				pSamplesR+=(SCOPE_BUF_SIZE-(num));
+				i -= (SCOPE_BUF_SIZE-(num));
+				num = 0;
+			}
+			else
+			{
+				memcpy(&bufL[num],pSamplesL,i*sizeof(float));
+				memcpy(&bufR[num],pSamplesR,i*sizeof(float));
+				num += i;
+				i = 0;
+			}
+		}
+	}
+
+	if ((!_mute) && (!_stopped) && (!_bypass))
+	{
+		/*
+		float const wet = (float)_outWet*0.00390625f;
+		float *pSamplesL = _pSamplesL;
+		float *pSamplesR = _pSamplesR;
+		int i = numSamples;
+		
+		--pSamplesL;
+		--pSamplesR;
+		do
+		{
+			*pSamplesL = *++pSamplesL*wet;
+			*pSamplesR = *++pSamplesR*wet;
+		}
+		while (--i);
+		*/
+#if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
+		if ( Global::pConfig->autoStopMachines )
+		{
+//			Machine::SetVolumeCounterAccurate(numSamples);
+			if (_volumeCounter < 8)	{
+				_volumeCounter = 0;
+				_volumeDisplay = 0;
+				_stopped = true;
+			}
+		}
+//		else Machine::SetVolumeCounter(numSamples);
+#endif // ndef _WINAMP_PLUGIN_
+	}
+#if !defined(_WINAMP_PLUGIN_)
+	CPUCOST_CALC(cost, numSamples);
+	_cpuCost += cost;
+#endif // ndef _WINAMP_PLUGIN_
+	_worked = true;
+}
+
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 

@@ -101,7 +101,7 @@ public:
 protected:
 
 	HTREEITEM hNodes[MAX_BROWSER_NODES];
-	HTREEITEM hInt[8];
+	HTREEITEM hInt[9];
 	HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 
 

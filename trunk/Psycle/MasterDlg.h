@@ -24,6 +24,7 @@ public:
 	CBitmap m_numbers;
 	Master* _pMachine;
 	char macname[MAX_CONNECTIONS][15];
+	afx_msg void OnCancel();
 
 // Dialog Data
 	//{{AFX_DATA(CMasterDlg)
@@ -76,7 +77,6 @@ protected:
 	afx_msg void OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnPaint();
-	afx_msg void OnCancel();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

@@ -23,6 +23,7 @@ public:
 	Sampler* _pMachine;
 	bool doit;
 	BOOL Create();
+	afx_msg void OnCancel();
 
 // Dialog Data
 	//{{AFX_DATA(CGearTracker)
@@ -50,7 +51,6 @@ protected:
 	afx_msg void OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeCombo1();
-	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -55,6 +55,7 @@ typedef enum
 	MACH_PLUGIN = 8,
 	MACH_VST = 9,
 	MACH_VSTFX = 10,
+	MACH_SCOPE = 11,
 	MACH_DUMMY = 255
 }
 MachineType;
@@ -267,6 +268,30 @@ public:
 			default:return false;
 		}
 	}
+
+protected:
+	static char* _psName;
+	static CIntMachParam pars[];
+};
+
+#define SCOPE_BUF_SIZE 2048
+
+class Scope : public Machine
+{
+public:
+	Scope();
+
+	virtual void Work(int numSamples);
+	virtual char* GetName(void) { return _psName; };
+	virtual void GetParamName(int numparam,char* name)
+	{
+		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);
+		else strcpy(name,"Out of Range");
+	}
+	BOOL bCanDraw;
+	float bufL[SCOPE_BUF_SIZE];
+	float bufR[SCOPE_BUF_SIZE];
+	int num;
 
 protected:
 	static char* _psName;
