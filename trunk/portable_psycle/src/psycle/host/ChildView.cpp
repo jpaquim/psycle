@@ -70,6 +70,7 @@ CChildView::CChildView()
 	wireDY=0;
 
 	maxView = false;
+	textLeftEdge = 2;
 
 	for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 	bmpDC = NULL;
@@ -836,6 +837,8 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 	return bResult;
 }
 
+#include <cderr.h>
+
 void CChildView::OnFileLoadsong()
 {
 	OPENFILENAME ofn;       // common dialog box structure
@@ -857,9 +860,55 @@ void CChildView::OnFileLoadsong()
 	
 	// Display the Open dialog box. 
 	
-	if (GetOpenFileName(&ofn)==TRUE)
+	if(::GetOpenFileName(&ofn)==TRUE)
 	{
 		OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
+	}
+	else
+	{
+		DWORD comDlgErr = CommDlgExtendedError();
+		switch(comDlgErr)
+		{
+		case CDERR_DIALOGFAILURE:
+			::MessageBox(0, "CDERR_DIALOGFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_FINDRESFAILURE:
+			::MessageBox(0, "CDERR_FINDRESFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_INITIALIZATION:
+			::MessageBox(0, "CDERR_INITIALIZATION", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_LOADRESFAILURE:
+			::MessageBox(0, "CDERR_LOADRESFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_LOADSTRFAILURE:
+			::MessageBox(0, "CDERR_LOADSTRFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_LOCKRESFAILURE:
+			::MessageBox(0, "CDERR_LOCKRESFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_MEMALLOCFAILURE:
+			::MessageBox(0, "CDERR_MEMALLOCFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_MEMLOCKFAILURE:
+			::MessageBox(0, "CDERR_MEMLOCKFAILURE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_NOHINSTANCE:
+			::MessageBox(0, "CDERR_NOHINSTANCE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_NOHOOK:
+			::MessageBox(0, "CDERR_NOHOOK", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_NOTEMPLATE:
+			::MessageBox(0, "CDERR_NOTEMPLATE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_REGISTERMSGFAIL:
+			::MessageBox(0, "CDERR_REGISTERMSGFAIL", "exception", MB_OK | MB_ICONERROR);
+			break;
+		case CDERR_STRUCTSIZE:
+			::MessageBox(0, "CDERR_STRUCTSIZE", "exception", MB_OK | MB_ICONERROR);
+			break;
+		}
 	}
 	pParentMain->StatusBarIdle();
 }

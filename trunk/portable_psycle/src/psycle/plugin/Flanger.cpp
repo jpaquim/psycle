@@ -41,7 +41,7 @@ public:
 			Information::Parameter::linear("feedback left", -1, 0, 1),
 			Information::Parameter::linear("feedback right", -1, 0, 1),
 		};
-		static const Information information(Information::Type::effect, "ayeternal Flanger", "Flanger", "jaz, bohan & the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Type::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 
@@ -125,8 +125,8 @@ void Flanger::sequencer_note_event(const int, const int, const int, const int co
 	{
 	case 1:
 		modulation_phase_ = value * math::pi * 2 / 0x100;
-		sin_sequences_[left] .set(modulation_phase_, modulation_radians_per_sample_);
-		sin_sequences_[right].set(modulation_phase_ + (*this)(modulation_stereo_dephase), modulation_radians_per_sample_);
+		sin_sequences_[left](modulation_phase_, modulation_radians_per_sample_);
+		sin_sequences_[right](modulation_phase_ + (*this)(modulation_stereo_dephase), modulation_radians_per_sample_);
 		break;
 	}
 }

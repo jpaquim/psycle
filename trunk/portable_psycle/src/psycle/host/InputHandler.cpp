@@ -498,6 +498,9 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 		}
+		if (pChildView->patStep == 0)
+			pChildView->PrevLine(1,Global::pConfig->_wrapAround);
+		else
 		pChildView->PrevLine(pChildView->patStep,Global::pConfig->_wrapAround);
 		if ( bDoingSelection )
 		{
@@ -513,6 +516,9 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 		}
+		if (pChildView->patStep == 0)
+			pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
+		else
 		pChildView->AdvanceLine(pChildView->patStep,Global::pConfig->_wrapAround);
 		if ( bDoingSelection )
 		{

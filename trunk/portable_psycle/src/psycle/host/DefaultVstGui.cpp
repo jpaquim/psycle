@@ -44,7 +44,7 @@ void CDefaultVstGui::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDefaultVstGui, CFormView)
 	//{{AFX_MSG_MAP(CDefaultVstGui)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
+	ON_WM_VSCROLL()
 	ON_LBN_SELCHANGE(IDC_LIST1, OnSelchangeList1)
 	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER1, OnReleasedcaptureSlider1)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
@@ -169,7 +169,7 @@ void CDefaultVstGui::OnSelchangeList1()
 	mainView->SetFocus();
 }
 
-void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+void CDefaultVstGui::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	if (!updatingvalue)
 	{
@@ -192,10 +192,7 @@ void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 		}
 	}
-	
-	*pResult = 0;
 }
-
 
 void CDefaultVstGui::OnReleasedcaptureSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {

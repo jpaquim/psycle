@@ -13,6 +13,8 @@ Version | Type of release          | By
 1.7.4   | release                  | pooplog & [JAZ]
 1.7.5   | beta                     | pooplog & [JAZ]
 1.7.6   | release                  | alk
+1.7.6.1 | bug fix                  | alk
+1.7.6.2 | microsoft bug fix        | alk, bohan
 -----------------------------------------------------------------
 
 From now on, releases will be named this way:
@@ -24,6 +26,15 @@ a = patch number.
 ----------------------------------------------------------------
 Legend :	+=addition		*=change	!=bug
 ----------------------------------------------------------------
+
+v1.7.6.2
+--------
+
+!back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you.
+
+v1.7.6.1
+--------
+!fixed OLD bug, VSTi data slider would send data to the VSTi whenever the slider was repainted, if tweak record is enabled then the data gets written to the pattern
 
 v1.7.6
 ------
