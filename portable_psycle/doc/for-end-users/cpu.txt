@@ -1,0 +1,6 @@
+
+    * G7-SSE: Athlon XP, late Duron, Pentium 4, Celeron Pentium 4, Pentium M Centrino, Athlon 64, Athlon FX
+    * G7: Athlon and early Duron.
+    * G6-SSE: Pentium III and Celeron Pentium III.
+    * G6: Pentium Pro, Pentium II, and early Celeron.
+    * G5: Pentium, K6, K6-2, K6-III, 5x86, 6x86, etc.
