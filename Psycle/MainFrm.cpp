@@ -345,7 +345,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCLEN);
 	hi = (HBITMAP)bmore; cb->SetBitmap(hi);
 	
-	UpdatePlayOrder(false);
+	UpdatePlayOrder(true);
 	
 	// Finally initializing timer
 	
@@ -1467,13 +1467,10 @@ void CMainFrame::OnDeclong()
 
 void CMainFrame::OnSeqnew() 
 {
-	if ( m_wndView.editPosition < (MAX_SONG_POSITIONS-1) )
+	if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
-		{
-			++_pSong->playLength;
-		}
+		++_pSong->playLength;
 
 		m_wndView.editPosition++;
 		int const pop=m_wndView.editPosition;
@@ -1498,13 +1495,10 @@ void CMainFrame::OnSeqnew()
 
 void CMainFrame::OnSeqins() 
 {
-	if ( m_wndView.editPosition < MAX_SONG_POSITIONS )
+	if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
-		{
-			++_pSong->playLength;
-		}
+		++_pSong->playLength;
 
 		m_wndView.editPosition++;
 		int const pop=m_wndView.editPosition;
@@ -1524,14 +1518,11 @@ void CMainFrame::OnSeqins()
 void CMainFrame::OnSeqduplicate() 
 {
 	int newpat = _pSong->GetNumPatternsUsed();
-	if ((m_wndView.editPosition < MAX_SONG_POSITIONS) && (newpat < MAX_PATTERNS-1))
+	if ((_pSong->playLength<(MAX_SONG_POSITIONS-1)) && (newpat < MAX_PATTERNS-1))
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 		int oldpat = _pSong->playOrder[m_wndView.editPosition];
-		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
-		{
-			++_pSong->playLength;
-		}
+		++_pSong->playLength;
 
 		m_wndView.editPosition++;
 		int const pop=m_wndView.editPosition;
@@ -1642,37 +1633,42 @@ void CMainFrame::OnSeqpaste()
 {
 	if (seqcopybufferlength > 0)
 	{
-		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-
-		// we will do this in a loop to easily handle an error if we run out of space
-
-	//	m_wndView.editPosition 
-
-		// our list can be in any order so we must be careful
-		for (int i=0; i < seqcopybufferlength; i++)
+		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
-			if ( m_wndView.editPosition < MAX_SONG_POSITIONS )
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+			// we will do this in a loop to easily handle an error if we run out of space
+
+			// our list can be in any order so we must be careful
+			int pastedcount = 0;
+			for (int i=0; i < seqcopybufferlength; i++)
 			{
 				if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 				{
 					++_pSong->playLength;
-				}
 
-				m_wndView.editPosition++;
-				int const pop=m_wndView.editPosition;
-				for(int c=(_pSong->playLength-1);c>=pop;c--)
-				{
-					_pSong->playOrder[c]=_pSong->playOrder[c-1];
+					m_wndView.editPosition++;
+					pastedcount++;
+					for(int c=(_pSong->playLength-1);c>=m_wndView.editPosition;c--)
+					{
+						_pSong->playOrder[c]=_pSong->playOrder[c-1];
+					}
+					_pSong->playOrder[c+1] = seqcopybuffer[i];
 				}
-				_pSong->playOrder[c+1] = seqcopybuffer[i];
+			}
+
+			if (pastedcount>0)
+			{
+				UpdatePlayOrder(true);
+				for (i=m_wndView.editPosition+1-pastedcount; i<m_wndView.editPosition;i++)
+				{
+					_pSong->playOrderSel[i] = true;
+				}
+				UpdateSequencer();
+				m_wndView.Repaint(DMPatternChange);
+				m_wndView.SetFocus();
 			}
 		}
-
-		UpdatePlayOrder(true);
-		UpdateSequencer();
-
-		m_wndView.Repaint(DMPatternChange);
-		m_wndView.SetFocus();
 	}
 }
 
@@ -1986,12 +1982,12 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 		pls->InsertString(ls,buffer);
 		// Update sequencer selection	
 		pls->SelItemRange(false,0,pls->GetCount()-1);
-		pls->SetSel(ls,true);
 		for (i=0; i<MAX_SONG_POSITIONS;i++)
 		{
 			_pSong->playOrderSel[i] = false;
 		}
-		_pSong->playOrderSel[ls] = true;
 	}
+	pls->SetSel(ls,true);
+	_pSong->playOrderSel[ls] = true;
 }
 
