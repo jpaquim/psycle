@@ -181,13 +181,14 @@ void CNewMachine::UpdateList(bool bInit)
 			}
 		}
 		hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
-		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
-		hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
-		hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
-		hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
-		hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
-		hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
-		hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+//		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
+//		hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
+//		hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
+//		hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
+//		hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
+//		hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
+//		hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+		hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 		m_browser.Select(hNodes[LastType0],TVGN_CARET);
 	}
 	else
@@ -236,13 +237,14 @@ void CNewMachine::UpdateList(bool bInit)
 
 		}
 		hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
-		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
-		hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
-		hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
-		hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
-		hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
-		hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
-		hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+//		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
+//		hInt[2] = m_browser.InsertItem("PsychOsc AM",1,1,intFxNode,TVI_SORT);
+//		hInt[3] = m_browser.InsertItem("Dalay Delay",1,1,intFxNode,TVI_SORT);
+//		hInt[4] = m_browser.InsertItem("2p Filter",1,1,intFxNode,TVI_SORT);
+//		hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
+//		hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
+//		hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+		hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 		m_browser.Select(hNodes[LastType1],TVGN_CARET);
 	}
 

@@ -688,6 +688,7 @@ Master::Master(int index)
 void Master::Init(void)
 {
 	Machine::Init();
+	sampleCount = 0;
 #if !defined(_WINAMP_PLUGIN_)
 //	_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
 //	_RMAX = 1;
@@ -708,8 +709,11 @@ void Master::Work(
 	CPUCOST_INIT(cost);
 #endif // ndef _WINAMP_PLUGIN
 
+	sampleCount++;
+	
 //	if (!_mute)
 //	{
+	
 		float mv = CValueMapper::Map_255_1(_outDry);
 		
 		float *pSamples = _pMasterSamples;

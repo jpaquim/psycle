@@ -266,6 +266,15 @@ bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItali
 	bool Read();
 	void Write();
 
+	inline const int GetSamplesPerSec() const throw()
+	{
+		return
+#if !defined(_WINAMP_PLUGIN_)
+			_pOutputDriver->
+#endif
+		_samplesPerSec;
+	}
+
 #if !defined(_WINAMP_PLUGIN_)
 
 	char* GetInstrumentDir() { return _psInstrumentDir; }

@@ -1134,6 +1134,8 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 }
 #endif // ndef _WINAMP_PLUGIN_
 
+#include "convert_internal_machines.h" // conversion
+
 bool Song::Load(RiffFile* pFile)
 {
 	char Header[9];
@@ -1239,7 +1241,7 @@ bool Song::Load(RiffFile* pFile)
 					pFile->Read(&temp,sizeof(temp));  // machineSoloed
 					solo = temp;	// we need to buffer this because destroy machine will clear it
 
-					pFile->Read(&temp,sizeof(temp));  // machineSoloed
+					pFile->Read(&temp,sizeof(temp));  // trackSoloed
 					_trackSoloed=temp;
 
 					pFile->Read(&temp,sizeof(temp));  
@@ -1722,6 +1724,11 @@ bool Song::Load(RiffFile* pFile)
 		pFile->Read(&_machineActive[0], sizeof(_machineActive));
 		Machine* pMac[128];
 		memset(pMac,0,sizeof(pMac));
+
+#if defined(PSYCLE__CONVERT_INTERNAL_MACHINES)
+		psycle::convert_internal_machines::Converter converter; // conversion
+#endif
+
 		for (i=0; i<128; i++)
 		{
 			Sine* pSine;
@@ -1746,6 +1753,12 @@ bool Song::Load(RiffFile* pFile)
 				pFile->Read(&y, sizeof(y));
 
 				pFile->Read(&type, sizeof(type));
+
+#if defined(PSYCLE__CONVERT_INTERNAL_MACHINES)
+				if(converter.plugin_names().exists(type))
+					pMac[i] = &converter.redirect(i, type, *pFile); // conversion
+				else
+#endif
 
 				switch (type)
 				{
@@ -2355,6 +2368,10 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
+
+#if defined(PSYCLE__CONVERT_INTERNAL_MACHINES)
+		converter.retweak(*this); // conversion
+#endif
 
 		_machineLock = false;
 		seqBus=0;

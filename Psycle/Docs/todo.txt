@@ -1,6 +1,5 @@
 * Legend
 --------
-
 *=bug
 !=change
 +=addition
@@ -15,22 +14,18 @@ X low priority
 [blah]  <- Notes written by developers
 
 
-rough bug count: ~60, many aren't really bugs though.
 
+rough bug count: ~60, many aren't really bugs though.
 
 * New and unsorted and untested
 -------------------------------
 
-
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
-++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms) 
-
-+ tracker commands to connect/disconnect machines
+++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
 ++ undos for machine and wave edit? also track changes for file changed flag
 
-
-** need save file? reminder on open file 
+** need save file? reminder on open file
 *** save as wave should alert when it runs out of space
 
 *** <YanniS> my settings directories always get corrupted somehow
@@ -97,12 +92,8 @@ rough bug count: ~60, many aren't really bugs though.
 **  clicking in pooplog synths when vca sustain is off
 **  pooplog delay panning knobs fuck with my brain because they work counter-intuitively
 !	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
-!	alk: dalay delay is not precise enough (in terms of time)
-		[JAZ: Ehem... use the keyboard arrows for sample-precise tweaking]
 +	pooplog synths don't have gain lfo phase cmd?
-++	<[JAZ]> Internals still miss mouse tweak, right?
 +	alk/[JAZ] Add Osci/etc from wire dialog to Master Dialog.
-!!	all native machines should be made external except sampler and dummy
 +	<pooplog> it would be nice to have an internal wavein machine to get live input
 		<Druttis> Yes
 		<trylle> i mean that it records and plays back at the same time * record wave in too
@@ -127,7 +118,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Wave Editor:
 --------------------------
-* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' 
+* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>'
 	button in the inst ed, and select some of the sample wav, the display goes blank
 * Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
 !	alk: escape to close wave ed
@@ -146,7 +137,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		to cause the bug of more than one line number highlighted:
 		select a line, then lower down click and drag to select a block.
 		cause the window to scroll by making the block go off the Bottom of the screen.
-		(notice the previous highlight moving up) now click another place. 
+		(notice the previous highlight moving up) now click another place.
 		[pooplog - cannot reproduce]
 *	Can't select with keyboard while follow song on, and playing.
 		[pooplog -  DUH The cursor is following the song, how are you going to select?!]
@@ -155,7 +146,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
-+	D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
++	D says: When you highlight something in Psycle would it be possible to make it so you can drag and
 		drop that highlighted area?
 +	Xerox replace, allow multiple - it replaces the selected pattern(s) with an identical new one
 +	Xerox multiple
@@ -169,49 +160,48 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
 		[KeyToCmd() isn't called when a mouse button is down... ]
-*	preview check box in preset dialog stopped working? envelope dialog for sampler?
-	[ it works, but you can't test notes realtime because the dialog is modal - unless you use midi ]
 *	moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
-	on every frame - 
+	on every frame -
 	[ make bigger buffers and more of them to prevent this from happening * i tried to minimize this ]
 *	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
 	[ could try to set up some sort of clipping rect stack, at the cost of cpu... ]
 *	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
 	[ this is perhaps a flaw in the transparency blit algo? - should port to ddraw ]
+
+
++++    Create a new "universal" MachineFrame class, for all plugins including all the following things:
+          (Needs a few more changes in the class definitions)
+*	cannot preview with keyboards in preset dialog
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
-!?	alk - make wires square ended, like spec analyser
-+	Option to disable vus (to save CPU)
-	[ you could easily make a skin with no vus.. just set the rects to size 0]
-+	Directories in "Add new machine" (Sorting with directories)
-		 Remember previous used and add "class/type" selection to registry
-+	Internal Fx Gui to Native Gui Conversion (including wiredialog, or not...)
-		 Create a new "universal" MachineFrame class, for all plugins
-		 (Needs a few more changes in the class definitions)
 +	VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
 +	Option to hide Parameters in VST GUI.
 +	Add Presets in a "tab" under Parameters (easy switching/testing)!
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
 		<pooplog> sliders, switches, and owner draw controls i say?
+EOF
+
++	Option to disable vus (to save CPU)
+	[ you could easily make a skin with no vus.. just set the rects to size 0]
+!?	alk - make wires square ended, like spec analyser
++	Directories in "Add new machine" (Sorting with directories)
+		 Remember previous used and add "class/type" selection to registry
 +	James says: how hard would it be to put nodes in the wires, so you can bend them?
-+ <JAL7OH> is it possible to make arrows resizable?
+
 
 * Player Engine:
 ----------------
-**	<sue> playbar should take latency into account - same as ^
-**	<_sue_> (autostop) now it also behaves weird with internal delays even if not in record mode....just 
-		playng
-		[Might be fixed already, if the problem was that machines remained muted]
+**	<sue> playbar should take latency into account
 *	When changing octave, notes playing should be stopped (because if not, notes playing don't stop)
 		[Problem!!! All key processing is done by InputHandler, so machines don't know when it happens,
 		 and neither does Inputhandler know which machines are playing.
 		 Doing a "player::Stop()" would be a bit hardcore.
 		 I agree]
 +++	Add options to "save as wave" for: sample rate, # channels, bitsize
-+++	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
++++	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command
 +++FF?	DirectX effects, intstruments
-+++	option for record to take command FD into account like ft2
++++	option for note-record to take command FD into account like ft2
 ++	ALK tracker command to bypass an fx, mute command for machines
 		[Currently machines are disconnected when doing so. If we do the commands, they should be just muted]
 ++	Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
@@ -222,9 +212,11 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	pattern repeat (loop) and song repeat (asked by Vir|us)
 +	alk: global Delay Trigger, that affects every note (not just the one on this channel)
 		[this seems hard, because the player will have to scan all tracks for this command, then go back and
-		play the tracks]
-+FF	Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to 
-	file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to 
+		play the tracks
+                We already do this for twk's, we could check one more command. Still, a dedicated global column
+                is a better solution.]
++FF	Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to
+	file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to
 	vol+panning for the gui for the user.
 
 * Vsts:
@@ -233,13 +225,13 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[Fix:Basically, make ONLY .fxb for VST's.]
 **	The Winamp plugin shows a memory leak with modules that have VST's. I have overlooked but I
 	haven't found the cause yet. I will try later with a leak detector program.
-** BLOCKFISH crashes on connect 
+** BLOCKFISH crashes on connect
 ** DashSynthesis daAlfa2k VSTi v1.28b - crashes with user breakpoints and access violation on instance in debug build
 ** ticky clav 1.1 causes random access violation crashes? - now i am not sure if it is ticky clav
 ** phatmatic causes crashes when you open the gui after loading a sample into it.
-	[ also, when opening/closing the directory pane, it tries to change the window size and does a poor job. 
+	[ also, when opening/closing the directory pane, it tries to change the window size and does a poor job.
 	  after a few tries it fucks up.  if you re-open it after it has fucked up, it crashes. ]
-** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
+** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66
 	it works fine?
 **	JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded;
 		docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible
@@ -251,21 +243,21 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		<_sue_> yes i am (in pro52)
 		[ How does those plugins do Automation then? Maybe it is a Host fault not reporting that it supports it? ]
 ** <_sue_> hey.....remember seeing someone at the boards sayn that psycles param bar went crazy with
-	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob 
-	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
-	 talking about......the first time it happened it scrolled for ages..i thought it had went 
+	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob
+	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was
+	 talking about......the first time it happened it scrolled for ages..i thought it had went
 	 crazy too.....
 ** ni fm7 locks up psycle on parameter change midi command with gui open
 ** ni pro53 sometimes crashes when loading a song that uses it.
 ** ni spektral delay 1.0 crashes on effClose or effEditIdle messages.  notice a trend with NI plugins yet?
 ** stylus locks up on fast songs, with looping sound
-** <pooplog> waveshell: i am aware that this does not work, i do not know why yet 
+** <pooplog> waveshell: i am aware that this does not work, i do not know why yet
 ** synth 1 1.05a crashes with exception error on instance in debug build.
 *	Many vsts randomly loose keyboard focus
 	[ alk says make an invisible topmost window that passes clicks and keys down to windows beneath it ]
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.
-		[ A "bypass" bug, if we do the above ^]
+		[ should be resolved when using .fxb format directly and the new FrameWindow ]
 *	JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly
 		 (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
 *	New Note in Quadrasid does not reinitialize the Envelope.
@@ -278,39 +270,37 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		-tools one
 * sonic syndicate plugins (talkbox and phaser) get enumerated as plucked string
 +++FF	<bdzld> which is support for multiout vsti?
-		<pooplog> if psycle was smart enough to detect mutli-out vst, when you drag a wire to it, it could pop up a 			
+		<pooplog> if psycle was smart enough to detect mutli-out vst, when you drag a wire to it, it could pop up a
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(
 
 
 * MIDI related
 ------------
-***	MIDI out only works with Waveout
-**	Midiout is NOT solid...
-	[ has this been tested in the last year ? ]
+***	MIDI in only works with Waveout
+++	MIDI out
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages
-++	<lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
+++	<lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change
 	the active machine to machine number [program number] ...this enables psycle for live use without screen
-+	<lastfutur> future feature requests for the controllers tab: midi routing presets; 
-	checkbox: binding which machine is active to incoming program changes; 
++	<lastfutur> future feature requests for the controllers tab: midi routing presets;
+	checkbox: binding which machine is active to incoming program changes;
 	binding midi routing presets to machines; (possibly: save the presets in the psy)
 
 * Interface (contains pattern stuff too):
 ------------
-** When 'cursor always down' is enabled u can't insert values on the last row
-	[ not recreated ]
-**	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
+**	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new
 	psycle opens..
 	[ DDE ? mmmm... ]
-**	<lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
+**	<lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key
 	combinations don't work either, like ctrl+pageup etc.
 **	should save wire dialog settings
 	[ are you sure? ]
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
 	<bdzld> yep, or if the sample rate is invalid
 * <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
-* sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
 	[ same thing, pattern ed looses focus ]
+	[ easy way to reproduce, click a button and move the mouse out without leaving. button gets selected, but event
+	 hasn't happened so it remains there ]
 *	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
 	in the "note" column.
 	[Is it useful to enter numbers while playing and follow song? what about just adding notes
@@ -320,9 +310,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
 	 range bigger]
-*	<alk> there's a bug where when u alt-tab the icon is not correct 
+*	<alk> there's a bug where when u alt-tab the icon is not correct
 		[ cannot find the reason, older version had this too ]
-*	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you 
+*	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you
 	move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
@@ -330,46 +320,45 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 !	JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
 ++	<alk> another idea, a keypress to toggle follow song
 ++	<alk_> alt-f5 - play song from start
-++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. 
+++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now..
 		[because machine view does not track changes yet]
-++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
+++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?
 + <bd|cup> poop: could you add an option to make psycle load the last opened .psy, when you run it?
-+ <sampler> Well, i've been playing and changing default hotkeys and now i think it would be good 
-	enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various 
++ <sampler> Well, i've been playing and changing default hotkeys and now i think it would be good
+	enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various
 	types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
 +	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
 +	<Alk> +alt to make the transposing only effect current machine/sample
 		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note
 		ctrl+alt+shift+f12 = transpose current gen/sample up 1 octave
-+	<dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
++	<dp|away> you could setup some standard buffers you know are solid and do like setting low -> high
 		and shield the user from the nastiness
-+	James says: i have an idea for that actually... seeing as there are so many configurable 
-		keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight 
++	James says: i have an idea for that actually... seeing as there are so many configurable
+		keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight
 		what was assigned to it
 +	<alk_> the 'Apply' button is not implemented in the config dialog
 +	<alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 +	<alk> song properties (allow carriage returns, make box bigger?)
 +	<_sue_> centering the open file menus....
-		and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
+		and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its
 		convenient for when you have folders with many files as you usually do with samples
-+	<Alk^> I also think that the cursor movement after a paste should be optional to =)
-+	<sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
++	<sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data
 		into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
-+	<wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through 
++	<wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through
 		9, change the row skip
-+	<wayfinder> alk, and it would be nice if the row skip would affect the cursor movement as well (or at 
++	<wayfinder> alk, and it would be nice if the row skip would affect the cursor movement as well (or at
 		least if the tracker could be configured to do so=)
 +	<wayfinder> like navigating in the sequence list with the cursor
 		[No. It is not needed, and causes alot of harm. if you want to navigate you have hotkeys]
 +	<wayfinder> numeric entering of pattern number
-+	<wayfinder> oh, i forgot one function of the IT pattern editor. when the cursor isnt following the 
++	<wayfinder> oh, i forgot one function of the IT pattern editor. when the cursor isnt following the
 		pattern, or when the song isnt playing, hitting the G key on a number takes you to that pattern
 		[ dear wayfinder, please remember that this is not IT damnit ]
 +?	<wayfinder> it would be so much cooler if there were like macros
 		say, i have a chorus part that's pattern 4, 6, 4, 5 and i have that three times in the song or so
-		i'd love to define pattern macro A as "4, 6, 4, 5" and be able to enter macro A in the 
+		i'd love to define pattern macro A as "4, 6, 4, 5" and be able to enter macro A in the
 		pattern sequencer
 +	 MORE Keyboard shortcuts
 		[ We've added some more actually]
@@ -378,15 +367,15 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Driver Issues:
 ------------
-** <_sue_> just a small issue ive noticed with this build....when i select asio psycle crashes...wich doesnt 
+** <_sue_> just a small issue ive noticed with this build....when i select asio psycle crashes...wich doesnt
 	amazes me since i dont have asio.....but software should be "crash free"...
 		[ if you have 0 drivers enumerated, perhaps you should not be able to select that method ]
 *	Output gets weird after a bit and start playing all crackly and doubletime
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
-*	DirectSound Output is a bit buggy.Crashes and bad sound reported. 
+*	DirectSound Output is a bit buggy.Crashes and bad sound reported.
 	[ still ? ]
-* <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall, 
+* <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall,
 	it got 8 outputs
 
 * Importing:
@@ -395,9 +384,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ++ .mid import/export
 +	IT importing
 +	.mid import
-+	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
++	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring
 		pattern data and other settings, this possible? (yes, but will require new song parser...)
-+ <angelus> In this threat I suggest an option to import a XM or IT file into differents 
++ <angelus> In this threat I suggest an option to import a XM or IT file into differents
 	Sampler-machines separating by instrument/sample.
 
 * File Format:

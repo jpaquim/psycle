@@ -232,6 +232,7 @@ class Master : public Machine
 {
 public:
 	Master(int index);
+	double sampleCount; // this is for the VstHost
 	int _outDry;
 	bool _clip;
 	bool decreaseOnClip;

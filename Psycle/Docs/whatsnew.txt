@@ -1,5 +1,5 @@
 ---------------------------------------------------
-Legend :	+=addition		*=change	!=bug	
+Legend :	+=addition		*=change	!=bug
 ---------------------------------------------------
 
 V1.7.3
@@ -21,6 +21,8 @@ V1.7.3
 * machine names can be longer now (pooplog)
 * more exceptions trapped on loading of vsts, more accurate data sent to pluginlog.txt (pooplog)
 * replace and exchange functions in gear rack maintain connections (pooplog)
+* Internal effects moved to native plugins and improved them in some cases. (bohan)
+* more work in the VstTimeInfo. samplePos is correctly indicated now and improved ppqPos. [JAZ]
 ! sampler doesn't crash when no instrument is specified any more (pooplog)
 ! save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
 ! error messages on file read/write problems (pooplog)
@@ -33,6 +35,11 @@ V1.7.3
 ! various other small bugfixes (pooplog)
 ! some memory leaks fixed [JAZ]
 ! Sample loading routine is now more flexible.This allows to load files that previously didn't. [JAZ]
+
+
+V1.7.2
+------
+! bug where the sampler didn't stop the notes sometimes.
 
 
 V1.7.1
