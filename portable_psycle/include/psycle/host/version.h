@@ -1,8 +1,11 @@
-#include <project.h>
+#include "../../../src/project.h"
 
 #if 0
 /*
 $Log$
+Revision 1.6  2005/01/14 22:09:14  jaz001
+fix for resources not being editable inside MSVC
+
 Revision 1.5  2005/01/13 23:18:50  johan-boule
 no message
 

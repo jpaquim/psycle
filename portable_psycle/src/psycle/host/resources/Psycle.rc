@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include <psycle/host/resource.h>
+#include "../../../../include/psycle/host/resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -62,6 +62,7 @@ IDB_MASTERSLIDER        BITMAP                  "./MasterMachine/slider.bmp"
 IDB_PATTERN_HEADER_SKIN BITMAP                  "./pattern_header_skin.bmp"
 IDB_MACHINE_SKIN        BITMAP                  "./machine_skin.bmp"
 IDB_ASIO                BITMAP                  "./AsioLogo.bmp"
+IDB_BETASPLASH          BITMAP                  "beta.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -947,7 +948,7 @@ BEGIN
     LTEXT           "",IDC_DESCLABEL,246,30,125,19,SS_SUNKEN
     LTEXT           "Dll Name",IDC_STATIC,212,54,30,8
     LTEXT           "",IDC_DLLNAMELABEL,246,49,125,21,SS_SUNKEN
-    LTEXT           "Version",IDC_STATIC,218,71,24,8
+    LTEXT           "API Version",IDC_STATIC,206,71,38,8
     LTEXT           "",IDC_VERSIONLABEL,246,70,125,12,SS_SUNKEN
     GROUPBOX        "List Machines by",IDC_STATIC,201,136,176,47
     CONTROL         "Library Name (Dll)",IDC_SHOWDLLNAME,"Button",
@@ -994,8 +995,8 @@ BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,5,187,323,1,
                     WS_EX_STATICEDGE
     CONTROL         "Show About Dialog at Startup",IDC_SHOWATSTARTUP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,5,190,117,11
-    RTEXT           "Version  [Date]",IDC_VERSION_INFO,138,190,190,11,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,190,111,11
+    RTEXT           "Version  [Date]",IDC_VERSION_INFO,119,190,212,11,
                     SS_CENTERIMAGE,WS_EX_TRANSPARENT
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,5,203,324,1,
                     WS_EX_STATICEDGE
@@ -1486,6 +1487,211 @@ BEGIN
                     BS_PUSHLIKE | WS_GROUP,175,257,76,15
 END
 
+IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 252
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Render as Wav File"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Output Path",IDC_STATIC,5,7,39,10
+    EDITTEXT        IDC_FILENAME,49,5,157,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_FILEBROWSE,212,5,39,13
+    CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
+                    IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,9,25,231,21
+    GROUPBOX        "Record:",IDC_STATIC,5,104,246,61
+    EDITTEXT        IDC_PATNUMBER,107,130,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(in HEX value)",IDC_STATIC,137,133,47,10
+    EDITTEXT        IDC_RANGESTART,107,145,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,149,145,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "to",IDC_STATIC,138,147,8,8
+    LTEXT           "(in HEX value)",IDC_STATIC,179,147,47,10
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
+                    0x1,5,218,245,9
+    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,154,232,50,14
+    PUSHBUTTON      "Close",IDCANCEL,209,232,41,14
+    CONTROL         "Record the entire song",IDC_RECSONG,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,13,117,112,10
+    CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
+                    BS_AUTORADIOBUTTON,13,132,89,10
+    CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
+                    BS_AUTORADIOBUTTON,13,147,93,10
+    RTEXT           "Sample Rate",IDC_STATIC,66,170,45,15,SS_CENTERIMAGE
+    RTEXT           "Channels",IDC_STATIC,61,200,50,15,SS_CENTERIMAGE
+    RTEXT           "Bit Depth",IDC_STATIC,61,185,50,15,SS_CENTERIMAGE
+    CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
+                    IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,9,47,230,24
+    COMBOBOX        IDC_COMBO_RATE,117,170,134,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_BITS,117,185,134,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_CHANNELS,117,200,133,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
+                    IDC_STATIC,12,170,50,45,WS_DISABLED
+    LTEXT           "",IDC_TEXT,6,233,144,12
+    CONTROL         "Save each unmuted generator as a separated wav (generator number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
+                    IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,9,76,230,24
+END
+
+IDD_NEW_VOLUME DIALOG  0, 0, 114, 63
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "New Volume"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_EDIT_DB,30,5,45,15,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "db",IDC_STATIC,80,5,15,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_PER,30,25,45,15,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "%",IDC_STATIC,80,25,15,15,SS_CENTERIMAGE
+    DEFPUSHBUTTON   "OK",IDOK,5,45,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,60,45,50,14
+END
+
+IDD_PROGRESS_DIALOG DIALOG  0, 0, 252, 9
+STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | DS_CENTER | 
+    WS_POPUP | WS_CAPTION
+CAPTION "Working..."
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",0x1,1,1,
+                    250,8
+END
+
+IDD_MIXER DIALOGEX 0, 0, 581, 195
+STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW
+CAPTION "Psycle Mixer"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_MIXSLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,5,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB,5,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER,5,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT1,5,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,41,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB2,41,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER2,41,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT2,41,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,77,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB3,77,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER3,77,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT3,77,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER4,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,113,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB4,113,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER4,113,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT4,113,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER5,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,149,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB5,149,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER5,149,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT6,185,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER6,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,185,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB6,185,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER6,185,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT7,221,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER7,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,221,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB7,221,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER7,221,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT8,257,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER8,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,257,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB8,257,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER8,257,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT9,293,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER9,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,293,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB9,293,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER9,293,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT10,329,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER10,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,329,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB10,329,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER10,329,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT11,365,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER11,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,365,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB11,365,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER11,365,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT12,401,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER12,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,401,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB12,401,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER12,401,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT13,437,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER13,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,437,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB13,437,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER13,437,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT14,473,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER14,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,473,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB14,473,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER14,473,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT15,509,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER15,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,509,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB15,509,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER15,509,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT16,545,169,31,22,ES_AUTOHSCROLL
+    CONTROL         "",IDC_MIXSLIDER16,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,545,13,21,127
+    PUSHBUTTON      "db",IDC_VOLUME_DB16,545,141,31,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER16,545,152,31,11,NOT WS_TABSTOP
+    EDITTEXT        IDC_EDIT17,12,5,24,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
+                    WS_BORDER
+    EDITTEXT        IDC_EDIT5,149,169,31,22,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT18,48,5,24,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
+                    WS_BORDER
+    EDITTEXT        IDC_EDIT19,84,5,24,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
+                    WS_BORDER
+    EDITTEXT        IDC_EDIT20,120,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT21,156,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT22,192,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT23,227,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT24,264,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT25,300,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT26,336,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT27,371,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT28,407,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT29,444,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT30,479,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT31,515,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_EDIT32,552,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+END
+
+IDD_ERRORLOGGER DIALOGEX 0, 0, 431, 218
+STYLE DS_SETFONT | DS_SETFOREGROUND | DS_NOFAILCREATE | DS_CENTER | 
+    WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU | 
+    WS_THICKFRAME
+CAPTION "Logging Window"
+FONT 7, "Lucida Console", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_ERRORLOG_TXT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
+                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,29,29,278,120,
+                    WS_EX_CLIENTEDGE
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1744,6 +1950,37 @@ BEGIN
         RIGHTMARGIN, 256
         TOPMARGIN, 7
         BOTTOMMARGIN, 277
+    END
+
+    IDD_SAVEWAVDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 250
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 245
+    END
+
+    IDD_NEW_VOLUME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 107
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 56
+    END
+
+    IDD_MIXER, DIALOG
+    BEGIN
+        RIGHTMARGIN, 185
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 194
+    END
+
+    IDD_ERRORLOGGER, DIALOG
+    BEGIN
+        LEFTMARGIN, 12
+        RIGHTMARGIN, 337
+        TOPMARGIN, 12
+        BOTTOMMARGIN, 188
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2097,7 +2334,7 @@ END
 // Version
 //
 
-#include <psycle/host/version.h>
+#include "../../../../include/psycle/host/version.h"
 #include <windows.h>
 // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 VS_VERSION_INFO VERSIONINFO
@@ -2106,14 +2343,14 @@ VS_VERSION_INFO VERSIONINFO
 	FILEFLAGSMASK VS_FF_DEBUG
 	#if defined NDEBUG
 		FILEFLAGS 0
-	#else
+#else
 		FILEFLAGS VS_FF_DEBUG
-	#endif
+#endif
 	FILEOS VOS_NT
 	FILETYPE VFT_UNKNOWN
 	FILESUBTYPE VFT2_UNKNOWN
 	{
-		BLOCK "StringFileInfo"
+    BLOCK "StringFileInfo"
 		{
 			BLOCK "040904b0" // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
 			{
@@ -2132,12 +2369,11 @@ VS_VERSION_INFO VERSIONINFO
 				VALUE "License", RC__License
 			}
 	}
-	BLOCK "VarFileInfo"
+    BLOCK "VarFileInfo"
 	{
 		VALUE "Translation", 0x409, 1200 // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
 	}
 END
-
 
 
 #ifdef APSTUDIO_INVOKED
@@ -2148,7 +2384,7 @@ END
 
 1 TEXTINCLUDE 
 BEGIN
-    "#include <psycle\\host\\resource.h>\r\n\0"
+    "..\\..\\..\\..\\include\\psycle\\host\\resource.h\0"
 END
 
 2 TEXTINCLUDE 
@@ -2372,337 +2608,7 @@ BEGIN
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
 END
 
-#endif    // Neutral (Default) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Catalan resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
-#ifdef _WIN32
-LANGUAGE LANG_CATALAN, SUBLANG_DEFAULT
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 252
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Render as Wav File"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    LTEXT           "Output Path",IDC_STATIC,5,7,39,10
-    EDITTEXT        IDC_FILENAME,49,5,157,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_FILEBROWSE,212,5,39,13
-    CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
-                    IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,9,25,231,21
-    GROUPBOX        "Record:",IDC_STATIC,5,104,246,61
-    EDITTEXT        IDC_PATNUMBER,107,130,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(in HEX value)",IDC_STATIC,137,133,47,10
-    EDITTEXT        IDC_RANGESTART,107,145,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGEEND,149,145,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "to",IDC_STATIC,138,147,8,8
-    LTEXT           "(in HEX value)",IDC_STATIC,179,147,47,10
-    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
-                    0x1,5,218,245,9
-    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,154,232,50,14
-    PUSHBUTTON      "Close",IDCANCEL,209,232,41,14
-    CONTROL         "Record the entire song",IDC_RECSONG,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,13,117,112,10
-    CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
-                    BS_AUTORADIOBUTTON,13,132,89,10
-    CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
-                    BS_AUTORADIOBUTTON,13,147,93,10
-    RTEXT           "Sample Rate",IDC_STATIC,66,170,45,15,SS_CENTERIMAGE
-    RTEXT           "Channels",IDC_STATIC,61,200,50,15,SS_CENTERIMAGE
-    RTEXT           "Bit Depth",IDC_STATIC,61,185,50,15,SS_CENTERIMAGE
-    CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
-                    IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,9,47,230,24
-    COMBOBOX        IDC_COMBO_RATE,117,170,134,75,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_BITS,117,185,134,75,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_CHANNELS,117,200,133,75,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
-                    IDC_STATIC,12,170,50,45,WS_DISABLED
-    LTEXT           "",IDC_TEXT,6,233,144,12
-    CONTROL         "Save each unmuted generator as a separated wav (generator number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
-                    IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,9,76,230,24
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_SAVEWAVDLG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 250
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 245
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Catalan resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_NEW_VOLUME DIALOG  0, 0, 114, 63
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "New Volume"
-FONT 8, "MS Sans Serif"
-BEGIN
-    EDITTEXT        IDC_EDIT_DB,30,5,45,15,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "db",IDC_STATIC,80,5,15,15,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT_PER,30,25,45,15,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "%",IDC_STATIC,80,25,15,15,SS_CENTERIMAGE
-    DEFPUSHBUTTON   "OK",IDOK,5,45,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,60,45,50,14
-END
-
-IDD_PROGRESS_DIALOG DIALOG  0, 0, 252, 9
-STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | DS_CENTER | 
-    WS_POPUP | WS_CAPTION
-CAPTION "Working..."
-FONT 8, "MS Sans Serif"
-BEGIN
-    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",0x1,1,1,
-                    250,8
-END
-
-IDD_MIXER DIALOGEX 0, 0, 581, 195
-STYLE DS_SETFONT | DS_3DLOOK | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_CAPTION | 
-    WS_SYSMENU
-EXSTYLE WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW
-CAPTION "Psycle Mixer"
-FONT 8, "MS Shell Dlg", 0, 0, 0x0
-BEGIN
-    CONTROL         "",IDC_MIXSLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,5,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB,5,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER,5,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT1,5,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,41,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB2,41,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER2,41,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT2,41,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER3,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,77,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB3,77,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER3,77,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT3,77,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER4,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,113,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB4,113,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER4,113,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT4,113,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER5,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,149,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB5,149,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER5,149,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT6,185,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER6,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,185,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB6,185,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER6,185,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT7,221,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER7,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,221,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB7,221,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER7,221,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT8,257,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER8,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,257,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB8,257,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER8,257,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT9,293,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER9,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,293,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB9,293,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER9,293,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT10,329,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER10,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,329,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB10,329,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER10,329,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT11,365,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER11,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,365,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB11,365,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER11,365,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT12,401,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER12,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,401,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB12,401,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER12,401,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT13,437,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER13,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,437,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB13,437,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER13,437,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT14,473,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER14,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,473,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB14,473,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER14,473,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT15,509,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER15,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,509,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB15,509,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER15,509,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT16,545,169,31,22,ES_AUTOHSCROLL
-    CONTROL         "",IDC_MIXSLIDER16,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,545,13,21,127
-    PUSHBUTTON      "db",IDC_VOLUME_DB16,545,141,31,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER16,545,152,31,11,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT17,12,5,24,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
-                    WS_BORDER
-    EDITTEXT        IDC_EDIT5,149,169,31,22,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT18,48,5,24,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
-                    WS_BORDER
-    EDITTEXT        IDC_EDIT19,84,5,24,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
-                    WS_BORDER
-    EDITTEXT        IDC_EDIT20,120,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT21,156,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT22,192,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT23,227,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT24,264,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT25,300,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT26,336,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT27,371,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT28,407,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT29,444,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT30,479,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT31,515,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-    EDITTEXT        IDC_EDIT32,552,5,24,12,ES_AUTOHSCROLL | ES_READONLY | 
-                    NOT WS_BORDER
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_NEW_VOLUME, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 107
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 56
-    END
-
-    IDD_MIXER, DIALOG
-    BEGIN
-        RIGHTMARGIN, 185
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 194
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
-IDB_BETASPLASH          BITMAP                  "beta.bmp"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_ERRORLOGGER DIALOGEX 0, 0, 431, 218
-STYLE DS_SETFONT | DS_SETFOREGROUND | DS_NOFAILCREATE | DS_CENTER | 
-    WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU | 
-    WS_THICKFRAME
-CAPTION "Logging Window"
-FONT 7, "Lucida Console", 400, 0, 0x0
-BEGIN
-    CONTROL         "",IDC_ERRORLOG_TXT,"RichEdit20A",ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
-                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,29,29,278,120,
-                    WS_EX_CLIENTEDGE
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_ERRORLOGGER, DIALOG
-    BEGIN
-        LEFTMARGIN, 12
-        RIGHTMARGIN, 337
-        TOPMARGIN, 12
-        BOTTOMMARGIN, 188
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // English (U.K.) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
