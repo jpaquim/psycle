@@ -475,7 +475,7 @@ namespace psycle
 				if(progressOpen)
 				{
 					Progress.Create();
-					Progress.SetWindowText("Scanning plugins ...");
+					Progress.SetWindowText("Scanning plugins ..");
 					Progress.ShowWindow(SW_SHOW);
 					class plugin_counter
 					{
@@ -508,7 +508,7 @@ namespace psycle
 								plugin_counter(Global::pConfig->GetVstDir())
 							)
 						);
-					Progress.SetWindowText("Scanning plugins ...."); // put a fourth dot
+					Progress.SetWindowText("Scanning plugins ..."); // put a third dot
 				}
 				std::ofstream out;
 				{
@@ -522,6 +522,7 @@ namespace psycle
 					out.open((module_directory + "/plugin-scan.log.txt").c_str());
 				}
 				out << "[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)" << std::endl;
+				Progress.SetWindowText("Scanning plugins ... Natives ...");
 				out << std::endl << "[Native Plugins]" << std::endl << std::endl;
 				out.flush();
 				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetPluginDir()), MACH_PLUGIN, out, progressOpen ? &Progress : 0);
