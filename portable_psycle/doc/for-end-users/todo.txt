@@ -141,8 +141,6 @@ Hope this makes stuff clear.
 ?+ release audio when psycle looses focus option
 	[And we will get lots of people again of why does psycle do that]
 
-+	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
-
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 
 + <AF> I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
