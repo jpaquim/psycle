@@ -38,6 +38,7 @@ enum
 	DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
 	DMCursor,		// Indicates a movement of the cursor. update the values to "editcur" directly
 					// and call this function.
+					// this is arbitrary message as cursor is checked
 	DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
 	DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
 //	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
@@ -212,6 +213,7 @@ public:
 	CMasterDlg * MasterMachineDialog;
 
 	bool blockSelected;
+	bool blockStart;
 	CCursor editcur;	// Edit Cursor Position in Pattern.
 	bool bEditMode;		// in edit mode?
 	int patStep;

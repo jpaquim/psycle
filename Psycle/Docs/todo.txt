@@ -26,11 +26,12 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 
 * GUI (pattern):
 ----------------
-** trying to select past the visible area with the mouse sucks
-** bug:	 Select with mouse when playing gives problems
+** Select past edge of screen sucks when center cursor is on
 **  select with keyboard while playing and follow mode on sucks
 **	when scrolling does x and y it sometimes fucks up when center mode is on
 * when shift block select mode is active, entering notes does not break the block selection
+* <pooplog> i need to figure a way to separate the scollbars and the selection from the cursor
+	and of course center cursor mode will especially hate that
 * <bdzld> block double should be contrained to block
 * <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
 	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 

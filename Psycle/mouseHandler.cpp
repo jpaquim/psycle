@@ -264,11 +264,12 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 
 			oldm.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
 
-			blockSelected=false;
-			blockSel.end.line=0;
-			blockSel.end.track=0;
-			Repaint(DMSelection);
-
+			blockStart = TRUE;
+			if (nFlags & MK_SHIFT)
+			{
+				editcur = oldm;
+				Repaint(DMCursor);
+			}
 		}
 
 	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
@@ -327,9 +328,9 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		break;
 
 	case VMPattern:
-		if ( ( !blockSelected )
-			&& ( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT))
-			&& (point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
+		if ( (blockStart) &&
+			( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT)) &&
+			(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
 		{
 			editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
 //			if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
@@ -395,7 +396,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 
 	case VMPattern:
 
-		if ( nFlags == MK_LBUTTON && oldm.track != -1)
+		if ((nFlags & MK_LBUTTON) && oldm.track != -1)
 		{
 			ntOff = tOff;
 			nlOff = lOff;
@@ -480,11 +481,51 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 
 			if ((ttm != oldm.track ) || (llm != oldm.line) || (ccm != oldm.col))
 			{
-				if (!blockSelected) StartBlock(oldm.track,oldm.line,oldm.col);
+				if (blockStart) 
+				{
+					blockStart = FALSE;
+					blockSelected=false;
+					blockSel.end.line=0;
+					blockSel.end.track=0;
+					StartBlock(oldm.track,oldm.line,oldm.col);
+				}
 				ChangeBlock(ttm,llm,ccm);
 				oldm.track=ttm;
 				oldm.line=llm;
 				oldm.col=ccm;
+				Repaint(DMSelection);
+			}
+
+			if (nFlags & MK_SHIFT)
+			{
+				editcur.track = ttm;
+				editcur.line = llm;
+				editcur.col = ccm;
+				Repaint(DMCursor);
+			}
+			else 
+			{
+				if (editcur.track < ntOff)
+				{
+					editcur.track = ntOff;
+					Repaint(DMCursor);
+				}
+				else if (editcur.track > ntOff+VISTRACKS-1)
+				{
+					editcur.track = ntOff+VISTRACKS-1;
+					Repaint(DMCursor);
+				}
+
+				if (editcur.line < nlOff)
+				{
+					editcur.line = nlOff;
+					Repaint(DMCursor);
+				}
+				else if (editcur.line > nlOff+VISLINES-1)
+				{
+					editcur.line = nlOff+VISLINES-1;
+					Repaint(DMCursor);
+				}
 			}
 		}
 		else if (nFlags == MK_MBUTTON)
