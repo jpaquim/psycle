@@ -1,7 +1,7 @@
 #ifndef __CONSTANTS_H
 #define __CONSTANTS_H
 
-#define VERSION_NUMBER "1.7.3 RC 1"
+#define VERSION_NUMBER "1.7.3 RC2"
 #define CONVERT_INTERNAL_MACHINES
 
 #define TWEAK_SLIDE_SAMPLES		64 // number of samples per tweak slide update

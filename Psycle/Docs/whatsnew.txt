@@ -2,8 +2,12 @@
 Legend :	+=addition		*=change	!=bug
 ---------------------------------------------------
 
-V1.7.3 RC 1
------------
+V1.7.3 RC2
+----------
+! whoops - fixed the dsound config dialog (pooplog)
+
+V1.7.3 RC1
+----------
 + double clicking on pattern highlights that track (pooplog)
 + 64 tracks available! (might break some machines?) (pooplog)
 + play from start button (pooplog)
