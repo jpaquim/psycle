@@ -86,7 +86,7 @@ bool DirectSound::Start()
 
 	format.wFormatTag = WAVE_FORMAT_PCM;
 	format.nChannels = 2;
-	format.wBitsPerSample = _bitDepth;
+	format.wBitsPerSample = 16;//_bitDepth;
 	format.nSamplesPerSec = _samplesPerSec;
 	format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
@@ -381,8 +381,8 @@ void DirectSound::ReadConfig()
 	numData = sizeof(_samplesPerSec);
 	configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
 
-	numData = sizeof(_bitDepth);
-	(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
+//	numData = sizeof(_bitDepth);
+//	(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
 
 
 	reg.CloseKey();
@@ -420,7 +420,7 @@ void DirectSound::WriteConfig()
 	reg.SetValue("Dither", REG_BINARY, (BYTE*)&_dither, sizeof(_dither));
 	reg.SetValue("Exclusive", REG_BINARY, (BYTE*)&_exclusive, sizeof(_exclusive));
 	reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
-	reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof(_bitDepth));
+//	reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof(_bitDepth));
 
 	reg.CloseKey();
 	reg.CloseRootKey();

@@ -29,6 +29,7 @@ CDSoundConfig::CDSoundConfig(CWnd* pParent /*=NULL*/)
 	m_deviceIndex = -1;
 	m_dither = FALSE;
 	m_exclusive = FALSE;
+	m_bitDepth = -1;
 	//}}AFX_DATA_INIT
 }
 
@@ -53,6 +54,7 @@ void CDSoundConfig::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_DSOUND_DEVICE, m_deviceIndex);
 	DDX_Check(pDX, IDC_DSOUND_DITHER, m_dither);
 	DDX_Check(pDX, IDC_EXCLUSIVE, m_exclusive);
+	DDX_CBIndex(pDX, IDC_DSOUND_BITDEPTH_COMBO, m_bitDepth);
 	//}}AFX_DATA_MAP
 }
 

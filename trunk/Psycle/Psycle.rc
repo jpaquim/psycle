@@ -1043,38 +1043,42 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,4,307,59,17
 END
 
-IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 103
+IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 118
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle DirectX Audio Driver Configuration"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Device:",IDC_STATIC,13,7,26,13,SS_CENTERIMAGE
     COMBOBOX        IDC_DSOUND_DEVICE,45,7,167,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         132,IDC_STATIC,"Static",SS_BITMAP,191,23,21,20
-    GROUPBOX        "Audio properties",IDC_STATIC,7,49,263,47
+    GROUPBOX        "Audio properties",IDC_STATIC,7,44,263,67
     RTEXT           "Samplerate:",IDC_STATIC,16,60,45,8,SS_CENTERIMAGE
     COMBOBOX        IDC_DSOUND_SAMPLERATE_COMBO,63,58,65,77,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    RTEXT           "Buffers:",IDC_STATIC,33,75,28,10,SS_CENTERIMAGE
-    EDITTEXT        IDC_DSOUND_BUFNUM_EDIT,63,74,33,12,ES_AUTOHSCROLL
+    RTEXT           "Buffers:",IDC_STATIC,33,90,28,10,SS_CENTERIMAGE
+    EDITTEXT        IDC_DSOUND_BUFNUM_EDIT,63,89,33,12,ES_AUTOHSCROLL
     CONTROL         "Spin1",IDC_DSOUND_BUFNUM_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,85,74,11,12
-    LTEXT           "*",IDC_STATIC,99,76,8,8
-    EDITTEXT        IDC_DSOUND_BUFSIZE_EDIT,108,74,48,12,ES_AUTOHSCROLL
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,85,89,11,12
+    LTEXT           "*",IDC_STATIC,99,91,8,8
+    EDITTEXT        IDC_DSOUND_BUFSIZE_EDIT,108,89,48,12,ES_AUTOHSCROLL
     CONTROL         "Spin2",IDC_DSOUND_BUFSIZE_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,144,74,11,12
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,144,89,11,12
     CONTROL         "Dither",IDC_DSOUND_DITHER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,147,60,35,10
+                    WS_TABSTOP,64,76,35,10
     CONTROL         "Exclusive",IDC_EXCLUSIVE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,203,60,60,10
-    LTEXT           "Latency: 12345 ms",IDC_DSOUND_LATENCY,166,76,64,8,
+                    WS_TABSTOP,120,76,60,10
+    LTEXT           "Latency: 12345 ms",IDC_DSOUND_LATENCY,166,91,64,8,
                     SS_CENTERIMAGE
     DEFPUSHBUTTON   "OK",IDOK,220,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,220,24,50,14
+    RTEXT           "Bit Depth:",IDC_STATIC,139,60,45,8,SS_CENTERIMAGE | 
+                    WS_DISABLED
+    COMBOBOX        IDC_DSOUND_BITDEPTH_COMBO,187,58,65,77,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_OUTPUT DIALOG DISCARDABLE  0, 0, 282, 121
@@ -1652,7 +1656,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 270
         TOPMARGIN, 7
-        BOTTOMMARGIN, 96
+        BOTTOMMARGIN, 111
     END
 
     IDD_OUTPUT, DIALOG
@@ -1992,14 +1996,14 @@ END
 
 IDD_DSOUNDCONFIG DLGINIT
 BEGIN
-    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 6, 0
-0x3639, 0x3030, 0x0030, 
-    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 6, 0
-0x3834, 0x3030, 0x0030, 
-    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 6, 0
-0x3434, 0x3031, 0x0030, 
-    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 6, 0
-0x3232, 0x3530, 0x0030, 
+    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 9, 0
+0x3639, 0x3030, 0x2030, 0x7a68, "\000" 
+    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 9, 0
+0x3834, 0x3030, 0x2030, 0x7a68, "\000" 
+    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 9, 0
+0x3434, 0x3031, 0x2030, 0x7a68, "\000" 
+    IDC_DSOUND_SAMPLERATE_COMBO, 0x403, 9, 0
+0x3232, 0x3530, 0x2030, 0x7a68, "\000" 
     0
 END
 
@@ -2372,9 +2376,9 @@ BEGIN
     LTEXT           "Output Path",IDC_STATIC,7,9,39,10
     EDITTEXT        IDC_FILENAME,51,7,157,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse",IDC_FILEBROWSE,213,7,40,13
-    CONTROL         "Save each input to master as a separated wav (wire number will be appended to it)",
+    CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
                     IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,51,25,193,21
+                    BS_MULTILINE | WS_TABSTOP,13,25,231,21
     GROUPBOX        "Record:",IDC_STATIC,15,74,228,61
     EDITTEXT        IDC_PATNUMBER,117,100,26,13,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "(in HEX value)",IDC_STATIC,147,103,47,10
@@ -2395,9 +2399,9 @@ BEGIN
     RTEXT           "Sample Rate",IDC_STATIC,70,140,45,15,SS_CENTERIMAGE
     RTEXT           "Channels",IDC_STATIC,65,170,50,15,SS_CENTERIMAGE
     RTEXT           "Bit Depth",IDC_STATIC,65,155,50,15,SS_CENTERIMAGE
-    CONTROL         "Save each track as a separated wav (track number will be appended to it)",
+    CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename)",
                     IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,50,50,193,21
+                    BS_MULTILINE | WS_TABSTOP,13,50,230,21
     COMBOBOX        IDC_COMBO_RATE,120,140,125,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO_BITS,120,155,125,75,CBS_DROPDOWNLIST | 
@@ -2406,6 +2410,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CTEXT           "Note: many filters screw up when rendering at low sample rates.",
                     IDC_STATIC,13,140,50,45,WS_DISABLED
+    LTEXT           "",IDC_TEXT,7,201,144,12
 END
 
 

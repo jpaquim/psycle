@@ -20,6 +20,7 @@ public:
 	CSaveWavDlg(CWnd* pParent = NULL);   // standard constructor
 	void SaveEnd(void);
 	int kill_thread;
+	int threadopen;
 	
 // Dialog Data
 	//{{AFX_DATA(CSaveWavDlg)
@@ -27,11 +28,13 @@ public:
 	CButton	m_cancel;
 	CButton	m_savewave;
 	CButton	m_savewires;
+	CButton	m_savetracks;
 	CEdit	m_rangestart;
 	CEdit	m_rangeend;
 	CProgressCtrl	m_progress;
 	CEdit	m_patnumber;
 	CEdit	m_filename;
+	CStatic m_text;
 	int		m_recmode;
 	CComboBox	m_rate;
 	CComboBox	m_bits;
@@ -58,10 +61,21 @@ protected:
 	static int bits;
 	static int channelmode;
 
+	int current;
+
+	char rootname[MAX_PATH];
+
+	static BOOL savetracks;
+	static BOOL savewires;
+
+	bool _Muted[MAX_TRACKS];
+
 	bool autostop;
 	bool playblock;
 	bool sel[MAX_SONG_POSITIONS];
 	bool saving;
+
+	void SaveWav(char* file, int bits, int rate, int channelmode);
 	
 	// Generated message map functions
 	//{{AFX_MSG(CSaveWavDlg)
@@ -75,6 +89,8 @@ protected:
 	afx_msg void OnSelchangeComboBits();
 	afx_msg void OnSelchangeComboChannels();
 	afx_msg void OnSelchangeComboRate();
+	afx_msg void OnSavetracksseparated();
+	afx_msg void OnSavewiresseparated();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

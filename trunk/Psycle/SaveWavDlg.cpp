@@ -11,7 +11,9 @@
 #include "Player.h"
 #include "Machine.h"
 #include "helpers.h"
+#include "MainFrm.h"
 
+extern CPsycleApp theApp;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,6 +26,8 @@ DWORD WINAPI __stdcall RecordThread(void *b);
 int CSaveWavDlg::channelmode = -1;
 int CSaveWavDlg::rate = -1;
 int CSaveWavDlg::bits = -1;
+BOOL CSaveWavDlg::savewires = false;
+BOOL CSaveWavDlg::savetracks = false;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -46,6 +50,7 @@ void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDCANCEL, m_cancel);
 	DDX_Control(pDX, IDC_SAVEWAVE, m_savewave);
 	DDX_Control(pDX, IDC_SAVEWIRESSEPARATED, m_savewires);
+	DDX_Control(pDX, IDC_SAVETRACKSSEPARATED, m_savetracks);
 	DDX_Control(pDX, IDC_RANGESTART, m_rangestart);
 	DDX_Control(pDX, IDC_RANGEEND, m_rangeend);
 	DDX_Control(pDX, IDC_PROGRESS, m_progress);
@@ -54,6 +59,7 @@ void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_RATE, m_rate);
 	DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
 	DDX_Control(pDX, IDC_COMBO_CHANNELS, m_channelmode);
+	DDX_Control(pDX, IDC_TEXT, m_text);
 
 	DDX_Radio(pDX, IDC_RECSONG, m_recmode);
 	//}}AFX_DATA_MAP
@@ -70,6 +76,8 @@ BEGIN_MESSAGE_MAP(CSaveWavDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_BITS, OnSelchangeComboBits)
 	ON_CBN_SELCHANGE(IDC_COMBO_CHANNELS, OnSelchangeComboChannels)
 	ON_CBN_SELCHANGE(IDC_COMBO_RATE, OnSelchangeComboRate)
+	ON_BN_CLICKED(IDC_SAVETRACKSSEPARATED, OnSavetracksseparated)
+	ON_BN_CLICKED(IDC_SAVEWIRESSEPARATED, OnSavewiresseparated)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -80,13 +88,14 @@ BOOL CSaveWavDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	threadopen = 0;
 	Song* pSong = Global::_pSong;
 	thread_handle=INVALID_HANDLE_VALUE;
-	kill_thread=0;
+	kill_thread=1;
 	lastpostick=0;
 	lastlinetick=0;
 	saving=false;
-	
+
 	CString name = Global::pConfig->GetSongDir();
 	name+="\\";
 	name+=pSong->fileName;
@@ -99,7 +108,7 @@ BOOL CSaveWavDlg::OnInitDialog()
 	m_patnumber.EnableWindow(FALSE);
 	
 	char num[3];
-	sprintf(num,"%02x",pSong->playOrder[0]);
+	sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
 	m_patnumber.SetWindowText(num);
 	sprintf(num,"%02x",0);
 	m_rangestart.SetWindowText(num);
@@ -182,6 +191,11 @@ BOOL CSaveWavDlg::OnInitDialog()
 		channelmode = Global::pConfig->_pOutputDriver->_channelmode;
 	}
 	m_channelmode.SetCurSel(channelmode);
+
+	m_savetracks.SetCheck(savetracks);
+	m_savewires.SetCheck(savewires);
+
+	m_text.SetWindowText("");
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -228,8 +242,6 @@ void CSaveWavDlg::OnSavewave()
 {
 	Song *pSong = Global::_pSong;
 	Player *pPlayer = Global::pPlayer;
-	int tmp;
-	int cont;
 
 	m_savewave.EnableWindow(FALSE);
 	m_cancel.SetWindowText("Stop");
@@ -251,10 +263,8 @@ void CSaveWavDlg::OnSavewave()
 	playblock = pPlayer->_playBlock;
 	memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
 	memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
-	saving=true;
 	
 	CString name;
-	pPlayer->StopRecording();
 //	m_samprate.GetWindowText(name);
 //	int val = _httoi(name.GetBuffer(5));
 //	pPlayer->SetSampleRate(val);
@@ -263,7 +273,123 @@ void CSaveWavDlg::OnSavewave()
 	const int real_rate[]={8192,11025,22050,44100,48000,96000};
 	const int real_bits[]={8,16,24,32};
 
-	pPlayer->StartRecording(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+	m_savetracks.EnableWindow(FALSE);
+	m_savewires.EnableWindow(FALSE);
+
+	if (m_savetracks.GetCheck())
+	{
+		memcpy(_Muted,pSong->_trackMuted,sizeof(pSong->_trackMuted));
+
+		strcpy(rootname,name);
+		rootname[strlen(rootname)-4] = 0;
+
+		int count = 0;
+
+		for (int i = 0; i < pSong->SONGTRACKS; i++)
+		{
+			if (!_Muted[i])
+			{
+				count++;
+				current = i;
+				for (int j = 0; j < pSong->SONGTRACKS; j++)
+				{
+					if (j != i)
+					{
+						pSong->_trackMuted[j] = TRUE;
+					}
+					else
+					{
+						pSong->_trackMuted[j] = FALSE;
+					}
+				}
+				// now save the song
+				char filename[MAX_PATH];
+				sprintf(filename,"%s-track %.2u.wav",rootname,i);
+				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+				return;
+			}
+		}
+		current = 256;
+		SaveEnd();
+	}
+	else if (m_savewires.GetCheck())
+	{
+		// this is tricky - sort of
+		// back up our connections first
+
+		for (int i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
+			{
+				_Muted[i] = pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute;
+			}
+			else
+			{
+				_Muted[i] = TRUE;
+			}
+		}
+
+		strcpy(rootname,name);
+		rootname[strlen(rootname)-4] = 0;
+
+		for (i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			if (!_Muted[i])
+			{
+				current = i;
+				for (int j = 0; j < MAX_CONNECTIONS; j++)
+				{
+					if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j])
+					{
+						if (j != i)
+						{
+							pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = TRUE;
+						}
+						else
+						{
+							pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = FALSE;
+						}
+					}
+				}
+				// now save the song
+				char filename[MAX_PATH];
+				sprintf(filename,"%s-wire %.2u %s.wav",rootname,i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+				return;
+			}
+		}
+		current = 256;
+		SaveEnd();
+	}
+	else
+	{
+		SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+	}
+}
+
+void CSaveWavDlg::SaveWav(char* file, int bits, int rate, int channelmode)
+{
+	saving=true;
+	Player *pPlayer = Global::pPlayer;
+	Song *pSong = Global::_pSong;
+	pPlayer->StopRecording();
+
+	char *q = strrchr(file,'\\')+1; // =
+	if (!q)
+	{
+		m_text.SetWindowText(file);
+	}
+	else
+	{
+		m_text.SetWindowText(q);
+	}
+
+	pPlayer->StartRecording(file,bits,rate,channelmode);
+
+	int tmp;
+	int cont;
+	CString name;
+
 	int pstart;
 	kill_thread = 0;
 	tickcont=0;
@@ -326,13 +452,35 @@ void CSaveWavDlg::OnSavewave()
 	}
 	unsigned long tmp2;
 	thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
-	
+
+	/*
+	int stream_size = 32767; // Player has just a single buffer of 65535 samples to allocate both channels
+//	int stream_buffer[65535];
+	while(!kill_thread)
+	{
+		if (!pPlayer->_recording) // the player automatically closes the wav recording when looping.
+		{
+			kill_thread = 1;
+		}
+		else
+		{
+			pPlayer->Work(pPlayer,stream_size);
+			SaveTick();
+		}
+		Sleep(1);
+	}
+
+	pPlayer->Stop();
+	pPlayer->StopRecording();
+	SaveEnd();
+	*/
 }
 
 DWORD WINAPI __stdcall RecordThread(void *b)
 {
+	((CSaveWavDlg*)b)->threadopen++;
 	Player* pPlayer = Global::pPlayer;
-	int stream_size = 32767; // Player has just a single buffer of 65535 samples to allocate both channels
+	int stream_size = 4096; // Player has just a single buffer of 65535 samples to allocate both channels
 //	int stream_buffer[65535];
 	while(!((CSaveWavDlg*)b)->kill_thread)
 	{
@@ -340,6 +488,7 @@ DWORD WINAPI __stdcall RecordThread(void *b)
 		{
 			pPlayer->Stop();
 			((CSaveWavDlg*)b)->SaveEnd();
+			((CSaveWavDlg*)b)->threadopen--;
 			ExitThread(0);
 			return 0;
 		}
@@ -350,23 +499,32 @@ DWORD WINAPI __stdcall RecordThread(void *b)
 	pPlayer->Stop();
 	pPlayer->StopRecording();
 	((CSaveWavDlg*)b)->SaveEnd();
+	((CSaveWavDlg*)b)->threadopen--;
 	ExitThread(0);
 	return 0;
 }
 
 void CSaveWavDlg::OnCancel() 
 {
-	if (saving)
+	if (saving || (threadopen > 0))
 	{
-		kill_thread=1;
-		while (saving) Sleep(20);
+//		while (threadopen > 0) 
+		{
+			current = 256;
+			kill_thread=1;
+			Sleep(100);
+		}
 	}
-	else CDialog::OnCancel();
+	else if (threadopen <= 0)
+	{
+		CDialog::OnCancel();
+	}
 }
 
 void CSaveWavDlg::SaveEnd()
 {
 	saving=false;
+	kill_thread=1;
 	if ( autostop ) 
 	{
 		Global::pConfig->autoStopMachines=true;
@@ -375,6 +533,88 @@ void CSaveWavDlg::SaveEnd()
 	memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
 	Global::pConfig->_pOutputDriver->Enable(true);
 	Global::pConfig->_pMidiInput->Open();
+
+	if (m_savetracks.GetCheck())
+	{
+		Song *pSong = Global::_pSong;
+
+		const int real_rate[]={8192,11025,22050,44100,48000,96000};
+		const int real_bits[]={8,16,24,32};
+
+		for (int i = current+1; i < pSong->SONGTRACKS; i++)
+		{
+			if (!_Muted[i])
+			{
+				current = i;
+				for (int j = 0; j < pSong->SONGTRACKS; j++)
+				{
+					if (j != i)
+					{
+						pSong->_trackMuted[j] = TRUE;
+					}
+					else
+					{
+						pSong->_trackMuted[j] = FALSE;
+					}
+				}
+				// now save the song
+				char filename[MAX_PATH];
+				sprintf(filename,"%s-track %.2u.wav",rootname,i);
+				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+				return;
+			}
+		}
+		memcpy(pSong->_trackMuted,_Muted,sizeof(pSong->_trackMuted));
+	}
+
+	else if (m_savewires.GetCheck())
+	{
+		Song *pSong = Global::_pSong;
+
+		const int real_rate[]={8192,11025,22050,44100,48000,96000};
+		const int real_bits[]={8,16,24,32};
+
+		for (int i = current+1; i < MAX_CONNECTIONS; i++)
+		{
+			if (!_Muted[i])
+			{
+				current = i;
+				for (int j = 0; j < MAX_CONNECTIONS; j++)
+				{
+					if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j])
+					{
+						if (j != i)
+						{
+							pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = TRUE;
+						}
+						else
+						{
+							pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = FALSE;
+						}
+					}
+				}
+				// now save the song
+				char filename[MAX_PATH];
+				sprintf(filename,"%s-wire %.2u %s.wav",rootname,i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+				SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+				return;
+			}
+		}
+
+		for (i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
+			{
+				pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute = _Muted[i];
+			}
+		}
+	}
+
+	m_text.SetWindowText("");
+
+	m_savetracks.EnableWindow(TRUE);
+	m_savewires.EnableWindow(TRUE);
+
 	m_progress.SetPos(0);
 	m_savewave.EnableWindow(TRUE);
 	m_cancel.SetWindowText("Close");
@@ -397,7 +637,10 @@ void CSaveWavDlg::SaveTick()
 	lastlinetick = pPlayer->_lineCounter;
 	lastpostick = pPlayer->_playPosition;
 
-   if (!kill_thread ) m_progress.SetPos(tickcont);
+   if (!kill_thread ) 
+   {
+	   m_progress.SetPos(tickcont);
+   }
 }
 
 void CSaveWavDlg::OnSelchangeComboBits() 
@@ -419,4 +662,24 @@ void CSaveWavDlg::OnSelchangeComboRate()
 	// TODO: Add your control notification handler code here
 	rate = m_rate.GetCurSel();
 	
+}
+
+void CSaveWavDlg::OnSavetracksseparated() 
+{
+	// TODO: Add your control notification handler code here
+	if (savetracks = m_savetracks.GetCheck())
+	{
+		m_savewires.SetCheck(FALSE);
+		savewires = FALSE;
+	}
+}
+
+void CSaveWavDlg::OnSavewiresseparated() 
+{
+	// TODO: Add your control notification handler code here
+	if (savewires = m_savewires.GetCheck())
+	{
+		m_savetracks.SetCheck(FALSE);
+		savetracks = FALSE;
+	}
 }
