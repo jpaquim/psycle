@@ -25,41 +25,58 @@ namespace psycle
 			{
 				namespace dispatch_errors
 				{
-					const std::string operation_description(const long int & code) throw()
-					{
-						std::ostringstream s; s << code << ": ";
-						switch(code)
+					std::string eff_opcode_to_string(long opcode) throw() {
+						#ifdef I
+							#error "macro clash"
+						#else
+							#define I(OPCODE) case eff##OPCODE: return "eff"#OPCODE;
+						
+						switch(opcode)
 						{
-						case effOpen: s << "open"; break;
-						case effClose: s << "close"; break;
-						case effSetProgram: s << "set program"; break;
-						case effGetProgram: s << "get program"; break;
-						case effSetProgramName: s << "set program name"; break;
-						case effGetProgramName: s << "get program name"; break;
-						case effGetParamLabel: s << "get parameter label"; break;
-						case effGetParamDisplay: s << "get parameter display"; break;
-						case effGetParamName: s << "get parameter name"; break;
-						case effGetVu: s << "get vu"; break;
-						// system
-						case effSetSampleRate: s << "set sample rate"; break;
-						case effSetBlockSize: s << "set block size"; break;
-						case effMainsChanged: s << "mains changed"; break;
-						// editor
-						case effEditGetRect: s << "get edit rectangle"; break;
-						case effEditOpen: s << "open edit"; break;
-						case effEditClose: s << "close edit"; break;
-						case effEditDraw: s << "draw edit"; break;
-						case effEditMouse: s << "edit mouse"; break;
-						case effEditKey: s << "edit key"; break;
-						case effEditIdle: s << "edit idle"; break;
-						case effEditTop: s << "edit top"; break;
-						case effEditSleep: s << "edit sleep"; break;
-						// other
-						case effIdentify: s << "identify"; break;
-						case effGetChunk: s << "get chunk"; break;
-						case effSetChunk: s << "set chunk"; break;
-						default: s << "unkown op code";
+							I(Open)
+							I(Close)
+							I(SetProgram)
+							I(GetProgram)
+							I(SetProgramName)
+							I(GetProgramName)
+							I(GetParamLabel)
+							I(GetParamDisplay)
+							I(GetParamName)
+							I(GetVu)
+							
+							// system
+							I(SetSampleRate)
+							I(SetBlockSize)
+							I(MainsChanged)
+	
+							// editor
+							I(EditGetRect)
+							I(EditOpen)
+							I(EditClose)
+							I(EditDraw)
+							I(EditMouse)
+							I(EditKey)
+							I(EditIdle)
+							I(EditTop)
+							I(EditSleep)
+	
+							// other
+							I(Identify)
+							I(GetChunk)
+							I(SetChunk)
+						default:
+							{
+								std::ostringstream s;
+								s << "unknown opcode " << opcode;
+								return s.str();
+							}
 						}
+						#undef I
+						#endif
+					}
+					const std::string operation_description(long code) throw()
+					{
+						std::ostringstream s; s << code << ": " << eff_opcode_to_string(code);
 						return s.str();
 					}
 				}
@@ -704,7 +721,7 @@ namespace psycle
 				queue_size = 0;
 			}
 
-			static const char *audioMaster_opcode_to_string(long opcode)
+			static std::string audioMaster_opcode_to_string(long opcode)
 			{
 				#ifdef I
 					#error "macro clash"
@@ -773,9 +790,11 @@ namespace psycle
 					// vst 2.3
 					I(GetInputSpeakerArrangement)
 				default:
-					static char temp[256];
-					sprintf(temp, "unknown opcode %i", opcode);
-					return temp;
+					{
+						std::ostringstream s;
+						s << "unknown opcode " << opcode;
+						return s.str();
+					}
 				}
 					#undef I
 				#endif
@@ -790,7 +809,7 @@ namespace psycle
 					<< " Index = " << index
 					<< " Value = " << value
 					<< " Ptr = " << ptr
-					<< " Opt = " << opt << std::endl;
+					<< " Opt = " << opt;
 					host::loggers::trace(s.str());
 				}
 #endif

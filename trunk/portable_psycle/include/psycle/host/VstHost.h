@@ -44,29 +44,29 @@ namespace psycle
 				plugin & host_;
 				AEffect * plugin_;
 			private:
-				inline plugin & host() throw();
-				inline const plugin & host() const throw();
-				inline AEffect & plugin() throw();
-				inline const AEffect & plugin() const throw();
+				plugin & host() throw();
+				const plugin & host() const throw();
+				AEffect & plugin() throw();
+				const AEffect & plugin() const throw();
 			public:
-				inline proxy(vst::plugin & host, AEffect * plugin = 0);
-				inline ~proxy() throw();
-				inline const bool operator()() const throw();
-				inline void operator()(AEffect * plugin) throw(host::exceptions::function_error);
-				inline long int magic() throw(host::exceptions::function_error);
-				inline long int dispatcher(long int operation = 0, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(host::exceptions::function_error);
-				inline void process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
-				inline void processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
-				inline void setParameter(long int index, float parameter) throw(host::exceptions::function_error);
-				inline float getParameter(long int index) throw(host::exceptions::function_error);
-				inline long int numPrograms() throw(host::exceptions::function_error);
-				inline long int numParams() throw(host::exceptions::function_error);
-				inline long int numInputs() throw(host::exceptions::function_error);
-				inline long int numOutputs() throw(host::exceptions::function_error);
-				inline long int flags() throw(host::exceptions::function_error);
-				inline long int uniqueId() throw(host::exceptions::function_error);
-				inline long int version() throw(host::exceptions::function_error);
-				inline void user(void * user) throw(host::exceptions::function_error);
+				proxy(vst::plugin & host, AEffect * plugin = 0);
+				~proxy() throw();
+				const bool operator()() const throw();
+				void operator()(AEffect * plugin) throw(host::exceptions::function_error);
+				long int magic() throw(host::exceptions::function_error);
+				long int dispatcher(long int operation = 0, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(host::exceptions::function_error);
+				void process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
+				void processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
+				void setParameter(long int index, float parameter) throw(host::exceptions::function_error);
+				float getParameter(long int index) throw(host::exceptions::function_error);
+				long int numPrograms() throw(host::exceptions::function_error);
+				long int numParams() throw(host::exceptions::function_error);
+				long int numInputs() throw(host::exceptions::function_error);
+				long int numOutputs() throw(host::exceptions::function_error);
+				long int flags() throw(host::exceptions::function_error);
+				long int uniqueId() throw(host::exceptions::function_error);
+				long int version() throw(host::exceptions::function_error);
+				void user(void * user) throw(host::exceptions::function_error);
 
 				// some common dispatch calls
 				long int open() {
@@ -273,7 +273,8 @@ namespace psycle
 				namespace dispatch_errors
 				{
 					/// Dispatcher operation code descriptions.
-					const std::string operation_description(const long int & code) throw();
+					const std::string operation_description(const long code) throw();
+					std::string eff_opcode_to_string(long code) throw();
 
 					template<typename e> void rethrow(plugin & plugin, const long int operation, const e * const e = 0) throw(dispatch_error)
 					{
@@ -333,6 +334,18 @@ namespace psycle
 			}
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
+#ifndef NDEBUG
+				{
+					std::ostringstream s;
+					s<< "VST plugin: call to plugin dispatcher: Eff: " << &plugin()
+						<< " Opcode = " << exceptions::dispatch_errors::operation_description(operation)
+					<< " Index = " << index
+					<< " Value = " << value
+					<< " Ptr = " << ptr
+					<< " Opt = " << opt;
+					host::loggers::trace(s.str());
+				}
+#endif
 				assert((*this)());
 				try
 				{
