@@ -718,6 +718,8 @@ bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCoun
 	Temp[8]=0;
 	if (strcmp(Temp,"PSYCACHE"))
 	{
+		file.Close();
+		DeleteFile(cache);
 		return false;
 	}
 
@@ -802,6 +804,7 @@ bool CNewMachine::SaveCacheFile()
 	
 	char *last = strrchr(cache,'\\');
 	strcpy(last,"\\cache.map");
+	DeleteFile(cache);
 
 	RiffFile file;
 	if (!file.Create(cache,true)) 
