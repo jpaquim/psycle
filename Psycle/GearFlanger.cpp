@@ -29,6 +29,7 @@ void CGearFlanger::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGearFlanger)
+	DDX_Control(pDX, IDC_CHECK1, m_resample);
 	DDX_Control(pDX, IDC_PRESETCOMBO, m_presetcombo);
 	DDX_Control(pDX, IDC_WETSLIDER, m_wet_slider);
 	DDX_Control(pDX, IDC_DRYSLIDER, m_dry_slider);
@@ -61,6 +62,7 @@ BEGIN_MESSAGE_MAP(CGearFlanger, CDialog)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_WETSLIDER, OnCustomdrawWetslider)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_DRYSLIDER, OnCustomdrawDryslider)
 	ON_CBN_SELCHANGE(IDC_PRESETCOMBO, OnSelchangePresetcombo)
+	ON_BN_CLICKED(IDC_CHECK1, OnCheckResampler)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -129,6 +131,8 @@ BOOL CGearFlanger::OnInitDialog()
 
 	m_wet_slider.SetRange(0,512);	// Don't use (-,+) range. It fucks up with the "0"
 	m_wet_slider.SetPos(_pMachine->_outWet+256);
+
+	m_resample.SetCheck(_pMachine->useResample?1:0);
 
 	return TRUE;
 }
@@ -229,4 +233,9 @@ void CGearFlanger::OnCancel()
 	m_pParent->FlangerMachineDialog = NULL;
 	DestroyWindow();
 	delete this;
+}
+
+void CGearFlanger::OnCheckResampler() 
+{
+	_pMachine->useResample= m_resample.GetCheck()?true:false;
 }

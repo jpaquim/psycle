@@ -94,7 +94,7 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 		_splitter.CreateView(0, VST_UI_PANE, RUNTIME_CLASS(CFrameMachine), size, pContext);
 		pGui = (CFrameMachine*)_splitter.GetPane(0, VST_UI_PANE);
 		((CFrameMachine*)pGui)->wndView=wndView;
-		((CFrameMachine*)pGui)->index=index;
+		((CFrameMachine*)pGui)->MachineIndex=MachineIndex;
 		((CFrameMachine*)pGui)->Generate();
 		((CFrameMachine*)pGui)->SelectMachine(_pMachine);
 		((CFrameMachine*)pGui)->_pActive=NULL;

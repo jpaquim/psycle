@@ -1654,8 +1654,8 @@ void CChildView::IncPosition(bool bRepeat)
 			pParentMain->UpdateSequencer();
 		}
 
-//		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-//		_pSong->playOrderSel[editPosition]=true;
+		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPattern);

@@ -662,38 +662,38 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 	
 	if (log_l || vuprevL)
 	{
-		canvasl.FillSolidRect(0,0,log_l,4,vu1);
+		canvasl.FillSolidRect(0,0,log_l,5,vu1);
 		if (vuprevL > log_l )
 		{
-			canvasl.FillSolidRect(log_l,0,vuprevL-log_l,4,vu3);
-			canvasl.FillSolidRect(vuprevL,0,226-vuprevL,4,vu2);
+			canvasl.FillSolidRect(log_l,0,vuprevL-log_l,5,vu3);
+			canvasl.FillSolidRect(vuprevL,0,226-vuprevL,5,vu2);
 			vuprevL-=2;
 		}
 		else 
 		{
-			canvasl.FillSolidRect(log_l,0,226-log_l,4,vu2);
+			canvasl.FillSolidRect(log_l,0,226-log_l,5,vu2);
 			vuprevL = log_l;
 		}
 	}
 	else
-		canvasr.FillSolidRect(0,0,226,4,vu2);
+		canvasr.FillSolidRect(0,0,226,5,vu2);
 	if (log_r || vuprevR)
 	{
-		canvasr.FillSolidRect(0,0,log_r,4,vu1);
+		canvasr.FillSolidRect(0,0,log_r,5,vu1);
 		if (vuprevR > log_r )
 		{
-			canvasr.FillSolidRect(log_r,0,vuprevR-log_r,4,vu3);
-			canvasr.FillSolidRect(vuprevR,0,226-vuprevR,4,vu2);
+			canvasr.FillSolidRect(log_r,0,vuprevR-log_r,5,vu3);
+			canvasr.FillSolidRect(vuprevR,0,226-vuprevR,5,vu2);
 			vuprevR-=2;
 		}
 		else 
 		{
-			canvasr.FillSolidRect(log_r,0,226-log_r,4,vu2);
+			canvasr.FillSolidRect(log_r,0,226-log_r,5,vu2);
 			vuprevR = log_r;
 		}
 	}
 	else
-		canvasl.FillSolidRect(0,0,226,4,vu2);
+		canvasl.FillSolidRect(0,0,226,5,vu2);
 	
 /*	if(draw_l)
 	{
@@ -866,7 +866,7 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	{
 		if (_pSong->seqBus < MAX_BUSES) // Generator
 		{
-			if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]])
+			if (_pSong->_machineActive[_pSong->busMachine[_pSong->seqBus]]) // Valid one.
 			{
 				if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
 				{
@@ -874,36 +874,32 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 					{
 						cb2->SetCurSel(2); // WAVES
 						_pSong->auxcolSelected = _pSong->instSelected;
-						UpdateComboIns();
 					}
 				}
 				else
 				{
 					cb2->SetCurSel(1); // PARAMS
 					_pSong->auxcolSelected = 0;
-					UpdateComboIns();
 				}
 			}
 			else
 			{
 				cb2->SetCurSel(1); // PARAMS
 				_pSong->auxcolSelected = 0;
-				UpdateComboIns();
 			}
 		}
 		else 
 		{
 			cb2->SetCurSel(1); // PARAMS
 			_pSong->auxcolSelected = 0;
-			UpdateComboIns();
 		}
 	}
 	else
 	{
 		cb2->SetCurSel(2); // WAVES
 		_pSong->auxcolSelected = _pSong->instSelected;
-		UpdateComboIns();
 	}
+	UpdateComboIns();
 	macComboInitialized = true;
 }
 
@@ -1473,7 +1469,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_pWndMac[tmac] = new CFrameMachine(tmac);
 				((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
 				((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-				((CFrameMachine*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
+				((CFrameMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
 
 				m_pWndMac[tmac]->LoadFrame(
 					IDR_MACHINEFRAME, 
@@ -1482,7 +1478,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				((CFrameMachine*)m_pWndMac[tmac])->Generate();
 				((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 				char winname[32];
-				sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->index
+				sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
 										 ,Global::_pSong->_pMachines[tmac]->_editName);
 				((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 				isguiopen[tmac] = true;
@@ -1495,7 +1491,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			m_pWndMac[tmac] = new CVstEditorDlg(0);
 			((CVstEditorDlg*)m_pWndMac[tmac])->_editorActive = &isguiopen[tmac];
 			((CVstEditorDlg*)m_pWndMac[tmac])->wndView = &m_wndView;
-			((CVstEditorDlg*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
+			((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
 			((CVstEditorDlg*)m_pWndMac[tmac])->_pMachine = (VSTPlugin*)ma;
 			((VSTPlugin*)ma)->editorWnd = NULL;
 			
@@ -1504,7 +1500,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					this);
 			((VSTPlugin*)ma)->editorWnd = m_pWndMac[tmac];
 			char winname[32];
-			sprintf(winname,"%.2X : %s",((CVstEditorDlg*)m_pWndMac[tmac])->index
+			sprintf(winname,"%.2X : %s",((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
 									,Global::_pSong->_pMachines[tmac]->_editName);
 
 			((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname);
@@ -2291,6 +2287,7 @@ void CMainFrame::OnFollowSong()
 
 void CMainFrame::UpdatePlayOrder(bool mode)
 {
+	
 	CStatic *ls_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ1);
 	CStatic *le_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ2);
 	CStatic *ll_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ3);
@@ -2374,12 +2371,21 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 		pls->DeleteString(ls);
 		sprintf(buffer,"%.2X: %.2X",ls,le);
 		pls->InsertString(ls,buffer);
+		// Update sequencer selection	
+		pls->SelItemRange(false,0,pls->GetCount()-1);
+		pls->SetSel(ls,true);
+		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+		_pSong->playOrderSel[ls] = true;
 	}
-	// Update sequencer selection	
-	pls->SelItemRange(false,0,pls->GetCount()-1);
-	pls->SetSel(ls,true);
-	memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-	_pSong->playOrderSel[ls] = true;
+	else
+	{
+		pls->SelItemRange(false,0,pls->GetCount()-1);
+		for (int i=0;i<MAX_SONG_POSITIONS;i++ )
+		{
+			if (_pSong->playOrderSel[i]) pls->SetSel(i,true);
+		}
+	}
+	
 }
 
 void CMainFrame::OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI) 

@@ -1454,7 +1454,7 @@ bool Song::Load(
 			_pMachines[i] = pMachine;
 
 #if !defined(_WINAMP_PLUGIN_)
-			switch (Global::_pSong->_pMachines[i]->_mode)
+			switch (_pMachines[i]->_mode)
 			{
 			case MACHMODE_GENERATOR:
 				if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
@@ -1623,7 +1623,7 @@ bool Song::Save(
 
 	// Patterns
 	//
-	i = GetBlankPatternUnused(GetNumPatternsUsed());
+	i = GetNumPatternsUsed();
 	pFile->Write(&i, sizeof(i));
 	for (int p=0; p<i; p++)
 	{
@@ -1769,6 +1769,10 @@ bool Song::Save(
 	// Since the old file format stored volumes on each output
 	// rather than on each input, we must convert
 	//
+#if !defined(_WINAMP_PLUGIN_)
+	CSingleLock lock(&door,TRUE);
+#endif // #if !defined(_WINAMP_PLUGIN_)
+	
 	float volMatrix[MAX_MACHINES][MAX_CONNECTIONS];
 	for (i=0; i<MAX_MACHINES; i++)
 	{

@@ -28,7 +28,6 @@ public:
 
 private:
 	Machine* _pMachine;
-	int	MachineIndex;
 	CBitmap b_knob;
 	CFont	b_font;
 // Enviroment
@@ -50,7 +49,7 @@ public:
 	void SelectMachine(Machine* pMachine);
 	void Generate();
 	CChildView *wndView;
-	UINT index;
+	UINT MachineIndex;
 
 	bool* _pActive;
 

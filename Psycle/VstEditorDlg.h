@@ -28,7 +28,7 @@ public:
 	CDefaultVstGui *pParamGui;
 	VSTPlugin* _pMachine;
 	CChildView* wndView;
-	int index;
+	UINT MachineIndex;
 	bool *_editorActive;
 
 // Operations

@@ -158,7 +158,7 @@ public:
 
 	Resampler()
 	{ 
-		_quality = RESAMPLE_LINEAR;
+		_quality = RESAMPLE_NONE;
 		_pWorkFn = None;
 	};
 	virtual void SetQuality(ResamplerQuality quality) = 0;
@@ -215,6 +215,11 @@ protected:
 		if (offset+3 > length)
 		{
 			y2 = 0;
+		}
+		if ( res >= 2048)
+		{
+			int bug;
+			bug=true;
 		}
 		return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
 	}
