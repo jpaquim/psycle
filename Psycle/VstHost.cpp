@@ -722,7 +722,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 			return 0;
 				
 	case 	audioMasterGetParameterQuantization:	
-		return NUMTICKS+1; // because its from 0 to NUMTICKS
+		return VST_QUANTIZATION;
 
 	case 	audioMasterGetBlockSize:
 		return STREAM_SIZE;

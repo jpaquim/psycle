@@ -188,8 +188,8 @@ void CFrameMachine::OnPaint()
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
 			min_v = 0;
-			max_v = 1000;
-			val_v = f2i(((VSTPlugin*)_pMachine)->GetParameter(c)*1000.0f);
+			max_v = VST_QUANTIZATION;
+			val_v = f2i(((VSTPlugin*)_pMachine)->GetParameter(c)*VST_QUANTIZATION);
 			memset(buffer,0,32);
 
 			if (((VSTPlugin*)_pMachine)->DescribeValue(c,buffer) == false)
@@ -297,7 +297,7 @@ void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
-			tweakbase = int(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+			tweakbase = int(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*VST_QUANTIZATION);
 		}
 		istweak = true;
 		SetCapture();
@@ -323,7 +323,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
 			min_v = 0;
-			max_v = 1000;
+			max_v = VST_QUANTIZATION;
 		}
 
 		if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
@@ -335,7 +335,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+				tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*VST_QUANTIZATION);
 			}
 			sourcepoint=point.y;
 			ultrafinetweak=!ultrafinetweak;
@@ -349,7 +349,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+				tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*VST_QUANTIZATION);
 			}
 			sourcepoint=point.y;
 			finetweak=!finetweak;
@@ -382,7 +382,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
-			((VSTPlugin*)_pMachine)->SetParameter(tweakpar,(float)(nv/1000.0f));
+			((VSTPlugin*)_pMachine)->SetParameter(tweakpar,(float)(nv/(float)VST_QUANTIZATION));
 			// well, this isn't so hard... just put the twk record here
 			if (Global::pConfig->_RecordTweaks)
 			{
@@ -436,9 +436,9 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
 				min_v = 0;
-				max_v = 1000;
+				max_v = VST_QUANTIZATION;
 				((VSTPlugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
-				dlg.m_Value = f2i(((VSTPlugin*)_pMachine)->GetParameter(thispar)*1000.0f);
+				dlg.m_Value = f2i(((VSTPlugin*)_pMachine)->GetParameter(thispar)*VST_QUANTIZATION);
 			}
 			
 			sprintf(
@@ -468,7 +468,7 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/1000.0f));
+				((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/(float)VST_QUANTIZATION));
 				SetFocus();
 			}
 			Invalidate(false);

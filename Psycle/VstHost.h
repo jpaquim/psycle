@@ -9,7 +9,7 @@
 #define MAX_EVENTS		64
 #define MAX_INOUTS		8
 
-#define NUMTICKS 1000 // Dialog max ticks for parameters.
+#define VST_QUANTIZATION 65535 // Dialog max ticks for parameters.
 
 
 #define VSTINSTANCE_ERR_NO_VALID_FILE -1

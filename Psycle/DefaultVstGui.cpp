@@ -77,7 +77,7 @@ void CDefaultVstGui::Init()
 	UpdateParList();
 	InitializePrograms();
 	//init slider range
-	m_slider.SetRange(0, NUMTICKS);
+	m_slider.SetRange(0, VST_QUANTIZATION);
 	nPar=0;
 	UpdateOne();
 }
@@ -142,9 +142,9 @@ void CDefaultVstGui::UpdateOne()
 	//update scroll bar with initial value
 	float value = _pMachine->GetParameter(nPar);
 	UpdateText(value);
-	value *= NUMTICKS;
+	value *= VST_QUANTIZATION;
 	updatingvalue =true;
-	m_slider.SetPos(NUMTICKS -(f2i(value)));
+	m_slider.SetPos(VST_QUANTIZATION -(f2i(value)));
 	updatingvalue =false;
 }
 
@@ -156,9 +156,9 @@ void CDefaultVstGui::UpdateNew(int par,float value)
 		m_parlist.SetCurSel(par);
 	}
 	UpdateText(value);
-	value *= NUMTICKS;
+	value *= VST_QUANTIZATION;
 	updatingvalue=true;
-	m_slider.SetPos(NUMTICKS -(f2i(value)));
+	m_slider.SetPos(VST_QUANTIZATION -(f2i(value)));
 	updatingvalue=false;
 }
 void CDefaultVstGui::OnSelchangeList1() 
@@ -173,7 +173,7 @@ void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	if (!updatingvalue)
 	{
-		float value = ((float)(NUMTICKS - m_slider.GetPos()))/NUMTICKS;
+		float value = ((float)(VST_QUANTIZATION - m_slider.GetPos()))/VST_QUANTIZATION;
 		_pMachine->SetParameter(nPar, value);
 		UpdateText(value);
 	}
