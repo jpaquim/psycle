@@ -6,7 +6,6 @@
 * <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
-+ <alk_> the 'Apply' button is not implemented in the config dialog
 
 * Machines
 ------------
@@ -153,7 +152,7 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	when you want.
 ! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! record button should set edit mode and follow mode on, should have new export wav button
-! <alk> increase pattern step (to 64?) (to go with the 256 row  patterns)
++ <alk_> the 'Apply' button is not implemented in the config dialog
 + <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 + <[JAZ]> gear rack The description was : " a dialog with 
 	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
@@ -180,9 +179,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
 	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
 + songs should save master decrease flag
-+ <sue>in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
-	(many vsts use control + left mouse button to reset knobs/params....maybe any other alike key 
-	combination.... )
 + <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
 	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
 + <sue> hotkeys for seq edit cut, copy, paste, etc?

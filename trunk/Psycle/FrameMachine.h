@@ -24,10 +24,11 @@ protected:
 
 // Attributes
 public:
-	CFrameMachine(int dum){};
+	CFrameMachine(int dum){MachineIndex = dum;};
 
 private:
 	Machine* _pMachine;
+	int	MachineIndex;
 	CBitmap b_knob;
 	CFont	b_font;
 // Enviroment
@@ -68,7 +69,7 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnParametersRandomparameters();
 	afx_msg void OnParametersResetparameters();
 	afx_msg void OnParametersCommand();
