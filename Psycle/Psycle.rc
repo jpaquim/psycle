@@ -2062,6 +2062,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Song &properties",            ID_FILE_SONGPROPERTIES
         MENUITEM SEPARATOR
+        MENUITEM "Revert to Saved",             ID_FILE_REVERT
         POPUP "&Recent Files"
         BEGIN
             MENUITEM "No recent file",              ID_FILE_RECENT_NONE

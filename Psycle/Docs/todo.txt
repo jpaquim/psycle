@@ -234,8 +234,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		exchange, and don't know if anything more... maybe some information (wires used... don't know)
 ++	<alk> another idea, a keypress to toggle follow song
 ++	<alk_> alt-f5 - play song from start
-++	<alk_> another thought: "revert to saved" - filemenu
-		[Isn't it the same as Load?]
 ++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. 
 		[because machine view does not track changes yet]
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  

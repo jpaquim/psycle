@@ -274,6 +274,7 @@ public:
 	void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 	void NewMachine(int x = -1, int y = -1, int mac = -1);
 	void DoMacPropDialog(int propMac);
+	void CChildView::FileLoadsongNamed(char* fName);
 	
 public:
 
@@ -484,6 +485,7 @@ public:
 	afx_msg BOOL OnFileSave(UINT id);
 	afx_msg BOOL OnFileSavesong(UINT id);
 	afx_msg void OnFileLoadsong();
+	afx_msg void OnFileRevert();
 	afx_msg void OnHelpSaludos();
 	afx_msg void OnUpdatePatternView(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMachineview(CCmdUI* pCmdUI);

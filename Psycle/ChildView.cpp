@@ -211,6 +211,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND_EX(ID_FILE_SAVE, OnFileSave)
 	ON_COMMAND_EX(ID_FILE_SAVESONG, OnFileSavesong)
 	ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
+	ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
 	ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
 	ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
 	ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
@@ -931,6 +932,20 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 		}
 	}
 	return TRUE;
+}
+
+void CChildView::OnFileRevert()
+{
+	if (MessageBox("Proceed? You will lose all changes from last save!","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+	{
+		if (Global::_pSong->_saved)
+		{
+			char buf[MAX_PATH];
+			sprintf(buf,"%s\\%s",Global::pConfig->GetSongDir(),Global::_pSong->fileName);
+			FileLoadsongNamed(buf);
+		}
+	}
+	pParentMain->StatusBarIdle();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1943,75 +1958,80 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	{
 		if (CheckUnsavedSong("Load Song"))
 		{
-			pParentMain->CloseAllMacGuis();
-			Global::pPlayer->Stop();
-			Sleep(LOCK_LATENCY);
-			_outputActive = false;
-			Global::pConfig->_pOutputDriver->Enable(false);
-			// MIDI IMPLEMENTATION
-			Global::pConfig->_pMidiInput->Close();
-			Sleep(LOCK_LATENCY);
-			
-			OldPsyFile file;
-			if (!file.Open(fName))
-			{
-				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
-				return;
-			}
-			_pSong->Load(&file);
-			file.Close();
-			
-			_pSong->_saved=true;
-
-			//!Fidelooop!!//
-			AppendToRecent(fName);
-			CString str = fName;
-			int index = str.ReverseFind('\\');
-			if (index != -1)
-			{
-				Global::pConfig->SetSongDir(str.Left(index));
-				Global::_pSong->fileName = str.Mid(index+1);
-			}
-			else
-			{
-				Global::_pSong->fileName = str;
-			}
-			
-			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-
-			_outputActive = true;
-			if (!Global::pConfig->_pOutputDriver->Enable(true))
-			{
-				_outputActive = false;
-			}
-			else
-			{
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Open();
-			}
-			editPosition=0;
-			Global::_pSong->seqBus=0;
-			pParentMain->PsybarsUpdate();
-			pParentMain->WaveEditorBackUpdate();
-			pParentMain->m_wndInst.WaveUpdate();
-			pParentMain->UpdateSequencer();
-			pParentMain->UpdatePlayOrder(false);
-//			pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
-			RecalculateColourGrid();
-			Repaint();
-			KillUndo();
-			KillRedo();
-			SetTitleBarText();
-
-			char buffer[512];
-			sprintf(buffer,"'%s'\n\n%s\n\n%s"
-				,_pSong->Name
-				,_pSong->Author
-				,_pSong->Comment);
-			
-			MessageBox(buffer,"Psycle song loaded",MB_OK);
+			FileLoadsongNamed(fName);
 		}
 	}
+}
+
+void CChildView::FileLoadsongNamed(char* fName)
+{
+	pParentMain->CloseAllMacGuis();
+	Global::pPlayer->Stop();
+	Sleep(LOCK_LATENCY);
+	_outputActive = false;
+	Global::pConfig->_pOutputDriver->Enable(false);
+	// MIDI IMPLEMENTATION
+	Global::pConfig->_pMidiInput->Close();
+	Sleep(LOCK_LATENCY);
+	
+	OldPsyFile file;
+	if (!file.Open(fName))
+	{
+		MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+		return;
+	}
+	_pSong->Load(&file);
+	file.Close();
+	
+	_pSong->_saved=true;
+
+	//!Fidelooop!!//
+	AppendToRecent(fName);
+	CString str = fName;
+	int index = str.ReverseFind('\\');
+	if (index != -1)
+	{
+		Global::pConfig->SetSongDir(str.Left(index));
+		Global::_pSong->fileName = str.Mid(index+1);
+	}
+	else
+	{
+		Global::_pSong->fileName = str;
+	}
+	
+	Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+
+	_outputActive = true;
+	if (!Global::pConfig->_pOutputDriver->Enable(true))
+	{
+		_outputActive = false;
+	}
+	else
+	{
+		// MIDI IMPLEMENTATION
+		Global::pConfig->_pMidiInput->Open();
+	}
+	editPosition=0;
+	Global::_pSong->seqBus=0;
+	pParentMain->PsybarsUpdate();
+	pParentMain->WaveEditorBackUpdate();
+	pParentMain->m_wndInst.WaveUpdate();
+	pParentMain->UpdateSequencer();
+	pParentMain->UpdatePlayOrder(false);
+//			pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
+	RecalculateColourGrid();
+	Repaint();
+	KillUndo();
+	KillRedo();
+	SetTitleBarText();
+
+	char buffer[512];
+	sprintf(buffer,"'%s'\n\n%s\n\n%s"
+		,_pSong->Name
+		,_pSong->Author
+		,_pSong->Comment);
+	
+	MessageBox(buffer,"Psycle song loaded",MB_OK);
 }
 
 void CChildView::CallOpenRecent(int pos)
@@ -2031,7 +2051,11 @@ void CChildView::SetTitleBarText()
 {
 	CString titlename = "[";
 	titlename+=Global::_pSong->fileName;
-	if (pUndoList)
+	if (!(Global::_pSong->_saved))
+	{
+		titlename+=" *";
+	}
+	else if (pUndoList)
 	{
 		if (UndoSaved != pUndoList->counter)
 		{
