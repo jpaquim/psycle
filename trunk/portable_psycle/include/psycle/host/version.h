@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.12  2005/01/23 09:41:25  johan-boule
+version numbering
+
 Revision 1.11  2005/01/23 09:32:32  johan-boule
 comments about version numbering.. we could go to 1.7.8 maybe?
 
@@ -45,8 +48,8 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 /// C.M.m.p , where:
 /// - C = codebase generation.
 /// - M = major version number: if even, stable release, if odd, beta or release candidate for next major version number.
-/// - m = minor version number, can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
-/// - p = patch number, incremented very often, each cvs commit.
+/// - m = minor version number: can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
+/// - p = patch number: incremented very often, each cvs commit.
 
 /// Other files that need to be updated accordingly:
 /// - make/doxygen/doxygen.configuration: PROJECT_NUMBER

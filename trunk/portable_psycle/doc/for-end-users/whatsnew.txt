@@ -21,9 +21,9 @@ Version | Type of release          | By
 Versions are composed this way:
 C.M.m.p , where:
 	- C = codebase generation.
-	- M = major version number.
-	- m = minor version number: if 0, release. if different than 0, release candidate for next major version number.
-	- p = patch number.
+	- M = major version number: if even, stable release, if odd, beta or release candidate for next major version number.
+	- m = minor version number: can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
+	- p = patch number: incremented very often, each cvs commit.
 
 ----------------------------------------------------------------
 Legend :       +=addition        *=change        !=bug
@@ -33,6 +33,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.17  2005/01/23 09:41:25  johan-boule
+version numbering
+
 Revision 1.16  2004/12/22 22:42:20  johan-boule
 fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
 
