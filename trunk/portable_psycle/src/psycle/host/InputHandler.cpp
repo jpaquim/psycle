@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::InputHandler.
 #include <project.private.hpp>
+#include "version.hpp"
 #include "mainfrm.hpp"
 #include "InputHandler.hpp"
 #include "machine.hpp"
@@ -243,7 +244,7 @@ namespace psycle
 			// File version
 			sect = "Info";
 			key = "AppVersion";
-			data = PSYCLE__VERSION;
+			data = PSYCLE__BUILD__IDENTIFIER(EOL);
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
 			key = "Description";
 			data = "Psycle";	
@@ -580,7 +581,6 @@ namespace psycle
 						if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
 						else
 						{
-												
 							if (Global::pPlayer->_playPosition > 0)
 							{
 								Global::pPlayer->_playPosition -= 1;
@@ -595,7 +595,6 @@ namespace psycle
 									Global::pPlayer->ExecuteLine();
 								}
 							}
-							
 						}
 					}
 				}

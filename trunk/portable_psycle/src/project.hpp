@@ -585,10 +585,30 @@
 #if !defined STRINGIZED
 	/// Interprets argument as a string litteral.
 	/// The indirection in the call to # lets the macro expansion on the argument be done first.
-	#define STRINGIZED(X) STRINGIZED__NO_EXPANSION(X)
+	#define STRINGIZED(tokens) STRINGIZED__NO_EXPANSION(tokens)
 	/// Don't call this macro directly ; call STRINGIZED, which calls this macro after macro expansion is done on the argument.
 	///\relates STRINGIZED
-	#define STRINGIZED__NO_EXPANSION(X) #X
+	#define STRINGIZED__NO_EXPANSION(tokens) #tokens
+#endif
+
+
+
+///\}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///\name end of lines
+///\{
+
+
+
+#if !defined EOL
+	#if defined OPERATING_SYSTEM__MICROSOFT
+		#define EOL "\r\n"
+	#elif defined OPERATING_SYSTEM__APPLE && OPERATING_SYSTEM__VERSION__MAJOR < 10 // before bsd-unix (darwin)
+		#define EOL "\n\r"
+	#else
+		#define EOL "\n"
+	#endif
 #endif
 
 

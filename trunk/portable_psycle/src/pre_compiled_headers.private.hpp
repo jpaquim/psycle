@@ -58,9 +58,20 @@
 		#if !defined WIN32_EXTRA_LEAN
 			#define WIN32_EXTRA_LEAN // for mfc apps, we would get unresolved symbols
 		#endif
+		/// tells microsoft's headers not to pollute the global namespace with min and max macros (which break a lot of libraries, including the standard c++ library!)
+		#define NOMINMAX
 		#include <windows.h> // for mfc apps,  we would get a fatal error C1189: #error :  WINDOWS.H already included.  MFC apps must not #include <windows.h>
 		//#include <gdiplus.h> // since <windows.h> must be included before <gdiplus.h>,
 		// we can't include it here for mfc apps, it is instead included by pre_compiled_headers.private.mfc.hpp after the inclusion of <afxwin.h>.
+		#if !defined NOMINMAX // GDI+ needs them :-(
+			// The following two mswindows macros break a lot of libraries, including the standard c++ library!
+			#undef min
+			#undef max
+			/// replacement for mswindows' min macro, but using a template in the root namespace instead of the ubiquitous macro, so we prevent clashes.
+			template<typename T1, T2> bool inline min(T1 const & t1, T2 const & t2) { return t1 < t2 ? t1 : t2; }
+			/// replacement for mswindows' max macro, but using a template in the root namespace instead of the ubiquitous macro, so we prevent clashes.
+			template<typename T1, T2> bool inline max(T1 const & t1, T2 const & t2) { return t1 > t2 ? t1 : t2; }
+		#endif
 	#endif
 #endif
 
@@ -127,7 +138,7 @@
 //#include <cstdio>
 //#include <cstdlib>
 #include <cstring> // std::memset, std::memcpy, std::memmove
-//#include <ctime> // std::clock_t std::clock() / CLOCKS_PER_SEC (not as accurate as the performance counter, CLOCKS_PER_SEC is only 1000)
+//#include <ctime> // std::clock_t std::clock() / CLOCKS_PER_SEC (not as accurate as the performance counter, CLOCKS_PER_SEC is only 1000 on windows)
 
 // c headers that might not work if wchar_t support is disabled.
 /*
@@ -140,9 +151,9 @@
 
 
 
-/////////
-// posix
-/////////
+//////////////////
+// posix standard
+//////////////////
 
 #if defined OPERATING_SYSTEM__POSIX
 	#include <sys/unistd.h>
@@ -154,22 +165,14 @@
 // boost http://boost.org
 //////////////////////////
 
+#include <boost/cstdint.hpp>
+#include <boost/static_assert.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+#include <boost/thread/read_write_mutex.hpp>
 #include <boost/thread/condition.hpp>
-//#include <boost/spirit.hpp>
-#if defined COMPILER__MICROSOFT
-	#if !defined LIBRARY__BOOST__PATH
-		#define LIBRARY__BOOST__PATH ""
-	#endif
-	#if defined NDEBUG
-		#pragma comment(lib, LIBRARY__BOOST__PATH "boost_thread")
-	#else
-		#pragma comment(lib, LIBRARY__BOOST__PATH "boost_threadd")
-	#endif
-	#undef LIBRARY__BOOST__PATH
-#endif
+// huge include! #include <boost/spirit.hpp>
 
 
 

@@ -2,8 +2,6 @@
 ///\brief the original machine interface api
 ///\see plugin.hpp another, more object-oriented, interface api
 #pragma once
-#include <stdio.h> // should be <cstdio>
-#include <assert.h> // should be <cassert>
 
 //namespace psycle
 //{

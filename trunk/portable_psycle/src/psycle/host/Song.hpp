@@ -5,7 +5,21 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
-class CCriticalSection;
+
+
+
+#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+	#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+		#include <boost/thread/read_write_mutex.hpp>
+	#else // original implementation
+		class CCriticalSection;
+	#endif
+#endif
+
+
+
 namespace psycle
 {
 	namespace host
@@ -27,8 +41,25 @@ namespace psycle
 			bool _saved;
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
-			/// ...
-			CCriticalSection door;
+
+
+
+		#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+			#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+		#else
+			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+				private:
+					boost::read_write_mutex mutable  read_write_mutex_;
+				public:
+					boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
+			#else // original implementation
+				CCriticalSection mutable door;
+			#endif
+		#endif
+
+
+
+		public:
 			/// constructor.
 			Song();
 			/// destructor.

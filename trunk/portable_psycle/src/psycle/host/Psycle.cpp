@@ -54,14 +54,7 @@ NAMESPACE__BEGIN(psycle)
 			Global::pLogWindow = new CLoggingWindow(pFrame);
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
 			//Global::pLogWindow->Validate();
-			host::loggers::info
-				(
-					"Psycle version: "
-					PSYCLE__VERSION
-					#if !defined NDEBUG
-						" debug"
-					#endif
-				);
+			host::loggers::info("build identifier: " EOL PSYCLE__BUILD__IDENTIFIER(EOL));
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
@@ -197,7 +190,7 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_HEADER, m_headercontrib);
 			DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
 			DDX_Control(pDX, IDC_EDIT1, m_contrib);
-			DDX_Control(pDX, IDC_VERSION_INFO, m_versioninfo);
+			DDX_Control(pDX, IDC_VERSION_INFO_MULTI_LINE, m_versioninfo);
 			//}}AFX_DATA_MAP
 		}
 
@@ -261,7 +254,7 @@ NAMESPACE__BEGIN(psycle)
 						"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
 						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n"
 						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
-						"Satoshi Fujiwara\t\t Initial code on the XM sampler support\r\n"
+						"Satoshi Fujiwara\t\t\tInitial code on the XM sampler support\r\n"
 						"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
 						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
@@ -273,16 +266,7 @@ NAMESPACE__BEGIN(psycle)
 
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
-
-			std::ostringstream s;
-			s << "Version "
-				//" $Date$"
-				PSYCLE__VERSION
-#				if !defined NDEBUG
-					" debug"
-#				endif
-				" [built on " __DATE__ ", " __TIME__ "]";
-			m_versioninfo.SetWindowText(s.str().c_str());
+			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER(EOL));
 
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE

@@ -24,19 +24,20 @@ VS_VERSION_INFO VERSIONINFO
 		{
 			BLOCK "040904b0" // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
 			{
-				VALUE "ProductName", RC__ProductName
-				VALUE "InternalName", RC__InternalName
-				VALUE "ProductVersion", RC__ProductVersion
-
-				VALUE "FileDescription", RC__FileDescription
-				VALUE "OriginalFilename", RC__OriginalFilename
-				VALUE "FileVersion", RC__FileVersion
-				VALUE "SpecialBuild", RC__SpecialBuild
-				VALUE "PrivateBuild", RC__PrivateBuild
-
 				VALUE "CompanyName", RC__CompanyName
 				VALUE "LegalCopyright", RC__LegalCopyright
 				VALUE "License", RC__License
+
+				VALUE "InternalName", RC__InternalName
+				VALUE "ProductName", RC__ProductName
+				VALUE "ProductVersion", RC__ProductVersion
+
+				VALUE "OriginalFilename", RC__OriginalFilename
+				VALUE "FileDescription", RC__FileDescription
+				VALUE "FileVersion", RC__FileVersion
+
+				VALUE "SpecialBuild", RC__SpecialBuild
+				VALUE "PrivateBuild", RC__PrivateBuild
 			}
 	}
 	BLOCK "VarFileInfo"
