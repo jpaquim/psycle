@@ -30,6 +30,7 @@ V1.7.3
 ! songs with invalid connections are dealt with correctly (pooplog)
 ! pattern lengths no longer can be randomly changed by adding new/cloning patterns (pooplog)
 ! can't delete the master any more (pooplog)
+! various other small bugfixes (pooplog)
 
 
 V1.7.1
