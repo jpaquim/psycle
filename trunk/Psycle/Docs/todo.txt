@@ -35,12 +35,13 @@ rough bug count: ~60, many aren't really bugs though.
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 
-*** gear rack stuff: exchange - is it backwards?
+++ an option to merge in another song...
+
+** gear rack stuff: exchange - is it backwards?
 
 ** parameter name lengths in plugs: http://psycle.pastnotecut.org/thread.php?threadid=938&boardid=2&styleid=1
 
 +++ bmps for background of machine view?
-+++ moving wires, preserving volume, dragging triangles with shift moves destination.
 
 ++ volume slide command
 
@@ -57,7 +58,7 @@ rough bug count: ~60, many aren't really bugs though.
 
 
 + <alk> some bastards want keyrepeat for notes back
-? in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
++++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 + volume slide in sampler, so that you can cut the vol of a sample without a click
 + option to not move cursor when pasting
 + save bar hide/unhide settings
@@ -199,8 +200,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	James says: how hard would it be to put nodes in the wires, so you can bend them?
 + <JAL7OH> is it possible to make arrows resizable?
 + <Druttis_> can you have background picture in psycle somehow?
-+?	<alk> make single click/drag move wire from one machine to another (preserving vol) 
-		[ This means changing the destination ]
 
 * Player Engine:
 ----------------

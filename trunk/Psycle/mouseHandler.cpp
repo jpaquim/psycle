@@ -127,6 +127,33 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		else if (nFlags & MK_SHIFT)
 		{
 			wiresource = GetMachine(point);
+			wiremove = -1;
+			if (wiresource == -1)
+			{
+				for (int c=0; c<MAX_MACHINES; c++)
+				{
+					Machine *tmac = Global::_pSong->_pMachine[c];
+					if (tmac)
+					{
+						for (int w = 0; w<MAX_CONNECTIONS; w++)
+						{
+							if (tmac->_connection[w])
+							{
+								int xt = tmac->_connectionPoint[w].x;
+								int yt = tmac->_connectionPoint[w].y;
+								
+								if ((point.x > xt) && (point.x < xt+20) && (point.y > yt) && (point.y < yt+20))
+								{
+									// we found it
+									wiremove = w;
+									wiresource = c;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
 			if (wiresource != -1)
 			{
 				switch (Global::_pSong->_pMachine[wiresource]->_mode)
@@ -374,10 +401,43 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 			wiredest = GetMachine(point);
 			if ((wiredest !=-1) && (wiredest != wiresource))
 			{
-				if (!Global::_pSong->InsertConnection(wiresource, wiredest))
+				// are we moving a wire?
+				if (wiremove >= 0)
+				{
+					// buffer the volume
+					int dm,w;
+					float volume = 1.0f;
+
+					if (Global::_pSong->_pMachine[wiresource])
+					{
+						dm = Global::_pSong->_pMachine[wiresource]->_outputMachines[wiremove];
+
+						if (Global::_pSong->_pMachine[dm])
+						{
+							w = Global::_pSong->_pMachine[dm]->FindInputWire(wiresource);
+							volume = Global::_pSong->_pMachine[dm]->_inputConVol[w];
+							if (Global::_pSong->InsertConnection(wiresource, wiredest,volume))
+							{
+								// delete the old wire
+								Global::_pSong->_pMachine[wiresource]->_connection[wiremove] = FALSE;
+								Global::_pSong->_pMachine[wiresource]->_numOutputs--;
+
+								Global::_pSong->_pMachine[dm]->_inputCon[w] = FALSE;
+								Global::_pSong->_pMachine[dm]->_numInputs--;
+							}
+							else
+							{
+								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+							}
+						}
+					}
+				}
+				// or making a new one?
+				else if (!Global::_pSong->InsertConnection(wiresource, wiredest))
 				{
 					MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 				}
+
 			}
 			wiresource = -1;
 			Repaint();

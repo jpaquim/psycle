@@ -65,15 +65,6 @@ CMainFrame		*pParentMain;
 
 //Bitmap mv_bg;
 
-// Enviroment variables
-int smac=-1;
-int smacmode=0;
-int wiresource=-1;
-int wiredest=-1;
-int wireSX=0;
-int wireSY=0;
-int wireDX=0;
-int wireDY=0;
 
 unsigned idletime=0;
 
@@ -83,6 +74,17 @@ unsigned idletime=0;
 CChildView::CChildView()
 {
 	// Set Gui Environment data
+
+	// Enviroment variables
+	smac=-1;
+	smacmode=0;
+	wiresource=-1;
+	wiredest=-1;
+	wiremove=-1;
+	wireSX=0;
+	wireSY=0;
+	wireDX=0;
+	wireDY=0;
 
 	for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 	bmpDC = NULL;

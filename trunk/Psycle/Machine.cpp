@@ -194,6 +194,7 @@ int Machine::FindInputWire(int macIndex)
 	}
 	return -1;
 }
+
 int Machine::FindOutputWire(int macIndex)
 {
 	for (int c=0; c<MAX_CONNECTIONS; c++)
