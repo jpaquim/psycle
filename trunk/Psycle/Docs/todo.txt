@@ -36,9 +36,6 @@
 	pooplog-we should just make a new slider class that uses shift and ctrl like knobs
 + alk-highlight the current line on the linenumbers on the left (so that even if the curson is on the 
 	right you can see which line its on)
-* alk-when you do ctrl + click on sampler it should change combo to samples (it doesnt if e.g. it was 
-	on parameters)
-
 
 * Machines
 ------------
