@@ -56,5 +56,69 @@ inline int f2i(float flt)
   return i;
 }
 
+inline int f2iclip16(float flt) 
+{ 
+	if (flt <-32767.0f)
+	{
+		return -32767;
+	}
+	if (flt > 32767.0f)
+	{
+		return 32767;
+	}
+	return f2i(flt);
+}
+
+inline int f2iclip18(float flt) 
+{ 
+	if (flt <-131071.0f)
+	{
+		return -131071;
+	}
+	if (flt > 131071.0f)
+	{
+		return 131071;
+	}
+	return f2i(flt);
+}
+
+inline int f2iclip20(float flt) 
+{ 
+	if (flt <-524287.0f)
+	{
+		return -524287;
+	}
+	if (flt > 524287.0f)
+	{
+		return 524287;
+	}
+	return f2i(flt);
+}
+
+inline int f2iclip24(float flt) 
+{ 
+	if (flt <-8388607.0f)
+	{
+		return -8388607;
+	}
+	if (flt > 8388607.0f)
+	{
+		return 8388607;
+	}
+	return f2i(flt);
+}
+
+inline int f2iclip32(float flt) 
+{ 
+	if (flt <-2147483647.0f)
+	{
+		return -2147483647;
+	}
+	if (flt > 2147483647.0f)
+	{
+		return 2147483647;
+	}
+	return f2i(flt);
+}
 
 #endif
