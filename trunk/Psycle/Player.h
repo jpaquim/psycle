@@ -14,7 +14,6 @@ class Machine;
 class Player
 {
 public:
-	void SetSampleRate(int samprate);
 	void AdvancePosition();
 	bool _playBlock;
 	bool _playing;

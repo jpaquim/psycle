@@ -224,6 +224,9 @@ public:
 	}
 
 	virtual char* GetName(void) { return _sProductName; }
+
+	virtual void SetSampleRate(int sr) {Dispatch( effSetSampleRate, 0, 0, NULL, (float)sr);};
+
 	long GetVersion() { return _version; }
 	char* GetVendorName(void) { return _sVendorName; }
 	char* GetDllName(void) { return _sDllName; }
