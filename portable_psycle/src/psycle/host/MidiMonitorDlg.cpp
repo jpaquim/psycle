@@ -331,14 +331,14 @@ namespace psycle
 		// FillChannelMap
 		//
 		// DESCRIPTION	  : Fill the channel mapping table
-		// PARAMETERS     : bool override - always fill?
+		// PARAMETERS     : bool overridden - always fill?
 		// RETURNS		  : <void>
 
-		void CMidiMonitorDlg::FillChannelMap( bool override )
+		void CMidiMonitorDlg::FillChannelMap( bool overridden )
 		{
 			// get the midi input interface
 			CMidiInput * pMidiInput = CMidiInput::Instance();
-			if( !override && (!pMidiInput || pMidiInput->GetStatsPtr()->channelMapUpdate == false) )
+			if( !overridden && (!pMidiInput || pMidiInput->GetStatsPtr()->channelMapUpdate == false) )
 			{
 				return;
 			}

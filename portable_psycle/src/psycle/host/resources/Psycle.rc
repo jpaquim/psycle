@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include ".\..\..\..\..\include\psycle\host\resource.h"
+#include <psycle/host/resource.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -2097,39 +2097,47 @@ END
 // Version
 //
 
+#include <psycle/host/version.h>
+#include <windows.h>
+// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,7,7,65535
- PRODUCTVERSION 1,7,7,65535
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "CompanyName", "Psycledelics"
-            VALUE "FileDescription", "Psycle Modular Music Creation Studio Application"
-            VALUE "FileVersion", "1.7.7.<read the patch number on the about dialog>"
-            VALUE "InternalName", "Psycle"
-            VALUE "LegalCopyright", "Copyright (C) 2000-2004 Psycledelics"
-            VALUE "OriginalFilename", "psycle.exe"
-            VALUE "ProductName", "Psycle Modular Music Creation Studio"
-            VALUE "ProductVersion", "1.7.7.<read the patch number on the about dialog>"
-            VALUE "SpecialBuild", "msvc 7.1"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
+	PRODUCTVERSION PSYCLE__VERSION__CODEBASE,PSYCLE__VERSION__MAJOR,PSYCLE__VERSION__MINOR,PSYCLE__VERSION__PATCH
+	FILEVERSION PSYCLE__VERSION__CODEBASE,PSYCLE__VERSION__MAJOR,PSYCLE__VERSION__MINOR,PSYCLE__VERSION__PATCH
+	FILEFLAGSMASK VS_FF_DEBUG
+	#if defined NDEBUG
+		FILEFLAGS 0
+	#else
+		FILEFLAGS VS_FF_DEBUG
+	#endif
+	FILEOS VOS_NT
+	FILETYPE VFT_UNKNOWN
+	FILESUBTYPE VFT2_UNKNOWN
+	{
+		BLOCK "StringFileInfo"
+		{
+			BLOCK "040904b0" // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
+			{
+				VALUE "ProductName", RC__ProductName
+				VALUE "InternalName", RC__InternalName
+				VALUE "ProductVersion", RC__ProductVersion
+
+				VALUE "FileDescription", RC__FileDescription
+				VALUE "OriginalFilename", RC__OriginalFilename
+				VALUE "FileVersion", RC__FileVersion
+				VALUE "SpecialBuild", RC__SpecialBuild
+				VALUE "PrivateBuild", RC__PrivateBuild
+
+				VALUE "CompanyName", RC__CompanyName
+				VALUE "LegalCopyright", RC__LegalCopyright
+				VALUE "License", RC__License
+			}
+	}
+	BLOCK "VarFileInfo"
+	{
+		VALUE "Translation", 0x409, 1200 // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
+	}
 END
+
 
 
 #ifdef APSTUDIO_INVOKED
@@ -2140,7 +2148,7 @@ END
 
 1 TEXTINCLUDE 
 BEGIN
-    ".\\..\\..\\..\\..\\include\\psycle\\host\\resource.h\0"
+    "#include <psycle\\host\\resource.h>\r\n\0"
 END
 
 2 TEXTINCLUDE 
@@ -2177,7 +2185,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "[Untitled.psy] Psycle Modular Music Creation Studio"
+    IDR_MAINFRAME           "[Untitled.psy] Psycle Modular Music Creation Studio " "PSYCLE__VERSION"
 END
 
 STRINGTABLE 

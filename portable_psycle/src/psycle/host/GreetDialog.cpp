@@ -57,7 +57,7 @@ namespace psycle
 
 		*/
 			m_greetz.AddString("All the people in the Forums");
-			m_greetz.AddString("All at #psycle [EFNET]");
+			m_greetz.AddString("All at #psycle [EFnet]");
 
 			m_greetz.AddString("Alk [Extreme testing + Coding]");
 			m_greetz.AddString("BigTick [for his excellent VSTs]");

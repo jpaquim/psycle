@@ -4,6 +4,7 @@
 #else
 	#include LIBRARY__IMPORT
 #endif
+
 #include "asiosys.h"
 #include "asio.h"
 namespace asio

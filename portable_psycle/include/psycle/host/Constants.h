@@ -1,31 +1,13 @@
 #pragma once
+#include "version.h"
 namespace psycle
 {
 	namespace host
 	{
-		/// The release number of the psycle host application.
-		/// Releases are named this way:
-		/// M.m.r.p , where:
-		/// - M = major version number.
-		/// - m = minor version number.
-		/// - r = revision number, if even, release. if odd, beta.
-		/// - p = patch number.
-		/// It is cubersome to change because we need to update:
-		/// - include/psycle/host/Constants.h: #define VERSION_NUMBER "x.x.x.x"
-		/// - src/psycle/host/resources/Psycle.rc: FILEVERSION x,x,x,x
-		/// - src/psycle/host/resources/Psycle.rc: PRODUCTVERSION x,x,x,x
-		/// - src/psycle/host/resources/Psycle.rc: VALUE "FileVersion", "x.x.x.x"
-		/// - src/psycle/host/resources/Psycle.rc: VALUE "ProductVersion", "x.x.x.x"
-		/// - src/psycle/host/resources/Psycle.rc: VALUE "SpecialBuild", "msvc 7.1"
-		/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
-		/// - doc/for-end-users/readme.txt
-		#define VERSION_NUMBER "Alpha 1.7.7.16" /* "$Revision$ $Date$" */
-			
 		/// number of samples per tweak slide update
 		#define TWEAK_SLIDE_SAMPLES		64
 		/// number of tws commands that can be active on one machine
 		#define MAX_TWS					16
-
 		/// Slots avaiable to load machines of each class (gen and FX). Power of 2! Important!
 		#define MAX_BUSES				64
 		/// Max number of machines+1 (master)

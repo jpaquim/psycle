@@ -18,12 +18,12 @@ Version | Type of release          | By
 1.7.7   | beta                     | alk & bohan & magnus & [JAZ] & logywang & sampler
 ---------------------------------------------------------------------------------------
 
-Since 1.7.3, releases are named this way:
-M.m.r.p , where:
-M = major version number.
-m = minor version number.
-r = revision number, if even, release. if odd, beta.
-p = patch number.
+Versions are composed this way:
+C.M.m.p , where:
+	- C = codebase generation.
+	- M = major version number.
+	- m = minor version number: if 0, release. if different than 0, release candidate for next major version number.
+	- p = patch number.
 
 ----------------------------------------------------------------
 Legend :       +=addition        *=change        !=bug
@@ -33,6 +33,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.16  2004/12/22 22:42:20  johan-boule
+fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
+
 Revision 1.15  2004/12/18 14:48:39  johan-boule
 change by alk in order to stop the note blasts when un muting vsts
 
