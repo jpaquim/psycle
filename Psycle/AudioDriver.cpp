@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AudioDriver.h"
+#include "helpers.h"
 
 #define SHORT_MIN	-32768
 #define SHORT_MAX	32767
@@ -52,12 +53,13 @@ void AudioDriver::QuantizeWithDither(float *pin, int *piout, int c)
 
 void AudioDriver::Quantize(float *pin, int *piout, int c)
 {
-	double const d2i = (1.5 * (1 << 26) * (1 << 26));
+//	double const d2i = (1.5 * (1 << 26) * (1 << 26));
 	
 	do
 	{
-		double res = ((double)pin[1]) + d2i;
-		int r = *(int *)&res;
+//		double res = ((double)pin[1]) + d2i;
+//		int r = *(int *)&res;
+		int r = f2i(pin[1]);
 
 		if (r < SHORT_MIN)
 		{
@@ -67,8 +69,9 @@ void AudioDriver::Quantize(float *pin, int *piout, int c)
 		{
 			r = SHORT_MAX;
 		}
-		res = ((double)pin[0]) + d2i;
-		int l = *(int *)&res;
+//		res = ((double)pin[0]) + d2i;
+//		int l = *(int *)&res;
+		int l = f2i(pin[0]);
 
 		if (l < SHORT_MIN)
 		{
