@@ -190,6 +190,7 @@ protected:
 	afx_msg void OnUpdateIndicatorFollow(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateIndicatorTweaks(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorOctave(CCmdUI *pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
