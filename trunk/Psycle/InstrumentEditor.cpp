@@ -6,6 +6,7 @@
 #include "MainFrm.h"
 #include "InstrumentEditor.h"
 #include "EnvDialog.h"
+#include "constants.h"
 //#include "io.h"
 //#include "direct.h"
 
@@ -351,10 +352,10 @@ void CInstrumentEditor::OnChangeLoopedit()
 	{
 		_pSong->_instruments[si]._lines = 1;
 	}
-	if (_pSong->_instruments[si]._lines > 128)
+/*	if (_pSong->_instruments[si]._lines > MAX_LINES)
 	{
-		_pSong->_instruments[si]._lines = 128;
-	}
+		_pSong->_instruments[si]._lines = MAX_LINES;
+	}*/
 }
 
 void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 

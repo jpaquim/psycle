@@ -367,8 +367,8 @@ void CMasterDlg::OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	_pMachine->SetWireVolume(10,(256-m_sliderm11.GetPos())*0.00390625f);
-//	PaintNumbers(256-m_sliderm11.GetPos(),292,142);
+	//	_pMachine->SetWireVolume(10,(256-m_sliderm11.GetPos())*0.00390625f);
+	//	PaintNumbers(256-m_sliderm11.GetPos(),292,142);
 	float val = ((256-m_sliderm11.GetPos())*(256-m_sliderm11.GetPos()))/64.0f;
 	_pMachine->SetWireVolume(10,val*0.00390625f);
 	PaintNumbers(f2i(val),292,142);
@@ -378,11 +378,31 @@ void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CMasterDlg::OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	_pMachine->SetWireVolume(11,(256-m_sliderm12.GetPos())*0.00390625f);
-//	PaintNumbers(256-m_sliderm12.GetPos(),312,142);
+	//	_pMachine->SetWireVolume(11,(256-m_sliderm12.GetPos())*0.00390625f);
+	//	PaintNumbers(256-m_sliderm12.GetPos(),312,142);
 	float val = ((256-m_sliderm12.GetPos())*(256-m_sliderm12.GetPos()))/64.0f;
 	_pMachine->SetWireVolume(11,val*0.00390625f);
 	PaintNumbers(f2i(val),312,142);
+
+// I know the following is Ugly, but it is the only solution I've found, because first,
+// OnPaint is called, after the bitmap is drawn, and finally the sliders are redrawn.
+	CDC *dcm = m_mixerview.GetDC();
+	CFont* oldfont = dcm->SelectObject(&namesFont);
+	dcm->SetTextColor(0x00FFFFFF); // White
+	dcm->SetBkColor(0x00000000); // Black
+	dcm->TextOut(353,24,macname[0]);
+	dcm->TextOut(428,24,macname[1]);
+	dcm->TextOut(353,46,macname[2]);
+	dcm->TextOut(428,46,macname[3]);
+	dcm->TextOut(353,68,macname[4]);
+	dcm->TextOut(428,68,macname[5]);
+	dcm->TextOut(353,90,macname[6]);
+	dcm->TextOut(428,90,macname[7]);
+	dcm->TextOut(353,112,macname[8]);
+	dcm->TextOut(428,112,macname[9]);
+	dcm->TextOut(353,134,macname[10]);
+	dcm->TextOut(428,134,macname[11]);
+	dcm->SelectObject(oldfont);	
 	
 	*pResult = 0;
 }
