@@ -1,27 +1,38 @@
 #pragma once
-#include "resource.h"
-#include "LogEntry.h"
+#include "resources/resource.h"
 #include <vector>
 #include <string>
-
 ///\file
 ///\brief interface file for psycle::host::CLoggingWindow.
 namespace psycle
 {
 	namespace host
 	{
-
 		class CMainFrame;
 
 		/// logging window.
 		class CLoggingWindow : public CDialog
 		{
 		public:
-			CLoggingWindow(CWnd* pParent = 0);
-			void Validate();
+			void AddEntry(const int & level, const std::string & string);
+		private:
+			void ResizeTextBox();
+			CHARFORMAT defaultCF;
+			CHARRANGE charrange;
+			class LogEntry
+			{
+			public:
+				const int level;
+				const std::string string;
+				inline LogEntry(const int & level, const std::string & string) : level(level), string(string) {}
+			};
+			typedef std::vector<LogEntry*> LogEntries;
+			LogEntries LogVector;
 
-			CMainFrame* pParentMain;
-			
+		public:
+			CLoggingWindow(CWnd * pParent = 0);
+			void Validate();
+			CMainFrame * pParentMain;
 			// Dialog Data
 			//{{AFX_DATA(CLoggingWindow)
 			enum { IDD = IDD_ERRORLOGGER };
@@ -42,15 +53,6 @@ namespace psycle
 			DECLARE_MESSAGE_MAP()
 		public:
 			afx_msg void OnSize(UINT nType, int cx, int cy);
-			void AddEntry(int Level, std::string String);
-
-		private:
-			void ResizeTextBox();
-			CHARFORMAT defaultCF;
-			CHARRANGE charrange;
-			typedef std::vector<LogEntry*> LogEntries;
-			LogEntries LogVector;
-
 		};
 		
 		//{{AFX_INSERT_LOCATION}}
