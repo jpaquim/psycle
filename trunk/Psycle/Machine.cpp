@@ -364,6 +364,7 @@ void Master::Init(void)
 	_lMax = 1;
 	_rMax = 1;
 #endif // ndef _WINAMP_PLUGIN
+	vuupdated = false;
 	_clip = false;
 }
 
@@ -402,8 +403,11 @@ void Master::Work(
 		}
 		while (--i);
 #else
-		_lMax -= numSamples*8;
-		_rMax -= numSamples*8;
+//		_lMax -= numSamples*8;
+//		_rMax -= numSamples*8;
+//		_lMax *= 0.5;
+//		_rMax *= 0.5;
+		if ( vuupdated ) { _lMax *= 0.5; _rMax *= 0.5;}
 
 		int i = numSamples;
 		do
@@ -432,19 +436,19 @@ void Master::Work(
 		{
 			_clip=true;
 			if (decreaseOnClip) _outDry = int((float)_outDry * 32768.0f / _lMax);
-			_lMax = 32768.0f; _LMAX = 32768;
+			_lMax = 32768.0f; //_LMAX = 32768;
 		}
-		else if (_lMax < 1.0f) { _lMax = 1.0f; _LMAX = 1; }
-		else _LMAX = Dsp::F2I(_lMax);
+		else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
+//		else _LMAX = Dsp::F2I(_lMax);
 
 		if (_rMax > 32768.0f)
 		{
 			_clip=true;
 			if (decreaseOnClip) _outDry = int((float)_outDry * 32768.0f / _rMax);
-			_rMax = 32768.0f; _RMAX = 32768;
+			_rMax = 32768.0f; //_RMAX = 32768;
 		}
-		else if (_rMax < 1.0f) { _rMax = 1.0f; _RMAX = 1; }
-		else _RMAX = Dsp::F2I(_rMax);
+		else if (_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }
+//		else _RMAX = Dsp::F2I(_rMax);
 #endif // _WINAMP_PLUGIN_
 //	}
 #if !defined(_WINAMP_PLUGIN_)

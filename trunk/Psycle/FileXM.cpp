@@ -140,7 +140,7 @@ char * CFileXM::AllocReadStr(LONG size, LONG start)
 	// allocate space
 	char * pData = new char[size+1];
 	if(pData==NULL)
-		return false;
+		return NULL;
 
 	// null terminate
 	pData[size]=0;
@@ -154,7 +154,6 @@ char * CFileXM::AllocReadStr(LONG size, LONG start)
 		return pData;
 
 	delete[] pData;
-	ASSERT(0);
 	return NULL;
 }
 

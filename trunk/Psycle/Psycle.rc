@@ -648,6 +648,24 @@ BEGIN
     LTEXT           "Theme Presets",IDC_STATIC,158,88,48,8
     COMBOBOX        IDC_PRESETSCOMBO,212,86,95,57,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_PBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,56,86,12,
+                    9
+    CONTROL         "",IDC_ROW_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,56,105,
+                    12,9
+    CONTROL         "",IDC_BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,56,126,
+                    12,9
+    CONTROL         "",IDC_FONT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,119,106,
+                    12,9
+    CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,119,
+                    126,12,9
+    CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,23,
+                    12,9
+    CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,38,
+                    12,9
+    CONTROL         "",IDC_VU3_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,55,
+                    12,9
+    CONTROL         "",IDC_MBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,207,25,
+                    12,9
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
@@ -741,7 +759,7 @@ IDD_NEWVAL DIALOGEX 0, 0, 264, 38
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "New Value"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_EDIT1,4,4,128,12,NOT WS_BORDER,WS_EX_CLIENTEDGE | 
                     WS_EX_RIGHT
@@ -751,19 +769,19 @@ BEGIN
 END
 
 IDD_VSTRACK DIALOGEX 0, 0, 142, 203
-STYLE WS_CHILD | WS_BORDER
+STYLE WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
+                    16
     COMBOBOX        IDC_COMBO1,23,4,116,136,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | 
                     WS_TABSTOP,3,20,20,166
     LISTBOX         IDC_LIST1,23,22,115,163,LBS_USETABSTOPS | 
                     LBS_WANTKEYBOARDINPUT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "",IDC_TEXT1,7,188,131,12,SS_CENTERIMAGE,
+    LTEXT           "",IDC_TEXT1,7,188,131,12,SS_CENTERIMAGE | NOT WS_GROUP,
                     WS_EX_STATICEDGE
-    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
-                    16
 END
 
 IDD_PRESETS DIALOGEX 0, 0, 167, 137
@@ -989,14 +1007,14 @@ BEGIN
                     WS_BORDER,0,0,335,13
 END
 
-IDD_SEQUENCER DIALOGEX 0, 0, 70, 348
+IDD_SEQUENCER DIALOGEX 0, 0, 70, 329
 STYLE WS_CHILD
 EXSTYLE WS_EX_STATICEDGE
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,5,218,62,8
-    LISTBOX         IDC_SEQLIST,4,5,36,157,LBS_SORT | LBS_EXTENDEDSEL | 
+    LISTBOX         IDC_SEQLIST,4,5,36,155,LBS_SORT | LBS_EXTENDEDSEL | 
                     WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "+",IDC_INCSHORT,43,5,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
@@ -1030,15 +1048,15 @@ BEGIN
     CTEXT           "00:00",IDC_LENGTH,35,204,31,12,SS_CENTERIMAGE | NOT 
                     WS_GROUP,WS_EX_STATICEDGE
     CONTROL         "Multichannel Audition",IDC_MULTICHANNEL_AUDITION,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,228,62,15
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,229,62,15
     CONTROL         "Wrap Around",IDC_WRAP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,5,279,56,11
+                    WS_TABSTOP,5,283,56,11
     CONTROL         "Center Cursor",IDC_CENTERCURSOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,5,290,62,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,5,295,62,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,300,60,16
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,306,60,16
     CONTROL         "Record NoteOffs",IDC_RECORD_NOTEOFF,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,245,60,15
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,247,60,15
     PUSHBUTTON      "++",IDC_INCLONG,43,37,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
     PUSHBUTTON      "-",IDC_DECLONG,43,53,23,12,BS_BITMAP | BS_CENTER | 
@@ -1046,7 +1064,7 @@ BEGIN
     PUSHBUTTON      "New",IDC_SEQNEW,43,69,23,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Sort",IDC_SEQSRT,43,149,23,12,0,WS_EX_STATICEDGE
     CONTROL         "Record Tweaks",IDC_RECORD_TWEAKS,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,263,60,15
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,266,60,15
     PUSHBUTTON      "Xerox",IDC_SEQDUPLICATE,43,85,23,12,0,WS_EX_STATICEDGE
 END
 
@@ -1386,7 +1404,7 @@ BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 66
         TOPMARGIN, 7
-        BOTTOMMARGIN, 346
+        BOTTOMMARGIN, 327
     END
 
     IDD_DSOUNDCONFIG, DIALOG
@@ -1866,6 +1884,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_DELETE          "Delete selection"
+    ID_CONVERT_MONO         "Mix channels to mono"
+    ID_CONVERT_STEREO       "Split channels to stereo"
     ID_INDICATOR_SIZE       "Size:"
     ID_INDICATOR_MODE       "Mode:"
 END
@@ -1888,12 +1908,6 @@ BEGIN
     ID_POP_TRANSPOSE1       "Transposes the notes 1 seminote up\nTraspose +1"
     ID_POP_TRANSPOSE12      "Transposes the notes 12 seminotes up (1 octave)\nTraspose +12"
     ID_POP_TRANSPOSE_12     "Transposes the notes 12 seminotes down (1 octave)\nTraspose -12"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_CONVERT_MONO         "Mix channels to mono"
-    ID_CONVERT_STEREO       "Split channels to stereo"
 END
 
 STRINGTABLE DISCARDABLE 

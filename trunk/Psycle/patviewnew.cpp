@@ -1,10 +1,28 @@
 /*
+  DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
+					// whole update is needed (For example, when changing pattern Properties, or TPB)
+
+  DMPatternSwitch,	// Use this when switching Patterns (changing from one to another)
+  DMDataChange,		// Data has Changed. Which data to update is indicated with DrawLineStart/End
+					// and DrawTrackStart/End
+					// Use it when editing and copy/pasting
+  DMScroll,			// Refresh called by the scrollbars or by mouse scrolling (when selecting).
+					// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+  DMResize,			// Indicates the Refresh is called from the "OnSize()" event.
+  DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
+  DMPlaybackChange,	// Indicates that while playing, a pattern switch is needed.
+  DMCursorMove,		// Indicates a movement of the cursor. update the values to "editcur" directly
+					// and call this function.
+  DMSelection,		// The selection has changed. use "blockSel" to indicate the values.
+  DMTrackHeader,	// Track header refresh (mute/solo, Record updating)
+  DMPatternHeader,	// Octave, Pattern name, Edit Mode on/off
+
+
 multiPattern : It needs MANY modifications to work properly. Basically in the
-               "PreparePatternRefresh". Also the parts of the "DrawPatEditor" that
-			   references it, needs some changes.
+"PreparePatternRefresh".
+Also the parts of the "DrawPatEditor" that references it, needs some changes.
 
-when appgetsfocus -> full update!
-
+  
 */
 #define DRAW_HEADER 1
 #define DRAW_DATA	2
@@ -14,16 +32,36 @@ when appgetsfocus -> full update!
 
 void CChildView::PreparePatternRefresh(int drawMode)
 {
-	if ( updateMode == DMNone ) updatePar=0;
-	updateMode=drawMode;
-	CRect rect;
-
-	if (drawMode == DMPatternHeader )
+	CRect rect;	
+	if ( updateMode == DMNone ) updatePar=0; // Reinitializes the updatePar value
+	updateMode=drawMode;					// only after DrawPatEditor has been processed
+	
+	switch (drawMode)
 	{
-		rect.top=0; rect.left=0;
-		rect.bottom=18;	rect.right=CW;
-		updatePar |= DRAW_HEADER;
-		InvalidateRect(rect,false);
+	case DMAll: break;
+	case DMPatternSwitch: break;
+	case DMDataChange: break;
+	case DMScroll: break;
+	case DMResize: break;
+	case DMPlayback: break;
+	case DMPlaybackChange: break;
+	case DMCursorMove: break;
+	case DMSelection: break;
+	case DMTrackHeader: break;
+	case DMPatternHeader: break;
+	case DMNone: break;
+	}
+
+	
+	if (drawMode == DMPatternHeader)
+	{
+		if ( !(updatePar & DRAW_HEADER ))
+		{
+			rect.top=0; rect.left=0;
+			rect.bottom=18;	rect.right=CW;
+			updatePar |= DRAW_HEADER;
+			InvalidateRect(rect,false);
+		}
 	}
 	else if (drawMode == DMTrackHeader )
 	{
@@ -32,7 +70,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		updatePar |= DRAW_TRHEADER;
 		InvalidateRect(rect,false);
 	}
-	else if (drawMode == DMSelection )//define or undefine the block.
+	else if (drawMode == DMSelection )//selection change (new/changed/deselected)
 	{
 		if ( blockSelected )
 		{
@@ -40,7 +78,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 				(blockSel.start.track>=tOff+VISTRACKS) ||
 				(blockSel.start.line>=lOff+VISLINES))
 			{
-				newselpos.bottom = 0;
+				newselpos.bottom = 0; // This marks as "don't show selection" (because out of range)
 			}
 			else 
 			{
@@ -74,8 +112,16 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		const int snt = _pSong->SONGTRACKS;
 		const int plines = _pSong->patternLines[_pSong->playOrder[editPosition]];
 
-		if ( editcur.track >= snt )	{ editcur.track = snt-1; }
-		if ( editcur.line >= plines ) { editcur.line = plines-1; }
+		if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
+		{							// Else, there is a problem.
+			TRACE("editcur.track out of range in PreparePatternRefresh");
+			editcur.track = snt-1;
+		}
+		if ( editcur.line >= plines ) // This should only happen when changing the pattern lines
+		{							  // or changing to a pattern with less lines.
+			TRACE("editcur.line out of range in PreparePatternRefresh");
+			editcur.line = plines-1;
+		}
 		
 		// Track Offset
 		if ( snt <= VISTRACKS)	{ maxt = snt; tofs = 0; }
@@ -169,8 +215,9 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		
 		scrollT=0;scrollL=0;
 
-		if (drawMode != DMAll && drawMode != DMPatternChange)
+		if (drawMode != DMAll && drawMode != DMPatternSwitch)
 		{
+			bool lchanged=false;
 			rect=guipos;
 			if ( lofs != lOff )
 			{
@@ -178,13 +225,27 @@ void CChildView::PreparePatternRefresh(int drawMode)
 				rect.bottom=CH;		rect.right=XOFFSET+maxt*ROWWIDTH;
 				scrollL= lOff-lofs;
 				updatePar |= DRAW_SCROLL | DRAW_DATA;
+				lchanged=true;
 			}
 			if ( tofs != tOff )
 			{
-				rect.top=18;		rect.left=XOFFSET;
-				rect.bottom=YOFFSET+ (maxl*ROWHEIGHT)+1;	rect.right=CW;
-				scrollT= tOff-tofs;
-				updatePar |= DRAW_SCROLL | DRAW_DATA;
+				if (!lchanged)
+				{
+					rect.left=XOFFSET;
+					rect.bottom=YOFFSET+ (maxl*ROWHEIGHT)+1;
+					updatePar |= DRAW_SCROLL | DRAW_DATA;
+					scrollT= tOff-tofs;
+					rect.top=18;		
+					rect.right=CW;
+				}
+				else 
+				{
+					updatePar = DRAW_DATA | DRAW_HEADER | 16;
+					rect.left=0;	rect.top=0;
+					rect.right=CW;	rect.bottom=CH;
+					scrollT = 0;
+					scrollL = 0;
+				}
 			}
 			InvalidateRect(rect,false);
 		}
@@ -231,7 +292,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 			rect.bottom=YOFFSET+drawLineEnd*ROWHEIGHT;
 			InvalidateRect(rect,false);
 		}
-		else if (drawMode == DMPatternChange ) // Need of Modification. Currently a copy of DMAll.
+		else if (drawMode == DMPatternSwitch ) // Need of Modification. Currently a copy of DMAll.
 		{
 			updatePar |= DRAW_DATA | DRAW_HEADER;
 			scrollT = maxt;
@@ -383,6 +444,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 	////////////////////////////////////////////////////////////
 	// Draw Header
+
 	if ( updatePar & DRAW_HEADER )
 	{
 		char buffer[256];
@@ -399,6 +461,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	// Do Scroll if needed.
 	if ( updatePar & DRAW_SCROLL )
 	{
+		TRACE("BLAAAAAAAAAAAAAAAAAAAAAASC\n\n");
 		const RECT patR = {XOFFSET,YOFFSET , CW, CH};
 		const RECT trkR = {XOFFSET, 18, CW, YOFFSET-1};
 		const RECT linR = {0, YOFFSET, XOFFSET, CH};
@@ -485,6 +548,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 		if ( scrollT )
 		{
+			TRACE("BLAAAAAAAAAAAAAAAAAAAAAAAAT\n\n");
 			CDC memDC;
 			CBitmap *oldbmp;
 			memDC.CreateCompatibleDC(devc);
@@ -531,6 +595,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 		// Draw Lines in case of vertical Scroll.
 		if ( scrollL )
 		{
+			TRACE("BLAAAAAAAAAAAAAAAAAAAAAAAAL\n\n");
 			int ScrollLineStart,ScrollLineEnd;
 			if ( scrollL > 0 ) { ScrollLineStart = 0; ScrollLineEnd=scrollL; }
 			else if ( scrollL < 0 ) { ScrollLineStart=VISLINES+scrollL; ScrollLineEnd=maxl; }
