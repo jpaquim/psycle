@@ -2,6 +2,7 @@
 !=change
 +=addition
 
+* scopes have gdi leak problem on win98 * partially repaired
 * psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
@@ -12,6 +13,7 @@
 * alk - gap in audio when add new machine?
 + alk - mute current track keypress (alt-f9)
 + <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
++ <trylle> i mean that it records and plays back at the same time * record wave in too
 
 * Machines
 ------------
@@ -71,7 +73,7 @@ feature: maybe: MultiPattern View (The code is not made in the best way)
 
 * GUI (machines):
 -----------------
-* <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i 
+* <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
 * alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window, before releasing mouse button  
 	release note, then release mouse.
 * preview check box in preset dialog stopped working?

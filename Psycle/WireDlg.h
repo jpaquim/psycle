@@ -78,7 +78,8 @@ protected:
 	inline int GetY(float f);
 	void SetMode();
 	CChildView* m_pParent;
-	CBitmap* bmpDC;
+	CBitmap* bufBM;
+	CBitmap* clearBM;
 	CRect rc;
 	CFont font;
 	CFont* oldFont;

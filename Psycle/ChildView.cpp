@@ -3015,13 +3015,19 @@ void CChildView::TransparentBlt(CDC* pDC,
    pDC->SetTextColor(RGB(0,0,0));
    pDC->SetBkColor(RGB(255,255,255));
 
-   pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
-	   SRCAND);
+   if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
+	   SRCAND))
+   {
+	   TRACE("Transparent Blit failure SRCAND");
+   }
 
    // Also note the use of SRCPAINT rather than SRCCOPY.
 
-   pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
-		SRCPAINT);
+	if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
+		SRCPAINT))
+	{
+		TRACE("Transparent Blit failure SRCPAINT");
+	}
 
    // Now, clean up.
    hdcMem.SelectObject(hbmT);

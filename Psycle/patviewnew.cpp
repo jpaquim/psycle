@@ -862,24 +862,6 @@ void CChildView::PreparePatternRefresh(int drawMode)
 
 
 
-/*
-Undraw gui/selpos and playpos
-
-if ModeHeader -> Draw header
-
-if ModeScroll  ->  scrollT scrollL
-
-if ModeData -> 	if needed, Draw track headers
-				draw inittrack till endtrack
-				draw iniline   till endline
-				draw data modification.
-
-				fillsolidrect if needed
-				fillsolidrect if needed
-
-
-draw new guipos and playpos and "guipos=newguipos"
-*/
 
 #define DF_NONE			0
 #define	DF_SELECTION	1
