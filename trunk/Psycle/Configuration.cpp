@@ -753,7 +753,22 @@ Configuration::Read()
 		{
 			if (!seqFont.CreatePointFont(pattern_font_point,"Verdana"))
 			{
-				seqFont.CreatePointFont(pattern_font_point,"Arial Bold");
+				if (!seqFont.CreatePointFont(pattern_font_point,"Arial Bold"))
+				{
+					if (!seqFont.CreatePointFont(pattern_font_point,"Arial"))
+					{
+						if (!seqFont.CreatePointFont(pattern_font_point,"tahoma"))
+						{
+							if (!seqFont.CreatePointFont(pattern_font_point,"verdana"))
+							{
+								if (!seqFont.CreatePointFont(pattern_font_point,"arial bold"))
+								{
+									seqFont.CreatePointFont(pattern_font_point,"arial");
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -765,7 +780,22 @@ Configuration::Read()
 		{
 			if (!generatorFont.CreatePointFont(generator_font_point,"Verdana"))
 			{
-				generatorFont.CreatePointFont(generator_font_point,"Arial Bold");
+				if (!generatorFont.CreatePointFont(generator_font_point,"Arial Bold"))
+				{
+					if (!generatorFont.CreatePointFont(generator_font_point,"Arial"))
+					{
+						if (!generatorFont.CreatePointFont(generator_font_point,"tahoma"))
+						{
+							if (!generatorFont.CreatePointFont(generator_font_point,"verdana"))
+							{
+								if (!generatorFont.CreatePointFont(generator_font_point,"arial bold"))
+								{
+									generatorFont.CreatePointFont(generator_font_point,"arial");
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -777,7 +807,22 @@ Configuration::Read()
 		{
 			if (!effectFont.CreatePointFont(effect_font_point,"Verdana"))
 			{
-				effectFont.CreatePointFont(effect_font_point,"Arial Bold");
+				if (!effectFont.CreatePointFont(effect_font_point,"Arial Bold"))
+				{
+					if (!effectFont.CreatePointFont(effect_font_point,"Arial"))
+					{
+						if (!effectFont.CreatePointFont(effect_font_point,"tahoma"))
+						{
+							if (!effectFont.CreatePointFont(effect_font_point,"verdana"))
+							{
+								if (!effectFont.CreatePointFont(effect_font_point,"arial bold"))
+								{
+									effectFont.CreatePointFont(effect_font_point,"arial");
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
