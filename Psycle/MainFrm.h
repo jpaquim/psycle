@@ -211,6 +211,7 @@ protected:
 	afx_msg void OnEditBlockDelete();
 	afx_msg void OnEditBlockMixpaste();
 	afx_msg void OnEditBlockPaste();
+	afx_msg void OnNotestoeffects();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

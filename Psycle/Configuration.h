@@ -75,6 +75,7 @@ bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItali
 	bool _midiMachineViewSeqMode;
 	bool _RecordNoteoff;
 	bool _RecordTweaks;
+	bool _notesToEffects;
 	bool _RecordUnarmed;
 	bool _RecordMouseTweaksSmooth;
 	bool useDoubleBuffer;

@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=Psycle
-AppVerName=Psycle 1.66.2
+AppVerName=Psycle 1.7
 AppPublisher=Psycledelics
 AppPublisherURL=http://psycle.pastnotecut.org/
 AppSupportURL=http://psycle.pastnotecut.org/
@@ -23,7 +23,7 @@ WindowResizable=false
 WindowStartMaximized=false
 ChangesAssociations=true
 UninstallDisplayIcon={app}\Psycle.exe
-AppVersion=1.60
+AppVersion=1.7RC6
 AlwaysShowComponentsList=true
 ShowComponentSizes=true
 FlatComponentsList=true

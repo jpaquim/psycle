@@ -118,6 +118,7 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
 ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
+	ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -331,6 +332,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS);
 	cb->SetCheck(Global::pConfig->_RecordTweaks?1:0);
+
+	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_NOTESTOEFFECTS);
+	cb->SetCheck(Global::pConfig->_notesToEffects?1:0);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW);
 	cb->SetCheck(Global::pConfig->_followSong?1:0);
@@ -2231,6 +2235,14 @@ void CMainFrame::OnRecordTweaks()
 	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS))->GetCheck() ) Global::pConfig->_RecordTweaks=true;
 	else Global::pConfig->_RecordTweaks=false;
 	m_wndView.SetFocus();
+}
+
+void CMainFrame::OnNotestoeffects() 
+{
+	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_NOTESTOEFFECTS))->GetCheck() ) Global::pConfig->_notesToEffects=true;
+	else Global::pConfig->_notesToEffects=false;
+	m_wndView.SetFocus();
+	
 }
 
 void CMainFrame::OnFollowSong() 

@@ -7,7 +7,9 @@
 #include "Vst\AEffEditor.h"
 #include "inputhandler.h"
 #include "MainFrm.h"
-	extern CPsycleApp theApp;
+#include "Machine.h"
+
+extern CPsycleApp theApp;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -84,7 +86,11 @@ void CVstGui::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		case CT_Note:
 			{
 				const int outnote = cmd.GetNote();
-				Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+				if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+				{
+					Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+				}
+				else Global::pInputHandler->PlayNote(outnote,127,true);
 			}
 			break;
 
@@ -103,7 +109,11 @@ void CVstGui::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
 	const int outnote = cmd.GetNote();
-	Global::pInputHandler->StopNote(outnote,true,_pMachine);
+	if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+	{
+		Global::pInputHandler->StopNote(outnote,true,_pMachine);
+	}
+	else Global::pInputHandler->StopNote(outnote,true);
 
 //	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.KeyUp(nChar, nRepCnt, nFlags);
 	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);

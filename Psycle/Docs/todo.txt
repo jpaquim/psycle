@@ -20,6 +20,7 @@ X low priority
 * New and unsorted and untested
 -------------------------------
 
++	Option to disable vus (to save CPU)
 +	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
 *	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
 	in the "note" column.
