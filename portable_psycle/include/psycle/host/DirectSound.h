@@ -13,14 +13,10 @@ namespace psycle
 		{
 		public:
 			DirectSound();
-			virtual ~DirectSound();
-			virtual void Initialize(
-				HWND hwnd,
-				AUDIODRIVERWORKFN pCallback,
-				void* context);
+			virtual ~DirectSound() throw();
+			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
-			virtual bool Enable(
-				bool e);
+			virtual bool Enable(bool e);
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 			virtual void Configure();
@@ -60,13 +56,11 @@ namespace psycle
 			bool _exclusive;
 			bool _dither;
 
-			static void PollerThread(
-				void* pDirectSound);
+			static void PollerThread(void* pDirectSound);
 		//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
 			void ReadConfig();
 			void WriteConfig();
-			void Error(
-				char const *msg);
+			void Error(const char msg[]);
 			void DoBlocks();
 			bool Start();
 			bool Stop();

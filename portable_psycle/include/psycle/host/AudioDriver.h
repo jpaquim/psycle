@@ -25,7 +25,6 @@ namespace psycle
 		public:
 			AudioDriver() { _samplesPerSec = 44100; _bitDepth = 16; _channelmode = 3;}
 			virtual ~AudioDriver() {};
-
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context) {};
 			virtual void Reset() {};
 			virtual bool Enable(bool e) { return false; };	
