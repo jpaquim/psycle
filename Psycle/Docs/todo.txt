@@ -84,6 +84,10 @@
 + ALK waveed: remove silence from start and end of wave
 * keyboard notes/noteoffs are not always displayed as they are recorded until you switch patterns back and forth
 ! Have exit warning on modified file
++ even if it isn't used specifically for volume, there should be a flag to allow machines to recieve command/instrument 
+	column data every tick with a SeqTick call (especially useful for effects, which are hurting with only being 
+	able to recieve tweaks)
+
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
