@@ -843,6 +843,58 @@ void Master::Work(
 	_worked = true;
 }
 
+bool Master::Load(
+				   RiffFile* pFile)
+{
+	char junk[256];
+	memset(&junk, 0, sizeof(junk));
+	
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
+	
+	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
+	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
+	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
+	pFile->Read(&_connection[0], sizeof(_connection));
+	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+	pFile->Read(&_numInputs, sizeof(_numInputs));
+	pFile->Read(&_numOutputs, sizeof(_numOutputs));
+	
+	pFile->Read(&_panning, sizeof(_panning));
+	Machine::SetPan(_panning);
+	pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
+	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
+	pFile->Read(&junk[0], sizeof(int)); // interpol
+	
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&_outDry, sizeof(int)); // outdry
+	
+	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
+	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
+	pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
+	pFile->Read(&junk[0], sizeof(int)); // distNegClamp
+	
+	pFile->Read(&junk[0], sizeof(char)); // sinespeed
+	pFile->Read(&junk[0], sizeof(char)); // sineglide
+	pFile->Read(&junk[0], sizeof(char)); // sinevolume
+	pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
+	pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
+	
+	pFile->Read(&junk[0], sizeof(int)); // delayTimeL
+	pFile->Read(&junk[0], sizeof(int)); // delayTimeR
+	pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
+	pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
+	
+	pFile->Read(&junk[0], sizeof(int)); // filterCutoff
+	pFile->Read(&junk[0], sizeof(int)); // filterResonance
+	pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
+	pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
+	pFile->Read(&junk[0], sizeof(int)); // filterLfophase
+	pFile->Read(&junk[0], sizeof(int)); // filterMode
+	
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////

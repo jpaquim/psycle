@@ -872,8 +872,12 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 
 	case audioMasterGetTime:
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
-		_timeInfo.samplePos = ((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount;
-
+		if ( Global::_pSong->_pMachine[MASTER_INDEX] ) // This happens on song loading with new fileformat.
+		{
+			_timeInfo.samplePos = ((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount;
+		}
+		else _timeInfo.samplePos = 0;
+		
 		if ( (Global::pPlayer)->_playing) _timeInfo.flags |= kVstTransportPlaying;
 		
 #if defined(_WINAMP_PLUGIN_)
