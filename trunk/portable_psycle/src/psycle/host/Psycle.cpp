@@ -1,5 +1,59 @@
 #include "stdafx.h"
 
+#if defined OPERATING_SYSTEM__CROSSPLATFORM
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// new gui
+
+#	include <operating_system/Logger.h>
+#	include <softsynth/gui/gui.h>
+#	include <boost/thread/thread.hpp>
+#	include <boost/thread/mutex.hpp>
+
+	class GUI
+	{
+	public:
+		GUI();
+		void start() throw(boost::thread_resource_error);
+		void operator()() throw();
+	private:
+		boost::thread * thread_;
+		template<typename Functor> class Thread
+		{
+		public:
+			inline Thread(Functor & functor) : functor_(functor) {}
+			inline void operator()() throw() { functor_(); }
+		private:
+			Functor & functor_;
+		};
+	};
+
+	GUI::GUI() : thread_(0) {}
+
+	void GUI::operator()() throw()
+	{
+		softsynth::gui::main();
+	}
+
+	void GUI::start() throw(boost::thread_resource_error)
+	{
+		if(thread_) return;
+		try
+		{
+			thread_ = new boost::thread(Thread<GUI>(*this));
+		}
+		catch(const boost::thread_resource_error & e)
+		{
+			std::cerr << typeid(e).name() << ": " << e.what() << std::endl;;
+			throw;
+		}
+	}
+
+	// new gui
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#endif
+
+
+
 // Psycle.cpp : Defines the class behaviors for the application.
 //
 
@@ -24,6 +78,19 @@ END_MESSAGE_MAP()
 
 CPsycleApp::CPsycleApp()
 {
+#	if defined OPERATING_SYSTEM__CROSSPLATFORM
+	{
+		try
+		{
+//			operating_system::Console console;
+		}
+		catch(...)
+		{
+			// we failed to get or create a console... continue anyway
+		}
+		(*new GUI).start(); // starts the new gui in parallel with the mfc one, each in their own thread
+	}
+#	endif
 }
 
 CPsycleApp::~CPsycleApp()
