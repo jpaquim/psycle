@@ -24,7 +24,7 @@ public:
 	//	(*) = If the command byte is zero, the last nonzero byte for the command should be used.
 
 		// [sartorius & bohan] was: static const compiler::uint8 ARPEGGIO		=		0x0; ///< Arpeggio
-		static compiler::uint8 const NONE = 0;
+		static const compiler::uint8 NONE = 0;
 		static const compiler::uint8 PORTAUP		=		0x01;///< Portamento Up		 (*)
 		static const compiler::uint8 PORTADOWN	=		0x02;///< Portamento Down	 (*)
 		static const compiler::uint8 PORTA2NOTE	=		0x03;///<  Tone Portamento	 (*)
@@ -402,7 +402,7 @@ X2 (*) Extra fine porta down
 			m_TremoloType = 0;
 			m_TremoloPos = 0;
 
-			panFactor = -1.0f;
+			panFactor = 0.5f;
 			m_PanSlideSpeed = 0.0f;
 			m_bUp = false;
 			m_VolumeSlideSpeed = 0;

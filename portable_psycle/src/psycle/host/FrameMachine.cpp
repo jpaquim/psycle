@@ -484,11 +484,10 @@ NAMESPACE__BEGIN(psycle)
 				double freak;
 				int screenh = wndView->CH;
 				if ( ultrafinetweak ) freak = 0.5f;
-				else if ( finetweak ) freak =  (max_v-min_v)/float(screenh);
 				else if (max_v-min_v < screenh/4) freak = (max_v-min_v)/float(screenh/4);
 				else if (max_v-min_v < screenh*2/3) freak = (max_v-min_v)/float(screenh/3);
-//				else freak = (max_v-min_v)/float(screenh/2);
-				else freak = (max_v-min_v)/float(screenh*2/3);
+				else freak = (max_v-min_v)/float(screenh*3/5);
+				if (finetweak) freak/=5;
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 

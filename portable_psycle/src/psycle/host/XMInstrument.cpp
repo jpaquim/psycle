@@ -45,6 +45,7 @@ namespace psycle
 			m_Lines = 16;
 			m_NNA = STOP;
 			m_InitPan = 0.5f;
+			m_PanEnabled=false;
 			m_AutoVibratoType = 0;
 			m_AutoVibratoSweep = 0;
 			m_AutoVibratoDepth = 0;
