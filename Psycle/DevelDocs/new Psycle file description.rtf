@@ -66,10 +66,9 @@ version = 0;\par
 \par
 DATA:\par
 // int index; // * for multipattern stuff\par
+char patternName[]; // null terminated string, should be less than 32 chars long, but we will truncate on load\par
 int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in \par
 \tab // position 3, it plays the pattern 5th. (zero based)\par
-char patternName[]; // null terminated string, should be less than 32 chars long, but we will truncate on load\par
-\par
 \par
 ===================\par
 PATTERN DATA\par
@@ -120,44 +119,166 @@ bool macactive[128]; // Desc: The array indicates if the pointer in the \ldblquo
 ===================\par
 MACHINES DATA\par
 ===================\par
+HEADER:\par
+id = "MACD"; \par
+size = ...;\par
+version = 0;\par
+\par
+typedef enum\par
+\{\par
+\tab MACH_MASTER = 0,\par
+\tab MACH_SINE = 1,\par
+\tab MACH_DIST = 2,\par
+\tab MACH_SAMPLER = 3,\par
+\tab MACH_DELAY = 4,\par
+\tab MACH_2PFILTER = 5,\par
+\tab MACH_GAIN = 6,\par
+\tab MACH_FLANGER = 7,\par
+\tab MACH_PLUGIN = 8,\par
+\tab MACH_VST = 9,\par
+\tab MACH_VSTFX = 10,\par
+//\tab MACH_DXI = 11,\par
+//\tab MACH_DXFX = 12,\par
+\tab MACH_DUMMY = 255\par
+\}\par
+MachineType;\par
+\par
+int index; // which machine we are loading\par
+int x; // x position in machine view\par
+int y; // y position of the machine in the machine view\par
+int type; // Desc: The type of machine that it is.\par
+int pan; // Desc: Indicates the value of the panning in the machine box. It affects all outputs.\par
+\tab // Values: 0 top left, 64center 128 top right.\par
+int inputmachines[12]; // Desc: The array that indicates the machines (in the machines array) that input sound to the current one. \par
+\tab // Verify the validity of the number with \ldblquote inputCon\rdblquote  *** instead of this, write -1 for invalid\par
+\tab // Values from 0 to 127\par
+int outputmachines[12]; // Desc: The array that indicates the machines (in the machines array) that this machine outputs sound to. \par
+\tab // Verify the validity of the number with \ldblquote Connection\rdblquote  *** instead of this, write -1 for invalid\par
+\tab // Values from 0 to 127\par
+float inputconvol[12]; // Desc: The array that indicates the volumes of each OUTPUT connection. If you look at psycle code, \par
+\tab // you\rquote ll see that it converts this value to be used in inputs. (that\rquote s why the variable is called inputconvol).\par
+\tab // There\rquote s a big mess in this, you should really use the code in the Song::Load function.\par
+\tab // **** should this big mess be cleared up or what?\par
+// bool connection[12]; // Desc: The array that indicates if an OUTPUT connection is valid or not. If connection[i] is false, \par
+\tab t// hen the value in \ldblquote outputmachines[i]\rdblquote  is not valid.  *** see above note\par
+// bool InputCon[12]; // Desc: The array that indicates if an INPUT connection is valid or not. If InputCon[i] is false, then the \par
+\tab // value in \ldblquote inputmachines[i]\rdblquote  is not valid.  *** see above note\par
+// conpoint; // Size: 12 Cpoint (bits? Don\rquote t know. Prosibly 32bits*2) *** goodbye\par
+// Desc: Array containing the \ldblquote point\rdblquote  where the connection is made. It\rquote s used to know where the \ldblquote wire triangle\rdblquote  is drawn. It \par
+// represents the upper left corner of a 20pixels square centered in the midde of the whire.\par
+// this is calculated by the wire drawing anyway, no need to save it.  It is dependant on things that are not able to be predicted, \par
+// such as skinning, so no need to save it anyway\par
+char editname[]; // null terminated string, truncated to [16]\par
+uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain\par
+byte MachineSpecificData[datasize]; // data depends on type member\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_MASTER)\par
+size: 0\par
+===================\par
+// none\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_SINE)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_DIST)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_SAMPLER)\par
+****** New sampler coming\par
+===================\par
+/*\par
+Label: voi\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the number of simultaneous voices to be used by the sampler Machine.\par
+Values: from 2 to 16\par
+\par
+Label: int\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the interpolation value.\par
+Values:\par
+\pard\fi708 0 -> No interpolation\par
+1 -> Linear interpolation\par
+2 -> Cubic interpolation\par
+*/\par
+\pard // incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_DELAY)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_2PFILTER)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_GAIN)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_FLANGER)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_PLUGIN)\par
+size: (strlen(dllname)+(2*sizeof(int))+(sizeof(UINT))+datasize);\par
+===================\par
+char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). \par
+int numParams; // Desc: Indicates the number of parameters that are stored for this plugin.\par
+int paramete[numParams];\par
+UINT datasize; // size of extra data chunk\par
+byte ExtraData[datasize]; // extra data chunk\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_VST)\par
+===================\par
+char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). \par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_VSTFX)\par
+===================\par
+char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). \par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_DXI)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_DXFX)\par
+===================\par
+// incomplete\par
+\par
+===================\par
+MACHINE SPECIFIC DATA(MACH_DUMMY)\par
+size 0\par
+===================\par
+// none\par
 \par
 ===================\par
 INSTRUMENT INFO\par
 ===================\par
+// incomplete\par
 \par
 ===================\par
 INSTRUMENT DATA\par
 ===================\par
+// incomplete\par
 \par
 \par
 \par
 -------------------------------------old format crap---------------------------------------------\par
-\par
-\par
-\pard\keepn\sb240\sa60\b\f1\fs26 PATTERN STRUCTURE\par
-\pard\b0\f0\fs24\par
-For Each Pattern :\par
-\par
-\f2 |-|0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|\par
-|?| | | | | | | | | | | | | |p|l|i|\f0\par
-\f2 |?|n|p|a|t|n|a|m|e| | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| |p|a|t|d|a|t|a| | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-....\par
-\f2 |?| |p|l|i|n|p|a|t|n|a|m|e| | | | |\f0\par
-....\par
-\par
-\par
-\par
-\par
-Label: patdata\par
-Size plin*5*32  unsigned chars\par
-Desc: Contains the raw data of the pattern. For some (weird) reason, the Tracks were hardcoded to MAX_TRACKS (that\rquote s the 32 in the size) instead of using SongTracks.\par
-Note: The structure PatternEntry is the following (thus, the 5 in the size):\par
-\par
-\par
 \pard\keepn\sb240\sa60\b\f1\fs26 INSTRUMENT STRUCTURE\par
 \pard\b0\f0\fs24\par
 Instruments : First, there is one isel, then for each instrument it comes its data (this means, ALWAYS, 255 instruments (from 0 to 254)).\par
@@ -452,175 +573,13 @@ Example from code:\par
 \tab\}\par
 \par
 \par
-Label: x\par
-Size: 1 int (32bits)\par
-Desc: The X position of the machine in the machine view\par
-\par
-Label: y\par
-Size: 1 int (32bits)\par
-Desc: The Y position of the machine in the machine view\par
-\par
-Label: t\par
-Size: 1 int (32bits)\par
-Desc: The type of machine that it is.\par
-typedef enum\par
-\{\par
-\tab MACH_MASTER = 0,\par
-\tab MACH_SINE = 1,\par
-\tab MACH_DIST = 2,\par
-\tab MACH_SAMPLER = 3,\par
-\tab MACH_DELAY = 4,\par
-\tab MACH_2PFILTER = 5,\par
-\tab MACH_GAIN = 6,\par
-\tab MACH_FLANGER = 7,\par
-\tab MACH_PLUGIN = 8,\par
-\tab MACH_VST = 9,\par
-\tab MACH_VSTFX = 10,\par
-\tab MACH_DUMMY = 255\par
-\}\par
-MachineType;\par
-\par
-There are some little differences between the loading of different machines. Still, it is almost the same loading for all machines (which turns to be a great amount of useless data)\par
-\par
 \par
 \b IF it is a MACH_PLUGIN,\par
 \b0\par
-\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
-|?|d|l|l|n|a|m|e| | | | | | | | | |\f0\par
-\f2 |-| | | | | | | | | | | | | | | | |\par
-\f0 ...\par
-\par
-Label: dllname\par
-Size: 256 chars. \par
-Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). It should be NULL terminated, but check it.\par
-\par
-\par
-\b Next, For all of them,\par
+\b Next, For all of them, (yes... I say all of them save the data from now till the next black text)\par
 \b0\par
-\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
-|?|e|d|i|t|n|a|m|e| | | | | | | | |\par
-\par
-\f0 Label: editname\par
-Size: 16 chars\par
-Desc: The name of the machine. Should be null terminated, but there are versions which didn\rquote t limited the editname characters, and thus, it can be missing. The valid length is 15 chars and one null.\par
-\b\par
-Next, again, if MACH_PLUGIN,\par
-\par
-\b0\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
-|?|n|u|m| |p|a|r|1|p|a|r|2| | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\par
-...\f0\par
-\f2 |?|e|x|t|r|a| | | | | | | | | | | |\par
-\b\f0\par
-\b0 Label: num\par
-Size:  1 int (32bits)\par
-Desc: Indicates the number of parameters that are stored for this plugin.\par
-\par
-Label: par1 / par2 ....\par
-Size: 1 int (32bits)\par
-Desc: It is each one of the parameters of the plugin.\par
-\par
-Label: extra\par
-Size:  unknown. \par
-Desc: It is any extra data that the plugin might save.\par
-Example from code:\par
-\tab\tab\tab int size = _pInterface->GetDataSize();\par
-\tab\tab\tab //pFile->Read(&size,sizeof(int));\tab // This SHOULD be the right thing to do\par
-\tab\tab\tab if (size)\par
-\tab\tab\tab\{\par
-\tab\tab\tab\tab byte* pData = new byte[size];\par
-\tab\tab\tab\tab pFile->Read(pData, size); // Number of parameters\par
-\tab\tab\tab\tab _pInterface->PutData(pData); // Internal load\par
-\tab\tab\tab\tab delete pData;\par
-\tab\tab\tab\}\par
-\par
-\b\par
-Next, For all of them, (yes... I say all of them save the data from now till the next black text)\par
-\b0\f2\par
-|?|i|n|p|u|t|m|a|c|h|i|n|e|s| | | |\par
-|?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?|o|u|t|p|u|t|m|a|c|h|i|n|e|s| | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?|i|p|u|t|c|o|n|v|o|l| | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?|c|o|n|n|e|c|t|i|o|n| |i|n|p|u|t|\f0\par
-\f2 |?|c|o|n| | | | |c|o|n|p|o|i|n|t| |\f0\par
-\f2 ...\par
-|?|n|m|i|n|n|m|o|t|p|a|n| | | | | |\f0\par
-\f2\par
-\f0\par
-Label: inputmachines\par
-Size: 12 ints ( 32bits * 12 )\par
-Desc: The array that indicates the machines (in the machines array) that input sound to the current one. Verify the validity of the number with \ldblquote inputCon\rdblquote\par
-Values: from 0 to 127\par
-\par
-Label: outputmachines\par
-Size: 12 ints ( 32bits * 12 )\par
-Desc: The array that indicates the machines (in the machines array) that this machine outputs sound to. Verify the validity of the number with \ldblquote Connection\rdblquote\par
-Values from 0 to 127\par
-\par
-Label: inputconvol\par
-Size: 12 floats ( 32bits * 12 )\par
-Desc: The array that indicates the volumes of each OUTPUT connection. If you look at psycle code, you\rquote ll see that it converts this value to be used in inputs. (that\rquote s why the variable is called inputconvol).\par
-There\rquote s a big mess in this, you should really use the code in the Song::Load function.\par
-Values:  0 full attenuation, 1 = no atttenuation.\par
- \par
-Label: connection\par
-Size: 12 bool ( whatever the size is in C++ )\par
-Desc: The array that indicates if an OUTPUT connection is valid or not. If connection[i] is false, then the value in \ldblquote outputmachines[i]\rdblquote  is not valid.\par
-\par
-Label: InputCon\par
-Size: 12 bool ( whatever the size is in C++ )\par
-Desc: The array that indicates if an INPUT connection is valid or not. If InputCon[i] is false, then the value in \ldblquote inputmachines[i]\rdblquote  is not valid.\par
-\par
-Label conpoint\par
-Size: 12 Cpoint (bits? Don\rquote t know. Prosibly 32bits*2)\par
-Desc: Array containing the \ldblquote point\rdblquote  where the connection is made. It\rquote s used to know where the \ldblquote wire triangle\rdblquote  is drawn. It represents the upper left corner of a 20pixels square centered in the midde of the whire.\par
-\par
-Label: nmin\par
-Size: 1 int ( 32bits )\par
-Desc: Indicates the number of valid input connections. (You should really forget this value, and get it from the inputCon array. Reason: Bugs in Psycle)\par
-Values: from 0 to 12\par
-\par
-Label: nmot\par
-Size: 1 int ( 32bits )\par
-Desc: Indicates the number of valid output connections. (You should really forget this value, and get it from the connection array. Reason: Bugs in Psycle)\par
-Values: from 0 to 12\par
-\par
-Label: pan\par
-Size: 1 int ( 32bits )\par
-Desc: Indicates the value of the panning in the machine box. It affects all outputs.\par
-Values: 0 top left, 64center 128 top right.\par
 \par
 \par
-\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
-|?|j|u|n|k| | | | | | | | | | | | |\par
-|?| | | | | | | | | | | | | | | | |\f0\par
-\f2 |?|v|o|i| |i|n|t| |o|u|t|d|o|u|t|w|\f0\par
-\f2 |?|d|p|t|h|d|p|c|l|d|n|t|h|d|n|c|l|\par
-|?|s|g|v|p|a| ...\f0\par
-\par
-\par
-Label: junk\par
-Size: 8 ints ( 32bits *8)\par
-Desc: VERY old data, used probably in the initial Sampler. Currently it is ignored by all the loading processes.\par
-\par
-Label: voi\par
-Size: 1 int ( 32bits )\par
-Desc: Indicates the number of simultaneous voices to be used by the sampler Machine.\par
-Values: from 2 to 16\par
-\par
-Label: int\par
-Size: 1 int ( 32bits )\par
-Desc: Indicates the interpolation value.\par
-Values:\par
-\pard\fi708 0 -> No interpolation\par
-1 -> Linear interpolation\par
-2 -> Cubic interpolation\par
-\pard\par
 Label: outd\par
 Size: 1 int ( 32bits )\par
 Desc: Indicates the \ldblquote dry\rdblquote  (unprocessed) factor of the sound. \par
