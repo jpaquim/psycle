@@ -836,7 +836,7 @@ int Song::WavAlloc(
 	long iSamplesPerChan,
 	const char * sName)
 {
-	ASSERT(iSamplesPerChan<2*1024*1024);
+	ASSERT(iSamplesPerChan<2*1024*1024); // why is this limit here - i wanna open 10 meg wavefiles, why can i open only 2 megs?
 
 	DeleteLayer(iInstr,iLayer);
 

@@ -83,12 +83,15 @@ void CConfigDlg::Init(
 	_skinDlg._linenumbers = pConfig->_linenumbers;
 	_skinDlg._linenumbersHex = pConfig->_linenumbersHex;
 
+	strcpy(_skinDlg._pattern_fontface, pConfig->pattern_fontface);
+
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
 	_outputDlg.m_syncDriverIndex = pConfig->_syncDriverIndex;
 	_outputDlg.m_midiHeadroom = pConfig->_midiHeadroom;
 	_outputDlg._numDrivers = pConfig->_numOutputDrivers;
 	_outputDlg.m_ppDrivers = pConfig->_ppOutputDrivers;
+
 
 	char* ps = pConfig->GetInitialInstrumentDir();
 	if (ps != NULL)
@@ -166,6 +169,19 @@ int CConfigDlg::DoModal()
 		_pConfig->_linenumbersHex = _skinDlg._linenumbersHex;
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET = _pConfig->_linenumbers?LINE_XOFFSET:1;
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.VISTRACKS = (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET)/ROWWIDTH;
+
+		strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
+		_pConfig->seqFont.DeleteObject();
+		if (!_pConfig->seqFont.CreatePointFont(80,_pConfig->pattern_fontface))
+		{
+			if (!_pConfig->seqFont.CreatePointFont(80,"Tahoma"))
+			{
+				if (!_pConfig->seqFont.CreatePointFont(80,"MS Sans Seriff"))
+				{
+					_pConfig->seqFont.CreatePointFont(80,"Verdana");
+				}
+			}
+		}
 
 		_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
 		_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;	// MIDI IMPLEMENTATION

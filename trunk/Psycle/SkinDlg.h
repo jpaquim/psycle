@@ -51,6 +51,8 @@ public:
 	bool _linenumbers;
 	bool _linenumbersHex;
 	int _wirewidth;
+	char _pattern_fontface[64];
+	static CComboBox* pm_pattern_fontface;
 
 	CSkinDlg();
 	~CSkinDlg();
@@ -58,8 +60,8 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
-	CComboBox	m_cpresets;
 	CComboBox	m_wirewidth;
+	CComboBox	m_pattern_fontface;
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
@@ -77,6 +79,8 @@ public:
 // Implementation
 protected:
 	bool BrowseTo(char *rpath);
+	static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *lpelfe,  NEWTEXTMETRICEX *lpntme, DWORD FontType,  LPARAM lParam);
+	static int CALLBACK EnumFontFamExProc2(ENUMLOGFONTEX *lpelfe,  NEWTEXTMETRICEX *lpntme, DWORD FontType,  LPARAM lParam);
 
 	// Generated message map functions
 	//{{AFX_MSG(CSkinDlg)
@@ -116,9 +120,10 @@ protected:
 	afx_msg void OnDoublebuffer();
 	afx_msg void OnLineNumbers();
 	afx_msg void OnLineNumbersHex();
-	afx_msg void OnSelendokPresetscombo();
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnImportReg();
+	afx_msg void OnExportReg();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

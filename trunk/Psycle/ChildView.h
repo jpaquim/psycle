@@ -283,7 +283,6 @@ private:
 
 private:
 	// GDI Stuff
-	CFont seqFont;
 	CBitmap stuffbmp;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];

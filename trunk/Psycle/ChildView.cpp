@@ -70,7 +70,7 @@ unsigned idletime=0;
 CChildView::CChildView()
 {
 	// Set Gui Environment data
-	seqFont.CreatePointFont(80,"Tahoma");
+
 	for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 	bmpDC = NULL;
 
@@ -140,7 +140,6 @@ CChildView::CChildView()
 CChildView::~CChildView()
 {
 	Global::pInputHandler->SetChildView(NULL);
-	seqFont.DeleteObject();
 //	stuffbmp.DeleteObject(); // Not needed. the CBitmap destructor does it.
 	KillRedo();
 	KillUndo();

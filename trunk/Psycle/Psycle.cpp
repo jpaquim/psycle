@@ -242,7 +242,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_contrib.SetWindowText("\
 Josep Mª Antolín. [JAZ]\t\tCurrent Main developer\
-\r\npooplog\t\t\t\tDeveloper in 1.6\
+\r\nJeremy Evers [pooplog]\t\tDeveloper in 1.6\
 \r\nDaniel Arena\t\t\tDeveloper in 1.5&1.6\
 \r\nMarcin Kowalski / FideLoop\t\tDeveloper in 1.6\
 \r\nMark McCormack\t\t\tMIDI (in) Support\
