@@ -316,7 +316,7 @@ namespace psycle
 			strcpy(s->_pInstrument[idx]->_sName,sInstrName);
 			zapArray(sInstrName);
 
-			int iSampleHeader = ReadInt4();
+			//int iSampleHeader = ReadInt4(); [bohan] unused var
 			ASSERT(iSampleHeader==0x28);
 			// exit if empty
 

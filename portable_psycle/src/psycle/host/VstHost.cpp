@@ -743,84 +743,86 @@ namespace psycle
 				}
 			}
 
-			static std::string audioMaster_opcode_to_string(long opcode)
-			{
-				#ifdef I
-					#error "macro clash"
-				#else
-					#define I(OPCODE) case audioMaster##OPCODE: return "audioMaster"#OPCODE;
-
-				switch(opcode)
+			#if !defined NDEBUG
+				static std::string audioMaster_opcode_to_string(long opcode)
 				{
-					// from AEffect.h
-					I(Automate)
-					I(Version)
-					I(CurrentId)
-					I(Idle)
-					I(PinConnected)
-					// from AEffectX.h
-					I(WantMidi)
-					I(GetTime)
-					I(ProcessEvents)
-					I(SetTime)
-					I(TempoAt)
-					I(GetNumAutomatableParameters)
-					I(GetParameterQuantization)
-					I(IOChanged)
-					I(NeedIdle)
-					I(SizeWindow)
-					I(GetSampleRate)
-					I(GetBlockSize)
-					I(GetInputLatency)
-					I(GetOutputLatency)
-					I(GetPreviousPlug)
-					I(GetNextPlug)
-					I(WillReplaceOrAccumulate)
-					I(GetCurrentProcessLevel)
-					I(GetAutomationState)
-					I(OfflineStart)
-					I(OfflineRead)
-					I(OfflineWrite)
-					I(OfflineGetCurrentPass)
-					I(OfflineGetCurrentMetaPass)
-					I(SetOutputSampleRate)
-					I(GetOutputSpeakerArrangement)
-					I(GetVendorString)
-					I(GetProductString)
-					I(GetVendorVersion)
-					I(VendorSpecific)
-					I(SetIcon)
-					I(CanDo)
-					I(GetLanguage)
-					I(OpenWindow)
-					I(CloseWindow)
-					I(GetDirectory)
-					I(UpdateDisplay)
+					#ifdef I
+						#error "macro clash"
+					#else
+						#define I(OPCODE) case audioMaster##OPCODE: return "audioMaster"#OPCODE;
+						switch(opcode)
+						{
+							// from AEffect.h
+							I(Automate)
+							I(Version)
+							I(CurrentId)
+							I(Idle)
+							I(PinConnected)
+							// from AEffectX.h
+							I(WantMidi)
+							I(GetTime)
+							I(ProcessEvents)
+							I(SetTime)
+							I(TempoAt)
+							I(GetNumAutomatableParameters)
+							I(GetParameterQuantization)
+							I(IOChanged)
+							I(NeedIdle)
+							I(SizeWindow)
+							I(GetSampleRate)
+							I(GetBlockSize)
+							I(GetInputLatency)
+							I(GetOutputLatency)
+							I(GetPreviousPlug)
+							I(GetNextPlug)
+							I(WillReplaceOrAccumulate)
+							I(GetCurrentProcessLevel)
+							I(GetAutomationState)
+							I(OfflineStart)
+							I(OfflineRead)
+							I(OfflineWrite)
+							I(OfflineGetCurrentPass)
+							I(OfflineGetCurrentMetaPass)
+							I(SetOutputSampleRate)
+							I(GetOutputSpeakerArrangement)
+							I(GetVendorString)
+							I(GetProductString)
+							I(GetVendorVersion)
+							I(VendorSpecific)
+							I(SetIcon)
+							I(CanDo)
+							I(GetLanguage)
+							I(OpenWindow)
+							I(CloseWindow)
+							I(GetDirectory)
+							I(UpdateDisplay)
 
-					// vst 2.1
+							// vst 2.1
 
-					I(BeginEdit)
-					I(EndEdit)
-					I(OpenFileSelector)
+							I(BeginEdit)
+							I(EndEdit)
+							I(OpenFileSelector)
 
-					// vst 2.2
+							// vst 2.2
 
-					I(CloseFileSelector)
-					I(EditFile)
-					I(GetChunkFile)
+							I(CloseFileSelector)
+							I(EditFile)
+							I(GetChunkFile)
 
-					// vst 2.3
-					I(GetInputSpeakerArrangement)
-				default:
-					{
-						std::ostringstream s;
-						s << "unknown opcode " << opcode;
-						return s.str();
-					}
+							// vst 2.3
+							I(GetInputSpeakerArrangement)
+						default:
+							{
+								std::ostringstream s;
+								s << "unknown opcode " << opcode;
+								return s.str();
+							}
+						}
+						#undef I
+					#endif
 				}
-					#undef I
-				#endif
-			}
+			#endif
+
 			long int plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
 				#ifndef NDEBUG
