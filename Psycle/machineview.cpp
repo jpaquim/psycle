@@ -675,7 +675,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				CFont* oldFont= devc->SelectObject(&Global::pConfig->generatorFont);
 				devc->SetBkMode(TRANSPARENT);
 				devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
-				devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+				if (Global::pConfig->draw_mac_index)
+				{
+					char name[sizeof(mac->_editName)+6];
+					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
+				}
+				else
+				{
+					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+				}
 				devc->SetBkMode(OPAQUE);
 				devc->SelectObject(oldFont);
 			}
@@ -743,7 +752,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				CFont* oldFont= devc->SelectObject(&Global::pConfig->effectFont);
 				devc->SetBkMode(TRANSPARENT);
 				devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
-				devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+				if (Global::pConfig->draw_mac_index)
+				{
+					char name[sizeof(mac->_editName)+6];
+					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
+				}
+				else
+				{
+					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+				}
 				devc->SetBkMode(OPAQUE);
 				devc->SelectObject(oldFont);
 			}
@@ -815,7 +833,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				CFont* oldFont= devc->SelectObject(&Global::pConfig->generatorFont);
 				devc->SetBkMode(TRANSPARENT);
 				devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
-				devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+				if (Global::pConfig->draw_mac_index)
+				{
+					char name[sizeof(mac->_editName)+6];
+					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
+				}
+				else
+				{
+					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+				}
 				devc->SetBkMode(OPAQUE);
 				devc->SelectObject(oldFont);
 			}
@@ -870,7 +897,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				CFont* oldFont= devc->SelectObject(&Global::pConfig->effectFont);
 				devc->SetBkMode(TRANSPARENT);
 				devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
-				devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+				if (Global::pConfig->draw_mac_index)
+				{
+					char name[sizeof(mac->_editName)+6];
+					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
+				}
+				else
+				{
+					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+				}
 				devc->SetBkMode(OPAQUE);
 				devc->SelectObject(oldFont);
 			}

@@ -57,7 +57,7 @@ class Machine
 {
 public:
 	bool wasVST;  // THIS NEVER EVER GETS RESET TO FALSE, SO WHAT DOES IT DO?  IT IS ALWAYS TRUE
-	int macIndex;
+	int _macIndex;
 
 	MachineType _type;
 	MachineMode _mode;

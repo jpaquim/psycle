@@ -51,6 +51,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MACHINE_FONT_POINT2, m_effect_font_point);
 	DDX_Control(pDX, IDC_MACHINE_SKIN, m_machine_skin);
 	DDX_Control(pDX, IDC_DRAW_EMPTY_DATA, m_pattern_draw_empty_data);
+	DDX_Control(pDX, IDC_DRAW_MAC_INDEX, m_draw_mac_index);
 
 	//}}AFX_DATA_MAP
 }
@@ -93,6 +94,7 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_CURSOR, OnLineNumbersCursor)
 	ON_BN_CLICKED(IDC_DRAW_EMPTY_DATA, OnDrawEmptyData)
+	ON_BN_CLICKED(IDC_DRAW_MAC_INDEX, OnDrawMacIndex)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
@@ -140,6 +142,7 @@ BOOL CSkinDlg::OnInitDialog()
 	m_linenumbersHex.SetCheck(_linenumbersHex);
 	m_linenumbersCursor.SetCheck(_linenumbersCursor);
 	m_pattern_draw_empty_data.SetCheck(_pattern_draw_empty_data);
+	m_draw_mac_index.SetCheck(_draw_mac_index);
 	SetTimer(2345,50,0);
 
 	char s[4];
@@ -1537,4 +1540,9 @@ void CSkinDlg::OnMVEffectFontColour()
 void CSkinDlg::OnDrawEmptyData()
 {
 	_pattern_draw_empty_data = m_pattern_draw_empty_data.GetCheck() >0?true:false;
+}
+
+void CSkinDlg::OnDrawMacIndex()
+{
+	_draw_mac_index = m_draw_mac_index.GetCheck() >0?true:false;
 }

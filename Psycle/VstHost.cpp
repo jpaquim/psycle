@@ -174,8 +174,9 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	
 	if ( overwriteName ) 
 	{
-		sprintf(_editName, "%.2X:%s",macIndex,_sProductName);
+		memcpy(_editName,_sProductName,31);
 	}
+	_editName[31]='\0';
 
 // Compatibility hacks
 	if ( strcmp(_sProductName,"sc-101") == 0 ) 
@@ -561,11 +562,11 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 			{
 				if (Global::pConfig->_RecordMouseTweaksSmooth)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->macIndex, index, f2i(opt*VST_QUANTIZATION));
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->_macIndex, index, f2i(opt*VST_QUANTIZATION));
 				}
 				else
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macIndex, index, f2i(opt*VST_QUANTIZATION));
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->_macIndex, index, f2i(opt*VST_QUANTIZATION));
 				}
 			}
 			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
@@ -812,10 +813,10 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 ///////////////////
 VSTInstrument::VSTInstrument(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_type = MACH_VST;
 	_mode = MACHMODE_GENERATOR;
-	sprintf(_editName, "%.2X:Vst2 Instr.",macIndex);
+	sprintf(_editName, "Vst2 Instr.");
 	_program = 0;
 	for (int i=0;i<MAX_TRACKS;i++)
 	{
@@ -1251,7 +1252,7 @@ void VSTInstrument::Work(int numSamples)
 
 VSTFX::VSTFX(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	for (int i=0; i<MAX_CONNECTIONS; i++)
 	{
 		_inputConVol[i] = 0.000030517578125f; // 1/32767 -> VST Plugins use the range -1.0..1.0
@@ -1259,7 +1260,7 @@ VSTFX::VSTFX(int index)
 	VSTPlugin::VSTPlugin();
 	_type = MACH_VSTFX;
 	_mode = MACHMODE_PLUGIN;
-	sprintf(_editName, "%.2X:Vst2 Fx",macIndex);
+	sprintf(_editName, "Vst2 Fx");
 	_pOutSamplesL = new float[STREAM_SIZE];
 	_pOutSamplesR = new float[STREAM_SIZE];
 	inputs[0]=_pSamplesL;

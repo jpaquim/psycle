@@ -775,6 +775,8 @@ BEGIN
     PUSHBUTTON      "pattern fontface",IDC_PATTERN_FONTFACE,5,20,135,15
     PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE,154,20,135,15
     PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE2,154,55,135,15
+    CONTROL         "Draw Machine Indexes",IDC_DRAW_MAC_INDEX,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,203,8,88,12
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
@@ -2462,10 +2464,17 @@ BEGIN
     ID_HELP_SALUDOS         "Greetings to People\nGreetings"
     ID_RECORDB              "Disk record\nRecord to .wav"
     ID_BARPLAY              "Play Song\nPlay"
-    ID_BARPLAYFROMSTART     "Play Song from Start\nPlay from Start"
     ID_BUTTONPLAYSEQBLOCK   "Plays the Selected Pattern(s) in the Sequence Looped\nPlay Sel Patterns"
     ID_BARSTOP              "Stop Song\nStop"
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_SEQUENCER       "Show/Hide Sequencer Bar"
+    ID_CONFIGURATION_LOOPPLAYBACK 
+                            "Switches between looping the song,once it has finished, or stop."
+    ID_BARPLAYFROMSTART     "Play Song from Start\nPlay from Start"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -2595,13 +2604,6 @@ BEGIN
     ID_INDICATOR_NOTEOFF    "NoteOffs"
     ID_INDICATOR_TWEAKS     "Tweaks"
     ID_INDICATOR_OCTAVE     "Oct:0"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_VIEW_SEQUENCER       "Show/Hide Sequencer Bar"
-    ID_CONFIGURATION_LOOPPLAYBACK 
-                            "Switches between looping the song,once it has finished, or stop."
 END
 
 #endif    // Neutral (Default) resources

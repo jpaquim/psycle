@@ -61,6 +61,7 @@ public:
 	int _pattern_font_x;
 	int _pattern_font_y;
 	bool _pattern_draw_empty_data;
+	bool _draw_mac_index;
 
 	UINT _pattern_font_flags;
 	UINT _effect_font_flags;
@@ -96,6 +97,7 @@ public:
 	CButton	m_linenumbersHex;
 	CButton	m_linenumbersCursor;
 	CButton	m_pattern_draw_empty_data;
+	CButton	m_draw_mac_index;
 	CComboBox	m_wireaa;
 	//}}AFX_DATA
 
@@ -171,6 +173,7 @@ protected:
 	afx_msg void OnEffectFontFace();
 	afx_msg void OnMVEffectFontColour();
 	afx_msg void OnDrawEmptyData();
+	afx_msg void OnDrawMacIndex();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
