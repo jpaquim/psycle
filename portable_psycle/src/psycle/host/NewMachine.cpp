@@ -475,7 +475,7 @@ namespace psycle
 				if(progressOpen)
 				{
 					Progress.Create();
-					Progress.SetWindowText("Scanning plugins...");
+					Progress.SetWindowText("Scanning plugins ...");
 					Progress.ShowWindow(SW_SHOW);
 					class plugin_counter
 					{
@@ -508,17 +508,8 @@ namespace psycle
 								plugin_counter(Global::pConfig->GetVstDir())
 							)
 						);
-					Progress.SetWindowText("Scanning plugins...."); // put a fourth dot
+					Progress.SetWindowText("Scanning plugins ...."); // put a fourth dot
 				}
-				/* old code */	char logname[MAX_PATH];
-				/* old code */	::GetModuleFileName(0, logname, sizeof logname);
-				/* old code */	{
-				/* old code */		char * last = strrchr(logname,'\\');
-				/* old code */		std::strcpy(last, "\\plugin-scan.log.vanillia-c.txt");
-				/* old code */	}
-				/* old code */	::DeleteFile(logname);
-				/* old code */	FILE * hfile(std::fopen(logname,"a"));
-				/* old code */	std::fprintf(hfile,"[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)\n\n");
 				std::ofstream out;
 				{
 					std::string module_directory;
@@ -528,18 +519,14 @@ namespace psycle
 						module_directory = module_file_name;
 						module_directory = module_directory.substr(0, module_directory.rfind('\\'));
 					}
-					out.open((module_directory + "/plugin-scan.log.c++-iostream.txt").c_str());
+					out.open((module_directory + "/plugin-scan.log.txt").c_str());
 				}
 				out << "[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)" << std::endl;
-				/* old code */	std::fprintf(hfile,"[Native Plugins]\n\n");
-				/* old code */	std::fclose(hfile);
 				out << std::endl << "[Native Plugins]" << std::endl << std::endl;
 				out.flush();
 				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetPluginDir()), MACH_PLUGIN, out, progressOpen ? &Progress : 0);
 				out.flush();
-				/* old code */	hfile = std::fopen(logname,"a");
-				/* old code */	std::fprintf(hfile, "\n[VST Plugins]\n\n");
-				/* old code */	std::fclose(hfile);
+				Progress.SetWindowText("Scanning plugins ... VST ...");
 				out << std::endl << "[VST Plugins]" << std::endl << std::endl;
 				out.flush();
 				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetVstDir()), MACH_VST, out, progressOpen ? &Progress : 0);
@@ -563,15 +550,6 @@ namespace psycle
 				if(finder.IsDirectory() && !finder.IsDots()) FindPluginsInDir(currentPlugsCount, currentBadPlugsCount, finder.GetFilePath(), type, out, pProgress);
 			}
 			finder.Close();
-
-			/* old code */	char logname[MAX_PATH];
-			/* old code */	::GetModuleFileName(0, logname, sizeof logname);
-			/* old code */	{
-			/* old code */		char * last = strrchr(logname,'\\');
-			/* old code */		std::strcpy(last,"\\plugin-scan.log.vanillia-c.txt");
-			/* old code */	}
-			/* old code */	FILE * hfile(std::fopen(logname,"a"));
-
 			int tmpCount = currentPlugsCount; tmpCount; // not used
 			loop = finder.FindFile(findDir + "\\*.dll"); // check if the directory is empty
 			while(loop)
@@ -582,20 +560,12 @@ namespace psycle
 					::Sleep(1);
 				}
 				loop = finder.FindNextFile();
-
 				::CString sDllName, tmpPath;
 				sDllName = finder.GetFileName();
 				sDllName.MakeLower();
-
-				
 				if(finder.IsDirectory()) continue; // Meaning : If it is not a directory and it is not in the cache ... <bohan> ???
-				/* old code */	std::fprintf(hfile,finder.GetFilePath());
-				/* old code */	std::fprintf(hfile," - ");
-				/* old code */	std::fclose(hfile);
-				/* old code */	hfile = std::fopen(logname, "a");
 				out << finder.GetFilePath() << " - ";
 				out.flush();
-
 				FILETIME time;
 				finder.GetLastWriteTime(&time);
 				bool exists(false);
@@ -615,27 +585,21 @@ namespace psycle
 								switch(_pPlugsInfo[i]->error_type)
 								{
 								case VSTINSTANCE_ERR_NO_VALID_FILE:
-									/* old code */	std::fprintf(hfile,"* Previously Disabled - No File Error *");
 									out << "* Previously Disabled - No File Error *";
 									break;
 								case VSTINSTANCE_ERR_NO_VST_PLUGIN:
-									/* old code */	std::fprintf(hfile,"* Previously Disabled - Not Plugin Error *");
 									out << "* Previously Disabled - Not Plugin Error *";
 									break;
 								case VSTINSTANCE_ERR_REJECTED:
-									/* old code */	std::fprintf(hfile,"* Previously Disabled - Rejected Error *");
 									out << "* Previously Disabled - Rejected Error *";
 									break;
 								case VSTINSTANCE_ERR_EXCEPTION:
-									/* old code */	std::fprintf(hfile,"* Previously Disabled - Exception Error *");
 									out << "* Previously Disabled - Exception Error *";
 									break;
 								case VSTINSTANCE_NO_ERROR:
-									/* old code */	std::fprintf(hfile,"* Previously Mapped *");
 									out << "* Previously Mapped *";
 									break;
 								default:
-									/* old code */	std::fprintf(hfile,"* Disabled - Unknown Reason *");
 									out << "* Disabled - Unknown Reason *";
 									break;
 								}
@@ -647,171 +611,184 @@ namespace psycle
 				}
 				if(!exists)
 				{
-					if(type == MACH_PLUGIN )
+					try
 					{
-						Plugin plug(0);
-
-						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-						::ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
-
-						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-						std::strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
-
-						FILETIME time;
-						finder.GetLastWriteTime(&time);
-						_pPlugsInfo[currentPlugsCount]->FileTime = time;
-
-						_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
-
-						if(plug.Instance((char*)(const char*)finder.GetFilePath()))
+						if(type == MACH_PLUGIN)
 						{
-							_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_NO_ERROR;
-							_pPlugsInfo[currentPlugsCount]->allow = true;
+							Plugin plug(0);
 
-							std::strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
-							std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-									(plug.IsSynth()) ? "Psycle instrument" : "Psycle effect",
-									plug.GetAuthor());
-							std::strcpy(_pPlugsInfo[currentPlugsCount]->version,"PsycleAPI 1.0");
+							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+							::ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
 
-							if( plug.IsSynth() ) 
+							_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
+							std::strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+
+							FILETIME time;
+							finder.GetLastWriteTime(&time);
+							_pPlugsInfo[currentPlugsCount]->FileTime = time;
+
+							_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
+
+							if(plug.Instance((char*)(const char*)finder.GetFilePath()))
 							{
-								_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+								_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_NO_ERROR;
+								_pPlugsInfo[currentPlugsCount]->allow = true;
+
+								std::strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
+										(plug.IsSynth()) ? "Psycle instrument" : "Psycle effect",
+										plug.GetAuthor());
+								std::strcpy(_pPlugsInfo[currentPlugsCount]->version,"could be any");
+								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+								char str2[1 << 10];
+								::CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+								str.MakeLower();
+								std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+								dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+								out << "*** NEW *** - " << plug.GetName();
+								out.flush();
 							}
-							else 
+							else
 							{
-								_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+								_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_ERR_NO_VST_PLUGIN;
+								_pPlugsInfo[currentPlugsCount]->allow = false;
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
+								out.flush();
 							}
-
-							char str2[256];
-							::CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-							str.MakeLower();
-							std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-							dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
-
-							/* old code */	std::fprintf(hfile,"*** NEW *** - ");
-							/* old code */	std::fprintf(hfile,plug.GetName());
-							out << "*** NEW *** - " << plug.GetName();
-							out.flush();
+							currentPlugsCount++;
 						}
-						else
+						else if(type == MACH_VST)
 						{
-							_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_ERR_NO_VST_PLUGIN;
-							_pPlugsInfo[currentPlugsCount]->allow = false;
+							VSTPlugin vstPlug;
 
-							sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
-							sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
-							sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
+							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+							::ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
 
-							/* old code */	std::fprintf(hfile,"*** ERROR - NOT NATIVE PLUGIN OR BUGGED ***");
-							/* old code */	out << "*** ERROR - NOT NATIVE PLUGIN OR BUGGED ***";
-							out.flush();
+							_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
+							std::strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+
+							FILETIME time;
+							finder.GetLastWriteTime(&time);
+							_pPlugsInfo[currentPlugsCount]->FileTime = time;
+
+							_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
+
+							try
+							{
+								_pPlugsInfo[currentPlugsCount]->error_type = vstPlug.Instance((char*)(const char*)finder.GetFilePath());
+							}
+							catch(const std::exception & e)
+							{
+								out << "*** ERROR - EXCEPTION *** - " << typeid(e).name() << ": " << e.what();
+								out.flush();
+								_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_ERR_EXCEPTION;
+								//throw;
+							}
+							catch(...)
+							{
+								out << "*** ERROR - EXCEPTION *** - unknown type";
+								out.flush();
+								_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_ERR_EXCEPTION;
+								//throw;
+							}
+							if(_pPlugsInfo[currentPlugsCount]->error_type == VSTINSTANCE_NO_ERROR)
+							{
+								_pPlugsInfo[currentPlugsCount]->allow = true;
+								std::strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
+								std::sprintf
+									(
+										_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
+										(vstPlug.IsSynth()) ? "VST2 instrument" : "VST2 effect",
+										vstPlug.GetVendorName()
+									);
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug.GetVersion());
+								_pPlugsInfo[currentPlugsCount]->version[15]='\0';
+								if(vstPlug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+								char str2[1 << 10];
+								::CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+								str.MakeLower();
+								std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+								dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+								out << "*** NEW *** - " << vstPlug.GetName();
+								out.flush();
+							}
+							else
+							{
+								_pPlugsInfo[currentPlugsCount]->allow = false;
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
+								switch (_pPlugsInfo[currentPlugsCount]->error_type)
+								{
+								case VSTINSTANCE_ERR_NO_VALID_FILE:
+									out << "*** ERROR - NO FILE ***";
+									break;
+								case VSTINSTANCE_ERR_NO_VST_PLUGIN:
+									out << "*** ERROR - NOT VST PLUGIN ***";
+									break;
+								case VSTINSTANCE_ERR_REJECTED:
+									out << "*** ERROR - REJECTED ***";
+									break;
+								case VSTINSTANCE_ERR_EXCEPTION:
+									out << "*** ERROR - EXCEPTION ***";
+									break;
+								default:
+									out << "*** ERROR - NOT VST PLUGIN OR BUGGED ***";
+									break;
+								}
+								out.flush();
+							}
+							++currentPlugsCount;
+							// <bohan> vstPlug is a stack object, so its destructor is called
+							// <bohan> at the end of its scope (this cope actually).
+							// <bohan> The problem with destructors of any object of any class is that
+							// <bohan> they are never allowed to throw any exception.
+							// <bohan> So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+							try
+							{
+								vstPlug.Free();
+							}
+							catch(...)
+							{
+								out << " ... ouch, exception when freeing the temporary instance";
+								out.flush();
+								throw;
+							}
 						}
-						currentPlugsCount++;
 					}
-					else if(type == MACH_VST)
+					catch(const std::exception & e)
 					{
-						VSTPlugin vstPlug;
-
-						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-						::ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
-
-						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-						std::strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
-
-						FILETIME time;
-						finder.GetLastWriteTime(&time);
-						_pPlugsInfo[currentPlugsCount]->FileTime = time;
-
-						_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
-
-						_pPlugsInfo[currentPlugsCount]->error_type = vstPlug.Instance((char*)(const char*)finder.GetFilePath());
-						if(_pPlugsInfo[currentPlugsCount]->error_type == VSTINSTANCE_NO_ERROR)
-						{
-							_pPlugsInfo[currentPlugsCount]->allow = true;
-
-							std::strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
-							std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-								(vstPlug.IsSynth()) ? "VST2 instrument" : "VST2 effect",
-								vstPlug.GetVendorName());
-							std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug.GetVersion());
-							_pPlugsInfo[currentPlugsCount]->version[15]='\0';
-							if(vstPlug.IsSynth()) 
-							{
-								_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-							}
-							else 
-							{
-								_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-							}
-
-							char str2[256];
-							::CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-							str.MakeLower();
-							std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-							dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
-
-							/* old code */	std::fprintf(hfile,"*** NEW *** - ");
-							/* old code */	std::fprintf(hfile,vstPlug.GetName());
-							out << "*** NEW *** - " << vstPlug.GetName();
-							out.flush();
-						}
-						else
-						{
-							_pPlugsInfo[currentPlugsCount]->allow = false;
-
-							std::sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
-							std::sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
-							std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
-
-							switch (_pPlugsInfo[currentPlugsCount]->error_type)
-							{
-							case VSTINSTANCE_ERR_NO_VALID_FILE:
-								/* old code */	std::fprintf(hfile,"*** ERROR - NO FILE ***");
-								out << "*** ERROR - NO FILE ***";
-								break;
-							case VSTINSTANCE_ERR_NO_VST_PLUGIN:
-								/* old code */	std::fprintf(hfile,"*** ERROR - NOT VST PLUGIN ***");
-								out << "*** ERROR - NOT VST PLUGIN ***";
-								break;
-							case VSTINSTANCE_ERR_REJECTED:
-								/* old code */	std::fprintf(hfile,"*** ERROR - REJECTED ***");
-								out << "*** ERROR - REJECTED ***";
-								break;
-							case VSTINSTANCE_ERR_EXCEPTION:
-								/* old code */	std::fprintf(hfile,"*** ERROR - EXCEPTION ***");
-								out << "*** ERROR - EXCEPTION ***";
-								break;
-							default:
-								/* old code */	std::fprintf(hfile,"*** ERROR - NOT VST PLUGIN OR BUGGED ***");
-								out << "*** ERROR - NOT VST PLUGIN OR BUGGED ***";
-								break;
-							}
-							out.flush();
-						}
-						++currentPlugsCount;
-						// <bohan> vstPlug is a stack object, so its destructor is called
-						// <bohan> at the end of its scope (this cope actually).
-						// <bohan> The problem with destructors of any object of any class is that
-						// <bohan> they are never allowed to throw any exception.
-						// <bohan> So, we catch exceptions here by calling vstPlug.Free(); explicitly.
-						try
-						{
-							vstPlug.Free();
-						}
-						catch(...)
-						{
-							/* old code */	std::fprintf(hfile, " ... ouch, exception when freeing the temporary instance");
-							out << " ... ouch, exception when freeing the temporary instance";
-							out.flush();
-						}
+						out << " - exception: " << typeid(e).name() << ": " << e.what();
+						out.flush();
+					}
+					catch(const char e[])
+					{
+						out << " - exception: " << typeid(e).name() << ": " << e;
+						out.flush();
+					}
+					catch(const int & e)
+					{
+						out << " - exception: " << typeid(e).name() << ": " << e;
+						out.flush();
+					}
+					catch(const unsigned int & e)
+					{
+						out << " - exception: " << typeid(e).name() << ": " << e;
+						out.flush();
+					}
+					catch(...)
+					{
+						out << " - exception: unknown type";
+						out.flush();
 					}
 				}
-				/* old code */	std::fprintf(hfile,"\n");
 				out << std::endl;
 				out.flush();
 			}
-			/* old code */	std::fclose(hfile);
 			out.flush();
 			finder.Close();
 		}
@@ -832,7 +809,7 @@ namespace psycle
 			GetModuleFileName(NULL,cache,_MAX_PATH);
 			
 			char *last = strrchr(cache,'\\');
-			strcpy(last,"\\cache.map");
+			strcpy(last,"\\plugin-scan.cache");
 
 			RiffFile file;
 			CFileFind finder;
@@ -928,7 +905,7 @@ namespace psycle
 			GetModuleFileName(NULL,cache,_MAX_PATH);
 			
 			char *last = strrchr(cache,'\\');
-			strcpy(last,"\\cache.map");
+			strcpy(last,"\\plugin-scan.cache");
 			DeleteFile(cache);
 
 			RiffFile file;

@@ -28,534 +28,196 @@ namespace psycle
 		VstTimeInfo VSTPlugin::_timeInfo;
 
 		VSTPlugin::VSTPlugin()
+			: queue_size(0)
+			, wantidle(false)
+			, _sDllName(0)
+			, _pEffect(0)
+			, h_dll(0)
+			, instantiated(false)
+			, requiresProcess(false)
+			, requiresRepl(false)
+			#if !defined _WINAMP_PLUGIN_
+				, editorWnd(0)
+			#endif
 		{
-			memset(junk,0,STREAM_SIZE*sizeof(float));
-			for (int i=0;i<MAX_INOUTS;i++)
+			outputs[0] = _pSamplesL;
+			outputs[1] = _pSamplesR;
+			std::memset(junk, 0, STREAM_SIZE * sizeof(float));
+			for(int i(0) ; i < MAX_INOUTS ; ++i)
 			{
 				inputs[i]=junk;
 				outputs[i]=junk;
 			}
-			outputs[0]=_pSamplesL;
-			outputs[1]=_pSamplesR;
-
-			queue_size=0;
-			wantidle = false;
-			_sDllName = NULL;
-			_pEffect=NULL;
-			h_dll=NULL;
-			instantiated=false;
-
-			requiresProcess=false;
-			requiresRepl=false;
-
-		#if !defined(_WINAMP_PLUGIN_)
-			editorWnd=NULL;
-		#endif // _WINAMP_PLUGIN_
 		}
 
-		VSTPlugin::~VSTPlugin()
+		VSTPlugin::~VSTPlugin() throw()
 		{
-			Free();				// Call free
-			delete _sDllName;	// if _sDllName = NULL , the operation does nothing -> it's safe.
+			try
+			{
+				Free();
+			}
+			catch(...)
+			{
+				// wow.. cannot do anything in a destructor
+			}
+			delete _sDllName;
 
 		}
 
-		int VSTPlugin::Instance(char *dllname,bool overwriteName)
+		int VSTPlugin::Instance(const char dllname[], bool overwriteName) throw(...)
 		{
-			char errtxt[256];
-			_pEffect=NULL;
-			instantiated=false;
-
-			h_dll=LoadLibrary(dllname);
-
-			if(h_dll==NULL)	
-			{
-				return VSTINSTANCE_ERR_NO_VALID_FILE;
-			}
-
-			PVSTMAIN main = NULL;
-			try 
-			{
-				main = (PVSTMAIN)GetProcAddress(h_dll,"main");
-			}
-			catch(char *error)
-			{
-				sprintf(errtxt,"Exception in GetProcAddress: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			if(!main)
-			{	
-				FreeLibrary(h_dll); /// <bohan> \todo shouldn't that be handled elsewhere?
-				return VSTINSTANCE_ERR_NO_VST_PLUGIN;
-			}
-
-			//This calls the "main" function and receives the pointer to the AEffect structure.
-			try 
-			{
-				_pEffect=main((audioMasterCallback)&AudioMaster);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in call main: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			
-			if(!_pEffect || _pEffect->magic!=kEffectMagic)
-			{
-				TRACE("VST plugin : Instance query rejected by 0x%.8X\n",(int)_pEffect);
-				FreeLibrary(h_dll);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_REJECTED;
-			}
-
-			TRACE("VST plugin : Instanced at (Effect*): %.8X\n",(int)_pEffect);
-
-		//2 :     Host to Plug, setSampleRate ( 44100.000000 ) 
-
 			try
 			{
-		#if defined(_WINAMP_PLUGIN_)
-				Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
-		#else
-				Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetSampleRate: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 3 :     Host to Plug, setBlockSize ( 512 ) 
-			try
-			{
-				Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetBlockSize: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-
-		//  4 :     Host to Plug, open
-
-			//init plugin (probably a call to "Init()" function should be done here)
-			_pEffect->user = this;
-			try
-			{
-				Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in effOpen: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-
-		// 5 :     Host to Plug, setSpeakerArrangement  returned : false 
-			VstSpeakerArrangement VSTsa;
-			VSTsa.type = kSpeakerArrStereo;
-			VSTsa.numChannels = 2;
-			VSTsa.speakers[0].type = kSpeakerL;
-			VSTsa.speakers[1].type = kSpeakerR;
-			try 
-			{
-				Dispatch(effSetSpeakerArrangement,0,(long)&VSTsa,&VSTsa,0);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetSpeakerArrangement: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 6 :     Host to Plug, setSampleRate ( 44100.000000 ) 
-
-			try
-			{
-		#if defined(_WINAMP_PLUGIN_)
-				Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
-		#else
-				Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetSampleRate(2): %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 7 :     Host to Plug, setBlockSize ( 512 ) 
-
-			try
-			{
-				Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetBlockSize(2): %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 8 :     Host to Plug, setSpeakerArrangement  returned : false 
-			try 
-			{
-				Dispatch(effSetSpeakerArrangement,0,(long)&VSTsa,&VSTsa,0);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetSpeakerArrangement(2): %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 9 :     Host to Plug, setSampleRate ( 44100.000000 ) 
-			try
-			{
-		#if defined(_WINAMP_PLUGIN_)
-				Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
-		#else
-				Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetSamplerate(3): %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 10 :     Host to Plug, setBlockSize ( 512 ) 
-			try
-			{
-				Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetBlockSize(3): %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-			long program = 0;
-
-		// 11 :     Host to Plug, getProgram  returned : 0 
-			try
-			{
-				program = Dispatch( effGetProgram  ,  0, 0, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in GetProgram: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 12 :     Host to Plug, getProgram  returned : 0 
-			try
-			{
-				program = Dispatch( effGetProgram  ,  0, 0, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in GetProgram: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-		// 13 :     Host to Plug, getVstVersion  returned : 2300 
-
-			try
-			{
-				_version = Dispatch(effGetVstVersion , 0 , 0 , NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in GetVstVersion: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-			if ( _version == 0 ) 
-			{
-				_version=1;
-			}
-
-		// 14 :     Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
-
-			try
-			{
-				Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in SetProgram: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-			try
-			{
-				Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
-			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in MainsChanged: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			
-			if (!Dispatch( effGetEffectName, 0, 0, &_sProductName, 0.0f))
-			{
-				CString str1(dllname);
-				CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
-				str1 = str2.Left(str2.Find('.'));
-				strcpy(_sProductName,str1);
-			}
-			
-			if ( overwriteName ) 
-			{
-				memcpy(_editName,_sProductName,31);
-			}
-			_editName[31]='\0';
-
-			// Compatibility hacks
-			{
-				if ( strcmp(_sProductName,"sc-101") == 0 ) 
+				_pEffect = 0;
+				instantiated = false;
+				if(!(h_dll = ::LoadLibrary(dllname));
 				{
-					requiresRepl=true;
+					std::ostringstream s; s
+						<< "could not load library:" << dllname << std::endl
+						<< operating_system::exceptions::code_description();
+					throw std::runtime_error(s.str());
 				}
-			}
-
-			try
-			{
-				if (!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName, 0.0f))
+				PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
+				if(!main)
+				{	
+					std::ostringstream s; s
+						<< "not a vst plugin" << std::endl
+						<< operating_system::exceptions::code_description();
+					throw std::runtime_error(s.str());
+				}
+				// 1: calls the "main" function and receives the pointer to the AEffect structure.
+				try 
 				{
-					strcpy(_sVendorName, "Unknown vendor");
+					_pEffect=main((audioMasterCallback)&AudioMaster);
 				}
+				catch(const std::exception & e)
+				{
+					std::ostringstream s; s << "main failed" << std::endl << typeid(e).name() << std::endl << e.what();
+					throw std::runtime_error(s.str());
+				}
+				catch(const char e[])
+				{
+					std::ostringstream s; s << "main failed" << std::endl << typeid(e).name() << std::endl << e;
+					throw std::runtime_error(s.str());
+				}
+				catch(const int & e)
+				{
+					std::ostringstream s; s << "main failed" << std::endl << typeid(e).name() << std::endl << e;
+					throw std::runtime_error(s.str());
+				}
+				catch(const unsigned int & e)
+				{
+					std::ostringstream s; s << "main failed" << std::endl << typeid(e).name() << std::endl << e;
+					throw std::runtime_error(s.str());
+				}
+				catch(...)
+				{
+					std::ostringstream s; s << "main failed" << std::endl << "unknown type";
+					throw std::runtime_error(s.str());
+				}
+				if(!_pEffect || _pEffect->magic!=kEffectMagic)
+				{
+					std::ostringstream s; s << "instance query rejected";
+					if(_pEffect) s << std::endl << "type: " << _pEffect->magic;
+					_pEffect = 0;
+					throw std::runtime_error(s.str());
+				}
+				TRACE("VST plugin : Instanced at (Effect*): %.8X\n", (int)_pEffect);
+				// 2: Host to Plug, setSampleRate ( 44100.000000 )
+				Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+				// 3: Host to Plug, setBlockSize ( 512 ) 
+				Dispatch(effSetBlockSize, 0, STREAM_SIZE);
+				// 4: Host to Plug, open
+				{
+					//init plugin (probably a call to "Init()" function should be done here)
+					_pEffect->user = this;
+					Dispatch(effOpen);
+				}
+				// 5: Host to Plug, setSpeakerArrangement returned: false 
+				VstSpeakerArrangement VSTsa;
+				{
+					VSTsa.type = kSpeakerArrStereo;
+					VSTsa.numChannels = 2;
+					VSTsa.speakers[0].type = kSpeakerL;
+					VSTsa.speakers[1].type = kSpeakerR;
+					Dispatch(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+				}
+				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
+				Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+				// 7: Host to Plug, setBlockSize ( 512 ) 
+				Dispatch(effSetBlockSize,  0, STREAM_SIZE);
+				// 8: Host to Plug, setSpeakerArrangement returned: false 
+				Dispatch(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+				// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
+				Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+				// 10: Host to Plug, setBlockSize ( 512 ) 
+				Dispatch(effSetBlockSize, 0, STREAM_SIZE);
+				// 11: Host to Plug, getProgram returned: 0 
+				long int program(Dispatch(effGetProgram);
+				// 12: Host to Plug, getProgram returned: 0 
+				program = Dispatch( effGetProgram);
+				// 13: Host to Plug, getVstVersion returned: 2300 
+				{
+					_version = Dispatch(effGetVstVersion);
+					if(!_version) _version=1;
+				}
+				// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
+				Dispatch(effSetProgram);
+				Dispatch(effMainsChanged, 0, 1);
+				if(!Dispatch(effGetEffectName, 0, 0, &_sProductName))
+				{
+					CString str1(dllname);
+					CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
+					str1 = str2.Left(str2.Find('.'));
+					std::strcpy(_sProductName,str1);
+				}
+				if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
+				_editName[31]='\0'; // <bohan> \todo why is that 31 ?
+				// Compatibility hacks
+				{
+					if(std::strcmp(_sProductName, "sc-101") == 0)
+					{
+						requiresRepl = true;
+					}
+				}
+				if(!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName))
+					std::strcpy(_sVendorName, "Unknown vendor");
+				_isSynth = (_pEffect->flags & effFlagsIsSynth) ? true : false;
+				if(_sDllName) delete _sDllName;
+				_sDllName = new char[std::strlen(dllname) + 1];
+				std::strcpy(_sDllName, dllname);
+				TRACE("VST plugin dll filename : %s\n",_sDllName);
+				instantiated = true;
+				TRACE("VST plugin : Inputs = %d, Outputs = %d\n",_pEffect->numInputs,_pEffect->numOutputs);
 			}
-			catch (char *error)
-			{
-				sprintf(errtxt,"Exception in GetVendorString: %s",error);
-				MessageBox(NULL,errtxt,dllname,NULL);
-				_pEffect=NULL;
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-			catch(...)
-			{
-				return VSTINSTANCE_ERR_EXCEPTION;
-			}
-
-			_isSynth = (_pEffect->flags & effFlagsIsSynth)?true:false;
-
-			if ( _sDllName != NULL ) delete _sDllName;
-			_sDllName = new char[strlen(dllname)+1];
-			strcpy(_sDllName,dllname);
-			TRACE("VST plugin dll filename : %s\n",_sDllName);
-
-			instantiated=true;
-
-			TRACE("VST plugin : Inputs = %d, Outputs = %d\n",_pEffect->numInputs,_pEffect->numOutputs);
-
-			return VSTINSTANCE_NO_ERROR;
 		}
-		/*
-		void VSTPlugin::Create(VSTPlugin *plug)  // Old way of loading VST's from songs
-		{
-			h_dll=plug->h_dll;
-			_pEffect=plug->_pEffect;
-			_pEffect->user=this;
-			Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
-		//	strcpy(_editName,plug->_editName); On current implementation, this replaces the right one. 
-			strcpy(_sProductName,plug->_sProductName);
-			strcpy(_sVendorName,plug->_sVendorName);
-			
-			_sDllName = new char[strlen(plug->_sDllName)+1];
-			strcpy(_sDllName,plug->_sDllName);
 
-			_isSynth=plug->_isSynth;
-			_version = plug->_version;
-
-			plug->instantiated=false;	// We are "stoling" the plugin from the "plug" object so this
-										// is just a "trick" so that when destructing the "plug", it
-										// doesn't unload the Dll.
-			instantiated=true;
-			requiresProcess=plug->requiresProcess;
-			requiresRepl=plug->requiresRepl;
-		}
-		*/
-		void VSTPlugin::Free() // Called also in destruction
+		void VSTPlugin::Free() throw(...) // Called also in destruction
 		{
 			if(instantiated)
 			{
-				instantiated=false;
-				TRACE("VST plugin : Free query 0x%.8X\n",(int)_pEffect);
-				_pEffect->user = NULL;
-				try
-				{
-					Dispatch( effMainsChanged, 0, 0, NULL, 0.0f);
-				}
-				catch (...)
-				{
-					MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
-				}
-				// this crashes that piece of shit native instruments spektral delay 1.0
-				try
-				{
-					Dispatch( effClose,        0, 0, NULL, 0.0f);
-				}
-				catch (...)
-				{
-					MessageBox(NULL,"Machine had an exception on effClose",_editName,NULL);
-				}
-				_pEffect=NULL;	
+				instantiated = false;
+				TRACE("VST plugin : Free query 0x%.8X\n", (int) _pEffect);
+				_pEffect->user = 0;
+				Dispatch(effMainsChanged);
+				Dispatch(effClose);
+				_pEffect = 0;	
 				FreeLibrary(h_dll);
 			}
 		}
 
-			/*
-		void VSTPlugin::Init(void) // This is currently unused! Changes need to be done in Song::Load() and Instance()
+		/*
+		void VSTPlugin::Init() // This is currently unused! Changes need to be done in Song::Load() and Instance()
 		{
 			Machine::Init();
-
-		//	Dispatch(effOpen        ,  0, 0, NULL, 0.f);
-			try 
-			{
-				Dispatch(effMainsChanged,  0, 0, NULL, 0.f);
-			}
-			catch (...)
-			{
-				MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
-			}
-
-			try
-			{
-		#if defined(_WINAMP_PLUGIN_)
-				Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_samplesPerSec);
-		#else
-				Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
-			}
-			catch (...)
-			{
-				MessageBox(NULL,"Machine had an exception on effSetSampleRate",_editName,NULL);
-			}
-
-
-			try
-			{
-				Dispatch(effSetBlockSize,  0, STREAM_SIZE, NULL, 0.f);
-			}
-			catch (...)
-			{
-				MessageBox(NULL,"Machine had an exception on effSetBlockSize",_editName,NULL);
-			}
-			try
-			{
-				Dispatch(effSetProgram  ,  0, 0, NULL, 0.f);
-			}
-			catch (...)
-			{
-				MessageBox(NULL,"Machine had an exception on effSetProgram",_editName,NULL);
-			}
-			try
-			{
-				Dispatch(effMainsChanged,  0, 1, NULL, 0.f);
-			}
-			catch (...)
-			{
-				MessageBox(NULL,"Machine had an exception on effMainsChanged",_editName,NULL);
-			}
-
+			//Dispatch(effOpen);
+			Dispatch(effMainsChanged);
+			Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+			Dispatch(effSetBlockSize, 0, STREAM_SIZE);
+			Dispatch(effSetProgram);
+			Dispatch(effMainsChanged, 0, 1);
 		}
-			*/
+		*/
 
 		bool VSTPlugin::Load(RiffFile* pFile)
 		{
@@ -901,9 +563,23 @@ namespace psycle
 				{
 					Dispatch(effProcessEvents, 0, 0, &events, 0.0f);
 				}
+				catch(std::exception & e)
+				{
+					std::ostringstream s;
+					s
+						<< "Machine had an exception on effProcessEvents:"
+						<< std::endl
+						<< e.what();
+					::MessageBox(0, s.str().c_str(), _editName, 0);
+				}
 				catch (...)
 				{
-					MessageBox(NULL,"Machine had an exception on effProcessEvents",_editName,NULL);
+					std::ostringstream s;
+					s
+						<< "Machine had an exception on effProcessEvents:"
+						<< std::endl
+						<< "unkown type";
+					::MessageBox(0, s.str().c_str(), _editName, 0);
 				}
 			}
 			queue_size=0;
