@@ -113,6 +113,7 @@ BOOL CPsycleApp::InitInstance()
 	{
 		OnAboutpsycle();
 	}
+	MessageBox(NULL,"THIS BUILD OF PSYCLE DOES NOT SAVE SONGS!",NULL,NULL);
 	
 	//Process Command Line
 	ProcessCmdLine(pFrame);
