@@ -11,7 +11,6 @@
 	Player* Global::pPlayer = NULL;
 	Resampler* Global::pResampler = NULL;
 	Configuration* Global::pConfig = NULL;
-	int Global::_lbc = -1;
 	
 	Global::Global()
 	{
@@ -20,7 +19,6 @@
 		pConfig = new Configuration;
 		pResampler = new Cubic;
 		pResampler->SetQuality(RESAMPLE_LINEAR);
-		_lbc = -1;
 	}
 
 	Global::~Global()
@@ -67,7 +65,6 @@
 	#include "InputHandler.h"
 
 	unsigned int Global::_cpuHz;
-	int Global::_lbc = -1;
 	Song* Global::_pSong = NULL;
 	Player* Global::pPlayer = NULL;
 	Configuration* Global::pConfig = NULL;
@@ -78,7 +75,6 @@
 	{
 		_pSong = new Song;
 		pPlayer = new Player;
-		_lbc = -1;
 		pConfig = new Configuration;
 		pResampler = new Cubic;
 		pResampler->SetQuality(RESAMPLE_LINEAR);

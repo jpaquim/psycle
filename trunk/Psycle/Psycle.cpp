@@ -102,8 +102,8 @@ BOOL CPsycleApp::InitInstance()
 	pFrame->ShowWindow(SW_MAXIMIZE);
 	
 	// center master machine
-	pFrame->m_wndView._pSong->_pMachines[0]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-	pFrame->m_wndView._pSong->_pMachines[0]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+	pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+	pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 	
 	pFrame->UpdateWindow();
 	

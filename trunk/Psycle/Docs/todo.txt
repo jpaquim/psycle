@@ -22,6 +22,10 @@ X low priority
 + <bdzld> poop: can you make mcm interpolated?
 + the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
 
+* <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
+	<bdzld> yep, or if the sample rate is invalid
+
+** save as - pick an existing song, and it doesn't ask if it is ok to overwrite
 *** sometimes psycle changes the length of a block for no reason
 * The play block feature doesn't work.
 * When 'cursor always down' is enabled u can't insert values on the last row

@@ -118,10 +118,9 @@ void CGearRackDlg::RedrawList()
 		}
 		for (b=0; b<MAX_BUSES; b++) // Check Generators
 		{
-			const int mac = Global::_pSong->busMachine[b]; 
-			if( mac != 255 && Global::_pSong->_machineActive[mac])
+			if(Global::_pSong->_pMachine[b])
 			{
-				sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachines[mac]->_editName);
+				sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
 				m_list.AddString(buffer);
 			}
 			else
@@ -149,10 +148,9 @@ void CGearRackDlg::RedrawList()
 		}
 		for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 		{
-			const int mac = Global::_pSong->busEffect[b-MAX_BUSES];
-			if(mac != 255 && Global::_pSong->_machineActive[mac])
+			if(Global::_pSong->_pMachine[b])
 			{
-				sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachines[mac]->_editName);
+				sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
 				m_list.AddString(buffer);
 			}
 			else
@@ -266,10 +264,10 @@ void CGearRackDlg::OnDelete()
 	case 0:
 		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 		{
-			if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+			if (Global::_pSong->_pMachine[tmac])
 			{
 				pParentMain->CloseMacGui(tmac);
-				Global::_pSong->DestroyMachine(Global::_pSong->busMachine[tmac]);
+				Global::_pSong->DestroyMachine(tmac);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (m_pParent->viewMode==VMMachine)
@@ -282,10 +280,10 @@ void CGearRackDlg::OnDelete()
 	case 1:
 		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 		{
-			if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac]])
+			if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 			{
 				pParentMain->CloseMacGui(tmac+MAX_BUSES);
-				Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac]);
+				Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (m_pParent->viewMode==VMMachine)
@@ -324,9 +322,9 @@ void CGearRackDlg::OnProperties()
 	switch (DisplayMode)
 	{
 	case 0:
-		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+		if (Global::_pSong->_pMachine[tmac])
 		{
-			m_pParent->DoMacPropDialog(Global::_pSong->busMachine[tmac]);
+			m_pParent->DoMacPropDialog(tmac);
 			pParentMain->UpdateEnvInfo();
 			pParentMain->UpdateComboGen();
 			if (m_pParent->viewMode==VMMachine)
@@ -336,9 +334,9 @@ void CGearRackDlg::OnProperties()
 		}
 		break;
 	case 1:
-		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac]])
+		if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 		{
-			m_pParent->DoMacPropDialog(Global::_pSong->busEffect[tmac]);
+			m_pParent->DoMacPropDialog(tmac+MAX_BUSES);
 			pParentMain->UpdateEnvInfo();
 			pParentMain->UpdateComboGen();
 			if (m_pParent->viewMode==VMMachine)
@@ -372,15 +370,15 @@ void CGearRackDlg::OnParameters()
 	switch (DisplayMode)
 	{
 	case 0:
-		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+		if (Global::_pSong->_pMachine[tmac])
 		{
-			pParentMain->ShowMachineGui(Global::_pSong->busMachine[tmac],point);
+			pParentMain->ShowMachineGui(tmac,point);
 		}
 		break;
 	case 1:
-		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac]])
+		if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 		{
-			pParentMain->ShowMachineGui(Global::_pSong->busEffect[tmac],point);
+			pParentMain->ShowMachineGui(tmac+MAX_BUSES,point);
 		}
 		break;
 	case 2:
@@ -434,19 +432,19 @@ void CGearRackDlg::OnExchange()
 	{
 		if ( m_list.GetSel(c) != 0) sel[j++]=c;
 	}
-	int tmp;
+	Machine* tmp;
 	switch (DisplayMode) // should be necessary to rename opened parameter windows.
 	{
 	case 0:
-		tmp = Global::_pSong->busMachine[sel[0]];
-		Global::_pSong->busMachine[sel[0]] = Global::_pSong->busMachine[sel[1]];
-		Global::_pSong->busMachine[sel[1]] = tmp;
+		tmp = Global::_pSong->_pMachine[sel[0]];
+		Global::_pSong->_pMachine[sel[0]] = Global::_pSong->_pMachine[sel[1]];
+		Global::_pSong->_pMachine[sel[1]] = tmp;
 		pParentMain->UpdateComboGen(true);
 		break;
 	case 1:
-		tmp = Global::_pSong->busEffect[sel[0]];
-		Global::_pSong->busEffect[sel[0]] = Global::_pSong->busEffect[sel[1]];
-		Global::_pSong->busEffect[sel[1]] = tmp;
+		tmp = Global::_pSong->_pMachine[sel[0]+MAX_BUSES];
+		Global::_pSong->_pMachine[sel[0]+MAX_BUSES] = Global::_pSong->_pMachine[sel[1]+MAX_BUSES];
+		Global::_pSong->_pMachine[sel[1]+MAX_BUSES] = tmp;
 		pParentMain->UpdateComboGen(true);
 		break;
 	case 2:

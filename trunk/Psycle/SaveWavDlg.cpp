@@ -157,9 +157,9 @@ void CSaveWavDlg::OnSavewave()
 		Global::pConfig->autoStopMachines = false;
 		for (int c=0; c<MAX_MACHINES; c++)
 		{
-			if (pSong->_machineActive[c])
+			if (pSong->_pMachine[c])
 			{
-				pSong->_pMachines[c]->_stopped=false;
+				pSong->_pMachine[c]->_stopped=false;
 			}
 		}
 	}

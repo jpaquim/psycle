@@ -113,12 +113,14 @@ void CMacProp::OnSolo()
 	 {
 		for ( int i=0;i<MAX_MACHINES;i++ )
 		{
-			if (( pSong->_machineActive[i] ) && 
-				( pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
+			if (pSong->_pMachine[i])
 			{
-				pSong->_pMachines[i]->_mute = true;
-				pSong->_pMachines[i]->_volumeCounter=0.0f;
-				pSong->_pMachines[i]->_volumeDisplay =0;
+				if ( pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR )
+				{
+					pSong->_pMachine[i]->_mute = true;
+					pSong->_pMachine[i]->_volumeCounter=0.0f;
+					pSong->_pMachine[i]->_volumeDisplay =0;
+				}
 			}
 		}
 		pMachine->_mute = false;
@@ -128,11 +130,12 @@ void CMacProp::OnSolo()
 	 else
 	 {
 		pSong->machineSoloed = 0;
-		for ( int i=0;i<MAX_MACHINES;i++ )
+		for ( int i=0;i<MAX_BUSES;i++ )
 		{
-			if (( pSong->_machineActive[i] ) && 
-				( pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
-					pSong->_pMachines[i]->_mute = false;
+			if (pSong->_pMachine[i])
+			{
+				pSong->_pMachine[i]->_mute = false;
+			}
 		}
 		if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
 	}

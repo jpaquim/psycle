@@ -103,8 +103,8 @@ public:
 	char currentOctave;
 
 	// Buses data
-	unsigned char busEffect[MAX_BUSES];
-	unsigned char busMachine[MAX_BUSES];
+//	unsigned char busEffect[MAX_BUSES];
+//	unsigned char busMachine[MAX_BUSES];
 
 	// Pattern data
 	unsigned char * ppPatternData[MAX_PATTERNS];
@@ -149,8 +149,7 @@ public:
 	// Machines ------------------------------------------------------
 	//
 	bool _machineLock;
-	bool _machineActive[MAX_MACHINES];
-	Machine* _pMachines[MAX_MACHINES];
+	Machine* _pMachine[MAX_MACHINES];
 
 	int seqBus;
 
@@ -164,7 +163,7 @@ public:
 	void Reset(void);
 
 	int GetFreeMachine(void);
-	bool CreateMachine(MachineType type, int x, int y, char* psPluginDll);
+	bool CreateMachine(MachineType type, int x, int y, char* psPluginDll, int index);
 	void DestroyMachine(int mac);
 	void DestroyAllMachines();
 	int GetNumPatternsUsed();

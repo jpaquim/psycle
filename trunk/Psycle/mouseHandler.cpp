@@ -14,10 +14,9 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
-				if (Global::_pSong->_machineActive[c])
+				Machine *tmac = Global::_pSong->_pMachine[c];
+				if (tmac)
 				{
-					Machine *tmac = Global::_pSong->_pMachines[c];
-					
 					for (int w = 0; w<MAX_CONNECTIONS; w++)
 					{
 						if (tmac->_connection[w])
@@ -32,7 +31,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 									if (WireDialog[i])
 									{
 										if ((WireDialog[i]->_pSrcMachine == tmac) &&
-											(WireDialog[i]->_pDstMachine == Global::_pSong->_pMachines[tmac->_outputMachines[w]]))
+											(WireDialog[i]->_pDstMachine == Global::_pSong->_pMachine[tmac->_outputMachines[w]]))
 										{
 											return;
 										}
@@ -47,7 +46,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 										WireDialog[i]->wireIndex = w;
 										WireDialog[i]->isrcMac = c;
 										WireDialog[i]->_pSrcMachine = tmac;
-										WireDialog[i]->_pDstMachine = Global::_pSong->_pMachines[tmac->_outputMachines[w]];
+										WireDialog[i]->_pDstMachine = Global::_pSong->_pMachine[tmac->_outputMachines[w]];
 										WireDialog[i]->Create();
 										pParentMain->CenterWindowOnPoint(WireDialog[i], point);
 										WireDialog[i]->ShowWindow(SW_SHOW);
@@ -118,8 +117,8 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 			smac=GetMachine(point);
 			if ( smac != -1 )
 			{
-				mcd_x = point.x - Global::_pSong->_pMachines[smac]->_x;
-				mcd_y = point.y - Global::_pSong->_pMachines[smac]->_y;
+				mcd_x = point.x - Global::_pSong->_pMachine[smac]->_x;
+				mcd_y = point.y - Global::_pSong->_pMachine[smac]->_y;
 			}
 
 			_pSong->seqBus = _pSong->FindBusFromIndex(smac);
@@ -128,28 +127,27 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		else if (nFlags & MK_SHIFT)
 		{
 			wiresource = GetMachine(point);
-			if (wiresource > 0)
+			if (wiresource != -1)
 			{
-				switch (Global::_pSong->_pMachines[wiresource]->_mode)
+				switch (Global::_pSong->_pMachine[wiresource]->_mode)
 				{
 				case MACHMODE_GENERATOR:
-					wireSX = Global::_pSong->_pMachines[wiresource]->_x+(MachineCoords.sGenerator.width/2);
-					wireSY = Global::_pSong->_pMachines[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+					wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
+					wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
 					break;
 				case MACHMODE_FX:
 				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-					wireSX = Global::_pSong->_pMachines[wiresource]->_x+(MachineCoords.sEffect.width/2);
-					wireSY = Global::_pSong->_pMachines[wiresource]->_y+(MachineCoords.sEffect.height/2);
+					wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
+					wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
 					break;
 
 				case MACHMODE_MASTER:
-					wireSX = Global::_pSong->_pMachines[wiresource]->_x+(MachineCoords.sMaster.width/2);
-					wireSY = Global::_pSong->_pMachines[wiresource]->_y+(MachineCoords.sMaster.height/2);
+					wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
+					wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
 					break;
 				}
 				OnMouseMove(nFlags,point);
 			}
-			else wiresource = -1; // wiresource=0 -> Master.
 		}// Shift
 		
 		else if (nFlags & MK_LBUTTON)
@@ -158,15 +156,15 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 
 			if ( smac != -1 )
 			{
-				mcd_x = point.x - Global::_pSong->_pMachines[smac]->_x;
-				mcd_y = point.y - Global::_pSong->_pMachines[smac]->_y;
+				mcd_x = point.x - Global::_pSong->_pMachine[smac]->_x;
+				mcd_y = point.y - Global::_pSong->_pMachine[smac]->_y;
 
 				int panning;
 
-				switch (Global::_pSong->_pMachines[smac]->_mode)
+				switch (Global::_pSong->_pMachine[smac]->_mode)
 				{
 				case MACHMODE_GENERATOR:
-					panning = Global::_pSong->_pMachines[smac]->_panning*MachineCoords.dGeneratorPan.width;
+					panning = Global::_pSong->_pMachine[smac]->_panning*MachineCoords.dGeneratorPan.width;
 					panning /= 128;
 					if ((mcd_x >= panning+MachineCoords.dGeneratorPan.x) && 
 						(mcd_x < panning+MachineCoords.dGeneratorPan.x+MachineCoords.sGeneratorPan.width) && 
@@ -181,11 +179,11 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							(mcd_y >= MachineCoords.dGeneratorMute.y) && 
 							(mcd_y < MachineCoords.dGeneratorMute.y+MachineCoords.sGeneratorMute.height)) //Mute 
 					{
-						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
-						if (Global::_pSong->_pMachines[smac]->_mute)
+						Global::_pSong->_pMachine[smac]->_mute = !Global::_pSong->_pMachine[smac]->_mute;
+						if (Global::_pSong->_pMachine[smac]->_mute)
 						{
-							Global::_pSong->_pMachines[smac]->_volumeCounter=0.0f;
-							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+							Global::_pSong->_pMachine[smac]->_volumeCounter=0.0f;
+							Global::_pSong->_pMachine[smac]->_volumeDisplay=0;
 							if (Global::_pSong->machineSoloed == smac )
 							{
 								Global::_pSong->machineSoloed = 0;
@@ -204,25 +202,30 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							Global::_pSong->machineSoloed = 0;
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
-								if (( Global::_pSong->_machineActive[i] ) && 
-									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
-										Global::_pSong->_pMachines[i]->_mute = false;
+								if ( Global::_pSong->_pMachine[i] )
+								{
+									if (( Global::_pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR ))
+									{
+										Global::_pSong->_pMachine[i]->_mute = false;
+									}
+								}
 							}
 						}
 						else 
 						{
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
-								if (( Global::_pSong->_machineActive[i] ) && 
-									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ) &&
-									(i != smac))
+								if ( Global::_pSong->_pMachine[i] )
 								{
-									Global::_pSong->_pMachines[i]->_mute = true;
-									Global::_pSong->_pMachines[i]->_volumeCounter=0.0f;
-									Global::_pSong->_pMachines[i]->_volumeDisplay=0;
+									if (( Global::_pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != smac))
+									{
+										Global::_pSong->_pMachine[i]->_mute = true;
+										Global::_pSong->_pMachine[i]->_volumeCounter=0.0f;
+										Global::_pSong->_pMachine[i]->_volumeDisplay=0;
+									}
 								}
 							}
-							Global::_pSong->_pMachines[smac]->_mute = false;
+							Global::_pSong->_pMachine[smac]->_mute = false;
 							Global::_pSong->machineSoloed = smac;
 						}
 						updatePar = smac;
@@ -231,7 +234,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					break;
 				case MACHMODE_FX:
 				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-					panning = Global::_pSong->_pMachines[smac]->_panning*MachineCoords.dEffectPan.width;
+					panning = Global::_pSong->_pMachine[smac]->_panning*MachineCoords.dEffectPan.width;
 					panning /= 128;
 					if ((mcd_x >= panning+MachineCoords.dEffectPan.x) && 
 						(mcd_x < panning+MachineCoords.dEffectPan.x+MachineCoords.sEffectPan.width) && 
@@ -246,11 +249,11 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							(mcd_y >= MachineCoords.dEffectMute.y) && 
 							(mcd_y < MachineCoords.dEffectMute.y+MachineCoords.sEffectMute.height)) //Mute 
 					{
-						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
-						if (Global::_pSong->_pMachines[smac]->_mute)
+						Global::_pSong->_pMachine[smac]->_mute = !Global::_pSong->_pMachine[smac]->_mute;
+						if (Global::_pSong->_pMachine[smac]->_mute)
 						{
-							Global::_pSong->_pMachines[smac]->_volumeCounter=0.0f;
-							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+							Global::_pSong->_pMachine[smac]->_volumeCounter=0.0f;
+							Global::_pSong->_pMachine[smac]->_volumeDisplay=0;
 						}
 						updatePar = smac;
 						Repaint(DMMacRefresh);
@@ -260,11 +263,11 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							(mcd_y >= MachineCoords.dEffectBypass.y) && 
 							(mcd_y < MachineCoords.dEffectBypass.y+MachineCoords.sEffectBypass.height)) //Solo 
 					{
-						Global::_pSong->_pMachines[smac]->_bypass = !Global::_pSong->_pMachines[smac]->_bypass;
-						if (Global::_pSong->_pMachines[smac]->_bypass)
+						Global::_pSong->_pMachine[smac]->_bypass = !Global::_pSong->_pMachine[smac]->_bypass;
+						if (Global::_pSong->_pMachine[smac]->_bypass)
 						{
-							Global::_pSong->_pMachines[smac]->_volumeCounter=0.0f;
-							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+							Global::_pSong->_pMachine[smac]->_volumeCounter=0.0f;
+							Global::_pSong->_pMachine[smac]->_volumeDisplay=0;
 						}
 						updatePar = smac;
 						Repaint(DMMacRefresh);
@@ -383,27 +386,27 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		}
 		else if ( smacmode == 0 && smac != -1 )
 		{
-			switch(_pSong->_pMachines[smac]->_mode)
+			switch(_pSong->_pMachine[smac]->_mode)
 			{
 				case MACHMODE_GENERATOR:
 					if (point.x-mcd_x < 0 ) 
 					{ 
-						_pSong->_pMachines[smac]->_x = 0; 
+						_pSong->_pMachine[smac]->_x = 0; 
 						Repaint(); 
 					}
 					else if	(point.x-mcd_x+MachineCoords.sGenerator.width > CW) 
 					{ 
-						_pSong->_pMachines[smac]->_x = CW-MachineCoords.sGenerator.width; 
+						_pSong->_pMachine[smac]->_x = CW-MachineCoords.sGenerator.width; 
 						Repaint(); 
 					}
 					if (point.y-mcd_y < 0 ) 
 					{ 
-						_pSong->_pMachines[smac]->_y = 0; 
+						_pSong->_pMachine[smac]->_y = 0; 
 						Repaint(); 
 					}
 					else if (point.y-mcd_y+MachineCoords.sGenerator.height > CH) 
 					{ 
-						_pSong->_pMachines[smac]->_y = CH-MachineCoords.sGenerator.height; 
+						_pSong->_pMachine[smac]->_y = CH-MachineCoords.sGenerator.height; 
 						Repaint(); 
 					}
 					break;
@@ -411,22 +414,22 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					if (point.x-mcd_x < 0 ) 
 					{ 
-						_pSong->_pMachines[smac]->_x = 0; 
+						_pSong->_pMachine[smac]->_x = 0; 
 						Repaint(); 
 					}
 					else if	(point.x-mcd_x+MachineCoords.sEffect.width > CW) 
 					{ 
-						_pSong->_pMachines[smac]->_x = CW-MachineCoords.sEffect.width; 
+						_pSong->_pMachine[smac]->_x = CW-MachineCoords.sEffect.width; 
 						Repaint(); 
 					}
 					if (point.y-mcd_y < 0 ) 
 					{ 
-						_pSong->_pMachines[smac]->_y = 0; 
+						_pSong->_pMachine[smac]->_y = 0; 
 						Repaint(); 
 					}
 					else if (point.y-mcd_y+MachineCoords.sEffect.height > CH) 
 					{ 
-						_pSong->_pMachines[smac]->_y = CH-MachineCoords.sEffect.height; 
+						_pSong->_pMachine[smac]->_y = CH-MachineCoords.sEffect.height; 
 						Repaint(); 
 					}
 					break;
@@ -434,22 +437,22 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 				case MACHMODE_MASTER:
 					if (point.x-mcd_x < 0 ) 
 					{ 
-						_pSong->_pMachines[smac]->_x = 0; 
+						_pSong->_pMachine[smac]->_x = 0; 
 						Repaint(); 
 					}
 					else if	(point.x-mcd_x+MachineCoords.sMaster.width > CW) 
 					{ 
-						_pSong->_pMachines[smac]->_x = CW-MachineCoords.sMaster.width; 
+						_pSong->_pMachine[smac]->_x = CW-MachineCoords.sMaster.width; 
 						Repaint(); 
 					}
 					if (point.y-mcd_y < 0 ) 
 					{ 
-						_pSong->_pMachines[smac]->_y = 0; 
+						_pSong->_pMachine[smac]->_y = 0; 
 						Repaint(); 
 					}
 					else if (point.y-mcd_y+MachineCoords.sMaster.height > CH) 
 					{ 
-						_pSong->_pMachines[smac]->_y = CH-MachineCoords.sMaster.height; 
+						_pSong->_pMachine[smac]->_y = CH-MachineCoords.sMaster.height; 
 						Repaint(); 
 					}
 					break;
@@ -501,53 +504,56 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 	case VMMachine:
 		if (smac > -1 && (nFlags & MK_LBUTTON))
 		{
-			if (smacmode == 0)
+			if (_pSong->_pMachine[smac])
 			{
-				_pSong->_pMachines[smac]->_x = point.x-mcd_x;
-				_pSong->_pMachines[smac]->_y = point.y-mcd_y;
+				if (smacmode == 0)
+				{
+					_pSong->_pMachine[smac]->_x = point.x-mcd_x;
+					_pSong->_pMachine[smac]->_y = point.y-mcd_y;
 
-				char buf[80];
-				sprintf(buf, "%s (%d,%d)", Global::_pSong->_pMachines[smac]->_editName, Global::_pSong->_pMachines[smac]->_x, Global::_pSong->_pMachines[smac]->_y);
-				pParentMain->StatusBarText(buf);
-				Repaint();
-			}
-			else if ((smacmode == 1) && (Global::_pSong->_pMachines[smac]->_mode != MACHMODE_MASTER))
-			{
-				int newpan = 64;
-				switch(Global::_pSong->_pMachines[smac]->_mode)
-				{
-				case MACHMODE_GENERATOR:
-					newpan = (point.x - Global::_pSong->_pMachines[smac]->_x - MachineCoords.dGeneratorPan.x - (MachineCoords.sGeneratorPan.width/2))*128;
-					if (MachineCoords.dGeneratorPan.width)
-					{
-						newpan /= MachineCoords.dGeneratorPan.width;
-					}
-					break;
-				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-					newpan = (point.x - Global::_pSong->_pMachines[smac]->_x - MachineCoords.dEffectPan.x - (MachineCoords.sEffectPan.width/2))*128;
-					if (MachineCoords.dEffectPan.width)
-					{
-						newpan /= MachineCoords.dEffectPan.width;
-					}
-					break;
+					char buf[80];
+					sprintf(buf, "%s (%d,%d)", Global::_pSong->_pMachine[smac]->_editName, Global::_pSong->_pMachine[smac]->_x, Global::_pSong->_pMachine[smac]->_y);
+					pParentMain->StatusBarText(buf);
+					Repaint();
 				}
+				else if ((smacmode == 1) && (Global::_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
+				{
+					int newpan = 64;
+					switch(Global::_pSong->_pMachine[smac]->_mode)
+					{
+					case MACHMODE_GENERATOR:
+						newpan = (point.x - Global::_pSong->_pMachine[smac]->_x - MachineCoords.dGeneratorPan.x - (MachineCoords.sGeneratorPan.width/2))*128;
+						if (MachineCoords.dGeneratorPan.width)
+						{
+							newpan /= MachineCoords.dGeneratorPan.width;
+						}
+						break;
+					case MACHMODE_FX:
+					case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+						newpan = (point.x - Global::_pSong->_pMachine[smac]->_x - MachineCoords.dEffectPan.x - (MachineCoords.sEffectPan.width/2))*128;
+						if (MachineCoords.dEffectPan.width)
+						{
+							newpan /= MachineCoords.dEffectPan.width;
+						}
+						break;
+					}
 
-				Global::_pSong->_pMachines[smac]->SetPan(newpan);
-				newpan= Global::_pSong->_pMachines[smac]->_panning;
-				
-				char buf[80];
-				if (newpan != 64)
-				{
-					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachines[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+					Global::_pSong->_pMachine[smac]->SetPan(newpan);
+					newpan= Global::_pSong->_pMachine[smac]->_panning;
+					
+					char buf[80];
+					if (newpan != 64)
+					{
+						sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+					}
+					else
+					{
+						sprintf(buf, "%s Pan: Center", Global::_pSong->_pMachine[smac]->_editName);
+					}
+					pParentMain->StatusBarText(buf);
+					updatePar = smac;
+					Repaint(DMMacRefresh);
 				}
-				else
-				{
-					sprintf(buf, "%s Pan: Center", Global::_pSong->_pMachines[smac]->_editName);
-				}
-				pParentMain->StatusBarText(buf);
-				updatePar = smac;
-				Repaint(DMMacRefresh);
 			}
 		}
 		
@@ -769,7 +775,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 
 			if(tmac>-1)
 			{
-				switch (Global::_pSong->_pMachines[tmac]->_mode)
+				switch (Global::_pSong->_pMachine[tmac]->_mode)
 				{
 				case MACHMODE_GENERATOR:
 					if ((mcd_x >= MachineCoords.dGeneratorPan.x) && 
@@ -787,11 +793,11 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							(mcd_y >= MachineCoords.dGeneratorMute.y) && 
 							(mcd_y < MachineCoords.dGeneratorMute.y+MachineCoords.sGeneratorMute.height)) //Mute 
 					{
-						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
-						if (Global::_pSong->_pMachines[tmac]->_mute)
+						Global::_pSong->_pMachine[tmac]->_mute = !Global::_pSong->_pMachine[tmac]->_mute;
+						if (Global::_pSong->_pMachine[tmac]->_mute)
 						{
-							Global::_pSong->_pMachines[tmac]->_volumeCounter=0.0f;
-							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+							Global::_pSong->_pMachine[tmac]->_volumeCounter=0.0f;
+							Global::_pSong->_pMachine[tmac]->_volumeDisplay=0;
 							if (Global::_pSong->machineSoloed == tmac )
 							{
 								Global::_pSong->machineSoloed = 0;
@@ -811,25 +817,30 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							Global::_pSong->machineSoloed = 0;
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
-								if (( Global::_pSong->_machineActive[i] ) && 
-									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
-										Global::_pSong->_pMachines[i]->_mute = false;
+								if ( Global::_pSong->_pMachine[i] )
+								{
+									if ( Global::_pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR )
+									{
+										Global::_pSong->_pMachine[i]->_mute = false;
+									}
+								}
 							}
 						}
 						else 
 						{
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
-								if (( Global::_pSong->_machineActive[i] ) && 
-									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ) &&
-									(i != tmac))
+								if ( Global::_pSong->_pMachine[i] ) 
 								{
-									Global::_pSong->_pMachines[i]->_mute = true;
-									Global::_pSong->_pMachines[i]->_volumeCounter=0.0f;
-									Global::_pSong->_pMachines[i]->_volumeDisplay=0;
+									if (( Global::_pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != tmac))
+									{
+										Global::_pSong->_pMachine[i]->_mute = true;
+										Global::_pSong->_pMachine[i]->_volumeCounter=0.0f;
+										Global::_pSong->_pMachine[i]->_volumeDisplay=0;
+									}
 								}
 							}
-							Global::_pSong->_pMachines[tmac]->_mute = false;
+							Global::_pSong->_pMachine[tmac]->_mute = false;
 							Global::_pSong->machineSoloed = tmac;
 						}
 						updatePar = tmac;
@@ -854,11 +865,11 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							(mcd_y >= MachineCoords.dEffectMute.y) && 
 							(mcd_y < MachineCoords.dEffectMute.y+MachineCoords.sEffectMute.height)) //Mute 
 					{
-						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
-						if (Global::_pSong->_pMachines[tmac]->_mute)
+						Global::_pSong->_pMachine[tmac]->_mute = !Global::_pSong->_pMachine[tmac]->_mute;
+						if (Global::_pSong->_pMachine[tmac]->_mute)
 						{
-							Global::_pSong->_pMachines[tmac]->_volumeCounter=0.0f;
-							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+							Global::_pSong->_pMachine[tmac]->_volumeCounter=0.0f;
+							Global::_pSong->_pMachine[tmac]->_volumeDisplay=0;
 						}
 						updatePar = tmac;
 						Repaint(DMMacRefresh);
@@ -869,11 +880,11 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							(mcd_y >= MachineCoords.dEffectBypass.y) && 
 							(mcd_y < MachineCoords.dEffectBypass.y+MachineCoords.sEffectBypass.height)) //Solo 
 					{
-						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
-						if (Global::_pSong->_pMachines[tmac]->_bypass)
+						Global::_pSong->_pMachine[tmac]->_bypass = !Global::_pSong->_pMachine[tmac]->_bypass;
+						if (Global::_pSong->_pMachine[tmac]->_bypass)
 						{
-							Global::_pSong->_pMachines[tmac]->_volumeCounter=0.0f;
-							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+							Global::_pSong->_pMachine[tmac]->_volumeCounter=0.0f;
+							Global::_pSong->_pMachine[tmac]->_volumeDisplay=0;
 						}
 						updatePar = tmac;
 						Repaint(DMMacRefresh);
@@ -893,10 +904,9 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (Global::_pSong->_machineActive[c])
+					Machine *tmac = Global::_pSong->_pMachine[c];
+					if (tmac)
 					{
-						Machine *tmac = Global::_pSong->_pMachines[c];
-						
 						for (int w = 0; w<MAX_CONNECTIONS; w++)
 						{
 							if (tmac->_connection[w])
@@ -911,7 +921,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 										if (WireDialog[i])
 										{
 											if ((WireDialog[i]->_pSrcMachine == tmac) &&
-												(WireDialog[i]->_pDstMachine == Global::_pSong->_pMachines[tmac->_outputMachines[w]]))
+												(WireDialog[i]->_pDstMachine == Global::_pSong->_pMachine[tmac->_outputMachines[w]]))
 											{
 												return;
 											}
@@ -926,7 +936,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 											WireDialog[i]->wireIndex = w;
 											WireDialog[i]->isrcMac = c;
 											WireDialog[i]->_pSrcMachine = tmac;
-											WireDialog[i]->_pDstMachine = Global::_pSong->_pMachines[tmac->_outputMachines[w]];
+											WireDialog[i]->_pDstMachine = Global::_pSong->_pMachine[tmac->_outputMachines[w]];
 											WireDialog[i]->Create();
 											pParentMain->CenterWindowOnPoint(WireDialog[i], point);
 											WireDialog[i]->ShowWindow(SW_SHOW);

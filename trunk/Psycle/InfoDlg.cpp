@@ -98,11 +98,11 @@ void CInfoDlg::OnTimer(UINT nIDEvent)
 		int n=0;
 		for (int c=0; c<MAX_MACHINES; c++)
 		{
-			if(_pSong->_machineActive[c])
+			if(_pSong->_pMachine[c])
 			{
 				float machCPU=0;
 //				float masterCPU=0;
-				Machine *tmac = _pSong->_pMachines[c];
+				Machine *tmac = _pSong->_pMachine[c];
 //				machCPU = (float)tmac->_cpuCost*0.1f;
 //				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * 100;
 				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
@@ -131,7 +131,7 @@ void CInfoDlg::OnTimer(UINT nIDEvent)
 		m_machscpu.SetWindowText(buffer);
 		
 //		sprintf(buffer,"%.1f%%",((float)_pSong->cpuIdle/Global::_cpuHz)*100);
-//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[0]->_wireCost/Global::_cpuHz)*100);
+//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->_wireCost/Global::_cpuHz)*100);
 		sprintf(buffer,"%.1f%%",wiresCPU);
 		m_cpurout.SetWindowText(buffer);
 		
@@ -161,9 +161,9 @@ void CInfoDlg::UpdateInfo()
 	int n=0;
 	for(int c=0; c<MAX_MACHINES; c++)
 	{
-		if(_pSong->_machineActive[c])
+		Machine *tmac = _pSong->_pMachine[c];
+		if(tmac)
 		{
-			Machine *tmac = _pSong->_pMachines[c];
 			char buffer[64];
 			
 			// Name [Machine view editor custom name]

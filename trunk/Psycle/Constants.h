@@ -1,14 +1,15 @@
 #ifndef __CONSTANTS_H
 #define __CONSTANTS_H
 
-#define VERSION_NUMBER "1.7.2"
+#define VERSION_NUMBER "1.7.3"
 
 #define TWEAK_SLIDE_SAMPLES		64 // number of samples per tweak slide update
 #define MAX_TWS					16 // # of tws commands that can be active on one machine
 
 #define MAX_PLUGINS				256 // Legacy! It is used in File loading/saving
 #define MAX_BUSES				64	// Power of 2! Important!
-#define MAX_MACHINES			128
+#define MAX_MACHINES			129
+#define MASTER_INDEX			128
 #define MAX_TRACKS				32	// Note: changing this breaks file format
 #define MAX_WAVES				16
 #define MAX_LINES				256
