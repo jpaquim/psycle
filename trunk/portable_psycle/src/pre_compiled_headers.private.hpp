@@ -115,6 +115,7 @@
 //#include <cfloat>
 //#include <ciso646>
 //#include <climits>
+#include <cerrno>
 //#include <clocale>
 #include <cmath>
 //#include <csetjmp>
@@ -143,7 +144,6 @@
 
 #if defined OPERATING_SYSTEM__POSIX
 	#include <sys/unistd.h>
-	#include <cerrno> // is it ISO?
 #endif
 
 
