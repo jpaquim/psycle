@@ -80,105 +80,105 @@ Configuration::Configuration()
 	_midiRecord1 = FALSE;
 	_midiType1 = 0;
 	_midiMessage1 = 14;
-	_midiCommand1 = 1;
+	_midiCommand1 = 2;
 	_midiFrom1 = 0;
 	_midiTo1 = 0xff;
 
 	_midiRecord2= FALSE;
 	_midiType2 = 0;
 	_midiMessage2 = 0;
-	_midiCommand2 = 1;
+	_midiCommand2 = 3;
 	_midiFrom2 = 0;
 	_midiTo2 = 0xff;
 
 	_midiRecord3 = FALSE;
 	_midiType3 = 0;
 	_midiMessage3 = 0;
-	_midiCommand3 = 1;
+	_midiCommand3 = 4;
 	_midiFrom3 = 0;
 	_midiTo3 = 0xff;
 
 	_midiRecord4 = FALSE;
 	_midiType4 = 0;
 	_midiMessage4 = 0;
-	_midiCommand4 = 1;
+	_midiCommand4 = 5;
 	_midiFrom4 = 0;
 	_midiTo4 = 0xff;
 
 	_midiRecord5 = FALSE;
 	_midiType5 = 0;
 	_midiMessage5 = 0;
-	_midiCommand5 = 1;
+	_midiCommand5 = 6;
 	_midiFrom5 = 0;
 	_midiTo5 = 0xff;
 
 	_midiRecord6 = FALSE;
 	_midiType6 = 0;
 	_midiMessage6 = 0;
-	_midiCommand6 = 1;
+	_midiCommand6 = 7;
 	_midiFrom6 = 0;
 	_midiTo6 = 0xff;
 
 	_midiRecord7 = FALSE;
 	_midiType7 = 0;
 	_midiMessage7 = 0;
-	_midiCommand7 = 1;
+	_midiCommand7 = 8;
 	_midiFrom7 = 0;
 	_midiTo7 = 0xff;
 
 	_midiRecord8 = FALSE;
 	_midiType8 = 0;
 	_midiMessage8 = 0;
-	_midiCommand8 = 1;
+	_midiCommand8 = 9;
 	_midiFrom8 = 0;
 	_midiTo8 = 0xff;
 
 	_midiRecord9 = FALSE;
 	_midiType9 = 0;
 	_midiMessage9 = 0;
-	_midiCommand9 = 1;
+	_midiCommand9 = 10;
 	_midiFrom9 = 0;
 	_midiTo9 = 0xff;
 
 	_midiRecord10 = FALSE;
 	_midiType10 = 0;
 	_midiMessage10 = 0;
-	_midiCommand10 = 1;
+	_midiCommand10 = 11;
 	_midiFrom10 = 0;
 	_midiTo10 = 0xff;
 
 	_midiRecord11 = FALSE;
 	_midiType11 = 0;
 	_midiMessage11 = 0;
-	_midiCommand11 = 1;
+	_midiCommand11 = 12;
 	_midiFrom11 = 0;
 	_midiTo11 = 0xff;
 
 	_midiRecord12 = FALSE;
 	_midiType12 = 0;
 	_midiMessage12 = 0;
-	_midiCommand12 = 1;
+	_midiCommand12 = 13;
 	_midiFrom12 = 0;
 	_midiTo12 = 0xff;
 
 	_midiRecord13 = FALSE;
 	_midiType13 = 0;
 	_midiMessage13 = 0;
-	_midiCommand13 = 1;
+	_midiCommand13 = 14;
 	_midiFrom13 = 0;
 	_midiTo13 = 0xff;
 
 	_midiRecord14 = FALSE;
 	_midiType14 = 0;
 	_midiMessage14 = 0;
-	_midiCommand14 = 1;
+	_midiCommand14 = 15;
 	_midiFrom14 = 0;
 	_midiTo14 = 0xff;
 
 	_midiRecord15 = FALSE;
 	_midiType15 = 0;
 	_midiMessage15 = 0;
-	_midiCommand15 = 1;
+	_midiCommand15 = 16;
 	_midiFrom15 = 0;
 	_midiTo15 = 0xff;
 
