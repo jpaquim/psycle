@@ -12,7 +12,6 @@ namespace psycle
 			char *ps = ((char *)&retbuf);
 			// Remember, this is Intel format!
 			// The first character goes in the LSB
-			// <bohan> so, actually, it's big endian, not little?
 			for(int i(0); i < 4 && psName[i]; ++i) *ps++ = psName[i];
 			return retbuf;
 		}
