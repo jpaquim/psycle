@@ -881,7 +881,7 @@ namespace psycle
 							_pPlugsInfo[currentPlugsCount]->dllname = Temp;
 							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
 
-							///\todo this cool be better handled
+							///\todo this could be better handled
 							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
 							{
 								_pPlugsInfo[currentPlugsCount]->error = "";
