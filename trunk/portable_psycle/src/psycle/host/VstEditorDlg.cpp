@@ -9,10 +9,8 @@
 #include "inputhandler.hpp"
 #include "MainFrm.hpp"
 #include <Vst/AEffEditor.h>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define VST_PARAMETRIC_WIDTH 228
 		#define VST_PARAMETRIC_HEIGHT 338
 		#define VST_PARAM_PANE 1
@@ -245,5 +243,5 @@ namespace psycle
 			CFrameWnd::OnClose();
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.SetFocus();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

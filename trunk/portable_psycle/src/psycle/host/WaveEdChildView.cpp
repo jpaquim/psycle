@@ -6,10 +6,8 @@
 #include "MainFrm.hpp"
 #include <mmreg.h>
 #include <math.h>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CWaveEdChildView::CWaveEdChildView()
 		{
 			cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
@@ -1147,5 +1145,5 @@ namespace psycle
 		{
 			pParent = parent;
 		}	
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

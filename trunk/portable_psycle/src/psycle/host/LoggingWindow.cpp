@@ -6,10 +6,8 @@
 #include "constants.hpp"
 #include "LoggingWindow.hpp"
 #include <cstring>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CLoggingWindow::CLoggingWindow(CWnd * pParent) : CDialog(CLoggingWindow::IDD, pParent)
 		{
 			AfxInitRichEdit();
@@ -111,5 +109,5 @@ namespace psycle
 			pParentMain->SetFocus();	
 			CDialog::OnClose();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

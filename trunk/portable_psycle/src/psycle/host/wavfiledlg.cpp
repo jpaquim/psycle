@@ -4,11 +4,9 @@
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "WavFileDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
-		IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
+IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 		CWavFileDlg::CWavFileDlg(
 								BOOL bOpenFileDialog,
@@ -62,5 +60,5 @@ namespace psycle
 
 			CFileDialog::OnFileNameChange();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

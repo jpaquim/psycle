@@ -1,9 +1,7 @@
 ///\file
 ///\brief keyboard handler for psycle::host::CChildView, private header
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 			// undo code not required, enter note handles it
@@ -2728,5 +2726,5 @@ namespace psycle
 			}
 			editcur.col = 0;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

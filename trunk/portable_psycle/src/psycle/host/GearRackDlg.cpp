@@ -6,10 +6,8 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "MainFrm.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		int CGearRackDlg::DisplayMode = 0;
 
 		CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain)
@@ -808,5 +806,5 @@ namespace psycle
 			
 			pParentMain->RedrawGearRackList();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -1,9 +1,7 @@
 ///\file
 ///\brief machine view graphic operations for psycle::host::CChildView, private header
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
 			if (Global::pConfig->draw_vus)
@@ -1175,5 +1173,5 @@ namespace psycle
 			}
 			return -1;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

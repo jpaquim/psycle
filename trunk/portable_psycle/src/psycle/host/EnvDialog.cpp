@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "EnvDialog.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CEnvDialog::CEnvDialog(CWnd* pParent)
 			: CDialog(CEnvDialog::IDD, pParent)
 		{
@@ -391,5 +389,5 @@ namespace psycle
 			
 			*pResult = 0;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

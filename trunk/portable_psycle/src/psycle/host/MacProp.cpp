@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "MacProp.hpp"
 #include "MainFrm.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		CMacProp::CMacProp(CWnd* pParent)
@@ -196,5 +194,5 @@ namespace psycle
 			}
 			OnCancel();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -5,10 +5,8 @@
 #include "Song.hpp"
 #include "WaveEdFrame.hpp"
 #include "MainFrm.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
@@ -137,5 +135,5 @@ namespace psycle
 			wavview.SetViewData(_pSong->instSelected, _pSong->waveSelected);
 			AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

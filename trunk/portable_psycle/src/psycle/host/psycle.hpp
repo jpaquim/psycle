@@ -3,10 +3,8 @@
 #pragma once
 #include "resources/resources.hpp" // main symbols
 #include <operating_system/logger.hpp>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		class CMainFrame; // forward declaration
 
 		/// root class.
@@ -15,27 +13,18 @@ namespace psycle
 		public:
 			CPsycleApp();
 			virtual ~CPsycleApp() throw();
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CPsycleApp)
-			public:
+		public:
 			virtual BOOL InitInstance();
 			virtual int ExitInstance();
-			//}}AFX_VIRTUAL
-		// Implementation
 		private:
 			void ProcessCmdLine(CMainFrame*);
 			void LoadRecent(CMainFrame*);
 			void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;
 		public:
-			Global _global;
-			//{{AFX_MSG(CPsycleApp)
 			afx_msg void OnAboutpsycle();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+		public:
+			Global _global;
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

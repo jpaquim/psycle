@@ -5,10 +5,8 @@
 #include "KeyConfigDlg.hpp"
 #include "inputhandler.hpp"
 #include "Configuration.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
 
 		CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
@@ -440,5 +438,5 @@ namespace psycle
 				m_textlines.SetWindowText(buffer);
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

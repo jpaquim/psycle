@@ -1,10 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveOutDialog.
 #pragma once
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		/// mme config window.
 		class CWaveOutDialog : public CDialog
 		{
@@ -50,5 +48,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -4,11 +4,9 @@
 #include "VSTHost.hpp"
 #include "ChildView.hpp"
 #include <afxext.h>
-namespace psycle
-{
-	namespace host
-	{
-		/// default vst gui window.
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
+/// default vst gui window.
 		class CDefaultVstGui : public CFormView
 		{
 		protected:
@@ -70,5 +68,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

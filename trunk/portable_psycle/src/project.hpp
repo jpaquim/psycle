@@ -345,6 +345,15 @@
 		#error "Ouch, shitty compiler... better giving up now."
 	#endif
 	#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
+	#if defined _AFXDLL // mfc
+		#if defined APPSTUDIO_INVOKED__THIS_MSVC_MFC_RESOURCE_EDITOR_IS_A_SHIT_AND_DOES_NOT_HANDLE_NAMESPACES_AND_WRONGLY_PARSES_PREPROCESSOR_DIRECTIVES
+			#define NAMESPACE__BEGIN(x)
+			#define NAMESPACE__END
+		#else
+			#define NAMESPACE__BEGIN(x) namespace x {
+			#define NAMESPACE__END }
+		#endif
+	#endif
 #endif
 
 #if !defined COMPILER && !defined COMPILER__RESOURCE

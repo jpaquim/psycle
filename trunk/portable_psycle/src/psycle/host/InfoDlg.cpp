@@ -6,10 +6,8 @@
 #include "Song.hpp"
 #include "InfoDlg.hpp"
 #include "Machine.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CInfoDlg::CInfoDlg(CWnd* pParent)
 		: CDialog(CInfoDlg::IDD, pParent)
 		{
@@ -185,5 +183,5 @@ namespace psycle
 			}
 			itemcount = n;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

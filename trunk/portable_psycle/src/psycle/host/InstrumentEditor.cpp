@@ -6,10 +6,8 @@
 #include "InstrumentEditor.hpp"
 #include "EnvDialog.hpp"
 #include "constants.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)
 			: CDialog(CInstrumentEditor::IDD, pParent)
 		{
@@ -439,5 +437,5 @@ namespace psycle
 			}
 			m_notelabel.SetWindowText(buffer);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

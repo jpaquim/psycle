@@ -9,17 +9,14 @@
 #include "NewMachine.hpp"
 #include <operating_system/exception.hpp>
 #include <sstream>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
+
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
-			//{{AFX_MSG_MAP(CPsycleApp)
 			ON_COMMAND(ID_ABOUTPSYCLE, OnAboutpsycle)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-		CPsycleApp::CPsycleApp() throw(std::runtime_error)
+		CPsycleApp::CPsycleApp()
 		{
 			operating_system::exceptions::translated::new_thread("mfc gui");
 			// support for unicode characters on mswin98
@@ -57,7 +54,14 @@ namespace psycle
 			Global::pLogWindow = new CLoggingWindow(pFrame);
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
 			//Global::pLogWindow->Validate();
-			host::loggers::info("Psycle version: " PSYCLE__VERSION);
+			host::loggers::info
+				(
+					"Psycle version: "
+					PSYCLE__VERSION
+					#if !defined NDEBUG
+						" debug"
+					#endif
+				);
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
@@ -415,8 +419,10 @@ namespace psycle
 				RegCloseKey(RegKey);
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -430,55 +436,64 @@ namespace psycle
 			#if defined OPERATING_SYSTEM__CROSSPLATFORM
 			{
 				#if !defined NDEBUG
-					operating_system::console console;
+					operating_system::terminal terminal;
 				#endif
-				(*new GUI).start(); // starts the new gui in parallel with the mfc one, each in their own thread
+				(*new psycle::front_ends::gui::gui).start(); // starts the new gui in parallel with the mfc one, each in their own thread
 			}
 			#endif
 */
 
 #undef OPERATING_SYSTEM__CROSSPLATFORM
 #if defined OPERATING_SYSTEM__CROSSPLATFORM
-	#include <operating_system/logger.h>
-	#include <softsynth/gui/gui.h>
+	#include <operating_system/logger.hpp>
+	#include <psycle/front_ends/gui/gui.hpp>
 	#include <boost/thread/thread.hpp>
 	#include <boost/thread/mutex.hpp>
-	class GUI
+	namespace psycle
 	{
-	public:
-		GUI();
-		void start() throw(boost::thread_resource_error);
-		void operator()() throw();
-	private:
-		boost::thread * thread_;
-	};
-
-	GUI::GUI() : thread_(0) {}
-
-	void GUI::operator()() throw()
-	{
-		softsynth::gui::main();
-	}
-
-	void GUI::start() throw(boost::thread_resource_error)
-	{
-		if(thread_) return;
-		try
+		namespace front_ends
 		{
-			template<typename Functor> class Thread
+			namespace gui
 			{
-			public:
-				inline Thread(Functor & functor) : functor_(functor) {}
-				inline void operator()() throw() { functor_(); }
-			private:
-				Functor & functor_;
-			};
-			thread_ = new boost::thread(Thread<GUI>(*this));
-		}
-		catch(const boost::thread_resource_error & e)
-		{
-			std::cerr << typeid(e).name() << ": " << e.what() << std::endl;;
-			throw;
+				class gui
+				{
+				public:
+					gui();
+					void start() throw(boost::thread_resource_error);
+					void operator()() throw();
+				private:
+					boost::thread * thread_;
+				};
+
+				gui::gui() : thread_(0) {}
+
+				void gui::operator()() throw()
+				{
+					softsynth::gui::main();
+				}
+
+				void gui::start() throw(boost::thread_resource_error)
+				{
+					if(thread_) return;
+					try
+					{
+						template<typename Functor> class thread
+						{
+						public:
+							inline thread(Functor & functor) : functor_(functor) {}
+							inline void operator()() throw() { functor_(); }
+						private:
+							Functor & functor_;
+						};
+						thread_ = new boost::thread(thread<gui>(*this));
+					}
+					catch(const boost::thread_resource_error & e)
+					{
+						std::cerr << typeid(e).name() << ": " << e.what() << std::endl;;
+						throw;
+					}
+				}
+			}
 		}
 	}
 #endif

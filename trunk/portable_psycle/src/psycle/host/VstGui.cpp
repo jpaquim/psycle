@@ -7,10 +7,8 @@
 #include "MainFrm.hpp"
 #include "Machine.hpp"
 #include <Vst/AEffEditor.h>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CVstGui, CFrameWnd)
@@ -138,5 +136,5 @@ namespace psycle
 			this->SetFocus();
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -8,10 +8,8 @@
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CMixerDlg::CMixerDlg(CWnd* pParent = 0) : CDialog(CMixerDlg::IDD, pParent = 0)
 		{
 			m_pParent = (CMainFrame*)pParent;
@@ -137,5 +135,5 @@ namespace psycle
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 			
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

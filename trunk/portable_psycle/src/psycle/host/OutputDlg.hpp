@@ -2,10 +2,8 @@
 ///\brief interface file for psycle::host::COutputDlg.
 #pragma once
 #include "AudioDriver.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define	MIN_HEADROOM	0
 		#define	MAX_HEADROOM	9999
 
@@ -56,5 +54,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -4,10 +4,8 @@
 #include "Machine.hpp"
 #include "constants.hpp"
 #include "resources/resources.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		class CMainFrame;
 
 		class Song;
@@ -49,5 +47,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -12,10 +12,8 @@
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
 #include "Machine.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		#define K_XSIZE				28
@@ -817,5 +815,5 @@ namespace psycle
 			CFrameWnd::OnSetFocus(pOldWnd);
 			Invalidate(false);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

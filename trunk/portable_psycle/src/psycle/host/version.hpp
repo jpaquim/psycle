@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.9  2005/01/29 18:25:43  johan-boule
+fixing problems for msvc's resource editor
+
 Revision 1.8  2005/01/29 16:12:06  johan-boule
 removed old cvs logs
 
@@ -40,7 +43,7 @@ Revision 1.1  2004/12/22 22:43:41  johan-boule
 fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
 */
 #endif
-		  
+
 ///\file
 ///\brief the version number of the psycle host application.
 

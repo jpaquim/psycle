@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "psycle.hpp"
 #include "ProgressDialog.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CProgressDialog)
@@ -48,5 +46,5 @@ namespace psycle
 			DestroyWindow();
 			AfxGetApp()->DoWaitCursor(-1); 
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

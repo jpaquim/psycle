@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "GreetDialog.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CGreetDialog::CGreetDialog(CWnd* pParent /* = 0 */) : CDialog(CGreetDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CGreetDialog)
@@ -92,5 +90,5 @@ namespace psycle
 			m_greetz.AddString("Vir|us");
 			return TRUE;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

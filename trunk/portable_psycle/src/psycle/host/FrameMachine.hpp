@@ -2,11 +2,9 @@
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
 #include "Machine.hpp"
-namespace psycle
-{
-	namespace host
-	{
-		class Song;
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
+class Song;
 		class CChildView;
 
 		/// machine window.
@@ -73,5 +71,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

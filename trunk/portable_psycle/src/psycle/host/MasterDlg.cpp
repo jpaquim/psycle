@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "ChildView.hpp"
 #include "MasterDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CMasterDlg::CMasterDlg(CChildView* pParent) : CDialog(CMasterDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -564,5 +562,5 @@ namespace psycle
 		void CMasterDlg::OnStnClickedMixerview()
 		{
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -7,10 +7,8 @@
 #include "VSTHost.hpp"
 #include "FrameMachine.hpp"
 #include "FileIO.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CPreset::CPreset()
 		{
 			params=NULL;
@@ -1112,5 +1110,5 @@ namespace psycle
 			}
 			presets[i2]=preset;;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

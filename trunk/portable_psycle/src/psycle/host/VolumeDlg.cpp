@@ -4,10 +4,8 @@
 #include "psycle.hpp"
 #include "VolumeDlg.hpp"
 #include <math.h>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CVolumeDlg::CVolumeDlg(CWnd* pParent) : CDialog(CVolumeDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CVolumeDlg)
@@ -144,5 +142,5 @@ namespace psycle
 				DrawDb();
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END
