@@ -12,7 +12,7 @@
 #include "FileXM.h"
 //#include "FileIT.h"
 #include "ChildView.h"
-#include "Bitmap.cpp"
+#include "Bitmap.h"
 
 #include "Player.h"
 #include "MidiInput.h"

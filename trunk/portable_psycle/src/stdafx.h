@@ -21,5 +21,11 @@
 
 #include <psycle/host/Global.h> ///< missing #include in psycle's source code
 
+/*
+#include <gdiplus.h>				//GDI+ code
+using namespace Gdiplus;			//
+#pragma comment(lib, "gdiplus.lib")	//
+*/
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
