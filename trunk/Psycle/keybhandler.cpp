@@ -1121,6 +1121,7 @@ void CChildView::IncPosition()
 			int const ep=_pSong->GetNumPatternsUsed();
 			_pSong->playLength=editPosition+1;
 			_pSong->playOrder[editPosition]=ep;
+			pParentMain->UpdateSequencer();
 		}
 
 		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
