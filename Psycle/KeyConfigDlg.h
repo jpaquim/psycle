@@ -35,6 +35,10 @@ public:
 	CButton	m_wrap;
 	CButton	m_centercursor;
 	CButton	m_cursordown;
+	CEdit	m_numlines;
+	CSpinButtonCtrl	m_spinlines;
+	CStatic m_textlines;
+
 	//}}AFX_DATA
 
 
@@ -47,6 +51,7 @@ public:
 
 // Implementation
 protected:
+	BOOL bInit;
 	long m_prvIdx;
 	void UpdateHotKey();	
 	void SaveHotKey(long idx,WORD & key,WORD & mods);
@@ -64,6 +69,7 @@ protected:
 	afx_msg void OnExportreg();
 	afx_msg void OnDefaults();
 	afx_msg void OnNone();
+	afx_msg void OnUpdateNumLines();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -225,6 +225,9 @@ public:
 	int _midiDriverIndex;		// MIDI IMPLEMENTATION
 	int _syncDriverIndex;
 	int _midiHeadroom;
+
+	int defaultPatLines;
+
 	AudioDriver** _ppOutputDrivers;
 	AudioDriver* _pOutputDriver;
 	CMidiInput* _pMidiInput;	// MIDI IMPLEMENTATION

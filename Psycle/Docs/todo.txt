@@ -239,8 +239,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?
-++	<doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" 
-		[ we should store a default pattern length parameter]
 +	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
 +	<Alk> +alt to make the transposing only effect current machine/sample
 		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note

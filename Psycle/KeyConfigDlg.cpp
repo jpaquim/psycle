@@ -25,7 +25,7 @@ CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
 	
 	//{{AFX_DATA_INIT(CKeyConfigDlg)
 	//}}AFX_DATA_INIT
-
+	bInit = FALSE;
 }
 
 
@@ -42,6 +42,9 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_WRAP, m_wrap);
 	DDX_Control(pDX, IDC_CENTERCURSOR, m_centercursor);
 	DDX_Control(pDX, IDC_CURSORDOWN, m_cursordown);
+	DDX_Control(pDX, IDC_EDIT_DEFLINES, m_numlines);
+	DDX_Control(pDX, IDC_SPIN_DEFLINES, m_spinlines);
+	DDX_Control(pDX, IDC_TEXT_DEFLINES, m_textlines);
 	//}}AFX_DATA_MAP
 }
 
@@ -53,6 +56,7 @@ BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
 	ON_BN_CLICKED(IDC_EXPORTREG, OnExportreg)
 	ON_BN_CLICKED(IDC_DEFAULTS, OnDefaults)
 	ON_BN_CLICKED(IDC_NONE, OnNone)
+	ON_EN_UPDATE(IDC_EDIT_DEFLINES, OnUpdateNumLines)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -103,6 +107,20 @@ BOOL CKeyConfigDlg::OnInitDialog()
 	m_wrap.SetCheck(Global::pConfig->_wrapAround?1:0);
 	m_centercursor.SetCheck(Global::pConfig->_centerCursor?1:0);
 	m_cursordown.SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
+
+	m_spinlines.SetRange(1,MAX_LINES);
+
+	char buffer[16];
+	itoa(Global::pConfig->defaultPatLines,buffer,10);
+	m_numlines.SetWindowText(buffer);
+
+	UDACCEL acc;
+	acc.nSec = 4;
+	acc.nInc = 16;
+	m_spinlines.SetAccel(1, &acc);
+
+	bInit = TRUE;
+	OnUpdateNumLines();
 
 	FillCmdList();
 	
@@ -216,6 +234,18 @@ void CKeyConfigDlg::OnOK()
 	Global::pConfig->_wrapAround = m_wrap.GetCheck()?true:false;
 	Global::pConfig->_centerCursor = m_centercursor.GetCheck()?true:false;
 	Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
+
+	char buffer[32];
+	m_numlines.GetWindowText(buffer,16);
+	
+	int nlines = atoi(buffer);
+
+	if (nlines < 1)
+		{ nlines = 1; }
+	else if (nlines > MAX_LINES)
+		{ nlines = MAX_LINES; }
+
+	Global::pConfig->defaultPatLines=nlines;
 
 	CDialog::OnOK();
 }
@@ -367,4 +397,26 @@ void CKeyConfigDlg::OnNone()
 	// TODO: Add your control notification handler code here
 	m_hotkey0.SetHotKey(0,0);
 	
+}
+
+void CKeyConfigDlg::OnUpdateNumLines() 
+{
+	// TODO: Add your control notification handler code here
+	char buffer[256];
+	if (bInit)
+	{
+		m_numlines.GetWindowText(buffer,16);
+		int val=atoi(buffer);
+
+		if (val < 0)
+		{
+			val = 0;
+		}
+		else if(val > MAX_LINES)
+		{
+			val = MAX_LINES-1;
+		}
+		sprintf(buffer,"HEX: %x",val);
+		m_textlines.SetWindowText(buffer);
+	}
 }
