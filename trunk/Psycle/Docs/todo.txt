@@ -20,6 +20,19 @@ X low priority
 * New and unsorted and untested
 -------------------------------
 
+* default pattern length doesnt seem to work
+* <+Schitz0> Hey, I notice that whenever I play a song in psycle it always loops, where can I change that?
+* screen should be made so 800x600 works
++ <alk> some bastards want keyrepeat for notes back
+* <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
+
+* sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
+* play block of patterns broken
+? in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
++ volume slide in sampler, so that you can cut the vol of a sample without a click
++ option to not move cursor when pasting
++ save bar hide/unhide settings
+
 ** master volume decrease lets a clipping sample through while detecting
 
 + midi controllers should be able to send midi messages (pitchbend for example), not just tweaks or cmds
