@@ -997,8 +997,7 @@ void CChildView::OnBarplay()
 	{
 		bScrollDetatch=false;
 	}
-	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
-
+	prevEditPosition=editPosition;
 	Global::pPlayer->Start(editPosition,0);
 	pParentMain->StatusBarIdle();
 }
@@ -1041,7 +1040,6 @@ void CChildView::OnButtonplayseqblock()
 	{
 		bScrollDetatch=false;
 	}
-	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 
 	int i=0;
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
@@ -1058,8 +1056,21 @@ void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI)
 
 void CChildView::OnBarstop()
 {
-	Global::pInputHandler->Stop();
-}
+	Global::pPlayer->Stop();
+	pParentMain->SetAppSongBpm(0);
+	pParentMain->SetAppSongTpb(0);
+	if ( Global::pConfig->_followSong )
+	{
+		editPosition=prevEditPosition;
+		pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
+		Repaint(DMPattern);
+	}
+	else
+	{
+		memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+		Global::_pSong->playOrderSel[editPosition] = true;
+		Repaint(DMCursor);  
+}}
 
 void CChildView::OnRecordWav() 
 {

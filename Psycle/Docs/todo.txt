@@ -90,7 +90,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	Xerox multiple
 +	In FT2, the cursor Jumps to the top of a pattern when you move from one to another (Kris)
 +	maybe: MultiPattern View (see the previous pattern at top and the next at bottom, like if it was continuous)
-
++	hotkeys in pattern editor for (un)mute/solo the current track
 
 * GUI (machines):
 -----------------

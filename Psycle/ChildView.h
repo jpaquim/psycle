@@ -305,6 +305,7 @@ public:
 	int patStep;
 
 	int editPosition;	// Position in the Sequence!
+	int prevEditPosition;
 	
 	int updateMode;
 	int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
