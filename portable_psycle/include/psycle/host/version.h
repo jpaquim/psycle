@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.16  2005/01/23 10:07:17  johan-boule
+typo
+
 Revision 1.15  2005/01/23 10:06:16  johan-boule
 typo
 
@@ -64,7 +67,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 ///			- if the major version number is odd (beta or RC), then this minor version number can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
 /// - p = patch number:
 ///			- if the major version number is even (stable release), then the minor version number is always 0, and this patch number is used for bug fixes.
-///			- if the major version number is odd (beta or RC), incremented very often, each cvs commit.
+///			- if the major version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
 
 /// Other files that need to be updated accordingly:
 /// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
