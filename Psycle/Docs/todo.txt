@@ -2,6 +2,8 @@
 !=change
 +=addition
 
+* <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
+
 * Other crap
 ------------
 <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
@@ -10,6 +12,7 @@
 * Sampler Machine/Wave Ed:
 --------------------------
 * {alk} fit sample to match 256 rows (in sampler) doesnt seem to work
+* internal max of 2megs/channel is too small.
 bug: 	 portamento to note, slides too much. (can anyone test this for me?)
 + ALK waveed: remove silence from start and end of wave
 feature: just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
@@ -28,7 +31,6 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 * GUI (pattern):
 ----------------
 *  select with keyboard while playing and follow mode on sucks
-* <bdzld> block double should be constrained to block
 * <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
 	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
 	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)

@@ -73,6 +73,9 @@ public:
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
 
+	char pattern_fontface[64];
+	CFont seqFont;
+
 	bool _midiRecordVel;
 	int _midiCommandVel;
 	int _midiFromVel;

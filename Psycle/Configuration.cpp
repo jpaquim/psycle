@@ -37,6 +37,7 @@ Configuration::Configuration()
 	_linenumbersHex = false;
 	_showAboutAtStart = true;
 	_followSong = false;
+	strcpy(pattern_fontface,"Tahoma");
 
 	mv_colour =	0x009a887c;
 	mv_wirecolour =	0x00000000;
@@ -281,6 +282,7 @@ Configuration::~Configuration()
 	{
 		delete _psVstDir;
 	}
+	seqFont.DeleteObject();
 }
 
 bool
@@ -646,6 +648,20 @@ Configuration::Read(
 					  ((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*2))/3)&0x00ff00) +
 					  ((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*2))/3)&0x00ff);
 
+	numData = sizeof(pattern_fontface);
+	reg.QueryValue("pattern_fontface", &type, (BYTE*)&pattern_fontface, &numData);
+	if (!seqFont.CreatePointFont(80,pattern_fontface))
+	{
+		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
+		if (!seqFont.CreatePointFont(80,"Tahoma"))
+		{
+			if (!seqFont.CreatePointFont(80,"MS Sans Seriff"))
+			{
+				seqFont.CreatePointFont(80,"Verdana");
+			}
+		}
+	}
+
 	numData = sizeof(output);
 	if (reg.QueryValue("OutputDriver", &type, (BYTE*)&output, &numData) == ERROR_SUCCESS)
 	{
@@ -938,7 +954,7 @@ Configuration::Write(
 	reg.SetValue("mv_colour", REG_DWORD, (BYTE*)&mv_colour, sizeof(mv_colour));	
 	reg.SetValue("mv_wirecolour", REG_DWORD, (BYTE*)&mv_wirecolour, sizeof(mv_wirecolour));	
 	reg.SetValue("mv_polycolour", REG_DWORD, (BYTE*)&mv_polycolour, sizeof(mv_polycolour));	
-	reg.SetValue("mv_wireaa", REG_DWORD, (BYTE*)&mv_wireaa, sizeof(mv_wireaa));	
+	reg.SetValue("mv_wireaa", REG_BINARY, (BYTE*)&mv_wireaa, sizeof(mv_wireaa));	
 	reg.SetValue("mv_wirewidth", REG_DWORD, (BYTE*)&mv_wirewidth, sizeof(mv_wirewidth));	
 
 	reg.SetValue("pvc_separator", REG_DWORD, (BYTE*)&pvc_separator, sizeof(pvc_separator));	
@@ -969,6 +985,8 @@ Configuration::Write(
 	reg.SetValue("vu1", REG_DWORD, (BYTE*)&vu1, sizeof(vu1));	
 	reg.SetValue("vu2", REG_DWORD, (BYTE*)&vu2, sizeof(vu2));	
 	reg.SetValue("vu3", REG_DWORD, (BYTE*)&vu3, sizeof(vu3));	
+
+	reg.SetValue("pattern_fontface", REG_SZ, (BYTE*)pattern_fontface, strlen(pattern_fontface));
 	
 	if (_psInitialInstrumentDir != NULL)
 	{

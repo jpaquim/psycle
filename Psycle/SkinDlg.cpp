@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "SkinDlg.h"
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -30,12 +31,14 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSkinDlg)
-	DDX_Control(pDX, IDC_PRESETSCOMBO, m_cpresets);
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
 	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
 	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
 	DDX_Control(pDX, IDC_AAWIRE, m_wireaa);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
+	DDX_Control(pDX, IDC_PATTERN_FONTFACE, m_pattern_fontface);
+	
+
 	//}}AFX_DATA_MAP
 }
 
@@ -66,18 +69,19 @@ ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_BN_CLICKED(IDC_BEATC2, OnBeatc2)
 	ON_BN_CLICKED(IDC_4BEAT, On4beat)
 	ON_BN_CLICKED(IDC_4BEAT2, On4beat2)
-	ON_BN_CLICKED(IDC_CURSORC, OnCursor)
-	ON_BN_CLICKED(IDC_CURSORC2, OnCursor2)
 	ON_BN_CLICKED(IDC_PLAYBARC, OnPlaybar)
 	ON_BN_CLICKED(IDC_PLAYBARC2, OnPlaybar2)
 	ON_BN_CLICKED(IDC_SELECTIONC, OnSelection)
 	ON_BN_CLICKED(IDC_SELECTIONC2, OnSelection2)
+	ON_BN_CLICKED(IDC_CURSORC, OnCursor)
+	ON_BN_CLICKED(IDC_CURSORC2, OnCursor2)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
-	ON_CBN_SELENDOK(IDC_PRESETSCOMBO, OnSelendokPresetscombo)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
+	ON_BN_CLICKED(IDC_EXPORTREG, OnExportReg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -89,6 +93,8 @@ void CSkinDlg::OnOK()
 	//TODO: Add code here
 	_wireaa = m_wireaa.GetCheck() >0?true:false;
 	_wirewidth = m_wirewidth.GetCurSel()+1;
+	m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface);
+		
 	CDialog::OnOK();
 }
 
@@ -96,6 +102,52 @@ void CSkinDlg::OnCancel()
 {
 	CDialog::OnCancel();
 }
+
+int CALLBACK CSkinDlg::EnumFontFamExProc(
+  ENUMLOGFONTEX *lpelfe,    // logical-font data
+  NEWTEXTMETRICEX *lpntme,  // physical-font data
+  DWORD FontType,           // type of font
+  LPARAM lParam             // application-defined data
+)
+{
+	// due to the stupid way ms font enum callback works, you have to find the family, and then enumerate that
+	// again if you want everything to be listed
+	LOGFONT lf;
+	memset(&lf,0,sizeof(lf));
+	lf.lfCharSet = ANSI_CHARSET;
+	strcpy(lf.lfFaceName,(char*)lpelfe->elfFullName);
+	char* p = strchr(lf.lfFaceName,32); // space
+	if (p)
+	{
+		p[0] = 0;
+	}
+	HDC hDC = ::GetDC( NULL );
+
+	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
+	::ReleaseDC( NULL, hDC );
+	if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
+	{
+		pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
+	}
+
+	return 1;
+}
+
+int CALLBACK CSkinDlg::EnumFontFamExProc2(
+  ENUMLOGFONTEX *lpelfe,    // logical-font data
+  NEWTEXTMETRICEX *lpntme,  // physical-font data
+  DWORD FontType,           // type of font
+  LPARAM lParam             // application-defined data
+)
+{
+	if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
+	{
+		pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
+	}
+	return 1;
+}
+
+CComboBox * CSkinDlg::pm_pattern_fontface;
 
 BOOL CSkinDlg::OnInitDialog() 
 {
@@ -115,6 +167,32 @@ BOOL CSkinDlg::OnInitDialog()
 	}
 	_snprintf(s,4,"%2i",_wirewidth);
 	m_wirewidth.SelectString(0,s);
+
+	LOGFONT lf;
+	memset(&lf,0,sizeof(lf));
+	lf.lfCharSet = ANSI_CHARSET;
+	HDC hDC = ::GetDC( NULL );
+
+	pm_pattern_fontface = &m_pattern_fontface;
+	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc, 0, 0);
+	::ReleaseDC( NULL, hDC );
+
+	int sel;
+	sel = m_pattern_fontface.FindStringExact(0,_pattern_fontface);
+	if (sel==CB_ERR)
+	{
+		MessageBox(_pattern_fontface,"Could not find this font!");
+		sel = m_pattern_fontface.FindStringExact(0,"Tahoma");
+		if (sel==CB_ERR)
+		{
+			sel = m_pattern_fontface.FindStringExact(0,"MS Sans Seriff");
+			if (sel==CB_ERR)
+			{
+				sel=0;
+			}
+		}
+	}
+	m_pattern_fontface.SetCurSel(sel);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -469,91 +547,6 @@ void CSkinDlg::OnLineNumbersHex()
 	_linenumbersHex = m_linenumbersHex.GetCheck() >0?true:false;
 }
 
-void CSkinDlg::OnSelendokPresetscombo() 
-{
-	switch( m_cpresets.GetCurSel() )
-	{
-	case 0: // Old theme
-		{
-			_machineViewColor =	0x0077AA99;
-			_machineViewWireColor =	0x00000000;
-			_machineViewPolyColor =	0x00ffffff;
-			_patternViewColor = 0x00AADDCC;
-			_4beatColor = 0x00CCCCCC;
-			_beatColor = 0x00BACBCA;
-			_rowColor = 0x00A9CAC8;
-			_fontColor = 0x00000000;
-			_wireaa = false;
-			_wirewidth = 1;
-
-			_vubColor = 0x0000FF00;
-			_vugColor = 0x00000000;
-			_vucColor = 0x000000FF;
-			break;
-		}
-	case 1: // Iced theme
-		{
-			_machineViewColor =	0x00bfa880;
-			_machineViewWireColor =	0x00000000;
-			_machineViewPolyColor =	0x00ffffff;
-			_patternViewColor = 0x00decaab;
-			_4beatColor = 0x00dec9ab;
-			_beatColor = 0x00ebddcb;
-			_rowColor = 0x00f3ebe0;
-			_fontColor = 0x00000000;
-			_wireaa = false;
-			_wirewidth = 1;
-
-			_vubColor = 0x00d6c6a9;
-			_vugColor = 0x00000000;
-			_vucColor = 0x00d6c6a9;	
-			break;
-		}
-	case 2: //clarify
-		{
-			_machineViewColor =	0x00b0bdbd;
-			_machineViewWireColor =	0x00000000;
-			_machineViewPolyColor =	0x00dddddd;
-			_patternViewColor = 0x009a8d7e;
-			_4beatColor = 0x00cbc5be;
-			_beatColor = 0x00d5d0ca;
-			_rowColor = 0x00c4cece;
-			_fontColor = 0x00000000;
-			_wireaa = false;
-			_wirewidth = 2;
-
-			_vubColor = 0x0025cd36;
-			_vugColor = 0x00332f28;
-			_vucColor = 0x000000c4;
-			break;
-		}
-	case 3: // bluegrey
-		{
-			_machineViewColor =	0x009a887c;
-			_machineViewWireColor =	0x003a281c;
-			_machineViewPolyColor =	0x00dac8bc;
-			_patternViewColor = 0x009a887c;
-			_4beatColor = 0x00d5ccc6;
-			_beatColor = 0x00c9beb8;
-			_rowColor = 0x00c1b5aa;
-			_fontColor = 0x00000000;
-			_wireaa = false;
-			_wirewidth = 2;
-
-			_vubColor = 0x00f1c992;
-			_vugColor = 0x00403731;
-			_vucColor = 0x00262bd7;
-			break;
-		}
-	default:
-		return;
-		break;
-	}
-	m_wireaa.SetCheck(_wireaa);
-	char s[4];
-	_snprintf(s,4,"%2i",_wirewidth);
-	m_wirewidth.SelectString(0,s);
-}
 
 void CSkinDlg::RepaintAllCanvas()
 {
@@ -614,5 +607,434 @@ void CSkinDlg::OnTimer(UINT nIDEvent)
 	}
 	
 	CPropertyPage::OnTimer(nIDEvent);
+}
+
+
+void CSkinDlg::OnImportReg() 
+{
+	// TODO: Add your control notification handler code here
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	
+	szFile[0]='\0';
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Psycle Display Presets\0*.psv\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	
+	// Display the Open dialog box. 
+	
+	if (GetOpenFileName(&ofn)==TRUE)
+	{
+		FILE* hfile;
+		if ((hfile=fopen(szFile,"rw")) == NULL )
+		{
+			MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
+			return;
+		}
+		char buf[512];
+		while (fgets(buf, 512, hfile))
+		{
+			if (strstr(buf,"\"pattern_fontface\"=\""))
+			{
+				char *q = strchr(buf,61); // =
+				if (q)
+				{
+					q+=2;
+					char *p = strrchr(q,34); // "
+					if (p)
+					{
+						p[0]=0;
+						strcpy(_pattern_fontface,q);
+					}
+				}
+			}
+			/*
+			else if (strstr(buf,"\"DisplayLineNumbers\"=hex:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_linenumbers=_httoi(q+1)?1:0;
+				}
+			}
+			else if (strstr(buf,"\"DisplayLineNumbersHex\"=hex:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_linenumbersHex=_httoi(q+1)?1:0;
+				}
+			}
+			*/
+			else if (strstr(buf,"\"pvc_separator\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_patternSeparatorColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_separator2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_patternSeparatorColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_background\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_patternViewColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_background2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_patternViewColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_font\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_font2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_fontCur\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColorCur=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_fontCur2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColorCur2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_fontSel\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColorSel=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_fontSel2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColorSel2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_fontPlay\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColorPlay=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_fontPlay2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_fontColorPlay2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_row\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_rowColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_row2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_rowColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_rowbeat\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_beatColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_rowbeat2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_beatColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_row4beat\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_4beatColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_row4beat2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_4beatColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_selection\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_selectionColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_selection2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_selectionColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_playbar\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_playbarColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_playbar2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_playbarColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_cursor\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_cursorColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pvc_cursor2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_cursorColor2=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"vu1\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_vubColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"vu2\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_vugColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"vu3\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_vucColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"mv_colour\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_machineViewColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"mv_wirecolour\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_machineViewWireColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"mv_polycolour\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_machineViewPolyColor=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"mv_wirewidth\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_wirewidth=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"mv_wirewidth\"=hex:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_wireaa=_httoi(q+1)?1:0;
+				}
+			}
+		}
+		fclose(hfile);
+		m_wireaa.SetCheck(_wireaa);
+//		m_linenumbers.SetCheck(_linenumbers);
+//		m_linenumbersHex.SetCheck(_linenumbersHex);
+		_snprintf(buf,4,"%2i",_wirewidth);
+		m_wirewidth.SelectString(0,buf);
+		RepaintAllCanvas();
+
+		int sel;
+		sel = m_pattern_fontface.FindStringExact(0,_pattern_fontface);
+		if (sel==CB_ERR)
+		{
+			MessageBox(_pattern_fontface,"Could not find this font!");
+			sel = m_pattern_fontface.FindStringExact(0,"Tahoma");
+			if (sel==CB_ERR)
+			{
+				sel = m_pattern_fontface.FindStringExact(0,"MS Sans Seriff");
+				if (sel==CB_ERR)
+				{
+					sel=0;
+				}
+			}
+		}
+		m_pattern_fontface.SetCurSel(sel);
+	}
+}
+
+void CSkinDlg::OnExportReg() 
+{
+	// TODO: Add your control notification handler code here
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	szFile[0]='\0';
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Psycle Display Presets\0*.psv\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.Flags = OFN_PATHMUSTEXIST;	
+
+	if (GetSaveFileName(&ofn)==TRUE)
+	{
+		FILE* hfile;
+
+		_wireaa = m_wireaa.GetCheck() >0?true:false;
+		_wirewidth = m_wirewidth.GetCurSel()+1;
+		m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface);
+
+		CString str = szFile;
+		CString str2 = str.Right(4);
+		if ( str2.CompareNoCase(".psv") != 0 ) str.Insert(str.GetLength(),".psv");
+		sprintf(szFile,str);
+		DeleteFile(szFile);
+
+		if ((hfile=fopen(szFile,"wa")) == NULL ) // file does not exist.
+		{
+			MessageBox("Couldn't open File for Writing. Operation Aborted","File Save Error",MB_OK);
+			return;
+		}
+
+		fprintf(hfile,"[Psycle Display Presets v1.0]\n\n");
+
+		fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface);
+//		fprintf(hfile,"\"DisplayLineNumbers\"=hex:%.2X\n",_linenumbers?1:0);
+//		fprintf(hfile,"\"DisplayLineNumbersHex\"=hex:%.2X\n",_linenumbersHex?1:0);
+		fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n",_patternSeparatorColor);
+		fprintf(hfile,"\"pvc_separator2\"=dword:%.8X\n",_patternSeparatorColor2);
+		fprintf(hfile,"\"pvc_background\"=dword:%.8X\n",_patternViewColor);
+		fprintf(hfile,"\"pvc_background2\"=dword:%.8X\n",_patternViewColor2);
+		fprintf(hfile,"\"pvc_font\"=dword:%.8X\n",_fontColor);
+		fprintf(hfile,"\"pvc_font2\"=dword:%.8X\n",_fontColor2);
+		fprintf(hfile,"\"pvc_fontCur\"=dword:%.8X\n",_fontColorCur);
+		fprintf(hfile,"\"pvc_fontCur2\"=dword:%.8X\n",_fontColorCur2);
+		fprintf(hfile,"\"pvc_fontSel\"=dword:%.8X\n",_fontColorSel);
+		fprintf(hfile,"\"pvc_fontSel2\"=dword:%.8X\n",_fontColorSel2);
+		fprintf(hfile,"\"pvc_fontPlay\"=dword:%.8X\n",_fontColorPlay);
+		fprintf(hfile,"\"pvc_fontPlay2\"=dword:%.8X\n",_fontColorPlay2);
+		fprintf(hfile,"\"pvc_row\"=dword:%.8X\n",_rowColor);
+		fprintf(hfile,"\"pvc_row2\"=dword:%.8X\n",_rowColor2);
+		fprintf(hfile,"\"pvc_rowbeat\"=dword:%.8X\n",_beatColor);
+		fprintf(hfile,"\"pvc_rowbeat2\"=dword:%.8X\n",_beatColor2);
+		fprintf(hfile,"\"pvc_row4beat\"=dword:%.8X\n",_4beatColor);
+		fprintf(hfile,"\"pvc_row4beat2\"=dword:%.8X\n",_4beatColor2);
+		fprintf(hfile,"\"pvc_selection\"=dword:%.8X\n",_selectionColor);
+		fprintf(hfile,"\"pvc_selection2\"=dword:%.8X\n",_selectionColor2);
+		fprintf(hfile,"\"pvc_playbar\"=dword:%.8X\n",_playbarColor);
+		fprintf(hfile,"\"pvc_playbar2\"=dword:%.8X\n",_playbarColor2);
+		fprintf(hfile,"\"pvc_cursor\"=dword:%.8X\n",_cursorColor);
+		fprintf(hfile,"\"pvc_cursor2\"=dword:%.8X\n",_cursorColor2);
+		fprintf(hfile,"\"vu1\"=dword:%.8X\n",_vubColor);
+		fprintf(hfile,"\"vu2\"=dword:%.8X\n",_vugColor);
+		fprintf(hfile,"\"vu3\"=dword:%.8X\n",_vucColor);
+		fprintf(hfile,"\"mv_colour\"=dword:%.8X\n",_machineViewColor);
+		fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n",_machineViewWireColor);
+		fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n",_machineViewPolyColor);
+		fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
+		fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa?1:0);
+
+		fclose(hfile);
+	}
 }
 

@@ -919,7 +919,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	// 1 if there is a redraw header, we do that 
 	/////////////////////////////////////////////////////////////
 	// Update Mute/Solo Indicators
-	oldfont= devc->SelectObject(&seqFont);
+	oldfont= devc->SelectObject(&Global::pConfig->seqFont);
 	if ((updatePar & DRAW_TRHEADER) || (abs(scrollT) > VISTRACKS))
 	{
 		if (XOFFSET!=1)
