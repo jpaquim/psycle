@@ -44,7 +44,7 @@ protected:
 	inline void process(Sample &);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Gainer);
+PSYCLE__PLUGIN__INSTANCIATOR(Gainer)
 
 void Gainer::process(Sample l[], Sample r[], int sample, int)
 {

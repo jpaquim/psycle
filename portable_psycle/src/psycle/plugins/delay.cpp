@@ -91,7 +91,7 @@ protected:
 	inline void resize(const int & channel, const Real & delay);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Delay);
+PSYCLE__PLUGIN__INSTANCIATOR(Delay)
 
 void Delay::init()
 {
