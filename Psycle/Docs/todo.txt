@@ -21,8 +21,6 @@ aditional known vst bugs/buggy vsts: ~33
 * New and unsorted and untested
 -------------------------------
 
-*** when saving multiple waves from render dialog, they are not in perfect sync.  ALSO when doing the track method, you can get delay buffer bleed, etc.
-
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 

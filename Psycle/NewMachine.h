@@ -115,7 +115,7 @@ protected:
 
 	bool bAllowChanged;
 	HTREEITEM hNodes[MAX_BROWSER_NODES];
-	HTREEITEM hInt[9];
+	HTREEITEM hInt[3];
 	HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 
 

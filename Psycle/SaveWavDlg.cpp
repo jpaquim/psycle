@@ -245,8 +245,6 @@ void CSaveWavDlg::OnSavewave()
 
 	m_savewave.EnableWindow(FALSE);
 	m_cancel.SetWindowText("Stop");
-	Global::pConfig->_pOutputDriver->Enable(false);
-	Global::pConfig->_pMidiInput->Close();
 	
 	autostop = Global::pConfig->autoStopMachines;
 	if ( Global::pConfig->autoStopMachines )
@@ -275,6 +273,9 @@ void CSaveWavDlg::OnSavewave()
 
 	m_savetracks.EnableWindow(FALSE);
 	m_savewires.EnableWindow(FALSE);
+	m_rate.EnableWindow(FALSE);
+	m_bits.EnableWindow(FALSE);
+	m_channelmode.EnableWindow(FALSE);
 
 	if (m_savetracks.GetCheck())
 	{
@@ -373,6 +374,8 @@ void CSaveWavDlg::SaveWav(char* file, int bits, int rate, int channelmode)
 	Player *pPlayer = Global::pPlayer;
 	Song *pSong = Global::_pSong;
 	pPlayer->StopRecording();
+	Global::pConfig->_pOutputDriver->Enable(false);
+	Global::pConfig->_pMidiInput->Close();
 
 	char *q = strrchr(file,'\\')+1; // =
 	if (!q)
@@ -453,34 +456,14 @@ void CSaveWavDlg::SaveWav(char* file, int bits, int rate, int channelmode)
 	unsigned long tmp2;
 	thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
 
-	/*
-	int stream_size = 32767; // Player has just a single buffer of 65535 samples to allocate both channels
-//	int stream_buffer[65535];
-	while(!kill_thread)
-	{
-		if (!pPlayer->_recording) // the player automatically closes the wav recording when looping.
-		{
-			kill_thread = 1;
-		}
-		else
-		{
-			pPlayer->Work(pPlayer,stream_size);
-			SaveTick();
-		}
-		Sleep(1);
-	}
 
-	pPlayer->Stop();
-	pPlayer->StopRecording();
-	SaveEnd();
-	*/
 }
 
 DWORD WINAPI __stdcall RecordThread(void *b)
 {
 	((CSaveWavDlg*)b)->threadopen++;
 	Player* pPlayer = Global::pPlayer;
-	int stream_size = 4096; // Player has just a single buffer of 65535 samples to allocate both channels
+	int stream_size = 576; // Player has just a single buffer of 65535 samples to allocate both channels
 //	int stream_buffer[65535];
 	while(!((CSaveWavDlg*)b)->kill_thread)
 	{
@@ -614,6 +597,9 @@ void CSaveWavDlg::SaveEnd()
 
 	m_savetracks.EnableWindow(TRUE);
 	m_savewires.EnableWindow(TRUE);
+	m_rate.EnableWindow(TRUE);
+	m_bits.EnableWindow(TRUE);
+	m_channelmode.EnableWindow(TRUE);
 
 	m_progress.SetPos(0);
 	m_savewave.EnableWindow(TRUE);
