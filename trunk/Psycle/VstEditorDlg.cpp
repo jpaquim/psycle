@@ -29,6 +29,7 @@ IMPLEMENT_DYNCREATE(CVstEditorDlg, CFrameWnd)
 CVstEditorDlg::CVstEditorDlg()
 {
 	editorgui = false;
+	creatingwindow = false;
 	_pMachine = NULL;
 }
 
@@ -55,6 +56,7 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 	int width=500;
 	int height=200;
 
+	creatingwindow = true;
 	_splitter.CreateStatic(this, 1, 2);
 	editorgui = (_pMachine->_pEffect->flags & effFlagsHasEditor);
 	if ( editorgui )
@@ -112,6 +114,8 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 	pParamGui->mainView=pGui;
 	pParamGui->Init();
 
+	creatingwindow = false;
+
 	CWnd *dsk = GetDesktopWindow();
 	CRect rClient;
 	dsk->GetClientRect(&rClient);
@@ -161,13 +165,15 @@ void CVstEditorDlg::Refresh()
 
 void CVstEditorDlg::Resize(int w,int h)
 {
-	int nw, nh;
-	nw = w + VST_PARAMETRIC_WIDTH + GetSystemMetrics(SM_CXEDGE)*3;
-	nh = h + VST_PARAMETRIC_HEIGHT + 9+GetSystemMetrics(SM_CYCAPTION) +
-		 GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE);
+	if (!creatingwindow)
+	{
+		int nw, nh;
+		nw = w + VST_PARAMETRIC_WIDTH + GetSystemMetrics(SM_CXEDGE)*3;
+		nh = h + VST_PARAMETRIC_HEIGHT + 9+GetSystemMetrics(SM_CYCAPTION) +
+			 GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE);
 
-	_splitter.SetColumnInfo(VST_UI_PANE,w,w);
-
-	SetWindowPos(this, 0, 0, nw, nh, SWP_NOMOVE | SWP_NOZORDER);
-	
+		SetWindowPos(NULL, 0, 0, nw, nh, SWP_NOMOVE | SWP_NOZORDER);
+		
+		_splitter.SetColumnInfo(VST_UI_PANE,w,w);
+	}
 }

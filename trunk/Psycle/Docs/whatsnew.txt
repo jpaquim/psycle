@@ -45,6 +45,7 @@ V1.67
 ! Made Master Machine Dialog modeless, updates display if volume attenuated
 
 
+
 V1.66
 -----
 + Added elapsed playtime (by KooPer)

@@ -189,18 +189,18 @@ void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max)
 	{
 		vol = 0;
 	}
-	devc->BitBlt(x+8+vol, y+3, 96-vol, 5, &memDC, 8, 51, SRCCOPY);
+	devc->BitBlt(x+8+vol, y+3, 96-vol, 5, &memDC, 8, 51, SRCCOPY); //background
 
 	if (max > 0)
 	{
 		max /= 6;// restrict to leds
 		max *= 6;
-		devc->BitBlt(x+8+max, y+3, 6, 5, &memDC, 96, 96, SRCCOPY);
+		devc->BitBlt(x+8+max, y+3, 6, 5, &memDC, 96, 96, SRCCOPY); //peak
 	}
 
 	if (vol)
 	{
-		devc->BitBlt(x+8, y+3, vol, 5, &memDC, 0, 96, SRCCOPY);
+		devc->BitBlt(x+8, y+3, vol, 5, &memDC, 0, 96, SRCCOPY); // leds
 	}
 	memDC.SelectObject(oldbmp);
 	memDC.DeleteDC();

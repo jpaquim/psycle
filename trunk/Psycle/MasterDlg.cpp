@@ -28,6 +28,7 @@ void CMasterDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMasterDlg)
+	DDX_Control(pDX, IDC_MASTERPEAK, m_masterpeak);
 	DDX_Control(pDX, IDC_SLIDERMASTER, m_slidermaster);
 	DDX_Control(pDX, IDC_SLIDERM9, m_sliderm9);
 	DDX_Control(pDX, IDC_SLIDERM8, m_sliderm8);
@@ -65,7 +66,7 @@ BOOL CMasterDlg::OnInitDialog()
 	m_slidermaster.SetPos(256-_pMachine->_outDry);
 	if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 	else m_autodec.SetCheck(0);
-	
+
 	return TRUE;
 }
 

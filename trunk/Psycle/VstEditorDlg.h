@@ -46,6 +46,7 @@ public:
 // Implementation
 protected:
 	bool editorgui;
+	bool creatingwindow;
 	CSplitterWnd _splitter;
 	virtual ~CVstEditorDlg();
 

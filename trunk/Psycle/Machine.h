@@ -164,7 +164,7 @@ protected:
 			}
 		}
 		_volumeCounter-=numSamples/4;
-		_volumeDisplay--;
+		_volumeDisplay-=2;
 	};
 	inline void SetVolumeCounterAccurate(int numSamples)
 	{
@@ -193,8 +193,10 @@ public:
 	bool decreaseOnClip;
 	static float* _pMasterSamples;
 #if !defined(_WINAMP_PLUGIN_)
-	int _LMAX;
-	int _RMAX;
+//	int _LMAX;
+//	int _RMAX;
+	int peaktime;
+	float currentpeak;
 	float _lMax;
 	float _rMax;
 	bool vuupdated;

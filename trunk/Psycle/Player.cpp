@@ -37,26 +37,20 @@ Player::~Player()
 #endif // ndef _WINAMP_PLUGIN_
 }
 
-void Player::Start(int line)
+void Player::Start(int pos, int line)
 {
-	Stop();
+	Stop(); // This causes all machines to reset, and samplespertick to init.
+
 	_lineChanged = true;
 	_lineCounter = line;
+	_playPosition= pos;
+	_playPattern = Global::_pSong->playOrder[_playPosition];
 	_playTime = 0;
 	_playTimem = 0;
-
-#if defined(_WINAMP_PLUGIN_)
-	_playPosition=0;
-	Global::_pSong->SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb);
-#else
-	if(_playPosition<0)	_playPosition=0;	// DAN FIXME
-	Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb);
-#endif // _WINAMP_PLUGIN_
-
-	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 0;
-	_playPattern = Global::_pSong->playOrder[_playPosition];
 	bpm=Global::_pSong->BeatsPerMin;
 	tpb=Global::_pSong->_ticksPerBeat;
+	
+	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 0;
 	_playing = true;
 	ExecuteLine();
 }

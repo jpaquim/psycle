@@ -189,7 +189,7 @@ int play(char *fn)
 	strcpy(_global._pSong->fileName,fn);
 	_global._pSong->SetBPM(_global._pSong->BeatsPerMin, _global._pSong->_ticksPerBeat, _global.pConfig->_samplesPerSec);
 
-	_global.pPlayer->Start(0);
+	_global.pPlayer->Start(0,0);
 
 	paused=0; worked=false;
 	memset(stream_buffer,0,sizeof(stream_buffer));

@@ -36,6 +36,7 @@
 #include "SongpDlg.h"
 #include "inputhandler.h"
 #include "VstEditorDlg.h"
+#include "masterdlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -306,8 +307,19 @@ void CChildView::OnTimer( UINT nIDEvent )
 			Global::pConfig->vu3,
 			((Master*)Global::_pSong->_pMachines[0])->_clip);
 
+		if ( MasterMachineDialog )
+		{
+			if (!--((Master*)Global::_pSong->_pMachines[0])->peaktime) 
+			{
+				char peak[10];
+				sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachines[0])->currentpeak)-90);
+				MasterMachineDialog->m_masterpeak.SetWindowText(peak);
+				((Master*)Global::_pSong->_pMachines[0])->peaktime=25;
+				((Master*)Global::_pSong->_pMachines[0])->currentpeak=0.0f;
+			}
+		}
 		((Master*)Global::_pSong->_pMachines[0])->vuupdated = true;
-			
+		
 		if (viewMode == VMMachine)
 		{
 			CClientDC dc(this);
@@ -790,8 +802,7 @@ void CChildView::OnBarplay()
 {
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 
-	Global::pPlayer->_playPosition = editPosition;
-	Global::pPlayer->Start(0);
+	Global::pPlayer->Start(editPosition,0);
 }
 void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 {
@@ -803,15 +814,11 @@ void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI)
 
 void CChildView::OnButtonplayseqblock() 
 {
-	Global::pPlayer->Stop();
-	Global::pPlayer->_playPosition = editPosition;
-	Global::pPlayer->Start(0);
+	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
+
 	int i=0;
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
-	Global::pPlayer->_playPosition = i;
-	Global::pPlayer->_playTime = 0;
-	Global::pPlayer->_playTimem = 0;
-	Global::pPlayer->_playPattern = Global::_pSong->playOrder[i];
+	Global::pPlayer->Start(i,0);
 	Global::pPlayer->_playBlock=true;
 	if ( viewMode == VMPattern ) Repaint(DMPatternSwitch);
 }
