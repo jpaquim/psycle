@@ -941,7 +941,6 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 {
 	// pipe MIDI note on messages into the pattern entry window
 
-	bool insertNote = false;
 	bool noteOff = false;
 	int note = 0;
 
@@ -978,27 +977,34 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 			// branch on status code
 			switch( statusHN )
 			{
-				// note on/off
-				case 0x09:
-					insertNote = true;											
-					break;
-
 				// (also) note off
 				case 0x08:		
 					noteOn=0;
-					insertNote = true;
-					break;
+				// note on/off
+				case 0x09:
+    				// limit to playable range (above this is special codes)
+    				if(note>119) 
+    					note=119;
+					
+					// TODO: watch this, it should be OK as long as we don't change things too much
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternNote(note,noteOn);
+					return;
+			}
+
+			if (Global::pConfig->_RecordTweaks)
+			{
+				if (Global::pConfig->_midiRawMcm)
+				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
+					return;
+				}
+				// branch on status code
+				switch( statusHN )
+				{
 
 				case 11:
 					// mods
 					// data 2 contains the info
-					if (Global::pConfig->_RecordTweaks)
-					{
-						if (Global::pConfig->_midiRawMcm)
-						{
-							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
-							return;
-						}
 						if (Global::pConfig->_midiRecord0)
 						{
 							if (Global::pConfig->_midiMessage0 == data1)
@@ -1540,11 +1546,6 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 					// data 2 contains the info
 					if (Global::pConfig->_RecordTweaks)
 					{
-						if (Global::pConfig->_midiRawMcm)
-						{
-							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
-							return;
-						}
 						if (Global::pConfig->_midiRecordPit)
 						{
 							switch (Global::pConfig->_midiTypePit)
@@ -1580,17 +1581,6 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 
 			}	// end of.. statusHN switch
 
-			// insert note?
-			if( insertNote )
-			{
-    			// limit to playable range (above this is special codes)
-    			if(note>119) 
-    				note=119;
-				
-				// TODO: watch this, it should be OK as long as we don't change things too much
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternNote(note,noteOn);
-				return;
-			}
 			// midi controllers pass-through
 			int mgn = Global::_pSong->seqBus;
 
