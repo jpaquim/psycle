@@ -344,6 +344,7 @@ namespace psycle
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
 #ifndef NDEBUG
+				
 				{
 					std::ostringstream s;
 					s<< "VST plugin: call to plugin dispatcher: Eff: " << &plugin()
@@ -354,6 +355,7 @@ namespace psycle
 					<< " Opt = " << opt;
 					host::loggers::trace(s.str());
 				}
+				
 #endif
 				assert((*this)());
 				try

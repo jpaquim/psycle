@@ -368,8 +368,7 @@ namespace psycle
 					numSamplex -= amount;
 				}
 				if(pThis->_playing) pThis->_ticksRemaining -= amount;
-			}
-			while(numSamplex>0); ///\todo this is strange
+			} while(numSamplex>0); ///\todo this is strange
 			return pThis->_pBuffer;
 		}
 
