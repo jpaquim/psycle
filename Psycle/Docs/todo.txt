@@ -85,6 +85,7 @@ aditional known vst bugs/buggy vsts: ~33
 	[ I need source to fix]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
+**                <lobyaway> ah, it bugs if i hold down a note while editing (to fill the pattern with notes)
 **	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 **	routing in pooplog synths for vcf->od modes only works when both vcfs are active?
 **  clicking in pooplog synths when vca sustain is off

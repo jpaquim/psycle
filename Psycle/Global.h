@@ -21,7 +21,7 @@ class Resampler;
 		static Configuration* pConfig;
 		static Resampler* pResampler;
 	};
-
+	
 #else
 
 	class InputHandler;

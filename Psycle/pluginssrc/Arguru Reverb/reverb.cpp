@@ -6,13 +6,16 @@
 #include <assert.h>
 #include <math.h>
 #include "combfilter.h"
-#include "allpass.h"
+//#include "allpass.h"
 #include "lowpass.h"
 
 #include "..\..\machineinterface.h"
 
+
 #define NCOMBS	1
 #define NALLS	12
+#define MAX_ALLPASS_DELAY			8192
+
 
 CMachineParameter const paraCombdelay = 
 { 
@@ -152,10 +155,12 @@ private:
 
 	//CCombFilter comb[NCOMBS];
 	CCombFilter comb;
-	CAllPass	all[NALLS];
+	//	CAllPass	all[NALLS];
+	float audioBuffer[NALLS][MAX_ALLPASS_DELAY][2];
+	int	counter[NALLS][4];
 	CLowpass	fl;
 	CLowpass	fr;
-
+	
 };
 
 DLL_EXPORTS		// To export DLL functions to host
@@ -163,6 +168,15 @@ DLL_EXPORTS		// To export DLL functions to host
 mi::mi()
 {
 	Vals=new int[8];
+
+	for(int d=0;d<NALLS;d++)
+	{
+		for(int c=0;c<MAX_ALLPASS_DELAY;c++)
+		{
+			audioBuffer[d][c][0]=0;
+			audioBuffer[d][c][1]=0;
+		}
+	}
 }
 
 mi::~mi()
@@ -210,20 +224,19 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	// This should be computed on ParameterTweak for optimization,
 	// using global intermediate variables, but,
 	// anyway, a few calcs doesnt take too CPU.
-
 	float const cf=(float)Vals[4]*0.0000453514739229024943310657596371882f;
 	float const dry_amount	=(float)Vals[5]*0.00390625f;
 	float const wet_amount	=(float)Vals[6]*0.00390625f;
 	
 	float l_revresult=0;
 	float r_revresult=0;
-
+	
 	float g=(float)Vals[3]*0.0009765f;
 	--psamplesleft;
 	--psamplesright;
-
+	
 	int na=Vals[7];
-
+	
 	do
 	{
 		float const sl = *++psamplesleft;
@@ -231,24 +244,36 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		
 		l_revresult=0;
 		r_revresult=0;
-
+		
 		comb.Work(sl+2,sr+2);
 		l_revresult+=comb.left_output;
 		r_revresult+=comb.right_output;
 		
-
+		
 		for(int c=0;c<na;c++)
 		{
-		all[c].Work(l_revresult,r_revresult,g);
-		l_revresult=all[c].left_output;
-		r_revresult=all[c].right_output;
+//			all[c].Work(l_revresult,r_revresult,g);
+//			l_revresult=all[c].left_output;
+//			r_revresult=all[c].right_output;
+			float const l_out = (l_revresult*-g)+audioBuffer[c][counter[c][2]][0];
+			audioBuffer[c][counter[c][2]][0]=l_revresult+l_out*g;
+			l_revresult=l_out;
+			float const r_out = (r_revresult*-g)+audioBuffer[c][counter[c][3]][1];
+			audioBuffer[c][counter[c][3]][1]=r_revresult+r_out*g;
+			r_revresult=r_out;
+			
+			if(++counter[c][0]>=MAX_ALLPASS_DELAY)counter[c][0]=0;
+			if(++counter[c][1]>=MAX_ALLPASS_DELAY)counter[c][1]=0;
+			if(++counter[c][2]>=MAX_ALLPASS_DELAY)counter[c][2]=0;
+			if(++counter[c][3]>=MAX_ALLPASS_DELAY)counter[c][3]=0;
+			
+			
 		}
-
+		
 		*psamplesleft=sl*dry_amount+fl.Process(l_revresult,cf)*wet_amount;
 		*psamplesright=sr*dry_amount+fr.Process(r_revresult,cf)*wet_amount;
-
+		
 	} while(--numsamples);
-	
 }
 
 // Function that describes value on client's displaying
@@ -297,6 +322,16 @@ void mi::SetAll(int delay)
 {
 	for(int c=0;c<NALLS;c++)
 	{
-	all[c].Initialize(delay*(c+1)+(c*c),int(float(c)*1.3f));
+//		all[c].Initialize(delay*(c+1)+(c*c),int(float(c)*1.3f));
+		
+		const time=delay*(c+1)+(c*c);
+
+		counter[c][0]=MAX_ALLPASS_DELAY-4;
+		counter[c][2]=counter[c][0]-time;
+		counter[c][1]=MAX_ALLPASS_DELAY-4;
+		counter[c][3]=counter[c][1]-(time+int(float(c)*1.3f));
+		
+		if(counter[c][2]<0)counter[c][2]=0;
+		if(counter[c][3]<0)counter[c][3]=0;
 	}
 }
