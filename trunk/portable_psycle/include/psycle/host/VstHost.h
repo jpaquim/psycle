@@ -283,7 +283,9 @@ namespace psycle
 							assert(note >= 0 && note < 128);
 							assert(channel >= 0 && channel < 16);
 							--note_on_count_[channel][note];
-							assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding a note-on!");
+							//assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding note-on!");
+							// <bohan> it happens!!!
+							psycle::host::loggers::exception("there was a note-off without corresponding note-on!");
 						}
 					private:
 						// 16 channels, 128 keys

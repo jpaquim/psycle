@@ -390,7 +390,12 @@ namespace psycle
 
 				case cdefErrorLog:	return "Show Error Log";
 
-				default: assert(false); return "Invalid";
+				default:
+					//assert(false);
+					// <bohan> argh. it happens!!!
+					std::stringstream s; s << "input handler: command definition: unknown command: " << ID;
+					psycle::host::loggers::exception(s.str());
+					return "[unknow command!]";
 				}
 			}
 		};
