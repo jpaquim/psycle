@@ -1514,24 +1514,24 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			break;
 		case MACH_PLUGIN:
 			{
-			m_pWndMac[tmac] = new CFrameMachine(0);
-			((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
-			((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-			((CFrameMachine*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
+				m_pWndMac[tmac] = new CFrameMachine(tmac);
+				((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+				((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
+				((CFrameMachine*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
 
-			m_pWndMac[tmac]->LoadFrame(
-				IDR_MACHINEFRAME, 
-				WS_POPUPWINDOW | WS_CAPTION,
-				this);
-			((CFrameMachine*)m_pWndMac[tmac])->Generate();
-			((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-			char winname[32];
-			sprintf(winname,"%x : %s",((CFrameMachine*)m_pWndMac[tmac])->index
-									 ,Global::_pSong->_pMachines[tmac]->_editName);
-			((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
-			isguiopen[tmac] = true;
-			break;
+				m_pWndMac[tmac]->LoadFrame(
+					IDR_MACHINEFRAME, 
+					WS_POPUPWINDOW | WS_CAPTION,
+					this);
+				((CFrameMachine*)m_pWndMac[tmac])->Generate();
+				((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+				char winname[32];
+				sprintf(winname,"%x : %s",((CFrameMachine*)m_pWndMac[tmac])->index
+										 ,Global::_pSong->_pMachines[tmac]->_editName);
+				((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+				isguiopen[tmac] = true;
 			}
+			break;
 		case MACH_VST:
 		case MACH_VSTFX:
 			{
@@ -1562,6 +1562,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 
 void CMainFrame::CloseAllMacGuis()
 {
+//	m_wndView->KillWireDialogs();
 	for (int c=0; c<MAX_MACHINES; c++)
 	{
 		if ( _pSong->_machineActive[c] ) CloseMacGui(c);

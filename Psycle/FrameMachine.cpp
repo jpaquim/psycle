@@ -11,12 +11,15 @@
 #include "VSTHost.h"
 #include "InputHandler.h"
 #include "Helpers.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+	extern CPsycleApp theApp;
 
 #define K_XSIZE				28
 #define K_YSIZE				28
@@ -42,7 +45,7 @@ BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
-	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
 	ON_COMMAND(ID_PARAMETERS_RANDOMPARAMETERS, OnParametersRandomparameters)
 	ON_COMMAND(ID_PARAMETERS_RESETPARAMETERS, OnParametersResetparameters)
 	ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
@@ -283,7 +286,7 @@ void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
-			tweakbase = f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+			tweakbase = int(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
 		}
 		istweak = true;
 		SetCapture();
@@ -389,63 +392,76 @@ void CFrameMachine::OnLButtonUp(UINT nFlags, CPoint point)
 	CFrameWnd::OnLButtonUp(nFlags, point);
 }
 
-void CFrameMachine::OnRButtonDown(UINT nFlags, CPoint point) 
+void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 {
-	if((tweakpar > -1) && (tweakpar < numParameters))
-	{		
-		int const thispar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
-		int min_v;
-		int max_v;
-		char name[64];
-		memset(name,0,64);
-		CNewVal dlg;
+	tweakpar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
+	if ((tweakpar > -1) && (tweakpar < numParameters))
+	{
+		if (nFlags & MK_CONTROL)
+		{
+			Global::_pSong->seqBus = Global::_pSong->FindBusFromIndex(MachineIndex);
+			((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
+			CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+			cb2->SetCurSel(1); // PARAMS
+			Global::_pSong->auxcolSelected=tweakpar;
+			((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
+		}
+		else 
+		{		
+			int const thispar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
+			int min_v;
+			int max_v;
+			char name[64];
+			memset(name,0,64);
+			CNewVal dlg;
 
-		if ( _pMachine->_type == MACH_PLUGIN )
-		{
-			min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MinValue;
-			max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MaxValue;
-			strcpy(name ,((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->Name);
-			dlg.m_Value = ((Plugin*)_pMachine)->GetInterface()->Vals[thispar];
-		}
-		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-		{
-			min_v = 0;
-			max_v = 1000;
-			((VSTPlugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
-			dlg.m_Value = f2i(((VSTPlugin*)_pMachine)->GetParameter(thispar)*1000.0f);
-		}
-		
-		sprintf(
-			dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)"
-			,thispar
-			,name
-			,min_v
-			,max_v);
-		dlg.min = min_v;
-		dlg.max = max_v;
+			if ( _pMachine->_type == MACH_PLUGIN )
+			{
+				min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MinValue;
+				max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MaxValue;
+				strcpy(name ,((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->Name);
+				dlg.m_Value = ((Plugin*)_pMachine)->GetInterface()->Vals[thispar];
+			}
+			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			{
+				min_v = 0;
+				max_v = 1000;
+				((VSTPlugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
+				dlg.m_Value = f2i(((VSTPlugin*)_pMachine)->GetParameter(thispar)*1000.0f);
+			}
+			
+			sprintf(
+				dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)"
+				,thispar
+				,name
+				,min_v
+				,max_v);
+			dlg.min = min_v;
+			dlg.max = max_v;
 
-		dlg.DoModal();
-		int nv = dlg.m_Value;
-		if (nv < min_v)
-		{
-			nv = min_v;
+			dlg.DoModal();
+			int nv = dlg.m_Value;
+			if (nv < min_v)
+			{
+				nv = min_v;
+			}
+			if (nv > max_v)
+			{
+				nv = max_v;
+			}
+			if ( _pMachine->_type == MACH_PLUGIN )
+			{
+				((Plugin*)_pMachine)->GetInterface()->ParameterTweak(thispar, nv);
+			}
+			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			{
+				((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/1000.0f));
+				SetFocus();
+			}
+			Invalidate(false);
 		}
-		if (nv > max_v)
-		{
-			nv = max_v;
-		}
-		if ( _pMachine->_type == MACH_PLUGIN )
-		{
-			((Plugin*)_pMachine)->GetInterface()->ParameterTweak(thispar, nv);
-		}
-		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-		{
-			((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/1000.0f));
-			SetFocus();
-		}
-		Invalidate(false);
 	}
-	CFrameWnd::OnRButtonDown(nFlags, point);
+	CFrameWnd::OnRButtonUp(nFlags, point);
 }
 
 void CFrameMachine::OnParametersRandomparameters() 
