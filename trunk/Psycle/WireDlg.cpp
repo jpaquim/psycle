@@ -540,7 +540,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 					rect.left = x;
 					rect.right = rect.left+width;
-					rect.top = bar_heightsl[i];
+					rect.top = bar_heightsr[i];
 					rect.bottom = amr;
 					bufDC.FillSolidRect(&rect,cr);
 
