@@ -93,18 +93,10 @@ BOOL CWireDlg::OnInitDialog()
 	rc.left = 2;
 	rc.bottom = 128+rc.top;
 	rc.right = 256+rc.left;
-	bmpDC = new CBitmap;
-	bmpDC->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
-
-	CDC bufDC;
-	bufDC.CreateCompatibleDC(&dc);
-	CBitmap* oldbmp;
-	oldbmp = bufDC.SelectObject(bmpDC);
-
-	bufDC.FillSolidRect(0,0,rc.right-rc.left,rc.bottom-rc.top,0);
-
-	bufDC.SelectObject(oldbmp);
-	bufDC.DeleteDC();
+	bufBM = new CBitmap;
+	bufBM->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
+	clearBM = new CBitmap;
+	clearBM->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
 
 	font.CreatePointFont(70,"Tahoma");
 
@@ -138,7 +130,8 @@ void CWireDlg::OnCancel()
 	m_pParent->WireDialog[this_index] = NULL;
 	KillTimer(2304+this_index);
 	DestroyWindow();
-	bmpDC->DeleteObject();
+	bufBM->DeleteObject();
+	clearBM->DeleteObject();
 	delete this;
 }
 
@@ -213,61 +206,22 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 		CDC bufDC;
 		bufDC.CreateCompatibleDC(&dc);
 		CBitmap* oldbmp;
-		oldbmp = bufDC.SelectObject(bmpDC);
-		bufDC.FillSolidRect(0,0,rc.right-rc.left,rc.bottom-rc.top,0);
+		oldbmp = bufDC.SelectObject(bufBM);
+
+		CDC clrDC;
+		clrDC.CreateCompatibleDC(&dc);
+		CBitmap* oldbmp2;
+		oldbmp2 = clrDC.SelectObject(clearBM);
+
+		bufDC.BitBlt(0,0,256,128,&clrDC,0,0,SRCCOPY);
+
+		clrDC.SelectObject(oldbmp2);
+		clrDC.DeleteDC();
 
 		switch (scope_mode)
 		{
 		case 0: // off
 			{
-				char buf[64];
-				sprintf(buf,"Refresh %.2fhz",1000.0f/scope_peak_rate);
-
-				CFont* oldFont= bufDC.SelectObject(&font);
-				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x505050);
-				bufDC.TextOut(4, 128-14, buf);
-
-				CPen linepen(PS_SOLID, 1, 0x00606060);
-
-				CPen *oldpen = bufDC.SelectObject(&linepen);
-
-				bufDC.MoveTo(32+24,32-8);
-				bufDC.LineTo(256-32-24,32-8);
-				sprintf(buf,"+6 db");
-				bufDC.TextOut(32-1, 32-8-6, buf);
-				bufDC.TextOut(256-32-22, 32-8-6, buf);
-
-				bufDC.MoveTo(32+24,32+44);
-				bufDC.LineTo(256-32-24,32+44);
-				sprintf(buf,"-6 db");
-				bufDC.TextOut(32-1+4, 32+44-6, buf);
-				bufDC.TextOut(256-32-22, 32+44-6, buf);
-
-				bufDC.MoveTo(32+24,32+44+16);
-				bufDC.LineTo(256-32-24,32+44+16);
-				sprintf(buf,"-12 db");
-				bufDC.TextOut(32-1-6+4, 32+44+16-6, buf);
-				bufDC.TextOut(256-32-22, 32+44+16-6, buf);
-
-				bufDC.MoveTo(32+24,32+44+16+18);
-				bufDC.LineTo(256-32-24,32+44+16+18);
-				sprintf(buf,"-24 db");
-				bufDC.TextOut(32-1-6+4, 32+44+16+18-6, buf);
-				bufDC.TextOut(256-32-22, 32+44+16+18-6, buf);
-
-				linepen.DeleteObject();
-				bufDC.SetTextColor(0x707070);
-				linepen.CreatePen(PS_SOLID, 1, 0x707070);
-				bufDC.SelectObject(&linepen);
-
-				bufDC.MoveTo(32+24,32+23);
-				bufDC.LineTo(256-32-24,32+23);
-				sprintf(buf,"0 db");
-				bufDC.TextOut(32-1+6, 32+23-6, buf);
-				bufDC.TextOut(256-32-22, 32+23-6, buf);
-
-				linepen.DeleteObject();
 
 				// now draw our scope
 
@@ -315,11 +269,9 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				// ok draw our meters
 
-				int y;
+				RECT rect;
 
-				LOGBRUSH lb;
-				lb.lbHatch = 0;
-				lb.lbStyle = 0;
+				int y;
 
 				y = 128-f2i(sqrtf(peak2L/6));
 				if (y < 0)
@@ -328,10 +280,10 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				}
 
 				int cd = (peakLifeL/17);
-				lb.lbColor = (0x804000+(128-y))+(cd<<16|cd<<8|cd);
-				linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,48,&lb,0,0);
-				bufDC.SelectObject(&linepen);
-				bufDC.MoveTo(128-32,y);
+				COLORREF lbColor = 0x804000+(128-y)+(cd<<16|cd<<8|cd)+((y<32+23)?32:0);
+				rect.left = 128-32-24;
+				rect.right = rect.left+48;
+				rect.top = y;
 
 				y = 128-f2i(sqrtf(peakL/6));
 				if (y < 0)
@@ -339,11 +291,11 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					y = 0;
 				}
 
-				bufDC.LineTo(128-32,y);
-				linepen.DeleteObject();
-				lb.lbColor = 0xb07030+(128-y);
-				linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,48,&lb,0,0);
-				bufDC.SelectObject(&linepen);
+				rect.bottom = y;
+				bufDC.FillSolidRect(&rect,lbColor);
+
+				rect.top = rect.bottom;
+				lbColor = 0xb07030+(128-y)+((y<32+23)?32:0);
 
 				y = 128-f2i(sqrtf(tawl/6));
 				if (y < 0)
@@ -351,13 +303,14 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					y = 0;
 				}
 
-				bufDC.LineTo(128-32,y);
-				linepen.DeleteObject();
-				lb.lbColor = 0xd09048+(128-y);
-				linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,48,&lb,0,0);
-				bufDC.SelectObject(&linepen);
-				bufDC.LineTo(128-32,128);
-				linepen.DeleteObject();
+				rect.bottom = y;
+				bufDC.FillSolidRect(&rect,lbColor);
+
+				rect.top = rect.bottom;
+				rect.bottom = 128;
+				lbColor = 0xd09048+(128-y)+((y<32+23)?32:0);
+
+				bufDC.FillSolidRect(&rect,lbColor);
 
 				y = 128-f2i(sqrtf(peak2R/6));
 				if (y < 0)
@@ -366,10 +319,11 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				}
 
 				cd = (peakLifeR/17);
-				lb.lbColor = (0x408000+(128-y))+(cd<<16|cd<<8|cd);
-				linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,48,&lb,0,0);
-				bufDC.SelectObject(&linepen);
-				bufDC.MoveTo(192-32,y);
+				lbColor = 0x408000+(128-y)+(cd<<16|cd<<8|cd)+((y<32+23)?32:0);
+
+				rect.left = 128+32-24;
+				rect.right = rect.left+48;
+				rect.top = y;
 
 				y = 128-f2i(sqrtf(peakR/6));
 				if (y < 0)
@@ -377,11 +331,11 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					y = 0;
 				}
 
-				bufDC.LineTo(192-32,y);
-				linepen.DeleteObject();
-				lb.lbColor = 0x70b030+(128-y);
-				linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,48,&lb,0,0);
-				bufDC.SelectObject(&linepen);
+				rect.bottom = y;
+				bufDC.FillSolidRect(&rect,lbColor);
+
+				rect.top = rect.bottom;
+				lbColor = 0x70b030+(128-y)+((y<32+23)?32:0);
 
 				y = 128-f2i(sqrtf(tawr/6));
 				if (y < 0)
@@ -389,13 +343,13 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					y = 0;
 				}
 
-				bufDC.LineTo(192-32,y);
-				linepen.DeleteObject();
-				lb.lbColor = 0x90d048+(128-y);
-				linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,48,&lb,0,0);
-				bufDC.SelectObject(&linepen);
-				bufDC.LineTo(192-32,128);
-				linepen.DeleteObject();
+				rect.bottom = y;
+				bufDC.FillSolidRect(&rect,lbColor);
+
+				rect.top = rect.bottom;
+				rect.bottom = 128;
+				lbColor = 0x90d048+(128-y)+((y<32+23)?32:0);
+				bufDC.FillSolidRect(&rect,lbColor);
 
 				if (!hold)
 				{
@@ -413,69 +367,51 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					}
 				}
 
-				bufDC.SelectObject(oldpen);
+				char buf[64];
+				sprintf(buf,"Refresh %.2fhz",1000.0f/scope_peak_rate);
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x505050);
+				bufDC.TextOut(4, 128-14, buf);
 				bufDC.SelectObject(oldFont);
-				linepen.DeleteObject();
 			}
 			break;
 		case 1: // oscilloscope
 			{
 				int freq = scope_osc_freq*scope_osc_freq;
 
-				char buf[64];
-				sprintf(buf,"Frequency %dhz Refresh %.2fhz",freq,1000.0f/scope_osc_rate);
-
-				CFont* oldFont= bufDC.SelectObject(&font);
-				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x505050);
-				bufDC.TextOut(4, 128-14, buf);
-
-				CPen linepen(PS_SOLID, 2, 0x00202020);
-
-				CPen *oldpen = bufDC.SelectObject(&linepen);
-
 				// now draw our scope
 
 				// red line if last frame was clipping
 				if (clip)
 				{
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 2, 0x00202030);
-					bufDC.SelectObject(&linepen);
-					bufDC.MoveTo(0,32);
-					bufDC.LineTo(255,32);
-					bufDC.MoveTo(0,96);
-					bufDC.LineTo(255,96);
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 8, 0x00202040);
-					bufDC.SelectObject(&linepen);
-					bufDC.MoveTo(0,64);
-					bufDC.LineTo(255,64);
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 4, 0x00101080);
-				}
-				// or grey line if fine
-				else
-				{
-					bufDC.MoveTo(0,32);
-					bufDC.LineTo(255,32);
-					bufDC.MoveTo(0,96);
-					bufDC.LineTo(255,96);
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
-					bufDC.MoveTo(0,64);
-					bufDC.LineTo(255,64);
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
-				}
-				bufDC.SelectObject(&linepen);
-				bufDC.MoveTo(0,64);
-				bufDC.LineTo(255,64);
+					RECT rect;
 
-				linepen.DeleteObject();
+					rect.left = 0;
+					rect.right = 256;
+					rect.top = 32;
+					rect.bottom = rect.top+2;
+
+					bufDC.FillSolidRect(&rect,0x00202040);
+
+					rect.top = 95;
+					rect.bottom = rect.top+2;
+					bufDC.FillSolidRect(&rect,0x00202040);
+
+					rect.top = 64-4;
+					rect.bottom = rect.top+8;
+					bufDC.FillSolidRect(&rect,0x00202050);
+
+					rect.top = 64-2;
+					rect.bottom = rect.top+4;
+					bufDC.FillSolidRect(&rect,0x00101080);
+
+					clip = FALSE;
+				}
+
+				CPen linepen;
 				linepen.CreatePen(PS_SOLID, 2, 0xc08080);
-				bufDC.SelectObject(&linepen);
-				clip = FALSE;
+				CPen *oldpen = bufDC.SelectObject(&linepen);
 
 				// ok this is a little tricky - it chases the wrapping buffer, starting at the last sample 
 				// buffered and working backwards - it does it this way to minimize chances of drawing 
@@ -505,28 +441,30 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				}
 
 				bufDC.SelectObject(oldpen);
-				bufDC.SelectObject(oldFont);
 				linepen.DeleteObject();
+
+				char buf[64];
+				sprintf(buf,"Frequency %dhz Refresh %.2fhz",freq,1000.0f/scope_osc_rate);
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x505050);
+				bufDC.TextOut(4, 128-14, buf);
+				bufDC.SelectObject(oldFont);
 			}
 			break;
 
 		case 2: // spectrum analyzer
 			{
-				char buf[64];
-				sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
-
-				CFont* oldFont= bufDC.SelectObject(&font);
-
-			   float aal[MAX_SCOPE_BANDS]; 
-			   float aar[MAX_SCOPE_BANDS]; 
-			   float bbl[MAX_SCOPE_BANDS]; 
-			   float bbr[MAX_SCOPE_BANDS]; 
-			   float ampl[MAX_SCOPE_BANDS];
-			   float ampr[MAX_SCOPE_BANDS];
-			   memset (aal,0,sizeof(aal));
-			   memset (bbl,0,sizeof(bbl));
-			   memset (aar,0,sizeof(aar));
-			   memset (bbr,0,sizeof(bbr));
+				float aal[MAX_SCOPE_BANDS]; 
+				float aar[MAX_SCOPE_BANDS]; 
+				float bbl[MAX_SCOPE_BANDS]; 
+				float bbr[MAX_SCOPE_BANDS]; 
+				float ampl[MAX_SCOPE_BANDS];
+				float ampr[MAX_SCOPE_BANDS];
+				memset (aal,0,sizeof(aal));
+				memset (bbl,0,sizeof(bbl));
+				memset (aar,0,sizeof(aar));
+				memset (bbr,0,sizeof(bbr));
 
 			   // calculate our bands using same buffer chasing technique
 
@@ -557,18 +495,12 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				int width = 128/scope_spec_bands;
 				COLORREF cl = 0xa06060;
 				COLORREF cr = 0x60a060;
-				CPen linepen(PS_SOLID, width, cl);
 
-				CPen *oldpen = bufDC.SelectObject(&linepen);
+				int x = 0;
 
-				linepen.DeleteObject();
-				int x = (width/2);
+				RECT rect;
 
 				// draw our bands
-
-				LOGBRUSH lb;
-				lb.lbHatch = 0;
-				lb.lbStyle = 0;
 
 				for (i = 0; i < scope_spec_bands; i++)
 				{
@@ -583,19 +515,16 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 						bar_heightsl[i]=aml;
 					}
 
-					lb.lbColor = cl;
-					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,width,&lb,0,0);
-					bufDC.SelectObject(&linepen);
-					bufDC.MoveTo(x,bar_heightsl[i]);
-					bufDC.LineTo(x,aml);
-					linepen.DeleteObject();
+					rect.left = x;
+					rect.right = rect.left+width;
+					rect.top = bar_heightsl[i];
+					rect.bottom = aml;
+					bufDC.FillSolidRect(&rect,cl);
 
-					lb.lbColor = cl+0x303030;
-					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,width,&lb,0,0);
-					bufDC.SelectObject(&linepen);
-					bufDC.LineTo(x,128);
-					linepen.DeleteObject();
-
+					rect.top = rect.bottom;
+					rect.bottom = 128;
+					bufDC.FillSolidRect(&rect,cl+0x303030);
+					
 					x+=width;
 
 //					int amr = 128-f2i((sqrtf(ampr[i]*16384)));
@@ -609,18 +538,15 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 						bar_heightsr[i]=amr;
 					}
 
-					lb.lbColor = cr;
-					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT ,width,&lb,0,0);
-					bufDC.SelectObject(&linepen);
-					bufDC.MoveTo(x,bar_heightsr[i]);
-					bufDC.LineTo(x,amr);
-					linepen.DeleteObject();
+					rect.left = x;
+					rect.right = rect.left+width;
+					rect.top = bar_heightsl[i];
+					rect.bottom = amr;
+					bufDC.FillSolidRect(&rect,cr);
 
-					lb.lbColor = cr+0x303030;
-					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT ,width,&lb,0,0);
-					bufDC.SelectObject(&linepen);
-					bufDC.LineTo(x,128);
-					linepen.DeleteObject();
+					rect.top = rect.bottom;
+					rect.bottom = 128;
+					bufDC.FillSolidRect(&rect,cr+0x303030);
 
 					x+=width;
 
@@ -645,77 +571,46 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 						}
 					}
 				}
+				char buf[64];
+				sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
+				CFont* oldFont= bufDC.SelectObject(&font);
 				bufDC.SetBkMode(TRANSPARENT);
 				bufDC.SetTextColor(0x505050);
 				bufDC.TextOut(4, 128-14, buf);
-
 				bufDC.SelectObject(oldFont);
-				bufDC.SelectObject(oldpen);
-				linepen.DeleteObject();
 			}
 			break;
 		case 3: // phase scope
 			{
-				CPen linepen(PS_SOLID, 8, 0x00303030);
+				CPen linepen(PS_SOLID, 8, 0x00202040);
 
 				CPen *oldpen = bufDC.SelectObject(&linepen);
 
 				if (clip)
 				{
+					// now draw our scope
+
+					bufDC.MoveTo(32,32);
+					bufDC.LineTo(128,128);
+					bufDC.LineTo(128,0);
+					bufDC.MoveTo(128,128);
+					bufDC.LineTo(256-32,32);
+					bufDC.Arc(0,0,256,256,256,128,0,128);
+					bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
+
+					bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
+
 					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 8, 0x00202040);
-					bufDC.SelectObject(&linepen);
-				}
-
-				// now draw our scope
-
-				bufDC.MoveTo(32,32);
-				bufDC.LineTo(128,128);
-				bufDC.LineTo(128,0);
-				bufDC.MoveTo(128,128);
-				bufDC.LineTo(256-32,32);
-				bufDC.Arc(0,0,256,256,256,128,0,128);
-//				bufDC.Arc(32,32,256-32,256-32,256-32,128,32,128);
-//				bufDC.Arc(64,64,256-64,256-64,256-64,128,64,128);
-				bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
-
-				bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
-
-				linepen.DeleteObject();
-				if (clip)
-				{
 					linepen.CreatePen(PS_SOLID, 4, 0x00101080);
+					bufDC.SelectObject(&linepen);
+					bufDC.MoveTo(32,32);
+					bufDC.LineTo(128,128);
+					bufDC.LineTo(128,0);
+					bufDC.MoveTo(128,128);
+					bufDC.LineTo(256-32,32);
+
+					clip = FALSE;
 				}
-				else
-				{
-					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
-				}
-				bufDC.SelectObject(&linepen);
-				bufDC.MoveTo(32,32);
-				bufDC.LineTo(128,128);
-				bufDC.LineTo(128,0);
-				bufDC.MoveTo(128,128);
-				bufDC.LineTo(256-32,32);
-
-//				bufDC.Arc(0,0,256,256,256,128,0,128);
-//				bufDC.Arc(32,32,256-32,256-32,256-32,128,32,128);
-//				bufDC.Arc(64,64,256-64,256-64,256-64,128,64,128);
-//				bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
-
-//				bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
-
-				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 2, 0xc08080);
-				bufDC.SelectObject(&linepen);
-				clip = FALSE;
-
-				char buf[64];
-				sprintf(buf,"Refresh %.2fhz",1000.0f/scope_phase_rate);
-
-				CFont* oldFont= bufDC.SelectObject(&font);
-				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x505050);
-				bufDC.TextOut(4, 128-14, buf);
 
 				// ok we need some points:
 
@@ -777,10 +672,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 							{
 								mvpc = awr+awl;
 							}
-//							if (awr-awl > mvdpc)
-//							{
-//								mvdpc = awr-awl; 
-//							}
 						}
 					}
 					else if (awl > awr)
@@ -857,7 +748,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				int x,y;
 
 				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 3, 0x806060);
+				linepen.CreatePen(PS_SOLID, 5, 0x806060);
 				bufDC.SelectObject(&linepen);
 
 				x=f2i(sinf(-(F_PI/4.0f)-(o_mvdpl*F_PI/(32768.0f*4.0f)))
@@ -876,7 +767,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 								
 				// panning data
 				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 3, 0x608060);
+				linepen.CreatePen(PS_SOLID, 5, 0x608060);
 				bufDC.SelectObject(&linepen);
 
 				x=f2i(sinf(-(o_mvdl*F_PI/(32768.0f*4.0f)))
@@ -892,7 +783,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				y=f2i(-cosf((o_mvdr*F_PI/(32768.0f*4.0f)))
 							*o_mvr*(128.0f/32768.0f))+128;
 				bufDC.LineTo(x,y);
-
 
 				linepen.DeleteObject();
 				linepen.CreatePen(PS_SOLID, 3, 0xc08080);
@@ -940,9 +830,16 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					o_mvc -= scope_phase_rate*32.0f;
 					o_mvr -= scope_phase_rate*32.0f;
 				}
-				bufDC.SelectObject(oldFont);
 				bufDC.SelectObject(oldpen);
 				linepen.DeleteObject();
+
+				char buf[64];
+				sprintf(buf,"Refresh %.2fhz",1000.0f/scope_phase_rate);
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x505050);
+				bufDC.TextOut(4, 128-14, buf);
+				bufDC.SelectObject(oldFont);
 			}
 			break;
 		}
@@ -1068,15 +965,74 @@ void CWireDlg::OnHold()
 
 void CWireDlg::SetMode()
 {
-	char buffer[64];
+	CClientDC dc(this);
+
+	CDC bufDC;
+	bufDC.CreateCompatibleDC(&dc);
+	CBitmap* oldbmp;
+	oldbmp = bufDC.SelectObject(clearBM);
+
+	bufDC.FillSolidRect(0,0,rc.right-rc.left,rc.bottom-rc.top,0);
+
+	char buf[64];
 	switch (scope_mode)
 	{
 	case 0:
 		// vu
 		KillTimer(2304+this_index);
+
+		{
+			CFont* oldFont= bufDC.SelectObject(&font);
+			bufDC.SetBkMode(TRANSPARENT);
+			bufDC.SetTextColor(0x606060);
+
+			RECT rect;
+
+			rect.left = 32+24;
+			rect.right = 256-32-24;
+			rect.top = 32-8;
+			rect.bottom = rect.top+1;
+			bufDC.FillSolidRect(&rect,0x00606060);
+			sprintf(buf,"+6 db");
+			bufDC.TextOut(32-1, 32-8-6, buf);
+			bufDC.TextOut(256-32-22, 32-8-6, buf);
+
+			rect.top = 32+44;
+			rect.bottom = rect.top+1;
+			bufDC.FillSolidRect(&rect,0x00606060);
+
+			sprintf(buf,"-6 db");
+			bufDC.TextOut(32-1+4, 32+44-6, buf);
+			bufDC.TextOut(256-32-22, 32+44-6, buf);
+
+			rect.top = 32+44+16;
+			rect.bottom = rect.top+1;
+			bufDC.FillSolidRect(&rect,0x00606060);
+			sprintf(buf,"-12 db");
+			bufDC.TextOut(32-1-6+4, 32+44+16-6, buf);
+			bufDC.TextOut(256-32-22, 32+44+16-6, buf);
+
+			rect.top = 32+44+16+18;
+			rect.bottom = rect.top+1;
+			bufDC.FillSolidRect(&rect,0x00606060);
+			sprintf(buf,"-24 db");
+			bufDC.TextOut(32-1-6+4, 32+44+16+18-6, buf);
+			bufDC.TextOut(256-32-22, 32+44+16+18-6, buf);
+
+			rect.top = 32+23;
+			rect.bottom = rect.top+1;
+			bufDC.SetTextColor(0x00707070);
+			bufDC.FillSolidRect(&rect,0x00707070);
+			sprintf(buf,"0 db");
+			bufDC.TextOut(32-1+6, 32+23-6, buf);
+			bufDC.TextOut(256-32-22, 32+23-6, buf);
+
+			bufDC.SelectObject(oldFont);
+		}
+
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_peak_rate);
-		sprintf(buffer,"Scope Mode");
+		sprintf(buf,"Scope Mode");
 		peakL = peakR = peak2L = peak2R = 0.0f;
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
@@ -1085,11 +1041,36 @@ void CWireDlg::SetMode()
 	case 1:
 		// oscilloscope
 		KillTimer(2304+this_index);
+
+		{
+			// now draw our scope
+
+			RECT rect;
+
+			rect.left = 0;
+			rect.right = 256;
+			rect.top = 32;
+			rect.bottom = rect.top+2;
+
+			bufDC.FillSolidRect(&rect,0x00202020);
+
+			rect.top = 95;
+			rect.bottom = rect.top+2;
+			bufDC.FillSolidRect(&rect,0x00202020);
+
+			rect.top = 64-4;
+			rect.bottom = rect.top+8;
+			bufDC.FillSolidRect(&rect,0x00202020);
+
+			rect.top = 64-2;
+			rect.bottom = rect.top+4;
+			bufDC.FillSolidRect(&rect,0x00404040);
+		}
 		m_slider.SetRange(1, 148);
 		m_slider.SetPos(scope_osc_freq);
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_osc_rate);
-		sprintf(buffer,"Oscilloscope");
+		sprintf(buf,"Oscilloscope");
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		SetTimer(2304+this_index,scope_osc_rate,0);
@@ -1108,7 +1089,7 @@ void CWireDlg::SetMode()
 		m_slider.SetPos(scope_spec_bands);
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_spec_rate);
-		sprintf(buffer,"Spectrum Analyzer");
+		sprintf(buf,"Spectrum Analyzer");
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		SetTimer(2304+this_index,scope_osc_rate,0);
@@ -1116,17 +1097,54 @@ void CWireDlg::SetMode()
 	case 3:
 		// phase
 		KillTimer(2304+this_index);
+		{
+			CPen linepen(PS_SOLID, 8, 0x00303030);
+
+			CPen *oldpen = bufDC.SelectObject(&linepen);
+
+			// now draw our scope
+
+			bufDC.MoveTo(32,32);
+			bufDC.LineTo(128,128);
+			bufDC.LineTo(128,0);
+			bufDC.MoveTo(128,128);
+			bufDC.LineTo(256-32,32);
+			bufDC.Arc(0,0,256,256,256,128,0,128);
+			bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
+
+			bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
+
+			linepen.DeleteObject();
+			linepen.CreatePen(PS_SOLID, 4, 0x00404040);
+			bufDC.SelectObject(&linepen);
+			bufDC.MoveTo(32,32);
+			bufDC.LineTo(128,128);
+			bufDC.LineTo(128,0);
+			bufDC.MoveTo(128,128);
+			bufDC.LineTo(256-32,32);
+			linepen.DeleteObject();
+
+			bufDC.SelectObject(oldpen);
+		}
+
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
-		sprintf(buffer,"Stereo Phase");
+		sprintf(buf,"Stereo Phase");
 		o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_phase_rate);
 		SetTimer(2304+this_index,scope_phase_rate,0);
 		break;
+	default:
+		sprintf(buf,"Scope Mode");
+		break;
 	}
-	m_mode.SetWindowText(buffer);
+	m_mode.SetWindowText(buf);
 	hold = false;
 	pos = 1;
+
+	bufDC.SelectObject(oldbmp);
+	bufDC.DeleteDC();
+
 }
 
