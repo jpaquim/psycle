@@ -94,10 +94,12 @@ namespace operating_system
 
 	void console::log(int level, const std::string & string)
 	{
+		if(!got_a_console_window_)
+			return;
 		::HANDLE output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE);
 		if(!output_handle)
 			return;
-		unsigned short attributes=0;
+		unsigned short attributes;
 		switch(level)
 		{
 		case ::psycle::host::loggers::levels::trace:
@@ -116,7 +118,8 @@ namespace operating_system
 			attributes|=FOREGROUND_BLUE;
 		};
 
+		DWORD length=string.length();
 		::SetConsoleTextAttribute(output_handle, attributes);
-		::WriteConsole(output_handle,string.c_str(),string.length(),0,0);
+		::WriteConsole(output_handle,string.c_str(),length,&length,0);
 	}
 }

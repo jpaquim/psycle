@@ -119,121 +119,113 @@ namespace psycle
 			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
 			{
 				Free();
-				try
+				zapArray(_sDllName,new char[std::strlen(dllname) + 1]);
+				std::strcpy(_sDllName, dllname);
+				TRACE("VST plugin: library file name: %s\n", _sDllName);
+				proxy()(0);
+				instantiated = false;
+				if(!(h_dll = ::LoadLibrary(dllname)))
 				{
-					zapArray(_sDllName,new char[std::strlen(dllname) + 1]);
-					std::strcpy(_sDllName, dllname);
-					TRACE("VST plugin: library file name: %s\n", _sDllName);
-					proxy()(0);
-					instantiated = false;
-					if(!(h_dll = ::LoadLibrary(dllname)))
+					std::ostringstream s; s
+						<< "could not load library: " << dllname << std::endl
+						<< operating_system::exceptions::code_description();
+					throw host::exceptions::library_errors::loading_error(s.str());
+				}
+				PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
+				if(!main)
+				{	
+					std::ostringstream s; s
+						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
+						<< operating_system::exceptions::code_description();
+					throw host::exceptions::library_errors::symbol_resolving_error(s.str());
+				}
+				// 1: calls the "main" function and receives the pointer to the AEffect structure.
+				{
+					try 
 					{
-						std::ostringstream s; s
-							<< "could not load library: " << dllname << std::endl
-							<< operating_system::exceptions::code_description();
-						throw host::exceptions::library_errors::loading_error(s.str());
+						AEffect* effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
+						proxy()(effect);
 					}
-					PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
-					if(!main)
-					{	
-						std::ostringstream s; s
-							<< "could not resolve symbol 'main' in library: " << dllname << std::endl
-							<< operating_system::exceptions::code_description();
-						throw host::exceptions::library_errors::symbol_resolving_error(s.str());
-					}
-					// 1: calls the "main" function and receives the pointer to the AEffect structure.
-					{
-						try 
-						{
-							AEffect* effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
-							proxy()(effect);
-						}
-						catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
-					}
-					if(!proxy()() || proxy().magic() != kEffectMagic)
-					{
-						std::ostringstream s; s << "call to function 'main' returned a bad value";
-						if(proxy()()) s << std::endl << "returned value signature: " << proxy().magic();
-						throw host::exceptions::function_errors::bad_returned_value(s.str());
-					}
-					TRACE("VST plugin: instanciated.");
-					// 2: Host to Plug, setSampleRate ( 44100.000000 )
-					proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
-					// 3: Host to Plug, setBlockSize ( 512 ) 
-					proxy().setBlockSize(STREAM_SIZE);
-					// 4: Host to Plug, open
-					{
-						//init plugin (probably a call to "Init()" function should be done here)
-						proxy().open();
-					}
+					catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+					catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+					catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+					catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
+				}
+				if(!proxy()() || proxy().magic() != kEffectMagic)
+				{
+					std::ostringstream s; s << "call to function 'main' returned a bad value";
+					if(proxy()()) s << std::endl << "returned value signature: " << proxy().magic();
+					throw host::exceptions::function_errors::bad_returned_value(s.str());
+				}
+				TRACE("VST plugin: instanciated.");
+				// 2: Host to Plug, setSampleRate ( 44100.000000 )
+				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
+				// 3: Host to Plug, setBlockSize ( 512 ) 
+				proxy().setBlockSize(STREAM_SIZE);
+				// 4: Host to Plug, open
+				{
+					//init plugin (probably a call to "Init()" function should be done here)
+					proxy().open();
+				}
 
-					// 5: Host to Plug, setSpeakerArrangement returned: false 
-					VstSpeakerArrangement VSTsa;
-					{
-						VSTsa.type = kSpeakerArrStereo;
-						VSTsa.numChannels = 2;
-						VSTsa.speakers[0].type = kSpeakerL;
-						VSTsa.speakers[1].type = kSpeakerR;
-						proxy().setSpeakerArrangement(&VSTsa);
-					}
-
-					// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
-					proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
-					// 7: Host to Plug, setBlockSize ( 512 ) 
-					proxy().setBlockSize(STREAM_SIZE);
-					// 8: Host to Plug, setSpeakerArrangement returned: false 
+				// 5: Host to Plug, setSpeakerArrangement returned: false 
+				VstSpeakerArrangement VSTsa;
+				{
+					VSTsa.type = kSpeakerArrStereo;
+					VSTsa.numChannels = 2;
+					VSTsa.speakers[0].type = kSpeakerL;
+					VSTsa.speakers[1].type = kSpeakerR;
 					proxy().setSpeakerArrangement(&VSTsa);
-					// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
-					proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
-					// 10: Host to Plug, setBlockSize ( 512 ) 
-					proxy().setBlockSize(STREAM_SIZE);
-					// 11: Host to Plug, getProgram returned: 0 
-					long int program = proxy().getProgram();
-					// 12: Host to Plug, getProgram returned: 0 
-					program = proxy().getProgram();
-					// 13: Host to Plug, getVstVersion returned: 2300 
-					{
-						_version = proxy().getVstVersion();
-						if(!_version) _version = 1;
-					}
-					// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
-					proxy().setProgram(0);
-					proxy().mainsChanged(true);
-					if(!proxy().getEffectName(_sProductName))
-					{
-						CString str1(dllname);
-						CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
-						str1 = str2.Left(str2.Find('.'));
-						std::strcpy(_sProductName,str1);
-					}
-
-					if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
-					_editName[31]='\0'; // <bohan> \todo why is that 31 ?
-					// Compatibility hacks
-					{
-						if(std::strcmp(_sProductName, "sc-101") == 0)
-						{
-							requiresRepl = true;
-						}
-					}
-
-					if(!proxy().getVendorString(_sVendorName))
-						std::strcpy(_sVendorName, "Unknown vendor");
-					_isSynth = proxy().flags() & effFlagsIsSynth;
-
-					instantiated = true;
-
-					TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
-
 				}
-				catch(...)
+
+				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
+				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
+				// 7: Host to Plug, setBlockSize ( 512 ) 
+				proxy().setBlockSize(STREAM_SIZE);
+				// 8: Host to Plug, setSpeakerArrangement returned: false 
+				proxy().setSpeakerArrangement(&VSTsa);
+				// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
+				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
+				// 10: Host to Plug, setBlockSize ( 512 ) 
+				proxy().setBlockSize(STREAM_SIZE);
+				// 11: Host to Plug, getProgram returned: 0 
+				long int program = proxy().getProgram();
+				// 12: Host to Plug, getProgram returned: 0 
+				program = proxy().getProgram();
+				// 13: Host to Plug, getVstVersion returned: 2300 
 				{
-					throw; // this is now all handled by parent calls
+					_version = proxy().getVstVersion();
+					if(!_version) _version = 1;
 				}
+				// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
+				proxy().setProgram(0);
+				proxy().mainsChanged(true);
+				if(!proxy().getEffectName(_sProductName))
+				{
+					CString str1(dllname);
+					CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
+					str1 = str2.Left(str2.Find('.'));
+					std::strcpy(_sProductName,str1);
+				}
+
+				if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
+				_editName[31]='\0'; // <bohan> \todo why is that 31 ?
+				// Compatibility hacks
+				{
+					if(std::strcmp(_sProductName, "sc-101") == 0)
+					{
+						requiresRepl = true;
+					}
+				}
+
+				if(!proxy().getVendorString(_sVendorName))
+					std::strcpy(_sVendorName, "Unknown vendor");
+				_isSynth = proxy().flags() & effFlagsIsSynth;
+
+				instantiated = true;
+
+				TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
 			}
 
 			void plugin::Free() throw(...) // called also in destructor
@@ -242,6 +234,7 @@ namespace psycle
 				const std::exception * exception(0);
 				if(proxy()())
 				{
+					assert(h_dll);
 					TRACE("VST plugin: freeing ... dispatcher");
 					try
 					{
@@ -262,6 +255,7 @@ namespace psycle
 				}
 				if(h_dll)
 				{
+					assert(!proxy()());
 					TRACE("VST plugin: freeing ... library");
 					::FreeLibrary(h_dll);
 					h_dll = 0;

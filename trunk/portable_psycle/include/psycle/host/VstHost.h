@@ -73,10 +73,16 @@ namespace psycle
 					return dispatcher(effOpen);
 				}
 				long int close() {
-					long int retval=dispatcher(effClose);
-					/// also clears plugin_ pointer since it is no longer valid after effClose.
-					plugin_=0;
-					return retval;
+					try {
+						/// also clears plugin_ pointer since it is no longer valid after effClose.
+						long int retval=dispatcher(effClose);
+						plugin_=0;
+						return retval;
+					}
+					catch(...) {
+						plugin_=0;
+						throw;
+					}
 				}
 				long int setSampleRate(float sr) {
 					assert(sr>0.0f);
@@ -85,7 +91,7 @@ namespace psycle
 				long int setBlockSize(int bs)
 				{
 					assert(bs>0);
-					return dispatcher(effSetSampleRate,0,bs);
+					return dispatcher(effSetBlockSize,0,bs);
 				}
 				long int setSpeakerArrangement(VstSpeakerArrangement* VSTsa) {
 					assert(VSTsa);
@@ -271,15 +277,14 @@ namespace psycle
 
 					template<typename e> void rethrow(plugin & plugin, const long int operation, const e * const e = 0) throw(dispatch_error)
 					{
-						std::ostringstream s; s
-							<< "Machine crashed: " << plugin._editName;
-						if(plugin.GetDllName()) s
-							<< ": " << plugin.GetDllName();
-						s
-							<< std::endl
-							<< "VST plugin had an exception on dispatcher operation: " << operation_description(operation) << '.' << std::endl
-							<< typeid(*e).name() << std::endl
-							<< host::exceptions::function_errors::string(*e);
+						std::ostringstream s;
+						s << "Machine crashed: " << plugin._editName;
+						if(plugin.GetDllName())
+							s << ": " << plugin.GetDllName();
+						s << std::endl
+						  << "VST plugin had an exception on dispatcher operation: " << operation_description(operation) << '.' << std::endl
+						  << typeid(*e).name() << std::endl
+						  << host::exceptions::function_errors::string(*e);
 						dispatch_error dispatch_error(s.str());
 						plugin.crashed(dispatch_error);
 						throw dispatch_error;
@@ -289,8 +294,8 @@ namespace psycle
 
 			inline plugin & proxy::host() throw() { return host_; }
 			inline const plugin & proxy::host() const throw() { return host_; }
-			inline AEffect & proxy::plugin() throw() { return *plugin_; }
-			inline const AEffect & proxy::plugin() const throw() { return *plugin_; }
+			inline AEffect & proxy::plugin() throw() { assert(plugin_); return *plugin_; }
+			inline const AEffect & proxy::plugin() const throw() { assert(plugin_); return *plugin_; }
 			inline proxy::proxy(vst::plugin & host, AEffect * plugin) : host_(host), plugin_(0) { (*this)(plugin); }
 			inline proxy::~proxy() throw() { (*this)(0); }
 			inline const bool proxy::operator()() const throw() { return plugin_; }
@@ -298,18 +303,19 @@ namespace psycle
 			{
 				if(this->plugin_)
 				{
-					user(0);
+//					user(0);
 					close();
 				}
 				// <magnus> we shouldn't delete plugin_ because the AEffect is allocated
 				// by the plugin's DLL by some unknown means. Dispatching effClose will
 				// automatically free up the AEffect structure.
 				this->plugin_ = plugin;
-				//if((*this)()) user(&host());
-				if(plugin) user(&host());
+
+				if(plugin_)
+					user(&host());
 			}
-			#pragma warning(push)
-			#pragma warning(disable:4702) // unreachable code
+//			#pragma warning(push)
+//			#pragma warning(disable:4702) // unreachable code
 			inline long int proxy::magic() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
@@ -515,7 +521,7 @@ namespace psycle
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 			}
-			#pragma warning(pop)
+//			#pragma warning(pop)
 		}
 	}
 }

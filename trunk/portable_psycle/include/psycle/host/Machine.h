@@ -41,7 +41,7 @@ namespace psycle
 			///\param e the exception that occured, converted to a std::exception if needed.
 			void crashed(const std::exception & e) throw();
 			/// Tells wether this machine has crashed.
-			inline const bool & crashed() const throw() { return crashed_; }
+			const bool & crashed() const throw() { return crashed_; }
 			///\}
 
 		public:
@@ -55,18 +55,18 @@ namespace psycle
 			virtual void Tick(int track, PatternEntry * pData) {};
 			virtual void Stop() {};
 			virtual void SetPan(int newpan);
-			inline virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
-			inline virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; }
+			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
+			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; }
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
 			virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
 			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
 			virtual int FindInputWire(int macIndex);
 			virtual int FindOutputWire(int macIndex);
-			inline virtual const char * const GetDllName() const throw() { return "built-in"; }
+			virtual const char * const GetDllName() const throw() { return "built-in"; }
 			virtual char * GetName() = 0;
 			virtual int GetNumParams() { return _numPars; }
 			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; }
-			inline virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
+			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
 			virtual int GetParamValue(int numparam) { return 0; };
 			virtual bool SetParameter(int numparam, int value) { return false;}; 
 			virtual void SetSampleRate(int sr) {};
@@ -78,8 +78,8 @@ namespace psycle
 					virtual void SaveSpecificChunk(RiffFile * pFile);
 					virtual void SaveDllName(RiffFile * pFile);
 				protected:
-					inline void SetVolumeCounter(int numSamples);
-					//inline void SetVolumeCounterAccurate(int numSamples);
+					void SetVolumeCounter(int numSamples);
+					//void SetVolumeCounterAccurate(int numSamples);
 			#endif
 
 		public:
@@ -234,7 +234,7 @@ namespace psycle
 		class exception : public std::runtime_error
 		{
 		public:
-			inline exception(const std::string & what) : std::runtime_error(what) {}
+			 exception(const std::string & what) : std::runtime_error(what) {}
 		};
 
 		/// Classes derived from exception.
@@ -244,7 +244,7 @@ namespace psycle
 			class library_error : public exception
 			{
 			public:
-				inline library_error(const std::string & what) : exception(what) {}
+				library_error(const std::string & what) : exception(what) {}
 			};
 
 			/// Classes derived from library.
@@ -254,14 +254,14 @@ namespace psycle
 				class loading_error : public library_error
 				{
 				public:
-					inline loading_error(const std::string & what) : library_error(what) {}
+					loading_error(const std::string & what) : library_error(what) {}
 				};
 
 				/// Exception caused by symbol resolving failure in a library.
 				class symbol_resolving_error : public library_error
 				{
 				public:
-					inline symbol_resolving_error(const std::string & what) : library_error(what) {}
+					symbol_resolving_error(const std::string & what) : library_error(what) {}
 				};
 			}
 
@@ -269,7 +269,7 @@ namespace psycle
 			class function_error : public exception
 			{
 			public:
-				inline function_error(const std::string & what) : exception(what) {}
+				function_error(const std::string & what) : exception(what) {}
 			};
 			
 			/// Classes derived from function.
@@ -277,9 +277,9 @@ namespace psycle
 			{
 				namespace
 				{
-					template<typename e> inline const std::string string(const e & e) { std::ostringstream s; s << e; return s.str(); }
-					template<> inline const std::string string<std::exception>(const std::exception & e) { return e.what(); }
-					template<> inline const std::string string<const void *>(const void * const &) { return "Type of exception is unkown, cannot display any further information."; }
+					template<typename e> const std::string string(const e & e) { std::ostringstream s; s << e; return s.str(); }
+					template<> const std::string string<std::exception>(const std::exception & e) { return e.what(); }
+					template<> const std::string string<const void *>(const void * const &) { return "Type of exception is unkown, cannot display any further information."; }
 				}
 
 				template<typename e> void rethrow(Machine & machine, const std::string & function, const e * const e = 0) throw(function_error)
@@ -302,7 +302,7 @@ namespace psycle
 				class bad_returned_value : public function_error
 				{
 				public:
-					inline bad_returned_value(const std::string & what) : function_error(what) {}
+					bad_returned_value(const std::string & what) : function_error(what) {}
 				};
 			}
 		}

@@ -102,9 +102,9 @@ namespace psycle
 			class logger : public operating_system::logger
 			{
 			public:
-				static inline logger & default_logger() throw();
-				inline logger(const int & threshold_level, std::ostream & ostream) : operating_system::logger(threshold_level, ostream) {}
-				inline const bool operator()(const int & level) const throw() { return operating_system::logger::operator()(level); }
+				static logger & default_logger() throw();
+				logger(const int & threshold_level, std::ostream & ostream) : operating_system::logger(threshold_level, ostream) {}
+				const bool operator()(const int & level) const throw() { return operating_system::logger::operator()(level); }
 				/*redefine*/ void operator()(const int & level, const std::string & string) throw();
 			private:
 				static logger & create_default_logger() throw(...);
@@ -158,7 +158,7 @@ namespace psycle
 			}
 		}
 
-		inline logger & logger::create_default_logger() throw(...)
+		logger & logger::create_default_logger() throw(...)
 		{
 			std::string module_directory;
 			{
@@ -170,7 +170,7 @@ namespace psycle
 			return *new logger(loggers::levels::trace, default_logger_ostream());
 		}
 
-		inline logger & logger::default_logger() throw()
+		logger & logger::default_logger() throw()
 		{
 			try
 			{
