@@ -81,6 +81,7 @@ public:
 	int _volumeMaxCounterLife;				// output peak level for display
 	unsigned long int _cpuCost;
 	unsigned long int _wireCost;
+	int _scopePrevNumSamples;
 	int	_scopeBufferIndex;
 	float *_pScopeBufferL;
 	float *_pScopeBufferR;
