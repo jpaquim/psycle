@@ -294,7 +294,7 @@ namespace psycle
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
 
 			std::ostringstream s;
-			s << VERSION_NUMBER " [built on " __DATE__ ")";
+			s << "NOT A RELEASE $Revision$ $Date$ [built on " __DATE__ "]";
 			m_versioninfo.SetWindowText(s.str().c_str());
 
 			// return TRUE unless you set the focus to a control
