@@ -759,6 +759,7 @@ void CMainFrame::OnBDecgen()
 	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 	const int val = cc->GetCurSel();
 	if ( val > 0 ) cc->SetCurSel(val-1);
+	OnSelchangeBarCombogen();
 	m_wndView.SetFocus();
 }
 
@@ -768,6 +769,7 @@ void CMainFrame::OnBIncgen()
 	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 	const int val = cc->GetCurSel();
 	if ( val < cc->GetCount()-1 ) cc->SetCurSel(val+1);
+	OnSelchangeBarCombogen();
 	m_wndView.SetFocus();
 }
 
