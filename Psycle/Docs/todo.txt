@@ -23,7 +23,7 @@ rough bug count: ~60, many aren't really bugs though.
 
 + undos for machine and wave edit?
 
-** need save file? reminder on open file
+** need save file? reminder on open file 
 
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
@@ -270,9 +270,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * MIDI related
 ------------
+***	MIDI out only works with Waveout
 **	Midiout is NOT solid...
 	[ has this been tested in the last year ? ]
-*	MIDI out only works with Waveout
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages
 ++	<lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
