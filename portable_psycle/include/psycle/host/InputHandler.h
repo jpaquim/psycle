@@ -146,6 +146,7 @@ namespace psycle
 			cdefRedo,
 			cdefFollowSong,
 			cdefMaxPattern,
+			cdefErrorLog,
 
 			cdefTransposeChannelInc = CS_EDT_START,	
 			cdefTransposeChannelDec,
