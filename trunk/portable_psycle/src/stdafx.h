@@ -8,6 +8,11 @@
 /// this is needed for compatibility of mfc with mswin98.
 #define WINVER 0x410
 
+/// mswinxp.
+//#define WINVER 0x501
+/// mswinxp.
+//#define _WIN32_WINNT 0x501
+
 #include <afxwin.h> // MFC core and standard components.
 
 #if defined _WINAMP_PLUGIN_

@@ -4,6 +4,21 @@
 #include <operating_system/logger.h>
 #include <operating_system/exceptions/code_description.h>
 
+#if defined OPERATING_SYSTEM__MICROSOFT
+	#include <io.h>
+	#include <fcntl.h>
+	/*
+	#if !defined WINVER
+		/// mswin2k
+		#define WINVER 0x0500
+	#endif
+	#if !defined _WIN32_WINNT
+		/// mswin2k
+		#define _WIN32_WINNT 0x0500
+	#endif
+	*/
+#endif
+
 logger::logger(const int & threshold_level, std::ostream & ostream) : threshold_level_(threshold_level), ostream_(ostream) {}
 logger logger::default_logger_(logger::default_threshold_level(), std::cout);
 
@@ -26,28 +41,9 @@ namespace operating_system
 	console::console() throw(exception)
 	{
 		got_a_console_window_ = false;
-		#if !defined OPERATING_SYSTEM__MICROSOFT
+		#if 1 // <bohan> currently disabled, it throws an exception
+		//#if !defined OPERATING_SYSTEM__MICROSOFT
 			// nothing to do when the operating system is not microsoft's
-		#elif 1
-		{
-			::HANDLE buffer = ::GetStdHandle(STD_OUTPUT_HANDLE);
-			unsigned short attributes = BACKGROUND_BLUE | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-			::SetConsoleTextAttribute(buffer, attributes);
-			::COORD coord = {0, 0};
-			const int width(256), height(1024);
-			unsigned long int length;
-			::FillConsoleOutputAttribute(buffer, attributes, width * height, coord, &length);
-			::CONSOLE_SCREEN_BUFFER_INFO buffer_info;
-			::GetConsoleScreenBufferInfo(buffer, &buffer_info);
-			if(buffer_info.dwSize.X < width) buffer_info.dwSize.X = width;
-			if(buffer_info.dwSize.Y < height) buffer_info.dwSize.Y = height;
-			got_a_console_window_ = ::SetConsoleScreenBufferSize(buffer, buffer_info.dwSize);
-			if(!got_a_console_window_)
-			{
-				// no real console, maybe we output to a file, so nevermind
-				//throw operating_system::exception("this console is not big enough ! please use ibm windows (aka nt)");
-			}
-		}
 		#else
 		{
 			// ok, the follow code looks completly weird,
@@ -55,24 +51,6 @@ namespace operating_system
 			bool allocated(false);
 			try
 			{
-				////////////////////////////////////////////////////////////////////
-				// allocates a new console window if we don't have one attached yet
-
-#if 0
-					if(!::GetConsoleWindow())
-					{
-						if(!::AllocConsole())
-						{
-							std::ostringstream s;
-							s << "could not allocate a console window: " << operating_system::exceptions::code_description();
-							throw operating_system::exception(s.str());
-						}
-						allocated = true;
-					}
-#endif
-
-//				::HANDLE console(::CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0));
-
 				/////////////////////////////////////////////////////////////////////////
 				// allocates the standard file streams for the operating sytem i/o layer
 
@@ -91,27 +69,27 @@ namespace operating_system
 				}
 				if(!operating_system_output)
 				{
-						std::ostringstream s;
-						s << "could not allocate a standard output file stream at the operating system layer: " << operating_system::exceptions::code_description();
-						throw exception(s.str());
+					std::ostringstream s;
+					s << "could not allocate a standard output file stream at the operating system layer: " << operating_system::exceptions::code_description();
+					throw exception(s.str());
 				}
 
 				// standard error file stream
 				::HANDLE operating_system_error(::GetStdHandle(STD_ERROR_HANDLE));
 				if(!operating_system_error)
 				{
-						std::ostringstream s;
-						s << "could not allocate a standard error file stream at the operating system layer: " << operating_system::exceptions::code_description();
-//						throw Exception(s.str());
+					std::ostringstream s;
+					s << "could not allocate a standard error file stream at the operating system layer: " << operating_system::exceptions::code_description();
+					throw exception(s.str());
 				}
 
 				// standard input file stream
 				::HANDLE operating_system_input(::GetStdHandle(STD_INPUT_HANDLE));
 				if(!operating_system_input)
 				{
-						std::ostringstream s;
-						s << "could not allocate a standard input file stream at the operating system layer: " << operating_system::exceptions::code_description();
-//						throw Exception(s.str());
+					std::ostringstream s;
+					s << "could not allocate a standard input file stream at the operating system layer: " << operating_system::exceptions::code_description();
+					throw exception(s.str());
 				}
 				
 				/////////////////////////////////////////////////////////////////
@@ -203,51 +181,80 @@ namespace operating_system
 	
 				std::ios::sync_with_stdio(); // makes cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
 
+				////////////////////////////////////////////////////////////////////
+				// allocates a new console window if we don't have one attached yet
+				if(!::GetConsoleWindow())
+				{
+					if(!::AllocConsole())
+					{
+						std::ostringstream s;
+						s << "could not allocate a console window: " << operating_system::exceptions::code_description();
+						throw operating_system::exception(s.str());
+					}
+					allocated = true;
+					::HANDLE console_window(::GetConsoleWindow());
+					if(console_window)
+					{
+						got_a_console_window_ = true;
+					}
+				}
+
 				//////////////////////////////////
 				// sets console window properties
 
 				if(::HANDLE console = operating_system_output) // ::GetStdHandle(STD_OUTPUT_HANDLE)
 				{
-					// colors
-					unsigned short attributes = BACKGROUND_BLUE | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-					::SetConsoleTextAttribute(console, attributes);
-
-					// buffer size
 					::CONSOLE_SCREEN_BUFFER_INFO buffer;
 					::GetConsoleScreenBufferInfo(console, &buffer);
+					// colors
 					{
-						const int width(buffer.dwSize.X), height(buffer.dwSize.Y);
-						::COORD coord = {0, 0};
-						unsigned long int length;
-						::FillConsoleOutputAttribute(console, attributes, width * height, coord, &length);
-					}
-					const int width(256), height(1024);
-					if(buffer.dwSize.X < width) buffer.dwSize.X = width;
-					if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
-					if(!::SetConsoleScreenBufferSize(console, buffer.dwSize))
-					{
-						::GetConsoleScreenBufferInfo(console, &buffer);
-						const int width(80), height(50); // on non nt systems, we can only have such a ridiculous size!
-						if(buffer.dwSize.X < width) buffer.dwSize.X = width;
-						if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
-						if(!::SetConsoleScreenBufferSize(console, buffer.dwSize))
+						const unsigned short attributes(BACKGROUND_BLUE | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+						::SetConsoleTextAttribute(console, attributes);
 						{
-							// huh? giving up.
+							const int width(buffer.dwSize.X), height(buffer.dwSize.Y);
+							::COORD coord = {0, 0};
+							unsigned long int length;
+							::FillConsoleOutputAttribute(console, attributes, width * height, coord, &length);
 						}
 					}
-
+					// buffer size
+					{
+						const int width(256), height(1024);
+						if(buffer.dwSize.X < width) buffer.dwSize.X = width;
+						if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
+						if(!(got_a_console_window_ = ::SetConsoleScreenBufferSize(console, buffer.dwSize)))
+						{
+							::GetConsoleScreenBufferInfo(console, &buffer);
+							const int width(80), height(50); // on non nt systems, we can only have such a ridiculous size!
+							if(buffer.dwSize.X < width) buffer.dwSize.X = width;
+							if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
+							if(!(got_a_console_window_ = ::SetConsoleScreenBufferSize(console, buffer.dwSize)))
+							{
+								// huh? giving up.
+							}
+						}
+					}
 					// cursor
-					::CONSOLE_CURSOR_INFO cursor;
-					::GetConsoleCursorInfo(console, &cursor); 
-					cursor.dwSize = 100;
-					cursor.bVisible = true;
-					::SetConsoleCursorInfo(console, &cursor);
+					{
+						::CONSOLE_CURSOR_INFO cursor;
+						::GetConsoleCursorInfo(console, &cursor); 
+						cursor.dwSize = 100;
+						cursor.bVisible = true;
+						::SetConsoleCursorInfo(console, &cursor);
+					}
+				}
+
+				if(!got_a_console_window_)
+				{
+					//::HANDLE console(::CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0));
+					// no real console, maybe we output to a file, so nevermind
+					//throw operating_system::exception("this console is not big enough ! please use ibm windows (aka nt)");
 				}
 			}
 			catch(const std::exception & e)
 			{
-//				std::freopen("conout$", "w", stdout);
-//				std::ios::sync_with_stdio(); // makes cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
+				//std::freopen("conout$", "w", stdout);
+				//std::ios::sync_with_stdio(); // makes cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
 				std::ostringstream types; types << typeid(*this).name() << ", threw " << typeid(e).name();
 				{
 					std::ostringstream s; s << types.str() << ": " << e.what();
