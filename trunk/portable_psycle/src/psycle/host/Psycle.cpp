@@ -272,6 +272,9 @@ namespace psycle
 			s << "Version "
 				//" $Date$"
 				VERSION_NUMBER
+#				if !defined NDEBUG
+					" debug"
+#				endif
 				" [built on " __DATE__ ", " __TIME__ "]";
 			m_versioninfo.SetWindowText(s.str().c_str());
 

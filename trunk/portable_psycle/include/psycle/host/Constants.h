@@ -14,8 +14,8 @@ namespace psycle
 		/// - include/psycle/host/Constants.h: #define VERSION_NUMBER "x.x.x.x"
 		/// - src/psycle/host/resources/Psycle.rc: FILEVERSION x,x,x,x
 		/// - src/psycle/host/resources/Psycle.rc: PRODUCTVERSION x,x,x,x
-		/// - src/psycle/host/resources/Psycle.rc: VALUE "FileVersion", "x, x, x, x"
-		/// - src/psycle/host/resources/Psycle.rc: VALUE "ProductVersion", "x, x, x, x"
+		/// - src/psycle/host/resources/Psycle.rc: VALUE "FileVersion", "x.x.x.x"
+		/// - src/psycle/host/resources/Psycle.rc: VALUE "ProductVersion", "x.x.x.x"
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "SpecialBuild", "msvc 7.1"
 		/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
 		/// - doc/for-end-users/readme.txt
