@@ -9,7 +9,6 @@
 #include "FileIO.h"
 ///\file
 ///\brief interface file for psycle::host::Machine
-
 namespace psycle
 {
 	namespace host
