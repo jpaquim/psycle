@@ -213,16 +213,16 @@ int CConfigDlg::DoModal()
 		_pConfig->pattern_font_y = _skinDlg._pattern_font_y;
 		_pConfig->pattern_draw_empty_data = _skinDlg._pattern_draw_empty_data;
 
+		if (strcmp(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin))
+		{
+			// LOAD HEADER SKIN
+			strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
+			if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
+		}
+
 		_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
 		_pConfig->pattern_font_flags = _skinDlg._pattern_font_flags;
 		strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
-
-		if (strcmp(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin))
-		{
-			strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
-			// LOAD HEADER SKIN
-			if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
-		}
 
 		_pConfig->generator_font_point = _skinDlg._generator_font_point;
 		_pConfig->generator_font_flags = _skinDlg._generator_font_flags;
@@ -232,7 +232,7 @@ int CConfigDlg::DoModal()
 		_pConfig->effect_font_flags = _skinDlg._effect_font_flags;
 		strcpy(_pConfig->effect_fontface, _skinDlg._effect_fontface);
 
-		((CMainFrame *)theApp.m_pMainWnd)->LoadFonts();
+		_pConfig->CreateFonts();
 
 		if (strcmp(_pConfig->machine_skin, _skinDlg._machine_skin))
 		{

@@ -7,6 +7,8 @@
 
 void CChildView::PreparePatternRefresh(int drawMode)
 {
+	TRACE("PreparePatternRefresh\n");
+
 	CRect rect;	
 	updateMode=drawMode;					// this is ununsed for patterns
 	const int snt = _pSong->SONGTRACKS;
@@ -2136,6 +2138,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 				if (scrollL > 0)
 				{	
 					TRACE("DRAW_VSCROLL+\n");
+					//if(editcur.line!=0)
 					DrawPatternData(devc, 0, VISTRACKS+1, 0,scrollL);
 				}
 				else 
@@ -2221,6 +2224,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 // ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
 void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
 {
+
+	TRACE("DrawPatternData\n");
+
 //	if (lstart > VISLINES)
 	if (lstart > maxl)
 	{

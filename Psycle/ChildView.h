@@ -464,6 +464,7 @@ private:
 
 
 public:
+	
 	void SelectMachineUnderCursor(void);
 	BOOL CheckUnsavedSong(char* szTitle);
 	// Generated message map functions

@@ -83,7 +83,6 @@ public:
 	LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
 	BOOL StatusBarIdleText();
 	void StatusBarIdle();
-	void LoadFonts();
 
 	void RedrawGearRackList();
 
