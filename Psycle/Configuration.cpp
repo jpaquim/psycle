@@ -70,17 +70,17 @@ Configuration::Configuration()
 	_midiRecordModWheel = FALSE;
 
 	_midiVelocityCommand = 0x0c;
-	_midiVelocityFrom = 0x01;
+	_midiVelocityFrom = 0x00;
 	_midiVelocityTo = 0xff;
 
 	_midiPitchBendType = 0;
-	_midiPitchBendCommand = 0;
-	_midiPitchBendFrom = 1;
+	_midiPitchBendCommand = 1;
+	_midiPitchBendFrom = 0;
 	_midiPitchBendTo = 0xff;
 
 	_midiModWheelType = 0;
-	_midiModWheelCommand = 0;
-	_midiModWheelFrom = 1;
+	_midiModWheelCommand = 1;
+	_midiModWheelFrom = 0;
 	_midiModWheelTo = 0xff;
 
 
