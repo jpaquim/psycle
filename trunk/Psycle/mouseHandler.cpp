@@ -617,10 +617,22 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						{
 							Global::_pSong->seqBus = fb;
 							Global::_pSong->busMachine[fb] = Global::_lbc;
+
+							if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
+								_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
+							{
+								((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb;
+							}
 						}
 						else
 						{
 							Global::_pSong->busEffect[fb] = Global::_lbc;
+
+							if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
+								_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
+							{
+								((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb+MAX_BUSES;
+							}
 						}
 						pParentMain->UpdateComboGen();
 					}

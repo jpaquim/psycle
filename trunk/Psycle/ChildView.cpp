@@ -314,8 +314,10 @@ void CChildView::OnTimer( UINT nIDEvent )
 				char peak[10];
 				sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachines[0])->currentpeak)-90);
 				MasterMachineDialog->m_masterpeak.SetWindowText(peak);
+				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachines[0])->_outDry);
 				((Master*)Global::_pSong->_pMachines[0])->peaktime=25;
 				((Master*)Global::_pSong->_pMachines[0])->currentpeak=0.0f;
+				
 			}
 		}
 		((Master*)Global::_pSong->_pMachines[0])->vuupdated = true;
@@ -985,7 +987,7 @@ void CChildView::OnNewmachine()
 				if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
 					_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
 				{
-					((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb;
+					((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb+MAX_BUSES;
 				}
 			}
 			

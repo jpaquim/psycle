@@ -139,6 +139,7 @@ bool Song::CreateMachine(
 	return true;
 }
 
+#if !defined(_WINAMP_PLUGIN_)
 int Song::FindBusFromIndex(int smac)
 {
 	int i;
@@ -159,6 +160,7 @@ int Song::FindBusFromIndex(int smac)
 	}
 	return 255;
 }
+#endif //  !defined(_WINAMP_PLUGIN_)
 //////////////////////////////////////////////////////////////////////
 // Song member functions source code
 
@@ -561,8 +563,9 @@ void Song::DestroyMachine(int mac)
 			}
 		}
 	}
-	
+#if  !defined(_WINAMP_PLUGIN_)	
 	if ( mac == machineSoloed ) machineSoloed = 0;
+#endif //  !defined(_WINAMP_PLUGIN_)
 	_machineActive[mac] = false;
 	delete _pMachines[mac];	// If it's a (Vst)Plugin, the destructor calls to free the .dll
 	
@@ -1297,8 +1300,9 @@ bool Song::Load(
 				
 				if ( type == MACH_VST ) pMachine = pVstPlugin = new VSTInstrument;
 				else if ( type == MACH_VSTFX ) pMachine = pVstPlugin = new VSTFX;
+#if  !defined(_WINAMP_PLUGIN_)
 				pVstPlugin->macindex = FindBusFromIndex(i);
-
+#endif //  !defined(_WINAMP_PLUGIN_)
 				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid))
 				{
 					CString sPath;

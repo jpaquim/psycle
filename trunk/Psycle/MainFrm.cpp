@@ -1241,7 +1241,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			((CFrameMachine*)m_pWndMac[tmac])->Generate();
 			((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 			char winname[32];
-			sprintf(winname,"%i : %s",((CFrameMachine*)m_pWndMac[tmac])->index
+			sprintf(winname,"%x : %s",((CFrameMachine*)m_pWndMac[tmac])->index
 									 ,Global::_pSong->_pMachines[tmac]->_editName);
 			((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 			isguiopen[tmac] = true;
