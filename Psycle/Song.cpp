@@ -1779,7 +1779,7 @@ bool Song::Load(RiffFile* pFile)
 
 				pFile->Read(&type, sizeof(type));
 
-#ifndef CONVERT_INTERNAL_MACHINES
+#ifdef CONVERT_INTERNAL_MACHINES
 				if(converter.plugin_names().exists(type))
 					pMac[i] = &converter.redirect(i, type, *pFile); // conversion
 				else

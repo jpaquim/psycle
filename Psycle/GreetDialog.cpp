@@ -89,9 +89,13 @@ BOOL CGreetDialog::OnInitDialog()
 	m_greetz.AddString("Felix Kaplan\\Spirit Of India");
 	m_greetz.AddString("Krzysztof Foltman / fsm [Coding help]");
 	m_greetz.AddString("krokpitr");
-	m_greetz.AddString("dj_d [Beta testing]");
+	m_greetz.AddString("sampler");
+	m_greetz.AddString("bdzld");
+	m_greetz.AddString("LegoStar [asio]");
+	m_greetz.AddString("KooPer");
 	m_greetz.AddString("pooplog [Machines and Code]");
-	m_greetz.AddString("Alk [Extreme testing]");
+	m_greetz.AddString("dj_d [Beta testing]");
+	m_greetz.AddString("Alk/yoji [Extreme testing]");
 	m_greetz.AddString("_sue_ [Extreme testing]");
 	m_greetz.AddString("Druttis [Machines]");
 
