@@ -665,7 +665,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWOR
 
 				/*
 				case 11:
-					// mod wheel
+					// mods
 					// data 2 contains the info
 					break;
 
@@ -969,6 +969,8 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 			int noteOn = p1HiWordLB;
 			int data1 = p1LowWordHB;
 			int data2 = p1HiWordLB;
+			int data = ((data2&0x7f)<<7)|(data1&0x7f);
+
 			int cmd = 0;
 			int parameter = 0;
 			note = p1LowWordHB;
@@ -992,321 +994,344 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 					insertNote = true;
 					break;
 
-			}	// end of.. statusHN switch
+				case 11:
+					// mods
+					// data 2 contains the info
+					if (Global::pConfig->_midiRecord0)
+					{
+						if (Global::pConfig->_midiMessage0 == data1)
+						{
+							if (Global::pConfig->_midiType0)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand0,
+												Global::pConfig->_midiFrom0 + 
+											(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand0,
+												Global::pConfig->_midiFrom0 + 
+											(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
+							}
+						}
+					}
 
-			if (Global::pConfig->_midiRecord0)
-			{
-				if (Global::pConfig->_midiMessage0 == statusHN)
-				{
-					if (Global::pConfig->_midiType0)
+					if (Global::pConfig->_midiRecord1)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand0,
-										Global::pConfig->_midiFrom0 + 
-									(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
+						if (Global::pConfig->_midiMessage1 == data1)
+						{
+							if (Global::pConfig->_midiType1)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand1,
+												Global::pConfig->_midiFrom1 + 
+											(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand1,
+												Global::pConfig->_midiFrom1 + 
+											(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand0,
-										Global::pConfig->_midiFrom0 + 
-									(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
-					}
-				}
-			}
-
-			if (Global::pConfig->_midiRecord1)
-			{
-				if (Global::pConfig->_midiMessage1 == statusHN)
-				{
-					if (Global::pConfig->_midiType1)
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand1,
-										Global::pConfig->_midiFrom1 + 
-									(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
-					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand1,
-										Global::pConfig->_midiFrom1 + 
-									(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
-					}
-				}
-			}
   
-			if (Global::pConfig->_midiRecord2)
-			{
-				if (Global::pConfig->_midiMessage2 == statusHN)
-				{
-					if (Global::pConfig->_midiType2)
+					if (Global::pConfig->_midiRecord2)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand2,
-										Global::pConfig->_midiFrom2 + 
-									(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
+						if (Global::pConfig->_midiMessage2 == data1)
+						{
+							if (Global::pConfig->_midiType2)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand2,
+												Global::pConfig->_midiFrom2 + 
+											(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand2,
+												Global::pConfig->_midiFrom2 + 
+											(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand2,
-										Global::pConfig->_midiFrom2 + 
-									(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
-					}
-				}
-			}
 
-			if (Global::pConfig->_midiRecord3)
-			{
-				if (Global::pConfig->_midiMessage3 == statusHN)
-				{
-					if (Global::pConfig->_midiType3)
+					if (Global::pConfig->_midiRecord3)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand3,
-										Global::pConfig->_midiFrom3 + 
-									(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
+						if (Global::pConfig->_midiMessage3 == data1)
+						{
+							if (Global::pConfig->_midiType3)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand3,
+												Global::pConfig->_midiFrom3 + 
+											(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand3,
+												Global::pConfig->_midiFrom3 + 
+											(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand3,
-										Global::pConfig->_midiFrom3 + 
-									(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
-					}
-				}
-			}
 
-			if (Global::pConfig->_midiRecord4)
-			{
-				if (Global::pConfig->_midiMessage4 == statusHN)
-				{
-					if (Global::pConfig->_midiType4)
+					if (Global::pConfig->_midiRecord4)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand4,
-										Global::pConfig->_midiFrom4 + 
-									(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
+						if (Global::pConfig->_midiMessage4 == data1)
+						{
+							if (Global::pConfig->_midiType4)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand4,
+												Global::pConfig->_midiFrom4 + 
+											(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand4,
+												Global::pConfig->_midiFrom4 + 
+											(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand4,
-										Global::pConfig->_midiFrom4 + 
-									(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
-					}
-				}
-			}
 
-			if (Global::pConfig->_midiRecord5)
-			{
-				if (Global::pConfig->_midiMessage5 == statusHN)
-				{
-					if (Global::pConfig->_midiType5)
+					if (Global::pConfig->_midiRecord5)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand5,
-										Global::pConfig->_midiFrom5 + 
-									(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
+						if (Global::pConfig->_midiMessage5 == data1)
+						{
+							if (Global::pConfig->_midiType5)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand5,
+												Global::pConfig->_midiFrom5 + 
+											(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand5,
+												Global::pConfig->_midiFrom5 + 
+											(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand5,
-										Global::pConfig->_midiFrom5 + 
-									(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
-					}
-				}
-			}
 
-			if (Global::pConfig->_midiRecord6)
-			{
-				if (Global::pConfig->_midiMessage6 == statusHN)
-				{
-					if (Global::pConfig->_midiType6)
+					if (Global::pConfig->_midiRecord6)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand6,
-										Global::pConfig->_midiFrom6 + 
-									(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
+						if (Global::pConfig->_midiMessage6 == data1)
+						{
+							if (Global::pConfig->_midiType6)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand6,
+												Global::pConfig->_midiFrom6 + 
+											(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand6,
+												Global::pConfig->_midiFrom6 + 
+											(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
+							}
+						}
 					}
-					else
+					
+					if (Global::pConfig->_midiRecord7)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand6,
-										Global::pConfig->_midiFrom6 + 
-									(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
+						if (Global::pConfig->_midiMessage7 == data1)
+						{
+							if (Global::pConfig->_midiType7)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand7,
+												Global::pConfig->_midiFrom7 + 
+											(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand7,
+												Global::pConfig->_midiFrom7 + 
+											(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
+							}
+						}
 					}
-				}
-			}
-			
-			if (Global::pConfig->_midiRecord7)
-			{
-				if (Global::pConfig->_midiMessage7 == statusHN)
-				{
-					if (Global::pConfig->_midiType7)
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand7,
-										Global::pConfig->_midiFrom7 + 
-									(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
-					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand7,
-										Global::pConfig->_midiFrom7 + 
-									(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
-					}
-				}
-			}
-
-
-			if (Global::pConfig->_midiRecord8)
-			{
-				if (Global::pConfig->_midiMessage8 == statusHN)
-				{
-					if (Global::pConfig->_midiType8)
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand8,
-										Global::pConfig->_midiFrom8 + 
-									(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
-					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand8,
-										Global::pConfig->_midiFrom8 + 
-									(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
-					}
-				}
-			}
 
 
-			if (Global::pConfig->_midiRecord9)
-			{
-				if (Global::pConfig->_midiMessage9 == statusHN)
-				{
-					if (Global::pConfig->_midiType9)
+					if (Global::pConfig->_midiRecord8)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand9,
-										Global::pConfig->_midiFrom9 + 
-									(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
+						if (Global::pConfig->_midiMessage8 == data1)
+						{
+							if (Global::pConfig->_midiType8)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand8,
+												Global::pConfig->_midiFrom8 + 
+											(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand8,
+												Global::pConfig->_midiFrom8 + 
+											(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand9,
-										Global::pConfig->_midiFrom9 + 
-									(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
-					}
-				}
-			}
 
 
-			if (Global::pConfig->_midiRecord10)
-			{
-				if (Global::pConfig->_midiMessage10 == statusHN)
-				{
-					if (Global::pConfig->_midiType10)
+					if (Global::pConfig->_midiRecord9)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand10,
-										Global::pConfig->_midiFrom10 + 
-									(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
+						if (Global::pConfig->_midiMessage9 == data1)
+						{
+							if (Global::pConfig->_midiType9)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand9,
+												Global::pConfig->_midiFrom9 + 
+											(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand9,
+												Global::pConfig->_midiFrom9 + 
+											(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand10,
-										Global::pConfig->_midiFrom10 + 
-									(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
-					}
-				}
-			}
 
 
-			if (Global::pConfig->_midiRecord11)
-			{
-				if (Global::pConfig->_midiMessage11 == statusHN)
-				{
-					if (Global::pConfig->_midiType11)
+					if (Global::pConfig->_midiRecord10)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand11,
-										Global::pConfig->_midiFrom11 + 
-									(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
+						if (Global::pConfig->_midiMessage10 == data1)
+						{
+							if (Global::pConfig->_midiType10)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand10,
+												Global::pConfig->_midiFrom10 + 
+											(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand10,
+												Global::pConfig->_midiFrom10 + 
+											(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand11,
-										Global::pConfig->_midiFrom11 + 
-									(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
-					}
-				}
-			}
 
 
-			if (Global::pConfig->_midiRecord12)
-			{
-				if (Global::pConfig->_midiMessage12 == statusHN)
-				{
-					if (Global::pConfig->_midiType12)
+					if (Global::pConfig->_midiRecord11)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand12,
-										Global::pConfig->_midiFrom12 + 
-									(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
+						if (Global::pConfig->_midiMessage11 == data1)
+						{
+							if (Global::pConfig->_midiType11)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand11,
+												Global::pConfig->_midiFrom11 + 
+											(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand11,
+												Global::pConfig->_midiFrom11 + 
+											(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
+							}
+						}
 					}
-					else
+
+
+					if (Global::pConfig->_midiRecord12)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand12,
-										Global::pConfig->_midiFrom12 + 
-									(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
+						if (Global::pConfig->_midiMessage12 == data1)
+						{
+							if (Global::pConfig->_midiType12)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand12,
+												Global::pConfig->_midiFrom12 + 
+											(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand12,
+												Global::pConfig->_midiFrom12 + 
+											(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
+							}
+						}
 					}
-				}
-			}
 
 
 
-			if (Global::pConfig->_midiRecord13)
-			{
-				if (Global::pConfig->_midiMessage13 == statusHN)
-				{
-					if (Global::pConfig->_midiType13)
+					if (Global::pConfig->_midiRecord13)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand13,
-										Global::pConfig->_midiFrom13 + 
-									(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
+						if (Global::pConfig->_midiMessage13 == data1)
+						{
+							if (Global::pConfig->_midiType13)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand13,
+												Global::pConfig->_midiFrom13 + 
+											(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand13,
+												Global::pConfig->_midiFrom13 + 
+											(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand13,
-										Global::pConfig->_midiFrom13 + 
-									(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
-					}
-				}
-			}
 
 
-			if (Global::pConfig->_midiRecord14)
-			{
-				if (Global::pConfig->_midiMessage14 == statusHN)
-				{
-					if (Global::pConfig->_midiType14)
+					if (Global::pConfig->_midiRecord14)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand14,
-										Global::pConfig->_midiFrom14 + 
-									(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
+						if (Global::pConfig->_midiMessage14 == data1)
+						{
+							if (Global::pConfig->_midiType14)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand14,
+												Global::pConfig->_midiFrom14 + 
+											(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand14,
+												Global::pConfig->_midiFrom14 + 
+											(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand14,
-										Global::pConfig->_midiFrom14 + 
-									(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
-					}
-				}
-			}
 
 
-			if (Global::pConfig->_midiRecord15)
-			{
-				if (Global::pConfig->_midiMessage15 == statusHN)
-				{
-					if (Global::pConfig->_midiType15)
+					if (Global::pConfig->_midiRecord15)
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand15,
-										Global::pConfig->_midiFrom15 + 
-									(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
+						if (Global::pConfig->_midiMessage15 == data1)
+						{
+							if (Global::pConfig->_midiType15)
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommand15,
+												Global::pConfig->_midiFrom15 + 
+											(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
+							}
+							else
+							{
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand15,
+												Global::pConfig->_midiFrom15 + 
+											(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
+							}
+						}
 					}
-					else
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommand15,
-										Global::pConfig->_midiFrom15 + 
-									(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
-					}
-				}
-			}
+					break;
 
+				case 14:
+					// pitch wheel
+					// data 2 contains the info
+					if (Global::pConfig->_midiRecordPit)
+					{
+						if (Global::pConfig->_midiTypePit)
+						{
+							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiCommandPit,
+											Global::pConfig->_midiFromPit + 
+										(((Global::pConfig->_midiToPit - Global::pConfig->_midiFromPit) * data)/0x3fff));
+						}
+						else
+						{
+							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiCommandPit,
+											Global::pConfig->_midiFromPit + 
+										(((Global::pConfig->_midiToPit - Global::pConfig->_midiFromPit) * data)/0x3fff));
+						}
+					}
+					break;
+
+			}	// end of.. statusHN switch
 
 			// insert note?
 			if( insertNote )

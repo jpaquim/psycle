@@ -36,11 +36,15 @@ void CMidiInputDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CMidiInputDlg)
 		// NOTE: the ClassWizard will add DDX and DDV calls here
 	DDX_Control(pDX, IDC_MIDI_RECORD_VEL, m_midiRecordVelButton);
-	DDX_Control(pDX, IDC_MIDI_MESSAGE_VEL, m_midiMessageVelEdit);
 	DDX_Control(pDX, IDC_MIDI_TYPE_VEL, m_midiTypeVelComboBox);
 	DDX_Control(pDX, IDC_MIDI_COMMAND_VEL, m_midiCommandVelEdit);
 	DDX_Control(pDX, IDC_MIDI_FROM_VEL, m_midiFromVelEdit);
 	DDX_Control(pDX, IDC_MIDI_TO_VEL, m_midiToVelEdit);
+	DDX_Control(pDX, IDC_MIDI_RECORD_PIT, m_midiRecordPitButton);
+	DDX_Control(pDX, IDC_MIDI_TYPE_PIT, m_midiTypePitComboBox);
+	DDX_Control(pDX, IDC_MIDI_COMMAND_PIT, m_midiCommandPitEdit);
+	DDX_Control(pDX, IDC_MIDI_FROM_PIT, m_midiFromPitEdit);
+	DDX_Control(pDX, IDC_MIDI_TO_PIT, m_midiToPitEdit);
 	DDX_Control(pDX, IDC_MIDI_RECORD_0, m_midiRecord0Button);
 	DDX_Control(pDX, IDC_MIDI_MESSAGE_0, m_midiMessage0Edit);
 	DDX_Control(pDX, IDC_MIDI_TYPE_0, m_midiType0ComboBox);
@@ -158,7 +162,6 @@ BOOL CMidiInputDlg::OnInitDialog()
 	CString str;
 
 	m_midiRecordVelButton.SetCheck(Global::pConfig->_midiRecordVel?1:0);
-	m_midiMessageVelEdit.SetWindowText("Velocity");
 	m_midiTypeVelComboBox.AddString("cmd");
 	m_midiTypeVelComboBox.SetCurSel(0);
 	str.Format("%x", Global::pConfig->_midiCommandVel);
@@ -167,6 +170,17 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiFromVelEdit.SetWindowText(str);
 	str.Format("%x", Global::pConfig->_midiToVel);
 	m_midiToVelEdit.SetWindowText(str);
+
+	m_midiRecordPitButton.SetCheck(Global::pConfig->_midiRecordPit?1:0);
+	m_midiTypePitComboBox.AddString("cmd");
+	m_midiTypePitComboBox.AddString("twk");
+	m_midiTypePitComboBox.SetCurSel(Global::pConfig->_midiTypePit);
+	str.Format("%x", Global::pConfig->_midiCommandPit);
+	m_midiCommandPitEdit.SetWindowText(str);
+	str.Format("%x", Global::pConfig->_midiFromPit);
+	m_midiFromPitEdit.SetWindowText(str);
+	str.Format("%x", Global::pConfig->_midiToPit);
+	m_midiToPitEdit.SetWindowText(str);
 
 	m_midiRecord0Button.SetCheck(Global::pConfig->_midiRecord0?1:0);
 	str.Format("%x", Global::pConfig->_midiMessage0);
@@ -438,6 +452,15 @@ void CMidiInputDlg::OnOK()
 	Global::pConfig->_midiFromVel = _httoi(str);
 	m_midiToVelEdit.GetWindowText(str,6);
 	Global::pConfig->_midiToVel = _httoi(str);
+
+	Global::pConfig->_midiRecordPit = m_midiRecordPitButton.GetCheck()?true:false;
+	Global::pConfig->_midiTypePit = m_midiTypePitComboBox.GetCurSel();
+	m_midiCommandPitEdit.GetWindowText(str,6);
+	Global::pConfig->_midiCommandPit = _httoi(str);
+	m_midiFromPitEdit.GetWindowText(str,6);
+	Global::pConfig->_midiFromPit = _httoi(str);
+	m_midiToPitEdit.GetWindowText(str,6);
+	Global::pConfig->_midiToPit = _httoi(str);
 
 	Global::pConfig->_midiRecord0 = m_midiRecord0Button.GetCheck()?true:false;
 	m_midiMessage0Edit.GetWindowText(str,6);

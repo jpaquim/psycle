@@ -320,6 +320,8 @@ void CChildView::OnTimer( UINT nIDEvent )
 					editcur.line=Global::pPlayer->_lineCounter;
 
 /*
+					// this was for the old messy multi track hack method
+
 					if ( _previousTicks-1 > editcur.track )
 					{
 						_previousTicks-=editcur.track+1;
