@@ -26,7 +26,7 @@ WaveOut::WaveOut()
 
 WaveOut::~WaveOut()
 {
-	Reset();
+	if (_initialized) Reset();
 }
 
 void WaveOut::Error(char const *msg)
@@ -316,7 +316,7 @@ void WaveOut::Initialize(
 
 void WaveOut::Reset()
 {
-	Stop();
+	if (_running) Stop();
 }
 
 void WaveOut::Configure()

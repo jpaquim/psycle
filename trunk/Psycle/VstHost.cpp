@@ -617,7 +617,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 #endif // ndef _WINAMP_PLUGIN_
 		return 0;		// index, value, returns 0
 		
-	case audioMasterVersion:			return 7;		// vst version, currently 7 (0 for older)
+	case audioMasterVersion:			return 2;		// vst version, currently 7 (0 for older)
 		
 	case audioMasterCurrentId:			return 'AASH';	// returns the unique id of a plug that's currently loading
 

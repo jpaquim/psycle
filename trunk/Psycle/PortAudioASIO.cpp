@@ -19,7 +19,7 @@ PortAudioASIO::PortAudioASIO(void)
 
 PortAudioASIO::~PortAudioASIO(void)
 {
-	Reset();
+	if (_initialized) Reset();
 }
 
 void PortAudioASIO::Error(char const *msg)
@@ -237,7 +237,7 @@ bool PortAudioASIO::Stop()
 
 void PortAudioASIO::Reset()
 {
-	Stop();
+	if (_running)Stop();
 }
 
 bool PortAudioASIO::Enable(bool e)
