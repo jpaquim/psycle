@@ -2,6 +2,8 @@
 !=change
 +=addition
 
+pen alpha
+
 * psycle default theme sucks
 * <alk> there's a bug where when u alt-tab the icon is not correct
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
@@ -13,8 +15,10 @@
 	does not track changes yet)
 * <dilvie> is the "cannot write to file" issue on the todo list anywhere?  (trying to autosave in a directory 
 	that doesn't exist or no write access..)
-<bohan`> pooplog, do you think it would be hard to make the version date being displayed dynamically in the 
-	about dialog instead of using a fixed resource ? with __DATE__ __TIME__ preprocessor keywords
++ <pooplog> again i ask why the connection limit is 12 and not 16 or 24->should use linked lists instead of 
+	arrays!!!
++ <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
+	and shield the user from the nastiness
 
 * Machines
 ------------
