@@ -1579,7 +1579,7 @@ void CChildView::DecCurPattern()
 void CChildView::DecPosition()
 {
 //	case cdefPlaySkipBack:
-	if (Global::pPlayer->_playing)
+	if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 	{
 		if (Global::pPlayer->_playPosition > 0 )
 		{
@@ -1617,7 +1617,7 @@ void CChildView::DecPosition()
 void CChildView::IncPosition()
 {
 //	case cdefPlaySkipAhead:
-	if (Global::pPlayer->_playing)
+	if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 	{
 		if (Global::pPlayer->_playPosition < _pSong->playLength-1)
 		{
@@ -1643,7 +1643,7 @@ void CChildView::IncPosition()
 //			editPosition = 0;
 			++editPosition;
 			AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition-1);
-			int const ep=_pSong->GetNumPatternsUsed();
+			int const ep=_pSong->GetBlankPatternUnused();
 			_pSong->playLength=editPosition+1;
 			_pSong->playOrder[editPosition]=ep;
 			pParentMain->UpdateSequencer();

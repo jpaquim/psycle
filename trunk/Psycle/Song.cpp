@@ -679,13 +679,63 @@ int Song::GetNumPatternsUsed()
 {
 	int rval=0;
 	
-	for(int c=0;c<MAX_SONG_POSITIONS;c++)
+	for(int c=0;c<playLength;c++)
 	{
-		if(rval<playOrder[c])rval=playOrder[c];
+		if(rval<playOrder[c])
+		{
+			rval=playOrder[c];
+		}
 	}
 	
 	++rval;
 	
+	if (rval > MAX_PATTERNS-1)
+	{
+		rval = MAX_PATTERNS-1;
+	}
+	return rval;
+}
+
+int Song::GetBlankPatternUnused(int rval)
+{
+	const unsigned char blank[5]={255,255,255,0,0};
+	BOOL bTryAgain = TRUE;
+
+	while ((bTryAgain) && (rval < MAX_PATTERNS-1))
+	{
+		for(int c=0;c<playLength;c++)
+		{
+			if(rval == playOrder[c]) 
+			{
+				rval++;
+				c=-1;
+			}
+		}
+		// now test to see if data is really blank
+		bTryAgain = FALSE;
+
+		int displace=rval*MULTIPLY2;
+		
+		for (int t=0;t<MULTIPLY2;t+=5)
+		{
+			unsigned char *offset_source=pPatternData+displace+t;
+			for (int i = 0; i < 5; i++)
+			{
+				if (offset_source[i] != blank[i])
+				{
+					rval++;
+					bTryAgain = TRUE;
+					t=MULTIPLY2;
+					i=5;
+				}
+			}
+		}
+	}
+
+	if (rval > MAX_PATTERNS-1)
+	{
+		rval = MAX_PATTERNS-1;
+	}
 	return rval;
 }
 
@@ -1573,7 +1623,7 @@ bool Song::Save(
 
 	// Patterns
 	//
-	i = GetNumPatternsUsed();
+	i = GetBlankPatternUnused(GetNumPatternsUsed());
 	pFile->Write(&i, sizeof(i));
 	for (int p=0; p<i; p++)
 	{

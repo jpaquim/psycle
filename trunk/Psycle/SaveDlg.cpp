@@ -98,7 +98,7 @@ void CSaveDlg::SaveSong(bool silent)
 	
 	// Write Pattern data --------------------------------------------
 	
-	int npats=_pSong->GetNumPatternsUsed();
+	int npats=_pSong->GetBlankPatternUnsed(GetNumPatternsUsed());
 	fwrite(&npats,sizeof(int),1,hFile);
 	
 	for(int c=0;c<npats;c++)

@@ -1682,7 +1682,7 @@ void CMainFrame::OnDblclkSeqlist()
 {
 /*
 	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
-	int const ep=_pSong->GetNumPatternsUsed();
+	int const ep=_pSong->GetBlankPatternUnsed();
 	int const sep=m_wndView.editPosition;
 	
 	if(ep!=_pSong->playOrder[sep])
@@ -1818,7 +1818,7 @@ void CMainFrame::OnSeqnew()
 		{
 			_pSong->playOrder[c]=_pSong->playOrder[c-1];
 		}
-		_pSong->playOrder[m_wndView.editPosition]=_pSong->GetNumPatternsUsed();
+		_pSong->playOrder[m_wndView.editPosition]=_pSong->GetBlankPatternUnused();
 		
 		if ( _pSong->playOrder[m_wndView.editPosition]>= MAX_PATTERNS )
 		{
@@ -1857,7 +1857,7 @@ void CMainFrame::OnSeqins()
 
 void CMainFrame::OnSeqduplicate() 
 {
-	int newpat = _pSong->GetNumPatternsUsed();
+	int newpat = _pSong->GetBlankPatternUnused();
 	if ((_pSong->playLength<(MAX_SONG_POSITIONS-1)) && (newpat < MAX_PATTERNS-1))
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
