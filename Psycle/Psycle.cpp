@@ -65,6 +65,19 @@ BOOL CPsycleApp::InitInstance()
 	CMainFrame* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
 	
+	// create and load the frame with its resources
+	// For some reason, there'a First-Chance exception when
+	// another pFrame member is called after this LoadFrame
+	// (for example, pFrame->ShowWindow(SW_MAXIMIZE);)
+	pFrame->LoadFrame(IDR_MAINFRAME,
+		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
+		NULL);
+
+	// Sets Icon
+	HICON tIcon;
+	tIcon=LoadIcon(IDR_MAINFRAME);
+	pFrame->SetIcon(tIcon,false);
+	
 	if (!Global::pConfig->Initialized())
 	{
 		if (!Global::pConfig->Read())
@@ -85,29 +98,17 @@ BOOL CPsycleApp::InitInstance()
 		pFrame->m_wndView.LoadPatternHeaderSkin();
 		pFrame->m_wndView.RecalcMetrics();
 		pFrame->m_wndView.RecalculateColourGrid();
-
+		
 	}
-	// create and load the frame with its resources
-	// For some reason, there'a First-Chance exception when
-	// another pFrame member is called after this LoadFrame
-	// (for example, pFrame->ShowWindow(SW_MAXIMIZE);)
-	pFrame->LoadFrame(IDR_MAINFRAME,
-		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
-		NULL);
-
-	// Sets Icon
-	HICON tIcon;
-	tIcon=LoadIcon(IDR_MAINFRAME);
-	pFrame->SetIcon(tIcon,false);
-	
 	// The one and only window has been initialized, so show and update it.
 	pFrame->ShowWindow(SW_MAXIMIZE);
-
+	
 	// center master machine
 	pFrame->m_wndView._pSong->_pMachines[0]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 	pFrame->m_wndView._pSong->_pMachines[0]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 	
 	pFrame->UpdateWindow();
+	
 	
 	CNewMachine::LoadPluginInfo();
 	// Show splash screen

@@ -42,12 +42,12 @@ Configuration::Configuration()
 	_followSong = false;
 	strcpy(pattern_fontface,"Tahoma");
 	strcpy(pattern_header_skin,DEFAULT_PATTERN_HEADER_SKIN);
-	pattern_font_point = 95;
-	pattern_font_x = 10;
-	pattern_font_y = 14;
-	strcpy(generator_fontface,"Tahoma Bold");
+	pattern_font_point = 85;
+	pattern_font_x = 9;
+	pattern_font_y = 12;
+	strcpy(generator_fontface,"Tahoma");
 	generator_font_point = 90;
-	strcpy(effect_fontface,"Tahoma Bold");
+	strcpy(effect_fontface,"Tahoma");
 	effect_font_point = 90;
 
 	strcpy(machine_skin,DEFAULT_MACHINE_SKIN);
@@ -1103,6 +1103,9 @@ Configuration::Write()
 
 	reg.SetValue("bShowSongInfoOnLoad", REG_DWORD, (BYTE*)&bShowSongInfoOnLoad, sizeof(bShowSongInfoOnLoad));	
 	reg.SetValue("bFileSaveReminders", REG_DWORD, (BYTE*)&bFileSaveReminders, sizeof(bFileSaveReminders));	
+
+	reg.SetValue("autosaveSong", REG_DWORD, (BYTE*)&autosaveSong, sizeof(autosaveSong));
+	reg.SetValue("autosaveSongTime", REG_DWORD, (BYTE*)&autosaveSongTime, sizeof(autosaveSong));
 
 	reg.SetValue("mv_colour", REG_DWORD, (BYTE*)&mv_colour, sizeof(mv_colour));	
 	reg.SetValue("mv_wirecolour", REG_DWORD, (BYTE*)&mv_wirecolour, sizeof(mv_wirecolour));	

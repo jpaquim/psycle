@@ -14,17 +14,11 @@ X low priority
 ------------
 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
-+ <lastfutur> no autosaving while recording/rendering
 + option to show or not the dots "." and lines "---" in the pattern editor.
 	[Using a variable "char dot;" and another "char line[3];" is possibly the fastest approach]
 <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
 	[JAZ: And a third one for Instruments. Time to time]
-
-* alk: select the the first and last row of channel 2 to select the whole channel
-	move to channel 1, goto the last row, do select end of block
-	[ I don't know what alk is talking about ]
-	[ I do, but I don't see any bug. It is with using CTRL+B CTRL+E to select ]
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
@@ -232,9 +226,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		show it when you want.
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 !	JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
-+++ 	<[JAZ]> gear rack The description was : " a dialog with 
-		a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
-		exchange, and don't know if anything more... maybe some information (wires used... don't know)
 ++	<alk> another idea, a keypress to toggle follow song
 ++	<alk_> alt-f5 - play song from start
 ++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. 
@@ -258,11 +249,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
 		convenient for when you have folders with many files as you usually do with samples
 +	<Alk^> I also think that the cursor movement after a paste should be optional to =)
-+	<_sue_> hey poop....can we have something like a right double click for inserting the first not used 
-		pattern (like instert button)?
-			[Isn't this what "New" is for?]
-			[yes jaz you are right, also there is no way to get right click messages to a list box
-			 without much trickery (pretranslate...)]
 +	<sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
 		into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
 +	<wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through 
