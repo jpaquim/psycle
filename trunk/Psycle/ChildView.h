@@ -268,6 +268,8 @@ public:
 	void LoadMachineSkin();
 	void KillWireDialogs();
 	void patTrackMute();
+	void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
+	void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 	
 public:
 
@@ -358,6 +360,7 @@ private:
 	void DrawMachineVumeters(CDC *devc);	
 	void DrawMachineEditor(CDC *devc);
 	void DrawMachine(Machine* mac, int macnum, CDC *devc);
+	void ClearMachineSpace(Machine* mac,int macnum, CDC *devc);
 	void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
 	int GetMachine(CPoint point);
 	void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 // Keyboard Handler sourcecode
 
-void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
 	// undo code not required, enter note handles it
 	CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
@@ -17,10 +17,16 @@ void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 			Global::pInputHandler->StopNote(outnote);
 		}
 	}
+}
+
+void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	// undo code not required, enter note handles it
+	KeyUp(nChar, nRepCnt, nFlags);
 	CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
-void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
+void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 {
 	// undo code not required, enter not and msbput handle it
 	BOOL bRepeat = nFlags&0x4000;
@@ -61,7 +67,11 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 			}
 		}
 	}
-	
+}
+
+void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
+{
+	KeyDown(nChar, nRepCnt, nFlags);
 	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 }
 

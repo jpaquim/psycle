@@ -6,6 +6,8 @@
 #include "VstGui.h"
 #include "Vst\AEffEditor.h"
 #include "inputhandler.h"
+#include "MainFrm.h"
+	extern CPsycleApp theApp;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,6 +75,7 @@ void CVstGui::OnTimer(UINT nIDEvent)
 
 void CVstGui::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
+	/*
 	const BOOL bRepeat = nFlags&0x4000;
 	CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 	if(!bRepeat && cmd.IsValid())
@@ -91,15 +94,19 @@ void CVstGui::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		}
 	}
-
+	*/
+	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.KeyDown(nChar, nRepCnt, nFlags);
 	CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 void CVstGui::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
+	/*
 	CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
 	const int outnote = cmd.GetNote();
 	Global::pInputHandler->StopNote(outnote,true,_pMachine);
+	*/
+	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.KeyUp(nChar, nRepCnt, nFlags);
 	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 

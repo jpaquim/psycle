@@ -542,6 +542,7 @@ void CChildView::OnPaint()
 				DrawMachineEditor(&bufDC);
 				break;
 			case DMMacRefresh:
+//				ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
 				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
 				DrawMachineVumeters(&bufDC);
 				updateMode=0;
@@ -579,6 +580,7 @@ void CChildView::OnPaint()
 				DrawMachineEditor(&dc);
 				break;
 			case DMMacRefresh:
+//				ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
 				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
 				DrawMachineVumeters(&dc);
 				updateMode=0;

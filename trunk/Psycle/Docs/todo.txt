@@ -33,35 +33,6 @@ bugs --->
 
 hold down a note, change octave, let go (note stuck)
 
-
-**
-start new song
-add pooplog filter
-select pooplog filter and filter cutoff param
-solo a track
-record arm the same track
-go to start off track
-make sure follow song is on
-hit shift enter to bring up machine dialog
-hit f5
-tweak the VCF cutoff
-hit f8
-move cursor up to where there is a tweak
-
-PROBLEM-->
-try to delete (del key)
-try to select a block (ctrl-b ctrl-e)
-try to get cursor to repeat
-
-tab to another program
-tab back
-you are now able to delete and make a block
-
-[ OK this problem isn't that bad, it's just that the machine dialog has the keyboard focus and isn't 
-forwarding key messages correctly ]
-**
-
-
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
@@ -113,9 +84,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * GUI (pattern):
 ----------------
-***	<alk> block select a channel. record some tweak to it live.
-		before the end of the pattern press stop. then do ctrl-x. It does not cut.
-		[cannot reproduce]
 **	<alk> somehow I managed to get the row number highlighted in two places.
 		to cause the bug of more than one line number highlighted:
 		select a line, then lower down click and drag to select a block.
