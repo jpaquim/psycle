@@ -111,29 +111,29 @@ void CConfigDlg::Init(
 	char* ps = pConfig->GetInitialInstrumentDir();
 	if (ps != NULL)
 	{
-		sprintf(_dirDlg._instPathBuf, ps);
+		strcpy(_dirDlg._instPathBuf, ps);
 	}
 	ps = pConfig->GetInitialSongDir();
 	if (ps != NULL)
 	{
-		sprintf(_dirDlg._songPathBuf, ps);
+		strcpy(_dirDlg._songPathBuf, ps);
 	}
 	ps = pConfig->GetInitialPluginDir();
 	if (ps != NULL)
 	{
-		sprintf(_dirDlg._pluginPathBuf, ps);
+		strcpy(_dirDlg._pluginPathBuf, ps);
 	}
 	ps = pConfig->GetInitialVstDir();
 	if (ps != NULL)
 	{
-		sprintf(_dirDlg._vstPathBuf, ps);
+		strcpy(_dirDlg._vstPathBuf, ps);
 	}
 	ps = pConfig->GetInitialSkinDir();
 	if (ps != NULL)
 	{
-		sprintf(_dirDlg._skinPathBuf, ps);
-		sprintf(_skinDlg._skinPathBuf, ps);
-		sprintf(_keyDlg._skinPathBuf, ps);
+		strcpy(_dirDlg._skinPathBuf, ps);
+		strcpy(_skinDlg._skinPathBuf, ps);
+		strcpy(_keyDlg._skinPathBuf, ps);
 	}
 	else
 	{

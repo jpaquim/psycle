@@ -683,7 +683,8 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 		}
 	}
 	else
-		canvasr.FillSolidRect(0,0,226,5,vu2);
+		canvasl.FillSolidRect(0,0,226,5,vu2);
+
 	if (log_r || vuprevR)
 	{
 		canvasr.FillSolidRect(0,0,log_r,5,vu1);
@@ -700,7 +701,7 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 		}
 	}
 	else
-		canvasl.FillSolidRect(0,0,226,5,vu2);
+		canvasr.FillSolidRect(0,0,226,5,vu2);
 	
 /*	if(draw_l)
 	{
@@ -869,41 +870,38 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	cb->SetCurSel(selected);
 
 	// Select the appropiate Option in Aux Combobox.
-	if (found)
+	if ((found) && (_pSong->_machineActive[_pSong->busMachine[_pSong->seqBus]])) // Valid one.
 	{
 		if (_pSong->seqBus < MAX_BUSES) // Generator
 		{
-			if (_pSong->_machineActive[_pSong->busMachine[_pSong->seqBus]]) // Valid one.
+			if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
 			{
-				if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
+				cb2->SetCurSel(AUX_WAVES);
+				_pSong->auxcolSelected = _pSong->instSelected;
+			}
+			else if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_VST)
+			{
+				if ( cb2->GetCurSel() == AUX_WAVES)
 				{
-					if (cb2->GetCurSel() != AUX_WAVES)
-					{
-						cb2->SetCurSel(2); // WAVES
-						_pSong->auxcolSelected = _pSong->instSelected;
-					}
-				}
-				else
-				{
-					cb2->SetCurSel(1); // PARAMS
-					_pSong->auxcolSelected = 0;
+					cb2->SetCurSel(AUX_MIDI);
+					_pSong->auxcolSelected = _pSong->midiSelected;
 				}
 			}
 			else
 			{
-				cb2->SetCurSel(1); // PARAMS
+				cb2->SetCurSel(AUX_PARAMS);
 				_pSong->auxcolSelected = 0;
 			}
 		}
-		else 
+		else
 		{
-			cb2->SetCurSel(1); // PARAMS
+			cb2->SetCurSel(AUX_PARAMS);
 			_pSong->auxcolSelected = 0;
 		}
 	}
 	else
 	{
-		cb2->SetCurSel(2); // WAVES
+		cb2->SetCurSel(AUX_WAVES); // WAVES
 		_pSong->auxcolSelected = _pSong->instSelected;
 	}
 	UpdateComboIns();
@@ -1019,25 +1017,36 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 		listlen = 16;
 //		_pSong->midiSelected=_pSong->auxcolSelected;
 	}
-	else if (( cc2->GetCurSel() == AUX_PARAMS) && (nmac != 255))	// Params
+	else if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
 	{
-		Machine *tmac = _pSong->_pMachines[nmac];
-		int i=0;
-		if (updatelist) 
+		if  (nmac != 255)
 		{
-			for (i=0;i<tmac->GetNumParams();i++)
+			Machine *tmac = _pSong->_pMachines[nmac];
+			int i=0;
+			if (updatelist) 
 			{
-				char buffer[64],buffer2[64];
-				memset(buffer2,0,64);
-				tmac->GetParamName(i,buffer2);
-				sprintf(buffer, "%.2X:  %s", i, buffer2);
-				cc->AddString(buffer);
-				listlen++;
+				for (i=0;i<tmac->GetNumParams();i++)
+				{
+					char buffer[64],buffer2[64];
+					memset(buffer2,0,64);
+					tmac->GetParamName(i,buffer2);
+					sprintf(buffer, "%.2X:  %s", i, buffer2);
+					cc->AddString(buffer);
+					listlen++;
+				}
+			}
+			else
+			{
+				listlen = cc->GetCount();
 			}
 		}
 		else
 		{
-			listlen = cc->GetCount();
+			if (updatelist) 
+			{
+				cc->AddString("No Machine");
+			}
+			listlen = 1;
 		}
 	}
 	else	// Waves
