@@ -60,7 +60,6 @@ namespace operating_system
 			{
 				std::ostringstream s;
 				s << "microsoft nt structured exception (external cpu/os exception): 0x" << std::hex << code << ": ";
-				if(logger::default_threshold_level() <= 0) s << "(ugly microsoft system error code number translated courtesy of bohan) ";
 				switch(code)
 				{
 				case EXCEPTION_ACCESS_VIOLATION: s << "access violation: The thread tried to read from or write to a virtual address for which it does not have the appropriate access."; break;
@@ -85,6 +84,7 @@ namespace operating_system
 				case EXCEPTION_STACK_OVERFLOW: s << "stack overflow: The thread used up its stack."; break;
 				default: s << "unkown exception code: 0x" << std::hex << code << " !!!";
 				}
+				if(logger::default_threshold_level() <= 0) s << " (ugly microsoft system error code number translated courtesy of bohan)";
 				return s.str();
 			}
 			void structured_exception_translator(unsigned int code, EXCEPTION_POINTERS *) throw(translated)

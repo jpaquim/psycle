@@ -347,6 +347,7 @@ namespace psycle
 		{
 			if(_numPlugins == -1)
 			{
+				host::logger(host::logger::info, "Scanning plugins ...");
 				::AfxGetApp()->DoWaitCursor(1); 
 				int plugsCount(0);
 				int badPlugsCount(0);
@@ -356,6 +357,7 @@ namespace psycle
 				int plugin_count(0);
 				if(progressOpen)
 				{
+					host::logger(host::logger::info, "Scanning plugins ... Counting ...");
 					Progress.Create();
 					Progress.SetWindowText("Scanning plugins ... Counting ...");
 					Progress.ShowWindow(SW_SHOW);
@@ -388,6 +390,7 @@ namespace psycle
 					Progress.m_Progress.SetStep(16384 / plugin_count);
 					{
 						std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
+						host::logger(host::logger::info, s.str().c_str());
 						Progress.SetWindowText(s.str().c_str());
 					}
 				}
@@ -413,6 +416,7 @@ namespace psycle
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Natives ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
+				host::logger(host::logger::info, "Scanning plugins ... Natives");
 				out
 					<< std::endl
 					<< "======================" << std::endl
@@ -426,6 +430,7 @@ namespace psycle
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... VST ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
+				host::logger(host::logger::info, "Scanning plugins ... VST");
 				out
 					<< std::endl
 					<< "===================" << std::endl
@@ -437,14 +442,21 @@ namespace psycle
 				if(progressOpen)
 				{
 					std::ostringstream s; s << "Scanned " << plugin_count << " plugins.";
+					host::logger(host::logger::info, s.str().c_str());
 					Progress.SetWindowText(s.str().c_str());
 				}
 				out.close();
 				_numPlugins = plugsCount;
-				if(progressOpen) Progress.m_Progress.SetPos(16384);
+				if(progressOpen)
+				{
+					Progress.m_Progress.SetPos(16384);
+					Progress.SetWindowText("Saving scan cache file ...");
+				}
+				host::logger(host::logger::info, "Saving scan cache file ...");
 				SaveCacheFile();
 				if(progressOpen) Progress.OnCancel();
 				::AfxGetApp()->DoWaitCursor(-1); 
+				host::logger(host::logger::info, "Done.");
 			}
 		}
 
@@ -491,9 +503,12 @@ namespace psycle
 							{
 								exists = true;
 								const std::string * error(_pPlugsInfo[i]->error);
-								if(!error) out << "cached.";
-								else out << "cache says it has previously been disabled because:" << std::endl << *error << std::endl;
+								std::stringstream s;
+								if(!error) s << "cached.";
+								else s << "cache says it has previously been disabled because:" << std::endl << *error << std::endl;
+								out << s.str().c_str();
 								out.flush();
+								host::logger(host::logger::info, std::string(finder.GetFilePath()) + '\n' + s.str().c_str());
 								break;
 							}
 						}
@@ -505,6 +520,7 @@ namespace psycle
 					{
 						out << "new plugin added to cache ; ";
 						out.flush();
+						host::logger(host::logger::info, std::string(finder.GetFilePath()) + "\nnew plugin added to cache");
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 						::ZeroMemory(_pPlugsInfo[currentPlugsCount], sizeof(PluginInfo));
 						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
@@ -581,7 +597,6 @@ namespace psycle
 							catch(const std::exception & e)
 							{
 								std::stringstream s; s
-									<< "### ERRONEOUS ###" << std::endl
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< typeid(e).name() << std::endl
@@ -593,8 +608,8 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(10, title.str() + '\n' + s.str());
-								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
+								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 							catch(...)
 							{
@@ -609,8 +624,8 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(10, title.str() + '\n' + s.str());
-								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
+								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 						}
 						else if(type == MACH_VST)
@@ -694,8 +709,8 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(10, title.str() + '\n' + s.str());
-								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
+								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 							catch(...)
 							{
@@ -710,8 +725,8 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(10, title.str() + '\n' + s.str());
-								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
+								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 						}
 					}

@@ -36,20 +36,16 @@ namespace psycle
 			#endif
 		};
 
-		//class logger
-		//{
-			inline static void logger(const int & level, const std::string & string) throw()
+		class logger
+		{
+		public:
+			enum levels
 			{
-				try
-				{
-					if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string);
-				}
-				catch(...)
-				{
-					// oh dear!
-					std::cerr << "logger crashed" << std::endl;
-				}
-			}
-		//};
+				trace,
+				info,
+				crash
+			};
+			logger(const int & level, const std::string & string) throw();
+		};
 	}
 }
