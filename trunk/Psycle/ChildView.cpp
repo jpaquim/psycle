@@ -1186,7 +1186,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 	// Show new machine dialog
 	CNewMachine dlg;
 	
-	if (dlg.DoModal() == IDOK)
+	if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
 	{
 		int fb,xs,ys;
 		if (mac < 0)

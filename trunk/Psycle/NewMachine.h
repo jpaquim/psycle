@@ -73,6 +73,8 @@ public:
 	static CMapStringToString dllNames;
 	static void DestroyPluginInfo();
 	static void LoadPluginInfo(void);
+	static int LastType0;
+	static int LastType1;
 
 	CNewMachine(CWnd* pParent = NULL);   // standard constructor
 	~CNewMachine();
@@ -113,6 +115,7 @@ protected:
 	afx_msg void OnRefresh();
 	afx_msg void OnByclass();
 	afx_msg void OnBytype();
+	virtual void OnOK();
 	afx_msg void OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
 	afx_msg void OnShowdllname();
@@ -128,7 +131,7 @@ private:
 	static void FindPluginsInDir(int& currentPlugsCount,CString findDir,MachineType type);
 	static bool LoadCacheFile(int& currentPlugsCount);
 	static bool SaveCacheFile(int numPlugins);
-	void UpdateList(void);
+	void UpdateList(bool bInit = false);
 };
 
 //{{AFX_INSERT_LOCATION}}
