@@ -157,7 +157,7 @@ public:
 protected:
 	virtual void samples_per_second_changed()
 	{
-		parameter(direct_delay_stereo_delta);
+		parameter(late_reflection_delay);
 	}
 	virtual void sequencer_ticks_per_second_changed()
 	{
