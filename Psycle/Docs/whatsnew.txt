@@ -31,6 +31,7 @@ V1.7.3
 ! pattern lengths no longer can be randomly changed by adding new/cloning patterns (pooplog)
 ! can't delete the master any more (pooplog)
 ! various other small bugfixes (pooplog)
+! some memory leaks fixed [JAZ]
 
 
 V1.7.1

@@ -8,6 +8,8 @@
 //
 #include "resource.h"
 #include "machine.h"
+#include "ProgressDialog.h"
+
 #include <afxcoll.h>
 
 #define MAX_BROWSER_NODES 72
@@ -133,7 +135,7 @@ private:
 	static int _numDirs;
 	static char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
 
-	static void FindPluginsInDir(int& currentPlugsCount,int &currentBadPlugsCount,CString findDir,MachineType type);
+	static void FindPluginsInDir(int& currentPlugsCount,int &currentBadPlugsCount,CString findDir,MachineType type,CProgressDialog * pProgress = NULL);
 	static bool LoadCacheFile(int& currentPlugsCount, int &currentBadPlugsCount);
 	static bool SaveCacheFile();
 	void UpdateList(bool bInit = false);
