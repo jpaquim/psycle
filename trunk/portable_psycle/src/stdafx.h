@@ -27,9 +27,8 @@
 
 #include <psycle/host/Global.h> // missing #includes in psycle's source code.
 
-/*
+
 // GDI+.
 #include <gdiplus.h>				
 #pragma comment(lib, "gdiplus")
-using namespace Gdiplus;
-*/
+//using namespace Gdiplus;
