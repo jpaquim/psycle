@@ -12,9 +12,9 @@ public:
 		out << "just a multiplier" << std::endl;
 		out << "it's of course compatible with original psycle 1 arguru's gainer" << std::endl;
 	}
-
-	enum Parameters { gain };
 	
+	enum Parameters { gain };
+
 	static const Information & information() throw()
 	{
 		static const Information::Parameter parameters [] =
