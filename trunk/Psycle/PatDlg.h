@@ -28,6 +28,7 @@ public:
 	CEdit	m_patname;
 	CSpinButtonCtrl	m_spinlines;
 	BOOL	m_adaptsize;
+	CStatic m_text;
 	//}}AFX_DATA
 
 
@@ -46,6 +47,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	afx_msg void OnCheck1();
+	afx_msg void OnUpdateNumLines();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

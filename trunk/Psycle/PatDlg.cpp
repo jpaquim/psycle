@@ -34,6 +34,7 @@ void CPatDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT1, m_patname);
 	DDX_Control(pDX, IDC_SPIN1, m_spinlines);
 	DDX_Check(pDX, IDC_CHECK1, m_adaptsize);
+	DDX_Control(pDX, IDC_TEXT, m_text);
 	//}}AFX_DATA_MAP
 }
 
@@ -41,6 +42,7 @@ void CPatDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CPatDlg, CDialog)
 	//{{AFX_MSG_MAP(CPatDlg)
 	ON_BN_CLICKED(IDC_CHECK1, OnCheck1)
+	ON_EN_UPDATE(IDC_EDIT2, OnUpdateNumLines)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -95,4 +97,23 @@ void CPatDlg::OnOK()
 void CPatDlg::OnCheck1() 
 {
 	m_adaptsize = m_adaptsizeCheck.GetCheck();
+}
+
+void CPatDlg::OnUpdateNumLines() 
+{
+	// TODO: Add your control notification handler code here
+	char buffer[256];
+	m_numlines.GetWindowText(buffer,16);
+	int val=atoi(buffer);
+
+	if (val < 0)
+	{
+		val = 0;
+	}
+	else if(val > MAX_LINES)
+	{
+		val = MAX_LINES-1;
+	}
+	sprintf(buffer,"HEX: %x",val);
+	m_text.SetWindowText(buffer);
 }
