@@ -416,12 +416,10 @@ namespace psycle
 			
 			if (viewMode == VMMachine )
 			{
-
 				int propMac = GetMachine(point);
 				if ( propMac != -1) // \todo this If sentence might not be correct.
 				{
-					// are we moving a wire?
-					if (wiremove >= 0)
+					if (wiremove >= 0) // are we moving a wire?
 					{
 						AddMacViewUndo();
 						if (wiredest == -1)
@@ -430,7 +428,7 @@ namespace psycle
 						}
 						else _pSong->ChangeWireSourceMac(propMac,wiredest,wiremove);
 					}
-					else if ((wiresource != -1) && (propMac != wiresource))
+					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
 						AddMacViewUndo();
 						if (!Global::_pSong->InsertConnection(wiresource, wiredest))
@@ -439,44 +437,39 @@ namespace psycle
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}
 					}
-			
-					wiresource = -1;
-					wiredest = -1;
-					wiremove = -1;
-					Repaint();
-				}
-				else if ( smacmode == 0 && smac != -1 )
-				{
-					SSkinSource ssrc;
-					AddMacViewUndo();
-
-					switch(_pSong->_pMachine[smac]->_mode)
+					else if ( smacmode == 0 && smac != -1 ) // Are we moving a machine?
 					{
-						case MACHMODE_GENERATOR:
-							ssrc = MachineCoords.sGenerator;break;
-						case MACHMODE_FX:
-							ssrc = MachineCoords.sEffect;break;
-						case MACHMODE_MASTER:
-							ssrc = MachineCoords.sMaster;break;
-						default:break;
-					}
-					if (point.x-mcd_x < 0 ) _pSong->_pMachine[smac]->_x = 0;
-					else if	(point.x-mcd_x+ssrc.width > CW) 
-					{ 
-						_pSong->_pMachine[smac]->_x = CW-ssrc.width; 
-					}
+						SSkinSource ssrc;
+						AddMacViewUndo();
 
-					if (point.y-mcd_y < 0 ) _pSong->_pMachine[smac]->_y = 0; 
-					else if (point.y-mcd_y+ssrc.height > CH) 
-					{ 
+						switch(_pSong->_pMachine[smac]->_mode)
+						{
+							case MACHMODE_GENERATOR:
+								ssrc = MachineCoords.sGenerator;break;
+							case MACHMODE_FX:
+								ssrc = MachineCoords.sEffect;break;
+							case MACHMODE_MASTER:
+								ssrc = MachineCoords.sMaster;break;
+							default:break;
+						}
+						if (point.x-mcd_x < 0 ) _pSong->_pMachine[smac]->_x = 0;
+						else if	(point.x-mcd_x+ssrc.width > CW) 
+						{ 
+							_pSong->_pMachine[smac]->_x = CW-ssrc.width; 
+						}
+
+						if (point.y-mcd_y < 0 ) _pSong->_pMachine[smac]->_y = 0; 
+						else if (point.y-mcd_y+ssrc.height > CH) 
+						{ 
 						_pSong->_pMachine[smac]->_y = CH-ssrc.height; 
+						}
+						Repaint(); 
 					}
-					Repaint(); 
-
 				}
 	
 				smac = -1;		smacmode = 0;
 				wiresource = -1;wiredest = -1;
+				Repaint();
 
 			}
 			else if (viewMode == VMPattern)
