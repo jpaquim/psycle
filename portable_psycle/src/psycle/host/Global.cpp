@@ -107,7 +107,6 @@ namespace psycle
 				const bool operator()(const int & level) const throw() { return operating_system::logger::operator()(level); }
 				/*redefine*/ void operator()(const int & level, const std::string & string) throw();
 			private:
-				static logger & create_default_logger() throw(...);
 				static std::ostream & default_logger_ostream() throw();
 			};
 		}
@@ -164,29 +163,25 @@ namespace psycle
 			}
 		}
 
-		logger & logger::create_default_logger() throw(...)
-		{
-			std::string module_directory;
-			{
-				char module_file_name[MAX_PATH];
-				::GetModuleFileName(0, module_file_name, sizeof module_file_name);
-				module_directory = module_file_name;
-				module_directory = module_directory.substr(0, module_directory.rfind('\\'));
-			}
-			return *new logger(loggers::levels::trace, default_logger_ostream());
-		}
-
 		logger & logger::default_logger() throw()
 		{
 			try
 			{
-				static logger instance = create_default_logger();
+				static logger instance(loggers::levels::trace, default_logger_ostream());
 				return instance;
 			}
 			catch(...)
 			{
-				std::cerr << "could not create logger" << std::endl;
-				return *new logger(loggers::levels::trace, std::cout);
+				static logger instance(loggers::levels::trace, std::cout);
+				try
+				{
+					instance(loggers::levels::exception, "could not create logger");
+				}
+				catch(...)
+				{
+					std::cerr << "could not create fallback logger" << std::endl;
+				}
+				return instance;
 			}
 		}
 
@@ -199,7 +194,7 @@ namespace psycle
 				public:
 					// <bohan> hmm, someone told me it is disallowed to have static functions in local classes, although msvc7.1 seems to allow it.
 					//static std::ostream & instanciate() throw(...)
-					std::ostream & instanciate() throw(...) // <bohan> hmm, someone told me it is disallowed to have static functions in local classes.
+					std::ostream & instanciate() throw(...)
 					{
 						std::string module_directory;
 						{
