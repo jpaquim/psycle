@@ -76,6 +76,7 @@ public:
 	void UpdateComboGen(bool updatelist=true);
 	void PsybarsUpdate();
 	void UpdateVumeters(float l, float r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip);
+	LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
 	virtual ~CMainFrame();
 
 private:
@@ -97,6 +98,7 @@ public:  // control bar embedded members
 	CDialogBar	m_wndControl2;
 	CDialogBar	m_wndSeq;
 	CReBar      m_wndReBar;
+	char		szStatusIdle[128];
 	
 	void EditQuantizeChange(int diff);
 	void ShiftOctave(int x);
@@ -191,8 +193,10 @@ protected:
 	afx_msg void OnUpdateIndicatorFollow(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateIndicatorTweaks(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorOctave(CCmdUI *pCmdUI);
 	afx_msg void OnCloseupCombooctave();
 	afx_msg void OnSelchangeCombooctave();
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
