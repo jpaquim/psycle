@@ -6,7 +6,7 @@ namespace psycle
 {
 	namespace host
 	{
-		ULONG RiffFile::FourCC(char *psName)
+		ULONG RiffFile::FourCC(char const *psName)
 		{
 			long retbuf = 0x20202020; // four spaces (padding)
 			char *ps = ((char *)&retbuf);
@@ -16,12 +16,12 @@ namespace psycle
 			return retbuf;
 		}
 
-		bool RiffFile::Open(char const* psFileName)
+		bool RiffFile::Open(std::string psFileName)
 		{
 			DWORD bytesRead;
-			std::strcpy(szName,psFileName);
+			szName = psFileName;
 			_modified = false;
-			_handle = ::CreateFile(psFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+			_handle = ::CreateFile(psFileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 			if(_handle == INVALID_HANDLE_VALUE) return false;
 			if(!ReadFile(_handle, &_header, sizeof(_header), &bytesRead, 0))
 			{
@@ -31,12 +31,12 @@ namespace psycle
 			return true;
 		}
 
-		bool RiffFile::Create(char* psFileName, bool overwrite)
+		bool RiffFile::Create(std::string psFileName, bool overwrite)
 		{
 			DWORD bytesWritten;
-			std::strcpy(szName,psFileName);
+			szName = psFileName;
 			_modified = false;
-			_handle = ::CreateFile(psFileName, GENERIC_READ | GENERIC_WRITE, 0, 0, overwrite ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+			_handle = ::CreateFile(psFileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, overwrite ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
 			if(_handle == INVALID_HANDLE_VALUE) return false;
 			_header._id = FourCC("RIFF");
 			_header._size = 0;
@@ -170,23 +170,23 @@ namespace psycle
 
 
 
-		bool OldPsyFile::Open(char* psFileName)
+		bool OldPsyFile::Open(std::string psFileName)
 		{
-			std::strcpy(szName,psFileName);
-			_file = fopen(psFileName, "rb");
+			szName = psFileName;
+			_file = fopen(psFileName.c_str(), "rb");
 			return (_file != 0);
 		}
 
-		bool OldPsyFile::Create(char* psFileName, bool overwrite)
+		bool OldPsyFile::Create(std::string psFileName, bool overwrite)
 		{
-			std::strcpy(szName,psFileName);
-			_file = fopen(psFileName, "rb");
+			szName = psFileName;
+			_file = fopen(psFileName.c_str(), "rb");
 			if(_file != 0)
 			{
 				fclose(_file);
 				if(!overwrite) return false;
 			}
-			_file = fopen(psFileName, "wb");
+			_file = fopen(psFileName.c_str(), "wb");
 			return (_file != 0);
 		}
 

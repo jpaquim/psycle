@@ -37,8 +37,8 @@ namespace psycle
 		{
 		public:
 			RiffChunkHeader _header;
-			virtual bool Open(char const* psFileName);
-			virtual bool Create(char* psFileName, bool overwrite);
+			virtual bool Open(std::string psFileName);
+			virtual bool Create(std::string psFileName, bool overwrite);
 			virtual BOOL Close(void);
 			virtual bool Read(void* pData, ULONG numBytes);
 			// <bohan> added const, damnit!!!
@@ -53,8 +53,8 @@ namespace psycle
 			virtual bool ReadString(char* pData, ULONG maxBytes);
 			virtual long GetPos(void);
 			virtual FILE* GetFile(void) { return NULL; };
-			static ULONG FourCC(char *psName);
-			char szName[MAX_PATH];
+			static ULONG FourCC(char const *psName);
+			std::string szName;
 		protected:
 			HANDLE _handle;
 			bool _modified;
@@ -63,8 +63,8 @@ namespace psycle
 		class OldPsyFile : public RiffFile
 		{
 		public:
-			virtual bool Open(char* psFileName);
-			virtual bool Create(char* psFileName, bool overwrite);
+			virtual bool Open(std::string psFileName);
+			virtual bool Create(std::string psFileName, bool overwrite);
 			virtual BOOL Close(void);
 			virtual BOOL Error();
 			virtual bool Read(void* pData, ULONG numBytes);

@@ -907,7 +907,7 @@ namespace psycle
 		}
 
 		///\todo that method does not take machine changes into account
-		BOOL CChildView::CheckUnsavedSong(char* szTitle)
+		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
 			BOOL bChecked = TRUE;
 			if (pUndoList)
@@ -939,7 +939,7 @@ namespace psycle
 					std::ostringstream szText;
 					szText << "Save changes to \"" << Global::_pSong->fileName
 						<< "\"?";
-					int result = MessageBox(szText.str().c_str(),szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+					int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 					switch (result)
 					{
 					case IDYES:
@@ -947,7 +947,7 @@ namespace psycle
 						{
 							szText.clear();
 							szText << "Error writing to \"" << filepath << "\"!!!";
-							MessageBox(szText.str().c_str(),szTitle,MB_ICONEXCLAMATION);
+							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
 							return FALSE;
 						}
 						_pSong->Save(&file);
@@ -972,9 +972,10 @@ namespace psycle
 			{
 				if (Global::_pSong->_saved)
 				{
-					char buf[MAX_PATH];
-					sprintf(buf,"%s\\%s",Global::pConfig->GetSongDir(),Global::_pSong->fileName);
-					FileLoadsongNamed(buf);
+					std::ostringstream fullpath;
+					fullpath << Global::pConfig->GetSongDir().c_str()
+						<< '\\' << Global::_pSong->fileName.c_str();
+					FileLoadsongNamed(fullpath.str());
 				}
 			}
 			pParentMain->StatusBarIdle();
@@ -1908,7 +1909,7 @@ namespace psycle
 			*/	
 		}
 
-		void CChildView::AppendToRecent(char* fName)
+		void CChildView::AppendToRecent(std::string fName)
 		{
 			int iCount;
 			char* nameBuff;
@@ -1938,7 +1939,7 @@ namespace psycle
 				nameSize = GetMenuString(hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
 				nameBuff = new char[nameSize];
 				GetMenuString(hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-				if ( !strcmp(nameBuff, fName) )
+				if ( !strcmp(nameBuff, fName.c_str()) )
 				{
 					DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
 				}
@@ -1953,8 +1954,8 @@ namespace psycle
 			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
 			hNewItemInfo.fType		= MFT_STRING;
 			hNewItemInfo.wID		= ids[0];
-			hNewItemInfo.cch		= strlen(fName);
-			hNewItemInfo.dwTypeData = fName;
+			hNewItemInfo.cch		= fName.length();
+			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
 			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
 			// Update identifiers.
 			for(iCount = 1;iCount < GetMenuItemCount(hRecentMenu);iCount++)
@@ -1986,11 +1987,11 @@ namespace psycle
 			CallOpenRecent(3);
 		}
 
-		void CChildView::OnFileLoadsongNamed(char* fName, int fType)
+		void CChildView::OnFileLoadsongNamed(std::string fName, int fType)
 		{
 			if( fType == 2 )
 			{
-				FILE* hFile=fopen(fName,"rb");
+				FILE* hFile=fopen(fName.c_str(),"rb");
 				LoadBlock(hFile);
 				fclose(hFile);
 			}
@@ -2003,7 +2004,7 @@ namespace psycle
 			}
 		}
 
-		void CChildView::FileLoadsongNamed(char* fName)
+		void CChildView::FileLoadsongNamed(std::string fName)
 		{
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
@@ -2015,7 +2016,7 @@ namespace psycle
 			Sleep(LOCK_LATENCY);
 			
 			OldPsyFile file;
-			if (!file.Open(fName))
+			if (!file.Open(fName.c_str()))
 			{
 				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				return;
@@ -2025,16 +2026,15 @@ namespace psycle
 			//file.Close(); <- load handles this
 			_pSong->_saved=true;
 			AppendToRecent(fName);
-			CString str = fName;
-			int index = str.ReverseFind('\\');
-			if (index != -1)
+			std::string::size_type index = fName.rfind('\\');
+			if (index != std::string::npos)
 			{
-				Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
-				Global::_pSong->fileName = str.Mid(index+1);
+				Global::pConfig->SetSongDir(fName.substr(0,index));
+				Global::_pSong->fileName = fName.substr(index+1);
 			}
 			else
 			{
-				Global::_pSong->fileName = str;
+				Global::_pSong->fileName = fName;
 			}
 			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 			_outputActive = true;
@@ -2062,16 +2062,13 @@ namespace psycle
 			SetTitleBarText();
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-				char buffer[512];
-				std::sprintf
-					(
-						buffer,
-						"'%s'\n\n%s\n\n%s",
-						_pSong->Name,
-						_pSong->Author,
-						_pSong->Comment
-					);
-				::MessageBox(0, buffer, "Psycle song loaded", MB_OK);
+				std::ostringstream songLoaded;
+				songLoaded << '\'' << _pSong->Name << '\'' << std::endl
+					<< std::endl
+					<< _pSong->Author << std::endl
+					<< std::endl
+					<< _pSong->Comment;
+				::MessageBox(0, songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 			}
 		}
 
