@@ -147,9 +147,15 @@ bool RiffFile::Eof(
 	return false;
 }
 
+long RiffFile::GetPos()
+{
+	return SetFilePointer(_handle, 0, NULL, FILE_CURRENT);
+}
+
+
 long RiffFile::FileSize()
 {
-	const long init = SetFilePointer(_handle, 0, NULL, FILE_CURRENT);
+	const long init = GetPos();
 	const long end = SetFilePointer(_handle,0,NULL,FILE_END);
 	SetFilePointer(_handle,init,NULL,FILE_BEGIN);
 	return end;
@@ -164,20 +170,12 @@ bool RiffFile::ReadString(char* pData, ULONG maxBytes)
 		char c;
 		for (ULONG index = 0; index < maxBytes; index++)
 		{
-			DWORD bytesRead;
-			if (ReadFile(_handle, &c, sizeof(char), &bytesRead, NULL))
+			if (Read(&c, sizeof(c)))
 			{
-				if (bytesRead == sizeof(char))
+				pData[index] = c;
+				if (c == 0)
 				{
-					pData[index] = c;
-					if (c == 0)
-					{
-						return true;
-					}
-				}
-				else 
-				{
-					return false;
+					return true;
 				}
 			}
 			else 
@@ -188,14 +186,7 @@ bool RiffFile::ReadString(char* pData, ULONG maxBytes)
 		while (c != 0)
 		{
 			DWORD bytesRead;
-			if (ReadFile(_handle, &c, sizeof(char), &bytesRead, NULL))
-			{
-				if (bytesRead != sizeof(char))
-				{
-					return false;
-				}
-			}
-			else 
+			if (!Read(&c, sizeof(c)))
 			{
 				return false;
 			}
@@ -318,3 +309,7 @@ long OldPsyFile::FileSize()
 	return end;
 }
 
+long OldPsyFile::GetPos()
+{
+	return ftell(_file);
+}

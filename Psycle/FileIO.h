@@ -36,6 +36,7 @@ public:
 	virtual bool Eof(void);
 	virtual long FileSize(void);
 	virtual bool ReadString(char* pData, ULONG maxBytes);
+	virtual long GetPos(void);
 	
 	virtual FILE* GetFile(void) { return NULL; };
 
@@ -59,6 +60,7 @@ public:
 	virtual long Skip(long numBytes);
 	virtual bool Eof(void);
 	virtual long FileSize(void);
+	virtual long GetPos(void);
 	
 
 	virtual FILE* GetFile(void) { return _file; };

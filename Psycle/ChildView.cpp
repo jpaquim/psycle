@@ -437,6 +437,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 	}
 	if (nIDEvent == 159 && !Global::pPlayer->_recording)
 	{
+//		MessageBox("Saving Disabled");
 		return;
 		CString filepath = Global::pConfig->GetInitialSongDir();
 		filepath += "\\autosave.psy";

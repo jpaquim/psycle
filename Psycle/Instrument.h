@@ -6,26 +6,19 @@
 #endif // _WINAMP_PLUGIN_
 
 #include "Constants.h"
+#include "FileIO.h"
 
 class Instrument
 {
 public:
-	char _sName[32];
 
-	/// -> legacy crap from here on
-
-	char waveName[MAX_WAVES][32];
-	unsigned short waveVolume[MAX_WAVES];
-	signed short *waveDataL[MAX_WAVES];
-	signed short *waveDataR[MAX_WAVES];
-	unsigned int waveLength[MAX_WAVES];
-	unsigned int waveLoopStart[MAX_WAVES];
-	unsigned int waveLoopEnd[MAX_WAVES];
-	int waveTune[MAX_WAVES];
-	int waveFinetune[MAX_WAVES];	
-
-	bool waveLoopType[MAX_WAVES];
-	bool waveStereo[MAX_WAVES];
+	Instrument();
+	~Instrument();
+	void Delete();
+	void DeleteLayer(int c);
+	void LoadFileChunk(RiffFile* pFile,int version);
+	void SaveFileChunk(RiffFile* pFile);
+	bool Empty();
 
 	//////////////////////////////////////////////////////////////////
 	// Loop stuff
@@ -65,7 +58,23 @@ public:
 	bool _RCUT;
 	bool _RRES;
 
-	bool Empty();
+	char _sName[32];
+
+	// wave stuff
+
+	unsigned int waveLength[MAX_WAVES];
+	unsigned short waveVolume[MAX_WAVES];
+	unsigned int waveLoopStart[MAX_WAVES];
+	unsigned int waveLoopEnd[MAX_WAVES];
+	int waveTune[MAX_WAVES];
+	int waveFinetune[MAX_WAVES];	
+	bool waveLoopType[MAX_WAVES];
+	bool waveStereo[MAX_WAVES];
+	char waveName[MAX_WAVES][32];
+
+	signed short *waveDataL[MAX_WAVES];
+	signed short *waveDataR[MAX_WAVES];
+
 };
 
 
