@@ -22,7 +22,6 @@ aditional known vst bugs/buggy vsts: ~33
 -------------------------------
 
 *** <pooplog> 1) master volume on old FF load
-*** <pooplog> 3) asio MSB 
 
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
@@ -398,6 +397,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
 *	DirectSound Output is a bit buggy.Crashes and bad sound reported.
 	[ still ? ]
+* <pooplog> 3) asio float MSB order unsupported
 
 * Importing:
 ------------
