@@ -29,18 +29,14 @@ namespace operating_system
 			//boost::mutex::scoped_lock lock(mutex()); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
 			try
 			{
-				if((*this)(level))
-				{
-					ostream()
-						<< "logger: " << level << ": "
-						<< string;
-				}
+				if((*this)(level)) ostream() << "logger: " << level << ": " << string;
 			}
 			catch(...)
 			{
 				// oh dear!
 				// fallback to std::cerr
 				std::cerr << "logger crashed" << std::endl;
+				std::cerr << "logger: " << level << ": " << string;
 			}
 		}
 		//boost::mutex & mutex() const throw() { return mutex_; }

@@ -18,7 +18,7 @@ namespace operating_system
 	class LIBRARY exception : public std::runtime_error
 	{
 	public:
-		exception(const std::string & what) : std::runtime_error(what) {}
+		exception(const std::string &) throw();
 		/// returns the message describing the cause of the exception.
 		/// same as what() but returns a std::string.
 		virtual operator const std::string() const throw();
@@ -31,13 +31,14 @@ namespace operating_system
 		class LIBRARY translated : public exception
 		{
 		public:
-			translated(unsigned int code);
+			translated(const unsigned int & code) throw();
 			/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
 			/// <bohan> This is needed for microsoft, i don't know about linux/gcc.
 			static void new_thread(const std::string & = "");
 		};
 	}
 }
+
 // causes clash with operator<<(std::ostringstream &,std::string)
 //#include <sstream>
 //inline std::ostringstream & operator<<(std::ostringstream & out, const operating_system::exception & e) { out << e.what(); return out; }
