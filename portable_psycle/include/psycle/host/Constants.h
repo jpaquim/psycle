@@ -12,11 +12,8 @@ namespace psycle
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "ProductVersion", "x, x, x, x"
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "SpecialBuild", "msvc 7.1"
 		/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
-		//#define VERSION_NUMBER \
-			"$Revision$" \
-			"$Date$" \
-			// "Release 1.7.7.0"
-
+		#define VERSION_NUMBER "Release 1.7.7.0" /* "$Revision$ $Date$" */
+			
 		/// number of samples per tweak slide update
 		#define TWEAK_SLIDE_SAMPLES		64
 		/// number of tws commands that can be active on one machine
