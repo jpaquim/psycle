@@ -73,9 +73,8 @@ BOOL CPsycleApp::InitInstance()
 	{
 		if (!Global::pConfig->Read())
 		{
-			MessageBox(pFrame->m_wndView,"Since this is your first time using Psycle, please take a moment to configure \
-the directories and the Input/Output configuration.","Psycle Configuration",MB_OK);
 			CConfigDlg dlg("Psycle configuration");
+			Global::pConfig->_outputDriverIndex=1; // Set waveout as default.
 			dlg.Init(Global::pConfig);
 			if (dlg.DoModal() == IDOK)
 			{
@@ -94,7 +93,7 @@ the directories and the Input/Output configuration.","Psycle Configuration",MB_O
 		NULL);
 
 	// The one and only window has been initialized, so show and update it.
-	pFrame->ShowWindow(SW_MAXIMIZE);
+	pFrame->ShowWindow(SW_MAXIMIZE); // This call causes two "first-chance Exception". why?
 	pFrame->UpdateWindow();
 	// Sets Icon
 	HICON tIcon;

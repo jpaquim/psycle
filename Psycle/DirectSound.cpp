@@ -344,13 +344,13 @@ void DirectSound::ReadConfig()
 
 	// Default configuration
 	//
-	_numBuffers = 2;
-	_bufferSize = 8192;
+	_numBuffers = 4;
+	_bufferSize = 4096;
 	_deviceIndex = 0;
 	_pDsGuid = NULL;
 	_dither = false;
 	_samplesPerSec = 44100;
-	_exclusive = true;
+	_exclusive = false;
 
 	if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
 	{
