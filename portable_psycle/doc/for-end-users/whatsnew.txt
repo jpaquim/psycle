@@ -33,6 +33,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.14  2004/12/11 00:20:36  johan-boule
+no message
+
 Revision 1.13  2004/12/09 09:12:17  johan-boule
 note about latest bug fix
 
@@ -66,7 +69,7 @@ release to come (v1.7.7.x)
 +added a message/error logging system (see file output.log.txt) (bohan & alk & magnus)
 !fixed small problem with cursor jumping at bottom of pattern (when pattern step >1 and wrapping is disabled) (sampler)
 +added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
-!fixed bug that made some VSTs didn't save good their parameters/presets (bohan) (note from bohan: well, this bug was introduced in the 1.7.7.x series and didn't exist in 1.7.6.2, so, it's not really a bug-fix compared to previous stable version)
+!fixed bug (only existed in previous 1.7.7.x alphas) that made some VSTs didn't save good their parameters/presets (bohan)
 
 v1.7.6.2
 --------
