@@ -402,12 +402,12 @@ namespace psycle
 				{
 					std::ostringstream s;
 					s
-						<< "VST plugin: call to plugin dispatcher: Eff: " << &plugin()
-						<< " Opcode = " << exceptions::dispatch_errors::operation_description(operation)
-						<< " Index = " << index
-						<< " Value = " << value
-						<< " Ptr = " << ptr
-						<< " Opt = " << opt;
+						<< "VST plugin: call to plugin dispatcher: plugin address: " << &plugin()
+						<< ", opcode: " << exceptions::dispatch_errors::operation_description(operation)
+						<< ", index: " << index
+						<< ", value = " << value
+						<< ", ptr = " << ptr
+						<< ", opt = " << opt;
 					host::loggers::trace(s.str());
 				}
 				#endif
