@@ -36,6 +36,10 @@ Sampler::Sampler()
 
 		_voices[i].effCmd = SAMPLER_CMD_NONE;
 	}
+	for (i = 0; i < MAX_TRACKS; i++)
+	{
+		lastInstrument[i]=255;
+	}
 }
 
 void Sampler::Init(void)
@@ -520,18 +524,33 @@ void Sampler::Tick(
 	int channel,
 	PatternEntry* pData)
 {
-	int voice;
-	int useVoice = -1;
-
 	if ( pData->_note > 120 ) // don't process twk , twf of Mcm Commands
 	{
 		if ( pData->_cmd == 0 || pData->_note != 255) return; // Return in everything but commands!
 	}
 	if ( _mute ) return; // Avoid new note entering when muted.
 
+	int voice;
+	int useVoice = -1;
+
+	PatternEntry data = *pData;
+
+	if (data._inst >= 255)
+	{
+		data._inst = lastInstrument[channel];
+		if (data._inst >= 255)
+		{
+			return;  // no previous sample
+		}
+	}
+	else
+	{
+		data._inst = lastInstrument[channel] = pData->_inst;
+	}
+
 	// Check some special commands like Portamento to note. Wasn't fully implemented, this is why
 	// it is disabled.
-/*	if ( pData->_cmd == SAMPLER_CMD_PORTA2NOTE )
+/*	if ( data._cmd == SAMPLER_CMD_PORTA2NOTE )
 	{
 		for (voice=0;voice<_numVoices; voice++)  // Find the...
 		{
@@ -544,30 +563,30 @@ void Sampler::Tick(
 			}
 		}
 		if (useVoice == -1) return; // No playing note found.
-		if ( pData->_parameter == 0 ) {
+		if ( data._parameter == 0 ) {
 			_voices[useVoice].effCmd=_voices[useVoice].effOld;
 			return;
 		}
-		else if (( pData->_note < 120 ))
+		else if (( data._note < 120 ))
 		{
 			_voices[useVoice].effCmd=SAMPLER_CMD_PORTA2NOTE;
-			_voices[useVoice].effVal=(float)(pData->_parameter*pData->_parameter)*0.001f;
+			_voices[useVoice].effVal=(float)(data._parameter*data._parameter)*0.001f;
 
 			int layer = 0; // Change this when adding working Layering code.
-			float const finetune = Global::_pSong->waveFinetune[pData->_inst][layer]*0.00390625f;
-			_voices[useVoice].effPortaNote= (int)(pow(2.0f, (pData->_note-48 +finetune)/12.0f)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+			float const finetune = Global::_pSong->waveFinetune[data._inst][layer]*0.00390625f;
+			_voices[useVoice].effPortaNote= (int)(pow(2.0f, (data._note-48 +finetune)/12.0f)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 		}
 		else {
 			_voices[useVoice].effCmd=SAMPLER_CMD_PORTA2NOTE;
-			_voices[useVoice].effVal=(float)(pData->_parameter*pData->_parameter)*0.001f;
+			_voices[useVoice].effVal=(float)(data._parameter*data._parameter)*0.001f;
 		}
 		return;
 	}
 	else if (effCmd== SAMPLER_CMD_PORTA2NOTE) effCmd=SAMPLER_CMD_NONE;
 */
-	if ( pData->_note < 120 )	// Handle Note On.
+	if ( data._note < 120 )	// Handle Note On.
 	{
-		if ( Global::_pSong->waveLength[pData->_inst][0] == 0 ) return; // if no wave, return.
+		if ( Global::_pSong->_instruments[data._inst].waveLength[0] == 0 ) return; // if no wave, return.
 
 		for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
 		{
@@ -621,7 +640,7 @@ void Sampler::Tick(
 																	 // Think on a slow fadeout and changing panning
 				(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 			{
-				if ( pData->_note == 120 ) NoteOff(voice);//  Handle Note Off
+				if ( data._note == 120 ) NoteOff(voice);//  Handle Note Off
 				useVoice=voice;
 			}
 		}
@@ -631,7 +650,7 @@ void Sampler::Tick(
 	// If you want to make a command that controls more than one voice (the entire channel, for
 	// example) you'll need to change this. Otherwise, add it to VoiceTick().
 
-	VoiceTick(useVoice,pData); 
+	VoiceTick(useVoice,&data); 
 }
 
 int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
@@ -672,7 +691,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 //  All this mess should be really changed with classes using the "operator=" to "copy" values.
 
 	int layer = 0; // Change this when adding working Layering code.
-	int twlength = Global::_pSong->waveLength[pEntry->_inst][layer];
+	int twlength = Global::_pSong->_instruments[pEntry->_inst].waveLength[layer];
 	
 	if (pEntry->_note < 120 && twlength > 0)
 	{
@@ -718,17 +737,17 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		
 		// Init Wave
 		//
-		pVoice->_wave._pL = Global::_pSong->waveDataL[pVoice->_instrument][layer];
-		pVoice->_wave._pR = Global::_pSong->waveDataR[pVoice->_instrument][layer];
-		pVoice->_wave._stereo = Global::_pSong->waveStereo[pVoice->_instrument][layer];
+		pVoice->_wave._pL = Global::_pSong->_instruments[pVoice->_instrument].waveDataL[layer];
+		pVoice->_wave._pR = Global::_pSong->_instruments[pVoice->_instrument].waveDataR[layer];
+		pVoice->_wave._stereo = Global::_pSong->_instruments[pVoice->_instrument].waveStereo[layer];
 		pVoice->_wave._length = twlength;
 		
 		// Init loop
-		if (Global::_pSong->waveLoopType[pVoice->_instrument][layer])
+		if (Global::_pSong->_instruments[pVoice->_instrument].waveLoopType[layer])
 		{
 			pVoice->_wave._loop = true;
-			pVoice->_wave._loopStart = Global::_pSong->waveLoopStart[pVoice->_instrument][layer];
-			pVoice->_wave._loopEnd = Global::_pSong->waveLoopEnd[pVoice->_instrument][layer];
+			pVoice->_wave._loopStart = Global::_pSong->_instruments[pVoice->_instrument].waveLoopStart[layer];
+			pVoice->_wave._loopEnd = Global::_pSong->_instruments[pVoice->_instrument].waveLoopEnd[layer];
 		}
 		else
 		{
@@ -745,11 +764,11 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 		}	
 		else
 		{
-			float const finetune = CValueMapper::Map_255_1(Global::_pSong->waveFinetune[pVoice->_instrument][layer]);
+			float const finetune = CValueMapper::Map_255_1(Global::_pSong->_instruments[pVoice->_instrument].waveFinetune[layer]);
 #if defined(_WINAMP_PLUGIN_)
-			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->waveTune[pVoice->_instrument][layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_samplesPerSec));
+			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_instruments[pVoice->_instrument].waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_samplesPerSec));
 #else
-			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->waveTune[pVoice->_instrument][layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec));
+			pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_instruments[pVoice->_instrument].waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec));
 #endif // _WINAMP_PLUGIN_
 		}
 		
@@ -768,7 +787,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 
 		// Calculating volume coef ---------------------------------------
 		//
-		pVoice->_wave._vol = (float)Global::_pSong->waveVolume[pVoice->_instrument][layer]*0.01f;
+		pVoice->_wave._vol = (float)Global::_pSong->_instruments[pVoice->_instrument].waveVolume[layer]*0.01f;
 
 		if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
 		{
@@ -867,7 +886,7 @@ int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
 	{
 		// Calculating volume coef ---------------------------------------
 		//
-		pVoice->_wave._vol = (float)Global::_pSong->waveVolume[pVoice->_instrument][layer]*0.01f;
+		pVoice->_wave._vol = (float)Global::_pSong->_instruments[pVoice->_instrument].waveVolume[layer]*0.01f;
 
 		if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
 		

@@ -25,6 +25,10 @@ X low priority
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
 	<bdzld> yep, or if the sample rate is invalid
 
++ add an editing mode that does not enter the istrument or machine
+
+** fm7 locks up psycle on parameter change midi command
+
 *** sometimes psycle changes the length of a block for no reason
 * The play block feature doesn't work.
 * When 'cursor always down' is enabled u can't insert values on the last row

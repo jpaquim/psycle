@@ -37,27 +37,22 @@ char name[]; // null terminated string
 char author[]; // null terminated string
 char comment[]; // null terminated string
 
-===================
-SEQUENCE INFO
-===================
-HEADER:
-id = "SEQI"; 
-version = 0;
-size = (6*sizeof(int))+sizeof(byte);
+		===================
+		SONG INFO
+		===================
+		HEADER:
+		id = "SNGI"; 
+		version = 0;
+		size = (4*sizeof(int))+sizeof(byte);
 
-DATA:
-int sequenceLength; // length of sequence 
-	// Label: plgt - Desc : Contains the limit of the playable sequence. The number just 
-	// indicates where the user has set the last position. i.e. : playorder[plgt] should not be played back.
-int numTracks; 
-	// Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks
-	// Values: from 4 to 64
-int numPatterns; 
-	// Label: pnum // Desc : Contains the number of patterns stored in the file.
-int bpm; // bpm of song (0-255) - int incase of future expansion?
-int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
-byte currentoctave; // curent octave on keyboard (0-9)
-int sequenceWidth; // * number of sequence columns for multipattern
+		DATA:
+		int numTracks; 
+			// Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks
+			// Values: from 4 to 64
+		int bpm; // bpm of song (0-255) - int incase of future expansion?
+		int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
+		int currentoctave; // curent octave on keyboard (0-9)
+		int sequenceWidth; // * number of sequence columns for multipattern
 
 ===================
 SEQUENCE DATA
@@ -125,8 +120,8 @@ typedef enum
 }
 MachineType;
 
-byte index; // which machine we are loading
-byte type; // Desc: The type of machine that it is.
+int index; // which machine we are loading
+int type; // Desc: The type of machine that it is.
 int x; // x position in machine view
 int y; // y position of the machine in the machine view
 int pan; // Desc: Indicates the value of the panning in the machine box. It affects all outputs.

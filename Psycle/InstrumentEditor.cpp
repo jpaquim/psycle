@@ -111,7 +111,7 @@ BOOL CInstrumentEditor::OnInitDialog()
 void CInstrumentEditor::WaveUpdate()
 {
 	if(_pSong->waveSelected<0)_pSong->waveSelected=0;
-	if(_pSong->waveSelected>15)_pSong->waveSelected=15;
+	if(_pSong->waveSelected>=MAX_WAVES)_pSong->waveSelected=MAX_WAVES-1;
 
 	int sw = _pSong->waveSelected;
 	int si = _pSong->instSelected;
@@ -145,11 +145,11 @@ void CInstrumentEditor::WaveUpdate()
 	m_loopedit.SetWindowText(buffer);
 
 	// Volume bar
-	m_volumebar.SetPos(_pSong->waveVolume[si][sw]);
-	m_finetune.SetPos(_pSong->waveFinetune[si][sw]+256);
+	m_volumebar.SetPos(_pSong->_instruments[si].waveVolume[sw]);
+	m_finetune.SetPos(_pSong->_instruments[si].waveFinetune[sw]+256);
 
 	// Set looptype
-	if(_pSong->waveLoopType[si][sw])
+	if(_pSong->_instruments[si].waveLoopType[sw])
 	sprintf(buffer,"Forward");
 	else
 	sprintf(buffer,"Off");
@@ -158,13 +158,13 @@ void CInstrumentEditor::WaveUpdate()
 
 	// Display Loop Points & Wave Length
 	
-	sprintf(buffer,"%d",_pSong->waveLoopStart[si][sw]);
+	sprintf(buffer,"%d",_pSong->_instruments[si].waveLoopStart[sw]);
 	m_loopstart.SetWindowText(buffer);
 
-	sprintf(buffer,"%d",_pSong->waveLoopEnd[si][sw]);
+	sprintf(buffer,"%d",_pSong->_instruments[si].waveLoopEnd[sw]);
 	m_loopend.SetWindowText(buffer);
 
-	sprintf(buffer,"%d",_pSong->waveLength[si][sw]);
+	sprintf(buffer,"%d",_pSong->_instruments[si].waveLength[sw]);
 	m_wlen.SetWindowText(buffer);
 
 }
@@ -177,9 +177,9 @@ void CInstrumentEditor::OnLoopoff()
 int si = _pSong->instSelected;
 int sw = _pSong->waveSelected;
 
-	if(_pSong->waveLoopType[si][sw])
+	if(_pSong->_instruments[si].waveLoopType[sw])
 	{
-	_pSong->waveLoopType[si][sw]=0;
+	_pSong->_instruments[si].waveLoopType[sw]=0;
 	WaveUpdate();
 	}
 }
@@ -189,9 +189,9 @@ void CInstrumentEditor::OnLoopforward()
 int sw=_pSong->waveSelected;
 int si=_pSong->instSelected;
 
-	if(!_pSong->waveLoopType[si][sw])
+	if(!_pSong->_instruments[si].waveLoopType[sw])
 	{
-	_pSong->waveLoopType[si][sw]=1;
+	_pSong->_instruments[si].waveLoopType[sw]=1;
 	WaveUpdate();
 	}
 }
@@ -205,9 +205,9 @@ int si=_pSong->instSelected;
 int sw=_pSong->waveSelected;
 char buffer[8];
 
-	_pSong->waveVolume[si][sw]=m_volumebar.GetPos();
+	_pSong->_instruments[si].waveVolume[sw]=m_volumebar.GetPos();
 	
-	sprintf(buffer,"%d%%",_pSong->waveVolume[si][sw]);
+	sprintf(buffer,"%d%%",_pSong->_instruments[si].waveVolume[sw]);
 	m_volabel.SetWindowText(buffer);
 
 	*pResult = 0;
@@ -369,9 +369,9 @@ void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 	char buffer[8];
 
 	if(cando)
-	_pSong->waveFinetune[si][sw]=m_finetune.GetPos()-256;
+	_pSong->_instruments[si].waveFinetune[sw]=m_finetune.GetPos()-256;
 	
-	sprintf(buffer,"%d",_pSong->waveFinetune[si][sw]);
+	sprintf(buffer,"%d",_pSong->_instruments[si].waveFinetune[sw]);
 	m_finelabel.SetWindowText(buffer);
 
 	*pResult = 0;

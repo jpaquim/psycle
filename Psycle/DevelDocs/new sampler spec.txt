@@ -10,14 +10,11 @@ Instrument - global params for entire instrument:
 -portamento speed
 -new note action type (note off, cut, continue, crossfade, etc.)
 -pan - main pan
-        - pitch pan toggle
-        - pan_pitch_1
-        - pan at pan_pitch_1
-        - pan_pitch_2
-        - pan at pan_pitch_2
+        - pitch pan amount (%/octave)
+        - pan_pitch center note
 -number of filters (0-4) * could be overkill
 -number of shapers (0-4) * could be overkill
--number of lfos (0-255)
+-number of lfos (0-32)
 -number of envelopes (0-255)
 -number of velocity splits (1-16)
 -number of samples (0-255)
@@ -48,14 +45,14 @@ Filter Data
 - routing position
 - cutoff
 - resonance
-- cutoff "follow note" toggle (ie cutoff = note freq + cutoff param)
+- cutoff "follow note" amount (ie cutoff = note freq + cutoff param) %/octave
+- cutoff "follow note" center note
 
 ================================
 
 Shaper Data
 
 - type
-- mixing method
 - routing position
 - gain
 

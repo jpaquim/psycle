@@ -127,6 +127,7 @@ protected:
 	int VoiceTick(int channel, PatternEntry* pData);
 	inline void TickEnvelope(int voice);
 	inline void TickFilterEnvelope(int voice);
+	unsigned char lastInstrument[MAX_TRACKS];
 	static inline int alteRand(int x)
 	{
 		return (x*rand())/32768;

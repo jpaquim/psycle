@@ -256,7 +256,7 @@ void CWaveEdChildView::GenerateAndShow()
 
 void  CWaveEdChildView::SetViewData(int ins, int wav)
 {
-	int wl=_pSong->waveLength[ins][wav];
+	int wl=_pSong->_instruments[ins].waveLength[wav];
 
 	wsInstrument=ins;	// Do not put inside of "if(wl)". Pasting needs this.
 	wsWave=wav;
@@ -266,12 +266,12 @@ void  CWaveEdChildView::SetViewData(int ins, int wav)
 		wdWave=true;
 			
 		wdLength=wl;
-		wdLeft=_pSong->waveDataL[ins][wav];
-		wdRight=_pSong->waveDataR[ins][wav];
-		wdStereo=_pSong->waveStereo[ins][wav];
-		wdLoop=_pSong->waveLoopType[ins][wav];
-		wdLoopS=_pSong->waveLoopStart[ins][wav];
-		wdLoopE=_pSong->waveLoopEnd[ins][wav];
+		wdLeft=_pSong->_instruments[ins].waveDataL[wav];
+		wdRight=_pSong->_instruments[ins].waveDataR[wav];
+		wdStereo=_pSong->_instruments[ins].waveStereo[wav];
+		wdLoop=_pSong->_instruments[ins].waveLoopType[wav];
+		wdLoopS=_pSong->_instruments[ins].waveLoopStart[wav];
+		wdLoopE=_pSong->_instruments[ins].waveLoopEnd[wav];
 
 		diStart=0;
 		diLength=wl;
@@ -349,15 +349,15 @@ void CWaveEdChildView::OnRButtonDown(UINT nFlags, CPoint point)
 			CRect rect;
 			GetClientRect(&rect);
 			wdLoopE = diStart+((x*diLength)/rect.Width());
-			_pSong->waveLoopEnd[wsInstrument][wsWave]=wdLoopE;
-			if (_pSong->waveLoopStart[wsInstrument][wsWave]> wdLoopE )
+			_pSong->_instruments[wsInstrument].waveLoopEnd[wsWave]=wdLoopE;
+			if (_pSong->_instruments[wsInstrument].waveLoopStart[wsWave]> wdLoopE )
 			{
-				_pSong->waveLoopStart[wsInstrument][wsWave]=wdLoopE;
+				_pSong->_instruments[wsInstrument].waveLoopStart[wsWave]=wdLoopE;
 			}
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->waveLoopType[wsInstrument][wsWave]=true;
+				_pSong->_instruments[wsInstrument].waveLoopType[wsWave]=true;
 			}
 			_pSong->Invalided=false;
 			drawwave=true;
@@ -389,15 +389,15 @@ void CWaveEdChildView::OnLButtonDown(UINT nFlags, CPoint point)
 			CRect rect;
 			GetClientRect(&rect);
 			wdLoopS = diStart+((x*diLength)/rect.Width());
-			_pSong->waveLoopStart[wsInstrument][wsWave]=wdLoopS;
-			if (_pSong->waveLoopEnd[wsInstrument][wsWave] < wdLoopS )
+			_pSong->_instruments[wsInstrument].waveLoopStart[wsWave]=wdLoopS;
+			if (_pSong->_instruments[wsInstrument].waveLoopEnd[wsWave] < wdLoopS )
 			{
-				_pSong->waveLoopEnd[wsInstrument][wsWave]=wdLoopS;
+				_pSong->_instruments[wsInstrument].waveLoopEnd[wsWave]=wdLoopS;
 			}
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->waveLoopType[wsInstrument][wsWave]=true;
+				_pSong->_instruments[wsInstrument].waveLoopType[wsWave]=true;
 			}
 			_pSong->Invalided=false;
 			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
@@ -764,9 +764,9 @@ void CWaveEdChildView::OnConvertMono()
 			*(wdLeft + c) = ( *(wdLeft + c) + *(wdRight + c) ) / 2;
 		}
 
-		_pSong->waveStereo[wsInstrument][wsWave] = false;
+		_pSong->_instruments[wsInstrument].waveStereo[wsWave] = false;
 		wdStereo = false;
-		delete _pSong->waveDataR[wsInstrument][wsWave];
+		delete _pSong->_instruments[wsInstrument].waveDataR[wsWave];
 		Invalidate(true);
 		_pSong->Invalided=false;
 	}
@@ -793,18 +793,18 @@ void CWaveEdChildView::OnEditDelete()
 				pTmpR= new signed short[datalen];
 				CopyMemory(pTmpR, wdRight, blStart*sizeof(short));
 				CopyMemory( (pTmpR+blStart), (wdRight + blStart + blLength), (wdLength - blStart - blLength)*sizeof(short) );
-				delete _pSong->waveDataR[wsInstrument][wsWave];
-				_pSong->waveDataR[wsInstrument][wsWave] = pTmpR;
+				delete _pSong->_instruments[wsInstrument].waveDataR[wsWave];
+				_pSong->_instruments[wsInstrument].waveDataR[wsWave] = pTmpR;
 				wdRight = pTmpR;
 			}
 
 			CopyMemory( pTmp, wdLeft, blStart*sizeof(short) );
 			CopyMemory( (pTmp+blStart), (wdLeft + blStart + blLength), (wdLength - blStart - blLength)*sizeof(short) );
-			delete _pSong->waveDataL[wsInstrument][wsWave];
+			delete _pSong->_instruments[wsInstrument].waveDataL[wsWave];
 			
-			_pSong->waveDataL[wsInstrument][wsWave] = pTmp;
+			_pSong->_instruments[wsInstrument].waveDataL[wsWave] = pTmp;
 			wdLeft = pTmp;
-			_pSong->waveLength[wsInstrument][wsWave] = datalen;
+			_pSong->_instruments[wsInstrument].waveLength[wsWave] = datalen;
 			wdLength = datalen;
 		}
 		else
@@ -1007,21 +1007,21 @@ void CWaveEdChildView::OnEditPaste()
 			_pSong->WavAlloc(wsInstrument, wsWave, (pFmt->nChannels==2) ? true : false, (pFmt->nChannels==2) ? (DWORD)(lData*0.25) : (DWORD)(lData*0.5), "Clipboard");
 			if (pFmt->nChannels == 1)
 			{
-				memcpy(_pSong->waveDataL[wsInstrument][wsWave], pData, lData);
+				memcpy(_pSong->_instruments[wsInstrument].waveDataL[wsWave], pData, lData);
 				wdLength = (DWORD)(lData*0.5);
-				wdLeft  = _pSong->waveDataL[wsInstrument][wsWave];
+				wdLeft  = _pSong->_instruments[wsInstrument].waveDataL[wsWave];
 				wdStereo = false;
 			}
 			else if (pFmt->nChannels == 2)
 			{
 				for (c = 0; c < lData*0.5; c += 2)
 				{
-					*(_pSong->waveDataL[wsInstrument][wsWave] + (long)(c*0.5)) = *((signed short*)pData + c);
-					*(_pSong->waveDataR[wsInstrument][wsWave] + (long)(c*0.5)) = *((signed short*)pData + c + 1);
+					*(_pSong->_instruments[wsInstrument].waveDataL[wsWave] + (long)(c*0.5)) = *((signed short*)pData + c);
+					*(_pSong->_instruments[wsInstrument].waveDataR[wsWave] + (long)(c*0.5)) = *((signed short*)pData + c + 1);
 				}
 				wdLength = (DWORD)(lData *0.25);
-				wdLeft = _pSong->waveDataL[wsInstrument][wsWave];
-				wdRight = _pSong->waveDataR[wsInstrument][wsWave];
+				wdLeft = _pSong->_instruments[wsInstrument].waveDataL[wsWave];
+				wdRight = _pSong->_instruments[wsInstrument].waveDataR[wsWave];
 				wdStereo = true;
 			}
 			wdWave = true;
@@ -1038,9 +1038,9 @@ void CWaveEdChildView::OnEditPaste()
 				memcpy(pTmp + blStart, pData, lData);
 				memcpy((BYTE*)pTmp + blStart*2 + lData, wdLeft + blStart, 2*(wdLength - blStart));
 
-				delete _pSong->waveDataL[wsInstrument][wsWave];
-				wdLeft = _pSong->waveDataL[wsInstrument][wsWave] = pTmp;
-				_pSong->waveLength[wsInstrument][wsWave] = wdLength + (DWORD)(lData*0.5);
+				delete _pSong->_instruments[wsInstrument].waveDataL[wsWave];
+				wdLeft = _pSong->_instruments[wsInstrument].waveDataL[wsWave] = pTmp;
+				_pSong->_instruments[wsInstrument].waveLength[wsWave] = wdLength + (DWORD)(lData*0.5);
 				wdLength = wdLength + (DWORD)(lData*0.5);
 			}
 			else if ( (pFmt->nChannels == 2) && (wdStereo == true) )
@@ -1058,11 +1058,11 @@ void CWaveEdChildView::OnEditPaste()
 				memcpy((BYTE*)pTmp + blStart*2 + (unsigned long)(lData*0.5), wdLeft + blStart, 2*(wdLength - blStart));
 				memcpy((BYTE*)pTmpR+ blStart*2 + (unsigned long)(lData*0.5), wdRight + blStart, 2*(wdLength - blStart));
 
-				delete _pSong->waveDataL[wsInstrument][wsWave];
-				wdLeft = _pSong->waveDataL[wsInstrument][wsWave] = pTmp;
-				delete _pSong->waveDataR[wsInstrument][wsWave];
-				wdRight = _pSong->waveDataR[wsInstrument][wsWave] = pTmpR;
-				_pSong->waveLength[wsInstrument][wsWave] = wdLength + (DWORD)(lData*0.25);
+				delete _pSong->_instruments[wsInstrument].waveDataL[wsWave];
+				wdLeft = _pSong->_instruments[wsInstrument].waveDataL[wsWave] = pTmp;
+				delete _pSong->_instruments[wsInstrument].waveDataR[wsWave];
+				wdRight = _pSong->_instruments[wsInstrument].waveDataR[wsWave] = pTmpR;
+				_pSong->_instruments[wsInstrument].waveLength[wsWave] = wdLength + (DWORD)(lData*0.25);
 				wdLength = wdLength + (DWORD)(lData*0.25);
 			}
 		}

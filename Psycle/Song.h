@@ -8,53 +8,10 @@
 #include "Constants.h"
 #include "FileIO.h"
 #include "SongStructs.h"
+#include "Instrument.h"
 
 class CCriticalSection;
 class Machine;
-
-class Instrument
-{
-public:
-	char _sName[32];
-
-	//////////////////////////////////////////////////////////////////
-	// Loop stuff
-
-	bool _loop;
-	int _lines;
-
-	//////////////////////////////////////////////////////////////////
-	// NNA values overview:
-	//
-	// 0 = Note Cut			[Fast Release 'Default']
-	// 1 = Note Release		[Release Stage]
-	// 2 = Note Continue	[No NNA]
-	unsigned char _NNA;
-	
-	//////////////////////////////////////////////////////////////////
-	// Amplitude Envelope overview:
-	//
-	int ENV_AT;	// Attack Time [in Samples at 44.1Khz]
-	int ENV_DT;	// Decay Time [in Samples at 44.1Khz]
-	int ENV_SL;	// Sustain Level [in %]
-	int ENV_RT;	// Release Time [in Samples at 44.1Khz]
-	
-	// Filter 
-	int ENV_F_AT;	// Attack Time [in Samples at 44.1Khz]
-	int ENV_F_DT;	// Decay Time [in Samples at 44.1Khz]
-	int ENV_F_SL;	// Sustain Level [0..128]
-	int ENV_F_RT;	// Release Time [in Samples at 44.1Khz]
-
-	int ENV_F_CO;	// Cutoff Frequency [0-127]
-	int ENV_F_RQ;	// Resonance [0-127]
-	int ENV_F_EA;	// EnvAmount [-128,128]
-	int ENV_F_TP;	// Filter Type [0-4]
-
-	int _pan;
-	bool _RPAN;
-	bool _RCUT;
-	bool _RRES;
-};
 
 class Song
 {
@@ -133,19 +90,6 @@ public:
 	// WaveData ------------------------------------------------------
 	//
 	int waveSelected;
-	char waveName[MAX_INSTRUMENTS][MAX_WAVES][32];
-	unsigned short waveVolume[MAX_INSTRUMENTS][MAX_WAVES];
-	signed short *waveDataL[MAX_INSTRUMENTS][MAX_WAVES];
-	signed short *waveDataR[MAX_INSTRUMENTS][MAX_WAVES];
-	unsigned int waveLength[MAX_INSTRUMENTS][MAX_WAVES];
-	unsigned int waveLoopStart[MAX_INSTRUMENTS][MAX_WAVES];
-	unsigned int waveLoopEnd[MAX_INSTRUMENTS][MAX_WAVES];
-	int waveTune[MAX_INSTRUMENTS][MAX_WAVES];
-	int waveFinetune[MAX_INSTRUMENTS][MAX_WAVES];	
-
-	bool waveLoopType[MAX_INSTRUMENTS][MAX_WAVES];
-	bool waveStereo[MAX_INSTRUMENTS][MAX_WAVES];
-
 	// Machines ------------------------------------------------------
 	//
 	bool _machineLock;
