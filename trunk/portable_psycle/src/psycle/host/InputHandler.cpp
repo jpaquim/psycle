@@ -564,7 +564,7 @@ namespace psycle
 				break;
 			case cdefNavPageUp:
 				//if added by sampler to move backward 16 lines when playing
-				if (Global::pPlayer->_playing)
+				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 				{
 					if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
 					else
@@ -602,7 +602,7 @@ namespace psycle
 
 			case cdefNavPageDn:
 				//if added by sampler
-				if (Global::pPlayer->_playing)
+				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 				{
 					Global::pPlayer->_lineCounter += 16;
 				}
