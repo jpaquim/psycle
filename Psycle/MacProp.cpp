@@ -93,7 +93,7 @@ void CMacProp::OnMute()
 	if ( m_view != NULL )
 	{
 		m_view->updatePar=thisMac;
-		m_view->Repaint(1);
+		m_view->Repaint(DMMacRefresh);
 	}
 }
 void CMacProp::OnBypass() 
@@ -102,7 +102,7 @@ void CMacProp::OnBypass()
 	if ( m_view != NULL )
 	{
 		m_view->updatePar=thisMac;
-		m_view->Repaint(1);
+		m_view->Repaint(DMMacRefresh);
 	}
 }
 
@@ -134,7 +134,6 @@ void CMacProp::OnSolo()
 	 }
 	if ( m_view != NULL )
 	{
-		m_view->updatePar=thisMac;
-		m_view->Repaint(0);
+		m_view->Repaint(DMAllMacsRefresh);
 	}
 }
