@@ -2524,7 +2524,7 @@ BEGIN
     ID_HELP_README          "Opens the ./doc/readme.txt File\nOpen ./doc/readme.txt"
     ID_HELP_TWEAKING        "Opens the ./doc/tweaking.txt File\nOpen ./doc/tweaking.txt"
     ID_HELP_KEYBTXT         "Opens the ./doc/keys.txt File, which describes the default keyboard configuration\nOpen ./doc/keys.txt"
-    ID_BARREC               "Record sequence\nRecord sequence"
+    ID_BARREC               "Record Notes Mode\nRecord Notes Mode"
     ID_CONFIGURATION_OPENONLYVISUALCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG "THIS IS A TESTING ONLY OPTION"
