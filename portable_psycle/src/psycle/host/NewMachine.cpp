@@ -667,15 +667,13 @@ namespace psycle
 							}
 							catch(const std::exception & e)
 							{
-								std::ostringstream s; s
-									<< typeid(e).name() << std::endl;
+								std::ostringstream s; s << typeid(e).name() << std::endl;
 								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
 							catch(...)
 							{
-								std::ostringstream s; s
-									<< "Type of exception is unknown, cannot display any further information." << std::endl;
+								std::ostringstream s; s << "Type of exception is unknown, cannot display any further information." << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
 							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
@@ -697,15 +695,14 @@ namespace psycle
 								_pPlugsInfo[currentPlugsCount]->allow = true;
 								_pPlugsInfo[currentPlugsCount]->name = vstPlug.GetName();
 								{
-									std::ostringstream oss;
-									oss << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect")
-										<< " by " << vstPlug.GetVendorName();
-									_pPlugsInfo[currentPlugsCount]->desc = oss.str();
+									std::ostringstream s;
+									s << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect") << " by " << vstPlug.GetVendorName();
+									_pPlugsInfo[currentPlugsCount]->desc = s.str();
 								}
 								{
-									std::ostringstream oss;
-									oss << vstPlug.GetVersion();
-									_pPlugsInfo[currentPlugsCount]->version = oss.str();
+									std::ostringstream s;
+									s << vstPlug.GetVersion();
+									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
 								
 								if(vstPlug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;

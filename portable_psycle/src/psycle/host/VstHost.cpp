@@ -296,24 +296,27 @@ namespace psycle
 				// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
 				proxy().setProgram(0);
 				proxy().mainsChanged(true);
-				char temp[1024];
-				if(proxy().getEffectName(temp) && temp[0])
-					_sProductName=temp;
-				else
 				{
-					std::string temp;
-					std::string::size_type pos;
-					pos = _sDllName.rfind('\\');
-					if(pos==std::string::npos)
-						temp=_sDllName;
+					char temp[32];
+					/// [bohan] \todo ProductName is a missleading name
+					/// confusion possible with: effGetProductString, // fills <ptr> with a string with product name (max 64 char)
+					if(proxy().getEffectName(temp) && temp[0]) _sProductName=temp;
 					else
-						temp=_sDllName.substr(pos+1);
-					_sProductName=temp.substr(0,temp.rfind('.'));
+					{
+						std::string temp;
+						std::string::size_type pos;
+						pos = _sDllName.rfind('\\');
+						if(pos==std::string::npos)
+							temp=_sDllName;
+						else
+							temp=_sDllName.substr(pos+1);
+						_sProductName=temp.substr(0,temp.rfind('.'));
+					}
 				}
-
-				if(overwriteName)
-					strncpy(_editName, _sProductName.c_str(), 32); // <bohan> \todo why is that 31 ?
-				_editName[31]='\0'; // <bohan> \todo why is that 31 ?
+				{
+					if(overwriteName) strncpy(_editName, _sProductName.c_str(), 32);
+					_editName[31]='\0';
+				}
 				// Compatibility hacks
 				{
 					if(_sProductName == "sc-101")
@@ -321,12 +324,11 @@ namespace psycle
 						requiresRepl = true;
 					}
 				}
-
-
-				if(proxy().getVendorString(temp) && temp[0])
-					_sVendorName = temp;
-				else
-					_sVendorName = "Unknown vendor";
+				{
+					char temp[64];
+					if(proxy().getVendorString(temp) && temp[0]) _sVendorName = temp;
+					else _sVendorName = "Unknown vendor";
+				}
 				_isSynth = proxy().flags() & effFlagsIsSynth;
 
 				instantiated = true;
