@@ -120,6 +120,11 @@ CChildView::CChildView()
 	Global::pResampler->SetQuality(RESAMPLE_LINEAR);
 	_outputActive = false;
 
+	// just give arbitrary values so OnSize doesn't give /0 error
+	// they will be filled in correctly when we switch to pattern view
+	VISLINES = 2;
+	VISTRACKS = 8;
+
 //	_getcwd(m_appdir,_MAX_PATH);
 	
 	stuffbmp.LoadBitmap(IDB_STUFF);
@@ -571,20 +576,6 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 	_pSong->viewSize.x=cx-148; // Hack to move machines boxes inside of the visible area.
 	_pSong->viewSize.y=cy-48;
 	
-	const int oldvl = VISLINES;
-	const int oldvt = VISTRACKS;
-	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
-	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
-	
-	if (VISLINES < 1) 
-	{ 
-		VISLINES = 1; 
-	}
-	if (VISTRACKS < 1) 
-	{ 
-		VISTRACKS = 1; 
-	}
-	
 	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 	{
 		TRACE("CChildView::OnResize(). Deleted bmpDC");
@@ -592,17 +583,10 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 		delete bmpDC;
 		bmpDC=NULL;
 	}
-	/*
 	if (viewMode == VMPattern)
 	{
-//		if ( oldvl != VISLINES || oldvt != VISTRACKS )
-//		{
-//			Repaint(DMResize); // DMResize does not exist yet
-			Repaint();
-//		}
+		RecalcMetrics();
 	}
-	else if ( viewMode == VMMachine ) Repaint();
-	*/
 	Repaint();
 }
 
@@ -1862,4 +1846,12 @@ void CChildView::RecalcMetrics()
 	}
 	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
 	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
+	if (VISLINES < 1) 
+	{ 
+		VISLINES = 1; 
+	}
+	if (VISTRACKS < 1) 
+	{ 
+		VISTRACKS = 1; 
+	}
 }

@@ -891,32 +891,34 @@ void CChildView::DrawPatEditor(CDC *devc)
 {
 	///////////////////////////////////////////////////////////
 	// Prepare pattern for update (Undraw guipos and playpos)
+	CRect rect;
+	CFont* oldFont;
+
 	int scrollT= tOff-rntOff;
 	int scrollL= lOff-rnlOff;
 
 	tOff = ntOff = rntOff; 
 	lOff = nlOff = rnlOff;
 
-	CBrush* oldBrush;
-	CFont* oldfont;
-	CPen* oldPen;
-	CBrush brush(Global::pConfig->pvc_background); // This affects BOX background
-	oldBrush= devc->SelectObject(&brush);
-	CPen linepen( PS_SOLID, 1, Global::pConfig->pvc_separator); // this affects BOX foreground
-	oldPen = devc->SelectObject(&linepen);
-	devc->SetBkColor(Global::pConfig->pvc_background);	// This affects TXT background
-	devc->SetTextColor(Global::pConfig->pvc_font);
-
+	oldFont= devc->SelectObject(&Global::pConfig->seqFont);
 
 	// 1 if there is a redraw header, we do that 
 	/////////////////////////////////////////////////////////////
 	// Update Mute/Solo Indicators
-	oldfont= devc->SelectObject(&Global::pConfig->seqFont);
 	if ((updatePar & DRAW_TRHEADER) || (abs(scrollT) > VISTRACKS))
 	{
+		rect.top = 0;
+		rect.bottom = YOFFSET;
 		if (XOFFSET!=1)
 		{
-			BOX(devc, 0, 0, XOFFSET-1, YOFFSET-1); // Draw lines between tracks
+			rect.left = 0;
+			rect.right = 1;
+			devc->FillSolidRect(&rect,pvc_separator[0]);
+			rect.left++;
+			rect.right = XOFFSET-1;
+			devc->FillSolidRect(&rect,pvc_background[0]);
+			devc->SetBkColor(Global::pConfig->pvc_background);	// This affects TXT background
+			devc->SetTextColor(Global::pConfig->pvc_font);
 			TXT(devc,"Line",1,1,XOFFSET-2,YOFFSET-2);
 		}
 		CDC memDC;
@@ -927,13 +929,12 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 		for(int i=tOff;i<tOff+maxt;i++)
 		{
-			CBrush newbrush(pvc_background[i+1]); // This affects BOX background
-			oldBrush= devc->SelectObject(&newbrush);
-			CPen newpen( PS_SOLID, 1, pvc_separator[i+1]); // this affects BOX foreground
-			oldPen = devc->SelectObject(&newpen);
-			BOX(devc, xOffset, 0, ROWWIDTH+1, YOFFSET); // Draw lines between track headers
-			newbrush.DeleteObject();
-			newpen.DeleteObject();
+			rect.left = xOffset;
+			rect.right = xOffset+1;
+			devc->FillSolidRect(&rect,pvc_separator[i+1]);
+			rect.left++;
+			rect.right+= ROWWIDTH-1;
+			devc->FillSolidRect(&rect,pvc_background[i+1]);
 
 			const int trackx0 = i/10;
 			const int track0x = i%10;
@@ -963,27 +964,28 @@ void CChildView::DrawPatEditor(CDC *devc)
 	{
 		TRACE("DRAW_FULL_DATA\n");
 		// draw everything
+		rect.top = YOFFSET;
+		rect.bottom = CH;
+
 		if (XOFFSET!=1)
 		{
-			CBrush newbrush(pvc_background[0]); // This affects BOX background
-			oldBrush= devc->SelectObject(&newbrush);
-			CPen newpen( PS_SOLID, 1, pvc_separator[0]); // this affects BOX foreground
-			oldPen = devc->SelectObject(&newpen);
-			BOX(devc, 0, YOFFSET-1, XOFFSET+1, CH-YOFFSET+2); // Draw lines between tracks
-			newbrush.DeleteObject();
-			newpen.DeleteObject();
+			rect.left = 0;
+			rect.right = 1;
+			devc->FillSolidRect(&rect,pvc_separator[0]);
+			rect.left++;
+			rect.right = XOFFSET-1;
+			devc->FillSolidRect(&rect,pvc_background[0]);
 		}
 		int xOffset = XOFFSET-1;
 
 		for (int i=tOff;i<tOff+maxt;i++)
 		{
-			CBrush newbrush(pvc_background[i+1]); // This affects BOX background
-			oldBrush= devc->SelectObject(&newbrush);
-			CPen newpen( PS_SOLID, 1, pvc_separator[i+1]); // this affects BOX foreground
-			oldPen = devc->SelectObject(&newpen);
-			BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-			newbrush.DeleteObject();
-			newpen.DeleteObject();
+			rect.left = xOffset;
+			rect.right = xOffset+1;
+			devc->FillSolidRect(&rect,pvc_separator[i+1]);
+			rect.left++;
+			rect.right+= ROWWIDTH-1;
+			devc->FillSolidRect(&rect,pvc_background[i+1]);
 
 			xOffset += ROWWIDTH;
 		}
@@ -996,7 +998,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 			TRACE("DRAW_BOTTOM\n");
 			if (XOFFSET!=1)
 			{
-				CRect rect;
 				rect.left=0; 
 				rect.right=XOFFSET; 
 				rect.top=YOFFSET+(maxl*ROWHEIGHT); 
@@ -1006,7 +1007,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 			int xOffset = XOFFSET;
 
-			CRect rect;
 			rect.top=YOFFSET+(maxl*ROWHEIGHT); 
 			rect.bottom=CH;
 			for(int i=tOff;i<tOff+maxt;i++)
@@ -1021,7 +1021,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 		if (maxt < VISTRACKS+1)
 		{
 			TRACE("DRAW_RIGHT\n");
-			CRect rect;
 			rect.top=0; 
 			rect.bottom=CH;  
 			rect.right=CW;
@@ -1034,42 +1033,41 @@ void CChildView::DrawPatEditor(CDC *devc)
 		if (scrollT && scrollL)
 		{
 			// scroll x AND y
-			CRect rect2;
 			CRgn rgn;
 			if (XOFFSET!=1)
 			{
 				const RECT linR = {0, YOFFSET, XOFFSET, CH};
-				devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect2);
+				devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect);
 			}
 			const RECT patR = {XOFFSET,YOFFSET , CW, CH};
-			devc->ScrollDC(scrollT*ROWWIDTH,scrollL*ROWHEIGHT,&patR,&patR,&rgn,&rect2);
+			devc->ScrollDC(scrollT*ROWWIDTH,scrollL*ROWHEIGHT,&patR,&patR,&rgn,&rect);
 			if (updatePar & DRAW_TRHEADER)
 			{
 				if (scrollT > 0)
 				{	
+					rect.top = YOFFSET;
+					rect.bottom = CH;
 					int xOffset = XOFFSET-1;
 					for (int i = 0; i < scrollT; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
 					xOffset = XOFFSET-1+((VISTRACKS-scrollT)*ROWWIDTH);
 					for (i = VISTRACKS-scrollT; i < VISTRACKS+1; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1088,29 +1086,29 @@ void CChildView::DrawPatEditor(CDC *devc)
 				}
 				else 
 				{	
+					rect.top = YOFFSET;
+					rect.bottom = CH;
 					int xOffset = XOFFSET-1;
 					for (int i = 0; i < 1-scrollT; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
 					xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
 					for (i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1132,32 +1130,33 @@ void CChildView::DrawPatEditor(CDC *devc)
 			{
 				// scroll header too
 				const RECT trkR = {XOFFSET, 0, CW, YOFFSET-1};
-				devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect2);
+				devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect);
 				if (scrollT > 0)
 				{	
+					rect.top = 0;
+					rect.bottom = CH;
 					int xOffset = XOFFSET-1;
 					for (int i = 0; i < scrollT; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
+					rect.top = YOFFSET;
 					xOffset = XOFFSET-1+((VISTRACKS-scrollT)*ROWWIDTH);
 					for (i = VISTRACKS-scrollT; i < VISTRACKS+1; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1182,14 +1181,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 					for(i=tOff;i<tOff+scrollT;i++)
 					{
-						CBrush newbrush(pvc_background[i+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, 0, ROWWIDTH+1, YOFFSET); // Draw lines between track headers
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
-
 						const int trackx0 = i/10;
 						const int track0x = i%10;
 
@@ -1214,29 +1205,30 @@ void CChildView::DrawPatEditor(CDC *devc)
 				}
 				else
 				{	
+					rect.top = YOFFSET;
+					rect.bottom = CH;
 					int xOffset = XOFFSET-1;
 					for (int i = 0; i < 1-scrollT; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
+					rect.top = 0;
 					xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
 					for (i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
 					{
-						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1261,14 +1253,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 					for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
 					{
-						CBrush newbrush(pvc_background[i+1]); // This affects BOX background
-						oldBrush= devc->SelectObject(&newbrush);
-						CPen newpen( PS_SOLID, 1, pvc_separator[i+1]); // this affects BOX foreground
-						oldPen = devc->SelectObject(&newpen);
-						BOX(devc, xOffset, 0, ROWWIDTH+1, YOFFSET); // Draw lines between track headers
-						newbrush.DeleteObject();
-						newpen.DeleteObject();
-
 						const int trackx0 = i/10;
 						const int track0x = i%10;
 
@@ -1337,25 +1321,26 @@ void CChildView::DrawPatEditor(CDC *devc)
 			//			  add to draw list uncovered area
 			if (scrollT)
 			{
-				CRect rect2;
 				CRgn rgn;
 				if (updatePar & DRAW_TRHEADER)
 				{
 					const RECT patR = {XOFFSET,YOFFSET , CW, CH};
-					devc->ScrollDC(scrollT*ROWWIDTH,0,&patR,&patR,&rgn,&rect2);
+					devc->ScrollDC(scrollT*ROWWIDTH,0,&patR,&patR,&rgn,&rect);
 					if ( scrollT > 0 )
 					{	
 						TRACE("DRAW_HSCROLL+\n");
+						rect.top = YOFFSET;
+						rect.bottom = CH;
+
 						int xOffset = XOFFSET-1;
 						for (int i = 0; i < scrollT; i++)
 						{
-							CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-							oldBrush= devc->SelectObject(&newbrush);
-							CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-							oldPen = devc->SelectObject(&newpen);
-							BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-							newbrush.DeleteObject();
-							newpen.DeleteObject();
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+							devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+							rect.left++;
+							rect.right+= ROWWIDTH-1;
+							devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1364,16 +1349,17 @@ void CChildView::DrawPatEditor(CDC *devc)
 					else 
 					{	
 						TRACE("DRAW_HSCROLL-\n");
+						rect.top = YOFFSET;
+						rect.bottom = CH;
 						int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
 						for (int i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
 						{
-							CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-							oldBrush= devc->SelectObject(&newbrush);
-							CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-							oldPen = devc->SelectObject(&newpen);
-							BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-							newbrush.DeleteObject();
-							newpen.DeleteObject();
+							rect.left = xOffset;
+							rect.right = xOffset+1;
+							devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+							rect.left++;
+							rect.right+= ROWWIDTH-1;
+							devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1384,20 +1370,21 @@ void CChildView::DrawPatEditor(CDC *devc)
 				{
 					// scroll header too
 					const RECT trkR = {XOFFSET, 0, CW, CH};
-					devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect2);
+					devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect);
 					if (scrollT > 0)
 					{	
 						TRACE("DRAW_HSCROLL+\n");
+						rect.top = 0;
+						rect.bottom = CH;
 						int xOffset = XOFFSET-1;
 						for (int i = 0; i < scrollT; i++)
 						{
-							CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-							oldBrush= devc->SelectObject(&newbrush);
-							CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-							oldPen = devc->SelectObject(&newpen);
-							BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-							newbrush.DeleteObject();
-							newpen.DeleteObject();
+							rect.left = xOffset;
+							rect.right = xOffset+1;
+							devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+							rect.left++;
+							rect.right+= ROWWIDTH-1;
+							devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1411,14 +1398,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 						for(i=tOff;i<tOff+scrollT;i++)
 						{
-							CBrush newbrush(pvc_background[i+1]); // This affects BOX background
-							oldBrush= devc->SelectObject(&newbrush);
-							CPen newpen( PS_SOLID, 1, pvc_separator[i+1]); // this affects BOX foreground
-							oldPen = devc->SelectObject(&newpen);
-							BOX(devc, xOffset, 0, ROWWIDTH+1, YOFFSET); // Draw lines between track headers
-							newbrush.DeleteObject();
-							newpen.DeleteObject();
-
 							const int trackx0 = i/10;
 							const int track0x = i%10;
 
@@ -1444,16 +1423,17 @@ void CChildView::DrawPatEditor(CDC *devc)
 					else 
 					{	
 						TRACE("DRAW_HSCROLL-\n");
+						rect.top = 0;
+						rect.bottom = CH;
 						int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
 						for (int i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
 						{
-							CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
-							oldBrush= devc->SelectObject(&newbrush);
-							CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
-							oldPen = devc->SelectObject(&newpen);
-							BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
-							newbrush.DeleteObject();
-							newpen.DeleteObject();
+							rect.left = xOffset;
+							rect.right = xOffset+1;
+							devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+							rect.left++;
+							rect.right+= ROWWIDTH-1;
+							devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1467,14 +1447,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 						for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
 						{
-							CBrush newbrush(pvc_background[i+1]); // This affects BOX background
-							oldBrush= devc->SelectObject(&newbrush);
-							CPen newpen( PS_SOLID, 1, pvc_separator[i+1]); // this affects BOX foreground
-							oldPen = devc->SelectObject(&newpen);
-							BOX(devc, xOffset, 0, ROWWIDTH+1, YOFFSET); // Draw lines between track headers
-							newbrush.DeleteObject();
-							newpen.DeleteObject();
-
 							const int trackx0 = i/10;
 							const int track0x = i%10;
 
@@ -1532,9 +1504,8 @@ void CChildView::DrawPatEditor(CDC *devc)
 			{
 				const RECT linR = {0, YOFFSET, CW, CH};
 
-				CRect rect2;
 				CRgn rgn;
-				devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect2);
+				devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect);
 				// add visible part to 
 				if (scrollL > 0)
 				{	
@@ -1614,11 +1585,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	selpos=newselpos;
 	editlast=editcur;
 
-	devc->SelectObject(oldBrush);
-	devc->SelectObject(oldPen);
-	devc->SelectObject(oldfont);
-	brush.DeleteObject();
-	linepen.DeleteObject();
+	devc->SelectObject(oldFont);
 
 	updateMode = DMNone;
 	updatePar = 0;
