@@ -31,8 +31,6 @@ namespace psycle
 			pConfig = new Configuration;
 			pResampler = new Cubic;
 			pResampler->SetQuality(RESAMPLE_LINEAR);
-			pLogWindow = new CLoggingWindow;
-			host::logger(host::logger::info, "logger initialized"); // huh? doesn't show...
 			#if !defined _WINAMP_PLUGIN_
 				pInputHandler = new InputHandler;
 			#endif
