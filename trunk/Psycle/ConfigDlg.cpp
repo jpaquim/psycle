@@ -85,6 +85,7 @@ void CConfigDlg::Init(
 	AddPage(&_dirDlg);
 	AddPage(&_skinDlg);
 	AddPage(&_outputDlg);
+	AddPage(&_midiDlg);
 }
 
 int CConfigDlg::DoModal() 
