@@ -1,31 +1,42 @@
-* Legend
---------
-*=bug
-!=change
-+=addition
-?=hmmm
-FF=requires file format update
-AF=API change
+######
+Legend
+######
 
-XXX very important, top priority
-XX important
-X low priority
+	*=bug
+	!=change
+	+=addition
+	?=hmmm
+	FF=requires file format update
+	AF=API change
 
-[blah]  <- Notes written by developers
+	XXX very important, top priority
+	XX important
+	X low priority
+
+	[blah]  <- Notes written by developers
 
 
 
-rough bug count: ~45 (not all are bugs)
-aditional known vst bugs/buggy vsts: ~33
+##########
+item count
+##########
 
-* New and unsorted and untested
--------------------------------
+	rough bug count: ~45 (not all are bugs)
+	aditional known vst bugs/buggy vsts: ~33
+
+
+
+################################################################################################################################################################################################
+################################################################################################################################################################################################
+################################################################################################################################################################################################
+New and unsorted and untested
+##############################
+
 
 ** jmr2@macs.hw.ac.uk: * when loading a song it doesnt move to first order
 * jmr2@macs.hw.ac.uk: * when playing a song and pressing sort causes it to play the wrong pattern 
 
 ** MIDI clock sync - does it work, or is it unsupported?
-=======
 
 ////////////////////
 <GabeCrowe> in the pattern view.
@@ -56,9 +67,6 @@ Hope this makes stuff clear.
 
 
 /////////////////
-
-
-
 
 *** When loading a stereo sample and reversing it in the wave editor (Psycle 1.74), a small artefact
   is added to the beginning, and when I try to cut this Psycle crashes. This doesn't seem to happen
@@ -126,8 +134,20 @@ Hope this makes stuff clear.
 	 could be called CUT ]
 
 
-* Machines
-------------
+################################################################################################################################################################################################
+################################################################################################################################################################################################
+################################################################################################################################################################################################
+tested and categorized and sorted
+##################################
+
+
+========
+Machines
+========
+
+**	<bohan> there's a bug in the current source code of the flanger plugin (the bug is not present in the distributed binary).
++	<bohan> add interpolation to the flanger plugin.
+
 **	cyanphase vibrasynth has an access violation bug
 	[ I need source to fix]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
@@ -144,8 +164,10 @@ Hope this makes stuff clear.
 		<Druttis> Yes
 		<trylle> i mean that it records and plays back at the same time * record wave in too
 
-* Sampler Machine:
---------------------------
+===============
+Sampler Machine
+===============
+
 FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	Sample loop not works - is it possible to fix it in next Psycle release?
 		[[JAZ] Works for me.]
@@ -162,8 +184,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	volume slides/arpeggio
 +	better way to set loop points. (+ ping-pong loops)
 
-* Wave Editor:
---------------------------
+===========
+Wave Editor
+===========
+
 * <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>'
 	button in the inst ed, and select some of the sample wav, the display goes blank
 * Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
@@ -178,8 +202,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	Toolbar for the Wave Editor.
 +       Wave-Editor Paste at the end (or any other part) of the current sample.
 
-* GUI (pattern):
-----------------
+=============
+GUI (pattern)
+=============
+
 *	<alk> somehow I managed to get the row number highlighted in two places.
 		to cause the bug of more than one line number highlighted:
 		select a line, then lower down click and drag to select a block.
@@ -200,8 +226,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	In FT2, the cursor Jumps to the top of a pattern when you move from one to another (Kris)
 +	maybe: MultiPattern View (see the previous pattern at top and the next at bottom, like if it was continuous)
 
-* GUI (machines):
------------------
+==============
+GUI (machines)
+==============
+
 **	alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window,
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
@@ -232,8 +260,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	James says: how hard would it be to put nodes in the wires, so you can bend them?
 
 
-* Player Engine:
-----------------
+=============
+Player Engine
+=============
+
 **	<sue> playbar should take latency into account
 *	When changing octave, notes playing should be stopped (because if not, notes playing don't stop)
 		[Problem!!! All key processing is done by InputHandler, so machines don't know when it happens,
@@ -260,8 +290,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to
 	vol+panning for the gui for the user.
 
-* Vsts:
-------------
+====
+Vsts
+====
+
 ** Steinberg Halion 2 VSTI: when you click "open halion program" nothing happens. the file browser window 
 	doesnt even pop up. ive tried this with aodix and it works fine.
 ** Steinberg LM4 MKII VSTI : when you click "open/import drum kit" nothing happens - prolly this file 
@@ -346,8 +378,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(
 
 
-* MIDI related
-------------
+============
+MIDI related
+============
+
 ***	MIDI in only works with Waveout
 ++	MIDI out
 ++	midi control commands learn
@@ -358,8 +392,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	checkbox: binding which machine is active to incoming program changes;
 	binding midi routing presets to machines; (possibly: save the presets in the psy)
 
-* Interface (contains pattern stuff too):
-------------
+======================================
+Interface (contains pattern stuff too)
+======================================
+
 **	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new
 	psycle opens..
 	[ DDE ? mmmm... ]
@@ -429,9 +465,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[ We've added some more actually]
 		[ and most the needed ones are listed up there ^^ ]
 
+=============
+Driver Issues
+=============
 
-* Driver Issues:
-------------
 *	Output gets weird after a bit and start playing all crackly and doubletime
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
@@ -439,8 +476,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	[ still ? ]
 * asio float MSB order unsupported
 
-* Importing:
-------------
+=========
+Importing
+=========
+
 *	It doesn't add the machines necessary to play all notes.
 ++ .mid import/export
 +	IT importing
@@ -450,17 +489,23 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 + <angelus> In this threat I suggest an option to import a XM or IT file into differents
 	Sampler-machines separating by instrument/sample.
 
-* File Format:
-------------
+===========
+File Format
+===========
+
 **	should save wire dialog settings
 +++FF	new file format: (vst multi-out, volume column, direct x stuff, etc.)
 
 
--- Possible Features For Psycle 2 --
-------------------------------------
+################################################################################################################################################################################################
+################################################################################################################################################################################################
+################################################################################################################################################################################################
+Possible Features For Psycle 2
+###############################
 
-* Editing Capabilities:
------------------------
+====================
+Editing Capabilities
+====================
 	* Multi pattern Sequencing
 	* Multiple Editors (Not only tracker view)
 	* Parameter Automation  ( Envelopes for Parameters )
@@ -472,8 +517,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	? Maybe notes/etc, of muted machines shown in grey
 	? Time signatures
 
-* Machines :
-------------
+========
+Machines
+========
 
 	* Multiple Inputs/Outputs
 	* MIDI generator - instead of generating audio, generates MIDI out - sync could be an issue.
@@ -481,8 +527,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	* Compressor/limiter
 	* Flanger/Chorus
 
-* Audio/Control:
-----------------
+=============
+Audio/Control
+=============
 
 	* audio record support (Like, from microphone)
 	* "MIDI Controlling <-> Machine <-> Machine" Interface = MIDI mapping

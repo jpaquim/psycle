@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.7.4 ----------
+				------------------------------- 1.7.6 ----------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -54,7 +54,7 @@ Psycle.
 
 Source Page is set at SourceForge site following this link:
 
-	http://www.sourceforge.net/projects/psycle
+	http://psycle.sourceforge.net
 
 
 Arguru Licensed Psycle 1.0 sources as "Public Domain".
@@ -126,4 +126,4 @@ in the PSY-Boards.
 
 Also, chat with other PSYCLE users or developers in our IRC - Channel:
 Join #psycle on EFNet network
- (some servers : irc.prison.net , irc.isdnet.fr , irc.homelien.no)
+ (some servers : irc.prison.net , irc.efnet.pl , irc.homelien.no) (<bohan> note: irc.isdnet.fr doesn't exist anymore)
