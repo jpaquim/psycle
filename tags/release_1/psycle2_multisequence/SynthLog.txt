@@ -1,0 +1,6 @@
+----START----                 
+fopen                         
+fclose = 0                    
+----START----                 
+fopen                         
+fclose = 0                    
