@@ -7,6 +7,7 @@
 #include "WireDlg.h"
 #include "Helpers.h"
 #include "ChildView.h"
+#include "InputHandler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,6 +47,8 @@ BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
 	ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
 	ON_WM_TIMER()
+//	ON_WM_KEYDOWN()
+//	ON_WM_KEYUP()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
 	ON_BN_CLICKED(IDC_BUTTON, OnMode)
@@ -1115,4 +1118,39 @@ void CWireDlg::SetMode()
 	bufDC.DeleteDC();
 
 }
+/*
 
+void CWireDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	// ignore repeats: nFlags&0x4000
+	const BOOL bRepeat = nFlags&0x4000;
+	CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+	if(!bRepeat && cmd.IsValid())
+	{
+		switch(cmd.GetType())
+		{
+		case CT_Note:
+			{
+				const int outnote = cmd.GetNote();
+				Global::pInputHandler->PlayNote(outnote,127,true);
+			}
+			break;
+
+		case CT_Immediate:
+			Global::pInputHandler->PerformCmd(cmd,bRepeat);
+			break;
+		}
+	}
+
+	CDialog::OnKeyDown(nChar, nRepCnt, nFlags);	
+}
+
+void CWireDlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+	const int outnote = cmd.GetNote();
+	if(outnote>=0)
+		Global::pInputHandler->StopNote(outnote,true);
+	CDialog::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+*/

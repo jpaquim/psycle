@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
+	ON_WM_TIMER()
 	ON_COMMAND(ID_PARAMETERS_RANDOMPARAMETERS, OnParametersRandomparameters)
 	ON_COMMAND(ID_PARAMETERS_RESETPARAMETERS, OnParametersResetparameters)
 	ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
@@ -116,7 +117,17 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 void CFrameMachine::OnDestroy() 
 {
 	if ( _pActive != NULL ) *_pActive = false;
+	KillTimer(2104+index);
 	CFrameWnd::OnDestroy();
+}
+
+void CFrameMachine::OnTimer(UINT nIDEvent) 
+{
+	if ( nIDEvent == 2104+index )
+	{
+		Invalidate(false);
+	}
+	CFrameWnd::OnTimer(nIDEvent);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -525,6 +536,7 @@ int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		return -1;
 	}
+	SetTimer(2104+index,100,0);
 	return 0;
 }
 

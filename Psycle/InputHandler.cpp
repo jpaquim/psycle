@@ -830,12 +830,16 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		// get command
 		CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
 
+		BOOL bRepeat = nFlags&0x4000;
 		if ( cmd.GetType() == CT_Note )
 		{
-			pChildView->EnterNote(cmd.GetNote());
-			return true;
+			if (!bRepeat)
+			{
+				pChildView->EnterNote(cmd.GetNote());
+				return true;
+			}
 		}
-		else return false;
+		return false;
 	}
 	else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
 	{
@@ -846,9 +850,6 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 
 void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 {
-	if(pMachine!=NULL && pMachine->_mode!=MACHMODE_GENERATOR)
-		pMachine=NULL;
-
 	if(note<0)
 		return;
 
@@ -901,9 +902,6 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 	// stop any notes with the same value
 	StopNote(note,bTranspose,pMachine);
 
-	if(pMachine!=NULL && pMachine->_mode!=MACHMODE_GENERATOR)
-		pMachine=NULL;
-	
 	if(note<0)
 		return;
 
