@@ -25,7 +25,7 @@ signed short WaveTable[5][2100];
 
 
 
-#define MAX_PSYCLE_TRACKS	32   // This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
+#define MAX_PSYCLE_TRACKS	64   // This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
 						 // Leave it like it is. Your Plugin NEEDS TO support it.
 						 // (Or dinamically allocate them. Check JMDrum's Source for an example)
 

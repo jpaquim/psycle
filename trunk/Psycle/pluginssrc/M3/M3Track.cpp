@@ -191,7 +191,11 @@ void CTrack::Tick( tvals const &tv)
 	if( tv.SubOscWave != 0xff)
 	{
 		if( tv.SubOscWave == 4) // random
+		{
 			RandomWaveSub = true;
+			pwavetabsub = WaveTable[(unsigned)pnoise[noisePhase++] % 4];
+			noisePhase &= 0x7ff;
+		}
 		else
 		{
 			_ASSERT(tv.SubOscWave < 4 );
@@ -231,7 +235,11 @@ void CTrack::Tick( tvals const &tv)
 	if( tv.MixType != 0xff)
 	{
 		if( tv.MixType == 8) // random
+		{
 			RandomMixType = true;
+			MixType = (unsigned)pnoise[noisePhase++] % 8;
+			noisePhase &= 0x7ff;
+		}
         else
 		{
 			MixType = tv.MixType;
@@ -244,11 +252,15 @@ void CTrack::Tick( tvals const &tv)
 		RandomWave1 = noise1 = false;
 
 		if( tv.Wave1 == 4) // noise
-		{	pwavetab1 = NULL;
-			noise1 = true;
+		{	noise1 = true;
+			pwavetab1 = NULL;
 		}
 		else if( tv.Wave1 == 5) // random
-		{	RandomWave1 = true;	}
+		{
+			RandomWave1 = true;
+			pwavetab1 = WaveTable[(unsigned)pnoise[noisePhase++] % 4];
+			noisePhase &= 0x7ff;
+		}
 		else 
 		{
 			_ASSERT(tv.Wave1 < 4 );
@@ -266,7 +278,11 @@ void CTrack::Tick( tvals const &tv)
 			pwavetab2 = NULL;
 		}
 		else if( tv.Wave2 == 5) // random
-		{	RandomWave2 = true;	}
+		{
+			RandomWave2 = true;
+			pwavetab2 = WaveTable[(unsigned)pnoise[noisePhase++] % 4];
+			noisePhase &= 0x7ff;
+		}
 		else 
 		{	
 			_ASSERT(tv.Wave2 < 4 );
