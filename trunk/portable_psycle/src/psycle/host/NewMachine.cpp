@@ -538,7 +538,6 @@ namespace psycle
 							}
 							catch(const std::exception & e)
 							{
-								out << "### ERRONEOUS ###" << std::endl;
 								std::ostringstream s; s
 									<< typeid(e).name() << std::endl
 									<< e.what() << std::endl;
@@ -548,14 +547,25 @@ namespace psycle
 							}
 							catch(...)
 							{
-								out << "### ERRONEOUS ###" << std::endl;
 								std::ostringstream s; s
 									<< "Type of exception is unknown, cannot display any further information." << std::endl;
-								out << s.str();
-								out.flush();
 								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
 							}
-							if(!_pPlugsInfo[currentPlugsCount]->error)
+							if(_pPlugsInfo[currentPlugsCount]->error)
+							{
+								out << "### ERRONEOUS ###" << std::endl;
+								out.flush();
+								out << *_pPlugsInfo[currentPlugsCount]->error;
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << finder.GetFilePath();
+								host::logger(host::logger::crash, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								_pPlugsInfo[currentPlugsCount]->allow = false;
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->version, "???");
+							}
+							else
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
 								std::strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
@@ -574,14 +584,6 @@ namespace psycle
 								std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
 								dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
 								out << plug.GetName() << " - successfully instanciated";
-								out.flush();
-							}
-							else
-							{
-								_pPlugsInfo[currentPlugsCount]->allow = false;
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->version, "???");
 								out.flush();
 							}
 							++currentPlugsCount;
@@ -638,7 +640,6 @@ namespace psycle
 							}
 							catch(const std::exception & e)
 							{
-								out << "### ERRONEOUS ###" << std::endl;
 								std::ostringstream s; s
 									<< typeid(e).name() << std::endl
 									<< e.what() << std::endl;
@@ -648,14 +649,25 @@ namespace psycle
 							}
 							catch(...)
 							{
-								out << "### ERRONEOUS ###" << std::endl;
 								std::ostringstream s; s
 									<< "Type of exception is unknown, cannot display any further information." << std::endl;
-								out << s.str();
-								out.flush();
 								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
 							}
-							if(!_pPlugsInfo[currentPlugsCount]->error)
+							if(_pPlugsInfo[currentPlugsCount]->error)
+							{
+								out << "### ERRONEOUS ###" << std::endl;
+								out.flush();
+								out << *_pPlugsInfo[currentPlugsCount]->error;
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << finder.GetFilePath();
+								host::logger(host::logger::crash, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								_pPlugsInfo[currentPlugsCount]->allow = false;
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
+								std::sprintf(_pPlugsInfo[currentPlugsCount]->version, "???");
+							}
+							else
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
 								std::strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
@@ -736,7 +748,7 @@ namespace psycle
 							<< std::endl
 							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################";
 						out.flush();
-						host::logger(host::logger::crash,"################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################");
+						host::logger(host::logger::crash, "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################");
 					}
 				}
 				out << std::endl;
