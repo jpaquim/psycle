@@ -320,16 +320,16 @@ private:
 			break;
 		case filter_2_poles:
 			{
-				enum Parameters { response, cutoff_frequency, resonance, modulation_radians_per_second, modulation_amplitude, modulation_stereo_dephase };
-				static const int parameters [] = { response, cutoff_frequency, resonance, modulation_radians_per_second, modulation_amplitude, modulation_stereo_dephase };
+				enum Parameters { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
+				static const int parameters [] = { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
 				parameter = parameters[--parameter];
 				switch(parameter)
 				{
 				case cutoff_frequency:
 					value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
 					break;
-				case modulation_radians_per_second:
-					value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 3e-8 * Global::pConfig->GetSamplesPerSec());
+				case modulation_sequencer_ticks:
+					value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::_pSong->SamplesPerTick);
 					break;
 				case resonance:
 				case modulation_amplitude:

@@ -21,6 +21,7 @@
 #include "VSTHost.h"
 #include "DataCompression.h"
 
+//#include <sstream>
 
 #ifdef CONVERT_INTERNAL_MACHINES
 	#include "convert_internal_machines.h" // conversion
@@ -66,7 +67,7 @@ bool Song::CreateMachine(
 	Machine* pMachine;
 	Master* pMaster;
 	Sampler* pSampler;
-#ifndef CONVERT_INTERNAL_MACHINES
+#if !defined(CONVERT_INTERNAL_MACHINES)
 	Delay* pDelay;
 	Filter2p* pFilter;
 	Gainer* pGainer;
@@ -90,7 +91,7 @@ bool Song::CreateMachine(
 	case MACH_SAMPLER:
 		pMachine = pSampler = new Sampler(index);
 		break;
-#ifndef CONVERT_INTERNAL_MACHINES
+#if !defined(CONVERT_INTERNAL_MACHINES)
 	case MACH_SINE:
 		pMachine = pSine = new Sine(index);
 		break;
@@ -1754,7 +1755,7 @@ bool Song::Load(RiffFile* pFile)
 
 		for (i=0; i<128; i++)
 		{
-#ifndef CONVERT_INTERNAL_MACHINES
+#if !defined(CONVERT_INTERNAL_MACHINES)
 			Sine* pSine;
 			Distortion* pDistortion;
 			Delay* pDelay;
@@ -1779,7 +1780,7 @@ bool Song::Load(RiffFile* pFile)
 
 				pFile->Read(&type, sizeof(type));
 
-#ifdef CONVERT_INTERNAL_MACHINES
+#if defined(CONVERT_INTERNAL_MACHINES)
 				if(converter.plugin_names().exists(type))
 					pMac[i] = &converter.redirect(i, type, *pFile); // conversion
 				else
@@ -1797,7 +1798,7 @@ bool Song::Load(RiffFile* pFile)
 					pMac[i]->Init();
 					pMac[i]->Load(pFile);
 					break;
-#ifndef CONVERT_INTERNAL_MACHINES
+#if !defined(CONVERT_INTERNAL_MACHINES)
 				case MACH_SINE:
 					pMac[i] = pSine = new Sine(i);
 					pMac[i]->Init();
@@ -1979,9 +1980,18 @@ bool Song::Load(RiffFile* pFile)
 					pMac[i]->Init();
 					pMac[i]->Load(pFile);
 					break;
+				default:
+					{
+						char buf[MAX_PATH];
+						sprintf(buf,"unkown machine type: %i",type);
+						::MessageBox(0, buf, "Loading old song", MB_ICONERROR);
+					}
+					pMac[i] = new Dummy(i);
+					pMac[i]->Init();
+					pMac[i]->Load(pFile);
 				}
 
-	#if !defined(_WINAMP_PLUGIN_)
+#if !defined(_WINAMP_PLUGIN_)
 				switch (pMac[i]->_mode)
 				{
 				case MACHMODE_GENERATOR:
@@ -1998,7 +2008,7 @@ bool Song::Load(RiffFile* pFile)
 					if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 					break;
 				}
-	#endif // _WINAMP_PLUGIN_
+#endif // _WINAMP_PLUGIN_
 
 				pMac[i]->_x = x;
 				pMac[i]->_y = y;
@@ -2396,7 +2406,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 
-#ifndef CONVERT_INTERNAL_MACHINES
+#if defined(CONVERT_INTERNAL_MACHINES) 
 		converter.retweak(*this); // conversion
 #endif
 
