@@ -195,7 +195,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 			}
 		}
 	}
-	else
+//	else
 	{
 		// build entry
 		PatternEntry entry;
@@ -298,7 +298,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 			Repaint(DMData);
 		}
 	}
-	else
+//	else
 	{
 		// build entry
 		PatternEntry entry;
@@ -467,15 +467,18 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	entry->_inst = _pSong->auxcolSelected;
 	if ( note < 120)
 	{
-		if (Global::pConfig->_midiRecordVel)
+		if (Global::pConfig->_RecordTweaks)
 		{
-			// command
-			entry->_cmd = Global::pConfig->_midiCommandVel;
-			entry->_parameter = Global::pConfig->_midiFromVel + 
-								(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
-			if (entry->_parameter > 255) entry->_parameter = 255;
-			else if (entry->_parameter < 0) entry->_parameter = 0;
-		}					
+			if (Global::pConfig->_midiRecordVel)
+			{
+				// command
+				entry->_cmd = Global::pConfig->_midiCommandVel;
+				entry->_parameter = Global::pConfig->_midiFromVel + 
+									(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
+				if (entry->_parameter > 255) entry->_parameter = 255;
+				else if (entry->_parameter < 0) entry->_parameter = 0;
+			}
+		}
 	}
 
 	int mgn;
@@ -486,9 +489,9 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 
 	if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
 	{
-		Machine *tmac = Global::_pSong->_pMachines[mgn];
 		if ( note < 120)
 		{
+			Machine *tmac = Global::_pSong->_pMachines[mgn];
 			tmac->Tick(editcur.track, entry);
 		}
 	}
