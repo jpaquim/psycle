@@ -288,6 +288,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 * Importing:
 ------------
 *	It doesn't add the machines necessary to play all notes.
+++ .mid import/export
 +	Add option for the user to create samplers for instruments
 +	IT importing
 +	.mid import
