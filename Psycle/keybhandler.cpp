@@ -2641,8 +2641,31 @@ void CChildView::KillUndo()
 
 void CChildView::SelectNextTrack()
 {
-	if(++editcur.track >= _pSong->SONGTRACKS)
-		editcur.track=0;
+	int i;
+	for (i = editcur.track+1; i < _pSong->SONGTRACKS; i++)
+	{
+		if (_pSong->_trackArmed[i])
+		{
+			if (Global::pInputHandler->notetrack[i] == 120)
+			{
+				break;
+			}
+		}
+	}
+	if (i >= _pSong->SONGTRACKS)
+	{
+		for (i = 0; i <= editcur.track; i++)
+		{
+			if (_pSong->_trackArmed[i])
+			{
+				if (Global::pInputHandler->notetrack[i] == 120)
+				{
+					break;
+				}
+			}
+		}
+	}
+	editcur.track = i;
 	while(_pSong->_trackArmed[editcur.track] == 0)
 	{
 		if(++editcur.track >= _pSong->SONGTRACKS)

@@ -98,7 +98,7 @@ bool DirectSound::Start()
 	desc.dwBufferBytes = _dsBufferSize; 
 	desc.dwReserved = 0;
 	desc.lpwfxFormat = _exclusive ? NULL : &format;
-	desc.guid3DAlgorithm = GUID_NULL;
+//	desc.guid3DAlgorithm = GUID_NULL;
 	
 	if (FAILED(_pDs->CreateSoundBuffer(&desc, &_pBuffer, NULL)))
 	{

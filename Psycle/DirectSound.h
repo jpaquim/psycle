@@ -2,8 +2,8 @@
 #define _DIRECTSOUND_H
 
 #include <mmsystem.h>
-#include <dsound.h>
 #include "AudioDriver.h"
+#include <dsound.h>
 
 class DirectSound : public AudioDriver
 {

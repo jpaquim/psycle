@@ -234,6 +234,8 @@ public:
 	int _midiFrom15;
 	int _midiTo15;
 
+	bool _midiRawMcm;
+
 	bool _linenumbers;
 	bool _linenumbersHex;
 	bool _linenumbersCursor;

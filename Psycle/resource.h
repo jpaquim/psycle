@@ -505,6 +505,7 @@
 #define IDC_LEARN_14                    1399
 #define IDC_LEARN_15                    1400
 #define IDC_PBG_CAN                     1401
+#define IDC_MIDI_RAW                    1401
 #define IDC_ROW_CAN                     1402
 #define IDC_BEAT_CAN                    1403
 #define IDC_FONT_CAN                    1404
