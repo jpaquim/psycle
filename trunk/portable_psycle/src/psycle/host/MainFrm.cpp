@@ -203,7 +203,7 @@ namespace psycle
 			
 			//Mixer
 			//m_wndMixer = new CMixerDlg(this);
-			m_wndMixer.Create(IDD_INSTRUMENT,this);
+			m_wndMixer.Create(IDD_MIXER,this);
 
 			// Instrument editor
 			m_wndInst._pSong=_pSong;
