@@ -2517,14 +2517,33 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // Dialog
 //
 
-IDD_ERRORLOGGER DIALOGEX 0, 0, 186, 94
+IDD_ERRORLOGGER DIALOGEX 0, 0, 283, 156
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
     WS_THICKFRAME
 CAPTION "Error Log"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_ERRORLOG_TXT,0,0,186,94,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "",IDC_ERRORLOG_TXT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
+                    WS_BORDER | WS_TABSTOP,0,0,282,155
 END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ERRORLOGGER, DIALOG
+    BEGIN
+        RIGHTMARGIN, 186
+        BOTTOMMARGIN, 94
+    END
+END
+#endif    // APSTUDIO_INVOKED
 
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
