@@ -65,8 +65,8 @@ public:
 		float vol = 0.0f;
 		do
 		{
-			const float volL = *++pSamplesL;
-			const float volR = *++pSamplesR;
+			const float volL = fabsf(*++pSamplesL); // not all waves are symmetrical
+			const float volR = fabsf(*++pSamplesR);
 			
 			if (volL > vol)
 			{
@@ -93,8 +93,8 @@ public:
 		float vol = 0.0f;
 		do
 		{
-			const float volL = *++pSamplesL;
-			const float volR = *++pSamplesR;
+			const float volL = fabsf(*++pSamplesL); // not all waves are symmetrical
+			const float volR = fabsf(*++pSamplesR);
 			
 			if (volL > vol)
 			{

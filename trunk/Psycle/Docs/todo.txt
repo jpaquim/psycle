@@ -5,10 +5,9 @@
 -more tracks (64)
 -store state of follow song toggle
 !DO NOT LOAD LIST VST list & database
-<Alk^> do u think the recording with subtracting the buffer delay will be doable?
+<Alk^> do u think the recording with subtracting the buffer delay will be doable? <[JAZ]> pooplog : just to let you know it: the loop is wrongly done (on this "gap" wave thing) " on record
 <Alk^> I think the line numbering should be optional
 <Alk^> I also think that the cursor movement after a paste should be optional to =)<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
-<[JAZ]> pooplog : just to let you know it: the loop is wrongly done (on this "gap" wave thing) " on record
 <bohan`> aha, yep, cause, for the machine ones, it'd be really better if it could have a log scale and be centered at "0dB"
 <Pikari> oh. and I hate it when I choose skip=0 and the cursor goes to the next column :(
 <_sue_> hey poop....can we have something like a right double click for inserting the first not used patter (like before with left double click)?

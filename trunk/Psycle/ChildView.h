@@ -241,7 +241,7 @@ private:
 	inline void TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h);
 	inline void BOX(CDC *devc,int x,int y, int w, int h);
 	inline void BOX(CDC *devc,CRect rect);
-	void DrawMachineVol(int x,int y,CClientDC *devc, int volu);
+	void DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max);
 	void DrawMachineVumeters(CClientDC *devc);	
 	void DrawMachineEditor(CDC *devc);
 	void DrawMachine(Machine* mac, int macnum, CDC *devc);
