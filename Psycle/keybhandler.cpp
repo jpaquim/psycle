@@ -1566,6 +1566,11 @@ void CChildView::OnEditUndo()
 					pParentMain->UpdatePlayOrder(true);
 					Repaint(DMPatternChange);
 				}
+				// delete undo from list
+				SPatternUndo* pTemp = pUndoList->pPrev;
+				delete (pUndoList->pData);
+				delete (pUndoList);
+				pUndoList = pTemp;
 			}
 			break;
 		case UNDO_LENGTH:
@@ -1585,6 +1590,11 @@ void CChildView::OnEditUndo()
 				}
 				// display changes
 				Repaint(DMPatternChange);
+				// delete undo from list
+				SPatternUndo* pTemp = pUndoList->pPrev;
+				delete (pUndoList->pData);
+				delete (pUndoList);
+				pUndoList = pTemp;
 				break;
 			}
 		case UNDO_SEQUENCE:
@@ -1601,13 +1611,13 @@ void CChildView::OnEditUndo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
+			// delete undo from list
+			SPatternUndo* pTemp = pUndoList->pPrev;
+			delete (pUndoList->pData);
+			delete (pUndoList);
+			pUndoList = pTemp;
 			break;
 		}
-		// delete undo from list
-		SPatternUndo* pTemp = pUndoList->pPrev;
-		delete (pUndoList->pData);
-		delete (pUndoList);
-		pUndoList = pTemp;
 	}
 }
 
@@ -1658,6 +1668,11 @@ void CChildView::OnEditRedo()
 					pParentMain->UpdatePlayOrder(true);
 					Repaint(DMPatternChange);
 				}
+				// delete redo from list
+				SPatternUndo* pTemp = pRedoList->pPrev;
+				delete (pRedoList->pData);
+				delete (pRedoList);
+				pRedoList = pTemp;
 			}
 			break;
 		case UNDO_LENGTH:
@@ -1677,6 +1692,11 @@ void CChildView::OnEditRedo()
 				}
 				// display changes
 				Repaint(DMPatternChange);
+				// delete redo from list
+				SPatternUndo* pTemp = pRedoList->pPrev;
+				delete (pRedoList->pData);
+				delete (pRedoList);
+				pRedoList = pTemp;
 				break;
 			}
 		case UNDO_SEQUENCE:
@@ -1693,13 +1713,13 @@ void CChildView::OnEditRedo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
+			// delete redo from list
+			SPatternUndo* pTemp = pRedoList->pPrev;
+			delete (pRedoList->pData);
+			delete (pRedoList);
+			pRedoList = pTemp;
 			break;
 		}
-		// delete redo from list
-		SPatternUndo* pTemp = pRedoList->pPrev;
-		delete (pRedoList->pData);
-		delete (pRedoList);
-		pRedoList = pTemp;
 	}
 }
 
