@@ -66,6 +66,29 @@ public:
 	CCursor start;	// Column not used. (It was harder to select!!!)
 	CCursor end;	//
 };
+
+struct SPatternUndo
+{
+	int type;
+	SPatternUndo* pPrev;
+	unsigned char* pData;
+	int pattern;
+	int x;
+	int y;
+	int	tracks;
+	int	lines;
+	// store positional data plz
+	int edittrack;
+	int editline;
+	int editcol;
+	int seqpos;
+};
+
+enum {
+	UNDO_PATTERN,
+	UNDO_LENGTH,
+	UNDO_SEQUENCE,
+};
 /////////////////////////////////////////////////////////////////////////////
 // CChildView window
 
@@ -132,6 +155,14 @@ public:
 	void IncPosition();
 	void DecPosition();
 
+	void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
+	void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos);
+	void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
+	void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos);
+	void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
+	void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos);
+	void KillUndo();
+	void KillRedo();
 
 public:
 
@@ -253,6 +284,8 @@ private:
 	int patBufferLines;
 	bool patBufferCopy;
 
+	SPatternUndo * pUndoList;
+	SPatternUndo * pRedoList;
 
 	int mcd_x;
 	int mcd_y;
@@ -329,6 +362,8 @@ public:
 	afx_msg void OnFileRecent_03();
 	afx_msg void OnFileRecent_04();
 	afx_msg void OnFileImportItfile();
+	afx_msg void OnEditUndo();
+	afx_msg void OnEditRedo();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -577,6 +612,7 @@ inline void CChildView::TXT(CDC *devc,char *txt, int x,int y,int w,int h)
 // song data
 inline int CChildView::_ps()
 {
+	// retrieves the pattern index
 	return _pSong->playOrder[editPosition];
 }
 inline unsigned char * CChildView::_offset(int ps)

@@ -82,6 +82,9 @@ BEGIN
     VK_F1,          ID_PSYHELP,             VIRTKEY, NOINVERT
     VK_F10,         ID_VIEW_INSTRUMENTEDITOR, VIRTKEY, NOINVERT
     VK_F4,          ID_SHOWPSEQ,            VIRTKEY, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_REDO,           VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
 END
 
 IDR_VSTFRAME ACCELERATORS DISCARDABLE 
@@ -677,7 +680,7 @@ END
 IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 228
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         170,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
     LTEXT           "Preset",IDC_STATIC,228,4,21,8
@@ -988,7 +991,7 @@ END
 IDD_SEQUENCER DIALOGEX 0, 0, 70, 295
 STYLE WS_CHILD
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Pattern Sequencer",IDC_STATIC,4,4,62,8
     CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX | 
@@ -997,7 +1000,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "+",IDC_INCSHORT,43,30,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      "-",IDC_DECSHORT,43,62,23,12,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      "-",IDC_DECSHORT,43,46,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
     PUSHBUTTON      "Ins",IDC_SEQINS,43,110,23,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Del",IDC_SEQDEL,43,126,23,12,0,WS_EX_STATICEDGE
@@ -1036,7 +1039,7 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,6,256,60,19
     CONTROL         "Record NoteOffs",IDC_RECORD_NOTEOFF,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,5,273,60,19
-    PUSHBUTTON      "++",IDC_INCLONG,43,46,23,12,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      "++",IDC_INCLONG,43,62,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
     PUSHBUTTON      "-",IDC_DECLONG,43,78,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
@@ -1047,7 +1050,7 @@ IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 103
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle DirectX Audio Driver Configuration"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Device:",IDC_STATIC,13,7,26,13,SS_CENTERIMAGE
     COMBOBOX        IDC_DSOUND_DEVICE,45,7,167,161,CBS_DROPDOWNLIST | 
@@ -1335,7 +1338,6 @@ BEGIN
     IDD_VSTRACK, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 257
         TOPMARGIN, 7
         BOTTOMMARGIN, 16
     END
@@ -1345,7 +1347,6 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 162
         TOPMARGIN, 7
-        BOTTOMMARGIN, 170
     END
 
     IDD_MIDI_MONITOR, DIALOG
@@ -1532,6 +1533,7 @@ BEGIN
     POPUP "&Edit"
     BEGIN
         MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Shift+Z",         ID_EDIT_REDO
         MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
@@ -1575,7 +1577,8 @@ IDR_POPUPMENU MENU DISCARDABLE
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "&Undo",                       ID_POP_UNDO
+        MENUITEM "&Undo\tCtrl+Z",                ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Shift+Z",          ID_EDIT_REDO
         MENUITEM SEPARATOR
         MENUITEM "&Cut",                        ID_POP_CUT
         MENUITEM "C&opy",                       ID_POP_COPY
@@ -1936,7 +1939,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_POP_UNDO             "Undo last action\\Undo"
     ID_POP_CUT              "Cut the selected rows (delete them) and puts them to the buffer\\Cut"
     ID_POP_COPY             "Copy the selected rows to the buffer\\Copy"
     ID_POP_PASTE            "Paste (overwriting) the content the buffer to the pattern"
@@ -1960,6 +1962,8 @@ BEGIN
     ID_EDIT_CUT             "Cut to clipboard"
     ID_EDIT_PASTE           "Paste from clipboard"
     ID_EDIT_SELECT_ALL      "Select whole wave"
+    ID_EDIT_UNDO            "Undo last action\\Undo"
+    ID_EDIT_REDO            "Redo last Undo\\Redo"
 END
 
 #endif    // Neutral (Default) resources
