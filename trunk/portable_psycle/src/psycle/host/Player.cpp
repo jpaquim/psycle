@@ -5,9 +5,7 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "Configuration.hpp"
-#if !defined _WINAMP_PLUGIN_
-	#include "MidiInput.hpp"
-#endif
+#include "MidiInput.hpp"
 #include "InputHandler.hpp"
 namespace psycle
 {
@@ -28,9 +26,7 @@ namespace psycle
 
 		Player::~Player()
 		{
-			#if !defined(_WINAMP_PLUGIN_)
-				if(_recording) _outputWaveFile.Close();
-			#endif
+			if(_recording) _outputWaveFile.Close();
 		}
 
 		void Player::Start(int pos, int line)
@@ -64,12 +60,7 @@ namespace psycle
 					for(int c = 0; c < MAX_TRACKS; c++) Global::_pSong->_pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			///\todo use the unified inlined function
-			#if defined(_WINAMP_PLUGIN_)
-				Global::_pSong->SamplesPerTick((Global::pConfig->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin()*Global::_pSong->_ticksPerBeat));
-			#else
-				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin()*Global::_pSong->_ticksPerBeat));
-			#endif
+			Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin()*Global::_pSong->_ticksPerBeat));
 		}
 
 		void Player::ExecuteLine(void)
@@ -90,24 +81,14 @@ namespace psycle
 						{
 							// proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 							bpm = pEntry->_parameter; //+0x20;
-							///\todo use the unified inlined function
-							#if defined _WINAMP_PLUGIN_
-								Global::_pSong->SamplesPerTick((Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb));
-							#else
-								Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb));
-							#endif
+							Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb));
 						}
 						break;
 					case 0xFE:
 						if(pEntry->_parameter != 0)
 						{
 							tpb=pEntry->_parameter;
-							///\todo use the unified inlined function
-							#if defined _WINAMP_PLUGIN_
-								Global::_pSong->SamplesPerTick(((Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb)));
-							#else
-								Global::_pSong->SamplesPerTick(((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb)));
-							#endif
+							Global::_pSong->SamplesPerTick(((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb)));
 						}
 						break;
 					case 0xFC:
@@ -224,43 +205,35 @@ namespace psycle
 			if(_lineCounter >= pSong->patternLines[_playPattern])
 			{
 				_lineCounter = 0;
-				#if defined(_WINAMP_PLUGIN_)
+				if(!_playBlock)
 					_playPosition++;
-					if(_playPosition >= pSong->playLength)
-					{
-						_playing= false;
-					}
-				#else
-					if(!_playBlock)
+				else
+				{
+					_playPosition++;
+					while(_playPosition< pSong->playLength && (!pSong->playOrderSel[_playPosition]))
 						_playPosition++;
-					else
+				}
+				if( _playPosition >= pSong->playLength)
+				{	
+					// Don't loop the recording
+					if(_recording)
 					{
-						_playPosition++;
-						while(_playPosition< pSong->playLength && (!pSong->playOrderSel[_playPosition]))
-							_playPosition++;
+						StopRecording();
 					}
-					if( _playPosition >= pSong->playLength)
-					{	
-						// Don't loop the recording
-						if(_recording)
+					if( _loopSong )
+					{
+						_playPosition = 0;
+						if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
 						{
-							StopRecording();
-						}
-						if( _loopSong )
-						{
-							_playPosition = 0;
-							if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
-							{
-								while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
-							}
-						}
-						else 
-						{
-							_playing = false;
-							_playBlock =false;
+							while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
 						}
 					}
-				#endif
+					else 
+					{
+						_playing = false;
+						_playBlock =false;
+					}
+				}
 				_playPattern = pSong->playOrder[_playPosition];
 			}
 		}
@@ -287,83 +260,74 @@ namespace psycle
 				// Processing plant
 				if(amount > 0)
 				{
-					#if defined(_WINAMP_PLUGIN_)
+					CSingleLock crit(&Global::_pSong->door, TRUE);
+					CPUCOST_INIT(idletime);
+					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
+					{
+						pSong->_sampCount =0;
 						for(int c=0; c<MAX_MACHINES; c++)
 						{
-							if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
+							if(pSong->_pMachine[c])
+							{
+								pSong->_pMachine[c]->_wireCost = 0;
+								pSong->_pMachine[c]->_cpuCost = 0;
+							}
 						}
+					}
+					// Reset all machines
+					for(int c=0; c<MAX_MACHINES; c++)
+					{
+						if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
+					}
+					if(pSong->PW_Stage == 1)
+					{
+						// Mixing preview WAV
+						pSong->PW_Work(pSong->_pMachine[MASTER_INDEX]->_pSamplesL,pSong->_pMachine[MASTER_INDEX]->_pSamplesR, amount);
+					}
+					// Inject Midi input data
+					if(!CMidiInput::Instance()->InjectMIDI( amount ))
+					{
+						// if midi not enabled we just do the original tracker thing
+						// Master machine initiates work
 						pSong->_pMachine[MASTER_INDEX]->Work(amount);
-
-					#else
-						CSingleLock crit(&Global::_pSong->door, TRUE);
-						CPUCOST_INIT(idletime);
-						if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
+					}
+					CPUCOST_CALC(idletime, amount);
+					pSong->cpuIdle = idletime;
+					pSong->_sampCount += amount;
+					if((pThis->_playing) && (pThis->_recording))
+					{
+						//float* pData(pThis->_pBuffer); ///\todo <- this was fuxxxxing up
+						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
+						float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
+						int i;
+						switch(Global::pConfig->_pOutputDriver->_channelmode)
 						{
-							pSong->_sampCount =0;
-							for(int c=0; c<MAX_MACHINES; c++)
+						case 0: // mono mix
+							for(i=0; i<amount; i++)
 							{
-								if(pSong->_pMachine[c])
-								{
-									pSong->_pMachine[c]->_wireCost = 0;
-									pSong->_pMachine[c]->_cpuCost = 0;
-								}
+								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
-						}
-						// Reset all machines
-						for(int c=0; c<MAX_MACHINES; c++)
-						{
-							if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
-						}
-						if(pSong->PW_Stage == 1)
-						{
-							// Mixing preview WAV
-							pSong->PW_Work(pSong->_pMachine[MASTER_INDEX]->_pSamplesL,pSong->_pMachine[MASTER_INDEX]->_pSamplesR, amount);
-						}
-						// Inject Midi input data
-						if(!CMidiInput::Instance()->InjectMIDI( amount ))
-						{
-							// if midi not enabled we just do the original tracker thing
-							// Master machine initiates work
-							pSong->_pMachine[MASTER_INDEX]->Work(amount);
-						}
-						CPUCOST_CALC(idletime, amount);
-						pSong->cpuIdle = idletime;
-						pSong->_sampCount += amount;
-						if((pThis->_playing) && (pThis->_recording))
-						{
-							//float* pData(pThis->_pBuffer); ///\todo <- this was fuxxxxing up
-							float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
-							float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
-							int i;
-							switch(Global::pConfig->_pOutputDriver->_channelmode)
+							break;
+						case 1: // mono L
+							for(i=0; i<amount; i++)
 							{
-							case 0: // mono mix
-								for(i=0; i<amount; i++)
-								{
-									if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
-								}
-								break;
-							case 1: // mono L
-								for(i=0; i<amount; i++)
-								{
-									if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->StopRecording(false);
-								}
-								break;
-							case 2: // mono R
-								for(i=0; i<amount; i++)
-								{
-									if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
-								}
-								break;
-							default: // stereo
-								for(i=0; i<amount; i++)
-								{
-									if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
-								}
-								break;
+								if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
+							break;
+						case 2: // mono R
+							for(i=0; i<amount; i++)
+							{
+								if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+							}
+							break;
+						default: // stereo
+							for(i=0; i<amount; i++)
+							{
+								if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+							}
+							break;
 						}
-					#endif
+					}
 					Master::_pMasterSamples += amount * 2;
 					numSamplex -= amount;
 				}
@@ -372,47 +336,45 @@ namespace psycle
 			return pThis->_pBuffer;
 		}
 
-		#if !defined _WINAMP_PLUGIN_
-			void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
+		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
+		{
+			if(!_recording)
 			{
-				if(!_recording)
+				backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
+				backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
+				backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
+				if(samplerate > 0) Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate;
+				if(bitdepth > 0) Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
+				if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
+				int channels = 2;
+				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
+				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
+				Stop();
+				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+					_recording = true;
+				else
 				{
-					backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
-					backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
-					backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
-					if(samplerate > 0) Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate;
-					if(bitdepth > 0) Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
-					if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
-					int channels = 2;
-					if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
-					Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
-					Stop();
-					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
-						_recording = true;
-					else
-					{
-						StopRecording();
-						::MessageBox(0, psFilename.c_str(), "FAILED", 0);
-					}
+					StopRecording();
+					::MessageBox(0, psFilename.c_str(), "FAILED", 0);
 				}
 			}
+		}
 
-			void Player::StopRecording(bool bOk)
+		void Player::StopRecording(bool bOk)
+		{
+			if(_recording)
 			{
-				if(_recording)
+				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
+				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
+				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
+				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
+				_outputWaveFile.Close();
+				_recording = false;
+				if(!bOk)
 				{
-					Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
-					Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
-					Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
-					Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
-					_outputWaveFile.Close();
-					_recording = false;
-					if(!bOk)
-					{
-						::MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
-					}
+					::MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
 				}
 			}
-		#endif
+		}
 	}
 }

@@ -5,12 +5,10 @@
 #include "Song.hpp"
 #include "Dsp.hpp"
 #include "Configuration.hpp"
-#if !defined _WINAMP_PLUGIN_
-	#include "psycle.hpp"
-	#include "WireDlg.hpp"
-	#include "MainFrm.hpp"
-	#include "InputHandler.hpp"
-#endif
+#include "psycle.hpp"
+#include "WireDlg.hpp"
+#include "MainFrm.hpp"
+#include "InputHandler.hpp"
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
@@ -21,9 +19,7 @@ namespace psycle
 {
 	namespace host
 	{
-		#if !defined _WINAMP_PLUGIN_
-			extern CPsycleApp theApp;
-		#endif
+		extern CPsycleApp theApp;
 
 		char* Master::_psName = "Master";
 		char* Dummy::_psName = "DummyPlug";
@@ -66,16 +62,14 @@ namespace psycle
 			, _numOutputs(0)
 			, TWSSamples(0)
 			, TWSActive(false)
-			#if !defined _WINAMP_PLUGIN_
-				, _volumeCounter(0.0f)
-				, _volumeDisplay(0)
-				, _volumeMaxDisplay(0)
-				, _volumeMaxCounterLife(0)
-				, _pScopeBufferL(0)
-				, _pScopeBufferR(0)
-				, _scopeBufferIndex(0)
-				, _scopePrevNumSamples(0)
-			#endif
+			, _volumeCounter(0.0f)
+			, _volumeDisplay(0)
+			, _volumeMaxDisplay(0)
+			, _volumeMaxCounterLife(0)
+			, _pScopeBufferL(0)
+			, _pScopeBufferR(0)
+			, _scopeBufferIndex(0)
+			, _scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
 			_pSamplesL = new float[STREAM_SIZE];
@@ -120,10 +114,8 @@ namespace psycle
 		void Machine::Init()
 		{
 			// Standard gear initalization
-			#if !defined _WINAMP_PLUGIN_
-				_cpuCost = 0;
-				_wireCost = 0;
-			#endif
+			_cpuCost = 0;
+			_wireCost = 0;
 			_mute = false;
 			_stopped = false;
 			_bypass = false;
@@ -273,43 +265,38 @@ namespace psycle
 		{
 			_worked = false;
 			_waitingForSound= false;
-			#if defined( _WINAMP_PLUGIN_)
-				Dsp::Clear(_pSamplesL, numSamples);
-				Dsp::Clear(_pSamplesR, numSamples);
-			#else
-				CPUCOST_INIT(cost);
-				if (_pScopeBufferL && _pScopeBufferR)
-				{
-					float *pSamplesL = _pSamplesL;   
-					float *pSamplesR = _pSamplesR;   
-					int i = _scopePrevNumSamples;
-					while (i > 0)   
+			CPUCOST_INIT(cost);
+			if (_pScopeBufferL && _pScopeBufferR)
+			{
+				float *pSamplesL = _pSamplesL;   
+				float *pSamplesR = _pSamplesR;   
+				int i = _scopePrevNumSamples;
+				while (i > 0)   
+				{   
+					if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
 					{   
-						if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
-						{   
-							memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-							memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-							pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-							pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-							i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-							_scopeBufferIndex = 0;   
-						}   
-						else   
-						{   
-							memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
-							memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
-							_scopeBufferIndex += i;   
-							i = 0;   
-						}   
-					} 
-				}
-				_scopePrevNumSamples=numSamples;
-				Dsp::Clear(_pSamplesL, numSamples);
-				Dsp::Clear(_pSamplesR, numSamples);
-				CPUCOST_CALC(cost, numSamples);
-				//_cpuCost = cost;
-				_wireCost+= cost;
-			#endif // _WINAMP_PLUGIN_
+						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+						pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+						pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+						i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+						_scopeBufferIndex = 0;   
+					}   
+					else   
+					{   
+						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
+						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
+						_scopeBufferIndex += i;   
+						i = 0;   
+					}   
+				} 
+			}
+			_scopePrevNumSamples=numSamples;
+			Dsp::Clear(_pSamplesL, numSamples);
+			Dsp::Clear(_pSamplesR, numSamples);
+			CPUCOST_CALC(cost, numSamples);
+			//_cpuCost = cost;
+			_wireCost+= cost;
 		}
 
 		/// Each machine is expected to produce its output in its own
@@ -342,28 +329,19 @@ namespace psycle
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
 						{
-							#if defined( _WINAMP_PLUGIN_)
-								Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-								Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-							#else
-								CPUCOST_INIT(wcost);
-								Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-								Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-								CPUCOST_CALC(wcost,numSamples);
-								_wireCost+=wcost;
-							#endif
+							CPUCOST_INIT(wcost);
+							Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
+							Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+							CPUCOST_CALC(wcost,numSamples);
+							_wireCost+=wcost;
 						}
 					}
 				}
 			}
-			#if defined( _WINAMP_PLUGIN_)
-				Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			#else
-				CPUCOST_INIT(wcost);
-				Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-				CPUCOST_CALC(wcost,numSamples);
-				_wireCost+=wcost;
-			#endif
+			CPUCOST_INIT(wcost);
+			Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			CPUCOST_CALC(wcost,numSamples);
+			_wireCost+=wcost;
 		}
 
 		bool Machine::LoadSpecificFileChunk(RiffFile* pFile, int version)
@@ -525,82 +503,77 @@ namespace psycle
 				delete pMachine;
 				pMachine=p;
 			}
-			#if !defined _WINAMP_PLUGIN_
-				if(index < MAX_BUSES)
-				{
-					pMachine->_mode = MACHMODE_GENERATOR;
-					if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
-						pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-					if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
-						pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
-				}
-				else if (index < MAX_BUSES*2)
-				{
-					pMachine->_mode = MACHMODE_FX;
-					if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
-						pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-					if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
-						pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
-				}
-				else
-				{
-					pMachine->_mode = MACHMODE_MASTER;
-					if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
-						pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-					if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
-						pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
-				}
-			#endif
+			if(index < MAX_BUSES)
+			{
+				pMachine->_mode = MACHMODE_GENERATOR;
+				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
+					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
+					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+			}
+			else if (index < MAX_BUSES*2)
+			{
+				pMachine->_mode = MACHMODE_FX;
+				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
+					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
+					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+			}
+			else
+			{
+				pMachine->_mode = MACHMODE_MASTER;
+				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
+					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
+				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
+					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+			}
 			pMachine->SetPan(pMachine->_panning);
 			return pMachine;
 		}
 
-		#if !defined _WINAMP_PLUGIN_
 
-			void Machine::SaveFileChunk(RiffFile* pFile)
+		void Machine::SaveFileChunk(RiffFile* pFile)
+		{
+			pFile->Write(&_type,sizeof(_type));
+			SaveDllName(pFile);
+			pFile->Write(&_bypass,sizeof(_bypass));
+			pFile->Write(&_mute,sizeof(_mute));
+			pFile->Write(&_panning,sizeof(_panning));
+			pFile->Write(&_x,sizeof(_x));
+			pFile->Write(&_y,sizeof(_y));
+			pFile->Write(&_numInputs,sizeof(_numInputs));							// number of Incoming connections
+			pFile->Write(&_numOutputs,sizeof(_numOutputs));						// number of Outgoing connections
+			for(int i = 0; i < MAX_CONNECTIONS; i++)
 			{
-				pFile->Write(&_type,sizeof(_type));
-				SaveDllName(pFile);
-				pFile->Write(&_bypass,sizeof(_bypass));
-				pFile->Write(&_mute,sizeof(_mute));
-				pFile->Write(&_panning,sizeof(_panning));
-				pFile->Write(&_x,sizeof(_x));
-				pFile->Write(&_y,sizeof(_y));
-				pFile->Write(&_numInputs,sizeof(_numInputs));							// number of Incoming connections
-				pFile->Write(&_numOutputs,sizeof(_numOutputs));						// number of Outgoing connections
-				for(int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
-					pFile->Write(&_outputMachines[i],sizeof(_outputMachines[i]));	// Outgoing connections Machine number
-					pFile->Write(&_inputConVol[i],sizeof(_inputConVol[i]));	// Incoming connections Machine vol
-					pFile->Write(&_wireMultiplier[i],sizeof(_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-					pFile->Write(&_connection[i],sizeof(_connection[i]));      // Outgoing connections activated
-					pFile->Write(&_inputCon[i],sizeof(_inputCon[i]));		// Incoming connections activated
-				}
-				pFile->Write(_editName,strlen(_editName)+1);
-				SaveSpecificChunk(pFile);
+				pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
+				pFile->Write(&_outputMachines[i],sizeof(_outputMachines[i]));	// Outgoing connections Machine number
+				pFile->Write(&_inputConVol[i],sizeof(_inputConVol[i]));	// Incoming connections Machine vol
+				pFile->Write(&_wireMultiplier[i],sizeof(_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				pFile->Write(&_connection[i],sizeof(_connection[i]));      // Outgoing connections activated
+				pFile->Write(&_inputCon[i],sizeof(_inputCon[i]));		// Incoming connections activated
 			}
+			pFile->Write(_editName,strlen(_editName)+1);
+			SaveSpecificChunk(pFile);
+		}
 
-			void Machine::SaveSpecificChunk(RiffFile* pFile) 
+		void Machine::SaveSpecificChunk(RiffFile* pFile) 
+		{
+			UINT count = GetNumParams();
+			UINT size = sizeof(count)+(count*sizeof(int));
+			pFile->Write(&size,sizeof(size));
+			pFile->Write(&count,sizeof(count));
+			for(UINT i = 0; i < count; i++)
 			{
-				UINT count = GetNumParams();
-				UINT size = sizeof(count)+(count*sizeof(int));
-				pFile->Write(&size,sizeof(size));
-				pFile->Write(&count,sizeof(count));
-				for(UINT i = 0; i < count; i++)
-				{
-					int temp = GetParamValue(i);
-					pFile->Write(&temp,sizeof(temp));
-				}
-			};
+				int temp = GetParamValue(i);
+				pFile->Write(&temp,sizeof(temp));
+			}
+		};
 
-			void Machine::SaveDllName(RiffFile* pFile)
-			{
-				char temp=0;
-				pFile->Write(&temp,1);
-			};
-
-		#endif // ndef _WINAMP_PLUGIN_
+		void Machine::SaveDllName(RiffFile* pFile)
+		{
+			char temp=0;
+			pFile->Write(&temp,1);
+		};
 
 
 
@@ -622,22 +595,20 @@ namespace psycle
 		void Dummy::Work(int numSamples)
 		{
 			Machine::Work(numSamples);
-			#if !defined(_WINAMP_PLUGIN_)
-				CPUCOST_INIT(cost);
-				Machine::SetVolumeCounter(numSamples);
-				if ( Global::pConfig->autoStopMachines )
-				{
-					//Machine::SetVolumeCounterAccurate(numSamples);
-					if (_volumeCounter < 8.0f)	{
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						_stopped = true;
-					}
+			CPUCOST_INIT(cost);
+			Machine::SetVolumeCounter(numSamples);
+			if ( Global::pConfig->autoStopMachines )
+			{
+				//Machine::SetVolumeCounterAccurate(numSamples);
+				if (_volumeCounter < 8.0f)	{
+					_volumeCounter = 0.0f;
+					_volumeDisplay = 0;
+					_stopped = true;
 				}
-				//else Machine::SetVolumeCounter(numSamples);
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
-			#endif // ndef _WINAMP_PLUGIN_
+			}
+			//else Machine::SetVolumeCounter(numSamples);
+			CPUCOST_CALC(cost, numSamples);
+			_cpuCost += cost;
 			_worked = true;
 		}
 
@@ -676,24 +647,20 @@ namespace psycle
 		{
 			Machine::Init();
 			sampleCount = 0;
-			#if !defined(_WINAMP_PLUGIN_)
-				//_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
-				//_RMAX = 1;
-				currentpeak=0.0f;
-				peaktime=1;
-				_lMax = 1;
-				_rMax = 1;
-				vuupdated = false;
-				_clip = false;
-			#endif
+			//_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
+			//_RMAX = 1;
+			currentpeak=0.0f;
+			peaktime=1;
+			_lMax = 1;
+			_rMax = 1;
+			vuupdated = false;
+			_clip = false;
 		}
 
 		void Master::Work(int numSamples)
 		{
 			Machine::Work(numSamples);
-			#if !defined(_WINAMP_PLUGIN_)
-				CPUCOST_INIT(cost);
-			#endif
+			CPUCOST_INIT(cost);
 			//if(!_mute)
 			//{
 				float mv = CValueMapper::Map_255_1(_outDry);
@@ -702,112 +669,100 @@ namespace psycle
 				float *pSamplesL = _pSamplesL;
 				float *pSamplesR = _pSamplesR;
 				
-				#if defined(_WINAMP_PLUGIN_)
-					int i = numSamples;
+				//_lMax -= numSamples*8;
+				//_rMax -= numSamples*8;
+				//_lMax *= 0.5;
+				//_rMax *= 0.5;
+				if(vuupdated) 
+				{ 
+					_lMax *= 0.5; 
+					_rMax *= 0.5; 
+				}
+				int i = numSamples;
+				if(decreaseOnClip)
+				{
 					do
 					{
-						*pSamples++ = *pSamplesL++ * mv;
-						*pSamples++ = *pSamplesR++ * mv;
+						// Left channel
+						if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
+						{
+							_lMax = fabsf(*pSamplesL);
+						}
+						if(*pSamples > 32767.0f)
+						{
+							_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+							mv = CValueMapper::Map_255_1(_outDry);
+							*pSamples = *pSamplesL = 32767.0f; 
+						}
+						else if (*pSamples < -32767.0f)
+						{
+							_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+							mv = CValueMapper::Map_255_1(_outDry);
+							*pSamples = *pSamplesL = -32767.0f; 
+						}
+						pSamples++;
+						pSamplesL++;
+						// Right channel
+						if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
+						{
+							_rMax = fabsf(*pSamplesR);
+						}
+						if(*pSamples > 32767.0f)
+						{
+							_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+							mv = CValueMapper::Map_255_1(_outDry);
+							*pSamples = *pSamplesR = 32767.0f; 
+						}
+						else if (*pSamples < -32767.0f)
+						{
+							_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+							mv = CValueMapper::Map_255_1(_outDry);
+							*pSamples = *pSamplesR = -32767.0f; 
+						}
+						pSamples++;
+						pSamplesR++;
 					}
 					while (--i);
-				#else
-					//_lMax -= numSamples*8;
-					//_rMax -= numSamples*8;
-					//_lMax *= 0.5;
-					//_rMax *= 0.5;
-					if(vuupdated) 
-					{ 
-						_lMax *= 0.5; 
-						_rMax *= 0.5; 
-					}
-					int i = numSamples;
-					if(decreaseOnClip)
+				}
+				else
+				{
+					do
 					{
-						do
+						// Left channel
+						if(std::fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
 						{
-							// Left channel
-							if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
-							{
-								_lMax = fabsf(*pSamplesL);
-							}
-							if(*pSamples > 32767.0f)
-							{
-								_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-								mv = CValueMapper::Map_255_1(_outDry);
-								*pSamples = *pSamplesL = 32767.0f; 
-							}
-							else if (*pSamples < -32767.0f)
-							{
-								_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-								mv = CValueMapper::Map_255_1(_outDry);
-								*pSamples = *pSamplesL = -32767.0f; 
-							}
-							pSamples++;
-							pSamplesL++;
-							// Right channel
-							if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
-							{
-								_rMax = fabsf(*pSamplesR);
-							}
-							if(*pSamples > 32767.0f)
-							{
-								_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-								mv = CValueMapper::Map_255_1(_outDry);
-								*pSamples = *pSamplesR = 32767.0f; 
-							}
-							else if (*pSamples < -32767.0f)
-							{
-								_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-								mv = CValueMapper::Map_255_1(_outDry);
-								*pSamples = *pSamplesR = -32767.0f; 
-							}
-							pSamples++;
-							pSamplesR++;
+							_lMax = fabsf(*pSamplesL);
 						}
-						while (--i);
-					}
-					else
-					{
-						do
+						pSamplesL++;
+						// Right channel
+						if(std::fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
 						{
-							// Left channel
-							if(std::fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
-							{
-								_lMax = fabsf(*pSamplesL);
-							}
-							pSamplesL++;
-							// Right channel
-							if(std::fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
-							{
-								_rMax = fabsf(*pSamplesR);
-							}
-							pSamplesR++;
+							_rMax = fabsf(*pSamplesR);
 						}
-						while (--i);
+						pSamplesR++;
 					}
-					if(_lMax > 32767.0f)
-					{
-						_clip=true;
-						_lMax = 32767.0f; //_LMAX = 32768;
-					}
-					else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
-					//else _LMAX = Dsp::F2I(_lMax);
-					if(_rMax > 32767.0f)
-					{
-						_clip=true;
-						_rMax = 32767.0f; //_RMAX = 32768;
-					}
-					else if(_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }
-					//else _RMAX = Dsp::F2I(_rMax);
-					if( _lMax > currentpeak ) currentpeak = _lMax;
-					if( _rMax > currentpeak ) currentpeak = _rMax;
-				#endif // _WINAMP_PLUGIN_
+					while (--i);
+				}
+				if(_lMax > 32767.0f)
+				{
+					_clip=true;
+					_lMax = 32767.0f; //_LMAX = 32768;
+				}
+				else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
+				//else _LMAX = Dsp::F2I(_lMax);
+				if(_rMax > 32767.0f)
+				{
+					_clip=true;
+					_rMax = 32767.0f; //_RMAX = 32768;
+				}
+				else if(_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }
+				//else _RMAX = Dsp::F2I(_rMax);
+				if( _lMax > currentpeak ) currentpeak = _lMax;
+				if( _rMax > currentpeak ) currentpeak = _rMax;
 			//}
 			sampleCount+=numSamples;
-			#if !defined(_WINAMP_PLUGIN_)
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
-			#endif
+			CPUCOST_CALC(cost, numSamples);
+			_cpuCost += cost;
 			_worked = true;
 		}
 
@@ -820,17 +775,13 @@ namespace psycle
 			return true;
 		};
 
-		#if !defined _WINAMP_PLUGIN_
-
-			void Master::SaveSpecificChunk(RiffFile* pFile)
-			{
-				UINT size = sizeof _outDry + sizeof decreaseOnClip;
-				pFile->Write(&size, sizeof size); // size of this part params to load
-				pFile->Write(&_outDry,sizeof _outDry);
-				pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
-			};
-
-		#endif
+		void Master::SaveSpecificChunk(RiffFile* pFile)
+		{
+			UINT size = sizeof _outDry + sizeof decreaseOnClip;
+			pFile->Write(&size, sizeof size); // size of this part params to load
+			pFile->Write(&_outDry,sizeof _outDry);
+			pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
+		};
 
 
 
@@ -853,11 +804,7 @@ namespace psycle
 			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-			#if defined (_WINAMP_PLUGIN_)
-				pFile->Skip(96) ; // sizeof(CPoint) = 8.
-			#else
-				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			#endif
+			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
 			pFile->Read(&_numInputs, sizeof(_numInputs));
 			pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -910,11 +857,7 @@ namespace psycle
 			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-			#if defined (_WINAMP_PLUGIN_)
-				pFile->Skip(96) ; // sizeof(CPoint) = 8.
-			#else
-				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			#endif
+			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
 			pFile->Read(&_numInputs, sizeof(_numInputs));
 			pFile->Read(&_numOutputs, sizeof(_numOutputs));
 			

@@ -45,14 +45,6 @@
 
 #include "psycle/host/global.hpp" // missing #includes in psycle's source code.
 
-#if defined _WINAMP_PLUGIN_
-	#if defined FOO_INPUT_STD_EXPORTS
-		#include "psycle/host/player_plugins/foobar2000/resources.hpp"
-	#else
-		#include "psycle/host/player_plugins/winamp/resources.hpp"
-	#endif
-#endif
-
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -7,9 +7,7 @@ namespace psycle
 {
 	namespace host
 	{
-		#if !defined(_WINAMP_PLUGIN_)
-			class CGearTracker; // forward declaration
-		#endif
+		class CGearTracker; // forward declaration
 
 		#define SAMPLER_MAX_POLYPHONY		16
 		#define SAMPLER_DEFAULT_POLYPHONY	8
@@ -148,36 +146,32 @@ namespace psycle
 				return TRUE;
 			};
 
-			#if !defined(_WINAMP_PLUGIN_)
-				inline virtual void SaveSpecificChunk(RiffFile* pFile) 
+			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
+			{
+				int temp;
+				UINT size = 2*sizeof(temp);
+				pFile->Write(&size,sizeof(size));
+				temp = _numVoices;
+				pFile->Write(&temp, sizeof(temp)); // numSubtracks
+				switch (_resampler._quality)
 				{
-					int temp;
-					UINT size = 2*sizeof(temp);
-					pFile->Write(&size,sizeof(size));
-					temp = _numVoices;
-					pFile->Write(&temp, sizeof(temp)); // numSubtracks
-					switch (_resampler._quality)
-					{
-					case RESAMPLE_NONE:
-						temp = 0;
-						break;
-					case RESAMPLE_LINEAR:
-						temp = 1;
-						break;
-					case RESAMPLE_SPLINE:
-						temp = 2;
-						break;
-					}
-					pFile->Write(&temp, sizeof(temp)); // quality
-				};
-			#endif // ndef _WINAMP_PLUGIN_
+				case RESAMPLE_NONE:
+					temp = 0;
+					break;
+				case RESAMPLE_LINEAR:
+					temp = 1;
+					break;
+				case RESAMPLE_SPLINE:
+					temp = 2;
+					break;
+				}
+				pFile->Write(&temp, sizeof(temp)); // quality
+			};
 
 			void Update(void);
 
 		protected:
-			#if !defined(_WINAMP_PLUGIN_)
-				friend CGearTracker;
-			#endif
+			friend CGearTracker;
 
 			static char* _psName;
 			int _numVoices;

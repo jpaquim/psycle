@@ -19,24 +19,16 @@ namespace psycle
 		public:
 			/// The file name this song was loaded from.
 			std::string fileName;
-			#if defined _WINAMP_PLUGIN_
-				/// The size of the file this song was loaded from.
-				/// Why is it stored? [JAZ] -> it's an information to show in the winamp plugin.
-				long filesize;
-			#else
-				/// The index of the machine which plays in solo.
-				int machineSoloed;
-				/// ???
-				CPoint viewSize;
-			#endif
+			/// The index of the machine which plays in solo.
+			int machineSoloed;
+			/// ???
+			CPoint viewSize;
 			/// Is this song saved to a file?
 			bool _saved;
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
-			#if !defined _WINAMP_PLUGIN_
-				/// ...
-				CCriticalSection door;
-			#endif
+			/// ...
+			CCriticalSection door;
 			/// constructor.
 			Song();
 			/// destructor.
@@ -47,12 +39,10 @@ namespace psycle
 			char Author[64];
 			/// the comments on the song
 			char Comment[256];
-			#if !defined _WINAMP_PLUGIN_
-				bool Tweaker;
-				unsigned cpuIdle;
-				unsigned _sampCount;
-				bool Invalided;
-			#endif
+			bool Tweaker;
+			unsigned cpuIdle;
+			unsigned _sampCount;
+			bool Invalided;
 			/// the initial beats per minute (BPM) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int m_BeatsPerMin;
@@ -77,10 +67,8 @@ namespace psycle
 			int playLength;
 			/// Sequence of patterns.
 			unsigned char playOrder[MAX_SONG_POSITIONS];
-			#if !defined _WINAMP_PLUGIN_
-				/// Selection of patterns (for the "playBlock()" play mode)
-				bool playOrderSel[MAX_SONG_POSITIONS];
-			#endif
+			/// Selection of patterns (for the "playBlock()" play mode)
+			bool playOrderSel[MAX_SONG_POSITIONS];
 			/// number of lines of each pattern
 			int patternLines[MAX_PATTERNS];
 			/// Pattern name 
@@ -121,17 +109,15 @@ namespace psycle
 			/// Current selected machine number in the GUI
 			/// \todo This is a gui thing... should not be here.
 			int seqBus;
-			#if !defined _WINAMP_PLUGIN_
-				///\name wavetable
-				///\{
-				/// ???
-				int WavAlloc(int iInstr,int iLayer,const char * str);
-				/// ???
-				int WavAlloc(int iInstr,int iLayer,bool bStereo,long iSamplesPerChan,const char * sName);
-				/// ???
-				int IffAlloc(int instrument,int layer,const char * str);
-				///\}
-			#endif
+			///\name wavetable
+			///\{
+			/// ???
+			int WavAlloc(int iInstr,int iLayer,const char * str);
+			/// ???
+			int WavAlloc(int iInstr,int iLayer,bool bStereo,long iSamplesPerChan,const char * sName);
+			/// ???
+			int IffAlloc(int instrument,int layer,const char * str);
+			///\}
 			/// Initializes the song to an empty one.
 			void New();
 			/// Resets some variables to their default values (used inside New(); )
@@ -146,28 +132,26 @@ namespace psycle
 			void DestroyAllMachines();
 			/// the number of pattern used in this song.
 			int GetNumPatternsUsed();
-			#if !defined _WINAMP_PLUGIN_
-				/// creates a new connection between two machines.
-				bool InsertConnection(int src,int dst,float value = 1.0f);
-				/// Changes the destination of a wire connection. wiresource= source mac index, wiredest= new dest mac index, wireindex= index of the wire in wiresource to change.
-				int ChangeWireDestMac(int wiresource, int wiredest, int wireindex);
-				/// Changes the destination of a wire connection. wiredest= dest mac index, wiresource= new source mac index, wireindex= index of the wire in wiredest to change.
-				int ChangeWireSourceMac(int wiresource, int wiredest, int wireindex);
-				/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
-				int GetFreeBus();
-				/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
-				int GetFreeFxBus();
-				/// Returns the Bus index out of a pMachine index.
-				int FindBusFromIndex(int smac);
-				/// Returns the first unused pattern in the pPatternData[] Array.
-				int GetBlankPatternUnused(int rval = 0);
-				/// creates a new pattern.
-				bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-				/// clones a machine.
-				bool CloneMac(int src,int dst);
-				/// clones an instrument.
-				bool CloneIns(int src,int dst);
-			#endif
+			/// creates a new connection between two machines.
+			bool InsertConnection(int src,int dst,float value = 1.0f);
+			/// Changes the destination of a wire connection. wiresource= source mac index, wiredest= new dest mac index, wireindex= index of the wire in wiresource to change.
+			int ChangeWireDestMac(int wiresource, int wiredest, int wireindex);
+			/// Changes the destination of a wire connection. wiredest= dest mac index, wiresource= new source mac index, wireindex= index of the wire in wiredest to change.
+			int ChangeWireSourceMac(int wiresource, int wiredest, int wireindex);
+			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
+			int GetFreeBus();
+			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
+			int GetFreeFxBus();
+			/// Returns the Bus index out of a pMachine index.
+			int FindBusFromIndex(int smac);
+			/// Returns the first unused pattern in the pPatternData[] Array.
+			int GetBlankPatternUnused(int rval = 0);
+			/// creates a new pattern.
+			bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
+			/// clones a machine.
+			bool CloneMac(int src,int dst);
+			/// clones an instrument.
+			bool CloneIns(int src,int dst);
 			/// deletes all the patterns of this song.
 			void DeleteAllPatterns();
 			/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses.
@@ -184,25 +168,23 @@ namespace psycle
 			///  loads a file into this song object.
 			///\param fullopen  used in context of the winamp/foobar player plugins, where it allows to get the info of the file, without needing to open it completely.
 			bool Load(RiffFile* pFile, bool fullopen=true);
-			#if !defined _WINAMP_PLUGIN_
-				/// saves this song to a file.
-				bool Save(RiffFile* pFile,bool autosave=false);
-				/// Used to detect if an especific pattern index contains any data.
-				bool IsPatternUsed(int i);
-				///\name previews waving
-				///\{
-				/// Function Work of the preview Wav.
-				void PW_Work(float *psamplesL, float *pSamplesR, int numSamples);
-				/// Start the playback of the preview wav
-				void PW_Play();
-				/// Current playback position, in samples
-				int PW_Phase;
-				/// Stage. 0 = Stopped. 1 = Playing.
-				int PW_Stage;
-				/// Stores the length of the preview wav.
-				int PW_Length;
-				///\}
-			#endif
+			/// saves this song to a file.
+			bool Save(RiffFile* pFile,bool autosave=false);
+			/// Used to detect if an especific pattern index contains any data.
+			bool IsPatternUsed(int i);
+			///\name previews waving
+			///\{
+			/// Function Work of the preview Wav.
+			void PW_Work(float *psamplesL, float *pSamplesR, int numSamples);
+			/// Start the playback of the preview wav
+			void PW_Play();
+			/// Current playback position, in samples
+			int PW_Phase;
+			/// Stage. 0 = Stopped. 1 = Playing.
+			int PW_Stage;
+			/// Stores the length of the preview wav.
+			int PW_Length;
+			///\}
 			/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 			/// This function now is the same as doing &pPatternData[ps]
 			inline unsigned char * _ppattern(int ps);

@@ -8,9 +8,7 @@
 #include <operating_system/exception.hpp>
 #include <operating_system/exceptions/code_description.hpp>
 #include <vst/AEffectx.h>
-#if !defined _WINAMP_PLUGIN_
-	#include "NewMachine.hpp"
-#endif
+#include "NewMachine.hpp"
 namespace psycle
 {
 	namespace host
@@ -218,10 +216,8 @@ namespace psycle
 				virtual bool Load(RiffFile * pFile);
 				virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
 
-				#if !defined _WINAMP_PLUGIN_
-					virtual void SaveSpecificChunk(RiffFile* pFile) ;
-					virtual void SaveDllName(RiffFile* pFile);
-				#endif
+				virtual void SaveSpecificChunk(RiffFile* pFile) ;
+				virtual void SaveDllName(RiffFile* pFile);
 
 				void Instance(std::string dllname, const bool overwriteName = true) throw(...);
 				void Free() throw(...);
@@ -248,9 +244,7 @@ namespace psycle
 				bool requiresProcess;
 				/// It needs to use ProcessRepl
 				bool requiresRepl;		
-				#if !defined _WINAMP_PLUGIN_
-					CFrameWnd * editorWnd;
-				#endif
+				CFrameWnd * editorWnd;
 
 			protected:
 				/// midi events queue, is sent to processEvents.

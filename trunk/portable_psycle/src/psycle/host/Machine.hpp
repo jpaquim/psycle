@@ -1,9 +1,6 @@
 ///\file
 ///\brief interface file for psycle::host::Machine
 #pragma once
-#if defined _WINAMP_PLUGIN_
-	#include <stdio.h>
-#endif
 #include "SongStructs.hpp"
 #include "Dsp.hpp"
 #include "Helpers.hpp"
@@ -73,14 +70,12 @@ namespace psycle
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version);
 
-			#if !defined _WINAMP_PLUGIN_
-					virtual void SaveFileChunk(RiffFile * pFile);
-					virtual void SaveSpecificChunk(RiffFile * pFile);
-					virtual void SaveDllName(RiffFile * pFile);
-				protected:
-					void SetVolumeCounter(int numSamples);
-					//void SetVolumeCounterAccurate(int numSamples);
-			#endif
+			virtual void SaveFileChunk(RiffFile * pFile);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveDllName(RiffFile * pFile);
+		protected:
+			void SetVolumeCounter(int numSamples);
+			//void SetVolumeCounterAccurate(int numSamples);
 
 		public:
 			int _macIndex;
@@ -130,24 +125,22 @@ namespace psycle
 			float TWSDelta[MAX_TWS];
 			float TWSCurrent[MAX_TWS];
 			float TWSDestination[MAX_TWS];
-			#if  !defined _WINAMP_PLUGIN_
-				/// output peak level for DSP
-				float _volumeCounter;					
-				/// output peak level for display
-				int _volumeDisplay;	
-				/// output peak level for display
-				int _volumeMaxDisplay;
-				/// output peak level for display
-				int _volumeMaxCounterLife;
-				unsigned long int _cpuCost;
-				unsigned long int _wireCost;
-				int _scopePrevNumSamples;
-				int	_scopeBufferIndex;
-				float *_pScopeBufferL;
-				float *_pScopeBufferR;
-				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
-				CPoint _connectionPoint[MAX_CONNECTIONS];
-			#endif
+			/// output peak level for DSP
+			float _volumeCounter;					
+			/// output peak level for display
+			int _volumeDisplay;	
+			/// output peak level for display
+			int _volumeMaxDisplay;
+			/// output peak level for display
+			int _volumeMaxCounterLife;
+			unsigned long int _cpuCost;
+			unsigned long int _wireCost;
+			int _scopePrevNumSamples;
+			int	_scopeBufferIndex;
+			float *_pScopeBufferL;
+			float *_pScopeBufferR;
+			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
+			CPoint _connectionPoint[MAX_CONNECTIONS];
 		};
 
 		/// dummy machine.
@@ -175,9 +168,7 @@ namespace psycle
 			virtual char* GetName(void) { return _psName; };
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
-			#if !defined _WINAMP_PLUGIN_
-				virtual void SaveSpecificChunk(RiffFile * pFile);
-			#endif
+			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 			/// this is for the VstHost
 			double sampleCount;
@@ -185,50 +176,37 @@ namespace psycle
 			bool _clip;
 			bool decreaseOnClip;
 			static float* _pMasterSamples;
-			#if !defined _WINAMP_PLUGIN_
-				int peaktime;
-				float currentpeak;
-				float _lMax;
-				float _rMax;
-				bool vuupdated;
-			#endif
+			int peaktime;
+			float currentpeak;
+			float _lMax;
+			float _rMax;
+			bool vuupdated;
 		protected:
 			static char* _psName;
 		};
 
-		#if !defined _CYRIX_PROCESSOR_ && !defined _WINAMP_PLUGIN_
-			///\todo make that a naked inline function
-			#define CPUCOST_INIT(cost)	\
-				ULONG cost;				\
-				__asm rdtsc				\
-				__asm mov cost, eax
-			/*
-			///\todo make that a naked inline function
-			#define CPUCOST_CALC(cost, numSamples)	\
-				__asm {								\
-				__asm rdtsc							\
-				__asm sub eax, cost					\
-				__asm mov cost, eax					\
-				}									\
-				cost = cost* Global::pConfig->_pOutputDriver->_samplesPerSec/ numSamples
-			//	cost = (cost*1000)/(numSamples*(Global::_cpuHz/Global::pConfig->_pOutputDriver->_samplesPerSec));
-			*/
-			///\todo make that a naked inline function
-			#define CPUCOST_CALC(cost, numSamples)	\
-				__asm rdtsc							\
-				__asm sub eax, cost					\
-				__asm mov cost, eax
+		///\todo make that a naked inline function
+		#define CPUCOST_INIT(cost)	\
+			ULONG cost;				\
+			__asm rdtsc				\
+			__asm mov cost, eax
+		/*
+		///\todo make that a naked inline function
+		#define CPUCOST_CALC(cost, numSamples)	\
+			__asm {								\
+			__asm rdtsc							\
+			__asm sub eax, cost					\
+			__asm mov cost, eax					\
+			}									\
+			cost = cost* Global::pConfig->_pOutputDriver->_samplesPerSec/ numSamples
+		//	cost = (cost*1000)/(numSamples*(Global::_cpuHz/Global::pConfig->_pOutputDriver->_samplesPerSec));
+		*/
+		///\todo make that a naked inline function
+		#define CPUCOST_CALC(cost, numSamples)	\
+			__asm rdtsc							\
+			__asm sub eax, cost					\
+			__asm mov cost, eax
 
-			#else
-
-			///\todo make that an inline function
-			#define CPUCOST_INIT(cost)	\
-				ULONG cost;				\
-				cost = 0;
-
-			///\todo make that an inline function
-			#define CPUCOST_CALC(cost, numSamples)	cost = 0;
-		#endif
 
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error

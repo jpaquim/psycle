@@ -1,13 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 #include <project.private.hpp>
-#if !defined _WINAMP_PLUGIN_
-	#include "psycle.hpp"
-	#include "NewMachine.hpp"
-	#include "MainFrm.hpp"
-	#include "ChildView.hpp"
-	#include "ProgressDialog.hpp"
-#endif
+#include "psycle.hpp"
+#include "NewMachine.hpp"
+#include "MainFrm.hpp"
+#include "ChildView.hpp"
+#include "ProgressDialog.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
@@ -16,30 +14,28 @@
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
 
-#if !defined _WINAMP_PLUGIN_
-	#include "Riff.hpp" // for Wave file loading.
-	namespace psycle
+#include "Riff.hpp" // for Wave file loading.
+namespace psycle
+{
+	namespace host
 	{
-		namespace host
-		{
-			extern CPsycleApp theApp;
+		extern CPsycleApp theApp;
 
-			/// the riff WAVE/fmt chunk.
-			class WavHeader
-			{
-			public:
-				char chunkID[4];
-				long chunkSize;
-				short wFormatTag;
-				unsigned short wChannels;
-				unsigned long  dwSamplesPerSec;
-				unsigned long  dwAvgBytesPerSec;
-				unsigned short wBlockAlign;
-				unsigned short wBitsPerSample;
-			};
-		}
+		/// the riff WAVE/fmt chunk.
+		class WavHeader
+		{
+		public:
+			char chunkID[4];
+			long chunkSize;
+			short wFormatTag;
+			unsigned short wChannels;
+			unsigned long  dwSamplesPerSec;
+			unsigned long  dwAvgBytesPerSec;
+			unsigned short wBlockAlign;
+			unsigned short wBitsPerSample;
+		};
 	}
-#endif
+}
 
 namespace psycle
 {
@@ -75,13 +71,11 @@ namespace psycle
 			case MACH_PLUGIN:
 				{
 					pMachine = pPlugin = new Plugin(index);
-					#if !defined _WINAMP_PLUGIN_
-						if(!CNewMachine::TestFilename(psPluginDll))
-						{
-							zapObject(pMachine);
-							return false;
-						}
-					#endif
+					if(!CNewMachine::TestFilename(psPluginDll))
+					{
+						zapObject(pMachine);
+						return false;
+					}
 					try
 					{
 						pPlugin->Instance(psPluginDll);
@@ -96,13 +90,11 @@ namespace psycle
 			case MACH_VST:
 				{
 					pMachine = pVstPlugin = new vst::instrument(index);
-					#if !defined _WINAMP_PLUGIN_
-						if(!CNewMachine::TestFilename(psPluginDll)) 
-						{
-							zapObject(pMachine);
-							return false;
-						}
-					#endif
+					if(!CNewMachine::TestFilename(psPluginDll)) 
+					{
+						zapObject(pMachine);
+						return false;
+					}
 					try
 					{
 						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
@@ -117,13 +109,11 @@ namespace psycle
 			case MACH_VSTFX:
 				{
 					pMachine = pVstPlugin = new vst::fx(index);
-					#if !defined _WINAMP_PLUGIN_
-						if(!CNewMachine::TestFilename(psPluginDll)) 
-						{
-							zapObject(pMachine);
-							return false;
-						}
-					#endif
+					if(!CNewMachine::TestFilename(psPluginDll)) 
+					{
+						zapObject(pMachine);
+						return false;
+					}
 					try
 					{
 						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
@@ -160,40 +150,31 @@ namespace psycle
 			return true;
 		}
 
-		#if !defined _WINAMP_PLUGIN_
-			int Song::FindBusFromIndex(int smac)
-			{
-				if(!_pMachine[smac])  return 255;
-				return smac;
-			}
-		#endif
+		int Song::FindBusFromIndex(int smac)
+		{
+			if(!_pMachine[smac])  return 255;
+			return smac;
+		}
 
 		Song::Song()
 		{
-			#if defined(_WINAMP_PLUGIN_)
-				filesize=0;
-			#else
-				_machineLock = false;
-				Invalided = false;
-				Tweaker = false;
-				PW_Phase = 0;
-				PW_Stage = 0;
-				PW_Length = 0;
-				// setting the preview wave volume to 25%
-				preview_vol = 0.25f;
-				#if !defined _CYRIX_PROCESSOR_
-					ULONG cpuHz;
-					__asm rdtsc ///< read time stamp to EAX
-					__asm mov cpuHz, eax
-					Sleep(1000);
-					__asm rdtsc
-					__asm sub eax, cpuHz ///< Find the difference
-					__asm mov cpuHz, eax
-					Global::_cpuHz = cpuHz;
-				#else
-					Global::_cpuHz = 1;
-				#endif
-			#endif
+			_machineLock = false;
+			Invalided = false;
+			Tweaker = false;
+			PW_Phase = 0;
+			PW_Stage = 0;
+			PW_Length = 0;
+			// setting the preview wave volume to 25%
+			preview_vol = 0.25f;
+			ULONG cpuHz;
+			__asm rdtsc ///< read time stamp to EAX
+			__asm mov cpuHz, eax
+			Sleep(1000);
+			__asm rdtsc
+			__asm sub eax, cpuHz ///< Find the difference
+			__asm mov cpuHz, eax
+			Global::_cpuHz = cpuHz;
+
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			CreateNewPattern(0);
@@ -210,9 +191,7 @@ namespace psycle
 
 		void Song::DestroyAllMachines()
 		{
-			#if !defined _WINAMP_PLUGIN_
-				_machineLock = true;
-			#endif
+			_machineLock = true;
 			for(int c(0) ;  c < MAX_MACHINES; ++c)
 			{
 				if(_pMachine[c])
@@ -232,9 +211,7 @@ namespace psycle
 				}
 				_pMachine[c] = 0;
 			}
-			#if !defined _WINAMP_PLUGIN_
-				_machineLock = false;
-			#endif
+			_machineLock = false;
 		}
 
 		void Song::DeleteLayer(int i,int c)
@@ -254,62 +231,48 @@ namespace psycle
 
 		void Song::DeleteInstrument(int i)
 		{
-			#if !defined _WINAMP_PLUGIN_
-				Invalided=true;
-			#endif
+			Invalided=true;
 			_pInstrument[i]->Delete();
-			#if !defined _WINAMP_PLUGIN_
-				Invalided=false;
-			#endif
+			Invalided=false;
 		}
 
 		void Song::Reset()
 		{
-			#if !defined _WINAMP_PLUGIN_
-				cpuIdle=0;
-				_sampCount=0;
-			#endif
+			cpuIdle=0;
+			_sampCount=0;
 			// Cleaning pattern allocation info
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) for(int c(0) ; c < MAX_WAVES; ++c) _pInstrument[i]->waveLength[c]=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
 					zapObject(_pMachine[i]);
 			}
-			#if !defined _WINAMP_PLUGIN_
-				for(int i(0) ; i < MAX_PATTERNS; ++i)
-				{
-					// All pattern reset
-					if(Global::pConfig) patternLines[i]=Global::pConfig->defaultPatLines;
-					else patternLines[i]=64;
-					std::sprintf(patternName[i], "Untitled"); 
-				}
-			#endif
+			for(int i(0) ; i < MAX_PATTERNS; ++i)
+			{
+				// All pattern reset
+				if(Global::pConfig) patternLines[i]=Global::pConfig->defaultPatLines;
+				else patternLines[i]=64;
+				std::sprintf(patternName[i], "Untitled"); 
+			}
 			_trackArmedCount = 0;
 			for(int i(0) ; i < MAX_TRACKS; ++i)
 			{
 				_trackMuted[i] = false;
 				_trackArmed[i] = false;
 			}
-			#if defined _WINAMP_PLUGIN_
-				for(int i(0) ; i < MAX_SONG_POSITIONS; ++i) playOrder[i]=0; // All pattern reset
-			#else
-				machineSoloed = -1;
-				_trackSoloed = -1;
-				playLength=1;
-				for(int i(0) ; i < MAX_SONG_POSITIONS; ++i)
-				{
-					playOrder[i]=0; // All pattern reset
-					playOrderSel[i]=false;
-				}
-				playOrderSel[0]=true;
-			#endif
+			machineSoloed = -1;
+			_trackSoloed = -1;
+			playLength=1;
+			for(int i(0) ; i < MAX_SONG_POSITIONS; ++i)
+			{
+				playOrder[i]=0; // All pattern reset
+				playOrderSel[i]=false;
+			}
+			playOrderSel[0]=true;
 		}
 
 		void Song::New()
 		{
-			#if !defined(_WINAMP_PLUGIN_)
-				CSingleLock lock(&door,TRUE);
-			#endif
+			CSingleLock lock(&door,TRUE);
 			seqBus=0;
 			// Song reset
 			std::memset(&Name, 0, sizeof Name);
@@ -339,27 +302,22 @@ namespace psycle
 			midiSelected = 0;
 			auxcolSelected = 0;
 			_saved=false;
-			#if defined _WINAMP_PLUGIN_
-				std::strcpy(fileName,"Untitled.psy");
-				CreateMachine(MACH_MASTER, 320, 200, NULL,MASTER_INDEX);
-			#else
-				fileName ="Untitled.psy";
-				if((CMainFrame *)theApp.m_pMainWnd)
-				{
-					CreateMachine
-						(
-							MACH_MASTER, 
-							(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-							(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
-							0,
-							MASTER_INDEX
-						);
-				}
-				else
-				{
-					CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
-				}
-			#endif
+			fileName ="Untitled.psy";
+			if((CMainFrame *)theApp.m_pMainWnd)
+			{
+				CreateMachine
+					(
+						MACH_MASTER, 
+						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
+						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
+						0,
+						MASTER_INDEX
+					);
+			}
+			else
+			{
+				CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
+			}
 		}
 
 		int Song::GetFreeMachine()
@@ -373,109 +331,104 @@ namespace psycle
 		}
 
 
-		#if !defined _WINAMP_PLUGIN_
-			bool Song::InsertConnection(int src, int dst, float value)
+		bool Song::InsertConnection(int src, int dst, float value)
+		{
+			int freebus=-1;
+			int dfreebus=-1;
+			bool error=false;
+			Machine *srcMac = _pMachine[src];
+			Machine *dstMac = _pMachine[dst];
+			if(!srcMac || !dstMac) return false;
+			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
+			// Get a free output slot on the source machine
+			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 			{
-				int freebus=-1;
-				int dfreebus=-1;
-				bool error=false;
-				Machine *srcMac = _pMachine[src];
-				Machine *dstMac = _pMachine[dst];
-				if(!srcMac || !dstMac) return false;
-				if(dstMac->_mode == MACHMODE_GENERATOR) return false;
-				// Get a free output slot on the source machine
-				for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-				{
-					if(!srcMac->_connection[c]) freebus = c;
-					// Checking that there's not an slot to the dest. machine already
-					else if(srcMac->_outputMachines[c] == dst) error = true;
-				}
-				if(freebus == -1 || error) return false;
-				// Get a free input slot on the destination machine
-				error=false;
-				for(int c=MAX_CONNECTIONS-1; c>=0; c--)
-				{
-					if(!dstMac->_inputCon[c]) dfreebus = c;
-					// Checking if the destination machine is connected with the source machine to avoid a loop.
-					else if((dstMac->_outputMachines[c] == src) && (dstMac->_connection[c])) error = true;
-				}
-				if(dfreebus == -1 || error) return false;
-				// Calibrating in/out properties
-				srcMac->_outputMachines[freebus] = dst;
-				srcMac->_connection[freebus] = true;
-				srcMac->_numOutputs++;
-				dstMac->_inputMachines[dfreebus] = src;
-				dstMac->_inputCon[dfreebus] = true;
-				dstMac->_numInputs++;
-				dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
-				return true;
+				if(!srcMac->_connection[c]) freebus = c;
+				// Checking that there's not an slot to the dest. machine already
+				else if(srcMac->_outputMachines[c] == dst) error = true;
 			}
-			int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
+			if(freebus == -1 || error) return false;
+			// Get a free input slot on the destination machine
+			error=false;
+			for(int c=MAX_CONNECTIONS-1; c>=0; c--)
 			{
-				int w;
-				float volume = 1.0f;
+				if(!dstMac->_inputCon[c]) dfreebus = c;
+				// Checking if the destination machine is connected with the source machine to avoid a loop.
+				else if((dstMac->_outputMachines[c] == src) && (dstMac->_connection[c])) error = true;
+			}
+			if(dfreebus == -1 || error) return false;
+			// Calibrating in/out properties
+			srcMac->_outputMachines[freebus] = dst;
+			srcMac->_connection[freebus] = true;
+			srcMac->_numOutputs++;
+			dstMac->_inputMachines[dfreebus] = src;
+			dstMac->_inputCon[dfreebus] = true;
+			dstMac->_numInputs++;
+			dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
+			return true;
+		}
+		int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
+		{
+			int w;
+			float volume = 1.0f;
 
-				if (_pMachine[wiresource])
+			if (_pMachine[wiresource])
+			{
+				Machine *dmac = _pMachine[_pMachine[wiresource]->_outputMachines[wireindex]];
+
+				if (dmac)
 				{
-					Machine *dmac = _pMachine[_pMachine[wiresource]->_outputMachines[wireindex]];
-
-					if (dmac)
+					w = dmac->FindInputWire(wiresource);
+					dmac->GetWireVolume(w,volume);
+					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
-						w = dmac->FindInputWire(wiresource);
-						dmac->GetWireVolume(w,volume);
-						if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
-						{
-							// delete the old wire
-							_pMachine[wiresource]->_connection[wireindex] = FALSE;
-							_pMachine[wiresource]->_numOutputs--;
+						// delete the old wire
+						_pMachine[wiresource]->_connection[wireindex] = FALSE;
+						_pMachine[wiresource]->_numOutputs--;
 
-							dmac->_inputCon[w] = FALSE;
-							dmac->_numInputs--;
-						}
-/*						else
-						{
-							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-						}*/
+						dmac->_inputCon[w] = FALSE;
+						dmac->_numInputs--;
 					}
-				}
-				return 0;
-			}
-			int Song::ChangeWireSourceMac(int wiresource,int wiredest, int wireindex)
-			{
-				float volume = 1.0f;
-
-				if (_pMachine[wiredest])
-				{					
-					Machine *smac = _pMachine[_pMachine[wiredest]->_inputMachines[wireindex]];
-
-					if (smac)
+/*						else
 					{
-						_pMachine[wiredest]->GetWireVolume(wireindex,volume);
-						if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
-						{
-							// delete the old wire
-							smac->_connection[smac->FindOutputWire(wiredest)] = FALSE;
-							smac->_numOutputs--;
-
-							_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
-							_pMachine[wiredest]->_numInputs--;
-						}
-/*						else
-						{
-							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-						}*/
-					}
+						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+					}*/
 				}
-				return 0;
 			}
+			return 0;
+		}
+		int Song::ChangeWireSourceMac(int wiresource,int wiredest, int wireindex)
+		{
+			float volume = 1.0f;
 
-		#endif
+			if (_pMachine[wiredest])
+			{					
+				Machine *smac = _pMachine[_pMachine[wiredest]->_inputMachines[wireindex]];
+
+				if (smac)
+				{
+					_pMachine[wiredest]->GetWireVolume(wireindex,volume);
+					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+					{
+						// delete the old wire
+						smac->_connection[smac->FindOutputWire(wiredest)] = FALSE;
+						smac->_numOutputs--;
+
+						_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
+						_pMachine[wiredest]->_numInputs--;
+					}
+/*						else
+					{
+						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+					}*/
+				}
+			}
+			return 0;
+		}
 
 		void Song::DestroyMachine(int mac)
 		{
-			#if !defined _WINAMP_PLUGIN_
-				CSingleLock lock(&door, TRUE);
-			#endif
+			CSingleLock lock(&door, TRUE);
 			Machine *iMac = _pMachine[mac];
 			Machine *iMac2;
 			if(iMac)
@@ -525,9 +478,7 @@ namespace psycle
 					}
 				}
 			}
-			#if !defined _WINAMP_PLUGIN_
-				if(mac == machineSoloed) machineSoloed = -1;
-			#endif
+			if(mac == machineSoloed) machineSoloed = -1;
 			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 			zapObject(_pMachine[mac]);
 		}
@@ -557,74 +508,72 @@ namespace psycle
 			return ppPatternData[ps];
 		}
 
-		#if !defined _WINAMP_PLUGIN_
-			bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
+		bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
+		{
+			unsigned char blank[5]={255,255,255,0,0};
+			unsigned char *toffset;
+			if(adaptsize)
 			{
-				unsigned char blank[5]={255,255,255,0,0};
-				unsigned char *toffset;
-				if(adaptsize)
+				float step;
+				if( patternLines[pattern] > lines ) 
 				{
-					float step;
-					if( patternLines[pattern] > lines ) 
+					step= (float)patternLines[pattern]/lines;
+					for(int t=0;t<SONGTRACKS;t++)
 					{
-						step= (float)patternLines[pattern]/lines;
-						for(int t=0;t<SONGTRACKS;t++)
+						toffset=_ptrack(pattern,t);
+						int l;
+						for(l = 1 ; l < lines; ++l)
 						{
-							toffset=_ptrack(pattern,t);
-							int l;
-							for(l = 1 ; l < lines; ++l)
-							{
-								std::memcpy(toffset + l * MULTIPLY, toffset + f2i(l * step) * MULTIPLY,EVENT_SIZE);
-							}
-							while(l < patternLines[pattern])
-							{
-								// This wouldn't be necessary if we really allocate a new pattern.
-								std::memcpy(toffset + (l * MULTIPLY), blank, EVENT_SIZE);
-								++l;
-							}
+							std::memcpy(toffset + l * MULTIPLY, toffset + f2i(l * step) * MULTIPLY,EVENT_SIZE);
 						}
-						patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
-					}
-					else if(patternLines[pattern] < lines)
-					{
-						step= (float)lines/patternLines[pattern];
-						int nl= patternLines[pattern];
-						for(int t=0;t<SONGTRACKS;t++)
+						while(l < patternLines[pattern])
 						{
-							toffset=_ptrack(pattern,t);
-							for(int l=nl-1;l>0;l--)
-							{
-								std::memcpy(toffset + f2i(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
-								int tz(f2i(l * step) - 1);
-								while (tz > (l - 1) * step)
-								{
-									std::memcpy(toffset + tz * MULTIPLY, blank, EVENT_SIZE);
-									--tz;
-								}
-							}
+							// This wouldn't be necessary if we really allocate a new pattern.
+							std::memcpy(toffset + (l * MULTIPLY), blank, EVENT_SIZE);
+							++l;
 						}
-						patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
 					}
+					patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
 				}
-				else
+				else if(patternLines[pattern] < lines)
 				{
-					int l(patternLines[pattern]);
-					while(l < lines)
+					step= (float)lines/patternLines[pattern];
+					int nl= patternLines[pattern];
+					for(int t=0;t<SONGTRACKS;t++)
 					{
-						// This wouldn't be necessary if we really allocate a new pattern.
-						for(int t(0) ; t < SONGTRACKS ; ++t)
+						toffset=_ptrack(pattern,t);
+						for(int l=nl-1;l>0;l--)
 						{
-							toffset=_ptrackline(pattern,t,l);
-							memcpy(toffset,blank,EVENT_SIZE);
-							l++;
+							std::memcpy(toffset + f2i(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
+							int tz(f2i(l * step) - 1);
+							while (tz > (l - 1) * step)
+							{
+								std::memcpy(toffset + tz * MULTIPLY, blank, EVENT_SIZE);
+								--tz;
+							}
 						}
 					}
-					patternLines[pattern] = lines;
+					patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
 				}
-				std::sprintf(patternName[pattern], name);
-				return true;
 			}
-		#endif
+			else
+			{
+				int l(patternLines[pattern]);
+				while(l < lines)
+				{
+					// This wouldn't be necessary if we really allocate a new pattern.
+					for(int t(0) ; t < SONGTRACKS ; ++t)
+					{
+						toffset=_ptrackline(pattern,t,l);
+						memcpy(toffset,blank,EVENT_SIZE);
+						l++;
+					}
+				}
+				patternLines[pattern] = lines;
+			}
+			std::sprintf(patternName[pattern], name);
+			return true;
+		}
 
 		void Song::SetBPM(int bpm, int tpb, int srate)
 		{
@@ -652,366 +601,363 @@ namespace psycle
 			return rval;
 		}
 
-		#if !defined _WINAMP_PLUGIN_
 
-			int Song::GetBlankPatternUnused(int rval)
+		int Song::GetBlankPatternUnused(int rval)
+		{
+			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
+			const unsigned char blank[5] = {255,255,255,0,0};
+			bool bTryAgain(true);
+			while(bTryAgain && rval < MAX_PATTERNS - 1)
 			{
-				for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
-				const unsigned char blank[5] = {255,255,255,0,0};
-				bool bTryAgain(true);
-				while(bTryAgain && rval < MAX_PATTERNS - 1)
+				for(int c(0) ; c < playLength ; ++c)
 				{
-					for(int c(0) ; c < playLength ; ++c)
+					if(rval == playOrder[c]) 
 					{
-						if(rval == playOrder[c]) 
-						{
-							++rval;
-							c = -1;
-						}
+						++rval;
+						c = -1;
 					}
-					// now test to see if data is really blank
-					bTryAgain = false;
-					if(rval < MAX_PATTERNS - 1)
+				}
+				// now test to see if data is really blank
+				bTryAgain = false;
+				if(rval < MAX_PATTERNS - 1)
+				{
+					unsigned char *offset_source(_ppattern(rval));
+					for(int t(0) ; t < MULTIPLY2 ; t += EVENT_SIZE)
 					{
-						unsigned char *offset_source(_ppattern(rval));
-						for(int t(0) ; t < MULTIPLY2 ; t += EVENT_SIZE)
+						for(int i(0) ; i < EVENT_SIZE; ++i)
 						{
-							for(int i(0) ; i < EVENT_SIZE; ++i)
+							if(offset_source[i] != blank[i])
 							{
-								if(offset_source[i] != blank[i])
-								{
-									++rval;
-									bTryAgain = true;
-									t = MULTIPLY2;
-									i = EVENT_SIZE;
-								}
-								offset_source += EVENT_SIZE;
+								++rval;
+								bTryAgain = true;
+								t = MULTIPLY2;
+								i = EVENT_SIZE;
 							}
+							offset_source += EVENT_SIZE;
 						}
 					}
 				}
-				if(rval > MAX_PATTERNS - 1)
-				{
-					rval = 0;
-					for(int c(0) ; c < playLength ; ++c)
-					{
-						if(rval == playOrder[c]) 
-						{
-							++rval;
-							c = -1;
-						}
-					}
-					if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
-				}
-				return rval;
 			}
-
-			int Song::GetFreeBus()
+			if(rval > MAX_PATTERNS - 1)
 			{
-				for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
-				return -1; 
+				rval = 0;
+				for(int c(0) ; c < playLength ; ++c)
+				{
+					if(rval == playOrder[c]) 
+					{
+						++rval;
+						c = -1;
+					}
+				}
+				if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
 			}
+			return rval;
+		}
 
-			int Song::GetFreeFxBus()
+		int Song::GetFreeBus()
+		{
+			for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
+			return -1; 
+		}
+
+		int Song::GetFreeFxBus()
+		{
+			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
+			return -1; 
+		}
+
+		// IFF structure ripped by krokpitr
+		// Current Code Extremely modified by [JAZ] ( RIFF based )
+		// Advise: IFF files use Big Endian byte ordering. That's why I use
+		// the following structure.
+		//
+		// typedef struct {
+		//   unsigned char hihi;
+		//   unsigned char hilo;
+		//   unsigned char lohi;
+		//   unsigned char lolo;
+		// } ULONGINV;
+		// 
+		//
+		/*
+		** IFF Riff Header
+		** ----------------
+
+		char Id[4]			// "FORM"
+		ULONGINV hlength	// of the data contained in the file (except Id and length)
+		char type[4]		// "16SV" == 16bit . 8SVX == 8bit
+
+		char name_Id[4]		// "NAME"
+		ULONGINV hlength	// of the data contained in the header "NAME". It is 22 bytes
+		char name[22]		// name of the sample.
+
+		char vhdr_Id[4]		// "VHDR"
+		ULONGINV hlength	// of the data contained in the header "VHDR". it is 20 bytes
+		ULONGINV Samplength	// Lenght of the sample. It is in bytes, not in Samples.
+		ULONGINV loopstart	// Start point for the loop. It is in bytes, not in Samples.
+		ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplenght) In bytes.
+		unsigned char unknown2[5]; //Always $20 $AB $01 $00 //
+		unsigned char volumeHiByte;
+		unsigned char volumeLoByte;
+		unsigned char unknown3;
+
+		char body_Id[4]		// "BODY"
+		ULONGINV hlength	// of the data contained in the file. It is the sample length as well (in bytes)
+		char *data			// the sample.
+
+		*/
+
+		int Song::IffAlloc(int instrument,int layer,const char * str)
+		{
+			if(instrument != PREV_WAV_INS)
 			{
-				for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
-				return -1; 
-			}
-
-			// IFF structure ripped by krokpitr
-			// Current Code Extremely modified by [JAZ] ( RIFF based )
-			// Advise: IFF files use Big Endian byte ordering. That's why I use
-			// the following structure.
-			//
-			// typedef struct {
-			//   unsigned char hihi;
-			//   unsigned char hilo;
-			//   unsigned char lohi;
-			//   unsigned char lolo;
-			// } ULONGINV;
-			// 
-			//
-			/*
-			** IFF Riff Header
-			** ----------------
-
-			char Id[4]			// "FORM"
-			ULONGINV hlength	// of the data contained in the file (except Id and length)
-			char type[4]		// "16SV" == 16bit . 8SVX == 8bit
-
-			char name_Id[4]		// "NAME"
-			ULONGINV hlength	// of the data contained in the header "NAME". It is 22 bytes
-			char name[22]		// name of the sample.
-
-			char vhdr_Id[4]		// "VHDR"
-			ULONGINV hlength	// of the data contained in the header "VHDR". it is 20 bytes
-			ULONGINV Samplength	// Lenght of the sample. It is in bytes, not in Samples.
-			ULONGINV loopstart	// Start point for the loop. It is in bytes, not in Samples.
-			ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplenght) In bytes.
-			unsigned char unknown2[5]; //Always $20 $AB $01 $00 //
-			unsigned char volumeHiByte;
-			unsigned char volumeLoByte;
-			unsigned char unknown3;
-
-			char body_Id[4]		// "BODY"
-			ULONGINV hlength	// of the data contained in the file. It is the sample length as well (in bytes)
-			char *data			// the sample.
-
-			*/
-
-			int Song::IffAlloc(int instrument,int layer,const char * str)
-			{
-				if(instrument != PREV_WAV_INS)
-				{
-					Invalided = true;
-					::Sleep(LOCK_LATENCY); ///< ???
-				}
-				RiffFile file;
-				RiffChunkHeader hd;
-				ULONG data;
-				ULONGINV tmp;
-				int bits = 0;
-				// opens the file and reads the "FORM" header.
-				if(!file.Open(const_cast<char*>(str)))
-				{
-					Invalided = false;
-					return 0;
-				}
-				DeleteLayer(instrument,layer);
-				file.Read(&data,4);
-				if( data == file.FourCC("16SV")) bits = 16;
-				else if(data == file.FourCC("8SVX")) bits = 8;
-				file.Read(&hd,sizeof hd);
-				if(hd._id == file.FourCC("NAME"))
-				{
-					file.Read(_pInstrument[instrument]->waveName[layer], 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
-					if( strcmp(_pInstrument[instrument]->_sName,"empty") == 0)
-					{
-						strncpy(_pInstrument[instrument]->_sName,str,31);
-						_pInstrument[instrument]->_sName[31]='\0';
-					}
-					file.Read(&hd,sizeof hd);
-				}
-				if ( hd._id == file.FourCC("VHDR"))
-				{
-					unsigned int Datalen, ls, le;
-					file.Read(&tmp,sizeof tmp);
-					Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-					file.Read(&tmp,sizeof tmp);
-					ls = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-					file.Read(&tmp,sizeof tmp);
-					le = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-					if(bits == 16)
-					{
-						Datalen >>= 1;
-						ls >>= 1;
-						le >>= 1;
-					}
-					_pInstrument[instrument]->waveLength[layer]=Datalen;
-					if(ls != le)
-					{
-						_pInstrument[instrument]->waveLoopStart[layer] = ls;
-						_pInstrument[instrument]->waveLoopEnd[layer] = ls + le;
-						_pInstrument[instrument]->waveLoopType[layer] = true;
-					}
-					file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
-					file.Read(&hd,sizeof hd);
-				}
-				if(hd._id == file.FourCC("BODY"))
-				{
-					short * csamples;
-					const unsigned int Datalen(_pInstrument[instrument]->waveLength[layer]);
-					_pInstrument[instrument]->waveStereo[layer] = false;
-					_pInstrument[instrument]->waveDataL[layer] = new signed short[Datalen];
-					csamples = _pInstrument[instrument]->waveDataL[layer];
-					if(bits == 16)
-					{
-						for(unsigned int smp(0) ; smp < Datalen; ++smp)
-						{
-							file.Read(&tmp, 2);
-							*csamples = tmp.hilo * 256 + tmp.hihi;
-							++csamples;
-						}
-					}
-					else
-					{
-						for(unsigned int smp(0) ; smp < Datalen; ++smp)
-						{
-							file.Read(&tmp, 1);
-							*csamples = tmp.hihi * 256 + tmp.hihi;
-							++csamples;
-						}
-					}
-				}
-				file.Close();
-				Invalided = false;
-				return 1;
-			}
-
-			int Song::WavAlloc(int iInstr, int iLayer, bool bStereo, long iSamplesPerChan, const char * sName)
-			{
-				///\todo what is ASSERT? some msicrosoft thingie?
-				ASSERT(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
-				DeleteLayer(iInstr,iLayer);
-				if(bStereo)
-				{
-					_pInstrument[iInstr]->waveDataL[iLayer] = new signed short[iSamplesPerChan];
-					_pInstrument[iInstr]->waveDataR[iLayer] = new signed short[iSamplesPerChan];
-					_pInstrument[iInstr]->waveStereo[iLayer] = true;
-				}
-				else
-				{
-					_pInstrument[iInstr]->waveDataL[iLayer] = new signed short[iSamplesPerChan];
-					_pInstrument[iInstr]->waveStereo[iLayer] = false;
-				}
-				_pInstrument[iInstr]->waveLength[iLayer] = iSamplesPerChan;
-				std::strncpy(_pInstrument[iInstr]->waveName[iLayer], sName, 31);
-				_pInstrument[iInstr]->waveName[iLayer][31] = '\0';
-				if(iLayer == 0)
-				{
-					std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
-					_pInstrument[iInstr]->_sName[31]='\0';
-				}
-				return true;
-			}
-
-			int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
-			{ 
-				///\todo what is ASSERT? some msicrosoft thingie?
-				ASSERT(Wavfile != 0);
-				WaveFile file;
-				ExtRiffChunkHeader hd;
-				// opens the file and read the format Header.
-				DDCRET retcode(file.OpenForRead((char*)Wavfile));
-				if(retcode != DDC_SUCCESS) 
-				{
-					Invalided = false;
-					return 0; 
-				}
 				Invalided = true;
 				::Sleep(LOCK_LATENCY); ///< ???
-				// sample type	
-				int st_type(file.NumChannels());
-				int bits(file.BitsPerSample());
-				long Datalen(file.NumSamples());
-				// Initializes the layer.
-				WavAlloc(instrument, layer, st_type == 2, Datalen, Wavfile);
-				// Reading of Wave data.
-				// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
-				// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-				short * sampL(_pInstrument[instrument]->waveDataL[layer]);
-
-				///\todo use template code for all this semi-repetitive code.
-
-				long io; ///< \todo why is this declared here?
-				// mono
-				if(st_type == 1)
+			}
+			RiffFile file;
+			RiffChunkHeader hd;
+			ULONG data;
+			ULONGINV tmp;
+			int bits = 0;
+			// opens the file and reads the "FORM" header.
+			if(!file.Open(const_cast<char*>(str)))
+			{
+				Invalided = false;
+				return 0;
+			}
+			DeleteLayer(instrument,layer);
+			file.Read(&data,4);
+			if( data == file.FourCC("16SV")) bits = 16;
+			else if(data == file.FourCC("8SVX")) bits = 8;
+			file.Read(&hd,sizeof hd);
+			if(hd._id == file.FourCC("NAME"))
+			{
+				file.Read(_pInstrument[instrument]->waveName[layer], 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
+				if( strcmp(_pInstrument[instrument]->_sName,"empty") == 0)
 				{
-					UINT8 smp8;
-					switch(bits)
+					strncpy(_pInstrument[instrument]->_sName,str,31);
+					_pInstrument[instrument]->_sName[31]='\0';
+				}
+				file.Read(&hd,sizeof hd);
+			}
+			if ( hd._id == file.FourCC("VHDR"))
+			{
+				unsigned int Datalen, ls, le;
+				file.Read(&tmp,sizeof tmp);
+				Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				file.Read(&tmp,sizeof tmp);
+				ls = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				file.Read(&tmp,sizeof tmp);
+				le = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				if(bits == 16)
+				{
+					Datalen >>= 1;
+					ls >>= 1;
+					le >>= 1;
+				}
+				_pInstrument[instrument]->waveLength[layer]=Datalen;
+				if(ls != le)
+				{
+					_pInstrument[instrument]->waveLoopStart[layer] = ls;
+					_pInstrument[instrument]->waveLoopEnd[layer] = ls + le;
+					_pInstrument[instrument]->waveLoopType[layer] = true;
+				}
+				file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
+				file.Read(&hd,sizeof hd);
+			}
+			if(hd._id == file.FourCC("BODY"))
+			{
+				short * csamples;
+				const unsigned int Datalen(_pInstrument[instrument]->waveLength[layer]);
+				_pInstrument[instrument]->waveStereo[layer] = false;
+				_pInstrument[instrument]->waveDataL[layer] = new signed short[Datalen];
+				csamples = _pInstrument[instrument]->waveDataL[layer];
+				if(bits == 16)
+				{
+					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-						case 8:
-							for(io = 0 ; io < Datalen ; ++io)
-							{
-								file.ReadData(&smp8, 1);
-								*sampL = (smp8 << 8) - 32768;
-								++sampL;
-							}
-							break;
-						case 16:
-								file.ReadData(sampL, Datalen);
-							break;
-						case 24:
-							for(io = 0 ; io < Datalen ; ++io)
-							{
-								file.ReadData(&smp8, 1);
-								file.ReadData(sampL, 1);
-								++sampL;
-							}
-							break;
-						default:
-							break;
+						file.Read(&tmp, 2);
+						*csamples = tmp.hilo * 256 + tmp.hihi;
+						++csamples;
 					}
 				}
-				// stereo
 				else
 				{
-					short *sampR(_pInstrument[instrument]->waveDataR[layer]);
-					UINT8 smp8;
-					switch(bits)
+					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-						case 8:
-							for(io = 0 ; io < Datalen ; ++io)
-							{
-								file.ReadData(&smp8, 1);
-								*sampL = (smp8 << 8) - 32768;
-								++sampL;
-								file.ReadData(&smp8, 1);
-								*sampR = (smp8 << 8) - 32768;
-								++sampR;
-							}
-							break;
-						case 16:
-							for(io = 0 ; io < Datalen ; ++io)
-							{
-								file.ReadData(sampL, 1);
-								file.ReadData(sampR, 1);
-								++sampL;
-								++sampR;
-							}
-							break;
-						case 24:
-							for(io = 0 ; io < Datalen ; ++io)
-							{
-								file.ReadData(&smp8, 1);
-								file.ReadData(sampL, 1);
-								++sampL;
-								file.ReadData(&smp8, 1);
-								file.ReadData(sampR, 1);
-								++sampR;
-							}
-							break;
-						default:
-							break; ///< \todo should throw an exception
+						file.Read(&tmp, 1);
+						*csamples = tmp.hihi * 256 + tmp.hihi;
+						++csamples;
 					}
 				}
-				retcode = file.Read(static_cast<void*>(&hd), 8);
-				while(retcode == DDC_SUCCESS)
-				{
-					if(hd.ckID == FourCC("smpl"))
-					{
-						char pl(0);
-						file.Skip(28);
-						file.Read(static_cast<void*>(&pl), 1);
-						if(pl == 1)
-						{
-							file.Skip(15);
-							unsigned int ls(0);
-							unsigned int le(0);
-							file.Read(static_cast<void*>(&ls), 4);
-							file.Read(static_cast<void*>(&le), 4);
-							_pInstrument[instrument]->waveLoopStart[layer] = ls;
-							_pInstrument[instrument]->waveLoopEnd[layer] = le;
-							// only for my bad sample collection
-							//if(!((ls <= 0) && (le >= Datalen - 1)))
-							{
-								_pInstrument[instrument]->waveLoopType[layer] = true;
-							}
-						}
-						file.Skip(9);
-					}
-					else if(hd.ckSize > 0)
-						file.Skip(hd.ckSize);
-					else
-						file.Skip(1);
-					retcode = file.Read(static_cast<void*>(&hd), 8);
-				}
-				file.Close();
-				Invalided = false;
-				return 1;
 			}
+			file.Close();
+			Invalided = false;
+			return 1;
+		}
 
-		#endif // ndef _WINAMP_PLUGIN_
+		int Song::WavAlloc(int iInstr, int iLayer, bool bStereo, long iSamplesPerChan, const char * sName)
+		{
+			///\todo what is ASSERT? some msicrosoft thingie?
+			ASSERT(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
+			DeleteLayer(iInstr,iLayer);
+			if(bStereo)
+			{
+				_pInstrument[iInstr]->waveDataL[iLayer] = new signed short[iSamplesPerChan];
+				_pInstrument[iInstr]->waveDataR[iLayer] = new signed short[iSamplesPerChan];
+				_pInstrument[iInstr]->waveStereo[iLayer] = true;
+			}
+			else
+			{
+				_pInstrument[iInstr]->waveDataL[iLayer] = new signed short[iSamplesPerChan];
+				_pInstrument[iInstr]->waveStereo[iLayer] = false;
+			}
+			_pInstrument[iInstr]->waveLength[iLayer] = iSamplesPerChan;
+			std::strncpy(_pInstrument[iInstr]->waveName[iLayer], sName, 31);
+			_pInstrument[iInstr]->waveName[iLayer][31] = '\0';
+			if(iLayer == 0)
+			{
+				std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
+				_pInstrument[iInstr]->_sName[31]='\0';
+			}
+			return true;
+		}
+
+		int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
+		{ 
+			///\todo what is ASSERT? some msicrosoft thingie?
+			ASSERT(Wavfile != 0);
+			WaveFile file;
+			ExtRiffChunkHeader hd;
+			// opens the file and read the format Header.
+			DDCRET retcode(file.OpenForRead((char*)Wavfile));
+			if(retcode != DDC_SUCCESS) 
+			{
+				Invalided = false;
+				return 0; 
+			}
+			Invalided = true;
+			::Sleep(LOCK_LATENCY); ///< ???
+			// sample type	
+			int st_type(file.NumChannels());
+			int bits(file.BitsPerSample());
+			long Datalen(file.NumSamples());
+			// Initializes the layer.
+			WavAlloc(instrument, layer, st_type == 2, Datalen, Wavfile);
+			// Reading of Wave data.
+			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
+			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
+			short * sampL(_pInstrument[instrument]->waveDataL[layer]);
+
+			///\todo use template code for all this semi-repetitive code.
+
+			long io; ///< \todo why is this declared here?
+			// mono
+			if(st_type == 1)
+			{
+				UINT8 smp8;
+				switch(bits)
+				{
+					case 8:
+						for(io = 0 ; io < Datalen ; ++io)
+						{
+							file.ReadData(&smp8, 1);
+							*sampL = (smp8 << 8) - 32768;
+							++sampL;
+						}
+						break;
+					case 16:
+							file.ReadData(sampL, Datalen);
+						break;
+					case 24:
+						for(io = 0 ; io < Datalen ; ++io)
+						{
+							file.ReadData(&smp8, 1);
+							file.ReadData(sampL, 1);
+							++sampL;
+						}
+						break;
+					default:
+						break;
+				}
+			}
+			// stereo
+			else
+			{
+				short *sampR(_pInstrument[instrument]->waveDataR[layer]);
+				UINT8 smp8;
+				switch(bits)
+				{
+					case 8:
+						for(io = 0 ; io < Datalen ; ++io)
+						{
+							file.ReadData(&smp8, 1);
+							*sampL = (smp8 << 8) - 32768;
+							++sampL;
+							file.ReadData(&smp8, 1);
+							*sampR = (smp8 << 8) - 32768;
+							++sampR;
+						}
+						break;
+					case 16:
+						for(io = 0 ; io < Datalen ; ++io)
+						{
+							file.ReadData(sampL, 1);
+							file.ReadData(sampR, 1);
+							++sampL;
+							++sampR;
+						}
+						break;
+					case 24:
+						for(io = 0 ; io < Datalen ; ++io)
+						{
+							file.ReadData(&smp8, 1);
+							file.ReadData(sampL, 1);
+							++sampL;
+							file.ReadData(&smp8, 1);
+							file.ReadData(sampR, 1);
+							++sampR;
+						}
+						break;
+					default:
+						break; ///< \todo should throw an exception
+				}
+			}
+			retcode = file.Read(static_cast<void*>(&hd), 8);
+			while(retcode == DDC_SUCCESS)
+			{
+				if(hd.ckID == FourCC("smpl"))
+				{
+					char pl(0);
+					file.Skip(28);
+					file.Read(static_cast<void*>(&pl), 1);
+					if(pl == 1)
+					{
+						file.Skip(15);
+						unsigned int ls(0);
+						unsigned int le(0);
+						file.Read(static_cast<void*>(&ls), 4);
+						file.Read(static_cast<void*>(&le), 4);
+						_pInstrument[instrument]->waveLoopStart[layer] = ls;
+						_pInstrument[instrument]->waveLoopEnd[layer] = le;
+						// only for my bad sample collection
+						//if(!((ls <= 0) && (le >= Datalen - 1)))
+						{
+							_pInstrument[instrument]->waveLoopType[layer] = true;
+						}
+					}
+					file.Skip(9);
+				}
+				else if(hd.ckSize > 0)
+					file.Skip(hd.ckSize);
+				else
+					file.Skip(1);
+				retcode = file.Read(static_cast<void*>(&hd), 8);
+			}
+			file.Close();
+			Invalided = false;
+			return 1;
+		}
 
 		bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
@@ -1021,12 +967,10 @@ namespace psycle
 
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
-				#if !defined _WINAMP_PLUGIN_
-					CProgressDialog Progress;
-					Progress.Create();
-					Progress.SetWindowText("Loading...");
-					Progress.ShowWindow(SW_SHOW);
-				#endif
+				CProgressDialog Progress;
+				Progress.Create();
+				Progress.SetWindowText("Loading...");
+				Progress.ShowWindow(SW_SHOW);
 				UINT version = 0;
 				UINT size = 0;
 				UINT index = 0;
@@ -1057,10 +1001,8 @@ namespace psycle
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				while(pFile->Read(&Header, 4))
 				{
-					#if !defined _WINAMP_PLUGIN_
-						Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
-						::Sleep(1); ///< Allow screen refresh.
-					#endif
+					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
+					::Sleep(1); ///< Allow screen refresh.
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
 					{
@@ -1137,12 +1079,7 @@ namespace psycle
 							Global::pPlayer->bpm = m_BeatsPerMin;
 							Global::pPlayer->tpb = _ticksPerBeat;
 							// calculate samples per tick
-							///\todo there's a unified call for samples per seconds
-							#if defined _WINAMP_PLUGIN_
-								m_SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
-							#else
-								m_SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
-							#endif
+							m_SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
@@ -1295,10 +1232,8 @@ namespace psycle
 					}
 				}
 				// now that we have loaded all the modules, time to prepare them.
-				#if !defined _WINAMP_PLUGIN_
-					Progress.m_Progress.SetPos(16384);
-					::Sleep(1); ///< ???
-				#endif
+				Progress.m_Progress.SetPos(16384);
+				::Sleep(1); ///< ???
 				// test all connections for invalid machines. disconnect invalid machines.
 				for(int i(0) ; i < MAX_MACHINES ; ++i)
 				{
@@ -1356,15 +1291,11 @@ namespace psycle
 				}
 
 				// translate any data that is required
-				#if !defined _WINAMP_PLUGIN_
-					static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
-					machineSoloed = solo;
-				#endif
+				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
+				machineSoloed = solo;
 				// allow stuff to work again
 				_machineLock = false;
-				#if !defined _WINAMP_PLUGIN_
-					Progress.OnCancel();
-				#endif
+				Progress.OnCancel();
 				if((!pFile->Close()) || (chunkcount))
 				{
 					char error[MAX_PATH];
@@ -1376,20 +1307,16 @@ namespace psycle
 			}
 			else if(std::strcmp(Header, "PSY2SONG") == 0)
 			{
-				#if !defined _WINAMP_PLUGIN_
-					CProgressDialog Progress;
-					Progress.Create();
-					Progress.SetWindowText("Loading old format...");
-					Progress.ShowWindow(SW_SHOW);
-				#endif
+				CProgressDialog Progress;
+				Progress.Create();
+				Progress.SetWindowText("Loading old format...");
+				Progress.ShowWindow(SW_SHOW);
 				int i;
 				int num;
 				bool _machineActive[128];
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
-				#if !defined _WINAMP_PLUGIN_
-					New();
-				#endif
+				New();
 				pFile->Read(&Name, 32);
 				pFile->Read(&Author, 32);
 				pFile->Read(&Comment, 128);
@@ -1404,11 +1331,7 @@ namespace psycle
 				Global::pPlayer->bpm = m_BeatsPerMin;
 				Global::pPlayer->tpb = _ticksPerBeat;
 				// The old format assumes we output at 44100 samples/sec, so...
-				#if defined _WINAMP_PLUGIN_
-					m_SamplesPerTick = m_SamplesPerTick * Global::pConfig->_samplesPerSec / 44100;
-				#else
-					m_SamplesPerTick = m_SamplesPerTick * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100;
-				#endif
+				m_SamplesPerTick = m_SamplesPerTick * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100;
 				pFile->Read(&currentOctave, sizeof currentOctave);
 				pFile->Read(&busMachine[0], sizeof busMachine);
 				pFile->Read(&playOrder, sizeof playOrder);
@@ -1435,10 +1358,8 @@ namespace psycle
 						RemovePattern(i);
 					}
 				}
-				#if !defined _WINAMP_PLUGIN_
-					Progress.m_Progress.SetPos(2048);
-					::Sleep(1); ///< ???
-				#endif
+				Progress.m_Progress.SetPos(2048);
+				::Sleep(1); ///< ???
 				// Instruments
 				pFile->Read(&instSelected, sizeof instSelected);
 				for(int i(0) ; i < OLD_MAX_INSTRUMENTS ; ++i)
@@ -1513,11 +1434,9 @@ namespace psycle
 				{
 					pFile->Read(&_pInstrument[i]->_RRES, sizeof(_pInstrument[0]->_RRES));
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(4096);
 				::Sleep(1);
-		#endif
 				// Waves
 				//
 				pFile->Read(&waveSelected, sizeof(waveSelected));
@@ -1548,11 +1467,9 @@ namespace psycle
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(4096+2048);
 				::Sleep(1);
-		#endif
 				// VST DLLs
 				//
 
@@ -1573,11 +1490,9 @@ namespace psycle
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(8192);
 				::Sleep(1);
-		#endif
 				// Machines
 				//
 				_machineLock = true;
@@ -1596,10 +1511,8 @@ namespace psycle
 					int x,y,type;
 					if (_machineActive[i])
 					{
-		#if !defined(_WINAMP_PLUGIN_)
 						Progress.m_Progress.SetPos(8192+i*(4096/128));
 						::Sleep(1);
-		#endif
 
 						pFile->Read(&x, sizeof(x));
 						pFile->Read(&y, sizeof(y));
@@ -1653,38 +1566,6 @@ namespace psycle
 							{
 								char sPath2[_MAX_PATH];
 								CString sPath;
-			#if defined(_WINAMP_PLUGIN_)
-								sPath = Global::pConfig->GetVstDir();
-								if ( fullopen && FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
-								{
-									strcpy(sPath2,sPath);
-
-									if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
-									{
-										Machine* pOldMachine = pMac[i];
-										pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-										pOldMachine->_pSamplesL = NULL;
-										pOldMachine->_pSamplesR = NULL;
-										// dummy name goes here
-										sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-										zapObject(pOldMachine);
-										pMac[i]->_type = MACH_DUMMY;
-										((Dummy*)pMac[i])->wasVST = true;
-									}
-								}
-								else
-								{
-									Machine* pOldMachine = pMac[i];
-									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-									pOldMachine->_pSamplesL = NULL;
-									pOldMachine->_pSamplesR = NULL;
-									// dummy name goes here
-									sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-									zapObject(pOldMachine);
-									pMac[i]->_type = MACH_DUMMY;
-									((Dummy*)pMac[i])->wasVST = true;
-								}
-			#else // if !_WINAMP_PLUGIN_
 								std::string temp;
 								if(CNewMachine::lookupDllName(vstL[pVstPlugin->_instance].dllName,temp))
 								{
@@ -1746,7 +1627,6 @@ namespace psycle
 									pMac[i]->_type = MACH_DUMMY;
 									((Dummy*)pMac[i])->wasVST = true;
 								}
-			#endif // _WINAMP_PLUGIN_
 							}
 							else
 							{
@@ -1779,7 +1659,6 @@ namespace psycle
 							pMac[i]->Load(pFile);
 						}
 
-		#if !defined(_WINAMP_PLUGIN_)
 						switch (pMac[i]->_mode)
 						{
 						case MACHMODE_GENERATOR:
@@ -1796,16 +1675,13 @@ namespace psycle
 							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 							break;
 						}
-		#endif // _WINAMP_PLUGIN_
 
 						pMac[i]->_x = x;
 						pMac[i]->_y = y;
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				Progress.m_Progress.SetPos(8192+4096);
 				::Sleep(1);
-		#endif
 
 				// Since the old file format stored volumes on each output
 				// rather than on each input, we must convert
@@ -1829,11 +1705,9 @@ namespace psycle
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(8192+4096+1024);
 				::Sleep(1);
-		#endif
 				for (i=0; i<128; i++) // Next, we go to fix this for each
 				{
 					if (_machineActive[i])		// valid machine (important, since we have to navigate!)
@@ -1884,11 +1758,9 @@ stack trace:
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(8192+4096+2048);
 				::Sleep(1);
-		#endif
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
 					pFile->Read(&_pInstrument[i]->_loop, sizeof(_pInstrument[0]->_loop));
@@ -2006,11 +1878,9 @@ stack trace:
 
 				// move machines around to where they really should go
 				// now we have to remap all the inputs and outputs again... ouch
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(8192+4096+2048+1024);
 				::Sleep(1);
-		#endif
 
 				for (i = 0; i < 64; i++)
 				{
@@ -2146,11 +2016,9 @@ stack trace:
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(8192+4096+2048+1024+512);
 				::Sleep(1);
-		#endif
 				// test all connections
 
 				for (int c=0; c<MAX_CONNECTIONS; c++)
@@ -2172,11 +2040,9 @@ stack trace:
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.m_Progress.SetPos(16384);
 				::Sleep(1);
-		#endif
 				// test all connections for invalid machines. disconnect invalid machines.
 				for (i = 0; i < MAX_MACHINES; i++)
 				{
@@ -2236,10 +2102,8 @@ stack trace:
 				if(fullopen) converter.retweak(*this);
 				_machineLock = false;
 				seqBus=0;
-		#if !defined(_WINAMP_PLUGIN_)
 				
 				Progress.OnCancel();
-		#endif
 				if (!pFile->Close())
 				{
 					char error[MAX_PATH];
@@ -2257,7 +2121,6 @@ stack trace:
 		}
 
 
-		#if !defined(_WINAMP_PLUGIN_)
 		bool Song::Save(RiffFile* pFile,bool autosave)
 		{
 			// NEW FILE FORMAT!!!
@@ -2971,7 +2834,5 @@ stack trace:
 			}
 			return bUsed;
 		}
-	#endif
-
 	}
 }

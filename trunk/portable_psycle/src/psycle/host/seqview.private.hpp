@@ -253,12 +253,7 @@ namespace psycle
 
 			curcol = seqTickOffs - (seqTickOffs%seqSteps);
 			
-		#if defined(_WINAMP_PLUGIN_) /*need change*/
-			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::pPlayer->bpm) / (60.0f * Global::pConfig->_samplesPerSec);
-		#else
 			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::pPlayer->bpm) / (60.0f * Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
-			
 
 			if ( (float)(curcol*seqSteps) <= curtime && Global::pPlayer->_playing )
 			{

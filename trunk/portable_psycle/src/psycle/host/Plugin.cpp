@@ -7,10 +7,8 @@
 #include <operating_system/exceptions/code_description.hpp>
 #include <algorithm>
 #include <cctype>
-#if !defined _WINAMP_PLUGIN_
-	#include "psycle.hpp"
-	#include "NewMachine.hpp"
-#endif
+#include "psycle.hpp"
+#include "NewMachine.hpp"
 namespace psycle
 {
 	namespace host
@@ -128,53 +126,43 @@ namespace psycle
 		{
 			std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
 			std::string sPath2;
-			#if defined _WINAMP_PLUGIN_
-				CString sPath;
-				sPath = Global::pConfig->GetPluginDir();
-				if( FindFileinDir(psFileName,sPath) )
-				{
-					return Instance(sPath2);
-				}
-				return false;
-			#else
-				std::string sPath;
-				if(!CNewMachine::lookupDllName(psFileName,sPath)) 
-				{
-					// Check Compatibility Table.
-					// Probably could be done with the dllNames lockup.
-					//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
-					sPath = psFileName;
-				}
+			std::string sPath;
+			if(!CNewMachine::lookupDllName(psFileName,sPath)) 
+			{
+				// Check Compatibility Table.
+				// Probably could be done with the dllNames lockup.
+				//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+				sPath = psFileName;
+			}
 
-				if(!CNewMachine::TestFilename(sPath) ) 
-				{
-					return false;
-				}
-				try
-				{
-					Instance(sPath.c_str());
-				}
-				catch(const std::exception & e)
-				{
-					std::ostringstream s; s
-						<< "Exception while instanciating: " << sPath << std::endl
-						<< "Replacing with dummy." << std::endl
-						<< typeid(e).name() << std::endl
-						<< e.what();
-					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-					return false;
-				}
-				catch(...)
-				{
-					std::ostringstream s; s
-						<< "Exception while instanciating: " << sPath2 << std::endl
-						<< "Replacing with dummy." << std::endl
-						<< "Unkown type of exception";
-					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-					return false;
-				}
-				return true;
-			#endif
+			if(!CNewMachine::TestFilename(sPath) ) 
+			{
+				return false;
+			}
+			try
+			{
+				Instance(sPath.c_str());
+			}
+			catch(const std::exception & e)
+			{
+				std::ostringstream s; s
+					<< "Exception while instanciating: " << sPath << std::endl
+					<< "Replacing with dummy." << std::endl
+					<< typeid(e).name() << std::endl
+					<< e.what();
+				::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+				return false;
+			}
+			catch(...)
+			{
+				std::ostringstream s; s
+					<< "Exception while instanciating: " << sPath2 << std::endl
+					<< "Replacing with dummy." << std::endl
+					<< "Unkown type of exception";
+				::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+				return false;
+			}
+			return true;
 		};
 
 		void Plugin::Free() throw(...)
@@ -255,52 +243,48 @@ namespace psycle
 			return true;
 		};
 
-		#if !defined _WINAMP_PLUGIN_
-			void Plugin::SaveSpecificChunk(RiffFile* pFile)
+		void Plugin::SaveSpecificChunk(RiffFile* pFile)
+		{
+			UINT count = GetNumParams();
+			UINT size2(0);
+			try
 			{
-				UINT count = GetNumParams();
-				UINT size2(0);
+				size2 = proxy().GetDataSize();
+			}
+			catch(const std::exception &)
+			{
+				// data won't be saved
+			}
+			UINT size = size2 + sizeof(count) + sizeof(int)*count;
+			pFile->Write(&size,sizeof(size));
+			pFile->Write(&count,sizeof(count));
+			//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+			for (UINT i = 0; i < count; i++)
+			{
+				int temp = GetParamValue(i);
+				pFile->Write(&temp,sizeof temp);
+			}
+			if(size2)
+			{
+				byte * pData = new byte[size2];
 				try
 				{
-					size2 = proxy().GetDataSize();
+					proxy().GetData(pData); // Internal save
 				}
 				catch(const std::exception &)
 				{
-					// data won't be saved
+					// this sucks because we already wrote the size,
+					// so now we have to write the data, even if they are corrupted.
 				}
-				UINT size = size2 + sizeof(count) + sizeof(int)*count;
-				pFile->Write(&size,sizeof(size));
-				pFile->Write(&count,sizeof(count));
-				//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-				for (UINT i = 0; i < count; i++)
-				{
-					int temp = GetParamValue(i);
-					pFile->Write(&temp,sizeof temp);
-				}
-				if(size2)
-				{
-					byte * pData = new byte[size2];
-					try
-					{
-						proxy().GetData(pData); // Internal save
-					}
-					catch(const std::exception &)
-					{
-						// this sucks because we already wrote the size,
-						// so now we have to write the data, even if they are corrupted.
-					}
-					pFile->Write(pData, size2); // Number of parameters
-					zapArray(pData);
-				}
-			};
-		#endif
+				pFile->Write(pData, size2); // Number of parameters
+				zapArray(pData);
+			}
+		};
 
 		void Plugin::Work(int numSamples)
 		{
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
-			#if !defined(_WINAMP_PLUGIN_)
-				CPUCOST_INIT(cost);
-			#endif
+			CPUCOST_INIT(cost);
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
@@ -476,25 +460,21 @@ namespace psycle
 							}
 						}
 					}
-					#ifndef _WINAMP_PLUGIN_
-						Machine::SetVolumeCounter(numSamples);
-						if ( Global::pConfig->autoStopMachines )
+					Machine::SetVolumeCounter(numSamples);
+					if ( Global::pConfig->autoStopMachines )
+					{
+						if (_volumeCounter < 8.0f)
 						{
-							if (_volumeCounter < 8.0f)
-							{
-								_volumeCounter = 0.0f;
-								_volumeDisplay = 0;
-								_stopped = true;
-							}
-							else _stopped = false;
+							_volumeCounter = 0.0f;
+							_volumeDisplay = 0;
+							_stopped = true;
 						}
-					#endif
+						else _stopped = false;
+					}
 				}
 			}
-			#ifndef _WINAMP_PLUGIN_
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
-			#endif // ndef _WINAMP_PLUGIN_
+			CPUCOST_CALC(cost, numSamples);
+			_cpuCost += cost;
 			_worked = true;
 		}
 
@@ -602,9 +582,7 @@ namespace psycle
 					catch(const std::exception &)
 					{
 					}
-					#if !defined _WINAMP_PLUGIN_
-						Global::_pSong->Tweaker = true;
-					#endif
+					Global::_pSong->Tweaker = true;
 				}
 			}
 			else if(pData->_note == cdefTweakS)
@@ -682,9 +660,7 @@ namespace psycle
 						}
 					}
 				}
-				#if !defined(_WINAMP_PLUGIN_)
-							Global::_pSong->Tweaker = true;
-				#endif // ndef _WINAMP_PLUGIN_
+				Global::_pSong->Tweaker = true;
 			}
 		}
 
@@ -729,51 +705,32 @@ namespace psycle
 				strcpy(sDllName,"arguru synth 2f.dll");
 			std::string sPath2;
 			CString sPath;
-			#if defined _WINAMP_PLUGIN_
-				sPath = Global::pConfig->GetPluginDir();
-				if ( FindFileinDir(sDllName,sPath) )
+			if ( !CNewMachine::lookupDllName(sDllName,sPath2) ) 
+			{
+				// Check Compatibility Table.
+				// Probably could be done with the dllNames lockup.
+				//GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
+				sPath2 = sDllName;
+			}
+			
+			if ( !CNewMachine::TestFilename(sPath2) ) 
+			{
+				result = false;
+			}
+			else 
+			{
+				try
 				{
-					try
-					{
-						Instance(sPath);
-					}
-					catch(...)
-					{
-						result = false;
-					}
+					Instance(sPath2.c_str());
 				}
-				else 
+				catch(...)
 				{
+					char sError[_MAX_PATH];
+					sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
+					::MessageBox(NULL,sError, "Error", MB_OK);
 					result = false;
 				}
-			#else
-				if ( !CNewMachine::lookupDllName(sDllName,sPath2) ) 
-				{
-					// Check Compatibility Table.
-					// Probably could be done with the dllNames lockup.
-					//GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
-					sPath2 = sDllName;
-				}
-				
-				if ( !CNewMachine::TestFilename(sPath2) ) 
-				{
-					result = false;
-				}
-				else 
-				{
-					try
-					{
-						Instance(sPath2.c_str());
-					}
-					catch(...)
-					{
-						char sError[_MAX_PATH];
-						sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-						::MessageBox(NULL,sError, "Error", MB_OK);
-						result = false;
-					}
-				}
-			#endif
+			}
 			Init();
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
@@ -861,11 +818,7 @@ namespace psycle
 			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-			#if defined (_WINAMP_PLUGIN_)
-				pFile->Skip(96) ; // sizeof(CPoint) = 8.
-			#else
-				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			#endif
+			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
 			pFile->Read(&_numInputs, sizeof(_numInputs));
 			pFile->Read(&_numOutputs, sizeof(_numOutputs));
 

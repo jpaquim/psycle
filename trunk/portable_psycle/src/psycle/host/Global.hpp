@@ -10,14 +10,7 @@ namespace psycle
 		class Player;
 		class Configuration;
 		class Resampler;
-
-		#if defined _WINAMP_PLUGIN_
-			bool FindFileinDir(/* const */ char name[], CString & path);
-		#endif
-
-		#if !defined _WINAMP_PLUGIN_
-			class InputHandler;
-		#endif
+		class InputHandler;
 
 		class Global
 		{
@@ -30,10 +23,8 @@ namespace psycle
 			static Player * pPlayer;
 			static Configuration * pConfig;
 			static Resampler * pResampler;
-			#if !defined _WINAMP_PLUGIN_
-				static unsigned int _cpuHz;
-				static InputHandler* pInputHandler;
-			#endif
+			static unsigned int _cpuHz;
+			static InputHandler* pInputHandler;
 		};
 
 		namespace loggers

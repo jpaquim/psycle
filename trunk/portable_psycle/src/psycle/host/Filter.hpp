@@ -51,11 +51,7 @@ namespace psycle
 			void ComputeCoeffs(int freq, int r, int t)
 			{
 				///\todo use unified function instead
-				#if defined(_WINAMP_PLUGIN_)
-					float omega = float(TPI*Cutoff(freq)/Global::pConfig->_samplesPerSec);
-				#else
-					float omega = float(TPI*Cutoff(freq)/Global::pConfig->_pOutputDriver->_samplesPerSec);
-				#endif
+				float omega = float(TPI*Cutoff(freq)/Global::pConfig->_pOutputDriver->_samplesPerSec);
 				float sn = (float)sin(omega);
 				float cs = (float)cos(omega);
 				float alpha;

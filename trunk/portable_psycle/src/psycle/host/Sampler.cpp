@@ -1,9 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
 #include <project.private.hpp>
-#if defined(_WINAMP_PLUGIN_)
-	//#include "global.hpp"
-#endif
 #include "Sampler.hpp"
 #include "Song.hpp"
 #include "FileIO.hpp"
@@ -68,11 +65,9 @@ namespace psycle
 			int numSamples)
 		{
 
-		#if !defined(_WINAMP_PLUGIN_)
 			CPUCOST_INIT(cost);
 			if (!_mute)
 			{
-		#endif //!defined(_WINAMP_PLUGIN_)		
 				for (int voice=0; voice<_numVoices; voice++)
 				{
 					PerformFx(voice); //<- needs to take numsamples into account
@@ -177,7 +172,6 @@ namespace psycle
 						}
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
 				Machine::SetVolumeCounter(numSamples);
 				if ( Global::pConfig->autoStopMachines )
 				{
@@ -194,9 +188,6 @@ namespace psycle
 
 			CPUCOST_CALC(cost, numSamples);
 			_cpuCost += cost;
-
-		#endif //!defined(_WINAMP_PLUGIN_)
-
 			_worked = true;
 		}
 
@@ -222,11 +213,7 @@ namespace psycle
 			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-		#if defined (_WINAMP_PLUGIN_)
-			pFile->Skip(96) ; // sizeof(CPoint) = 8.
-		#else
 			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-		#endif
 			pFile->Read(&_numInputs, sizeof(_numInputs));
 			pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
@@ -297,10 +284,6 @@ namespace psycle
 
 			pVoice->_tickCounter += numsamples;
 
-		#if defined(_WINAMP_PLUGIN_)
-			if ((pVoice->_triggerNoteDelay) && (pVoice->_tickCounter >= pVoice->_triggerNoteDelay))
-			{
-		#else
 			if (Global::_pSong->Invalided)
 			{
 				pVoice->_envelope._stage = ENV_OFF;
@@ -308,19 +291,11 @@ namespace psycle
 			}
 			else if ((pVoice->_triggerNoteDelay) && (pVoice->_tickCounter >= pVoice->_triggerNoteDelay))
 			{
-		#endif
 				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 				{
 					pVoice->_triggerNoteDelay = pVoice->_tickCounter+ pVoice->effVal;
-
-		#if defined(_WINAMP_PLUGIN_)
-					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
-					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
-		#else
 					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
-
 					pVoice->effretTicks--;
 					pVoice->_wave._pos.QuadPart = 0;
 					if ( pVoice->effretMode == 1 )
@@ -598,9 +573,7 @@ namespace psycle
 			int triggered = 0;
 			unsigned __int64 w_offset = 0;
 
-		#if !defined(_WINAMP_PLUGIN_)
 			if (Global::_pSong->Invalided) return 0;
-		#endif
 
 			pVoice->_tickCounter=0;
 			pVoice->effCmd=pEntry->_cmd;
@@ -666,11 +639,7 @@ namespace psycle
 				{
 					pVoice->_filterEnv._stage = ENV_ATTACK;
 				}
-		#if defined(_WINAMP_PLUGIN_)
-				pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
-		#else
 				pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
 				pVoice->_filterEnv._value = 0;
 				
 				// Init Wave
@@ -703,11 +672,7 @@ namespace psycle
 				else
 				{
 					float const finetune = CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune[layer]);
-		#if defined(_WINAMP_PLUGIN_)
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_samplesPerSec));
-		#else
 					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec));
-		#endif // _WINAMP_PLUGIN_
 				}
 				
 
@@ -765,11 +730,7 @@ namespace psycle
 
 				// Init Amplitude Envelope
 				//
-		#if defined(_WINAMP_PLUGIN_)
-				pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
-		#else
 				pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN
 				pVoice->_envelope._value = 0.0f;
 				pVoice->_envelope._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 				// This must be last, or the voice could be started by VoiceWork before all
@@ -878,11 +839,7 @@ namespace psycle
 				{
 					pVoice->_filterEnv._stage = ENV_DECAY;
 					pVoice->_filterEnv._value = 1.0f;
-		#if defined(_WINAMP_PLUGIN_)
-					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pConfig->_samplesPerSec);
-		#else
 					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
 				}
 				break;
 			case ENV_DECAY:
@@ -918,11 +875,7 @@ namespace psycle
 				{
 					pVoice->_envelope._value = 1.0f;
 					pVoice->_envelope._stage = ENV_DECAY;
-		#if defined(_WINAMP_PLUGIN_)
-					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pConfig->_samplesPerSec);
-		#else
 					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
 				}
 				break;
 			case ENV_DECAY:
@@ -954,13 +907,8 @@ namespace psycle
 			{
 				pVoice->_envelope._stage = ENV_RELEASE;
 				pVoice->_filterEnv._stage = ENV_RELEASE;
-		#if defined(_WINAMP_PLUGIN_)
-				pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
-				pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
-		#else
 				pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 				pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-		#endif // _WINAMP_PLUGIN_
 			}
 		}
 
