@@ -1475,7 +1475,7 @@ bool Song::Load(
 	// (.dll not found, or Load failed), which is, then, replaced by a DUMMY machine.
 	int j=0;
 	for ( i=0;i<MAX_BUSES;i++ ) {
-		if (busMachine[i] != 255) { // If there's a machine in the generators' bus that it is not a generator:
+		if (busMachine[i] != 255 && _machineActive[busMachine[i]]) { // If there's a machine in the generators' bus that it is not a generator:
 			if (_pMachines[busMachine[i]]->_mode != MACHMODE_GENERATOR ) {
 				_pMachines[busMachine[i]]->_mode = MACHMODE_FX;
 				while (busEffect[j] != 255 && j<MAX_BUSES) j++;
