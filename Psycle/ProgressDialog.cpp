@@ -48,6 +48,7 @@ BOOL CProgressDialog::OnInitDialog()
 	CDialog::OnInitDialog();
 	m_Progress.SetPos(0);
 	m_Progress.SetRange(0,16384);
+	AfxGetApp()->DoWaitCursor(1);
 	return true;
 }
 
@@ -60,5 +61,6 @@ BOOL CProgressDialog::Create()
 void CProgressDialog::OnCancel()
 {
 	DestroyWindow();
+	AfxGetApp()->DoWaitCursor(-1); 
 }
 

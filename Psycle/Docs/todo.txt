@@ -24,6 +24,7 @@ rough bug count: ~60, many aren't really bugs though.
 + undos for machine and wave edit?
 
 ** need save file? reminder on open file 
+*** save as wave should alert when it runs out of space
 
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
