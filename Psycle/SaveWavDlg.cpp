@@ -207,9 +207,12 @@ void CSaveWavDlg::OnFilebrowse()
 	CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 	if ( dlg.DoModal() == IDOK ) 
 	{
-		CString str = dlg.GetFileName();
+		CString str = dlg.GetPathName();
 		CString str2 = str.Right(4);
-		if ( str2.CompareNoCase(".wav") != 0 ) str.Insert(str.GetLength(),".wav");
+		if ( str2.CompareNoCase(".wav") != 0 ) 
+		{
+			str.Insert(str.GetLength(),".wav");
+		}
 		m_filename.SetWindowText(str);
 	}
 }
@@ -263,11 +266,11 @@ void CSaveWavDlg::OnSavewave()
 	memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
 	
 	CString name;
-//	m_samprate.GetWindowText(name);
-//	int val = _httoi(name.GetBuffer(5));
-//	pPlayer->SetSampleRate(val);
-//  int bitdepth = (m_bitdepth.GetCurSel()+1)*8;
 	m_filename.GetWindowText(name);
+
+	strcpy(rootname,name);
+	rootname[strlen(rootname)-4] = 0;
+
 	const int real_rate[]={8192,11025,22050,44100,48000,96000};
 	const int real_bits[]={8,16,24,32};
 
@@ -284,12 +287,13 @@ void CSaveWavDlg::OnSavewave()
 	m_bits.EnableWindow(FALSE);
 	m_channelmode.EnableWindow(FALSE);
 
+	m_rangeend.EnableWindow(FALSE);
+	m_rangestart.EnableWindow(FALSE);
+	m_patnumber.EnableWindow(FALSE);
+
 	if (m_savetracks.GetCheck())
 	{
 		memcpy(_Muted,pSong->_trackMuted,sizeof(pSong->_trackMuted));
-
-		strcpy(rootname,name);
-		rootname[strlen(rootname)-4] = 0;
 
 		int count = 0;
 
@@ -336,9 +340,6 @@ void CSaveWavDlg::OnSavewave()
 				_Muted[i] = TRUE;
 			}
 		}
-
-		strcpy(rootname,name);
-		rootname[strlen(rootname)-4] = 0;
 
 		for (i = 0; i < MAX_CONNECTIONS; i++)
 		{
@@ -614,6 +615,25 @@ void CSaveWavDlg::SaveEnd()
 	m_rate.EnableWindow(TRUE);
 	m_bits.EnableWindow(TRUE);
 	m_channelmode.EnableWindow(TRUE);
+
+	switch (m_recmode)
+	{
+	case 0:
+		m_rangeend.EnableWindow(FALSE);
+		m_rangestart.EnableWindow(FALSE);
+		m_patnumber.EnableWindow(FALSE);
+		break;
+	case 1:
+		m_rangeend.EnableWindow(FALSE);
+		m_rangestart.EnableWindow(FALSE);
+		m_patnumber.EnableWindow(TRUE);
+		break;
+	case 2:
+		m_rangeend.EnableWindow(TRUE);
+		m_rangestart.EnableWindow(TRUE);
+		m_patnumber.EnableWindow(FALSE);
+		break;
+	}
 
 	m_progress.SetPos(0);
 	m_savewave.EnableWindow(TRUE);
