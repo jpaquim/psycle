@@ -403,6 +403,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		}
 		break;
 	case DMSelection: 
+		// could optimize to only draw the changes
 		if (blockSelected)
 		{
 			if ((blockSel.end.track<rntOff) || (blockSel.end.line<rnlOff) ||
