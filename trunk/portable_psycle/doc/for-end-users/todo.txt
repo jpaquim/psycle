@@ -34,12 +34,22 @@ New and unsorted and untested
 
 
 
-<kSh>
+------------ <kSh> -------------
+1)
 For you, I have a little idea - trivial to do, very important to the users. Let Psycle save files to another name, then check if the file is OK, and then delete the old one and rename the new one.
 Paranoia for Psycle  	From kSh on 26.05.2004, 23:06 to BJohan
 Paranoia works well and if I get no problems with it through the upcoming weekend I'll release it with full source code in C++ Builder. Still I have a question: I would be able to overwrite the autosave settings in Psycle by modifying the registry with Paranoia but the Autosave options are shown as "Incorrect DWORD values" in regedit. What are they then?
 Regards,
 kSh
+
+2)
+Can someone at last do something with the little disturbing behaviour of opening new Psycle instances for files opened from the command line? If DDE is too complex then you could implement something very simple and still effective:
+- when Psycle runs, it pops a mutex
+- when another instance is launched, it sees that there is already one opened because there is already a mutex
+- then it passes the command line arguments to the first instance by throwing a windows message and exits
+- the first one receives the message and optionally asks user: "Save changes?", and then opens the new file
+Isn't that simple?
+--------------------------------
 
 
 
