@@ -3,6 +3,9 @@
 +=addition
 
 * psycle default theme sucks
+* Taika-Kim - Whenever I have the red ! pressed and I set wave export it gets depressed and I get no sound 
+	from Psycle until I press it down again, or sometimes only one instrument is played until the button 
+	is pressed down again, etc.
 
 * Other crap
 ------------
@@ -84,11 +87,11 @@ feature: Internal Fx Gui to Native Gui Conversion (including wiredialog)
 feature: VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
 feature: Option to hide Parameters in VST GUI.
 feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
-feature: Really good looking new Master Machine.(Graphics under res\MasterMachine)
 
 
 * Player Engine:
 ----------------
+* Midiout is NOT solid...
 * <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
 * <sue> playbar should take latency into account - same as ^
 * song length calculation does not take ffxx/fexx commands into account

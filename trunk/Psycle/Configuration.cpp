@@ -275,6 +275,14 @@ Configuration::~Configuration()
 	{
 		delete _psSongDir;
 	}
+	if (_psInitialSkinDir != NULL)
+	{
+		delete _psInitialSkinDir;
+	}
+	if (_psSkinDir != NULL)
+	{
+		delete _psSkinDir;
+	}
 #endif // ndef _WINAMP_PLUGIN_
 
 	if (_psInitialPluginDir != NULL)
@@ -292,14 +300,6 @@ Configuration::~Configuration()
 	if (_psVstDir != NULL)
 	{
 		delete _psVstDir;
-	}
-	if (_psInitialSkinDir != NULL)
-	{
-		delete _psInitialSkinDir;
-	}
-	if (_psSkinDir != NULL)
-	{
-		delete _psSkinDir;
 	}
 }
 
@@ -789,6 +789,29 @@ Configuration::Read()
 	{
 		SetSongDir(_psInitialSongDir);
 	}
+
+	if (_psInitialSkinDir != NULL)
+	{
+		delete _psInitialSkinDir;
+		_psInitialSkinDir = NULL;
+	}
+	numData = sizeof(string);
+	if (reg.QueryValue("SkinDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
+	{
+		_psInitialSkinDir = new char[numData];
+		strcpy(_psInitialSkinDir, &string[0]);
+	}
+	else
+	{
+		_psInitialSkinDir = new char[strlen(appPath)+sizeof(DEFAULT_SKIN_DIR)];
+		strcpy(_psInitialSkinDir, &appPath[0]);
+		strcat(_psInitialSkinDir, DEFAULT_SKIN_DIR);
+	}
+	if (_psSkinDir == NULL)
+	{
+		SetSkinDir(_psInitialSkinDir);
+	}
+
 #endif // ndef _WINAMP_PLUGIN_
 
 	if (_psInitialPluginDir != NULL)
@@ -835,27 +858,6 @@ Configuration::Read()
 		SetVstDir(_psInitialVstDir);
 	}
 
-	if (_psInitialSkinDir != NULL)
-	{
-		delete _psInitialSkinDir;
-		_psInitialSkinDir = NULL;
-	}
-	numData = sizeof(string);
-	if (reg.QueryValue("SkinDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
-	{
-		_psInitialSkinDir = new char[numData];
-		strcpy(_psInitialSkinDir, &string[0]);
-	}
-	else
-	{
-		_psInitialSkinDir = new char[strlen(appPath)+sizeof(DEFAULT_SKIN_DIR)];
-		strcpy(_psInitialSkinDir, &appPath[0]);
-		strcat(_psInitialSkinDir, DEFAULT_SKIN_DIR);
-	}
-	if (_psSkinDir == NULL)
-	{
-		SetSkinDir(_psInitialSkinDir);
-	}
 
 	reg.CloseKey();
 	reg.CloseRootKey();
@@ -1133,6 +1135,27 @@ void Configuration::SetInitialSongDir(const char* psDir)
 	SetSongDir(psDir);
 }
 
+void Configuration::SetSkinDir(const char* psDir)
+{
+	if (_psSkinDir != NULL)
+	{
+		delete _psSkinDir;
+	}
+	_psSkinDir = new char[strlen(psDir)+1];
+	strcpy(_psSkinDir, psDir);
+}
+
+void Configuration::SetInitialSkinDir(const char* psDir)
+{
+	if (_psInitialSkinDir != NULL)
+	{
+		delete _psInitialSkinDir;
+	}
+	_psInitialSkinDir = new char[strlen(psDir)+1];
+	strcpy(_psInitialSkinDir, psDir);
+	SetSkinDir(psDir);
+}
+
 #endif // ndef _WINAMP_PLUGIN_
 
 void Configuration::SetPluginDir(const char* psDir)
@@ -1182,23 +1205,3 @@ void Configuration::Error(const char* psMsg)
 	MessageBox(NULL,psMsg, "Psycle", MB_OK);
 }
 
-void Configuration::SetSkinDir(const char* psDir)
-{
-	if (_psSkinDir != NULL)
-	{
-		delete _psSkinDir;
-	}
-	_psSkinDir = new char[strlen(psDir)+1];
-	strcpy(_psSkinDir, psDir);
-}
-
-void Configuration::SetInitialSkinDir(const char* psDir)
-{
-	if (_psInitialSkinDir != NULL)
-	{
-		delete _psInitialSkinDir;
-	}
-	_psInitialSkinDir = new char[strlen(psDir)+1];
-	strcpy(_psInitialSkinDir, psDir);
-	SetSkinDir(psDir);
-}
