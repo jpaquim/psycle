@@ -168,7 +168,10 @@ namespace psycle
 				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255))
 				{
 					int mac = pEntry->_mach;
-					if(( mac != 255 || prevMachines[track] != 255) && (pEntry->_note != 255 || pEntry->_cmd != 0x00))
+					// used to be like this:
+					//if(( mac != 255 || prevMachines[track] != 255) && (pEntry->_note != 255 || pEntry->_cmd != 0x00))
+					// changed by alk in order to stop the note blasts when un muting vsts:
+					if(( mac != 255 || prevMachines[track] != 255) && (pEntry->_note != 255 || pEntry->_cmd != 0x00) && !(Global::_pSong->_pMachine[mac]->_mute))
 					{
 						if(mac != 255) prevMachines[track] = mac;
 						else mac = prevMachines[track];
