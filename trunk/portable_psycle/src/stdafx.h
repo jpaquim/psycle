@@ -6,7 +6,9 @@
 #include <project.h> // project-wide compiler, operating system, and processor specific tweaks.
 
 /// this is needed for compatibility of mfc with mswin98.
-#define WINVER 0x410 // [bohan] can we use GDI+ on mswin98?
+#define WINVER 0x410
+	// [bohan] can we use GDI+ on mswin98?
+	// [alk] bohan; I believe so
 
 /// mswinxp.
 //#define WINVER 0x501
