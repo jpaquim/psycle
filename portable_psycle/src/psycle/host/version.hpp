@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.4  2005/01/24 17:36:59  johan-boule
+no message
+
 Revision 1.3  2005/01/24 17:36:22  johan-boule
 there was a nasty backslash at the end of a line preventing the psycle namespace to close and creating a nested psycle namespace inside the psycle namespace itself.
 new alpha version 1.7.26 released.
