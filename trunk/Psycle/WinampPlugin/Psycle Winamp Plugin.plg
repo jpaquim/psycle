@@ -6,16 +6,13 @@
 --------------------Configuration: Psycle Winamp Plugin - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\WINDOWS\TEMP\RSP4384.TMP" with contents
+Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP8.tmp" with contents
 [
 /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PSYCLEWINAMPPLUGIN_EXPORTS" /D "_WINDLL" /D "_AFXDLL" /D "_WINAMP_PLUGIN_" /Fp"Release/Psycle Winamp Plugin.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
-"C:\Mis documentos\Visual C++\psycle16RC1_src\WinampPlugin\in_psycle.cpp"
-"C:\Mis documentos\Visual C++\psycle16RC1_src\Machine.cpp"
-"C:\Mis documentos\Visual C++\psycle16RC1_src\Sampler.cpp"
-"C:\Mis documentos\Visual C++\psycle16RC1_src\Song.cpp"
+"D:\Documents and Settings\All Users\Documentos\Visual C++\Psycle\Song.cpp"
 ]
-Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP4384.TMP" 
-Creating temporary file "C:\WINDOWS\TEMP\RSP4385.TMP" with contents
+Creating command line "cl.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP8.tmp" 
+Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP9.tmp" with contents
 [
 /nologo /dll /incremental:no /pdb:"Release/in_psycle.pdb" /machine:I386 /out:"Release/in_psycle.dll" /implib:"Release/in_psycle.lib" 
 ".\Release\ConfigDlg.obj"
@@ -34,15 +31,11 @@ Creating temporary file "C:\WINDOWS\TEMP\RSP4385.TMP" with contents
 ".\Release\VstHost.obj"
 ".\Release\in_psycle.res"
 ]
-Creating command line "xilink6.exe @C:\WINDOWS\TEMP\RSP4385.TMP"
+Creating command line "link.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP9.tmp"
 <h3>Output Window</h3>
 Compiling...
-in_psycle.cpp
-Machine.cpp
-Sampler.cpp
 Song.cpp
 Linking...
-xilink6: executing 'C:\ARCHIV~1\MICROS~1\VC98\BIN\link.exe'
    Creating library Release/in_psycle.lib and object Release/in_psycle.exp
 
 
