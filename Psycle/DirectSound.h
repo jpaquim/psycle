@@ -35,7 +35,7 @@ private:
 	bool _playing;
 	bool _timerActive;
 	static AudioDriverEvent _event;
-	static CCriticalSection _lock;
+	/*static*/ CCriticalSection _lock; // <bohan> fix-bug-id 1. made the static _lock object become member object
 
 	GUID _dsGuid;
 	LPCGUID _pDsGuid;
