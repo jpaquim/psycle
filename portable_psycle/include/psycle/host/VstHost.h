@@ -161,6 +161,21 @@ namespace psycle
 				virtual ~plugin() throw();
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
+				virtual int GetNumParams()
+				{
+					try
+					{
+						return proxy().numParams();
+					}
+					catch(const std::exception &)
+					{
+						// <bohan>
+						// exception blocked here for now,
+						// but we really should do something...
+						//throw;
+						return 0; /// \todo <bohan> ???
+					}
+				}
 				virtual void GetParamName(int numparam, char * name)
 				{
 					try
@@ -175,7 +190,7 @@ namespace psycle
 						// exception blocked here for now,
 						// but we really should do something...
 						//throw;
-						std::strcpy(name, "fucked up");
+						std::strcpy(name, "fucked up"); /// \todo <bohan> ???
 					}
 				}
 				virtual void GetParamValue(int numparam, char * parval);
