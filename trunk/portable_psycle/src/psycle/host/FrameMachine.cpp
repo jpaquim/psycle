@@ -71,7 +71,7 @@ namespace psycle
 		{
 			_pMachine = pMachine;
 			me = true;
-			int const cxsize=134;
+			int const cxsize=150;
 
 			// Get NumParameters
 			int ncol=1;
@@ -179,7 +179,7 @@ namespace psycle
 
 			CRect rect;
 			GetClientRect(&rect);
-			int const cxsize=134;
+			int const cxsize=150;
 			int const K_XSIZE2=K_XSIZE+8;
 			int const K_YSIZE2=K_YSIZE/2;
 		//	int hsp=0;
@@ -365,7 +365,7 @@ namespace psycle
 
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
-			tweakpar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
+			tweakpar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				sourcepoint = point.y;
@@ -555,7 +555,7 @@ namespace psycle
 
 		void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 		{
-			tweakpar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
+			tweakpar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				if (nFlags & MK_CONTROL)
@@ -569,7 +569,7 @@ namespace psycle
 				}
 				else 
 				{		
-					int const thispar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
+					int const thispar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
 					int min_v=1;
 					int max_v=1;
 					char name[64];
