@@ -15,6 +15,7 @@ X low priority
 [blah]  <- Notes written by developers
 
 
+rough bug count: ~60, many aren't really bugs though.
 
 
 * New and unsorted and untested
@@ -22,13 +23,12 @@ X low priority
 
 + undos for machine and wave edit?
 
-** The play block feature doesn't work.
-
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still
 	<YanniS> C:\Audio\Psycle\Skinss\
 	[ not recreated * yannis says it is still happening]
+	[ * tried a fix, need to talk to yannis to see if it worked]
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 
@@ -129,13 +129,14 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * GUI (pattern):
 ----------------
-**	<alk> somehow I managed to get the row number highlighted in two places.
+*	<alk> somehow I managed to get the row number highlighted in two places.
 		to cause the bug of more than one line number highlighted:
 		select a line, then lower down click and drag to select a block.
 		cause the window to scroll by making the block go off the Bottom of the screen.
 		(notice the previous highlight moving up) now click another place. 
 		[pooplog - cannot reproduce]
-**	Can't select with keyboard while follow song on, and playing.
+*	Can't select with keyboard while follow song on, and playing.
+		[pooplog -  DUH The cursor is following the song, how are you going to select?!]
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
 +	how about option to switch the instrument and machine columns?
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
@@ -151,11 +152,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * GUI (machines):
 -----------------
-** <_sue_> hey.....remember seeing someone at the boards sayn that psycles param bar went crazy with
-	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob 
-	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
-	 talking about......the first time it happened it scrolled for ages..i thought it had went 
-	 crazy too.....
 **	preview check box in preset dialog stopped working? 
 	[ it works, but you can't test notes realtime because the dialog is modal ]
 **	alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window,
@@ -165,7 +161,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	on every frame - 
 	[ make bigger buffers and more of them to prevent this from happening ]
 *	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
+	[ could try to set up some sort of clipping rect stack, at the cost of cpu... ]
 *	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
+	[ this is perhaps a flaw in the transparency blit algo ]
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
@@ -189,7 +187,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Player Engine:
 ----------------
-**	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
+** The play block feature doesn't work.
 **	<sue> playbar should take latency into account - same as ^
 **	<_sue_> (autostop) now it also behaves weird with internal delays even if not in record mode....just 
 		playng
@@ -199,7 +197,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		 and neither does Inputhandler know which machines are playing.
 		 Doing a "player::Stop()" would be a bit hardcore.
 		 I agree]
-++	Add options to "save as wave" for: sample rate, # channels, bitsize
++++	Add options to "save as wave" for: sample rate, # channels, bitsize
++++	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
 +++FF?	DirectX effects, intstruments
 +++	option for record to take command FD into account like ft2
 ++	ALK tracker command to bypass an fx, mute command for machines
@@ -221,10 +220,15 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ------------
 ***	Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra and JAL7OH-)
 		[Fix:Basically, make ONLY .fxb for VST's.]
+** <_sue_> hey.....remember seeing someone at the boards sayn that psycles param bar went crazy with
+	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob 
+	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
+	 talking about......the first time it happened it scrolled for ages..i thought it had went 
+	 crazy too.....
 ** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
-** vst fm7 locks up psycle on parameter change midi command
+** vst fm7 locks up psycle on parameter change midi command with gui open
 ** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
 	it works fine?
 * drumatic 2 vst: http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
@@ -261,6 +265,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 * MIDI related
 ------------
 **	Midiout is NOT solid...
+	[ has this been tested in the last year ? ]
 *	MIDI out only works with Waveout
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages
@@ -272,8 +277,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Interface (contains pattern stuff too):
 ------------
-*** when recording mouse tweaks, it puts the mac # of the currently selected machine instead of the machine you are tweaking
-	[not recreated]
 ** When 'cursor always down' is enabled u can't insert values on the last row
 **	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
@@ -379,6 +382,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * File Format:
 ------------
+**	should save wire dialog settings
 +++FF	new file format: (vst multi-out, volume column, direct x stuff, etc.)
 
 

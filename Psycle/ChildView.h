@@ -370,11 +370,12 @@ private:
 	inline void TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h);
 	inline void BOX(CDC *devc,int x,int y, int w, int h);
 	inline void BOX(CDC *devc,CRect rect);
-	void DrawMachineVol(int x,int y,CDC *devc, int vol, int max, int mode);
-	void DrawMachineVumeters(CDC *devc);	
+	void DrawMachineVol(int c, CDC *devc);
+	void DrawMachineVumeters(int c, CDC *devc);	
+	void DrawAllMachineVumeters(CDC *devc);	
 	void DrawMachineEditor(CDC *devc);
-	void DrawMachine(Machine* mac, int macnum, CDC *devc);
-	void ClearMachineSpace(Machine* mac,int macnum, CDC *devc);
+	void DrawMachine(int macnum, CDC *devc);
+	void ClearMachineSpace(int macnum, CDC *devc);
 	void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
 	int GetMachine(CPoint point);
 	void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);

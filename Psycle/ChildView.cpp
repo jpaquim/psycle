@@ -379,7 +379,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 		if (viewMode == VMMachine)
 		{
 			CClientDC dc(this);
-			DrawMachineVumeters(&dc);
+			DrawAllMachineVumeters(&dc);
 		}
 		if (Global::_pSong->Tweaker)
 		{
@@ -554,8 +554,8 @@ void CChildView::OnPaint()
 				break;
 			case DMMacRefresh:
 //				ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
-				DrawMachine(Global::_pSong->_pMachine[updatePar], updatePar, &bufDC);
-				DrawMachineVumeters(&bufDC);
+				DrawMachine(updatePar, &bufDC);
+				DrawMachineVumeters(updatePar, &bufDC);
 				updateMode=0;
 				break;
 			case DMAllMacsRefresh:
@@ -563,10 +563,10 @@ void CChildView::OnPaint()
 				{
 					if (_pSong->_pMachine[i])
 					{
-						DrawMachine(Global::_pSong->_pMachine[i], i, &bufDC);
+						DrawMachine(i, &bufDC);
 					}
 				}
-				DrawMachineVumeters(&bufDC);
+				DrawAllMachineVumeters(&bufDC);
 				break;
 			}
 		}
@@ -592,8 +592,8 @@ void CChildView::OnPaint()
 				break;
 			case DMMacRefresh:
 //				ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
-				DrawMachine(Global::_pSong->_pMachine[updatePar], updatePar, &dc);
-				DrawMachineVumeters(&dc);
+				DrawMachine(updatePar, &dc);
+				DrawMachineVumeters(updatePar, &dc);
 				updateMode=0;
 				break;
 			case DMAllMacsRefresh:
@@ -601,10 +601,10 @@ void CChildView::OnPaint()
 				{
 					if (_pSong->_pMachine[i]) 
 					{
-						DrawMachine(Global::_pSong->_pMachine[i], i, &dc);
+						DrawMachine(i, &dc);
 					}
 				}
-				DrawMachineVumeters(&dc);
+				DrawAllMachineVumeters(&dc);
 				break;
 			}
 		}

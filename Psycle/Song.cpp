@@ -1318,7 +1318,7 @@ bool Song::Load(RiffFile* pFile)
 					{
 						// we had better load it
 						DestroyMachine(index);
-						_pMachine[index] = Machine::LoadFileChunk(pFile,version);
+						_pMachine[index] = Machine::LoadFileChunk(pFile,index,version);
 					}
 					else
 					{
@@ -1719,10 +1719,16 @@ bool Song::Load(RiffFile* pFile)
 				case MACH_VSTFX:
 					{
 					
-					if ( type == MACH_VST ) pMachine[i] = pVstPlugin = new VSTInstrument;
-					else if ( type == MACH_VSTFX ) pMachine[i] = pVstPlugin = new VSTFX;
+					if ( type == MACH_VST ) 
+					{
+						pMachine[i] = pVstPlugin = new VSTInstrument;
+					}
+					else if ( type == MACH_VSTFX ) 
+					{
+						pMachine[i] = pVstPlugin = new VSTFX;
+					}
 	#if  !defined(_WINAMP_PLUGIN_)
-					pVstPlugin->macindex = FindBusFromIndex(i);
+					pVstPlugin->macindex = i;
 	#endif //  !defined(_WINAMP_PLUGIN_)
 					if ((pMachine[i]->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 					{
@@ -2084,6 +2090,20 @@ bool Song::Load(RiffFile* pFile)
 							}
 						}
 					}
+				}
+			}
+		}
+
+		// fix vst machine #s
+
+		for (i = 0; i < MAX_MACHINES-1; i++)
+		{
+			if (_pMachine[i])
+			{
+				if (( _pMachine[i]->_type == MACH_VST ) || 
+					( _pMachine[i]->_type == MACH_VSTFX))
+				{
+					((VSTPlugin*)_pMachine[i])->macindex = i;
 				}
 			}
 		}

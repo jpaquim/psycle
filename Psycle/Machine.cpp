@@ -405,7 +405,7 @@ bool Machine::Load(
 	return true;
 }
 
-Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
+Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 {
 	// assume version 0 for now
 	// call setpan
@@ -471,6 +471,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 				pMachine = new Dummy;
 				type = MACH_DUMMY;
 			}
+			p->macindex = index;
 		}
 		break;
 	case MACH_VSTFX:
@@ -486,6 +487,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 				pMachine = new Dummy;
 				type = MACH_DUMMY;
 			}
+			p->macindex = index;
 		}
 		break;
 	default:
