@@ -16,21 +16,29 @@
 #define ROWHEIGHT 13
 #define ROWWIDTH 111
 
+
 enum 
 {
-	DMAll = 0,		// Don't use this mode if it is not really necessary.
+	DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
+					// whole update is needed (For example, when changing pattern Properties, or TPB)
 	DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
-	DMMacRefresh,	// Used to refresh the image of one machine
-	DMPatternChange,// Use this when changing the props of the Pattern, or when changing the pattern shown
-	DMDataChange,	// Data has Changed. Which data to update is indicated with a CRect Struct:
-					// track/line start (left,top) and the track/line end (right,bottom).
-	DMPlayback,
-	DMCursorMove,
-	DMScroll,		// ntOff and nlOff ( new track offset and new line offset);
-	DMSelection,
-	DMTrackHeader,
-	DMPatternHeader,
-	DMNone			// This is used to indicate none of the modes.
+	DMMacRefresh,	// Used to refresh the image of one machine (mac num in "updatePar")
+
+	DMPatternSwitch,	// Use this when switching Patterns (changing from one to another)
+	DMDataChange,	// Data has Changed. Which data to update is indicated with DrawLineStart/End
+					// and DrawTrackStart/End
+					// Use it when editing and copy/pasting
+	DMScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
+					// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
+	DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
+	DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
+	DMCursorMove,	// Indicates a movement of the cursor. update the values to "editcur" directly
+					// and call this function.
+	DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
+	DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
+	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
+	DMNone			// Do not use this one directly. It is used to detect refresh calls from the OS.
 
 	// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
 	// "DrawPatternEditor()".
@@ -42,6 +50,8 @@ enum
 	//						to avoid problems when two modes do completely different things. On
 	//						other cases, it still ends to wrong content being shown.
 };
+
+#define DMPatternChange DMPatternSwitch // Remove when finishing the graphics update.
 
 enum
 {

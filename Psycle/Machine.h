@@ -182,6 +182,7 @@ public:
 	int _RMAX;
 	float _lMax;
 	float _rMax;
+	bool vuupdated;
 #endif // ndef _WINAMP_PLUGIN_
 
 	Master();
@@ -286,16 +287,15 @@ public:
 		switch(numparam)
 		{
 			case 0: return false;
-			case 1: if (value >=0 && value <=128 ) { _sineSpeed=value; return true; }
+			case 1: if (value >=0 && value <=128 ) { _sineSpeed=value; Update(); return true; }
 					else return false;
-			case 2: if (value >=0 && value <=128 ) { _sineGlide=value; return true; }
+			case 2: if (value >=0 && value <=128 ) { _sineGlide=value; Update(); return true; }
 					else return false;
-			case 3: if (value >=0 && value <=128 ) { _sineLfoSpeed=value; return true; }
+			case 3: if (value >=0 && value <=128 ) { _sineLfoSpeed=value; Update(); return true; }
 					else return false;
-			case 4: if (value >=0 && value <=128 ) { _sineLfoAmp=value; return true; }
+			case 4: if (value >=0 && value <=128 ) { _sineLfoAmp=value; Update(); return true; }
 					else return false;
 			default:return false;
-			Update();
 		}
 	}
 

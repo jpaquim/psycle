@@ -32,7 +32,8 @@ protected:
 // Attributes
 public:
 	Song* _pSong;
-
+	int vuprevL;
+	int vuprevR;
 // Operations
 public:
 	void SetAppSongBpm(int x);
@@ -72,7 +73,7 @@ public:
 	void UpdateComboIns(bool updatelist=true);
 	void UpdateComboGen(bool updatelist=true);
 	void PsybarsUpdate();
-	void UpdateVumeters(int l, int r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip);
+	void UpdateVumeters(float l, float r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip);
 	virtual ~CMainFrame();
 
 private:

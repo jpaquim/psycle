@@ -115,6 +115,8 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	Global::pInputHandler->SetMainFrame(this);
+	vuprevR=0;
+	vuprevL=0;
 }
 
 CMainFrame::~CMainFrame()
@@ -502,14 +504,14 @@ void CMainFrame::OnDecTPB()
 {
 	SetAppSongTpb(-1);
 	m_wndView.SetFocus();
-	m_wndView.Repaint(DMPatternChange);
+	m_wndView.Repaint();
 }
 
 void CMainFrame::OnIncTPB()
 {
 	SetAppSongTpb(+1);
 	m_wndView.SetFocus();
-	m_wndView.Repaint(DMPatternChange);
+	m_wndView.Repaint();
 }
 
 void CMainFrame::SetAppSongBpm(int x) 
@@ -560,22 +562,26 @@ void CMainFrame::OnClipbut()
 	m_wndView.SetFocus();
 }
 
-void CMainFrame::UpdateVumeters(int l, int r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
+void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
 {
 	if(l<1)l=1;
 	if(r<1)r=1;
 	
 	CStatic *lc=(CStatic *)m_wndControl.GetDlgItem(IDC_FRAMECLIP);
 	CClientDC clcanvasl(lc);
-
+	
 	if (clip) clcanvasl.FillSolidRect(0,0,9,16,vu3);
 	else  clcanvasl.FillSolidRect(0,0,9,16,vu2);
 	
-	float log_l=50.0f*(float)log10((0.000030517578125f*(float)l));
+//	bool draw_l=true;
+//	bool draw_r=true;
+
+//	float log_l=20*(float)log10(l/baselevel);				// Standard formula
+//  float log_l=20*(float)log10(l) - 20*log10(vaselevel);	// simplified (speedwise) formula.
+//  float log_l=(226pixels/90db)*20*(float)log10(l) // Formula for 16bit precision. (15bit, in fact)
+
+/*	float log_l=50.0f*(float)log10((0.000030517578125f*(float)l));
 	float log_r=50.0f*(float)log10((0.000030517578125f*(float)r));
-	
-	bool draw_l=true;
-	bool draw_r=true;
 	
 	if(log_l<-220.0f)
 		draw_l=false;
@@ -588,13 +594,55 @@ void CMainFrame::UpdateVumeters(int l, int r,COLORREF vu1,COLORREF vu2,COLORREF 
 	
 	int cl=226+(int)log_l;
 	int cr=226+(int)log_r;
-	
+*/	
 	CStatic *lv=(CStatic *)m_wndControl.GetDlgItem(IDC_LVUM);
 	CStatic *rv=(CStatic *)m_wndControl.GetDlgItem(IDC_RVUM);
 	CClientDC canvasl(lv);
 	CClientDC canvasr(rv);
+
+	int log_l=(int)(100*log10(l));
+	int log_r=(int)(100*log10(r));
+	log_l=log_l-226;
+	if ( log_l < 0 )log_l=0;
+	log_r=log_r-226;
+	if ( log_r < 0 )log_r=0;
 	
-	if(draw_l)
+	if (log_l || vuprevL)
+	{
+		canvasl.FillSolidRect(0,0,log_l,4,vu1);
+		if (vuprevL > log_l )
+		{
+			canvasl.FillSolidRect(log_l,0,vuprevL-log_l,4,vu3);
+			canvasl.FillSolidRect(vuprevL,0,226-vuprevL,4,vu2);
+			vuprevL-=2;
+		}
+		else 
+		{
+			canvasl.FillSolidRect(log_l,0,226-log_l,4,vu2);
+			vuprevL = log_l;
+		}
+	}
+	else
+		canvasr.FillSolidRect(0,0,226,4,vu2);
+	if (log_r || vuprevR)
+	{
+		canvasr.FillSolidRect(0,0,log_r,4,vu1);
+		if (vuprevR > log_r )
+		{
+			canvasr.FillSolidRect(log_r,0,vuprevR-log_r,4,vu3);
+			canvasr.FillSolidRect(vuprevR,0,226-vuprevR,4,vu2);
+			vuprevR-=2;
+		}
+		else 
+		{
+			canvasr.FillSolidRect(log_r,0,226-log_r,4,vu2);
+			vuprevR = log_r;
+		}
+	}
+	else
+		canvasl.FillSolidRect(0,0,226,4,vu2);
+	
+/*	if(draw_l)
 	{
 		canvasl.FillSolidRect(0,0,cl,5,vu1);
 		canvasl.FillSolidRect(cl,0,226-cl,5,vu2);
@@ -609,7 +657,7 @@ void CMainFrame::UpdateVumeters(int l, int r,COLORREF vu1,COLORREF vu2,COLORREF 
 	}
 	else
 		canvasr.FillSolidRect(0,0,226,5,vu2);
-	
+*/	
 }
 
 /////////////////
@@ -1292,7 +1340,7 @@ void CMainFrame::OnSelchangeSeqlist()
 		
 		if(cpid!=_pSong->playOrder[ep])
 		{
-			m_wndView.Repaint(DMPatternChange);
+			m_wndView.Repaint(DMPatternSwitch);
 		}		
 	}
 	m_wndView.SetFocus();
@@ -1309,7 +1357,7 @@ void CMainFrame::OnDblclkSeqlist()
 	{
 		_pSong->playOrder[sep]=ep;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();
 	*/		
@@ -1334,7 +1382,7 @@ void CMainFrame::OnInclong()
 	{
 		_pSong->playOrder[pop]+=10;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();	
 }
@@ -1347,20 +1395,20 @@ void CMainFrame::OnDeclong()
 	{
 		_pSong->playOrder[pop]-=10;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	else if (_pSong->playOrder[pop]>0)
 	{
 		_pSong->playOrder[pop]=0;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();	
 }
 
 void CMainFrame::OnSeqnew() 
 {
-	if ( m_wndView.editPosition < MAX_PATTERNS )
+	if ( m_wndView.editPosition < (MAX_SONG_POSITIONS-1) )
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
@@ -1384,7 +1432,7 @@ void CMainFrame::OnSeqnew()
 		UpdatePlayOrder(false);
 		UpdateSequencer();
 
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();
 }
@@ -1450,7 +1498,7 @@ void CMainFrame::OnSeqduplicate()
 		UpdatePlayOrder(false);
 		UpdateSequencer();
 
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();
 }
@@ -1464,32 +1512,35 @@ void CMainFrame::OnSeqdel()
 	{
 		_pSong->playOrder[c]=_pSong->playOrder[c+1];
 	}
-
 	_pSong->playOrder[_pSong->playLength-1]=0;
 
-	if(_pSong->playLength>pop+1)
+	if((_pSong->playLength>pop+1) || ((_pSong->playLength==pop+1) && (pop>0)))
 	{
 		--_pSong->playLength;
 	}
+
 	UpdatePlayOrder(false);
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternChange);
+	m_wndView.Repaint(DMPatternSwitch);
 	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnSeqclr() 
 {
-	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	for(int c=0;c<MAX_SONG_POSITIONS;c++)
+	if (MessageBox("Do you really want to clear all the sequence?","Sequencer",MB_YESNO) == IDYES)
 	{
-		_pSong->playOrder[c]=0;
-	}
+		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+		for(int c=0;c<MAX_SONG_POSITIONS;c++)
+		{
+			_pSong->playOrder[c]=0;
+		}
 
-	m_wndView.editPosition=0;
-	_pSong->playLength=1;
-	UpdatePlayOrder(false);
-	UpdateSequencer();
-	m_wndView.Repaint(DMPatternChange);
+		m_wndView.editPosition=0;
+		_pSong->playLength=1;
+		UpdatePlayOrder(false);
+		UpdateSequencer();
+		m_wndView.Repaint(DMPatternSwitch);
+	}
 	m_wndView.SetFocus();
 	
 }
@@ -1572,7 +1623,7 @@ void CMainFrame::OnSeqsort()
 // Part four. All the needed things.
 
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternChange);
+	m_wndView.Repaint(DMPatternSwitch);
 	m_wndView.SetFocus();
 }
 
@@ -1583,7 +1634,7 @@ void CMainFrame::OnIncpos2()
 	{
 		++m_wndView.editPosition;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
@@ -1596,7 +1647,7 @@ void CMainFrame::OnDecpos2()
 	{
 		--m_wndView.editPosition;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
@@ -1610,7 +1661,7 @@ void CMainFrame::OnIncpat2()
 	{
 		++_pSong->playOrder[pop];
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();	
 }
@@ -1623,7 +1674,7 @@ void CMainFrame::OnDecpat2()
 	{
 		--_pSong->playOrder[pop];
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPatternSwitch);
 	}
 	m_wndView.SetFocus();	
 }
@@ -1711,7 +1762,7 @@ void CMainFrame::OnFollowSong()
 		if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
 		{
 			m_wndView.editPosition=Global::pPlayer->_playPosition;
-			m_wndView.Repaint(DMPatternChange);
+			m_wndView.Repaint(DMPatternSwitch);
 		}
 	}
 	else if ( !Global::pPlayer->_playing )

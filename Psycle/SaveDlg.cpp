@@ -295,18 +295,8 @@ void CSaveDlg::SaveSong(bool silent)
 
 void CSaveDlg::LoadSong(bool silent) 
 {
-//	char fbuffer[32][512];
 	
-	int FailedMac=0;
 	
-	char buffer[512];
-	
-	// Intermediate import variable
-	
-//	char HeadBuf[16];
-	
-	sprintf(buffer,"Loading '%s'...",szFile);
-
 	OldPsyFile file;
 	if (!file.Open(szFile))
 	{
@@ -316,16 +306,18 @@ void CSaveDlg::LoadSong(bool silent)
 	_pSong->Load(&file);
 	file.Close();
 
-	sprintf(buffer,"'%s'\n\n%s\n\n%s"
-		,_pSong->Name
-		,_pSong->Author
-		,_pSong->Comment);
-	
-	MessageBox(buffer,"Psycle song loaded",MB_OK);
 	_pSong->_saved=true;
 	
 /*	
-	//////////////////////////////////////////////////////////////////////
+	char fbuffer[32][512];
+
+	int FailedMac=0;
+  
+// Intermediate import variable
+	
+	char HeadBuf[16];
+
+    //////////////////////////////////////////////////////////////////////
 	//	Read Function
 	
 	// Read PSY HEADER -------------------------------------------

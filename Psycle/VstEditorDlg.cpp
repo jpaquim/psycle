@@ -146,7 +146,7 @@ void CVstEditorDlg::OnParametersShowpreset()
 
 void CVstEditorDlg::OnSetFocus(CWnd* pOldWnd) 
 {
-//	CFrameWnd::OnSetFocus(pOldWnd);
+	CFrameWnd::OnSetFocus(pOldWnd);
 	
 	pGui->SetFocus();
 }

@@ -48,8 +48,7 @@ static char THIS_FILE[] = __FILE__;
 
 CMainFrame		*pParentMain;
 
-Bitmap mv_bg;
-Bitmap pv_bg;
+//Bitmap mv_bg;
 
 // Enviroment variables
 int smac=-1;
@@ -80,7 +79,7 @@ CChildView::CChildView()
 
 	patStep=1;
 	editPosition=0;
-	bEditMode = false;
+	bEditMode = true;
 
 	_followSong = true;
 	_previousTicks=0;
@@ -266,7 +265,7 @@ void CChildView::ValidateParent()
 
 void CChildView::InitTimer()
 {
-	if (!SetTimer(31,10,NULL) || !SetTimer(159,600000,NULL)) // 1st Timer: GUI update. 2nd Timer: AutoSave
+	if (!SetTimer(31,20,NULL) || !SetTimer(159,600000,NULL)) // 1st Timer: GUI update. 2nd Timer: AutoSave
 	{
 		AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 	}
@@ -281,13 +280,17 @@ void CChildView::OnTimer( UINT nIDEvent )
 		CSingleLock lock(&_pSong->door,TRUE);
 
 		pParentMain->UpdateVumeters(
-			((Master*)Global::_pSong->_pMachines[0])->_LMAX,
-			((Master*)Global::_pSong->_pMachines[0])->_RMAX,
+//			((Master*)Global::_pSong->_pMachines[0])->_LMAX,
+//			((Master*)Global::_pSong->_pMachines[0])->_RMAX,
+			((Master*)Global::_pSong->_pMachines[0])->_lMax,
+			((Master*)Global::_pSong->_pMachines[0])->_rMax,
 			Global::pConfig->vu1,
 			Global::pConfig->vu2,
 			Global::pConfig->vu3,
 			((Master*)Global::_pSong->_pMachines[0])->_clip);
 
+		((Master*)Global::_pSong->_pMachines[0])->vuupdated = true;
+			
 		if (viewMode == VMMachine)
 		{
 			CClientDC dc(this);
@@ -343,7 +346,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 						editPosition=Global::pPlayer->_playPosition;
-						if ( viewMode == VMPattern ) Repaint(DMPatternChange);
+						if ( viewMode == VMPattern ) Repaint(DMPlaybackChange);
 					}
 					else if( viewMode == VMPattern ) Repaint(DMPlayback);
 				}
@@ -513,24 +516,22 @@ void CChildView::Repaint(int drawMode)
 	}
 	else if ( viewMode == VMPattern )
 	{
-		if (drawMode >= DMPatternChange || drawMode == DMAll )	PreparePatternRefresh(drawMode);
+		if (drawMode >= DMPatternSwitch || drawMode == DMAll )	PreparePatternRefresh(drawMode);
 	}
 }
 
 void CChildView::OnSize(UINT nType, int cx, int cy) 
 {
 	CWnd ::OnSize(nType, cx, cy);
-	
-//	CRect rClient;
-//	GetClientRect(&rClient);
-//	CW = rClient.Width();
-//	CH = rClient.Height();
+
 	CW = cx;
 	CH = cy;
-	_pSong->viewSize.x=cx-148;
+	_pSong->viewSize.x=cx-148; // Hack to move machines boxes inside of the visible area.
 	_pSong->viewSize.y=cy-48;
 
 	newplaypos.right=CW;
+	const int oldvl = VISLINES;
+	const int oldvt = VISTRACKS;
 	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
 	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
 
@@ -543,7 +544,11 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 		delete bmpDC;
 		bmpDC=NULL;
 	}
-	Repaint();
+	if (viewMode == VMPattern)
+	{
+		if ( updateMode == DMNone || oldvl != VISLINES || oldvt != VISTRACKS ) Repaint(DMResize);
+	}
+	else if ( viewMode == VMMachine ) Repaint();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -646,7 +651,7 @@ void CChildView::OnFileSavesong()
 		titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
 		pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
 	}
-	Repaint();
+//	Repaint();
 }
 
 void CChildView::OnFileLoadsong()
@@ -802,7 +807,7 @@ void CChildView::OnButtonplayseqblock()
 	Global::pPlayer->_playTimem = 0;
 	Global::pPlayer->_playPattern = Global::_pSong->playOrder[i];
 	Global::pPlayer->_playBlock=true;
-	if ( viewMode == VMPattern ) Repaint(DMPatternChange);
+	if ( viewMode == VMPattern ) Repaint(DMPatternSwitch);
 }
 void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 {
@@ -916,7 +921,7 @@ void CChildView::ShowPatternDlg(void)
 			{
 				strcpy(_pSong->patternName[patNum],dlg.patName);
 			}
-			Repaint(DMPatternChange);
+			Repaint();
 		}
 		else if ( strcmp(name,dlg.patName) != 0 )
 		{
@@ -959,6 +964,8 @@ void CChildView::OnNewmachine()
 				Global::_pSong->busEffect[fb] = Global::_lbc;
 			}
 			pParentMain->UpdateComboGen();
+			updatePar = Global::_lbc;
+			Repaint(DMMacRefresh);
 		}
 		
 		// Restarting the driver...
@@ -1173,7 +1180,7 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 	}
 	
-	CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
+	CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 
@@ -1217,12 +1224,11 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if ((int)nPos < tOff )
 				{
 					ntOff=nPos;
-					PrevLine(tOff-nPos,false,false);
+					PrevTrack(tOff-nPos,false,false);
 					Repaint(DMScroll);
 				}
 				break;
 			case SB_THUMBTRACK:
-				ntOff=nPos;
 				if ((int)nPos > tOff )
 				{
 					ntOff=nPos;
@@ -1232,7 +1238,7 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if ((int)nPos < tOff )
 				{
 					ntOff=nPos;
-					PrevLine(tOff-nPos,false,false);
+					PrevTrack(tOff-nPos,false,false);
 					Repaint(DMScroll);
 				}
 				break;
@@ -1240,7 +1246,7 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		}
 	}
 	
-	CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
+	CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CChildView::OnFileImportXmfile() 
@@ -1549,6 +1555,15 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 		dlg._pSong = Global::_pSong;
 		sprintf(dlg.szFile,fName);
 		dlg.LoadSong();
+
+		char buffer[512];
+		sprintf(buffer,"'%s'\n\n%s\n\n%s"
+			,_pSong->Name
+			,_pSong->Author
+			,_pSong->Comment);
+		
+		MessageBox(buffer,"Psycle song loaded",MB_OK);
+		
 		
 		//!Fidelooop!!//
 		AppendToRecent(fName);

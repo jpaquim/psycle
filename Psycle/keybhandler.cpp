@@ -907,7 +907,7 @@ void CChildView::patTranspose(int trp)
 				not+=trp;
 				if(not<0)not=0;
 				if(not>119)not=119;
-				*(soffset+c)=unsigned char(not);
+				soffset[c]=static_cast<unsigned char>(not);
 			}
 		}
 		drawTrackStart=0;
@@ -1284,7 +1284,7 @@ void CChildView::BlockTranspose(int trp)
 					not+=trp;
 					if(not<0)not=0;
 					if(not>119)not=119;
-					*(toffset+displace2)=unsigned char(not);
+					toffset[displace2]=static_cast<unsigned char>(not);
 				}
 			}
 		}
@@ -1310,16 +1310,16 @@ void CChildView::BlockGenChange(int x)
 		{
 			for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
 			{
-				const int displace2=t*5+l*MULTIPLY;
+				const int displace2=t*5+l*MULTIPLY+2;
 				
-				int gen=*(toffset+displace2+2);
+				int gen=*(toffset+displace2);
 				
 				if ( gen != 255 )
 				{
 					gen=x;
 					if(gen<0)gen=0;
 					if(gen>63)gen=63;
-					*(toffset+displace2+2)=unsigned char(gen);
+					toffset[displace2]=static_cast<unsigned char>(gen);
 				}
 			}
 		}
@@ -1345,16 +1345,16 @@ void CChildView::BlockInsChange(int x)
 		{
 			for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
 			{
-				const int displace2=t*5+l*MULTIPLY;
+				const int displace2=t*5+l*MULTIPLY+1;
 				
-				int ins=*(toffset+displace2+1);
+				int ins=*(toffset+displace2);
 			
 				if (ins != 255 )
 				{
 					ins=x;
 					if(ins<0)ins=0;
 					if(ins>255)ins=255;
-					*(toffset+displace2+1)=unsigned char(ins);
+					toffset[displace]=static_cast<unsigned char>(ins);
 				}
 			}
 		}
@@ -1391,8 +1391,8 @@ void CChildView::BlockParamInterpolate()
 			const int displace2=blockSel.start.track*5+l*MULTIPLY;
 			
 			const int val=(int)(initvalue+addvalue*(l-blockSel.start.line));
-			*(toffset+displace2+3)=unsigned char(val/0x100);
-			*(toffset+displace2+4)=unsigned char(val%0x100);
+			toffset[displace+3]=static_cast<unsigned char>(val/0x100);
+			toffset[displace+4]=static_cast<unsigned char>(val%0x100);
 		}
 		drawTrackStart=blockSel.start.track;
 		drawTrackEnd=blockSel.end.track;
