@@ -94,7 +94,6 @@ feature: VST/Native machine Windows : ESC = close (Problem: can't close within t
 feature: Option to hide Parameters in VST GUI.
 feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 
-
 * Player Engine:
 ----------------
 * Midiout is NOT solid...
