@@ -73,7 +73,8 @@ void CConfigDlg::Init(
 	_skinDlg._machineViewColor = pConfig->mv_colour;
 	_skinDlg._machineViewWireColor = pConfig->mv_wirecolour;
 	_skinDlg._machineViewPolyColor = pConfig->mv_polycolour;
-	_skinDlg._machineViewFontColor = pConfig->mv_fontcolour;
+	_skinDlg._machineViewGeneratorFontColor = pConfig->mv_generator_fontcolour;
+	_skinDlg._machineViewEffectFontColor = pConfig->mv_effect_fontcolour;
 	_skinDlg._wireaa = pConfig->mv_wireaa;
 	_skinDlg._wirewidth = pConfig->mv_wirewidth;
 
@@ -90,8 +91,12 @@ void CConfigDlg::Init(
 	_skinDlg._pattern_font_y = pConfig->pattern_font_y;
 	strcpy(_skinDlg._pattern_header_skin, pConfig->pattern_header_skin);
 
-	strcpy(_skinDlg._machine_fontface, pConfig->machine_fontface);
-	_skinDlg._machine_font_point = pConfig->machine_font_point;
+	strcpy(_skinDlg._generator_fontface, pConfig->generator_fontface);
+	_skinDlg._generator_font_point = pConfig->generator_font_point;
+
+	strcpy(_skinDlg._effect_fontface, pConfig->effect_fontface);
+	_skinDlg._effect_font_point = pConfig->effect_font_point;
+
 	strcpy(_skinDlg._machine_skin, pConfig->machine_skin);
 
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
@@ -156,7 +161,9 @@ int CConfigDlg::DoModal()
 									(((((_pConfig->mv_wirecolour&0x00ff)) + ((_pConfig->mv_colour&0x00ff)))/2)&0x00ff);
 
 		_pConfig->mv_polycolour = _skinDlg._machineViewPolyColor;
-		_pConfig->mv_fontcolour = _skinDlg._machineViewFontColor;
+
+		_pConfig->mv_generator_fontcolour = _skinDlg._machineViewGeneratorFontColor;
+		_pConfig->mv_effect_fontcolour = _skinDlg._machineViewEffectFontColor;
 
 		_pConfig->pvc_separator = _skinDlg._patternSeparatorColor;
 		_pConfig->pvc_separator2 = _skinDlg._patternSeparatorColor2;
@@ -220,23 +227,42 @@ int CConfigDlg::DoModal()
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 		}
 
-		if ((strcmp(_pConfig->machine_fontface, _skinDlg._machine_fontface)) ||
-			(_pConfig->machine_font_point != _skinDlg._machine_font_point))
+		if ((strcmp(_pConfig->generator_fontface, _skinDlg._generator_fontface)) ||
+			(_pConfig->generator_font_point != _skinDlg._generator_font_point))
 		{
-			_pConfig->machine_font_point = _skinDlg._machine_font_point;
-			strcpy(_pConfig->machine_fontface, _skinDlg._machine_fontface);
-			_pConfig->machineFont.DeleteObject();
-			if (!_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,_pConfig->machine_fontface))
+			_pConfig->generator_font_point = _skinDlg._generator_font_point;
+			strcpy(_pConfig->generator_fontface, _skinDlg._generator_fontface);
+			_pConfig->generatorFont.DeleteObject();
+			if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,_pConfig->generator_fontface))
 			{
-				if (!_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,"Tahoma"))
+				if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Tahoma"))
 				{
-					if (!_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,"Verdana"))
+					if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Verdana"))
 					{
-						_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,"Arial Bold");
+						_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Arial Bold");
 					}
 				}
 			}
 		}
+
+		if ((strcmp(_pConfig->effect_fontface, _skinDlg._effect_fontface)) ||
+			(_pConfig->effect_font_point != _skinDlg._effect_font_point))
+		{
+			_pConfig->effect_font_point = _skinDlg._effect_font_point;
+			strcpy(_pConfig->effect_fontface, _skinDlg._effect_fontface);
+			_pConfig->effectFont.DeleteObject();
+			if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,_pConfig->effect_fontface))
+			{
+				if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Tahoma"))
+				{
+					if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Verdana"))
+					{
+						_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Arial Bold");
+					}
+				}
+			}
+		}
+
 		if (strcmp(_pConfig->machine_skin, _skinDlg._machine_skin))
 		{
 			strcpy(_pConfig->machine_skin, _skinDlg._machine_skin);
