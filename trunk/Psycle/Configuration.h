@@ -14,6 +14,7 @@
 #define DEFAULT_VST_DIR "Vst"
 #define DEFAULT_SKIN_DIR "Skins"
 #define DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
+#define DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 
 #if !defined(_WINAMP_PLUGIN_)
 	class CMidiInput;	// MIDI IMPLEMENTATION 
@@ -30,6 +31,7 @@ public:
 	COLORREF mv_wirecolour;
 	COLORREF mv_wireaacolour;
 	COLORREF mv_polycolour;
+	COLORREF mv_fontcolour;
 
 	COLORREF pvc_separator;
 	COLORREF pvc_separator2;
@@ -81,7 +83,12 @@ public:
 	int pattern_font_x;
 	int pattern_font_y;
 
+	char machine_fontface[64];
+	char machine_skin[64];
+	int machine_font_point;
+
 	CFont seqFont;
+	CFont machineFont;
 
 	bool _midiRecordVel;
 	int _midiCommandVel;

@@ -73,6 +73,7 @@ void CConfigDlg::Init(
 	_skinDlg._machineViewColor = pConfig->mv_colour;
 	_skinDlg._machineViewWireColor = pConfig->mv_wirecolour;
 	_skinDlg._machineViewPolyColor = pConfig->mv_polycolour;
+	_skinDlg._machineViewFontColor = pConfig->mv_fontcolour;
 	_skinDlg._wireaa = pConfig->mv_wireaa;
 	_skinDlg._wirewidth = pConfig->mv_wirewidth;
 
@@ -88,6 +89,10 @@ void CConfigDlg::Init(
 	_skinDlg._pattern_font_x = pConfig->pattern_font_x;
 	_skinDlg._pattern_font_y = pConfig->pattern_font_y;
 	strcpy(_skinDlg._pattern_header_skin, pConfig->pattern_header_skin);
+
+	strcpy(_skinDlg._machine_fontface, pConfig->machine_fontface);
+	_skinDlg._machine_font_point = pConfig->machine_font_point;
+	strcpy(_skinDlg._machine_skin, pConfig->machine_skin);
 
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
@@ -147,6 +152,7 @@ int CConfigDlg::DoModal()
 									((((_pConfig->mv_wirecolour&0x00ff) + ((_pConfig->mv_colour&0x00ff)*2))/3)&0x00ff);
 
 		_pConfig->mv_polycolour = _skinDlg._machineViewPolyColor;
+		_pConfig->mv_fontcolour = _skinDlg._machineViewFontColor;
 
 		_pConfig->pvc_separator = _skinDlg._patternSeparatorColor;
 		_pConfig->pvc_separator2 = _skinDlg._patternSeparatorColor2;
@@ -208,6 +214,30 @@ int CConfigDlg::DoModal()
 			strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
 			// LOAD HEADER SKIN
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
+		}
+
+		if ((strcmp(_pConfig->machine_fontface, _skinDlg._machine_fontface)) ||
+			(_pConfig->machine_font_point != _skinDlg._machine_font_point))
+		{
+			_pConfig->machine_font_point = _skinDlg._machine_font_point;
+			strcpy(_pConfig->machine_fontface, _skinDlg._machine_fontface);
+			_pConfig->machineFont.DeleteObject();
+			if (!_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,_pConfig->machine_fontface))
+			{
+				if (!_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,"Tahoma"))
+				{
+					if (!_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,"Verdana"))
+					{
+						_pConfig->machineFont.CreatePointFont(_pConfig->machine_font_point,"Arial Bold");
+					}
+				}
+			}
+		}
+		if (strcmp(_pConfig->machine_skin, _skinDlg._machine_skin))
+		{
+			strcpy(_pConfig->machine_skin, _skinDlg._machine_skin);
+			// LOAD HEADER SKIN
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
 		}
 
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();

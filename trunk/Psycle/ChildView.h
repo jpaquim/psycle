@@ -140,6 +140,34 @@ struct SPatternHeaderCoords
 	SSkinDest dSoloOn;
 };
 
+struct SMachineCoords
+{
+	SSkinSource sMaster;
+	SSkinSource sGenerator;
+	SSkinSource sGeneratorVu0;
+	SSkinSource sGeneratorVuPeak;
+	SSkinSource sGeneratorPan;
+	SSkinSource sGeneratorMute;
+	SSkinSource sGeneratorSolo;
+	SSkinSource sEffect;
+	SSkinSource sEffectVu0;
+	SSkinSource sEffectVuPeak;
+	SSkinSource sEffectPan;
+	SSkinSource sEffectMute;
+	SSkinSource sEffectBypass;
+	SSkinSource dGeneratorVu;
+	SSkinSource dGeneratorPan;
+	SSkinDest dGeneratorMute;
+	SSkinDest dGeneratorSolo;
+	SSkinDest dGeneratorName;
+	SSkinSource dEffectVu;
+	SSkinSource dEffectPan;
+	SSkinDest dEffectMute;
+	SSkinDest dEffectBypass;
+	SSkinDest dEffectName;
+};
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CChildView window
 
@@ -220,6 +248,8 @@ public:
 	void RecalculateColourGrid();
 	void RecalcMetrics();
 	void LoadPatternHeaderSkin();
+	void LoadMachineSkin();
+
 
 public:
 
@@ -267,6 +297,7 @@ public:
 						// 
 
 	SPatternHeaderCoords PatHeaderCoords;
+	SMachineCoords	MachineCoords;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -297,7 +328,7 @@ private:
 	inline void TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h);
 	inline void BOX(CDC *devc,int x,int y, int w, int h);
 	inline void BOX(CDC *devc,CRect rect);
-	void DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max);
+	void DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max, int mode);
 	void DrawMachineVumeters(CClientDC *devc);	
 	void DrawMachineEditor(CDC *devc);
 	void DrawMachine(Machine* mac, int macnum, CDC *devc);
@@ -307,6 +338,7 @@ private:
 	void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
 	COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
 	void FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result);
+	void FindMachineSkin(CString findDir, CString findName, BOOL *result);
 
 	inline int _ps();
 	inline unsigned char * _offset(int ps);
@@ -315,9 +347,10 @@ private:
 
 private:
 	// GDI Stuff
-	CBitmap stuffbmp;
 	CBitmap patternheader;
 	HBITMAP hbmPatHeader;
+	CBitmap machineskin;
+	HBITMAP hbmMachineSkin;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];
 	int CH;

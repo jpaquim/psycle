@@ -44,6 +44,9 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PATTERN_FONT_X, m_pattern_font_x);
 	DDX_Control(pDX, IDC_PATTERN_FONT_Y, m_pattern_font_y);
 	DDX_Control(pDX, IDC_PATTERN_HEADER_SKIN, m_pattern_header_skin);
+	DDX_Control(pDX, IDC_MACHINE_FONTFACE, m_machine_fontface);
+	DDX_Control(pDX, IDC_MACHINE_FONT_POINT, m_machine_font_point);
+	DDX_Control(pDX, IDC_MACHINE_SKIN, m_machine_skin);
 
 	//}}AFX_DATA_MAP
 }
@@ -95,6 +98,10 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_PATTERN_HEADER_SKIN, OnSelchangePatternHeaderSkin)
 	ON_CBN_SELCHANGE(IDC_WIRE_WIDTH, OnSelchangeWireWidth)
 	ON_BN_CLICKED(IDC_AAWIRE, OnWireAA)
+	ON_CBN_SELCHANGE(IDC_MACHINE_FONT_POINT, OnSelchangeMachineFontPoint)
+	ON_CBN_SELCHANGE(IDC_MACHINE_FONTFACE, OnSelchangeMachineFontFace)
+	ON_CBN_SELCHANGE(IDC_MACHINE_SKIN, OnSelchangeMachineSkin)
+	ON_BN_CLICKED(IDC_MV_FONT_COLOUR, OnMVFontColour)
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -176,12 +183,14 @@ int CALLBACK CSkinDlg::EnumFontFamExProc2(
 		if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
 		{
 			pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
+			pm_machine_fontface->AddString((char*)lpelfe->elfFullName);
 		}
 	}
 	return 1;
 }
 
 CComboBox * CSkinDlg::pm_pattern_fontface;
+CComboBox * CSkinDlg::pm_machine_fontface;
 HDC CSkinDlg::hDC;
 SFontName* CSkinDlg::pNameStruct;
 
@@ -210,6 +219,7 @@ BOOL CSkinDlg::OnInitDialog()
 	hDC = ::GetDC( NULL );
 
 	pm_pattern_fontface = &m_pattern_fontface;
+	pm_machine_fontface = &m_machine_fontface;
 	pNameStruct = NULL;
 	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc, 0, 0);
 	// done this way instead of recursive because recursive fucks up on huge lists of fonts...
@@ -252,6 +262,26 @@ BOOL CSkinDlg::OnInitDialog()
 	}
 	m_pattern_fontface.SetCurSel(sel);
 
+	sel = m_machine_fontface.FindStringExact(0,_machine_fontface);
+	if (sel==CB_ERR)
+	{
+		MessageBox(_machine_fontface,"Could not find this font!");
+		sel = m_machine_fontface.FindStringExact(0,"Tahoma");
+		if (sel==CB_ERR)
+		{
+			sel = m_machine_fontface.FindStringExact(0,"Verdana");
+			if (sel==CB_ERR)
+			{
+				sel = m_machine_fontface.FindStringExact(0,"Arial Black");
+				if (sel==CB_ERR)
+				{
+					sel=0;
+				}
+			}
+		}
+	}
+	m_machine_fontface.SetCurSel(sel);
+
 	for(i=4;i<=64;i++)
 	{
 		char s[4];
@@ -274,10 +304,13 @@ BOOL CSkinDlg::OnInitDialog()
 			sprintf(s,"%.1f",float(i)/10.0f);
 		}
 		m_pattern_font_point.AddString(s);
+		m_machine_font_point.AddString(s);
 	}
 	m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
+	m_machine_font_point.SetCurSel((_machine_font_point-50)/5);
 
 	m_pattern_header_skin.AddString(DEFAULT_PATTERN_HEADER_SKIN);
+	m_machine_skin.AddString(DEFAULT_MACHINE_SKIN);
 	
 	// ok now browse our folder for skins
 	FindSkinsInDir(Global::pConfig->GetInitialSkinDir());
@@ -288,6 +321,13 @@ BOOL CSkinDlg::OnInitDialog()
 		sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
 	}
 	m_pattern_header_skin.SetCurSel(sel);
+
+	sel = m_machine_skin.FindStringExact(0,_machine_skin);
+	if (sel==CB_ERR)
+	{
+		sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
+	}
+	m_machine_skin.SetCurSel(sel);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -325,6 +365,28 @@ void CSkinDlg::FindSkinsInDir(CString findDir)
 			if (hBitmap)
 			{
 				m_pattern_header_skin.AddString(sName);
+			}
+			DeleteObject(hBitmap);
+		}
+	}
+
+	loop = finder.FindFile(findDir + "\\*.psm"); // check if the directory is empty
+	while (loop)
+	{
+		loop = finder.FindNextFile();
+		if (!finder.IsDirectory())
+		{
+			CString sName, tmpPath;
+			sName = finder.GetFileName();
+			// ok so we have a .psh, does it have a valid matching .bmp?
+			char szBmpName[MAX_PATH];
+			char* pExt = strrchr(sName,46);// last .
+			pExt[0]=0;
+			sprintf(szBmpName,"%s\\%s.bmp",findDir,sName);
+			HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, szBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+			if (hBitmap)
+			{
+				m_machine_skin.AddString(sName);
 			}
 			DeleteObject(hBitmap);
 		}
@@ -687,10 +749,10 @@ void CSkinDlg::RepaintAllCanvas()
 	UpdateCanvasColour(IDC_MBG_CAN,_machineViewColor);
 	UpdateCanvasColour(IDC_MWIRE_COL,_machineViewWireColor);
 	UpdateCanvasColour(IDC_MPOLY_COL,_machineViewPolyColor);
+	UpdateCanvasColour(IDC_MBG_MV_FONT,_machineViewFontColor);
 	UpdateCanvasColour(IDC_VU1_CAN,_vubColor);
 	UpdateCanvasColour(IDC_VU2_CAN,_vugColor);
 	UpdateCanvasColour(IDC_VU3_CAN,_vucColor);
-
 	UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
 	UpdateCanvasColour(IDC_PBG_CAN2,_patternViewColor2);
 	UpdateCanvasColour(IDC_PBG_SEPARATOR,_patternSeparatorColor);
@@ -825,6 +887,42 @@ void CSkinDlg::OnImportReg()
 					{
 						p[0]=0;
 						strcpy(_pattern_header_skin,q);
+					}
+				}
+			}
+			else if (strstr(buf,"\"machine_fontface\"=\""))
+			{
+				char *q = strchr(buf,61); // =
+				if (q)
+				{
+					q+=2;
+					char *p = strrchr(q,34); // "
+					if (p)
+					{
+						p[0]=0;
+						strcpy(_machine_fontface,q);
+					}
+				}
+			}
+			else if (strstr(buf,"\"machine_font_point\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_machine_font_point=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"machine_skin\"=\""))
+			{
+				char *q = strchr(buf,61); // =
+				if (q)
+				{
+					q+=2;
+					char *p = strrchr(q,34); // "
+					if (p)
+					{
+						p[0]=0;
+						strcpy(_machine_skin,q);
 					}
 				}
 			}
@@ -1102,6 +1200,14 @@ void CSkinDlg::OnImportReg()
 					_wireaa=_httoi(q+1)?1:0;
 				}
 			}
+			else if (strstr(buf,"\"mv_fontcolour\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_machineViewFontColor=_httoi(q+1);
+				}
+			}
 		}
 		fclose(hfile);
 		m_wireaa.SetCheck(_wireaa);
@@ -1140,6 +1246,33 @@ void CSkinDlg::OnImportReg()
 			sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
 		}
 		m_pattern_header_skin.SetCurSel(sel);
+
+		sel = m_machine_fontface.FindStringExact(0,_machine_fontface);
+		if (sel==CB_ERR)
+		{
+			MessageBox(_machine_fontface,"Could not find this font!");
+			sel = m_machine_fontface.FindStringExact(0,"Tahoma");
+			if (sel==CB_ERR)
+			{
+				sel = m_machine_fontface.FindStringExact(0,"Verdana");
+				if (sel==CB_ERR)
+				{
+					sel = m_machine_fontface.FindStringExact(0,"Arial Black");
+					if (sel==CB_ERR)
+					{
+						sel=0;
+					}
+				}
+			}
+		}
+		m_machine_fontface.SetCurSel(sel);
+		m_machine_font_point.SetCurSel((_machine_font_point-50)/5);
+		sel = m_machine_skin.FindStringExact(0,_machine_skin);
+		if (sel==CB_ERR)
+		{
+			sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
+		}
+		m_machine_skin.SetCurSel(sel);
 	}
 }
 
@@ -1160,14 +1293,11 @@ void CSkinDlg::OnExportReg()
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
 	ofn.Flags = OFN_PATHMUSTEXIST;	
+	ofn.lpstrInitialDir = _skinPathBuf;
 
 	if (GetSaveFileName(&ofn)==TRUE)
 	{
 		FILE* hfile;
-
-		_wireaa = m_wireaa.GetCheck() >0?true:false;
-		_wirewidth = m_wirewidth.GetCurSel()+1;
-		m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface);
 
 		CString str = szFile;
 		CString str2 = str.Right(4);
@@ -1217,9 +1347,13 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"\"vu1\"=dword:%.8X\n",_vubColor);
 		fprintf(hfile,"\"vu2\"=dword:%.8X\n",_vugColor);
 		fprintf(hfile,"\"vu3\"=dword:%.8X\n",_vucColor);
+		fprintf(hfile,"\"machine_fontface\"=\"%s\"\n",_machine_fontface);
+		fprintf(hfile,"\"machine_font_point\"=dword:%.8X\n",_machine_font_point);
+		fprintf(hfile,"\"machine_skin\"=\"%s\"\n",_machine_skin);
 		fprintf(hfile,"\"mv_colour\"=dword:%.8X\n",_machineViewColor);
 		fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n",_machineViewWireColor);
 		fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n",_machineViewPolyColor);
+		fprintf(hfile,"\"mv_fontcolour\"=dword:%.8X\n",_machineViewFontColor);
 		fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
 		fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa?1:0);
 
@@ -1265,4 +1399,32 @@ void CSkinDlg::OnSelchangeWireWidth()
 void CSkinDlg::OnWireAA()
 {
 	_wireaa = m_wireaa.GetCheck() >0?true:false;
+}
+
+
+void CSkinDlg::OnSelchangeMachineFontPoint() 
+{
+	// TODO: Add your control notification handler code here
+	_machine_font_point=(m_machine_font_point.GetCurSel()*5)+50;
+}
+
+void CSkinDlg::OnSelchangeMachineFontFace()
+{
+	m_machine_fontface.GetLBText(m_machine_fontface.GetCurSel(),_machine_fontface);
+}
+
+void CSkinDlg::OnSelchangeMachineSkin()
+{
+	m_machine_skin.GetLBText(m_machine_skin.GetCurSel(),_machine_skin);
+}
+
+void CSkinDlg::OnMVFontColour() 
+{
+	CColorDialog dlg(_machineViewFontColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_machineViewFontColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_MBG_MV_FONT,_machineViewFontColor);
+	}
 }
