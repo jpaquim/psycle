@@ -104,11 +104,12 @@ namespace psycle
 			
 			CNewMachine::LoadPluginInfo();
 
-			// Show splash screen	
-			if (Global::pConfig->_showAboutAtStart)
-			{
+			// Show splash screen
+			// If has been commented out for BETA builds..
+			//if (Global::pConfig->_showAboutAtStart)
+			//{
 				OnAboutpsycle();
-			}
+			//}
 			
 			ProcessCmdLine(pFrame); // Process Command Line
 
