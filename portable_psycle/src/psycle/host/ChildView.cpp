@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 //
 // Original Coder : Juan Antonio Arguelles Rius
 //
@@ -9,6 +7,8 @@
 //
 // ChildView.cpp : implementation of the CChildView class
 //
+#include "stdafx.h"
+
 #define rdtsc __asm __emit 0fh __asm __emit 031h
 #define cpuid __asm __emit 0fh __asm __emit 0a2h
 
@@ -82,7 +82,7 @@ CChildView::CChildView()
 	MasterMachineDialog = NULL;
 	SamplerMachineDialog = NULL;
 
-	for (int c = 0; c < MAX_WIRE_DIALOGS; c++)
+	for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 	{
 		WireDialog[c] = NULL;
 	}
@@ -129,8 +129,8 @@ CChildView::CChildView()
 
 	ChordModeOffs = 0;
 
-//	Global::pInputHandler->SetChildView(this); <bohan> wrong initialization order fix
-//	Global::pResampler->SetQuality(RESAMPLE_LINEAR); <bohan> wrong initialization order fix
+	Global::pInputHandler->SetChildView(this);
+	Global::pResampler->SetQuality(RESAMPLE_LINEAR);
 	_outputActive = false;
 
 	// just give arbitrary values so OnSize doesn't give /0 error
@@ -140,12 +140,13 @@ CChildView::CChildView()
 
 //	_getcwd(m_appdir,_MAX_PATH);
 	
+// Creates a new song object. The application Song.
+//	Global::_pSong->Reset(); It's already called in _pSong->New();
+	Global::_pSong->New();
+	
 	// Referencing the childView song pointer to the
 	// Main Global::_pSong object [The application Global::_pSong]
 	_pSong = Global::_pSong;
-
-	// Creates a new song object. The application Song.
-	_pSong->New();
 
 	// Show Machine view and init MIDI
 	OnMachineview();
@@ -153,7 +154,7 @@ CChildView::CChildView()
 
 CChildView::~CChildView()
 {
-	Global::pInputHandler->SetChildView(0);
+	Global::pInputHandler->SetChildView(NULL);
 	KillRedo();
 	KillUndo();
 
@@ -257,6 +258,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_HELP_README, OnHelpReadme)
 	ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
 	ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
+	ON_COMMAND(ID_CONFIGURATION_LOOPPLAYBACK, OnConfigurationLoopplayback)
+	ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_LOOPPLAYBACK, OnUpdateConfigurationLoopplayback)
 	ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdateCutCopy)
 	ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
 	ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
@@ -276,8 +279,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
 	ON_COMMAND(ID_EDIT_DELETE, patDelete)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
-	ON_COMMAND(ID_CONFIGURATION_LOOPPLAYBACK, OnConfigurationLoopplayback)
-	ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_LOOPPLAYBACK, OnUpdateConfigurationLoopplayback)
+	ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
+	ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -342,16 +345,19 @@ void CChildView::OnTimer( UINT nIDEvent )
 
 		if (Global::_pSong->_pMachine[MASTER_INDEX])
 		{
-
+			
 			pParentMain->UpdateVumeters(
-	//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
-	//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
+				//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
+				//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
 				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
 				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
 				Global::pConfig->vu1,
 				Global::pConfig->vu2,
 				Global::pConfig->vu3,
 				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip);
+			
+			float val = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry;
+			pParentMain->UpdateMasterValue(f2i(sqrtf(val*1024.0f)));
 
 			if ( MasterMachineDialog )
 			{
@@ -362,8 +368,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 					MasterMachineDialog->m_masterpeak.SetWindowText(peak);
 	//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 
-					float val = sqrtf(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry*64.0f);
-					MasterMachineDialog->m_slidermaster.SetPos(256-f2i(val));
+					MasterMachineDialog->m_slidermaster.SetPos(256-f2i(sqrtf(val*64.0f)));
 					
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
@@ -428,6 +433,8 @@ void CChildView::OnTimer( UINT nIDEvent )
 					else if( viewMode == VMPattern ) Repaint(DMPlayback);
 				}
 				else if ( viewMode == VMPattern ) Repaint(DMPlayback);
+				if ( viewMode == VMSequence ) Repaint(DMPlayback);
+
 			}
 		}
 	}
@@ -442,7 +449,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 		{
 			return;
 		}
-		_pSong->Save(&file);
+		_pSong->Save(&file,true);
 //		file.Close(); <- save now handles this
 	}
 }
@@ -509,7 +516,7 @@ void CChildView::OnAppExit()
 
 #include "machineview.cpp"
 #include "patviewnew.cpp"
-
+#include "seqview.cpp"
 
 void CChildView::OnPaint() 
 {
@@ -570,6 +577,10 @@ void CChildView::OnPaint()
 		{
 			DrawPatEditor(&bufDC);
 		}
+		else if ( viewMode == VMSequence)
+		{
+			DrawSeqEditor(&bufDC);
+		}
 
 		CRect rc;
 		GetClientRect(&rc);
@@ -608,6 +619,10 @@ void CChildView::OnPaint()
 		{
 			DrawPatEditor(&dc);
 		}
+		else if ( viewMode == VMSequence)
+		{
+			DrawSeqEditor(&dc);
+		}
 	}
 }
 
@@ -627,6 +642,10 @@ void CChildView::Repaint(int drawMode)
 		{
 			PreparePatternRefresh(drawMode);
 		}
+	}
+	if ( viewMode == VMSequence )
+	{
+		Invalidate(false);
 	}
 }
 
@@ -1031,6 +1050,31 @@ void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI)
 		pCmdUI->SetCheck(0);
 }
 
+
+void CChildView::OnShowPatternSeq() 
+{
+	if (viewMode != VMSequence)
+	{
+		viewMode = VMSequence;
+		ShowScrollBar(SB_BOTH,FALSE);
+		
+		// set midi input mode to step insert
+		CMidiInput::Instance()->m_midiMode = MODE_STEP;
+		
+		GetParent()->SetActiveWindow();
+		Repaint();
+		pParentMain->StatusBarIdle();
+	}	
+	SetFocus();
+}
+
+void CChildView::OnUpdatePatternSeq(CCmdUI* pCmdUI) 
+{
+	if (viewMode==VMSequence)
+		pCmdUI->SetCheck(1);
+	else
+		pCmdUI->SetCheck(0);	
+}
 void CChildView::OnBarplay() 
 {
 	if (Global::pConfig->_followSong)

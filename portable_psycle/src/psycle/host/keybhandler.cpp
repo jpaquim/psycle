@@ -56,6 +56,18 @@ void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 			}
 		}
 	}
+	else if (viewMode == VMSequence && bEditMode)
+	{
+		bool success;
+		// add data
+//		success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
+		success = false;
+		if ( success )
+		{
+			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+			return;
+		}
+	}
 	else
 	{
 		ChordModeOffs = 0;
@@ -71,7 +83,7 @@ void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		{			
 			Global::pInputHandler->PerformCmd(cmd,bRepeat);
 		}
-		else if (cmd.GetType() == CT_Note )
+		else if (cmd.GetType() == CT_Note && viewMode != VMSequence)
 		{
 			if(!bRepeat) 
 			{	

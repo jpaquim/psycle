@@ -1,11 +1,10 @@
-#include "stdafx.h"
-
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
 //////////////////////////////////////////////////////////////////////
 // Include CTrack code
 
+#include "stdafx.h"
 #include "Psycle2.h"
 #include "MainFrm.h"
 #include "WavFileDlg.h"
@@ -111,9 +110,10 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SONGBAR, OnUpdateViewSongbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SEQUENCERBAR, OnUpdateViewSequencerbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
+	ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
 ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
-	ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_MASTERSLIDER, OnCustomdrawMasterslider)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -137,18 +137,20 @@ static UINT indicators[] =
 CMainFrame::CMainFrame()
 {
 	Global::pInputHandler->SetMainFrame(this);
-	Global::pInputHandler->SetChildView(&m_wndView); // <bohan> wrong initialization order fix
 	vuprevR = 0;
 	vuprevL = 0;
 	seqcopybufferlength = 0;
-	_pSong = 0;
-	pGearRackDialog = 0;
+	_pSong=NULL;
+	pGearRackDialog = NULL;
 }
 
 CMainFrame::~CMainFrame()
 {
-	Global::pInputHandler->SetMainFrame(0);
-	if(pGearRackDialog) pGearRackDialog->OnCancel();
+	Global::pInputHandler->SetMainFrame(NULL);
+	if (pGearRackDialog)
+	{
+		pGearRackDialog->OnCancel();
+	}
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -158,18 +160,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
 	
-	if (CFrameWnd::OnCreate(lpCreateStruct) == -1) return -1;
-
+	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+		return -1;
 	// create a view to occupy the client area of the frame
 	
-	if(!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
+	if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
+		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
 	{
 		TRACE0("Failed to create view window\n");
 		return -1;
 	}
-
 	// Create Toolbars.
-
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP
 		| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
@@ -229,6 +230,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndToolBar.SetWindowText("Psycle tool bar");
 	m_wndControl.SetWindowText("Psycle control bar");
 	CButton *cb;
+	CSliderCtrl *cs;
 
 	HBITMAP hi;
 	blessless.LoadMappedBitmap(IDB_LESSLESS,0);
@@ -259,6 +261,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	cb=(CButton*)m_wndControl.GetDlgItem(IDC_INC_TPB);
 	hi = (HBITMAP)bmore; cb->SetBitmap(hi);
+
+	cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
+	cs->SetRange(0,1024);
+	cs->SetPos(512);
+	cs->SetTicFreq(64);
 
 
 	m_wndControl2.SetWindowText("Psycle control bar 2");
@@ -580,6 +587,27 @@ void CMainFrame::ShiftOctave(int x)
 	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
 	cc2->SetCurSel(_pSong->currentOctave);
 }
+void CMainFrame::UpdateMasterValue(int newvalue)
+{
+	CSliderCtrl *cs;
+	if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
+	{
+		cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
+		cs->SetPos(newvalue);
+	}
+}
+
+void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	CSliderCtrl *cs;
+	if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
+	{
+		cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
+		((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
+	}
+	
+	*pResult = 0;
+}
 
 void CMainFrame::OnClipbut() 
 {
@@ -597,8 +625,8 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 		CStatic *lc=(CStatic *)m_wndControl.GetDlgItem(IDC_FRAMECLIP);
 		CClientDC clcanvasl(lc);
 		
-		if (clip) clcanvasl.FillSolidRect(0,0,9,16,vu3);
-		else  clcanvasl.FillSolidRect(0,0,9,16,vu2);
+		if (clip) clcanvasl.FillSolidRect(0,0,9,20,vu3);
+		else  clcanvasl.FillSolidRect(0,0,9,20,vu2);
 		
 	//	bool draw_l=true;
 	//	bool draw_r=true;
@@ -629,46 +657,50 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 
 		int log_l=f2i(100*log10f(l));
 		int log_r=f2i(100*log10f(r));
-		log_l=log_l-226;
+		log_l=log_l-225;
 		if ( log_l < 0 )log_l=0;
-		log_r=log_r-226;
+		log_r=log_r-225;
 		if ( log_r < 0 )log_r=0;
 		
 		if (log_l || vuprevL)
 		{
-			canvasl.FillSolidRect(0,0,log_l,5,vu1);
+//			canvasl.FillSolidRect(0,0,log_l,5,vu1);
+			canvasl.FillSolidRect(0,0,log_l,4,vu1);
 			if (vuprevL > log_l )
 			{
-				canvasl.FillSolidRect(log_l,0,vuprevL-log_l,5,vu3);
-				canvasl.FillSolidRect(vuprevL,0,226-vuprevL,5,vu2);
+				canvasl.FillSolidRect(log_l,0,vuprevL-log_l,4,vu3);
+				canvasl.FillSolidRect(vuprevL,0,225-vuprevL,4,vu2);
 				vuprevL-=2;
 			}
 			else 
 			{
-				canvasl.FillSolidRect(log_l,0,226-log_l,5,vu2);
+				canvasl.FillSolidRect(log_l,0,225-log_l,4,vu2);
 				vuprevL = log_l;
 			}
 		}
 		else
-			canvasl.FillSolidRect(0,0,226,5,vu2);
+//			canvasl.FillSolidRect(0,0,226,5,vu2);
+			canvasl.FillSolidRect(0,0,225,4,vu2);
 
 		if (log_r || vuprevR)
 		{
-			canvasr.FillSolidRect(0,0,log_r,5,vu1);
+//			canvasr.FillSolidRect(0,0,log_r,5,vu1);
+			canvasl.FillSolidRect(0,5,log_r,4,vu1);
+			
 			if (vuprevR > log_r )
 			{
-				canvasr.FillSolidRect(log_r,0,vuprevR-log_r,5,vu3);
-				canvasr.FillSolidRect(vuprevR,0,226-vuprevR,5,vu2);
+				canvasl.FillSolidRect(log_r,5,vuprevR-log_r,4,vu3);
+				canvasl.FillSolidRect(vuprevR,5,225-vuprevR,4,vu2);
 				vuprevR-=2;
 			}
 			else 
 			{
-				canvasr.FillSolidRect(log_r,0,226-log_r,5,vu2);
+				canvasl.FillSolidRect(log_r,5,225-log_r,4,vu2);
 				vuprevR = log_r;
 			}
 		}
 		else
-			canvasr.FillSolidRect(0,0,226,5,vu2);
+			canvasl.FillSolidRect(0,5,225,4,vu2);
 		
 	/*	if(draw_l)
 		{
@@ -2479,3 +2511,4 @@ void CMainFrame::RedrawGearRackList()
 		pGearRackDialog->RedrawList();
 	}
 }
+

@@ -1,5 +1,3 @@
-#include "stdafx.h"	
-
 /*
 	Steinberg Audio Stream I/O API
 	(c) 1996, Steinberg Soft- und Hardware GmbH
@@ -10,6 +8,7 @@
 	asio interface to the asiodrvr class methods
 */ 
 
+#include "stdafx.h"	
 #include <string.h>
 #include "asiosys.h"		// platform definition
 #include "asio.h"

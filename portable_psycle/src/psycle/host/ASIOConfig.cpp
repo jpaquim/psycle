@@ -1,8 +1,7 @@
-#include "stdafx.h"
-
 // ASIOConfig.cpp : implementation file
 //
 
+#include "stdafx.h"
 #include "Psycle2.h"
 #include "ASIOConfig.h"
 

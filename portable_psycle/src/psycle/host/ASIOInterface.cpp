@@ -1,7 +1,6 @@
-#include "stdafx.h"
-
 // notes: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 
+#include "stdafx.h"
 #include "ASIOInterface.h"
 #include "resource.h"
 #include "Registry.h"

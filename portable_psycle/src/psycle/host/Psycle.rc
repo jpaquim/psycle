@@ -133,18 +133,18 @@ BEGIN
     CTEXT           "",IDC_TPBLABEL,248,2,16,12,SS_CENTERIMAGE | SS_SUNKEN
     PUSHBUTTON      ">",IDC_INC_TPB,265,2,16,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
-    LTEXT           "VU",IDC_STATIC,345,4,10,8
-    CONTROL         "",IDC_LVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,3,152,
-                    4
-    CONTROL         "",IDC_RVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,10,152,
-                    4
-    CONTROL         "",IDC_FRAMECLIP,"Static",SS_BLACKRECT | SS_SUNKEN,512,3,
-                    7,11
-    PUSHBUTTON      "",IDC_CLIPBUT,521,3,8,11,NOT WS_TABSTOP,
-                    WS_EX_STATICEDGE
     LTEXT           "Octave",IDC_STATIC,286,4,24,8
     COMBOBOX        IDC_COMBOOCTAVE,311,2,28,132,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_LVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,1,152,
+                    7
+    LTEXT           "VU",IDC_STATIC,345,4,10,8
+    CONTROL         "Slider2",IDC_MASTERSLIDER,"msctls_trackbar32",
+                    TBS_AUTOTICKS | WS_TABSTOP,358,9,152,7
+    CONTROL         "",IDC_FRAMECLIP,"Static",SS_BLACKRECT | SS_SUNKEN,512,1,
+                    7,14
+    PUSHBUTTON      "",IDC_CLIPBUT,521,1,8,14,NOT WS_TABSTOP,
+                    WS_EX_STATICEDGE
 END
 
 IDD_PSYBAR2 DIALOGEX 0, 0, 532, 16
@@ -978,7 +978,7 @@ BEGIN
                     NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
     CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
                     WS_BORDER,0,0,335,186
-    LTEXT           "ASIO Steinberg Audio Stream I/O API (C)1996 Steinb0rg",
+    LTEXT           "ASIO Audio Stream I/O API (C)1996 Steinb0rg",
                     IDC_ASIO,133,158,182,8,NOT WS_VISIBLE
     LTEXT           "VST Virtual Studio Crash Technology v2.3 (C)2003 Steinb0rg",
                     IDC_STEINBERGCOPY,133,169,182,8,NOT WS_VISIBLE
@@ -2066,6 +2066,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_MACHINEVIEW
     BUTTON      ID_PATTERNVIEW
+    BUTTON      ID_SHOWPSEQ
     SEPARATOR
     BUTTON      ID_NEWMACHINE
     BUTTON      ID_VIEW_INSTRUMENTEDITOR

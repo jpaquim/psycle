@@ -35,7 +35,7 @@ private:
 	bool _playing;
 	bool _timerActive;
 	static AudioDriverEvent _event;
-	/*static*/ CCriticalSection _lock;
+	CCriticalSection _lock;
 
 	GUID _dsGuid;
 	LPCGUID _pDsGuid;

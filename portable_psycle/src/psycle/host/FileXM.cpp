@@ -1,9 +1,8 @@
-#include "stdafx.h"
-
 // FileXM.cpp: implementation of the CFileXM class.
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
 #include "FileXM.h"
 #include "song.h"
 

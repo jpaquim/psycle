@@ -1,8 +1,7 @@
-#include "stdafx.h"
-
 // EnvDialog.cpp : implementation file
 //
 
+#include "stdafx.h"
 #include "Psycle2.h"
 #include "Song.h"
 #include "EnvDialog.h"

@@ -1,8 +1,7 @@
-#include "stdafx.h"
-
 // DefaultVstGui.cpp : implementation file
 //
 
+#include "stdafx.h"
 #include "Psycle2.h"
 #include "DefaultVstGui.h"
 #include "Helpers.h"
