@@ -49,15 +49,49 @@ void CChildView::DrawMachineEditor(CDC *devc)
 			if(_pSong->_machineActive[c])
 			{
 				Machine *tmac=_pSong->_pMachines[c];
-				int oriX = tmac->_x+74;
-				int oriY = tmac->_y+24;
+				int oriX;
+				int oriY;
+				switch (tmac->_mode)
+				{
+				case MACHMODE_GENERATOR:
+					oriX = tmac->_x+(MachineCoords.sGenerator.width/2);
+					oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
+					break;
+				case MACHMODE_FX:
+				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+					oriX = tmac->_x+(MachineCoords.sEffect.width/2);
+					oriY = tmac->_y+(MachineCoords.sEffect.height/2);
+					break;
+
+				case MACHMODE_MASTER:
+					oriX = tmac->_x+(MachineCoords.sMaster.width/2);
+					oriY = tmac->_y+(MachineCoords.sMaster.height/2);
+					break;
+				}
 
 				for (int w=0; w<MAX_CONNECTIONS; w++)
 				{
 					if (tmac->_connection[w])
 					{
-						int desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+74;
-						int desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+24;
+						int desX;
+						int desY;
+						switch (_pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_mode)
+						{
+						case MACHMODE_GENERATOR:
+							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sGenerator.width/2);
+							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sGenerator.height/2);
+							break;
+						case MACHMODE_FX:
+						case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sEffect.width/2);
+							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sEffect.height/2);
+							break;
+
+						case MACHMODE_MASTER:
+							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sMaster.width/2);
+							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sMaster.height/2);
+							break;
+						}
 						
 						int const f1 = (desX+oriX)/2;
 						int const f2 = (desY+oriY)/2;
@@ -110,15 +144,49 @@ void CChildView::DrawMachineEditor(CDC *devc)
 			if(_pSong->_machineActive[c])
 			{
 				Machine *tmac=_pSong->_pMachines[c];
-				int oriX = tmac->_x+74;
-				int oriY = tmac->_y+24;
+				int oriX;
+				int oriY;
+				switch (tmac->_mode)
+				{
+				case MACHMODE_GENERATOR:
+					oriX = tmac->_x+(MachineCoords.sGenerator.width/2);
+					oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
+					break;
+				case MACHMODE_FX:
+				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+					oriX = tmac->_x+(MachineCoords.sEffect.width/2);
+					oriY = tmac->_y+(MachineCoords.sEffect.height/2);
+					break;
+
+				case MACHMODE_MASTER:
+					oriX = tmac->_x+(MachineCoords.sMaster.width/2);
+					oriY = tmac->_y+(MachineCoords.sMaster.height/2);
+					break;
+				}
 
 				for (int w=0; w<MAX_CONNECTIONS; w++)
 				{
 					if (tmac->_connection[w])
 					{
-						int desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+74;
-						int desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+24;
+						int desX;
+						int desY;
+						switch (_pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_mode)
+						{
+						case MACHMODE_GENERATOR:
+							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sGenerator.width/2);
+							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sGenerator.height/2);
+							break;
+						case MACHMODE_FX:
+						case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sEffect.width/2);
+							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sEffect.height/2);
+							break;
+
+						case MACHMODE_MASTER:
+							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sMaster.width/2);
+							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sMaster.height/2);
+							break;
+						}
 						
 						int const f1 = (desX+oriX)/2;
 						int const f2 = (desY+oriY)/2;
