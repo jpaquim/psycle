@@ -985,17 +985,16 @@ namespace psycle
 					return 0;
 				case audioMasterGetSampleRate:
 					{
-						double sampleRate=Global::pConfig->GetSamplesPerSec();
-						if(effect)
+						long sampleRate=Global::pConfig->GetSamplesPerSec();
+						if(effect && effect->user)
 							reinterpret_cast<plugin *>(effect->user)->proxy().setSampleRate(sampleRate);
-						//return sampleRate;
-						return 0;
+						return sampleRate;
 					}
 				case audioMasterGetBlockSize:
-					if(effect)
+					if(effect && effect->user) {
 						reinterpret_cast<plugin *>(effect->user)->proxy().setBlockSize(STREAM_SIZE);
-					//return STREAM_SIZE;
-					return 0;
+					}
+					return STREAM_SIZE;
 				case audioMasterGetVendorString:
 					// Just fooling version string
 					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
