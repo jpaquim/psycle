@@ -214,9 +214,13 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		
 		if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
 		{	
-			int pointpos= (point.x-XOFFSET)%ROWWIDTH;
+			int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
 
-			if ( pointpos > 55-17 && pointpos < 79-17 ) {
+			if ((pointpos >= PatHeaderCoords.dRecordOn.x) && 
+				(pointpos <= PatHeaderCoords.dRecordOn.x+PatHeaderCoords.sRecordOn.width) &&
+				(point.y >= PatHeaderCoords.dRecordOn.y+1) &&
+				(point.y <= PatHeaderCoords.dRecordOn.y+1+PatHeaderCoords.sRecordOn.height))
+			{
 				_pSong->_trackArmed[ttm] = !_pSong->_trackArmed[ttm];
 				_pSong->_trackArmedCount = 0;
 				for ( int i=0;i<MAX_TRACKS;i++ )
@@ -227,10 +231,18 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					}
 				}
 			}
-			else if ( pointpos > 55+6 && pointpos < 79+6 ) {
+			else if ((pointpos >= PatHeaderCoords.dMuteOn.x) && 
+				(pointpos <= PatHeaderCoords.dMuteOn.x+PatHeaderCoords.sMuteOn.width) &&
+				(point.y >= PatHeaderCoords.dMuteOn.y+1) &&
+				(point.y <= PatHeaderCoords.dMuteOn.y+1+PatHeaderCoords.sMuteOn.height))
+			{
 				_pSong->_trackMuted[ttm] = !_pSong->_trackMuted[ttm];
 			}
-			else if ( pointpos > 85 && pointpos < 108 ) {
+			else if ((pointpos >= PatHeaderCoords.dSoloOn.x) && 
+				(pointpos <= PatHeaderCoords.dSoloOn.x+PatHeaderCoords.sSoloOn.width) &&
+				(point.y >= PatHeaderCoords.dSoloOn.y+1) &&
+				(point.y <= PatHeaderCoords.dSoloOn.y+1+PatHeaderCoords.sSoloOn.height))
+			{
 				if (Global::_pSong->_trackSoloed != ttm )
 				{
 					for ( int i=0;i<MAX_TRACKS;i++ )

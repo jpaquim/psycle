@@ -11,9 +11,6 @@
 #include "Song.h"
 #include "Configuration.h"
 
-#define HEADER_HEIGHT 18
-#define HEADER_ROWWIDTH 111
-
 #define MAX_DRAW_MESSAGES 32
 
 class CMasterDlg;
@@ -115,6 +112,34 @@ struct SPatternDraw
 	int drawLineEnd;
 };
 
+struct SSkinSource
+{
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
+struct SSkinDest
+{
+	int x;
+	int y;
+};
+
+struct SPatternHeaderCoords
+{
+	SSkinSource sBackground;
+	SSkinSource sNumber0;
+	SSkinSource sRecordOn;
+	SSkinSource sMuteOn;
+	SSkinSource sSoloOn;
+	SSkinDest dDigitX0;
+	SSkinDest dDigit0X;
+	SSkinDest dRecordOn;
+	SSkinDest dMuteOn;
+	SSkinDest dSoloOn;
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CChildView window
 
@@ -194,6 +219,7 @@ public:
 	void SetTitleBarText();
 	void RecalculateColourGrid();
 	void RecalcMetrics();
+	void LoadPatternHeaderSkin();
 
 public:
 
@@ -229,6 +255,8 @@ public:
 	int TEXTWIDTH;
 	int TEXTHEIGHT;
 	int HEADER_INDENT;
+	int HEADER_HEIGHT;
+	int HEADER_ROWWIDTH;
 
 	int VISTRACKS;
 	int CW;
@@ -238,6 +266,7 @@ public:
 						// initialized, or while song is being modified (New(),Load()..).
 						// 
 
+	SPatternHeaderCoords PatHeaderCoords;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -276,7 +305,8 @@ private:
 	int GetMachine(CPoint point);
 	void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 	void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
-	COLORREF CChildView::ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
+	COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
+	void FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result);
 
 	inline int _ps();
 	inline unsigned char * _offset(int ps);
@@ -286,6 +316,8 @@ private:
 private:
 	// GDI Stuff
 	CBitmap stuffbmp;
+	CBitmap patternheader;
+	HBITMAP hbmPatHeader;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];
 	int CH;

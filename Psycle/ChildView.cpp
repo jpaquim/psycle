@@ -128,7 +128,6 @@ CChildView::CChildView()
 //	_getcwd(m_appdir,_MAX_PATH);
 	
 	stuffbmp.LoadBitmap(IDB_STUFF);
-
 // Creates a new song object. The application Song.
 //	Global::_pSong->Reset(); It's already called in _pSong->New();
 	Global::_pSong->New();
@@ -156,6 +155,8 @@ CChildView::~CChildView()
 		bmpDC->DeleteObject();
 		delete bmpDC;
 	}
+	patternheader.DeleteObject();
+	DeleteObject(hbmPatHeader);
 }
 
 BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -828,6 +829,7 @@ void CChildView::OnPatternView()
 {
 	if (viewMode != VMPattern)
 	{
+		LoadPatternHeaderSkin();
 		RecalcMetrics();
 
 		viewMode = VMPattern;
@@ -1799,6 +1801,302 @@ void CChildView::OnHelpWhatsnew()
 	ShellExecute(pParentMain->m_hWnd,"open","Docs\\whatsnew.txt",NULL,"",SW_SHOW);
 }
 
+void CChildView::LoadPatternHeaderSkin()
+{
+	static char szOldHeader[64] = "";
+	if (strcmp(szOldHeader, Global::pConfig->pattern_header_skin))
+	{
+		strcpy(szOldHeader, Global::pConfig->pattern_header_skin);
+		// ok so...
+		if (strcmp(szOldHeader, DEFAULT_PATTERN_HEADER_SKIN))
+		{
+			BOOL result = FALSE;
+			FindPatternHeaderSkin(Global::pConfig->GetInitialSkinDir(),Global::pConfig->pattern_header_skin, &result);
+			if (result)
+			{
+				return;
+			}
+		}
+		// load defaults
+		strcpy(szOldHeader, DEFAULT_PATTERN_HEADER_SKIN);
+		// and coords
+		PatHeaderCoords.sBackground.x=0;
+		PatHeaderCoords.sBackground.y=0;
+		PatHeaderCoords.sBackground.width=109;
+		PatHeaderCoords.sBackground.height=16;
+		PatHeaderCoords.sNumber0.x = 0;
+		PatHeaderCoords.sNumber0.y = 16;
+		PatHeaderCoords.sNumber0.width = 7;
+		PatHeaderCoords.sNumber0.height = 12;
+		PatHeaderCoords.sRecordOn.x = 70;
+		PatHeaderCoords.sRecordOn.y = 16;
+		PatHeaderCoords.sRecordOn.width = 7;
+		PatHeaderCoords.sRecordOn.height = 7;
+		PatHeaderCoords.sMuteOn.x = 77;
+		PatHeaderCoords.sMuteOn.y = 16;
+		PatHeaderCoords.sMuteOn.width = 7;
+		PatHeaderCoords.sMuteOn.height = 7;
+		PatHeaderCoords.sSoloOn.x = 84;
+		PatHeaderCoords.sSoloOn.y = 16;
+		PatHeaderCoords.sSoloOn.width = 7;
+		PatHeaderCoords.sSoloOn.height = 7;
+		PatHeaderCoords.dDigitX0.x = 22;
+		PatHeaderCoords.dDigitX0.y = 2;
+		PatHeaderCoords.dDigit0X.x = 29;
+		PatHeaderCoords.dDigit0X.y = 2;
+		PatHeaderCoords.dRecordOn.x = 52;
+		PatHeaderCoords.dRecordOn.y = 5;
+		PatHeaderCoords.dMuteOn.x = 75;
+		PatHeaderCoords.dMuteOn.y = 5;
+		PatHeaderCoords.dSoloOn.x = 96;
+		PatHeaderCoords.dSoloOn.y = 5;
+
+		patternheader.DeleteObject();
+		DeleteObject(hbmPatHeader);
+		patternheader.LoadBitmap(IDB_PATTERN_HEADER_SKIN);
+	}
+}
+
+void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result)
+{
+	CFileFind finder;
+
+	int loop = finder.FindFile(findDir + "\\*.");	// check for subfolders.
+	while (loop) 
+	{								// Note: Subfolders with dots won't work.
+		loop = finder.FindNextFile();
+		if (finder.IsDirectory() && !finder.IsDots())
+		{
+			FindPatternHeaderSkin(finder.GetFilePath(),findName,result);
+		}
+	}
+	finder.Close();
+
+	loop = finder.FindFile(findDir + "\\" + findName + ".psh"); // check if the directory is empty
+	while (loop)
+	{
+		loop = finder.FindNextFile();
+		if (!finder.IsDirectory())
+		{
+			CString sName, tmpPath;
+			sName = finder.GetFileName();
+			// ok so we have a .psh, does it have a valid matching .bmp?
+			char* pExt = strrchr(sName,46);// last .
+			pExt[0]=0;
+			char szOpenName[MAX_PATH];
+			sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
+
+			patternheader.DeleteObject();
+			DeleteObject(hbmPatHeader);
+			hbmPatHeader = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+			if (hbmPatHeader)
+			{
+				if (patternheader.Attach(hbmPatHeader))
+				{	
+					memset(&PatHeaderCoords,0,sizeof(PatHeaderCoords));
+					// load settings
+					FILE* hfile;
+					sprintf(szOpenName,"%s\\%s.psh",findDir,sName);
+					if ((hfile=fopen(szOpenName,"rw")) == NULL )
+					{
+						MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
+						return;
+					}
+					char buf[512];
+					while (fgets(buf, 512, hfile))
+					{
+						if (strstr(buf,"\"background_source\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.sBackground.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.sBackground.y = atoi(q+1);
+									q = strchr(q+1,44); // ,
+									if (q)
+									{
+										PatHeaderCoords.sBackground.width = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											PatHeaderCoords.sBackground.height = atoi(q+1);
+										}
+									}
+								}
+							}
+						}
+						else if (strstr(buf,"\"number_0_source\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.sNumber0.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.sNumber0.y = atoi(q+1);
+									q = strchr(q+1,44); // ,
+									if (q)
+									{
+										PatHeaderCoords.sNumber0.width = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											PatHeaderCoords.sNumber0.height = atoi(q+1);
+										}
+									}
+								}
+							}
+						}
+						else if (strstr(buf,"\"record_on_source\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.sRecordOn.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.sRecordOn.y = atoi(q+1);
+									q = strchr(q+1,44); // ,
+									if (q)
+									{
+										PatHeaderCoords.sRecordOn.width = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											PatHeaderCoords.sRecordOn.height = atoi(q+1);
+										}
+									}
+								}
+							}
+						}
+						else if (strstr(buf,"\"mute_on_source\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.sMuteOn.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.sMuteOn.y = atoi(q+1);
+									q = strchr(q+1,44); // ,
+									if (q)
+									{
+										PatHeaderCoords.sMuteOn.width = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											PatHeaderCoords.sMuteOn.height = atoi(q+1);
+										}
+									}
+								}
+							}
+						}
+						else if (strstr(buf,"\"solo_on_source\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.sSoloOn.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.sSoloOn.y = atoi(q+1);
+									q = strchr(q+1,44); // ,
+									if (q)
+									{
+										PatHeaderCoords.sSoloOn.width = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											PatHeaderCoords.sSoloOn.height = atoi(q+1);
+										}
+									}
+								}
+							}
+						}
+						else if (strstr(buf,"\"digit_x0_dest\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.dDigitX0.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.dDigitX0.y = atoi(q+1);
+								}
+							}
+						}
+						else if (strstr(buf,"\"digit_0x_dest\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.dDigit0X.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.dDigit0X.y = atoi(q+1);
+								}
+							}
+						}
+						else if (strstr(buf,"\"record_on_dest\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.dRecordOn.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.dRecordOn.y = atoi(q+1);
+								}
+							}
+						}
+						else if (strstr(buf,"\"mute_on_dest\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.dMuteOn.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.dMuteOn.y = atoi(q+1);
+								}
+							}
+						}
+						else if (strstr(buf,"\"solo_on_dest\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.dSoloOn.x = atoi(q+1);
+								q = strchr(q+1,44); // ,
+								if (q)
+								{
+									PatHeaderCoords.dSoloOn.y = atoi(q+1);
+								}
+							}
+						}
+					}
+
+					*result = TRUE;
+					break;
+				}
+			}
+		}
+	}
+	finder.Close();
+}
+
+
 void CChildView::RecalcMetrics()
 {
 	TEXTHEIGHT = Global::pConfig->pattern_font_y;
@@ -1820,6 +2118,8 @@ void CChildView::RecalcMetrics()
 	COLX[8] = COLX[7]+TEXTWIDTH;
 	COLX[9] = COLX[8]+TEXTWIDTH+1;
 	ROWWIDTH = COLX[9];
+	HEADER_ROWWIDTH = PatHeaderCoords.sBackground.width+1;
+	HEADER_HEIGHT = PatHeaderCoords.sBackground.height+2;
 	if (ROWWIDTH < HEADER_ROWWIDTH)
 	{
 		int temp = (HEADER_ROWWIDTH-ROWWIDTH)/2;
@@ -1855,3 +2155,4 @@ void CChildView::RecalcMetrics()
 		VISTRACKS = 1; 
 	}
 }
+

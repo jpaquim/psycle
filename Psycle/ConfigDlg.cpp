@@ -87,6 +87,7 @@ void CConfigDlg::Init(
 	_skinDlg._pattern_font_point = pConfig->pattern_font_point;
 	_skinDlg._pattern_font_x = pConfig->pattern_font_x;
 	_skinDlg._pattern_font_y = pConfig->pattern_font_y;
+	strcpy(_skinDlg._pattern_header_skin, pConfig->pattern_header_skin);
 
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
@@ -201,6 +202,12 @@ int CConfigDlg::DoModal()
 					}
 				}
 			}
+		}
+		if (strcmp(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin))
+		{
+			strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
+			// LOAD HEADER SKIN
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 		}
 
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();

@@ -37,6 +37,7 @@ Configuration::Configuration()
 	_showAboutAtStart = true;
 	_followSong = false;
 	strcpy(pattern_fontface,"Tahoma");
+	strcpy(pattern_header_skin,DEFAULT_PATTERN_HEADER_SKIN);
 	pattern_font_point = 95;
 	pattern_font_x = 10;
 	pattern_font_y = 14;
@@ -661,6 +662,8 @@ Configuration::Read()
 
 	numData = sizeof(pattern_fontface);
 	reg.QueryValue("pattern_fontface", &type, (BYTE*)&pattern_fontface, &numData);
+	numData = sizeof(pattern_header_skin);
+	reg.QueryValue("pattern_header_skin", &type, (BYTE*)&pattern_header_skin, &numData);
 	numData = sizeof(pattern_font_point);
 	reg.QueryValue("pattern_font_point", &type, (BYTE*)&pattern_font_point, &numData);
 	numData = sizeof(pattern_font_x);
@@ -1030,6 +1033,8 @@ Configuration::Write()
 	reg.SetValue("pattern_font_point", REG_DWORD, (BYTE*)&pattern_font_point, sizeof(pattern_font_point));	
 	reg.SetValue("pattern_font_x", REG_DWORD, (BYTE*)&pattern_font_x, sizeof(pattern_font_x));	
 	reg.SetValue("pattern_font_y", REG_DWORD, (BYTE*)&pattern_font_y, sizeof(pattern_font_y));	
+
+	reg.SetValue("pattern_header_skin", REG_SZ, (BYTE*)pattern_header_skin, strlen(pattern_header_skin));
 	
 	if (_psInitialInstrumentDir != NULL)
 	{
