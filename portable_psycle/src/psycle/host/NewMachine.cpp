@@ -532,6 +532,7 @@ namespace psycle
 				out.flush();
 				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetVstDir()), MACH_VST, out, progressOpen ? &Progress : 0);
 				out.flush();
+				Progress.SetWindowText("Scanning plugins ...");
 				out.close();
 				_numPlugins = plugsCount;
 				if(progressOpen) Progress.m_Progress.SetPos(16384);
