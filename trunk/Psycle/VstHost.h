@@ -5,7 +5,11 @@
 #include "Vst\AEffectx.h"
 #include "constants.h"
 #include "Helpers.h"
-#include "NewMachine.h"
+#include "Configuration.h"
+
+#if !defined(_WINAMP_PLUGIN_)
+	#include "NewMachine.h"
+#endif
 
 #define MAX_EVENTS		64
 #define MAX_INOUTS		8

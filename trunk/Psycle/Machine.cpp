@@ -15,6 +15,7 @@
 //	#include "FileIO.h"
 	#include "Configuration.h"
 	#include "WireDlg.h"
+	#include "MainFrm.h"
 
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
@@ -22,8 +23,7 @@
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
-#include "MainFrm.h"
-
+	
 #include "InputHandler.h"
 
 char* Master::_psName = "Master";
@@ -559,7 +559,8 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		pMachine=p;
 	}
 
-
+#if !defined(_WINAMP_PLUGIN_)
+	
 	if (index < MAX_BUSES)
 	{
 		pMachine->_mode = MACHMODE_GENERATOR;
@@ -596,6 +597,9 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 			pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 		}
 	}
+
+#endif // !defined(_WINAMP_PLUGIN_)
+
 
 	return pMachine;
 }

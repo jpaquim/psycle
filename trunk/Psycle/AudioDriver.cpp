@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "AudioDriver.h"
 #include "helpers.h"
+#include "constants.h"
 
 #define SHORT_MIN	-32768
 #define SHORT_MAX	32767

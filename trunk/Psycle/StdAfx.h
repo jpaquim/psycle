@@ -26,7 +26,7 @@
 	#include <afxcmn.h>			// MFC support for Windows Common Controls
 	#endif // _AFX_NO_AFXCMN_SUPPORT
 	#include <afxmt.h>
-#endif !defined(_WINAMP_PLUGIN_)
+#endif //!defined(_WINAMP_PLUGIN_)
 
 #include "Global.h"
 

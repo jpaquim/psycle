@@ -6,7 +6,10 @@
 #include "Configuration.h"
 #include "MachineInterface.h"
 #include "Player.h"
-#include "NewMachine.h"
+
+#if !defined(_WINAMP_PLUGIN_)
+	#include "NewMachine.h"
+#endif
 
 class PluginFxCallback : public CFxCallback
 {

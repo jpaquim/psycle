@@ -1,10 +1,6 @@
 #ifndef _AUDIODRIVER_H
 #define _AUDIODRIVER_H
 
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned long dword;
-
 #define ADF_STEREO 1
 
 typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
