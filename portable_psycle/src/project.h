@@ -459,7 +459,7 @@ typedef __int8 int8;
 		//
 		// <bohan> shit! warning C4535: calling _set_se_translator() requires /EHa; the command line options /EHc and /GX are insufficient
 #else
-#	error unkown compiler
+	#error unknown compiler
 #endif
 
 ////////////////////////////////

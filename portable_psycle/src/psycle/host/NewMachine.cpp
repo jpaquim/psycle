@@ -596,7 +596,7 @@ namespace psycle
 									out << "* Previously Disabled - Rejected Error *";
 									break;
 								case VSTINSTANCE_ERR_EXCEPTION:
-									out << "* Previously Disabled - Exception Error *";
+									out << "* Previously Disabled - Exception Error *"; // <bohan> currently all errors are reported as exceptions
 									break;
 								case VSTINSTANCE_NO_ERROR:
 									out << "* Previously Mapped *";
@@ -737,7 +737,7 @@ namespace psycle
 									out << "*** ERROR - REJECTED ***";
 									break;
 								case VSTINSTANCE_ERR_EXCEPTION:
-									out << "*** ERROR - EXCEPTION ***";
+									out << "*** ERROR - EXCEPTION ***"; // <bohan> currently all errors are reported as exceptions
 									break;
 								default:
 									out << "*** ERROR - NOT VST PLUGIN OR BUGGED ***";
