@@ -257,7 +257,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 		// play it
 		int mgn;
 		Machine* pMachine;
-		if ( Global::_pSong->seqBus < MAX_BUSES )
+		if (Global::_pSong->seqBus < MAX_BUSES)
 			mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
 		else
 			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
@@ -430,7 +430,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 
 	int mgn;
-	if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
+	if (_pSong->seqBus & MAX_BUSES) // If it is an effect
 	{
 		mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
 	}
@@ -439,7 +439,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		mgn = _pSong->busMachine[_pSong->seqBus];
 	}
 
-	if (Global::_pSong->_machineActive[mgn])
+	if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
 	{
 		Machine *tmac = Global::_pSong->_pMachines[mgn];
 

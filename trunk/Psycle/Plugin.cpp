@@ -149,13 +149,12 @@ void Plugin::Work(int numSamples)
 		Machine::Work(numSamples);
 	}
 
-	_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
 #ifndef _WINAMP_PLUGIN_
 	CPUCOST_INIT(cost);
 	if (!_mute) 
 	{
 #endif
-		if ((_mode != MACHMODE_FX) || !_bypass)
+		if ((_mode != MACHMODE_FX) || (!_bypass && !_stopped))
 		{
 			int ns = numSamples;
 			while (ns)
@@ -253,41 +252,21 @@ void Plugin::Work(int numSamples)
 			Machine::SetVolumeCounter(numSamples);
 			if ( Global::pConfig->autoStopMachines )
 			{
-	//			Machine::SetVolumeCounterAccurate(numSamples);
-				if (_volumeCounter < 8)	{
+				if (_volumeCounter < 8)	
+				{
 					_volumeCounter = 0;
 					_volumeDisplay = 0;
 					_stopped = true;
 				}
 				else _stopped = false;
 			}
-	//		else Machine::SetVolumeCounter(numSamples);
 		}
 #endif
-		/*
-		else if (!_stopped && !_bypass)
-		{
-			_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
-			Machine::SetVolumeCounter(numSamples);
-			if ( Global::pConfig->autoStopMachines )
-			{
-	//			Machine::SetVolumeCounterAccurate(numSamples);
-				if (_volumeCounter < 8)	{
-					_volumeCounter = 0;
-					_volumeDisplay = 0;
-					_stopped = true;
-				}
-				else _stopped = false;
-			}
-	//		else Machine::SetVolumeCounter(numSamples);
-		}
-		*/
 	}
 #ifndef _WINAMP_PLUGIN_
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;
 #endif // ndef _WINAMP_PLUGIN_
-
 	_worked = true;
 }
 
