@@ -26,6 +26,7 @@ VSTPlugin::VSTPlugin()
 	outputs[1]=_pSamplesR;
 
 	queue_size=0;
+	wantidle = false;
 	_sDllName = NULL;
 	_pEffect=NULL;
 	h_dll=NULL;
@@ -612,7 +613,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	case audioMasterTempoAt:			return Global::_pSong->BeatsPerMin*10000;
 
 	case audioMasterNeedIdle:	
-		effect->dispatcher(effect, effIdle, 0, 0, NULL, 0.0f);
+		((VSTPlugin*)effect->user)->wantidle = true;
 		return 1;
 #if defined(_WINAMP_PLUGIN_)
 	case audioMasterGetSampleRate:		return Global::pConfig->_samplesPerSec;	
@@ -835,10 +836,12 @@ void VSTInstrument::Stop()
 
 void VSTInstrument::Work(int numSamples)
 {
+
 #if defined(_WINAMP_PLUGIN_)
 
 	if (instantiated)
 	{
+		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 		SendMidi();
 
 		_pEffect->process(_pEffect,NULL,outputs,numSamples);
@@ -851,6 +854,8 @@ void VSTInstrument::Work(int numSamples)
 	if (!_mute && instantiated)
 	{
 //		Dispatch(effSetBlockSize, 0, numSamples, NULL, 0.f); // Should this be done?
+
+		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 
 		SendMidi();
 
@@ -944,6 +949,8 @@ void VSTFX::Work(int numSamples)
 	{
 		if (instantiated)
 		{
+			if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
+		
 			SendMidi();
 
 			Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);

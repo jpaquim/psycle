@@ -105,7 +105,7 @@ public:
 
 protected:
 	HINSTANCE _dll;
-	char _psShortName[15];
+	char _psShortName[16];
 	char* _psAuthor;
 	char* _psDllName;
 	char* _psName;

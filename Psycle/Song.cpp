@@ -11,6 +11,7 @@
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
+#include "Riff.h"	 // For Wave file loading.
 
 #if !defined(_WINAMP_PLUGIN_)
 typedef struct 
@@ -727,7 +728,11 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 	ULONGINV tmp;
 	int bits=0;
 
-	if (!file.Open((char*)str)) return 0; // This opens the file and reads the "FORM" header.
+	if (!file.Open((char*)str)) // This opens the file and reads the "FORM" header.
+	{
+		Invalided=false;
+		return 0;
+	}
 
 	DeleteLayer(instrument,layer);
 
@@ -848,200 +853,146 @@ int Song::WavAlloc(
 
 int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 { 
-  // name valid? 
-	if( Wavfile==NULL || Wavfile[0] == 0)
-	{
-		Invalided=false;
-		return 0;
-	}
+  
+	ASSERT(Wavfile!=NULL);
 
-	// file valid?
-	FILE *in;
-	in = fopen(Wavfile,"rb");
-	if(in==NULL)
-	{
-		Invalided=false;
-		return 0;
-	}
-
-  // check File ID number
-	fseek(in,8,SEEK_SET);
-	int idchk=fgetc(in)*fgetc(in)*fgetc(in)*fgetc(in);	
-	if (idchk!=33556770)
-	{
-	  fclose(in);
-	  Invalided = false;
-	  return 0;
-	}
+	WaveFile file;
+	ExtRiffChunkHeader hd;
 	
-	// WAV Magic number identified - 
-	// ok, we've got a wave file
+	DDCRET retcode = file.OpenForRead((char*)Wavfile); //This opens the file and read the format Header.
+														// Also, it skips extra data, and points to the RAW wave data.
+	if ( retcode != DDC_SUCCESS) 
+	{
+		Invalided= false;
+		return 0; 
+	}
 
 	Invalided=true;
 	Sleep(LOCK_LATENCY);
 
-  int Freeindex2=0;
-	
-	short inx=0;
-
-//	rewind(in);
-	fseek(in,12,SEEK_SET);
-
-	WavHeader h;
-	fread(&h,sizeof(WavHeader),1,in);
-
-	int fmtchklen=h.chunkSize;
-
 	// sample type	
-	int st_type=h.wChannels;	
-	int rate = h.dwSamplesPerSec;
-	int align = h.wBlockAlign;
-	int bits = h.wBitsPerSample;
+	int st_type= file.NumChannels();
+//	int rate = file.SamplingRate();
+//	int align = file.NumChannels()* file.BitsPerSample() /8;
+	int bits = file.BitsPerSample();
+	long Datalen=file.NumSamples();
 
-	// Set cursor at possible list
-	fseek(in,20+fmtchklen,SEEK_SET);
-	unsigned int lchk=0;
-	fread(&lchk,4,1,in);
-		
-	if(lchk==1414744396)
-	{
-		fmtchklen+=8;// LIST HANDLED!
-		
-		// handling size of LIST chunk
-		unsigned char lelist;
-		fread(&lelist,1,1,in);
-		fmtchklen+=lelist;
-	}
+	WavAlloc(instrument,layer,st_type==2,Datalen,Wavfile); // Initializes the layer.
+
+// Reading of Wave data.
+// I don't use the WaveFile "ReadSamples" functions, because there are two main differences:
+// I need to convert 8bits to 16bits, and stereo channels are in different arrays.
 	
-	// look for dataID
-	fseek(in,20+fmtchklen,SEEK_SET);
-	char dataID[4];//={0,0,0,0};
-	while(true)
-	{
-		fread((void*)dataID,sizeof(char),4,in);
-
-		// end of file? revert to old behaviour
-		if(feof(in))
-		{
-			fseek(in,24+fmtchklen,SEEK_SET);
-			break;
-		}
-
-		if(!strncmp(dataID,"data",4))
-		{
-			break;
-		}
-	}
-
-	// get sample len
-	//fseek(in,24+fmtchklen,SEEK_SET);
-	long ld0=fgetc(in);				
-	long ld1=fgetc(in);
-	long ld2=fgetc(in);
-	long ld3=fgetc(in);
-	long Datalen=(ld3<<24)+(ld2<<16)+(ld1<<8)+ld0;
-		
-	if(bits==16)
-		Datalen/=2;
-		
-	if(st_type==2)
-		Datalen/=2;
+	short *sampL=waveDataL[instrument][layer];
 	
-	WavAlloc(instrument,layer,st_type==2,Datalen,Wavfile);
-
-	short *csamples=waveDataL[instrument][layer];
-	short *csamples2 = NULL;	
-	if(st_type==2)
-		csamples2=waveDataR[instrument][layer];
-
-	
-	for(long io=0;io<Datalen;io++)
+	long io;
+	if ( st_type == 1 ) // mono
 	{
+		UINT8 smp8;
 		switch(bits)
 		{
-		case 8:
-			inx=fgetc(in)<<8;
-			break;
-
-		case 16:
-			fread(&inx,2,1,in);
-			//inx=fgetc(in);
-			//inx+=fgetc(in)<<8;
-			break;
-
-		case 24:			
-			fgetc(in); // discard
-			fread(&inx,2,1,in);
-			//inx=fgetc(in);
-			//inx+=fgetc(in)<<8;
-			break;
-		}
-
-		
-		if (st_type==2)
-		{
-			switch(bits)
-			{
 			case 8:
-				*csamples2=(fgetc(in)<<8)-32767;
-				csamples2++;
+				for(io=0;io<Datalen;io++)
+				{
+					file.ReadData(&smp8,1);
+					*sampL=(smp8<<8)-32768;
+					sampL++;
+				}
 				break;
-
 			case 16:
-				fread(csamples2,2,1,in);
-				//=fgetc(in);
-				//*csamples2+=fgetc(in)<<8;
-				csamples2++;
+					file.ReadData(sampL,Datalen);
 				break;
+			case 24:
+				for(io=0;io<Datalen;io++)
+				{
+					file.ReadData(&smp8,1);
+					file.ReadData(sampL,1);
+					sampL++;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	else // stereo
+	{
+		short *sampR = waveDataR[instrument][layer];
 
-			case 24:				
-				fgetc(in);
-				fread(csamples2,2,1,in);
-				//*csamples2=fgetc(in);
-				//*csamples2+=fgetc(in)<<8;
-				csamples2++;
-					
+		UINT8 smp8;
+		switch(bits)
+		{
+			case 8:
+				for(io=0;io<Datalen;io++)
+				{
+					file.ReadData(&smp8,1);
+					*sampL=(smp8<<8)-32768;
+					sampL++;
+					file.ReadData(&smp8,1);
+					*sampR=(smp8<<8)-32768;
+					sampR++;
+				}
 				break;
+			case 16:
+				for(io=0;io<Datalen;io++)
+				{
+					file.ReadData(sampL,1);
+					file.ReadData(sampR,1);
+					sampL++;
+					sampR++;
+				}
+				break;
+			case 24:
+				for(io=0;io<Datalen;io++)
+				{
+					file.ReadData(&smp8,1);
+					file.ReadData(sampL,1);
+					sampL++;
+					file.ReadData(&smp8,1);
+					file.ReadData(sampR,1);
+					sampR++;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	retcode = file.Read((void*)&hd,8);
+
+	while ( retcode == DDC_SUCCESS )
+	{
+		if ( hd.ckID == FourCC("smpl") )
+		{
+			char pl=0;
+
+			file.Skip(28);
+			file.Read((void*)&pl,1);
+			if ( pl == 1 )
+			{
+				file.Skip(15);
+				
+				unsigned int ls=0;
+				unsigned int le=0;
+				file.Read((void*)&ls,4);
+				file.Read((void*)&le,4);
+				waveLoopStart[instrument][layer]=ls;
+				waveLoopEnd[instrument][layer]=le;
+				waveLoopType[instrument][layer]=true;
+
 			}
+			file.Skip(9);
+		}
+		else
+		{
+			if ( hd.ckSize > 0 ) file.Skip(hd.ckSize);
+			else file.Skip(1);
 		}
 
-		if (bits==8)
-			*csamples=inx-32767;
-		else
-			*csamples=inx;					
-
-		//CString tmp('*',10 + *csamples/12);
-		//TRACE("%s\n",LPCSTR(tmp));
-
-		csamples++;
+		retcode = file.Read((void*)&hd,8);
 	}
 	
-	char smpc[16];
-	smpc[4]=0;
-	fread(&smpc,4,1,in);
-	if(strcmp("smpl",smpc)==0)
-	{
-		// Loop Found
-		fseek(in,32,SEEK_CUR);
-		
-		char pl=0;
-		
-		fread(&pl,1,1,in);
-		
-		if(pl==1)
-		{
-			fseek(in,15,SEEK_CUR);
-			
-			unsigned int ls=0;
-			unsigned int le=0;
-			fread(&ls,sizeof(unsigned int),1,in);
-			fread(&le,sizeof(unsigned int),1,in);
-			waveLoopStart[instrument][layer]=ls;
-			waveLoopEnd[instrument][layer]=le;
-			waveLoopType[instrument][layer]=true;
-		}
-	}
-	fclose(in);
+	file.Close();
+	
 	Invalided=false;
 	return 1;
 
@@ -1384,6 +1335,7 @@ bool Song::Load(
 					pOldMachine->_pSamplesR = NULL;					// of the "Machine"-class params
 					delete pOldMachine;
 					pMachine->_type = MACH_DUMMY;
+					pMachine->wasVST = true;
 				}
 				break;
 				}
@@ -1402,6 +1354,7 @@ bool Song::Load(
 					pOldMachine->_pSamplesR = NULL;
 					delete pOldMachine;
 					pMachine->_type = MACH_DUMMY;
+					pMachine->wasVST = true;
 				}
 				break;
 				}
@@ -1419,10 +1372,10 @@ bool Song::Load(
 	}
 
 	// Since the old file format stored volumes on each output
-	// rather than on each inout, we must convert
+	// rather than on each input, we must convert
 	//
 	float volMatrix[MAX_MACHINES][MAX_CONNECTIONS];
-	for (i=0; i<MAX_MACHINES; i++)
+	for (i=0; i<MAX_MACHINES; i++) // First, we add the output volumes to a Matrix for latter reference
 	{
 		if (_machineActive[i])
 		{
@@ -1432,34 +1385,43 @@ bool Song::Load(
 			}
 		}
 	}
-	for (i=0; i<MAX_MACHINES; i++)
+	for (i=0; i<MAX_MACHINES; i++) // Next, we go to fix this for each
 	{
-		if (_machineActive[i])
+		if (_machineActive[i])		// valid machine (important, since we have to navigate!)
 		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
+			for (int c=0; c<MAX_CONNECTIONS; c++) // all of its input connections.
 			{
-				if (_pMachines[i]->_inputCon[c])
+				if (_pMachines[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
 				{
-					Machine* pDstMachine = _pMachines[_pMachines[i]->_inputMachines[c]];
-					for (int d=0; d<MAX_CONNECTIONS; d++)
+					Machine* pOrigMachine = _pMachines[_pMachines[i]->_inputMachines[c]]; // We get that machine
+					for (int d=0; d<MAX_CONNECTIONS; d++) // We look through all of
 					{
-						if ((pDstMachine->_connection[d]) && (pDstMachine->_outputMachines[d] == i))
-						{
-							if ( pDstMachine->_type == MACH_VST || pDstMachine->_type == MACH_VSTFX )
+						if ((pOrigMachine->_connection[d]) && (pOrigMachine->_outputMachines[d] == i)) // its output connections till we find one that outputs to the machine we were updating,
+						{																			// And update the volume. These extended if's (for VST) are explained some lines below.
+							if ( pOrigMachine->_type == MACH_VST || pOrigMachine->_type == MACH_VSTFX || pOrigMachine->wasVST )
 							{
-								if (_pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX )
+								if (_pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX || _pMachines[i]->wasVST  ) // If both are VST's, just directly convert.
 								{
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
 								}
-								else _pMachines[i]->_inputConVol[c] *= 32768.0f;
+								else
+								{
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 32768.0f; // Else if VST outputs to native, multiply by 32768.
+									
+									if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a BIG Bugfix...
+										_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+								}
+									
 							}
-							else if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX )
+							else if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX || _pMachines[i]->wasVST ) // else If origin is native, and destination vst, divide by 32768.
 							{
-								_pMachines[i]->_inputConVol[c] *= 0.000030517578125f;
-							}
-							else _pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+								_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
 
-//							_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a BIG Bugfix...
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+							}
+							else _pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d]; // else if both are native, directly convert too.
+
 							break;
 						}
 					}
@@ -1467,6 +1429,14 @@ bool Song::Load(
 			}
 		}
 	}
+
+	// The reason of the conversions in the case of MACH_VST is because VST's output wave data
+	// in the range -1.0 to +1.0, while native and internal, output at -32768.0 to +32768.0
+	// Initially (when the format was made), Psycle did convert this in the "Work" function,
+	// but since it already needs to multiply the output by inputConVol, I decided to remove
+	// that extra conversion and use directly the volume to do so.
+	// The "This is a BIG bugfix" stands for me forgetting to do the same at saving...
+	// The saving bug was not noticed because the loading function was not working correctly.
 
 	_machineLock = false;
 
@@ -1517,10 +1487,20 @@ bool Song::Load(
 		for ( i=0;i<MAX_MACHINES;i++ ) {
 			if (_machineActive[i])
 			{
-				if (( _pMachines[i]->_type == MACH_VST ) || // WARNING!!! This could cause crashes
-					( _pMachines[i]->_type == MACH_VSTFX))	// When a .dll is missing! (replaced by dummy)
+				if (( _pMachines[i]->_type == MACH_VST ) || 
+					( _pMachines[i]->_type == MACH_VSTFX) ||
+					( _pMachines[i]->wasVST ))
 				{
-					((VSTPlugin*)_pMachines[i])->LoadChunk(pFile);
+					if ( _pMachines[i]->wasVST ) 
+					{
+
+						// Since we don't know if the plugin saved it or not, 
+						// we're stuck on letting the loading be corrupted in
+						// case of wrong plugin...
+						// There should be a flag, like in the VST dll loading to be correct.
+					}
+					else
+						((VSTPlugin*)_pMachines[i])->LoadChunk(pFile);
 				}
 			}
 		}
@@ -1725,7 +1705,25 @@ bool Song::Save(
 					{
 						if ((pDstMachine->_inputCon[d]) && (pDstMachine->_inputMachines[d] == i))
 						{
-							_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d];
+							if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX )
+							{
+								if (pDstMachine->_type == MACH_VST || pDstMachine->_type == MACH_VSTFX ) // If both are VST's, just directly convert.
+								{
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d];
+								}
+								else
+								{
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d] * 0.000030517578125f; // Else if VST outputs to native, divide by 32768.
+								}
+									
+							}
+							else if ( pDstMachine->_type == MACH_VST || pDstMachine->_type == MACH_VSTFX ) // else If origin is native, and destination vst, multiply by 32768.
+							{
+								_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d] *  32768.0f;
+
+							}
+							else _pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d]; // else if both are native, directly convert too.
+
 							break;
 						}
 					}

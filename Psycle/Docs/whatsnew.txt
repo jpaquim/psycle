@@ -1,3 +1,10 @@
+
+* Changed Wav loading routines to use RIFF loader. This allows to see SoundForge's loops settings.
+! Fixed : Loading bug that causes volumes to be damaged between native<->VST<->native connections.
+          Generally, you won't notice it, but the file is damaged (meaning, not complying to what
+		  there should be in the file). The saving routine has been fixed and the loader routine
+		  has been modified to be aware of this problem. This is a fix to the
+		  "In some rare cases, when opening a song, psycle produces noise." bug
 ! Fixed : Loading a sample with a name longer than 32chars, activated the "Tempo Syncronized Loop"
 ! Fixed : Rare "divide by zero" error at startup fixed ( thanks to Gulrak for this )
 

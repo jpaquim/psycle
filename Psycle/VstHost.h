@@ -94,6 +94,7 @@ protected:
 	char _sVendorName[64];
 	long _version;
 	bool _isSynth;
+	bool wantidle;
 
 	float * inputs[MAX_INOUTS];
 	float * outputs[MAX_INOUTS];
