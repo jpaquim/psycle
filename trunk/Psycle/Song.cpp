@@ -1408,7 +1408,11 @@ bool Song::Load(RiffFile* pFile)
 			if (patternLines[i] > 0)
 			{
 				unsigned char * pData = CreateNewPattern(i);
-				pFile->Read((char*)pData, patternLines[i]*OLD_MAX_TRACKS*sizeof(PatternEntry));
+				for (int c=0; c<patternLines[i]; c++)
+				{
+					pFile->Read((char*)pData, OLD_MAX_TRACKS*sizeof(PatternEntry));
+					pData+=MAX_TRACKS*sizeof(PatternEntry);
+				}
 			}
 			else
 			{
