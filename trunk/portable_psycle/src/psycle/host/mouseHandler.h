@@ -431,9 +431,9 @@ namespace psycle
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
 						AddMacViewUndo();
+						wiredest = GetMachine(point);
 						if (!Global::_pSong->InsertConnection(wiresource, wiredest))
 						{
-							wiredest = GetMachine(point);
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}
 					}
