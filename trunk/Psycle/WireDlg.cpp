@@ -51,8 +51,6 @@ BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
 	ON_BN_CLICKED(IDC_BUTTON, OnMode)
 	ON_BN_CLICKED(IDC_BUTTON2, OnHold)
-	ON_WM_KEYUP()
-	ON_WM_KEYDOWN()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1120,18 +1118,13 @@ void CWireDlg::SetMode()
 }
 
 
-void CWireDlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
 {
-	// TODO: Add your message handler code here and/or call default
-	m_pParent->KeyUp(nChar, nRepCnt, nFlags);	
-	
-	CDialog::OnKeyUp(nChar, nRepCnt, nFlags);
-}
+	// TODO: Add your specialized code here and/or call the base class
+	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
+	{
+		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+	}
 
-void CWireDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
-{
-	// TODO: Add your message handler code here and/or call default
-	m_pParent->KeyDown(nChar, nRepCnt, nFlags);	
-	
-	CDialog::OnKeyDown(nChar, nRepCnt, nFlags);
+	return CDialog::PreTranslateMessage(pMsg);
 }
