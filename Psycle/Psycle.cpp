@@ -252,8 +252,8 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	m_contrib.SetWindowText("\
-Josep Mª Antolín. [JAZ]\t\tDeveloper and Manager\
-\r\nJeremy Evers [pooplog]\t\tMain Developer in 1.7\
+Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5\
+\r\nJeremy Evers [pooplog]\t\tActive Developer in 1.7\
 \r\nDaniel Arena\t\t\tDeveloper in 1.5&1.6\
 \r\nMarcin Kowalski / FideLoop\t\tDeveloper in 1.6\
 \r\nMark McCormack\t\t\tMIDI (in) Support\

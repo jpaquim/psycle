@@ -279,8 +279,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	 MORE Keyboard shortcuts
 		[ We've added some more actually]
 		[ and most the needed ones are listed up there ^^ ]
-+ <alk_> re: gear rack
-	[JAZ: And a third one for Instruments. Time to time]
+
 
 * Driver Issues:
 ------------
