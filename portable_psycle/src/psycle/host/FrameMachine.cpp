@@ -285,28 +285,35 @@ namespace psycle
 					
 					dc.SetBkColor(0x00788D93 + nc*2);
 					dc.SetTextColor(0x00CCDDEE + nc);
-					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), CString(parName), NULL);
+					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
 					
 					dc.SetBkColor(0x00687D83 + nc*2);
 					dc.SetTextColor(0x0044EEFF + nc);
-					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), CString(buffer), NULL);
+					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
 				
 				}
 				else
 				{
-					/*
-					dc.SetBkColor(0x00788D93);
-					dc.SetTextColor(0x00CCDDEE);
-					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), CString(parName), NULL);
+					if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
+					{
+						dc.SetBkColor(0x00788D93);
+						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), "", 0);
 
-					dc.SetBkColor(0x00687D83);
-					dc.SetTextColor(0x0044EEFF);
-					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", NULL);
-					*/
+						dc.SetBkColor(0x00687D83);
+						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", 0);
+					}
+					else
+					{
+						dc.SetBkColor(0x00788D93);
+						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize + x_knob, y_knob + K_YSIZE / 4), "", 0);
 
-					dc.SetBkColor(0x00899EA4);
-					dc.SetTextColor(0x00FFFFFF);
-					dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE2 * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize + x_knob, y_knob + K_YSIZE), CString(parName), 0);
+						dc.SetBkColor(0x0088a8b4);
+						dc.SetTextColor(0x00FFFFFF);
+						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, cxsize + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
+
+						dc.SetBkColor(0x00687D83);
+						dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, cxsize + x_knob, y_knob + K_YSIZE), "", 0);
+					}
 				}
 				y_knob += K_YSIZE;
 
@@ -350,11 +357,11 @@ namespace psycle
 				{
 					dc.SetBkColor(0x00788D93);
 					dc.SetTextColor(0x00CCDDEE);
-					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), "", NULL);
+					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), "", 0);
 
 					dc.SetBkColor(0x00687D83);
 					dc.SetTextColor(0x0044EEFF);
-					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", NULL);
+					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", 0);
 
 					y_knob += K_YSIZE;
 				}

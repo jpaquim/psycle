@@ -46,16 +46,17 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
-			Information::Parameter::linear("dry/wet", 0, 1, 1),
+			//Information::Parameter::linear("dry / wet", -1, 1, 1),
+			Information::Parameter::linear("dry / wet", 0, 1, 1),
 			Information::Parameter("direct"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
-			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
+			Information::Parameter::linear("delay stereo delta", -.01, 0, +.01),
 			Information::Parameter("early reflection"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter::exponential("delay", .0005, .01, .045),
-			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
+			Information::Parameter::linear("delay stereo delta", -.01, 0, +.01),
 			Information::Parameter("late reflection"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
@@ -83,6 +84,16 @@ public:
 			out << (*this)(parameter) * 1000 << " ms";
 			break;
 		case overall_dry_wet:
+			out
+				<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
+				<< " ("
+				//<< std::setw(6) << 20 * std::log10(std::min(Real(1), (1 - (*this)(parameter))))
+				<< std::setw(6) << 20 * std::log10(1 - (*this)(parameter))
+				<< ", "
+				//<< 20 * std::log10(std::min(Real(1), (1 + (*this)(parameter))))
+				<< 20 * std::log10((*this)(parameter))
+				<< " dB)";
+			break;
 		case direct_gain:
 		case early_reflection_gain:
 		case late_reflection_gain:
@@ -179,9 +190,9 @@ void Haas::parameter(const int & parameter)
 	switch(parameter)
 	{
 	case direct_delay_stereo_delta:
-		direct_delay_stereo_delta_positive = (*this)(direct_delay_stereo_delta) > 0;
-		direct_delay_stereo_delta_negative = !direct_delay_stereo_delta_positive && (*this)(direct_delay_stereo_delta) < 0;
-		direct_delay_stereo_delta_abs = std::fabs((*this)(direct_delay_stereo_delta));
+		direct_delay_stereo_delta_positive = (*this)(parameter) > 0;
+		direct_delay_stereo_delta_negative = !direct_delay_stereo_delta_positive && (*this)(parameter) < 0;
+		direct_delay_stereo_delta_abs = std::fabs((*this)(parameter));
 		if(direct_delay_stereo_delta_positive)
 		{
 			direct_left = direct_last;
@@ -199,9 +210,9 @@ void Haas::parameter(const int & parameter)
 		}
 		goto resize_max;
 	case early_reflection_delay_stereo_delta:
-		early_reflection_delay_stereo_delta_positive = (*this)(early_reflection_delay_stereo_delta) > 0;
-		early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive && (*this)(early_reflection_delay_stereo_delta) < 0;
-		early_reflection_delay_stereo_delta_abs = std::fabs((*this)(early_reflection_delay_stereo_delta));
+		early_reflection_delay_stereo_delta_positive = (*this)(parameter) > 0;
+		early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive && (*this)(parameter) < 0;
+		early_reflection_delay_stereo_delta_abs = std::fabs((*this)(parameter));
 		if(early_reflection_delay_stereo_delta_positive)
 		{
 			early_reflection_left = early_reflection_last;
@@ -229,6 +240,8 @@ void Haas::parameter(const int & parameter)
 		}
 		break;
 	case overall_dry_wet:
+		//overall_gain_dry = std::min(Real(1), (1 - (*this)(parameter)));
+		//overall_gain_wet = std::min(Real(1), (1 + (*this)(parameter)));
 		overall_gain_dry = 1 - (*this)(parameter);
 		overall_gain_wet = (*this)(parameter);
 		break;
@@ -253,11 +266,11 @@ inline void Haas::resize(const Real & delay)
 {
 	buffer_.resize(1 + static_cast<int>(delay * samples_per_second()), 0);
 		 // resizes the buffer at least to 1, the smallest length possible for the algorithm to work
-	buffer_iterators_[direct_first] = buffer_.begin();
-	buffer_iterators_[direct_last] = buffer_.begin() + static_cast<int>(direct_delay_stereo_delta_abs * samples_per_second());
-	buffer_iterators_[early_reflection_first]  = buffer_.begin() + static_cast<int>((*this)(early_reflection_delay) * samples_per_second());
-	buffer_iterators_[early_reflection_last]  = buffer_.begin() + static_cast<int>(((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs) * samples_per_second());
-	buffer_iterators_[late_reflection] = buffer_.end() - 1;
+	buffer_iterators_[direct_first] = buffer_.end() - 1;
+	buffer_iterators_[direct_last] = buffer_.end() - 1 - static_cast<int>(direct_delay_stereo_delta_abs * samples_per_second());
+	buffer_iterators_[early_reflection_first] = buffer_.end() - 1 - static_cast<int>((*this)(early_reflection_delay) * samples_per_second());
+	buffer_iterators_[early_reflection_last] = buffer_.end() - 1 - static_cast<int>(((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs) * samples_per_second());
+	buffer_iterators_[late_reflection] = buffer_.begin();
 }
 
 void Haas::process(Sample l [], Sample r [], int samples, int)
