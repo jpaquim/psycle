@@ -14,7 +14,12 @@ namespace operating_system
 
 	exception::exception(const std::string & what) throw() : std::runtime_error(what)
 	{
-		std::cerr << "exception: " << this->what() << std::endl; 
+		std::cerr << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl; 
+		{
+			std::ostringstream title; title << "exception: " << typeid(*this).name();
+			std::ostringstream message; message << typeid(*this).name() << std::endl << this->what();
+			::MessageBox(0, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
+		}
 	}
 
 	exception::operator const std::string() const throw()

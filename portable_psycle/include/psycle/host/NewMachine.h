@@ -3,6 +3,7 @@
 #include "machine.h"
 #include "ProgressDialog.h"
 #include <afxcoll.h>
+#include <iostream>
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 namespace psycle
@@ -24,14 +25,10 @@ namespace psycle
 			FILETIME FileTime;
 			bool allow;
 			int error_type;
-
-			PluginInfo()
+			inline PluginInfo() : dllname(0) {}
+			inline ~PluginInfo() throw()
 			{
-				dllname = NULL;
-			}
-			~PluginInfo()
-			{
-				if ( dllname != NULL ) delete dllname;
+				if(dllname) delete dllname;
 			}
 		/*	void operator=(PluginInfo& newinfo)
 			{
@@ -119,8 +116,8 @@ namespace psycle
 			static int _numPlugins;
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 			static int _numDirs;
-			static void FindPluginsInDir(int& currentPlugsCount,int &currentBadPlugsCount,CString findDir,MachineType type,CProgressDialog * pProgress = NULL);
-			static bool LoadCacheFile(int& currentPlugsCount, int &currentBadPlugsCount);
+			static void FindPluginsInDir(int & currentPlugsCount, int & currentBadPlugsCount, ::CString findDir, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);
+			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);
 		};
