@@ -66,7 +66,6 @@ IDB_MASTERSLIDER        BITMAP  DISCARDABLE     "res\\MasterMachine\\slider.bmp"
 IDB_PATTERN_HEADER_SKIN BITMAP  DISCARDABLE     "res\\pattern_header_skin.bmp"
 IDB_MACHINE_SKIN        BITMAP  DISCARDABLE     "res\\machine_skin.bmp"
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
@@ -158,7 +157,7 @@ END
 
 IDD_PSYBAR2 DIALOGEX 0, 0, 532, 16
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Pattern Step",IDC_STATIC,5,4,43,8
     COMBOBOX        IDC_SSCOMBO2,50,2,24,158,CBS_DROPDOWNLIST | WS_VSCROLL | 
@@ -290,21 +289,21 @@ BEGIN
     CTEXT           "",IDC_MEM_RESO4,96,68,80,10,SS_CENTERIMAGE | SS_SUNKEN
 END
 
-IDD_WIREDIALOG DIALOGEX 0, 0, 209, 140
+IDD_WIREDIALOG DIALOGEX 0, 0, 209, 137
 STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,107
-    CTEXT           "Static",IDC_STATIC1,174,107,32,11,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Delete Connection",IDC_BUTTON1,2,120,205,19
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,119
+    PUSHBUTTON      "Delete Connection",IDC_BUTTON1,2,120,169,16
     CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,96,138,11
     PUSHBUTTON      "Mode",IDC_BUTTON,2,83,169,12
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,108,138,11
     PUSHBUTTON      "Hold",IDC_BUTTON2,141,98,30,19
+    CTEXT           "",IDC_STATIC1,174,120,33,16,SS_SUNKEN
 END
 
 IDD_GEARDISTORT DIALOGEX 0, 0, 169, 177
@@ -441,7 +440,7 @@ END
 IDD_GEAR_TRACKER DIALOGEX 0, 0, 280, 71
 STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     GROUPBOX        "Properties",IDC_STATIC,4,0,208,68
     CTEXT           "Polyphony",IDC_STATIC,8,18,33,17,SS_CENTERIMAGE
@@ -453,10 +452,9 @@ BEGIN
                     SS_CENTERIMAGE
     COMBOBOX        IDC_COMBO1,104,46,104,60,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    DEFPUSHBUTTON   "OK",IDOK,216,4,60,20
-    CTEXT           "Psycle Sampler",IDC_STATIC,216,28,60,8,SS_CENTERIMAGE
-    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,216,40,61,16
-    CTEXT           "- Professional -",IDC_STATIC,216,60,60,8,SS_CENTERIMAGE
+    CTEXT           "Psycle Sampler",IDC_STATIC,216,4,60,8,SS_CENTERIMAGE
+    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,216,16,61,16
+    CTEXT           "- Professional -",IDC_STATIC,216,36,60,8,SS_CENTERIMAGE
 END
 
 IDD_GEAR_DELAY DIALOGEX 0, 0, 340, 210
@@ -801,17 +799,17 @@ END
 IDD_GEAR_GAINER DIALOGEX 0, 0, 40, 161
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
                     TBS_VERT | TBS_BOTH | WS_TABSTOP,6,0,27,140
     CTEXT           "",IDC_VOLABEL,1,143,37,17,SS_SUNKEN
 END
 
-IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 228
+IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 210
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         170,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
     LTEXT           "Preset",IDC_STATIC,228,4,21,8
@@ -852,7 +850,6 @@ BEGIN
     CONTROL         "Slider1",IDC_WETSLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,36,188,240,12
     CTEXT           "",IDC_WETLABEL,280,188,28,12,SS_CENTERIMAGE | SS_SUNKEN
-    DEFPUSHBUTTON   "OK",IDOK,4,212,314,14
 END
 
 IDD_MASTERDLG DIALOGEX 0, 0, 338, 123
@@ -914,7 +911,7 @@ IDD_NEWVAL DIALOGEX 0, 0, 264, 38
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "New Value"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_EDIT1,4,4,128,12,NOT WS_BORDER,WS_EX_CLIENTEDGE | 
                     WS_EX_RIGHT
@@ -1607,6 +1604,7 @@ BEGIN
     CTEXT           "Unchecked = Center BPM",IDC_STATIC,115,20,60,20
 END
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -1655,7 +1653,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 202
         TOPMARGIN, 7
-        BOTTOMMARGIN, 133
+        BOTTOMMARGIN, 130
     END
 
     IDD_GEARDISTORT, DIALOG
@@ -1755,7 +1753,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 313
         TOPMARGIN, 7
-        BOTTOMMARGIN, 221
+        BOTTOMMARGIN, 203
     END
 
     IDD_MASTERDLG, DIALOG
@@ -1870,6 +1868,7 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 64
     END
+
     IDD_MIDI_INPUT, DIALOG
     BEGIN
         RIGHTMARGIN, 320
@@ -2251,6 +2250,44 @@ END
 #endif    // !_MAC
 
 
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\Psycle.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
@@ -2426,43 +2463,6 @@ END
 #endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
-    "#define _AFX_NO_OLE_RESOURCES\r\n"
-    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
-    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
-    "\r\n"
-    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
-    "#ifdef _WIN32\r\n"
-    "LANGUAGE 9, 1\r\n"
-    "#pragma code_page(1252)\r\n"
-    "#endif //_WIN32\r\n"
-    "#include ""res\\Psycle.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
-    "#include ""afxres.rc""         // Standard components\r\n"
-    "#endif\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
 
 
 #ifndef APSTUDIO_INVOKED

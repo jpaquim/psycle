@@ -604,11 +604,12 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 #if !defined(_WINAMP_PLUGIN_)
 		Global::_pSong->Tweaker = true;
 
-		if ( effect->user && Global::pConfig->_RecordTweaks)  // ugly solution...
+		if ( effect->user ) 
 		{
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
-		}
-		if ( effect->user ) {
+			if (Global::pConfig->_RecordTweaks)  // ugly solution...
+			{
+				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
+			}
 			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
 				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Refresh(index,opt);
 		}
