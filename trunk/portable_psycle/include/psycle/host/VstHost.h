@@ -54,7 +54,7 @@ namespace psycle
 				inline const bool operator()() const throw();
 				inline void operator()(AEffect * plugin) throw(host::exceptions::function_error);
 				inline long int magic() throw(host::exceptions::function_error);
-				inline long int dispatcher(long int operation = 0, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(exceptions::dispatch_error);
+				inline long int dispatcher(long int operation = 0, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(host::exceptions::function_error);
 				inline void process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
 				inline void processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
 				inline void setParameter(long int index, float parameter) throw(host::exceptions::function_error);
@@ -253,7 +253,8 @@ namespace psycle
 				if((*this)()) user(0);
 				delete this->plugin_;
 				this->plugin_ = plugin;
-				if((*this)()) user(&host());
+				//if((*this)()) user(&host());
+				if(plugin) user(&host());
 			}
 			#pragma warning(push)
 			#pragma warning(disable:4702) // unreachable code
@@ -272,7 +273,7 @@ namespace psycle
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 				return 0; // dummy return to avoid warning
 			}
-			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(exceptions::dispatch_error)
+			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
 				assert((*this)());
 				try
@@ -451,7 +452,7 @@ namespace psycle
 			inline void proxy::user(void * user) throw(host::exceptions::function_error)
 			{
 				assert((*this)());
-				static const char function[] = "processReplacing";
+				static const char function[] = "user";
 				try
 				{
 					plugin().user = user;

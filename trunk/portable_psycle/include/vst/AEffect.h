@@ -69,10 +69,10 @@ struct AEffect
 	long (VSTCALLBACK *dispatcher)(AEffect *effect, long opCode, long index, long value,
 		void *ptr, float opt) throw(...);
 	
-	void (VSTCALLBACK *process)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
+	void (VSTCALLBACK *process)(AEffect *effect, float **inputs, float **outputs, long sampleframes) throw(...);
 	
-	void (VSTCALLBACK *setParameter)(AEffect *effect, long index, float parameter);
-	float (VSTCALLBACK *getParameter)(AEffect *effect, long index);
+	void (VSTCALLBACK *setParameter)(AEffect *effect, long index, float parameter) throw(...);
+	float (VSTCALLBACK *getParameter)(AEffect *effect, long index) throw(...);
 
 	long numPrograms;   // number of Programs
 	long numParams;		// all programs are assumed to have numParams parameters
@@ -97,7 +97,7 @@ struct AEffect
 						// this is used to identify an effect for save+load
 	long version;		// (example 1100 for version 1.1.0.0)
 
-	void (VSTCALLBACK *processReplacing)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
+	void (VSTCALLBACK *processReplacing)(AEffect *effect, float **inputs, float **outputs, long sampleframes) throw(...);
 
 	char future[60];	// pls zero
 };
