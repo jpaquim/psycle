@@ -7,10 +7,11 @@
 //
 // ChildView.cpp : implementation of the CChildView class
 //
+#include "stdafx.h"
+
 #define rdtsc __asm __emit 0fh __asm __emit 031h
 #define cpuid __asm __emit 0fh __asm __emit 0a2h
 
-#include "stdafx.h"
 #include "Psycle2.h"
 //#include "Registry.h"
 #include "Configuration.h"
