@@ -1412,6 +1412,7 @@ void CChildView::IncCurPattern()
 		++_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPatternChange);
+//		Repaint(DMPatternSwitch); // new code
 	}
 }
 
@@ -1424,6 +1425,7 @@ void CChildView::DecCurPattern()
 		--_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPatternChange);
+//		Repaint(DMPatternSwitch); // new code
 	}
 }
 
@@ -1438,6 +1440,8 @@ void CChildView::DecPosition()
 
 		pParentMain->UpdatePlayOrder(false);
 		Repaint(DMPatternChange);
+//		Repaint(DMPatternSwitch); // new code
+		
 	}
 }
 
@@ -1460,6 +1464,8 @@ void CChildView::IncPosition()
 
 		pParentMain->UpdatePlayOrder(false);
 		Repaint(DMPatternChange);
+//		Repaint(DMPatternSwitch); // new code
+		
 	}
 }
 
@@ -1736,6 +1742,8 @@ void CChildView::OnEditUndo()
 					editPosition = pUndoList->seqpos;
 					pParentMain->UpdatePlayOrder(true);
 					Repaint(DMPatternChange);
+			//		Repaint(DMPatternSwitch); // new code
+					
 				}
 				// delete undo from list
 				SPatternUndo* pTemp = pUndoList->pPrev;
@@ -1761,6 +1769,8 @@ void CChildView::OnEditUndo()
 				}
 				// display changes
 				Repaint(DMPatternChange);
+		//		Repaint(DMPatternSwitch); // new code
+				
 				// delete undo from list
 				SPatternUndo* pTemp = pUndoList->pPrev;
 				delete (pUndoList->pData);
@@ -1782,6 +1792,8 @@ void CChildView::OnEditUndo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
+	//		Repaint(DMPatternSwitch); // new code
+			
 			// delete undo from list
 			{
 				SPatternUndo* pTemp = pUndoList->pPrev;
@@ -1805,6 +1817,8 @@ void CChildView::OnEditUndo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
+	//		Repaint(DMPatternSwitch); // new code
+			
 			// delete undo from list
 			{
 				SPatternUndo* pTemp = pUndoList->pPrev;
@@ -1864,6 +1878,8 @@ void CChildView::OnEditRedo()
 					editPosition = pRedoList->seqpos;
 					pParentMain->UpdatePlayOrder(true);
 					Repaint(DMPatternChange);
+			//		Repaint(DMPatternSwitch); // new code
+					
 				}
 				// delete redo from list
 				SPatternUndo* pTemp = pRedoList->pPrev;
@@ -1889,6 +1905,8 @@ void CChildView::OnEditRedo()
 				}
 				// display changes
 				Repaint(DMPatternChange);
+		//		Repaint(DMPatternSwitch); // new code
+				
 				// delete redo from list
 				SPatternUndo* pTemp = pRedoList->pPrev;
 				delete (pRedoList->pData);
@@ -1910,6 +1928,8 @@ void CChildView::OnEditRedo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
+	//		Repaint(DMPatternSwitch); // new code
+			
 			{
 				// delete redo from list
 				SPatternUndo* pTemp = pRedoList->pPrev;
@@ -1933,6 +1953,8 @@ void CChildView::OnEditRedo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
+	//		Repaint(DMPatternSwitch); // new code
+			
 			{
 				// delete redo from list
 				SPatternUndo* pTemp = pRedoList->pPrev;
