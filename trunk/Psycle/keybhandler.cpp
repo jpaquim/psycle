@@ -439,6 +439,11 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		mgn = _pSong->busMachine[_pSong->seqBus];
 	}
 
+	if (note>120)
+	{
+		entry->_inst = _pSong->auxcolSelected;
+	}
+
 	if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
 	{
 		Machine *tmac = _pSong->_pMachines[mgn];
