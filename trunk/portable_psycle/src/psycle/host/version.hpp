@@ -3,6 +3,10 @@
 #if 0
 /*
 $Log$
+Revision 1.3  2005/01/24 17:36:22  johan-boule
+there was a nasty backslash at the end of a line preventing the psycle namespace to close and creating a nested psycle namespace inside the psycle namespace itself.
+new alpha version 1.7.26 released.
+
 Revision 1.2  2005/01/24 15:54:03  johan-boule
 path for resources.rc
 
@@ -104,7 +108,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 25 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 26 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
