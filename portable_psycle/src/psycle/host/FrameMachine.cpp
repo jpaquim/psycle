@@ -262,6 +262,7 @@ namespace psycle
 				}
 				else
 				{
+					/*
 					dc.SetBkColor(0x00788D93);
 					dc.SetTextColor(0x00CCDDEE);
 					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), CString(parName), NULL);
@@ -269,6 +270,11 @@ namespace psycle
 					dc.SetBkColor(0x00687D83);
 					dc.SetTextColor(0x0044EEFF);
 					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", NULL);
+					*/
+
+					dc.SetBkColor(0x00899EA4);
+					dc.SetTextColor(0x00FFFFFF);
+					dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE2 * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize + x_knob, y_knob + K_YSIZE), CString(parName), 0);
 				}
 				y_knob += K_YSIZE;
 
@@ -439,9 +445,9 @@ namespace psycle
 				}
 
 				double freak;
-				if ( ultrafinetweak) freak = 0.25f;
-				else if ( finetweak ) freak = (max_v-min_v)/630.0f;
-				else freak = (max_v-min_v)/63.0f;
+				if ( ultrafinetweak) freak = 0.5f;
+				else if ( finetweak ) freak = (max_v-min_v)/4000.0f;
+				else freak = (max_v-min_v)/600.0f;
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 
@@ -697,8 +703,8 @@ namespace psycle
 			}
 			MessageBox
 				(
-					"Machine coded by "+CString(((Plugin*)_pMachine)->GetInfo()->Author),
-					"About "+CString(((Plugin*)_pMachine)->GetInfo()->Name)
+					"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
+					"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
 				);
 		}
 
@@ -724,7 +730,7 @@ namespace psycle
 				case CT_Note:
 					{
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
@@ -737,7 +743,7 @@ namespace psycle
 				}
 			}
 
-		//	wndView->KeyDown(nChar,nRepCnt,nFlags);
+			//wndView->KeyDown(nChar,nRepCnt,nFlags);
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 		}
 
@@ -755,7 +761,7 @@ namespace psycle
 				else Global::pInputHandler->StopNote(outnote,true,NULL);
 			}
 
-		//	wndView->KeyUp(nChar, nRepCnt, nFlags);
+			//wndView->KeyUp(nChar, nRepCnt, nFlags);
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
@@ -770,7 +776,6 @@ namespace psycle
 		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
-			
 			Invalidate(false);
 		}
 	}

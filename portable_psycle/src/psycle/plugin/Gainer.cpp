@@ -30,8 +30,8 @@ public:
 		switch(parameter)
 		{
 		case gain:
-			out << std::setprecision(3) << std::setw(6) << (*this)(gain);
-			out << " (" << std::setw(6) << 20 * ::log10((*this)(gain)) << " dB)";
+			out << std::setprecision(3) << std::setw(6) << (*this)(parameter);
+			out << " (" << std::setw(6) << 20 * std::log10((*this)(parameter)) << " dB)";
 			break;
 		default:
 			Plugin::describe(out, parameter);

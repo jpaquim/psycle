@@ -11,12 +11,18 @@ class Delay : public Plugin
 public:
 	virtual void help(std::ostream & out) const throw()
 	{
-		out << "delay ..." << std::endl;
-		out << "compatible with original psycle 1 arguru's dala delay" << std::endl;
-		out << "beware if you tweak the delay length with a factor > 2 that the memory buffer gets resized" << std::endl;
+		out << "Delay." << std::endl;
+		out << "Compatible with original psycle 1 arguru's dala delay." << std::endl;
+		out << std::endl;
+		out << "Beware if you tweak the delay length with a factor > 2 that the memory buffer gets resized." << std::endl;
 	}
-
-	enum Parameters { dry, wet, left_delay, left_feedback, right_delay, right_feedback, snap };
+	enum Parameters
+	{
+		dry, wet,
+		left_delay, left_feedback,
+		right_delay, right_feedback,
+		snap
+	};
 
 	static const Information & information() throw()
 	{
@@ -42,9 +48,7 @@ public:
 		{
 		case left_delay:
 		case right_delay:
-			{
-				out << (*this)(parameter) << " ticks (lines)";
-			}
+			out << (*this)(parameter) << " ticks (lines)";
 			break;
 		case snap:
 			if((*this)[parameter] == information().parameter(parameter).maximum_value) out << "off ";
@@ -80,10 +84,9 @@ protected:
 		parameter(right_delay);
 	}
 	enum Channels { left, right, channels };
-	enum Stages { read, write, stages };
 	std::vector<Real> buffers_ [channels];
-	std::vector<Real>::iterator buffer_iterators_ [channels][stages];
-	inline void process(std::vector<Real> & buffer, std::vector<Real>::iterator buffer_iterators[stages], Sample & input, const Sample & feedback);
+	std::vector<Real>::iterator buffer_iterators_ [channels];
+	inline void process(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback);
 	inline void resize(const int & channel, const int & parameter);
 	inline void resize(const int & channel, const Real & delay);
 };
@@ -122,9 +125,7 @@ inline void Delay::resize(const int & channel, const Real & delay)
 {
 	buffers_[channel].resize(1 + static_cast<int>(delay * samples_per_sequencer_tick()), 0);
 		 // resizes the buffer at least to 1, the smallest length possible for the algorithm to work
-	buffer_iterators_[channel][read]  = buffers_[channel].begin();
-	buffer_iterators_[channel][write] = buffers_[channel].end() - 1;
-	assert(buffer_iterators_[channel][write] - buffer_iterators_[channel][read] == static_cast<int>(delay * samples_per_sequencer_tick())); 
+	buffer_iterators_[channel] = buffers_[channel].begin();
 }
 
 void Delay::process(Sample l [], Sample r [], int samples, int)
@@ -136,13 +137,12 @@ void Delay::process(Sample l [], Sample r [], int samples, int)
 	}
 }
 
-inline void Delay::process(std::vector<Real> & buffer, std::vector<Real>::iterator buffer_iterators[stages], Sample & input, const Sample & feedback)
+inline void Delay::process(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback)
 {
-	*buffer_iterators[write] = /*math::renormalized*/(input + feedback * *buffer_iterators[read]);
-	input = static_cast<Sample>((*this)(dry) * input + (*this)(wet) * *buffer_iterators[read]);
-	for(int stage(0) ; stage < stages ; ++stage)
-		if(++buffer_iterators[stage] == buffer.end())
-			buffer_iterators[stage] = buffer.begin();
+	const Real read(*buffer_iterator);
+	*buffer_iterator = /*math::renormalized*/(input + feedback * read);
+	if(++buffer_iterator == buffer.end()) buffer_iterator = buffer.begin();
+	input = static_cast<Sample>((*this)(dry) * input + (*this)(wet) * read);
 }
 
 }}
