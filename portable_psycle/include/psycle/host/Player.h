@@ -64,7 +64,7 @@ namespace psycle
 			///\name secondary output device, write the a file
 			///\{
 			/// starts the recording output device.
-			void StartRecording(char* psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
+			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
 			/// stops the recording output device.
 			void StopRecording(bool bOk = true);
 			/// wether the recording device has been started.

@@ -9,6 +9,9 @@
 #include "Machine.h"
 #include "helpers.h"
 #include "MainFrm.h"
+#include <iostream>
+#include <iomanip>
+#undef max
 ///\file
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 namespace psycle
@@ -254,8 +257,10 @@ namespace psycle
 			CString name;
 			m_filename.GetWindowText(name);
 
-			strcpy(rootname,name);
-			rootname[strlen(rootname)-4] = 0;
+			rootname=name;
+			name=name;
+			rootname=rootname.substr(
+				std::max(std::string::size_type(0),rootname.length()-4));
 
 			const int real_rate[]={8192,11025,22050,44100,48000,96000};
 			const int real_bits[]={8,16,24,32};
@@ -301,10 +306,30 @@ namespace psycle
 								pSong->_trackMuted[j] = FALSE;
 							}
 						}
+/*
+similar conversions;
+\operating_system\exception.h(43)
+'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
+\include\string(603):
+'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
+with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
+[found using argument-dependent lookup];
+while trying to match the argument list
+'(std::ostringstream, std::string)'
+*/
 						// now save the song
-						char filename[MAX_PATH];
-						sprintf(filename,"%s-track %.2u.wav",rootname,i);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+						std::ostringstream filename;
+						filename << rootname;
+						filename << "-track "
+							<< std::setprecision(2) << (unsigned)i;
+						SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode);
+/*
+'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
+'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
+with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
+[found using argument-dependent lookup]; while trying to match the argument list
+'(std::ostringstream, std::string)'
+*/
 						return;
 					}
 				}
@@ -408,7 +433,7 @@ namespace psycle
 			}
 		}
 
-		void CSaveWavDlg::SaveWav(char* file, int bits, int rate, int channelmode)
+		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode)
 		{
 			saving=true;
 			Player *pPlayer = Global::pPlayer;
@@ -417,14 +442,14 @@ namespace psycle
 			Global::pConfig->_pOutputDriver->Enable(false);
 			Global::pConfig->_pMidiInput->Close();
 
-			char *q = strrchr(file,'\\')+1; // =
-			if (!q)
+			std::string::size_type pos = file.rfind('\\');
+			if (pos == std::string::npos)
 			{
-				m_text.SetWindowText(file);
+				m_text.SetWindowText(file.c_str());
 			}
 			else
 			{
-				m_text.SetWindowText(q);
+				m_text.SetWindowText(file.substr(pos+1).c_str());
 			}
 
 			pPlayer->StartRecording(file,bits,rate,channelmode);
