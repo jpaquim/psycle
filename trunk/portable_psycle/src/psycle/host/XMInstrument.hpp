@@ -11,12 +11,10 @@ namespace psycle
 	class XMInstrument
 	{
 	public:
-		/// Max number of samples per Instrument
-		static const int MAX_INSTRUMENT_SAMPLES = 32;
 		/// Size of the Instrument's note mapping.
 		static const int NOTE_MAP_SIZE = 120; // C-0 .. B-9
 		/// A Note pair (note number=first, and sample number=second)
-		typedef std::pair<short,short> NotePair;
+		typedef std::pair<unsigned char,unsigned char> NotePair;
 		
 		/// When a note starts to play in a channel, and there is still a note playing in it,
 		/// do this on the currently playing note:
@@ -26,21 +24,19 @@ namespace psycle
 			NOTEOFF = 0x2,		///  [Note off]
 			FADEOUT = 0x3		///  [Note fade]
 			};
-/*		enum DuplicateCheckType
+		enum DCType
 			{
-			 NONE=0x0,
-			 NOTE,
-			 SAMPLE,
-			 INSTRUMENT
+			 DCT_NONE=0x0,
+			 DCT_NOTE,
+			 DCT_SAMPLE,
+			 DCT_INSTRUMENT
 			};
-		enum DuplicateNoteAction
+		enum DCAction
 			{
-			STOP=0x0,
-			NOTEOFF,
-			FADEOUT
-			};*/
-		// DCT duplicated check type
-		// DCA duplicated check action
+			DCA_STOP=0x0,
+			DCA_NOTEOFF,
+			DCA_FADEOUT
+			};
 
 		//////////////////////////////////////////////////////////////////////////
 		//  XMInstrument::Envelope Class declaration
@@ -56,7 +52,7 @@ namespace psycle
 			typedef float ValueType;
 			// Invalid point. Used to indicate that sustain/loop are disabled.
 			static const short INVALID = -1;
-			typedef std::pair<short,ValueType> PointValue;
+			typedef std::pair<int,ValueType> PointValue;
 			typedef std::vector< PointValue > Points;
 			// constructor & destructor
 			explicit Envelope()
@@ -74,6 +70,7 @@ namespace psycle
 			// Init
 			void Init()
 			{	m_Enabled = false;
+				m_Carry = false;
 				m_SustainBegin = INVALID;
 				m_SustainEnd = INVALID;
 				m_LoopStart = INVALID;
@@ -85,6 +82,8 @@ namespace psycle
 			const bool IsEnabled(){ return m_Enabled;}
 			void IsEnabled(const bool value){ m_Enabled = value;}
 
+			const bool IsCarry(){ return m_Carry;}
+			void IsCarry(const bool value){ m_Carry = value;}
 			
 			//////////////////////////////////////////////////////////////////////////
 			// Point Functions. Helpers to get and set the values for them.
@@ -164,12 +163,14 @@ namespace psycle
 				if(this == &other){ return *this;};
 
 				m_Enabled = other.m_Enabled;
-				m_Points.clear();
+				m_Carry = other.m_Carry;
 
+				m_Points.clear();
 				for(Points::const_iterator it = other.m_Points.begin();it != other.m_Points.end();it++)
 				{
 					m_Points.push_back(*it);
 				}
+
 				m_SustainBegin = other.m_SustainBegin;
 				m_SustainEnd = other.m_SustainEnd;
 				m_LoopStart = other.m_LoopStart;
@@ -181,6 +182,8 @@ namespace psycle
 		private:
 			// Envelope is enabled or disabled
 			bool m_Enabled;
+			// ????
+			bool m_Carry;
 			//Array of Points of the envelope.
 			// first : sample position since relative to envelope start. THIS HAS TO BE UPDATED IF CHANGED BPM and/or SampleRate.
 			// second : 0 .. 1.0f .Use it as a multiplier.
@@ -206,6 +209,13 @@ namespace psycle
 				NORMAL = 0x1,///< normal Start --> End ,Start --> End ...
 				BIDI = 0x2	 ///< bidirectional Start --> End, End --> Start ...
 				};
+			enum WaveForms {
+				SINUS = 0x0,
+				SQUARE = 0x1,
+				SAWUP = 0x2,
+				SAWDOWN = 0x3,
+				RANDOM = 0x4
+			};
 			/// Constructor
 			WaveData()
 			{
@@ -217,16 +227,24 @@ namespace psycle
 			void Init(){
 				DeleteWaveData();
 				m_WaveLength = 0;
-				m_WaveVolume = 0;
+				m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
+				m_WaveDefVolume = 256; // Default volume ( volume at which it starts to play. corresponds to 0Cxx )
 				m_WaveLoopStart = 0;
 				m_WaveLoopEnd = 0;
+				m_WaveLoopType = DO_NOT;
+				m_WaveSusLoopStart = 0;
+				m_WaveSusLoopEnd = 0;
+				m_WaveSusLoopType = DO_NOT;
 				m_WaveTune = 0;
 				m_WaveFineTune = 0;	
 				m_WaveStereo = false;
-				m_WaveLoopType = DO_NOT;
 				m_PanFactor = 0.5f;
 				m_PanEnabled = false;
-				memset(m_WaveName,0,sizeof(m_WaveName)*sizeof(TCHAR));
+				m_VibratoRate = 0;
+				m_VibratoSweep = 0;
+				m_VibratoDepth = 0;
+				m_VibratoType = 0;
+				m_WaveName= _T("");
 			};
 
 			/// Destructor
@@ -237,34 +255,51 @@ namespace psycle
 			const UINT WaveLength(){ return m_WaveLength;};
 			void WaveLength (const UINT value){m_WaveLength = value;};
 
-			const unsigned short WaveVolume(){ return m_WaveVolume;};
-			void WaveVolume(const unsigned short value){m_WaveVolume = value;};
-			
+			const float WaveGlobVolume(){ return m_WaveGlobVolume;};
+			void WaveGlobVolume(const float value){m_WaveGlobVolume = value;};
+			const unsigned short WaveVolume(){ return m_WaveDefVolume;};
+			void WaveVolume(const unsigned short value){m_WaveDefVolume = value;};
+
 			const float PanFactor(){ return m_PanFactor;};
 			void PanFactor(const float value){m_PanFactor = value;};
-
 			bool PanEnabled(){ return m_PanEnabled;};
 			void PanEnabled(bool pan){ m_PanEnabled=pan;};
 
 			const UINT WaveLoopStart(){ return m_WaveLoopStart;};
 			void WaveLoopStart(const UINT value){m_WaveLoopStart = value;};
-
 			const UINT WaveLoopEnd(){ return m_WaveLoopEnd;};
 			void WaveLoopEnd(const UINT value){m_WaveLoopEnd = value;};
-
-			const int WaveTune(){return m_WaveTune;};
-			void WaveTune(const int value){m_WaveTune = value;};
-
-			const int WaveFineTune(){return m_WaveFineTune;};
-			void WaveFineTune(const int value){m_WaveFineTune = value;};
-
 			const LoopType WaveLoopType(){ return m_WaveLoopType;};
 			void WaveLoopType(const LoopType value){ m_WaveLoopType = value;};
+
+			const UINT WaveSusLoopStart(){ return m_WaveSusLoopStart;};
+			void WaveSusLoopStart(const UINT value){m_WaveSusLoopStart = value;};
+			const UINT WaveSusLoopEnd(){ return m_WaveSusLoopEnd;};
+			void WaveSusLoopEnd(const UINT value){m_WaveSusLoopEnd = value;};
+			const LoopType WaveSusLoopType(){ return m_WaveSusLoopType;};
+			void WaveSusLoopType(const LoopType value){ m_WaveSusLoopType = value;};
+
+			const short WaveTune(){return m_WaveTune;};
+			void WaveTune(const short value){m_WaveTune = value;};
+			const short WaveFineTune(){return m_WaveFineTune;};
+			void WaveFineTune(const short value){m_WaveFineTune = value;};
 
 			const bool IsWaveStereo(){ return m_WaveStereo;};
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
 
-			const TCHAR * WaveName(){ return m_WaveName;};
+			const unsigned char VibratoType(){return m_VibratoType;};
+			const unsigned char VibratoSweep(){return m_VibratoSweep;};
+			const unsigned char VibratoDepth(){return m_VibratoDepth;};
+			const unsigned char VibratoRate(){return m_VibratoRate;};
+
+			void VibratoType(const unsigned char value){m_VibratoType = value ;};
+			void VibratoSweep(const unsigned char value){m_VibratoSweep = value ;};
+			void VibratoDepth(const unsigned char value){m_VibratoDepth = value ;};
+			void VibratoRate(const unsigned char value){m_VibratoRate = value ;};
+
+			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoRate;};
+
+			const std::string WaveName(){ return m_WaveName;};
 
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
@@ -297,14 +332,22 @@ namespace psycle
 			{
 				Init();
 				m_WaveLength = source.m_WaveLength;
-				m_WaveVolume = source.m_WaveVolume;
+				m_WaveGlobVolume = source.m_WaveGlobVolume;
+				m_WaveDefVolume = source.m_WaveDefVolume;
 				m_WaveLoopStart = source.m_WaveLoopStart;
 				m_WaveLoopEnd = source.m_WaveLoopEnd;
+				m_WaveLoopType = source.m_WaveLoopType;
+				m_WaveSusLoopStart = source.m_WaveSusLoopStart;
+				m_WaveSusLoopEnd = source.m_WaveSusLoopEnd;
+				m_WaveSusLoopType = source.m_WaveSusLoopType;
 				m_WaveTune = source.m_WaveTune;
 				m_WaveFineTune = source.m_WaveFineTune;	
-				m_WaveLoopType = source.m_WaveLoopType;
 				m_WaveStereo = source.m_WaveStereo;
-				_tcscpy(m_WaveName,source.m_WaveName);
+				m_WaveName = source.m_WaveName;
+				m_VibratoRate = source.m_VibratoRate;
+				m_VibratoSweep = source.m_VibratoSweep;
+				m_VibratoDepth = source.m_VibratoDepth;
+				m_VibratoType = source.m_VibratoType;
 
 				AllocWaveData(source.m_WaveLength,source.m_WaveStereo);
 			
@@ -317,18 +360,26 @@ namespace psycle
 		private:
 
 			UINT m_WaveLength;
-			unsigned short m_WaveVolume;
+			float m_WaveGlobVolume;
+			unsigned short m_WaveDefVolume;
 			UINT m_WaveLoopStart;
 			UINT m_WaveLoopEnd;
-			int m_WaveTune;
-			int m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			LoopType m_WaveLoopType;
+			UINT m_WaveSusLoopStart;
+			UINT m_WaveSusLoopEnd;
+			LoopType m_WaveSusLoopType;
+			short m_WaveTune;
+			short m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			bool m_WaveStereo;
-			TCHAR m_WaveName[32];
+			std::string m_WaveName;
 			signed short *m_pWaveDataL;
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
-			float m_PanFactor; // Default position for panning ( 0..1 ) 0right 1 left
+			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right
+			unsigned char m_VibratoRate;
+			unsigned char m_VibratoSweep;
+			unsigned char m_VibratoDepth;
+			unsigned char m_VibratoType;
 
 		};// WaveData()
 
@@ -339,69 +390,65 @@ namespace psycle
 		~XMInstrument();
 
 		void Init();
-		void DeleteLayer(int c);
+//		void DeleteLayer(int c);
 
 		void Load(RiffFile& riffFile,const UINT version);
 		void Save(RiffFile& riffFile,const UINT version);
 
 		// Property //
 		
+		const bool IsEnabled(){ return m_bEnabled;};
+		void IsEnabled(const bool value){ m_bEnabled = value;};
+
+		std::string& Name(){return m_Name;};
+		void Name(const std::string& name) { m_Name= name; }
+
+		const bool IsLinesMode(){ return m_LinesMode;};
+		void IsLinesMode(const bool value){m_LinesMode = value;};
+		const int Lines(){ return m_Lines;};
+		void Lines(const int value){ m_Lines = value;};
+
 		Envelope* const AmpEnvelope(){ return &m_AmpEnvelope;};
-		Envelope* const FilterEnvelope(){ return &m_FilterEnvelope;};
-		
 		Envelope* const PanEnvelope(){return &m_PanEnvelope;};
+		Envelope* const FilterEnvelope(){ return &m_FilterEnvelope;};
 		Envelope* const PitchEnvelope(){return &m_PitchEnvelope;};
 
 		const int FilterCutoff(){ return m_FilterCutoff;};
 		void FilterCutoff(const int value){m_FilterCutoff = value;};
-
 		const int FilterResonance() { return m_FilterResonance;};
 		void FilterResonance(const int value){m_FilterResonance = value;};
-
 		const int FilterEnvAmount() { return m_FilterEnvAmount;};
 		void FilterEnvAmount(const int value){ m_FilterEnvAmount = value;};
-		
 		const dsp::FilterType FilterType(){ return m_FilterType;};
 		void FilterType(const dsp::FilterType value){ m_FilterType = value;};
 
-		const NewNoteAction NNA() { return m_NNA;};
-		void NNA(const NewNoteAction value){ m_NNA = value;};
+		const unsigned char RandomVolume(){return  m_RandomVolume;};///< Random Volume
+		void RandomVolume(const unsigned char value){m_RandomVolume = value;};
+		const unsigned char RandomPanning(){return  m_RandomPanning;};///< Random Panning
+		void RandomPanning(const unsigned char value){m_RandomPanning = value;};
+		const unsigned char RandomCutoff(){return m_RandomCutoff;};///< Random CutOff
+		void RandomCutoff(const unsigned char value){m_RandomCutoff = value;};
+		const unsigned char RandomResonance(){return m_RandomResonance;};///< Random Resonance
+		void RandomResonance(const unsigned char value){m_RandomResonance = value;};
+		const unsigned char RandomSampleStart(){return m_RandomSampleStart;};///< Random Sample Start
+		void RandomSampleStart(const unsigned char value){m_RandomSampleStart = value;};
 
-		///\todo : Add a "Depth" Parameter to randompanning/cutoff/ressonance
-		const bool IsRandomPanning(){return  m_RandomPanning;};///< Random Panning
-		void IsRandomPanning(const bool value){m_RandomPanning = value;};
-
-		const bool IsRandomCutoff(){return m_RandomCutoff;};///< Random CutOff
-		void IsRandomCutoff(const bool value){m_RandomCutoff = value;};
-
-		const bool IsRandomResonance(){return m_RandomResonance;};///< Random Resonance
-		void IsRandomResonance(const bool value){m_RandomResonance = value;};
-		
-		const bool IsRandomSampleStart(){return m_RandomSampleStart;};///< Random Sample Start
-		void IsRandomSampleStart(const bool value){m_RandomSampleStart = value;};
-
-		const bool IsLoop(){ return m_Loop;};
-		void IsLoop(const bool value){m_Loop = value;};
-
-		const int Lines(){ return m_Lines;};
-		void Lines(const int value){ m_Lines = value;};
-	
 		const float Pan() { return m_InitPan;};
 		void Pan(const float pan) { m_InitPan = pan;};
-
 		const bool PanEnabled() { return m_PanEnabled;};
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
+		const char PitchPanSep() { return m_PitchPanSep;};
+		void PitchPanSep(const char pan) { m_PitchPanSep = pan;};
+		const unsigned char PitchPanCenter() { return m_PitchPanCenter;};
+		void PitchPanCenter(const unsigned char pan) { m_PitchPanCenter = pan;};
 
-		/// Get Volume Fade Enable or Disable
-		const bool IsVolumeFade() { return m_bVolumeFade;};
-		/// Set Volume Fade Enable or Disable
-		void IsVolumeFade(const bool value){m_bVolumeFade = value;};
-
-		/// Get Volume Fade Speed 
+		const float GlobVol() { return m_GlobVol;};
+		void GlobVol(const float value){m_GlobVol = value;};
+		//const bool IsVolumeFade() { return m_bVolumeFade;};
+		//void IsVolumeFade(const bool value){m_bVolumeFade = value;};
 		const float VolumeFadeSpeed() { return m_VolumeFadeSpeed;};
-		/// Set Volume Fade Speed
 		void VolumeFadeSpeed(const float value){ m_VolumeFadeSpeed = value;};
-
+/*
 		const int AutoVibratoType(){return m_AutoVibratoType;};
 		const int AutoVibratoSweep(){return m_AutoVibratoSweep;};
 		const int AutoVibratoDepth(){return m_AutoVibratoDepth;};
@@ -413,31 +460,36 @@ namespace psycle
 		void AutoVibratoRate(const int value){m_AutoVibratoRate = value ;};
 
 		const bool IsAutoVibrato(){return m_AutoVibratoDepth && m_AutoVibratoRate;};
+*/
+		const char MidiChannel() { return m_MidiChannel;};
+		void MidiChannel(const char value){ m_MidiChannel = value;};
+		const char MidiProgram() { return m_MidiProgram;};
+		void MidiProgram(const char value){ m_MidiProgram = value;};
+		const char MidiBank() { return m_MidiBank;};
+		void MidiBank(const char value){ m_MidiBank = value;};
 
-		const bool IsEnabled(){ return m_bEnabled;};
-		void IsEnabled(const bool value){ m_bEnabled = value;};
+		const NewNoteAction NNA() { return m_NNA;};
+		void NNA(const NewNoteAction value){ m_NNA = value;};
+		const DCType DCT() { return m_DCT;};
+		void DCT(const DCType value){ m_DCT = value;};
+		const DCAction DCA() { return m_DCA;};
+		void DCA(const DCAction value){ m_DCA = value;};
 
 		const NotePair NoteToSample(const int note){return m_AssignNoteToSample[note];};
 		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;};
 
-		std::string& Name(){return m_Name;};
-		void Name(const std::string& name) { m_Name= name; }
-
-		WaveData& rWaveLayer(const int index){ return m_WaveLayer[index];};
+//		WaveData& rWaveLayer(const int index){ return m_WaveLayer[index];};
 
 		void operator= (const XMInstrument & other)
 		{
 			int i;
-			for(i = 0;i < MAX_INSTRUMENT_SAMPLES;i++)
-			{
-				m_WaveLayer[i] = other.m_WaveLayer[i];
-			}
+			m_bEnabled = other.m_bEnabled;
 
-			m_Loop = other.m_Loop;
+			m_Name = other.m_Name;
+
+			m_LinesMode = other.m_LinesMode;
 			m_Lines = other.m_Lines;
 
-			m_NNA = other.m_NNA;
-			
 			m_AmpEnvelope = other.m_AmpEnvelope;
 			m_FilterEnvelope = other.m_FilterEnvelope;
 			m_FilterCutoff = other.m_FilterCutoff;
@@ -447,32 +499,38 @@ namespace psycle
 
 			// Paninng
 			m_InitPan = other.m_InitPan;
-			m_PanEnabled=false;
+			m_PanEnabled=other.m_PanEnabled;
 			m_PanEnvelope = other.m_PanEnvelope;
+			m_PitchPanCenter=other.m_PitchPanCenter;
+			m_PitchPanSep=other.m_PitchPanSep;
 
 			// Pitch Envelope
 			m_PitchEnvelope = other.m_PitchEnvelope;
 
-			// LFO
+			m_RandomVolume = other.m_RandomVolume;
 			m_RandomPanning = other.m_RandomPanning;
 			m_RandomCutoff = other.m_RandomCutoff;
 			m_RandomResonance = other.m_RandomResonance;
 			m_RandomSampleStart = other.m_RandomSampleStart;
 
-			m_Name = other.m_Name;
-
-			m_bVolumeFade = other.m_bVolumeFade;
+			m_GlobVol = other.m_GlobVol;
+			//m_bVolumeFade = other.m_bVolumeFade;
 			m_VolumeFadeSpeed = other.m_VolumeFadeSpeed;
 
-			// Auto Vibrato
+/*			// Auto Vibrato
 			m_AutoVibratoType = other.m_AutoVibratoType;
 			m_AutoVibratoSweep = other.m_AutoVibratoSweep;
 			m_AutoVibratoDepth = other.m_AutoVibratoDepth;
 			m_AutoVibratoRate = other.m_AutoVibratoRate;
 
-			// 
-			m_bEnabled = other.m_bEnabled;
-
+*/			// 
+			m_MidiChannel=other.m_MidiChannel;
+			m_MidiProgram=other.m_MidiProgram;
+			m_MidiBank=other.m_MidiBank;
+			
+			m_NNA = other.m_NNA;
+			m_DCT = other.m_DCT;
+			m_DCA = other.m_DCA;
 			for(i=0;i<NOTE_MAP_SIZE;i++)
 			{
 				m_AssignNoteToSample[i]=other.m_AssignNoteToSample[i];
@@ -480,52 +538,116 @@ namespace psycle
 		};
 
 	private:
-		WaveData m_WaveLayer[MAX_INSTRUMENT_SAMPLES];
+		// 
+		bool m_bEnabled;
 
-		bool m_Loop;
-		int m_Lines;
+		std::string m_Name;
 
-		NewNoteAction m_NNA;
-		
+		bool m_LinesMode;
+		unsigned char m_Lines;
+
 		Envelope m_AmpEnvelope;
 		Envelope m_FilterEnvelope;
-		int m_FilterCutoff;		///< Cutoff Frequency [0-127]
-		int m_FilterResonance;	///< Resonance [0-127]
-		int m_FilterEnvAmount;	///< EnvAmount [-128,128]
+		unsigned short m_FilterCutoff;		///< Cutoff Frequency [0-127]
+		unsigned short m_FilterResonance;	///< Resonance [0-127]
+		short m_FilterEnvAmount;	///< EnvAmount [-128,128]
 		dsp::FilterType m_FilterType;		///< Filter Type [0-4]
 
 		// Paninng
 		float m_InitPan;
 		bool m_PanEnabled;
+		short m_PitchPanCenter;
+		short m_PitchPanSep;
+
 		Envelope m_PanEnvelope;
 		// Pitch Envelope
 		Envelope m_PitchEnvelope;
 
 		// LFO
-		bool m_RandomPanning;	///< Random Panning
-		bool m_RandomCutoff;	///< Random CutOff
-		bool m_RandomResonance;	///< Random Resonance
-		bool m_RandomSampleStart;///< Random SampleStart
+		unsigned char m_RandomVolume;	///< Random Volume % [ 0 -> No randomize. 100 = randomize full scale.]
+		unsigned char m_RandomPanning;	///< Random Panning
+		unsigned char m_RandomCutoff;	///< Random CutOff
+		unsigned char m_RandomResonance;	///< Random Resonance
+		unsigned char m_RandomSampleStart;///< Random SampleStart
 
-		std::string m_Name;
-
-		bool m_bVolumeFade;
+		float m_GlobVol;
+//		bool m_bVolumeFade;
 		float m_VolumeFadeSpeed;
 
 		// Auto Vibrato
-		int m_AutoVibratoType;
+/*		int m_AutoVibratoType;
 		int m_AutoVibratoSweep;
 		int m_AutoVibratoDepth;
 		int m_AutoVibratoRate;
+*/
+		char m_MidiChannel;
+		char m_MidiProgram;
+		short m_MidiBank;
 
-		// 
-		bool m_bEnabled;
+		NewNoteAction m_NNA;
+		DCType m_DCT;
+		DCAction m_DCA;
 
 		/// Table of mapped notes to samples
 		// (note number=first, sample number=second)
 		///\todo: Could it be interesting to map other things like volume,panning, cutoff...?
 		NotePair m_AssignNoteToSample[NOTE_MAP_SIZE];
 		
+	};
+	class SampleList{
+	public:
+		SampleList(){top=0;};
+		~SampleList(){};
+		int AddSample(XMInstrument::WaveData &wave)
+		{
+			if ( top+1<MAX_INSTRUMENTS)
+			{
+				m_waves[top++]=wave;
+				return top-1;
+			}
+			else return -1;
+		}
+		int SetSample(XMInstrument::WaveData &wave,int pos)
+		{
+			ASSERT(pos<MAX_INSTRUMENTS);
+			m_waves[pos]=wave;
+			return pos;
+		}
+		XMInstrument::WaveData &operator[](int pos)
+		{
+			ASSERT(pos<MAX_INSTRUMENTS);
+			return m_waves[pos];
+		}
+	private:
+		XMInstrument::WaveData m_waves[MAX_INSTRUMENTS];
+		int top;
+	};
+	class InstrumentList {
+	public:
+		InstrumentList(){top=0;}
+		~InstrumentList(){};
+		int AddIns(XMInstrument &ins)
+		{
+			if ( top+1<MAX_INSTRUMENTS)
+			{
+				m_inst[top++]=ins;
+				return top-1;
+			}
+			else return -1;
+		}
+		int SetInst(XMInstrument &inst,int pos)
+		{
+			ASSERT(pos<MAX_INSTRUMENTS);
+			m_inst[pos]=inst;
+			return pos;
+		}
+		XMInstrument &operator[](int pos){
+			ASSERT(pos<MAX_INSTRUMENTS);
+			return m_inst[pos];
+		}
+	private:
+		XMInstrument m_inst[MAX_INSTRUMENTS];
+		int top;
 	};
 	}
 }

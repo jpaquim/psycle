@@ -197,7 +197,7 @@ X2 (*) Extra fine porta down
 		const float RVolumeCurr() { return _rVolCurr;};
 		void RVolumeCurr(const float value) { _rVolCurr = value;};
 
-		void Init(XMInstrument & instrument,Channel& channel,const int note);
+		void Init(XMSampler *samp,int iInstIdx,Channel& channel,const int note);
 		
 		const int Layer() { return m_Layer;};
 		void Layer(const int value){m_Layer = value;};
@@ -287,7 +287,7 @@ X2 (*) Extra fine porta down
 
 		void Work()
 		{
-			if((m_Stage == EnvelopeStage::DOSTEP)|(m_Stage == EnvelopeStage::RELEASE)){
+			if((m_Stage == EnvelopeStage::DOSTEP)|| (m_Stage == EnvelopeStage::RELEASE)){
 				m_ModulationAmount += m_Step;
 
 			} else {
@@ -319,7 +319,7 @@ X2 (*) Extra fine porta down
 					m_Stage = EnvelopeStage::SUSTAIN;
 				}
 
-				if((m_PositionIndex >= (m_pEnvelope->NumOfPoints() - 1))  | (m_PositionIndex > 15) | (m_pEnvelope->GetTime(m_PositionIndex) == -1)){
+				if((m_PositionIndex >= (m_pEnvelope->NumOfPoints() - 1)) || (m_PositionIndex > 15) || (m_pEnvelope->GetTime(m_PositionIndex) == -1)){
 					m_Stage = EnvelopeStage::END;
 					m_ModulationAmount = m_pEnvelope->GetValue(m_pEnvelope->NumOfPoints() - 1);
 				} else {
@@ -1092,6 +1092,7 @@ X2 (*) Extra fine porta down
 	Voice& rVoice(const int index) { return _voices[index];};///< 
 
 	XMInstrument & Instrument(const int index){return m_Instruments[index];};
+	XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];};
 	
 	/// get which Frequency is Linear or Amiga ?
 	const bool IsLinearFreq(){ return m_bLinearFreq;};
@@ -1144,6 +1145,7 @@ private:
 	bool m_bLinearFreq;
 	///
 	XMInstrument m_Instruments[MAX_INSTRUMENT];
+	XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT];
 	boost::recursive_mutex m_Mutex;
 };
 }

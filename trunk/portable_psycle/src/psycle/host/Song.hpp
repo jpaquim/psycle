@@ -223,13 +223,13 @@ namespace psycle
 
 		inline unsigned char * Song::_ptrack(int ps, int track)
 		{
-			if(!ppPatternData[ps]) return CreateNewPattern(ps);
+			if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
 			return ppPatternData[ps] + (track*EVENT_SIZE);
 		}	
 
 		inline unsigned char * Song::_ptrackline(int ps, int track, int line)
 		{
-			if(!ppPatternData[ps]) return CreateNewPattern(ps);
+			if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
 			return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
 		}
 	}

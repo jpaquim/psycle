@@ -1881,12 +1881,12 @@ NAMESPACE__BEGIN(psycle)
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
 				Sleep(LOCK_LATENCY);
-				CFileIT it;
+				ITModule2 it;
 				it.Open(ofn.lpstrFile);
 				//CXM XM;
 				char buffer[512];		
 				Global::_pSong->New();
-				if(!it.Import(_pSong))
+				if(!it.LoadITModule(_pSong))
 					{			
 					MessageBox("Load failed");
 					Global::_pSong->New();
@@ -1894,10 +1894,7 @@ NAMESPACE__BEGIN(psycle)
 					return;
 					}
 				it.Close();
-				// build sampler
-				_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",0);
-				_pSong->InsertConnection(0,MASTER_INDEX);
-				_pSong->seqBus = 0;
+
 				std::sprintf
 					(
 					buffer,"%s\n\n%s\n\n%s",

@@ -491,8 +491,8 @@ namespace psycle
 			PatternEntry& data = *pData;///<  
 			bool _bInstrumentSet = data._inst < 255;///<  
 			bool _bvoiceFound = false;/// 
-//			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF) & (data._volcmd != CMD::NOTE_OFF);/// 
-			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF);
+//			bool _bNoteOn = (data._note < 120) && (data._cmd != CMD::NOTE_OFF) && (data._volcmd != CMD::NOTE_OFF);/// 
+			bool _bNoteOn = (data._note < 120) && (data._cmd != CMD::NOTE_OFF);
 //			bool _bPorta2Note = ((data._cmd == CMD::PORTA2NOTE) || (data._volcmd == CMD::PORTA2NOTE));
 			bool _bPorta2Note = ((data._cmd == CMD::PORTA2NOTE));
 			
@@ -531,7 +531,7 @@ namespace psycle
 			// 
 			for(_current = 0;_current < XMSampler::MAX_POLYPHONY;_current++)
 			{
-				if ( (_voices[_current].Channel() == channel) & (_voices[_current].IsPlaying())) // NoteOff previous Notes in this channel.
+				if ( (_voices[_current].Channel() == channel) && (_voices[_current].IsPlaying())) // NoteOff previous Notes in this channel.
 				{
 					_bvoiceFound = true;
 					_currentVoice = &(_voices[_current]);
@@ -542,18 +542,20 @@ namespace psycle
 			//  
 			if(_bvoiceFound)
 			{
-				if ((_bNoteOn) & (!_bPorta2Note))
+				if ((_bNoteOn) && (!_bPorta2Note))
 				{	
 					// New Note Action
 					switch (m_Instruments[_currentVoice->Instrument()].NNA())
 					{
-						case 0:
+						case XMInstrument::NewNoteAction::STOP:
 							//  
 							_currentVoice->NoteOffFast();
 							break;
-						case 2:
+						case XMInstrument::NewNoteAction::NOTEOFF:
 							// NNA
 							_currentVoice->NoteOff();
+							break;
+						case XMInstrument::NewNoteAction::FADEOUT:
 							break;
 					}
 				} else if(data._note == 120 ){
@@ -563,7 +565,7 @@ namespace psycle
 			
 			//\todo : Is this sentence correct?? I think the chech about "bPorta2Note" should be before the previous if, since
 			//  the note will be note-off.
-			if(((_bNoteOn) & (!_bPorta2Note)) | (!_bvoiceFound))
+			if(((_bNoteOn) && (!_bPorta2Note)) || (!_bvoiceFound))
 			{
 				int _newVoiceIndex = -1 ;///<  
 				bool _bFound = false;///<  
@@ -625,14 +627,12 @@ namespace psycle
 
 			XMInstrument & _inst = m_Instruments[_newVoice->Instrument()];
 			
-			// Total Wave Length
 			int _layer = 0; 
-			
-			//  
 
 			if(_bNoteOn)
 			{
-				int _note = data._note;
+				// \todo: Workaround! Channel note should really store last note played in channel, not the mapped note.
+				int _note = _inst.NoteToSample(data._note).first;
 
 				_channel.Porta2NoteDestNote(_note);
 
@@ -643,16 +643,18 @@ namespace psycle
 				}
 				
 				
-				_layer = _inst.NoteToSample(_channel.Note()).second;
+//				_layer = _inst.NoteToSample(_channel.Note()).second;
+//				_note = _inst.NoteToSample(_channel.Note()).first;
 				
-				int twlength = _inst.rWaveLayer(_layer).WaveLength();
+//				int twlength = _inst.rWaveLayer(_layer).WaveLength();
+				int twlength = m_rWaveLayer[_layer].WaveLength();
 
 				if(twlength > 0){
 
-					if((_bPorta2Note) & (_bvoiceFound))
+					if((_bPorta2Note) && (_bvoiceFound))
 					{
 						_bNoteOn = false; //  
-						if((_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::RELEASE) | (_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::END))
+						if((_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::RELEASE) || (_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::END))
 						{
 							_channel.Note(data._note,_inst.NoteToSample(data._note).second);
 							_layer = _inst.NoteToSample(_channel.Note()).second;
@@ -665,7 +667,7 @@ namespace psycle
 						_newVoice->VoiceInit(_channel.Note()); //  
 						_channel.EffectInit();
 
-						if (( data._cmd == CMD::EXTENDED) & ((data._parameter & 0xf0) == CMD::EXT_NOTEDELAY))
+						if (( data._cmd == CMD::EXTENDED) && ((data._parameter & 0xf0) == CMD::EXT_NOTEDELAY))
 						{
 							_newVoice->TriggerNoteDelay( 
 								(Global::_pSong->SamplesPerTick() / 6)
@@ -674,7 +676,7 @@ namespace psycle
 							//  
 							_newVoice->NoteOn();
 
-							if ((data._cmd == CMD::RETRIG) & ((data._parameter & 0x0f) > 0))
+							if ((data._cmd == CMD::RETRIG) && ((data._parameter & 0x0f) > 0))
 							{
 								_newVoice->Retrigger(data._parameter & 0x0f
 									,(data._parameter & 0xf0) >> 4);
@@ -706,7 +708,7 @@ namespace psycle
 
 			//   /////////////////////////////////////////////////////
 			
-//			if((data._cmd == CMD::VOLUME) | (data._volcmd == CMD::VOLUME))
+//			if((data._cmd == CMD::VOLUME) || (data._volcmd == CMD::VOLUME))
 			if(data._cmd == CMD::VOLUME)
 			{
 				//  
@@ -723,22 +725,24 @@ namespace psycle
 					_channel.IsVolumeChange(true);
 				} else {
 
-					rChannel(channel).Volume(_inst.rWaveLayer(_layer).WaveVolume() * 255 / 100);
+//					rChannel(channel).Volume(_inst.rWaveLayer(_layer).WaveVolume() * 255 / 100);
+					rChannel(channel).Volume(m_rWaveLayer[_layer].WaveVolume() * 255 / 100);
 					_channel.IsVolumeChange(true);
 				}
 			} else if(_bInstrumentSet)
 			{
 				//  
-				rChannel(channel).Volume(_inst.rWaveLayer(_layer).WaveVolume() * 255 / 100);
+//				rChannel(channel).Volume(_inst.rWaveLayer(_layer).WaveVolume() * 255 / 100);
+				rChannel(channel).Volume(m_rWaveLayer[_layer].WaveVolume() * 255 / 100);
 				_channel.IsVolumeChange(true);
 			}
 			
 			//   ////////////////////////////////////////////////////////////////
 
-			if (_inst.IsRandomPanning())
+			if (_inst.RandomPanning())
 			{
 				// Instrument 
-				_channel.PanFactor((float)rand() * 0.000030517578125f);
+				_channel.PanFactor((float)rand() * _inst.RandomPanning() / 3276800.0f);
 				_channel.IsVolumeChange(true);
 			}
 			else if ( data._cmd == CMD::PANNING) 
@@ -765,9 +769,11 @@ namespace psycle
 						_channel.PanFactor(_inst.Pan());
 						_channel.IsVolumeChange(true);
 						}
-					else if (_inst.rWaveLayer(_layer).PanEnabled())
+//					else if (_inst.rWaveLayer(_layer).PanEnabled())
+					else if (m_rWaveLayer[_layer].PanEnabled())
 						{
-						_channel.PanFactor(_inst.rWaveLayer(_layer).PanFactor());
+//						_channel.PanFactor(_inst.rWaveLayer(_layer).PanFactor());
+						_channel.PanFactor(m_rWaveLayer[_layer].PanFactor());
 						_channel.IsVolumeChange(true);
 						}
 				}
@@ -781,12 +787,12 @@ namespace psycle
 
 
 			//   //
-			if(_channel.IsVolumeChange() & _newVoice->IsPlaying()){
+			if(_channel.IsVolumeChange() && _newVoice->IsPlaying()){
 				_newVoice->SetWaveVolume(_channel.Volume());
 			}
 
 
-			if(_channel.IsPeriodChange() & _newVoice->IsPlaying()){
+			if(_channel.IsPeriodChange() && _newVoice->IsPlaying()){
 				_newVoice->PeriodToSpeed();
 			}
 		}
@@ -816,18 +822,18 @@ namespace psycle
 
 			_filter.Init();
 
-			if (_inst.IsRandomCutoff())
+			if (_inst.RandomCutoff())
 			{
-				_cutoff = alteRand(_inst.FilterCutoff());
+				_cutoff = _inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f;
 			}
 			else
 			{
 				_cutoff = _inst.FilterCutoff();
 			}
 			
-			if (_inst.IsRandomResonance())
+			if (_inst.RandomResonance())
 			{
-				_filter._q = alteRand(_inst.FilterResonance());
+				_filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
 			}
 			else
 			{
@@ -853,7 +859,7 @@ namespace psycle
 			// Init Wave
 			//
 			
-			m_WaveDataController.Init(_inst,rChannel(),note);
+			m_WaveDataController.Init(m_pSampler,_instrument,rChannel(),note);
 			PeriodToSpeed();
 
 		}// XMSampler::Voice::VoiceInit) 
@@ -880,7 +886,7 @@ namespace psycle
 			{
 				_tickCounter++;
 				
-				if (!_bTrigger  & (_triggerNoteDelay) & (_tickCounter >= _triggerNoteDelay))
+				if (!_bTrigger  && (_triggerNoteDelay) && (_tickCounter >= _triggerNoteDelay))
 				{
 					_bTrigger = true;
 
@@ -917,7 +923,7 @@ namespace psycle
 					m_WaveDataController.RVolumeCurr(0);
 					return;
 				}*/
-				else if (!_bTrigger & (_triggerNoteOff) & (_tickCounter >= _triggerNoteOff))
+				else if (!_bTrigger && (_triggerNoteOff) && (_tickCounter >= _triggerNoteOff))
 				{
 					_bTrigger = true;
 					_triggerNoteOff = 0;
@@ -1143,8 +1149,7 @@ namespace psycle
 						}
 					}
 				}
-				
-				if ((int)(m_WaveDataController.Position() >> 32) >= m_WaveDataController.Length())
+				else if ((int)(m_WaveDataController.Position() >> 32) >= m_WaveDataController.Length())
 				{
 					IsPlaying(false);
 					return;
@@ -1268,11 +1273,11 @@ namespace psycle
 		{
 			m_pChannel->IsPeriodChange(false);
 
-			if(m_pInstrument->IsAutoVibrato())
+/*			if(m_pInstrument->IsAutoVibrato())
 			{
 				AutoVibrato();
 			}
-
+*/
 			if(this->Channel() != -1){
 			
 				if(m_pChannel->EffectFlags() & Channel::EffectFlag::PORTAUP)
@@ -1387,7 +1392,8 @@ namespace psycle
 
 			if(!m_pChannel->IsTremorMute()){
 				Wave().Volume(
-					(float)m_pSampler->Instrument(_instrument).rWaveLayer(Wave().Layer()).WaveVolume()
+//					(float)m_pSampler->Instrument(_instrument).rWaveLayer(Wave().Layer()).WaveVolume()
+					(float)m_pSampler->m_rWaveLayer[Wave().Layer()].WaveVolume()
 					* 0.01f * CValueMapper::Map_255_1(volume)
 				);
 			} else {
@@ -1431,23 +1437,34 @@ namespace psycle
 	//			* ( (ValueType)(44100.0) / (ValueType)(Global::pConfig->_pOutputDriver->_samplesPerSec));
 		};// XMSampler::EnvelopeController::CalcStep() ----------------------------------
 
-		void XMSampler::WaveDataController::Init(XMInstrument & instrument,Channel& channel,const int note){
+		void XMSampler::WaveDataController::Init(XMSampler *samp,int iInstIdx, Channel& channel,const int note){
 			
-			m_Layer = instrument.NoteToSample(note).second;
+			m_Layer = samp->Instrument(iInstIdx).NoteToSample(note).second;
 			int _layer = m_Layer;
 
-			m_pL = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataL());
-			m_pR = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataR());
+//			m_pL = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataL());
+//			m_pR = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataR());
+			m_pL = const_cast<short *>(samp->SampleData(_layer).pWaveDataL());
+			m_pR = const_cast<short *>(samp->SampleData(_layer).pWaveDataR());
+
+//			IsStereo(instrument.rWaveLayer(_layer).IsWaveStereo());
+//			Length(instrument.rWaveLayer(_layer).WaveLength());
+			IsStereo(samp->SampleData(_layer).IsWaveStereo());
+			Length(samp->SampleData(_layer).WaveLength());
 			
 
-			IsStereo(instrument.rWaveLayer(_layer).IsWaveStereo());
-			Length(instrument.rWaveLayer(_layer).WaveLength());
-			
-			if (instrument.rWaveLayer(_layer).WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
+/*			if (instrument.rWaveLayer(_layer).WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
 			{
 				LoopType(instrument.rWaveLayer(_layer).WaveLoopType());
 				LoopStart(instrument.rWaveLayer(_layer).WaveLoopStart());
 				LoopEnd(instrument.rWaveLayer(_layer).WaveLoopEnd());
+				CurrentLoopDirection(LoopDirection::FORWARD);
+			}*/
+			if (samp->SampleData(_layer).WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
+			{
+				LoopType(samp->SampleData(_layer).WaveLoopType());
+				LoopStart(samp->SampleData(_layer).WaveLoopStart());
+				LoopEnd(samp->SampleData(_layer).WaveLoopEnd());
 				CurrentLoopDirection(LoopDirection::FORWARD);
 			}
 			else
@@ -1542,15 +1559,19 @@ namespace psycle
 			
 			switch (m_VibratoType & 0x03)
 			{
-			case 1:
-				vdelta = m_RampDownTable[m_VibratoPos & 0x3f ];
-				break;
-			case 2:
+			case XMInstrument::WaveData::WaveForms::SQUARE:
 				vdelta = m_SquareTable[m_VibratoPos & 0x3f];
 				break;
-			case 3:
+			case XMInstrument::WaveData::WaveForms::SAWDOWN:
+				vdelta = m_RampDownTable[m_VibratoPos & 0x3f ];
+				break;
+			case XMInstrument::WaveData::WaveForms::SAWUP:
+				vdelta = m_RampDownTable[0x3f - (m_VibratoPos & 0x3f) ];
+				break;
+			case XMInstrument::WaveData::WaveForms::RANDOM:
 				vdelta = m_RandomTable[m_VibratoPos & 0x3f];
 				break;
+			case XMInstrument::WaveData::WaveForms::SINUS:
 			default:
 				vdelta = m_SinTable[m_VibratoPos & 0x3f];
 			}
@@ -1564,25 +1585,26 @@ namespace psycle
 
 		void XMSampler::Voice::AutoVibrato()
 		{
-			
+/*			
 			int vdelta;
 			XMInstrument& _inst = *m_pInstrument;
 			
 			switch (_inst.AutoVibratoType())
 			{
-			case 4:	// Random
+			case XMInstrument::WaveData::WaveForms::RANDOM:	// Random
 				vdelta = m_RandomTable[m_AutoVibratoPos & 0x3F];
 				m_AutoVibratoPos++;
 				break;
-			case 3:	// Ramp Down
+			case XMInstrument::WaveData::WaveForms::SAWDOWN:	// Ramp Down
 				vdelta = ((0x40 - (m_AutoVibratoPos >> 1)) & 0x7F) - 0x40;
 				break;
-			case 2:	// Ramp Up
+			case XMInstrument::WaveData::WaveForms::SAWUP:	// Ramp Up
 				vdelta = ((0x40 + (m_AutoVibratoPos >> 1)) & 0x7f) - 0x40;
 				break;
-			case 1:	// Square
+			case XMInstrument::WaveData::WaveForms::SQUARE:	// Square
 				vdelta = (m_AutoVibratoPos & 128) ? +64 : -64;
 				break;
+			case XMInstrument::WaveData::WaveForms::SINUS:
 			default:	// Sine
 				vdelta = m_ft2VibratoTable[m_AutoVibratoPos & 255];
 			}
@@ -1603,7 +1625,7 @@ namespace psycle
 			rChannel().IsPeriodChange(true);
 
 			m_AutoVibratoPos = (m_AutoVibratoPos + _inst.AutoVibratoRate());
-
+*/
 
 		}//XMSampler::Voice::AutoVibrato() -------------------------------------
 
@@ -1665,16 +1687,17 @@ namespace psycle
 		const double XMSampler::Channel::NoteToPeriod(const int note,const int layer)
 		{
 			XMInstrument::WaveData& _wave 
-				= m_pSampler->Instrument(this->InstrumentNo()).rWaveLayer(layer);
+//				= m_pSampler->Instrument(this->InstrumentNo()).rWaveLayer(layer);
+				= m_pSampler->m_rWaveLayer[layer];
 
 			if(m_pSampler->IsLinearFreq())
 			{
-				//       note+ 1 , because C-0 for Fast Tracker is 1!
-				return (10.0 * 12.0 * 64.0) - ((double)(note+1 + _wave.WaveTune()) * 64.0)
+				//       note-11 , because C-0 for Fast Tracker is 1! and C-0 is psylce's C-1 
+				return (10.0 * 12.0 * 64.0) - ((double)(note-11 + _wave.WaveTune()) * 64.0)
 					- ((double)(_wave.WaveFineTune()) * 0.25); // 0.25 since the range is +-256 for XMSampler as opposed to +-128 for FT.
 			} else {
 				// Amiga Period  
-				return pow(2.0,(116.898 - ((double)(note+1 + _wave.WaveTune())
+				return pow(2.0,(116.898 - ((double)(note-11 + _wave.WaveTune())
 					+ ((double)_wave.WaveFineTune()) / 256.0))/12.0) * 32.0;
 			}
 		};
@@ -1711,7 +1734,8 @@ namespace psycle
 		///  
 		const int XMSampler::Channel::PeriodToNote(const double period,const int layer)
 		{
-			XMInstrument::WaveData& _wave = m_pSampler->Instrument(this->InstrumentNo()).rWaveLayer(layer);
+//			XMInstrument::WaveData& _wave = m_pSampler->Instrument(this->InstrumentNo()).rWaveLayer(layer);
+			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[layer];
 
 			if(m_pSampler->IsLinearFreq()){
 				// period = ((10.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
@@ -1719,7 +1743,7 @@ namespace psycle
 				// period / 64.0 = 10.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
 				// note = (int)(10.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5/* ŽlŽÌŒÜ“ü*/);
 				
-				return -1+(int)(10.0*12.0 - (double)_wave.WaveTune() - (double)_wave.WaveFineTune() / 256.0  - period / 64.0 + 0.5);
+				return +11+(int)(10.0*12.0 - (double)_wave.WaveTune() - (double)_wave.WaveFineTune() / 256.0  - period / 64.0 + 0.5);
 			} else {
 				//period = pow(2.0,(116.898 - ((double)(note + _wave.WaveTune()) + (double)_wave.WaveFineTune() / 128.0))/12.0) * 32;
 				//log2(period/32) = (116.898 - ((double)(note + _wave.WaveTune()) + (double)_wave.WaveFineTune() / 128.0))/12.0;
@@ -1727,7 +1751,7 @@ namespace psycle
 				//note = (116.898 - ((double)(_wave.WaveTune()) + (double)_wave.WaveFineTune() / 128.0)) - log2(period/32) * 12.0;
 				int _note = (int)(116.898 - ((double)_wave.WaveTune() + (double)_wave.WaveFineTune() / 256.0) 
 					-12.0 * log((double)(period / 32.0))/(0.69314718055994529 /*log(2)*/ ));
-				return _note-1;
+				return _note+11;
 					
 			}
 		}

@@ -202,8 +202,9 @@ namespace host{
 	// Load instruments
 	const bool XMSongLoader::LoadInstruments(XMSampler & sampler, LONG iInstrStart)
 	{	
+		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
-			iInstrStart = LoadInstrument(sampler,iInstrStart,i);
+			iInstrStart = LoadInstrument(sampler,iInstrStart,i,currentSample);
 			TRACE2("%d %s\n",i,sampler.Instrument(i).Name().c_str());
 		}
 
@@ -374,10 +375,9 @@ namespace host{
 						case XMSampler::CMD::VIBRATO_SPEED:
 						case XMSampler::CMD::PORTADOWN:
 						case XMSampler::CMD::PORTAUP:
-							e._parameter = param * 4;
+							e._parameter = param;
 							break;
 						case XMSampler::CMD::VOLUMESLIDE:
-							// ***** [bohan] iso-(10)646 encoding only please! *****
 							if(param & 0xf){
 								e._cmd = XMSampler::CMD::VOLSLIDEDOWN;
 								e._parameter = (param & 0x0f) << 2;
@@ -558,7 +558,7 @@ namespace host{
 						default: 
 							if(note >= 96 || note < 0)
 								TRACE(_T("invalid note\n"));
-							e._note  = note-1; // Note 0 means noteoff, whereas in psycle it is C-0.
+							e._note  = note+11; // +11 -> +12 ( FT2 C-0 is Psycle's C-1) -1 ( Ft2 C-0 is value 1)
 				/*		
 
 							// force note into range
@@ -604,10 +604,11 @@ namespace host{
 		return true;
 	}	
 
-	const LONG XMSongLoader::LoadInstrument(XMSampler & sampler, LONG iStart, const int idx)
+	const LONG XMSongLoader::LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int &curSample)
 	{
 		// read header
 		Seek(iStart);
+		unsigned char sRemap[16];
 		
 		int iInstrSize = ReadInt4();
 		ASSERT(iInstrSize==0x107||iInstrSize==0x21);
@@ -630,48 +631,52 @@ namespace host{
 		//int iSampleHeader = ReadInt4();
 		//ATLASSERT(iSampleHeader==0x28);
 		
-		if( iSampleCount > 0) {
-			XMSAMPLEHEADER _samph;
-			ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
-			Read(&_samph,sizeof(XMSAMPLEHEADER));
-			
-			sampler.Instrument(idx).AutoVibratoDepth(_samph.vibdepth);
-			sampler.Instrument(idx).AutoVibratoRate(_samph.vibrate);
-			sampler.Instrument(idx).AutoVibratoSweep(_samph.vibsweep);
-			sampler.Instrument(idx).AutoVibratoType(_samph.vibtype);
-			
-			XMInstrument::NotePair npair;
-			npair.second=_samph.snum[0];
-			for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-				npair.first=i;
-				if (i< 12){
-					//npair.second=_samph.snum[0]; implicit.
-					sampler.Instrument(idx).NoteToSample(i,npair);
-				} else if(i < 108){
-					npair.second=_samph.snum[i-12];
-					sampler.Instrument(idx).NoteToSample(i,npair);
-				} else {
-					//npair.second=_samph.snum[95]; implicit.
-					sampler.Instrument(idx).NoteToSample(i,npair);
-				}
-			}
-
-			ReadEnvelopes(sampler.Instrument(idx),_samph);
-		}
-
 		iStart += iInstrSize;
-		
+
 		if(iSampleCount==0)
 			return iStart;
 
-		// read instrument data	
+        
+		XMSAMPLEHEADER _samph;
+		ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
+		Read(&_samph,sizeof(XMSAMPLEHEADER));
 		
-		// load individual samples
+/*		sampler.Instrument(idx).AutoVibratoDepth(_samph.vibdepth);
+		sampler.Instrument(idx).AutoVibratoRate(_samph.vibrate);
+		sampler.Instrument(idx).AutoVibratoSweep(_samph.vibsweep);
+		sampler.Instrument(idx).AutoVibratoType(_samph.vibtype);
+*/			
+
+		ReadEnvelopes(sampler.Instrument(idx),_samph);
+
+		
 		int i;
+		// read instrument data	
 		for(i=0;i<iSampleCount;i++)
-			iStart = LoadSampleHeader(sampler,iStart,idx,i);
+		{
+			sRemap[i]=curSample;
+			iStart = LoadSampleHeader(sampler,iStart,idx,curSample);
+			curSample++;
+		}
+		// load individual samples
 		for(i=0;i<iSampleCount;i++)
-			iStart = LoadSampleData(sampler,iStart,idx,i);
+			iStart = LoadSampleData(sampler,iStart,idx,sRemap[i]);
+
+		XMInstrument::NotePair npair;
+		npair.second=sRemap[_samph.snum[0]];
+		for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+			npair.first=i;
+			if (i< 12){
+				//npair.second=_samph.snum[0]; implicit.
+				sampler.Instrument(idx).NoteToSample(i,npair);
+			} else if(i < 108){
+				npair.second=sRemap[_samph.snum[i-12]];
+				sampler.Instrument(idx).NoteToSample(i,npair);
+			} else {
+				//npair.second=_samph.snum[95]; implicit.
+				sampler.Instrument(idx).NoteToSample(i,npair);
+			}
+		}
 
 		sampler.Instrument(idx).IsEnabled(true);
 		return iStart;
@@ -707,8 +712,8 @@ namespace host{
 
 		ASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 
-	
-		XMInstrument::WaveData& _wave = sampler.Instrument(iInstrIdx).rWaveLayer(iSampleIdx);
+		//\todo: This needs to be changed
+		XMInstrument::WaveData& _wave = sampler.SampleData(iSampleIdx);
 		
 		_wave.Init();
 		_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
@@ -763,7 +768,8 @@ namespace host{
 		// parse
 		
 		BOOL b16Bit = smpFlags[iSampleIdx] & 0x10;
-		XMInstrument::WaveData& _wave =  sampler.Instrument(iInstrIdx).rWaveLayer(iSampleIdx);
+		//\todo : this needs to be changed
+		XMInstrument::WaveData& _wave =  sampler.SampleData(iSampleIdx);
 		short wNew=0;
 
 		// cache sample data

@@ -1,13 +1,13 @@
 Fileformat Documentation of .psy Files
 
 Psycle Version : 1.7+
-Document Version: 1.1.3
-Date:16-Dec-2003
+Document Version: 1.2
+Date:xx-Feb-2005
 
-Psycle will be getting a new file format soon.  The old format is limited and difficult to 
-maintain.  The new format will be Riff based with independant versioning for each 
-chunk, and a "total" version number for the entire file (major and minor).  Each chunk is 
-HEADER followed immediately by DATA
+This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle >= 1.7
+It is Riff-like, with independant versioning for each chunk, and a "total" version number for
+the entire file (major and minor).  Each chunk is HEADER followed immediately by DATA
+
 
 chunk header format:
 
@@ -15,14 +15,21 @@ FOURCC id; // eg "PSY3"
 UINT	version; // version of this chunk type
 UINT	size; // size of chunk NOT including header
 
-Here are the proposed changes to each chunk:
+
+
+
+Here are the structures of each chunk:
 
 ===================
 FILE HEADER
 ===================
-id = "PSY3SONG"; // PSY2 was 1.66
-version = 0; // "total" version of all chunk versions
-size = 0;
+id[8] = "PSY3SONG"; // Attention!!! This is the only exception where "ID" is 8bytes instead of 4
+version; 	// "total" version of all chunk versions. see CURRENT_FILE_VERSION in constants.h
+size = 4;		// Size of extra information data of the File Header. Note: It is used as version too.
+
+DATA:
+int chunkcount;		// Number of chunks in the file, not counting the File Header.
+
 
 ===================
 SONG INFO TEXT
@@ -33,26 +40,27 @@ version = 0;
 size = strlen(Name)+strlen(Author)+strlen(Comment);
 
 DATA:
-char name[]; // null terminated string
-char author[]; // null terminated string
-char comment[]; // null terminated string
+char name[]; // null terminated string, so read until you find NULL.
+char author[]; // null terminated string, so read until you find NULL
+char comment[]; // null terminated string, so read until you find NULL
 
-		===================
-		SONG INFO
-		===================
-		HEADER:
-		id = "SNGI"; 
-		version = 0;
-		size = (4*sizeof(int))+sizeof(byte);
 
-		DATA:
-		int numTracks; 
-			// Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks
-			// Values: from 4 to 64
-		int bpm; // bpm of song (0-255) - int incase of future expansion?
-		int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
-		int currentoctave; // curent octave on keyboard (0-9)
-		int sequenceWidth; // * number of sequence columns for multipattern
+===================
+SONG PROPERTIES (INFO)
+===================
+HEADER:
+id = "SNGI"; 
+version = 0;
+size = (4*sizeof(int))+sizeof(byte);
+
+DATA:
+int numTracks; // Contains the number of tracks that the song has. In multipattern it would be total tracks	Values: from 4 to 64
+int bpm; // bpm of song (0-255) - int incase of future expansion?
+int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
+int currentoctave; // curent octave on keyboard (0-9)
+int sequenceWidth; // * number of sequence columns for multipattern
+
+
 
 ===================
 SEQUENCE DATA
@@ -195,7 +203,7 @@ MACHINE SPECIFIC DATA(MACH_PLUGIN)
 size: (strlen(dllname)+(2*sizeof(int))+(sizeof(UINT))+datasize);
 ===================
 char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains 
-the name of the .dll file (including the “.dll” string). 
+the name of the .dll file (including the ?.dll? string). 
 int numParams; // Desc: Indicates the number of parameters that are stored for this 
 plugin.
 int parameter[numParams];
@@ -206,7 +214,7 @@ byte ExtraData[datasize]; // extra data chunk
 MACHINE SPECIFIC DATA(MACH_VST)
 ===================
 char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains 
-the name of the .dll file (including the “.dll” string). 
+the name of the .dll file (including the ?.dll? string). 
 int numParams; // Desc: Indicates the number of parameters that are stored for this 
 plugin.
 float parameter[numParams];
@@ -217,7 +225,7 @@ byte ExtraData[datasize]; // extra data chunk
 MACHINE SPECIFIC DATA(MACH_VSTFX)
 ===================
 char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains 
-the name of the .dll file (including the “.dll” string). 
+the name of the .dll file (including the ?.dll? string). 
 int numParams; // Desc: Indicates the number of parameters that are stored for this 
 plugin.
 float parameter[numParams];
@@ -305,7 +313,7 @@ Size 1 int (32bits)
 Desc: Contains the WAVE instrument that the user had selected when saving. i.e. 
 instruments[i] is the last selected instrument. (Remember that this means the wave 
 Patches).
-Values: from 0 to 254 (255 is reserved for “preview”)
+Values: from 0 to 254 (255 is reserved for ?preview?)
 
 Label: sname
 Size 32 chars
@@ -420,11 +428,11 @@ Values: from 0 to F (15)
 Label: wlgt
 Size 1 unsigned int (32bits)
 Desc: Indicates length of the wave sample in Samples (sample format used is signed 
-short) . If it is 0, there’s no sample (neither sample data), so read the next value, which is 
+short) . If it is 0, there?s no sample (neither sample data), so read the next value, which is 
 the next wlgt.
 Max size ? Unknown, yes, really...
-There’s an “ASSERT” in wave loading for a channel bufferzise to be less than 
-2Msamples. There’s no clear reason of why.
+There?s an ?ASSERT? in wave loading for a channel bufferzise to be less than 
+2Msamples. There?s no clear reason of why.
 
 For each valid sample, this follows:
 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
@@ -522,63 +530,63 @@ black text)
 
 Label: outd
 Size: 1 int ( 32bits )
-Desc: Indicates the “dry” (unprocessed) factor of the sound. 
+Desc: Indicates the ?dry? (unprocessed) factor of the sound. 
 Values from 0 to 1 (1 = 100%). It can be ignored by most of the machines. It is used in 
 the dalay delay, for example
 
 Label: outw
 Size: 1 int ( 32bits )
-Desc: Indicates the “wet” (processed) factor of the sound. 
+Desc: Indicates the ?wet? (processed) factor of the sound. 
 Values from 0 to 1 (1 = 100%). It can be ignored by most of the machines. It is used in 
 the dalay delay, for example, This is also the parameter of the gainer
 
 Label: dpth
 Size: 1 int ( 32bits )
-Desc: It is the “Distortion” machine, “positive threshold” parameter.
+Desc: It is the ?Distortion? machine, ?positive threshold? parameter.
 Value: 0 to 128 ( 128 = full amplitude = no effect)
 
 Label: dpcl
 Size: 1 int ( 32bits )
-Desc: It is the “Distortion” machine, “positive Clamp” parameter.
+Desc: It is the ?Distortion? machine, ?positive Clamp? parameter.
 Value: 0 to 128 ( 128 = default)
 
 Label: dnth
 Size: 1 int ( 32bits )
-Desc: It is the “Distortion” machine, “negative threshold” parameter.
+Desc: It is the ?Distortion? machine, ?negative threshold? parameter.
 Value: 0 to 128 ( 128 = full amplitude = no effect)
 
 Label: dncl
 Size: 1 int ( 32bits )
-Desc: It is the “Distortion” machine, “negative clamp” parameter.
+Desc: It is the ?Distortion? machine, ?negative clamp? parameter.
 Value: 0 to 128 ( 128 = default)
 
 Label: s
 Size: 1 char (8 bits )
-Desc: It is the “PsychOcs AM” “Sine Speed”
+Desc: It is the ?PsychOcs AM? ?Sine Speed?
 Value: 1 to 129.  Period = 2PI / (sineSpeed*0.0025)
 
 Label: g
 Size: 1 char (8 bits )
-Desc: It is the “PsychOcs AM” “Sine Glide”
+Desc: It is the ?PsychOcs AM? ?Sine Glide?
 Value: 1 to 129, 129 = 100%, 1 = 1/129%
 
 Label: v
 Size: 1 char (8 bits )
-Desc: It is the “PsychOcs AM” “Sine Volume”. ARCHAIC variable. Not used!!!
+Desc: It is the ?PsychOcs AM? ?Sine Volume?. ARCHAIC variable. Not used!!!
 
 Label: p
 Size: 1 char (8 bits )
-Desc: It is the “PsychOcs AM” “Sine LFO speed”
+Desc: It is the ?PsychOcs AM? ?Sine LFO speed?
 Value: 1 to 129.  Period = 2PI / (sinelfoSpeed*0.000025)
 
 Label: a 
 Two meanings, depending on the machine that is being loaded:
 Size: 1 char (8 bits )
-Desc: It is the “PsychOcs AM” “Sine LFO amp”
+Desc: It is the ?PsychOcs AM? ?Sine LFO amp?
 Value: 1 to 129, 129 = 100%, 1 = 1/129%
 
 Size: 1 bool (8 bits )
-Desc: It is the Flanger “Resample” switch. (on or off)
+Desc: It is the Flanger ?Resample? switch. (on or off)
 Value: 0 disabled, 1 enabled
 This meaning has been added in Psycle version 1.7
 
@@ -589,7 +597,7 @@ This meaning has been added in Psycle version 1.7
 
 Label: dltl
 Size: 1 int (32 bits )
-Desc: It is the “Dalay delay” or Flanger “delay time Left channel” (note: for flanger it is 
+Desc: It is the ?Dalay delay? or Flanger ?delay time Left channel? (note: for flanger it is 
 for both, left and right channels)
 
 
@@ -597,48 +605,48 @@ Value: 1 to 65535 SAMPLES (should be in milliseconds...)
 
 Label: dltr
 Size: 1 int (32 bits )
-Desc: It is the “Dalay delay” “delay time Right channel”
+Desc: It is the ?Dalay delay? ?delay time Right channel?
 Value: 1 to 65535 SAMPLES (should be in milliseconds...)
 
 Label: dlfl
 Size: 1 int (32 bits )
-Desc: It is the “Dalay delay” or Flanger “feedback Left channel”
+Desc: It is the ?Dalay delay? or Flanger ?feedback Left channel?
 Value : -100 inverted full feedback, 0 no feedback, 100 full feedback
 
 Label: dlfr
 Size: 1 int (32 bits )
-Desc: It is the “Dalay delay” or Flanger “feedback Right channel”
+Desc: It is the ?Dalay delay? or Flanger ?feedback Right channel?
 Value : -100 inverted full feedback, 0 no feedback, 100 full feedback
 
 Label: ftc
 Size: 1 int (32 bits )
-Desc: It is the “2p Filter” “filter cutOff”
+Desc: It is the ?2p Filter? ?filter cutOff?
 Value: 0 to 256. (256 = samplerate/2)
 
 Label: ftr
 Size: 1 int (32 bits )
-Desc: It is the “2p Filter” “filter Resonance”
+Desc: It is the ?2p Filter? ?filter Resonance?
 Value: 0 to 256 ( 256 = 100% )
 
 Label: ftls
 Size: 1 int (32 bits )
-Desc: It is the “2p Filter” or Flanger  “filter lfo speed”
+Desc: It is the ?2p Filter? or Flanger  ?filter lfo speed?
 Value: 0 to 32768.
 Period = lfoSpeed * 0.00000003f*samplesRate / 6.283185f
 
 Label: ftla
 Size: 1 int (32 bits )
-Desc: It is the “2p Filter” or Flanger “filter lfo amp”
+Desc: It is the ?2p Filter? or Flanger ?filter lfo amp?
 Value: 0 to 256 ( 256 = 100%)
 
 Label: ftlp
 Size: 1 int (32 bits )
-Desc: It is the “2p Filter” or Flanger  “filter lfo phase”
+Desc: It is the ?2p Filter? or Flanger  ?filter lfo phase?
 Value: 0 to 256 ( 0 = 0 degrees 256 = 180degrees)
 
 Label: ftm
 Size: 1 int (32 bits )
-Desc: It is the “2p Filter” “filter mode”
+Desc: It is the ?2p Filter? ?filter mode?
 Value:
 0 : LowPass Filter
 1 : highPass Filter
@@ -654,13 +662,13 @@ EXTRA DATA (ADDED AFTER)
 
 Label: l
 Size: 1 bool (whatever the size is)
-Desc: Indicates if the “Auto Looping” is enabled. This loop makes the wave play so that 
+Desc: Indicates if the ?Auto Looping? is enabled. This loop makes the wave play so that 
 it exactly loops at the ticks specified by lins
 
 Label: lins
 Size: 1 int (32 bits)
 Desc: Indicates the number of lines for that the sample will be played. It automatically 
-adjusts the frequency rate so that it fits. (this means, notes don’t have an effect).
+adjusts the frequency rate so that it fits. (this means, notes don?t have an effect).
 
 
 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
@@ -673,8 +681,8 @@ adjusts the frequency rate so that it fits. (this means, notes don’t have an eff
 
 Label: c
 Size 1 bool (whatever the size is)
-Desc : indicates that the file has a VST chunk Zone. If you’ve reached the end of the file, 
-you’re done.
+Desc : indicates that the file has a VST chunk Zone. If you?ve reached the end of the file, 
+you?re done.
 
 Label: chsz
 Size 1 long (32 bits)
@@ -705,7 +713,7 @@ long chunk_size;
 	}
 
 
-There’s again another problem in this implementation. If the VST is missing, you don’t 
+There?s again another problem in this implementation. If the VST is missing, you don?t 
 know if you have to skip the data, or if it is the data of another VST (because you cannot 
-evaluate “if(_pEffect->flags & effFlagsProgramChunks)” )
+evaluate ?if(_pEffect->flags & effFlagsProgramChunks)? )
 
