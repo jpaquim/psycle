@@ -144,10 +144,10 @@ namespace psycle
 				//operating_system::logger::operator()(level, string);
 				if((*this)(level))
 				{
-						ostream() << string;
-						ostream().flush();
-						operating_system::console::log(level,string);
-						if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string + '\n'); // hmm, nasty end-of-lines ;p we should clearly specify where it should be added
+					ostream() << string << std::endl;
+					ostream().flush();
+					operating_system::console::log(level, string);
+					if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string);
 				}
 			}
 			catch(...)
