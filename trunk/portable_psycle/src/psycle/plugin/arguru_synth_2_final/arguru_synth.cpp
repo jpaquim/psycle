@@ -262,7 +262,7 @@ CMachineParameter const paraGlobalDetune =
 	-36,											// MinValue	
 	36,											// MaxValue
 	MPF_STATE,										// Flags
-	0
+	-6 // [bohan] default value so that it's no more detuned.. haven't checked with ears. assumed that after quickly looking at the code.. seems it does actual_note = requested_note - 24 + 6
 };
 
 CMachineParameter const paraGlobalFinetune = 
