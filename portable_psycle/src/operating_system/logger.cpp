@@ -109,7 +109,7 @@ namespace operating_system
 					}
 					else
 					{
-						const FILE * const file = ::_fdopen(file_descriptor, "w");
+						const FILE * const file(::_fdopen(file_descriptor, "w"));
 						if(!file)
 						{
 								std::ostringstream s;
@@ -118,8 +118,6 @@ namespace operating_system
 						}
 						fclose(stdout);
 						*stdout = *file;
-
-
 					}
 					if(::setvbuf(stdout, 0, _IONBF, 0))
 					{
@@ -147,7 +145,6 @@ namespace operating_system
 							throw exception(s.str());
 					}
 					*stderr = *file;
-
 					if(::setvbuf(stderr, 0, _IONBF, 0))
 					{
 							std::ostringstream s;
@@ -174,7 +171,6 @@ namespace operating_system
 							throw exception(s.str());
 					}
 					*stdin = *file;
-				
 					if(::setvbuf(stdin, 0, _IONBF, 0))
 					{
 							std::ostringstream s;
@@ -195,6 +191,7 @@ namespace operating_system
 				{
 					::CONSOLE_SCREEN_BUFFER_INFO buffer;
 					::GetConsoleScreenBufferInfo(console, &buffer);
+
 					// colors
 					{
 						const unsigned short attributes =
@@ -234,8 +231,8 @@ namespace operating_system
 						cursor.bVisible = true;
 						::SetConsoleCursorInfo(console, &cursor);
 					}
-
 				}
+
 				if(!got_a_console_window_)
 				{
 					//::HANDLE console(::CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0));

@@ -46,7 +46,7 @@ namespace psycle
 			Global::pLogWindow = new CLoggingWindow;
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,0);
 			Global::pLogWindow->Validate();
-			host::logger(host::logger::info, "alk's logger initialised ;p");
+			host::loggers::info("alk's logger initialised ;p");
 
 			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
 			

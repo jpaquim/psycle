@@ -346,7 +346,7 @@ namespace psycle
 		{
 			if(_numPlugins == -1)
 			{
-				host::logger(host::logger::info, "Scanning plugins ...");
+				host::loggers::info("Scanning plugins ...");
 				::AfxGetApp()->DoWaitCursor(1); 
 				int plugsCount(0);
 				int badPlugsCount(0);
@@ -356,7 +356,7 @@ namespace psycle
 				int plugin_count(0);
 				if(progressOpen)
 				{
-					host::logger(host::logger::info, "Scanning plugins ... Counting ...");
+					host::loggers::info("Scanning plugins ... Counting ...");
 					Progress.Create();
 					Progress.SetWindowText("Scanning plugins ... Counting ...");
 					Progress.ShowWindow(SW_SHOW);
@@ -389,7 +389,7 @@ namespace psycle
 					Progress.m_Progress.SetStep(16384 / plugin_count);
 					{
 						std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
-						host::logger(host::logger::info, s.str().c_str());
+						host::loggers::info(s.str().c_str());
 						Progress.SetWindowText(s.str().c_str());
 					}
 				}
@@ -415,7 +415,7 @@ namespace psycle
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Natives ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
-				host::logger(host::logger::info, "Scanning plugins ... Natives");
+				host::loggers::info("Scanning plugins ... Natives");
 				out
 					<< std::endl
 					<< "======================" << std::endl
@@ -429,7 +429,7 @@ namespace psycle
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... VST ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
-				host::logger(host::logger::info, "Scanning plugins ... VST");
+				host::loggers::info("Scanning plugins ... VST");
 				out
 					<< std::endl
 					<< "===================" << std::endl
@@ -441,7 +441,7 @@ namespace psycle
 				if(progressOpen)
 				{
 					std::ostringstream s; s << "Scanned " << plugin_count << " plugins.";
-					host::logger(host::logger::info, s.str().c_str());
+					host::loggers::info(s.str().c_str());
 					Progress.SetWindowText(s.str().c_str());
 				}
 				out.close();
@@ -451,11 +451,11 @@ namespace psycle
 					Progress.m_Progress.SetPos(16384);
 					Progress.SetWindowText("Saving scan cache file ...");
 				}
-				host::logger(host::logger::info, "Saving scan cache file ...");
+				host::loggers::info("Saving scan cache file ...");
 				SaveCacheFile();
 				if(progressOpen) Progress.OnCancel();
 				::AfxGetApp()->DoWaitCursor(-1); 
-				host::logger(host::logger::info, "Done.");
+				host::loggers::info("Done.");
 			}
 		}
 
@@ -507,7 +507,7 @@ namespace psycle
 								else s << "cache says it has previously been disabled because:" << std::endl << *error << std::endl;
 								out << s.str().c_str();
 								out.flush();
-								host::logger(host::logger::info, std::string(finder.GetFilePath()) + '\n' + s.str().c_str());
+								host::loggers::info(std::string(finder.GetFilePath()) + '\n' + s.str().c_str());
 								break;
 							}
 						}
@@ -519,9 +519,10 @@ namespace psycle
 					{
 						out << "new plugin added to cache ; ";
 						out.flush();
-						host::logger(host::logger::info, std::string(finder.GetFilePath()) + "\nnew plugin added to cache");
+						host::loggers::info(std::string(finder.GetFilePath()) + "\nnew plugin added to cache");
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-						::ZeroMemory(_pPlugsInfo[currentPlugsCount], sizeof(PluginInfo));
+						// <bohan> added proper constructor for the PluginInfo class. no need to zero it out now.
+						//::ZeroMemory(_pPlugsInfo[currentPlugsCount], sizeof(PluginInfo));
 						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
 						std::strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
 						FILETIME time;
@@ -538,11 +539,8 @@ namespace psycle
 							}
 							catch(const std::exception & e)
 							{
-								std::ostringstream s; s
-									<< typeid(e).name() << std::endl
-									<< e.what() << std::endl;
-								out << s.str();
-								out.flush();
+								std::ostringstream s; s << typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
 							}
 							catch(...)
@@ -559,7 +557,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::exception, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								host::loggers::exception(title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
@@ -601,8 +599,8 @@ namespace psycle
 								std::stringstream s; s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
-									<< typeid(e).name() << std::endl
-									<< e.what();
+									<< typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 								out
 									<< std::endl
 									<< "### ERRONEOUS ###" << std::endl
@@ -610,7 +608,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::exception, title.str() + '\n' + s.str());
+								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -625,7 +623,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::exception, title.str() + '\n' + s.str());
+								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
 						else if(type == MACH_VST)
@@ -639,10 +637,8 @@ namespace psycle
 							catch(const std::exception & e)
 							{
 								std::ostringstream s; s
-									<< typeid(e).name() << std::endl
-									<< e.what() << std::endl;
-								out << s.str();
-								out.flush();
+									<< typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
 							}
 							catch(...)
@@ -651,7 +647,6 @@ namespace psycle
 									<< "Type of exception is unknown, cannot display any further information." << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
 							}
-/*
 							if(_pPlugsInfo[currentPlugsCount]->error)
 							{
 								out << "### ERRONEOUS ###" << std::endl;
@@ -660,7 +655,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::exception, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								host::loggers::exception(title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
@@ -689,7 +684,6 @@ namespace psycle
 								out.flush();
 							}
 							++currentPlugsCount;
-*/
 							// <bohan> vstPlug is a stack object, so its destructor is called
 							// <bohan> at the end of its scope (this cope actually).
 							// <bohan> The problem with destructors of any object of any class is that
@@ -706,8 +700,8 @@ namespace psycle
 								std::stringstream s; s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
-									<< typeid(e).name() << std::endl
-									<< e.what();
+									<< typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 								out
 									<< std::endl
 									<< "### ERRONEOUS ###" << std::endl
@@ -715,7 +709,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::exception, title.str() + '\n' + s.str());
+								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -730,17 +724,32 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::exception, title.str() + '\n' + s.str());
+								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
 					}
+					catch(const std::exception & e)
+					{
+						std::stringstream s; s
+							<< std::endl
+							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
+							<< typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+						out
+							<< s.str().c_str();
+						out.flush();
+						host::loggers::crash(s.str());
+					}
 					catch(...)
 					{
-						out
+						std::stringstream s; s
 							<< std::endl
-							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################";
+							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
+							<< "Type of exception is unknown, no further information available.";
+						out
+							<< s.str().c_str();
 						out.flush();
-						host::logger(host::logger::crash, "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################");
+						host::loggers::crash(s.str());
 					}
 				}
 				out << std::endl;
