@@ -756,6 +756,19 @@ namespace psycle
 								}
 							}
 							currentPlugsCount++;
+							// <bohan> vstPlug is a stack object, so its destructor is called
+							// <bohan> at the end of its scope (this cope actually).
+							// <bohan> The problem with destructors of any object of any class is that
+							// <bohan> they are never allowed to throw any exception.
+							// <bohan> So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+							try
+							{
+								vstPlug.Free();
+							}
+							catch(...)
+							{
+								fprintf(hfile," ... ouch, exception when freeing the temporary instance");
+							}
 						}
 					}
 					fprintf(hfile,"\n");
