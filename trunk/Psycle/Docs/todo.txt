@@ -221,6 +221,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	browser problem happens with more Steinberg plugins.
 **  Waldorf PPG WAVE 2.V VSTI : psycle misses/skips notes ramdomly - to check this fill in all 64 
 	pattern ticks with notes and press play - ive tried this plug with aodix and it worked fine.
+*** if you have more than 1 stereo out selected on dr008, it can crash psycle.
 *** Speedsoft Virtual Sampler VSTI : open the plug's gui and click "view" -> "Rack view". the plug 
 	will change its gui to rack view (wich is a smaller window). close the plugs gui. reopen the gui; 
 	the plug will crash with : "Acess violation at adress 0047F99C in module 'psycle.exe'. 

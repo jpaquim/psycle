@@ -255,8 +255,7 @@ BOOL CAboutDlg::OnInitDialog()
 	m_contrib.SetWindowText("\
 Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5\
 \r\nJeremy Evers (pooplog)\t\tDeveloper since version 1.7\
-\r\nBohan\t\t\t\tDeveloper in version 1.73\
-\r\nDruttis\t\t\t\tMachine Developer\
+\r\nJohan Boulé\t\t\tDeveloper in version 1.73\
 \r\nDaniel Arena\t\t\tDeveloper in 1.5&1.6\
 \r\nMarcin Kowalski / FideLoop\t\tDeveloper in 1.6\
 \r\nMark McCormack\t\t\tMIDI (in) Support\
