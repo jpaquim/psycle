@@ -65,29 +65,22 @@ namespace psycle
 		}
 	}
 
-	/// safer version of delete that clears the pointer. Don't use it for arrays!
-	/// automatically.
-	/// \param ptr pointer to single object to be deleted.
-	/// \param newValue the new value ptr will be set to. By default it is null.
-
-	template<class T>
-	T* zapObject(T*& ptr, T* newValue=NULL)
+	/// Safer version of delete that clears the pointer automatically. Don't use it for arrays!
+	/// \param pointer pointer to single object to be deleted.
+	/// \param new_value the new value pointer will be set to. By default it is null.
+	inline template<typename single_object> single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)
 	{
-		if(ptr)
-			delete ptr;
-		return ptr=newValue;
+		if(pointer) delete pointer;
+		return pointer = new_value;
 	}
 
-	/// safer version of delete[] that clears the pointer. Only use it for arrays!
-	/// automatically.
-	/// \param ptr pointer to array to be deleted.
-	/// \param newValue the new value ptr will be set to. By default it is null.
-	template<class T>
-	T* zapArray(T *&ptr, T* newValue=NULL)
+	/// Safer version of delete[] that clears the pointer automatically. Only use it for arrays!
+	/// \param pointer pointer to array to be deleted.
+	/// \param new_value the new value pointer will be set to. By default it is null.
+	inline template<typename object_array> object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
 	{
-		if(ptr)
-			delete [] ptr;
-		return ptr=newValue;
+		if(pointer) delete [] pointer;
+		return pointer = new_value;
 	}
 
 }
