@@ -61,7 +61,7 @@ namespace psycle
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
 				Global::pConfig->_initialized = false;
-				CConfigDlg dlg("Psycle configuration");
+				CConfigDlg dlg("Psycle Settings");
 				dlg.Init(Global::pConfig);
 				if (dlg.DoModal() == IDOK)
 				{
