@@ -796,7 +796,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefSongPosInc:
-		pChildView->IncPosition();
+		pChildView->IncPosition(brepeat);
 		break;
 
 	case cdefSongPosDec:
@@ -937,8 +937,26 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 	entry._inst = Global::_pSong->auxcolSelected;
 	entry._mach = Global::_pSong->seqBus;	// Not really needed.
 
-	entry._cmd = 0;
-	entry._parameter = 0;
+	if ((velocity != 127) &&  (Global::pConfig->_midiRecordVel))
+	{
+		entry._cmd = Global::pConfig->_midiCommandVel;
+		int par = Global::pConfig->_midiFromVel + 
+			(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
+		if (par > 255) 
+		{
+			par = 255;
+		}
+		else if (par < 0) 
+		{
+			par = 0;
+		}
+		entry._parameter = par;
+	}
+	else
+	{
+		entry._cmd=0;
+		entry._parameter=0;
+	}
 
 	// play it
 	if(pMachine==NULL)

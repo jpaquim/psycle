@@ -124,7 +124,8 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	{
 		strcpy(_sVendorName, "Unknown vendor");
 	}
-	_version = _pEffect->dispatcher(_pEffect,effGetVendorVersion , 0 , 0 , NULL, 0.0f);
+	_version = _pEffect->dispatcher(_pEffect,effGetVstVersion , 0 , 0 , NULL, 0.0f);
+	if ( _version == 0 ) _version=1;
 
 	_isSynth = (_pEffect->flags & effFlagsIsSynth)?true:false;
 

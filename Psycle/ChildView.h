@@ -247,7 +247,7 @@ public:
 
 	void DecCurPattern();
 	void IncCurPattern();
-	void IncPosition();
+	void IncPosition(bool bRepeat=false);
 	void DecPosition();
 
 	void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
