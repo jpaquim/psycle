@@ -55,6 +55,7 @@ protected:
 	afx_msg void OnMute();
 	afx_msg void OnBypass();
 	afx_msg void OnSolo();
+	afx_msg void OnClone();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -117,6 +117,9 @@ public:
 	int FindBusFromIndex(int smac);
 	int GetBlankPatternUnused(int rval = 0);
 	bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
+	bool CloneMac(int src,int dst);
+	bool CloneIns(int src,int dst);
+
 #endif // ndef _WINAMP_PLUGIN_
 	void DeleteAllPatterns(void);
 	void DeleteInstrument(int i);

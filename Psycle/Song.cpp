@@ -2649,4 +2649,271 @@ void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 	}while(--numSamples);
 }
 
+bool Song::CloneMac(int src,int dst)
+{
+	// src has to be occupied and dst must be empty
+	if (_pMachine[src] && _pMachine[dst])
+	{
+		return false;
+	}
+	if (_pMachine[dst])
+	{
+		int temp = src;
+		src = dst;
+		dst = temp;
+	}
+	if (!_pMachine[src])
+	{
+		return false;
+	}
+	// check to see both are same type
+	if (((dst < MAX_BUSES) && (src >= MAX_BUSES))
+		|| ((dst >= MAX_BUSES) && (src < MAX_BUSES)))
+	{
+		return false;
+	}
+
+	if ((src >= MAX_MACHINES-1) || (dst >= MAX_MACHINES-1))
+	{
+		return false;
+	}
+
+	// save our file
+
+	CString filepath = Global::pConfig->GetInitialSongDir();
+	filepath += "\\psycle.tmp";
+	DeleteFile(filepath);
+	OldPsyFile file;
+	if (!file.Create(filepath.GetBuffer(1), true))
+	{
+		return false;
+	}
+
+	file.Write("MACD",4);
+	UINT version = CURRENT_FILE_VERSION_MACD;
+	file.Write(&version,sizeof(version));
+	long pos = file.GetPos();
+	UINT size = 0;
+	file.Write(&size,sizeof(size));
+
+	int index = dst; // index
+	file.Write(&index,sizeof(index));
+
+	_pMachine[src]->SaveFileChunk(&file);
+
+	long pos2 = file.GetPos(); 
+	size = pos2-pos-sizeof(size);
+	file.Seek(pos);
+	file.Write(&size,sizeof(size));
+	file.Close();
+
+	// now load it
+
+	if (!file.Open(filepath.GetBuffer(1)))
+	{
+		DeleteFile(filepath);
+		return false;
+	}
+	char Header[5];
+	file.Read(&Header, 4);
+	Header[4] = 0;
+	if (strcmp(Header,"MACD")==0)
+	{
+		file.Read(&version,sizeof(version));
+		file.Read(&size,sizeof(size));
+		if (version > CURRENT_FILE_VERSION_MACD)
+		{
+			// there is an error, this file is newer than this build of psycle
+			file.Close();
+			DeleteFile(filepath);
+			return false;
+		}
+		else
+		{
+			file.Read(&index,sizeof(index));
+			index = dst;
+			if (index < MAX_MACHINES)
+			{
+				// we had better load it
+				DestroyMachine(index);
+				_pMachine[index] = Machine::LoadFileChunk(&file,index,version);
+			}
+			else
+			{
+				file.Close();
+				DeleteFile(filepath);
+				return false;
+			}
+		}
+	}
+	else
+	{
+		file.Close();
+		DeleteFile(filepath);
+		return false;
+	}
+	file.Close();
+	DeleteFile(filepath);
+
+	// oh and randomize the dst's position
+
+	int xs,ys,x,y;
+	if (src >= MAX_BUSES)
+	{
+		xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+		ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+	}
+	else 
+	{
+		xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+		ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+	}
+
+	bool bCovered = TRUE;
+	while (bCovered)
+	{
+		x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
+		y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);
+		bCovered = FALSE;
+		for (int i=0; i < MAX_MACHINES; i++)
+		{
+			if (i != dst)
+			{
+				if (_pMachine[i])
+				{
+					if ((abs(_pMachine[i]->_x - x) < 32) &&
+						(abs(_pMachine[i]->_y - y) < 32))
+					{
+						bCovered = TRUE;
+						i = MAX_MACHINES;
+					}
+				}
+			}
+		}
+	}
+	_pMachine[dst]->_x = x;
+	_pMachine[dst]->_y = y;
+
+	// oh and delete all connections
+
+	_pMachine[dst]->_numInputs = 0;
+	_pMachine[dst]->_numOutputs = 0;
+
+	for (int i = 0; i < MAX_CONNECTIONS; i++)
+	{
+		if (_pMachine[dst]->_connection[i])
+		{
+			_pMachine[dst]->_connection[i] = false;
+			_pMachine[dst]->_outputMachines[i] = 255;
+		}
+
+		if (_pMachine[dst]->_inputCon[i])
+		{
+			_pMachine[dst]->_inputCon[i] = false;
+			_pMachine[dst]->_inputMachines[i] = 255;
+		}
+	}
+	return true;
+}
+
+
+bool Song::CloneIns(int src,int dst)
+{
+	// src has to be occupied and dst must be empty
+	if (!Global::_pSong->_instruments[src].Empty() && !Global::_pSong->_instruments[dst].Empty())
+	{
+		return false;
+	}
+	if (!Global::_pSong->_instruments[dst].Empty())
+	{
+		int temp = src;
+		src = dst;
+		dst = temp;
+	}
+	if (Global::_pSong->_instruments[src].Empty())
+	{
+		return false;
+	}
+	// ok now we get down to business
+
+	// save our file
+
+	CString filepath = Global::pConfig->GetInitialSongDir();
+	filepath += "\\psycle.tmp";
+	DeleteFile(filepath);
+	OldPsyFile file;
+	if (!file.Create(filepath.GetBuffer(1), true))
+	{
+		return false;
+	}
+
+	file.Write("INSD",4);
+	UINT version = CURRENT_FILE_VERSION_INSD;
+	file.Write(&version,sizeof(version));
+	long pos = file.GetPos();
+	UINT size = 0;
+	file.Write(&size,sizeof(size));
+
+	int index = dst; // index
+	file.Write(&index,sizeof(index));
+
+	_instruments[src].SaveFileChunk(&file);
+
+	long pos2 = file.GetPos(); 
+	size = pos2-pos-sizeof(size);
+	file.Seek(pos);
+	file.Write(&size,sizeof(size));
+
+	file.Close();
+
+	// now load it
+
+	if (!file.Open(filepath.GetBuffer(1)))
+	{
+		DeleteFile(filepath);
+		return false;
+	}
+	char Header[5];
+	file.Read(&Header, 4);
+	Header[4] = 0;
+
+	if (strcmp(Header,"INSD")==0)
+	{
+		file.Read(&version,sizeof(version));
+		file.Read(&size,sizeof(size));
+		if (version > CURRENT_FILE_VERSION_INSD)
+		{
+			// there is an error, this file is newer than this build of psycle
+			file.Close();
+			DeleteFile(filepath);
+			return false;
+		}
+		else
+		{
+			file.Read(&index,sizeof(index));
+			index = dst;
+			if (index < MAX_INSTRUMENTS)
+			{
+				// we had better load it
+				_instruments[index].LoadFileChunk(&file,version);
+			}
+			else
+			{
+				file.Close();
+				DeleteFile(filepath);
+				return false;
+			}
+		}
+	}
+	else
+	{
+		file.Close();
+		DeleteFile(filepath);
+		return false;
+	}
+	file.Close();
+	DeleteFile(filepath);
+	return true;
+}
+
 #endif // ndef _WINAMP_PLUGIN_

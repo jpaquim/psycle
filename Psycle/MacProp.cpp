@@ -4,12 +4,15 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "MacProp.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+extern CPsycleApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CMacProp dialog
@@ -43,6 +46,7 @@ BEGIN_MESSAGE_MAP(CMacProp, CDialog)
 	ON_BN_CLICKED(IDC_MUTE, OnMute)
 	ON_BN_CLICKED(IDC_BYPASS, OnBypass)
 	ON_BN_CLICKED(IDC_SOLO, OnSolo)
+	ON_BN_CLICKED(IDC_CLONE, OnClone)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -65,8 +69,14 @@ BOOL CMacProp::OnInitDialog()
 	m_muteCheck.SetCheck(pMachine->_mute);
 	m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
 	m_bypassCheck.SetCheck(pMachine->_bypass);
-	if (pMachine->_mode == MACHMODE_GENERATOR ) m_bypassCheck.ShowWindow(SW_HIDE);
-	else m_soloCheck.ShowWindow(SW_HIDE);
+	if (pMachine->_mode == MACHMODE_GENERATOR ) 
+	{
+		m_bypassCheck.ShowWindow(SW_HIDE);
+	}
+	else 
+	{
+		m_soloCheck.ShowWindow(SW_HIDE);
+	}
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -143,4 +153,51 @@ void CMacProp::OnSolo()
 	{
 		m_view->Repaint(DMAllMacsRefresh);
 	}
+}
+
+void CMacProp::OnClone() 
+{
+	// TODO: Add your control notification handler code here
+	int src = pMachine->_macIndex;
+	int dst = -1;
+
+	if ((src < MAX_BUSES) && (src >=0))
+	{
+		// we need to find an empty slot
+		for (int i = 0; i < MAX_BUSES; i++)
+		{
+			if (!Global::_pSong->_pMachine[i])
+			{
+				dst = i;
+				break;
+			}
+		}
+	}
+	else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
+	{
+		for (int i = MAX_BUSES; i < MAX_BUSES*2; i++)
+		{
+			if (!Global::_pSong->_pMachine[i])
+			{
+				dst = i;
+				break;
+			}
+		}
+	}
+	if (dst >= 0)
+	{
+		if (!Global::_pSong->CloneMac(src,dst))
+		{
+			MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
+		}
+		if ( m_view != NULL )
+		{
+			((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
+			if (m_view->viewMode==VMMachine)
+			{
+				m_view->Repaint();
+			}
+		}
+	}
+	OnCancel();
 }
