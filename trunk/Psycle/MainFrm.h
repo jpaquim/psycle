@@ -165,6 +165,7 @@ protected:
 	afx_msg void OnSeqcut();
 	afx_msg void OnSeqcopy();
 	afx_msg void OnSeqpaste();
+	afx_msg void OnSeqdelete();
 	afx_msg void OnSeqduplicate();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg void OnDecTPB();

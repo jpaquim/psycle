@@ -84,6 +84,7 @@ ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
 ON_BN_CLICKED(IDC_SEQCUT, OnSeqcut)
 ON_BN_CLICKED(IDC_SEQCOPY, OnSeqcopy)
 ON_BN_CLICKED(IDC_SEQPASTE, OnSeqpaste)
+ON_BN_CLICKED(IDC_SEQDELETE, OnSeqdelete)
 ON_BN_CLICKED(IDC_SEQDUPLICATE, OnSeqduplicate)
 ON_WM_ACTIVATE()
 ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
@@ -1895,6 +1896,11 @@ void CMainFrame::OnSeqduplicate()
 void CMainFrame::OnSeqcut() 
 {
 	OnSeqcopy();
+	OnSeqdelete();
+}
+
+void CMainFrame::OnSeqdelete() 
+{
 	int indexes[MAX_SONG_POSITIONS];
 	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 

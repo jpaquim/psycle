@@ -227,6 +227,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePopPaste)
 	ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
 	ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePopMixpaste)
+	ON_COMMAND(ID_POP_DELETE, OnPopDelete)
+	ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdatePopDelete)
 	ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
 	ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdatePopInterpolate)
 	ON_COMMAND(ID_POP_CHANGEGENERATOR, OnPopChangegenerator)
@@ -273,6 +275,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternCutCopyPaste)
+	ON_COMMAND(ID_EDIT_DELETE, patDelete)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopyPaste)
 	ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
 	ON_COMMAND(ID_HELP_README, OnHelpReadme)
 	ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
@@ -1379,6 +1383,13 @@ void CChildView::OnUpdatePopMixpaste(CCmdUI* pCmdUI)
 {
 	if (isBlockCopied) pCmdUI->Enable(TRUE);
 	else  pCmdUI->Enable(FALSE);
+}
+
+void CChildView::OnPopDelete() { DeleteBlock(); }
+void CChildView::OnUpdatePopDelete(CCmdUI* pCmdUI) 
+{
+	if ( blockSelected ) pCmdUI->Enable(TRUE);
+	else pCmdUI->Enable(FALSE);
 }
 
 void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }

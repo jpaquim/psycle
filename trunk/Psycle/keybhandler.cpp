@@ -960,6 +960,30 @@ void CChildView::patMixPaste()
 	}
 }
 
+void CChildView::patDelete()
+{
+	if(viewMode == VMPattern)
+	{
+		// UNDO CODE PATT CUT
+		const int ps = _ps();
+		unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
+		unsigned char blank[5]={255,255,255,0,0};
+
+		patBufferLines = _pSong->patternLines[ps];
+		AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+
+		int length = patBufferLines*5*MAX_TRACKS;
+		
+		for	(int c=0; c<length; c+=5)
+		{
+			memcpy(soffset,blank,sizeof(char)*5);
+			soffset+=5;
+		}
+
+		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+		Repaint(DMData);
+	}
+}
 
 void CChildView::patTranspose(int trp)
 {
@@ -1131,16 +1155,49 @@ void CChildView::CopyBlock(bool cutit)
 			}
 			++ts;
 		}
-	}
-	
-	if(cutit)
-	{
-//		drawTrackStart=blockSel.start.track;
-//		drawTrackEnd=blockSel.end.track;
-//		drawLineStart=blockSel.start.line;
-//		drawLineEnd=blockSel.end.line;
-		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+		if(cutit)
+		{
+	//		drawTrackStart=blockSel.start.track;
+	//		drawTrackEnd=blockSel.end.track;
+	//		drawLineStart=blockSel.start.line;
+	//		drawLineEnd=blockSel.end.line;
+			NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 
+			Repaint(DMData);
+		}
+	}
+}
+
+void CChildView::DeleteBlock()
+{
+	// UNDO CODE HERE CUT
+	if(blockSelected)
+	{
+		int ps=_pSong->playOrder[editPosition];
+		int displace=ps*MULTIPLY2;
+		
+		int ls=0;
+		int ts=0;
+		unsigned char blank[5]={255,255,255,0,0};
+
+		AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+		for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
+		{
+			ls=0;
+			for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
+			{
+				int const displace2=t*5+l*MULTIPLY;
+				int const displace3=ts*5+ls*MULTIPLY;
+				
+				unsigned char *offset_source=_pSong->pPatternData+displace+displace2;				
+				
+				memcpy(offset_source,blank,5*sizeof(char));
+				
+				++ls;
+			}
+			++ts;
+		}
+		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 		Repaint(DMData);
 	}
 }
