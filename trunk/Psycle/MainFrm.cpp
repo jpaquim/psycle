@@ -636,6 +636,7 @@ void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 		((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
+		m_wndView.SetFocus();
 	}
 	
 	*pResult = 0;
@@ -647,6 +648,7 @@ void CMainFrame::OnClipbut()
 	m_wndView.SetFocus();
 }
 
+//l and r are the left and right vu meter values
 void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
 {
 	if (Global::pConfig->draw_vus)
@@ -954,6 +956,9 @@ void CMainFrame::OnSelchangeBarCombogen()
 			UpdateComboGen(false);
 		}
 		RedrawGearRackList();
+		//Added by J.Redfern, repaints main view after changing selection in combo
+		m_wndView.Repaint();
+
 	}
 }
 
