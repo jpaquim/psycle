@@ -348,7 +348,6 @@ namespace psycle
 			//Recent Files!!!!//
 			void AppendToRecent(std::string fName);
 			void CallOpenRecent(int pos);
-			
 			//Recent Files!!!!//
 
 			void PreparePatternRefresh(int drawMode);
@@ -371,6 +370,8 @@ namespace psycle
 			void ClearMachineSpace(int macnum, CDC *devc);
 			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
 			int GetMachine(CPoint point);
+			int GetWire(CPoint point,int&wiresource);
+			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
 			COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
@@ -939,6 +940,11 @@ namespace psycle
 			else if ( pointpos < 100 ) return 7;
 		*/
 
+		}
+		inline bool CChildView::InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
+		{
+		return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
+			(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
 		//{{AFX_INSERT_LOCATION}}

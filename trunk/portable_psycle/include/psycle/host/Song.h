@@ -149,6 +149,10 @@ namespace psycle
 			#if !defined _WINAMP_PLUGIN_
 				/// creates a new connection between two machines.
 				bool InsertConnection(int src,int dst,float value = 1.0f);
+				/// Changes the destination of a wire connection. wiresource= source mac index, wiredest= new dest mac index, wireindex= index of the wire in wiresource to change.
+				int ChangeWireDestMac(int wiresource, int wiredest, int wireindex);
+				/// Changes the destination of a wire connection. wiredest= dest mac index, wiresource= new source mac index, wireindex= index of the wire in wiredest to change.
+				int ChangeWireSourceMac(int wiresource, int wiredest, int wireindex);
 				/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 				int GetFreeBus();
 				/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
@@ -227,8 +231,7 @@ namespace psycle
 
 			const bool IsInvalided(){return Invalided;};
 			void IsInvalided(const bool value){Invalided = value;};
-
-		};
+};
 
 		inline unsigned char * Song::_ppattern(int ps)
 		{
