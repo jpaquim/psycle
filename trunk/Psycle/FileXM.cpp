@@ -374,24 +374,24 @@ LONG CFileXM::ImportSampleHeader(Song *s, LONG iStart, int iInstrIdx, int iSampl
 
 	if(bLoop)
 	{
-		s->waveLoopType[iInstrIdx][iSampleIdx]=true;
+		s->_instruments[iInstrIdx].waveLoopType[iSampleIdx]=true;
 		if(b16Bit)
 		{
-			s->waveLoopStart[iInstrIdx][iSampleIdx]=iLoopStart/2;
-			s->waveLoopEnd[iInstrIdx][iSampleIdx]=(iLoopLength+iLoopStart)/2;
+			s->_instruments[iInstrIdx].waveLoopStart[iSampleIdx]=iLoopStart/2;
+			s->_instruments[iInstrIdx].waveLoopEnd[iSampleIdx]=(iLoopLength+iLoopStart)/2;
 		}
 		else
 		{
-			s->waveLoopStart[iInstrIdx][iSampleIdx]=iLoopStart;
-			s->waveLoopEnd[iInstrIdx][iSampleIdx]=iLoopLength+iLoopStart;
+			s->_instruments[iInstrIdx].waveLoopStart[iSampleIdx]=iLoopStart;
+			s->_instruments[iInstrIdx].waveLoopEnd[iSampleIdx]=iLoopLength+iLoopStart;
 		}
 	}
 
 
-	s->waveVolume[iInstrIdx][iSampleIdx]= iVol;
-	s->waveTune[iInstrIdx][iSampleIdx] = iRelativeNote;	
-//	s->waveFinetune[iInstrIdx][iSampleIdx] = int((100.0*iFineTune)/128);
-	s->waveFinetune[iInstrIdx][iSampleIdx] = iFineTune*2;
+	s->_instruments[iInstrIdx].waveVolume[iSampleIdx]= iVol;
+	s->_instruments[iInstrIdx].waveTune[iSampleIdx] = iRelativeNote;	
+//	s->_instruments[iInstrIdx].waveFinetune[iSampleIdx] = int((100.0*iFineTune)/128);
+	s->_instruments[iInstrIdx].waveFinetune[iSampleIdx] = iFineTune*2;
 
 	smpLen[iSampleIdx] = iLen;
 	smpFlags[iSampleIdx] = iFlags;
@@ -423,7 +423,7 @@ LONG CFileXM::ImportSampleData(Song *s, LONG iStart, int iInstrIdx, int iSampleI
 		for(int j=0;j<sampleCnt;j+=2)
 		{
 			wNew += 0xFF & smpbuf[j] | smpbuf[j+1]<<8;				
-			s->waveDataL[iInstrIdx][iSampleIdx][out] = wNew;
+			s->_instruments[iInstrIdx].waveDataL[iSampleIdx][out] = wNew;
 			out++;
 		}   
 	}
@@ -433,7 +433,7 @@ LONG CFileXM::ImportSampleData(Song *s, LONG iStart, int iInstrIdx, int iSampleI
 		for(int j=0;j<sampleCnt;j++)
 		{			
 			wNew += (smpbuf[j]<<8);// | char(rand())); // scale + dither
-			s->waveDataL[iInstrIdx][iSampleIdx][j] = wNew;
+			s->_instruments[iInstrIdx].waveDataL[iSampleIdx][j] = wNew;
 		}
 	}
 

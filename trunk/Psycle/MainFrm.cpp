@@ -1164,7 +1164,7 @@ void CMainFrame::OnLoadwave()
 			Global::pConfig->SetInstrumentDir(str.Left(index));
 		}
 	}
-	if ( _pSong->waveLength[PREV_WAV_INS][0] > 0)
+	if ( _pSong->_instruments[PREV_WAV_INS].waveLength[0] > 0)
 	{
 		// Stopping wavepreview if not stopped.
 		if(_pSong->PW_Stage)
@@ -1187,22 +1187,22 @@ void CMainFrame::OnSavewave()
 	WaveFile output;
 	static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 	
-	if (_pSong->waveLength[_pSong->instSelected][_pSong->waveSelected])
+	if (_pSong->_instruments[_pSong->instSelected].waveLength[_pSong->waveSelected])
 	{
-		CFileDialog dlg(FALSE, "wav", _pSong->waveName[_pSong->instSelected][_pSong->waveSelected], OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+		CFileDialog dlg(FALSE, "wav", _pSong->_instruments[_pSong->instSelected].waveName[_pSong->waveSelected], OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 		if (dlg.DoModal() == IDOK)
 		{
-			output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->waveStereo[_pSong->instSelected][_pSong->waveSelected]) ? (2) : (1) );
-			if (_pSong->waveStereo[_pSong->instSelected][_pSong->waveSelected])
+			output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_instruments[_pSong->instSelected].waveStereo[_pSong->waveSelected]) ? (2) : (1) );
+			if (_pSong->_instruments[_pSong->instSelected].waveStereo[_pSong->waveSelected])
 			{
-				for ( unsigned int c=0; c < _pSong->waveLength[_pSong->instSelected][_pSong->waveSelected]; c++)
+				for ( unsigned int c=0; c < _pSong->_instruments[_pSong->instSelected].waveLength[_pSong->waveSelected]; c++)
 				{
-					output.WriteStereoSample( *(_pSong->waveDataL[_pSong->instSelected][_pSong->waveSelected] + c), *(_pSong->waveDataR[_pSong->instSelected][_pSong->waveSelected] + c) );
+					output.WriteStereoSample( *(_pSong->_instruments[_pSong->instSelected].waveDataL[_pSong->waveSelected] + c), *(_pSong->_instruments[_pSong->instSelected].waveDataR[_pSong->waveSelected] + c) );
 				}
 			}
 			else
 			{
-				output.WriteData(_pSong->waveDataL[_pSong->instSelected][_pSong->waveSelected], _pSong->waveLength[_pSong->instSelected][_pSong->waveSelected]);
+				output.WriteData(_pSong->_instruments[_pSong->instSelected].waveDataL[_pSong->waveSelected], _pSong->_instruments[_pSong->instSelected].waveLength[_pSong->waveSelected]);
 			}
 
 			output.Close();

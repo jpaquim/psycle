@@ -31,10 +31,11 @@ public:
 	virtual bool Read(void* pData, ULONG numBytes);
 	virtual bool Write(void* pData, ULONG numBytes);
 	virtual bool Expect(void* pData, ULONG numBytes);
-	virtual ULONG Seek(ULONG offset);
-	virtual ULONG Skip(ULONG numBytes);
+	virtual long Seek(long offset);
+	virtual long Skip(long numBytes);
 	virtual bool Eof(void);
 	virtual long FileSize(void);
+	virtual bool ReadString(char* pData, ULONG maxBytes);
 	
 	virtual FILE* GetFile(void) { return NULL; };
 
@@ -54,8 +55,8 @@ public:
 	virtual bool Read(void* pData, ULONG numBytes);
 	virtual bool Write(void* pData, ULONG numBytes);
 	virtual bool Expect(void* pData, ULONG numBytes);
-	virtual ULONG Seek(ULONG offset);
-	virtual ULONG Skip(ULONG numBytes);
+	virtual long Seek(long offset);
+	virtual long Skip(long numBytes);
 	virtual bool Eof(void);
 	virtual long FileSize(void);
 	

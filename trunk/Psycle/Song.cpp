@@ -248,25 +248,25 @@ void Song::DestroyAllMachines()
 
 void Song::DeleteLayer(int i,int c)
 {
-	sprintf(waveName[i][c],"empty");
+	sprintf(_instruments[i].waveName[c],"empty");
 	
-	if(waveLength[i][c]>0)
+	if(_instruments[i].waveLength[c]>0)
 	{
-		delete waveDataL[i][c];
-		if(waveStereo[i][c])
+		delete _instruments[i].waveDataL[c];
+		if(_instruments[i].waveStereo[c])
 		{
-			delete waveDataR[i][c];
+			delete _instruments[i].waveDataR[c];
 		}
-		waveLength[i][c] = 0;
+		_instruments[i].waveLength[c] = 0;
 	}
 	
-	waveStereo[i][c]=false;
-	waveLoopStart[i][c]=0;
-	waveLoopEnd[i][c]=0;
-	waveLoopType[i][c]=0;
-	waveVolume[i][c]=100;
-	waveFinetune[i][c]=0;
-	waveTune[i][c]=0;
+	_instruments[i].waveStereo[c]=false;
+	_instruments[i].waveLoopStart[c]=0;
+	_instruments[i].waveLoopEnd[c]=0;
+	_instruments[i].waveLoopType[c]=0;
+	_instruments[i].waveVolume[c]=100;
+	_instruments[i].waveFinetune[c]=0;
+	_instruments[i].waveTune[c]=0;
 }
 
 void Song::DeleteInstruments()
@@ -331,7 +331,7 @@ void Song::Reset(void)
 	{
 		for (int c=0; c<MAX_WAVES; c++)
 		{
-			waveLength[i][c]=0;
+			_instruments[i].waveLength[c]=0;
 		}
 	}
 	for (i = 0; i<MAX_MACHINES;i++)
@@ -871,7 +871,7 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 
 	if ( hd._id == file.FourCC("NAME"))
 	{
-		file.Read(waveName[instrument][layer],22); // should be hd._size instead of "22", but it is incorrectly read.
+		file.Read(_instruments[instrument].waveName[layer],22); // should be hd._size instead of "22", but it is incorrectly read.
 		if ( strcmp(_instruments[instrument]._sName,"empty") == 0 )
 		{
 			strncpy(_instruments[instrument]._sName,str,31);
@@ -897,13 +897,13 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 		{
 			Datalen>>=1;		ls>>=1;		le>>=1;
 		}
-		waveLength[instrument][layer]=Datalen;
+		_instruments[instrument].waveLength[layer]=Datalen;
 
 		if ( ls != le )
 		{
-			waveLoopStart[instrument][layer]=ls;
-			waveLoopEnd[instrument][layer]=ls+le;
-			waveLoopType[instrument][layer]=true;
+			_instruments[instrument].waveLoopStart[layer]=ls;
+			_instruments[instrument].waveLoopEnd[layer]=ls+le;
+			_instruments[instrument].waveLoopType[layer]=true;
 		}
 		file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
 		file.Read(&hd,sizeof(RiffChunkHeader));
@@ -912,11 +912,11 @@ int Song::IffAlloc(int instrument,int layer,const char * str)
 	if ( hd._id == file.FourCC("BODY"))
 	{
 	    short *csamples;
-		const unsigned int Datalen = waveLength[instrument][layer];
+		const unsigned int Datalen = _instruments[instrument].waveLength[layer];
 
-		waveStereo[instrument][layer]=false;
-		waveDataL[instrument][layer]=new signed short[Datalen];
-		csamples=waveDataL[instrument][layer];
+		_instruments[instrument].waveStereo[layer]=false;
+		_instruments[instrument].waveDataL[layer]=new signed short[Datalen];
+		csamples=_instruments[instrument].waveDataL[layer];
 		
 		if ( bits == 16 )
 		{
@@ -955,19 +955,19 @@ int Song::WavAlloc(
 
 	if(bStereo)
 	{
-		waveDataL[iInstr][iLayer]=new signed short[iSamplesPerChan];
-		waveDataR[iInstr][iLayer]=new signed short[iSamplesPerChan];
-		waveStereo[iInstr][iLayer]=true;
+		_instruments[iInstr].waveDataL[iLayer]=new signed short[iSamplesPerChan];
+		_instruments[iInstr].waveDataR[iLayer]=new signed short[iSamplesPerChan];
+		_instruments[iInstr].waveStereo[iLayer]=true;
 	}
 	else
 	{
-		waveDataL[iInstr][iLayer]=new signed short[iSamplesPerChan];
-		waveStereo[iInstr][iLayer]=false;
+		_instruments[iInstr].waveDataL[iLayer]=new signed short[iSamplesPerChan];
+		_instruments[iInstr].waveStereo[iLayer]=false;
 	}
-	waveLength[iInstr][iLayer]=iSamplesPerChan;
+	_instruments[iInstr].waveLength[iLayer]=iSamplesPerChan;
 
-	strncpy(waveName[iInstr][iLayer],sName,31);
-	waveName[iInstr][iLayer][31]='\0';
+	strncpy(_instruments[iInstr].waveName[iLayer],sName,31);
+	_instruments[iInstr].waveName[iLayer][31]='\0';
 	
 	if(iLayer==0)
 	{
@@ -1010,7 +1010,7 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 // I don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 // I need to convert 8bits to 16bits, and stereo channels are in different arrays.
 	
-	short *sampL=waveDataL[instrument][layer];
+	short *sampL=_instruments[instrument].waveDataL[layer];
 	
 	long io;
 	if ( st_type == 1 ) // mono
@@ -1043,7 +1043,7 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 	}
 	else // stereo
 	{
-		short *sampR = waveDataR[instrument][layer];
+		short *sampR = _instruments[instrument].waveDataR[layer];
 
 		UINT8 smp8;
 		switch(bits)
@@ -1102,11 +1102,11 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 				unsigned int le=0;
 				file.Read((void*)&ls,4);
 				file.Read((void*)&le,4);
-				waveLoopStart[instrument][layer]=ls;
-				waveLoopEnd[instrument][layer]=le;
+				_instruments[instrument].waveLoopStart[layer]=ls;
+				_instruments[instrument].waveLoopEnd[layer]=le;
 //				if (!((ls <= 0) && (le >= Datalen-1))) // **** only for my bad sample collection
 				{
-					waveLoopType[instrument][layer]=true;
+					_instruments[instrument].waveLoopType[layer]=true;
 				}
 			}
 			file.Skip(9);
@@ -1135,12 +1135,172 @@ bool Song::Load(
 	pFile->Read(&Header, 8);
 	Header[8]=0;
 
-/*	if (strcmp(Header,"PSY3SONG")==0)
+	if (strcmp(Header,"PSY3SONG")==0)
 	{
+		while(pFile->Eof()==FALSE)
+		{
+			pFile->Read(&Header, 4);
+			Header[4]=0;
+
+			UINT version = 0;
+			UINT size = 0;
+			int temp;
+
+			pFile->Read(&version,sizeof(version));
+			pFile->Read(&size,sizeof(size));
+			if (version > CURRENT_FILE_VERSION)
+			{
+				// there is an error, this file is newer than this build of psycle
+//				MessageBox(NULL,"File is from a newer version of psycle!",NULL,NULL);
+				pFile->Skip(size);
+			}
+			/*
+			else
+			{
+				// there is currently no data in this segment
+			}
+			*/
+
+			// we should use the size to update the index, but for now we will skip it
+			if (strcmp(Header,"INFO")==0)
+			{
+				pFile->Read(&version,sizeof(version));
+				pFile->Read(&size,sizeof(size));
+				if (version > CURRENT_FILE_VERSION_INFO)
+				{
+					// there is an error, this file is newer than this build of psycle
+//					MessageBox(NULL,"Info Seqment of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+				else
+				{
+					pFile->ReadString(Name,sizeof(Name));
+					pFile->ReadString(Author,sizeof(Author));
+					pFile->ReadString(Comment,sizeof(Comment));
+				}
+			}
+			else if (strcmp(Header,"SNGI")==0)
+			{
+				pFile->Read(&version,sizeof(version));
+				pFile->Read(&size,sizeof(size));
+				if (version > CURRENT_FILE_VERSION_SNGI)
+				{
+					// there is an error, this file is newer than this build of psycle
+//					MessageBox(NULL,"Song Segment of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+				else
+				{
+					pFile->Read(&temp,sizeof(int));  // # of tracks for whole song
+					SONGTRACKS = temp;
+					pFile->Read(&temp,sizeof(int));  // bpm
+					BeatsPerMin = temp;
+					pFile->Read(&temp,sizeof(int));  // tpb
+					_ticksPerBeat = temp;
+					pFile->Read(&temp,sizeof(int));  // current octave
+					currentOctave = temp;
+					pFile->Read(&temp,sizeof(int));  // sequence width, for multipattern
+				}
+			}
+			else if (strcmp(Header,"SEQD")==0)
+			{
+				pFile->Read(&version,sizeof(version));
+				pFile->Read(&size,sizeof(size));
+				if (version > CURRENT_FILE_VERSION_SEQD)
+				{
+					// there is an error, this file is newer than this build of psycle
+//					MessageBox(NULL,"Sequence section of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+				else
+				{
+					char pTemp[2];
+					pFile->Read(&temp,sizeof(int)); // index, for multipattern - for now always 0
+					pFile->Read(&temp,sizeof(int)); // play length for this sequence
+					playLength = temp;
+
+					pFile->ReadString(pTemp,sizeof(pTemp)); // name, for multipattern, for now unused
+
+					for (int i = 0; i < playLength; i++)
+					{
+						pFile->Read(&temp,sizeof(int));
+						playOrder[i] = temp;
+					}
+				}
+			}
+			else if (strcmp(Header,"PATD")==0)
+			{
+				pFile->Read(&version,sizeof(version));
+				pFile->Read(&size,sizeof(size));
+				if (version > CURRENT_FILE_VERSION_PATD)
+				{
+					// there is an error, this file is newer than this build of psycle
+//					MessageBox(NULL,"Pattern section of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+				else
+				{
+					pFile->Read(&temp,sizeof(int)); // index
+					int i = temp;
+					pFile->Read(&temp,sizeof(int)); // num lines
+					patternLines[i] = temp;
+					pFile->Read(&temp,sizeof(int)); // num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
+
+					pFile->ReadString(patternName[i],sizeof(patternName[i]));
+
+					RemovePattern(i); // clear it out if it already exists
+
+					for (int y = 0; y < patternLines[i]; y++)
+					{
+						unsigned char* pData = _ppattern(i)+(y*MULTIPLY);
+						pFile->Read(pData,EVENT_SIZE*SONGTRACKS);
+					}
+
+				}
+			}
+			else if (strcmp(Header,"MACD")==0)
+			{
+				pFile->Read(&version,sizeof(version));
+				pFile->Read(&size,sizeof(size));
+				if (version > CURRENT_FILE_VERSION_MACD)
+				{
+					// there is an error, this file is newer than this build of psycle
+//					MessageBox(NULL,"Machine section of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+				else
+				{
+				}
+			}
+			else if (strcmp(Header,"INSD")==0)
+			{
+				pFile->Read(&version,sizeof(version));
+				pFile->Read(&size,sizeof(size));
+				if (version > CURRENT_FILE_VERSION_INSD)
+				{
+					// there is an error, this file is newer than this build of psycle
+//					MessageBox(NULL,"Instrument section of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
+				}
+				else
+				{
+				}
+			}
+			else 
+			{
+				// we are not at a valid header for some weird reason.  
+				// probably there is some extra data.
+				// shift back 3 bytes and try again
+				pFile->Skip(-3);
+			}
+		}
+		// now that we have loaded all the modules, time to prepare them.
+
+		// calculate samples per tick
+		// connect all output machines, test all connections for invalid machines.
+
 	}
-	else 
-	*/
-	if (strcmp(Header,"PSY2SONG")==0)
+	else if (strcmp(Header,"PSY2SONG")==0)
 	{
 
 		int i;
@@ -1284,24 +1444,24 @@ bool Song::Load(
 		{
 			for (int w=0; w<MAX_WAVES; w++)
 			{
-				pFile->Read(&waveLength[i][w], sizeof(waveLength[0][0]));
-				if (waveLength[i][w] > 0)
+				pFile->Read(&_instruments[i].waveLength[w], sizeof(_instruments[0].waveLength[0]));
+				if (_instruments[i].waveLength[w] > 0)
 				{
 					short tmpFineTune;
-					pFile->Read(&waveName[i][w], sizeof(waveName[0][0]));
-					pFile->Read(&waveVolume[i][w], sizeof(waveVolume[0][0]));
+					pFile->Read(&_instruments[i].waveName[w], sizeof(_instruments[0].waveName[0]));
+					pFile->Read(&_instruments[i].waveVolume[w], sizeof(_instruments[0].waveVolume[0]));
 					pFile->Read(&tmpFineTune, sizeof(short));
-					waveFinetune[i][w]=(int)tmpFineTune;
-					pFile->Read(&waveLoopStart[i][w], sizeof(waveLoopStart[0][0]));
-					pFile->Read(&waveLoopEnd[i][w], sizeof(waveLoopEnd[0][0]));
-					pFile->Read(&waveLoopType[i][w], sizeof(waveLoopType[0][0]));
-					pFile->Read(&waveStereo[i][w], sizeof(waveStereo[0][0]));
-					waveDataL[i][w] = new signed short[waveLength[i][w]];
-					pFile->Read(waveDataL[i][w], waveLength[i][w]*sizeof(short));
-					if (waveStereo[i][w])
+					_instruments[i].waveFinetune[w]=(int)tmpFineTune;
+					pFile->Read(&_instruments[i].waveLoopStart[w], sizeof(_instruments[0].waveLoopStart[0]));
+					pFile->Read(&_instruments[i].waveLoopEnd[w], sizeof(_instruments[0].waveLoopEnd[0]));
+					pFile->Read(&_instruments[i].waveLoopType[w], sizeof(_instruments[0].waveLoopType[0]));
+					pFile->Read(&_instruments[i].waveStereo[w], sizeof(_instruments[0].waveStereo[0]));
+					_instruments[i].waveDataL[w] = new signed short[_instruments[i].waveLength[w]];
+					pFile->Read(_instruments[i].waveDataL[w], _instruments[i].waveLength[w]*sizeof(short));
+					if (_instruments[i].waveStereo[w])
 					{
-						waveDataR[i][w] = new signed short[waveLength[i][w]];
-						pFile->Read(waveDataR[i][w], waveLength[i][w]*sizeof(short));
+						_instruments[i].waveDataR[w] = new signed short[_instruments[i].waveLength[w]];
+						pFile->Read(_instruments[i].waveDataR[w], _instruments[i].waveLength[w]*sizeof(short));
 					}
 				}
 			}
@@ -1844,6 +2004,223 @@ bool Song::Load(
 bool Song::Save(
 	RiffFile* pFile)
 {
+	// NEW FILE FORMAT!!!
+	// this is much more flexible, making maintenance a breeze compared to that old hell.
+	// now you can just update one module without breaking the whole thing.
+
+	// header, this has to be at the top of the file
+
+	/*
+	===================
+	FILE HEADER
+	===================
+	id = "PSY3SONG"; // PSY2 was 1.66
+	version = 0; // "total" version of all chunk versions
+	size = 0;
+	*/
+
+	pFile->Write("PSY3SONG", 8);
+
+	UINT version = CURRENT_FILE_VERSION;
+;
+	UINT size = 0;
+	int temp;
+
+	pFile->Write(&version,sizeof(version));
+	pFile->Write(&size,sizeof(size));
+
+	// the rest of the modules can be arranged in any order
+
+	/*
+	===================
+	SONG INFO TEXT
+	===================
+	HEADER:
+	id = "INFO"; 
+	version = 0;
+	size = strlen(Name)+strlen(Author)+strlen(Comment);
+
+	DATA:
+	char name[]; // null terminated string
+	char author[]; // null terminated string
+	char comment[]; // null terminated string
+	*/
+
+	pFile->Write("INFO",4);
+	version = CURRENT_FILE_VERSION_INFO;
+	size = strlen(Name)+strlen(Author)+strlen(Comment);
+	pFile->Write(&version,sizeof(version));
+	pFile->Write(&size,sizeof(size));
+
+	pFile->Write(&Name,strlen(Name));
+	pFile->Write(&Author,strlen(Author));
+	pFile->Write(&Comment,strlen(Comment));
+
+	/*
+	===================
+	SONG INFO
+	===================
+	HEADER:
+	id = "SNGI"; 
+	version = 0;
+	size = (4*sizeof(int));
+
+	DATA:
+	int numTracks; 
+		// Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks
+		// Values: from 4 to 64
+	int bpm; // bpm of song (0-255) - int incase of future expansion?
+	int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
+	int currentoctave; // curent octave on keyboard (0-9)
+	int sequenceWidth; // * number of sequence columns for multipattern
+	*/
+
+	pFile->Write("SNGI",4);
+	version = CURRENT_FILE_VERSION_SNGI;
+	size = (5*sizeof(int));
+	pFile->Write(&version,sizeof(version));
+	pFile->Write(&size,sizeof(size));
+
+	temp = SONGTRACKS;
+	pFile->Write(&temp,sizeof(int));
+	temp = BeatsPerMin;
+	pFile->Write(&temp,sizeof(int));
+	temp = _ticksPerBeat;
+	pFile->Write(&temp,sizeof(int));
+	temp = currentOctave;
+	pFile->Write(&temp,sizeof(int));
+	temp = 1; // sequence width
+	pFile->Write(&temp,sizeof(int));
+
+	/*
+	===================
+	SEQUENCE DATA
+	===================
+	HEADER:
+	id = "SEQD"; 
+	version = 0;
+	size = ((sequenceLength+2)*sizeof(int))+sizeof(int)+strlen(sequenceColumnName);
+
+	DATA:
+	int index; // * column index for multipattern stuff
+	int sequenceLength
+	char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, but we will truncate on load
+	int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in position 3, it plays the pattern 5th. (zero based)
+	*/
+
+	char* pSequenceName = "seq0\0";
+
+	pFile->Write("SEQD",4);
+	version = CURRENT_FILE_VERSION_SEQD;
+	size = ((playLength+2)*sizeof(int))+strlen(pSequenceName);
+	pFile->Write(&version,sizeof(version));
+	pFile->Write(&size,sizeof(size));
+
+	temp = 0; // index
+	pFile->Write(&temp,sizeof(int));
+	temp = playLength;
+	pFile->Write(&temp,sizeof(int));
+
+	pFile->Write(&pSequenceName,strlen(pSequenceName));
+
+	for (int i = 0; i < playLength; i++)
+	{
+		temp = playOrder[i];
+		pFile->Write(&temp,sizeof(int));
+	}
+
+	/*
+	===================
+	PATTERN DATA
+	===================
+	HEADER:
+	id = "PATD"; 
+	version = 0;
+	size = (3*sizeof(int))+(numlines*patterntracks*sizeof(PatternEntry));
+
+	typedef struct PatternEntry
+	{
+		UCHAR _note;
+		UCHAR _inst; // Aux column.  Instrument for sampler.
+		UCHAR _mach;
+		UCHAR _cmd;
+		UCHAR _parameter;
+	//	UCHAR _vol; // Volume Column - not implemented yet
+	}
+	PatternEntry;
+
+	DATA:
+	int index; // which pattern we are loading
+	int numlines; // how many lines in this pattern (1-512)
+	int patterntracks; // how many tracks in this pattern * for multipattern
+	char patternName[]; // null terminated string.
+	PatternEntry pe[numlines*patterntracks]; // data for this pattern- use numTracks until pattern tracks is implemented
+
+	*/
+
+	for (i = 0; i < MAX_PATTERNS; i++)
+	{
+		// check every pattern for validity
+		if (ppPatternData[i])
+		{
+			// we could also check to see if pattern is unused AND blank, but for now, don't worry about it.
+
+			pFile->Write("PATD",4);
+			version = CURRENT_FILE_VERSION_PATD;
+			size = (3*sizeof(int))+(patternLines[i]*SONGTRACKS*EVENT_SIZE)+strlen(patternName[i]);
+			pFile->Write(&version,sizeof(version));
+			pFile->Write(&size,sizeof(size));
+
+			temp = i; // index
+			pFile->Write(&temp,sizeof(int));
+			temp = patternLines[i];
+			pFile->Write(&temp,sizeof(int));
+			temp = SONGTRACKS; // eventually this may be variable per pattern
+			pFile->Write(&temp,sizeof(int));
+
+			pFile->Write(&patternName[i],strlen(patternName[i]));
+
+			for (int y = 0; y < patternLines[i]; y++)
+			{
+				unsigned char* pData = ppPatternData[i]+(y*MULTIPLY);
+				pFile->Write(pData,EVENT_SIZE*SONGTRACKS);
+			}
+		}
+	}
+
+	// machine and instruments handle their save and load in their respective classes
+
+	for (i = 0; i < MAX_MACHINES; i++)
+	{
+		if (_pMachine[i])
+		{
+//			pFile->Write("MACD",4);
+//			_pMachine[i]->SaveFileChunk(pFile);
+		}
+	}
+
+	for (i = 0; i < MAX_INSTRUMENTS; i++)
+	{
+		if (!_instruments[i].Empty())
+		{
+//			pFile->Write("INSD",4);
+//			_instruments[i].SaveFileChunk(pFile);
+		}
+	}
+
+
+	return true;
+
+
+
+
+
+
+
+
+
+
+	/*
 	int i;
 	char junk[256];
 	memset(&junk, sizeof(junk), 0);
@@ -2139,13 +2516,14 @@ bool Song::Save(
 	_machineLock = false;
 
 	return true;
+	*/
 }
 
 void Song::PW_Play()
 {
 	if (PW_Stage==0)
 	{
-		PW_Length=waveLength[PREV_WAV_INS][0];
+		PW_Length=_instruments[PREV_WAV_INS].waveLength[0];
 		if (PW_Length>0 )
 		{
 			PW_Stage=1;
@@ -2161,9 +2539,9 @@ void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 	--pSamplesL;
 	--pSamplesR;
 	
-	signed short *wl=waveDataL[PREV_WAV_INS][0];
-	signed short *wr=waveDataR[PREV_WAV_INS][0];
-	bool const stereo=waveStereo[PREV_WAV_INS][0];
+	signed short *wl=_instruments[PREV_WAV_INS].waveDataL[0];
+	signed short *wr=_instruments[PREV_WAV_INS].waveDataR[0];
+	bool const stereo=_instruments[PREV_WAV_INS].waveStereo[0];
 	float ld=0;
 	float rd=0;
 		

@@ -129,14 +129,14 @@ bool RiffFile::Expect(
 	return true;
 }
 
-ULONG RiffFile::Seek(
-	ULONG offset)
+long RiffFile::Seek(
+	long offset)
 {
 	return SetFilePointer(_handle, offset, NULL, FILE_BEGIN);
 }
 
-ULONG RiffFile::Skip(
-	ULONG numBytes)
+long RiffFile::Skip(
+	long numBytes)
 {
 	return SetFilePointer(_handle, numBytes, NULL, FILE_CURRENT); 
 }
@@ -154,6 +154,57 @@ long RiffFile::FileSize()
 	SetFilePointer(_handle,init,NULL,FILE_BEGIN);
 	return end;
 }
+
+bool RiffFile::ReadString(char* pData, ULONG maxBytes)
+{
+	if (maxBytes > 0)
+	{
+		memset(pData,0,maxBytes);
+
+		char c;
+		for (ULONG index = 0; index < maxBytes; index++)
+		{
+			DWORD bytesRead;
+			if (ReadFile(_handle, &c, sizeof(char), &bytesRead, NULL))
+			{
+				if (bytesRead == sizeof(char))
+				{
+					pData[index] = c;
+					if (c == 0)
+					{
+						return true;
+					}
+				}
+				else 
+				{
+					return false;
+				}
+			}
+			else 
+			{
+				return false;
+			}
+		}
+		while (c != 0)
+		{
+			DWORD bytesRead;
+			if (ReadFile(_handle, &c, sizeof(char), &bytesRead, NULL))
+			{
+				if (bytesRead != sizeof(char))
+				{
+					return false;
+				}
+			}
+			else 
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,22 +283,22 @@ bool OldPsyFile::Expect(
 	return true;
 }
 
-ULONG OldPsyFile::Seek(
-	ULONG offset)
+long OldPsyFile::Seek(
+	long offset)
 {
 	if (fseek(_file, offset, SEEK_SET) != 0)
 	{
-		return (ULONG)-1;
+		return -1;
 	}
 	return ftell(_file);
 }
 
-ULONG OldPsyFile::Skip(
-	ULONG numBytes)
+long OldPsyFile::Skip(
+	long numBytes)
 {
 	if (fseek(_file, numBytes, SEEK_CUR) != 0)
 	{
-		return (ULONG)-1;
+		return -1;
 	}
 	return ftell(_file);
 }
@@ -266,3 +317,4 @@ long OldPsyFile::FileSize()
 	fseek(_file,init,SEEK_SET);
 	return end;
 }
+

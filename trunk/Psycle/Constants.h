@@ -10,11 +10,11 @@
 #define MAX_BUSES				64	// Power of 2! Important!
 #define MAX_MACHINES			129
 #define MASTER_INDEX			128
-#define MAX_TRACKS				32	// Note: changing this breaks file format
+#define MAX_TRACKS				32	// Note: changing this breaks file format.. but not for long
 #define MAX_WAVES				16
 #define MAX_LINES				256
-#define MAX_INSTRUMENTS			255
-#define PREV_WAV_INS			254
+#define MAX_INSTRUMENTS			256
+#define PREV_WAV_INS			255
 #define LOCK_LATENCY			256
 #define MAX_PATTERNS			128		// MAX NUM OF PATTERNS - NOTE: this was used incorrectly in many places instead of MAX_SONG_POSITIONS
 #define EVENT_SIZE				5
@@ -27,5 +27,15 @@
 #define MAX_DELAY_BUFFER		65536 // Dalay Delay ,Flanger and Player
 #define OVERLAPTIME				128  // Sampler
 #define STREAM_SIZE				256	// If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, if needed.
+
+#define CURRENT_FILE_VERSION_INFO	0
+#define CURRENT_FILE_VERSION_SNGI	0
+#define CURRENT_FILE_VERSION_SEQD	0
+#define CURRENT_FILE_VERSION_PATD	0
+#define CURRENT_FILE_VERSION_MACD	0
+#define CURRENT_FILE_VERSION_INSD	0
+
+
+#define CURRENT_FILE_VERSION		CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD
 
 #endif
