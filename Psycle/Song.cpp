@@ -2452,7 +2452,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 
 
 #if !defined(_WINAMP_PLUGIN_)
-bool Song::Save(RiffFile* pFile)
+bool Song::Save(RiffFile* pFile,bool autosave)
 {
 	// NEW FILE FORMAT!!!
 	// this is much more flexible, making maintenance a breeze compared to that old hell.
@@ -2461,9 +2461,12 @@ bool Song::Save(RiffFile* pFile)
 	// header, this has to be at the top of the file
 
 	CProgressDialog Progress;
-	Progress.Create();
-	Progress.SetWindowText("Saving...");
-	Progress.ShowWindow(SW_SHOW);
+	if ( !autosave ) 
+	{
+		Progress.Create();
+		Progress.SetWindowText("Saving...");
+		Progress.ShowWindow(SW_SHOW);
+	}
 
 	int chunkcount = 3; // 3 chunks plus:
 	for (int i = 0; i < MAX_PATTERNS; i++)
@@ -2492,8 +2495,11 @@ bool Song::Save(RiffFile* pFile)
 		}
 	}
 
-	Progress.m_Progress.SetRange(0,chunkcount);
-	Progress.m_Progress.SetStep(1);
+	if ( !autosave ) 
+	{
+		Progress.m_Progress.SetRange(0,chunkcount);
+		Progress.m_Progress.SetStep(1);
+	}
 
 	/*
 	===================
@@ -2513,8 +2519,11 @@ bool Song::Save(RiffFile* pFile)
 	pFile->Write(&size,sizeof(size));
 	pFile->Write(&chunkcount,sizeof(chunkcount));
 
-	Progress.m_Progress.StepIt();
-	::Sleep(1);
+	if ( !autosave ) 
+	{
+		Progress.m_Progress.StepIt();
+		::Sleep(1);
+	}
 
 	// the rest of the modules can be arranged in any order
 
@@ -2535,8 +2544,11 @@ bool Song::Save(RiffFile* pFile)
 	pFile->Write(&Author,strlen(Author)+1);
 	pFile->Write(&Comment,strlen(Comment)+1);
 
-	Progress.m_Progress.StepIt();
-	::Sleep(1);
+	if ( !autosave ) 
+	{
+		Progress.m_Progress.StepIt();
+		::Sleep(1);
+	}
 
 	/*
 	===================
@@ -2583,8 +2595,11 @@ bool Song::Save(RiffFile* pFile)
 		pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
 	}
 
-	Progress.m_Progress.StepIt();
-	::Sleep(1);
+	if ( !autosave ) 
+	{
+		Progress.m_Progress.StepIt();
+		::Sleep(1);
+	}
 
 	/*
 	===================
@@ -2614,8 +2629,11 @@ bool Song::Save(RiffFile* pFile)
 		pFile->Write(&temp,sizeof(temp));
 	}
 
-	Progress.m_Progress.StepIt();
-	::Sleep(1);
+	if ( !autosave ) 
+	{
+		Progress.m_Progress.StepIt();
+		::Sleep(1);
+	}
 
 	/*
 	===================
@@ -2663,8 +2681,11 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(pCopy,size);
 			delete pCopy;
 
-			Progress.m_Progress.StepIt();
-			::Sleep(1);
+			if ( !autosave ) 
+			{
+				Progress.m_Progress.StepIt();
+				::Sleep(1);
+			}
 		}
 	}
 
@@ -2692,8 +2713,11 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(&size,sizeof(size));
 			pFile->Seek(pos2);
 
-			Progress.m_Progress.StepIt();
-			::Sleep(1);
+			if ( !autosave ) 
+			{
+				Progress.m_Progress.StepIt();
+				::Sleep(1);
+			}
 		}
 	}
 
@@ -2719,16 +2743,22 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(&size,sizeof(size));
 			pFile->Seek(pos2);
 
-			Progress.m_Progress.StepIt();
-			::Sleep(1);
+			if ( !autosave ) 
+			{
+				Progress.m_Progress.StepIt();
+				::Sleep(1);
+			}
 		}
 	}
 
-	Progress.m_Progress.SetPos(chunkcount);
-	::Sleep(1);
+	if ( !autosave ) 
+	{
+		Progress.m_Progress.SetPos(chunkcount);
+		::Sleep(1);
 
-	Progress.OnCancel();
-
+		Progress.OnCancel();
+	}
+	
 	if (!pFile->Close())
 	{
 		char error[MAX_PATH];

@@ -898,7 +898,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 void CChildView::DrawPatEditor(CDC *devc)
 {
 	///////////////////////////////////////////////////////////
-	// Prepare pattern for update (Undraw guipos and playpos)
+	// Prepare pattern for update 
 	CRect rect;
 	CFont* oldFont;
 

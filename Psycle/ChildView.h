@@ -70,7 +70,8 @@ enum
 enum
 {
 	VMMachine,
-	VMPattern
+	VMPattern,
+	VMSequence
 };
 
 
@@ -393,6 +394,7 @@ private:
 	void FindMachineSkin(CString findDir, CString findName, BOOL *result);
 	void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
 	void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
+	void DrawSeqEditor(CDC *devc);
 
 	inline int _ps();
 	inline unsigned char * _ptrack(int ps, int track);
@@ -589,6 +591,8 @@ public:
 	afx_msg void OnHelpWhatsnew();
 	afx_msg void OnConfigurationLoopplayback();
 	afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
+	afx_msg void OnShowPatternSeq();
+	afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -368,7 +368,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 
 	if ( _sDllName != NULL ) delete _sDllName;
 	_sDllName = new char[strlen(dllname)+1];
-	sprintf(_sDllName,dllname);
+	strcpy(_sDllName,dllname);
 	TRACE("VST plugin dll filename : %s\n",_sDllName);
 
 	instantiated=true;
@@ -993,7 +993,7 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 			{*/
 //				const double ppq = ((((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount/ _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60.0f ));
 //				_timeInfo.ppqPos =  ppq - 4*((int)ppq/4);
-				_timeInfo.ppqPos = ((((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount/ _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60.0f ));
+				_timeInfo.ppqPos = (((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::pPlayer->bpm )/ (_timeInfo.sampleRate* 60.0f  );
 //			}
 		}
 		if (value & kVstTempoValid)

@@ -1,5 +1,6 @@
 // Configure the Foobar2000 SDK $PATH before compiling 
 #include "stdafx.h"
+/*
 #include <input.h>
 #include <tagread.h>
 #include <file_info_helper.h>
@@ -8,6 +9,9 @@
 //#include <foobar2000.h>
 //#include "utf8api.h"
 #include "resource.h"
+*/
+#include "../../foobarSDK/foobar2000/SDK/foobar2000.h"
+
 // psycle
 #include "../configuration.h"
 #include "../Song.h"
@@ -15,8 +19,11 @@
 #include "../machine.h"
 #include "../helpers.h"
 
+
 #include <math.h>
 #include <shlobj.h>
+
+
 
 Global _global;
 
@@ -94,9 +101,9 @@ public:
 	}
 
 
-	virtual int test_filename(const char * fn,const char * ext) 
+	virtual bool test_filename(const char * fn,const char * ext) 
 	{
-		return !stricmp(ext,"PSY");
+		return !stricmp(ext,"psy");
 	}
 
 
@@ -250,7 +257,7 @@ public:
 	return 0;
 	}
 
-	virtual int open(reader * r,file_info * info,int full_open)
+	virtual bool open(reader * r,file_info * info,unsigned int full_open)
 	{
 
 	string_ansi_from_utf8 _f(info->get_file_path());
@@ -340,7 +347,7 @@ public:
 		return 1;
 	}
  
-	virtual int seek(double time_in_ms)
+	virtual bool seek(double time_in_ms)
 	{
 	Song* pSong = _global._pSong;
 	int time_left = (int)time_in_ms*1000;
@@ -363,8 +370,8 @@ public:
 		return 1;
 	}
 
-	virtual int can_seek() { return pReader->can_seek();}
-    virtual set_info_t set_info(reader *r,const file_info * info) { return SET_INFO_FAILURE; }
+	virtual bool can_seek() { return pReader->can_seek();}
+    virtual input::set_info_t set_info(reader *r,const file_info * info) { return SET_INFO_FAILURE; }
  
 };
 
@@ -583,7 +590,7 @@ static BOOL CALLBACK ConfigProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		case (CBN_SELCHANGE<<16)|IDC_COMBO_SAMPLING_RATE:
 				cfg_sampling_rate = srate_tab[SendMessage((HWND)lp,CB_GETCURSEL,0,0)];
 				break;
-
+				
 		case IDC_BROWSE_NATIVE:
 			{
 				m_lpPluginsDir = BrowseForFolder(wnd, _global.pConfig->GetPluginDir());
@@ -615,3 +622,4 @@ public:
 
 static service_factory_t<input,input_psycle> foo;
 static service_factory_t<config,config_input_psycle> foo2;
+DECLARE_COMPONENT_VERSION("Psycle Module Decoder","1.0","Psycle Module Decoder for foobar2000\nDeveloped by Psycledelics 2001-2003");

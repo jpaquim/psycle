@@ -503,7 +503,7 @@ void CFrameMachine::OnParametersRandomparameters()
 		int minran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
 		int maxran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
 
-		int dif = maxran-minran;
+		int dif = (maxran-minran)+1;
 
 		float randsem = (float)rand()*0.000030517578125f;
 

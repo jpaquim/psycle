@@ -100,6 +100,13 @@ public:  // control bar embedded members
 	int GetNumFromCombo(CComboBox* cb);
 	void ChangeIns(int i);
 	void ChangeGen(int i);
+	afx_msg void OnLoadwave();
+	
+	void EditQuantizeChange(int diff);
+	void ShiftOctave(int x);
+	void UpdateMasterValue(int newvalue);
+		
+	
 	CStatusBar  m_wndStatusBar;
 	CToolBar    m_wndToolBar;
 	CChildView  m_wndView;
@@ -108,11 +115,7 @@ public:  // control bar embedded members
 	CDialogBar	m_wndSeq;
 	CReBar      m_wndReBar;
 	char		szStatusIdle[192];
-	afx_msg void OnLoadwave();
-	
-	void EditQuantizeChange(int diff);
-	void ShiftOctave(int x);
-	
+
 	CInstrumentEditor	m_wndInst;
 	CInfoDlg	m_wndInfo;
 	CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
@@ -212,6 +215,7 @@ protected:
 	afx_msg void OnEditBlockMixpaste();
 	afx_msg void OnEditBlockPaste();
 	afx_msg void OnNotestoeffects();
+	afx_msg void OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
