@@ -614,7 +614,17 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 		return 0;		// call application idle routine (this will call effEditIdle for all open editors too) 
 		
-	case audioMasterPinConnected:	
+	case audioMasterPinConnected:
+		if (value == 0) //input
+		{
+			if ( index < 2) return 0;
+			else return 1;
+		}
+		else //output
+		{
+			if ( index < 2) return 0;
+			else return 1;
+		}
 		return 0;	// inquire if an input or output is beeing connected;
 
 	case audioMasterWantMidi:			return 0;
@@ -900,8 +910,8 @@ void VSTInstrument::Work(int numSamples)
 		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 		SendMidi();
 
-		if (!requiresRepl ) _pEffect->process(_pEffect,NULL,outputs,numSamples);
-		else _pEffect->processReplacing(_pEffect,NULL,outputs,numSamples);
+		if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,numSamples);
+		else _pEffect->processReplacing(_pEffect,inputs,outputs,numSamples);
 
 		if ( _pEffect->numOutputs == 1)
 		{
