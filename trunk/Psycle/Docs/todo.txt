@@ -10,13 +10,39 @@ X low priority
 
 [blah]  <- Notes written by developers
 
-* New and unsorted
+
+* New and unsorted and untested
 ------------
+
+Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to vol+panning for the gui for the user.
 
 <alk> 'play current block' loops current pattern -should it just play the selected block?
 <alk> 'play current pattern' plays song from current order (which is the same function as 'play song (normal)' -should it just play the current pattern?
 <alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
 <alk> in keyboard settings make a button to set keypress to 'none'
+
+DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
+	machines ....
+alk: global Delay Trigger, that affects every note (not just the one on this channel)
+alk: escape to close wave ed
+alk: dalay delay is not precise enough (in terms of time)
+
+alk: keypress arm current channel
+alk: rightclick on vol slider in wire dialog to enter vol numerically (0.0db is imposibble to set once 
+	the slider has been moved)
+
+alk:
+**
+do add machine
+double click sampler
+half of the dialog disappears leaving some garbage on the screen whic disappears after some seconds
+**
+
+alk:
+**
+select the the first and last row of channel 2 to select the whole channel
+move to channel 1, goto the last row, do select end of block
+**
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
