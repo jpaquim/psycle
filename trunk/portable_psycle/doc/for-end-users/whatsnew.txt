@@ -17,7 +17,7 @@ Version | Type of release          | By
 1.7.6.2 | microsoft bug fix        | alk & bohan
 -----------------------------------------------------------------
 
-From now on, releases will be named this way:
+Since 1.7.3, releases are named this way:
 M.m.r.p , where:
 M = major version number.
 m = minor version number.
@@ -27,6 +27,14 @@ p = patch number.
 ----------------------------------------------------------------
 Legend :       +=addition        *=change        !=bug
 ----------------------------------------------------------------
+
+cvs commit messages
+-------------------
+
+$Log$
+Revision 1.7  2004/05/10 15:15:47  johan-boule
+added commit log to whatsnew.txt
+
 
 v1.7.6.2
 --------
