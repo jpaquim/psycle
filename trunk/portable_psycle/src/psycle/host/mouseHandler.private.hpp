@@ -454,7 +454,8 @@ namespace psycle
 								ssrc = MachineCoords.sEffect;break;
 							case MACHMODE_MASTER:
 								ssrc = MachineCoords.sMaster;break;
-							default:break;
+							default:
+								assert(false);ssrc=SSkinSource();break;
 						}
 						if (point.x-mcd_x < 0 ) _pSong->_pMachine[smac]->_x = 0;
 						else if	(point.x-mcd_x+ssrc.width > CW) 
