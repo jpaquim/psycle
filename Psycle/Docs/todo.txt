@@ -10,7 +10,6 @@
 * waves list did not enum waves on song load
 + gear rack
 * <alk> there's a bug where when u alt-tab the icon is not correct
-* <alk> and the save as filename being picked up incorrecctly
 + song not saved dialog on load or exit
 
 * Machines
@@ -167,7 +166,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	 (like instert button)?
 + <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
 	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
-+ pooplog - dragging files onto psycle window would be nice, hmm?
 + songs should save master decrease flag
 + <sue>in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
 	(many vsts use control + left mouse button to reset knobs/params....maybe any other alike key 

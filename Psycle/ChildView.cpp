@@ -645,8 +645,7 @@ void CChildView::OnFileSave()
 void CChildView::OnFileSavesong() 
 {
 	OPENFILENAME ofn;       // common dialog box structure
-	CString ifile = Global::_pSong->Name;
-	ifile += ".psy";
+	CString ifile = Global::_pSong->fileName;
 	CString if2 = ifile.SpanExcluding("\\/:*\"<>|");
 	
 	char szFile[_MAX_PATH];

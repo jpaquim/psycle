@@ -2292,6 +2292,7 @@ void CMainFrame::OnDropFiles(WPARAM wParam)
 				DragFinish((HDROP)  wParam);	// handle of structure for dropped files
 				return;
 			}
+			// add psb, psv?
 			// load waves and crap here
 		}
 	}
