@@ -75,7 +75,6 @@ END
 
 IDR_MAINFRAME ACCELERATORS MOVEABLE PURE 
 BEGIN
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_LOADSONG,       VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F1,          ID_PSYHELP,             VIRTKEY, NOINVERT
@@ -1814,7 +1813,7 @@ IDR_MAINFRAME MENU DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New\tCTRL+N",                ID_FILE_NEW
+        MENUITEM "&New",						ID_FILE_NEW
         MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
         MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
         MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
