@@ -340,7 +340,7 @@ bool InputHandler::ConfigRestore()
 
 // perform command
 // TODO: move to a callback system... this is disgustingly messy
-void InputHandler::PerformCmd(CmdDef cmd)
+void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 {
 	switch(cmd.ID)
 	{
@@ -735,7 +735,7 @@ void InputHandler::PerformCmd(CmdDef cmd)
 		break;
 
 	case cdefSongPosInc:
-		pChildView->IncPosition();
+		if ( !brepeat || pChildView->editPosition+1 < Global::_pSong->playLength) pChildView->IncPosition();
 		break;
 
 	case cdefSongPosDec:

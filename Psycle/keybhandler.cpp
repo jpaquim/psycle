@@ -51,7 +51,7 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		if((cmd.GetType() == CT_Immediate) ||
 		   (cmd.GetType() == CT_Editor && viewMode == VMPattern) ) 
 		{			
-			Global::pInputHandler->PerformCmd(cmd);
+			Global::pInputHandler->PerformCmd(cmd,bRepeat);
 		}
 		else if (cmd.GetType() == CT_Note )
 		{
@@ -697,7 +697,11 @@ void CChildView::patCut()
 	}
 	patBufferCopy = true;
 
-	Repaint();
+	drawTrackStart=0;
+	drawTrackEnd=_pSong->SONGTRACKS;
+	drawLineStart=0;
+	drawLineEnd=patBufferLines-1;
+	Repaint(DMDataChange);
 }
 
 void CChildView::patCopy()
@@ -711,24 +715,26 @@ void CChildView::patCopy()
 	memcpy(patBufferData,soffset,length);
 	
 	patBufferCopy=true;
-
-	Repaint(DMCursorMove); // Needed?
 }
 
 void CChildView::patPaste()
 {
-	const int ps = _ps();
-	unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
-
 	if(patBufferCopy && viewMode == VMPattern)
 	{
+		const int ps = _ps();
+		unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
+
 		if ( patBufferLines != _pSong->patternLines[_ps()] )
 		{
 			_pSong->AllocNewPattern(_ps(),"",patBufferLines,false);
 		}
 		memcpy(soffset,patBufferData,patBufferLines*5*MAX_TRACKS);
 		
-		Repaint();
+		drawTrackStart=0;
+		drawTrackEnd=_pSong->SONGTRACKS;
+		drawLineStart=0;
+		drawLineEnd=patBufferLines-1;
+		Repaint(DMDataChange);
 	}
 }
 
@@ -1218,7 +1224,7 @@ void CChildView::IncCurPattern()
 	{
 		++_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternChange);
+		Repaint(DMPatternSwitch);
 	}
 }
 
@@ -1229,7 +1235,7 @@ void CChildView::DecCurPattern()
 	{
 		--_pSong->playOrder[editPosition];
 		pParentMain->UpdatePlayOrder(true);
-		Repaint(DMPatternChange);
+		Repaint(DMPatternSwitch);
 	}
 }
 
@@ -1243,7 +1249,7 @@ void CChildView::DecPosition()
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(false);
-		Repaint(DMPatternChange);
+		Repaint(DMPatternSwitch);
 	}
 }
 
@@ -1264,7 +1270,7 @@ void CChildView::IncPosition()
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(false);
-		Repaint(DMPatternChange);
+		Repaint(DMPatternSwitch);
 	}
 }
 

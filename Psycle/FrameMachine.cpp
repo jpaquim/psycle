@@ -516,7 +516,7 @@ void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 
 		case CT_Immediate:
-			Global::pInputHandler->PerformCmd(cmd,nRepCnt);
+			Global::pInputHandler->PerformCmd(cmd,bRepeat);
 			break;
 		}
 	}
