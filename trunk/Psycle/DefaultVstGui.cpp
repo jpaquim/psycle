@@ -109,7 +109,7 @@ void CDefaultVstGui::UpdateParList()
 	const long params = _pMachine->NumParameters();
 	for (int i=0; i<params; i++)
 	{
-		char str[64], buf[64];
+		char str[128], buf[128];
 
 		memset(str,0,64);
 		_pMachine->Dispatch(effGetParamName, i, 0, str, 0);
@@ -130,7 +130,7 @@ void CDefaultVstGui::UpdateParList()
 
 void CDefaultVstGui::UpdateText(float value)
 {
-	char str[512],str2[15];
+	char str[512],str2[32];
 	_pMachine->DescribeValue(nPar,str);
 	sprintf(str2,"\t[Hex: %4X]",f2i(value*65535.0f));
 	strcat(str,str2);

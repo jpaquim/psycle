@@ -89,6 +89,7 @@
 #define IDD_GEAR_RACK                   201
 #define IDD_NEW_VOLUME                  202
 #define IDD_SAVEWAVDLG                  203
+#define IDD_PROGRESS_DIALOG             204
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -600,9 +601,12 @@
 #define IDC_SLIDERM11                   1471
 #define IDC_DRAW_EMPTY_DATA             1471
 #define IDC_SLIDERM12                   1472
+#define IDC_DRAW_MAC_INDEX              1472
 #define IDC_SEQCUT                      1473
+#define IDC_TRIANGLESIZE                1473
 #define IDC_SEQCOPY                     1474
 #define IDC_SEQPASTE                    1475
+#define IDC_MACHINE_BITMAP              1475
 #define IDC_SEQDELETE                   1476
 #define IDC_VERSION_INFO                1479
 #define IDC_BUTTON                      1481
@@ -649,8 +653,10 @@
 #define IDC_RADIO_EFX                   1523
 #define IDC_NOTESTOEFFECTS              1523
 #define IDC_RADIO_INS                   1524
+#define IDC_PROGRESS1                   1524
+#define IDC_CLONE                       1525
+#define IDC_CHECK_ALLOW                 1526
 #define ID_FILE_LOADSONG                32775
-#define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
 #define ID_FILE_SONGPROPERTIES          32779
@@ -732,6 +738,9 @@
 #define ID_VIEW_MACHINEBAR              32912
 #define ID_VIEW_SEQUENCER               32913
 #define ID_VIEW_SEQUENCERBAR            32914
+#define ID_CONFIGURATION_LOOPPLAYBACK   32920
+#define ID_BARPLAYFROMSTART             32921
+#define ID_BUTTON32922                  32922
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -739,9 +748,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        204
-#define _APS_NEXT_COMMAND_VALUE         32920
-#define _APS_NEXT_CONTROL_VALUE         1524
+#define _APS_NEXT_RESOURCE_VALUE        205
+#define _APS_NEXT_COMMAND_VALUE         32923
+#define _APS_NEXT_CONTROL_VALUE         1527
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

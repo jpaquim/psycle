@@ -17,17 +17,12 @@ static char THIS_FILE[] = __FILE__;
 int CNewMachine::pluginOrder = 1;
 bool CNewMachine::pluginName = 1;
 int CNewMachine::_numPlugins = -1;
-int CNewMachine::_numDirs = 0;
 int CNewMachine::LastType0=0;
 int CNewMachine::LastType1=0;
 
-int CNewMachine::_numBadPlugins;
-char * CNewMachine::_BadPluginPath[MAX_BAD_PLUGINS];
-FILETIME CNewMachine::_BadPluginFileTime[MAX_BAD_PLUGINS];
-
 PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
-//char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
-CMapStringToString CNewMachine::dllNames(64);
+
+CMapStringToString CNewMachine::dllNames(MAX_BROWSER_PLUGINS);
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,10 +39,6 @@ CNewMachine::CNewMachine(CWnd* pParent /*=NULL*/)
 	psOutputDll = NULL;
 //	pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
 //					It is initialized above, where it is declared.
-	for (int i = 0; i < MAX_BAD_PLUGINS; i++)
-	{
-		_BadPluginPath[i] = NULL;
-	}
 }
 
 CNewMachine::~CNewMachine()
@@ -56,20 +47,13 @@ CNewMachine::~CNewMachine()
 	{
 		delete psOutputDll;
 	}
-	for (int i = 0; i < MAX_BAD_PLUGINS; i++)
-	{
-		if (_BadPluginPath[i])
-		{
-			delete _BadPluginPath[i];
-			_BadPluginPath[i] = NULL;
-		}
-	}
 }
 
 void CNewMachine::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CNewMachine)
+	DDX_Control(pDX, IDC_CHECK_ALLOW, m_Allow);
 	DDX_Control(pDX, IDC_NAMELABEL, m_nameLabel);
 	DDX_Control(pDX, IDC_BROWSER, m_browser);
 	DDX_Control(pDX, IDC_VERSIONLABEL, m_versionLabel);
@@ -91,6 +75,7 @@ BEGIN_MESSAGE_MAP(CNewMachine, CDialog)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_SHOWDLLNAME, OnShowdllname)
 	ON_BN_CLICKED(IDC_SHOWEFFNAME, OnShoweffname)
+	ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -107,6 +92,8 @@ BOOL CNewMachine::OnInitDialog()
  	}
 	imgList.Create(IDB_MACHINETYPE,16,2,1);
 	m_browser.SetImageList(&imgList,TVSIL_NORMAL);
+
+	bAllowChanged = FALSE;
 
 	LoadPluginInfo();
 	UpdateList();
@@ -157,39 +144,41 @@ void CNewMachine::UpdateList(bool bInit)
 		}*/
 		for (int i=_numPlugins-1; i>=0; i--)
 		{
-			int imgindex;
-			HTREEITEM hitem;
-			if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
+			if (_pPlugsInfo[i]->error_type == VSTINSTANCE_NO_ERROR)
 			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
-				{ 
-					imgindex = 2; 
-					hitem= hNodes[1]; 
+				int imgindex;
+				HTREEITEM hitem;
+				if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
+				{
+					if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+					{ 
+						imgindex = 2; 
+						hitem= hNodes[1]; 
+					}
+					else 
+					{ 
+						imgindex = 4; 
+						hitem=hNodes[2]; 
+					}
 				}
-				else 
-				{ 
-					imgindex = 4; 
-					hitem=hNodes[2]; 
+				else
+				{
+					if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+					{ 
+						imgindex = 3; 
+						hitem= hNodes[1];
+					}
+					else 
+					{ 
+						imgindex = 5; 
+						hitem=hNodes[2];
+					}
 				}
+				if (pluginName)
+					hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
+				else
+					hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
 			}
-			else
-			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
-				{ 
-					imgindex = 3; 
-					hitem= hNodes[1];
-				}
-				else 
-				{ 
-					imgindex = 5; 
-					hitem=hNodes[2];
-				}
-			}
-			if (pluginName)
-				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
-			else
-				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
-
 		}
 		hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 		hInt[1] = m_browser.InsertItem("'Dist!' Distortion",1,1,intFxNode,TVI_SORT);
@@ -209,38 +198,41 @@ void CNewMachine::UpdateList(bool bInit)
 		nodeindex=2;
 		for (int i=_numPlugins-1; i>=0; i--)// I Search from the end because when creating the
 		{									// array, the deepest dir comes first.
-			int imgindex;
-			HTREEITEM hitem;
-			if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
+			if (_pPlugsInfo[i]->error_type == VSTINSTANCE_NO_ERROR)
 			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
-				{ 
-					imgindex = 2; 
-					hitem= hNodes[0]; 
+				int imgindex;
+				HTREEITEM hitem;
+				if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
+				{
+					if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+					{ 
+						imgindex = 2; 
+						hitem= hNodes[0]; 
+					}
+					else 
+					{ 
+						imgindex = 4; 
+						hitem=hNodes[0]; 
+					}
 				}
-				else 
-				{ 
-					imgindex = 4; 
-					hitem=hNodes[0]; 
+				else
+				{
+					if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
+					{ 
+						imgindex = 3; 
+						hitem= hNodes[1]; 
+					}
+					else 
+					{ 
+						imgindex = 5; 
+						hitem=hNodes[1]; 
+					}
 				}
+				if (pluginName)
+					hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
+				else
+					hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
 			}
-			else
-			{
-				if ( _pPlugsInfo[i]->type == MACH_PLUGIN ) 
-				{ 
-					imgindex = 3; 
-					hitem= hNodes[1]; 
-				}
-				else 
-				{ 
-					imgindex = 5; 
-					hitem=hNodes[1]; 
-				}
-			}
-			if (pluginName)
-				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
-			else
-				hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
 
 		}
 		hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
@@ -262,7 +254,7 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 
-	HTREEITEM tHand = m_browser.GetSelectedItem();
+	tHand = m_browser.GetSelectedItem();
 
 	Outputmachine = -1;
 	OutBus = false;
@@ -277,6 +269,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		OutBus = true;
 		LastType0 = 0;
 		LastType1 = 0;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	// Effects
@@ -289,6 +283,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_DIST;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	if (tHand == hInt[2])
@@ -300,6 +296,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_SINE;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	if (tHand == hInt[3])
@@ -311,6 +309,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_DELAY;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	if (tHand == hInt[4])
@@ -322,6 +322,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_2PFILTER;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	if (tHand == hInt[5])
@@ -333,6 +335,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_GAIN;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	if (tHand == hInt[6])
@@ -344,6 +348,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_FLANGER;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 	
 	if (tHand == hInt[7])
@@ -355,6 +361,8 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		Outputmachine = MACH_DUMMY;
 		LastType0 = 0;
 		LastType1 = 1;
+		m_Allow.SetCheck(FALSE);
+		m_Allow.EnableWindow(FALSE);
 	}
 
 	for (int i=0; i<_numPlugins; i++)
@@ -401,6 +409,9 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 			if (psOutputDll != NULL) delete psOutputDll;
 			psOutputDll = new char[strlen(_pPlugsInfo[i]->dllname)+1];
 			strcpy(psOutputDll,_pPlugsInfo[i]->dllname);
+
+			m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
+			m_Allow.EnableWindow(TRUE);
 		}
 	}
 
@@ -465,7 +476,6 @@ void CNewMachine::LoadPluginInfo()
 		int plugsCount=0;
 		int badPlugsCount =0;
 		_numPlugins = 0;
-		_numBadPlugins = 0;
 		BOOL bProgressOpen = !LoadCacheFile(plugsCount,badPlugsCount);
 		CProgressDialog Progress;
 
@@ -513,7 +523,6 @@ void CNewMachine::LoadPluginInfo()
 			FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetVstDir()),MACH_VST);
 		}
 		_numPlugins = plugsCount;
-		_numBadPlugins = badPlugsCount;
 
 		if (bProgressOpen)
 		{
@@ -596,7 +605,27 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 						if (strcmp(finder.GetFilePath(),_pPlugsInfo[i]->dllname)==0)
 						{
 							bExist = TRUE;
-							fprintf(hfile,"already mapped");
+							switch (_pPlugsInfo[i]->error_type)
+							{
+							case VSTINSTANCE_ERR_NO_VALID_FILE:
+								fprintf(hfile,"* Previously Disabled - No File Error *");
+								break;
+							case VSTINSTANCE_ERR_NO_VST_PLUGIN:
+								fprintf(hfile,"* Previously Disabled - Not Plugin Error *");
+								break;
+							case VSTINSTANCE_ERR_REJECTED:
+								fprintf(hfile,"* Previously Disabled - Rejected Error *");
+								break;
+							case VSTINSTANCE_ERR_EXCEPTION:
+								fprintf(hfile,"* Previously Disabled - Exception Error *");
+								break;
+							case VSTINSTANCE_NO_ERROR:
+								fprintf(hfile,"* Previously Mapped *");
+								break;
+							default:
+								fprintf(hfile,"* Disabled - Unknown Reason *");
+								break;
+							}
 							break;
 						}
 					}
@@ -604,126 +633,137 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 			}
 			if (!bExist)
 			{
-				bExist = FALSE;
-				for (int i = 0; i < _numBadPlugins; i++)
+				if (type == MACH_PLUGIN )
 				{
-					if ((_BadPluginFileTime[i].dwHighDateTime == time.dwHighDateTime)
-						&& (_BadPluginFileTime[i].dwLowDateTime == time.dwLowDateTime))
+					Plugin plug(0);
+
+					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+					ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
+
+					_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
+					strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+
+					FILETIME time;
+					finder.GetLastWriteTime(&time);
+					_pPlugsInfo[currentPlugsCount]->FileTime = time;
+
+					_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
+
+					if (plug.Instance((char*)(const char*)finder.GetFilePath()))
 					{
-						if (strcmp(finder.GetFilePath(),_BadPluginPath[i])==0)
+						_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_NO_ERROR;
+						_pPlugsInfo[currentPlugsCount]->allow = true;
+
+						strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
+						sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
+								(plug.IsSynth()) ? "Psycle instrument" : "Psycle effect",
+								plug.GetAuthor());
+						strcpy(_pPlugsInfo[currentPlugsCount]->version,"PsycleAPI 1.0");
+
+						if ( plug.IsSynth() ) 
 						{
-							bExist = TRUE;
-							fprintf(hfile,"already mapped - not plugin or bugged");
+							_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+						}
+						else 
+						{
+							_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+						}
+
+						char str2[256];
+						CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+						str.MakeLower();
+						strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+						dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+
+						fprintf(hfile,"*** NEW *** - ");
+						fprintf(hfile,plug.GetName());
+					}
+					else
+					{
+						_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_ERR_NO_VST_PLUGIN;
+						_pPlugsInfo[currentPlugsCount]->allow = false;
+
+						sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
+						sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
+						sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
+						fprintf(hfile,"*** ERROR - NOT NATIVE PLUGIN OR BUGGED ***");
+					}
+					currentPlugsCount++;
+				}
+				else if (type == MACH_VST)
+				{
+					VSTPlugin vstPlug;
+
+					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+					ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
+
+					_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
+					strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+
+					FILETIME time;
+					finder.GetLastWriteTime(&time);
+					_pPlugsInfo[currentPlugsCount]->FileTime = time;
+
+					_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
+
+					_pPlugsInfo[currentPlugsCount]->error_type = vstPlug.Instance((char*)(const char*)finder.GetFilePath());
+
+					if (_pPlugsInfo[currentPlugsCount]->error_type == VSTINSTANCE_NO_ERROR)
+					{
+						_pPlugsInfo[currentPlugsCount]->allow = true;
+
+						strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
+						sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
+							(vstPlug.IsSynth()) ? "VST2 instrument" : "VST2 effect",
+							vstPlug.GetVendorName());
+						sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug.GetVersion());
+						_pPlugsInfo[currentPlugsCount]->version[15]='\0';
+						if ( vstPlug.IsSynth() ) 
+						{
+							_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+						}
+						else 
+						{
+							_pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+						}
+
+						char str2[256];
+						CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+						str.MakeLower();
+						strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+						dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+
+						fprintf(hfile,"*** NEW *** - ");
+						fprintf(hfile,vstPlug.GetName());
+					}
+					else
+					{
+						_pPlugsInfo[currentPlugsCount]->allow = false;
+
+						sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
+						sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
+						sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
+
+						switch (_pPlugsInfo[currentPlugsCount]->error_type)
+						{
+						case VSTINSTANCE_ERR_NO_VALID_FILE:
+							fprintf(hfile,"*** ERROR - NO FILE ***");
+							break;
+						case VSTINSTANCE_ERR_NO_VST_PLUGIN:
+							fprintf(hfile,"*** ERROR - NOT VST PLUGIN ***");
+							break;
+						case VSTINSTANCE_ERR_REJECTED:
+							fprintf(hfile,"*** ERROR - REJECTED ***");
+							break;
+						case VSTINSTANCE_ERR_EXCEPTION:
+							fprintf(hfile,"*** ERROR - EXCEPTION ***");
+							break;
+						default:
+							fprintf(hfile,"*** ERROR - NOT VST PLUGIN OR BUGGED ***");
 							break;
 						}
 					}
-				}
-				if (!bExist)
-				{
-					if (type == MACH_PLUGIN )
-					{
-						Plugin plug(0);
-						if (plug.Instance((char*)(const char*)finder.GetFilePath()))
-						{
-							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-							ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
-							strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
-							sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-									(plug.IsSynth()) ? "Psycle instrument" : "Psycle effect",
-									plug.GetAuthor());
-							strcpy(_pPlugsInfo[currentPlugsCount]->version,"PsycleAPI 1.0");
-							if ( plug.IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-							else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-							_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
-							_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-							strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
-
-							char str2[256];
-							CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-							str.MakeLower();
-							strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-							dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
-
-							FILETIME time;
-							finder.GetLastWriteTime(&time);
-							_pPlugsInfo[currentPlugsCount]->FileTime = time;
-
-							currentPlugsCount++;
-							fprintf(hfile,"*** NEW *** - ");
-							fprintf(hfile,plug.GetName());
-						}
-						else
-						{
-							_BadPluginPath[currentBadPlugsCount] = new char[strlen(finder.GetFilePath())+1];
-							strcpy(_BadPluginPath[currentBadPlugsCount],finder.GetFilePath());
-							FILETIME time;
-							finder.GetLastWriteTime(&time);
-							_BadPluginFileTime[currentBadPlugsCount] = time;
-							currentBadPlugsCount++;
-							fprintf(hfile,"*** ERROR - NOT NATIVE PLUGIN OR BUGGED ***");
-						}
-					}
-					else if (type == MACH_VST)
-					{
-						VSTPlugin vstPlug;
-						int ret = vstPlug.Instance((char*)(const char*)finder.GetFilePath());
-						if (ret == VSTINSTANCE_NO_ERROR)
-						{
-							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-							strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
-							sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-								(vstPlug.IsSynth()) ? "VST2 instrument" : "VST2 effect",
-								vstPlug.GetVendorName());
-							sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug.GetVersion());
-							_pPlugsInfo[currentPlugsCount]->version[15]='\0';
-							if ( vstPlug.IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-							else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-							_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
-							_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-							strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
-
-							char str2[256];
-							CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-							str.MakeLower();
-							strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-							dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
-
-							FILETIME time;
-							finder.GetLastWriteTime(&time);
-							_pPlugsInfo[currentPlugsCount]->FileTime = time;
-
-							currentPlugsCount++;
-							fprintf(hfile,"*** NEW *** - ");
-							fprintf(hfile,vstPlug.GetName());
-						}
-						else
-						{
-							_BadPluginPath[currentBadPlugsCount] = new char[strlen(finder.GetFilePath())+1];
-							strcpy(_BadPluginPath[currentBadPlugsCount],finder.GetFilePath());
-							FILETIME time;
-							finder.GetLastWriteTime(&time);
-							_BadPluginFileTime[currentBadPlugsCount] = time;
-							currentBadPlugsCount++;
-							switch (ret)
-							{
-							case VSTINSTANCE_ERR_NO_VALID_FILE:
-								fprintf(hfile,"*** ERROR - NO FILE ***");
-								break;
-							case VSTINSTANCE_ERR_NO_VST_PLUGIN:
-								fprintf(hfile,"*** ERROR - NOT VST PLUGIN ***");
-								break;
-							case VSTINSTANCE_ERR_REJECTED:
-								fprintf(hfile,"*** ERROR - REJECTED ***");
-								break;
-							case VSTINSTANCE_ERR_EXCEPTION:
-								fprintf(hfile,"*** ERROR - EXCEPTION ***");
-								break;
-							default:
-								fprintf(hfile,"*** ERROR - NOT VST PLUGIN OR BUGGED ***");
-								break;
-							}
-						}
-					}
+					currentPlugsCount++;
 				}
 			}
 			fprintf(hfile,"\n");
@@ -731,17 +771,6 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 	}
 	fclose(hfile);
 	finder.Close();
-
-/*	if ( tmpCount != currentPlugsCount ) // If a plugin has been found & loaded, add this directory.
-	{
-		if ( _numDirs < 32 ) // Limit of dirs.
-		{
-			_dirArray[_numDirs] = new char[findDir.GetLength()+1];
-			strcpy(_dirArray[_numDirs],findDir);
-			_numDirs++;
-		}
-	}
-*/
 }
 
 void CNewMachine::DestroyPluginInfo()
@@ -750,18 +779,8 @@ void CNewMachine::DestroyPluginInfo()
 	{
 		delete _pPlugsInfo[i];
 	}
-	for (i = 0; i <_numBadPlugins; i++)
-	{
-		delete _BadPluginPath[i];
-		_BadPluginPath[i] = 0;
-	}
-/*	for (i=0;i<_numDirs; i++)
-	{
-		delete _dirArray[i];
-	}*/
 	dllNames.RemoveAll();
 	_numPlugins = -1;
-	_numDirs=0;
 }
 
 bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount)
@@ -790,6 +809,14 @@ bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCoun
 		return false;
 	}
 
+	UINT version;
+	file.Read(&version,sizeof(version));
+	if (version > CURRENT_CACHE_MAP_VERSION)
+	{
+		file.Close();
+		DeleteFile(cache);
+		return false;
+	}
 	file.Read(&_numPlugins,sizeof(_numPlugins));
 
 	for (int i = 0; i < _numPlugins; i++)
@@ -798,6 +825,8 @@ bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCoun
 
 		file.ReadString(Temp,sizeof(Temp));
 		file.Read(&p.FileTime,sizeof(_pPlugsInfo[currentPlugsCount]->FileTime));
+		file.Read(&p.error_type,sizeof(p.error_type));
+		file.Read(&p.allow,sizeof(p.allow));
 		file.Read(&p.mode,sizeof(p.mode));
 		file.Read(&p.type,sizeof(p.type));
 		file.ReadString(p.name,sizeof(p.name));
@@ -814,46 +843,32 @@ bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCoun
 					&& (p.FileTime.dwLowDateTime == time.dwLowDateTime))
 				{
 					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+					ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
 
 					_pPlugsInfo[currentPlugsCount]->dllname = new char[strlen(Temp)+1];
 					strcpy(_pPlugsInfo[currentPlugsCount]->dllname,Temp);
 
 					_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
+
+					_pPlugsInfo[currentPlugsCount]->error_type = p.error_type;
+					_pPlugsInfo[currentPlugsCount]->allow = p.allow;
+
 					_pPlugsInfo[currentPlugsCount]->mode = p.mode;
 					_pPlugsInfo[currentPlugsCount]->type = p.type;
 					strcpy(_pPlugsInfo[currentPlugsCount]->name,p.name);
 					strcpy(_pPlugsInfo[currentPlugsCount]->desc,p.desc);
 					strcpy(_pPlugsInfo[currentPlugsCount]->version,p.version);
 
-					char str2[MAX_PATH];
-					CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-					str.MakeLower();
-					strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-					dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+					if (p.error_type == VSTINSTANCE_NO_ERROR)
+					{
+						char str2[MAX_PATH];
+						CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+						str.MakeLower();
+						strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+						dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+					}
 
 					currentPlugsCount++;
-				}
-			}
-		}
-	}
-
-	file.Read(&_numBadPlugins,sizeof(_numBadPlugins));
-	for (i = 0; i < _numBadPlugins; i++)
-	{
-		file.ReadString(Temp,sizeof(Temp));
-		file.Read(&_BadPluginFileTime[currentBadPlugsCount],sizeof(_BadPluginFileTime[currentBadPlugsCount]));
-		if ( finder.FindFile(Temp) )
-		{
-			FILETIME time;
-			finder.FindNextFile();
-			if (finder.GetLastWriteTime(&time))
-			{
-				if ((_BadPluginFileTime[currentBadPlugsCount].dwHighDateTime == time.dwHighDateTime)
-					&& (_BadPluginFileTime[currentBadPlugsCount].dwLowDateTime == time.dwLowDateTime))
-				{
-					_BadPluginPath[currentBadPlugsCount] = new char[strlen(Temp)+1];
-					strcpy(_BadPluginPath[currentBadPlugsCount],Temp);
-					currentBadPlugsCount++;
 				}
 			}
 		}
@@ -880,24 +895,21 @@ bool CNewMachine::SaveCacheFile()
 	}
 
 	file.Write("PSYCACHE",8);
+	UINT version = CURRENT_CACHE_MAP_VERSION;
+	file.Write(&version,sizeof(version));
 	file.Write(&_numPlugins,sizeof(_numPlugins));
 
 	for (int i=0; i<_numPlugins; i++ )
 	{
 		file.Write(_pPlugsInfo[i]->dllname,strlen(_pPlugsInfo[i]->dllname)+1);
 		file.Write(&_pPlugsInfo[i]->FileTime,sizeof(_pPlugsInfo[i]->FileTime));
+		file.Write(&_pPlugsInfo[i]->error_type,sizeof(_pPlugsInfo[i]->error_type));
+		file.Write(&_pPlugsInfo[i]->allow,sizeof(_pPlugsInfo[i]->allow));
 		file.Write(&_pPlugsInfo[i]->mode,sizeof(_pPlugsInfo[i]->mode));
 		file.Write(&_pPlugsInfo[i]->type,sizeof(_pPlugsInfo[i]->type));
 		file.Write(_pPlugsInfo[i]->name,strlen(_pPlugsInfo[i]->name)+1);
 		file.Write(_pPlugsInfo[i]->desc,strlen(_pPlugsInfo[i]->desc)+1);
 		file.Write(_pPlugsInfo[i]->version,strlen(_pPlugsInfo[i]->version)+1);
-	}
-
-	file.Write(&_numBadPlugins,sizeof(_numBadPlugins));
-	for (i=0; i<_numBadPlugins; i++ )
-	{
-		file.Write(_BadPluginPath[i],strlen(_BadPluginPath[i])+1);
-		file.Write(&_BadPluginFileTime[i],sizeof(_BadPluginFileTime[i]));
 	}
 
 	file.Close();
@@ -908,6 +920,63 @@ void CNewMachine::OnOK()
 {
 	if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
 	{
+		if (bAllowChanged)
+		{
+			SaveCacheFile();
+		}
 		CDialog::OnOK();
 	}
+}
+
+void CNewMachine::OnCheckAllow() 
+{
+	// TODO: Add your control notification handler code here
+	for (int i=0; i<_numPlugins; i++)
+	{
+		if (tHand == hPlug[i])
+		{
+			_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
+			bAllowChanged = TRUE;
+		}
+	}
+}
+
+bool CNewMachine::TestFilename(char* name)
+{
+	for (int i=0; i<_numPlugins; i++)
+	{
+		if (strcmp(name,_pPlugsInfo[i]->dllname)==0)
+		{
+			// bad plugins always have allow = false
+			if (_pPlugsInfo[i]->allow)
+			{
+				return TRUE;
+			}
+			char buf[256];
+			switch (_pPlugsInfo[i]->error_type)
+			{
+			case VSTINSTANCE_ERR_NO_VALID_FILE:
+				sprintf(buf,"%s is Disabled - No File Error.  Try to Load Anyway?",name);
+				break;
+			case VSTINSTANCE_ERR_NO_VST_PLUGIN:
+				sprintf(buf,"%s is Disabled - Not Plugin Error.  Try to Load Anyway?",name);
+				break;
+			case VSTINSTANCE_ERR_REJECTED:
+				sprintf(buf,"%s is Disabled - Rejected Error  Try to Load Anyway?",name);
+				break;
+			case VSTINSTANCE_ERR_EXCEPTION:
+				sprintf(buf,"%s is Disabled - Exception Error  Try to Load Anyway?",name);
+				break;
+			case VSTINSTANCE_NO_ERROR:
+				sprintf(buf,"%s is Disabled by User.  Try to Load Anyway?",name);
+				break;
+			default:
+				sprintf(buf,"%s is Disabled - Unknown Reason  Try to Load Anyway?",name);
+				break;
+			}
+			return (::MessageBox(NULL,buf,"Plugin Warning!",MB_YESNO) == IDYES);
+
+		}
+	}
+	return FALSE;
 }

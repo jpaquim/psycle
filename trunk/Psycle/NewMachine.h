@@ -12,9 +12,8 @@
 
 #include <afxcoll.h>
 
-#define MAX_BROWSER_NODES 72
+#define MAX_BROWSER_NODES 512
 #define MAX_BROWSER_PLUGINS 512
-#define MAX_BAD_PLUGINS 512
 
 class PluginInfo
 {
@@ -26,6 +25,8 @@ public:
 	char desc[64];
 	char version[16];
 	FILETIME FileTime;
+	bool allow;
+	int error_type;
 
 	PluginInfo()
 	{
@@ -59,6 +60,7 @@ public:
 */
 };
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CNewMachine dialog
 
@@ -67,6 +69,8 @@ class CNewMachine : public CDialog
 // Construction
 public:
 	CImageList imgList;
+
+	HTREEITEM tHand;
 
 	int Outputmachine;
 	char* psOutputDll;
@@ -83,9 +87,12 @@ public:
 	CNewMachine(CWnd* pParent = NULL);   // standard constructor
 	~CNewMachine();
 
+	static bool TestFilename(char* name);
+
 // Dialog Data
 	//{{AFX_DATA(CNewMachine)
 	enum { IDD = IDD_NEWMACHINE };
+	CButton	m_Allow;
 	CStatic	m_nameLabel;
 	CTreeCtrl	m_browser;
 	CStatic	m_versionLabel;
@@ -106,6 +113,7 @@ public:
 // Implementation
 protected:
 
+	bool bAllowChanged;
 	HTREEITEM hNodes[MAX_BROWSER_NODES];
 	HTREEITEM hInt[9];
 	HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
@@ -124,16 +132,13 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnShowdllname();
 	afx_msg void OnShoweffname();
+	afx_msg void OnCheckAllow();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
 	static int _numPlugins;
-	static int _numBadPlugins;
-	static char *_BadPluginPath[MAX_BAD_PLUGINS];
-	static FILETIME _BadPluginFileTime[MAX_BAD_PLUGINS];
 	static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 	static int _numDirs;
-	static char *CNewMachine::_dirArray[MAX_BROWSER_NODES];
 
 	static void FindPluginsInDir(int& currentPlugsCount,int &currentBadPlugsCount,CString findDir,MachineType type,CProgressDialog * pProgress = NULL);
 	static bool LoadCacheFile(int& currentPlugsCount, int &currentBadPlugsCount);

@@ -215,6 +215,10 @@ public:
 			strcpy(sPath2,sPath); 
 		}
 
+		if ( !CNewMachine::TestFilename(sPath2) ) 
+		{
+			return false;
+		}
 		if (!Instance(sPath2))
 		{
 			char sError[_MAX_PATH];

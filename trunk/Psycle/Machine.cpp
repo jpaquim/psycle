@@ -407,7 +407,7 @@ bool Machine::Load(
 Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 {
 	// assume version 0 for now
-	// call setpan
+	BOOL bDeleted = FALSE;
 
 	Machine* pMachine;
 	MachineType type;//,oldtype;
@@ -448,14 +448,13 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
-				sprintf(sError,"Missing or Corrupted native plug-in \"%s\" - replacing with Dummy.",dllName);
+				sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 				pMachine = new Dummy(index);
-				// dummy name goes here
-				sprintf(pMachine->_editName,"X %s",p->_editName);
 				type = MACH_DUMMY;
 				delete p;
+				bDeleted = TRUE;
 			}
 		}
 		break;
@@ -466,14 +465,13 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",dllName);
+				sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 				pMachine = new Dummy(index);
-				// dummy name goes here
-				sprintf(pMachine->_editName,"X %s",p->_editName);
 				type = MACH_DUMMY;
 				delete p;
+				bDeleted = TRUE;
 			}
 		}
 		break;
@@ -484,14 +482,13 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",dllName);
+				sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 				pMachine = new Dummy(index);
-				// dummy name goes here
-				sprintf(pMachine->_editName,"X %s",p->_editName);
 				type = MACH_DUMMY;
 				delete p;
+				bDeleted = TRUE;
 			}
 		}
 		break;
@@ -521,6 +518,13 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
 	}
 	pFile->ReadString(pMachine->_editName,32);
+	if (bDeleted)
+	{
+		char buf[34];
+		sprintf(buf,"X %s",pMachine->_editName);
+		buf[31]=0;
+		strcpy(pMachine->_editName,buf);
+	}
 
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
