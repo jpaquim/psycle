@@ -44,7 +44,7 @@ file: mach.psm (machines info)
 
 NOTE!!!
 
-**All the following coords are relative to the top left corner of the source graphic, wither the gen or the fx. (i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)**
+**All the following coords are relative to the top left corner of the source graphic, wether the gen or the fx. (i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)**
 
 all the buttons below refer to unhighlighted versions (that are part of the background source graphic)
 

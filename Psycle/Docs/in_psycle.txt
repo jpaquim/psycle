@@ -62,7 +62,19 @@ $$      $$$$              $..$$     $$...........
 
 \/ Version Revision
 --------------------
-Beta 4 (30-03-2002)
+
+Beta 6 (10-12-2002)
+--------------------
+·Engine Update to Psycle 1.7
+·Added configuration Dialog
+·Added Info dialog
+·Fixed the "winamp refreshing always" problem.
+·Linked to MFC statically (hence the increase of size). Should
+ add for stability. Most of the code doesn't need it so it might
+ be possible in the future to remove MFC completely.
+
+
+Beta 5 (??-09-2002)
 --------------------
 ·Engine Update to Psycle 1.66
 

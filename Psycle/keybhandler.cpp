@@ -1591,12 +1591,12 @@ void CChildView::BlockParamInterpolate()
 	// UNDO CODE BLOCK INTERPOLATE
 	if (blockSelected)
 	{
-	///////////////////////////////////////////////////////// Add ROW
+		///////////////////////////////////////////////////////// Add ROW
 		const int displace=_pSong->playOrder[editPosition]*MULTIPLY2;
 		unsigned char *toffset=_pSong->pPatternData+displace;
-
+		
 		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
-	
+		
 		const int initvalue = 
 			*(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3) * 0x100 +
 			*(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+4);
@@ -1605,14 +1605,38 @@ void CChildView::BlockParamInterpolate()
 			*(toffset+blockSel.start.track*5+blockSel.end.line*MULTIPLY+4);
 		const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
 		const unsigned char comd = *(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3);
-			int displace2=(blockSel.start.track*5)+((blockSel.start.line+1)*MULTIPLY);
-
-		for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
+		int displace2=(blockSel.start.track*5)+((blockSel.start.line)*MULTIPLY);
+		
+		if ( toffset[displace2] == 121 || toffset[displace2] == 122)
 		{
-			int val=f2i(initvalue+addvalue*(l-blockSel.start.line));
-			toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
-			toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
+			unsigned char note = toffset[displace2];
+			unsigned char aux = toffset[displace2+1];
+			unsigned char mac = toffset[displace2+2];
 			displace2+=MULTIPLY;
+			for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
+			{
+				toffset[displace2]=note;
+				toffset[displace2+1]=aux;
+				toffset[displace2+2]=mac;
+				int val=f2i(initvalue+addvalue*(l-blockSel.start.line));
+				toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
+				toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
+				displace2+=MULTIPLY;
+			}
+			toffset[displace2]=note;
+			toffset[displace2+1]=aux;
+			toffset[displace2+2]=mac;
+		}
+		else
+		{
+			displace2+=MULTIPLY;
+			for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
+			{
+				int val=f2i(initvalue+addvalue*(l-blockSel.start.line));
+				toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
+				toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
+				displace2+=MULTIPLY;
+			}
 		}
 //		drawTrackStart=blockSel.start.track;
 //		drawTrackEnd=blockSel.end.track;
