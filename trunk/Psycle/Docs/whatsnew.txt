@@ -32,6 +32,7 @@ V1.7.3
 ! can't delete the master any more (pooplog)
 ! various other small bugfixes (pooplog)
 ! some memory leaks fixed [JAZ]
+! Sample loading routine is now more flexible.This allows to load files that previously didn't. [JAZ]
 
 
 V1.7.1
