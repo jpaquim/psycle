@@ -228,8 +228,8 @@ void Haas::parameter(const int & parameter)
 		}
 		break;
 	case overall_dry_wet:
-		overall_gain_dry = 1 - (*this)(direct_pan);
-		overall_gain_wet = (*this)(direct_pan);
+		overall_gain_dry = 1 - (*this)(parameter);
+		overall_gain_wet = (*this)(parameter);
 		break;
 	case direct_gain:
 	case direct_pan:
