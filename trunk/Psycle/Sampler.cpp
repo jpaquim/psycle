@@ -574,14 +574,18 @@ void Sampler::Tick(
 			switch(_voices[voice]._envelope._stage)
 			{
 				case ENV_OFF: 
-					if ( _voices[voice]._triggerNoteDelay == 0 ) { useVoice=voice; }
+					if ( _voices[voice]._triggerNoteDelay == 0 ) 
+					{ 
+						useVoice=voice; 
+						voice=_numVoices; 
+					}
 					break;
 				case ENV_FASTRELEASE: 
-					if ( useVoice == -1 ) useVoice = voice;
-					else if ( _voices[useVoice]._envelope._stage == ENV_RELEASE) useVoice = voice;
+					useVoice = voice;
 					break;
 				case ENV_RELEASE:
-					if ( useVoice == -1 ) useVoice= voice;
+					if ( useVoice == -1 ) 
+						useVoice= voice;
 					break;
 				default:break;
 			}

@@ -1,4 +1,5 @@
 
+
 #define DRAW_DATA		1
 #define DRAW_HSCROLL	2
 #define DRAW_VSCROLL	4
@@ -7,7 +8,9 @@
 
 void CChildView::PreparePatternRefresh(int drawMode)
 {
+#ifdef _DEBUG_PATVIEW
 	TRACE("PreparePatternRefresh\n");
+#endif
 
 	CRect rect;	
 	updateMode=drawMode;					// this is ununsed for patterns
@@ -1096,7 +1099,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 	// 2 if there is a redraw all, we do that then exit
 	if ((updatePar & DRAW_FULL_DATA) || (abs(scrollT) > VISTRACKS) || (abs(scrollL) > VISLINES) || (scrollT && scrollL))
 	{
+#ifdef _DEBUG_PATVIEW
 		TRACE("DRAW_FULL_DATA\n");
+#endif
 		// draw everything
 		rect.top = YOFFSET;
 		rect.bottom = CH;
@@ -1129,7 +1134,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 		// Fill Bottom Space with Background colour if needed
 		if (maxl < VISLINES+1)
 		{
+#ifdef _DEBUG_PATVIEW
 			TRACE("DRAW_BOTTOM\n");
+#endif
 			if (XOFFSET!=1)
 			{
 				rect.left=0; 
@@ -1154,7 +1161,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 		// Fill Right Space with Background colour if needed
 		if (maxt < VISTRACKS+1)
 		{
+#ifdef _DEBUG_PATVIEW
 			TRACE("DRAW_RIGHT\n");
+#endif
 			rect.top=0; 
 			rect.bottom=CH;  
 			rect.right=CW;
@@ -1214,12 +1223,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 					DrawPatternData(devc, VISTRACKS-scrollT-1, VISTRACKS+1, 0,VISLINES+1);
 					if (scrollL > 0)
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL++\n");
+#endif
 						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1, 0,scrollL);
 					}
 					else 
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL+-\n");
+#endif
 						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1,VISLINES+scrollL,VISLINES+1);
 					}
 				}
@@ -1255,12 +1268,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 					DrawPatternData(devc,0, 1-scrollT, 0, VISLINES+1);
 					if (scrollL > 0)
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL-+\n");
+#endif
 						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT, 0,scrollL);
 					}
 					else
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL--\n");
+#endif
 						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
 					}
 				}
@@ -1303,12 +1320,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 					DrawPatternData(devc, VISTRACKS-scrollT-1, VISTRACKS+1, 0,VISLINES+1);
 					if (scrollL > 0)
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL++H\n");
+#endif
 						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1, 0,scrollL);
 					}
 					else 
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL+-H\n");
+#endif
 						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1,VISLINES+scrollL,VISLINES+1);
 					}
 
@@ -1497,12 +1518,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 					DrawPatternData(devc,0, 1-scrollT, 0, VISLINES+1);
 					if (scrollL > 0)
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL-+H\n");
+#endif
 						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT, 0,scrollL);
 					}
 					else
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HVSCROLL--H\n");
+#endif
 						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
 					}
 
@@ -1662,7 +1687,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 			// Fill Bottom Space with Background colour if needed
 			if (maxl < VISLINES+1)
 			{
+#ifdef _DEBUG_PATVIEW
 				TRACE("DRAW_BOTTOM\n");
+#endif
 				if (XOFFSET!=1)
 				{
 					CRect rect;
@@ -1689,7 +1716,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 			// Fill Right Space with Background colour if needed
 			if (maxt < VISTRACKS+1)
 			{
+#ifdef _DEBUG_PATVIEW
 				TRACE("DRAW_RIGHT\n");
+#endif
 				CRect rect;
 				rect.top=0; 
 				rect.bottom=CH;  
@@ -1712,7 +1741,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 					devc->ScrollDC(scrollT*ROWWIDTH,0,&patR,&patR,&rgn,&rect);
 					if ( scrollT > 0 )
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HSCROLL+\n");
+#endif
 						rect.top = YOFFSET;
 						rect.bottom = CH;
 
@@ -1732,7 +1763,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 					}
 					else 
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HSCROLL-\n");
+#endif
 						rect.top = YOFFSET;
 						rect.bottom = CH;
 						int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
@@ -1757,7 +1790,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 					devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect);
 					if (scrollT > 0)
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HSCROLL+\n");
+#endif
 						rect.top = 0;
 						rect.bottom = CH;
 						int xOffset = XOFFSET-1;
@@ -1928,7 +1963,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 					}
 					else 
 					{	
+#ifdef _DEBUG_PATVIEW
 						TRACE("DRAW_HSCROLL-\n");
+#endif
 						rect.top = 0;
 						rect.bottom = CH;
 						int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
@@ -2116,7 +2153,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 				// Fill Right Space with Background colour if needed
 				if (maxt < VISTRACKS+1)
 				{
+#ifdef _DEBUG_PATVIEW
 					TRACE("DRAW_RIGHT\n");
+#endif
 					CRect rect;
 					rect.top=0; 
 					rect.bottom=CH;  
@@ -2137,19 +2176,25 @@ void CChildView::DrawPatEditor(CDC *devc)
 				// add visible part to 
 				if (scrollL > 0)
 				{	
+#ifdef _DEBUG_PATVIEW
 					TRACE("DRAW_VSCROLL+\n");
+#endif
 					//if(editcur.line!=0)
 					DrawPatternData(devc, 0, VISTRACKS+1, 0,scrollL);
 				}
 				else 
 				{	
+#ifdef _DEBUG_PATVIEW
 					TRACE("DRAW_VSCROLL-\n");
+#endif
 					DrawPatternData(devc, 0, VISTRACKS+1,VISLINES+scrollL,VISLINES+1);
 				}
 				// Fill Bottom Space with Background colour if needed
 				if (maxl < VISLINES+1)
 				{
+#ifdef _DEBUG_PATVIEW
 					TRACE("DRAW_BOTTOM\n");
+#endif
 					if (XOFFSET!=1)
 					{
 						CRect rect;
@@ -2184,7 +2229,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 		// Draw Pattern data.
 		if (updatePar & DRAW_DATA)
 		{
+#ifdef _DEBUG_PATVIEW
 			TRACE("DRAW_DATA\n");
+#endif
 			////////////////////////////////////////////////
 			// Draw Data Changed (DMDataChange)
 			for (int i = 0; i < numPatternDraw; i++)
@@ -2225,7 +2272,9 @@ void CChildView::DrawPatEditor(CDC *devc)
 void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
 {
 
+#ifdef _DEBUG_PATVIEW
 	TRACE("DrawPatternData\n");
+#endif
 
 //	if (lstart > VISLINES)
 	if (lstart > maxl)
