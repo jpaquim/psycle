@@ -7,10 +7,20 @@ V1.67
   not update the sample in the instrument editor, which in turn made the wave loader function to
   load over an incorrect position.
 ! Loading songs with VST plugins didn't restore the name of them (was set back to default one). Fixed
+* Changed Master Vu-meter logic. Range from -45db to 0db (as opposed to -90 to 0db before), made
+  faster and added a 2nd bar which decreases slowly to show the peaks.
+* Changed default values for sound buffers (both DX and WO), set WO as default output
+  (as opposed to silent) and disabled the DX "exclusive mode" by default.
+! Fixed the Song information message box (in song loading) not being Modal (say on top).
++ Added colour boxes to "Visual" configuration to show the actual configuration. (Updates when changing preset too)
+* Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize and "HostCanDo")
+! (Tried to) Fix several GDI Leaks.
+! Fixed problem with saving songs (affected TPB) when using a Sample Rate different than 44100.
+! "Couldn't Save file" error when trying to save "autosave.psy" doesn't pop up now.
 + Added functioning Track record arm buttons- new graphics required (pooplog)
 + Added midi velocity, modwheel, pitchbend, etc mapping to twks/cmds!! (pooplog)
-+ Added new button in sequencer, changed insert button to behave as an insert button should (pooplog)
-! Changed double click on pattern to open that pattern in patternview for edit (pooplog)
++ Added "new" button in sequencer, changed insert button to behave as an insert button should (pooplog)
+! Changed double click on pattern (in sequence) to open that pattern in patternview for edit (pooplog)
 ! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles (pooplog)
 * Fixed minusminus button to decrease to 0 (pooplog)
 + UNDO/REDO for pattern and sequence editing!!! (pooplog)

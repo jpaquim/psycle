@@ -5,7 +5,6 @@
 -longer sequences (256)
 -more tracks (64)
 -store state of follow song toggle
-*song name message box on load clear on loss of focus
 !DO NOT LOAD LIST VST list & database
 !MOUSEWHEEL SUPPORT
 <Alk^> do u think the recording with subtracting the buffer delay will be doable?
@@ -18,8 +17,6 @@
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
-
-	*correct "No sound on startup" "novice" question.
 
 	*changing octave, make notes stop (because if not, notes playing don't stop)
 
