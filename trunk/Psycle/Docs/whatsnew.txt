@@ -35,6 +35,7 @@ V1.67
 ! VU Meters are all nicer
 + Look of Machine Wires can be changed in the visual dialog (pooplog)
 ! Many Optimizations
++ Multiple Selections in the sequencer menu (ctrl or shift + left mouse button) can be deleted, copied, pasted. (pooplog)
 
 V1.66
 -----

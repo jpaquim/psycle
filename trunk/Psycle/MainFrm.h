@@ -55,6 +55,8 @@ public:
 	bool isguiopen[MAX_MACHINES];
 	CFrameWnd	*m_pWndMac[MAX_MACHINES];
 	bool macComboInitialized;
+	int seqcopybuffer[MAX_SONG_POSITIONS];
+	int seqcopybufferlength;
 
 	void ClosePsycle();
 	void WaveEditorBackUpdate();
@@ -154,7 +156,9 @@ protected:
 	afx_msg void OnDecshort();
 	afx_msg void OnSeqins();
 	afx_msg void OnSeqnew();
-	afx_msg void OnSeqdel();
+	afx_msg void OnSeqcut();
+	afx_msg void OnSeqcopy();
+	afx_msg void OnSeqpaste();
 	afx_msg void OnSeqduplicate();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg void OnDecTPB();

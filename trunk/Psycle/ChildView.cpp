@@ -238,9 +238,11 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_EDIT_CUT, patCut)
 	ON_COMMAND(ID_EDIT_COPY, patCopy)
 	ON_COMMAND(ID_EDIT_PASTE, patPaste)
+	ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternCutCopyPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternCutCopyPaste)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_MBUTTONDOWN()
 	//}}AFX_MSG_MAP
@@ -1257,21 +1259,25 @@ void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
 		case UNDO_SEQUENCE:
 			pCmdUI->Enable(TRUE);
+			pCmdUI->SetText("Undo");
 			break;
 		default:
 			if(viewMode == VMPattern)// && bEditMode)
 			{
 				pCmdUI->Enable(TRUE);
+				pCmdUI->SetText("Undo");
 			}
 			else
 			{
 				pCmdUI->Enable(FALSE);
+				pCmdUI->SetText("Undo in Pattern View");
 			}
 			break;
 		}
 	}
 	else
 	{
+		pCmdUI->SetText("Undo");
 		pCmdUI->Enable(FALSE);
 	}
 }
@@ -1284,15 +1290,18 @@ void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
 		case UNDO_SEQUENCE:
 			pCmdUI->Enable(TRUE);
+			pCmdUI->SetText("Redo");
 			break;
 		default:
 			if(viewMode == VMPattern)// && bEditMode)
 			{
 				pCmdUI->Enable(TRUE);
+				pCmdUI->SetText("Redo");
 			}
 			else
 			{
 				pCmdUI->Enable(FALSE);
+				pCmdUI->SetText("Redo in Pattern View");
 			}
 			break;
 		}
@@ -1300,6 +1309,7 @@ void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 	else
 	{
 		pCmdUI->Enable(FALSE);
+		pCmdUI->SetText("Redo");
 	}
 }
 

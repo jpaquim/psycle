@@ -78,7 +78,9 @@ ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
 ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
 ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
-ON_BN_CLICKED(IDC_SEQDEL, OnSeqdel)
+ON_BN_CLICKED(IDC_SEQCUT, OnSeqcut)
+ON_BN_CLICKED(IDC_SEQCOPY, OnSeqcopy)
+ON_BN_CLICKED(IDC_SEQPASTE, OnSeqpaste)
 ON_BN_CLICKED(IDC_SEQDUPLICATE, OnSeqduplicate)
 ON_WM_ACTIVATE()
 ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
@@ -118,6 +120,7 @@ CMainFrame::CMainFrame()
 	Global::pInputHandler->SetMainFrame(this);
 	vuprevR=0;
 	vuprevL=0;
+	seqcopybufferlength = 0;
 }
 
 CMainFrame::~CMainFrame()
@@ -1330,12 +1333,12 @@ void CMainFrame::OnSelchangeSeqlist()
 	if(m_wndView.editPosition<0) m_wndView.editPosition = 0; // DAN FIXME
 	int const cpid=_pSong->playOrder[m_wndView.editPosition];
 
-	for (int c=0;c<maxitems-1;c++) {
+	for (int c=0;c<maxitems;c++) {
 		if ( cc->GetSel(c) != 0) _pSong->playOrderSel[c]=true;
 		else _pSong->playOrderSel[c]=false;
 	}
 	
-	if((ep!=m_wndView.editPosition) && ( cc->GetSelCount() == 1))
+	if((ep!=m_wndView.editPosition))// && ( cc->GetSelCount() == 1))
 	{
 		m_wndView.editPosition=ep;
 		UpdatePlayOrder(false);
@@ -1368,44 +1371,98 @@ void CMainFrame::OnDblclkSeqlist()
 
 void CMainFrame::OnIncshort() 
 {
-	OnIncpat2();
+	int indexes[MAX_SONG_POSITIONS];
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int const num= cc->GetSelCount();
+	cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+	for (int i = 0; i < num; i++)
+	{
+		if(_pSong->playOrder[indexes[i]]<(MAX_PATTERNS-1))
+		{
+			_pSong->playOrder[indexes[i]]++;
+		}
+	}
+	UpdatePlayOrder(false);
+	UpdateSequencer();
+	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnDecshort() 
 {
-	OnDecpat2();	
+	int indexes[MAX_SONG_POSITIONS];
+	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int const num= cc->GetSelCount();
+	cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+	for (int i = 0; i < num; i++)
+	{
+		if(_pSong->playOrder[indexes[i]]>0)
+		{
+			_pSong->playOrder[indexes[i]]--;
+		}
+	}
+	UpdatePlayOrder(false);
+	UpdateSequencer();
+	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnInclong() 
 {
+	int indexes[MAX_SONG_POSITIONS];
 	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	int pop=m_wndView.editPosition;
-	if(_pSong->playOrder[pop]<(MAX_PATTERNS-10))
+
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int const num= cc->GetSelCount();
+	cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+	for (int i = 0; i < num; i++)
 	{
-		_pSong->playOrder[pop]+=10;
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		if(_pSong->playOrder[indexes[i]]<(MAX_PATTERNS-16))
+		{
+			_pSong->playOrder[indexes[i]]+=16;			
+		}
+		else
+		{
+			_pSong->playOrder[indexes[i]]=(MAX_PATTERNS-1);
+		}
 	}
-	m_wndView.SetFocus();	
+	UpdatePlayOrder(false);
+	UpdateSequencer();
+	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnDeclong() 
 {
+	int indexes[MAX_SONG_POSITIONS];
 	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-	int pop=m_wndView.editPosition;
-	if(_pSong->playOrder[pop]>9)
+
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int const num= cc->GetSelCount();
+	cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+	for (int i = 0; i < num; i++)
 	{
-		_pSong->playOrder[pop]-=10;
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		if(_pSong->playOrder[indexes[i]]>=16)
+		{
+			_pSong->playOrder[indexes[i]]-=16;			
+		}
+		else
+		{
+			_pSong->playOrder[indexes[i]]=0;
+		}
 	}
-	else if (_pSong->playOrder[pop]>0)
-	{
-		_pSong->playOrder[pop]=0;
-		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
-	}
-	m_wndView.SetFocus();	
+	UpdatePlayOrder(false);
+	UpdateSequencer();
+	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnSeqnew() 
@@ -1431,7 +1488,7 @@ void CMainFrame::OnSeqnew()
 			_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
 		}
 
-		UpdatePlayOrder(false);
+		UpdatePlayOrder(true);
 		UpdateSequencer();
 
 		m_wndView.Repaint(DMPatternSwitch);
@@ -1441,7 +1498,7 @@ void CMainFrame::OnSeqnew()
 
 void CMainFrame::OnSeqins() 
 {
-	if ( m_wndView.editPosition < MAX_PATTERNS )
+	if ( m_wndView.editPosition < MAX_SONG_POSITIONS )
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
@@ -1456,7 +1513,7 @@ void CMainFrame::OnSeqins()
 			_pSong->playOrder[c]=_pSong->playOrder[c-1];
 		}
 
-		UpdatePlayOrder(false);
+		UpdatePlayOrder(true);
 		UpdateSequencer();
 
 		m_wndView.Repaint(DMPatternChange);
@@ -1467,7 +1524,7 @@ void CMainFrame::OnSeqins()
 void CMainFrame::OnSeqduplicate() 
 {
 	int newpat = _pSong->GetNumPatternsUsed();
-	if ((m_wndView.editPosition < MAX_PATTERNS) && (newpat < MAX_PATTERNS-1))
+	if ((m_wndView.editPosition < MAX_SONG_POSITIONS) && (newpat < MAX_PATTERNS-1))
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 		int oldpat = _pSong->playOrder[m_wndView.editPosition];
@@ -1497,7 +1554,7 @@ void CMainFrame::OnSeqduplicate()
 		// and the name
 		memcpy(&_pSong->patternName[newpat],&_pSong->patternName[oldpat],sizeof(char)*32);
 
-		UpdatePlayOrder(false);
+		UpdatePlayOrder(true);
 		UpdateSequencer();
 
 		m_wndView.Repaint(DMPatternSwitch);
@@ -1505,8 +1562,9 @@ void CMainFrame::OnSeqduplicate()
 	m_wndView.SetFocus();
 }
 
-void CMainFrame::OnSeqdel() 
+void CMainFrame::OnSeqcut() 
 {
+	OnSeqcopy();
 	int indexes[MAX_SONG_POSITIONS];
 	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 
@@ -1514,6 +1572,8 @@ void CMainFrame::OnSeqdel()
 	int const num= cc->GetSelCount();
 	cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
 
+	// our list can be in any order so we must be careful
+	int smallest = indexes[0]; // we need a good place to put the cursor when we are done, above the topmost selection seems most intuitive
 	for (int i=0; i < num; i++)
 	{
 		for(int c=indexes[i];c<_pSong->playLength-1;c++)
@@ -1526,10 +1586,6 @@ void CMainFrame::OnSeqdel()
 		{
 			_pSong->playLength =1;
 		}
-		if (m_wndView.editPosition>indexes[i])
-		{
-			m_wndView.editPosition--;
-		}
 		for (int j=i+1;j<num;j++)
 		{
 			if (indexes[j] > indexes[i])
@@ -1537,41 +1593,111 @@ void CMainFrame::OnSeqdel()
 				indexes[j]--;
 			}
 		}
+		if (indexes[i] < smallest)
+		{
+			smallest = indexes[i];
+		}
 	}
+	m_wndView.editPosition = smallest-1;
 
-	if (m_wndView.editPosition>_pSong->playLength)
+	if (m_wndView.editPosition<0)
+	{
+		m_wndView.editPosition = 0;
+	}
+	else if (m_wndView.editPosition>=_pSong->playLength)
 	{
 		m_wndView.editPosition=_pSong->playLength-1;
 	}
-	
 
-
-	/*
-	if((_pSong->playLength>pop+1) || ((_pSong->playLength==pop+1) && (pop>0)))
-	{
-		--_pSong->playLength;
-	}
-	*/
-
-	UpdatePlayOrder(false);
+	UpdatePlayOrder(true);
 	UpdateSequencer();
 	m_wndView.Repaint(DMPatternSwitch);
 	m_wndView.SetFocus();
 }
 
-void CMainFrame::OnSeqclr() 
+void CMainFrame::OnSeqcopy() 
 {
-	if (MessageBox("Do you really want to clear all the sequence?","Sequencer",MB_YESNO) == IDYES)
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	seqcopybufferlength= cc->GetSelCount();
+	cc->GetSelItems(MAX_SONG_POSITIONS,seqcopybuffer);
+
+	// sort our table so we can paste it in a sensible manner later
+	for (int i=0; i < seqcopybufferlength; i++)
+	{
+		for (int j=i+1; j < seqcopybufferlength; j++)
+		{
+			if (seqcopybuffer[j] < seqcopybuffer[i])
+			{
+				int k = seqcopybuffer[i];
+				seqcopybuffer[i] = seqcopybuffer[j];
+				seqcopybuffer[j] = k;
+			}
+		}
+		// convert to actual index
+		seqcopybuffer[i] = _pSong->playOrder[seqcopybuffer[i]];
+	}
+}
+
+void CMainFrame::OnSeqpaste() 
+{
+	if (seqcopybufferlength > 0)
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+		// we will do this in a loop to easily handle an error if we run out of space
+
+	//	m_wndView.editPosition 
+
+		// our list can be in any order so we must be careful
+		for (int i=0; i < seqcopybufferlength; i++)
+		{
+			if ( m_wndView.editPosition < MAX_SONG_POSITIONS )
+			{
+				if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+				{
+					++_pSong->playLength;
+				}
+
+				m_wndView.editPosition++;
+				int const pop=m_wndView.editPosition;
+				for(int c=(_pSong->playLength-1);c>=pop;c--)
+				{
+					_pSong->playOrder[c]=_pSong->playOrder[c-1];
+				}
+				_pSong->playOrder[c+1] = seqcopybuffer[i];
+			}
+		}
+
+		UpdatePlayOrder(true);
+		UpdateSequencer();
+
+		m_wndView.Repaint(DMPatternChange);
+		m_wndView.SetFocus();
+	}
+}
+
+
+void CMainFrame::OnSeqclr() 
+{
+	if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
+	{
+		m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+		// clear sequence
 		for(int c=0;c<MAX_SONG_POSITIONS;c++)
 		{
 			_pSong->playOrder[c]=0;
 		}
-
+		// clear pattern data
+		unsigned char *soffset = _pSong->pPatternData;
+		unsigned char blank[5]={255,255,255,0,0};
+		for	(c=0; c<MAX_TRACKS*MAX_LINES*MAX_PATTERNS; c+=5)
+		{
+			memcpy(soffset,blank,sizeof(char)*5);
+			soffset+=5;
+		}
 		m_wndView.editPosition=0;
 		_pSong->playLength=1;
-		UpdatePlayOrder(false);
+		UpdatePlayOrder(true);
 		UpdateSequencer();
 		m_wndView.Repaint(DMPatternSwitch);
 	}
@@ -1656,6 +1782,7 @@ void CMainFrame::OnSeqsort()
 
 // Part four. All the needed things.
 
+	seqcopybufferlength = 0;
 	UpdateSequencer();
 	m_wndView.Repaint(DMPatternSwitch);
 	m_wndView.SetFocus();
@@ -1843,6 +1970,7 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	for (int i=0; i <ll; i++)
 	{
 		int pattern = _pSong->playOrder[i];
+		// this should parse each line for ffxx commands if you want it to be truly accurate
 		songLength += (_pSong->patternLines[pattern] * 60/(_pSong->BeatsPerMin * _pSong->_ticksPerBeat));
 	}
 
@@ -1856,17 +1984,14 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 		pls->DeleteString(ls);
 		sprintf(buffer,"%.2X: %.2X",ls,le);
 		pls->InsertString(ls,buffer);
+		// Update sequencer selection	
+		pls->SelItemRange(false,0,pls->GetCount()-1);
+		pls->SetSel(ls,true);
+		for (i=0; i<MAX_SONG_POSITIONS;i++)
+		{
+			_pSong->playOrderSel[i] = false;
+		}
+		_pSong->playOrderSel[ls] = true;
 	}
-	
-// Update sequencer selection	
-	
-	pls->SelItemRange(false,0,pls->GetCount()-1);
-	pls->SetSel(ls,true);
-	for (i=0; i<MAX_SONG_POSITIONS;i++)
-	{
-		_pSong->playOrderSel[i] = false;
-	}
-	_pSong->playOrderSel[ls] = true;
-
 }
 

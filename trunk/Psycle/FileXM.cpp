@@ -107,7 +107,7 @@ long CFileXM::ImportPatterns(Song *s)
 		if ( playOrder[i] < MAX_PATTERNS ) s->playOrder[i] = playOrder[i];
 		else s->playOrder[i] = 0;
 	}
-	if ( iSongLen > MAX_PATTERNS ) s->playLength = MAX_PATTERNS;
+	if ( iSongLen > MAX_SONG_POSITIONS ) s->playLength = MAX_SONG_POSITIONS;
 	else s->playLength = iSongLen;
 
 	s->SONGTRACKS = iNoChannels;

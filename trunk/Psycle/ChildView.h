@@ -145,6 +145,7 @@ public:
 
 	void patCopy();
 	void patPaste();
+	void patMixPaste();
 	void patCut();
 	void patTranspose(int trp);
 	void HalveLength();

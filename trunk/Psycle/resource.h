@@ -66,6 +66,7 @@
 #define IDD_PRESETS                     181
 #define IDD_SAVESONG                    183
 #define IDD_INST_EDITOR                 185
+#define IDD_SWINGFILL                   187
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -281,6 +282,7 @@
 #define IDC_SEQNEW                      1212
 #define IDC_SEQINS                      1213
 #define IDC_SEQDEL                      1214
+#define IDC_SEQCUT                      1214
 #define IDC_SEQCLR                      1215
 #define IDC_SEQ1                        1216
 #define IDC_SEQ2                        1217
@@ -291,8 +293,8 @@
 #define IDC_INCPAT2                     1222
 #define IDC_DECLEN                      1223
 #define IDC_INCLEN                      1224
-#define IDC_SEQSLEN                     1225
-#define IDC_REFRESH                     1226
+#define IDC_SEQSRT                      1225
+#define IDC_SEQDUPLICATE                1226
 #define IDC_LENGTH                      1227
 #define IDC_WRAP                        1228
 #define IDC_MULTICHANNEL_AUDITION       1229
@@ -301,7 +303,9 @@
 #define IDC_CURSORDOWN                  1232
 #define IDC_MUTE                        1233
 #define IDC_BYPASS                      1234
+#define IDC_SEQCOPY                     1234
 #define IDC_SOLO                        1235
+#define IDC_SEQPASTE                    1235
 #define IDC_PRESETSCOMBO                1236
 #define IDC_SAVE                        1237
 #define IDC_DELETE                      1238
@@ -467,6 +471,29 @@
 #define IDC_LEARN_13                    1398
 #define IDC_LEARN_14                    1399
 #define IDC_LEARN_15                    1400
+#define IDC_PBG_CAN                     1401
+#define IDC_ROW_CAN                     1402
+#define IDC_BEAT_CAN                    1403
+#define IDC_FONT_CAN                    1404
+#define IDC_4BEAT_CAN                   1405
+#define IDC_VU1_CAN                     1406
+#define IDC_VU2_CAN                     1407
+#define IDC_VU3_CAN                     1408
+#define IDC_MBG_CAN                     1409
+#define IDC_REFRESH                     1410
+#define IDC_MWIRE_COL                   1410
+#define IDC_RECORD_TWEAKS               1411
+#define IDC_MPOLY_COL                   1411
+#define IDC_CENTER_TEMPO                1412
+#define IDC_VARIANCE                    1413
+#define IDC_WIDTH                       1414
+#define IDC_PHASE                       1415
+#define IDC_OFFSET                      1416
+#define IDC_BG_COLOUR                   1417
+#define IDC_WIRE_COLOUR                 1418
+#define IDC_POLY_COLOUR                 1419
+#define IDC_AAWIRE                      1420
+#define IDC_WIRE_WIDTH                  1423
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -524,22 +551,25 @@
 #define ID_SELECCION_ZOOMOUT            32844
 #define ID_SELECTION_SHOWALL            32845
 #define ID_EDIT_DELETE                  32849
-#define ID_CONVERT_MONO                 32950
-#define ID_CONVERT_STEREO               32951
+#define ID_CONVERT_MONO                 32850
+#define ID_CONVERT_STEREO               32851
 #define ID_INDICATOR_SIZE               32853
 #define ID_INDICATOR_MODE               32854
 #define IDS_COULDNT_INITIALIZE_TIMER    32880
 #define IDS_SONG_SAVED                  32881
 #define IDS_ARE_YOU_SURE                32882
+#define ID_POP_BLOCK_SWINGFILL          32885
+#define ID_POP_TRACK_SWINGFILL          32886
+#define ID_EDIT_MIXPASTE                32890
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        187
-#define _APS_NEXT_COMMAND_VALUE         32884
-#define _APS_NEXT_CONTROL_VALUE         1401
+#define _APS_NEXT_RESOURCE_VALUE        189
+#define _APS_NEXT_COMMAND_VALUE         32891
+#define _APS_NEXT_CONTROL_VALUE         1424
 #define _APS_NEXT_SYMED_VALUE           52
 #endif
 #endif

@@ -176,6 +176,10 @@ enum CmdSet
 
 	cdefEditQuantizeDec,
 	cdefEditQuantizeInc,
+
+	// new ones have to go at bottom of each section or else bad registry reads
+	cdefPatternMixPaste,
+
 };
 
 
@@ -292,6 +296,7 @@ struct CmdDef
 		case cdefPatternCut:	return "Pattern Cut";
 		case cdefPatternCopy:	return "Pattern Copy";
 		case cdefPatternPaste:	return "Pattern Paste";
+		case cdefPatternMixPaste:	return "Pattern Mix Paste";
 				
 		case cdefBlockCut:		return "Block Cut";
 		case cdefBlockCopy:		return "Block Copy";
