@@ -179,11 +179,18 @@ namespace psycle
 		CmdDef InputHandler::StringToCmd(LPCTSTR str)
 		{
 			CmdDef ret;
-			for(UINT i=0;i<CS_LAST;i++)
+			int i,j;
+			for(j=0;j<MOD_MAX;j++)
 			{
-				ret.ID = CmdSet(i);
-				if(!strcmp(ret.GetName(),str))
-					return ret;
+				for(i=0;i<256;i++)
+				{
+					ret=cmdLUT[j][i];
+					if(ret.IsValid())
+					{
+						if(!strcmp(ret.GetName(),str))
+						return ret;
+					}
+				}
 			}
 			ret.ID = cdefNull;
 			return ret;
@@ -233,31 +240,14 @@ namespace psycle
 			CString key;
 			CString data;
 
+			// File version
 			sect = "Info";
 			key = "AppVersion";
-			data = "N/A" ;
+			data = PSYCLE__VERSION;
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
 			key = "Description";
-			data = "N/A";	
+			data = "Psycle";	
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);	
-
-			UINT i,j;
-			
-			// note keys
-			sect = "Keys";
-			WritePrivateProfileString(sect,NULL,NULL,sDefaultCfgName); 	// clear
-			for(j=0;j<MOD_MAX;j++)
-			{
-				for(i=0;i<256;i++)
-				{
-					if(cmdLUT[j][i].IsValid())
-					{
-						key.Format("Key[%d]%03d",j,i);
-						data.Format("%03d     ; cmd = '%s'",cmdLUT[j][i].ID,cmdLUT[j][i].GetName());
-						WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-					}
-				}
-			}
 
 			// option data
 			sect = "Options";
@@ -281,6 +271,27 @@ namespace psycle
 			data.Format("%d",bShiftArrowsDoSelect);
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
 
+
+			UINT i,j;
+			
+			// note keys
+			sect = "Keys";
+			WritePrivateProfileString(sect,NULL,NULL,sDefaultCfgName); 	// clear
+			for(j=0;j<MOD_MAX;j++)
+			{
+				for(i=0;i<256;i++)
+				{
+					if(cmdLUT[j][i].IsValid())
+					{
+						key.Format("n%03d",int(cmdLUT[j][i].ID));
+						data.Format("%04d   ; cmd = '%s'",(j*256)+i,cmdLUT[j][i].GetName());
+						WritePrivateProfileString(sect,key,data,sDefaultCfgName);
+					}
+				}
+			}
+
+
+
 			return true;
 		}
 
@@ -299,30 +310,9 @@ namespace psycle
 			data = "";	
 			GetPrivateProfileString(sect,key,"",data.GetBufferSetLength(64),64,sDefaultCfgName);
 			if(data=="")
-				return false;
-
-			
-			// save key data
-			UINT i,j;
-			
-			CmdSet ID;
-			int cmddata;
-			sect = "Keys";
-			for(j=0;j<MOD_MAX;j++)
 			{
-				for(i=0;i<256;i++)
-				{
-					key.Format("Key[%d]%03d",j,i);
-					cmddata = GetPrivateProfileInt(sect,key,-1,sDefaultCfgName);			
-					ID = CmdSet(cmddata);
-					if ( ID == cdefTweakE) ID = cdefMIDICC;// Old twf Command
-					SetCmd(ID,i,j);
-				}
+				return false;
 			}
-			WORD tmpkey, tmpmods;
-			CmdToKey(cdefSelectMachine,tmpkey,tmpmods);
-			if ( !tmpkey ) SetCmd(cdefSelectMachine,VK_RETURN,0);
-
 			// option data
 			sect = "Options";
 			key = "bNewHomeBehaviour"; // Variable renamed to bFT2HomeBehaviour.
@@ -340,9 +330,58 @@ namespace psycle
 			key = "bShiftArrowsDoSelect";
 			bShiftArrowsDoSelect = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
 
+			if (data== "N/A")
+			{
+				return ParseOldFileformat();
+			}
+			else
+			{
+				// restore key data
+				sect = "Keys";
+				CmdDef cmd;
+				CString cmdDefn;
+				int cmddata, i,modi;
+				for(i=0;i<max_cmds;i++)
+				{
+					cmd.ID = CmdSet(i);
+					cmdDefn = cmd.GetName();
+					if(cmdDefn!="Invalid")
+					{
+						key.Format("n%d",i);
+						cmddata= GetPrivateProfileInt(sect,key,-1,sDefaultCfgName);
+						modi=cmddata/256;
+						SetCmd(cmd.ID,cmddata%256,modi);
+					}
+				}
+				return true;
+			}
+		}
+		bool InputHandler::ParseOldFileformat()
+		{
+			// save key data
+			UINT i,j;
+			CString sect;
+			CString key;
+
+			CmdSet ID;
+			int cmddata;
+			sect = "Keys";
+			for(j=0;j<MOD_MAX;j++)
+			{
+				for(i=0;i<256;i++)
+				{
+					key.Format("Key[%d]%03d",j,i);
+					cmddata = GetPrivateProfileInt(sect,key,-1,sDefaultCfgName);			
+					ID = CmdSet(cmddata);
+					if ( ID == cdefTweakE) ID = cdefMIDICC;// Old twf Command
+					SetCmd(ID,i,j);
+				}
+			}
+			WORD tmpkey, tmpmods;
+			CmdToKey(cdefSelectMachine,tmpkey,tmpmods);
+			if ( !tmpkey ) SetCmd(cdefSelectMachine,VK_RETURN,0);
 			return true;
 		}
-
 
 
 

@@ -67,16 +67,19 @@ namespace psycle
 			m_lstCmds.ResetContent();
 
 			// add command definitions
-			CString cmdDefn;
-			int i;
-			CmdDef cmd;
-			for(i=0;i<1023;i++)
+			InputHandler* pinp = Global::pInputHandler;
+			int j,i;
+
+			for(j=0;j<MOD_MAX;j++)
 			{
-				cmd.ID = CmdSet(i);
-				cmdDefn = cmd.GetName();
-				if(cmdDefn!="Null" && cmdDefn!="-" && cmdDefn!="" && cmdDefn!="Invalid")
-					m_lstCmds.AddString(LPCTSTR(cmdDefn));
-			}        
+				for(i=0;i<256;i++)
+				{
+					if(pinp->cmdLUT[j][i].IsValid())
+					{
+						m_lstCmds.AddString(LPCTSTR(pinp->cmdLUT[j][i].GetName()));
+					}
+				}
+			}
 		}
 
 		BOOL CKeyConfigDlg::OnInitDialog() 
