@@ -563,33 +563,65 @@ namespace psycle
 				bDoingSelection = false;
 				break;
 			case cdefNavPageUp:
-				pChildView->bScrollDetatch=false;
-				pChildView->ChordModeOffs = 0;
-				if ( bDoingSelection && !pChildView->blockSelected)
+				//if added by sampler to move backward 16 lines when playing
+				if (Global::pPlayer->_playing)
 				{
-					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+					else
+					{
+						if (Global::pPlayer->_playPosition > 0)
+						{
+							Global::pPlayer->_playPosition -= 1;
+							Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - 16;												
+						}
+						else
+						{
+							if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+							else Global::pPlayer->_lineCounter = 0;
+						}
+					}
 				}
-				pChildView->PrevLine(16,false);
-				if ( bDoingSelection )
+				//end of if added by sampler
+				else
 				{
-					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					pChildView->bScrollDetatch=false;
+					pChildView->ChordModeOffs = 0;
+					
+					if ( bDoingSelection && !pChildView->blockSelected)
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					pChildView->PrevLine(16,false);
+					if ( bDoingSelection )
+					{
+						pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				}
-				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				break;
 
 			case cdefNavPageDn:
-				pChildView->bScrollDetatch=false;
-				pChildView->ChordModeOffs = 0;
-				if ( bDoingSelection && !pChildView->blockSelected)
+				//if added by sampler
+				if (Global::pPlayer->_playing)
 				{
-					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					Global::pPlayer->_lineCounter += 16;
 				}
-				pChildView->AdvanceLine(16,false);
-				if ( bDoingSelection )
+				//end of if added by sampler
+				else
 				{
-					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					pChildView->bScrollDetatch=false;
+					pChildView->ChordModeOffs = 0;
+					if ( bDoingSelection && !pChildView->blockSelected)
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					pChildView->AdvanceLine(16,false);
+					if ( bDoingSelection )
+					{
+						pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				}
-				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				break;
 			
 			case cdefNavTop:
