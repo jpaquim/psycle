@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
 #include <project.private.hpp>
+#include "version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
 #include "FileXM.hpp"
@@ -324,11 +325,19 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (nIDEvent == 31)
 			{
-				//\todo : IMPORTANT! change this lock to a more flexible one
-				// It is causing skips on sound when there is a pattern change because
-				// it is not allowing the player to work. Do the same in the one inside
-				// Player::Work()
-				CSingleLock lock(&_pSong->door,TRUE);
+				#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+					#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+				#else
+					#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+						boost::read_write_mutex::scoped_read_lock lock(Global::_pSong->read_write_mutex());
+					#else // original implementation
+						//\todo : IMPORTANT! change this lock to a more flexible one
+						// It is causing skips on sound when there is a pattern change because
+						// it is not allowing the player to work. Do the same in the one inside
+						// Player::Work()
+						CSingleLock lock(&_pSong->door,TRUE);
+					#endif
+				#endif
 				if (Global::_pSong->_pMachine[MASTER_INDEX])
 				{
 					pParentMain->UpdateVumeters
@@ -2214,7 +2223,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
-			titlename += "] Psycle Modular Music Creation Studio " PSYCLE__VERSION;
+			titlename += "] Psycle Modular Music Creation Studio (" PSYCLE__VERSION ")";
 			pParentMain->SetWindowText(titlename.c_str());
 		}
 

@@ -170,6 +170,7 @@
 #define IDC_EDIT19                      1054
 #define IDC_SLIDER6                     1055
 #define IDC_EDIT20                      1055
+#define IDC_SHOWATSTARTUP2              1055
 #define IDC_DRYSLIDER                   1056
 #define IDC_EDIT21                      1056
 #define IDC_DRYLABEL                    1057
@@ -679,7 +680,6 @@
 #define IDC_SEQPASTE                    1475
 #define IDC_MACHINE_BITMAP              1475
 #define IDC_SEQDELETE                   1476
-#define IDC_VERSION_INFO                1479
 #define IDC_BUTTON                      1481
 #define IDC_SLIDER                      1482
 #define IDC_VOLSLIDER                   1484
@@ -853,6 +853,7 @@
 #define IDC_R_SHOWCHAN                  1615
 #define IDC_R_SHOWVOICE                 1616
 #define IDC_VOICESPLAYING               1617
+#define IDC_VERSION_INFO_MULTI_LINE     1619
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -953,7 +954,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        226
 #define _APS_NEXT_COMMAND_VALUE         32938
-#define _APS_NEXT_CONTROL_VALUE         1618
+#define _APS_NEXT_CONTROL_VALUE         1620
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

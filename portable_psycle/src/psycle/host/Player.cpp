@@ -332,7 +332,16 @@ namespace psycle
 				// Processing plant
 				if(amount > 0)
 				{
-					CSingleLock crit(&Global::_pSong->door, TRUE);
+					#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+						#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+					#else
+						#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+							boost::read_write_mutex::scoped_read_lock lock(Global::_pSong->read_write_mutex());
+						#else // original implementation
+							CSingleLock crit(&Global::_pSong->door, TRUE);
+						#endif
+					#endif
+
 					CPUCOST_INIT(idletime);
 					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
 					{
@@ -404,7 +413,7 @@ namespace psycle
 					numSamplex -= amount;
 				}
 				if(pThis->_playing) pThis->_ticksRemaining -= amount;
-			} while(numSamplex>0); ///\todo this is strange
+			} while(numSamplex>0);
 			return pThis->_pBuffer;
 		}
 

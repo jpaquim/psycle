@@ -5,3 +5,24 @@
 #define HAVE_CONFIG_H
 #define OPERATING_SYSTEM__VERSION__MICROSOFT__COMPATIBILITY \
          OPERATING_SYSTEM__VERSION__MICROSOFT__COMPATIBILITY__1998
+
+/// [bohan] added implementation of psycle::host::Song's lock using boost 1.3's read_write_mutex.
+/// [bohan]
+/// [bohan] I used a temporary #define (to be removed) to enable this new implementation of the gui<->audio thread synchronization.
+/// [bohan] Once the new implementation is known to work well,
+/// [bohan] we can remove this #define, which will trigger some #error in the places of the code that are concerned.
+/// [bohan] Where the #error occurred, we can removed the old implementation.
+/// [bohan]
+/// [bohan] to enable this new implementation,
+/// [bohan] #define PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX 1
+/// [bohan]
+/// [bohan] to disable this new implementation, do not undefine the preprocessor symbol (which will triggers the #error's), but rather
+/// [bohan] #define PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX 0
+#define PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX 0
+
+#define PSYCLE__CONFIGURATION__OPTIONS(EOL) \
+	"compiler build tool chain = msvc" \
+	EOL \
+	"read_write_mutex = " STRINGIZED(PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX) \
+	EOL \
+	"debugging = " PSYCLE__CONFIGURATION__OPTION__DEBUG

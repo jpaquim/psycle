@@ -162,6 +162,15 @@ namespace psycle
 		}
 
 		Song::Song()
+		#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+			#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+		#else
+			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+				: read_write_mutex_(boost::read_write_scheduling_policy::alternating_many_reads) // see: http://boost.org/doc/html/threads/concepts.html#threads.concepts.read-write-scheduling-policies.inter-class
+			#else // original implementation
+				// nothing
+			#endif
+		#endif
 		{
 			_machineLock = false;
 			Invalided = false;
@@ -276,7 +285,15 @@ namespace psycle
 
 		void Song::New()
 		{
-			CSingleLock lock(&door,TRUE);
+			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#else
+				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
+				#else // original implementation
+					CSingleLock lock(&door,TRUE);
+				#endif
+			#endif
 			seqBus=0;
 			// Song reset
 			std::memset(&Name, 0, sizeof Name);
@@ -433,7 +450,15 @@ namespace psycle
 
 		void Song::DestroyMachine(int mac)
 		{
-			CSingleLock lock(&door, TRUE);
+			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#else
+				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
+				#else // original implementation
+					CSingleLock lock(&door, TRUE);
+				#endif
+			#endif
 			Machine *iMac = _pMachine[mac];
 			Machine *iMac2;
 			if(iMac)

@@ -3,6 +3,12 @@
 #if 0
 /*
 $Log$
+Revision 1.20  2005/04/06 04:32:03  johan-boule
+Attempt to use boost::read_write_mutex instead of an exclusive mutex for Song's lock.
+Curiously, it dead-locks.
+So, i made it a build option that can be enabled/disabled in src/configuration.hpp
+The version info and the about box is modified to show what build options were used (multiline text).
+
 Revision 1.19  2005/04/02 21:48:37  johan-boule
 releasing alpha version 1.7.37
 
@@ -69,13 +75,18 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 /// - doc/for-end-users/readme.txt
 /// - doc/for-end-users/whatsnew.txt
 /// [bohan] ... if only we were using a programmable build system like autoconf.
-			
-#define PSYCLE__BRANCH "" // mainline (psycledelics)
+
+#define PSYCLE__TAR_NAME "psycle"
+#define PSYCLE__NAME "Psycle Modular Music Creation Studio"
+#define PSYCLE__BRANCH "Psycledelics (mainline)"
+#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
+#define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 37 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 38 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
+/// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
 	PSYCLE__BRANCH " " \
 	PSYCLE__VERSION__QUALITY " " \
@@ -83,28 +94,44 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 	STRINGIZED(PSYCLE__VERSION__MINOR) "." \
 	STRINGIZED(PSYCLE__VERSION__PATCH)
 
+/// identifies both what sources the build comes from, and what build options were used.
+#define PSYCLE__BUILD__IDENTIFIER(EOL) \
+	"version: " PSYCLE__VERSION \
+	EOL \
+	"build configuration options:" EOL PSYCLE__CONFIGURATION__OPTIONS(EOL) \
+	EOL \
+	"built on: " PSYCLE__BUILD__DATE
+
+#if defined NDEBUG
+	#define PSYCLE__CONFIGURATION__OPTION__DEBUG "off"
+#else
+	#define PSYCLE__CONFIGURATION__OPTION__DEBUG "on"
+#endif
+
+#if defined COMPILER__RESOURCE
+	/// [bohan] __DATE__ and __TIME__ doesn't seem to work with msvc's resource compiler
+	#define PSYCLE__BUILD__DATE "a sunny day"
+#else
+	#define PSYCLE__BUILD__DATE __DATE__ ", " __TIME__
+#endif
+
 #if defined COMPILER__RESOURCE
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 
-	#define RC__CompanyName "Psycledelics"
-	#define RC__LegalCopyright "Copyright (C) 2000-2005 Psycledelics"
-	#define RC__License "none, public domain"
+	#define RC__CompanyName PSYCLE__BRANCH
+	#define RC__LegalCopyright PSYCLE__COPYRIGHT
+	#define RC__License PSYCLE__LICENSE
 
-	#define RC__ProductName "Psycle Modular Music Creation Studio"
-	#define RC__InternalName "Psycle"
-	#define RC__ProductVersion PSYCLE__VERSION ", " RC__DEBUG
+	#define RC__InternalName PSYCLE__TAR_NAME
+	#define RC__ProductName PSYCLE__NAME
+	#define RC__ProductVersion PSYCLE__VERSION EOL "$File: $" EOL "$Revision$" EOL "$Date$"
 
+	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
 	#define RC__FileDescription RC__ProductName " - Host"
-	#define RC__OriginalFilename "psycle.exe"
 	#define RC__FileVersion RC__ProductVersion
-	#define RC__SpecialBuild "compiler build tool chain:\r\n" "msvc 7.1"
-	#define RC__PrivateBuild "built every sunnyday" //__DATE__ __TIME__
 
-	#if defined NDEBUG
-		#define RC__DEBUG "compiled with debugging disabled"
-	#else
-		#define RC__DEBUG "compiled with debugging enabled"
-	#endif
+	#define RC__SpecialBuild PSYCLE__CONFIGURATION__OPTIONS(EOL)
+	#define RC__PrivateBuild PSYCLE__BUILD__DATE
 
 	// [bohan]
 	// Actual resource code moved back to resources.rc ...

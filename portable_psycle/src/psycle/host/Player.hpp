@@ -98,8 +98,7 @@ namespace psycle
 			/// wether the recording device has been started.
 			bool _recording;
 			///\}
-
-		protected:			
+		protected:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 			int prevMachines[MAX_TRACKS];
 			/// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
