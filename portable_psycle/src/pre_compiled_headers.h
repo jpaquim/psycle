@@ -174,15 +174,12 @@
 	//#include <boost/spirit.hpp>
 	#if defined COMPILER__MICROSOFT
 		#if !defined LIBRARY__BOOST__PATH
-			//#define LIBRARY__BOOST__PATH "/usr/lib/boost/libs/"
-			//#define LIBRARY__BOOST__PATH__THREAD LIBRARY__BOOST__PATH "thread/build/bin-stage/"
-			#define LIBRARY__BOOST__PATH
-			#define LIBRARY__BOOST__PATH__THREAD LIBRARY__BOOST__PATH
+			#define LIBRARY__BOOST__PATH ""
 		#endif
 		#if defined NDEBUG
-			#pragma comment(lib, LIBRARY__BOOST__PATH__THREAD "boost_thread")
+			#pragma comment(lib, LIBRARY__BOOST__PATH "boost_thread")
 		#else
-			#pragma comment(lib, LIBRARY__BOOST__PATH__THREAD "boost_threadd")
+			#pragma comment(lib, LIBRARY__BOOST__PATH "boost_threadd")
 		#endif
 		#undef LIBRARY__BOOST__PATH
 		#undef LIBRARY__BOOST__PATH__THREAD
@@ -211,9 +208,8 @@
 	#if !defined _WIN32_WINNT
 		#define _WIN32_WINNT 0x0500
 	#endif
-	#if 0 // disabled since i've put fltk in the directory tree
 	#if !defined LIBRARY__FLTK__PATH
-		#define LIBRARY__FLTK__PATH "/home/bohan/projects/cvs.sourceforge.net/fltk/fltk/lib/"
+		#define LIBRARY__FLTK__PATH ""
 	#endif
 	#if defined NDEBUG
 		#pragma comment(lib, LIBRARY__FLTK__PATH "fltkdll")
