@@ -2580,18 +2580,34 @@ BOOL CMainFrame::StatusBarIdleText()
 			{
 				if (_pSong->_machineActive[machine])
 				{
-					char buf[64];
-					buf[0]=0;
-					_pSong->_pMachines[machine]->GetParamName(toffset[1],buf);
-					if (buf[0])
+					if (_pSong->_pMachines[machine]->_type == MACH_SAMPLER)
 					{
-						sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName,buf);
-						return TRUE;
+						if (_pSong->_instruments[toffset[1]]._sName[0])
+						{
+							sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName,_pSong->_instruments[toffset[1]]._sName);
+							return TRUE;
+						}
+						else 
+						{
+							sprintf(szStatusIdle,"%s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName);
+							return TRUE;
+						}
 					}
 					else
 					{
-						sprintf(szStatusIdle,"%s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName);
-						return TRUE;
+						char buf[64];
+						buf[0]=0;
+						_pSong->_pMachines[machine]->GetParamName(toffset[1],buf);
+						if (buf[0])
+						{
+							sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName,buf);
+							return TRUE;
+						}
+						else 
+						{
+							sprintf(szStatusIdle,"%s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName);
+							return TRUE;
+						}
 					}
 				}
 				else

@@ -36,7 +36,7 @@ V1.67
   [Alk] (poolog) -> who suggested CLONE? i forgot
 + Added Swing Fill command (pooplog)
 ! Increased max lines/pattern to 256 (pooplog)
-+ Basic Mousewheel support for pattern edit mode (pooplog)
++ Basic Mousewheel support for pattern edit mode, scrollbars detach from cursor, etc. (pooplog)
 * Fixed song bpm and tpb being misreported to machines if they used FF or FE command
 ! VU Meters are all nicer
 + Look of Machine Wires can be changed in the visual dialog (pooplog)
@@ -59,6 +59,15 @@ V1.67
 + in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
 + You can drag songs onto the window to load them now (pooplog)
 ! All native machines can now recieve pattern data, not just generators (pooplog) [Druttis]
++ Gear rack (pooplog) [JAZ]
++ options for default length of pattern, etc. (pooplog) [doktor, sue]
+* millions of tiny bugfixes (pooplog & JAZ)
++ revert to saved option (pooplog) [alk]
+* fixed wave header reading (pooplog) [Druttis]
+* fix for chord entering (shift+note) so it works correctly (pooplog)
++ added record button that sets edit and follow mode (pooplog)
+
+
 
 V1.66
 -----
