@@ -102,8 +102,10 @@ void mi::Setup(bool clearfiltermemory)
 		BiQuad_new(LPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,clearfiltermemory);
 		break;
 	case 1:
+		/*
 		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,clearfiltermemory);
 		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,clearfiltermemory);
+		*/
 		break;
 	}
 }
@@ -147,7 +149,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		break;
 	case 1:
 		do
-		{
+		{/*
 			float xl = *psamplesleft;
 			float xr = *psamplesleft;
 			
@@ -159,7 +161,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			
 			++psamplesleft;
 			++psamplesright;
-			
+		*/	
 		} while(--numsamples);
 		break;
 	}
@@ -177,10 +179,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		switch(value)
 		{
 		case 0:
-			strcpy(txt,"Old Mode");
+			strcpy(txt,"On");
 			return true;
 		case 1:
-			strcpy(txt,"New Mode");
+			strcpy(txt,"Off");
 			return true;
 		}
 		break;
