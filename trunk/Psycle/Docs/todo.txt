@@ -19,7 +19,6 @@
 * <alk> move mouse over vu, black flickering (more noticable on the big vus)
 * <alk> double clicking mute or bypass should not bring up machine dialog
 * <alk> click solo, mute, solo (bug last solo does not get done)
-* <alk> master is not centred when new song is done
 + <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
@@ -94,7 +93,6 @@ bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  
 	updates ALL the knobs
 + <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
 	owner draw controls i say?
-+ how about nice looking bmp windows for machine link and master machine dialogs?
 + James says: how hard would it be to put nodes in the wires, so you can bend them?
 * Saving all the missing settings to registry (like class of plugin..)
 feature: Replace Machine by another (right click menu? new button?).

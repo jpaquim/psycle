@@ -308,9 +308,9 @@ public:
 	int HEADER_INDENT;
 	int HEADER_HEIGHT;
 	int HEADER_ROWWIDTH;
-
-	int VISTRACKS;
+	int CH;
 	int CW;
+	int VISTRACKS;
 	int COLX[10];
 	bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 						// Its function is to prevent audio (and midi) operations while it is not
@@ -379,7 +379,6 @@ private:
 	HBITMAP hbmMachineSkin;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];
-	int CH;
 	int VISLINES;
 	
 	int playpos;		// Play Cursor Position in Screen // left and right are unused
