@@ -23,9 +23,14 @@ namespace psycle
 		BOOL CMixerDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
+			
+			std::ostringstream oss;
 
 			for (int i = 0; i <= 15; i++)
-				m_Numbers[0].SetWindowText("test");
+			{			
+				oss << i;
+				m_Numbers[i].SetWindowText(oss.str().c_str());
+			}
 			
 			return TRUE;
 		}
