@@ -23,7 +23,7 @@ class CGearGainer;
 class CGearFlanger;
 class CWireDlg;
 
-#define MAX_SCOPES 16
+#define MAX_WIRE_DIALOGS 16
 
 enum 
 {
@@ -284,7 +284,7 @@ public:
 	CGearfilter * FilterMachineDialog;
 	CGearGainer * GainerMachineDialog;
 	CGearFlanger * FlangerMachineDialog;
-	CWireDlg * WireDialog[MAX_SCOPES];
+	CWireDlg * WireDialog[MAX_WIRE_DIALOGS];
 
 	bool blockSelected;
 	bool blockStart;
@@ -362,6 +362,7 @@ private:
 	void FindMachineSkin(CString findDir, CString findName, BOOL *result);
 	void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
 	void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
+	void KillWireDialogs();
 
 	inline int _ps();
 	inline unsigned char * _offset(int ps);

@@ -95,7 +95,7 @@ CChildView::CChildView()
 	FilterMachineDialog = NULL;
 	GainerMachineDialog = NULL;
 	FlangerMachineDialog = NULL;
-	for (c = 0; c < MAX_SCOPES; c++)
+	for (c = 0; c < MAX_WIRE_DIALOGS; c++)
 	{
 		WireDialog[c] = NULL;
 	}
@@ -163,7 +163,7 @@ CChildView::CChildView()
 
 CChildView::~CChildView()
 {
-//	KillModelessMachines();
+	KillWireDialogs();
 	Global::pInputHandler->SetChildView(NULL);
 	KillRedo();
 	KillUndo();
@@ -809,7 +809,7 @@ void CChildView::OnFileNew()
 {
 	if (CheckUnsavedSong("New Song"))
 	{
-//		KillModelessMachines();
+		KillWireDialogs();
 		KillUndo();
 		KillRedo();
 		pParentMain->CloseAllMacGuis();
@@ -1778,7 +1778,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	{
 		if (CheckUnsavedSong("Load Song"))
 		{
-//			KillModelessMachines();
+			KillWireDialogs();
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
 			Sleep(LOCK_LATENCY);
@@ -3023,3 +3023,13 @@ void CChildView::TransparentBlt(CDC* pDC,
    hdcMem.DeleteDC();
 }
 
+void CChildView::KillWireDialogs()
+{
+	for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+	{
+		if (WireDialog[i])
+		{
+			WireDialog[i]->OnCancel();
+		}
+	}
+}

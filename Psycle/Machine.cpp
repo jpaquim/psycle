@@ -12,6 +12,7 @@
 	#include "Song.h"
 //	#include "FileIO.h"
 	#include "Configuration.h"
+#include "WireDlg.h"
 
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
@@ -51,6 +52,9 @@ Machine::Machine()
 	_volumeDisplay = 0;
 	_volumeMaxDisplay = 0;
 	_volumeMaxCounterLife = 0;
+	_pScopeBufferL = NULL;
+	_pScopeBufferR = NULL;
+	_scopeBufferIndex = 0;
 #endif // _WINAMP_PLUGIN_
 
 	_pSamplesL = new float[STREAM_SIZE];
@@ -235,6 +239,31 @@ void Machine::PreWork(int numSamples)
 	Dsp::Clear(_pSamplesR, numSamples);
 #else
 	CPUCOST_INIT(cost);
+	if (_pScopeBufferL && _pScopeBufferR)
+	{
+		float *pSamplesL = _pSamplesL;   
+		float *pSamplesR = _pSamplesR;   
+		int i = numSamples;   
+		while (i > 0)   
+		{   
+			if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
+			{   
+				 memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex))*sizeof(float));   
+				 memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex))*sizeof(float));   
+				 pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex));   
+				 pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex));   
+				 i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex));   
+				 _scopeBufferIndex = 0;   
+			}   
+			else   
+			{   
+				 memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
+				 memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
+				 _scopeBufferIndex += i;   
+				 i = 0;   
+			}   
+		} 
+	}
 	Dsp::Clear(_pSamplesL, numSamples);
 	Dsp::Clear(_pSamplesR, numSamples);
 	CPUCOST_CALC(cost, numSamples);

@@ -246,7 +246,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 								
 								if ((point.x > xt) && (point.x < xt+20) && (point.y > yt) && (point.y < yt+20))
 								{
-									for (int i = 0; i < MAX_SCOPES; i++)
+									for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 									{
 										if (WireDialog[i])
 										{
@@ -257,7 +257,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 											}
 										}
 									}
-									for (i = 0; i < MAX_SCOPES; i++)
+									for (i = 0; i < MAX_WIRE_DIALOGS; i++)
 									{
 										if (!WireDialog[i])
 										{

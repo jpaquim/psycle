@@ -12,7 +12,7 @@
 class CChildView;
 
 #define MAX_SCOPE_BANDS 32
-#define SCOPE_BUF_SIZE 256
+#define SCOPE_BUF_SIZE 4096
 #define SCOPE_SPEC_SAMPLES	256
 
 class Song;
@@ -42,6 +42,9 @@ public:
 	int scope_osc_rate;
 	int scope_spec_bands;
 	int scope_spec_rate;
+
+	float pSamplesL[SCOPE_BUF_SIZE];
+	float pSamplesR[SCOPE_BUF_SIZE];
 // Dialog Data
 	//{{AFX_DATA(CWireDlg)
 	enum { IDD = IDD_WIREDIALOG };
@@ -69,8 +72,9 @@ protected:
 	CRect rc;
 	CFont font;
 	CFont* oldFont;
-	int pos;
 	BOOL hold;
+	BOOL clip;
+	int pos;
 	int bar_heightsl[MAX_SCOPE_BANDS];
 	int bar_heightsr[MAX_SCOPE_BANDS];
 

@@ -1416,8 +1416,14 @@ bool Song::Load(
 					int d = pOrigMachine->FindOutputWire(i);
 
 					float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-					if( val > 2 ) val*=0.000030517578125f; // BugFix
-					else if ( val < 0.00004) val*=32768.0f; // BugFix
+					if( val >= 2.000001f ) 
+					{
+						val*=0.000030517578125f; // BugFix
+					}
+					else if ( val < 0.00004f) 
+					{
+						val*=32768.0f; // BugFix
+					}
 
 					_pMachines[i]->InitWireVolume(pOrigMachine->_type,c,val);
 				}
