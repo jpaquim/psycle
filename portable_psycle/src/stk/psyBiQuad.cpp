@@ -12,6 +12,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyBiQuad.h"
 #include <math.h>
 

@@ -9,6 +9,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyGenerator.h"
 
 Generator :: Generator() : Stk()

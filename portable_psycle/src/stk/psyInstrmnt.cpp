@@ -9,6 +9,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyInstrmnt.h"
 
 Instrmnt :: Instrmnt()

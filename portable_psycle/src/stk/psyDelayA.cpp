@@ -22,6 +22,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyDelayA.h"
 
 DelayA :: DelayA() : Delay()

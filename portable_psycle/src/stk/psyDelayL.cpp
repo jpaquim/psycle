@@ -22,6 +22,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyDelayL.h"
 
 DelayL :: DelayL() : Delay()

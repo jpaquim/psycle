@@ -18,6 +18,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyDelay.h"
 
 Delay :: Delay() : Filter()

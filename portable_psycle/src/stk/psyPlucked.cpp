@@ -17,6 +17,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyPlucked.h"
 
 Plucked :: Plucked(StkFloat lowestFrequency)

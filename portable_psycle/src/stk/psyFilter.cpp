@@ -27,6 +27,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyFilter.h"
 #include <stdio.h>
 
