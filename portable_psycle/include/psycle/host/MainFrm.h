@@ -1,6 +1,7 @@
 #pragma once
 #include "ChildView.h"
 #include "InstrumentEditor.h"
+#include "Mixer.h"
 #include "LoggingWindow.h"
 #include "InfoDlg.h"
 #include "WaveEdFrame.h"
@@ -67,6 +68,8 @@ namespace psycle
 			void ShowPerformanceDlg();
 			void HideMidiMonitorDlg();
 			void ShowMidiMonitorDlg();
+			void HideMixer();
+			void ShowMixer();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
 			void ShowErrorLogger();
@@ -106,6 +109,7 @@ namespace psycle
 			std::string		szStatusIdle;
 			
 			CInstrumentEditor	m_wndInst;
+			CMixerDlg			m_wndMixer;
 			//CLoggingWindow m_wndLog;
 			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st

@@ -200,6 +200,10 @@ namespace psycle
 
 			// MIDI monitor Dialog
 			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);
+			
+			//Mixer
+			//m_wndMixer = new CMixerDlg(this);
+			m_wndMixer.Create(IDD_INSTRUMENT,this);
 
 			// Instrument editor
 			m_wndInst._pSong=_pSong;
@@ -1264,6 +1268,17 @@ namespace psycle
 		{
 			Global::pLogWindow->ShowWindow(SW_SHOWNORMAL);
 			Global::pLogWindow->SetActiveWindow();
+		}
+
+		void CMainFrame::ShowMixer()
+		{
+			m_wndMixer.ShowWindow(SW_SHOWNORMAL);
+			m_wndMixer.SetActiveWindow();
+		}
+
+		void CMainFrame::HideMixer()
+		{
+			m_wndMixer.ShowWindow(SW_HIDE);
 		}
 
 		void CMainFrame::ShowInstrumentEditor()

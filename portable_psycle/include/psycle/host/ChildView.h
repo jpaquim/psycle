@@ -527,6 +527,7 @@ namespace psycle
 			afx_msg void OnUpdateBarrec(CCmdUI* pCmdUI);
 			afx_msg void OnFileSongproperties();
 			afx_msg void OnViewInstrumenteditor();
+			afx_msg void OnViewMixer();
 			afx_msg void OnViewErrorLogger();
 			afx_msg void OnNewmachine();
 			afx_msg void OnButtonplayseqblock();
