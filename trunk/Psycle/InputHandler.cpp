@@ -825,23 +825,16 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 void InputHandler::Stop()
 {
-	Global::pPlayer->Stop();
-	pMainFrame->SetAppSongBpm(0);
-	pMainFrame->SetAppSongTpb(0);
-	pMainFrame->UpdatePlayOrder(false); // <- This restores the selected block
-	pChildView->Repaint(DMCursor);  
+	pChildView->OnBarstop();
 }
 
 void InputHandler::PlaySong() 
 {
-	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
-	Global::pPlayer->Start(pChildView->editPosition,0);
-	pMainFrame->StatusBarIdle();
+	pChildView->OnBarplay();
 }
 
 void InputHandler::PlayFromCur() 
 {
-	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 	Global::pPlayer->Start(pChildView->editPosition,pChildView->editcur.line);
 	pMainFrame->StatusBarIdle();
 }

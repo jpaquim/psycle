@@ -42,6 +42,7 @@ void Player::Start(int pos, int line)
 {
 	Stop(); // This causes all machines to reset, and samplespertick to init.
 
+	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 	_lineChanged = true;
 	_lineCounter = line;
 	_playPosition= pos;
