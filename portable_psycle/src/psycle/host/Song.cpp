@@ -410,6 +410,65 @@ namespace psycle
 				dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
 				return true;
 			}
+			int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
+			{
+				int w;
+				float volume = 1.0f;
+
+				if (_pMachine[wiresource])
+				{
+					Machine *dmac = _pMachine[_pMachine[wiresource]->_outputMachines[wireindex]];
+
+					if (dmac)
+					{
+						w = dmac->FindInputWire(wiresource);
+						dmac->GetWireVolume(w,volume);
+						if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+						{
+							// delete the old wire
+							_pMachine[wiresource]->_connection[wireindex] = FALSE;
+							_pMachine[wiresource]->_numOutputs--;
+
+							dmac->_inputCon[w] = FALSE;
+							dmac->_numInputs--;
+						}
+/*						else
+						{
+							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+						}*/
+					}
+				}
+				return 0;
+			}
+			int Song::ChangeWireSourceMac(int wiresource,int wiredest, int wireindex)
+			{
+				float volume = 1.0f;
+
+				if (_pMachine[wiredest])
+				{					
+					Machine *smac = _pMachine[_pMachine[wiredest]->_inputMachines[wireindex]];
+
+					if (smac)
+					{
+						_pMachine[wiredest]->GetWireVolume(wireindex,volume);
+						if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+						{
+							// delete the old wire
+							smac->_connection[smac->FindOutputWire(wiredest)] = FALSE;
+							smac->_numOutputs--;
+
+							_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
+							_pMachine[wiredest]->_numInputs--;
+						}
+/*						else
+						{
+							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+						}*/
+					}
+				}
+				return 0;
+			}
+
 		#endif
 
 		void Song::DestroyMachine(int mac)

@@ -66,14 +66,14 @@ namespace psycle
 
 			CBrush fillbrush(Global::pConfig->mv_polycolour);
 			CBrush *oldbrush = devc->SelectObject(&fillbrush);
-			if (Global::pConfig->bBmpBkg)
+			if (Global::pConfig->bBmpBkg) // Draw Background image
 			{
 				CDC memDC;
 				CBitmap* oldbmp;
 				memDC.CreateCompatibleDC(devc);
 				oldbmp=memDC.SelectObject(&machinebkg);
 
-				if ((CW > bkgx) || (CH > bkgy))
+				if ((CW > bkgx) || (CH > bkgy)) 
 				{
 					for (int cx=0; cx<CW; cx+=bkgx)
 					{
@@ -92,7 +92,7 @@ namespace psycle
 				memDC.DeleteDC();
 
 			}
-			else
+			else // else fill with solid color
 			{
 				CRect rClient;
 				GetClientRect(&rClient);
@@ -1149,6 +1149,31 @@ namespace psycle
 				}
 			}
 			return tmac;
+		}
+		int CChildView::GetWire(CPoint point,int& wiresource)
+		{
+			for (int c=0; c<MAX_MACHINES; c++)
+			{
+				Machine *tmac = Global::_pSong->_pMachine[c];
+				if (tmac)
+				{
+					for (int w = 0; w<MAX_CONNECTIONS; w++)
+					{
+						if (tmac->_connection[w])
+						{
+							int xt = tmac->_connectionPoint[w].x;
+							int yt = tmac->_connectionPoint[w].y;
+
+							if ((point.x > xt) && (point.x < xt+triangle_size_tall) && (point.y > yt) && (point.y < yt+triangle_size_tall))
+							{
+								wiresource=c;
+								return w;
+							}
+						}
+					}
+				}
+			}
+			return -1;
 		}
 	}
 }
