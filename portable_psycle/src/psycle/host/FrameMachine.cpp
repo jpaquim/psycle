@@ -111,12 +111,44 @@ namespace psycle
 			CRect rClient;
 			dsk->GetClientRect(&rClient);
 
-			MoveWindow(rClient.Width()/2-(cxsize*ncol/2), rClient.Height()/2-(48+winh)/2, cxsize*ncol,
-			9+GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE)+winh, true);	
+			if(true)
+			{
+				// <bohan>
+				// Dilvie reported it doesn't work with non default size fonts.
+				// Especially, the menu bar can be spanned on several lines,
+				// hence, GetSystemMetrics(SM_CYMENUSIZE) is wrong.
+				MoveWindow
+					(
+						rClient.Width() / 2 - cxsize * ncol / 2,
+						rClient.Height() / 2 - (48 + winh) / 2,
+						cxsize * ncol,
+						9 + GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE) + winh,
+						true
+					);
+			}
+			else
+			{
+				CRect rect
+					(
+						CPoint
+						(
+							rClient.Width() / 2 - cxsize * ncol / 2,
+							rClient.Height() / 2 - 48 + winh / 2
+						),
+						CSize
+						(
+							cxsize * ncol,
+							9 + winh
+						)
+					);
+
+				CalcWindowRect(&rect, adjustOutside);
+				MoveWindow(&rect, true);
+			}
 			
 			ShowWindow(SW_SHOWNORMAL);
-		//	SetActiveWindow();
-		//	UpdateWindow();
+			//SetActiveWindow();
+			//UpdateWindow();
 		}
 
 		void CFrameMachine::OnDestroy() 

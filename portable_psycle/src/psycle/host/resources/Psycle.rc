@@ -1788,12 +1788,11 @@ END
 
 IDR_MACHINEFRAME MENU 
 BEGIN
-    POPUP "Machine"
+    POPUP "About"
     BEGIN
-        MENUITEM "Command 1",                   ID_MACHINE_COMMAND
+        MENUITEM "Help",                        ID_MACHINE_COMMAND
         MENUITEM SEPARATOR
         MENUITEM "About this machine",          ID_MACHINE_ABOUTTHISMACHINE
-        MENUITEM "About PSYGEAR v1.0",          ID_MACHINE_ABOUTPSYGEARV10
     END
     POPUP "Parameters"
     BEGIN
@@ -1802,7 +1801,7 @@ BEGIN
         MENUITEM "Random parameters",           ID_PARAMETERS_RANDOMPARAMETERS
 
         MENUITEM SEPARATOR
-        MENUITEM "Open Preset Dialog\tCtrl+P",  ID_PARAMETERS_SHOWPRESET
+        MENUITEM "Open preset dialog\tCtrl+P",  ID_PARAMETERS_SHOWPRESET
     END
 END
 
