@@ -53,6 +53,7 @@ rough bug count: ~60, many aren't really bugs though.
 
 + midi controllers should be able to send midi messages (pitchbend for example), not just tweaks or cmds
 + I agree that final output should be limited
+	[ it is when you have the decrease flag set ]
 
 + i was wondering if it is possible to make a header skin that indicates when a track creates an output?? (like those small vu meters at the headers in mp-tracker, or something)
 
@@ -67,6 +68,7 @@ rough bug count: ~60, many aren't really bugs though.
 
 
 +	Option to disable vus (to save CPU)
+	[ you could easily make a skin with no vus.. just set the rects to size 0]
 
 +	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
 
@@ -231,7 +233,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
 	 talking about......the first time it happened it scrolled for ages..i thought it had went 
 	 crazy too.....
-** ticky clav 1.1 causes random access violation crashes?
+** ticky clav 1.1 causes random access violation crashes? - now i am not sure if it is ticky clav
 ** phatmatic causes crashes when you open the gui after loading a sample into it.
 ** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
 	minimize/refocus psycle or change the current view
