@@ -1,10 +1,16 @@
 #ifndef _GLOBAL_H
 #define _GLOBAL_H
-
+/** @file
+ *  @brief implementation file
+ *  $Date$
+ *  $Revision$
+ */
+#if !defined(_PORTING)
 class Song;
 class Player;
-class Configuration;
 class Resampler;
+#endif
+class Configuration;
 
 #if defined(_WINAMP_PLUGIN_)
 
@@ -15,16 +21,19 @@ class Resampler;
 	public:
 		Global();
 		~Global();
-
+#if !defined(_PORTING)
 		static Song* _pSong;
 		static Player* pPlayer;
 		static Configuration* pConfig;
+#endif
 		static Resampler* pResampler;
 	};
 	
 #else
 
+#if !defined(_PORTING)
 	class InputHandler;
+#endif
 
 	class Global
 	{
@@ -33,11 +42,13 @@ class Resampler;
 		~Global();
 
 		static unsigned int _cpuHz;
+		static Configuration* pConfig;
+#if !defined(_PORTING)
 		static Song* _pSong;
 		static Player* pPlayer;
-		static Configuration* pConfig;
 		static Resampler* pResampler;
 		static InputHandler* pInputHandler;
+#endif
 	};
 #endif // _WINAMP_PLUGIN_
 
