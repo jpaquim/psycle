@@ -16,12 +16,14 @@ V1.7.3
 * new cache.map file format with many improvements - making psycle open quicker for your pleasure (pooplog)
 * machine names can be longer now (pooplog)
 * more exceptions trapped on loading of vsts, more accurate data sent to pluginlog.txt (pooplog)
+* replace and exchange functions in gear rack maintain connections (pooplog)
 ! sampler doesn't crash when no instrument is specified any more (pooplog)
 ! save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
 ! error messages on file read/write problems (pooplog)
 ! vsts don't immediately crash psycle when they give an exception on save/load/instance any more (pooplog)
 ! master machine does not let clipping samples through when decrease on clip is set (pooplog)
 ! folders with .s are now working for plugins, vsts, skins, etc. (pooplog)
+! songs with invalid connections are dealt with correctly (pooplog)
 
 
 V1.7.1
