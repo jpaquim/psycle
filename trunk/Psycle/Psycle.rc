@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -28,57 +28,58 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\Psycle.ico"
-IDR_VSTFRAME            ICON    DISCARDABLE     "res\\idr_vstf.ico"
-IDR_WAVEFRAME           ICON    DISCARDABLE     "res\\icon1.ico"
-IDR_MACHINEFRAME        ICON    DISCARDABLE     "res\\ico00001.ico"
+IDR_MAINFRAME           ICON                    "res\\Psycle.ico"
+IDR_VSTFRAME            ICON                    "res\\idr_vstf.ico"
+IDR_WAVEFRAME           ICON                    "res\\icon1.ico"
+IDR_MACHINEFRAME        ICON                    "res\\ico00001.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDB_PSYCHOSC            BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
-IDB_DIST                BITMAP  DISCARDABLE     "res\\bmp00001.bmp"
-IDB_SAMPLER             BITMAP  DISCARDABLE     "res\\bmp00003.bmp"
-IDB_DALAYDELAY          BITMAP  DISCARDABLE     "res\\dalaydelay.bmp"
-IDB_SPEAKER             BITMAP  DISCARDABLE     "res\\bmp00004.bmp"
-IDB_CPU                 BITMAP  DISCARDABLE     "res\\bmp00005.bmp"
-IDB_FLANGER             BITMAP  DISCARDABLE     "res\\bmp00006.bmp"
-IDB_KNOB                BITMAP  DISCARDABLE     "res\\TbMainKnob.bmp"
-IDB_PLUS                BITMAP  DISCARDABLE     "res\\plus.bmp"
-IDB_LESSLESS            BITMAP  DISCARDABLE     "res\\lessless.bmp"
-IDB_MINUS               BITMAP  DISCARDABLE     "res\\minus.bmp"
-IDB_MORE                BITMAP  DISCARDABLE     "res\\more.bmp"
-IDB_MOREMORE            BITMAP  DISCARDABLE     "res\\moremore.bmp"
-IDB_LESS                BITMAP  DISCARDABLE     "res\\less.bmp"
-IDB_LLEFT               BITMAP  DISCARDABLE     "res\\littleleft.bmp"
-IDB_LRIGHT              BITMAP  DISCARDABLE     "res\\littleright.bmp"
-IDB_SPLASH              BITMAP  DISCARDABLE     "res\\splash copia.bmp"
-IDB_MACHINETYPE         BITMAP  DISCARDABLE     "res\\bmp00002.bmp"
-IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
-IDB_DIRECTX             BITMAP  DISCARDABLE     "res\\bmp00009.bmp"
-IDB_PLUSPLUS            BITMAP  DISCARDABLE     "res\\plus1.bmp"
-IDB_MINUSMINUS          BITMAP  DISCARDABLE     "res\\minus1.bmp"
-IDB_MASTERBACK          BITMAP  DISCARDABLE     "res\\MasterMachine\\masterbk.bmp"
-IDB_MASTERNUMBERS       BITMAP  DISCARDABLE     "res\\MasterMachine\\numbers.bmp"
-IDB_MASTERSLIDER        BITMAP  DISCARDABLE     "res\\MasterMachine\\slider.bmp"
-IDB_PATTERN_HEADER_SKIN BITMAP  DISCARDABLE     "res\\pattern_header_skin.bmp"
-IDB_MACHINE_SKIN        BITMAP  DISCARDABLE     "res\\machine_skin.bmp"
+IDB_PSYCHOSC            BITMAP                  "res\\bitmap1.bmp"
+IDB_DIST                BITMAP                  "res\\bmp00001.bmp"
+IDB_SAMPLER             BITMAP                  "res\\bmp00003.bmp"
+IDB_DALAYDELAY          BITMAP                  "res\\dalaydelay.bmp"
+IDB_SPEAKER             BITMAP                  "res\\bmp00004.bmp"
+IDB_CPU                 BITMAP                  "res\\bmp00005.bmp"
+IDB_FLANGER             BITMAP                  "res\\bmp00006.bmp"
+IDB_KNOB                BITMAP                  "res\\TbMainKnob.bmp"
+IDB_PLUS                BITMAP                  "res\\plus.bmp"
+IDB_LESSLESS            BITMAP                  "res\\lessless.bmp"
+IDB_MINUS               BITMAP                  "res\\minus.bmp"
+IDB_MORE                BITMAP                  "res\\more.bmp"
+IDB_MOREMORE            BITMAP                  "res\\moremore.bmp"
+IDB_LESS                BITMAP                  "res\\less.bmp"
+IDB_LLEFT               BITMAP                  "res\\littleleft.bmp"
+IDB_LRIGHT              BITMAP                  "res\\littleright.bmp"
+IDB_SPLASH              BITMAP                  "res\\splash copia.bmp"
+IDB_MACHINETYPE         BITMAP                  "res\\bmp00002.bmp"
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDB_DIRECTX             BITMAP                  "res\\bmp00009.bmp"
+IDB_PLUSPLUS            BITMAP                  "res\\plus1.bmp"
+IDB_MINUSMINUS          BITMAP                  "res\\minus1.bmp"
+IDB_MASTERBACK          BITMAP                  "res\\MasterMachine\\masterbk.bmp"
+IDB_MASTERNUMBERS       BITMAP                  "res\\MasterMachine\\numbers.bmp"
+IDB_MASTERSLIDER        BITMAP                  "res\\MasterMachine\\slider.bmp"
+IDB_PATTERN_HEADER_SKIN BITMAP                  "res\\pattern_header_skin.bmp"
+IDB_MACHINE_SKIN        BITMAP                  "res\\machine_skin.bmp"
+IDB_ASIO                BITMAP                  "res\\AsioLogo.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDR_MACHINEFRAME ACCELERATORS DISCARDABLE 
+IDR_MACHINEFRAME ACCELERATORS 
 BEGIN
     "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, CONTROL, NOINVERT
     "R",            ID_PARAMETERS_RANDOMPARAMETERS, VIRTKEY, CONTROL, 
                                                     NOINVERT
 END
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS 
 BEGIN
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_LOADSONG,       VIRTKEY, CONTROL, NOINVERT
@@ -88,14 +89,14 @@ BEGIN
     VK_F4,          ID_SHOWPSEQ,            VIRTKEY, NOINVERT
 END
 
-IDR_VSTFRAME ACCELERATORS DISCARDABLE 
+IDR_VSTFRAME ACCELERATORS 
 BEGIN
     "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, CONTROL, NOINVERT
     "R",            ID_PARAMETERS_RANDOMPARAMETERS, VIRTKEY, CONTROL, 
                                                     NOINVERT
 END
 
-IDR_WAVEFRAME ACCELERATORS DISCARDABLE 
+IDR_WAVEFRAME ACCELERATORS 
 BEGIN
     "A",            ID_SELECTION_SHOWALL,   VIRTKEY, CONTROL, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
@@ -119,7 +120,7 @@ END
 //
 
 IDD_PSYBAR DIALOGEX 0, 0, 533, 16
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     RTEXT           "Tracks",IDC_STATIC,4,4,21,8
@@ -156,7 +157,7 @@ BEGIN
 END
 
 IDD_PSYBAR2 DIALOGEX 0, 0, 532, 16
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Pattern Step",IDC_STATIC,5,4,43,8
@@ -189,7 +190,7 @@ BEGIN
 END
 
 IDD_WAVEOUTCONFIG DIALOGEX 0, 0, 272, 79
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle MME Audio Driver Configuration"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -219,7 +220,8 @@ BEGIN
 END
 
 IDD_GEAR_PSYCHOSC DIALOGEX 0, 0, 215, 145
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "PsychOsc"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -252,7 +254,7 @@ BEGIN
 END
 
 IDD_INFO DIALOGEX 0, 0, 316, 239
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle CPU/DSP Performance Monitor"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -290,7 +292,8 @@ BEGIN
 END
 
 IDD_WIREDIALOG DIALOGEX 0, 0, 209, 161
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -307,7 +310,8 @@ BEGIN
 END
 
 IDD_GEARDISTORT DIALOGEX 0, 0, 169, 177
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -338,7 +342,8 @@ BEGIN
 END
 
 IDD_MACPROP DIALOGEX 0, 0, 187, 60
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -356,7 +361,7 @@ BEGIN
 END
 
 IDD_PATDLG DIALOGEX 0, 0, 186, 50
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Pattern Properties"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -376,7 +381,8 @@ BEGIN
 END
 
 IDD_INSTRUMENT DIALOGEX 0, 0, 217, 223
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Instrument Editor"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -438,7 +444,8 @@ BEGIN
 END
 
 IDD_GEAR_TRACKER DIALOGEX 0, 0, 280, 71
-STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -458,7 +465,7 @@ BEGIN
 END
 
 IDD_GEAR_DELAY DIALOGEX 0, 0, 340, 210
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -521,7 +528,7 @@ BEGIN
 END
 
 IDD_ENVDIALOG DIALOGEX 0, 0, 348, 327
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Envelope Editor"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -584,7 +591,7 @@ BEGIN
 END
 
 IDD_GEAR_FILTER DIALOGEX 0, 0, 292, 151
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -615,8 +622,9 @@ BEGIN
     LTEXT           "0 (0%)",IDC_PARAM_INF_5,235,113,50,12
 END
 
-IDD_GREETS DIALOG DISCARDABLE  0, 0, 240, 157
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_GREETS DIALOG  0, 0, 240, 157
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 CAPTION "Greetings and info"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -628,8 +636,8 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,7,135,226,15
 END
 
-IDD_SKIN DIALOG DISCARDABLE  0, 0, 298, 286
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_SKIN DIALOG  0, 0, 298, 286
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Visual"
 FONT 8, "Tahoma"
 BEGIN
@@ -783,7 +791,7 @@ BEGIN
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Song Properties"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -799,7 +807,7 @@ BEGIN
 END
 
 IDD_GEAR_GAINER DIALOGEX 0, 0, 40, 161
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -810,7 +818,7 @@ BEGIN
 END
 
 IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 210
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -856,7 +864,8 @@ BEGIN
 END
 
 IDD_MASTERDLG DIALOGEX 0, 0, 338, 123
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle Master and Minimixer"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -911,7 +920,7 @@ BEGIN
 END
 
 IDD_NEWVAL DIALOGEX 0, 0, 264, 38
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "New Value"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -924,7 +933,7 @@ BEGIN
 END
 
 IDD_VSTRACK DIALOGEX 0, 0, 142, 203
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
@@ -940,7 +949,7 @@ BEGIN
 END
 
 IDD_PRESETS DIALOGEX 0, 0, 167, 137
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Machine Presets"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -959,7 +968,7 @@ BEGIN
 END
 
 IDD_MIDI_MONITOR DIALOGEX 0, 0, 309, 338
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle MIDI Monitor"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -1068,8 +1077,8 @@ BEGIN
     CTEXT           "",IDC_CH16,283,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
 END
 
-IDD_KEYCONFIG DIALOG DISCARDABLE  0, 0, 262, 276
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_KEYCONFIG DIALOG  0, 0, 262, 276
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Key Configuration"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1100,7 +1109,7 @@ BEGIN
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "New Machine"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -1108,8 +1117,8 @@ BEGIN
     LTEXT           "Gear Browser",IDC_STATIC,7,2,88,9
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    TVS_TRACKSELECT | TVS_SINGLEEXPAND | WS_BORDER | 
-                    WS_TABSTOP,7,13,187,223
+                    TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP | 0x400,7,13,
+                    187,223
     GROUPBOX        "Machine Properties",IDC_STATIC,201,7,176,82
     LTEXT           "Name",IDC_STATIC,223,19,20,8
     LTEXT           "",IDC_NAMELABEL,246,18,125,12,SS_SUNKEN
@@ -1135,7 +1144,7 @@ BEGIN
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 233
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
 EXSTYLE WS_EX_STATICEDGE
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -1170,7 +1179,7 @@ BEGIN
 END
 
 IDD_SEQUENCER DIALOGEX 0, 0, 70, 335
-STYLE WS_CHILD
+STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_STATICEDGE
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
@@ -1237,7 +1246,7 @@ BEGIN
 END
 
 IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 103
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle DirectX Audio Driver Configuration"
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -1270,8 +1279,8 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,220,24,50,14
 END
 
-IDD_OUTPUT DIALOG DISCARDABLE  0, 0, 282, 121
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_OUTPUT DIALOG  0, 0, 282, 121
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Input/Output"
 FONT 8, "Tahoma"
 BEGIN
@@ -1296,8 +1305,8 @@ BEGIN
                     WS_TABSTOP,15,105,260,10
 END
 
-IDD_DIRECTORIES DIALOG DISCARDABLE  0, 0, 310, 182
-STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
+IDD_DIRECTORIES DIALOG  0, 0, 310, 182
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Directories"
 FONT 8, "Tahoma"
 BEGIN
@@ -1318,8 +1327,8 @@ BEGIN
     GROUPBOX        "Skin Directory",IDC_STATIC,7,151,296,28
 END
 
-IDD_CONFIGURATION DIALOG DISCARDABLE  0, 0, 398, 156
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_CONFIGURATION DIALOG  0, 0, 398, 156
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Configuration"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1328,7 +1337,7 @@ BEGIN
 END
 
 IDD_WAVED_AMPLIFY DIALOGEX 0, 0, 264, 57
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Amplify..."
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -1343,8 +1352,8 @@ BEGIN
     CTEXT           "db",IDC_STATIC,242,20,15,15,SS_CENTERIMAGE
 END
 
-IDD_INST_EDITOR DIALOG DISCARDABLE  0, 0, 261, 234
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_INST_EDITOR DIALOG  0, 0, 261, 234
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Instruments Editor"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1360,8 +1369,8 @@ BEGIN
     PUSHBUTTON      "Remove",IDC_REMOVE,217,7,37,14
 END
 
-IDD_MIDI_INPUT DIALOG DISCARDABLE  0, 0, 327, 282
-STYLE WS_POPUP | WS_CAPTION
+IDD_MIDI_INPUT DIALOG  0, 0, 327, 282
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION
 CAPTION "MIDI Controllers"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1580,8 +1589,8 @@ BEGIN
     CTEXT           "to ",IDC_STATIC,96,25,15,10,SS_CENTERIMAGE
 END
 
-IDD_MIDI_LEARN DIALOG DISCARDABLE  0, 0, 186, 54
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_MIDI_LEARN DIALOG  0, 0, 186, 54
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Learn MIDI Controller"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1591,8 +1600,8 @@ BEGIN
                     172,26
 END
 
-IDD_SWINGFILL DIALOG DISCARDABLE  0, 0, 177, 86
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_SWINGFILL DIALOG  0, 0, 177, 86
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Swing Fill"
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -1612,6 +1621,39 @@ BEGIN
     CTEXT           "Unchecked = Center BPM",IDC_STATIC,115,20,60,20
 END
 
+IDD_PORTAUDIO_ASIO_CONFIG DIALOGEX 0, 0, 277, 78
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Psycle PortAudio ASIO Driver Configuration"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    LTEXT           "Device:",-1,7,7,26,13,SS_CENTERIMAGE
+    COMBOBOX        IDC_PORTAUDIO_ASIO_DEVICE,36,7,167,161,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         198,-1,"Static",SS_BITMAP,210,43,60,29
+    LTEXT           "Samplerate:",-1,7,26,45,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO,52,24,65,77,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Buffers:",-1,7,46,28,10,SS_CENTERIMAGE
+    EDITTEXT        IDC_PORTAUDIO_ASIO_BUFNUM_EDIT,37,44,20,12,
+                    ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_PORTAUDIO_ASIO_BUFNUM_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,59,44,11,12
+    LTEXT           "*",-1,73,47,8,8
+    EDITTEXT        IDC_PORTAUDIO_ASIO_BUFSIZE_EDIT,82,44,36,12,
+                    ES_AUTOHSCROLL
+    CONTROL         "Spin2",IDC_PORTAUDIO_ASIO_BUFSIZE_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,120,44,11,12
+    CONTROL         "Dither",IDC_PORTAUDIO_ASIO_DITHER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,129,26,35,10
+    LTEXT           "Latency: 12345 ms",IDC_PORTAUDIO_ASIO_LATENCY,140,47,64,
+                    8,SS_CENTERIMAGE
+    DEFPUSHBUTTON   "OK",IDOK,220,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,220,24,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1619,7 +1661,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_PSYBAR, DIALOG
     BEGIN
@@ -1899,6 +1941,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 79
     END
+
+    IDD_PORTAUDIO_ASIO_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 270
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 72
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1908,7 +1958,7 @@ END
 // Menu
 //
 
-IDR_WAVEFRAME MENU DISCARDABLE 
+IDR_WAVEFRAME MENU 
 BEGIN
     POPUP "Process"
     BEGIN
@@ -1940,7 +1990,7 @@ BEGIN
     END
 END
 
-IDR_MACHINEFRAME MENU DISCARDABLE 
+IDR_MACHINEFRAME MENU 
 BEGIN
     POPUP "Machine"
     BEGIN
@@ -1960,7 +2010,7 @@ BEGIN
     END
 END
 
-IDR_VSTFRAME MENU DISCARDABLE 
+IDR_VSTFRAME MENU 
 BEGIN
     POPUP "Parameters"
     BEGIN
@@ -1973,7 +2023,7 @@ BEGIN
     END
 END
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -2052,7 +2102,7 @@ BEGIN
     END
 END
 
-IDR_POPUPMENU MENU DISCARDABLE 
+IDR_POPUPMENU MENU 
 BEGIN
     POPUP ""
     BEGIN
@@ -2181,13 +2231,26 @@ BEGIN
     0
 END
 
+IDD_PORTAUDIO_ASIO_CONFIG DLGINIT
+BEGIN
+    IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3639, 0x3030, 0x0030, 
+    IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3834, 0x3030, 0x0030, 
+    IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3434, 0x3031, 0x0030, 
+    IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3232, 0x3530, 0x0030, 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR DISCARDABLE  17, 17
+IDR_MAINFRAME TOOLBAR  17, 17
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_LOADSONG
@@ -2216,7 +2279,6 @@ BEGIN
 END
 
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -2239,18 +2301,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "\0"
-            VALUE "CompanyName", "Psycledelics\0"
-            VALUE "FileDescription", "Psycle Digital Audio Studio\0"
-            VALUE "FileVersion", "1, 6, 6, 5\0"
-            VALUE "InternalName", "Psycle\0"
-            VALUE "LegalCopyright", "Copyright (C) 2000-2002\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "Psycle.EXE\0"
-            VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Psycle Application\0"
-            VALUE "ProductVersion", "1, 6, 6, 5\0"
-            VALUE "SpecialBuild", "\0"
+            VALUE "CompanyName", "Psycledelics"
+            VALUE "FileDescription", "Psycle Digital Audio Studio"
+            VALUE "FileVersion", "1, 6, 6, 5"
+            VALUE "InternalName", "Psycle"
+            VALUE "LegalCopyright", "Copyright (C) 2000-2002"
+            VALUE "OriginalFilename", "Psycle.EXE"
+            VALUE "ProductName", "Psycle Application"
+            VALUE "ProductVersion", "1, 6, 6, 5"
         END
     END
     BLOCK "VarFileInfo"
@@ -2259,8 +2317,6 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -2268,18 +2324,18 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -2305,18 +2361,18 @@ END
 // String Table
 //
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDR_MAINFRAME           "[Untitled.psy] Psycle Modular Music Creation Studio"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_APP_TITLE       "Psycle"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -2327,18 +2383,18 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_NEW             "New song\nNew"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_ABOUTPSYCLE          "Information and Logo\nLogo"
     ID_HELP_SALUDOS         "Greetings to People\nGreetings"
@@ -2349,7 +2405,7 @@ BEGIN
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
     ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
@@ -2357,7 +2413,7 @@ BEGIN
     ID_BARREC               "Record sequence\nRecord sequence"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_FILE_LOADSONG        "Open song\nOpen"
     ID_FILE_SAVESONG        "Save song\nSave"
@@ -2366,7 +2422,7 @@ BEGIN
     ID_FILE_SONGPROPERTIES  "Shows the Song Properties Dialog\nShow Song Properties"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_MACHINEVIEW          "Show Machine view\nMachines"
     ID_PATTERNVIEW          "Show Pattern view\nPatterns"
@@ -2382,7 +2438,7 @@ BEGIN
     ID_PSYHELP              "Open online help\nHelp"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_POP_PATTENPROPERTIES "Pops Up the Pattern Properties Dialog\nShow Pattern Properties"
     ID_POP_MIXPASTE         "Paste, Mixing the content of the buffer with the pattern\nMix Paste"
@@ -2398,7 +2454,7 @@ BEGIN
     ID_SELECTION_SHOWALL    "Show entire wave"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDS_COULDNT_INITIALIZE_TIMER "Couldn't initialize timer"
     IDS_SONG_SAVED          "Song Saved"
@@ -2410,7 +2466,7 @@ BEGIN
     ID_HELP_WHATSNEW        "Opens the WhatsNew.txt file\nOpen whatsnew.txt"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_EDIT_DELETE          "Delete selection"
     ID_CONVERT_MONO         "Mix channels to mono"
@@ -2419,7 +2475,7 @@ BEGIN
     ID_INDICATOR_MODE       "Mode:"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_POP_CUT              "Cut the selected rows (delete them) and puts them to the buffer\nCut Selection"
     ID_POP_COPY             "Copy the selected rows to the buffer\nCopy Selection"
@@ -2432,7 +2488,7 @@ BEGIN
     ID_POP_TRANSPOSE_12     "Transposes the notes 12 seminotes down (1 octave)\nTraspose -12"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_EDIT_COPY            "Pattern Copy to clipboard\nPattern Copy"
     ID_EDIT_CUT             "Cut Pattern to clipboard\nCut Pattern"
@@ -2442,25 +2498,25 @@ BEGIN
     ID_EDIT_REDO            "Redo last Undo\nRedo"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_APP_EXIT             "Exits Psycle\nExit"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     IDC_SEQCUT              "Sequence Cut to Clipboard\nCut Sequence"
     IDC_SEQCOPY             "Sequence Copy to Clipboard\nCopy Sequence"
     IDC_SEQPASTE            "Sequence Paste to Clipboard\nPaste Sequence"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_VIEW_TOOLBAR         "Show/Hide Toolbar"
     ID_VIEW_STATUS_BAR      "Show/Hide Status Bar"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE 
 BEGIN
     ID_INDICATOR_SEQPOS     "Pos:00"
     ID_INDICATOR_PATTERN    "Pat:00"

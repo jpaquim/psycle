@@ -193,7 +193,7 @@ protected:
 	afx_msg void OnUpdateIndicatorOctave(CCmdUI *pCmdUI);
 	afx_msg void OnCloseupCombooctave();
 	afx_msg void OnSelchangeCombooctave();
-	afx_msg void OnDropFiles(WPARAM wParam);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	//}}AFX_MSG

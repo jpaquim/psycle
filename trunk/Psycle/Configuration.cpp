@@ -9,6 +9,7 @@
 	#include "Registry.h"
 	#include "WaveOut.h"
 	#include "DirectSound.h"
+	#include "PortAudioASIO.h"
 	#include "MidiInput.h"
 #endif //_WINAMP_PLUGIN_
 
@@ -94,15 +95,16 @@ Configuration::Configuration()
 	vu2 = 0x00403731;
 	vu3 = 0x00262bd7;
 
-	_numOutputDrivers = 3;
+	_numOutputDrivers = 4;
 	_outputDriverIndex = 0;
 	_midiDriverIndex = 0;			// MIDI IMPLEMENTATION
 	_syncDriverIndex = 0;
 	_midiHeadroom = 100;
-	_ppOutputDrivers = new AudioDriver*[3];
+	_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
 	_ppOutputDrivers[0] = new AudioDriver;
 	_ppOutputDrivers[1] = new WaveOut;
 	_ppOutputDrivers[2] = new DirectSound;
+	_ppOutputDrivers[3] = new PortAudioASIO;
 	_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
 	_pMidiInput = new CMidiInput;	// MIDI IMPLEMENTATION

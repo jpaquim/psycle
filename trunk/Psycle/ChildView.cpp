@@ -206,8 +206,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_TIMER()
 	ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
-	ON_COMMAND(ID_FILE_SAVE, OnFileSave)
-	ON_COMMAND(ID_FILE_SAVESONG, OnFileSavesong)
+	ON_COMMAND_EX(ID_FILE_SAVE, OnFileSave)
+	ON_COMMAND_EX(ID_FILE_SAVESONG, OnFileSavesong)
 	ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
 	ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
 	ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
@@ -647,7 +647,7 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 //////////////////////////////////////////////////////////////////////
 // "Save Song" Function
 
-BOOL CChildView::OnFileSave() 
+BOOL CChildView::OnFileSave(UINT id) 
 {
 	BOOL bResult = TRUE;
 	if ( Global::_pSong->_saved )
@@ -689,7 +689,7 @@ BOOL CChildView::OnFileSave()
 	}
 	else 
 	{
-		return OnFileSavesong();
+		return OnFileSavesong(0);
 	}
 	return bResult;
 }
@@ -697,7 +697,7 @@ BOOL CChildView::OnFileSave()
 //////////////////////////////////////////////////////////////////////
 // "Save Song As" Function
 
-BOOL CChildView::OnFileSavesong() 
+BOOL CChildView::OnFileSavesong(UINT id) 
 {
 	OPENFILENAME ofn;       // common dialog box structure
 	CString ifile = Global::_pSong->fileName;
@@ -893,7 +893,7 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 		switch (result)
 		{
 		case IDYES:
-			return OnFileSave();
+			return OnFileSave(0);
 			break;
 		case IDNO:
 			return TRUE;

@@ -2550,19 +2550,19 @@ BOOL CMainFrame::StatusBarIdleText()
 	return FALSE;
 }
 
-void CMainFrame::OnDropFiles(WPARAM wParam)
+void CMainFrame::OnDropFiles(HDROP hDropInfo)
 {
     char szFileName[MAX_PATH];
 	char * szExtension;
 
-	int iNumFiles = DragQueryFile((HDROP)  wParam,	// handle of structure for dropped files
+	int iNumFiles = DragQueryFile((HDROP)  hDropInfo,	// handle of structure for dropped files
 		0xFFFFFFFF, // this returns number of dropped files
 		NULL,
 		NULL);
 
 	for (int i = 0; i < iNumFiles; i++)
 	{
-		DragQueryFile((HDROP)  wParam,	// handle of structure for dropped files
+		DragQueryFile((HDROP)  hDropInfo,	// handle of structure for dropped files
 			i,	// index of file to query
 			szFileName,	// buffer for returned filename
 			MAX_PATH); 	// size of buffer for filename
@@ -2575,14 +2575,14 @@ void CMainFrame::OnDropFiles(WPARAM wParam)
 			{
 				SetForegroundWindow();
 				m_wndView.OnFileLoadsongNamed(szFileName, 1);
-				DragFinish((HDROP)  wParam);	// handle of structure for dropped files
+				DragFinish((HDROP)  hDropInfo);	// handle of structure for dropped files
 				return;
 			}
 			// add psb, psv?
 			// load waves and crap here
 		}
 	}
-	DragFinish((HDROP)  wParam);	// handle of structure for dropped files
+	DragFinish((HDROP)  hDropInfo);	// handle of structure for dropped files
 	SetForegroundWindow();
 }
 
