@@ -208,8 +208,15 @@ namespace psycle
 				#endif
 
 			protected:
+				/// midi events queue, is sent to processEvents.
 				VstMidiEvent midievent[MAX_VST_EVENTS];
 				int	queue_size;
+
+				/// reserves space for a new midi event in the queue.
+				/// \return midi event to be filled in, or null if queue is full.
+				VstMidiEvent* reserveVstMidiEvent();
+				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
+
 				float * inputs[max_io];
 				float * outputs[max_io];
 				bool wantidle;

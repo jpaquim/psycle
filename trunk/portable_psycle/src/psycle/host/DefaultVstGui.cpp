@@ -90,7 +90,7 @@ namespace psycle
 				std::strcpy(s2, "<unnamed>");
 				try
 				{
-					int categories = _pMachine->proxy().dispatcher(effGetNumProgramCategories); categories; // not used
+					//int categories = _pMachine->proxy().dispatcher(effGetNumProgramCategories); categories; // not used
 					_pMachine->proxy().dispatcher(effGetProgramNameIndexed, i, -1, s2);
 				}
 				catch(const std::exception &)
