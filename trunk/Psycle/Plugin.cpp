@@ -144,10 +144,10 @@ void Plugin::Init(void)
 
 void Plugin::Work(int numSamples)
 {
-//	if (_mode != MACHMODE_GENERATOR)
-//	{
-//		Machine::Work(numSamples);
-//	}
+	if (_mode != MACHMODE_GENERATOR)
+	{
+		Machine::Work(numSamples);
+	}
 
 #ifndef _WINAMP_PLUGIN_
 	CPUCOST_INIT(cost);
@@ -157,6 +157,7 @@ void Plugin::Work(int numSamples)
 		if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
 		{
 			int ns = numSamples;
+			int us = 0;
 			while (ns)
 			{
 				int nextevent = ns+1;
@@ -180,11 +181,7 @@ void Plugin::Work(int numSamples)
 							TriggerDelayCounter[i] -= ns;
 						}
 					}
-					if (_mode != MACHMODE_GENERATOR)
-					{
-						Machine::Work(ns);
-					}
-					_pInterface->Work(_pSamplesL, _pSamplesR, ns, Global::_pSong->SONGTRACKS);
+					_pInterface->Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
 
 					ns = 0;
 				}
@@ -193,11 +190,8 @@ void Plugin::Work(int numSamples)
 					if (nextevent)
 					{
 						ns -= nextevent;
-						if (_mode != MACHMODE_GENERATOR)
-						{
-							Machine::Work(nextevent);
-						}
-						_pInterface->Work(_pSamplesL, _pSamplesR, nextevent, Global::_pSong->SONGTRACKS);
+						_pInterface->Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
+						us += nextevent;
 					}
 					for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 					{

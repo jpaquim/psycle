@@ -2,6 +2,9 @@
 !=change
 +=addition
 
+<alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
+<alk_> f6 is broken (play pattern) it plays the first pattern first
+<alk_> alt-f5 - play song from start
 * psycle default theme sucks (cursor, selection, etc.)
 
 * Machines

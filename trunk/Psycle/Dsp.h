@@ -119,14 +119,20 @@ public:
 	}
 	static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 	{
+		float id = float(1.0E-25);
 		for(int s=0;s<numsamples;s++)
 		{
-			if ( IS_DENORMAL(pSamplesL[s]) ) pSamplesL[s]=0.0f;
-			if ( IS_DENORMAL(pSamplesR[s]) ) pSamplesR[s]=0.0f;
+//			if ( IS_DENORMAL(pSamplesL[s]) ) pSamplesL[s]=0.0f;
+//			if ( IS_DENORMAL(pSamplesR[s]) ) pSamplesR[s]=0.0f;
+
 //			float const is1=pSamplesL[s];
 //			float const is2=pSamplesR[s];
 //			pSamplesL[s] = IS_DENORMAL(is1) ? 0.0f : is1;
 //			pSamplesR[s] = IS_DENORMAL(is2) ? 0.0f : is2;
+
+			pSamplesL[s] += id;
+			pSamplesR[s] += id;
+			id = - id;
 		}
 	}
 };
