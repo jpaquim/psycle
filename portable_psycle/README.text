@@ -2,7 +2,7 @@
 intro
 =====
 
-This is "portable" in that it's iso c++ compatible,
+This is "portable" in that it's iso c++,
 or, at least the syntax is understood by both gcc and msvc 7.1.
 (This mean the source code in this directory is not compilable under msvc 6, which is not iso compliant.)
 
