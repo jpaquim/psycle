@@ -3,9 +3,8 @@
 
 #include "project.private.hpp"
 #include "Psycle.hpp"
-#include "XMSamplerMixerPage.h"
+#include "XMSamplerMixerPage.hpp"
 #include "XMSampler.hpp"
-#include ".\xmsamplermixerpage.h"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
