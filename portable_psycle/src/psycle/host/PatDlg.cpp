@@ -3,7 +3,7 @@
 // PatDlg.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "constants.h"
 #include "PatDlg.h"
 

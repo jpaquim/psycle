@@ -1,11 +1,12 @@
+#include "stdafx.h"
+
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
 //////////////////////////////////////////////////////////////////////
 // Include CTrack code
 
-#include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "MainFrm.h"
 #include "WavFileDlg.h"
 

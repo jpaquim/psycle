@@ -6,7 +6,7 @@
 	#include "Song.h"
 	#include "Configuration.h"
 #else
-	#include "Psycle2.h"
+	#include "Psycle.h"
 	#include "Machine.h"
 	#include "Dsp.h"
 	#include "Song.h"

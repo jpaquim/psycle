@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "DefaultVstGui.h"
 #include "Helpers.h"
 #include "ChildView.h"

@@ -1,8 +1,9 @@
+#include "stdafx.h"
+
 // GearRackDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
-#include "psycle2.h"
+#include "psycle.h"
 #include "GearRackDlg.h"
 #include "Song.h"
 #include "Machine.h"

@@ -1,18 +1,12 @@
-//
-// Original Coder : Juan Antonio Arguelles Rius
-//
-// [C] 2000 All Rights Reserved
-//
-// [C] 2001-2002 Psycledelics.
-//
+#include "stdafx.h"
+
 // ChildView.cpp : implementation of the CChildView class
 //
-#include "stdafx.h"
 
 #define rdtsc __asm __emit 0fh __asm __emit 031h
 #define cpuid __asm __emit 0fh __asm __emit 0a2h
 
-#include "Psycle2.h"
+#include "Psycle.h"
 //#include "Registry.h"
 #include "Configuration.h"
 #include "FileXM.h"
@@ -2179,28 +2173,28 @@ void CChildView::SetTitleBarText()
 void CChildView::OnHelpKeybtxt() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sdoc/keys.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc\\keys.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpReadme() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sdoc/readme.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc\\readme.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpTweaking() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sdoc/tweaking.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc\\tweaking.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpWhatsnew() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sdoc/whatsnew.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc\\whatsnew.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 

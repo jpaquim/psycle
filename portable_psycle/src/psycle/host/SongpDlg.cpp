@@ -3,7 +3,7 @@
 // SongpDlg.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "Song.h"
 #include "SongpDlg.h"
 

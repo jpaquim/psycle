@@ -1,8 +1,9 @@
+#include "stdafx.h"
+
 // DSoundConfig.cpp : implementation file
 //
 
-#include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "DSoundConfig.h"
 
 #ifdef _DEBUG

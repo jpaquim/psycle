@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "WaveEdAmplifyDialog.h"
 #include "Helpers.h"
 

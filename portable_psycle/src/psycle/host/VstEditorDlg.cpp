@@ -3,7 +3,7 @@
 // VstEditorDlg.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "VstEditorDlg.h"
 #include "FrameMachine.h"
 #include "VstGui.h"

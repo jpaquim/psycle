@@ -1,8 +1,9 @@
+#include "stdafx.h"
+
 // FrameMachine.cpp : implementation file
 //
 
-#include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "FrameMachine.h"
 #include "Childview.h"
 #include "NewVal.h"

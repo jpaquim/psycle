@@ -14,7 +14,7 @@
 #pragma comment(lib, "winmm")
 
 #include "MidiInput.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "Song.h"
 #include "Player.h"
 #include "Configuration.h"

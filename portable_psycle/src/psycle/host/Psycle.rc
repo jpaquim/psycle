@@ -1898,10 +1898,10 @@ BEGIN
     BEGIN
         MENUITEM "&Help\tF1",                   ID_PSYHELP, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "&keys.txt",                   ID_HELP_KEYBTXT
-        MENUITEM "&ReadMe.txt",                 ID_HELP_README
-        MENUITEM "&Tweakings and Commands.txt", ID_HELP_TWEAKING
-        MENUITEM "&WhatsNew.txt",               ID_HELP_WHATSNEW
+        MENUITEM "./doc/&readme.txt",           ID_HELP_README
+        MENUITEM "./doc/&keys.txt",             ID_HELP_KEYBTXT
+        MENUITEM "./doc/&tweaking.txt",         ID_HELP_TWEAKING
+        MENUITEM "./doc/&whatsnew.txt",         ID_HELP_WHATSNEW
         MENUITEM SEPARATOR
         MENUITEM "&About Psycle...",            ID_ABOUTPSYCLE
         MENUITEM "&Greetings",                  ID_HELP_SALUDOS
@@ -2225,9 +2225,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
-    ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
-    ID_HELP_KEYBTXT         "Open the keys.txt,which describes the default keyboard configuration\nOpen keys"
+    ID_HELP_README          "Opens the ./doc/readme.txt File\nOpen ./doc/readme.txt"
+    ID_HELP_TWEAKING        "Opens the ./doc/tweaking.txt File\nOpen ./doc/tweaking.txt"
+    ID_HELP_KEYBTXT         "Open the ./doc/keys.txt, which describes the default keyboard configuration\nOpen ./doc/keys.txt"
     ID_BARREC               "Record sequence\nRecord sequence"
     ID_CONFIGURATION_OPENONLYVISUALCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG "THIS IS A TESTING ONLY OPTION"
@@ -2286,7 +2286,7 @@ BEGIN
     ID_POP_TRACK_SWINGFILL  "Fill effects column of current track with global BPM change commands (FFxx) to create a swing"
     ID_EDIT_MIXPASTE        "Pattern Mix Paste from clipboard\\Pattern Mix"
     ID_FILE_SAVEAUDIO       "Save the file to Wav or to a compressed format\nSave as Audio File"
-    ID_HELP_WHATSNEW        "Opens the WhatsNew.txt file\nOpen whatsnew.txt"
+    ID_HELP_WHATSNEW        "Opens the ./doc/whatsnew.txt File\nOpen ./doc/whatsnew.txt"
 END
 
 STRINGTABLE 

@@ -3,7 +3,7 @@
 // WireDlg.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "Machine.h"
 #include "WireDlg.h"
 #include "Helpers.h"

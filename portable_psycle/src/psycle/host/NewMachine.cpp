@@ -3,7 +3,7 @@
 // NewMachine.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "NewMachine.h"
 #include "Plugin.h"
 #include "VstHost.h"

@@ -3,7 +3,7 @@
 // InstrumentEditor.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "MainFrm.h"
 #include "InstrumentEditor.h"
 #include "EnvDialog.h"

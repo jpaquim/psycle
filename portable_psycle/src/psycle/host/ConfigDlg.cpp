@@ -1,8 +1,9 @@
+#include "stdafx.h"
+
 // ConfigDlg.cpp : implementation file
 //
 
-#include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "ConfigDlg.h"
 #include "MainFrm.h"
 

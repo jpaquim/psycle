@@ -3,7 +3,7 @@
 // SkinDlg.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "SkinDlg.h"
 #include "Helpers.h"
 #include "Configuration.h"

@@ -3,7 +3,7 @@
 // SaveWavDlg.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "SaveWavDlg.h"
 #include "Global.h"
 #include "Song.h"
