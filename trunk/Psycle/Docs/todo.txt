@@ -279,7 +279,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +++FF	<bdzld> which is support for multiout vsti?
 		<pooplog> if psycle was smart enough to detect mutli-out vst, when you drag a wire to it, it could pop up a 			
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(
-!	List of "VST's not to load".
 
 
 * MIDI related
