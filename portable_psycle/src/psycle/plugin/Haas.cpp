@@ -5,10 +5,12 @@
 /// \file
 /// \brief Haas stereo time delay spatial localization
 namespace psycle { namespace plugin {
+/// Haas stereo time delay spatial localization.
 class Haas : public Plugin
 {
 public:
-	typedef double Real; ///< <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
+	/// <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
+	typedef double Real;
 
 	virtual void help(std::ostream & out) const throw()
 	{
@@ -28,11 +30,11 @@ public:
 	enum Parameters
 	{
 		separator_direct,
-		direct_delay_stereo_delta, direct_gain, direct_pan_amount,
+		direct_gain, direct_delay_stereo_delta, direct_pan_amount,
 		separator_early_reflection,
-		early_reflection_delay, early_reflection_delay_stereo_delta, early_reflection_gain, early_reflection_pan_amount,
+		early_reflection_gain, early_reflection_delay, early_reflection_delay_stereo_delta, early_reflection_pan_amount,
 		separator_late_reflection,
-		late_reflection_delay, late_reflection_gain, late_reflection_pan,
+		late_reflection_gain, late_reflection_delay, late_reflection_pan,
 		separator,
 		channel_mix
 	};
@@ -44,17 +46,17 @@ public:
 		static const Information::Parameter parameters [] =
 		{
 			Information::Parameter("direct"),
-			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
+			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter::linear("pan amount", 0, 0, 1),
 			Information::Parameter("early reflection"),
+			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::exponential("delay", .0005, .01, .045),
 			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan amount", 0, 0, 1),
 			Information::Parameter("late reflection"),
-			Information::Parameter::exponential("delay", .015, .04, .100),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
+			Information::Parameter::exponential("delay", .015, .04, .100),
 			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter(),
 			Information::Parameter::discrete("channel mix", normal, mono)
