@@ -35,9 +35,9 @@ $$      $$$$              $..$$     $$...........
 
 	This Plugin allows you to play .psy files containing Psycle Songs.
 
-	It is based on the source code of Psycle 1.66 released on 2-Sep-2002
+	It is based on the source code of Psycle 1.7.
 	It is faster than psycle (since this code doesn't calculate the CPU usage
-	nor the vumeters) but it is slower if you use the eq and Vis stuff.
+	nor the vumeters) but with winamp's eq and vis, it can become slower.
 
 	On a side note:
 	---------------
@@ -55,8 +55,7 @@ $$      $$$$              $..$$     $$...........
 	This version of the plugin has the following limitations:
 
 	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
-	· No Configuration avaiable. It reads the configuration from psycle.
-	· No Info Dialog.
+	· Cannot save the info.
 	· Maybe others that I can't think of right now.
 
 
