@@ -74,22 +74,30 @@ namespace psycle
 					, wantidle(false)
 					, _sDllName(0)
 					, h_dll(0)
+					, _program(0)
 					, instantiated(false)
-					, proxy_(*this)
+					, _instance(0)
 					, requiresProcess(false)
 					, requiresRepl(false)
+					, _version(0)
+					, _isSynth(false)
+					, proxy_(0)
 					#if !defined _WINAMP_PLUGIN_
 						, editorWnd(0)
 					#endif
 				{
-					outputs[0] = _pSamplesL;
-					outputs[1] = _pSamplesR;
 					std::memset(junk, 0, STREAM_SIZE * sizeof(float));
 					for(int i(0) ; i < vst::max_io ; ++i)
 					{
 						inputs[i]=junk;
 						outputs[i]=junk;
 					}
+					outputs[0] = _pSamplesL;
+					outputs[1] = _pSamplesR;
+					_sProductName[0]=0;
+					_sVendorName[0]=0;
+
+					proxy_ = new vst::proxy(*this);
 				}
 			#pragma warning(pop)
 
@@ -104,11 +112,13 @@ namespace psycle
 					// wow.. cannot do anything in a destructor
 					assert(false);
 				}
+				zapObject(proxy_);
 				zapArray(_sDllName);
 			}
 
 			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
 			{
+				Free();
 				try
 				{
 					zapArray(_sDllName,new char[std::strlen(dllname) + 1]);
@@ -135,7 +145,8 @@ namespace psycle
 					{
 						try 
 						{
-							proxy()(main(reinterpret_cast<audioMasterCallback>(&AudioMaster)));
+							AEffect* effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
+							proxy()(effect);
 						}
 						catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 						catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
@@ -151,14 +162,15 @@ namespace psycle
 					}
 					TRACE("VST plugin: instanciated.");
 					// 2: Host to Plug, setSampleRate ( 44100.000000 )
-					proxy().dispatcher(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+					proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 					// 3: Host to Plug, setBlockSize ( 512 ) 
-					proxy().dispatcher(effSetBlockSize, 0, STREAM_SIZE);
+					proxy().setBlockSize(STREAM_SIZE);
 					// 4: Host to Plug, open
 					{
 						//init plugin (probably a call to "Init()" function should be done here)
-						proxy().dispatcher(effOpen);
+						proxy().open();
 					}
+
 					// 5: Host to Plug, setSpeakerArrangement returned: false 
 					VstSpeakerArrangement VSTsa;
 					{
@@ -166,37 +178,39 @@ namespace psycle
 						VSTsa.numChannels = 2;
 						VSTsa.speakers[0].type = kSpeakerL;
 						VSTsa.speakers[1].type = kSpeakerR;
-						proxy().dispatcher(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+						proxy().setSpeakerArrangement(&VSTsa);
 					}
+
 					// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
-					proxy().dispatcher(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+					proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 					// 7: Host to Plug, setBlockSize ( 512 ) 
-					proxy().dispatcher(effSetBlockSize,  0, STREAM_SIZE);
+					proxy().setBlockSize(STREAM_SIZE);
 					// 8: Host to Plug, setSpeakerArrangement returned: false 
-					proxy().dispatcher(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+					proxy().setSpeakerArrangement(&VSTsa);
 					// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
-					proxy().dispatcher(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+					proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 					// 10: Host to Plug, setBlockSize ( 512 ) 
-					proxy().dispatcher(effSetBlockSize, 0, STREAM_SIZE);
+					proxy().setBlockSize(STREAM_SIZE);
 					// 11: Host to Plug, getProgram returned: 0 
-					long int program(proxy().dispatcher(effGetProgram));
+					long int program = proxy().getProgram();
 					// 12: Host to Plug, getProgram returned: 0 
-					program = proxy().dispatcher(effGetProgram);
+					program = proxy().getProgram();
 					// 13: Host to Plug, getVstVersion returned: 2300 
 					{
-						_version = proxy().dispatcher(effGetVstVersion);
+						_version = proxy().getVstVersion();
 						if(!_version) _version = 1;
 					}
 					// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
-					proxy().dispatcher(effSetProgram);
-					proxy().dispatcher(effMainsChanged, 0, 1);
-					if(!proxy().dispatcher(effGetEffectName, 0, 0, &_sProductName))
+					proxy().setProgram(0);
+					proxy().mainsChanged(true);
+					if(!proxy().getEffectName(_sProductName))
 					{
 						CString str1(dllname);
 						CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
 						str1 = str2.Left(str2.Find('.'));
 						std::strcpy(_sProductName,str1);
 					}
+
 					if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
 					_editName[31]='\0'; // <bohan> \todo why is that 31 ?
 					// Compatibility hacks
@@ -206,10 +220,15 @@ namespace psycle
 							requiresRepl = true;
 						}
 					}
-					if(!proxy().dispatcher(effGetVendorString, 0, 0, &_sVendorName)) std::strcpy(_sVendorName, "Unknown vendor");
+
+					if(!proxy().getVendorString(_sVendorName))
+						std::strcpy(_sVendorName, "Unknown vendor");
 					_isSynth = proxy().flags() & effFlagsIsSynth;
+
 					instantiated = true;
+
 					TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
+
 				}
 				catch(...)
 				{
@@ -219,47 +238,36 @@ namespace psycle
 
 			void plugin::Free() throw(...) // called also in destructor
 			{
-				if(instantiated)
+				TRACE("VST plugin: freeing ...");
+				const std::exception * exception(0);
+				if(proxy()())
 				{
-					TRACE("VST plugin: freeing ...");
-					const std::exception * exception(0);
-					if(proxy()())
+					TRACE("VST plugin: freeing ... dispatcher");
+					try
 					{
-						TRACE("VST plugin: freeing ... dispatcher");
-						try
-						{
-							proxy().dispatcher(effMainsChanged);
-						}
-						catch(const std::exception & e)
-						{
-							if(!exception) exception = &e;
-						}
-						try
-						{
-							proxy().dispatcher(effClose);
-						}
-						catch(const std::exception & e)
-						{
-							if(!exception) exception = &e;
-						}
-						try
-						{
-							proxy()(0);
-						}
-						catch(const std::exception & e)
-						{
-							if(!exception) exception = &e;
-						}
+						proxy().mainsChanged(false);
 					}
-					if(h_dll)
+					catch(const std::exception & e)
 					{
-						TRACE("VST plugin: freeing ... library");
-						::FreeLibrary(h_dll);
-						h_dll = 0;
+						if(!exception) exception = &e;
 					}
-					instantiated = false;
-					if(exception) throw *exception;
+					try
+					{
+						proxy().close(); // frees the AEffect too
+					}
+					catch(const std::exception & e)
+					{
+						if(!exception) exception = &e;
+					}
 				}
+				if(h_dll)
+				{
+					TRACE("VST plugin: freeing ... library");
+					::FreeLibrary(h_dll);
+					h_dll = 0;
+				}
+				instantiated = false;
+				if(exception) throw *exception;
 			}
 
 			bool plugin::LoadSpecificFileChunk(RiffFile * pFile, int version)
@@ -868,7 +876,9 @@ namespace psycle
 				case audioMasterGetLanguage:		
 					return kVstLangEnglish;
 				case audioMasterUpdateDisplay:
-					if(effect && effect->user)
+					// <magnus> PSP EasyVerb calls this from main(),
+					// with effect->user=0x00000019
+					if(effect && effect->user > (void *)0x100)
 					{
 						try
 						{
