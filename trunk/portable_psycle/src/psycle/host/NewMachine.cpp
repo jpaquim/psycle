@@ -28,7 +28,7 @@ namespace psycle
 		std::map<std::string,std::string> CNewMachine::dllNames;
 
 
-		void CNewMachine::learnDllName(std::string fullname)
+		void CNewMachine::learnDllName(const std::string & fullname)
 		{
 			std::string str=fullname;
 			// strip off path
@@ -42,7 +42,7 @@ namespace psycle
 			dllNames[str]=fullname;
 		}
 
-		bool CNewMachine::lookupDllName(std::string name, std::string & result)
+		bool CNewMachine::lookupDllName(const std::string & name, std::string & result)
 		{
 			std::map<std::string,std::string>::iterator iterator
 				= dllNames.find(name);
@@ -544,7 +544,7 @@ namespace psycle
 								const std::string error(_pPlugsInfo[i]->error);
 								std::stringstream s;
 								if(error.empty())
-									s << "cached.";
+									s << "found in cache.";
 								else
 									s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
 								out << s.str();
@@ -561,10 +561,8 @@ namespace psycle
 					{
 						out << "new plugin added to cache ; ";
 						out.flush();
-						host::loggers::info(fileName + "\nnew plugin added to cache");
+						host::loggers::info(fileName + "\nnew plugin added to cache.");
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-						// <bohan> added proper constructor for the PluginInfo class. no need to zero it out now.
-						//::ZeroMemory(_pPlugsInfo[currentPlugsCount], sizeof(PluginInfo));
 						_pPlugsInfo[currentPlugsCount]->dllname = fileName;
 						_pPlugsInfo[currentPlugsCount]->FileTime = time;
 						if(type == MACH_PLUGIN)
@@ -613,8 +611,6 @@ namespace psycle
 								_pPlugsInfo[currentPlugsCount]->version = "could be any";
 								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-								CString str2;
-
 								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
 								out << plug.GetName() << " - successfully instanciated";
 								out.flush();
@@ -839,8 +835,8 @@ namespace psycle
 				DeleteFile(cache.c_str());
 				return false;
 			}
-			file.Read(&_numPlugins,sizeof(_numPlugins));
 
+			file.Read(&_numPlugins,sizeof(_numPlugins));
 			for (int i = 0; i < _numPlugins; i++)
 			{
 				PluginInfo p;
@@ -973,7 +969,7 @@ namespace psycle
 			}
 		}
 
-		bool CNewMachine::TestFilename(std::string name)
+		bool CNewMachine::TestFilename(const std::string & name)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{

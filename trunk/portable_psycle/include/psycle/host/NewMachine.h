@@ -74,13 +74,13 @@ namespace psycle
 			int OutBus;
 			static int pluginOrder;
 			static bool pluginName;
-			static void learnDllName(std::string fullpath);
-			static bool lookupDllName(std::string, std::string & result);
+			static void learnDllName(const std::string & fullpath);
+			static bool lookupDllName(const std::string &, std::string & result);
 			static void DestroyPluginInfo();
-			static void LoadPluginInfo(void);
+			static void LoadPluginInfo();
 			static int LastType0;
 			static int LastType1;
-			static bool TestFilename(std::string name);
+			static bool TestFilename(const std::string & name);
 		// Dialog Data
 			//{{AFX_DATA(CNewMachine)
 			enum { IDD = IDD_NEWMACHINE };
