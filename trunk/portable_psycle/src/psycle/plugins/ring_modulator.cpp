@@ -76,7 +76,7 @@ protected:
 		am_glide_, glided_am_radians_per_samples_, fm_bandwidth_;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Ring_Modulator);
+PSYCLE__PLUGIN__INSTANCIATOR(Ring_Modulator)
 
 void Ring_Modulator::sequencer_note_event(const int, const int, const int, const int command, const int value)
 {

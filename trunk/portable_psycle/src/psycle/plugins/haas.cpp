@@ -5,6 +5,7 @@
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
+	
 /// Haas stereo time delay spatial localization.
 class Haas : public Plugin
 {
@@ -178,7 +179,7 @@ protected:
 	inline void resize(const Real & delay);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Haas);
+PSYCLE__PLUGIN__INSTANCIATOR(Haas)
 
 void Haas::init()
 {

@@ -71,6 +71,7 @@ namespace psycle
 			return i;
 		}
 
+		#if 0
 		/// for 32-bit
 		inline const Sample log(const Sample & x) /// <bohan> i don't remember from where i got that bit of crunching... looks weird.
 		{ 
@@ -79,7 +80,8 @@ namespace psycle
 				( (i & 0x7f800000) >> 23 )
 				+ (i & 0x007fffff) / Sample(0x800000)
 				- 0x7f;
-		} 
+		}
+		#endif
 
 		#if PSYCLE__MATH__REAL == 8
 			/// when Real is 64-bit

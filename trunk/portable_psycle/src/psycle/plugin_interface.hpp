@@ -134,7 +134,7 @@ public:
 #define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) \
 	extern "C" \
 	{ \
-		__declspec(dllexport) CMachineInfo const * __cdecl GetInfo() { return &info; } \
-		__declspec(dllexport) CMachineInterface * __cdecl CreateMachine() { return new typename; } \
-		__declspec(dllexport) void __cdecl DeleteMachine(CMachineInterface & plugin) { delete &plugin; } \
+		__declspec(dllexport) ::CMachineInfo const * const cdecl GetInfo() { return &info; } \
+		__declspec(dllexport) ::CMachineInterface * cdecl CreateMachine() { return new typename; } \
+		__declspec(dllexport) void cdecl DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
 	}

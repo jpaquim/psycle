@@ -112,7 +112,7 @@ protected:
 	math::Sin_Sequence sin_sequences_[channels];
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Flanger);
+PSYCLE__PLUGIN__INSTANCIATOR(Flanger)
 
 void Flanger::init()
 {

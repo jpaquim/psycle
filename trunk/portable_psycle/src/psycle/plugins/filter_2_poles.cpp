@@ -98,7 +98,7 @@ protected:
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Filter_2_Poles);
+PSYCLE__PLUGIN__INSTANCIATOR(Filter_2_Poles)
 
 void Filter_2_Poles::sequencer_note_event(const int, const int, const int, const int command, const int value)
 {
