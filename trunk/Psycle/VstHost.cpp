@@ -165,10 +165,8 @@ void VSTPlugin::Free() // Called also in destruction
 		instantiated=false;
 		TRACE("VST plugin : Free query 0x%.8X\n",(int)_pEffect);
 		_pEffect->user = NULL;
-		int mg = _pEffect->magic;
 		Dispatch( effMainsChanged, 0, 0, NULL, 0.0f);
 		Dispatch( effClose,        0, 0, NULL, 0.0f);
-		
 		_pEffect=NULL;	
 		FreeLibrary(h_dll);
 	}
@@ -604,7 +602,8 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 #if !defined(_WINAMP_PLUGIN_)
 		Global::_pSong->Tweaker = true;
 
-		if ( effect->user ) { // ugly solution...
+		if ( effect->user && Global::pConfig->_RecordTweaks)  // ugly solution...
+		{
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
 		}
 		if ( effect->user ) {

@@ -129,6 +129,37 @@ void Machine::SetPan(
 	}
 	_panning = newPan;
 }
+void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
+{
+	if ( mType == MACH_VST || mType == MACH_VSTFX )
+	{
+		if (_type == MACH_VST || _type == MACH_VSTFX ) // VST to VST, no need to convert.
+		{
+			_inputConVol[wireIndex] = value;
+			_wireMultiplier[wireIndex] = 1.0f;
+		}
+		else											// VST to native, multiply
+		{
+			_inputConVol[wireIndex] = value*32768.0f;
+			_wireMultiplier[wireIndex] = 0.000030517578125f;
+		}
+	}
+	else if ( _type == MACH_VST || _type == MACH_VSTFX ) // native to VST, divide.
+	{
+		_inputConVol[wireIndex] = value*0.000030517578125f;
+		_wireMultiplier[wireIndex] = 32768.0f;
+	}
+	else												// native to native, no need to convert.
+	{
+		_inputConVol[wireIndex] = value;
+		_wireMultiplier[wireIndex] = 1.0f;
+	}	
+	// The reason of the conversions in the case of MACH_VST is because VST's output wave data
+	// in the range -1.0 to +1.0, while native and internal output at -32768.0 to +32768.0
+	// Initially (when the format was made), Psycle did convert this in the "Work" function,
+	// but since it already needs to multiply the output by inputConVol, I decided to remove
+	// that extra conversion and use directly the volume to do so.
+}
 int Machine::FindInputWire(Machine* pDstMac,int macIndex)
 {
 	for (int c=0; c<MAX_CONNECTIONS; c++)

@@ -48,6 +48,8 @@ V1.67
 + Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) for all generator types. (pooplog)
 ! Fixed the crash bug happening when changing from waveout to Directound (and viceversa).
 * Complete pattern display overhaul, including many new features and bugfixes (pooplog)
+! Fixed two memory leaks when loading songs with plugins (native as well as VST)
+
 
 V1.66
 -----

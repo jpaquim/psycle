@@ -480,30 +480,7 @@ bool Song::InsertConnection(int src,int dst)
 	dstMac->_inputCon[dfreebus] = true;
 	dstMac->_numInputs++;
 	
-	// This is some Specific VST conversions to avoid having to multiply every time.
-	if ( srcMac->_type == MACH_VST || srcMac->_type == MACH_VSTFX )
-	{
-		if (dstMac->_type == MACH_VST || dstMac->_type == MACH_VSTFX )
-		{
-			dstMac->_inputConVol[dfreebus] = 1.0f;
-			dstMac->_wireMultiplier[dfreebus] = 1.0f;
-		}
-		else 
-		{
-			dstMac->_inputConVol[dfreebus] = 32768.0f;
-			dstMac->_wireMultiplier[dfreebus] = 0.000030517578125f;
-		}
-	}
-	else if ( dstMac->_type == MACH_VST || dstMac->_type == MACH_VSTFX )
-	{
-		dstMac->_inputConVol[dfreebus] = 0.000030517578125f;
-		dstMac->_wireMultiplier[dfreebus] = 32768.0f;
-	}
-	else 
-	{
-		dstMac->_inputConVol[dfreebus] = 1.0f;
-		dstMac->_wireMultiplier[dfreebus] = 1.0f;
-	}
+	dstMac->InitWireVolume(srcMac->_type,dfreebus,1.0f);
 	
 	return true;
 }
@@ -1430,46 +1407,11 @@ bool Song::Load(
 					{
 						if ((pOrigMachine->_connection[d]) && (pOrigMachine->_outputMachines[d] == i)) // its output connections till we find one that outputs to the machine we were updating,
 						{																			// And update the volume. These extended if's (for VST) are explained some lines below.
-							if ( pOrigMachine->_type == MACH_VST || pOrigMachine->_type == MACH_VSTFX )
-							{
-								if (_pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX ) // If both are VST's, just directly convert.
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-									_pMachines[i]->_wireMultiplier[c] = 1.0f;
-								}
-								else 
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 32768.0f; // Else if VST outputs to native, multiply by 32768.
-									_pMachines[i]->_wireMultiplier[c] = 0.000030517578125f;
-									
-									if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a big Bugfix
-										_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-								}
-							}
-							else if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX ) // else If origin is native, and destination vst, divide by 32768.
-							{
-								_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
-								_pMachines[i]->_wireMultiplier[c] = 32768.0f;
+							float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+							if( val > 2 ) val*=0.000030517578125f; // BugFix
+							else if ( val < 0.00004) val*=32768.0f; // BugFix
 
-								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a big Bugfix
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-							}
-							else
-							{
-								_pMachines[i]->_wireMultiplier[c] = 1.0f;
-								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a big Bugfix
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
-								}
-								else if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a big Bugfix
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 32768.0f;
-								}
-								else
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-								}
-							}
+							_pMachines[i]->InitWireVolume(pOrigMachine->_type,c,val);
 
 							break;
 						}
@@ -1478,14 +1420,6 @@ bool Song::Load(
 			}
 		}
 	}
-
-	// The reason of the conversions in the case of MACH_VST is because VST's output wave data
-	// in the range -1.0 to +1.0, while native and internal output at -32768.0 to +32768.0
-	// Initially (when the format was made), Psycle did convert this in the "Work" function,
-	// but since it already needs to multiply the output by inputConVol, I decided to remove
-	// that extra conversion and use directly the volume to do so.
-	// The "This is a BIG bugfix" stands for me forgetting to do the same at saving...
-	// The saving bug was not noticed because the loading function was not working correctly either.
 
 	_machineLock = false;
 
@@ -1761,24 +1695,9 @@ bool Song::Save(
 					{
 						if ((pDstMachine->_inputCon[d]) && (pDstMachine->_inputMachines[d] == i))
 						{
-							if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX )
-							{
-								if (pDstMachine->_type == MACH_VST || pDstMachine->_type == MACH_VSTFX ) // If both are VST's, just directly convert.
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d];
-								}
-								else
-								{
-									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d] * 0.000030517578125f; // Else if VST outputs to native, divide by 32768.
-								}
-									
-							}
-							else if ( pDstMachine->_type == MACH_VST || pDstMachine->_type == MACH_VSTFX ) // else If origin is native, and destination vst, multiply by 32768.
-							{
-								_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d] *  32768.0f;
-
-							}
-							else _pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_outputMachines[c]][d]; // else if both are native, directly convert too.
+							float val;
+							_pMachines[i]->GetWireVolume(c,val); //this gets automatically the value in 0.0..1.0 range
+							_pMachines[i]->_inputConVol[c]=val;
 
 							break;
 						}
