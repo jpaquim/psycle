@@ -683,12 +683,14 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 #endif // _WINAMP_PLUGIN_
 	case audioMasterGetVendorString:	// Just fooling version string
 		strcpy((char*)ptr,"Steinberg");
+//		strcpy((char*)ptr,"Psycledelics");
 		return 0;
 	
 	case audioMasterGetVendorVersion:	return 5000;	// HOST version 5000
 
 	case audioMasterGetProductString:	// Just fooling product string
 		strcpy((char*)ptr,"Cubase VST");
+//		strcpy((char*)ptr,"Psycle");
 		return 0;
 
 	case audioMasterVendorSpecific:		return 0;
@@ -705,13 +707,31 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		break;
 	case 	audioMasterGetParameterQuantization:	
 		return NUMTICKS+1; // because its from 0 to NUMTICKS
+
+	case 	audioMasterGetBlockSize:
+		return STREAM_SIZE;
+		break;
+
+	case 	audioMasterCanDo:
+			if (!strcmp((char*)ptr,"sendVstEvents")) return 1;
+			if (!strcmp((char*)ptr,"sendVstMidiEvent")) return 1;
+			if (!strcmp((char*)ptr,"sendVstTimeInfo")) return 1;
+//			"receiveVstEvents",
+//			"receiveVstMidiEvent",
+//			"receiveVstTimeInfo",
+		
+//			"reportConnectionChanges",
+//			"acceptIOChanges",
+//			"sizeWindow",
+			if (!strcmp((char*)ptr,"supplyIdle")) return 1;
+			return -1;
+		break;
 		
 	case 	audioMasterSetTime:						TRACE("VST master dispatcher: Set Time\n");break;
 	case 	audioMasterGetNumAutomatableParameters:	TRACE("VST master dispatcher: GetNumAutPar\n");break;
 //	case 	audioMasterGetParameterQuantization:	TRACE("VST master dispatcher: ParamQuant\n");break;
 	case 	audioMasterIOChanged:					TRACE("VST master dispatcher: IOchanged\n");break;
 //	case 	audioMasterSizeWindow:					TRACE("VST master dispatcher: Size Window\n");break;
-	case 	audioMasterGetBlockSize:				TRACE("VST master dispatcher: GetBlockSize\n");break;
 	case 	audioMasterGetInputLatency:				TRACE("VST master dispatcher: GetInLatency\n");break;
 	case 	audioMasterGetOutputLatency:			TRACE("VST master dispatcher: GetOutLatency\n");break;
 	case 	audioMasterGetPreviousPlug:				TRACE("VST master dispatcher: PrevPlug\n");break;
@@ -727,7 +747,6 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	case 	audioMasterSetOutputSampleRate:			TRACE("VST master dispatcher: SetOutputsamplerate\n");break;
 	case 	audioMasterGetSpeakerArrangement:		TRACE("VST master dispatcher: Getspeaker\n");break;
 	case 	audioMasterSetIcon:						TRACE("VST master dispatcher: SetIcon\n");break;
-	case 	audioMasterCanDo:						TRACE("VST master dispatcher: Can Do\n");break;
 	case 	audioMasterOpenWindow:					TRACE("VST master dispatcher: OpenWindow\n");break;
 	case 	audioMasterCloseWindow:					TRACE("VST master dispatcher: CloseWindow\n");break;
 	case 	audioMasterGetDirectory:				TRACE("VST master dispatcher: GetDirectory\n");break;
