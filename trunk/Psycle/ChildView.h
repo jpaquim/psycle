@@ -167,6 +167,7 @@ public:
 	void AddRedoSong(int edittrack, int editline, int editcol, int seqpos);
 	void KillUndo();
 	void KillRedo();
+	void SelectNextTrack();  // for armed tracks recording
 
 	int FindBusFromIndex(int smac);
 public:

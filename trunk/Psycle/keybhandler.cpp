@@ -124,6 +124,39 @@ void CChildView::MidiPatternTweak(int command, int value)
 	else if (value > 65535) value = 65535;
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		if (Global::pPlayer->_playing&&_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				_previousTicks++;
+				SelectNextTrack();
+			}
+			else
+			{
+				// build entry
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._cmd = (value>>8)&255;
+				entry._parameter = value&255;
+				entry._inst = command;
+				entry._note = 121;
+
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if ( Global::_pSong->seqBus < MAX_BUSES )
+					mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
+				else
+					mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+
+				if ( mgn != 255 ) pMachine = Global::_pSong->_pMachines[mgn];
+				else return;
+
+				// play
+				pMachine->Tick(0,&entry);
+				return;
+			}
+		}
 		// write effect
 		int ps = _ps();
 		int line = Global::pPlayer->_lineCounter;
@@ -193,6 +226,39 @@ void CChildView::MidiPatternCommand(int command, int value)
 	else if (value > 255) value = 255;
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		if (Global::pPlayer->_playing&&_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				_previousTicks++;
+				SelectNextTrack();
+			}
+			else
+			{
+				// build entry
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._inst = _pSong->auxcolSelected;
+				entry._cmd = command;
+				entry._parameter = value;
+				entry._note = 255;
+
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if ( Global::_pSong->seqBus < MAX_BUSES )
+					mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
+				else
+					mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+
+				if ( mgn != 255 ) pMachine = Global::_pSong->_pMachines[mgn];
+				else return;
+
+				// play
+				pMachine->Tick(0,&entry);
+				return;
+			}
+		}
 		// write effect
 		int ps = _ps();
 		int line = Global::pPlayer->_lineCounter;
@@ -257,6 +323,18 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 	else if (value > 65535) value = 65535;
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		if (Global::pPlayer->_playing&&_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				_previousTicks++;
+				SelectNextTrack();
+			}
+			else
+			{
+				return;
+			}
+		}
 		// write effect
 		int ps = _ps();
 		int line = Global::pPlayer->_lineCounter;
@@ -317,9 +395,9 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	// realtime note entering
 	if (Global::pPlayer->_playing&&_followSong)
 	{
-		_previousTicks++;
 		if(_pSong->_trackArmedCount)
 		{
+			_previousTicks++;
 			if (velocity == 0)
 			{
 				for (int i = 0; i < _pSong->SONGTRACKS; i++)
@@ -340,14 +418,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			}
 			else
 			{
-				if(++editcur.track >= _pSong->SONGTRACKS)
-					editcur.track=0;
-				while(_pSong->_trackArmed[editcur.track] == 0)
-				{
-					if(++editcur.track >= _pSong->SONGTRACKS)
-						editcur.track=0;
-				}
-				editcur.col = 0;
+				SelectNextTrack();
 			}
 		}
 		else
@@ -1887,3 +1958,15 @@ void CChildView::KillUndo()
 	}
 }
 
+
+void CChildView::SelectNextTrack()
+{
+	if(++editcur.track >= _pSong->SONGTRACKS)
+		editcur.track=0;
+	while(_pSong->_trackArmed[editcur.track] == 0)
+	{
+		if(++editcur.track >= _pSong->SONGTRACKS)
+			editcur.track=0;
+	}
+	editcur.col = 0;
+}
