@@ -1,8 +1,9 @@
 #include <project.h>
 #include <psycle/plugin/plugin.h>
 /// \file
-/// \brief just a multiplier
+/// \brief just a negative
 namespace psycle { namespace plugin {
+
 class Negative : public Plugin
 {
 public:
@@ -20,7 +21,9 @@ public:
 protected:
 	inline void process(Sample &);
 };
+
 PSYCLE__PLUGIN__INSTANCIATOR(Negative);
+
 void Negative::process(Sample l[], Sample r[], int sample, int)
 {
 	while(sample--)
@@ -29,8 +32,10 @@ void Negative::process(Sample l[], Sample r[], int sample, int)
 		process(r[sample]);
 	}
 }
+
 inline void Negative::process(Sample & sample)
 {
 	sample = -sample;
 }
+
 }}
