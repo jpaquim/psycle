@@ -443,6 +443,14 @@ void CChildView::EnableSound()
 		if (!Global::pConfig->_pOutputDriver->Configured())
 		{
 			Global::pConfig->_pOutputDriver->Configure();
+			if (Global::pPlayer->_playing)
+			{
+				Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+			}
+			else
+			{
+				Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+			}
 			_outputActive = true;
 		}
 		if (Global::pConfig->_pOutputDriver->Enable(true))
