@@ -22,12 +22,12 @@ namespace psycle
 			class LogEntry
 			{
 			public:
-				const int level;
-				const std::string string;
-				inline LogEntry(const int & level, const std::string & string) : level(level), string(string) {}
+				int level;
+				std::string string;
+				LogEntry(const int & level_, const std::string & string_)
+					: level(level_), string(string_) {}
 			};
-			typedef std::vector<LogEntry*> LogEntries;
-			LogEntries LogVector;
+			std::vector<LogEntry> LogVector;
 
 		public:
 			CLoggingWindow(CWnd * pParent = 0);

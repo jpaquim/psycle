@@ -206,29 +206,27 @@ namespace psycle
 					assert(false);
 				}
 				zapObject(proxy_);
-				zapArray(_sDllName);
 			}
 
 			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
 			{
 				Free();
-				zapArray(_sDllName,new char[std::strlen(dllname) + 1]);
-				std::strcpy(_sDllName, dllname);
-				TRACE("VST plugin: library file name: %s\n", _sDllName);
+				_sDllName=dllname;
+				TRACE("VST plugin: library file name: %s\n", _sDllName.c_str());
 				proxy()(0);
 				instantiated = false;
-				if(!(h_dll = ::LoadLibrary(dllname)))
+				if(!(h_dll = ::LoadLibrary(_sDllName.c_str())))
 				{
-					std::ostringstream s; s
-						<< "could not load library: " << dllname << std::endl
+					std::ostringstream s;
+					s	<< "could not load library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::loading_error(s.str());
 				}
 				PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
 				if(!main)
 				{	
-					std::ostringstream s; s
-						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
+					std::ostringstream s;
+					s	<< "could not resolve symbol 'main' in library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::symbol_resolving_error(s.str());
 				}
@@ -248,9 +246,12 @@ namespace psycle
 				}
 				if(!proxy()() || proxy().magic() != kEffectMagic)
 				{
-					std::ostringstream s; s << "call to function 'main' returned a bad value: ";
-					if(proxy()()) s << "returned value signature: " << proxy().magic();
-					else s << "returned value is a null pointer";
+					std::ostringstream s;
+					s << "call to function 'main' returned a bad value: ";
+					if(proxy()())
+						s << "returned value signature: " << proxy().magic();
+					else
+						s << "returned value is a null pointer";
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
 				TRACE("VST plugin: instanciated.");
@@ -297,26 +298,37 @@ namespace psycle
 				// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
 				proxy().setProgram(0);
 				proxy().mainsChanged(true);
-				if(!proxy().getEffectName(_sProductName))
+				char temp[1024];
+				if(proxy().getEffectName(temp) && temp[0])
+					_sProductName=temp;
+				else
 				{
-					CString str1(dllname);
-					CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
-					str1 = str2.Left(str2.Find('.'));
-					std::strcpy(_sProductName,str1);
+					std::string temp;
+					std::string::size_type pos;
+					pos = _sDllName.rfind('\\');
+					if(pos==std::string::npos)
+						temp=_sDllName;
+					else
+						temp=_sDllName.substr(pos+1);
+					_sProductName=temp.substr(0,temp.rfind('.'));
 				}
 
-				if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
+				if(overwriteName)
+					strncpy(_editName, _sProductName.c_str(), 32); // <bohan> \todo why is that 31 ?
 				_editName[31]='\0'; // <bohan> \todo why is that 31 ?
 				// Compatibility hacks
 				{
-					if(std::strcmp(_sProductName, "sc-101") == 0)
+					if(_sProductName == "sc-101")
 					{
 						requiresRepl = true;
 					}
 				}
 
-				if(!proxy().getVendorString(_sVendorName))
-					std::strcpy(_sVendorName, "Unknown vendor");
+
+				if(proxy().getVendorString(temp) && temp[0])
+					_sVendorName = temp;
+				else
+					_sVendorName = "Unknown vendor";
 				_isSynth = proxy().flags() & effFlagsIsSynth;
 
 				instantiated = true;
