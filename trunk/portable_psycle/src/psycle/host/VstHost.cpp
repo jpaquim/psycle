@@ -150,7 +150,9 @@ namespace psycle
 					catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-					catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
+					catch(...) {
+						host::exceptions::function_errors::rethrow<void*>(*this, "main");
+					}
 				}
 				if(!proxy()() || proxy().magic() != kEffectMagic)
 				{
@@ -683,7 +685,8 @@ namespace psycle
 
 			long plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
-				TRACE("VST plugin: call to host dispatcher: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n", (int) effect, opcode, index, value, (int) ptr, opt);
+				if(opcode!=audioMasterGetTime)
+					TRACE("VST plugin: call to host dispatcher: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n", (int) effect, opcode, index, value, (int) ptr, opt);
 				// believe it or not, some plugs tried to call psycle with a null AEffect.
 				// Support opcodes
 				switch(opcode)
@@ -709,7 +712,7 @@ namespace psycle
 				case audioMasterVersion:			
 					return 2; // vst version, currently 7 (0 for older)
 				case audioMasterCurrentId:			
-					return 'AASH'; // returns the unique id of a plug that's currently loading
+					break;
 				case audioMasterIdle:
 					if(effect && effect->user)
 					{
@@ -738,11 +741,8 @@ namespace psycle
 						if(index < 2) return 0;
 						else return 1;
 					}
-					// return 0; // inquire if an input or output is beeing connected;
 				case audioMasterWantMidi:			
 					return 0;
-				case audioMasterProcessEvents:		
-					return 0; // Support of vst events to host is not available
 				case audioMasterGetTime:
 					std::memset(&_timeInfo, 0, sizeof _timeInfo);
 					/*
@@ -827,10 +827,17 @@ namespace psycle
 						_timeInfo.timeSigDenominator = 4;
 					}
 					return (long) &_timeInfo;
+				case audioMasterProcessEvents:		
+					return 0; // Support of vst events to host is not available
+				case audioMasterSetTime:
+					//IGNORE!
+					break;
 				case audioMasterTempoAt:
 					// This might be incorrect:
 					// Declaration: virtual long tempoAt (long pos); // returns tempo (in bpm * 10000) at sample frame location <pos>
 					return Global::pPlayer->bpm * 10000;
+				case audioMasterGetParameterQuantization:	
+					return vst::quantization;
 				case audioMasterNeedIdle:
 					if(effect && effect->user)
 					{
@@ -848,46 +855,6 @@ namespace psycle
 						}
 					}
 					return 1;
-				case audioMasterGetSampleRate:		
-					return Global::pConfig->GetSamplesPerSec();
-				case audioMasterGetVendorString:
-					// Just fooling version string
-					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
-					std::strcpy((char *) ptr,"Steinberg");
-					//std::strcpy((char*)ptr,"Psycledelics");
-					return 0;
-				case audioMasterGetVendorVersion:	
-					return 5000; // HOST version 5000
-					// <bohan> is that a Cubase VST version?
-				case audioMasterGetProductString:
-					// Just fooling product string
-					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
-					std::strcpy((char *) ptr, "Cubase VST");
-					//std::strcpy((char*) ptr, "Psycle");
-					return 0;
-				case audioMasterVendorSpecific:		
-					return 0;
-				case audioMasterGetLanguage:		
-					return kVstLangEnglish;
-				case audioMasterUpdateDisplay:
-					// <magnus> PSP EasyVerb calls this from main(),
-					// with effect->user=0x00000019
-					if(effect && effect->user > (void *)0x100)
-					{
-						try
-						{
-							reinterpret_cast<plugin *>(effect->user)->proxy().dispatcher(effEditIdle);
-						}
-						catch(const std::exception &)
-						{
-							// o_O`
-						}
-						catch(...) // reinterpret_cast sucks
-						{
-							// o_O`
-						}
-					}
-					return 0;
 				case audioMasterSizeWindow:
 					#if !defined _WINAMP_PLUGIN_
 							if(effect && effect->user)
@@ -908,10 +875,53 @@ namespace psycle
 							}
 					#endif
 					return 0;
-				case audioMasterGetParameterQuantization:	
-					return vst::quantization;
+				case audioMasterGetSampleRate:
+					{
+						double sampleRate=Global::pConfig->GetSamplesPerSec();
+						if(effect)
+							reinterpret_cast<plugin *>(effect->user)->proxy().setSampleRate(sampleRate);
+						//return sampleRate;
+						return 0;
+					}
 				case audioMasterGetBlockSize:
-					return STREAM_SIZE;
+					if(effect)
+						reinterpret_cast<plugin *>(effect->user)->proxy().setBlockSize(STREAM_SIZE);
+					//return STREAM_SIZE;
+					return 0;
+				case audioMasterGetVendorString:
+					// Just fooling version string
+					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
+					std::strcpy((char *) ptr,"Steinberg");
+					//std::strcpy((char*)ptr,"Psycledelics");
+					return 1;
+				case audioMasterGetProductString:
+					// Just fooling product string
+					// <bohan> why? do we have to fool some plugins to make them work with psycle's host?
+					std::strcpy((char *) ptr, "Cubase VST");
+					//std::strcpy((char*) ptr, "Psycle");
+					return 1;
+				case audioMasterGetVendorVersion:	
+					return 5000; // HOST version 5000
+					// <bohan> is that a Cubase VST version?
+				case audioMasterUpdateDisplay:
+					// <magnus> PSP EasyVerb calls this from main(),
+					// with effect->user=0x00000019
+					if(effect && effect->user > (void *)0x100)
+					{
+						try
+						{
+							reinterpret_cast<plugin *>(effect->user)->proxy().dispatcher(effEditIdle);
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+						catch(...) // reinterpret_cast sucks
+						{
+							// o_O`
+						}
+					}
+					return 0;
 				case audioMasterCanDo:
 					if(!std::strcmp((char *) ptr, "sendVstEvents")) return 1;
 					if(!std::strcmp((char *) ptr, "sendVstMidiEvent")) return 1;
@@ -925,75 +935,6 @@ namespace psycle
 					if(!std::strcmp((char *) ptr, "sizeWindow")) return 1;
 					if(!std::strcmp((char *) ptr, "supplyIdle")) return 1;
 					return -1;
-					break;
-				case audioMasterSetTime:						
-					TRACE("VST master dispatcher: Set Time\n");
-					break;
-				case audioMasterGetNumAutomatableParameters:	
-					TRACE("VST master dispatcher: GetNumAutPar\n");
-					break;
-				//case audioMasterGetParameterQuantization:	
-					//TRACE("VST master dispatcher: ParamQuant\n");
-					//break;
-				case audioMasterIOChanged:					
-					TRACE("VST master dispatcher: IOchanged\n");
-					break;
-				//case audioMasterSizeWindow:					
-					//TRACE("VST master dispatcher: Size Window\n");
-					//break;
-				case audioMasterGetInputLatency:				
-					TRACE("VST master dispatcher: GetInLatency\n");
-					break;
-				case audioMasterGetOutputLatency:			
-					TRACE("VST master dispatcher: GetOutLatency\n");
-					break;
-				case audioMasterGetPreviousPlug:				
-					TRACE("VST master dispatcher: PrevPlug\n");
-					break;
-				case audioMasterGetNextPlug:					
-					TRACE("VST master dispatcher: NextPlug\n");
-					break;
-				case audioMasterWillReplaceOrAccumulate:		
-					TRACE("VST master dispatcher: WillReplace\n");
-					break;
-				case audioMasterGetCurrentProcessLevel:		
-					TRACE("VST master dispatcher: GetProcessLevel\n");
-					break;
-				case audioMasterGetAutomationState:			
-					TRACE("VST master dispatcher: GetAutState\n");
-					break;
-				case audioMasterOfflineStart:				
-					TRACE("VST master dispatcher: Offlinestart\n");
-					break;
-				case audioMasterOfflineRead:					
-					TRACE("VST master dispatcher: Offlineread\n");
-					break;
-				case audioMasterOfflineWrite:				
-					TRACE("VST master dispatcher: Offlinewrite\n");
-					break;
-				case audioMasterOfflineGetCurrentPass:		
-					TRACE("VST master dispatcher: OfflineGetcurrentpass\n");
-					break;
-				case audioMasterOfflineGetCurrentMetaPass:	
-					TRACE("VST master dispatcher: OfflineGetCurrentMetapass\n");
-					break;
-				case audioMasterSetOutputSampleRate:			
-					TRACE("VST master dispatcher: SetOutputsamplerate\n");
-					break;
-				case audioMasterGetSpeakerArrangement:		
-					TRACE("VST master dispatcher: Getspeaker\n");
-					break;
-				case audioMasterSetIcon:						
-					TRACE("VST master dispatcher: SetIcon\n");
-					break;
-				case audioMasterOpenWindow:					
-					TRACE("VST master dispatcher: OpenWindow\n");
-					break;
-				case audioMasterCloseWindow:					
-					TRACE("VST master dispatcher: CloseWindow\n");
-					break;
-				case audioMasterGetDirectory:				
-					TRACE("VST master dispatcher: GetDirectory\n");
 					break;
 				default: 
 					TRACE("VST master dispatcher: undefed: %d\n",opcode);
