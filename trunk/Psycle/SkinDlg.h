@@ -11,12 +11,6 @@
 // CSkinDlg dialog
 
 
-struct SFontName
-{
-	SFontName* pPrev;
-	char szName[64];
-};
-
 class CSkinDlg : public CPropertyPage
 {
 	DECLARE_DYNCREATE(CSkinDlg)
@@ -68,19 +62,15 @@ public:
 	int _pattern_font_y;
 	bool _pattern_draw_empty_data;
 
+	UINT _pattern_font_flags;
+	UINT _effect_font_flags;
+	UINT _generator_font_flags;
+
 	char _machine_skin[64];
 	char _generator_fontface[64];
 	int _generator_font_point;
 	char _effect_fontface[64];
 	int _effect_font_point;
-
-	static CComboBox* pm_pattern_fontface;
-	static CComboBox* pm_generator_fontface;
-	static CComboBox* pm_effect_fontface;
-
-	static HDC hDC;
-	static SFontName* pNameStruct;
-
 
 	CSkinDlg();
 	~CSkinDlg();
@@ -91,15 +81,15 @@ public:
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
 	CComboBox	m_wirewidth;
-	CComboBox	m_pattern_fontface;
+	CButton	m_pattern_fontface;
 	CComboBox	m_pattern_font_point;
 	CComboBox	m_pattern_font_x;
 	CComboBox	m_pattern_font_y;
 	CComboBox	m_pattern_header_skin;
 	CComboBox	m_machine_skin;
-	CComboBox	m_generator_fontface;
+	CButton	m_generator_fontface;
 	CComboBox	m_generator_font_point;
-	CComboBox	m_effect_fontface;
+	CButton	m_effect_fontface;
 	CComboBox	m_effect_font_point;
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
@@ -169,16 +159,16 @@ protected:
 	afx_msg void OnSelchangePatternFontPoint();
 	afx_msg void OnSelchangePatternFontX();
 	afx_msg void OnSelchangePatternFontY();
-	afx_msg void OnSelchangePatternFontFace();
+	afx_msg void OnPatternFontFace();
 	afx_msg void OnSelchangePatternHeaderSkin();
 	afx_msg void OnSelchangeWireWidth();
 	afx_msg void OnSelchangeMachineSkin();
 	afx_msg void OnSelchangeWireAA();
 	afx_msg void OnSelchangeGeneratorFontPoint();
-	afx_msg void OnSelchangeGeneratorFontFace();
+	afx_msg void OnGeneratorFontFace();
 	afx_msg void OnMVGeneratorFontColour();
 	afx_msg void OnSelchangeEffectFontPoint();
-	afx_msg void OnSelchangeEffectFontFace();
+	afx_msg void OnEffectFontFace();
 	afx_msg void OnMVEffectFontColour();
 	afx_msg void OnDrawEmptyData();
 
@@ -189,6 +179,7 @@ private:
 	void RepaintAllCanvas();
 	void UpdateCanvasColour(int id,COLORREF col);
 	void FindSkinsInDir(CString findDir);
+	void SetFontNames();
 };
 
 

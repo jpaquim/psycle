@@ -92,12 +92,15 @@ void CConfigDlg::Init(
 	_skinDlg._pattern_font_y = pConfig->pattern_font_y;
 	_skinDlg._pattern_draw_empty_data = pConfig->pattern_draw_empty_data;
 	strcpy(_skinDlg._pattern_header_skin, pConfig->pattern_header_skin);
+	_skinDlg._pattern_font_flags = pConfig->pattern_font_flags;
 
 	strcpy(_skinDlg._generator_fontface, pConfig->generator_fontface);
 	_skinDlg._generator_font_point = pConfig->generator_font_point;
+	_skinDlg._generator_font_flags = pConfig->generator_font_flags;
 
 	strcpy(_skinDlg._effect_fontface, pConfig->effect_fontface);
 	_skinDlg._effect_font_point = pConfig->effect_font_point;
+	_skinDlg._effect_font_flags = pConfig->effect_font_flags;
 
 	strcpy(_skinDlg._machine_skin, pConfig->machine_skin);
 
@@ -210,38 +213,10 @@ int CConfigDlg::DoModal()
 		_pConfig->pattern_font_y = _skinDlg._pattern_font_y;
 		_pConfig->pattern_draw_empty_data = _skinDlg._pattern_draw_empty_data;
 
-		if ((strcmp(_pConfig->pattern_fontface, _skinDlg._pattern_fontface)) ||
-			(_pConfig->pattern_font_point != _skinDlg._pattern_font_point))
-		{
-			_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
-			strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
-			_pConfig->seqFont.DeleteObject();
-			if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,_pConfig->pattern_fontface))
-			{
-				if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Tahoma"))
-				{
-					if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Verdana"))
-					{
-						if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Arial Bold"))
-						{
-							if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Arial"))
-							{
-								if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"tahoma"))
-								{
-									if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"verdana"))
-									{
-										if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"arial bold"))
-										{
-											_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"arial");
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
+		_pConfig->pattern_font_flags = _skinDlg._pattern_font_flags;
+		strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
+
 		if (strcmp(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin))
 		{
 			strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
@@ -249,71 +224,15 @@ int CConfigDlg::DoModal()
 			if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 		}
 
-		if ((strcmp(_pConfig->generator_fontface, _skinDlg._generator_fontface)) ||
-			(_pConfig->generator_font_point != _skinDlg._generator_font_point))
-		{
-			_pConfig->generator_font_point = _skinDlg._generator_font_point;
-			strcpy(_pConfig->generator_fontface, _skinDlg._generator_fontface);
-			_pConfig->generatorFont.DeleteObject();
-			if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,_pConfig->generator_fontface))
-			{
-				if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Tahoma"))
-				{
-					if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Verdana"))
-					{
-						if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Arial Bold"))
-						{
-							if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Arial"))
-							{
-								if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"tahoma"))
-								{
-									if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"verdana"))
-									{
-										if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"arial bold"))
-										{
-											_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"arial");
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		_pConfig->generator_font_point = _skinDlg._generator_font_point;
+		_pConfig->generator_font_flags = _skinDlg._generator_font_flags;
+		strcpy(_pConfig->generator_fontface, _skinDlg._generator_fontface);
 
-		if ((strcmp(_pConfig->effect_fontface, _skinDlg._effect_fontface)) ||
-			(_pConfig->effect_font_point != _skinDlg._effect_font_point))
-		{
-			_pConfig->effect_font_point = _skinDlg._effect_font_point;
-			strcpy(_pConfig->effect_fontface, _skinDlg._effect_fontface);
-			_pConfig->effectFont.DeleteObject();
-			if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,_pConfig->effect_fontface))
-			{
-				if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Tahoma"))
-				{
-					if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Verdana"))
-					{
-						if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Arial Bold"))
-						{
-							if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Arial"))
-							{
-								if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"tahoma"))
-								{
-									if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"verdana"))
-									{
-										if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"arial bold"))
-										{
-											_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"arial");
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		_pConfig->effect_font_point = _skinDlg._effect_font_point;
+		_pConfig->effect_font_flags = _skinDlg._effect_font_flags;
+		strcpy(_pConfig->effect_fontface, _skinDlg._effect_fontface);
+
+		((CMainFrame *)theApp.m_pMainWnd)->LoadFonts();
 
 		if (strcmp(_pConfig->machine_skin, _skinDlg._machine_skin))
 		{

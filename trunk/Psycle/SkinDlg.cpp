@@ -100,15 +100,15 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_POINT, OnSelchangePatternFontPoint)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_X, OnSelchangePatternFontX)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_Y, OnSelchangePatternFontY)
-	ON_CBN_SELCHANGE(IDC_PATTERN_FONTFACE, OnSelchangePatternFontFace)
+	ON_BN_CLICKED(IDC_PATTERN_FONTFACE, OnPatternFontFace)
 	ON_CBN_SELCHANGE(IDC_PATTERN_HEADER_SKIN, OnSelchangePatternHeaderSkin)
 	ON_CBN_SELCHANGE(IDC_WIRE_WIDTH, OnSelchangeWireWidth)
 	ON_CBN_SELCHANGE(IDC_MACHINE_SKIN, OnSelchangeMachineSkin)
 	ON_CBN_SELCHANGE(IDC_MACHINE_FONT_POINT, OnSelchangeGeneratorFontPoint)
-	ON_CBN_SELCHANGE(IDC_MACHINE_FONTFACE, OnSelchangeGeneratorFontFace)
+	ON_BN_CLICKED(IDC_MACHINE_FONTFACE, OnGeneratorFontFace)
 	ON_BN_CLICKED(IDC_MV_FONT_COLOUR, OnMVGeneratorFontColour)
 	ON_CBN_SELCHANGE(IDC_MACHINE_FONT_POINT2, OnSelchangeEffectFontPoint)
-	ON_CBN_SELCHANGE(IDC_MACHINE_FONTFACE2, OnSelchangeEffectFontFace)
+	ON_BN_CLICKED(IDC_MACHINE_FONTFACE2, OnEffectFontFace)
 	ON_BN_CLICKED(IDC_MV_FONT_COLOUR2, OnMVEffectFontColour)
 	ON_CBN_SELCHANGE(IDC_WIREAA, OnSelchangeWireAA)
 
@@ -130,80 +130,6 @@ void CSkinDlg::OnCancel()
 	CDialog::OnCancel();
 }
 
-int CALLBACK CSkinDlg::EnumFontFamExProc(
-  ENUMLOGFONTEX *lpelfe,    // logical-font data
-  NEWTEXTMETRICEX *lpntme,  // physical-font data
-  DWORD FontType,           // type of font
-  LPARAM lParam             // application-defined data
-)
-{
-	// due to the stupid way ms font enum callback works, you have to find the family, and then enumerate that
-	// again if you want everything to be listed
-	if ((lpelfe->elfFullName[0] >= 33) &&
-		(lpelfe->elfFullName[0] <= 126))
-	{
-		// no bad characters
-		for (UINT i = 0; i < strlen((char*)lpelfe->elfFullName); i++)
-		{
-			if ((lpelfe->elfFullName[i] < 32) ||
-				(lpelfe->elfFullName[i] > 126))
-			{
-				return 1;
-			}
-		}
-		// no duplicates
-		SFontName* pNew = pNameStruct;
-		while (pNew)
-		{
-			if (strcmp(pNew->szName,(char*)lpelfe->elfFullName)==0)
-			{
-				return 1;
-			}
-			pNew=pNew->pPrev;
-		}
-		pNew = new SFontName;
-		pNew->pPrev = pNameStruct;
-		strcpy(pNew->szName,(char*)lpelfe->elfFullName);
-		pNameStruct = pNew;
-	}
-	return 1;
-}
-
-int CALLBACK CSkinDlg::EnumFontFamExProc2(
-  ENUMLOGFONTEX *lpelfe,    // logical-font data
-  NEWTEXTMETRICEX *lpntme,  // physical-font data
-  DWORD FontType,           // type of font
-  LPARAM lParam             // application-defined data
-)
-{
-	// no bad characters thanks
-	if ((lpelfe->elfFullName[0] >= 33)
-		&& (lpelfe->elfFullName[0] <= 126))
-	{
-		for (UINT i = 0; i < strlen((char*)lpelfe->elfFullName); i++)
-		{
-			if ((lpelfe->elfFullName[i] < 32) ||
-				(lpelfe->elfFullName[i] > 126))
-			{
-				return 1;
-			}
-		}
-		// no duplicates thanks
-		if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
-		{
-			pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
-			pm_generator_fontface->AddString((char*)lpelfe->elfFullName);
-			pm_effect_fontface->AddString((char*)lpelfe->elfFullName);
-		}
-	}
-	return 1;
-}
-
-CComboBox * CSkinDlg::pm_pattern_fontface;
-CComboBox * CSkinDlg::pm_generator_fontface;
-CComboBox * CSkinDlg::pm_effect_fontface;
-HDC CSkinDlg::hDC;
-SFontName* CSkinDlg::pNameStruct;
 
 BOOL CSkinDlg::OnInitDialog() 
 {
@@ -227,160 +153,6 @@ BOOL CSkinDlg::OnInitDialog()
 	m_wirewidth.SetCurSel(_wirewidth-1);
 	m_wireaa.SetCurSel(_wireaa);
 
-	LOGFONT lf;
-	memset(&lf,0,sizeof(lf));
-	lf.lfCharSet = ANSI_CHARSET;
-//	lf.lfCharSet = DEFAULT_CHARSET;
-	hDC = ::GetDC( NULL );
-
-	pm_pattern_fontface = &m_pattern_fontface;
-	pm_generator_fontface = &m_generator_fontface;
-	pm_effect_fontface = &m_effect_fontface;
-	pNameStruct = NULL;
-	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc, 0, 0);
-	// done this way instead of recursive because recursive fucks up on huge lists of fonts...
-	while (pNameStruct)
-	{
-		strcpy(lf.lfFaceName,pNameStruct->szName);
-		EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
-		// enumerate the root too
-		char* p = strchr(lf.lfFaceName,32); // space
-		if ((p) && (p!=lf.lfFaceName))
-		{
-			p[0] = 0;
-			EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
-		}
-
-		SFontName* pNew = pNameStruct;
-		pNameStruct = pNameStruct->pPrev;
-		delete pNew;
-	}
-	::ReleaseDC( NULL, hDC );
-
-	int sel;
-	sel = m_pattern_fontface.FindStringExact(0,_pattern_fontface);
-	if (sel==CB_ERR)
-	{
-		MessageBox(_pattern_fontface,"Could not find this font!");
-		sel = m_pattern_fontface.FindStringExact(0,"Tahoma");
-		if (sel==CB_ERR)
-		{
-			sel = m_pattern_fontface.FindStringExact(0,"Verdana");
-			if (sel==CB_ERR)
-			{
-				sel = m_pattern_fontface.FindStringExact(0,"Arial Black");
-				if (sel==CB_ERR)
-				{
-					sel = m_pattern_fontface.FindStringExact(0,"Arial");
-					if (sel==CB_ERR)
-					{
-						sel = m_pattern_fontface.FindStringExact(0,"tahoma");
-						if (sel==CB_ERR)
-						{
-							sel = m_pattern_fontface.FindStringExact(0,"verdana");
-							if (sel==CB_ERR)
-							{
-								sel = m_pattern_fontface.FindStringExact(0,"arial black");
-								if (sel==CB_ERR)
-								{
-									sel = m_pattern_fontface.FindStringExact(0,"arial");
-									if (sel==CB_ERR)
-									{
-										sel=0;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	m_pattern_fontface.SetCurSel(sel);
-	m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface); // If "couldn't find it"
-	
-	sel = m_generator_fontface.FindStringExact(0,_generator_fontface);
-	if (sel==CB_ERR)
-	{
-		MessageBox(_generator_fontface,"Could not find this font!");
-		sel = m_generator_fontface.FindStringExact(0,"Tahoma");
-		if (sel==CB_ERR)
-		{
-			sel = m_generator_fontface.FindStringExact(0,"Verdana");
-			if (sel==CB_ERR)
-			{
-				sel = m_generator_fontface.FindStringExact(0,"Arial Black");
-				if (sel==CB_ERR)
-				{
-					sel = m_generator_fontface.FindStringExact(0,"Arial");
-					if (sel==CB_ERR)
-					{
-						sel = m_generator_fontface.FindStringExact(0,"tahoma");
-						if (sel==CB_ERR)
-						{
-							sel = m_generator_fontface.FindStringExact(0,"verdana");
-							if (sel==CB_ERR)
-							{
-								sel = m_generator_fontface.FindStringExact(0,"arial black");
-								if (sel==CB_ERR)
-								{
-									sel = m_generator_fontface.FindStringExact(0,"arial");
-									if (sel==CB_ERR)
-									{
-										sel=0;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	m_generator_fontface.SetCurSel(sel);
-	m_generator_fontface.GetLBText(m_generator_fontface.GetCurSel(),_generator_fontface); // If "couldn't find it"
-	
-	sel = m_effect_fontface.FindStringExact(0,_effect_fontface);
-	if (sel==CB_ERR)
-	{
-		MessageBox(_effect_fontface,"Could not find this font!");
-		sel = m_effect_fontface.FindStringExact(0,"Tahoma");
-		if (sel==CB_ERR)
-		{
-			sel = m_effect_fontface.FindStringExact(0,"Verdana");
-			if (sel==CB_ERR)
-			{
-				sel = m_effect_fontface.FindStringExact(0,"Arial Black");
-				if (sel==CB_ERR)
-				{
-					sel = m_effect_fontface.FindStringExact(0,"Arial");
-					if (sel==CB_ERR)
-					{
-						sel = m_effect_fontface.FindStringExact(0,"tahoma");
-						if (sel==CB_ERR)
-						{
-							sel = m_effect_fontface.FindStringExact(0,"verdana");
-							if (sel==CB_ERR)
-							{
-								sel = m_effect_fontface.FindStringExact(0,"arial black");
-								if (sel==CB_ERR)
-								{
-									sel = m_effect_fontface.FindStringExact(0,"arial");
-									if (sel==CB_ERR)
-									{
-										sel=0;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	m_effect_fontface.SetCurSel(sel);
-	m_effect_fontface.GetLBText(m_effect_fontface.GetCurSel(),_effect_fontface); // if "couldn't find it"
-	
 	for(i=4;i<=64;i++)
 	{
 		char s[4];
@@ -406,9 +178,8 @@ BOOL CSkinDlg::OnInitDialog()
 		m_generator_font_point.AddString(s);
 		m_effect_font_point.AddString(s);
 	}
-	m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
-	m_generator_font_point.SetCurSel((_generator_font_point-50)/5);
-	m_effect_font_point.SetCurSel((_effect_font_point-50)/5);
+
+	SetFontNames();
 
 	m_pattern_header_skin.AddString(DEFAULT_PATTERN_HEADER_SKIN);
 	m_machine_skin.AddString(DEFAULT_MACHINE_SKIN);
@@ -416,7 +187,7 @@ BOOL CSkinDlg::OnInitDialog()
 	// ok now browse our folder for skins
 	FindSkinsInDir(Global::pConfig->GetInitialSkinDir());
 
-	sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
+	int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
 	if (sel==CB_ERR)
 	{
 		sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
@@ -941,6 +712,10 @@ void CSkinDlg::OnImportReg()
 			MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 			return;
 		}
+		_pattern_font_flags = 0;
+		_generator_font_flags = 0;
+		_effect_font_flags = 0;
+
 		char buf[512];
 		while (fgets(buf, 512, hfile))
 		{
@@ -964,6 +739,14 @@ void CSkinDlg::OnImportReg()
 				if (q)
 				{
 					_pattern_font_point=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pattern_font_flags\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_pattern_font_flags=_httoi(q+1);
 				}
 			}
 			else if (strstr(buf,"\"pattern_font_x\"=dword:"))
@@ -1018,6 +801,14 @@ void CSkinDlg::OnImportReg()
 					_generator_font_point=_httoi(q+1);
 				}
 			}
+			else if (strstr(buf,"\"generator_font_flags\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_generator_font_flags=_httoi(q+1);
+				}
+			}
 			else if (strstr(buf,"\"effect_fontface\"=\""))
 			{
 				char *q = strchr(buf,61); // =
@@ -1038,6 +829,14 @@ void CSkinDlg::OnImportReg()
 				if (q)
 				{
 					_effect_font_point=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"effect_font_flags\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_effect_font_flags=_httoi(q+1);
 				}
 			}
 			else if (strstr(buf,"\"machine_skin\"=\""))
@@ -1344,7 +1143,13 @@ void CSkinDlg::OnImportReg()
 					_machineViewEffectFontColor=_httoi(q+1);
 				}
 			}
+			//
+			//
+			//
 			// legacy...
+			//
+			//
+			//
 			else if (strstr(buf,"\"mv_fontcolour\"=dword:"))
 			{
 				char *q = strchr(buf,58); // :
@@ -1388,137 +1193,17 @@ void CSkinDlg::OnImportReg()
 		m_wireaa.SetCurSel(_wireaa);
 		RepaintAllCanvas();
 
-		int sel;
-		sel = m_pattern_fontface.FindStringExact(0,_pattern_fontface);
-		if (sel==CB_ERR)
-		{
-			MessageBox(_pattern_fontface,"Could not find this font!");
-			sel = m_pattern_fontface.FindStringExact(0,"Tahoma");
-			if (sel==CB_ERR)
-			{
-				sel = m_pattern_fontface.FindStringExact(0,"Verdana");
-				if (sel==CB_ERR)
-				{
-					sel = m_pattern_fontface.FindStringExact(0,"Arial Black");
-					if (sel==CB_ERR)
-					{
-						sel = m_pattern_fontface.FindStringExact(0,"Arial");
-						if (sel==CB_ERR)
-						{
-							sel = m_pattern_fontface.FindStringExact(0,"tahoma");
-							if (sel==CB_ERR)
-							{
-								sel = m_pattern_fontface.FindStringExact(0,"verdana");
-								if (sel==CB_ERR)
-								{
-									sel = m_pattern_fontface.FindStringExact(0,"arial black");
-									if (sel==CB_ERR)
-									{
-										sel = m_pattern_fontface.FindStringExact(0,"arial");
-										if (sel==CB_ERR)
-										{
-											sel=0;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		m_pattern_fontface.SetCurSel(sel);
+		SetFontNames();
+
 		m_pattern_font_x.SetCurSel(_pattern_font_x-4);
 		m_pattern_font_y.SetCurSel(_pattern_font_y-4);
-		m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
-		sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
+
+		int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
 		if (sel==CB_ERR)
 		{
 			sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
 		}
 		m_pattern_header_skin.SetCurSel(sel);
-
-		sel = m_generator_fontface.FindStringExact(0,_generator_fontface);
-		if (sel==CB_ERR)
-		{
-			MessageBox(_generator_fontface,"Could not find this font!");
-			sel = m_generator_fontface.FindStringExact(0,"Tahoma");
-			if (sel==CB_ERR)
-			{
-				sel = m_generator_fontface.FindStringExact(0,"Verdana");
-				if (sel==CB_ERR)
-				{
-					sel = m_generator_fontface.FindStringExact(0,"Arial Black");
-					if (sel==CB_ERR)
-					{
-						sel = m_generator_fontface.FindStringExact(0,"Arial");
-						if (sel==CB_ERR)
-						{
-							sel = m_generator_fontface.FindStringExact(0,"tahoma");
-							if (sel==CB_ERR)
-							{
-								sel = m_generator_fontface.FindStringExact(0,"verdana");
-								if (sel==CB_ERR)
-								{
-									sel = m_generator_fontface.FindStringExact(0,"arial black");
-									if (sel==CB_ERR)
-									{
-										sel = m_generator_fontface.FindStringExact(0,"arial");
-										if (sel==CB_ERR)
-										{
-											sel=0;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		m_generator_fontface.SetCurSel(sel);
-		m_generator_font_point.SetCurSel((_generator_font_point-50)/5);
-
-		sel = m_effect_fontface.FindStringExact(0,_effect_fontface);
-		if (sel==CB_ERR)
-		{
-			MessageBox(_effect_fontface,"Could not find this font!");
-			sel = m_effect_fontface.FindStringExact(0,"Tahoma");
-			if (sel==CB_ERR)
-			{
-				sel = m_effect_fontface.FindStringExact(0,"Verdana");
-				if (sel==CB_ERR)
-				{
-					sel = m_effect_fontface.FindStringExact(0,"Arial Black");
-					if (sel==CB_ERR)
-					{
-						sel = m_effect_fontface.FindStringExact(0,"Arial");
-						if (sel==CB_ERR)
-						{
-							sel = m_effect_fontface.FindStringExact(0,"tahoma");
-							if (sel==CB_ERR)
-							{
-								sel = m_effect_fontface.FindStringExact(0,"verdana");
-								if (sel==CB_ERR)
-								{
-									sel = m_effect_fontface.FindStringExact(0,"arial black");
-									if (sel==CB_ERR)
-									{
-										sel = m_effect_fontface.FindStringExact(0,"arial");
-										if (sel==CB_ERR)
-										{
-											sel=0;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		m_effect_fontface.SetCurSel(sel);
-		m_effect_font_point.SetCurSel((_effect_font_point-50)/5);
 
 		sel = m_machine_skin.FindStringExact(0,_machine_skin);
 		if (sel==CB_ERR)
@@ -1568,6 +1253,7 @@ void CSkinDlg::OnExportReg()
 
 		fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface);
 		fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n",_pattern_font_point);
+		fprintf(hfile,"\"pattern_font_flags\"=dword:%.8X\n",_pattern_font_flags);
 		fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n",_pattern_font_x);
 		fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n",_pattern_font_y);
 		fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n",_pattern_header_skin);
@@ -1602,8 +1288,10 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"\"vu3\"=dword:%.8X\n",_vucColor);
 		fprintf(hfile,"\"generator_fontface\"=\"%s\"\n",_generator_fontface);
 		fprintf(hfile,"\"generator_font_point\"=dword:%.8X\n",_generator_font_point);
+		fprintf(hfile,"\"generator_font_flags\"=dword:%.8X\n",_generator_font_flags);
 		fprintf(hfile,"\"effect_fontface\"=\"%s\"\n",_effect_fontface);
 		fprintf(hfile,"\"effect_font_point\"=dword:%.8X\n",_effect_font_point);
+		fprintf(hfile,"\"effect_font_flags\"=dword:%.8X\n",_effect_font_flags);
 		fprintf(hfile,"\"machine_skin\"=\"%s\"\n",_machine_skin);
 		fprintf(hfile,"\"mv_colour\"=dword:%.8X\n",_machineViewColor);
 		fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n",_machineViewWireColor);
@@ -1637,9 +1325,82 @@ void CSkinDlg::OnSelchangePatternFontY()
 	
 }
 
-void CSkinDlg::OnSelchangePatternFontFace()
+void CSkinDlg::OnPatternFontFace()
 {
-	m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface);
+	LOGFONT lf;
+	memset(&lf, 0, sizeof(LOGFONT));
+
+	CClientDC dc(this);
+	lf.lfHeight = -MulDiv(_pattern_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
+	strcpy(lf.lfFaceName, _pattern_fontface);
+	if (_pattern_font_flags&1)
+	{
+		lf.lfWeight = FW_BOLD;
+	}
+	lf.lfItalic = (_pattern_font_flags&2)?true:false;
+	
+	CFontDialog dlg(&lf,CF_SCREENFONTS);
+	if (dlg.DoModal() == IDOK)
+	{
+		strcpy(_pattern_fontface,dlg.GetFaceName());
+		_pattern_font_flags = 0;
+		if (dlg.IsBold())
+		{
+			_pattern_font_flags |= 1;
+		}
+		if (dlg.IsItalic())
+		{
+			_pattern_font_flags |= 2;
+		}
+		_pattern_font_point = dlg.GetSize();
+		if (_pattern_font_point > 320)
+		{
+			_pattern_font_point = 320;
+		}
+		// get size, colour too
+		SetFontNames();
+	}
+}
+
+void CSkinDlg::SetFontNames()
+{
+	char buf[256];
+	strcpy(buf,_pattern_fontface);
+	if (_pattern_font_flags & 1)
+	{
+		strcat(buf," Bold");
+	}
+	if (_pattern_font_flags & 2)
+	{
+		strcat(buf," Italic");
+	}
+	m_pattern_fontface.SetWindowText(buf);
+	
+	strcpy(buf,_generator_fontface);
+	if (_generator_font_flags & 1)
+	{
+		strcat(buf," Bold");
+	}
+	if (_generator_font_flags & 2)
+	{
+		strcat(buf," Italic");
+	}
+	m_generator_fontface.SetWindowText(buf);
+
+	strcpy(buf,_effect_fontface);
+	if (_effect_font_flags & 1)
+	{
+		strcat(buf," Bold");
+	}
+	if (_effect_font_flags & 2)
+	{
+		strcat(buf," Italic");
+	}
+	m_effect_fontface.SetWindowText(buf);
+
+	m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
+	m_generator_font_point.SetCurSel((_generator_font_point-50)/5);
+	m_effect_font_point.SetCurSel((_effect_font_point-50)/5);
 }
 
 void CSkinDlg::OnSelchangePatternHeaderSkin()
@@ -1664,9 +1425,41 @@ void CSkinDlg::OnSelchangeGeneratorFontPoint()
 	_generator_font_point=(m_generator_font_point.GetCurSel()*5)+50;
 }
 
-void CSkinDlg::OnSelchangeGeneratorFontFace()
+void CSkinDlg::OnGeneratorFontFace()
 {
-	m_generator_fontface.GetLBText(m_generator_fontface.GetCurSel(),_generator_fontface);
+	LOGFONT lf;
+	memset(&lf, 0, sizeof(LOGFONT));
+
+	CClientDC dc(this);
+	lf.lfHeight = -MulDiv(_generator_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
+	strcpy(lf.lfFaceName, _generator_fontface);
+	if (_generator_font_flags&1)
+	{
+		lf.lfWeight = FW_BOLD;
+	}
+	lf.lfItalic = (_generator_font_flags&2)?true:false;
+	
+	CFontDialog dlg(&lf,CF_SCREENFONTS);
+	if (dlg.DoModal() == IDOK)
+	{
+		strcpy(_generator_fontface,dlg.GetFaceName());
+		_generator_font_flags = 0;
+		if (dlg.IsBold())
+		{
+			_generator_font_flags |= 1;
+		}
+		if (dlg.IsItalic())
+		{
+			_generator_font_flags |= 2;
+		}
+		_generator_font_point = dlg.GetSize();
+		if (_generator_font_point > 320)
+		{
+			_generator_font_point = 320;
+		}
+		// get size, colour too
+		SetFontNames();
+	}
 }
 
 
@@ -1676,9 +1469,41 @@ void CSkinDlg::OnSelchangeEffectFontPoint()
 	_effect_font_point=(m_effect_font_point.GetCurSel()*5)+50;
 }
 
-void CSkinDlg::OnSelchangeEffectFontFace()
+void CSkinDlg::OnEffectFontFace()
 {
-	m_effect_fontface.GetLBText(m_effect_fontface.GetCurSel(),_effect_fontface);
+	LOGFONT lf;
+	memset(&lf, 0, sizeof(LOGFONT));
+
+	CClientDC dc(this);
+	lf.lfHeight = -MulDiv(_effect_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
+	strcpy(lf.lfFaceName, _effect_fontface);
+	if (_effect_font_flags&1)
+	{
+		lf.lfWeight = FW_BOLD;
+	}
+	lf.lfItalic = (_effect_font_flags&2)?true:false;
+	
+	CFontDialog dlg(&lf,CF_SCREENFONTS);
+	if (dlg.DoModal() == IDOK)
+	{
+		strcpy(_effect_fontface,dlg.GetFaceName());
+		_effect_font_flags = 0;
+		if (dlg.IsBold())
+		{
+			_effect_font_flags |= 1;
+		}
+		if (dlg.IsItalic())
+		{
+			_effect_font_flags |= 2;
+		}
+		_effect_font_point = dlg.GetSize();
+		if (_effect_font_point > 320)
+		{
+			_effect_font_point = 320;
+		}
+		// get size, colour too
+		SetFontNames();
+	}
 }
 
 

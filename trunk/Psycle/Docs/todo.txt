@@ -22,6 +22,12 @@ X low priority
 
 + <lastfutur> what i am missing: block cut copy and paste commands in the edit menu
 
++ <sampler> Well, i've been playing and changing default hotkeys and now i think it would be good 
+	enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various 
+	types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
+ 
++ <bd|cup> poop: could you add an option to make psycle load the last opened .psy, when you run it?
+
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still
@@ -119,6 +125,11 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * GUI (machines):
 -----------------
+** <_sue_> hey.....remember seeing someone at the boards sayn that psycles param bar went crazy with
+	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob 
+	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
+	 talking about......the first time it happened it scrolled for ages..i thought it had went 
+	 crazy too.....
 **	preview check box in preset dialog stopped working? 
 	[ it works, but you can't test notes realtime because the dialog is modal ]
 **	alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window,
