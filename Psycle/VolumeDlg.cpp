@@ -144,8 +144,8 @@ void CVolumeDlg::OnChangeEditDb()
 		char buf[32];
 		m_db.GetWindowText(buf,31);
 
-		float val = atof(buf);
-		volume = powf(10.0,val/20.0);
+		float val = float(atof(buf));
+		volume = powf(10.0,val/20.0f);
 		DrawPer();	
 	}
 	
@@ -164,7 +164,7 @@ void CVolumeDlg::OnChangeEditPer()
 		char buf[32];
 		m_per.GetWindowText(buf,31);
 
-		float val = atof(buf);
+		float val = float(atof(buf));
 
 		volume = val/100.0f;
 		DrawDb();

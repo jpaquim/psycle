@@ -21,7 +21,7 @@ public:
 	virtual ~CWaveEdFrame();
 	
 //	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
-	GenerateView();
+	void GenerateView();
 	void Notify(void);
 	Song *_pSong;
 	CMainFrame *_pFrame;
