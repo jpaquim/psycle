@@ -30,7 +30,7 @@
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
 
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 char* Gainer::_psName = "Gainer";
 CIntMachParam Gainer::pars[] = {{"Reserved",0,0},{"Gain",0,1024}};
 char* Sine::_psName = "PsychOsc AM";
@@ -427,7 +427,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	case MACH_SAMPLER:
 		pMachine = new Sampler(index);
 		break;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 
 	case MACH_SINE:
 		pMachine = new Sine(index);
@@ -847,7 +847,7 @@ void Master::Work(
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 Gainer::Gainer(int index)
 {
 	_macIndex = index;

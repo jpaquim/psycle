@@ -280,7 +280,7 @@ protected:
 
 };
 
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 
 class Gainer : public Machine
 {
