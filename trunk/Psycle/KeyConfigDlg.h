@@ -31,6 +31,7 @@ public:
 	CButton	m_autosave;
 	CButton	m_save_reminders;
 	CButton	m_tweak_smooth;
+	CButton	m_record_unarmed;
 	CButton	m_show_info;
 	CButton	m_cmdShiftArrows;
 	CButton	m_cmdFT2Del;

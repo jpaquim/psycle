@@ -147,22 +147,42 @@ void CChildView::MidiPatternTweak(int command, int value)
 	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
 		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
 				SelectNextTrack();
 			}
-		}
-		// write effect
-		int ps = _ps();
-		int line = Global::pPlayer->_lineCounter;
-		unsigned char * offset = _offset(ps);
-		unsigned char * toffset = _toffset(ps);
-		
-		// realtime note entering
-		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
-		{
+			else if (!Global::pConfig->_RecordUnarmed)
+			{		
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._cmd = (value>>8)&255;
+				entry._parameter = value&255;
+				entry._inst = command;
+				entry._note = cdefTweakM;
+
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if ( _pSong->seqBus < MAX_BUSES )
+					mgn = _pSong->busMachine[_pSong->seqBus];
+				else
+					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+
+				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+					pMachine = _pSong->_pMachines[mgn];
+				else return;
+
+				// play
+				pMachine->Tick(editcur.track,&entry);
+				return;
+			}
 			toffset = offset+(line*MULTIPLY);
 		}
 		else
@@ -211,7 +231,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 		else return;
 
 		// play
-		pMachine->Tick(0,&entry);
+		pMachine->Tick(editcur.track,&entry);
 	}
 }
 
@@ -222,22 +242,44 @@ void CChildView::MidiPatternTweakSlide(int command, int value)
 	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
 		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
 				SelectNextTrack();
 			}
-		}
-		// write effect
-		int ps = _ps();
-		int line = Global::pPlayer->_lineCounter;
-		unsigned char * offset = _offset(ps);
-		unsigned char * toffset = _toffset(ps);
-		
-		// realtime note entering
-		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
-		{
+			else if (!Global::pConfig->_RecordUnarmed)
+			{
+				// build entry
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._cmd = (value>>8)&255;
+				entry._parameter = value&255;
+				entry._inst = command;
+				entry._note = cdefTweakS;
+
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if ( _pSong->seqBus < MAX_BUSES )
+					mgn = _pSong->busMachine[_pSong->seqBus];
+				else
+					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+
+				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+					pMachine = _pSong->_pMachines[mgn];
+				else return;
+
+				// play
+				pMachine->Tick(editcur.track,&entry);
+
+				return;
+			}
 			toffset = offset+(line*MULTIPLY);
 		}
 		else
@@ -286,7 +328,7 @@ void CChildView::MidiPatternTweakSlide(int command, int value)
 		else return;
 
 		// play
-		pMachine->Tick(0,&entry);
+		pMachine->Tick(editcur.track,&entry);
 	}
 }
 
@@ -298,22 +340,44 @@ void CChildView::MidiPatternCommand(int command, int value)
 	if (value > 0xff) value = 0xff; // no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
 		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
 				SelectNextTrack();
 			}
-		}
-		// write effect
-		int ps = _ps();
-		int line = Global::pPlayer->_lineCounter;
-		unsigned char * offset = _offset(ps);
-		unsigned char * toffset = _toffset(ps);
-		
-		// realtime note entering
-		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
-		{
+			else if (!Global::pConfig->_RecordUnarmed)
+			{		
+				// build entry
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._inst = _pSong->auxcolSelected;
+				entry._cmd = command;
+				entry._parameter = value;
+				entry._note = 255;
+
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if (_pSong->seqBus < MAX_BUSES)
+					mgn = _pSong->busMachine[_pSong->seqBus];
+				else
+					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+
+				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+					pMachine = _pSong->_pMachines[mgn];
+				else return;
+
+				// play
+				pMachine->Tick(editcur.track,&entry);
+
+				return;
+			}
 			toffset = offset+(line*MULTIPLY);
 		}
 		else
@@ -358,7 +422,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 		else return;
 
 		// play
-		pMachine->Tick(0,&entry);
+		pMachine->Tick(editcur.track,&entry);
 	}
 }
 
@@ -369,22 +433,44 @@ void CChildView::MidiPatternInstrument(int value)
 	if (value > 0xff) value = 0xff; // no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
 		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
 				SelectNextTrack();
 			}
-		}
-		// write effect
-		int ps = _ps();
-		int line = Global::pPlayer->_lineCounter;
-		unsigned char * offset = _offset(ps);
-		unsigned char * toffset = _toffset(ps);
-		
-		// realtime note entering
-		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
-		{
+			else if (!Global::pConfig->_RecordUnarmed)
+			{		
+				// build entry
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._inst = value;
+				entry._cmd = 255;
+				entry._parameter = 255;
+				entry._note = 255;
+
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if (_pSong->seqBus < MAX_BUSES)
+					mgn = _pSong->busMachine[_pSong->seqBus];
+				else
+					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+
+				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+					pMachine = _pSong->_pMachines[mgn];
+				else return;
+
+				// play
+				pMachine->Tick(editcur.track,&entry);
+
+				return;
+			}
 			toffset = offset+(line*MULTIPLY);
 		}
 		else
@@ -427,7 +513,7 @@ void CChildView::MidiPatternInstrument(int value)
 		else return;
 
 		// play
-		pMachine->Tick(0,&entry);
+		pMachine->Tick(editcur.track,&entry);
 	}
 }
 
@@ -438,22 +524,21 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
 		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
 				SelectNextTrack();
 			}
-		}
-		// write effect
-		int ps = _ps();
-		int line = Global::pPlayer->_lineCounter;
-		unsigned char * offset = _offset(ps);
-		unsigned char * toffset = _toffset(ps);
-		
-		// realtime note entering
-		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
-		{
+			else if (!Global::pConfig->_RecordUnarmed)
+			{	
+				return;
+			}
 			toffset = offset+(line*MULTIPLY);
 		}
 		else
@@ -488,22 +573,21 @@ void CChildView::MousePatternTweakSlide(int machine, int command, int value)
 	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
 		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 		{
 			if(_pSong->_trackArmedCount)
 			{
 				SelectNextTrack();
 			}
-		}
-		// write effect
-		int ps = _ps();
-		int line = Global::pPlayer->_lineCounter;
-		unsigned char * offset = _offset(ps);
-		unsigned char * toffset = _toffset(ps);
-		
-		// realtime note entering
-		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
-		{
+			else if (!Global::pConfig->_RecordUnarmed)
+			{	
+				return;
+			}
 			toffset = offset+(line*MULTIPLY);
 		}
 		else
@@ -581,6 +665,72 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			{
 				SelectNextTrack();
 			}
+		}
+		else if (!Global::pConfig->_RecordUnarmed)
+		{
+			// build entry
+			PatternEntry entry;
+			entry._note = note;
+			entry._mach = _pSong->seqBus;
+
+			if ( note < 120)
+			{
+				if (Global::pConfig->_RecordTweaks)
+				{
+					if (Global::pConfig->_midiRecordVel)
+					{
+						// command
+						entry._cmd = Global::pConfig->_midiCommandVel;
+						int par = Global::pConfig->_midiFromVel + 
+											(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
+						if (par > 255) 
+						{
+							par = 255;
+						}
+						else if (par < 0) 
+						{
+							par = 0;
+						}
+						entry._parameter = par;
+					}
+				}
+			}
+
+			int mgn;
+			if (_pSong->seqBus & MAX_BUSES) // If it is an effect
+			{
+				mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+			}
+			else
+			{
+				mgn = _pSong->busMachine[_pSong->seqBus];
+			}
+
+			if (note>120)
+			{
+				entry._inst = _pSong->auxcolSelected;
+			}
+
+			if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			{
+				Machine *tmac = _pSong->_pMachines[mgn];
+
+				if (tmac->_type == MACH_SAMPLER)
+				{
+					entry._inst = _pSong->auxcolSelected;
+				}
+				else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+				{
+					entry._inst = _pSong->auxcolSelected;
+				}
+				
+				if ( note < 120)
+				{
+					tmac->Tick(editcur.track, &entry);
+				}
+			}
+			Global::pInputHandler->notetrack[editcur.track]=note;
+			return;
 		}
 		line = Global::pPlayer->_lineCounter;
 		offset = _offset(ps);
@@ -677,7 +827,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		{
 			entry->_inst = _pSong->auxcolSelected;
 		}
-		if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+		else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
 		{
 			entry->_inst = _pSong->auxcolSelected;
 		}
