@@ -1412,10 +1412,13 @@ namespace psycle
 							}
 							try
 							{
-								if(!requiresRepl) 
+								if(requiresProcess || !requiresRepl) {
+									assert(!requiresRepl);
 									proxy().process(tempinputs, tempoutputs, ns);
-								else
+								}
+								else {
 									proxy().processReplacing(tempinputs, tempoutputs, ns);
+								}
 							}
 							catch(const std::exception &)
 							{
