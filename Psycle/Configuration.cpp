@@ -27,7 +27,7 @@ Configuration::Configuration()
 	_wrapAround = true;
 	_centerCursor = false;
 	_cursorAlwaysDown = false;
-	_midiRecordNoteoff = false;
+	_RecordNoteoff = false;
 	_midiMachineViewSeqMode = false;
 	autoStopMachines = false;
 	useDoubleBuffer = true;
@@ -64,6 +64,25 @@ Configuration::Configuration()
 	_psPluginDir = NULL;
 	_psInitialVstDir = NULL;
 	_psVstDir = NULL;
+
+	_midiRecordVelocity = FALSE;
+	_midiRecordPitchBend = FALSE;
+	_midiRecordModWheel = FALSE;
+
+	_midiVelocityCommand = 0x0c;
+	_midiVelocityFrom = 0x01;
+	_midiVelocityTo = 0xff;
+
+	_midiPitchBendType = 0;
+	_midiPitchBendCommand = 0;
+	_midiPitchBendFrom = 1;
+	_midiPitchBendTo = 0xff;
+
+	_midiModWheelType = 0;
+	_midiModWheelCommand = 0;
+	_midiModWheelFrom = 1;
+	_midiModWheelTo = 0xff;
+
 
 #endif // _WINAMP_PLUGIN
 }
@@ -177,10 +196,42 @@ Configuration::Read(
 	reg.QueryValue("useDoubleBuffer", &type, (BYTE*)&useDoubleBuffer, &numData);
 	numData = sizeof(_showAboutAtStart);
 	reg.QueryValue("showAboutAtStart", &type, (BYTE*)&_showAboutAtStart, &numData);
-	numData = sizeof(_midiRecordNoteoff);
-	reg.QueryValue("MidiRecordNoteoff", &type, (BYTE*)&_midiRecordNoteoff, &numData);
+	numData = sizeof(_RecordNoteoff);
+	reg.QueryValue("RecordNoteoff", &type, (BYTE*)&_RecordNoteoff, &numData);
 	numData = sizeof(_midiMachineViewSeqMode);
 	reg.QueryValue("MidiMachineViewSeqMode", &type, (BYTE*)&_midiMachineViewSeqMode, &numData);
+
+	numData = sizeof(_midiRecordVelocity);
+	reg.QueryValue("MidiRecordVelocity", &type, (BYTE*)&_midiRecordVelocity, &numData);
+	numData = sizeof(_midiRecordPitchBend);
+	reg.QueryValue("MidiRecordPitchBend", &type, (BYTE*)&_midiRecordPitchBend, &numData);
+	numData = sizeof(_midiRecordModWheel);
+	reg.QueryValue("MidiRecordModWheel", &type, (BYTE*)&_midiRecordModWheel, &numData);
+
+	numData = sizeof(_midiVelocityCommand);
+	reg.QueryValue("MidiVelocityCommand", &type, (BYTE*)&_midiVelocityCommand, &numData);
+	numData = sizeof(_midiVelocityFrom);
+	reg.QueryValue("MidiVelocityFrom", &type, (BYTE*)&_midiVelocityFrom, &numData);
+	numData = sizeof(_midiVelocityTo);
+	reg.QueryValue("MidiVelocityTo", &type, (BYTE*)&_midiVelocityTo, &numData);
+
+	numData = sizeof(_midiPitchBendType);
+	reg.QueryValue("MidiPitchBendType", &type, (BYTE*)&_midiPitchBendType, &numData);
+	numData = sizeof(_midiPitchBendCommand);
+	reg.QueryValue("MidiPitchBendCommand", &type, (BYTE*)&_midiPitchBendCommand, &numData);
+	numData = sizeof(_midiPitchBendFrom);
+	reg.QueryValue("MidiPitchBendFrom", &type, (BYTE*)&_midiPitchBendFrom, &numData);
+	numData = sizeof(_midiPitchBendTo);
+	reg.QueryValue("MidiPitchBendTo", &type, (BYTE*)&_midiPitchBendTo, &numData);
+
+	numData = sizeof(_midiModWheelType);
+	reg.QueryValue("MidiModWheelType", &type, (BYTE*)&_midiModWheelType, &numData);
+	numData = sizeof(_midiModWheelCommand);
+	reg.QueryValue("MidiModWheelCommand", &type, (BYTE*)&_midiModWheelCommand, &numData);
+	numData = sizeof(_midiModWheelFrom);
+	reg.QueryValue("MidiModWheelFrom", &type, (BYTE*)&_midiModWheelFrom, &numData);
+	numData = sizeof(_midiModWheelTo);
+	reg.QueryValue("MidiModWheelTo", &type, (BYTE*)&_midiModWheelTo, &numData);
 
 	numData = sizeof(mv_colour);
 	reg.QueryValue("mv_colour", &type, (BYTE*)&mv_colour, &numData);
@@ -357,12 +408,30 @@ Configuration::Write(
 	reg.SetValue("CursorAlwaysDown", REG_BINARY, (BYTE*)&_cursorAlwaysDown, sizeof(_cursorAlwaysDown));
 	reg.SetValue("useDoubleBuffer", REG_BINARY, (BYTE*)&useDoubleBuffer, sizeof(useDoubleBuffer));
 	reg.SetValue("showAboutAtStart", REG_BINARY, (BYTE*)&_showAboutAtStart, sizeof(_showAboutAtStart));
-	reg.SetValue("MidiRecordNoteoff", REG_BINARY, (BYTE*)&_midiRecordNoteoff, sizeof(_midiRecordNoteoff));
+	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
 	reg.SetValue("MidiMachineViewSeqMode", REG_BINARY, (BYTE*)&_midiMachineViewSeqMode, sizeof(_midiMachineViewSeqMode));
 	reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&_outputDriverIndex, sizeof(_outputDriverIndex));
 	reg.SetValue("MidiInputDriver", REG_DWORD, (BYTE*)&_midiDriverIndex, sizeof(_midiDriverIndex));	// MIDI IMPLEMENTATION
 	reg.SetValue("MidiSyncDriver", REG_DWORD, (BYTE*)&_syncDriverIndex, sizeof(_syncDriverIndex));	// MIDI IMPLEMENTATION
 	reg.SetValue("MidiInputHeadroom", REG_DWORD, (BYTE*)&_midiHeadroom, sizeof(_midiHeadroom));	
+
+	reg.SetValue("MidiRecordVelocity", REG_BINARY, (BYTE*)&_midiRecordVelocity, sizeof(_midiRecordVelocity));
+	reg.SetValue("MidiRecordPitchBend", REG_BINARY, (BYTE*)&_midiRecordPitchBend, sizeof(_midiRecordPitchBend));
+	reg.SetValue("MidiRecordModWheel", REG_BINARY, (BYTE*)&_midiRecordModWheel, sizeof(_midiRecordModWheel));
+
+	reg.SetValue("MidiVelocityCommand", REG_DWORD, (BYTE*)&_midiVelocityCommand, sizeof(_midiVelocityCommand));	
+	reg.SetValue("MidiVelocityFrom", REG_DWORD, (BYTE*)&_midiVelocityFrom, sizeof(_midiVelocityFrom));	
+	reg.SetValue("MidiVelocityTo", REG_DWORD, (BYTE*)&_midiVelocityTo, sizeof(_midiVelocityTo));	
+	
+	reg.SetValue("MidiPitchBendType", REG_DWORD, (BYTE*)&_midiPitchBendType, sizeof(_midiPitchBendType));	
+	reg.SetValue("MidiPitchBendCommand", REG_DWORD, (BYTE*)&_midiPitchBendCommand, sizeof(_midiPitchBendCommand));	
+	reg.SetValue("MidiPitchBendFrom", REG_DWORD, (BYTE*)&_midiPitchBendFrom, sizeof(_midiPitchBendFrom));	
+	reg.SetValue("MidiPitchBendTo", REG_DWORD, (BYTE*)&_midiPitchBendTo, sizeof(_midiPitchBendTo));	
+
+	reg.SetValue("MidiModWheelType", REG_DWORD, (BYTE*)&_midiModWheelType, sizeof(_midiModWheelType));	
+	reg.SetValue("MidiModWheelCommand", REG_DWORD, (BYTE*)&_midiModWheelCommand, sizeof(_midiModWheelCommand));	
+	reg.SetValue("MidiModWheelFrom", REG_DWORD, (BYTE*)&_midiModWheelFrom, sizeof(_midiModWheelFrom));	
+	reg.SetValue("MidiModWheelTo", REG_DWORD, (BYTE*)&_midiModWheelTo, sizeof(_midiModWheelTo));	
 
 	reg.SetValue("mv_colour", REG_DWORD, (BYTE*)&mv_colour, sizeof(mv_colour));	
 	reg.SetValue("pvc_background", REG_DWORD, (BYTE*)&pvc_background, sizeof(pvc_background));	

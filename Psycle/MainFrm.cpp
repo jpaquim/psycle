@@ -94,6 +94,7 @@ ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
 ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
 ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
 ON_BN_CLICKED(IDC_INCLONG, OnInclong)
+ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
 //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -296,6 +297,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_CURSORDOWN);
 	cb->SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
+
+	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
+	cb->SetCheck(Global::pConfig->_RecordNoteoff?1:0);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCSHORT);
 	hi = (HBITMAP)bplus; cb->SetBitmap(hi);
@@ -1626,6 +1630,14 @@ void CMainFrame::OnCursordown()
 	else Global::pConfig->_cursorAlwaysDown=false;
 	m_wndView.SetFocus();
 }
+
+void CMainFrame::OnRecordNoteoff() 
+{
+	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF))->GetCheck() ) Global::pConfig->_RecordNoteoff=true;
+	else Global::pConfig->_RecordNoteoff=false;
+	m_wndView.SetFocus();
+}
+
 
 void CMainFrame::OnFollowSong() 
 {

@@ -42,8 +42,22 @@ public:
 	CComboBox	m_driverComboBox;
 	CEdit		m_midiHeadroomEdit;
 	CSpinButtonCtrl m_midiHeadroomSpin;
-	CButton m_midiRecordNoteoff;
-	CButton m_midiMachineViewSeqMode;
+	CButton		m_midiMachineViewSeqMode;
+	CButton		m_midiRecordVelocityButton;
+	CButton		m_midiRecordPitchButton;
+	CButton		m_midiRecordModwheelButton;
+	CComboBox	m_midiVelocityTypeComboBox;
+	CComboBox	m_midiPitchTypeComboBox;
+	CComboBox	m_midiModWheelTypeComboBox;
+	CEdit		m_midiVelocityCommandEdit;
+	CEdit		m_midiVelocityFromEdit;
+	CEdit		m_midiVelocityToEdit;
+	CEdit		m_midiPitchCommandEdit;
+	CEdit		m_midiPitchFromEdit;
+	CEdit		m_midiPitchToEdit;
+	CEdit		m_midiModWheelCommandEdit;
+	CEdit		m_midiModWheelFromEdit;
+	CEdit		m_midiModWheelToEdit;
 	//}}AFX_DATA
 
 

@@ -427,11 +427,14 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 			devc->BitBlt(xOffset+1, 19, 110, 16, &memDC, 148, 65, SRCCOPY);
-			devc->BitBlt(xOffset+35, 21, 7, 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-			devc->BitBlt(xOffset+42, 21, 7, 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+			devc->BitBlt(xOffset+35-11, 21, 7, 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+			devc->BitBlt(xOffset+42-11, 21, 7, 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 			if (Global::_pSong->_trackMuted[i])
-				devc->BitBlt(xOffset+72, 24, 7, 7, &memDC, 258, 49, SRCCOPY);
+				devc->BitBlt(xOffset+71+5, 24, 7, 7, &memDC, 258, 49, SRCCOPY);
+
+			if (Global::_pSong->_trackArmed[i])
+				devc->BitBlt(xOffset+71-18, 24, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 			if (Global::_pSong->_trackSoloed == i )
 				devc->BitBlt(xOffset+97, 24, 7, 7, &memDC, 267, 49, SRCCOPY);
@@ -498,15 +501,17 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 				devc->BitBlt(xOffset+1, 19, 110, 16, &memDC, 148, 65, SRCCOPY);
-				devc->BitBlt(xOffset+35, 21, 7, 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-				devc->BitBlt(xOffset+42, 21, 7, 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+				devc->BitBlt(xOffset+35-11, 21, 7, 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+				devc->BitBlt(xOffset+42-11, 21, 7, 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 				if (Global::_pSong->_trackMuted[i])
-					devc->BitBlt(xOffset+72, 24, 7, 7, &memDC, 258, 49, SRCCOPY);
+					devc->BitBlt(xOffset+71+5, 24, 7, 7, &memDC, 258, 49, SRCCOPY);
+
+				if (Global::_pSong->_trackArmed[i])
+					devc->BitBlt(xOffset+71-18, 24, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 				if (Global::_pSong->_trackSoloed == i )
 					devc->BitBlt(xOffset+97, 24, 7, 7, &memDC, 267, 49, SRCCOPY);
-
 				xOffset += ROWWIDTH;
 			}
 			BOX(devc,0,YOFFSET-1,XOFFSET+maxt*ROWWIDTH,1);

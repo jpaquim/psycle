@@ -4,8 +4,25 @@
 void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
 	CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
-	const int outnote = cmd.GetNote();
-	Global::pInputHandler->StopNote(outnote);
+	if (cmd.GetType() == CT_Note)
+	{
+		const int outnote = cmd.GetNote();
+		if(viewMode == VMPattern && bEditMode)
+		{ 
+			if(Global::pConfig->_RecordNoteoff)
+			{
+				EnterNote(outnote,0,true);	// note end
+			}
+			else
+			{
+				Global::pInputHandler->StopNote(outnote);
+			}
+		}
+		else
+		{
+			Global::pInputHandler->StopNote(outnote);
+		}
+	}
 	CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
@@ -76,9 +93,9 @@ void CChildView::MidiPatternNote(int outnote, int velocity)
 			}
 			else
 			{
-				if(Global::pConfig->_midiRecordNoteoff)
+				if(Global::pConfig->_RecordNoteoff)
 				{
-					EnterNote(120);	// note end
+					EnterNote(outnote,0,false);	// note end
 				}
 				else
 				{
@@ -96,6 +113,140 @@ void CChildView::MidiPatternNote(int outnote, int velocity)
 		}
 //	}
 }
+
+void CChildView::MidiPatternTweak(int command, int value)
+{
+	if (value < 0) value = 0;
+	else if (value > 65535) value = 65535;
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		// write effect
+		int ps = _ps();
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&_followSong)
+		{
+			offset = _offset(ps);
+			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if (entry->_note >= 120)
+		{
+			entry->_mach = _pSong->seqBus;
+			entry->_cmd = (value>>8)&255;
+			entry->_parameter = value&255;
+			entry->_inst = command;
+			entry->_note = 121;
+
+			int mgn;
+			if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
+				mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+			else
+				mgn = _pSong->busMachine[_pSong->seqBus];
+
+			drawTrackStart=editcur.track;
+			drawTrackEnd=editcur.track;
+			drawLineStart=editcur.line;
+			drawLineEnd=editcur.line;
+
+			Repaint(DMDataChange);
+		}
+	}
+	else
+	{
+		// build entry
+		PatternEntry entry;
+		entry._mach = _pSong->seqBus;
+		entry._cmd = (value>>8)&255;
+		entry._parameter = value&255;
+		entry._inst = command;
+		entry._note = 121;
+
+		// play it
+		int mgn;
+		Machine* pMachine;
+		if ( Global::_pSong->seqBus < MAX_BUSES )
+			mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
+		else
+			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+
+		if ( mgn != 255 ) pMachine = Global::_pSong->_pMachines[mgn];
+		else return;
+
+		// play
+		pMachine->Tick(0,&entry);
+	}
+}
+
+
+void CChildView::MidiPatternCommand(int command, int value)
+{
+	if (value < 0) value = 0;
+	else if (value > 255) value = 255;
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		// write effect
+		int ps = _ps();
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&_followSong)
+		{
+			offset = _offset(ps);
+			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		entry->_mach = _pSong->seqBus;
+		entry->_inst = _pSong->auxcolSelected;
+		entry->_cmd = command;
+		entry->_parameter = value;
+
+		int mgn;
+		if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
+			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+		else
+			mgn = _pSong->busMachine[_pSong->seqBus];
+
+		drawTrackStart=editcur.track;
+		drawTrackEnd=editcur.track;
+		drawLineStart=editcur.line;
+		drawLineEnd=editcur.line;
+
+		Repaint(DMDataChange);
+	}
+	else
+	{
+		// build entry
+		PatternEntry entry;
+		entry._mach = _pSong->seqBus;
+		entry._inst = _pSong->auxcolSelected;
+		entry._cmd = command;
+		entry._parameter = value;
+		entry._note = 255;
+
+		// play it
+		int mgn;
+		Machine* pMachine;
+		if ( Global::_pSong->seqBus < MAX_BUSES )
+			mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
+		else
+			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+
+		if ( mgn != 255 ) pMachine = Global::_pSong->_pMachines[mgn];
+		else return;
+
+		// play
+		pMachine->Tick(0,&entry);
+	}
+}
+
 
 void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 {
@@ -118,22 +269,76 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	// realtime note entering
 	if (Global::pPlayer->_playing&&_followSong)
 	{
-		if(_previousTicks)
-		{
-			if(++editcur.track >= _pSong->SONGTRACKS)
-				editcur.track=0;
-		}
 		_previousTicks++;
+		if(_pSong->_trackArmedCount)
+		{
+			if (velocity == 0)
+			{
+				for (int i = 0; i < _pSong->SONGTRACKS; i++)
+				{
+					if (_pSong->_trackArmed[i])
+					{
+						if (Global::pInputHandler->notetrack[i] == note)
+						{
+							editcur.track = i;
+							i = _pSong->SONGTRACKS+1;
+						}
+					}
+				}
+				if (i == _pSong->SONGTRACKS)
+				{
+					return;
+				}
+			}
+			else
+			{
+				if(++editcur.track >= _pSong->SONGTRACKS)
+					editcur.track=0;
+				while(_pSong->_trackArmed[editcur.track] == 0)
+				{
+					if(++editcur.track >= _pSong->SONGTRACKS)
+						editcur.track=0;
+				}
+			}
+		}
+		else
+		{
+			if(velocity>0)
+				Global::pInputHandler->PlayNote(note,velocity,false);
+			else
+				Global::pInputHandler->StopNote(note,false);
 
+			return;
+		}
 		offset = _offset(ps);
 		toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
 	}
 
 	// build entry
 	PatternEntry *entry = (PatternEntry*) toffset;
+	if (velocity==0)
+	{
+		if (entry->_note == note)
+		{
+			return;
+		}
+		note = 120;
+	}
 	entry->_note = note;
 	entry->_mach = _pSong->seqBus;
 	entry->_inst = _pSong->auxcolSelected;
+	if ( note < 120)
+	{
+		if (Global::pConfig->_midiRecordVelocity)
+		{
+			// command
+			entry->_cmd = Global::pConfig->_midiVelocityCommand;
+			entry->_parameter = Global::pConfig->_midiVelocityFrom + 
+								(((Global::pConfig->_midiVelocityTo - Global::pConfig->_midiVelocityFrom) * velocity)/127);
+			if (entry->_parameter > 255) entry->_parameter = 255;
+			else if (entry->_parameter < 0) entry->_parameter = 0;
+		}					
+	}
 
 	int mgn;
 	if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
@@ -144,105 +349,35 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	if (mgn != 255)
 	{
 		Machine *tmac = Global::_pSong->_pMachines[mgn];
-		if ( tmac->_type == MACH_SAMPLER || tmac->_type == MACH_VST)
-		{
-			if( entry->_cmd==0 || entry->_cmd==0x0C )
-			{
-				if(velocity==127)
-				{
-					entry->_cmd = 0;
-					entry->_parameter = 0;
-				}
-				else
-				{
-					entry->_cmd = 0x0C;
-					entry->_parameter = velocity*2;
-				}
-			}					
-		}
-
 		if ( note < 120)
 		{
-			Global::pInputHandler->notetrack[editcur.track]=note;
 			tmac->Tick(editcur.track, entry);
 		}
 	}
+	Global::pInputHandler->notetrack[editcur.track]=note;
 
-/*	if(note>=0)
+	if (_previousTicks)
 	{
-		// octave offset
-		if(note<120)
-		{
-			if(bTranspose)
-				note+=_pSong->currentOctave*12;
-
-			if (note > 119) 
-				note = 119;
-		}
-
-		// realtime note entering
-		if (Global::pPlayer->_playing&&_followSong)
-		{
-			if(_previousTicks)
-			{
-				if(++editcur.track >= _pSong->SONGTRACKS)
-					editcur.track=0;
-			}
-			_previousTicks++;
-
-			offset = _offset(ps);
-			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
-		}
-		
-	
-		// build entry
-		PatternEntry *entry = (PatternEntry*) toffset;
-		entry->_note = note;
-		entry->_mach = _pSong->seqBus;
-		
-		// insert
-		int mgn;
-		if ( note == 122 )  mgn = _pSong->busEffect[_pSong->seqBus];
-		else mgn = _pSong->busMachine[_pSong->seqBus];
-		if (mgn != 255)
-		{
-			Machine *tmac = Global::_pSong->_pMachines[mgn];
-			
-			if ( note == 121 || note == 122 )
-			{
-				entry->_inst = _pSong->instSelected;
-			}
-			else if ( tmac->_type == MACH_SAMPLER || tmac->_type == MACH_VST)
-			{
-				entry->_inst = _pSong->instSelected;
-				if( entry->_cmd==0 || entry->_cmd==0x0C )
-				{
-					if(velocity==127)
-					{
-						entry->_cmd = 0;
-						entry->_parameter = 0;
-					}
-					else
-					{
-						entry->_cmd = 0x0C;
-						entry->_parameter = velocity*2;
-					}
-				}					
-			}
-			else 
-			{
-				entry->_inst = 255;
-			}
-
-			Global::pInputHandler->notetrack[editcur.track]=note;
-			tmac->Tick(editcur.track, entry);
-		}
+		if (editcur.track < drawTrackStart)
+			drawTrackStart=editcur.track;
+		if ( editcur.track > drawTrackEnd)
+			drawTrackEnd=editcur.track;
+		if (editcur.line < drawLineStart)
+			drawLineStart=editcur.line;
+		if (editcur.line > drawLineEnd)
+			drawLineEnd=editcur.line;
 	}
-*/
-	drawTrackStart=editcur.track;
-	drawTrackEnd=editcur.track;
-	drawLineStart=editcur.line;
-	drawLineEnd=editcur.line;
+	else
+	{
+		drawTrackStart=editcur.track;
+		drawTrackEnd=editcur.track;
+		drawLineStart=editcur.line;
+		drawLineEnd=editcur.line;
+	}
+	if (drawTrackStart < 0)
+	{
+		drawTrackStart = 0;
+	}
 
 	if ( GetKeyState(VK_SHIFT)<0) 
 		AdvanceLine(0,Global::pConfig->_wrapAround,false);

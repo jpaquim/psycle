@@ -229,7 +229,18 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		{	
 			int pointpos= (point.x-XOFFSET)%ROWWIDTH;
 
-			if ( pointpos > 55 && pointpos < 79 ) {
+			if ( pointpos > 55-17 && pointpos < 79-17 ) {
+				_pSong->_trackArmed[ttm] = !_pSong->_trackArmed[ttm];
+				_pSong->_trackArmedCount = 0;
+				for ( int i=0;i<MAX_TRACKS;i++ )
+				{
+					if (_pSong->_trackArmed[i])
+					{
+						_pSong->_trackArmedCount++;
+					}
+				}
+			}
+			else if ( pointpos > 55+6 && pointpos < 79+6 ) {
 				_pSong->_trackMuted[ttm] = !_pSong->_trackMuted[ttm];
 			}
 			else if ( pointpos > 85 && pointpos < 108 ) {

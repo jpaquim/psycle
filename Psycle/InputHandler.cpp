@@ -868,16 +868,8 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 	entry._inst = Global::_pSong->auxcolSelected;
 	entry._mach = Global::_pSong->seqBus;	// Not really needed.
 
-	if(velocity<127)
-	{
-		entry._cmd = 0x0C;
-		entry._parameter = velocity*2;
-	}
-	else
-	{
-		entry._cmd = 0;
-		entry._parameter = 0;
-	}
+	entry._cmd = 0;
+	entry._parameter = 0;
 
 	// play it
 	if(pMachine==NULL)

@@ -295,9 +295,11 @@ void Song::Reset(void)
 		patternLines[c]=64;
 		sprintf(patternName[c],"Untitled"); 
 	}
+	_trackArmedCount = 0;
 	for(c=0; c<MAX_TRACKS; c++)
 	{
 		_trackMuted[c] = false;
+		_trackArmed[c] = false;
 	}
 #if defined(_WINAMP_PLUGIN_)
 	for (c=0; c < MAX_SONG_POSITIONS; c++)
