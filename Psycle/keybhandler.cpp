@@ -474,6 +474,51 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	Repaint(DMData);
 }
 
+void CChildView::EnterNoteoffAny()
+{
+	if (viewMode == VMPattern)
+	{
+		// UNDO CODE ENTER NOTE
+		int ps = _ps();
+		unsigned char * offset; 
+		unsigned char * toffset;
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			offset = _offset(ps);
+			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+		}
+		else
+		{
+			offset = _offset(ps);
+			toffset = _toffset(ps);
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+		entry->_note = 120;
+
+		Global::pInputHandler->notetrack[editcur.track]=120;
+
+	//	drawTrackStart=editcur.track;
+	//	drawTrackEnd=editcur.track;
+	//	drawLineStart=editcur.line;
+	//	drawLineEnd=editcur.line;
+		NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+
+		if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+		{
+			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+		}
+
+		bScrollDetatch=false;
+		Global::pInputHandler->bDoingSelection = false;
+		Repaint(DMData);
+	}
+}
+
 bool CChildView::MSBPut(int nChar)
 {
 	// UNDO CODE MSB PUT

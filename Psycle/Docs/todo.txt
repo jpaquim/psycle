@@ -12,8 +12,7 @@
 	save the old psy (wich i havent even changed)
 	<pooplog> so should the song info popup
 * why does it take so long to load a song?
-+ make file dialogs remember preferences
-+ shift + off inserts an off that does not specify machine
+* make file dialogs remember preferences
 + option to see waveform instead of notes in pattern editor for acid mode
 * psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
@@ -23,13 +22,13 @@
 * alk - when opening master dialog [doesn't] centre on mouse?
 ! alk - make wires square ended, like spec analyser?
 * alk - gap in audio when add new machine?
-+ alk - mute current track keypress (alt-f9)
 + <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
 + <trylle> i mean that it records and plays back at the same time * record wave in too
 + <_sue_> (wire dialog) also i cant use the keyb to set the db level like before (cursor keys)
-* <_sue_> the gainer machine doesnt work (getting stuck bug i have not been able to recreate)
+* <_sue_> the gainer machine doesnt work (getting stuck bug i have been able to recreate once but not 
+	debug-when i recreated it, song was fucking up bad due to not enough buffers (and too small))
 * <_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
-	depending on the place where theyr box was placed...
+	depending on the place where theyr box was placed... (also not able to recreate)
 +? alk-make single click/drag move wire from one machine to another (preserving vol)
 + pooplog-we should just make a new slider class that uses shift and ctrl like knobs
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger

@@ -395,6 +395,10 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->patTrackMute();
 		break;
 
+	case cdefKeyStopAny:
+		pChildView->EnterNoteoffAny();
+		break;
+
 	case cdefColumnNext:
 		pChildView->bScrollDetatch=false;
 		pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
@@ -1095,6 +1099,7 @@ void InputHandler::BuildCmdLUT()
 
 	// special
 	SetCmd(cdefKeyStop,'1',0);
+	SetCmd(cdefKeyStopAny,'1',MOD_C);
 	SetCmd(cdefTweakM,192,0);        // tweak machine (`)
 	SetCmd(cdefMIDICC,192,MOD_S);    // Previously Tweak Effect. Now Mcm Command (~)
 

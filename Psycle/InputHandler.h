@@ -181,6 +181,7 @@ enum CmdSet
 	// new ones have to go at bottom of each section or else bad registry reads
 	cdefPatternMixPaste,
 	cdefPatternTrackMute,
+	cdefKeyStopAny,	// NOTE STOP
 
 };
 
@@ -275,6 +276,7 @@ struct CmdDef
 		case cdefKeyA_3: return "Key (Oct.2) A";
 
 		case cdefKeyStop: return "Key Stop";
+		case cdefKeyStopAny: return "Key Stop Current";
 		case cdefTweakM:  return "Tweak (Machine)";
 		case cdefMIDICC:  return "Mcm (MIDI CC)";
 

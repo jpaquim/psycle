@@ -3071,3 +3071,4 @@ void CChildView::patTrackMute()
 		Repaint(DMTrackHeader);
 	}
 }
+
