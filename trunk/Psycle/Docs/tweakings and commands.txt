@@ -1,0 +1,199 @@
+- Controlling/Tweaking Generators and Effects
+---------------------------------------------
+
+	Tweaking a machine from the pattern is changing the value of its knobs to
+	another one.
+	This way, you can control the machine in realtime (playback).
+
+	To do so, you use the TWEAK command. You see it like "twk" in the note Row.
+
+
+- How to insert the TWEAK command in the Pattern
+------------------------------------------------
+
+	If the following is a pattern Row,
+           
+	Description:   (1) (2)(3) (4)
+	Pattern Row : ---- .. .. ....
+
+	then, on (1) , you insert the TWEAK command. To do so, you should press the TWK key.
+	When doing so, the word "twk" will appear.
+
+	\\\	The twk key differs from different keyboard languages, but you can Configure
+	///	it in the Keyboard Settings DialogBox (Configuration-Keyboard Configuration)
+
+	 
+	On (2) , you define the Controller/Parameter you want to change. Later in this
+ 	document it is explained how you can know this number.
+
+	On (3) , you specify the number of the Machine, just like you do to enter notes.
+	To know the Number of an Effect, you need to change the Combobox that says
+	"Generators", to "Effects". Then, the Generators' list will be updated with
+	the Effects Machines.
+
+	Finally, on (4), you specify the Value that the parameter will take. There are
+	little differences in tweaking an Native Plugin and a VST plugin. Look further on
+	this document to know them.
+
+	Example:
+
+		twk 05 42 0067  05 Indicates Parameter 05
+				42 Indicates Effect Number 2
+				0067 Indicates the value
+
+
+
+- Knowing the Parameter number of a Machine
+-------------------------------------------
+
+	You have different ways to know the parameter number of one plugin.
+
+	* The easiest one is selecting "Params" in the "MIDI/Params/Waves", combobox.
+	  This way, the next combobox will be updated with the parameter list of the current
+	  selected machine.
+	  The number will automatically be added to the pattern when doing twk.
+
+	You could also know it by:
+	* With Native Machines:
+	  Opening the parameters' windows and right clicking over the parameter you want to
+	  change.This will pop up the "Tweaking" dialog.
+	  On the titlebar of this dialog, you will see a number in HEX. This is the number
+	  of the parameter.
+
+	* With VST plugins:
+	  Opening the parameters' window, you can see a list of the parameters on the
+	  right side. These parameters are numbered in HEX.
+	  This is the number you need.
+
+
+- Knowing the Right Value
+-------------------------
+
+	There are differences between VST plugins, Psycle plugins and internal plugins:
+
+	* VST Plugins:
+	  They have a fixed range. 0 is the smallest value, and FFFF is the biggest.
+
+	* Psycle Native Plugins:
+	  They have a range defined by the knob's value. You need to move the knob to the
+	  desired position and right click over the parameter to open the "Tweaking" dialog.
+	  Then, the value of that knob in that position will be shown.
+	__Remember that you have to convert the given value to an hex value__
+
+	  Advise: If the knob's minimum value is not zero (Like, with the VCF Envmod), 
+	  0 = min value
+
+	* Psycle Internal machines: (The Mess)
+	  They usually have values between 0 and 128 (or 0 and 256).
+	  __Remember that you have to convert the given value to an hex value__
+	  
+	  To indicate a negative value, (for example, for the feedback) you can add 8000
+	  Example: 8004 means -4
+
+
+
+- Mcm Command. Use MIDI CC's to control VST Plugins
+-----------------------------------------------
+
+	The Mcm command works in a similar way than the Twk Command:
+
+	If the following is a pattern Row,
+           
+	Description:   (1) (2)(3) (4)
+	Pattern Row : ---- .. .. ....
+
+	then, on (1) , you insert the Mcm command.
+	To do so, you should press SHIFT + TWK key. Of course, you can change this key to
+	another one in the Keyboard Configuation Dialog.
+
+	On (2) , you define the CC (Command number) that you want to send.
+	You might need to check some MIDI documents and/or the Plugin's help to know what
+	to write in here.
+
+	On (3) , you specify the number of the Machine, just like you do to enter notes.
+	To know the Number of an Effect, you need to change the Combobox that says
+	"Generators", to "Effects". Then, the Generators' list will be updated with
+	the Effects Machines.
+
+	Finally, on (4), you specify the Value that the parameter will take.
+	
+	(4) is divided in two groups of two values AABB.
+	You might only need to speficy AA.
+
+	Example: Send NoteOn:
+
+		Mcm 90 01 3C7F  90 Means NoteOn (9) on Midi Channel 1 (0).
+				01 Means Generator number 1
+				3C Means C-5 (3C in Hex = 60 in Dec)
+				7F Means the Velocity (volume) of the note.
+
+- Pattern Commands
+------------------
+
+	Psycle also allows to use some "old school" commands in the command row.
+	The currently supported ones are:
+
+
+	* Global/Tracker Commands: 
+
+	  FFxx	-	Change BPM
+	  FExx	-	Change Tick Per Beat
+	  FCxx	-	Change Global/Wire Volume
+			Examples:
+			--- .. .. FC80	Sets Global Volume to the half.
+			--- 01 05 FC40	Sets Wire 1 of GENERATOR 5 to volume 40 (1/4th)
+			--- 01 45 FC30	Sets Wire 1 of EFFECT 5 to volume 30.
+
+			Aux column indicates the wire number.
+			It is shown in the _title_ of the wire Dialog.
+	
+	  F8xx	-	Sets the indicated Machine's Panning
+			Example:
+			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle)
+
+	* VST Commands:
+
+	  0Cxx	-	Set volume (only works on NoteOn!)
+
+	  10xx	-	_OLD_ MIDI Command. Not documented anymore. Use the "Mcm" command.
+
+	  (More to come, someday)
+
+
+	* Sampler Commands:
+
+	  01xx	-	Portamento Up
+	  02xx	-	Portamento Down
+	  08xx	-	Set panning position
+	  09xx	-	Set sampler offset
+	  0Cxx	-	Set volume
+	  0ECx	-	Note cut in x frames
+	  0EDx	-	Note delay in x frames
+	  15xy	-	Retrig Command. y = Number of retrigs (1 = do one retrig)
+			-	x changes the volume in the following way:
+				0 or 8 : No change
+				1: +1		9:  -1
+				2: +2		10: -2
+				3: +4		11: -4
+				4: +8		12: -8
+				5: +16		13: -16
+				6: *2/3		14: *3/2
+				7: *1/2		15: *2
+	
+
+	* Argury Synth 2f ( Also other (old) Arguru Synths) :
+
+	  01xx	-	Pitch slide-up
+	  02xx	-	Pitch slide-down
+	  03xx	-	Pitch glide
+	  04xx	-	Vibrato [x=depth, y=speed]
+	  07xx	-	Change VCF ENV modulation [00=-128,FF=128]
+	  08xx	-	Change VCF Cutoff frequency
+	  09xx	-	Change VCF Resonance amount
+	  0Exx	-	Note Cut in x frames (Only AS2.xx)
+	  11xx	-	VCF Cutoff slide-up
+	  12xx	-	VCF Cutoff slide-down
+
+	* JMDrum Synth:
+
+	  0Cxx	-	Set volume
