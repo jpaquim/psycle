@@ -6,7 +6,6 @@
 
 */
 
-//#include "..\Global.h"
 #include "stdafx.h"
 #include "../configuration.h"
 #include "../Song.h"

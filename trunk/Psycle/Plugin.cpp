@@ -581,7 +581,11 @@ bool Plugin::Load(RiffFile* pFile)
 	pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Read(&_connection[0], sizeof(_connection));
 	pFile->Read(&_inputCon[0], sizeof(_inputCon));
+#if defined (_WINAMP_PLUGIN_)
+	pFile->Skip(96) ; // sizeof(CPoint) = 8.
+#else
 	pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+#endif
 	pFile->Read(&_numInputs, sizeof(_numInputs));
 	pFile->Read(&_numOutputs, sizeof(_numOutputs));
 

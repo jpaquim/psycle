@@ -98,7 +98,9 @@ public:
 	bool _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
 	int _numInputs;							// number of Incoming connections
 	int _numOutputs;						// number of Outgoing connections
+#if !defined(_WINAMP_PLUGIN_)
 	CPoint _connectionPoint[MAX_CONNECTIONS];// point for wire? 
+#endif
 	PatternEntry	TriggerDelay[MAX_TRACKS];
 	int				TriggerDelayCounter[MAX_TRACKS];
 	int				RetriggerRate[MAX_TRACKS];

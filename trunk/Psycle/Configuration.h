@@ -23,12 +23,11 @@
 class Configuration
 {
 public:
-	void CreateFonts();
-
-bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItalic);
 
 #if !defined(_WINAMP_PLUGIN_)
-
+	void CreateFonts();
+	bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItalic);
+	
 	bool autoStopMachines;
 	COLORREF mv_colour;
 	COLORREF mv_wirecolour;
