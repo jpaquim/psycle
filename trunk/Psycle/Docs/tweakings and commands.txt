@@ -153,7 +153,8 @@
 	  FAxy  -	Retrigger Continue (x/16 = ticks duration per trigger, 
 				0 = use current) (y = acceleration, 1-8 pos, 9-f negative
 				f is the slowest negative acceleration, 1 is slowest 
-				positive acceleration)
+				positive acceleration) * does not trigger on new line, rather
+				continues from previous retrigger position
 	  F8xx	-	Sets the indicated Machine's Panning
 			Example:
 			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle)

@@ -123,13 +123,13 @@ BOOL CWireDlg::Create()
 
 void CWireDlg::OnCancel()
 {
+	KillTimer(2304+this_index);
 	_pSrcMachine->_pScopeBufferL = NULL;
 	_pSrcMachine->_pScopeBufferR = NULL;
 	_pSrcMachine->_scopeBufferIndex = 0;
-	font.DeleteObject();
 	m_pParent->WireDialog[this_index] = NULL;
-	KillTimer(2304+this_index);
 	DestroyWindow();
+	font.DeleteObject();
 	bufBM->DeleteObject();
 	clearBM->DeleteObject();
 	linepenL.DeleteObject();
@@ -147,19 +147,19 @@ void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (invol > 1.0f)
 	{	
-		sprintf(buffer,"+%.1f dB",20.0f * log10(invol)); 
+		sprintf(buffer,"+%.1f dB\n%.2f%%",20.0f * log10(invol),invol*100); 
 	}
 	else if (invol == 1.0f)
 	{	
-		sprintf(buffer,"0.0 dB"); 
+		sprintf(buffer,"0.0 dB\n100.00%%"); 
 	}
 	else if (invol > 0.0f)
 	{	
-		sprintf(buffer,"%.1f dB",20.0f * log10(invol)); 
+		sprintf(buffer,"%.1f dB\n%.2f%%",20.0f * log10(invol),invol*100); 
 	}
 	else 
 	{				
-		sprintf(buffer,"-Inf. dB"); 
+		sprintf(buffer,"-Inf. dB\n0.00%%"); 
 	}
 
 	m_volabel.SetWindowText(buffer);
@@ -422,7 +422,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				float n = float(_pSrcMachine->_scopeBufferIndex-pos);
 				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
-				for (int x = 256-4; x >= 0; x-=4)
+				for (int x = 256-2; x >= 0; x-=2)
 				{
 					n -= add;
 					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
@@ -432,7 +432,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				n = float(_pSrcMachine->_scopeBufferIndex-pos);
 				bufDC.MoveTo(256,GetY(pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
-				for (x = 256-4; x >= 0; x-=4)
+				for (x = 256-2; x >= 0; x-=2)
 				{
 					n -= add;
 					bufDC.LineTo(x,GetY(pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
@@ -500,7 +500,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				for (i = 0; i < scope_spec_bands; i++)
 				{
-//					int aml = 128-f2i((sqrtf(ampr[i]*16384)));
 					int aml = 128-f2i(sqrtf(ampl[i]));
 					if (aml < 0)
 					{
@@ -522,7 +521,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					
 					rect.left+=width;
 
-//					int amr = 128-f2i((sqrtf(ampr[i]*16384)));
 					int amr = 128-f2i(sqrtf(ampr[i]));
 					if (amr < 0)
 					{
@@ -902,6 +900,7 @@ void CWireDlg::OnHold()
 		}
 		else
 		{
+			pos = 1;
 			m_slider2.SetRange(10,100);
 			m_slider2.SetPos(scope_osc_rate);
 		}
@@ -1032,6 +1031,7 @@ void CWireDlg::SetMode()
 
 		m_slider.SetRange(1, 148);
 		m_slider.SetPos(scope_osc_freq);
+		pos = 1;
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_osc_rate);
 		sprintf(buf,"Oscilloscope");

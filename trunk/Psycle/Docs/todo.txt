@@ -2,6 +2,7 @@
 !=change
 +=addition
 
+* machines other than sampler should NOT spam instrument column so new machines can use it as volume or whatever
 * psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
@@ -18,6 +19,8 @@
 * <_sue_> the gainer machine doesnt work and the sliders in the minimixer are set to -99
 * <_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
 	depending on the place where theyr box was placed...
+* James says: you have to click on delete connection twice?
+
 
 * Machines
 ------------
@@ -146,6 +149,13 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
 	require a file format change though :(
 ! DO NOT LOAD LIST VST list & database
+* many vsts freeze the childview from updating while Left mouse button is down, which makes it so pattern does
+	not draw, so it appears that tweak recording is not working, such as:
+	-juno X2
+	-externalizer
+	-leveler
+	-tools one
+
 
 * Interface:
 ------------
