@@ -38,8 +38,8 @@ namespace operating_system
 	console::console() throw(exception)
 	{
 		got_a_console_window_ = false;
-		#if 1 // <bohan> currently disabled, it throws an exception
-		//#if !defined OPERATING_SYSTEM__MICROSOFT
+		//#if 1 // <bohan> currently disabled, it throws an exception
+		#if !defined OPERATING_SYSTEM__MICROSOFT
 			// nothing to do when the operating system is not microsoft's
 		#else
 		{
@@ -95,7 +95,12 @@ namespace operating_system
 				// standard output file stream
 				if(operating_system_output)
 				{
-					int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(operating_system_output), _O_TEXT /* opens file in text (translated) mode */));
+					int file_descriptor = ::_open_osfhandle(
+						/* microsoft messed the type definition of handles,
+						we *must* hard cast! */
+						reinterpret_cast<intptr_t>(operating_system_output),
+						_O_TEXT /* opens file in text (translated) mode */);
+
 					if(file_descriptor == -1)
 					{
 							std::ostringstream s;
@@ -104,14 +109,17 @@ namespace operating_system
 					}
 					else
 					{
-						const FILE * const file(::_fdopen(file_descriptor, "w"));
+						const FILE * const file = ::_fdopen(file_descriptor, "w");
 						if(!file)
 						{
 								std::ostringstream s;
 								s << "could not open the standard output file stream at the runtime layer: " << operating_system::exceptions::code_description();
 								throw exception(s.str());
 						}
+						fclose(stdout);
 						*stdout = *file;
+
+
 					}
 					if(::setvbuf(stdout, 0, _IONBF, 0))
 					{
@@ -139,6 +147,7 @@ namespace operating_system
 							throw exception(s.str());
 					}
 					*stderr = *file;
+
 					if(::setvbuf(stderr, 0, _IONBF, 0))
 					{
 							std::ostringstream s;
@@ -165,6 +174,7 @@ namespace operating_system
 							throw exception(s.str());
 					}
 					*stdin = *file;
+				
 					if(::setvbuf(stdin, 0, _IONBF, 0))
 					{
 							std::ostringstream s;
@@ -178,34 +188,18 @@ namespace operating_system
 	
 				std::ios::sync_with_stdio(); // makes cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
 
-				////////////////////////////////////////////////////////////////////
-				// allocates a new console window if we don't have one attached yet
-				if(!::GetConsoleWindow())
-				{
-					if(!::AllocConsole())
-					{
-						std::ostringstream s;
-						s << "could not allocate a console window: " << operating_system::exceptions::code_description();
-						throw operating_system::exception(s.str());
-					}
-					allocated = true;
-					::HANDLE console_window(::GetConsoleWindow());
-					if(console_window)
-					{
-						got_a_console_window_ = true;
-					}
-				}
-
 				//////////////////////////////////
 				// sets console window properties
 
-				if(::HANDLE console = operating_system_output) // ::GetStdHandle(STD_OUTPUT_HANDLE)
+				if(::HANDLE console = operating_system_output)
 				{
 					::CONSOLE_SCREEN_BUFFER_INFO buffer;
 					::GetConsoleScreenBufferInfo(console, &buffer);
 					// colors
 					{
-						const unsigned short attributes(BACKGROUND_BLUE | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+						const unsigned short attributes =
+							BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE|
+							FOREGROUND_RED|FOREGROUND_INTENSITY;
 						::SetConsoleTextAttribute(console, attributes);
 						{
 							const int width(buffer.dwSize.X), height(buffer.dwSize.Y);
@@ -214,6 +208,7 @@ namespace operating_system
 							::FillConsoleOutputAttribute(console, attributes, width * height, coord, &length);
 						}
 					}
+
 					// buffer size
 					{
 						const int width(256), height(1024);
@@ -239,8 +234,8 @@ namespace operating_system
 						cursor.bVisible = true;
 						::SetConsoleCursorInfo(console, &cursor);
 					}
-				}
 
+				}
 				if(!got_a_console_window_)
 				{
 					//::HANDLE console(::CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, 0, CONSOLE_TEXTMODE_BUFFER, 0));
@@ -252,14 +247,22 @@ namespace operating_system
 			{
 				//std::freopen("conout$", "w", stdout);
 				//std::ios::sync_with_stdio(); // makes cout, wcout, cin, wcin, wcerr, cerr, wclog and clog point to console as well
-				std::ostringstream types; types << typeid(*this).name() << ", threw " << typeid(e).name();
+				std::ostringstream types;
+				types << typeid(*this).name() << ", threw " << typeid(e).name();
 				{
-					std::ostringstream s; s << types.str() << ": " << e.what();
+					std::ostringstream s;
+					s << types;
+					s << ": ";
+					s << e.what();
 					std::printf(s.str().c_str());
 				}
 				{
-					std::ostringstream title; title << "error in " << types.str();
-					std::ostringstream message; message << "could not allocate a console!" << std::endl << types.str() << std::endl << e.what();
+					std::ostringstream title;
+					std::ostringstream message;
+					title << "error in " << types.str();
+					message << "could not allocate a console!" << std::endl;
+					message << types;
+					message << std::endl << e.what();
 					::MessageBox(0, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 				}
 				throw;
