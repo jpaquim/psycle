@@ -252,7 +252,6 @@
 		#define PROCESSOR__SPARC 9
 		#undef PROCESSOR__SPARC // was just defined to insert documentation.
 
-
 		/// ia instruction set (hewlett-packard/(sgi)/intel architecture).\n
 		/// 2 == itanium2.\n
 		/// 1 == itanium1.\n
