@@ -99,7 +99,6 @@ public:
 	float _lVol;							// left chan volume
 	float _rVol;							// right chan volume
 	int _panning;							// numerical value of panning.
-	float _volumeMultiplier;				// Trick to avoid some extra multiplications.
 #if !defined(_WINAMP_PLUGIN_)
 	int _volumeCounter;						// output peak level.
 	int _volumeDisplay;						// output peak level.
@@ -116,18 +115,32 @@ public:
 	int _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
 	int _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
 	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
+	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
 	bool _connection[MAX_CONNECTIONS];      // Outgoing connections activated
 	bool _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
 	int _numInputs;							// number of Incoming connections
 	int _numOutputs;						// number of Outgoing connections
 	CPoint _connectionPoint[MAX_CONNECTIONS];
-
+	PatternEntry	TriggerDelay[MAX_TRACKS];
+	int				TriggerDelayCounter[MAX_TRACKS];
+	
 	Machine();
 	virtual ~Machine();
 
 	virtual void Init(void);
 	virtual void SetPan(int newpan);
-	virtual void SetWireVolume(int srcIndex, int WireIndex,int value);
+	virtual bool SetDestWireVolume(int srcIndex, int WireIndex,int value);
+	virtual void SetWireVolume(int wireIndex,float value)
+	{
+		_inputConVol[wireIndex] = value * _wireMultiplier[wireIndex];
+	}
+	virtual bool GetDestWireVolume(int srcIndex, int WireIndex,int &value);
+	virtual void GetWireVolume(int wireIndex, float &value)
+	{
+		value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex];
+	}
+	virtual int FindInputWire(Machine* pDstMac,int macIndex);
+	virtual int FindOutputWire(Machine* pSrcMac,int macIndex);
 	virtual void Tick(void) {};
 	virtual void Tick(int track, PatternEntry* pData) {};
 	virtual void PreWork(int numSamples);
@@ -142,8 +155,6 @@ public:
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
-	PatternEntry	TriggerDelay[MAX_TRACKS];
-	int				TriggerDelayCounter[MAX_TRACKS];
 protected:
 	inline void SetVolumeCounter(int numSamples)
 	{

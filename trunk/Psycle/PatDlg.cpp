@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
-#include "Song.h"
+#include "constants.h"
 #include "PatDlg.h"
 
 #ifdef _DEBUG

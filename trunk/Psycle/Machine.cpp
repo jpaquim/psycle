@@ -4,18 +4,14 @@
 	#include "global.h"
 	#include "Machine.h"
 	#include "Song.h"
-	#include "FileIO.h"
+//	#include "FileIO.h"
 	#include "Configuration.h"
 #else
 	#include "Psycle2.h"
 	#include "Machine.h"
 	#include "Song.h"
-	#include "FileIO.h"
+//	#include "FileIO.h"
 	#include "Configuration.h"
-	#include "MasterDlg.h"
-
-	#include "Helpers.h"
-	#include "MainFrm.h"
 
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
@@ -56,7 +52,7 @@ Machine::Machine()
 	_volumeMaxDisplay = 0;
 	_volumeMaxCounterLife = 0;
 #endif // _WINAMP_PLUGIN_
-	_volumeMultiplier = 32768.0f;
+
 	_pSamplesL = new float[STREAM_SIZE];
 	_pSamplesR = new float[STREAM_SIZE];
 	
@@ -102,6 +98,7 @@ void Machine::Init(void)
 	for (int i=0; i<MAX_CONNECTIONS; i++)
 	{
 		_inputConVol[i] = 1.0f;
+		_wireMultiplier[i] = 1.0f;
 		_connection[i] = false;
 		_inputCon[i] = false;
 	}
@@ -132,29 +129,68 @@ void Machine::SetPan(
 	}
 	_panning = newPan;
 }
-
-void Machine::SetWireVolume(int srcIndex, int WireIndex,int value)
+int Machine::FindInputWire(Machine* pDstMac,int macIndex)
 {
-	if ( value == 255 ) value =256; // FF = 255
-	const float invol = value*0.00390625f; // Convert a 0..256 value to a 0..1.0 value
-
-	// Get reference to the destination machine
-	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return;
-	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
-
 	for (int c=0; c<MAX_CONNECTIONS; c++)
 	{
-		if (_pDstMachine->_inputCon[c])
+		if (pDstMac->_inputCon[c])
 		{
-			if (_pDstMachine->_inputMachines[c] == srcIndex)
+			if (pDstMac->_inputMachines[c] == macIndex)
 			{
-				_pDstMachine->_inputConVol[c] = 
-					invol * 
-					_pDstMachine->_volumeMultiplier / _volumeMultiplier;
-				break;
+				return c;
 			}
 		}
-	}	
+	}
+	return -1;
+}
+int Machine::FindOutputWire(Machine* pSrcMac,int macIndex)
+{
+	for (int c=0; c<MAX_CONNECTIONS; c++)
+	{
+		if (pSrcMac->_connection[c])
+		{
+			if (pSrcMac->_outputMachines[c] == macIndex)
+			{
+				return c;
+			}
+		}
+	}
+	return -1;
+}
+
+bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,int value)
+{
+	// Get reference to the destination machine
+	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
+	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
+
+	if ( value == 255 ) value =256; // FF = 255
+	const float invol = value*0.00390625f; // Convert a 0..256 value to a 0..1.0 value
+	
+	int c;
+	if ( (c = FindInputWire(_pDstMachine,srcIndex)) != -1)
+	{
+		_pDstMachine->SetWireVolume(c,invol);
+		return true;
+	}
+	return false;
+}
+bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,int &value)
+{
+	// Get reference to the destination machine
+	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
+	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
+	
+	int c;
+	if ( (c = FindInputWire(_pDstMachine,srcIndex)) != -1)
+	{
+		float val;
+		_pDstMachine->GetWireVolume(c,val);
+		value = f2i(val*256.0f);
+		return true;
+	}
+	
+	return false;
 }
 
 void Machine::PreWork(int numSamples)
@@ -274,20 +310,7 @@ bool Machine::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
@@ -486,6 +509,7 @@ void Master::Work(
 #endif // _WINAMP_PLUGIN_
 	_worked = true;
 }
+
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -771,20 +795,7 @@ bool Sine::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
@@ -985,20 +996,7 @@ bool Distortion::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
@@ -1297,20 +1295,7 @@ bool Delay::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
@@ -1696,20 +1681,7 @@ bool Flanger::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
@@ -2019,20 +1991,7 @@ bool Filter2p::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));

@@ -8,7 +8,7 @@
 #include "Constants.h"
 #include "Machine.h"
 #include "FileIO.h"
-#include "SongStructs.h"
+//#include "SongStructs.h"
 
 class CCriticalSection;
 
@@ -85,6 +85,8 @@ public:
 	unsigned cpuIdle;
 	unsigned _sampCount;
 
+	bool Invalided;
+	
 #endif // ndef _WINAMP_PLUGIN_
 
 	int BeatsPerMin;
@@ -93,7 +95,6 @@ public:
 	int LineCounter;
 	bool LineChanged;
 	
-	bool Invalided;
 
 	char currentOctave;
 

@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "psycle2.h"
+#include <mmreg.h>
 #include "WaveEdChildView.h"
 #include "MainFrm.h"
-#include <mmreg.h>
+//#include "Song.h" // included  in "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -87,7 +88,6 @@ void CWaveEdChildView::OnPaint(void)
 	int wrHeight = 0, wrHeight_R = 0, yLow = 0, yHi = 0, absBuf = 0, abs_yBuf = 0;
 	double OffsetStep = 0;
 	__int32 c, d;
-	CPen *oldpen;
 //	LOGPEN _pen;
 		
 	if(wdWave)
@@ -106,7 +106,7 @@ void CWaveEdChildView::OnPaint(void)
 		{
 			// Draw preliminary stuff
 			
-			oldpen= pDC->SelectObject(&cpen_me);
+			CPen *oldpen= pDC->SelectObject(&cpen_me);
 			
 			// Left channel 0 amplitude line
 			pDC->MoveTo(0,wrHeight);

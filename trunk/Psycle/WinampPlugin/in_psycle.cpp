@@ -4,9 +4,6 @@
 
   This plugin plays Psycle Song files with Winamp.
 
-  Note: Source Code should be common for both, the tracker and the plugin.
-		There will be common sources in the future.
-
 */
 
 #include "..\Global.h"
@@ -18,7 +15,7 @@
 
 #include "in2.h"	// Winamp Input plugin header file
 
-// post this to the main window at end of file (after playback as stopped)
+// post this to the main window at end of file (after playback has stopped)
 #define WM_WA_MPEG_EOF WM_USER+2
 
 //
@@ -301,8 +298,8 @@ void Quantize(float *pin, short *piout, int c)
 {
 	for (int i=0; i<c; i++)
 	{
-		if ( *pin > 32767.0) *piout = 32767;
-		else if ( *pin < -32767.0 ) *piout = -32768;
+		if ( *pin > 32767.0f) *piout = 32767;
+		else if ( *pin < -32767.0f ) *piout = -32768;
 		else *piout = f2i(*pin);
 		*pin++; piout++;
 	}

@@ -5,7 +5,7 @@
 // 21st April 
 // by Mark McCormack (mark_jj_mccormak@yahoo.co.uk)
 
-#define _DEBUGGING	// comment out when building release
+//#define _DEBUGGING	// comment out when building release
 
 #include "stdafx.h"
 #include <assert.h>
@@ -83,7 +83,7 @@ CMidiInput::CMidiInput() :
 CMidiInput::~CMidiInput()
 {
 	// close midi now, if not already done explicitly
-	if( m_midiInHandle )
+	if( m_midiInHandle[ DRIVER_MIDI ] || m_midiInHandle[ DRIVER_SYNC ] )
 	{
 		Close();
 	}
@@ -282,12 +282,6 @@ void CMidiInput::ReSync( void )
 bool CMidiInput::Close( void )
 {
 	MMRESULT result;
-
-	// no handle?
-	if( m_midiInHandle == NULL )
-	{
-		return true;
-	}
 
 	int problem = 0;
 
@@ -1480,7 +1474,7 @@ bool CMidiInput::InjectMIDI( int amount )
 	// implemented!?  Oh, and the DSound functions are also not working correctly!
 
 	// midi injection NOT enabled?
-	if( !m_midiInHandle || 
+	if( !m_midiInHandle[ DRIVER_MIDI ] || 
 		strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
 	{
 		m_stats.flags &= ~FSTAT_ACTIVE;

@@ -33,7 +33,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 	}
 
 	CBrush fillbrush(Global::pConfig->mv_polycolour);
-	devc->SelectObject(&fillbrush);
+	CBrush *oldbrush = devc->SelectObject(&fillbrush);
 	CRect rClient;
 	GetClientRect(&rClient);
 	devc->FillSolidRect(&rClient,Global::pConfig->mv_colour);
@@ -79,14 +79,15 @@ void CChildView::DrawMachineEditor(CDC *devc)
 
 						CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+2, Global::pConfig->mv_wireaacolour);
 //						CPen linepen1( PS_SOLID, f2i((Global::pConfig->mv_wirewidth*1.3f)+1.7f), Global::pConfig->mv_wireaacolour); // try this one, it's fun
-						devc->SelectObject(&linepen1);
+						CPen *oldpen = devc->SelectObject(&linepen1);
 						amosDraw(devc, oriX, oriY, desX, desY);
 						devc->Polygon(&pol[1], 3);
-						linepen1.DeleteObject();
 						CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
 						devc->SelectObject(&linepen2);
 						amosDraw(devc, oriX, oriY, desX, desY);
 						devc->Polygon(&pol[1], 3);
+						devc->SelectObject(oldpen);
+						linepen1.DeleteObject();
 						linepen2.DeleteObject();
 
 						tmac->_connectionPoint[w].x = f1-10;
@@ -99,7 +100,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 	else
 	{
 		CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
-		devc->SelectObject(&linepen);
+		CPen *oldpen = devc->SelectObject(&linepen);
 		// Draw wire [connections]
 		for(int c=0;c<MAX_MACHINES;c++)
 		{
@@ -167,6 +168,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		amosDraw(devc, wireSX, wireSY, wireDX, wireDY);
 		devc->SetROP2(prevROP);
 	}
+	devc->SelectObject(oldbrush);
 	fillbrush.DeleteObject();
 }
 
@@ -217,11 +219,8 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 	int y=mac->_y;
 
 	CDC memDC;
-	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(devc);
-	oldbmp = memDC.SelectObject(&stuffbmp);
-
-	// BLIT [DESTX,DESTY,SIZEX,SIZEY,SOURBMPX,SOURBMPY)
+	CBitmap* oldbmp = memDC.SelectObject(&stuffbmp);
 
 	int panning = mac->_panning;
 	panning -= 3;

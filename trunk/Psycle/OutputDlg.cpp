@@ -146,6 +146,7 @@ void COutputDlg::OnCancel()
 
 void COutputDlg::OnConfig() 
 {
+
 	int index = m_driverComboBox.GetCurSel();
 	m_ppDrivers[index]->Configure();
 }

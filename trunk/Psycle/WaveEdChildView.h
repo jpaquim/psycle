@@ -6,9 +6,9 @@
 #endif // _MSC_VER > 1000
 
 #include "WaveEdAmplifyDialog.h"
-#include "song.h"
 
 class CMainFrame;
+class Song;
 
 class CWaveEdChildView : public CWnd
 {

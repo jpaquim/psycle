@@ -30,7 +30,6 @@
 #include "MacProp.h"
 #include "NewMachine.h"
 #include "PatDlg.h"
-#include "SaveDlg.h"
 #include "GreetDialog.h"
 #include "ConfigDlg.h"
 #include "SongpDlg.h"
@@ -140,18 +139,9 @@ CChildView::CChildView()
 
 CChildView::~CChildView()
 {
-	
-	Global::pConfig->Write();
-	Global::pPlayer->Stop();
-	_outputActive = false;
-	Global::pConfig->_pOutputDriver->Enable(false);
-	// MIDI IMPLEMENTATION
-	Global::pConfig->_pMidiInput->Close();
-	Sleep(LOCK_LATENCY);
-	CNewMachine::DestroyPluginInfo();
 	Global::pInputHandler->SetChildView(NULL);
 	seqFont.DeleteObject();
-	stuffbmp.DeleteObject();
+//	stuffbmp.DeleteObject(); // Not needed. the CBitmap destructor does it.
 	KillRedo();
 	KillUndo();
 
@@ -365,8 +355,8 @@ void CChildView::OnTimer( UINT nIDEvent )
 				{
 					CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 					editcur.line=Global::pPlayer->_lineCounter;
-
- 					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+					
+					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
@@ -383,15 +373,18 @@ void CChildView::OnTimer( UINT nIDEvent )
 	{
 		CString filepath = Global::pConfig->GetInitialSongDir();
 		filepath += "\\autosave.psy";
-		CSaveDlg dlg;
-		dlg._pSong = Global::_pSong;
-		sprintf(dlg.szFile, filepath);
-		dlg.SaveSong(true); // true = don't report saving problems
+		OldPsyFile file;
+		if (!file.Create(filepath.GetBuffer(1), true))
+		{
+			return;
+		}
+		_pSong->Save(&file);
+		file.Close();
 	}
 }
 
 
-void CChildView::OnActivate()
+void CChildView::EnableSound()
 {
 	if (_outputActive)
 	{
@@ -594,11 +587,20 @@ void CChildView::OnFileSave()
 			CString filepath = Global::pConfig->GetSongDir();
 			filepath += "\\";
 			filepath += Global::_pSong->fileName;
-			CSaveDlg dlg;
-			dlg._pSong = Global::_pSong;
-			sprintf(dlg.szFile, filepath);
-			dlg.SaveSong();
-	//		AfxMessageBox(IDS_SONG_SAVED,MB_ICONINFORMATION); <- Needed or not?
+			
+			OldPsyFile file;
+			if (!file.Create(filepath.GetBuffer(1), true))
+			{
+				MessageBox("Error creating file", "Error", MB_OK);
+				return;
+			}
+			if (!_pSong->Save(&file))
+			{
+				MessageBox("Error saving file", "Error", MB_OK);
+			}
+			else _pSong->_saved=true;
+			file.Close();
+
 			if (pUndoList)
 			{
 				UndoSaved = pUndoList->counter;
@@ -666,23 +668,32 @@ void CChildView::OnFileSavesong()
 			{
 				Global::_pSong->fileName = str;
 			}
+			
+			OldPsyFile file;
+			if (!file.Create(str.GetBuffer(1), true))
+			{
+				MessageBox("Error creating file", "Error", MB_OK);
+				return;
+			}
+			if (!_pSong->Save(&file))
+			{
+				MessageBox("Error saving file", "Error", MB_OK);
+			}
+			else _pSong->_saved=true;
+			file.Close();
 
-			CSaveDlg dlg;
+			AppendToRecent(str.GetBuffer(1));
+			
+			if (pUndoList)
+			{
+				UndoSaved = pUndoList->counter;
+			}
+			else
+			{
+				UndoSaved = 0;
+			}
+		}
 
-			dlg._pSong = Global::_pSong;
-			strcpy(dlg.szFile, str);
-			dlg.SaveSong();
-
-			AppendToRecent(dlg.szFile);
-		}
-		if (pUndoList)
-		{
-			UndoSaved = pUndoList->counter;
-		}
-		else
-		{
-			UndoSaved = 0;
-		}
 		SetTitleBarText();
 	}
 //	Repaint();
@@ -1025,13 +1036,12 @@ void CChildView::OnConfigurationSettings()
 {
 	CConfigDlg dlg("Psycle Configuration");
 
+	_outputActive = false;
 	dlg.Init(Global::pConfig);
 	if (dlg.DoModal() == IDOK)
 	{
 		_outputActive = true;
-		Global::pConfig->_pOutputDriver->Enable(true);
-		// MIDI IMPLEMENTATION
-		Global::pConfig->_pMidiInput->Open();
+		EnableSound();
 	}
 //	Repaint();
 	
@@ -1764,10 +1774,16 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 		Global::pConfig->_pMidiInput->Close();
 		Sleep(LOCK_LATENCY);
 		
-		CSaveDlg dlg;
-		dlg._pSong = Global::_pSong;
-		sprintf(dlg.szFile,fName);
-		dlg.LoadSong();
+		OldPsyFile file;
+		if (!file.Open(fName))
+		{
+			MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+			return;
+		}
+		_pSong->Load(&file);
+		file.Close();
+		
+		_pSong->_saved=true;
 
 		char buffer[512];
 		sprintf(buffer,"'%s'\n\n%s\n\n%s"

@@ -5,6 +5,7 @@
 #include "psycle2.h"
 #include "MidiMonitorDlg.h"
 #include "MidiInput.h"
+#include "song.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -8,7 +8,9 @@
 //
 
 #include "Machine.h"
+#include "constants.h"
 
+class CChildView;
 /////////////////////////////////////////////////////////////////////////////
 // CMasterDlg dialog
 
@@ -17,7 +19,10 @@ class CMasterDlg : public CDialog
 // Construction
 public:
 	CMasterDlg(CChildView* pParent = NULL);   // standard constructor
+	void PaintNumbers(int val, int x, int y);
+	CBitmap m_numbers;
 	Master* _pMachine;
+	char macname[MAX_CONNECTIONS][15];
 	BOOL Create();
 
 // Dialog Data
@@ -59,6 +64,19 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnAutodec();
 	afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnPaint();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

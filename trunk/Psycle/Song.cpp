@@ -4,16 +4,18 @@
 #else
 	#include "psycle2.h"
 	#include "NewMachine.h"
-#endif // ndef _WINAMP_PLUGIN_
+#endif // _WINAMP_PLUGIN_
 
 #include "Song.h"
 #include "Machine.h" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
-#include "Riff.h"	 // For Wave file loading.
 
 #if !defined(_WINAMP_PLUGIN_)
+
+#include "Riff.h"	 // For Wave file loading.
+
 typedef struct 
 {
   char           chunkID[4];
@@ -451,7 +453,7 @@ bool Song::InsertConnection(int src,int dst)
 
 	// Get a free input slot on the destination machine
 	error=false;
-	for (c=0; c<MAX_CONNECTIONS; c++)
+	for (c=MAX_CONNECTIONS-1; c>=0; c--)
 	{
 		if (!dstMac->_inputCon[c])
 		{
@@ -484,16 +486,25 @@ bool Song::InsertConnection(int src,int dst)
 		if (dstMac->_type == MACH_VST || dstMac->_type == MACH_VSTFX )
 		{
 			dstMac->_inputConVol[dfreebus] = 1.0f;
+			dstMac->_wireMultiplier[dfreebus] = 1.0f;
 		}
-		else dstMac->_inputConVol[dfreebus] = 32768.0f;
+		else 
+		{
+			dstMac->_inputConVol[dfreebus] = 32768.0f;
+			dstMac->_wireMultiplier[dfreebus] = 0.000030517578125f;
+		}
 	}
 	else if ( dstMac->_type == MACH_VST || dstMac->_type == MACH_VSTFX )
 	{
 		dstMac->_inputConVol[dfreebus] = 0.000030517578125f;
+		dstMac->_wireMultiplier[dfreebus] = 32768.0f;
 	}
-	else dstMac->_inputConVol[dfreebus] = 1.0f;
+	else 
+	{
+		dstMac->_inputConVol[dfreebus] = 1.0f;
+		dstMac->_wireMultiplier[dfreebus] = 1.0f;
+	}
 	
-
 	return true;
 }
 #endif // ndef _WINAMP_PLUGIN_
@@ -575,13 +586,10 @@ void Song::DeleteAllPatterns(void)
 {
 	SONGTRACKS = 16;
 	
+	unsigned char blank[5]={255,255,255,0,0};
 	for(int c=0; c<MAX_PATTERN_BUFFER_LEN; c+=5)
 	{
-		pPatternData[c] = 255;
-		pPatternData[c+1] = 255;
-		pPatternData[c+2] = 255;
-		pPatternData[c+3] = 0;
-		pPatternData[c+4] = 0;
+		memcpy(pPatternData+c,blank,5);
 	}
 }
 #if !defined(_WINAMP_PLUGIN_)
@@ -742,6 +750,7 @@ ULONGINV hlength	// of the data contained in the file. It is the sample length a
 char *data			// the sample.
 
 */
+
 int Song::IffAlloc(int instrument,int layer,const char * str)
 {
 	if(instrument!=PREV_WAV_INS)
@@ -1426,25 +1435,28 @@ bool Song::Load(
 								if (_pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX ) // If both are VST's, just directly convert.
 								{
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+									_pMachines[i]->_wireMultiplier[c] = 1.0f;
 								}
 								else 
 								{
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 32768.0f; // Else if VST outputs to native, multiply by 32768.
+									_pMachines[i]->_wireMultiplier[c] = 0.000030517578125f;
 									
 									if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a big Bugfix
 										_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-									
 								}
 							}
 							else if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX ) // else If origin is native, and destination vst, divide by 32768.
 							{
 								_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
+								_pMachines[i]->_wireMultiplier[c] = 32768.0f;
 
 								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a big Bugfix
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
 							}
 							else
 							{
+								_pMachines[i]->_wireMultiplier[c] = 1.0f;
 								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a big Bugfix
 								{
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
@@ -1541,7 +1553,13 @@ bool Song::Load(
 			}
 		}
 	}
-
+	for (i=0; i<MAX_PLUGINS; i++) // Clean "pars" array.
+	{
+		if( vstL[i].valid )
+		{
+			delete vstL[i].pars;
+		}
+	}
 	return true;
 }
 

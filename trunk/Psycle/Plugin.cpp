@@ -404,7 +404,7 @@ bool Plugin::Load(
 			{
 				_pInterface->ParameterTweak(17,Vals[17]+10);
 			}
-
+			delete Vals;
 		}
 		else
 		{
@@ -498,20 +498,7 @@ bool Plugin::Save(
 
 	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-
-	float tmpvol[MAX_CONNECTIONS];
-	memcpy(tmpvol,_inputConVol,MAX_CONNECTIONS*sizeof(float));
-	for (int i=0; i<MAX_CONNECTIONS;i++) // Just a conversion to the new Values used.
-	{
-		if ( _inputCon[i] )
-		{
-			MachineType type =Global::_pSong->_pMachines[_inputMachines[i]]->_type;
-
-			if ( type != MACH_VST || type != MACH_VSTFX ) tmpvol[i]*=0.000030517578125f;
-		}
-	}
-	pFile->Write(&tmpvol[0], sizeof(_inputConVol));
-
+	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
 	pFile->Write(&_connection[0], sizeof(_connection));
 	pFile->Write(&_inputCon[0], sizeof(_inputCon));
 	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));

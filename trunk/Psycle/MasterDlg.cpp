@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
+#include "ChildView.h"
 #include "MasterDlg.h"
 
 #ifdef _DEBUG
@@ -52,6 +53,19 @@ BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
 	//{{AFX_MSG_MAP(CMasterDlg)
 	ON_BN_CLICKED(IDC_AUTODEC, OnAutodec)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERMASTER, OnCustomdrawSlidermaster)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM1, OnCustomdrawSliderm1)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM10, OnCustomdrawSliderm10)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM11, OnCustomdrawSliderm11)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM12, OnCustomdrawSliderm12)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM2, OnCustomdrawSliderm2)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM3, OnCustomdrawSliderm3)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM4, OnCustomdrawSliderm4)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM5, OnCustomdrawSliderm5)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM6, OnCustomdrawSliderm6)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM7, OnCustomdrawSliderm7)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM8, OnCustomdrawSliderm8)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM9, OnCustomdrawSliderm9)
+	ON_WM_PAINT()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -63,10 +77,89 @@ BOOL CMasterDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	m_slidermaster.SetRange(0, 256, true);
+	m_sliderm1.SetRange(0, 256, true);
+	m_sliderm2.SetRange(0, 256, true);
+	m_sliderm3.SetRange(0, 256, true);
+	m_sliderm4.SetRange(0, 256, true);
+	m_sliderm5.SetRange(0, 256, true);
+	m_sliderm6.SetRange(0, 256, true);
+	m_sliderm7.SetRange(0, 256, true);
+	m_sliderm8.SetRange(0, 256, true);
+	m_sliderm9.SetRange(0, 256, true);
+	m_sliderm10.SetRange(0, 256, true);
+	m_sliderm11.SetRange(0, 256, true);
+	m_sliderm12.SetRange(0, 256, true);
+	
 	m_slidermaster.SetPos(256-_pMachine->_outDry);
+
+	float val;
+	if (_pMachine->_inputCon[0])
+	{
+		_pMachine->GetWireVolume(0,val);
+		m_sliderm1.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[1])
+	{
+		_pMachine->GetWireVolume(1,val);
+		m_sliderm2.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[2])
+	{
+		_pMachine->GetWireVolume(2,val);
+		m_sliderm3.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[3])
+	{
+		_pMachine->GetWireVolume(3,val);
+		m_sliderm4.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[4])
+	{
+		_pMachine->GetWireVolume(4,val);
+		m_sliderm5.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[5])
+	{
+		_pMachine->GetWireVolume(5,val);
+		m_sliderm6.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[6])
+	{
+			_pMachine->GetWireVolume(6,val);
+			m_sliderm7.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[7])
+	{
+		_pMachine->GetWireVolume(7,val);
+		m_sliderm8.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[8])
+	{
+		_pMachine->GetWireVolume(8,val);
+		m_sliderm9.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[9])
+	{
+		_pMachine->GetWireVolume(9,val);
+		m_sliderm10.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[10])
+	{
+		_pMachine->GetWireVolume(10,val);
+		m_sliderm11.SetPos(256-f2i(val*256));
+	}
+	if (_pMachine->_inputCon[11])
+	{
+		_pMachine->GetWireVolume(11,val);
+		m_sliderm12.SetPos(256-f2i(val*256));
+	}
+	
+	
 	if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 	else m_autodec.SetCheck(0);
 
+	m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
+	
 	return TRUE;
 }
 
@@ -88,6 +181,7 @@ void CMasterDlg::OnCancel()
 {
 	m_pParent->MasterMachineDialog = NULL;
 	DestroyWindow();
+	delete this;
 }
 
 
@@ -95,17 +189,187 @@ void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	_pMachine->_outDry = 256-m_slidermaster.GetPos();
 	
+	PaintNumbers(_pMachine->_outDry,32,142);
+	
 /*	float const mv = _pMachine->_outDry*0.00390625f;
 	char buffer[16];
 	
-	if (mv > 0.0f)
+	  if (mv > 0.0f)
+	  {
+	  sprintf(buffer,"%.1f dB",20.0f * log10(mv));
+	  }
+	  else
+	  {
+	  sprintf(buffer,"-Inf. dB");
+	  }
+	m_dblevel.SetWindowText(buffer);
+*/
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::PaintNumbers(int val, int x, int y)
+{
+	CDC *dc = m_mixerview.GetDC();
+	CDC memDC;
+	CBitmap* oldbmp;
+	memDC.CreateCompatibleDC(dc);
+	oldbmp = memDC.SelectObject(&m_numbers);
+
+//  val*=0.390625f // Percentage ( 0% ..100% )
+	if (val > 0 ) // dB (-99.9dB .. 0dB)
 	{
-		sprintf(buffer,"%.1f dB",20.0f * log10(mv));
+		val = f2i(-200.0f * log10(val*0.00390625f)); // better don't aproximate with log2
+	}
+	else val = 999;
+	
+
+	if ( val < 100)
+	{
+		dc->BitBlt(x,y,4,8,&memDC,50,0,SRCCOPY);
 	}
 	else
 	{
-		sprintf(buffer,"-Inf. dB");
+		dc->BitBlt(x,y,4,8,&memDC,val/100*5,0,SRCCOPY);
+		val = val%100;
 	}
-	m_dblevel.SetWindowText(buffer);*/
+	const int vx0 = val/10;
+	const int v0x = val%10;
+	dc->BitBlt(x+5,y,4,8,&memDC,vx0*5,0,SRCCOPY);
+	dc->BitBlt(x+12,y,4,8,&memDC,v0x*5,0,SRCCOPY);
+
+	memDC.SelectObject(oldbmp);
+	memDC.DeleteDC();
+}
+
+void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(0,(256-m_sliderm1.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm1.GetPos(),92,142);
+	
 	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(9,(256-m_sliderm10.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm10.GetPos(),272,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(10,(256-m_sliderm11.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm11.GetPos(),292,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(11,(256-m_sliderm12.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm12.GetPos(),312,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(1,(256-m_sliderm2.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm2.GetPos(),112,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(2,(256-m_sliderm3.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm3.GetPos(),132,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(3,(256-m_sliderm4.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm4.GetPos(),152,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(4,(256-m_sliderm5.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm5.GetPos(),172,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(5,(256-m_sliderm6.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm6.GetPos(),192,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(6,(256-m_sliderm7.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm7.GetPos(),212,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(7,(256-m_sliderm8.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm8.GetPos(),232,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	_pMachine->SetWireVolume(9,(256-m_sliderm9.GetPos())*0.00390625f);
+	
+	PaintNumbers(256-m_sliderm9.GetPos(),252,142);
+	
+	*pResult = 0;
+}
+
+void CMasterDlg::OnPaint() 
+{
+	CPaintDC dc(this); // device context for painting
+
+	if ( dc.m_ps.rcPaint.top >= 145 && dc.m_ps.rcPaint.bottom <= 155)
+	{
+		PaintNumbers(256-m_slidermaster.GetPos(),32,142);
+		PaintNumbers(256-m_sliderm1.GetPos(),92,142);
+		PaintNumbers(256-m_sliderm2.GetPos(),112,142);
+		PaintNumbers(256-m_sliderm3.GetPos(),132,142);
+		PaintNumbers(256-m_sliderm4.GetPos(),152,142);
+		PaintNumbers(256-m_sliderm5.GetPos(),172,142);
+		PaintNumbers(256-m_sliderm6.GetPos(),192,142);
+		PaintNumbers(256-m_sliderm7.GetPos(),212,142);
+		PaintNumbers(256-m_sliderm8.GetPos(),232,142);
+		PaintNumbers(256-m_sliderm9.GetPos(),252,142);
+		PaintNumbers(256-m_sliderm10.GetPos(),272,142);
+		PaintNumbers(256-m_sliderm11.GetPos(),292,142);
+		PaintNumbers(256-m_sliderm12.GetPos(),312,142);
+	}
+
+	// Do not call CDialog::OnPaint() for painting messages
 }

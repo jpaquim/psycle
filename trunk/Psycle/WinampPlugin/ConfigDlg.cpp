@@ -1,6 +1,5 @@
 // ConfigDlg.cpp : implementation file
 //
-
 #include "..\global.h"
 #include "ConfigDlg.h"
 #include "..\configuration.h"
