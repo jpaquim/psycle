@@ -670,8 +670,8 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 
 BOOL CChildView::OnFileSave(UINT id) 
 {
-	MessageBox("Saving Disabled");
-	return false;
+//	MessageBox("Saving Disabled");
+//	return false;
 	BOOL bResult = TRUE;
 	if ( Global::_pSong->_saved )
 	{
@@ -724,8 +724,8 @@ BOOL CChildView::OnFileSave(UINT id)
 
 BOOL CChildView::OnFileSaveAs(UINT id) 
 {
-	MessageBox("Saving Disabled");
-	return false;
+//	MessageBox("Saving Disabled");
+//	return false;
 	OPENFILENAME ofn;       // common dialog box structure
 	CString ifile = Global::_pSong->fileName;
 	CString if2 = ifile.SpanExcluding("\\/:*\"<>|");

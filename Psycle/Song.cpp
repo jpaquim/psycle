@@ -2163,8 +2163,40 @@ bool Song::Save(RiffFile* pFile)
 	*/
 	CProgressDialog Progress;
 	Progress.Create();
-	Progress.m_Progress.SetRange(0,MAX_PATTERNS+MAX_MACHINES+MAX_INSTRUMENTS);
 	Progress.ShowWindow(SW_SHOW);
+
+	int eventcount = 4;
+	for (int i = 0; i < MAX_PATTERNS; i++)
+	{
+		// check every pattern for validity
+		if (ppPatternData[i])
+		{
+			eventcount++;
+		}
+	}
+
+	for (i = 0; i < MAX_MACHINES; i++)
+	{
+		// check every pattern for validity
+		if (_pMachine[i])
+		{
+			eventcount++;
+		}
+	}
+
+	int NumInstruments = 0;
+	for (i = 0; i < MAX_INSTRUMENTS; i++)
+	{
+		if (!_instruments[i].Empty())
+		{
+			eventcount++;
+		}
+	}
+
+	Progress.m_Progress.SetRange(0,eventcount);
+	Progress.m_Progress.SetStep(1);
+	Progress.m_Progress.StepIt();
+	::Sleep(1);
 
 
 	pFile->Write("PSY3SONG", 8);
@@ -2203,6 +2235,9 @@ bool Song::Save(RiffFile* pFile)
 	pFile->Write(&Name,strlen(Name)+1);
 	pFile->Write(&Author,strlen(Author)+1);
 	pFile->Write(&Comment,strlen(Comment)+1);
+
+	Progress.m_Progress.StepIt();
+	::Sleep(1);
 
 	/*
 	===================
@@ -2255,11 +2290,14 @@ bool Song::Save(RiffFile* pFile)
 	temp = 1; // sequence width
 	pFile->Write(&temp,sizeof(temp));
 
-	for (int i = 0; i < SONGTRACKS; i++)
+	for (i = 0; i < SONGTRACKS; i++)
 	{
 		pFile->Write(&_trackMuted[i],sizeof(_trackMuted[i]));
 		pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
 	}
+
+	Progress.m_Progress.StepIt();
+	::Sleep(1);
 
 	/*
 	===================
@@ -2297,6 +2335,9 @@ bool Song::Save(RiffFile* pFile)
 		temp = playOrder[i];
 		pFile->Write(&temp,sizeof(temp));
 	}
+
+	Progress.m_Progress.StepIt();
+	::Sleep(1);
 
 	/*
 	===================
@@ -2366,13 +2407,10 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(pCopy,size);
 			delete pCopy;
 
-			Progress.m_Progress.SetPos(i);
+			Progress.m_Progress.StepIt();
 			::Sleep(1);
 		}
 	}
-
-	Progress.m_Progress.SetPos(MAX_PATTERNS);
-	::Sleep(1);
 
 	// machine and instruments handle their save and load in their respective classes
 
@@ -2398,13 +2436,10 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(&size,sizeof(size));
 			pFile->Seek(pos2);
 
-			Progress.m_Progress.SetPos(MAX_PATTERNS+i);
+			Progress.m_Progress.StepIt();
 			::Sleep(1);
 		}
 	}
-
-	Progress.m_Progress.SetPos(MAX_PATTERNS+MAX_MACHINES);
-	::Sleep(1);
 
 	for (i = 0; i < MAX_INSTRUMENTS; i++)
 	{
@@ -2428,12 +2463,12 @@ bool Song::Save(RiffFile* pFile)
 			pFile->Write(&size,sizeof(size));
 			pFile->Seek(pos2);
 
-			Progress.m_Progress.SetPos(MAX_PATTERNS+MAX_MACHINES+i);
+			Progress.m_Progress.StepIt();
 			::Sleep(1);
 		}
 	}
 
-	Progress.m_Progress.SetPos(MAX_PATTERNS+MAX_MACHINES+MAX_INSTRUMENTS);
+	Progress.m_Progress.SetPos(eventcount);
 	::Sleep(1);
 
 	Progress.OnCancel();

@@ -5,8 +5,8 @@ Legend :	+=addition		*=change	!=bug
 V1.7.3
 ------
 + double clicking on pattern highlights that track (pooplog)
-+ new file format fixing a lot of problems (pooplog)
-+ 64 tracks available! (might break some machines) (pooplog)
++ new file format fixing a lot of problems, and incorporating lossless data compression (pooplog)
++ 64 tracks available! (might break some machines?) (pooplog)
 ! better memory management of pattern data (up to 10mb savings) (pooplog)
 ! optimized machine indexing (pooplog)
 * sampler doesn't crash when no instrument is specified any more (pooplog)
