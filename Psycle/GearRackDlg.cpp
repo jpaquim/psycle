@@ -496,8 +496,7 @@ void CGearRackDlg::OnExchange()
 		return;
 	}
 
-	int sel[2],j=0;
-	sel[2] = 0;
+	int sel[2]={0,0},j=0;
 	const int maxitems=m_list.GetCount();
 	for (int c=0;c<maxitems;c++) 
 	{
@@ -538,63 +537,83 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 {
 	Machine * tmp1 = Global::_pSong->_pMachine[one];
 	Machine * tmp2 = Global::_pSong->_pMachine[two];
-
+	
 	// if they are both valid
-
+	
 	if (tmp1 && tmp2)
 	{
 		m_pParent->AddMacViewUndo();
 		Global::_pSong->_pMachine[one] = tmp2;
 		Global::_pSong->_pMachine[two] = tmp1;
-
+		
 		tmp1->_macIndex = two;
 		tmp2->_macIndex = one;
-
+		
 		// gotta exchange positions
-
+		
 		int temp = tmp1->_x;
 		tmp1->_x = tmp2->_x;
 		tmp2->_x = temp;
-
+		
 		temp = tmp1->_y;
 		tmp1->_y = tmp2->_y;
 		tmp2->_y = temp;
-
+		
 		// gotta exchange all connections
-
+		
 		temp = tmp1->_numOutputs;
 		tmp1->_numOutputs = tmp2->_numOutputs;
 		tmp2->_numOutputs = temp;
-
+		
 		temp = tmp1->_numInputs;
 		tmp1->_numInputs = tmp2->_numInputs;
 		tmp2->_numInputs = temp;
-
+		
+		
+		float tmp1vols[MAX_CONNECTIONS],tmp2vols[MAX_CONNECTIONS];
+		
 		for (int i = 0; i < MAX_CONNECTIONS; i++)
 		{
 			temp = tmp1->_outputMachines[i];
 			tmp1->_outputMachines[i] = tmp2->_outputMachines[i];
 			tmp2->_outputMachines[i] = temp;
-
+			
 			temp = tmp1->_inputMachines[i];
 			tmp1->_inputMachines[i] = tmp2->_inputMachines[i];
 			tmp2->_inputMachines[i] = temp;
-
-			float ftemp = tmp1->_inputConVol[i];
-			tmp1->_inputConVol[i] = tmp2->_inputConVol[i];
-			tmp2->_inputConVol[i] = ftemp;
-
-			ftemp = tmp1->_wireMultiplier[i];
-			tmp1->_wireMultiplier[i] = tmp2->_wireMultiplier[i];
-			tmp2->_wireMultiplier[i] = ftemp;
-
+			
 			bool btemp = tmp1->_connection[i];
 			tmp1->_connection[i] = tmp2->_connection[i];
 			tmp2->_connection[i] = btemp;
-
+			
 			btemp = tmp1->_inputCon[i];
 			tmp1->_inputCon[i] = tmp2->_inputCon[i];
 			tmp2->_inputCon[i] = btemp;
+			
+			tmp1->GetWireVolume(i,tmp1vols[i]);
+			tmp2->GetWireVolume(i,tmp2vols[i]);
+		}
+		for (i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			if (tmp1->_connection[i])
+			{
+				Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2vols[i]);
+			}
+			if (tmp2->_connection[i])
+			{
+				Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1vols[i]);
+			}
+			
+			if (tmp1->_inputCon[i])
+			{
+				tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2vols[i]);
+			}
+			else tmp1->SetWireVolume(i,0);
+			if (tmp2->_inputCon[i])
+			{
+				tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1vols[i]);
+			}
+			else tmp2->SetWireVolume(i,0);
 		}
 		return;
 	}
@@ -687,8 +706,7 @@ void CGearRackDlg::OnClonemachine()
 
 	if ( m_list.GetSelCount() == 2 )
 	{
-		int sel[2],j=0;
-		sel[2] = 0;
+		int sel[2]={0,0},j=0;
 		const int maxitems=m_list.GetCount();
 		for (int c=0;c<maxitems;c++) 
 		{
