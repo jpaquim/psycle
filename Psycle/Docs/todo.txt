@@ -3,6 +3,7 @@
 -copy paste in edit menu
 -midi control commands learn
 -longer patterns
+-store state of follow song toggle
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
