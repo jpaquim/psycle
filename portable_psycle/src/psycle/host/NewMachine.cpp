@@ -522,17 +522,17 @@ namespace psycle
 					out.open((module_directory + "/plugin-scan.log.txt").c_str());
 				}
 				out << "[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)" << std::endl;
-				Progress.SetWindowText("Scanning plugins ... Natives ...");
+				if(progressOpen) Progress.SetWindowText("Scanning plugins ... Natives ...");
 				out << std::endl << "[Native Plugins]" << std::endl << std::endl;
 				out.flush();
 				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetPluginDir()), MACH_PLUGIN, out, progressOpen ? &Progress : 0);
 				out.flush();
-				Progress.SetWindowText("Scanning plugins ... VST ...");
+				if(progressOpen) Progress.SetWindowText("Scanning plugins ... VST ...");
 				out << std::endl << "[VST Plugins]" << std::endl << std::endl;
 				out.flush();
 				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetVstDir()), MACH_VST, out, progressOpen ? &Progress : 0);
 				out.flush();
-				Progress.SetWindowText("Scanning plugins ...");
+				if(progressOpen) Progress.SetWindowText("Scanning plugins ...");
 				out.close();
 				_numPlugins = plugsCount;
 				if(progressOpen) Progress.m_Progress.SetPos(16384);
@@ -754,6 +754,7 @@ namespace psycle
 							try
 							{
 								vstPlug.Free();
+								// <bohan> phatmatik crashes here...
 							}
 							catch(...)
 							{
@@ -996,7 +997,7 @@ namespace psycle
 						sprintf(buf,"%s is Disabled - Unknown Reason  Try to Load Anyway?",name);
 						break;
 					}
-					return (::MessageBox(NULL,buf,"Plugin Warning!",MB_YESNO) == IDYES);
+					return (::MessageBox(NULL,buf,"Plugin Warning!",MB_YESNO | MB_ICONWARNING) == IDYES);
 
 				}
 			}

@@ -299,7 +299,8 @@ namespace psycle
 						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e.what();
-					::MessageBox(0, s.str().c_str(), _editName, 0);
+					std::ostringstream title; title << _editName << ": " << GetDllName();
+					::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 					throw std::runtime_error(s.str());
 				}
 				catch(const char e[])
@@ -308,7 +309,8 @@ namespace psycle
 						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e;
-					::MessageBox(0, s.str().c_str(), _editName, 0);
+					std::ostringstream title; title << _editName << ": " << GetDllName();
+					::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 					throw std::runtime_error(s.str());
 				}
 				catch(const int & e)
@@ -317,7 +319,8 @@ namespace psycle
 						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e;
-					::MessageBox(0, s.str().c_str(), _editName, 0);
+					std::ostringstream title; title << _editName << ": " << GetDllName();
+					::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 					throw std::runtime_error(s.str());
 				}
 				catch(const unsigned int & e)
@@ -326,7 +329,8 @@ namespace psycle
 						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e;
-					::MessageBox(0, s.str().c_str(), _editName, 0);
+					std::ostringstream title; title << _editName << ": " << GetDllName();
+					::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 					throw std::runtime_error(s.str());
 				}
 				catch(...)
@@ -334,7 +338,8 @@ namespace psycle
 					std::ostringstream s; s
 						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< "unkown type";
-					::MessageBox(0, s.str().c_str(), _editName, 0);
+					std::ostringstream title; title << _editName << ": " << GetDllName();
+					::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 					throw std::runtime_error(s.str());
 				}
 			}

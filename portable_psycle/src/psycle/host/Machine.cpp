@@ -30,6 +30,8 @@ namespace psycle
 
 		Machine::Machine()
 		{
+			_editName[0] = '\0';
+
 			_numPars = 0;
 			#if !defined _WINAMP_PLUGIN_
 				_volumeCounter = 0.0f;
