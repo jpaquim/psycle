@@ -51,7 +51,7 @@ void Player::Start(int pos, int line)
 	bpm=Global::_pSong->BeatsPerMin;
 	tpb=Global::_pSong->_ticksPerBeat;
 	
-	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 0;
+	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 	_playing = true;
 	ExecuteLine();
 }
