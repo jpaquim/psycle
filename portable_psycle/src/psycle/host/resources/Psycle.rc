@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -78,8 +78,9 @@ BEGIN
     "O",            ID_FILE_LOADSONG,       VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F1,          ID_PSYHELP,             VIRTKEY, NOINVERT
-    VK_F10,         ID_VIEW_INSTRUMENTEDITOR, VIRTKEY, NOINVERT
     VK_F4,          ID_SHOWPSEQ,            VIRTKEY, NOINVERT
+    VK_F10,         ID_VIEW_INSTRUMENTEDITOR, VIRTKEY, NOINVERT
+    "S",            ID_CONFIGURATION_SETTINGS, VIRTKEY, ALT, NOINVERT
 END
 
 IDR_VSTFRAME ACCELERATORS 
@@ -266,7 +267,7 @@ BEGIN
     PUSHBUTTON      "%",IDC_VOLUME_PER,177,147,34,11,NOT WS_TABSTOP
 END
 
-IDD_MACPROP DIALOGEX 0, 0, 186, 58
+IDD_MACPROP DIALOGEX 0, 0, 190, 73
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
@@ -280,9 +281,9 @@ BEGIN
                     WS_TABSTOP,68,30,39,12
     CONTROL         "Solo",IDC_SOLO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,73,
                     30,29,12
-    DEFPUSHBUTTON   "OK",IDOK,124,7,56,15
-    PUSHBUTTON      "Delete Machine",IDC_BUTTON1,124,22,56,15
-    PUSHBUTTON      "Clone Machine",IDC_CLONE,124,38,56,15
+    DEFPUSHBUTTON   "OK",IDOK,7,47,176,19
+    PUSHBUTTON      "Delete Machine",IDC_BUTTON1,122,7,61,15
+    PUSHBUTTON      "Clone Machine",IDC_CLONE,122,23,61,15
 END
 
 IDD_PATDLG DIALOGEX 0, 0, 184, 49
@@ -1533,9 +1534,9 @@ BEGIN
     IDD_MACPROP, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 179
+        RIGHTMARGIN, 183
         TOPMARGIN, 7
-        BOTTOMMARGIN, 51
+        BOTTOMMARGIN, 66
     END
 
     IDD_PATDLG, DIALOG
@@ -1889,7 +1890,7 @@ BEGIN
         MENUITEM "Loop Playback",               ID_CONFIGURATION_LOOPPLAYBACK
 
         MENUITEM SEPARATOR
-        MENUITEM "&Settings...",                ID_CONFIGURATION_SETTINGS
+        MENUITEM "&Settings...\tALT+S",         ID_CONFIGURATION_SETTINGS
     END
     POPUP "&Performance"
     BEGIN
@@ -2363,12 +2364,12 @@ BEGIN
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Catalan resources
+// Catalán resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
 #ifdef _WIN32
@@ -2381,10 +2382,10 @@ LANGUAGE LANG_CATALAN, SUBLANG_DEFAULT
 // Dialog
 //
 
-IDD_SAVEWAVDLG DIALOG  0, 0, 257, 252
+IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 252
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Render as Wav File"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     LTEXT           "Output Path",IDC_STATIC,5,7,39,10
     EDITTEXT        IDC_FILENAME,49,5,157,13,ES_AUTOHSCROLL
@@ -2448,12 +2449,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Catalan resources
+#endif    // Catalán resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// Inglés (Estados Unidos) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -2636,12 +2637,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.S.) resources
+#endif    // Inglés (Estados Unidos) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// Inglés (Reino Unido) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2693,7 +2694,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (U.K.) resources
+#endif    // Inglés (Reino Unido) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

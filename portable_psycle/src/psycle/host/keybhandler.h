@@ -857,7 +857,7 @@ namespace psycle
 			{
 				if (ChordModeOffs)
 				{
-					AdvanceLine(-1,Global::pConfig->_wrapAround,false);
+					AdvanceLine(-1,Global::pConfig->_wrapAround,false); //Advance track?
 				}
 				else
 				{
@@ -1191,11 +1191,8 @@ namespace psycle
 
 			const int nl = _pSong->patternLines[_ps()];
 
-			if ( x >= 0)	
-			{
-				editcur.line += x;
-			}
-			else
+			// <sampler> a bit recoded. It only is increased when needed, not increased, checked and then decreased.
+			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
 				editcur.track+=1;
 				if (editcur.track >= _pSong->SONGTRACKS)
@@ -1204,11 +1201,18 @@ namespace psycle
 					editcur.line+=1;
 				}
 			}
-
-			if (editcur.line >= nl)
+			else //advance corresponding rows
 			{
-				if(wrap){ editcur.line = editcur.line % nl; }
-				else	{ editcur.line = nl-1; }
+				if (wrap)
+				{
+					editcur.line += x;
+					editcur.line = editcur.line % nl; 
+				}
+				else
+				{
+					if (editcur.line + x < nl) editcur.line = editcur.line + x;
+				}
+				
 			}
 
 			pParentMain->StatusBarIdle();

@@ -186,6 +186,7 @@ namespace psycle
 			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
 			ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
 			ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
+			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
 			ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
 			ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
 			ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
@@ -1481,7 +1482,7 @@ namespace psycle
 
 		void CChildView::OnConfigurationSettings() 
 		{
-			CConfigDlg dlg("Psycle Configuration");
+			CConfigDlg dlg("Psycle Settings");
 			_outputActive = false;
 			dlg.Init(Global::pConfig);
 			if (dlg.DoModal() == IDOK)
