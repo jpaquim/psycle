@@ -336,7 +336,7 @@ DDCRET WaveFile::OpenForRead ( const char *Filename )
 
 			while ( pcm_data.ckID != FourCC("data") )
 			{
-				Skip ( pcm_data.ckSize );
+				Skip (1-sizeof(pcm_data));// read each block until we find the correct one
 		        pcm_data_offset = CurrentFilePosition();
 
 				retcode = Read ( &pcm_data, sizeof(pcm_data) );
