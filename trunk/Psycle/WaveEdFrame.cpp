@@ -87,7 +87,7 @@ BOOL CWaveEdFrame::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;	
 }
 
-CWaveEdFrame::GenerateView() {	this->wavview.GenerateAndShow(); }
+void CWaveEdFrame::GenerateView() {	this->wavview.GenerateAndShow(); }
 
 BOOL CWaveEdFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
 {
