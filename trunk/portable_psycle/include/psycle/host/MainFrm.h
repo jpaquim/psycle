@@ -122,11 +122,8 @@ namespace psycle
 			CBitmap blittleleft;
 			CBitmap blittleright;
 
-
-			Gdiplus::GdiplusStartupInput gdiplusStartupInput;	//GDI+ stuff
-			ULONG_PTR gdiplusToken;			//
-
-
+			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
+			ULONG_PTR gdiplusToken; // GDI+ stuff
 
 		protected:
 			// Generated message map functions

@@ -125,29 +125,22 @@ namespace psycle
 			vuprevR = 0;
 			vuprevL = 0;
 			seqcopybufferlength = 0;
-			_pSong=NULL;
-			pGearRackDialog = NULL;
-
-			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);	//GDI+ stuff
-
+			_pSong = 0;
+			pGearRackDialog = 0;
+			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
 		}
 
 		CMainFrame::~CMainFrame()
 		{
-			
-			Gdiplus::GdiplusShutdown(gdiplusToken);	//GDI+ stuff
-
+			Gdiplus::GdiplusShutdown(gdiplusToken); // GDI+ stuff
 			Global::pInputHandler->SetMainFrame(NULL);
-			if (pGearRackDialog)
-			{
-				pGearRackDialog->OnCancel();
-			}
+			if(pGearRackDialog) pGearRackDialog->OnCancel();
 		}
 
 		int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{
 			m_wndView.pParentFrame = this;
-			macComboInitialized=false;
+			macComboInitialized = false;
 			
 			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
 			
