@@ -144,11 +144,16 @@ CMainFrame::CMainFrame()
 	vuprevL=0;
 	seqcopybufferlength = 0;
 	_pSong=NULL;
+	pGearRackDialog = NULL;
 }
 
 CMainFrame::~CMainFrame()
 {
 	Global::pInputHandler->SetMainFrame(NULL);
+	if (pGearRackDialog)
+	{
+		pGearRackDialog->OnCancel();
+	}
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -1210,8 +1215,12 @@ void CMainFrame::OnSavewave()
 
 void CMainFrame::OnGearRack() 
 {
-	CGearRackDlg dlg(&m_wndView);
-	dlg.DoModal();
+	if (pGearRackDialog == NULL)
+	{
+		pGearRackDialog = new CGearRackDlg(&m_wndView);
+		pGearRackDialog->Create();
+		pGearRackDialog->ShowWindow(SW_SHOW);
+	}
 }
 
 void CMainFrame::OnEditwave() 

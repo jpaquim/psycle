@@ -1263,10 +1263,14 @@ void CChildView::NewMachine(int x, int y, int mac)
 			}
 		}
 		// Stop driver to handle possible conflicts between threads.
+		// should be no conflicts because last thing create machine does is set active machine flag.
+		// busses are set last, so no messages will be sent until after machine is created anyway
+		/*
 		_outputActive = false;
 		Global::pConfig->_pOutputDriver->Enable(false);
 		// MIDI IMPLEMENTATION
 		Global::pConfig->_pMidiInput->Close();
+		*/
 
 		if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll))
 		{
@@ -1302,6 +1306,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 			Repaint(DMMacRefresh);
 		}
 		
+		/*
 		// Restarting the driver...
 		pParentMain->UpdateEnvInfo();
 		_outputActive = true;
@@ -1314,6 +1319,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 			// MIDI IMPLEMENTATION
 			Global::pConfig->_pMidiInput->Open();
 		}
+		*/
 	}
 	//	Repaint();
 }

@@ -6,12 +6,15 @@
 #include "GearRackDlg.h"
 #include "Song.h"
 #include "Machine.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+extern CPsycleApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGearRackDlg dialog
@@ -52,6 +55,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGearRackDlg message handlers
 
+BOOL CGearRackDlg::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
 BOOL CGearRackDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
@@ -60,6 +68,13 @@ BOOL CGearRackDlg::OnInitDialog()
 	RedrawList();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CGearRackDlg::OnCancel()
+{
+	((CMainFrame *)theApp.m_pMainWnd)->pGearRackDialog = NULL;
+	DestroyWindow();
+	delete this;
 }
 
 BOOL CGearRackDlg::PreTranslateMessage(MSG* pMsg) 
@@ -132,6 +147,8 @@ void CGearRackDlg::OnCreate()
 	Global::_pSong->seqBus = tmac;
 	m_pParent->NewMachine(-1,-1,tmac);
 	RedrawList();
+//	m_pParent->Invalidate();
+//	m_pParent->Repaint(DMAllMacsRefresh);
 }
 
 void CGearRackDlg::OnName() 
@@ -156,6 +173,8 @@ void CGearRackDlg::OnDelete()
 			Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac-MAX_BUSES]);
 			Global::_pSong->seqBus = tmac;
 			RedrawList();
+//			m_pParent->Invalidate();
+//			m_pParent->Repaint(DMAllMacsRefresh);
 		}
 	}
 	else
@@ -165,6 +184,8 @@ void CGearRackDlg::OnDelete()
 			Global::_pSong->DestroyMachine(Global::_pSong->busMachine[tmac]);
 			Global::_pSong->seqBus = tmac;
 			RedrawList();
+//			m_pParent->Invalidate();
+//			m_pParent->Repaint(DMAllMacsRefresh);
 		}
 	}
 }
@@ -192,3 +213,4 @@ void CGearRackDlg::OnDblclkGearlist()
 	// TODO: Add your control notification handler code here
 	OnCreate();	
 }
+
