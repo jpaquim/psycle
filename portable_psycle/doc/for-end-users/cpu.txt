@@ -1,6 +1,18 @@
+The pack contains the "doc" dir,
+and directories containing the binaries themselves,
+of the psycle host application, and all the open source native plugins.
 
-    * G7-SSE: Athlon XP, late Duron, Pentium 4, Celeron Pentium 4, Pentium M Centrino, Athlon 64, Athlon FX
-    * G7: Athlon and early Duron.
-    * G6-SSE: Pentium III and Celeron Pentium III.
-    * G6: Pentium Pro, Pentium II, and early Celeron.
-    * G5: Pentium, K6, K6-2, K6-III, 5x86, 6x86, etc.
+All binaries come currently in two versions, one for each CPU type. Both are included in the pack:
+
+	- G7:
+		- G7-SSE: Athlon XP, late Duron, Pentium 4, Celeron Pentium 4, Pentium M Centrino, Athlon 64, Athlon FX
+		- G7: Athlon and early Duron.
+
+	- G6:
+		- G6-SSE: Pentium III and Celeron Pentium III.
+		- G6: Pentium Pro, Pentium II, and early Celeron.
+
+Currently, we don't distribute builds for older cpus, G5: Pentium, K6, K6-2, K6-III, 5x86, 6x86, etc.
+If you request us to add it, we'll add it.
+At the time of this writing, AMD Athlon 64/FX and Intel IA-64 are not yet widely used,
+and we don't have tools to make builds for these CPUs.
