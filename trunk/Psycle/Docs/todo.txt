@@ -25,7 +25,7 @@ aditional known vst bugs/buggy vsts: ~33
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
 +++ add a mode to dump each GENERATOR's signal path to wav
-
+*** songs saved with quadrasid play muted
 ++ undos for machine and wave edit? 
 
 *** <YanniS> my settings directories always get corrupted somehow

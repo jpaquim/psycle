@@ -845,6 +845,11 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 {
 	TRACE("VST plugin call to host dispatcher: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
 
+	// believe it or not, some plugs tried to call psycle with a null AEffect.
+	if (!effect)
+	{
+		return 0;
+	}
 	// Support opcodes
 	switch(opcode)
 	{
