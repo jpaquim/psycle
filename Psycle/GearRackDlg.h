@@ -19,6 +19,8 @@ public:
 	CGearRackDlg(CChildView* pParent);   // standard constructor
 	CChildView* m_pParent;
 	void RedrawList();
+	BOOL Create();
+	afx_msg void OnCancel();
 
 // Dialog Data
 	//{{AFX_DATA(CGearRackDlg)

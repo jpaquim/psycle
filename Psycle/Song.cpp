@@ -1613,7 +1613,7 @@ bool Song::Save(
 	pFile->Write(&Comment, 128);
 	
 	pFile->Write(&BeatsPerMin, sizeof(BeatsPerMin));
-	i = SamplesPerTick*44100/Global::pConfig->_pOutputDriver->_samplesPerSec;
+	i = SamplesPerTick*44100/Global::pConfig->_pOutputDriver->_samplesPerSec;//*should save tbp instead of this
 	pFile->Write(&i, sizeof(SamplesPerTick));
 	pFile->Write(&currentOctave, sizeof(currentOctave));
 

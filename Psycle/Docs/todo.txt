@@ -14,34 +14,14 @@ X low priority
 * New and unsorted and untested
 ------------
 
-<alk> 'play current block' loops current pattern -should it just play the selected block?
-<alk> 'play current pattern' plays song from current order (which is the same function as 'play song (normal)' -should it just play the current pattern?
-<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
-
-
-++ alk: rightclick on vol slider in wire dialog to enter vol numerically (0.0db is imposibble to set once 
-	the slider has been moved)
-
-alk:
-**
-do add machine
-double click sampler
-half of the dialog disappears leaving some garbage on the screen whic disappears after some seconds
-**
-
-alk:
-**
-select the the first and last row of channel 2 to select the whole channel
-move to channel 1, goto the last row, do select end of block
-**
+* alk: select the the first and last row of channel 2 to select the whole channel
+	move to channel 1, goto the last row, do select end of block
+	[ I don't know what alk is talking about ]
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
 ------------
-***	alk - gap in audio when add new machine.
-		[ It is caused because the method closes the output to avoid thread conflicts.
-		Should be using the semaphore of the Player class.]
 **	<_sue_> the gainer machine doesnt work
 		[ getting stuck bug i have been able to recreate once but not debug-when i recreated it,
 		song was fucking up bad due to not enough buffers (and too small)]
@@ -52,6 +32,7 @@ move to channel 1, goto the last row, do select end of block
 *	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 !	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
 ! alk: dalay delay is not precise enough (in terms of time)
++ pooplog synths don't have gain lfo phase cmd?
 ++	<[JAZ]> Internals still miss mouse tweak, right?
 +	<alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
 +	<pooplog> it would be nice to have an internal wavein machine to get live input
@@ -129,6 +110,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
 !?	alk - make wires square ended, like spec analyser
+++ alk: rightclick on vol slider in wire dialog to enter vol numerically (0.0db is imposibble to set once 
+	the slider has been moved)
 + Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 + Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
@@ -156,30 +139,21 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		 and neither does Inputhandler know which machines are playing.
 		 Doing a "player::Stop()" would be a bit hardcore.
 		 I agree]
-*FF	plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
-		missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
-!!!FF	longer sequences (256)
-!!!FF	more tracks (64)
 +++	Finish SAVE as wave, have options for: sample rate, # channels, bitsize
 +++FF?	DirectX effects, intstruments
 +++	option for record to take command FD into account like ft2
-+++FF	new file format: (machines save custom data length, patterns stored according to # tracks, sequence 
-		length stored according to length, vst multi-out, connections as linked lists, wire nodes, 
-		volume column, multiout info, direct x stuff, etc.)
 ++	ALK tracker command to bypass an fx, mute command for machines
 		[Currently machines are disconnected when doing so. If we do the commands, they should be just muted]
 ++	Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)
 ++	tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
-++ DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
+++FF DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
 	machines ....
 +	pattern repeat (loop) and song repeat (asked by Vir|us)
 + alk: global Delay Trigger, that affects every note (not just the one on this channel)
 	[this seems hard, because the player will have to scan all tracks for this command, then go back and
 		play the tracks]
-+FF	<pooplog> again i ask why the connection limit is 12 and not 16 or 24
-		[should use linked lists instead of arrays]
 +FF Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to 
 	file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to 
 	vol+panning for the gui for the user.
@@ -222,6 +196,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ***	Midiout is NOT solid...
 *	MIDI out only works with Waveout
 ++	midi control commands learn
+++  midi control commands handling 14 bit messages
 ++	velocity should be able to store data to instrument column. So should other midi messages
 ++ <lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
 	the active machine to machine number [program number] ...this enables psycle for live use without screen
@@ -235,7 +210,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[_fileName doesn't store the SongDir, and it gets reseted after closing the config dialog.
 		Fix: add directory to filename and remove it for titlebar and load/save dialogs]
 		[ -> config dialog only changes SongDir if user changes it in the dialog ]
-*** (2nd Duplicate. See line 125) new machine dialog should save preferred sorting method
 ** <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
 ** <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
@@ -247,6 +221,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 *	<alk> there's a bug where when u alt-tab the icon is not correct 
 		[ cannot find the reason, older version had this too ]
+* <alk> 'play current block' loops current pattern -should it just play the selected block?
+* <alk> 'play current pattern' plays song from current order (which is the same function as 'play song (normal)' 
+	-should it just play the current pattern?
+* <alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	<_sue_> hi...... all those loading/exit/save confirmations are anoying me a bit.....any chance to make 
 		them optional in the configs menu? when i start psycle and load a track it even asks me if i want to 
@@ -268,8 +246,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[because machine view does not track changes yet]
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
-++FF	songs should save master decrease flag
-		[This can be hacked by now without need of fileformat change]
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?
 ++	<doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" 
 		[ we should store a default pattern length parameter]
@@ -323,13 +299,28 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 * Importing:
 ------------
 *	It doesn't add the machines necessary to play all notes.
-*FF	if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
 +	Add option for the user to create samplers for instruments
 +	IT importing
 +	.mid import
 +	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
 		pattern data and other settings, this possible? (yes, but will require new song parser...)
 
+* File Format:
+------------
+**FF psycle is saving the WRONG lines/beat from file.  I saved a song with 3, it loaded as 2.
+	[Save LPB instead of TicksPerBeat]
+*FF	plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
+		missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
+*FF	if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
+!!!FF	longer sequences (256)
+!!!FF	more tracks (64)
++++FF	new file format: (machines save custom data length, patterns stored according to # tracks, sequence 
+		length stored according to length, vst multi-out, connections as linked lists, wire nodes, 
+		volume column, multiout info, direct x stuff, etc.)
++FF	<pooplog> again i ask why the connection limit is 12 and not 16 or 24
+		[should use linked lists instead of arrays]
+++FF	songs should save master decrease flag
+		[This can be hacked by now without need of fileformat change]
 
 
 

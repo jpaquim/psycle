@@ -10,6 +10,7 @@
 #include "InfoDlg.h"
 #include "WaveEdFrame.h"
 #include "MidiMonitorDlg.h"
+#include "GearRackDlg.h"
 
 class Song;
 
@@ -34,6 +35,8 @@ public:
 	Song* _pSong;
 	int vuprevL;
 	int vuprevR;
+
+	CGearRackDlg* pGearRackDialog;
 // Operations
 public:
 	void SetAppSongBpm(int x);
