@@ -1,0 +1,194 @@
+=============
+Player Core =
+=============
+
+* Sequencer/Player
+------------------
+- Status :
+         Being defined
+
+- Coders :
+         pooplog, [JAZ]
+
+- Sources/Docs :
+         -
+
+- Notes :
+         * Event Based.
+         * Interpolated events when resuming playback
+         * 1 pattern list per machine.
+
+
+* Mixing-Routing Core
+---------------------
+- Status :
+         Queued for definition.
+
+- Coders :
+         -
+
+- Sources/Docs :
+         -
+
+- Notes :
+        * Multichannel (possibility of, for example, 5.1)
+        * Optimized buffers (dynamic, not static like in Psycle 1)
+        * Possible use of xDSP library.
+
+
+* Basic DSP
+-----------
+- Status :
+         Queued for definition.
+
+- Coders :
+         -
+
+- Sources/Docs :
+          http://www.fftw.org/
+          http://shibatch.sourceforge.net/ ( Resampling / Param EQ )
+          http://www.sunpoint.net/~oparviai/soundtouch/ ( Pitch/Tempo/Speed changer )
+          Foobar2000 SDK (?)
+
+
+===============
+File I/O Core =
+===============
+
+* Song Data Management (Song Class)
+-----------------------------------
+- Status :
+         Queued for definition.
+
+- Coders :
+         [JAZ], pooplog
+
+- Sources/Docs :
+         Current Psycle 1.7.4 sources.
+
+
+
+* .PSY(new) Load/Save
+---------------------
+- Status :
+         Defined. Extensions pending.
+
+- Coders :
+         pooplog, ([JAZ])
+
+- Sources/Docs :
+         Current Psycle 1.7.4 sources.
+		 DevelDocs\new psycle file description.txt
+
+
+* .PSY(old) Load
+----------------
+- Status :
+         Defined.
+
+- Coders:
+         -
+
+- Sources/Docs :
+         Current Psycle 1.7.4 sources.
+      	 DevelDocs\Psycle File description.doc
+
+
+* XM Importer
+-------------
+- Status :
+         Partly done. Needs Instruments importing and extra options.
+
+- Coders :
+         pooplog, [JAZ]
+
+- Sources/Docs :
+         Current Psycle 1.7.4 sources.
+         FT2 fileformat definition.
+
+
+* IT Importer
+-------------
+- Status :
+         Started. Not working.
+
+- Coders :
+         [JAZ], pooplog, (lipid)
+
+- Sources/Docs :
+         Current Psycle 1.7.4 sources.
+         IT fileformat definition.
+
+
+* MOD/other Importer
+--------------------
+- Status :
+         Not queued yet.
+
+- Coders :
+         -
+
+- Sources/Docs :
+         -
+
+
+
+=============
+Plugin Core =
+=============
+
+* (New)Native Plugin Host
+--------------------
+- Status :
+         Being defined
+
+- Coders :
+         Multiple
+
+- Sources/Docs :
+         PluginAPI mailinglist
+
+
+
+* VST Plugin Host
+-----------------
+- Status :
+         Functional. Compatibility needs to be improved.
+
+- Coders :
+         pooplog, [JAZ]
+
+- Sources/Docs :
+         Current Psycle 1.7.4 sources.
+         VSTSDK 2.3
+
+
+
+===============
+Core Machines =
+===============
+
+* Sampler
+---------
+- Status :
+         Half defined
+
+- Coders :
+         pooplog, [JAZ]
+
+- Sources/Docs :
+		 DevelDocs/new sampler spec.txt
+		 Possible use of Shibatch and soundtouch libraries for better quality, and/or xDSP
+
+
+* Recorder
+----------
+- Status :
+        Not queued yet.
+
+- Coders :
+         pooplog, [JAZ]
+
+- Sources/Docs :
+         -
+
