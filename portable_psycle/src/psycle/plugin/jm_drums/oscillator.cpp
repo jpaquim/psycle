@@ -1,5 +1,6 @@
+#include <project.h>
 #include <assert.h>
-#include "oscillator.h"
+#include <psycle/plugin/jm_drums/oscillator.h>
 
 // oscillator.cpp: implementation of the Coscillator class.
 //

@@ -1,10 +1,6 @@
 #include <project.h>
-#include <psycle/plugin/MachineInterface.h>
-//
-// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling 
-// requirements.
-//
-#include "M3Track.h"
+// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
+#include <psycle/plugin/m3/m3track.h>
 #include <string.h>
 
 // M3 Buzz plugin by MAKK makk@gmx.de

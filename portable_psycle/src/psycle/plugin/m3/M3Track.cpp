@@ -1,12 +1,7 @@
 #include <project.h>
+#include <psycle/plugin/m3/m3track.h>
 
 // CTrack Definition file (M3Track.cpp)
-
-extern float freqTab[120];
-extern float coefsTab[4*128*128*8];
-extern float LFOOscTab[0x10000];
-extern signed short WaveTable[5][2100];
-
 
 /* Since This doesn't work, the values in the "Init()" are hardcoded
 extern CMachineParameter const paraWave1;
@@ -50,9 +45,6 @@ extern CMachineParameter const paraLFO2Freq;
 extern CMachineParameter const paraLFO2Amount;
 
 */
-
-#include "M3Track.h"
-
 
 void CTrack::Stop()
 {
@@ -326,9 +318,9 @@ void CTrack::Tick( tvals const &tv)
 			{
 				GlideActive = true;
 				if( Frequency > FrequencyFrom)
-				{	GlideMul = pow( 2, 1.0/GlideTime); }
+				{	GlideMul = std::pow(2., 1. / GlideTime); }
 				else
-				{	GlideMul = pow( 0.5, 1.0/GlideTime); }
+				{	GlideMul = std::pow(0.5, 1. / GlideTime); }
 				GlideFactor = 1;
 				GlideCount = (int)(log( Frequency/FrequencyFrom)/log(GlideMul));
 			}

@@ -196,66 +196,57 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	float fbc=(float)Vals[1]*0.00390625f;
 	float const cdry=Vals[2]*0.00390625f;
 	float const cwet=Vals[3]*0.00390625f;
-
 	do
 	{
-	float const il=++*psamplesleft;
-	float const ir=++*psamplesright;
+		float const il=++*psamplesleft;
+		float const ir=++*psamplesright;
 
-	dbl[ccl]=il+dbl[dcl]*fbc;
-	dbr[ccr]=ir+dbr[dcr]*fbc;
+		dbl[ccl]=il+dbl[dcl]*fbc;
+		dbr[ccr]=ir+dbr[dcr]*fbc;
 
-	*psamplesleft	=il*cdry+dbl[dcl]*cwet;
-	*psamplesright	=ir*cdry+dbr[dcl]*cwet;
-	
-	if(++ccl==MAX_DELAY_SAMPLES)ccl=0;
-	if(++ccr==MAX_DELAY_SAMPLES)ccr=0;
-	if(++dcl==MAX_DELAY_SAMPLES)dcl=0;
-	if(++dcr==MAX_DELAY_SAMPLES)dcr=0;
+		*psamplesleft	=il*cdry+dbl[dcl]*cwet;
+		*psamplesright	=ir*cdry+dbr[dcl]*cwet;
+		
+		if(++ccl==MAX_DELAY_SAMPLES)ccl=0;
+		if(++ccr==MAX_DELAY_SAMPLES)ccr=0;
+		if(++dcl==MAX_DELAY_SAMPLES)dcl=0;
+		if(++dcr==MAX_DELAY_SAMPLES)dcr=0;
 
-	++psamplesleft;
-	++psamplesright;
-
-	}while(--numsamples);
+		++psamplesleft;
+		++psamplesright;
+	} while(--numsamples);
 }
 
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
-
 	if(param==0)
 	{
-	float const spt=(float)pCB->GetTickLength()*2;
-	sprintf(txt,"%.3f",(float)value/spt);
-	return true;
+		float const spt=(float)pCB->GetTickLength()*2;
+		sprintf(txt,"%.3f",(float)value/spt);
+		return true;
 	}
-
 	if(param==1)
 	{
-	sprintf(txt,"%.1f%%",(float)value*0.390625f);
-	return true;
+		sprintf(txt,"%.1f%%",(float)value*0.390625f);
+		return true;
 	}
-
 	if(param==2 || param==3)
 	{
-	float coef=value*0.00390625f;
-	
-	if(coef>0.0f)
-	sprintf(txt,"%.1f dB",20.0f * log10(coef));
-	else
-	sprintf(txt,"-Inf. dB");	
-	return true;
+		float coef=value*0.00390625f;
+		if(coef>0.0f)
+			sprintf(txt,"%.1f dB",20.0f * log10(coef));
+		else
+			sprintf(txt,"-Inf. dB");	
+		return true;
 	}
-
 	if(param==4)
 	{
 		if(value==0)
-		sprintf(txt,"Off");
+			sprintf(txt,"Off");
 		else
-		sprintf(txt,"On");
-		
+			sprintf(txt,"On");
 		return true;
 	}
-
 	return false;
 }

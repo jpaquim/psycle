@@ -1,16 +1,10 @@
+#pragma once
+#include <math.h>
+#include "oscillator.h"
+
 // Drum.h: interface for the Drum class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_DRUM_H__E6FCA427_B715_11D4_8B11_9FFC09C4A814__INCLUDED_)
-#define AFX_DRUM_H__E6FCA427_B715_11D4_8B11_9FFC09C4A814__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-#include <math.h>
-#include "oscillator.h"
 
 #define ST_NONOTE	   0
 #define ST_NOTESUSTAIN 3
@@ -134,5 +128,3 @@ public:
 	virtual ~Drum();
 
 };
-
-#endif // !defined(AFX_DRUM_H__E6FCA427_B715_11D4_8B11_9FFC09C4A814__INCLUDED_)

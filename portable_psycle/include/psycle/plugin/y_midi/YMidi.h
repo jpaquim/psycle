@@ -1,8 +1,12 @@
 #pragma once
-#include <windows.h>
-#include <mmsystem.h>
-#include <stdio.h>
 #include "../MachineInterface.h"
+#include <windows.h>
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
+#include <stdio.h>
 
 #define YMIDI_VERSION "1.0a"
 #define NUMPARAMETERS 1
