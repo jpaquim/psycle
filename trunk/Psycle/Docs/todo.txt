@@ -4,6 +4,9 @@
 -midi control commands learn
 -longer patterns
 -store state of follow song toggle
+-"groove fill"
+*song name message box on load clear on loss of focus
+*follow song state save
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
