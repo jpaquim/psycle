@@ -295,7 +295,7 @@ namespace psycle
 
 			std::ostringstream s;
 			s << "Version " VERSION_NUMBER
-				//$Date$
+				//" $Date$"
 				//VERSION_NUMBER
 				" [built on " __DATE__ ", " __TIME__ "]";
 			m_versioninfo.SetWindowText(s.str().c_str());
