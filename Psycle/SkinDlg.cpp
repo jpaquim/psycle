@@ -215,7 +215,7 @@ BOOL CSkinDlg::OnInitDialog()
 	}
 	else
 	{
-		m_machine_background_bitmap.SetWindowText("Background Bitmap");
+		m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 	}
 
 	for (i = 8; i <= 64; i++)
@@ -1270,7 +1270,7 @@ void CSkinDlg::OnImportReg()
 		}
 		else
 		{
-			m_machine_background_bitmap.SetWindowText("Background Bitmap");
+			m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 		}
 
 		m_triangle_size.SetCurSel(_triangle_size-8);
@@ -1654,7 +1654,7 @@ void CSkinDlg::OnMachineBitmap()
 	else
 	{
 		bBmpBkg = FALSE;
-		m_machine_background_bitmap.SetWindowText("Background Bitmap");
+		m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 	}
 }
 
