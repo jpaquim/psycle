@@ -65,21 +65,21 @@ BOOL CPsycleApp::InitInstance()
 	CMainFrame* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
 	
-		if (!Global::pConfig->Read()) // problem reading registry info. missing or damaged
-		{
-			Global::pConfig->_initialized = false;
-			CConfigDlg dlg("Psycle configuration");
-			dlg.Init(Global::pConfig);
-			if (dlg.DoModal() == IDOK)
-			{
-				pFrame->m_wndView._outputActive = true;
-				Global::pConfig->_initialized = true;
-			}
-		}
-		else
+	if (!Global::pConfig->Read()) // problem reading registry info. missing or damaged
+	{
+		Global::pConfig->_initialized = false;
+		CConfigDlg dlg("Psycle configuration");
+		dlg.Init(Global::pConfig);
+		if (dlg.DoModal() == IDOK)
 		{
 			pFrame->m_wndView._outputActive = true;
+			Global::pConfig->_initialized = true;
 		}
+	}
+	else
+	{
+		pFrame->m_wndView._outputActive = true;
+	}
 
 	// create and load the frame with its resources
 	// For some reason, there'a First-Chance exception when

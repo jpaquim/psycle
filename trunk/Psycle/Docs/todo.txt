@@ -34,8 +34,6 @@ X low priority
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 
-
-
 + humanizer
 + global volume fades
 + <bdzld> poop: can you make mcm interpolated? (like a midi tweak smooth)
@@ -228,7 +226,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
-** VST Native instruments Pro-53 crash when loading a song
 ** vst fm7 locks up psycle on parameter change midi command
 ** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
 	it works fine?
