@@ -19,7 +19,7 @@ namespace operating_system
 		#if defined OPERATING_SYSTEM__MICROSOFT
 			{
 				std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << this->what();
-				TRACE("%s", s.str().c_str(), '\n');
+				TRACE("%s\n", s.str().c_str());
 				psycle::host::logger(psycle::host::logger::trace, s.str());
 			}
 			/*
