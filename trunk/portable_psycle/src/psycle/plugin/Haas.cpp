@@ -123,14 +123,14 @@ public:
 		early_reflection_delay_stereo_delta_abs(0),
 		early_reflection_delay_stereo_delta_positive(false),
 		early_reflection_delay_stereo_delta_negative(false),
-		early_reflection_left(direct_first),
-		early_reflection_right(direct_first),
+		early_reflection_left(early_reflection_first),
+		early_reflection_right(early_reflection_first),
 		early_reflection_gain_left(1),
 		early_reflection_gain_right(1),
 		late_reflection_gain_left(1),
 		late_reflection_gain_right(1)
-		{
-		}
+	{
+	}
 	virtual void init();
 	virtual void process(Sample l [], Sample r [], int samples, int);
 	virtual void parameter(const int &);
@@ -162,16 +162,6 @@ PSYCLE__PLUGIN__INSTANCIATOR(Haas);
 void Haas::init()
 {
 	resize(Real(0)); // resizes the buffer not to 0, but to 1, the smallest length possible for the algorithm to work
-	direct_left = direct_first;
-	direct_right = direct_first;
-	direct_gain_left = 1;
-	direct_gain_right = 1;
-	early_reflection_left = direct_first;
-	early_reflection_right = direct_first;
-	early_reflection_gain_left = 1;
-	early_reflection_gain_right = 1;
-	late_reflection_gain_left = 1;
-	late_reflection_gain_right = 1;
 }
 
 void Haas::parameter(const int & parameter)
@@ -180,12 +170,12 @@ void Haas::parameter(const int & parameter)
 	{
 	case direct_delay_stereo_delta:
 		direct_delay_stereo_delta_positive = (*this)(direct_delay_stereo_delta) > 0;
-		direct_delay_stereo_delta_negative = !direct_delay_stereo_delta_positive || (*this)(direct_delay_stereo_delta) < 0;
+		direct_delay_stereo_delta_negative = !direct_delay_stereo_delta_positive && (*this)(direct_delay_stereo_delta) < 0;
 		direct_delay_stereo_delta_abs = std::fabs((*this)(direct_delay_stereo_delta));
 		goto resize_max;
 	case early_reflection_delay_stereo_delta:
 		early_reflection_delay_stereo_delta_positive = (*this)(direct_delay_stereo_delta) > 0;
-		early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive || (*this)(direct_delay_stereo_delta) < 0;
+		early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive && (*this)(direct_delay_stereo_delta) < 0;
 		early_reflection_delay_stereo_delta_abs = std::fabs((*this)(direct_delay_stereo_delta));
 		goto resize_max;
 	case early_reflection_delay:
