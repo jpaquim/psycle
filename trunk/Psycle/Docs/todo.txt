@@ -51,7 +51,6 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 * bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> Internals still miss mouse tweak, right?
-* sue says poopsynth blows up at 22050 sometimes * MIGHT BE FIXED
 
 * Sampler Machine/Wave Ed:
 --------------------------
@@ -106,9 +105,6 @@ bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  
 		 Fix:Basically, make ONLY .fxb for VST's.
 ! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
 	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
-! <_sue_> another thing....the lfo knob on your filter should be moving all the time....but it isnt....its only 
-	refreshed when it receives tweaks.... <pooplog> it doesn't update knobs unless they are tweaked... then it 
-	updates ALL the knobs
 + <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
 	owner draw controls i say?
 + James says: how hard would it be to put nodes in the wires, so you can bend them?

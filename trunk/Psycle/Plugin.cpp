@@ -154,7 +154,7 @@ void Plugin::Work(int numSamples)
 	if (!_mute) 
 	{
 #endif
-		if ((_mode != MACHMODE_FX) || (!_bypass && !_stopped))
+		if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
 		{
 			int ns = numSamples;
 			while (ns)
