@@ -93,8 +93,6 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_CURSOR, OnLineNumbersCursor)
-	ON_BN_CLICKED(IDC_DRAW_EMPTY_DATA, OnDrawEmptyData)
-	ON_BN_CLICKED(IDC_DRAW_MAC_INDEX, OnDrawMacIndex)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
@@ -106,14 +104,16 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_PATTERN_HEADER_SKIN, OnSelchangePatternHeaderSkin)
 	ON_CBN_SELCHANGE(IDC_WIRE_WIDTH, OnSelchangeWireWidth)
 	ON_CBN_SELCHANGE(IDC_MACHINE_SKIN, OnSelchangeMachineSkin)
+	ON_CBN_SELCHANGE(IDC_WIREAA, OnSelchangeWireAA)
 	ON_CBN_SELCHANGE(IDC_MACHINE_FONT_POINT, OnSelchangeGeneratorFontPoint)
 	ON_BN_CLICKED(IDC_MACHINE_FONTFACE, OnGeneratorFontFace)
 	ON_BN_CLICKED(IDC_MV_FONT_COLOUR, OnMVGeneratorFontColour)
 	ON_CBN_SELCHANGE(IDC_MACHINE_FONT_POINT2, OnSelchangeEffectFontPoint)
 	ON_BN_CLICKED(IDC_MACHINE_FONTFACE2, OnEffectFontFace)
 	ON_BN_CLICKED(IDC_MV_FONT_COLOUR2, OnMVEffectFontColour)
-	ON_CBN_SELCHANGE(IDC_WIREAA, OnSelchangeWireAA)
-
+	ON_BN_CLICKED(IDC_DRAW_EMPTY_DATA, OnDrawEmptyData)
+	ON_BN_CLICKED(IDC_DRAW_MAC_INDEX, OnDrawMacIndex)
+	ON_BN_CLICKED(IDC_MACHINE_BITMAP, OnMachineBitmap)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -718,6 +718,7 @@ void CSkinDlg::OnImportReg()
 		_pattern_font_flags = 0;
 		_generator_font_flags = 0;
 		_effect_font_flags = 0;
+		bBmpBkg = FALSE;
 
 		char buf[512];
 		while (fgets(buf, 512, hfile))
@@ -853,6 +854,22 @@ void CSkinDlg::OnImportReg()
 					{
 						p[0]=0;
 						strcpy(_machine_skin,q);
+					}
+				}
+			}
+			else if (strstr(buf,"\"machine_background\"=\""))
+			{
+				char *q = strchr(buf,61); // =
+				if (q)
+				{
+					q+=2;
+					char *p = strrchr(q,34); // "
+					if (p)
+					{
+						p[0]=0;
+						strcpy(szBmpBkgFilename,q);
+						// check for no \ in which case search for it?
+						bBmpBkg = TRUE;
 					}
 				}
 			}
@@ -1146,6 +1163,7 @@ void CSkinDlg::OnImportReg()
 					_machineViewEffectFontColor=_httoi(q+1);
 				}
 			}
+
 			//
 			//
 			//
@@ -1303,6 +1321,7 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"\"mv_effect_fontcolour\"=dword:%.8X\n",_machineViewEffectFontColor);
 		fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
 		fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
+		fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename);
 
 		fclose(hfile);
 	}
@@ -1545,4 +1564,47 @@ void CSkinDlg::OnDrawEmptyData()
 void CSkinDlg::OnDrawMacIndex()
 {
 	_draw_mac_index = m_draw_mac_index.GetCheck() >0?true:false;
+}
+
+void CSkinDlg::OnMachineBitmap() 
+{
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	char szPath[_MAX_PATH];       // buffer for file name
+	szFile[0]='\0';
+	szPath[0]='\0';
+
+	CString str1(szBmpBkgFilename);
+	int i = str1.ReverseFind('\\')+1;
+	CString str2 = str1.Mid(i);
+	strcpy(szFile,str2);
+
+	strcpy(szPath,str1);
+	szPath[i]=0;
+
+
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Bitmaps (*.bmp)\0*.bmp\0";
+	ofn.nFilterIndex = 0;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = szPath;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	
+	// Display the Open dialog box. 
+	
+	if (GetOpenFileName(&ofn)==TRUE)
+	{
+		strcpy(szBmpBkgFilename,szFile);
+		bBmpBkg = TRUE;
+	}
+	else
+	{
+		bBmpBkg = FALSE;
+	}
 }

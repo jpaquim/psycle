@@ -261,6 +261,10 @@ Configuration::Configuration()
 	autosaveSong = true;
 	autosaveSongTime = 10;
 
+	bBmpBkg = FALSE;
+	sprintf(szBmpBkgFilename,"psycle.bmp");
+
+
 #endif // _WINAMP_PLUGIN
 }
 
@@ -676,6 +680,12 @@ Configuration::Read()
 	reg.QueryValue("mv_generator_fontcolour", &type, (BYTE*)&mv_generator_fontcolour, &numData);
 	numData = sizeof(mv_effect_fontcolour);
 	reg.QueryValue("mv_effect_fontcolour", &type, (BYTE*)&mv_effect_fontcolour, &numData);
+
+	numData = sizeof(bBmpBkg);
+	reg.QueryValue("bBmpBkg", &type, (BYTE*)&bBmpBkg, &numData);
+
+	numData = sizeof(szBmpBkgFilename);
+	reg.QueryValue("szBmpBkgFilename", &type, (BYTE*)&szBmpBkgFilename, &numData);
 
 	numData = sizeof(pvc_background);
 	reg.QueryValue("pvc_background", &type, (BYTE*)&pvc_background, &numData);
@@ -1114,6 +1124,10 @@ Configuration::Write()
 	reg.SetValue("mv_wirewidth", REG_DWORD, (BYTE*)&mv_wirewidth, sizeof(mv_wirewidth));	
 	reg.SetValue("mv_generator_fontcolour", REG_DWORD, (BYTE*)&mv_generator_fontcolour, sizeof(mv_generator_fontcolour));	
 	reg.SetValue("mv_effect_fontcolour", REG_DWORD, (BYTE*)&mv_effect_fontcolour, sizeof(mv_effect_fontcolour));	
+
+
+	reg.SetValue("bBmpBkg", REG_DWORD, (BYTE*)&bBmpBkg, sizeof(bBmpBkg));	
+	reg.SetValue("szBmpBkgFilename", REG_DWORD, (BYTE*)&szBmpBkgFilename, sizeof(szBmpBkgFilename));
 
 	reg.SetValue("pvc_separator", REG_DWORD, (BYTE*)&pvc_separator, sizeof(pvc_separator));	
 	reg.SetValue("pvc_separator2", REG_DWORD, (BYTE*)&pvc_separator2, sizeof(pvc_separator2));	

@@ -96,6 +96,7 @@ BOOL CPsycleApp::InitInstance()
 	
 	pFrame->m_wndView.LoadMachineSkin();
 	pFrame->m_wndView.LoadPatternHeaderSkin();
+	pFrame->m_wndView.LoadMachineBackground();
 	pFrame->m_wndView.RecalcMetrics();
 	pFrame->m_wndView.RecalculateColourGrid();
 	// The one and only window has been initialized, so show and update it.

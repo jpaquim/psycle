@@ -41,8 +41,6 @@ rough bug count: ~60, many aren't really bugs though.
 
 ** parameter name lengths in plugs: http://psycle.pastnotecut.org/thread.php?threadid=938&boardid=2&styleid=1
 
-+++ bmps for background of machine view?
-
 ++ volume slide command
 
 ++ <sampler> mmmm, i miss another feature. Show with a different colour the notes of the actual Generator/effect in patterns
@@ -199,7 +197,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		<pooplog> sliders, switches, and owner draw controls i say?
 +	James says: how hard would it be to put nodes in the wires, so you can bend them?
 + <JAL7OH> is it possible to make arrows resizable?
-+ <Druttis_> can you have background picture in psycle somehow?
 
 * Player Engine:
 ----------------

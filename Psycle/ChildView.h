@@ -271,6 +271,7 @@ public:
 	void RecalcMetrics();
 	void LoadPatternHeaderSkin();
 	void LoadMachineSkin();
+	void LoadMachineBackground();
 	void KillWireDialogs();
 	void patTrackMute();
 	void patTrackSolo();
@@ -405,10 +406,15 @@ private:
 	HBITMAP hbmPatHeader;
 	CBitmap machineskin;
 	CBitmap machineskinmask;
+	CBitmap machinebkg;
 	HBITMAP hbmMachineSkin;
+	HBITMAP hbmMachineBkg;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];
 	int VISLINES;
+
+	int bkgx;
+	int bkgy;
 	
 	int playpos;		// Play Cursor Position in Screen // left and right are unused
 	int newplaypos;		// Play Cursor Position in Screen that is gonna be drawn.

@@ -78,6 +78,9 @@ public:
 
 	char _skinPathBuf[MAX_PATH];
 
+	bool bBmpBkg;
+	char szBmpBkgFilename[MAX_PATH];
+
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
@@ -174,7 +177,7 @@ protected:
 	afx_msg void OnMVEffectFontColour();
 	afx_msg void OnDrawEmptyData();
 	afx_msg void OnDrawMacIndex();
-
+	afx_msg void OnMachineBitmap();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

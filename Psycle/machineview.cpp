@@ -56,9 +56,38 @@ void CChildView::DrawMachineEditor(CDC *devc)
 
 	CBrush fillbrush(Global::pConfig->mv_polycolour);
 	CBrush *oldbrush = devc->SelectObject(&fillbrush);
-	CRect rClient;
-	GetClientRect(&rClient);
-	devc->FillSolidRect(&rClient,Global::pConfig->mv_colour);
+	if (Global::pConfig->bBmpBkg)
+	{
+		CDC memDC;
+		CBitmap* oldbmp;
+		memDC.CreateCompatibleDC(devc);
+		oldbmp=memDC.SelectObject(&machinebkg);
+
+		if ((CW > bkgx) || (CH > bkgy))
+		{
+			for (int cx=0; cx<CW; cx+=bkgx)
+			{
+				for (int cy=0; cy<CH; cy+=bkgy)
+				{
+					devc->BitBlt(cx,cy,bkgx,bkgy,&memDC,0,0,SRCCOPY);
+				}
+			}
+		}
+		else
+		{
+			devc->BitBlt(0,0,CW,CH,&memDC,0,0,SRCCOPY);
+		}
+
+		memDC.SelectObject(oldbmp);
+		memDC.DeleteDC();
+
+	}
+	else
+	{
+		CRect rClient;
+		GetClientRect(&rClient);
+		devc->FillSolidRect(&rClient,Global::pConfig->mv_colour);
+	}
 
 	if (Global::pConfig->mv_wireaa)
 	{
@@ -130,14 +159,14 @@ void CChildView::DrawMachineEditor(CDC *devc)
 								
 						CPoint pol[4];
 						
-						pol[0].x = f1 - Dsp::F2I(modX*10);
-						pol[0].y = f2 - Dsp::F2I(modY*10);
-						pol[1].x = pol[0].x + Dsp::F2I(modX*20);
-						pol[1].y = pol[0].y + Dsp::F2I(modY*20);
-						pol[2].x = pol[0].x - Dsp::F2I(modY*12);
-						pol[2].y = pol[0].y + Dsp::F2I(modX*12);
-						pol[3].x = pol[0].x + Dsp::F2I(modY*12);
-						pol[3].y = pol[0].y - Dsp::F2I(modX*12);
+						pol[0].x = f1 - Dsp::F2I(modX*(10+Global::pConfig->mv_wirewidth));
+						pol[0].y = f2 - Dsp::F2I(modY*(10+Global::pConfig->mv_wirewidth));
+						pol[1].x = pol[0].x + Dsp::F2I(modX*(20+2*Global::pConfig->mv_wirewidth));
+						pol[1].y = pol[0].y + Dsp::F2I(modY*(20+2*Global::pConfig->mv_wirewidth));
+						pol[2].x = pol[0].x - Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
+						pol[2].y = pol[0].y + Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
+						pol[3].x = pol[0].x + Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
+						pol[3].y = pol[0].y - Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
 
 						devc->SelectObject(&linepen1);
 						amosDraw(devc, oriX, oriY, desX, desY);
@@ -149,8 +178,8 @@ void CChildView::DrawMachineEditor(CDC *devc)
 						amosDraw(devc, oriX, oriY, desX, desY);
 						devc->Polygon(&pol[1], 3);
 
-						tmac->_connectionPoint[w].x = f1-10;
-						tmac->_connectionPoint[w].y = f2-10;
+						tmac->_connectionPoint[w].x = f1-(10+Global::pConfig->mv_wirewidth);
+						tmac->_connectionPoint[w].y = f2-(10+Global::pConfig->mv_wirewidth);
 					}
 				}
 			}// Machine actived
@@ -230,19 +259,19 @@ void CChildView::DrawMachineEditor(CDC *devc)
 								
 						CPoint pol[4];
 						
-						pol[0].x = f1 - Dsp::F2I(modX*10);
-						pol[0].y = f2 - Dsp::F2I(modY*10);
-						pol[1].x = pol[0].x + Dsp::F2I(modX*20);
-						pol[1].y = pol[0].y + Dsp::F2I(modY*20);
-						pol[2].x = pol[0].x - Dsp::F2I(modY*12);
-						pol[2].y = pol[0].y + Dsp::F2I(modX*12);
-						pol[3].x = pol[0].x + Dsp::F2I(modY*12);
-						pol[3].y = pol[0].y - Dsp::F2I(modX*12);
+						pol[0].x = f1 - Dsp::F2I(modX*(10+Global::pConfig->mv_wirewidth));
+						pol[0].y = f2 - Dsp::F2I(modY*(10+Global::pConfig->mv_wirewidth));
+						pol[1].x = pol[0].x + Dsp::F2I(modX*(20+2*Global::pConfig->mv_wirewidth));
+						pol[1].y = pol[0].y + Dsp::F2I(modY*(20+2*Global::pConfig->mv_wirewidth));
+						pol[2].x = pol[0].x - Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
+						pol[2].y = pol[0].y + Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
+						pol[3].x = pol[0].x + Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
+						pol[3].y = pol[0].y - Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
 
 						devc->Polygon(&pol[1], 3);
 
-						tmac->_connectionPoint[w].x = f1-10;
-						tmac->_connectionPoint[w].y = f2-10;
+						tmac->_connectionPoint[w].x = f1-(10+Global::pConfig->mv_wirewidth);
+						tmac->_connectionPoint[w].y = f2-(10+Global::pConfig->mv_wirewidth);
 					}
 				}
 			}// Machine actived
@@ -975,46 +1004,3 @@ int CChildView::GetMachine(CPoint point)
 	return tmac;
 }
 
-/*
-void CChildView::Draw_BackSkin()
-{
-	CRect rClient;
-
-	GetClientRect(&rClient);
-	int CW=rClient.Width();
-	int CH=rClient.Height();
-
-	UpdateCanvas cv(m_hWnd);
-
-	int sx;
-	int sy;
-
-	Blitter* blit;
-
-	switch (viewMode)
-	{
-	case 0:
-		blit=new Blitter (mv_bg);
-		mv_bg.GetSize(sx,sy);
-		break;
-	case 1:
-		blit=new Blitter (sv_bg);
-		sv_bg.GetSize(sx,sy);
-		break;
-	case 2:
-		blit=new Blitter (pv_bg);
-		pv_bg.GetSize(sx,sy);
-		break;
-	}
-	
-	for (int cx=0; cx<CW; cx+=sx)
-	{
-		for (int cy=0; cy<CH; cy+=sy)
-		{
-			blit->SetDest(cx, cy);
-			blit->BlitTo(cv);
-		}
-	}
-	delete blit;
-}	
-*/

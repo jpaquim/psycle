@@ -105,6 +105,9 @@ void CConfigDlg::Init(
 
 	strcpy(_skinDlg._machine_skin, pConfig->machine_skin);
 
+	strcpy(_skinDlg.szBmpBkgFilename, pConfig->szBmpBkgFilename);
+	_skinDlg.bBmpBkg = pConfig->bBmpBkg;
+
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
 	_outputDlg.m_syncDriverIndex = pConfig->_syncDriverIndex;
@@ -240,10 +243,28 @@ int CConfigDlg::DoModal()
 		{
 			strcpy(_pConfig->machine_skin, _skinDlg._machine_skin);
 			// LOAD HEADER SKIN
-			if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
+			if (_pConfig->Initialized() ) 
+			{
+				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
+			}
 		}
 
-		if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
+		_pConfig->bBmpBkg = _skinDlg.bBmpBkg;
+		if (_pConfig->bBmpBkg)
+		{
+			strcpy(_pConfig->szBmpBkgFilename, _skinDlg.szBmpBkgFilename);
+			// LOAD HEADER SKIN
+			if (_pConfig->Initialized() ) 
+			{
+				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();
+			}
+		}
+		if (_pConfig->Initialized() ) 
+		{
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
+		}
+
+
 
 		_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
 		_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;	// MIDI IMPLEMENTATION

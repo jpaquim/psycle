@@ -63,9 +63,6 @@ static char THIS_FILE[] = __FILE__;
 
 CMainFrame		*pParentMain;
 
-//Bitmap mv_bg;
-
-
 unsigned idletime=0;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -185,6 +182,8 @@ CChildView::~CChildView()
 	DeleteObject(hbmMachineSkin);
 	patternheadermask.DeleteObject();
 	machineskinmask.DeleteObject();
+	machinebkg.DeleteObject();
+	DeleteObject(hbmMachineBkg);
 }
 
 BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -3491,4 +3490,31 @@ void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI)
 		pCmdUI->SetCheck(1);
 	else
 		pCmdUI->SetCheck(0);	
+}
+
+void CChildView::LoadMachineBackground()
+{
+	machinebkg.DeleteObject();
+	DeleteObject(hbmMachineBkg);
+	if (Global::pConfig->bBmpBkg)
+	{
+		Global::pConfig->bBmpBkg=FALSE;
+		hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+		if (hbmMachineBkg)
+		{
+			if (machinebkg.Attach(hbmMachineBkg))
+			{	
+				BITMAP bm;
+				GetObject(hbmMachineBkg,sizeof(BITMAP),&bm);
+
+				bkgx=bm.bmWidth;
+				bkgy=bm.bmHeight;
+
+				if ((bkgx > 0) && (bkgy > 0))
+				{
+					Global::pConfig->bBmpBkg=TRUE;
+				}
+			}
+		}
+	}
 }
