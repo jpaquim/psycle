@@ -2278,6 +2278,7 @@ void CMainFrame::OnFollowSong()
 
 	if (( Global::pConfig->_followSong ) && ( Global::pPlayer->_playing ))
 	{
+		m_wndView.ChordModeOffs = 0;
 		m_wndView.bScrollDetatch=false;
 		if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 		{

@@ -138,6 +138,8 @@ CChildView::CChildView()
 	ntOff=0;
 	nlOff=0;
 
+	ChordModeOffs = 0;
+
 	Global::pInputHandler->SetChildView(this);
 	Global::pResampler->SetQuality(RESAMPLE_LINEAR);
 	_outputActive = false;

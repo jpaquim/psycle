@@ -384,10 +384,14 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefPatternPaste:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->patPaste();
 		break;
 
 	case cdefPatternMixPaste:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->patPaste();
 		break;
 
@@ -413,16 +417,19 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 	case cdefColumnNext:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
 		break;
 
 	case cdefColumnPrev:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->PrevTrack(1,Global::pConfig->_wrapAround);
 		break;
 
 	case cdefNavLeft:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( !bDoingSelection )
 		{
 			pChildView->PrevCol(Global::pConfig->_wrapAround);
@@ -442,6 +449,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	case cdefNavRight:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( !bDoingSelection )
 		{
 			pChildView->NextCol(Global::pConfig->_wrapAround);
@@ -461,6 +469,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	case cdefNavUp:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -475,6 +484,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	case cdefNavDn:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -489,6 +499,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	case cdefNavPageUp:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -503,6 +514,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 	case cdefNavPageDn:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -515,8 +527,9 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 		break;
 	
-	case cdefNavTop:				
+	case cdefNavTop:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -546,6 +559,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 	
 	case cdefNavBottom:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -574,22 +588,32 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	
 	case cdefRowInsert:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->InsertCurr();
 		break;
 
 	case cdefRowDelete:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->DeleteCurr();
 		break;
 
 	case cdefRowClear:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->ClearCurr();		
 		break;
 
 	case cdefBlockStart:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 		break;
 
 	case cdefBlockEnd:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->EndBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 		break;
 
@@ -649,10 +673,14 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefBlockDouble:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->DoubleLength();
 		break;
 
 	case cdefBlockHalve:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->HalveLength();
 		break;
 
@@ -665,14 +693,20 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefBlockPaste:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,false);
 		break;
 
 	case cdefBlockMix:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,true);
 		break;
 
 	case cdefBlockDelete:
+		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		pChildView->DeleteBlock();
 		break;
 
@@ -726,6 +760,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 	case cdefEditToggle:
 		pChildView->bEditMode = !pChildView->bEditMode;
+		pChildView->ChordModeOffs = 0;
 		
 		if(bCtrlPlay && GetKeyState(VK_RCONTROL)<0) Stop();
 		
@@ -784,6 +819,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 	case cdefEditPattern:
 		pChildView->OnPatternView();
+		pChildView->ChordModeOffs = 0;
 		break;
 
 	case cdefEditInstr:
@@ -796,28 +832,34 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 
 
 	case cdefPatternInc:
+		pChildView->ChordModeOffs = 0;
 		pChildView->IncCurPattern();
 		break;
 
 	case cdefPatternDec:
+		pChildView->ChordModeOffs = 0;
 		pChildView->DecCurPattern();
 		break;
 
 	case cdefSongPosInc:
+		pChildView->ChordModeOffs = 0;
 		pChildView->IncPosition(brepeat?true:false);
 		break;
 
 	case cdefSongPosDec:
+		pChildView->ChordModeOffs = 0;
 		pChildView->DecPosition();
 		break;
 
 	case cdefUndo:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		 pChildView->OnEditUndo();
 		 break;
 
 	case cdefRedo:
 		pChildView->bScrollDetatch=false;
+		pChildView->ChordModeOffs = 0;
 		 pChildView->OnEditRedo();
 		 break;
 	}
