@@ -14,6 +14,7 @@
 *make master machine update display if it decides to change volume
 *dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today it is fine.  i think it has to do with cpu load.
 *pattern view does not refresh when skin dlg presets have changed.
+*input handler is not called during machine view, thus undo/redo don't work for seq edits from control keys.  so... add them to machine view somehow.
 +actual skinning
 +visual preset saving/loading
 !DO NOT LOAD LIST VST list & database
