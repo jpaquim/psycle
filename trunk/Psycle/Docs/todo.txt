@@ -60,6 +60,20 @@
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
 + pooplog - dragging files onto psycle window would be nice, hmm?
 * machine numbers in dialog headers should be in hex
+* switched a pattern length to 2 and the empty space was not cleared, it looped 0 1 0 1 0 1
+* trying to select past the visible area with the mouse sucks
+* preview check box in preset dialog stopped working?
+* noteffs didn't play when recording
+* keyrepeat on recording! what the fuck?!
+* did some transpose selection and display got fucking crazy i was very confused - undo did same.
+* moving machines makes playback pop
+* waveoutMME gets weird after a bit and start playing all crackly and doubletime
+* psycle crashed after changing waveout/directx settings around
++ songs should save master decrease flag
++ What if master machine looked like a mixer and you could double click it to bring up not only the master volume,
+	but labelled volume sliders for each of the machines connected to it? -> this would suck as you would get names
+	for only the effects
++ how about nice looking bmp windows for machine link and master machine dialogs?
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
