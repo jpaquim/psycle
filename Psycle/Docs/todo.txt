@@ -57,7 +57,6 @@
 	require a file format change though :(
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
 + pooplog - dragging files onto psycle window would be nice, hmm?
-! machine numbers in dialog headers should be in hex
 * switched a pattern length to 2 and the empty space was not cleared, it looped 0 1 0 1 0 1
 * trying to select past the visible area with the mouse sucks
 * preview check box in preset dialog stopped working?
@@ -71,24 +70,13 @@
 	for only the effects
 + how about nice looking bmp windows for machine link and master machine dialogs?
 + how about option to switch the instrument and machine columns?
-+ how about making instrument column data available to all machines?
 * record button should set edit mode and follow mode on, should have new export wav button
 + global note delay effects command
-* <bohan> bpm or tpb seems not set correctly sometimes when loading a song. but, after reloading, it's 
-	back to normal. what's odd is that the labels displaying the bpm and tpb settings are right the first time, 
-	but, when we play, bpm and/or (?) tbp are not the ones that are displayed
-* <_sue_> hi poop....the last time i used psycle (the last psycle youve sent me) when i pressed play pattern 
-	(F6) it didnt played the first or second ticks....when pressisng play (F5) everything was nice....but today 
-	ive tried it and everything plays allright.....ever happened to you?
 * <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
 	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
 	rec tweaks when you do a refresh.......like closing the plugs  gui...
 * <_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all..... <pooplog> are you able to 
 	control 	the tweaks of it from the pattern? <_sue_> yes i am (in pro52)
-* <_sue_> hi.....back to psycling.....ehehe......ok so i found how play pattern (F6) doesnt play 
-	tick 0.......its when youre using VSTI ......load a vsti......insert a note on tick/line 0 
-	and press F6 ......nothing happens.....press F5 and it will play......this prolly haves 
-	something to do with jaz removing the silence in the beguining of the wav recording....
 + ALK You may have coinsidered this already, making machines have a right click menu (from the 
 	machines view) with one of the items benig duplicate machine.
 * <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
@@ -96,8 +84,6 @@
 + ALK tracker command to bypass an fx, mute command for machines
 + ALK waveed: remove silence from start and end of wave
 * keyboard notes/noteoffs do not always seem to record
-* <bohan> well, i dunno how to explain it more... the bug that makes the song being played at a 
-	bad speed the first time they are loaded (not after a reload)
 
 
 	*Flanger feedback slider

@@ -452,10 +452,10 @@ void Master::Work(
 			if (decreaseOnClip) 
 			{
 				_outDry = f2i((float)_outDry * 32768.0f / _lMax);
-				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
+/*				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slidermaster.SetPos(_outDry);
-				}
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slidermaster.SetPos(256-_outDry);
+				}*/
 			}
 			_lMax = 32768.0f; //_LMAX = 32768;
 		}
@@ -468,10 +468,10 @@ void Master::Work(
 			if (decreaseOnClip) 
 			{
 				_outDry = f2i((float)_outDry * 32768.0f / _rMax);
-				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
+/*				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slidermaster.SetPos(_outDry);
-				}
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slidermaster.SetPos(256-_outDry);
+				}*/
 			}
 			_rMax = 32768.0f; //_RMAX = 32768;
 		}

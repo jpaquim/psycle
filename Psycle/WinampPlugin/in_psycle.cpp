@@ -232,9 +232,7 @@ void setoutputtime(int time_in_ms)
 		}
 		else time_left-=tmp;
 	}
-	_global.pPlayer->Start(patline);
-	_global.pPlayer->_playPosition=i;
-	_global.pPlayer->_playPattern=pSong->playOrder[i];
+	_global.pPlayer->Start(i,patline);
 
 	mod.outMod->Flush(time_in_ms);
 }
