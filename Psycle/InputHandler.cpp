@@ -391,14 +391,17 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefColumnNext:
+		pChildView->bScrollDetatch=false;
 		pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
 		break;
 
 	case cdefColumnPrev:
+		pChildView->bScrollDetatch=false;
 		pChildView->PrevTrack(1,Global::pConfig->_wrapAround);
 		break;
 
 	case cdefNavLeft:
+		pChildView->bScrollDetatch=false;
 		if ( !bDoingSelection )
 		{
 			pChildView->PrevCol(Global::pConfig->_wrapAround);
@@ -417,6 +420,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		bDoingSelection = false;
 		break;
 	case cdefNavRight:
+		pChildView->bScrollDetatch=false;
 		if ( !bDoingSelection )
 		{
 			pChildView->NextCol(Global::pConfig->_wrapAround);
@@ -435,6 +439,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		bDoingSelection = false;
 		break;
 	case cdefNavUp:
+		pChildView->bScrollDetatch=false;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -448,6 +453,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		bDoingSelection = false;
 		break;
 	case cdefNavDn:
+		pChildView->bScrollDetatch=false;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -461,6 +467,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		bDoingSelection = false;
 		break;
 	case cdefNavPageUp:
+		pChildView->bScrollDetatch=false;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -474,6 +481,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefNavPageDn:
+		pChildView->bScrollDetatch=false;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -487,7 +495,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	
 	case cdefNavTop:				
-		
+		pChildView->bScrollDetatch=false;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -516,7 +524,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 	
 	case cdefNavBottom:
-		
+		pChildView->bScrollDetatch=false;
 		if ( bDoingSelection && !pChildView->blockSelected)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -779,10 +787,12 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefUndo:
+		pChildView->bScrollDetatch=false;
 		 pChildView->OnEditUndo();
 		 break;
 
 	case cdefRedo:
+		pChildView->bScrollDetatch=false;
 		 pChildView->OnEditRedo();
 		 break;
 	}

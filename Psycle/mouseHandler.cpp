@@ -407,6 +407,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		{
 			ntOff = tOff;
 			nlOff = lOff;
+			int paintmode = 0;
 
 			int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 			if ( point.x < XOFFSET ) ttm--; // 1/2 = 0 , -1/2 = 0 too!
@@ -417,7 +418,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 				if ( ttm < 0 ) { ttm = 0; } // Out of Range
 				// and Scroll
 				ntOff = ttm;
-				if (ntOff != tOff) Repaint(DMHScroll);
+				if (ntOff != tOff) paintmode=DMHScroll;
 			}
 			else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 			{
@@ -428,14 +429,14 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					if ( tOff != ttm-VISTRACKS ) 
 					{ 
 						ntOff = ttm-VISTRACKS+1; 
-						Repaint(DMHScroll); 
+						paintmode=DMHScroll; 
 					}
 				}
 				else	//scroll
 				{	
 					ntOff = ttm-VISTRACKS+1;
 					if ( ntOff != tOff ) 
-						Repaint(DMHScroll);
+						paintmode=DMHScroll;
 				}
 			}
 			else // Not exceeded
@@ -455,14 +456,14 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					if ( lOff != 0 ) 
 					{ 
 						nlOff = 0; 
-						Repaint(DMVScroll); 
+						paintmode=DMVScroll; 
 					}
 				}
 				else	//scroll
 				{	
 					nlOff = llm;
 					if ( nlOff != lOff ) 
-						Repaint(DMVScroll);
+						paintmode=DMVScroll;
 				}
 			}
 			else if ( llm - lOff >= VISLINES ) // Exceeded from bottom
@@ -473,14 +474,14 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					if ( lOff != llm-VISLINES) 
 					{ 
 						nlOff = llm-VISLINES+1; 
-						Repaint(DMVScroll); 
+						paintmode=DMVScroll; 
 					}
 				}
 				else	//scroll
 				{	
 					nlOff = llm-VISLINES+1;
 					if ( nlOff != lOff ) 
-						Repaint(DMVScroll);
+						paintmode=DMVScroll;
 				}
 			}
 			
@@ -500,39 +501,25 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 				oldm.track=ttm;
 				oldm.line=llm;
 				oldm.col=ccm;
-				Repaint(DMSelection);
+				paintmode=DMSelection;
 			}
 
+			bScrollDetatch=true;
+			detatchpoint.track = ttm;
+			detatchpoint.line = llm;
+			detatchpoint.col = ccm;
 			if (nFlags & MK_SHIFT)
 			{
-				editcur.track = ttm;
-				editcur.line = llm;
-				editcur.col = ccm;
-				Repaint(DMCursor);
+				editcur = detatchpoint;
+				if (!paintmode)
+				{
+					paintmode=DMCursor;
+				}
 			}
-			else 
-			{
-				if (editcur.track < ntOff)
-				{
-					editcur.track = ntOff;
-					Repaint(DMCursor);
-				}
-				else if (editcur.track > ntOff+VISTRACKS-1)
-				{
-					editcur.track = ntOff+VISTRACKS-1;
-					Repaint(DMCursor);
-				}
 
-				if (editcur.line < nlOff)
-				{
-					editcur.line = nlOff;
-					Repaint(DMCursor);
-				}
-				else if (editcur.line > nlOff+VISLINES-1)
-				{
-					editcur.line = nlOff+VISLINES-1;
-					Repaint(DMCursor);
-				}
+			if (paintmode)
+			{
+				Repaint(paintmode);
 			}
 		}
 		else if (nFlags == MK_MBUTTON)
@@ -551,7 +538,9 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 						nlOff = nlines-VISLINES;
 					else
 						nlOff=nPos;
-					AdvanceLine(nPos-lOff,false,false); 
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
 					Repaint(DMVScroll);
 				}
 				else if (nPos < lOff )
@@ -562,7 +551,9 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 						nlOff = nlines-VISLINES;
 					else
 						nlOff=nPos;
-					PrevLine(lOff-nPos,false,false);
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
 					Repaint(DMVScroll);
 				}
 				MBStart.y += delta*ROWHEIGHT;
@@ -580,7 +571,9 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 						ntOff=_pSong->SONGTRACKS-VISTRACKS;
 					else
 						ntOff=nPos;
-					AdvanceTrack(nPos-tOff,false,false);
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
 					Repaint(DMHScroll);
 				}
 				else if (nPos < tOff)
@@ -591,7 +584,9 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 						ntOff=_pSong->SONGTRACKS-VISTRACKS;
 					else
 						ntOff=nPos;
-					PrevTrack(tOff-nPos,false,false);
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
 					Repaint(DMHScroll);
 				}
 				MBStart.x += delta*ROWWIDTH;
@@ -760,7 +755,9 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 				nlOff = nlines-VISLINES;
 			else
 				nlOff=nPos;
-			AdvanceLine(nPos-lOff,false,false); 
+			bScrollDetatch=true;
+			detatchpoint.track = ntOff+1;
+			detatchpoint.line = nlOff+1;
 			Repaint(DMVScroll);
 		}
 		else if (nPos < lOff )
@@ -771,7 +768,9 @@ BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 				nlOff = nlines-VISLINES;
 			else
 				nlOff=nPos;
-			PrevLine(lOff-nPos,false,false);
+			bScrollDetatch=true;
+			detatchpoint.track = ntOff+1;
+			detatchpoint.line = nlOff+1;
 			Repaint(DMVScroll);
 		}
 	}
@@ -783,4 +782,144 @@ void CChildView::OnMButtonDown( UINT nFlags, CPoint point )
 	MBStart.x = point.x;
 	MBStart.y = point.y;
 	CWnd ::OnMButtonDown(nFlags, point);
+}
+
+void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+{
+	if ( viewMode == VMPattern )
+	{
+		switch(nSBCode)
+		{
+			case SB_LINEDOWN:
+				if ( lOff<_pSong->patternLines[_ps()]-VISLINES)
+				{
+					nlOff=lOff+1;
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMVScroll);
+				}
+				break;
+			case SB_LINEUP:
+				if ( lOff>0 )
+				{
+					nlOff=lOff-1;
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMVScroll);
+				}
+				break;
+			case SB_PAGEDOWN:
+				if ( lOff<_pSong->patternLines[_ps()]-VISLINES)
+				{
+					const int nl = _pSong->patternLines[_ps()];
+					nlOff=lOff+16;
+					if (nlOff >= nl)
+					{
+						nlOff = nl-1;
+					}
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMVScroll);
+				}
+				break;
+			case SB_PAGEUP:
+				if ( lOff>0)
+				{
+					nlOff=lOff-16;
+					if (nlOff < 0)
+					{
+						nlOff = 0;
+					}
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMVScroll);
+				}
+				break;
+			case SB_THUMBPOSITION:
+			case SB_THUMBTRACK:
+				if (nlOff!=(int)nPos)
+				{
+					const int nl = _pSong->patternLines[_ps()];
+					nlOff=(int)nPos;
+					if (nlOff >= nl)
+					{
+						nlOff = nl-1;
+					}
+					else if (nlOff < 0)
+					{
+						nlOff = 0;
+					}
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMVScroll);
+				}
+				break;
+			default: 
+				break;
+		}
+	}
+	CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+{
+	if ( viewMode == VMPattern )
+	{
+		switch(nSBCode)
+		{
+			case SB_LINERIGHT:
+			case SB_PAGERIGHT:
+				if ( tOff<_pSong->SONGTRACKS-VISTRACKS)
+				{
+					ntOff=tOff+1;
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMHScroll);
+				}
+				break;
+			case SB_LINELEFT:
+			case SB_PAGELEFT:
+				if ( tOff>0 )
+				{
+					ntOff=tOff-1;
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMHScroll);
+				}
+				else PrevTrack(1,false);
+				break;
+			case SB_THUMBPOSITION:
+			case SB_THUMBTRACK:
+				if (ntOff!=(int)nPos)
+				{
+					const int nt = _pSong->SONGTRACKS;
+					ntOff=(int)nPos;
+					if (ntOff >= nt)
+					{
+						ntOff = nt-1;
+					}
+					else if (ntOff < 0)
+					{
+						ntOff = 0;
+					}
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					Repaint(DMHScroll);
+				}
+				break;
+			default: 
+				break;
+		}
+	}
+
+	CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 }

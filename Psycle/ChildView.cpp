@@ -846,6 +846,10 @@ void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI)
 
 void CChildView::OnBarplay() 
 {
+	if (Global::pConfig->_followSong)
+	{
+		bScrollDetatch=false;
+	}
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 
 	Global::pPlayer->Start(editPosition,0);
@@ -860,6 +864,10 @@ void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI)
 
 void CChildView::OnButtonplayseqblock() 
 {
+	if (Global::pConfig->_followSong)
+	{
+		bScrollDetatch=false;
+	}
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 
 	int i=0;
@@ -1371,137 +1379,6 @@ void CChildView::OnUpdatePatternCutCopyPaste(CCmdUI* pCmdUI)
 {
 	if(viewMode == VMPattern) pCmdUI->Enable(TRUE);
 	else pCmdUI->Enable(FALSE);
-}
-
-void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-{
-	if ( viewMode == VMPattern )
-	{
-		switch(nSBCode)
-		{
-			case SB_LINEDOWN:
-				if ( lOff<_pSong->patternLines[_ps()]-VISLINES)
-				{
-					nlOff=lOff+1;
-					AdvanceLine(1,false,false);
-					Repaint(DMVScroll);
-				}
-				else AdvanceLine(1,false);
-				break;
-			case SB_LINEUP:
-				if ( lOff>0 )
-				{
-					nlOff=lOff-1;
-					PrevLine(1,false,false);
-					Repaint(DMVScroll);
-				}
-				else PrevLine(1,false);
-				break;
-			case SB_PAGEDOWN:
-				AdvanceLine(16,false);
-				break;
-			case SB_PAGEUP:
-				PrevLine(16,false);
-				break;
-			case SB_THUMBPOSITION:
-				if ((int)nPos > lOff )
-				{
-					nlOff=nPos;
-					AdvanceLine(nPos-lOff,false,false); 
-					Repaint(DMVScroll);
-				}
-				else if ((int)nPos < lOff )
-				{
-					nlOff=nPos;
-					PrevLine(lOff-nPos,false,false);
-					Repaint(DMVScroll);
-				}
-				break;
-			case SB_THUMBTRACK:
-				if ((int)nPos > lOff )
-				{
-					nlOff=nPos;
-					AdvanceLine(nPos-lOff,false,false); 
-					Repaint(DMVScroll);
-				}
-				else if ((int)nPos < lOff )
-				{
-					nlOff=nPos;
-					PrevLine(lOff-nPos,false,false);
-					Repaint(DMVScroll);
-				}
-				break;
-			default: break;
-		}
-	}
-	
-	CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
-}
-
-
-void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-{
-	if ( viewMode == VMPattern )
-	{
-		switch(nSBCode)
-		{
-			case SB_LINERIGHT:
-				if ( tOff<_pSong->SONGTRACKS-VISTRACKS)
-				{
-					ntOff=tOff+1;
-					AdvanceTrack(1,false,false);
-					Repaint(DMHScroll);
-				}
-				else AdvanceTrack(1,false);
-				break;
-			case SB_LINELEFT:
-				if ( tOff>0 )
-				{
-					ntOff=tOff-1;
-					PrevTrack(1,false,false);
-					Repaint(DMHScroll);
-				}
-				else PrevTrack(1,false);
-				break;
-			case SB_PAGERIGHT:
-				AdvanceTrack(VISTRACKS,false);
-				break;
-			case SB_PAGELEFT:
-				PrevTrack(VISTRACKS,false);
-				break;
-			case SB_THUMBPOSITION:
-				if ((int)nPos > tOff )
-				{
-					ntOff=nPos;
-					AdvanceTrack(nPos-tOff,false,false);
-					Repaint(DMHScroll);
-				}
-				else if ((int)nPos < tOff )
-				{
-					ntOff=nPos;
-					PrevTrack(tOff-nPos,false,false);
-					Repaint(DMHScroll);
-				}
-				break;
-			case SB_THUMBTRACK:
-				if ((int)nPos > tOff )
-				{
-					ntOff=nPos;
-					AdvanceTrack(nPos-tOff,false,false);
-					Repaint(DMHScroll);
-				}
-				else if ((int)nPos < tOff )
-				{
-					ntOff=nPos;
-					PrevTrack(tOff-nPos,false,false);
-					Repaint(DMHScroll);
-				}
-				break;
-			default: break;
-		}
-	}
-	
-	CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CChildView::OnFileImportXmfile() 
