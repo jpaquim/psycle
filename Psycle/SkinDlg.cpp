@@ -114,7 +114,8 @@ int CALLBACK CSkinDlg::EnumFontFamExProc(
 	// again if you want everything to be listed
 	LOGFONT lf;
 	memset(&lf,0,sizeof(lf));
-	lf.lfCharSet = ANSI_CHARSET;
+//	lf.lfCharSet = ANSI_CHARSET;
+	lf.lfCharSet = DEFAULT_CHARSET;
 	strcpy(lf.lfFaceName,(char*)lpelfe->elfFullName);
 	char* p = strchr(lf.lfFaceName,32); // space
 	if (p)
@@ -170,7 +171,8 @@ BOOL CSkinDlg::OnInitDialog()
 
 	LOGFONT lf;
 	memset(&lf,0,sizeof(lf));
-	lf.lfCharSet = ANSI_CHARSET;
+//	lf.lfCharSet = ANSI_CHARSET;
+	lf.lfCharSet = DEFAULT_CHARSET;
 	HDC hDC = ::GetDC( NULL );
 
 	pm_pattern_fontface = &m_pattern_fontface;

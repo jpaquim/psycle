@@ -231,6 +231,7 @@ Configuration::~Configuration()
 
 #if !defined(_WINAMP_PLUGIN_)
 
+	seqFont.DeleteObject();
 	if (_ppOutputDrivers != NULL)
 	{
 		for (int i=0; i<_numOutputDrivers; i++)
@@ -282,7 +283,6 @@ Configuration::~Configuration()
 	{
 		delete _psVstDir;
 	}
-	seqFont.DeleteObject();
 }
 
 bool
