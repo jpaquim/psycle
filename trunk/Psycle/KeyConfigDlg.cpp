@@ -38,7 +38,6 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_AUTOSAVE_CURRENT_SONG, m_autosave);
 	DDX_Control(pDX, IDC_FILE_SAVE_REMINDERS, m_save_reminders);
 	DDX_Control(pDX, IDC_TWEAK_SMOOTH, m_tweak_smooth);
-	DDX_Control(pDX, IDC_RECORD_UNARMED, m_record_unarmed);
 	DDX_Control(pDX, IDC_SHOW_INFO_ON_LOAD, m_show_info);
 	DDX_Control(pDX, IDC_SHIFTARROWS, m_cmdShiftArrows);
 	DDX_Control(pDX, IDC_FT2DEL, m_cmdFT2Del);
@@ -105,7 +104,6 @@ BOOL CKeyConfigDlg::OnInitDialog()
 
 	m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
 	m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
-	m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
 	m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
 	m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
 	
@@ -254,7 +252,6 @@ void CKeyConfigDlg::OnOK()
 
 	Global::pConfig->bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
 	Global::pConfig->_RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
-	Global::pConfig->_RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
 
 	Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
 	Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
@@ -426,9 +423,27 @@ void CKeyConfigDlg::OnDefaults()
 
 void CKeyConfigDlg::OnNone() 
 {
+
 	// TODO: Add your control notification handler code here
-	m_hotkey0.SetHotKey(0,0);
+
+	WORD key = 0;
+	WORD mods = 0;	
 	
+	// save key settings for key we've just moved from
+	FindKey(m_prvIdx,key,mods);
+
+	UINT nKey=key;
+	UINT nMod=0;
+	if(mods&HOTKEYF_SHIFT)
+		nMod|=MOD_S;
+	if(mods&HOTKEYF_CONTROL)
+		nMod|=MOD_C;
+	if(mods&HOTKEYF_EXT)
+		nMod|=MOD_E;
+
+	Global::pInputHandler->SetCmd(cdefNull,nKey,nMod);
+	
+	m_hotkey0.SetHotKey(0,0);
 }
 
 void CKeyConfigDlg::OnUpdateNumLines() 
