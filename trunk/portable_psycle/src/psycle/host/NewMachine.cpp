@@ -796,7 +796,7 @@ namespace psycle
 							///\todo this cool be better handled
 							if(_pPlugsInfo[currentPlugsCount]->error)
 							{
-								delete _pPlugsInfo[currentPlugsCount]->error
+								delete _pPlugsInfo[currentPlugsCount]->error;
 								_pPlugsInfo[currentPlugsCount]->error = 0;
 							}
 							if(p.error)
