@@ -155,7 +155,7 @@ namespace psycle
 
 		/// interpolator work function.
 		///\todo typdef should be inside the Resampler class itself.
-		typedef float (*PRESAMPLERFN)(float yo,float y0,float y1,float y2,unsigned __int32 res,  unsigned __int64 offset, unsigned __int64 length);
+		typedef float (*PRESAMPLERFN)(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length);
 
 		/// sample interpolator.
 		class Resampler
@@ -175,9 +175,9 @@ namespace psycle
 			virtual void SetQuality(ResamplerQuality quality) = 0;
 		protected:
 			/// interpolation work function which does nothing.
-			static float None(float yo,float y0,float y1,float y2,unsigned __int32 res,  unsigned __int64 offset, unsigned __int64 length)
+			static float None(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
 			{
-				return y0;
+				return *pData;
 			}
 		};
 
@@ -206,30 +206,23 @@ namespace psycle
 			}
 		protected:
 			/// interpolation work function which does linear interpolation.
-			static float Linear(float yo,float y0,float y1,float y2,unsigned __int32 res,  unsigned __int64 offset, unsigned __int64 length)
+			static float Linear(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
 			{
-				if (offset+2 > length)
-				{
-					y1 = 0;
-				}
+				float y0,y1;
+				y0 = *pData;
+				y1 =(offset+1 == length)?0:*(pData+1);
 				return (y0+(y1-y0)*_lTable[res>>21]);
 			}
 			/// interpolation work function which does spline interpolation.
-			static float Spline(float yo,float y0,float y1,float y2,unsigned __int32 res,  unsigned __int64 offset, unsigned __int64 length)
+			static float Spline(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
 			{
+				float yo, y0,y1, y2;
 				res = res >> 21;
-				if (offset == 0)
-				{
-					yo = 0;
-				}
-				if (offset+2 > length)
-				{
-					y1 = 0;
-				}
-				if (offset+3 > length)
-				{
-					y2 = 0;
-				}
+			
+				yo=(offset==0)?0:*(pData-1);
+				y0=*(pData);
+				y1=(offset+1 == length)?0:*(pData+1);
+				y2=(offset+2 == length)?0:*(pData+2);
 				return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
 			}
 			

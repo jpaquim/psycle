@@ -1188,7 +1188,10 @@ BEGIN
     PUSHBUTTON      "Button1",IDC_INST_MORE,47,7,10,14,BS_BITMAP
     PUSHBUTTON      "Button1",IDC_INST_LESS,80,7,10,14,BS_BITMAP
     EDITTEXT        IDC_INST_NAME,93,8,124,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Remove",IDC_REMOVE,220,7,37,14
+    PUSHBUTTON      "Load",IDC_REMOVE,220,7,37,14
+    PUSHBUTTON      "Duplicate",IDC_REMOVE2,257,7,37,14
+    PUSHBUTTON      "Save",IDC_REMOVE3,295,7,37,14
+    PUSHBUTTON      "Clear",IDC_REMOVE4,333,7,37,14
 END
 
 IDD_MIDI_INPUT DIALOGEX 0, 0, 329, 295
@@ -1697,10 +1700,10 @@ BEGIN
                     WS_EX_CLIENTEDGE
 END
 
-IDD_CONFIGURATION1 DIALOG  0, 0, 398, 156
+IDD_CONFIGURATION1 DIALOGEX 0, 0, 398, 156
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Configuration"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,341,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,341,24,50,14
@@ -1739,11 +1742,84 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
 END
 
-IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 319, 238
+IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 542, 412
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Samples"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
+END
+
+IDD_INST_GENERAL DIALOGEX 0, 0, 453, 395
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "New Note Action",IDC_STATIC,8,13,55,8
+    COMBOBOX        IDC_COMBO3,67,11,74,57,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Resample Quality",IDC_STATIC,8,30,54,8
+    COMBOBOX        IDC_COMBO4,67,28,74,57,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Global Volume",IDC_STATIC,7,49,45,8
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,48,100,13
+    LTEXT           "Fadeout",IDC_STATIC,7,68,27,8
+    CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,67,100,13
+    CONTROL         "Default Pan",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,86,52,12
+    CONTROL         "",IDC_SLIDER8,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,86,100,13
+    LTEXT           "Pitch Pan Center Note",IDC_STATIC,8,105,71,8
+    COMBOBOX        IDC_COMBO1,83,104,34,142,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Octave",IDC_STATIC,121,105,23,8
+    COMBOBOX        IDC_COMBO2,148,104,24,114,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Pitch Pan Septn.",IDC_STATIC,7,125,54,8
+    CONTROL         "",IDC_SLIDER12,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,124,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,144,45,8
+    CONTROL         "",IDC_SLIDER13,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,143,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,163,45,8
+    CONTROL         "",IDC_SLIDER14,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,162,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,182,45,8
+    CONTROL         "",IDC_SLIDER15,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,181,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,201,45,8
+    CONTROL         "",IDC_SLIDER16,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,200,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,220,45,8
+    CONTROL         "",IDC_SLIDER17,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,219,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,239,45,8
+    CONTROL         "",IDC_SLIDER18,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,238,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,258,45,8
+    CONTROL         "",IDC_SLIDER19,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,257,100,13
+    LTEXT           "Global Volume",IDC_STATIC,7,277,45,8
+    CONTROL         "",IDC_SLIDER20,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,276,99,13
+END
+
+IDD_INST_MIXER DIALOGEX 0, 0, 401, 319
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_HSCROLL | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,31,143,11,143
+    CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,97,135,11,143
+    CONTROL         "",IDC_SLIDER3,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,112,134,11,143
+    CONTROL         "",IDC_SLIDER4,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,127,134,11,143
+    CONTROL         "",IDC_SLIDER21,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,148,134,11,143
+    CONTROL         "",IDC_SLIDER22,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,170,134,11,143
 END
 
 
@@ -2073,9 +2149,25 @@ BEGIN
     IDD_XMSAMPLERUISAMPLE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 312
+        RIGHTMARGIN, 535
         TOPMARGIN, 7
-        BOTTOMMARGIN, 231
+        BOTTOMMARGIN, 405
+    END
+
+    IDD_INST_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 446
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 388
+    END
+
+    IDD_INST_MIXER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 394
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 302
     END
 END
 #endif    // APSTUDIO_INVOKED

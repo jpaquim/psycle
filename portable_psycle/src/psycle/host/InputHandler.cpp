@@ -743,7 +743,7 @@ namespace psycle
 						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 					}
 
-					int blockLength = (4 * pChildView->blockSelectBarState * Global::_pSong->_ticksPerBeat)-1;
+					int blockLength = (4 * pChildView->blockSelectBarState * Global::_pSong->LinesPerBeat())-1;
 
 					if ((pChildView->editcur.line + blockLength) >= nl-1)
 					{

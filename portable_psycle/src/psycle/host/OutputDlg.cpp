@@ -136,14 +136,7 @@ IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
 			int index = m_driverComboBox.GetCurSel();
 			m_ppDrivers[index]->Configure();
-			if (Global::pPlayer->_playing)
-			{
-				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
-			}
-			else
-			{
-				Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-			}
+			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 		}
 	NAMESPACE__END
 NAMESPACE__END

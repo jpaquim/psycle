@@ -5,9 +5,10 @@
 #include "Plugin.hpp"
 #include "InputHandler.hpp"
 #include <operating_system/exceptions/code_description.hpp>
-#include <algorithm>
+#include "Song.hpp"
+//#include <algorithm>
 #include <cctype>
-#include "psycle.hpp"
+//#include "psycle.hpp"
 #include "NewMachine.hpp"
 namespace psycle
 {
@@ -418,7 +419,7 @@ namespace psycle
 										catch(const std::exception &)
 										{
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 									}
 									else
 									{
@@ -437,7 +438,7 @@ namespace psycle
 										catch(const std::exception &)
 										{
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
 										if (parameter < 9)
 										{
@@ -451,6 +452,53 @@ namespace psycle
 												RetriggerRate[i] = 16;
 											}
 										}
+									}
+									else
+									{
+										TriggerDelayCounter[i] -= nextevent;
+									}
+								}
+								else if (TriggerDelay[i]._cmd == 0xf0)
+								{
+									if (TriggerDelayCounter[i] == nextevent)
+									{
+										PatternEntry entry =TriggerDelay[i];
+										switch(ArpeggioCount[i])
+										{
+										case 0: 
+											try
+											{
+												proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+											}
+											catch(const std::exception &)
+											{
+											}
+											ArpeggioCount[i]++;
+											break;
+										case 1:
+											entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
+											try
+											{
+												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
+											}
+											catch(const std::exception &)
+											{
+											}
+											ArpeggioCount[i]++;
+											break;
+										case 2:
+											entry._note+=(TriggerDelay[i]._parameter&0x0F);
+											try
+											{
+												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
+											}
+											catch(const std::exception &)
+											{
+											}
+											ArpeggioCount[i]=0;
+											break;
+										}
+										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
 									}
 									else
 									{
@@ -582,7 +630,7 @@ namespace psycle
 					catch(const std::exception &)
 					{
 					}
-					Global::_pSong->Tweaker = true;
+					Global::pPlayer->Tweaker = true;
 				}
 			}
 			else if(pData->_note == cdefTweakS)
@@ -639,7 +687,7 @@ namespace psycle
 						catch(const std::exception &)
 						{
 						}
-						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick();
+						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer->SamplesPerRow();
 						TWSSamples = 0;
 						TWSActive = TRUE;
 					}
@@ -660,7 +708,7 @@ namespace psycle
 						}
 					}
 				}
-				Global::_pSong->Tweaker = true;
+				Global::pPlayer->Tweaker = true;
 			}
 		}
 

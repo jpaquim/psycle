@@ -86,6 +86,7 @@ namespace psycle
 				TriggerDelay[c]._cmd = 0;
 				TriggerDelayCounter[c]=0;
 				RetriggerRate[c]=256;
+				ArpeggioCount[c]=0;
 			}
 			for (int c = 0; c<MAX_TWS; c++)
 			{

@@ -39,7 +39,6 @@ namespace psycle
 			char Author[64];
 			/// the comments on the song
 			char Comment[256];
-			bool Tweaker;
 			unsigned cpuIdle;
 			unsigned _sampCount;
 			bool Invalided;
@@ -48,14 +47,7 @@ namespace psycle
 			int m_BeatsPerMin;
 			/// the initial ticks per beat (TPB) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
-			int _ticksPerBeat;
-			/// samples per tick. (Number of samples that are produced for each line of pattern)
-			/// This is computed from the BeatsPerMin, _ticksPerBeat, and SamplesPerSeconds()
-			int m_SamplesPerTick;
-			/// \todo Unused. Serves any function?
-			//int LineCounter;
-			/// \todo Unused. Serves any function?
-			//bool LineChanged;
+			int m_LinesPerBeat;
 			/// \todo This is a GUI thing... should not be here.
 			char currentOctave;
 			// The volume of the preview wave in the wave load dialog.
@@ -163,8 +155,6 @@ namespace psycle
 			/// destroy all instruments in this song.
 			/// \todo ZapObject ??? What does this function really do?
 			void DestroyAllInstruments();
-			/// sets a new BPM, TPB, and sample per seconds.
-			void SetBPM(int bpm, int tpb, int srate);
 			///  loads a file into this song object.
 			///\param fullopen  used in context of the winamp/foobar player plugins, where it allows to get the info of the file, without needing to open it completely.
 			bool Load(RiffFile* pFile, bool fullopen=true);
@@ -203,13 +193,20 @@ namespace psycle
 			void SongTracks(const int value){ SONGTRACKS = value;};
 
 			const int BeatsPerMin(){return m_BeatsPerMin;};
-			void BeatsPerMin(const int value){ m_BeatsPerMin = value;};
+			void BeatsPerMin(const int value)
+			{ 
+				if ( value < 32 ) m_BeatsPerMin = 32;
+				else if ( value > 999 ) m_BeatsPerMin = 999;
+				else m_BeatsPerMin = value;
+			};
 
-			const int TicksPerBeat(){return _ticksPerBeat;};
-			void TicksPerBeat(const int value){_ticksPerBeat = value;};
-
-			const int SamplesPerTick(){ return m_SamplesPerTick;};
-			void SamplesPerTick(const int samplePerTick){m_SamplesPerTick = samplePerTick;};
+			const int LinesPerBeat(){return m_LinesPerBeat;};
+			void LinesPerBeat(const int value)
+			{
+				if ( value < 1 )m_LinesPerBeat = 1;
+				else if ( value > 31 ) m_LinesPerBeat = 31;
+				else m_LinesPerBeat = value;
+			};
 
 			const bool IsInvalided(){return Invalided;};
 			void IsInvalided(const bool value){Invalided = value;};

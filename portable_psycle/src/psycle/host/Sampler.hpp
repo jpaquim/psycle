@@ -71,7 +71,7 @@ namespace psycle
 		public:
 			Envelope _filterEnv;
 			Envelope _envelope;
-			int _tickCounter;
+			int _sampleCounter;
 			int _triggerNoteOff;
 			int _triggerNoteDelay;
 			int _instrument;

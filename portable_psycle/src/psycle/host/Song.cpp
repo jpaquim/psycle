@@ -165,7 +165,6 @@ namespace psycle
 		{
 			_machineLock = false;
 			Invalided = false;
-			Tweaker = false;
 			PW_Phase = 0;
 			PW_Stage = 0;
 			PW_Length = 0;
@@ -288,7 +287,8 @@ namespace psycle
 			std::sprintf(Comment, "No Comments");
 			currentOctave=4;
 			// General properties
-			SetBPM(125, 4, 44100);
+			m_BeatsPerMin=125;
+			m_LinesPerBeat=4;
 //			LineCounter=0;
 //			LineChanged=false;
 			//::MessageBox(0, "Machines", 0, 0);
@@ -578,23 +578,6 @@ namespace psycle
 			}
 			std::sprintf(patternName[pattern], name);
 			return true;
-		}
-
-		void Song::SetBPM(int bpm, int tpb, int srate)
-		{
-			static int sr = 0;
-			m_BeatsPerMin = bpm;
-			_ticksPerBeat = tpb;
-			m_SamplesPerTick = (srate*15*4)/(bpm*tpb);
-			///\todo update the source code of the plugins... hey if our rate has changed, let everybody know!
-			if(sr != srate)
-			{
-				sr = srate;
-				for(int i(0) ; i < MAX_MACHINES; ++i)
-				{
-					if(_pMachine[i]) _pMachine[i]->SetSampleRate(srate);
-				}
-			}
 		}
 
 		int Song::GetNumPatternsUsed()
@@ -981,7 +964,7 @@ namespace psycle
 				UINT index = 0;
 				int temp;
 				int solo(0);
-				int chunkcount;
+				int chunkcount=0;
 				Header[4]=0;
 				long filesize = pFile->FileSize();
 				pFile->Read(&version,sizeof(version));
@@ -1056,7 +1039,7 @@ namespace psycle
 							m_BeatsPerMin = temp;
 							// tpb
 							pFile->Read(&temp, sizeof temp);
-							_ticksPerBeat = temp;
+							m_LinesPerBeat = temp;
 							// current octave
 							pFile->Read(&temp, sizeof temp);
 							currentOctave = temp;
@@ -1086,9 +1069,9 @@ namespace psycle
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
 							Global::pPlayer->bpm = m_BeatsPerMin;
-							Global::pPlayer->tpb = _ticksPerBeat;
+							Global::pPlayer->tpb = m_LinesPerBeat;
 							// calculate samples per tick
-							m_SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+							Global::pPlayer->RecalcSPR();
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
@@ -1321,7 +1304,7 @@ namespace psycle
 				Progress.SetWindowText("Loading old format...");
 				Progress.ShowWindow(SW_SHOW);
 				int i;
-				int num;
+				int num,sampR;
 				bool _machineActive[128];
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
@@ -1330,17 +1313,17 @@ namespace psycle
 				pFile->Read(&Author, 32);
 				pFile->Read(&Comment, 128);
 				pFile->Read(&m_BeatsPerMin, sizeof m_BeatsPerMin);
-				pFile->Read(&m_SamplesPerTick, sizeof m_SamplesPerTick);
-				if( m_SamplesPerTick <= 0)
+				pFile->Read(&sampR, sizeof sampR);
+				if( sampR <= 0)
 				{
 					// Shouldn't happen but has happened.
-					_ticksPerBeat= 4; m_SamplesPerTick = 4315;
+					m_LinesPerBeat= 4; sampR = 4315;
 				}
-				else _ticksPerBeat = 44100 * 15 * 4 / (m_SamplesPerTick * m_BeatsPerMin);
+				else m_LinesPerBeat = 44100 * 15 * 4 / (sampR * m_BeatsPerMin);
 				Global::pPlayer->bpm = m_BeatsPerMin;
-				Global::pPlayer->tpb = _ticksPerBeat;
+				Global::pPlayer->tpb = m_LinesPerBeat;
 				// The old format assumes we output at 44100 samples/sec, so...
-				m_SamplesPerTick = m_SamplesPerTick * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100;
+				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
 				pFile->Read(&currentOctave, sizeof currentOctave);
 				pFile->Read(&busMachine[0], sizeof busMachine);
 				pFile->Read(&playOrder, sizeof playOrder);
@@ -2251,7 +2234,7 @@ stack trace:
 			pFile->Write(&temp,sizeof(temp));
 			temp = m_BeatsPerMin;
 			pFile->Write(&temp,sizeof(temp));
-			temp = _ticksPerBeat;
+			temp = m_LinesPerBeat;
 			pFile->Write(&temp,sizeof(temp));
 			temp = currentOctave;
 			pFile->Write(&temp,sizeof(temp));

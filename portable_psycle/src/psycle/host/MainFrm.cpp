@@ -535,45 +535,38 @@ NAMESPACE__BEGIN(psycle)
 		void CMainFrame::SetAppSongBpm(int x) 
 		{
 			char buffer[16];
-			if (Global::pPlayer->_playing )
+			if ( x != 0 )
 			{
-				if ( x == 0 ) sprintf(buffer,"%d",Global::pPlayer->bpm);
-				else
+				if (Global::pPlayer->_playing ) 
 				{
-					Global::pPlayer->bpm+=x;
-					int const cur= m_wndView.SongIncBpm(Global::pPlayer->bpm - Global::_pSong->BeatsPerMin());
-					sprintf(buffer,"%d",cur);
+					Global::_pSong->BeatsPerMin(Global::pPlayer->bpm+x);
 				}
-			}
-			else
-			{
-				if ( x != 0 ) m_wndView.SongIncBpm(x);
+				else Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin());
 			}
-			CStatic *tmplab=(CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL);
-			tmplab->SetWindowText(buffer);
+			else sprintf(buffer,"%d",Global::pPlayer->bpm);
+			
+			((CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL))->SetWindowText(buffer);
 		}
 
 		void CMainFrame::SetAppSongTpb(int x) 
 		{
 			char buffer[16];
-
 			if ( x != 0)
 			{
-				Global::_pSong->_ticksPerBeat += x;
-				
-				if (Global::_pSong->_ticksPerBeat < 1) 	Global::_pSong->_ticksPerBeat = 1;
-				else if (Global::_pSong->_ticksPerBeat > 32) Global::_pSong->_ticksPerBeat = 32;
-
-				Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-				Global::pPlayer->tpb=Global::_pSong->_ticksPerBeat;
+				if (Global::pPlayer->_playing ) 
+				{
+					Global::_pSong->LinesPerBeat(Global::pPlayer->tpb+x);
+				}
+				else Global::_pSong->LinesPerBeat(Global::_pSong->LinesPerBeat()+x);
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
+				sprintf(buffer,"%d",Global::_pSong->LinesPerBeat());
 			}
+			else sprintf(buffer, "%d", Global::pPlayer->tpb);
 			
-			if (Global::pPlayer->_playing ) sprintf(buffer, "%d", Global::pPlayer->tpb);
-			else sprintf(buffer, "%d", Global::_pSong->_ticksPerBeat);
 			((CStatic *)m_wndControl.GetDlgItem(IDC_TPBLABEL))->SetWindowText(buffer);
 		}
-
 
 		void CMainFrame::OnCloseupCombooctave() 
 		{
@@ -2221,7 +2214,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				int pattern = _pSong->playOrder[i];
 				// this should parse each line for ffxx commands if you want it to be truly accurate
-				songLength += (_pSong->patternLines[pattern] * 60/(_pSong->BeatsPerMin() * _pSong->_ticksPerBeat));
+				songLength += (_pSong->patternLines[pattern] * 60/(_pSong->BeatsPerMin() * _pSong->_LinesPerBeat));
 			}
 
 			sprintf(buffer, "%02d:%02d", songLength / 60, songLength % 60);
@@ -2231,7 +2224,7 @@ NAMESPACE__BEGIN(psycle)
 
 			float songLength = 0;
 			int bpm = _pSong->BeatsPerMin();
-			int tpb = _pSong->_ticksPerBeat;
+			int tpb = _pSong->LinesPerBeat();
 			for (int i=0; i <ll; i++)
 			{
 				int pattern = _pSong->playOrder[i];

@@ -16,9 +16,14 @@ namespace psycle
 			_playing = false;
 			_playBlock = false;
 			_recording = false;
+			Tweaker = false;
 			_ticksRemaining=0;
 			_lineCounter=0;
 			_loopSong=true;
+			_patternjump=-1;
+			_linejump=-1;
+			m_SampleRate=44100;
+			m_SamplesPerRow=(44100*60)/(125*4);
 			tpb=4;
 			bpm=125;
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
@@ -31,7 +36,7 @@ namespace psycle
 
 		void Player::Start(int pos, int line)
 		{
-			Stop(); // This causes all machines to reset, and samplespertick to init.
+			Stop(); // This causes all machines to reset, and samplesperRow to init.
 			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
@@ -41,7 +46,7 @@ namespace psycle
 			_playTime = 0;
 			_playTimem = 0;
 			bpm=Global::_pSong->BeatsPerMin();
-			tpb=Global::_pSong->_ticksPerBeat;
+			tpb=Global::_pSong->LinesPerBeat();
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			ExecuteLine();
@@ -60,14 +65,37 @@ namespace psycle
 					for(int c = 0; c < MAX_TRACKS; c++) Global::_pSong->_pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::_pSong->BeatsPerMin()*Global::_pSong->_ticksPerBeat));
+			SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*60)/(Global::_pSong->BeatsPerMin()*Global::_pSong->LinesPerBeat()));
+		}
+
+		void Player::SampleRate(const int sampleRate){
+			SamplesPerRow((sampleRate*60)/(bpm*tpb));
+			///\todo update the source code of the plugins...
+			if(m_SampleRate != sampleRate)
+			{
+				for(int i(0) ; i < MAX_MACHINES; ++i)
+				{
+					if(Global::_pSong->_pMachine[i]) Global::_pSong->_pMachine[i]->SetSampleRate(sampleRate);
+				}
+			}
+			m_SampleRate = sampleRate;
+		}
+		void Player::SetBPM(int _bpm,int _tpb)
+		{
+			tpb=_tpb;
+			bpm=_bpm;
+			RecalcSPR();
+			//\todo : Find out if we should notify the plugins of this change.
 		}
 
 		void Player::ExecuteLine(void)
 		{
 			Song* pSong = Global::_pSong;
 			_lineChanged = true;
+			_patternjump = -1;
+			_linejump = -1;
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
+
 			// Initial Loop. Check for Tracker Commands.
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
@@ -76,22 +104,50 @@ namespace psycle
 				{
 					switch(pEntry->_cmd)
 					{
-					case 0xFF:
+					case CMD::SET_TEMPO:
 						if(pEntry->_parameter != 0)
-						{
-							// proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
-							bpm = pEntry->_parameter; //+0x20;
-							Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb));
+						{	//\todo: implement the Tempo slide
+							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
+							bpm = pEntry->_parameter;
+							RecalcSPR();
 						}
 						break;
-					case 0xFE:
+					case CMD::EXTENDED:
 						if(pEntry->_parameter != 0)
 						{
-							tpb=pEntry->_parameter;
-							Global::_pSong->SamplesPerTick(((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(bpm*tpb)));
+							if ( (pEntry->_parameter&0xF0) == CMD::PATTERN_DELAY )
+							{
+							//\todo: finish the implementation of these two commands.
+							}
+							else if ( (pEntry->_parameter&0xF0) == CMD::FINE_PATTERN_DELAY)
+							{
+							}
+							else if ( (pEntry->_parameter&0xF0) == CMD::PATTERN_LOOP)
+							{
+							}
+							else if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
+							{
+								tpb=pEntry->_parameter;
+								RecalcSPR();
+							}
 						}
 						break;
-					case 0xFC:
+					case CMD::JUMP_TO_ORDER:
+						if ( pEntry->_parameter < pSong->playLength ){
+							_patternjump=pEntry->_parameter;
+							_linejump=0;
+						}
+						break;
+					case CMD::BREAK_TO_LINE:
+						if (_patternjump ==-1) 
+						{
+							_patternjump=(_playPosition+1>=pSong->playLength)?0:_playPosition+1;
+						}
+						if ( pEntry->_parameter >= pSong->patternLines[_patternjump])
+						{
+							_linejump = pSong->patternLines[_patternjump];
+						} else { _linejump= pEntry->_parameter; }
+					case CMD::SET_VOLUME:
 						if(pEntry->_mach == 255)
 						{
 							((Master*)(pSong->_pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
@@ -105,7 +161,7 @@ namespace psycle
 							}
 						}
 						break;
-					case  0xF8:
+					case  CMD::SET_PANNING:
 						int mIndex = pEntry->_mach;
 						if(mIndex < MAX_MACHINES)
 						{
@@ -158,44 +214,59 @@ namespace psycle
 							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
-								if(pEntry->_cmd == 0xfd)
+								if(pEntry->_cmd == CMD::NOTE_DELAY)
 								{
 									// delay
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick())/256;
+									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
 								}
-								else if(pEntry->_cmd == 0xfb)
+								else if(pEntry->_cmd == CMD::RETRIGGER)
 								{
 									// retrigger
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
 									pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
 									pMachine->TriggerDelayCounter[track] = 0;
 								}
-								else if(pEntry->_cmd == 0xfa)
+								else if(pEntry->_cmd == CMD::RETR_CONT)
 								{
 									// retrigger continue
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
 									if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+								}
+								else if (pEntry->_cmd == CMD::ARPEGGIO)
+								{
+									// arpeggio
+									//\todo : Add Memory.
+									//\todo : This won't work... What about sampler's NNA's?
+									if (pEntry->_parameter)
+									{
+										memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+										pMachine->ArpeggioCount[track] = 1;
+									}
+									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
 								}
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
 									pMachine->Tick(track, pEntry);
 									pMachine->TriggerDelayCounter[track] = 0;
+									pMachine->ArpeggioCount[track] = 0;
 								}
 							}
 						}
 					}
 				}
 			}
-			_ticksRemaining = pSong->SamplesPerTick();
+			_ticksRemaining = SamplesPerRow();
 		}	
 
 
 		void Player::AdvancePosition()
 		{
 			Song* pSong = Global::_pSong;
-			_lineCounter++;
+			if ( _patternjump!=-1 ) _playPosition= _patternjump;
+			if ( _linejump!=-1 ) _lineCounter=_linejump;
+			else _lineCounter++;
 			_playTime += 60 / float (bpm * tpb);
 			if(_playTime>60)
 			{
@@ -213,29 +284,30 @@ namespace psycle
 					while(_playPosition< pSong->playLength && (!pSong->playOrderSel[_playPosition]))
 						_playPosition++;
 				}
-				if( _playPosition >= pSong->playLength)
-				{	
-					// Don't loop the recording
-					if(_recording)
+			}
+			if( _playPosition >= pSong->playLength)
+			{	
+				// Don't loop the recording
+				if(_recording)
+				{
+					StopRecording();
+				}
+				if( _loopSong )
+				{
+					_playPosition = 0;
+					if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
 					{
-						StopRecording();
-					}
-					if( _loopSong )
-					{
-						_playPosition = 0;
-						if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
-						{
-							while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
-						}
-					}
-					else 
-					{
-						_playing = false;
-						_playBlock =false;
+						while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
 					}
 				}
-				_playPattern = pSong->playOrder[_playPosition];
+				else 
+				{
+					_playing = false;
+					_playBlock =false;
+				}
 			}
+			// this is outside the if, so that _patternjump works
+			_playPattern = pSong->playOrder[_playPosition];
 		}
 
 		float * Player::Work(void* context, int & numSamples)
@@ -255,7 +327,7 @@ namespace psycle
 				{
 					// Advance position in the sequencer
 					pThis->AdvancePosition();
-					if(pThis->_playing) pThis->ExecuteLine();
+					if (pThis->_playing) pThis->ExecuteLine();
 				}
 				// Processing plant
 				if(amount > 0)
@@ -340,6 +412,7 @@ namespace psycle
 		{
 			if(!_recording)
 			{
+				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
 				backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 				backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
 				backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
@@ -348,7 +421,7 @@ namespace psycle
 				if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
-				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
+				SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*60)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 				Stop();
 				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
 					_recording = true;
@@ -367,7 +440,7 @@ namespace psycle
 				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
 				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
 				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
-				Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
+				SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 				_outputWaveFile.Close();
 				_recording = false;
 				if(!bOk)

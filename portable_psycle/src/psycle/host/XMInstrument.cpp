@@ -20,230 +20,8 @@ namespace psycle
 {
 	namespace host
 	{
-		XMInstrument::XMInstrument()
-		{
-			// clear everythingout
-			Init();
-		}
-
-		// destructor
-		XMInstrument::~XMInstrument()
-		{
-			// No need to delete anything, since we don't allocate memory explicitely.
-		}
-
-		// other functions
-		void XMInstrument::Init()
-		{
-			m_bEnabled = false;
-
-			m_Name = _T("");
-
-			m_LinesMode = false;
-			m_Lines = 16;
-
-			m_GlobVol = 1.0f;
-//			m_bVolumeFade = false;
-			m_VolumeFadeSpeed = 0;
-
-			m_PanEnabled=false;
-			m_InitPan = 0.5f;
-			m_PitchPanCenter = 60;
-			m_PitchPanSep = 0;
-/*			m_AutoVibratoType = 0;
-			m_AutoVibratoSweep = 0;
-			m_AutoVibratoDepth = 0;
-			m_AutoVibratoRate = 0;
-*/
-			m_RandomVolume = 0;	///< Random Volume
-			m_RandomPanning = 0;///< Random Panning
-			m_RandomCutoff = 0;///< Random CutOff
-			m_RandomResonance = 0;///< Random Resonance
-			m_RandomSampleStart = false;///< Random SampleStart
-
-			m_FilterCutoff = 127;
-			m_FilterResonance = 0;
-			m_FilterEnvAmount = 0;
-			m_FilterType = dsp::F_NONE;
-
-			m_MidiChannel=-1;
-			m_MidiProgram=-1;
-			m_MidiBank=-1;
-
-			m_NNA = NewNoteAction::STOP;
-			m_DCT = DCType::DCT_NONE;
-			m_DCA = DCAction::DCA_STOP;
-
-			NotePair npair;
-			npair.second=255;
-			for(int i = 0;i < NOTE_MAP_SIZE;i++){
-				npair.first=i;
-				m_AssignNoteToSample[i] = npair;
-			}
-
-			m_AmpEnvelope.Init();
-			m_FilterEnvelope.Init();
-			m_PanEnvelope.Init();
-			m_PitchEnvelope.Init();
-
-		}
-
-/*		// delete layer
-		void XMInstrument::DeleteLayer(int c)
-		{
-			ASSERT(c<MAX_INSTRUMENT_SAMPLES);
-			m_WaveLayer[c].Init();
-		}
-*/
-		// load XMInstrument
-		void XMInstrument::Load(RiffFile& riffFile,const UINT version)
-		{
-			int i;
-			Init();
-			// assume version 0 for now
-
-			TCHAR _name[128];
-			riffFile.ReadStringA2T(_name,sizeof(_name));
-			m_Name = _name;
-
-			riffFile.Read(&m_bEnabled,sizeof(m_bEnabled));
-
-			riffFile.Read(&m_LinesMode,sizeof(m_LinesMode));
-			riffFile.Read(&m_Lines,sizeof(m_Lines));
-
-			riffFile.Read(m_GlobVol);
-			riffFile.Read(m_VolumeFadeSpeed);
-
-			riffFile.Read(m_InitPan);
-			riffFile.Read(m_PanEnabled);
-			riffFile.Read(m_PitchPanCenter);
-			riffFile.Read(m_PitchPanSep);
-
-			riffFile.Read(m_RandomPanning);
-			riffFile.Read(m_RandomResonance);
-			riffFile.Read(m_RandomSampleStart);
-
-			riffFile.Read(m_FilterCutoff);
-			riffFile.Read(m_FilterResonance);
-			riffFile.Read(m_FilterEnvAmount);
-			riffFile.Read(&m_FilterType,sizeof(m_FilterType));
-
-
-			riffFile.Read(m_MidiChannel);
-			riffFile.Read(m_MidiProgram);
-			riffFile.Read(m_MidiBank);
-
-			riffFile.Read(&m_NNA,sizeof(m_NNA));
-			riffFile.Read(&m_DCT,sizeof(m_DCT));
-			riffFile.Read(&m_DCA,sizeof(m_DCA));
-
-			NotePair npair;
-			for(i = 0;i < NOTE_MAP_SIZE;i++){
-				riffFile.Read(&npair,sizeof(npair));
-				NoteToSample(i,npair);
-			}
-			
-			m_AmpEnvelope.Load(riffFile,version);
-			m_FilterEnvelope.Load(riffFile,version);
-			m_PanEnvelope.Load(riffFile,version);
-			m_PitchEnvelope.Load(riffFile,version);
-
-		
-
-/*			int numwaves;
-			riffFile.Read(numwaves);
-
-			for (i = 0; i < numwaves; i++)
-			{
-				UINT index;
-				riffFile.Read(index);
-				m_WaveLayer[index].Load(riffFile,version);
-			}
-*/
-		}
-
-		// save XMInstrument
-
-		void XMInstrument::Save(RiffFile& riffFile,const UINT version)
-		{
-			int i;
-
-			//riffFile.Write("INST");
-			//riffFile.Write(size);
-			CT2A _name(m_Name.data());
-			riffFile.Write(_name,strlen(_name) + 1);
-
-			riffFile.Write(&m_bEnabled,sizeof(m_bEnabled));
-
-			riffFile.Write(&m_LinesMode,sizeof(m_LinesMode));
-			riffFile.Write(&m_Lines,sizeof(m_Lines));
-
-			riffFile.Write(m_GlobVol);
-			riffFile.Write(m_VolumeFadeSpeed);
-
-			riffFile.Write(m_InitPan);
-			riffFile.Write(m_PanEnabled);
-			riffFile.Write(m_PitchPanCenter);
-			riffFile.Write(m_PitchPanSep);
-
-			riffFile.Write(m_RandomPanning);
-			riffFile.Write(m_RandomResonance);
-			riffFile.Write(m_RandomSampleStart);
-
-			riffFile.Write(m_FilterCutoff);
-			riffFile.Write(m_FilterResonance);
-			riffFile.Write(m_FilterEnvAmount);
-			riffFile.Write(&m_FilterType,sizeof(m_FilterType));
-
-			riffFile.Write(&m_MidiChannel);
-			riffFile.Write(&m_MidiProgram);
-			riffFile.Write(&m_MidiBank);
-
-			riffFile.Write(&m_NNA,sizeof(m_NNA));
-			riffFile.Write(&m_DCT,sizeof(m_DCT));
-			riffFile.Write(&m_DCA,sizeof(m_DCA));
-
-			NotePair npair;
-			for(i = 0;i < NOTE_MAP_SIZE;i++){
-				riffFile.Write(&npair,sizeof(npair));
-				NoteToSample(i,npair);
-			}
-
-			m_AmpEnvelope.Save(riffFile,version);
-			m_FilterEnvelope.Save(riffFile,version);
-			m_PanEnvelope.Save(riffFile,version);
-			m_PitchEnvelope.Save(riffFile,version);
-
-
-
-			// now we have to write out the waves, but only the valid ones
-
-/*			int numwaves = 0;
-			for (i = 0; i < MAX_INSTRUMENT_SAMPLES; i++)
-			{
-				if (m_WaveLayer[i].WaveLength() > 0)
-				{
-					numwaves++;
-				}
-			}
-
-			riffFile.Write(numwaves);
-			
-			for (i = 0; i < MAX_INSTRUMENT_SAMPLES; i++)
-			{
-				if (m_WaveLayer[i].WaveLength() > 0)
-				{
-					UINT index = i;
-					riffFile.Write(index);
-					m_WaveLayer[i].Save(riffFile,version);
-				}
-			}
-*/
-		}
-
-
-		//////////////////////////////////////////////////////////////////////////
-		//  XMInstrument::WaveData Implementation.
+//////////////////////////////////////////////////////////////////////////
+//  XMInstrument::WaveData Implementation.
 
 		void XMInstrument::WaveData::Load(RiffFile& riffFile,const UINT version)
 		{	
@@ -360,8 +138,8 @@ namespace psycle
 		}
 
 
-		//////////////////////////////////////////////////////////////////////////
-		//  XMInstrument::Envelope Implementation.
+//////////////////////////////////////////////////////////////////////////
+//  XMInstrument::Envelope Implementation.
 
 		/** 
 		* @param pointIndex : Current point index.
@@ -611,6 +389,230 @@ namespace psycle
 				riffFile.Write(m_Points[i].second);//value
 			}
 		}
+
+//////////////////////////////////////////////////////////////////////////
+//   XMInstrument Implementation
+		XMInstrument::XMInstrument()
+		{
+			// clear everythingout
+			Init();
+		}
+
+		// destructor
+		XMInstrument::~XMInstrument()
+		{
+			// No need to delete anything, since we don't allocate memory explicitely.
+		}
+
+		// other functions
+		void XMInstrument::Init()
+		{
+			m_bEnabled = false;
+
+			m_Name = _T("");
+
+			m_LinesMode = false;
+			m_Lines = 16;
+
+			m_GlobVol = 1.0f;
+			m_VolumeFadeSpeed = 0;
+
+			m_PanEnabled=false;
+			m_InitPan = 0.5f;
+			m_PitchPanCenter = 60;
+			m_PitchPanSep = 0;
+/*			m_AutoVibratoType = 0;
+			m_AutoVibratoSweep = 0;
+			m_AutoVibratoDepth = 0;
+			m_AutoVibratoRate = 0;
+*/
+			m_RandomVolume = 0;	///< Random Volume
+			m_RandomPanning = 0;///< Random Panning
+			m_RandomCutoff = 0;///< Random CutOff
+			m_RandomResonance = 0;///< Random Resonance
+			m_RandomSampleStart = false;///< Random SampleStart
+
+			m_FilterCutoff = 127;
+			m_FilterResonance = 0;
+			m_FilterEnvAmount = 0;
+			m_FilterType = dsp::F_NONE;
+
+/*			m_MidiChannel=-1;
+			m_MidiProgram=-1;
+			m_MidiBank=-1;
+*/
+			m_NNA = NewNoteAction::STOP;
+			m_DCT = DCType::DCT_NONE;
+			m_DCA = DCAction::DCA_STOP;
+
+			NotePair npair;
+			npair.second=255;
+			for(int i = 0;i < NOTE_MAP_SIZE;i++){
+				npair.first=i;
+				m_AssignNoteToSample[i] = npair;
+			}
+
+			m_AmpEnvelope.Init();
+			m_FilterEnvelope.Init();
+			m_PanEnvelope.Init();
+			m_PitchEnvelope.Init();
+
+		}
+
+/*		// delete layer
+		void XMInstrument::DeleteLayer(int c)
+		{
+			ASSERT(c<MAX_INSTRUMENT_SAMPLES);
+			m_WaveLayer[c].Init();
+		}
+*/
+		// load XMInstrument
+		void XMInstrument::Load(RiffFile& riffFile,const UINT version)
+		{
+			int i;
+			Init();
+			// assume version 0 for now
+
+			TCHAR _name[128];
+			riffFile.ReadStringA2T(_name,sizeof(_name));
+			m_Name = _name;
+
+			riffFile.Read(&m_bEnabled,sizeof(m_bEnabled));
+
+			riffFile.Read(&m_LinesMode,sizeof(m_LinesMode));
+			riffFile.Read(&m_Lines,sizeof(m_Lines));
+
+			riffFile.Read(m_GlobVol);
+			riffFile.Read(m_VolumeFadeSpeed);
+
+			riffFile.Read(m_InitPan);
+			riffFile.Read(m_PanEnabled);
+			riffFile.Read(m_PitchPanCenter);
+			riffFile.Read(m_PitchPanSep);
+
+			riffFile.Read(m_RandomPanning);
+			riffFile.Read(m_RandomResonance);
+			riffFile.Read(m_RandomSampleStart);
+
+			riffFile.Read(m_FilterCutoff);
+			riffFile.Read(m_FilterResonance);
+			riffFile.Read(m_FilterEnvAmount);
+			riffFile.Read(&m_FilterType,sizeof(m_FilterType));
+
+/*
+			riffFile.Read(m_MidiChannel);
+			riffFile.Read(m_MidiProgram);
+			riffFile.Read(m_MidiBank);
+*/
+			riffFile.Read(&m_NNA,sizeof(m_NNA));
+			riffFile.Read(&m_DCT,sizeof(m_DCT));
+			riffFile.Read(&m_DCA,sizeof(m_DCA));
+
+			NotePair npair;
+			for(i = 0;i < NOTE_MAP_SIZE;i++){
+				riffFile.Read(&npair,sizeof(npair));
+				NoteToSample(i,npair);
+			}
+
+			m_AmpEnvelope.Load(riffFile,version);
+			m_FilterEnvelope.Load(riffFile,version);
+			m_PanEnvelope.Load(riffFile,version);
+			m_PitchEnvelope.Load(riffFile,version);
+
+
+
+/*			int numwaves;
+			riffFile.Read(numwaves);
+
+			for (i = 0; i < numwaves; i++)
+			{
+				UINT index;
+				riffFile.Read(index);
+				m_WaveLayer[index].Load(riffFile,version);
+			}
+*/
+		}
+
+		// save XMInstrument
+
+		void XMInstrument::Save(RiffFile& riffFile,const UINT version)
+		{
+			int i;
+
+			//riffFile.Write("INST");
+			//riffFile.Write(size);
+			CT2A _name(m_Name.data());
+			riffFile.Write(_name,strlen(_name) + 1);
+
+			riffFile.Write(&m_bEnabled,sizeof(m_bEnabled));
+
+			riffFile.Write(&m_LinesMode,sizeof(m_LinesMode));
+			riffFile.Write(&m_Lines,sizeof(m_Lines));
+
+			riffFile.Write(m_GlobVol);
+			riffFile.Write(m_VolumeFadeSpeed);
+
+			riffFile.Write(m_InitPan);
+			riffFile.Write(m_PanEnabled);
+			riffFile.Write(m_PitchPanCenter);
+			riffFile.Write(m_PitchPanSep);
+
+			riffFile.Write(m_RandomPanning);
+			riffFile.Write(m_RandomResonance);
+			riffFile.Write(m_RandomSampleStart);
+
+			riffFile.Write(m_FilterCutoff);
+			riffFile.Write(m_FilterResonance);
+			riffFile.Write(m_FilterEnvAmount);
+			riffFile.Write(&m_FilterType,sizeof(m_FilterType));
+/*
+			riffFile.Write(&m_MidiChannel);
+			riffFile.Write(&m_MidiProgram);
+			riffFile.Write(&m_MidiBank);
+*/
+			riffFile.Write(&m_NNA,sizeof(m_NNA));
+			riffFile.Write(&m_DCT,sizeof(m_DCT));
+			riffFile.Write(&m_DCA,sizeof(m_DCA));
+
+			NotePair npair;
+			for(i = 0;i < NOTE_MAP_SIZE;i++){
+				riffFile.Write(&npair,sizeof(npair));
+				NoteToSample(i,npair);
+			}
+
+			m_AmpEnvelope.Save(riffFile,version);
+			m_FilterEnvelope.Save(riffFile,version);
+			m_PanEnvelope.Save(riffFile,version);
+			m_PitchEnvelope.Save(riffFile,version);
+
+
+
+			// now we have to write out the waves, but only the valid ones
+
+/*			int numwaves = 0;
+			for (i = 0; i < MAX_INSTRUMENT_SAMPLES; i++)
+			{
+				if (m_WaveLayer[i].WaveLength() > 0)
+				{
+						numwaves++;
+				}
+			}
+
+			riffFile.Write(numwaves);
+
+			for (i = 0; i < MAX_INSTRUMENT_SAMPLES; i++)
+			{
+				if (m_WaveLayer[i].WaveLength() > 0)
+				{
+					UINT index = i;
+					riffFile.Write(index);
+					m_WaveLayer[i].Save(riffFile,version);
+				}
+			}
+*/
+		}
+
+
 
 	} //namespace host
 }// namespace psycle

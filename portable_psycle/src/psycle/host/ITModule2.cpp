@@ -2,6 +2,7 @@
 #include ".\itmodule2.h"
 #include "Configuration.hpp"
 #include "Song.hpp"
+#include "Player.hpp"
 #include "XMSampler.hpp"
 
 namespace psycle
@@ -82,7 +83,11 @@ namespace psycle
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
 			sampler->BPM(itFileH.iTempo);
-			sampler->TicksPerRow(itFileH.iSpeed);
+			if(itFileH.iSpeed == 0){
+				sampler->TicksPerRow(6);
+			} else {
+				sampler->TicksPerRow(itFileH.iSpeed);
+			}
 			sampler->CalcBPMAndTick();
 			sampler->IsLinearFreq(itFileH.flags&Flags::LINEARSLIDES?true:false);
 /*
@@ -128,23 +133,28 @@ Special:  Bit 0: On = song message attached.
 */
 			bool stereo=itFileH.flags&Flags::STEREO;
 			int i,j;
+			int numchans=0;
 			for (i=0;i<64;i++)
 			{
 				if (stereo)
 				{
-					if (itFileH.chanPan[i]&0x7F < ChanFlags::IS_SURROUND)
-						sampler->rChannel(i).PanFactor((itFileH.chanPan[i]&0x7F)/64.0f);
-					else if ( itFileH.chanPan[i] == ChanFlags::IS_SURROUND)
-						sampler->rChannel(i).IsSurround(true);
+					sampler->rChannel(i).DefaultPanFactor(itFileH.chanPan[i]);
 				}
 				else
-					sampler->rChannel(i).PanFactor(0.5f);
+					sampler->rChannel(i).DefaultPanFactor(0.5f);
 				
 				if ( !(itFileH.chanPan[i]&ChanFlags::IS_DISABLED) ) 
 				{
+					numchans=i+1; // topmost used channel.
+				}
+				else
+				{
 					; //  Disable channel.
 				}
+				sampler->rChannel(i).DefaultVolume(itFileH.chanVol[i]);
 			}
+			song->SONGTRACKS=numchans;
+
 
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
@@ -205,7 +215,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadOldITInst(XMSampler *sampler,int iInstIdx)
 		{
 			itInsHeader1x curH;
-			XMInstrument &xins = sampler->Instrument(iInstIdx);
+			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 			Read(&curH,sizeof(curH));
 
 			std::string itname(curH.sName);
@@ -224,7 +234,7 @@ Special:  Bit 0: On = song message attached.
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=short(curH.notes[i].first);
 				npair.second=short(curH.notes[i].second)-1;
-				sampler->Instrument(iInstIdx).NoteToSample(i,npair);
+				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
 			xins.AmpEnvelope()->Init();
 			if(curH.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
@@ -240,9 +250,29 @@ Special:  Bit 0: On = song message attached.
 					xins.AmpEnvelope()->LoopEnd(curH.loopE);
 				}
 
-				/*
-					It is not clear what needs to be done here.
-				*/
+/*
+*
+			// load IT 1xx volume envelope
+				_mm_read_UBYTES (ih.volenv, 200, modreader);
+				for (lp = 0; lp < ITENVCNT; lp++)
+				{
+					ih.oldvoltick[lp] = _mm_read_UBYTE (modreader);
+					ih.volnode[lp] = _mm_read_UBYTE (modreader);
+				}
+				if (ih.volflg & 1)
+				{
+				for (u = 0; u < ITENVCNT; u++)
+				if (ih.oldvoltick[d->volpts] != 0xff)
+				{
+				d->volenv[d->volpts].val = (ih.volnode[d->volpts] << 2);
+				d->volenv[d->volpts].pos = ih.oldvoltick[d->volpts];
+				d->volpts++;
+				}
+				else
+				break;
+				}
+ */
+
 			}
 			xins.PanEnvelope()->Init();
 			xins.PitchEnvelope()->Init();
@@ -253,7 +283,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadITInst(XMSampler *sampler,int iInstIdx)
 		{
 			itInsHeader2x curH;
-			XMInstrument &xins = sampler->Instrument(iInstIdx);
+			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 
             Read(&curH,sizeof(curH));
 
@@ -262,11 +292,11 @@ Special:  Bit 0: On = song message attached.
 			xins.DCT(XMInstrument::DCType(curH.DCT));
 			xins.DCA(XMInstrument::DCAction(curH.DCA));
 
-			xins.Pan(curH.defPan & 0x7F);
+			xins.Pan((curH.defPan & 0x7F)/64);
 			xins.PanEnabled((curH.defPan & 0x80)?false:true);
 			xins.PitchPanCenter(curH.pPanCenter);
 			xins.PitchPanSep(curH.pPanSep);
-			xins.GlobVol(curH.gVol);
+			xins.GlobVol(curH.gVol/127.0f);
 			xins.VolumeFadeSpeed(curH.fadeout*32);
 			xins.RandomVolume(curH.randVol);
 			xins.RandomPanning(curH.randPan);
@@ -280,11 +310,9 @@ Special:  Bit 0: On = song message attached.
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=curH.notes[i].first;
 				npair.second=curH.notes[i].second-1;
-				sampler->Instrument(iInstIdx).NoteToSample(i,npair);
+				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
 //////////////////////////////////////////////////////////////////////////
-
-			const int _tickPerWave = Global::pConfig->_pOutputDriver->_samplesPerSec  /* samples/sec */ * 60 /* sec */  / (4 /*row */ * 6 /* tick */ *sampler->BPM());
 
 			// volume envelope
 			xins.AmpEnvelope()->Init();
@@ -309,7 +337,7 @@ Special:  Bit 0: On = song message attached.
 
 				for(int i = 0; i < envelope_point_num;i++){
 					short envtmp = curH.volEnv.nodes[i].secondlo | curH.volEnv.nodes[i].secondhi <<8;
-					xins.AmpEnvelope()->Append(envtmp * _tickPerWave,(float)curH.volEnv.nodes[i].first/ 64.0f);
+					xins.AmpEnvelope()->Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
 				}
 
 			} else {
@@ -339,7 +367,7 @@ Special:  Bit 0: On = song message attached.
 
 				for(int i = 0; i < envelope_point_num;i++){
 					short pantmp = curH.panEnv.nodes[i].secondlo || curH.panEnv.nodes[i].secondhi <<8;
-					xins.PanEnvelope()->Append(pantmp* _tickPerWave,(float)curH.panEnv.nodes[i].first/ 32.0f);
+					xins.PanEnvelope()->Append(pantmp,(float)(curH.panEnv.nodes[i].first+32)/ 64.0f);
 				}
 
 			} else {
@@ -374,6 +402,21 @@ Special:  Bit 0: On = song message attached.
 			bool bLoop=curH.flg&SampleFlags::USELOOP;
 			bool bsustainloop=curH.flg&SampleFlags::USESUSTAIN;
 
+
+			// If this MOD doesn't use Instruments, we need to map the notes manually.
+			if ( !(itFileH.flags & Flags::USEINSTR)) 
+			{
+				int i;
+				XMInstrument::NotePair npair;
+				npair.second=iSampleIdx;
+				for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+					npair.first=i;
+					sampler->rInstrument(iSampleIdx).NoteToSample(i,npair);
+				}
+				sampler->rInstrument(iSampleIdx).IsEnabled(true);
+			}
+
+
 			if (curH.flg&SampleFlags::HAS_SAMPLE)
 			{
 				_wave.Init();
@@ -404,7 +447,7 @@ Special:  Bit 0: On = song message attached.
 					_wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
 				}
 
-				_wave.WaveVolume(((int)curH.vol * 100) / 64);
+				_wave.WaveVolume(curH.vol * 4);
 				_wave.WaveGlobVolume(curH.gVol /64.0f);
 
 				double tune = log(double(curH.c5Speed)/8363.0f)/log(double(2));
@@ -655,118 +698,20 @@ Special:  Bit 0: On = song message attached.
 					if(mask[channel]&8)
 					{
 						pent._mach=0;
-						unsigned char command=ReadInt(1)-1;
+						unsigned char command=ReadInt(1);
 						unsigned char param=ReadInt(1);
-						lastcom[channel]=command;
-						lasteff[channel]=param;
-						switch(command){
-							case CMD::VOLUME_SLIDE:
-								if (param&0xf == 0 || param&0xf == 0xf) {
-									if (param&0xf == 0) {
-										pent._cmd = XMSampler::CMD::VOLSLIDEUP;
-									} else {
-										pent._cmd = XMSampler::CMD::FINE_VOLSLIDE_UP;
-									}
-									pent._parameter= (param & 0xf0)>>4;
-								}
-								else if(param & 0xf0 ==0 || param & 0xf0 == 0xf0)
-								{
-									if (param&0xf0 == 0) {
-										pent._cmd = XMSampler::CMD::VOLSLIDEUP;
-									} else {
-										pent._cmd = XMSampler::CMD::FINE_VOLSLIDE_UP;
-									}
-									pent._parameter= (param & 0x0f);
-								}
-								break;
-						case CMD::PORTAMENTO_DOWN:
-							if (param&0xf0 == 0xf0 ){
-								pent._cmd=XMSampler::CMD::FINE_PORTAMENTO_DOWN;
-								pent._parameter=(param &0xf);
-							} else if (param&0xf0 == 0xe0 )
-							{
-								pent._cmd = XMSampler::CMD::EXTRA_FINE_PORTAMENTO_DOWN;
-								pent._parameter = param & 0xf;
-							} else {
-								pent._cmd=XMSampler::CMD::PORTADOWN;
-								pent._parameter=(param&0xf)*2;
-							}
-							break;
-						case CMD::PORTAMENTO_UP:
-							if (param&0xf0 == 0xf0 ){
-								pent._cmd=XMSampler::CMD::FINE_PORTAMENTO_UP;
-								pent._parameter = (param&0xf);
-							} else if (param&0xf0 == 0xe0 )
-							{
-								pent._cmd = XMSampler::CMD::FINE_PORTAMENTO_UP;
-								pent._parameter = param & 0xf;
-							} else {
-								pent._cmd=XMSampler::CMD::PORTAUP;
-								pent._parameter = (param&0xf)*2;
-							}
-							break;
-						case CMD::VOLSLIDE_VIBRATO:
-							pent._cmd=XMSampler::CMD::VIBRATO_SPEED;
-							pent._parameter=param;
-							break;
-						case CMD::ARPEGGIO:
-							pent._cmd = XMSampler::CMD::ARPEGGIO;
-							pent._parameter = param;
-							break;
-						case CMD::S:
-							switch((param & 0xf0)>>8){
-							case CMD_S::S_SET_GLISSANDO_CONTROL:
-									pent._cmd = XMSampler::CMD::GRISSANDO;
-									pent._parameter = param & 0xf;
-									break;
-							case CMD_S::S_FINETUNE:
-								pent._cmd = XMSampler::CMD::SET_FINE_TUNE;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_VIBRATO_WAVEFORM:
-								pent._cmd = XMSampler::CMD::VIBRATO_TYPE;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_TREMOLO_WAVEFORM:
-								pent._cmd = XMSampler::CMD::TREMOLO_TYPE;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_PAN:
-								pent._cmd = XMSampler::CMD::SET_PANNING;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_HIGH_OFFSET:
-								pent._cmd = XMSampler::CMD::SET_HIGH_OFFSET;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_PATTERN_LOOP:
-								pent._cmd = XMSampler::CMD::PATTERN_LOOP;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_DELAYED_NOTE_CUT:
-								pent._cmd = XMSampler::CMD::NOTE_CUT;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_NOTE_DELAY:
-								pent._cmd = XMSampler::CMD::NOTE_DELAY;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_PATTERN_DELAY:
-								pent._cmd = XMSampler::CMD::PATTERN_DELAY;
-								pent._parameter = param & 0xf;
-								break;
-							}
-							break;
-						default:
-							break;
-						}
+						if ( command != 0 ) pent._parameter = param;
+						ParseEffect(pent,command,param);
+						lastcom[channel]=pent._cmd;
+						lasteff[channel]=pent._parameter;
+
 					}
 					if (mask[channel]&16) { pent._note=lastnote[channel]; pent._mach=0; }
 					if (mask[channel]&32) { pent._inst=lastinst[channel]; pent._mach=0; }
-					if (mask[channel]&128){
-						pent._cmd=lastcom[channel];
-						pent._parameter=lasteff[channel];
-						pent._mach=0;
+					if ( mask[channel]&128 )
+					{
+						pent._cmd = lastcom[channel];
+						pent._parameter = lasteff[channel];
 					}
 
 					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
@@ -780,7 +725,144 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-
+		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param)
+		{
+			switch(command){
+/*				case ITModule2::CMD::SET_SPEED:
+					pent._cmd=XMSampler::CMD::SETSPEED;
+					break;
+*/
+				case ITModule2::CMD::JUMP_TO_ORDER:
+					pent._cmd = Player::CMD::JUMP_TO_ORDER;
+					break;
+				case ITModule2::CMD::BREAK_TO_ROW:
+					pent._cmd = Player::CMD::BREAK_TO_LINE;
+					break;
+				case ITModule2::CMD::VOLUME_SLIDE:
+					pent._cmd = XMSampler::CMD::VOLUMESLIDE;
+					break;
+				case ITModule2::CMD::PORTAMENTO_DOWN:
+					pent._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
+					break;
+				case ITModule2::CMD::PORTAMENTO_UP:
+					pent._cmd = XMSampler::CMD::PORTAMENTO_UP;
+					break;
+				case ITModule2::CMD::TONE_PORTAMENTO:
+					pent._cmd = XMSampler::CMD::PORTA2NOTE;
+					break;
+				case ITModule2::CMD::VIBRATO:
+					pent._cmd = XMSampler::CMD::VIBRATO;
+					break;
+				case ITModule2::CMD::TREMOR:
+					pent._cmd = XMSampler::CMD::TREMOR;
+					break;
+				case ITModule2::CMD::ARPEGGIO:
+					pent._cmd = XMSampler::CMD::ARPEGGIO;
+					break;
+				case ITModule2::CMD::VOLSLIDE_VIBRATO:
+					pent._cmd = XMSampler::CMD::VIBRATOVOL;
+					break;
+				case ITModule2::CMD::VOLSLIDE_TONEPORTA:
+					pent._cmd = XMSampler::CMD::TONEPORTAVOL;
+					break;
+				case CMD::SET_CHANNEL_VOLUME: // IT
+					pent._cmd = XMSampler::CMD::SET_CHANNEL_VOLUME;
+					break;
+				case CMD::CHANNEL_VOLUME_SLIDE: // IT
+					pent._cmd = XMSampler::CMD::CHANNEL_VOLUME_SLIDE;
+					break;
+				case CMD::SET_SAMPLE_OFFSET:
+					pent._cmd = XMSampler::CMD::OFFSET; //\todo: + mem[thischannel].highoffset; 
+					break;
+				case ITModule2::CMD::PANNING_SLIDE: // IT
+					pent._cmd = XMSampler::CMD::PANNINGSLIDE;
+					break;
+				case ITModule2::CMD::RETRIGGER_NOTE:
+					pent._cmd = XMSampler::CMD::RETRIG;
+					break;
+				case ITModule2::CMD::TREMOLO:
+					pent._cmd = XMSampler::CMD::TREMOLO;
+					break;
+				case ITModule2::CMD::S:
+/*					switch(param & 0xf0){
+						case CMD_S::S_SET_FILTER:
+							break;
+						case CMD_S::S_SET_GLISSANDO_CONTROL:
+							pent._cmd = XMSampler::CMD::GRISSANDO;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_FINETUNE:
+							pent._cmd = XMSampler::CMD::SET_FINE_TUNE;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_SET_VIBRATO_WAVEFORM:
+							pent._cmd = XMSampler::CMD::VIBRATO_TYPE;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_SET_TREMOLO_WAVEFORM:
+							pent._cmd = XMSampler::CMD::TREMOLO_TYPE;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_SET_PANBRELLO_WAVEFORM: // IT
+							break;
+						case CMD_S::S_FINE_PATTERN_DELAY: // IT
+							break;
+						case CMD_S::S7: // IT
+							break;
+						case CMD_S::S_SET_PAN:
+							pent._cmd = XMSampler::CMD::SET_PANNING;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S9: // IT
+							break;
+						case CMD_S::S_SET_HIGH_OFFSET: // IT
+							pent._cmd = XMSampler::CMD::SET_HIGH_OFFSET;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_PATTERN_LOOP:
+							pent._cmd = Player::CMD::PATTERN_LOOP;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_DELAYED_NOTE_CUT:
+							pent._cmd = XMSampler::CMD::NOTECUT;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_NOTE_DELAY:
+							pent._cmd = XMSampler::CMD::NOTE_DELAY;
+							pent._parameter = param & 0xf;
+							break;
+						case CMD_S::S_PATTERN_DELAY:
+							pent._cmd = Player::CMD::PATTERN_DELAY;
+							pent._parameter = param & 0xf;
+							break;
+					}*/
+					break;
+				case CMD::SET_SONG_TEMPO:
+					pent._cmd = Player::CMD::SET_TEMPO;
+					break;
+				case CMD::FINE_VIBRATO:
+					pent._cmd = XMSampler::CMD::FINE_VIBRATO;
+					break;
+				case CMD::SET_GLOBAL_VOLUME: 
+					pent._cmd = Player::CMD::SET_VOLUME;
+					if (param== 64)
+					{	
+						pent._parameter=255;
+					} else pent._parameter = param * 4;
+					break;
+				case CMD::GLOBAL_VOLUME_SLIDE: // IT
+					//\todo: implement when it is done.
+					break;
+				case CMD::SET_PANNING: // IT
+					pent._cmd = XMSampler::CMD::PANNING;
+					break;
+				case CMD::PANBRELLO: // IT
+					pent._cmd = XMSampler::CMD::PANBRELLO;
+					break;
+				default:
+					break;
+			}
+		}
 
 //////////////////////////////////////////////////////////////////////////
 //     S3M Module Members
@@ -804,7 +886,11 @@ Special:  Bit 0: On = song message attached.
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
 			sampler->BPM(s3mFileH.iTempo);
-			sampler->TicksPerRow(s3mFileH.iSpeed);
+			if(s3mFileH.iSpeed == 0){
+				sampler->TicksPerRow(6);
+			} else {
+				sampler->TicksPerRow(s3mFileH.iSpeed);
+			}
 			sampler->CalcBPMAndTick();
 			sampler->IsLinearFreq(false);
 			
@@ -826,25 +912,31 @@ Special:  Bit 0: On = song message attached.
 			unsigned short * pointersp = new unsigned short[s3mFileH.patNum];
 			Read(pointersp,s3mFileH.patNum*sizeof(unsigned short));
 
-			bool stereo=s3mFileH.mVol&S3MSampleFlags::STEREO;
+			bool stereo=s3mFileH.mVol&0x80;
+			int numchans=0;
 			for (i=0;i<32;i++)
 			{
 				if (stereo)
 				{
 					if (s3mFileH.chanSet[i]&S3MChanType::ISRIGHTCHAN)
-						sampler->rChannel(i).PanFactor(0xB/14.0f);
+						sampler->rChannel(i).DefaultPanFactor(48);
 					else if ( !(s3mFileH.chanSet[i]&S3MChanType::ISADLIBCHAN))
-						sampler->rChannel(i).PanFactor(0x3/14.0f);
+						sampler->rChannel(i).DefaultPanFactor(12);
 					else 
-						sampler->rChannel(i).PanFactor(0.5f);
+						sampler->rChannel(i).DefaultPanFactor(32);
 				}
 				else
-					sampler->rChannel(i).PanFactor(0.5f);
-				if ( !(s3mFileH.chanSet[i]&S3MChanType::ISENABLED) ) 
+					sampler->rChannel(i).DefaultPanFactor(32);
+				if ( !(s3mFileH.chanSet[i]&S3MChanType::ISDISABLED) && s3mFileH.chanSet[i]!=S3MChanType::ISUNUSED) 
+				{
+					numchans=i+1; // topmost used channel.
+				}
+				else
 				{
 					; //  Disable channel.
 				}
 			}
+			s->SONGTRACKS=numchans;
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
@@ -857,12 +949,7 @@ Special:  Bit 0: On = song message attached.
 						if (chansettings[i]&S3MChanType::HASCUSTOMPOS)
 						{
 							char chtmp=chansettings[i]&0x0F;
-							if ( chtmp < 7)
-								sampler->rChannel(i).PanFactor(chtmp/14);
-							else if (chtmp < 9)
-								sampler->rChannel(i).PanFactor(0.5f);
-							else 
-								sampler->rChannel(i).PanFactor((chtmp-1)/14);
+							sampler->rChannel(i).DefaultPanFactor(chtmp*4);
 						}
 					}
 				}
@@ -889,16 +976,16 @@ Special:  Bit 0: On = song message attached.
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
 
-			sampler->Instrument(iInstIdx).Name(curH.sName);
+			sampler->rInstrument(iInstIdx).Name(curH.sName);
 
 			int i;
 			XMInstrument::NotePair npair;
 			npair.second=iInstIdx;
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=i;
-				sampler->Instrument(iInstIdx).NoteToSample(i,npair);
+				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
-			sampler->Instrument(iInstIdx).IsEnabled(true);
+			sampler->rInstrument(iInstIdx).IsEnabled(true);
 
 			if ( curH.type == 1) return LoadS3MSampleX(sampler,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,0);
 			else
@@ -964,7 +1051,7 @@ OFFSET              Count TYPE   Description
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
 			}
 
-			_wave.WaveVolume(((int)currHeader->vol * 100) / 64);
+			_wave.WaveVolume(currHeader->vol * 4);
 
 			double tune = log(double(currHeader->c2speed)/8363.0f)/log(double(2));
 			double maintune = floor(tune*12);
@@ -1109,114 +1196,16 @@ OFFSET              Count TYPE   Description
 							pent._mach=0;
 							pent._cmd=0x0C;
 							pent._parameter=unsigned char(tmp);
+
 						}
 					}
 					if(newEntry&128)
 					{
 						pent._mach=0;
-						unsigned char command=ReadInt(1)+'A'-1;
+						unsigned char command=ReadInt(1);
 						unsigned char param=ReadInt(1);
-						switch(command){
-						case CMD::VOLUME_SLIDE:
-							if (param&0xf == 0 || param&0xf == 0xf) {
-								if (param&0xf == 0) {
-									pent._cmd = XMSampler::CMD::VOLSLIDEUP;
-								} else {
-									pent._cmd = XMSampler::CMD::FINE_VOLSLIDE_UP;
-								}
-								pent._parameter= (param & 0xf0)>>4;
-							}
-							else if(param & 0xf0 ==0 || param & 0xf0 == 0xf0)
-							{
-								if (param&0xf0 == 0) {
-									pent._cmd = XMSampler::CMD::VOLSLIDEUP;
-								} else {
-									pent._cmd = XMSampler::CMD::FINE_VOLSLIDE_UP;
-								}
-								pent._parameter= (param & 0x0f);
-							}
-							break;
-						case CMD::PORTAMENTO_DOWN:
-							if (param&0xf0 == 0xf0 ){
-								pent._cmd=XMSampler::CMD::FINE_PORTAMENTO_DOWN;
-								pent._parameter=(param &0xf);
-							} else if (param&0xf0 == 0xe0 )
-								{
-								pent._cmd = XMSampler::CMD::EXTRA_FINE_PORTAMENTO_DOWN;
-								pent._parameter = param & 0xf;
-							} else {
-								pent._cmd=XMSampler::CMD::PORTADOWN;
-								pent._parameter=(param&0xf)*2;
-							}
-							break;
-						case CMD::PORTAMENTO_UP:
-							if (param&0xf0 == 0xf0 ){
-								pent._cmd=XMSampler::CMD::FINE_PORTAMENTO_UP;
-								pent._parameter = (param&0xf);
-							} else if (param&0xf0 == 0xe0 )
-								{
-								pent._cmd = XMSampler::CMD::FINE_PORTAMENTO_UP;
-								pent._parameter = param & 0xf;
-							} else {
-								pent._cmd=XMSampler::CMD::PORTAUP;
-								pent._parameter = (param&0xf)*2;
-							}
-							break;
-						case CMD::VOLSLIDE_VIBRATO:
-							pent._cmd=XMSampler::CMD::VIBRATO_SPEED;
-							pent._parameter=param*4;
-							break;
-						case CMD::ARPEGGIO:
-							pent._cmd = XMSampler::CMD::ARPEGGIO;
-							pent._parameter = param;
-							break;
-						case CMD::S:
-							switch((param & 0xf0)>>8){
-							case CMD_S::S_SET_GLISSANDO_CONTROL:
-								pent._cmd = XMSampler::CMD::GRISSANDO;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_FINETUNE:
-								pent._cmd = XMSampler::CMD::SET_FINE_TUNE;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_VIBRATO_WAVEFORM:
-								pent._cmd = XMSampler::CMD::VIBRATO_TYPE;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_TREMOLO_WAVEFORM:
-								pent._cmd = XMSampler::CMD::TREMOLO_TYPE;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_PAN:
-								pent._cmd = XMSampler::CMD::SET_PANNING;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_SET_HIGH_OFFSET:
-								pent._cmd = XMSampler::CMD::SET_HIGH_OFFSET;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_PATTERN_LOOP:
-								pent._cmd = XMSampler::CMD::PATTERN_LOOP;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_DELAYED_NOTE_CUT:
-								pent._cmd = XMSampler::CMD::NOTE_CUT;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_NOTE_DELAY:
-								pent._cmd = XMSampler::CMD::NOTE_DELAY;
-								pent._parameter = param & 0xf;
-								break;
-							case CMD_S::S_PATTERN_DELAY:
-								pent._cmd = XMSampler::CMD::PATTERN_DELAY;
-								pent._parameter = param & 0xf;
-								break;
-							}
-							break;
-						default:
-							break;
-						}
+						if ( command != 0 ) pent._parameter = param;
+						ParseEffect(pent,command,param);
 					}
 					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
 
