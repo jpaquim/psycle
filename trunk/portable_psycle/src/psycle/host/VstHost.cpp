@@ -249,7 +249,7 @@ namespace psycle
 							std::ostringstream s; s
 								<< typeid(e).name() << std::endl
 								<< e.what();
-							exception = new exceptions::function_error(s.str());
+							exception = new host::exceptions::function_error(s.str());
 						}
 					}
 					try
@@ -263,7 +263,7 @@ namespace psycle
 							std::ostringstream s; s
 								<< typeid(e).name() << std::endl
 								<< e.what();
-							exception = new exceptions::function_error(s.str());
+							exception = new host::exceptions::function_error(s.str());
 						}
 					}
 				}
