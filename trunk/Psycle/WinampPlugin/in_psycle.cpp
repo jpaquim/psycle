@@ -122,63 +122,88 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 	}
 	else
 	{
-
 		OldPsyFile file;
-		if (!file.Open(filename) || !file.Expect("PSY2SONG", 8))
+		char Header[9];
+
+		if (file.Open(filename))
 		{
-			if (title)
-			{
-				char *p=filename+strlen(filename);
-				while (*p != '\\' && p >= filename) p--;
-				strcpy(title,++p);
-			}
-			if (length_in_ms ) *length_in_ms = -1000;
-		}
-		else
-		{
-			char Name[33], Author[33];
-			int bpm, tpb, spt, num, playLength, patternLines[MAX_PATTERNS];
-			unsigned char playOrder[MAX_SONG_POSITIONS];
+	
+			file.Read(&Header, 8);
+			Header[8]=0;
 			
-			file.Read(Name, 32); Name[32]='\0';
-			file.Read(Author, 32); Author[32]='\0';
-			if (title) { sprintf(title,"%s - %s\0",Author,Name); }
+			if (strcmp(Header,"PSY3SONG")==0)
+			{
+				Song *pSong;
+				pSong=new Song;
+				file.Seek(0);
+				//////////////// Maybe a modification of Song::Load to not load the machines would
+				//////////////// be nice, to speed up the info loading.
 
-			if (length_in_ms) { 
-				file.Skip(128); // Comment;
-				file.Read(&bpm, sizeof(bpm));
-				file.Read(&spt, sizeof(spt));
-				if ( spt <= 0 ) { // Shouldn't happen but has happened. (bug of 1.1b1)
-					tpb= 4; spt = 4315;
-				}
-				else tpb = 44100*15*4/(spt*bpm);
-
-				file.Skip(sizeof(unsigned char)); // currentOctave
-				file.Skip(sizeof(unsigned char)*MAX_BUSES); // BusMachine
-
-				file.Read(&playOrder, sizeof(playOrder));
-				file.Read(&playLength, sizeof(playLength));
-				file.Skip(sizeof(int));	//SONG_TRACKS
-
-				// Patterns
-				//
-				file.Read(&num, sizeof(num));
-				for (int i=0; i<num; i++)
+				pSong->Load(&file);
+				if (title) { sprintf(title,"%s - %s\0",pSong->Author,pSong->Name); }
+				if (length_in_ms)
 				{
-					file.Read(&patternLines[i], sizeof(patternLines[0]));
-					file.Skip(sizeof(char)*32);	// Pattern Name
-					file.Skip(patternLines[i]*MAX_TRACKS*sizeof(PatternEntry)); // Pattern Data
+					*length_in_ms = CalcSongLength(pSong);
 				}
-				
-				*length_in_ms = 0;
-				for (i=0; i <playLength; i++)
-				{
-					*length_in_ms += (patternLines[playOrder[i]] * 60000/(bpm * tpb));
-				}
-				
+					
+//				file.Close(); <- load handles this
+				return;
 			}
+			else if (strcmp(Header,"PSY2SONG")==0)
+			{
+				char Name[33], Author[33];
+				int bpm, tpb, spt, num, playLength, patternLines[MAX_PATTERNS];
+				unsigned char playOrder[MAX_SONG_POSITIONS];
+				
+				file.Read(Name, 32); Name[32]='\0';
+				file.Read(Author, 32); Author[32]='\0';
+				if (title) { sprintf(title,"%s - %s\0",Author,Name); }
+
+				if (length_in_ms) { 
+					file.Skip(128); // Comment;
+					file.Read(&bpm, sizeof(bpm));
+					file.Read(&spt, sizeof(spt));
+					if ( spt <= 0 )  // Shouldn't happen but has happened. (bug of 1.1b1)
+					{	tpb= 4; spt = 4315;
+					}
+					else tpb = 44100*15*4/(spt*bpm);
+
+					file.Skip(sizeof(unsigned char)); // currentOctave
+					file.Skip(sizeof(unsigned char)*MAX_BUSES); // BusMachine
+
+					file.Read(&playOrder, sizeof(playOrder));
+					file.Read(&playLength, sizeof(playLength));
+					file.Skip(sizeof(int));	//SONG_TRACKS
+
+					// Patterns
+					//
+					file.Read(&num, sizeof(num));
+					for (int i=0; i<num; i++)
+					{
+						file.Read(&patternLines[i], sizeof(patternLines[0]));
+						file.Skip(sizeof(char)*32);	// Pattern Name
+						file.Skip(patternLines[i]*OLD_MAX_TRACKS*sizeof(PatternEntry)); // Pattern Data
+					}
+					
+					*length_in_ms = 0;
+					for (i=0; i <playLength; i++)
+					{
+						*length_in_ms += (patternLines[playOrder[i]] * 60000/(bpm * tpb));
+					}
+					
+				}
+				file.Close();
+				return;
+			}
+			file.Close();
 		}
-		file.Close();
+		if (title)
+		{
+			char *p=filename+strlen(filename);
+			while (*p != '\\' && p >= filename) p--;
+			strcpy(title,++p);
+		}
+		if (length_in_ms ) *length_in_ms = -1000;
 	}
 }
 
@@ -189,7 +214,7 @@ int infoDlg(char *fn, HWND hwnd)
 		strcpy(infofileName,fn);
 	}
 	else infofileName[0]='\0';
-
+	
 	DialogBox(mod.hDllInstance,(char*)IDD_INFODLG,hwnd,InfoProc);
 	
 	return 0;
@@ -198,14 +223,26 @@ int infoDlg(char *fn, HWND hwnd)
 int isourfile(char *fn)
 {
 	OldPsyFile file;
-	if (!file.Open(fn)) return 0;
-	if (!file.Expect("PSY2SONG", 8))
+	char Header[9];
+	
+	if (file.Open(fn))
 	{
+		file.Read(&Header, 8);
+		Header[8]=0;
+		
+		if (strcmp(Header,"PSY3SONG")==0)
+		{
+			file.Close();
+			return 1;
+		}
+		else if (strcmp(Header,"PSY2SONG")==0)
+		{
+			file.Close();
+			return 1;
+		}
 		file.Close();
-		return 0;
 	}
-	file.Close();
-	return 1;
+	return 0;
 }
 
 void stop()
@@ -519,7 +556,7 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 
 		for( i=0;i<MAX_MACHINES;i++)
 		{
-			if(Global::_pSong->_pMachine[i])
+			if(pSong->_pMachine[i])
 			{
 				switch( pSong->_pMachine[i]->_type )
 				{
