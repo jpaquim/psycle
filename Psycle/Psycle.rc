@@ -1204,7 +1204,7 @@ END
 IDD_SEQUENCER DIALOGEX 0, 0, 73, 331
 STYLE WS_CHILD | WS_CLIPSIBLINGS
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LISTBOX         IDC_SEQLIST,5,5,38,209,LBS_SORT | LBS_EXTENDEDSEL | 
                     LBS_DISABLENOSCROLL | WS_VSCROLL
@@ -2071,7 +2071,7 @@ BEGIN
         MENUITEM "&New\tCTRL+N",                ID_FILE_NEW
         MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
         MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
-        MENUITEM "Save &as...",                 ID_FILE_SAVESONG
+        MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
         MENUITEM "Save as Au&dio File...",      ID_FILE_SAVEAUDIO
         POPUP "I&mport"
         BEGIN
@@ -2481,8 +2481,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_FILE_LOADSONG        "Open song\nOpen"
-    ID_FILE_SAVESONG        "Save song\nSave"
+    ID_FILE_LOADSONG        "Open Song\nOpen"
+    ID_FILE_SAVE_AS			"Save Song As\nSave As"
     ID_FILE_IMPORT_XMFILE   "Imports Songs in XM (FT2) format\nImport XM"
     ID_FILE_IMPORT_ITFILE   "Imports Songs in IT (Impulse Tracker) format\nImport IT"
     ID_FILE_SONGPROPERTIES  "Shows the Song Properties Dialog\nShow Song Properties"

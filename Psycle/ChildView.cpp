@@ -209,7 +209,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
 	ON_COMMAND_EX(ID_FILE_SAVE, OnFileSave)
-	ON_COMMAND_EX(ID_FILE_SAVESONG, OnFileSavesong)
+	ON_COMMAND_EX(ID_FILE_SAVE_AS, OnFileSaveAs)
 	ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
 	ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
 	ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
@@ -713,7 +713,7 @@ BOOL CChildView::OnFileSave(UINT id)
 	}
 	else 
 	{
-		return OnFileSavesong(0);
+		return OnFileSaveAs(0);
 	}
 	return bResult;
 }
@@ -721,7 +721,7 @@ BOOL CChildView::OnFileSave(UINT id)
 //////////////////////////////////////////////////////////////////////
 // "Save Song As" Function
 
-BOOL CChildView::OnFileSavesong(UINT id) 
+BOOL CChildView::OnFileSaveAs(UINT id) 
 {
 	MessageBox("Saving Disabled");
 	return false;
@@ -766,6 +766,16 @@ BOOL CChildView::OnFileSavesong(UINT id)
 			CString str2 = str.Right(4);
 			if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
 			int index = str.ReverseFind('\\');
+			OldPsyFile file;
+			if (file.Open(str.GetBuffer(1)))
+			{
+				file.Close();
+				if (MessageBox(str.GetBuffer(1),"Overwrite this file?",MB_YESNO) != IDYES)
+				{
+					return FALSE;
+				}
+			}
+
 			if (index != -1)
 			{
 				Global::pConfig->SetSongDir(str.Left(index));
@@ -776,7 +786,6 @@ BOOL CChildView::OnFileSavesong(UINT id)
 				Global::_pSong->fileName = str;
 			}
 			
-			OldPsyFile file;
 			if (!file.Create(str.GetBuffer(1), true))
 			{
 				MessageBox("Error creating file", "Error", MB_OK);
