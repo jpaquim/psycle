@@ -769,47 +769,92 @@ void Master::Work(
 //		_rMax -= numSamples*8;
 //		_lMax *= 0.5;
 //		_rMax *= 0.5;
-		if ( vuupdated ) { _lMax *= 0.5; _rMax *= 0.5; }
+		if ( vuupdated ) 
+		{ 
+			_lMax *= 0.5; 
+			_rMax *= 0.5; 
+		}
 
 		int i = numSamples;
-		do
+		if (decreaseOnClip)
 		{
-			// Left channel
-			if (fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
+			do
 			{
-				_lMax = fabsf(*pSamplesL);
+				// Left channel
+				if (fabs( *pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
+				{
+					_lMax = fabsf(*pSamplesL);
+				}
+				if (*pSamples > 32767.0f)
+				{
+					*pSamples = *pSamplesL = 32767.0f; 
+				}
+				else if (*pSamples < -32767.0f)
+				{
+					*pSamples = *pSamplesL = -32767.0f; 
+				}
+				pSamples++;
+				pSamplesL++;
+				
+				// Right channel
+				if (fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
+				{
+					_rMax = fabsf(*pSamplesR);
+				}
+				if (*pSamples > 32767.0f)
+				{
+					*pSamples = *pSamplesR = 32767.0f; 
+				}
+				else if (*pSamples < -32767.0f)
+				{
+					*pSamples = *pSamplesR = -32767.0f; 
+				}
+				pSamples++;
+				pSamplesR++;
 			}
-			pSamplesL++;
-			
-			// Right channel
-			if (fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
-			{
-				_rMax = fabsf(*pSamplesR);
-			}
-			pSamplesR++;
+			while (--i);
 		}
-		while (--i);
+		else
+		{
+			do
+			{
+				// Left channel
+				if (fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
+				{
+					_lMax = fabsf(*pSamplesL);
+				}
+				pSamplesL++;
+				
+				// Right channel
+				if (fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
+				{
+					_rMax = fabsf(*pSamplesR);
+				}
+				pSamplesR++;
+			}
+			while (--i);
+		}
 		
-		if (_lMax > 32768.0f)
+		if (_lMax > 32767.0f)
 		{
 			_clip=true;
 			if (decreaseOnClip) 
 			{
-				_outDry = f2i((float)_outDry * 32768.0f / _lMax);
+				_outDry = f2i((float)_outDry * 32767.0f / _lMax);
 			}
-			_lMax = 32768.0f; //_LMAX = 32768;
+			_lMax = 32767.0f; //_LMAX = 32768;
 		}
 		else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
 //		else _LMAX = Dsp::F2I(_lMax);
 
-		if (_rMax > 32768.0f)
+		if (_rMax > 32767.0f)
 		{
 			_clip=true;
 			if (decreaseOnClip) 
 			{
-				_outDry = f2i((float)_outDry * 32768.0f / _rMax);
+				_outDry = f2i((float)_outDry * 32767.0f / _rMax);
 			}
-			_rMax = 32768.0f; //_RMAX = 32768;
+			_rMax = 32767.0f; //_RMAX = 32768;
 		}
 		else if (_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }
 //		else _RMAX = Dsp::F2I(_rMax);

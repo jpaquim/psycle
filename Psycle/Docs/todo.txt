@@ -24,8 +24,6 @@ X low priority
 
 ** The play block feature doesn't work.
 
-** master volume decrease lets a clipping sample through while detecting
-
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still

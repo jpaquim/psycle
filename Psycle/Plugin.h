@@ -164,13 +164,13 @@ public:
 			try 
 			{
 				_pInterface->GetData(pData); // Internal save
-				pFile->Write(pData, size2); // Number of parameters
-				delete pData;
 			}
 			catch (...)
 			{
 				MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
 			}
+			pFile->Write(pData, size2); // Number of parameters
+			delete pData;
 		}
 	};
 	virtual void SaveDllName(RiffFile* pFile) 
