@@ -55,10 +55,10 @@ namespace psycle
 			// Error Logging window
 			Global::pLogWindow = new CLoggingWindow(pFrame);
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
-//			Global::pLogWindow->Validate();
+			//Global::pLogWindow->Validate();
 			host::loggers::info("Psycle version: " VERSION_NUMBER);
 
-			if (!Global::pConfig->Read()) // problem reading registry info. missing or damaged
+			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
 				Global::pConfig->_initialized = false;
 				CConfigDlg dlg("Psycle configuration");
@@ -83,8 +83,8 @@ namespace psycle
 			// Sets Icon
 			HICON tIcon;
 			tIcon=LoadIcon(IDR_MAINFRAME);
-			pFrame->SetIcon(tIcon,true);
-			pFrame->SetIcon(tIcon,false);
+			pFrame->SetIcon(tIcon, true);
+			pFrame->SetIcon(tIcon, false);
 			
 			pFrame->m_wndView.LoadMachineSkin();
 			pFrame->m_wndView.LoadPatternHeaderSkin();

@@ -22,7 +22,6 @@ namespace operating_system
 	logger::logger(const int & threshold_level, std::ostream & ostream) : threshold_level_(threshold_level), ostream_(ostream) {}
 	logger logger::default_logger_(logger::default_threshold_level(), std::cout);
 
-
 	bool console::got_a_console_window_ = false;
 
 	console::console()
@@ -52,7 +51,7 @@ namespace operating_system
 			// nothing to do when the operating system is not microsoft's
 		#else
 		{
-			::HANDLE output_handle=0;
+			::HANDLE output_handle(0);
 			if(!AllocConsole() || !(output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE))) {
 				std::ostringstream s;
 				s << "could not allocate a console at the operating system layer: " << operating_system::exceptions::code_description();
@@ -94,37 +93,35 @@ namespace operating_system
 
 	void console::log(int level, const std::string & string)
 	{
-		if(!got_a_console_window_)
-			return;
+		if(!got_a_console_window_) return;
 		::HANDLE output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE);
-		if(!output_handle)
-			return;
-		unsigned short attributes;
+		if(!output_handle) return;
+		const unsigned short base_attributes(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
+		unsigned short attributes(base_attributes);
 		switch(level)
 		{
 		case ::psycle::host::loggers::levels::trace:
-			attributes=FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+			attributes |= FOREGROUND_BLUE;
 			break;
 		case ::psycle::host::loggers::levels::info:
-			attributes=FOREGROUND_GREEN|FOREGROUND_INTENSITY;
+			attributes |= FOREGROUND_GREEN;
 			break;
 		case ::psycle::host::loggers::levels::exception:
-			attributes=FOREGROUND_RED|FOREGROUND_INTENSITY;
+			attributes |= FOREGROUND_RED;
 			break;
 		case ::psycle::host::loggers::levels::crash:
-			attributes=BACKGROUND_RED;
+			attributes |= FOREGROUND_RED | FOREGROUND_INTENSITY;
 			break;
 		default:
-			attributes=FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+			attributes |= 0;
 		};
-
-		DWORD length=string.length();
+		DWORD length(string.length());
 		::SetConsoleTextAttribute(output_handle, attributes);
-		::WriteConsole(output_handle,string.c_str(),length,&length,0);
+		::WriteConsole(output_handle, string.c_str(), length, &length, 0);
 		// <bohan> "reset" the attributes before new line because otherwize we have
 		// <bohan> the cells of the whole next line set with attributes, up to the rightmost column.
 		// <bohan> i haven't checked, but it is possible that this only happens when the buffer scrolls due to the new line.
-		attributes=FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY;
-		::WriteConsole(output_handle,"\n",1,&length,0);
+		attributes = base_attributes;
+		::WriteConsole(output_handle, "\n", 1, &length, 0);
 	}
 }
