@@ -1,6 +1,13 @@
 ---------------------------------------------------
 Legend :	+=addition		*=change	!=bug
 ---------------------------------------------------
+V1.7.3 (Final)
+--------------
+! Old Fileformat songs did not load the master volume (was set always to 0)
+! Crash with Linplug's VST's when loading songs with the
+! small Memory leak fixed (had to do with new ASIO implementation)
+! Bug with Machine exchange (wolumes where messed when the change was native for VST)
+
 
 V1.7.3 RC2
 ----------
