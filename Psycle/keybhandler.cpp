@@ -181,13 +181,13 @@ void CChildView::MidiPatternTweak(int command, int value)
 		// play it
 		int mgn;
 		Machine* pMachine;
-		if ( Global::_pSong->seqBus < MAX_BUSES )
-			mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
+		if ( _pSong->seqBus < MAX_BUSES )
+			mgn = _pSong->busMachine[_pSong->seqBus];
 		else
-			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
 
-		if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
-			pMachine = Global::_pSong->_pMachines[mgn];
+		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			pMachine = _pSong->_pMachines[mgn];
 		else return;
 
 		// play
@@ -257,13 +257,13 @@ void CChildView::MidiPatternCommand(int command, int value)
 		// play it
 		int mgn;
 		Machine* pMachine;
-		if (Global::_pSong->seqBus < MAX_BUSES)
-			mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
+		if (_pSong->seqBus < MAX_BUSES)
+			mgn = _pSong->busMachine[_pSong->seqBus];
 		else
-			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
 
-		if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
-			pMachine = Global::_pSong->_pMachines[mgn];
+		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			pMachine = _pSong->_pMachines[mgn];
 		else return;
 
 		// play
@@ -439,9 +439,9 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		mgn = _pSong->busMachine[_pSong->seqBus];
 	}
 
-	if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
+	if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
 	{
-		Machine *tmac = Global::_pSong->_pMachines[mgn];
+		Machine *tmac = _pSong->_pMachines[mgn];
 
 		if (tmac->_type == MACH_SAMPLER)
 		{
@@ -1222,7 +1222,7 @@ void CChildView::PasteBlock(int tx,int lx,bool mix)
 			ls=0;
 			for (int l=lx;l<lx+blockNLines;l++)
 			{
-				if(l<nl && t<Global::_pSong->SONGTRACKS)
+				if(l<nl && t<_pSong->SONGTRACKS)
 				{
 					int const displace2=t*5+l*MULTIPLY;
 					int const displace3=ts*5+ls*MULTIPLY;
@@ -1578,26 +1578,70 @@ void CChildView::DecCurPattern()
 
 void CChildView::DecPosition()
 {
-	if(editPosition>0)
+//	case cdefPlaySkipBack:
+	if (Global::pPlayer->_playing)
 	{
-		--editPosition;
+		if (Global::pPlayer->_playPosition > 0 )
+		{
+			bool b = Global::pPlayer->_playBlock;
+			Global::pPlayer->Start(Global::pPlayer->_playPosition-1,0);
+			Global::pPlayer->_playBlock = b;
+		}
+		else
+		{
+			bool b = Global::pPlayer->_playBlock;
+			Global::pPlayer->Start(_pSong->playLength-1,0);
+			Global::pPlayer->_playBlock = b;
+		}
+	}
+	else
+	{
+		if(editPosition>0)
+		{
+			--editPosition;
+		}
+		else
+		{
+//			editPosition = _pSong->playLength-1;
+			editPosition = 0;
+		}
 		
 		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 		_pSong->playOrderSel[editPosition]=true;
 
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPattern);
-		
 	}
 }
 
 void CChildView::IncPosition()
 {
-	if(editPosition<(MAX_SONG_POSITIONS-1))
+//	case cdefPlaySkipAhead:
+	if (Global::pPlayer->_playing)
 	{
-		++editPosition;
-		if ( editPosition >= _pSong->playLength )
+		if (Global::pPlayer->_playPosition < _pSong->playLength-1)
 		{
+			bool b = Global::pPlayer->_playBlock;
+			Global::pPlayer->Start(Global::pPlayer->_playPosition+1,0);
+			Global::pPlayer->_playBlock = b;
+		}
+		else
+		{
+			bool b = Global::pPlayer->_playBlock;
+			Global::pPlayer->Start(0,0);
+			Global::pPlayer->_playBlock = b;
+		}
+	}
+	else 
+	{
+		if(editPosition < _pSong->playLength-1)
+		{
+			++editPosition;
+		}
+		else
+		{
+//			editPosition = 0;
+			++editPosition;
 			AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition-1);
 			int const ep=_pSong->GetNumPatternsUsed();
 			_pSong->playLength=editPosition+1;
