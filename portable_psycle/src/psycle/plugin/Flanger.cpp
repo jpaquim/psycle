@@ -194,7 +194,14 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 			const size(buffer.size());
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
-				const Real sin(sin_sequence());
+				const Real sin(sin_sequence()); /// <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+				/* test without optimized sin sequence...
+				Real sin;
+				if(&sin_sequence == &sin_sequences_[left])
+					sin = std::sin(modulation_phase_);
+				else
+					sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
+				*/
 
 				assert(-1 <= sin);
 				assert(sin <= 1);
