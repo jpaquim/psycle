@@ -51,7 +51,7 @@ public:
 	friend class InputHandler;
 // Implementation
 public:
-	void UpdateSequencer();
+	void UpdateSequencer(int bottom = -1);
 	bool isguiopen[MAX_MACHINES];
 	CFrameWnd	*m_pWndMac[MAX_MACHINES];
 	bool macComboInitialized;

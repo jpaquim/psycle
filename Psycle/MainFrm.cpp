@@ -1305,11 +1305,12 @@ void CMainFrame::CloseMacGui(int mac)
 ////////////////////
 
 
-void CMainFrame::UpdateSequencer()
+void CMainFrame::UpdateSequencer(int bottom)
 {
 	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 	char buf[16];
-	
+
+	int top = cc->GetTopIndex();
 	cc->ResetContent();
 	
 	for(int n=0;n<_pSong->playLength;n++)
@@ -1323,6 +1324,18 @@ void CMainFrame::UpdateSequencer()
 	{
 		if ( _pSong->playOrderSel[i]) cc->SetSel(i,true);
 	}
+	if (bottom >= 0)
+	{
+		if (top < bottom-0x15)
+		{
+			top = bottom-0x15;
+		}
+		if (top < 0)
+		{
+			top = 0;
+		}
+	}
+	cc->SetTopIndex(top);
 }
 
 void CMainFrame::OnSelchangeSeqlist() 
@@ -1486,7 +1499,7 @@ void CMainFrame::OnSeqnew()
 		}
 
 		UpdatePlayOrder(true);
-		UpdateSequencer();
+		UpdateSequencer(m_wndView.editPosition);
 
 		m_wndView.Repaint(DMPatternSwitch);
 	}
@@ -1508,7 +1521,7 @@ void CMainFrame::OnSeqins()
 		}
 
 		UpdatePlayOrder(true);
-		UpdateSequencer();
+		UpdateSequencer(m_wndView.editPosition);
 
 		m_wndView.Repaint(DMPatternChange);
 	}
@@ -1546,7 +1559,7 @@ void CMainFrame::OnSeqduplicate()
 		memcpy(&_pSong->patternName[newpat],&_pSong->patternName[oldpat],sizeof(char)*32);
 
 		UpdatePlayOrder(true);
-		UpdateSequencer();
+		UpdateSequencer(m_wndView.editPosition);
 
 		m_wndView.Repaint(DMPatternSwitch);
 	}
@@ -1601,7 +1614,7 @@ void CMainFrame::OnSeqcut()
 	}
 
 	UpdatePlayOrder(true);
-	UpdateSequencer();
+	UpdateSequencer(m_wndView.editPosition);
 	m_wndView.Repaint(DMPatternSwitch);
 	m_wndView.SetFocus();
 }
@@ -1664,7 +1677,7 @@ void CMainFrame::OnSeqpaste()
 				{
 					_pSong->playOrderSel[i] = true;
 				}
-				UpdateSequencer();
+				UpdateSequencer(m_wndView.editPosition);
 				m_wndView.Repaint(DMPatternChange);
 				m_wndView.SetFocus();
 			}
