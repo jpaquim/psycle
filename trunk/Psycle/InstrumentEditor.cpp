@@ -220,8 +220,11 @@ void CInstrumentEditor::OnChangeInstname()
 {
 	int si = _pSong->instSelected;
 	m_instname.GetWindowText(_pSong->_instruments[si]._sName, 32);
-	if ( !initializingDialog ) pParentMain->UpdateComboIns();
-	pParentMain->RedrawGearRackList();
+	if ( !initializingDialog ) 
+	{
+		pParentMain->UpdateComboIns();
+		pParentMain->RedrawGearRackList();
+	}
 }
 
 
