@@ -23,6 +23,7 @@
 //
 
 DWORD WINAPI __stdcall PlayThread(void *b);
+BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 
 Global _global;
 short stream_buffer[576<<2];
@@ -38,8 +39,9 @@ int worked;
 // InModule Functions:
 //
 
-void config(HWND hwndParent)
+void config(HWND w)
 {
+	DialogBox(mod.hDllInstance,(char*)IDD_CONFIGDLG,w,CfgProc);
 }
 void about(HWND hwndParent)
 {
@@ -52,7 +54,7 @@ void init()
 	{
 		if (!_global.pConfig->Read())
 		{
-			//Need of manual configuration
+			config(mod.hMainWindow);
 		}
 	}
 	_global._pSong->fileName[0] = '\0';
@@ -77,12 +79,16 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 {
 	if (!filename || !*filename) // Current Playing
 	{
-		if (title) { sprintf(title,"%s - %s",_global._pSong->Author,_global._pSong->Name); }
-
-		if (length_in_ms) { *length_in_ms = CalcSongLength(_global._pSong); }
+		if (_global.pPlayer->_playing)
+		{
+			if (title) { sprintf(title,"%s - %s",_global._pSong->Author,_global._pSong->Name); }
+			
+			if (length_in_ms) { *length_in_ms = CalcSongLength(_global._pSong); }
+		}
 	}
 	else
 	{
+
 		OldPsyFile file;
 		if (!file.Open(filename) || !file.Expect("PSY2SONG", 8))
 		{
@@ -162,7 +168,7 @@ void stop()
 		CloseHandle(thread_handle);
 		thread_handle = INVALID_HANDLE_VALUE;
 	}
-
+	_global.pPlayer->_playing=false;
 	mod.outMod->Close();
 	mod.SAVSADeInit();
 	
@@ -351,3 +357,68 @@ DWORD WINAPI __stdcall PlayThread(void *b)
 	}
 	return 0;
 }
+
+
+BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
+{
+	HWND w;
+	int c;
+	char tmptext[_MAX_PATH];
+	
+	switch(msg)
+	{
+	case WM_INITDIALOG:
+		
+		//	Sample Rate Combobox
+		w=GetDlgItem(wnd,IDC_SAMP_RATE);
+		char valstr[10];
+		for (c=0;c<4;c++)
+		{
+			sprintf(valstr,"%i",(int)(11025*powf(2.0f,(float)c)));
+			SendMessage(w,CB_ADDSTRING,0,(long)valstr);
+			sprintf(valstr,"%i",(int)(12000*powf(2.0f,(float)c)));
+			SendMessage(w,CB_ADDSTRING,0,(long)valstr);
+		}
+		switch (_global.pConfig->_samplesPerSec)
+		{
+		case 11025: SendMessage(w,CB_SETCURSEL,0,0);break;
+		case 12000: SendMessage(w,CB_SETCURSEL,1,0);break;
+		case 22050: SendMessage(w,CB_SETCURSEL,2,0);break;
+		case 24000: SendMessage(w,CB_SETCURSEL,3,0);break;
+		case 44100: SendMessage(w,CB_SETCURSEL,4,0);break;
+		case 48000: SendMessage(w,CB_SETCURSEL,5,0);break;
+		case 88200: SendMessage(w,CB_SETCURSEL,6,0);break;
+		case 96000: SendMessage(w,CB_SETCURSEL,7,0);break;
+		}
+		
+		// Directories.
+		
+		SetDlgItemText(wnd,IDC_EDIT_NATIVE,_global.pConfig->GetPluginDir());
+		SetDlgItemText(wnd,IDC_EDIT_VST,_global.pConfig->GetVstDir());
+		
+		return 1;
+		break;
+		case WM_COMMAND:
+			switch(wp)
+			{
+			case IDOK:
+				stop();
+				c = SendDlgItemMessage(wnd,IDC_SAMP_RATE,CB_GETCURSEL,0,0);
+				if ( (c % 2) == 0) _global.pConfig->_samplesPerSec = (int)(11025*powf(2.0f,(float)(c/2)));
+				else _global.pConfig->_samplesPerSec = (int)(12000*powf(2.0f,(float)(c/2)));
+				
+				GetDlgItemText(wnd,IDC_EDIT_NATIVE,tmptext,_MAX_PATH);
+				_global.pConfig->SetPluginDir(tmptext);
+				GetDlgItemText(wnd,IDC_EDIT_VST,tmptext,_MAX_PATH);
+				_global.pConfig->SetVstDir(tmptext);
+				EndDialog(wnd,1);
+				break;
+			case IDCANCEL:
+				EndDialog(wnd,0);
+				break;
+			}
+			break;
+	}
+	return 0;
+}
+

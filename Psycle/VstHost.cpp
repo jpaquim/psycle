@@ -87,8 +87,6 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	//init plugin (probably a call to "Init()" function should be done here)
 	_pEffect->user = this;
 	Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
-	Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
-	Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
 
 #if defined(_WINAMP_PLUGIN_)
 	Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
@@ -98,6 +96,9 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 
 	Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
 
+	Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
+	Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
+	
 	if (!Dispatch( effGetEffectName, 0, 0, &_sProductName, 0.0f))
 	{
 		CString str1(dllname);
@@ -176,10 +177,9 @@ void VSTPlugin::Init(void) // This is currently unused! Changes need to be done 
 {
 	Machine::Init();
 
-	Dispatch(effOpen        ,  0, 0, NULL, 0.f);
-	Dispatch(effSetProgram  ,  0, 0, NULL, 0.f);
-	Dispatch(effMainsChanged,  0, 1, NULL, 0.f);
-
+//	Dispatch(effOpen        ,  0, 0, NULL, 0.f);
+	Dispatch(effMainsChanged,  0, 0, NULL, 0.f);
+	
 #if defined(_WINAMP_PLUGIN_)
 	Dispatch(effSetSampleRate, 0, 0, 0, (float)Global::pConfig->_samplesPerSec);
 #else
@@ -187,6 +187,8 @@ void VSTPlugin::Init(void) // This is currently unused! Changes need to be done 
 #endif // _WINAMP_PLUGIN_
 
 	Dispatch(effSetBlockSize,  0, STREAM_SIZE, NULL, 0.f);
+	Dispatch(effSetProgram  ,  0, 0, NULL, 0.f);
+	Dispatch(effMainsChanged,  0, 1, NULL, 0.f);
 }
 
 bool VSTPlugin::Load(RiffFile* pFile)
@@ -571,8 +573,8 @@ bool VSTPlugin::AddMIDI(unsigned char data0,unsigned char data1,unsigned char da
 
 void VSTPlugin::SendMidi()
 {
-	if(/*instantiated &&*/ queue_size>0)
-	{
+/*	if(instantiated && queue_size>0)
+	{*/
 		// Prepare MIDI events and free queue dispatching all events
 		events.numEvents = queue_size;
 		events.reserved  = 0;
@@ -582,7 +584,7 @@ void VSTPlugin::SendMidi()
 
 		Dispatch(effProcessEvents, 0, 0, &events, 0.0f);
 		queue_size=0;
-	}
+//	}
 }
 
 // Host callback dispatcher
@@ -931,7 +933,7 @@ void VSTInstrument::Stop()
 
 void VSTInstrument::Work(int numSamples)
 {
-
+/*
 #if defined(_WINAMP_PLUGIN_)
 
 	if (instantiated)
@@ -1039,12 +1041,12 @@ void VSTInstrument::Work(int numSamples)
 	_worked = true;
 
 #else
-	
+*/
+#if !defined(_WINAMP_PLUGIN_)	
 	CPUCOST_INIT(cost);
+#endif // !defined(_WINAMP_PLUGIN_)	
 	if (!_mute && instantiated)
 	{
-//		Dispatch(effSetBlockSize, 0, numSamples, NULL, 0.f); // Should this be done?
-
 		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 
 		SendMidi();
@@ -1144,7 +1146,7 @@ void VSTInstrument::Work(int numSamples)
 		{
 			Dsp::Add(outputs[0],outputs[1],numSamples,1);
 		}
-
+#if !defined(_WINAMP_PLUGIN_)	
 		_volumeCounter = f2i(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
 		if (_volumeCounter > 32768)
 		{
@@ -1174,12 +1176,13 @@ void VSTInstrument::Work(int numSamples)
 				_stopped = false;
 			}
 		}
+#endif // !defined(_WINAMP_PLUGIN_)	
 	}
-
+#if !defined(_WINAMP_PLUGIN_)	
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;
-	_worked = true;
 #endif // _WINAMP_PLUGIN_
+	_worked = true;
 }
 
 
