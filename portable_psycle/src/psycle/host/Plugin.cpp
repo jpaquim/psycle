@@ -1,15 +1,12 @@
 #include "stdafx.h"
-#if defined(_WINAMP_PLUGIN_)
-	//#include "global.h"
-	#include "Plugin.h"
-	#include "FileIO.h"
-#else
-	#include "psycle.h"
-	#include "Plugin.h"
-	#include "FileIO.h"
-	#include "NewMachine.h"
-#endif // _WINAMP_PLUGIN_
+#include "FileIO.h"
+#include "Plugin.h"
 #include "InputHandler.h"
+#include <operating_system/exceptions/code_description.h>
+#if !defined _WINAMP_PLUGIN_
+	#include "psycle.h"
+	#include "NewMachine.h"
+#endif
 ///\file
 ///\brief implementation file for psycle::host::Plugin
 namespace psycle
@@ -32,145 +29,108 @@ namespace psycle
 			_psAuthor=NULL;
 			_psDllName=NULL;
 			_psName=NULL;
-
 		}
 
-		Plugin::~Plugin()
+		Plugin::~Plugin() throw()
 		{
 			Free();
-			delete _psAuthor;	// delete NULL has no effect, so It's safe.
-			delete _psDllName;	//
-			delete _psName;		//
-			delete _pInterface;	//
-
+			delete _psAuthor;
+			delete _psDllName;
+			delete _psName;
+			delete _pInterface;
 		}
 
-		bool Plugin::Instance(char* psFileName)
+		void Plugin::Instance(const char file_name[]) throw(...)
 		{
-			_dll = LoadLibrary(psFileName);
-
-			if (_dll == NULL) return false;
-
-			GETINFO GetInfo =(GETINFO)GetProcAddress(_dll, "GetInfo");
-			if (GetInfo == NULL)
+			_dll = ::LoadLibrary(file_name);
+			if(!_dll)
 			{
-		//		MessageBox(NULL,"Could not Get address of Getinfo","",MB_OK);
-				FreeLibrary(_dll);
-				_dll=NULL;
-				return false;
+				std::ostringstream s; s
+					<< "could not load library:" << file_name << std::endl
+					<< operating_system::exceptions::code_description();
+				throw exceptions::library_errors::loading_error(s.str());
 			}
-
-			_pInfo = GetInfo();
-			
-			if ( _pInfo->Version < MI_VERSION )
+			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
+			if(!GetInfo)
 			{
-		//		MessageBox(NULL,"Invalid MI_VERSION","",MB_OK);
-				FreeLibrary(_dll);
-				_dll=NULL;
-				return false;
+				std::ostringstream s; s
+					<< "could not resolve symbol 'GetInfo' in library: " << file_name << std::endl
+					<< operating_system::exceptions::code_description();
+				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
-
-			_isSynth = (_pInfo->Flags == 3 );
-			if (_isSynth )	
+			try
 			{
-				_mode = MACHMODE_GENERATOR;
+				_pInfo = GetInfo();
 			}
-
+			catch(const std::exception & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
+			catch(const char * const e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
+			catch(const long int & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
+			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
+			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetInfo"); }
+			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
+			_isSynth = _pInfo->Flags == 3;
+			if(_isSynth) _mode = MACHMODE_GENERATOR;
 			strncpy(_psShortName,_pInfo->ShortName,15);
 			_psShortName[15]='\0';
 			strncpy(_editName, _pInfo->ShortName,31);
 			_editName[31]='\0';
-
 			_psAuthor = new char[strlen(_pInfo->Author)+1];
 			strcpy(_psAuthor,_pInfo->Author);
-
 			_psName = new char[strlen(_pInfo->Name)+1];
 			strcpy(_psName,_pInfo->Name);
-
-			_psDllName = new char[strlen(psFileName)+1];
-			strcpy(_psDllName, psFileName);
-
-			if ( GetProcAddress(_dll, "CreateMachine") == NULL)
+			_psDllName = new char[strlen(file_name)+1];
+			strcpy(_psDllName, file_name);
+			CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress(_dll, "CreateMachine");
+			if(!GetInterface)
 			{
-		//		MessageBox(NULL,"createmachine address failed","",MB_OK);
-				
+				std::ostringstream s; s
+					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
+					<< operating_system::exceptions::code_description();
+				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
-			CREATEMACHINE GetInterface =(CREATEMACHINE)GetProcAddress(_dll, "CreateMachine");
-			if (GetInterface == NULL)
+			try
 			{
-		//		MessageBox(NULL,"Createmachine get interface failed","",MB_OK);
-			
-				FreeLibrary(_dll);
-				_dll=NULL;
-				return false;
+				_pInterface = GetInterface();
 			}
-
-			_pInterface = GetInterface();
+			catch(const std::exception & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
+			catch(const char * const e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
+			catch(const long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
+			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
+			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
 			_pInterface->pCB = &_callback;
-
-			return true;
 		}
-		void Plugin::Free(void)
+
+		void Plugin::Free()
 		{
-			if (_dll != NULL)
+			if(_pInterface)
 			{
 				delete _pInterface;
-				_pInterface = NULL;
+				_pInterface = 0;
+			}
+			if(_dll)
+			{
 				FreeLibrary(_dll);
-				_dll=NULL;
+				_dll = 0;
 			}
 		}
-		/*bool Plugin::Create(Plugin *plug)
-		{
-			_dll=plug->_dll;
-			_pInfo = plug->_pInfo;
-			_isSynth = plug->_isSynth;
 
-			strcpy(_psShortName,plug->_psShortName);
-
-			_psAuthor = new char[strlen(plug->_psAuthor)+1];
-			strcpy(_psAuthor,plug->_psAuthor);
-
-			_psName = new char[strlen(plug->_psName)+1];
-			strcpy(_psName,plug->_psName);
-
-			_psDllName = new char[strlen(plug->_psDllName)+1];
-			strcpy(_psDllName, plug->_psDllName);
-
-			_pInterface = plug->_pInterface;
-			
-			_isSynth = plug->_isSynth;
-
-			strcpy(_editName, plug->_editName);
-
-			plug->_dll=NULL;	// This is to avoid the "Free()" call when "plug" is destroyed.
-			Init();
-			return true;
-		}*/
-		void Plugin::Init(void)
+		void Plugin::Init()
 		{
 			Machine::Init();
-
-			if (_pInterface!= NULL ) 
+			if(_pInterface) 
 			{
 				_pInterface->Init();
-				for (int gbp = 0; gbp<_pInfo->numParameters; gbp++)
-				{
+				for(int gbp = 0; gbp<_pInfo->numParameters; gbp++)
 					_pInterface->ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
-				}
 			}
 		}
 
 		void Plugin::Work(int numSamples)
 		{
-			if (_mode != MACHMODE_GENERATOR)
-			{
-				Machine::Work(numSamples);
-			}
-
-		#if !defined(_WINAMP_PLUGIN_)
-			CPUCOST_INIT(cost);
-		#endif
+			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
+			#if !defined(_WINAMP_PLUGIN_)
+				CPUCOST_INIT(cost);
+			#endif
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
@@ -314,25 +274,25 @@ namespace psycle
 							}
 						}
 					}
-		#ifndef _WINAMP_PLUGIN_
-					Machine::SetVolumeCounter(numSamples);
-					if ( Global::pConfig->autoStopMachines )
-					{
-						if (_volumeCounter < 8.0f)
+					#ifndef _WINAMP_PLUGIN_
+						Machine::SetVolumeCounter(numSamples);
+						if ( Global::pConfig->autoStopMachines )
 						{
-							_volumeCounter = 0.0f;
-							_volumeDisplay = 0;
-							_stopped = true;
+							if (_volumeCounter < 8.0f)
+							{
+								_volumeCounter = 0.0f;
+								_volumeDisplay = 0;
+								_stopped = true;
+							}
+							else _stopped = false;
 						}
-						else _stopped = false;
-					}
-		#endif
+					#endif
 				}
 			}
-		#ifndef _WINAMP_PLUGIN_
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
-		#endif // ndef _WINAMP_PLUGIN_
+			#ifndef _WINAMP_PLUGIN_
+				CPUCOST_CALC(cost, numSamples);
+				_cpuCost += cost;
+			#endif // ndef _WINAMP_PLUGIN_
 			_worked = true;
 		}
 
@@ -346,14 +306,12 @@ namespace psycle
 			_pInterface->SequencerTick();
 		}
 
-		void Plugin::Tick(
-			int channel,
-			PatternEntry* pData)
+		void Plugin::Tick(int channel, PatternEntry* pData)
 		{
-		//	if (_mode == MACHMODE_GENERATOR) <- effects want command data too please
-		//	{
-				_pInterface->SeqTick(channel ,pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
-		//	}
+			//	if (_mode == MACHMODE_GENERATOR) <- effects want command data too please
+			//	{
+					_pInterface->SeqTick(channel ,pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
+			//	}
 
 			if (pData->_note == cdefTweakM || pData->_note == cdefTweakE)
 			{
@@ -370,9 +328,9 @@ namespace psycle
 					}
 
 					_pInterface->ParameterTweak(pData->_inst, nv);
-		#if !defined(_WINAMP_PLUGIN_)
-					Global::_pSong->Tweaker = true;
-		#endif // ndef _WINAMP_PLUGIN_
+					#if !defined(_WINAMP_PLUGIN_)
+								Global::_pSong->Tweaker = true;
+					#endif // ndef _WINAMP_PLUGIN_
 				}
 			}
 			else if (pData->_note == cdefTweakS)
@@ -444,12 +402,21 @@ namespace psycle
 						_pInterface->ParameterTweak(pData->_inst, nv);
 					}
 				}
-		#if !defined(_WINAMP_PLUGIN_)
-					Global::_pSong->Tweaker = true;
-		#endif // ndef _WINAMP_PLUGIN_
+				#if !defined(_WINAMP_PLUGIN_)
+							Global::_pSong->Tweaker = true;
+				#endif // ndef _WINAMP_PLUGIN_
 			}
 		}
 
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// old file format vomit. don't look at it.
+
+
+
+		/// old file format vomit. don't look at it.
 		bool Plugin::Load(RiffFile* pFile)
 		{
 			bool result = true;
@@ -460,30 +427,30 @@ namespace psycle
 			int numParameters;
 
 
-				pFile->Read(sDllName, sizeof(sDllName)); // Plugin dll name
-				_strlwr(sDllName);
+			pFile->Read(sDllName, sizeof(sDllName)); // Plugin dll name
+			_strlwr(sDllName);
 
-				//Patch: Automatically replace old AS's by AS2F.
-				bool wasAB=false;
-				bool wasAS1=false;
-				if (strcmp(sDllName,"arguru bass.dll" ) == 0)
-				{
-					strcpy(sDllName,"arguru synth 2f.dll");
-					wasAB=true;
-				}
-				if (strcmp(sDllName,"arguru synth.dll" ) == 0)
-				{
-					strcpy(sDllName,"arguru synth 2f.dll");
-					wasAS1=true;
-				}
-				if (strcmp(sDllName,"arguru synth 2.dll" ) == 0)
-					strcpy(sDllName,"arguru synth 2f.dll");
-				if (strcmp(sDllName,"synth21.dll" ) == 0)
-					strcpy(sDllName,"arguru synth 2f.dll");
+			//Patch: Automatically replace old AS's by AS2F.
+			bool wasAB=false;
+			bool wasAS1=false;
+			if (strcmp(sDllName,"arguru bass.dll" ) == 0)
+			{
+				strcpy(sDllName,"arguru synth 2f.dll");
+				wasAB=true;
+			}
+			if (strcmp(sDllName,"arguru synth.dll" ) == 0)
+			{
+				strcpy(sDllName,"arguru synth 2f.dll");
+				wasAS1=true;
+			}
+			if (strcmp(sDllName,"arguru synth 2.dll" ) == 0)
+				strcpy(sDllName,"arguru synth 2f.dll");
+			if (strcmp(sDllName,"synth21.dll" ) == 0)
+				strcpy(sDllName,"arguru synth 2f.dll");
 
-				char sPath2[_MAX_PATH];
-				CString sPath;
-		#if defined(_WINAMP_PLUGIN_)
+			char sPath2[_MAX_PATH];
+			CString sPath;
+			#if defined(_WINAMP_PLUGIN_)
 				sPath = Global::pConfig->GetPluginDir();
 
 				if ( FindFileinDir(sDllName,sPath) )
@@ -498,13 +465,13 @@ namespace psycle
 				{
 					result = false;
 				}
-		#else
+			#else
 				if ( !CNewMachine::dllNames.Lookup(sDllName,sPath) ) 
 				{
-		//			Check Compatibility Table.
-		//			Probably could be done with the dllNames lockup.
-		//
-		//			GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
+					//			Check Compatibility Table.
+					//			Probably could be done with the dllNames lockup.
+					//
+					//			GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
 					strcpy(sPath2,sDllName);
 				}
 				else 
@@ -518,7 +485,11 @@ namespace psycle
 				}
 				else 
 				{
-					if (!Instance(sPath2))
+					try
+					{
+						Instance(sPath2);
+					}
+					catch(...)
 					{
 						char sError[_MAX_PATH];
 						sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
@@ -526,7 +497,7 @@ namespace psycle
 						result = false;
 					}
 				}
-		#endif // _WINAMP_PLUGIN_
+			#endif // _WINAMP_PLUGIN_
 			Init();
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
@@ -594,11 +565,11 @@ namespace psycle
 			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-		#if defined (_WINAMP_PLUGIN_)
-			pFile->Skip(96) ; // sizeof(CPoint) = 8.
-		#else
-			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-		#endif
+			#if defined (_WINAMP_PLUGIN_)
+				pFile->Skip(96) ; // sizeof(CPoint) = 8.
+			#else
+				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+			#endif
 			pFile->Read(&_numInputs, sizeof(_numInputs));
 			pFile->Read(&_numOutputs, sizeof(_numOutputs));
 

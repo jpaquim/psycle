@@ -20,12 +20,12 @@ namespace psycle
 			CVstEditorDlg(); // protected constructor used by dynamic creation
 		// Attributes
 		public:
-			CWnd *pGui;
-			CDefaultVstGui *pParamGui;
-			VSTPlugin* _pMachine;
-			CChildView* wndView;
+			CWnd * pGui;
+			CDefaultVstGui * pParamGui;
+			vst::plugin * _pMachine;
+			CChildView * wndView;
 			UINT MachineIndex;
-			bool *_editorActive;
+			bool * _editorActive;
 		// Operations
 		public:
 			void Resize(int w,int h);

@@ -140,11 +140,10 @@ namespace psycle
 		void CVstEditorDlg::OnParametersRandomparameters() 
 		{
 			// Randomize controls
-			for (int c=0; c<((VSTPlugin*)_pMachine)->NumParameters(); c++)
+			for(int c(0); c < reinterpret_cast<vst::plugin *>(_pMachine)->NumParameters() ; ++c)
 			{
-				float randsem = (float)rand()*0.000030517578125f;
-
-				((VSTPlugin*)_pMachine)->SetParameter(c, randsem);
+				const float randsem(static_cast<float>(rand() * 0.000030517578125f));
+				reinterpret_cast<vst::plugin *>(_pMachine)->SetParameter(c, randsem);
 			}
 			pGui->Invalidate(false);
 		}

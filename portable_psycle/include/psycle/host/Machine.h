@@ -16,13 +16,13 @@ namespace psycle
 		class RiffFile; // forward declaration
 
 		#if !defined(_CYRIX_PROCESSOR_) && !defined(_WINAMP_PLUGIN_)
-			///\todo make that an inline function
+			///\todo make that a naked inline function
 			#define CPUCOST_INIT(cost)	\
 				ULONG cost;				\
 				__asm rdtsc				\
 				__asm mov cost, eax
 			/*
-			///\todo make that an inline function
+			///\todo make that a naked inline function
 			#define CPUCOST_CALC(cost, numSamples)	\
 				__asm {								\
 				__asm rdtsc							\
@@ -32,7 +32,7 @@ namespace psycle
 				cost = cost* Global::pConfig->_pOutputDriver->_samplesPerSec/ numSamples
 			//	cost = (cost*1000)/(numSamples*(Global::_cpuHz/Global::pConfig->_pOutputDriver->_samplesPerSec));
 			*/
-			///\todo make that an inline function
+			///\todo make that a naked inline function
 			#define CPUCOST_CALC(cost, numSamples)	\
 				__asm rdtsc							\
 				__asm sub eax, cost					\
@@ -162,7 +162,8 @@ namespace psycle
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
 			virtual void Stop(void) {};
-			virtual char* GetName(void) = 0;
+			virtual char * GetName() = 0;
+			inline virtual const char * const GetDllName() const throw() { return "built-in"; }
 			virtual int GetNumParams(void) { return _numPars; }
 			virtual void GetParamName(int numparam,char* name) { name[0]='\0'; }
 			virtual void GetParamValue(int numparam,char* parval) { parval[0]='\0'; };
@@ -239,6 +240,77 @@ namespace psycle
 				*/
 			#endif // ndef _WINAMP_PLUGIN_
 		};
+
+		/// Base class for exceptions thrown from plugins.
+		class exception : public std::runtime_error
+		{
+		public:
+			inline exception(const std::string & what) : std::runtime_error(what) {}
+		};
+
+		/// Classes derived from exception.
+		namespace exceptions
+		{
+			/// Base class for exceptions caused by errors on library operation.
+			class library_error : public exception
+			{
+			public:
+				inline library_error(const std::string & what) : exception(what) {}
+			};
+
+			/// Classes derived from library.
+			namespace library_errors
+			{
+				/// Exception caused by library loading failure.
+				class loading_error : public library_error
+				{
+				public:
+					inline loading_error(const std::string & what) : library_error(what) {}
+				};
+
+				/// Exception caused by symbol resolving failure in a library.
+				class symbol_resolving_error : public library_error
+				{
+				public:
+					inline symbol_resolving_error(const std::string & what) : library_error(what) {}
+				};
+			}
+
+			/// Base class for exceptions caused by an error in a library function.
+			class function_error : public exception
+			{
+			public:
+				inline function_error(const std::string & what) : exception(what) {}
+			};
+			
+			/// Classes derived from function.
+			namespace function_errors
+			{
+				namespace
+				{
+					template<typename e> inline const std::string string(const e & e) { std::ostringstream s; s << e; return s.str(); }
+					template<> inline const std::string string<std::exception>(const std::exception & e) { return e.what(); }
+					template<> inline const std::string string<const void *>(const void * const &) { return "Type of exception is unkown, cannot display any further information."; }
+				}
+
+				template<typename e> void rethrow(const Machine & machine, const std::string & function, const e * const e = 0) throw(function_error)
+				{
+					std::ostringstream s; s
+						<< "Machine: " << machine._editName << ": " << machine.GetDllName() << std::endl
+						<< "Machine had an exception in function '" << function << "'." << std::endl
+						<< typeid(*e).name() << std::endl
+						<< string(*e);
+					throw function_error(s.str());
+				}
+
+				/// Exception caused by a bad returned value from a library function.
+				class bad_returned_value : public function_error
+				{
+				public:
+					inline bad_returned_value(const std::string & what) : function_error(what) {}
+				};
+			}
+		}
 
 		/// dummy machine.
 		class Dummy : public Machine

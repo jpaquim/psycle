@@ -61,7 +61,7 @@ namespace psycle
 			Master* pMaster;
 			Sampler* pSampler;
 			Plugin* pPlugin;
-			VSTPlugin* pVstPlugin;
+			vst::plugin* pVstPlugin;
 			switch (type)
 			{
 			case MACH_MASTER:
@@ -82,7 +82,11 @@ namespace psycle
 							return false;
 						}
 					#endif
-					if(!pPlugin->Instance(psPluginDll))
+					try
+					{
+						pPlugin->Instance(psPluginDll);
+					}
+					catch(...)
 					{
 						delete pMachine; 
 						return false;
@@ -91,7 +95,7 @@ namespace psycle
 				}
 			case MACH_VST:
 				{
-					pMachine = pVstPlugin = new VSTInstrument(index);
+					pMachine = pVstPlugin = new vst::instrument(index);
 					#if !defined _WINAMP_PLUGIN_
 						if(!CNewMachine::TestFilename(psPluginDll)) 
 						{
@@ -112,7 +116,7 @@ namespace psycle
 				}
 			case MACH_VSTFX:
 				{
-					pMachine = pVstPlugin = new VSTFX(index);
+					pMachine = pVstPlugin = new vst::fx(index);
 					#if !defined _WINAMP_PLUGIN_
 						if(!CNewMachine::TestFilename(psPluginDll)) 
 						{
@@ -1538,8 +1542,7 @@ namespace psycle
 				{
 					Sampler* pSampler;
 					Plugin* pPlugin;
-					VSTPlugin* pVstPlugin(0);
-
+					vst::plugin * pVstPlugin(0);
 					int x,y,type;
 					if (_machineActive[i])
 					{
@@ -1590,11 +1593,11 @@ namespace psycle
 							
 							if ( type == MACH_VST ) 
 							{
-								pMac[i] = pVstPlugin = new VSTInstrument(i);
+								pMac[i] = pVstPlugin = new vst::instrument(i);
 							}
 							else if ( type == MACH_VSTFX ) 
 							{
-								pMac[i] = pVstPlugin = new VSTFX(i);
+								pMac[i] = pVstPlugin = new vst::fx(i);
 							}
 							if ((pMac[i]->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 							{
@@ -1891,15 +1894,15 @@ namespace psycle
 								( pMac[i]->_type == MACH_VSTFX))
 						{
 							bool chunkread=false;
-							if( chunkpresent )	chunkread=((VSTPlugin*)pMac[i])->LoadChunk(pFile);
-							((VSTPlugin*)pMac[i])->SetCurrentProgram(((VSTPlugin*)pMac[i])->_program);
+							if( chunkpresent )	chunkread=((vst::plugin*)pMac[i])->LoadChunk(pFile);
+							((vst::plugin*)pMac[i])->SetCurrentProgram(((vst::plugin*)pMac[i])->_program);
 							if ( !chunkpresent || !chunkread )
 							{
-								const int vi = ((VSTPlugin*)pMac[i])->_instance;
+								const int vi = ((vst::plugin*)pMac[i])->_instance;
 								const int numpars=vstL[vi].numpars;
 								for (int c=0; c<numpars; c++)
 								{
-									((VSTPlugin*)pMac[i])->SetParameter(c, vstL[vi].pars[c]);
+									((vst::plugin*)pMac[i])->SetParameter(c, vstL[vi].pars[c]);
 								}
 							}
 						}

@@ -16,19 +16,25 @@ namespace operating_system
 	exception::exception(const std::string & what) throw() : std::runtime_error(what)
 	{
 		#if defined OPERATING_SYSTEM__MICROSOFT
-			std::ofstream out;
 			{
-				std::string module_directory;
-				{
-					char module_file_name[MAX_PATH];
-					::GetModuleFileName(0, module_file_name, sizeof module_file_name);
-					module_directory = module_file_name;
-					module_directory = module_directory.substr(0, module_directory.rfind('\\'));
-				}
-				// overwrites
-				out.open((module_directory + "/output.log.txt").c_str());
+				std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
+				TRACE("%s", s.str().c_str());
 			}
-			out << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
+			{
+				std::ofstream out;
+				{
+					std::string module_directory;
+					{
+						char module_file_name[MAX_PATH];
+						::GetModuleFileName(0, module_file_name, sizeof module_file_name);
+						module_directory = module_file_name;
+						module_directory = module_directory.substr(0, module_directory.rfind('\\'));
+					}
+					// overwrites
+					out.open((module_directory + "/output.log.txt").c_str());
+				}
+				out << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
+			}
 			/* annoying popup
 			{
 				std::ostringstream title; title << "exception: " << typeid(*this).name();

@@ -1411,13 +1411,13 @@ namespace psycle
 						((CVstEditorDlg*)m_pWndMac[tmac])->_editorActive = &isguiopen[tmac];
 						((CVstEditorDlg*)m_pWndMac[tmac])->wndView = &m_wndView;
 						((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
-						((CVstEditorDlg*)m_pWndMac[tmac])->_pMachine = (VSTPlugin*)ma;
-						((VSTPlugin*)ma)->editorWnd = NULL;
+						((CVstEditorDlg*)m_pWndMac[tmac])->_pMachine = (vst::plugin*)ma;
+						((vst::plugin*)ma)->editorWnd = 0;
 						
 						((CVstEditorDlg*)m_pWndMac[tmac])->LoadFrame(IDR_VSTFRAME,
 								WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU,
 								this);
-						((VSTPlugin*)ma)->editorWnd = m_pWndMac[tmac];
+						((vst::plugin*)ma)->editorWnd = m_pWndMac[tmac];
 						char winname[32];
 						sprintf(winname,"%.2X : %s",((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
 												,ma->_editName);

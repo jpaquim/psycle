@@ -17,28 +17,23 @@ namespace psycle
 		{
 		public:
 			HWND hWnd;
-
-			virtual void MessBox(char* ptxt,char *caption,unsigned int type)
+			inline virtual void MessBox(char* ptxt,char *caption,unsigned int type)
 			{
 				MessageBox(hWnd,ptxt,caption,type);
 			}
-			virtual int GetTickLength(void)
+			inline virtual int GetTickLength(void)
 			{
 				return Global::_pSong->SamplesPerTick;
 			}
-			virtual int GetSamplingRate(void)
+			inline virtual int GetSamplingRate(void)
 			{
-		#if defined(_WINAMP_PLUGIN_)
-				return Global::pConfig->_samplesPerSec;
-		#else
-				return Global::pConfig->_pOutputDriver->_samplesPerSec;
-		#endif // _WINAMP_PLUGIN_
+				return Global::pConfig->GetSamplesPerSec();
 			}
-			virtual int GetBPM(void)
+			inline virtual int GetBPM(void)
 			{
 				return Global::pPlayer->bpm;
 			}
-			virtual int GetTPB(void)
+			inline virtual int GetTPB(void)
 			{
 				return Global::pPlayer->tpb;
 			}
@@ -47,25 +42,22 @@ namespace psycle
 		class Plugin : public Machine
 		{
 		public:
-
 			Plugin(int index);
-			virtual ~Plugin();
-
-			virtual void Init(void);
+			virtual ~Plugin() throw();
+			virtual void Init();
 			virtual void Work(int numSamples);
-			virtual void Stop(void);
-			void Tick(void);
-			virtual void Tick(int channel, PatternEntry* pEntry);
-			virtual char* GetName(void) { return _psName; };
-			virtual int GetNumParams(void) { return _pInfo->numParameters; }
-			virtual void GetParamName(int numparam,char* name)
+			virtual void Stop();
+			void Tick();
+			virtual void Tick(int channel, PatternEntry * pEntry);
+			virtual char * GetName() { return _psName; };
+			virtual int GetNumParams() { return _pInfo->numParameters; }
+			inline virtual void GetParamName(int numparam, char * name)
 			{
-				if ( numparam < _pInfo->numParameters )
-					strcpy(name,_pInfo->Parameters[numparam]->Name);
-				else strcpy(name,"Out of Range");
+				if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);
+				else std::strcpy(name, "Out of Range");
 
 			}
-			virtual void GetParamValue(int numparam,char* parval)
+			inline virtual void GetParamValue(int numparam,char* parval)
 			{
 				if ( numparam < _pInfo->numParameters )
 				{
@@ -76,13 +68,13 @@ namespace psycle
 				}
 				else strcpy(parval,"Out of Range");
 			}
-			virtual int GetParamValue(int numparam)
+			inline virtual int GetParamValue(int numparam)
 			{
 				if ( numparam < _pInfo->numParameters )
 					return _pInterface->Vals[numparam];
 				else return -1;
 			}
-			virtual bool SetParameter(int numparam,int value)
+			inline virtual bool SetParameter(int numparam,int value)
 			{
 				if ( numparam < _pInfo->numParameters )
 				{
@@ -92,7 +84,7 @@ namespace psycle
 				else return false;
 			}
 			virtual bool Load(RiffFile* pFile);
-			virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+			inline virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 			{
 				UINT size;
 				pFile->Read(&size,sizeof(size)); // size of whole structure
@@ -144,105 +136,108 @@ namespace psycle
 				}
 				return TRUE;
 			};
-
-		#if !defined(_WINAMP_PLUGIN_)
-			virtual void SaveSpecificChunk(RiffFile* pFile) 
-			{
-				UINT count = GetNumParams();
-				UINT size2 = _pInterface->GetDataSize();
-				UINT size = size2 + sizeof(count) + sizeof(int)*count;
-
-				pFile->Write(&size,sizeof(size));
-				pFile->Write(&count,sizeof(count));
-		//		pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-
-				for (UINT i = 0; i < count; i++)
+			#if !defined _WINAMP_PLUGIN_
+				inline virtual void SaveSpecificChunk(RiffFile* pFile) 
 				{
-					int temp = GetParamValue(i);
-					pFile->Write(&temp,sizeof(temp));
-				}
+					UINT count = GetNumParams();
+					UINT size2 = _pInterface->GetDataSize();
+					UINT size = size2 + sizeof(count) + sizeof(int)*count;
 
-				if (size2)
+					pFile->Write(&size,sizeof(size));
+					pFile->Write(&count,sizeof(count));
+					//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+					for (UINT i = 0; i < count; i++)
+					{
+						int temp = GetParamValue(i);
+						pFile->Write(&temp,sizeof temp);
+					}
+					if(size2)
+					{
+						byte* pData = new byte[size2];
+						try 
+						{
+							_pInterface->GetData(pData); // Internal save
+						}
+						catch (...)
+						{
+							MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
+						}
+						pFile->Write(pData, size2); // Number of parameters
+						delete pData;
+					}
+				};
+				virtual void SaveDllName(RiffFile* pFile) 
 				{
-					byte* pData = new byte[size2];
-					try 
-					{
-						_pInterface->GetData(pData); // Internal save
-					}
-					catch (...)
-					{
-						MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
-					}
-					pFile->Write(pData, size2); // Number of parameters
-					delete pData;
-				}
-			};
-			virtual void SaveDllName(RiffFile* pFile) 
-			{
-				CString str = _psDllName;
-				char str2[256];
-				strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-				pFile->Write(&str2,strlen(str2)+1);
-			};
-
-		#endif // ndef _WINAMP_PLUGIN_
-
-			bool Instance(char* psFileName);
-			void Free(void);
-		//	bool Create(Plugin *plug);
+					CString str = _psDllName;
+					char str2[256];
+					strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+					pFile->Write(&str2,strlen(str2)+1);
+				};
+			#endif
+			void Instance(const char file_name[]) throw(...);
+			void Free();
 			bool LoadDll(char* psFileName)
 			{
 				_strlwr(psFileName);
 				char sPath2[_MAX_PATH];
 				CString sPath;
-		#if defined(_WINAMP_PLUGIN_)
-				sPath = Global::pConfig->GetPluginDir();
-
-				if( FindFileinDir(psFileName,sPath) )
-				{
-					strcpy(sPath2,sPath);
-					return Instance(sPath2);
-				}
-				return false;
-		#else
-				if ( !CNewMachine::dllNames.Lookup(psFileName,sPath) ) 
-				{
-		//			Check Compatibility Table.
-		//			Probably could be done with the dllNames lockup.
-		//
-		//			GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
-					strcpy(sPath2,psFileName);
-				}
-				else 
-				{ 
-					strcpy(sPath2,sPath); 
-				}
-
-				if(!CNewMachine::TestFilename(sPath2) ) 
-				{
+				#if defined _WINAMP_PLUGIN_
+					sPath = Global::pConfig->GetPluginDir();
+					if( FindFileinDir(psFileName,sPath) )
+					{
+						strcpy(sPath2,sPath);
+						return Instance(sPath2);
+					}
 					return false;
-				}
-				if(!Instance(sPath2))
-				{
-					char sError[_MAX_PATH + 100];
-					sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",psFileName);
-					::MessageBox(NULL,sError, "Error", MB_OK);
-					return false;
-				}
-				return true;
-		#endif // _WINAMP_PLUGIN_	};
+				#else
+					if(!CNewMachine::dllNames.Lookup(psFileName,sPath)) 
+					{
+						// Check Compatibility Table.
+						// Probably could be done with the dllNames lockup.
+						//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+						std::strcpy(sPath2, psFileName);
+					}
+					else 
+					{ 
+						std::strcpy(sPath2,sPath); 
+					}
+					if(!CNewMachine::TestFilename(sPath2) ) 
+					{
+						return false;
+					}
+					try
+					{
+						Instance(sPath2);
+					}
+					catch(const std::exception & e)
+					{
+						std::ostringstream s; s
+							<< "Exception while instanciating:" << sPath2 << std::endl
+							<< "Replacing with dummy." << std::endl
+							<< typeid(e).name() << std::endl
+							<< e.what();
+						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						return false;
+					}
+					catch(...)
+					{
+						std::ostringstream s; s
+							<< "Exception while instanciating:" << sPath2 << std::endl
+							<< "Replacing with dummy." << std::endl
+							<< "Unkown type of exception";
+						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						return false;
+					}
+					return true;
+				#endif
 			};
-
 			bool IsSynth(void) { return _isSynth; }
-			char* GetDllName(void) { return _psDllName; }
+			inline virtual const char * const GetDllName() const throw() { return _psDllName; }
 			char* GetShortName(void) { return _psShortName; }
 			char* GetAuthor(void) { return _psAuthor; }
-
 			CMachineInfo* GetInfo(void) { return _pInfo; };
 			CMachineInterface* GetInterface(void) { return _pInterface; };
 			PluginFxCallback* GetCallback(void) { return &_callback; };
-
-
 		protected:
 			HINSTANCE _dll;
 			char _psShortName[16];
@@ -253,7 +248,6 @@ namespace psycle
 			static PluginFxCallback _callback;
 			CMachineInfo* _pInfo;
 			CMachineInterface* _pInterface;
-
 		};
 	}
 }

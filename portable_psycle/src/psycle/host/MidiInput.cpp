@@ -1578,7 +1578,7 @@ namespace psycle
 						{
 							if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
 					{
-								((VSTPlugin*)pMachine)->AddMIDI(status,data1,data2);
+						((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
 								return;
 							}
 						}

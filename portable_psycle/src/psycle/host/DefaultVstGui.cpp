@@ -65,7 +65,7 @@ namespace psycle
 			UpdateParList();
 			InitializePrograms();
 			//init slider range
-			m_slider.SetRange(0, VST_QUANTIZATION);
+			m_slider.SetRange(0, vst::quantization);
 			nPar=0;
 			UpdateOne();
 		}
@@ -130,9 +130,9 @@ namespace psycle
 			//update scroll bar with initial value
 			float value = _pMachine->GetParameter(nPar);
 			UpdateText(value);
-			value *= VST_QUANTIZATION;
+			value *= vst::quantization;
 			updatingvalue =true;
-			m_slider.SetPos(VST_QUANTIZATION -(f2i(value)));
+			m_slider.SetPos(vst::quantization -(f2i(value)));
 			updatingvalue =false;
 		}
 
@@ -144,40 +144,35 @@ namespace psycle
 				m_parlist.SetCurSel(par);
 			}
 			UpdateText(value);
-			value *= VST_QUANTIZATION;
+			value *= vst::quantization;
 			updatingvalue=true;
-			m_slider.SetPos(VST_QUANTIZATION -(f2i(value)));
+			m_slider.SetPos(vst::quantization -(f2i(value)));
 			updatingvalue=false;
 		}
 		void CDefaultVstGui::OnSelchangeList1() 
 		{
 			nPar=m_parlist.GetCurSel();
 			UpdateOne();
-			ASSERT(mainView != NULL);
+			assert(mainView);
 			mainView->SetFocus();
 		}
 
 		void CDefaultVstGui::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
-			if (!updatingvalue)
+			if(!updatingvalue)
 			{
-				int val1 = VST_QUANTIZATION - m_slider.GetPos();
-				float value = (float)val1/VST_QUANTIZATION;
-
+				int val1(vst::quantization - m_slider.GetPos());
+				float value = static_cast<float>(val1) / vst::quantization;
 				_pMachine->SetParameter(nPar, value);
 				UpdateText(value);
 				// well, this isn't so hard... just put the twk record here
-				if (Global::pConfig->_RecordTweaks)
+				if(Global::pConfig->_RecordTweaks)
 				{
-					ASSERT(mainView != NULL);
+					assert(mainView);
 					if (Global::pConfig->_RecordMouseTweaksSmooth)
-					{
 						childView->MousePatternTweakSlide(MachineIndex, nPar, val1);
-					}
 					else
-					{
 						childView->MousePatternTweak(MachineIndex, nPar, val1);
-					}
 				}
 			}
 		}
@@ -185,7 +180,6 @@ namespace psycle
 		void CDefaultVstGui::OnReleasedcaptureSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			mainView->SetFocus();
-			
 			*pResult = 0;
 		}
 
@@ -198,22 +192,19 @@ namespace psycle
 
 		void CDefaultVstGui::OnCloseupCombo1() 
 		{
-			ASSERT(mainView != NULL);
+			assert(mainView);
 			mainView->SetFocus();
 		}
 
 		void CDefaultVstGui::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-
-			int const se=m_program.GetCurSel() + pNMUpDown->iDelta;
-
-			if (se >= 0)
+			const int se(m_program.GetCurSel() + pNMUpDown->iDelta);
+			if(se >= 0)
 			{
 				m_program.SetCurSel(se);
 				_pMachine->SetCurrentProgram(se);
 			}
-
 			*pResult = 0;
 			mainView->SetFocus();
 		}
