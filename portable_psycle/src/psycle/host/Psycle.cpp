@@ -250,16 +250,18 @@ namespace psycle
 						"Jeremy Evers [pooplog]\t\tDeveloper since release 1.7" "\r\n"
 						"James Redfern [alk]\t\tDeveloper since release 1.7.6" "\r\n"
 						"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
+						"Magnus Jonsson [zealmange]\t\tDeveloper since release 1.7.7" "\r\n"
 						"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
 						"Marcin Kowalski [FideLoop]\t\tDeveloper in release 1.6" "\r\n"
 						"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
 						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n"
 						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
+						"Martin Etnestad Johansen [lobywang]\t Coding Help" "\r\n"
 						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
 						"frown\t\t\t\tAdditional Graphics" "\r\n"
 						"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
-						"Haralabos Michael\t\tInstaller and Debugging help"
+						"Haralabos Michael\t\t\tInstaller and Debugging help"
 					);
 			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
 

@@ -1,6 +1,6 @@
------------------------------------------------------------------
+-----------------------------------------------------------------------------
 Version | Type of release          | By
---------|--------------------------|-----------------------------
+--------|--------------------------|-----------------------------------------
 0.x     | Alphas and betas         | arguru
 1.0/01  | release (bugfix)         | arguru
 1.1/11  | release (bugfix)         | Mats
@@ -15,7 +15,8 @@ Version | Type of release          | By
 1.7.6   | release                  | alk
 1.7.6.1 | bug fix                  | alk
 1.7.6.2 | microsoft bug fix        | alk & bohan
------------------------------------------------------------------
+1.7.7   | beta                     | alk & bohan & magnus & [JAZ] & logywang
+-----------------------------------------------------------------------------
 
 Since 1.7.3, releases are named this way:
 M.m.r.p , where:
@@ -32,18 +33,22 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.9  2004/05/27 03:11:52  johan-boule
+information about new release
+
 Revision 1.8  2004/05/10 15:44:15  johan-boule
 added comments on upcoming release
 
 Revision 1.7  2004/05/10 15:15:47  johan-boule
 added commit log to whatsnew.txt
 
-release to come
----------------
+release to come (v1.7.7.x)
+--------------------------
++rewriting of the native and vst plugin hosts (bohan & magnus)
 +added automatized compilation + packaging + update of psycle sourceforge site for faster and more frequent updates (bohan)
 *ported the open source native plugins to the new compiler (bohan)
 *refactoring of the source code: cleaner internally, but no visible changes for the users (bohan)
-!fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk, pooplog)
+!fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
 +added cpu specific builds for 6th and 7th generation x86 CPUs (bohan)
 
 v1.7.6.2
