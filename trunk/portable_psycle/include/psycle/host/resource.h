@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by c:\cvs.sourceforge.net\psycle\portable_psycle\src\psycle\host\resources\Psycle.rc
+// Used by d:\cvs.sourceforge.net\psycle\portable_psycle\src\psycle\host\resources\Psycle.rc
 //
 #define IDC_COPY                        3
 #define IDC_PASTE                       4
@@ -764,6 +764,7 @@
 #define ID_BUTTON32922                  32922
 #define ID_VIEW_LoggingWindow           32927
 #define ID_VIEW_ERRORLOGGER             32928
+#define ID_EDIT_CROP                    32929
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -772,7 +773,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        209
-#define _APS_NEXT_COMMAND_VALUE         32929
+#define _APS_NEXT_COMMAND_VALUE         32932
 #define _APS_NEXT_CONTROL_VALUE         1540
 #define _APS_NEXT_SYMED_VALUE           60
 #endif

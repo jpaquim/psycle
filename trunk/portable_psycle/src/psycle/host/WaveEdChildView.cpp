@@ -63,6 +63,8 @@ namespace psycle
 			ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
 			ON_COMMAND(ID_EDIT_CUT, OnEditCut)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
+			ON_COMMAND(ID_EDIT_CROP, OnEditCrop)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_CROP, OnUpdateEditCrop)
 			ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
 			ON_COMMAND(ID_EDIT_DELETE, OnEditDelete)
@@ -183,14 +185,14 @@ namespace psycle
 							int ls = ((wdLoopS-diStart)*nWidth)/diLength;
 							pDC->MoveTo(ls,0);
 							pDC->LineTo(ls,nHeight);
-							pDC->TextOut(ls,0,"S");
+							pDC->TextOut(ls,0,"Start");
 						}
 						if ( wdLoopE >= diStart && wdLoopE < diStart+diLength)
 						{
 							int le = ((wdLoopE-diStart)*nWidth)/diLength;
 							pDC->MoveTo(le,0);
 							pDC->LineTo(le,nHeight);
-							pDC->TextOut(le-8,nHeight-16,"E");
+							pDC->TextOut(le-8,nHeight-16,"End");
 						}
 
 					}
@@ -912,6 +914,11 @@ namespace psycle
 			pCmdUI->Enable(wdWave && blSelection && blLength > 1);
 		}
 
+		void CWaveEdChildView::OnUpdateEditCrop(CCmdUI* pCmdUI) 
+		{
+			pCmdUI->Enable(wdWave && blSelection && blLength > 1);
+		}
+
 		void CWaveEdChildView::OnUpdateEditPaste(CCmdUI* pCmdUI) 
 		{
 			pCmdUI->Enable( ((wdWave && blSelection && blLength == 1) || !wdWave) && IsClipboardFormatAvailable(CF_WAVE));
@@ -990,6 +997,21 @@ namespace psycle
 		void CWaveEdChildView::OnEditCut() 
 		{
 			OnEditCopy();
+			OnEditDelete();
+		}
+
+		void CWaveEdChildView::OnEditCrop()
+		{
+			unsigned long blStartTemp = blStart;
+			unsigned long blLengthTemp = blLength;
+
+			blStart += blLengthTemp;
+			blLength = (wdLength - blStartTemp);
+			OnEditDelete();
+			
+			blSelection = true;
+			blStart = 0;
+			blLength = blStartTemp;
 			OnEditDelete();
 		}
 
