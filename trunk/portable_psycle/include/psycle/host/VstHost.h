@@ -41,19 +41,23 @@ namespace psycle
 			/// Proxy between the host and a plugin.
 			class proxy
 			{
+			public:
+				proxy(vst::plugin & host, AEffect * const plugin = 0);
+				~proxy() throw();
+
 			private:
 				plugin & host_;
-				AEffect * plugin_;
-			private:
 				plugin & host() throw();
 				const plugin & host() const throw();
+
+			private:
+				AEffect * plugin_;
 				AEffect & plugin() throw();
 				const AEffect & plugin() const throw();
 			public:
-				proxy(vst::plugin & host, AEffect * plugin = 0);
-				~proxy() throw();
+				void operator()(AEffect * const plugin) throw(host::exceptions::function_error);
 				const bool operator()() const throw();
-				void operator()(AEffect * plugin) throw(host::exceptions::function_error);
+
 				long int magic() throw(host::exceptions::function_error);
 				long int dispatcher(long int operation = 0, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(host::exceptions::function_error);
 				void process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
@@ -67,7 +71,6 @@ namespace psycle
 				long int flags() throw(host::exceptions::function_error);
 				long int uniqueId() throw(host::exceptions::function_error);
 				long int version() throw(host::exceptions::function_error);
-				void user(void * user) throw(host::exceptions::function_error);
 
 				/// Create and initialize the VST plugin ( plugin Side ). Call this before using it. (except for string data)
 				long int open()
@@ -258,7 +261,7 @@ namespace psycle
 				float junk[STREAM_SIZE];
 				static VstTimeInfo _timeInfo;
 				VstEvents mevents;
-				vst::proxy *proxy_;
+				vst::proxy * proxy_;
 
 				#ifndef NDEBUG
 					class note_checker
@@ -368,14 +371,16 @@ namespace psycle
 				}
 			}
 
+			inline proxy::proxy(vst::plugin & host, AEffect * const plugin) : host_(host), plugin_(0) { (*this)(plugin); }
+			inline proxy::~proxy() throw() { (*this)(0); }
+
 			inline plugin & proxy::host() throw() { return host_; }
 			inline const plugin & proxy::host() const throw() { return host_; }
+
 			inline AEffect & proxy::plugin() throw() { assert(plugin_); return *plugin_; }
 			inline const AEffect & proxy::plugin() const throw() { assert(plugin_); return *plugin_; }
-			inline proxy::proxy(vst::plugin & host, AEffect * plugin) : host_(host), plugin_(0) { (*this)(plugin); }
-			inline proxy::~proxy() throw() { (*this)(0); }
 			inline const bool proxy::operator()() const throw() { return plugin_; }
-			inline void proxy::operator()(AEffect * plugin) throw(host::exceptions::function_error)
+			inline void proxy::operator()(AEffect * const plugin) throw(host::exceptions::function_error)
 			{
 				if(this->plugin_)
 				{
@@ -386,8 +391,29 @@ namespace psycle
 				// by the plugin's DLL by some unknown means. Dispatching effClose will
 				// automatically free up the AEffect structure.
 				this->plugin_ = plugin;
-				if(plugin_) user(&host());
+				if(plugin)
+				{
+					static const char function[] = "operator()(AEffect * const plugin)";
+					try
+					{
+						// AEffect's resvd2 data member is right after the resvd1 data member in memory,
+						// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address,
+						// if we ever recompile psycle on a 64-bit operating system.
+						// The vst plugins don't need to be recompiled for this to work,
+						// but anyway, some other parts of the vst headers are supposed to be used on a 32-bit compiler
+						// (i.e. their authors didn't forsee the problem).
+						// So, those headers should be made explicitly 32-bit to support 32-bit vst plugins.
+						// Since those headers are under a restricted license by steinberg, only steinberg's employees are allowed to fix them.
+						*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
+					}
+					catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
+					catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
+					catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
+					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
+					catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				}
 			}
+
 			#pragma warning(push)
 			#pragma warning(disable:4702) // unreachable code
 			inline long int proxy::magic() throw(host::exceptions::function_error)
@@ -593,20 +619,6 @@ namespace psycle
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 				return 0; // dummy return to avoid warning
-			}
-			inline void proxy::user(void * user) throw(host::exceptions::function_error)
-			{
-				assert((*this)());
-				static const char function[] = "user";
-				try
-				{
-					plugin().user = user;
-				}
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 			}
 			#pragma warning(pop)
 		}
