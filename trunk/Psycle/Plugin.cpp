@@ -432,8 +432,7 @@ void Plugin::Tick(
 	}
 }
 
-bool Plugin::Load(
-	RiffFile* pFile)
+bool Plugin::Load(RiffFile* pFile)
 {
 	bool result = true;
 	char junk[256];

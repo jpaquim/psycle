@@ -324,7 +324,7 @@ void Song::Reset(void)
 		playOrder[i]=0; // All pattern reset
 	}
 #else
-	machineSoloed = 0;
+	machineSoloed = -1;
 	_trackSoloed = -1;
 	playLength=1;
 	for (i=0; i < MAX_SONG_POSITIONS; i++)
@@ -501,39 +501,42 @@ void Song::DestroyMachine(int mac)
 	Machine *iMac = _pMachine[mac];
 	Machine *iMac2;
 
-	//Deleting the connections to/from other machines
-	for (int w=0; w<MAX_CONNECTIONS; w++)
+	if (iMac)
 	{
-		// Checking In-Wires
-		if (iMac->_inputCon[w])
+		//Deleting the connections to/from other machines
+		for (int w=0; w<MAX_CONNECTIONS; w++)
 		{
-			iMac2 = _pMachine[iMac->_inputMachines[w]];
-			if (iMac2)
+			// Checking In-Wires
+			if (iMac->_inputCon[w])
 			{
-				for (int x=0; x<MAX_CONNECTIONS; x++)
+				iMac2 = _pMachine[iMac->_inputMachines[w]];
+				if (iMac2)
 				{
-					if ( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
+					for (int x=0; x<MAX_CONNECTIONS; x++)
 					{
-						iMac2->_connection[x] = false;
-						iMac2->_numOutputs--;
-						break;
+						if ( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
+						{
+							iMac2->_connection[x] = false;
+							iMac2->_numOutputs--;
+							break;
+						}
 					}
 				}
 			}
-		}
-		// Checking Out-Wires
-		if(iMac->_connection[w])
-		{
-			iMac2 = _pMachine[iMac->_outputMachines[w]];
-			if (iMac2)
+			// Checking Out-Wires
+			if(iMac->_connection[w])
 			{
-				for (int x=0; x<MAX_CONNECTIONS; x++)
+				iMac2 = _pMachine[iMac->_outputMachines[w]];
+				if (iMac2)
 				{
-					if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
+					for (int x=0; x<MAX_CONNECTIONS; x++)
 					{
-						iMac2->_inputCon[x] = false;
-						iMac2->_numInputs--;
-						break;
+						if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
+						{
+							iMac2->_inputCon[x] = false;
+							iMac2->_numInputs--;
+							break;
+						}
 					}
 				}
 			}
@@ -541,7 +544,10 @@ void Song::DestroyMachine(int mac)
 	}
 
 #if  !defined(_WINAMP_PLUGIN_)	
-	if ( mac == machineSoloed ) machineSoloed = 0;
+	if ( mac == machineSoloed ) 
+	{
+		machineSoloed = -1;
+	}
 #endif //  !defined(_WINAMP_PLUGIN_)
 	delete _pMachine[mac];	// If it's a (Vst)Plugin, the destructor calls to free the .dll
 	_pMachine[mac] = NULL;
@@ -1096,6 +1102,7 @@ bool Song::Load(RiffFile* pFile)
 		UINT size = 0;
 		UINT index = 0;
 		int temp;
+		int solo;
 
 		Header[4]=0;
 		_machineLock = true;
@@ -1157,6 +1164,8 @@ bool Song::Load(RiffFile* pFile)
 					_ticksPerBeat = temp;
 					pFile->Read(&temp,sizeof(temp));  // current octave
 					currentOctave = temp;
+					pFile->Read(&temp,sizeof(temp));  // machineSoloed
+					solo = temp;	// we need to buffer this because destroy machine will clear it
 					pFile->Read(&temp,sizeof(temp));  // sequence width, for multipattern
 				}
 			}
@@ -1172,17 +1181,25 @@ bool Song::Load(RiffFile* pFile)
 				}
 				else
 				{
-					char pTemp[256];
 					pFile->Read(&index,sizeof(index)); // index, for multipattern - for now always 0
-					pFile->Read(&temp,sizeof(temp)); // play length for this sequence
-					playLength = temp;
-
-					pFile->ReadString(pTemp,sizeof(pTemp)); // name, for multipattern, for now unused
-
-					for (int i = 0; i < playLength; i++)
+					if (index < MAX_SEQUENCES)
 					{
-						pFile->Read(&temp,sizeof(temp));
-						playOrder[i] = temp;
+						char pTemp[256];
+						pFile->Read(&temp,sizeof(temp)); // play length for this sequence
+						playLength = temp;
+
+						pFile->ReadString(pTemp,sizeof(pTemp)); // name, for multipattern, for now unused
+
+						for (int i = 0; i < playLength; i++)
+						{
+							pFile->Read(&temp,sizeof(temp));
+							playOrder[i] = temp;
+						}
+					}
+					else
+					{
+//						MessageBox(NULL,"Sequence section of File is from a newer version of psycle!",NULL,NULL);
+						pFile->Skip(size-sizeof(index));
 					}
 				}
 			}
@@ -1199,20 +1216,27 @@ bool Song::Load(RiffFile* pFile)
 				else
 				{
 					pFile->Read(&index,sizeof(index)); // index
-					pFile->Read(&temp,sizeof(temp)); // num lines
-					RemovePattern(index); // clear it out if it already exists
-					patternLines[index] = temp;
-					pFile->Read(&temp,sizeof(temp)); // num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
-
-					pFile->ReadString(patternName[index],sizeof(patternName[index]));
-
-
-					for (int y = 0; y < patternLines[index]; y++)
+					if (index < MAX_PATTERNS)
 					{
-						unsigned char* pData = _ppattern(index)+(y*MULTIPLY);
-						pFile->Read(pData,EVENT_SIZE*SONGTRACKS);
-					}
+						pFile->Read(&temp,sizeof(temp)); // num lines
+						RemovePattern(index); // clear it out if it already exists
+						patternLines[index] = temp;
+						pFile->Read(&temp,sizeof(temp)); // num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 
+						pFile->ReadString(patternName[index],sizeof(patternName[index]));
+
+
+						for (int y = 0; y < patternLines[index]; y++)
+						{
+							unsigned char* pData = _ppattern(index)+(y*MULTIPLY);
+							pFile->Read(pData,EVENT_SIZE*SONGTRACKS);
+						}
+					}
+					else
+					{
+//						MessageBox(NULL,"Pattern section of File is from a newer version of psycle!",NULL,NULL);
+						pFile->Skip(size-sizeof(index));
+					}
 				}
 			}
 			else if (strcmp(Header,"MACD")==0)
@@ -1228,9 +1252,17 @@ bool Song::Load(RiffFile* pFile)
 				else
 				{
 					pFile->Read(&index,sizeof(index));
-
-
-//					_pMachine[index]->LoadFileChunk(pFile,version);
+					if (index < MAX_MACHINES)
+					{
+						// we had better load it
+						DestroyMachine(index);
+						_pMachine[index] = Machine::LoadFileChunk(pFile,version);
+					}
+					else
+					{
+//						MessageBox(NULL,"Instrument section of File is from a newer version of psycle!",NULL,NULL);
+						pFile->Skip(size-sizeof(index));
+					}
 				}
 			}
 			else if (strcmp(Header,"INSD")==0)
@@ -1270,6 +1302,7 @@ bool Song::Load(RiffFile* pFile)
 		// calculate samples per tick
 		// connect all output machines, test all connections for invalid machines.
 
+		machineSoloed = solo;
 		_machineLock = false;
 		return true;
 
@@ -2035,7 +2068,7 @@ bool Song::Save(
 	HEADER:
 	id = "SNGI"; 
 	version = 0;
-	size = (4*sizeof(int));
+	size = (6*sizeof(int));
 
 	DATA:
 	int numTracks; 
@@ -2049,7 +2082,7 @@ bool Song::Save(
 
 	pFile->Write("SNGI",4);
 	version = CURRENT_FILE_VERSION_SNGI;
-	size = (5*sizeof(temp));
+	size = (6*sizeof(temp));
 	pFile->Write(&version,sizeof(version));
 	pFile->Write(&size,sizeof(size));
 
@@ -2060,6 +2093,8 @@ bool Song::Save(
 	temp = _ticksPerBeat;
 	pFile->Write(&temp,sizeof(temp));
 	temp = currentOctave;
+	pFile->Write(&temp,sizeof(temp));
+	temp = machineSoloed;
 	pFile->Write(&temp,sizeof(temp));
 	temp = 1; // sequence width
 	pFile->Write(&temp,sizeof(temp));
@@ -2176,7 +2211,7 @@ bool Song::Save(
 			index = i; // index
 			pFile->Write(&index,sizeof(index));
 
-//			_pMachine[i]->SaveFileChunk(pFile);
+			_pMachine[i]->SaveFileChunk(pFile);
 
 			long pos2 = pFile->GetPos(); 
 			size = pos2-pos-sizeof(size);

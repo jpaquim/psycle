@@ -9,6 +9,7 @@
 #include "Dsp.h"
 #include "Helpers.h"
 #include "Constants.h"
+#include "FileIO.h"
 
 #if !defined(_CYRIX_PROCESSOR_) && !defined(_WINAMP_PLUGIN_)
 #define CPUCOST_INIT(cost)	\
@@ -55,7 +56,7 @@ class RiffFile;
 class Machine
 {
 public:
-	bool wasVST;
+	bool wasVST;  // THIS NEVER EVER GETS RESET TO FALSE, SO WHAT DOES IT DO?  IT IS ALWAYS TRUE
 
 	MachineType _type;
 	MachineMode _mode;
@@ -97,7 +98,7 @@ public:
 	bool _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
 	int _numInputs;							// number of Incoming connections
 	int _numOutputs;						// number of Outgoing connections
-	CPoint _connectionPoint[MAX_CONNECTIONS];
+	CPoint _connectionPoint[MAX_CONNECTIONS];// point for wire? 
 	PatternEntry	TriggerDelay[MAX_TRACKS];
 	int				TriggerDelayCounter[MAX_TRACKS];
 	int				RetriggerRate[MAX_TRACKS];
@@ -139,8 +140,28 @@ public:
 	virtual int GetParamValue(int numparam) { return 0; };
 	virtual bool SetParameter(int numparam,int value) { return false;}; 
 	virtual bool Load(RiffFile* pFile);
+	static Machine* LoadFileChunk(RiffFile* pFile, int version);
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		UINT size;
+		pFile->Read(&size,sizeof(size));
+		pFile->Skip(size);
+		return TRUE;
+	};
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
+	void SaveFileChunk(RiffFile* pFile);
+	virtual void SaveSpecificChunk(RiffFile* pFile) 
+	{
+		UINT size = 0;
+		pFile->Write(&size,sizeof(size));
+	};
+	virtual void SaveDllName(RiffFile* pFile) 
+	{
+		char temp=0;
+		pFile->Write(&temp,1);
+	};
+
 protected:
 	inline void SetVolumeCounter(int numSamples)
 	{
@@ -168,7 +189,6 @@ protected:
 	};
 	*/
 #endif // ndef _WINAMP_PLUGIN_
-
 };
 
 class Dummy : public Machine

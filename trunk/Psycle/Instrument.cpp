@@ -88,9 +88,11 @@ void Instrument::DeleteLayer(int c)
 	if(waveLength[c]>0)
 	{
 		delete waveDataL[c];
+		waveDataL[c] = NULL;
 		if(waveStereo[c])
 		{
 			delete waveDataR[c];
+			waveDataR[c] = NULL;
 		}
 		waveLength[c] = 0;
 	}
@@ -165,7 +167,6 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version)
 		{
 			UINT version;
 			UINT size;
-			UINT index;
 
 			pFile->Read(&version,sizeof(version));
 			pFile->Read(&size,sizeof(size));
@@ -177,6 +178,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version)
 			}
 			else
 			{
+				UINT index;
 				pFile->Read(&index,sizeof(index));
 
 				pFile->Read(&waveLength[index],sizeof(waveLength[index]));

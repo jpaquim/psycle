@@ -629,7 +629,7 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 							MachineCoords.sGeneratorMute.x, 
 							MachineCoords.sGeneratorMute.y);
 			}
-			else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
+			else if (_pSong->machineSoloed == macnum)
 			{
 				TransparentBlt(devc,
 							x+MachineCoords.dGeneratorSolo.x, 
@@ -770,7 +770,7 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 							MachineCoords.sGeneratorMute.y, 
 							SRCCOPY);
 			}
-			else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
+			else if (_pSong->machineSoloed == macnum)
 			{
 				devc->BitBlt(x+MachineCoords.dGeneratorSolo.x, 
 							y+MachineCoords.dGeneratorSolo.y, 

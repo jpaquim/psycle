@@ -204,8 +204,7 @@ void Sampler::Stop(void)
 	}
 }
 
-bool Sampler::Load(
-	RiffFile* pFile)
+bool Sampler::Load(RiffFile* pFile)
 {
 	int i;
 	char junk[256];
