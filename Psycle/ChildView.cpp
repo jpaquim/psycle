@@ -19,6 +19,7 @@
 
 #include "Player.h"
 #include "MidiInput.h"
+#include "SwingFillDlg.h"
 
 //#include "Dsp.h"
 //#include "Filter.h"
@@ -215,6 +216,9 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_AUTOSTOP, OnAutostop)
 	ON_UPDATE_COMMAND_UI(ID_AUTOSTOP, OnUpdateAutostop)
 	ON_COMMAND(ID_POP_PATTENPROPERTIES, OnPopPattenproperties)
+	ON_COMMAND(ID_POP_BLOCK_SWINGFILL, OnPopBlockSwingfill)
+	ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdatePopBlockSwingfill)
+	ON_COMMAND(ID_POP_TRACK_SWINGFILL, OnPopTrackSwingfill)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
 	ON_WM_CONTEXTMENU()
@@ -1032,6 +1036,85 @@ void CChildView::SetPatStep(int stp)
 	}*/
 }
 
+#include <math.h>
+
+#define TWOPI_F (2.0f*3.141592665f)
+
+void CChildView::ShowSwingFillDlg(bool bTrackMode)
+{
+	static int st = Global::_pSong->BeatsPerMin;
+	static int sw = 2;
+	static float sv = 50.0f;
+	static float sp = 90.0f;
+	CSwingFillDlg dlg;
+	dlg.tempo = st;
+	dlg.width = sw;
+	dlg.variance = sv;
+	dlg.phase = sp;
+
+	dlg.DoModal();
+	if (dlg.bGo)
+	{
+		st = dlg.tempo;
+		sw = dlg.width;
+		sv = dlg.variance;
+		sp = dlg.phase;
+		float var = (sv/100.0f);
+
+		// time to do our fill
+		// first some math
+		// our range has to go from spd+var to spd-var and back in width+1 lines
+		float step = TWOPI_F/(sw);
+		float index = sp*TWOPI_F/360;
+
+		int x;
+		int y;
+		int ny;
+		if (bTrackMode)
+		{
+			x = editcur.track;
+			y = 0;
+			ny = _pSong->patternLines[_ps()];
+		}
+		else
+		{
+			x = blockSel.start.track;
+			y = blockSel.start.line;
+			ny = 1+blockSel.end.line-blockSel.start.line;
+		}
+		AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
+
+		int displace=_ps()*MULTIPLY2;
+
+		for (int l=y;l<y+ny;l++)
+		{
+			int const displace2=x*5+l*MULTIPLY;
+			
+			unsigned char *offset=_pSong->pPatternData+displace+displace2;
+			
+			PatternEntry *entry = (PatternEntry*) offset;
+			entry->_cmd = 0xff;
+			int val = int((sin(index)*var*st)+dlg.tempo);
+			if (val < 33)
+			{
+				val = 33;
+			}
+			else if (val > 255)
+			{
+				val = 255;
+			}
+			entry->_parameter = unsigned char (val);
+			index+=step;
+		}
+		drawTrackStart=x;
+		drawTrackEnd=x;
+		drawLineStart=y;
+		drawLineEnd=y+ny;
+
+		Repaint(DMDataChange);
+	}
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 // Right Click Popup Menu
@@ -1116,6 +1199,24 @@ void CChildView::OnUpdatePopTranspose_12(CCmdUI* pCmdUI)
 void CChildView::OnPopPattenproperties() 
 {
 	ShowPatternDlg();
+}
+
+void CChildView::OnPopBlockSwingfill()
+{
+	// fill block
+	ShowSwingFillDlg(FALSE);
+}
+
+void CChildView::OnUpdatePopBlockSwingfill(CCmdUI* pCmdUI)
+{
+	if ( blockSelected ) pCmdUI->Enable(TRUE);
+	else pCmdUI->Enable(FALSE);
+}
+
+void CChildView::OnPopTrackSwingfill()
+{
+	// fill track
+	ShowSwingFillDlg(TRUE);
 }
 
 void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
