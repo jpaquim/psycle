@@ -384,8 +384,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +++FF	new file format: (vst multi-out, volume column, direct x stuff, etc.)
 
 
-
-
 -- Possible Features For Psycle 2 --
 ------------------------------------
 
