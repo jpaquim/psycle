@@ -1408,7 +1408,7 @@ Flanger::Flanger()
 	_type = MACH_FLANGER;
 	_mode = MACHMODE_FX;
 	sprintf(_editName, "Flanger");
-	_resampler.SetQuality(RESAMPLE_LINEAR);// ADVISE!!!! Only linear resample can be done. SPLINE needs samples ahead
+//	_resampler.SetQuality(RESAMPLE_LINEAR);// ADVISE!!!! Only linear resample can be done. SPLINE needs samples ahead
 	useResample=false;
 	
 	_pBufferL = NULL;
@@ -1493,9 +1493,6 @@ void Flanger::Work(
 
 	if ((!_mute) && (!_stopped) && (!_bypass))
 	{
-		PRESAMPLERFN pResamplerWork;
-		pResamplerWork = _resampler._pWorkFn;
-		
 		const float fdbkL =(float)_feedbackL*0.01f;
 		const float fdbkR =(float)_feedbackR*0.01f;
 		const float dry =(float)_outDry*0.00390625f;
@@ -1518,6 +1515,9 @@ void Flanger::Work(
 
 		if ( useResample)
 		{
+			PRESAMPLERFN pResamplerWork;
+			pResamplerWork = Global::pResampler->_pWorkFn;
+
 			int i = numSamples;
 			do
 			{
