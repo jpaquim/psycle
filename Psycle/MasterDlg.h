@@ -18,7 +18,7 @@ class CMasterDlg : public CDialog
 {
 // Construction
 public:
-	CMasterDlg(CChildView* pParent = NULL);   // standard constructor
+	CMasterDlg(CChildView* pParent);   // standard constructor
 	BOOL Create();
 	void PaintNumbers(int val, int x, int y);
 	void PaintNumbersDC(CDC* dc,CDC* memDC,int val,int x,int y);
