@@ -15,8 +15,14 @@ X low priority
 ------------
 
 **** Psycle crash on settings dialog
+	[ pooplog - i cannot recreate this ]
 ** Some skins not getting enumerated?
+	[ pooplog - i cannot recreate this ]
 
++ <_sue_> i really dont like parameter automation with tweak commands.....theyre so steped.....i can never 
+	get a good smooth fast filter sweep.....something cool for psycle would be a window where you could 
+	draw many envelopes.....then with a pattern command a selected envelope would be triggered associated 
+	also to a parameter.....like that you could use/trigger the same envelope 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 + <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
@@ -83,7 +89,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		select a line, then lower down click and drag to select a block.
 		cause the window to scroll by making the block go off the Bottom of the screen.
 		(notice the previous highlight moving up) now click another place. 
-		[cannot reproduce]
+		[pooplog - cannot reproduce]
 **	Can't select with keyboard while follow song on, and playing.
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
 +	how about option to switch the instrument and machine columns?
@@ -106,12 +112,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
 *	moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
-	on every frame - make bigger buffers and more of them to prevent this from happening
+	on every frame - 
+	[ make bigger buffers and more of them to prevent this from happening ]
 *	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
 *	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
-*	<alk> in felix.psy can't connect attack generator to the compressor effect (machine connect failed) 
-		[ this file has been corrupted somehow, how/when was it saved? ]
-		[ it was saved in march or april in and old version, most likely bugged alpha - SO we should forget about it ]
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
