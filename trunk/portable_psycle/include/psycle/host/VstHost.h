@@ -67,6 +67,52 @@ namespace psycle
 				inline long int uniqueId() throw(host::exceptions::function_error);
 				inline long int version() throw(host::exceptions::function_error);
 				inline void user(void * user) throw(host::exceptions::function_error);
+
+				// some common dispatch calls
+				long int open() {
+					return dispatcher(effOpen);
+				}
+				long int close() {
+					long int retval=dispatcher(effClose);
+					/// also clears plugin_ pointer since it is no longer valid after effClose.
+					(*this)(0);
+					return retval;
+				}
+				long int setSampleRate(float sr) {
+					assert(sr>0.0f);
+					return dispatcher(effSetSampleRate,0,0,0,sr);
+				}
+				long int setBlockSize(int bs)
+				{
+					assert(bs>0);
+					return dispatcher(effSetSampleRate,0,bs);
+				}
+				long int setSpeakerArrangement(VstSpeakerArrangement* VSTsa) {
+					assert(VSTsa);
+					return dispatcher(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+				}
+				long int getProgram() {
+					return dispatcher(effGetProgram);
+				}
+				long int setProgram(int program) {
+					assert(program>=0);
+					assert(program<numPrograms() || numPrograms()==0);
+					return dispatcher(effSetProgram,0,program);
+				}
+				long int getVstVersion() {
+					return dispatcher(effGetVstVersion);
+				}
+				long int mainsChanged(bool on) {
+					return dispatcher(effMainsChanged, 0, on ? 1 : 0);
+				}
+				long int getEffectName(char * buffer) {
+					assert(buffer);
+					return dispatcher(effGetEffectName, 0, 0, buffer);
+				}
+				long int getVendorString(char * buffer) {
+					assert(buffer);
+					return dispatcher(effGetVendorString, 0, 0, buffer);
+				}
 			};
 
 			/// VST plugin.
@@ -137,7 +183,7 @@ namespace psycle
 				inline const bool & IsSynth() const throw() { return _isSynth; }
 				inline bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
 				inline void SendMidi();
-				inline proxy & proxy() throw() { return proxy_; };
+				inline proxy & proxy() throw() { return *proxy_; };
 				bool SetParameter(int parameter, float value);
 				bool SetParameter(int parameter, int value);
 				//void SetCurrentProgram(int prg);
@@ -172,7 +218,7 @@ namespace psycle
 				float junk[STREAM_SIZE];
 				static VstTimeInfo _timeInfo;
 				VstEvents events;
-				vst::proxy proxy_;
+				vst::proxy *proxy_;
 			};
 
 			/// vst note for an instrument.
@@ -250,9 +296,15 @@ namespace psycle
 			inline const bool proxy::operator()() const throw() { return plugin_; }
 			inline void proxy::operator()(AEffect * plugin) throw(host::exceptions::function_error)
 			{
-				if((*this)()) user(0);
-				if(this->plugin_) user(0);
-				zapObject(this->plugin_,plugin);
+				if(this->plugin_)
+				{
+					user(0);
+					close();
+				}
+				// <magnus> we shouldn't delete plugin_ because the AEffect is allocated
+				// by the plugin's DLL by some unknown means. Dispatching effClose will
+				// automatically free up the AEffect structure.
+				this->plugin_ = plugin;
 				//if((*this)()) user(&host());
 				if(plugin) user(&host());
 			}

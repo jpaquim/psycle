@@ -651,6 +651,7 @@ namespace psycle
 									<< "Type of exception is unknown, cannot display any further information." << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
 							}
+/*
 							if(_pPlugsInfo[currentPlugsCount]->error)
 							{
 								out << "### ERRONEOUS ###" << std::endl;
@@ -688,6 +689,7 @@ namespace psycle
 								out.flush();
 							}
 							++currentPlugsCount;
+*/
 							// <bohan> vstPlug is a stack object, so its destructor is called
 							// <bohan> at the end of its scope (this cope actually).
 							// <bohan> The problem with destructors of any object of any class is that
@@ -697,6 +699,7 @@ namespace psycle
 							{
 								vstPlug.Free();
 								// <bohan> phatmatik crashes here...
+								// <magnus> so does PSP Easyverb, in FreeLibrary
 							}
 							catch(const std::exception & e)
 							{

@@ -46,7 +46,24 @@ namespace psycle
 
 		Machine::Machine()
 			: crashed_(false)
+			, _macIndex(0)
+			, _type(MACH_UNDEFINED)
+			, _mode(MACHMODE_UNDEFINED)
+			, _bypass(false)
+			, _mute(false)
+			, _waitingForSound(false)
+			, _stopped(false)
+			, _worked(false)
+			, _pSamplesL(0)
+			, _pSamplesR(0)
+			, _lVol(0)
+			, _rVol(0)
+			, _panning(0)
+			, _x(0)
+			, _y(0)
 			, _numPars(0)
+			, _numInputs(0)
+			, _numOutputs(0)
 			, TWSSamples(0)
 			, TWSActive(false)
 			#if !defined _WINAMP_PLUGIN_
@@ -81,6 +98,16 @@ namespace psycle
 				TWSDelta[c] = 0;
 				TWSCurrent[c] = 0;
 				TWSDestination[c] = 0;
+			}
+
+			for (int i = 0; i<MAX_CONNECTIONS; i++)
+			{
+				_inputMachines[i]=-1;
+				_outputMachines[i]=-1;
+				_inputConVol[i]=0.0f;
+				_wireMultiplier[i]=0.0f;
+				_connection[i]=false;
+				_inputCon[i]=false;
 			}
 		}
 

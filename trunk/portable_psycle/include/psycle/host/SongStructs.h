@@ -24,6 +24,7 @@ Pattern;
 
 typedef enum
 {
+	MACH_UNDEFINED = -1,
 	MACH_MASTER = 0,
 		MACH_SINE = 1,
 		MACH_DIST = 2,
@@ -42,6 +43,7 @@ MachineType;
 
 typedef enum
 {
+	MACHMODE_UNDEFINED = -1,
 	MACHMODE_GENERATOR = 0,
 	MACHMODE_FX = 1,
 	MACHMODE_MASTER = 2,
