@@ -984,7 +984,7 @@ BEGIN
     LTEXT           "Source Forge:",IDC_STATIC,19,144,46,8
     EDITTEXT        IDC_EDIT5,79,144,236,11,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
-    CONTROL         209,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
+    CONTROL         208,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
                     WS_BORDER,0,0,335,186
     LTEXT           "ASIO Steinberg Audio Stream I/O API (C) 1996 Steinb0rg",
                     IDC_ASIO,133,158,182,8,NOT WS_VISIBLE
