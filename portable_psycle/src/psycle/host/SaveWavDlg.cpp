@@ -81,7 +81,7 @@ namespace psycle
 			lastlinetick=0;
 			saving=false;
 
-			CString name = Global::pConfig->GetSongDir();
+			CString name = Global::pConfig->GetSongDir().c_str();
 			name+="\\";
 			name+=pSong->fileName;
 			name = name.Left(name.GetLength()-4);

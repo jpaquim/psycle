@@ -14,7 +14,7 @@ namespace psycle
 			void FillCmdList();
 			void DoCommandList();
 			CKeyConfigDlg();
-			char _skinPathBuf[MAX_PATH];
+			std::string _skinPathBuf;
 		// Dialog Data
 			//{{AFX_DATA(CKeyConfigDlg)
 			enum { IDD = IDD_KEYCONFIG };

@@ -179,16 +179,16 @@ namespace psycle
 			m_machine_skin.AddString(DEFAULT_MACHINE_SKIN);
 			
 			// ok now browse our folder for skins
-			FindSkinsInDir(Global::pConfig->GetInitialSkinDir());
+			FindSkinsInDir(Global::pConfig->GetInitialSkinDir().c_str());
 
-			int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
+			int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin.c_str());
 			if (sel==CB_ERR)
 			{
 				sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
 			}
 			m_pattern_header_skin.SetCurSel(sel);
 
-			sel = m_machine_skin.FindStringExact(0,_machine_skin);
+			sel = m_machine_skin.FindStringExact(0,_machine_skin.c_str());
 			if (sel==CB_ERR)
 			{
 				sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
@@ -197,7 +197,7 @@ namespace psycle
 
 			if (bBmpBkg)
 			{
-				CString str1(szBmpBkgFilename);
+				CString str1(szBmpBkgFilename.c_str());
 				int i = str1.ReverseFind('\\')+1;
 				CString str2 = str1.Mid(i);
 				m_machine_background_bitmap.SetWindowText(str2);
@@ -718,7 +718,7 @@ namespace psycle
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrInitialDir = _skinPathBuf;
+			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 			// Display the Open dialog box. 
 			
 			if (GetOpenFileName(&ofn)==TRUE)
@@ -746,7 +746,7 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(_pattern_fontface,q);
+								_pattern_fontface = q;
 							}
 						}
 					}
@@ -792,7 +792,7 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(_pattern_header_skin,q);
+								_pattern_header_skin = q;
 							}
 						}
 					}
@@ -806,7 +806,7 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(_generator_fontface,q);
+								_generator_fontface = q;
 							}
 						}
 					}
@@ -836,7 +836,7 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(_effect_fontface,q);
+								_effect_fontface = q;
 							}
 						}
 					}
@@ -866,7 +866,7 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(_machine_skin,q);
+								_machine_skin = q;
 							}
 						}
 					}
@@ -880,7 +880,7 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(szBmpBkgFilename,q);
+								szBmpBkgFilename = q;
 								// check for no \ in which case search for it?
 								bBmpBkg = TRUE;
 							}
@@ -1211,8 +1211,8 @@ namespace psycle
 							if (p)
 							{
 								p[0]=0;
-								strcpy(_generator_fontface,q);
-								strcpy(_effect_fontface,q);
+								_generator_fontface = q;
+								_effect_fontface = q;
 							}
 						}
 					}
@@ -1240,14 +1240,14 @@ namespace psycle
 				m_pattern_font_x.SetCurSel(_pattern_font_x-4);
 				m_pattern_font_y.SetCurSel(_pattern_font_y-4);
 
-				int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
+				int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin.c_str());
 				if (sel==CB_ERR)
 				{
 					sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
 				}
 				m_pattern_header_skin.SetCurSel(sel);
 
-				sel = m_machine_skin.FindStringExact(0,_machine_skin);
+				sel = m_machine_skin.FindStringExact(0,_machine_skin.c_str());
 				if (sel==CB_ERR)
 				{
 					sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
@@ -1256,7 +1256,7 @@ namespace psycle
 
 				if (bBmpBkg)
 				{
-					CString str1(szBmpBkgFilename);
+					CString str1(szBmpBkgFilename.c_str());
 					int i = str1.ReverseFind('\\')+1;
 					CString str2 = str1.Mid(i);
 					m_machine_background_bitmap.SetWindowText(str2);
@@ -1286,7 +1286,7 @@ namespace psycle
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
-			ofn.lpstrInitialDir = _skinPathBuf;
+			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 
 			if (GetSaveFileName(&ofn)==TRUE)
 			{
@@ -1382,7 +1382,7 @@ namespace psycle
 			std::memset(&lf, 0, sizeof lf);
 			CClientDC dc(this);
 			lf.lfHeight = -MulDiv(_pattern_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
-			strcpy(lf.lfFaceName, _pattern_fontface);
+			strcpy(lf.lfFaceName, _pattern_fontface.c_str());
 			if (_pattern_font_flags&1)
 			{
 				lf.lfWeight = FW_BOLD;
@@ -1392,7 +1392,7 @@ namespace psycle
 			CFontDialog dlg(&lf,CF_SCREENFONTS);
 			if (dlg.DoModal() == IDOK)
 			{
-				strcpy(_pattern_fontface,dlg.GetFaceName());
+				_pattern_fontface = dlg.GetFaceName();
 				_pattern_font_flags = 0;
 				if (dlg.IsBold())
 				{
@@ -1411,42 +1411,22 @@ namespace psycle
 				SetFontNames();
 			}
 		}
+		
+		static std::string describeFont(std::string name, UINT flags)
+		{
+			std::string fontDesc = name;
+			if (flags & 1)
+				fontDesc += " Bold";
+			if (flags & 2)
+				fontDesc += " Italic";
+			return fontDesc;
+		}
 
 		void CSkinDlg::SetFontNames()
 		{
-			char buf[256];
-			strcpy(buf,_pattern_fontface);
-			if (_pattern_font_flags & 1)
-			{
-				strcat(buf," Bold");
-			}
-			if (_pattern_font_flags & 2)
-			{
-				strcat(buf," Italic");
-			}
-			m_pattern_fontface.SetWindowText(buf);
-			
-			strcpy(buf,_generator_fontface);
-			if (_generator_font_flags & 1)
-			{
-				strcat(buf," Bold");
-			}
-			if (_generator_font_flags & 2)
-			{
-				strcat(buf," Italic");
-			}
-			m_generator_fontface.SetWindowText(buf);
-
-			strcpy(buf,_effect_fontface);
-			if (_effect_font_flags & 1)
-			{
-				strcat(buf," Bold");
-			}
-			if (_effect_font_flags & 2)
-			{
-				strcat(buf," Italic");
-			}
-			m_effect_fontface.SetWindowText(buf);
+			m_pattern_fontface.SetWindowText(describeFont(_pattern_fontface,_pattern_font_flags).c_str());
+			m_generator_fontface.SetWindowText(describeFont(_generator_fontface,_generator_font_flags).c_str());
+			m_effect_fontface.SetWindowText(describeFont(_effect_fontface,_effect_font_flags).c_str());
 
 			m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
 			m_generator_font_point.SetCurSel((_generator_font_point-50)/5);
@@ -1455,7 +1435,9 @@ namespace psycle
 
 		void CSkinDlg::OnSelchangePatternHeaderSkin()
 		{
-			m_pattern_header_skin.GetLBText(m_pattern_header_skin.GetCurSel(),_pattern_header_skin);
+			CString temp;
+			m_pattern_header_skin.GetLBText(m_pattern_header_skin.GetCurSel(),temp);
+			_pattern_header_skin=temp;
 		}
 
 		void CSkinDlg::OnSelchangeWireWidth()
@@ -1481,7 +1463,7 @@ namespace psycle
 
 			CClientDC dc(this);
 			lf.lfHeight = -MulDiv(_generator_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
-			strcpy(lf.lfFaceName, _generator_fontface);
+			strcpy(lf.lfFaceName, _generator_fontface.c_str());
 			if (_generator_font_flags&1)
 			{
 				lf.lfWeight = FW_BOLD;
@@ -1491,7 +1473,7 @@ namespace psycle
 			CFontDialog dlg(&lf,CF_SCREENFONTS);
 			if (dlg.DoModal() == IDOK)
 			{
-				strcpy(_generator_fontface,dlg.GetFaceName());
+				_generator_fontface = dlg.GetFaceName();
 				_generator_font_flags = 0;
 				if (dlg.IsBold())
 				{
@@ -1524,7 +1506,7 @@ namespace psycle
 
 			CClientDC dc(this);
 			lf.lfHeight = -MulDiv(_effect_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
-			strcpy(lf.lfFaceName, _effect_fontface);
+			strcpy(lf.lfFaceName, _effect_fontface.c_str());
 			if (_effect_font_flags&1)
 			{
 				lf.lfWeight = FW_BOLD;
@@ -1534,7 +1516,7 @@ namespace psycle
 			CFontDialog dlg(&lf,CF_SCREENFONTS);
 			if (dlg.DoModal() == IDOK)
 			{
-				strcpy(_effect_fontface,dlg.GetFaceName());
+				_effect_fontface = dlg.GetFaceName();
 				_effect_font_flags = 0;
 				if (dlg.IsBold())
 				{
@@ -1557,7 +1539,9 @@ namespace psycle
 
 		void CSkinDlg::OnSelchangeMachineSkin()
 		{
-			m_machine_skin.GetLBText(m_machine_skin.GetCurSel(),_machine_skin);
+			CString temp;
+			m_machine_skin.GetLBText(m_machine_skin.GetCurSel(),temp);
+			_machine_skin = temp;
 		}
 
 		void CSkinDlg::OnMVGeneratorFontColour() 
@@ -1599,7 +1583,7 @@ namespace psycle
 			char szPath[_MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			szPath[0]='\0';
-			CString str1(szBmpBkgFilename);
+			CString str1(szBmpBkgFilename.c_str());
 			int i = str1.ReverseFind('\\')+1;
 			CString str2 = str1.Mid(i);
 			std::strcpy(szFile,str2);
@@ -1620,9 +1604,9 @@ namespace psycle
 			// Display the Open dialog box. 
 			if(GetOpenFileName(&ofn)==TRUE)
 			{
-				std::strcpy(szBmpBkgFilename,szFile);
+				szBmpBkgFilename = szFile;
 				bBmpBkg = TRUE;
-				CString str1(szBmpBkgFilename);
+				CString str1(szBmpBkgFilename.c_str());
 				int i = str1.ReverseFind('\\')+1;
 				CString str2 = str1.Mid(i);
 				m_machine_background_bitmap.SetWindowText(str2);

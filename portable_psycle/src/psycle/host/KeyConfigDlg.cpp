@@ -284,7 +284,7 @@ namespace psycle
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrInitialDir = _skinPathBuf;
+			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 			// Display the Open dialog box. 
 			
 			if (GetOpenFileName(&ofn)==TRUE)
@@ -355,7 +355,7 @@ namespace psycle
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
-			ofn.lpstrInitialDir = _skinPathBuf;
+			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 
 			if (GetSaveFileName(&ofn)==TRUE)
 			{

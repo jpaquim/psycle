@@ -77,11 +77,36 @@ namespace psycle
 		{
 			return RegQueryValueEx(_key, psName, 0, pType, pData, pNumData);
 		}
+		
+		LONG
+		Registry::QueryStringValue(LPTSTR psName, std::string &value)
+		{
+			DWORD numChars=0;
+			DWORD type;
+			// get length of string
+			LONG error=QueryValue(psName,&type,NULL,&numChars);
+			if(error != ERROR_SUCCESS)
+				return error;
+			if(type != REG_SZ)
+				return ERROR;
+			// allocate a buffer
+			BYTE* buffer = new BYTE[numChars];
+			error=QueryValue(psName,&type,buffer,&numChars);
+			if(error == ERROR_SUCCESS && type==REG_SZ)
+				value = (char const*)buffer;
+			delete[] buffer;
+			return type==REG_SZ ? error : ERROR;
+		}
 
 		LONG
 		Registry::SetValue(LPTSTR psName, DWORD type, LPBYTE pData, DWORD numData)
 		{
 			return RegSetValueEx(_key, psName, 0, type, pData, numData);
+		}
+		
+		LONG Registry::SetStringValue(LPTSTR psName, std::string value)
+		{
+			return SetValue(psName, REG_SZ, (BYTE*)value.c_str(),value.length());
 		}
 
 		LONG

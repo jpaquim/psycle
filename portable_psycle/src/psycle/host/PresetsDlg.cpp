@@ -334,11 +334,11 @@ namespace psycle
 			ofn.nMaxFileTitle = 0;
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				ofn.lpstrInitialDir = Global::pConfig->GetPluginDir();
+				ofn.lpstrInitialDir = Global::pConfig->GetPluginDir().c_str();
 			}
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
-				ofn.lpstrInitialDir = Global::pConfig->GetVstDir();
+				ofn.lpstrInitialDir = Global::pConfig->GetVstDir().c_str();
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
@@ -595,11 +595,11 @@ namespace psycle
 			ofn.nMaxFileTitle = 0;
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-				ofn.lpstrInitialDir = Global::pConfig->GetPluginDir();
+				ofn.lpstrInitialDir = Global::pConfig->GetPluginDir().c_str();
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				ofn.lpstrInitialDir = Global::pConfig->GetVstDir();
+				ofn.lpstrInitialDir = Global::pConfig->GetVstDir().c_str();
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 

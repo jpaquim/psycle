@@ -11,15 +11,15 @@ namespace psycle
 			DECLARE_DYNCREATE(CDirectoryDlg)
 		public:
 			bool _instPathChanged;
-			char _instPathBuf[MAX_PATH];
+			std::string _instPathBuf;
 			bool _songPathChanged;
-			char _songPathBuf[MAX_PATH];
+			std::string _songPathBuf;
 			bool _pluginPathChanged;
-			char _pluginPathBuf[MAX_PATH];
+			std::string _pluginPathBuf;
 			bool _vstPathChanged;
-			char _vstPathBuf[MAX_PATH];
+			std::string _vstPathBuf;
 			bool _skinPathChanged;
-			char _skinPathBuf[MAX_PATH];
+			std::string _skinPathBuf;
 			bool initializingDlg;
 			CDirectoryDlg();
 			~CDirectoryDlg();
@@ -40,7 +40,7 @@ namespace psycle
 			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
-			bool BrowseForFolder(char *rpath);
+			bool BrowseForFolder(std::string& rpath);
 			// Generated message map functions
 			//{{AFX_MSG(CDirectoryDlg)
 			afx_msg void OnBrowseInst();

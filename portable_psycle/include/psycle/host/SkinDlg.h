@@ -48,8 +48,8 @@ namespace psycle
 			bool _linenumbersHex;
 			bool _linenumbersCursor;
 			int _wirewidth;
-			char _pattern_fontface[64];
-			char _pattern_header_skin[64];
+			std::string _pattern_fontface;
+			std::string _pattern_header_skin;
 			int _pattern_font_point;
 			int _pattern_font_x;
 			int _pattern_font_y;
@@ -62,19 +62,19 @@ namespace psycle
 			UINT _effect_font_flags;
 			UINT _generator_font_flags;
 
-			char _machine_skin[64];
-			char _generator_fontface[64];
+			std::string _machine_skin;
+			std::string _generator_fontface;
 			int _generator_font_point;
-			char _effect_fontface[64];
+			std::string _effect_fontface;
 			int _effect_font_point;
 
 			CSkinDlg();
 			~CSkinDlg();
 
-			char _skinPathBuf[MAX_PATH];
+			std::string _skinPathBuf;
 
 			bool bBmpBkg;
-			char szBmpBkgFilename[MAX_PATH];
+			std::string szBmpBkgFilename;
 		// Dialog Data
 			//{{AFX_DATA(CSkinDlg)
 			enum { IDD = IDD_SKIN };

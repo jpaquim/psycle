@@ -32,7 +32,7 @@ namespace psycle
 
 			#if !defined _WINAMP_PLUGIN_
 				void CreateFonts();
-				bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItalic);
+				bool CreatePsyFont(CFont&f, std::string sFontFace,int HeightPx, bool bBold, bool bItalic);
 				
 				bool autoStopMachines;
 				COLORREF mv_colour;
@@ -90,10 +90,10 @@ namespace psycle
 				int mv_triangle_size;
 
 				bool bBmpBkg;
-				char szBmpBkgFilename[MAX_PATH];
+				std::string szBmpBkgFilename;
 
-				char pattern_fontface[64];
-				char pattern_header_skin[64];
+				std::string pattern_fontface;
+				std::string pattern_header_skin;
 				int pattern_font_point;
 				int pattern_font_x;
 				int pattern_font_y;
@@ -106,12 +106,12 @@ namespace psycle
 				bool draw_mac_index;
 				bool draw_vus;
 
-				char generator_fontface[64];
+				std::string generator_fontface;
 				int generator_font_point;
-				char effect_fontface[64];
+				std::string effect_fontface;
 				int effect_font_point;
 
-				char machine_skin[64];
+				std::string machine_skin;
 
 				CFont seqFont;
 				CFont generatorFont;
@@ -267,7 +267,7 @@ namespace psycle
 				int _samplesPerSec;
 			#endif
 
-			char appPath[_MAX_PATH];
+			std::string appPath; //char[_MAX_PATH];
 
 			bool Initialized() { return _initialized; }
 			bool Read();
@@ -283,42 +283,42 @@ namespace psycle
 			}
 
 			#if !defined _WINAMP_PLUGIN_
-				char* GetInstrumentDir() { return _psInstrumentDir; }
-				char* GetInitialInstrumentDir() { return _psInitialInstrumentDir; }
-				void SetInstrumentDir(const char* psDir);
-				void SetInitialInstrumentDir(const char* psDir);
-				char* GetSongDir(void) { return _psSongDir; }
-				char* GetInitialSongDir(void) { return _psInitialSongDir; }
-				void SetSongDir(const char* psDir);
-				void SetInitialSongDir(const char* psDir);
-				void SetSkinDir(const char* psDir);
-				void SetInitialSkinDir(const char* psDir);
-				char* GetSkinDir(void) { return _psSkinDir; }
-				char* GetInitialSkinDir(void) { return _psInitialSkinDir; }
+				std::string GetInstrumentDir() { return _psInstrumentDir; }
+				std::string GetInitialInstrumentDir() { return _psInitialInstrumentDir; }
+				void SetInstrumentDir(std::string psDir);
+				void SetInitialInstrumentDir(std::string psDir);
+				std::string GetSongDir(void) { return _psSongDir; }
+				std::string GetInitialSongDir(void) { return _psInitialSongDir; }
+				void SetSongDir(std::string psDir);
+				void SetInitialSongDir(std::string psDir);
+				void SetSkinDir(std::string psDir);
+				void SetInitialSkinDir(std::string psDir);
+				std::string GetSkinDir(void) { return _psSkinDir; }
+				std::string GetInitialSkinDir(void) { return _psInitialSkinDir; }
 			#endif
-			void SetPluginDir(const char* psDir);
-			void SetInitialPluginDir(const char* psDir);
-			char* GetPluginDir(void) { return _psPluginDir; }
-			char* GetInitialPluginDir(void) { return _psInitialPluginDir; }
-			void SetVstDir(const char* psDir);
-			void SetInitialVstDir(const char* psDir);
-			char* GetVstDir(void) { return _psVstDir; }
-			char* GetInitialVstDir(void) { return _psInitialVstDir; }
+			void SetPluginDir(std::string psDir);
+			void SetInitialPluginDir(std::string psDir);
+			std::string GetPluginDir(void) { return _psPluginDir; }
+			std::string GetInitialPluginDir(void) { return _psInitialPluginDir; }
+			void SetVstDir(std::string psDir);
+			void SetInitialVstDir(std::string psDir);
+			std::string GetVstDir(void) { return _psVstDir; }
+			std::string GetInitialVstDir(void) { return _psInitialVstDir; }
 			bool _initialized;
 		protected:
 			#if !defined _WINAMP_PLUGIN_
-				char* _psInitialInstrumentDir;
-				char* _psInstrumentDir;
-				char* _psInitialSongDir;
-				char* _psSongDir;
-				char* _psInitialSkinDir;
-				char* _psSkinDir;
+			std::string _psInitialInstrumentDir;
+			std::string _psInstrumentDir;
+			std::string _psInitialSongDir;
+			std::string _psSongDir;
+			std::string _psInitialSkinDir;
+			std::string _psSkinDir;
 			#endif
-			char* _psInitialPluginDir;
-			char* _psPluginDir;
-			char* _psInitialVstDir;
-			char* _psVstDir;
-			void Error(	char const* psMsg);
+			std::string _psInitialPluginDir;
+			std::string _psPluginDir;
+			std::string _psInitialVstDir;
+			std::string _psVstDir;
+			void Error(	std::string psMsg);
 		};
 	}
 }

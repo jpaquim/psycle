@@ -413,7 +413,7 @@ namespace psycle
 			{
 				//MessageBox("Saving Disabled");
 				//return;
-				CString filepath = Global::pConfig->GetInitialSongDir();
+				CString filepath = Global::pConfig->GetInitialSongDir().c_str();
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
@@ -637,7 +637,7 @@ namespace psycle
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
 				{
-					CString filepath = Global::pConfig->GetSongDir();
+					CString filepath = Global::pConfig->GetSongDir().c_str();
 					filepath += "\\";
 					filepath += Global::_pSong->fileName;
 					
@@ -705,7 +705,7 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+			ofn.lpstrInitialDir = Global::pConfig->GetSongDir().c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
 			
@@ -732,7 +732,7 @@ namespace psycle
 
 					if (index != -1)
 					{
-						Global::pConfig->SetSongDir(str.Left(index));
+						Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
 						Global::_pSong->fileName = str.Mid(index+1);
 					}
 					else
@@ -794,7 +794,7 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+			ofn.lpstrInitialDir = Global::pConfig->GetSongDir().c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
 			// Display the Open dialog box. 
@@ -932,7 +932,7 @@ namespace psycle
 				if (Global::pConfig->bFileSaveReminders)
 				{
 					char szText[128];
-					CString filepath = Global::pConfig->GetSongDir();
+					CString filepath = Global::pConfig->GetSongDir().c_str();
 					filepath += "\\";
 					filepath += Global::_pSong->fileName;
 					OldPsyFile file;
@@ -1748,7 +1748,7 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+			ofn.lpstrInitialDir = Global::pConfig->GetSongDir().c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
@@ -1790,7 +1790,7 @@ namespace psycle
 				int index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::pConfig->SetSongDir(str.Left(index));
+					Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
 					Global::_pSong->fileName = str.Mid(index+1)+".psy";
 				}
 				else
@@ -2028,7 +2028,7 @@ namespace psycle
 			int index = str.ReverseFind('\\');
 			if (index != -1)
 			{
-				Global::pConfig->SetSongDir(str.Left(index));
+				Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
 				Global::_pSong->fileName = str.Mid(index+1);
 			}
 			else
@@ -2148,21 +2148,21 @@ namespace psycle
 
 		void CChildView::LoadMachineSkin()
 		{
-			static char szOld[64] = "";
-			if (strcmp(szOld, Global::pConfig->machine_skin))
+			std::string szOld;
+			if (!Global::pConfig->machine_skin.empty())
 			{
-				std::strcpy(szOld, Global::pConfig->machine_skin);
-				if (std::strcmp(szOld, DEFAULT_MACHINE_SKIN))
+				szOld = Global::pConfig->machine_skin;
+				if (szOld != DEFAULT_MACHINE_SKIN)
 				{
 					BOOL result = FALSE;
-					FindMachineSkin(Global::pConfig->GetInitialSkinDir(),Global::pConfig->machine_skin, &result);
+					FindMachineSkin(Global::pConfig->GetInitialSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
 					if(result)
 					{
 						return;
 					}
 				}
 				// load defaults
-				std::strcpy(szOld, DEFAULT_MACHINE_SKIN);
+				szOld = DEFAULT_MACHINE_SKIN;
 				// and coords
 				#if defined _UGLY_DEFAULT_SKIN_
 					MachineCoords.sMaster.x = 0;
@@ -2886,22 +2886,22 @@ namespace psycle
 
 		void CChildView::LoadPatternHeaderSkin()
 		{
-			static char szOld[64] = "";
-			if (strcmp(szOld, Global::pConfig->pattern_header_skin))
+			std::string szOld;
+			if (Global::pConfig->pattern_header_skin.empty())
 			{
-				strcpy(szOld, Global::pConfig->pattern_header_skin);
+				szOld = Global::pConfig->pattern_header_skin;
 				// ok so...
-				if (strcmp(szOld, DEFAULT_PATTERN_HEADER_SKIN))
+				if (szOld != DEFAULT_PATTERN_HEADER_SKIN)
 				{
 					BOOL result = FALSE;
-					FindPatternHeaderSkin(Global::pConfig->GetInitialSkinDir(),Global::pConfig->pattern_header_skin, &result);
+					FindPatternHeaderSkin(Global::pConfig->GetInitialSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
 					if (result)
 					{
 						return;
 					}
 				}
 				// load defaults
-				strcpy(szOld, DEFAULT_PATTERN_HEADER_SKIN);
+				szOld = DEFAULT_PATTERN_HEADER_SKIN;
 				// and coords
 				#if defined _UGLY_DEFAULT_SKIN_
 					PatHeaderCoords.sBackground.x=0;
@@ -3480,7 +3480,7 @@ namespace psycle
 			if (Global::pConfig->bBmpBkg)
 			{
 				Global::pConfig->bBmpBkg=FALSE;
-				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 				if (hbmMachineBkg)
 				{
 					if (machinebkg.Attach(hbmMachineBkg))
