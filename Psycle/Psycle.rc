@@ -2399,9 +2399,9 @@ BEGIN
     RTEXT           "Sample Rate",IDC_STATIC,70,140,45,15,SS_CENTERIMAGE
     RTEXT           "Channels",IDC_STATIC,65,170,50,15,SS_CENTERIMAGE
     RTEXT           "Bit Depth",IDC_STATIC,65,155,50,15,SS_CENTERIMAGE
-    CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename)",
+    CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
                     IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,13,50,230,21
+                    BS_MULTILINE | WS_TABSTOP,13,47,230,24
     COMBOBOX        IDC_COMBO_RATE,120,140,125,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COMBO_BITS,120,155,125,75,CBS_DROPDOWNLIST | 
