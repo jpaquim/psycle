@@ -16,6 +16,7 @@
 #define ROWHEIGHT 13
 #define ROWWIDTH 111
 
+class CMasterDlg;
 
 enum 
 {
@@ -193,6 +194,7 @@ public:
 	Song* _pSong;
 	bool useDoubleBuffer;
 	bool multiPattern;
+	CMasterDlg * MasterMachineDialog;
 
 	bool blockSelected;
 	CCursor editcur;	// Edit Cursor Position in Pattern.

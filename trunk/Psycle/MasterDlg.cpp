@@ -15,9 +15,10 @@ static char THIS_FILE[] = __FILE__;
 // CMasterDlg dialog
 
 
-CMasterDlg::CMasterDlg(CWnd* pParent /*=NULL*/)
+CMasterDlg::CMasterDlg(CChildView* pParent /*=NULL*/)
 	: CDialog(CMasterDlg::IDD, pParent)
 {
+	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CMasterDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
@@ -84,3 +85,15 @@ void CMasterDlg::OnAutodec()
 	}
 	else ((Master*)_pMachine)->decreaseOnClip=false;
 }
+
+BOOL CMasterDlg::Create()
+{
+	return CDialog::Create(IDD, m_pParent);
+}
+
+void CMasterDlg::OnCancel()
+{
+	m_pParent->MasterMachineDialog = NULL;
+	DestroyWindow();
+}
+

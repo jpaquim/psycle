@@ -13,7 +13,11 @@
 	#include "Configuration.h"
 #endif // _WINAMP_PLUGIN_
 #include "Helpers.h"
+#include "MainFrm.h"
+#include "Psycle2.h"
+#include "MasterDlg.h"
 
+extern CPsycleApp theApp;
 
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
@@ -423,16 +427,16 @@ void Master::Work(
 			
 
 			// Left channel
-			if (( *pSamples = *pSamplesL * mv) > _lMax)
+			if (fabs( *pSamples = *pSamplesL * mv) > _lMax)
 			{
-				_lMax = *pSamples;
+				_lMax = fabsf(*pSamples);
 			}
 			
 			// Right channel
 			++pSamples;
-			if ((*pSamples = *pSamplesR * mv) > _rMax)
+			if (fabs(*pSamples = *pSamplesR * mv) > _rMax)
 			{
-				_rMax = *pSamples;
+				_rMax = fabsf(*pSamples);
 			}
 		}
 		while (--i);
@@ -440,7 +444,14 @@ void Master::Work(
 		if (_lMax > 32768.0f)
 		{
 			_clip=true;
-			if (decreaseOnClip) _outDry = f2i((float)_outDry * 32768.0f / _lMax);
+			if (decreaseOnClip) 
+			{
+				_outDry = f2i((float)_outDry * 32768.0f / _lMax);
+				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
+				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slider.SetPos(_outDry);
+				}
+			}
 			_lMax = 32768.0f; //_LMAX = 32768;
 		}
 		else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
@@ -449,7 +460,14 @@ void Master::Work(
 		if (_rMax > 32768.0f)
 		{
 			_clip=true;
-			if (decreaseOnClip) _outDry = f2i((float)_outDry * 32768.0f / _rMax);
+			if (decreaseOnClip) 
+			{
+				_outDry = f2i((float)_outDry * 32768.0f / _rMax);
+				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
+				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slider.SetPos(_outDry);
+				}
+			}
 			_rMax = 32768.0f; //_RMAX = 32768;
 		}
 		else if (_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }

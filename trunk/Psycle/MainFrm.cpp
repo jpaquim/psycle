@@ -1154,7 +1154,7 @@ void CMainFrame::OnPsyhelp()
 //	HtmlHelp(NULL, "psycle.chm", HH_DISPLAY_TOPIC, 0);
 }
 
-void CMainFrame::ShowMachineGui(int tmac)
+void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 {
 	Machine *ma = _pSong->_pMachines[tmac];
 
@@ -1167,12 +1167,15 @@ void CMainFrame::ShowMachineGui(int tmac)
 		switch (Global::_pSong->_pMachines[tmac]->_type)
 		{
 		case MACH_MASTER:
+			if (!m_wndView.MasterMachineDialog)
 			{
-			CMasterDlg dlg;
-			dlg._pMachine = (Master*)Global::_pSong->_pMachines[tmac];
-			dlg.DoModal();
-			break;
+				m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
+				m_wndView.MasterMachineDialog->_pMachine = (Master*)Global::_pSong->_pMachines[tmac];
+				m_wndView.MasterMachineDialog->Create();
+				m_wndView.MasterMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+				m_wndView.MasterMachineDialog->SetActiveWindow();
 			}
+			break;
 		case MACH_SINE:
 			{
 			CGearPsychOsc dlg;

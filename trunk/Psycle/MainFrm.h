@@ -62,7 +62,7 @@ public:
 	void WaveEditorBackUpdate();
 	void CloseMacGui(int mac);
 	void CloseAllMacGuis();
-	void ShowMachineGui(int tmac);
+	void ShowMachineGui(int tmac, CPoint point);
 	void ShowMaster();
 	void UpdateEnvInfo();
 	void HidePerformanceDlg();
