@@ -869,6 +869,11 @@ namespace psycle
 				pMainFrame->ShowInstrumentEditor();
 				break;
 
+
+			case cdefErrorLog:
+				pMainFrame->ShowErrorLogger();
+				break;
+
 			case cdefAddMachine:
 				pChildView->OnNewmachine();
 				break;
@@ -1144,6 +1149,7 @@ namespace psycle
 			SetCmd(cdefAddMachine,VK_F9,0);
 			SetCmd(cdefEditInstr,VK_F10,0);
 			SetCmd(cdefMaxPattern,VK_TAB,MOD_C);
+			SetCmd(cdefErrorLog,VK_F11,0);			
 
 			SetCmd(cdefOctaveUp,VK_MULTIPLY,0);
 			SetCmd(cdefOctaveDn,VK_DIVIDE,MOD_E);
