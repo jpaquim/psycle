@@ -169,9 +169,13 @@ void CSaveWavDlg::OnSavewave()
 	saving=true;
 	
 	CString name;
-	m_filename.GetWindowText(name);
 	pPlayer->StopRecording();
-	pPlayer->StartRecording(name.GetBuffer(4));
+//	m_samprate.GetWindowText(name);
+//	int val = _httoi(name.GetBuffer(5));
+//	pPlayer->SetSampleRate(val);
+//  int bitdepth = (m_bitdepth.GetCurSel()+1)*8;
+	m_filename.GetWindowText(name);
+	pPlayer->StartRecording(name.GetBuffer(4)/*,bitdepth*/);
 	int pstart;
 	kill_thread = 0;
 	tickcont=0;
@@ -247,6 +251,7 @@ DWORD WINAPI __stdcall RecordThread(void *b)
 			pPlayer->Stop();
 			((CSaveWavDlg*)b)->SaveEnd();
 			ExitThread(0);
+			return 0;
 		}
 		pPlayer->Work(pPlayer,stream_size);
 		((CSaveWavDlg*)b)->SaveTick();
