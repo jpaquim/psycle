@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 #include "Song.h"
 #include "Configuration.h"
+#include "InputHandler.h"
 
 #define MAX_DRAW_MESSAGES 32
 
@@ -206,7 +207,10 @@ public:
 	void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes
 	void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
 	void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
+	void MidiPatternTweakSlide(int command, int value); // called by midi to insert pattern commands
+	void MidiPatternInstrument(int value); // called by midi to insert pattern commands
 	void MousePatternTweak(int machine, int command, int value);
+	void MousePatternTweakSlide(int machine, int command, int value);
 	void EnterNote(int note, int velocity=127, bool bTranspose=true);
 	void EnterNoteoffAny();
 	bool MSBPut(int nChar);
@@ -687,9 +691,10 @@ inline void CChildView::OutNote(CDC *devc,int x,int y,int note)
 	case 118: TXTFLAT(devc,"A#9",x,y,srx,sry);break;
 	case 119: TXTFLAT(devc,"B-9",x,y,srx,sry);break;
 	case 120: TXTFLAT(devc,"off",x,y,srx,sry);break;
-	case 121: TXTFLAT(devc,"twk",x,y,srx,sry);break;
-	case 122: TXTFLAT(devc,"twf",x,y,srx,sry);break;
-	case 123: TXTFLAT(devc,"Mcm",x,y,srx,sry);break;
+	case cdefTweakM: TXTFLAT(devc,"twk",x,y,srx,sry);break;
+	case cdefTweakE: TXTFLAT(devc,"twf",x,y,srx,sry);break;
+	case cdefMIDICC: TXTFLAT(devc,"Mcm",x,y,srx,sry);break;
+	case cdefTweakS: TXTFLAT(devc,"tws",x,y,srx,sry);break;
 	}
 }
 

@@ -174,19 +174,15 @@ void CChildView::MidiPatternTweak(int command, int value)
 		PatternEntry *entry = (PatternEntry*) toffset;
 		if (entry->_note >= 120)
 		{
-			if ((entry->_mach != _pSong->seqBus) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || (entry->_note != 121))
+			if ((entry->_mach != _pSong->seqBus) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
 			{
 				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 				entry->_mach = _pSong->seqBus;
 				entry->_cmd = (value>>8)&255;
 				entry->_parameter = value&255;
 				entry->_inst = command;
-				entry->_note = 121;
+				entry->_note = cdefTweakM;
 
-//				drawTrackStart=editcur.track;
-//				drawTrackEnd=editcur.track;
-//				drawLineStart=editcur.line;
-//				drawLineEnd=editcur.line;
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 				Repaint(DMData);
 			}
@@ -200,7 +196,82 @@ void CChildView::MidiPatternTweak(int command, int value)
 		entry._cmd = (value>>8)&255;
 		entry._parameter = value&255;
 		entry._inst = command;
-		entry._note = 121;
+		entry._note = cdefTweakM;
+
+		// play it
+		int mgn;
+		Machine* pMachine;
+		if ( _pSong->seqBus < MAX_BUSES )
+			mgn = _pSong->busMachine[_pSong->seqBus];
+		else
+			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+
+		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			pMachine = _pSong->_pMachines[mgn];
+		else return;
+
+		// play
+		pMachine->Tick(0,&entry);
+	}
+}
+
+void CChildView::MidiPatternTweakSlide(int command, int value)
+{
+	// UNDO CODE MIDI PATTERN TWEAK
+	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				SelectNextTrack();
+			}
+		}
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.line;
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if (entry->_note >= 120)
+		{
+			if ((entry->_mach != _pSong->seqBus) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+			{
+				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				entry->_mach = _pSong->seqBus;
+				entry->_cmd = (value>>8)&255;
+				entry->_parameter = value&255;
+				entry->_inst = command;
+				entry->_note = cdefTweakS;
+
+				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				Repaint(DMData);
+			}
+		}
+	}
+//	else
+	{
+		// build entry
+		PatternEntry entry;
+		entry._mach = _pSong->seqBus;
+		entry._cmd = (value>>8)&255;
+		entry._parameter = value&255;
+		entry._inst = command;
+		entry._note = cdefTweakS;
 
 		// play it
 		int mgn;
@@ -260,10 +331,6 @@ void CChildView::MidiPatternCommand(int command, int value)
 			entry->_cmd = command;
 			entry->_parameter = value;
 
-//			drawTrackStart=editcur.track;
-//			drawTrackEnd=editcur.track;
-//			drawLineStart=editcur.line;
-//			drawLineEnd=editcur.line;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 			Repaint(DMData);
 		}
@@ -276,6 +343,75 @@ void CChildView::MidiPatternCommand(int command, int value)
 		entry._inst = _pSong->auxcolSelected;
 		entry._cmd = command;
 		entry._parameter = value;
+		entry._note = 255;
+
+		// play it
+		int mgn;
+		Machine* pMachine;
+		if (_pSong->seqBus < MAX_BUSES)
+			mgn = _pSong->busMachine[_pSong->seqBus];
+		else
+			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+
+		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			pMachine = _pSong->_pMachines[mgn];
+		else return;
+
+		// play
+		pMachine->Tick(0,&entry);
+	}
+}
+
+void CChildView::MidiPatternInstrument(int value)
+{
+	// UNDO CODE MIDI PATTERN
+	if (value < 0) value = (0x80-value);// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xff) value = 0xff; // no else incase of neg overflow
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				SelectNextTrack();
+			}
+		}
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.track;
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if ((entry->_mach != _pSong->seqBus) || (entry->_inst != value))
+		{
+			AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			entry->_mach = _pSong->seqBus;
+			entry->_inst = value;
+
+			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+			Repaint(DMData);
+		}
+	}
+//	else
+	{
+		// build entry
+		PatternEntry entry;
+		entry._mach = _pSong->seqBus;
+		entry._inst = value;
+		entry._cmd = 255;
+		entry._parameter = 255;
 		entry._note = 255;
 
 		// play it
@@ -329,19 +465,65 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 		PatternEntry *entry = (PatternEntry*) toffset;
 		if (entry->_note >= 120)
 		{
-			if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || (entry->_note != 121))
+			if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
 			{
 				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 				entry->_mach = machine;
 				entry->_cmd = (value>>8)&255;
 				entry->_parameter = value&255;
 				entry->_inst = command;
-				entry->_note = 121;
+				entry->_note = cdefTweakM;
 
-//				drawTrackStart=editcur.track;
-//				drawTrackEnd=editcur.track;
-//				drawLineStart=editcur.line;
-//				drawLineEnd=editcur.line;
+				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				Repaint(DMData);
+			}
+		}
+	}
+}
+
+void CChildView::MousePatternTweakSlide(int machine, int command, int value)
+{
+	// UNDO CODE MIDI PATTERN TWEAK
+	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				SelectNextTrack();
+			}
+		}
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.line;
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if (entry->_note >= 120)
+		{
+			if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+			{
+				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				entry->_mach = machine;
+				entry->_cmd = (value>>8)&255;
+				entry->_parameter = value&255;
+				entry->_inst = command;
+				entry->_note = cdefTweakS;
+
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 				Repaint(DMData);
 			}
@@ -359,7 +541,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	unsigned char * offset; 
 	unsigned char * toffset;
 	
-	if (note < 0 || note > 123 ) return;
+	if (note < 0 || note > cdefTweakS ) return;
 
 	// octave offset
 	if(note<120)
@@ -407,7 +589,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 	else 
 	{
-		if ( GetKeyState(VK_SHIFT)<0) 
+		if ((GetKeyState(VK_SHIFT)<0) && (note != cdefTweakM) && (note != cdefTweakE) && (note != cdefTweakS) && (note != cdefMIDICC))
 		{
 			if (ChordModeOffs == 0)
 			{
@@ -553,10 +735,6 @@ void CChildView::EnterNoteoffAny()
 
 		Global::pInputHandler->notetrack[editcur.track]=120;
 
-	//	drawTrackStart=editcur.track;
-	//	drawTrackEnd=editcur.track;
-	//	drawLineStart=editcur.line;
-	//	drawLineEnd=editcur.line;
 		NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 		if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
@@ -586,11 +764,6 @@ bool CChildView::MSBPut(int nChar)
 	else											{ return false; }
 
 	if (editcur.col < 5 && oldValue == 255)	{ oldValue = 0; }
-
-//	drawTrackStart=editcur.track;
-//	drawTrackEnd=editcur.track;
-//	drawLineStart=editcur.line;
-//	drawLineEnd=editcur.line;
 
 	AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
@@ -656,10 +829,6 @@ void CChildView::ClearCurr() // delete content at Cursor pos.
 	else if (editcur.col < 5 )	{	*(toffset+(editcur.col+1)/2)= 255; }
 	else						{	*(toffset+(editcur.col+1)/2)= 0; }
 
-//	drawTrackStart=editcur.track;
-//	drawTrackEnd=editcur.track;
-//	drawLineStart=editcur.line;
-//	drawLineEnd=editcur.line;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 	AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
@@ -692,10 +861,6 @@ void CChildView::DeleteCurr()
 	unsigned char blank[5]={255,255,255,0,0};
 	memcpy(offset+(i*MULTIPLY),blank,5*sizeof(char));
 
-//	drawTrackStart=editcur.track;
-//	drawTrackEnd=editcur.track;
-//	drawLineStart=editcur.line;
-//	drawLineEnd=patlines-1;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 	Global::pInputHandler->bDoingSelection = false;
@@ -719,10 +884,6 @@ void CChildView::InsertCurr()
 	unsigned char blank[5]={255,255,255,0,0};
 	memcpy(offset+(i*MULTIPLY),blank,5*sizeof(char));
 
-//	drawTrackStart=editcur.track;
-//	drawTrackEnd=editcur.track;
-//	drawLineStart=editcur.line;
-//	drawLineEnd=patlines-1;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 	Global::pInputHandler->bDoingSelection = false;
@@ -752,7 +913,7 @@ void CChildView::PlayCurrentRow(void)
 		{
 			int mIndex;
 			if ( pEntry->_mach & MAX_BUSES ) mIndex = _pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
-			else if ( pEntry->_note == 122 ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
+			else if ( pEntry->_note == cdefTweakE ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
 			else mIndex = _pSong->busMachine[(pEntry->_mach & (MAX_BUSES-1))];
 			
 			if (mIndex < MAX_MACHINES && _pSong->_machineActive[mIndex])
@@ -781,7 +942,7 @@ void CChildView::PlayCurrentNote(void)
 	{
 		int mIndex;
 		if ( pEntry->_mach & MAX_BUSES ) mIndex = _pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
-		else if ( pEntry->_note == 122 ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
+		else if ( pEntry->_note == cdefTweakE ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
 		else mIndex = _pSong->busMachine[(pEntry->_mach & (MAX_BUSES-1))];
 		
 		if (mIndex < MAX_MACHINES && _pSong->_machineActive[mIndex])
@@ -945,10 +1106,6 @@ void CChildView::patCut()
 		}
 		patBufferCopy = true;
 
-//		drawTrackStart=0;
-//		drawTrackEnd=_pSong->SONGTRACKS;
-//		drawLineStart=0;
-//		drawLineEnd=patBufferLines-1;
 		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
 		Repaint(DMData);
 	}
@@ -986,10 +1143,6 @@ void CChildView::patPaste()
 		}
 		memcpy(soffset,patBufferData,patBufferLines*5*MAX_TRACKS);
 		
-//		drawTrackStart=0;
-//		drawTrackEnd=_pSong->SONGTRACKS;
-//		drawLineStart=0;
-//		drawLineEnd=patBufferLines-1;
 		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
 		Repaint(DMData);
 	}
@@ -1022,10 +1175,6 @@ void CChildView::patMixPaste()
 			offset_source+= 5;
 		}
 		
-//		drawTrackStart=0;
-//		drawTrackEnd=_pSong->SONGTRACKS;
-//		drawLineStart=0;
-//		drawLineEnd=patBufferLines-1;
 		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
 		Repaint(DMData);
 	}
@@ -1081,10 +1230,6 @@ void CChildView::patTranspose(int trp)
 				soffset[c]=static_cast<unsigned char>(not);
 			}
 		}
-//		drawTrackStart=0;
-//		drawTrackEnd=_pSong->SONGTRACKS;
-//		drawLineStart=editcur.line;
-//		drawLineEnd=pLines-1;
 		NewPatternDraw(0,_pSong->SONGTRACKS,editcur.line,pLines-1);
 
 		Repaint(DMData);
@@ -1238,10 +1383,6 @@ void CChildView::CopyBlock(bool cutit)
 		}
 		if(cutit)
 		{
-	//		drawTrackStart=blockSel.start.track;
-	//		drawTrackEnd=blockSel.end.track;
-	//		drawLineStart=blockSel.start.line;
-	//		drawLineEnd=blockSel.end.line;
 			NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 
 			Repaint(DMData);
@@ -1331,10 +1472,6 @@ void CChildView::PasteBlock(int tx,int lx,bool mix)
 		if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 		else editcur.line = nl-1;
 
-//		drawTrackStart=tx;
-//		drawTrackEnd=tx+blockNTracks-1;
-//		drawLineStart=lx;
-//		drawLineEnd=lx+blockNLines-1;
 		bScrollDetatch=false;
 		NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
 		Repaint(DMData);
@@ -1453,10 +1590,6 @@ void CChildView::DoubleLength()
 		}
 	}
 
-//	drawTrackStart=st;
-//	drawTrackEnd=et;
-//	drawLineStart=sl;
-//	drawLineEnd=el;
 	NewPatternDraw(st,et,sl,el);
 	Repaint(DMData);
 }
@@ -1503,10 +1636,6 @@ void CChildView::HalveLength()
 		}
 	}
 
-//	drawTrackStart=st;
-//	drawTrackEnd=et;
-//	drawLineStart=sl;
-//	drawLineEnd=nl+sl;
 	NewPatternDraw(st,et,sl,nl+sl);
 	Repaint(DMData);
 }
@@ -1539,10 +1668,6 @@ void CChildView::BlockTranspose(int trp)
 				}
 			}
 		}
-//		drawTrackStart=blockSel.start.track;
-//		drawTrackEnd=blockSel.end.track;
-//		drawLineStart=blockSel.start.line;
-//		drawLineEnd=blockSel.end.line;
 		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 		Repaint(DMData);
 	}
@@ -1576,10 +1701,6 @@ void CChildView::BlockGenChange(int x)
 				}
 			}
 		}
-//		drawTrackStart=blockSel.start.track;
-//		drawTrackEnd=blockSel.end.track;
-//		drawLineStart=blockSel.start.line;
-//		drawLineEnd=blockSel.end.line;
 		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 		Repaint(DMData);
 	}
@@ -1612,10 +1733,6 @@ void CChildView::BlockInsChange(int x)
 				}
 			}
 		}
-//		drawTrackStart=blockSel.start.track;
-//		drawTrackEnd=blockSel.end.track;
-//		drawLineStart=blockSel.start.line;
-//		drawLineEnd=blockSel.end.line;
 		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 		Repaint(DMData);
 	}
@@ -1642,7 +1759,7 @@ void CChildView::BlockParamInterpolate()
 		const unsigned char comd = *(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3);
 		int displace2=(blockSel.start.track*5)+((blockSel.start.line)*MULTIPLY);
 		
-		if ( toffset[displace2] == 121 || toffset[displace2] == 122)
+		if ( toffset[displace2] == cdefTweakM || toffset[displace2] == cdefTweakE || toffset[displace2] == cdefTweakS)
 		{
 			unsigned char note = toffset[displace2];
 			unsigned char aux = toffset[displace2+1];
@@ -1673,10 +1790,6 @@ void CChildView::BlockParamInterpolate()
 				displace2+=MULTIPLY;
 			}
 		}
-//		drawTrackStart=blockSel.start.track;
-//		drawTrackEnd=blockSel.end.track;
-//		drawLineStart=blockSel.start.line;
-//		drawLineEnd=blockSel.end.line;
 		NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 		Repaint(DMData);
 	}
@@ -2082,10 +2195,6 @@ void CChildView::OnEditUndo()
 				if (pUndoList->seqpos == editPosition)
 				{
 					// display changes
-//					drawTrackStart=pUndoList->x;
-//					drawTrackEnd=pUndoList->x+pUndoList->tracks;
-//					drawLineStart=pUndoList->y;
-//					drawLineEnd=pUndoList->y+pUndoList->lines;
 					NewPatternDraw(pUndoList->x,pUndoList->x+pUndoList->tracks,pUndoList->y,pUndoList->y+pUndoList->lines);
 					Repaint(DMData);
 				}
@@ -2216,10 +2325,6 @@ void CChildView::OnEditRedo()
 				if (pRedoList->seqpos == editPosition)
 				{
 					// display changes
-//					drawTrackStart=pRedoList->x;
-//					drawTrackEnd=pRedoList->x+pRedoList->tracks;
-//					drawLineStart=pRedoList->y;
-//					drawLineEnd=pRedoList->y+pRedoList->lines;
 					NewPatternDraw(pRedoList->x,pRedoList->x+pRedoList->tracks,pRedoList->y,pRedoList->y+pRedoList->lines);
 					Repaint(DMData);
 				}

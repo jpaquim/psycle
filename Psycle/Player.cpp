@@ -15,6 +15,7 @@
 	#include "MidiInput.h"
 #endif // _WINAMP_PLUGIN_
 
+#include "InputHandler.h"
 
 Player::Player()
 {
@@ -94,7 +95,7 @@ void Player::ExecuteLine(void)
 	{
 		PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*5);
 		
-		if ( pEntry->_note < 121 || pEntry->_note == 255 ) // Check for Global Command.
+		if ( pEntry->_note < cdefTweakM || pEntry->_note == 255 ) // Check for Global Command.
 		{
 			switch(pEntry->_cmd)
 			{
@@ -157,7 +158,7 @@ void Player::ExecuteLine(void)
 
 				int mIndex;
 				if ( mac & MAX_BUSES ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
-				else if ( pEntry->_note == 122 ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
+				else if ( pEntry->_note == cdefTweakE ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
 				else mIndex = pSong->busMachine[(mac&(MAX_BUSES-1))];
 				
 				if (mIndex < MAX_MACHINES && pSong->_machineActive[mIndex])
@@ -190,7 +191,7 @@ void Player::ExecuteLine(void)
 		PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*5);
 
 		if (( !pSong->_trackMuted[track]) &&
-			( pEntry->_note < 121 || pEntry->_note == 255 ))
+			( pEntry->_note < cdefTweakM || pEntry->_note == 255 ))
 		{
 			int mac = pEntry->_mach;
 			if (( mac != 255 || prevMachines[track] != 255) &&

@@ -16,6 +16,7 @@
 //#include "FileIO.h"
 #include "Configuration.h"
 #include "Player.h"
+#include "InputHandler.h"
 
 #if !defined(_WINAMP_PLUGIN_)
 	#include "VstEditorDlg.h"
@@ -609,7 +610,14 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		{
 			if (Global::pConfig->_RecordTweaks)  // ugly solution...
 			{
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
+				if (Global::pConfig->_RecordMouseTweaksSmooth)
+				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
+				}
+				else
+				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
+				}
 			}
 			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
 				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Refresh(index,opt);
@@ -801,7 +809,7 @@ void VSTInstrument::Tick(int channel,PatternEntry* pData)
 			}
 			else AddMIDI(pData->_inst,pData->_parameter);
 		}
-		else if (pData->_note == 123) // Mcm (MIDI CC) Command
+		else if (pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
 		{
 			AddMIDI(pData->_inst,pData->_cmd,pData->_parameter);
 		}
@@ -823,10 +831,21 @@ void VSTInstrument::Tick(int channel,PatternEntry* pData)
 			if ( pData->_inst== 0xFF) AddNoteOff(channel);
 			else AddNoteOff(channel,pData->_inst&0x0F);
 		}
-		else if ((note == 121) || ( note == 122 )) // Tweak Command
+		else if ((note == cdefTweakM) || ( note == cdefTweakE )) // Tweak Command
 		{
 			const float value = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
 			SetParameter(pData->_inst, value);
+#if !defined(_WINAMP_PLUGIN_)
+			Global::_pSong->Tweaker = true;
+#endif // ndef _WINAMP_PLUGIN_
+		}
+		else if (note == cdefTweakS)
+		{
+			TWSDestination = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
+			TWSInst = pData->_inst;
+			TWSCurrent = GetParameter(TWSInst);
+			TWSSamples = 0;
+			TWSDelta = ((TWSDestination-TWSCurrent)*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
 #if !defined(_WINAMP_PLUGIN_)
 			Global::_pSong->Tweaker = true;
 #endif // ndef _WINAMP_PLUGIN_
@@ -941,6 +960,7 @@ void VSTInstrument::Stop()
 
 void VSTInstrument::Work(int numSamples)
 {
+	
 #if !defined(_WINAMP_PLUGIN_)	
 	CPUCOST_INIT(cost);
 #endif // !defined(_WINAMP_PLUGIN_)	
@@ -949,10 +969,28 @@ void VSTInstrument::Work(int numSamples)
 		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 
 		SendMidi();
+
+		float * tempinputs[MAX_INOUTS];
+		float * tempoutputs[MAX_INOUTS];
+
+		for (int i = 0; i < MAX_INOUTS; i++)
+		{
+			tempinputs[i] = inputs[i];
+			tempoutputs[i] = outputs[i];
+		}
+
 		int ns = numSamples;
 		while (ns)
 		{
-			int nextevent = ns+1;
+			int nextevent;
+			if (TWSDelta != 0)
+			{
+				nextevent = TWSSamples;
+			}
+			else
+			{
+				nextevent = ns+1;
+			}
 			for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 			{
 				if (TriggerDelay[i]._cmd)
@@ -965,6 +1003,10 @@ void VSTInstrument::Work(int numSamples)
 			}
 			if (nextevent > ns)
 			{
+				if (TWSDelta != 0)
+				{
+					TWSSamples -= ns;
+				}
 				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					// come back to this
@@ -973,8 +1015,14 @@ void VSTInstrument::Work(int numSamples)
 						TriggerDelayCounter[i] -= ns;
 					}
 				}
-				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,ns);
-				else _pEffect->processReplacing(_pEffect,inputs,outputs,ns);
+				if (!requiresRepl ) 
+				{
+					_pEffect->process(_pEffect,tempinputs,tempoutputs,ns);
+				}
+				else 
+				{
+					_pEffect->processReplacing(_pEffect,tempinputs,tempoutputs,ns);
+				}
 				ns = 0;
 			}
 			else
@@ -984,11 +1032,35 @@ void VSTInstrument::Work(int numSamples)
 					ns -= nextevent;
 					if (!requiresRepl ) 
 					{
-						_pEffect->process(_pEffect,inputs,outputs,nextevent);
+						_pEffect->process(_pEffect,tempinputs,tempoutputs,nextevent);
 					}
 					else 
 					{
-						_pEffect->processReplacing(_pEffect,inputs,outputs,nextevent);
+						_pEffect->processReplacing(_pEffect,tempinputs,tempoutputs,nextevent);
+					}
+					for (int i = 0; i < MAX_INOUTS; i++)
+					{
+						tempinputs[i]+=nextevent;
+						tempoutputs[i]+=nextevent;
+					}
+				}
+				if (TWSDelta != 0)
+				{
+					if (TWSSamples == nextevent)
+					{
+						TWSCurrent += TWSDelta;
+
+						if (((TWSDelta > 0) && (TWSCurrent >= TWSDestination))
+							|| ((TWSDelta < 0) && (TWSCurrent <= TWSDestination)))
+						{
+							TWSCurrent = TWSDestination;
+							TWSDelta = 0;
+						}
+						else
+						{
+							TWSSamples = TWEAK_SLIDE_SAMPLES;
+						}
+						SetParameter(TWSInst,TWSCurrent);
 					}
 				}
 				for (i=0; i < Global::_pSong->SONGTRACKS; i++)
@@ -1134,11 +1206,11 @@ void VSTFX::Tick(int channel,PatternEntry* pData)
 			}
 			else AddMIDI(pData->_inst,pData->_parameter);
 		}
-		else if (pData->_note == 123) // Mcm (MIDI CC) Command
+		else if (pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
 		{
 			AddMIDI(pData->_inst,pData->_cmd,pData->_parameter);
 		}
-		else if ((pData->_note == 121) || ( pData->_note == 122 )) // Tweak command
+		else if ((pData->_note == cdefTweakM) || ( pData->_note == cdefTweakE )) // Tweak command
 		{
 			const float value = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
 			SetParameter(pData->_inst, value);
@@ -1146,8 +1218,21 @@ void VSTFX::Tick(int channel,PatternEntry* pData)
 			Global::_pSong->Tweaker = true;
 #endif // ndef _WINAMP_PLUGIN_
 		}
+		else if (pData->_note == cdefTweakS)
+		{
+			TWSDestination = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
+			TWSInst = pData->_inst;
+			TWSCurrent = GetParameter(TWSInst);
+			TWSSamples = 0;
+			TWSDelta = ((TWSDestination-TWSCurrent)*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+#if !defined(_WINAMP_PLUGIN_)
+			Global::_pSong->Tweaker = true;
+#endif // ndef _WINAMP_PLUGIN_
+		}
 	}
 }
+
+
 void VSTFX::Work(int numSamples)
 {
 	Machine::Work(numSamples);
@@ -1167,17 +1252,165 @@ void VSTFX::Work(int numSamples)
 			{
 			// MIX input0 and input1!
 			}
-			if ((_pEffect->flags & effFlagsCanReplacing) || requiresRepl)
-			{
-				_pEffect->processReplacing(_pEffect, inputs, outputs, numSamples);
-			}
-			else
+			if (!((_pEffect->flags & effFlagsCanReplacing) || requiresRepl))
 			{
 				Dsp::Clear(_pOutSamplesL,numSamples);
 				Dsp::Clear(_pOutSamplesR,numSamples);
-
-				_pEffect->process(_pEffect,inputs,outputs,numSamples);
 			}
+
+			float * tempinputs[MAX_INOUTS];
+			float * tempoutputs[MAX_INOUTS];
+
+			for (int i = 0; i < MAX_INOUTS; i++)
+			{
+				tempinputs[i] = inputs[i];
+				tempoutputs[i] = outputs[i];
+			}
+
+			int ns = numSamples;
+
+			while (ns)
+			{
+				int nextevent;
+				if (TWSDelta != 0)
+				{
+					nextevent = TWSSamples;
+				}
+				else
+				{
+					nextevent = ns+1;
+				}
+				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+				{
+					if (TriggerDelay[i]._cmd)
+					{
+						if (TriggerDelayCounter[i] < nextevent)
+						{
+							nextevent = TriggerDelayCounter[i];
+						}
+					}
+				}
+				if (nextevent > ns)
+				{
+					if (TWSDelta != 0)
+					{
+						TWSSamples -= ns;
+					}
+					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+					{
+						// come back to this
+						if (TriggerDelay[i]._cmd)
+						{
+							TriggerDelayCounter[i] -= ns;
+						}
+					}
+					if ((_pEffect->flags & effFlagsCanReplacing) || requiresRepl)
+					{
+						_pEffect->processReplacing(_pEffect, tempinputs, tempoutputs, ns);
+					}
+					else
+					{
+						_pEffect->process(_pEffect,tempinputs,tempoutputs,ns);
+					}
+					ns = 0;
+				}
+				else
+				{
+					if (nextevent)
+					{
+						ns -= nextevent;
+						if ((_pEffect->flags & effFlagsCanReplacing) || requiresRepl)
+						{
+							_pEffect->processReplacing(_pEffect, tempinputs, tempoutputs, nextevent);
+						}
+						else
+						{
+							_pEffect->process(_pEffect,tempinputs,tempoutputs,nextevent);
+						}
+						for (int i = 0; i < MAX_INOUTS; i++)
+						{
+							tempinputs[i]+=nextevent;
+							tempoutputs[i]+=nextevent;
+						}
+					}
+					if (TWSDelta != 0)
+					{
+						if (TWSSamples == nextevent)
+						{
+							TWSCurrent += TWSDelta;
+
+							if (((TWSDelta > 0) && (TWSCurrent >= TWSDestination))
+								|| ((TWSDelta < 0) && (TWSCurrent <= TWSDestination)))
+							{
+								TWSCurrent = TWSDestination;
+								TWSDelta = 0;
+							}
+							else
+							{
+								TWSSamples = TWEAK_SLIDE_SAMPLES;
+							}
+							SetParameter(TWSInst,TWSCurrent);
+						}
+					}
+					for (i=0; i < Global::_pSong->SONGTRACKS; i++)
+					{
+						// come back to this
+						if (TriggerDelay[i]._cmd == 0xfd)
+						{
+							if (TriggerDelayCounter[i] == nextevent)
+							{
+								// do event
+								Tick(i,&TriggerDelay[i]);
+								TriggerDelay[i]._cmd = 0;
+							}
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
+							}
+						}
+						else if (TriggerDelay[i]._cmd == 0xfb)
+						{
+							if (TriggerDelayCounter[i] == nextevent)
+							{
+								// do event
+								Tick(i,&TriggerDelay[i]);
+								TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+							}
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
+							}
+						}
+						else if (TriggerDelay[i]._cmd == 0xfa)
+						{
+							if (TriggerDelayCounter[i] == nextevent)
+							{
+								// do event
+								Tick(i,&TriggerDelay[i]);
+								TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+								int parameter = TriggerDelay[i]._parameter&0x0f;
+								if (parameter < 9)
+								{
+									RetriggerRate[i]+= 4*parameter;
+								}
+								else
+								{
+									RetriggerRate[i]-= 2*(16-parameter);
+									if (RetriggerRate[i] < 16)
+									{
+										RetriggerRate[i] = 16;
+									}
+								}
+							}
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
+							}
+						}
+					}
+				}
+			}
+
 			if ( _pEffect->numOutputs == 1 )
 			{
 				memcpy(outputs[1],outputs[0],numSamples*sizeof(float));

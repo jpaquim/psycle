@@ -19,6 +19,7 @@
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
 
+#include "InputHandler.h"
 
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
@@ -47,6 +48,11 @@ Machine::Machine()
 {
 	wasVST = false;
 
+	TWSInst = 0;
+	TWSSamples = 0;
+	TWSDelta = 0;
+	TWSCurrent = 0;
+	TWSDestination = 0;
 	
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
@@ -637,7 +643,7 @@ void Gainer::Work(
 
 void Gainer::Tick(int channel, PatternEntry *pData)
 {
-	if ( pData->_note == 121 || pData->_note == 122 )
+	if ( pData->_note == cdefTweakM || pData->_note == cdefTweakE )
 	{
 		SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
 	}
@@ -708,7 +714,7 @@ void Sine::GetParamValue(int numparam,char* parval)
 
 void Sine::Tick(int channel, PatternEntry *pData)
 {
-	if ( pData->_note == 121 || pData->_note == 122 ) SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
+	if ( pData->_note == cdefTweakM || pData->_note == cdefTweakE ) SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
 }
 
 void Sine::Update(void)
@@ -997,7 +1003,7 @@ void Distortion::Work(
 
 void Distortion::Tick(int channel, PatternEntry *pData)
 {
-	if ( pData->_note == 121 || pData->_note == 122 ) SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
+	if ( pData->_note == cdefTweakM || pData->_note == cdefTweakE ) SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
 }
 
 bool Distortion::Load(
@@ -1409,7 +1415,7 @@ bool Delay::Save(
 
 void Delay::Tick(int channel, PatternEntry *pData)
 {
-	if ( pData->_note == 121 || pData->_note == 122 )
+	if ( pData->_note == cdefTweakM || pData->_note == cdefTweakE )
 	{
 		if ( pData->_cmd & 0x80 ) SetParameter(pData->_inst,(((pData->_cmd&0x7F)<<8) + pData->_parameter)*(-1));
 		else SetParameter(pData->_inst,((pData->_cmd&0x7F)<<8) + pData->_parameter);
@@ -1680,7 +1686,7 @@ void Flanger::Tick(int channel, PatternEntry *pData)
 	if ( pData->_cmd & 0x80 ) cmd = (((pData->_cmd & 0x7F)<<8) +pData->_parameter)*(-1);
 	else cmd = ( pData->_cmd&0x7F<<8) + pData->_parameter;
 
-	if ( pData->_note == 121 || pData->_note == 122 ) {
+	if ( pData->_note == cdefTweakM || pData->_note == cdefTweakE ) {
 		switch(pData->_inst)
 		{
 		case 1: _time=cmd & 0x400;Update();break;
@@ -2017,7 +2023,7 @@ float Filter2p::WorkR(
 
 void Filter2p::Tick(int channel, PatternEntry *pData)
 {
-	if ( pData->_note == 121 || pData->_note == 122 ) {
+	if ( pData->_note == cdefTweakM || pData->_note == cdefTweakE ) {
 		switch(pData->_inst)
 		{
 		case 1: _filterMode=pData->_parameter;break;

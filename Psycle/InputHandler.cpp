@@ -171,7 +171,12 @@ CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
 
 		nFlags= nFlags & ~MK_LBUTTON;
 		// This comparison is to allow the "Shift+Note" (chord mode) to work.
-		CmdDef thisCmd = cmdLUT[(GetModifierIdx(nFlags) & ~MOD_S)][nChar];
+
+		CmdDef thisCmd = cmdLUT[GetModifierIdx(nFlags)][nChar];
+		if ( thisCmd.GetType() == CT_Note )
+			return thisCmd;
+
+		thisCmd = cmdLUT[(GetModifierIdx(nFlags) & ~MOD_S)][nChar];
 		if ( thisCmd.GetType() == CT_Note )
 			return thisCmd;
 		else
@@ -894,7 +899,7 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		BOOL bRepeat = nFlags&0x4000;
 		if ( cmd.GetType() == CT_Note )
 		{
-			if ((!bRepeat) || (cmd.GetNote() == 121))
+			if ((!bRepeat) || (cmd.GetNote() == cdefTweakM) || (cmd.GetNote() == cdefTweakS) || (cmd.GetNote() == cdefMIDICC))
 			{
 				pChildView->EnterNote(cmd.GetNote());
 				return true;
@@ -984,7 +989,6 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 
 	if ((velocity != 127) &&  (Global::pConfig->_midiRecordVel))
 	{
-		entry._cmd = Global::pConfig->_midiCommandVel;
 		int par = Global::pConfig->_midiFromVel + 
 			(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
 		if (par > 255) 
@@ -995,7 +999,16 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 		{
 			par = 0;
 		}
-		entry._parameter = par;
+		switch(Global::pConfig->_midiTypeVel)
+		{
+		case 0:
+			entry._cmd = Global::pConfig->_midiCommandVel;
+			entry._parameter = par;
+			break;
+		case 3:
+			entry._inst = par;
+			break;
+		}
 	}
 	else
 	{
@@ -1176,6 +1189,7 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefKeyStop,'1',0);
 	SetCmd(cdefKeyStopAny,'1',MOD_C);
 	SetCmd(cdefTweakM,192,0);        // tweak machine (`)
+	SetCmd(cdefTweakS,192,MOD_C);        // tweak machine (`)
 	SetCmd(cdefMIDICC,192,MOD_S);    // Previously Tweak Effect. Now Mcm Command (~)
 
 	/*

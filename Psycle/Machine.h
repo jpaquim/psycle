@@ -101,6 +101,12 @@ public:
 	PatternEntry	TriggerDelay[MAX_TRACKS];
 	int				TriggerDelayCounter[MAX_TRACKS];
 	int				RetriggerRate[MAX_TRACKS];
+
+	int TWSInst;
+	int TWSSamples;
+	float TWSDelta;
+	float TWSCurrent;
+	float TWSDestination;
 	
 	Machine();
 	virtual ~Machine();

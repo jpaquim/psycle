@@ -72,6 +72,7 @@ public:
 	bool _midiMachineViewSeqMode;
 	bool _RecordNoteoff;
 	bool _RecordTweaks;
+	bool _RecordMouseTweaksSmooth;
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
 
@@ -99,6 +100,7 @@ public:
 	CFont effectFont;
 
 	bool _midiRecordVel;
+	int _midiTypeVel;
 	int _midiCommandVel;
 	int _midiFromVel;
 	int _midiToVel;

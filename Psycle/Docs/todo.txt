@@ -14,33 +14,17 @@ X low priority
 * New and unsorted and untested
 ------------
 
-+ <sampler> Well, i've been playing and changing default hotkeys and now i think it would be good 
-	enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various 
-	types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
- 
-++ <bd|cup> poop: could you add an option to make psycle load the last opened .psy, when you run it?
-
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still
 	<YanniS> C:\Audio\Psycle\Skinss\
-
-* <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
-	minimize/refocus psycle or change the current view
-	this only seems to happen on the rgc audio z3ta+ and on nothing else
-
-+++ <_sue_> i really dont like parameter automation with tweak commands.....theyre so steped.....i can never 
-	get a good smooth fast filter sweep.....something cool for psycle would be a window where you could 
-	draw many envelopes.....then with a pattern command a selected envelope would be triggered associated 
-	also to a parameter.....like that you could use/trigger the same envelope 
+	[ not recreated ]
 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 + <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
 	[JAZ: And a third one for Instruments. Time to time]
 
-* <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall, 
-	it got 8 outputs
 
 + <AF> I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
 	to allow the user to speficy a "different than default" fadeout.
@@ -175,7 +159,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ++	Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)
-++	tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 ++FF	DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
 	machines ....
 +	pattern repeat (loop) and song repeat (asked by Vir|us)
@@ -190,6 +173,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ------------
 ***	Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra and JAL7OH-)
 		[Fix:Basically, make ONLY .fxb for VST's.]
+** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
+	minimize/refocus psycle or change the current view
+	this only seems to happen on the rgc audio z3ta+ and on nothing else
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.
 		[ A "bypass" bug, if we do the above ^]
@@ -222,7 +208,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	MIDI out only works with Waveout
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages
-++	velocity should be able to store data to instrument column. So should other midi messages
 ++	<lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
 	the active machine to machine number [program number] ...this enables psycle for live use without screen
 +	<lastfutur> future feature requests for the controllers tab: midi routing presets; 
@@ -259,6 +244,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?
++ <bd|cup> poop: could you add an option to make psycle load the last opened .psy, when you run it?
++ <sampler> Well, i've been playing and changing default hotkeys and now i think it would be good 
+	enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various 
+	types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
 +	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
 +	<Alk> +alt to make the transposing only effect current machine/sample
 		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note
@@ -304,6 +293,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
 *	DirectSound Output is a bit buggy.Crashes and bad sound reported. 
+	[ still ? ]
+* <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall, 
+	it got 8 outputs
 
 * Importing:
 ------------

@@ -377,7 +377,14 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			// well, this isn't so hard... just put the twk record here
 			if (Global::pConfig->_RecordTweaks)
 			{
-				wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
+				if (Global::pConfig->_RecordMouseTweaksSmooth)
+				{
+					wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-min_v);
+				}
+				else
+				{
+					wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
+				}
 			}
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
@@ -386,7 +393,14 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			// well, this isn't so hard... just put the twk record here
 			if (Global::pConfig->_RecordTweaks)
 			{
-				wndView->MousePatternTweak(MachineIndex, tweakpar, (int)nv);
+				if (Global::pConfig->_RecordMouseTweaksSmooth)
+				{
+					wndView->MousePatternTweakSlide(MachineIndex, tweakpar, (int)nv);
+				}
+				else
+				{
+					wndView->MousePatternTweak(MachineIndex, tweakpar, (int)nv);
+				}
 			}
 		}
 
