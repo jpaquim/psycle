@@ -4,6 +4,12 @@ namespace psycle
 	namespace host
 	{
 		/// The release number of the psycle host application.
+		/// Releases are named this way:
+		/// M.m.r.p , where:
+		/// - M = major version number.
+		/// - m = minor version number.
+		/// - r = revision number, if even, release. if odd, beta.
+		/// - p = patch number.
 		/// It is cubersome to change because we need to update:
 		/// - include/psycle/host/Constants.h: #define VERSION_NUMBER "x.x.x.x"
 		/// - src/psycle/host/resources/Psycle.rc: FILEVERSION x,x,x,x
@@ -12,7 +18,7 @@ namespace psycle
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "ProductVersion", "x, x, x, x"
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "SpecialBuild", "msvc 7.1"
 		/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
-		#define VERSION_NUMBER "Release 1.7.7.0" /* "$Revision$ $Date$" */
+		#define VERSION_NUMBER "Release 1.7.7" /* "$Revision$ $Date$" */
 			
 		/// number of samples per tweak slide update
 		#define TWEAK_SLIDE_SAMPLES		64
