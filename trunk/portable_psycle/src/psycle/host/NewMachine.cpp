@@ -793,7 +793,17 @@ namespace psycle
 
 							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
 
-							_pPlugsInfo[currentPlugsCount]->error = new std::string(*p.error);
+							///\todo this cool be better handled
+							if(_pPlugsInfo[currentPlugsCount]->error)
+							{
+								delete _pPlugsInfo[currentPlugsCount]->error
+								_pPlugsInfo[currentPlugsCount]->error = 0;
+							}
+							if(p.error)
+							{
+								_pPlugsInfo[currentPlugsCount]->error = new std::string(*p.error);
+							}
+
 							_pPlugsInfo[currentPlugsCount]->allow = p.allow;
 
 							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
