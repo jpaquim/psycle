@@ -2,6 +2,7 @@
 !=change
 +=addition
 
++ Mystic - import .mp3 format for samples
 * JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already sorted by the authors
 * JAL7OH- psycle crashes when i try to load a .fxb containing more patches than the maximum allowed number, load up crystal and try to import both of the banks available at greenoak.com
 * JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
@@ -47,12 +48,10 @@
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 bug:	 JMDrum is buggy (Crashes sometimes)
 ! James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
-* <mstr_> btw, the xExx command (note cut) has got an issue on your synths, prolly on others, too
-	when a value is not set ie 0E00, it mutes all notes
 * bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> Internals still miss mouse tweak, right?
-* pooplog synths can fuck up vca envelopes somehow weird.
+* sue says poopsynth blows up at 22050 sometimes * MIGHT BE FIXED
 
 * Sampler Machine/Wave Ed:
 --------------------------

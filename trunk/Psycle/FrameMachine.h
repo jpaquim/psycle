@@ -50,7 +50,7 @@ public:
 	void SelectMachine(Machine* pMachine);
 	void Generate();
 	CChildView *wndView;
-	int index;
+	UINT index;
 
 	bool* _pActive;
 
@@ -80,6 +80,7 @@ protected:
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnParametersShowpreset();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
