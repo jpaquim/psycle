@@ -319,14 +319,16 @@ void CChildView::OnTimer( UINT nIDEvent )
 					CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 					editcur.line=Global::pPlayer->_lineCounter;
 
+/*
 					if ( _previousTicks-1 > editcur.track )
 					{
 						_previousTicks-=editcur.track+1;
 						editcur.track = _pSong->SONGTRACKS-1;
 					}
-					if (_previousTicks>1) editcur.track-= _previousTicks-1;
-
-					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+					if (_previousTicks>1) 
+						editcur.track-= _previousTicks-1;
+*/
+ 					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);

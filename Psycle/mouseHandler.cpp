@@ -31,9 +31,10 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 			Repaint();
 		}
 	}
+	/*
 	else if (viewMode == VMPattern)
 	{
-/*		editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
+		editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
 		if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
 		else if ( editcur.track < 0 ) editcur.track = 0;
 
@@ -43,8 +44,8 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		else if ( editcur.line < 0 ) editcur.line = 0;
 
 		editcur.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
-*/
 	}
+*/
 }
 
 void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
