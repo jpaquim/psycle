@@ -846,32 +846,31 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 	TRACE("VST plugin call to host dispatcher: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
 
 	// believe it or not, some plugs tried to call psycle with a null AEffect.
-	if (!effect)
-	{
-		return 0;
-	}
 	// Support opcodes
 	switch(opcode)
 	{
 	case audioMasterAutomate:
 #if !defined(_WINAMP_PLUGIN_)
 		Global::_pSong->Tweaker = true;
-
-		if ( effect->user ) 
+		if (effect)
 		{
-			if (Global::pConfig->_RecordTweaks)  // ugly solution...
+
+			if ( effect->user ) 
 			{
-				if (Global::pConfig->_RecordMouseTweaksSmooth)
+				if (Global::pConfig->_RecordTweaks)  // ugly solution...
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->_macIndex, index, f2i(opt*VST_QUANTIZATION));
+					if (Global::pConfig->_RecordMouseTweaksSmooth)
+					{
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->_macIndex, index, f2i(opt*VST_QUANTIZATION));
+					}
+					else
+					{
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->_macIndex, index, f2i(opt*VST_QUANTIZATION));
+					}
 				}
-				else
-				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->_macIndex, index, f2i(opt*VST_QUANTIZATION));
-				}
+				if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
+					((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Refresh(index,opt);
 			}
-			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
-				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Refresh(index,opt);
 		}
 		
 #endif // ndef _WINAMP_PLUGIN_
@@ -884,13 +883,16 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 		return 'AASH';	// returns the unique id of a plug that's currently loading
 
 	case audioMasterIdle:
-		try
+		if (effect)
 		{
-			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
-		}
-		catch (...)
-		{
-			MessageBox(NULL,"Machine had an exception on effEditIdle","unknown vst",NULL);
+			try
+			{
+				effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception on effEditIdle","unknown vst",NULL);
+			}
 		}
 		return 0;		// call application idle routine (this will call effEditIdle for all open editors too) 
 		
@@ -1012,9 +1014,12 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 		return Global::pPlayer->bpm*10000;
 
 	case audioMasterNeedIdle:
-		if ( effect->user ) 
+		if (effect)
 		{
-			((VSTPlugin*)effect->user)->wantidle = true;
+			if ( effect->user ) 
+			{
+				((VSTPlugin*)effect->user)->wantidle = true;
+			}
 		}
 		return 1;
 #if defined(_WINAMP_PLUGIN_)
@@ -1045,24 +1050,30 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 	
 	case audioMasterUpdateDisplay:
 		// this crashes that piece of shit ni spektral delay 1.0
-		try
+		if (effect)
 		{
-			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
-		}
-		catch (...)
-		{
-			MessageBox(NULL,"Machine had an exception on effEditIdle","unknown vst",NULL);
+			try
+			{
+				effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception on effEditIdle","unknown vst",NULL);
+			}
 		}
 
 		return 0;
 
 	case 	audioMasterSizeWindow:
 #if !defined(_WINAMP_PLUGIN_)
-		if ( effect->user ) 
+		if (effect)
 		{
-			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
+			if ( effect->user ) 
 			{
-				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
+				if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
+				{
+					((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
+				}
 			}
 		}
 #endif // !defined(_WINAMP_PLUGIN_)
