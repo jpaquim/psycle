@@ -53,7 +53,7 @@
 // Psycle.cpp : Defines the class behaviors for the application.
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "ConfigDlg.h"
 
 #include "MainFrm.h"
@@ -302,19 +302,19 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_contrib.SetWindowText
 			(
-				"Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5\n"
-				"Jeremy Evers [pooplog]\t\tDeveloper since version 1.7\n"
-				"James Redfern [alk]\t\tDevelopper since version 1.7.6\n"				
-				"Johan Boulé [bohan]\t\tDeveloper since version 1.73\n"
-				"Daniel Arena\t\t\tDeveloper in 1.5&1.6\n"
-				"Marcin Kowalski [FideLoop]\t\tDeveloper in 1.6\n"
-				"Mark McCormack\t\t\tMIDI (in) Support\n"
-				"Mats Höjlund\t\t\tMain developer until 1.5 (Internal Recoding)\n"
-				"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until 1.0\n"
-				"Hamarr Heylen\t\t\tInitial Graphics\n"
-				"David Buist\t\t\tAdditional Graphics\n"
-				"frown\t\t\t\tAdditional Graphics\n"
-				"/\\/\\ark\t\t\t\tAdditional Graphics\n"
+				"Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5" "\r\n"
+				"Jeremy Evers [pooplog]\t\tDeveloper since version 1.7" "\r\n"
+				"James Redfern [alk]\t\tDevelopper since version 1.7.6" "\r\n"
+				"Johan Boulé [bohan]\t\tDeveloper since version 1.73" "\r\n"
+				"Daniel Arena\t\t\tDeveloper in 1.5&1.6" "\r\n"
+				"Marcin Kowalski [FideLoop]\t\tDeveloper in 1.6" "\r\n"
+				"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
+				"Mats Höjlund\t\t\tMain developer until 1.5 (Internal Recoding)" "\r\n"
+				"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until 1.0" "\r\n"
+				"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
+				"David Buist\t\t\tAdditional Graphics" "\r\n"
+				"frown\t\t\t\tAdditional Graphics" "\r\n"
+				"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
 				"Michael Haralabos [Athlon]\t\t\tInstaller and Debugging help"
 			);
 	m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);

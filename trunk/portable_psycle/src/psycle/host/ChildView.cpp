@@ -2179,28 +2179,28 @@ void CChildView::SetTitleBarText()
 void CChildView::OnHelpKeybtxt() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sDocs\\keys.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc/keys.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpReadme() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sDocs\\readme.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc/readme.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpTweaking() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sDocs\\tweaking.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc/tweaking.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
 void CChildView::OnHelpWhatsnew() 
 {
 	char path[MAX_PATH];
-	sprintf(path,"%sDocs\\whatsnew.txt",Global::pConfig->appPath);
+	sprintf(path,"%sdoc/whatsnew.txt",Global::pConfig->appPath);
 	ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 }
 
