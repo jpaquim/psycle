@@ -157,16 +157,22 @@ BOOL CDSoundConfig::OnInitDialog()
 
 void CDSoundConfig::OnOK() 
 {
-	CString str;
-	m_sampleRateCombo.GetWindowText(str);
-	m_sampleRate = atoi(str);
 
-	m_pDeviceGuid = (LPCGUID)m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel());
-	if (m_pDeviceGuid != NULL)
+	if (m_deviceComboBox.GetCount() > 0)
 	{
-		memcpy(&m_deviceGuid, m_pDeviceGuid, sizeof(GUID));
+		CString str;
+		m_sampleRateCombo.GetWindowText(str);
+		m_sampleRate = atoi(str);
+
+		m_pDeviceGuid = (LPCGUID)m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel());
+		if (m_pDeviceGuid != NULL)
+		{
+			memcpy(&m_deviceGuid, m_pDeviceGuid, sizeof(GUID));
+			CDialog::OnOK();
+			return;
+		}
 	}
-	CDialog::OnOK();
+	CDialog::OnCancel();
 }
 
 void CDSoundConfig::OnSelendokSamplerate() 

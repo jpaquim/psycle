@@ -63,6 +63,7 @@ public:
 	int _triangle_size;
 	bool _pattern_draw_empty_data;
 	bool _draw_mac_index;
+	bool _draw_vus;
 
 	UINT _pattern_font_flags;
 	UINT _effect_font_flags;
@@ -99,6 +100,7 @@ public:
 	CButton	m_effect_fontface;
 	CComboBox	m_effect_font_point;
 	CButton	m_gfxbuffer;
+	CButton	m_draw_vus;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
 	CButton	m_linenumbersCursor;
@@ -182,6 +184,7 @@ protected:
 	afx_msg void OnDrawMacIndex();
 	afx_msg void OnMachineBitmap();
 	afx_msg void OnSelchangeTrianglesize();
+	afx_msg void OnCheckVus();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -21,6 +21,9 @@ aditional known vst bugs/buggy vsts: ~33
 * New and unsorted and untested
 -------------------------------
 
+*** <pooplog> 1) master volume on old FF load
+*** <pooplog> 3) asio MSB 
+
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
@@ -390,16 +393,11 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Driver Issues:
 ------------
-** <_sue_> just a small issue ive noticed with this build....when i select asio psycle crashes...wich doesnt
-	amazes me since i dont have asio.....but software should be "crash free"...
-		[ if you have 0 drivers enumerated, perhaps you should not be able to select that method ]
 *	Output gets weird after a bit and start playing all crackly and doubletime
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
 *	DirectSound Output is a bit buggy.Crashes and bad sound reported.
 	[ still ? ]
-* <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall,
-	it got 8 outputs
 
 * Importing:
 ------------
@@ -446,7 +444,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 * Audio/Control:
 ----------------
 
-	* ASIO driver I/O
 	* audio record support (Like, from microphone)
 	* "MIDI Controlling <-> Machine <-> Machine" Interface = MIDI mapping
 	  (allow to map midi commands to change different parameters)

@@ -93,6 +93,7 @@ void CConfigDlg::Init(
 	_skinDlg._pattern_font_y = pConfig->pattern_font_y;
 	_skinDlg._pattern_draw_empty_data = pConfig->pattern_draw_empty_data;
 	_skinDlg._draw_mac_index = pConfig->draw_mac_index;
+	_skinDlg._draw_vus = pConfig->draw_vus;
 	strcpy(_skinDlg._pattern_header_skin, pConfig->pattern_header_skin);
 	_skinDlg._pattern_font_flags = pConfig->pattern_font_flags;
 
@@ -220,6 +221,7 @@ int CConfigDlg::DoModal()
 		_pConfig->pattern_font_y = _skinDlg._pattern_font_y;
 		_pConfig->pattern_draw_empty_data = _skinDlg._pattern_draw_empty_data;
 		_pConfig->draw_mac_index = _skinDlg._draw_mac_index;
+		_pConfig->draw_vus = _skinDlg._draw_vus;
 
 		if (strcmp(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin))
 		{

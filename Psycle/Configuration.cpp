@@ -9,7 +9,7 @@
 	#include "Registry.h"
 	#include "WaveOut.h"
 	#include "DirectSound.h"
-	#include "PortAudioASIO.h"
+	#include "ASIOInterface.h"
 	#include "MidiInput.h"
 #include "Song.h"
 #include "NewMachine.h"
@@ -50,6 +50,7 @@ Configuration::Configuration()
 	pattern_font_y = 12;
 	pattern_draw_empty_data = TRUE;
 	draw_mac_index = TRUE;
+	draw_vus = TRUE;
 	strcpy(generator_fontface,"Tahoma");
 	generator_font_point = 90;
 	strcpy(effect_fontface,"Tahoma");
@@ -107,8 +108,10 @@ Configuration::Configuration()
 	vu2 = 0x00403731;
 	vu3 = 0x00262bd7;
 
-	_numOutputDrivers = 4;
+	_numOutputDrivers = 4;// decrease it if no asio
 	_outputDriverIndex = 1;
+//	_numOutputDrivers = 1;// decrease it if no asio
+//	_outputDriverIndex = 0;
 	_midiDriverIndex = 0;			// MIDI IMPLEMENTATION
 	_syncDriverIndex = 0;
 	_midiHeadroom = 100;
@@ -116,7 +119,12 @@ Configuration::Configuration()
 	_ppOutputDrivers[0] = new AudioDriver;
 	_ppOutputDrivers[1] = new WaveOut;
 	_ppOutputDrivers[2] = new DirectSound;
-	_ppOutputDrivers[3] = new PortAudioASIO;
+	_ppOutputDrivers[3] = new ASIOInterface;
+//	_ppOutputDrivers[0] = new ASIOInterface;
+	if (((ASIOInterface*)(_ppOutputDrivers[3]))->drivercount <= 0)
+	{
+		_numOutputDrivers--;
+	}
 	_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
 	_pMidiInput = new CMidiInput;	// MIDI IMPLEMENTATION
@@ -770,6 +778,8 @@ Configuration::Read()
 	reg.QueryValue("pattern_draw_empty_data", &type, (BYTE*)&pattern_draw_empty_data, &numData);
 	numData = sizeof(draw_mac_index);
 	reg.QueryValue("draw_mac_index", &type, (BYTE*)&draw_mac_index, &numData);
+	numData = sizeof(draw_vus);
+	reg.QueryValue("draw_vus", &type, (BYTE*)&draw_vus, &numData);
 
 	numData = sizeof(generator_fontface);
 	reg.QueryValue("generator_fontface", &type, (BYTE*)&generator_fontface, &numData);
@@ -1169,6 +1179,7 @@ Configuration::Write()
 	reg.SetValue("pattern_font_y", REG_DWORD, (BYTE*)&pattern_font_y, sizeof(pattern_font_y));	
 	reg.SetValue("pattern_draw_empty_data", REG_DWORD, (BYTE*)&pattern_draw_empty_data, sizeof(pattern_draw_empty_data));	
 	reg.SetValue("draw_mac_index", REG_DWORD, (BYTE*)&draw_mac_index, sizeof(draw_mac_index));	
+	reg.SetValue("draw_vus", REG_DWORD, (BYTE*)&draw_vus, sizeof(draw_vus));	
 
 	reg.SetValue("pattern_header_skin", REG_SZ, (BYTE*)pattern_header_skin, strlen(pattern_header_skin));
 

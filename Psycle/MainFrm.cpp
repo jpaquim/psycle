@@ -621,101 +621,104 @@ void CMainFrame::OnClipbut()
 
 void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
 {
-	if(l<1)l=1;
-	if(r<1)r=1;
-	
-	CStatic *lc=(CStatic *)m_wndControl.GetDlgItem(IDC_FRAMECLIP);
-	CClientDC clcanvasl(lc);
-	
-	if (clip) clcanvasl.FillSolidRect(0,0,9,16,vu3);
-	else  clcanvasl.FillSolidRect(0,0,9,16,vu2);
-	
-//	bool draw_l=true;
-//	bool draw_r=true;
-
-//	float log_l=20*(float)log10(l/baselevel);				// Standard formula
-//  float log_l=20*(float)log10(l) - 20*log10(vaselevel);	// simplified (speedwise) formula.
-//  float log_l=(226pixels/90db)*20*(float)log10(l) // Formula for 16bit precision. (15bit, in fact)
-
-/*	float log_l=50.0f*(float)log10((0.000030517578125f*(float)l));
-	float log_r=50.0f*(float)log10((0.000030517578125f*(float)r));
-	
-	if(log_l<-220.0f)
-		draw_l=false;
-	
-	if(log_r<-220.0f)
-		draw_r=false;
-	
-	if(log_l>0)log_l=0;
-	if(log_r>0)log_r=0;
-	
-	int cl=226+(int)log_l;
-	int cr=226+(int)log_r;
-*/	
-	CStatic *lv=(CStatic *)m_wndControl.GetDlgItem(IDC_LVUM);
-	CStatic *rv=(CStatic *)m_wndControl.GetDlgItem(IDC_RVUM);
-	CClientDC canvasl(lv);
-	CClientDC canvasr(rv);
-
-	int log_l=f2i(100*log10f(l));
-	int log_r=f2i(100*log10f(r));
-	log_l=log_l-226;
-	if ( log_l < 0 )log_l=0;
-	log_r=log_r-226;
-	if ( log_r < 0 )log_r=0;
-	
-	if (log_l || vuprevL)
+	if (Global::pConfig->draw_vus)
 	{
-		canvasl.FillSolidRect(0,0,log_l,5,vu1);
-		if (vuprevL > log_l )
-		{
-			canvasl.FillSolidRect(log_l,0,vuprevL-log_l,5,vu3);
-			canvasl.FillSolidRect(vuprevL,0,226-vuprevL,5,vu2);
-			vuprevL-=2;
-		}
-		else 
-		{
-			canvasl.FillSolidRect(log_l,0,226-log_l,5,vu2);
-			vuprevL = log_l;
-		}
-	}
-	else
-		canvasl.FillSolidRect(0,0,226,5,vu2);
+		if(l<1)l=1;
+		if(r<1)r=1;
+		
+		CStatic *lc=(CStatic *)m_wndControl.GetDlgItem(IDC_FRAMECLIP);
+		CClientDC clcanvasl(lc);
+		
+		if (clip) clcanvasl.FillSolidRect(0,0,9,16,vu3);
+		else  clcanvasl.FillSolidRect(0,0,9,16,vu2);
+		
+	//	bool draw_l=true;
+	//	bool draw_r=true;
 
-	if (log_r || vuprevR)
-	{
-		canvasr.FillSolidRect(0,0,log_r,5,vu1);
-		if (vuprevR > log_r )
+	//	float log_l=20*(float)log10(l/baselevel);				// Standard formula
+	//  float log_l=20*(float)log10(l) - 20*log10(vaselevel);	// simplified (speedwise) formula.
+	//  float log_l=(226pixels/90db)*20*(float)log10(l) // Formula for 16bit precision. (15bit, in fact)
+
+	/*	float log_l=50.0f*(float)log10((0.000030517578125f*(float)l));
+		float log_r=50.0f*(float)log10((0.000030517578125f*(float)r));
+		
+		if(log_l<-220.0f)
+			draw_l=false;
+		
+		if(log_r<-220.0f)
+			draw_r=false;
+		
+		if(log_l>0)log_l=0;
+		if(log_r>0)log_r=0;
+		
+		int cl=226+(int)log_l;
+		int cr=226+(int)log_r;
+	*/	
+		CStatic *lv=(CStatic *)m_wndControl.GetDlgItem(IDC_LVUM);
+		CStatic *rv=(CStatic *)m_wndControl.GetDlgItem(IDC_RVUM);
+		CClientDC canvasl(lv);
+		CClientDC canvasr(rv);
+
+		int log_l=f2i(100*log10f(l));
+		int log_r=f2i(100*log10f(r));
+		log_l=log_l-226;
+		if ( log_l < 0 )log_l=0;
+		log_r=log_r-226;
+		if ( log_r < 0 )log_r=0;
+		
+		if (log_l || vuprevL)
 		{
-			canvasr.FillSolidRect(log_r,0,vuprevR-log_r,5,vu3);
-			canvasr.FillSolidRect(vuprevR,0,226-vuprevR,5,vu2);
-			vuprevR-=2;
+			canvasl.FillSolidRect(0,0,log_l,5,vu1);
+			if (vuprevL > log_l )
+			{
+				canvasl.FillSolidRect(log_l,0,vuprevL-log_l,5,vu3);
+				canvasl.FillSolidRect(vuprevL,0,226-vuprevL,5,vu2);
+				vuprevL-=2;
+			}
+			else 
+			{
+				canvasl.FillSolidRect(log_l,0,226-log_l,5,vu2);
+				vuprevL = log_l;
+			}
 		}
-		else 
+		else
+			canvasl.FillSolidRect(0,0,226,5,vu2);
+
+		if (log_r || vuprevR)
 		{
-			canvasr.FillSolidRect(log_r,0,226-log_r,5,vu2);
-			vuprevR = log_r;
+			canvasr.FillSolidRect(0,0,log_r,5,vu1);
+			if (vuprevR > log_r )
+			{
+				canvasr.FillSolidRect(log_r,0,vuprevR-log_r,5,vu3);
+				canvasr.FillSolidRect(vuprevR,0,226-vuprevR,5,vu2);
+				vuprevR-=2;
+			}
+			else 
+			{
+				canvasr.FillSolidRect(log_r,0,226-log_r,5,vu2);
+				vuprevR = log_r;
+			}
 		}
+		else
+			canvasr.FillSolidRect(0,0,226,5,vu2);
+		
+	/*	if(draw_l)
+		{
+			canvasl.FillSolidRect(0,0,cl,5,vu1);
+			canvasl.FillSolidRect(cl,0,226-cl,5,vu2);
+		}
+		else
+			canvasl.FillSolidRect(0,0,226,5,vu2);
+		
+		if(draw_r)
+		{
+			canvasr.FillSolidRect(0,0,cr,5,vu1);
+			canvasr.FillSolidRect(cr,0,226-cr,5,vu2);
+		}
+		else
+			canvasr.FillSolidRect(0,0,226,5,vu2);
+	*/	
 	}
-	else
-		canvasr.FillSolidRect(0,0,226,5,vu2);
-	
-/*	if(draw_l)
-	{
-		canvasl.FillSolidRect(0,0,cl,5,vu1);
-		canvasl.FillSolidRect(cl,0,226-cl,5,vu2);
-	}
-	else
-		canvasl.FillSolidRect(0,0,226,5,vu2);
-	
-	if(draw_r)
-	{
-		canvasr.FillSolidRect(0,0,cr,5,vu1);
-		canvasr.FillSolidRect(cr,0,226-cr,5,vu2);
-	}
-	else
-		canvasr.FillSolidRect(0,0,226,5,vu2);
-*/	
 }
 
 /////////////////

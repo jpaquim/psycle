@@ -2,13 +2,41 @@
 // Machine view GDI operations
 void CChildView::DrawAllMachineVumeters(CDC *devc)
 {
-	if (_pSong->_machineLock)
+	if (Global::pConfig->draw_vus)
 	{
-		return;
+		if (_pSong->_machineLock)
+		{
+			return;
+		}
+		// Draw machine boxes
+		for (int c=0; c<MAX_MACHINES-1; c++)
+		{
+			Machine* pMac = _pSong->_pMachine[c];
+			if (pMac)
+			{
+				pMac->_volumeMaxCounterLife--;
+				if ((pMac->_volumeDisplay > pMac->_volumeMaxDisplay)
+					|| (pMac->_volumeMaxCounterLife <= 0))
+				{
+					pMac->_volumeMaxDisplay = pMac->_volumeDisplay-1;
+					pMac->_volumeMaxCounterLife = 60;
+				}
+				DrawMachineVol(c, devc);
+			}
+		}
 	}
-	// Draw machine boxes
-	for (int c=0; c<MAX_MACHINES-1; c++)
+}
+
+void CChildView::DrawMachineVumeters(int c, CDC *devc)
+{
+	if (Global::pConfig->draw_vus)
 	{
+		if (_pSong->_machineLock)
+		{
+			return;
+		}
+		// Draw machine boxes
+
 		Machine* pMac = _pSong->_pMachine[c];
 		if (pMac)
 		{
@@ -21,28 +49,6 @@ void CChildView::DrawAllMachineVumeters(CDC *devc)
 			}
 			DrawMachineVol(c, devc);
 		}
-	}
-}
-
-void CChildView::DrawMachineVumeters(int c, CDC *devc)
-{
-	if (_pSong->_machineLock)
-	{
-		return;
-	}
-	// Draw machine boxes
-
-	Machine* pMac = _pSong->_pMachine[c];
-	if (pMac)
-	{
-		pMac->_volumeMaxCounterLife--;
-		if ((pMac->_volumeDisplay > pMac->_volumeMaxDisplay)
-			|| (pMac->_volumeMaxCounterLife <= 0))
-		{
-			pMac->_volumeMaxDisplay = pMac->_volumeDisplay-1;
-			pMac->_volumeMaxCounterLife = 60;
-		}
-		DrawMachineVol(c, devc);
 	}
 }
 
