@@ -37,9 +37,6 @@ namespace psycle
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
-			#if !defined NDEBUG
-				operating_system::console console;
-			#endif
 		};
 
 		//{{AFX_INSERT_LOCATION}}
