@@ -135,9 +135,10 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 			{
 				Song *pSong;
 				pSong=new Song;
+				pSong->New();
 				file.Seek(0);
-				//////////////// Maybe a modification of Song::Load to not load the machines would
-				//////////////// be nice, to speed up the info loading.
+//////////////// Maybe a modification of Song::Load to not load the machines would
+//////////////// be nice, to speed up the info loading.
 
 				pSong->Load(&file);
 				if (title) { sprintf(title,"%s - %s\0",pSong->Author,pSong->Name); }
@@ -163,7 +164,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 					file.Skip(128); // Comment;
 					file.Read(&bpm, sizeof(bpm));
 					file.Read(&spt, sizeof(spt));
-					if ( spt <= 0 )  // Shouldn't happen but has happened. (bug of 1.1b1)
+					if ( spt <= 0 )  // Shouldn't happen, but has happened. (bug of 1.1b1)
 					{	tpb= 4; spt = 4315;
 					}
 					else tpb = 44100*15*4/(spt*bpm);

@@ -313,10 +313,19 @@ DDCRET WaveFile::OpenForRead ( const char *Filename )
 
       if ( retcode == DDC_SUCCESS )
       {
-         retcode = Read ( &wave_format, sizeof(wave_format) );
-
-         if ( retcode == DDC_SUCCESS &&
-              !wave_format.VerifyValidity() )
+         retcode = Read ( &wave_format.header, sizeof(wave_format.header) );
+/// Modified by [JAZ]
+		 while ( wave_format.header.ckID != FourCC("fmt "))
+		 { 
+			 Skip (wave_format.header.ckSize);// read each block until we find the correct one
+			 
+			 retcode = Read ( &wave_format.header, sizeof(wave_format.header) );
+			 if ( retcode != DDC_SUCCESS ) return retcode;
+		 }
+         retcode = Read ( &wave_format.data, sizeof(wave_format.data) );
+///
+		 
+         if ( !wave_format.VerifyValidity() )
          {
             // This isn't standard PCM, so we don't know what it is!
 
@@ -333,10 +342,10 @@ DDCRET WaveFile::OpenForRead ( const char *Filename )
             retcode = Read ( &pcm_data, sizeof(pcm_data) );
 
 /// Modified by [JAZ]
-
-			while ( pcm_data.ckID != FourCC("data") )
+			
+			while ( pcm_data.ckID != FourCC("data") || pcm_data.ckSize == 0)
 			{
-				Skip (1-sizeof(pcm_data));// read each block until we find the correct one
+				Skip (pcm_data.ckSize);// read each block until we find the correct one
 		        pcm_data_offset = CurrentFilePosition();
 
 				retcode = Read ( &pcm_data, sizeof(pcm_data) );
