@@ -20,6 +20,10 @@ namespace psycle
 
 			void Filter::Init()
 			{
+				_cutoff=127;
+				_q=0;
+				_type = F_LOWPASS12;
+				Update();
 			}
 
 			void Filter::Update()

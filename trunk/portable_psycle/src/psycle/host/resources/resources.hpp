@@ -99,6 +99,8 @@
 #define IDD_XM_GENERAL                  215
 #define IDD_XMSAMPLERUIINST             217
 #define IDD_XMSAMPLERUISAMPLE           218
+#define IDD_INST_GENERAL                220
+#define IDD_INST_MIXER                  221
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -183,30 +185,44 @@
 #define IDC_SLIDER4                     1064
 #define IDC_A_A_LABEL                   1065
 #define IDC_MIXSLIDER5                  1065
+#define IDC_SLIDER21                    1065
 #define IDC_A_D_LABEL                   1066
 #define IDC_MIXSLIDER6                  1066
+#define IDC_SLIDER7                     1066
+#define IDC_SLIDER22                    1066
 #define IDC_A_R_LABEL                   1067
 #define IDC_MIXSLIDER7                  1067
+#define IDC_SLIDER8                     1067
 #define IDC_A_S_LABEL                   1068
 #define IDC_MIXSLIDER8                  1068
+#define IDC_SLIDER11                    1068
 #define IDC_AMPFRAME2                   1069
 #define IDC_MIXSLIDER9                  1069
+#define IDC_SLIDER12                    1069
 #define IDC_F_A_LABEL                   1070
 #define IDC_MIXSLIDER10                 1070
+#define IDC_SLIDER13                    1070
 #define IDC_F_D_LABEL                   1071
 #define IDC_MIXSLIDER11                 1071
+#define IDC_SLIDER14                    1071
 #define IDC_F_R_LABEL                   1072
 #define IDC_MIXSLIDER12                 1072
+#define IDC_SLIDER15                    1072
 #define IDC_F_S_LABEL                   1073
 #define IDC_MIXSLIDER13                 1073
+#define IDC_SLIDER16                    1073
 #define IDC_F_SLIDER1                   1074
 #define IDC_MIXSLIDER14                 1074
+#define IDC_SLIDER17                    1074
 #define IDC_F_SLIDER2                   1075
 #define IDC_MIXSLIDER15                 1075
+#define IDC_SLIDER18                    1075
 #define IDC_F_SLIDER3                   1076
 #define IDC_MIXSLIDER16                 1076
+#define IDC_SLIDER19                    1076
 #define IDC_F_SLIDER4                   1077
 #define IDC_EDIT26                      1077
+#define IDC_SLIDER20                    1077
 #define IDC_SLIDER9                     1078
 #define IDC_EDIT27                      1078
 #define IDC_SLIDER10                    1079
@@ -301,8 +317,11 @@
 #define IDC_INST_NAME                   1150
 #define IDC_REMOVE                      1151
 #define IDC_TRACKLABEL2                 1152
+#define IDC_REMOVE2                     1152
 #define IDC_TRACKSLIDER2                1153
+#define IDC_REMOVE3                     1153
 #define IDC_SLIDER_TIME                 1154
+#define IDC_REMOVE4                     1154
 #define IDC_LABEL_LTIME                 1155
 #define IDC_LABEL_MSL                   1156
 #define IDC_F_LABEL_L                   1157
@@ -766,6 +785,9 @@
 #define IDC_XMPOLYLABEL                 1549
 #define IDC_IGNORE_STEP_NAVIGATING      1550
 #define IDC_NAVIGATION_IGNORES_STEP     1550
+#define IDC_COMBO2                      1551
+#define IDC_COMBO3                      1552
+#define IDC_COMBO4                      1553
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -864,9 +886,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        219
+#define _APS_NEXT_RESOURCE_VALUE        222
 #define _APS_NEXT_COMMAND_VALUE         32938
-#define _APS_NEXT_CONTROL_VALUE         1551
+#define _APS_NEXT_CONTROL_VALUE         1554
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

@@ -189,7 +189,6 @@ NAMESPACE__BEGIN(psycle)
 			void ShowPatternDlg(void);
 			void BlockInsChange(int x);
 			void BlockGenChange(int x);
-			int SongIncBpm(int x);
 			void ShowSwingFillDlg(bool bTrackMode);
 
 			void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes

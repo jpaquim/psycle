@@ -126,7 +126,7 @@ NAMESPACE__BEGIN(psycle)
 							{
 								// Needs modification, since the patterns don't need to come one after the other in Multipattern sequence.
 
-								int psize=(_pSong->patternLines[_pSong->playOrder[j]]*SEQ_ROWWIDTH)/(_pSong->_ticksPerBeat*seqSteps);
+								int psize=(_pSong->patternLines[_pSong->playOrder[j]]*SEQ_ROWWIDTH)/(_pSong->LinesPerBeat()*seqSteps);
 								rect.left=curXoffset;
 								//rect.right=curXoffset+psize;
 								//devc->FillSolidRect(rect,Global::pConfig->pvc_row4beat);
@@ -199,7 +199,7 @@ NAMESPACE__BEGIN(psycle)
 				k=0;
 				for (i=0;k<seqTick;i++)
 				{
-					k+=_pSong->patternLines[_pSong->playOrder[i]]/(seqSteps*_pSong->_ticksPerBeat);
+					k+=_pSong->patternLines[_pSong->playOrder[i]]/(seqSteps*_pSong->LinesPerBeat());
 				}
 				if ( k == seqTick ) sprintf(cbuffer,"%.2d",_pSong->playOrder[i]);
 				else strcpy(cbuffer,"...");

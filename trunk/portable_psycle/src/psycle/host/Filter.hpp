@@ -7,8 +7,8 @@ namespace psycle
 {
 	namespace host
 	{
-		namespace dsp
-			{
+	namespace dsp
+	{
 		#define TPI 6.28318530717958647692528676655901
 
 		enum FilterType{
@@ -170,6 +170,6 @@ namespace psycle
 			float _x1, _x2, _y1, _y2;
 			float _a1, _a2, _b1, _b2;
 		};
-		}
+	}
 	}
 }

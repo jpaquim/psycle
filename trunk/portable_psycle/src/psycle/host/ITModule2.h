@@ -69,10 +69,10 @@ namespace psycle
 			 S_SET_FILTER=				0, // Greyed out in IT...
 			 S_SET_GLISSANDO_CONTROL=	1, // Greyed out in IT...
 			 S_FINETUNE=				2, // Greyed out in IT...
-			 S_SET_VIBRATO_WAVEFORM=	3,
-			 S_SET_TREMOLO_WAVEFORM=	4,
-			 S_SET_PANBRELLO_WAVEFORM=	5,
-			 S_FINE_PATTERN_DELAY=		6,
+			 S_SET_VIBRATO_WAVEFORM=	3, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
+			 S_SET_TREMOLO_WAVEFORM=	4, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
+			 S_SET_PANBRELLO_WAVEFORM=	5, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
+			 S_FINE_PATTERN_DELAY=		6, // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
 			 S7=						7,
 			 S_SET_PAN=					8,
 			 S9=						9,
@@ -80,7 +80,7 @@ namespace psycle
 			 S_PATTERN_LOOP=			11,
 			 S_DELAYED_NOTE_CUT=		12,
 			 S_NOTE_DELAY=				13,
-			 S_PATTERN_DELAY=			14,
+			 S_PATTERN_DELAY=			14, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
 			 S_SET_MIDI_MACRO=			15
 			};
 		};
@@ -105,10 +105,73 @@ namespace psycle
 		struct CMD_S9
 		{
 			enum{
-			S9_SURROUND_OFF=		0,
-			S9_SURROUND_ON=			1
+			S9_SURROUND_OFF	=		0,
+			S9_SURROUND_ON	=		1,
+			S9_REVERB_OFF	=		8,
+			S9_REVERB_FORCE	=		9,
+			S9_STANDARD_SURROUND=	10,
+			S9_QUAD_SURROUND	=	11,// Select quad surround mode: this allows you to pan in the rear channels, especially useful for 4-speakers playback. Note that S9A and S9B do not activate the surround for the current channel, it is a global setting that will affect the behavior of the surround for all channels. You can enable or disable the surround for individual channels by using the S90 and S91 effects. In quad surround mode, the channel surround will stay active until explicitely disabled by a S90 effect
+			S9_GLOBAL_FILTER	=	12,// Select global filter mode (IT compatibility). This is the default, when resonant filters are enabled with a Zxx effect, they will stay active until explicitely disabled by setting the cutoff frequency to the maximum (Z7F), and the resonance to the minimum (Z80).
+			S9_LOCAL_FILTER		=	13,// Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
+			S9_PLAY_FORWARD		=	14,// Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
+			S9_PLAY_BACKWARD	=	15 // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward. 
 			};
 		};
+		struct ITVOLCMD
+		{
+			enum{
+			VOL_VOL_POSITION		=   0x0,
+			VOL_FINE_VOLSLIDE_UP	=	0x41,
+			VOL_FINE_VOL_SLIDE_DOWN	=	0x4B,
+			VOL_VOL_SLIDE_UP		=	0x55,
+			VOL_VOL_SLIDE_DOWN		=	0x5F,
+			VOL_PITCH_SLIDE_DOWN	=	0x69,
+			VOL_PITCH_SLIDE_UP		=	0x73,
+			VOL_PAN_POSITION		=	0x80,
+			VOL_PORTANOTE			=	0xC1,
+			VOL_VIBRATO				=	0xCB 
+			};
+		};
+
+/*
+The following effects 'memorise' their previous values:
+(D/K/L), (E/F/G), (HU), I, J, N, O, S, T, W
+
+Commands H and U are linked even more closely.
+If you use H00 or U00, then the previous vibrato, no matter
+whether it was set with Hxx or Uxx will be used.
+
+
+Volume column effects are selected by pressing A-H in the first
+column of the effects.
+
+Ax = fine volume slide up by x
+Bx = fine volume slide down by x
+Cx = volume slide up by x
+Dx = volume slide down by x
+Ex = pitch slide down by x
+Fx = pitch slide up by x
+Gx = portamento to note with speed x
+Hx = vibrato with depth x
+
+// Volume ranges from 0->64
+// Panning ranges from 0->64, mapped onto 128->192
+// Prepare for the following also:
+//  65->74 = Fine volume up
+//  75->84 = Fine volume down
+//  85->94 = Volume slide up
+//  95->104 = Volume slide down
+//  105->114 = Pitch Slide down
+//  115->124 = Pitch Slide up
+//  193->202 = Portamento to
+//  203->212 = Vibrato
+In all cases, if x is 0, then the effect memory is used (as
+explained in (4)
+
+The memory for Ax/Bx/Cx/Dx are shared, as is the memory for
+Ex/Fx.
+*/
+
 
 /*			//Some effects needed for XM compatibility
 			#define IT_XM_PORTAMENTO_DOWN    27
@@ -257,6 +320,7 @@ namespace psycle
 			bool LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
 			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit);
 			bool LoadITPattern(int patIdx);
+			void ParseEffect(PatternEntry&pent, int command,int param);
 			
 //////////////////////////////////////////////////////////////////////////
 ///    S3M Fileformat 
@@ -302,7 +366,8 @@ namespace psycle
 				ISRIGHTCHAN=	0x08, // Else, is Left Chan.
 				ISADLIBCHAN=	0x10,
 				HASCUSTOMPOS=	0x20,
-				ISENABLED=		0x80
+				ISDISABLED=		0x80,
+				ISUNUSED=		0xFF
 			};
 		};
 		typedef struct {

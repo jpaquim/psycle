@@ -119,6 +119,7 @@ namespace psycle
 			PatternEntry TriggerDelay[MAX_TRACKS];
 			int TriggerDelayCounter[MAX_TRACKS];
 			int RetriggerRate[MAX_TRACKS];
+			int ArpeggioCount[MAX_TRACKS];
 			bool TWSActive;
 			int TWSInst[MAX_TWS];
 			int TWSSamples;

@@ -3,6 +3,7 @@
 #include <project.private.hpp>
 #include "Sampler.hpp"
 #include "Song.hpp"
+#include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
 namespace psycle
@@ -28,7 +29,7 @@ namespace psycle
 				_voices[i]._filterEnv._sustain = 0;
 				_voices[i]._filter.Init();
 				_voices[i]._cutoff = 0;
-				_voices[i].	_tickCounter = 0;
+				_voices[i]._sampleCounter = 0;
 				_voices[i]._triggerNoteOff = 0;
 				_voices[i]._triggerNoteDelay = 0;
 				_voices[i]._channel = -1;
@@ -136,7 +137,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 								}
 								else
 								{
@@ -149,7 +150,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick())/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 									int parameter = TriggerDelay[i]._parameter&0x0f;
 									if (parameter < 9)
 									{
@@ -282,18 +283,18 @@ namespace psycle
 			float left_output;
 			float right_output;
 
-			pVoice->_tickCounter += numsamples;
+			pVoice->_sampleCounter += numsamples;
 
 			if (Global::_pSong->Invalided)
 			{
 				pVoice->_envelope._stage = ENV_OFF;
 				return;
 			}
-			else if ((pVoice->_triggerNoteDelay) && (pVoice->_tickCounter >= pVoice->_triggerNoteDelay))
+			else if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
 			{
 				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 				{
-					pVoice->_triggerNoteDelay = pVoice->_tickCounter+ pVoice->effVal;
+					pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
 					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 					pVoice->effretTicks--;
@@ -321,7 +322,7 @@ namespace psycle
 				pVoice->_wave._rVolCurr = 0;
 				return;
 			}
-			else if ((pVoice->_triggerNoteOff) && (pVoice->_tickCounter >= pVoice->_triggerNoteOff))
+			else if ((pVoice->_triggerNoteOff) && (pVoice->_sampleCounter >= pVoice->_triggerNoteOff))
 			{
 				pVoice->_triggerNoteOff = 0;
 				NoteOff(voice);
@@ -336,6 +337,16 @@ namespace psycle
 				if (pVoice->_envelope._stage != ENV_OFF)
 				{
 					left_output = pResamplerWork(
+						pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
+						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+					if (pVoice->_wave._stereo)
+					{
+						right_output = pResamplerWork(
+							pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
+							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+					}
+
+/*					left_output = pResamplerWork(
 						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart-1),
 						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart),
 						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart+1),
@@ -350,7 +361,7 @@ namespace psycle
 							*(pVoice->_wave._pR + pVoice->_wave._pos.HighPart+2), // Attention, this can (and does)go out of range 
 							pVoice->_wave._pos.LowPart, pVoice->_wave._pos.HighPart, pVoice->_wave._length);// It is not a problem since
 						}															// the resample function already takes care of it
-
+*/
 					// Filter section
 					//
 					if (pVoice->_filter._type < dsp::F_NONE)
@@ -575,7 +586,7 @@ namespace psycle
 
 			if (Global::_pSong->Invalided) return 0;
 
-			pVoice->_tickCounter=0;
+			pVoice->_sampleCounter=0;
 			pVoice->effCmd=pEntry->_cmd;
 
 			switch(pEntry->_cmd) // DO NOT ADD here those commands that REQUIRE a note.
@@ -583,7 +594,7 @@ namespace psycle
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = (Global::_pSong->SamplesPerTick()/6)*(pEntry->_parameter & 0x0f);
+						pVoice->_triggerNoteOff = (Global::pPlayer->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
 					}
 					else if (((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->_parameter & 0x0f) == 0 ))
 					{
@@ -665,7 +676,7 @@ namespace psycle
 				//
 				if (Global::_pSong->_pInstrument[pVoice->_instrument]->_loop)
 				{
-					double const totalsamples = double(Global::_pSong->SamplesPerTick()*Global::_pSong->_pInstrument[pVoice->_instrument]->_lines);
+					double const totalsamples = double(Global::pPlayer->SamplesPerRow()*Global::_pSong->_pInstrument[pVoice->_instrument]->_lines);
 		//			pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}	
@@ -733,12 +744,9 @@ namespace psycle
 				pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 				pVoice->_envelope._value = 0.0f;
 				pVoice->_envelope._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
-				// This must be last, or the voice could be started by VoiceWork before all
-				// elements are initialized
-				//
 				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = (Global::_pSong->SamplesPerTick()/6)*(pEntry->_parameter & 0x0f);
+					pVoice->_triggerNoteDelay = (Global::pPlayer->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
@@ -746,8 +754,8 @@ namespace psycle
 					if (pEntry->_cmd == SAMPLER_CMD_RETRIG && (pEntry->_parameter&0x0f) > 0)
 					{
 						pVoice->effretTicks=(pEntry->_parameter&0x0f); // number of Ticks.
-						pVoice->effVal= (Global::_pSong->SamplesPerTick()/(pVoice->effretTicks+1));
-			//			pVoice->retTime=(Global::_pSong->SamplesPerTick()/pVoice->effVal); // Number of samples for each retrig.
+						pVoice->effVal= (Global::pPlayer->SamplesPerRow()/(pVoice->effretTicks+1));
+			//			pVoice->retTime=(Global::_pSong->SamplesPerRow()/pVoice->effVal); // Number of samples for each retrig.
 						
 						int volmod = (pEntry->_parameter&0xf0)>>4; // Volume modifier.
 						switch (volmod) 
@@ -775,6 +783,9 @@ namespace psycle
 					{
 						pVoice->_triggerNoteDelay=0;
 					}
+					// This must be last, or the voice could be started by VoiceWork before all
+					// elements are initialized
+					//
 					pVoice->_envelope._stage = ENV_ATTACK;
 				}
 				

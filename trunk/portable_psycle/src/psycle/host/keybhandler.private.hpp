@@ -1869,10 +1869,11 @@ NAMESPACE__BEGIN(psycle)
 				{
 					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
 					{
-						unsigned char *toffset=_ptrackline(ps,t,l)+1;
-						unsigned char ins=*(toffset);
+						unsigned char *toffset=_ptrackline(ps,t,l);
+						unsigned char ins=*(toffset+1);
+						unsigned char mac=*(toffset+2);
 					
-						if (ins != 255 )
+						if (mac != 255 )
 						{
 							ins=x;
 							if(ins<0)ins=0;

@@ -2329,9 +2329,9 @@ NAMESPACE__BEGIN(psycle)
 			for (int i=lstart;i<lend;i++) // Lines
 			{
 				// break this up into several more general loops for speed
-				if((linecount%_pSong->_ticksPerBeat) == 0)
+				if((linecount%_pSong->LinesPerBeat()) == 0)
 				{
-					if ((linecount%(_pSong->_ticksPerBeat*4)) == 0) 
+					if ((linecount%(_pSong->LinesPerBeat()*4)) == 0) 
 						pBkg = pvc_row4beat;
 					else 
 						pBkg = pvc_rowbeat;

@@ -360,7 +360,7 @@ NAMESPACE__BEGIN(psycle)
 					CClientDC dc(this);
 					DrawAllMachineVumeters(&dc);
 				}
-				if (Global::_pSong->Tweaker)
+				if (Global::pPlayer->Tweaker)
 				{
 					for(int c=0; c<MAX_MACHINES; c++)
 					{
@@ -380,7 +380,7 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					Global::_pSong->Tweaker = false;
+					Global::pPlayer->Tweaker = false;
 				}
 				if (Global::pPlayer->_playing)
 				{
@@ -432,25 +432,19 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (_outputActive)
 			{
+				AudioDriver* pOut = Global::pConfig->_pOutputDriver;
 				_outputActive = false;
-				if (!Global::pConfig->_pOutputDriver->Initialized())
+				if (!pOut->Initialized())
 				{
-					Global::pConfig->_pOutputDriver->Initialize(m_hWnd, Global::pPlayer->Work, Global::pPlayer);
+					pOut->Initialize(m_hWnd, Global::pPlayer->Work, Global::pPlayer);
 				}
-				if (!Global::pConfig->_pOutputDriver->Configured())
+				if (!pOut->Configured())
 				{
-					Global::pConfig->_pOutputDriver->Configure();
-					if (Global::pPlayer->_playing)
-					{
-						Global::_pSong->SamplesPerTick((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
-					}
-					else
-					{
-						Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-					}
+					pOut->Configure();
+					Global::pPlayer->SampleRate(pOut->_samplesPerSec);
 					_outputActive = true;
 				}
-				if (Global::pConfig->_pOutputDriver->Enable(true))
+				if (pOut->Enable(true))
 				{
 					_outputActive = true;
 				}
@@ -1509,22 +1503,6 @@ NAMESPACE__BEGIN(psycle)
 			//Repaint();
 		}
 
-		int CChildView::SongIncBpm(int x)
-		{
-			AddMacViewUndo();
-			Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
-			if (Global::_pSong->BeatsPerMin() < 33)
-			{
-				Global::_pSong->BeatsPerMin(33);
-			}
-			if (Global::_pSong->BeatsPerMin() > 999)
-			{
-				Global::_pSong->BeatsPerMin(999);
-			}
- 			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-			return Global::_pSong->BeatsPerMin();
-		}
-
 		///\todo extemely toxic pollution
 		#define TWOPI_F (2.0f*3.141592665f)
 
@@ -1825,7 +1803,6 @@ NAMESPACE__BEGIN(psycle)
 				{
 					Global::_pSong->fileName = str+".psy";
 				}
-				//Global::_pSong->SetBPM(XM.default_BPM, XM.default_tempo, Global::pConfig->_pOutputDriver->_samplesPerSec);
 				_outputActive = true;
 				if (!Global::pConfig->_pOutputDriver->Enable(true))
 				{
@@ -2154,7 +2131,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				Global::_pSong->fileName = fName;
 			}
-			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+//			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_LinesPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 			_outputActive = true;
 			if (!Global::pConfig->_pOutputDriver->Enable(true))
 			{
