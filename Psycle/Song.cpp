@@ -1109,6 +1109,7 @@ bool Song::Load(RiffFile* pFile)
 		UINT index = 0;
 		int temp;
 		int solo;
+		int chunkcount;
 
 		Header[4]=0;
 		_machineLock = true;
@@ -1117,13 +1118,14 @@ bool Song::Load(RiffFile* pFile)
 
 		pFile->Read(&version,sizeof(version));
 		pFile->Read(&size,sizeof(size));
+		pFile->Read(&chunkcount,sizeof(chunkcount));
 
 		if (version > CURRENT_FILE_VERSION)
 		{
 			// there is an error, this file is newer than this build of psycle
 			MessageBox(NULL,"File is from a newer version of psycle! You should get a new one immediately!",NULL,NULL);
 		}
-		pFile->Skip(size);
+		pFile->Skip(size-sizeof(chunkcount));
 		/*
 		else
 		{
@@ -1149,6 +1151,7 @@ bool Song::Load(RiffFile* pFile)
 			// we should use the size to update the index, but for now we will skip it
 			if (strcmp(Header,"INFO")==0)
 			{
+				chunkcount--;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if (version > CURRENT_FILE_VERSION_INFO)
@@ -1166,6 +1169,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"SNGI")==0)
 			{
+				chunkcount--;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if (version > CURRENT_FILE_VERSION_SNGI)
@@ -1216,6 +1220,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"SEQD")==0)
 			{
+				chunkcount--;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if (version > CURRENT_FILE_VERSION_SEQD)
@@ -1250,6 +1255,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"PATD")==0)
 			{
+				chunkcount--;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if (version > CURRENT_FILE_VERSION_PATD)
@@ -1296,6 +1302,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"MACD")==0)
 			{
+				chunkcount--;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if (version > CURRENT_FILE_VERSION_MACD)
@@ -1322,6 +1329,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"INSD")==0)
 			{
+				chunkcount--;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if (version > CURRENT_FILE_VERSION_INSD)
@@ -1394,7 +1402,7 @@ bool Song::Load(RiffFile* pFile)
 
 		Progress.OnCancel();
 
-		if (!pFile->Close())
+		if ((!pFile->Close()) || (chunkcount))
 		{
 			char error[MAX_PATH];
 			sprintf(error,"Error reading from \"%s\"!!!",pFile->szName);
@@ -2171,25 +2179,17 @@ bool Song::Save(RiffFile* pFile)
 
 	// header, this has to be at the top of the file
 
-	/*
-	===================
-	FILE HEADER
-	===================
-	id = "PSY3SONG"; // PSY2 was 1.66
-	version = 0; // "total" version of all chunk versions
-	size = 0;
-	*/
 	CProgressDialog Progress;
 	Progress.Create();
 	Progress.ShowWindow(SW_SHOW);
 
-	int eventcount = 4;
+	int chunkcount = 3; // 3 chunks plus:
 	for (int i = 0; i < MAX_PATTERNS; i++)
 	{
 		// check every pattern for validity
 		if (ppPatternData[i])
 		{
-			eventcount++;
+			chunkcount++;
 		}
 	}
 
@@ -2198,34 +2198,44 @@ bool Song::Save(RiffFile* pFile)
 		// check every pattern for validity
 		if (_pMachine[i])
 		{
-			eventcount++;
+			chunkcount++;
 		}
 	}
 
-	int NumInstruments = 0;
 	for (i = 0; i < MAX_INSTRUMENTS; i++)
 	{
 		if (!_instruments[i].Empty())
 		{
-			eventcount++;
+			chunkcount++;
 		}
 	}
 
-	Progress.m_Progress.SetRange(0,eventcount);
+	Progress.m_Progress.SetRange(0,chunkcount);
 	Progress.m_Progress.SetStep(1);
-	Progress.m_Progress.StepIt();
-	::Sleep(1);
 
+	/*
+	===================
+	FILE HEADER
+	===================
+	id = "PSY3SONG"; // PSY2 was 1.66
+	version = 0; // "total" version of all chunk versions
+	size = sizeof(UINT);
+	int chunkcount // number of chunks in this file.
+	*/
 
 	pFile->Write("PSY3SONG", 8);
 
 	UINT version = CURRENT_FILE_VERSION;
-	UINT size = 0;
+	UINT size = sizeof(chunkcount);
 	UINT index = 0;
 	int temp;
 
 	pFile->Write(&version,sizeof(version));
 	pFile->Write(&size,sizeof(size));
+	pFile->Write(&chunkcount,sizeof(chunkcount));
+
+	Progress.m_Progress.StepIt();
+	::Sleep(1);
 
 	// the rest of the modules can be arranged in any order
 
@@ -2486,7 +2496,7 @@ bool Song::Save(RiffFile* pFile)
 		}
 	}
 
-	Progress.m_Progress.SetPos(eventcount);
+	Progress.m_Progress.SetPos(chunkcount);
 	::Sleep(1);
 
 	Progress.OnCancel();
