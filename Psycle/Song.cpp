@@ -1282,10 +1282,10 @@ bool Song::Load(
 
 #if defined(_WINAMP_PLUGIN_)
 					sPath = Global::pConfig->GetVstDir();
-					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllname,sPath) )
+					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);
-						pVstPlugin->Instance(sPath2)
+						pVstPlugin->Instance(sPath2);
 					}
 #else // if !_WINAMP_PLUGIN_
 					if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
@@ -1305,10 +1305,10 @@ bool Song::Load(
 						::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 					}
+#endif // _WINAMP_PLUGIN_
 				}
 				break;
 				}
-#endif // _WINAMP_PLUGIN_
 			case MACH_DUMMY:
 				pMachine = new Dummy;
 				pMachine->Init();
