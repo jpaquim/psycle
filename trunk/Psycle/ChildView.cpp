@@ -1393,8 +1393,8 @@ void CChildView::OnConfigurationSettings()
 		EnableSound();
 	}
 //	Repaint();
-	
 }
+
 void CChildView::OnHelpSaludos() 
 {
 	CGreetDialog dlg;

@@ -468,7 +468,7 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 			( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT)) &&
 			(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
 		{
-			editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
+			editcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
 //			if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
 //			else if ( editcur.track < 0 ) editcur.track = 0;
 

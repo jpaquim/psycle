@@ -443,7 +443,22 @@ void CNewMachine::LoadPluginInfo()
 	{
 		int plugsCount=0;
 		LoadCacheFile(plugsCount);
+
+		char logname[MAX_PATH];
+		GetModuleFileName(NULL,logname,MAX_PATH);
+		char *last = strrchr(logname,'\\');
+		strcpy(last,"\\pluginlog.txt");
+
+		DeleteFile(logname);
+		FILE* hfile;
+		hfile=fopen(logname,"wa");  
+		fprintf(hfile,"[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)\n\n");
+		fprintf(hfile,"[Native Plugins]\n\n");
+		fclose(hfile);
 		FindPluginsInDir(plugsCount,CString(Global::pConfig->GetPluginDir()),MACH_PLUGIN);
+		hfile=fopen(logname,"a");  
+		fprintf(hfile,"\n[VST Plugins]\n\n");
+		fclose(hfile);
 		FindPluginsInDir(plugsCount,CString(Global::pConfig->GetVstDir()),MACH_VST);
 		_numPlugins = plugsCount;
 		if ( plugsCount != 0 ) SaveCacheFile(_numPlugins);
@@ -466,6 +481,12 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 	}
 	finder.Close();
 
+	char logname[MAX_PATH];
+	GetModuleFileName(NULL,logname,MAX_PATH);
+	char *last = strrchr(logname,'\\');
+	strcpy(last,"\\pluginlog.txt");
+	FILE* hfile;
+	hfile=fopen(logname,"a");  
 	int tmpCount = currentPlugsCount;
 
 	loop = finder.FindFile(findDir + "\\*.dll"); // check if the directory is empty
@@ -478,66 +499,92 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,CString findDir,Machin
 		sDllName.MakeLower();
 
 		// Meaning : If it is not a directory and it is not in the cache
-		if (!finder.IsDirectory() && !dllNames.Lookup(sDllName,tmpPath))
+		if (!finder.IsDirectory())
 		{
-			if (type == MACH_PLUGIN )
+			fprintf(hfile,finder.GetFilePath());
+			fprintf(hfile," - ");
+			fclose(hfile);
+			hfile=fopen(logname,"a");  
+
+			if (!dllNames.Lookup(sDllName,tmpPath))
 			{
-				plug = new Plugin;
-				if (plug->Instance((char*)(const char*)finder.GetFilePath()))
+				if (type == MACH_PLUGIN )
 				{
-					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-					ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
-					strcpy(_pPlugsInfo[currentPlugsCount]->name,plug->GetName());
-					sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-							(plug->IsSynth()) ? "Psycle instrument" : "Psycle effect",
-							plug->GetAuthor());
-					strcpy(_pPlugsInfo[currentPlugsCount]->version,"PsycleAPI 1.0");
-					if ( plug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-					else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-					_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
-					_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-					strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+					plug = new Plugin;
+					if (plug->Instance((char*)(const char*)finder.GetFilePath()))
+					{
+						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+						ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
+						strcpy(_pPlugsInfo[currentPlugsCount]->name,plug->GetName());
+						sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
+								(plug->IsSynth()) ? "Psycle instrument" : "Psycle effect",
+								plug->GetAuthor());
+						strcpy(_pPlugsInfo[currentPlugsCount]->version,"PsycleAPI 1.0");
+						if ( plug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+						else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+						_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
+						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
+						strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
 
-					char str2[256];
-					CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-					str.MakeLower();
-					strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-					dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+						char str2[256];
+						CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+						str.MakeLower();
+						strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+						dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
 
-					currentPlugsCount++;
+						currentPlugsCount++;
+						fprintf(hfile,"*** NEW *** - ");
+						fprintf(hfile,plug->GetName());
+					}
+					else
+					{
+						fprintf(hfile,"*** NOT PLUGIN ***");
+					}
+					delete plug;
 				}
-				delete plug;
+				else if (type == MACH_VST)
+				{
+					vstPlug = new VSTPlugin;
+					if (vstPlug->Instance((char*)(const char*)finder.GetFilePath()) == VSTINSTANCE_NO_ERROR)
+					{
+						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+						strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug->GetName());
+						sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
+								(vstPlug->IsSynth()) ? "VST2 instrument" : "VST2 effect",
+								vstPlug->GetVendorName());
+						sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug->GetVersion());
+						_pPlugsInfo[currentPlugsCount]->version[15]='\0';
+						if ( vstPlug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+						else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+						_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
+						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
+						strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+
+						char str2[256];
+						CString str = _pPlugsInfo[currentPlugsCount]->dllname;
+						str.MakeLower();
+						strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+						dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+
+						currentPlugsCount++;
+						fprintf(hfile,"*** NEW *** - ");
+						fprintf(hfile,vstPlug->GetName());
+					}
+					else
+					{
+						fprintf(hfile,"*** NOT PLUGIN ***");
+					}
+					delete vstPlug;
+				}
 			}
-			else if (type == MACH_VST)
+			else
 			{
-				vstPlug = new VSTPlugin;
-				if (vstPlug->Instance((char*)(const char*)finder.GetFilePath()) == VSTINSTANCE_NO_ERROR)
-				{
-					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-					strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug->GetName());
-					sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-							(vstPlug->IsSynth()) ? "VST2 instrument" : "VST2 effect",
-							vstPlug->GetVendorName());
-					sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug->GetVersion());
-					_pPlugsInfo[currentPlugsCount]->version[15]='\0';
-					if ( vstPlug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-					else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-					_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
-					_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-					strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
-
-					char str2[256];
-					CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-					str.MakeLower();
-					strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-					dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
-
-					currentPlugsCount++;
-				}
-				delete vstPlug;
+				fprintf(hfile,"already mapped");
 			}
+			fprintf(hfile,"\n");
 		}
 	}
+	fclose(hfile);
 	finder.Close();
 
 /*	if ( tmpCount != currentPlugsCount ) // If a plugin has been found & loaded, add this directory.
