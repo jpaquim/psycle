@@ -1,7 +1,6 @@
 *remove waits from play when in export mode
 -copy paste in edit menu
 -midi control commands learn
--longer patterns (256 or 512)
 -longer sequences (256)
 -more tracks (64)
 -store state of follow song toggle
@@ -29,7 +28,7 @@
 --------------------------
 	bug: 	 portamento to note slides too much. (can anyone test this for me?)
 	feature: just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
-	feature: Instruments Support ( *.xi , *.iti. Maybe more)
+	feature: Instruments Support ( *.xi , *.iti, *.sf2. Maybe more)
 		 * samples mapped by key
 		 * maybe: samples mapped by velocity?
 	feature: Improve Filter support.

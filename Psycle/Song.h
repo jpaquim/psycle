@@ -12,9 +12,9 @@
 #define MAX_PLUGINS				256 // Legacy! It is used in File loading/saving
 #define MAX_BUSES				64	// Power of 2! Important!
 #define MAX_MACHINES			128
-#define MAX_TRACKS				32	// Note: 
+#define MAX_TRACKS				32	// Note: changing this breaks file format
 #define MAX_WAVES				16
-#define MAX_LINES				128
+#define MAX_LINES				256
 #define MAX_INSTRUMENTS			255
 #define PREV_WAV_INS			254
 #define LOCK_LATENCY			256
@@ -22,7 +22,7 @@
 #define MULTIPLY				MAX_TRACKS * 5				// you don't need to calc these by hand, 
 #define MULTIPLY2				MULTIPLY * MAX_LINES		// precompiler will do that for you
 #define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	// without any affect on the generated code
-#define MAX_SONG_POSITIONS		128
+#define MAX_SONG_POSITIONS		128 // Note: changing this breaks file format
 
 class CCriticalSection;
 
