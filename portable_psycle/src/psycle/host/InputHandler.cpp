@@ -566,18 +566,36 @@ namespace psycle
 				//if added by sampler to move backward 16 lines when playing
 				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 				{
-					if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
-					else
-					{
-						if (Global::pPlayer->_playPosition > 0)
-						{
-							Global::pPlayer->_playPosition -= 1;
-							Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - 16;												
-						}
-						else
+					if (Global::pPlayer->_playBlock )
 						{
 							if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
-							else Global::pPlayer->_lineCounter = 0;
+							else
+							{
+								Global::pPlayer->_lineCounter = 0;
+								Global::pPlayer->ExecuteLine();
+							}
+						}
+					else
+					{
+						if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+						else
+						{
+												
+							if (Global::pPlayer->_playPosition > 0)
+							{
+								Global::pPlayer->_playPosition -= 1;
+								Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - 16;												
+							}
+							else
+							{
+								if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+								else
+								{
+									Global::pPlayer->_lineCounter = 0;
+									Global::pPlayer->ExecuteLine();
+								}
+							}
+							
 						}
 					}
 				}

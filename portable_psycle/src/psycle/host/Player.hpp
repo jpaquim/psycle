@@ -40,6 +40,8 @@ namespace psycle
 			virtual ~Player() throw();
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
+			/// Indicates to the playback engine that starts to process the current line in the pattern and send the events to machines.
+			void ExecuteLine();
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
 			/// the line currently being played in the current pattern
@@ -96,9 +98,8 @@ namespace psycle
 			/// wether the recording device has been started.
 			bool _recording;
 			///\}
-		protected:
-			/// Indicates to the playback engine that starts to process the current line in the pattern and send the events to machines.
-			void ExecuteLine();
+
+		protected:			
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 			int prevMachines[MAX_TRACKS];
 			/// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
