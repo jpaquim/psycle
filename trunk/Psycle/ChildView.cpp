@@ -1759,9 +1759,9 @@ void CChildView::OnFileImportXmfile()
 		}
 
 		// build sampler
-		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",1);
-		_pSong->InsertConnection(1,0);
-		_pSong->seqBus = 1;
+		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",0);
+		_pSong->InsertConnection(0,MASTER_INDEX);
+		_pSong->seqBus = 0;
 
 		sprintf(buffer,"%s\n\n%s\n\n%s"
 			,Global::_pSong->Name
