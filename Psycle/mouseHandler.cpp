@@ -584,7 +584,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 				}
 				else
 				{
-					pParentMain->ShowMachineGui(tmac);
+					pParentMain->ShowMachineGui(tmac, point);
 //					Repaint();
 				}
 			}

@@ -16,8 +16,9 @@ class CMasterDlg : public CDialog
 {
 // Construction
 public:
-	CMasterDlg(CWnd* pParent = NULL);   // standard constructor
+	CMasterDlg(CChildView* pParent = NULL);   // standard constructor
 	Master* _pMachine;
+	BOOL Create();
 
 // Dialog Data
 	//{{AFX_DATA(CMasterDlg)
@@ -37,6 +38,8 @@ public:
 
 // Implementation
 protected:
+	CChildView* m_pParent;
+	void OnCancel();
 
 	// Generated message map functions
 	//{{AFX_MSG(CMasterDlg)

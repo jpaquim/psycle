@@ -14,12 +14,11 @@
 + Vst hex values for parameters in gui
 ! should make it so clicking on colour boxes pops up menu
 * screen flashes switching from machine to pattern view (new)
-* make master machine update display if it decides to change volume
 * dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
 	it is fine.  i think it has to do with cpu load.
 * pattern view does not refresh when skin dlg presets have changed.
 + actual skinning
-* song length calculation does not take ffxx commands into account
+* song length calculation does not take ffxx/fexx commands into account
 + visual preset saving/loading
 ! DO NOT LOAD LIST VST list & database
 ! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
@@ -74,6 +73,7 @@
 + how about option to switch the instrument and machine columns?
 + how about making instrument column data available to all machines?
 * record button should set edit mode and follow mode on, should have new export wav button
++ global note delay effects command
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)

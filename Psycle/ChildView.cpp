@@ -75,6 +75,7 @@ CChildView::CChildView()
 	bmpDC = NULL;
 	
 	viewMode=VMMachine;
+	MasterMachineDialog = NULL;
 	updateMode=0;
 	updatePar=0;
 	multiPattern=true; // Long way till it can be finished!

@@ -40,6 +40,9 @@ V1.67
 ! Many small Optimizations and improvements
 + Multiple Selections in the sequencer menu (ctrl or shift + left mouse button or drag) can be deleted, copied, 
   pasted, etc. [sue] (pooplog)
+! Cleaned up Status Bar (pooplog)
+! Made Master Machine Dialog modeless, updates display if volume attenuated (pooplog)
+
 
 V1.66
 -----
