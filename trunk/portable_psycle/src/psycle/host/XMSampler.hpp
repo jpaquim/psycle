@@ -22,7 +22,10 @@ public:
 
 	struct CMD {
 	//	(*) = If the command byte is zero, the last nonzero byte for the command should be used.
-		static const UCHAR ARPEGGIO		=		0x0; ///< Arpeggio
+
+		// [sartorius & bohan] was: static const UCHAR ARPEGGIO		=		0x0; ///< Arpeggio
+		static compiler::uint8 const NONE = 0;
+
 		static const UCHAR PORTAUP		=		0x01;///< Portamento Up		 (*)
 		static const UCHAR PORTADOWN	=		0x02;///< Portamento Down	 (*)
 		static const UCHAR PORTA2NOTE	=		0x03;///<  Tone Portamento	 (*)
