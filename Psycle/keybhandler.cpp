@@ -700,7 +700,12 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			{
 				if (Global::pConfig->_RecordTweaks)
 				{
-					if (Global::pConfig->_midiRecordVel)
+					if (Global::pConfig->_midiRawMcm)
+					{
+						entry._cmd = 0x0c;
+						entry._parameter = velocity*2;
+					}
+					else if (Global::pConfig->_midiRecordVel)
 					{
 						// command
 						entry._cmd = Global::pConfig->_midiCommandVel;
@@ -795,7 +800,12 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	{
 		if (Global::pConfig->_RecordTweaks)
 		{
-			if (Global::pConfig->_midiRecordVel)
+			if (Global::pConfig->_midiRawMcm)
+			{
+				entry->_cmd = 0x0c;
+				entry->_parameter = velocity*2;
+			}
+			else if (Global::pConfig->_midiRecordVel)
 			{
 				// command
 				entry->_cmd = Global::pConfig->_midiCommandVel;
