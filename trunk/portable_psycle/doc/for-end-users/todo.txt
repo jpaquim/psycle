@@ -32,7 +32,16 @@ item count
 New and unsorted and untested
 ##############################
 
-<kSh> For you, I have a little idea - trivial to do, very important to the users. Let Psycle save files to another name, then check if the file is OK, and then delete the old one and rename the new one.
+
+
+<kSh>
+For you, I have a little idea - trivial to do, very important to the users. Let Psycle save files to another name, then check if the file is OK, and then delete the old one and rename the new one.
+Paranoia for Psycle  	From kSh on 26.05.2004, 23:06 to BJohan
+Paranoia works well and if I get no problems with it through the upcoming weekend I'll release it with full source code in C++ Builder. Still I have a question: I would be able to overwrite the autosave settings in Psycle by modifying the registry with Paranoia but the Autosave options are shown as "Incorrect DWORD values" in regedit. What are they then?
+Regards,
+kSh
+
+
 
 ** jmr2@macs.hw.ac.uk: * when loading a song it doesnt move to first order
 * jmr2@macs.hw.ac.uk: * when playing a song and pressing sort causes it to play the wrong pattern 
