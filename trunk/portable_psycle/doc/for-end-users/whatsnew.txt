@@ -30,6 +30,7 @@ Legend :       +=addition        *=change        !=bug
 
 v1.7.6.2
 --------
+!fixed bug in the optimized sine sequence generator (32-bit floating point numbers were not accurate enough, now it's 64-bit)
 !back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you.
 
 v1.7.6.1
