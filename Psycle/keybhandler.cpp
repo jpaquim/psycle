@@ -17,13 +17,15 @@ void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 			Global::pInputHandler->StopNote(outnote);
 		}
 	}
-	else if ((nChar == 16) && (nFlags == 49194) && ChordModeOffs)
+	else if ((nChar == 16) && (nFlags & 49152) && ChordModeOffs)
 	{
 		// shift is up, abort chord mode
 		editcur.line = ChordModeLine;
 		editcur.track = ChordModeTrack;
 		ChordModeOffs = 0;
 		AdvanceLine(patStep,Global::pConfig->_wrapAround,true);
+//		pParentMain->StatusBarIdle();
+//		Repaint(DMCursor);
 	}
 }
 
@@ -421,7 +423,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		else
 		{
 			if (ChordModeOffs) // this should never happen because the shift check should catch it... but..
-			{
+			{					// ok pooplog, now it REALLY shouldn't happen (now that the shift check works)
 				editcur.line = ChordModeLine;
 				editcur.track = ChordModeTrack;
 				ChordModeOffs = 0;

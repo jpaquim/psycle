@@ -110,6 +110,7 @@ CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
 		CmdDef cmdNull;
 		return cmdNull;
 	}
+	TRACE("Key nChar : %u pressed. Flags %u\n",nChar,nFlags);
 
 	// special: right control mapped to PLAY
 	if(bCtrlPlay && GetKeyState(VK_RCONTROL)<0)
@@ -168,6 +169,7 @@ CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
 			}
 		}
 
+		nFlags= nFlags & ~MK_LBUTTON;
 		// This comparison is to allow the "Shift+Note" (chord mode) to work.
 		CmdDef thisCmd = cmdLUT[(GetModifierIdx(nFlags) & ~MOD_S)][nChar];
 		if ( thisCmd.GetType() == CT_Note )
@@ -1196,7 +1198,3 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefRedo,'Z',MOD_C|MOD_S);
 
 }
-
-
-
-
