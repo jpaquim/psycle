@@ -131,8 +131,6 @@ CChildView::CChildView()
 	newselpos.bottom=0;
 	numPatternDraw=0;
 
-//	drawTrackStart=-1;
-
 //	scrollT=0;
 //	scrollL=0;
 	tOff=0;
@@ -1513,10 +1511,6 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 			entry->_parameter = unsigned char (val);
 			index+=step;
 		}
-//		drawTrackStart=x;
-//		drawTrackEnd=x;
-//		drawLineStart=y;
-//		drawLineEnd=y+ny;
 		NewPatternDraw(x,x,y,y+ny);	
 		Repaint(DMData);
 	}

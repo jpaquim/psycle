@@ -34,6 +34,7 @@ V1.7RC1
 + SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
 + Wire Dialog contains some diagnostic tools, and has a more functional +12db->-inf range (pooplog)
 + in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
++ tws "smooth" tweak mode, where it interpolates from the current param value to the desired one over the course of one line [sue] (pooplog)
 * Complete pattern display overhaul, including many new features and bugfixes (pooplog)
 * Made Master Machine Dialog modeless, updates display if volume attenuated
 * All native machines can now recieve pattern data, not just generators (pooplog) [Druttis]

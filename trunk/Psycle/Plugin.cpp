@@ -10,6 +10,7 @@
 	#include "FileIO.h"
 	#include "NewMachine.h"
 #endif // _WINAMP_PLUGIN_
+#include "InputHandler.h"
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
@@ -160,7 +161,15 @@ void Plugin::Work(int numSamples)
 			int us = 0;
 			while (ns)
 			{
-				int nextevent = ns+1;
+				int nextevent;
+				if (TWSDelta != 0)
+				{
+					nextevent = TWSSamples;
+				}
+				else
+				{
+					nextevent = ns+1;
+				}
 				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					if (TriggerDelay[i]._cmd)
@@ -173,6 +182,10 @@ void Plugin::Work(int numSamples)
 				}
 				if (nextevent > ns)
 				{
+					if (TWSDelta != 0)
+					{
+						TWSSamples -= ns;
+					}
 					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 					{
 						// come back to this
@@ -192,6 +205,25 @@ void Plugin::Work(int numSamples)
 						ns -= nextevent;
 						_pInterface->Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
 						us += nextevent;
+					}
+					if (TWSDelta != 0)
+					{
+						if (TWSSamples == nextevent)
+						{
+							TWSCurrent += TWSDelta;
+
+							if (((TWSDelta > 0) && (TWSCurrent >= TWSDestination))
+								|| ((TWSDelta < 0) && (TWSCurrent <= TWSDestination)))
+							{
+								TWSCurrent = TWSDestination;
+								TWSDelta = 0;
+							}
+							else
+							{
+								TWSSamples = TWEAK_SLIDE_SAMPLES;
+							}
+							_pInterface->ParameterTweak(TWSInst,int(TWSCurrent));
+						}
 					}
 					for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 					{
@@ -292,11 +324,10 @@ void Plugin::Tick(
 		_pInterface->SeqTick(channel ,pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
 //	}
 
-	if (pData->_note == 121 || pData->_note == 122 )
+	if (pData->_note == cdefTweakM || pData->_note == cdefTweakE)
 	{
 		if (pData->_inst < _pInfo->numParameters)
 		{
-
 			int nv = (pData->_cmd<<8)+pData->_parameter;
 			int const min = _pInfo->Parameters[pData->_inst]->MinValue;
 			int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
@@ -312,6 +343,25 @@ void Plugin::Tick(
 			Global::_pSong->Tweaker = true;
 #endif // ndef _WINAMP_PLUGIN_
 		}
+	}
+	else if (pData->_note == cdefTweakS)
+	{
+		TWSDestination = float(pData->_cmd<<8)+pData->_parameter;
+		float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
+		float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
+
+		TWSDestination += min;
+		if (TWSDestination > max)
+		{
+			TWSDestination = max;
+		}
+		TWSInst = pData->_inst;
+		TWSCurrent = float(_pInterface->Vals[TWSInst]);
+		TWSSamples = 0;
+		TWSDelta = float((TWSDestination-TWSCurrent)*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+#if !defined(_WINAMP_PLUGIN_)
+			Global::_pSong->Tweaker = true;
+#endif // ndef _WINAMP_PLUGIN_
 	}
 }
 

@@ -30,6 +30,7 @@ public:
 	CEdit	m_autosave_mins;
 	CButton	m_autosave;
 	CButton	m_save_reminders;
+	CButton	m_tweak_smooth;
 	CButton	m_show_info;
 	CButton	m_cmdShiftArrows;
 	CButton	m_cmdFT2Del;

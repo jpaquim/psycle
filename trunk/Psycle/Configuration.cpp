@@ -32,6 +32,7 @@ Configuration::Configuration()
 	_cursorAlwaysDown = false;
 	_RecordNoteoff = false;
 	_RecordTweaks = false;
+	_RecordMouseTweaksSmooth = FALSE;
 	_midiMachineViewSeqMode = false;
 	autoStopMachines = false;
 	useDoubleBuffer = true;
@@ -128,6 +129,7 @@ Configuration::Configuration()
 	_psSkinDir = NULL;
 
 	_midiRecordVel = FALSE;
+	_midiTypeVel = 0;
 	_midiCommandVel = 0x0c;
 	_midiFromVel = 0x00;
 	_midiToVel = 0xff;
@@ -396,11 +398,16 @@ Configuration::Read()
 	reg.QueryValue("RecordNoteoff", &type, (BYTE*)&_RecordNoteoff, &numData);
 	numData = sizeof(_RecordTweaks);
 	reg.QueryValue("RecordTweaks", &type, (BYTE*)&_RecordTweaks, &numData);
+	numData = sizeof(_RecordMouseTweaksSmooth);
+	reg.QueryValue("RecordMouseTweaksSmooth", &type, (BYTE*)&_RecordMouseTweaksSmooth, &numData);
+
 	numData = sizeof(_midiMachineViewSeqMode);
 	reg.QueryValue("MidiMachineViewSeqMode", &type, (BYTE*)&_midiMachineViewSeqMode, &numData);
 
 	numData = sizeof(_midiRecordVel);
 	reg.QueryValue("MidiRecordVel", &type, (BYTE*)&_midiRecordVel, &numData);
+	numData = sizeof(_midiTypeVel);
+	reg.QueryValue("MidiTypeVel", &type, (BYTE*)&_midiTypeVel, &numData);
 	numData = sizeof(_midiCommandVel);
 	reg.QueryValue("MidiCommandVel", &type, (BYTE*)&_midiCommandVel, &numData);
 	numData = sizeof(_midiFromVel);
@@ -948,6 +955,7 @@ Configuration::Write()
 	reg.SetValue("showAboutAtStart", REG_BINARY, (BYTE*)&_showAboutAtStart, sizeof(_showAboutAtStart));
 	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
 	reg.SetValue("RecordTweaks", REG_BINARY, (BYTE*)&_RecordTweaks, sizeof(_RecordTweaks));
+	reg.SetValue("RecordMouseTweaksSmooth", REG_BINARY, (BYTE*)&_RecordMouseTweaksSmooth, sizeof(_RecordMouseTweaksSmooth));
 	reg.SetValue("MidiMachineViewSeqMode", REG_BINARY, (BYTE*)&_midiMachineViewSeqMode, sizeof(_midiMachineViewSeqMode));
 	reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&_outputDriverIndex, sizeof(_outputDriverIndex));
 	reg.SetValue("MidiInputDriver", REG_DWORD, (BYTE*)&_midiDriverIndex, sizeof(_midiDriverIndex));	// MIDI IMPLEMENTATION
@@ -955,6 +963,7 @@ Configuration::Write()
 	reg.SetValue("MidiInputHeadroom", REG_DWORD, (BYTE*)&_midiHeadroom, sizeof(_midiHeadroom));	
 
 	reg.SetValue("MidiRecordVel", REG_BINARY, (BYTE*)&_midiRecordVel, sizeof(_midiRecordVel));
+	reg.SetValue("MidiTypeVel", REG_BINARY, (BYTE*)&_midiTypeVel, sizeof(_midiTypeVel));
 	reg.SetValue("MidiCommandVel", REG_DWORD, (BYTE*)&_midiCommandVel, sizeof(_midiCommandVel));	
 	reg.SetValue("MidiFromVel", REG_DWORD, (BYTE*)&_midiFromVel, sizeof(_midiFromVel));	
 	reg.SetValue("MidiToVel", REG_DWORD, (BYTE*)&_midiToVel, sizeof(_midiToVel));	

@@ -3,6 +3,7 @@
 
 #define VERSION_NUMBER "1.7RC5"
 
+#define TWEAK_SLIDE_SAMPLES		64
 
 #define MAX_PLUGINS				256 // Legacy! It is used in File loading/saving
 #define MAX_BUSES				64	// Power of 2! Important!

@@ -88,6 +88,7 @@ enum CmdSet
 	cdefTweakM = 121,	// tweak
 	cdefTweakE = 122,	// tweak effect. Old!
 	cdefMIDICC = 123,	// Mcm Command (MIDI CC)
+	cdefTweakS = 124,
 
 
 
@@ -282,6 +283,7 @@ struct CmdDef
 		case cdefKeyStop: return "Key Stop";
 		case cdefKeyStopAny: return "Key Stop Current";
 		case cdefTweakM:  return "Tweak (Machine)";
+		case cdefTweakS:  return "Tweak Smooth (Machine)";
 		case cdefMIDICC:  return "Mcm (MIDI CC)";
 
 		case cdefColumnPrev:	return "Prev column";
