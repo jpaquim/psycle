@@ -87,7 +87,7 @@ namespace psycle
 			/// when Real is 64-bit
 			template<typename Real> inline const bool denormal(const Real & x)
 			{
-				//return ::fabs(x) < std::numeric_limits<Real>::denorm_min();
+				//return std::fabs(x) < std::numeric_limits<Real>::denorm_min();
 				return std::fabs(x) < std::numeric_limits<Real>::epsilon();
 			}
 		#endif
@@ -122,10 +122,11 @@ namespace psycle
 		class Sin_Sequence
 		{
 		public:
+			typedef double Real; ///< <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
 			inline Sin_Sequence() : index_(0) {}
 			inline void operator()(const Real & phase, const Real & radians_per_sample) throw()
 			{
-				step_ = static_cast<Real>(2 * ::cos(radians_per_sample));
+				step_ = static_cast<Real>(2 * std::cos(radians_per_sample));
 				sequence_[0] = static_cast<Real>(std::sin(phase - radians_per_sample));
 				sequence_[1] = static_cast<Real>(std::sin(phase - 2 * radians_per_sample));
 				index_ = 0;
