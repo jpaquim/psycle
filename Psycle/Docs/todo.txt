@@ -2,9 +2,6 @@
 !=change
 +=addition
 
-<alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
-<alk_> f6 is broken (play pattern) it plays the first pattern first
-<alk_> alt-f5 - play song from start
 * psycle default theme sucks (cursor, selection, etc.)
 
 * Machines
@@ -18,8 +15,9 @@
 * cyanphase vibrasynth has an access violation bug * I need source to fix
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 * JMDrum is buggy (Crashes sometimes)
-! James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
 * bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
+! James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
++? <alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> Internals still miss mouse tweak, right?
 + <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
@@ -50,10 +48,24 @@
 * GUI (pattern):
 ----------------
 * select with keyboard while playing and follow mode on sucks
+* <wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
+		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
+		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
+		next row in my start column?
 * <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
 	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
 	rec tweaks when you do a refresh.......like closing the plugs  gui... * the pattern client rect 
 	doesn't seem to update when you have the mouse button down on a vst dialog!  repaint messages are lost!!!!!
+* <alk> somehow I managed to get the row number highlighted in two places, could not reproduce it - will keep 
+	trying * to cause the bug of more than one line number highlighted:
+	select a line.
+	then lower down click and drag to select a block. cause the window to scroll by making the block 
+	go off the ottom of the screen. (notice the previous highlight moving up) now click another place. 
+	[not tested]
+* <alk> block select a channel. record some tweak to it live. before the end of the pattern press stop. 
+	then do ctrl-x. It does not cut. [not tested]
++ <_sue_> how about the line numbering cursor marker being optional? .....it missleds me lots of 
+	times....i confuse it with the cursor because it moves and its the same colour
 + velocity should be able to store data to instrument column * so should other midi messages
 + how about option to switch the instrument and machine columns?
 + option to see waveform instead of notes in pattern editor for acid mode
@@ -67,6 +79,7 @@
 
 * GUI (machines):
 -----------------
+* <alk> in felix.psy can't connect attack generator to the compressor effect (machine connect failed) 
 * <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
 * alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window, before releasing mouse button  
 	release note, then release mouse.
@@ -155,8 +168,11 @@
 	require a file format change though :(
 ! DO NOT LOAD LIST VST list & database
 
-* Interface:
+* Interface (contains pattern stuff too):
 ------------
+* <alk> with follow on: start playing song, wait for it to move to another order (maybe two or three on). press 
+	f8. then press f6 (you expect it to play the displayed/selected pattern, rather it plays the first 
+	order then some other patterns! (in my case orders 00, 01 and 05) [not tested]
 * why does it take so long to load a song?
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
@@ -181,6 +197,28 @@
 	when you want.
 ! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
++ <alk> another idea, a keypress to toggle follow song
++ <alk_> alt-f5 - play song from start
++ <alk_> another thought: "revert to saved" - filemenu 
++ <wayfinder> it would be so much cooler if there were like macros
+				say, i have a chorus part that's pattern 4, 6, 4, 5
+				and i have that three times in the song or so
+				i'd love to define pattern macro A as "4, 6, 4, 5" and be able to enter macro A in the 
+				pattern sequencer
++ <wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through 
+		9, change the row skip
++ <wayfinder> alk, and it would be nice if the row skip would affect the cursor movement as well (or at 
+		least if the tracker could be configured to do so=)
++ <wayfinder> alk, i'm also missing keys for soloing channels (in IT it's alt-F10 for solo)
++ <wayfinder> like navigating in the sequence list with the cursor
++ <wayfinder> numeric entering of pattern number
++ <wayfinder> oh, i forgot one function of the IT pattern editor. when the cursor isnt following the 
+		pattern, or when the song isnt playing, hitting the G key on a number takes you to that pattern
+		* dear wayfinder, please remember that this is not IT damnit
++ <Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
++ <Alk> +alt to make the transposing only effect current machine/sample
+		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note
+		ctrl+alt+shift+f12 = transpose current gen/sample up 1 octave
 + midi control commands learn
 + pooplog-we should just make a new slider class that uses shift and ctrl like knobs
 + <alk_> the 'Apply' button is not implemented in the config dialog
