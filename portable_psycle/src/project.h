@@ -707,8 +707,8 @@ typedef unsigned __int8 uint8;
 
 
 
-#if !defined COMPILER__GNU
-	// gcc does not support pre-compiled headers yet,
+#if !defined COMPILER__GNU || COMPILER__VERSION__MAJOR > 3 || (COMPILER__VERSION__MAJOR == 3 && COMPILER__VERSION__MINOR >= 4)
+	// gcc < 3.4 does not support pre-compiled headers,
 	// this inclusion would just slow it down considerably
 	#include "pre_compiled_headers.h"
 #endif

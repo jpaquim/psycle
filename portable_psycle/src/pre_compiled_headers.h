@@ -19,7 +19,7 @@
 
 
 
-#if !(defined COMPILER__GNU && COMPILER__VERSION__MAJOR <= 3 && COMPILER__VERSION__MINOR < 4)
+#if !defined COMPILER__GNU || COMPILER__VERSION__MAJOR > 3 || (COMPILER__VERSION__MAJOR == 3 && COMPILER__VERSION__MINOR >= 4)
 	// gcc < 3.4 does not support pre-compiled headers,
 	// the following inclusions would just slow it down considerably
 
