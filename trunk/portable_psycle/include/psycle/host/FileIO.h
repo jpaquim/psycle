@@ -40,8 +40,34 @@ namespace psycle
 			virtual bool Open(std::string psFileName);
 			virtual bool Create(std::string psFileName, bool overwrite);
 			virtual BOOL Close(void);
+
 			virtual bool Read(void* pData, ULONG numBytes);
+			virtual void Read(unsigned short &value){int _t;Read(&_t,sizeof(unsigned short));value =  _t;};
+			virtual void Read(int &value){int _t;Read(&_t,sizeof(int));value =  _t;};
+			virtual void Read(char &value){char _t;Read(&_t,sizeof(char));value =  _t;};
+			virtual void Read(unsigned char &value){unsigned char _t;Read(&_t,sizeof(unsigned char));value =  _t;};
+			virtual void Read(bool &value){bool _t;Read(&_t,sizeof(bool));value =  _t;};
+			virtual void Read(UINT &value){UINT _t;Read(&_t,sizeof(UINT));value =  _t;};
+			virtual void Read(float &value){float _t;Read(&_t,sizeof(float));value =  _t;};
+			virtual void Read(double &value){double _t;Read(&_t,sizeof(double));value =  _t;};
+
+			virtual const int ReadInt(){int _t;Read(&_t,sizeof(int));return _t;};
+			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
+			virtual const unsigned short ReadUShort(){unsigned short _t;Read(&_t,sizeof(unsigned short));return _t;};
+			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
+			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};
+			virtual const float ReadFloat(){float _t;Read(&_t,sizeof(float));return _t;};
+			virtual const double ReadDouble(){double _t;Read(&_t,sizeof(double));return _t;};
+
 			virtual bool Write(const void * pData, ULONG numBytes);
+			virtual void Write(const int value){Write((void *)(&value),sizeof(int));};
+			virtual void Write(const char value){Write((void *)(&value),sizeof(char));};
+			virtual void Write(const unsigned short value){Write((void *)(&value),sizeof(unsigned short));};
+			virtual void Write(const bool value){Write((void *)(&value),sizeof(bool));};
+			virtual void Write(const UINT value){Write((void *)(&value),sizeof(UINT));};
+			virtual void Write(const float value){Write((void *)(&value),sizeof(float));};
+			virtual void Write(const double value){Write((void *)(&value),sizeof(double));};
+
 			virtual bool Expect(void* pData, ULONG numBytes);
 			virtual long Seek(long offset);
 			virtual long Skip(long numBytes);
@@ -49,6 +75,7 @@ namespace psycle
 			virtual long FileSize(void);
 			virtual bool ReadString(std::string &string);
 			virtual bool ReadString(char* pData, ULONG maxBytes);
+			const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const ULONG maxLength);
 			virtual long GetPos(void);
 			virtual FILE* GetFile(void) { return NULL; };
 			static ULONG FourCC(char const *psName);
@@ -66,6 +93,13 @@ namespace psycle
 			virtual BOOL Close(void);
 			virtual BOOL Error();
 			virtual bool Read(void* pData, ULONG numBytes);
+
+			virtual const int ReadInt(){int _t;Read(&_t,sizeof(int));return _t;};
+			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
+			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
+			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};
+			virtual const float ReadFloat(){float _t;Read(&_t,sizeof(float));return _t;};
+
 			virtual bool Write(const void* pData, ULONG numBytes);
 			virtual bool Expect(void* pData, ULONG numBytes);
 			virtual long Seek(long offset);

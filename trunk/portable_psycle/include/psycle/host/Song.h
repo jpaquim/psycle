@@ -29,7 +29,7 @@ namespace psycle
 				/// ???
 				CPoint viewSize;
 			#endif
-			/// wether this song has been saved to a file
+			/// Is this song saved to a file?
 			bool _saved;
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
@@ -55,13 +55,13 @@ namespace psycle
 			#endif
 			/// the initial beats per minute (BPM) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
-			int BeatsPerMin;
+			int m_BeatsPerMin;
 			/// the initial ticks per beat (TPB) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int _ticksPerBeat;
 			/// samples per tick. (Number of samples that are produced for each line of pattern)
 			/// This is computed from the BeatsPerMin, _ticksPerBeat, and SamplesPerSeconds()
-			int SamplesPerTick;
+			int m_SamplesPerTick;
 			/// \todo Unused. Serves any function?
 			//int LineCounter;
 			/// \todo Unused. Serves any function?
@@ -212,6 +212,22 @@ namespace psycle
 			unsigned char * CreateNewPattern(int ps);
 			/// removes a pattern from this song.
 			void RemovePattern(int ps);
+			
+			const int SongTracks(){return SONGTRACKS;};
+			void SongTracks(const int value){ SONGTRACKS = value;};
+
+			const int BeatsPerMin(){return m_BeatsPerMin;};
+			void BeatsPerMin(const int value){ m_BeatsPerMin = value;};
+
+			const int TicksPerBeat(){return _ticksPerBeat;};
+			void TicksPerBeat(const int value){_ticksPerBeat = value;};
+
+			const int SamplesPerTick(){ return m_SamplesPerTick;};
+			void SamplesPerTick(const int samplePerTick){m_SamplesPerTick = samplePerTick;};
+
+			const bool IsInvalided(){return Invalided;};
+			void IsInvalided(const bool value){Invalided = value;};
+
 		};
 
 		inline unsigned char * Song::_ppattern(int ps)

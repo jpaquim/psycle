@@ -251,6 +251,7 @@ namespace psycle
 				}
 			}
 			playblock = pPlayer->_playBlock;
+			loopsong = pPlayer->_loopSong;
 			memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
 			memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
 			
@@ -578,6 +579,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				Global::pConfig->autoStopMachines=true;
 			}
 			Global::pPlayer->_playBlock=playblock;
+			Global::pPlayer->_loopSong=loopsong;
 			memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
 			Global::pConfig->_pOutputDriver->Enable(true);
 			Global::pConfig->_pMidiInput->Open();

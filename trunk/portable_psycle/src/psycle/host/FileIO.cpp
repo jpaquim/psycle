@@ -161,6 +161,14 @@ namespace psycle
 			return false;
 		}
 
+		const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const ULONG maxLength)
+		{
+			char* _buffer = new char[maxLength];
+			ReadString(_buffer,maxLength);
+			_tcscpy(pData,CA2T(_buffer));
+			delete [] _buffer;
+			return pData;
+		}
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
