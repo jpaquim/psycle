@@ -1141,24 +1141,26 @@ END
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 233
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    DEFPUSHBUTTON   "Start Psycle",IDOK,105,209,221,17,WS_GROUP
-    PUSHBUTTON      "Contributors && Credits",IDC_BUTTON1,7,209,97,17
     LTEXT           "Name\t\t\t\t\tContribution",IDC_HEADER,18,27,298,12,
                     SS_SUNKEN | NOT WS_VISIBLE | WS_BORDER
-    EDITTEXT        IDC_EDIT1,18,40,298,97,ES_MULTILINE | ES_NOHIDESEL | 
+    GROUPBOX        "Contributors List",IDC_STATIC,7,16,319,165
+    EDITTEXT        IDC_EDIT1,18,40,298,90,ES_MULTILINE | ES_NOHIDESEL | 
                     ES_READONLY | ES_WANTRETURN | NOT WS_VISIBLE | 
                     WS_VSCROLL
-    LTEXT           "Psycledelics Site:",IDC_STATIC,19,142,55,8
-    LTEXT           "Source Forge:",IDC_STATIC,19,154,46,8
-    EDITTEXT        IDC_EDIT2,79,142,236,11,ES_AUTOHSCROLL | ES_READONLY | 
+    LTEXT           "Psycledelics Site:",IDC_STATIC,19,132,55,8
+    EDITTEXT        IDC_EDIT2,79,132,236,11,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
-    EDITTEXT        IDC_EDIT5,79,154,236,11,ES_AUTOHSCROLL | ES_READONLY | 
+    LTEXT           "Source Forge:",IDC_STATIC,19,144,46,8
+    EDITTEXT        IDC_EDIT5,79,144,236,11,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
+    CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
+                    WS_BORDER,0,0,335,186
+    LTEXT           "ASIO Support Using PortAudio Library",IDC_ASIO,133,158,
+                    182,8,NOT WS_VISIBLE
     LTEXT           "VST Virtual Studio Technology v2.0 (C)2000 by Steinberg",
                     IDC_STEINBERGCOPY,133,169,182,8,NOT WS_VISIBLE
-    GROUPBOX        "Contributors List",IDC_STATIC,7,16,319,165
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,8,187,320,1,
                     WS_EX_STATICEDGE
     CONTROL         "Show About Dialog at Startup",IDC_SHOWATSTARTUP,"Button",
@@ -1167,8 +1169,8 @@ BEGIN
                     SS_CENTERIMAGE,WS_EX_TRANSPARENT
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,8,203,320,1,
                     WS_EX_STATICEDGE
-    CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
-                    WS_BORDER,0,0,335,186
+    PUSHBUTTON      "Contributors && Credits",IDC_BUTTON1,7,209,97,17
+    DEFPUSHBUTTON   "Start Psycle",IDOK,105,209,221,17,WS_GROUP
     CONTROL         "",IDC_HEADERDLG,"Static",SS_BLACKRECT | NOT WS_VISIBLE | 
                     WS_BORDER,0,0,335,13
 END

@@ -492,6 +492,7 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			{
 				pSong->Load(&file);
 				pSong->filesize=file.FileSize();
+				strcpy(pSong->fileName,infofileName);
 				file.Close();
 			}
 		}
