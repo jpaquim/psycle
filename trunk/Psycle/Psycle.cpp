@@ -152,6 +152,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CAboutDlg)
 	enum { IDD = IDD_ABOUTBOX };
+	CStatic	m_asio;
 	CEdit	m_sourceforge;
 	CEdit	m_psycledelics;
 	CStatic	m_steincopyright;
@@ -189,6 +190,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAboutDlg)
+	DDX_Control(pDX, IDC_ASIO, m_asio);
 	DDX_Control(pDX, IDC_EDIT5, m_sourceforge);
 	DDX_Control(pDX, IDC_EDIT2, m_psycledelics);
 	DDX_Control(pDX, IDC_STEINBERGCOPY, m_steincopyright);
@@ -198,7 +200,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
 	DDX_Control(pDX, IDC_EDIT1, m_contrib);
 	DDX_Control(pDX, IDC_VERSION_INFO, m_versioninfo);
-
 	//}}AFX_DATA_MAP
 }
 
@@ -232,6 +233,7 @@ void CAboutDlg::OnContributors()
 		m_headerdlg.ShowWindow(SW_SHOW);
 		m_psycledelics.ShowWindow(SW_SHOW);
 		m_sourceforge.ShowWindow(SW_SHOW);
+		m_asio.ShowWindow(SW_SHOW);
 		m_steincopyright.ShowWindow(SW_SHOW);
 	}
 	else 
@@ -242,6 +244,7 @@ void CAboutDlg::OnContributors()
 		m_headerdlg.ShowWindow(SW_HIDE);
 		m_psycledelics.ShowWindow(SW_HIDE);
 		m_sourceforge.ShowWindow(SW_HIDE);
+		m_asio.ShowWindow(SW_HIDE);
 		m_steincopyright.ShowWindow(SW_HIDE);
 	}
 }

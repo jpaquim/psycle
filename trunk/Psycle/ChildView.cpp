@@ -907,7 +907,8 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 		switch (result)
 		{
 		case IDYES:
-			if (!file.Create(filepath.GetBuffer(1), true))
+			strcpy(szText,filepath);
+			if (!file.Create(szText, true))
 			{
 				sprintf(szText,"Error writing to %s!",filepath);
 				MessageBox(szText,szTitle,MB_ICONEXCLAMATION);

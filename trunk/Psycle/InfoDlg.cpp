@@ -60,8 +60,8 @@ BOOL CInfoDlg::OnInitDialog()
 	m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
 	m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
 	m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
-	m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,48,1);
-	m_machlist.InsertColumn(4,"OutWir",LVCFMT_RIGHT,48,1);
+	m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
+	m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
 	m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 	
 	char buffer[64];

@@ -2,7 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by Psycle.rc
 //
-#define IDCANCEL2                       3
+#define IDC_COPY                        3
 #define ID_INDICATOR_SEQPOS             52
 #define ID_INDICATOR_PATTERN            53
 #define ID_INDICATOR_LINE               54
@@ -12,7 +12,7 @@
 #define ID_INDICATOR_NOTEOFF            58
 #define ID_INDICATOR_TWEAKS             59
 #define ID_INDICATOR_OCTAVE             60
-#define IDR_MAINFRAME                   100
+#define IDR_MAINFRAME                   101
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
 #define IDB_LESSLESS                    104
@@ -77,12 +77,14 @@
 #define IDD_SAVESONG                    183
 #define IDD_INST_EDITOR                 185
 #define IDD_SWINGFILL                   187
+#define IDD_PORTAUDIO_ASIO_CONFIG       188
 #define IDB_MASTERBACK                  190
 #define IDB_MASTERNUMBERS               191
 #define IDB_MASTERSLIDER                192
 #define IDB_PATTERN_HEADER_SKIN         194
 #define IDB_MACHINE_SKIN                195
 #define IDD_GEAR_SCOPE                  196
+#define IDB_ASIO                        198
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -145,6 +147,7 @@
 #define IDC_EDIT5                       1052
 #define IDC_SHOWATSTARTUP               1053
 #define IDC_SLIDER5                     1054
+#define IDC_ASIO                        1054
 #define IDC_SLIDER6                     1055
 #define IDC_DRYSLIDER                   1056
 #define IDC_DRYLABEL                    1057
@@ -582,14 +585,25 @@
 #define IDC_SLIDERM9                    1469
 #define IDC_MBG_MV_FONT2                1469
 #define IDC_SLIDERM10                   1470
+#define IDC_LINE_NUMBERS_CURSOR         1470
 #define IDC_SLIDERM11                   1471
 #define IDC_SLIDERM12                   1472
 #define IDC_SEQCUT                      1473
 #define IDC_SEQCOPY                     1474
 #define IDC_SEQPASTE                    1475
+#define IDC_SEQDELETE                   1476
 #define IDC_VERSION_INFO                1479
 #define IDC_BUTTON                      1481
 #define IDC_SLIDER                      1482
+#define IDC_VOLSLIDER                   1484
+#define IDC_PORTAUDIO_ASIO_DEVICE       1485
+#define IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO 1486
+#define IDC_PORTAUDIO_ASIO_DITHER       1487
+#define IDC_PORTAUDIO_ASIO_BUFNUM_EDIT  1488
+#define IDC_PORTAUDIO_ASIO_BUFNUM_SPIN  1489
+#define IDC_PORTAUDIO_ASIO_BUFSIZE_EDIT 1490
+#define IDC_PORTAUDIO_ASIO_BUFSIZE_SPIN 1491
+#define IDC_PORTAUDIO_ASIO_LATENCY      1492
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -661,15 +675,17 @@
 #define ID_HELP_README                  32896
 #define ID_HELP_TWEAKING                32897
 #define ID_HELP_KEYBTXT                 32898
+#define ID_BARREC                       32902
+#define ID_POP_DELETE                   32903
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        197
-#define _APS_NEXT_COMMAND_VALUE         32899
-#define _APS_NEXT_CONTROL_VALUE         1484
+#define _APS_NEXT_RESOURCE_VALUE        201
+#define _APS_NEXT_COMMAND_VALUE         32904
+#define _APS_NEXT_CONTROL_VALUE         1493
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif
