@@ -93,6 +93,8 @@ struct SPatternUndo
 	int editline;
 	int editcol;
 	int seqpos;
+	// counter for tracking, works like ID
+	int counter;
 };
 
 enum {
@@ -169,17 +171,18 @@ public:
 	void IncPosition();
 	void DecPosition();
 
-	void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
-	void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos);
-	void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
-	void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos);
-	void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
-	void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos);
-	void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
-	void AddRedoSong(int edittrack, int editline, int editcol, int seqpos);
+	void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+	void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+	void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+	void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+	void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+	void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+	void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+	void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
 	void KillUndo();
 	void KillRedo();
 	void SelectNextTrack();  // for armed tracks recording
+	void SetTitleBarText();
 
 public:
 
@@ -304,6 +307,9 @@ private:
 
 	SPatternUndo * pUndoList;
 	SPatternUndo * pRedoList;
+
+	int UndoCounter;
+	int UndoSaved;
 
 	int mcd_x;
 	int mcd_y;
