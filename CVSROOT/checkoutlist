@@ -11,6 +11,3 @@
 #	[<whitespace>]<filename><whitespace><error message><end-of-line>
 #
 # comment lines begin with '#'
-
-commitlog commitlog not found in CVSROOT
-commitlog.portable_psycle commitlog.portable_psycle not found in CVSROOT
