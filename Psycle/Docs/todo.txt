@@ -221,6 +221,36 @@ EOF
 
 * Vsts:
 ------------
+** Steinberg Halion 2 VSTI: when you click "open halion program" nothing happens. the file browser window 
+	doesnt even pop up. ive tried this with aodix and it works fine.
+** Steinberg LM4 MKII VSTI : when you click "open/import drum kit" nothing happens - prolly this file 
+	browser problem happens with more Steinberg plugins.
+**  Waldorf PPG WAVE 2.V VSTI : psycle misses/skips notes ramdomly - to check this fill in all 64 
+	pattern ticks with notes and press play - ive tried this plug with aodix and it worked fine.
+*** Speedsoft Virtual Sampler VSTI : open the plug's gui and click "view" -> "Rack view". the plug 
+	will change its gui to rack view (wich is a smaller window). close the plugs gui. reopen the gui; 
+	the plug will crash with : "Acess violation at adress 0047F99C in module 'psycle.exe'. 
+	Read of adress 00000038" This crash happens with more plugs wich change the size of their gui.
+*** E-phonic Invader VSTI (synthedit) crashes psycle if you press play several times (...press F5 & F8 
+	alternated and in a fast way to make it happen)... the plug doesnt even needs to be playng sounds 
+	to crash psycle, it just needs to be loaded and connected to the master. when psycle crashes 
+	because of invader sometimes it displays the following message : "Assertion failed : sampleFrames: 
+	0, file..\se_sdk\SEModule_base.cpp, line 157" ive made a screenshot of this error in case someone 
+	wants to...erm..."error window gaze"  This crash happens in the latest beta 1.7.3 [May-16-2003] & 
+	in the previous 1.7.2 release, BUT it DOESNT happen in the beta 1.7a [Dec-06-2002] .this was the 
+	beta previous to the implementation of the new routing code. At the time ive kept it cause it was 
+	much more cpu friendlier.
+** Psycle's Import VST Banks feature doesnt work with most FXB banks - something to do with chunks bla 
+	bla bla - [Jaz] knows what im talking about (and you prolly too). FXP support would be nice too.
+** When you Load a VST/VSTi preset file using a plug's built in preset manager, the preset names above 
+	the parameters box are not updated.
+** Biskmark BS-16 VSTI (soundfont player) (and prolly BS-1 also) - when loading a track using BS-16 i 
+	get a window saying : "Error : file open". this windows has an "ok" button bellow. i click "ok" 
+	and the soundfont is loaded into BS-16. if i use 3 soundfonts in a song i have to click "ok" 3 
+	times. An old version of psycle had the same problem. This problem was fixed in psycle 1.6 release 
+	(i think, note really sure of the ver). Now it reapeared with the new file format. This is the only 
+	bug im reporting that only happens in the latest beta 1.7.3 [May-16-2003]. all the previous 
+	reports happened since previous versions.
 ***	Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra and JAL7OH-)
 		[Fix:Basically, make ONLY .fxb for VST's.]
 **	The Winamp plugin shows a memory leak with modules that have VST's. I have overlooked but I
