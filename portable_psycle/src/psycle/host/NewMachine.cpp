@@ -478,11 +478,16 @@ namespace psycle
 					pProgress->m_Progress.StepIt();
 					::Sleep(1);
 				}
+
 				loop = finder.FindNextFile();
 				::CString sDllName, tmpPath;
 				sDllName = finder.GetFileName();
 				sDllName.MakeLower();
-				if(finder.IsDirectory()) continue; // Meaning : If it is not a directory and it is not in the cache ... <bohan> ???
+				
+				if(finder.IsDirectory()) continue;
+				/// workaround for a FindFile bug where short filenames are matched as well as long filenames.
+				if(sDllName.Right(4) != ".dll") continue;
+
 				out << finder.GetFilePath() << " ... ";
 				out.flush();
 				FILETIME time;
