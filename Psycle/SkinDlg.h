@@ -10,6 +10,13 @@
 /////////////////////////////////////////////////////////////////////////////
 // CSkinDlg dialog
 
+
+struct SFontName
+{
+	SFontName* pPrev;
+	char szName[64];
+};
+
 class CSkinDlg : public CPropertyPage
 {
 	DECLARE_DYNCREATE(CSkinDlg)
@@ -54,7 +61,7 @@ public:
 	char _pattern_fontface[64];
 	static CComboBox* pm_pattern_fontface;
 	static HDC hDC;
-//	static int numFonts;
+	static SFontName* pNameStruct;
 
 	int _pattern_font_point;
 	int _pattern_font_x;
@@ -65,7 +72,6 @@ public:
 
 	char _skinPathBuf[MAX_PATH];
 
-	HWND m_hWnd;
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };

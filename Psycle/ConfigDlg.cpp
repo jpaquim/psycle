@@ -195,9 +195,9 @@ int CConfigDlg::DoModal()
 			{
 				if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Tahoma"))
 				{
-					if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"MS Sans Seriff"))
+					if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Verdana"))
 					{
-						_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Verdana");
+						_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Arial Bold");
 					}
 				}
 			}

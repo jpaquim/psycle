@@ -12,7 +12,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define MAX_FONTS 512
+#define MAX_FONTS 256
 
 /////////////////////////////////////////////////////////////////////////////
 // CSkinDlg property page
@@ -120,30 +120,33 @@ int CALLBACK CSkinDlg::EnumFontFamExProc(
 {
 	// due to the stupid way ms font enum callback works, you have to find the family, and then enumerate that
 	// again if you want everything to be listed
-	LOGFONT lf;
-	memset(&lf,0,sizeof(lf));
-//	lf.lfCharSet = ANSI_CHARSET;
-	lf.lfCharSet = DEFAULT_CHARSET;
-	strcpy(lf.lfFaceName,(char*)lpelfe->elfFullName);
-	char* p = strchr(lf.lfFaceName,32); // space
-	if ((p) && (p!=lf.lfFaceName))
+	if ((lpelfe->elfFullName[0] >= 33) &&
+		(lpelfe->elfFullName[0] <= 126))
 	{
-		p[0] = 0;
+		// no bad characters
+		for (UINT i = 0; i < strlen((char*)lpelfe->elfFullName); i++)
+		{
+			if ((lpelfe->elfFullName[i] < 32) ||
+				(lpelfe->elfFullName[i] > 126))
+			{
+				return 1;
+			}
+		}
+		// no duplicates
+		SFontName* pNew = pNameStruct;
+		while (pNew)
+		{
+			if (strcmp(pNew->szName,(char*)lpelfe->elfFullName)==0)
+			{
+				return 1;
+			}
+			pNew=pNew->pPrev;
+		}
+		pNew = new SFontName;
+		pNew->pPrev = pNameStruct;
+		strcpy(pNew->szName,(char*)lpelfe->elfFullName);
+		pNameStruct = pNew;
 	}
-
-	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
-	if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
-	{
-		pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
-//		numFonts++;
-	}
-	/*
-	if (numFonts >= MAX_FONTS)
-	{
-		::MessageBox(0,"You have more than 512 fonts, you are crazy!","font enumeration error",0);
-		return 0;
-	}
-	*/
 	return 1;
 }
 
@@ -154,29 +157,35 @@ int CALLBACK CSkinDlg::EnumFontFamExProc2(
   LPARAM lParam             // application-defined data
 )
 {
-	if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
+	// no bad characters thanks
+	if ((lpelfe->elfFullName[0] >= 33)
+		&& (lpelfe->elfFullName[0] <= 126))
 	{
-		pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
-//		numFonts++;
+		for (UINT i = 0; i < strlen((char*)lpelfe->elfFullName); i++)
+		{
+			if ((lpelfe->elfFullName[i] < 32) ||
+				(lpelfe->elfFullName[i] > 126))
+			{
+				return 1;
+			}
+		}
+		// no duplicates thanks
+		if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
+		{
+			pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
+		}
 	}
-	/*
-	if (numFonts >= MAX_FONTS)
-	{
-		return 0;
-	}
-	*/
 	return 1;
 }
 
 CComboBox * CSkinDlg::pm_pattern_fontface;
 HDC CSkinDlg::hDC;
-//int CSkinDlg::numFonts;
+SFontName* CSkinDlg::pNameStruct;
 
 BOOL CSkinDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 
-	m_hWnd = GetParent()->m_hWnd;
 	m_gfxbuffer.SetCheck(_gfxbuffer);
 	m_wireaa.SetCheck(_wireaa);
 	m_linenumbers.SetCheck(_linenumbers);
@@ -190,19 +199,33 @@ BOOL CSkinDlg::OnInitDialog()
 		m_wirewidth.AddString(s);
 	}
 	m_wirewidth.SetCurSel(_wirewidth-1);
-//	sprintf(s,"%2i",_wirewidth);
-//	m_wirewidth.SelectString(0,s);
 
 	LOGFONT lf;
 	memset(&lf,0,sizeof(lf));
-//	lf.lfCharSet = ANSI_CHARSET;
-	lf.lfCharSet = DEFAULT_CHARSET;
+	lf.lfCharSet = ANSI_CHARSET;
+//	lf.lfCharSet = DEFAULT_CHARSET;
 	hDC = ::GetDC( NULL );
 
 	pm_pattern_fontface = &m_pattern_fontface;
-//	numFonts = 0;
-//	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
+	pNameStruct = NULL;
 	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc, 0, 0);
+	// done this way instead of recursive because recursive fucks up on huge lists of fonts...
+	while (pNameStruct)
+	{
+		strcpy(lf.lfFaceName,pNameStruct->szName);
+		EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
+		// enumerate the root too
+		char* p = strchr(lf.lfFaceName,32); // space
+		if ((p) && (p!=lf.lfFaceName))
+		{
+			p[0] = 0;
+			EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
+		}
+
+		SFontName* pNew = pNameStruct;
+		pNameStruct = pNameStruct->pPrev;
+		delete pNew;
+	}
 	::ReleaseDC( NULL, hDC );
 
 	int sel;
@@ -213,10 +236,14 @@ BOOL CSkinDlg::OnInitDialog()
 		sel = m_pattern_fontface.FindStringExact(0,"Tahoma");
 		if (sel==CB_ERR)
 		{
-			sel = m_pattern_fontface.FindStringExact(0,"MS Sans Seriff");
+			sel = m_pattern_fontface.FindStringExact(0,"Verdana");
 			if (sel==CB_ERR)
 			{
-				sel=0;
+				sel = m_pattern_fontface.FindStringExact(0,"Arial Black");
+				if (sel==CB_ERR)
+				{
+					sel=0;
+				}
 			}
 		}
 	}
@@ -1024,10 +1051,14 @@ void CSkinDlg::OnImportReg()
 			sel = m_pattern_fontface.FindStringExact(0,"Tahoma");
 			if (sel==CB_ERR)
 			{
-				sel = m_pattern_fontface.FindStringExact(0,"MS Sans Seriff");
+				sel = m_pattern_fontface.FindStringExact(0,"Verdana");
 				if (sel==CB_ERR)
 				{
-					sel=0;
+					sel = m_pattern_fontface.FindStringExact(0,"Arial Black");
+					if (sel==CB_ERR)
+					{
+						sel=0;
+					}
 				}
 			}
 		}
