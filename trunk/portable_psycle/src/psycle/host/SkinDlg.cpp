@@ -736,6 +736,7 @@ namespace psycle
 				char buf[512];
 				while (fgets(buf, 512, hfile))
 				{
+					// <bohan> this is a horror of repetitive code :-(
 					if (strstr(buf,"\"pattern_fontface\"=\""))
 					{
 						char *q = strchr(buf,61); // =
