@@ -49,6 +49,7 @@ V1.67
 ! Fixed the crash bug happening when changing from waveout to Directound (and viceversa).
 * Complete pattern display overhaul, including many new features and bugfixes (pooplog)
 ! Fixed two memory leaks when loading songs with plugins (native as well as VST)
++ SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
 
 
 V1.66
