@@ -67,7 +67,7 @@ Configuration::Configuration()
 	mv_generator_fontcolour = 0x00000000;
 	mv_effect_fontcolour = 0x00000000;
 	mv_wireaa = 1;
-	mv_triangle_size = 24;
+	mv_triangle_size = 22;
 	mv_wirewidth = 1;
 	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
 			((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
