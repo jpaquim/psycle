@@ -419,6 +419,17 @@ private:
 	SPatternDraw pPatternDraw[MAX_DRAW_MESSAGES];
 	int numPatternDraw;
 
+	// Enviroment variables
+	int smac;
+	int smacmode;
+	int wiresource;
+	int wiredest;
+	int wiremove;
+	int wireSX;
+	int wireSY;
+	int wireDX;
+	int wireDY;
+
 	int maxt;		// num of tracks shown
 	int maxl;		// num of lines shown
 	int tOff;		// Track Offset (first track shown)
