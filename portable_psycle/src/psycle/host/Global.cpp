@@ -163,16 +163,16 @@ namespace psycle
 				//operating_system::logger::operator()(level, string);
 				if((*this)(level))
 				{
-					ostream << "=== "
+					ostream() << "=== ";
 					switch(level)
 					{
-					case trace: ostream() << "trace"; break;
-					case info: ostream() << "info"; break;
-					case exception: ostream() << "exception"; break;
-					case crash: ostream() << "crash"; break;
+					case loggers::levels::trace: ostream() << "trace"; break;
+					case loggers::levels::info: ostream() << "info"; break;
+					case loggers::levels::exception: ostream() << "exception"; break;
+					case loggers::levels::crash: ostream() << "crash"; break;
 					default: ostream() << "default"; break;
 					}
-					ostream << " ===" << std::endl;
+					ostream() << " ===" << std::endl;
 					ostream() << string << std::endl;
 					ostream().flush();
 					operating_system::console::log(level, string);
