@@ -16,7 +16,7 @@
 
 #include "in2.h"	// Winamp Input plugin header file
 
-#define WA_PLUGIN_VERSION "1.1"
+#define WA_PLUGIN_VERSION "1.1a"
 
 // post this to the main window at end of file (after playback has stopped)
 #define WM_WA_PSY_EOF WM_USER+2
@@ -275,10 +275,10 @@ int play(char *fn)
 	{
 		return -1;
 	}
-	while ( mod.outMod->IsPlaying())
+/*	while ( mod.outMod->IsPlaying())
 	{
 		Sleep(10);
-	}
+	}*/
 	_global._pSong->filesize=file.FileSize();
 	loading = true;
 //	_global._pSong->New();
