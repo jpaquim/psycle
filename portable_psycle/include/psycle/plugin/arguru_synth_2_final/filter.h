@@ -85,7 +85,8 @@ public:
 	}
 	void SetParametricEQ(float fc, float q, float v, float esr, float gain=1.0f)
 	{
-		float sq = (float)sqrt(2.0*(double)v);
+		// not used: float sq = (float)sqrt(2.0*(double)v);
+
 		float omega = TWOPI_F*fc/esr;
 		float k = (float) tan((double)omega*0.5);
 		float kk = k*k;

@@ -31,7 +31,7 @@ public:
 			Information::Parameter::exponential("fm frequency", 0.0001 * math::pi * 2, 0, 100 * math::pi * 2),
 			Information::Parameter::exponential("fm bandwidth", 0.0001 * math::pi * 2, 0, 22050 * math::pi * 2)
 		};
-		static const Information information(Information::Type::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan & the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Type::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 

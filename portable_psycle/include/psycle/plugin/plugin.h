@@ -1,5 +1,3 @@
-#ifndef PSYCLE__PLUGIN
-#define PSYCLE__PLUGIN
 #pragma once
 #include <string>
 #include <sstream>
@@ -7,10 +5,12 @@
 #include "../scale.h"
 #include <exception>
 /// \file
-/// \brief yet another psycle api by bohan
+/// \brief yet another psycle plugin interface api by bohan
+/// This one is more object-oriented than the original "MachineInterface.h" one.
 namespace psycle { namespace plugin {
 
-class Host_Plugin // the plugin class used by the host hence to which all plugins must conform
+/// the plugin class used by the host hence to which all plugins must conform.
+class Host_Plugin
 {
 public:
 	class Information
@@ -77,11 +77,11 @@ public:
 				maximum_value(0)
 			{}
 		public:
-#		if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR < 7
+		#if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR < 7
 			enum { inmput_maximum_value = 0xffff };
-#		else
+		#else
 			static const int input_maximum_value = 0xffff;
-#		endif
+		#endif
 		private:
 			Parameter(const char name[], const Scale & scale, const Real & default_value, const int & input_maximum_value = Parameter::input_maximum_value)
 			:
@@ -280,4 +280,3 @@ protected:
 	} \
 
 }}
-#endif

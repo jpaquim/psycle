@@ -1,15 +1,10 @@
-// filter.cpp: implementation of the filter class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#include "filter.h"
+#include <psycle/plugin/arguru_synth_2_final/filter.h>
+///\file filter.cpp
+///\brief implementation of the filter class.
 
 #define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))
 #define THREESEL(sel,a,b,c) ((sel)<120)?((a)+((b)-(a))*(sel)/120):((b)+((c)-(b))*((sel)-120)/120)
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 /*
 filterS2::filterS2()
 {
@@ -86,13 +81,6 @@ void filterS2::SetFilter_Vocal2(int CurCutoff, int Resonance)
 }
 */
 
-//////////////////////////////////////////////////////////////////////////////
-//
-//
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
 filter::filter()
 {
 
@@ -105,7 +93,7 @@ filter::~filter()
 
 void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(264*pow(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(264*pow(32.,CurCutoff/240.));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
@@ -136,24 +124,24 @@ void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
 
 void filter::SetFilter_4PoleEQ1(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(264*pow(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(264*pow(32.,CurCutoff/240.));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
-	float ScaleResonance=1.0;
-	float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
+	// not used: float ScaleResonance=1.0;
+	// not used: float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
 	Biquad.SetParametricEQ(cf,(float)(1.0+Resonance/12.0),float(6+Resonance/30.0),sr,0.4f/(1+(240-Resonance)/120.0f));
 	Biquad2.SetParametricEQ(float(cf/(1+Resonance/240.0)),float(1.0+Resonance/12.0),float(6+Resonance/30.0),sr,0.4f);
 }
 
 void filter::SetFilter_4PoleEQ2(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(264*pow(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(264*pow(32.,CurCutoff/240.));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
-	float ScaleResonance=1.0;
-	float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
+	// not used: float ScaleResonance=1.0;
+	// not used: float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
 	Biquad.SetParametricEQ(cf,8.0f,9.0f,sr,0.5f);
 	Biquad2.SetParametricEQ(float(cf/(3.5-2*Resonance/240.0)),8.0f,9.0f,sr,0.4f);
 }
