@@ -1500,6 +1500,53 @@ void CChildView::AddUndoSequence(int lines, int edittrack, int editline, int edi
 	}
 }
 
+void CChildView::AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pUndoList;
+	pUndoList = pNew;
+	// fill data
+	pNew->pData = new unsigned char[MAX_SONG_POSITIONS+MAX_PATTERN_BUFFER_LEN];
+	memcpy(pNew->pData, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
+	memcpy(pNew->pData+MAX_SONG_POSITIONS,_pSong->pPatternData,MAX_PATTERN_BUFFER_LEN*sizeof(char));
+	pNew->pattern = 0;
+	pNew->x = 0;
+	pNew->y = 0;
+	pNew->tracks = 0;
+	pNew->lines = _pSong->playLength;
+	pNew->type = UNDO_SONG;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+
+	if (bWipeRedo)
+	{
+		KillRedo();
+	}
+}
+
+void CChildView::AddRedoSong(int edittrack, int editline, int editcol, int seqpos)
+{
+	SPatternUndo* pNew = new SPatternUndo;
+	pNew->pPrev = pRedoList;
+	pRedoList = pNew;
+	// fill data
+	pNew->pData = new unsigned char[MAX_SONG_POSITIONS+MAX_PATTERN_BUFFER_LEN];
+	memcpy(pNew->pData, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
+	memcpy(pNew->pData+MAX_SONG_POSITIONS,_pSong->pPatternData,MAX_PATTERN_BUFFER_LEN*sizeof(char));
+	pNew->pattern = 0;
+	pNew->x = 0;
+	pNew->y = 0;
+	pNew->tracks = 0;
+	pNew->lines = _pSong->playLength;
+	pNew->type = UNDO_SONG;
+	pNew->edittrack = edittrack;
+	pNew->editline = editline;
+	pNew->editcol = editcol;
+	pNew->seqpos = seqpos;
+}
+
 void CChildView::AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos)
 {
 	SPatternUndo* pNew = new SPatternUndo;
@@ -1612,11 +1659,37 @@ void CChildView::OnEditUndo()
 			// display changes
 			Repaint(DMPatternChange);
 			// delete undo from list
-			SPatternUndo* pTemp = pUndoList->pPrev;
-			delete (pUndoList->pData);
-			delete (pUndoList);
-			pUndoList = pTemp;
+			{
+				SPatternUndo* pTemp = pUndoList->pPrev;
+				delete (pUndoList->pData);
+				delete (pUndoList);
+				pUndoList = pTemp;
+			}
 			break;
+		case UNDO_SONG:
+			AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition);
+			// do undo
+			memcpy(_pSong->playOrder, pUndoList->pData, MAX_SONG_POSITIONS*sizeof(char));
+			memcpy(_pSong->pPatternData,pUndoList->pData+MAX_SONG_POSITIONS,MAX_PATTERN_BUFFER_LEN*sizeof(char));
+			_pSong->playLength = pUndoList->lines;
+			// set up cursor
+			editcur.track = pUndoList->edittrack;
+			editcur.line = pUndoList->editline;
+			editcur.col = pUndoList->editcol;
+			editPosition = pUndoList->seqpos;
+			pParentMain->UpdatePlayOrder(true);
+			pParentMain->UpdateSequencer();
+			// display changes
+			Repaint(DMPatternChange);
+			// delete undo from list
+			{
+				SPatternUndo* pTemp = pUndoList->pPrev;
+				delete (pUndoList->pData);
+				delete (pUndoList);
+				pUndoList = pTemp;
+			}
+			break;
+
 		}
 	}
 }
@@ -1713,11 +1786,36 @@ void CChildView::OnEditRedo()
 			pParentMain->UpdateSequencer();
 			// display changes
 			Repaint(DMPatternChange);
-			// delete redo from list
-			SPatternUndo* pTemp = pRedoList->pPrev;
-			delete (pRedoList->pData);
-			delete (pRedoList);
-			pRedoList = pTemp;
+			{
+				// delete redo from list
+				SPatternUndo* pTemp = pRedoList->pPrev;
+				delete (pRedoList->pData);
+				delete (pRedoList);
+				pRedoList = pTemp;
+			}
+			break;
+		case UNDO_SONG:
+			AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,FALSE);
+			// do undo
+			memcpy(_pSong->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
+			memcpy(_pSong->pPatternData,pRedoList->pData+MAX_SONG_POSITIONS,MAX_PATTERN_BUFFER_LEN*sizeof(char));
+			_pSong->playLength = pRedoList->lines;
+			// set up cursor
+			editcur.track = pRedoList->edittrack;
+			editcur.line = pRedoList->editline;
+			editcur.col = pRedoList->editcol;
+			editPosition = pRedoList->seqpos;
+			pParentMain->UpdatePlayOrder(true);
+			pParentMain->UpdateSequencer();
+			// display changes
+			Repaint(DMPatternChange);
+			{
+				// delete redo from list
+				SPatternUndo* pTemp = pRedoList->pPrev;
+				delete (pRedoList->pData);
+				delete (pRedoList);
+				pRedoList = pTemp;
+			}
 			break;
 		}
 	}

@@ -88,6 +88,7 @@ enum {
 	UNDO_PATTERN,
 	UNDO_LENGTH,
 	UNDO_SEQUENCE,
+	UNDO_SONG,
 };
 /////////////////////////////////////////////////////////////////////////////
 // CChildView window
@@ -161,6 +162,8 @@ public:
 	void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos);
 	void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
 	void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos);
+	void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE);
+	void AddRedoSong(int edittrack, int editline, int editcol, int seqpos);
 	void KillUndo();
 	void KillRedo();
 
