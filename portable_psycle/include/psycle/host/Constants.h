@@ -12,8 +12,9 @@ namespace psycle
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "ProductVersion", "x, x, x, x"
 		/// - src/psycle/host/resources/Psycle.rc: VALUE "SpecialBuild", "msvc 7.1"
 		/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
-		#define VERSION_NUMBER \
-		"$Revision$" \
+		//#define VERSION_NUMBER \
+			"$Revision$" \
+			"$Date$" \
 			// "Release 1.7.7.0"
 
 		/// number of samples per tweak slide update
