@@ -51,7 +51,7 @@ void Player::Start(int line)
 #endif // _WINAMP_PLUGIN_
 	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 0;
 	_playPattern = Global::_pSong->playOrder[_playPosition];
-	_ticksRemaining = Global::_pSong->SamplesPerTick;
+	_ticksRemaining = 0; //Global::_pSong->SamplesPerTick;
 	bpm=Global::_pSong->BeatsPerMin;
 	tpb=Global::_pSong->_ticksPerBeat;
 	_playing = true;
