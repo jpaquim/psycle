@@ -489,7 +489,7 @@ bool Plugin::Load(RiffFile* pFile)
 		if (!Instance(sPath2))
 		{
 			char sError[_MAX_PATH];
-			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with dummy.",sDllName);
+			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
 			::MessageBox(NULL,sError, "Error", MB_OK);
 			result = false;
 		}

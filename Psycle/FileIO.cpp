@@ -27,6 +27,7 @@ bool RiffFile::Open(
 	char* psFileName)
 {
 	DWORD bytesRead;
+	strcpy(szName,psFileName);
 
 	_modified = false;
 	_handle = ::CreateFile(psFileName,
@@ -48,6 +49,8 @@ bool RiffFile::Create(
 	bool overwrite)
 {
 	DWORD bytesWritten;
+	strcpy(szName,psFileName);
+
 	_modified = false;
 	_handle = ::CreateFile(psFileName,
 		GENERIC_READ|GENERIC_WRITE, 0, NULL,
@@ -67,7 +70,7 @@ bool RiffFile::Create(
 	return true;
 }
 
-void RiffFile::Close(
+BOOL RiffFile::Close(
 	void)
 {
 	DWORD bytesWritten;
@@ -77,8 +80,9 @@ void RiffFile::Close(
 		WriteFile(_handle, &_header, sizeof(_header), &bytesWritten, NULL);
 		_modified = false;
 	}
-	CloseHandle(_handle);
+	BOOL b = CloseHandle(_handle);
 	_handle = INVALID_HANDLE_VALUE;
+	return b;
 }
 
 bool RiffFile::Read(
@@ -210,6 +214,7 @@ bool OldPsyFile::Create(
 	char* psFileName,
 	bool overwrite)
 {
+	strcpy(szName,psFileName);
 	_file = fopen(psFileName, "rb");
 	if (_file != NULL)
 	{
@@ -224,15 +229,23 @@ bool OldPsyFile::Create(
 	return (_file != NULL);
 }
 
-void OldPsyFile::Close(
-	void)
+BOOL OldPsyFile::Close()
 {
 	if ( _file != NULL )
 	{
 		fflush(_file);
+		BOOL b = !ferror(_file);
 		fclose(_file);
 		_file = NULL;
+		return b;
 	}
+	return true;
+}
+
+BOOL OldPsyFile::Error()
+{
+	BOOL b = !ferror(_file);
+	return b;
 }
 
 bool OldPsyFile::Read(
