@@ -2382,8 +2382,8 @@ BEGIN
     EDITTEXT        IDC_RANGEEND,159,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "to",IDC_STATIC,148,92,8,8
     LTEXT           "(in HEX value)",IDC_STATIC,189,92,47,10
-    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
-                    119,246,12
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | 
+                    WS_BORDER,7,119,246,12
     DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,161,140,50,14
     PUSHBUTTON      "Close",IDCANCEL,212,140,41,14
     CONTROL         "Record all the song",IDC_RECSONG,"Button",
