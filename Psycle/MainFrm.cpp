@@ -78,6 +78,7 @@ ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
 ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
 ON_BN_CLICKED(IDC_SEQDEL, OnSeqdel)
+ON_BN_CLICKED(IDC_SEQDUPLICATE, OnSeqduplicate)
 ON_WM_ACTIVATE()
 ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
 ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
@@ -1362,22 +1363,22 @@ void CMainFrame::OnSeqnew()
 	if ( m_wndView.editPosition < MAX_PATTERNS )
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		m_wndView.editPosition++;
 		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
 			++_pSong->playLength;
 		}
 
+		m_wndView.editPosition++;
 		int const pop=m_wndView.editPosition;
-		for(int c=(_pSong->playLength-1);c>pop;c--)
+		for(int c=(_pSong->playLength-1);c>=pop;c--)
 		{
 			_pSong->playOrder[c]=_pSong->playOrder[c-1];
 		}
-		_pSong->playOrder[pop]=_pSong->GetNumPatternsUsed();
+		_pSong->playOrder[m_wndView.editPosition]=_pSong->GetNumPatternsUsed();
 		
-		if ( _pSong->playOrder[pop]>= MAX_PATTERNS )
+		if ( _pSong->playOrder[m_wndView.editPosition]>= MAX_PATTERNS )
 		{
-			_pSong->playOrder[pop]=MAX_PATTERNS-1;
+			_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
 		}
 
 		UpdatePlayOrder(false);
@@ -1393,18 +1394,58 @@ void CMainFrame::OnSeqins()
 	if ( m_wndView.editPosition < MAX_PATTERNS )
 	{
 		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		m_wndView.editPosition++;
 		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
 			++_pSong->playLength;
 		}
 
+		m_wndView.editPosition++;
 		int const pop=m_wndView.editPosition;
-		for(int c=(_pSong->playLength-1);c>pop;c--)
+		for(int c=(_pSong->playLength-1);c>=pop;c--)
 		{
 			_pSong->playOrder[c]=_pSong->playOrder[c-1];
 		}
-		_pSong->playOrder[pop]=_pSong->playOrder[pop-1];
+
+		UpdatePlayOrder(false);
+		UpdateSequencer();
+
+		m_wndView.Repaint(DMPatternChange);
+	}
+	m_wndView.SetFocus();
+}
+
+void CMainFrame::OnSeqduplicate() 
+{
+	int newpat = _pSong->GetNumPatternsUsed();
+	if ((m_wndView.editPosition < MAX_PATTERNS) && (newpat < MAX_PATTERNS-1))
+	{
+		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+		int oldpat = _pSong->playOrder[m_wndView.editPosition];
+		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+		{
+			++_pSong->playLength;
+		}
+
+		m_wndView.editPosition++;
+		int const pop=m_wndView.editPosition;
+		for(int c=(_pSong->playLength-1);c>=pop;c--)
+		{
+			_pSong->playOrder[c]=_pSong->playOrder[c-1];
+		}
+
+		_pSong->playOrder[m_wndView.editPosition]=newpat;
+		
+		// now we copy the data
+		m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+		memcpy(&_pSong->pPatternData[MULTIPLY2*newpat],&_pSong->pPatternData[MULTIPLY2*oldpat],MULTIPLY2);
+		// now we copy the length
+		if (_pSong->patternLines[newpat] != _pSong->patternLines[oldpat])
+		{
+			m_wndView.AddUndoLength(newpat,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			_pSong->patternLines[newpat] = _pSong->patternLines[oldpat];
+		}
+		// and the name
+		memcpy(&_pSong->patternName[newpat],&_pSong->patternName[oldpat],sizeof(char)*32);
 
 		UpdatePlayOrder(false);
 		UpdateSequencer();
