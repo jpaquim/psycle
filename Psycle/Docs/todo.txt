@@ -10,9 +10,16 @@ X low priority
 
 [blah]  <- Notes written by developers
 
-
 * New and unsorted and untested
 ------------
+
+<lastfutur> oh by the way please remember to make autosave optional?
+<lastfutur> pooplog: another improvement: adjustable autosave interval and no autosaving while recording/rendering
+<lastfutur> because it still cuts the notes on a hand full of vstis
+<alk_> The "revert to saved" dialog shuold say: "Warning! You will lose everything done since song 
+	was saved!"
+<alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
+	lists one for gen, one for fx
 
 * alk: select the the first and last row of channel 2 to select the whole channel
 	move to channel 1, goto the last row, do select end of block
