@@ -929,7 +929,7 @@ BEGIN
     LTEXT           "Gear Browser",IDC_STATIC,7,2,88,9
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    TVS_TRACKSELECT | TVS_SINGLEEXPAND | WS_BORDER | 
+                    TVS_TRACKSELECT | WS_BORDER | 
                     WS_TABSTOP,7,13,187,223
     GROUPBOX        "Machine Properties",IDC_STATIC,201,7,176,111
     LTEXT           "Name",IDC_STATIC,223,19,20,8
