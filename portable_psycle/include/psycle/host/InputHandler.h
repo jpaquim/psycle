@@ -45,7 +45,7 @@ namespace psycle
 		/// .
 		const int CS_EDT_START = 512;
 		/// .
-		const int CS_LAST = 1024;
+		const int CS_LAST = max_cmds;
 		///\}
 
 		/// command set.
@@ -230,7 +230,7 @@ namespace psycle
 				return (ID==other.ID);	
 			}
 
-			bool IsValid()
+			inline bool IsValid()
 			{
 				return (ID!=cdefNull);
 			}
@@ -250,8 +250,6 @@ namespace psycle
 			{
 				switch(ID)
 				{
-				case cdefNull: return "-";
-
 				case cdefKeyC_0: return "Key (Oct.0) C";
 				case cdefKeyCS0: return "Key (Oct.0) C#";
 				case cdefKeyD_0: return "Key (Oct.0) D";
@@ -390,12 +388,10 @@ namespace psycle
 
 				case cdefErrorLog:	return "Show Error Log";
 
+				case cdefNull:
 				default:
-					//assert(false);
-					// <bohan> argh. it happens!!!
-					std::stringstream s; s << "input handler: command definition: unknown command: " << ID;
-					psycle::host::loggers::exception(s.str());
-					return "[unknow command!]";
+					// This is a valid point. It is used when doing searches for name.
+					return "Invalid";
 				}
 			}
 		};
@@ -460,6 +456,8 @@ namespace psycle
 			bool ConfigSave();
 			/// .
 			bool ConfigRestore();
+			/// . 
+			bool ParseOldFileformat();
 			///\}
 		public:	
 			///\name behaviour
