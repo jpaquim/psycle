@@ -192,6 +192,7 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 	{
 		// get next values
 		for(int row=0;row<iNumRows;row++)
+		{
 			for(int col=0;col<iTracks;col++)
 			{	
 				// reset
@@ -230,7 +231,7 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 				}								
 
 				// translate
-				e._inst = instr;			
+				e._inst = instr;	
 				e._mach = 0;				
 
 				// volume/command
@@ -277,10 +278,13 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 						break;	// transpose
 				}
 
-
+				if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+				{
+					e._mach = -1;
+				}
 				WritePatternEntry(s,patIdx,row,col,e);	
-
 			}
+		}
 	}
 
 	//int z = ftell(_file);
