@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.7  2005/01/14 22:34:42  johan-boule
+new version
+
 Revision 1.6  2005/01/14 22:09:14  jaz001
 fix for resources not being editable inside MSVC
 
@@ -42,7 +45,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__VERSION__CODEBASE 1
 #define PSYCLE__VERSION__MAJOR 7
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 20 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 21 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
