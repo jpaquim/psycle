@@ -3,17 +3,13 @@
 +=addition
 
 * psycle default theme sucks
-* Taika-Kim - Whenever I have the red ! pressed and I set wave export it gets depressed and I get no sound 
-	from Psycle until I press it down again, or sometimes only one instrument is played until the button 
-	is pressed down again, etc.
-+ <_sue_> centering psycle master machine would be cool also...as well as centering the open file menus....
-	and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
-	convenient for when you have folders with many files as you usually do with samples
 
-* Other crap
+* Machines
 ------------
-<Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
-<Alk^^> in pooplog filter tweak inertia doesnt work
+* <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
+* <Alk^^> in pooplog filter tweak inertia doesnt work
+* cyanphase vibrasynth has an access violation bug
+* <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 
 * Sampler Machine/Wave Ed:
 --------------------------
@@ -95,6 +91,9 @@ feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 * Player Engine:
 ----------------
 * Midiout is NOT solid...
+* Taika-Kim - Whenever I have the red ! pressed and I set wave export it gets depressed and I get no sound 
+	from Psycle until I press it down again, or sometimes only one instrument is played until the button 
+	is pressed down again, etc.
 * <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
 * <sue> playbar should take latency into account - same as ^
 * song length calculation does not take ffxx/fexx commands into account
@@ -130,6 +129,9 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 
 * Interface:
 ------------
+* <alk> "pattern step" bar, all widgets are misaligned (2 pixels to low) e.g. gear rack etc.. Alk likes to 
+	have things aligned and balanced =) (feng shui) , also the seq bar the things are offcentre (are closer 
+	to the left)
 * <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
 * <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
@@ -143,6 +145,12 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	when you want.
 ! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! record button should set edit mode and follow mode on, should have new export wav button
+! <alk> increase pattern step (to 64?) (to go with the 256 row  patterns)
++ <alk> song properties (allow carriage returns, make box bigger?)
++ <alk> be able to save/load key config
++ <_sue_> centering psycle master machine would be cool also...as well as centering the open file menus....
+	and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
+	convenient for when you have folders with many files as you usually do with samples
 + <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
 	pattern length parameter
 + <Alk^> I also think that the cursor movement after a paste should be optional to =)

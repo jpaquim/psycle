@@ -123,6 +123,7 @@ public:
 	CPoint _connectionPoint[MAX_CONNECTIONS];
 	PatternEntry	TriggerDelay[MAX_TRACKS];
 	int				TriggerDelayCounter[MAX_TRACKS];
+	int				RetriggerRate[MAX_TRACKS];
 	
 	Machine();
 	virtual ~Machine();
