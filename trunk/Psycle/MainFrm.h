@@ -171,6 +171,7 @@ protected:
 	afx_msg void OnCentercursor();
 	afx_msg void OnCursordown();
 	afx_msg void OnRecordNoteoff();
+	afx_msg void OnRecordTweaks();
 	afx_msg void OnCloseupAuxselect();
 	afx_msg void OnSelchangeAuxselect();
 	afx_msg void OnDeclong();

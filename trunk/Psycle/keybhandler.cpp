@@ -126,32 +126,30 @@ void CChildView::MidiPatternTweak(int command, int value)
 	{ 
 		// write effect
 		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
 		unsigned char * offset = _offset(ps);
 		unsigned char * toffset = _toffset(ps);
 		
 		// realtime note entering
 		if (Global::pPlayer->_playing&&_followSong)
 		{
-			offset = _offset(ps);
-			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.line;
 		}
 
 		// build entry
 		PatternEntry *entry = (PatternEntry*) toffset;
 		if (entry->_note >= 120)
 		{
-			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 			entry->_mach = _pSong->seqBus;
 			entry->_cmd = (value>>8)&255;
 			entry->_parameter = value&255;
 			entry->_inst = command;
 			entry->_note = 121;
-
-			int mgn;
-			if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
-				mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-			else
-				mgn = _pSong->busMachine[_pSong->seqBus];
 
 			drawTrackStart=editcur.track;
 			drawTrackEnd=editcur.track;
@@ -197,29 +195,27 @@ void CChildView::MidiPatternCommand(int command, int value)
 	{ 
 		// write effect
 		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
 		unsigned char * offset = _offset(ps);
 		unsigned char * toffset = _toffset(ps);
 		
 		// realtime note entering
 		if (Global::pPlayer->_playing&&_followSong)
 		{
-			offset = _offset(ps);
-			toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.track;
 		}
 
-		AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+		AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 		// build entry
 		PatternEntry *entry = (PatternEntry*) toffset;
 		entry->_mach = _pSong->seqBus;
 		entry->_inst = _pSong->auxcolSelected;
 		entry->_cmd = command;
 		entry->_parameter = value;
-
-		int mgn;
-		if ( (_pSong->seqBus & MAX_BUSES) ) // If it is an effect
-			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-		else
-			mgn = _pSong->busMachine[_pSong->seqBus];
 
 		drawTrackStart=editcur.track;
 		drawTrackEnd=editcur.track;
@@ -251,6 +247,50 @@ void CChildView::MidiPatternCommand(int command, int value)
 
 		// play
 		pMachine->Tick(0,&entry);
+	}
+}
+
+void CChildView::MousePatternTweak(int machine, int command, int value)
+{
+	// UNDO CODE MIDI PATTERN TWEAK
+	if (value < 0) value = 0;
+	else if (value > 65535) value = 65535;
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		
+		// realtime note entering
+		if (Global::pPlayer->_playing&&_followSong)
+		{
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.line;
+		}
+
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if (entry->_note >= 120)
+		{
+			AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			entry->_mach = machine;
+			entry->_cmd = (value>>8)&255;
+			entry->_parameter = value&255;
+			entry->_inst = command;
+			entry->_note = 121;
+
+			drawTrackStart=editcur.track;
+			drawTrackEnd=editcur.track;
+			drawLineStart=editcur.line;
+			drawLineEnd=editcur.line;
+
+			Repaint(DMDataChange);
+		}
 	}
 }
 

@@ -311,8 +311,6 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			max_v = 1000;
 		}
 
-
-
 		if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 			( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 		{
@@ -361,6 +359,11 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 		if ( _pMachine->_type == MACH_PLUGIN )
 		{
 			((Plugin*)_pMachine)->GetInterface()->ParameterTweak(tweakpar, (int)nv);
+			// well, this isn't so hard... just put the twk record here
+			if (Global::pConfig->_RecordTweaks)
+			{
+				wndView->MousePatternTweak(index, tweakpar, (int)nv);
+			}
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{

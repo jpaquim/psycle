@@ -96,6 +96,7 @@ ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
 ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
 ON_BN_CLICKED(IDC_INCLONG, OnInclong)
 ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
+ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
 //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -300,6 +301,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
 	cb->SetCheck(Global::pConfig->_RecordNoteoff?1:0);
+
+	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS);
+	cb->SetCheck(Global::pConfig->_RecordTweaks?1:0);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW);
 	cb->SetCheck(m_wndView._followSong?1:0);
@@ -1156,6 +1160,8 @@ void CMainFrame::ShowMachineGui(int tmac)
 			{
 			m_pWndMac[tmac] = new CFrameMachine(0);
 			((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+			((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
+			((CFrameMachine*)m_pWndMac[tmac])->index=m_wndView.FindBusFromIndex(tmac);
 
 			m_pWndMac[tmac]->LoadFrame(
 				IDR_MACHINEFRAME, 
@@ -1642,6 +1648,12 @@ void CMainFrame::OnRecordNoteoff()
 	m_wndView.SetFocus();
 }
 
+void CMainFrame::OnRecordTweaks() 
+{
+	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_TWEAKS))->GetCheck() ) Global::pConfig->_RecordTweaks=true;
+	else Global::pConfig->_RecordTweaks=false;
+	m_wndView.SetFocus();
+}
 
 void CMainFrame::OnFollowSong() 
 {

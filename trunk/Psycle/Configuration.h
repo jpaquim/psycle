@@ -43,6 +43,7 @@ public:
 	bool _cursorAlwaysDown;
 	bool _midiMachineViewSeqMode;
 	bool _RecordNoteoff;
+	bool _RecordTweaks;
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
 

@@ -47,6 +47,9 @@ private:
 public:
 	void SelectMachine(Machine* pMachine);
 	void Generate();
+	CChildView *wndView;
+	int index;
+
 	bool* _pActive;
 
 // Overrides

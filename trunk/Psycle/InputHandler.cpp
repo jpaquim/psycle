@@ -706,7 +706,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 			nmac = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
 
 		if (nmac < MAX_MACHINES && Global::_pSong->_machineActive[nmac])
-			pMainFrame->ShowMachineGui(nmac);
+			pMainFrame->ShowMachineGui(nmac);//, Global::_pSong->seqBus);
 		break;
 
 	case cdefEditMachine:
