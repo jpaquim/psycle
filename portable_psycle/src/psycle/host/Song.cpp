@@ -986,19 +986,23 @@ namespace psycle
 				long filesize = pFile->FileSize();
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
-				pFile->Read(&chunkcount,sizeof(chunkcount));
 				if(version > CURRENT_FILE_VERSION)
 				{
-					// there is an error, this file is newer than this build of psycle
-					::MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", 0, 0);
+					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 				}
-				pFile->Skip(size - sizeof chunkcount); // This ensures that any extra data is skipped.
-				/*
-				else
+				if (size == 4) // Since "version" is used for File version, we use size as version identifier
 				{
-					// This is left here if someday, extra data is added to the file version chunk.
+					
+				}
+				/*
+				else if (size == )
+				{
+				// This is left here if someday, extra data is added to the file version chunk.
+				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - 8);
 				}
 				*/
+				else pFile->Skip(size - 4/*Size of the current Header DATA*/); // This ensures that any extra data is skipped.
+
 				DestroyAllMachines();
 				_machineLock = true;
 				DeleteInstruments();

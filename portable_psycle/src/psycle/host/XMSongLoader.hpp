@@ -23,7 +23,7 @@ namespace host{
 		const LONG LoadPatterns(Song & song);
 		const LONG LoadSinglePattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
 		const bool LoadInstruments(XMSampler & sampler, LONG iInstrStart);
-		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx);
+		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
 		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const LONG LoadSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
