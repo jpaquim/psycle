@@ -510,14 +510,14 @@ bool VSTPlugin::DescribeValue(int parameter,char* psTxt)
 		if(parameter<_pEffect->numParams)
 		{
 //			char par_name[64];
-			char par_display[64];
-			char par_label[64];
+			char par_display[64]={0};
+			char par_label[64]={0};
 
 //			Dispatch(effGetParamName,parameter,0,par_name,0.0f);
 			Dispatch(effGetParamDisplay,parameter,0,par_display,0.0f);
 			Dispatch(effGetParamLabel,parameter,0,par_label,0.0f);
 //			sprintf(psTxt,"%s:%s%s",par_name,par_display,par_label);
-			sprintf(psTxt,"%s%s",par_display,par_label);
+			sprintf(psTxt,"%s(%s)",par_display,par_label);
 			return true;
 		}
 		else	sprintf(psTxt,"Invalid NumParams Value");

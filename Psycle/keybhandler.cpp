@@ -2053,7 +2053,7 @@ void CChildView::KillUndo()
 	}
 	UndoCounter = 0;
 	UndoSaved = 0;
-	SetTitleBarText();
+//	SetTitleBarText();
 }
 
 
