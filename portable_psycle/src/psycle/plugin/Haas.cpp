@@ -48,7 +48,7 @@ public:
 		{
 			Information::Parameter::linear("dry/wet", 0, 1, 1),
 			Information::Parameter("direct"),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), std::pow(10., -6. / 20), std::pow(10., +24. / 20)),
+			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
 			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter("early reflection"),
