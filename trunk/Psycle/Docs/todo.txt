@@ -13,13 +13,10 @@ X low priority
 * New and unsorted and untested
 ------------
 
-<lastfutur> oh by the way please remember to make autosave optional?
-<lastfutur> pooplog: another improvement: adjustable autosave interval and no autosaving while recording/rendering
-<lastfutur> because it still cuts the notes on a hand full of vstis
-<alk_> The "revert to saved" dialog shuold say: "Warning! You will lose everything done since song 
-	was saved!"
+<lastfutur> no autosaving while recording/rendering
 <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
+	[JAZ: And a third one for Instruments. Time to time]
 
 * alk: select the the first and last row of channel 2 to select the whole channel
 	move to channel 1, goto the last row, do select end of block
@@ -33,16 +30,19 @@ X low priority
 **	<_sue_> the gainer machine doesnt work
 		[ getting stuck bug i have been able to recreate once but not debug-when i recreated it,
 		song was fucking up bad due to not enough buffers (and too small)]
+		[JAZ:Could this have happened due to the fixed but where psycle stopped machines
+		when having "autostop" enabled, and doing "Record (to wav)"?]
 **	cyanphase vibrasynth has an access violation bug
 		[ I need source to fix]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
 *	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 !	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
-! alk: dalay delay is not precise enough (in terms of time)
-+ pooplog synths don't have gain lfo phase cmd?
+!	alk: dalay delay is not precise enough (in terms of time)
+		[JAZ: Ehem... use the keyboard arrows for sample-precise tweaking]
++	pooplog synths don't have gain lfo phase cmd?
 ++	<[JAZ]> Internals still miss mouse tweak, right?
-+	<alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
++	alk/[JAZ] Add Osci/etc from wire dialog to Master Dialog.
 +	<pooplog> it would be nice to have an internal wavein machine to get live input
 		<Druttis> Yes
 		<trylle> i mean that it records and plays back at the same time * record wave in too
@@ -66,8 +66,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Wave Editor:
 --------------------------
-! alk: escape to close wave ed
-+++ <_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
+!	alk: escape to close wave ed
+		[JAZ : It's a window, not a dialog]
++++	<_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
 		[Problem: Needs a sampler Machine. The wave preview is not adecuated
 		 it doesn't loop, and doesn't take note into consideration ]
 +	ALK waveed: remove silence from start and end of wave
@@ -98,26 +99,26 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * GUI (machines):
 -----------------
-** preview check box in preset dialog stopped working? 
+**	preview check box in preset dialog stopped working? 
 	[ it works, but you can't test notes realtime because the dialog is modal ]
 **	alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window,
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
-* moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
+*	moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
 	on every frame - make bigger buffers and more of them to prevent this from happening
-* <bdzld> when you put a machine on top of each other, the vus always pop to the top?
-* <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
-* <alk> in felix.psy can't connect attack generator to the compressor effect (machine connect failed) 
-	[ this file has been corrupted somehow, how/when was it saved? ]
-	[ it was saved in march or april in and old version, most likely bugged alpha - SO we should forget about it ]
+*	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
+*	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
+*	<alk> in felix.psy can't connect attack generator to the compressor effect (machine connect failed) 
+		[ this file has been corrupted somehow, how/when was it saved? ]
+		[ it was saved in march or april in and old version, most likely bugged alpha - SO we should forget about it ]
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
 !?	alk - make wires square ended, like spec analyser
-+ Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
-+ Directories in "Add new machine" (Sorting with directories)
++	Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
++	Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
-+ Internal Fx Gui to Native Gui Conversion (including wiredialog, or not...)
++	Internal Fx Gui to Native Gui Conversion (including wiredialog, or not...)
 		 Create a new "universal" MachineFrame class, for all plugins
 		 (Needs a few more changes in the class definitions)
 +	VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
@@ -150,13 +151,13 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)
 ++	tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
-++FF DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
+++FF	DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
 	machines ....
 +	pattern repeat (loop) and song repeat (asked by Vir|us)
-+ alk: global Delay Trigger, that affects every note (not just the one on this channel)
-	[this seems hard, because the player will have to scan all tracks for this command, then go back and
++	alk: global Delay Trigger, that affects every note (not just the one on this channel)
+		[this seems hard, because the player will have to scan all tracks for this command, then go back and
 		play the tracks]
-+FF Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to 
++FF	Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to 
 	file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to 
 	vol+panning for the gui for the user.
 
@@ -198,11 +199,11 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ***	Midiout is NOT solid...
 *	MIDI out only works with Waveout
 ++	midi control commands learn
-++  midi control commands handling 14 bit messages
+++	midi control commands handling 14 bit messages
 ++	velocity should be able to store data to instrument column. So should other midi messages
-++ <lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
+++	<lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
 	the active machine to machine number [program number] ...this enables psycle for live use without screen
-+ <lastfutur> future feature requests for the controllers tab: midi routing presets; 
++	<lastfutur> future feature requests for the controllers tab: midi routing presets; 
 	checkbox: binding which machine is active to incoming program changes; 
 	binding midi routing presets to machines; (possibly: save the presets in the psy)
 
@@ -212,21 +213,21 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[_fileName doesn't store the SongDir, and it gets reseted after closing the config dialog.
 		Fix: add directory to filename and remove it for titlebar and load/save dialogs]
 		[ -> config dialog only changes SongDir if user changes it in the dialog ]
-** <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
+**	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
-** <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
+**	<lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
 	combinations don't work either, like ctrl+pageup etc.
-** <[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
+**	<[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
 	the info when new one.
-** should save wire dialog settings
+**	should save wire dialog settings
 *??	why does it take so long to load a song?
-* <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
+*	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 *	<alk> there's a bug where when u alt-tab the icon is not correct 
 		[ cannot find the reason, older version had this too ]
-* <alk> 'play current block' loops current pattern -should it just play the selected block?
-* <alk> 'play current pattern' plays song from current order (which is the same function as 'play song (normal)' 
+*	<alk> 'play current block' loops current pattern -should it just play the selected block?
+*	<alk> 'play current pattern' plays song from current order (which is the same function as 'play song (normal)' 
 	-should it just play the current pattern?
-* <alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
+*	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or 
@@ -305,8 +306,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * File Format:
 ------------
-**FF psycle is saving the WRONG lines/beat from file.  I saved a song with 3, it loaded as 2.
-	[Save LPB instead of TicksPerBeat]
+**FF	psycle is saving the WRONG lines/beat from file.  I saved a song with 3, it loaded as 2.
+	[Save LPB instead of SamplesPerTick]
 **FF	plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
 *FF	if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)

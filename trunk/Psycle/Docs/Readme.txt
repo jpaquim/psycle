@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------------- 1.66 -----
+				------------------------------------- 1.7 ------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -15,9 +15,9 @@ contents:
 1. About PSYCLE:
 
 
-PSYCLE is a free OpenSource Music Production Studio,
+PSYCLE is a free OpenSource Music Production Studio
 that offers unlimited (opinions may vary) possibilites
-for creating your own music in a professional way. 
+for creating your own music in a professional way.
 
 PSYCLE has an Old-School Tracker interface, but it 
 supports VST Plugins and VST Instruments in addition
@@ -29,7 +29,7 @@ Here some facts about Psycle:
 - Stereo Sampler unit, that supports high quality
   stereo .wav files and .iff samples as well (more formats will eventually come)
 - 8 internal Plugins (Sampler & Effects)
-- 20+ Native Plugins (Generators & effects)
+- 20+ Native Plugins (Generators & effects), with open API for third party plugins.
 - VST + VSTi Host (still limited but most plugins will work fine)
 - Internal .wav output
 - Configurable Keyboard Layout
@@ -39,11 +39,7 @@ Here some facts about Psycle:
 and much much more...
 
 If you need help starting with Psycle, please, check the "Docs" section at
- __Psycledelics site__ (official Psycle Users Site)
-
-  http://psycle.pastnotecut.org/
-
-  or its mirror at: http://psycle.project-psy.com/
+Psycledelics site (official Psycle Users Site) (See the links at the bottom of this document)
 
 
 Note:
@@ -53,9 +49,9 @@ Plans for supporting DXi are there, but it's not a primary work.
 --------------------------------------------------------------------------------------------
 2. OpenSource Notes:
 
-PSYCLE is OpenSource. This Means: Everyone who thinks that he's the right person/alien
-for coding on PSYCLE can contact the Team of developers and ask/tell what he
-can do for Psycle.
+PSYCLE is OpenSource. This Means: Everyone who thinks that he/she is the right person/alien
+for coding on PSYCLE can contact the Team of developers and ask/tell what he/she can do for
+Psycle.
 
 Source Page is set at SourceForge site following this link:
 
@@ -70,9 +66,9 @@ This licensing applies ONLY to his sources, which day by day are less and less.
 
 The current team preffers to enforce that psycle sources remain Free to everyone, which
 means everyone can see and modify the source, but If he does it, he cannot distribute them
-in a closed way.
+in a closed way. (This means, if you do so, you have to give the sources as well)
 
-He might, on the other hand, distrubute them as his own work, specifying that it
+You might, on the other hand, distrubute them as your own work, specifying that it
 is A DERIVED WORK FROM PSYCLE
 
 
@@ -102,12 +98,15 @@ Sources for a Fast sinus calculation used in the Flanger are extracted from
 --------------------------------------------------------------------------------------------
 3. Development:
 
-Psycle 1:
-	It is still alive. This version confirms it. Much more will come in the following
-	months, as long as the dev. team has time.
+Psycle 1: (The only active one right now)
 
-	Next major steps will be : Multipattern sequence, mutisample instrument sampler
-				   and new fileformat.
+	Many improvements have been done in this new version ( 1.7 ) making it better in
+	many ways ( more stable, better looking, more powerful,... are just some of them).
+
+	Still, the main goals for a definitive Psycle 1 version haven't been reached, which
+	are still multipattern sequence, multisample instrument sampler and a new fileformat.
+	This will, with no more delays, come with the next version (at least the fileformat)
+
 
 
 For up to date information, don't forget to visit the Developement forums on Psycledelics 
@@ -116,7 +115,7 @@ site.
 --------------------------------------------------------------------------------------------
 4. Psycledelics' Community:
 
-This is the place to find the answers for your burning questions. 
+This is the place to find the answers for your burning questions.
 The Psycledelics community is still small but growing.
 
 	http://psycle.pastnotecut.org/
@@ -128,4 +127,5 @@ PSYCLE users, find usefull links to VST & other Audio related resources, or simp
 in the PSY-Boards. 
 
 Also, chat with other PSYCLE users or developers in our IRC - Channel:
-Join #psycle on EFNet
+Join #psycle on EFNet network
+ (some servers : irc.prison.net , irc.isdnet.fr , irc.homelien.no)

@@ -181,12 +181,12 @@
 			-	x changes the volume in the following way:
 				0 or 8 : No change
 				1: +1		9:  -1
-				2: +2		10: -2
-				3: +4		11: -4
-				4: +8		12: -8
-				5: +16		13: -16
-				6: *2/3		14: *3/2
-				7: *1/2		15: *2
+				2: +2		A: -2
+				3: +4		B: -4
+				4: +8		C: -8
+				5: +16		D: -16
+				6: *2/3		E: *3/2
+				7: *1/2		F: *2
 	
 
 	* Argury Synth 2f ( Also other (old) Arguru Synths) :

@@ -209,9 +209,9 @@ void CSaveWavDlg::OnSavewave()
 			}
 		}
 		lastpostick=pstart;
-		pPlayer->_playBlock=true;
 		pSong->playOrderSel[cont]=true;
 		pPlayer->Start(pstart,0);
+		pPlayer->_playBlock=true;
 		break;
 	case 2:
 		m_rangestart.GetWindowText(name);
@@ -219,7 +219,6 @@ void CSaveWavDlg::OnSavewave()
 		m_rangeend.GetWindowText(name);
 		tmp=_httoi(name.GetBuffer(2));
 		j=0;
-		pPlayer->_playBlock=true;
 		for (cont=pstart;cont<=tmp;cont++)
 		{
 			pSong->playOrderSel[cont]=true;
@@ -229,6 +228,7 @@ void CSaveWavDlg::OnSavewave()
 
 		lastpostick=pstart;
 		pPlayer->Start(pstart,0);
+		pPlayer->_playBlock=true;
 		break;
 	default:
 		SaveEnd();

@@ -17,10 +17,11 @@ V1.7
   too)
 * Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize,
    audioMasterAutomate and HostCanDo)
-! Fix several GDI Leaks (still missing a a few DC and bitmap ones).
+! Fix several GDI Leaks.
 ! Fixed problem with saving songs (affected TPB) when using a Sample Rate different than 44100.
 ! "Couldn't Save file" error when trying to save "autosave.psy" doesn't pop up now.
-! Fixed wave recording bug where it had an extra silent at the beggining and missing tick at the end.
++ Autosave option, and interval is user configurable now.
+! Fixed wave recording bug where it had an extra silent tick at the beggining and missing tick at the end.
 + Added functioning Track record arm buttons- new graphics required (pooplog)
 + Added midi velocity, modwheel, pitchbend, etc mapping to twks/cmds!! (pooplog)
 + Added "new" button in sequencer, changed insert button to behave as an insert button should (pooplog)
@@ -37,7 +38,7 @@ V1.7
 + Added Swing Fill command (pooplog)
 ! Increased max lines/pattern to 256 (pooplog)
 + Basic Mousewheel support for pattern edit mode, scrollbars detach from cursor, etc. (pooplog)
-* Fixed song bpm and tpb being misreported to machines if they used FF or FE command
+* Fixed song bpm and tpb being misreported to machines if FF or FE commands where used
 ! VU Meters are all nicer
 + Look of Machine Wires can be changed in the visual dialog (pooplog)
 ! Many small Optimizations and improvements

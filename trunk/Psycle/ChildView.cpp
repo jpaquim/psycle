@@ -946,7 +946,7 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 
 void CChildView::OnFileRevert()
 {
-	if (MessageBox("Proceed? You will lose all changes from last save!","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+	if (MessageBox("Warning! You will lose everything done since song was saved!","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 	{
 		if (Global::_pSong->_saved)
 		{
@@ -1085,13 +1085,14 @@ void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI)
 void CChildView::OnBarstop()
 {
 	bool pl = Global::pPlayer->_playing;
+	bool blk = Global::pPlayer->_playBlock;
 	Global::pPlayer->Stop();
 	pParentMain->SetAppSongBpm(0);
 	pParentMain->SetAppSongTpb(0);
 
 	if (pl)
 	{
-		if ( Global::pConfig->_followSong )
+		if ( Global::pConfig->_followSong && blk)
 		{
 			editPosition=prevEditPosition;
 			pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
