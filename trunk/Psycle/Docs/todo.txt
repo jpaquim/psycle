@@ -26,11 +26,13 @@ X low priority
 <alk_> and then could enter notes
 <alk_> I repeated it once, this time it coming back by not changing app, not quite sure how
 <alk_> sorry it's so vague..
+<alk_> are you busy?
 
 
 bugs --->
 
 hold down a note, change octave, let go (note stuck)
+
 
 **
 start new song
@@ -49,16 +51,15 @@ move cursor up to where there is a tweak
 PROBLEM-->
 try to delete (del key)
 try to select a block (ctrl-b ctrl-e)
+try to get cursor to repeat
 
 tab to another program
 tab back
 you are now able to delete and make a block
+
+[ OK this problem isn't that bad, it's just that the machine dialog has the keyboard focus and isn't 
+forwarding key messages correctly ]
 **
-
-new ideas --->
-
-remove keypress for random parameters on a machine,
-at the moment it's ctrl-R (dangerous)
 
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
