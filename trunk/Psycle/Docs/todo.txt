@@ -4,6 +4,8 @@
 
 pen alpha
 
+* <[JAZ]> actually.. another thing in the "todo" should be "fixing" the cache.map file so that it can 
+	include dates of dll's and update automatically the info when new one.
 * psycle default theme sucks
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> gear rack The description was : " a dialog with 
