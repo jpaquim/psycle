@@ -803,16 +803,18 @@ namespace psycle
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount)
 		{
-			char cache[_MAX_PATH];
-			GetModuleFileName(NULL,cache,_MAX_PATH);
-			
-			char *last = strrchr(cache,'\\');
-			strcpy(last,"\\plugin-scan.cache");
+			char modulefilename[_MAX_PATH];
+			GetModuleFileName(NULL,modulefilename,_MAX_PATH);
+			std::string path=modulefilename;
+			std::string::size_type pos=path.rfind('\\');
+			if(pos != std::string::npos)
+				path=path.substr(0,pos);
+			std::string cache=path + "\\plugin-scan.cache";
 
 			RiffFile file;
 			CFileFind finder;
 
-			if (!file.Open(cache)) 
+			if (!file.Open(cache.c_str())) 
 			{
 				return false;
 			}
@@ -823,7 +825,7 @@ namespace psycle
 			if (strcmp(Temp,"PSYCACHE")!=0)
 			{
 				file.Close();
-				DeleteFile(cache);
+				DeleteFile(cache.c_str());
 				return false;
 			}
 
@@ -832,7 +834,7 @@ namespace psycle
 			if (version > CURRENT_CACHE_MAP_VERSION)
 			{
 				file.Close();
-				DeleteFile(cache);
+				DeleteFile(cache.c_str());
 				return false;
 			}
 			file.Read(&_numPlugins,sizeof(_numPlugins));
