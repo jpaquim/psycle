@@ -399,7 +399,7 @@ namespace psycle
 			#if defined $
 				#error "macro clash"
 			#endif
-			#define $(function) \
+			#define $catch$(function) \
 				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
@@ -425,7 +425,7 @@ namespace psycle
 						// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address,
 						*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
 					}
-					$("operator()(AEffect * const plugin)")
+					$catch$("operator()(AEffect * const plugin)")
 				}
 			}
 
@@ -439,7 +439,7 @@ namespace psycle
 				{
 					return plugin().magic;
 				}
-				$("magic")
+				$catch$("magic")
 			}
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
@@ -460,7 +460,7 @@ namespace psycle
 				{
 					return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt);
 				}
-				$("dispatcher")
+				$catch$("dispatcher")
 				return 0; // dummy return to avoid warning
 			}
 			inline void proxy::process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
@@ -470,7 +470,7 @@ namespace psycle
 				{
 					plugin().process(&plugin(), inputs, outputs, sampleframes);
 				}
-				$("process")
+				$catch$("process")
 			}
 			inline void proxy::processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
 			{
@@ -479,7 +479,7 @@ namespace psycle
 				{
 					plugin().processReplacing(&plugin(), inputs, outputs, sampleframes);
 				}
-				$("processReplacing")
+				$catch$("processReplacing")
 			}
 			inline void proxy::setParameter(long int index, float parameter) throw(host::exceptions::function_error)
 			{
@@ -488,7 +488,7 @@ namespace psycle
 				{
 					plugin().setParameter(&plugin(), index, parameter);
 				}
-				$("setParameter")
+				$catch$("setParameter")
 			}
 			inline float proxy::getParameter(long int index) throw(host::exceptions::function_error)
 			{
@@ -497,7 +497,7 @@ namespace psycle
 				{
 					return plugin().getParameter(&plugin(), index);
 				}
-				$("getParameter")
+				$catch$("getParameter")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numPrograms() throw(host::exceptions::function_error)
@@ -507,7 +507,7 @@ namespace psycle
 				{
 					return plugin().numPrograms;
 				}
-				$("numPrograms")
+				$catch$("numPrograms")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numParams() throw(host::exceptions::function_error)
@@ -517,7 +517,7 @@ namespace psycle
 				{
 					return plugin().numParams;
 				}
-				$("numParams")
+				$catch$("numParams")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numInputs() throw(host::exceptions::function_error)
@@ -527,7 +527,7 @@ namespace psycle
 				{
 					return plugin().numInputs;
 				}
-				$("numInputs")
+				$catch$("numInputs")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numOutputs() throw(host::exceptions::function_error)
@@ -537,7 +537,7 @@ namespace psycle
 				{
 					return plugin().numOutputs;
 				}
-				$("numOutputs")
+				$catch$("numOutputs")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::flags() throw(host::exceptions::function_error)
@@ -547,7 +547,7 @@ namespace psycle
 				{
 					return plugin().flags;
 				}
-				$("flags")
+				$catch$("flags")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::uniqueId() throw(host::exceptions::function_error)
@@ -557,7 +557,7 @@ namespace psycle
 				{
 					return plugin().uniqueID;
 				}
-				$("uniqueId")
+				$catch$("uniqueId")
 				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::version() throw(host::exceptions::function_error)
@@ -567,11 +567,11 @@ namespace psycle
 				{
 					return plugin().version;
 				}
-				$("version")
+				$catch$("version")
 				return 0; // dummy return to avoid warning
 			}
 			#pragma warning(pop)
-			#undef $
+			#undef $catch$
 		}
 	}
 }
