@@ -56,7 +56,6 @@ public:
 	int LineCounter;
 	bool LineChanged;
 	
-
 	char currentOctave;
 
 	// Buses data

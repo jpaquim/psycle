@@ -93,10 +93,20 @@ public:
 		pFile->Read(&size,sizeof(size));
 		if (size)
 		{
-			byte* pData = new byte[size];
-			pFile->Read(pData, size); // Number of parameters
-			_pInterface->PutData(pData); // Internal load
-			delete pData;
+			if (version > CURRENT_FILE_VERSION_MACD)
+			{
+				// data is from a newer format of psycle, it might be unsafe to load.
+				pFile->Skip(size);
+				return FALSE;
+			}
+			else
+			{
+				byte* pData = new byte[size];
+				pFile->Read(pData, size); // Number of parameters
+				_pInterface->PutData(pData); // Internal load
+				delete pData;
+				return TRUE;
+			}
 		}
 		return TRUE;
 	};

@@ -19,7 +19,9 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
+*** when recording mouse tweaks, it puts the mac # of the currently selected machine instead of the machine you are tweaking
 *** psycle doesn't give an error message when save fails due to lack of space
+
 + humanizer
 + global volume fades
 + <bdzld> poop: can you make mcm interpolated? (like a midi tweak smooth)
@@ -375,20 +377,11 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * File Format:
 ------------
-**FF	psycle is saving the WRONG lines/beat from file.  I saved a song with 3, it loaded as 2.
-	[Save LPB instead of SamplesPerTick]
-**FF	plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
-		missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
-*FF	if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
-!!!FF	longer sequences (256)
-!!!FF	more tracks (64)
-+++FF	new file format: (machines save custom data length, patterns stored according to # tracks, sequence 
-		length stored according to length, vst multi-out, connections as linked lists, wire nodes, 
-		volume column, multiout info, direct x stuff, etc.)
++++FF	new file format: (machines save custom data length, patterns stored acording to # tracks, sequence 
+		length stored according to length, vst multi-out, 
+		volume column, direct x stuff, etc.)
 ++FF	songs should save master decrease flag
 		[This can be hacked by now without need of fileformat change]
-+FF	<pooplog> again i ask why the connection limit is 12 and not 16 or 24
-		[should use linked lists instead of arrays]
 
 
 

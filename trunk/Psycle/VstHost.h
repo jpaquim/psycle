@@ -5,6 +5,7 @@
 #include "Vst\AEffectx.h"
 #include "constants.h"
 #include "Helpers.h"
+#include "NewMachine.h"
 
 #define MAX_EVENTS		64
 #define MAX_INOUTS		8
@@ -43,19 +44,119 @@ public:
 		pFile->Read(&size,sizeof(size));
 		if (size)
 		{
-		// specific data for vst type
-		// chunk shit
+			if (version > CURRENT_FILE_VERSION_MACD)
+			{
+				// data is from a newer format of psycle, it might be unsafe to load.
+				pFile->Skip(size);
+				return FALSE;
+			}
+			else
+			{
+				pFile->Read(&_program,sizeof(_program));
+				// set the program
+				SetCurrentProgram(_program);
+
+				size -= sizeof(_program);
+				if (size > 0)
+				{
+					if(_pEffect->flags & effFlagsProgramChunks)
+					{
+						char* pData = new char[size];
+						pFile->Read(pData, size); // Number of parameters
+						Dispatch(effSetChunk,0, size, pData,0.0f);
+						delete pData;
+					}
+					else
+					{
+						// there is a data chunk, but this machine does not want one.
+						pFile->Skip(size);
+						return FALSE;
+					}
+				}
+			}
 		}
 		return TRUE;
 	};
+
+	bool LoadDll(char* psFileName)
+	{
+		_strlwr(psFileName);
+
+		char sPath2[_MAX_PATH];
+		CString sPath;
+#if defined(_WINAMP_PLUGIN_)
+		sPath = Global::pConfig->GetVstDir();
+		if ( FindFileinDir(psFileName,sPath) )
+		{
+			strcpy(sPath2,sPath);
+			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+			{
+				char sError[128];
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				return FALSE;
+			}
+		}
+		else
+		{
+			char sError[128];
+			sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+			::MessageBox(NULL,sError, "Loading Error", MB_OK);
+			return FALSE;
+		}
+#else // if !_WINAMP_PLUGIN_
+		if ( CNewMachine::dllNames.Lookup(psFileName,sPath) )
+		{
+			strcpy(sPath2,sPath);
+			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+			{
+				char sError[128];
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				return FALSE;
+			}
+		}
+		else
+		{
+			char sError[128];
+			sprintf(sError,"Missing VST plug-in \"%s\"",psFileName);
+			::MessageBox(NULL,sError, "Loading Error", MB_OK);
+			return FALSE;
+		}
+#endif // _WINAMP_PLUGIN_
+		return TRUE;
+	};
+
+
 
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
 	bool SaveChunk(RiffFile* pFile,bool &isfirst);	// "    "   "   " 
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
-		// specific data for vst type
-		// chunk shit
+		UINT size = sizeof(_program);
+		char* pData = NULL;
+
+		if(_pEffect->flags & effFlagsProgramChunks)
+		{
+			size += Dispatch( effGetChunk,0,0, &pData,0.0f);
+		}
+
+		pFile->Write(&size,sizeof(size));
+		pFile->Write(&_program,sizeof(_program));
+		size-=sizeof(_program);
+		if (size > 0)
+		{
+			pFile->Write(pData,size);
+		}
+
+	};
+	virtual void SaveDllName(RiffFile* pFile) 
+	{
+		CString str = GetDllName();
+		char str2[256];
+		strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+		pFile->Write(&str2,strlen(str2)+1);
 	};
 
 #endif // ndef _WINAMP_PLUGIN_
