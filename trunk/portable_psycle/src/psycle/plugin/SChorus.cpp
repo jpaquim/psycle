@@ -5,9 +5,10 @@
 // Alexey Smoli, http://st.karelia.ru/~smlalx
 // smlalx@yahoo.com
 
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
 #include <string.h>
 #include <stdlib.h>
-#include "..\machineinterface.h"
 
 #define MAXIMUM_DELAY   30000
 
