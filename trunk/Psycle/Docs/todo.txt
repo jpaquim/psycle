@@ -20,6 +20,18 @@ X low priority
 * New and unsorted and untested
 -------------------------------
 
+
+?+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
+	[50MB to clipboard? ehem...]
+?+ 'Free wave' button that sets driver to silent
+?+ release audio when psycle looses focus option
+	[And we will get lots of people again of why does psycle do that]
+?! Dunno if i mentioned this before: reaktorvst v3.05 crashes psycle when it generates the 'CPU overload' popup
+! Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
+
+
+
+
 +	Option to disable vus (to save CPU)
 +	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
 *	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
