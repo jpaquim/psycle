@@ -65,6 +65,9 @@ BOOL CWireDlg::OnInitDialog()
 	scope_osc_rate = 20;
 	scope_spec_bands = 16;
 	scope_spec_rate = 25;
+	scope_phase_rate = 20;
+
+	o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
 
 	Inval = false;
 	m_volslider.SetRange(0,256);
@@ -432,8 +435,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			break;
 		case 3: // phase scope
 			{
-				char buf[64];
-				sprintf(buf,"Phase Scope");
 
 				CPen linepen(PS_SOLID, 8, 0x00303030);
 
@@ -489,6 +490,15 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.SelectObject(&linepen);
 				clip = FALSE;
 
+				char buf[64];
+				sprintf(buf,"Refresh %.2fhz",1000.0f/scope_phase_rate);
+
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x606060);
+				bufDC.TextOut(4, 128-14, buf);
+				bufDC.SelectObject(oldFont);
+
 				// ok we need some points:
 
 				// max vol center
@@ -503,8 +513,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				// max vol phase right
 				// max vol dif phase right
 
-				float mvc, mvpc, mvdpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
-				mvc = mvpc = mvdpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
+				float mvc, mvpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
+				mvc = mvpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
 
 			   int index = _pSrcMachine->_scopeBufferIndex;
 			   for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
@@ -549,10 +559,10 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 							{
 								mvpc = awr+awl;
 							}
-							if (awr-awl > mvdpc)
-							{
-								mvdpc = awr-awl; 
-							}
+//							if (awr-awl > mvdpc)
+//							{
+//								mvdpc = awr-awl; 
+//							}
 						}
 					}
 					else if (awl > awr)
@@ -596,7 +606,75 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			   // ok we have some data, lets make some points and draw them
 			   // let's move left to right phase data first
 
+				if (mvpl > o_mvpl)
+				{
+					o_mvpl = mvpl;
+					o_mvdpl = mvdpl;
+				}
+				if (mvpc > o_mvpc)
+				{
+					o_mvpc = mvpc;
+				}
+				if (mvpr > o_mvpr)
+				{
+					o_mvpr = mvpr;
+					o_mvdpr = mvdpr;
+				}
+
+				if (mvl > o_mvl)
+				{
+					o_mvl = mvl;
+					o_mvdl = mvdl;
+				}
+				if (mvc > o_mvc)
+				{
+					o_mvc = mvc;
+				}
+				if (mvr > o_mvr)
+				{
+					o_mvr = mvr;
+					o_mvdr = mvdr;
+				}
+
 				int x,y;
+
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 3, 0x806060);
+				bufDC.SelectObject(&linepen);
+
+				x=f2i(sinf(-(F_PI/4.0f)-(o_mvdpl*F_PI/(32768.0f*4.0f)))
+							*o_mvpl*(128.0f/32768.0f))+128;
+				y=f2i(-cosf(-(F_PI/4.0f)-(o_mvdpl*F_PI/(32768.0f*4.0f)))
+							*o_mvpl*(128.0f/32768.0f))+128;
+				bufDC.MoveTo(x,y);
+				bufDC.LineTo(128,128);
+				bufDC.LineTo(128,128-f2i(o_mvpc*(128.0f/32768.0f)));
+				bufDC.MoveTo(128,128);
+				x=f2i(sinf((F_PI/4.0f)+(o_mvdpr*F_PI/(32768.0f*4.0f)))
+							*o_mvpr*(128.0f/32768.0f))+128;
+				y=f2i(-cosf((F_PI/4.0f)+(o_mvdpr*F_PI/(32768.0f*4.0f)))
+							*o_mvpr*(128.0f/32768.0f))+128;
+				bufDC.LineTo(x,y);
+								
+				// panning data
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 3, 0x608060);
+				bufDC.SelectObject(&linepen);
+
+				x=f2i(sinf(-(o_mvdl*F_PI/(32768.0f*4.0f)))
+							*o_mvl*(128.0f/32768.0f))+128;
+				y=f2i(-cosf(-(o_mvdl*F_PI/(32768.0f*4.0f)))
+							*o_mvl*(128.0f/32768.0f))+128;
+				bufDC.MoveTo(x,y);
+				bufDC.LineTo(128,128);
+				bufDC.LineTo(128,128-f2i(o_mvc*(128.0f/32768.0f)));
+				bufDC.MoveTo(128,128);
+				x=f2i(sinf((o_mvdr*F_PI/(32768.0f*4.0f)))
+							*o_mvr*(128.0f/32768.0f))+128;
+				y=f2i(-cosf((o_mvdr*F_PI/(32768.0f*4.0f)))
+							*o_mvr*(128.0f/32768.0f))+128;
+				bufDC.LineTo(x,y);
+
 
 				linepen.DeleteObject();
 				linepen.CreatePen(PS_SOLID, 3, 0xc08080);
@@ -635,11 +713,12 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 							*mvr*(128.0f/32768.0f))+128;
 				bufDC.LineTo(x,y);
 
-				CFont* oldFont= bufDC.SelectObject(&font);
-				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x606060);
-				bufDC.TextOut(4, 128-14, buf);
-				bufDC.SelectObject(oldFont);
+				o_mvpl -= scope_phase_rate*32.0f;
+				o_mvpc -= scope_phase_rate*32.0f;
+				o_mvpr -= scope_phase_rate*32.0f;
+				o_mvl -= scope_phase_rate*32.0f;
+				o_mvc -= scope_phase_rate*32.0f;
+				o_mvr -= scope_phase_rate*32.0f;
 			}
 			break;
 		}
@@ -698,6 +777,14 @@ void CWireDlg::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 			scope_spec_rate = m_slider2.GetPos();
 			KillTimer(2304+this_index);
 			SetTimer(2304+this_index,scope_spec_rate,0);
+		}
+		break;
+	case 3:
+		if (scope_phase_rate != m_slider2.GetPos())
+		{
+			scope_phase_rate = m_slider2.GetPos();
+			KillTimer(2304+this_index);
+			SetTimer(2304+this_index,scope_phase_rate,0);
 		}
 		break;
 	}
@@ -793,7 +880,9 @@ void CWireDlg::SetMode()
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		sprintf(buffer,"Stereo Phase");
-		SetTimer(2304+this_index,scope_osc_rate,0);
+		m_slider2.SetRange(10,100);
+		m_slider2.SetPos(scope_phase_rate);
+		SetTimer(2304+this_index,scope_phase_rate,0);
 		break;
 	}
 	m_mode.SetWindowText(buffer);

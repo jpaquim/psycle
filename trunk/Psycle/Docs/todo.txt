@@ -33,6 +33,8 @@
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 bug:	 JMDrum is buggy (Crashes sometimes)
 * James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
+* <mstr_> btw, the xExx command (note cut) has got an issue on your synths, prolly on others, too
+	when a value is not set ie 0E00, it mutes all notes
 
 * Sampler Machine/Wave Ed:
 --------------------------
