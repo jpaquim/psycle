@@ -1962,34 +1962,59 @@ void CMainFrame::OnSeqins()
 
 void CMainFrame::OnSeqduplicate() 
 {
-	int newpat = _pSong->GetBlankPatternUnused();
-	if ((_pSong->playLength<(MAX_SONG_POSITIONS-1)) && (newpat < MAX_PATTERNS-1))
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int *litems;
+	int i,counter=0, selcount = cc->GetSelCount();
+	if ( _pSong->playLength+selcount >= MAX_SONG_POSITIONS)
 	{
-		m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		int oldpat = _pSong->playOrder[m_wndView.editPosition];
-		++_pSong->playLength;
-
-		m_wndView.editPosition++;
-		int const pop=m_wndView.editPosition;
-		for(int c=(_pSong->playLength-1);c>=pop;c--)
+		MessageBox("Cannot clone the pattern(s). The maximum sequence length would be excessed.","Clone Patterns");
+		return;
+	}
+	litems = new int[selcount];
+	cc->GetSelItems(selcount,litems);
+	
+	for(i=(_pSong->playLength-1);i>=litems[0];i--)
+	{
+		_pSong->playOrder[i+selcount]=_pSong->playOrder[i];
+	}
+	
+	for (i=0;i<selcount;i++)
+	{
+		int newpat = _pSong->GetBlankPatternUnused();
+		if (newpat < MAX_PATTERNS-1)
 		{
-			_pSong->playOrder[c]=_pSong->playOrder[c-1];
+			m_wndView.editPosition=litems[i];
+			
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			int oldpat = _pSong->playOrder[litems[i]];
+			
+			// now we copy the data
+			// we don't really need to be able to undo this, since it's a new pattern anyway.
+//			m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
+			
+			memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
+			
+			++_pSong->playLength;
+
+			_pSong->playOrder[litems[i]]=newpat;
+
+			counter++;
 		}
-
-		_pSong->playOrder[m_wndView.editPosition]=newpat;
-		
-		// now we copy the data
-		// we don't really need to be able to undo this, since it's a new pattern anyway.
-//		m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-		_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
-
-		memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
-
+		else 
+		{
+			_pSong->playOrder[litems[i]]=0;
+		}
+	}
+	if ( counter > 0)
+	{
+		m_wndView.editPosition++;
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 
 		m_wndView.Repaint(DMPattern);
 	}
+	delete litems;
 	m_wndView.SetFocus();
 }
 
