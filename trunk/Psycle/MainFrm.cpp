@@ -18,7 +18,6 @@
 #include "gearFilter.h"
 #include "gearGainer.h"
 #include "gearFlanger.h"
-#include "gearScope.h"
 #include "FrameMachine.h"
 #include "VstEditorDlg.h"
 #include "Helpers.h"
@@ -1512,24 +1511,6 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 //				m_wndView.FlangerMachineDialog->SetActiveWindow();
 			}
 			break;
-		case MACH_SCOPE:
-			{
-				for (int i = 0; i < MAX_SCOPES; i++)
-				{
-					if (!m_wndView.ScopeMachineDialog[i])
-					{
-						m_wndView.ScopeMachineDialog[i] = new CGearScope(&m_wndView);
-						m_wndView.ScopeMachineDialog[i]->_pMachine = (Scope*)Global::_pSong->_pMachines[tmac];
-						m_wndView.ScopeMachineDialog[i]->this_index = i;
-						m_wndView.ScopeMachineDialog[i]->Create();
-						m_wndView.ScopeMachineDialog[i]->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-						m_wndView.ScopeMachineDialog[i]->ShowWindow(SW_SHOW);
-//						m_wndView.ScopeMachineDialog[i]->SetActiveWindow();
-						break;
-					}
-				}
-			}
-			break;
 		case MACH_PLUGIN:
 			{
 			m_pWndMac[tmac] = new CFrameMachine(0);
@@ -1613,20 +1594,6 @@ void CMainFrame::CloseMacGui(int mac)
 			break;
 		case MACH_FLANGER:
 			if (m_wndView.FlangerMachineDialog) m_wndView.FlangerMachineDialog->OnCancel();
-			break;
-		case MACH_SCOPE:
-			{
-				for (int i = 0; i < MAX_SCOPES; i++)
-				{
-					if (m_wndView.ScopeMachineDialog[i]) 
-					{
-						if (m_wndView.ScopeMachineDialog[i]->_pMachine == _pSong->_pMachines[mac])
-						{
-							m_wndView.ScopeMachineDialog[i]->OnCancel();
-						}
-					}
-				}
-			}
 			break;
 		case MACH_PLUGIN:
 		case MACH_VST:

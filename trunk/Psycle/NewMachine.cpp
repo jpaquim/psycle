@@ -192,7 +192,6 @@ void CNewMachine::UpdateList()
 	hInt[5] = m_browser.InsertItem("Gainer",1,1,intFxNode,TVI_SORT);
 	hInt[6] = m_browser.InsertItem("Flanger",1,1,intFxNode,TVI_SORT);
 	hInt[7] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
-	hInt[8] = m_browser.InsertItem("Scope",1,1,intFxNode,TVI_SORT);
 
 	m_browser.Select(hNodes[0],TVGN_CARET);
 	Outputmachine = -1;
@@ -280,15 +279,6 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_dllnameLabel.SetWindowText("Internal Machine");
 		m_versionLabel.SetWindowText("V1.0");
 		Outputmachine = MACH_DUMMY;
-	}
-
-	if (tHand == hInt[8])
-	{
-		m_nameLabel.SetWindowText("Scope");
-		m_descLabel.SetWindowText("Monitors Frequency");
-		m_dllnameLabel.SetWindowText("Internal Machine");
-		m_versionLabel.SetWindowText("V1.0");
-		Outputmachine = MACH_SCOPE;
 	}
 
 	for (int i=0; i<_numPlugins; i++)

@@ -304,16 +304,21 @@ BEGIN
     CTEXT           "",IDC_MEM_RESO4,96,68,80,10,SS_CENTERIMAGE | SS_SUNKEN
 END
 
-IDD_WIREDIALOG DIALOGEX 0, 0, 159, 71
+IDD_WIREDIALOG DIALOGEX 0, 0, 209, 140
 STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    CTEXT           "Connection Link Volume",IDC_STATIC,4,0,152,9
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_BOTH | WS_TABSTOP,4,12,152,25
-    CTEXT           "Static",IDC_STATIC1,4,40,152,11,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Delete Connection",IDC_BUTTON1,4,52,152,16
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,107
+    CTEXT           "Static",IDC_STATIC1,174,107,32,11,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Delete Connection",IDC_BUTTON1,2,120,205,19
+    CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,1,96,138,11
+    PUSHBUTTON      "Mode",IDC_BUTTON,2,84,169,11
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,1,108,138,11
+    PUSHBUTTON      "Hold",IDC_BUTTON2,141,98,30,19
 END
 
 IDD_GEARDISTORT DIALOGEX 0, 0, 169, 177
@@ -1356,20 +1361,6 @@ BEGIN
     PUSHBUTTON      "Remove",IDC_REMOVE,217,7,37,14
 END
 
-IDD_GEAR_SCOPE DIALOGEX 0, 0, 174, 107
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "Pooplog-o-Scope"
-FONT 8, "Tahoma"
-BEGIN
-    CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,1,83,136,11
-    PUSHBUTTON      "Mode",IDC_BUTTON,141,82,30,11
-    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,1,95,136,11
-    PUSHBUTTON      "Hold",IDC_BUTTON2,141,94,30,11
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1417,9 +1408,9 @@ BEGIN
     IDD_WIREDIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 152
+        RIGHTMARGIN, 202
         TOPMARGIN, 7
-        BOTTOMMARGIN, 64
+        BOTTOMMARGIN, 133
     END
 
     IDD_GEARDISTORT, DIALOG

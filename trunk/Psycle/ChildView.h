@@ -21,7 +21,7 @@ class CGearDelay;
 class CGearfilter;
 class CGearGainer;
 class CGearFlanger;
-class CGearScope;
+class CWireDlg;
 
 #define MAX_SCOPES 16
 
@@ -284,7 +284,7 @@ public:
 	CGearfilter * FilterMachineDialog;
 	CGearGainer * GainerMachineDialog;
 	CGearFlanger * FlangerMachineDialog;
-	CGearScope * ScopeMachineDialog[MAX_SCOPES];
+	CWireDlg * WireDialog[MAX_SCOPES];
 
 	bool blockSelected;
 	bool blockStart;

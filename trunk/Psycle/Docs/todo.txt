@@ -2,9 +2,6 @@
 !=change
 +=addition
 
-* the scope machine will NOT remain as a machine, it is going to be a tool.  Bohan suggest activating it
-	by clicking on a machine's VU meter.  I was thinking of activating it from the wire dialog...
-
 * <[JAZ]> actually.. another thing in the "todo" should be "fixing" the cache.map file so that it can 
 	include dates of dll's and update automatically the info when new one.
 * psycle default theme sucks
@@ -20,6 +17,15 @@
 * <alk> my new skin, can u make it possible to change the fonts of the gen and fx separately?
 * <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
+* <alk> move mouse over vu, black flickering (more noticable on the big vus)
+* <alk> double clicking mute or bypass should not bring up machine dialog
+* <alk> click solo, mute, solo (bug last solo does not get done)
+* <alk> master is not centred when new song is done
++ <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
+* <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
+* <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
+
+
 
 * Machines
 ------------
