@@ -180,7 +180,7 @@ namespace psycle
 					virtual void SaveDllName(RiffFile* pFile);
 				#endif
 
-				void Instance(const char dllname[], const bool overwriteName = true) throw(...);
+				void Instance(std::string dllname, const bool overwriteName = true) throw(...);
 				void Free() throw(...);
 				bool DescribeValue(int parameter, char * psTxt);
 				bool LoadDll(std::string psFileName);

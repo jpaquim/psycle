@@ -77,8 +77,8 @@ namespace psycle
 			virtual void Tick();
 			virtual void Tick(int channel, PatternEntry * pEntry);
 			virtual void Stop();
-			inline virtual const char * const GetDllName() const throw() { return _psDllName; }
-			virtual char * GetName() { return _psName; };
+			inline virtual const char * const GetDllName() const throw() { return _psDllName.c_str(); }
+			virtual char * GetName() { return (char *)_psName.c_str(); };
 			virtual int GetNumParams() { return GetInfo()->numParameters; }
 			virtual void GetParamName(int numparam, char * name);
 			virtual int GetParamValue(int numparam);
@@ -91,20 +91,20 @@ namespace psycle
 				virtual void SaveDllName(RiffFile * pFile);
 			#endif
 
-			void Instance(const char file_name[]) throw(...);
+			void Instance(std::string file_name) throw(...);
 			void Free() throw(...);
 			bool LoadDll(std::string psFileName);
-			inline char * GetShortName() throw() { return _psShortName; }
-			inline char * GetAuthor() throw() { return _psAuthor; }
+			inline std::string GetShortName() throw() { return _psShortName; }
+			inline std::string GetAuthor() throw() { return _psAuthor; }
 			inline const bool & IsSynth() const throw() { return _isSynth; }
 			inline CMachineInfo * GetInfo() throw() { return _pInfo; };
 			inline proxy & proxy() throw() { return proxy_; };
 		private:
 			HINSTANCE _dll;
 			char _psShortName[16];
-			char* _psAuthor;
-			char* _psDllName;
-			char* _psName;
+			std::string _psAuthor;
+			std::string _psDllName;
+			std::string _psName;
 			bool _isSynth;
 			CMachineInfo * _pInfo;
 			host::proxy proxy_;
