@@ -25,7 +25,7 @@ namespace psycle
 			int MachineIndex;
 			int nPar;
 			int previousProg;
-			VSTPlugin* _pMachine;
+			vst::plugin * _pMachine;
 			bool updatingvalue;
 			CWnd* mainView;
 			CChildView* childView;

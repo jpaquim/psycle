@@ -83,7 +83,7 @@ namespace psycle
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				numParameters = ((VSTPlugin*)_pMachine)->NumParameters();
+				numParameters = ((vst::plugin*)_pMachine)->NumParameters();
 		//		ncol = 1;
 				while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 			}
@@ -187,15 +187,15 @@ namespace psycle
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
 					min_v = 0;
-					max_v = VST_QUANTIZATION;
-					val_v = f2i(((VSTPlugin*)_pMachine)->GetParameter(c)*VST_QUANTIZATION);
+					max_v = vst::quantization;
+					val_v = f2i(((vst::plugin*)_pMachine)->GetParameter(c) * vst::quantization);
 					memset(buffer,0,sizeof(buffer));
 
-					if (((VSTPlugin*)_pMachine)->DescribeValue(c,buffer) == false)
+					if (((vst::plugin*)_pMachine)->DescribeValue(c,buffer) == false)
 					{
 						sprintf(buffer,"%d",val_v);
 					}
-					((VSTPlugin*)_pMachine)->Dispatch(effGetParamName, c, 0, parName, 0);
+					((vst::plugin*)_pMachine)->Dispatch(effGetParamName, c, 0, parName, 0);
 				}
 
 				if (bDrawKnob)
@@ -308,7 +308,7 @@ namespace psycle
 				}
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
-					tweakbase = int(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*VST_QUANTIZATION);
+					tweakbase = int(((vst::plugin*)_pMachine)->GetParameter(tweakpar)*vst::quantization);
 				}
 				istweak = true;
 				SetCapture();
@@ -334,7 +334,7 @@ namespace psycle
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
 					min_v = 0;
-					max_v = VST_QUANTIZATION;
+					max_v = vst::quantization;
 				}
 
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
@@ -346,7 +346,7 @@ namespace psycle
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
-						tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*VST_QUANTIZATION);
+						tweakbase=f2i(((vst::plugin*)_pMachine)->GetParameter(tweakpar)*vst::quantization);
 					}
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
@@ -360,7 +360,7 @@ namespace psycle
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
-						tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*VST_QUANTIZATION);
+						tweakbase=f2i(((vst::plugin*)_pMachine)->GetParameter(tweakpar)*vst::quantization);
 					}
 					sourcepoint=point.y;
 					finetweak=!finetweak;
@@ -401,7 +401,7 @@ namespace psycle
 				}
 				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
-					((VSTPlugin*)_pMachine)->SetParameter(tweakpar,(float)(nv/(float)VST_QUANTIZATION));
+					((vst::plugin*)_pMachine)->SetParameter(tweakpar,(float)(nv/(float)vst::quantization));
 					// well, this isn't so hard... just put the twk record here
 					if (Global::pConfig->_RecordTweaks)
 					{
@@ -462,9 +462,9 @@ namespace psycle
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
 						min_v = 0;
-						max_v = VST_QUANTIZATION;
-						((VSTPlugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
-						dlg.m_Value = f2i(((VSTPlugin*)_pMachine)->GetParameter(thispar)*VST_QUANTIZATION);
+						max_v = vst::quantization;
+						((vst::plugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
+						dlg.m_Value = f2i(((vst::plugin*)_pMachine)->GetParameter(thispar)*vst::quantization);
 					}
 					
 					sprintf(
@@ -495,7 +495,7 @@ namespace psycle
 					}
 					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 					{
-						((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/(float)VST_QUANTIZATION));
+						((vst::plugin*)_pMachine)->SetParameter(thispar,(float)(nv/(float)vst::quantization));
 						SetFocus();
 					}
 					Invalidate(false);

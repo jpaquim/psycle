@@ -4,33 +4,36 @@
 #include "ProgressDialog.h"
 #include <afxcoll.h>
 #include <iostream>
+#include <typeinfo>
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 namespace psycle
 {
 	namespace host
 	{
-		#define MAX_BROWSER_NODES 64
-		#define MAX_BROWSER_PLUGINS 2048
+		const int MAX_BROWSER_NODES = 64;
+		const int MAX_BROWSER_PLUGINS = 2048;
 
 		class PluginInfo
 		{
 		public:
+			inline PluginInfo() : dllname(0), error(0) {}
+			inline ~PluginInfo() throw()
+			{
+				if(dllname) delete dllname;
+				if(error) delete error;
+			}
+			char * dllname;
+			std::string * error;
 			MachineMode mode;
 			MachineType type;
-			char *dllname;
 			char name[64];
 			char desc[64];
 			char version[16];
 			FILETIME FileTime;
 			bool allow;
-			int error_type;
-			inline PluginInfo() : dllname(0) {}
-			inline ~PluginInfo() throw()
-			{
-				if(dllname) delete dllname;
-			}
-		/*	void operator=(PluginInfo& newinfo)
+			/*
+			void operator=(PluginInfo& newinfo)
 			{
 				mode=newinfo.mode;
 				type=newinfo.type;
@@ -51,7 +54,7 @@ namespace psycle
 					(strcmp(info1.dllname,info2.dllname) != 0)) return true;
 				else return false;
 			}
-		*/
+			*/
 		};
 
 		/// new machine dialog window.

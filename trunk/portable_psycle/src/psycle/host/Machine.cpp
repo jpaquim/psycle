@@ -427,18 +427,17 @@ namespace psycle
 					if ( !fullopen ) pMachine = new Dummy(index);
 					else 
 					{
-						VSTInstrument * p;
-						pMachine = p = new VSTInstrument(index);
+						vst::instrument * p;
+						pMachine = p = new vst::instrument(index);
 						if (!p->LoadDll(dllName))
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
 							::MessageBox(NULL,sError, "Loading Error", MB_OK);
-
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
-							bDeleted = TRUE;
+							bDeleted = true;
 						}
 					}
 				}
@@ -448,8 +447,8 @@ namespace psycle
 					if ( !fullopen ) pMachine = new Dummy(index);
 					else 
 					{
-						VSTFX * p;
-						pMachine = p = new VSTFX(index);
+						vst::fx * p;
+						pMachine = p = new vst::fx(index);
 						if (!p->LoadDll(dllName))
 						{
 							char sError[MAX_PATH + 100];

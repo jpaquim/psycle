@@ -69,7 +69,7 @@ namespace psycle
 			return (bytesRead == numBytes);
 		}
 
-		bool RiffFile::Write(void* pData, ULONG numBytes)
+		bool RiffFile::Write(const void * const pData, ULONG numBytes)
 		{
 			DWORD bytesWritten;
 			if(!WriteFile(_handle, pData, numBytes, &bytesWritten, 0)) return false;

@@ -41,7 +41,8 @@ namespace psycle
 			virtual bool Create(char* psFileName, bool overwrite);
 			virtual BOOL Close(void);
 			virtual bool Read(void* pData, ULONG numBytes);
-			virtual bool Write(void* pData, ULONG numBytes);
+			// <bohan> added const, damnit!!!
+			virtual bool Write(const void * pData, ULONG numBytes);
 			virtual bool Expect(void* pData, ULONG numBytes);
 			virtual long Seek(long offset);
 			virtual long Skip(long numBytes);

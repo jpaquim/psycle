@@ -184,16 +184,14 @@ namespace psycle
 		BOOL CPresetsDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-
 			m_preslist.LimitText(32);
-
-			presetChanged=false;
+			presetChanged = false;
 			CString buffer;
-			if ( _pMachine->_type == MACH_PLUGIN )
+			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
 				sizeDataStruct = ((Plugin *)_pMachine)->GetInterface()->GetDataSize();
-				if (sizeDataStruct > 0)
+				if(sizeDataStruct > 0)
 				{
 					byte* pData = new byte[sizeDataStruct];
 					((Plugin *)_pMachine)->GetInterface()->GetData(pData); // Internal Save
@@ -204,30 +202,25 @@ namespace psycle
 				{
 					iniPreset.Init(numParameters , "", ((Plugin*)_pMachine)->GetInterface()->Vals, 0,  NULL);
 				}
-
 				buffer = ((Plugin *)_pMachine)->GetDllName();
 			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
-				numParameters = ((VSTPlugin*)_pMachine)->NumParameters();
+				numParameters = reinterpret_cast<vst::plugin *>(_pMachine)->NumParameters();
 				iniPreset.Init(numParameters);
-				int i=0;
-				while (i < numParameters)
+				int i(0);
+				while(i < numParameters)
 				{
-					iniPreset.SetParam(i,f2i(((VSTPlugin*)_pMachine)->GetParameter(i)*65535));
-					i++;
+					iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * 65535));
+					++i;
 				}
-
-				buffer = ((VSTPlugin *)_pMachine)->GetDllName();
+				buffer = reinterpret_cast<vst::plugin *>(_pMachine)->GetDllName();
 			}
-
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
 			fileName= buffer;
-
 			ReadPresets();
 			UpdateList();
-
 			return TRUE;
 		}
 
@@ -289,36 +282,32 @@ namespace psycle
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-
-			if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
 			}
 			else ofn.lpstrFilter = "Presets\0*.prs\0All\0*.*\0";
-
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if ( _pMachine->_type == MACH_PLUGIN )
+			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				ofn.lpstrInitialDir = Global::pConfig->GetPluginDir();
 			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				ofn.lpstrInitialDir = Global::pConfig->GetVstDir();
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			
 			// Display the Open dialog box. 
-			
-			if (GetOpenFileName(&ofn)==TRUE)
+			if(GetOpenFileName(&ofn) == TRUE)
 			{
-				if ( ofn.nFilterIndex == 1 )
+				if(ofn.nFilterIndex == 1)
 				{
 					int numpresets;
 					int filenumpars;
-					FILE* hfile;
-					if ((hfile=fopen(szFile,"rb")) == NULL )
+					FILE * hfile;
+					if((hfile=fopen(szFile,"rb")) == NULL )
 					{
 						MessageBox("Couldn't open File. Operation Aborted","File Open Error",MB_OK);
 						return;
@@ -333,7 +322,7 @@ namespace psycle
 					if (numpresets >= 0)
 					{
 						int i=0;
-		//				int init=m_preslist.GetCount();
+						//int init=m_preslist.GetCount();
 						char cbuf[32];
 						int* ibuf = new int[filenumpars];
 						byte* dbuf = new byte[sizeDataStruct];
@@ -852,27 +841,26 @@ namespace psycle
 		//	float *params		 //variable no. of params
 		// }
 
-			if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				RiffFile fxb;
-				CString buffer= ((VSTPlugin *)_pMachine)->GetDllName();
+				CString buffer = reinterpret_cast<vst::plugin *>(_pMachine)->GetDllName();
 				buffer = buffer.Left(buffer.GetLength()-4);
 				buffer += ".fxb";
 				char filename[_MAX_PATH];
-				sprintf(filename,buffer);
-
-				if ( !fxb.Open(filename) ) return; // here it is read "CcnK" and its "size" (it is 0)
-				if ( fxb._header._id != fxb.FourCC("CcnK") ) return;
+				std::sprintf(filename,buffer);
+				if( !fxb.Open(filename) ) return; // here it is read "CcnK" and its "size" (it is 0)
+				if( fxb._header._id != fxb.FourCC("CcnK") ) return;
 				RiffChunkHeader tmp;
 				fxb.Read(&tmp,8);
-				if ( tmp._id == fxb.FourCC("FBCh") ) // Bank Chunk
+				if(tmp._id == fxb.FourCC("FBCh")) // Bank Chunk
 				{
 					MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
 					// Possible structure
 					// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
 					// Can't be read program by program, so it has to be loaded directly.
 				}
-				else if ( tmp._id == fxb.FourCC("FxBk") )
+				else if( tmp._id == fxb.FourCC("FxBk"))
 				{
 					fxb.Skip(8); // VST ID + VSTVersion
 					ULONGINV numpresets;
@@ -882,20 +870,18 @@ namespace psycle
 					fxb.Skip(128);
 
 					ULONGINV filenumpars;
-					fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another
-												// cause problems.
+					fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another cause problems.
 
 					char cbuf[29]; cbuf[28]='\0';
 					float* fbuf;
 					fbuf= new float[numParameters];
 					
 					intpresets+=i; // Global "i" to prevent deleting presets previously read from .prs file
-					while ( i < intpresets)
+					while( i < intpresets)
 					{
 						fxb.Skip(24); // CcnK header + "size" +  FxCk header + fxbkVersion + VST ID + VSTVersion
 						fxb.Read(&filenumpars,4);
-
-						if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters) // same here...
+						if(filenumpars.lohi * 256 + filenumpars.lolo != numParameters) // same here...
 						{
 							MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
 							fxb.Close();
@@ -912,8 +898,8 @@ namespace psycle
 							((char*)&fbuf[y])[3]=((char*)&temp)[0];
 
 						}
-						AddPreset(cbuf,fbuf);
-						i++;
+						AddPreset(cbuf, fbuf);
+						++i;
 					}
 					delete fbuf;
 				}
@@ -1011,12 +997,10 @@ namespace psycle
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				for (int i=0;i<num;i++)
-				{
-					((VSTPlugin *)_pMachine)->SetParameter(i,preset.GetParam(i)/65535.0f);
-				}
+				for(int i(0) ; i < num ; ++i)
+					reinterpret_cast<vst::plugin *>(_pMachine)->SetParameter(i, preset.GetParam(i) / 65535.0f);
 			}
-			presetChanged=true;
+			presetChanged = true;
 		}
 
 
