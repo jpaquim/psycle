@@ -29,7 +29,7 @@ public:
 	//{{AFX_DATA(CGearGainer)
 	enum { IDD = IDD_GEAR_GAINER };
 	CStatic	m_volabel;
-	CSliderCtrl	m_volsider;
+	CSliderCtrl	m_volslider;
 	//}}AFX_DATA
 
 
@@ -47,7 +47,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CGearGainer)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

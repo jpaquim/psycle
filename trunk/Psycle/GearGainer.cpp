@@ -31,14 +31,14 @@ void CGearGainer::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGearGainer)
 	DDX_Control(pDX, IDC_VOLABEL, m_volabel);
-	DDX_Control(pDX, IDC_SLIDER1, m_volsider);
+	DDX_Control(pDX, IDC_VOLSLIDER, m_volslider);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CGearGainer, CDialog)
 	//{{AFX_MSG_MAP(CGearGainer)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VOLSLIDER, OnCustomdrawVolSlider)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -53,19 +53,19 @@ BOOL CGearGainer::OnInitDialog()
 	sprintf(buffer,_pMachine->_editName);
 	SetWindowText(buffer);
 
-	m_volsider.SetRange(0, 1024);
-	m_volsider.SetPos(1024-_pMachine->_outWet);
-	m_volsider.SetTic(0);
-	m_volsider.SetTicFreq(64);
+	m_volslider.SetRange(0, 1024);
+	m_volslider.SetPos(1024-_pMachine->_outWet);
+	m_volslider.SetTic(0);
+	m_volslider.SetTicFreq(64);
 
 	return TRUE;
 }
 
-void CGearGainer::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+void CGearGainer::OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	if (doit)
 	{
-		_pMachine->_outWet = 1024-m_volsider.GetPos();
+		_pMachine->_outWet = 1024-m_volslider.GetPos();
 	}
 
 	float wet = (float)_pMachine->_outWet*0.00390625f;
