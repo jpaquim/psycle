@@ -226,7 +226,7 @@ namespace psycle
 					// predict that this sample should be last sample + (last sample - previous last sample)
 					// and calculate the deviation from that as our error value to store
 					signed short t = *pSource++;
-					signed short error = t - (prev+(prev-prevprev));
+					signed short error = (t - (prev+(prev-prevprev))) & 0xFFFF;
 					// shuffle our previous values for next value
 					prevprev = prev;
 					prev = t;

@@ -61,31 +61,11 @@ namespace psycle
 				return *reinterpret_cast<int*>(&tmp);
 			};
 			/// finds the maximum amplitude in a signal buffer.
-			/// why is that specific to vst?
+			/// It contains "VST" because initially the return type for native machines 
+			/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
 			static inline float GetMaxVSTVol(float *pSamplesL, float *pSamplesR, int numSamples)
 			{
-				--pSamplesL;
-				--pSamplesR;
-				
-				float vol = 0.0f;
-				do
-				{
-					/// not all waves are symmetrical
-					const float volL = fabsf(*++pSamplesL);
-					const float volR = fabsf(*++pSamplesR);
-					
-					if (volL > vol)
-					{
-						vol = volL;
-					}
-					if (volR > vol)
-					{
-						vol = volR;
-					}
-				}
-				while (--numSamples);
-				
-				return vol;
+				return GetMaxVol(pSamplesL,pSamplesR,numSamples);
 			}
 			/*
 			static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
@@ -121,7 +101,28 @@ namespace psycle
 			/// finds the maximum amplitude in a signal buffer.
 			static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 			{
-				return GetMaxVSTVol(pSamplesL,pSamplesR,numSamples); // F2I is for doubles, f2i is for floats
+				--pSamplesL;
+				--pSamplesR;
+				
+				float vol = 0.0f;
+				do
+				{
+					/// not all waves are symmetrical
+					const float volL = fabsf(*++pSamplesL);
+					const float volR = fabsf(*++pSamplesR);
+					
+					if (volL > vol)
+					{
+						vol = volL;
+					}
+					if (volR > vol)
+					{
+						vol = volR;
+					}
+				}
+				while (--numSamples);
+				
+				return vol;
 			}
 			/// undenormalize (renormalize) samples in a signal buffer.
 			///\todo make a template version that accept both float and doubles
@@ -130,7 +131,7 @@ namespace psycle
 				float id(float(1.0E-20));
 				for(int s(0) ; s < numsamples ; ++s)
 				{
-					/*
+					/* Old denormal code. Now we use a 1bit sinus.
 					if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
 					if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
 					const float is1=pSamplesL[s];
@@ -252,7 +253,7 @@ namespace psycle
 		private:
 			/// Currently is 2048
 			static int _resolution;
-			/// we like global space pollution, we also like to shout in capitals.
+			/// 
 			#define CUBIC_RESOLUTION 2048
 			static float _aTable[CUBIC_RESOLUTION];
 			static float _bTable[CUBIC_RESOLUTION];

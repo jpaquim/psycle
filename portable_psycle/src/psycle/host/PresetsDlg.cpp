@@ -118,8 +118,8 @@ namespace psycle
 
 			if ( newpreset.sizeData > 0 )
 			{
-				zapArray(data,new byte[sizeData]);
 				sizeData = newpreset.sizeData;
+				zapArray(data,new byte[sizeData]);
 				memcpy(data,newpreset.data,sizeData);
 			}
 			else

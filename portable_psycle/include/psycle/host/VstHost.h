@@ -29,7 +29,8 @@ namespace psycle
 				};
 			}
 
-			/// midi's 16 channels limit?
+			/// Maximum number of Audio Input/outputs
+			/// \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
 			const int max_io = 16;
 
 			/// Dialog max ticks for parameters.
@@ -68,13 +69,14 @@ namespace psycle
 				long int version() throw(host::exceptions::function_error);
 				void user(void * user) throw(host::exceptions::function_error);
 
-				// some common dispatch calls
+				/// Create and initialize the VST plugin ( plugin Side ). Call this before using it. (except for string data)
 				long int open()
 				{
 					return dispatcher(effOpen);
 				}
 				#pragma warning(push)
 				#pragma warning(disable:4702) // unreachable code
+				/// Destroys the VST plugin instance ( plugin side ).
 				long int close()
 				{
 					try
@@ -91,11 +93,14 @@ namespace psycle
 					}
 				}
 				#pragma warning(pop)
+				// Tells the VST plugin the desired samplerate.
 				long int setSampleRate(float sr)
 				{
 					assert(sr>0.0f);
 					return dispatcher(effSetSampleRate,0,0,0,sr);
 				}
+				// Tels the VST plugin the MAX block size of data that it will request.
+			
 				long int setBlockSize(int bs)
 				{
 					assert(bs>0);
@@ -116,10 +121,12 @@ namespace psycle
 					assert(program<numPrograms() || numPrograms()==0);
 					return dispatcher(effSetProgram,0,program);
 				}
+				/// Gets the VST implementation's Version that the plugin uses. ( 1.0,2.0,2.1,2.2 or 2.3)
 				long int getVstVersion()
 				{
 					return dispatcher(effGetVstVersion);
 				}
+				/// Turns on or off the plugin. If it is disabled, it won't produce output, but should behave without errors.
 				long int mainsChanged(bool on)
 				{
 					return dispatcher(effMainsChanged, 0, on ? 1 : 0);
@@ -152,43 +159,43 @@ namespace psycle
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				virtual void GetParamName(int numparam, char * name)
-														{
-															try
-															{
-																if(numparam < proxy().numParams())
-																	proxy().dispatcher(effGetParamName, numparam, 0, name);
-																else std::strcpy(name,"Out of Range");
-															}
-															catch(const std::exception &)
-															{
-																// <bohan>
-																// exception blocked here for now,
-																// but we really should do something...
-																//throw;
-																std::strcpy(name, "fucked up");
-															}
-														}
+				{
+					try
+					{
+						if(numparam < proxy().numParams())
+							proxy().dispatcher(effGetParamName, numparam, 0, name);
+						else std::strcpy(name,"Out of Range");
+					}
+					catch(const std::exception &)
+					{
+						// <bohan>
+						// exception blocked here for now,
+						// but we really should do something...
+						//throw;
+						std::strcpy(name, "fucked up");
+					}
+				}
 				virtual void GetParamValue(int numparam, char * parval);
 				#pragma warning(push)
 				#pragma warning(disable:4702) // unreachable code
 				virtual int GetParamValue(int numparam)
-														{
-															try
-															{
-																if(numparam < proxy().numParams())
-																	return f2i(proxy().getParameter(numparam) * 65535);
-																else
-																	return 0; /// \todo <bohan> ???
-															}
-															catch(const std::exception &)
-															{
-																// <bohan>
-																// exception blocked here for now,
-																// but we really should do something...
-																//throw;
-																return 0; /// \todo <bohan> ???
-															}
-														}
+				{
+					try
+					{
+						if(numparam < proxy().numParams())
+							return f2i(proxy().getParameter(numparam) * 65535);
+						else
+							return 0; /// \todo <bohan> ???
+					}
+					catch(const std::exception &)
+					{
+						// <bohan>
+						// exception blocked here for now,
+						// but we really should do something...
+						//throw;
+						return 0; /// \todo <bohan> ???
+					}
+				}
 				#pragma warning(pop)
 				virtual bool Load(RiffFile * pFile);
 				virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);

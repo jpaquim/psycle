@@ -2,6 +2,7 @@
 #include "Psycle.h"
 #include "Configuration.h"
 #include "FileXM.h"
+//#include "FileIT.h" //re-add when it.cpp and it.h work.
 #include "ChildView.h"
 #include "Bitmap.h"
 #include "Player.h"
@@ -332,7 +333,7 @@ namespace psycle
 							Global::pConfig->vu3,
 							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip
 						);
-					float val = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry; val; // not used
+					//float val = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry; // not used
 					//pParentMain->UpdateMasterValue(f2i(sqrtf(val*1024.0f)));
 					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 					if ( MasterMachineDialog )
@@ -419,6 +420,7 @@ namespace psycle
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
 				_pSong->Save(&file,true);
+				/// \todo Save should not close a file which doesn't open.
 				//file.Close(); <- save now handles this
 			}
 		}

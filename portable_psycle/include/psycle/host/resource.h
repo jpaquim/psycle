@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by x:\home\bohan\projects\cvs.sourceforge.net\psycle\portable_psycle\src\psycle\host\resources\Psycle.rc
+// Used by d:\Documents and Settings\All Users\Documentos\Visual C++\portable_psycle\src\psycle\host\resources\Psycle.rc
 //
 #define IDC_COPY                        3
 #define IDC_PASTE                       4
@@ -14,7 +14,6 @@
 #define ID_INDICATOR_TWEAKS             59
 #define ID_INDICATOR_OCTAVE             60
 #define IDR_MAINFRAME                   101
-#define IDD_MIXER                       101
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
 #define IDB_LESSLESS                    104
@@ -91,9 +90,10 @@
 #define IDD_NEW_VOLUME                  202
 #define IDD_SAVEWAVDLG                  203
 #define IDD_PROGRESS_DIALOG             204
-#define IDD_ERRORLOGGER                 208
-#define IDB_BITMAP1                     209
-#define IDB_BETASPLASH                  209
+#define IDD_ERRORLOGGER                 206
+#define IDB_BITMAP1                     207
+#define IDB_BETASPLASH                  208
+#define IDD_MIXER                       209
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -851,9 +851,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        210
-#define _APS_NEXT_COMMAND_VALUE         32935
-#define _APS_NEXT_CONTROL_VALUE         1540
+#define _APS_NEXT_RESOURCE_VALUE        212
+#define _APS_NEXT_COMMAND_VALUE         32937
+#define _APS_NEXT_CONTROL_VALUE         1545
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

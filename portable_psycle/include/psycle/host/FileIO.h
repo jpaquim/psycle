@@ -41,8 +41,6 @@ namespace psycle
 			virtual bool Create(std::string psFileName, bool overwrite);
 			virtual BOOL Close(void);
 			virtual bool Read(void* pData, ULONG numBytes);
-			// <bohan> added const, damnit!!!
-			// <JAZ> Thanks bohan.. but next time... add it to the subclass too!!!
 			virtual bool Write(const void * pData, ULONG numBytes);
 			virtual bool Expect(void* pData, ULONG numBytes);
 			virtual long Seek(long offset);
