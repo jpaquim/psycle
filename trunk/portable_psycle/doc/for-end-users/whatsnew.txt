@@ -37,6 +37,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.27  2005/02/26 12:36:35  sampler
+Added my last addition about Pattern Navigation (and deleted the other line about my fix i've reverted back)
+
 Revision 1.26  2005/01/27 14:31:45  sampler
 Right mouse button additions
 
@@ -100,7 +103,7 @@ release to come (v1.7.7.x)
 +added crop command in the wave editor (lobywang)
 !fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
 +added a message/error logging system (see file output.log.txt) (bohan & alk & magnus)
-!fixed small problem with cursor jumping at bottom of pattern (when pattern step >1 and wrapping is disabled) (sampler)
++added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
 +added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
 !fixed bug (only existed in previous 1.7.7.x alphas) that made some VSTs didn't save good their parameters/presets (bohan)
 +added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)
