@@ -1,4 +1,18 @@
 ===================================
+\bug \id 6 \status pending
+
+when loading taika's song psycle can't find the machine called vdallpass.dll which causes ->
+"please inform devvers of unknown kind of native machine" error message
+
+Then, after saving it, and re-opening, psycle error's "unknown file type"
+
+===================================
+\bug \id 5 \status pending
+
+<alk>
+It seems that pattern data is going missing on pattern of length >128 (only on lines that are 128+)
+
+===================================
 \bug \id 4 \status addressed by alk
 
 <alk>
