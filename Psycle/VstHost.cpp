@@ -841,11 +841,49 @@ void VSTInstrument::Tick(int channel,PatternEntry* pData)
 		}
 		else if (note == cdefTweakS)
 		{
-			TWSDestination = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
-			TWSInst = pData->_inst;
-			TWSCurrent = GetParameter(TWSInst);
-			TWSSamples = 0;
-			TWSDelta = ((TWSDestination-TWSCurrent)*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+			int i;
+			if (TWSActive)
+			{
+				for (i = 0; i < MAX_TWS; i++)
+				{
+					if ((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+					{
+						break;
+					}
+				}
+				if (i == MAX_TWS)
+				{
+					for (i = 0; i < MAX_TWS; i++)
+					{
+						if (TWSDelta[i] == 0)
+						{
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				for (i = MAX_TWS-1; i > 0; i--)
+				{
+					TWSDelta[i] = 0;
+				}
+			}
+			if (i < MAX_TWS)
+			{
+				TWSDestination[i] = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
+				TWSInst[i] = pData->_inst;
+				TWSCurrent[i] = GetParameter(TWSInst[i]);
+				TWSDelta[i] = ((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+				TWSSamples = 0;
+				TWSActive = TRUE;
+			}
+			else
+			{
+				// we have used all our slots, just send a twk
+				const float value = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
+				SetParameter(pData->_inst, value);
+			}
 #if !defined(_WINAMP_PLUGIN_)
 			Global::_pSong->Tweaker = true;
 #endif // ndef _WINAMP_PLUGIN_
@@ -983,7 +1021,7 @@ void VSTInstrument::Work(int numSamples)
 		while (ns)
 		{
 			int nextevent;
-			if (TWSDelta != 0)
+			if (TWSActive)
 			{
 				nextevent = TWSSamples;
 			}
@@ -1003,7 +1041,7 @@ void VSTInstrument::Work(int numSamples)
 			}
 			if (nextevent > ns)
 			{
-				if (TWSDelta != 0)
+				if (TWSActive)
 				{
 					TWSSamples -= ns;
 				}
@@ -1044,23 +1082,35 @@ void VSTInstrument::Work(int numSamples)
 						tempoutputs[i]+=nextevent;
 					}
 				}
-				if (TWSDelta != 0)
+				if (TWSActive)
 				{
 					if (TWSSamples == nextevent)
 					{
-						TWSCurrent += TWSDelta;
+						int activecount = 0;
+						TWSSamples = TWEAK_SLIDE_SAMPLES;
+						for (i = 0; i < MAX_TWS; i++)
+						{
+							if (TWSDelta[i] != 0)
+							{
+								TWSCurrent[i] += TWSDelta[i];
 
-						if (((TWSDelta > 0) && (TWSCurrent >= TWSDestination))
-							|| ((TWSDelta < 0) && (TWSCurrent <= TWSDestination)))
-						{
-							TWSCurrent = TWSDestination;
-							TWSDelta = 0;
+								if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i]))
+									|| ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i])))
+								{
+									TWSCurrent[i] = TWSDestination[i];
+									TWSDelta[i] = 0;
+								}
+								else
+								{
+									activecount++;
+								}
+								SetParameter(TWSInst[i],TWSCurrent[i]);
+							}
 						}
-						else
+						if (activecount == 0)
 						{
-							TWSSamples = TWEAK_SLIDE_SAMPLES;
+							TWSActive = FALSE;
 						}
-						SetParameter(TWSInst,TWSCurrent);
 					}
 				}
 				for (i=0; i < Global::_pSong->SONGTRACKS; i++)
@@ -1220,11 +1270,49 @@ void VSTFX::Tick(int channel,PatternEntry* pData)
 		}
 		else if (pData->_note == cdefTweakS)
 		{
-			TWSDestination = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
-			TWSInst = pData->_inst;
-			TWSCurrent = GetParameter(TWSInst);
-			TWSSamples = 0;
-			TWSDelta = ((TWSDestination-TWSCurrent)*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+			int i;
+			if (TWSActive)
+			{
+				for (i = 0; i < MAX_TWS; i++)
+				{
+					if ((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+					{
+						break;
+					}
+				}
+				if (i == MAX_TWS)
+				{
+					for (i = 0; i < MAX_TWS; i++)
+					{
+						if (TWSDelta[i] == 0)
+						{
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				for (i = MAX_TWS-1; i > 0; i--)
+				{
+					TWSDelta[i] = 0;
+				}
+			}
+			if (i < MAX_TWS)
+			{
+				TWSDestination[i] = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
+				TWSInst[i] = pData->_inst;
+				TWSCurrent[i] = GetParameter(TWSInst[i]);
+				TWSDelta[i] = ((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
+				TWSSamples = 0;
+				TWSActive = TRUE;
+			}
+			else
+			{
+				// we have used all our slots, just send a twk
+				const float value = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
+				SetParameter(pData->_inst, value);
+			}
 #if !defined(_WINAMP_PLUGIN_)
 			Global::_pSong->Tweaker = true;
 #endif // ndef _WINAMP_PLUGIN_
@@ -1272,7 +1360,7 @@ void VSTFX::Work(int numSamples)
 			while (ns)
 			{
 				int nextevent;
-				if (TWSDelta != 0)
+				if (TWSActive)
 				{
 					nextevent = TWSSamples;
 				}
@@ -1292,7 +1380,7 @@ void VSTFX::Work(int numSamples)
 				}
 				if (nextevent > ns)
 				{
-					if (TWSDelta != 0)
+					if (TWSActive)
 					{
 						TWSSamples -= ns;
 					}
@@ -1333,23 +1421,35 @@ void VSTFX::Work(int numSamples)
 							tempoutputs[i]+=nextevent;
 						}
 					}
-					if (TWSDelta != 0)
+					if (TWSActive)
 					{
 						if (TWSSamples == nextevent)
 						{
-							TWSCurrent += TWSDelta;
+							int activecount = 0;
+							TWSSamples = TWEAK_SLIDE_SAMPLES;
+							for (i = 0; i < MAX_TWS; i++)
+							{
+								if (TWSDelta[i] != 0)
+								{
+									TWSCurrent[i] += TWSDelta[i];
 
-							if (((TWSDelta > 0) && (TWSCurrent >= TWSDestination))
-								|| ((TWSDelta < 0) && (TWSCurrent <= TWSDestination)))
-							{
-								TWSCurrent = TWSDestination;
-								TWSDelta = 0;
+									if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i]))
+										|| ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i])))
+									{
+										TWSCurrent[i] = TWSDestination[i];
+										TWSDelta[i] = 0;
+									}
+									else
+									{
+										activecount++;
+									}
+									SetParameter(TWSInst[i],TWSCurrent[i]);
+								}
 							}
-							else
+							if (activecount == 0)
 							{
-								TWSSamples = TWEAK_SLIDE_SAMPLES;
+								TWSActive = FALSE;
 							}
-							SetParameter(TWSInst,TWSCurrent);
 						}
 					}
 					for (i=0; i < Global::_pSong->SONGTRACKS; i++)

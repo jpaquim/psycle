@@ -48,12 +48,6 @@ Machine::Machine()
 {
 	wasVST = false;
 
-	TWSInst = 0;
-	TWSSamples = 0;
-	TWSDelta = 0;
-	TWSCurrent = 0;
-	TWSDestination = 0;
-	
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
 	_volumeCounter = 0.0f;
@@ -80,6 +74,15 @@ Machine::Machine()
 		TriggerDelayCounter[c]=0;
 		RetriggerRate[c]=256;
 	}
+	for (c = 0; c<MAX_TWS; c++)
+	{
+		TWSInst[c] = 0;
+		TWSDelta[c] = 0;
+		TWSCurrent[c] = 0;
+		TWSDestination[c] = 0;
+	}
+	TWSSamples = 0;
+	TWSActive = FALSE;
 }
 
 Machine::~Machine()
