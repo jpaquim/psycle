@@ -25,9 +25,9 @@ void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 	// undo code not required, enter not and msbput handle it
 	BOOL bRepeat = nFlags&0x4000;
 
-	if (!bRepeat)
+	if(viewMode == VMPattern && bEditMode)
 	{
-		if(viewMode == VMPattern && bEditMode)
+		if (!(Global::pPlayer->_playing && _followSong && bRepeat))
 		{
 			bool success;
 			// add data
