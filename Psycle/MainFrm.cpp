@@ -1,4 +1,3 @@
-// test
 // MainFrm.cpp : implementation of the CMainFrame class
 //
 
@@ -869,8 +868,8 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 			cc->AddString(buffer);
 		}
 //		_pSong->instSelected=_pSong->auxcolSelected;
-		WaveEditorBackUpdate();
-		m_wndInst.WaveUpdate();
+//		WaveEditorBackUpdate();
+//		m_wndInst.WaveUpdate();
 	}
 
 	cc->SetCurSel(_pSong->auxcolSelected);
@@ -914,7 +913,7 @@ void CMainFrame::ChangeIns(int i)	// User Called (Hotkey)
 	}
 	else if ( cc2->GetCurSel() == AUX_PARAMS )
 	{
-		if (i>0 && i < cc->GetCount() )
+		if (i>=0 && i < cc->GetCount() )
 		{
 			_pSong->auxcolSelected=i;
 		}

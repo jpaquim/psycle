@@ -1,3 +1,14 @@
+V1.67
+-----
+! Manually editing sample name didn't update the combobox.
+! When the "MIDI/Params/Waves" combobox was showing "Params", and the user tried to decrease the current
+  selected with the arrows, the position 0 was unreachable ( it stopped at 1 ).
+! Using "Enter" key to get the generator and instrument/wave under cursor (In pattern editor) did
+  not update the sample in the instrument editor, which in turn made the wave loader function to
+  load over an incorrect position.
+! Loading songs with VST plugins didn't restore the name of them (was set back to default one). Fixed
+
+
 V1.66
 -----
 + Added elapsed playtime (by KooPer)

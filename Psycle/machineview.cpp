@@ -100,8 +100,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int volu)
 {
 	CDC memDC;
+	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(devc);
-	memDC.SelectObject(&stuffbmp);
+	oldbmp=memDC.SelectObject(&stuffbmp);
 
 	int size = volu/256;
 	
@@ -113,6 +114,8 @@ void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int volu)
 	// BLIT [DESTX,DESTY,SIZEX,SIZEY,SOURBMPX,SOURBMPY)
 	devc->BitBlt(x+8, y+3, size, 5, &memDC, 0, 96, SRCCOPY);
 	devc->BitBlt(x+8+size, y+3, 96-size, 5, &memDC, 8, 51, SRCCOPY);
+	memDC.SelectObject(oldbmp);
+	memDC.DeleteDC();
 }
 
 void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
@@ -126,8 +129,9 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 	int y=mac->_y;
 
 	CDC memDC;
+	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(devc);
-	memDC.SelectObject(&stuffbmp);
+	oldbmp = memDC.SelectObject(&stuffbmp);
 
 	// BLIT [DESTX,DESTY,SIZEX,SIZEY,SOURBMPX,SOURBMPY)
 
@@ -174,6 +178,8 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 		devc->TextOut(x+8, y+10, mac->_editName);
 		devc->SetBkMode(OPAQUE);
 	}
+	memDC.SelectObject(oldbmp);
+	memDC.DeleteDC();
 }
 
 

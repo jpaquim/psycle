@@ -30,8 +30,8 @@ public:
 	~VSTPlugin();
 
 	void Free();
-	int Instance(char *dllname);
-	void Create(VSTPlugin *plug);
+	int Instance(char *dllname,bool overwriteName=true);
+//	void Create(VSTPlugin *plug);
 	virtual void Init(void);
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)

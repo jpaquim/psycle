@@ -1,3 +1,11 @@
+	*Flanger feedback slider
+	 Instrument filter envelope slider. (check differences with finetune slider)
+
+	*correct "No sound on startup" "novice" question.
+
+	*changing octave, make notes stop (because if not, notes playing don't stop)
+
+
 
 -- Psycle 1.67 (If it Comes. If not, many of these will come with Psycle 2) --
 ------------------------------------------------------------------------------
@@ -13,7 +21,7 @@
 		 * twk Control
 		 * maybe: allow filter cutoff/res mapping to velocity
 	feature: volume slides/arpeggio
-	feature: ability to set loop points. (+ ping-pong loops)
+	feature: better way to set loop points. (+ ping-pong loops)
 	feature: Easier way to load Samples.
 	feature: Toolbar for the Wave Editor.
 	feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave preview is not adecuated)
@@ -24,6 +32,10 @@
 	feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
 	feature: maybe: MultiPattern View (The code is not made in the best way)
 	feature: MORE Keyboard shortcuts 
+	feature: Live Parameter change Recording.
+	feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
+	feature: First, I'd like to see the Generator or Effect name in one of these places
+		 when I hover over a note in the Pattern Editor ( MrToast )
 
 * GUI (machines):
 -----------------
@@ -55,6 +67,9 @@
 
 * Player Engine:
 ----------------
+	bug:	 In some rare cases, when opening a song, psycle produces noise. (See "fly to the moon [non vocal].psy")
+		 When opening it, a noise is produced by one machine and passed to the others. The bug doesn't happen
+		 when debugging!
 	bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
 	bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
@@ -88,8 +103,6 @@
 	* Multi pattern Sequencing
 	* Multiple Editors (Not only tracker view)
 	* Parameter Automation  ( Envelopes for Parameters )
-	* Live Parameter change Recording.
-	* tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	* Velocity/Panning/other_weird column to pattern data
 	* Appregiator: One "template" note, notes "produced" by the appregiator in a different colour.
 	* "zip"-able columns.
@@ -101,7 +114,6 @@
 * Machines :
 ------------
 
-	* the morphing fft-filter machine!!!! http://psycle.pastnotecut.org/thread.php?threadid=39&boardid=1&styleid=1
 	* Multiple Inputs/Outputs
 	* MIDI generator - instead of generating audio, generates MIDI out - sync could be an issue.
 	* Sequencers: Posibility to control more than one machine at the same time

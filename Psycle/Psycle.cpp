@@ -354,6 +354,7 @@ void CPsycleApp::SaveRecent(CMainFrame* pFrame)
 	{
 		RegDeleteKey(RegKey, "RecentFiles");
 	}
+	RegCloseKey(RegKey);
 	
 	if (RegCreateKeyEx(HKEY_CURRENT_USER,
 							"AAS\\Psycle\\CurrentVersion\\RecentFiles",

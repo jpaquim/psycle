@@ -1141,8 +1141,8 @@ void CChildView::SelectMachineUnderCursor()
 	PatternEntry *entry = (PatternEntry*) toffset;
 
 	if ( entry->_mach < MAX_BUSES*2 ) _pSong->seqBus = entry->_mach;
-	pParentMain->UpdateComboGen();
+	pParentMain->ChangeGen(_pSong->seqBus);
 	if ( entry->_inst != 255 ) _pSong->auxcolSelected = entry->_inst;
-	pParentMain->UpdateComboIns();
+	pParentMain->ChangeIns(_pSong->auxcolSelected);
 
 }

@@ -310,7 +310,7 @@ void CSaveDlg::LoadSong()
 	OldPsyFile file;
 	if (!file.Open(szFile))
 	{
-		MessageBox("Error reading file", "Error", MB_OK);
+		MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 		return;
 	}
 	_pSong->Load(&file);

@@ -678,8 +678,8 @@ int Song::GetFreeFxBus()
 
 // IFF structure ripped by krokpitr
 // Current Code Extremely modified by [JAZ] ( RIFF based )
-// Advise: I've detected that this RiffFile Class reads bytes
-// in inversed mode. Hence, I've had to use the following structure:
+// Advise: IFF files use Big Endian byte ordering. That's why I use
+// the following structure.
 //
 // typedef struct {
 //   unsigned char hihi;
@@ -1030,9 +1030,9 @@ bool Song::Load(
 	// The old format assumes we output at 44100 samples/sec, so...
 	//
 #if defined(_WINAMP_PLUGIN_)
-	SamplesPerTick = SamplesPerTick*(Global::pConfig->_samplesPerSec/44100);
+	SamplesPerTick = SamplesPerTick*Global::pConfig->_samplesPerSec/44100;
 #else
-	SamplesPerTick = SamplesPerTick*(Global::pConfig->_pOutputDriver->_samplesPerSec/44100);
+	SamplesPerTick = SamplesPerTick*Global::pConfig->_pOutputDriver->_samplesPerSec/44100;
 #endif // _WINAMP_PLUGIN_
 
 	pFile->Read(&currentOctave, sizeof(currentOctave));
@@ -1285,7 +1285,7 @@ bool Song::Load(
 					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);
-						if (pVstPlugin->Instance(sPath2) != VSTINSTANCE_NO_ERROR)
+						if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 						{
 							Machine* pOldMachine = pMachine;
 							pMachine = new Dummy(*((Dummy*)pOldMachine));
@@ -1296,11 +1296,21 @@ bool Song::Load(
 							pMachine->wasVST = true;
 						}
 					}
+					else
+					{
+						Machine* pOldMachine = pMachine;
+						pMachine = new Dummy(*((Dummy*)pOldMachine));
+						pOldMachine->_pSamplesL = NULL;
+						pOldMachine->_pSamplesR = NULL;
+						delete pOldMachine;
+						pMachine->_type = MACH_DUMMY;
+						pMachine->wasVST = true;
+					}
 #else // if !_WINAMP_PLUGIN_
 					if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);
-						if (pVstPlugin->Instance(sPath2) != VSTINSTANCE_NO_ERROR)
+						if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 						{
 							char sError[128];
 							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
@@ -1330,6 +1340,16 @@ bool Song::Load(
 						pMachine->wasVST = true;
 					}
 #endif // _WINAMP_PLUGIN_
+				}
+				else
+				{
+					Machine* pOldMachine = pMachine;
+					pMachine = new Dummy(*((Dummy*)pOldMachine));
+					pOldMachine->_pSamplesL = NULL;
+					pOldMachine->_pSamplesR = NULL;
+					delete pOldMachine;
+					pMachine->_type = MACH_DUMMY;
+					pMachine->wasVST = true;
 				}
 				break;
 				}
@@ -1513,7 +1533,7 @@ bool Song::Save(
 	pFile->Write(&Comment, 128);
 	
 	pFile->Write(&BeatsPerMin, sizeof(BeatsPerMin));
-	i = SamplesPerTick*(44100/Global::pConfig->_pOutputDriver->_samplesPerSec);
+	i = SamplesPerTick*44100/Global::pConfig->_pOutputDriver->_samplesPerSec;
 	pFile->Write(&i, sizeof(SamplesPerTick));
 	pFile->Write(&currentOctave, sizeof(currentOctave));
 

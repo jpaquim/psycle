@@ -511,6 +511,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 			}
 			BOX(devc,0,YOFFSET-1,XOFFSET+maxt*ROWWIDTH,1);
 			memDC.SelectObject(oldbmp);
+			memDC.DeleteDC();
 
 			if ( multiPattern )
 			{
@@ -564,6 +565,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	devc->SetROP2(prevmode);
 	devc->SelectObject(oldBrush);
 	devc->SelectObject(oldfont);
+	brush.DeleteObject();
 
 	updateMode = DMNone;
 	updatePar = DRAW_DATA | DRAW_HEADER;
