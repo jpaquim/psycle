@@ -333,19 +333,19 @@ void CChildView::PreparePatternRefresh(int drawMode)
 					rect.bottom=rect.top+ROWHEIGHT;	// left never changes and is set at ChildView init.
 					rect.left = 0;
 					rect.right=CW;
-					InvalidateRect(rect,false);
 					NewPatternDraw(0, _pSong->SONGTRACKS, pos, pos);
 					updatePar |= DRAW_DATA;
+					InvalidateRect(rect,false);
 					if ((playpos >= 0) && (playpos != newplaypos))
 					{
 						rect.top = YOFFSET+ ((playpos-rnlOff)*ROWHEIGHT);
 						rect.bottom = rect.top+ROWHEIGHT;
 						rect.left = 0;
 						rect.right = CW;
-						InvalidateRect(rect,false);
 						NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
 						updatePar |= DRAW_DATA;
 						playpos =-1;
+						InvalidateRect(rect,false);
 					}
 				}
 			}
@@ -358,10 +358,10 @@ void CChildView::PreparePatternRefresh(int drawMode)
 					rect.bottom = rect.top+ROWHEIGHT;
 					rect.left = 0;
 					rect.right = CW;
-					InvalidateRect(rect,false);
 					NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
 					updatePar |= DRAW_DATA;
 					playpos = -1;
+					InvalidateRect(rect,false);
 				}
 			}
 		}
@@ -414,17 +414,30 @@ void CChildView::PreparePatternRefresh(int drawMode)
 			}
 			else 
 			{
-				if ((newselpos.top != blockSel.start.line) ||
-					(newselpos.left != blockSel.start.track) ||
-					(newselpos.bottom != blockSel.end.line+1) ||
-					(newselpos.right != blockSel.end.track+1))
-				{
-					
+//				if (blockSel.start.line <= blockSel.end.line)
+//				{
 					newselpos.top=blockSel.start.line;
-					newselpos.left=blockSel.start.track;
 					newselpos.bottom=blockSel.end.line+1;
-					newselpos.right=blockSel.end.track+1;
+//				}
+//				else
+//				{
+//					newselpos.top=blockSel.end.line;
+//					newselpos.bottom=blockSel.start.line+1;
+//				}
 
+//				if (blockSel.start.track <= blockSel.end.track)
+//				{
+					newselpos.left=blockSel.start.track;
+					newselpos.right=blockSel.end.track+1;
+//				}
+//				else
+//				{
+//					newselpos.right=blockSel.start.track;
+//					newselpos.left=blockSel.end.track+1;
+//				}
+
+				if (selpos.bottom == 0)
+				{
 					//if(blockSel.start.track<rntOff) 
 					//	rect.left=XOFFSET;
 					//else 
@@ -445,36 +458,309 @@ void CChildView::PreparePatternRefresh(int drawMode)
 					//else 
 						rect.bottom=YOFFSET+(blockSel.end.line-rnlOff+1)*ROWHEIGHT;
 					
-					InvalidateRect(rect,false);
 					NewPatternDraw(blockSel.start.track, blockSel.end.track, blockSel.start.line, blockSel.end.line);
 					updatePar |= DRAW_DATA;
+					InvalidateRect(rect,false);
 				}
-			}
-			if ((selpos.bottom != 0 ) && (newselpos != selpos))
-			{
-				//if(selpos.left<rntOff) 
-				//	rect.left=XOFFSET;
-				//else 
-					rect.left=XOFFSET+(selpos.left-rntOff)*ROWWIDTH;
-				
-				//if(selpos.top<=rnlOff) 
-				//	rect.top=YOFFSET;
-				//else 
-					rect.top=YOFFSET+(selpos.top-rnlOff)*ROWHEIGHT;
-				
-				//if(selpos.right>=rntOff+VISTRACKS) 
-				//	rect.right=CW;
-				//else 
-					rect.right=XOFFSET+(selpos.right-rntOff)*ROWWIDTH;
+				else if (newselpos != selpos)
+				{
+					if (newselpos.left < selpos.left)
+					{
+						rect.left = newselpos.left;
+						if (newselpos.right > selpos.right)
+						{
+							rect.right = newselpos.right;
+						}
+						else if (newselpos.right < selpos.right)
+						{
+							rect.right = selpos.right;
+						}
+						else 
+						{
+							rect.right = selpos.left;
+						}
 
-				//if(selpos.bottom>=rnlOff+VISLINES ) 
-				//	rect.bottom=CH;
-				//else 
-					rect.bottom=YOFFSET+(selpos.bottom-rnlOff)*ROWHEIGHT;
-				
-				InvalidateRect(rect,false);
-				NewPatternDraw(selpos.left, selpos.right, selpos.top, selpos.bottom);
-				updatePar |= DRAW_DATA;
+						if (newselpos.top <= selpos.top)
+						{
+							rect.top = newselpos.top;
+						}
+						else 
+						{
+							rect.top = selpos.top;
+						}
+
+						if (newselpos.bottom >= selpos.bottom)
+						{
+							rect.bottom = newselpos.bottom;
+						}
+						else 
+						{
+							rect.bottom = selpos.bottom;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+					else if (newselpos.left > selpos.left)
+					{
+						rect.left = selpos.left;
+						if (newselpos.right > selpos.right)
+						{
+							rect.right = newselpos.right;
+						}
+						else if (newselpos.right < selpos.right)
+						{
+							rect.right = selpos.right;
+						}
+						else 
+						{
+							rect.right = newselpos.left;
+						}
+
+						if (newselpos.top <= selpos.top)
+						{
+							rect.top = newselpos.top;
+						}
+						else 
+						{
+							rect.top = selpos.top;
+						}
+
+						if (newselpos.bottom >= selpos.bottom)
+						{
+							rect.bottom = newselpos.bottom;
+						}
+						else 
+						{
+							rect.bottom = selpos.bottom;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+
+					if (newselpos.right < selpos.right)
+					{
+						rect.left = newselpos.right;
+						rect.right = selpos.right;
+
+						if (newselpos.top <= selpos.top)
+						{
+							rect.top = newselpos.top;
+						}
+						else 
+						{
+							rect.top = selpos.top;
+						}
+
+						if (newselpos.bottom >= selpos.bottom)
+						{
+							rect.bottom = newselpos.bottom;
+						}
+						else 
+						{
+							rect.bottom = selpos.bottom;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+					else if (newselpos.right > selpos.right)
+					{
+						rect.left = selpos.right;
+						rect.right = newselpos.right;
+
+						if (newselpos.top <= selpos.top)
+						{
+							rect.top = newselpos.top;
+						}
+						else 
+						{
+							rect.top = selpos.top;
+						}
+
+						if (newselpos.bottom >= selpos.bottom)
+						{
+							rect.bottom = newselpos.bottom;
+						}
+						else 
+						{
+							rect.bottom = selpos.bottom;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+
+					if (newselpos.top < selpos.top)
+					{
+						rect.top = newselpos.top;
+						if (newselpos.bottom > selpos.bottom)
+						{
+							rect.bottom = newselpos.bottom;
+						}
+						else if (newselpos.bottom < selpos.bottom)
+						{
+							rect.bottom = selpos.bottom;
+						}
+						else 
+						{
+							rect.bottom = selpos.top;
+						}
+
+						if (newselpos.left <= selpos.left)
+						{
+							rect.left = newselpos.left;
+						}
+						else 
+						{
+							rect.left = selpos.left;
+						}
+
+						if (newselpos.right >= selpos.right)
+						{
+							rect.right = newselpos.right;
+						}
+						else 
+						{
+							rect.right = selpos.right;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+					else if (newselpos.top > selpos.top)
+					{
+						rect.top = selpos.top;
+						if (newselpos.bottom > selpos.bottom)
+						{
+							rect.bottom = newselpos.bottom;
+						}
+						else if (newselpos.bottom < selpos.bottom)
+						{
+							rect.bottom = selpos.bottom;
+						}
+						else 
+						{
+							rect.bottom = newselpos.top;
+						}
+
+						if (newselpos.left <= selpos.left)
+						{
+							rect.left = newselpos.left;
+						}
+						else 
+						{
+							rect.left = selpos.left;
+						}
+
+						if (newselpos.right >= selpos.right)
+						{
+							rect.right = newselpos.right;
+						}
+						else 
+						{
+							rect.right = selpos.right;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+
+					if (newselpos.bottom < selpos.bottom)
+					{
+						rect.top = newselpos.bottom;
+						rect.bottom = selpos.bottom;
+
+						if (newselpos.left <= selpos.left)
+						{
+							rect.left = newselpos.left;
+						}
+						else 
+						{
+							rect.left = selpos.left;
+						}
+
+						if (newselpos.right >= selpos.right)
+						{
+							rect.right = newselpos.right;
+						}
+						else 
+						{
+							rect.right = selpos.right;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+					else if (newselpos.bottom > selpos.bottom)
+					{
+						rect.top = selpos.bottom;
+						rect.bottom = newselpos.bottom;
+
+						if (newselpos.left <= selpos.left)
+						{
+							rect.left = newselpos.left;
+						}
+						else 
+						{
+							rect.left = selpos.left;
+						}
+
+						if (newselpos.right >= selpos.right)
+						{
+							rect.right = newselpos.right;
+						}
+						else 
+						{
+							rect.right = selpos.right;
+						}
+					
+						NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+						updatePar |= DRAW_DATA;
+						rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+						rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+						rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+						rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+						InvalidateRect(rect,false);
+					}
+
+				}
 			}
 		}
 		else if ( selpos.bottom != 0)
@@ -499,10 +785,10 @@ void CChildView::PreparePatternRefresh(int drawMode)
 			//else 
 				rect.bottom=YOFFSET+(selpos.bottom-rnlOff)*ROWHEIGHT;
 			
-			InvalidateRect(rect,false);
 			NewPatternDraw(selpos.left, selpos.right, selpos.top, selpos.bottom);
 			updatePar |= DRAW_DATA;
 			newselpos.bottom=0;
+			InvalidateRect(rect,false);
 		}
 		break;
 	case DMData: 
@@ -521,8 +807,8 @@ void CChildView::PreparePatternRefresh(int drawMode)
 			rect.right=XOFFSET+drawTrackEnd*ROWWIDTH;
 			rect.top=YOFFSET+	drawLineStart*ROWHEIGHT;
 			rect.bottom=YOFFSET+drawLineEnd*ROWHEIGHT;
-			InvalidateRect(rect,false);
 			updatePar |= DRAW_DATA;
+			InvalidateRect(rect,false);
 		}
 		break;
 	case DMTrackHeader: 
@@ -546,17 +832,17 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		rect.right = rect.left+ROWWIDTH;
 		rect.top = YOFFSET+(editcur.line-rnlOff)*ROWHEIGHT;
 		rect.bottom = rect.top+ROWWIDTH;
-		InvalidateRect(rect,false);
 		NewPatternDraw(editcur.track, editcur.track, editcur.line, editcur.line);
 		updatePar |= DRAW_DATA;
+		InvalidateRect(rect,false);
 		if ((editcur.line != editlast.line) || (editcur.track != editlast.track))
 		{
 			rect.left = XOFFSET+(editlast.track-rntOff)*ROWWIDTH;
 			rect.right = rect.left+ROWWIDTH;
 			rect.top = YOFFSET+(editlast.line-rnlOff)*ROWHEIGHT;
 			rect.bottom = rect.top+ROWWIDTH;
-			InvalidateRect(rect,false);
 			NewPatternDraw(editlast.track, editlast.track, editlast.line, editlast.line);
+			InvalidateRect(rect,false);
 		}
 	}
 
@@ -568,10 +854,10 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		rect.bottom = rect.top+ROWHEIGHT;
 		rect.left = 0;
 		rect.right = XOFFSET+(maxt)*ROWWIDTH;
-		InvalidateRect(rect,false);
 		NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
 		playpos =-1;
 		updatePar |= DRAW_DATA;
+		InvalidateRect(rect,false);
 	}
 
 	////////////////////////////////////////////////////////////////////
@@ -816,7 +1102,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 				else 
 				{	
 					int xOffset = XOFFSET-1;
-					for (int i = 0; i < -scrollT; i++)
+					for (int i = 0; i < 1-scrollT; i++)
 					{
 						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
 						oldBrush= devc->SelectObject(&newbrush);
@@ -842,16 +1128,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 						xOffset += ROWWIDTH;
 					}
 					DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
-					DrawPatternData(devc,0, -scrollT, 0, VISLINES+1);
+					DrawPatternData(devc,0, 1-scrollT, 0, VISLINES+1);
 					if (scrollL > 0)
 					{	
 						TRACE("DRAW_HVSCROLL-+\n");
-						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT, 0,scrollL);
+						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT, 0,scrollL);
 					}
 					else
 					{	
 						TRACE("DRAW_HVSCROLL--\n");
-						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
+						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
 					}
 				}
 			}
@@ -942,7 +1228,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 				else
 				{	
 					int xOffset = XOFFSET-1;
-					for (int i = 0; i < -scrollT; i++)
+					for (int i = 0; i < 1-scrollT; i++)
 					{
 						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
 						oldBrush= devc->SelectObject(&newbrush);
@@ -968,16 +1254,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 						xOffset += ROWWIDTH;
 					}
 					DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
-					DrawPatternData(devc,0, -scrollT, 0, VISLINES+1);
+					DrawPatternData(devc,0, 1-scrollT, 0, VISLINES+1);
 					if (scrollL > 0)
 					{	
 						TRACE("DRAW_HVSCROLL-+H\n");
-						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT, 0,scrollL);
+						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT, 0,scrollL);
 					}
 					else
 					{	
 						TRACE("DRAW_HVSCROLL--H\n");
-						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
+						DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
 					}
 
 					CDC memDC;

@@ -348,6 +348,7 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 				blockSelected=false;
 				blockSel.end.line=0;
 				blockSel.end.track=0;
+				bScrollDetatch=false;
 				Repaint(DMSelection);
 			}
 		}
