@@ -34,6 +34,9 @@ rough bug count: ~60, many aren't really bugs though.
 	[ * tried a fix, need to talk to yannis to see if it worked]
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
+++ volume slide command
+
+++ <sampler> mmmm, i miss another feature. Show with a different colour the notes of the actual Generator/effect in patterns
 
 + humanizer
 + global volume fades
@@ -227,36 +230,39 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[Fix:Basically, make ONLY .fxb for VST's.]
 **	The Winamp plugin shows a memory leak with modules that have VST's. I have overlooked but I
 	haven't found the cause yet. I will try later with a leak detector program.
+** DashSynthesis daAlfa2k VSTi v1.28b - crashes with user breakpoints and access violation on instance in debug build
+** ticky clav 1.1 causes random access violation crashes? - now i am not sure if it is ticky clav
+** phatmatic causes crashes when you open the gui after loading a sample into it.
+	[ also, when opening/closing the directory pane, it tries to change the window size and does a poor job. 
+	  after a few tries it fucks up.  if you re-open it after it has fucked up, it crashes. ]
+** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
+	minimize/refocus psycle or change the current view
+	this only seems to happen on the rgc audio z3ta+ and on nothing else
+** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
+	it works fine?
+**	JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded;
+		docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible
+		again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
+	psycle crashes when i get the 'cpu overload' warning in reaktor
+**	<_sue_> bug with native intruments pro-52 it doesnt rec the tweaks at all.....
+		<pooplog> are you able to control the tweaks of it from the pattern?
+		<_sue_> yes i am (in pro52)
+		[ How does those plugins do Automation then? Maybe it is a Host fault not reporting that it supports it? ]
 ** <_sue_> hey.....remember seeing someone at the boards sayn that psycles param bar went crazy with
 	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob 
 	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
 	 talking about......the first time it happened it scrolled for ages..i thought it had went 
 	 crazy too.....
-** ticky clav 1.1 causes random access violation crashes? - now i am not sure if it is ticky clav
-** phatmatic causes crashes when you open the gui after loading a sample into it.
-** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
-	minimize/refocus psycle or change the current view
-	this only seems to happen on the rgc audio z3ta+ and on nothing else
-** vst fm7 locks up psycle on parameter change midi command with gui open
+** ni fm7 locks up psycle on parameter change midi command with gui open
 ** ni pro53 sometimes crashes when loading a song that uses it.
-** phatmatic crashes with an assertion error when you reopen the gui after loading a sample.
-** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
-	it works fine?
-* drumatic 2 vst: http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
+** ni spektral delay 1.0 crashes on effClose or effEditIdle messages.  notice a trend with NI plugins yet?
+** synth 1 crashes with exception error on instance in debug build.
 *	Many vsts randomly loose keyboard focus
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.
 		[ A "bypass" bug, if we do the above ^]
 *	JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly
 		 (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
-*	JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded;
-		docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible
-		again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
-	psycle crashes when i get the 'cpu overload' warning in reaktor
-*	<_sue_> bug with native intruments pro-52 it doesnt rec the tweaks at all.....
-		<pooplog> are you able to control the tweaks of it from the pattern?
-		<_sue_> yes i am (in pro52)
-		[ How does those plugins do Automation then? Maybe it is a Host fault not reporting that it supports it? ]
 *	New Note in Quadrasid does not reinitialize the Envelope.
 		[ Bug? This doesn't happen on freebase]
 *	many vsts freeze the childview from updating while Left mouse button is down, which makes it so pattern does
@@ -265,6 +271,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		-externalizer
 		-leveler
 		-tools one
+* sonic syndicate plugins (talkbox and phaser) get enumerated as plucked string
 +++FF	<bdzld> which is support for multiout vsti?
 		<pooplog> if psycle was smart enough to detect mutli-out vst, when you drag a wire to it, it could pop up a 			
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(

@@ -35,7 +35,10 @@ CVstEditorDlg::CVstEditorDlg()
 
 CVstEditorDlg::~CVstEditorDlg()
 {
-	if (_editorActive != NULL) *_editorActive = false;
+	if (_editorActive != NULL) 
+	{
+		*_editorActive = false;
+	}
 }
 
 
@@ -45,6 +48,7 @@ BEGIN_MESSAGE_MAP(CVstEditorDlg, CFrameWnd)
 	ON_COMMAND(ID_PARAMETERS_SHOWPRESET, OnParametersShowpreset)
 	ON_WM_SETFOCUS()
 	ON_WM_CLOSE()
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -68,7 +72,7 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 		((CVstGui*)pGui)->_pMachine= _pMachine;
 		((CVstGui*)pGui)->effect = _pMachine->_pEffect;
 
-		_pMachine->Dispatch(effEditOpen, 0, 0, ((CVstGui*)pGui)->m_hWnd, 0.0f);
+		_pMachine->Dispatch(effEditOpen, 0, 0, pGui->m_hWnd, 0.0f);
 	
 		ERect * er;
 		_pMachine->Dispatch(effEditGetRect, 0, 0, &er,0.0f);
@@ -189,3 +193,4 @@ void CVstEditorDlg::OnClose()
 	
 	CFrameWnd::OnClose();
 }
+
