@@ -931,7 +931,6 @@ void VSTInstrument::Stop()
 		// Reset all controllers
 		for (i=0;i<16;i++)
 		{
-			AddMIDI(0xb0+i,0x7e);
 			AddMIDI(0xb0+i,0x7b);
 		}
 	}
