@@ -204,6 +204,12 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnViewSongbar();
+	afx_msg void OnViewMachinebar();
+	afx_msg void OnViewSequencerbar();
+	afx_msg void OnUpdateViewSongbar(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewSequencerbar(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewMachinebar(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

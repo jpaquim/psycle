@@ -933,6 +933,8 @@ void VSTInstrument::Stop()
 		{
 			AddMIDI(0xb0+i,0x7b);
 		}
+		SendMidi();
+		_pEffect->process(_pEffect,inputs,inputs,64);
 	}
 }
 

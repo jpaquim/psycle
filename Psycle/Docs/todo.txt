@@ -199,16 +199,13 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.
 		[ A "bypass" bug, if we do the above ^]
-*	<_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
-		depending on the place where theyr box was placed...
-		[also not able to recreate]
 *	JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly
 		 (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
 *	JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded;
 		docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible
 		again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
 	psycle crashes when i get the 'cpu overload' warning in reaktor
-*	<_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all.....
+*	<_sue_> bug with native intruments pro-52 it doesnt rec the tweaks at all.....
 		<pooplog> are you able to control the tweaks of it from the pattern?
 		<_sue_> yes i am (in pro52)
 		[ How does those plugins do Automation then? Maybe it is a Host fault not reporting that it supports it? ]
@@ -240,19 +237,17 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Interface (contains pattern stuff too):
 ------------
-***	<alk> after I leave a song open for some time, I try and do save and it says "error creating file"
-		[_fileName doesn't store the SongDir, and it gets reseted after closing the config dialog.
-		Fix: add directory to filename and remove it for titlebar and load/save dialogs]
-		[ -> config dialog only changes SongDir if user changes it in the dialog ]
 **	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
+	[ DDE ? mmmm... ]
 **	<lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
 	combinations don't work either, like ctrl+pageup etc.
 **	<[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
 	the info when new one.
 **	should save wire dialog settings
-*??	why does it take so long to load a song?
 *	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
+	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
+	 range bigger]
 *	<alk> there's a bug where when u alt-tab the icon is not correct 
 		[ cannot find the reason, older version had this too ]
 *	<alk> 'play current block' loops current pattern -should it just play the selected block?
@@ -261,8 +256,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
-!!	<angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or 
-		show it when you want.
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 !	JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
 ++	<alk> another idea, a keypress to toggle follow song
@@ -322,7 +315,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ------------
 *	It doesn't add the machines necessary to play all notes.
 ++ .mid import/export
-+	Add option for the user to create samplers for instruments
 +	IT importing
 +	.mid import
 +	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 

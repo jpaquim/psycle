@@ -2110,6 +2110,9 @@ BEGIN
     POPUP "&View"
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "Song Bar",                    ID_VIEW_SONGBAR
+        MENUITEM "Machine Bar",                 ID_VIEW_MACHINEBAR
+        MENUITEM "Sequencer Bar",               ID_VIEW_SEQUENCERBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
         MENUITEM SEPARATOR
         MENUITEM "Machine View\tF2",            ID_MACHINEVIEW
@@ -2478,6 +2481,7 @@ BEGIN
     ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYINPUTOUTPUTCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYMIDIINPUTCONFIG "THIS IS A TESTING ONLY OPTION"
+    ID_VIEW_SONGBAR         "Show/Hide Song Bar (Tempo, tbp, and Vu-meter)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -2594,6 +2598,11 @@ BEGIN
     ID_INDICATOR_NOTEOFF    "NoteOffs"
     ID_INDICATOR_TWEAKS     "Tweaks"
     ID_INDICATOR_OCTAVE     "Oct:0"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_SEQUENCER       "Show/Hide Sequencer Bar"
 END
 
 #endif    // Neutral (Default) resources
