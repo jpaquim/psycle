@@ -448,6 +448,10 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			pMachine = p = new Plugin;
 			if (!p->LoadDll(dllName))
 			{
+				char sError[MAX_PATH];
+				sprintf(sError,"Missing or Corrupted native plug-in \"%s\" - replacing with dummy.",dllName);
+				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+
 				delete pMachine;
 				pMachine = new Dummy;
 				type = MACH_DUMMY;
@@ -460,6 +464,9 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			 pMachine = p = new VSTInstrument;
 			if (!p->LoadDll(dllName))
 			{
+				char sError[MAX_PATH];
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",dllName);
+				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				delete pMachine;
 				pMachine = new Dummy;
 				type = MACH_DUMMY;
@@ -472,6 +479,9 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			pMachine = p = new VSTFX;
 			if (!p->LoadDll(dllName))
 			{
+				char sError[MAX_PATH];
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",dllName);
+				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				delete pMachine;
 				pMachine = new Dummy;
 				type = MACH_DUMMY;
@@ -509,17 +519,12 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 	}
 	pFile->ReadString(pMachine->_editName,sizeof(pMachine->_editName));
 
-	int temp;
-	pFile->Read(&temp,sizeof(temp)); // num params to load
-	for (i = 0; i < temp; i++)
-	{
-		int temp;
-		pFile->Read(&temp,sizeof(temp));
-		pMachine->SetParameter(i,temp);
-	}
-
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
+		char sError[MAX_PATH];
+		sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with dummy.",dllName);
+		::MessageBox(NULL,sError, "Loading Error", MB_OK);
+
 		Machine* p = new Dummy;
 		p->Init();
 		p->_type=MACH_DUMMY;
@@ -620,13 +625,6 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 //		pFile->Write(&_connectionPoint[i],sizeof(_connectionPoint[i]));// point for wire? 
 	}
 	pFile->Write(_editName,strlen(_editName)+1);
-	int temp = GetNumParams();
-	pFile->Write(&temp,sizeof(temp));
-	for (i = 0; i < temp; i++)
-	{
-		int temp = GetParamValue(i);
-		pFile->Write(&temp,sizeof(temp));
-	}
 	SaveSpecificChunk(pFile);
 }
 

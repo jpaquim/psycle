@@ -1745,7 +1745,7 @@ bool Song::Load(RiffFile* pFile)
 							if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
 								char sError[128];
-								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
 								::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 								Machine* pOldMachine = pMachine[i];
