@@ -120,7 +120,7 @@ public:
 	void BlockGenChange(int x);
 	int SongIncBpm(int x);
 	void SetPatStep(int stp);
-
+	void ShowSwingFillDlg(bool bTrackMode);
 
 	void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes
 	void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
@@ -367,6 +367,9 @@ public:
 	afx_msg void OnAutostop();
 	afx_msg void OnUpdateAutostop(CCmdUI* pCmdUI);
 	afx_msg void OnPopPattenproperties();
+	afx_msg void OnPopBlockSwingfill();
+	afx_msg void OnUpdatePopBlockSwingfill(CCmdUI* pCmdUI);
+	afx_msg void OnPopTrackSwingfill();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnConfigurationSettings();
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);

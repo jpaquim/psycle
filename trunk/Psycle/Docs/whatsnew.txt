@@ -18,6 +18,7 @@ V1.67
 + Native Plugin realtime mouse tweak recording!!! (pooplog)
 + value dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
 ! Added "Xerox" button to seq editor (named that until someone suggests a good 5 letter word for duplicate) [Alk] (poolog)
+! Added Swing Fill command (pooplog)
 
 V1.66
 -----
