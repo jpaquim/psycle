@@ -640,7 +640,7 @@ void mi::DSPClear(float *psamplesleft,float *psamplesright, int numsamples)
 
 void mi::Work(float *psamplesleft,float *psamplesright, int numsamples,int numtracks)
 {
-	bool gotsomething = false;
+	//bool gotsomething = false;
 	
 	DSPClear(psamplesleft,psamplesright,numsamples);
 

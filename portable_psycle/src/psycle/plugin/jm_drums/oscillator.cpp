@@ -8,10 +8,10 @@
 
 Coscillator::Coscillator()
 {
-	hz=44100;
-	hztosamples=MAX_ENVPOS/44100.0;
-	incremspeed=0.015;
-	envpos=0;
+	hz = 44100;
+	hztosamples = static_cast<float>(MAX_ENVPOS / 44100.);
+	incremspeed = 0.015;
+	envpos = 0;
 }
 
 Coscillator::~Coscillator()
