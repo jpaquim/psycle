@@ -421,19 +421,26 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.SetTextColor(0x606060);
 				bufDC.TextOut(4, 128-14, buf);
 
-				CPen linepen(PS_SOLID, 8, 0x00303030);
+				CPen linepen(PS_SOLID, 2, 0x00202020);
 
 				CPen *oldpen = bufDC.SelectObject(&linepen);
 
 				// now draw our scope
 
 				// red line if last frame was clipping
-				bufDC.MoveTo(0,64);
 				if (clip)
 				{
 					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 8, 0x00101040);
+					linepen.CreatePen(PS_SOLID, 2, 0x00202030);
 					bufDC.SelectObject(&linepen);
+					bufDC.MoveTo(0,32);
+					bufDC.LineTo(255,32);
+					bufDC.MoveTo(0,96);
+					bufDC.LineTo(255,96);
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 8, 0x00202040);
+					bufDC.SelectObject(&linepen);
+					bufDC.MoveTo(0,64);
 					bufDC.LineTo(255,64);
 					linepen.DeleteObject();
 					linepen.CreatePen(PS_SOLID, 4, 0x00101080);
@@ -441,12 +448,20 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				// or grey line if fine
 				else
 				{
+					bufDC.MoveTo(0,32);
+					bufDC.LineTo(255,32);
+					bufDC.MoveTo(0,96);
+					bufDC.LineTo(255,96);
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
+					bufDC.MoveTo(0,64);
 					bufDC.LineTo(255,64);
 					linepen.DeleteObject();
 					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
 				}
 				bufDC.SelectObject(&linepen);
-				bufDC.LineTo(0,64);
+				bufDC.MoveTo(0,64);
+				bufDC.LineTo(255,64);
 
 				linepen.DeleteObject();
 				linepen.CreatePen(PS_SOLID, 2, 0xc08080);
@@ -465,6 +480,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				{
 					n -= add;
 					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+//					bufDC.LineTo(x,GetY(32768/2));
 				}
 
 				linepen.DeleteObject();
@@ -629,7 +645,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			break;
 		case 3: // phase scope
 			{
-
 				CPen linepen(PS_SOLID, 8, 0x00303030);
 
 				CPen *oldpen = bufDC.SelectObject(&linepen);
@@ -637,7 +652,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				if (clip)
 				{
 					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 8, 0x00101040);
+					linepen.CreatePen(PS_SOLID, 8, 0x00202040);
 					bufDC.SelectObject(&linepen);
 				}
 
@@ -665,12 +680,11 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
 				}
 				bufDC.SelectObject(&linepen);
-//				bufDC.LineTo(128,128);
-//				bufDC.LineTo(128,0);
-//				bufDC.MoveTo(128,128);
-//				bufDC.LineTo(0,0);
-				bufDC.MoveTo(128,0);
+				bufDC.MoveTo(32,32);
 				bufDC.LineTo(128,128);
+				bufDC.LineTo(128,0);
+				bufDC.MoveTo(128,128);
+				bufDC.LineTo(256-32,32);
 
 //				bufDC.Arc(0,0,256,256,256,128,0,128);
 //				bufDC.Arc(32,32,256-32,256-32,256-32,128,32,128);
