@@ -3,6 +3,9 @@
 +=addition
 
 * <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
+* psycle default theme sucks
+* <sue> it recs the track where you have the cursor on.....is that what youre sayng ? <pooplog> yes
+	if you have 0 tracks armed
 
 * Other crap
 ------------
@@ -61,6 +64,7 @@ feature: First, I'd like to see the Generator or Effect name in one of these pla
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
 * dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
 	it is fine.  i think it has to do with cpu load.
+* moving machines makes playback pop - machine interface takes too long to redraw
 bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
 		 Fix:Basically, make ONLY .fxb for VST's.
 bug:	 JMDrum is buggy (Crashes sometimes)
@@ -166,7 +170,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 
 * Driver Issues:
 ------------
-* moving machines makes playback pop
 * Output gets weird after a bit and start playing all crackly and doubletime
   <[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
    in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.

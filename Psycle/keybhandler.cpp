@@ -129,7 +129,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 			{
 				SelectNextTrack();
 			}
-			else
+/*			else
 			{
 				// build entry
 				PatternEntry entry;
@@ -155,6 +155,7 @@ void CChildView::MidiPatternTweak(int command, int value)
 				pMachine->Tick(0,&entry);
 				return;
 			}
+			*/
 		}
 		// write effect
 		int ps = _ps();
@@ -235,7 +236,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 			{
 				SelectNextTrack();
 			}
-			else
+/*			else
 			{
 				// build entry
 				PatternEntry entry;
@@ -261,6 +262,7 @@ void CChildView::MidiPatternCommand(int command, int value)
 				pMachine->Tick(0,&entry);
 				return;
 			}
+			*/
 		}
 		// write effect
 		int ps = _ps();
@@ -336,10 +338,11 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 			{
 				SelectNextTrack();
 			}
-			else
+/*			else
 			{
 				return;
 			}
+			*/
 		}
 		// write effect
 		int ps = _ps();
@@ -430,7 +433,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 				SelectNextTrack();
 			}
 		}
-		else
+/*		else
 		{
 			if(velocity>0)
 				Global::pInputHandler->PlayNote(note,velocity,false);
@@ -438,6 +441,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 				Global::pInputHandler->StopNote(note,false);
 			return;
 		}
+		*/
 		offset = _offset(ps);
 		toffset = offset+(Global::pPlayer->_lineCounter*MULTIPLY);
 	}
