@@ -112,7 +112,7 @@ public:
 			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 			{
 				char sError[128];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				return FALSE;
 			}
@@ -120,7 +120,7 @@ public:
 		else
 		{
 			char sError[128];
-			sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
+			sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
 			::MessageBox(NULL,sError, "Loading Error", MB_OK);
 			return FALSE;
 		}
@@ -131,7 +131,7 @@ public:
 			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 			{
 				char sError[128];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				return FALSE;
 			}
@@ -139,7 +139,7 @@ public:
 		else
 		{
 			char sError[128];
-			sprintf(sError,"Missing VST plug-in \"%s\" - replacing with dummy.",psFileName);
+			sprintf(sError,"Missing VST plug-in \"%s\" - replacing with Dummy.",psFileName);
 			::MessageBox(NULL,sError, "Loading Error", MB_OK);
 			return FALSE;
 		}

@@ -239,9 +239,9 @@ int play(char *fn)
 	{
 		return -1;
 	}
-	_global._pSong->Load(&file);
 	_global._pSong->filesize=file.FileSize();
-	file.Close();
+	_global._pSong->Load(&file);
+//	file.Close(); <- load handles this
 	strcpy(_global._pSong->fileName,fn);
 	_global._pSong->SetBPM(_global._pSong->BeatsPerMin, _global._pSong->_ticksPerBeat, _global.pConfig->_samplesPerSec);
 
@@ -501,10 +501,10 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			pSong->New(); // this is NOT done in Load for the winamp plugin.
 			if (file.Open(infofileName))
 			{
-				pSong->Load(&file);
 				pSong->filesize=file.FileSize();
+				pSong->Load(&file);
 				strcpy(pSong->fileName,infofileName);
-				file.Close();
+//				file.Close(); <- load handles this
 			}
 		}
 		else pSong= _global._pSong;

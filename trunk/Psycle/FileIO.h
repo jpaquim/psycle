@@ -27,7 +27,7 @@ public:
 
 	virtual bool Open(char* psFileName);
 	virtual bool Create(char* psFileName, bool overwrite);
-	virtual void Close(void);
+	virtual BOOL Close(void);
 	virtual bool Read(void* pData, ULONG numBytes);
 	virtual bool Write(void* pData, ULONG numBytes);
 	virtual bool Expect(void* pData, ULONG numBytes);
@@ -41,6 +41,7 @@ public:
 	virtual FILE* GetFile(void) { return NULL; };
 
 	static ULONG FourCC(char *psName);
+	char szName[MAX_PATH];
 
 protected:
 	HANDLE _handle;
@@ -52,7 +53,8 @@ class OldPsyFile : public RiffFile
 public:
 	virtual bool Open(char* psFileName);
 	virtual bool Create(char* psFileName, bool overwrite);
-	virtual void Close(void);
+	virtual BOOL Close(void);
+	virtual BOOL Error();
 	virtual bool Read(void* pData, ULONG numBytes);
 	virtual bool Write(void* pData, ULONG numBytes);
 	virtual bool Expect(void* pData, ULONG numBytes);

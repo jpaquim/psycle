@@ -447,7 +447,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 			return;
 		}
 		_pSong->Save(&file);
-		file.Close();
+//		file.Close(); <- save now handles this
 	}
 }
 
@@ -684,12 +684,12 @@ BOOL CChildView::OnFileSave(UINT id)
 			OldPsyFile file;
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{
-				MessageBox("Error creating file", "Error", MB_OK);
+				MessageBox("Error creating file!", "Error!", MB_OK);
 				return FALSE;
 			}
 			if (!_pSong->Save(&file))
 			{
-				MessageBox("Error saving file", "Error", MB_OK);
+				MessageBox("Error saving file!", "Error!", MB_OK);
 				bResult = FALSE;
 			}
 			else 
@@ -705,7 +705,7 @@ BOOL CChildView::OnFileSave(UINT id)
 				}
 				SetTitleBarText();
 			}				
-			file.Close();
+//			file.Close();  <- save handles this 
 		}
 		else 
 		{
@@ -789,12 +789,12 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 			
 			if (!file.Create(str.GetBuffer(1), true))
 			{
-				MessageBox("Error creating file", "Error", MB_OK);
+				MessageBox("Error creating file!", "Error!", MB_OK);
 				return FALSE;
 			}
 			if (!_pSong->Save(&file))
 			{
-				MessageBox("Error saving file", "Error", MB_OK);
+				MessageBox("Error saving file!", "Error!", MB_OK);
 				bResult = FALSE;
 			}
 			else 
@@ -812,7 +812,7 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 				}
 				SetTitleBarText();
 			}
-			file.Close();
+//			file.Close(); <- save handles this
 		}
 	}
 	else
@@ -937,7 +937,7 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 		filepath += Global::_pSong->fileName;
 		OldPsyFile file;
 		
-		sprintf(szText,"Save changes to %s?",Global::_pSong->fileName);
+		sprintf(szText,"Save changes to \"%s\"?",Global::_pSong->fileName);
 		int result = MessageBox(szText,szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 		switch (result)
 		{
@@ -945,12 +945,12 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 			strcpy(szText,filepath);
 			if (!file.Create(szText, true))
 			{
-				sprintf(szText,"Error writing to %s!",filepath);
+				sprintf(szText,"Error writing to \"%s\"!!!",filepath);
 				MessageBox(szText,szTitle,MB_ICONEXCLAMATION);
 				return FALSE;
 			}
 			_pSong->Save(&file);
-			file.Close();
+//			file.Close(); <- save handles this
 			return TRUE;
 			break;
 		case IDNO:
@@ -1982,7 +1982,7 @@ void CChildView::FileLoadsongNamed(char* fName)
 		return;
 	}
 	_pSong->Load(&file);
-	file.Close();
+//	file.Close(); <- load handles this
 	
 	_pSong->_saved=true;
 

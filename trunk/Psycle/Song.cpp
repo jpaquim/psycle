@@ -1394,6 +1394,14 @@ bool Song::Load(RiffFile* pFile)
 
 		Progress.OnCancel();
 
+		if (!pFile->Close())
+		{
+			char error[MAX_PATH];
+			sprintf(error,"Error reading from \"%s\"!!!",pFile->szName);
+			MessageBox(NULL,error,"File Error!!!",0);
+			return false;
+		}
+
 		return true;
 
 	}
@@ -1745,7 +1753,7 @@ bool Song::Load(RiffFile* pFile)
 							if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
 								char sError[128];
-								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
+								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
 								::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 								Machine* pOldMachine = pMachine[i];
@@ -1954,6 +1962,7 @@ bool Song::Load(RiffFile* pFile)
 				delete vstL[i].pars;
 			}
 		}
+
 		// ok so it's all loaded... except we don't use those stupid bus remaps any more, so 
 		// all we have to do is translate some stuff around to the pMachine array
 
@@ -2135,11 +2144,20 @@ bool Song::Load(RiffFile* pFile)
 		seqBus=0;
 
 		Progress.OnCancel();
+
+		if (!pFile->Close())
+		{
+			char error[MAX_PATH];
+			sprintf(error,"Error reading from \"%s\"!!!",pFile->szName);
+			MessageBox(NULL,error,"File Error!!!",0);
+			return false;
+		}
+
 		return true;
 	}
 
 	// load did not work
-	::MessageBox(NULL,"Incorrect file format","Error",MB_OK);
+	MessageBox(NULL,"Incorrect file format","Error",MB_OK);
 	return false;
 }
 
@@ -2472,6 +2490,15 @@ bool Song::Save(RiffFile* pFile)
 	::Sleep(1);
 
 	Progress.OnCancel();
+
+	if (!pFile->Close())
+	{
+		char error[MAX_PATH];
+		sprintf(error,"Error writing to \"%s\"!!!",pFile->szName);
+		MessageBox(NULL,error,"File Error!!!",0);
+		return false;
+	}
+
 	return true;
 }
 

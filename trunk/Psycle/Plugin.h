@@ -130,7 +130,7 @@ public:
 					}
 					catch (...)
 					{
-						MessageBox(NULL,"Machine had an exception while loading it's chunk.\nIt has crashed and is being replaced by a dummy.",GetDllName(),NULL);
+						MessageBox(NULL,"Machine had an exception while loading it's chunk.\nIt has crashed and is being replaced by Dummy.",GetDllName(),NULL);
 						return FALSE;
 					}
 					return TRUE;
@@ -216,7 +216,7 @@ public:
 		if (!Instance(sPath2))
 		{
 			char sError[_MAX_PATH];
-			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with dummy.",psFileName);
+			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",psFileName);
 			::MessageBox(NULL,sError, "Error", MB_OK);
 			return FALSE;
 		}

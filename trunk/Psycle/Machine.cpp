@@ -449,7 +449,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
-				sprintf(sError,"Missing or Corrupted native plug-in \"%s\" - replacing with dummy.",dllName);
+				sprintf(sError,"Missing or Corrupted native plug-in \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 				delete pMachine;
@@ -465,7 +465,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",dllName);
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				delete pMachine;
 				pMachine = new Dummy;
@@ -480,7 +480,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 			if (!p->LoadDll(dllName))
 			{
 				char sError[MAX_PATH];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",dllName);
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				delete pMachine;
 				pMachine = new Dummy;
@@ -522,7 +522,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
 		char sError[MAX_PATH];
-		sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with dummy.",dllName);
+		sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
 		::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 		Machine* p = new Dummy;
