@@ -21,7 +21,6 @@ class CGearGainer : public CDialog
 public:
 	CGearGainer(CChildView* pParent = NULL);   // standard constructor
 	Gainer* _pMachine;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 

@@ -23,7 +23,6 @@ CGearPsychOsc::CGearPsychOsc(CChildView* pParent /*=NULL*/)
 	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearPsychOsc)
 	//}}AFX_DATA_INIT
-	doit=false;
 }
 
 

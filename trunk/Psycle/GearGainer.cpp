@@ -63,10 +63,7 @@ BOOL CGearGainer::OnInitDialog()
 
 void CGearGainer::OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_outWet = 1024-m_volslider.GetPos();
-	}
+	_pMachine->_outWet = 1024-m_volslider.GetPos();
 
 	float wet = (float)_pMachine->_outWet*0.00390625f;
 	char buffer[32];

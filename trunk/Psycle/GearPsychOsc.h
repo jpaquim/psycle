@@ -21,7 +21,6 @@ class CGearPsychOsc : public CDialog
 public:
 	CGearPsychOsc(CChildView* pParent = NULL);   // standard constructor
 	Sine* _pMachine;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 
