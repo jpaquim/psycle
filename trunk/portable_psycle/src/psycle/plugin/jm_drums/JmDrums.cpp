@@ -1,6 +1,6 @@
 #include <project.h>
 #include <psycle/plugin/MachineInterface.h>
-#include "drum.h"
+#include <psycle/plugin/jm_drums/drum.h>
 
 #define DRUM_VERSION "2.2"
 #define MAX_TRACKS 32

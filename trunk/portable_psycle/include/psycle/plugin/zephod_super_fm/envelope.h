@@ -1,13 +1,8 @@
+#pragma once
+
 // envelope.h: interface for the envelope class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_ENVELOPE_H__4E342580_F672_11D1_A5BC_0040C72DEEB6__INCLUDED_)
-#define AFX_ENVELOPE_H__4E342580_F672_11D1_A5BC_0040C72DEEB6__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 #define ENV_ATT 1
 #define ENV_DEC 2
@@ -117,5 +112,3 @@ float envelope::res(void)
 	return 0;
 
 }
-
-#endif // !defined(AFX_ENVELOPE_H__4E342580_F672_11D1_A5BC_0040C72DEEB6__INCLUDED_)

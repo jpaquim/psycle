@@ -1,10 +1,10 @@
 #include <project.h>
 #include <psycle/plugin/MachineInterface.h>
+#include <psycle/plugin/surround/biquad.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "biquad.h"
 
 //////////////////////////////////////////////////////////////////////
 // KarLKoX "Surround" plugin for PSYCLE
@@ -129,7 +129,8 @@ void mi::ParameterTweak(int par, int val)
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-	float xlb, xrb, xlt, xrt;
+	//float xlb, xrb, xlt, xrt;
+
 	// over all samples 
 	switch(Vals[1])
 	{

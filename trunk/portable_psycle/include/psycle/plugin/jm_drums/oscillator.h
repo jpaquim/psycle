@@ -1,13 +1,8 @@
+#pragma once
+
 // oscillator.h: interface for the Coscillator class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_OSCILLATOR_H__8DCC6093_4904_4A88_BE80_EED313A8F713__INCLUDED_)
-#define AFX_OSCILLATOR_H__8DCC6093_4904_4A88_BE80_EED313A8F713__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 #define TWOPI 6.283185307179586476925286766559
 
@@ -59,5 +54,3 @@ protected:
 	double envpos;
 
 };
-
-#endif // !defined(AFX_OSCILLATOR_H__8DCC6093_4904_4A88_BE80_EED313A8F713__INCLUDED_)

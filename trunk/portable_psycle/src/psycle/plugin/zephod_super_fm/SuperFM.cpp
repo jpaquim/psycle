@@ -1,3 +1,8 @@
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
+#include <psycle/plugin/zephod_super_fm/envelope.h>
+#include <math.h>
+
 //////////////////////////////////////////////////////////////////////
 // Psycle
 //////////////////////////////////////////////////////////////////////
@@ -34,10 +39,6 @@
 // * Original Buzz SuperFM release
 //
 //////////////////////////////////////////////////////////////////////
-
-#include <math.h>
-#include "..\..\machineinterface.h"
-#include "envelope.h"
 
 #define MAX_TRACKS	32
 #define WF_SET		0
@@ -559,7 +560,7 @@ void mi::Init()
 		Tracks[c].pmi = this;
 		Tracks[c].Stop();
 	}
-	for (c = 0; c < MAX_TRACKS; c++)
+	for (int c = 0; c < MAX_TRACKS; c++)
 	{
 		medBreakNote[c]=0;
 		Tracks[c].Init();
@@ -669,6 +670,7 @@ void mi::Stop()
 {
         for( int i=0; i<MAX_TRACKS; i++) Tracks[i].Stop();
 }
+
 /*
 char const *mi::DescribeValue(int const param, int const value)
 {
@@ -720,8 +722,4 @@ char const *mi::DescribeValue(int const param, int const value)
 
 	return txt;
 }
-
-
-
-
 */

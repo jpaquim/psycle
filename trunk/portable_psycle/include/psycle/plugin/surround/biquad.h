@@ -1,3 +1,7 @@
+#pragma once
+#include <math.h>
+#include <stdlib.h>
+
 /* Simple implementation of Biquad filters -- Tom St Denis
  *
  * Based on the work
@@ -22,10 +26,6 @@ http://www.smartelectronix.com/musicdsp/text/filters005.txt
 
 // KarLKoX : thanx to Tom St Denis for this code !
 
-
-/* this would be biquad.h */
-#include <math.h>
-#include <stdlib.h>
 
 #ifndef M_LN2
 #define M_LN2	   0.69314718055994530942
@@ -103,7 +103,7 @@ smp_type srate, smp_type bandwidth, biquad *bq,bool reset_memory)
     smp_type a0, a1, a2, b0, b1, b2;
 
     /* setup variables */
-    A = pow(10, dbGain /40);
+	A = std::pow(10., dbGain / 40.);
     omega = 2 * M_PI * freq /srate;
     sn = sin(omega);
     cs = cos(omega);
@@ -186,4 +186,3 @@ smp_type srate, smp_type bandwidth, biquad *bq,bool reset_memory)
 		bq->y1 = bq->y2 = 0;
 	}
 }
-

@@ -1,4 +1,5 @@
-#include "drum.h"
+#include <project.h>
+#include <psycle/plugin/jm_drums/drum.h>
 
 // Drum.cpp: implementation of the Drum class.
 //

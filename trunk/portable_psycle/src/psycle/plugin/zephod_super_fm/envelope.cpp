@@ -1,4 +1,4 @@
-#include <project>
+#include <project.h>
 #include <psycle/plugin/zephod_super_fm/envelope.h>
 
 // envelope.cpp: implementation of the envelope class.

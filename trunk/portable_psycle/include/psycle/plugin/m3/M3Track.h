@@ -1,12 +1,16 @@
-// CTrack Declaration file (M3Track.h)
-
-#if !defined(_M3TRACK_H)
-#define _M3TRACK_H
-
+#pragma once
+#include <psycle/plugin/MachineInterface.h>
+// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
 #include <stdlib.h>
 #include <crtdbg.h>
 #include <math.h>
 
+// CTrack Declaration file (M3Track.h)
+
+extern float freqTab[120];
+extern float coefsTab[4*128*128*8];
+extern float LFOOscTab[0x10000];
+extern signed short WaveTable[5][2100];
 
 #define MAX_SIMUL_TRACKS	8
 
@@ -578,6 +582,3 @@ inline void CTrack::NewPhases()
         PhaseLFO1 += PhaseAddLFO1;
         PhaseLFO2 += PhaseAddLFO2;
 }
-
-
-#endif // !defined(_M3_TRACK_H)
