@@ -12,8 +12,8 @@
 
 #include <afxcoll.h>
 
-#define MAX_BROWSER_NODES 512
-#define MAX_BROWSER_PLUGINS 512
+#define MAX_BROWSER_NODES 64
+#define MAX_BROWSER_PLUGINS 2048
 
 class PluginInfo
 {

@@ -137,7 +137,7 @@ void Player::ExecuteLine(void)
 					{
 						if (pSong->_pMachine[mIndex] )
 						{
-							pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,pEntry->_parameter);
+							pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,CValueMapper::Map_255_1(pEntry->_parameter));
 						}
 					}
 				}
