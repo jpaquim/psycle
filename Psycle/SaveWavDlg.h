@@ -7,6 +7,8 @@
 // SaveWavDlg.h : header file
 //
 
+#include "constants.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CSaveWavDlg dialog
 
@@ -14,19 +16,23 @@ class CSaveWavDlg : public CDialog
 {
 // Construction
 public:
+	void SaveTick(void);
 	CSaveWavDlg(CWnd* pParent = NULL);   // standard constructor
+	void SaveEnd(void);
+	int kill_thread;
 	
 // Dialog Data
 	//{{AFX_DATA(CSaveWavDlg)
 	enum { IDD = IDD_SAVEWAVDLG };
+	CButton	m_cancel;
 	CButton	m_savewave;
 	CButton	m_savewires;
-	CButton	m_savesong;
 	CEdit	m_rangestart;
 	CEdit	m_rangeend;
 	CProgressCtrl	m_progress;
 	CEdit	m_patnumber;
 	CEdit	m_filename;
+	int		m_recmode;
 	//}}AFX_DATA
 
 
@@ -40,7 +46,15 @@ public:
 // Implementation
 protected:
 	HANDLE thread_handle;
-	int kill_thread;
+
+	int lastpostick;
+	int lastlinetick;
+	int tickcont;
+
+	bool autostop;
+	bool playblock;
+	bool sel[MAX_SONG_POSITIONS];
+	bool saving;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CSaveWavDlg)

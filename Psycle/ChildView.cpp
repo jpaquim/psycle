@@ -875,13 +875,13 @@ void CChildView::OnFileNew()
 
 void CChildView::OnFileSaveaudio() 
 {
-	MessageBox("Option not developed yet","Save to wav file",MB_OK);
-	// TODO: Add your command handler code here
-
+	OnBarstop();
+	KillTimer(31);
+	
 	CSaveWavDlg dlg;
 	dlg.DoModal();
 
-	
+	SetTimer(31,20,NULL)
 }
 
 BOOL CChildView::CheckUnsavedSong(char* szTitle)
@@ -1065,6 +1065,7 @@ void CChildView::OnButtonplayseqblock()
 		bScrollDetatch=false;
 	}
 
+	prevEditPosition=editPosition;
 	int i=0;
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
 	Global::pPlayer->Start(i,0);

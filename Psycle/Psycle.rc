@@ -2601,24 +2601,24 @@ BEGIN
     PUSHBUTTON      "Browse",IDC_FILEBROWSE,213,7,40,13
     CONTROL         "Save each input to master as a separated wav (wire number will be appended to it)",
                     IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,51,25,193,21
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,51,25,193,21
     GROUPBOX        "Record:",IDC_STATIC,15,49,228,61
-    CONTROL         "All Song",IDC_SAVESONG,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,29,63,42,10
-    CONTROL         "Pattern number",IDC_SAVEPATTERN,"Button",
-                    BS_AUTORADIOBUTTON,29,77,64,10
-    CONTROL         "Range from position",IDC_SAVERANGE,"Button",
-                    BS_AUTORADIOBUTTON,29,91,79,10
-    EDITTEXT        IDC_PATNUMBER,110,75,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(in HEX value)",IDC_STATIC,141,77,47,10
-    EDITTEXT        IDC_RANGESTART,110,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGEEND,154,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "to",IDC_STATIC,141,92,8,8
-    LTEXT           "(in HEX value)",IDC_STATIC,184,92,47,10
+    EDITTEXT        IDC_PATNUMBER,117,75,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(in HEX value)",IDC_STATIC,147,78,47,10
+    EDITTEXT        IDC_RANGESTART,117,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,159,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "to",IDC_STATIC,148,92,8,8
+    LTEXT           "(in HEX value)",IDC_STATIC,189,92,47,10
     CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
                     119,246,12
     DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,161,140,50,14
     PUSHBUTTON      "Close",IDCANCEL,212,140,41,14
+    CONTROL         "Record all the song",IDC_RECSONG,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,23,62,77,10
+    CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
+                    BS_AUTORADIOBUTTON,23,77,89,10
+    CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
+                    BS_AUTORADIOBUTTON,23,92,93,10
 END
 
 

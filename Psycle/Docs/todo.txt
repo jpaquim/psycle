@@ -134,7 +134,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		 and neither does Inputhandler know which machines are playing.
 		 Doing a "player::Stop()" would be a bit hardcore.
 		 I agree]
-+++	Finish SAVE as wave, have options for: sample rate, # channels, bitsize
+++	Add options to "save as wave" for: sample rate, # channels, bitsize
 +++FF?	DirectX effects, intstruments
 +++	option for record to take command FD into account like ft2
 ++	ALK tracker command to bypass an fx, mute command for machines
