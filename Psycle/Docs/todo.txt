@@ -9,6 +9,7 @@
 
 * Sampler Machine/Wave Ed:
 --------------------------
+* {alk} fit sample to match 256 rows (in sampler) doesnt seem to work
 bug: 	 portamento to note, slides too much. (can anyone test this for me?)
 + ALK waveed: remove silence from start and end of wave
 feature: just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)

@@ -33,6 +33,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PRESETSCOMBO, m_cpresets);
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
 	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
+	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
 	DDX_Control(pDX, IDC_AAWIRE, m_wireaa);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	//}}AFX_DATA_MAP
@@ -73,6 +74,7 @@ ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_BN_CLICKED(IDC_SELECTIONC2, OnSelection2)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
+	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
 	ON_CBN_SELENDOK(IDC_PRESETSCOMBO, OnSelendokPresetscombo)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
@@ -102,6 +104,7 @@ BOOL CSkinDlg::OnInitDialog()
 	m_gfxbuffer.SetCheck(_gfxbuffer);
 	m_wireaa.SetCheck(_wireaa);
 	m_linenumbers.SetCheck(_linenumbers);
+	m_linenumbersHex.SetCheck(_linenumbersHex);
 	SetTimer(2345,50,0);
 
 	char s[4];
@@ -459,6 +462,11 @@ void CSkinDlg::OnDoublebuffer()
 void CSkinDlg::OnLineNumbers() 
 {
 	_linenumbers = m_linenumbers.GetCheck() >0?true:false;
+}
+
+void CSkinDlg::OnLineNumbersHex() 
+{
+	_linenumbersHex = m_linenumbersHex.GetCheck() >0?true:false;
 }
 
 void CSkinDlg::OnSelendokPresetscombo() 

@@ -197,6 +197,7 @@ public:
 	int _midiTo15;
 
 	bool _linenumbers;
+	bool _linenumbersHex;
 	bool _followSong;
 
 	int _numOutputDrivers;

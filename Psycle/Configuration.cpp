@@ -34,6 +34,7 @@ Configuration::Configuration()
 	autoStopMachines = false;
 	useDoubleBuffer = true;
 	_linenumbers = true;
+	_linenumbersHex = false;
 	_showAboutAtStart = true;
 	_followSong = false;
 
@@ -335,6 +336,8 @@ Configuration::Read(
 	reg.QueryValue("useDoubleBuffer", &type, (BYTE*)&useDoubleBuffer, &numData);
 	numData = sizeof(_linenumbers);
 	reg.QueryValue("DisplayLineNumbers", &type, (BYTE*)&_linenumbers, &numData);
+	numData = sizeof(_linenumbersHex);
+	reg.QueryValue("DisplayLineNumbersHex", &type, (BYTE*)&_linenumbersHex, &numData);
 	numData = sizeof(_showAboutAtStart);
 	reg.QueryValue("showAboutAtStart", &type, (BYTE*)&_showAboutAtStart, &numData);
 	numData = sizeof(_RecordNoteoff);
@@ -799,6 +802,7 @@ Configuration::Write(
 	reg.SetValue("CursorAlwaysDown", REG_BINARY, (BYTE*)&_cursorAlwaysDown, sizeof(_cursorAlwaysDown));
 	reg.SetValue("useDoubleBuffer", REG_BINARY, (BYTE*)&useDoubleBuffer, sizeof(useDoubleBuffer));
 	reg.SetValue("DisplayLineNumbers", REG_BINARY, (BYTE*)&_linenumbers, sizeof(_linenumbers));
+	reg.SetValue("DisplayLineNumbersHex", REG_BINARY, (BYTE*)&_linenumbersHex, sizeof(_linenumbersHex));
 	reg.SetValue("showAboutAtStart", REG_BINARY, (BYTE*)&_showAboutAtStart, sizeof(_showAboutAtStart));
 	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
 	reg.SetValue("RecordTweaks", REG_BINARY, (BYTE*)&_RecordTweaks, sizeof(_RecordTweaks));
