@@ -106,8 +106,8 @@ namespace psycle
 		{
 			if ( newpreset.numPars > 0 )
 			{
-				zapArray(params, new int[numPars]);
 				numPars=newpreset.numPars;
+				zapArray(params, new int[numPars]);
 				memcpy(params,newpreset.params,numPars*sizeof(int));
 			}
 			else

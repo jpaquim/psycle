@@ -25,9 +25,9 @@ namespace psycle
 			Plugin::Plugin(int index)
 				: _dll(0)
 				, proxy_(*this)
-				, _psAuthor(0)
-				, _psDllName(0)
-				, _psName(0)
+				, _psAuthor("")
+				, _psDllName("")
+				, _psName("")
 			{
 				_macIndex = index;
 				_type = MACH_PLUGIN;
