@@ -816,8 +816,36 @@ namespace psycle
 					// Prepare MIDI events and free queue dispatching all events
 					mevents.numEvents = queue_size;
 					mevents.reserved = 0;
-					for(int q(0) ; q < queue_size ; ++q)
+					for(int q(0) ; q < queue_size ; ++q) {
 						mevents.events[q] = (VstEvent*) &midievent[q];
+
+						#ifndef NDEBUG
+
+						if(q>0) {
+							// assert that events are sent in order.
+							// although the standard doesn't require this,
+							// many synths rely on this.
+							assert(mevents.events[q-1]->deltaFrames <= 
+								mevents.events[q]->deltaFrames);
+						}
+
+						// assert that the note sequence is well-formed,
+						// which means, no note-offs happen without a
+						// corresponding preceding note-on.
+						switch(mevents.events[q]->data[0]&0xf0) {
+						case 0x90: // note-on
+							note_checker_.note_on(mevents.events[q]->data[1],
+								mevents.events[q]->data[0]&0x0f);
+							break;
+						case 0x80: // note-off
+							note_checker_.note_off(mevents.events[q]->data[1],
+								mevents.events[q]->data[0]&0x0f);
+							break;
+						}
+
+						#endif
+					}
+
 					queue_size = 0;
 					//Finally Send the events.
 					try

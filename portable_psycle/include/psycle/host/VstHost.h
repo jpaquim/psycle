@@ -234,6 +234,38 @@ namespace psycle
 				static VstTimeInfo _timeInfo;
 				VstEvents mevents;
 				vst::proxy *proxy_;
+
+#ifndef NDEBUG
+				class note_checker {
+				public:
+					note_checker() {
+						for(int channel=0;channel<16;channel++)
+							for(int note=0;note<128;note++)
+								note_on_count_[channel][note]=0;
+					}
+					~note_checker() {
+						for(int channel=0;channel<16;channel++)
+							for(int note=0;note<128;note++)
+								assert(note_on_count_[channel][note]==0);
+					}
+					void note_on(int note, int channel) {
+						assert(note >= 0 && note < 128);
+						assert(channel >= 0 && channel < 16);
+						assert(note_on_count_[channel][note]>=0);
+						++note_on_count_[channel][note];
+					}
+					void note_off(int note, int channel) {
+						assert(note >= 0 && note < 128);
+						assert(channel >= 0 && channel < 16);
+						--note_on_count_[channel][note];
+						assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding a note-on!");
+					}
+				private:
+					// 16 channels, 128 keys
+					short note_on_count_[16][128];
+				};
+				note_checker note_checker_;
+#endif
 			};
 
 			/// vst note for an instrument.
