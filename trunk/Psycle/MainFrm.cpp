@@ -1880,7 +1880,7 @@ void CMainFrame::OnSeqnew()
 			_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
 		}
 
-		// as soon as something tries to access the new pattern, it will be created with default length
+		_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::pConfig->defaultPatLines,FALSE);
 
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
@@ -1933,16 +1933,9 @@ void CMainFrame::OnSeqduplicate()
 		// now we copy the data
 		// we don't really need to be able to undo this, since it's a new pattern anyway.
 //		m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+		_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
+
 		memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
-		// now we copy the length
-		if (_pSong->patternLines[newpat] != _pSong->patternLines[oldpat])
-		{
-		// we don't really need to be able to undo this, since it's a new pattern anyway.
-//			m_wndView.AddUndoLength(newpat,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-			_pSong->patternLines[newpat] = _pSong->patternLines[oldpat];
-		}
-		// and the name
-		memcpy(&_pSong->patternName[newpat],&_pSong->patternName[oldpat],sizeof(char)*32);
 
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
