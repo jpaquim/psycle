@@ -131,11 +131,13 @@ public:
 
 	int midiSelected;
 	int auxcolSelected;
+	int _trackArmedCount;
 	// InstrumentData
 	int instSelected;
 	Instrument _instruments[MAX_INSTRUMENTS];
 
 	bool _trackMuted[MAX_TRACKS];
+	bool _trackArmed[MAX_TRACKS];
 
 	// WaveData ------------------------------------------------------
 	//

@@ -42,9 +42,27 @@ public:
 	bool _centerCursor;
 	bool _cursorAlwaysDown;
 	bool _midiMachineViewSeqMode;
-	bool _midiRecordNoteoff;
+	bool _RecordNoteoff;
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
+
+	bool _midiRecordVelocity;
+	bool _midiRecordPitchBend;
+	bool _midiRecordModWheel;
+
+	int _midiVelocityCommand;
+	int _midiVelocityFrom;
+	int _midiVelocityTo;
+
+	int _midiPitchBendType;
+	int _midiPitchBendCommand;
+	int _midiPitchBendFrom;
+	int _midiPitchBendTo;
+
+	int _midiModWheelType;
+	int _midiModWheelCommand;
+	int _midiModWheelFrom;
+	int _midiModWheelTo;
 
 	int _numOutputDrivers;
 	int _outputDriverIndex;

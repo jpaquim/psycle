@@ -663,6 +663,18 @@ void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWOR
 				}
 				break;
 
+				/*
+				case 11:
+					// mod wheel
+					// data 2 contains the info
+					break;
+
+				case 14:
+					// pitch wheel
+					// data 2 contains the info
+					break;
+					*/
+
 				// extended codes
 				case 0x0F:
 				{
@@ -979,6 +991,47 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 					noteOn=0;
 					insertNote = true;
 					break;
+
+				case 11:
+					// mod wheel
+					// data 2 contains the info
+					if (Global::pConfig->_midiRecordModWheel)
+					{
+						if (Global::pConfig->_midiModWheelType)
+						{
+							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiModWheelCommand,
+											Global::pConfig->_midiModWheelFrom + 
+										(((Global::pConfig->_midiModWheelTo - Global::pConfig->_midiModWheelFrom) * data2)/127));
+						}
+						else
+						{
+							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiModWheelCommand,
+											Global::pConfig->_midiModWheelFrom + 
+										(((Global::pConfig->_midiModWheelTo - Global::pConfig->_midiModWheelFrom) * data2)/127));
+						}
+					}
+					break;
+
+				case 14:
+					// pitch wheel
+					// data 2 contains the info
+					if (Global::pConfig->_midiRecordPitchBend)
+					{
+						if (Global::pConfig->_midiPitchBendType)
+						{
+							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternTweak(Global::pConfig->_midiPitchBendCommand,
+											Global::pConfig->_midiPitchBendFrom + 
+										(((Global::pConfig->_midiPitchBendTo - Global::pConfig->_midiPitchBendFrom) * data2)/127));
+						}
+						else
+						{
+							((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternCommand(Global::pConfig->_midiPitchBendCommand,
+											Global::pConfig->_midiPitchBendFrom + 
+										(((Global::pConfig->_midiPitchBendTo - Global::pConfig->_midiPitchBendFrom) * data2)/127));
+						}
+					}
+					break;
+
 			}	// end of.. statusHN switch
 
   

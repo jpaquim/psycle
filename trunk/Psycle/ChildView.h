@@ -87,6 +87,8 @@ public:
 
 
 	void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes
+	void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
+	void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
 	void EnterNote(int note, int velocity=127, bool bTranspose=true);
 	bool CChildView::MSBPut(int nChar);
 	void PrevTrack(int x,bool wrap,bool updateDisplay=true);
