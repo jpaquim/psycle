@@ -114,6 +114,15 @@ BOOL CWireDlg::OnInitDialog()
 	SetMode();
 	pos = 1;
 
+	if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
+	{
+		mult = 32768.0f;
+	}
+	else												// native to native, no need to convert.
+	{
+		mult = 1.0f;
+	}	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -273,8 +282,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				{ 
 					index--;
 					index&=(SCOPE_BUF_SIZE-1);
-					float awl=fabsf(pSamplesL[index]*invol);///32768; 
-					float awr=fabsf(pSamplesR[index]*invol);///32768; 
+					float awl=fabsf(pSamplesL[index]*invol*mult);///32768; 
+					float awr=fabsf(pSamplesR[index]*invol*mult);///32768; 
 
 					if (awl>tawl)
 					{
@@ -475,11 +484,11 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 				float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
 				for (int x = 256-4; x >= 0; x-=4)
 				{
 					n -= add;
-					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
 //					bufDC.LineTo(x,GetY(32768/2));
 				}
 
@@ -488,11 +497,11 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.SelectObject(&linepen);
 
 				n = float(_pSrcMachine->_scopeBufferIndex-pos);
-				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
 				for (x = 256-4; x >= 0; x-=4)
 				{
 					n -= add;
-					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol));
+					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
 				}
 
 				bufDC.SelectObject(oldpen);
@@ -530,8 +539,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			   { 
 					index--;
 					index&=(SCOPE_BUF_SIZE-1);
-					float wl=(pSamplesL[index]*invol);///32768; 
-					float wr=(pSamplesR[index]*invol);///32768; 
+					float wl=(pSamplesL[index]*invol*mult);///32768; 
+					float wr=(pSamplesR[index]*invol*mult);///32768; 
 					int im = i-(SCOPE_SPEC_SAMPLES/2); 
 					for(int h=0;h<scope_spec_bands;h++) 
 					{ 
@@ -728,8 +737,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			   { 
 					index--;
 					index&=(SCOPE_BUF_SIZE-1);
-					float wl=(pSamplesL[index]*invol);///32768; 
-					float wr=(pSamplesR[index]*invol);///32768; 
+					float wl=(pSamplesL[index]*invol*mult);///32768; 
+					float wr=(pSamplesR[index]*invol*mult);///32768; 
 					float awl=fabsf(wl);
 					float awr=fabsf(wr);
 					if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))

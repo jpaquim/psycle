@@ -36,6 +36,7 @@ public:
 	Machine* _pDstMachine;
 	int _dstWireIndex;
 	float invol;
+	float mult;
 
 	int scope_mode;
 	int scope_peak_rate;
