@@ -2,6 +2,16 @@
 !=change
 +=addition
 
+! <_sue_> hi...... all those loading/exit/save confirmations are anoying me a bit.....any chance to make 
+	them optional in the configs menu? when i start psycle and load a track it even asks me if i want to 
+	save the old psy (wich i havent even changed)
+	<pooplog> so should the song info popup
+* why does it take so long to load a song?
++ make file dialogs remember preferences
++ shift + off inserts an off that does not specify machine
+* right click on machine should mention machine # in title
++ option to see waveform instead of notes in pattern editor for acid mode
+* clicking on a different block in sequencer should jump play position to it
 * machines other than sampler should NOT spam instrument column so new machines can use it as volume or whatever
 * psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
@@ -19,7 +29,15 @@
 * <_sue_> the gainer machine doesnt work and the sliders in the minimixer are set to -99
 * <_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
 	depending on the place where theyr box was placed...
-* James says: you have to click on delete connection twice?
+* James says: you have to click on delete connection twice? (in wire dialog)
+! alk-make wire dialog open on double click
++ alk-make single click/drag move wire from one machine to another (preserving vol)
++ alk-make wire vol slider more precise (bigger) (it has become less precise)
+	pooplog-we should just make a new slider class that uses shift and ctrl like knobs
++ alk-highlight the current line on the linenumbers on the left (so that even if the curson is on the 
+	right you can see which line its on)
+* alk-when you do ctrl + click on sampler it should change combo to samples (it doesnt if e.g. it was 
+	on parameters)
 
 
 * Machines
@@ -37,6 +55,7 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 * bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> Internals still miss mouse tweak, right?
+* pooplog synths can fuck up vca envelopes somehow weird.
 
 * Sampler Machine/Wave Ed:
 --------------------------

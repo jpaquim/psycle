@@ -939,115 +939,6 @@ void VSTInstrument::Stop()
 
 void VSTInstrument::Work(int numSamples)
 {
-/*
-#if defined(_WINAMP_PLUGIN_)
-
-	if (instantiated)
-	{
-		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
-		SendMidi();
-
-		int ns = numSamples;
-		while (ns)
-		{
-			int nextevent = numSamples+1;
-			for (int i=0; i < MAX_TRACKS; i++)
-			{
-				if (TriggerDelay[i]._cmd)
-				{
-					if (TriggerDelayCounter[i] < nextevent)
-					{
-						nextevent = TriggerDelayCounter[i];
-					}
-				}
-			}
-			if (nextevent > ns)
-			{
-				for (int i=0; i < MAX_TRACKS; i++)
-				{
-					// come back to this
-					if (TriggerDelay[i]._cmd)
-					{
-						TriggerDelayCounter[i] -= ns;
-					}
-				}
-				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,ns);
-				else _pEffect->processReplacing(_pEffect,inputs,outputs,ns);
-				ns = 0;
-			}
-			else
-			{
-				ns -= nextevent;
-				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,nextevent);
-				else _pEffect->processReplacing(_pEffect,inputs,outputs,nextevent);
-				for (i=0; i < MAX_TRACKS; i++)
-				{
-					// come back to this
-					if (TriggerDelay[i]._cmd == 0xfd)
-					{
-						if (TriggerDelayCounter[i] == nextevent)
-						{
-							// do event
-							Tick(i,&TriggerDelay[i]);
-							TriggerDelay[i]._cmd = 0;
-						}
-						else
-						{
-							TriggerDelayCounter[i] -= nextevent;
-						}
-					}
-					else if (TriggerDelay[i]._cmd == 0xfb)
-					{
-						if (TriggerDelayCounter[i] == nextevent)
-						{
-							// do event
-							Tick(i,&TriggerDelay[i]);
-							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
-						}
-						else
-						{
-							TriggerDelayCounter[i] -= nextevent;
-						}
-					}
-					else if (TriggerDelay[i]._cmd == 0xfa)
-					{
-						if (TriggerDelayCounter[i] == nextevent)
-						{
-							// do event
-							Tick(i,&TriggerDelay[i]);
-							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
-							int parameter = TriggerDelay[i]._parameter&0f;
-							if (parameter < 9)
-							{
-								RetriggerRate[i]+= 4*parameter;
-							}
-							else
-							{
-								RetriggerRate[i]-= 2*(16-parameter);
-								if (RetriggerRate[i] < 16)
-								{
-									RetriggerRate[i] = 16;
-								}
-							}
-						}
-						else
-						{
-							TriggerDelayCounter[i] -= nextevent;
-						}
-					}
-				}
-			}
-		}
-
-		if ( _pEffect->numOutputs == 1)
-		{
-			Dsp::Add(outputs[0],outputs[1],numSamples,1);
-		}
-	}
-	_worked = true;
-
-#else
-*/
 #if !defined(_WINAMP_PLUGIN_)	
 	CPUCOST_INIT(cost);
 #endif // !defined(_WINAMP_PLUGIN_)	
@@ -1059,8 +950,8 @@ void VSTInstrument::Work(int numSamples)
 		int ns = numSamples;
 		while (ns)
 		{
-			int nextevent = numSamples+1;
-			for (int i=0; i < MAX_TRACKS; i++)
+			int nextevent = ns+1;
+			for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 			{
 				if (TriggerDelay[i]._cmd)
 				{
@@ -1072,7 +963,7 @@ void VSTInstrument::Work(int numSamples)
 			}
 			if (nextevent > ns)
 			{
-				for (int i=0; i < MAX_TRACKS; i++)
+				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					// come back to this
 					if (TriggerDelay[i]._cmd)
@@ -1086,10 +977,19 @@ void VSTInstrument::Work(int numSamples)
 			}
 			else
 			{
-				ns -= nextevent;
-				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,nextevent);
-				else _pEffect->processReplacing(_pEffect,inputs,outputs,nextevent);
-				for (i=0; i < MAX_TRACKS; i++)
+				if (nextevent)
+				{
+					ns -= nextevent;
+					if (!requiresRepl ) 
+					{
+						_pEffect->process(_pEffect,inputs,outputs,nextevent);
+					}
+					else 
+					{
+						_pEffect->processReplacing(_pEffect,inputs,outputs,nextevent);
+					}
+				}
+				for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					// come back to this
 					if (TriggerDelay[i]._cmd == 0xfd)

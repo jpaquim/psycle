@@ -60,118 +60,20 @@ void Sampler::Work(
 	int numSamples)
 {
 
-/*#if defined(_WINAMP_PLUGIN_)
-//	for (int voice=0; voice<_numVoices; voice++)
-//	{
-		int ns = numSamples;
-		while (ns)
-		{
-			int nextevent = numSamples+1;
-			for (int i=0; i < MAX_TRACKS; i++)
-			{
-				if (TriggerDelay[i]._cmd)
-				{
-					if (TriggerDelayCounter[i] < nextevent)
-					{
-						nextevent = TriggerDelayCounter[i];
-					}
-				}
-			}
-			if (nextevent > ns)
-			{
-				for (int i=0; i < MAX_TRACKS; i++)
-				{
-					// come back to this
-					if (TriggerDelay[i]._cmd)
-					{
-						TriggerDelayCounter[i] -= ns;
-					}
-				}
-				for (int voice=0; voice<_numVoices; voice++)
-				{
-					PerformFx(voice);
-					VoiceWork(ns, voice);
-				}
-				ns = 0;
-			}
-			else
-			{
-				ns -= nextevent;
-				for (int voice=0; voice<_numVoices; voice++)
-				{
-					PerformFx(voice);
-					VoiceWork(nextevent, voice);
-				}
-				for (i=0; i < MAX_TRACKS; i++)
-				{
-					// come back to this
-					if (TriggerDelay[i]._cmd == 0xfd)
-					{
-						if (TriggerDelayCounter[i] == nextevent)
-						{
-							// do event
-							Tick(i,&TriggerDelay[i]);
-							TriggerDelay[i]._cmd = 0;
-						}
-						else
-						{
-							TriggerDelayCounter[i] -= nextevent;
-						}
-					}
-					else if (TriggerDelay[i]._cmd == 0xfb)
-					{
-						if (TriggerDelayCounter[i] == nextevent)
-						{
-							// do event
-							Tick(i,&TriggerDelay[i]);
-							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
-						}
-						else
-						{
-							TriggerDelayCounter[i] -= nextevent;
-						}
-					}
-					else if (TriggerDelay[i]._cmd == 0xfa)
-					{
-						if (TriggerDelayCounter[i] == nextevent)
-						{
-							// do event
-							Tick(i,&TriggerDelay[i]);
-							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
-							int parameter = TriggerDelay[i]._parameter&0f;
-							if (parameter < 9)
-							{
-								RetriggerRate[i]+= 4*parameter;
-							}
-							else
-							{
-								RetriggerRate[i]-= 2*(16-parameter);
-								if (RetriggerRate[i] < 16)
-								{
-									RetriggerRate[i] = 16;
-								}
-							}
-						}
-						else
-						{
-							TriggerDelayCounter[i] -= nextevent;
-						}
-					}
-				}
-			}
-		}
-//	}
-	_worked = true;*/
 #if !defined(_WINAMP_PLUGIN_)
 	CPUCOST_INIT(cost);
 	if (!_mute)
 	{
 #endif //!defined(_WINAMP_PLUGIN_)		
+		for (int voice=0; voice<_numVoices; voice++)
+		{
+			PerformFx(voice); //<- needs to take numsamples into account
+		}
 		int ns = numSamples;
 		while (ns)
 		{
-			int nextevent = numSamples+1;
-			for (int i=0; i < MAX_TRACKS; i++)
+			int nextevent = ns+1;
+			for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 			{
 				if (TriggerDelay[i]._cmd)
 				{
@@ -183,7 +85,7 @@ void Sampler::Work(
 			}
 			if (nextevent > ns)
 			{
-				for (int i=0; i < MAX_TRACKS; i++)
+				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					// come back to this
 					if (TriggerDelay[i]._cmd)
@@ -191,22 +93,25 @@ void Sampler::Work(
 						TriggerDelayCounter[i] -= ns;
 					}
 				}
-				for (int voice=0; voice<_numVoices; voice++)
+				for (voice=0; voice<_numVoices; voice++)
 				{
-					PerformFx(voice);
+//					PerformFx(voice); <- needs to take numsamples into account
 					VoiceWork(ns, voice);
 				}
 				ns = 0;
 			}
 			else
 			{
-				ns -= nextevent;
-				for (int voice=0; voice<_numVoices; voice++)
+				if (nextevent)
 				{
-					PerformFx(voice);
-					VoiceWork(nextevent, voice);
+					ns -= nextevent;
+					for (voice=0; voice<_numVoices; voice++)
+					{
+//						PerformFx(voice); <- needs to take numsamples into account
+						VoiceWork(nextevent, voice);
+					}
 				}
-				for (i=0; i < MAX_TRACKS; i++)
+				for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					// come back to this
 					if (TriggerDelay[i]._cmd == 0xfd)
@@ -506,7 +411,7 @@ void Sampler::VoiceWork(int numsamples, int voice)
 	}
 
 	pResamplerWork = _resampler._pWorkFn;
-	do
+	while (numsamples)
 	{
 		left_output=0;
 		right_output=0;
@@ -596,9 +501,8 @@ void Sampler::VoiceWork(int numsamples, int voice)
 			
 		*pSamplesL++ = *pSamplesL+left_output;
 		*pSamplesR++ = *pSamplesR+right_output;
+		numsamples--;
 	}
-	while (--numsamples);
-
 }
 
 void Sampler::Tick()
