@@ -5,7 +5,7 @@
 //	#define TRACE //
 
 #else
-	#include "psycle2.h"
+	#include "psycle.h"
 	#include "MainFrm.h"
 
 	extern CPsycleApp theApp;

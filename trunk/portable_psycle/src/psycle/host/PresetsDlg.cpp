@@ -3,7 +3,7 @@
 // PresetsDlg.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "PresetsDlg.h"
 #include "Plugin.h"
 #include "VSTHost.h"

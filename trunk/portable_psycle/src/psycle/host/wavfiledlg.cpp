@@ -3,7 +3,7 @@
 // FileDialogEx1.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "Song.h"
 #include "WavFileDlg.h"
 

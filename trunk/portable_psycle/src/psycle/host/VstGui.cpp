@@ -3,7 +3,7 @@
 // VstGui1.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "VstGui.h"
 #include "Vst\AEffEditor.h"
 #include "inputhandler.h"

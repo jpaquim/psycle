@@ -5,7 +5,7 @@
 	#include "Plugin.h"
 	#include "FileIO.h"
 #else
-	#include "psycle2.h"
+	#include "psycle.h"
 	#include "Plugin.h"
 	#include "FileIO.h"
 	#include "NewMachine.h"

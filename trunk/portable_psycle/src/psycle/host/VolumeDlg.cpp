@@ -3,7 +3,7 @@
 // VolumeDlg.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "VolumeDlg.h"
 #include <math.h>
 

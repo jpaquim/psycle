@@ -3,7 +3,7 @@
 // ProgressDialog.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "ProgressDialog.h"
 
 #ifdef _DEBUG

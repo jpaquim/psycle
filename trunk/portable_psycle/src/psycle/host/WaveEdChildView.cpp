@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "psycle2.h"
+#include "psycle.h"
 #include <mmreg.h>
 #include <math.h>
 #include "WaveEdChildView.h"

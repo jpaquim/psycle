@@ -3,7 +3,7 @@
 // MidiLearn.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "OutputDlg.h"
 #include "MidiInput.h"
 #include "Configuration.h"

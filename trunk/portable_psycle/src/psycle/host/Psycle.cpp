@@ -315,7 +315,7 @@ BOOL CAboutDlg::OnInitDialog()
 				"David Buist\t\t\tAdditional Graphics" "\r\n"
 				"frown\t\t\t\tAdditional Graphics" "\r\n"
 				"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
-				"Michael Haralabos [Athlon]\t\t\tInstaller and Debugging help"
+				"Michael Haralabos [Athlon]\t\tInstaller and Debugging help"
 			);
 	m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
 

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "Song.h"
 #include "WaveEdFrame.h"
 #include "MainFrm.h"

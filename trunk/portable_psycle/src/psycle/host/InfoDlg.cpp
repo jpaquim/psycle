@@ -3,7 +3,7 @@
 // InfoDlg.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "configuration.h"
 #include "Song.h"
 #include "InfoDlg.h"

@@ -3,7 +3,7 @@
 // MidiMonitorDlg.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "MidiMonitorDlg.h"
 #include "MidiInput.h"
 #include "song.h"

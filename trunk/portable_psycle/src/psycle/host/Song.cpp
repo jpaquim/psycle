@@ -1,16 +1,11 @@
 #include "stdafx.h"
 
-
-
-#if defined(_WINAMP_PLUGIN_)
-//	#include "global.h"
-#else
-	#include "psycle2.h"
+#if !defined _WINAMP_PLUGIN_
+	#include "psycle.h"
 	#include "NewMachine.h"
 	#include "MainFrm.h"
 	#include "ChildView.h"
 	#include "ProgressDialog.h"
-
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
 

@@ -1,29 +1,29 @@
----------------------------------------------------
+-----------------------------------------------------------------
 Version | Type of release          | By
---------|--------------------------|---------------
+--------|--------------------------|-----------------------------
 0.x     | Alphas and betas         | arguru
-1.0/01  | release (bugfix)	     | arguru
+1.0/01  | release (bugfix)         | arguru
 1.1/11  | release (bugfix)         | Mats
 1.5     | Alpha, beta, RC, release | [JAZ] & Mark
 1.6     | Alpha, beta, RC, release | [JAZ] & Dan/Dub & Fideloop
 1.6+/66 | maintenance releases     | [JAZ]
-1.7     | release			     | pooplog & [JAZ]
-1.7.1/2 | bugfix releases	     | [JAZ]
-1.7.3   | beta			     | pooplog & [JAZ] & bohan
-1.7.4   | release			     | pooplog & [JAZ]
-1.7.5   | release			     | pooplog & [JAZ]
-1.7.6   | release			     | alk
----------------------------------------------------
+1.7     | release                  | pooplog & [JAZ]
+1.7.1/2 | bugfix releases          | [JAZ]
+1.7.3   | beta                     | pooplog & [JAZ] & bohan
+1.7.4   | release                  | pooplog & [JAZ]
+1.7.5   | beta                     | pooplog & [JAZ]
+1.7.6   | release                  | alk
+-----------------------------------------------------------------
 
 From now on, releases will be named this way:
 X.Y.z.a , where:
 X.Y = version number
 z = revision number, if even, release. if odd, beta.
-a = compile number.
+a = patch number.
 
----------------------------------------------------
+----------------------------------------------------------------
 Legend :	+=addition		*=change	!=bug
----------------------------------------------------
+----------------------------------------------------------------
 
 v1.7.6
 ------
@@ -145,8 +145,7 @@ V1.7RC6 (Official 1.7)
 + Psycle now creates a log of the loaded plugins at start, to help you know which one made it crash, if any.
 + Implemented "Exchange" button in Gear Rack and added Instruments as well.
 * Speeded up some of the internals thanks to Dan.
-! Fixed the Crashes reported by people when opening the Settings dialog (Happened in Win9X systems
-  with many fonts)
+! Fixed the Crashes reported by people when opening the Settings dialog (Happened in Win9X systems with many fonts)
 ! Fixed a problem with Tweak recording with VST's with Native GUI.
 ! Fixed bug with some VST's not playing the first note.
 ! Fixed bug where a few VST's became monophonic after pressing play (Wrong MIDI command sent)
@@ -166,8 +165,7 @@ V1.7RC1
 + Look of Machine Wires can be changed in the visual dialog (pooplog)
 + options for default length of pattern, etc. (pooplog) [doktor, sue]
 + Autosave option, and interval is user configurable now.
-+ Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize,
-   audioMasterAutomate and HostCanDo)
++ Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize, audioMasterAutomate and HostCanDo)
 + Basic Mousewheel support for pattern edit mode, scrollbars detach from cursor, etc. (pooplog)
 + added record button that sets edit and follow mode (pooplog)
 + Added functioning Track record arm buttons- new graphics required (pooplog)
@@ -180,8 +178,7 @@ V1.7RC1
 + Native and VST Plugins realtime mouse tweak recording!!! (pooplog&[JAZ])
 + Value Dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
 + VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
-+ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) and FAxy for all generator 
-  types. (pooplog)
++ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) and FAxy for all generator types. (pooplog)
 + SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
 + Wire Dialog contains some diagnostic tools, and has a more functional +12db->-inf range (pooplog)
 + in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
@@ -212,8 +209,7 @@ V1.7RC1
 ! Fixed minusminus button to decrease to 0 (pooplog)
 ! Fixed song bpm and tpb being misreported to machines if FF or FE commands where used
 ! Fixed two memory leaks when loading songs with plugins (native as well as VST)
-! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles
-  (pooplog)
+! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles (pooplog)
 ! Fixed wave recording bug where it had an extra silent tick at the beggining and missing tick at the end.
 ! Fix several GDI Leaks.
 ! Fixed problem with saving songs (affected TPB) when using a Sample Rate different than 44100.
@@ -246,8 +242,7 @@ V1.66
   Removed "Spread" and replaced by "Sort patterns".
 * Changed Wav loading routines to use RIFF loader. This allows to see SoundForge's loops settings.
 * Pattern editor now hides the "0000" value in effects column (when it is not used as twk or mcm)
-* Cleaned up a bit the Instrument editor Dialog (No new functionality yet) and fixed little errors
-  in the envelopes editor.
+* Cleaned up a bit the Instrument editor Dialog (No new functionality yet) and fixed little errors in the envelopes editor.
 ! Fixed several problems with VST's and presets. (pooplog made changes to allow his plugins to
   save extra data, but he didn't realize that VST's do save in .prs format too)
 ! Fixed that annoying "param increased by 1" bug with some VST's. ( int(intvar-b) != intvar-(int)b )

@@ -3,7 +3,7 @@
 // MacProp.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "MacProp.h"
 #include "MainFrm.h"
 

@@ -3,7 +3,7 @@
 // ADriverDialog.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "WaveOutDialog.h"
 #include <mmsystem.h>
 

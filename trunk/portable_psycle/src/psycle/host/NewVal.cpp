@@ -3,7 +3,7 @@
 // NewVal.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "NewVal.h"
 
 #ifdef _DEBUG

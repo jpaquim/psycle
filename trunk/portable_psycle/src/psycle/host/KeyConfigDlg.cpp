@@ -3,7 +3,7 @@
 // KeyConfigDlg.cpp : implementation file
 //
 
-#include "psycle2.h"
+#include "psycle.h"
 #include "KeyConfigDlg.h"
 #include "inputhandler.h"
 #include "Configuration.h"

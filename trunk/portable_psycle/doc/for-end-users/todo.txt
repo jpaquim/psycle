@@ -145,8 +145,10 @@ tested and categorized and sorted
 Machines
 ========
 
-**	<bohan> there's a bug in the current source code of the flanger plugin (the bug is not present in the distributed binary).
-+	<bohan> add interpolation to the flanger plugin.
+**	flanger: <bohan> there's a bug in the current source code of the flanger plugin (the bug is not present in the distributed binary).
+*	flanger: <bohan> <[JAZ]> Flanger Machine could become unstable and use all the CPU avaiable when the feedback was higher than 50% and the input sound stopped.
+		<bohan> i wonder if that bug is back in the plugin... there's no denormal check.
++	flanger: <bohan> add interpolation to the flanger plugin.
 
 **	cyanphase vibrasynth has an access violation bug
 	[ I need source to fix]

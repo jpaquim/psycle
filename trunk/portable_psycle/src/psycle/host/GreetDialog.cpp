@@ -3,7 +3,7 @@
 // GreetDialog.cpp : implementation file
 //
 
-#include "Psycle2.h"
+#include "Psycle.h"
 #include "GreetDialog.h"
 
 #ifdef _DEBUG
