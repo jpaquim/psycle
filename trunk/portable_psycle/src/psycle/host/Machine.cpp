@@ -36,13 +36,12 @@ namespace psycle
 			_bypass = true;
 			_mute = true;
 			std::ostringstream title; title
+				<< "Machine crashed: "
 				<< _editName;
 			if(GetDllName()) title
 				<< ": " << GetDllName();
-			 title
-				 << " crashed.";
-			host::logger(10, title.str() + e.what());
-			::MessageBox(0, e.what(), title.str().c_str(), MB_OK | MB_ICONWARNING);
+			host::logger(host::logger::crash, title.str() + '\n' + e.what());
+			//::MessageBox(0, e.what(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 		}
 
 		Machine::Machine()

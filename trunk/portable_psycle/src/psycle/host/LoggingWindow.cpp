@@ -39,8 +39,8 @@ namespace psycle
 		BOOL CLoggingWindow::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			ResizeTextBox();			
-			defaultCF.crTextColor = RGB(255,0,0);		
+			ResizeTextBox();
+			defaultCF.crTextColor = RGB(0, 0, 0);
 			std::strcpy(defaultCF.szFaceName, "Lucida Console");
 			defaultCF.yHeight = 160;
 			defaultCF.cbSize = sizeof(defaultCF);
@@ -52,24 +52,32 @@ namespace psycle
 
 		void CLoggingWindow::AddEntry(const int & level, const std::string & string)
 		{	
-			switch(level % 4)
+			LogVector.push_back(new LogEntry(level, string));
+			// puts a separator
 			{
-			case 0: 
-				defaultCF.crTextColor = RGB(255,0,0);
+				defaultCF.crTextColor = RGB(0, 0, 0);
+				m_ErrorTxt.SetSelectionCharFormat(defaultCF);
+				m_ErrorTxt.ReplaceSel("===\n");
+			}
+			switch(level)
+			{
+			case host::logger::trace: 
+				defaultCF.crTextColor = RGB(128, 128, 128);
 				break;
-			case 1:
-				defaultCF.crTextColor = RGB(0,255,0);
+			case host::logger::info:
+				defaultCF.crTextColor = RGB(0, 64, 0);
 				break;
-			case 2:
-				defaultCF.crTextColor = RGB(0,0,255);
+			case host::logger::crash:
+				defaultCF.crTextColor = RGB(255, 0, 0);
 				break;
 			default:
-				defaultCF.crTextColor = RGB(255,0,255);
+				defaultCF.crTextColor = RGB(255, 0, 255);
 			}
-			m_ErrorTxt.SetDefaultCharFormat(defaultCF);
-			LogVector.push_back(new LogEntry(level, string));
-			m_ErrorTxt.ReplaceSel(LogVector[(LogVector.size()-1)]->string.c_str());
+			m_ErrorTxt.SetSelectionCharFormat(defaultCF);
+			m_ErrorTxt.ReplaceSel((**--LogVector.end()).string.c_str());
 			m_ErrorTxt.ReplaceSel("\n");
+			m_ErrorTxt.SetSelectionCharFormat(defaultCF);
+			if(level > host::logger::info) Global::pLogWindow->ShowWindow(SW_SHOWNORMAL);
 		}
 
 		void CLoggingWindow::ResizeTextBox()

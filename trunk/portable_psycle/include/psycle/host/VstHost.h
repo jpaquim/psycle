@@ -225,13 +225,15 @@ namespace psycle
 
 					template<typename e> void rethrow(plugin & plugin, const long int operation, const e * const e = 0) throw(dispatch_error)
 					{
-						std::ostringstream title; title << "VST Plugin: " << plugin._editName << ": " << plugin.GetDllName();
 						std::ostringstream s; s
-							<< title.str().c_str() << std::endl
+							<< "Machine crashed: " << plugin._editName;
+						if(plugin.GetDllName()) s
+							<< ": " << plugin.GetDllName();
+						s
+							<< std::endl
 							<< "VST plugin had an exception on dispatcher operation: " << operation_description(operation) << '.' << std::endl
 							<< typeid(*e).name() << std::endl
 							<< host::exceptions::function_errors::string(*e);
-						::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 						dispatch_error dispatch_error(s.str());
 						plugin.crashed(dispatch_error);
 						throw dispatch_error;

@@ -285,7 +285,7 @@ namespace psycle
 				template<typename e> void rethrow(Machine & machine, const std::string & function, const e * const e = 0) throw(function_error)
 				{
 					std::ostringstream s; s
-						<< "Machine: " << machine._editName;
+						<< "Machine crashed: " << machine._editName;
 					if(machine.GetDllName()) s
 						<< ": " << machine.GetDllName();
 					s
