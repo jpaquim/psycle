@@ -39,60 +39,128 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		return;
 	}
 
+	CBrush fillbrush(Global::pConfig->mv_polycolour);
+	devc->SelectObject(&fillbrush);
 	CRect rClient;
 	GetClientRect(&rClient);
 	devc->FillSolidRect(&rClient,Global::pConfig->mv_colour);
 
-	// Draw wire [connections]
-	for(int c=0;c<MAX_MACHINES;c++)
+	if (Global::pConfig->mv_wireaa)
 	{
-		if(_pSong->_machineActive[c])
+		// Draw wire [connections]
+		for(int c=0;c<MAX_MACHINES;c++)
 		{
-			Machine *tmac=_pSong->_pMachines[c];
-			int oriX = tmac->_x+74;
-			int oriY = tmac->_y+24;
-
-			for (int w=0; w<MAX_CONNECTIONS; w++)
+			if(_pSong->_machineActive[c])
 			{
-				if (tmac->_connection[w])
+				Machine *tmac=_pSong->_pMachines[c];
+				int oriX = tmac->_x+74;
+				int oriY = tmac->_y+24;
+
+				for (int w=0; w<MAX_CONNECTIONS; w++)
 				{
-					int desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+74;
-					int desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+24;
-					
-					int const f1 = (desX+oriX)/2;
-					int const f2 = (desY+oriY)/2;
+					if (tmac->_connection[w])
+					{
+						int desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+74;
+						int desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+24;
+						
+						int const f1 = (desX+oriX)/2;
+						int const f2 = (desY+oriY)/2;
 
-					amosDraw(devc, oriX, oriY, desX, desY);
-					
-					double modX = double(desX-oriX);
-					double modY = double(desY-oriY);
-					double modT = sqrt(modX*modX+modY*modY);
-					
-					modX = modX/modT;
-					modY = modY/modT;
-							
-					CPoint pol[4];
-					
-					pol[0].x = f1 - Dsp::F2I(modX*10);
-					pol[0].y = f2 - Dsp::F2I(modY*10);
-					pol[1].x = pol[0].x + Dsp::F2I(modX*20);
-					pol[1].y = pol[0].y + Dsp::F2I(modY*20);
-					pol[2].x = pol[0].x - Dsp::F2I(modY*12);
-					pol[2].y = pol[0].y + Dsp::F2I(modX*12);
-					pol[3].x = pol[0].x + Dsp::F2I(modY*12);
-					pol[3].y = pol[0].y - Dsp::F2I(modX*12);
+						double modX = double(desX-oriX);
+						double modY = double(desY-oriY);
+						double modT = sqrt(modX*modX+modY*modY);
+						
+						modX = modX/modT;
+						modY = modY/modT;
+								
+						CPoint pol[4];
+						
+						pol[0].x = f1 - Dsp::F2I(modX*10);
+						pol[0].y = f2 - Dsp::F2I(modY*10);
+						pol[1].x = pol[0].x + Dsp::F2I(modX*20);
+						pol[1].y = pol[0].y + Dsp::F2I(modY*20);
+						pol[2].x = pol[0].x - Dsp::F2I(modY*12);
+						pol[2].y = pol[0].y + Dsp::F2I(modX*12);
+						pol[3].x = pol[0].x + Dsp::F2I(modY*12);
+						pol[3].y = pol[0].y - Dsp::F2I(modX*12);
 
-					devc->Polygon(&pol[1], 3);
+						CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+2, Global::pConfig->mv_wireaacolour);
+//						CPen linepen1( PS_SOLID, f2i((Global::pConfig->mv_wirewidth*1.3f)+1.7f), Global::pConfig->mv_wireaacolour); // try this one, it's fun
+						devc->SelectObject(&linepen1);
+						amosDraw(devc, oriX, oriY, desX, desY);
+						devc->Polygon(&pol[1], 3);
+						linepen1.DeleteObject();
+						CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+						devc->SelectObject(&linepen2);
+						amosDraw(devc, oriX, oriY, desX, desY);
+						devc->Polygon(&pol[1], 3);
+						linepen2.DeleteObject();
 
-					tmac->_connectionPoint[w].x = f1-10;
-					tmac->_connectionPoint[w].y = f2-10;
+						tmac->_connectionPoint[w].x = f1-10;
+						tmac->_connectionPoint[w].y = f2-10;
+					}
 				}
-			}
-		}// Machine actived
+			}// Machine actived
+		}
+	}
+	else
+	{
+		CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+		devc->SelectObject(&linepen);
+		// Draw wire [connections]
+		for(int c=0;c<MAX_MACHINES;c++)
+		{
+			if(_pSong->_machineActive[c])
+			{
+				Machine *tmac=_pSong->_pMachines[c];
+				int oriX = tmac->_x+74;
+				int oriY = tmac->_y+24;
+
+				for (int w=0; w<MAX_CONNECTIONS; w++)
+				{
+					if (tmac->_connection[w])
+					{
+						int desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+74;
+						int desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+24;
+						
+						int const f1 = (desX+oriX)/2;
+						int const f2 = (desY+oriY)/2;
+
+						amosDraw(devc, oriX, oriY, desX, desY);
+						
+						double modX = double(desX-oriX);
+						double modY = double(desY-oriY);
+						double modT = sqrt(modX*modX+modY*modY);
+						
+						modX = modX/modT;
+						modY = modY/modT;
+								
+						CPoint pol[4];
+						
+						pol[0].x = f1 - Dsp::F2I(modX*10);
+						pol[0].y = f2 - Dsp::F2I(modY*10);
+						pol[1].x = pol[0].x + Dsp::F2I(modX*20);
+						pol[1].y = pol[0].y + Dsp::F2I(modY*20);
+						pol[2].x = pol[0].x - Dsp::F2I(modY*12);
+						pol[2].y = pol[0].y + Dsp::F2I(modX*12);
+						pol[3].x = pol[0].x + Dsp::F2I(modY*12);
+						pol[3].y = pol[0].y - Dsp::F2I(modX*12);
+
+						devc->Polygon(&pol[1], 3);
+
+						tmac->_connectionPoint[w].x = f1-10;
+						tmac->_connectionPoint[w].y = f2-10;
+					}
+				}
+			}// Machine actived
+		}
+
+		linepen.DeleteObject();
 	}
 
+
 	// Draw machine boxes
-	for (c=0; c<MAX_MACHINES; c++)
+	for (int c=0; c<MAX_MACHINES; c++)
 	{
 		if(_pSong->_machineActive[c])
 		{
@@ -106,6 +174,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		amosDraw(devc, wireSX, wireSY, wireDX, wireDY);
 		devc->SetROP2(prevROP);
 	}
+	fillbrush.DeleteObject();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -236,8 +305,9 @@ void CChildView::amosDraw(CDC *devc, int oX,int oY,int dX,int dY)
 	{
 		oY++;
 	}
+
 	devc->MoveTo(oX,oY);
-	devc->LineTo(dX,dY);			
+	devc->LineTo(dX,dY);	
 }
 
 int CChildView::GetMachine(CPoint point)

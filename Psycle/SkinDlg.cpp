@@ -32,13 +32,17 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CSkinDlg)
 	DDX_Control(pDX, IDC_PRESETSCOMBO, m_cpresets);
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
+	DDX_Control(pDX, IDC_AAWIRE, m_wireaa);
+	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	//{{AFX_MSG_MAP(CSkinDlg)
-ON_BN_CLICKED(IDC_BUTTON1, OnColourMachine)
+ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
+ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
+ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
 ON_BN_CLICKED(IDC_BUTTON3, OnButtonPattern)
 ON_BN_CLICKED(IDC_BUTTON23, OnVuBarColor)
 ON_BN_CLICKED(IDC_BUTTON24, OnVuBackColor)
@@ -60,7 +64,8 @@ END_MESSAGE_MAP()
 void CSkinDlg::OnOK()
 {
 	//TODO: Add code here
-	
+	_wireaa = m_wireaa.GetCheck() >0?true:false;
+	_wirewidth = m_wirewidth.GetCurSel()+1;
 	CDialog::OnOK();
 }
 
@@ -74,8 +79,17 @@ BOOL CSkinDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	m_gfxbuffer.SetCheck(_gfxbuffer);
+	m_wireaa.SetCheck(_wireaa);
 	SetTimer(2345,50,0);
 
+	char s[4];
+	for (int i = 1; i < 17; i++)
+	{
+		_snprintf(s,4,"%2i",i);
+		m_wirewidth.AddString(s);
+	}
+	_snprintf(s,4,"%2i",_wirewidth);
+	m_wirewidth.SelectString(0,s);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -91,6 +105,30 @@ void CSkinDlg::OnColourMachine()
 		UpdateCanvasColour(IDC_MBG_CAN,_machineViewColor);
 	}
 }
+
+void CSkinDlg::OnColourWire() 
+{
+	CColorDialog dlg(_machineViewWireColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_machineViewWireColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_MWIRE_COL,_machineViewWireColor);
+	}
+}
+
+
+void CSkinDlg::OnColourPoly() 
+{
+	CColorDialog dlg(_machineViewPolyColor);
+
+	if(dlg.DoModal() == IDOK)
+	{
+		_machineViewPolyColor = dlg.GetColor();
+		UpdateCanvasColour(IDC_MPOLY_COL,_machineViewPolyColor);
+	}
+}
+
 
 void CSkinDlg::OnButtonPattern() 
 {
@@ -192,11 +230,15 @@ void CSkinDlg::OnSelendokPresetscombo()
 	case 0: // Old theme
 		{
 			_machineViewColor =	0x0077AA99;
+			_machineViewWireColor =	0x00000000;
+			_machineViewPolyColor =	0x00ffffff;
 			_patternViewColor = 0x00AADDCC;
 			_4beatColor = 0x00CCCCCC;
 			_beatColor = 0x00BACBCA;
 			_rowColor = 0x00A9CAC8;
 			_fontColor = 0x00000000;
+			_wireaa = false;
+			_wirewidth = 1;
 
 			_vubColor = 0x0000FF00;
 			_vugColor = 0x00000000;
@@ -206,11 +248,15 @@ void CSkinDlg::OnSelendokPresetscombo()
 	case 1: // Iced theme
 		{
 			_machineViewColor =	0x00bfa880;
+			_machineViewWireColor =	0x00000000;
+			_machineViewPolyColor =	0x00ffffff;
 			_patternViewColor = 0x00decaab;
 			_4beatColor = 0x00dec9ab;
 			_beatColor = 0x00ebddcb;
 			_rowColor = 0x00f3ebe0;
 			_fontColor = 0x00000000;
+			_wireaa = false;
+			_wirewidth = 1;
 
 			_vubColor = 0x00d6c6a9;
 			_vugColor = 0x00000000;
@@ -220,11 +266,15 @@ void CSkinDlg::OnSelendokPresetscombo()
 	case 2: //clarify
 		{
 			_machineViewColor =	0x00b0bdbd;
+			_machineViewWireColor =	0x00000000;
+			_machineViewPolyColor =	0x00dddddd;
 			_patternViewColor = 0x009a8d7e;
 			_4beatColor = 0x00cbc5be;
 			_beatColor = 0x00d5d0ca;
 			_rowColor = 0x00c4cece;
 			_fontColor = 0x00000000;
+			_wireaa = false;
+			_wirewidth = 2;
 
 			_vubColor = 0x0025cd36;
 			_vugColor = 0x00332f28;
@@ -234,23 +284,37 @@ void CSkinDlg::OnSelendokPresetscombo()
 	case 3: // bluegrey
 		{
 			_machineViewColor =	0x009a887c;
+			_machineViewWireColor =	0x003a281c;
+			_machineViewPolyColor =	0x00dac8bc;
 			_patternViewColor = 0x009a887c;
 			_4beatColor = 0x00d5ccc6;
 			_beatColor = 0x00c9beb8;
 			_rowColor = 0x00c1b5aa;
 			_fontColor = 0x00000000;
+			_wireaa = false;
+			_wirewidth = 2;
 
 			_vubColor = 0x00f1c992;
 			_vugColor = 0x00403731;
 			_vucColor = 0x00262bd7;
 			break;
 		}
+	default:
+		return;
+		break;
 	}
+	m_wireaa.SetCheck(_wireaa);
+	char s[4];
+	_snprintf(s,4,"%2i",_wirewidth);
+	m_wirewidth.SelectString(0,s);
 }
+
 void CSkinDlg::RepaintAllCanvas()
 {
 	UpdateCanvasColour(IDC_PBG_CAN,_patternViewColor);
 	UpdateCanvasColour(IDC_MBG_CAN,_machineViewColor);
+	UpdateCanvasColour(IDC_MWIRE_COL,_machineViewWireColor);
+	UpdateCanvasColour(IDC_MPOLY_COL,_machineViewPolyColor);
 	UpdateCanvasColour(IDC_4BEAT_CAN,_4beatColor);
 	UpdateCanvasColour(IDC_BEAT_CAN,_beatColor);
 	UpdateCanvasColour(IDC_ROW_CAN,_rowColor);

@@ -34,6 +34,13 @@ Configuration::Configuration()
 	useDoubleBuffer = true;
 	_showAboutAtStart = true;
 	mv_colour =	0x009a887c;
+	mv_wirecolour =	0x00000000;
+	mv_polycolour =	0x00ffffff;
+	mv_wireaa = false;
+	mv_wirewidth = 1;
+	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
+			((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*2))/3)&0x00ff00) +
+			((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*2))/3)&0x00ff);
 	pvc_background = 0x009a887c;
 	pvc_row4beat = 0x00d5ccc6;
 	pvc_rowbeat = 0x00c9beb8;
@@ -538,6 +545,14 @@ Configuration::Read(
 
 	numData = sizeof(mv_colour);
 	reg.QueryValue("mv_colour", &type, (BYTE*)&mv_colour, &numData);
+	numData = sizeof(mv_wirecolour);
+	reg.QueryValue("mv_wirecolour", &type, (BYTE*)&mv_wirecolour, &numData);
+	numData = sizeof(mv_polycolour);
+	reg.QueryValue("mv_polycolour", &type, (BYTE*)&mv_polycolour, &numData);
+	numData = sizeof(mv_wireaa);
+	reg.QueryValue("mv_wireaa", &type, (BYTE*)&mv_wireaa, &numData);
+	numData = sizeof(mv_wirewidth);
+	reg.QueryValue("mv_wirewidth", &type, (BYTE*)&mv_wirewidth, &numData);
 	numData = sizeof(pvc_background);
 	reg.QueryValue("pvc_background", &type, (BYTE*)&pvc_background, &numData);
 	numData = sizeof(pvc_row4beat);
@@ -554,6 +569,10 @@ Configuration::Read(
 	reg.QueryValue("vu2", &type, (BYTE*)&vu2, &numData);
 	numData = sizeof(vu3);
 	reg.QueryValue("vu3", &type, (BYTE*)&vu3, &numData);
+
+	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
+					  ((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*2))/3)&0x00ff00) +
+					  ((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*2))/3)&0x00ff);
 
 	numData = sizeof(output);
 	if (reg.QueryValue("OutputDriver", &type, (BYTE*)&output, &numData) == ERROR_SUCCESS)
@@ -843,6 +862,10 @@ Configuration::Write(
 	reg.SetValue("MidiTo15", REG_DWORD, (BYTE*)&_midiTo15, sizeof(_midiTo15));	
 
 	reg.SetValue("mv_colour", REG_DWORD, (BYTE*)&mv_colour, sizeof(mv_colour));	
+	reg.SetValue("mv_wirecolour", REG_DWORD, (BYTE*)&mv_wirecolour, sizeof(mv_wirecolour));	
+	reg.SetValue("mv_polycolour", REG_DWORD, (BYTE*)&mv_polycolour, sizeof(mv_polycolour));	
+	reg.SetValue("mv_wireaa", REG_DWORD, (BYTE*)&mv_wireaa, sizeof(mv_wireaa));	
+	reg.SetValue("mv_wirewidth", REG_DWORD, (BYTE*)&mv_wirewidth, sizeof(mv_wirewidth));	
 	reg.SetValue("pvc_background", REG_DWORD, (BYTE*)&pvc_background, sizeof(pvc_background));	
 	reg.SetValue("pvc_row4beat", REG_DWORD, (BYTE*)&pvc_row4beat, sizeof(pvc_row4beat));	
 	reg.SetValue("pvc_rowbeat", REG_DWORD, (BYTE*)&pvc_rowbeat, sizeof(pvc_rowbeat));	

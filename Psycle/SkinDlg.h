@@ -22,10 +22,14 @@ public:
 	COLORREF _beatColor;
 	COLORREF _4beatColor;
 	COLORREF _machineViewColor;
+	COLORREF _machineViewWireColor;
+	COLORREF _machineViewPolyColor;
 	COLORREF _vubColor;
 	COLORREF _vugColor;
 	COLORREF _vucColor;
 	bool _gfxbuffer;
+	bool _wireaa;
+	int _wirewidth;
 
 	CSkinDlg();
 	~CSkinDlg();
@@ -34,7 +38,9 @@ public:
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
 	CComboBox	m_cpresets;
+	CComboBox	m_wirewidth;
 	CButton	m_gfxbuffer;
+	CButton	m_wireaa;
 	//}}AFX_DATA
 
 
@@ -55,6 +61,8 @@ protected:
 	virtual void OnCancel();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnColourMachine();
+	afx_msg void OnColourWire();
+	afx_msg void OnColourPoly();
 	afx_msg void OnButtonPattern();
 	afx_msg void OnVuBarColor();
 	afx_msg void OnVuBackColor();

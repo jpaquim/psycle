@@ -630,10 +630,10 @@ BEGIN
     COMBOBOX        IDC_FONTFACE,6,29,134,85,CBS_DROPDOWN | CBS_SORT | 
                     WS_DISABLED | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Machine View ",IDC_STATIC,149,7,100,64
-    PUSHBUTTON      "BgColour...",IDC_BUTTON1,158,23,44,12
+    PUSHBUTTON      "BackGnd",IDC_BG_COLOUR,153,21,32,12
     GROUPBOX        "VU Colors",IDC_STATIC,254,7,60,64
-    PUSHBUTTON      "Vu Bar",IDC_BUTTON23,262,20,32,12
-    PUSHBUTTON      "BackGnd",IDC_BUTTON24,262,36,32,12
+    PUSHBUTTON      "Vu Bar",IDC_BUTTON23,261,35,32,12
+    PUSHBUTTON      "BackGnd",IDC_BUTTON24,261,17,32,12
     PUSHBUTTON      "OnClip",IDC_BUTTON25,262,52,32,12
     GROUPBOX        "Colours ",IDC_STATIC,6,68,134,79
     PUSHBUTTON      "BackGnd",IDC_BUTTON3,12,84,39,12
@@ -658,14 +658,25 @@ BEGIN
                     12,9
     CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,119,
                     126,12,9
-    CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,23,
+    CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,38,
                     12,9
-    CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,38,
+    CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,19,
                     12,9
     CONTROL         "",IDC_VU3_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,297,55,
                     12,9
-    CONTROL         "",IDC_MBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,207,25,
+    CONTROL         "",IDC_MBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,189,23,
                     12,9
+    PUSHBUTTON      "Wires",IDC_WIRE_COLOUR,153,36,32,12
+    PUSHBUTTON      "Polygons",IDC_POLY_COLOUR,154,52,31,12
+    CONTROL         "",IDC_MWIRE_COL,"Static",SS_GRAYRECT | SS_SUNKEN,189,38,
+                    12,9
+    CONTROL         "",IDC_MPOLY_COL,"Static",SS_GRAYRECT | SS_SUNKEN,189,54,
+                    12,9
+    CONTROL         "AntiAlias",IDC_AAWIRE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,205,52,42,13
+    COMBOBOX        IDC_WIRE_WIDTH,204,36,24,104,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Wdth",IDC_STATIC,230,35,17,13,SS_CENTERIMAGE
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
