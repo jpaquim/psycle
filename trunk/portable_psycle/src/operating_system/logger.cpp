@@ -115,12 +115,16 @@ namespace operating_system
 			attributes=BACKGROUND_RED;
 			break;
 		default:
-			attributes|=FOREGROUND_BLUE|FOREGROUND_RED|FOREGROUND_INTENSITY;
+			attributes=FOREGROUND_RED|FOREGROUND_BLUE|FOREGROUND_INTENSITY;
 		};
 
 		DWORD length=string.length();
 		::SetConsoleTextAttribute(output_handle, attributes);
 		::WriteConsole(output_handle,string.c_str(),length,&length,0);
+		// <bohan> "reset" the attributes before new line because otherwize we have
+		// <bohan> the cells of the whole next line set with attributes, up to the rightmost column.
+		// <bohan> i haven't checked, but it is possible that this only happens when the buffer scrolls due to the new line.
+		attributes=FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY;
 		::WriteConsole(output_handle,"\n",1,&length,0);
 	}
 }
