@@ -10,6 +10,7 @@
 #include "Plugin.h"
 #include "VSTHost.h"
 #include "InputHandler.h"
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -174,7 +175,7 @@ void CFrameMachine::OnPaint()
 		{
 			min_v = 0;
 			max_v = 1000;
-			val_v = (int)(((VSTPlugin*)_pMachine)->GetParameter(c)*1000.0f);
+			val_v = f2i(((VSTPlugin*)_pMachine)->GetParameter(c)*1000.0f);
 			memset(buffer,0,32);
 
 			if (((VSTPlugin*)_pMachine)->DescribeValue(c,buffer) == false)
@@ -282,7 +283,7 @@ void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
-			tweakbase = (int)(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+			tweakbase = f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
 		}
 		istweak = true;
 		SetCapture();
@@ -320,7 +321,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				tweakbase=(int)(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+				tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
 			}
 			sourcepoint=point.y;
 			ultrafinetweak=!ultrafinetweak;
@@ -334,7 +335,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				tweakbase=(int)(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
+				tweakbase=f2i(((VSTPlugin*)_pMachine)->GetParameter(tweakpar)*1000.0f);
 			}
 			sourcepoint=point.y;
 			finetweak=!finetweak;
@@ -362,7 +363,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			// well, this isn't so hard... just put the twk record here
 			if (Global::pConfig->_RecordTweaks)
 			{
-				wndView->MousePatternTweak(index, tweakpar, (int)nv-min_v);
+				wndView->MousePatternTweak(index, tweakpar, ((int)nv)-min_v);
 			}
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
@@ -406,7 +407,7 @@ void CFrameMachine::OnRButtonDown(UINT nFlags, CPoint point)
 			min_v = 0;
 			max_v = 1000;
 			((VSTPlugin*)_pMachine)->Dispatch(effGetParamName, thispar, 0, name, 0);
-			dlg.m_Value = (int)(((VSTPlugin*)_pMachine)->GetParameter(thispar)*1000.0f);
+			dlg.m_Value = f2i(((VSTPlugin*)_pMachine)->GetParameter(thispar)*1000.0f);
 		}
 		
 		sprintf(
@@ -430,11 +431,11 @@ void CFrameMachine::OnRButtonDown(UINT nFlags, CPoint point)
 		}
 		if ( _pMachine->_type == MACH_PLUGIN )
 		{
-			((Plugin*)_pMachine)->GetInterface()->ParameterTweak(thispar, (int)nv);
+			((Plugin*)_pMachine)->GetInterface()->ParameterTweak(thispar, nv);
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 		{
-			((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/1000.0));
+			((VSTPlugin*)_pMachine)->SetParameter(thispar,(float)(nv/1000.0f));
 			SetFocus();
 		}
 		Invalidate(false);

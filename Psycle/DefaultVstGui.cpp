@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "DefaultVstGui.h"
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -141,7 +142,7 @@ void CDefaultVstGui::UpdateOne()
 	//update scroll bar with initial value
 	float value = _pMachine->GetParameter(nPar);
 	value *= NUMTICKS;
-	m_slider.SetPos(NUMTICKS -((int)value));
+	m_slider.SetPos(NUMTICKS -(f2i(value)));
 }
 
 void CDefaultVstGui::OnSelchangeList1() 

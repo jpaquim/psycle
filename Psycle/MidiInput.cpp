@@ -20,6 +20,7 @@
 
 #include "ChildView.h"
 #include "MainFrm.h"
+#include "Helpers.h"
 
 
 extern CPsycleApp theApp;
@@ -1371,7 +1372,7 @@ void CMidiInput::InternalClock( DWORD dwParam2 )
 	int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
 
 	// adjust the sample position (fix latency)
-	int adjPlayPos = playPos - (int)((midiLatencyMs/1000.f) * (float)samplesPerSecond );
+	int adjPlayPos = playPos - f2i((midiLatencyMs/1000.f) * samplesPerSecond );
 	
 	// never let the adjusted play pos become negative (this really breaks things - usually
 	// when trying to resync just after the audio engine has restared)
@@ -1440,7 +1441,7 @@ void CMidiInput::InternalReSync( DWORD dwParam2 )
 	// using our own timer, started at the same time (hopefully!) as the MIDI
 	// input timer.
  	int midiLatency = ( timeGetTime() - m_tickBase ) - dwParam2;
-	int midiLatencySamples = (int)( (midiLatency/1000.f) * (float)samplesPerSecond );
+	int midiLatencySamples = f2i( (midiLatency/1000.f) * samplesPerSecond );
 	m_stats.syncEventLatency = midiLatencySamples;
 
 	// work out the real play position
@@ -1616,7 +1617,7 @@ TRACE( "*Lost Event*\n" );
 						}
 
 						// create actual value
-						int value = min + (int)( (max-min) * (data2/127.f) );
+						int value = min + f2i( (max-min) * (data2/127.f) );
 
 						// assign
 						m_midiBuffer[ m_patOut ].entry._inst = data1;
