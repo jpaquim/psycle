@@ -17,7 +17,7 @@ void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 			Global::pInputHandler->StopNote(outnote);
 		}
 	}
-	else if ((nChar == 16) && (nFlags & 49152) && ChordModeOffs)
+	else if ((nChar == 16) && ((nFlags & 0xC000) == 0xC000) && ChordModeOffs)
 	{
 		// shift is up, abort chord mode
 		editcur.line = ChordModeLine;

@@ -556,7 +556,6 @@ int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	/*
 	// ignore repeats: nFlags&0x4000
 	const BOOL bRepeat = nFlags&0x4000;
 	CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
@@ -576,20 +575,19 @@ void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		}
 	}
-	*/
-	wndView->KeyDown(nChar,nRepCnt,nFlags);
+
+//	wndView->KeyDown(nChar,nRepCnt,nFlags);
 	CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 }
 
 void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
-	/*
+
 	CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 	const int outnote = cmd.GetNote();
-	if(outnote>=0)
-		Global::pInputHandler->StopNote(outnote,true,_pMachine);
-		*/
-	wndView->KeyUp(nChar, nRepCnt, nFlags);
+	if(outnote>=0)	Global::pInputHandler->StopNote(outnote,true,_pMachine);
+
+//	wndView->KeyUp(nChar, nRepCnt, nFlags);
 	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
