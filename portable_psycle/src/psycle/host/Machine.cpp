@@ -34,9 +34,15 @@ namespace psycle
 			///\todo gui needs to update
 			crashed_ = true;
 			_bypass = true;
+			_mute = true;
 			std::ostringstream title; title
-				<< _editName << " crashed.";
-			::MessageBox(0, title.str().c_str(), e.what(), MB_OK | MB_ICONWARNING);
+				<< _editName;
+			if(GetDllName()) title
+				<< ": " << GetDllName();
+			 title
+				 << " crashed.";
+			host::logger(10, title.str() + e.what());
+			::MessageBox(0, e.what(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 		}
 
 		Machine::Machine()

@@ -557,7 +557,7 @@ namespace psycle
 								str.MakeLower();
 								std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
 								dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
-								out << "successfully instanciated - " << plug.GetName();
+								out << plug.GetName() << " - successfully instanciated";
 								out.flush();
 							}
 							else
@@ -580,24 +580,37 @@ namespace psycle
 							}
 							catch(const std::exception & e)
 							{
-								out
-									<< std::endl
+								std::stringstream s; s
 									<< "### ERRONEOUS ###" << std::endl
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< typeid(e).name() << std::endl
 									<< e.what();
-								out.flush();
-							}
-							catch(...)
-							{
 								out
 									<< std::endl
 									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << finder.GetFilePath();
+								host::logger(10, title.str() + '\n' + s.str());
+								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
+							}
+							catch(...)
+							{
+								std::stringstream s; s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< "Type of exception is unknown, no further information available.";
+								out
+									<< std::endl
+									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
 								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << finder.GetFilePath();
+								host::logger(10, title.str() + '\n' + s.str());
+								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 						}
 						else if(type == MACH_VST)
@@ -646,7 +659,7 @@ namespace psycle
 								str.MakeLower();
 								std::strcpy(str2, str.Mid(str.ReverseFind('\\') + 1));
 								dllNames.SetAt(str2, _pPlugsInfo[currentPlugsCount]->dllname);
-								out << "successfully instanciated - " << vstPlug.GetName();
+								out << vstPlug.GetName() << " - successfully instanciated";
 								out.flush();
 							}
 							else
@@ -669,24 +682,36 @@ namespace psycle
 							}
 							catch(const std::exception & e)
 							{
-								out
-									<< std::endl
-									<< "### ERRONEOUS ###" << std::endl
+								std::stringstream s; s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< typeid(e).name() << std::endl
 									<< e.what();
-								out.flush();
-							}
-							catch(...)
-							{
 								out
 									<< std::endl
 									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << finder.GetFilePath();
+								host::logger(10, title.str() + '\n' + s.str());
+								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
+							}
+							catch(...)
+							{
+								std::stringstream s; s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< "Type of exception is unknown, no further information available.";
+								out
+									<< std::endl
+									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
 								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << finder.GetFilePath();
+								host::logger(10, title.str() + '\n' + s.str());
+								::MessageBox(0, title.str().c_str(), s.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 						}
 					}

@@ -249,10 +249,12 @@ namespace psycle
 			inline void proxy::operator()(AEffect * plugin) throw(host::exceptions::function_error)
 			{
 				if((*this)()) user(0);
-				delete &this->plugin();
+				delete this->plugin_;
 				this->plugin_ = plugin;
-				if((*this)()) user(this);
+				if((*this)()) user(&host());
 			}
+			#pragma warning(push)
+			#pragma warning(disable:4702) // unreachable code
 			inline long int proxy::magic() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
@@ -266,6 +268,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(exceptions::dispatch_error)
 			{
@@ -279,6 +282,7 @@ namespace psycle
 				catch(const long int & e) { exceptions::dispatch_errors::rethrow(host(), operation, &e); }
 				catch(const unsigned long int & e) { exceptions::dispatch_errors::rethrow(host(), operation, &e); }
 				catch(...) { exceptions::dispatch_errors::rethrow<void*>(host(), operation); }
+				return 0; // dummy return to avoid warning
 			}
 			inline void proxy::process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
 			{
@@ -335,6 +339,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numPrograms() throw(host::exceptions::function_error)
 			{
@@ -349,6 +354,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numParams() throw(host::exceptions::function_error)
 			{
@@ -363,6 +369,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numInputs() throw(host::exceptions::function_error)
 			{
@@ -377,6 +384,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::numOutputs() throw(host::exceptions::function_error)
 			{
@@ -391,6 +399,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::flags() throw(host::exceptions::function_error)
 			{
@@ -405,6 +414,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::uniqueId() throw(host::exceptions::function_error)
 			{
@@ -419,6 +429,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline long int proxy::version() throw(host::exceptions::function_error)
 			{
@@ -433,6 +444,7 @@ namespace psycle
 				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				return 0; // dummy return to avoid warning
 			}
 			inline void proxy::user(void * user) throw(host::exceptions::function_error)
 			{
@@ -448,6 +460,7 @@ namespace psycle
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 			}
+			#pragma warning(pop)
 		}
 	}
 }

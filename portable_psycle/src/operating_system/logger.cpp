@@ -3,7 +3,6 @@
 #define OPERATING_SYSTEM__LOGGER
 #include <operating_system/logger.h>
 #include <operating_system/exceptions/code_description.h>
-
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <io.h>
 	#include <fcntl.h>
@@ -18,12 +17,10 @@
 	#endif
 	*/
 #endif
-
-logger::logger(const int & threshold_level, std::ostream & ostream) : threshold_level_(threshold_level), ostream_(ostream) {}
-logger logger::default_logger_(logger::default_threshold_level(), std::cout);
-
 namespace operating_system
 {
+	logger::logger(const int & threshold_level, std::ostream & ostream) : threshold_level_(threshold_level), ostream_(ostream) {}
+	logger logger::default_logger_(logger::default_threshold_level(), std::cout);
 
 	console::~console() throw()
 	{
