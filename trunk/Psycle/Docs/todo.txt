@@ -22,7 +22,6 @@
 <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
 <Alk^> I think the line numbering should be optional
 <Alk^> I also think that the cursor movement after a paste should be optional to =)
-Alk* roll mouse wheel down, bug (past bottom)
 Alk* place cursor on last line, change to machine screen and back to pattern, bug
 Alk* would be useful to put dialogs like wire vol into separate tasks (modeless) so psycle is not disabled when they are open
 <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps

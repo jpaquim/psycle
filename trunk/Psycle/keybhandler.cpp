@@ -743,8 +743,7 @@ void CChildView::NextCol(bool wrap,bool updateDisplay)
 
 void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 {
-	const int ps = _pSong->playOrder[editPosition];
-	const int nl = _pSong->patternLines[ps];
+	const int nl = _pSong->patternLines[_ps()];
 
 	editcur.line -= x;
 
@@ -758,8 +757,7 @@ void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 
 void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 {
-	const int ps = _pSong->playOrder[editPosition];
-	const int nl = _pSong->patternLines[ps];
+	const int nl = _pSong->patternLines[_ps()];
 
 	if ( x != 0)	editcur.line += x;
 	else
