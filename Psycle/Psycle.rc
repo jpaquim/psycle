@@ -2357,7 +2357,7 @@ LANGUAGE 0x3, 0x1
 // Dialog
 //
 
-IDD_SAVEWAVDLG DIALOG DISCARDABLE  0, 0, 260, 220
+IDD_SAVEWAVDLG DIALOG DISCARDABLE  0, 0, 260, 254
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Render as Wav File"
 FONT 8, "MS Sans Serif"
@@ -2368,38 +2368,41 @@ BEGIN
     CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
                     IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
                     BS_MULTILINE | WS_TABSTOP,13,25,231,21
-    GROUPBOX        "Record:",IDC_STATIC,15,74,228,61
-    EDITTEXT        IDC_PATNUMBER,117,100,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(in HEX value)",IDC_STATIC,147,103,47,10
-    EDITTEXT        IDC_RANGESTART,117,115,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGEEND,159,115,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "to",IDC_STATIC,148,117,8,8
-    LTEXT           "(in HEX value)",IDC_STATIC,189,117,47,10
+    GROUPBOX        "Record:",IDC_STATIC,15,106,228,61
+    EDITTEXT        IDC_PATNUMBER,117,132,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(in HEX value)",IDC_STATIC,147,135,47,10
+    EDITTEXT        IDC_RANGESTART,117,147,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,159,147,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "to",IDC_STATIC,148,149,8,8
+    LTEXT           "(in HEX value)",IDC_STATIC,189,149,47,10
     CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | 
-                    WS_BORDER,5,188,250,9
-    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,155,200,50,14
-    PUSHBUTTON      "Close",IDCANCEL,210,200,41,14
+                    WS_BORDER,5,220,250,9
+    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,155,232,50,14
+    PUSHBUTTON      "Close",IDCANCEL,210,232,41,14
     CONTROL         "Record the entire song",IDC_RECSONG,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,23,87,112,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,23,119,112,10
     CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
-                    BS_AUTORADIOBUTTON,23,102,89,10
+                    BS_AUTORADIOBUTTON,23,134,89,10
     CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
-                    BS_AUTORADIOBUTTON,23,117,93,10
-    RTEXT           "Sample Rate",IDC_STATIC,70,140,45,15,SS_CENTERIMAGE
-    RTEXT           "Channels",IDC_STATIC,65,170,50,15,SS_CENTERIMAGE
-    RTEXT           "Bit Depth",IDC_STATIC,65,155,50,15,SS_CENTERIMAGE
+                    BS_AUTORADIOBUTTON,23,149,93,10
+    RTEXT           "Sample Rate",IDC_STATIC,70,172,45,15,SS_CENTERIMAGE
+    RTEXT           "Channels",IDC_STATIC,65,202,50,15,SS_CENTERIMAGE
+    RTEXT           "Bit Depth",IDC_STATIC,65,187,50,15,SS_CENTERIMAGE
     CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
                     IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
                     BS_MULTILINE | WS_TABSTOP,13,47,230,24
-    COMBOBOX        IDC_COMBO_RATE,120,140,125,75,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_RATE,120,172,125,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_BITS,120,155,125,75,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_BITS,120,187,125,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_CHANNELS,120,170,125,75,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_CHANNELS,120,202,125,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CTEXT           "Note: many filters screw up when rendering at low sample rates.",
-                    IDC_STATIC,13,140,50,45,WS_DISABLED
-    LTEXT           "",IDC_TEXT,7,201,144,12
+                    IDC_STATIC,13,172,50,45,WS_DISABLED
+    LTEXT           "",IDC_TEXT,7,235,144,12
+    CONTROL         "Save each unmuted generator as a separated wav (generator number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
+                    IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,13,76,230,24
 END
 
 
@@ -2416,7 +2419,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 253
         TOPMARGIN, 7
-        BOTTOMMARGIN, 213
+        BOTTOMMARGIN, 247
     END
 END
 #endif    // APSTUDIO_INVOKED

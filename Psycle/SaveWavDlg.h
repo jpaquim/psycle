@@ -28,6 +28,7 @@ public:
 	CButton	m_cancel;
 	CButton	m_savewave;
 	CButton	m_savewires;
+	CButton	m_savegens;
 	CButton	m_savetracks;
 	CEdit	m_rangestart;
 	CEdit	m_rangeend;
@@ -67,8 +68,9 @@ protected:
 
 	static BOOL savetracks;
 	static BOOL savewires;
+	static BOOL savegens;
 
-	bool _Muted[MAX_TRACKS];
+	bool _Muted[MAX_BUSES];
 
 	bool autostop;
 	bool playblock;
@@ -91,6 +93,7 @@ protected:
 	afx_msg void OnSelchangeComboRate();
 	afx_msg void OnSavetracksseparated();
 	afx_msg void OnSavewiresseparated();
+	afx_msg void OnSavegensseparated();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
