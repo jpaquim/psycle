@@ -985,9 +985,9 @@ BEGIN
                     NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
     CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
                     WS_BORDER,0,0,335,186
-    LTEXT           "ASIO Steinberg Audio Stream I/O API (C)1996 Steinberg",
+    LTEXT           "ASIO Steinberg Audio Stream I/O API (C) 1996 Steinb0rg",
                     IDC_ASIO,133,158,182,8,NOT WS_VISIBLE
-    LTEXT           "VST Virtual Studio Technology v2.3 (C)2003 Steinberg",
+    LTEXT           "VST Virtual Studio Technology v2.3 (C) 2003 Steinb0rg",
                     IDC_STEINBERGCOPY,133,169,182,8,NOT WS_VISIBLE
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,5,187,323,1,
                     WS_EX_STATICEDGE
