@@ -1,0 +1,828 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033\deftab708{\fonttbl{\f0\froman\fcharset0 Times New Roman;}{\f1\fswiss\fcharset0 Arial;}{\f2\fmodern\fcharset0 Courier New;}}
+{\*\generator Msftedit 5.41.15.1503;}\viewkind4\uc1\pard\lang1027\ul\b\f0\fs36 Fileformat Documentation of .psy Files\ulnone\b0\fs24\par
+\b\par
+Psycle Version : 1.7+\par
+Document Version: 1.1.3\par
+Date:16-Dec-2003\par
+\ul\fs36\par
+\ulnone\b0\fs24 Psycle will be getting a new file format soon.  The old format is limited and difficult to maintain.  The new format will be Riff based with independant versioning for each chunk, and a "total" version number for the entire file (major and minor).  Each chunk is HEADER followed immediately by DATA\par
+\par
+chunk header format:\par
+\par
+FOURCC id; // eg "PSY3"\par
+UINT\tab size; // size of chunk NOT including header\par
+UINT\tab version; // version of this chunk type\par
+\par
+Here are the proposed changes to each chunk:\par
+\par
+===================\par
+FILE HEADER\par
+===================\par
+id = "PSY3"; // PSY2 was 1.66\par
+size = 0;\par
+version = 0; // "total" version of all chunk versions\par
+\par
+===================\par
+SONG INFO TEXT\par
+===================\par
+HEADER:\par
+id = "INFO"; \par
+size = strlen(Name)+strlen(Author)+strlen(Comment);\par
+version = 0;\par
+\par
+DATA:\par
+char name[]; // null terminated string\par
+char author[]; // null terminated string\par
+char comment[]; // null terminated string\par
+\par
+===================\par
+SEQUENCE INFO\par
+*******Multipattern stuff needed\par
+===================\par
+HEADER:\par
+id = "SEQI"; \par
+size = (5*sizeof(int))+sizeof(byte);\par
+version = 0;\par
+\par
+DATA:\par
+int sequenceLength; // length of sequence // Label: plgt - Desc : Contains the limit of the playable sequence. The number just \par
+\tab // indicates where the user has set the last position. i.e. : playorder[plgt] should not be played back.\par
+int numTracks; // Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks\par
+\tab // Values: from 4 to 64\par
+int numPatterns; // Label: pnum // Desc : Contains the number of patterns stored in the file.\par
+int bpm; // bpm of song (0-255) - int incase of future expansion?\par
+int tpb; // ticks per beat of song (1-256) - int incase of future expansion?\par
+byte currentoctave; // curent octave on keyboard (0-9)\par
+// int sequenceWidth; // * number of sequence columns for multipattern\par
+\par
+===================\par
+SEQUENCE DATA\par
+*******Multipattern stuff needed\par
+===================\par
+HEADER:\par
+id = "SEQD"; \par
+size = (sequenceLength*sizeof(int));\par
+version = 0;\par
+\par
+DATA:\par
+// int index; // * for multipattern stuff\par
+int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in \par
+\tab // position 3, it plays the pattern 5th. (zero based)\par
+char patternName[]; // null terminated string, should be less than 32 chars long, but we will truncate on load\par
+\par
+\par
+===================\par
+PATTERN DATA\par
+*******Multipattern stuff needed\par
+===================\par
+HEADER:\par
+id = "PATD"; \par
+size = (sequenceLength*sizeof(int));\par
+version = 0;\par
+\par
+typedef struct PatternEntry\par
+\{\par
+\tab UCHAR _note;\par
+\tab UCHAR _inst; // Aux column.  Instrument for sampler.\par
+\tab UCHAR _mach;\par
+\tab UCHAR _cmd;\par
+\tab UCHAR _parameter;\par
+\}\par
+PatternEntry;\par
+\par
+DATA:\par
+int index; // which pattern we are loading\par
+int numlines; // how many lines in this pattern (1-512)\par
+// int patterntracks; // how many tracks in this pattern * for multipattern\par
+PatternEntry pe[numlines*patterntracks]; // data for this pattern- use numTracks until pattern tracks is implemented\par
+\par
+===================\par
+MACHINES INFO\par
+* i always wondered why things were routed like this?\par
+* it seems redundant and wasteful\par
+* why is there even a busmachine array, instead of just putting things in the right spot in the machines array?\par
+* pmachines could be an array of pointers to machines if it's too hard to move things around otherwise\par
+===================\par
+HEADER:\par
+id = "MACI"; \par
+size = (sizeof(byte)*128)+(sizeof(bool)*128);\par
+version = 0;\par
+\par
+DATA:\par
+byte busmachine[64]; // mapping of generators to busses - Desc : Contains the values of the array that represent the machine\par
+ \tab // assignations for Generators.  What this means is, which machine in the \ldblquote machines\rdblquote  array corresponds to the specified \par
+\tab // position (used in the pattern) if busmachine[3] = 5 , it means that the machine numbered 3 in the pattern, is the machine \par
+\tab // in machines[5] . (zero based) - Values: from 0 to 7F ( 127 )\par
+byte buseffect[64]; // mapping of effects to busses - as above\par
+bool macactive[128]; // Desc: The array indicates if the pointer in the \ldblquote machines\rdblquote  array is a valid machine, or not. Example if \par
+\tab // macactive[5] = false , then machines[5] is NOT a valid machine.\par
+\par
+===================\par
+MACHINES DATA\par
+===================\par
+\par
+===================\par
+INSTRUMENT INFO\par
+===================\par
+\par
+===================\par
+INSTRUMENT DATA\par
+===================\par
+\par
+\par
+\par
+-------------------------------------old format crap---------------------------------------------\par
+\par
+\par
+\pard\keepn\sb240\sa60\b\f1\fs26 PATTERN STRUCTURE\par
+\pard\b0\f0\fs24\par
+For Each Pattern :\par
+\par
+\f2 |-|0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|\par
+|?| | | | | | | | | | | | | |p|l|i|\f0\par
+\f2 |?|n|p|a|t|n|a|m|e| | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| |p|a|t|d|a|t|a| | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+....\par
+\f2 |?| |p|l|i|n|p|a|t|n|a|m|e| | | | |\f0\par
+....\par
+\par
+\par
+\par
+\par
+Label: patdata\par
+Size plin*5*32  unsigned chars\par
+Desc: Contains the raw data of the pattern. For some (weird) reason, the Tracks were hardcoded to MAX_TRACKS (that\rquote s the 32 in the size) instead of using SongTracks.\par
+Note: The structure PatternEntry is the following (thus, the 5 in the size):\par
+\par
+\par
+\pard\keepn\sb240\sa60\b\f1\fs26 INSTRUMENT STRUCTURE\par
+\pard\b0\f0\fs24\par
+Instruments : First, there is one isel, then for each instrument it comes its data (this means, ALWAYS, 255 instruments (from 0 to 254)).\par
+Notice that instead of being saved instrument by instrument, it is saved type of data by type of data (Another weird thing of the format)\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|i|s|e|l|s|n|a|m|e| | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | |s|n|a|m|e| | | | | | | |\par
+...\par
+|?|n|n|a| |n|n|a| | | | | | | | | |\par
+...\par
+|?|e|n|a|t|e|n|a|t| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|n|d|t|e|n|d|t| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|n|s|l|e|n|s|l| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|n|r|t|e|n|r|t| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|a|t|e|f|a|t| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|d|t|e|f|d|t| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|s|l|e|f|s|l| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|r|t|e|f|r|t| | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|c|o| | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|r|q| | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|e|a| | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|e|f|t|p| | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|p|a|n| | | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|r|p|a|n| | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|r|c|u|t| | | | | | | | | | | | |\f0\par
+\f2 ...\par
+|?|r|r|e|s| | | | | | | | | | | | |\f0\par
+\par
+\par
+Label: isel\par
+Size 1 int (32bits)\par
+Desc: Contains the WAVE instrument that the user had selected when saving. i.e. instruments[i] is the last selected instrument. (Remember that this means the wave Patches).\par
+Values: from 0 to 254 (255 is reserved for \ldblquote preview\rdblquote )\par
+\par
+Label: sname\par
+Size 32 chars\par
+Desc: Contains the name assigned to the WAVE instrument. Can be NOT NULL terminated.\par
+\par
+Label: nna\par
+Size 1 unsigned char\par
+Desc: Indicates the NNA selection as follows:\par
+\tab // 0 = Note Cut\tab\tab\tab [Fast Release 'Default']\par
+\tab // 1 = Note Release\tab\tab [Release Stage]\par
+\tab // 2 = Note Continue\tab [No NNA]\par
+\par
+Label: enat / endt / ensl / enrt \par
+Size 1 int (32bits) (each)\par
+Desc: indicates the value for the ADSR Volume envelope (attack time, decay time, sustain level, and release time)\par
+Values :\par
+\pard{\pntext\f0 a)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart1\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 enat = any value (indicates samples. Design fault. Should indicate milliseconds)\par
+\pard{\pntext\f0 b)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart2\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 endt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)\par
+\pard{\pntext\f0 c)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart3\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 ensl = 0..100 ( 100 being no attenuation at all, and 0 full attenuation)\par
+\pard{\pntext\f0 d)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart4\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 enrt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)\par
+\pard\par
+Label: efat / efdt / efsl / efrt \par
+Size 1 int (32bits) (each)\par
+Desc: indicates the value for the ADSR Filter envelope (attack time, decay time, sustain level, and release time)\par
+Values :\par
+\pard{\pntext\f0 a)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart1\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 enat = any value (indicates samples. Design fault. Should indicate milliseconds)\par
+\pard{\pntext\f0 b)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart2\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 endt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)\par
+\pard{\pntext\f0 c)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart3\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 ensl = 0..100 ( 100 being no attenuation at all, and 0 full attenuation)\par
+\pard{\pntext\f0 d)\tab}{\*\pn\pnlvlbody\pnf0\pnindent360\pnstart4\pnlcltr{\pntxta)}}
+\fi-360\li720\tx720 enrt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)\par
+\pard\par
+Label: efco\par
+Size 1 int (32bits)\par
+Desc: Indicates the cuttoff value for the filter.\par
+Values from 0 to 32767. (0 = 0hz , 32768 = samplerate/2) <- This is another fault of the design. Changing the sampling rate changes the value of the filter.\par
+\par
+Label: efrq\par
+Size 1 int (32bits)\par
+Desc: Indicates the ressonance value.\par
+Values from 0 to 127 (127 = full ressonance)\par
+\par
+Label: efea\par
+Size 1 int (32bits)\par
+Desc: Indicates the amount that the envelope affects the filter.\par
+Values from 0 to 32768. 32768 = full effect.\par
+\par
+Labe: eftp\par
+Size 1 int (32bits)\par
+Desc: Indicates the Type of filter being used Values from 0 to 4\par
+\tab // 0 -> LowPass Filter\par
+\tab // 1 -> HighPass Filter\par
+\tab // 2 -> BandPass Filter\par
+\tab // 3 -> NotchBand Filter\par
+\tab // 4 -> Filtering disabled\par
+\par
+Label: pan\par
+Size 1 int (32bits)\par
+Desc: Indicates the pan value.\par
+Values from 0 to 256, being 0 top left, and 256 top right. Center is 128.\par
+\par
+Label: rpan\par
+Size bool (whatever the size is defined in C++ )\par
+Desc: Indicates that the panning position (to be played) has to be randomized at each note on.\par
+\par
+Label: rcut\par
+Size bool (whatever the size is defined in C++ )\par
+Desc: Indicates that the cuttoff value (to be played) has to be randomized at each note on.\par
+\par
+Label: rres\par
+Size bool (whatever the size is defined in C++ )\par
+Desc: Indicates that the ressonance value (to be played) has to be randomized at each note on.\par
+\par
+\par
+\par
+Samples of the Instrument Patches. For each instrument (0..254), you have to check for each sample ( 0..15 ) if the wlgt is higher than 0. if it is, then the wave data follows. If not, the next wlgt follows.\par
+From code: \par
+\tab for (i=0; i<MAX_INSTRUMENTS; i++)\par
+\tab\{\par
+\tab\tab for (int w=0; w<MAX_WAVES; w++)\par
+\tab\tab\{\par
+\tab\tab\tab pFile->Read(&waveLength[i][w], sizeof(waveLength[0][0]));\par
+\tab\tab\tab if (waveLength[i][w] > 0)\par
+\tab\tab\tab\{\par
+\tab\tab\tab\tab read data\par
+\pard\fi708\li1416\}\par
+\pard\tab\tab\}\par
+\pard\fi708\}\par
+\pard\par
+\par
+\pard\keepn\sb240\sa60\b\f1\fs26 SAMPLE STRUCTURE\par
+\pard\b0\f0\fs24\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|w|s|e|l|w|l|g|t| | | | | | | | |\f0\par
+\par
+\par
+\par
+\par
+Label: wsel\par
+Size 1 int (32bits)\par
+Desc: Indicates the WAVE instrument SAMPLE that the user had selected in the Instruments Editor. (One instrument Patch is formed of, at much, 16 samples. This value indicates which of them the user edited last).\par
+Values: from 0 to F (15)\par
+\par
+Label: wlgt\par
+Size 1 unsigned int (32bits)\par
+Desc: Indicates length of the wave sample in Samples (sample format used is signed short) . If it is 0, there\rquote s no sample (neither sample data), so read the next value, which is the next wlgt.\par
+Max size ? Unknown, yes, really...\par
+There\rquote s an \ldblquote ASSERT\rdblquote  in wave loading for a channel bufferzise to be less than 2Msamples. There\rquote s no clear reason of why.\par
+\par
+For each valid sample, this follows:\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|n|a|m|e| | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | |v|l|f|t|l|s| | |l|e| | |\f0\par
+\f2 |?|t|s| | | | | | | | | | | | | | |\f0\par
+\par
+Label: name\par
+Size 32 chars\par
+Desc : The array of the name of the wave file. It can be NOT NULL terminated\par
+\par
+Label: vl\par
+Size unsigned short ( 16bits )\par
+Desc : value of the volume.\par
+Values : 0 full attenuation,  100 no modification. Max: 512 multiply by 512%.\par
+\par
+Label: ft\par
+Size : short (16bits)\par
+Desc: Contains the finetune of the sample.\par
+Values: -256 : one seminote down. 0 no mod. 256 one seminote up.\par
+\par
+Label: ls\par
+Size : int (32bits)\par
+Desc: Contains the loop start *sample* position\par
+\par
+Label: le\par
+Size : int (32bits)\par
+Desc: Contains the loop end *sample* position\par
+\par
+Label: t\par
+Size : bool (whatever the size is defined in C++ )\par
+Desc: Indicates if the loop is enabled (true) or disabled (false)\par
+\par
+Label: s\par
+Size bool (whatever the size is defined in C++ )\par
+Desc: Indicates that the wave is stereo (which means, contains two arrays of wave data)\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|L|d|a|t|a| | | | | | | | | | | |\par
+...\par
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|R|d|a|t|a| | | | | | | | | | | |\f0\par
+\par
+\par
+Label: Ldata\par
+Size: wlgt*16 ( 16 = sizeof(short int) )\par
+Desc : Contains the array of wave data for the left (or mono) channel.\par
+Format is 16bits signed.\par
+\par
+Label: Rdata\par
+Size: wlgt*16 ( 16 = sizeof(short int) )\par
+Desc : *IF* the wave is stereo, then, after Ldata follows Rdata, which is the data for the Right channel.\par
+Format is 16bits signed.\par
+\par
+\par
+\par
+\pard\keepn\sb240\sa60\b\f1\fs26 VST MODULES STRUCTURE\par
+\pard\b0\f0\fs24\par
+For each Module ( ALWAYS  256, from 0 to 255 ) you have to check \ldblquote v\rdblquote  (for valid). If it is true, then plugin data follows, if not, there\rquote s no data, and next \ldblquote v\rdblquote  follows.\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|v|n|a|m|e| | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| |n|u|m| |p|a|r|1|p|a|r|2| | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\par
+\par
+Label: v\par
+Size:  bool (whatever the size is defined in C++ )\par
+Desc: Indicates if there is a  VST plugin in this VST Rack position.\par
+This was used in the pre 1.1 Psycle version. In Psycle version from 1.1 and after, it is filled from 0 to the number of vst\rquote s used, and then, all the following have \ldblquote v\rdblquote  to false.\par
+\par
+Label: name\par
+Size:  128 chars\par
+Desc: Contains the file name of the dll (including the .\rdblquote dll\rdblquote  part), can be NOT NULL terminated.\par
+\par
+Label: num\par
+Size:  1 int (32bits)\par
+Desc: Indicates the number of parameters that are stored for this plugin.\par
+\par
+Label: par1 / par2 ....\par
+Size: 1 float (32bits)\par
+Desc: Each one of the parameters of the VST. VST parameter range goes from 0 to 1\par
+From code:\par
+\pard\li708 for (int c=0; c<num; c++)\par
+\{\par
+\tab float f;\par
+\tab pFile->Read(&f, sizeof(f));\par
+\tab //other things\par
+\}\par
+\pard\par
+Advise for correct loading:\par
+Load all this data to a structure array. Next, when finding the corresponding machine (in the next file part), create the machine structure, use the \ldblquote inst\rdblquote  value that you\rquote ll read to find this structure, and instantiate the VST plugin.\par
+Once you have it, read the chunk (if appropiate) from the file, send Program number and finally, send SetParameter for all the VST\rquote s that don\rquote t have chunk data. (The data is valid for all VST\rquote s, but plugins that use chunks don\rquote t need to use setParameter when loading. Anyway, sending it shouldn\rquote t cause problems)\par
+\par
+\pard\keepn\sb240\sa60\b\f1\fs26 MACHINES\par
+\pard\b0\f0\fs24\par
+\f2\par
+For Each *Active* Machine (128 total, from 0 to 127):\par
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|x| | | |y| | | |t| | | |l|o|a|d|\par
+\par
+(load means all the data to load, see the next grid)\par
+\f0\par
+\par
+Example from code:\par
+\par
+\tab pFile->Read(&_machineActive[0], sizeof(_machineActive));\par
+\tab for (i=0; i<MAX_MACHINES; i++)\par
+\tab\{\par
+\tab\tab if (_machineActive[i])\par
+\tab\tab\{\par
+\tab\tab\tab pFile->Read(&x, sizeof(x));\par
+\tab\tab\tab pFile->Read(&y, sizeof(y));\par
+\tab\tab\tab pFile->Read(&type, sizeof(type));\par
+\par
+\tab\tab\tab switch (type)\par
+\tab\tab\tab\{\par
+\tab\tab\tab\tab // load all data depending on type of machine.\par
+\pard\fi708\li1416\}\tab\tab\tab\par
+\pard\tab\tab\}\par
+\tab\}\par
+\par
+\par
+Label: x\par
+Size: 1 int (32bits)\par
+Desc: The X position of the machine in the machine view\par
+\par
+Label: y\par
+Size: 1 int (32bits)\par
+Desc: The Y position of the machine in the machine view\par
+\par
+Label: t\par
+Size: 1 int (32bits)\par
+Desc: The type of machine that it is.\par
+typedef enum\par
+\{\par
+\tab MACH_MASTER = 0,\par
+\tab MACH_SINE = 1,\par
+\tab MACH_DIST = 2,\par
+\tab MACH_SAMPLER = 3,\par
+\tab MACH_DELAY = 4,\par
+\tab MACH_2PFILTER = 5,\par
+\tab MACH_GAIN = 6,\par
+\tab MACH_FLANGER = 7,\par
+\tab MACH_PLUGIN = 8,\par
+\tab MACH_VST = 9,\par
+\tab MACH_VSTFX = 10,\par
+\tab MACH_DUMMY = 255\par
+\}\par
+MachineType;\par
+\par
+There are some little differences between the loading of different machines. Still, it is almost the same loading for all machines (which turns to be a great amount of useless data)\par
+\par
+\par
+\b IF it is a MACH_PLUGIN,\par
+\b0\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|d|l|l|n|a|m|e| | | | | | | | | |\f0\par
+\f2 |-| | | | | | | | | | | | | | | | |\par
+\f0 ...\par
+\par
+Label: dllname\par
+Size: 256 chars. \par
+Desc: The array that contains the name of the .dll file (including the \ldblquote .dll\rdblquote  string). It should be NULL terminated, but check it.\par
+\par
+\par
+\b Next, For all of them,\par
+\b0\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|e|d|i|t|n|a|m|e| | | | | | | | |\par
+\par
+\f0 Label: editname\par
+Size: 16 chars\par
+Desc: The name of the machine. Should be null terminated, but there are versions which didn\rquote t limited the editname characters, and thus, it can be missing. The valid length is 15 chars and one null.\par
+\b\par
+Next, again, if MACH_PLUGIN,\par
+\par
+\b0\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|n|u|m| |p|a|r|1|p|a|r|2| | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\par
+...\f0\par
+\f2 |?|e|x|t|r|a| | | | | | | | | | | |\par
+\b\f0\par
+\b0 Label: num\par
+Size:  1 int (32bits)\par
+Desc: Indicates the number of parameters that are stored for this plugin.\par
+\par
+Label: par1 / par2 ....\par
+Size: 1 int (32bits)\par
+Desc: It is each one of the parameters of the plugin.\par
+\par
+Label: extra\par
+Size:  unknown. \par
+Desc: It is any extra data that the plugin might save.\par
+Example from code:\par
+\tab\tab\tab int size = _pInterface->GetDataSize();\par
+\tab\tab\tab //pFile->Read(&size,sizeof(int));\tab // This SHOULD be the right thing to do\par
+\tab\tab\tab if (size)\par
+\tab\tab\tab\{\par
+\tab\tab\tab\tab byte* pData = new byte[size];\par
+\tab\tab\tab\tab pFile->Read(pData, size); // Number of parameters\par
+\tab\tab\tab\tab _pInterface->PutData(pData); // Internal load\par
+\tab\tab\tab\tab delete pData;\par
+\tab\tab\tab\}\par
+\par
+\b\par
+Next, For all of them, (yes... I say all of them save the data from now till the next black text)\par
+\b0\f2\par
+|?|i|n|p|u|t|m|a|c|h|i|n|e|s| | | |\par
+|?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?|o|u|t|p|u|t|m|a|c|h|i|n|e|s| | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?|i|p|u|t|c|o|n|v|o|l| | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?|c|o|n|n|e|c|t|i|o|n| |i|n|p|u|t|\f0\par
+\f2 |?|c|o|n| | | | |c|o|n|p|o|i|n|t| |\f0\par
+\f2 ...\par
+|?|n|m|i|n|n|m|o|t|p|a|n| | | | | |\f0\par
+\f2\par
+\f0\par
+Label: inputmachines\par
+Size: 12 ints ( 32bits * 12 )\par
+Desc: The array that indicates the machines (in the machines array) that input sound to the current one. Verify the validity of the number with \ldblquote inputCon\rdblquote\par
+Values: from 0 to 127\par
+\par
+Label: outputmachines\par
+Size: 12 ints ( 32bits * 12 )\par
+Desc: The array that indicates the machines (in the machines array) that this machine outputs sound to. Verify the validity of the number with \ldblquote Connection\rdblquote\par
+Values from 0 to 127\par
+\par
+Label: inputconvol\par
+Size: 12 floats ( 32bits * 12 )\par
+Desc: The array that indicates the volumes of each OUTPUT connection. If you look at psycle code, you\rquote ll see that it converts this value to be used in inputs. (that\rquote s why the variable is called inputconvol).\par
+There\rquote s a big mess in this, you should really use the code in the Song::Load function.\par
+Values:  0 full attenuation, 1 = no atttenuation.\par
+ \par
+Label: connection\par
+Size: 12 bool ( whatever the size is in C++ )\par
+Desc: The array that indicates if an OUTPUT connection is valid or not. If connection[i] is false, then the value in \ldblquote outputmachines[i]\rdblquote  is not valid.\par
+\par
+Label: InputCon\par
+Size: 12 bool ( whatever the size is in C++ )\par
+Desc: The array that indicates if an INPUT connection is valid or not. If InputCon[i] is false, then the value in \ldblquote inputmachines[i]\rdblquote  is not valid.\par
+\par
+Label conpoint\par
+Size: 12 Cpoint (bits? Don\rquote t know. Prosibly 32bits*2)\par
+Desc: Array containing the \ldblquote point\rdblquote  where the connection is made. It\rquote s used to know where the \ldblquote wire triangle\rdblquote  is drawn. It represents the upper left corner of a 20pixels square centered in the midde of the whire.\par
+\par
+Label: nmin\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the number of valid input connections. (You should really forget this value, and get it from the inputCon array. Reason: Bugs in Psycle)\par
+Values: from 0 to 12\par
+\par
+Label: nmot\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the number of valid output connections. (You should really forget this value, and get it from the connection array. Reason: Bugs in Psycle)\par
+Values: from 0 to 12\par
+\par
+Label: pan\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the value of the panning in the machine box. It affects all outputs.\par
+Values: 0 top left, 64center 128 top right.\par
+\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|j|u|n|k| | | | | | | | | | | | |\par
+|?| | | | | | | | | | | | | | | | |\f0\par
+\f2 |?|v|o|i| |i|n|t| |o|u|t|d|o|u|t|w|\f0\par
+\f2 |?|d|p|t|h|d|p|c|l|d|n|t|h|d|n|c|l|\par
+|?|s|g|v|p|a| ...\f0\par
+\par
+\par
+Label: junk\par
+Size: 8 ints ( 32bits *8)\par
+Desc: VERY old data, used probably in the initial Sampler. Currently it is ignored by all the loading processes.\par
+\par
+Label: voi\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the number of simultaneous voices to be used by the sampler Machine.\par
+Values: from 2 to 16\par
+\par
+Label: int\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the interpolation value.\par
+Values:\par
+\pard\fi708 0 -> No interpolation\par
+1 -> Linear interpolation\par
+2 -> Cubic interpolation\par
+\pard\par
+Label: outd\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the \ldblquote dry\rdblquote  (unprocessed) factor of the sound. \par
+Values from 0 to 1 (1 = 100%). It can be ignored by most of the machines. It is used in the dalay delay, for example\par
+\par
+Label: outw\par
+Size: 1 int ( 32bits )\par
+Desc: Indicates the \ldblquote wet\rdblquote  (processed) factor of the sound. \par
+Values from 0 to 1 (1 = 100%). It can be ignored by most of the machines. It is used in the dalay delay, for example, This is also the parameter of the gainer\par
+\par
+Label: dpth\par
+Size: 1 int ( 32bits )\par
+Desc: It is the \ldblquote Distortion\rdblquote  machine, \ldblquote positive threshold\rdblquote  parameter.\par
+Value: 0 to 128 ( 128 = full amplitude = no effect)\par
+\par
+Label: dpcl\par
+Size: 1 int ( 32bits )\par
+Desc: It is the \ldblquote Distortion\rdblquote  machine, \ldblquote positive Clamp\rdblquote  parameter.\par
+Value: 0 to 128 ( 128 = default)\par
+\par
+Label: dnth\par
+Size: 1 int ( 32bits )\par
+Desc: It is the \ldblquote Distortion\rdblquote  machine, \ldblquote negative threshold\rdblquote  parameter.\par
+Value: 0 to 128 ( 128 = full amplitude = no effect)\par
+\par
+Label: dncl\par
+Size: 1 int ( 32bits )\par
+Desc: It is the \ldblquote Distortion\rdblquote  machine, \ldblquote negative clamp\rdblquote  parameter.\par
+Value: 0 to 128 ( 128 = default)\par
+\par
+Label: s\par
+Size: 1 char (8 bits )\par
+Desc: It is the \ldblquote PsychOcs AM\rdblquote  \ldblquote Sine Speed\rdblquote\par
+Value: 1 to 129.  Period = 2PI / (sineSpeed*0.0025)\par
+\par
+Label: g\par
+Size: 1 char (8 bits )\par
+Desc: It is the \ldblquote PsychOcs AM\rdblquote  \ldblquote Sine Glide\rdblquote\par
+Value: 1 to 129, 129 = 100%, 1 = 1/129%\par
+\par
+Label: v\par
+Size: 1 char (8 bits )\par
+Desc: It is the \ldblquote PsychOcs AM\rdblquote  \ldblquote Sine Volume\rdblquote . ARCHAIC variable. Not used!!!\par
+\par
+Label: p\par
+Size: 1 char (8 bits )\par
+Desc: It is the \ldblquote PsychOcs AM\rdblquote  \ldblquote Sine LFO speed\rdblquote\par
+Value: 1 to 129.  Period = 2PI / (sinelfoSpeed*0.000025)\par
+\par
+Label: a \par
+\ul Two meanings, depending on the machine that is being loaded:\par
+\ulnone Size: 1 char (8 bits )\par
+Desc: It is the \ldblquote PsychOcs AM\rdblquote  \ldblquote Sine LFO amp\rdblquote\par
+Value: 1 to 129, 129 = 100%, 1 = 1/129%\par
+\par
+Size: 1 bool (8 bits )\par
+Desc: It is the Flanger \ldblquote Resample\rdblquote  switch. (on or off)\par
+Value: 0 disabled, 1 enabled\par
+This meaning has been added in Psycle version 1.7\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|d|l|t|l|d|l|t|r|d|l|f|l|d|l|f|r|\f0\par
+\f2 |?|f|t|c| |f|t|r| |f|t|l|s|f|t|l|a|\f0\par
+\f2 |?|f|t|l|p|f|t|m| | | | | | | | | |\f0\par
+\par
+Label: dltl\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote Dalay delay\rdblquote  or Flanger \ldblquote delay time Left channel\rdblquote  (note: for flanger it is for both, left and right channels)\par
+\par
+\par
+Value: 1 to 65535 SAMPLES (should be in milliseconds...)\par
+\par
+Label: dltr\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote Dalay delay\rdblquote  \ldblquote delay time Right channel\rdblquote\par
+Value: 1 to 65535 SAMPLES (should be in milliseconds...)\par
+\par
+Label: dlfl\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote Dalay delay\rdblquote  or Flanger \ldblquote feedback Left channel\rdblquote\par
+Value : -100 inverted full feedback, 0 no feedback, 100 full feedback\par
+\par
+Label: dlfr\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote Dalay delay\rdblquote  or Flanger \ldblquote feedback Right channel\rdblquote\par
+Value : -100 inverted full feedback, 0 no feedback, 100 full feedback\par
+\par
+Label: ftc\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote 2p Filter\rdblquote  \ldblquote filter cutOff\rdblquote\par
+Value: 0 to 256. (256 = samplerate/2)\par
+\par
+Label: ftr\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote 2p Filter\rdblquote  \ldblquote filter Resonance\rdblquote\par
+Value: 0 to 256 ( 256 = 100% )\par
+\par
+Label: ftls\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote 2p Filter\rdblquote  or Flanger  \ldblquote filter lfo speed\rdblquote\par
+Value: 0 to 32768.\par
+Period = lfoSpeed * 0.00000003f*samplesRate / 6.283185f\par
+\par
+Label: ftla\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote 2p Filter\rdblquote  or Flanger \ldblquote filter lfo amp\rdblquote\par
+Value: 0 to 256 ( 256 = 100%)\par
+\par
+Label: ftlp\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote 2p Filter\rdblquote  or Flanger  \ldblquote filter lfo phase\rdblquote\par
+Value: 0 to 256 ( 0 = 0 degrees 256 = 180degrees)\par
+\par
+Label: ftm\par
+Size: 1 int (32 bits )\par
+Desc: It is the \ldblquote 2p Filter\rdblquote  \ldblquote filter mode\rdblquote\par
+Value:\par
+0 : LowPass Filter\par
+1 : highPass Filter\par
+\par
+\b Done.. (yes... till here it was the things that all machines save/load).\par
+\par
+Now,  if MACH_VST or MACH_VSTFX:\par
+\par
+\par
+\b0\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|o|i|n|s|t|p| | | | | | | | | | |\par
+\par
+\f0 Label: o\par
+Size: 1 bool (whatever the size is)\par
+Desc: This value was used in pre 1.1 to indicate if the Machine instantiated a VST Plugin or not.(in other words, if \ldblquote inst\rdblquote  was a valid value or not).\par
+Between 1.0 and 1.6plus, the value was ignored (assumed true), and saved as true.\par
+Now, in 1.66 and forward, it helps to identify the fileformat. \b If you read \ldblquote true\rdblquote , assume it is 1.6plus or before. If you read false, assume it is 1.66 or newer.\par
+\b0 Why should you care about versions? Because of the value stored in \ldblquote p\rdblquote , being really a program or not (set program to 0 if \ldblquote old version\rdblquote , else, read it)\par
+\par
+Label: inst\par
+Size: 1 int (32 bits)\par
+Desc: Indicates the number of the VST Rack that this machine references to (which means, the vst that this machine is). The initial design was made to allow to have one vst and several machines that used it. This is not the current case.\par
+\par
+Label: p\par
+Size: 1 unsigned char (8bits)\par
+Desc: NEW IN 1.66: This value indicates the Program number. This value should be sent to the VST plugin after loading the chunk, but previous to setParameter(s).\par
+\lang1033 Advise: In version 1.1 and before, this value was a signed char that indicated t\lang1027 he MIDI Channel number (if not modified, it was 0). Later versions wrote always zero (0).\par
+\par
+\par
+\pard\keepn\sb240\sa60\b\f1\fs26 EXTRA DATA (ADDED AFTER)\par
+\pard\b0\f0\fs24\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|l|l|i|n|s|b|u|s|e|f|f|e|c|t| | |\f0\par
+\par
+\par
+Label: l\par
+Size: 1 bool (whatever the size is)\par
+Desc: Indicates if the \ldblquote Auto Looping\rdblquote  is enabled. This loop makes the wave play so that it exactly loops at the ticks specified by lins\par
+\par
+Label: lins\par
+Size: 1 int (32 bits)\par
+Desc: Indicates the number of lines for that the sample will be played. It automatically adjusts the frequency rate so that it fits. (this means, notes don\rquote t have an effect).\par
+\par
+\par
+\f2 |-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|\par
+|?|c|c|h|s|z|c|h|d|t| | | | | | | |\par
+|?| | | | | | | | | | | | | | | | |\par
+...\par
+|?||c|h|s|z|c|h|d|t| | | | | | | | |\par
+\par
+\par
+\par
+\f0 Label: c\par
+Size 1 bool (whatever the size is)\par
+Desc : indicates that the file has a VST chunk Zone. If you\rquote ve reached the end of the file, you\rquote re done.\par
+\par
+Label: chsz\par
+Size 1 long (32 bits)\par
+Desc : Indicates the size of the chdt\par
+\par
+Label: chdt\par
+Size chsz chars\par
+Desc : Raw data that the VST plugin has saved.\par
+\par
+Example from source:\par
+\par
+\pard\fi708 for ( i=0;i<MAX_MACHINES;i++ ) \{\par
+\pard\tab\tab if (_machineActive[i])\par
+\tab\tab\{\par
+\tab\tab\tab if (( _pMachines[i]->_type == MACH_VST ) || ( _pMachines[i]->_type == MACH_VSTFX))\tab  \{\par
+\tab\tab\tab\tab if(_pEffect->flags & effFlagsProgramChunks)\par
+\tab\tab\tab\tab\{\par
+\pard\fi708\li2832 long chunk_size;\par
+\pard\tab\tab\tab\tab\tab pFile->Read(&chunk_size,sizeof(long));\par
+\par
+\tab\tab\tab\tab\tab // Read chunk\par
+\tab\tab\tab\tab\tab char *chunk=new char[chunk_size];\tab\par
+\tab\tab\tab\tab\tab pFile->Read(chunk,chunk_size);\par
+\pard\fi708\li2124\}\par
+\pard\fi708\li1416\}\par
+\pard\tab\tab\}\par
+\tab\}\par
+\par
+\par
+There\rquote s again another problem in this implementation. If the VST is missing, you don\rquote t know if you have to skip the data, or if it is the data of another VST (because you cannot evaluate \ldblquote if(_pEffect->flags & effFlagsProgramChunks)\rdblquote  )\par
+\par
+}
+ 

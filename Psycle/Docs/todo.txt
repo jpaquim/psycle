@@ -24,11 +24,15 @@ X low priority
 <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
 	[JAZ: And a third one for Instruments. Time to time]
+<angelus> In this threat I suggest an option to import a XM or IT file into differents 
+	Sampler-machines separating by instrument/sample.
+
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 *AF I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
 	to allow the user to speficy a "different than default" fadeout.
-
+	[pooplog: OFF should be in the note column, but if you want a different than default fadeout perhaps it
+	 could be called CUT ]
 
 * Machines
 ------------
