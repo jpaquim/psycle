@@ -13,6 +13,7 @@
 //#include "Registry.h"
 #include "Configuration.h"
 #include "FileXM.h"
+//#include "FileIT.h"
 #include "ChildView.h"
 #include "Bitmap.cpp"
 
@@ -215,12 +216,11 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_COMMAND(ID_FILE_IMPORT_XMFILE, OnFileImportXmfile)
-
 	ON_COMMAND(ID_FILE_RECENT_01, OnFileRecent_01)
 	ON_COMMAND(ID_FILE_RECENT_02, OnFileRecent_02)
 	ON_COMMAND(ID_FILE_RECENT_03, OnFileRecent_03)
 	ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
-
+	ON_COMMAND(ID_FILE_IMPORT_ITFILE, OnFileImportItfile)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -399,6 +399,8 @@ void CChildView::OnDestroy()
 	{
 		Global::pConfig->_pOutputDriver->Reset();
 	}
+	KillTimer(31);
+	KillTimer(159);
 }
 
 void CChildView::OnAppExit() 
@@ -1112,16 +1114,16 @@ void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				if ((int)nPos != lOff )
 				{
 					AdvanceLine(nPos-lOff,false,false); // AdvanceLine does not accept Negative values
-				}										// in general, but here we can make an exception.
-				Repaint(DMScroll);
+					Repaint(DMScroll);					// in general, but here we can make an exception.
+				}						
 				break;
 			case SB_THUMBTRACK:
 				nlOff=nPos;
 				if ((int)nPos != lOff )
 				{
 					AdvanceLine(nPos-lOff,false,false); // AdvanceLine does not accept Negative values
-				}										// in general, but here we can make an exception.
-				Repaint(DMScroll);
+					Repaint(DMScroll);					// in general, but here we can make an exception.
+				}						
 				break;
 			default: break;
 		}
@@ -1163,13 +1165,19 @@ void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				break;
 			case SB_THUMBPOSITION:
 				ntOff=nPos;
-				AdvanceTrack(nPos-tOff,false,false);// AdvanceTrack does not accept Negative values
-				Repaint(DMScroll);					// in general, but here we can make an exception.
+				if ((int)nPos != lOff )
+				{
+					AdvanceTrack(nPos-tOff,false,false);// AdvanceTrack does not accept Negative values
+					Repaint(DMScroll);					// in general, but here we can make an exception.
+				}
 				break;
 			case SB_THUMBTRACK:
 				ntOff=nPos;
-				AdvanceTrack(nPos-tOff,false,false);// AdvanceTrack does not accept Negative values
-				Repaint(DMScroll);					// in general, but here we can make an exception.
+				if ((int)nPos != lOff )
+				{
+					AdvanceTrack(nPos-tOff,false,false);// AdvanceTrack does not accept Negative values
+					Repaint(DMScroll);					// in general, but here we can make an exception.
+				}
 				break;
 			default: break;
 		}
@@ -1274,6 +1282,105 @@ void CChildView::OnFileImportXmfile()
 	titlename+="] ";
 	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
 	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.	
+}
+
+void CChildView::OnFileImportItfile() 
+{
+/*	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	
+	szFile[0]='\0';
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Impulse Tracker Songs\0*.it\0All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	
+	// Display the Open dialog box. 
+	
+	if (GetOpenFileName(&ofn)==TRUE)
+	{
+
+		pParentMain->CloseAllMacGuis();
+		Global::pPlayer->Stop();
+		Sleep(LOCK_LATENCY);
+		_outputActive = false;
+		Global::pConfig->_pOutputDriver->Enable(false);
+		// MIDI IMPLEMENTATION
+		Global::pConfig->_pMidiInput->Close();
+		Sleep(LOCK_LATENCY);
+		
+		CFileIT it;
+		it.Open(ofn.lpstrFile);
+
+		//CXM XM;
+		char buffer[512];		
+		Global::_pSong->New();
+		
+ 		if(!it.Import(_pSong))
+		{			
+			MessageBox("Load failed");
+			Global::_pSong->New();
+			return;
+		}
+
+		// build sampler
+		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "");
+		_pSong->InsertConnection(1,0);
+		_pSong->seqBus = _pSong->GetFreeBus();
+		_pSong->busMachine[_pSong->seqBus] = Global::_lbc;
+
+		sprintf(buffer,"%s\n\n%s\n\n%s"
+			,Global::_pSong->Name
+			,Global::_pSong->Author
+			,Global::_pSong->Comment);
+		MessageBox(buffer,"IT file imported",MB_OK);
+		Global::_pSong->_saved=true;
+
+		CString str = ofn.lpstrFile;
+		int index = str.ReverseFind('\\');
+		if (index != -1)
+		{
+			Global::pConfig->SetSongDir(str.Left(index));
+			Global::_pSong->fileName = str.Mid(index+1)+".psy";
+		}
+		else
+		{
+			Global::_pSong->fileName = str+".psy";
+		}
+		
+		Global::_pSong->fileName =str+".psy";
+		//Global::_pSong->SetBPM(XM.default_BPM, XM.default_tempo, Global::pConfig->_pOutputDriver->_samplesPerSec);
+		
+		_outputActive = true;
+		if (!Global::pConfig->_pOutputDriver->Enable(true))
+		{
+			_outputActive = false;
+		}
+		else
+		{
+			// MIDI IMPLEMENTATION
+			Global::pConfig->_pMidiInput->Open();
+		}
+		Repaint();
+		pParentMain->PsybarsUpdate();
+		pParentMain->WaveEditorBackUpdate();
+		pParentMain->UpdateSequencer();
+		pParentMain->UpdatePlayOrder(false);
+	}
+	CString titlename = "[";
+	titlename+=Global::_pSong->fileName;
+	titlename+="] ";
+	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
+	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.	
+*/	
 }
 
 void CChildView::AppendToRecent(char* fName)
@@ -1437,3 +1544,4 @@ void CChildView::CallOpenRecent(int pos)
 	OnFileLoadsongNamed(nameBuff, 1);
 	delete nameBuff;
 }
+

@@ -1511,6 +1511,7 @@ BEGIN
         POPUP "Import"
         BEGIN
             MENUITEM "XM File",                     ID_FILE_IMPORT_XMFILE
+            MENUITEM "IT File",                     ID_FILE_IMPORT_ITFILE
         END
         MENUITEM SEPARATOR
         MENUITEM "Song properties...",          ID_FILE_SONGPROPERTIES
@@ -1949,6 +1950,7 @@ BEGIN
     ID_EDIT_DELETE          "Delete selection"
     ID_CONVERT_MONO         "Mix channels to mono"
     ID_CONVERT_STEREO       "Split channels to stereo"
+    ID_FILE_IMPORT_ITFILE   "Import Impulse Tracker File"
 END
 
 STRINGTABLE DISCARDABLE 

@@ -52,7 +52,9 @@ void CWaveEdFrame::OnClose()
 int CWaveEdFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+	{
 		return -1;
+	}
 
 /*	toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP |
 		CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
@@ -78,8 +80,8 @@ BOOL CWaveEdFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if( !CFrameWnd::PreCreateWindow(cs) ) return FALSE;
 
-	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-	cs.lpszClass = AfxRegisterWndClass(0,0,0, AfxGetApp()->LoadIcon(IDR_WAVEFRAME));
+//	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+//	cs.lpszClass = AfxRegisterWndClass(0,0,0, AfxGetApp()->LoadIcon(IDR_WAVEFRAME));
 	
 	return TRUE;	
 }

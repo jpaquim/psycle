@@ -442,6 +442,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 			xOffset += ROWWIDTH;
 		}
 		memDC.SelectObject(oldbmp);
+		memDC.DeleteDC();
 	}
 
 	////////////////////////////////////////////////////////////

@@ -190,7 +190,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Wave Editor Window
 	m_pWndWed=new CWaveEdFrame(this->_pSong,this);
-
 	m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this, NULL);
 	m_pWndWed->GenerateView();
 
@@ -421,6 +420,8 @@ void CMainFrame::ClosePsycle()
 
 void CMainFrame::OnDestroy() 
 {
+	HICON _icon = GetIcon(false);
+	DestroyIcon(_icon);
 	CFrameWnd::OnDestroy();
 }
 

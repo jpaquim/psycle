@@ -19,6 +19,7 @@ VstTimeInfo VSTPlugin::_timeInfo;
 VSTPlugin::VSTPlugin()
 {
 	_volumeMultiplier = 1.0f;
+	memset(junk,0,STREAM_SIZE*sizeof(float));
 	for (int i=0;i<MAX_INOUTS;i++)
 	{
 		inputs[i]=junk;
@@ -187,8 +188,8 @@ void VSTPlugin::Init(void) // Currently this function is unused!!! Some changes 
 
 bool VSTPlugin::Load(RiffFile* pFile)
 {
-	char junk[256];
-	memset(&junk, 0, sizeof(junk));
+	char junkdata[256];
+	memset(&junkdata, 0, sizeof(junkdata));
 
 	Machine::Init();
 /*  This part is read when loading the song to detect the machine type.
@@ -232,8 +233,8 @@ bool VSTPlugin::Load(RiffFile* pFile)
 
 	if ( !instantiated ) 
 	{
-		for (int p=0;p<num;p++ ) pFile->Read(&junk,sizeof(float));
-		pFile->Read(&junk,sizeof(int));
+		for (int p=0;p<num;p++ ) pFile->Read(&junkdata,sizeof(float));
+		pFile->Read(&junkdata,sizeof(int));
 
 		if(_pEffect->flags & effFlagsProgramChunks)
 		{
@@ -287,35 +288,35 @@ bool VSTPlugin::Load(RiffFile* pFile)
 
 	pFile->Read(&_panning, sizeof(_panning));
 	Machine::SetPan(_panning);
-	pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Read(&junk[0], sizeof(int)); // interpol
+	pFile->Read(&junkdata[0], 8*sizeof(int)); // SubTrack[]
+	pFile->Read(&junkdata[0], sizeof(int)); // numSubtracks
+	pFile->Read(&junkdata[0], sizeof(int)); // interpol
 
 	pFile->Read(&_outDry, sizeof(_outDry));
 	pFile->Read(&_outWet, sizeof(_outWet));
 
-	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Read(&junk[0], sizeof(int)); // distNegClamp
+	pFile->Read(&junkdata[0], sizeof(int)); // distPosThreshold
+	pFile->Read(&junkdata[0], sizeof(int)); // distPosClamp
+	pFile->Read(&junkdata[0], sizeof(int)); // distNegThreshold
+	pFile->Read(&junkdata[0], sizeof(int)); // distNegClamp
 
-	pFile->Read(&junk[0], sizeof(char)); // sinespeed
-	pFile->Read(&junk[0], sizeof(char)); // sineglide
-	pFile->Read(&junk[0], sizeof(char)); // sinevolume
-	pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
+	pFile->Read(&junkdata[0], sizeof(char)); // sinespeed
+	pFile->Read(&junkdata[0], sizeof(char)); // sineglide
+	pFile->Read(&junkdata[0], sizeof(char)); // sinevolume
+	pFile->Read(&junkdata[0], sizeof(char)); // sinelfospeed
+	pFile->Read(&junkdata[0], sizeof(char)); // sinelfoamp
 
-	pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
+	pFile->Read(&junkdata[0], sizeof(int)); // delayTimeL
+	pFile->Read(&junkdata[0], sizeof(int)); // delayTimeR
+	pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackL
+	pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackR
 
-	pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Read(&junk[0], sizeof(int)); // filterResonance
-	pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Read(&junk[0], sizeof(int)); // filterMode
+	pFile->Read(&junkdata[0], sizeof(int)); // filterCutoff
+	pFile->Read(&junkdata[0], sizeof(int)); // filterResonance
+	pFile->Read(&junkdata[0], sizeof(int)); // filterLfospeed
+	pFile->Read(&junkdata[0], sizeof(int)); // filterLfoamp
+	pFile->Read(&junkdata[0], sizeof(int)); // filterLfophase
+	pFile->Read(&junkdata[0], sizeof(int)); // filterMode
 
 		bool old;
 		pFile->Read(&old, sizeof(old)); // old format
@@ -336,8 +337,8 @@ bool VSTPlugin::Load(RiffFile* pFile)
 #if !defined(_WINAMP_PLUGIN_)
 bool VSTPlugin::Save(RiffFile* pFile)
 {
-	char junk[256];
-	memset(&junk, 0, sizeof(junk));
+	char junkdata[256];
+	memset(&junkdata, 0, sizeof(junkdata));
 
 /*  This part is read when loading the song to detect the machine type.
 	Might change in the new fileformat (i.e. Moving this to Machine::Save(RiffFile* pFile).*/
@@ -401,35 +402,35 @@ bool VSTPlugin::Save(RiffFile* pFile)
 	pFile->Write(&_numOutputs, sizeof(_numOutputs));
 
 	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
+	pFile->Write(&junkdata[0], 8*sizeof(int)); // SubTrack[]
+	pFile->Write(&junkdata[0], sizeof(int)); // numSubtracks
+	pFile->Write(&junkdata[0], sizeof(int)); // interpol
 
 	pFile->Write(&_outDry, sizeof(_outDry));
 	pFile->Write(&_outWet, sizeof(_outWet));
 
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
+	pFile->Write(&junkdata[0], sizeof(int)); // distPosThreshold
+	pFile->Write(&junkdata[0], sizeof(int)); // distPosClamp
+	pFile->Write(&junkdata[0], sizeof(int)); // distNegThreshold
+	pFile->Write(&junkdata[0], sizeof(int)); // distNegClamp
 
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
+	pFile->Write(&junkdata[0], sizeof(char)); // sinespeed
+	pFile->Write(&junkdata[0], sizeof(char)); // sineglide
+	pFile->Write(&junkdata[0], sizeof(char)); // sinevolume
+	pFile->Write(&junkdata[0], sizeof(char)); // sinelfospeed
+	pFile->Write(&junkdata[0], sizeof(char)); // sinelfoamp
 
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackR
+	pFile->Write(&junkdata[0], sizeof(int)); // delayTimeL
+	pFile->Write(&junkdata[0], sizeof(int)); // delayTimeR
+	pFile->Write(&junkdata[0], sizeof(int)); // delayFeedbackL
+	pFile->Write(&junkdata[0], sizeof(int)); // delayFeedbackR
 
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
+	pFile->Write(&junkdata[0], sizeof(int)); // filterCutoff
+	pFile->Write(&junkdata[0], sizeof(int)); // filterResonance
+	pFile->Write(&junkdata[0], sizeof(int)); // filterLfospeed
+	pFile->Write(&junkdata[0], sizeof(int)); // filterLfoamp
+	pFile->Write(&junkdata[0], sizeof(int)); // filterLfophase
+	pFile->Write(&junkdata[0], sizeof(int)); // filterMode
 
 		bool old = false;
 		pFile->Write(&old, sizeof(old)); // Is old format?
