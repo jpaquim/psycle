@@ -1501,6 +1501,7 @@ bool Song::Load(RiffFile* pFile)
 
 		Global::pPlayer->bpm = BeatsPerMin;
 		Global::pPlayer->tpb = _ticksPerBeat;
+		Global::pPlayer->_playPosition= 0;
 		// calculate samples per tick
 		
 #if defined(_WINAMP_PLUGIN_)
@@ -1557,6 +1558,8 @@ bool Song::Load(RiffFile* pFile)
 			_ticksPerBeat= 4; SamplesPerTick = 4315;
 		}
 		else _ticksPerBeat = 44100*15*4/(SamplesPerTick*BeatsPerMin);
+
+		Global::pPlayer->_playPosition= 0;
 
 		// The old format assumes we output at 44100 samples/sec, so...
 		//

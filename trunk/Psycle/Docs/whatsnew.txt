@@ -7,6 +7,7 @@ V1.7.3 RC2
 ! whoops - fixed the dsound config dialog (pooplog)
 ! whoops - fixed the unable to load many types of wave files issue (pooplog)
 ! whoops - fixed the note-off bug while recording (pooplog)
+! whoops - loading a song moves to the top of the sequence again (pooplog)
 
 V1.7.3 RC1
 ----------
