@@ -33,7 +33,7 @@ Configuration::Configuration()
 	_RecordNoteoff = false;
 	_RecordTweaks = false;
 	_RecordMouseTweaksSmooth = FALSE;
-	_RecordUnarmed = false;
+	_RecordUnarmed = true;
 	_midiMachineViewSeqMode = false;
 	autoStopMachines = false;
 	useDoubleBuffer = true;
