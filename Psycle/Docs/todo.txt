@@ -254,6 +254,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	<_sue_> hey poop....can we have something like a right double click for inserting the first not used 
 		pattern (like instert button)?
 			[Isn't this what "New" is for?]
+			[yes jaz you are right, also there is no way to get right click messages to a list box
+			 without much trickery (pretranslate...)]
 +	<sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
 		into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
 +	<wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through 
@@ -272,11 +274,13 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		pattern sequencer
 +	 MORE Keyboard shortcuts
 		[ We've added some more actually]
+		[ and most the needed ones are listed up there ^^ ]
 
 * Driver Issues:
 ------------
 ** <_sue_> just a small issue ive noticed with this build....when i select asio psycle crashes...wich doesnt 
 	amazes me since i dont have asio.....but software should be "crash free"...
+		[ if you have 0 drivers enumerated, perhaps you should not be able to select that method ]
 *	Output gets weird after a bit and start playing all crackly and doubletime
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
@@ -295,7 +299,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ------------
 **FF psycle is saving the WRONG lines/beat from file.  I saved a song with 3, it loaded as 2.
 	[Save LPB instead of TicksPerBeat]
-*FF	plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
+**FF	plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
 *FF	if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
 !!!FF	longer sequences (256)
@@ -303,10 +307,10 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +++FF	new file format: (machines save custom data length, patterns stored according to # tracks, sequence 
 		length stored according to length, vst multi-out, connections as linked lists, wire nodes, 
 		volume column, multiout info, direct x stuff, etc.)
-+FF	<pooplog> again i ask why the connection limit is 12 and not 16 or 24
-		[should use linked lists instead of arrays]
 ++FF	songs should save master decrease flag
 		[This can be hacked by now without need of fileformat change]
++FF	<pooplog> again i ask why the connection limit is 12 and not 16 or 24
+		[should use linked lists instead of arrays]
 
 
 
