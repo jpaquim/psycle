@@ -42,7 +42,7 @@ V1.67
 + Multiple Selections in the sequencer menu (ctrl or shift + left mouse button or drag) can be deleted, copied, 
   pasted, etc. [sue] (pooplog)
 ! Cleaned up Status Bar (pooplog)
-! Made Master Machine Dialog modeless, updates display if volume attenuated (pooplog)
+! Made Master Machine Dialog modeless, updates display if volume attenuated
 
 
 V1.66
