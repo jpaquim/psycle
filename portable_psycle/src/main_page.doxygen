@@ -5,9 +5,9 @@
 	\section news News
 		bohan, 2004, July, the 16th,
 		
-		Past month (or was that two months ago?), there's been a coding frenesy on Psycle involving alk?, zealmange, me, and even JAZ at some point, to recode its internals and make it more stable.
+		Past month (or was that two months ago?), there's been a coding frenesy on Psycle involving alk, zealmange, me, and even JAZ at some point, to recode its internals and make it more stable.
 		The current code in the CVS has hence changed a lot since 1.7.6.2, but we can't release it yet because of an obscur bug that appears when we turn the compiler optimizations on.
-		On a side note, i've just been talking with Guillaume? about porting psycle to GNU/Linux, we're both still motivated, and actually, i must say that's the only direction that motivates me,
+		On a side note, i've just been talking with Guillaume about porting psycle to GNU/Linux, we're both still motivated, and actually, i must say that's the only direction that motivates me,
 		i hate mswindows and programming in/for mswindows, with all my bones...
 		By developping in mswindows, we're loosing an incredible amount of time and an incredible amount of potential developpers
 		because there's no easy way to distribute a source package that everybody can compile:
