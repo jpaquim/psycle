@@ -1161,12 +1161,22 @@ void CChildView::EndBlock(int track,int line, int col)
 	{
 		TRACE("%i,%i",blockSel.end.line,blockSel.start.line);
 		if(blockSel.end.line<blockSel.start.line)
-			blockSel.end.line=blockSel.start.line;
-	
+		{
+			int tmp = blockSel.start.line;
+			blockSel.start.line=blockSel.end.line;
+			blockSel.end.line=tmp;
+//			blockSel.end.line=blockSel.start.line;
+		}
+		
 		TRACE("%i,%i",blockSel.end.track,blockSel.start.track);
 		if(blockSel.end.track<blockSel.start.track)
-			blockSel.end.track=blockSel.start.track;
-	
+		{
+			int tmp = blockSel.start.track;
+			blockSel.start.track=blockSel.end.track;
+			blockSel.end.track=tmp;
+//			blockSel.end.track=blockSel.start.track;
+		}
+		
 	}
 	else
 	{

@@ -274,7 +274,8 @@ BOOL CSkinDlg::OnInitDialog()
 		}
 	}
 	m_pattern_fontface.SetCurSel(sel);
-
+	m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface); // If "couldn't find it"
+	
 	sel = m_generator_fontface.FindStringExact(0,_generator_fontface);
 	if (sel==CB_ERR)
 	{
@@ -294,7 +295,8 @@ BOOL CSkinDlg::OnInitDialog()
 		}
 	}
 	m_generator_fontface.SetCurSel(sel);
-
+	m_generator_fontface.GetLBText(m_generator_fontface.GetCurSel(),_generator_fontface); // If "couldn't find it"
+	
 	sel = m_effect_fontface.FindStringExact(0,_effect_fontface);
 	if (sel==CB_ERR)
 	{
@@ -314,7 +316,8 @@ BOOL CSkinDlg::OnInitDialog()
 		}
 	}
 	m_effect_fontface.SetCurSel(sel);
-
+	m_effect_fontface.GetLBText(m_effect_fontface.GetCurSel(),_effect_fontface); // if "couldn't find it"
+	
 	for(i=4;i<=64;i++)
 	{
 		char s[4];

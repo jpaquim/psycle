@@ -1,5 +1,53 @@
-V1.7
------
+---------------------------------------------------
+Legend :	+=addition		*=change	!=bug	
+---------------------------------------------------
+
+V1.7RC1
+-------
++ added ASIO support through "PortAudio" library (in its version 18). (LegoStar)
++ revert to saved option (pooplog) [alk]
++ added "Save to wav..." (offline mode) so that you don't need to play all the song.
++ Added colour boxes to "Visual" configuration to show the actual configuration. (Updates when changing preset
+  too)
++ You can drag songs onto the window to load them now (pooplog)
++ Visual Presets load and saving (pooplog)
++ Machine and Pattern Header Skinning (pooplog)
++ Look of Machine Wires can be changed in the visual dialog (pooplog)
++ options for default length of pattern, etc. (pooplog) [doktor, sue]
++ Autosave option, and interval is user configurable now.
++ Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize,
+   audioMasterAutomate and HostCanDo)
++ Basic Mousewheel support for pattern edit mode, scrollbars detach from cursor, etc. (pooplog)
++ added record button that sets edit and follow mode (pooplog)
++ Added functioning Track record arm buttons- new graphics required (pooplog)
++ Added Swing Fill command (pooplog)
++ Gear rack (pooplog) [JAZ]
++ Added midi velocity, modwheel, pitchbend, etc mapping to twks/cmds!! (pooplog)
++ UNDO/REDO for pattern and sequence editing!!! (pooplog)
++ Added "new" Clone,Copy,Cut and Paste buttons in sequencer, changed insert button to behave as an insert button
+ should [Alk] [sue] (pooplog)
++ Native and VST Plugins realtime mouse tweak recording!!! (pooplog&[JAZ])
++ Value Dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
++ VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
++ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) and FAxy for all generator 
+  types. (pooplog)
++ SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
++ Wire Dialog contains some diagnostic tools, and has a more functional +12db->-inf range (pooplog)
++ in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
+* Complete pattern display overhaul, including many new features and bugfixes (pooplog)
+* Made Master Machine Dialog modeless, updates display if volume attenuated
+* All native machines can now recieve pattern data, not just generators (pooplog) [Druttis]
+* Increased max lines/pattern to 256 (pooplog)
+* Cleaned up Status Bar (pooplog)
+* VU Meters are all nicer
+* slight reordering of interface due to user request for more intuitive use (pooplog)
+* Litte redesign in the Toolbar and control bars.
+* Changed Master Vu-meter logic. Range from -45db to 0db (as opposed to -90 to 0db before), made
+  faster and added a 2nd bar which decreases slowly to show the peaks.
+* Changed default values for sound buffers (both DX and WO), set WO as default output
+  (as opposed to silent) and disabled the DX "exclusive mode" by default.
+* Changed double click on pattern (in sequence) to open that pattern in patternview for edit (pooplog)
+* Many small Optimizations and improvements
 ! When having "autostop Machines" and recording to wav, some machines could become muted.
 ! Manually editing sample name didn't update the combobox.
 ! When the "MIDI/Params/Waves" combobox was showing "Params", and the user tried to decrease the selected
@@ -8,67 +56,20 @@ V1.7
   not update the sample in the instrument editor, which in turn made the wave loader function to
   load over an incorrect position.
 ! Loading songs with VST plugins didn't restore the name of them (was set back to default one). Fixed
-* Changed Master Vu-meter logic. Range from -45db to 0db (as opposed to -90 to 0db before), made
-  faster and added a 2nd bar which decreases slowly to show the peaks.
-* Changed default values for sound buffers (both DX and WO), set WO as default output
-  (as opposed to silent) and disabled the DX "exclusive mode" by default.
-! Fixed the Song information message box (in song loading) not being Modal (stay on top).
-+ Added colour boxes to "Visual" configuration to show the actual configuration. (Updates when changing preset
-  too)
-* Modifications to the VST Host ( Added VstTimeInfo, audioMasterPinConnected, GetBlockSize,
-   audioMasterAutomate and HostCanDo)
+! Fixed minusminus button to decrease to 0 (pooplog)
+! Fixed song bpm and tpb being misreported to machines if FF or FE commands where used
+! Fixed two memory leaks when loading songs with plugins (native as well as VST)
+! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles 
+  (pooplog)
+! Fixed wave recording bug where it had an extra silent tick at the beggining and missing tick at the end.
 ! Fix several GDI Leaks.
 ! Fixed problem with saving songs (affected TPB) when using a Sample Rate different than 44100.
 ! "Couldn't Save file" error when trying to save "autosave.psy" doesn't pop up now.
-+ Autosave option, and interval is user configurable now.
-! Fixed wave recording bug where it had an extra silent tick at the beggining and missing tick at the end.
-+ Added functioning Track record arm buttons- new graphics required (pooplog)
-+ Added midi velocity, modwheel, pitchbend, etc mapping to twks/cmds!! (pooplog)
-+ Added "new" button in sequencer, changed insert button to behave as an insert button should (pooplog)
-! Changed double click on pattern (in sequence) to open that pattern in patternview for edit (pooplog)
-! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles 
-  (pooplog)
-* Fixed minusminus button to decrease to 0 (pooplog)
-+ UNDO/REDO for pattern and sequence editing!!! (pooplog)
-! slight reordering of interface due to user request for more intuitive use (pooplog)
-+ Native and VST Plugins realtime mouse tweak recording!!! (pooplog&[JAZ])
-+ Value Dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
-+ Added "Xerox" button to seq editor (named that until someone suggests a good 5 letter word for duplicate) 
-  [Alk] (poolog) -> who suggested CLONE? i forgot
-+ Added Swing Fill command (pooplog)
-! Increased max lines/pattern to 256 (pooplog)
-+ Basic Mousewheel support for pattern edit mode, scrollbars detach from cursor, etc. (pooplog)
-* Fixed song bpm and tpb being misreported to machines if FF or FE commands where used
-! VU Meters are all nicer
-+ Look of Machine Wires can be changed in the visual dialog (pooplog)
-! Many small Optimizations and improvements
-+ Multiple Selections in the sequencer menu (ctrl or shift + left mouse button or drag) can be deleted, copied, 
-  pasted, etc. [sue] (pooplog)
-! Cleaned up Status Bar (pooplog)
-! Made Master Machine Dialog modeless, updates display if volume attenuated
-+ VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
-+ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) and FAxy for all generator 
-  types. (pooplog)
+! Fixed the Song information message box (in song loading) not being Modal (stay on top).
+! fixed wave header reading (pooplog) [Druttis]
+! fix for chord entering (shift+note) so it works correctly (pooplog)
 ! Fixed the crash bug happening when changing from waveout to Directound (and viceversa).
-* Complete pattern display overhaul, including many new features and bugfixes (pooplog)
-! Fixed two memory leaks when loading songs with plugins (native as well as VST)
-* Litte redesign in the Toolbar and control bars. Pending "Next/Previous" Machine to select the correct one.
-+ SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
-+ Visual Presets load and saving (pooplog)
-+ Machine and Pattern Header Skinning (pooplog)
-+ Wire Dialog contains some diagnostic tools, and has a more functional +12db->-inf range (pooplog)
-+ in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
-+ You can drag songs onto the window to load them now (pooplog)
-! All native machines can now recieve pattern data, not just generators (pooplog) [Druttis]
-+ Gear rack (pooplog) [JAZ]
-+ options for default length of pattern, etc. (pooplog) [doktor, sue]
-* millions of tiny bugfixes (pooplog & JAZ)
-+ revert to saved option (pooplog) [alk]
-* fixed wave header reading (pooplog) [Druttis]
-* fix for chord entering (shift+note) so it works correctly (pooplog)
-+ added record button that sets edit and follow mode (pooplog)
-+ added "Save to wav..." (offline mode) so that you don't need to play all the song.
-
+! millions of other tiny bugfixes (pooplog & JAZ)
 
 
 V1.66

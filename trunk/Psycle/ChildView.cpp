@@ -432,7 +432,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 			}
 		}
 	}
-	if (nIDEvent == 159 )
+	if (nIDEvent == 159 && !Global::pPlayer->_recording)
 	{
 		CString filepath = Global::pConfig->GetInitialSongDir();
 		filepath += "\\autosave.psy";
