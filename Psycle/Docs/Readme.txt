@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------------- 1.7 ------
+				------------------------------- 1.73 RC 1 ------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -25,10 +25,9 @@ to samples, to let your wildest music ideas come true.
 
 Here some facts about Psycle:
 
-- 32 Tracks Pattern Editor (this limitation will be removed in the future)
-- Stereo Sampler unit, that supports high quality
+- 64Tracks Pattern Editor 
+- Internal Stereo Sampler unit, that supports high quality
   stereo .wav files and .iff samples as well (more formats will eventually come)
-- 8 internal Plugins (Sampler & Effects)
 - 20+ Native Plugins (Generators & effects), with open API for third party plugins.
 - VST + VSTi Host (still limited but most plugins will work fine)
 - Internal .wav output
@@ -76,7 +75,7 @@ Also, the team would appreciate that any work done over Psycle sources, are mixe
 the current sources, which would mean that Psycle grows instead of being divided.
 
 There are open Forums and Bug trackers in SourceForge site and in Psycledelics site
-where you can contact us.
+where you can contact us.  We check the Psycledelics site often.
 
 If you need to contact specifically the developers, write an e-mail to
 
@@ -100,13 +99,12 @@ Sources for a Fast sinus calculation used in the Flanger are extracted from
 
 Psycle 1: (The only active one right now)
 
-	Many improvements have been done in this new version ( 1.7 ) making it better in
+	Many improvements have been done in this new version ( 1.73 ) making it better in
 	many ways ( more stable, better looking, more powerful,... are just some of them).
 
 	Still, the main goals for a definitive Psycle 1 version haven't been reached, which
-	are still multipattern sequence, multisample instrument sampler and a new fileformat.
-	This will, with no more delays, come with the next version (at least the fileformat)
-
+	are still multipattern sequence and a multisample instrument sampler.  These options
+	are being designed currently.
 
 
 For up to date information, don't forget to visit the Developement forums on Psycledelics 

@@ -259,6 +259,8 @@ bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItali
 	int _samplesPerSec;
 #endif // ndef _WINAMP_PLUGIN_
 
+	char appPath[_MAX_PATH];
+
 	Configuration();
 	~Configuration();
 
