@@ -2082,7 +2082,7 @@ namespace psycle
 					<< _pSong->Author << std::endl
 					<< std::endl
 					<< _pSong->Comment;
-				::MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
+				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 			}
 		}
 
