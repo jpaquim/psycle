@@ -791,7 +791,7 @@ namespace psycle
 	// Voice Class Implementation 
 	// ----------------------------------------------------------------------------
 		
-		void XMSampler::Voice::VoiceInit(const UCHAR note)
+		void XMSampler::Voice::VoiceInit(const compiler::uint8 note)
 		{
 
 			// Init filter synthesizer
@@ -1350,7 +1350,7 @@ namespace psycle
 		}// PerformFX() -------------------------------------------
 
 		// ***** [bohan] iso-(10)646 encoding only please! ***** //
-		void XMSampler::Channel::Porta2Note(const UCHAR note,const int parameter,const int layer)
+		void XMSampler::Channel::Porta2Note(const compiler::uint8 note,const int parameter,const int layer)
 		{
 			m_EffectFlags |= EffectFlag::PORTA2NOTE;
 			
