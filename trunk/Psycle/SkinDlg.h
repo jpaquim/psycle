@@ -59,6 +59,7 @@ public:
 	bool _linenumbersHex;
 	int _wirewidth;
 	char _pattern_fontface[64];
+	char _pattern_header_skin[64];
 	static CComboBox* pm_pattern_fontface;
 	static HDC hDC;
 	static SFontName* pNameStruct;
@@ -80,6 +81,7 @@ public:
 	CComboBox	m_pattern_font_point;
 	CComboBox	m_pattern_font_x;
 	CComboBox	m_pattern_font_y;
+	CComboBox	m_pattern_header_skin;
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
@@ -145,12 +147,18 @@ protected:
 	afx_msg void OnSelchangePatternFontPoint();
 	afx_msg void OnSelchangePatternFontX();
 	afx_msg void OnSelchangePatternFontY();
+	afx_msg void OnSelchangePatternFontFace();
+	afx_msg void OnSelchangePatternHeaderSkin();
+	afx_msg void OnSelchangeWireWidth();
+	afx_msg void OnWireAA();
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 private:
 	void RepaintAllCanvas();
 	void UpdateCanvasColour(int id,COLORREF col);
+	void FindSkinsInDir(CString findDir);
 };
 
 

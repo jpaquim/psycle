@@ -5,6 +5,7 @@
 #include "Psycle2.h"
 #include "SkinDlg.h"
 #include "Helpers.h"
+#include "Configuration.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,7 +43,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PATTERN_FONT_POINT, m_pattern_font_point);
 	DDX_Control(pDX, IDC_PATTERN_FONT_X, m_pattern_font_x);
 	DDX_Control(pDX, IDC_PATTERN_FONT_Y, m_pattern_font_y);
-	
+	DDX_Control(pDX, IDC_PATTERN_HEADER_SKIN, m_pattern_header_skin);
 
 	//}}AFX_DATA_MAP
 }
@@ -50,12 +51,12 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	//{{AFX_MSG_MAP(CSkinDlg)
-ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
-ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
-ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
-ON_BN_CLICKED(IDC_BUTTON23, OnVuBarColor)
-ON_BN_CLICKED(IDC_BUTTON24, OnVuBackColor)
-ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
+	ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
+	ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
+	ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
+	ON_BN_CLICKED(IDC_BUTTON23, OnVuBarColor)
+	ON_BN_CLICKED(IDC_BUTTON24, OnVuBackColor)
+	ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_BN_CLICKED(IDC_PATTERNBACKC, OnButtonPattern)
 	ON_BN_CLICKED(IDC_PATTERNBACKC2, OnButtonPattern2)
 	ON_BN_CLICKED(IDC_PATSEPARATORC, OnButtonPatternSeparator)
@@ -90,6 +91,11 @@ ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_POINT, OnSelchangePatternFontPoint)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_X, OnSelchangePatternFontX)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_Y, OnSelchangePatternFontY)
+	ON_CBN_SELCHANGE(IDC_PATTERN_FONTFACE, OnSelchangePatternFontFace)
+	ON_CBN_SELCHANGE(IDC_PATTERN_HEADER_SKIN, OnSelchangePatternHeaderSkin)
+	ON_CBN_SELCHANGE(IDC_WIRE_WIDTH, OnSelchangeWireWidth)
+	ON_BN_CLICKED(IDC_AAWIRE, OnWireAA)
+
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -99,10 +105,7 @@ END_MESSAGE_MAP()
 void CSkinDlg::OnOK()
 {
 	//TODO: Add code here
-	_wireaa = m_wireaa.GetCheck() >0?true:false;
-	_wirewidth = m_wirewidth.GetCurSel()+1;
-	m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface);
-		
+
 	CDialog::OnOK();
 }
 
@@ -274,8 +277,59 @@ BOOL CSkinDlg::OnInitDialog()
 	}
 	m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
 
+	m_pattern_header_skin.AddString(DEFAULT_PATTERN_HEADER_SKIN);
+	
+	// ok now browse our folder for skins
+	FindSkinsInDir(Global::pConfig->GetInitialSkinDir());
+
+	sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
+	if (sel==CB_ERR)
+	{
+		sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
+	}
+	m_pattern_header_skin.SetCurSel(sel);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CSkinDlg::FindSkinsInDir(CString findDir)
+{
+	CFileFind finder;
+
+	int loop = finder.FindFile(findDir + "\\*.");	// check for subfolders.
+	while (loop) 
+	{								// Note: Subfolders with dots won't work.
+		loop = finder.FindNextFile();
+		if (finder.IsDirectory() && !finder.IsDots())
+		{
+			FindSkinsInDir(finder.GetFilePath());
+		}
+	}
+	finder.Close();
+
+	loop = finder.FindFile(findDir + "\\*.psh"); // check if the directory is empty
+	while (loop)
+	{
+		loop = finder.FindNextFile();
+		if (!finder.IsDirectory())
+		{
+			CString sName, tmpPath;
+			sName = finder.GetFileName();
+			// ok so we have a .psh, does it have a valid matching .bmp?
+			char szBmpName[MAX_PATH];
+			char* pExt = strrchr(sName,46);// last .
+			pExt[0]=0;
+			sprintf(szBmpName,"%s\\%s.bmp",findDir,sName);
+			HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, szBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
+			if (hBitmap)
+			{
+				m_pattern_header_skin.AddString(sName);
+			}
+			DeleteObject(hBitmap);
+		}
+	}
+	finder.Close();
 }
 
 void CSkinDlg::OnColourMachine() 
@@ -760,6 +814,20 @@ void CSkinDlg::OnImportReg()
 					_pattern_font_y=_httoi(q+1);
 				}
 			}
+			else if (strstr(buf,"\"pattern_header_skin\"=\""))
+			{
+				char *q = strchr(buf,61); // =
+				if (q)
+				{
+					q+=2;
+					char *p = strrchr(q,34); // "
+					if (p)
+					{
+						p[0]=0;
+						strcpy(_pattern_header_skin,q);
+					}
+				}
+			}
 			/*
 			else if (strstr(buf,"\"DisplayLineNumbers\"=hex:"))
 			{
@@ -1066,6 +1134,12 @@ void CSkinDlg::OnImportReg()
 		m_pattern_font_x.SetCurSel(_pattern_font_x-4);
 		m_pattern_font_y.SetCurSel(_pattern_font_y-4);
 		m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
+		sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin);
+		if (sel==CB_ERR)
+		{
+			sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
+		}
+		m_pattern_header_skin.SetCurSel(sel);
 	}
 }
 
@@ -1113,6 +1187,7 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n",_pattern_font_point);
 		fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n",_pattern_font_x);
 		fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n",_pattern_font_y);
+		fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n",_pattern_header_skin);
 //		fprintf(hfile,"\"DisplayLineNumbers\"=hex:%.2X\n",_linenumbers?1:0);
 //		fprintf(hfile,"\"DisplayLineNumbersHex\"=hex:%.2X\n",_linenumbersHex?1:0);
 		fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n",_patternSeparatorColor);
@@ -1170,4 +1245,24 @@ void CSkinDlg::OnSelchangePatternFontY()
 	// TODO: Add your control notification handler code here
 	_pattern_font_y=m_pattern_font_y.GetCurSel()+4;
 	
+}
+
+void CSkinDlg::OnSelchangePatternFontFace()
+{
+	m_pattern_fontface.GetLBText(m_pattern_fontface.GetCurSel(),_pattern_fontface);
+}
+
+void CSkinDlg::OnSelchangePatternHeaderSkin()
+{
+	m_pattern_header_skin.GetLBText(m_pattern_header_skin.GetCurSel(),_pattern_header_skin);
+}
+
+void CSkinDlg::OnSelchangeWireWidth()
+{
+	_wirewidth = m_wirewidth.GetCurSel()+1;
+}
+
+void CSkinDlg::OnWireAA()
+{
+	_wireaa = m_wireaa.GetCheck() >0?true:false;
 }

@@ -13,6 +13,7 @@
 #define DEFAULT_PLUGIN_DIR "Plugins"
 #define DEFAULT_VST_DIR "Vst"
 #define DEFAULT_SKIN_DIR "Skins"
+#define DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 
 #if !defined(_WINAMP_PLUGIN_)
 	class CMidiInput;	// MIDI IMPLEMENTATION 
@@ -75,6 +76,7 @@ public:
 	bool _showAboutAtStart;
 
 	char pattern_fontface[64];
+	char pattern_header_skin[64];
 	int pattern_font_point;
 	int pattern_font_x;
 	int pattern_font_y;

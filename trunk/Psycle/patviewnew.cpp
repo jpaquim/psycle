@@ -905,7 +905,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	// 1 if there is a redraw header, we do that 
 	/////////////////////////////////////////////////////////////
 	// Update Mute/Solo Indicators
-	if ((updatePar & DRAW_TRHEADER) || (abs(scrollT) > VISTRACKS))
+	if ((updatePar & DRAW_TRHEADER) || (abs(scrollT) > VISTRACKS) || (scrollT && scrollL))
 	{
 		rect.top = 0;
 		rect.bottom = YOFFSET;
@@ -924,7 +924,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 		CDC memDC;
 		CBitmap *oldbmp;
 		memDC.CreateCompatibleDC(devc);
-		oldbmp = memDC.SelectObject(&stuffbmp);
+		oldbmp = memDC.SelectObject(&patternheader);
 		int xOffset = XOFFSET-1;
 
 		for(int i=tOff;i<tOff+maxt;i++)
@@ -940,18 +940,67 @@ void CChildView::DrawPatEditor(CDC *devc)
 			const int track0x = i%10;
 
 			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			devc->BitBlt(xOffset+1 +HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-			devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-			devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+			devc->BitBlt(
+				xOffset+1+HEADER_INDENT,
+				1,
+				PatHeaderCoords.sBackground.width, 
+				PatHeaderCoords.sBackground.height,
+				&memDC, 
+				PatHeaderCoords.sBackground.x,
+				PatHeaderCoords.sBackground.y, 
+				SRCCOPY);
+			devc->BitBlt(
+				xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+				1+PatHeaderCoords.dDigitX0.y, 
+				PatHeaderCoords.sNumber0.width,	 
+				PatHeaderCoords.sNumber0.height, 
+				&memDC, 
+				PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+				PatHeaderCoords.sNumber0.y, 
+				SRCCOPY);
+			devc->BitBlt(
+				xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+				1+PatHeaderCoords.dDigit0X.y, 
+				PatHeaderCoords.sNumber0.width,	 
+				PatHeaderCoords.sNumber0.height, 
+				&memDC, 
+				PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+				PatHeaderCoords.sNumber0.y, 
+				SRCCOPY);
 
+			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 			if (Global::_pSong->_trackMuted[i])
-				devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+				devc->BitBlt(
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+					1+PatHeaderCoords.dMuteOn.y, 
+					PatHeaderCoords.sMuteOn.width, 
+					PatHeaderCoords.sMuteOn.height, 
+					&memDC, 
+					PatHeaderCoords.sMuteOn.x, 
+					PatHeaderCoords.sMuteOn.y, 
+					SRCCOPY);
 
 			if (Global::_pSong->_trackArmed[i])
-				devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+				devc->BitBlt(
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+					1+PatHeaderCoords.dRecordOn.y, 
+					PatHeaderCoords.sRecordOn.width, 
+					PatHeaderCoords.sRecordOn.height, 
+					&memDC, 
+					PatHeaderCoords.sRecordOn.x, 
+					PatHeaderCoords.sRecordOn.y, 
+					SRCCOPY);
 
 			if (Global::_pSong->_trackSoloed == i )
-				devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+				devc->BitBlt(
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+					1+PatHeaderCoords.dSoloOn.y, 
+					PatHeaderCoords.sSoloOn.width, 
+					PatHeaderCoords.sSoloOn.height, 
+					&memDC, 
+					PatHeaderCoords.sSoloOn.x, 
+					PatHeaderCoords.sSoloOn.y, 
+					SRCCOPY);
 
 			xOffset += ROWWIDTH;
 		}
@@ -960,7 +1009,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	}
 
 	// 2 if there is a redraw all, we do that then exit
-	if ((updatePar & DRAW_FULL_DATA) || (abs(scrollT) > VISTRACKS) || (abs(scrollL) > VISLINES))
+	if ((updatePar & DRAW_FULL_DATA) || (abs(scrollT) > VISTRACKS) || (abs(scrollL) > VISLINES) || (scrollT && scrollL))
 	{
 		TRACE("DRAW_FULL_DATA\n");
 		// draw everything
@@ -1032,6 +1081,11 @@ void CChildView::DrawPatEditor(CDC *devc)
 	{
 		if (scrollT && scrollL)
 		{
+			/*
+			// there is a flaw in this that makes background rect not draw quite right
+			// so for now x+y does a redraw all - i don't think anyone will complain
+			// as x+y scrolling only happens when you have that stupid center cursor on
+			// or when selecting
 			// scroll x AND y
 			CRgn rgn;
 			if (XOFFSET!=1)
@@ -1176,7 +1230,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 					CDC memDC;
 					CBitmap *oldbmp;
 					memDC.CreateCompatibleDC(devc);
-					oldbmp = memDC.SelectObject(&stuffbmp);
+					oldbmp = memDC.SelectObject(&patternheader);
 					xOffset = XOFFSET-1;
 
 					for(i=tOff;i<tOff+scrollT;i++)
@@ -1185,18 +1239,67 @@ void CChildView::DrawPatEditor(CDC *devc)
 						const int track0x = i%10;
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-						devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-						devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+						devc->BitBlt(
+							xOffset+1+HEADER_INDENT,
+							1,
+							PatHeaderCoords.sBackground.width, 
+							PatHeaderCoords.sBackground.height,
+							&memDC, 
+							PatHeaderCoords.sBackground.x,
+							PatHeaderCoords.sBackground.y, 
+							SRCCOPY);
+						devc->BitBlt(
+							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+							1+PatHeaderCoords.dDigitX0.y, 
+							PatHeaderCoords.sNumber0.width,	 
+							PatHeaderCoords.sNumber0.height, 
+							&memDC, 
+							PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+							PatHeaderCoords.sNumber0.y, 
+							SRCCOPY);
+						devc->BitBlt(
+							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+							1+PatHeaderCoords.dDigit0X.y, 
+							PatHeaderCoords.sNumber0.width,	 
+							PatHeaderCoords.sNumber0.height, 
+							&memDC, 
+							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+							PatHeaderCoords.sNumber0.y, 
+							SRCCOPY);
 
+						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (Global::_pSong->_trackMuted[i])
-							devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+								1+PatHeaderCoords.dMuteOn.y, 
+								PatHeaderCoords.sMuteOn.width, 
+								PatHeaderCoords.sMuteOn.height, 
+								&memDC, 
+								PatHeaderCoords.sMuteOn.x, 
+								PatHeaderCoords.sMuteOn.y, 
+								SRCCOPY);
 
 						if (Global::_pSong->_trackArmed[i])
-							devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+								1+PatHeaderCoords.dRecordOn.y, 
+								PatHeaderCoords.sRecordOn.width, 
+								PatHeaderCoords.sRecordOn.height, 
+								&memDC, 
+								PatHeaderCoords.sRecordOn.x, 
+								PatHeaderCoords.sRecordOn.y, 
+								SRCCOPY);
 
 						if (Global::_pSong->_trackSoloed == i )
-							devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+								1+PatHeaderCoords.dSoloOn.y, 
+								PatHeaderCoords.sSoloOn.width, 
+								PatHeaderCoords.sSoloOn.height, 
+								&memDC, 
+								PatHeaderCoords.sSoloOn.x, 
+								PatHeaderCoords.sSoloOn.y, 
+								SRCCOPY);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1248,7 +1351,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 					CDC memDC;
 					CBitmap *oldbmp;
 					memDC.CreateCompatibleDC(devc);
-					oldbmp = memDC.SelectObject(&stuffbmp);
+					oldbmp = memDC.SelectObject(&patternheader);
 					xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
 					for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
@@ -1257,18 +1360,67 @@ void CChildView::DrawPatEditor(CDC *devc)
 						const int track0x = i%10;
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-						devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-						devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+						devc->BitBlt(
+							xOffset+1+HEADER_INDENT,
+							1,
+							PatHeaderCoords.sBackground.width, 
+							PatHeaderCoords.sBackground.height,
+							&memDC, 
+							PatHeaderCoords.sBackground.x,
+							PatHeaderCoords.sBackground.y, 
+							SRCCOPY);
+						devc->BitBlt(
+							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+							1+PatHeaderCoords.dDigitX0.y, 
+							PatHeaderCoords.sNumber0.width,	 
+							PatHeaderCoords.sNumber0.height, 
+							&memDC, 
+							PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+							PatHeaderCoords.sNumber0.y, 
+							SRCCOPY);
+						devc->BitBlt(
+							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+							1+PatHeaderCoords.dDigit0X.y, 
+							PatHeaderCoords.sNumber0.width,	 
+							PatHeaderCoords.sNumber0.height, 
+							&memDC, 
+							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+							PatHeaderCoords.sNumber0.y, 
+							SRCCOPY);
 
+						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (Global::_pSong->_trackMuted[i])
-							devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+								1+PatHeaderCoords.dMuteOn.y, 
+								PatHeaderCoords.sMuteOn.width, 
+								PatHeaderCoords.sMuteOn.height, 
+								&memDC, 
+								PatHeaderCoords.sMuteOn.x, 
+								PatHeaderCoords.sMuteOn.y, 
+								SRCCOPY);
 
 						if (Global::_pSong->_trackArmed[i])
-							devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+								1+PatHeaderCoords.dRecordOn.y, 
+								PatHeaderCoords.sRecordOn.width, 
+								PatHeaderCoords.sRecordOn.height, 
+								&memDC, 
+								PatHeaderCoords.sRecordOn.x, 
+								PatHeaderCoords.sRecordOn.y, 
+								SRCCOPY);
 
 						if (Global::_pSong->_trackSoloed == i )
-							devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+								1+PatHeaderCoords.dSoloOn.y, 
+								PatHeaderCoords.sSoloOn.width, 
+								PatHeaderCoords.sSoloOn.height, 
+								&memDC, 
+								PatHeaderCoords.sSoloOn.x, 
+								PatHeaderCoords.sSoloOn.y, 
+								SRCCOPY);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1314,6 +1466,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 				rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
 				devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
 			}
+			*/
 		}
 		else // not scrollT + scrollL
 		{
@@ -1393,7 +1546,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 						CDC memDC;
 						CBitmap *oldbmp;
 						memDC.CreateCompatibleDC(devc);
-						oldbmp = memDC.SelectObject(&stuffbmp);
+						oldbmp = memDC.SelectObject(&patternheader);
 						xOffset = XOFFSET-1;
 
 						for(i=tOff;i<tOff+scrollT;i++)
@@ -1402,18 +1555,67 @@ void CChildView::DrawPatEditor(CDC *devc)
 							const int track0x = i%10;
 
 							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-							devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-							devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT,
+								1,
+								PatHeaderCoords.sBackground.width, 
+								PatHeaderCoords.sBackground.height,
+								&memDC, 
+								PatHeaderCoords.sBackground.x,
+								PatHeaderCoords.sBackground.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+								1+PatHeaderCoords.dDigitX0.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+								1+PatHeaderCoords.dDigit0X.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
+								SRCCOPY);
 
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 							if (Global::_pSong->_trackMuted[i])
-								devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+									1+PatHeaderCoords.dMuteOn.y, 
+									PatHeaderCoords.sMuteOn.width, 
+									PatHeaderCoords.sMuteOn.height, 
+									&memDC, 
+									PatHeaderCoords.sMuteOn.x, 
+									PatHeaderCoords.sMuteOn.y, 
+									SRCCOPY);
 
 							if (Global::_pSong->_trackArmed[i])
-								devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+									1+PatHeaderCoords.dRecordOn.y, 
+									PatHeaderCoords.sRecordOn.width, 
+									PatHeaderCoords.sRecordOn.height, 
+									&memDC, 
+									PatHeaderCoords.sRecordOn.x, 
+									PatHeaderCoords.sRecordOn.y, 
+									SRCCOPY);
 
 							if (Global::_pSong->_trackSoloed == i )
-								devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+									1+PatHeaderCoords.dSoloOn.y, 
+									PatHeaderCoords.sSoloOn.width, 
+									PatHeaderCoords.sSoloOn.height, 
+									&memDC, 
+									PatHeaderCoords.sSoloOn.x, 
+									PatHeaderCoords.sSoloOn.y, 
+									SRCCOPY);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1442,7 +1644,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 						CDC memDC;
 						CBitmap *oldbmp;
 						memDC.CreateCompatibleDC(devc);
-						oldbmp = memDC.SelectObject(&stuffbmp);
+						oldbmp = memDC.SelectObject(&patternheader);
 						xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
 						for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
@@ -1451,18 +1653,67 @@ void CChildView::DrawPatEditor(CDC *devc)
 							const int track0x = i%10;
 
 							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-							devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-							devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT,
+								1,
+								PatHeaderCoords.sBackground.width, 
+								PatHeaderCoords.sBackground.height,
+								&memDC, 
+								PatHeaderCoords.sBackground.x,
+								PatHeaderCoords.sBackground.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+								1+PatHeaderCoords.dDigitX0.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+								1+PatHeaderCoords.dDigit0X.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
+								SRCCOPY);
 
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 							if (Global::_pSong->_trackMuted[i])
-								devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+									1+PatHeaderCoords.dMuteOn.y, 
+									PatHeaderCoords.sMuteOn.width, 
+									PatHeaderCoords.sMuteOn.height, 
+									&memDC, 
+									PatHeaderCoords.sMuteOn.x, 
+									PatHeaderCoords.sMuteOn.y, 
+									SRCCOPY);
 
 							if (Global::_pSong->_trackArmed[i])
-								devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+									1+PatHeaderCoords.dRecordOn.y, 
+									PatHeaderCoords.sRecordOn.width, 
+									PatHeaderCoords.sRecordOn.height, 
+									&memDC, 
+									PatHeaderCoords.sRecordOn.x, 
+									PatHeaderCoords.sRecordOn.y, 
+									SRCCOPY);
 
 							if (Global::_pSong->_trackSoloed == i )
-								devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+									1+PatHeaderCoords.dSoloOn.y, 
+									PatHeaderCoords.sSoloOn.width, 
+									PatHeaderCoords.sSoloOn.height, 
+									&memDC, 
+									PatHeaderCoords.sSoloOn.x, 
+									PatHeaderCoords.sSoloOn.y, 
+									SRCCOPY);
 
 							xOffset += ROWWIDTH;
 						}
