@@ -26,11 +26,15 @@ public:
 	enum { IDD = IDD_MIDI_INPUT };
 
 	CButton		m_midiRecordVelButton;
-	CEdit		m_midiMessageVelEdit;
 	CComboBox	m_midiTypeVelComboBox;
 	CEdit		m_midiCommandVelEdit;
 	CEdit		m_midiFromVelEdit;
 	CEdit		m_midiToVelEdit;
+	CButton		m_midiRecordPitButton;
+	CComboBox	m_midiTypePitComboBox;
+	CEdit		m_midiCommandPitEdit;
+	CEdit		m_midiFromPitEdit;
+	CEdit		m_midiToPitEdit;
 	CButton		m_midiRecord0Button;
 	CEdit		m_midiMessage0Edit;
 	CComboBox	m_midiType0ComboBox;

@@ -70,114 +70,120 @@ Configuration::Configuration()
 	_midiFromVel = 0x00;
 	_midiToVel = 0xff;
 
+	_midiRecordPit = FALSE;
+	_midiTypePit = 0;
+	_midiCommandPit = 1;
+	_midiFromPit = 0;
+	_midiToPit = 0xff;
+
 	_midiRecord0 = FALSE;
 	_midiType0 = 0;
-	_midiMessage0 = 11;
+	_midiMessage0 = 1;
 	_midiCommand0 = 1;
 	_midiFrom0 = 0;
 	_midiTo0 = 0xff;
 
 	_midiRecord1 = FALSE;
 	_midiType1 = 0;
-	_midiMessage1 = 14;
+	_midiMessage1 = 2;
 	_midiCommand1 = 2;
 	_midiFrom1 = 0;
 	_midiTo1 = 0xff;
 
 	_midiRecord2= FALSE;
 	_midiType2 = 0;
-	_midiMessage2 = 0;
+	_midiMessage2 = 3;
 	_midiCommand2 = 3;
 	_midiFrom2 = 0;
 	_midiTo2 = 0xff;
 
 	_midiRecord3 = FALSE;
 	_midiType3 = 0;
-	_midiMessage3 = 0;
+	_midiMessage3 = 4;
 	_midiCommand3 = 4;
 	_midiFrom3 = 0;
 	_midiTo3 = 0xff;
 
 	_midiRecord4 = FALSE;
 	_midiType4 = 0;
-	_midiMessage4 = 0;
+	_midiMessage4 = 5;
 	_midiCommand4 = 5;
 	_midiFrom4 = 0;
 	_midiTo4 = 0xff;
 
 	_midiRecord5 = FALSE;
 	_midiType5 = 0;
-	_midiMessage5 = 0;
+	_midiMessage5 = 6;
 	_midiCommand5 = 6;
 	_midiFrom5 = 0;
 	_midiTo5 = 0xff;
 
 	_midiRecord6 = FALSE;
 	_midiType6 = 0;
-	_midiMessage6 = 0;
+	_midiMessage6 = 7;
 	_midiCommand6 = 7;
 	_midiFrom6 = 0;
 	_midiTo6 = 0xff;
 
 	_midiRecord7 = FALSE;
 	_midiType7 = 0;
-	_midiMessage7 = 0;
+	_midiMessage7 = 8;
 	_midiCommand7 = 8;
 	_midiFrom7 = 0;
 	_midiTo7 = 0xff;
 
 	_midiRecord8 = FALSE;
 	_midiType8 = 0;
-	_midiMessage8 = 0;
+	_midiMessage8 = 9;
 	_midiCommand8 = 9;
 	_midiFrom8 = 0;
 	_midiTo8 = 0xff;
 
 	_midiRecord9 = FALSE;
 	_midiType9 = 0;
-	_midiMessage9 = 0;
+	_midiMessage9 = 10;
 	_midiCommand9 = 10;
 	_midiFrom9 = 0;
 	_midiTo9 = 0xff;
 
 	_midiRecord10 = FALSE;
 	_midiType10 = 0;
-	_midiMessage10 = 0;
+	_midiMessage10 = 11;
 	_midiCommand10 = 11;
 	_midiFrom10 = 0;
 	_midiTo10 = 0xff;
 
 	_midiRecord11 = FALSE;
 	_midiType11 = 0;
-	_midiMessage11 = 0;
+	_midiMessage11 = 12;
 	_midiCommand11 = 12;
 	_midiFrom11 = 0;
 	_midiTo11 = 0xff;
 
 	_midiRecord12 = FALSE;
 	_midiType12 = 0;
-	_midiMessage12 = 0;
+	_midiMessage12 = 13;
 	_midiCommand12 = 13;
 	_midiFrom12 = 0;
 	_midiTo12 = 0xff;
 
 	_midiRecord13 = FALSE;
 	_midiType13 = 0;
-	_midiMessage13 = 0;
+	_midiMessage13 = 14;
 	_midiCommand13 = 14;
 	_midiFrom13 = 0;
 	_midiTo13 = 0xff;
 
 	_midiRecord14 = FALSE;
 	_midiType14 = 0;
-	_midiMessage14 = 0;
+	_midiMessage14 = 15;
 	_midiCommand14 = 15;
 	_midiFrom14 = 0;
 	_midiTo14 = 0xff;
 
 	_midiRecord15 = FALSE;
 	_midiType15 = 0;
-	_midiMessage15 = 0;
+	_midiMessage15 = 16;
 	_midiCommand15 = 16;
 	_midiFrom15 = 0;
 	_midiTo15 = 0xff;
@@ -308,13 +314,24 @@ Configuration::Read(
 	numData = sizeof(_midiToVel);
 	reg.QueryValue("MidiToVel", &type, (BYTE*)&_midiToVel, &numData);
 
+	numData = sizeof(_midiRecordPit);
+	reg.QueryValue("MidiRecordPit", &type, (BYTE*)&_midiRecordPit, &numData);
+	numData = sizeof(_midiTypePit);
+	reg.QueryValue("MidiTypePit", &type, (BYTE*)&_midiTypePit, &numData);
+	numData = sizeof(_midiCommandPit);
+	reg.QueryValue("MidiCommandPit", &type, (BYTE*)&_midiCommandPit, &numData);
+	numData = sizeof(_midiFromPit);
+	reg.QueryValue("MidiFromPit", &type, (BYTE*)&_midiFromPit, &numData);
+	numData = sizeof(_midiToPit);
+	reg.QueryValue("MidiToPit", &type, (BYTE*)&_midiToPit, &numData);
+
 	numData = sizeof(_midiRecord0);
 	reg.QueryValue("MidiRecord0", &type, (BYTE*)&_midiRecord0, &numData);
-	numData = sizeof(_midiCommand0);
-	reg.QueryValue("MidiMessage0", &type, (BYTE*)&_midiMessage0, &numData);
 	numData = sizeof(_midiMessage0);
-	reg.QueryValue("MidiType0", &type, (BYTE*)&_midiType0, &numData);
+	reg.QueryValue("MidiMessage0", &type, (BYTE*)&_midiMessage0, &numData);
 	numData = sizeof(_midiType0);
+	reg.QueryValue("MidiType0", &type, (BYTE*)&_midiType0, &numData);
+	numData = sizeof(_midiCommand0);
 	reg.QueryValue("MidiCommand0", &type, (BYTE*)&_midiCommand0, &numData);
 	numData = sizeof(_midiFrom0);
 	reg.QueryValue("MidiFrom0", &type, (BYTE*)&_midiFrom0, &numData);
@@ -323,11 +340,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord1);
 	reg.QueryValue("MidiRecord1", &type, (BYTE*)&_midiRecord1, &numData);
-	numData = sizeof(_midiCommand1);
-	reg.QueryValue("MidiMessage1", &type, (BYTE*)&_midiMessage1, &numData);
 	numData = sizeof(_midiMessage1);
-	reg.QueryValue("MidiType1", &type, (BYTE*)&_midiType1, &numData);
+	reg.QueryValue("MidiMessage1", &type, (BYTE*)&_midiMessage1, &numData);
 	numData = sizeof(_midiType1);
+	reg.QueryValue("MidiType1", &type, (BYTE*)&_midiType1, &numData);
+	numData = sizeof(_midiCommand1);
 	reg.QueryValue("MidiCommand1", &type, (BYTE*)&_midiCommand1, &numData);
 	numData = sizeof(_midiFrom1);
 	reg.QueryValue("MidiFrom1", &type, (BYTE*)&_midiFrom1, &numData);
@@ -336,11 +353,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord2);
 	reg.QueryValue("MidiRecord2", &type, (BYTE*)&_midiRecord2, &numData);
-	numData = sizeof(_midiCommand2);
-	reg.QueryValue("MidiMessage2", &type, (BYTE*)&_midiMessage2, &numData);
 	numData = sizeof(_midiMessage2);
-	reg.QueryValue("MidiType2", &type, (BYTE*)&_midiType2, &numData);
+	reg.QueryValue("MidiMessage2", &type, (BYTE*)&_midiMessage2, &numData);
 	numData = sizeof(_midiType2);
+	reg.QueryValue("MidiType2", &type, (BYTE*)&_midiType2, &numData);
+	numData = sizeof(_midiCommand2);
 	reg.QueryValue("MidiCommand2", &type, (BYTE*)&_midiCommand2, &numData);
 	numData = sizeof(_midiFrom2);
 	reg.QueryValue("MidiFrom2", &type, (BYTE*)&_midiFrom2, &numData);
@@ -349,11 +366,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord3);
 	reg.QueryValue("MidiRecord3", &type, (BYTE*)&_midiRecord3, &numData);
-	numData = sizeof(_midiCommand3);
-	reg.QueryValue("MidiMessage3", &type, (BYTE*)&_midiMessage3, &numData);
 	numData = sizeof(_midiMessage3);
-	reg.QueryValue("MidiType3", &type, (BYTE*)&_midiType3, &numData);
+	reg.QueryValue("MidiMessage3", &type, (BYTE*)&_midiMessage3, &numData);
 	numData = sizeof(_midiType3);
+	reg.QueryValue("MidiType3", &type, (BYTE*)&_midiType3, &numData);
+	numData = sizeof(_midiCommand3);
 	reg.QueryValue("MidiCommand3", &type, (BYTE*)&_midiCommand3, &numData);
 	numData = sizeof(_midiFrom3);
 	reg.QueryValue("MidiFrom3", &type, (BYTE*)&_midiFrom3, &numData);
@@ -362,11 +379,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord4);
 	reg.QueryValue("MidiRecord4", &type, (BYTE*)&_midiRecord4, &numData);
-	numData = sizeof(_midiCommand4);
-	reg.QueryValue("MidiMessage4", &type, (BYTE*)&_midiMessage4, &numData);
 	numData = sizeof(_midiMessage4);
-	reg.QueryValue("MidiType4", &type, (BYTE*)&_midiType4, &numData);
+	reg.QueryValue("MidiMessage4", &type, (BYTE*)&_midiMessage4, &numData);
 	numData = sizeof(_midiType4);
+	reg.QueryValue("MidiType4", &type, (BYTE*)&_midiType4, &numData);
+	numData = sizeof(_midiCommand4);
 	reg.QueryValue("MidiCommand4", &type, (BYTE*)&_midiCommand4, &numData);
 	numData = sizeof(_midiFrom4);
 	reg.QueryValue("MidiFrom4", &type, (BYTE*)&_midiFrom4, &numData);
@@ -375,11 +392,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord5);
 	reg.QueryValue("MidiRecord5", &type, (BYTE*)&_midiRecord5, &numData);
-	numData = sizeof(_midiCommand5);
-	reg.QueryValue("MidiMessage5", &type, (BYTE*)&_midiMessage5, &numData);
 	numData = sizeof(_midiMessage5);
-	reg.QueryValue("MidiType5", &type, (BYTE*)&_midiType5, &numData);
+	reg.QueryValue("MidiMessage5", &type, (BYTE*)&_midiMessage5, &numData);
 	numData = sizeof(_midiType5);
+	reg.QueryValue("MidiType5", &type, (BYTE*)&_midiType5, &numData);
+	numData = sizeof(_midiCommand5);
 	reg.QueryValue("MidiCommand5", &type, (BYTE*)&_midiCommand5, &numData);
 	numData = sizeof(_midiFrom5);
 	reg.QueryValue("MidiFrom5", &type, (BYTE*)&_midiFrom5, &numData);
@@ -388,11 +405,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord6);
 	reg.QueryValue("MidiRecord6", &type, (BYTE*)&_midiRecord6, &numData);
-	numData = sizeof(_midiCommand6);
-	reg.QueryValue("MidiMessage6", &type, (BYTE*)&_midiMessage6, &numData);
 	numData = sizeof(_midiMessage6);
-	reg.QueryValue("MidiType6", &type, (BYTE*)&_midiType6, &numData);
+	reg.QueryValue("MidiMessage6", &type, (BYTE*)&_midiMessage6, &numData);
 	numData = sizeof(_midiType6);
+	reg.QueryValue("MidiType6", &type, (BYTE*)&_midiType6, &numData);
+	numData = sizeof(_midiCommand6);
 	reg.QueryValue("MidiCommand6", &type, (BYTE*)&_midiCommand6, &numData);
 	numData = sizeof(_midiFrom6);
 	reg.QueryValue("MidiFrom6", &type, (BYTE*)&_midiFrom6, &numData);
@@ -401,11 +418,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord7);
 	reg.QueryValue("MidiRecord7", &type, (BYTE*)&_midiRecord7, &numData);
-	numData = sizeof(_midiCommand7);
-	reg.QueryValue("MidiMessage7", &type, (BYTE*)&_midiMessage7, &numData);
 	numData = sizeof(_midiMessage7);
-	reg.QueryValue("MidiType7", &type, (BYTE*)&_midiType7, &numData);
+	reg.QueryValue("MidiMessage7", &type, (BYTE*)&_midiMessage7, &numData);
 	numData = sizeof(_midiType7);
+	reg.QueryValue("MidiType7", &type, (BYTE*)&_midiType7, &numData);
+	numData = sizeof(_midiCommand7);
 	reg.QueryValue("MidiCommand7", &type, (BYTE*)&_midiCommand7, &numData);
 	numData = sizeof(_midiFrom7);
 	reg.QueryValue("MidiFrom7", &type, (BYTE*)&_midiFrom7, &numData);
@@ -414,11 +431,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord8);
 	reg.QueryValue("MidiRecord8", &type, (BYTE*)&_midiRecord8, &numData);
-	numData = sizeof(_midiCommand8);
-	reg.QueryValue("MidiMessage8", &type, (BYTE*)&_midiMessage8, &numData);
 	numData = sizeof(_midiMessage8);
-	reg.QueryValue("MidiType8", &type, (BYTE*)&_midiType8, &numData);
+	reg.QueryValue("MidiMessage8", &type, (BYTE*)&_midiMessage8, &numData);
 	numData = sizeof(_midiType8);
+	reg.QueryValue("MidiType8", &type, (BYTE*)&_midiType8, &numData);
+	numData = sizeof(_midiCommand8);
 	reg.QueryValue("MidiCommand8", &type, (BYTE*)&_midiCommand8, &numData);
 	numData = sizeof(_midiFrom8);
 	reg.QueryValue("MidiFrom8", &type, (BYTE*)&_midiFrom8, &numData);
@@ -427,11 +444,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord9);
 	reg.QueryValue("MidiRecord9", &type, (BYTE*)&_midiRecord9, &numData);
-	numData = sizeof(_midiCommand9);
-	reg.QueryValue("MidiMessage9", &type, (BYTE*)&_midiMessage9, &numData);
 	numData = sizeof(_midiMessage9);
-	reg.QueryValue("MidiType9", &type, (BYTE*)&_midiType9, &numData);
+	reg.QueryValue("MidiMessage9", &type, (BYTE*)&_midiMessage9, &numData);
 	numData = sizeof(_midiType9);
+	reg.QueryValue("MidiType9", &type, (BYTE*)&_midiType9, &numData);
+	numData = sizeof(_midiCommand9);
 	reg.QueryValue("MidiCommand9", &type, (BYTE*)&_midiCommand9, &numData);
 	numData = sizeof(_midiFrom9);
 	reg.QueryValue("MidiFrom9", &type, (BYTE*)&_midiFrom9, &numData);
@@ -440,11 +457,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord10);
 	reg.QueryValue("MidiRecord10", &type, (BYTE*)&_midiRecord10, &numData);
-	numData = sizeof(_midiCommand10);
-	reg.QueryValue("MidiMessage10", &type, (BYTE*)&_midiMessage10, &numData);
 	numData = sizeof(_midiMessage10);
-	reg.QueryValue("MidiType10", &type, (BYTE*)&_midiType10, &numData);
+	reg.QueryValue("MidiMessage10", &type, (BYTE*)&_midiMessage10, &numData);
 	numData = sizeof(_midiType10);
+	reg.QueryValue("MidiType10", &type, (BYTE*)&_midiType10, &numData);
+	numData = sizeof(_midiCommand10);
 	reg.QueryValue("MidiCommand10", &type, (BYTE*)&_midiCommand10, &numData);
 	numData = sizeof(_midiFrom10);
 	reg.QueryValue("MidiFrom10", &type, (BYTE*)&_midiFrom10, &numData);
@@ -453,11 +470,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord11);
 	reg.QueryValue("MidiRecord11", &type, (BYTE*)&_midiRecord11, &numData);
-	numData = sizeof(_midiCommand11);
-	reg.QueryValue("MidiMessage11", &type, (BYTE*)&_midiMessage11, &numData);
 	numData = sizeof(_midiMessage11);
-	reg.QueryValue("MidiType11", &type, (BYTE*)&_midiType11, &numData);
+	reg.QueryValue("MidiMessage11", &type, (BYTE*)&_midiMessage11, &numData);
 	numData = sizeof(_midiType11);
+	reg.QueryValue("MidiType11", &type, (BYTE*)&_midiType11, &numData);
+	numData = sizeof(_midiCommand11);
 	reg.QueryValue("MidiCommand11", &type, (BYTE*)&_midiCommand11, &numData);
 	numData = sizeof(_midiFrom11);
 	reg.QueryValue("MidiFrom11", &type, (BYTE*)&_midiFrom11, &numData);
@@ -466,11 +483,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord12);
 	reg.QueryValue("MidiRecord12", &type, (BYTE*)&_midiRecord12, &numData);
-	numData = sizeof(_midiCommand12);
-	reg.QueryValue("MidiMessage12", &type, (BYTE*)&_midiMessage12, &numData);
 	numData = sizeof(_midiMessage12);
-	reg.QueryValue("MidiType12", &type, (BYTE*)&_midiType12, &numData);
+	reg.QueryValue("MidiMessage12", &type, (BYTE*)&_midiMessage12, &numData);
 	numData = sizeof(_midiType12);
+	reg.QueryValue("MidiType12", &type, (BYTE*)&_midiType12, &numData);
+	numData = sizeof(_midiCommand12);
 	reg.QueryValue("MidiCommand12", &type, (BYTE*)&_midiCommand12, &numData);
 	numData = sizeof(_midiFrom12);
 	reg.QueryValue("MidiFrom12", &type, (BYTE*)&_midiFrom12, &numData);
@@ -479,11 +496,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord13);
 	reg.QueryValue("MidiRecord13", &type, (BYTE*)&_midiRecord13, &numData);
-	numData = sizeof(_midiCommand13);
-	reg.QueryValue("MidiMessage13", &type, (BYTE*)&_midiMessage13, &numData);
 	numData = sizeof(_midiMessage13);
-	reg.QueryValue("MidiType13", &type, (BYTE*)&_midiType13, &numData);
+	reg.QueryValue("MidiMessage13", &type, (BYTE*)&_midiMessage13, &numData);
 	numData = sizeof(_midiType13);
+	reg.QueryValue("MidiType13", &type, (BYTE*)&_midiType13, &numData);
+	numData = sizeof(_midiCommand13);
 	reg.QueryValue("MidiCommand13", &type, (BYTE*)&_midiCommand13, &numData);
 	numData = sizeof(_midiFrom13);
 	reg.QueryValue("MidiFrom13", &type, (BYTE*)&_midiFrom13, &numData);
@@ -492,11 +509,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord14);
 	reg.QueryValue("MidiRecord14", &type, (BYTE*)&_midiRecord14, &numData);
-	numData = sizeof(_midiCommand14);
-	reg.QueryValue("MidiMessage14", &type, (BYTE*)&_midiMessage14, &numData);
 	numData = sizeof(_midiMessage14);
-	reg.QueryValue("MidiType14", &type, (BYTE*)&_midiType14, &numData);
+	reg.QueryValue("MidiMessage14", &type, (BYTE*)&_midiMessage14, &numData);
 	numData = sizeof(_midiType14);
+	reg.QueryValue("MidiType14", &type, (BYTE*)&_midiType14, &numData);
+	numData = sizeof(_midiCommand14);
 	reg.QueryValue("MidiCommand14", &type, (BYTE*)&_midiCommand14, &numData);
 	numData = sizeof(_midiFrom14);
 	reg.QueryValue("MidiFrom14", &type, (BYTE*)&_midiFrom14, &numData);
@@ -505,11 +522,11 @@ Configuration::Read(
 
 	numData = sizeof(_midiRecord15);
 	reg.QueryValue("MidiRecord15", &type, (BYTE*)&_midiRecord15, &numData);
-	numData = sizeof(_midiCommand15);
-	reg.QueryValue("MidiMessage15", &type, (BYTE*)&_midiMessage15, &numData);
 	numData = sizeof(_midiMessage15);
-	reg.QueryValue("MidiType15", &type, (BYTE*)&_midiType15, &numData);
+	reg.QueryValue("MidiMessage15", &type, (BYTE*)&_midiMessage15, &numData);
 	numData = sizeof(_midiType15);
+	reg.QueryValue("MidiType15", &type, (BYTE*)&_midiType15, &numData);
+	numData = sizeof(_midiCommand15);
 	reg.QueryValue("MidiCommand15", &type, (BYTE*)&_midiCommand15, &numData);
 	numData = sizeof(_midiFrom15);
 	reg.QueryValue("MidiFrom15", &type, (BYTE*)&_midiFrom15, &numData);
@@ -702,6 +719,12 @@ Configuration::Write(
 	reg.SetValue("MidiCommandVel", REG_DWORD, (BYTE*)&_midiCommandVel, sizeof(_midiCommandVel));	
 	reg.SetValue("MidiFromVel", REG_DWORD, (BYTE*)&_midiFromVel, sizeof(_midiFromVel));	
 	reg.SetValue("MidiToVel", REG_DWORD, (BYTE*)&_midiToVel, sizeof(_midiToVel));	
+
+	reg.SetValue("MidiRecordPit", REG_BINARY, (BYTE*)&_midiRecordPit, sizeof(_midiRecordPit));
+	reg.SetValue("MidiTypePit", REG_BINARY, (BYTE*)&_midiTypePit, sizeof(_midiTypePit));
+	reg.SetValue("MidiCommandPit", REG_DWORD, (BYTE*)&_midiCommandPit, sizeof(_midiCommandPit));	
+	reg.SetValue("MidiFromPit", REG_DWORD, (BYTE*)&_midiFromPit, sizeof(_midiFromPit));	
+	reg.SetValue("MidiToPit", REG_DWORD, (BYTE*)&_midiToPit, sizeof(_midiToPit));	
 	
 	reg.SetValue("MidiRecord0", REG_BINARY, (BYTE*)&_midiRecord0, sizeof(_midiRecord0));
 	reg.SetValue("MidiMessage0", REG_BINARY, (BYTE*)&_midiMessage0, sizeof(_midiMessage0));

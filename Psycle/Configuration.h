@@ -51,6 +51,12 @@ public:
 	int _midiFromVel;
 	int _midiToVel;
 
+	bool _midiRecordPit;
+	int _midiTypePit;
+	int _midiCommandPit;
+	int _midiFromPit;
+	int _midiToPit;
+
 	bool _midiRecord0;
 	int _midiType0;
 	int _midiMessage0;
