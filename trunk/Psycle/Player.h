@@ -6,6 +6,8 @@
 	#include "Riff.h"
 #endif
 
+#include "Constants.h"
+
 class Machine;
 
 class Player
@@ -39,7 +41,7 @@ public:
 	void StartRecording(char* psFilename);
 	void StopRecording(void);
 protected:
-	int prevMachines[/*MAX_TRACKS*/32];
+	int prevMachines[MAX_TRACKS];
 
 	float _pBuffer[65536];
 #if !defined(_WINAMP_PLUGIN_)

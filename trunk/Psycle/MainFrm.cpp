@@ -2494,6 +2494,12 @@ BOOL CMainFrame::StatusBarIdleText()
 			{
 				machine = _pSong->busEffect[toffset[2]];
 			}
+			/*
+			else if ((toffset[0]<255)||(toffset[1]<255)||(toffset[3]<255))
+			{
+				machine = Global::pPlayer->prevMachines[m_wndView.editcur.track];
+			}
+			*/
 			if (machine<255)
 			{
 				if (_pSong->_machineActive[machine])

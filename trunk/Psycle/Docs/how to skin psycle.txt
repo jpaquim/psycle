@@ -1,0 +1,92 @@
+A quick doc on skinning psycle 
+------------------------------
+
+Alk 15th Nov 2002
+
+2 bmps, one for the machines, one for the channel headers.
+
+2 text files, with names corresponding to the bmps, stores position info about the gfx in the bmps.
+
+e.g.
+
+mach.bmp
+mach.psm
+head.bmp
+head.psh
+
+info on making the two text files follows;
+
+
+If you do not want a vu on either machine you may set the height of the vu source 0.
+
+
+
+file: mach.psm (machines info)
+
+
+
+"master_source"=0,153,189,22         <---- coords are top, left, width height
+"generator_source"=0,6,195,112       <---- coords are top, left, width height
+"generator_vu0_source"=0,0,4,6       <---- " " the highlighted vu graphic, should be the width of one chunk of the vu
+"generator_vu_peak_source"=157,0,4,6 <---- the chunk of the vu that is left when the vu goes down
+"generator_pan_source"=196,39,8,9    <---- the pan handle graphic 
+"generator_mute_source"=233,0,28,27  <---- the mute highlighted graphic 
+"generator_solo_source"=195,0,37,38  <---- the solo highlighted graphic 
+
+"effect_source"=0,118,227,32        <----- coords are top, left, width height
+"effect_vu0_source"=0,150,2,3       <----- " " the highlighted vu graphic, should be the width of one chunk of the vu
+"effect_vu_peak_source"=41,150,2,3  <----- the chunk of the vu that is left when the vu goes down
+"effect_pan_source"=196,39,8,9      <----- the pan handle graphic
+"effect_mute_source"=197,51,19,11   <----- the mute highlighted graphic
+"effect_bypass_source"=221,51,21,10 <----- the bypass highlighted graphic
+
+
+
+NOTE!!!
+
+**All the following coords are relative to the top left corner of the source graphic, wither the gen or the fx. (i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)**
+
+all the buttons below refer to unhighlighted versions (that are part of the background source graphic)
+
+"generator_vu_dest"=19,44,156 <---- top, left and width coords of the blank vu
+"generator_pan_dest"=90,67,76 <---- top, left and width coords of the pan, subtract the width of the pan handle from this width 
+"generator_mute_dest"=51,68 <---- top, left coords of the mute button
+"generator_solo_dest"=11,62 <----top,left coords of the solo button
+"generator_name_dest"=16,20 <---- top,left cords of the machine text
+
+"effect_vu_dest"=18,9,40    <---- top, left and width coords of the blank vu
+"effect_pan_dest"=117,20,71 <---- top, left and width coords of the pan, subtract the width of the pan handle from this width 
+"effect_mute_dest"=173,5    <---- top, left coords of the mute button
+"effect_bypass_dest"=197,5  <----top,left coords of the bypass button
+"effect_name_dest"=62,4     <---- top,left cords of the machine text
+
+"transparency"=0000ff00  <---- RGB value of the colour that is to be used as transparency. Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
+
+
+file: head.psh (headers info)
+
+
+
+If you do not want any track numbers then make the height of the numbers 0.
+
+
+"background_source"=0,0,106,16 <---- coords are top, left, width height
+"number_0_source"=0,16,7,12    <---- top,left,width,height of the first number 
+"record_on_source"=70,16,9,9   <---- hihlighted record on button
+"mute_on_source"=79,16,9,9     <---- highlighted mute
+"solo_on_source"=88,16,9,9     <---- highlighted solo
+
+
+
+
+NOTE!!!
+
+**All folowing coords use top left of the background source as 0,0**
+
+"digit_x0_dest"=10,2           <---- left digit position
+"digit_0x_dest"=17,2	       <---- right digit position
+"record_on_dest"=40,4         
+"mute_on_dest"=63,4
+"solo_on_dest"=85,4
+
+"transparency"=0000ff00  <---- RGB value of the colour that is to be used as transparency. Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
