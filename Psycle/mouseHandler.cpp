@@ -945,6 +945,23 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		
 			break;
 
+			////////////////////////////////////////////////////////////////
+
+		case VMPattern: // User is in pattern view mode
+			// select track
+			if (( point.y >= YOFFSET ) && (point.x >= XOFFSET))
+			{
+				const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
+				const int nl = _pSong->patternLines[_pSong->playOrder[editPosition]];
+
+				StartBlock(ttm,0,0);
+				EndBlock(ttm,nl-1,8);
+				blockStart = FALSE;
+			}
+
+			break;
+
+
 	} // <-- End switch(viewMode)
 }
 

@@ -140,7 +140,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	Can't select with keyboard while follow song on, and playing.
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
 +	how about option to switch the instrument and machine columns?
-++ double clicking on pattern should highlight that track
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking

@@ -2,6 +2,11 @@
 Legend :	+=addition		*=change	!=bug	
 ---------------------------------------------------
 
+V1.7.3
+------
+++ double clicking on pattern highlights that track (pooplog)
+
+
 V1.7.1
 ------
 
