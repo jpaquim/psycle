@@ -24,12 +24,11 @@ namespace psycle
 		{
 			CDialog::OnInitDialog();
 			
-			std::ostringstream oss;
-
-			for (int i = 0; i <= 15; i++)
+			for (int i = 1; i <= 16; i++)
 			{			
+				std::ostringstream oss;
 				oss << i;
-				m_Numbers[i].SetWindowText(oss.str().c_str());
+				m_Numbers[i-1].SetWindowText(oss.str().c_str());
 			}
 			
 			return TRUE;
