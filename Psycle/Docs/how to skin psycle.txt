@@ -1,4 +1,4 @@
-A quick doc on skinning psycle 
+A quick doc on skinning psycle
 ------------------------------
 
 1) Preface, What's skinnable?
@@ -109,6 +109,7 @@ A quick doc on skinning psycle
 	"mute_on_dest"=63,4		<---- position for the mute button
 	"solo_on_dest"=85,4		<---- position for the solo button
 
-	"transparency"=0000ff00  <---- RGB value of the colour that is to be used as transparency.
+	"transparency"=0000ff00  <---- 00BBGGRR . Colour that is to be used as transparency.
+	                                Note: It is important that you put the number next to the equal sign!
 					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
 

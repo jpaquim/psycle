@@ -264,6 +264,16 @@ void Player::AdvancePosition()
 	{
 		_lineCounter = 0;
 
+
+#if defined(_WINAMP_PLUGIN_)
+		_playPosition++;
+
+		if (_playPosition >= pSong->playLength)
+		{
+			_playing= false;
+		}
+#else
+		
 		if(!_playBlock)
 			_playPosition++;
 		else
@@ -294,6 +304,7 @@ void Player::AdvancePosition()
 				_playBlock =false;
 			}
 		}
+#endif // _WINAMP_PLUGIN
 		_playPattern = pSong->playOrder[_playPosition];
 	}
 }
@@ -345,9 +356,9 @@ float * Player::Work(
 #if defined(_WINAMP_PLUGIN_)
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
-				if (pSong->_machineActive[c])
+				if (pSong->_pMachine[c])
 				{
-					pSong->_pMachines[c]->PreWork(amount);
+					pSong->_pMachine[c]->PreWork(amount);
 				}
 			}
 			pSong->_pMachine[MASTER_INDEX]->Work(amount);

@@ -7,6 +7,7 @@
 	#include "NewMachine.h"
 	#include "MainFrm.h"
 	#include "ChildView.h"
+	#include "ProgressDialog.h"
 
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
@@ -17,7 +18,6 @@
 #include "Plugin.h"
 #include "VSTHost.h"
 #include "DataCompression.h"
-#include "ProgressDialog.h"
 
 
 #if !defined(_WINAMP_PLUGIN_)
@@ -402,7 +402,7 @@ void Song::New(void)
 	_saved=false;
 #if defined(_WINAMP_PLUGIN_)
 	strcpy(fileName,"Untitled.psy");
-	CreateMachine(MACH_MASTER, 320, 200, NULL);
+	CreateMachine(MACH_MASTER, 320, 200, NULL,MASTER_INDEX);
 #else
 	fileName ="Untitled.psy";
 	if ((CMainFrame *)theApp.m_pMainWnd)
@@ -1128,10 +1128,13 @@ bool Song::Load(RiffFile* pFile)
 	if (strcmp(Header,"PSY3SONG")==0)
 	{
 
+#if !defined(_WINAMP_PLUGIN_)
+		
 		CProgressDialog Progress;
 		Progress.Create();
 		Progress.SetWindowText("Loading...");
 		Progress.ShowWindow(SW_SHOW);
+#endif
 
 		UINT version = 0;
 		UINT size = 0;
@@ -1174,9 +1177,10 @@ bool Song::Load(RiffFile* pFile)
 
 		while(pFile->Read(&Header, 4))
 		{
+#if !defined(_WINAMP_PLUGIN_)
 			Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
 			::Sleep(1);
-
+#endif
 			// we should use the size to update the index, but for now we will skip it
 			if (strcmp(Header,"INFO")==0)
 			{
@@ -1390,10 +1394,11 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 		// now that we have loaded all the modules, time to prepare them.
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(16384);
 		::Sleep(1);
-
+#endif
 		// test all connections for invalid machines. disconnect invalid machines.
 		for (int i = 0; i < MAX_MACHINES; i++)
 		{
@@ -1453,17 +1458,23 @@ bool Song::Load(RiffFile* pFile)
 
 		// translate any data that is required
 
-		machineSoloed = solo;
-		((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen();
-		// calculate samples per tick
 		Global::pPlayer->bpm = BeatsPerMin;
 		Global::pPlayer->tpb = _ticksPerBeat;
+		// calculate samples per tick
+		
+#if defined(_WINAMP_PLUGIN_)
+		SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+#else
 		SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+		((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen();
+		machineSoloed = solo;
+#endif
 		// allow stuff to work again
 		_machineLock = false;
 
+#if !defined(_WINAMP_PLUGIN_)
 		Progress.OnCancel();
-
+#endif
 		if ((!pFile->Close()) || (chunkcount))
 		{
 			char error[MAX_PATH];
@@ -1477,12 +1488,13 @@ bool Song::Load(RiffFile* pFile)
 	}
 	else if (strcmp(Header,"PSY2SONG")==0)
 	{
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		CProgressDialog Progress;
 		Progress.Create();
 		Progress.SetWindowText("Loading old format...");
 		Progress.ShowWindow(SW_SHOW);
-
+#endif
 		int i;
 		int num;
 
@@ -1543,10 +1555,11 @@ bool Song::Load(RiffFile* pFile)
 				RemovePattern(i);
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(2048);
 		::Sleep(1);
-
+#endif
 		// Instruments
 		//
 		pFile->Read(&instSelected, sizeof(instSelected));
@@ -1622,10 +1635,11 @@ bool Song::Load(RiffFile* pFile)
 		{
 			pFile->Read(&_instruments[i]._RRES, sizeof(_instruments[0]._RRES));
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(4096);
 		::Sleep(1);
-
+#endif
 		// Waves
 		//
 		pFile->Read(&waveSelected, sizeof(waveSelected));
@@ -1656,10 +1670,11 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(4096+2048);
 		::Sleep(1);
-
+#endif
 		// VST DLLs
 		//
 
@@ -1680,10 +1695,11 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(8192);
 		::Sleep(1);
-
+#endif
 		// Machines
 		//
 		_machineLock = true;
@@ -1706,9 +1722,10 @@ bool Song::Load(RiffFile* pFile)
 			int x,y,type;
 			if (_machineActive[i])
 			{
+#if !defined(_WINAMP_PLUGIN_)
 				Progress.m_Progress.SetPos(8192+i*(4096/128));
 				::Sleep(1);
-
+#endif
 
 				pFile->Read(&x, sizeof(x));
 				pFile->Read(&y, sizeof(y));
@@ -1904,9 +1921,10 @@ bool Song::Load(RiffFile* pFile)
 				pMac[i]->_y = y;
 			}
 		}
+#if !defined(_WINAMP_PLUGIN_)
 		Progress.m_Progress.SetPos(8192+4096);
 		::Sleep(1);
-
+#endif
 
 		// Since the old file format stored volumes on each output
 		// rather than on each input, we must convert
@@ -1934,10 +1952,11 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(8192+4096+1024);
 		::Sleep(1);
-
+#endif
 		for (i=0; i<128; i++) // Next, we go to fix this for each
 		{
 			if (_machineActive[i])		// valid machine (important, since we have to navigate!)
@@ -1964,10 +1983,11 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(8192+4096+2048);
 		::Sleep(1);
-
+#endif
 		for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 		{
 			pFile->Read(&_instruments[i]._loop, sizeof(_instruments[0]._loop));
@@ -2066,10 +2086,11 @@ bool Song::Load(RiffFile* pFile)
 
 		// move machines around to where they really should go
 		// now we have to remap all the inputs and outputs again... ouch
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(8192+4096+2048+1024);
 		::Sleep(1);
-
+#endif
 
 		for (i = 0; i < 64; i++)
 		{
@@ -2204,10 +2225,11 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(8192+4096+2048+1024+512);
 		::Sleep(1);
-
+#endif
 		// test all connections
 
 		for (int c=0; c<MAX_CONNECTIONS; c++)
@@ -2229,10 +2251,11 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.m_Progress.SetPos(16384);
 		::Sleep(1);
-
+#endif
 		// test all connections for invalid machines. disconnect invalid machines.
 		for (i = 0; i < MAX_MACHINES; i++)
 		{
@@ -2292,9 +2315,10 @@ bool Song::Load(RiffFile* pFile)
 
 		_machineLock = false;
 		seqBus=0;
-
+#if !defined(_WINAMP_PLUGIN_)
+		
 		Progress.OnCancel();
-
+#endif
 		if (!pFile->Close())
 		{
 			char error[MAX_PATH];

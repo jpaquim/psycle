@@ -80,7 +80,7 @@ int CalcSongLength(Song *pSong)
 	{
 		int pattern = pSong->playOrder[i];
 		// this should parse each line for ffxx commands if you want it to be truly accurate
-		unsigned char* const plineOffset = pSong->pPatternData + pattern*MULTIPLY2;
+		unsigned char* const plineOffset = pSong->_ppattern(pattern);
 		for (int l = 0; l < pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
 		{
 			for (int t = 0; t < pSong->SONGTRACKS*5; t+=5)
@@ -519,9 +519,9 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 
 		for( i=0;i<MAX_MACHINES;i++)
 		{
-			if (pSong->_machineActive[i])
+			if(Global::_pSong->_pMachine[i])
 			{
-				switch( pSong->_pMachines[i]->_type )
+				switch( pSong->_pMachine[i]->_type )
 				{
 					case MACH_VST: strcpy(tmp2,"V");break;
 					case MACH_VSTFX: strcpy(tmp2,"V");break;
@@ -529,15 +529,15 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 					default: strcpy(tmp2,"_"); break;
 				}
 				
-				if ( pSong->_pMachines[i]->wasVST )
+				if ( pSong->_pMachine[i]->wasVST )
 				{
-					sprintf(valstr,"%.02i:[*]  %s",i,pSong->_pMachines[i]->_editName);
+					sprintf(valstr,"%.02i:[*]  %s",i,pSong->_pMachine[i]->_editName);
 				}
-				else if ( pSong->_pMachines[i]->_type == MACH_DUMMY )
+				else if ( pSong->_pMachine[i]->_type == MACH_DUMMY )
 				{
-					sprintf(valstr,"%.02i:[?]  %s",i,pSong->_pMachines[i]->_editName);
+					sprintf(valstr,"%.02i:[?]  %s",i,pSong->_pMachine[i]->_editName);
 				}
-				else sprintf(valstr,"%.02i:[%s]  %s",i,tmp2,pSong->_pMachines[i]->_editName);
+				else sprintf(valstr,"%.02i:[%s]  %s",i,tmp2,pSong->_pMachine[i]->_editName);
 				
 				SendDlgItemMessage(wnd,IDC_MACHINELIST,LB_ADDSTRING,0,(long)valstr);
 				j++;
