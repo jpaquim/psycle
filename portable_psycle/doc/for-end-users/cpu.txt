@@ -1,18 +1,27 @@
-The pack contains the "doc" dir,
-and directories containing the binaries themselves,
-of the psycle host application, and all the open source native plugins.
+This pack contains separate directories for each type of CPU.
+Each of them contains the psycle host application, and all the open source native plugins,
+specially targeted to run best on a particular type of CPU.
 
-All binaries come currently in two versions, one for each CPU type. Both are included in the pack:
+There are currently two directories:
 
-	- "recent" AMD and Intel CPUs:
-		- G7: AMD Athlon and early Duron.
+	- the G7 directory, for "recent" AMD and Intel CPUs:
+		- G7:
+			AMD Athlon and early Duron.
 		- G7-SSE:
 			AMD: Athlon XP, late Duron, Athlon 64, Athlon FX,
 			Intel: Pentium 4, Celeron Pentium 4, Pentium M Centrino
 
-	- "old" Intel CPUs:
-		- G6: Intel Pentium Pro, Pentium II, and early Celeron.
-		- G6-SSE: Intel Pentium III and Celeron Pentium III.
+	- the G6 directory, for "old" Intel CPUs:
+		- G6:
+			Intel Pentium Pro, Pentium II, and early Celeron.
+		- G6-SSE:
+			Intel Pentium III and Celeron Pentium III.
+
+You should copy everything contained in the directory that matches your cpu into the psycle directory.
+Make sure you don't have duplicates of the same plugins:
+	the packs from psycledelics puts the plugins into subdirs of the plugins dir,
+	and this pack does have them all at the top of the plugins dir.
+Actually, I recommend you don't use subdirectories inside your plugins dir.
 
 Currently, we don't distribute builds for older CPUs, G5: Intel Pentium I, AMD K6, K6-2, K6-III, 5x86, 6x86, etc.
 If you request us to add it, we'll add it.
