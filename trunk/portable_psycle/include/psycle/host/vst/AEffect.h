@@ -67,7 +67,7 @@ struct AEffect
 	long magic;			// must be kEffectMagic ('VstP')
 
 	long (VSTCALLBACK *dispatcher)(AEffect *effect, long opCode, long index, long value,
-		void *ptr, float opt);
+		void *ptr, float opt) throw(...);
 	
 	void (VSTCALLBACK *process)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
 	

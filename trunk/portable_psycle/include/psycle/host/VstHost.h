@@ -286,16 +286,17 @@ namespace psycle
 			inline void SendMidi();
 
 			AEffect *_pEffect;
-			inline long Dispatch(long opCode = 0, long index = 0, long value = 0, void * ptr = 0, float opt = 0.0f) throw(...)
+			inline long int Dispatch(long opCode = 0, long index = 0, long value = 0, void * ptr = 0, float opt = 0.0f) throw(...)
 			{
 				try
 				{
+					///<bohan> \todo i don't know why we get a "warning C4702: unreachable code" with msvc7.1 here...
 					return _pEffect->dispatcher(_pEffect, opCode, index, value, ptr, opt);
 				}
 				catch(const std::exception & e)
 				{
 					std::ostringstream s; s
-						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e.what();
 					::MessageBox(0, s.str().c_str(), _editName, 0);
@@ -304,7 +305,7 @@ namespace psycle
 				catch(const char e[])
 				{
 					std::ostringstream s; s
-						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e;
 					::MessageBox(0, s.str().c_str(), _editName, 0);
@@ -313,7 +314,7 @@ namespace psycle
 				catch(const int & e)
 				{
 					std::ostringstream s; s
-						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e;
 					::MessageBox(0, s.str().c_str(), _editName, 0);
@@ -322,7 +323,7 @@ namespace psycle
 				catch(const unsigned int & e)
 				{
 					std::ostringstream s; s
-						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< typeid(e).name() << std::endl
 						<< e;
 					::MessageBox(0, s.str().c_str(), _editName, 0);
@@ -331,7 +332,7 @@ namespace psycle
 				catch(...)
 				{
 					std::ostringstream s; s
-						<< "Machine had an exception on opcode:" << opCode << std::endl
+						<< "Machine had an exception on opcode: " << opCode << std::endl
 						<< "unkown type";
 					::MessageBox(0, s.str().c_str(), _editName, 0);
 					throw std::runtime_error(s.str());
