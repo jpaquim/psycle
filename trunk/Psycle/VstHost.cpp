@@ -2,15 +2,23 @@
 
 #if defined(_WINAMP_PLUGIN_)
 	#include "global.h"
+#else
+	#include "psycle2.h"
+	#include "MainFrm.h"
+
+	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
 
+#include "VstHost.h"
 #include "song.h"
 #include "Configuration.h"
-#include "FileIO.h"
-#include "VstHost.h"
+//#include "FileIO.h"
 #include "Player.h"
 
-
+#if !defined(_WINAMP_PLUGIN_)
+	#include "VstEditorDlg.h"
+#endif // !defined(_WINAMP_PLUGIN_)
+	
 VstTimeInfo VSTPlugin::_timeInfo;
 
 ////////////////////
@@ -34,6 +42,7 @@ VSTPlugin::VSTPlugin()
 	_pEffect=NULL;
 	h_dll=NULL;
 	instantiated=false;		// Constructin' with no instance
+	macindex = 0;
 
 	requiresProcess=false;
 	requiresRepl=false;
@@ -604,7 +613,14 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	switch(opcode)
 	{
 	case audioMasterAutomate:
+#if !defined(_WINAMP_PLUGIN_)
+		Global::_pSong->Tweaker = true;
 
+		if ( effect->user ) { // ugly solution...
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, (int)(opt*65535));
+		}
+
+#endif // ndef _WINAMP_PLUGIN_
 		return 0;		// index, value, returns 0
 		
 	case audioMasterVersion:			return 7;		// vst version, currently 7 (0 for older)
@@ -702,15 +718,18 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		return 0;
 
 	case 	audioMasterSizeWindow:
-//		((VSTPlugin*)effect->user)->
-		
-		break;
+#if !defined(_WINAMP_PLUGIN_)
+			if ( effect->user ) {
+				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
+			}
+#endif // !defined(_WINAMP_PLUGIN_)
+			return 0;
+				
 	case 	audioMasterGetParameterQuantization:	
 		return NUMTICKS+1; // because its from 0 to NUMTICKS
 
 	case 	audioMasterGetBlockSize:
 		return STREAM_SIZE;
-		break;
 
 	case 	audioMasterCanDo:
 			if (!strcmp((char*)ptr,"sendVstEvents")) return 1;
@@ -812,6 +831,9 @@ void VSTInstrument::Tick(int channel,PatternEntry* pData)
 		{
 			const float value = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
 			SetParameter(pData->_inst, value);
+#if !defined(_WINAMP_PLUGIN_)
+			Global::_pSong->Tweaker = true;
+#endif // ndef _WINAMP_PLUGIN_
 		}
 	}
 }
@@ -1053,6 +1075,9 @@ void VSTFX::Tick(int channel,PatternEntry* pData)
 		{
 			const float value = ((pData->_cmd*256)+pData->_parameter)/65535.0f;
 			SetParameter(pData->_inst, value);
+#if !defined(_WINAMP_PLUGIN_)
+			Global::_pSong->Tweaker = true;
+#endif // ndef _WINAMP_PLUGIN_
 		}
 	}
 }

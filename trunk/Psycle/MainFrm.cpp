@@ -1172,6 +1172,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
 				m_wndView.MasterMachineDialog->_pMachine = (Master*)Global::_pSong->_pMachines[tmac];
 				m_wndView.MasterMachineDialog->Create();
+//				m_wndView.MasterMachineDialog->GetWindowRect(&crect);
 				m_wndView.MasterMachineDialog->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 				m_wndView.MasterMachineDialog->SetActiveWindow();
 			}
@@ -1231,7 +1232,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			m_pWndMac[tmac] = new CFrameMachine(0);
 			((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
 			((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-			((CFrameMachine*)m_pWndMac[tmac])->index=m_wndView.FindBusFromIndex(tmac);
+			((CFrameMachine*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
 
 			m_pWndMac[tmac]->LoadFrame(
 				IDR_MACHINEFRAME, 
@@ -1240,23 +1241,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			((CFrameMachine*)m_pWndMac[tmac])->Generate();
 			((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 			char winname[32];
-			int i; 
-			for (i=0;i<MAX_BUSES;i++)
-			{
-				if (_pSong->busMachine[i] == tmac)
-				{
-					sprintf(winname,"%i : %s",i,Global::_pSong->_pMachines[tmac]->_editName);
-					break;
-				}
-			}
-			if (i == MAX_BUSES) for (i=0;i<MAX_BUSES;i++)
-			{
-				if (_pSong->busEffect[i] == tmac)
-				{
-					sprintf(winname,"%i : %s",i+MAX_BUSES,Global::_pSong->_pMachines[tmac]->_editName);
-					break;
-				}
-			}
+			sprintf(winname,"%i : %s",((CFrameMachine*)m_pWndMac[tmac])->index
+									 ,Global::_pSong->_pMachines[tmac]->_editName);
 			((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 			isguiopen[tmac] = true;
 			break;
@@ -1266,28 +1252,19 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			{
 			m_pWndMac[tmac] = new CVstEditorDlg(0);
 			((CVstEditorDlg*)m_pWndMac[tmac])->_editorActive = &isguiopen[tmac];
+			((CVstEditorDlg*)m_pWndMac[tmac])->wndView = &m_wndView;
+			((CVstEditorDlg*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
 			((CVstEditorDlg*)m_pWndMac[tmac])->_pMachine = (VSTPlugin*)ma;
+			((VSTPlugin*)ma)->editorWnd = m_pWndMac[tmac];
+			
+
 			((CVstEditorDlg*)m_pWndMac[tmac])->LoadFrame(IDR_VSTFRAME,
 					WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU,
 					this);
 			char winname[32];
-			int i; 
-			for (i=0;i<MAX_BUSES;i++)
-			{
-				if (_pSong->busMachine[i] == tmac)
-				{
-					sprintf(winname,"%x : %s",i,Global::_pSong->_pMachines[tmac]->_editName);
-					break;
-				}
-			}
-			if (i == MAX_BUSES) for (i=0;i<MAX_BUSES;i++)
-			{
-				if (_pSong->busEffect[i] == tmac)
-				{
-					sprintf(winname,"%x : %s",i+MAX_BUSES,Global::_pSong->_pMachines[tmac]->_editName);
-					break;
-				}
-			}
+			sprintf(winname,"%x : %s",((CVstEditorDlg*)m_pWndMac[tmac])->index
+									,Global::_pSong->_pMachines[tmac]->_editName);
+
 			((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname);
 			((CVstEditorDlg*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
 			isguiopen[tmac] = true;

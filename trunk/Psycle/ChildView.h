@@ -181,7 +181,6 @@ public:
 	void KillRedo();
 	void SelectNextTrack();  // for armed tracks recording
 
-	int FindBusFromIndex(int smac);
 public:
 
 //	char m_appdir[_MAX_PATH];

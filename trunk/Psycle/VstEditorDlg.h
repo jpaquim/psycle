@@ -27,10 +27,14 @@ public:
 	CWnd *pGui;
 	CDefaultVstGui *pParamGui;
 	VSTPlugin* _pMachine;
+	CChildView* wndView;
+	int index;
 	bool *_editorActive;
 
 // Operations
 public:
+	void Resize(int w,int h);
+	void Refresh();
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -41,6 +45,7 @@ public:
 
 // Implementation
 protected:
+	bool editorgui;
 	CSplitterWnd _splitter;
 	virtual ~CVstEditorDlg();
 

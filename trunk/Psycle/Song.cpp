@@ -130,7 +130,7 @@ bool Song::CreateMachine(
 	pMachine->Init();
 	pMachine->_x = x;
 	pMachine->_y = y;
-
+	
 	Global::_lbc = tmac;
 	
 	// Finally, activate the machine
@@ -139,6 +139,26 @@ bool Song::CreateMachine(
 	return true;
 }
 
+int Song::FindBusFromIndex(int smac)
+{
+	int i;
+	if ( !_machineActive[smac] ) return 255;
+	for (i=0;i<MAX_BUSES;i++)
+	{
+		if (busMachine[i] == smac)
+		{
+			return i;
+		}
+	}
+	for (i=0;i<MAX_BUSES;i++)
+	{
+		if (busEffect[i] == smac)
+		{
+			return i+MAX_BUSES;
+		}
+	}
+	return 255;
+}
 //////////////////////////////////////////////////////////////////////
 // Song member functions source code
 
@@ -1277,6 +1297,7 @@ bool Song::Load(
 				
 				if ( type == MACH_VST ) pMachine = pVstPlugin = new VSTInstrument;
 				else if ( type == MACH_VSTFX ) pMachine = pVstPlugin = new VSTFX;
+				pVstPlugin->macindex = FindBusFromIndex(i);
 
 				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid))
 				{

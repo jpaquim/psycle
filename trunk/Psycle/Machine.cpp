@@ -7,17 +7,19 @@
 	#include "FileIO.h"
 	#include "Configuration.h"
 #else
+	#include "Psycle2.h"
 	#include "Machine.h"
 	#include "Song.h"
 	#include "FileIO.h"
 	#include "Configuration.h"
-#endif // _WINAMP_PLUGIN_
-#include "Helpers.h"
-#include "MainFrm.h"
-#include "Psycle2.h"
-#include "MasterDlg.h"
+	#include "MasterDlg.h"
 
-extern CPsycleApp theApp;
+	#include "Helpers.h"
+	#include "MainFrm.h"
+
+	extern CPsycleApp theApp;
+#endif // _WINAMP_PLUGIN_
+
 
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
@@ -372,9 +374,9 @@ void Master::Init(void)
 	_RMAX = 1;
 	_lMax = 1;
 	_rMax = 1;
-#endif // ndef _WINAMP_PLUGIN
 	vuupdated = false;
 	_clip = false;
+#endif // ndef _WINAMP_PLUGIN
 }
 
 void Master::Work(
@@ -449,7 +451,7 @@ void Master::Work(
 				_outDry = f2i((float)_outDry * 32768.0f / _lMax);
 				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slider.SetPos(_outDry);
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slidermaster.SetPos(_outDry);
 				}
 			}
 			_lMax = 32768.0f; //_LMAX = 32768;
@@ -465,7 +467,7 @@ void Master::Work(
 				_outDry = f2i((float)_outDry * 32768.0f / _rMax);
 				if (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slider.SetPos(_outDry);
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MasterMachineDialog->m_slidermaster.SetPos(_outDry);
 				}
 			}
 			_rMax = 32768.0f; //_RMAX = 32768;

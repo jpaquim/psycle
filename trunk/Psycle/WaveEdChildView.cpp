@@ -437,7 +437,7 @@ void CWaveEdChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 
 void CWaveEdChildView::OnMouseMove(UINT nFlags, CPoint point) //Fideloop's
 {
-	if(nFlags == 1 && wdWave)
+	if(nFlags == MK_LBUTTON && wdWave)
 	{
 		int x=point.x;
 		CRect rect;
