@@ -39,6 +39,9 @@ X low priority
 	[pooplog: OFF should be in the note column, but if you want a different than default fadeout perhaps it
 	 could be called CUT ]
 
+** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
+	it works fine?
+
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
@@ -215,7 +218,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * MIDI related
 ------------
-***	Midiout is NOT solid...
+**	Midiout is NOT solid...
 *	MIDI out only works with Waveout
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages

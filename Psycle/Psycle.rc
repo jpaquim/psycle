@@ -1248,7 +1248,7 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_MULTILINE,4,270,60,15
     CONTROL         "Record Tweaks",IDC_RECORD_TWEAKS,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE,4,289,60,15
-    LTEXT           "Lin",IDC_STATIC,6,212,10,8
+    LTEXT           "Len",IDC_STATIC,6,212,12,8
 END
 
 IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 103
