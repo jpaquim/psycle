@@ -157,8 +157,12 @@ bool DirectSound::Stop()
 		/*
 		<bohan> i put a comment here, because the lock above is violating an assertion when i compile and run psycle on msvc7.1.
 		<bohan> this is triggered when i close psycle, and always happens.
+		<bohan> it looks like the m_pObject pointer of the _lock object is null! (that 0xcccccccc looks like the debug value for null pointers)
 
 		Debug assertion failed in mtex.cpp, line 90.
+
+		+	lock	{m_pObject=0xcccccccc {CSyncObject} m_hObject=0xcccccccc m_bAcquired=-858993460 }	CSingleLock
+
 
 		Call Stack:
 				mfc71d.dll!CSingleLock::CSingleLock(CSyncObject * pObject=0x00702868, int bInitialLock=1)  Line 90 + 0x22	C++
