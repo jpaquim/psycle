@@ -1,22 +1,18 @@
 #pragma once
-/** @file
- *  @brief XMSampler Header File
- *  XMSampler‚ÌInstrument***** [bohan] iso-(10)646 encoding only please! *****Edit***** [bohan] iso-(10)646 encoding only please! *****Class***** [bohan] iso-(10)646 encoding only please! *****
- *  
- *  $Date$
- *  $Revision$
- */
 
 // XMSamplerUIInst
-namespace SF {
-	class XMSampler;
+NAMESPACE__BEGIN(psycle)
+NAMESPACE__BEGIN(host)
+class XMSampler;
 	/// XMInstrument ***** [bohan] iso-(10)646 encoding only please! *****
-	class XMSamplerUIInst :
-		public WTL::CPropertyPageImpl<XMSamplerUIInst>
+class XMSamplerUIInst : public CPropertyPage
 	{
+
+#if 0
+
 		/** EnvelopeEditor Class 
 		 * Envelope Graph ***** [bohan] iso-(10)646 encoding only please! *****Edit***** [bohan] iso-(10)646 encoding only please! ***** */
-		class EnvelopeEditor : public CScrollWindowImpl<XMSamplerUIInst::EnvelopeEditor> 
+		class EnvelopeEditor : public CScrollView
 		{
 		public:
 			// constant
@@ -426,9 +422,9 @@ namespace SF {
 		void OnChangeCustom(UINT id,int command,HWND hwnd){
 			ATLTRACE2(_T("OnChangeCustom\n"));
 		};
+#endif 
 
 };
-
-}
-
+NAMESPACE__END
+NAMESPACE__END
 

@@ -13,6 +13,7 @@
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
 #include "Sampler.hpp"
+#include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VSTHost.hpp"
 namespace psycle
@@ -379,6 +380,10 @@ namespace psycle
 			case MACH_SAMPLER:
 				if ( !fullopen ) pMachine = new Dummy(index);
 				else pMachine = new Sampler(index);
+				break;
+			case MACH_XMSAMPLER:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new XMSampler(index);
 				break;
 			case MACH_PLUGIN:
 				{

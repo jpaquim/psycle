@@ -4,29 +4,19 @@
  *  $Date$
  *  $Revision$
  */
-#include "stdafx.h"
-#include "volume.h"
-#include "d3d.h"
+#include <project.private.hpp>
+#include "Psycle.hpp"
 
-#if defined(_MSC_VER) && defined(_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include "crtdbg.h"
-#define malloc(a) _malloc_dbg(a,_NORMAL_BLOCK,__FILE__,__LINE__)
-    inline void*  operator new(size_t size, LPCSTR strFileName, INT iLine)
-        {return _malloc_dbg(size, _NORMAL_BLOCK, strFileName, iLine);}
-    inline void operator delete(void *pVoid, LPCSTR strFileName, INT iLine)
-        {_free_dbg(pVoid, _NORMAL_BLOCK);}
-#define new  ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
-
-#include "XMInstrument.h"
-#include "XMSampler.h"
-#include "XMSamplerUIInst.h"
+#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
+#include "XMSamplerUIInst.hpp"
 
 using namespace Gdiplus;
 
-namespace SF {
+NAMESPACE__BEGIN(psycle)
+NAMESPACE__BEGIN(host)
+
+#if 0
 
 // Constructor
 XMSamplerUIInst::XMSamplerUIInst()
@@ -1436,8 +1426,9 @@ void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMIn
 
 		return boost::optional<int>();//ñ≥å¯Ç»ílÇï‘Ç∑ÅB
 	};
-
-}
+#endif
+NAMESPACE__END
+NAMESPACE__END
 
 // XMSamplerUIInst
 

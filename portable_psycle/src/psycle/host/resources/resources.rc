@@ -1692,6 +1692,55 @@ BEGIN
                     WS_EX_CLIENTEDGE
 END
 
+IDD_CONFIGURATION1 DIALOG  0, 0, 398, 156
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configuration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,341,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,341,24,50,14
+END
+
+IDD_XM_SAMPLER DIALOGEX 0, 0, 375, 188
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Extended Sampler"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Aceptar",IDOK,318,7,50,14
+    PUSHBUTTON      "Cancelar",IDCANCEL,318,24,50,14
+END
+
+IDD_XM_GENERAL DIALOGEX 0, 0, 361, 214
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_XMINTERPOL,89,19,93,43,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Interpolation",IDC_STATIC,21,20,66,13
+    EDITTEXT        IDC_XMSPEED,76,57,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_XMTEMPO,75,76,40,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_XMPOLY,"msctls_trackbar32",TBS_TOP | TBS_NOTICKS | 
+                    WS_TABSTOP,149,59,100,15
+    CTEXT           "Estático",IDC_XMPOLYLABEL,262,59,31,18,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+END
+
+IDD_XMSAMPLERUIINST DIALOGEX 0, 0, 389, 238
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Instruments"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 319, 238
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Samples"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1982,6 +2031,46 @@ BEGIN
         TOPMARGIN, 12
         BOTTOMMARGIN, 188
     END
+
+    IDD_CONFIGURATION1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 391
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_XM_SAMPLER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 368
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 181
+    END
+
+    IDD_XM_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 354
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 207
+    END
+
+    IDD_XMSAMPLERUIINST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 382
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 231
+    END
+
+    IDD_XMSAMPLERUISAMPLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 312
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 231
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2069,6 +2158,7 @@ BEGIN
         BEGIN
             MENUITEM "&XM File",                    ID_FILE_IMPORT_XMFILE
             MENUITEM "&IT File",                    ID_FILE_IMPORT_ITFILE
+            MENUITEM "S3M File",                    ID_IMPORT_S3MFILE
         END
         MENUITEM SEPARATOR
         MENUITEM "Song &properties",            ID_FILE_SONGPROPERTIES
@@ -2358,8 +2448,8 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""./resources.rc2""\r\n"  // non-Microsoft Visual C++ edited resources\r\n"
-    "#include <afxres.rc>\r\n"         // Standard components\r\n"
+    "#include ""./resources.rc2""\r\n"
+    "#include <afxres.rc>\r\n"
     "#endif\r\n"
     "\0"
 END
@@ -2374,7 +2464,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "[Untitled.psy] Psycle Modular Music Creation Studio" // RC__ProductName " " RC__ProductVersion
+    IDR_MAINFRAME           "[Untitled.psy] Psycle Modular Music Creation Studio"
 END
 
 STRINGTABLE 
@@ -2581,8 +2671,8 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "./resources.rc2"  // non-Microsoft Visual C++ edited resources
-#include <afxres.rc>         // Standard components
+#include "./resources.rc2"
+#include <afxres.rc>
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

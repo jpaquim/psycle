@@ -581,7 +581,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-		};
+			afx_msg void OnImportS3mfile();
+};
 
 
 		/////////////////////////////////////////////////////////////////////////////

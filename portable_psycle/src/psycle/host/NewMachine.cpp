@@ -184,6 +184,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+				hInt[2] = m_browser.InsertItem("XMSampler",0, 0, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[LastType0],TVGN_CARET);
 			}
 			else
@@ -233,6 +234,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+				hInt[2] = m_browser.InsertItem("XMSampler",0, 0, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[LastType1],TVGN_CARET);
 			}
 			Outputmachine = -1;
@@ -269,6 +271,19 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
+			if (tHand == hInt[2])
+				{
+				m_nameLabel.SetWindowText("XMSampler");
+				m_descLabel.SetWindowText("Extended Sampler Based on SF's work");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V0.5b");
+				Outputmachine = MACH_XMSAMPLER;
+				OutBus = true;
+				LastType0 = 0;
+				LastType1 = 0;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+				}
 			for (int i=0; i<_numPlugins; i++)
 			{
 				if (tHand == hPlug[i])

@@ -1,5 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
+// Used by resources.rc
+//
 #define IDC_COPY                        3
 #define IDC_PASTE                       4
 #define ID_INDICATOR_SEQPOS             52
@@ -92,6 +94,11 @@
 #define IDB_BITMAP1                     207
 #define IDB_BETASPLASH                  208
 #define IDD_MIXER                       209
+#define IDD_CONFIGURATION1              210
+#define IDD_XM_SAMPLER                  214
+#define IDD_XM_GENERAL                  215
+#define IDD_XMSAMPLERUIINST             217
+#define IDD_XMSAMPLERUISAMPLE           218
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -752,6 +759,11 @@
 #define IDC_MIXSLIDER2                  1542
 #define IDC_MIXSLIDER3                  1543
 #define IDC_MIXSLIDER4                  1544
+#define IDC_XMINTERPOL                  1545
+#define IDC_XMPOLY                      1546
+#define IDC_XMTEMPO                     1547
+#define IDC_XMSPEED                     1548
+#define IDC_XMPOLYLABEL                 1549
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -842,15 +854,17 @@
 #define ID_EDIT_CROP                    32929
 #define ID_MIXER                        32934
 #define ID_VIEW_MIXER                   32934
+#define ID_IMPORT_S3MFILE               32937
 #define ID_TEXT                         65535
 
 // Next default values for new objects
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_3D_CONTROLS                1
-#define _APS_NEXT_RESOURCE_VALUE        214
-#define _APS_NEXT_COMMAND_VALUE         32937
-#define _APS_NEXT_CONTROL_VALUE         1545
+#define _APS_3D_CONTROLS                     1
+#define _APS_NEXT_RESOURCE_VALUE        219
+#define _APS_NEXT_COMMAND_VALUE         32938
+#define _APS_NEXT_CONTROL_VALUE         1550
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

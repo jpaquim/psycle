@@ -1,15 +1,10 @@
-#ifndef _XMSAMPLER_H
-#define _XMSAMPLER_H
+///\file
+///\brief interface file for psycle::host::XMSampler.
 #pragma once
-/** @file 
- *  @brief header file
- *  $Date$
- *  $Revision$
- */
-#include "Machine.h"
-#include "Filter.h"
+#include "Machine.hpp"
+#include "Filter.hpp"
+#include "XMInstrument.hpp"
 
-//namespace SF {
 namespace psycle
 {
 	namespace host
@@ -17,9 +12,9 @@ namespace psycle
 class XMSampler : public Machine
 {
 public:
-	static const int POINT = 16;///< envelope point
+//	static const int POINT = 16;///< envelope point
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
-	static const int MAX_INSTRUMENT = 256;///< max instrument
+	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const int LINEAR_FREQUECY = 1;///< Liner
 	static const UINT VERSION = 0x00008000;
 	/// \todo Sampling rate can't be a constant!
@@ -116,7 +111,6 @@ public:
 		
 
 	};
-
 
 
 	enum InterpolationType
@@ -240,7 +234,7 @@ public:
 			m_Tick = 0;
 			m_PositionIndex = 0;
 			m_Stage = EnvelopeStage::DOSTEP;
-			m_ModulationAmount = m_pEnvelope->Value(0);
+			m_ModulationAmount = m_pEnvelope->GetValue(0);
 			
 			if(m_pEnvelope->SustainBegin() == 0)
 			{
@@ -249,7 +243,7 @@ public:
 				return;
 			}
 
-			if(m_pEnvelope->Point(1) == - 1){
+			if(m_pEnvelope->GetTime(1) == - 1){
 				m_Stage = EnvelopeStage::END;
 			} else {
 				CalcStep(0,1);
@@ -259,7 +253,6 @@ public:
 		/// NoteOff EnvelopeStage
 		void NoteOff()
 		{
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
 			if(m_Stage == EnvelopeStage::SUSTAIN || m_Stage == EnvelopeStage::DOSTEP){
 				m_Stage = EnvelopeStage::RELEASE;
 				CalcStep(m_PositionIndex,m_PositionIndex + 1);
@@ -267,10 +260,8 @@ public:
 
 		};
 
-		/// Tick‚ ***** [bohan] iso-(10)646 encoding only please! *****
 		void Work()
 		{
-			// DOSTEP ***** [bohan] iso-(10)646 encoding only please! *****
 			if((m_Stage == EnvelopeStage::DOSTEP)|(m_Stage == EnvelopeStage::RELEASE)){
 				m_ModulationAmount += m_Step;
 
@@ -278,16 +269,16 @@ public:
 				return;
 			}
 
-			m_Tick++;// 1Tick ***** [bohan] iso-(10)646 encoding only please! ***** 44100
+			m_Tick++;// 1Tick  44100
 
-			if((m_Tick >= m_pEnvelope->Point(m_PositionIndex + 1)))
+			if((m_Tick >= m_pEnvelope->GetTime(m_PositionIndex + 1)))
 			{
 				m_PositionIndex++;
 
 				if(m_pEnvelope->LoopEnd() == m_PositionIndex){
 					m_PositionIndex = m_pEnvelope->LoopStart();
-					m_Tick = m_pEnvelope->Point(m_PositionIndex);
-					m_ModulationAmount = m_pEnvelope->Value(m_PositionIndex);
+					m_Tick = m_pEnvelope->GetTime(m_PositionIndex);
+					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
 					if(m_pEnvelope->LoopStart() != m_pEnvelope->LoopEnd()){
 						CalcStep(m_PositionIndex,m_PositionIndex + 1);
 					} else {
@@ -303,18 +294,18 @@ public:
 					m_Stage = EnvelopeStage::SUSTAIN;
 				}
 
-				if((m_PositionIndex >= (m_pEnvelope->NumOfPoints() - 1))  | (m_PositionIndex > 15) | (m_pEnvelope->Point(m_PositionIndex) == -1)){
+				if((m_PositionIndex >= (m_pEnvelope->NumOfPoints() - 1))  | (m_PositionIndex > 15) | (m_pEnvelope->GetTime(m_PositionIndex) == -1)){
 					m_Stage = EnvelopeStage::END;
-					m_ModulationAmount = m_pEnvelope->Value(m_pEnvelope->NumOfPoints() - 1);
+					m_ModulationAmount = m_pEnvelope->GetValue(m_pEnvelope->NumOfPoints() - 1);
 				} else {
-					m_ModulationAmount = m_pEnvelope->Value(m_PositionIndex);
+					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
 					CalcStep(m_PositionIndex,m_PositionIndex + 1);
 				}
 			}
 
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+		/// 
 		const ValueType ModulationAmount()
 		{
 			return m_ModulationAmount;
@@ -324,7 +315,6 @@ public:
 		void Stage(const EnvelopeStage value){m_Stage = value;};
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 	private:
-		/// 1S ample‚ ***** [bohan] iso-(10)646 encoding only please! *****
 		inline void CalcStep(const int start,const int  end);
 
 		int m_Tick;
@@ -337,38 +327,36 @@ public:
 		ValueType m_Step;
 	};// EnvelopeController
 	class Voice;
-	/// ***** [bohan] iso-(10)646 encoding only please! *****
+
 	class Channel {
 	public:
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		struct EffectFlag
 		{
-			static const int VIBRATO =			0x00000001;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int PORTAUP =			0x00000002;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int PORTADOWN =		0x00000004;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int PORTA2NOTE =		0x00000008;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int VOLUMESLIDE =		0x00000010;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int PANSLIDE =			0x00000020;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int TREMOLO =			0x00000040;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int ARPEGGIO =			0x00000080;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int NOTECUT =			0x00000100;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			static const int VIBRATO =			0x00000001;///< 
+			static const int PORTAUP =			0x00000002;///< 
+			static const int PORTADOWN =		0x00000004;///< 
+			static const int PORTA2NOTE =		0x00000008;///< 
+			static const int VOLUMESLIDE =		0x00000010;///< 
+			static const int PANSLIDE =			0x00000020;///< 
+			static const int TREMOLO =			0x00000040;///< 
+			static const int ARPEGGIO =			0x00000080;///< 
+			static const int NOTECUT =			0x00000100;///< 
 			static const int PANBRELLO =		0x00000200;///<	Panbrello
 			static const int GLOBALVOLSLIDE	=   0x00000400;///< GLobal Volume Slide
 			static const int TREMOR			=	0x00000800;///< Tremor
 
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		Channel()
 		{
 			Init();
 		};
 
 		void Init(){
-						m_InstrumentNo = 255;// ***** [bohan] iso-(10)646 encoding only please! *****
+			m_InstrumentNo = 255;// 
 			m_Volume = 0;
-			m_ChannelVolume = 128;// ***** [bohan] iso-(10)646 encoding only please! *****
-			m_Note = 255;// ***** [bohan] iso-(10)646 encoding only please! *****
+			m_ChannelVolume = 128;//
+			m_Note = 255;// 
 			m_PortamentoSpeed = 0;
 			m_Porta2NoteDestPeriod= 0;
 			m_FinePortamentoValue  = 0;
@@ -439,24 +427,16 @@ public:
 		
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int InstrumentNo(){return m_InstrumentNo;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void InstrumentNo(const int no){m_InstrumentNo = no;};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const float ChannelVolume(){return m_ChannelVolume;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void ChannelVolume(const float value){m_ChannelVolume = value;};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int Volume(){return m_Volume;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Volume(const int value){m_Volume = value;};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int Note(){ return m_Note;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Note(const int note,const int layer)
 		{	m_Note = note;
 			m_Period = NoteToPeriod(note,layer);
@@ -465,7 +445,6 @@ public:
 
 
 		// Channel Command
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void VolumeDown(const int value){
 			m_Volume -= value;
 			if(m_Volume < 0){
@@ -473,7 +452,6 @@ public:
 			}
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void VolumeUp(const int value){
 			m_Volume += value;
 			if(m_Volume > 255){
@@ -481,18 +459,14 @@ public:
 			}
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Porta2NoteDestPeriod(const double speed)
 		{m_Porta2NoteDestPeriod = speed;};
-		inline void Porta2NoteDestPeriod(const int note,const int layer);///< ***** [bohan] iso-(10)646 encoding only please! *****
-		const double Porta2NoteDestPeriod(){return m_Porta2NoteDestPeriod;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		inline void Porta2NoteDestPeriod(const int note,const int layer);///
+		const double Porta2NoteDestPeriod(){return m_Porta2NoteDestPeriod;};///
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Porta2Note(const UCHAR note,const int parameter,const int layer);
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Porta2Note(XMSampler::Voice& voice);
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void PortamentoUp(const int speed)
 		{ 
 			m_EffectFlags |= EffectFlag::PORTAUP;
@@ -501,14 +475,12 @@ public:
 			}
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void PortamentoUp()
 		{
 			m_Period -= m_PortamentoSpeed;
 			m_bPeriodChange = true;
 		};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void PortamentoDown(const int speed)
 		{	m_EffectFlags |= EffectFlag::PORTADOWN;
 			if(speed != 0){
@@ -516,7 +488,6 @@ public:
 			}
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void PortamentoDown()
 		{
 			m_Period += m_PortamentoSpeed;
@@ -525,7 +496,6 @@ public:
 
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void FinePortamentoUp(const int value)
 		{
 			if(value != 0)
@@ -536,7 +506,6 @@ public:
 
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void FinePortamentoDown(const int value)
 		{
 			if(value != 0)
@@ -547,19 +516,14 @@ public:
 
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int EffectFlags(){return m_EffectFlags;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void EffectFlags(const int value){m_EffectFlags = value;};
 
 		void pSampler(XMSampler * const pSampler){m_pSampler = pSampler;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+
 		const bool IsGrissando(){return m_bGrissando;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void IsGrissando(const bool value){m_bGrissando = value;};
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const bool IsVibrato(){return (m_EffectFlags & EffectFlag::VIBRATO) > 0;};
-		///	***** [bohan] iso-(10)646 encoding only please! *****
 		void IsVibrato(const bool value)
 		{
 			if(value){
@@ -569,16 +533,14 @@ public:
 			}
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		inline void Vibrato(const int depth,const int speed = 0);
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		inline void Vibrato();
 
-		void VibratoSpeed(const int value){	m_VibratoSpeed = value;};///< ***** [bohan] iso-(10)646 encoding only please! *****
-		const int VibratoSpeed() {return m_VibratoSpeed;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		void VibratoSpeed(const int value){	m_VibratoSpeed = value;};///
+		const int VibratoSpeed() {return m_VibratoSpeed;};///
 
-		void VibratoDepth(const int value){	m_VibratoDepth = value;};///< ***** [bohan] iso-(10)646 encoding only please! *****
-		const int VibratoDepth() {return m_VibratoDepth;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		void VibratoDepth(const int value){	m_VibratoDepth = value;};///
+		const int VibratoDepth() {return m_VibratoDepth;};///
 
 		void AutoVibratoAmount(const double value){m_AutoVibratoAmount = value;};
 		const double AutoVibratoAmount(){return m_AutoVibratoAmount;};
@@ -587,11 +549,9 @@ public:
 		const double VibratoAmount(){return m_VibratoAmount;};
 
 
-		/** ***** [bohan] iso-(10)646 encoding only please! ***** */
 		void VibratoType(const int value){	m_VibratoType = value;};
 		const int VibratoType() {return m_VibratoType;};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Tremolo(const int depth,const int speed)
 		{
 			if(depth) m_TremoloDepth = depth;
@@ -599,16 +559,12 @@ public:
 			m_EffectFlags |= EffectFlag::TREMOLO;
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void TremoloType(const int type){m_TremoloType = type;};
 		const int TremoloType(){return m_TremoloType;};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		inline void Tremolo();
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const float TremoloDelta(){return m_TremoloDelta;};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void VolumeSlide(const int speed,const bool bUp)
 		{
 			if(speed > 0){
@@ -618,7 +574,6 @@ public:
 			m_EffectFlags |= EffectFlag::VOLUMESLIDE;
 		};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void VolumeSlide()
 		{
 			if(m_bUp){
@@ -629,7 +584,6 @@ public:
 			m_bVolumeChange = true;
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void PanningSlide(const int speed,const bool bLeft)
 		{
 			if(speed){
@@ -639,7 +593,6 @@ public:
 			m_EffectFlags |= EffectFlag::PANSLIDE;
 		};
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void PanningSlide(){
 			if(m_bLeft){
 				panFactor -= m_PanSlideSpeed;
@@ -653,7 +606,6 @@ public:
 			}
 		};
 
-		/// Panbrello ***** [bohan] iso-(10)646 encoding only please! ***** Panbrello Type
 		void PanbrelloType(const int type){m_PanbrelloType = type;};
 		const int PanbrelloType(){return m_PanbrelloType;};
 
@@ -827,8 +779,8 @@ public:
 		int m_Volume;///<  (0 - 100)
 		float m_ChannelVolume;///< (0.0f - 1.0f)
 		
-		int m_Note;///< ***** [bohan] iso-(10)646 encoding only please! *****
-		double m_Period;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		int m_Note;///< 
+		double m_Period;///< 
 		bool m_bPeriodChange;
 		
 		int m_EffectFlags;
@@ -842,17 +794,16 @@ public:
 		XMSampler *m_pSampler;
 		bool m_bGrissando;
 
-		// ***** [bohan] iso-(10)646 encoding only please! *****
-		int m_VibratoSpeed;///< vibrato speed ***** [bohan] iso-(10)646 encoding only please! *****
-		int m_VibratoDepth;///< vibrato depth ***** [bohan] iso-(10)646 encoding only please! *****
-		int m_VibratoType;///< vibrato type ***** [bohan] iso-(10)646 encoding only please! *****
+		int m_VibratoSpeed;///< vibrato speed 
+		int m_VibratoDepth;///< vibrato depth
+		int m_VibratoType;///< vibrato type 
 		int m_VibratoPos;///< vibrato position 
 		double m_VibratoAmount;///< vibrato amount
 		double m_AutoVibratoAmount;///< vibrato amount
 
-		int m_Index;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		int m_Index;///< 
 
-		// ***** [bohan] iso-(10)646 encoding only please! *****
+		// 
 		int m_TremoloSpeed;
 		int m_TremoloDepth;
 		float m_TremoloDelta;
@@ -866,13 +817,13 @@ public:
 		int m_PanbrelloPos;
 		int m_PanbrelloType;
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+		///
 		float m_PanSlideSpeed;
 		bool m_bLeft;
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+		///
 		int m_VolumeSlideSpeed;
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+		///
 		bool m_bUp;
 
 		/// Arpeggio  
@@ -893,7 +844,7 @@ public:
 		int m_TremorCount;
 		bool m_bTremorMute;
 
-		float panFactor;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		float panFactor;///< 
 
 		// Note Cut Command 
 		//	Channel volume is 0 after n ticks
@@ -901,23 +852,22 @@ public:
 
 		bool m_bSurround;
 
-		// ***** [bohan] iso-(10)646 encoding only please! *****
+		// 
 		static const int m_SinTable[64];///< Sin
 		static const int m_RampDownTable[64];///< RampDown
 		static const int m_SquareTable[64];///< Square
 		static const int m_RandomTable[64];///< Random
 	};
 
-	/// ***** [bohan] iso-(10)646 encoding only please! *****
+	/// 
 	class Voice
 	{
 	public:
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+		/// 
 		Voice(){
 			Init();
 		};
 
-		/// Voice ***** [bohan] iso-(10)646 encoding only please! *****
 		void Init(){
 
 			m_AmplitudeEnvelope.Init();
@@ -958,11 +908,11 @@ public:
 			m_bPlay = false;
 		};
 
-		void VoiceInit(const UCHAR note);///< ***** [bohan] iso-(10)646 encoding only please! *****
-		void ClearEffectFlags() {m_EffectFlags = 0;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		void VoiceInit(const UCHAR note);///< 
+		void ClearEffectFlags() {m_EffectFlags = 0;};///< 
 		
-		const int TickCounter(){return _tickCounter;};///< Tick(Sample) ***** [bohan] iso-(10)646 encoding only please! *****
-		void TickCounter(const int value){_tickCounter = value;};///< Tick(Sample) ***** [bohan] iso-(10)646 encoding only please! *****
+		const int TickCounter(){return _tickCounter;};///< Tick(Sample) 
+		void TickCounter(const int value){_tickCounter = value;};///< Tick(Sample) 
 
 		const int TriggerNoteOff(){return _triggerNoteOff;};
 		void TriggerNoteOff(const int value){_triggerNoteOff = value;};
@@ -970,23 +920,18 @@ public:
 		const int TriggerNoteDelay(){return _triggerNoteDelay;};
 		void TriggerNoteDelay(const int value){_triggerNoteDelay = value;};
 
-		// ***** [bohan] iso-(10)646 encoding only please! *****
 		void NoteOn();
-		void NoteOff();///< ***** [bohan] iso-(10)646 encoding only please! *****
-		void NoteOffFast();///< ***** [bohan] iso-(10)646 encoding only please! *****
+		void NoteOff();///< 
+		void NoteOffFast();///< 
 		
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Retrigger(const int ticks,const int volumeModifier);
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Work(int numSamples,float * pSampleL,float *pSamlpesR,Cubic& _resampler);
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int Instrument(){ return _instrument;};
 		void Instrument(const int value){_instrument = value;};
 		
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int Channel(){ return m_channel;};
 		void Channel(const int value){ m_channel = value;};
 
@@ -1005,17 +950,16 @@ public:
 
 		void PerformFx();
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		inline void SetWaveVolume(const int volume);
 
-		void pSampler(XMSampler * const p){m_pSampler = p;};///< ***** [bohan] iso-(10)646 encoding only please! *****
-		XMSampler * const pSampler(){return m_pSampler;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		void pSampler(XMSampler * const p){m_pSampler = p;};///< 
+		XMSampler * const pSampler(){return m_pSampler;};///< 
 
-		void NextTick(const int value){m_NextTick = value;};///< ***** [bohan] iso-(10)646 encoding only please! *****
-		const int NextTick(){ return m_NextTick;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		void NextTick(const int value){m_NextTick = value;};///< 
+		const int NextTick(){ return m_NextTick;};///< 
 		
-		const bool IsPlaying(){ return m_bPlay;};///< ***** [bohan] iso-(10)646 encoding only please! *****
-		void IsPlaying(const bool value){ m_bPlay = value;};///< ***** [bohan] iso-(10)646 encoding only please! *****
+		const bool IsPlaying(){ return m_bPlay;};///< 
+		void IsPlaying(const bool value){ m_bPlay = value;};///< 
 		
 		XMInstrument *pInstrument() { return m_pInstrument;};///< Get Instrument Pointer
 		void pInstrument(XMInstrument *p){m_pInstrument = p;};///< Set Instrument Pointer
@@ -1033,45 +977,43 @@ public:
 
 	private:
 		
-		bool m_bPlay;///< ***** [bohan] iso-(10)646 encoding only please! *****
-		int _instrument;///< Instrument ”Ô†
+		bool m_bPlay;///
+		int _instrument;///< Instrument
 
 		XMInstrument *m_pInstrument;
 
-		DWORD m_EffectFlags;/// ***** [bohan] iso-(10)646 encoding only please! *****
+		DWORD m_EffectFlags;///
 
-		// ***** [bohan] iso-(10)646 encoding only please! *****
 	
 		float m_VolumeFadeSpeed;
 		float m_VolumeFadeAmount;
 
-		int _tickCounter;///< Tick ***** [bohan] iso-(10)646 encoding only please! *****
-		int m_NextTick;///<  ***** [bohan] iso-(10)646 encoding only please! ***** ÌTicks
+		int _tickCounter;///< Tick
+		int m_NextTick;///< 
 
 		int _triggerNoteOff;
 		int _triggerNoteDelay;
 		
-		// ***** [bohan] iso-(10)646 encoding only please! *****
 	
-		int effVal;//? ***** [bohan] iso-(10)646 encoding only please! *****
-		int effCmd;//? ***** [bohan] iso-(10)646 encoding only please! *****
+		int effVal;//
+		int effCmd;//
 
-		EnvelopeController m_FilterEnvelope;///< ***** [bohan] iso-(10)646 encoding only please! *****
-		EnvelopeController m_AmplitudeEnvelope;///< ***** [bohan] iso-(10)646 encoding only please! *****
-		EnvelopeController m_PanEnvelope;///< ***** [bohan] iso-(10)646 encoding only please! *****
-		EnvelopeController m_PitchEnvelope;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		EnvelopeController m_FilterEnvelope;///
+		EnvelopeController m_AmplitudeEnvelope;///
+		EnvelopeController m_PanEnvelope;///< 
+		EnvelopeController m_PitchEnvelope;///< 
 		
-		WaveDataController m_WaveDataController;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		WaveDataController m_WaveDataController;///< 
 		
-		Filter _filter;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		Filter _filter;///< 
 		
-		int _cutoff;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		int _cutoff;///< 
 		float _coModify;///< 
 		
-		int m_channel;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		int m_channel;///< 
 		
-		XMSampler::Channel* m_pChannel;///< ***** [bohan] iso-(10)646 encoding only please! *****
-		XMSampler *m_pSampler;///< ***** [bohan] iso-(10)646 encoding only please! *****
+		XMSampler::Channel* m_pChannel;///< 
+		XMSampler *m_pSampler;///< 
 		int effretMode;
 		int effretTicks;
 		float effretVol;
@@ -1094,7 +1036,7 @@ public:
 	virtual void Init(void);
 	
 	void Tick();
-	/// numSamples ***** [bohan] iso-(10)646 encoding only please! *****
+	/// numSamples
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
@@ -1109,13 +1051,13 @@ public:
 	void BPM (const int value){m_BPM = value;};///< Beat Per Minutes
 	const int BPM (){return m_BPM;};///< Beat Per Minutes
 	
-	// MOD Tick ***** [bohan] iso-(10)646 encoding only please! *****
-	void TicksPerRow(const int value){m_TicksPerRow = value;};///< Get 1s ***** [bohan] iso-(10)646 encoding only please! *****
-	const int TicksPerRow(){ return m_TicksPerRow;};///< Set 1s ***** [bohan] iso-(10)646 encoding only please! *****
+	// MOD Tick 
+	void TicksPerRow(const int value){m_TicksPerRow = value;};///< Get 1s 
+	const int TicksPerRow(){ return m_TicksPerRow;};///< Set 1s 
 
 
-	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];};///< Channel ***** [bohan] iso-(10)646 encoding only please! *****
-	Voice& rVoice(const int index) { return _voices[index];};///< ***** [bohan] iso-(10)646 encoding only please! *****
+	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];};///< Channel 
+	Voice& rVoice(const int index) { return _voices[index];};///< 
 
 	XMInstrument & Instrument(const int index){return m_Instruments[index];};
 	
@@ -1139,7 +1081,7 @@ public:
 	const psycle::host::ResamplerQuality ResamplerQuality();
 #endif
 
-	/// BPM Speed ***** [bohan] iso-(10)646 encoding only please! *****
+	/// BPM Speed
 	void CalcBPMAndTick();
 	
 	boost::recursive_mutex & Mutex()
@@ -1170,14 +1112,13 @@ protected:
 private:
 
 	int m_BPM;
-	int m_TicksPerRow;///< ***** [bohan] iso-(10)646 encoding only please! *****
-	int m_DeltaTick;///< Tick ***** [bohan] iso-(10)646 encoding only please! *****
-	int m_TickCount;///< 1s ***** [bohan] iso-(10)646 encoding only please! *****
+	int m_TicksPerRow;///< 
+	int m_DeltaTick;///< Tick
+	int m_TickCount;///< 1s 
 	bool m_bLinearFreq;
-	/// ***** [bohan] iso-(10)646 encoding only please! ***** Instrument Data
+	///
 	XMInstrument m_Instruments[MAX_INSTRUMENT];
 	boost::recursive_mutex m_Mutex;
 };
 }
 }
-#endif

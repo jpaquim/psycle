@@ -26,7 +26,7 @@ namespace psycle
 				return false;
 
 			// clear existing data
-			s->DeleteAllPatterns();
+		//	s->DeleteAllPatterns(); // [JAZ] : we have just made a song->New()
 
 			LONG iInstrStart = ImportPatterns(s);
 			ImportInstruments(s,iInstrStart);
@@ -316,8 +316,9 @@ namespace psycle
 			strcpy(s->_pInstrument[idx]->_sName,sInstrName);
 			zapArray(sInstrName);
 
-			//int iSampleHeader = ReadInt4(); [bohan] unused var
+			int iSampleHeader = ReadInt4();
 			ASSERT(iSampleHeader==0x28);
+			iSampleHeader=iSampleHeader; // assing to make compiler happy.
 			// exit if empty
 
 			iStart += iInstrSize;

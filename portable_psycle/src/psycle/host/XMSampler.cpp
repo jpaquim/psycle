@@ -1,26 +1,16 @@
-#include "stdafx.h"
+
 /** @file 
  *  @brief implementation file
  *  $Date$
  *  $Revision$
  */
-#if defined(_MSC_VER) && defined(_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include "crtdbg.h"
-#define malloc(a) _malloc_dbg(a,_NORMAL_BLOCK,__FILE__,__LINE__)
-    inline void*  operator new(size_t size, LPCSTR strFileName, INT iLine)
-        {return _malloc_dbg(size, _NORMAL_BLOCK, strFileName, iLine);}
-    inline void operator delete(void *pVoid, LPCSTR strFileName, INT iLine)
-        {_free_dbg(pVoid, _NORMAL_BLOCK);}
-#define new  ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
-#include "XMInstrument.h"
-#include "XMSampler.h"
-#include "Song.h"
-#include "FileIO.h"
+#include <project.private.hpp>
+#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
+#include "Song.hpp"
+#include "FileIO.hpp"
 //#include "IPsySongLoader.h"
-#include "Configuration.h"
+#include "Configuration.hpp"
 #pragma unmanaged
 
 //namespace SF {
@@ -493,7 +483,8 @@ namespace psycle
 
 			if ( pData->_note > 120 ) // don't process twk , twf of Mcm Commands
 			{
-				if ( (pData->_cmd == 0 && pData->_volcmd == 0) || pData->_note != 255) return; // Return in everything but commands!
+//				if ( (pData->_cmd == 0 && pData->_volcmd == 0) || pData->_note != 255) return; // Return in everything but commands!
+				if ( (pData->_cmd == 0 ) || pData->_note != 255) return; // Return in everything but commands!
 		
 			}
 
@@ -507,8 +498,10 @@ namespace psycle
 			PatternEntry& data = *pData;///< ***** [bohan] iso-(10)646 encoding only please! *****
 			bool _bInstrumentSet = data._inst < 255;///< ***** [bohan] iso-(10)646 encoding only please! *****
 			bool _bvoiceFound = false;///***** [bohan] iso-(10)646 encoding only please! *****
-			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF) & (data._volcmd != CMD::NOTE_OFF);///***** [bohan] iso-(10)646 encoding only please! *****
-			bool _bNotPorta2Note = !((data._cmd == CMD::PORTA2NOTE) || (data._volcmd == CMD::PORTA2NOTE));
+//			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF) & (data._volcmd != CMD::NOTE_OFF);///***** [bohan] iso-(10)646 encoding only please! *****
+			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF);
+//			bool _bNotPorta2Note = !((data._cmd == CMD::PORTA2NOTE) || (data._volcmd == CMD::PORTA2NOTE));
+			bool _bNotPorta2Note = !((data._cmd == CMD::PORTA2NOTE));
 			
 			///< ***** [bohan] iso-(10)646 encoding only please! *****
 			int _current;///< ***** [bohan] iso-(10)646 encoding only please! *****
@@ -660,7 +653,7 @@ namespace psycle
 				
 				_layer = _inst.NoteToSample(_channel.Note());
 				
-				int twlength = _inst.rWaveData(_layer).WaveLength();
+				int twlength = _inst.rWaveLayer(_layer).WaveLength();
 
 				if(twlength > 0){
 
@@ -721,10 +714,12 @@ namespace psycle
 
 			// ***** [bohan] iso-(10)646 encoding only please! ***** /////////////////////////////////////////////////////
 			
-			if((data._cmd == CMD::VOLUME) | (data._volcmd == CMD::VOLUME))
+//			if((data._cmd == CMD::VOLUME) | (data._volcmd == CMD::VOLUME))
+			if(data._cmd == CMD::VOLUME)
 			{
 				// ***** [bohan] iso-(10)646 encoding only please! *****
-				int _volume = (data._cmd == CMD::VOLUME)?data._parameter:data._volume;
+//				int _volume = (data._cmd == CMD::VOLUME)?data._parameter:data._volume;
+				int _volume = data._parameter;
 				_channel.Volume(_volume);
 				_channel.IsVolumeChange(true);
 			} 
@@ -736,13 +731,13 @@ namespace psycle
 					_channel.IsVolumeChange(true);
 				} else {
 
-					rChannel(channel).Volume(_inst.rWaveData(_layer).WaveVolume() * 255 / 100);
+					rChannel(channel).Volume(_inst.rWaveLayer(_layer).WaveVolume() * 255 / 100);
 					_channel.IsVolumeChange(true);
 				}
 			} else if(_bInstrumentSet)
 			{
 				// ***** [bohan] iso-(10)646 encoding only please! *****
-				rChannel(channel).Volume(_inst.rWaveData(_layer).WaveVolume() * 255 / 100);
+				rChannel(channel).Volume(_inst.rWaveLayer(_layer).WaveVolume() * 255 / 100);
 				_channel.IsVolumeChange(true);
 			}
 			
@@ -761,13 +756,14 @@ namespace psycle
 				_channel.IsVolumeChange(true);
 				_channel.IsSurround(false);
 			}
-			else if ( data._volcmd == CMD::PANNING) 
+/*			else if ( data._volcmd == CMD::PANNING) 
 			{
 				// Panninng ***** [bohan] iso-(10)646 encoding only please! *****
 				_channel.PanFactor(CValueMapper::Map_255_1(data._volume));
 				_channel.IsVolumeChange(true);
 				_channel.IsSurround(false);
 			}
+*/
 			else {
 				// Instrument***** [bohan] iso-(10)646 encoding only please! ***** Panning
 				if((_channel.PanFactor() < 0 || _bInstrumentSet) & (!_channel.IsSurround()))
@@ -779,7 +775,7 @@ namespace psycle
 
 			
 			// ***** [bohan] iso-(10)646 encoding only please! *****
-			_channel.PerformEffect(*_newVoice,data._volcmd,data._volume);
+//			_channel.PerformEffect(*_newVoice,data._volcmd,data._volume);
 
 			// Effect Command
 			_channel.PerformEffect(*_newVoice,data._cmd,data._parameter);
@@ -839,7 +835,7 @@ namespace psycle
 				_filter._q = _inst.FilterResonance();
 			}
 
-			_filter._type = (FilterType)_inst.FilterType();
+			_filter._type = (TFilterType)_inst.FilterType();
 			_coModify = (float)_inst.FilterEnvAmount();
 			
 	//		_filterEnv.Sustain(
@@ -1373,12 +1369,12 @@ namespace psycle
 
 			//int layer = 0; // Change this when adding working Layering code.
 			//float const finetune = 
-			//	CValueMapper::Map_255_1(m_Instruments[_instrument].rWaveData(layer).WaveFineTune());
+			//	CValueMapper::Map_255_1(m_Instruments[_instrument].rWaveLayer(layer).WaveFineTune());
 
 			Porta2NoteDestPeriod(note,layer);
 			//m_effDestPortaNote = 
 			//	(pow(2.0f, ((note
-			//		+ m_Instruments[_instrument].rWaveData(layer).WaveTune()) - 48.0f
+			//		+ m_Instruments[_instrument].rWaveLayer(layer).WaveTune()) - 48.0f
 			//		+ finetune) / 12.0f) 
 			//		* (44100.0	/ Global::pConfig->_pOutputDriver->_samplesPerSec));
 		}// Porta2Note()  -------------------------------------------
@@ -1389,7 +1385,7 @@ namespace psycle
 
 			if(!m_pChannel->IsTremorMute()){
 				Wave().Volume(
-					(float)m_pSampler->Instrument(_instrument).rWaveData(Wave().Layer()).WaveVolume()
+					(float)m_pSampler->Instrument(_instrument).rWaveLayer(Wave().Layer()).WaveVolume()
 					* 0.01f * CValueMapper::Map_255_1(volume)
 				);
 			} else {
@@ -1428,8 +1424,8 @@ namespace psycle
 
 		void XMSampler::EnvelopeController::CalcStep(const int start,const int  end)
 		{
-			m_Step = (m_pEnvelope->Value(end) - m_pEnvelope->Value(start))
-				/ (ValueType)(m_pEnvelope->Point(end) - m_pEnvelope->Point(start));
+			m_Step = (m_pEnvelope->GetValue(end) - m_pEnvelope->GetValue(start))
+				/ (ValueType)(m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
 	//			* ( (ValueType)(44100.0) / (ValueType)(Global::pConfig->_pOutputDriver->_samplesPerSec));
 		};// XMSampler::EnvelopeController::CalcStep() ----------------------------------
 
@@ -1438,18 +1434,18 @@ namespace psycle
 			m_Layer = instrument.NoteToSample(note);
 			int _layer = m_Layer;
 
-			m_pL = const_cast<short *>(instrument.rWaveData(_layer).pWaveDataL());
-			m_pR = const_cast<short *>(instrument.rWaveData(_layer).pWaveDataR());
+			m_pL = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataL());
+			m_pR = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataR());
 			
 
-			IsStereo(instrument.rWaveData(_layer).IsWaveStereo());
-			Length(instrument.rWaveData(_layer).WaveLength());
+			IsStereo(instrument.rWaveLayer(_layer).IsWaveStereo());
+			Length(instrument.rWaveLayer(_layer).WaveLength());
 			
-			if (instrument.rWaveData(_layer).WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
+			if (instrument.rWaveLayer(_layer).WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
 			{
-				LoopType(instrument.rWaveData(_layer).WaveLoopType());
-				LoopStart(instrument.rWaveData(_layer).WaveLoopStart());
-				LoopEnd(instrument.rWaveData(_layer).WaveLoopEnd());
+				LoopType(instrument.rWaveLayer(_layer).WaveLoopType());
+				LoopStart(instrument.rWaveLayer(_layer).WaveLoopStart());
+				LoopEnd(instrument.rWaveLayer(_layer).WaveLoopEnd());
 				CurrentLoopDirection(LoopDirection::FORWARD);
 			}
 			else
@@ -1460,7 +1456,7 @@ namespace psycle
 			
 			// Init Resampler
 		
-		//	if (instrument.rWaveData(_layer).IsWaveLooped())
+		//	if (instrument.rWaveLayer(_layer).IsWaveLooped())
 		//	{
 		//		double const totalsamples = 
 		//			(double)(Global::_pSong->SamplesPerTick() 
@@ -1470,8 +1466,8 @@ namespace psycle
 		//	else
 			//{
 			//	const double finetune =
-			//		CValueMapper::Map_255_1(instrument.rWaveData(_layer).WaveFineTune());
-			//	const double _period = ((double)(note + instrument.rWaveData(_layer).WaveTune()) - 48.0 + finetune) / 12.0;
+			//		CValueMapper::Map_255_1(instrument.rWaveLayer(_layer).WaveFineTune());
+			//	const double _period = ((double)(note + instrument.rWaveLayer(_layer).WaveTune()) - 48.0 + finetune) / 12.0;
 
 			//	Speed(
 			//		(
@@ -1486,10 +1482,10 @@ namespace psycle
 			//int layer = 0; // Change this when adding working Layering code.
 			//
 			//const double finetune = 
-			//	(double)CValueMapper::Map_255_1(m_Instruments[m_InstrumentNo].rWaveData(layer).WaveFineTune());
+			//	(double)CValueMapper::Map_255_1(m_Instruments[m_InstrumentNo].rWaveLayer(layer).WaveFineTune());
 			//m_Porta2NoteDestSpeed = 
 			//pow(2.0, ((double)(note
-			//		+ m_Instruments[m_InstrumentNo].rWaveData(layer).WaveTune()) - 48.0
+			//		+ m_Instruments[m_InstrumentNo].rWaveLayer(layer).WaveTune()) - 48.0
 			//		+ finetune) / 12.0) 
 			//		* (44100.0	/ (double)Global::pConfig->_pOutputDriver->_samplesPerSec);
 
@@ -1667,7 +1663,7 @@ namespace psycle
 		const double XMSampler::Channel::NoteToPeriod(const int note,const int layer)
 		{
 			XMInstrument::WaveData& _wave 
-				= m_pSampler->Instrument(this->InstrumentNo()).rWaveData(layer);
+				= m_pSampler->Instrument(this->InstrumentNo()).rWaveLayer(layer);
 
 			if(m_pSampler->IsLinearFreq())
 			{
@@ -1712,7 +1708,7 @@ namespace psycle
 		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int XMSampler::Channel::PeriodToNote(const double period,const int layer)
 		{
-			XMInstrument::WaveData& _wave = m_pSampler->Instrument(this->InstrumentNo()).rWaveData(layer);
+			XMInstrument::WaveData& _wave = m_pSampler->Instrument(this->InstrumentNo()).rWaveLayer(layer);
 
 			if(m_pSampler->IsLinearFreq()){
 				// period = ((10.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)

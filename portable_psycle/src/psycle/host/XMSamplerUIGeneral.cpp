@@ -1,90 +1,51 @@
-/** @file
- *  @brief implementation file
- *  $Date$
- *  $Revision$
- */
-// GearTracker.cpp : implementation file
-//
+///\file
+///\brief implementation file for psycle::host::CDirectoryDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "XMSamplerUIGeneral.hpp"
+#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
+NAMESPACE__BEGIN(psycle)
+NAMESPACE__BEGIN(host)
 
-#include "stdafx.h"
-#if defined(_MSC_VER) && defined(_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include "crtdbg.h"
-#define malloc(a) _malloc_dbg(a,_NORMAL_BLOCK,__FILE__,__LINE__)
-    inline void*  operator new(size_t size, LPCSTR strFileName, INT iLine)
-        {return _malloc_dbg(size, _NORMAL_BLOCK, strFileName, iLine);}
-    inline void operator delete(void *pVoid, LPCSTR strFileName, INT iLine)
-        {_free_dbg(pVoid, _NORMAL_BLOCK);}
-#define new  ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
+IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
-#include "d3d.h"
-#include "XMSamplerUIGeneral.h"
-#include "XMInstrument.h"
-#include "XMSampler.h"
-#include "PsycleWTLView.h"
-#include ".\geartracker.h"
-#include ".\xmsampleruigeneral.h"
-
-
-/////////////////////////////////////////////////////////////////////////////
-// XMSamplerUIGeneral dialog
-#pragma unmanaged
-
-namespace SF {
-XMSamplerUIGeneral::XMSamplerUIGeneral()
-{
-	m_bInitialize = false;
-}
-
-
-void XMSamplerUIGeneral::OnCancel()
-{
-	m_pParent->XMSamplerMachineDialog = NULL;
-	DestroyWindow();
-}
-
-LRESULT XMSamplerUIGeneral::OnNMCustomdrawTrackslider2(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// Assign new value
-	BOOL _bError = FALSE;
-	_pMachine->NumVoices(m_polyslider.GetPos());
-
-	for(int c = 0; c < XMSampler::MAX_POLYPHONY; c++)
+XMSamplerUIGeneral::XMSamplerUIGeneral() : CPropertyPage(XMSamplerUIGeneral::IDD)
 	{
-		_pMachine->rVoice(c).NoteOffFast();
+		m_bInitialize = false;
 	}
 
-	// Label on dialog display
-	m_polylabel.SetWindowText(boost::lexical_cast<SF::string>(_pMachine->NumVoices()).data());
+void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
+	{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CDirectoryDlg)
+	DDX_Control(pDX, IDC_XMTEMPO, m_Tempo);
+	DDX_Control(pDX, IDC_XMSPEED, m_Speed);
+	DDX_Control(pDX, IDC_XMINTERPOL, m_interpol);
+	DDX_Control(pDX, IDC_XMPOLY, m_polyslider);
+	DDX_Control(pDX, IDC_XMPOLYLABEL, m_polylabel);
+	//}}AFX_DATA_MAP
+	}
+BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
+	ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
+	ON_EN_CHANGE(IDC_XMSPEED, OnEnChangeXmspeed)
+	ON_EN_CHANGE(IDC_XMTEMPO, OnEnChangeXmtempo)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
+END_MESSAGE_MAP()
 
-	return 0;
-}
+XMSamplerUIGeneral::~XMSamplerUIGeneral()
+	{
+	}
+/////////////////////////////////////////////////////////////////////////////
+// XMSamplerUIGeneral message handlers
 
-LRESULT XMSamplerUIGeneral::OnCbnSelchangeCombo1(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	_pMachine->ResamplerQuality((ResamplerQuality)m_interpol.GetCurSel());
-
-	return 0;
-}
-
-LRESULT XMSamplerUIGeneral::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
-{
-	ExecuteDlgInit(IDD);
-	m_interpol.Attach(GetDlgItem(IDC_COMBO1));
-	m_polyslider.Attach(GetDlgItem(IDC_TRACKSLIDER2));
-	m_polylabel.Attach(GetDlgItem(IDC_TRACKLABEL2));
-	
-	m_Tempo.Attach(GetDlgItem(IDC_EDIT_TEMPO));
-	m_Speed.Attach(GetDlgItem(IDC_EDIT_SPEED));
-	//m_GlobalVolume.Attach(GetDlgItem(IDC_EDIT_GLOBALVOL));
-
-
-	m_interpol.AddString(_T("–³‚µ   [’á•iŽ¿]"));
-	m_interpol.AddString(_T("ØÆ±    [’†•iŽ¿]"));
-	m_interpol.AddString(_T("½Ìß×²Ý [‚•iŽ¿]"));
+BOOL XMSamplerUIGeneral::OnInitDialog() 
+	{
+	CPropertyPage::OnInitDialog();
+	m_bInitialize=true;
+	m_interpol.AddString(_T("No Interpolation"));
+	m_interpol.AddString(_T("Linear Interpolation"));
+	m_interpol.AddString(_T("Spline Interpolation"));
 
 	m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 
@@ -92,69 +53,65 @@ LRESULT XMSamplerUIGeneral::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam
 
 	m_polyslider.SetRange(2, XMSampler::MAX_POLYPHONY);
 	m_polyslider.SetPos(_pMachine->NumVoices());
-	
-	
-	m_Tempo.SetWindowText(boost::lexical_cast<SF::string>(_pMachine->BPM()).c_str());
-	m_Speed.SetWindowText(boost::lexical_cast<SF::string>(_pMachine->TicksPerRow()).c_str());
-	m_bInitialize = true;
-//	m_Speed.SetWindowText((boo
-	return TRUE;
-}
 
-//void XMSamplerUIGeneral::OnFinalMessage(HWND hWnd)
-//{
-//	// TODO : ***** [bohan] iso-(10)646 encoding only please! *****
-//	//CDialogImpl<XMSamplerUIGeneral>::OnFinalMessage(hWnd);
-//	//delete this;
-//}
+	std::string tmp;
+	tmp=_pMachine->BPM();
+	m_Tempo.SetWindowText(tmp.c_str());
+	tmp=_pMachine->TicksPerRow();
+	m_Speed.SetWindowText(tmp.c_str());
 
-//LRESULT XMSamplerUIGeneral::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-//{
-//	// TODO : ***** [bohan] iso-(10)646 encoding only please! *****
-//	OnCancel();
-//	return 0;
-//}
-}
 
-LRESULT SF::XMSamplerUIGeneral::OnEnChangeEditSpeed(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	// TODO : ***** [bohan] iso-(10)646 encoding only please! ***** ACDialogImpl<XMSamplerUIGeneral>::OnInitDialog() ***** [bohan] iso-(10)646 encoding only please! *****
-	// OR ***** [bohan] iso-(10)646 encoding only please! *****
-	// CRichEditCtrl().SetEventMask() ‚***** [bohan] iso-(10)646 encoding only please! *****
-	// ***** [bohan] iso-(10)646 encoding only please! *****
-
-	// TODO : ***** [bohan] iso-(10)646 encoding only please! *****
-	if(!m_bInitialize)
-	{
-		return 0;
+	m_bInitialize=false;
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
 	}
+
+void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
+	{
+	_pMachine->ResamplerQuality((ResamplerQuality)m_interpol.GetCurSel());
+
+	}
+
+void XMSamplerUIGeneral::OnEnChangeXmspeed()
+	{
+	if(!m_bInitialize)
+		{
+		return;
+		}
 
 	TCHAR buf[256];
 	m_Speed.GetWindowText(buf,256);
-	_pMachine->TicksPerRow(boost::lexical_cast<int>(buf));
+	_pMachine->TicksPerRow(atoi(buf));
 	_pMachine->CalcBPMAndTick();
-
-	return 0;
-}
-
-LRESULT SF::XMSamplerUIGeneral::OnEnChangeEditTempo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	// TODO :  ***** [bohan] iso-(10)646 encoding only please! ***** ACDialogImpl<XMSamplerUIGeneral>::OnInitDialog() ***** [bohan] iso-(10)646 encoding only please! *****
-	// OR ***** [bohan] iso-(10)646 encoding only please! ***** ENM_CORRECTTEXT ***** [bohan] iso-(10)646 encoding only please! *****
-	// CRichEditCtrl().SetEventMask() ***** [bohan] iso-(10)646 encoding only please! *****
-	// ***** [bohan] iso-(10)646 encoding only please! *****
-	if(!m_bInitialize)
-	{
-		return 0;
 	}
-	// TODO :  ***** [bohan] iso-(10)646 encoding only please! *****
+
+void XMSamplerUIGeneral::OnEnChangeXmtempo()
+	{
+	if(!m_bInitialize)
+		{
+		return;
+		}
 	TCHAR buf[256];
 	m_Tempo.GetWindowText(buf,256);
-	_pMachine->BPM(boost::lexical_cast<int>(buf));
+	_pMachine->BPM(atoi(buf));
 	_pMachine->CalcBPMAndTick();
+	}
 
-	return 0;
-}
+void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
+	{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	_pMachine->NumVoices(m_polyslider.GetPos());
 
+	for(int c = 0; c < XMSampler::MAX_POLYPHONY; c++)
+		{
+		_pMachine->rVoice(c).NoteOffFast();
+		}
 
-
+	// Label on dialog display
+	std::string tmp;
+	tmp = _pMachine->NumVoices();
+	m_polylabel.SetWindowText(tmp.c_str());
+	*pResult = 0;
+	}
+NAMESPACE__END
+NAMESPACE__END

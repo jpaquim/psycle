@@ -1,41 +1,46 @@
-#ifndef FILEIT_H
-#define FILEIT_H
+///\file
+///\brief interface file for psycle::host::CFileIT.
+#pragma once
 
-#include "SongStructs.h"
-#include "FileIO.h"
-#include "it.h"
+#include "SongStructs.hpp"
+#include "FileIO.hpp"
+#include "it.hpp"
+namespace psycle
+	{
+	namespace host
+		{
+		class CFileIT : public OldPsyFile
+		{
+		public:
+			CFileIT();
+			virtual ~CFileIT();
+			bool Import(Song * s);	
 
-class CFileIT : public OldPsyFile
-{
-public:
-	CFileIT();
-	virtual ~CFileIT();
-	bool Import(Song * s);	
+		protected:
+			bool IsValid();
 
-protected:
-	bool IsValid();
+			LONG ImportPatterns(Song * s);
+			LONG ImportSinglePattern(Song * s, int patIdx,int iTracks);	
 
-	LONG ImportPatterns(Song * s);
-	LONG ImportSinglePattern(Song * s, int patIdx,int iTracks);	
+			bool ImportInstruments(Song * s, LONG iInstrStart);
+			LONG ImportInstrument(Song *s, LONG iStart, int idx);
+			LONG ImportSampleHeader(Song *s, LONG iStart, int InstrIdx, int SampleIdx);
+			LONG ImportSampleData(Song *s, LONG iStart, int InstrIdx, int SampleIdx);
 
-	bool ImportInstruments(Song * s, LONG iInstrStart);
-	LONG ImportInstrument(Song *s, LONG iStart, int idx);
-	LONG ImportSampleHeader(Song *s, LONG iStart, int InstrIdx, int SampleIdx);
-	LONG ImportSampleData(Song *s, LONG iStart, int InstrIdx, int SampleIdx);
+		protected:
 
-protected:
+			BOOL WritePatternEntry(Song * s,int patIdx,int row, int col, PatternEntry & e);
+			
+		protected:
+			
+			char * AllocReadStr(LONG size, LONG start=-1);
 
-	BOOL WritePatternEntry(Song * s,int patIdx,int row, int col, PatternEntry & e);
-	
-protected:
-	
-	char * AllocReadStr(LONG size, LONG start=-1);
+			ITModule mod;
+			int m_iInstrCnt;
 
-	ITModule mod;
-	int m_iInstrCnt;
+			int smpLen[256];
+			char smpFlags[256];
+		};
+	}
+}
 
-	int smpLen[256];
-	char smpFlags[256];
-};
-
-#endif
