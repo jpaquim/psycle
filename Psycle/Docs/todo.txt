@@ -20,38 +20,48 @@ X low priority
 * New and unsorted and untested
 -------------------------------
 *** when recording mouse tweaks, it puts the mac # of the currently selected machine instead of the machine you are tweaking
+
 * <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' button in the inst ed, and select some of the sample wav, the display goes blank
-** VST Native instruments Pro-53 crash when loading a song
+* <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
+	<bdzld> yep, or if the sample rate is invalid
+
+*** sometimes psycle changes the length of a block for no reason
+** The play block feature doesn't work.
+** When 'cursor always down' is enabled u can't insert values on the last row
+** master volume decrease lets a clipping sample through while detecting
+* screen should be made so 800x600 works
+* <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
+* sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
+*	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
+	in the "note" column.
+	[Is it useful to enter numbers while playing and follow song? what about just adding notes
+	 wherever the position of the cursor is?]
+
+*** <YanniS> my settings directories always get corrupted somehow
+	<YanniS> psycle has a lisp
+	<YanniS> quit and restarted, and it's still
+	<YanniS> C:\Audio\Psycle\Skinss\
+	[ not recreated * yannis says it is still happening]
+** <alk_> when Psycle is open hibernate does not work (windows crashes)
+
+
+
 
 + humanizer
 + global volume fades
 + <bdzld> poop: can you make mcm interpolated? (like a midi tweak smooth)
 + the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
 
-* <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
-	<bdzld> yep, or if the sample rate is invalid
 
 + add an editing mode that does not enter the istrument or machine
 
-** fm7 locks up psycle on parameter change midi command
 
-*** sometimes psycle changes the length of a block for no reason
-* The play block feature doesn't work.
-* When 'cursor always down' is enabled u can't insert values on the last row
 
-* drumatic 2 vst: http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
-
-* screen should be made so 800x600 works
 + <alk> some bastards want keyrepeat for notes back
-* <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
-
-* sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
 ? in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 + volume slide in sampler, so that you can cut the vol of a sample without a click
 + option to not move cursor when pasting
 + save bar hide/unhide settings
-
-** master volume decrease lets a clipping sample through while detecting
 
 + midi controllers should be able to send midi messages (pitchbend for example), not just tweaks or cmds
 + I agree that final output should be limited
@@ -71,16 +81,6 @@ X low priority
 +	Option to disable vus (to save CPU)
 
 +	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
-*	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
-	in the "note" column.
-	[Is it useful to enter numbers while playing and follow song? what about just adding notes
-	 wherever the position of the cursor is?]
-
-*** <YanniS> my settings directories always get corrupted somehow
-	<YanniS> psycle has a lisp
-	<YanniS> quit and restarted, and it's still
-	<YanniS> C:\Audio\Psycle\Skinss\
-	[ not recreated * yannis says it is still happening]
 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 
@@ -88,11 +88,6 @@ X low priority
 	to allow the user to speficy a "different than default" fadeout.
 	[pooplog: OFF should be in the note column, but if you want a different than default fadeout perhaps it
 	 could be called CUT ]
-
-** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
-	it works fine?
-
-** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 
 * Machines
@@ -243,6 +238,12 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
+** VST Native instruments Pro-53 crash when loading a song
+** vst fm7 locks up psycle on parameter change midi command
+** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
+	it works fine?
+* drumatic 2 vst: http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
+*	Many vsts randomly loose keyboard focus
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.
 		[ A "bypass" bug, if we do the above ^]
