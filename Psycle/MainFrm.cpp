@@ -118,10 +118,10 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_COMMAND(ID_VIEW_SONGBAR, OnViewSongbar)
 	ON_COMMAND(ID_VIEW_MACHINEBAR, OnViewMachinebar)
 	ON_COMMAND(ID_VIEW_SEQUENCERBAR, OnViewSequencerbar)
-ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SONGBAR, OnUpdateViewSongbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SEQUENCERBAR, OnUpdateViewSequencerbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
+ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -2843,4 +2843,5 @@ void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI)
 	if ( m_wndSeq.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
 	else pCmdUI->SetCheck(FALSE);
 }
+
 

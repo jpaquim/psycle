@@ -14,19 +14,11 @@ X low priority
 * New and unsorted and untested
 ------------
 
-*** Psycle is not writing blocks correctly when saving blocks
-	[ pooplog - it seems to write the same incorrect data always, regardless of song loaded ]
-*** Psycle is not loading blocks correctly when loading blocks, infact, it does nothing
-** Some skins not getting enumerated?
-	[ pooplog - i cannot recreate this ]
-
-+ <lastfutur> what i am missing: block cut copy and paste commands in the edit menu
-
 + <sampler> Well, i've been playing and changing default hotkeys and now i think it would be good 
 	enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various 
 	types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
  
-+ <bd|cup> poop: could you add an option to make psycle load the last opened .psy, when you run it?
+++ <bd|cup> poop: could you add an option to make psycle load the last opened .psy, when you run it?
 
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
@@ -37,14 +29,16 @@ X low priority
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
 
-+ <_sue_> i really dont like parameter automation with tweak commands.....theyre so steped.....i can never 
++++ <_sue_> i really dont like parameter automation with tweak commands.....theyre so steped.....i can never 
 	get a good smooth fast filter sweep.....something cool for psycle would be a window where you could 
 	draw many envelopes.....then with a pattern command a selected envelope would be triggered associated 
 	also to a parameter.....like that you could use/trigger the same envelope 
+
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 + <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
 	[JAZ: And a third one for Instruments. Time to time]
+
 * <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall, 
 	it got 8 outputs
 

@@ -225,34 +225,34 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_BUTTONPLAYSEQBLOCK, OnButtonplayseqblock)
 	ON_UPDATE_COMMAND_UI(ID_BUTTONPLAYSEQBLOCK, OnUpdateButtonplayseqblock)
 	ON_COMMAND(ID_POP_CUT, OnPopCut)
-	ON_UPDATE_COMMAND_UI(ID_POP_CUT, OnUpdatePopCut)
+	ON_UPDATE_COMMAND_UI(ID_POP_CUT, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_COPY, OnPopCopy)
-	ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdatePopCopy)
+	ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_PASTE, OnPopPaste)
-	ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePopPaste)
+	ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePaste)
 	ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
-	ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePopMixpaste)
+	ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
 	ON_COMMAND(ID_POP_DELETE, OnPopDelete)
-	ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdatePopDelete)
+	ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
-	ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdatePopInterpolate)
+	ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_CHANGEGENERATOR, OnPopChangegenerator)
-	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEGENERATOR, OnUpdatePopChangegenerator)
+	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEGENERATOR, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_CHANGEINSTRUMENT, OnPopChangeinstrument)
-	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEINSTRUMENT, OnUpdatePopChangeinstrument)
+	ON_UPDATE_COMMAND_UI(ID_POP_CHANGEINSTRUMENT, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE1, OnPopTranspose1)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE1, OnUpdatePopTranspose1)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE1, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE12, OnPopTranspose12)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE12, OnUpdatePopTranspose12)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE12, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE_1, OnPopTranspose_1)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_1, OnUpdatePopTranspose_1)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_1, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRANSPOSE_12, OnPopTranspose_12)
-	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_12, OnUpdatePopTranspose_12)
+	ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_12, OnUpdateCutCopy)
 	ON_COMMAND(ID_AUTOSTOP, OnAutostop)
 	ON_UPDATE_COMMAND_UI(ID_AUTOSTOP, OnUpdateAutostop)
 	ON_COMMAND(ID_POP_PATTENPROPERTIES, OnPopPattenproperties)
 	ON_COMMAND(ID_POP_BLOCK_SWINGFILL, OnPopBlockSwingfill)
-	ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdatePopBlockSwingfill)
+	ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdateCutCopy)
 	ON_COMMAND(ID_POP_TRACK_SWINGFILL, OnPopTrackSwingfill)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
@@ -271,7 +271,7 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateRedo)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_MBUTTONDOWN()
-	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopyPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopy)
 	ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
 	ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
 	ON_COMMAND(ID_HELP_README, OnHelpReadme)
@@ -281,11 +281,11 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_EDIT_COPY, patCopy)
 	ON_COMMAND(ID_EDIT_PASTE, patPaste)
 	ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopyPaste)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternCutCopyPaste)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternCutCopyPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopy)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
 	ON_COMMAND(ID_EDIT_DELETE, patDelete)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopyPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
 	ON_COMMAND(ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG, OnConfigurationOpenonlydirectoriesconfig)
 	ON_COMMAND(ID_CONFIGURATION_OPENONLYINPUTOUTPUTCONFIG, OnConfigurationOpenonlyinputoutputconfig)
 	ON_COMMAND(ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG, OnConfigurationOpenonlykeyboardconfig)
@@ -736,7 +736,7 @@ BOOL CChildView::OnFileSavesong(UINT id)
 	ofn.hwndOwner = GetParent()->m_hWnd;
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = "Songs\0*.psy\0Psycle Block\0*.psb\0All\0*.*\0";
+	ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -821,7 +821,7 @@ void CChildView::OnFileLoadsong()
 	ofn.hwndOwner = GetParent()->m_hWnd;
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = "Songs\0*.psy\0Psycle Block\0*.psb\0All\0*.*\0";
+	ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -1527,88 +1527,38 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 // Right Click Popup Menu
 
 void CChildView::OnPopCut() { CopyBlock(true); }
-void CChildView::OnUpdatePopCut(CCmdUI* pCmdUI) 
+void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 {
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
+	if (blockSelected && (viewMode == VMPattern)) pCmdUI->Enable(TRUE);
 	else pCmdUI->Enable(FALSE);
 }
 
 void CChildView::OnPopCopy() { CopyBlock(false); }
-void CChildView::OnUpdatePopCopy(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopPaste() { PasteBlock(editcur.track,editcur.line,false); }
-void CChildView::OnUpdatePopPaste(CCmdUI* pCmdUI) 
+void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 {
-	if (isBlockCopied) pCmdUI->Enable(TRUE);
+	if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(TRUE);
 	else  pCmdUI->Enable(FALSE);
 }
 
 void CChildView::OnPopMixpaste() { PasteBlock(editcur.track,editcur.line,true); }
-void CChildView::OnUpdatePopMixpaste(CCmdUI* pCmdUI) 
-{
-	if (isBlockCopied) pCmdUI->Enable(TRUE);
-	else  pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopDelete() { DeleteBlock(); }
-void CChildView::OnUpdatePopDelete(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }
-void CChildView::OnUpdatePopInterpolate(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopChangegenerator() { BlockGenChange(_pSong->seqBus); }
-void CChildView::OnUpdatePopChangegenerator(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopChangeinstrument() { BlockInsChange(_pSong->auxcolSelected); }
-void CChildView::OnUpdatePopChangeinstrument(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopTranspose1() { BlockTranspose(1); }
-void CChildView::OnUpdatePopTranspose1(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopTranspose12() { BlockTranspose(12); }
-void CChildView::OnUpdatePopTranspose12(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopTranspose_1() { BlockTranspose(-1); }
-void CChildView::OnUpdatePopTranspose_1(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopTranspose_12() { BlockTranspose(-12); }
-void CChildView::OnUpdatePopTranspose_12(CCmdUI* pCmdUI) 
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
-}
 
 void CChildView::OnPopPattenproperties() 
 {
@@ -1619,12 +1569,6 @@ void CChildView::OnPopBlockSwingfill()
 {
 	// fill block
 	ShowSwingFillDlg(FALSE);
-}
-
-void CChildView::OnUpdatePopBlockSwingfill(CCmdUI* pCmdUI)
-{
-	if ( blockSelected ) pCmdUI->Enable(TRUE);
-	else pCmdUI->Enable(FALSE);
 }
 
 void CChildView::OnPopTrackSwingfill()
@@ -1695,9 +1639,15 @@ void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 	}
 }
 
-void CChildView::OnUpdatePatternCutCopyPaste(CCmdUI* pCmdUI) 
+void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
 {
 	if(viewMode == VMPattern) pCmdUI->Enable(TRUE);
+	else pCmdUI->Enable(FALSE);
+}
+
+void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
+{
+	if(patBufferCopy&&(viewMode == VMPattern)) pCmdUI->Enable(TRUE);
 	else pCmdUI->Enable(FALSE);
 }
 

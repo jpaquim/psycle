@@ -1344,49 +1344,74 @@ void CChildView::PasteBlock(int tx,int lx,bool mix)
 
 void CChildView::SaveBlock(FILE* file)
 {
-	if(isBlockCopied)
-	{
-		fwrite(&blockNTracks, sizeof(int), 1, file);
-		fwrite(&blockNLines, sizeof(int), 1, file);
-
-		for (int t=0;t<blockNTracks;t++)
-		{
-			for (int l=0;l<blockNLines;l++)
-			{
-				int const displace2=t*5+l*MULTIPLY;
-				
-				unsigned char *offset_source=blockBufferData+displace2;
-				
-				fwrite(offset_source,sizeof(char),5,file);
-
-			}
-		}
-	}
-}
-void CChildView::LoadBlock(FILE* file)
-{
-	fread(&blockNTracks,sizeof(int),1,file);
-	fread(&blockNLines,sizeof(int),1,file);
 
 	int patNum = _pSong->playOrder[editPosition];
 	int nlines = _pSong->patternLines[patNum];
-	AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-	AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 
-	for (int t=0;t<blockNTracks;t++)
+	fwrite(&_pSong->SONGTRACKS, sizeof(int), 1, file);
+	fwrite(&nlines, sizeof(int), 1, file);
+
+	int const offset = patNum*MULTIPLY2;
+
+	for (int t=0;t<_pSong->SONGTRACKS;t++)
 	{
-		for (int l=0;l<blockNLines;l++)
+		for (int l=0;l<nlines;l++)
 		{
-			if(l<MAX_LINES && t<MAX_TRACKS)
-			{
-				int const displace2=t*5+l*MULTIPLY;
-				unsigned char* offset_target=blockBufferData+displace2;
+			int const displace2=t*5+l*MULTIPLY;
+			unsigned char* offset_source=_pSong->pPatternData+offset+displace2;
 			
-				fread(offset_target,sizeof(char),5,file);
-			}
+			fwrite(offset_source,sizeof(char),5,file);
 		}
 	}
-	isBlockCopied=true;		
+}
+
+void CChildView::LoadBlock(FILE* file)
+{
+	int nt, nl;
+	fread(&nt,sizeof(int),1,file);
+	fread(&nl,sizeof(int),1,file);
+
+	if ((nt > 0) && (nl > 0))
+	{
+
+		int patNum = _pSong->playOrder[editPosition];
+		int nlines = _pSong->patternLines[patNum];
+		AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+		if (nlines != nl)
+		{
+			AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+			_pSong->patternLines[patNum] = nl;
+		}
+
+		int const offset = patNum*MULTIPLY2;
+
+		for (int t=0;t<nt;t++)
+		{
+			for (int l=0;l<nl;l++)
+			{
+				if(l<MAX_LINES && t<MAX_TRACKS)
+				{
+					int const displace2=t*5+l*MULTIPLY;
+					unsigned char* offset_target=_pSong->pPatternData+offset+displace2;
+				
+					fread(offset_target,sizeof(char),5,file);
+				}
+			}
+		}
+		unsigned char blank[5]={255,255,255,0,0};
+
+		for (t = nt; t < MAX_TRACKS;t++)
+		{
+			for (int l = nl; l < MAX_LINES; l++)
+			{
+				int const displace2=t*5+l*MULTIPLY;
+				unsigned char* offset_target=_pSong->pPatternData+offset+displace2;
+				memcpy(offset_target,blank,5*sizeof(char));
+			}
+		}
+		NewPatternDraw(0,nl-1,0,nt-1);
+		Repaint(DMData);
+	}
 }
 
 void CChildView::DoubleLength()
