@@ -28,40 +28,40 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "resources/Psycle.ico"
-IDR_VSTFRAME            ICON                    "resources/idr_vstf.ico"
-IDR_WAVEFRAME           ICON                    "resources/icon1.ico"
-IDR_MACHINEFRAME        ICON                    "resources/ico00001.ico"
+IDR_MAINFRAME           ICON                    "./Psycle.ico"
+IDR_VSTFRAME            ICON                    "./idr_vstf.ico"
+IDR_WAVEFRAME           ICON                    "./icon1.ico"
+IDR_MACHINEFRAME        ICON                    "./ico00001.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDB_SAMPLER             BITMAP                  "resources/bmp00003.bmp"
-IDB_SPEAKER             BITMAP                  "resources/bmp00004.bmp"
-IDB_CPU                 BITMAP                  "resources/bmp00005.bmp"
-IDB_KNOB                BITMAP                  "resources/TbMainKnob.bmp"
-IDB_PLUS                BITMAP                  "resources/plus.bmp"
-IDB_LESSLESS            BITMAP                  "resources/lessless.bmp"
-IDB_MINUS               BITMAP                  "resources/minus.bmp"
-IDB_MORE                BITMAP                  "resources/more.bmp"
-IDB_MOREMORE            BITMAP                  "resources/moremore.bmp"
-IDB_LESS                BITMAP                  "resources/less.bmp"
-IDB_LLEFT               BITMAP                  "resources/littleleft.bmp"
-IDB_LRIGHT              BITMAP                  "resources/littleright.bmp"
-IDB_SPLASH              BITMAP                  "resources/splash copia.bmp"
-IDB_MACHINETYPE         BITMAP                  "resources/bmp00002.bmp"
-IDR_MAINFRAME           BITMAP                  "resources/Toolbar.bmp"
-IDB_DIRECTX             BITMAP                  "resources/bmp00009.bmp"
-IDB_PLUSPLUS            BITMAP                  "resources/plus1.bmp"
-IDB_MINUSMINUS          BITMAP                  "resources/minus1.bmp"
-IDB_MASTERBACK          BITMAP                  "resources/MasterMachine/masterbk.bmp"
-IDB_MASTERNUMBERS       BITMAP                  "resources/MasterMachine/numbers.bmp"
-IDB_MASTERSLIDER        BITMAP                  "resources/MasterMachine/slider.bmp"
-IDB_PATTERN_HEADER_SKIN BITMAP                  "resources/pattern_header_skin.bmp"
-IDB_MACHINE_SKIN        BITMAP                  "resources/machine_skin.bmp"
-IDB_ASIO                BITMAP                  "resources/AsioLogo.bmp"
+IDB_SAMPLER             BITMAP                  "./bmp00003.bmp"
+IDB_SPEAKER             BITMAP                  "./bmp00004.bmp"
+IDB_CPU                 BITMAP                  "./bmp00005.bmp"
+IDB_KNOB                BITMAP                  "./TbMainKnob.bmp"
+IDB_PLUS                BITMAP                  "./plus.bmp"
+IDB_LESSLESS            BITMAP                  "./lessless.bmp"
+IDB_MINUS               BITMAP                  "./minus.bmp"
+IDB_MORE                BITMAP                  "./more.bmp"
+IDB_MOREMORE            BITMAP                  "./moremore.bmp"
+IDB_LESS                BITMAP                  "./less.bmp"
+IDB_LLEFT               BITMAP                  "./littleleft.bmp"
+IDB_LRIGHT              BITMAP                  "./littleright.bmp"
+IDB_SPLASH              BITMAP                  "./splash copia.bmp"
+IDB_MACHINETYPE         BITMAP                  "./bmp00002.bmp"
+IDR_MAINFRAME           BITMAP                  "./Toolbar.bmp"
+IDB_DIRECTX             BITMAP                  "./bmp00009.bmp"
+IDB_PLUSPLUS            BITMAP                  "./plus1.bmp"
+IDB_MINUSMINUS          BITMAP                  "./minus1.bmp"
+IDB_MASTERBACK          BITMAP                  "./MasterMachine/masterbk.bmp"
+IDB_MASTERNUMBERS       BITMAP                  "./MasterMachine/numbers.bmp"
+IDB_MASTERSLIDER        BITMAP                  "./MasterMachine/slider.bmp"
+IDB_PATTERN_HEADER_SKIN BITMAP                  "./pattern_header_skin.bmp"
+IDB_MACHINE_SKIN        BITMAP                  "./machine_skin.bmp"
+IDB_ASIO                BITMAP                  "./AsioLogo.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2156,7 +2156,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""resources/Psycle.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""./Psycle.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#endif\r\n"
     "\0"
@@ -2227,7 +2227,7 @@ STRINGTABLE
 BEGIN
     ID_HELP_README          "Opens the ./doc/readme.txt File\nOpen ./doc/readme.txt"
     ID_HELP_TWEAKING        "Opens the ./doc/tweaking.txt File\nOpen ./doc/tweaking.txt"
-    ID_HELP_KEYBTXT         "Open the ./doc/keys.txt, which describes the default keyboard configuration\nOpen ./doc/keys.txt"
+    ID_HELP_KEYBTXT         "Opens the ./doc/keys.txt File, which describes the default keyboard configuration\nOpen ./doc/keys.txt"
     ID_BARREC               "Record sequence\nRecord sequence"
     ID_CONFIGURATION_OPENONLYVISUALCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG "THIS IS A TESTING ONLY OPTION"
@@ -2517,7 +2517,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "resources/Psycle.rc2"  // non-Microsoft Visual C++ edited resources
+#include "./Psycle.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
 #endif
 
