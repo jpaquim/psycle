@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "Instrument.h"
-#include "DataCompression.h"
 ///\file
 ///\brief interface file for psycle::host::Filter.
+#include <project.private.hpp>
+#include "Instrument.hpp"
+#include "DataCompression.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include <mmreg.h>
-#include <math.h>
-#include "WaveEdChildView.h"
-#include "MainFrm.h"
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "WaveEdChildView.hpp"
+#include "MainFrm.hpp"
+#include <mmreg.h>
+#include <math.h>
 namespace psycle
 {
 	namespace host

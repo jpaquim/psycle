@@ -1,9 +1,9 @@
-#include <project.h>
+#include <project.private.hpp>
 #if defined OPERATING_SYSTEM__MICROSOFT
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
-#	include <operating_system/Logger.h>
-#	if LOGGER__THRESHOLD_LEVEL <= 1
-#		include <windows.h>
+	#include <operating_system/logger.hpp>
+	#if LOGGER__THRESHOLD_LEVEL <= 1
+		#include <windows.h>
 		bool stdcall DllMain/*EntryPoint*/(::HINSTANCE instance_handle, unsigned long int reason_for_call, void *)
 		{
 			if(Logger::default_threshold_level() <= 1)
@@ -33,5 +33,5 @@
 			LOGGER(1) << std::endl;
 			return true;
 		}
-#	endif
+	#endif
 #endif

@@ -1,12 +1,12 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "PresetsDlg.h"
-#include "Plugin.h"
-#include "VSTHost.h"
-#include "FrameMachine.h"
-#include "FileIO.h"
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "PresetsDlg.hpp"
+#include "Plugin.hpp"
+#include "VSTHost.hpp"
+#include "FrameMachine.hpp"
+#include "FileIO.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "helpers.h"
 ///\file
 ///\brief implementation file for psycle::host::CValueMapper.
+#include <project.private.hpp>
+#include "helpers.hpp"
 namespace psycle
 {
 	namespace host

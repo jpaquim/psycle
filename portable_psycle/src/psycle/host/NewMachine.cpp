@@ -1,9 +1,11 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "NewMachine.h"
-#include "Plugin.h"
-#include "VstHost.h"
-#include "ProgressDialog.h"
+///\file
+///\brief implementation file for psycle::host::CNewMachine.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "NewMachine.hpp"
+#include "Plugin.hpp"
+#include "VstHost.hpp"
+#include "ProgressDialog.hpp"
 #undef min
 #undef max
 #include <string>
@@ -11,8 +13,6 @@
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
-///\file
-///\brief implementation file for psycle::host::CNewMachine.
 namespace psycle
 {
 	namespace host

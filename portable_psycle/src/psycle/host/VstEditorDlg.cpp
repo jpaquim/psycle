@@ -1,14 +1,14 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "VstEditorDlg.h"
-#include "FrameMachine.h"
-#include "VstGui.h"
-#include "Vst\AEffEditor.h"
-#include "PresetsDlg.h"
-#include "inputhandler.h"
-#include "MainFrm.h"
 ///\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "VstEditorDlg.hpp"
+#include "FrameMachine.hpp"
+#include "VstGui.hpp"
+#include "PresetsDlg.hpp"
+#include "inputhandler.hpp"
+#include "MainFrm.hpp"
+#include <Vst/AEffEditor.h>
 namespace psycle
 {
 	namespace host

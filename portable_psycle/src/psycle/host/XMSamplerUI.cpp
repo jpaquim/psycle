@@ -111,4 +111,4 @@ LRESULT XMSamplerUI::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	return 0;
 }
 
-		}
+}

@@ -1,12 +1,12 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "OutputDlg.h"
-#include "MidiInput.h"
-#include "Configuration.h"
-#include "Player.h"
-#include "Song.h"
 ///\file
 ///\brief implementation file for psycle::host::COutputDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "OutputDlg.hpp"
+#include "MidiInput.hpp"
+#include "Configuration.hpp"
+#include "Player.hpp"
+#include "Song.hpp"
 namespace psycle
 {
 	namespace host

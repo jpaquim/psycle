@@ -1,31 +1,31 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "Configuration.h"
-#include "FileXM.h"
-//#include "FileIT.h" //re-add when it.cpp and it.h work.
-#include "ChildView.h"
-#include "Bitmap.h"
-#include "Player.h"
-#include "MidiInput.h"
-#include "SwingFillDlg.h"
-#include "Helpers.h"
-#include "MasterDlg.h"
-#include "GearTracker.h"
-#include "MainFrm.h"
-#include "WireDlg.h"
-#include "MacProp.h"
-#include "NewMachine.h"
-#include "PatDlg.h"
-#include "GreetDialog.h"
-#include "ConfigDlg.h"
-#include "SongpDlg.h"
-#include "inputhandler.h"
-#include "VstEditorDlg.h"
-#include "masterdlg.h"
-#include "SaveWavDlg.h"
-#include <cmath> // SwingFill
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "Configuration.hpp"
+#include "FileXM.hpp"
+//#include "FileIT.hpp" //re-add when it.cpp and it.hpp work.
+#include "ChildView.hpp"
+#include "Bitmap.hpp"
+#include "Player.hpp"
+#include "MidiInput.hpp"
+#include "SwingFillDlg.hpp"
+#include "Helpers.hpp"
+#include "MasterDlg.hpp"
+#include "GearTracker.hpp"
+#include "MainFrm.hpp"
+#include "WireDlg.hpp"
+#include "MacProp.hpp"
+#include "NewMachine.hpp"
+#include "PatDlg.hpp"
+#include "GreetDialog.hpp"
+#include "ConfigDlg.hpp"
+#include "SongpDlg.hpp"
+#include "inputhandler.hpp"
+#include "VstEditorDlg.hpp"
+#include "masterdlg.hpp"
+#include "SaveWavDlg.hpp"
+#include <cmath> // SwingFill
 namespace psycle
 {
 	namespace host
@@ -2082,7 +2082,7 @@ namespace psycle
 					<< _pSong->Author << std::endl
 					<< std::endl
 					<< _pSong->Comment;
-				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
+				::MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 			}
 		}
 
@@ -3515,10 +3515,10 @@ namespace psycle
 }
 
 // graphics operations, private headers
-#include "machineview.h"
-#include "patviewnew.h"
-#include "seqview.h"
+#include "machineview.private.hpp"
+#include "patviewnew.private.hpp"
+#include "seqview.private.hpp"
 
 // User/Mouse Responses, private headers
-#include "keybhandler.h"
-#include "mouseHandler.h"
+#include "keybhandler.private.hpp"
+#include "mouseHandler.private.hpp"

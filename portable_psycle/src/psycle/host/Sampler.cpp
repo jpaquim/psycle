@@ -1,13 +1,13 @@
-#include "stdafx.h"
-#if defined(_WINAMP_PLUGIN_)
-	//#include "global.h"
-#endif
-#include "Sampler.h"
-#include "Song.h"
-#include "FileIO.h"
-#include "Configuration.h"
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
+#include <project.private.hpp>
+#if defined(_WINAMP_PLUGIN_)
+	//#include "global.hpp"
+#endif
+#include "Sampler.hpp"
+#include "Song.hpp"
+#include "FileIO.hpp"
+#include "Configuration.hpp"
 namespace psycle
 {
 	namespace host

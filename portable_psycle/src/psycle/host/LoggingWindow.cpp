@@ -1,11 +1,11 @@
-#include <stdafx.h>
-#include <psycle/host/psycle.h>
-#include <psycle/host/MainFrm.h>
-#include <psycle/host/constants.h>
-#include <psycle/host/LoggingWindow.h>
-#include <cstring>
 ///\file
 ///\brief implementation file for psycle::host::CLoggingWindow.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "MainFrm.hpp"
+#include "constants.hpp"
+#include "LoggingWindow.hpp"
+#include <cstring>
 namespace psycle
 {
 	namespace host

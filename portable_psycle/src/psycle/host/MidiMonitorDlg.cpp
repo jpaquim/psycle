@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "MidiMonitorDlg.h"
-#include "MidiInput.h"
-#include "song.h"
-#include "machine.h"
 ///\file
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "MidiMonitorDlg.hpp"
+#include "MidiInput.hpp"
+#include "song.hpp"
+#include "machine.hpp"
 namespace psycle
 {
 	namespace host

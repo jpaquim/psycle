@@ -1,27 +1,19 @@
+#include <project.private.hpp>
+
 // Configure the Foobar2000 SDK $PATH before compiling 
-#include "stdafx.h"
-/*
-#include <input.h>
-#include <tagread.h>
-#include <file_info_helper.h>
-#include <console.h>
-#include <config.h>
-//#include <foobar2000.h>
-//#include "utf8api.h"
-#include "resource.h"
-*/
-#include "../../foobarSDK/foobar2000/SDK/foobar2000.h"
+#include <foobarSDK/foobar2000/SDK/foobar2000.h>
+
+#include <math.h> // should be <cmath>
+#include <shlobj.h>
 
 // psycle
-#include "../configuration.h"
-#include "../Song.h"
-#include "../player.h"
-#include "../machine.h"
-#include "../helpers.h"
+#include <psycle/host/configuration.hpp>
+#include <psycle/host/song.hpp>
+#include <psycle/host/player.hpp>
+#include <psycle/host/machine.hpp>
+#include <psycle/host/helpers.hpp>
 
 
-#include <math.h>
-#include <shlobj.h>
 
 
 

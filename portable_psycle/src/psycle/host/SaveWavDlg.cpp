@@ -1,19 +1,19 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "SaveWavDlg.h"
-#include "Global.h"
-#include "Song.h"
-#include "configuration.h"
-#include "MidiInput.h"
-#include "Player.h"
-#include "Machine.h"
-#include "helpers.h"
-#include "MainFrm.h"
+///\file
+///\brief implementation file for psycle::host::CSaveWavDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "SaveWavDlg.hpp"
+#include "Global.hpp"
+#include "Song.hpp"
+#include "configuration.hpp"
+#include "MidiInput.hpp"
+#include "Player.hpp"
+#include "Machine.hpp"
+#include "helpers.hpp"
+#include "MainFrm.hpp"
 #include <iostream>
 #include <iomanip>
 #undef max
-///\file
-///\brief implementation file for psycle::host::CSaveWavDlg.
 namespace psycle
 {
 	namespace host

@@ -1,13 +1,13 @@
-#include <stdafx.h>
+///\file
+///\brief implementation file for operating_system::exception
+#include <project.private.hpp>
 #define OPERATING_SYSTEM__EXCEPTION
-#include <operating_system/exception.h>
-#include <operating_system/logger.h>
+#include "exception.hpp"
+#include "logger.hpp"
 #include <iostream>
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 #endif
-///\file
-///\brief implementation file for operating_system::exception
 namespace operating_system
 {
 	exception::exception(const std::string & what) throw() : std::runtime_error(what)

@@ -1,15 +1,15 @@
-#include "stdafx.h"
-#include "WaveOut.h"
-#pragma comment(lib, "winmm")
-#include "resource.h"
-#include "WaveOutDialog.h"
-#include "Registry.h"
-#include "Configuration.h"
-#include "MidiInput.h"
-#include <process.h>
-#include <operating_system/exception.h>
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
+#include <project.private.hpp>
+#include "WaveOut.hpp"
+#pragma comment(lib, "winmm")
+#include "resources/resources.hpp"
+#include "WaveOutDialog.hpp"
+#include "Registry.hpp"
+#include "Configuration.hpp"
+#include "MidiInput.hpp"
+#include <operating_system/exception.hpp>
+#include <process.h>
 namespace psycle
 {
 	namespace host

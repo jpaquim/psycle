@@ -1,9 +1,8 @@
-//#include <project.h>
-#include "stdafx.h"
+#include <project.private.hpp>
 #define ASIO
 #include <windows.h>
-#include <asio/iasiodrv.h>
-#include <asio/asiolist.h>
+#include "iasiodrv.h"
+#include "asiolist.h"
 namespace asio
 {
 	#define ASIODRV_DESC		"description"

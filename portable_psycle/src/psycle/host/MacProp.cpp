@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "MacProp.h"
-#include "MainFrm.h"
 ///\file
 ///\brief implementation file for psycle::host::CMacProp.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "MacProp.hpp"
+#include "MainFrm.hpp"
 namespace psycle
 {
 	namespace host

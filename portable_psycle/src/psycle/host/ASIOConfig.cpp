@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "ASIOConfig.h"
 ///\file
 ///\brief implementation file for psycle::host::CASIOConfig.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "ASIOConfig.hpp"
 namespace psycle
 {
 	namespace host

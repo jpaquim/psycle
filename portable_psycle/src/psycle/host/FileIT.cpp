@@ -1,21 +1,8 @@
-// FileIT.cpp: implementation of the CFileIT class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#include "stdafx.h"
-#include "FileIT.h"
-#include "song.h"
-
-
-#ifdef _DEBUG
-#undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
-#endif
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+///\file
+///\brief
+#include <project.private.hpp>
+#include "FileIT.hpp"
+#include "song.hpp"
 
 static const char * IT_HEADER = "IMPM";
 

@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "constants.h"
-#include "PatDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CPatDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "constants.hpp"
+#include "PatDlg.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "DefaultVstGui.h"
-#include "Helpers.h"
-#include "ChildView.h"
-#include "configuration.h"
 ///\file
 ///\brief implementation file for psycle::host::CDefaultVstGui.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "DefaultVstGui.hpp"
+#include "Helpers.hpp"
+#include "ChildView.hpp"
+#include "configuration.hpp"
 namespace psycle
 {
 	namespace host

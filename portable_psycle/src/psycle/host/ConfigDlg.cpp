@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "ConfigDlg.h"
-#include "MainFrm.h"
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "ConfigDlg.hpp"
+#include "MainFrm.hpp"
 namespace psycle
 {
 	namespace host

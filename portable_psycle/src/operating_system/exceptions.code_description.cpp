@@ -1,12 +1,11 @@
-#include <stdafx.h>
-//#include <project.h>
+///\file
+///\brief
+#include <project.private.hpp>
 #define OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION
-#include <operating_system/exceptions/code_description.h>
+#include "exceptions/code_description.hpp"
 #include <string>
 #include <sstream>
 #include <windows.h>
-///\file
-///\brief
 namespace operating_system
 {
 	namespace exceptions

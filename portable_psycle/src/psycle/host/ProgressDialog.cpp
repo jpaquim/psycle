@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "ProgressDialog.h"
 ///\file
 ///\brief implementation file for psycle::host::CProgressDialog.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "ProgressDialog.hpp"
 namespace psycle
 {
 	namespace host

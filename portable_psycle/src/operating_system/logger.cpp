@@ -1,8 +1,9 @@
-#include <stdafx.h>
-//#include <project.h>
+///\file
+///\brief
+#include <project.private.hpp>
 #define OPERATING_SYSTEM__LOGGER
-#include <operating_system/logger.h>
-#include <operating_system/exceptions/code_description.h>
+#include "logger.hpp"
+#include "exceptions/code_description.hpp"
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <io.h>
 	#include <fcntl.h>

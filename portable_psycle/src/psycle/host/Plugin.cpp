@@ -1,16 +1,16 @@
-#include "stdafx.h"
-#include "FileIO.h"
-#include "Plugin.h"
-#include "InputHandler.h"
-#include <operating_system/exceptions/code_description.h>
+///\file
+///\brief implementation file for psycle::host::Plugin
+#include <project.private.hpp>
+#include "FileIO.hpp"
+#include "Plugin.hpp"
+#include "InputHandler.hpp"
+#include <operating_system/exceptions/code_description.hpp>
 #include <algorithm>
 #include <cctype>
 #if !defined _WINAMP_PLUGIN_
-	#include "psycle.h"
-	#include "NewMachine.h"
+	#include "psycle.hpp"
+	#include "NewMachine.hpp"
 #endif
-///\file
-///\brief implementation file for psycle::host::Plugin
 namespace psycle
 {
 	namespace host

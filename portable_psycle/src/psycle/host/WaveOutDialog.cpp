@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "WaveOutDialog.h"
-#include <mmsystem.h>
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "WaveOutDialog.hpp"
+#include <mmsystem.h>
 namespace psycle
 {
 	namespace host

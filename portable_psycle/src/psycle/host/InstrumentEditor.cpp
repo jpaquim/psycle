@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "MainFrm.h"
-#include "InstrumentEditor.h"
-#include "EnvDialog.h"
-#include "constants.h"
 ///\file
 ///\brief implementation file for psycle::host::CInstrumentEditor.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "MainFrm.hpp"
+#include "InstrumentEditor.hpp"
+#include "EnvDialog.hpp"
+#include "constants.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,10 +1,10 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "SkinDlg.h"
-#include "Helpers.h"
-#include "Configuration.h"
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "SkinDlg.hpp"
+#include "Helpers.hpp"
+#include "Configuration.hpp"
 namespace psycle
 {
 	namespace host

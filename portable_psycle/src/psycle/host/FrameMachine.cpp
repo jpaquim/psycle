@@ -1,17 +1,17 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "FrameMachine.h"
-#include "Childview.h"
-#include "NewVal.h"
-#include "PresetsDlg.h"
-#include "Plugin.h"
-#include "VSTHost.h"
-#include "InputHandler.h"
-#include "Helpers.h"
-#include "MainFrm.h"
-#include "Machine.h"
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "FrameMachine.hpp"
+#include "Childview.hpp"
+#include "NewVal.hpp"
+#include "PresetsDlg.hpp"
+#include "Plugin.hpp"
+#include "VSTHost.hpp"
+#include "InputHandler.hpp"
+#include "Helpers.hpp"
+#include "MainFrm.hpp"
+#include "Machine.hpp"
 namespace psycle
 {
 	namespace host

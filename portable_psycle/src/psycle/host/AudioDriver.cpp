@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "AudioDriver.h"
-#include "helpers.h"
-#include "constants.h"
 ///\file
 ///\brief implementation file for psycle::host::AudioDriver.
+#include <project.private.hpp>
+#include "AudioDriver.hpp"
+#include "helpers.hpp"
+#include "constants.hpp"
 namespace psycle
 {
 	namespace host

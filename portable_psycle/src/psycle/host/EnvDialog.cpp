@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "Song.h"
-#include "EnvDialog.h"
 ///\file
 ///\brief implementation file for psycle::host::CEnvDialog.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "Song.hpp"
+#include "EnvDialog.hpp"
 namespace psycle
 {
 	namespace host

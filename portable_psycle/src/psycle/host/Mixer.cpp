@@ -1,13 +1,13 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "Machine.h"
-#include "Mixer.h"
-#include "Helpers.h"
-#include "ChildView.h"
-#include "InputHandler.h"
-#include "VolumeDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CMixerDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "Machine.hpp"
+#include "Mixer.hpp"
+#include "Helpers.hpp"
+#include "ChildView.hpp"
+#include "InputHandler.hpp"
+#include "VolumeDlg.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "OutputDlg.h"
-#include "MidiInput.h"
-#include "Configuration.h"
-#include "MidiLearn.h"
 ///\file
 ///\brief implementation file for psycle::host::CMidiLearn.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "OutputDlg.hpp"
+#include "MidiInput.hpp"
+#include "Configuration.hpp"
+#include "MidiLearn.hpp"
 namespace psycle
 {
 	namespace host

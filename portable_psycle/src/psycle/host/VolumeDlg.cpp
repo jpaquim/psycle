@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "VolumeDlg.h"
-#include <math.h>
 ///\file
 ///\brief implementation file for psycle::host::CVolumeDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "VolumeDlg.hpp"
+#include <math.h>
 namespace psycle
 {
 	namespace host

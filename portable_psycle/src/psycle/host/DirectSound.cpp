@@ -1,14 +1,14 @@
-#include <stdafx.h>
-#include <DirectSound.h>
-#pragma comment(lib, "dsound")
-#include "resource.h"
-#include "DSoundConfig.h"
-#include "Registry.h"
-#include "Configuration.h"
-#include <process.h>
-#include <operating_system/exception.h>
 ///\file
 ///\brief implementation file for psycle::host::DirectSound.
+#include <project.private.hpp>
+#include "DirectSound.hpp"
+#pragma comment(lib, "dsound")
+#include "resources/resources.hpp"
+#include "DSoundConfig.hpp"
+#include "Registry.hpp"
+#include "Configuration.hpp"
+#include <operating_system/exception.hpp>
+#include <process.h>
 namespace psycle
 {
 	namespace host

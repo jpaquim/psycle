@@ -1,21 +1,21 @@
-#include "stdafx.h"
-#include <assert.h>
-#include <mmsystem.h>
-#pragma comment(lib, "winmm")
-#include "MidiInput.h"
-#include "Psycle.h"
-#include "Song.h"
-#include "Player.h"
-#include "Configuration.h"
-#include "Plugin.h"
-#include "VstHost.h"
-#include "ChildView.h"
-#include "MainFrm.h"
-#include "Helpers.h"
-#include "InputHandler.h"
 ///\file
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
+#include <project.private.hpp>
+#include <cassert>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm")
+#include "MidiInput.hpp"
+#include "Psycle.hpp"
+#include "Song.hpp"
+#include "Player.hpp"
+#include "Configuration.hpp"
+#include "Plugin.hpp"
+#include "VstHost.hpp"
+#include "ChildView.hpp"
+#include "MainFrm.hpp"
+#include "Helpers.hpp"
+#include "InputHandler.hpp"
 namespace psycle
 {
 	namespace host

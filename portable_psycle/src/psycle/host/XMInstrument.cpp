@@ -445,11 +445,11 @@ namespace psycle
 			m_Name = name; 		
 		};
 
-		/** エンベロープ位置と値をセットする
+		/** ***** [bohan] iso-(10)646 encoding only please! *****
 			* @param index Envelopeのindex
 			* @param point Envelopeの位置
 			* @param value Envelopeの値 
-			* @return 挿入後のindex */
+			* @return ***** [bohan] iso-(10)646 encoding only please! ******/
 		const int  XMInstrument::Envelope::PointAndValue(const int index,const int point,const ValueType value)
 		{
 			ATLASSERT(index < (int)m_Points.size());
@@ -459,7 +459,7 @@ namespace psycle
 				m_Points[index].first = point;
 				m_Points[index].second = value;
 
-				// pointが1つ前と、1つ後との前後関係の変動がない場合は終了
+				// point***** [bohan] iso-(10)646 encoding only please! *****
 
 				if(index > 0 && (index + 1) < (int)m_Points.size())
 				{	
@@ -487,7 +487,7 @@ namespace psycle
 					}
 				}
 
-				// 要素が1個しかない場合
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				if(index == 0 && (index + 1) == ((int)(m_Points.size()) - 1))
 				{
 					return index;
@@ -495,10 +495,10 @@ namespace psycle
 
 				if(index > 0)
 				{
-					// pointが1つ前の座標より小さい場合
+					// point***** [bohan] iso-(10)646 encoding only please! *****
 					int _new_index = index;
 					if(point < m_Points[index - 1].first){
-						// 1つ前より以前のものも調べる
+						// ***** [bohan] iso-(10)646 encoding only please! *****
 						do {
 							_new_index--;
 							if(point > m_Points[_new_index].first)
@@ -510,21 +510,21 @@ namespace psycle
 								m_Points.insert(m_Points.begin() + _new_index,_point);
 
 
-								// Sustain,Loopポイントの修正
-								// <挿入前>
+								// Sustain,Loop***** [bohan] iso-(10)646 encoding only please! *****
+								// ***** [bohan] iso-(10)646 encoding only please! *****
 								// pt var
 								// 10 -----------------
 								// 09 -----------------
 								// 08 index             --+
 								// 07 -----------------   +
 								// 06 -----------------   +
-								// 05 挿入位置          <-+ 
+								// 05 ***** [bohan] iso-(10)646 encoding only please! *****          <-+ 
 								// 04 _new_index
 								// 03 -----------------
 								// 02 -----------------
 								// 01 -----------------
 								// 00 -----------------
-								// <挿入後>
+								// ***** [bohan] iso-(10)646 encoding only please! *****
 								// pt 元pt var
 								// 10 10 -----------------
 								// 09 09 -----------------
@@ -537,10 +537,10 @@ namespace psycle
 								// 02 02 -----------------
 								// 01 01 -----------------
 								// 00 00 -----------------
-								//  1. index > Sustain,Loop ポイントの場合、変化無し
-								//  2. 挿入位置 <= Sustain,Loop ポイント < index の場合、 +1
-								//  3. 挿入位置 < Sustain,Loop ポイントの場合、変化無し
-								//  4. index == Sustain,Loop ポイントの場合、Sutain,Loopポイント = 挿入位置
+								//  1. index > Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
+								//  2. ***** [bohan] iso-(10)646 encoding only please! ***** <= Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
+								//  3. ***** [bohan] iso-(10)646 encoding only please! ***** < Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
+								//  4. index == Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
 								
 								if((_new_index <= m_SustainBegin) && (m_SustainBegin < index))
 								{
@@ -579,7 +579,7 @@ namespace psycle
 
 						} while(_new_index > 0);
 
-						// _new_index == 0の場合の処理
+						// _new_index == ***** [bohan] iso-(10)646 encoding only please! *****
 						if(_new_index == 0){
 							PointValue _point = m_Points[index];
 							m_Points.erase(m_Points.begin() + index);
@@ -612,7 +612,7 @@ namespace psycle
 							
 						}
 
-						// サステイン開始が、サステイン終了より大きい場合は無効にする
+						// ***** [bohan] iso-(10)646 encoding only please! *****
 						if(m_SustainBegin != INVALID && m_SustainEnd != INVALID)
 						{
 							if(m_SustainBegin > m_SustainEnd){
@@ -672,9 +672,9 @@ namespace psycle
 							// 02 02 -----------------
 							// 01 01 -----------------
 							// 00 00 -----------------
-							//  1. index < Sustain,Loop ポイント < _new_index の場合 -1
-							//  2. _new_index <= Sustain,Loop ポイント の場合変化無し
-							//  3. index > Sustain,Loop ポイントの場合変化無し
+							//  1. index < Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! ***** < _new_index ***** [bohan] iso-(10)646 encoding only please! *****
+							//  2. _new_index <= Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
+							//  3. index > Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
 
 							if((index < m_SustainBegin) && (m_SustainBegin < _new_index))
 							{
@@ -750,7 +750,7 @@ namespace psycle
 						}
 					}
 
-					// サステイン開始が、サステイン終了より大きい場合は無効にする
+					// ***** [bohan] iso-(10)646 encoding only please! *****
 					if(m_SustainBegin != INVALID && m_SustainEnd != INVALID)
 					{
 						if(m_SustainBegin > m_SustainEnd){
@@ -759,7 +759,7 @@ namespace psycle
 						}
 					}
 
-					// ループ開始が、ループ終了より大きい場合は無効にする
+					// ***** [bohan] iso-(10)646 encoding only please! *****
 					if(m_LoopStart != INVALID && m_LoopEnd != INVALID)
 					{
 						if(m_LoopStart > m_LoopEnd){
@@ -774,11 +774,11 @@ namespace psycle
 			return INVALID;
 		}
 
-		/** Point値と値を挿入する
-			* @param index Envelopeのindex
-			* @param point Envelopeの位置
-			* @param value Envelopeの値 
-			* @return 変更後のindex */
+		/** Point***** [bohan] iso-(10)646 encoding only please! *****
+			* @param index Envelope***** [bohan] iso-(10)646 encoding only please! *****
+			* @param point Envelope***** [bohan] iso-(10)646 encoding only please! *****
+			* @param value Envelope***** [bohan] iso-(10)646 encoding only please! *****
+			* @return ***** [bohan] iso-(10)646 encoding only please! *****index */
 		const int XMInstrument::Envelope::Insert(const int point,const ValueType value)
 		{
 
@@ -793,8 +793,8 @@ namespace psycle
 
 					m_Points.insert(m_Points.begin() + (UINT)_new_index,_point);
 
-					// Sustain,Loopポイントの修正
-					// <挿入前>
+					// Sustain,Loop***** [bohan] iso-(10)646 encoding only please! *****
+					// ***** [bohan] iso-(10)646 encoding only please! *****
 					// pt var
 					// 10 -----------------
 					// 09 _new_index
@@ -820,9 +820,9 @@ namespace psycle
 					// 02 02 -----------------
 					// 01 01 -----------------
 					// 00 00 -----------------
-					//  1. index < Sustain,Loop ポイント < _new_index の場合 -1
-					//  2. _new_index <= Sustain,Loop ポイント の場合変化無し
-					//  3. index > Sustain,Loop ポイントの場合変化無し
+					//  1. index < Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
+					//  2. _new_index <= Sustain,Loop***** [bohan] iso-(10)646 encoding only please! *****
+					//  3. index > Sustain,Loop ***** [bohan] iso-(10)646 encoding only please! *****
 
 					if(m_SustainBegin >= _new_index)
 					{
@@ -843,7 +843,7 @@ namespace psycle
 					{
 						m_LoopEnd++;
 					}
-					// ループより抜けて、終了
+					// ***** [bohan] iso-(10)646 encoding only please! *****
 					break;
 
 				}
@@ -851,12 +851,12 @@ namespace psycle
 			}
 
 			if(_new_index == (int)(m_Points.size())){
-				// _new_index が　最大値の場合
+				// _new_index ***** [bohan] iso-(10)646 encoding only please! *****
 				PointValue _point;
 				_point.first = point;
 				_point.second = value;
 				m_Points.push_back(_point);
-				// ポジションは変化無し
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 			}
 			return _new_index;
 

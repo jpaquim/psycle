@@ -10,16 +10,14 @@ or, at least the syntax is understood by both gcc and msvc 7.1.
 directory structure
 ===================
 
-	include/: public headers
-		psycle/: psycle public headers, some are shared between the psycle host and its plugins
-			host/: psycle host public headers
-			plugins/: psycle plugins public headers
-	src/: sources and private headers
-		project.h: private header #included by all source files to centralize compiler tweaking
-		precompiled_headers.h: private header included by project.h (and hence all source files) that #include what is precompiled
-		psycle/: sources and private headers
-			host/: psycle host sources and private headers
-			plugins/: psycle plugins sources and private headers
+	include/: public headers of third party libraries
+	src/: sources (*.cpp), private headers (*.private.hpp), and public headers (*.hpp) of this package
+		project.private.hpp: private header #included by all source files (*.cpp) to centralize compiler tweaking
+		project.hpp: public version of the project.private.hpp private header that can be #included by other public headers.
+		precompiled_headers.private.hpp: private header included by project.private.hpp (and hence all source files) that #include what is precompiled
+		psycle/:
+			host/: psycle host
+			plugins/: psycle plugins
 	make/: build systems for various compilers (only msvc 7.1 so far!)
 		msvc_7.1/: solution and project files for msvc 7.1
 			solution.sln: solution (.sln) file

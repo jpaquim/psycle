@@ -1,5 +1,4 @@
-//#include <project.h>
-#include "stdafx.h"
+#include <project.private.hpp>
 #define ASIO
 
 /*
@@ -13,11 +12,11 @@
 */ 
 
 #include <string.h>
-#include <asio/asiosys.h> // platform definition
-#include <asio/asio.h>
+#include "asiosys.h" // platform definition
+#include "asio.h"
 
 #if MAC
-	#include <asio/asiodrvr.h>
+	#include "asiodrvr.h"
 	#pragma export on
 	namespace asio
 	{ 
@@ -25,15 +24,15 @@
 	}
 #elif WINDOWS
 	#include <windows.h>
-	#include <asio/iasiodrv.h>
-	#include <asio/asiodrivers.h>
+	#include "iasiodrv.h"
+	#include "asiodrivers.h"
 	namespace asio
 	{ 
 		IASIO *theAsioDriver = 0;
 		extern AsioDrivers *asioDrivers;
 	}
 #elif SGI || SUN || BEOS || LINUX
-	#include <asio/asiodrvr.h>
+	#include "asiodrvr.h"
 	namespace asio
 	{ 
 		static AsioDriver *theAsioDriver = 0;
