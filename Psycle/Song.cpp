@@ -1700,9 +1700,7 @@ bool Song::Save(
 				{
 					Machine* pDstMachine = _pMachines[_pMachines[i]->_outputMachines[c]];
 					int d = pDstMachine->FindInputWire(i);
-					float val;
-					pDstMachine->GetWireVolume(d,val); //this gets automatically the value in 0.0..1.0 range
-					_pMachines[i]->_inputConVol[c]=val; // and we invert the volumes (input to output)
+					_pMachines[i]->_inputConVol[c]=volMatrix[_pMachines[i]->_outputMachines[c]][d]*pDstMachine->_wireMultiplier[d];
 				}
 			}
 		}
