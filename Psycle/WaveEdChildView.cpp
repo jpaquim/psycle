@@ -1104,7 +1104,7 @@ void CWaveEdChildView::OnDestroyClipboard()
 	GlobalFree(hClipboardData);
 }
 
-CWaveEdChildView::SetSong(Song* _sng)
+void CWaveEdChildView::SetSong(Song* _sng)
 {
 	_pSong = _sng;
 }

@@ -65,19 +65,6 @@ BOOL CPsycleApp::InitInstance()
 	CMainFrame* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
 	
-	// create and load the frame with its resources
-	// For some reason, there'a First-Chance exception when
-	// another pFrame member is called after this LoadFrame
-	// (for example, pFrame->ShowWindow(SW_MAXIMIZE);)
-	pFrame->LoadFrame(IDR_MAINFRAME,
-		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
-		NULL);
-
-	// Sets Icon
-	HICON tIcon;
-	tIcon=LoadIcon(IDR_MAINFRAME);
-	pFrame->SetIcon(tIcon,false);
-	
 	if (!Global::pConfig->Initialized())
 	{
 		if (!Global::pConfig->Read())
@@ -100,6 +87,20 @@ BOOL CPsycleApp::InitInstance()
 		pFrame->m_wndView.RecalculateColourGrid();
 		
 	}
+	// LOAD THE REGISTRY SETTINGS FIRST UNLESS YOU WANT BIG TROUBLE
+	// create and load the frame with its resources
+	// For some reason, there'a First-Chance exception when
+	// another pFrame member is called after this LoadFrame
+	// (for example, pFrame->ShowWindow(SW_MAXIMIZE);)
+	pFrame->LoadFrame(IDR_MAINFRAME,
+		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
+		NULL);
+
+	// Sets Icon
+	HICON tIcon;
+	tIcon=LoadIcon(IDR_MAINFRAME);
+	pFrame->SetIcon(tIcon,false);
+	
 	// The one and only window has been initialized, so show and update it.
 	pFrame->ShowWindow(SW_MAXIMIZE);
 	

@@ -13,7 +13,7 @@ class Song;
 class CWaveEdChildView : public CWnd
 {
 public:
-	SetSong(Song*);
+	void SetSong(Song*);
 	void SetParent(CMainFrame*);
 
 	CWaveEdChildView();
