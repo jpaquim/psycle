@@ -244,7 +244,13 @@ namespace psycle
 					}
 					catch(const std::exception & e)
 					{
-						if(!exception) exception = &e;
+						if(!exception)
+						{
+							std::ostringstream s; s
+								<< typeid(e).name() << std::endl
+								<< e.what();
+							exception = new exceptions::function_error(s.str());
+						}
 					}
 					try
 					{
@@ -252,14 +258,28 @@ namespace psycle
 					}
 					catch(const std::exception & e)
 					{
-						if(!exception) exception = &e;
+						if(!exception)
+						{
+							std::ostringstream s; s
+								<< typeid(e).name() << std::endl
+								<< e.what();
+							exception = new exceptions::function_error(s.str());
+						}
 					}
 				}
 				if(h_dll)
 				{
 					assert(!proxy()());
 					TRACE("VST plugin: freeing ... library");
-					::FreeLibrary(h_dll);
+					try
+					{
+						::FreeLibrary(h_dll);
+					}
+					catch(...)
+					{
+						h_dll = 0;
+						throw; // <bohan> magnus, does it cause any problem to rethrow?
+					}
 					h_dll = 0;
 				}
 				instantiated = false;
