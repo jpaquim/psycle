@@ -50,6 +50,7 @@ bool Plugin::Instance(char* psFileName)
 	GETINFO GetInfo =(GETINFO)GetProcAddress(_dll, "GetInfo");
 	if (GetInfo == NULL)
 	{
+//		MessageBox(NULL,"Could not Get address of Getinfo","",MB_OK);
 		FreeLibrary(_dll);
 		_dll=NULL;
 		return false;
@@ -59,6 +60,7 @@ bool Plugin::Instance(char* psFileName)
 	
 	if ( _pInfo->Version < MI_VERSION )
 	{
+//		MessageBox(NULL,"Invalid MI_VERSION","",MB_OK);
 		FreeLibrary(_dll);
 		_dll=NULL;
 		return false;
@@ -84,9 +86,16 @@ bool Plugin::Instance(char* psFileName)
 	_psDllName = new char[strlen(psFileName)+1];
 	strcpy(_psDllName, psFileName);
 
+	if ( GetProcAddress(_dll, "CreateMachine") == NULL)
+	{
+//		MessageBox(NULL,"createmachine address failed","",MB_OK);
+		
+	}
 	CREATEMACHINE GetInterface =(CREATEMACHINE)GetProcAddress(_dll, "CreateMachine");
 	if (GetInterface == NULL)
 	{
+//		MessageBox(NULL,"Createmachine get interface failed","",MB_OK);
+	
 		FreeLibrary(_dll);
 		_dll=NULL;
 		return false;

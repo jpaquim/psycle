@@ -31,6 +31,7 @@ void CInstrumentEditor::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CInstrumentEditor)
+	DDX_Control(pDX, IDC_NOTETUNE, m_notelabel);
 	DDX_Control(pDX, IDC_PANLABEL, m_panlabel);
 	DDX_Control(pDX, IDC_VOLABEL2, m_finelabel);
 	DDX_Control(pDX, IDC_SLIDER2, m_finetune);
@@ -71,6 +72,10 @@ BEGIN_MESSAGE_MAP(CInstrumentEditor, CDialog)
 	ON_EN_CHANGE(IDC_LOOPEDIT, OnChangeLoopedit)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
 	ON_BN_CLICKED(IDC_BUTTON7, OnKillInstrument)
+	ON_BN_CLICKED(IDC_INS_DECOCTAVE, OnInsDecoctave)
+	ON_BN_CLICKED(IDC_INS_DECNOTE, OnInsDecnote)
+	ON_BN_CLICKED(IDC_INS_INCNOTE, OnInsIncnote)
+	ON_BN_CLICKED(IDC_INS_INCOCTAVE, OnInsIncoctave)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -113,8 +118,8 @@ void CInstrumentEditor::WaveUpdate()
 	if(_pSong->waveSelected<0)_pSong->waveSelected=0;
 	if(_pSong->waveSelected>=MAX_WAVES)_pSong->waveSelected=MAX_WAVES-1;
 
-	int sw = _pSong->waveSelected;
-	int si = _pSong->instSelected;
+	const int sw = _pSong->waveSelected;
+	const int si = _pSong->instSelected;
 
 	char buffer[64];
 	// Set instrument current selected label
@@ -148,6 +153,9 @@ void CInstrumentEditor::WaveUpdate()
 	m_volumebar.SetPos(_pSong->_pInstrument[si]->waveVolume[sw]);
 	m_finetune.SetPos(_pSong->_pInstrument[si]->waveFinetune[sw]+256);
 
+	UpdateNoteLabel();	
+	
+	
 	// Set looptype
 	if(_pSong->_pInstrument[si]->waveLoopType[sw])
 	sprintf(buffer,"Forward");
@@ -367,13 +375,13 @@ void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 	int si=_pSong->instSelected;
 	int sw=_pSong->waveSelected;
 	char buffer[8];
-
+	
 	if(cando)
-	_pSong->_pInstrument[si]->waveFinetune[sw]=m_finetune.GetPos()-256;
+		_pSong->_pInstrument[si]->waveFinetune[sw]=m_finetune.GetPos()-256;
 	
 	sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveFinetune[sw]);
 	m_finelabel.SetWindowText(buffer);
-
+	
 	*pResult = 0;
 }
 
@@ -383,4 +391,69 @@ void CInstrumentEditor::OnKillInstrument()
 	WaveUpdate();
 	pParentMain->UpdateComboIns();
 	pParentMain->RedrawGearRackList();
+}
+
+void CInstrumentEditor::OnInsDecoctave() 
+{
+	const int si=_pSong->instSelected;
+	const int sw=_pSong->waveSelected;
+	if ( _pSong->_pInstrument[si]->waveTune[sw]>-37)
+		_pSong->_pInstrument[si]->waveTune[sw]-=12;
+	else _pSong->_pInstrument[si]->waveTune[sw]=-48;
+	UpdateNoteLabel();	
+}
+
+void CInstrumentEditor::OnInsDecnote() 
+{
+	const int si=_pSong->instSelected;
+	const int sw=_pSong->waveSelected;
+	if ( _pSong->_pInstrument[si]->waveTune[sw]>-47)
+		_pSong->_pInstrument[si]->waveTune[sw]-=1;
+	else _pSong->_pInstrument[si]->waveTune[sw]=-48;
+	UpdateNoteLabel();	
+}
+
+void CInstrumentEditor::OnInsIncnote() 
+{
+	const int si=_pSong->instSelected;
+	const int sw=_pSong->waveSelected;
+	if ( _pSong->_pInstrument[si]->waveTune[sw] < 71)
+		_pSong->_pInstrument[si]->waveTune[sw]+=1;
+	else _pSong->_pInstrument[si]->waveTune[sw]=71;
+	UpdateNoteLabel();	
+}
+
+void CInstrumentEditor::OnInsIncoctave() 
+{
+	const int si=_pSong->instSelected;
+	const int sw=_pSong->waveSelected;
+	if ( _pSong->_pInstrument[si]->waveTune[sw] < 60)
+		_pSong->_pInstrument[si]->waveTune[sw]+=12;
+	else _pSong->_pInstrument[si]->waveTune[sw]=71;
+	UpdateNoteLabel();	
+}
+
+void CInstrumentEditor::UpdateNoteLabel()
+{
+	const int sw = _pSong->waveSelected;
+	const int si = _pSong->instSelected;
+	char buffer[64];
+	
+	const int octave= ((_pSong->_pInstrument[si]->waveTune[sw]+48)/12);
+	switch ((_pSong->_pInstrument[si]->waveTune[sw]+48)%12)
+	{
+	case 0:  sprintf(buffer,"C-%i",octave);break;
+	case 1:  sprintf(buffer,"C#%i",octave);break;
+	case 2:  sprintf(buffer,"D-%i",octave);break;
+	case 3:  sprintf(buffer,"D#%i",octave);break;
+	case 4:  sprintf(buffer,"E-%i",octave);break;
+	case 5:  sprintf(buffer,"F-%i",octave);break;
+	case 6:  sprintf(buffer,"F#%i",octave);break;
+	case 7:  sprintf(buffer,"G-%i",octave);break;
+	case 8:  sprintf(buffer,"G#%i",octave);break;
+	case 9:  sprintf(buffer,"A-%i",octave);break;
+	case 10:  sprintf(buffer,"A#%i",octave);break;
+	case 11:  sprintf(buffer,"B-%i",octave);break;
+	}
+	m_notelabel.SetWindowText(buffer);
 }

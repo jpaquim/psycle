@@ -33,16 +33,18 @@ BEGIN
     LTEXT           "Sampling rate ",IDC_SAMPLING_LABEL,15,22,50,9
     COMBOBOX        IDC_COMBO_SAMPLING_RATE,66,19,64,12,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Directories",IDC_FRAME,15,46,204,85
-    EDITTEXT        IDC_EDIT_NATIVE,20,73,171,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BROWSE_NATIVE,195,73,20,14
-    EDITTEXT        IDC_EDIT_VST,20,105,171,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BROWSE_VST,195,105,20,14
-    LTEXT           "Native Plugins",IDC_STATIC,20,60,123,8
-    LTEXT           "Vst Plugins",IDC_STATIC,20,92,123,8
+    GROUPBOX        "Directories",IDC_FRAME,13,57,208,85
+    EDITTEXT        IDC_EDIT_NATIVE,20,86,171,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BROWSE_NATIVE,195,86,20,14
+    EDITTEXT        IDC_EDIT_VST,20,118,171,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BROWSE_VST,195,118,20,14
+    LTEXT           "Native Plugins",IDC_STATIC,20,73,123,8
+    LTEXT           "Vst Plugins",IDC_STATIC,20,106,123,8
     LTEXT           "Warning : new sample rate will take effect **immediatly**",
-                    IDC_STATIC,29,137,179,11
-    LTEXT           "http://psycle.pastnotecut.org",IDC_URL,125,164,96,9
+                    IDC_STATIC,16,36,179,11
+    LTEXT           "http://psycle.pastnotecut.org",IDC_URL,123,190,96,9
+    CTEXT           "Original port of the plugin from winamp to foobar2000 by KarlKoX.\nContinued developement by Psycledelics.",
+                    IDC_STATIC,18,151,201,31,SS_SUNKEN
 END
 
 

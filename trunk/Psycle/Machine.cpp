@@ -411,7 +411,7 @@ bool Machine::Load(
 	return true;
 }
 
-Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
+Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen)
 {
 	// assume version 0 for now
 	BOOL bDeleted = FALSE;
@@ -425,80 +425,100 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	switch (type)
 	{
 	case MACH_MASTER:
-		pMachine = new Master(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Master(index);
 		break;
 	case MACH_SAMPLER:
-		pMachine = new Sampler(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Sampler(index);
 		break;
 #ifndef CONVERT_INTERNAL_MACHINES
 
 	case MACH_SINE:
-		pMachine = new Sine(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Sine(index);
 		break;
 	case MACH_DIST:
-		pMachine = new Distortion(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Distortion(index);
 		break;
 	case MACH_DELAY:
-		pMachine = new Delay(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Delay(index);
 		break;
 	case MACH_2PFILTER:
-		pMachine = new Filter2p(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Filter2p(index);
 		break;
 	case MACH_GAIN:
-		pMachine = new Gainer(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Gainer(index);
 		break;
 	case MACH_FLANGER:
-		pMachine = new Flanger(index);
+		if ( !fullopen ) pMachine = new Dummy(index);
+		else pMachine = new Flanger(index);
 		break;
 #endif
 	case MACH_PLUGIN:
 		{
-			Plugin * p;
-			pMachine = p = new Plugin(index);
-			if (!p->LoadDll(dllName))
+			if ( !fullopen ) pMachine = new Dummy(index);
+			else 
 			{
-				char sError[MAX_PATH];
-				sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
-				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				Plugin * p;
+				pMachine = p = new Plugin(index);
+				if (!p->LoadDll(dllName))
+				{
+					char sError[MAX_PATH];
+					sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
+					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-				pMachine = new Dummy(index);
-				type = MACH_DUMMY;
-				delete p;
-				bDeleted = TRUE;
+					pMachine = new Dummy(index);
+					type = MACH_DUMMY;
+					delete p;
+					bDeleted = TRUE;
+				}
 			}
 		}
 		break;
 	case MACH_VST:
 		{
-			VSTInstrument * p;
-			 pMachine = p = new VSTInstrument(index);
-			if (!p->LoadDll(dllName))
+			if ( !fullopen ) pMachine = new Dummy(index);
+			else 
 			{
-				char sError[MAX_PATH];
-				sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
-				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				VSTInstrument * p;
+				pMachine = p = new VSTInstrument(index);
+				if (!p->LoadDll(dllName))
+				{
+					char sError[MAX_PATH];
+					sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
+					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-				pMachine = new Dummy(index);
-				type = MACH_DUMMY;
-				delete p;
-				bDeleted = TRUE;
+					pMachine = new Dummy(index);
+					type = MACH_DUMMY;
+					delete p;
+					bDeleted = TRUE;
+				}
 			}
 		}
 		break;
 	case MACH_VSTFX:
 		{
-			VSTFX * p;
-			pMachine = p = new VSTFX(index);
-			if (!p->LoadDll(dllName))
+			if ( !fullopen ) pMachine = new Dummy(index);
+			else 
 			{
-				char sError[MAX_PATH];
-				sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
-				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				VSTFX * p;
+				pMachine = p = new VSTFX(index);
+				if (!p->LoadDll(dllName))
+				{
+					char sError[MAX_PATH];
+					sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
+					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-				pMachine = new Dummy(index);
-				type = MACH_DUMMY;
-				delete p;
-				bDeleted = TRUE;
+					pMachine = new Dummy(index);
+					type = MACH_DUMMY;
+					delete p;
+					bDeleted = TRUE;
+				}
 			}
 		}
 		break;
@@ -535,7 +555,9 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		buf[31]=0;
 		strcpy(pMachine->_editName,buf);
 	}
-
+	
+	if ( !fullopen ) return pMachine;
+	
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
 		char sError[MAX_PATH];

@@ -302,22 +302,22 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,129,22,50,15
 END
 
-IDD_INSTRUMENT DIALOGEX 0, 0, 217, 223
+IDD_INSTRUMENT DIALOGEX 0, 0, 217, 243
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Instrument Editor"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     RTEXT           "Instrument",IDC_STATIC,6,10,37,12,SS_CENTERIMAGE
     CTEXT           "000",IDC_INSTNUMBER,46,10,20,12,SS_CENTERIMAGE | 
-                    WS_BORDER
+                    SS_SUNKEN
     PUSHBUTTON      "<",IDC_BUTTON12,70,10,8,12
     PUSHBUTTON      ">",IDC_BUTTON13,78,10,8,12
     EDITTEXT        IDC_INSTNAME,89,10,84,12,ES_AUTOHSCROLL
     PUSHBUTTON      "Kill...",IDC_BUTTON7,176,10,32,12
-    GROUPBOX        "Instrument Properties",IDC_STATIC,5,25,205,191
+    GROUPBOX        "Instrument Properties",IDC_STATIC,4,24,208,215
     LTEXT           "New Note Action",IDC_STATIC,16,38,56,9,SS_CENTERIMAGE
-    COMBOBOX        IDC_NNA_COMBO,83,35,84,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_NNA_COMBO,89,35,84,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Panning",IDC_STATIC,16,53,31,9
     CONTROL         "Slider3",IDC_PANSLIDER,"msctls_trackbar32",TBS_BOTH | 
@@ -335,7 +335,7 @@ BEGIN
                     WS_TABSTOP,15,104,68,10
     EDITTEXT        IDC_LOOPEDIT,86,103,22,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Pattern rows",IDC_STATIC,113,104,46,10
-    GROUPBOX        "Instrument Wave Layer",IDC_STATIC,8,122,200,75,
+    GROUPBOX        "Instrument Wave Layer",IDC_STATIC,8,122,200,114,
                     BS_CENTER
     RTEXT           "Volume",IDC_STATIC,12,134,32,12,SS_CENTERIMAGE
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
@@ -347,21 +347,28 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,48,148,128,12
     CTEXT           "100%",IDC_VOLABEL2,180,148,24,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    RTEXT           "Loop",IDC_STATIC,12,162,32,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Off",IDC_LOOPOFF,48,162,52,12
-    PUSHBUTTON      "Forward",IDC_LOOPFORWARD,100,162,56,12
-    CTEXT           "Forw.",IDC_LOOPTYPE,160,162,44,12,SS_CENTERIMAGE | 
+    RTEXT           "Tune",IDC_STATIC,12,163,32,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Oct -",IDC_INS_DECOCTAVE,48,162,31,12
+    PUSHBUTTON      "Note -",IDC_INS_DECNOTE,80,162,31,12
+    PUSHBUTTON      "Note +",IDC_INS_INCNOTE,112,162,31,12
+    PUSHBUTTON      "Oct. +",IDC_INS_INCOCTAVE,144,162,31,12
+    CTEXT           "C#5",IDC_NOTETUNE,180,162,24,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    CTEXT           "Loop At",IDC_STATIC,16,178,32,12,SS_CENTERIMAGE
-    CTEXT           "1234567",IDC_LOOPSTART,48,178,36,12,SS_CENTERIMAGE | 
+    RTEXT           "Loop",IDC_STATIC,12,178,32,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Off",IDC_LOOPOFF,48,180,52,12
+    PUSHBUTTON      "Forward",IDC_LOOPFORWARD,100,180,56,12
+    CTEXT           "Forw.",IDC_LOOPTYPE,160,180,44,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CTEXT           "Loop At",IDC_STATIC,16,196,32,12,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPSTART,48,196,36,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    CTEXT           "To",IDC_STATIC,84,178,16,12,SS_CENTERIMAGE
-    CTEXT           "1234567",IDC_LOOPEND,100,178,36,12,SS_CENTERIMAGE | 
+    CTEXT           "To",IDC_STATIC,84,196,16,12,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPEND,101,196,36,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    LTEXT           "Length",IDC_STATIC,141,178,24,12,SS_CENTERIMAGE
-    CTEXT           "1234567",IDC_WAVELENGTH,168,178,36,12,SS_CENTERIMAGE | 
+    LTEXT           "Length",IDC_STATIC,141,196,24,12,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_WAVELENGTH,168,196,36,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    PUSHBUTTON      "Amplitude/Filter Envelopes",IDC_BUTTON8,8,199,198,14
+    PUSHBUTTON      "Amplitude/Filter Envelopes",IDC_BUTTON8,11,214,194,17
 END
 
 IDD_GEAR_TRACKER DIALOGEX 0, 0, 280, 71
@@ -1424,7 +1431,7 @@ IDD_ASIO_CONFIG DIALOGEX 0, 0, 277, 100
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle ASIO Driver Configuration"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         198,IDC_STATIC,"Static",SS_BITMAP,210,25,60,29
     LTEXT           "Samplerate:",IDC_STATIC,11,61,54,8,SS_CENTERIMAGE
@@ -1532,7 +1539,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 210
         TOPMARGIN, 7
-        BOTTOMMARGIN, 216
+        BOTTOMMARGIN, 236
     END
 
     IDD_GEAR_TRACKER, DIALOG
@@ -2075,8 +2082,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,7,3,0
- PRODUCTVERSION 1,7,3,0
+ FILEVERSION 1,7,4,0
+ PRODUCTVERSION 1,7,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -2094,14 +2101,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "Psycledelics\0"
             VALUE "FileDescription", "Psycle Digital Audio Studio\0"
-            VALUE "FileVersion", "1, 7, 3, 0\0"
+            VALUE "FileVersion", "1, 7, 4, 0\0"
             VALUE "InternalName", "Psycle\0"
             VALUE "LegalCopyright", "Copyright (C) 2000-2002\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Psycle.EXE\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Psycle Application\0"
-            VALUE "ProductVersion", "1, 7, 3, 0\0"
+            VALUE "ProductVersion", "1, 7, 4, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

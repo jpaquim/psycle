@@ -1180,7 +1180,7 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 }
 #endif // ndef _WINAMP_PLUGIN_
 
-bool Song::Load(RiffFile* pFile)
+bool Song::Load(RiffFile* pFile, bool fullopen)
 {
 	char Header[9];
 	pFile->Read(&Header, 8);
@@ -1403,9 +1403,14 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"MACD")==0)
 			{
-				chunkcount--;
+				int curpos=0;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
+				chunkcount--;
+				if ( !fullopen )
+				{
+					curpos=pFile->GetPos();
+				}
 				if (version > CURRENT_FILE_VERSION_MACD)
 				{
 					// there is an error, this file is newer than this build of psycle
@@ -1419,7 +1424,8 @@ bool Song::Load(RiffFile* pFile)
 					{
 						// we had better load it
 						DestroyMachine(index);
-						_pMachine[index] = Machine::LoadFileChunk(pFile,index,version);
+						_pMachine[index] = Machine::LoadFileChunk(pFile,index,version,fullopen);
+						if ( !fullopen ) pFile->Seek(curpos+size); // skips specific chunk.
 					}
 					else
 					{
@@ -1430,9 +1436,10 @@ bool Song::Load(RiffFile* pFile)
 			}
 			else if (strcmp(Header,"INSD")==0)
 			{
-				chunkcount--;
+				int curpos=0;
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
+				chunkcount--;
 				if (version > CURRENT_FILE_VERSION_INSD)
 				{
 					// there is an error, this file is newer than this build of psycle
@@ -1444,7 +1451,7 @@ bool Song::Load(RiffFile* pFile)
 					pFile->Read(&index,sizeof(index));
 					if (index < MAX_INSTRUMENTS)
 					{
-						_pInstrument[index]->LoadFileChunk(pFile,version);
+						_pInstrument[index]->LoadFileChunk(pFile,version,fullopen);
 					}
 					else
 					{
@@ -1887,7 +1894,7 @@ bool Song::Load(RiffFile* pFile)
 						CString sPath;
 	#if defined(_WINAMP_PLUGIN_)
 						sPath = Global::pConfig->GetVstDir();
-						if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
+						if ( fullopen && FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 						{
 							strcpy(sPath2,sPath);
 
@@ -2151,7 +2158,7 @@ bool Song::Load(RiffFile* pFile)
 		bool chunkpresent=false;
 		pFile->Read(&chunkpresent,sizeof(chunkpresent)); // Patch 2: VST's Chunk.
 
-		for ( i=0;i<128;i++ ) 
+		if ( fullopen ) for ( i=0;i<128;i++ ) 
 		{
 			if (_machineActive[i])
 			{
@@ -2418,7 +2425,7 @@ bool Song::Load(RiffFile* pFile)
 		}
 
 #if defined(CONVERT_INTERNAL_MACHINES) 
-		converter.retweak(*this); // conversion
+		if ( fullopen ) converter.retweak(*this); // conversion
 #endif
 
 		_machineLock = false;

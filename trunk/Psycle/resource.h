@@ -78,7 +78,7 @@
 #define IDD_SAVESONG                    183
 #define IDD_INST_EDITOR                 185
 #define IDD_SWINGFILL                   187
-#define IDD_PORTAUDIO_ASIO_CONFIG       188
+#define IDD_ASIO_CONFIG                 188
 #define IDB_MASTERBACK                  190
 #define IDB_MASTERNUMBERS               191
 #define IDB_MASTERSLIDER                192
@@ -115,6 +115,7 @@
 #define IDC_DSOUND_DITHER               1022
 #define IDC_EXCLUSIVE                   1023
 #define IDC_BROWSESONG                  1024
+#define IDC_DSOUND_BITDEPTH_COMBO       1024
 #define IDC_SONGEDIT                    1025
 #define IDC_BROWSEINST                  1026
 #define IDC_INSTEDIT                    1027
@@ -193,6 +194,7 @@
 #define IDC_BUTTON2                     1092
 #define IDC_BUTTON3                     1093
 #define IDC_BUTTON4                     1094
+#define IDC_INS_DECOCTAVE               1094
 #define IDC_BUTTON14                    1095
 #define IDC_BUTTON15                    1096
 #define IDC_BUTTON16                    1097
@@ -612,15 +614,17 @@
 #define IDC_BUTTON                      1481
 #define IDC_SLIDER                      1482
 #define IDC_VOLSLIDER                   1484
-#define IDC_PORTAUDIO_ASIO_DEVICE       1485
-#define IDC_PORTAUDIO_ASIO_SAMPLERATE_COMBO 1486
-#define IDC_PORTAUDIO_ASIO_DITHER       1487
-#define IDC_PORTAUDIO_ASIO_BUFNUM_EDIT  1488
-#define IDC_PORTAUDIO_ASIO_BUFNUM_SPIN  1489
-#define IDC_PORTAUDIO_ASIO_BUFSIZE_EDIT 1490
-#define IDC_PORTAUDIO_ASIO_BUFSIZE_SPIN 1491
-#define IDC_PORTAUDIO_ASIO_LATENCY      1492
+#define IDC_ASIO_DEVICE                 1485
+#define IDC_ASIO_SAMPLERATE_COMBO       1486
+#define IDC_ASIO_DITHER                 1487
+#define IDC_ASIO_BUFNUM_EDIT            1488
+#define IDC_ASIO_BUFFERSIZE_COMBO       1488
+#define IDC_ASIO_BUFNUM_SPIN            1489
+#define IDC_ASIO_BUFSIZE_EDIT           1490
+#define IDC_ASIO_BUFSIZE_SPIN           1491
+#define IDC_ASIO_LATENCY                1492
 #define IDC_GEARLIST                    1493
+#define IDC_ASIO_DRIVER                 1493
 #define IDC_CREATE                      1494
 #define IDC_NAME                        1495
 #define IDC_VOLUME_DB                   1495
@@ -643,7 +647,9 @@
 #define IDC_RECPATTERN                  1512
 #define IDC_RECRANGE                    1513
 #define IDC_AUTOSAVE_CURRENT_SONG       1514
+#define IDC_SAVETRACKSSEPARATED         1514
 #define IDC_AUTOSAVE_MINS               1515
+#define IDC_SAVEGENERATORSEPARATED      1515
 #define IDC_AUTOSAVE_MINS_SPIN          1516
 #define IDC_CLONEMACHINE                1517
 #define IDC_EXCHANGE                    1520
@@ -656,6 +662,15 @@
 #define IDC_PROGRESS1                   1524
 #define IDC_CLONE                       1525
 #define IDC_CHECK_ALLOW                 1526
+#define IDC_COMBO_RATE                  1528
+#define IDC_CONTROL_PANEL               1529
+#define IDC_COMBO_BITS                  1530
+#define IDC_COMBO_CHANNELS              1531
+#define IDC_CHECK_VUS                   1531
+#define IDC_INS_DECNOTE                 1532
+#define IDC_INS_INCNOTE                 1533
+#define IDC_INS_INCOCTAVE               1534
+#define IDC_NOTETUNE                    1535
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -750,7 +765,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        205
 #define _APS_NEXT_COMMAND_VALUE         32923
-#define _APS_NEXT_CONTROL_VALUE         1527
+#define _APS_NEXT_CONTROL_VALUE         1536
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

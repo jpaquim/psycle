@@ -1,19 +1,42 @@
 ---------------------------------------------------
+Version | Type of release          | By
+--------|--------------------------|---------------
+0.x     | Alphas and betas         | arguru
+1.0/01  | release (bugfix)	       | arguru
+1.1/11  | release (bugfix)         | Mats
+1.5     | Alpha, beta, RC, release | [JAZ] & Mark
+1.6     | Alpha, beta, RC, release | [JAZ] & Dan/Dub & Fideloop
+1.6+/66 | maintenance releases     | [JAZ]
+1.7     | release				   | pooplog & [JAZ]
+1.7.1/2 | bugfix releases		   | [JAZ]
+1.7.3   | beta					   | pooplog & [JAZ] & bohan
+1.7.4   | release				   | pooplog & [JAZ]
+---------------------------------------------------
+
+From now on, releases will be named this way:
+X.Y.z.a , where:
+X.Y = version number
+z = revision number, if even, release. if odd, beta.
+a = compile number.
+
+---------------------------------------------------
 Legend :	+=addition		*=change	!=bug
 ---------------------------------------------------
-V1.7.3 (Final)
---------------
+
+V1.7.4
+------
++ Added seminote tunning to sample instruments.
 ! VSTs that call the psycle host callback with a NULL pointer can't crash psycle any more (pooplog)
 ! XM import doesn't spam machine columns with 00 any more. (pooplog)
 ! Old Fileformat songs did not load the master volume (was set always to 0)
 ! Crash with Linplug's VST's when loading songs with the new fileformat.
 ! Bug with VST's GetTimeInfo. This affected VST's that try to sync with the host.
 ! small Memory leak fixed (had to do with new ASIO implementation)
-! Bug with Machine exchange (wolumes where messed for several reasons)
+! Bug with Machine exchange (volumes where messed for several reasons)
 ! asio hard clips for the babies who don't leave any headroom (pooplog)
 ! some memory leaks and access violation [JAZ]
 ! cloning locates the new machine better and numbers it correctly (pooplog)
-! Icon in "alt-tab" now shows correctly (looks like there was a missing line!)
+! Icon in "alt-tab" now shows correctly (a line of code was missing, duh!)
 ! fix for trying to allocate patterns greater than 7F (pooplog)
 ! fix for panning not being properly set on load (pooplog)
 ! fix for pasting out of range bug (pooplog)
@@ -26,7 +49,7 @@ V1.7.3 RC2
 ! whoops - fixed the unable to load many types of wave files issue (pooplog)
 ! whoops - fixed the note-off bug while recording (pooplog)
 ! whoops - loading a song moves to the top of the sequence again (pooplog)
-! whoops - fixed the tempo not set before machines loaded bug- made crossdelay 
+! whoops - fixed the tempo not set before machines loaded bug- made crossdelay
   have wrong tempo on tick mode (pooplog)
 ! whoops - there were 2 warnings on loading a song (pooplog)
 + vu meter can be turned off from the theme dialog (pooplog)
@@ -87,7 +110,7 @@ V1.7.1
 ! Fixed Saving to wav. options "save pattern" and "save sequence position" didn't ever stop.
 
 
-V1.7RC6
+V1.7RC6 (Official 1.7)
 -------
 
 + Tweak Slide command. Slides a Tweak to make it smoother. (pooplog)
@@ -161,7 +184,7 @@ V1.7RC1
 ! Fixed minusminus button to decrease to 0 (pooplog)
 ! Fixed song bpm and tpb being misreported to machines if FF or FE commands where used
 ! Fixed two memory leaks when loading songs with plugins (native as well as VST)
-! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles 
+! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles
   (pooplog)
 ! Fixed wave recording bug where it had an extra silent tick at the beggining and missing tick at the end.
 ! Fix several GDI Leaks.

@@ -18,6 +18,7 @@ class CInstrumentEditor : public CDialog
 {
 // Construction
 public:
+	void UpdateNoteLabel();
 	void Validate();
 
 	CInstrumentEditor(CWnd* pParent = NULL);   // standard constructor
@@ -33,6 +34,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CInstrumentEditor)
 	enum { IDD = IDD_INSTRUMENT };
+	CStatic	m_notelabel;
 	CStatic	m_panlabel;
 	CStatic	m_finelabel;
 	CSliderCtrl	m_finetune;
@@ -83,6 +85,10 @@ protected:
 	afx_msg void OnChangeLoopedit();
 	afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKillInstrument();
+	afx_msg void OnInsDecoctave();
+	afx_msg void OnInsDecnote();
+	afx_msg void OnInsIncnote();
+	afx_msg void OnInsIncoctave();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

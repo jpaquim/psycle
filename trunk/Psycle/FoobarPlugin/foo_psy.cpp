@@ -6,6 +6,7 @@
 #include <console.h>
 #include <config.h>
 //#include <foobar2000.h>
+//#include "utf8api.h"
 #include "resource.h"
 // psycle
 #include "../configuration.h"
@@ -26,7 +27,7 @@ class input_psycle : public input
 private:
 // variables
 	int		bPlaying;
-	mem_block_t<audio_sample> buffers;
+	mem_block_aligned_t<audio_sample> buffers;
 	reader *pReader;
 
 public:
@@ -84,8 +85,8 @@ public:
 
 		for (int i=0; i<c; i++)
 		{
-			if ( *inb > 32767.0f) *outb = 32767.0f*fMult;
-			else if ( *inb < -32767.0f ) *outb = -32767.0f*fMult;
+			if ( *inb > 32767.0f) *outb = 1;
+			else if ( *inb < -32767.0f ) *outb = -1;
 			else *outb = (audio_sample)(*inb)*fMult;		
 		
 			*inb++; outb++;
@@ -112,7 +113,7 @@ public:
 
 				if (!_global.pConfig->Read())
 				{
-					console::warning("Please set the plugins directories !");
+					console::error("[Psycle Plugin] Please set the Plugins directories in the configuration!");
 				}
 			}
 		
@@ -139,6 +140,10 @@ public:
 			pSong= _global._pSong;
 			i=CalcSongLength(pSong)/1000;
 
+			info->meta_add("Artist",pSong->Author);
+			info->meta_add("Title",pSong->Name);
+			info->meta_add("Comment",pSong->Comment);
+
 			info->set_length(i);
 			info->info_set_int("Filesize", pSong->filesize);
 			info->info_set_int("Bpm", pSong->BeatsPerMin);
@@ -156,11 +161,12 @@ public:
 		if (strcmp(Header,"PSY3SONG")==0)
 		{
 			OldPsyFile file;
-			const char *_f = info->get_file_path();
+			string_ansi_from_utf8 _f(info->get_file_path()); ;
 			char *filename;
-			filename = strrchr(_f, '/');
+			filename = strrchr(_f.get_ptr(), '/');
 			if (filename)
 				++filename;
+			else filename = (char *)_f.get_ptr();
 
 			if (file.Open(filename))
 			{
@@ -170,7 +176,11 @@ public:
 //////////////// Maybe a modification of Song::Load to not load the machines would
 //////////////// be nice, to speed up the info loading.
 
-				pSong->Load(&file);
+				pSong->Load(&file,false);
+
+				info->meta_add("Artist",pSong->Author);
+				info->meta_add("Title",pSong->Name);
+				info->meta_add("Comment",pSong->Comment);
 
 				length_in_ms=CalcSongLength(pSong)/1000;
 				info->set_length(length_in_ms);
@@ -178,7 +188,8 @@ public:
 				info->info_set_int("Bpm", pSong->BeatsPerMin);
 				info->info_set_int("LinePerBeat", pSong->_ticksPerBeat);
 				info->info_set_int("PatternsUsed", pSong->GetNumPatternsUsed());
-
+				info->info_set("Fileformat", "1.7.4");
+				
 //				file.Close(); <- load handles this
 				return 1;
 			}
@@ -217,12 +228,13 @@ public:
 			pReader->read(&num, sizeof(num));
 			
 			info->info_set_int("PatternsUsed",num);
+			info->info_set("Fileformat", "1.6 or older");
 			
 			for (i=0; i<num; i++)
 			{
 				pReader->read(&patternLines[i], sizeof(patternLines[0]));
 				pReader->seek(pReader->get_position() + sizeof(char)*32);
-				pReader->seek(pReader->get_position() + patternLines[i]*MAX_TRACKS*sizeof(PatternEntry));
+				pReader->seek(pReader->get_position() + patternLines[i]*OLD_MAX_TRACKS*sizeof(PatternEntry));
 			}
 			
 			length_in_ms = 0;
@@ -231,7 +243,7 @@ public:
 				length_in_ms += (patternLines[playOrder[i]] * 60000/(bpm * tpb));
 			}
 			
-//			info->set_length(length_in_ms/1000);				
+			info->set_length(length_in_ms/1000);				
 			return 1;
 		}					
 	}
@@ -241,15 +253,14 @@ public:
 	virtual int open(reader * r,file_info * info,int full_open)
 	{
 
-		const char *_f = info->get_file_path();
-		char *f;
-
-		f = strrchr(_f, '/');
+	string_ansi_from_utf8 _f(info->get_file_path());
+	char *f;
+		f = strrchr(_f.get_ptr(), '/');
 		if (f)
 			++f;
-
+		else f = (char*)_f.get_ptr();
+		
 		pReader = r;
-
 
 		if (!full_open)
 			if (!do_info(info, full_open))
@@ -272,6 +283,7 @@ public:
 			}
 
 			_global._pSong->filesize=file.FileSize();
+			_global._pSong->New();
 			_global._pSong->Load(&file);
 			//file.Close(); Song::Load already closes the file. Should we not do it?
 
@@ -312,17 +324,18 @@ public:
 		if (pPlayer->_playing)
 		{
 
-		buffers.check_size(plug_stream_size * 2);
 		float_buffer = pPlayer->Work(pPlayer, plug_stream_size);
 
+		buffers.check_size(plug_stream_size * 2);
 		Quantize(float_buffer,buffers,plug_stream_size*2);
 
-		chunk->data = buffers;
-		chunk->samples = plug_stream_size;
-		chunk->nch = 2;
-		chunk->srate = samprate;
-		} else 
+		chunk->set_data(buffers,plug_stream_size,2,samprate);
+		
+		}else 
+		{
+			_global._pSong->New();
 			return 0;
+		}
 
 		return 1;
 	}
@@ -351,7 +364,7 @@ public:
 	}
 
 	virtual int can_seek() { return pReader->can_seek();}
-	virtual int set_info(reader *r,const file_info * info) { return 0; }
+    virtual set_info_t set_info(reader *r,const file_info * info) { return SET_INFO_FAILURE; }
  
 };
 
@@ -475,7 +488,7 @@ static BOOL CALLBACK ConfigProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		SetDlgItemInt(wnd,IDC_COMBO_SAMPLING_RATE,cfg_sampling_rate,0);
 		// Directories.
 		if (!_global.pConfig->GetPluginDir()) {
-			console::warning("Psycle doesn't seem to be install in you computer, please go to http://psycle.pastnotecut.org/ then set the plugin paths directory");
+			console::warning("Psycle doesn't seem to be installed in you computer, please go to http://psycle.pastnotecut.org/ then set the plugin paths directory");
 			EnableWindow(GetDlgItem(wnd, IDC_BROWSE_VST), TRUE);
 		}
 

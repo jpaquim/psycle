@@ -1142,7 +1142,7 @@ Configuration::Write()
 	reg.SetValue("mv_triangle_size", REG_BINARY, (BYTE*)&mv_triangle_size, sizeof(mv_triangle_size));	
 
 	reg.SetValue("bBmpBkg", REG_DWORD, (BYTE*)&bBmpBkg, sizeof(bBmpBkg));	
-	reg.SetValue("szBmpBkgFilename", REG_DWORD, (BYTE*)&szBmpBkgFilename, sizeof(szBmpBkgFilename));
+	reg.SetValue("szBmpBkgFilename", REG_SZ, (BYTE*)&szBmpBkgFilename, sizeof(szBmpBkgFilename));
 
 	reg.SetValue("pvc_separator", REG_DWORD, (BYTE*)&pvc_separator, sizeof(pvc_separator));	
 	reg.SetValue("pvc_separator2", REG_DWORD, (BYTE*)&pvc_separator2, sizeof(pvc_separator2));	
