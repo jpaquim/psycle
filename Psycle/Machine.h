@@ -132,13 +132,14 @@ public:
 	virtual bool SetDestWireVolume(int srcIndex, int WireIndex,int value);
 	virtual void SetWireVolume(int wireIndex,float value)
 	{
-		_inputConVol[wireIndex] = value * _wireMultiplier[wireIndex];
+		_inputConVol[wireIndex] = value / _wireMultiplier[wireIndex];
 	}
 	virtual bool GetDestWireVolume(int srcIndex, int WireIndex,int &value);
 	virtual void GetWireVolume(int wireIndex, float &value)
 	{
 		value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex];
 	}
+	virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
 	virtual int FindInputWire(Machine* pDstMac,int macIndex);
 	virtual int FindOutputWire(Machine* pSrcMac,int macIndex);
 	virtual void Tick(void) {};

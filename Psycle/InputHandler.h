@@ -5,7 +5,8 @@
 #if !defined(AFX_InputHandler_H__BE3B4B0C_C330_46B6_A52E_75F094503556__INCLUDED_)
 #define AFX_InputHandler_H__BE3B4B0C_C330_46B6_A52E_75F094503556__INCLUDED_
 
-#include "constants.h"	// Added by ClassView
+#include "constants.h"
+
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000

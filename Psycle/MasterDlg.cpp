@@ -343,7 +343,7 @@ void CMasterDlg::OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	_pMachine->SetWireVolume(9,(256-m_sliderm9.GetPos())*0.00390625f);
+	_pMachine->SetWireVolume(8,(256-m_sliderm9.GetPos())*0.00390625f);
 	
 	PaintNumbers(256-m_sliderm9.GetPos(),252,142);
 	

@@ -61,8 +61,6 @@ int CWaveEdFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	toolbar.LoadToolBar(IDR_WAVEBAR); */
 	
-//	wavview.SetSong(_pSong);
-//	wavview.SetParent(_pFrame);
 	statusbar.Create(this);
 	statusbar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 	statusbar.SetPaneStyle(0, SBPS_NORMAL);
