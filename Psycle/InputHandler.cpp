@@ -664,11 +664,11 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefOctaveUp:
-		pChildView->ShiftOctave(1);
+		pMainFrame->ShiftOctave(1);
 		break;
 
 	case cdefOctaveDn:
-		pChildView->ShiftOctave(-1);
+		pMainFrame->ShiftOctave(-1);
 		break;
 
 	case cdefPlaySong:

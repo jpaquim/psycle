@@ -129,7 +129,11 @@ bool Song::CreateMachine(
 	int tmac =	GetFreeMachine();
 
 	_pMachines[tmac] = pMachine;
-	pMachine->Init();
+	if (pMachine->_type == MACH_VSTFX || pMachine->_type == MACH_VST ) // Do not call VST Init() function
+	{																	// after Instance.
+		((Machine*)pMachine)->Init();
+	}
+	else pMachine->Init();
 	pMachine->_x = x;
 	pMachine->_y = y;
 	
@@ -1289,7 +1293,7 @@ bool Song::Load(
 #if  !defined(_WINAMP_PLUGIN_)
 				pVstPlugin->macindex = FindBusFromIndex(i);
 #endif //  !defined(_WINAMP_PLUGIN_)
-				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid))
+				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 				{
 					CString sPath;
 					char sPath2[_MAX_PATH];

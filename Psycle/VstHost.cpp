@@ -98,6 +98,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 #endif // _WINAMP_PLUGIN_
 
 	Dispatch( effSetBlockSize,  0, STREAM_SIZE, NULL, 0.0f);
+
 	if (!Dispatch( effGetEffectName, 0, 0, &_sProductName, 0.0f))
 	{
 		CString str1(dllname);
@@ -172,14 +173,9 @@ void VSTPlugin::Free() // Called also in destruction
 	}
 }
 
-void VSTPlugin::Init(void) // Currently this function is unused!!! Some changes in the creation and
-{							// loading from song need to be done.
+void VSTPlugin::Init(void) // This is currently unused! Changes need to be done in Song::Load() and Instance()
+{
 	Machine::Init();
-
-	for (int i=0; i<MAX_CONNECTIONS; i++)
-	{
-		_inputConVol[i] = 0.000030517578125f; // 1/32767 -> VST Plugins use the range -1.0..1.0
-	}
 
 	Dispatch(effOpen        ,  0, 0, NULL, 0.f);
 	Dispatch(effSetProgram  ,  0, 0, NULL, 0.f);

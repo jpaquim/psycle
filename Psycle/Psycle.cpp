@@ -310,43 +310,41 @@ void CPsycleApp::LoadRecent(CMainFrame* pFrame)
 
 	hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 8);
+	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 9);
 
-	if (RegOpenKeyEx(HKEY_CURRENT_USER,
-						"AAS\\Psycle\\CurrentVersion\\RecentFiles",
-						0,
-						KEY_READ,
-						&RegKey) == ERROR_SUCCESS)
+	char key[72]=CONFIG_ROOT_KEY;
+	strcat(key,"\\RecentFiles");
+	if (RegOpenKeyEx(HKEY_CURRENT_USER , key, 0, KEY_READ, &RegKey) == ERROR_SUCCESS)
+	{
+		RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
+		if (nValues)
 		{
-			RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
-			if (nValues)
+			DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
+			while (RegEnumValue(RegKey,
+							iCount,
+							cntBuff,
+							&cntSize,
+							NULL,
+							NULL,
+							(unsigned char*)nameBuff,
+							&nameSize) == ERROR_SUCCESS)
 			{
-				DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
-				while (RegEnumValue(RegKey,
-								iCount,
-								cntBuff,
-								&cntSize,
-								NULL,
-								NULL,
-								(unsigned char*)nameBuff,
-								&nameSize) == ERROR_SUCCESS)
-				{
-							
-					hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
-					hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
-					hNewItemInfo.fType		= MFT_STRING;
-					hNewItemInfo.wID		= ids[iCount];
-					hNewItemInfo.cch		= strlen(nameBuff);
-					hNewItemInfo.dwTypeData = nameBuff;
-	
-					InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
-					cntSize = sizeof(cntBuff);
-					nameSize = sizeof(nameBuff);
-					iCount++;
-				}
-		RegCloseKey(RegKey);
+						
+				hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
+				hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
+				hNewItemInfo.fType		= MFT_STRING;
+				hNewItemInfo.wID		= ids[iCount];
+				hNewItemInfo.cch		= strlen(nameBuff);
+				hNewItemInfo.dwTypeData = nameBuff;
+
+				InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
+				cntSize = sizeof(cntBuff);
+				nameSize = sizeof(nameBuff);
+				iCount++;
 			}
+			RegCloseKey(RegKey);
 		}
+	}
 }
 
 void CPsycleApp::SaveRecent(CMainFrame* pFrame)
@@ -354,7 +352,7 @@ void CPsycleApp::SaveRecent(CMainFrame* pFrame)
 	HKEY RegKey;
 	HMENU hRootMenuBar, hFileMenu;
 	DWORD Effect;
-
+	
 	int iCount;
 	char nameBuff[256];
 	char cntBuff[3];
@@ -362,35 +360,37 @@ void CPsycleApp::SaveRecent(CMainFrame* pFrame)
 	
 	hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 8);
-
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, "AAS\\Psycle\\CurrentVersion", 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
+	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 9);
+	
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, CONFIG_ROOT_KEY, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
 	{
 		RegDeleteKey(RegKey, "RecentFiles");
 	}
 	RegCloseKey(RegKey);
 	
+	char key[72]=CONFIG_ROOT_KEY;
+	strcat(key,"\\RecentFiles");	
 	if (RegCreateKeyEx(HKEY_CURRENT_USER,
-							"AAS\\Psycle\\CurrentVersion\\RecentFiles",
-							 0,
-							 0,
-							 REG_OPTION_NON_VOLATILE,
-							 KEY_ALL_ACCESS,
-							 NULL,
-							 &RegKey,
-							 &Effect) == ERROR_SUCCESS)
+						key,
+						0,
+						0,
+						REG_OPTION_NON_VOLATILE,
+						KEY_ALL_ACCESS,
+						NULL,
+						&RegKey,
+						&Effect) == ERROR_SUCCESS)
+	{
+		for (iCount = 0; iCount<GetMenuItemCount(pFrame->m_wndView.hRecentMenu);iCount++)
 		{
-			for (iCount = 0; iCount<GetMenuItemCount(pFrame->m_wndView.hRecentMenu);iCount++)
+			nameSize = GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
+			GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
+			if (strcmp(nameBuff, "No recent files"))
 			{
-				nameSize = GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-				GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-				if (strcmp(nameBuff, "No recent files"))
-				{
-					itoa(iCount, cntBuff, 10);
-					RegSetValueEx(RegKey, cntBuff, 0, REG_SZ, (const unsigned char*)nameBuff, nameSize);
-				}
-
+				itoa(iCount, cntBuff, 10);
+				RegSetValueEx(RegKey, cntBuff, 0, REG_SZ, (const unsigned char*)nameBuff, nameSize);
 			}
-		RegCloseKey(RegKey);
+
 		}
+		RegCloseKey(RegKey);
+	}
 }
