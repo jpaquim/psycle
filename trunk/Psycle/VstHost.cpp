@@ -612,11 +612,11 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 			{
 				if (Global::pConfig->_RecordMouseTweaksSmooth)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*VST_QUANTIZATION));
 				}
 				else
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*65535));
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((VSTPlugin*)effect->user)->macindex, index, f2i(opt*VST_QUANTIZATION));
 				}
 			}
 			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
@@ -801,21 +801,21 @@ void VSTInstrument::Tick(int channel,PatternEntry* pData)
 	{
 		const int note = pData->_note;
 
-		if ( pData->_cmd == 0x10 ) // _OLD_ MIDI Command
-		{
-			if ( (pData->_inst & 0xF0) == 0x80 || (pData->_inst & 0xF0) == 0x90)
-			{
-				AddMIDI(pData->_inst,note,pData->_parameter);
-			}
-			else AddMIDI(pData->_inst,pData->_parameter);
-		}
-		else if (pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
+		if (pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
 		{
 			AddMIDI(pData->_inst,pData->_cmd,pData->_parameter);
 		}
-		else if (note < 120)
+		else if (note < 120) // Noteon
 		{
-			if (pData->_cmd == 0x0C) 
+			if ( pData->_cmd == 0x10 ) // _OLD_ MIDI Command
+			{
+				if ( (pData->_inst & 0xF0) == 0x80 || (pData->_inst & 0xF0) == 0x90)
+				{
+					AddMIDI(pData->_inst,note,pData->_parameter);
+				}
+				else AddMIDI(pData->_inst,pData->_parameter);
+			}
+			else if (pData->_cmd == 0x0C) 
 			{
 				if ( pData->_inst== 0xFF) AddNoteOn(channel,note,pData->_parameter/2);
 				else AddNoteOn(channel,note,pData->_parameter/2,pData->_inst&0x0F);
