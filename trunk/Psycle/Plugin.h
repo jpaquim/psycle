@@ -35,7 +35,7 @@ public:
 	}
 	virtual int GetTPB(void)
 	{
-		return Global::_pSong->_ticksPerBeat;
+		return Global::pPlayer->tpb;
 	}
 };
 

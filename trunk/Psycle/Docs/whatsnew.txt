@@ -34,7 +34,7 @@ V1.67
 + Added Swing Fill command (pooplog)
 ! Increased max lines/pattern to 256 (pooplog) * pending further tests
 + Basic Mousewheel support for pattern edit mode (pooplog)
-* Fixed song bpm being misreported to machines if they used FF command
+* Fixed song bpm and tpb being misreported to machines if they used FF or FE command
 ! VU Meters are all nicer
 + Look of Machine Wires can be changed in the visual dialog (pooplog)
 ! Many small Optimizations and improvements
