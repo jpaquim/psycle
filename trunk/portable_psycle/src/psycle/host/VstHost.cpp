@@ -144,16 +144,14 @@ namespace psycle
 					try 
 					{
 						AEffect* effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
-						proxy()(effect);
 					}
 					catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-					catch(...) {
-						host::exceptions::function_errors::rethrow<void*>(*this, "main");
-					}
+					catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
 				}
+				proxy()(effect);
 				if(!proxy()() || proxy().magic() != kEffectMagic)
 				{
 					std::ostringstream s; s << "call to function 'main' returned a bad value";
