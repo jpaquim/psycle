@@ -68,13 +68,42 @@ void quit() { }
 
 int CalcSongLength(Song *pSong)
 {
-	int songsize = 0;
+	// take ff and fe commands into account
+	
+	float songLength = 0;
+	int bpm = pSong->BeatsPerMin;
+	int tpb = pSong->_ticksPerBeat;
 	for (int i=0; i <pSong->playLength; i++)
 	{
 		int pattern = pSong->playOrder[i];
-		songsize += (pSong->patternLines[pattern] * 60000/(pSong->BeatsPerMin * pSong->_ticksPerBeat));
+		// this should parse each line for ffxx commands if you want it to be truly accurate
+		unsigned char* const plineOffset = pSong->pPatternData + pattern*MULTIPLY2;
+		for (int l = 0; l < pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
+		{
+			for (int t = 0; t < pSong->SONGTRACKS*5; t+=5)
+			{
+				PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
+				switch (pEntry->_cmd)
+				{
+				case 0xFF:
+					if ( pEntry->_parameter != 0 )
+					{
+						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+					}
+					break;
+					
+				case 0xFE:
+					if ( pEntry->_parameter != 0 )
+					{
+						tpb=pEntry->_parameter;
+					}
+				}
+			}
+			songLength += (60.0f/(bpm * tpb));
+		}
 	}
-	return songsize;
+	
+	return f2i(songLength*1000.0f);
 }
 
 void getfileinfo(char *filename, char *title, int *length_in_ms)
