@@ -3,7 +3,11 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "WaveOutDialog.hpp"
-#include <mmsystem.h>
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)

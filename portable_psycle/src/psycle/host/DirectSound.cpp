@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::DirectSound.
 #include <project.private.hpp>
 #include "DirectSound.hpp"
-#pragma comment(lib, "dsound")
 #include "resources/resources.hpp"
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"

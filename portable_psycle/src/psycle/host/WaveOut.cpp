@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::WaveOut.
 #include <project.private.hpp>
 #include "WaveOut.hpp"
-#pragma comment(lib, "winmm")
 #include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"

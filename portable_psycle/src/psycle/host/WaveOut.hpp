@@ -1,7 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::WaveOut.
 #pragma once
-#include <mmsystem.h>
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
 #include "AudioDriver.hpp"
 namespace psycle
 {

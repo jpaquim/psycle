@@ -32,13 +32,14 @@ namespace psycle
 		// Patterns are organized in lines by rows,
 		// i.e. the first TRACK*sizeof(Entry) bytes
 		// belong to the first line.
-		#pragma warning(disable:4200) // warning C4200: nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+		#pragma warning(push)
+		#pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
 		class Pattern
 		{
 			public:
 				PatternEntry _data[];
 		};
-		#pragma warning(default:4200)
+		#pragma warning(pop)
 
 		enum MachineType
 		{

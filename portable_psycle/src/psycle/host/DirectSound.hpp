@@ -1,8 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::DirectSound.
 #pragma once
-#include <mmsystem.h>
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
 #include <dsound.h>
+#pragma comment(lib, "dsound")
 #include "AudioDriver.hpp"
 namespace psycle
 {
