@@ -42,6 +42,11 @@ namespace operating_system
 		#endif
 	}
 
+	namespace
+	{
+		const unsigned short base_attributes(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
+	}
+
 	void console::open() throw(exception)
 	{
 		assert(!got_a_console_window_);
@@ -63,6 +68,28 @@ namespace operating_system
 			{
 				::CONSOLE_SCREEN_BUFFER_INFO buffer;
 				::GetConsoleScreenBufferInfo(output_handle, &buffer);
+				buffer.wAttributes = base_attributes;
+				const int width(10), height(10);
+				if(buffer.dwSize.X < width) buffer.dwSize.X = width;
+				if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
+				if(!(got_a_console_window_ = ::SetConsoleScreenBufferSize(output_handle, buffer.dwSize)))
+				{
+					::GetConsoleScreenBufferInfo(output_handle, &buffer);
+					buffer.wAttributes = base_attributes;
+					const int width(80), height(50); // on non nt systems, we can only have such a ridiculous size!
+					if(buffer.dwSize.X < width) buffer.dwSize.X = width;
+					if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
+					if(!(got_a_console_window_ = ::SetConsoleScreenBufferSize(output_handle, buffer.dwSize)))
+					{
+						// huh? giving up.
+					}
+				}
+			}
+
+			// change buffer size
+			{
+				::CONSOLE_SCREEN_BUFFER_INFO buffer;
+				::GetConsoleScreenBufferInfo(output_handle, &buffer);
 				const int width(256), height(1024);
 				if(buffer.dwSize.X < width) buffer.dwSize.X = width;
 				if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
@@ -76,6 +103,12 @@ namespace operating_system
 					{
 						// huh? giving up.
 					}
+				}
+				// background colours
+				{
+					::COORD coords = {0, 0};
+					::DWORD length;
+					::FillConsoleOutputAttribute(output_handle, base_attributes, buffer.dwSize.X * buffer.dwSize.Y, coords, &length);
 				}
 			}
 
@@ -96,7 +129,6 @@ namespace operating_system
 		if(!got_a_console_window_) return;
 		::HANDLE output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE);
 		if(!output_handle) return;
-		const unsigned short base_attributes(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
 		unsigned short attributes(base_attributes);
 		switch(level)
 		{
@@ -115,7 +147,7 @@ namespace operating_system
 		default:
 			attributes |= 0;
 		};
-		DWORD length(string.length());
+		::DWORD length(string.length());
 		::SetConsoleTextAttribute(output_handle, attributes);
 		::WriteConsole(output_handle, string.c_str(), length, &length, 0);
 		// <bohan> "reset" the attributes before new line because otherwize we have
