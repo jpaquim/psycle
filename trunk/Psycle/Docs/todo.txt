@@ -377,16 +377,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * File Format:
 ------------
-+++FF	new file format: (machines save custom data length, patterns stored acording to # tracks, sequence 
-		length stored according to length, vst multi-out, 
-		volume column, direct x stuff, etc.)
-++FF	songs should save master decrease flag
-		[This can be hacked by now without need of fileformat change]
-
-
-
-
-
++++FF	new file format: (vst multi-out, volume column, direct x stuff, etc.)
 
 
 

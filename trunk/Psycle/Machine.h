@@ -210,6 +210,26 @@ public:
 	bool _clip;
 	bool decreaseOnClip;
 	static float* _pMasterSamples;
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		UINT size;
+		pFile->Read(&size,sizeof(size));
+		if (size)
+		{
+			if (version > CURRENT_FILE_VERSION_MACD)
+			{
+				// data is from a newer format of psycle, it might be unsafe to load.
+				pFile->Skip(size);
+				return FALSE;
+			}
+			else
+			{
+				pFile->Read(&decreaseOnClip, sizeof(decreaseOnClip)); // numSubtracks
+			}
+		}
+		return TRUE;
+	};
+
 #if !defined(_WINAMP_PLUGIN_)
 //	int _LMAX;
 //	int _RMAX;
@@ -218,6 +238,14 @@ public:
 	float _lMax;
 	float _rMax;
 	bool vuupdated;
+
+	virtual void SaveSpecificChunk(RiffFile* pFile) 
+	{
+		UINT size = sizeof(decreaseOnClip);
+		pFile->Write(&size,sizeof(size));
+		pFile->Write(&decreaseOnClip, sizeof(decreaseOnClip)); 
+	};
+
 #endif // ndef _WINAMP_PLUGIN_
 
 	Master();
@@ -323,13 +351,13 @@ public:
 		switch(numparam)
 		{
 			case 0: return false;
-			case 1: if (value >=0 && value <=128 ) { _sineSpeed=value; Update(); return true; }
+			case 1: if (value >=0 && value <=129 ) { _sineSpeed=value; Update(); return true; }
 					else return false;
-			case 2: if (value >=0 && value <=128 ) { _sineGlide=value; Update(); return true; }
+			case 2: if (value >=0 && value <=129 ) { _sineGlide=value; Update(); return true; }
 					else return false;
-			case 3: if (value >=0 && value <=128 ) { _sineLfoSpeed=value; Update(); return true; }
+			case 3: if (value >=0 && value <=129 ) { _sineLfoSpeed=value; Update(); return true; }
 					else return false;
-			case 4: if (value >=0 && value <=128 ) { _sineLfoAmp=value; Update(); return true; }
+			case 4: if (value >=0 && value <=129 ) { _sineLfoAmp=value; Update(); return true; }
 					else return false;
 			default:return false;
 		}
@@ -479,16 +507,16 @@ public:
 		{
 			case 0: return false;
 			case 1: if (value >=1 && value <=MAX_DELAY_BUFFER-1 )
-					{	Update(value,_feedbackL,_timeR,_feedbackR); return true; }
+					{	Update(value,_timeR,_feedbackL,_feedbackR); return true; }
 					else return false;
 			case 2: if (value >=-100 && value < 100 )
-					{	Update(value,_feedbackL,_timeR,_feedbackR); return true; }
+					{	Update(_timeL,_timeR,value,_feedbackR); return true; }
 					else return false;
 			case 3: if (value >=1 && value <=MAX_DELAY_BUFFER-1 )
-					{	Update(value,_feedbackL,_timeR,_feedbackR); return true; }
+					{	Update(_timeL,value,_feedbackL,_feedbackR); return true; }
 					else return false;
 			case 4: if (value >=-100 && value <=100 )
-					{	Update(value,_feedbackL,_timeR,_feedbackR); return true; }
+					{	Update(_timeL,_timeR,_feedbackL,value); return true; }
 					else return false;
 			case 5: if (value >=-256 && value <=256 ) { _outDry = value; return true; }
 					else return false;
@@ -540,7 +568,7 @@ public:
 	{
 		switch(numparam)
 		{
-			case 0: return -1;
+			case 0: return useResample;
 			case 1: return _time;
 			case 2: return _lfoAmp;
 			case 3: return _lfoSpeed;
@@ -556,10 +584,12 @@ public:
 	{
 		switch(numparam)
 		{
-			case 0: return false;
+			case 0: if (value) {useResample= TRUE;}
+				else {useResample = FALSE;}
+				return true;
 			case 1: if (value >=1 && value <=1024 ) { _time= value; return true; }
 				    else return false;
-			case 2: if (value >=1 && value < 256 )	{	_lfoAmp= value; Update(); return true; }
+			case 2: if (value >=1 && value <= 256 )	{	_lfoAmp= value; Update(); return true; }
 				    else return false;
 			case 3: if (value >=0 && value <=32768 ) { _lfoSpeed=value; Update(); return true; }
 					else return false;
