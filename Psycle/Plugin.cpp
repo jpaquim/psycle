@@ -149,19 +149,19 @@ void Plugin::Work(int numSamples)
 		Machine::Work(numSamples);
 	}
 
-#if defined(_WINAMP_PLUGIN_)
 	_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
-#else
+#ifndef _WINAMP_PLUGIN_
 	CPUCOST_INIT(cost);
-	if (!_mute)
+	if (!_mute) 
 	{
-		if (_mode == MACHMODE_GENERATOR)
+#endif
+		if ((_mode != MACHMODE_FX) || !_bypass)
 		{
 			int ns = numSamples;
 			while (ns)
 			{
-				int nextevent = numSamples+1;
-				for (int i=0; i < MAX_TRACKS; i++)
+				int nextevent = ns+1;
+				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					if (TriggerDelay[i]._cmd)
 					{
@@ -173,7 +173,7 @@ void Plugin::Work(int numSamples)
 				}
 				if (nextevent > ns)
 				{
-					for (int i=0; i < MAX_TRACKS; i++)
+					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 					{
 						// come back to this
 						if (TriggerDelay[i]._cmd)
@@ -186,9 +186,12 @@ void Plugin::Work(int numSamples)
 				}
 				else
 				{
-					ns -= nextevent;
-					_pInterface->Work(_pSamplesL, _pSamplesR, nextevent, Global::_pSong->SONGTRACKS);
-					for (i=0; i < MAX_TRACKS; i++)
+					if (nextevent)
+					{
+						ns -= nextevent;
+						_pInterface->Work(_pSamplesL, _pSamplesR, nextevent, Global::_pSong->SONGTRACKS);
+					}
+					for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 					{
 						// come back to this
 						if (TriggerDelay[i]._cmd == 0xfd)
@@ -246,6 +249,7 @@ void Plugin::Work(int numSamples)
 					}
 				}
 			}
+#ifndef _WINAMP_PLUGIN_
 			Machine::SetVolumeCounter(numSamples);
 			if ( Global::pConfig->autoStopMachines )
 			{
@@ -259,6 +263,8 @@ void Plugin::Work(int numSamples)
 			}
 	//		else Machine::SetVolumeCounter(numSamples);
 		}
+#endif
+		/*
 		else if (!_stopped && !_bypass)
 		{
 			_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
@@ -275,7 +281,9 @@ void Plugin::Work(int numSamples)
 			}
 	//		else Machine::SetVolumeCounter(numSamples);
 		}
+		*/
 	}
+#ifndef _WINAMP_PLUGIN_
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;
 #endif // ndef _WINAMP_PLUGIN_
