@@ -161,11 +161,7 @@ protected:
 	afx_msg void OnSelchangeSeqlist();
 	afx_msg void OnDblclkSeqlist();
 	afx_msg void OnDeclen();
-	afx_msg void OnDecpat2();
-	afx_msg void OnDecpos2();
 	afx_msg void OnInclen();
-	afx_msg void OnIncpat2();
-	afx_msg void OnIncpos2();
 	afx_msg void OnIncshort();
 	afx_msg void OnDecshort();
 	afx_msg void OnSeqins();
