@@ -39,6 +39,8 @@ public:
 	void SetAppSongBpm(int x);
 	void SetAppSongTpb(int x);
 	void UpdatePlayOrder(bool mode);
+	void CenterWindowOnPoint(CWnd* pWnd, POINT point);
+
 
 // Overrides
 	// ClassWizard generated virtual function overrides

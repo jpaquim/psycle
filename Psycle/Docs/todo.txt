@@ -91,13 +91,11 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * GUI (machines):
 -----------------
-*** preview check box in preset dialog stopped working? 
+** preview check box in preset dialog stopped working? 
 	[ it works, but you can't test notes realtime because the dialog is modal ]
 **	alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window,
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
-* alk - when opening master dialog [doesn't] centre on mouse?
-	[ he refers to the X coordinate not centered i believe ]
 * moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
 	on every frame - make bigger buffers and more of them to prevent this from happening
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?

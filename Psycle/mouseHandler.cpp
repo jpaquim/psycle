@@ -69,7 +69,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 										WireDialog[i]->_pSrcMachine = tmac;
 										WireDialog[i]->_pDstMachine = Global::_pSong->_pMachines[tmac->_outputMachines[w]];
 										WireDialog[i]->Create();
-										WireDialog[i]->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+										pParentMain->CenterWindowOnPoint(WireDialog[i], point);
 										WireDialog[i]->ShowWindow(SW_SHOW);
 										return;
 									}
@@ -947,7 +947,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 											WireDialog[i]->_pSrcMachine = tmac;
 											WireDialog[i]->_pDstMachine = Global::_pSong->_pMachines[tmac->_outputMachines[w]];
 											WireDialog[i]->Create();
-											WireDialog[i]->SetWindowPos(NULL,point.x,point.y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+											pParentMain->CenterWindowOnPoint(WireDialog[i], point);
 											WireDialog[i]->ShowWindow(SW_SHOW);
 											return;
 										}
