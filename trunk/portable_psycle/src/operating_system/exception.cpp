@@ -1,56 +1,15 @@
 #include <stdafx.h>
-//#include <project.h>
 #define OPERATING_SYSTEM__EXCEPTION
 #include <operating_system/exception.h>
 #include <operating_system/logger.h>
 #include <iostream>
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
-	#include <fstream>
-	#include <psycle/host/Global.h> // for psycle::host::logger
 #endif
 ///\file
 ///\brief implementation file for operating_system::exception
 namespace operating_system
 {
-
-	exception::exception(const std::string & what) throw() : std::runtime_error(what)
-	{
-		#if defined OPERATING_SYSTEM__MICROSOFT
-			{
-				std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << this->what();
-				TRACE("%s\n", s.str().c_str());
-				psycle::host::logger(psycle::host::logger::crash, s.str());
-			}
-			/*
-			{
-				std::ofstream out;
-				{
-					std::string module_directory;
-					{
-						char module_file_name[MAX_PATH];
-						::GetModuleFileName(0, module_file_name, sizeof module_file_name);
-						module_directory = module_file_name;
-						module_directory = module_directory.substr(0, module_directory.rfind('\\'));
-					}
-					// overwrites
-					out.open((module_directory + "/output.log.txt").c_str());
-				}
-				out << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
-			}
-			*/
-			/* annoying popup
-			{
-				std::ostringstream title; title << "exception: " << typeid(*this).name();
-				std::ostringstream message; message << typeid(*this).name() << std::endl << this->what();
-				::MessageBox(0, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
-			}
-			*/
-		#else
-			std::cerr << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl; 
-		#endif
-	}
-
 	exception::operator const std::string() const throw()
 	{
 		return std::exception::what(); 
@@ -88,19 +47,27 @@ namespace operating_system
 				case EXCEPTION_STACK_OVERFLOW: s << "stack overflow: The thread used up its stack."; break;
 				default: s << "unkown exception code: 0x" << std::hex << code << " !!!";
 				}
-				if(logger::default_threshold_level() <= 0) s << " (ugly microsoft system error code number translated courtesy of bohan)";
 				return s.str();
 			}
+
 			void structured_exception_translator(unsigned int code, EXCEPTION_POINTERS *) throw(translated)
 			{
-				//if(code == EXCEPTION_BREAKPOINT) return;
+				///\todo adds more information using EXCEPTION_POINTERS *
+				if(code == EXCEPTION_BREAKPOINT) return; // <bohan> not sure what to do with break points...
 				throw translated(code);
 			}
 		}
 
-		translated::translated(const unsigned int & code) throw() : exception(code_description(code)) {}
+		translated::translated(const unsigned int & code) throw() : exception(code_description(code))
+		{
+			// This type of exception is usually likely followed by a bad crash of the whole program,
+			// because it is caused by really bad things like wrong memory access, etc...
+			// So, we automatically log them as soon as they are created, that is, even before they are thrown.
+			std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << what();
+			psycle::host::loggers::crash(s.str());
+		}
 
-		void translated::new_thread() throw()
+		void translated::new_thread()
 		{
 			#if defined OPERATING_SYSTEM__MICROSOFT
 				// In a multithreaded environment,
@@ -111,10 +78,8 @@ namespace operating_system
 				// call ::_set_se_translator with the name of your translation function as its argument.
 				// The translator function that you write is called once for each function invocation on the stack that has try blocks.
 				// There is no default translator function.
-				//#if !defined NDEBUG
-					// <bohan> shit! warning C4535: calling _set_se_translator() requires /EHa; the command line options /EHc and /GX are insufficient
-					::_set_se_translator(structured_exception_translator);
-				//#endif
+				// <bohan> This requires compilation with the asynchronous exception handling model (/EHa)
+				::_set_se_translator(structured_exception_translator);
 				//::SetErrorMode(SEM_FAILCRITICALERRORS);
 			#endif
 		}

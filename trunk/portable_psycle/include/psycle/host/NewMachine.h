@@ -17,7 +17,13 @@ namespace psycle
 		class PluginInfo
 		{
 		public:
-			inline PluginInfo() : dllname(0), error(0) {}
+			inline PluginInfo() : dllname(0), error(0), allow(true)
+			{
+				name[0] = '\0';
+				desc[0] = '\0';
+				version[0] = '\0';
+				std::memset(&FileTime, 0, sizeof FileTime);
+			}
 			inline ~PluginInfo() throw()
 			{
 				zapArray(dllname);

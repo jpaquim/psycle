@@ -53,6 +53,7 @@ namespace psycle
 		void CLoggingWindow::AddEntry(const int & level, const std::string & string)
 		{	
 			LogVector.push_back(new LogEntry(level, string));
+			if(level > host::loggers::levels::info) Global::pLogWindow->ShowWindow(SW_SHOWNORMAL); /// <bohan> \todo can we bring it to topmost z-order too?
 			// puts a separator
 			{
 				defaultCF.crTextColor = RGB(64, 64, 64);
@@ -61,16 +62,16 @@ namespace psycle
 			}
 			switch(level)
 			{
-			case host::logger::trace: 
+			case host::loggers::levels::trace: 
 				defaultCF.crTextColor = RGB(160, 160, 160);
 				break;
-			case host::logger::info:
+			case host::loggers::levels::info:
 				defaultCF.crTextColor = RGB(0, 128, 0);
 				break;
-			case host::logger::exception:
+			case host::loggers::levels::exception:
 				defaultCF.crTextColor = RGB(255, 128, 0);
 				break;
-			case host::logger::crash:
+			case host::loggers::levels::crash:
 				defaultCF.crTextColor = RGB(255, 0, 32);
 				break;
 			default:
@@ -80,7 +81,6 @@ namespace psycle
 			m_ErrorTxt.ReplaceSel((**--LogVector.end()).string.c_str());
 			m_ErrorTxt.ReplaceSel("\n");
 			m_ErrorTxt.SetSelectionCharFormat(defaultCF);
-			if(level > host::logger::info) Global::pLogWindow->ShowWindow(SW_SHOWNORMAL);
 		}
 
 		void CLoggingWindow::ResizeTextBox()
@@ -99,7 +99,6 @@ namespace psycle
 
 		void CLoggingWindow::OnSize(UINT nType, int cx, int cy) 
 		{
-			//::MessageBox(0, "test", "test", MB_OK | MB_ICONWARNING);
 			CDialog::OnSize(nType, cx, cy);
 			ResizeTextBox();
 		}

@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-//#include <boost/thread/mutex.hpp>
+//#include <boost/thread/mutex.hpp> // would be nice to integrate boost libs into the cvs
 #include <operating_system/exception.h>
 #if defined OPERATING_SYSTEM__LOGGER
 	#include LIBRARY__EXPORT
@@ -11,15 +11,6 @@
 ///\brief logger.
 namespace operating_system
 {
-	#define LOGGER__DEFAULT_THRESHOLD_LEVEL 1
-	#undef LOGGER
-	#if defined NDEBUG
-		#define LOGGER_TO(level, ostream) if (false) ostream
-	#else
-		#define LOGGER_TO(level, ostream) if(level >= logger::default_threshold_level()) ostream /*<< "logger: " << level << ": "*/
-	#endif
-	#define LOGGER(level) LOGGER_TO(level, std::cout)
-
 	/// logger.
 	class LIBRARY logger
 	{
@@ -28,23 +19,33 @@ namespace operating_system
 		static inline const int & default_threshold_level() throw() { return default_threshold_level_; }
 	private:
 		static logger default_logger_;
-		static const int default_threshold_level_ = LOGGER__DEFAULT_THRESHOLD_LEVEL;
+		static const int default_threshold_level_ = 1;
 	public:
-		logger(const int & threshold_level, std::ostream & ostream) throw();
+		logger(const int & threshold_level, std::ostream &);
 		inline const int & threshold_level() const throw() { return threshold_level_; }
 		inline const bool operator()(const int & level) const throw() { return level >= this->threshold_level_; }
-		inline void operator()(const int & level, const std::string & string)
+		inline virtual void operator()(const int & level, const std::string & string) throw()
 		{
-			#if defined NDEBUG
-				level, string; // not used
-			#else
+			//boost::mutex::scoped_lock lock(mutex()); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
+			try
+			{
 				if((*this)(level))
 				{
-					//boost::mutex::scoped_lock lock(mutex_);
-					ostream_ << "logger: " << level << ' ' << string;
+					ostream()
+						<< "logger: " << level << ": "
+						<< string;
 				}
-			#endif
+			}
+			catch(...)
+			{
+				// oh dear!
+				// fallback to std::cerr
+				std::cerr << "logger crashed" << std::endl;
+			}
 		}
+		//inline boost::mutex & mutex() const throw() { return mutex_; }
+	protected:
+		inline std::ostream & ostream() const throw() { return ostream_; }
 	private:
 		int threshold_level_;
 		std::ostream & ostream_;
