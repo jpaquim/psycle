@@ -91,9 +91,11 @@
 	something to do with jaz removing the silence in the beguining of the wav recording....
 + ALK You may have coinsidered this already, making machines have a right click menu (from the 
 	machines view) with one of the items benig duplicate machine.
-* <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new psycle opens..
+* <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
+	psycle opens..
 + ALK tracker command to bypass an fx, mute command for machines
 + ALK waveed: remove silence from start and end of wave
+* keyboard notes/noteoffs do not always seem to record
 
 
 
