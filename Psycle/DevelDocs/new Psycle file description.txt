@@ -1,0 +1,742 @@
+Fileformat Documentation of .psy Files
+
+Psycle Version : 1.7+
+Document Version: 1.1.3
+Date:16-Dec-2003
+
+Psycle will be getting a new file format soon.  The old format is limited and difficult to 
+maintain.  The new format will be Riff based with independant versioning for each 
+chunk, and a "total" version number for the entire file (major and minor).  Each chunk is 
+HEADER followed immediately by DATA
+
+chunk header format:
+
+FOURCC id; // eg "PSY3"
+UINT	version; // version of this chunk type
+UINT	size; // size of chunk NOT including header
+
+Here are the proposed changes to each chunk:
+
+===================
+FILE HEADER
+===================
+id = "PSY3"; // PSY2 was 1.66
+version = 0; // "total" version of all chunk versions
+size = 0;
+
+===================
+SONG INFO TEXT
+===================
+HEADER:
+id = "INFO"; 
+version = 0;
+size = strlen(Name)+strlen(Author)+strlen(Comment);
+
+DATA:
+char name[]; // null terminated string
+char author[]; // null terminated string
+char comment[]; // null terminated string
+
+===================
+SEQUENCE INFO
+===================
+HEADER:
+id = "SEQI"; 
+version = 0;
+size = (6*sizeof(int))+sizeof(byte);
+
+DATA:
+int sequenceLength; // length of sequence 
+	// Label: plgt - Desc : Contains the limit of the playable sequence. The number just 
+	// indicates where the user has set the last position. i.e. : playorder[plgt] should not be played back.
+int numTracks; 
+	// Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks
+	// Values: from 4 to 64
+int numPatterns; 
+	// Label: pnum // Desc : Contains the number of patterns stored in the file.
+int bpm; // bpm of song (0-255) - int incase of future expansion?
+int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
+byte currentoctave; // curent octave on keyboard (0-9)
+int sequenceWidth; // * number of sequence columns for multipattern
+
+===================
+SEQUENCE DATA
+===================
+HEADER:
+id = "SEQD"; 
+version = 0;
+size = (sequenceLength*sizeof(int))+sizeof(int)+strlen(sequenceColumnName);
+
+DATA:
+int index; // * column index for multipattern stuff
+char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, but we will truncate on load
+int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in 
+	// position 3, it plays the pattern 5th. (zero based)
+
+===================
+PATTERN DATA
+===================
+HEADER:
+id = "PATD"; 
+version = 0;
+size = (3*sizeof(int))+(numlines*patterntracks*sizeof(PatternEntry));
+
+typedef struct PatternEntry
+{
+	UCHAR _note;
+	UCHAR _inst; // Aux column.  Instrument for sampler.
+	UCHAR _mach;
+	UCHAR _cmd;
+	UCHAR _parameter;
+//	UCHAR _vol; // Volume Column - not implemented yet
+}
+PatternEntry;
+
+DATA:
+int index; // which pattern we are loading
+int numlines; // how many lines in this pattern (1-512)
+int patterntracks; // how many tracks in this pattern * for multipattern
+PatternEntry pe[numlines*patterntracks]; // data for this pattern- use numTracks until pattern tracks is implemented
+
+===================
+MACHINES INFO
+* i always wondered why things were routed like this?
+* it seems redundant and wasteful
+* why is there even a busmachine array, instead of just putting things in the right spot in 
+the machines array?
+* pmachines could be an array of pointers to machines if it's too hard to move things 
+around otherwise
+===================
+HEADER:
+id = "MACI"; 
+version = 0;
+//size = (sizeof(byte)*128)+(sizeof(bool)*128);
+size = (sizeof(bool)*128);
+
+DATA:
+//byte busmachine[64]; // mapping of generators to busses - Desc : Contains the values of the array that represent the machine
+ 	// assignations for Generators.  What this means is, which machine in the “machines” array corresponds to the specified 
+	// position (used in the pattern) if busmachine[3] = 5 , it means that the machine numbered 3 in the pattern, is the machine 
+	// in machines[5] . (zero based) - Values: from 0 to 7F ( 127 )
+//byte buseffect[64]; // mapping of effects to busses - as above
+bool macactive[128]; // Desc: The array indicates if the pointer in the “machines” array is a valid machine, or not. Example if 
+	// macactive[5] = false , then machines[5] is NOT a valid machine.
+
+===================
+MACHINES DATA
+===================
+HEADER:
+id = "MACD"; 
+version = 0;
+size = ...;
+
+typedef enum
+{
+	MACH_MASTER = 0,
+	MACH_SINE = 1,
+	MACH_DIST = 2,
+	MACH_SAMPLER = 3,
+	MACH_DELAY = 4,
+	MACH_2PFILTER = 5,
+	MACH_GAIN = 6,
+	MACH_FLANGER = 7,
+	MACH_PLUGIN = 8,
+	MACH_VST = 9,
+	MACH_VSTFX = 10,
+//	MACH_DXI = 11,
+//	MACH_DXFX = 12,
+	MACH_DUMMY = 255
+}
+MachineType;
+
+byte index; // which machine we are loading
+byte type; // Desc: The type of machine that it is.
+int x; // x position in machine view
+int y; // y position of the machine in the machine view
+int pan; // Desc: Indicates the value of the panning in the machine box. It affects all outputs.
+	// Values: 0 top left, 64center 128 top right.
+int inputmachines[MAX_CONNECTIONS]; // Desc: The array that indicates the machines (in the machines array) that input 
+	// sound to the current one. *** -1 for no connection
+	// Values from 0 to 127
+float inputconvol[MAX_CONNECTIONS]; // Desc: The array that indicates the volumes of each input connection.
+int outputmachines[MAX_CONNECTIONS]; // Desc: The array that indicates the machines (in the machines array) that this 
+	// machine outputs sound to.  *** -1 for no connection
+char editname[]; // null terminated string, truncated to [16]
+uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain
+byte MachineSpecificData[datasize]; // data depends on type member
+
+===================
+MACHINE SPECIFIC DATA(MACH_MASTER)
+size: 0
+===================
+// none
+
+===================
+MACHINE SPECIFIC DATA(MACH_SINE)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_DIST)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_SAMPLER)
+****** New sampler coming
+===================
+/*
+Label: voi
+Size: 1 int ( 32bits )
+Desc: Indicates the number of simultaneous voices to be used by the sampler Machine.
+Values: from 2 to 16
+
+Label: int
+Size: 1 int ( 32bits )
+Desc: Indicates the interpolation value.
+Values:
+0 -> No interpolation
+1 -> Linear interpolation
+2 -> Cubic interpolation
+*/
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_DELAY)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_2PFILTER)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_GAIN)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_FLANGER)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_PLUGIN)
+size: (strlen(dllname)+(2*sizeof(int))+(sizeof(UINT))+datasize);
+===================
+char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains 
+the name of the .dll file (including the “.dll” string). 
+int numParams; // Desc: Indicates the number of parameters that are stored for this 
+plugin.
+int parameter[numParams];
+UINT datasize; // size of extra data chunk
+byte ExtraData[datasize]; // extra data chunk
+
+===================
+MACHINE SPECIFIC DATA(MACH_VST)
+===================
+char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains 
+the name of the .dll file (including the “.dll” string). 
+int numParams; // Desc: Indicates the number of parameters that are stored for this 
+plugin.
+float parameter[numParams];
+UINT datasize; // size of extra data chunk
+byte ExtraData[datasize]; // extra data chunk
+
+===================
+MACHINE SPECIFIC DATA(MACH_VSTFX)
+===================
+char dllname[]; // null terminated string, Size: 256 chars. Desc: The array that contains 
+the name of the .dll file (including the “.dll” string). 
+int numParams; // Desc: Indicates the number of parameters that are stored for this 
+plugin.
+float parameter[numParams];
+UINT datasize; // size of extra data chunk
+byte ExtraData[datasize]; // extra data chunk
+
+===================
+MACHINE SPECIFIC DATA(MACH_DXI)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_DXFX)
+===================
+// incomplete
+
+===================
+MACHINE SPECIFIC DATA(MACH_DUMMY)
+size 0
+===================
+// none
+
+===================
+INSTRUMENT INFO
+===================
+// incomplete
+
+===================
+INSTRUMENT DATA
+===================
+// incomplete
+
+
+
+-------------------------------------old format crap---------------------------------------------
+INSTRUMENT STRUCTURE
+
+Instruments : First, there is one isel, then for each instrument it comes its data (this 
+means, ALWAYS, 255 instruments (from 0 to 254)).
+Notice that instead of being saved instrument by instrument, it is saved type of data by 
+type of data (Another weird thing of the format)
+
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|i|s|e|l|s|n|a|m|e| | | | | | | |
+|?| | | | | | | | | | | | | | | | |
+|?| | | | |s|n|a|m|e| | | | | | | |
+...
+|?|n|n|a| |n|n|a| | | | | | | | | |
+...
+|?|e|n|a|t|e|n|a|t| | | | | | | | |
+...
+|?|e|n|d|t|e|n|d|t| | | | | | | | |
+...
+|?|e|n|s|l|e|n|s|l| | | | | | | | |
+...
+|?|e|n|r|t|e|n|r|t| | | | | | | | |
+...
+|?|e|f|a|t|e|f|a|t| | | | | | | | |
+...
+|?|e|f|d|t|e|f|d|t| | | | | | | | |
+...
+|?|e|f|s|l|e|f|s|l| | | | | | | | |
+...
+|?|e|f|r|t|e|f|r|t| | | | | | | | |
+...
+|?|e|f|c|o| | | | | | | | | | | | |
+...
+|?|e|f|r|q| | | | | | | | | | | | |
+...
+|?|e|f|e|a| | | | | | | | | | | | |
+...
+|?|e|f|t|p| | | | | | | | | | | | |
+...
+|?|p|a|n| | | | | | | | | | | | | |
+...
+|?|r|p|a|n| | | | | | | | | | | | |
+...
+|?|r|c|u|t| | | | | | | | | | | | |
+...
+|?|r|r|e|s| | | | | | | | | | | | |
+
+
+Label: isel
+Size 1 int (32bits)
+Desc: Contains the WAVE instrument that the user had selected when saving. i.e. 
+instruments[i] is the last selected instrument. (Remember that this means the wave 
+Patches).
+Values: from 0 to 254 (255 is reserved for “preview”)
+
+Label: sname
+Size 32 chars
+Desc: Contains the name assigned to the WAVE instrument. Can be NOT NULL 
+terminated.
+
+Label: nna
+Size 1 unsigned char
+Desc: Indicates the NNA selection as follows:
+	// 0 = Note Cut			[Fast Release 'Default']
+	// 1 = Note Release		[Release Stage]
+	// 2 = Note Continue	[No NNA]
+
+Label: enat / endt / ensl / enrt 
+Size 1 int (32bits) (each)
+Desc: indicates the value for the ADSR Volume envelope (attack time, decay time, 
+sustain level, and release time)
+Values :
+a) enat = any value (indicates samples. Design fault. Should indicate milliseconds)
+b) endt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)
+c) ensl = 0..100 ( 100 being no attenuation at all, and 0 full attenuation)
+d) enrt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)
+
+Label: efat / efdt / efsl / efrt 
+Size 1 int (32bits) (each)
+Desc: indicates the value for the ADSR Filter envelope (attack time, decay time, sustain 
+level, and release time)
+Values :
+a) enat = any value (indicates samples. Design fault. Should indicate milliseconds)
+b) endt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)
+c) ensl = 0..100 ( 100 being no attenuation at all, and 0 full attenuation)
+d) enrt = anyvalue (indicates samples. Design fault. Should indicate milliseconds)
+
+Label: efco
+Size 1 int (32bits)
+Desc: Indicates the cuttoff value for the filter.
+Values from 0 to 32767. (0 = 0hz , 32768 = samplerate/2) <- This is another fault of the 
+design. Changing the sampling rate changes the value of the filter.
+
+Label: efrq
+Size 1 int (32bits)
+Desc: Indicates the ressonance value.
+Values from 0 to 127 (127 = full ressonance)
+
+Label: efea
+Size 1 int (32bits)
+Desc: Indicates the amount that the envelope affects the filter.
+Values from 0 to 32768. 32768 = full effect.
+
+Labe: eftp
+Size 1 int (32bits)
+Desc: Indicates the Type of filter being used Values from 0 to 4
+	// 0 -> LowPass Filter
+	// 1 -> HighPass Filter
+	// 2 -> BandPass Filter
+	// 3 -> NotchBand Filter
+	// 4 -> Filtering disabled
+
+Label: pan
+Size 1 int (32bits)
+Desc: Indicates the pan value.
+Values from 0 to 256, being 0 top left, and 256 top right. Center is 128.
+
+Label: rpan
+Size bool (whatever the size is defined in C++ )
+Desc: Indicates that the panning position (to be played) has to be randomized at each note 
+on.
+
+Label: rcut
+Size bool (whatever the size is defined in C++ )
+Desc: Indicates that the cuttoff value (to be played) has to be randomized at each note on.
+
+Label: rres
+Size bool (whatever the size is defined in C++ )
+Desc: Indicates that the ressonance value (to be played) has to be randomized at each 
+note on.
+
+
+
+Samples of the Instrument Patches. For each instrument (0..254), you have to check for 
+each sample ( 0..15 ) if the wlgt is higher than 0. if it is, then the wave data follows. If 
+not, the next wlgt follows.
+From code: 
+	for (i=0; i<MAX_INSTRUMENTS; i++)
+	{
+		for (int w=0; w<MAX_WAVES; w++)
+		{
+			pFile->Read(&waveLength[i][w], sizeof(waveLength[0][0]));
+			if (waveLength[i][w] > 0)
+			{
+				read data
+}
+		}
+}
+
+
+SAMPLE STRUCTURE
+
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|w|s|e|l|w|l|g|t| | | | | | | | |
+
+
+
+
+Label: wsel
+Size 1 int (32bits)
+Desc: Indicates the WAVE instrument SAMPLE that the user had selected in the 
+Instruments Editor. (One instrument Patch is formed of, at much, 16 samples. This value 
+indicates which of them the user edited last).
+Values: from 0 to F (15)
+
+Label: wlgt
+Size 1 unsigned int (32bits)
+Desc: Indicates length of the wave sample in Samples (sample format used is signed 
+short) . If it is 0, there’s no sample (neither sample data), so read the next value, which is 
+the next wlgt.
+Max size ? Unknown, yes, really...
+There’s an “ASSERT” in wave loading for a channel bufferzise to be less than 
+2Msamples. There’s no clear reason of why.
+
+For each valid sample, this follows:
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|n|a|m|e| | | | | | | | | | | | |
+|?| | | | | | | | | | | | | | | | |
+|?| | | | |v|l|f|t|l|s| | |l|e| | |
+|?|t|s| | | | | | | | | | | | | | |
+
+Label: name
+Size 32 chars
+Desc : The array of the name of the wave file. It can be NOT NULL terminated
+
+Label: vl
+Size unsigned short ( 16bits )
+Desc : value of the volume.
+Values : 0 full attenuation,  100 no modification. Max: 512 multiply by 512%.
+
+Label: ft
+Size : short (16bits)
+Desc: Contains the finetune of the sample.
+Values: -256 : one seminote down. 0 no mod. 256 one seminote up.
+
+Label: ls
+Size : int (32bits)
+Desc: Contains the loop start *sample* position
+
+Label: le
+Size : int (32bits)
+Desc: Contains the loop end *sample* position
+
+Label: t
+Size : bool (whatever the size is defined in C++ )
+Desc: Indicates if the loop is enabled (true) or disabled (false)
+
+Label: s
+Size bool (whatever the size is defined in C++ )
+Desc: Indicates that the wave is stereo (which means, contains two arrays of wave data)
+
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|L|d|a|t|a| | | | | | | | | | | |
+...
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|R|d|a|t|a| | | | | | | | | | | |
+
+
+Label: Ldata
+Size: wlgt*16 ( 16 = sizeof(short int) )
+Desc : Contains the array of wave data for the left (or mono) channel.
+Format is 16bits signed.
+
+Label: Rdata
+Size: wlgt*16 ( 16 = sizeof(short int) )
+Desc : *IF* the wave is stereo, then, after Ldata follows Rdata, which is the data for the 
+Right channel.
+Format is 16bits signed.
+
+
+
+MACHINES
+
+
+For Each *Active* Machine (128 total, from 0 to 127):
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|x| | | |y| | | |t| | | |l|o|a|d|
+
+(load means all the data to load, see the next grid)
+
+
+Example from code:
+
+	pFile->Read(&_machineActive[0], sizeof(_machineActive));
+	for (i=0; i<MAX_MACHINES; i++)
+	{
+		if (_machineActive[i])
+		{
+			pFile->Read(&x, sizeof(x));
+			pFile->Read(&y, sizeof(y));
+			pFile->Read(&type, sizeof(type));
+
+			switch (type)
+			{
+				// load all data depending on type of machine.
+}			
+		}
+	}
+
+
+
+IF it is a MACH_PLUGIN,
+
+Next, For all of them, (yes... I say all of them save the data from now till the next 
+black text)
+
+
+
+Label: outd
+Size: 1 int ( 32bits )
+Desc: Indicates the “dry” (unprocessed) factor of the sound. 
+Values from 0 to 1 (1 = 100%). It can be ignored by most of the machines. It is used in 
+the dalay delay, for example
+
+Label: outw
+Size: 1 int ( 32bits )
+Desc: Indicates the “wet” (processed) factor of the sound. 
+Values from 0 to 1 (1 = 100%). It can be ignored by most of the machines. It is used in 
+the dalay delay, for example, This is also the parameter of the gainer
+
+Label: dpth
+Size: 1 int ( 32bits )
+Desc: It is the “Distortion” machine, “positive threshold” parameter.
+Value: 0 to 128 ( 128 = full amplitude = no effect)
+
+Label: dpcl
+Size: 1 int ( 32bits )
+Desc: It is the “Distortion” machine, “positive Clamp” parameter.
+Value: 0 to 128 ( 128 = default)
+
+Label: dnth
+Size: 1 int ( 32bits )
+Desc: It is the “Distortion” machine, “negative threshold” parameter.
+Value: 0 to 128 ( 128 = full amplitude = no effect)
+
+Label: dncl
+Size: 1 int ( 32bits )
+Desc: It is the “Distortion” machine, “negative clamp” parameter.
+Value: 0 to 128 ( 128 = default)
+
+Label: s
+Size: 1 char (8 bits )
+Desc: It is the “PsychOcs AM” “Sine Speed”
+Value: 1 to 129.  Period = 2PI / (sineSpeed*0.0025)
+
+Label: g
+Size: 1 char (8 bits )
+Desc: It is the “PsychOcs AM” “Sine Glide”
+Value: 1 to 129, 129 = 100%, 1 = 1/129%
+
+Label: v
+Size: 1 char (8 bits )
+Desc: It is the “PsychOcs AM” “Sine Volume”. ARCHAIC variable. Not used!!!
+
+Label: p
+Size: 1 char (8 bits )
+Desc: It is the “PsychOcs AM” “Sine LFO speed”
+Value: 1 to 129.  Period = 2PI / (sinelfoSpeed*0.000025)
+
+Label: a 
+Two meanings, depending on the machine that is being loaded:
+Size: 1 char (8 bits )
+Desc: It is the “PsychOcs AM” “Sine LFO amp”
+Value: 1 to 129, 129 = 100%, 1 = 1/129%
+
+Size: 1 bool (8 bits )
+Desc: It is the Flanger “Resample” switch. (on or off)
+Value: 0 disabled, 1 enabled
+This meaning has been added in Psycle version 1.7
+
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|d|l|t|l|d|l|t|r|d|l|f|l|d|l|f|r|
+|?|f|t|c| |f|t|r| |f|t|l|s|f|t|l|a|
+|?|f|t|l|p|f|t|m| | | | | | | | | |
+
+Label: dltl
+Size: 1 int (32 bits )
+Desc: It is the “Dalay delay” or Flanger “delay time Left channel” (note: for flanger it is 
+for both, left and right channels)
+
+
+Value: 1 to 65535 SAMPLES (should be in milliseconds...)
+
+Label: dltr
+Size: 1 int (32 bits )
+Desc: It is the “Dalay delay” “delay time Right channel”
+Value: 1 to 65535 SAMPLES (should be in milliseconds...)
+
+Label: dlfl
+Size: 1 int (32 bits )
+Desc: It is the “Dalay delay” or Flanger “feedback Left channel”
+Value : -100 inverted full feedback, 0 no feedback, 100 full feedback
+
+Label: dlfr
+Size: 1 int (32 bits )
+Desc: It is the “Dalay delay” or Flanger “feedback Right channel”
+Value : -100 inverted full feedback, 0 no feedback, 100 full feedback
+
+Label: ftc
+Size: 1 int (32 bits )
+Desc: It is the “2p Filter” “filter cutOff”
+Value: 0 to 256. (256 = samplerate/2)
+
+Label: ftr
+Size: 1 int (32 bits )
+Desc: It is the “2p Filter” “filter Resonance”
+Value: 0 to 256 ( 256 = 100% )
+
+Label: ftls
+Size: 1 int (32 bits )
+Desc: It is the “2p Filter” or Flanger  “filter lfo speed”
+Value: 0 to 32768.
+Period = lfoSpeed * 0.00000003f*samplesRate / 6.283185f
+
+Label: ftla
+Size: 1 int (32 bits )
+Desc: It is the “2p Filter” or Flanger “filter lfo amp”
+Value: 0 to 256 ( 256 = 100%)
+
+Label: ftlp
+Size: 1 int (32 bits )
+Desc: It is the “2p Filter” or Flanger  “filter lfo phase”
+Value: 0 to 256 ( 0 = 0 degrees 256 = 180degrees)
+
+Label: ftm
+Size: 1 int (32 bits )
+Desc: It is the “2p Filter” “filter mode”
+Value:
+0 : LowPass Filter
+1 : highPass Filter
+
+Done.. (yes... till here it was the things that all machines save/load).
+
+EXTRA DATA (ADDED AFTER)
+
+
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|l|l|i|n|s|b|u|s|e|f|f|e|c|t| | |
+
+
+Label: l
+Size: 1 bool (whatever the size is)
+Desc: Indicates if the “Auto Looping” is enabled. This loop makes the wave play so that 
+it exactly loops at the ticks specified by lins
+
+Label: lins
+Size: 1 int (32 bits)
+Desc: Indicates the number of lines for that the sample will be played. It automatically 
+adjusts the frequency rate so that it fits. (this means, notes don’t have an effect).
+
+
+|-|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|?|
+|?|c|c|h|s|z|c|h|d|t| | | | | | | |
+|?| | | | | | | | | | | | | | | | |
+...
+|?||c|h|s|z|c|h|d|t| | | | | | | | |
+
+
+
+Label: c
+Size 1 bool (whatever the size is)
+Desc : indicates that the file has a VST chunk Zone. If you’ve reached the end of the file, 
+you’re done.
+
+Label: chsz
+Size 1 long (32 bits)
+Desc : Indicates the size of the chdt
+
+Label: chdt
+Size chsz chars
+Desc : Raw data that the VST plugin has saved.
+
+Example from source:
+
+for ( i=0;i<MAX_MACHINES;i++ ) {
+		if (_machineActive[i])
+		{
+			if (( _pMachines[i]->_type == MACH_VST ) || ( _pMachines[i]-
+>_type == MACH_VSTFX))	 {
+				if(_pEffect->flags & effFlagsProgramChunks)
+				{
+long chunk_size;
+					pFile->Read(&chunk_size,sizeof(long));
+
+					// Read chunk
+					char *chunk=new char[chunk_size];	
+					pFile->Read(chunk,chunk_size);
+}
+}
+		}
+	}
+
+
+There’s again another problem in this implementation. If the VST is missing, you don’t 
+know if you have to skip the data, or if it is the data of another VST (because you cannot 
+evaluate “if(_pEffect->flags & effFlagsProgramChunks)” )
+
