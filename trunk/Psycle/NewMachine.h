@@ -12,7 +12,7 @@
 
 #define MAX_BROWSER_NODES 72
 #define MAX_BROWSER_PLUGINS 512
-#define MAX_BAD_PLUGINS 256
+#define MAX_BAD_PLUGINS 512
 
 class PluginInfo
 {
