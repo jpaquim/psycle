@@ -473,7 +473,6 @@ void Player::StartRecording(
 		backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
 		backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
 
-
 		if (samplerate > 0)
 		{
 			Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate;
@@ -497,7 +496,8 @@ void Player::StartRecording(
 
 		Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 
-		if (_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, 	Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+		Stop();
+		if (_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
 		{
 			_recording = true;
 		}

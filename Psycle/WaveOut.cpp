@@ -49,7 +49,7 @@ bool WaveOut::Start()
 
 	WAVEFORMATEX format;
 	format.wFormatTag = WAVE_FORMAT_PCM;
-	format.wBitsPerSample = _bitDepth;
+	format.wBitsPerSample = 16;//_bitDepth;
 	format.nSamplesPerSec = _samplesPerSec;
 	format.cbSize = 0;
 	format.nChannels = 2;
@@ -272,8 +272,8 @@ void WaveOut::ReadConfig()
 	configured &= (reg.QueryValue("Dither", &type, (BYTE*)&_dither, &numData) == ERROR_SUCCESS);
 	numData = sizeof(_samplesPerSec);
 	configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
-	numData = sizeof(_bitDepth);
-	(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
+//	numData = sizeof(_bitDepth);
+//	(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
 	reg.CloseKey();
 	reg.CloseRootKey();
 	_configured = configured;
@@ -301,7 +301,7 @@ void WaveOut::WriteConfig()
 	reg.SetValue("PollSleep", REG_DWORD, (BYTE*)&_pollSleep, sizeof(_pollSleep));
 	reg.SetValue("Dither", REG_DWORD, (BYTE*)&_dither, sizeof(_dither));
 	reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
-	reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof(_bitDepth));
+//	reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof(_bitDepth));
 	reg.CloseKey();
 	reg.CloseRootKey();
 }
