@@ -16,6 +16,7 @@ V1.7.3 (Final)
 ! Icon in "alt-tab" now shows correctly (looks like there was a missing line!)
 ! fix for trying to allocate patterns greater than 7F (pooplog)
 ! fix for panning not being properly set on load (pooplog)
+! fix for pasting out of range bug (pooplog)
 * changed so that 255 unique patterns can be stored, although only 127 can be sequenced (pooplog)
 
 V1.7.3 RC2

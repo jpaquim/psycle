@@ -2029,7 +2029,16 @@ void CChildView::AddUndo(int pattern, int x, int y, int tracks, int lines, int e
 	pNew->pattern = pattern;
 	pNew->x = x;
 	pNew->y = y;
+	if (tracks+x > _pSong->SONGTRACKS)
+	{
+		tracks = _pSong->SONGTRACKS-x;
+	}
 	pNew->tracks = tracks;
+	const int nl = _pSong->patternLines[pattern];
+	if (lines+y > nl)
+	{
+		lines = nl-y;
+	}
 	pNew->lines = lines;
 	pNew->type = UNDO_PATTERN;
 	pNew->edittrack = edittrack;
@@ -2071,6 +2080,16 @@ void CChildView::AddRedo(int pattern, int x, int y, int tracks, int lines, int e
 	pNew->pattern = pattern;
 	pNew->x = x;
 	pNew->y = y;
+	if (tracks+x > _pSong->SONGTRACKS)
+	{
+		tracks = _pSong->SONGTRACKS-x;
+	}
+	pNew->tracks = tracks;
+	const int nl = _pSong->patternLines[pattern];
+	if (lines+y > nl)
+	{
+		lines = nl-y;
+	}
 	pNew->tracks = tracks;
 	pNew->lines = lines;
 	pNew->type = UNDO_PATTERN;
