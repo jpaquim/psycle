@@ -2012,9 +2012,13 @@ bool Song::Load(RiffFile* pFile)
 		}
 		for ( i=0;i<64;i++ ) 
 		{
-			if (busEffect[i] != 255 && _machineActive[busEffect[i]]) 
+			if ((busMachine[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)) 
 			{
-				pMac[busEffect[i]]->_mode = MACHMODE_FX;
+				busMachine[i] = 255;
+			}
+			if ((busEffect[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busEffect[i]]->_mode != MACHMODE_FX)) 
+			{
+				busEffect[i] = 255;
 			}
 		}
 
@@ -2030,6 +2034,7 @@ bool Song::Load(RiffFile* pFile)
 					// Since we don't know if the plugin saved it or not, 
 					// we're stuck on letting the loading crash/behave incorrectly.
 					// There should be a flag, like in the VST loading Section to be correct.
+					::MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 				}
 				else if (( pMac[i]->_type == MACH_VST ) || 
 						( pMac[i]->_type == MACH_VSTFX))
@@ -2073,6 +2078,7 @@ bool Song::Load(RiffFile* pFile)
 					if (pMac[busMachine[i]]->_mode == MACHMODE_GENERATOR)
 					{
 						_pMachine[i] = pMac[busMachine[i]];
+						_machineActive[busMachine[i]] = FALSE; // don't update this twice;
 
 						for (int c=0; c<MAX_CONNECTIONS; c++)
 						{
@@ -2127,6 +2133,7 @@ bool Song::Load(RiffFile* pFile)
 					if (pMac[busEffect[i]]->_mode == MACHMODE_FX)
 					{
 						_pMachine[i+MAX_BUSES] = pMac[busEffect[i]];
+						_machineActive[busEffect[i]] = FALSE; // don't do this again
 
 						for (int c=0; c<MAX_CONNECTIONS; c++)
 						{
@@ -2190,6 +2197,7 @@ bool Song::Load(RiffFile* pFile)
 						// this should NEVER happen
 						// delete the second one :(
 						_pMachine[j] = NULL;
+						// and we should remap anything that had wires to it to the first one
 					}
 				}
 			}
@@ -2257,7 +2265,7 @@ bool Song::Load(RiffFile* pFile)
 
 					if (_pMachine[i]->_inputCon[c])
 					{
-						if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
+						if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
 						{
 							_pMachine[i]->_inputCon[c]=FALSE;
 							_pMachine[i]->_inputMachines[c]=255;
@@ -2855,6 +2863,30 @@ bool Song::CloneMac(int src,int dst)
 			_pMachine[dst]->_inputMachines[i] = 255;
 		}
 	}
+
+	int number = 1;
+	char buf[sizeof(_pMachine[dst]->_editName)+4];
+	strcpy (buf,_pMachine[dst]->_editName);
+
+	for (i = 0; i < MAX_MACHINES-1; i++)
+	{
+		if (i!=dst)
+		{
+			if (_pMachine[i])
+			{
+				if (strcmp(_pMachine[i]->_editName,buf)==0)
+				{
+					number++;
+					sprintf(buf,"%s %d",_pMachine[dst]->_editName,number);
+					i = -1;
+				}
+			}
+		}
+	}
+
+	buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
+	strcpy(_pMachine[dst]->_editName,buf);
+
 	return true;
 }
 

@@ -474,7 +474,7 @@ void CNewMachine::LoadPluginInfo()
 
 		DeleteFile(logname);
 		FILE* hfile;
-		hfile=fopen(logname,"wa");  
+		hfile=fopen(logname,"a");  
 		fprintf(hfile,"[Psycle Plugin Enumeration Log]\n\nIf psycle is crashing on load, chances are it's a bad plugin, specifically the last item listed\n(if it has no comment after the -)\n\n");
 		fprintf(hfile,"[Native Plugins]\n\n");
 		fclose(hfile);
