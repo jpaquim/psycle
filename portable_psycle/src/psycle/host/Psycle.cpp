@@ -21,9 +21,6 @@ namespace psycle
 		CPsycleApp::CPsycleApp() throw(std::runtime_error)
 		{
 			operating_system::exceptions::translated::new_thread();
-			// Error Logging window
-			Global::pLogWindow->Create(IDD_ERRORLOGGER,0);
-			Global::pLogWindow->Validate();
 			// support for unicode characters on mswin98
 			{
 				#if 0
@@ -45,18 +42,11 @@ namespace psycle
 
 		BOOL CPsycleApp::InitInstance()
 		{
-			// Standard initialization
-			// If you are not using these features and wish to reduce the size
-			//  of your final executable, you should remove from the following
-			//  the specific initialization routines you do not need.
-
-			/* deprecated
-				#if defined _AFXDLL
-					Enable3dControls();			// Call this when using MFC in a shared DLL
-				#else
-					Enable3dControlsStatic();	// Call this when linking to MFC statically
-				#endif
-			*/
+			// Error Logging window
+			Global::pLogWindow = new CLoggingWindow;
+			Global::pLogWindow->Create(IDD_ERRORLOGGER,0);
+			Global::pLogWindow->Validate();
+			host::logger(host::logger::info, "logger initialized");
 
 			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
 			

@@ -20,6 +20,7 @@ namespace operating_system
 				std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
 				TRACE("%s", s.str().c_str());
 			}
+			/*
 			{
 				std::ofstream out;
 				{
@@ -35,6 +36,7 @@ namespace operating_system
 				}
 				out << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
 			}
+			*/
 			/* annoying popup
 			{
 				std::ostringstream title; title << "exception: " << typeid(*this).name();
