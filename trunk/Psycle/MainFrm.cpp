@@ -927,6 +927,7 @@ void CMainFrame::OnSelchangeBarCombogen()
 			_pSong->seqBus=nsb;
 			UpdateComboGen(false);
 		}
+		RedrawGearRackList();
 	}
 }
 
@@ -1063,7 +1064,7 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 		{
 			for (int i=0;i<PREV_WAV_INS;i++)
 			{
-				sprintf(buffer, "%.2X:  %s", i, _pSong->_instruments[i]._sName);
+				sprintf(buffer, "%.2X: %s", i, _pSong->_instruments[i]._sName);
 				cc->AddString(buffer);
 				listlen++;
 			}
@@ -1075,6 +1076,7 @@ void CMainFrame::UpdateComboIns(bool updatelist)
 //		_pSong->instSelected=_pSong->auxcolSelected;
 //		WaveEditorBackUpdate();
 //		m_wndInst.WaveUpdate();
+//		RedrawGearRackList();
 	}
 	if (_pSong->auxcolSelected >= listlen)
 	{
@@ -1097,6 +1099,7 @@ void CMainFrame::OnSelchangeBarComboins()
 		_pSong->instSelected=cc->GetCurSel();
 		WaveEditorBackUpdate();
 		m_wndInst.WaveUpdate();
+		RedrawGearRackList();
 	}
 
 	_pSong->auxcolSelected=cc->GetCurSel();
@@ -1135,6 +1138,7 @@ void CMainFrame::ChangeIns(int i)	// User Called (Hotkey)
 			_pSong->auxcolSelected=i;
 			WaveEditorBackUpdate();
 			m_wndInst.WaveUpdate();
+			RedrawGearRackList();
 		}
 	}
 	cc->SetCurSel(_pSong->auxcolSelected);
@@ -1173,6 +1177,7 @@ void CMainFrame::OnLoadwave()
 				m_wndStatusBar.SetWindowText("New wave loaded");
 				WaveEditorBackUpdate();
 				m_wndInst.WaveUpdate();
+				RedrawGearRackList();
 			}
 		}
 		CString str = dlg.m_ofn.lpstrFile;
@@ -1261,6 +1266,7 @@ void CMainFrame::ShowInstrumentEditor()
 	cc2->SetCurSel(AUX_WAVES);
 	_pSong->auxcolSelected=_pSong->instSelected;
 	UpdateComboIns();
+	m_wndInst.WaveUpdate();
 	m_wndInst.ShowWindow(SW_SHOWNORMAL);
 	m_wndInst.SetActiveWindow();
 }
@@ -2845,3 +2851,10 @@ void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI)
 }
 
 
+void CMainFrame::RedrawGearRackList()
+{
+	if (pGearRackDialog)
+	{
+		pGearRackDialog->RedrawList();
+	}
+}

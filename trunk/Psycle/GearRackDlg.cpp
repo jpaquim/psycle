@@ -17,13 +17,12 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CGearRackDlg dialog
 
-BOOL CGearRackDlg::bShowGenerators = TRUE;
+int CGearRackDlg::DisplayMode = 0;
 
 CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain /*=NULL*/)
 	: CDialog(CGearRackDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CGearRackDlg)
-		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 	m_pParent = pParent;
 	pParentMain = pMain;
@@ -34,9 +33,11 @@ void CGearRackDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGearRackDlg)
+	DDX_Control(pDX, IDC_RADIO_INS, m_radio_ins);
+	DDX_Control(pDX, IDC_RADIO_GEN, m_radio_gen);
+	DDX_Control(pDX, IDC_RADIO_EFX, m_radio_efx);
 	DDX_Control(pDX, ID_TEXT, m_text);
 	DDX_Control(pDX, IDC_GEARLIST, m_list);
-	DDX_Control(pDX, IDC_MACHINETYPE, m_machinetype);
 	//}}AFX_DATA_MAP
 }
 
@@ -48,8 +49,10 @@ BEGIN_MESSAGE_MAP(CGearRackDlg, CDialog)
 	ON_LBN_DBLCLK(IDC_GEARLIST, OnDblclkGearlist)
 	ON_BN_CLICKED(IDC_PROPERTIES, OnProperties)
 	ON_BN_CLICKED(IDC_PARAMETERS, OnParameters)
-	ON_BN_CLICKED(IDC_MACHINETYPE, OnMachineType)
 	ON_LBN_SELCHANGE(IDC_GEARLIST, OnSelchangeGearlist)
+	ON_BN_CLICKED(IDC_RADIO_EFX, OnRadioEfx)
+	ON_BN_CLICKED(IDC_RADIO_GEN, OnRadioGen)
+	ON_BN_CLICKED(IDC_RADIO_INS, OnRadioIns)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -93,17 +96,24 @@ void CGearRackDlg::RedrawList()
 	char buffer[64];
 	
 	m_list.ResetContent();
-	int selected = Global::_pSong->seqBus;
 
-	if (bShowGenerators)
+	int selected;
+	int b;
+
+	switch (DisplayMode)
 	{
-		m_machinetype.SetWindowText("Type: Generators");
+	case 0:
 		m_text.SetWindowText("Machines: Generators");
+		m_radio_gen.SetCheck(1);
+		m_radio_efx.SetCheck(0);
+		m_radio_ins.SetCheck(0);
+
+		selected = Global::_pSong->seqBus;
 		if (selected >= MAX_BUSES)
 		{
 			selected = 0;
 		}
-		for (int b=0; b<MAX_BUSES; b++) // Check Generators
+		for (b=0; b<MAX_BUSES; b++) // Check Generators
 		{
 			const int mac = Global::_pSong->busMachine[b]; 
 			if( mac != 255 && Global::_pSong->_machineActive[mac])
@@ -113,15 +123,19 @@ void CGearRackDlg::RedrawList()
 			}
 			else
 			{
-				sprintf(buffer,"%.2X",b);
+				sprintf(buffer,"%.2X: empty",b);
 				m_list.AddString(buffer);
 			}
 		}
-	}
-	else
-	{
-		m_machinetype.SetWindowText("Type: Effects");
+		break;
+	case 1:
 		m_text.SetWindowText("Machines: Effects");
+
+		m_radio_gen.SetCheck(0);
+		m_radio_efx.SetCheck(1);
+		m_radio_ins.SetCheck(0);
+
+		selected = Global::_pSong->seqBus;
 		if (selected < MAX_BUSES)
 		{
 			selected = 0;
@@ -130,7 +144,7 @@ void CGearRackDlg::RedrawList()
 		{
 			selected -= MAX_BUSES;
 		}
-		for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
+		for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 		{
 			const int mac = Global::_pSong->busEffect[b-MAX_BUSES];
 			if(mac != 255 && Global::_pSong->_machineActive[mac])
@@ -140,10 +154,36 @@ void CGearRackDlg::RedrawList()
 			}
 			else
 			{
-				sprintf(buffer,"%.2X",b);
+				sprintf(buffer,"%.2X: empty",b);
 				m_list.AddString(buffer);
 			}
 		}
+		break;
+	case 2:
+		m_text.SetWindowText("Sample Instruments");
+
+		m_radio_gen.SetCheck(0);
+		m_radio_efx.SetCheck(0);
+		m_radio_ins.SetCheck(1);
+
+		char buffer[64];
+		for (int b=0;b<PREV_WAV_INS;b++)
+		{
+			sprintf(buffer, "%.2X: %s", b, Global::_pSong->_instruments[b]._sName);
+			m_list.AddString(buffer);
+		}
+		CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+		if (cc->GetCurSel() == AUX_WAVES)
+		{
+			selected = Global::_pSong->instSelected;
+		}
+		else
+		{
+			cc->SetCurSel(AUX_WAVES);
+			pParentMain->UpdateComboIns(true);
+			selected = Global::_pSong->instSelected;
+		}
+		break;
 	}
 
 	m_list.SetCurSel(selected);
@@ -153,57 +193,74 @@ void CGearRackDlg::OnSelchangeGearlist()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (!bShowGenerators)
+	switch (DisplayMode)
 	{
+	case 1:
 		tmac += MAX_BUSES;
+	case 0:
+		Global::_pSong->seqBus = tmac;
+		pParentMain->UpdateComboGen();
+		break;
+	case 2:
+		{
+			CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+			if (cc->GetCurSel() == AUX_WAVES)
+			{
+				Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+				pParentMain->UpdateComboIns(false);
+			}
+			else
+			{
+				cc->SetCurSel(AUX_WAVES);
+				Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+				pParentMain->UpdateComboIns(true);
+			}
+			pParentMain->m_wndInst.WaveUpdate();
+		}
+		break;
 	}
-	Global::_pSong->seqBus = tmac;
-	pParentMain->UpdateComboGen();
 }
 
 void CGearRackDlg::OnCreate() 
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (!bShowGenerators)
+	switch (DisplayMode)
 	{
+	case 1:
 		tmac += MAX_BUSES;
+	case 0:
+		Global::_pSong->seqBus = tmac;
+		m_pParent->NewMachine(-1,-1,tmac);
+		pParentMain->UpdateEnvInfo();
+		pParentMain->UpdateComboGen();
+		if (m_pParent->viewMode==VMMachine)
+		{
+			m_pParent->Repaint();
+		}
+		break;
+	case 2:
+		{
+			CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+			cc->SetCurSel(AUX_WAVES);
+			Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+			pParentMain->UpdateComboIns(true);
+			pParentMain->m_wndInst.WaveUpdate();
+		}
+		pParentMain->OnLoadwave();
+		pParentMain->UpdateComboIns(true);
+		break;
 	}
-	Global::_pSong->seqBus = tmac;
-	m_pParent->NewMachine(-1,-1,tmac);
-	pParentMain->UpdateEnvInfo();
-	pParentMain->UpdateComboGen();
-	if (m_pParent->viewMode==VMMachine)
-	{
-		m_pParent->Repaint();
-	}
+	RedrawList();
 }
 
 void CGearRackDlg::OnDelete() 
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (!bShowGenerators)
+	switch (DisplayMode)
 	{
-		tmac += MAX_BUSES;
-		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-		{
-			if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
-			{
-				pParentMain->CloseMacGui(tmac-MAX_BUSES);
-				Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac-MAX_BUSES]);
-				pParentMain->UpdateEnvInfo();
-				pParentMain->UpdateComboGen();
-				RedrawList();
-				if (m_pParent->viewMode==VMMachine)
-				{
-					m_pParent->Repaint();
-				}
-			}
-		}
-	}
-	else
-	{
+	case 0:
 		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 		{
 			if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
@@ -212,14 +269,42 @@ void CGearRackDlg::OnDelete()
 				Global::_pSong->DestroyMachine(Global::_pSong->busMachine[tmac]);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
-				RedrawList();
 				if (m_pParent->viewMode==VMMachine)
 				{
 					m_pParent->Repaint();
 				}
 			}
 		}
+		break;
+	case 1:
+		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+		{
+			if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac]])
+			{
+				pParentMain->CloseMacGui(tmac+MAX_BUSES);
+				Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac]);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (m_pParent->viewMode==VMMachine)
+				{
+					m_pParent->Repaint();
+				}
+			}
+		}
+		break;
+	case 2:
+		{
+			CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+			cc->SetCurSel(AUX_WAVES);
+			Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+			pParentMain->UpdateComboIns(true);
+			pParentMain->m_wndInst.WaveUpdate();
+		}
+		Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
+		pParentMain->UpdateComboIns(true);
+		break;
 	}
+	RedrawList();
 }
 
 void CGearRackDlg::OnDblclkGearlist() 
@@ -233,22 +318,9 @@ void CGearRackDlg::OnProperties()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (!bShowGenerators)
+	switch (DisplayMode)
 	{
-		tmac += MAX_BUSES;
-		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
-		{
-			m_pParent->DoMacPropDialog(Global::_pSong->busEffect[tmac-MAX_BUSES]);
-			pParentMain->UpdateEnvInfo();
-			pParentMain->UpdateComboGen();
-			if (m_pParent->viewMode==VMMachine)
-			{
-				m_pParent->Repaint();
-			}
-		}
-	}
-	else
-	{
+	case 0:
 		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
 		{
 			m_pParent->DoMacPropDialog(Global::_pSong->busMachine[tmac]);
@@ -259,7 +331,32 @@ void CGearRackDlg::OnProperties()
 				m_pParent->Repaint();
 			}
 		}
+		break;
+	case 1:
+		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac]])
+		{
+			m_pParent->DoMacPropDialog(Global::_pSong->busEffect[tmac]);
+			pParentMain->UpdateEnvInfo();
+			pParentMain->UpdateComboGen();
+			if (m_pParent->viewMode==VMMachine)
+			{
+				m_pParent->Repaint();
+			}
+		}
+		break;
+	case 2:
+		{
+			CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+			cc->SetCurSel(AUX_WAVES);
+			Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+			pParentMain->UpdateComboIns(true);
+			pParentMain->m_wndInst.WaveUpdate();
+		}
+		pParentMain->ShowInstrumentEditor();
+		pParentMain->UpdateComboIns(true);
+		break;
 	}
+	RedrawList();
 }
 
 void CGearRackDlg::OnParameters() 
@@ -268,25 +365,54 @@ void CGearRackDlg::OnParameters()
 	POINT point;
 	GetCursorPos(&point);
 	int tmac = m_list.GetCurSel();
-	if (!bShowGenerators)
+	switch (DisplayMode)
 	{
-		tmac += MAX_BUSES;
-		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
-		{
-			pParentMain->ShowMachineGui(Global::_pSong->busEffect[tmac-MAX_BUSES],point);
-		}
-	}
-	else
-	{
+	case 0:
 		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
 		{
 			pParentMain->ShowMachineGui(Global::_pSong->busMachine[tmac],point);
 		}
+		break;
+	case 1:
+		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac]])
+		{
+			pParentMain->ShowMachineGui(Global::_pSong->busEffect[tmac],point);
+		}
+		break;
+	case 2:
+		{
+			CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+			cc->SetCurSel(AUX_WAVES);
+			Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+			pParentMain->UpdateComboIns(true);
+			pParentMain->m_wndInst.WaveUpdate();
+		}
+		pParentMain->ShowInstrumentEditor();
+		pParentMain->UpdateComboIns(true);
+		break;
 	}
+	RedrawList();
 }
 
-void CGearRackDlg::OnMachineType()
+void CGearRackDlg::OnRadioGen() 
 {
-	bShowGenerators = !bShowGenerators;
+	// TODO: Add your control notification handler code here
+	DisplayMode = 0;
 	RedrawList();
+}
+
+void CGearRackDlg::OnRadioEfx() 
+{
+	// TODO: Add your control notification handler code here
+	DisplayMode = 1;
+	RedrawList();
+	
+}
+
+void CGearRackDlg::OnRadioIns() 
+{
+	// TODO: Add your control notification handler code here
+	DisplayMode = 2;
+	RedrawList();
+	
 }
