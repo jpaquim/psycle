@@ -37,6 +37,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.28  2005/03/01 20:13:49  sampler
+added PgUp/PgDn (or assigned keys) to move backward/fordward 16 rows while playing
+
 Revision 1.27  2005/02/26 12:36:35  sampler
 Added my last addition about Pattern Navigation (and deleted the other line about my fix i've reverted back)
 
@@ -107,6 +110,7 @@ release to come (v1.7.7.x)
 +added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
 !fixed bug (only existed in previous 1.7.7.x alphas) that made some VSTs didn't save good their parameters/presets (bohan)
 +added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)
++added PgUp/PgDn (or assigned keys) to move backward/fordward 16 rows while playing (sampler)
 
 v1.7.6.2
 --------
