@@ -519,16 +519,19 @@ void Song::DestroyMachine(int mac)
 			// Checking In-Wires
 			if (iMac->_inputCon[w])
 			{
-				iMac2 = _pMachine[iMac->_inputMachines[w]];
-				if (iMac2)
+				if ((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
 				{
-					for (int x=0; x<MAX_CONNECTIONS; x++)
+					iMac2 = _pMachine[iMac->_inputMachines[w]];
+					if (iMac2)
 					{
-						if ( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
+						for (int x=0; x<MAX_CONNECTIONS; x++)
 						{
-							iMac2->_connection[x] = false;
-							iMac2->_numOutputs--;
-							break;
+							if ( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
+							{
+								iMac2->_connection[x] = false;
+								iMac2->_numOutputs--;
+								break;
+							}
 						}
 					}
 				}
@@ -536,16 +539,19 @@ void Song::DestroyMachine(int mac)
 			// Checking Out-Wires
 			if(iMac->_connection[w])
 			{
-				iMac2 = _pMachine[iMac->_outputMachines[w]];
-				if (iMac2)
+				if ((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
 				{
-					for (int x=0; x<MAX_CONNECTIONS; x++)
+					iMac2 = _pMachine[iMac->_outputMachines[w]];
+					if (iMac2)
 					{
-						if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
+						for (int x=0; x<MAX_CONNECTIONS; x++)
 						{
-							iMac2->_inputCon[x] = false;
-							iMac2->_numInputs--;
-							break;
+							if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
+							{
+								iMac2->_inputCon[x] = false;
+								iMac2->_numInputs--;
+								break;
+							}
 						}
 					}
 				}
@@ -1371,27 +1377,60 @@ bool Song::Load(RiffFile* pFile)
 		// now that we have loaded all the modules, time to prepare them.
 
 		Progress.m_Progress.SetPos(16384);
+		::Sleep(1);
 
 		// test all connections for invalid machines. disconnect invalid machines.
 		for (int i = 0; i < MAX_MACHINES; i++)
 		{
 			if (_pMachine[i])
 			{
+				_pMachine[i]->_numInputs = 0;
+				_pMachine[i]->_numOutputs = 0;
+
 				for (int c = 0; c < MAX_CONNECTIONS; c++)
 				{
 					if (_pMachine[i]->_connection[c])
 					{
-						if (!_pMachine[_pMachine[i]->_outputMachines[c]])
+						if (_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 						{
 							_pMachine[i]->_connection[c]=FALSE;
+							_pMachine[i]->_outputMachines[c]=255;
+						}
+						else if (!_pMachine[_pMachine[i]->_outputMachines[c]])
+						{
+							_pMachine[i]->_connection[c]=FALSE;
+							_pMachine[i]->_outputMachines[c]=255;
+						}
+						else 
+						{
+							_pMachine[i]->_numOutputs++;
 						}
 					}
+					else
+					{
+						_pMachine[i]->_outputMachines[c]=255;
+					}
+
 					if (_pMachine[i]->_inputCon[c])
 					{
-						if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+						if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
 						{
 							_pMachine[i]->_inputCon[c]=FALSE;
+							_pMachine[i]->_inputMachines[c]=255;
 						}
+						else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+						{
+							_pMachine[i]->_inputCon[c]=FALSE;
+							_pMachine[i]->_inputMachines[c]=255;
+						}
+						else
+						{
+							_pMachine[i]->_numInputs++;
+						}
+					}
+					else
+					{
+						_pMachine[i]->_inputMachines[c]=255;
 					}
 				}
 			}
@@ -2005,7 +2044,7 @@ bool Song::Load(RiffFile* pFile)
 
 		for (i = 0; i < 64; i++)
 		{
-			if (busMachine[i] < MAX_MACHINES-1)
+			if ((busMachine[i] < MAX_MACHINES-1) && (busMachine[i] > 0))
 			{
 				if (_machineActive[busMachine[i]])
 				{
@@ -2055,7 +2094,7 @@ bool Song::Load(RiffFile* pFile)
 					}
 				}
 			}
-			if (busEffect[i] < MAX_MACHINES-1)
+			if ((busEffect[i] < MAX_MACHINES-1) && (busEffect[i] > 0))
 			{
 				if (_machineActive[busEffect[i]])
 				{
@@ -2138,39 +2177,62 @@ bool Song::Load(RiffFile* pFile)
 				}
 			}
 		}
+
 		Progress.m_Progress.SetPos(16384);
 		::Sleep(1);
 
-		// remove all invalid connections
+		// test all connections for invalid machines. disconnect invalid machines.
 		for (i = 0; i < MAX_MACHINES; i++)
 		{
 			if (_pMachine[i])
 			{
-				for (int c=0; c<MAX_CONNECTIONS; c++)
+				_pMachine[i]->_numInputs = 0;
+				_pMachine[i]->_numOutputs = 0;
+
+				for (int c = 0; c < MAX_CONNECTIONS; c++)
 				{
-					if (_pMachine[i]->_inputCon[c])
-					{
-						if (!_pMachine[_pMachine[i]->_inputMachines[c]])
-						{
-							_pMachine[i]->_inputCon[c] = false;
-							_pMachine[i]->_inputMachines[c] = 255;
-						}
-					}
-					else
-					{
-						_pMachine[i]->_inputMachines[c] = 255;
-					}
 					if (_pMachine[i]->_connection[c])
 					{
-						if (!_pMachine[_pMachine[i]->_outputMachines[c]])
+						if (_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 						{
-							_pMachine[i]->_connection[c] = false;
-							_pMachine[i]->_outputMachines[c] = 255;
+							_pMachine[i]->_connection[c]=FALSE;
+							_pMachine[i]->_outputMachines[c]=255;
+						}
+						else if (!_pMachine[_pMachine[i]->_outputMachines[c]])
+						{
+							_pMachine[i]->_connection[c]=FALSE;
+							_pMachine[i]->_outputMachines[c]=255;
+						}
+						else 
+						{
+							_pMachine[i]->_numOutputs++;
 						}
 					}
 					else
 					{
-						_pMachine[i]->_outputMachines[c] = 255;
+						_pMachine[i]->_outputMachines[c]=255;
+					}
+
+					if (_pMachine[i]->_inputCon[c])
+					{
+						if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
+						{
+							_pMachine[i]->_inputCon[c]=FALSE;
+							_pMachine[i]->_inputMachines[c]=255;
+						}
+						else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+						{
+							_pMachine[i]->_inputCon[c]=FALSE;
+							_pMachine[i]->_inputMachines[c]=255;
+						}
+						else
+						{
+							_pMachine[i]->_numInputs++;
+						}
+					}
+					else
+					{
+						_pMachine[i]->_inputMachines[c]=255;
 					}
 				}
 			}
