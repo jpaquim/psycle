@@ -505,6 +505,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 
 	bScrollDetatch=false;
+	Global::pInputHandler->bDoingSelection = false;
 	Repaint(DMData);
 }
 
@@ -572,6 +573,7 @@ bool CChildView::MSBPut(int nChar)
 		}
 	}
 	bScrollDetatch=false;
+	Global::pInputHandler->bDoingSelection = false;
 	Repaint(DMCursor);
 	return true;
 }
@@ -600,6 +602,7 @@ void CChildView::ClearCurr() // delete content at Cursor pos.
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 	AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+	Global::pInputHandler->bDoingSelection = false;
 	bScrollDetatch=false;
 	Repaint(DMData);
 }
@@ -633,6 +636,7 @@ void CChildView::DeleteCurr()
 //	drawLineEnd=patlines-1;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
+	Global::pInputHandler->bDoingSelection = false;
 	bScrollDetatch=false;
 	Repaint(DMData);
 }
@@ -658,6 +662,7 @@ void CChildView::InsertCurr()
 //	drawLineEnd=patlines-1;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
+	Global::pInputHandler->bDoingSelection = false;
 	bScrollDetatch=false;
 	Repaint(DMData);
 }
@@ -669,6 +674,10 @@ void CChildView::InsertCurr()
 
 void CChildView::PlayCurrentRow(void)
 {
+	if (Global::pConfig->_followSong)
+	{
+		bScrollDetatch=false;
+	}
 	int displace=(_pSong->playOrder[editPosition]*MULTIPLY2) +
 				(editcur.line*MULTIPLY);
 
@@ -695,6 +704,10 @@ void CChildView::PlayCurrentRow(void)
 
 void CChildView::PlayCurrentNote(void)
 {
+	if (Global::pConfig->_followSong)
+	{
+		bScrollDetatch=false;
+	}
 	const int displace=	(_pSong->playOrder[editPosition]*MULTIPLY2) +
 						(editcur.line*MULTIPLY) + 
 						(editcur.track*5);

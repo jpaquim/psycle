@@ -32,7 +32,43 @@ void CChildView::PreparePatternRefresh(int drawMode)
 	}
 	else
 	{
-		if (Global::pConfig->_centerCursor)
+		if (bScrollDetatch)
+		{
+			if ( drawMode == DMHScroll )
+			{
+				rntOff = ntOff;
+				if ( rntOff >= snt-VISTRACKS ) 
+					maxt = VISTRACKS;
+				else 
+					maxt = VISTRACKS+1;
+			}
+			else
+			{
+				if ( tOff+VISTRACKS > snt )
+				{
+					rntOff = snt-VISTRACKS;
+					maxt=VISTRACKS;
+				}
+				else if (detatchpoint.track < tOff ) 
+				{ 
+					rntOff = detatchpoint.track; 
+					maxt = VISTRACKS+1; 
+				}
+				else
+				{
+					if (detatchpoint.track >= tOff+VISTRACKS ) 
+						rntOff =detatchpoint.track-VISTRACKS+1;
+					else 
+						rntOff = tOff;
+				
+					if ( rntOff >= snt-VISTRACKS ) 
+						maxt = VISTRACKS;
+					else 
+						maxt = VISTRACKS+1;
+				}
+			}
+		}
+		else if (Global::pConfig->_centerCursor)
 		{
 			if ( drawMode == DMHScroll ) 
 				rntOff = ntOff;
@@ -98,7 +134,47 @@ void CChildView::PreparePatternRefresh(int drawMode)
 	}
 	else 
 	{
-		if (Global::pConfig->_centerCursor)
+		if (bScrollDetatch)
+		{
+			if ( drawMode == DMVScroll )
+			{
+				rnlOff = nlOff;
+				if ( rnlOff >= plines-VISLINES ) 
+					maxl = VISLINES;
+				else 
+					maxl = VISLINES+1;
+			}
+			else 
+			{
+				if ( lOff+VISLINES > plines )
+				{
+					rnlOff = plines-VISLINES;
+					maxl=VISLINES;
+				}
+				else if ( detatchpoint.line < lOff+1 ) 
+				{ 
+					rnlOff = detatchpoint.line-1; 
+					if (rnlOff < 0)
+					{
+						rnlOff = 0;
+					}
+					maxl = VISLINES+1; 
+				}
+				else 
+				{
+					if ( detatchpoint.line >= lOff+VISLINES ) 
+						rnlOff =detatchpoint.line-VISLINES+1;
+					else 
+						rnlOff = lOff;
+
+					if ( rnlOff >= plines-VISLINES ) 
+						maxl = VISLINES;
+					else 
+						maxl = VISLINES+1;
+				}
+			}
+		}
+		else if (Global::pConfig->_centerCursor)
 		{
 			if ( drawMode == DMVScroll ) 
 				rnlOff = nlOff;
@@ -136,9 +212,13 @@ void CChildView::PreparePatternRefresh(int drawMode)
 					rnlOff = plines-VISLINES;
 					maxl=VISLINES;
 				}
-				else if ( editcur.line < lOff ) 
+				else if ( editcur.line < lOff+1 ) 
 				{ 
-					rnlOff = editcur.line; 
+					rnlOff = editcur.line-1; 
+					if (rnlOff < 0)
+					{
+						rnlOff = 0;
+					}
 					maxl = VISLINES+1; 
 				}
 				else 
@@ -655,7 +735,6 @@ void CChildView::DrawPatEditor(CDC *devc)
 			devc->ScrollDC(scrollT*ROWWIDTH,scrollL*ROWHEIGHT,&patR,&patR,&rgn,&rect2);
 			if (updatePar & DRAW_TRHEADER)
 			{
-
 				if (scrollT > 0)
 				{	
 					int xOffset = XOFFSET-1;
@@ -671,22 +750,49 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 						xOffset += ROWWIDTH;
 					}
+					xOffset = XOFFSET-1+((VISTRACKS-scrollT)*ROWWIDTH);
+					for (i = VISTRACKS-scrollT; i < VISTRACKS+1; i++)
+					{
+						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
+						oldBrush= devc->SelectObject(&newbrush);
+						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
+						oldPen = devc->SelectObject(&newpen);
+						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
+						newbrush.DeleteObject();
+						newpen.DeleteObject();
+
+						xOffset += ROWWIDTH;
+					}
 					DrawPatternData(devc,0, scrollT, 0, VISLINES+1);
+					DrawPatternData(devc, VISTRACKS-scrollT-1, VISTRACKS+1, 0,VISLINES+1);
 					if (scrollL > 0)
 					{	
 						TRACE("DRAW_HVSCROLL++\n");
-						DrawPatternData(devc, scrollT+1, VISTRACKS+1, 0,scrollL);
+						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1, 0,scrollL);
 					}
 					else 
 					{	
 						TRACE("DRAW_HVSCROLL+-\n");
-						DrawPatternData(devc, scrollT+1, VISTRACKS+1,VISLINES+scrollL,VISLINES+1);
+						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1,VISLINES+scrollL,VISLINES+1);
 					}
 				}
 				else 
 				{	
-					int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
-					for (int i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
+					int xOffset = XOFFSET-1;
+					for (int i = 0; i < -scrollT; i++)
+					{
+						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
+						oldBrush= devc->SelectObject(&newbrush);
+						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
+						oldPen = devc->SelectObject(&newpen);
+						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
+						newbrush.DeleteObject();
+						newpen.DeleteObject();
+
+						xOffset += ROWWIDTH;
+					}
+					xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
+					for (i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
 					{
 						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
 						oldBrush= devc->SelectObject(&newbrush);
@@ -699,15 +805,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 						xOffset += ROWWIDTH;
 					}
 					DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
+					DrawPatternData(devc,0, -scrollT, 0, VISLINES+1);
 					if (scrollL > 0)
 					{	
 						TRACE("DRAW_HVSCROLL-+\n");
-						DrawPatternData(devc, 0, VISTRACKS+scrollT, 0,scrollL);
+						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT, 0,scrollL);
 					}
 					else
 					{	
 						TRACE("DRAW_HVSCROLL--\n");
-						DrawPatternData(devc, 0, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
+						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
 					}
 				}
 			}
@@ -731,16 +838,30 @@ void CChildView::DrawPatEditor(CDC *devc)
 
 						xOffset += ROWWIDTH;
 					}
+					xOffset = XOFFSET-1+((VISTRACKS-scrollT)*ROWWIDTH);
+					for (i = VISTRACKS-scrollT; i < VISTRACKS+1; i++)
+					{
+						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
+						oldBrush= devc->SelectObject(&newbrush);
+						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
+						oldPen = devc->SelectObject(&newpen);
+						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
+						newbrush.DeleteObject();
+						newpen.DeleteObject();
+
+						xOffset += ROWWIDTH;
+					}
 					DrawPatternData(devc,0, scrollT, 0, VISLINES+1);
+					DrawPatternData(devc, VISTRACKS-scrollT-1, VISTRACKS+1, 0,VISLINES+1);
 					if (scrollL > 0)
 					{	
 						TRACE("DRAW_HVSCROLL++H\n");
-						DrawPatternData(devc, scrollT+1, VISTRACKS+1, 0,scrollL);
+						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1, 0,scrollL);
 					}
 					else 
 					{	
 						TRACE("DRAW_HVSCROLL+-H\n");
-						DrawPatternData(devc, scrollT+1, VISTRACKS+1,VISLINES+scrollL,VISLINES+1);
+						DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1,VISLINES+scrollL,VISLINES+1);
 					}
 
 					CDC memDC;
@@ -775,8 +896,21 @@ void CChildView::DrawPatEditor(CDC *devc)
 				}
 				else
 				{	
-					int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
-					for (int i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
+					int xOffset = XOFFSET-1;
+					for (int i = 0; i < -scrollT; i++)
+					{
+						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
+						oldBrush= devc->SelectObject(&newbrush);
+						CPen newpen( PS_SOLID, 1, pvc_separator[i+tOff+1]); // this affects BOX foreground
+						oldPen = devc->SelectObject(&newpen);
+						BOX(devc, xOffset, YOFFSET-1, ROWWIDTH+1, CH-YOFFSET+2); // Draw lines between tracks
+						newbrush.DeleteObject();
+						newpen.DeleteObject();
+
+						xOffset += ROWWIDTH;
+					}
+					xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
+					for (i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
 					{
 						CBrush newbrush(pvc_background[i+tOff+1]); // This affects BOX background
 						oldBrush= devc->SelectObject(&newbrush);
@@ -789,15 +923,16 @@ void CChildView::DrawPatEditor(CDC *devc)
 						xOffset += ROWWIDTH;
 					}
 					DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
+					DrawPatternData(devc,0, -scrollT, 0, VISLINES+1);
 					if (scrollL > 0)
 					{	
 						TRACE("DRAW_HVSCROLL-+H\n");
-						DrawPatternData(devc, 0, VISTRACKS+scrollT, 0,scrollL);
+						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT, 0,scrollL);
 					}
 					else
 					{	
 						TRACE("DRAW_HVSCROLL--H\n");
-						DrawPatternData(devc, 0, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
+						DrawPatternData(devc, -scrollT+1, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
 					}
 
 					CDC memDC;

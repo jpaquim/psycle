@@ -216,6 +216,7 @@ public:
 	bool blockStart;
 	bool bScrollDetatch;
 	CCursor editcur;	// Edit Cursor Position in Pattern.
+	CCursor detatchpoint;
 	bool bEditMode;		// in edit mode?
 	int patStep;
 
