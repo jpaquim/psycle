@@ -122,6 +122,7 @@ void CMacProp::OnSolo()
 			}
 		}
 		pMachine->_mute = false;
+		if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
 		pSong->machineSoloed = thisMac;
 	 }
 	 else
@@ -133,7 +134,8 @@ void CMacProp::OnSolo()
 				( pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
 					pSong->_pMachines[i]->_mute = false;
 		}
-	 }
+		if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
+	}
 	if ( m_view != NULL )
 	{
 		m_view->Repaint(DMAllMacsRefresh);
