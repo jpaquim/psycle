@@ -1398,12 +1398,12 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 			((CVstEditorDlg*)m_pWndMac[tmac])->wndView = &m_wndView;
 			((CVstEditorDlg*)m_pWndMac[tmac])->index=_pSong->FindBusFromIndex(tmac);
 			((CVstEditorDlg*)m_pWndMac[tmac])->_pMachine = (VSTPlugin*)ma;
-			((VSTPlugin*)ma)->editorWnd = m_pWndMac[tmac];
+			((VSTPlugin*)ma)->editorWnd = NULL;
 			
-
 			((CVstEditorDlg*)m_pWndMac[tmac])->LoadFrame(IDR_VSTFRAME,
 					WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU,
 					this);
+			((VSTPlugin*)ma)->editorWnd = m_pWndMac[tmac];
 			char winname[32];
 			sprintf(winname,"%x : %s",((CVstEditorDlg*)m_pWndMac[tmac])->index
 									,Global::_pSong->_pMachines[tmac]->_editName);

@@ -1407,19 +1407,15 @@ bool Song::Load(
 				if (_pMachines[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
 				{
 					Machine* pOrigMachine = _pMachines[_pMachines[i]->_inputMachines[c]]; // We get that machine
-					for (int d=0; d<MAX_CONNECTIONS; d++) // We look through all of
-					{
-						if ((pOrigMachine->_connection[d]) && (pOrigMachine->_outputMachines[d] == i)) // its output connections till we find one that outputs to the machine we were updating,
-						{																			// And update the volume. These extended if's (for VST) are explained some lines below.
-							float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-							if( val > 2 ) val*=0.000030517578125f; // BugFix
-							else if ( val < 0.00004) val*=32768.0f; // BugFix
+					int d = pOrigMachine->FindOutputWire(i);
 
-							_pMachines[i]->InitWireVolume(pOrigMachine->_type,c,val);
+					float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+					if( val > 2 ) val*=0.000030517578125f; // BugFix
+					else if ( val < 0.00004) val*=32768.0f; // BugFix
 
-							break;
-						}
-					}
+					_pMachines[i]->InitWireVolume(pOrigMachine->_type,c,val);
+
+					break;
 				}
 			}
 		}
@@ -1695,17 +1691,12 @@ bool Song::Save(
 				if (_pMachines[i]->_connection[c])
 				{
 					Machine* pDstMachine = _pMachines[_pMachines[i]->_outputMachines[c]];
-					for (int d=0; d<MAX_CONNECTIONS; d++)
-					{
-						if ((pDstMachine->_inputCon[d]) && (pDstMachine->_inputMachines[d] == i))
-						{
-							float val;
-							_pMachines[i]->GetWireVolume(c,val); //this gets automatically the value in 0.0..1.0 range
-							_pMachines[i]->_inputConVol[c]=val;
+					int d = pDstMachine->FindInputWire(i);
+					float val;
+					pDstMachine->GetWireVolume(d,val); //this gets automatically the value in 0.0..1.0 range
+					_pMachines[i]->_inputConVol[c]=val; // and we invert the volumes (input to output)
 
-							break;
-						}
-					}
+					break;
 				}
 			}
 		}

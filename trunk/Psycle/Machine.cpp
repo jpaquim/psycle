@@ -160,13 +160,13 @@ void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
 	// but since it already needs to multiply the output by inputConVol, I decided to remove
 	// that extra conversion and use directly the volume to do so.
 }
-int Machine::FindInputWire(Machine* pDstMac,int macIndex)
+int Machine::FindInputWire(int macIndex)
 {
 	for (int c=0; c<MAX_CONNECTIONS; c++)
 	{
-		if (pDstMac->_inputCon[c])
+		if (_inputCon[c])
 		{
-			if (pDstMac->_inputMachines[c] == macIndex)
+			if (_inputMachines[c] == macIndex)
 			{
 				return c;
 			}
@@ -174,13 +174,13 @@ int Machine::FindInputWire(Machine* pDstMac,int macIndex)
 	}
 	return -1;
 }
-int Machine::FindOutputWire(Machine* pSrcMac,int macIndex)
+int Machine::FindOutputWire(int macIndex)
 {
 	for (int c=0; c<MAX_CONNECTIONS; c++)
 	{
-		if (pSrcMac->_connection[c])
+		if (_connection[c])
 		{
-			if (pSrcMac->_outputMachines[c] == macIndex)
+			if (_outputMachines[c] == macIndex)
 			{
 				return c;
 			}
@@ -199,7 +199,7 @@ bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,int value)
 	const float invol = value*0.00390625f; // Convert a 0..256 value to a 0..1.0 value
 	
 	int c;
-	if ( (c = FindInputWire(_pDstMachine,srcIndex)) != -1)
+	if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 	{
 		_pDstMachine->SetWireVolume(c,invol);
 		return true;
@@ -213,7 +213,7 @@ bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,int &value)
 	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
 	
 	int c;
-	if ( (c = FindInputWire(_pDstMachine,srcIndex)) != -1)
+	if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 	{
 		float val;
 		_pDstMachine->GetWireVolume(c,val);
