@@ -337,13 +337,13 @@ CMachineInfo const MacInfo =
 	NUMPARAMETERS,							// numParameters
 	pParameters,							// Pointer to parameters
 #ifdef _DEBUG
-	"Arguru Synth 2f (Debug build)",		// name
+	"Arguru Synth 2 final (Debug build)",		// name
 #else
-	"Arguru Synth 2f",						// name
+	"Arguru Synth 2 final",						// name
 #endif
-	"ASynth 2f",							// short name
-	"J. Arguelles",							// author
-	"Help",									// A command, that could be use for open an editor, etc...
+	"Arguru Synth",							// short name
+	"J. Arguelles (arguru)",							// author
+	"help",									// A command, that could be use for open an editor, etc...
 	4
 };
 
