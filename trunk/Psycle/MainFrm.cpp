@@ -845,15 +845,6 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 			_pSong->auxcolSelected = _pSong->instSelected;
 			UpdateComboIns();
 		}
-		else if (_pSong->_pMachines[_pSong->busMachine[selected]]->_type == MACH_VST)
-		{
-			if (cb2->GetCurSel() == AUX_WAVES)
-			{
-				cb2->SetCurSel(0); //MIDI
-				_pSong->auxcolSelected = _pSong->midiSelected;
-				UpdateComboIns();
-			}
-		}
 		else if (_pSong->_pMachines[_pSong->busMachine[selected]]->_type == MACH_SAMPLER)
 		{
 			if ( cb2->GetCurSel() != AUX_WAVES)
