@@ -185,7 +185,6 @@ bool RiffFile::ReadString(char* pData, ULONG maxBytes)
 		}
 		while (c != 0)
 		{
-			DWORD bytesRead;
 			if (!Read(&c, sizeof(c)))
 			{
 				return false;

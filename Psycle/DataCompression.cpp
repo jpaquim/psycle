@@ -137,7 +137,7 @@ int BEERZ77Comp2(byte * pSource, byte ** pDestination, int size)
 	}
 }
 
-void BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination)
+bool BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination)
 {
 	// remember to delete your destination when done
 	if ((pSourcePos) && (*pSourcePos == 0x03))
@@ -181,5 +181,7 @@ void BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination)
 				FileSize -= Length;
 			}
 		}
+		return true;
 	}
+	return false;
 }
