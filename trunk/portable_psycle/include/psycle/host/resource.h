@@ -91,6 +91,8 @@
 #define IDD_SAVEWAVDLG                  203
 #define IDD_PROGRESS_DIALOG             204
 #define IDD_ERRORLOGGER                 208
+#define IDB_BITMAP1                     209
+#define IDB_BETASPLASH                  209
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -772,7 +774,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        209
+#define _APS_NEXT_RESOURCE_VALUE        210
 #define _APS_NEXT_COMMAND_VALUE         32933
 #define _APS_NEXT_CONTROL_VALUE         1540
 #define _APS_NEXT_SYMED_VALUE           60
