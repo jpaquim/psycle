@@ -69,7 +69,7 @@ void CKeyConfigDlg::FillCmdList()
 		cmd.ID = CmdSet(i);
 		cmdDefn = cmd.GetName();
 		if(cmdDefn!="Null" && cmdDefn!="-" && cmdDefn!="" && cmdDefn!="Invalid")
-	    m_lstCmds.AddString(LPCTSTR(cmdDefn));
+		    m_lstCmds.AddString(LPCTSTR(cmdDefn));
     }        
 }
 

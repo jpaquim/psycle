@@ -348,3 +348,4 @@ void CSkinDlg::OnTimer(UINT nIDEvent)
 	
 	CPropertyPage::OnTimer(nIDEvent);
 }
+

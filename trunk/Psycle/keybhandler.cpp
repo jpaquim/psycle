@@ -823,42 +823,48 @@ void CChildView::ShiftOctave(int x)
 
 void CChildView::patCut()
 {
-	// UNDO CODE PATT CUT
-	const int ps = _ps();
-	unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
-	unsigned char blank[5]={255,255,255,0,0};
-
-	patBufferLines = _pSong->patternLines[ps];
-	AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
-
-	int length = patBufferLines*5*MAX_TRACKS;
-	
-	memcpy(patBufferData,soffset,length);
-	for	(int c=0; c<length; c+=5)
+	if(viewMode == VMPattern)
 	{
-		memcpy(soffset,blank,sizeof(char)*5);
-		soffset+=5;
-	}
-	patBufferCopy = true;
+		// UNDO CODE PATT CUT
+		const int ps = _ps();
+		unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
+		unsigned char blank[5]={255,255,255,0,0};
 
-	drawTrackStart=0;
-	drawTrackEnd=_pSong->SONGTRACKS;
-	drawLineStart=0;
-	drawLineEnd=patBufferLines-1;
-	Repaint(DMDataChange);
+		patBufferLines = _pSong->patternLines[ps];
+		AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+
+		int length = patBufferLines*5*MAX_TRACKS;
+		
+		memcpy(patBufferData,soffset,length);
+		for	(int c=0; c<length; c+=5)
+		{
+			memcpy(soffset,blank,sizeof(char)*5);
+			soffset+=5;
+		}
+		patBufferCopy = true;
+
+		drawTrackStart=0;
+		drawTrackEnd=_pSong->SONGTRACKS;
+		drawLineStart=0;
+		drawLineEnd=patBufferLines-1;
+		Repaint(DMDataChange);
+	}
 }
 
 void CChildView::patCopy()
 {
-	const int ps = _ps();
-	unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
-	
-	patBufferLines=_pSong->patternLines[ps];
-	int length=patBufferLines*5*MAX_TRACKS;
-	
-	memcpy(patBufferData,soffset,length);
-	
-	patBufferCopy=true;
+	if(viewMode == VMPattern)
+	{
+		const int ps = _ps();
+		unsigned char *soffset = _pSong->pPatternData + (ps*MULTIPLY2);
+		
+		patBufferLines=_pSong->patternLines[ps];
+		int length=patBufferLines*5*MAX_TRACKS;
+		
+		memcpy(patBufferData,soffset,length);
+		
+		patBufferCopy=true;
+	}
 }
 
 void CChildView::patPaste()

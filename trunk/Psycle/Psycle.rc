@@ -82,9 +82,6 @@ BEGIN
     VK_F1,          ID_PSYHELP,             VIRTKEY, NOINVERT
     VK_F10,         ID_VIEW_INSTRUMENTEDITOR, VIRTKEY, NOINVERT
     VK_F4,          ID_SHOWPSEQ,            VIRTKEY, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
-    "Z",            ID_EDIT_REDO,           VIRTKEY, SHIFT, CONTROL, 
-                                                    NOINVERT
 END
 
 IDR_VSTFRAME ACCELERATORS DISCARDABLE 
@@ -630,7 +627,7 @@ BEGIN
     COMBOBOX        IDC_FONTFACE,6,29,134,85,CBS_DROPDOWN | CBS_SORT | 
                     WS_DISABLED | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Machine View ",IDC_STATIC,149,7,100,64
-    PUSHBUTTON      "BackGnd",IDC_BG_COLOUR,153,21,32,12
+    PUSHBUTTON      "BackGnd",IDC_BG_COLOUR,153,21,34,12
     GROUPBOX        "VU Colors",IDC_STATIC,254,7,60,64
     PUSHBUTTON      "Vu Bar",IDC_BUTTON23,261,35,32,12
     PUSHBUTTON      "BackGnd",IDC_BUTTON24,261,17,32,12
@@ -666,8 +663,8 @@ BEGIN
                     12,9
     CONTROL         "",IDC_MBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,189,23,
                     12,9
-    PUSHBUTTON      "Wires",IDC_WIRE_COLOUR,153,36,32,12
-    PUSHBUTTON      "Polygons",IDC_POLY_COLOUR,154,52,31,12
+    PUSHBUTTON      "Wires",IDC_WIRE_COLOUR,153,36,34,12
+    PUSHBUTTON      "Polygons",IDC_POLY_COLOUR,154,52,33,12
     CONTROL         "",IDC_MWIRE_COL,"Static",SS_GRAYRECT | SS_SUNKEN,189,38,
                     12,9
     CONTROL         "",IDC_MPOLY_COL,"Static",SS_GRAYRECT | SS_SUNKEN,189,54,
@@ -1564,12 +1561,12 @@ BEGIN
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM "&Redo\tCtrl+Shift+Z",         ID_EDIT_REDO
+        MENUITEM "&Undo",                       ID_EDIT_UNDO
+        MENUITEM "&Redo",                       ID_EDIT_REDO
         MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "Pattern Cu&t",                ID_EDIT_CUT
+        MENUITEM "Pattern &Copy",               ID_EDIT_COPY
+        MENUITEM "Pattern &Paste",              ID_EDIT_PASTE
     END
     POPUP "&View"
     BEGIN
@@ -1609,13 +1606,13 @@ IDR_POPUPMENU MENU DISCARDABLE
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM "&Redo\tCtrl+Shift+Z",         ID_EDIT_REDO
+        MENUITEM "&Undo",                       ID_EDIT_UNDO
+        MENUITEM "&Redo",                       ID_EDIT_REDO
         MENUITEM SEPARATOR
-        MENUITEM "&Cut",                        ID_POP_CUT
-        MENUITEM "C&opy",                       ID_POP_COPY
-        MENUITEM "&Paste",                      ID_POP_PASTE
-        MENUITEM "&Mix Paste",                  ID_POP_MIXPASTE
+        MENUITEM "Block &Cut",                  ID_POP_CUT
+        MENUITEM "Block C&opy",                 ID_POP_COPY
+        MENUITEM "Block &Paste",                ID_POP_PASTE
+        MENUITEM "Block &Mix Paste",            ID_POP_MIXPASTE
         MENUITEM SEPARATOR
         MENUITEM "&Interpolate Effect",         ID_POP_INTERPOLATE
         MENUITEM "Change &Generator",           ID_POP_CHANGEGENERATOR

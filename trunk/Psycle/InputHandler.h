@@ -173,7 +173,9 @@ enum CmdSet
 	cdefSelectCol,
 
 	cdefEditQuantizeDec,
-	cdefEditQuantizeInc
+	cdefEditQuantizeInc,
+	cdefUndo,
+	cdefRedo,
 };
 
 
@@ -353,6 +355,9 @@ struct CmdDef
 		case cdefSongPosInc:		return "Position +1";
 		case cdefSongPosDec:		return "Position -1";
 
+		case cdefUndo:		return "Edit Undo";
+		case cdefRedo:		return "Edit Redo";
+
 		default: return "Invalid";
 		}
 	}
@@ -421,7 +426,7 @@ public:
 	bool bDoingSelection;		// Indicates that Shift+Arrow is Selection.
 
 	// multi-key playback state stuff
-	int notetrack[256]; // should be MAX TRACKS instead of 256
+	int notetrack[MAX_TRACKS]; // should be MAX TRACKS instead of 256
 	int outtrack;		// last track output to	
 
 private:
