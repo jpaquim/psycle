@@ -413,7 +413,7 @@ namespace psycle
 					//user(0);
 					close();
 				}
-				// <magnus> we shouldn't delete plugin_ because the AEffect is allocated
+				// [magnus] we shouldn't delete plugin_ because the AEffect is allocated
 				// by the plugin's DLL by some unknown means. Dispatching effClose will
 				// automatically free up the AEffect structure.
 				this->plugin_ = plugin;
@@ -423,12 +423,6 @@ namespace psycle
 					{
 						// AEffect's resvd2 data member is right after the resvd1 data member in memory,
 						// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address,
-						// if we ever recompile psycle on a 64-bit operating system.
-						// The vst plugins don't need to be recompiled for this to work,
-						// but anyway, some other parts of the vst headers are supposed to be used on a 32-bit compiler
-						// (i.e. their authors didn't forsee the problem).
-						// So, those headers should be made explicitly 32-bit to support 32-bit vst plugins.
-						// Since those headers are under a restricted license by steinberg, only steinberg's employees are allowed to fix them.
 						*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
 					}
 					$("operator()(AEffect * const plugin)")
