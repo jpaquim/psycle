@@ -41,6 +41,7 @@ public:
 
 // Implementation
 protected:
+	BOOL bInit;
 
 	// Generated message map functions
 	//{{AFX_MSG(CPatDlg)

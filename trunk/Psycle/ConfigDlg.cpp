@@ -84,6 +84,9 @@ void CConfigDlg::Init(
 	_skinDlg._linenumbersHex = pConfig->_linenumbersHex;
 
 	strcpy(_skinDlg._pattern_fontface, pConfig->pattern_fontface);
+	_skinDlg._pattern_font_point = pConfig->pattern_font_point;
+	_skinDlg._pattern_font_x = pConfig->pattern_font_x;
+	_skinDlg._pattern_font_y = pConfig->pattern_font_y;
 
 	_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 	_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
@@ -167,24 +170,29 @@ int CConfigDlg::DoModal()
 		_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
 		_pConfig->_linenumbers = _skinDlg._linenumbers;
 		_pConfig->_linenumbersHex = _skinDlg._linenumbersHex;
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET = _pConfig->_linenumbers?LINE_XOFFSET:1;
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.VISTRACKS = (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET)/ROWWIDTH;
 
-		if (strcmp(_pConfig->pattern_fontface, _skinDlg._pattern_fontface))
+		_pConfig->pattern_font_x = _skinDlg._pattern_font_x;
+		_pConfig->pattern_font_y = _skinDlg._pattern_font_y;
+
+		if ((strcmp(_pConfig->pattern_fontface, _skinDlg._pattern_fontface)) ||
+			(_pConfig->pattern_font_point != _skinDlg._pattern_font_point))
 		{
+			_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
 			strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
 			_pConfig->seqFont.DeleteObject();
-			if (!_pConfig->seqFont.CreatePointFont(80,_pConfig->pattern_fontface))
+			if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,_pConfig->pattern_fontface))
 			{
-				if (!_pConfig->seqFont.CreatePointFont(80,"Tahoma"))
+				if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Tahoma"))
 				{
-					if (!_pConfig->seqFont.CreatePointFont(80,"MS Sans Seriff"))
+					if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"MS Sans Seriff"))
 					{
-						_pConfig->seqFont.CreatePointFont(80,"Verdana");
+						_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Verdana");
 					}
 				}
 			}
 		}
+
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
 
 		_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
 		_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;	// MIDI IMPLEMENTATION

@@ -2,6 +2,14 @@
 // Microsoft Developer Studio generated include file.
 // Used by Psycle.rc
 //
+#define ID_INDICATOR_SEQPOS             52
+#define ID_INDICATOR_PATTERN            53
+#define ID_INDICATOR_LINE               54
+#define ID_INDICATOR_TIME               55
+#define ID_INDICATOR_EDIT               56
+#define ID_INDICATOR_FOLLOW             57
+#define ID_INDICATOR_NOTEOFF            58
+#define ID_INDICATOR_TWEAKS             59
 #define IDR_MAINFRAME                   100
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
@@ -67,6 +75,9 @@
 #define IDD_SAVESONG                    183
 #define IDD_INST_EDITOR                 185
 #define IDD_SWINGFILL                   187
+#define IDB_MASTERBACK                  190
+#define IDB_MASTERNUMBERS               191
+#define IDB_MASTERSLIDER                192
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -108,14 +119,16 @@
 #define IDC_ROWC                        1038
 #define IDC_BEATC                       1039
 #define IDC_4BEAT                       1040
-#define IDC_FONTFACE                    1041
+#define IDC_PATTERN_FONTFACE            1041
 #define IDC_DOUBLEBUFFER                1042
 #define IDC_FONTC                       1043
 #define IDC_RESETCOLOURS                1044
+#define IDC_PATTERN_HEADER_SKIN         1044
 #define IDC_BUTTON23                    1045
 #define IDC_BUTTON24                    1046
 #define IDC_BUTTON25                    1047
 #define IDC_ABOUTBMP                    1048
+#define IDC_PATTERN_HEADER_SKIN2        1048
 #define IDC_HEADER                      1049
 #define IDC_HEADERDLG                   1050
 #define IDC_STEINBERGCOPY               1051
@@ -282,7 +295,6 @@
 #define IDC_SEQNEW                      1212
 #define IDC_SEQINS                      1213
 #define IDC_SEQDEL                      1214
-#define IDC_SEQCUT                      1214
 #define IDC_SEQCLR                      1215
 #define IDC_SEQ1                        1216
 #define IDC_SEQ2                        1217
@@ -303,9 +315,7 @@
 #define IDC_CURSORDOWN                  1232
 #define IDC_MUTE                        1233
 #define IDC_BYPASS                      1234
-#define IDC_SEQCOPY                     1234
 #define IDC_SOLO                        1235
-#define IDC_SEQPASTE                    1235
 #define IDC_PRESETSCOMBO                1236
 #define IDC_SAVE                        1237
 #define IDC_DELETE                      1238
@@ -485,15 +495,81 @@
 #define IDC_RECORD_TWEAKS               1411
 #define IDC_MPOLY_COL                   1411
 #define IDC_CENTER_TEMPO                1412
+#define IDC_PBG_SEPARATOR               1412
 #define IDC_VARIANCE                    1413
+#define IDC_PBG_SEPARATOR2              1413
 #define IDC_WIDTH                       1414
+#define IDC_ROW_CAN2                    1414
 #define IDC_PHASE                       1415
+#define IDC_BEAT_CAN2                   1415
 #define IDC_OFFSET                      1416
+#define IDC_4BEAT_CAN2                  1416
 #define IDC_BG_COLOUR                   1417
 #define IDC_WIRE_COLOUR                 1418
 #define IDC_POLY_COLOUR                 1419
 #define IDC_AAWIRE                      1420
+#define IDC_PLAYBAR_CAN                 1421
+#define IDC_PLAYBAR_CAN2                1422
 #define IDC_WIRE_WIDTH                  1423
+#define IDC_MIXERVIEW                   1424
+#define IDC_FONTPLAY_CAN                1424
+#define IDC_MASTERPEAK                  1425
+#define IDC_FONTSEL_CAN                 1425
+#define IDC_PATSEPARATORC               1426
+#define IDC_PATTERNBACKC                1427
+#define IDC_FONTCURSOR_CAN              1428
+#define IDC_COMBOOCTAVE                 1428
+#define IDC_PATSEPARATORC2              1429
+#define IDC_EDITMACS                    1429
+#define IDC_SELECTION_CAN               1430
+#define IDC_CURSOR_CAN                  1431
+#define IDC_SELECTION_CAN2              1432
+#define IDC_CURSOR_CAN2                 1433
+#define IDC_PATTERNBACKC2               1434
+#define IDC_PBG_CAN2                    1435
+#define IDC_FONT_CAN2                   1436
+#define IDC_FONTPLAY_CAN2               1437
+#define IDC_FONTSEL_CAN2                1438
+#define IDC_FONTCURSOR_CAN2             1439
+#define IDC_LINE_NUMBERS                1440
+#define IDC_ROWC2                       1441
+#define IDC_BEATC2                      1442
+#define IDC_4BEAT2                      1443
+#define IDC_PLAYBARC                    1444
+#define IDC_PLAYBARC2                   1445
+#define IDC_FONTPLAYC                   1446
+#define IDC_SELECTIONC                  1447
+#define IDC_CURSORC                     1448
+#define IDC_SELECTIONC2                 1449
+#define IDC_CURSORC2                    1450
+#define IDC_FONTSELC                    1451
+#define IDC_FONTCURSORC                 1452
+#define IDC_FONTC2                      1453
+#define IDC_FONTPLAYC2                  1454
+#define IDC_FONTSELC2                   1455
+#define IDC_FONTCURSORC2                1456
+#define IDC_LINE_NUMBERS_HEX            1457
+#define IDC_EXPORTREG                   1458
+#define IDC_IMPORTREG                   1459
+#define IDC_SLIDERMASTER                1460
+#define IDC_PATTERN_FONT_Y              1460
+#define IDC_SLIDERM1                    1461
+#define IDC_PATTERN_FONT_X              1461
+#define IDC_SLIDERM2                    1462
+#define IDC_PATTERN_FONT_POINT          1462
+#define IDC_SLIDERM3                    1463
+#define IDC_SLIDERM4                    1464
+#define IDC_SLIDERM5                    1465
+#define IDC_SLIDERM6                    1466
+#define IDC_SLIDERM7                    1467
+#define IDC_SLIDERM8                    1468
+#define IDC_SLIDERM9                    1469
+#define IDC_SLIDERM10                   1470
+#define IDC_SLIDERM11                   1471
+#define IDC_SLIDERM12                   1472
+#define IDC_SEQCUT                      1473
+#define IDC_SEQCOPY                     1474
+#define IDC_SEQPASTE                    1475
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -561,15 +637,20 @@
 #define ID_POP_BLOCK_SWINGFILL          32885
 #define ID_POP_TRACK_SWINGFILL          32886
 #define ID_EDIT_MIXPASTE                32890
+#define ID_FILE_SAVEAUDIO               32894
+#define ID_HELP_WHATSNEW                32895
+#define ID_HELP_README                  32896
+#define ID_HELP_TWEAKING                32897
+#define ID_HELP_KEYBTXT                 32898
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        189
-#define _APS_NEXT_COMMAND_VALUE         32891
-#define _APS_NEXT_CONTROL_VALUE         1424
-#define _APS_NEXT_SYMED_VALUE           52
+#define _APS_NEXT_RESOURCE_VALUE        193
+#define _APS_NEXT_COMMAND_VALUE         32899
+#define _APS_NEXT_CONTROL_VALUE         1475
+#define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

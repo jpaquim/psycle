@@ -74,6 +74,10 @@ public:
 	bool _showAboutAtStart;
 
 	char pattern_fontface[64];
+	int pattern_font_point;
+	int pattern_font_x;
+	int pattern_font_y;
+
 	CFont seqFont;
 
 	bool _midiRecordVel;
