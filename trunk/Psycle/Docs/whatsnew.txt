@@ -10,6 +10,7 @@ V1.7.3
 * new file format fixing a lot of problems, and incorporating FAST lossless data compression (pooplog)
 * better memory management of pattern data (up to 10mb savings) (pooplog)
 * optimized machine indexing and also machine view rendering (pooplog)
+* new cache.map file format with many improvements (pooplog)
 ! sampler doesn't crash when no instrument is specified any more (pooplog)
 ! save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
 ! error messages on file read/write problems (pooplog)
