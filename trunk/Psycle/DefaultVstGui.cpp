@@ -174,6 +174,7 @@ void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	if (!updatingvalue)
 	{
 		float value = ((float)(VST_QUANTIZATION - m_slider.GetPos()))/VST_QUANTIZATION;
+
 		_pMachine->SetParameter(nPar, value);
 		UpdateText(value);
 	}
