@@ -207,3 +207,4 @@ int CDefaultVstGui::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	return 0;
 }
+

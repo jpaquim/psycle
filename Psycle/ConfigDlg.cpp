@@ -33,7 +33,7 @@ CConfigDlg::~CConfigDlg()
 
 BEGIN_MESSAGE_MAP(CConfigDlg, CPropertySheet)
 	//{{AFX_MSG_MAP(CConfigDlg)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
+		// NOTE - the ClassWizard will add and remove mapping macros here.	
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
