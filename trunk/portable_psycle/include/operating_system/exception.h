@@ -34,7 +34,7 @@ namespace operating_system
 			translated(const unsigned int & code);
 			/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
 			/// <bohan> This is needed for microsoft, i don't know about linux/gcc.
-			static void new_thread();
+			static void new_thread(const std::string & = "");
 		};
 	}
 }

@@ -63,12 +63,26 @@ namespace operating_system
 			// This type of exception is usually likely followed by a bad crash of the whole program,
 			// because it is caused by really bad things like wrong memory access, etc...
 			// So, we automatically log them as soon as they are created, that is, even before they are thrown.
-			std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << what();
+			std::ostringstream s;
+			s << "exception: ";
+			#if defined OPERATING_SYSTEM__MICROSOFT
+				s << "thread id: " << ::GetCurrentThreadId() << ", ";
+			#endif
+			s << typeid(*this).name() << ": " << what();
 			psycle::host::loggers::crash(s.str());
 		}
 
-		void translated::new_thread()
+		void translated::new_thread(const std::string & name)
 		{
+			{
+				std::ostringstream s;
+				s << "new thread: ";
+				if(name.size()) s << "name: " << name.c_str() << ", ";
+				#if defined OPERATING_SYSTEM__MICROSOFT
+					s << "id: " << ::GetCurrentThreadId();
+				#endif
+				psycle::host::loggers::trace(s.str());
+			}
 			#if defined OPERATING_SYSTEM__MICROSOFT
 				// In a multithreaded environment,
 				// translator functions are maintained separately for each thread.

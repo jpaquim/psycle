@@ -109,7 +109,7 @@ namespace psycle
 
 		void WaveOut::PollerThread(void * pWaveOut)
 		{
-			operating_system::exceptions::translated::new_thread();
+			operating_system::exceptions::translated::new_thread("mme wave out");
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 			while(!pThis->_stopPolling)
