@@ -55,6 +55,7 @@ protected:
 	afx_msg void OnParametersRandomparameters();
 	afx_msg void OnParametersShowpreset();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnClose();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

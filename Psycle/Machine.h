@@ -140,8 +140,8 @@ public:
 		value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex];
 	}
 	virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
-	virtual int FindInputWire(Machine* pDstMac,int macIndex);
-	virtual int FindOutputWire(Machine* pSrcMac,int macIndex);
+	virtual int FindInputWire(int macIndex);
+	virtual int FindOutputWire(int macIndex);
 	virtual void Tick(void) {};
 	virtual void Tick(int track, PatternEntry* pData) {};
 	virtual void PreWork(int numSamples);

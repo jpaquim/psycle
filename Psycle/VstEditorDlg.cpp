@@ -44,6 +44,7 @@ BEGIN_MESSAGE_MAP(CVstEditorDlg, CFrameWnd)
 	ON_COMMAND(ID_PARAMETERS_RANDOMPARAMETERS, OnParametersRandomparameters)
 	ON_COMMAND(ID_PARAMETERS_SHOWPRESET, OnParametersShowpreset)
 	ON_WM_SETFOCUS()
+	ON_WM_CLOSE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -178,4 +179,11 @@ void CVstEditorDlg::Resize(int w,int h)
 		
 		_splitter.SetColumnInfo(VST_UI_PANE,w,w);
 	}
+}
+
+void CVstEditorDlg::OnClose() 
+{
+	_pMachine->editorWnd=NULL;
+	
+	CFrameWnd::OnClose();
 }

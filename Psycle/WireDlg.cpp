@@ -53,11 +53,12 @@ BOOL CWireDlg::OnInitDialog()
 	Inval = false;
 	m_volslider.SetRange(0,128);
 	m_volslider.SetTicFreq(16);
-	_dstWireIndex = _pSrcMachine->FindInputWire(_pDstMachine,isrcMac);
+	_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 
 	float val;
 	_pDstMachine->GetWireVolume(_dstWireIndex,val);
-	m_volslider.SetPos(f2i(val*128));
+	int t = (int)(val*128.0f);
+	m_volslider.SetPos(t);
 
 	char buffer[64];
 	sprintf(buffer,"[%d] %s -> %s", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
