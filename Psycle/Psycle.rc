@@ -973,7 +973,7 @@ BEGIN
                     WS_EX_STATICEDGE
     CONTROL         "Show About Dialog at Startup",IDC_SHOWATSTARTUP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,190,165,11
-    CTEXT           "Version 1.66 [3 September 2002]",IDC_STATIC,181,191,151,
+    CTEXT           "Version 1.66 [4 September 2002]",IDC_STATIC,181,191,151,
                     8,SS_CENTERIMAGE,WS_EX_TRANSPARENT
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,8,203,320,1,
                     WS_EX_STATICEDGE
