@@ -61,9 +61,9 @@ ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
 ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
 ON_COMMAND(ID_PSYHELP, OnPsyhelp)
 ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
-ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
 ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
 ON_BN_CLICKED(IDC_EDITWAVE, OnEditwave)
+ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
 ON_BN_CLICKED(IDC_WAVEBUT, OnWavebut)
 ON_WM_DESTROY()
 ON_BN_CLICKED(IDC_B_DECGEN, OnBDecgen)
@@ -114,9 +114,14 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
 	ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
-ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
 	ON_WM_DROPFILES()
-
+	ON_COMMAND(ID_VIEW_SONGBAR, OnViewSongbar)
+	ON_COMMAND(ID_VIEW_MACHINEBAR, OnViewMachinebar)
+	ON_COMMAND(ID_VIEW_SEQUENCERBAR, OnViewSequencerbar)
+ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SONGBAR, OnUpdateViewSongbar)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SEQUENCERBAR, OnUpdateViewSequencerbar)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -2426,7 +2431,7 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 
 void CMainFrame::OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI) 
 {
-    pCmdUI->Enable(); 
+    pCmdUI->Enable();
     CString str;
 	if (Global::pPlayer->_playing)
 	{
@@ -2791,3 +2796,51 @@ void CMainFrame::LoadFonts()
 		}
 	}
 }
+
+void CMainFrame::OnViewSongbar() 
+{
+	if (m_wndControl.IsWindowVisible())
+	{
+		ShowControlBar(&m_wndControl,FALSE,FALSE);
+	}
+	else {	ShowControlBar(&m_wndControl,TRUE,FALSE);	}
+}
+
+void CMainFrame::OnViewMachinebar() 
+{
+	if (m_wndControl2.IsWindowVisible())
+	{
+		ShowControlBar(&m_wndControl2,FALSE,FALSE);
+	}
+	else {	ShowControlBar(&m_wndControl2,TRUE,FALSE);	}
+}
+
+void CMainFrame::OnViewSequencerbar() 
+{
+	if (m_wndSeq.IsWindowVisible())
+	{
+		ShowControlBar(&m_wndSeq,FALSE,FALSE);
+	}
+	else {	ShowControlBar(&m_wndSeq,TRUE,FALSE);	}	
+}
+
+void CMainFrame::OnUpdateViewSongbar(CCmdUI* pCmdUI) 
+{
+	if ( m_wndControl.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
+	else pCmdUI->SetCheck(FALSE);
+	
+}
+
+void CMainFrame::OnUpdateViewMachinebar(CCmdUI* pCmdUI) 
+{
+	if ( m_wndControl2.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
+	else pCmdUI->SetCheck(FALSE);
+	
+}
+
+void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI) 
+{
+	if ( m_wndSeq.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
+	else pCmdUI->SetCheck(FALSE);
+}
+

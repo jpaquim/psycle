@@ -14,6 +14,10 @@ mach.psm
 head.bmp
 head.psh
 
+You can put these files in subfolders, but directories should NOT contain dots "."
+
+
+
 info on making the two text files follows;
 
 
