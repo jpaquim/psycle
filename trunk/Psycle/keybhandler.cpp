@@ -127,7 +127,6 @@ void CChildView::MidiPatternTweak(int command, int value)
 		{
 			if(_pSong->_trackArmedCount)
 			{
-				_previousTicks++;
 				SelectNextTrack();
 			}
 			else
@@ -234,7 +233,6 @@ void CChildView::MidiPatternCommand(int command, int value)
 		{
 			if(_pSong->_trackArmedCount)
 			{
-				_previousTicks++;
 				SelectNextTrack();
 			}
 			else
@@ -336,7 +334,6 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 		{
 			if(_pSong->_trackArmedCount)
 			{
-				_previousTicks++;
 				SelectNextTrack();
 			}
 			else
@@ -409,7 +406,6 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	{
 		if(_pSong->_trackArmedCount)
 		{
-			_previousTicks++;
 			if (velocity == 0)
 			{
 				for (int i = 0; i < _pSong->SONGTRACKS; i++)
@@ -494,28 +490,10 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	}
 	Global::pInputHandler->notetrack[editcur.track]=note;
 
-	if (_previousTicks)
-	{
-		if (editcur.track < drawTrackStart)
-			drawTrackStart=editcur.track;
-		if ( editcur.track > drawTrackEnd)
-			drawTrackEnd=editcur.track;
-		if (editcur.line < drawLineStart)
-			drawLineStart=editcur.line;
-		if (editcur.line > drawLineEnd)
-			drawLineEnd=editcur.line;
-	}
-	else
-	{
-		drawTrackStart=editcur.track;
-		drawTrackEnd=editcur.track;
-		drawLineStart=editcur.line;
-		drawLineEnd=editcur.line;
-	}
-	if (drawTrackStart < 0)
-	{
-		drawTrackStart = 0;
-	}
+	drawTrackStart=editcur.track;
+	drawTrackEnd=editcur.track;
+	drawLineStart=editcur.line;
+	drawLineEnd=editcur.line;
 
 	if (!(Global::pPlayer->_playing&&_followSong))
 	{
