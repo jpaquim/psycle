@@ -30,6 +30,7 @@ public:
 	COLORREF mv_colour;
 	COLORREF mv_wirecolour;
 	COLORREF mv_wireaacolour;
+	COLORREF mv_wireaacolour2;
 	COLORREF mv_polycolour;
 	COLORREF mv_fontcolour;
 
@@ -66,7 +67,7 @@ public:
 	COLORREF vu2;
 	COLORREF vu3;
 
-	bool mv_wireaa;
+	int mv_wireaa;
 	int mv_wirewidth;
 	bool _wrapAround;
 	bool _centerCursor;

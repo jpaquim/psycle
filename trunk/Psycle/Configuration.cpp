@@ -49,11 +49,15 @@ Configuration::Configuration()
 	mv_wirecolour =	0x00000000;
 	mv_polycolour =	0x00ffffff;
 	mv_fontcolour = 0x00000000;
-	mv_wireaa = false;
+	mv_wireaa = 1;
 	mv_wirewidth = 1;
-	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
-			((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*2))/3)&0x00ff00) +
-			((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*2))/3)&0x00ff);
+	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
+			((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
+			((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*4))/5)&0x00ff);
+
+	mv_wireaacolour2 = (((((mv_wirecolour&0x00ff0000)) + ((mv_colour&0x00ff0000)))/2)&0x00ff0000) +
+			(((((mv_wirecolour&0x00ff00)) + ((mv_colour&0x00ff00)))/2)&0x00ff00) +
+			(((((mv_wirecolour&0x00ff)) + ((mv_colour&0x00ff)))/2)&0x00ff);
 
 	pvc_separator  = 0x00400000;
 	pvc_separator2  = 0x00004000;
@@ -663,9 +667,13 @@ Configuration::Read()
 	numData = sizeof(vu3);
 	reg.QueryValue("vu3", &type, (BYTE*)&vu3, &numData);
 
-	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
-					  ((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*2))/3)&0x00ff00) +
-					  ((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*2))/3)&0x00ff);
+	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
+					  ((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
+					  ((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*4))/5)&0x00ff);
+
+	mv_wireaacolour2 = (((((mv_wirecolour&0x00ff0000)) + ((mv_colour&0x00ff0000)))/2)&0x00ff0000) +
+			(((((mv_wirecolour&0x00ff00)) + ((mv_colour&0x00ff00)))/2)&0x00ff00) +
+			(((((mv_wirecolour&0x00ff)) + ((mv_colour&0x00ff)))/2)&0x00ff);
 
 	numData = sizeof(pattern_fontface);
 	reg.QueryValue("pattern_fontface", &type, (BYTE*)&pattern_fontface, &numData);

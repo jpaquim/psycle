@@ -37,7 +37,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
 	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
 	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
-	DDX_Control(pDX, IDC_AAWIRE, m_wireaa);
+	DDX_Control(pDX, IDC_WIREAA, m_wireaa);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	DDX_Control(pDX, IDC_PATTERN_FONTFACE, m_pattern_fontface);
 	DDX_Control(pDX, IDC_PATTERN_FONT_POINT, m_pattern_font_point);
@@ -97,11 +97,11 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_PATTERN_FONTFACE, OnSelchangePatternFontFace)
 	ON_CBN_SELCHANGE(IDC_PATTERN_HEADER_SKIN, OnSelchangePatternHeaderSkin)
 	ON_CBN_SELCHANGE(IDC_WIRE_WIDTH, OnSelchangeWireWidth)
-	ON_BN_CLICKED(IDC_AAWIRE, OnWireAA)
 	ON_CBN_SELCHANGE(IDC_MACHINE_FONT_POINT, OnSelchangeMachineFontPoint)
 	ON_CBN_SELCHANGE(IDC_MACHINE_FONTFACE, OnSelchangeMachineFontFace)
 	ON_CBN_SELCHANGE(IDC_MACHINE_SKIN, OnSelchangeMachineSkin)
 	ON_BN_CLICKED(IDC_MV_FONT_COLOUR, OnMVFontColour)
+	ON_CBN_SELCHANGE(IDC_WIREAA, OnSelchangeWireAA)
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -199,18 +199,20 @@ BOOL CSkinDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	m_gfxbuffer.SetCheck(_gfxbuffer);
-	m_wireaa.SetCheck(_wireaa);
 	m_linenumbers.SetCheck(_linenumbers);
 	m_linenumbersHex.SetCheck(_linenumbersHex);
 	SetTimer(2345,50,0);
 
 	char s[4];
+	m_wireaa.AddString("off");
 	for (int i = 1; i <= 16; i++)
 	{
 		sprintf(s,"%2i",i);
 		m_wirewidth.AddString(s);
+		m_wireaa.AddString(s);
 	}
 	m_wirewidth.SetCurSel(_wirewidth-1);
+	m_wireaa.SetCurSel(_wireaa);
 
 	LOGFONT lf;
 	memset(&lf,0,sizeof(lf));
@@ -1192,12 +1194,12 @@ void CSkinDlg::OnImportReg()
 					_wirewidth=_httoi(q+1);
 				}
 			}
-			else if (strstr(buf,"\"mv_wirewidth\"=hex:"))
+			else if (strstr(buf,"\"mv_wireaa\"=hex:"))
 			{
 				char *q = strchr(buf,58); // :
 				if (q)
 				{
-					_wireaa=_httoi(q+1)?1:0;
+					_wireaa=_httoi(q+1);
 				}
 			}
 			else if (strstr(buf,"\"mv_fontcolour\"=dword:"))
@@ -1210,11 +1212,12 @@ void CSkinDlg::OnImportReg()
 			}
 		}
 		fclose(hfile);
-		m_wireaa.SetCheck(_wireaa);
 //		m_linenumbers.SetCheck(_linenumbers);
 //		m_linenumbersHex.SetCheck(_linenumbersHex);
-		_snprintf(buf,4,"%2i",_wirewidth);
-		m_wirewidth.SelectString(0,buf);
+//		_snprintf(buf,4,"%2i",_wirewidth);
+//		m_wirewidth.SelectString(0,buf);
+		m_wirewidth.SetCurSel(_wirewidth-1);
+		m_wireaa.SetCurSel(_wireaa);
 		RepaintAllCanvas();
 
 		int sel;
@@ -1355,7 +1358,7 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n",_machineViewPolyColor);
 		fprintf(hfile,"\"mv_fontcolour\"=dword:%.8X\n",_machineViewFontColor);
 		fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
-		fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa?1:0);
+		fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
 
 		fclose(hfile);
 	}
@@ -1396,9 +1399,9 @@ void CSkinDlg::OnSelchangeWireWidth()
 	_wirewidth = m_wirewidth.GetCurSel()+1;
 }
 
-void CSkinDlg::OnWireAA()
+void CSkinDlg::OnSelchangeWireAA()
 {
-	_wireaa = m_wireaa.GetCheck() >0?true:false;
+	_wireaa = m_wireaa.GetCurSel();
 }
 
 
