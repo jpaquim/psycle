@@ -25,6 +25,7 @@ V1.7.3
 ! master machine does not let clipping samples through when decrease on clip is set (pooplog)
 ! folders with .s are now working for plugins, vsts, skins, etc. (pooplog)
 ! songs with invalid connections are dealt with correctly (pooplog)
+! pattern lengths no longer can be randomly changed by adding new/cloning patterns (pooplog)
 
 
 V1.7.1
