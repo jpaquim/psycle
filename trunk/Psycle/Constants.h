@@ -21,7 +21,7 @@
 #define MAX_SEQUENCES			1 // for multipattern
 #define PREV_WAV_INS			255
 #define LOCK_LATENCY			256
-#define MAX_PATTERNS			128		// MAX NUM OF PATTERNS - NOTE: this was used incorrectly in many places instead of MAX_SONG_POSITIONS
+#define MAX_PATTERNS			255		// MAX NUM OF PATTERNS - NOTE: this was used incorrectly in many places instead of MAX_SONG_POSITIONS
 #define EVENT_SIZE				5
 #define MULTIPLY				MAX_TRACKS * EVENT_SIZE		// you don't need to calc these by hand, 
 #define MULTIPLY2				MULTIPLY * MAX_LINES		// precompiler will do that for you

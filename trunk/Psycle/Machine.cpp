@@ -614,7 +614,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 
 #endif // !defined(_WINAMP_PLUGIN_)
 
-
+	pMachine->SetPan(pMachine->_panning);
 	return pMachine;
 }
 
