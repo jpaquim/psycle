@@ -870,9 +870,9 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	cb->SetCurSel(selected);
 
 	// Select the appropiate Option in Aux Combobox.
-	if ((found) && (_pSong->_machineActive[_pSong->busMachine[_pSong->seqBus]])) // Valid one.
+	if (found) // If found (which also means, if it exists)
 	{
-		if (_pSong->seqBus < MAX_BUSES) // Generator
+		if ( _pSong->seqBus < MAX_BUSES ) // it's a Generator
 		{
 			if (_pSong->_pMachines[_pSong->busMachine[_pSong->seqBus]]->_type == MACH_SAMPLER)
 			{
