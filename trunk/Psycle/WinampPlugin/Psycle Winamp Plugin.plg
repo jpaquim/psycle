@@ -6,37 +6,6 @@
 --------------------Configuration: Psycle Winamp Plugin - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP3B.tmp" with contents
-[
-/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PSYCLEWINAMPPLUGIN_EXPORTS" /D "_WINDLL" /D "_AFXDLL" /D "_WINAMP_PLUGIN_" /Fp"Release/Psycle Winamp Plugin.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
-"D:\Documents and Settings\All Users\Documentos\Visual C++\Psycle\Song.cpp"
-]
-Creating command line "cl.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP3B.tmp" 
-Creating temporary file "D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP3C.tmp" with contents
-[
-/nologo /dll /incremental:no /pdb:"Release/in_psycle.pdb" /machine:I386 /out:"Release/in_psycle.dll" /implib:"Release/in_psycle.lib" 
-".\Release\ConfigDlg.obj"
-".\Release\Configuration.obj"
-".\Release\Dsp.obj"
-".\Release\FileIO.obj"
-".\Release\Filter.obj"
-".\Release\Global.obj"
-".\Release\in_psycle.obj"
-".\Release\Machine.obj"
-".\Release\Player.obj"
-".\Release\Plugin.obj"
-".\Release\Registry.obj"
-".\Release\Sampler.obj"
-".\Release\Song.obj"
-".\Release\VstHost.obj"
-".\Release\in_psycle.res"
-]
-Creating command line "link.exe @D:\DOCUME~1\JOSEPM~1\CONFIG~1\Temp\RSP3C.tmp"
-<h3>Output Window</h3>
-Compiling...
-Song.cpp
-Linking...
-   Creating library Release/in_psycle.lib and object Release/in_psycle.exp
 
 
 
