@@ -145,7 +145,7 @@ namespace psycle
 				int	_scopeBufferIndex;
 				float *_pScopeBufferL;
 				float *_pScopeBufferR;
-				/// point for wire? 
+				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
 				CPoint _connectionPoint[MAX_CONNECTIONS];
 			#endif
 		};

@@ -11,7 +11,7 @@ namespace psycle
 		public:
 			CNewVal(CWnd* pParent = 0);
 			int m_Value;
-			char Title[1024];
+			char title[1024];
 			int min;
 			int max;
 			int macindex;

@@ -90,6 +90,7 @@ namespace psycle
 				std::strcpy(s2, "<unnamed>");
 				try
 				{
+					/// \todo Not used but... needed? (to call before getprogramname)
 					//int categories = _pMachine->proxy().dispatcher(effGetNumProgramCategories); categories; // not used
 					_pMachine->proxy().dispatcher(effGetProgramNameIndexed, i, -1, s2);
 				}

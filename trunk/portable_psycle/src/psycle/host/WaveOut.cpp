@@ -14,7 +14,8 @@ namespace psycle
 {
 	namespace host
 	{
-		#define BYTES_PER_SAMPLE 4	// 2 * 16bits
+		/// \todo Create a GetBytesPerSample() function for class AudioDriver, and derive in the subclasses.
+		#define BYTES_PER_SAMPLE 4
 
 		AudioDriverInfo WaveOut::_info = { "Windows WaveOut MME" };
 		AudioDriverEvent WaveOut::_event;

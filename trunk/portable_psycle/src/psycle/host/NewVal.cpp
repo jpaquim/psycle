@@ -34,7 +34,7 @@ namespace psycle
 		BOOL CNewVal::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			SetWindowText(Title);
+			SetWindowText(title);
 			char buf[32];
 			sprintf(buf,"%d",m_Value);
 			m_value.SetWindowText(buf);

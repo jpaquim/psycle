@@ -26,56 +26,62 @@ namespace psycle
 		/// number of tws commands that can be active on one machine
 		#define MAX_TWS					16
 
-		/// Legacy! It is used in File loading/saving
-		#define MAX_PLUGINS				256
-		/// Power of 2! Important!
+		/// Slots avaiable to load machines of each class (gen and FX). Power of 2! Important!
 		#define MAX_BUSES				64
+		/// Max number of machines+1 (master)
 		#define MAX_MACHINES			129
+		/// Index of MasterMachine
 		#define MASTER_INDEX			128
+		/// Max number of waves per instrument.
+		#define MAX_WAVES				32
+		/// Max number of instruments.
+		#define MAX_INSTRUMENTS			256
+		/// Instrument index of the wave preview.
+		#define PREV_WAV_INS			255
+		/// Number of tracks of the sequence (psycle just support one sequence now). Modify this, CURRENT_FILE_VERSION_SEQD and add the appropiated load and save code.
+		#define MAX_SEQUENCES			1
+		/// harcoded maximal number different patterns.
+		#define MAX_PATTERNS			255
+		/// Max number of pattern tracks
 		#define MAX_TRACKS				64
-		/// \todo changing this breaks file format.. but not for long
+		/// harcoded maximal number of lines per pattern
+		#define MAX_LINES				256
+		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
+		#define EVENT_SIZE				5
+		/// PSY2-fileformat Constants
 		#define OLD_MAX_TRACKS			32
 		#define OLD_MAX_WAVES			16
-		#define MAX_WAVES				32
-		#define MAX_LINES				256
-		#define MAX_INSTRUMENTS			256
 		#define OLD_MAX_INSTRUMENTS		255
-		/// for multipattern
-		#define MAX_SEQUENCES			1
-		#define PREV_WAV_INS			255
+		#define OLD_MAX_PLUGINS				256
+		/// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
 		#define LOCK_LATENCY			256
-		/// harcoded maximal number of patterns
-		#define MAX_PATTERNS			255
-		#define EVENT_SIZE				5
+		/// \todo changing this breaks file format
+		#define MAX_SONG_POSITIONS		128
+		/// Max input connections and output connections a machine can have. (should be replaced by a dynamic array)
+		#define MAX_CONNECTIONS		12
 
-		// you don't need to calc the following by hand, 
-		// precompiler will do that for you
-		// without any affect on the generated code
-
+		/// Miscellaneous offset data.
 		#define MULTIPLY				MAX_TRACKS * EVENT_SIZE
 		#define MULTIPLY2				MULTIPLY * MAX_LINES		
 		#define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	
-		/// \todo changing this breaks file format
-		#define MAX_SONG_POSITIONS		128
-		#define MAX_CONNECTIONS		12
 
-		/// Player \todo <bohan> a delay buffer in the player?
+		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 		#define MAX_DELAY_BUFFER		65536
 		/// Sampler
 		#define OVERLAPTIME				128
-		/// \todo If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, if needed.
+		/// \todo Size of audio blocks which are work'd together (max value). If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, appropiatedly.
 		#define STREAM_SIZE				256
 
-		/// \todo we need to make a high/low version system that breaks the UINT into 2 numbers
-		#define CURRENT_FILE_VERSION_INFO	0
-		#define CURRENT_FILE_VERSION_SNGI	0
-		#define CURRENT_FILE_VERSION_SEQD	0
-		#define CURRENT_FILE_VERSION_PATD	0
-		#define CURRENT_FILE_VERSION_MACD	0
-		#define CURRENT_FILE_VERSION_INSD	0
-		#define CURRENT_FILE_VERSION_WAVE	0
+		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
+		#define CURRENT_FILE_VERSION_INFO	0x0000
+		#define CURRENT_FILE_VERSION_SNGI	0x0000
+		#define CURRENT_FILE_VERSION_SEQD	0x0000
+		#define CURRENT_FILE_VERSION_PATD	0x0000
+		#define CURRENT_FILE_VERSION_MACD	0x0000
+		#define CURRENT_FILE_VERSION_INSD	0x0000
+		#define CURRENT_FILE_VERSION_WAVE	0x0000
 
-		#define CURRENT_CACHE_MAP_VERSION	0
+		#define CURRENT_CACHE_MAP_VERSION	0x0000
 
 		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE
 

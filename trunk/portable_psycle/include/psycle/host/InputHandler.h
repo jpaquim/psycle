@@ -92,7 +92,7 @@ namespace psycle
 			cdefTweakM = 121,	///< tweak
 			cdefTweakE = 122,	///< tweak effect. Old!
 			cdefMIDICC = 123,	///< Mcm Command (MIDI CC)
-			cdefTweakS = 124,
+			cdefTweakS = 124,	///< tweak slide command
 
 			// immediate commands
 

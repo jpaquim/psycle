@@ -581,29 +581,36 @@ namespace psycle
 				tmp1->_macIndex = two;
 				tmp2->_macIndex = one;
 
+				/// \todo There is a problem in this function with the volumes. You can't swap them because the connection index may differ
+				/// \todo and definitely it would be if they don't have the same number of inputs/outputs. So for now I've made that 
+				/// \todo the wire volume values remain unchanged.
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					if (tmp1->_inputCon[i])
 					{
-						tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
+/// \todo				tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
+						tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp1ivol[i]);
 					}
 		//			else tmp1->SetWireVolume(i,0);
 					if (tmp2->_inputCon[i])
 					{
-						tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
+/// \todo 				tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
+						tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp2ivol[i]);
 					}
 		//			else tmp2->SetWireVolume(i,0);
 
 					if (tmp1->_connection[i])
 					{
-						Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,tmp1->FindOutputWire(tmp1->_outputMachines[i]),tmp2ovol[i]);
+/// \todo				Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,tmp1->FindOutputWire(tmp1->_outputMachines[i]),tmp2ovol[i]);
+						Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,tmp1->FindOutputWire(tmp1->_outputMachines[i]),tmp1ovol[i]);
 					}
 					if (tmp2->_connection[i])
 					{
-						Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,tmp2->FindOutputWire(tmp2->_outputMachines[i]),tmp1ovol[i]);
-					}
-					
+/// \todo				Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,tmp2->FindOutputWire(tmp2->_outputMachines[i]),tmp1ovol[i]);
+						Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,tmp2->FindOutputWire(tmp2->_outputMachines[i]),tmp2ovol[i]);
+					}					
 				}
+
 				return;
 			}
 			if (tmp1)

@@ -13,6 +13,7 @@ namespace psycle
 {
 	namespace host
 	{
+		/// \todo Create a GetBytesPerSample() function for class AudioDriver, and derive in the subclasses.
 		#define BYTES_PER_SAMPLE 4
 
 		AudioDriverInfo DirectSound::_info = { "DirectSound Output" };

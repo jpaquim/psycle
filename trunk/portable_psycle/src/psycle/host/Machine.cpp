@@ -463,7 +463,7 @@ namespace psycle
 				}
 				break;
 			default:
-				::MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
+				if (type != MACH_DUMMY ) ::MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
 				pMachine = new Dummy(index);
 				break;
 			}

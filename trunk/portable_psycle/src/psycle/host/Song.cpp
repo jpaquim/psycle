@@ -321,8 +321,8 @@ namespace psycle
 			currentOctave=4;
 			// General properties
 			SetBPM(125, 4, 44100);
-			LineCounter=0;
-			LineChanged=false;
+//			LineCounter=0;
+//			LineChanged=false;
 			//::MessageBox(0, "Machines", 0, 0);
 			// Clean up allocated machines.
 			DestroyAllMachines();
@@ -982,13 +982,13 @@ namespace psycle
 				if(version > CURRENT_FILE_VERSION)
 				{
 					// there is an error, this file is newer than this build of psycle
-					::MessageBox(0,"File is from a newer version of psycle! You should get a new one immediately!", 0, 0);
+					::MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", 0, 0);
 				}
-				pFile->Skip(size - sizeof chunkcount);
+				pFile->Skip(size - sizeof chunkcount); // This ensures that any extra data is skipped.
 				/*
 				else
 				{
-					// there is currently no data in this segment
+					// This is left here if someday, extra data is added to the file version chunk.
 				}
 				*/
 				DestroyAllMachines();
@@ -999,7 +999,7 @@ namespace psycle
 				{
 					#if !defined _WINAMP_PLUGIN_
 						Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
-						::Sleep(1); ///< ???
+						::Sleep(1); ///< Allow screen refresh.
 					#endif
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
@@ -1496,8 +1496,8 @@ namespace psycle
 				// VST DLLs
 				//
 
-				VSTLoader vstL[MAX_PLUGINS]; 
-				for (i=0; i<MAX_PLUGINS; i++)
+				VSTLoader vstL[OLD_MAX_PLUGINS]; 
+				for (i=0; i<OLD_MAX_PLUGINS; i++)
 				{
 					pFile->Read(&vstL[i].valid,sizeof(bool));
 					if( vstL[i].valid )
@@ -1912,7 +1912,7 @@ namespace psycle
 						}
 					}
 				}
-				for (i=0; i<MAX_PLUGINS; i++) // Clean "pars" array.
+				for (i=0; i<OLD_MAX_PLUGINS; i++) // Clean "pars" array.
 				{
 					if( vstL[i].valid )
 					{
@@ -2329,28 +2329,29 @@ namespace psycle
 			===================
 			id = "SEQD"; 
 			*/
-
-			char* pSequenceName = "seq0\0";
-
-			pFile->Write("SEQD",4);
-			version = CURRENT_FILE_VERSION_SEQD;
-			size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
-
 			index = 0; // index
-			pFile->Write(&index,sizeof(index));
-			temp = playLength;
-			pFile->Write(&temp,sizeof(temp));
-
-			pFile->Write(pSequenceName,strlen(pSequenceName)+1);
-
-			for (int i = 0; i < playLength; i++)
+			for (index=0;index<MAX_SEQUENCES;index++)
 			{
-				temp = playOrder[i];
-				pFile->Write(&temp,sizeof(temp));
-			}
+				char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
 
+				pFile->Write("SEQD",4);
+				version = CURRENT_FILE_VERSION_SEQD;
+				size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
+				pFile->Write(&version,sizeof(version));
+				pFile->Write(&size,sizeof(size));
+				
+				pFile->Write(&index,sizeof(index)); // Sequence Track number
+				temp = playLength;
+				pFile->Write(&temp,sizeof(temp)); // Sequence length
+
+				pFile->Write(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
+
+				for (int i = 0; i < playLength; i++)
+				{
+					temp = playOrder[i];
+					pFile->Write(&temp,sizeof(temp));	// Sequence data.
+				}
+			}
 			if ( !autosave ) 
 			{
 				Progress.m_Progress.StepIt();

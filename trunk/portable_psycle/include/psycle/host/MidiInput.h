@@ -10,8 +10,8 @@ namespace psycle
 {
 	namespace host
 	{
-		/// make sure this never gets changed in WaveOut/DSound!
-		#define BYTES_PER_SAMPLE 4				
+		/// \todo Create a GetBytesPerSample() function for class AudioDriver, and derive in the subclasses.
+		#define BYTES_PER_SAMPLE 4
 
 		#define	MAX_MIDI_CHANNELS	16
 		#define	MAX_CONTROLLERS		127

@@ -28,9 +28,12 @@ namespace psycle
 
 		enum ExtRiffFileMode
 		{
-			RFM_UNKNOWN, ///< undefined type (can use to mean "N/A" or "not open")
-			RFM_WRITE, ///< open for write
-			RFM_READ ///< open for read
+			///< undefined type (can use to mean "N/A" or "not open")
+			RFM_UNKNOWN, 
+			///< open for write
+			RFM_WRITE, 
+			///< open for read
+			RFM_READ 
 		};
 
 		class ExtRiffChunkHeader

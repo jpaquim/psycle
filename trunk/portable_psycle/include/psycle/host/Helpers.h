@@ -33,9 +33,9 @@ namespace psycle
 				else	
 					return iByte*0.390625f;
 			}
-			/// why is that public?
+			/// \todo why is that public?
 			static float fMap_255_1[257];
-			/// why is that public?
+			/// \todo why is that public?
 			static float fMap_255_100[257];
 		};
 

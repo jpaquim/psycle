@@ -620,7 +620,7 @@ namespace psycle
 					}
 					std::sprintf
 						(
-							dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)\0",
+							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
 							thispar,
 							name,
 							min_v,

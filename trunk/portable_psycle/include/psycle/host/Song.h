@@ -21,7 +21,7 @@ namespace psycle
 			std::string fileName;
 			#if defined _WINAMP_PLUGIN_
 				/// The size of the file this song was loaded from.
-				/// Why is it stored?
+				/// Why is it stored? [JAZ] -> it's an information to show in the winamp plugin.
 				long filesize;
 			#else
 				/// The index of the machine which plays in solo.
@@ -59,40 +59,35 @@ namespace psycle
 			/// the initial ticks per beat (TPB) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int _ticksPerBeat;
-			/// samples per tick.
+			/// samples per tick. (Number of samples that are produced for each line of pattern)
 			/// This is computed from the BeatsPerMin, _ticksPerBeat, and SamplesPerSeconds()
 			int SamplesPerTick;
-			/// ???
-			int LineCounter;
-			/// ???
-			bool LineChanged;
-			/// This is a GUI thing... should not be here.
+			/// \todo Unused. Serves any function?
+			//int LineCounter;
+			/// \todo Unused. Serves any function?
+			//bool LineChanged;
+			/// \todo This is a GUI thing... should not be here.
 			char currentOctave;
 			// The volume of the preview wave in the wave load dialog.
-			/// This is a GUI thing... should not be here.
+			/// \todo This is a GUI thing... should not be here.
 			float preview_vol; 
-			/// Pattern data
+			/// Array of Pattern data.
 			unsigned char * ppPatternData[MAX_PATTERNS];
-			/// ???
+			/// Length, in patterns, of the sequence.
 			int playLength;
-			/// ???
+			/// Sequence of patterns.
 			unsigned char playOrder[MAX_SONG_POSITIONS];
 			#if !defined _WINAMP_PLUGIN_
-				/// ???
+				/// Selection of patterns (for the "playBlock()" play mode)
 				bool playOrderSel[MAX_SONG_POSITIONS];
 			#endif
-			/// ??? number of lines in each pattern?
+			/// number of lines of each pattern
 			int patternLines[MAX_PATTERNS];
-			/// ???
+			/// Pattern name 
 			char patternName[MAX_PATTERNS][32];
-			/// The number of tracks inr each pattern of this song.
+			/// The number of tracks in each pattern of this song.
 			int SONGTRACKS;
 			/// ???
-			int midiSelected;
-			/// ???
-			int auxcolSelected;
-			/// ???
-			int _trackArmedCount;
 			///\name instrument
 			///\{
 			///
@@ -100,20 +95,31 @@ namespace psycle
 			///
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
 			///\}
+			/// The index of the selected waveform in the wavetable.
+			/// \todo This is a gui thing... should not be here.
+			int waveSelected;
+			/// The index of the selected MIDI program for note entering
+			/// \todo This is a gui thing... should not be here.
+			int midiSelected;
+			/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
+			/// \todo This is a gui thing... should not be here.
+			int auxcolSelected;
 			/// Wether each of the tracks is muted.
 			bool _trackMuted[MAX_TRACKS];
-			/// ???
+			/// The number of tracks Armed (enabled for record)
+			/// \todo should this be here? (used exclusively in childview)
+			int _trackArmedCount;
+			/// Wether each of the tracks is armed (selected for recording data in)
 			bool _trackArmed[MAX_TRACKS];
-			/// The index of the selected waveform in the wavetable.
-			/// This is a gui thing... should not be here.
-			int waveSelected;
 			///\name machines
 			///\{
-			/// ???
+			/// Sort of semaphore to not allow doing something with machines when they are changing (deleting,creating, etc..)
+			/// \todo change it by a real semaphore?
 			bool _machineLock;
 			/// the array of machines.
 			Machine* _pMachine[MAX_MACHINES];
-			/// ???
+			/// Current selected machine number in the GUI
+			/// \todo This is a gui thing... should not be here.
 			int seqBus;
 			#if !defined _WINAMP_PLUGIN_
 				///\name wavetable
@@ -126,11 +132,11 @@ namespace psycle
 				int IffAlloc(int instrument,int layer,const char * str);
 				///\}
 			#endif
-			/// ???
+			/// Initializes the song to an empty one.
 			void New();
-			/// resets this song to an empty one.
+			/// Resets some variables to their default values (used inside New(); )
 			void Reset();
-			/// the first free slot for a new machine.
+			/// Gets the first free slot in the pMachine[] Array
 			int GetFreeMachine();
 			/// creates a new machine in this song.
 			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index);
@@ -143,13 +149,13 @@ namespace psycle
 			#if !defined _WINAMP_PLUGIN_
 				/// creates a new connection between two machines.
 				bool InsertConnection(int src,int dst,float value = 1.0f);
-				/// ???
+				/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 				int GetFreeBus();
-				/// ???
+				/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
 				int GetFreeFxBus();
-				/// ???
+				/// Returns the Bus index out of a pMachine index.
 				int FindBusFromIndex(int smac);
-				/// ???
+				/// Returns the first unused pattern in the pPatternData[] Array.
 				int GetBlankPatternUnused(int rval = 0);
 				/// creates a new pattern.
 				bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
@@ -160,13 +166,14 @@ namespace psycle
 			#endif
 			/// deletes all the patterns of this song.
 			void DeleteAllPatterns();
-			/// this actually just resets to a blank instrument.
+			/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses.
 			void DeleteInstrument(int i);
-			/// this actually just resets to a blank instrument.
+			/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses. (all instruments)
 			void DeleteInstruments();
-			// seeks and destroys allocated instruments.
+			// Removes the sample/layer "layer" of the instrument "instrument"
 			void DeleteLayer(int instrument, int layer);
 			/// destroy all instruments in this song.
+			/// \todo ZapObject ??? What does this function really do?
 			void DestroyAllInstruments();
 			/// sets a new BPM, TPB, and sample per seconds.
 			void SetBPM(int bpm, int tpb, int srate);
@@ -176,30 +183,32 @@ namespace psycle
 			#if !defined _WINAMP_PLUGIN_
 				/// saves this song to a file.
 				bool Save(RiffFile* pFile,bool autosave=false);
-				/// ???
+				/// Used to detect if an especific pattern index contains any data.
 				bool IsPatternUsed(int i);
 				///\name previews waving
 				///\{
-				/// ???
+				/// Function Work of the preview Wav.
 				void PW_Work(float *psamplesL, float *pSamplesR, int numSamples);
-				/// ???
+				/// Start the playback of the preview wav
 				void PW_Play();
-				/// ???
+				/// Current playback position, in samples
 				int PW_Phase;
-				/// ???
+				/// Stage. 0 = Stopped. 1 = Playing.
 				int PW_Stage;
-				/// ???
+				/// Stores the length of the preview wav.
 				int PW_Length;
 				///\}
 			#endif
-			/// either returns a requested pattern or creates one
-			/// if none exists and returns that (as an unsigned char pointer?)
+			/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
+			/// This function now is the same as doing &pPatternData[ps]
 			inline unsigned char * _ppattern(int ps);
-			/// ???
+			/// Returns the start offset of the requested track of pattern ps in the
+			/// pPatternData Array and creates one if none exists.
 			inline unsigned char * _ptrack(int ps, int track);
-			/// ???
+			/// Returns the start offset of the requested line of the track of pattern ps in
+			/// the pPatternData Array and creates one if none exists.
 			inline unsigned char * _ptrackline(int ps, int track, int line);
-			/// ???
+			/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
 			unsigned char * CreateNewPattern(int ps);
 			/// removes a pattern from this song.
 			void RemovePattern(int ps);
