@@ -2189,7 +2189,7 @@ BEGIN
     BUTTON      ID_EDIT_UNDO
     BUTTON      ID_EDIT_REDO
     SEPARATOR
-    BUTTON      ID_BAR_REC
+    BUTTON      ID_BARREC
     BUTTON      ID_BARPLAY
     BUTTON      ID_BUTTONPLAYSEQBLOCK
     BUTTON      ID_BARSTOP
@@ -2337,6 +2337,7 @@ BEGIN
     ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
     ID_BARSTOP              "Stop song\nStop"
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
+    ID_BARREC               "Record song\nRecord"
 END
 
 STRINGTABLE DISCARDABLE 
