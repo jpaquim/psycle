@@ -171,15 +171,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	// using global intermediate variables, but,
 	// anyway, a few calcs doesnt take too CPU.
 
-	float const cf=(float)Vals[4]*0.0000453514739229024943310657596371882f;
-	float const dry_amount	=(float)Vals[5]*0.00390625f;
-	float const wet_amount	=(float)Vals[6]*0.00390625f;
+	//float const cf=(float)Vals[4]*0.0000453514739229024943310657596371882f;
+	//float const dry_amount	=(float)Vals[5]*0.00390625f;
+	//float const wet_amount	=(float)Vals[6]*0.00390625f;
 	
-	float l_revresult=0;
-	float r_revresult=0;
+	//float l_revresult=0;
+	//float r_revresult=0;
 
-	float g=(float)Vals[3]*0.0009765f;
-	int na=Vals[7];
+	//float g=(float)Vals[3]*0.0009765f;
+	//int na=Vals[7];
 	
 	reverb.processreplace(psamplesleft,psamplesright,psamplesleft,psamplesright,numsamples,1);
 }

@@ -1,5 +1,5 @@
 #include <project.h>
-#include <psycle/plugin/yezar_freverb/LowPass.h>
+#include <psycle/plugin/yezar_freeverb/LowPass.h>
 
 // Lowpass.cpp: implementation of the CLowpass class.
 //

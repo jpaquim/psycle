@@ -1,10 +1,11 @@
+#include <project.h>
+#include <psycle/plugin/yezar_freeverb/revmodel.hpp>
+
 // Reverb model implementation
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#include "revmodel.hpp"
 
 revmodel::revmodel()
 {
@@ -64,7 +65,7 @@ void revmodel::mute()
 		combL[i].mute();
 		combR[i].mute();
 	}
-	for (i=0;i<numallpasses;i++)
+	for (int i=0;i<numallpasses;i++)
 	{
 		allpassL[i].mute();
 		allpassR[i].mute();
@@ -88,7 +89,7 @@ void revmodel::processreplace(float *inputL, float *inputR, float *outputL, floa
 		}
 
 		// Feed through allpasses in series
-		for(i=0; i<numallpasses; i++)
+		for(int i=0; i<numallpasses; i++)
 		{
 			outL = allpassL[i].process(outL);
 			outR = allpassR[i].process(outR);
@@ -123,7 +124,7 @@ void revmodel::processmix(float *inputL, float *inputR, float *outputL, float *o
 		}
 
 		// Feed through allpasses in series
-		for(i=0; i<numallpasses; i++)
+		for(int i=0; i<numallpasses; i++)
 		{
 			outL = allpassL[i].process(outL);
 			outR = allpassR[i].process(outR);
@@ -248,5 +249,3 @@ float revmodel::getmode()
 	else
 		return 0;
 }
-
-//ends
