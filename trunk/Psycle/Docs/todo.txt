@@ -9,6 +9,12 @@
 	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
 	exchange, and don't know if anything more... maybe some information (wires used... don't know)
 + <[JAZ]> Internals still miss mouse tweak, right?
++ <[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. (because machine view
+	does not track changes yet)
+* <dilvie> is the "cannot write to file" issue on the todo list anywhere?  (trying to autosave in a directory 
+	that doesn't exist or no write access..)
+<bohan`> pooplog, do you think it would be hard to make the version date being displayed dynamically in the 
+	about dialog instead of using a fixed resource ? with __DATE__ __TIME__ preprocessor keywords
 
 * Machines
 ------------

@@ -1383,6 +1383,7 @@ void CChildView::BlockGenChange(int x)
 	{
 		const int displace=_pSong->playOrder[editPosition]*MULTIPLY2;
 		unsigned char *toffset=_pSong->pPatternData+displace;
+
 		AddUndo(_ps(),blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 		for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
@@ -1397,7 +1398,7 @@ void CChildView::BlockGenChange(int x)
 				{
 					gen=x;
 					if(gen<0)gen=0;
-					if(gen>63)gen=63;
+					if(gen>=MAX_MACHINES)gen=MAX_MACHINES-1;
 					toffset[displace2]=gen;
 				}
 			}
