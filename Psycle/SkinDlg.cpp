@@ -168,16 +168,16 @@ void CSkinDlg::On4beat()
 
 void CSkinDlg::OnResetcolours() 
 {
-	_machineViewColor =	0x0077AA99;
-	_patternViewColor = 0x00AADDCC;
-	_4beatColor = 0x00CCCCCC;
-	_beatColor = 0x00BACBCA;
-	_rowColor = 0x00A9CAC8;
+	_machineViewColor =	0x00bfa880;
+	_patternViewColor = 0x00decaab;
+	_4beatColor = 0xdec9ab;
+	_beatColor = 0x00ebddcb;
+	_rowColor = 0x00f3ebe0;
 	_fontColor = 0x00000000;
 
-	_vubColor = 0x0000FF00;
+	_vubColor = 0x00d6c6a9;
 	_vugColor = 0x00000000;
-	_vucColor = 0x000000FF;
+	_vucColor = 0x00d6c6a9;
 }
 
 void CSkinDlg::OnDoublebuffer() 

@@ -10,7 +10,7 @@
 #include "resource.h"
 
 class Song;
-
+class CMainFrame;
 /////////////////////////////////////////////////////////////////////////////
 // CInstrumentEditor dialog
 
@@ -26,10 +26,13 @@ public:
 	void UpdateCombo();
 	Song* _pSong;
 	bool cando;
+	CMainFrame* pParentMain;
+
 
 // Dialog Data
 	//{{AFX_DATA(CInstrumentEditor)
 	enum { IDD = IDD_INSTRUMENT };
+	CStatic	m_panlabel;
 	CStatic	m_finelabel;
 	CSliderCtrl	m_finetune;
 	CEdit	m_loopedit;
@@ -38,9 +41,7 @@ public:
 	CSliderCtrl	m_panslider;
 	CButton	m_rpan_check;
 	CButton	m_rcut_check;
-	CStatic	m_nnaval;
 	CComboBox	m_nna_combo;
-	CButton	m_pabu;
 	CEdit	m_instname;
 	CStatic	m_volabel;
 	CSliderCtrl	m_volumebar;
@@ -48,11 +49,7 @@ public:
 	CStatic	m_loopstart;
 	CStatic	m_loopend;
 	CStatic	m_looptype;
-	CStatic	m_chanlabel;
-	CStatic	m_status;
 	CStatic	m_instlabel;
-	CEdit	m_wavename;
-	CStatic	m_layer;
 	//}}AFX_DATA
 
 
@@ -68,28 +65,11 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CInstrumentEditor)
-	afx_msg void OnLayer1();
-	afx_msg void OnLayer2();
-	afx_msg void OnLayer3();
-	afx_msg void OnLayer4();
-	afx_msg void OnLayer5();
-	afx_msg void OnLayer6();
-	afx_msg void OnLayer7();
-	afx_msg void OnLayer8();
-	afx_msg void OnLayer9();
-	afx_msg void OnLayer10();
-	afx_msg void OnLayer11();
-	afx_msg void OnLayer12();
-	afx_msg void OnLayer13();
-	afx_msg void OnLayer14();
-	afx_msg void OnLayer15();
-	afx_msg void OnLayer16();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnLoopoff();
 	afx_msg void OnLoopforward();
 	afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangeInstname();
-	afx_msg void OnChangeWavename();
 	afx_msg void OnSelchangeNnaCombo();
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();

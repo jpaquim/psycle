@@ -7,10 +7,12 @@
 
 #include "WaveEdChildView.h"
 
+class CMainFrame;
+
 class CWaveEdFrame : public CFrameWnd
 {
 public:
-	CWaveEdFrame(Song*);
+	CWaveEdFrame(Song*,CMainFrame*);
 	virtual ~CWaveEdFrame();
 
 	void Notify(void);

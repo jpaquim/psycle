@@ -75,7 +75,7 @@ CChildView::CChildView()
 	viewMode=VMMachine;
 	updateMode=0;
 	updatePar=0;
-	multiPattern=true; // Long way till it can be finished!
+	multiPattern=false; // Long way till it can be finished!
 
 	patStep=1;
 	editPosition=0;
@@ -269,6 +269,8 @@ void CChildView::OnTimer( UINT nIDEvent )
 {
 	if (nIDEvent == 31)
 	{
+		CSingleLock lock(&_pSong->door,TRUE);
+
 		pParentMain->UpdateVumeters(
 			((Master*)Global::_pSong->_pMachines[0])->_LMAX,
 			((Master*)Global::_pSong->_pMachines[0])->_RMAX,
@@ -299,10 +301,13 @@ void CChildView::OnTimer( UINT nIDEvent )
 			{
 				Global::pPlayer->_lineChanged = false;
 				char buf[80];
-				sprintf(buf,"[Playing] Pos: %.2X   Pat: %.2X   Lin: %d",
+				sprintf(buf,"[Playing] Pos: %.2X   Pat: %.2X   Lin: %.2d ,   [Elapsed Time]: %.2d : %.2d : %.2f",
 					Global::pPlayer->_playPosition,
 					Global::pPlayer->_playPattern,
-					Global::pPlayer->_lineCounter);
+					Global::pPlayer->_lineCounter,
+					Global::pPlayer->_playTimem / 60,
+					Global::pPlayer->_playTimem % 60,
+					Global::pPlayer->_playTime);
 				
 				pParentMain->StatusBarText(buf);
 				pParentMain->SetAppSongBpm(0);
@@ -491,6 +496,8 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 //	CH = rClient.Height();
 	CW = cx;
 	CH = cy;
+	_pSong->viewSize.x=cx-148;
+	_pSong->viewSize.y=cy-48;
 
 	newplaypos.right=CW;
 	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
@@ -758,6 +765,8 @@ void CChildView::OnButtonplayseqblock()
 	int i=0;
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
 	Global::pPlayer->_playPosition = i;
+	Global::pPlayer->_playTime = 0;
+	Global::pPlayer->_playTimem = 0;
 	Global::pPlayer->_playPattern = Global::_pSong->playOrder[i];
 	Global::pPlayer->_playBlock=true;
 	Repaint(DMPatternChange);

@@ -1449,15 +1449,6 @@ void Flanger::Work(
 //			const float acc_timeL = _time + (float)(sin(_fLfoDegree)*_fLfoAmp);	// 0 <= _fLfoDegree <= TWOPI
 //			const float acc_timeR = _time + (float)(sin(_fLfoDegree+_fLfoPhase)*_fLfoAmp); // 0 <= _fLfoPhase <= PI
 
-			if ( y0L > 1 )
-			{
-				int a = 0;
-			}
-			if ( y0L < -1 )
-			{
-				int a = 0;
-			}
-			
 			if (++_counter >= 2048)	{ _counter = 0; }
 			
 			int _delayedCounterL = _counter-Dsp::F2I(acc_timeL);
@@ -1466,9 +1457,11 @@ void Flanger::Work(
 			int _delayedCounterR = _counter-Dsp::F2I(acc_timeR);
 			if (_delayedCounterR < 0) _delayedCounterR += 2048;
 
-			float const y_l = _pBufferL[_delayedCounterL];
+			float y_l = _pBufferL[_delayedCounterL];
+			if (IS_DENORMAL(y_l) ) y_l=0.0f;
 
-			float const y_r = _pBufferR[_delayedCounterR];
+			float y_r = _pBufferR[_delayedCounterR];
+			if (IS_DENORMAL(y_r) ) y_r=0.0f;
 			
 			inputL = *++pSamplesL;
 			inputR = *++pSamplesR;

@@ -107,6 +107,8 @@ public:  // control bar embedded members
 	CBitmap bmoremore;
 	CBitmap bplus;
 	CBitmap bminus;
+	CBitmap bplusplus;
+	CBitmap bminusminus;
 	CBitmap blittleleft;
 	CBitmap blittleright;
 
@@ -151,7 +153,6 @@ protected:
 	afx_msg void OnDecshort();
 	afx_msg void OnSeqins();
 	afx_msg void OnSeqdel();
-	afx_msg void OnSeqslen();
 	afx_msg void OnSeqspr();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg void OnDecTPB();
@@ -170,6 +171,8 @@ protected:
 	afx_msg void OnCursordown();
 	afx_msg void OnCloseupAuxselect();
 	afx_msg void OnSelchangeAuxselect();
+	afx_msg void OnDeclong();
+	afx_msg void OnInclong();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

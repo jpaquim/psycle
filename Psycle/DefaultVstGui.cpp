@@ -11,8 +11,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define NUMTICKS 1000
-
 /////////////////////////////////////////////////////////////////////////////
 // CDefaultVstGui
 
@@ -143,7 +141,7 @@ void CDefaultVstGui::UpdateOne()
 	//update scroll bar with initial value
 	float value = _pMachine->GetParameter(nPar);
 	value *= NUMTICKS;
-	m_slider.SetPos(int(NUMTICKS -value));
+	m_slider.SetPos(NUMTICKS -((int)value));
 }
 
 void CDefaultVstGui::OnSelchangeList1() 
@@ -159,7 +157,6 @@ void CDefaultVstGui::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	float value = ((float)(NUMTICKS - m_slider.GetPos()))/NUMTICKS;
 	_pMachine->SetParameter(nPar, value);
 	UpdateText();
-	ASSERT(mainView != NULL);
 
 	*pResult = 0;
 }

@@ -391,6 +391,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 		else
 			sprintf(buffer," Pattern Editor [%.2X: %s]   Octave: %d   EDIT MODE: Off",editPattern,_pSong->patternName[editPattern],_pSong->currentOctave);
 
+		devc->SetTextColor(Global::pConfig->pvc_font);
 		TXT(devc,buffer,0,0,CW,18);
 	}
 
@@ -410,7 +411,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 	}
 	/////////////////////////////////////////////////////////////
 	// Update Mute/Solo Indicators. This is small duplication of code, but I think It's better
-	if ( updatePar & DRAW_TRHEADER ) // to duplicate it to avoid complex solutions.
+	if ( updatePar & DRAW_TRHEADER ) // to duplicate it avoiding complex solutions.
 	{
 		CDC memDC;
 		CBitmap *oldbmp;
@@ -425,15 +426,15 @@ void CChildView::DrawPatEditor(CDC *devc)
 			const int track0x = i%10;
 
 			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			devc->BitBlt(xOffset+1, 19, 109, 16, &memDC, 148, 65, SRCCOPY);
+			devc->BitBlt(xOffset+1, 19, 110, 16, &memDC, 148, 65, SRCCOPY);
 			devc->BitBlt(xOffset+35, 21, 7, 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
 			devc->BitBlt(xOffset+42, 21, 7, 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 			if (Global::_pSong->_trackMuted[i])
-				devc->BitBlt(xOffset+71, 23, 9, 9, &memDC, 257, 48, SRCCOPY);
+				devc->BitBlt(xOffset+72, 24, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 			if (Global::_pSong->_trackSoloed == i )
-				devc->BitBlt(xOffset+96, 23, 9, 9, &memDC, 266, 48, SRCCOPY);
+				devc->BitBlt(xOffset+97, 24, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 			xOffset += ROWWIDTH;
 		}
@@ -496,15 +497,15 @@ void CChildView::DrawPatEditor(CDC *devc)
 				const int track0x = i%10;
 
 				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-				devc->BitBlt(xOffset+1, 19, 109, 16, &memDC, 148, 65, SRCCOPY);
+				devc->BitBlt(xOffset+1, 19, 110, 16, &memDC, 148, 65, SRCCOPY);
 				devc->BitBlt(xOffset+35, 21, 7, 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
 				devc->BitBlt(xOffset+42, 21, 7, 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 				if (Global::_pSong->_trackMuted[i])
-					devc->BitBlt(xOffset+71, 23, 9, 9, &memDC, 257, 48, SRCCOPY);
+					devc->BitBlt(xOffset+72, 24, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 				if (Global::_pSong->_trackSoloed == i )
-					devc->BitBlt(xOffset+96, 23, 9, 9, &memDC, 266, 48, SRCCOPY);
+					devc->BitBlt(xOffset+97, 24, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 				xOffset += ROWWIDTH;
 			}
@@ -602,10 +603,29 @@ void CChildView::DrawSinglePatternData(CDC *devc,int tstart,int tend, int lstart
 			const int xOffset= XOFFSET+t*ROWWIDTH;
 
 			OutNote(devc,xOffset,yOffset,*patOffset);
-			OutData(devc,xOffset+28,yOffset,*++patOffset,true);
-			OutData(devc,xOffset+49,yOffset,*++patOffset,true);
-			OutData(devc,xOffset+70,yOffset,*++patOffset,false);
-			OutData(devc,xOffset+90,yOffset,*++patOffset,false);
+			if (*++patOffset == 255 )
+			{
+				OutData(devc,xOffset+28,yOffset,*patOffset,true);
+			}else OutData(devc,xOffset+28,yOffset,*patOffset,false);
+
+			if (*++patOffset == 255 )
+			{
+				OutData(devc,xOffset+49,yOffset,*patOffset,true);
+			}else OutData(devc,xOffset+49,yOffset,*patOffset,false);
+
+			if (*++patOffset == 0 && *(patOffset+1) == 0 && 
+				(*(patOffset-3) <= 120 || *(patOffset-3) == 255 ))
+			{
+				OutData(devc,xOffset+70,yOffset,*patOffset,true);
+				patOffset++;
+				OutData(devc,xOffset+90,yOffset,*patOffset,true);
+			}
+			else
+			{
+				OutData(devc,xOffset+70,yOffset,*patOffset,false);
+				patOffset++;
+				OutData(devc,xOffset+90,yOffset,*patOffset,false);
+			}
 			patOffset++;
 		}
 		linecount++;
@@ -670,10 +690,30 @@ void CChildView::DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart,
 			const int xOffset= XOFFSET+t*ROWWIDTH;
 
 			OutNote(devc,xOffset,yOffset,*patOffset);
-			OutData(devc,xOffset+28,yOffset,*++patOffset,true);
-			OutData(devc,xOffset+49,yOffset,*++patOffset,true);
-			OutData(devc,xOffset+70,yOffset,*++patOffset,false);
-			OutData(devc,xOffset+90,yOffset,*++patOffset,false);
+			if (*++patOffset == 255 )
+			{
+				OutData(devc,xOffset+28,yOffset,*patOffset,true);
+			}else OutData(devc,xOffset+28,yOffset,*patOffset,false);
+
+			if (*++patOffset == 255 )
+			{
+				OutData(devc,xOffset+49,yOffset,*patOffset,true);
+			}else OutData(devc,xOffset+49,yOffset,*patOffset,false);
+
+			if (*++patOffset == 0 && *(patOffset+1) == 0 && 
+				(*(patOffset-3) <= 120 || *(patOffset-3) == 255 ))
+			{
+				OutData(devc,xOffset+70,yOffset,*patOffset,true);
+				patOffset++;
+				OutData(devc,xOffset+90,yOffset,*patOffset,true);
+			}
+			else
+			{
+				OutData(devc,xOffset+70,yOffset,*patOffset,false);
+				patOffset++;
+				OutData(devc,xOffset+90,yOffset,*patOffset,false);
+			}
+			
 			patOffset++;
 		}
 		linecount++;

@@ -39,6 +39,8 @@ void Player::Start(int line)
 	Stop();
 	_lineChanged = true;
 	_lineCounter = line;
+	_playTime = 0;
+	_playTimem = 0;
 #if defined(_WINAMP_PLUGIN_)
 	_playPosition=0;
 #else
@@ -122,7 +124,7 @@ void Player::ExecuteLine(void)
 						if ( pEntry->_mach < MAX_BUSES ) /*Gen*/ mIndex = pSong->busMachine[pEntry->_mach];
 						else /*Fx*/ mIndex = pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
 
-						if ( pSong->_machineActive[mIndex] )
+						if ( mIndex < MAX_MACHINES && pSong->_machineActive[mIndex] )
 							pSong->_pMachines[mIndex]->SetWireVolume(mIndex,pEntry->_inst,pEntry->_parameter);
 					}
 					break;
@@ -132,7 +134,7 @@ void Player::ExecuteLine(void)
 					if ( pEntry->_mach < MAX_BUSES ) /*Gen*/ mIndex = pSong->busMachine[pEntry->_mach];
 					else /*Fx*/ mIndex = pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
 
-					if ( pSong->_machineActive[mIndex] )
+					if ( mIndex < MAX_MACHINES && pSong->_machineActive[mIndex] )
 						pSong->_pMachines[mIndex]->SetPan(pEntry->_parameter>>1);
 
 					break;
@@ -151,7 +153,7 @@ void Player::ExecuteLine(void)
 					else if ( pEntry->_note == 122 ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
 					else mIndex = pSong->busMachine[(mac&(MAX_BUSES-1))];
 					
-					if (pSong->_machineActive[mIndex])
+					if (mIndex < MAX_MACHINES && pSong->_machineActive[mIndex])
 					{
 						Machine *pMachine = pSong->_pMachines[mIndex];
 						
@@ -190,7 +192,7 @@ void Player::ExecuteLine(void)
 					if ( mac & MAX_BUSES ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
 					else mIndex = pSong->busMachine[(mac&(MAX_BUSES-1))];
 					
-					if (pSong->_machineActive[mIndex])
+					if (mIndex < MAX_MACHINES && pSong->_machineActive[mIndex])
 					{
 						Machine *pMachine = pSong->_pMachines[mIndex];
 						
@@ -204,6 +206,12 @@ void Player::ExecuteLine(void)
 		//
 		_ticksRemaining = pSong->SamplesPerTick;
 		_lineCounter++;
+		_playTime += 60 / float (bpm * tpb);
+		if (_playTime>60)
+		{
+			_playTime-=60;
+			_playTimem++;
+		}
 
 		if (_lineCounter >= pSong->patternLines[_playPattern])
 		{

@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				--------------------------------- 1.6Final -----
+				------------------------------------- 1.66 -----
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -27,9 +27,9 @@ Here some facts about Psycle:
 
 - 32 Tracks Pattern Editor (this limitation will be removed in the future)
 - Stereo Sampler unit, that supports high quality
-  stereo .wav files and .iff samples as well
+  stereo .wav files and .iff samples as well (more formats will eventually come)
 - 8 internal Plugins (Sampler & Effects)
-- 18 Native Plugins (Generators & effects)
+- 20+ Native Plugins (Generators & effects)
 - VST + VSTi Host (still limited but most plugins will work fine)
 - Internal .wav output
 - Configurable Keyboard Layout
@@ -55,7 +55,7 @@ Plans for supporting DXi are there, but it's not a primary work.
 
 PSYCLE is OpenSource. This Means: Everyone who thinks that he's the right person/alien
 for coding on PSYCLE can contact the Team of developers and ask/tell what he
-can do for Psycle. 
+can do for Psycle.
 
 Source Page is set at SourceForge site following this link:
 
@@ -92,28 +92,26 @@ There's no SDK ready, but you can download Psycle plugins' sourcecode from
 SourceForge Site (link above)
 
 A Buzz2Psycle SDK is avaiable at the site, but it is untested.
+Hint: Check M3 sources too, which are derived from a buzz plugin.
 
 Sources for a Fast sinus calculation used in the Flanger are extracted from
 
-	http://www.smartelectronix.com/musicdsp
+	http://www.musicdsp.org/
 
 
 --------------------------------------------------------------------------------------------
 3. Development:
 
-Many changes in the developement have been done recently.
+Psycle 1:
+	It is still alive. This version confirms it. Much more will come in the following
+	months, as long as the dev. team has time.
 
-We are trying to get help from other projects in which we will work in cooperation to make
-Psycle and the other project better.
+	Next major steps will be : Multipattern sequence, mutisample instrument sampler
+				   and new fileformat.
 
-Psycle 1.6 has gone FINAL now. There is the possibility for a 1.61 version sometime in summer
-to fix bugs and add some features, but our main attention now is Psycle 2, which has been
-started already.
 
-No data can be said yet as for when will this project see the light but we expect to have
-a beta (with limited functionality!) sometime in summer too.
-
-We will keep you informed.
+For up to date information, don't forget to visit the Developement forums on Psycledelics 
+site.
 
 --------------------------------------------------------------------------------------------
 4. Psycledelics' Community:

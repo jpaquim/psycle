@@ -27,6 +27,15 @@ typedef struct
 } WavHeader;
 #endif // ndef _WINAMP_PLUGIN_
 
+typedef struct
+{
+	bool		valid;
+	char		dllName[128];
+	int			numpars;
+	float*		pars;
+
+} VSTLoader;
+
 //////////////////////////////////////////////////////////////////////
 // Create machine member
 
@@ -50,7 +59,6 @@ bool Song::CreateMachine(
 	Plugin* pPlugin;
 	VSTPlugin* pVstPlugin;
 
-	int tmac = 1;
 	switch (type)
 	{
 	case MACH_MASTER:
@@ -58,7 +66,6 @@ bool Song::CreateMachine(
 		{
 			return false;
 		}
-		tmac = 0;
 		pMachine = pMaster = new Master;
 		break;
 	case MACH_SINE:
@@ -117,17 +124,7 @@ bool Song::CreateMachine(
 		return false;
 	}
 
-	while (true)
-	{
-		if (!_machineActive[tmac])
-		{
-			break;
-		}
-		if (tmac++ >= MAX_MACHINES)
-		{
-			return false;
-		}
-	}
+	int tmac =	GetFreeMachine();
 
 	_pMachines[tmac] = pMachine;
 	pMachine->Init();
@@ -325,6 +322,8 @@ void Song::Reset(void)
 
 void Song::New(void)
 {
+	CSingleLock lock(&door,TRUE);
+
 	
 	for (int c=0;c<MAX_BUSES;c++)
 	{
@@ -359,12 +358,13 @@ void Song::New(void)
 	DeleteAllPatterns();
 	
 	// Clear sequence
-	
+
+	Reset();
+
 	waveSelected = 0;
 	instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
-	Reset();
 	_saved=false;
 #if defined(_WINAMP_PLUGIN_)
 	strcpy(fileName,"Untitled.psy");
@@ -376,19 +376,21 @@ void Song::New(void)
 
 int Song::GetFreeMachine(void)
 {
-	int c = -1;
-	bool doloop = true;
-	
-	do
+	int tmac = 0;
+	while (true)
 	{
-		if(!_machineActive[++c])
+		if (!_machineActive[tmac])
 		{
-			doloop = false;
+			return tmac;
+		}
+		if (tmac++ >= MAX_MACHINES)
+		{
+			return -1;
 		}
 	}
-	while (doloop);
-	return c;
 }
+
+
 #if !defined(_WINAMP_PLUGIN_)
 bool Song::InsertConnection(int src,int dst)
 {
@@ -1161,87 +1163,28 @@ bool Song::Load(
 	// VST DLLs
 	//
 
-	VSTPlugin* pDlls[MAX_PLUGINS];
+	VSTLoader vstL[MAX_PLUGINS];
 	for (i=0; i<MAX_PLUGINS; i++)
 	{
-		bool b;
-		pDlls[i] = NULL;
-		pFile->Read(&b, sizeof(b));
-		if (b)
+		pFile->Read(&vstL[i].valid,sizeof(bool));
+		if( vstL[i].valid )
 		{
-			CString sPath;
-			char sPath2[_MAX_PATH];
-			char dllName[128];
-			pFile->Read(dllName,sizeof(dllName));
-			_strlwr(dllName);
+			pFile->Read(vstL[i].dllName,sizeof(vstL[i].dllName));
+			_strlwr(vstL[i].dllName);
+			pFile->Read(&(vstL[i].numpars), sizeof(int));
+			vstL[i].pars = new float[vstL[i].numpars];
 
-#if defined(_WINAMP_PLUGIN_)
-			pFile->Read(&num, sizeof(num));
-			sPath = Global::pConfig->GetVstDir();
-			if ( FindFileinDir(dllName,sPath) )
+			for (int c=0; c<vstL[i].numpars; c++)
 			{
-				strcpy(sPath2,sPath);
-				pDlls[i] = new VSTPlugin;
-				if (pDlls[i]->Instance(sPath2) != VSTINSTANCE_NO_ERROR)
-				{
-					delete pDlls[i];
-					pDlls[i]=NULL;
-					pFile->Skip(sizeof(float)*num);
-				}
-				else for (int c=0; c<num; c++)
-				{
-					float f;
-					pFile->Read(&f, sizeof(f));
-					pDlls[i]->SetParameter(c, f);
-				}
+				pFile->Read(&(vstL[i].pars[c]), sizeof(float));
 			}
-			else pFile->Skip(sizeof(float)*num);
-#else
-			if ( CNewMachine::dllNames.Lookup(dllName,sPath) ) 
-			{
-				pDlls[i] = new VSTPlugin;
-				strcpy(sPath2,sPath);
-				if (pDlls[i]->Instance(sPath2) != VSTINSTANCE_NO_ERROR)
-				{
-					delete pDlls[i];
-					pDlls[i]=NULL;
-					char sError[128];
-					sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
-					::MessageBox(NULL,sError, "Loading Error", MB_OK);
-					b = false;
-
-					pFile->Read(&num, sizeof(num));
-					pFile->Skip(sizeof(float)*num);
-				}
-				else
-				{
-					pFile->Read(&num, sizeof(num));
-					for (int c=0; c<num; c++)
-					{
-						float f;
-						pFile->Read(&f, sizeof(f));
-						pDlls[i]->SetParameter(c, f);
-					}
-
-				}
-			}
-			else
-			{
-				char sError[128];
-		sprintf(sError,"Missing VST plug-in \"%s\"",dllName);
-				MessageBox(NULL,sError, "Loading Error", MB_OK);
-				b = false;
-
-				pFile->Read(&num, sizeof(num));
-				pFile->Skip(sizeof(float)*num);
-			}
-#endif // 	_WINAMP_PLUGIN_
 		}
 	}
 
-	_machineLock = true;
 	// Machines
 	//
+	_machineLock = true;
+
 	pFile->Read(&_machineActive[0], sizeof(_machineActive));
 	for (i=0; i<MAX_MACHINES; i++)
 	{
@@ -1261,6 +1204,11 @@ bool Song::Load(
 		{
 			pFile->Read(&x, sizeof(x));
 			pFile->Read(&y, sizeof(y));
+#if !defined(_WINAMP_PLUGIN_)
+			if ( x > viewSize.x ) x = viewSize.x;
+			if ( y > viewSize.y ) y = viewSize.y;
+#endif // _WINAMP_PLUGIN_
+
 			pFile->Read(&type, sizeof(type));
 
 			switch (type)
@@ -1308,7 +1256,7 @@ bool Song::Load(
 			case MACH_PLUGIN:
 				{
 				pMachine = pPlugin = new Plugin;
-				// Should the "Init()" function go here? -> Needs to load the dll first.
+				// Should the "Init()" function go here? -> No. Needs to load the dll first.
 				if (!pMachine->Load(pFile))
 				{
 					Machine* pOldMachine = pMachine;
@@ -1321,43 +1269,46 @@ bool Song::Load(
 				break;
 				}
 			case MACH_VST:
-				{
-				pMachine = pVstPlugin = new VSTInstrument;
-				if ((pMachine->Load(pFile)) && (pDlls[pVstPlugin->_instance] != NULL))
-				{
-					pVstPlugin->Create(pDlls[pVstPlugin->_instance]);
-				}
-				else
-				{
-					Machine* pOldMachine = pMachine;
-					pMachine = new Dummy(*((Dummy*)pOldMachine));	// This is definitely not what
-					pOldMachine->_pSamplesL = NULL;					// should be done, but a copy
-					pOldMachine->_pSamplesR = NULL;					// of the "Machine"-class params
-					delete pOldMachine;
-					pMachine->_type = MACH_DUMMY;
-					pMachine->wasVST = true;
-				}
-				break;
-				}
 			case MACH_VSTFX:
 				{
-				pMachine = pVstPlugin = new VSTFX;
-				if ((pMachine->Load(pFile)) && (pDlls[pVstPlugin->_instance] != NULL))
+				
+				if ( type == MACH_VST ) pMachine = pVstPlugin = new VSTInstrument;
+				else if ( type == MACH_VSTFX ) pMachine = pVstPlugin = new VSTFX;
+
+				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid))
 				{
-					pVstPlugin->Create(pDlls[pVstPlugin->_instance]);
-				}
-				else
-				{
-					Machine* pOldMachine = pMachine;
-					pMachine = new Dummy(*((Dummy*)pOldMachine));
-					pOldMachine->_pSamplesL = NULL;
-					pOldMachine->_pSamplesR = NULL;
-					delete pOldMachine;
-					pMachine->_type = MACH_DUMMY;
-					pMachine->wasVST = true;
+					CString sPath;
+					char sPath2[_MAX_PATH];
+
+#if defined(_WINAMP_PLUGIN_)
+					sPath = Global::pConfig->GetVstDir();
+					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllname,sPath) )
+					{
+						strcpy(sPath2,sPath);
+						pVstPlugin->Instance(sPath2)
+					}
+#else // if !_WINAMP_PLUGIN_
+					if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
+					{
+						strcpy(sPath2,sPath);
+						if (pVstPlugin->Instance(sPath2) != VSTINSTANCE_NO_ERROR)
+						{
+							char sError[128];
+							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+						}
+					}
+					else
+					{
+						char sError[128];
+						sprintf(sError,"Missing VST plug-in \"%s\"",sPath2);
+						::MessageBox(NULL,sError, "Loading Error", MB_OK);
+
+					}
 				}
 				break;
 				}
+#endif // _WINAMP_PLUGIN_
 			case MACH_DUMMY:
 				pMachine = new Dummy;
 				pMachine->Init();
@@ -1398,29 +1349,43 @@ bool Song::Load(
 					{
 						if ((pOrigMachine->_connection[d]) && (pOrigMachine->_outputMachines[d] == i)) // its output connections till we find one that outputs to the machine we were updating,
 						{																			// And update the volume. These extended if's (for VST) are explained some lines below.
-							if ( pOrigMachine->_type == MACH_VST || pOrigMachine->_type == MACH_VSTFX || pOrigMachine->wasVST )
+							if ( pOrigMachine->_type == MACH_VST || pOrigMachine->_type == MACH_VSTFX )
 							{
-								if (_pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX || _pMachines[i]->wasVST  ) // If both are VST's, just directly convert.
+								if (_pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX ) // If both are VST's, just directly convert.
 								{
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
 								}
-								else
+								else 
 								{
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 32768.0f; // Else if VST outputs to native, multiply by 32768.
 									
-									if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a BIG Bugfix...
+									if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a big Bugfix
 										_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-								}
 									
+								}
 							}
-							else if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX || _pMachines[i]->wasVST ) // else If origin is native, and destination vst, divide by 32768.
+							else if ( _pMachines[i]->_type == MACH_VST || _pMachines[i]->_type == MACH_VSTFX ) // else If origin is native, and destination vst, divide by 32768.
 							{
 								_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
 
-								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a BIG Bugfix...
+								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a big Bugfix
 									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
 							}
-							else _pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d]; // else if both are native, directly convert too.
+							else
+							{
+								if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] > 2) // This is a big Bugfix
+								{
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 0.000030517578125f;
+								}
+								else if ( volMatrix[_pMachines[i]->_inputMachines[c]][d] < 0.00004) // This is a big Bugfix
+								{
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d] * 32768.0f;
+								}
+								else
+								{
+									_pMachines[i]->_inputConVol[c] = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+								}
+							}
 
 							break;
 						}
@@ -1431,12 +1396,12 @@ bool Song::Load(
 	}
 
 	// The reason of the conversions in the case of MACH_VST is because VST's output wave data
-	// in the range -1.0 to +1.0, while native and internal, output at -32768.0 to +32768.0
+	// in the range -1.0 to +1.0, while native and internal output at -32768.0 to +32768.0
 	// Initially (when the format was made), Psycle did convert this in the "Work" function,
 	// but since it already needs to multiply the output by inputConVol, I decided to remove
 	// that extra conversion and use directly the volume to do so.
 	// The "This is a BIG bugfix" stands for me forgetting to do the same at saving...
-	// The saving bug was not noticed because the loading function was not working correctly.
+	// The saving bug was not noticed because the loading function was not working correctly either.
 
 	_machineLock = false;
 
@@ -1447,13 +1412,6 @@ bool Song::Load(
 	for (i=0; i<MAX_INSTRUMENTS; i++)
 	{
 		pFile->Read(&_instruments[i]._lines, sizeof(_instruments[0]._lines));
-	}
-	for (i=0; i<MAX_MACHINES; i++)
-	{
-		if (pDlls[i] != NULL)
-		{
-			delete pDlls[i]; // We have already taken the values and the dll from this
-		}					 // temporal containers. Now we can delete them.
 	}
 
 	if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false ) // Patch 1: BusEffects (twf)
@@ -1481,26 +1439,32 @@ bool Song::Load(
 	}
 
 
-	bool chunkpresent;
-	if ( pFile->Read(&chunkpresent,sizeof(chunkpresent)) ) // Patch 2: VST's Chunk.
-	{
-		for ( i=0;i<MAX_MACHINES;i++ ) {
-			if (_machineActive[i])
-			{
-				if (( _pMachines[i]->_type == MACH_VST ) || 
-					( _pMachines[i]->_type == MACH_VSTFX) ||
-					( _pMachines[i]->wasVST ))
-				{
-					if ( _pMachines[i]->wasVST ) 
-					{
+	bool chunkpresent=false;
+	pFile->Read(&chunkpresent,sizeof(chunkpresent)); // Patch 2: VST's Chunk.
 
-						// Since we don't know if the plugin saved it or not, 
-						// we're stuck on letting the loading be corrupted in
-						// case of wrong plugin...
-						// There should be a flag, like in the VST dll loading to be correct.
+	for ( i=0;i<MAX_MACHINES;i++ ) {
+		if (_machineActive[i])
+		{
+			if ( _pMachines[i]->wasVST && chunkpresent )
+			{
+				// Since we don't know if the plugin saved it or not, 
+				// we're stuck on letting the loading crash/behave incorrectly.
+				// There should be a flag, like in the VST loading Section to be correct.
+			}
+			else if (( _pMachines[i]->_type == MACH_VST ) || 
+					( _pMachines[i]->_type == MACH_VSTFX))
+			{
+				bool chunkread=false;
+				((VSTPlugin*)_pMachines[i])->SetCurrentProgram(((VSTPlugin*)_pMachines[i])->_program);
+				if( chunkpresent )	chunkread=((VSTPlugin*)_pMachines[i])->LoadChunk(pFile);
+				if ( !chunkpresent || !chunkread )
+				{
+					const int vi = ((VSTPlugin*)_pMachines[i])->_instance;
+					const int numpars=vstL[vi].numpars;
+					for (int c=0; c<numpars; c++)
+					{
+						((VSTPlugin*)_pMachines[i])->SetParameter(c, vstL[vi].pars[c]);
 					}
-					else
-						((VSTPlugin*)_pMachines[i])->LoadChunk(pFile);
 				}
 			}
 		}
@@ -1508,6 +1472,8 @@ bool Song::Load(
 
 	return true;
 }
+
+
 #if !defined(_WINAMP_PLUGIN_)
 bool Song::Save(
 	RiffFile* pFile)

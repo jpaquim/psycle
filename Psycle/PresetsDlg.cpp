@@ -27,104 +27,128 @@ CPreset::CPreset()
 	data=NULL;
 	numPars = -1;
 	sizeData = 0;
-	strcpy(name,"");
+	memset(name,0,32);
 }
 
 CPreset::~CPreset()
 {
 	if ( params != NULL ) delete params;
+	if ( data != NULL ) delete data;
 }
 
 void CPreset::Clear()
 {
-	if ( params != NULL ) 
-	{
-		delete params;
-		params=NULL;
-	}
+	if ( params != NULL ) delete params;
+	params=NULL;
 	numPars =-1;
+
+	if ( data != NULL ) delete data;
 	data=NULL;
 	sizeData = 0;
-	strcpy(name,"");
 
+	memset(name,0,32);
 }
 
 void CPreset::Init(int num)
 {
+	if ( params != NULL ) delete params;
 	if ( num > 0 )
 	{
-		if ( params != NULL ) delete params;
 		params= new int[num];
 		numPars=num;
-		data=NULL;
-		sizeData = 0;
-		strcpy(name,"");
 	}
+	else
+	{
+		params=NULL;
+		numPars =-1;
+	}
+	if ( data != NULL ) delete data;
+	data=NULL;
+	sizeData = 0;
+
+	memset(name,0,32);
 }
 
 void CPreset::Init(int num,char* newname,int* parameters,int size, byte* newdata)
 {
+	if ( params != NULL ) delete params;
 	if ( num > 0 )
 	{
-		if ( params != NULL ) delete params;
 		params= new int[num];
 		numPars=num;
 		memcpy(params,parameters,numPars*sizeof(int));
-		strcpy(name,newname);
-		if (data) delete data;
-		if (sizeData = size)
-		{
-			data= new byte[sizeData];
-			memcpy(data,newdata,size);
-		}
-		else
-		{
-			data = NULL;
-		}
 	}
-}
+	else
+	{
+		params=NULL;
+		numPars=-1;
+	}
 
-void CPreset::Init(char* newname)
-{
-	params = NULL;
-	numPars = -1;
-	data=NULL;
-	sizeData = 0;
+	if ( data != NULL )	delete data;
+	if ( size > 0 )
+	{
+		data= new byte[size];
+		memcpy(data,newdata,size);
+		sizeData = size;
+	}
+	else
+	{
+		data=NULL;
+		sizeData=0;
+	}
 	strcpy(name,newname);
 }
 
 void CPreset::Init(int num,char* newname,float* parameters)
 {
+	if ( params != NULL ) delete params;
 	if ( num > 0 )
 	{
-		if ( params != NULL ) delete params;
 		params= new int[num];
 		numPars=num;
-		data=NULL;
-		sizeData = 0;
 		for(int x=0;x<num;x++) params[x]= (int)(parameters[x]*65535.0f);
-		strcpy(name,newname);
 	}
+	else
+	{
+		params=NULL;
+		numPars=-1;
+	}
+
+	if ( data != NULL )	delete data;
+	data=NULL;
+	sizeData = 0;
+
+	strcpy(name,newname);
 }
 
 void CPreset::operator=(CPreset& newpreset)
 {
 	if ( params != NULL) delete params;
-	numPars=newpreset.numPars;
-	params= new int[numPars];
-	memcpy(params,newpreset.params,numPars*sizeof(int));
-	strcpy(name,newpreset.name);
-	sizeData = newpreset.sizeData;
-	if (data) delete data;
-	if (sizeData)
+	if ( newpreset.numPars > 0 )
 	{
+		numPars=newpreset.numPars;
+		params= new int[numPars];
+		memcpy(params,newpreset.params,numPars*sizeof(int));
+	}
+	else
+	{
+		params=NULL;
+		numPars=-1;
+	}
+	if ( data != NULL ) delete data;
+	if ( newpreset.sizeData > 0 )
+	{
+		sizeData = newpreset.sizeData;
 		data= new byte[sizeData];
 		memcpy(data,newpreset.data,sizeData);
 	}
 	else
 	{
 		data=NULL;
+		sizeData = 0;
 	}
+
+	strcpy(name,newpreset.name);
 }
 
 int CPreset::GetParam(int n)
@@ -148,6 +172,9 @@ void CPreset::SetParam(int n,int val)
 CPresetsDlg::CPresetsDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CPresetsDlg::IDD, pParent)
 {
+	numParameters = -1;
+	sizeDataStruct = 0;
+
 	//{{AFX_DATA_INIT(CPresetsDlg)
 	//}}AFX_DATA_INIT
 }
@@ -190,16 +217,16 @@ BOOL CPresetsDlg::OnInitDialog()
 	{
 		numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
 		sizeDataStruct = ((Plugin *)_pMachine)->GetInterface()->GetDataSize();
-		if (sizeDataStruct)
+		if (sizeDataStruct > 0)
 		{
 			byte* pData = new byte[sizeDataStruct];
-			((Plugin *)_pMachine)->GetInterface()->GetData(pData); // Internal save
+			((Plugin *)_pMachine)->GetInterface()->GetData(pData); // Internal Save
 			iniPreset.Init(numParameters , "", ((Plugin*)_pMachine)->GetInterface()->Vals, sizeDataStruct,  pData);
 			delete pData;
 		}
 		else
 		{
-			iniPreset.Init(numParameters , "", ((Plugin*)_pMachine)->GetInterface()->Vals, sizeDataStruct,  NULL);
+			iniPreset.Init(numParameters , "", ((Plugin*)_pMachine)->GetInterface()->Vals, 0,  NULL);
 		}
 
 		buffer = ((Plugin *)_pMachine)->GetDllName();
@@ -576,7 +603,7 @@ void CPresetsDlg::OnExport()
 		{
 			if ((hfile=fopen(szFile,"a+b")) == NULL ) // file cannot be created
 			{
-				MessageBox("Couldn't open File. Operation Aborted","File Save Error",MB_OK);
+				MessageBox("Couldn't open File for Writing. Operation Aborted","File Save Error",MB_OK);
 				return;
 			}
 			fclose(hfile);
@@ -646,7 +673,8 @@ void CPresetsDlg::OnExport()
 			}
 			char cbuf[32];
 			int* ibuf = new int[numParameters];
-			byte* dbuf = new byte[sizeDataStruct];
+			byte* dbuf = NULL;
+			if ( sizeDataStruct > 0 ) dbuf = new byte[sizeDataStruct];
 			presets[selpreset].GetName(cbuf);
 			presets[selpreset].GetParsArray(ibuf);
 			presets[selpreset].GetDataArray(dbuf);
@@ -658,7 +686,7 @@ void CPresetsDlg::OnExport()
 			fseek(hfile,0,SEEK_END);
 			fwrite(cbuf,sizeof(cbuf),1,hfile);
 			fwrite(ibuf,numParameters*sizeof(int),1,hfile);
-			fwrite(dbuf,sizeDataStruct,1,hfile);
+			if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
 
 			fclose(hfile);
 			delete ibuf;
@@ -782,13 +810,14 @@ void CPresetsDlg::ReadPresets()
 				}
 				// ok that works, so we should now load the names of all of the presets
 				int* ibuf= new int[numParameters];
-				byte* dbuf= new byte[sizeDataStruct];
+				byte* dbuf=NULL;
+				if ( sizeDataStruct > 0 ) dbuf = new byte[sizeDataStruct];
 
 				while ( i< numpresets && !feof(hfile) && !ferror(hfile) )
 				{
 					fread(cbuf,sizeof(cbuf),1,hfile);
 					fread(ibuf,numParameters*sizeof(int),1,hfile);
-					fread(dbuf,sizeDataStruct,1,hfile);
+					if ( sizeDataStruct > 0 )  fread(dbuf,sizeDataStruct,1,hfile);
 					AddPreset(cbuf,ibuf,dbuf);
 					i++;
 				}
@@ -880,7 +909,7 @@ void CPresetsDlg::ReadPresets()
 			fxb.Read(fbuf,numParameters*sizeof(float)); // Read All params.
 			for (int y=0;y<numParameters;y++)
 			{
-				float temp=fbuf[y];
+				const float temp=fbuf[y];
 				((char*)&fbuf[y])[0]=((char*)&temp)[3];
 				((char*)&fbuf[y])[1]=((char*)&temp)[2];
 				((char*)&fbuf[y])[2]=((char*)&temp)[1];
@@ -949,7 +978,8 @@ void CPresetsDlg::SavePresets()
 		int i=0;
 		char cbuf[32];
 		int* ibuf= new int[numParameters];
-		byte* dbuf = new byte[sizeDataStruct];
+		byte* dbuf=NULL;
+		if ( sizeDataStruct > 0 ) dbuf = new byte[sizeDataStruct];
 
 		while ( i< numpresets && !feof(hfile) && !ferror(hfile) )
 		{
@@ -958,7 +988,7 @@ void CPresetsDlg::SavePresets()
 			presets[i].GetDataArray(dbuf);
 			fwrite(cbuf,sizeof(cbuf),1,hfile);
 			fwrite(ibuf,numParameters*sizeof(int),1,hfile);
-			fwrite(dbuf,sizeDataStruct,1,hfile);
+			if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
 			i++;
 		}
 		fclose(hfile);
@@ -998,13 +1028,6 @@ void CPresetsDlg::AddPreset(char *name, int *parameters, byte *newdata)
 {
 	CPreset preset;
 	preset.Init(numParameters,name,parameters,sizeDataStruct,newdata);
-	AddPreset(preset);
-}
-
-void CPresetsDlg::AddPreset(char *name)
-{
-	CPreset preset;
-	preset.Init(name);
 	AddPreset(preset);
 }
 

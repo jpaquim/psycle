@@ -229,14 +229,15 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_contrib.SetWindowText("\
 Josep Mª Antolín. [JAZ]\t\tCurrent Main developer\
-\r\nDaniel Arena\t\t\tDeveloper\
-\r\nMarcin Kowalski / FideLoop\t\tDeveloper\
+\r\nDaniel Arena\t\t\tDeveloper in 1.5&1.6\
+\r\nMarcin Kowalski / FideLoop\t\tDeveloper in 1.6\
 \r\nMark McCormack\t\t\tMIDI (in) Support\
 \r\nMats Höjlund\t\t\tMain developer until 1.5 (Internal Recoding)\
 \r\nJuan Antonio Arguelles. Arguru\tCreator and Main Developer until 1.0\
 \r\nHamarr Heylen\t\t\tInitial Graphics\
 \r\nBun/Bunny/Alk/Alexkidd\t\tAdditional Graphics\
 \r\nfrown\t\t\t\tAdditional Graphics\
+\r\n/\\/\\ark\t\t\t\tAdditional Graphics\
 \r\nMichael Haralabos\t\t\tInstaller and Debugging help\
 ");
 	m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);

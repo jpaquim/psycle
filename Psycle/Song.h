@@ -48,20 +48,20 @@ public:
 	//////////////////////////////////////////////////////////////////
 	// Amplitude Envelope overview:
 	//
-	int ENV_AT;	// Attack Time [Samples]
-	int ENV_DT;	// Decay Time [Samples]
-	int ENV_SL;	// Sustain Level [100=1.0]
-	int ENV_RT;	// Release Time [Samples]
+	int ENV_AT;	// Attack Time [in Samples at 44.1Khz]
+	int ENV_DT;	// Decay Time [in Samples at 44.1Khz]
+	int ENV_SL;	// Sustain Level [in %]
+	int ENV_RT;	// Release Time [in Samples at 44.1Khz]
 	
 	// Filter 
-	int ENV_F_AT;	// Attack Time [Samples]
-	int ENV_F_DT;	// Decay Time [Samples]
-	int ENV_F_SL;	// Sustain Level [32768 max]
-	int ENV_F_RT;	// Release Time [Samples]
+	int ENV_F_AT;	// Attack Time [in Samples at 44.1Khz]
+	int ENV_F_DT;	// Decay Time [in Samples at 44.1Khz]
+	int ENV_F_SL;	// Sustain Level [0..128]
+	int ENV_F_RT;	// Release Time [in Samples at 44.1Khz]
 
-	int ENV_F_CO;	// Cutoff Frequency [32768]
+	int ENV_F_CO;	// Cutoff Frequency [0-127]
 	int ENV_F_RQ;	// Resonance [0-127]
-	int ENV_F_EA;	// EnvAmount [0-32768]
+	int ENV_F_EA;	// EnvAmount [-128,128]
 	int ENV_F_TP;	// Filter Type [0-4]
 
 	int _pan;
@@ -73,12 +73,15 @@ public:
 class Song
 {
 public:
+
 #if defined(_WINAMP_PLUGIN_)
 	char fileName[_MAX_PATH];
 #else
 	int machineSoloed;
 	CString fileName;
+	CPoint viewSize;
 #endif //  _WINAMP_PLUGIN_
+
 	bool _saved;
 	int _trackSoloed;
 	CCriticalSection door;

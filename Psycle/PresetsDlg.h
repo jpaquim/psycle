@@ -7,7 +7,7 @@
 // PresetsDlg.h : header file
 //
 
-#define MAX_PRESETS 128
+#define MAX_PRESETS 256
 
 class Machine;
 class CFrameMachine;
@@ -22,19 +22,19 @@ class CPreset
 	long int sizeData;
 	byte* data;
 	char name[32];
+
 public:
 	void Clear();
 	void Init(int num);
 	void Init(int num,char* newname,int* parameters,int size, byte* newdata);
 	void Init(int num,char* newname, float* parameters); // for VST .fxb's
-	void Init(char* newname);
 	int GetNumPars() { return numPars; }
-	void GetParsArray(int* destarray) { memcpy(destarray,params,numPars*sizeof(int)); }
-	void GetDataArray(byte* destarray) {if(data){ memcpy(destarray,data,sizeData); }}
-	void SetName(char *setname) { strcpy(name,setname); }
-	void GetName(char *nname) { strcpy(nname,name); }
+	void GetParsArray(int* destarray) { if(numPars>0){ memcpy(destarray,params,numPars*sizeof(int)); }}
+	void GetDataArray(byte* destarray) {if(sizeData>0){ memcpy(destarray,data,sizeData); }}
 	byte* GetData() {return data;}
 	long int GetSizeData() {return sizeData;}
+	void SetName(char *setname) { strcpy(name,setname); }
+	void GetName(char *nname) { strcpy(nname,name); }
 	int GetParam(int n);
 	void SetParam(int n,int val);
 	CPreset();
@@ -52,7 +52,6 @@ public:
 	void AddPreset(CPreset& preset);
 	void AddPreset(char* name ,float* parameters);
 	void AddPreset(char* name,int* parameters, byte* newdata);
-	void AddPreset(char* name);
 	CFrameMachine* m_wndFrame;
 	Machine* _pMachine;
 	CPresetsDlg(CWnd* pParent = NULL);   // standard constructor

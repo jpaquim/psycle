@@ -343,6 +343,7 @@ inline void CChildView::OutNote(CDC *devc,int x,int y,int note)
 	switch(note)
 	{
 	case 255: TXTFLAT(devc,"---",x,y,srx,sry);break;
+//	case 255: TXTFLAT(devc,"   ",x,y,srx,sry);break;
 	case 0:   TXTFLAT(devc,"C-0",x,y,srx,sry);break;
 	case 1:   TXTFLAT(devc,"C#0",x,y,srx,sry);break;
 	case 2:   TXTFLAT(devc,"D-0",x,y,srx,sry);break;
@@ -478,11 +479,14 @@ inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool t
 	Rect.right=x+10;
 	Rect.bottom=y+12;
 	
-	if (trflag && data==255)
+	if (trflag)
 	{
 		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
 		Rect.left+=10; Rect.right+=10;
 		devc->ExtTextOut(x+12,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
+
+//		Rect.right+=10;
+//		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"  ",FLATSIZES);
 		return;
 	}
 	

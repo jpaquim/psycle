@@ -38,7 +38,6 @@ IDR_MACHINEFRAME        ICON    DISCARDABLE     "res\\ico00001.ico"
 // Bitmap
 //
 
-IDB_STUFF               BITMAP  DISCARDABLE     "res\\stuff.bmp"
 IDB_PSYCHOSC            BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
 IDB_DIST                BITMAP  DISCARDABLE     "res\\bmp00001.bmp"
 IDB_SAMPLER             BITMAP  DISCARDABLE     "res\\bmp00003.bmp"
@@ -59,6 +58,9 @@ IDB_SPLASH              BITMAP  DISCARDABLE     "res\\splash copia.bmp"
 IDB_MACHINETYPE         BITMAP  DISCARDABLE     "res\\bmp00002.bmp"
 IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
 IDB_DIRECTX             BITMAP  DISCARDABLE     "res\\bmp00009.bmp"
+IDB_PLUSPLUS            BITMAP  DISCARDABLE     "res\\plus1.bmp"
+IDB_MINUSMINUS          BITMAP  DISCARDABLE     "res\\minus1.bmp"
+IDB_STUFF               BITMAP  DISCARDABLE     "res\\stuff.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -361,111 +363,65 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,129,25,50,16
 END
 
-IDD_INSTRUMENT DIALOGEX 0, 0, 216, 290
+IDD_INSTRUMENT DIALOGEX 0, 0, 217, 223
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Instrument Editor"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Instrument Properties",IDC_STATIC,4,4,208,268
-    RTEXT           "Instrmnt.",IDC_STATIC,8,16,32,12,SS_CENTERIMAGE
-    CTEXT           "000",IDC_INSTNUMBER,44,16,20,12,SS_CENTERIMAGE | 
+    GROUPBOX        "Instrument Properties",IDC_STATIC,5,25,205,191
+    RTEXT           "Instrument",IDC_STATIC,6,10,37,12,SS_CENTERIMAGE
+    CTEXT           "000",IDC_INSTNUMBER,46,10,20,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    PUSHBUTTON      "<",IDC_BUTTON12,68,16,8,12
-    PUSHBUTTON      ">",IDC_BUTTON13,76,16,8,12
-    EDITTEXT        IDC_INSTNAME,88,16,84,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Kill...",IDC_BUTTON7,176,16,32,12
-    PUSHBUTTON      "Synthesis...",IDC_BUTTON8,8,32,56,12
-    LTEXT           "New Note Action",IDC_STATIC,68,32,56,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_NNA_COMBO,124,32,84,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    PUSHBUTTON      "<",IDC_BUTTON12,70,10,8,12
+    PUSHBUTTON      ">",IDC_BUTTON13,78,10,8,12
+    EDITTEXT        IDC_INSTNAME,89,10,84,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Kill...",IDC_BUTTON7,176,10,32,12
+    PUSHBUTTON      "Amplitude/Filter Envelopes",IDC_BUTTON8,8,199,198,14
+    LTEXT           "New Note Action",IDC_STATIC,16,38,56,9,SS_CENTERIMAGE
+    COMBOBOX        IDC_NNA_COMBO,83,35,84,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CTEXT           "Panning",IDC_STATIC,8,52,100,8
+    LTEXT           "Panning",IDC_STATIC,16,53,31,9
     CONTROL         "Slider3",IDC_PANSLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,8,60,100,12
+                    TBS_NOTICKS | WS_TABSTOP,50,51,121,12
     CONTROL         "Random panning",IDC_RPAN,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,112,48,96,8
+                    WS_TABSTOP,15,66,79,8
     CONTROL         "Random VCF Cutoff",IDC_RCUT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,112,56,96,8
+                    WS_TABSTOP,15,79,80,8
     CONTROL         "Random VCF Reso/Bw.",IDC_RRES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,112,64,96,8
-    GROUPBOX        "Looping Tool",IDC_STATIC,8,76,200,32
-    CONTROL         "Tempo synchronized",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,89,83,10
-    EDITTEXT        IDC_LOOPEDIT,105,88,19,12,ES_AUTOHSCROLL | ES_NUMBER | 
-                    NOT WS_BORDER,WS_EX_DLGMODALFRAME
-    LTEXT           "Ticks",IDC_STATIC,128,90,18,8
-    GROUPBOX        "Instrument Wave Layers",IDC_STATIC,8,112,200,156,
+                    WS_TABSTOP,105,79,92,8
+    GROUPBOX        "Tempo Looping Tool",IDC_STATIC,8,91,200,30
+    CONTROL         "Play sample to fit",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,104,68,10
+    EDITTEXT        IDC_LOOPEDIT,86,103,22,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Pattern rows",IDC_STATIC,113,104,46,10
+    GROUPBOX        "Instrument Wave Layer",IDC_STATIC,8,122,200,75,
                     BS_CENTER
-    CONTROL         "1",IDC_LAYER1,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,12,125,24,12
-    CONTROL         "2",IDC_LAYER2,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,36,125,24,12
-    CONTROL         "3",IDC_LAYER3,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,60,125,24,12
-    CONTROL         "4",IDC_LAYER4,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,84,125,24,12
-    CONTROL         "5",IDC_LAYER5,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,108,125,24,12
-    CONTROL         "6",IDC_LAYER6,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,132,125,24,12
-    CONTROL         "7",IDC_LAYER7,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,156,125,24,12
-    CONTROL         "8",IDC_LAYER8,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,180,125,24,12
-    CONTROL         "9",IDC_LAYER9,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | 
-                    WS_DISABLED,12,138,24,12
-    CONTROL         "10",IDC_LAYER10,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,36,138,24,12
-    CONTROL         "11",IDC_LAYER11,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,60,138,24,12
-    CONTROL         "12",IDC_LAYER12,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,84,138,24,12
-    CONTROL         "13",IDC_LAYER13,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,108,138,24,12
-    CONTROL         "14",IDC_LAYER14,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,132,138,24,12
-    CONTROL         "15",IDC_LAYER15,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,156,138,24,12
-    CONTROL         "16",IDC_LAYER16,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_DISABLED,180,138,24,12
-    RTEXT           "wvLayer",IDC_STATIC,12,154,32,12,SS_CENTERIMAGE
-    CTEXT           "00",IDC_LAYERN,48,154,16,12,SS_CENTERIMAGE | WS_BORDER
-    EDITTEXT        IDC_WAVENAME,68,154,108,12,ES_AUTOHSCROLL
-    CTEXT           "Mono",IDC_STEREO,180,154,24,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    RTEXT           "Basenote",IDC_STATIC,12,170,32,12,SS_CENTERIMAGE
-    PUSHBUTTON      "<<",IDC_BUTTON2,48,170,32,12,WS_DISABLED
-    PUSHBUTTON      "<",IDC_BUTTON4,80,170,32,12,WS_DISABLED
-    PUSHBUTTON      ">",IDC_BUTTON5,112,170,32,12,WS_DISABLED
-    PUSHBUTTON      ">>",IDC_BUTTON6,144,170,32,12,WS_DISABLED
-    CTEXT           "C-4",IDC_STATIC,180,170,24,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    RTEXT           "wvVolume",IDC_STATIC,12,186,32,12,SS_CENTERIMAGE
+    RTEXT           "Volume",IDC_STATIC,12,134,32,12,SS_CENTERIMAGE
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,48,186,128,12
-    CTEXT           "100%",IDC_VOLABEL,180,186,24,12,SS_CENTERIMAGE | 
+                    TBS_NOTICKS | WS_TABSTOP,48,134,128,12
+    CTEXT           "100%",IDC_VOLABEL,180,134,24,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    RTEXT           "wvTune",IDC_STATIC,12,200,32,12,SS_CENTERIMAGE
+    RTEXT           "Finetune",IDC_STATIC,12,148,32,12,SS_CENTERIMAGE
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,48,200,128,12
-    CTEXT           "100%",IDC_VOLABEL2,180,200,24,12,SS_CENTERIMAGE | 
+                    TBS_NOTICKS | WS_TABSTOP,48,148,128,12
+    CTEXT           "100%",IDC_VOLABEL2,180,148,24,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    RTEXT           "wvLength",IDC_STATIC,12,216,32,12,SS_CENTERIMAGE
-    CTEXT           "1234567",IDC_WAVELENGTH,48,216,36,12,SS_CENTERIMAGE | 
+    LTEXT           "Length",IDC_STATIC,141,178,24,12,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_WAVELENGTH,168,178,36,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    CTEXT           "Loop At",IDC_STATIC,84,216,32,12,SS_CENTERIMAGE
-    CTEXT           "1234567",IDC_LOOPSTART,116,216,36,12,SS_CENTERIMAGE | 
+    CTEXT           "Loop At",IDC_STATIC,16,178,32,12,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPSTART,48,178,36,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    CTEXT           "1234567",IDC_LOOPEND,168,216,36,12,SS_CENTERIMAGE | 
+    CTEXT           "1234567",IDC_LOOPEND,100,178,36,12,SS_CENTERIMAGE | 
                     WS_BORDER
-    CTEXT           "To",IDC_STATIC,152,216,16,12,SS_CENTERIMAGE
-    RTEXT           "wvLoop",IDC_STATIC,12,230,32,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Off",IDC_LOOPOFF,48,230,52,12
-    PUSHBUTTON      "Forward",IDC_LOOPFORWARD,100,230,56,12
-    CTEXT           "Forw.",IDC_LOOPTYPE,160,230,44,12,SS_CENTERIMAGE | 
+    CTEXT           "To",IDC_STATIC,84,178,16,12,SS_CENTERIMAGE
+    RTEXT           "Loop",IDC_STATIC,12,162,32,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Off",IDC_LOOPOFF,48,162,52,12
+    PUSHBUTTON      "Forward",IDC_LOOPFORWARD,100,162,56,12
+    CTEXT           "Forw.",IDC_LOOPTYPE,160,162,44,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    PUSHBUTTON      "Loop Tuner...",IDC_BUTTON11,12,252,192,12,WS_DISABLED
-    CTEXT           "Ready",IDC_STATUS,4,276,208,12,SS_CENTERIMAGE | 
+    CTEXT           "100%",IDC_PANLABEL,178,50,24,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
 END
 
@@ -995,7 +951,7 @@ END
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 233
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Start Psycle",IDOK,105,209,221,17,WS_GROUP
     PUSHBUTTON      "Contributors && Credits",IDC_BUTTON1,7,209,97,17
@@ -1017,7 +973,7 @@ BEGIN
                     WS_EX_STATICEDGE
     CONTROL         "Show About Dialog at Startup",IDC_SHOWATSTARTUP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,190,165,11
-    CTEXT           "Version 1.67a  [Sometime in 2002]",IDC_STATIC,181,191,
+    CTEXT           "Version 1.66a [Sometime in 2002]",IDC_STATIC,181,191,
                     151,8,SS_CENTERIMAGE,WS_EX_TRANSPARENT
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,8,203,320,1,
                     WS_EX_STATICEDGE
@@ -1037,15 +993,14 @@ BEGIN
                     WS_TABSTOP,4,18,62,8
     LISTBOX         IDC_SEQLIST,4,30,36,131,LBS_SORT | LBS_EXTENDEDSEL | 
                     WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "+",IDC_INCSHORT,46,30,20,12,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      "+",IDC_INCSHORT,43,30,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      "-",IDC_DECSHORT,46,46,20,12,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      "-",IDC_DECSHORT,43,62,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      "Ins",IDC_SEQINS,46,62,20,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Del",IDC_SEQDEL,46,78,20,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Clr",IDC_SEQCLR,46,94,20,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Sprd",IDC_SEQSPR,46,110,20,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "SLen",IDC_SEQSLEN,46,126,20,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Ins",IDC_SEQINS,43,94,23,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Del",IDC_SEQDEL,43,110,23,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Clear",IDC_SEQCLR,43,126,23,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Sort",IDC_SEQSPR,43,142,23,12,0,WS_EX_STATICEDGE
     LTEXT           "Po.",IDC_STATIC,4,166,9,8,SS_CENTERIMAGE
     PUSHBUTTON      "<",IDC_DECPOS2,16,164,16,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
@@ -1078,6 +1033,10 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,5,249,62,12
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,6,264,60,19
+    PUSHBUTTON      "++",IDC_INCLONG,43,46,23,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER,WS_EX_STATICEDGE
+    PUSHBUTTON      "-",IDC_DECLONG,43,78,23,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER,WS_EX_STATICEDGE
 END
 
 IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 103
@@ -1284,9 +1243,9 @@ BEGIN
     IDD_INSTRUMENT, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 209
+        RIGHTMARGIN, 210
         TOPMARGIN, 7
-        BOTTOMMARGIN, 283
+        BOTTOMMARGIN, 216
     END
 
     IDD_GEAR_TRACKER, DIALOG
@@ -1811,8 +1770,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,7,0
- PRODUCTVERSION 1,6,7,0
+ FILEVERSION 1,6,6,0
+ PRODUCTVERSION 1,6,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1830,14 +1789,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "Psycledelics\0"
             VALUE "FileDescription", "Psycle Digital Audio Studio\0"
-            VALUE "FileVersion", "1, 6, 7, 0\0"
+            VALUE "FileVersion", "1, 6, 6, 0\0"
             VALUE "InternalName", "Psycle\0"
             VALUE "LegalCopyright", "Copyright (C) 2000-2002\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Psycle.EXE\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Psycle Application\0"
-            VALUE "ProductVersion", "1, 6, 7, 0\0"
+            VALUE "ProductVersion", "1, 6, 6, 0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

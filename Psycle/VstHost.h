@@ -7,6 +7,9 @@
 #define MAX_EVENTS		64
 #define MAX_INOUTS		8
 
+#define NUMTICKS 1000 // Dialog max ticks for parameters.
+
+
 #define VSTINSTANCE_ERR_NO_VALID_FILE -1
 #define VSTINSTANCE_ERR_NO_VST_PLUGIN -2
 #define VSTINSTANCE_ERR_REJECTED -3
@@ -81,9 +84,12 @@ public:
 	}
 	static long Master(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 
-	char _midichannel;
+	unsigned char _program;
 	bool instantiated;
 	int _instance;		// Remove when Changing the FileFormat.
+
+	bool requiresProcess;	// It needs to use Process
+	bool requiresRepl;		// It needs to use ProcessRepl
 
 protected:
 

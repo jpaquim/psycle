@@ -364,7 +364,7 @@ void CMidiMonitorDlg::FillChannelMap( bool override )
 		int genFxIdx = pMidiInput->GetGenMap( ch );
 
 		// machine mapped & active?
-		if( genFxIdx >= 0 && Global::_pSong->_machineActive[ genFxIdx ] )
+		if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES && Global::_pSong->_machineActive[ genFxIdx ] )
 		{
 			// machine
 			Machine * pMachine = Global::_pSong->_pMachines[ genFxIdx ];

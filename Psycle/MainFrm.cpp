@@ -76,24 +76,25 @@ ON_BN_CLICKED(IDC_INCPOS2, OnIncpos2)
 ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
 ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
-	ON_BN_CLICKED(IDC_SEQDEL, OnSeqdel)
-ON_BN_CLICKED(IDC_SEQSLEN, OnSeqslen)
+ON_BN_CLICKED(IDC_SEQDEL, OnSeqdel)
 ON_BN_CLICKED(IDC_SEQSPR, OnSeqspr)
-	ON_WM_ACTIVATE()
-	ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
-	ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
-	ON_BN_CLICKED(IDC_FOLLOW, OnFollowSong)
-	ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
-	ON_CBN_SELCHANGE(IDC_BAR_GENFX, OnSelchangeBarGenfx)
-	ON_CBN_CLOSEUP(IDC_BAR_GENFX, OnCloseupBarGenfx)
-	ON_BN_CLICKED(IDC_WRAP, OnWrap)
-	ON_COMMAND(ID_CONFIGURATION_KEYBOARD, OnConfigurationKeyboard)
-	ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
-	ON_BN_CLICKED(IDC_CENTERCURSOR, OnCentercursor)
-	ON_BN_CLICKED(IDC_CURSORDOWN, OnCursordown)
-	ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
-	ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
-	//}}AFX_MSG_MAP
+ON_WM_ACTIVATE()
+ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
+ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
+ON_BN_CLICKED(IDC_FOLLOW, OnFollowSong)
+ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
+ON_CBN_SELCHANGE(IDC_BAR_GENFX, OnSelchangeBarGenfx)
+ON_CBN_CLOSEUP(IDC_BAR_GENFX, OnCloseupBarGenfx)
+ON_BN_CLICKED(IDC_WRAP, OnWrap)
+ON_COMMAND(ID_CONFIGURATION_KEYBOARD, OnConfigurationKeyboard)
+ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
+ON_BN_CLICKED(IDC_CENTERCURSOR, OnCentercursor)
+ON_BN_CLICKED(IDC_CURSORDOWN, OnCursordown)
+ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
+ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
+ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
+ON_BN_CLICKED(IDC_INCLONG, OnInclong)
+//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -182,11 +183,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Instrument editor
 	m_wndInst._pSong=_pSong;
+	m_wndInst.pParentMain=this;
 	m_wndInst.Create(IDD_INSTRUMENT,this);
 	m_wndInst.Validate();
 
 	// Wave Editor Window
-	m_pWndWed=new CWaveEdFrame(this->_pSong);
+	m_pWndWed=new CWaveEdFrame(this->_pSong,this);
 
 	m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this, NULL);
 	m_pWndWed->GenerateView();
@@ -203,6 +205,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	bmoremore.LoadMappedBitmap(IDB_MOREMORE,0);
 	bplus.LoadMappedBitmap(IDB_PLUS,0);
 	bminus.LoadMappedBitmap(IDB_MINUS,0);
+	bplusplus.LoadMappedBitmap(IDB_PLUSPLUS,0);
+	bminusminus.LoadMappedBitmap(IDB_MINUSMINUS,0);
 	blittleleft.LoadMappedBitmap(IDB_LLEFT,0);
 	blittleright.LoadMappedBitmap(IDB_LRIGHT,0);
 
@@ -296,9 +300,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCSHORT);
 	hi = (HBITMAP)bplus; cb->SetBitmap(hi);
 
+	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCLONG);
+	hi = (HBITMAP)bplusplus; cb->SetBitmap(hi);
+
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECSHORT);
 	hi = (HBITMAP)bminus; cb->SetBitmap(hi);
 	
+	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECLONG);
+	hi = (HBITMAP)bminusminus; cb->SetBitmap(hi);
+
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_DECPOS2);
 	hi = (HBITMAP)bless; cb->SetBitmap(hi);
 
@@ -658,20 +668,6 @@ void CMainFrame::OnBIncgen()
 	m_wndView.OnActivate();
 }
 
-void CMainFrame::OnBDecwav() 
-{
-	ChangeIns(_pSong->auxcolSelected-1);
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-}
-
-void CMainFrame::OnBIncwav() 
-{
-	ChangeIns(_pSong->auxcolSelected+1);
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-}
-
 void CMainFrame::UpdateComboGen(bool updatelist)
 {
 	if ( _pSong == NULL ) return;
@@ -813,6 +809,20 @@ void CMainFrame::ChangeGen(int i)	// User Called (Hotkey)
 			UpdateComboGen(true);
 		}
 	}
+}
+
+void CMainFrame::OnBDecwav() 
+{
+	ChangeIns(_pSong->auxcolSelected-1);
+	m_wndView.SetFocus();
+	m_wndView.OnActivate();
+}
+
+void CMainFrame::OnBIncwav() 
+{
+	ChangeIns(_pSong->auxcolSelected+1);
+	m_wndView.SetFocus();
+	m_wndView.OnActivate();
 }
 
 void CMainFrame::UpdateComboIns(bool updatelist)
@@ -1253,7 +1263,7 @@ void CMainFrame::UpdateSequencer()
 	
 	cc->ResetContent();
 	
-	for(int n=0;n<MAX_SONG_POSITIONS;n++)
+	for(int n=0;n<_pSong->playLength;n++)
 	{
 		sprintf(buf,"%.2X: %.2X",n,_pSong->playOrder[n]);
 		cc->AddString(buf);
@@ -1293,6 +1303,7 @@ void CMainFrame::OnSelchangeSeqlist()
 	}
 	else {
 		m_wndView.SetFocus();
+		m_wndView.OnActivate();
 	}
 }
 
@@ -1315,42 +1326,206 @@ void CMainFrame::OnDblclkSeqlist()
 	}
 }
 
+void CMainFrame::OnIncshort() 
+{
+	OnIncpat2();
+}
 
-void CMainFrame::OnIncpat2() 
+void CMainFrame::OnDecshort() 
+{
+	OnDecpat2();	
+}
+
+void CMainFrame::OnInclong() 
 {
 	int pop=m_wndView.editPosition;
-	if(_pSong->playOrder[pop]<(MAX_PATTERNS-1))
+	if(_pSong->playOrder[pop]<(MAX_PATTERNS-10))
 	{
-		++_pSong->playOrder[pop];
+		_pSong->playOrder[pop]+=10;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint();
-		m_wndView.SetActiveWindow();
+		m_wndView.Repaint(DMPatternChange);
+//		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();	
 	m_wndView.OnActivate();
 }
 
-void CMainFrame::OnDecpat2() 
+void CMainFrame::OnDeclong() 
 {
 	int pop=m_wndView.editPosition;
-	if(_pSong->playOrder[pop]>0)
+	if(_pSong->playOrder[pop]>9)
 	{
-		--_pSong->playOrder[pop];
+		_pSong->playOrder[pop]-=10;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint();
-		m_wndView.SetActiveWindow();
+		m_wndView.Repaint(DMPatternChange);
+//		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();	
+	m_wndView.OnActivate();	
+	
+}
+
+void CMainFrame::OnSeqins() 
+{
+	if ( m_wndView.editPosition < MAX_PATTERNS )
+	{
+		m_wndView.editPosition++;
+		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+		{
+			++_pSong->playLength;
+		}
+
+		int const pop=m_wndView.editPosition;
+		for(int c=(_pSong->playLength-1);c>pop;c--)
+		{
+			_pSong->playOrder[c]=_pSong->playOrder[c-1];
+		}
+		_pSong->playOrder[pop]=_pSong->GetNumPatternsUsed();
+		
+		if ( _pSong->playOrder[pop]>= MAX_PATTERNS )
+		{
+			_pSong->playOrder[pop]=MAX_PATTERNS-1;
+		}
+
+		UpdatePlayOrder(false);
+		UpdateSequencer();
+
+		m_wndView.Repaint(DMPatternChange);
+	}
+	m_wndView.SetFocus();
 	m_wndView.OnActivate();
 }
+
+void CMainFrame::OnSeqdel() 
+{
+	int const pop=m_wndView.editPosition;
+
+	for(int c=pop;c<_pSong->playLength-1;c++)
+	{
+		_pSong->playOrder[c]=_pSong->playOrder[c+1];
+	}
+
+	_pSong->playOrder[_pSong->playLength-1]=0;
+
+	if(_pSong->playLength>pop+1)
+	{
+		--_pSong->playLength;
+	}
+	UpdatePlayOrder(false);
+	UpdateSequencer();
+	m_wndView.Repaint();
+	m_wndView.SetFocus();
+	m_wndView.OnActivate();
+}
+
+void CMainFrame::OnSeqclr() 
+{
+	for(int c=0;c<MAX_SONG_POSITIONS;c++)
+	{
+		_pSong->playOrder[c]=0;
+	}
+
+	m_wndView.editPosition=0;
+	_pSong->playLength=1;
+	UpdatePlayOrder(false);
+	UpdateSequencer();
+	m_wndView.Repaint(DMPatternChange);
+	m_wndView.SetFocus();
+	m_wndView.OnActivate();
+	
+}
+//// Changed to " Resort patterns "
+void CMainFrame::OnSeqspr()
+{
+	unsigned char oldtonew[MAX_PATTERNS];
+	unsigned char newtoold[MAX_PATTERNS];
+	memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
+	memset(newtoold,255,MAX_PATTERNS*sizeof(char));
+
+// Part one, Read patterns from sequence and assign them a new ordered number.
+	unsigned char freep=0;
+	for ( int i=0 ; i<_pSong->playLength ; i++ )
+	{
+		const char cp=_pSong->playOrder[i];
+		if ( oldtonew[cp] == 255 ) // else, we have processed it already
+		{
+			oldtonew[cp]=freep;
+			newtoold[freep]=cp;
+			freep++;
+		}
+	}
+// Part one and a half. End filling the order numbers.
+	for(i=0; i<MAX_PATTERNS ; i++ )
+	{
+		if ( oldtonew[i] == 255 )
+		{
+			oldtonew[i] = freep;
+			newtoold[freep] = i;
+			freep++;
+		}
+	}
+// Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
+//			 When we have to put the first read one back, do it and find next candidate.
+
+	int patl; // first one is initial one, next one is temp one
+	char patn[32]; // ""
+	unsigned char pData[MULTIPLY2]; // ""
+
+
+	int idx=0;
+	int idx2=0;
+	for ( i=0 ; i < MAX_PATTERNS ; i++ )
+	{
+		if ( newtoold[i] != i ) // check if this place belongs to another pattern
+		{
+			memcpy(pData ,&_pSong->pPatternData[MULTIPLY2*i], MULTIPLY2); // Store pattern
+			memcpy(&patl,&_pSong->patternLines[i],sizeof(int));
+			memcpy(patn,&_pSong->patternName[i],sizeof(char)*32);
+
+			idx = i;
+			while ( newtoold[idx] != i ) // Start moving patterns while it is not the stored one.
+			{
+				idx2 = newtoold[idx]; // get pattern that goes here and move.
+
+				memcpy(&_pSong->pPatternData[MULTIPLY2*idx],&_pSong->pPatternData[MULTIPLY2*idx2],MULTIPLY2);
+				memcpy(&_pSong->patternLines[idx],&_pSong->patternLines[idx2],sizeof(int));
+				memcpy(&_pSong->patternName[idx],&_pSong->patternName[idx2],sizeof(char)*32);
+				
+				newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+				idx = idx2;
+			}
+
+			// Put pattern back.
+			memcpy(&_pSong->pPatternData[MULTIPLY2*idx],pData,MULTIPLY2);
+			memcpy(&_pSong->patternLines[idx],&patl,sizeof(int));
+			memcpy(_pSong->patternName[idx],patn,sizeof(char)*32);
+
+			newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+		}
+	}
+// Part three. Update the sequence
+
+	for (i=0 ; i<_pSong->playLength ; i++ )
+	{
+		_pSong->playOrder[i]=oldtonew[_pSong->playOrder[i]];
+	}
+
+// Part four. All the needed things.
+
+	UpdateSequencer();
+	m_wndView.Repaint();
+	m_wndView.SetFocus();
+	m_wndView.OnActivate();
+}
+
 
 void CMainFrame::OnIncpos2() 
 {
-	if(m_wndView.editPosition<(MAX_SONG_POSITIONS-1))
+	if(m_wndView.editPosition<(_pSong->playLength-1))
 	{
 		++m_wndView.editPosition;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint();
+		m_wndView.Repaint(DMPatternChange);
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
@@ -1363,10 +1538,38 @@ void CMainFrame::OnDecpos2()
 	{
 		--m_wndView.editPosition;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint();
+		m_wndView.Repaint(DMPatternChange);
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
+	m_wndView.OnActivate();
+}
+
+void CMainFrame::OnIncpat2() 
+{
+	int pop=m_wndView.editPosition;
+	if(_pSong->playOrder[pop]<(MAX_PATTERNS-1))
+	{
+		++_pSong->playOrder[pop];
+		UpdatePlayOrder(true);
+		m_wndView.Repaint(DMPatternChange);
+//		m_wndView.SetActiveWindow();
+	}
+	m_wndView.SetFocus();	
+	m_wndView.OnActivate();
+}
+
+void CMainFrame::OnDecpat2() 
+{
+	int pop=m_wndView.editPosition;
+	if(_pSong->playOrder[pop]>0)
+	{
+		--_pSong->playOrder[pop];
+		UpdatePlayOrder(true);
+		m_wndView.Repaint(DMPatternChange);
+//		m_wndView.SetActiveWindow();
+	}
+	m_wndView.SetFocus();	
 	m_wndView.OnActivate();
 }
 
@@ -1376,6 +1579,7 @@ void CMainFrame::OnInclen()
 	{
 		++_pSong->playLength;
 		UpdatePlayOrder(false);
+		UpdateSequencer();
 	}
 	m_wndView.SetFocus();
 	m_wndView.OnActivate();
@@ -1386,104 +1590,14 @@ void CMainFrame::OnDeclen()
 	if(_pSong->playLength>1)
 	{
 		--_pSong->playLength;
+		_pSong->playOrder[_pSong->playLength]=0;
 		UpdatePlayOrder(false);
+		UpdateSequencer();
 	}
 	m_wndView.SetFocus();	
 	m_wndView.OnActivate();
 }
 
-
-void CMainFrame::OnIncshort() 
-{
-	OnIncpat2();
-}
-
-void CMainFrame::OnDecshort() 
-{
-	OnDecpat2();	
-}
-
-void CMainFrame::OnSeqins() 
-{
-	int const ep=_pSong->GetNumPatternsUsed();
-	int const pop=m_wndView.editPosition;
-	
-	for(int c=(MAX_SONG_POSITIONS-1);c>pop;c--)
-	{
-		_pSong->playOrder[c]=_pSong->playOrder[c-1];
-	}
-	_pSong->playOrder[pop]=ep;
-	OnInclen();
-	UpdatePlayOrder(false);
-	UpdateSequencer();
-	m_wndView.Repaint();
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-}
-
-void CMainFrame::OnSeqdel() 
-{
-
-	int const pop=m_wndView.editPosition;
-	
-	for(int c=pop;c<MAX_SONG_POSITIONS-1;c++)
-	{
-		_pSong->playOrder[c]=_pSong->playOrder[c+1];
-	}
-
-	_pSong->playOrder[MAX_SONG_POSITIONS-1]=0;
-
-	OnDeclen();
-	UpdatePlayOrder(false);
-	UpdateSequencer();
-	m_wndView.Repaint();
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-}
-
-void CMainFrame::OnSeqclr() 
-{
-
-	for(int c=0;c<MAX_SONG_POSITIONS;c++)
-	{
-		_pSong->playOrder[c]=0;
-	}
-
-	_pSong->playLength=1;
-	UpdatePlayOrder(false);
-	UpdateSequencer();
-	m_wndView.Repaint();
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-	
-}
-
-void CMainFrame::OnSeqslen() 
-{
-	int const pop=m_wndView.editPosition;
-	
-	if(_pSong->playLength!=(pop+1))
-	{
-		_pSong->playLength=pop+1;
-		UpdatePlayOrder(false);	
-	}
-	
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-}
-
-void CMainFrame::OnSeqspr()
-{
-	int const pop=m_wndView.editPosition;
-	
-	for(int c=0;c<pop;c++)
-		_pSong->playOrder[c]=c;
-	
-	UpdateSequencer();
-	m_wndView.Repaint();
-	m_wndView.SetFocus();
-	m_wndView.OnActivate();
-}
 
 void CMainFrame::OnMultichannelAudition() 
 {
@@ -1543,7 +1657,7 @@ void CMainFrame::OnFollowSong()
 	m_wndView.SetFocus();
 }
 
-void CMainFrame::UpdatePlayOrder(bool mode) 
+void CMainFrame::UpdatePlayOrder(bool mode)
 {
 	CStatic *ls_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ1);
 	CStatic *le_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ2);
@@ -1560,6 +1674,8 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 
 	char buffer[16];
 
+// Update Labels
+	
 	sprintf(buffer,"%.2X",ls);
 	ls_l->SetWindowText(buffer);
 
@@ -1568,13 +1684,6 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 
 	sprintf(buffer,"%.2X",ll);
 	ll_l->SetWindowText(buffer);
-
-	if (mode)
-	{
-		pls->DeleteString(ls);
-		sprintf(buffer,"%.2X: %.2X",ls,le);
-		pls->InsertString(ls,buffer);
-	}
 
 	int songLength = 0;
 	for (int i=0; i <ll; i++)
@@ -1586,12 +1695,23 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	sprintf(buffer, "%02d:%02d", songLength / 60, songLength % 60);
 	pLength->SetWindowText(buffer);
 
+// Update sequencer line
+
+	if (mode)
+	{
+		pls->DeleteString(ls);
+		sprintf(buffer,"%.2X: %.2X",ls,le);
+		pls->InsertString(ls,buffer);
+	}
+	
+// Update sequencer selection	
+	
 	pls->SelItemRange(false,0,pls->GetCount()-1);
-	pls->SetSel(m_wndView.editPosition,true);
+	pls->SetSel(ls,true);
 	for (i=0; i<MAX_SONG_POSITIONS;i++)
 	{
 		_pSong->playOrderSel[i] = false;
 	}
-	_pSong->playOrderSel[m_wndView.editPosition] = true;
+	_pSong->playOrderSel[ls] = true;
 
 }

@@ -31,6 +31,9 @@ VSTPlugin::VSTPlugin()
 	_pEffect=NULL;
 	h_dll=NULL;
 	instantiated=false;		// Constructin' with no instance
+
+	requiresProcess=false;
+	requiresRepl=false;
 }
 
 VSTPlugin::~VSTPlugin()
@@ -74,7 +77,7 @@ int VSTPlugin::Instance(char *dllname)
 	_pEffect->user = this;
 	Dispatch( effOpen        ,  0, 0, NULL, 0.0f);
 	Dispatch( effSetProgram  ,  0, 0, NULL, 0.0f);
-//	Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
+	Dispatch( effMainsChanged,  0, 1, NULL, 0.0f);
 
 #if defined(_WINAMP_PLUGIN_)
 	Dispatch( effSetSampleRate, 0, 0, NULL, (float)Global::pConfig->_samplesPerSec);
@@ -92,6 +95,12 @@ int VSTPlugin::Instance(char *dllname)
 
 	}
 	memcpy(_editName,_sProductName,15);
+
+// Compatibility hacks
+	if ( strcmp(_sProductName,"sc-101") == 0 ) requiresRepl=true;
+
+//
+
 	_editName[15] ='\0';
 	if (!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName, 0.0f))
 	{
@@ -106,7 +115,6 @@ int VSTPlugin::Instance(char *dllname)
 	sprintf(_sDllName,dllname);
 	TRACE("VST plugin dll filename : %s\n",_sDllName);
 
-	//keep plugin name
 	instantiated=true;
 
 	TRACE("VST plugin : Inputs = %d, Outputs = %d\n",_pEffect->numInputs,_pEffect->numOutputs);
@@ -134,6 +142,8 @@ void VSTPlugin::Create(VSTPlugin *plug)
 								// is just a "trick" so that when destructing the "plug", it
 								// doesn't unload the Dll.
 	instantiated=true;
+	requiresProcess=plug->requiresProcess;
+	requiresRepl=plug->requiresRepl;
 }
 void VSTPlugin::Free() // Called also in destruction
 {
@@ -304,16 +314,21 @@ bool VSTPlugin::Load(RiffFile* pFile)
 	pFile->Read(&junk[0], sizeof(int)); // filterLfophase
 	pFile->Read(&junk[0], sizeof(int)); // filterMode
 
-	bool any;
-	if (_type == MACH_VST || _type == MACH_VSTFX)
-	{
-		pFile->Read(&any, sizeof(any)); // ovst.ANY
+		bool old;
+		pFile->Read(&old, sizeof(old)); // old format
 		pFile->Read(&_instance, sizeof(_instance)); // ovst.instance
-		pFile->Read(&_midichannel, sizeof(_midichannel));
-	}
+		if ( old )
+		{
+			char mch;
+			pFile->Read(&mch,sizeof(mch));
+			_program=0;
+		}
+		else
+		{
+			pFile->Read(&_program, sizeof(_program));
+		}
 
-	return any;
-
+	return true;
 }
 #if !defined(_WINAMP_PLUGIN_)
 bool VSTPlugin::Save(RiffFile* pFile)
@@ -413,13 +428,12 @@ bool VSTPlugin::Save(RiffFile* pFile)
 	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
 	pFile->Write(&junk[0], sizeof(int)); // filterMode
 
-	if (_type == MACH_VST || _type == MACH_VSTFX)
-	{
-		bool any = true;
-		pFile->Write(&any, sizeof(any)); // ovst.ANY
+		bool old = false;
+		pFile->Write(&old, sizeof(old)); // Is old format?
 		pFile->Write(&_instance, sizeof(_instance)); // ovst.instance
-		pFile->Write(&_midichannel, sizeof(_midichannel));
-	}
+		int p = GetCurrentProgram();
+		_program = p;
+		pFile->Write(&_program, sizeof(_program));
 
 	return true;
 
@@ -433,8 +447,20 @@ bool VSTPlugin::LoadChunk(RiffFile *pFile)
 		long chunk_size;
 		pFile->Read(&chunk_size,sizeof(long));
 		
+		char *chunk=NULL;
+
+//		This was to be used as a "safe chunk loader", but some
+//		plugins change its size depending on the settings.
+//
+//		long ck_sz=Dispatch( effGetChunk,0,0, &chunk ,0.0f);
+//		while ( chunk_size != ck_sz && !pFile->Eof())
+//		{
+//			pFile->Skip(chunk_size);
+//			pFile->Read(&chunk_size,sizeof(long));
+//		}
+
 		// Read chunk
-		char *chunk=new char[chunk_size];	
+		chunk=new char[chunk_size];	
 		pFile->Read(chunk,chunk_size);
 		Dispatch(effSetChunk,0, chunk_size, chunk ,0.0f);
 		delete chunk;
@@ -612,8 +638,10 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		
 	case audioMasterTempoAt:			return Global::_pSong->BeatsPerMin*10000;
 
-	case audioMasterNeedIdle:	
-		((VSTPlugin*)effect->user)->wantidle = true;
+	case audioMasterNeedIdle:
+		if ( effect->user ) {
+			((VSTPlugin*)effect->user)->wantidle = true;
+		}
 		return 1;
 #if defined(_WINAMP_PLUGIN_)
 	case audioMasterGetSampleRate:		return Global::pConfig->_samplesPerSec;	
@@ -638,12 +666,18 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 		return 0;
 
+	case 	audioMasterSizeWindow:
+//		((VSTPlugin*)effect->user)->
+		
+		break;
+	case 	audioMasterGetParameterQuantization:	
+		return NUMTICKS+1; // because its from 0 to NUMTICKS
 		
 	case 	audioMasterSetTime:						TRACE("VST master dispatcher: Set Time");break;
 	case 	audioMasterGetNumAutomatableParameters:	TRACE("VST master dispatcher: GetNumAutPar");break;
-	case 	audioMasterGetParameterQuantization:	TRACE("VST master dispatcher: ParamQuant");break;
+//	case 	audioMasterGetParameterQuantization:	TRACE("VST master dispatcher: ParamQuant");break;
 	case 	audioMasterIOChanged:					TRACE("VST master dispatcher: IOchanged");break;
-	case 	audioMasterSizeWindow:					TRACE("VST master dispatcher: Size Window");break;
+//	case 	audioMasterSizeWindow:					TRACE("VST master dispatcher: Size Window");break;
 	case 	audioMasterGetBlockSize:				TRACE("VST master dispatcher: GetBlockSize");break;
 	case 	audioMasterGetInputLatency:				TRACE("VST master dispatcher: GetInLatency");break;
 	case 	audioMasterGetOutputLatency:			TRACE("VST master dispatcher: GetOutLatency");break;
@@ -678,7 +712,7 @@ VSTInstrument::VSTInstrument()
 	_type = MACH_VST;
 	_mode = MACHMODE_GENERATOR;
 	sprintf(_editName, "Vst2 Instr.");
-	_midichannel = 0;
+	_program = 0;
 	for (int i=0;i<MAX_TRACKS;i++)
 	{
 		trackNote[i].note=255; // No Note.
@@ -844,7 +878,13 @@ void VSTInstrument::Work(int numSamples)
 		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 		SendMidi();
 
-		_pEffect->process(_pEffect,NULL,outputs,numSamples);
+		if (!requiresRepl ) _pEffect->process(_pEffect,NULL,outputs,numSamples);
+		else _pEffect->processReplacing(_pEffect,NULL,outputs,numSamples);
+
+		if ( _pEffect->numOutputs == 1)
+		{
+			Dsp::Add(outputs[0],outputs[1],numSamples,1);
+		}
 	}
 	_worked = true;
 
@@ -859,7 +899,12 @@ void VSTInstrument::Work(int numSamples)
 
 		SendMidi();
 
-		_pEffect->process(_pEffect,NULL,outputs,numSamples);
+		if (!requiresRepl ) _pEffect->process(_pEffect,NULL,outputs,numSamples);
+		else _pEffect->processReplacing(_pEffect,NULL,outputs,numSamples);
+		if ( _pEffect->numOutputs == 1)
+		{
+			Dsp::Add(outputs[0],outputs[1],numSamples,1);
+		}
 
 		if ( Global::pConfig->autoStopMachines )
 		{
@@ -909,7 +954,7 @@ VSTFX::VSTFX()
 	inputs[1]=_pSamplesR;
 	outputs[0]=_pOutSamplesL;
 	outputs[1]=_pOutSamplesR;
-	_midichannel = 0;
+	_program = 0;
 }
 VSTFX::~VSTFX()
 {
@@ -958,7 +1003,7 @@ void VSTFX::Work(int numSamples)
 			{
 			// MIX input0 and input1!
 			}
-			if (_pEffect->flags & effFlagsCanReplacing)
+			if ((_pEffect->flags & effFlagsCanReplacing) || requiresRepl)
 			{
 				_pEffect->processReplacing(_pEffect, inputs, outputs, numSamples);
 			}

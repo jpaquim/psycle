@@ -139,6 +139,11 @@ ULONG RiffFile::Skip(
 	return SetFilePointer(_handle, numBytes, NULL, FILE_CURRENT); 
 }
 
+bool RiffFile::Eof(
+	void)
+{
+	return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -236,4 +241,10 @@ ULONG OldPsyFile::Skip(
 		return (ULONG)-1;
 	}
 	return ftell(_file);
+}
+
+bool OldPsyFile::Eof(
+	void)
+{
+	return (bool) feof(_file);
 }
