@@ -32,13 +32,28 @@ public:
 	{
 		overall_gain,
 		overall_dry_wet,
+
 		separator_direct,
-		direct_gain, direct_pan, direct_delay_stereo_delta,
+
+		direct_gain,
+		direct_pan,
+		direct_delay_stereo_delta,
+
 		separator_early_reflection,
-		early_reflection_gain, early_reflection_pan, early_reflection_delay, early_reflection_delay_stereo_delta,
+
+		early_reflection_gain,
+		early_reflection_pan,
+		early_reflection_delay,
+		early_reflection_delay_stereo_delta,
+
 		separator_late_reflection,
-		late_reflection_gain, late_reflection_pan, late_reflection_delay,
+
+		late_reflection_gain,
+		late_reflection_pan,
+		late_reflection_delay,
+
 		separator,
+
 		channel_mix
 	};
 
@@ -48,23 +63,31 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
-			Information::Parameter::linear("dry / wet", 0, 1, 1),
-			Information::Parameter("direct"),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
-			Information::Parameter::linear("pan", -1, 0, 1),
-			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
-			Information::Parameter("early reflection"),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
-			Information::Parameter::linear("pan", -1, 0, 1),
-			Information::Parameter::exponential("delay", .0005, .01, .045),
-			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
-			Information::Parameter("late reflection"),
-			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
-			Information::Parameter::linear("pan", -1, 0, 1),
-			Information::Parameter::exponential("delay", .015, .04, .100),
-			Information::Parameter(),
-			Information::Parameter::discrete("channel mix", normal, mono)
+			/* overall_gain                        = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
+			/* overall_dry_wet                     = */ Information::Parameter::linear("dry / wet", 0, 1, 1),
+
+			/* separator_direct                    = */ Information::Parameter("direct"),
+
+			/* direct_gain                         = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
+			/* direct_pan                          = */ Information::Parameter::linear("pan", -1, 0, 1),
+			/* direct_delay_stereo_delta           = */ Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
+
+			/* separator_early_reflection          = */ Information::Parameter("early reflection"),
+
+			/* early_reflection_gain               = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
+			/* early_reflection_pan                = */ Information::Parameter::linear("pan", -1, 0, 1),
+			/* early_reflection_delay              = */ Information::Parameter::exponential("delay", .0005, .01, .045),
+			/* early_reflection_delay_stereo_delta = */ Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
+
+			/* separator_late_reflection           = */ Information::Parameter("late reflection"),
+
+			/* late_reflection_gain                = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
+			/* late_reflection_pan                 = */ Information::Parameter::linear("pan", -1, 0, 1),
+			/* late_reflection_delay               = */ Information::Parameter::exponential("delay", .015, .04, .100),
+
+			/* separator                           = */ Information::Parameter(),
+
+			/* channel_mix                         = */ Information::Parameter::discrete("channel mix", normal, mono)
 		};
 		static const Information information(Information::Type::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
 		return information;
