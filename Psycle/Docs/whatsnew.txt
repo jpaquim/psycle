@@ -11,6 +11,8 @@ V1.7.3
 * better memory management of pattern data (up to 10mb savings!) (pooplog)
 * optimized machine indexing and also machine view rendering (pooplog)
 * new cache.map file format with many improvements - making psycle open quicker for your pleasure (pooplog)
+* psycle now names new machines with numbers if duplicate name exists (pooplog)
+* machine names can be longer now (pooplog)
 ! sampler doesn't crash when no instrument is specified any more (pooplog)
 ! save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
 ! error messages on file read/write problems (pooplog)
@@ -33,7 +35,7 @@ V1.7.1
 V1.7RC6
 -------
 
-+ Tweak Slide command. Slides a Tweak to make it smoother.
++ Tweak Slide command. Slides a Tweak to make it smoother. (pooplog)
 + Psycle now creates a log of the loaded plugins at start, to help you know which one made it crash, if any.
 + Implemented "Exchange" button in Gear Rack and added Instruments as well.
 * Speeded up some of the internals thanks to Dan.
