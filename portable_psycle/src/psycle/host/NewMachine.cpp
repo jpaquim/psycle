@@ -413,25 +413,25 @@ namespace psycle
 				std::vector<std::string> nativePlugs;
 				std::vector<std::string> vstPlugs;
 
+				CProgressDialog Progress;
+				host::loggers::info("Scanning plugins ... ");
+				if(progressOpen)
+				{
+					Progress.Create();
+					Progress.SetWindowText("Scanning plugins ... ");
+					Progress.ShowWindow(SW_SHOW);
+				}
+
 				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
 				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
 
+				int plugin_count = nativePlugs.size() + vstPlugs.size();
 
-				CProgressDialog Progress;
-				int plugin_count(0);
-				if(progressOpen)
-				{
-					host::loggers::info("Scanning plugins ... Counting ...");
-					Progress.Create();
-					Progress.SetWindowText("Scanning plugins ... Counting ...");
-					Progress.ShowWindow(SW_SHOW);
-					plugin_count = nativePlugs.size() + vstPlugs.size();
+				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
+				host::loggers::info(s.str());
+				if(progressOpen) {
 					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
-					{
-						std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
-						host::loggers::info(s.str().c_str());
-						Progress.SetWindowText(s.str().c_str());
-					}
+					Progress.SetWindowText(s.str().c_str());
 				}
 				std::ofstream out;
 				{
@@ -450,6 +450,7 @@ namespace psycle
 					<< std::endl
 					<< "If psycle is crashing on load, chances are it's a bad plugin, "
 					<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
+				
 				if(progressOpen)
 				{
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Natives ...";
@@ -493,7 +494,8 @@ namespace psycle
 				}
 				host::loggers::info("Saving scan cache file ...");
 				SaveCacheFile();
-				if(progressOpen) Progress.OnCancel();
+				if(progressOpen)
+					Progress.OnCancel();
 				::AfxGetApp()->DoWaitCursor(-1); 
 				host::loggers::info("Done.");
 			}
@@ -541,8 +543,10 @@ namespace psycle
 								exists = true;
 								const std::string error(_pPlugsInfo[i]->error);
 								std::stringstream s;
-								if(error.empty()) s << "cached.";
-								else s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
+								if(error.empty())
+									s << "cached.";
+								else
+									s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
 								out << s.str();
 								out.flush();
 								host::loggers::info(fileName + '\n' + s.str());

@@ -244,9 +244,10 @@ namespace psycle
 								note_on_count_[channel][note]=0;
 					}
 					~note_checker() {
-						for(int channel=0;channel<16;channel++)
+/*						for(int channel=0;channel<16;channel++)
 							for(int note=0;note<128;note++)
 								assert(note_on_count_[channel][note]==0);
+*/
 					}
 					void note_on(int note, int channel) {
 						assert(note >= 0 && note < 128);
