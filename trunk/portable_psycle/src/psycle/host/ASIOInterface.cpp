@@ -1,20 +1,20 @@
-#include "stdafx.h"
-#include "ASIOInterface.h"
-#include "resource.h"
-#include "Registry.h"
-#include "ASIOConfig.h"
-#include "Configuration.h"
-#include "MidiInput.h"
-#include "ASIO\\asiosys.h"
-#include "ASIO\\asio.h"
-#include "ASIO\\asiodrivers.h"
-#include "helpers.h"
+#include <stdafx.h>
+#include <psycle/host/ASIOInterface.h>
+#include <psycle/host/resource.h>
+#include <psycle/host/Registry.h>
+#include <psycle/host/ASIOConfig.h>
+#include <psycle/host/Configuration.h>
+#include <psycle/host/MidiInput.h>
+#include <psycle/host/helpers.h>
+#include <asio/asiosys.h>
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
 namespace psycle
 {
 	namespace host
 	{
+		using namespace asio;
+
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 
 		#define ALLOW_NON_ASIO

@@ -1,6 +1,11 @@
-#ifndef __asiosys__
-	#define __asiosys__
-
+#pragma once
+#if defined ASIO
+	#include LIBRARY__EXPORT
+#else
+	#include LIBRARY__IMPORT
+#endif
+namespace asio
+{
 	#ifdef WIN32
 		#undef MAC 
 		#define PPC 0
@@ -78,5 +83,4 @@
 			#endif
 		#endif
 	#endif
-
-#endif
+}

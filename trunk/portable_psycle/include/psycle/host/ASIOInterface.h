@@ -1,7 +1,8 @@
 #pragma once
-#include "AudioDriver.h"
-#include "ASIO\\asiodrivers.h"
-#include "ASIO\\asio.h"
+#include <psycle/host/AudioDriver.h>
+#include <asio/asiodrivers.h>
+#include <asio/asio.h>
+#pragma comment(lib, "asio")
 ///\file
 ///\brief interface file for psycle::host::ASIOInterface.
 namespace psycle
@@ -17,10 +18,7 @@ namespace psycle
 		public:
 			ASIOInterface();
 			virtual ~ASIOInterface() throw();
-			virtual void Initialize(
-				HWND hwnd,
-				AUDIODRIVERWORKFN pCallback,
-				void* context);
+			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context);
 			virtual void Configure();
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };
@@ -52,8 +50,8 @@ namespace psycle
 			bool Start();
 			bool Stop();
 
-			static AudioDriverInfo		_info;
-			static CCriticalSection		_lock;
+			static AudioDriverInfo _info;
+			static ::CCriticalSection _lock;
 
 			bool _initialized;
 			bool _configured;
@@ -63,7 +61,7 @@ namespace psycle
 
 			char szNameBuf[MAX_ASIO_DRIVERS][64];
 			
-			AsioDrivers asioDrivers;
+			asio::AsioDrivers asioDrivers;
 		};
 	}
 }
