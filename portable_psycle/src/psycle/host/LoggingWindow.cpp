@@ -3,6 +3,7 @@
 #include <psycle/host/MainFrm.h>
 #include <psycle/host/constants.h>
 #include <psycle/host/LoggingWindow.h>
+#include <cstring>
 ///\file
 ///\brief implementation file for psycle::host::CLoggingWindow.
 namespace psycle
@@ -40,7 +41,7 @@ namespace psycle
 			CDialog::OnInitDialog();
 			ResizeTextBox();			
 			defaultCF.crTextColor = RGB(255,0,0);		
-			strcpy (defaultCF.szFaceName, "Lucida Console");
+			std::strcpy(defaultCF.szFaceName, "Lucida Console");
 			defaultCF.yHeight = 160;
 			defaultCF.cbSize = sizeof(defaultCF);
 			defaultCF.dwMask = CFM_SIZE | CFM_FACE |  CFM_COLOR;
