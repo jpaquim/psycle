@@ -21,7 +21,14 @@ rough bug count: ~60, many aren't really bugs though.
 * New and unsorted and untested
 -------------------------------
 
-+ undos for machine and wave edit?
+
++++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
+++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms) 
+
++ tracker commands to connect/disconnect machines
+
+++ undos for machine and wave edit? also track changes for file changed flag
+
 
 ** need save file? reminder on open file 
 *** save as wave should alert when it runs out of space
@@ -34,29 +41,25 @@ rough bug count: ~60, many aren't really bugs though.
 	[ * tried a fix, need to talk to yannis to see if it worked]
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
+*** when you drag pan handle over transparency, it leaves trails.
 
 ++ an option to merge in another song...
 
 ** gear rack stuff: exchange - is it backwards?
 
-** parameter name lengths in plugs: http://psycle.pastnotecut.org/thread.php?threadid=938&boardid=2&styleid=1
-
 ++ volume slide command
 
-++ <sampler> mmmm, i miss another feature. Show with a different colour the notes of the actual Generator/effect in patterns
+++ <sampler> Show with a different colour the notes of the actual Generator/effect in patterns
 
 + humanizer
 + global volume fades
 + <bdzld> poop: can you make mcm interpolated? (like a midi tweak smooth)
+	[-problem of knowing what current value is-]
 + the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
-
 
 + add an editing mode that does not enter the istrument or machine
 
-
-
 + <alk> some bastards want keyrepeat for notes back
-+++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 + volume slide in sampler, so that you can cut the vol of a sample without a click
 + option to not move cursor when pasting
 + save bar hide/unhide settings
@@ -72,13 +75,6 @@ rough bug count: ~60, many aren't really bugs though.
 ?+ 'Free wave' button that sets driver to silent
 ?+ release audio when psycle looses focus option
 	[And we will get lots of people again of why does psycle do that]
-?! Dunno if i mentioned this before: reaktorvst v3.05 crashes psycle when it generates the 'CPU overload' popup
-! Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
-
-
-
-+	Option to disable vus (to save CPU)
-	[ you could easily make a skin with no vus.. just set the rects to size 0]
 
 +	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
 
@@ -133,6 +129,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 --------------------------
 * <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' 
 	button in the inst ed, and select some of the sample wav, the display goes blank
+* Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
 !	alk: escape to close wave ed
 		[JAZ : It's a window, not a dialog]
 +++	<_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
@@ -185,6 +182,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
 !?	alk - make wires square ended, like spec analyser
++	Option to disable vus (to save CPU)
+	[ you could easily make a skin with no vus.. just set the rects to size 0]
 +	Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
 +	Internal Fx Gui to Native Gui Conversion (including wiredialog, or not...)
@@ -244,7 +243,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded;
 		docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible
 		again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
-	psycle crashes when i get the 'cpu overload' warning in reaktor
+**	psycle crashes when i get the 'cpu overload' warning in reaktor 3.05
+** reaktor 4.0 has gui problems, including the wrong parameter being changed by the mouse?
 **	<_sue_> bug with native intruments pro-52 it doesnt rec the tweaks at all.....
 		<pooplog> are you able to control the tweaks of it from the pattern?
 		<_sue_> yes i am (in pro52)
@@ -257,6 +257,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ** ni fm7 locks up psycle on parameter change midi command with gui open
 ** ni pro53 sometimes crashes when loading a song that uses it.
 ** ni spektral delay 1.0 crashes on effClose or effEditIdle messages.  notice a trend with NI plugins yet?
+** stylus locks up on fast songs, with looping sound
+** <pooplog> waveshell: i am aware that this does not work, i do not know why yet 
 ** synth 1 1.05a crashes with exception error on instance in debug build.
 *	Many vsts randomly loose keyboard focus
 	[ alk says make an invisible topmost window that passes clicks and keys down to windows beneath it ]

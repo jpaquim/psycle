@@ -476,9 +476,15 @@ bool Plugin::Load(RiffFile* pFile)
 		if ( FindFileinDir(sDllName,sPath) )
 		{
 			strcpy(sPath2,sPath);
-			if (!Instance(sPath2)) result=false;
+			if (!Instance(sPath2)) 
+			{
+				result=false;
+			}
 		}
-		else result = false;
+		else 
+		{
+			result = false;
+		}
 #else
 		if ( !CNewMachine::dllNames.Lookup(sDllName,sPath) ) 
 		{
@@ -488,14 +494,24 @@ bool Plugin::Load(RiffFile* pFile)
 //			GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
 			strcpy(sPath2,sDllName);
 		}
-		else { strcpy(sPath2,sPath); }
-
-		if (!Instance(sPath2))
+		else 
+		{ 
+			strcpy(sPath2,sPath); 
+		}
+		
+		if ( !CNewMachine::TestFilename(sPath2) ) 
 		{
-			char sError[_MAX_PATH];
-			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-			::MessageBox(NULL,sError, "Error", MB_OK);
 			result = false;
+		}
+		else 
+		{
+			if (!Instance(sPath2))
+			{
+				char sError[_MAX_PATH];
+				sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
+				::MessageBox(NULL,sError, "Error", MB_OK);
+				result = false;
+			}
 		}
 #endif // _WINAMP_PLUGIN_
 	Init();

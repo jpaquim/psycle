@@ -133,6 +133,10 @@ public:
 		if ( CNewMachine::dllNames.Lookup(psFileName,sPath) )
 		{
 			strcpy(sPath2,sPath);
+			if ( !CNewMachine::TestFilename(sPath2) ) 
+			{
+				return false;
+			}
 			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 			{
 				char sError[128];

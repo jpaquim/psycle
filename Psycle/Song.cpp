@@ -102,33 +102,48 @@ bool Song::CreateMachine(
 		break;
 	case MACH_PLUGIN:
 		{
-		pMachine = pPlugin = new Plugin(index);
-		if (!pPlugin->Instance(psPluginDll))
-		{
-			delete pMachine; 
-			return false;
-		}
-		break;
+			pMachine = pPlugin = new Plugin(index);
+			if ( !CNewMachine::TestFilename(psPluginDll) ) 
+			{
+				delete pMachine; 
+				return false;
+			}
+			if (!pPlugin->Instance(psPluginDll))
+			{
+				delete pMachine; 
+				return false;
+			}
+			break;
 		}
 	case MACH_VST:
 		{
-		pMachine = pVstPlugin = new VSTInstrument(index);
-		if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
-		{
-			delete pMachine; 
-			return false;
-		}
-		break;
+			pMachine = pVstPlugin = new VSTInstrument(index);
+			if ( !CNewMachine::TestFilename(psPluginDll) ) 
+			{
+				delete pMachine; 
+				return false;
+			}
+			if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
+			{
+				delete pMachine; 
+				return false;
+			}
+			break;
 		}
 	case MACH_VSTFX:
 		{
-		pMachine = pVstPlugin = new VSTFX(index);
-		if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
-		{
-			delete pMachine; 
-			return false;
-		}
-		break;
+			pMachine = pVstPlugin = new VSTFX(index);
+			if ( !CNewMachine::TestFilename(psPluginDll) ) 
+			{
+				delete pMachine; 
+				return false;
+			}
+			if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
+			{
+				delete pMachine; 
+				return false;
+			}
+			break;
 		}
 
 	case MACH_DUMMY:
@@ -1812,7 +1827,19 @@ bool Song::Load(RiffFile* pFile)
 						if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 						{
 							strcpy(sPath2,sPath);
-							if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+							if (!CNewMachine::TestFilename(sPath2))
+							{
+								Machine* pOldMachine = pMac[i];
+								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+								pOldMachine->_pSamplesL = NULL;
+								pOldMachine->_pSamplesR = NULL;
+								// dummy name goes here
+								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+								delete pOldMachine;
+								pMac[i]->_type = MACH_DUMMY;
+								pMac[i]->wasVST = true;
+							}
+							else if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
 								Machine* pOldMachine = pMac[i];
 								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
@@ -1841,7 +1868,23 @@ bool Song::Load(RiffFile* pFile)
 						if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
 						{
 							strcpy(sPath2,sPath);
-							if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+							if (!CNewMachine::TestFilename(sPath2))
+							{
+								char sError[128];
+								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
+								::MessageBox(NULL,sError, "Loading Error", MB_OK);
+
+								Machine* pOldMachine = pMac[i];
+								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+								pOldMachine->_pSamplesL = NULL;
+								pOldMachine->_pSamplesR = NULL;
+								// dummy name goes here
+								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+								delete pOldMachine;
+								pMac[i]->_type = MACH_DUMMY;
+								pMac[i]->wasVST = true;
+							}
+							else if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
 								char sError[128];
 								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
