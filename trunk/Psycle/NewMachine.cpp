@@ -275,6 +275,7 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_Allow.EnableWindow(FALSE);
 	}
 	
+	/*
 	// Effects
 	if (tHand == hInt[1])
 	{
@@ -353,8 +354,9 @@ void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult)
 		m_Allow.SetCheck(FALSE);
 		m_Allow.EnableWindow(FALSE);
 	}
+	*/
 	
-	if (tHand == hInt[7])
+	if (tHand == hInt[1])
 	{
 		m_nameLabel.SetWindowText("Dummy");
 		m_descLabel.SetWindowText("Replaces inexistent plugins");

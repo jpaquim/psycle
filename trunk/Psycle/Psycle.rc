@@ -1818,7 +1818,7 @@ BEGIN
         MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
         MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
         MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
-        MENUITEM "Render as &Wav File",         ID_FILE_SAVEAUDIO
+        MENUITEM "Render as &Wav...",           ID_FILE_SAVEAUDIO
         POPUP "I&mport"
         BEGIN
             MENUITEM "&XM File",                    ID_FILE_IMPORT_XMFILE
