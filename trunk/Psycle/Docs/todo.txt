@@ -1,41 +1,55 @@
 *I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
-*remove waits from play when in export mode
-*<alk>I tried recordnig the wave out, the start gap is indeed fixed, but it seems the last line or two is not recorded (wave ends prematurely)
-*should be able to pick cursor colour rather than have it invert background 
-*lines between tracks should be definable, not black
--midi control commands learn
--longer sequences (256)
--more tracks (64)
--store state of follow song toggle
--Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring pattern data and other settings, this possible? (yes, but will require new song parser...)
--Vst hex values for parameters in gui
-!should make it so clicking on colour boxes pops up menu
-*screen flashes switching from machine to pattern view (new)
-*make master machine update display if it decides to change volume
-*dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today it is fine.  i think it has to do with cpu load.
-*pattern view does not refresh when skin dlg presets have changed.
-*input handler is not called during machine view, thus undo/redo don't work for seq edits from control keys.  so... add them to machine view somehow.
-+actual skinning
-*song length calculation does not take ffxx commands into account
-+visual preset saving/loading
-!DO NOT LOAD LIST VST list & database
-!<angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it when you want.
-<doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default pattern length parameter
-<Alk^> do u think the recording with subtracting the buffer delay will be doable? 
-<Alk^> I think the line numbering should be optional
-<Alk^> I also think that the cursor movement after a paste should be optional to =)
-Alk* place cursor on last line, change to machine screen and back to pattern, bug
-Alk* would be useful to put dialogs like wire vol into separate tasks (modeless) so psycle is not disabled when they are open
-<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
-<Pikari> oh. and I hate it when I choose skip=0 and the cursor goes to the next column :(
-<_sue_> hey poop....can we have something like a right double click for inserting the first not used patter (like before with left double click)?
-<_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in the one im using i have half of the tab where the pattern seq is completely free.....oki no more sugestions for today...hihihi
-<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
-<_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
-<sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
-- when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
-- when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already happens to native plugs)
-- in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu (many vsts use control + left mouse button to reset knobs/params....maybe any other alike key combination.... )
+* remove waits from play when in export mode
+* <alk>I tried recordnig the wave out, the start gap is indeed fixed, but it seems the last line or two is
+      not recorded (wave ends prematurely)
+* should be able to pick cursor colour rather than have it invert background 
+* lines between tracks should be definable, not black
++ midi control commands learn
+! longer sequences (256)
+! more tracks (64)
++ store state of follow song toggle
++ Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
+	pattern data and other settings, this possible? (yes, but will require new song parser...)
++ Vst hex values for parameters in gui
+! should make it so clicking on colour boxes pops up menu
+* screen flashes switching from machine to pattern view (new)
+* make master machine update display if it decides to change volume
+* dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
+	it is fine.  i think it has to do with cpu load.
+* pattern view does not refresh when skin dlg presets have changed.
++ actual skinning
+* song length calculation does not take ffxx commands into account
++ visual preset saving/loading
+! DO NOT LOAD LIST VST list & database
+! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
+	when you want.
++ <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
+	pattern length parameter
+* <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
++ <Alk^> I think the line numbering should be optional
++ <Alk^> I also think that the cursor movement after a paste should be optional to =)
+* Alk* place cursor on last line, change to machine screen and back to pattern, bug
++ Alk* would be useful to put dialogs like wire vol into separate tasks (modeless) so psycle is not disabled 
+	when they are open
+! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
++ <_sue_> hey poop....can we have something like a right double click for inserting the first not used pattern
+	 (like instert button)?
+! <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in 
+	the one im using i have half of the tab where the pattern seq is completely free.
++ <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
+	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
+! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
+	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
++ <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
+	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
+* when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
+	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
+	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
+* when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
+	happens to native plugs)
++ in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
+	(many vsts use control + left mouse button to reset knobs/params....maybe any other alike key 
+	combination.... )
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
