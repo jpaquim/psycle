@@ -32,38 +32,49 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.8  2004/05/10 15:44:15  johan-boule
+added comments on upcoming release
+
 Revision 1.7  2004/05/10 15:15:47  johan-boule
 added commit log to whatsnew.txt
 
+release to come
+---------------
++added automatized compilation + packaging + update of psycle sourceforge site for faster and more frequent updates (bohan)
+*ported the open source native plugins to the new compiler (bohan)
+*refactoring of the source code: cleaner internally, but no visible changes for the users (bohan)
+!fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk, pooplog)
++added cpu specific builds for 6th and 7th generation x86 CPUs (bohan)
 
 v1.7.6.2
 --------
-!fixed bug in the optimized sine sequence generator (32-bit floating point numbers were not accurate enough, now it's 64-bit)
-!back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you.
+!fixed bug in the flanger's optimized sine sequence generator: 32-bit floating point numbers were not accurate enough, now it's 64-bit (bohan)
+!back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you, but psycle still works on it. (alk, bohan)
 
 v1.7.6.1
 --------
-!fixed OLD bug, VSTi data slider would send data to the VSTi whenever the slider was repainted, if tweak record is enabled then the data gets written to the pattern
+!fixed OLD bug, VSTi data slider would send data to the VSTi whenever the slider was repainted, if tweak record is enabled then the data gets written to the pattern (alk)
+*final port (merged again) of the source code to the latest microsoft compiler, msvc7.1. needs new dll to be distributed. (bohan)
 
 v1.7.6
 ------
-!fixed bug, master volume does not release focus!
-!realigned widgets and controls so they are neater ;)
-+added key "select bar" (ctrl-k, you need to reset keysettings or assign your own key) (quickselects 16, 32, 64 lines etc, ala 	IT, multiples of TPB)
-+added keypress for follow song (ctrl-f, you need to reset keysettings or assign your own key)
-+added move wire source (ctrl + mouse button on wire to change it's source)
-+pattern step now affects navigation
-+swing fill defaults are nicer :)
-+added selected machine highlighting
-+changed machine selection to be more intuitive, now just click on a gen to select it
-+added maximise pattern view (ctrl-tab, you need to reset keysettings or assign your own key)
-+changed the preview wave volume to 25% (it was too loud)
-!fixed master volume slider and master volume dialog master slider
-!disabled the master volume dialog wire volumes (they were screwing up 	the wire vols!)
-!fixed bug when loopmode was off, it played the first line of the song 	after the song finished
-!fixed bug, playbar was not being drawn when changing pattern
-!changed midi config default to not write mcm from midi data input
-+made move cursor when pasting optional (set in the config dialog)
+!fixed bug, master volume does not release focus! (alk)
+!realigned widgets and controls so they are neater ;) (alk)
++added key "select bar" (ctrl-k, you need to reset keysettings or assign your own key) (quickselects 16, 32, 64 lines etc, ala 	IT, multiples of TPB) (alk)
++added keypress for follow song (ctrl-f, you need to reset keysettings or assign your own key) (alk)
++added move wire source (ctrl + mouse button on wire to change it's source) (alk)
++pattern step now affects navigation (alk)
++swing fill defaults are nicer :) (alk)
++added selected machine highlighting (alk)
++changed machine selection to be more intuitive, now just click on a gen to select it (alk)
++added maximise pattern view (ctrl-tab, you need to reset keysettings or assign your own key) (alk)
++changed the preview wave volume to 25% (it was too loud) (alk)
+!fixed master volume slider and master volume dialog master slider (alk)
+!disabled the master volume dialog wire volumes (they were screwing up 	the wire vols!) (alk)
+!fixed bug when loopmode was off, it played the first line of the song 	after the song finished (alk)
+!fixed bug, playbar was not being drawn when changing pattern (alk)
+!changed midi config default to not write mcm from midi data input (alk)
++made move cursor when pasting optional (set in the config dialog) (alk)
 
 v1.7.5
 ------
