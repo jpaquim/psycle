@@ -15,7 +15,6 @@
 + make file dialogs remember preferences
 + shift + off inserts an off that does not specify machine
 + option to see waveform instead of notes in pattern editor for acid mode
-* clicking on a different block in sequencer should jump play position to it
 * psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
@@ -38,7 +37,7 @@
 
 * Machines
 ------------
-* cyanphase vibrasynth has an access violation bug
+* cyanphase vibrasynth has an access violation bug * I need source to fix
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 bug:	 JMDrum is buggy (Crashes sometimes)
 ! James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
