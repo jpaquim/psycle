@@ -336,8 +336,8 @@ CMachineInfo const MacInfo =
 	GENERATOR,								// flags
 	NUMPARAMETERS,							// numParameters
 	pParameters,							// Pointer to parameters
-#ifdef _DEBUG
-	"Arguru Synth 2 final (Debug build)",		// name
+#if defined _DEBUG ///< should use NDEBUG
+	"Arguru Synth 2 final (debug build)",		// name
 #else
 	"Arguru Synth 2 final",						// name
 #endif
