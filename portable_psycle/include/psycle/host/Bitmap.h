@@ -221,7 +221,7 @@ protected:
 class Blitter
 {
 public:
-    Blitter (Bitmap & bmp)
+	Blitter (Bitmap & bmp)
         : _bmp (bmp), _mode (SRCCOPY),
           _xDst (0), _yDst (0),
           _xSrc (0), _ySrc (0)
