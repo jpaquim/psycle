@@ -33,11 +33,14 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.12  2004/12/06 19:23:37  sampler
+information about latest fixed bug by bohan
+
 Revision 1.11  2004/12/05 00:41:09  johan-boule
 bug fix with psycle::Machine::GetNumParams() and its redefinition in derived classes
 
 Revision 1.10  2004/11/29 21:57:08  sampler
-no message
+information about new release
 
 Revision 1.9  2004/05/27 03:11:52  johan-boule
 information about new release
@@ -60,6 +63,7 @@ release to come (v1.7.7.x)
 +added a message/error logging system (see file output.log.txt) (bohan & alk & magnus)
 !fixed small problem with cursor jumping at bottom of pattern (when pattern step >1 and wrapping is disabled) (sampler)
 +added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
+!fixed bug that made some VSTs didn't save good their parameters/presets (bohan)
 
 v1.7.6.2
 --------
