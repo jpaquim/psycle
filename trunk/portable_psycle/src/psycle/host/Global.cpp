@@ -190,6 +190,7 @@ namespace psycle
 				// oh dear!
 				// fallback to std::cerr
 				std::cerr << "logger crashed" << std::endl;
+				std::cerr << "logger: " << level << ": " << string;
 			}
 		}
 
