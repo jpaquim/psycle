@@ -99,7 +99,6 @@ void Player::ExecuteLine(void)
 					if ( pEntry->_parameter != 0 )
 					{
 						bpm=pEntry->_parameter;
-						Global::_pSong->BeatsPerMin = bpm;
 #if defined(_WINAMP_PLUGIN_)
 						Global::_pSong->SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(bpm*tpb);
 #else

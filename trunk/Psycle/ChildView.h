@@ -290,6 +290,7 @@ private:
 	CCursor iniSelec;
 	CSelection blockSel;
 	CCursor oldm;	// Indicates the previous track/line/col when selecting (used for mouse)
+	CPoint MBStart; 
 
 	bool isBlockCopied;
 	unsigned char blockBufferData[5*MAX_LINES*MAX_TRACKS];
@@ -383,6 +384,8 @@ public:
 	afx_msg void OnFileImportItfile();
 	afx_msg void OnEditUndo();
 	afx_msg void OnEditRedo();
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnMButtonDown( UINT nFlags, CPoint point );
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

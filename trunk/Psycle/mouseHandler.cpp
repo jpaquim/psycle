@@ -103,7 +103,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 			else wiresource = -1; // wiresource=0 -> Master.
 		}// Shift
 		
-		else if (nFlags == 1)
+		else if (nFlags == MK_LBUTTON)
 		{
 			smac=GetMachine(point);
 
@@ -333,7 +333,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 	switch (viewMode)
 	{
 	case VMMachine:
-		if (smac > -1 && nFlags == 1)
+		if (smac > -1 && (nFlags == MK_LBUTTON))
 		{
 			if (smacmode == 0)
 			{
@@ -367,7 +367,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 			}
 		}
 		
-		if ((nFlags == 5) && (wiresource != -1))
+		if ((nFlags == (MK_SHIFT | MK_LBUTTON)) && (wiresource != -1))
 		{
 			wireDX = point.x;
 			wireDY = point.y;
@@ -377,7 +377,7 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 
 	case VMPattern:
 
-		if ( nFlags == 1 && oldm.track != -1)
+		if ( nFlags == MK_LBUTTON && oldm.track != -1)
 		{
 			ntOff = tOff;
 			nlOff = lOff;
@@ -447,6 +447,76 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 				oldm.line=llm;
 				oldm.col=ccm;
 			}
+		}
+		else if (nFlags == MK_MBUTTON)
+		{
+			// scrolling
+			if (abs(point.y - MBStart.y) > 8)
+			{
+				int delta = (point.y - MBStart.y)/8;
+				int nPos = lOff - delta;
+				if (nPos < 0)
+					nPos = 0;
+				if (nPos > lOff )
+				{
+					nlOff=nPos;
+					AdvanceLine(nPos-lOff,false,false); 
+					Repaint(DMScroll);
+				}
+				else if (nPos < lOff )
+				{
+					nlOff=nPos;
+					PrevLine(lOff-nPos,false,false);
+					Repaint(DMScroll);
+				}
+				MBStart.y += delta*8;
+			}
+			// switching tracks
+			if (abs(point.x - MBStart.x) > (8*11))
+			{
+				int delta = (point.x - MBStart.x)/(8*11);
+				int nPos = tOff - delta;
+				if (nPos < 0)
+					nPos = 0;
+				if (nPos > tOff)
+				{
+					ntOff=nPos;
+					AdvanceTrack(nPos-tOff,false,false);
+					Repaint(DMScroll);
+				}
+				else if (nPos < tOff)
+				{
+					ntOff=nPos;
+					PrevTrack(tOff-nPos,false,false);
+					Repaint(DMScroll);
+				}
+				MBStart.x += delta*8*11;
+			}
+
+			/*
+			dx = point.x - MBStart.x;
+			dy = point.y - MBStart.y;
+
+			if ((point.y - MBStart.y) > 8)
+			{
+				int nPos = lOff - (zDelta/30);
+				if (nPos < 0)
+					nPos = 0;
+				if (nPos > lOff )
+				{
+					nlOff=nPos;
+					AdvanceLine(nPos-lOff,false,false); 
+					Repaint(DMScroll);
+				}
+				else if (nPos < lOff )
+				{
+					nlOff=nPos;
+					PrevLine(lOff-nPos,false,false);
+					Repaint(DMScroll);
+				}
+			}
+			*/
+
 		}
 		break;
 	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
@@ -597,4 +667,37 @@ int CChildView::FindBusFromIndex(int smac)
 		}
 	}
 	return 255;
+}
+
+
+
+BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
+{
+	// TODO: Add your message handler code here and/or call default
+	if ( viewMode == VMPattern )
+	{
+		int nPos = lOff - (zDelta/30);
+		if (nPos < 0)
+			nPos = 0;
+		if (nPos > lOff )
+		{
+			nlOff=nPos;
+			AdvanceLine(nPos-lOff,false,false); 
+			Repaint(DMScroll);
+		}
+		else if (nPos < lOff )
+		{
+			nlOff=nPos;
+			PrevLine(lOff-nPos,false,false);
+			Repaint(DMScroll);
+		}
+	}
+	return CWnd ::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CChildView::OnMButtonDown( UINT nFlags, CPoint point )
+{
+	MBStart.x = point.x;
+	MBStart.y = point.y;
+	CWnd ::OnMButtonDown(nFlags, point);
 }
