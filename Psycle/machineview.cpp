@@ -81,7 +81,6 @@ void CChildView::DrawMachineEditor(CDC *devc)
 					oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					oriX = tmac->_x+(MachineCoords.sEffect.width/2);
 					oriY = tmac->_y+(MachineCoords.sEffect.height/2);
 					break;
@@ -108,7 +107,6 @@ void CChildView::DrawMachineEditor(CDC *devc)
 								desY = pout->_y+(MachineCoords.sGenerator.height/2);
 								break;
 							case MACHMODE_FX:
-							case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 								desX = pout->_x+(MachineCoords.sEffect.width/2);
 								desY = pout->_y+(MachineCoords.sEffect.height/2);
 								break;
@@ -181,7 +179,6 @@ void CChildView::DrawMachineEditor(CDC *devc)
 					oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
 					break;
 				case MACHMODE_FX:
-				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 					oriX = tmac->_x+(MachineCoords.sEffect.width/2);
 					oriY = tmac->_y+(MachineCoords.sEffect.height/2);
 					break;
@@ -208,7 +205,6 @@ void CChildView::DrawMachineEditor(CDC *devc)
 								desY = pout->_y+(MachineCoords.sGenerator.height/2);
 								break;
 							case MACHMODE_FX:
-							case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 								desX = pout->_x+(MachineCoords.sEffect.width/2);
 								desY = pout->_y+(MachineCoords.sEffect.height/2);
 								break;
@@ -425,7 +421,6 @@ void CChildView::DrawMachineVol(int c,CDC *devc)
 
 			break;
 		case MACHMODE_FX:
-		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 			// scale our volumes
 			vol *= MachineCoords.dEffectVu.width;
 			vol /= 96;
@@ -582,7 +577,6 @@ void CChildView::ClearMachineSpace(int macnum, CDC *devc)
 			devc->FillSolidRect(&r,Global::pConfig->mv_colour);
 			break;
 		case MACHMODE_FX:
-		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 			r.left = mac->_x;
 			r.top = mac->_y;
 			r.right = r.left + MachineCoords.sEffect.width;
@@ -690,7 +684,6 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 			}
 			break;
 		case MACHMODE_FX:
-		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 			/*
 			RECT r;
 			r.left = x;
@@ -848,7 +841,6 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 			}
 			break;
 		case MACHMODE_FX:
-		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 			devc->BitBlt(x, 
 						y,
 						MachineCoords.sEffect.width, 
@@ -963,7 +955,6 @@ int CChildView::GetMachine(CPoint point)
 				y2 = pMac->_y+MachineCoords.sGenerator.height;
 				break;
 			case MACHMODE_FX:
-			case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 				x2 = pMac->_x+MachineCoords.sEffect.width;
 				y2 = pMac->_y+MachineCoords.sEffect.height;
 				break;

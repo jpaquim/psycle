@@ -1259,7 +1259,7 @@ VSTFX::VSTFX(int index)
 	}
 	VSTPlugin::VSTPlugin();
 	_type = MACH_VSTFX;
-	_mode = MACHMODE_PLUGIN;
+	_mode = MACHMODE_FX;
 	sprintf(_editName, "Vst2 Fx");
 	_pOutSamplesL = new float[STREAM_SIZE];
 	_pOutSamplesR = new float[STREAM_SIZE];

@@ -21,7 +21,7 @@ Plugin::Plugin(int index)
 {
 	_macIndex = index;
 	_type = MACH_PLUGIN;
-	_mode = MACHMODE_PLUGIN;
+	_mode = MACHMODE_FX;
 	sprintf(_editName, "Plugin");
 	_dll = NULL;
 	_pInterface = NULL;
@@ -65,7 +65,10 @@ bool Plugin::Instance(char* psFileName)
 	}
 
 	_isSynth = (_pInfo->Flags == 3 );
-	if (_isSynth )	_mode = MACHMODE_GENERATOR;
+	if (_isSynth )	
+	{
+		_mode = MACHMODE_GENERATOR;
+	}
 
 	strncpy(_psShortName,_pInfo->ShortName,15);
 	_psShortName[15]='\0';
