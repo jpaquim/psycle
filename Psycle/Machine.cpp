@@ -507,16 +507,18 @@ void Master::Work(
 		do
 		{
 			// Left channel
-			if (fabs( *pSamples++ = *pSamplesL++ * mv) > _lMax)
+			if (fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
 			{
-				_lMax = fabsf(*pSamples);
+				_lMax = fabsf(*pSamplesL);
 			}
+			pSamplesL++;
 			
 			// Right channel
-			if (fabs(*pSamples++ = *pSamplesR++ * mv) > _rMax)
+			if (fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
 			{
-				_rMax = fabsf(*pSamples);
+				_rMax = fabsf(*pSamplesR);
 			}
+			pSamplesR++;
 		}
 		while (--i);
 		
