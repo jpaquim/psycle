@@ -246,7 +246,7 @@ public:
 	{
 		return _pEffect->dispatcher(_pEffect, opCode, index, value, ptr, opt);
 	}
-	static long Master(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
+	static long AudioMaster(AEffect *effect, long opcode, long index, long value, void *ptr, float opt);
 
 	unsigned char _program;
 	bool instantiated;

@@ -90,7 +90,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	//This calls the "main" function and receives the pointer to the AEffect structure.
 	try 
 	{
-		_pEffect=main((audioMasterCallback)&Master);
+		_pEffect=main((audioMasterCallback)&AudioMaster);
 	}
 	catch (...)
 	{
@@ -803,7 +803,7 @@ void VSTPlugin::SendMidi()
 }
 
 // Host callback dispatcher
-long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, void *ptr, float opt)
+long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value, void *ptr, float opt)
 {
 	TRACE("VST plugin call to host dispatcher: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n",(int)effect, opcode,index,value,(int)ptr,opt);
 
@@ -854,7 +854,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	case audioMasterPinConnected:
 		if (value == 0) //input
 		{
-			if ( index < 2) return 0;
+			if ( index < 2) return 0; // 0 means connected, 1 disconnected.
 			else return 1;
 		}
 		else //output
@@ -872,26 +872,34 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 
 	case audioMasterGetTime:
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
-		_timeInfo.samplePos = 0;
+		_timeInfo.samplePos = ((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount;
 
+		if ( (Global::pPlayer)->_playing) _timeInfo.flags |= kVstTransportPlaying;
+		
 #if defined(_WINAMP_PLUGIN_)
 		_timeInfo.sampleRate = Global::pConfig->_samplesPerSec;
 #else
 		_timeInfo.sampleRate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 #endif // _WINAMP_PLUGIN_
 
-/*		if (value & kVstNanosValid)
+/*
+// "error C2065: 'timeGetTime' : undeclared identifier" @#~!"%&$!"!!!!
+		if (value & kVstNanosValid)
 		{
 			_timeInfo.flags |= kVstNanosValid;
-			_timeInfo.nanoSeconds = ::timeGetTime();
+			_timeInfo.nanoSeconds = timeGetTime();
 		}*/
 		if (value & kVstPpqPosValid)
 		{
 			_timeInfo.flags |= kVstPpqPosValid;
 
-			const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb*4))/Global::pPlayer->tpb;
+// commented code ensures correct beat indication, but doesn't work when stopped, as opposed to the other one.
+
+/*			const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb*4))/Global::pPlayer->tpb;
 			const float linestep = (((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining))/Global::_pSong->SamplesPerTick)/Global::pPlayer->tpb;
 			_timeInfo.ppqPos = currentline+linestep;
+*/
+			_timeInfo.ppqPos = (((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount / _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60 );
 			
 		}
 		if (value & kVstTempoValid)
@@ -907,7 +915,10 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		}
 		return (long)&_timeInfo;
 		
-	case audioMasterTempoAt:			
+	case audioMasterTempoAt:
+		// This might be incorrect:
+		// Definition:  	virtual long tempoAt (long pos);				// Returns tempo (in bpm * 10000) at sample frame location <pos>
+		
 		return Global::pPlayer->bpm*10000;
 
 	case audioMasterNeedIdle:

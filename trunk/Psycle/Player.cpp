@@ -1,17 +1,11 @@
 #include "stdafx.h"
-//#include "machineinterface.h"
 
-#if defined(_WINAMP_PLUGIN_)
-//	#include "global.h"
 	#include "player.h"
 	#include "Song.h"
 	#include "Machine.h"
 	#include "Configuration.h"
-#else 
-	#include "player.h"
-	#include "Song.h"
-	#include "Machine.h"
-	#include "Configuration.h"
+
+#if !defined(_WINAMP_PLUGIN_)
 	#include "MidiInput.h"
 #endif // _WINAMP_PLUGIN_
 
@@ -45,6 +39,7 @@ void Player::Start(int pos, int line)
 	Stop(); // This causes all machines to reset, and samplespertick to init.
 
 	((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
+	((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 	_lineChanged = true;
 	_lineCounter = line;
 	_playPosition= pos;
