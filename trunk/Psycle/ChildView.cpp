@@ -848,6 +848,7 @@ void CChildView::OnPatternView()
 		}
 		Repaint();
 	}
+	SetFocus();
 }
 
 void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) 
