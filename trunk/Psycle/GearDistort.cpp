@@ -23,7 +23,6 @@ CGearDistort::CGearDistort(CChildView* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CGearDistort)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	doit=false;
 }
 
 
@@ -77,49 +76,37 @@ BOOL CGearDistort::OnInitDialog()
 	sprintf(buffer,_pMachine->_editName);
 	SetWindowText(buffer);
 
-	doit = true;
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CGearDistort::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_posThreshold = 128-m_post.GetPos();
-	}
-	
+	_pMachine->_posThreshold = 128-m_post.GetPos();
+
 	*pResult = 0;
 }
 
 void CGearDistort::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_posClamp = 128-m_posc.GetPos();
-	}
+	_pMachine->_posClamp = 128-m_posc.GetPos();
 	
 	*pResult = 0;
 }
 
 void CGearDistort::OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_negThreshold = 128-m_negt.GetPos();
-	}
-	
+
+	_pMachine->_negThreshold = 128-m_negt.GetPos();
+
 	*pResult = 0;
 }
 
 void CGearDistort::OnCustomdrawSlider4(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_negClamp = 128-m_negc.GetPos();
-	}
-	
+
+	_pMachine->_negClamp = 128-m_negc.GetPos();
+
 	*pResult = 0;
 }
 

@@ -1,7 +1,9 @@
 //
-// Designed / Lead Coder / Programming : Juan Antonio Arguelles Rius
+// Original Coder : Juan Antonio Arguelles Rius
 //
 // [C] 2000 All Rights Reserved
+//
+// [C] 2001-2002 Psycledelics.
 //
 // ChildView.cpp : implementation of the CChildView class
 //
@@ -159,7 +161,7 @@ CChildView::CChildView()
 
 CChildView::~CChildView()
 {
-	KillModelessMachines();
+//	KillModelessMachines();
 	Global::pInputHandler->SetChildView(NULL);
 	KillRedo();
 	KillUndo();
@@ -805,7 +807,7 @@ void CChildView::OnFileNew()
 {
 	if (CheckUnsavedSong("New Song"))
 	{
-		KillModelessMachines();
+//		KillModelessMachines();
 		KillUndo();
 		KillRedo();
 		pParentMain->CloseAllMacGuis();
@@ -1002,7 +1004,7 @@ void CChildView::OnRecordb()
 		
 		CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 		if ( dlg.DoModal() == IDOK ) Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
-		if ( Global::pConfig->autoStopMachines ) Global::pConfig->autoStopMachines = false;
+		if ( Global::pConfig->autoStopMachines ) OnAutostop();
 	}
 	else
 	{
@@ -1774,7 +1776,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	{
 		if (CheckUnsavedSong("Load Song"))
 		{
-			KillModelessMachines();
+//			KillModelessMachines();
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
 			Sleep(LOCK_LATENCY);
@@ -3019,38 +3021,3 @@ void CChildView::TransparentBlt(CDC* pDC,
    hdcMem.DeleteDC();
 }
 
-void CChildView::KillModelessMachines()
-{
-	if (MasterMachineDialog)
-	{
-		MasterMachineDialog->OnCancel();
-	}
-	if (ScopeMachineDialog)
-	{
-		ScopeMachineDialog->OnCancel();
-	}
-	if (FlangerMachineDialog)
-	{
-		FlangerMachineDialog->OnCancel();
-	}
-	if (GainerMachineDialog)
-	{
-		GainerMachineDialog->OnCancel();
-	}
-	if (DelayMachineDialog)
-	{
-		DelayMachineDialog->OnCancel();
-	}
-	if (SamplerMachineDialog)
-	{
-		SamplerMachineDialog->OnCancel();
-	}
-	if (DistortionMachineDialog)
-	{
-		DistortionMachineDialog->OnCancel();
-	}
-	if (PsychMachineDialog)
-	{
-		PsychMachineDialog->OnCancel();
-	}
-}

@@ -23,7 +23,6 @@ CGearGainer::CGearGainer(CChildView* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CGearGainer)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	doit=false;
 }
 
 
@@ -58,8 +57,6 @@ BOOL CGearGainer::OnInitDialog()
 	m_volsider.SetPos(1024-_pMachine->_outWet);
 	m_volsider.SetTic(0);
 	m_volsider.SetTicFreq(64);
-
-	doit = true;
 
 	return TRUE;
 }

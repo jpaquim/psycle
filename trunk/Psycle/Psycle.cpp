@@ -15,8 +15,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define SPLASHSCREEN 1
-#define VERSION_NUMBER "1.66.2e"
+#define VERSION_NUMBER "1.66.5a"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPsycleApp
@@ -159,7 +158,6 @@ public:
 	CStatic	m_aboutbmp;
 	CEdit	m_contrib;
 	CStatic m_versioninfo;
-
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides

@@ -59,10 +59,6 @@ public:
 	COLORREF pvc_cursor;
 	COLORREF pvc_cursor2;
 
-	COLORREF gen_colour;
-	COLORREF eff_colour;
-	COLORREF mas_colour;
-	COLORREF plg_colour;
 	COLORREF vu1;
 	COLORREF vu2;
 	COLORREF vu3;

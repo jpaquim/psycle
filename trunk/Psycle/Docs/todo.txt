@@ -14,11 +14,8 @@ pen alpha
 + <[JAZ]> Internals still miss mouse tweak, right?
 + <[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. (because machine view
 	does not track changes yet)
-* <dilvie> is the "cannot write to file" issue on the todo list anywhere?  (trying to autosave in a directory 
-	that doesn't exist or no write access..)
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
-* when native machines are deleted they should close their windows...
 
 * Machines
 ------------
@@ -31,7 +28,7 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 
 * Sampler Machine/Wave Ed:
 --------------------------
-* {alk} fit sample to match 256 rows (in sampler) doesnt seem to work
+* {alk} fit sample to match 256 rows (in sampler) doesnt seem to work [JAZ] Are you sure? Code seems OK.
 * internal max of 2megs/channel is too small.
 bug: 	 portamento to note, slides too much. (can anyone test this for me?)
 + ALK waveed: remove silence from start and end of wave
@@ -76,8 +73,7 @@ feature: First, I'd like to see the Generator or Effect name in one of these pla
 	release note, then release mouse.
 * preview check box in preset dialog stopped working?
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
-* dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
-	it is fine.  i think it has to do with cpu load.
+
 * moving machines makes playback pop - machine interface takes too long to redraw
 bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
 		 Fix:Basically, make ONLY .fxb for VST's.
@@ -88,9 +84,6 @@ bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  
 	updates ALL the knobs
 + <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
 	owner draw controls i say?
-+ What if master machine looked like a mixer and you could double click it to bring up not only the master volume,
-	but labelled volume sliders for each of the machines connected to it? -> this would suck as you would get names
-	for only the effects
 + how about nice looking bmp windows for machine link and master machine dialogs?
 + James says: how hard would it be to put nodes in the wires, so you can bend them?
 * Saving all the missing settings to registry (like class of plugin..)
@@ -109,12 +102,11 @@ feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 * Player Engine:
 ----------------
 * Midiout is NOT solid...
-* Taika-Kim - Whenever I have the red ! pressed and I set wave export it gets depressed and I get no sound 
-	from Psycle until I press it down again, or sometimes only one instrument is played until the button 
-	is pressed down again, etc.
 * <Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
 * <sue> playbar should take latency into account - same as ^
 * when changing octave, notes playing should be stopped (because if not, notes playing don't stop)
+  Problem!!! All key processing is done by InputHandler, so machines don't know when it happens, and neither
+             does Inputhandler know which machines are playing. Doing a "player::Stop()" would be a bit hardcore.
 bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
 bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
@@ -169,7 +161,7 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	what was assigned to it
 + <alk> song properties (allow carriage returns, make box bigger?)
 + <alk> be able to save/load key config
-+ <_sue_> centering psycle master machine would be cool also...as well as centering the open file menus....
++ <_sue_> centering the open file menus....
 	and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
 	convenient for when you have folders with many files as you usually do with samples
 + <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 

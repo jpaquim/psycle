@@ -24,7 +24,7 @@ CGearScope::CGearScope(CChildView* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CGearScope)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-	doit=false;
+
 }
 
 

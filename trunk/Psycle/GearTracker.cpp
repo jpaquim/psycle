@@ -64,8 +64,6 @@ BOOL CGearTracker::OnInitDialog()
 	m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 	m_polyslider.SetPos(_pMachine->_numVoices);
 
-	doit = true;
-
 	return TRUE;
 }
 
@@ -77,10 +75,7 @@ void CGearTracker::OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult)
 void CGearTracker::OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	// Assign new value
-	if (doit)
-	{
-		_pMachine->_numVoices = m_polyslider.GetPos();
-	}
+	_pMachine->_numVoices = m_polyslider.GetPos();
 
 	for(int c=0; c<SAMPLER_MAX_POLYPHONY; c++)
 	{
@@ -97,10 +92,8 @@ void CGearTracker::OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearTracker::OnSelchangeCombo1() 
 {
-	if (doit)
-	{
-		_pMachine->_resampler.SetQuality((ResamplerQuality)m_interpol.GetCurSel());
-	}
+	_pMachine->_resampler.SetQuality((ResamplerQuality)m_interpol.GetCurSel());
+
 }
 
 
