@@ -338,16 +338,17 @@ void Dummy::Work(int numSamples)
 	Machine::Work(numSamples);
 #if !defined(_WINAMP_PLUGIN_)
 	CPUCOST_INIT(cost);
+	Machine::SetVolumeCounter(numSamples);
 	if ( Global::pConfig->autoStopMachines )
 	{
-		Machine::SetVolumeCounterAccurate(numSamples);
+//		Machine::SetVolumeCounterAccurate(numSamples);
 		if (_volumeCounter < 8)	{
 			_volumeCounter = 0;
 			_volumeDisplay = 0;
 			_stopped = true;
 		}
 	}
-	else Machine::SetVolumeCounter(numSamples);
+//	else Machine::SetVolumeCounter(numSamples);
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;
 #endif // ndef _WINAMP_PLUGIN_
@@ -525,16 +526,17 @@ void Gainer::Work(
 		}
 		while (--i);
 #if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 #endif // ndef _WINAMP_PLUGIN_
 	}
 #if !defined(_WINAMP_PLUGIN_)
@@ -685,16 +687,17 @@ void Sine::Work(
 		}
 		while (--i);
 #if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 #endif // ndef _WINAMP_PLUGIN_
 	}
 #if !defined(_WINAMP_PLUGIN_)
@@ -895,16 +898,17 @@ void Distortion::Work(
 		}
 		while (--i);
 #if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 #endif // ndef _WINAMP_PLUGIN_
 	}
 #if !defined(_WINAMP_PLUGIN_)
@@ -1206,16 +1210,17 @@ void Delay::Work(int numSamples)
 		}
 		while(--i);
 #if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 #endif // ndef _WINAMP_PLUGIN_
 	}
 #if !defined(_WINAMP_PLUGIN_)
@@ -1491,10 +1496,10 @@ void Flanger::Work(
 
 			if (++_counter >= 2048)	{ _counter = 0; }
 			
-			int _delayedCounterL = _counter-Dsp::F2I(acc_timeL);
+			int _delayedCounterL = _counter-f2i(acc_timeL);
 			if (_delayedCounterL < 0) _delayedCounterL += 2048;
 
-			int _delayedCounterR = _counter-Dsp::F2I(acc_timeR);
+			int _delayedCounterR = _counter-f2i(acc_timeR);
 			if (_delayedCounterR < 0) _delayedCounterR += 2048;
 
 			float y_l = _pBufferL[_delayedCounterL];
@@ -1520,16 +1525,17 @@ void Flanger::Work(
 		}
 		while (--i);
 #if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 #endif // ndef _WINAMP_PLUGIN_
 	}
 	else
@@ -1833,16 +1839,17 @@ void Filter2p::Work(
 		}
 		while (--i);
 #if !defined(_WINAMP_PLUGIN_)
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 #endif // ndef _WINAMP_PLUGIN_
 	}
 #if !defined(_WINAMP_PLUGIN_)

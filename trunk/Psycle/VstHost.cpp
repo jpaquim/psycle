@@ -982,9 +982,24 @@ void VSTInstrument::Work(int numSamples)
 			Dsp::Add(outputs[0],outputs[1],numSamples,1);
 		}
 
+		_volumeCounter = f2i(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
+		if (_volumeCounter > 32768)
+		{
+			_volumeCounter = 32768;
+		}
+		int temp = (f2i(fast_log2(float(_volumeCounter))*78.0f*4/14.0f) - (78*3));//*2;// not 100% accurate, but looks as it sounds
+		// prevent downward jerkiness
+		if (temp > 97)
+		{
+			temp = 97;
+		}
+		if (temp > _volumeDisplay)
+		{
+			_volumeDisplay = temp;
+		}
+		_volumeDisplay--;
 		if ( Global::pConfig->autoStopMachines )
 		{
-			_volumeCounter = Dsp::F2I(Dsp::GetMaxVSTVolAccurate(_pSamplesL,_pSamplesR,numSamples) * 32768.0f);
 			if (_volumeCounter < 8)	
 			{
 				_volumeCounter = 0;
@@ -995,30 +1010,6 @@ void VSTInstrument::Work(int numSamples)
 			{	
 				_stopped = false;
 			}
-		}
-		else 
-		{
-			int newVolume = Dsp::F2I(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
-			if (newVolume > 32768)
-			{
-				newVolume = 32768;
-			}
-			if (newVolume > _volumeCounter)
-			{
-				_volumeCounter = newVolume;
-				int temp = (f2i(fast_log2(float(newVolume))*78.0f*4*2/14.0f) - (78*3*2));//*2;// not 100% accurate, but looks as it sounds
-				// prevent downward jerkiness
-				if (temp > 97*2)
-				{
-					temp = 97*2;
-				}
-				if (temp > _volumeDisplay)
-				{
-					_volumeDisplay = temp;
-				}
-			}
-			_volumeCounter-=numSamples/4;
-			_volumeDisplay--;
 		}
 	}
 
@@ -1131,39 +1122,30 @@ void VSTFX::Work(int numSamples)
 
 		}
 #if !defined(_WINAMP_PLUGIN_)
+		_volumeCounter = f2i(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
+		if (_volumeCounter > 32768)
+		{
+			_volumeCounter = 32768;
+		}
+		int temp = (f2i(fast_log2(float(_volumeCounter))*78.0f*4/14.0f) - (78*3));//*2;// not 100% accurate, but looks as it sounds
+		// prevent downward jerkiness
+		if (temp > 97)
+		{
+			temp = 97;
+		}
+		if (temp > _volumeDisplay)
+		{
+			_volumeDisplay = temp;
+		}
+		_volumeDisplay--;
 		if ( Global::pConfig->autoStopMachines )
 		{
-			_volumeCounter = Dsp::F2I(Dsp::GetMaxVSTVolAccurate(_pSamplesL,_pSamplesR,numSamples) * 32768.0f);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
 			else _stopped = false;
-		}
-		else 
-		{
-			int newVolume = Dsp::F2I(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
-			if (newVolume > 32768)
-			{
-				newVolume = 32768;
-			}
-			if (newVolume > _volumeCounter)
-			{
-				_volumeCounter = newVolume;
-				int temp = (f2i(fast_log2(float(newVolume))*78.0f*4*2/14.0f) - (78*3*2));//*2;// not 100% accurate, but looks as it sounds
-				// prevent downward jerkiness
-				if (temp > 97*2)
-				{
-					temp = 97*2;
-				}
-				if (temp > _volumeDisplay)
-				{
-					_volumeDisplay = temp;
-				}
-			}
-			_volumeCounter-=numSamples/4;
-			_volumeDisplay--;
 		}
 #endif // ndef _WINAMP_PLUGIN_
 	}

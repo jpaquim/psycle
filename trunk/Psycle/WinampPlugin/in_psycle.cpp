@@ -305,7 +305,7 @@ void Quantize(float *pin, short *piout, int c)
 	{
 		if ( *pin > 32767.0) *piout = 32767;
 		else if ( *pin < -32767.0 ) *piout = -32768;
-		else *piout = Dsp::F2I(*pin);
+		else *piout = f2i(*pin);
 		*pin++; piout++;
 	}
 }

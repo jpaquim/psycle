@@ -96,7 +96,8 @@
 + ALK tracker command to bypass an fx, mute command for machines
 + ALK waveed: remove silence from start and end of wave
 * keyboard notes/noteoffs do not always seem to record
-
+* <bohan> well, i dunno how to explain it more... the bug that makes the song being played at a 
+	bad speed the first time they are loaded (not after a reload)
 
 
 	*Flanger feedback slider

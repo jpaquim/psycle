@@ -144,32 +144,29 @@ public:
 protected:
 	inline void SetVolumeCounter(int numSamples)
 	{
-		int newVolume = Dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
-		if (newVolume > 32768)
+		_volumeCounter = Dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+		if (_volumeCounter > 32768)
 		{
-			newVolume = 32768;
+			_volumeCounter = 32768;
 		}
-		if (newVolume > _volumeCounter)
+		int temp = (f2i(fast_log2(float(_volumeCounter))*78.0f*4/14.0f) - (78*3));// not 100% accurate, but looks as it sounds
+		// prevent downward jerkiness
+		if (temp > 97)
 		{
-			_volumeCounter = newVolume;
-			int temp = (f2i(fast_log2(float(newVolume))*78.0f*4*2/14.0f) - (78*3*2));//*2;// not 100% accurate, but looks as it sounds
-			// prevent downward jerkiness
-			if (temp > 97*2)
-			{
-				temp = 97*2;
-			}
-			if (temp > _volumeDisplay)
-			{
-				_volumeDisplay = temp;
-			}
+			temp = 97;
 		}
-		_volumeCounter-=numSamples/4;
-		_volumeDisplay-=2;
+		if (temp > _volumeDisplay)
+		{
+			_volumeDisplay = temp;
+		}
+		_volumeDisplay--;
 	};
+	/*
 	inline void SetVolumeCounterAccurate(int numSamples)
 	{
 		_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
 	};
+	*/
 #endif // ndef _WINAMP_PLUGIN_
 
 };
