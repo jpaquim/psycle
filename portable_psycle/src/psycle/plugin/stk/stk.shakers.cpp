@@ -157,7 +157,7 @@ void mi::Stop()
 	for(int c=0;c<MAX_TRACKS;c++)
 	{
 		track[c].noteOff(0.0f);
-		noteonoff[i]=false;
+		noteonoff[c]=false;
 	}
 
 }
