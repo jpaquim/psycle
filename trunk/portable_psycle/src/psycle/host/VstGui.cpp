@@ -1,12 +1,12 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "VstGui.h"
-#include "Vst\AEffEditor.h"
-#include "inputhandler.h"
-#include "MainFrm.h"
-#include "Machine.h"
 ///\file
 ///\brief implementation file for psycle::host::CVstGui.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "VstGui.hpp"
+#include "inputhandler.hpp"
+#include "MainFrm.hpp"
+#include "Machine.hpp"
+#include <Vst/AEffEditor.h>
 namespace psycle
 {
 	namespace host

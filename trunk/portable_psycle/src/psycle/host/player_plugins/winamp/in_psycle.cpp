@@ -6,15 +6,16 @@
 
 */
 
-#include "stdafx.h"
-#include "../configuration.h"
-#include "../Song.h"
-#include "../player.h"
-#include "../machine.h"
-#include "../helpers.h"
-#include <math.h>
+#include <project.private.hpp>
+#include <psycle/host/configuration.hpp>
+#include <psycle/host/song.hpp>
+#include <psycle/host/player.hpp>
+#include <psycle/host/machine.hpp>
+#include <psycle/host/helpers.hpp>
 
-#include "in2.h"	// Winamp Input plugin header file
+#include <math.h> // should be <cmath>
+
+#include <winamp-2/in.h>	// Winamp Input plugin header file
 
 #define WA_PLUGIN_VERSION "1.1a"
 

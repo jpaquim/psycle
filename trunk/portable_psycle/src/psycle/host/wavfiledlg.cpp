@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "Song.h"
-#include "WavFileDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CWavFileDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "Song.hpp"
+#include "WavFileDlg.hpp"
 namespace psycle
 {
 	namespace host

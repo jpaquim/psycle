@@ -1,10 +1,10 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "Song.h"
-#include "WaveEdFrame.h"
-#include "MainFrm.h"
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "Song.hpp"
+#include "WaveEdFrame.hpp"
+#include "MainFrm.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "ChildView.h"
-#include "MasterDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CMasterDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "ChildView.hpp"
+#include "MasterDlg.hpp"
 namespace psycle
 {
 	namespace host

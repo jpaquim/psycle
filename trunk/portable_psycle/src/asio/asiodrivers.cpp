@@ -1,12 +1,11 @@
-//#include <project.h>
-#include "stdafx.h"
+#include <project.private.hpp>
 #define ASIO
 #include <string.h>
-#include <asio/asiodrivers.h>
+#include "asiodrivers.h"
 #if WINDOWS
-	#include <asio/iasiodrv.h>
+	#include "iasiodrv.h"
 #elif SGI || BEOS
-	#include <asio/asiolist.h>
+	#include "asiolist.h"
 #endif
 namespace asio
 {

@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "Filter.h"
 ///\file
 ///\brief implementation file for psycle::host::Filter.
+#include <project.private.hpp>
+#include "Filter.hpp"
 namespace psycle
 {
 	namespace host

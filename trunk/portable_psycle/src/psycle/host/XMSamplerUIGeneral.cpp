@@ -103,14 +103,14 @@ LRESULT XMSamplerUIGeneral::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam
 
 //void XMSamplerUIGeneral::OnFinalMessage(HWND hWnd)
 //{
-//	// TODO : ‚±‚±‚É“Á’è‚ÈƒR[ƒh‚ğ’Ç‰Á‚·‚é‚©A‚à‚µ‚­‚ÍŠî–{ƒNƒ‰ƒX‚ğŒÄ‚Ño‚µ‚Ä‚­‚¾‚³‚¢B
+//	// TODO : ***** [bohan] iso-(10)646 encoding only please! *****
 //	//CDialogImpl<XMSamplerUIGeneral>::OnFinalMessage(hWnd);
 //	//delete this;
 //}
 
 //LRESULT XMSamplerUIGeneral::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 //{
-//	// TODO : ‚±‚±‚ÉƒƒbƒZ[ƒW ƒnƒ“ƒhƒ‰ ƒR[ƒh‚ğ’Ç‰Á‚·‚é‚©AŠù’è‚Ìˆ—‚ğŒÄ‚Ño‚µ‚Ü‚·B
+//	// TODO : ***** [bohan] iso-(10)646 encoding only please! *****
 //	OnCancel();
 //	return 0;
 //}
@@ -118,12 +118,12 @@ LRESULT XMSamplerUIGeneral::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam
 
 LRESULT SF::XMSamplerUIGeneral::OnEnChangeEditSpeed(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	// TODO :  ‚±‚ê‚ª RICHEDIT ƒRƒ“ƒgƒ[ƒ‹‚Ìê‡A‚Ü‚¸ACDialogImpl<XMSamplerUIGeneral>::OnInitDialog() ŠÖ”‚ğƒI[ƒo[ƒ‰ƒCƒh‚µ‚ÄA
-	// OR ó‘Ô‚Ì ENM_CORRECTTEXT ƒtƒ‰ƒO‚ğƒ}ƒXƒN‚É“ü‚ê‚ÄA
-	// CRichEditCtrl().SetEventMask() ‚ğŒÄ‚Ño‚³‚È‚¢ŒÀ‚èA
-	// ƒRƒ“ƒgƒ[ƒ‹‚ÍA‚±‚Ì’Ê’m‚ğ‘—M‚µ‚Ü‚¹‚ñB
+	// TODO : ***** [bohan] iso-(10)646 encoding only please! ***** ACDialogImpl<XMSamplerUIGeneral>::OnInitDialog() ***** [bohan] iso-(10)646 encoding only please! *****
+	// OR ***** [bohan] iso-(10)646 encoding only please! *****
+	// CRichEditCtrl().SetEventMask() ‚***** [bohan] iso-(10)646 encoding only please! *****
+	// ***** [bohan] iso-(10)646 encoding only please! *****
 
-	// TODO :  ‚±‚±‚ÉƒRƒ“ƒgƒ[ƒ‹’Ê’mƒnƒ“ƒhƒ‰ ƒR[ƒh‚ğ’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢B
+	// TODO : ***** [bohan] iso-(10)646 encoding only please! *****
 	if(!m_bInitialize)
 	{
 		return 0;
@@ -139,15 +139,15 @@ LRESULT SF::XMSamplerUIGeneral::OnEnChangeEditSpeed(WORD /*wNotifyCode*/, WORD /
 
 LRESULT SF::XMSamplerUIGeneral::OnEnChangeEditTempo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	// TODO :  ‚±‚ê‚ª RICHEDIT ƒRƒ“ƒgƒ[ƒ‹‚Ìê‡A‚Ü‚¸ACDialogImpl<XMSamplerUIGeneral>::OnInitDialog() ŠÖ”‚ğƒI[ƒo[ƒ‰ƒCƒh‚µ‚ÄA
-	// OR ó‘Ô‚Ì ENM_CORRECTTEXT ƒtƒ‰ƒO‚ğƒ}ƒXƒN‚É“ü‚ê‚ÄA
-	// CRichEditCtrl().SetEventMask() ‚ğŒÄ‚Ño‚³‚È‚¢ŒÀ‚èA
-	// ƒRƒ“ƒgƒ[ƒ‹‚ÍA‚±‚Ì’Ê’m‚ğ‘—M‚µ‚Ü‚¹‚ñB
+	// TODO :  ***** [bohan] iso-(10)646 encoding only please! ***** ACDialogImpl<XMSamplerUIGeneral>::OnInitDialog() ***** [bohan] iso-(10)646 encoding only please! *****
+	// OR ***** [bohan] iso-(10)646 encoding only please! ***** ENM_CORRECTTEXT ***** [bohan] iso-(10)646 encoding only please! *****
+	// CRichEditCtrl().SetEventMask() ***** [bohan] iso-(10)646 encoding only please! *****
+	// ***** [bohan] iso-(10)646 encoding only please! *****
 	if(!m_bInitialize)
 	{
 		return 0;
 	}
-	// TODO :  ‚±‚±‚ÉƒRƒ“ƒgƒ[ƒ‹’Ê’mƒnƒ“ƒhƒ‰ ƒR[ƒh‚ğ’Ç‰Á‚µ‚Ä‚­‚¾‚³‚¢B
+	// TODO :  ***** [bohan] iso-(10)646 encoding only please! *****
 	TCHAR buf[256];
 	m_Tempo.GetWindowText(buf,256);
 	_pMachine->BPM(boost::lexical_cast<int>(buf));

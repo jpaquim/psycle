@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "WaveEdAmplifyDialog.h"
-#include "Helpers.h"
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdAmplifyDialog.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "WaveEdAmplifyDialog.hpp"
+#include "Helpers.hpp"
 namespace psycle
 {
 	namespace host

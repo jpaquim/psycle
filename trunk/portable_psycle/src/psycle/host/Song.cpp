@@ -1,23 +1,23 @@
-#include "stdafx.h"
-#if !defined _WINAMP_PLUGIN_
-	#include "psycle.h"
-	#include "NewMachine.h"
-	#include "MainFrm.h"
-	#include "ChildView.h"
-	#include "ProgressDialog.h"
-#endif
-#include "Song.h"
-#include "Machine.h" // It wouldn't be needed, since it is already included in "song.h"
-#include "Sampler.h"
-#include "Plugin.h"
-#include "VSTHost.h"
-#include "DataCompression.h"
-#include <psycle/host/convert_internal_machines.h>
 ///\file
 ///\brief implementation file for psycle::host::Song.
+#include <project.private.hpp>
+#if !defined _WINAMP_PLUGIN_
+	#include "psycle.hpp"
+	#include "NewMachine.hpp"
+	#include "MainFrm.hpp"
+	#include "ChildView.hpp"
+	#include "ProgressDialog.hpp"
+#endif
+#include "Song.hpp"
+#include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
+#include "Sampler.hpp"
+#include "Plugin.hpp"
+#include "VSTHost.hpp"
+#include "DataCompression.hpp"
+#include "convert_internal_machines.hpp"
 
 #if !defined _WINAMP_PLUGIN_
-	#include "Riff.h" // for Wave file loading.
+	#include "Riff.hpp" // for Wave file loading.
 	namespace psycle
 	{
 		namespace host

@@ -1,9 +1,3 @@
-#include "stdafx.h"
-#include "riff.h"
-#include <io.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 /**
 	\file
 	implementation file for psycle::host::ExtRiffFile and psycle::host::WaveFile.
@@ -36,6 +30,12 @@
 		==========================================================================
 	\endverbatim
 */
+#include <project.private.hpp>
+#include "riff.hpp"
+#include <io.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 namespace psycle
 {
 	namespace host

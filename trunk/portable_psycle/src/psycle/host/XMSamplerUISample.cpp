@@ -4,8 +4,8 @@
  *  $Revision$
  */
 
-#include "stdafx.h"
-#include "XMSamplerUISample.h"
+#include <project.private.hpp>
+#include "XMSamplerUISample.hpp"
 
 namespace SF {
 }

@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "GearTracker.h"
-#include "ChildView.h"
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "GearTracker.hpp"
+#include "ChildView.hpp"
 namespace psycle
 {
 	namespace host

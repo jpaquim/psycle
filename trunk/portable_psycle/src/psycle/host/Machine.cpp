@@ -1,22 +1,22 @@
-#include "stdafx.h"
-#include "Machine.h"
-#include "Song.h"
-#include "Dsp.h"
-#include "Configuration.h"
+///\file
+///\brief implementation file for psycle::host::Machine
+#include <project.private.hpp>
+#include "Machine.hpp"
+#include "Song.hpp"
+#include "Dsp.hpp"
+#include "Configuration.hpp"
 #if !defined _WINAMP_PLUGIN_
-	#include "psycle.h"
-	#include "WireDlg.h"
-	#include "MainFrm.h"
-	#include "InputHandler.h"
+	#include "psycle.hpp"
+	#include "WireDlg.hpp"
+	#include "MainFrm.hpp"
+	#include "InputHandler.hpp"
 #endif
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
-#include "Sampler.h"
-#include "Plugin.h"
-#include "VSTHost.h"
-///\file
-///\brief implementation file for psycle::host::Machine
+#include "Sampler.hpp"
+#include "Plugin.hpp"
+#include "VSTHost.hpp"
 namespace psycle
 {
 	namespace host

@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "Registry.h"
 ///\file
 ///\brief implementation file for psycle::host::Registry.
+#include <project.private.hpp>
+#include "Registry.hpp"
 namespace psycle
 {
 	namespace host

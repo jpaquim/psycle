@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "configuration.h"
-#include "Song.h"
-#include "InfoDlg.h"
-#include "Machine.h"
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "configuration.hpp"
+#include "Song.hpp"
+#include "InfoDlg.hpp"
+#include "Machine.hpp"
 namespace psycle
 {
 	namespace host

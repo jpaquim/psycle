@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "GreetDialog.h"
 ///\file
 ///\brief implementation file for psycle::host::CGreetDialog.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "GreetDialog.hpp"
 namespace psycle
 {
 	namespace host

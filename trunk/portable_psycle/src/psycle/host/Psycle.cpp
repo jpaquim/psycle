@@ -1,14 +1,14 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "version.h"
-#include "ConfigDlg.h"
-#include "MainFrm.h"
-#include "midiinput.h"
-#include "NewMachine.h"
-#include <operating_system/exception.h>
-#include <sstream>
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "version.hpp"
+#include "ConfigDlg.hpp"
+#include "MainFrm.hpp"
+#include "midiinput.hpp"
+#include "NewMachine.hpp"
+#include <operating_system/exception.hpp>
+#include <sstream>
 namespace psycle
 {
 	namespace host

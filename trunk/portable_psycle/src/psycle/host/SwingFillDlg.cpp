@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "SwingFillDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CSwingFillDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "SwingFillDlg.hpp"
 namespace psycle
 {
 	namespace host

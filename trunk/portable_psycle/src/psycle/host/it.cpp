@@ -1,5 +1,5 @@
-
-// Impulse Tracker File Format Loading/Saving/Editing code
+///\file
+///\brief Impulse Tracker File Format Loading/Saving/Editing code
 // version 0.11
 // Copyright 1997-2000 Austin Luminais
 // e-mail: lipid@chromosome57.com
@@ -20,12 +20,9 @@
 //  0.11 - memory leak fixes (thanks to christopher micali)
 //         fixed sample loading bug
 
-
-
-
-#include "stdafx.h"
+#include <project.private.hpp>
 #include <stdio.h>
-#include "it.h"
+#include "it.hpp"
 
 //  #define DEBUG
 //  #define DEBUG_PATTERNS
@@ -1213,5 +1210,3 @@ bool ITModule::GrowIfNeeded(int pattern, int channel, int row) {
 
     return 0;
 }
-
-

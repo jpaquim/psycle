@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "DSoundConfig.h"
 ///\file
 ///\brief implementation file for psycle::host::CDSoundConfig.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "DSoundConfig.hpp"
 namespace psycle
 {
 	namespace host

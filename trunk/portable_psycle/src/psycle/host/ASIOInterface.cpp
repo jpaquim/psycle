@@ -1,15 +1,15 @@
-#include <stdafx.h>
-#include <psycle/host/ASIOInterface.h>
-#include <psycle/host/resource.h>
-#include <psycle/host/Registry.h>
-#include <psycle/host/ASIOConfig.h>
-#include <psycle/host/Configuration.h>
-#include <psycle/host/MidiInput.h>
-#include <psycle/host/helpers.h>
-#include <operating_system/exception.h>
-#include <asio/asiosys.h>
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
+#include <project.private.hpp>
+#include "ASIOInterface.hpp"
+#include "resources/resources.hpp"
+#include "Registry.hpp"
+#include "ASIOConfig.hpp"
+#include "Configuration.hpp"
+#include "MidiInput.hpp"
+#include "helpers.hpp"
+#include <operating_system/exception.hpp>
+#include <asio/asiosys.h>
 namespace psycle
 {
 	namespace host

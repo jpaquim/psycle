@@ -390,7 +390,7 @@ namespace SF {
 							e._parameter = param * 4;
 							break;
 						case XMSampler::CMD::VOLUMESLIDE:
-							// ボリュームスライドコマンド
+							// ***** [bohan] iso-(10)646 encoding only please! *****
 							if(param & 0xf){
 								e._cmd = XMSampler::CMD::VOLSLIDEDOWN;
 								e._parameter = (param & 0x0f) << 2;
@@ -400,7 +400,7 @@ namespace SF {
 							}
 							break;
 						case XMSampler::CMD::PANNINGSLIDE:
-							// パンスライドコマンド
+							// ***** [bohan] iso-(10)646 encoding only please! *****
 							if(param & 0xf){
 								e._cmd = XMSampler::CMD::PANSLIDERIGHT;
 								e._parameter = (param & 0xf) << 2;
@@ -410,7 +410,7 @@ namespace SF {
 							}
 							break;
 						case XMSampler::CMD::EXTENDED:
-							// ファインポルタメントアップ・ダウン
+							// ***** [bohan] iso-(10)646 encoding only please! *****
 							switch(param & 0xf0){
 							case 0x10:
 								e._cmd = XMSampler::CMD::FINE_PORTAMENTO_UP;

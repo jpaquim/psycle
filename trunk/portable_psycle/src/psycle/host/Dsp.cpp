@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "Dsp.h"
 ///\file
 ///\brief implementation file for psycle::host::Cubic.
+#include <project.private.hpp>
+#include "Dsp.hpp"
 namespace psycle
 {
 	namespace host

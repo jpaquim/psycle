@@ -1,6 +1,3 @@
-#include "stdafx.h"
-#include "constants.h"
-#include <cstring>
 ///\file
 ///\brief implementation file for beerz77-2 algorithm.
 /// beerz77-2 algorithm by jeremy evers, loosely based on lz77 
@@ -12,6 +9,9 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
+#include <project.private.hpp>
+#include "constants.hpp"
+#include <cstring>
 namespace psycle
 {
 	namespace host

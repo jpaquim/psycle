@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "DirectoryDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "DirectoryDlg.hpp"
 namespace psycle
 {
 	namespace host

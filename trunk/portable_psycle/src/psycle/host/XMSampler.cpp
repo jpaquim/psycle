@@ -501,23 +501,23 @@ namespace psycle
 			if (Global::_pSong->IsInvalided()) 
 				return;
 			
-			// ƒ{ƒCƒX‚ğŒŸõ‚·‚é //
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 
 			
-			PatternEntry& data = *pData;///< ƒpƒ^[ƒ“ƒGƒ“ƒgƒŠ‚Ö‚ÌQÆ
-			bool _bInstrumentSet = data._inst < 255;///< ƒCƒ“ƒXƒgƒ‹ƒƒ“ƒg‚ªƒZƒbƒg‚³‚ê‚Ä‚¢‚é‚©H
-			bool _bvoiceFound = false;///<Œ»İ‚±‚Ìƒ`ƒƒƒ“ƒlƒ‹‚Å”­‰¹’†‚Ìƒ{ƒCƒX‚ª‚ ‚é‚©H
-			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF) & (data._volcmd != CMD::NOTE_OFF);///<ƒm[ƒgƒIƒ“‚©H
+			PatternEntry& data = *pData;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			bool _bInstrumentSet = data._inst < 255;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			bool _bvoiceFound = false;///***** [bohan] iso-(10)646 encoding only please! *****
+			bool _bNoteOn = (data._note < 120) & (data._cmd != CMD::NOTE_OFF) & (data._volcmd != CMD::NOTE_OFF);///***** [bohan] iso-(10)646 encoding only please! *****
 			bool _bNotPorta2Note = !((data._cmd == CMD::PORTA2NOTE) || (data._volcmd == CMD::PORTA2NOTE));
 			
-			///< Œ»İ‚±‚Ìƒ`ƒƒƒ“ƒlƒ‹‚Å”­‰¹‚µ‚Ä‚¢‚éƒ{ƒCƒX‚ÌƒCƒ“ƒfƒbƒNƒX
-			int _current;///< Œ»İ‚±‚Ìƒ`ƒƒƒ“ƒlƒ‹‚Å”­‰¹‚µ‚Ä‚¢‚éƒ{ƒCƒX‚ÌƒCƒ“ƒfƒbƒNƒX
+			///< ***** [bohan] iso-(10)646 encoding only please! *****
+			int _current;///< ***** [bohan] iso-(10)646 encoding only please! *****
 			
-			XMSampler::Channel& _channel = rChannel(channel);///< ƒ`ƒƒƒ“ƒlƒ‹ƒIƒuƒWƒFƒNƒg‚Ö‚ÌQÆ
+			XMSampler::Channel& _channel = rChannel(channel);///< ***** [bohan] iso-(10)646 encoding only please! *****
 			_channel.IsPeriodChange(false);
 			_channel.IsVolumeChange(false);
 			
-			// –‘Oˆ—ƒGƒtƒFƒNƒg
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			switch(data._cmd)
 			{
 							// Set Speed 
@@ -539,10 +539,10 @@ namespace psycle
 
 			}
 			
-			Voice* _currentVoice;///< Œ»İ‚±‚Ìƒ`ƒƒƒ“ƒlƒ‹‚Å”­‰¹‚µ‚Ä‚¢‚éƒ{ƒCƒX‚Ö‚Ìƒ|ƒCƒ“ƒ^
-			Voice* _newVoice;///< ˆ—‘ÎÛ‚Ìƒ{ƒCƒX‚Ö‚Ìƒ|ƒCƒ“ƒ^
+			Voice* _currentVoice;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			Voice* _newVoice;///< ***** [bohan] iso-(10)646 encoding only please! *****
 
-			// Œ»İ‚±‚Ìƒ`ƒƒƒ“ƒlƒ‹‚Å”­‰¹’†‚Ìƒ{ƒCƒX‚ğŒŸõ‚·‚é
+			//***** [bohan] iso-(10)646 encoding only please! *****
 			for(_current = 0;_current < XMSampler::MAX_POLYPHONY;_current++)
 			{
 				if ( (_voices[_current].Channel() == channel) & (_voices[_current].IsPlaying())) // NoteOff previous Notes in this channel.
@@ -553,7 +553,7 @@ namespace psycle
 				}
 			}
 
-			// ƒ{ƒCƒX‚ªŒ©‚Â‚©‚Á‚½‚çANNA‚Ì’l‚É‚µ‚½‚ª‚Á‚Äƒm[ƒgƒIƒt‚·‚é
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			if(_bvoiceFound)
 			{
 				if ((_bNoteOn) & (_bNotPorta2Note))
@@ -562,7 +562,7 @@ namespace psycle
 					switch (m_Instruments[_currentVoice->Instrument()].NNA())
 					{
 						case 0:
-							// ‚Ô‚Á‚¿‚¬‚é
+							// ***** [bohan] iso-(10)646 encoding only please! *****
 							_currentVoice->NoteOffFast();
 							break;
 						case 1:
@@ -575,11 +575,11 @@ namespace psycle
 				}
 			}
 			
-			// V‚µ‚¢‹ó‚«ƒ{ƒCƒX‚ÌŒŸõ
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			if(((_bNoteOn) & (_bNotPorta2Note)) | (!_bvoiceFound))
 			{
-				int _newVoiceIndex = -1 ;///< ‹ó‚«ƒ{ƒCƒX‚Ö‚ÌƒCƒ“ƒfƒbƒNƒX
-				bool _bFound = false;///< ‹ó‚«ƒ{ƒCƒX‚ªŒ©‚Â‚©‚Á‚½‚©H
+				int _newVoiceIndex = -1 ;///< ***** [bohan] iso-(10)646 encoding only please! *****
+				bool _bFound = false;///< ***** [bohan] iso-(10)646 encoding only please! *****
 
 				for (int _voice = 0; _voice < XMSampler::MAX_POLYPHONY; _voice++)	// Find a voice to apply the new note
 				{
@@ -603,10 +603,10 @@ namespace psycle
 				_newVoice = _currentVoice;
 			}
 
-			// TickƒJƒEƒ“ƒ^‚Ì‰Šú‰»
+			// Tick***** [bohan] iso-(10)646 encoding only please! *****
 			_newVoice->TickCounter(0);
 			
-			// XMTickƒGƒ~ƒ…ƒŒ[ƒg—p
+			// XMTick***** [bohan] iso-(10)646 encoding only please! *****
 			m_DeltaTick = 
 				Global::_pSong->SamplesPerTick() 
 				* Global::_pSong->TicksPerBeat() / (4 * TicksPerRow());
@@ -616,7 +616,7 @@ namespace psycle
 			_newVoice->NextTick(0);
 			_newVoice->ClearEffectFlags();
 			_newVoice->TickRemain(TicksPerRow() - 1);
-			// ƒCƒ“ƒXƒgƒ‹ƒƒ“ƒg‚ÌƒZƒbƒg
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			
 
 			if(_bInstrumentSet){// 
@@ -634,7 +634,7 @@ namespace psycle
 			}
 
 
-			// ƒ`ƒƒƒ“ƒlƒ‹‚Ìİ’è
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			_newVoice->Channel(channel);
 			_newVoice->pChannel(&(m_Channel[channel]));
 
@@ -643,7 +643,7 @@ namespace psycle
 			// Total Wave Length
 			int _layer = 0; // Change this when adding working Layering code.
 			
-			// ƒm[ƒgƒIƒ“‚Ìˆ—
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 
 			if(_bNoteOn)
 			{
@@ -666,7 +666,7 @@ namespace psycle
 
 					if((!_bNotPorta2Note) & (_bvoiceFound))
 					{
-						_bNoteOn = false; // Œ»İ‚ÌVoice‚ğ‘±‚·‚é
+						_bNoteOn = false; // ***** [bohan] iso-(10)646 encoding only please! *****
 						if((_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::RELEASE) | (_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::END))
 						{
 							_channel.Note(data._note,_inst.NoteToSample(data._note));
@@ -677,7 +677,7 @@ namespace psycle
 							_newVoice->Wave().Layer(_layer);
 						}
 					} else 	{
-						_newVoice->VoiceInit(_channel.Note()); // ‰Šú‰»
+						_newVoice->VoiceInit(_channel.Note()); // ***** [bohan] iso-(10)646 encoding only please! *****
 						_channel.EffectInit();
 
 						if (( data._cmd == CMD::EXTENDED) & ((data._parameter & 0xf0) == CMD::EXT_NOTEDELAY))
@@ -686,7 +686,7 @@ namespace psycle
 								(Global::_pSong->SamplesPerTick() / 6)
 								* (data._parameter & 0x0f));
 						} else {
-							// ‚±‚Ìê‡‚Íƒm[ƒgƒIƒ“
+							// ***** [bohan] iso-(10)646 encoding only please! *****
 							_newVoice->NoteOn();
 
 							if ((data._cmd == CMD::RETRIG) & ((data._parameter & 0x0f) > 0))
@@ -700,7 +700,7 @@ namespace psycle
 							}
 						}
 						
-						// ƒEƒF[ƒuƒIƒtƒZƒbƒgƒRƒ}ƒ“ƒh
+						// ***** [bohan] iso-(10)646 encoding only please! *****
 						__int64 w_offset;
 
 						if (data._cmd == CMD::OFFSET)
@@ -719,11 +719,11 @@ namespace psycle
 				}
 			} 
 
-			// ƒ{ƒŠƒ…[ƒ€ƒRƒ}ƒ“ƒh /////////////////////////////////////////////////////
+			// ***** [bohan] iso-(10)646 encoding only please! ***** /////////////////////////////////////////////////////
 			
 			if((data._cmd == CMD::VOLUME) | (data._volcmd == CMD::VOLUME))
 			{
-				// ƒ{ƒŠƒ…[ƒ€ƒRƒ}ƒ“ƒh
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				int _volume = (data._cmd == CMD::VOLUME)?data._parameter:data._volume;
 				_channel.Volume(_volume);
 				_channel.IsVolumeChange(true);
@@ -732,7 +732,7 @@ namespace psycle
 			{
 				if(!_bInstrumentSet)
 				{
-					// ƒ{ƒŠƒ…[ƒ€‚ÍŒ»İ‚Ìİ’è‚ğˆø‚«Œp‚®
+					// ***** [bohan] iso-(10)646 encoding only please! *****
 					_channel.IsVolumeChange(true);
 				} else {
 
@@ -741,35 +741,35 @@ namespace psycle
 				}
 			} else if(_bInstrumentSet)
 			{
-				// ƒCƒ“ƒXƒgƒ‹ƒƒ“ƒg‚Ì‚İ‚Ìİ’è
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				rChannel(channel).Volume(_inst.rWaveData(_layer).WaveVolume() * 255 / 100);
 				_channel.IsVolumeChange(true);
 			}
 			
-			// ƒpƒ“ ////////////////////////////////////////////////////////////////
+			// ***** [bohan] iso-(10)646 encoding only please! ***** ////////////////////////////////////////////////////////////////
 
 			if (_inst.IsRandomPanning())
 			{
-				// Instrument‚Ìƒ‰ƒ“ƒ_ƒ€ƒpƒ“ƒjƒ“ƒO
+				// Instrument***** [bohan] iso-(10)646 encoding only please! *****
 				_channel.PanFactor((float)rand() * 0.000030517578125f);
 				_channel.IsVolumeChange(true);
 			}
 			else if ( data._cmd == CMD::PANNING) 
 			{
-				// Panninng ƒRƒ}ƒ“ƒh
+				// Panninng ***** [bohan] iso-(10)646 encoding only please! *****
 				_channel.PanFactor(CValueMapper::Map_255_1(data._parameter));
 				_channel.IsVolumeChange(true);
 				_channel.IsSurround(false);
 			}
 			else if ( data._volcmd == CMD::PANNING) 
 			{
-				// Panninng ƒRƒ}ƒ“ƒh
+				// Panninng ***** [bohan] iso-(10)646 encoding only please! *****
 				_channel.PanFactor(CValueMapper::Map_255_1(data._volume));
 				_channel.IsVolumeChange(true);
 				_channel.IsSurround(false);
 			}
 			else {
-				// Instrument‚ÌƒfƒtƒHƒ‹ƒg Panning
+				// Instrument***** [bohan] iso-(10)646 encoding only please! ***** Panning
 				if((_channel.PanFactor() < 0 || _bInstrumentSet) & (!_channel.IsSurround()))
 				{
 					_channel.PanFactor(_inst.Pan());
@@ -778,14 +778,14 @@ namespace psycle
 			}
 
 			
-			// ƒ{ƒŠƒ…[ƒ€ƒGƒtƒFƒNƒgƒRƒ}ƒ“ƒh
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			_channel.PerformEffect(*_newVoice,data._volcmd,data._volume);
 
 			// Effect Command
 			_channel.PerformEffect(*_newVoice,data._cmd,data._parameter);
 
 
-			// ƒ{ƒŠƒ…[ƒ€’l‚ÌŒvZ //
+			// ***** [bohan] iso-(10)646 encoding only please! ***** //
 			if(_channel.IsVolumeChange() & _newVoice->IsPlaying()){
 				_newVoice->SetWaveVolume(_channel.Volume());
 			}
@@ -810,10 +810,10 @@ namespace psycle
 
 			XMInstrument & _inst = m_pSampler->Instrument(_instrument);
 
-			// ƒsƒbƒ`‚ğ‚¢‚¶‚éƒGƒtƒFƒNƒg’l‚Ì‰Šú‰»
+			// ***** [bohan] iso-(10)646 encoding only please! *****
 			m_pChannel->EffectInit();
 
-			// Envelope ‰Šú‰»
+			// Envelope ***** [bohan] iso-(10)646 encoding only please! *****
 			m_FilterEnvelope.Init(_inst.FilterEnvelope());
 			m_AmplitudeEnvelope.Init(_inst.AmpEnvelope());
 			m_PitchEnvelope.Init(_inst.PitchEnvelope());
@@ -929,8 +929,8 @@ namespace psycle
 					NoteOff();
 				}
 
-				// MOD‚Å‚¢‚¤Tick‚ª—ˆ‚½‚çƒGƒtƒFƒNƒg‚ğŒÄ‚Ño‚·B
-				// ?‚±‚±‚ÍSampleTick’PˆÊ‚É•ÏX‚·‚é
+				// MOD ***** [bohan] iso-(10)646 encoding only please! ***** Tick ***** [bohan] iso-(10)646 encoding only please! *****
+				// ***** [bohan] iso-(10)646 encoding only please! ***** SampleTick ***** [bohan] iso-(10)646 encoding only please! *****
 				if(_tickCounter > NextTick())
 				{
 					//::ATLTRACE2(_T("remain:%x tick:%x delta:%x next:%x "),m_TickRemain,_tickCounter,m_pSampler->DeltaTick(),m_NextTick);
@@ -945,7 +945,7 @@ namespace psycle
 					}
 				}
 				
-				// ƒŠƒTƒ“ƒvƒ‹ˆ—
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				_LARGE_INTEGER _temp;
 				_temp.QuadPart = m_WaveDataController.Position();
 				left_output = pResamplerWork(
@@ -1099,7 +1099,7 @@ namespace psycle
 				left_output *= (m_WaveDataController.LVolumeCurr()) * _volume;
 	*/
 				
-				// Monoral‚Ìê‡Aleft output‚Æright output‚Ì’l‚ğ“¯‚¶‚É‚·‚é
+				// Monoral ***** [bohan] iso-(10)646 encoding only please! ***** output‚ right output ***** [bohan] iso-(10)646 encoding only please! *****
 				if(!m_WaveDataController.IsStereo()){
 					right_output = left_output;
 				}
@@ -1162,7 +1162,7 @@ namespace psycle
 		
 		}
 
-		// ƒm[ƒgƒIƒt
+		// ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::Voice::NoteOff()
 		{
 			
@@ -1195,7 +1195,7 @@ namespace psycle
 
 		}// XMSampler::Voice::NoteOff()
 
-		// ƒm[ƒgƒIƒtƒtƒ@[ƒXƒg
+		// ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::Voice::NoteOffFast()
 		{
 		
@@ -1227,7 +1227,7 @@ namespace psycle
 
 		}// XMSampler::Voice::NoteOffFast()
 
-		// ƒŠƒgƒŠƒK[ƒRƒ}ƒ“ƒh
+		// ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::Voice::Retrigger(const int ticks,const int volumeModifier)
 		{
 			effretTicks = ticks; // number of Ticks.
@@ -1360,7 +1360,7 @@ namespace psycle
 
 		}// PerformFX() -------------------------------------------
 
-		// ƒg[ƒ“ƒ|ƒ‹ƒ^ƒƒ“ƒg‰Šúİ’è //
+		// ***** [bohan] iso-(10)646 encoding only please! ***** //
 		void XMSampler::Channel::Porta2Note(const UCHAR note,const int parameter,const int layer)
 		{
 			m_EffectFlags |= EffectFlag::PORTA2NOTE;
@@ -1663,7 +1663,7 @@ namespace psycle
 
 		};// Panbrello() -------------------------------------------
 
-		/// ƒm[ƒg’l‚©‚çƒsƒŠƒIƒh‚ğ‹‚ß‚é
+		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const double XMSampler::Channel::NoteToPeriod(const int note,const int layer)
 		{
 			XMInstrument::WaveData& _wave 
@@ -1671,17 +1671,17 @@ namespace psycle
 
 			if(m_pSampler->IsLinearFreq())
 			{
-				// üŒ`ü”g”Ó°ÄŞ
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				return ((10.0 /* octave */ * 12.0 /* note/octave */ * 64.0  - (double)(note + _wave.WaveTune()) * 64.0)
 					- ((double)(_wave.WaveFineTune()) * 0.25));
 			} else {
-				// Amiga Period‚Ì‹ß—®
+				// Amiga Period ***** [bohan] iso-(10)646 encoding only please! *****
 				return pow(2.0,(116.898 - ((double)(note + _wave.WaveTune())
 					+ ((double)_wave.WaveFineTune()) / 128.0))/12.0) * 32.0;
 			}
 		};
 
-		/// ƒsƒŠƒIƒh‚©‚çƒXƒs[ƒh‚ğ‹‚ß‚é
+		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::Voice::PeriodToSpeed()
 		{
 			double _period = rChannel().Period();
@@ -1709,7 +1709,7 @@ namespace psycle
 			}
 		};
 
-		/// ƒsƒŠƒIƒh‚©‚çƒm[ƒg‚ğ‹‚ß‚é
+		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		const int XMSampler::Channel::PeriodToNote(const double period,const int layer)
 		{
 			XMInstrument::WaveData& _wave = m_pSampler->Instrument(this->InstrumentNo()).rWaveData(layer);
@@ -1733,10 +1733,10 @@ namespace psycle
 			}
 		}
 
-		/// ƒGƒtƒFƒNƒg‚ğˆ—‚·‚é
+		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::Channel::PerformEffect(Voice& voice,const int cmd,const int parameter)
 		{
-					// ƒGƒtƒFƒNƒgƒRƒ}ƒ“ƒh
+					// ***** [bohan] iso-(10)646 encoding only please! *****
 			switch(cmd) // DO NOT ADD here those commands that REQUIRE a note.
 			{
 				case CMD::VOLUMESLIDE:
@@ -1766,11 +1766,11 @@ namespace psycle
 					Vibrato((parameter & 0x0F)*4,((parameter >> 4) & 0x0F));
 					break;
 
-				// ƒg[ƒ“ƒ|ƒ‹ƒ^ƒƒ“ƒg
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				case CMD::PORTA2NOTE:
 					Porta2Note(Porta2NoteDestNote(),parameter * 4,voice.Wave().Layer());
 					break;
-				// ƒgƒŒƒ‚ƒ
+				// ***** [bohan] iso-(10)646 encoding only please! *****
 				case CMD::TREMOLO:
 					Tremolo((parameter & 0x0F) << 2,(parameter>> 4) & 0x0F);
 					break;
@@ -1937,7 +1937,7 @@ namespace psycle
 		}
 #endif
 
-		/// XM‚ÌTempo‚ÆSpeed‚©‚çÀÛ‚ÌTempo‚¨‚æ‚Ñdelta tick‚ğŒvZ‚·‚é
+		/// XM‚ÌTempo‚ÆSpeed ***** [bohan] iso-(10)646 encoding only please! ***** delta tick ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::CalcBPMAndTick()
 		{
 			Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow());

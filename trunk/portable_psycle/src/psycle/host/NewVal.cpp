@@ -1,8 +1,8 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "NewVal.h"
 ///\file
 ///\brief implementation file for psycle::host::CNewVal.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "NewVal.hpp"
 namespace psycle
 {
 	namespace host

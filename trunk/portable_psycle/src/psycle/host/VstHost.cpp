@@ -1,18 +1,18 @@
-#include "stdafx.h"
-#if !defined _WINAMP_PLUGIN_
-	#include "psycle.h"
-	#include "MainFrm.h"
-	#include "VstEditorDlg.h"
-#endif
-#include "VstHost.h"
-#include "song.h"
-#include "Configuration.h"
-#include "Player.h"
-#include "InputHandler.h"
-#include <algorithm>
-#include <cctype>
 ///\file
 ///\brief implementation file for psycle::host::plugin
+#include <project.private.hpp>
+#if !defined _WINAMP_PLUGIN_
+	#include "psycle.hpp"
+	#include "MainFrm.hpp"
+	#include "VstEditorDlg.hpp"
+#endif
+#include "VstHost.hpp"
+#include "song.hpp"
+#include "Configuration.hpp"
+#include "Player.hpp"
+#include "InputHandler.hpp"
+#include <algorithm>
+#include <cctype>
 namespace psycle
 {
 	namespace host

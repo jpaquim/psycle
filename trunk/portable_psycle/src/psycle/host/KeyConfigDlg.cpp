@@ -1,10 +1,10 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "KeyConfigDlg.h"
-#include "inputhandler.h"
-#include "Configuration.h"
 ///\file
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "KeyConfigDlg.hpp"
+#include "inputhandler.hpp"
+#include "Configuration.hpp"
 namespace psycle
 {
 	namespace host

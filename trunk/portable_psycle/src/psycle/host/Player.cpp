@@ -1,14 +1,14 @@
-#include "stdafx.h"
-#include "player.h"
-#include "Song.h"
-#include "Machine.h"
-#include "Configuration.h"
-#if !defined _WINAMP_PLUGIN_
-	#include "MidiInput.h"
-#endif
-#include "InputHandler.h"
 ///\file
 ///\brief implementation file for psycle::host::Player.
+#include <project.private.hpp>
+#include "player.hpp"
+#include "Song.hpp"
+#include "Machine.hpp"
+#include "Configuration.hpp"
+#if !defined _WINAMP_PLUGIN_
+	#include "MidiInput.hpp"
+#endif
+#include "InputHandler.hpp"
 namespace psycle
 {
 	namespace host

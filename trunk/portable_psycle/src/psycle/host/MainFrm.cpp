@@ -1,23 +1,23 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "MainFrm.h"
-#include "WavFileDlg.h"
-#include "MasterDlg.h"
-#include "gearTracker.h"
-#include "FrameMachine.h"
-#include "VstEditorDlg.h"
-#include "Helpers.h"
-#include "WireDlg.h"
-#include "GearRackDlg.h"
-#include "Player.h"
-#include "MidiInput.h"
-#include <math.h>
-#include "inputhandler.h"
-#include "KeyConfigDlg.h"
-#include <sstream>
-#include <iomanip>
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "MainFrm.hpp"
+#include "WavFileDlg.hpp"
+#include "MasterDlg.hpp"
+#include "gearTracker.hpp"
+#include "FrameMachine.hpp"
+#include "VstEditorDlg.hpp"
+#include "Helpers.hpp"
+#include "WireDlg.hpp"
+#include "GearRackDlg.hpp"
+#include "Player.hpp"
+#include "MidiInput.hpp"
+#include <math.h>
+#include "inputhandler.hpp"
+#include "KeyConfigDlg.hpp"
+#include <sstream>
+#include <iomanip>
 namespace psycle
 {
 	namespace host

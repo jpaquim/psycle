@@ -1,11 +1,11 @@
-#include "stdafx.h"
-#include "psycle.h"
-#include "GearRackDlg.h"
-#include "Song.h"
-#include "Machine.h"
-#include "MainFrm.h"
 ///\file
 ///\brief implementation file for psycle::host::CGearRackDlg.
+#include <project.private.hpp>
+#include "psycle.hpp"
+#include "GearRackDlg.hpp"
+#include "Song.hpp"
+#include "Machine.hpp"
+#include "MainFrm.hpp"
 namespace psycle
 {
 	namespace host

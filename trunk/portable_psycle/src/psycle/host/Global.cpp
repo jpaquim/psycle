@@ -1,15 +1,15 @@
-#include <stdafx.h>
-#include <global.h>
-#include <Song.h>
-#include <Player.h>
-#include <Dsp.h>
-#include <Configuration.h>
-#include <operating_system/logger.h>
-#if !defined _WINAMP_PLUGIN_
-	#include <InputHandler.h>
-#endif
 ///\file
 ///\brief implementation file for psycle::host::Global.
+#include <project.private.hpp>
+#include "global.hpp"
+#include "Song.hpp"
+#include "Player.hpp"
+#include "Dsp.hpp"
+#include "Configuration.hpp"
+#include <operating_system/logger.hpp>
+#if !defined _WINAMP_PLUGIN_
+	#include "InputHandler.hpp"
+#endif
 namespace psycle
 {
 	namespace host

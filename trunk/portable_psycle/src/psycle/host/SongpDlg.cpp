@@ -1,9 +1,9 @@
-#include "stdafx.h"
-#include "Psycle.h"
-#include "Song.h"
-#include "SongpDlg.h"
 ///\file
 ///\brief implementation file for psycle::host::CSongpDlg.
+#include <project.private.hpp>
+#include "Psycle.hpp"
+#include "Song.hpp"
+#include "SongpDlg.hpp"
 namespace psycle
 {
 	namespace host

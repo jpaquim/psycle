@@ -1,16 +1,16 @@
-#include "stdafx.h"
-#include "Configuration.h"
-#include "Registry.h"
-#if !defined _WINAMP_PLUGIN_
-	#include "WaveOut.h"
-	#include "DirectSound.h"
-	#include "ASIOInterface.h"
-	#include "MidiInput.h"
-	#include "Song.h"
-	#include "NewMachine.h"
-#endif
 ///\file
 ///\brief implementation file for psycle::host::Configuration.
+#include <project.private.hpp>
+#include "Configuration.hpp"
+#include "Registry.hpp"
+#if !defined _WINAMP_PLUGIN_
+	#include "WaveOut.hpp"
+	#include "DirectSound.hpp"
+	#include "ASIOInterface.hpp"
+	#include "MidiInput.hpp"
+	#include "Song.hpp"
+	#include "NewMachine.hpp"
+#endif
 namespace psycle
 {
 	namespace host

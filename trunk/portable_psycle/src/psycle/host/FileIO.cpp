@@ -1,7 +1,7 @@
-#include "stdafx.h"
-#include "FileIO.h"
 ///\file
 ///\brief implementation file for psycle::host::RiffFile.
+#include <project.private.hpp>
+#include "FileIO.hpp"
 namespace psycle
 {
 	namespace host
