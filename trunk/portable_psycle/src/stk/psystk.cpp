@@ -12,6 +12,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyStk.h"
 
 StkFloat Stk :: srate_ = (StkFloat) SRATE;

@@ -12,6 +12,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyOnePole.h"
 
 OnePole :: OnePole() : Filter()

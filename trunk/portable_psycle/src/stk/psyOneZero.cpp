@@ -12,6 +12,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyOneZero.h"
 
 OneZero :: OneZero() : Filter()

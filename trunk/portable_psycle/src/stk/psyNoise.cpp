@@ -10,6 +10,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyNoise.h"
 #include <stdlib.h>
 #include <time.h>

@@ -61,6 +61,7 @@
 */
 /***************************************************/
 
+#include <project.h>
 #include "psyStk.h"
 #include <math.h>
 
