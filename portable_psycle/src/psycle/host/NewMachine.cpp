@@ -344,6 +344,10 @@ namespace psycle
 
 		void CNewMachine::LoadPluginInfo()
 		{
+			class plugin_finder
+			{
+			public:
+			};
 			if(_numPlugins == -1)
 			{
 				host::loggers::info("Scanning plugins ...");
@@ -371,11 +375,12 @@ namespace psycle
 							while(loop)
 							{								
 								loop = finder.FindNextFile();
-								if(finder.IsDirectory() && !finder.IsDots()) count += (*this)(std::string(finder.GetFilePath()));
+								if(finder.IsDirectory() && !finder.IsDots())
+									count += (*this)(std::string(finder.GetFilePath()));
 								else
 								{
-									std::string s(finder.GetFilePath());
-									if(s.substr(s.rfind('.')) == ".dll") ++count;
+									if(finder.GetFilePath().Right(4) == ".dll")
+										++count;
 								}
 							}
 							finder.Close();
