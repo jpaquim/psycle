@@ -14,10 +14,10 @@
 class CCombFilter  
 {
 public:
-	Initialize(int time, int stph);
 	CCombFilter();
-	virtual ~CCombFilter();
-	Work(float l_input,float r_input);
+	virtual ~CCombFilter() throw();
+	void Initialize(int time, int stph);
+	void Work(float l_input,float r_input);
 	float left_output;
 	float right_output;
 

@@ -1,8 +1,10 @@
+#include <project.h>
+
 // CombFilter.cpp: implementation of the CCombFilter class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "CombFilter.h"
+#include <psycle/plugin/arguru_reverb/CombFilter.h>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -21,12 +23,12 @@ CCombFilter::CCombFilter()
 
 }
 
-CCombFilter::~CCombFilter()
+CCombFilter::~CCombFilter() throw()
 {
 
 }
 
-CCombFilter::Initialize(int time, int stph)
+void CCombFilter::Initialize(int time, int stph)
 {
 	l_Counter=MAX_COMB_DELAY-4;
 	r_Counter=MAX_COMB_DELAY-4;
@@ -37,7 +39,7 @@ CCombFilter::Initialize(int time, int stph)
 	if(r_delayedCounter<0)r_delayedCounter=0;
 }
 
-CCombFilter::Work(float l_input,float r_input)
+void CCombFilter::Work(float l_input,float r_input)
 {
 	leftBuffer[l_Counter]=l_input;
 	rightBuffer[r_Counter]=r_input;

@@ -1,8 +1,10 @@
+#include <project.h>
+
 // AllPass.cpp: implementation of the CAllPass class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "AllPass.h"
+#include <psycle/plugin/arguru_reverb/AllPass.h>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -21,12 +23,12 @@ CAllPass::CAllPass()
 
 }
 
-CAllPass::~CAllPass()
+CAllPass::~CAllPass() throw()
 {
 
 }
 
-CAllPass::Initialize(int time, int stph)
+void CAllPass::Initialize(int time, int stph)
 {
 	l_Counter=MAX_ALLPASS_DELAY-4;
 	r_Counter=MAX_ALLPASS_DELAY-4;
