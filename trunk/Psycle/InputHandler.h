@@ -180,6 +180,7 @@ enum CmdSet
 
 	// new ones have to go at bottom of each section or else bad registry reads
 	cdefPatternMixPaste,
+	cdefPatternTrackMute,
 
 };
 
@@ -298,6 +299,7 @@ struct CmdDef
 		case cdefPatternCopy:	return "Pattern Copy";
 		case cdefPatternPaste:	return "Pattern Paste";
 		case cdefPatternMixPaste:	return "Pattern Mix Paste";
+		case cdefPatternTrackMute:	return "Pattern Track Mute";
 				
 		case cdefBlockCut:		return "Block Cut";
 		case cdefBlockCopy:		return "Block Copy";

@@ -264,6 +264,7 @@ public:
 	void LoadPatternHeaderSkin();
 	void LoadMachineSkin();
 	void KillWireDialogs();
+	void patTrackMute();
 	
 public:
 

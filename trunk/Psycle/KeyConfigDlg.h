@@ -34,7 +34,6 @@ public:
 	CButton	m_wrap;
 	CButton	m_centercursor;
 	CButton	m_cursordown;
-
 	//}}AFX_DATA
 
 
@@ -60,6 +59,8 @@ protected:
 	afx_msg void OnSelchangeCmdlist();
 	virtual void OnCancel();
 	virtual void OnOK();
+	afx_msg void OnImportreg();
+	afx_msg void OnExportreg();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

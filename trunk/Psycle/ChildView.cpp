@@ -3063,3 +3063,11 @@ void CChildView::TransparentBlt(CDC* pDC,
    hdcMem.DeleteDC();
 }
 
+void CChildView::patTrackMute()
+{
+	if (viewMode == VMPattern)
+	{
+		_pSong->_trackMuted[editcur.track] = !_pSong->_trackMuted[editcur.track];
+		Repaint(DMTrackHeader);
+	}
+}

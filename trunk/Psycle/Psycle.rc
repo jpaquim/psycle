@@ -292,7 +292,7 @@ END
 IDD_WIREDIALOG DIALOGEX 0, 0, 209, 161
 STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
                     TBS_VERT | TBS_BOTH | WS_TABSTOP,176,0,28,140
@@ -440,7 +440,7 @@ END
 IDD_GEAR_TRACKER DIALOGEX 0, 0, 280, 71
 STYLE DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Properties",IDC_STATIC,4,0,208,68
     CTEXT           "Polyphony",IDC_STATIC,8,18,33,17,SS_CENTERIMAGE
@@ -799,7 +799,7 @@ END
 IDD_GEAR_GAINER DIALOGEX 0, 0, 40, 161
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Slider1",IDC_VOLSLIDER,"msctls_trackbar32",
                     TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,6,0,27,
@@ -810,7 +810,7 @@ END
 IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 210
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         170,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
     LTEXT           "Preset",IDC_STATIC,228,4,21,8
@@ -1092,6 +1092,9 @@ BEGIN
                     BS_AUTOCHECKBOX,138,70,115,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE,138,82,115,10
+    PUSHBUTTON      "Save",IDC_EXPORTREG,197,257,55,12,WS_DISABLED
+    PUSHBUTTON      "Load",IDC_IMPORTREG,138,257,55,12,WS_DISABLED
+    GROUPBOX        "Theme Options",IDC_STATIC,133,245,125,30,WS_DISABLED
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
@@ -2337,6 +2340,13 @@ BEGIN
     ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
     ID_BARSTOP              "Stop song\nStop"
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
+    ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
+    ID_HELP_KEYBTXT         "Open the keys.txt,which describes the default keyboard configuration\nOpen keys"
     ID_BARREC               "Record song\nRecord"
 END
 
@@ -2423,13 +2433,6 @@ BEGIN
     ID_EDIT_SELECT_ALL      "Select whole wave"
     ID_EDIT_UNDO            "Undo last action\nUndo"
     ID_EDIT_REDO            "Redo last Undo\nRedo"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
-    ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
-    ID_HELP_KEYBTXT         "Open the keys.txt,which describes the default keyboard configuration\nOpen keys"
 END
 
 STRINGTABLE DISCARDABLE 
