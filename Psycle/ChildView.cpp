@@ -25,7 +25,7 @@
 #include "Helpers.h"
 #include "MasterDlg.h"
 #include "GearTracker.h"
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 #include "GearPsychOsc.h"
 #include "GearDistort.h"
 #include "GearDelay.h"
@@ -92,7 +92,7 @@ CChildView::CChildView()
 	MasterMachineDialog = NULL;
 	SamplerMachineDialog = NULL;
 
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 
 	PsychMachineDialog = NULL;
 	DistortionMachineDialog = NULL;

@@ -22,7 +22,7 @@
 #include "DataCompression.h"
 
 
-#ifdef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifdef CONVERT_INTERNAL_MACHINES
 	#include "convert_internal_machines.h" // conversion
 #endif
 
@@ -66,7 +66,7 @@ bool Song::CreateMachine(
 	Machine* pMachine;
 	Master* pMaster;
 	Sampler* pSampler;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 	Delay* pDelay;
 	Filter2p* pFilter;
 	Gainer* pGainer;
@@ -90,7 +90,7 @@ bool Song::CreateMachine(
 	case MACH_SAMPLER:
 		pMachine = pSampler = new Sampler(index);
 		break;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 	case MACH_SINE:
 		pMachine = pSine = new Sine(index);
 		break;
@@ -1733,13 +1733,13 @@ bool Song::Load(RiffFile* pFile)
 		Machine* pMac[128];
 		memset(pMac,0,sizeof(pMac));
 
-#if defined(PSYCLE__CONVERT_INTERNAL_MACHINES)
+#if defined(CONVERT_INTERNAL_MACHINES)
 		psycle::convert_internal_machines::Converter converter; // conversion
 #endif
 
 		for (i=0; i<128; i++)
 		{
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 			Sine* pSine;
 			Distortion* pDistortion;
 			Delay* pDelay;
@@ -1764,7 +1764,7 @@ bool Song::Load(RiffFile* pFile)
 
 				pFile->Read(&type, sizeof(type));
 
-#if defined(PSYCLE__CONVERT_INTERNAL_MACHINES)
+#ifndef CONVERT_INTERNAL_MACHINES
 				if(converter.plugin_names().exists(type))
 					pMac[i] = &converter.redirect(i, type, *pFile); // conversion
 				else
@@ -1782,7 +1782,7 @@ bool Song::Load(RiffFile* pFile)
 					pMac[i]->Init();
 					pMac[i]->Load(pFile);
 					break;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 				case MACH_SINE:
 					pMac[i] = pSine = new Sine(i);
 					pMac[i]->Init();
@@ -2381,7 +2381,7 @@ bool Song::Load(RiffFile* pFile)
 			}
 		}
 
-#if defined(PSYCLE__CONVERT_INTERNAL_MACHINES)
+#ifndef CONVERT_INTERNAL_MACHINES
 		converter.retweak(*this); // conversion
 #endif
 

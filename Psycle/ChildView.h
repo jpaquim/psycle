@@ -15,7 +15,7 @@
 #define MAX_DRAW_MESSAGES 32
 
 class CMasterDlg;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 class CGearPsychOsc;
 class CGearDistort;
 class CGearDelay;
@@ -298,7 +298,7 @@ public:
 //	bool multiPattern;
 	CMasterDlg * MasterMachineDialog;
 	CGearTracker * SamplerMachineDialog;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 	CGearPsychOsc * PsychMachineDialog;
 	CGearDistort * DistortionMachineDialog;
 	CGearDelay * DelayMachineDialog;

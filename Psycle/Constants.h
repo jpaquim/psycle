@@ -2,7 +2,7 @@
 #define __CONSTANTS_H
 
 #define VERSION_NUMBER "1.7.3"
-#define PSYCLE__CONVERT_INTERNAL_MACHINES
+#define CONVERT_INTERNAL_MACHINES
 
 #define TWEAK_SLIDE_SAMPLES		64 // number of samples per tweak slide update
 #define MAX_TWS					16 // # of tws commands that can be active on one machine

@@ -12,7 +12,7 @@
 // Included dialogs
 #include "MasterDlg.h"
 #include "gearTracker.h"
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 #include "gearPsychosc.h"
 #include "gearDistort.h"
 #include "gearDelay.h"
@@ -1352,7 +1352,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
 				}
 				break;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 			case MACH_SINE:
 				if (m_wndView.PsychMachineDialog)
 				{
@@ -1632,7 +1632,7 @@ void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
 			case MACH_SAMPLER:
 				if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
 				break;
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef CONVERT_INTERNAL_MACHINES
 			case MACH_SINE:
 				if (m_wndView.PsychMachineDialog) m_wndView.PsychMachineDialog->OnCancel();
 				break;
