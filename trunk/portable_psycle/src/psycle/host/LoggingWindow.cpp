@@ -71,7 +71,7 @@ namespace psycle
 				defaultCF.crTextColor = RGB(200, 128, 0);
 				break;
 			case host::logger::crash:
-				defaultCF.crTextColor = RGB(255, 0, 0);
+				defaultCF.crTextColor = RGB(255, 0, 64);
 				break;
 			default:
 				defaultCF.crTextColor = RGB(255, 0, 255);
