@@ -207,7 +207,7 @@ BEGIN
     CONTROL         "&Dither",IDC_CONFIG_DITHER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,152,35,35,10
     LTEXT           "Latency: 12345ms",IDC_CONFIG_LATENCY,143,56,60,8
-    CONTROL         152,IDC_STATIC,"Static",SS_BITMAP,208,36,51,30
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,208,36,51,30
     DEFPUSHBUTTON   "OK",IDOK,219,7,50,14
 END
 
@@ -239,7 +239,7 @@ BEGIN
                     WS_EX_STATICEDGE
     CTEXT           "",IDC_STATIC4,162,104,40,11,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
-    CONTROL         145,IDC_STATIC,"Static",SS_BITMAP,7,122,72,22
+    CONTROL         160,IDC_STATIC,"Static",SS_BITMAP,7,122,72,22
     CTEXT           "Analog theremin emulator/Ring modulator",IDC_STATIC,88,
                     125,119,20
 END
@@ -268,7 +268,7 @@ BEGIN
     CTEXT           "Routing",IDC_STATIC,188,68,32,8,SS_CENTERIMAGE
     CTEXT           "",IDC_MCPULABEL2,228,68,40,10,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    CONTROL         108,IDC_STATIC,"Static",SS_BITMAP,272,28,24,18
+    CONTROL         137,IDC_STATIC,"Static",SS_BITMAP,272,28,24,18
     GROUPBOX        "Memory status",IDC_STATIC,8,16,168,68
     CTEXT           "Available resources",IDC_STATIC,12,28,76,12,
                     SS_CENTERIMAGE
@@ -322,7 +322,7 @@ BEGIN
     PUSHBUTTON      "Flat",IDC_BUTTON3,91,128,64,12
     PUSHBUTTON      "Do Symmetric",IDC_BUTTON2,11,144,64,12
     PUSHBUTTON      "Randomize",IDC_BUTTON4,11,160,64,12
-    CONTROL         147,IDC_STATIC,"Static",SS_BITMAP,98,144,47,19
+    CONTROL         162,IDC_STATIC,"Static",SS_BITMAP,98,144,47,19
     CTEXT           "Digital Distortion v1.0",IDC_STATIC,86,164,76,8
 END
 
@@ -442,7 +442,7 @@ BEGIN
                     WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,216,4,60,20
     CTEXT           "Psycle Sampler",IDC_STATIC,216,28,60,8,SS_CENTERIMAGE
-    CONTROL         149,IDC_STATIC,"Static",SS_BITMAP,216,40,61,16
+    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,216,40,61,16
     CTEXT           "- Professional -",IDC_STATIC,216,60,60,8,SS_CENTERIMAGE
 END
 
@@ -451,7 +451,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    CONTROL         151,IDC_STATIC,"Static",SS_BITMAP,4,0,221,17
+    CONTROL         166,IDC_STATIC,"Static",SS_BITMAP,4,0,221,17
     GROUPBOX        "Left Channel Delay",IDC_STATIC,4,16,332,68
     CTEXT           "Time(1)",IDC_STATIC,8,32,40,12,SS_CENTERIMAGE
     CONTROL         "Slider1",IDC_SLIDER_TIME,"msctls_trackbar32",
@@ -677,9 +677,9 @@ END
 IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 228
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    CONTROL         156,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
+    CONTROL         170,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
     LTEXT           "Preset",IDC_STATIC,228,4,21,8
     COMBOBOX        IDC_PRESETCOMBO,228,12,88,92,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
@@ -979,7 +979,7 @@ BEGIN
                     151,8,SS_CENTERIMAGE,WS_EX_TRANSPARENT
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,8,203,320,1,
                     WS_EX_STATICEDGE
-    CONTROL         106,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
+    CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
                     WS_BORDER,0,0,335,186
     CONTROL         "",IDC_HEADERDLG,"Static",SS_BLACKRECT | NOT WS_VISIBLE | 
                     WS_BORDER,0,0,335,13
@@ -1047,12 +1047,12 @@ IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 103
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle DirectX Audio Driver Configuration"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Device:",IDC_STATIC,13,7,26,13,SS_CENTERIMAGE
     COMBOBOX        IDC_DSOUND_DEVICE,45,7,167,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         112,IDC_STATIC,"Static",SS_BITMAP,191,23,21,20
+    CONTROL         132,IDC_STATIC,"Static",SS_BITMAP,191,23,21,20
     GROUPBOX        "Audio properties",IDC_STATIC,7,49,263,47
     RTEXT           "Samplerate:",IDC_STATIC,16,60,45,8,SS_CENTERIMAGE
     COMBOBOX        IDC_DSOUND_SAMPLERATE_COMBO,63,58,65,77,CBS_DROPDOWNLIST | 
@@ -1274,9 +1274,9 @@ BEGIN
 
     IDD_GEAR_FILTER, DIALOG
     BEGIN
-        RIGHTMARGIN, 288
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 210
         TOPMARGIN, 7
-        BOTTOMMARGIN, 144
     END
 
     IDD_GREETS, DIALOG
@@ -1306,9 +1306,7 @@ BEGIN
     IDD_GEAR_GAINER, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 33
         TOPMARGIN, 7
-        BOTTOMMARGIN, 168
     END
 
     IDD_GEAR_FLANGER, DIALOG
@@ -1322,7 +1320,7 @@ BEGIN
     IDD_MASTERDLG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 261
+        RIGHTMARGIN, 152
         TOPMARGIN, 7
     END
 
@@ -1334,12 +1332,20 @@ BEGIN
         BOTTOMMARGIN, 16
     END
 
+    IDD_VSTRACK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 257
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 16
+    END
+
     IDD_PRESETS, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 160
+        RIGHTMARGIN, 162
         TOPMARGIN, 7
-        BOTTOMMARGIN, 130
+        BOTTOMMARGIN, 170
     END
 
     IDD_MIDI_MONITOR, DIALOG
@@ -1422,9 +1428,8 @@ BEGIN
     IDD_INST_EDITOR, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 254
         TOPMARGIN, 7
-        BOTTOMMARGIN, 227
+        BOTTOMMARGIN, 64
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1471,7 +1476,7 @@ IDR_MACHINEFRAME MENU DISCARDABLE
 BEGIN
     POPUP "Machine"
     BEGIN
-        MENUITEM "Command 1",                   ID_PARAMETERS_COMMAND
+        MENUITEM "Command 1",                   ID_MACHINE_COMMAND
         MENUITEM SEPARATOR
         MENUITEM "About this machine",          ID_MACHINE_ABOUTTHISMACHINE
         MENUITEM "About PSYGEAR v1.0",          ID_MACHINE_ABOUTPSYGEARV10
@@ -1873,59 +1878,60 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_BARPLAY              "Play song\nPlay"
-    ID_BARSTOP              "Stop song\nStop"
+    ID_ABOUTPSYCLE          "Logo\nLogo"
     ID_RECORDB              "Disk record\nRecord"
-    ID_FILE_LOADSONG        "Open song\nOpen"
-    ID_FILE_SAVESONG        "Save song\nSave"
-    ID_COPYPATTERN          "Copy pattern to buffer"
+    ID_BARPLAY              "Play song\nPlay"
+    ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
+    ID_BARSTOP              "Stop song\nStop"
+    ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_NEWMACHINE           "Insert new machine\nNew machine"
-    ID_PSYHELP              "Open online help\nHelp"
-    ID_SELECCION_ZOOM       "Zoom in view"
-    ID_SELECTION_FADEIN     "Linear fade in"
-    ID_SELECTION_FADEOUT    "Linear fade out"
-    ID_CUTWAVE              "Cut wave marked selection\nCut selection"
-    ID_SELECCION_ZOOMOUT    "Zoom out view"
-    ID_PATTERNVIEW          "Pattern view\nPatterns"
+    ID_FILE_LOADSONG        "Open song\nOpen"
+    ID_FILE_SAVESONG        "Save song\nSave"
+    ID_FILE_IMPORT_ITFILE   "Import Impulse Tracker File"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_MACHINEVIEW          "Machine view\nMachines"
+    ID_PATTERNVIEW          "Pattern view\nPatterns"
+    ID_SHOWPSEQ             "Pattern sequencer\nSequencer"
+    ID_NEWMACHINE           "Insert new machine\nNew machine"
     ID_VIEW_INSTRUMENTEDITOR 
                             "Opens Instruments/Samples Editor\nOpen Instruments Editor"
-    ID_ABOUTPSYCLE          "Logo\nLogo"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
-    ID_INDICATOR_SIZE       "Size:"
-    ID_INDICATOR_MODE       "Mode:"
-    IDS_COULDNT_INITIALIZE_TIMER "Couldn't initialize timer"
-    IDS_SONG_SAVED          "Song Saved"
-    IDS_ARE_YOU_SURE        "Are you Sure?"
-    ID_SELECTION_NORMALIZE  "Maximize peak samples value"
-    ID_SELECTION_REMOVEDC   "Remove DC"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_CUTPATTERN           "Cut pattern"
-    ID_PASTEPATTERN         "Paste pattern data from buffer"
-    ID_SHOWPSEQ             "Pattern sequencer\nSequencer"
+    ID_PSYHELP              "Open online help\nHelp"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_POP_PATTENPROPERTIES "Pops Up the Pattern Properties Dialog\nShow Pattern Properties"
     ID_POP_MIXPASTE         "Paste, Mixing the content of the buffer with the pattern\\Mix Paste"
-    ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
     ID_POP_TRANSPOSE_1      "Transposes the notes 1 seminote down\nTraspose -1"
+    ID_SELECTION_AMPLIFY    "Volume adjust..."
+    ID_SELECTION_REVERSE    "Reverse sample direction"
+    ID_SELECTION_FADEIN     "Linear fade in"
+    ID_SELECTION_FADEOUT    "Linear fade out"
+    ID_SELECTION_NORMALIZE  "Maximize peak samples value"
+    ID_SELECTION_REMOVEDC   "Remove DC"
+    ID_SELECCION_ZOOM       "Zoom in view"
+    ID_SELECCION_ZOOMOUT    "Zoom out view"
+    ID_SELECTION_SHOWALL    "Show entire wave"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_DELETE          "Delete selection"
+    ID_INDICATOR_SIZE       "Size:"
+    ID_INDICATOR_MODE       "Mode:"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COULDNT_INITIALIZE_TIMER "Couldn't initialize timer"
+    IDS_SONG_SAVED          "Song Saved"
+    IDS_ARE_YOU_SURE        "Are you Sure?"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -1944,13 +1950,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SELECTION_AMPLIFY    "Volume adjust..."
-    ID_SELECTION_REVERSE    "Reverse sample direction"
-    ID_SELECTION_SHOWALL    "Show entire wave"
-    ID_EDIT_DELETE          "Delete selection"
     ID_CONVERT_MONO         "Mix channels to mono"
     ID_CONVERT_STEREO       "Split channels to stereo"
-    ID_FILE_IMPORT_ITFILE   "Import Impulse Tracker File"
 END
 
 STRINGTABLE DISCARDABLE 

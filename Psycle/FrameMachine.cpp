@@ -44,7 +44,7 @@ BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 	ON_WM_RBUTTONDOWN()
 	ON_COMMAND(ID_PARAMETERS_RANDOMPARAMETERS, OnParametersRandomparameters)
 	ON_COMMAND(ID_PARAMETERS_RESETPARAMETERS, OnParametersResetparameters)
-	ON_COMMAND(ID_PARAMETERS_COMMAND, OnParametersCommand)
+	ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
 	ON_COMMAND(ID_MACHINE_ABOUTTHISMACHINE, OnMachineAboutthismachine)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
@@ -84,7 +84,7 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 	{
 		numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
 		ncol = ((Plugin*)_pMachine)->GetInfo()->numCols;
-		GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_PARAMETERS_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
+		GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
 	}
 	else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 	{
@@ -516,7 +516,7 @@ void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 
 		case CT_Immediate:
-			Global::pInputHandler->PerformCmd(cmd);
+			Global::pInputHandler->PerformCmd(cmd,nRepCnt);
 			break;
 		}
 	}
