@@ -11,7 +11,6 @@
 	#include "NewMachine.h"
 #endif
 
-#define MAX_EVENTS		64
 #define MAX_INOUTS		8
 
 #define VST_QUANTIZATION 65535 // Dialog max ticks for parameters.
@@ -39,7 +38,7 @@ public:
 	void Free();
 	int Instance(char *dllname,bool overwriteName=true);
 //	void Create(VSTPlugin *plug);
-	virtual void Init(void);
+//	virtual void Init(void);
 	virtual bool Load(RiffFile* pFile);
 
 	bool LoadChunk(RiffFile* pFile);	// To be removed when changing the fileformat.
@@ -276,7 +275,7 @@ protected:
 	float junk[STREAM_SIZE];
 
 	static VstTimeInfo _timeInfo;
-	VstMidiEvent midievent[MAX_EVENTS];
+	VstMidiEvent midievent[MAX_VST_EVENTS];
 	VstEvents events;
 	int	queue_size;
 

@@ -1,3 +1,12 @@
+there will actually be several sampler machines, but they can share format 
+
+1) akai style sampler
+
+2) acid style sampler
+
+3) e-z drum sampler
+
+4) live recording/direct to/from disk reader
 
 
 =================================
