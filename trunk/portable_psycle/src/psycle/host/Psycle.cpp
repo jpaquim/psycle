@@ -84,6 +84,7 @@ CPsycleApp::CPsycleApp() throw(std::runtime_error)
 	}
 	#endif
 	// support for unicode characters on mswin98
+	/*
 	class exceptions
 	{
 	public:
@@ -112,6 +113,7 @@ CPsycleApp::CPsycleApp() throw(std::runtime_error)
 		::MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
 		throw e;
 	}
+	*/
 }
 
 CPsycleApp::~CPsycleApp()
