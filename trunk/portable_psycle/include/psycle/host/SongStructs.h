@@ -5,15 +5,15 @@
 typedef struct PatternEntry
 {
 	PatternEntry()
-	{ _note=0;_inst=0;_mach=0;_cmd=0;_parameter=0;_volcmd=0;_volume=0;
+	{ _note=0;_inst=0;_mach=0;_cmd=0;_parameter=0;/*_volcmd=0;_volume=0;*/
 	}
 	UCHAR _note;
 	UCHAR _inst;
 	UCHAR _mach;
 	UCHAR _cmd;
 	UCHAR _parameter;
-	UCHAR _volcmd;	// Unimplemented by now.
-	UCHAR _volume;	// Unimplemented by now.
+//	UCHAR _volcmd;	// Unimplemented for now. Used by XMSampler
+//	UCHAR _volume;	// Unimplemented for now. Used by XMSampler
 }
 PatternEntry;
 
