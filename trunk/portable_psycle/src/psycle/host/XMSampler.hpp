@@ -23,33 +23,32 @@ public:
 	struct CMD {
 	//	(*) = If the command byte is zero, the last nonzero byte for the command should be used.
 
-		// [sartorius & bohan] was: static const UCHAR ARPEGGIO		=		0x0; ///< Arpeggio
+		// [sartorius & bohan] was: static const compiler::uint8 ARPEGGIO		=		0x0; ///< Arpeggio
 		static compiler::uint8 const NONE = 0;
-
-		static const UCHAR PORTAUP		=		0x01;///< Portamento Up		 (*)
-		static const UCHAR PORTADOWN	=		0x02;///< Portamento Down	 (*)
-		static const UCHAR PORTA2NOTE	=		0x03;///<  Tone Portamento	 (*)
-		static const UCHAR VIBRATO =			0x04;///< Do Vibrato		 (*)
-		static const UCHAR TONEPORTAVOL =		0x05;///< Tone Portament & Volume Slide (*)
-		static const UCHAR VIBRATOVOL =			0x06;///< Vibrato & Volume Slide (*)
-		static const UCHAR TREMOLO =			0x07;///< Tremolo			 (*)
-		static const UCHAR PANNING	=			0x08;///< Set Panning Position
-		static const UCHAR OFFSET	=			0x09;///< Set Sample Offset
-		static const UCHAR VOLUMESLIDE	=		0x0a;///< Volume Slide		 (*)
-		static const UCHAR POSITION_JUMP	=	0x0b;///< Position Jump
-		static const UCHAR VOLUME	=			0x0c;///< Set Volume
-		static const UCHAR PATTERN_BREAK	=	0x0d;///< Pattern Break
-		static const UCHAR EXTENDED		=		0x0e;///< Extend Command
-		static const UCHAR SETSPEED	=			0x0f;///< Set Speed or BPM
-		static const UCHAR SET_GLOBAL_VOLUME =	0x10;///< Set Global Volume
-		static const UCHAR GLOBAL_VOLUME_SLIDE = 0x11;///< Global Volume Slide (*)
-		static const UCHAR NOTE_OFF			 =	0x14;///< Note Off
-		static const UCHAR SET_ENV_POSITION =	0x15;///< Set Envelope Position
-		static const UCHAR PANNINGSLIDE =		0x19;///< PANNING SLIDE		 (*)
-		static const UCHAR RETRIG	=			0x1B;///< Retrigger Note	 (*)
-		static const UCHAR TREMOR	=			0x1D;///< Tremor
-		static const UCHAR EXTEND_XM_EFFECTS =	0x21;///< Extend XM Effects	
-		static const UCHAR PANBRELLO	=		0x22;///< Panbrello
+		static const compiler::uint8 PORTAUP		=		0x01;///< Portamento Up		 (*)
+		static const compiler::uint8 PORTADOWN	=		0x02;///< Portamento Down	 (*)
+		static const compiler::uint8 PORTA2NOTE	=		0x03;///<  Tone Portamento	 (*)
+		static const compiler::uint8 VIBRATO =			0x04;///< Do Vibrato		 (*)
+		static const compiler::uint8 TONEPORTAVOL =		0x05;///< Tone Portament & Volume Slide (*)
+		static const compiler::uint8 VIBRATOVOL =			0x06;///< Vibrato & Volume Slide (*)
+		static const compiler::uint8 TREMOLO =			0x07;///< Tremolo			 (*)
+		static const compiler::uint8 PANNING	=			0x08;///< Set Panning Position
+		static const compiler::uint8 OFFSET	=			0x09;///< Set Sample Offset
+		static const compiler::uint8 VOLUMESLIDE	=		0x0a;///< Volume Slide		 (*)
+		static const compiler::uint8 POSITION_JUMP	=	0x0b;///< Position Jump
+		static const compiler::uint8 VOLUME	=			0x0c;///< Set Volume
+		static const compiler::uint8 PATTERN_BREAK	=	0x0d;///< Pattern Break
+		static const compiler::uint8 EXTENDED		=		0x0e;///< Extend Command
+		static const compiler::uint8 SETSPEED	=			0x0f;///< Set Speed or BPM
+		static const compiler::uint8 SET_GLOBAL_VOLUME =	0x10;///< Set Global Volume
+		static const compiler::uint8 GLOBAL_VOLUME_SLIDE = 0x11;///< Global Volume Slide (*)
+		static const compiler::uint8 NOTE_OFF			 =	0x14;///< Note Off
+		static const compiler::uint8 SET_ENV_POSITION =	0x15;///< Set Envelope Position
+		static const compiler::uint8 PANNINGSLIDE =		0x19;///< PANNING SLIDE		 (*)
+		static const compiler::uint8 RETRIG	=			0x1B;///< Retrigger Note	 (*)
+		static const compiler::uint8 TREMOR	=			0x1D;///< Tremor
+		static const compiler::uint8 EXTEND_XM_EFFECTS =	0x21;///< Extend XM Effects	
+		static const compiler::uint8 PANBRELLO	=		0x22;///< Panbrello
 
 /*  Extended Command
 *
@@ -76,65 +75,65 @@ X2 (*) Extra fine porta down
 
 		/// Volume Column commands
  
-		static const UCHAR VOLSLIDEDOWN =		0x40;
-		static const UCHAR VOLSLIDEUP	=		0x41;
-		static const UCHAR FINEVOLDOWN	=		0x42;
-		static const UCHAR FINEVOLUP	=		0x43;
-//		static const UCHAR VIBRATO		= 0x1B;
-		static const UCHAR EXFINEPORTAMENT =	0x44;
-		static const UCHAR PANSLIDELEFT =		0x45;
-		static const UCHAR PANSLIDERIGHT = 0x46;
-//		static const UCHAR TONEPORTAMENTO = 0x1F;
+		static const compiler::uint8 VOLSLIDEDOWN =		0x40;
+		static const compiler::uint8 VOLSLIDEUP	=		0x41;
+		static const compiler::uint8 FINEVOLDOWN	=		0x42;
+		static const compiler::uint8 FINEVOLUP	=		0x43;
+//		static const compiler::uint8 VIBRATO		= 0x1B;
+		static const compiler::uint8 EXFINEPORTAMENT =	0x44;
+		static const compiler::uint8 PANSLIDELEFT =		0x45;
+		static const compiler::uint8 PANSLIDERIGHT = 0x46;
+//		static const compiler::uint8 TONEPORTAMENTO = 0x1F;
 		
-		static const UCHAR ARPEGGIO				= 0x47;
-		static const UCHAR GRISSANDO			= 0x48;
-		static const UCHAR TREMOLO_TYPE			= 0x49;
-		static const UCHAR FINE_PORTAMENTO_DOWN = 0x4A;
-		static const UCHAR FINE_PORTAMENTO_UP	= 0x4B;
+		static const compiler::uint8 ARPEGGIO				= 0x47;
+		static const compiler::uint8 GRISSANDO			= 0x48;
+		static const compiler::uint8 TREMOLO_TYPE			= 0x49;
+		static const compiler::uint8 FINE_PORTAMENTO_DOWN = 0x4A;
+		static const compiler::uint8 FINE_PORTAMENTO_UP	= 0x4B;
 		
-		static const UCHAR VIBRATO_TYPE = 0x4C;
-		static const UCHAR VIBRATO_SPEED = 0x4D;
-		static const UCHAR VIBRATO_DEPTH = 0x4E;
-		static const UCHAR VIBRATO2 = 0x4F;
+		static const compiler::uint8 VIBRATO_TYPE = 0x4C;
+		static const compiler::uint8 VIBRATO_SPEED = 0x4D;
+		static const compiler::uint8 VIBRATO_DEPTH = 0x4E;
+		static const compiler::uint8 VIBRATO2 = 0x4F;
 		
-		static const UCHAR NOTE_CUT	= 0x50;
+		static const compiler::uint8 NOTE_CUT	= 0x50;
 
-		static const UCHAR EXTRA_FINE_PORTAMENTO_DOWN = 0x51;
-		static const UCHAR EXTRA_FINE_PORTAMENTO_UP	= 0x52;
+		static const compiler::uint8 EXTRA_FINE_PORTAMENTO_DOWN = 0x51;
+		static const compiler::uint8 EXTRA_FINE_PORTAMENTO_UP	= 0x52;
 
-		static const UCHAR PANBRELLO_WAVE_FORM = 0x53;
-		static const UCHAR FINE_PATTERN_DELAY = 0x54;
+		static const compiler::uint8 PANBRELLO_WAVE_FORM = 0x53;
+		static const compiler::uint8 FINE_PATTERN_DELAY = 0x54;
 
-		static const UCHAR SURROUND_OFF = 0x55;
-		static const UCHAR SURROUND_ON = 0x56;
+		static const compiler::uint8 SURROUND_OFF = 0x55;
+		static const compiler::uint8 SURROUND_ON = 0x56;
 
-		static const UCHAR REVERB_OFF = 0x57;
-		static const UCHAR REVERB_ON = 0x58;
+		static const compiler::uint8 REVERB_OFF = 0x57;
+		static const compiler::uint8 REVERB_ON = 0x58;
 
-		static const UCHAR CENTER_SURROUND = 0x59;
-		static const UCHAR QUOAD_SURROUND  = 0x5A;
+		static const compiler::uint8 CENTER_SURROUND = 0x59;
+		static const compiler::uint8 QUOAD_SURROUND  = 0x5A;
 
-		static const UCHAR GROBAL_FILTERS = 0x5B;
-		static const UCHAR LOCAL_FILTERS = 0x5C;
+		static const compiler::uint8 GROBAL_FILTERS = 0x5B;
+		static const compiler::uint8 LOCAL_FILTERS = 0x5C;
 
-		static const UCHAR PLAY_FORWARD = 0x5D;
-		static const UCHAR PLAY_BACKWARD = 0x5E;
+		static const compiler::uint8 PLAY_FORWARD = 0x5D;
+		static const compiler::uint8 PLAY_BACKWARD = 0x5E;
 
-		static const UCHAR SET_HIGH_OFFSET = 0x5F;
+		static const compiler::uint8 SET_HIGH_OFFSET = 0x5F;
 
-		static const UCHAR PATTERN_DELAY = 0x60;
-		static const UCHAR PATTERN_LOOP = 0x61;
+		static const compiler::uint8 PATTERN_DELAY = 0x60;
+		static const compiler::uint8 PATTERN_LOOP = 0x61;
 
-		static const UCHAR SET_FINE_TUNE = 0x62;
-		static const UCHAR SET_PANNING = 0x63;
-		static const UCHAR RETRIGGER_NOTE = 0x64;
-		static const UCHAR FINE_VOLSLIDE_UP = 0x65;
-		static const UCHAR FINE_VOLSLIDE_DOWN = 0x66;
-		static const UCHAR NOTE_DELAY = 0x67;
-		static const UCHAR SET_ACTIVE_MACRO = 0x69;
+		static const compiler::uint8 SET_FINE_TUNE = 0x62;
+		static const compiler::uint8 SET_PANNING = 0x63;
+		static const compiler::uint8 RETRIGGER_NOTE = 0x64;
+		static const compiler::uint8 FINE_VOLSLIDE_UP = 0x65;
+		static const compiler::uint8 FINE_VOLSLIDE_DOWN = 0x66;
+		static const compiler::uint8 NOTE_DELAY = 0x67;
+		static const compiler::uint8 SET_ACTIVE_MACRO = 0x69;
 
-		static const UCHAR EXT_NOTEOFF	=	0xc0;
-		static const UCHAR EXT_NOTEDELAY	= 0xd0;
+		static const compiler::uint8 EXT_NOTEOFF	=	0xc0;
+		static const compiler::uint8 EXT_NOTEDELAY	= 0xd0;
 		
 
 	};
@@ -522,7 +521,7 @@ X2 (*) Extra fine porta down
 		inline void Porta2NoteDestPeriod(const int note,const int layer);///
 		const double Porta2NoteDestPeriod(){return m_Porta2NoteDestPeriod;};///
 
-		void Porta2Note(const UCHAR note,const int parameter,const int layer);
+		void Porta2Note(const compiler::uint8 note,const int parameter,const int layer);
 		void Porta2Note(XMSampler::Voice& voice);
 
 		/// convert note to period
@@ -937,7 +936,7 @@ X2 (*) Extra fine porta down
 			m_bPlay = false;
 		};
 
-		void VoiceInit(const UCHAR note);///< 
+		void VoiceInit(const compiler::uint8 note);///< 
 		void ClearEffectFlags() {m_EffectFlags = 0;};///< 
 		
 		const int TickCounter(){return _tickCounter;};///< Tick(Sample) 
