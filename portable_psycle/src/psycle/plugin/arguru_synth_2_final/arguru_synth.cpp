@@ -1,6 +1,4 @@
-/////////////////////////////////////////////////////////////////////
-// Arguru Synth 2 plugin for PSYCLE
-
+#include <project.h>
 #include <psycle/plugin/MachineInterface.h>
 #include <psycle/plugin/arguru_synth_2_final/SynthTrack.h>
 #include <stdlib.h> ///< should be <cstdlib>
