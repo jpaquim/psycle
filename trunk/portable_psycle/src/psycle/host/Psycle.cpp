@@ -1,14 +1,13 @@
 #include "stdafx.h"
 
+#undef OPERATING_SYSTEM__CROSSPLATFORM
 #if defined OPERATING_SYSTEM__CROSSPLATFORM
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// new gui
-
 #	include <operating_system/Logger.h>
 #	include <softsynth/gui/gui.h>
 #	include <boost/thread/thread.hpp>
 #	include <boost/thread/mutex.hpp>
-
 	class GUI
 	{
 	public:
@@ -47,12 +46,9 @@
 			throw;
 		}
 	}
-
 	// new gui
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
-
-
 
 // Psycle.cpp : Defines the class behaviors for the application.
 //
