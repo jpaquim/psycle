@@ -77,27 +77,27 @@ namespace psycle
 			_skinDlg._linenumbersHex = pConfig->_linenumbersHex;
 			_skinDlg._linenumbersCursor = pConfig->_linenumbersCursor;
 
-			strcpy(_skinDlg._pattern_fontface, pConfig->pattern_fontface);
+			_skinDlg._pattern_fontface = pConfig->pattern_fontface;
 			_skinDlg._pattern_font_point = pConfig->pattern_font_point;
 			_skinDlg._pattern_font_x = pConfig->pattern_font_x;
 			_skinDlg._pattern_font_y = pConfig->pattern_font_y;
 			_skinDlg._pattern_draw_empty_data = pConfig->pattern_draw_empty_data;
 			_skinDlg._draw_mac_index = pConfig->draw_mac_index;
 			_skinDlg._draw_vus = pConfig->draw_vus;
-			strcpy(_skinDlg._pattern_header_skin, pConfig->pattern_header_skin);
+			_skinDlg._pattern_header_skin = pConfig->pattern_header_skin;
 			_skinDlg._pattern_font_flags = pConfig->pattern_font_flags;
 
-			strcpy(_skinDlg._generator_fontface, pConfig->generator_fontface);
+			_skinDlg._generator_fontface = pConfig->generator_fontface;
 			_skinDlg._generator_font_point = pConfig->generator_font_point;
 			_skinDlg._generator_font_flags = pConfig->generator_font_flags;
 
-			strcpy(_skinDlg._effect_fontface, pConfig->effect_fontface);
+			_skinDlg._effect_fontface = pConfig->effect_fontface;
 			_skinDlg._effect_font_point = pConfig->effect_font_point;
 			_skinDlg._effect_font_flags = pConfig->effect_font_flags;
 
-			strcpy(_skinDlg._machine_skin, pConfig->machine_skin);
+			_skinDlg._machine_skin = pConfig->machine_skin;
 
-			strcpy(_skinDlg.szBmpBkgFilename, pConfig->szBmpBkgFilename);
+			_skinDlg.szBmpBkgFilename = pConfig->szBmpBkgFilename;
 			_skinDlg.bBmpBkg = pConfig->bBmpBkg;
 
 			_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
@@ -107,38 +107,38 @@ namespace psycle
 			_outputDlg._numDrivers = pConfig->_numOutputDrivers;
 			_outputDlg.m_ppDrivers = pConfig->_ppOutputDrivers;
 
-			char* ps = pConfig->GetInitialInstrumentDir();
-			if (ps != NULL)
+			std::string ps = pConfig->GetInitialInstrumentDir();
+			if (!ps.empty())
 			{
-				strcpy(_dirDlg._instPathBuf, ps);
+				_dirDlg._instPathBuf = ps;
 			}
 			ps = pConfig->GetInitialSongDir();
-			if (ps != NULL)
+			if (!ps.empty())
 			{
-				strcpy(_dirDlg._songPathBuf, ps);
+				_dirDlg._songPathBuf = ps;
 			}
 			ps = pConfig->GetInitialPluginDir();
-			if (ps != NULL)
+			if (!ps.empty())
 			{
-				strcpy(_dirDlg._pluginPathBuf, ps);
+				_dirDlg._pluginPathBuf = ps;
 			}
 			ps = pConfig->GetInitialVstDir();
-			if (ps != NULL)
+			if (!ps.empty())
 			{
-				strcpy(_dirDlg._vstPathBuf, ps);
+				_dirDlg._vstPathBuf = ps;
 			}
 			ps = pConfig->GetInitialSkinDir();
-			if (ps != NULL)
+			if (!ps.empty())
 			{
-				strcpy(_dirDlg._skinPathBuf, ps);
-				strcpy(_skinDlg._skinPathBuf, ps);
-				strcpy(_keyDlg._skinPathBuf, ps);
+				_dirDlg._skinPathBuf = ps;
+				_skinDlg._skinPathBuf = ps;
+				_keyDlg._skinPathBuf = ps;
 			}
 			else
 			{
-				_dirDlg._skinPathBuf[0] = 0;
-				_skinDlg._skinPathBuf[0] = 0;
-				_keyDlg._skinPathBuf[0] = 0;
+				_dirDlg._skinPathBuf.clear();
+				_skinDlg._skinPathBuf.clear();
+				_keyDlg._skinPathBuf.clear();
 			}
 			if ( dlgnum == 1 || dlgnum == 0 ) AddPage(&_skinDlg);
 			if ( dlgnum == 2 || dlgnum == 0 ) AddPage(&_keyDlg);
@@ -211,30 +211,30 @@ namespace psycle
 				_pConfig->draw_mac_index = _skinDlg._draw_mac_index;
 				_pConfig->draw_vus = _skinDlg._draw_vus;
 
-				if (strcmp(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin))
+				if (_pConfig->pattern_header_skin != _skinDlg._pattern_header_skin)
 				{
 					// LOAD HEADER SKIN
-					strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
+					_pConfig->pattern_header_skin = _skinDlg._pattern_header_skin;
 					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 				}
 
 				_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
 				_pConfig->pattern_font_flags = _skinDlg._pattern_font_flags;
-				strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
+				_pConfig->pattern_fontface = _skinDlg._pattern_fontface;
 
 				_pConfig->generator_font_point = _skinDlg._generator_font_point;
 				_pConfig->generator_font_flags = _skinDlg._generator_font_flags;
-				strcpy(_pConfig->generator_fontface, _skinDlg._generator_fontface);
+				_pConfig->generator_fontface = _skinDlg._generator_fontface;
 
 				_pConfig->effect_font_point = _skinDlg._effect_font_point;
 				_pConfig->effect_font_flags = _skinDlg._effect_font_flags;
-				strcpy(_pConfig->effect_fontface, _skinDlg._effect_fontface);
+				_pConfig->effect_fontface = _skinDlg._effect_fontface;
 
 				_pConfig->CreateFonts();
 
-				if (strcmp(_pConfig->machine_skin, _skinDlg._machine_skin))
+				if (_pConfig->machine_skin != _skinDlg._machine_skin)
 				{
-					strcpy(_pConfig->machine_skin, _skinDlg._machine_skin);
+					_pConfig->machine_skin = _skinDlg._machine_skin;
 					// LOAD HEADER SKIN
 					if (_pConfig->Initialized() ) 
 					{
@@ -245,7 +245,7 @@ namespace psycle
 				_pConfig->bBmpBkg = _skinDlg.bBmpBkg;
 				if (_pConfig->bBmpBkg)
 				{
-					strcpy(_pConfig->szBmpBkgFilename, _skinDlg.szBmpBkgFilename);
+					_pConfig->szBmpBkgFilename = _skinDlg.szBmpBkgFilename;
 					// LOAD HEADER SKIN
 					if (_pConfig->Initialized() ) 
 					{

@@ -70,7 +70,7 @@ namespace psycle
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
 			void ShowErrorLogger();
-			void StatusBarText(char *txt);
+			void StatusBarText(std::string txt);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);
 			void PsybarsUpdate();
@@ -103,7 +103,7 @@ namespace psycle
 			CDialogBar	m_wndControl2;
 			CDialogBar	m_wndSeq;
 			CReBar      m_wndReBar;
-			char		szStatusIdle[192];
+			std::string		szStatusIdle;
 			
 			CInstrumentEditor	m_wndInst;
 			//CLoggingWindow m_wndLog;

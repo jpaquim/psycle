@@ -427,7 +427,7 @@ namespace psycle
 					<< "=== Native Plugins ===" << std::endl
 					<< std::endl;
 				out.flush();
-				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetPluginDir()), MACH_PLUGIN, out, progressOpen ? &Progress : 0);
+				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetPluginDir().c_str()), MACH_PLUGIN, out, progressOpen ? &Progress : 0);
 				out.flush();
 				if(progressOpen)
 				{
@@ -441,7 +441,7 @@ namespace psycle
 					<< "=== VST Plugins ===" << std::endl
 					<< std::endl;
 				out.flush();
-				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetVstDir()), MACH_VST, out, progressOpen ? &Progress : 0);
+				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetVstDir().c_str()), MACH_VST, out, progressOpen ? &Progress : 0);
 				out.flush();
 				if(progressOpen)
 				{

@@ -19,10 +19,6 @@ namespace psycle
 		{
 			_initialized = false;
 			#if defined _WINAMP_PLUGIN_
-				_psInitialPluginDir = 0;
-				_psPluginDir = 0;
-				_psInitialVstDir = 0;
-				_psVstDir = 0;
 				_samplesPerSec = 44100;
 			#else
 				_wrapAround = true;
@@ -42,24 +38,24 @@ namespace psycle
 				_linenumbersCursor = false;
 				_showAboutAtStart = true;
 				_followSong = false;
-				strcpy(pattern_fontface,"Tahoma");
-				strcpy(pattern_header_skin,DEFAULT_PATTERN_HEADER_SKIN);
+				pattern_fontface = "Tahoma";
+				pattern_header_skin = DEFAULT_PATTERN_HEADER_SKIN;
 				pattern_font_point = 85;
 				pattern_font_x = 9;
 				pattern_font_y = 12;
 				pattern_draw_empty_data = TRUE;
 				draw_mac_index = TRUE;
 				draw_vus = TRUE;
-				std::strcpy(generator_fontface,"Tahoma");
+				generator_fontface = "Tahoma";
 				generator_font_point = 90;
-				std::strcpy(effect_fontface,"Tahoma");
+				effect_fontface = "Tahoma";
 				effect_font_point = 90;
 
 				pattern_font_flags = 0;
 				generator_font_flags = 0;
 				effect_font_flags = 0;
 
-				std::strcpy(machine_skin,DEFAULT_MACHINE_SKIN);
+				machine_skin = DEFAULT_MACHINE_SKIN;
 
 				mv_colour =	0x009a887c;
 				mv_wirecolour =	0x00000000;
@@ -129,17 +125,6 @@ namespace psycle
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
 				_pMidiInput = new CMidiInput;
-
-				_psInitialInstrumentDir = 0;
-				_psInstrumentDir = 0;
-				_psInitialSongDir = 0;
-				_psSongDir = 0;
-				_psInitialPluginDir = 0;
-				_psPluginDir = 0;
-				_psInitialVstDir = 0;
-				_psVstDir = 0;
-				_psInitialSkinDir = 0;
-				_psSkinDir = 0;
 
 				_midiRecordVel = FALSE;
 				_midiTypeVel = 0;
@@ -274,7 +259,7 @@ namespace psycle
 				autosaveSongTime = 10;
 
 				bBmpBkg = FALSE;
-				std::sprintf(szBmpBkgFilename, "psycle.bmp");
+				szBmpBkgFilename = "psycle.bmp";
 			#endif
 		}
 
@@ -291,17 +276,7 @@ namespace psycle
 					zapArray(_ppOutputDrivers);
 				}
 				zapObject(_pMidiInput);
-				zapArray(_psInitialInstrumentDir);
-				zapArray(_psInstrumentDir);
-				zapArray(_psInitialSongDir);
-				zapArray(_psSongDir);
-				zapArray(_psInitialSkinDir);
-				zapArray(_psSkinDir);
 			#endif
-			zapArray(_psInitialPluginDir);
-			zapArray(_psPluginDir);
-			zapArray(_psInitialVstDir);
-			zapArray(_psVstDir);
 		}
 
 		bool Configuration::Read()
@@ -315,11 +290,13 @@ namespace psycle
 				int syncDriver;
 				int midiHeadroom;
 			#endif
-			char string[256];
+			char temp_array[1024];
 			DWORD type;
 			DWORD numData;
-			::GetCurrentDirectory(sizeof appPath, &appPath[0]);
-			std::strcat(appPath, "\\");
+			temp_array[0]='\0';
+			::GetCurrentDirectory(sizeof(temp_array), temp_array);
+			appPath=temp_array; appPath+='\\';
+
 			_initialized = true;
 			if(reg.OpenRootKey(HKEY_CURRENT_USER, SOFTWARE_ROOT_KEY) != ERROR_SUCCESS) return false;
 			result = reg.OpenKey(CONFIG_KEY);
@@ -643,8 +620,7 @@ namespace psycle
 				numData = sizeof(bBmpBkg);
 				reg.QueryValue("bBmpBkg", &type, (BYTE*)&bBmpBkg, &numData);
 
-				numData = sizeof(szBmpBkgFilename);
-				reg.QueryValue("szBmpBkgFilename", &type, (BYTE*)&szBmpBkgFilename, &numData);
+				reg.QueryStringValue("szBmpBkgFilename", szBmpBkgFilename);
 
 				numData = sizeof(pvc_background);
 				reg.QueryValue("pvc_background", &type, (BYTE*)&pvc_background, &numData);
@@ -712,10 +688,8 @@ namespace psycle
 					(((((mv_wirecolour&0x00ff00)) + ((mv_colour&0x00ff00)))/2)&0x00ff00) +
 					(((((mv_wirecolour&0x00ff)) + ((mv_colour&0x00ff)))/2)&0x00ff);
 
-				numData = sizeof(pattern_fontface);
-				reg.QueryValue("pattern_fontface", &type, (BYTE*)&pattern_fontface, &numData);
-				numData = sizeof(pattern_header_skin);
-				reg.QueryValue("pattern_header_skin", &type, (BYTE*)&pattern_header_skin, &numData);
+				reg.QueryStringValue("pattern_fontface", pattern_fontface);
+				reg.QueryStringValue("pattern_header_skin", pattern_header_skin);
 				numData = sizeof(pattern_font_point);
 				reg.QueryValue("pattern_font_point", &type, (BYTE*)&pattern_font_point, &numData);
 				numData = sizeof(pattern_font_x);
@@ -732,22 +706,19 @@ namespace psycle
 				numData = sizeof(draw_vus);
 				reg.QueryValue("draw_vus", &type, (BYTE*)&draw_vus, &numData);
 
-				numData = sizeof(generator_fontface);
-				reg.QueryValue("generator_fontface", &type, (BYTE*)&generator_fontface, &numData);
+				reg.QueryStringValue("generator_fontface", generator_fontface);
 				numData = sizeof(generator_font_point);
 				reg.QueryValue("generator_font_point", &type, (BYTE*)&generator_font_point, &numData);
 				numData = sizeof(generator_font_flags);
 				reg.QueryValue("generator_font_flags", &type, (BYTE*)&generator_font_flags, &numData);
 
-				numData = sizeof(effect_fontface);
-				reg.QueryValue("effect_fontface", &type, (BYTE*)&effect_fontface, &numData);
+				reg.QueryStringValue("effect_fontface", effect_fontface);
 				numData = sizeof(effect_font_point);
 				reg.QueryValue("effect_font_point", &type, (BYTE*)&effect_font_point, &numData);
 				numData = sizeof(effect_font_flags);
 				reg.QueryValue("effect_font_flags", &type, (BYTE*)&effect_font_flags, &numData);
 
-				numData = sizeof(machine_skin);
-				reg.QueryValue("machine_skin", &type, (BYTE*)&machine_skin, &numData);
+				reg.QueryStringValue("machine_skin", machine_skin);
 
 				CreateFonts();	
 				
@@ -788,92 +759,47 @@ namespace psycle
 					CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = midiHeadroom;
 				}
 
-				zapArray(_psInitialInstrumentDir);
-				numData = sizeof(string);
-				if(reg.QueryValue("InstrumentDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
+				if(ERROR_SUCCESS != reg.QueryStringValue("InstrumentDir", _psInitialInstrumentDir))
 				{
-					_psInitialInstrumentDir = new char[numData+1];
-					strcpy(_psInitialInstrumentDir, &string[0]);
+					_psInitialInstrumentDir = appPath + DEFAULT_INSTRUMENT_DIR;
 				}
-				else
-				{
-					_psInitialInstrumentDir = new char[strlen(appPath)+sizeof(DEFAULT_INSTRUMENT_DIR)];
-					strcpy(_psInitialInstrumentDir, &appPath[0]);
-					strcat(_psInitialInstrumentDir, DEFAULT_INSTRUMENT_DIR);
-				}
-				if(_psInstrumentDir == 0)
+				if(_psInstrumentDir.empty())
 				{
 					SetInstrumentDir(_psInitialInstrumentDir);
 				}
 
-				zapArray(_psInitialSongDir);
-				numData = sizeof(string);
-				if(reg.QueryValue("SongDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
+				if(ERROR_SUCCESS != reg.QueryStringValue("SongDir",_psInitialSongDir))
 				{
-					_psInitialSongDir = new char[numData+1];
-					strcpy(_psInitialSongDir, &string[0]);
+					_psInitialSongDir = appPath + DEFAULT_SONG_DIR;
 				}
-				else
-				{
-					_psInitialSongDir = new char[strlen(appPath)+sizeof(DEFAULT_SONG_DIR)];
-					strcpy(_psInitialSongDir, &appPath[0]);
-					strcat(_psInitialSongDir, DEFAULT_SONG_DIR);
-				}
-				if(_psSongDir == 0)
+				if(_psSongDir.empty())
 				{
 					SetSongDir(_psInitialSongDir);
 				}
 
-				zapArray(_psInitialSkinDir);
-				numData = sizeof(string);
-				if(reg.QueryValue("SkinDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
+				if(ERROR_SUCCESS != reg.QueryStringValue("SkinDir", _psInitialSkinDir))
 				{
-					_psInitialSkinDir = new char[numData+1];
-					strcpy(_psInitialSkinDir, &string[0]);
+					_psInitialSkinDir = appPath + DEFAULT_SKIN_DIR;
 				}
-				else
-				{
-					_psInitialSkinDir = new char[strlen(appPath)+sizeof(DEFAULT_SKIN_DIR)];
-					strcpy(_psInitialSkinDir, &appPath[0]);
-					strcat(_psInitialSkinDir, DEFAULT_SKIN_DIR);
-				}
-				if(_psSkinDir == 0)
+				if(_psSkinDir.empty())
 				{
 					SetSkinDir(_psInitialSkinDir);
 				}
 			#endif
-			zapArray(_psInitialPluginDir);
-			numData = sizeof(string);
-			if(reg.QueryValue("PluginDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
+			if(ERROR_SUCCESS != reg.QueryStringValue("PluginDir", _psInitialPluginDir))
 			{
-				_psInitialPluginDir = new char[numData+1];
-				std::strcpy(_psInitialPluginDir, &string[0]);
+				_psInitialPluginDir = appPath + DEFAULT_PLUGIN_DIR;
 			}
-			else
-			{
-				_psInitialPluginDir = new char[strlen(appPath)+sizeof(DEFAULT_PLUGIN_DIR)];
-				std::strcpy(_psInitialPluginDir, &appPath[0]);
-				std::strcat(_psInitialPluginDir, DEFAULT_PLUGIN_DIR);
-			}
-			if(_psPluginDir == 0)
+			if(_psPluginDir.empty())
 			{
 				SetPluginDir(_psInitialPluginDir);
 			}
 
-			zapArray(_psInitialVstDir);
-			numData = sizeof(string);
-			if(reg.QueryValue("VstDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
+			if(ERROR_SUCCESS != reg.QueryStringValue("VstDir",_psInitialVstDir))
 			{
-				_psInitialVstDir = new char[numData+1];
-				strcpy(_psInitialVstDir, &string[0]);
+				_psInitialVstDir = appPath + DEFAULT_VST_DIR;
 			}
-			else
-			{
-				_psInitialVstDir = new char[strlen(appPath)+sizeof(DEFAULT_VST_DIR)];
-				strcpy(_psInitialVstDir, &appPath[0]);
-				strcat(_psInitialVstDir, DEFAULT_VST_DIR);
-			}
-			if(_psVstDir == 0)
+			if(_psVstDir.empty())
 			{
 				SetVstDir(_psInitialVstDir);
 			}
@@ -1069,7 +995,7 @@ namespace psycle
 				reg.SetValue("mv_triangle_size", REG_BINARY, (BYTE*)&mv_triangle_size, sizeof(mv_triangle_size));	
 
 				reg.SetValue("bBmpBkg", REG_DWORD, (BYTE*)&bBmpBkg, sizeof(bBmpBkg));	
-				reg.SetValue("szBmpBkgFilename", REG_SZ, (BYTE*)&szBmpBkgFilename, sizeof(szBmpBkgFilename));
+				reg.SetStringValue("szBmpBkgFilename",szBmpBkgFilename);
 
 				reg.SetValue("pvc_separator", REG_DWORD, (BYTE*)&pvc_separator, sizeof(pvc_separator));	
 				reg.SetValue("pvc_separator2", REG_DWORD, (BYTE*)&pvc_separator2, sizeof(pvc_separator2));	
@@ -1100,7 +1026,7 @@ namespace psycle
 				reg.SetValue("vu2", REG_DWORD, (BYTE*)&vu2, sizeof(vu2));	
 				reg.SetValue("vu3", REG_DWORD, (BYTE*)&vu3, sizeof(vu3));	
 
-				reg.SetValue("pattern_fontface", REG_SZ, (BYTE*)pattern_fontface, strlen(pattern_fontface));
+				reg.SetStringValue("pattern_fontface", pattern_fontface);
 				reg.SetValue("pattern_font_point", REG_DWORD, (BYTE*)&pattern_font_point, sizeof(pattern_font_point));	
 				reg.SetValue("pattern_font_flags", REG_DWORD, (BYTE*)&pattern_font_flags, sizeof(pattern_font_flags));	
 				reg.SetValue("pattern_font_x", REG_DWORD, (BYTE*)&pattern_font_x, sizeof(pattern_font_x));	
@@ -1109,106 +1035,96 @@ namespace psycle
 				reg.SetValue("draw_mac_index", REG_DWORD, (BYTE*)&draw_mac_index, sizeof(draw_mac_index));	
 				reg.SetValue("draw_vus", REG_DWORD, (BYTE*)&draw_vus, sizeof(draw_vus));	
 
-				reg.SetValue("pattern_header_skin", REG_SZ, (BYTE*)pattern_header_skin, strlen(pattern_header_skin));
+				reg.SetStringValue("pattern_header_skin",pattern_header_skin);
 
-				reg.SetValue("generator_fontface", REG_SZ, (BYTE*)generator_fontface, strlen(generator_fontface));
+				reg.SetStringValue("generator_fontface", generator_fontface);
 				reg.SetValue("generator_font_point", REG_DWORD, (BYTE*)&generator_font_point, sizeof(generator_font_point));	
 				reg.SetValue("generator_font_flags", REG_DWORD, (BYTE*)&generator_font_flags, sizeof(generator_font_flags));	
 
-				reg.SetValue("effect_fontface", REG_SZ, (BYTE*)effect_fontface, strlen(effect_fontface));
+				reg.SetStringValue("effect_fontface", effect_fontface);
 				reg.SetValue("effect_font_point", REG_DWORD, (BYTE*)&effect_font_point, sizeof(effect_font_point));	
 				reg.SetValue("effect_font_flags", REG_DWORD, (BYTE*)&effect_font_flags, sizeof(effect_font_flags));	
 
-				reg.SetValue("machine_skin", REG_SZ, (BYTE*)machine_skin, strlen(machine_skin));
+				reg.SetStringValue("machine_skin", machine_skin);
 				
-				if(_psInitialInstrumentDir != 0) reg.SetValue("InstrumentDir", REG_SZ, (BYTE*)_psInitialInstrumentDir, strlen(_psInitialInstrumentDir));
-				if(_psInitialSongDir != 0) reg.SetValue("SongDir", REG_SZ, (BYTE*)_psInitialSongDir, strlen(_psInitialSongDir));
-				if(_psInitialPluginDir != 0) reg.SetValue("PluginDir", REG_SZ, (BYTE*)_psInitialPluginDir, strlen(_psInitialPluginDir));
-				if(_psInitialVstDir != 0) reg.SetValue("VstDir", REG_SZ, (BYTE*)_psInitialVstDir, strlen(_psInitialVstDir));
-				if(_psInitialSkinDir != 0) reg.SetValue("SkinDir", REG_SZ, (BYTE*)_psInitialSkinDir, strlen(_psInitialSkinDir));
+				if(!_psInitialInstrumentDir.empty()) reg.SetStringValue("InstrumentDir", _psInitialInstrumentDir);
+				if(!_psInitialSongDir.empty()) reg.SetStringValue("SongDir", _psInitialSongDir);
+				if(!_psInitialPluginDir.empty()) reg.SetStringValue("PluginDir", _psInitialPluginDir);
+				if(!_psInitialVstDir.empty()) reg.SetStringValue("VstDir", _psInitialVstDir);
+				if(!_psInitialSkinDir.empty()) reg.SetStringValue("SkinDir", _psInitialSkinDir);
 
 				reg.CloseKey();
 				reg.CloseRootKey();
 			}
 
-			void Configuration::SetInstrumentDir(const char* psDir)
+			void Configuration::SetInstrumentDir(std::string psDir)
 			{
-				zapArray(_psInstrumentDir,new char[strlen(psDir)+1]);
-				std::strcpy(_psInstrumentDir, psDir);
+				_psInstrumentDir = psDir;
 			}
 
-			void Configuration::SetInitialInstrumentDir(const char* psDir)
+			void Configuration::SetInitialInstrumentDir(std::string psDir)
 			{
-				zapArray(_psInitialInstrumentDir,new char[strlen(psDir)+1]);
-				std::strcpy(_psInitialInstrumentDir, psDir);
+				_psInitialInstrumentDir = psDir;
 				SetInstrumentDir(psDir);
 			}
 
-			void Configuration::SetSongDir(const char* psDir)
+			void Configuration::SetSongDir(std::string psDir)
 			{
-				zapArray(_psSongDir,new char[strlen(psDir)+1]);
-				std::strcpy(_psSongDir, psDir);
+				_psSongDir = psDir;
 			}
 
-			void Configuration::SetInitialSongDir(const char* psDir)
+			void Configuration::SetInitialSongDir(std::string psDir)
 			{
-				zapArray(_psInitialSongDir, new char[strlen(psDir)+1]);
-				std::strcpy(_psInitialSongDir, psDir);
+				_psInitialSongDir = psDir;
 				SetSongDir(psDir);
 			}
 
-			void Configuration::SetSkinDir(const char* psDir)
+			void Configuration::SetSkinDir(std::string psDir)
 			{
-				zapArray(_psSkinDir,new char[strlen(psDir)+1]);
-				std::strcpy(_psSkinDir, psDir);
+				_psSkinDir = psDir;
 			}
 
-			void Configuration::SetInitialSkinDir(const char* psDir)
+			void Configuration::SetInitialSkinDir(std::string psDir)
 			{
-				zapArray(_psInitialSkinDir,new char[strlen(psDir)+1]);
-				std::strcpy(_psInitialSkinDir, psDir);
+				_psInitialSkinDir = psDir;
 				SetSkinDir(psDir);
 			}
 
 		#endif
 
-		void Configuration::SetPluginDir(const char* psDir)
+		void Configuration::SetPluginDir(std::string psDir)
 		{
-			zapArray(_psPluginDir,new char[strlen(psDir)+1]);
-			std::strcpy(_psPluginDir, psDir);
+			_psPluginDir = psDir;
 		}
 
-		void Configuration::SetInitialPluginDir(const char* psDir)
+		void Configuration::SetInitialPluginDir(std::string psDir)
 		{
-			zapArray(_psInitialPluginDir, new char[strlen(psDir)+1]);
-			std::strcpy(_psInitialPluginDir, psDir);
+			_psInitialPluginDir = psDir;
 			SetPluginDir(psDir);
 		}
 
-		void Configuration::SetVstDir(const char* psDir)
+		void Configuration::SetVstDir(std::string psDir)
 		{
-			zapArray(_psVstDir, new char[strlen(psDir)+1]);
-			std::strcpy(_psVstDir, psDir);
+			_psVstDir = psDir;
 		}
 
-		void Configuration::SetInitialVstDir(const char* psDir)
+		void Configuration::SetInitialVstDir(std::string psDir)
 		{
-			zapArray(_psInitialVstDir,new char[strlen(psDir)+1]);
-			std::strcpy(_psInitialVstDir, psDir);
+			_psInitialVstDir = psDir;
 			SetVstDir(psDir);
 		}
 
-		void Configuration::Error(const char* psMsg)
+		void Configuration::Error(std::string psMsg)
 		{
-			::MessageBox(0, psMsg, "Psycle", MB_OK);
+			::MessageBox(0, psMsg.c_str(), "Psycle", MB_OK);
 		}
 
 		#if !defined _WINAMP_PLUGIN_
 
-			bool Configuration::CreatePsyFont(CFont &f, char * sFontFace, int HeightPx, bool bBold, bool bItalic)
+			bool Configuration::CreatePsyFont(CFont &f, std::string sFontFace, int HeightPx, bool bBold, bool bItalic)
 			{
 				f.DeleteObject();
-				CString sFace(sFontFace);
+				CString sFace(sFontFace.c_str());
 				LOGFONT lf;
 				std::memset(&lf, 0, sizeof lf); // clear out structure.
 				if(bBold) lf.lfWeight = FW_BOLD;
@@ -1232,7 +1148,7 @@ namespace psycle
 				bool bItalic = pattern_font_flags&2?true:false;
 				if(!CreatePsyFont(seqFont,pattern_fontface,pattern_font_point,bBold,bItalic))
 				{
-					MessageBox(0,pattern_fontface,"Could not find this font!",0);
+					MessageBox(0,pattern_fontface.c_str(),"Could not find this font!",0);
 					if(!CreatePsyFont(seqFont,"Tahoma",pattern_font_point,bBold,bItalic))
 						if(!CreatePsyFont(seqFont,"Verdana",pattern_font_point,bBold,bItalic))
 							CreatePsyFont(seqFont,"Arial",pattern_font_point,bBold,bItalic);
@@ -1241,16 +1157,16 @@ namespace psycle
 				bItalic = generator_font_flags&2?true:false;
 				if(!CreatePsyFont(generatorFont,generator_fontface,generator_font_point,bBold,bItalic))
 				{
-					MessageBox(0,generator_fontface,"Could not find this font!",0);
+					MessageBox(0,generator_fontface.c_str(),"Could not find this font!",0);
 					if(!CreatePsyFont(seqFont,"Tahoma",generator_font_point,bBold,bItalic))
 						if(!CreatePsyFont(seqFont,"Verdana",generator_font_point,bBold,bItalic))
 							CreatePsyFont(seqFont,"Arial",generator_font_point,bBold,bItalic);
 				}
 				bBold = effect_font_flags&1;
 				bItalic = effect_font_flags&2?true:false;
-				if(!CreatePsyFont(effectFont,generator_fontface,effect_font_point,bBold,bItalic))
+				if(!CreatePsyFont(effectFont,effect_fontface,effect_font_point,bBold,bItalic))
 				{
-					MessageBox(0,effect_fontface,"Could not find this font!",0);
+					MessageBox(0,effect_fontface.c_str(),"Could not find this font!",0);
 					if(!CreatePsyFont(seqFont,"Tahoma",effect_font_point,bBold,bItalic))
 						if(!CreatePsyFont(seqFont,"Verdana",effect_font_point,bBold,bItalic))
 							CreatePsyFont(seqFont,"Arial",effect_font_point,bBold,bItalic);

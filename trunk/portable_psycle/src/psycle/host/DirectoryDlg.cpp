@@ -67,7 +67,7 @@ namespace psycle
 			if (BrowseForFolder(_instPathBuf))
 			{
 				_instPathChanged = true;
-				m_instEdit.SetWindowText(_instPathBuf);
+				m_instEdit.SetWindowText(_instPathBuf.c_str());
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace psycle
 			if (BrowseForFolder(_songPathBuf))
 			{
 				_songPathChanged = true;
-				m_songEdit.SetWindowText(_songPathBuf);
+				m_songEdit.SetWindowText(_songPathBuf.c_str());
 			}
 		}
 
@@ -85,7 +85,7 @@ namespace psycle
 			if (BrowseForFolder(_pluginPathBuf))
 			{
 				_pluginPathChanged = true;
-				m_pluginEdit.SetWindowText(_pluginPathBuf);
+				m_pluginEdit.SetWindowText(_pluginPathBuf.c_str());
 			}
 		}
 
@@ -94,11 +94,11 @@ namespace psycle
 			if (BrowseForFolder(_vstPathBuf))
 			{
 				_vstPathChanged = true;
-				m_vstEdit.SetWindowText(_vstPathBuf);
+				m_vstEdit.SetWindowText(_vstPathBuf.c_str());
 			}
 		}
 
-		bool CDirectoryDlg::BrowseForFolder(char *rpath) 
+		bool CDirectoryDlg::BrowseForFolder(std::string& rpath) 
 		{
 			bool val=false;
 			
@@ -128,7 +128,7 @@ namespace psycle
 						// At this point pszBuffer contains the selected path
 						//
 						val = true;
-						sprintf(rpath,pszBuffer);
+						rpath =pszBuffer;
 					}
 					// Free the PIDL allocated by SHBrowseForFolder.
 					//
@@ -145,11 +145,11 @@ namespace psycle
 		{
 			CPropertyPage::OnInitDialog();
 			initializingDlg=true;
-			m_instEdit.SetWindowText(_instPathBuf);
-			m_songEdit.SetWindowText(_songPathBuf);
-			m_pluginEdit.SetWindowText(_pluginPathBuf);
-			m_vstEdit.SetWindowText(_vstPathBuf);
-			m_skinEdit.SetWindowText(_skinPathBuf);
+			m_instEdit.SetWindowText(_instPathBuf.c_str());
+			m_songEdit.SetWindowText(_songPathBuf.c_str());
+			m_pluginEdit.SetWindowText(_pluginPathBuf.c_str());
+			m_vstEdit.SetWindowText(_vstPathBuf.c_str());
+			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			initializingDlg=false;
 			
 			return TRUE;  // return TRUE unless you set the focus to a control
@@ -161,7 +161,9 @@ namespace psycle
 			if (!initializingDlg)
 			{
 				_songPathChanged = true;
-				m_songEdit.GetWindowText(_songPathBuf,MAX_PATH);
+				CString temp;
+				m_songEdit.GetWindowText(temp);
+				_songPathBuf = temp;
 			}
 		}
 
@@ -170,7 +172,9 @@ namespace psycle
 			if (!initializingDlg)
 			{
 				_instPathChanged = true;
-				m_instEdit.GetWindowText(_instPathBuf,MAX_PATH);
+				CString temp;
+				m_instEdit.GetWindowText(temp);
+				_instPathBuf = temp;
 			}
 		}
 		void CDirectoryDlg::OnChangePluginedit() 
@@ -178,7 +182,9 @@ namespace psycle
 			if (!initializingDlg)
 			{
 				_pluginPathChanged = true;
-				m_pluginEdit.GetWindowText(_pluginPathBuf,MAX_PATH);
+				CString temp;
+				m_pluginEdit.GetWindowText(temp);
+				_pluginPathBuf = temp;
 			}
 		}
 
@@ -187,7 +193,9 @@ namespace psycle
 			if (!initializingDlg)
 			{
 				_vstPathChanged = true;
-				m_vstEdit.GetWindowText(_vstPathBuf,MAX_PATH);
+				CString temp;
+				m_vstEdit.GetWindowText(temp);
+				_vstPathBuf=temp;
 			}
 		}
 
@@ -196,7 +204,7 @@ namespace psycle
 			if (BrowseForFolder(_skinPathBuf))
 			{
 				_skinPathChanged = true;
-				m_skinEdit.SetWindowText(_skinPathBuf);
+				m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			}
 		}
 
@@ -205,7 +213,9 @@ namespace psycle
 			if (!initializingDlg)
 			{
 				_skinPathChanged = true;
-				m_skinEdit.GetWindowText(_skinPathBuf,MAX_PATH);
+				CString temp;
+				m_skinEdit.GetWindowText(temp);
+				_skinPathBuf=temp;
 			}
 		}
 	}

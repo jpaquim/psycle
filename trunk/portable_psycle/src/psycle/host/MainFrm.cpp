@@ -447,9 +447,9 @@ namespace psycle
 			CFrameWnd::OnDestroy();
 		}
 
-		void CMainFrame::StatusBarText(char *txt)
+		void CMainFrame::StatusBarText(std::string txt)
 		{
-			m_wndStatusBar.SetWindowText(txt);
+			m_wndStatusBar.SetWindowText(txt.c_str());
 		}
 
 		void CMainFrame::PsybarsUpdate()
@@ -1149,7 +1149,7 @@ namespace psycle
 			
 			CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			dlg._pSong = _pSong;
-			dlg.m_ofn.lpstrInitialDir = Global::pConfig->GetInstrumentDir();
+			dlg.m_ofn.lpstrInitialDir = Global::pConfig->GetInstrumentDir().c_str();
 			if (dlg.DoModal() == IDOK)
 			{
 				m_wndView.AddMacViewUndo();
@@ -1185,7 +1185,7 @@ namespace psycle
 				int index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::pConfig->SetInstrumentDir(str.Left(index));
+					Global::pConfig->SetInstrumentDir((LPCSTR)str.Left(index));
 				}
 			}
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength[0] > 0)
@@ -2397,7 +2397,7 @@ namespace psycle
 			{
 				if (StatusBarIdleText())
 				{
-					return CFrameWnd::OnSetMessageString (0,(LPARAM)szStatusIdle);
+					return CFrameWnd::OnSetMessageString (0,(LPARAM)szStatusIdle.c_str());
 				}
 			}
 			return CFrameWnd::OnSetMessageString (wParam, lParam);
@@ -2408,7 +2408,7 @@ namespace psycle
 		{
 			if (StatusBarIdleText())
 			{
-				m_wndStatusBar.SetWindowText(szStatusIdle);
+				m_wndStatusBar.SetWindowText(szStatusIdle.c_str());
 			}
 		}
 
@@ -2416,6 +2416,10 @@ namespace psycle
 		{
 			if (_pSong)
 			{
+				std::ostringstream oss;
+				oss << _pSong->Name
+					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
+
 				if ((m_wndView.viewMode==VMPattern)	&& (!Global::pPlayer->_playing))
 				{
 					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
@@ -2424,44 +2428,30 @@ namespace psycle
 					{
 						if (_pSong->_pMachine[machine])
 						{
+							oss << " - " << _pSong->_pMachine[machine]->_editName;
 							if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
 							{
+								
 								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
-								{
-									sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachine[machine]->_editName,_pSong->_pInstrument[toffset[1]]->_sName);
-									return TRUE;
-								}
-								else 
-								{
-									sprintf(szStatusIdle,"%s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachine[machine]->_editName);
-									return TRUE;
-								}
+									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
 							}
 							else
 							{
 								char buf[64];
 								buf[0]=0;
 								_pSong->_pMachine[machine]->GetParamName(toffset[1],buf);
-								if (buf[0])
-								{
-									sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachine[machine]->_editName,buf);
-									return TRUE;
-								}
-								else 
-								{
-									sprintf(szStatusIdle,"%s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachine[machine]->_editName);
-									return TRUE;
-								}
+								if(buf[0])
+									oss <<  " - " << buf;
 							}
 						}
 						else
 						{
-							sprintf(szStatusIdle,"%s - %s - Machine Out of Range",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
-							return TRUE;
+							oss << " - Machine Out of Range";
 						}
 					}
 				}
-				sprintf(szStatusIdle,"%s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
+
+				szStatusIdle=oss.str();
 				return TRUE;
 			}
 			return FALSE;

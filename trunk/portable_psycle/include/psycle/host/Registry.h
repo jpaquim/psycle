@@ -17,7 +17,9 @@ namespace psycle
 			LONG CloseKey();
 			LONG CreateKey(LPTSTR psName);
 			LONG QueryValue(LPTSTR psName, LPDWORD pType, LPBYTE pData, LPDWORD pNumData);
+			LONG QueryStringValue(LPTSTR psName, std::string &value); // helper function
 			LONG SetValue(LPTSTR psName, DWORD type, LPBYTE pData, DWORD numData);
+			LONG SetStringValue(LPTSTR psName, std::string value); // helper function
 			LONG DeleteValue(LPTSTR psName);
 		protected:
 			HKEY _root;
