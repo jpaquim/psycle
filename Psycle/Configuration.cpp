@@ -1287,7 +1287,7 @@ void Configuration::Error(const char* psMsg)
 {
 	MessageBox(NULL,psMsg, "Psycle", MB_OK);
 }
-
+#if !defined(_WINAMP_PLUGIN_)
 bool Configuration::CreatePsyFont(CFont &f, char * sFontFace, int HeightPx, bool bBold, bool bItalic)
 {
 	f.DeleteObject();
@@ -1352,3 +1352,4 @@ void Configuration::CreateFonts()
 	}
 
 }
+#endif // #if !defined(_WINAMP_PLUGIN_)

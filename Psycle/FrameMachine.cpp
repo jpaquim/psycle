@@ -456,7 +456,7 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 			}
 			
 			sprintf(
-				dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)"
+				dlg.Title, "Param:'%.2x:%s' (Range from %d to %d)\0"
 				,thispar
 				,name
 				,min_v

@@ -394,7 +394,7 @@ sprintf(
 		"Pattern commands\n\n",
 		"0Cxx : Set Volume\n\n",
 		"  Compatible 1.x : $00->0 $FF->32767\n",
-		"  Compatible 2.x : $00->0 $FF->OutVol\n"
+		"  Compatible 2.x : $00->0 $FF->OutVol\n\0"
 		);
 
 pCB->MessBox(buffer,"·-=<[JAZ]> JMDrum Synth v." DRUM_VERSION "=-·",0);

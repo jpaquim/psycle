@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Psycle2.h"
+
 #include "helpers.h"
 
 float CValueMapper::fMap_255_1[257] = 

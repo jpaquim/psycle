@@ -1080,8 +1080,8 @@ BEGIN
     PUSHBUTTON      "None",IDC_NONE,8,258,55,12
     PUSHBUTTON      "Lookup",IDC_DEFAULTS3,68,258,55,12,WS_DISABLED
     GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,94
-    CONTROL         "Right CTRL play / Space stop",IDC_PLAY_R_CTRL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
+    CONTROL         "Right CTRL= play . Edit Toggle = stop",IDC_PLAY_R_CTRL,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
     CONTROL         "FT2 Style Home/End Behaviour",IDC_FT2_HOME_END,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,24,172,10
     CONTROL         "FT2 Style Delete Behaviour",IDC_FT2DEL,"Button",

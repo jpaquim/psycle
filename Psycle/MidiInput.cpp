@@ -1602,7 +1602,7 @@ int static tstrobe = 0;
 if( tstrobe == 0 )
 {
 	char tmp[ 128 ];
-	sprintf( tmp, "(0x%x) ms difference = %d playPos = %u (samples)\n", dwParam2, m_fixOffset, playPos );
+	sprintf( tmp, "(0x%x) ms difference = %d playPos = %u (samples)\n\0", dwParam2, m_fixOffset, playPos );
 	TRACE( tmp );
 }
 tstrobe++;
@@ -1647,7 +1647,7 @@ void CMidiInput::InternalReSync( DWORD dwParam2 )
 #ifdef _DEBUGGING
 // (DEBUGGING)
 char tmp[128];
-sprintf( tmp, "(0x%x) MIDI latency error %d (samples) samplebase = %u\n", dwParam2, midiLatencySamples, m_adjustedPlayPos );
+sprintf( tmp, "(0x%x) MIDI latency error %d (samples) samplebase = %u\n\0", dwParam2, midiLatencySamples, m_adjustedPlayPos );
 TRACE( tmp );
 #endif
 }
@@ -1699,7 +1699,7 @@ bool CMidiInput::InjectMIDI( int amount )
 #ifdef _DEBUGGING
 // (DEBUGGING)
 char tmp[128];
-sprintf( tmp, "writePos %d (samples) syncAdjuster %d (samples) buffer %d (events)\n", writePos, syncAdjuster, m_stats.bufferCount );
+sprintf( tmp, "writePos %d (samples) syncAdjuster %d (samples) buffer %d (events)\n\0", writePos, syncAdjuster, m_stats.bufferCount );
 TRACE( tmp );
 #endif
 

@@ -769,7 +769,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->bEditMode = !pChildView->bEditMode;
 		pChildView->ChordModeOffs = 0;
 		
-		if(bCtrlPlay && GetKeyState(VK_RCONTROL)<0) Stop();
+		if(bCtrlPlay) Stop();
 		
 //		pChildView->Repaint(DMPatternHeader);
 		break;

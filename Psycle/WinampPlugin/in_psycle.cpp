@@ -25,13 +25,13 @@
 //
 // Global Variables.
 //
-#define WA_STREAM_SIZE 4096
+#define WA_STREAM_SIZE 576
 DWORD WINAPI __stdcall PlayThread(void *b);
 BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 
 Global _global;
-short stream_buffer[WA_STREAM_SIZE*2];
+short stream_buffer[WA_STREAM_SIZE*4];
 extern In_Module mod;
 
 int killDecodeThread=0;
@@ -89,14 +89,14 @@ int CalcSongLength(Song *pSong)
 				switch (pEntry->_cmd)
 				{
 				case 0xFF:
-					if ( pEntry->_parameter != 0 )
+					if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
 					{
 						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 					}
 					break;
 					
 				case 0xFE:
-					if ( pEntry->_parameter != 0 )
+					if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
 					{
 						tpb=pEntry->_parameter;
 					}
@@ -115,7 +115,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 	{
 		if (_global.pPlayer->_playing)
 		{
-			if (title) { sprintf(title,"%s - %s",_global._pSong->Author,_global._pSong->Name); }
+			if (title) { sprintf(title,"%s - %s\0",_global._pSong->Author,_global._pSong->Name); }
 			
 			if (length_in_ms) { *length_in_ms = CalcSongLength(_global._pSong); }
 		}
@@ -229,7 +229,7 @@ int play(char *fn)
 	int maxlatency;
 	unsigned long tmp;
 
-	//	stop();
+	_global.pPlayer->Stop();//	stop();
 
 	OldPsyFile file;
 	if (!file.Open(fn))
@@ -242,6 +242,9 @@ int play(char *fn)
 	strcpy(_global._pSong->fileName,fn);
 	_global._pSong->SetBPM(_global._pSong->BeatsPerMin, _global._pSong->_ticksPerBeat, _global.pConfig->_samplesPerSec);
 
+	int val=64;
+	_global.pPlayer->Work(_global.pPlayer,val); // Some plugins don't like to receive data without making first a
+								// work call. (for example, Phantom)
 	_global.pPlayer->Start(0,0);
 
 	paused=0; worked=false;
@@ -368,7 +371,10 @@ DWORD WINAPI __stdcall PlayThread(void *b)
 	float *float_buffer;
 	Player* pPlayer = _global.pPlayer;
 	int samprate = _global.pConfig->_samplesPerSec;
-	int plug_stream_size = samprate/40;
+	int smp2 = _global.pConfig->_samplesPerSec/1000;
+//	int plug_stream_size = samprate/200;
+	int plug_stream_size = WA_STREAM_SIZE;
+//	int plug_stream_size = 1024;
 
 	while (! *((int *)b) )  // While !killDecodeThread
 	{
@@ -378,7 +384,7 @@ DWORD WINAPI __stdcall PlayThread(void *b)
 			{	int bmp = _global._pSong->BeatsPerMin;
 				float_buffer = pPlayer->Work(pPlayer,plug_stream_size);
 				Quantize(float_buffer,stream_buffer,plug_stream_size*2);
-				if ( bmp != _global._pSong->BeatsPerMin ) mod.SetInfo(_global.pPlayer->bpm,_global.pConfig->_samplesPerSec/1000,2,1);
+				if ( bmp != _global._pSong->BeatsPerMin ) mod.SetInfo(_global.pPlayer->bpm,smp2,2,1);
 				worked=true;
 			}
 			else
@@ -395,8 +401,8 @@ DWORD WINAPI __stdcall PlayThread(void *b)
 		else if (mod.outMod->CanWrite() >= (plug_stream_size<<(mod.dsp_isactive()?3:2)))
 		{
 			int t;
-			if (mod.dsp_isactive()) t=mod.dsp_dosamples(stream_buffer,plug_stream_size,16,2,samprate)<<2;
-			else t=plug_stream_size<<2;
+			if (mod.dsp_isactive()) t=mod.dsp_dosamples(stream_buffer,plug_stream_size,16,2,samprate)*4;
+			else t=plug_stream_size*4;
 
 			int s=mod.outMod->GetWrittenTime();
 			mod.SAAddPCMData((char*)stream_buffer,2,16,s);
@@ -513,21 +519,21 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			{
 				switch( pSong->_pMachines[i]->_type )
 				{
-				case MACH_VST: strcpy(tmp2,"VSTi");break;
-				case MACH_VSTFX: strcpy(tmp2,"VSTf");break;
-				case MACH_PLUGIN: strcpy(tmp2,"NatP");break;
-				default: strcpy(tmp2,"IntM.");break;
+					case MACH_VST: strcpy(tmp2,"V");break;
+					case MACH_VSTFX: strcpy(tmp2,"V");break;
+					case MACH_PLUGIN: strcpy(tmp2,"P");break;
+					default: strcpy(tmp2,"_"); break;
 				}
 				
 				if ( pSong->_pMachines[i]->wasVST )
 				{
-					sprintf(valstr,"[!%s] %.02i:%s",tmp2,i,pSong->_pMachines[i]->_editName);
+					sprintf(valstr,"%.02i:[*]  %s",i,pSong->_pMachines[i]->_editName);
 				}
-				else if ( pSong->_pMachines[i]->_type == MACH_DUMMY)
+				else if ( pSong->_pMachines[i]->_type == MACH_DUMMY )
 				{
-					sprintf(valstr,"[?%s] %.02i: %s",tmp2,i,pSong->_pMachines[i]->_editName);
+					sprintf(valstr,"%.02i:[?]  %s",i,pSong->_pMachines[i]->_editName);
 				}
-				else sprintf(valstr,"[ %s] %.02i: %s",tmp2,i,pSong->_pMachines[i]->_editName);
+				else sprintf(valstr,"%.02i:[%s]  %s",i,tmp2,pSong->_pMachines[i]->_editName);
 				
 				SendDlgItemMessage(wnd,IDC_MACHINELIST,LB_ADDSTRING,0,(long)valstr);
 				j++;

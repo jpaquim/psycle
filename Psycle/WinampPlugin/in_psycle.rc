@@ -54,8 +54,8 @@ BEGIN
     EDITTEXT        IDC_SONGFILENAME,7,7,250,14,ES_AUTOHSCROLL | ES_READONLY
     LISTBOX         IDC_MACHINELIST,7,117,163,102,LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Plugins Used  ( ! = not loaded. ? = Dummy)",IDC_STATIC,
-                    7,106,135,8
+    LTEXT           "Machines ( P=Plugin, V= VST, * or ? = Not loaded)",
+                    IDC_STATIC,7,106,160,8
     LTEXT           "Filesize:blah\nBpm:blah\nTpb:blah\nLength:blah\nPatterns Used:blah\nMachines:blah\n",
                     IDC_EXTINFO,175,28,82,171,SS_SUNKEN
     RTEXT           "Artist",IDC_STATIC,20,39,20,9
@@ -65,7 +65,7 @@ BEGIN
     GROUPBOX        "File Info",IDC_STATIC,7,24,164,77
     LTEXT           "Comment",IDC_STATIC,11,68,30,10
     EDITTEXT        IDC_SONGCOMMENT,45,66,119,32,ES_MULTILINE | 
-                    ES_WANTRETURN
+                    ES_WANTRETURN | WS_VSCROLL
 END
 
 

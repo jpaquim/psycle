@@ -101,7 +101,7 @@ void CGearPsychOsc::OnCustomdrawSlider4(NMHDR* pNMHDR, LRESULT* pResult)
 	_pMachine->Update();
 
 	char buffer[32];
-	sprintf(buffer,"%.1f%%",_pMachine->_lfoAmp*1550.3876f);
+	sprintf(buffer,"%.1f%%\0",_pMachine->_lfoAmp*1550.3876f);
 	m_label4.SetWindowText(buffer);
 
 	*pResult = 0;

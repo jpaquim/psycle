@@ -458,7 +458,7 @@ sprintf(
 		"\n0Bxx Change attack",
 		"\n0Cxx Detune Osc2",
 		"\n0Dxx Detune whole Synth",
-		"\n0Exx Change Glide RealTime"
+		"\n0Exx Change Glide RealTime\0"
 		);
 
 pCB->MessBox(buffer,"Arguru Synth 2 Point 2",0);

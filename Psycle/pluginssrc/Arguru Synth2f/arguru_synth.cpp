@@ -460,7 +460,7 @@ sprintf(
 		"\n08xx : Change vcf cutoff frequency",
 		"\n09xx : Change vcf resonance amount",
 		"\n11xx : Vcf cutoff slide-up",
-		"\n12xx : Vcf cutoff slide-down"
+		"\n12xx : Vcf cutoff slide-down\0"
 		);
 
 pCB->MessBox(buffer,"·-=<([aRgUrU's SYNTH 2 (Final)])>=-·",0);
