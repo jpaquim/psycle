@@ -1022,8 +1022,9 @@ FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,5,251,62,8
-    LISTBOX         IDC_SEQLIST,4,5,36,188,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
-                    LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_SEQLIST,2,5,38,188,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_VSCROLL | 
+                    WS_TABSTOP
     PUSHBUTTON      "+",IDC_INCSHORT,43,5,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
     PUSHBUTTON      "-",IDC_DECSHORT,43,21,23,12,BS_BITMAP | BS_CENTER | 
@@ -1906,6 +1907,7 @@ BEGIN
     IDS_ARE_YOU_SURE        "Are you Sure?"
     ID_POP_BLOCK_SWINGFILL  "Fill effects column of selected block with global BPM change commands (FFxx) to create a swing"
     ID_POP_TRACK_SWINGFILL  "Fill effects column of current track with global BPM change commands (FFxx) to create a swing"
+    ID_EDIT_MIXPASTE        "Mix Paste from clipboard"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -1935,7 +1937,6 @@ BEGIN
     ID_EDIT_COPY            "Copy to clipboard"
     ID_EDIT_CUT             "Cut to clipboard"
     ID_EDIT_PASTE           "Paste from clipboard"
-    ID_EDIT_MIXPASTE        "Mix Paste from clipboard"
     ID_EDIT_SELECT_ALL      "Select whole wave"
     ID_EDIT_UNDO            "Undo last action"
     ID_EDIT_REDO            "Redo last Undo"
