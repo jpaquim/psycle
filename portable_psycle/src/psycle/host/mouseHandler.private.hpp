@@ -14,8 +14,41 @@ NAMESPACE__BEGIN(psycle)
 				
 				smac = -1; 		smacmode = 0;
 				wiresource = -1; wiredest = -1;
+				wiremove = -1;
+				if (nFlags & MK_CONTROL)
+					{
+					smac=GetMachine(point);
+					if ( smac == -1 )
+						{						
+						int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
+						if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
+							{
+							wiredest = _pSong->_pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
+							wiremove = _pSong->_pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection point in destination machine
 
-				if (nFlags & MK_RBUTTON) // Right click alone. Action: Create connection or move wire.
+							switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
+								{
+								/*							case MACHMODE_GENERATOR: //A wire can't end in a generator
+								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sGenerator.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sGenerator.height/2);
+								break;
+								*/								
+								case MACHMODE_FX:
+									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
+									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+									break;
+
+								case MACHMODE_MASTER:
+									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
+									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+									break;
+								}		
+							wiresource=-1;
+							//							OnMouseMove(nFlags,point);
+							}
+						}
+					}
+				else if (nFlags == MK_RBUTTON) // Right click alone. Action: Create connection or move wire.
 				{
 					wiremove = -1;					
 					wiresource = GetMachine(point); //See if we have clicked over a machine.
@@ -77,6 +110,10 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
+					else if ( wiremove != -1) //where we moving a wire then?
+						{
+							_pSong->ChangeWireSourceMac(propMac,wiredest,wiremove);
+						}
 				}
 				else
 				{					
@@ -577,7 +614,7 @@ NAMESPACE__BEGIN(psycle)
 					wireDY = point.y;
 					Repaint();
 				}
-				else if ((nFlags == (MK_CONTROL | MK_LBUTTON)) && (wiredest != -1))
+				else if (((nFlags == (MK_CONTROL | MK_LBUTTON)) || (nFlags == (MK_CONTROL | MK_RBUTTON))) && (wiredest != -1))
 				{
 					wireSX = point.x;
 					wireSY = point.y;
