@@ -34,6 +34,8 @@ New and unsorted and untested
 
 
 
++ option to disable popup on save.
+
 ------------ <kSh> -------------
 1)
 For you, I have a little idea - trivial to do, very important to the users. Let Psycle save files to another name, then check if the file is OK, and then delete the old one and rename the new one.
