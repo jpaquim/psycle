@@ -201,7 +201,7 @@ public:
 		CString str = GetDllName();
 		char str2[256];
 		strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-		pFile->Write(&str2,strlen(str2)+1);
+		pFile->Write(str2,strlen(str2)+1);
 	};
 
 #endif // ndef _WINAMP_PLUGIN_

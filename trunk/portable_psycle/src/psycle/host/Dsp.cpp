@@ -11,7 +11,8 @@ float Cubic::_lTable[CUBIC_RESOLUTION];
 Cubic::Cubic()
 {
 	_resolution = CUBIC_RESOLUTION;
-	// initialize tables
+	// Initialize tables
+	//
 	for (int i=0; i<_resolution; i++)
 	{
 		float x = (float)i/(float)_resolution;

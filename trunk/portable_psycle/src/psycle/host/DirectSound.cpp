@@ -1,7 +1,6 @@
-#include "stdafx.h"
-
 // DirectSound stuff based on buzz code
 
+#include "stdafx.h"
 #include "DirectSound.h"
 #pragma comment(lib, "dsound")
 #include "resource.h"
@@ -14,7 +13,6 @@
 
 AudioDriverInfo DirectSound::_info = { "DirectSound Output" };
 AudioDriverEvent DirectSound::_event;
-//CCriticalSection DirectSound::_lock;
 
 DirectSound::DirectSound()
 {
@@ -135,6 +133,7 @@ bool DirectSound::Start()
 		_dsBufferSize = caps.dwBufferBytes;
 		WriteConfig();
 	}
+	_pBuffer->Initialize(_pDs,&desc);
 
 	_lowMark = 0;
 	_highMark = _bufferSize;

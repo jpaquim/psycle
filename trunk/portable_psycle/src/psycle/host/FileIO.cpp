@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
+
 #if defined(_WINAMP_PLUGIN_)
+//#include <windows.h>
 #include <stdio.h>
 #endif // _WINAMP_PLUGIN_
 

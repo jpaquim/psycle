@@ -1,6 +1,6 @@
 #include "stdafx.h"
-
 #include "Filter.h"
+
 
 FilterCoeff Filter::_coeffs;
 
