@@ -53,12 +53,13 @@
 // Psycle.cpp : Defines the class behaviors for the application.
 //
 
-#include "Psycle.h"
+#include "psycle.h"
 #include "ConfigDlg.h"
 
 #include "MainFrm.h"
 #include "midiinput.h"
 #include "NewMachine.h"
+#include <exception>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -72,7 +73,7 @@ BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-CPsycleApp::CPsycleApp()
+CPsycleApp::CPsycleApp() throw(std::runtime_error)
 {
 	#if defined OPERATING_SYSTEM__CROSSPLATFORM
 	{
@@ -82,6 +83,35 @@ CPsycleApp::CPsycleApp()
 		(*new GUI).start(); // starts the new gui in parallel with the mfc one, each in their own thread
 	}
 	#endif
+	// support for unicode characters on mswin98
+	class exceptions
+	{
+	public:
+		static const std::string code_description(const unsigned long int & code = ::GetLastError()) throw()
+		{
+			char * error_message_pointer;
+			::FormatMessage // ouch! plain old c api style, this is ugly...
+			(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+				0, // module to get message from. 0 means system.
+				code,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),
+				reinterpret_cast<char*>(&error_message_pointer), // we *must* hard-cast! this seems to be a hack to extend an originally badly designed api... there is no other way to do it
+				0,
+				0
+			);
+			std::ostringstream s;
+			s << "microsoft api error: " << code << " 0x" << std::hex << code << ": " << error_message_pointer;
+			::LocalFree(error_message_pointer);
+			return s.str();
+		}
+	};
+	if(!::LoadLibrary("unicows"))
+	{
+		std::runtime_error e("could not load library unicows: " + exceptions::code_description());
+		::MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
+		throw e;
+	}
 }
 
 CPsycleApp::~CPsycleApp()

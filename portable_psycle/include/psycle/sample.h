@@ -123,7 +123,7 @@ namespace psycle
 		{
 		public:
 			inline Sin_Sequence() : index_(0) {}
-			inline void set(const Real & phase, const Real & radians_per_sample) throw()
+			inline void operator()(const Real & phase, const Real & radians_per_sample) throw()
 			{
 				step_ = static_cast<Real>(2 * ::cos(radians_per_sample));
 				sequence_[0] = static_cast<Real>(std::sin(phase - radians_per_sample));

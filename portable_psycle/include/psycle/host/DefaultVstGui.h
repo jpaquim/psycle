@@ -71,7 +71,7 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CDefaultVstGui)
-	afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSelchangeList1();
 	afx_msg void OnReleasedcaptureSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeCombo1();
