@@ -80,6 +80,10 @@ protected:
 	CChildView* m_pParent;
 	CBitmap* bufBM;
 	CBitmap* clearBM;
+	CPen linepenL;
+	CPen linepenR;
+	CPen linepenbL;
+	CPen linepenbR;
 	CRect rc;
 	CFont font;
 	CFont* oldFont;
