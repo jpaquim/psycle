@@ -98,7 +98,6 @@ Hope this makes stuff clear.
 + option to not move cursor when pasting
 + save bar hide/unhide settings
 
-+ midi controllers should be able to send midi messages (pitchbend for example), not just tweaks or cmds
 + I agree that final output should be limited
 	[ it is when you have the decrease flag set ]
 
