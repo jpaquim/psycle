@@ -1407,15 +1407,21 @@ bool Song::Load(
 				if (_pMachines[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
 				{
 					Machine* pOrigMachine = _pMachines[_pMachines[i]->_inputMachines[c]]; // We get that machine
-					int d = pOrigMachine->FindOutputWire(i);
+//					int d = pOrigMachine->FindOutputWire(c);
 
-					float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
-					if( val > 2 ) val*=0.000030517578125f; // BugFix
-					else if ( val < 0.00004) val*=32768.0f; // BugFix
+					for (int d=0; d<MAX_CONNECTIONS; d++) // We look through all of                                          int d = pOrigMachine->FindOutputWire(i); 
+					{   
+                         if ((pOrigMachine->_connection[d]) && (pOrigMachine->_outputMachines[d] == i)) // its output connections till we find one that outputs to the machine we were updating,   
+                         {                                                                                                                                                       // And update the volume. These extended if's (for VST) are explained some lines below. 
+							float val = volMatrix[_pMachines[i]->_inputMachines[c]][d];
+							if( val > 2 ) val*=0.000030517578125f; // BugFix
+							else if ( val < 0.00004) val*=32768.0f; // BugFix
 
-					_pMachines[i]->InitWireVolume(pOrigMachine->_type,c,val);
+							_pMachines[i]->InitWireVolume(pOrigMachine->_type,c,val);
 
-					break;
+							break;
+						 }
+					}
 				}
 			}
 		}

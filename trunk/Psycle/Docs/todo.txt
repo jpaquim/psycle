@@ -3,7 +3,6 @@
 +=addition
 
 * psycle default theme sucks
-* WIRE VOLUMES ARE NOT LOADED PROPERLY
 
 * Other crap
 ------------
@@ -94,7 +93,6 @@ feature: Really good looking new Master Machine.(Graphics under res\MasterMachin
 * <sue> playbar should take latency into account - same as ^
 * song length calculation does not take ffxx/fexx commands into account
 * when changing octave, notes playing should be stopped (because if not, notes playing don't stop)
-
 bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
 bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
@@ -163,7 +161,7 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
   <[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
    in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.
 bug:	 DirectSound Output is a bit buggy.Crashes and bad sound reported. 
-+ ASIO?
++ ASIO? LegoStar has it working....
 
 * Importing:
 ------------
