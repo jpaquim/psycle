@@ -1,8 +1,10 @@
+#include <project.h>
+
 // Lowpass.cpp: implementation of the CLowpass class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "Lowpass.h"
+#include <psycle/plugin/arguru_reverb/LowPass.h>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -13,7 +15,7 @@ CLowpass::CLowpass()
 	o1=0.0f;
 }
 
-CLowpass::~CLowpass()
+CLowpass::~CLowpass() throw()
 {
 
 }

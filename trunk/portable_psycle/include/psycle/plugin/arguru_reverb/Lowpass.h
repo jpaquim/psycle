@@ -13,7 +13,7 @@ class CLowpass
 {
 public:
 	CLowpass();
-	virtual ~CLowpass();
+	virtual ~CLowpass() throw();
 	inline float Process(float i,float c);
 
 private:

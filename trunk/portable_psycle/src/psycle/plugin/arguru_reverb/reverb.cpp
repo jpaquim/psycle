@@ -1,3 +1,5 @@
+#include <project.h>
+
 /////////////////////////////////////////////////////////////////////
 // Arguru reverb plugin for PSYCLE
 
@@ -5,11 +7,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "combfilter.h"
-#include "allpass.h"
-#include "lowpass.h"
-
-#include "..\..\machineinterface.h"
+#include <psycle/plugin/arguru_reverb/AllPass.h>
+#include <psycle/plugin/arguru_reverb/CombFilter.h>
+#include <psycle/plugin/arguru_reverb/LowPass.h>
+#include <psycle/plugin/MachineInterface.h>
 
 #define NCOMBS	1
 #define NALLS	12

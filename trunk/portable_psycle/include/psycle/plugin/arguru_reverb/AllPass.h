@@ -14,9 +14,9 @@
 class CAllPass
 {
 public:
-	Initialize(int time, int stph);
 	CAllPass();
-	virtual ~CAllPass();
+	virtual ~CAllPass() throw();
+	void Initialize(int time, int stph);
 	inline void Work(float l_input,float r_input,float g);
 	float left_output;
 	float right_output;
