@@ -127,10 +127,16 @@ namespace psycle
 			seqcopybufferlength = 0;
 			_pSong=NULL;
 			pGearRackDialog = NULL;
+
+			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);	//GDI+ stuff
+
 		}
 
 		CMainFrame::~CMainFrame()
 		{
+			
+			Gdiplus::GdiplusShutdown(gdiplusToken);	//GDI+ stuff
+
 			Global::pInputHandler->SetMainFrame(NULL);
 			if (pGearRackDialog)
 			{
