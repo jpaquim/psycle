@@ -3,6 +3,7 @@
 
 #include "Machine.h"
 #include "Vst\AEffectx.h"
+#include "Song.h"
 
 #define MAX_EVENTS		64
 #define MAX_INOUTS		8
@@ -125,7 +126,7 @@ public:
 	bool AddNoteOff(unsigned char channel,unsigned char midichannel=0,bool addatStart=false);
 
 protected:
-	VSTinote trackNote[/*MAX_TRACKS*/32];
+	VSTinote trackNote[MAX_TRACKS];
 };
 
 class VSTFX : public VSTPlugin
