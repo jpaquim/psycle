@@ -451,9 +451,9 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		else if (nFlags == MK_MBUTTON)
 		{
 			// scrolling
-			if (abs(point.y - MBStart.y) > 8)
+			if (abs(point.y - MBStart.y) > 13)
 			{
-				int delta = (point.y - MBStart.y)/8;
+				int delta = (point.y - MBStart.y)/13;
 				int nPos = lOff - delta;
 				if (nPos < 0)
 					nPos = 0;
@@ -469,12 +469,12 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					PrevLine(lOff-nPos,false,false);
 					Repaint(DMScroll);
 				}
-				MBStart.y += delta*8;
+				MBStart.y += delta*13;
 			}
 			// switching tracks
-			if (abs(point.x - MBStart.x) > (8*11))
+			if (abs(point.x - MBStart.x) > (111))
 			{
-				int delta = (point.x - MBStart.x)/(8*11);
+				int delta = (point.x - MBStart.x)/(111);
 				int nPos = tOff - delta;
 				if (nPos < 0)
 					nPos = 0;
@@ -490,33 +490,8 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 					PrevTrack(tOff-nPos,false,false);
 					Repaint(DMScroll);
 				}
-				MBStart.x += delta*8*11;
+				MBStart.x += delta*111;
 			}
-
-			/*
-			dx = point.x - MBStart.x;
-			dy = point.y - MBStart.y;
-
-			if ((point.y - MBStart.y) > 8)
-			{
-				int nPos = lOff - (zDelta/30);
-				if (nPos < 0)
-					nPos = 0;
-				if (nPos > lOff )
-				{
-					nlOff=nPos;
-					AdvanceLine(nPos-lOff,false,false); 
-					Repaint(DMScroll);
-				}
-				else if (nPos < lOff )
-				{
-					nlOff=nPos;
-					PrevLine(lOff-nPos,false,false);
-					Repaint(DMScroll);
-				}
-			}
-			*/
-
 		}
 		break;
 	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
