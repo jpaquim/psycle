@@ -156,7 +156,7 @@ namespace psycle
 
 		void logger::operator()(const int & level, const std::string & string) throw()
 		{
-			//boost::mutex::scoped_lock lock(mutex()); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
+			boost::mutex::scoped_lock lock(mutex()); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
 			try
 			{
 				// could reuse the default implementation, but here we've redefined it all
