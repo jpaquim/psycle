@@ -1986,7 +1986,6 @@ bool Song::Load(RiffFile* pFile)
 							if (_pMachine[i+MAX_BUSES]->_outputMachines[c] == 0)
 							{
 								_pMachine[i+MAX_BUSES]->_outputMachines[c] = MASTER_INDEX;
-								break;
 							}
 							else
 							{
