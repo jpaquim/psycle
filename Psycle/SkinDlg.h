@@ -59,6 +59,7 @@ public:
 	int _wireaa;
 	bool _linenumbers;
 	bool _linenumbersHex;
+	bool _linenumbersCursor;
 	int _wirewidth;
 	char _pattern_fontface[64];
 	char _pattern_header_skin[64];
@@ -102,6 +103,7 @@ public:
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
+	CButton	m_linenumbersCursor;
 	CComboBox	m_wireaa;
 	//}}AFX_DATA
 
@@ -157,6 +159,7 @@ protected:
 	afx_msg void OnDoublebuffer();
 	afx_msg void OnLineNumbers();
 	afx_msg void OnLineNumbersHex();
+	afx_msg void OnLineNumbersCursor();
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnImportReg();

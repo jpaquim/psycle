@@ -217,6 +217,7 @@ public:
 
 	bool _linenumbers;
 	bool _linenumbersHex;
+	bool _linenumbersCursor;
 	bool _followSong;
 
 	int _numOutputDrivers;

@@ -84,6 +84,7 @@ void CConfigDlg::Init(
 	_skinDlg._gfxbuffer = pConfig->useDoubleBuffer;
 	_skinDlg._linenumbers = pConfig->_linenumbers;
 	_skinDlg._linenumbersHex = pConfig->_linenumbersHex;
+	_skinDlg._linenumbersCursor = pConfig->_linenumbersCursor;
 
 	strcpy(_skinDlg._pattern_fontface, pConfig->pattern_fontface);
 	_skinDlg._pattern_font_point = pConfig->pattern_font_point;
@@ -202,6 +203,7 @@ int CConfigDlg::DoModal()
 		_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
 		_pConfig->_linenumbers = _skinDlg._linenumbers;
 		_pConfig->_linenumbersHex = _skinDlg._linenumbersHex;
+		_pConfig->_linenumbersCursor = _skinDlg._linenumbersCursor;
 
 		_pConfig->pattern_font_x = _skinDlg._pattern_font_x;
 		_pConfig->pattern_font_y = _skinDlg._pattern_font_y;
