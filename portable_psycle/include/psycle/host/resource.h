@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by Psycle.rc
+// Microsoft Visual C++ generated include file.
+// Used by c:\cvs.sourceforge.net\psycle\portable_psycle\src\psycle\host\resources\Psycle.rc
 //
 #define IDC_COPY                        3
 #define IDC_PASTE                       4
@@ -90,6 +90,7 @@
 #define IDD_NEW_VOLUME                  202
 #define IDD_SAVEWAVDLG                  203
 #define IDD_PROGRESS_DIALOG             204
+#define IDD_ERRORLOGGER                 208
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -675,6 +676,7 @@
 #define IDC_INS_INCOCTAVE               1534
 #define IDC_NOTETUNE                    1535
 #define IDC_MASTERSLIDER                1536
+#define IDC_ERRORLOG_TXT                1537
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -760,6 +762,8 @@
 #define ID_CONFIGURATION_LOOPPLAYBACK   32920
 #define ID_BARPLAYFROMSTART             32921
 #define ID_BUTTON32922                  32922
+#define ID_VIEW_LoggingWindow           32927
+#define ID_VIEW_ERRORLOGGER             32928
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -767,9 +771,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         32924
-#define _APS_NEXT_CONTROL_VALUE         1537
+#define _APS_NEXT_RESOURCE_VALUE        209
+#define _APS_NEXT_COMMAND_VALUE         32929
+#define _APS_NEXT_CONTROL_VALUE         1538
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

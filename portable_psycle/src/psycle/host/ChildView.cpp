@@ -192,6 +192,7 @@ namespace psycle
 			ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
 			ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
+			ON_COMMAND(ID_VIEW_ERRORLOGGER, OnViewErrorLogger)
 			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
 			ON_COMMAND(ID_BUTTONPLAYSEQBLOCK, OnButtonplayseqblock)
 			ON_UPDATE_COMMAND_UI(ID_BUTTONPLAYSEQBLOCK, OnUpdateButtonplayseqblock)
@@ -1248,6 +1249,11 @@ namespace psycle
 		void CChildView::OnViewInstrumenteditor()
 		{
 			pParentMain->ShowInstrumentEditor();
+		}
+
+		void CChildView::OnViewErrorLogger()
+		{
+			pParentMain->ShowErrorLogger();
 		}
 
 		/// Show the CPU Performance dialog

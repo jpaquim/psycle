@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "resource.h"
+#include ".\..\..\..\..\include\psycle\host\resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -1879,6 +1879,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Add machine\tF9",             ID_NEWMACHINE
         MENUITEM "Instrument Editor\tF10",      ID_VIEW_INSTRUMENTEDITOR
+        MENUITEM "Logging Window\tF11",         ID_VIEW_ERRORLOGGER
     END
     POPUP "&Configuration"
     BEGIN
@@ -2135,7 +2136,7 @@ END
 
 1 TEXTINCLUDE 
 BEGIN
-    "resource.h\0"
+    ".\\..\\..\\..\\..\\include\\psycle\\host\\resource.h\0"
 END
 
 2 TEXTINCLUDE 
@@ -2221,6 +2222,7 @@ BEGIN
     ID_CONFIGURATION_LOOPPLAYBACK 
                             "Switches between looping the song,once it has finished, or stop."
     ID_BARPLAYFROMSTART     "Play Song from Start\nPlay from Start"
+    ID_VIEW_LoggingWindow   "Opens the error logging window"
 END
 
 STRINGTABLE 
@@ -2498,6 +2500,33 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ERRORLOGGER DIALOGEX 0, 0, 186, 94
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
+    WS_THICKFRAME
+CAPTION "Error Log"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_ERRORLOG_TXT,0,0,186,94,ES_AUTOHSCROLL | ES_READONLY
+END
+
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

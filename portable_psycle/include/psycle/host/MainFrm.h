@@ -1,6 +1,7 @@
 #pragma once
 #include "ChildView.h"
 #include "InstrumentEditor.h"
+#include "LoggingWindow.h"
 #include "InfoDlg.h"
 #include "WaveEdFrame.h"
 #include "MidiMonitorDlg.h"
@@ -68,6 +69,7 @@ namespace psycle
 			void ShowMidiMonitorDlg();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
+			void ShowErrorLogger();
 			void StatusBarText(char *txt);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);
@@ -104,6 +106,7 @@ namespace psycle
 			char		szStatusIdle[192];
 			
 			CInstrumentEditor	m_wndInst;
+			CLoggingWindow m_wndLog;
 			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
 			CWaveEdFrame	*m_pWndWed;
