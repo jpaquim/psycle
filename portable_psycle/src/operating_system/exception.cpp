@@ -76,14 +76,14 @@ namespace operating_system
 						FORMAT_MESSAGE_IGNORE_INSERTS
 					);
 					char * error_message_pointer(0);
-					HMODULE hModule(::LoadLibraryEx("ntdll", 0, LOAD_LIBRARY_AS_DATAFILE));
-					if(hModule != 0) flags |= FORMAT_MESSAGE_FROM_HMODULE;
+					HMODULE module(::LoadLibraryEx("ntdll", 0, LOAD_LIBRARY_AS_DATAFILE));
+					if(module) flags |= FORMAT_MESSAGE_FROM_HMODULE;
 					if
 					(
 						!::FormatMessage // ouch! plain old c api style, this is ugly...
 						(
 							flags,
-							hModule,
+							module,
 							code,
 							MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),
 							reinterpret_cast<char*>(&error_message_pointer), // we *must* hard-cast! this seems to be a hack to extend an originally badly designed api... there is no other way to do it
@@ -98,8 +98,8 @@ namespace operating_system
 					{
 						s << error_message_pointer;
 					}
-					if(error_message_pointer != 0) ::LocalFree(error_message_pointer);
-					if(hModule != 0) ::FreeLibrary(hModule);
+					if(error_message_pointer) ::LocalFree(error_message_pointer);
+					if(module) ::FreeLibrary(module);
 				}
 				return s.str();
 			}
