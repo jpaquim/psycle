@@ -82,6 +82,7 @@ public:
 		case late_reflection_delay:
 			out << (*this)(parameter) * 1000 << " ms";
 			break;
+		case overall_dry_wet:
 		case direct_gain:
 		case early_reflection_gain:
 		case late_reflection_gain:
@@ -203,18 +204,18 @@ void Haas::parameter(const int & parameter)
 		early_reflection_delay_stereo_delta_abs = std::fabs((*this)(early_reflection_delay_stereo_delta));
 		if(early_reflection_delay_stereo_delta_positive)
 		{
-			early_reflection_left = direct_last;
-			early_reflection_right = direct_first;
+			early_reflection_left = early_reflection_last;
+			early_reflection_right = early_reflection_first;
 		}
 		else if(early_reflection_delay_stereo_delta_negative)
 		{
-			early_reflection_left = direct_first;
-			early_reflection_right = direct_last;
+			early_reflection_left = early_reflection_first;
+			early_reflection_right = early_reflection_last;
 		}
 		else
 		{
-			early_reflection_left = direct_first;
-			early_reflection_right = direct_first;
+			early_reflection_left = early_reflection_first;
+			early_reflection_right = early_reflection_first;
 		}
 		goto resize_max;
 	case early_reflection_delay:
