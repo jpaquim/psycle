@@ -485,17 +485,25 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 			{
 				int delta = (point.x - MBStart.x)/(111);
 				int nPos = tOff - delta;
-				if (nPos < 0)
-					nPos = 0;
 				if (nPos > tOff)
 				{
-					ntOff=nPos;
+					if (nPos < 0)
+						ntOff= 0;
+					else if (nPos>_pSong->SONGTRACKS-VISTRACKS)
+						ntOff=_pSong->SONGTRACKS-VISTRACKS;
+					else
+						ntOff=nPos;
 					AdvanceTrack(nPos-tOff,false,false);
 					Repaint(DMScroll);
 				}
 				else if (nPos < tOff)
 				{
-					ntOff=nPos;
+					if (nPos < 0)
+						ntOff= 0;
+					else if (nPos>_pSong->SONGTRACKS-VISTRACKS)
+						ntOff=_pSong->SONGTRACKS-VISTRACKS;
+					else
+						ntOff=nPos;
 					PrevTrack(tOff-nPos,false,false);
 					Repaint(DMScroll);
 				}
