@@ -60,7 +60,7 @@ void Sampler::Work(
 	int numSamples)
 {
 
-#if defined(_WINAMP_PLUGIN_)
+/*#if defined(_WINAMP_PLUGIN_)
 //	for (int voice=0; voice<_numVoices; voice++)
 //	{
 		int ns = numSamples;
@@ -161,11 +161,12 @@ void Sampler::Work(
 			}
 		}
 //	}
-	_worked = true;
-#else
+	_worked = true;*/
+#if !defined(_WINAMP_PLUGIN_)
 	CPUCOST_INIT(cost);
 	if (!_mute)
 	{
+#endif //!defined(_WINAMP_PLUGIN_)		
 		int ns = numSamples;
 		while (ns)
 		{
@@ -263,6 +264,7 @@ void Sampler::Work(
 				}
 			}
 		}
+#if !defined(_WINAMP_PLUGIN_)
 		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
@@ -279,8 +281,10 @@ void Sampler::Work(
 
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;
+
+#endif //!defined(_WINAMP_PLUGIN_)
+
 	_worked = true;
-#endif // _WINAMP_PLUGIN_
 }
 
 void Sampler::Stop(void)
