@@ -30,6 +30,7 @@ public:
 	virtual bool Expect(void* pData, ULONG numBytes);
 	virtual ULONG Seek(ULONG offset);
 	virtual ULONG Skip(ULONG numBytes);
+	virtual bool Eof(void);
 
 	virtual FILE* GetFile(void) { return NULL; };
 
@@ -51,6 +52,7 @@ public:
 	virtual bool Expect(void* pData, ULONG numBytes);
 	virtual ULONG Seek(ULONG offset);
 	virtual ULONG Skip(ULONG numBytes);
+	virtual bool Eof(void);
 	
 
 	virtual FILE* GetFile(void) { return _file; };

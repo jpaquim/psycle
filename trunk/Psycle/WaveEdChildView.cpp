@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "psycle2.h"
 #include "WaveEdChildView.h"
+#include "MainFrm.h"
 #include <mmreg.h>
 
 #ifdef _DEBUG
@@ -255,11 +256,12 @@ void  CWaveEdChildView::SetViewData(int ins, int wav)
 {
 	int wl=_pSong->waveLength[ins][wav];
 
+	wsInstrument=ins;	// Do not put inside "if(wl)". Pasting needs this.
+	wsWave=wav;
+
 	if(wl)
 	{
 		wdWave=true;
-		wsInstrument=ins;
-		wsWave=wav;
 			
 		wdLength=wl;
 		wdLeft=_pSong->waveDataL[ins][wav];
@@ -357,6 +359,7 @@ void CWaveEdChildView::OnRButtonDown(UINT nFlags, CPoint point)
 			}
 			_pSong->Invalided=false;
 			drawwave=true;
+			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate();
 		}
 		else
@@ -395,6 +398,7 @@ void CWaveEdChildView::OnLButtonDown(UINT nFlags, CPoint point)
 				_pSong->waveLoopType[wsInstrument][wsWave]=true;
 			}
 			_pSong->Invalided=false;
+			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			drawwave=true;
 			Invalidate();
 		}
@@ -822,6 +826,7 @@ void CWaveEdChildView::OnEditDelete()
 		blSelection = false;
 		blLength  = 0;
 		blStart   = 0;
+		pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 
 		Invalidate(true);
 		_pSong->Invalided=false;
@@ -1064,6 +1069,8 @@ void CWaveEdChildView::OnEditPaste()
 	GlobalUnlock(hPasteData);
 	CloseClipboard();
 	OnSelectionShowall();
+
+	pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 	Invalidate(true);
 	_pSong->Invalided=false;
 }
@@ -1097,5 +1104,9 @@ void CWaveEdChildView::OnDestroyClipboard()
 
 CWaveEdChildView::SetSong(Song* _sng)
 {
-	this->_pSong = _sng;
+	_pSong = _sng;
+}
+void CWaveEdChildView::SetParent(CMainFrame* parent)
+{
+	pParent = parent;
 }

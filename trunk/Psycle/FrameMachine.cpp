@@ -101,7 +101,8 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 	CRect rClient;
 	dsk->GetClientRect(&rClient);
 
-	MoveWindow(rClient.Width()/2-(cxsize*ncol/2), rClient.Height()/2-(48+winh)/2, cxsize*ncol, 48+winh, true);	
+	MoveWindow(rClient.Width()/2-(cxsize*ncol/2), rClient.Height()/2-(48+winh)/2, cxsize*ncol,
+	9+GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE)+winh, true);	
 	
 	ShowWindow(SW_SHOWNORMAL);
 //	SetActiveWindow();

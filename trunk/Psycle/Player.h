@@ -16,6 +16,8 @@ public:
 	int _lineCounter;
 	int _playPosition;
 	int _playPattern;
+	float _playTime;
+	int _playTimem;
 	int bpm;
 	int tpb;
 

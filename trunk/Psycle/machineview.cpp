@@ -131,51 +131,49 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 
 	// BLIT [DESTX,DESTY,SIZEX,SIZEY,SOURBMPX,SOURBMPY)
 
+	int panning = mac->_panning;
+	panning -= 3;
+
+	if (panning < 6) panning = 6;
+	if (panning > 117) panning = 117;
+
 	switch (mac->_mode)
 	{
 	case MACHMODE_GENERATOR:
 		devc->BitBlt(x, y, 148, 48, &memDC, 0, 48, SRCCOPY);
+		// Draw pan
+		devc->BitBlt(x+panning, y+36, 24, 9, &memDC, 257, 65, SRCCOPY);
 		break;
 	case MACHMODE_FX:
+	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
 		devc->BitBlt(x, y, 148, 48, &memDC, 148, 0, SRCCOPY);
+		// Draw pan
+		devc->BitBlt(x+panning, y+36, 24, 9, &memDC, 257, 74, SRCCOPY);
 		break;
+
 	case MACHMODE_MASTER:
 		devc->BitBlt(x, y, 148, 48, &memDC, 0, 0, SRCCOPY);
-		break;
-	case MACHMODE_PLUGIN:
-		devc->BitBlt(x, y, 148, 48, &memDC, 148, 0, SRCCOPY);
 		break;
 	}
 	if (mac->_mode != MACHMODE_MASTER)
 	{
-		int panning = mac->_panning;
-		panning -= 3;
-
-		if (panning < 6) panning = 6;
-		if (panning > 117) panning = 117;
-
-		// Draw pan
-		devc->BitBlt(x+panning, y+36, 24, 8, &memDC, 258, 65, SRCCOPY);
-
 		if (mac->_mute)
 		{
-			devc->BitBlt(x+136, y+3, 9, 9, &memDC, 257, 48, SRCCOPY);
+			devc->BitBlt(x+137, y+4, 7, 7, &memDC, 258, 49, SRCCOPY);
 		}
 		else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
 		{
-			devc->BitBlt(x+136, y+14, 9, 9, &memDC, 266, 48, SRCCOPY);
+			devc->BitBlt(x+137, y+17, 7, 7, &memDC, 267, 49, SRCCOPY);
 		}
 		if (mac->_bypass)
 		{
-			devc->BitBlt(x+136, y+14, 9, 14, &memDC, 248, 48, SRCCOPY);
+			devc->BitBlt(x+137, y+16, 7, 12, &memDC, 249, 49, SRCCOPY);
 		}
+		// Draw text
+		devc->SetBkMode(TRANSPARENT);
+		devc->TextOut(x+8, y+10, mac->_editName);
+		devc->SetBkMode(OPAQUE);
 	}
-
-	// Draw text
-	devc->SetBkMode(TRANSPARENT);
-	devc->TextOut(x+8, y+10, mac->_editName);
-	devc->SetBkMode(OPAQUE);
-
 }
 
 

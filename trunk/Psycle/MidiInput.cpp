@@ -649,7 +649,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWOR
 					}
 
 					// machine active?
-					if( Global::_pSong->_machineActive[ newBus ] )
+					if( newBus < MAX_MACHINES && Global::_pSong->_machineActive[ newBus ] )
 					{
 						// ok, map
 						SetGenMap( channel, newBus );

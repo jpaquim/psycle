@@ -387,7 +387,7 @@ void CChildView::PlayCurrentRow(void)
 			else if ( pEntry->_note == 122 ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
 			else mIndex = _pSong->busMachine[(pEntry->_mach & (MAX_BUSES-1))];
 			
-			if (_pSong->_machineActive[mIndex])
+			if (mIndex < MAX_MACHINES && _pSong->_machineActive[mIndex])
 			{
 				Machine *pMachine = _pSong->_pMachines[mIndex];
 				
@@ -412,7 +412,7 @@ void CChildView::PlayCurrentNote(void)
 		else if ( pEntry->_note == 122 ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
 		else mIndex = _pSong->busMachine[(pEntry->_mach & (MAX_BUSES-1))];
 		
-		if (_pSong->_machineActive[mIndex])
+		if (mIndex < MAX_MACHINES && _pSong->_machineActive[mIndex])
 		{
 			Machine *pMachine = _pSong->_pMachines[mIndex];
 			
@@ -1116,6 +1116,12 @@ void CChildView::IncPosition()
 	if(editPosition<(MAX_SONG_POSITIONS-1))
 	{
 		++editPosition;
+		if ( editPosition >= _pSong->playLength )
+		{
+			int const ep=_pSong->GetNumPatternsUsed();
+			_pSong->playLength=editPosition+1;
+			_pSong->playOrder[editPosition]=ep;
+		}
 
 		memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 		_pSong->playOrderSel[editPosition]=true;

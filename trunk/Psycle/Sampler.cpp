@@ -267,16 +267,15 @@ void Sampler::VoiceWork(int numsamples, int voice)
 		if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 		{
 			pVoice->_triggerNoteDelay = pVoice->_tickCounter+ pVoice->effVal;
+
 #if defined(_WINAMP_PLUGIN_)
 			pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
-#else
-			pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-#endif // _WINAMP_PLUGIN
-#if defined(_WINAMP_PLUGIN_)
 			pVoice->_filterEnv._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_AT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
+			pVoice->_envelope._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 			pVoice->_filterEnv._step = (1.0f/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
+
 			pVoice->effretTicks--;
 			pVoice->_wave._pos.QuadPart = 0;
 			if ( pVoice->effretMode == 1 )
@@ -886,16 +885,12 @@ void Sampler::NoteOff(
 	if (pVoice->_envelope._stage != ENV_OFF)
 	{
 		pVoice->_envelope._stage = ENV_RELEASE;
-#if defined(_WINAMP_PLUGIN_)
-		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
-#else
-		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-#endif // _WINAMP_PLUGIN_
-		
 		pVoice->_filterEnv._stage = ENV_RELEASE;
 #if defined(_WINAMP_PLUGIN_)
+		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
 		pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_RT)*(44100.0f/Global::pConfig->_samplesPerSec);
 #else
+		pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 		pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_instruments[pVoice->_instrument].ENV_F_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif // _WINAMP_PLUGIN_
 	}

@@ -1,4 +1,3 @@
-#include "song.h"
 #if !defined(AFX_WAVEEDCHILDVIEW_H__266742FB_1A13_41EF_BE56_FAF1FB456280__INCLUDED_)
 #define AFX_WAVEEDCHILDVIEW_H__266742FB_1A13_41EF_BE56_FAF1FB456280__INCLUDED_
 
@@ -7,11 +6,16 @@
 #endif // _MSC_VER > 1000
 
 #include "WaveEdAmplifyDialog.h"
+#include "song.h"
+
+class CMainFrame;
 
 class CWaveEdChildView : public CWnd
 {
 public:
 	SetSong(Song*);
+	void SetParent(CMainFrame*);
+
 	CWaveEdChildView();
 	virtual ~CWaveEdChildView();
 
@@ -110,9 +114,11 @@ private:
 
 	bool drawwave;
 
-	unsigned long SelStart; // Selection start (point when left clicked);
+	unsigned long SelStart; // Selection start (point where left clicked);
 
 	CWaveEdAmplifyDialog AmpDialog;
+
+	CMainFrame* pParent;
 
 };
 

@@ -87,12 +87,12 @@ BOOL CEnvDialog::OnInitDialog()
 	// Set slider ranges
 	m_a_attack_slider.SetRange(1,65536);
 	m_a_decay_slider.SetRange(1,65536);
-	m_a_sustain_slider.SetRange(1,100);
+	m_a_sustain_slider.SetRange(0,100);
 	m_a_release_slider.SetRange(16,65536);
 
 	m_f_attack_slider.SetRange(1,65536);
 	m_f_decay_slider.SetRange(1,65536);
-	m_f_sustain_slider.SetRange(1,128);
+	m_f_sustain_slider.SetRange(0,128);
 	m_f_release_slider.SetRange(16,65536);
 		
 	m_cutoff_slider.SetRange(0,127);
@@ -256,9 +256,9 @@ void CEnvDialog::OnCustomdrawFSlider3(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	int si=_pSong->instSelected;
 
-	_pSong->_instruments[si].ENV_F_SL=m_f_sustain_slider.GetPos();
 	char buffer[12];
-	sprintf(buffer,"%d%%",_pSong->_instruments[si].ENV_F_SL*0.78125);
+	_pSong->_instruments[si].ENV_F_SL=m_f_sustain_slider.GetPos();
+	sprintf(buffer,"%.0f%%",_pSong->_instruments[si].ENV_F_SL*0.78125);
 	m_f_s_label.SetWindowText(buffer);
 
 	// Update filter ADSR
@@ -381,7 +381,7 @@ void CEnvDialog::OnCustomdrawSliderQ(NMHDR* pNMHDR, LRESULT* pResult)
 	_pSong->_instruments[si].ENV_F_RQ = m_q_slider.GetPos();
 
 	char buffer[12];
-	sprintf(buffer,"%d%%",_pSong->_instruments[si].ENV_F_RQ);
+	sprintf(buffer,"%.0f%%",_pSong->_instruments[si].ENV_F_RQ*0.78740);
 	m_q_label.SetWindowText(buffer);
 
 	*pResult = 0;
@@ -398,7 +398,7 @@ void CEnvDialog::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult)
 	int si=_pSong->instSelected;
 	_pSong->_instruments[si].ENV_F_EA = m_envelope_slider.GetPos();
 	char buffer[12];
-	sprintf(buffer,"%.2f",(float)_pSong->_instruments[si].ENV_F_EA*0.78125f);
+	sprintf(buffer,"%.0f",(float)_pSong->_instruments[si].ENV_F_EA*0.78125f);
 	m_envelope_label.SetWindowText(buffer);
 	
 	*pResult = 0;

@@ -2,6 +2,7 @@
 #include "Psycle2.h"
 #include "Song.h"
 #include "WaveEdFrame.h"
+#include "MainFrm.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -15,10 +16,11 @@ static UINT indicators[] =
 	ID_INDICATOR_MODE
 };
 
-CWaveEdFrame::CWaveEdFrame(Song* _sng)
+CWaveEdFrame::CWaveEdFrame(Song* _sng,CMainFrame* pframe)
 {
 	this->_pSong=_sng;
 	wavview.SetSong(this->_pSong);
+	wavview.SetParent(pframe);
 }
 
 CWaveEdFrame::~CWaveEdFrame()

@@ -1,12 +1,46 @@
-
+V1.66
+-----
++ Added elapsed playtime (by KooPer)
++ Now loading songs with machines outside of the screen moves them to a visible area.
++ VST host now replies to "GetParameterQuantization". Some plugins use this to round correctly.
++ VST host correctly does "idle" calls to VST's now. This supposedly makes AbSynth work.
++ Added Patch to make VSTi sc-101 from SC developers work. (Not an awesome plugin anyway, and crashes)
+* Important change in the Song Loading routine to load better the VST Plugins.
+  Also, now saves the program number, so VST's like "Triangle II", "Vivaldi" and "Ganymed" work!
+  New Files wont load VST's in previous versions of Psycle. It's sort of a security for newer files.
+* Changed the sequencer a bit:
+  Now only shows the patterns within the sequence length. (Following a request made some time ago)
+  Added "add 10" and "dec 10" to pattern position (This will make some happy too)
+  Now Insert inserts after the current position (previously, it was before).
+  "Next Pattern" keyboard key now auto inserts new pattern when reaching the end.
+  Removed "setLen", since now it is a bit useless.
+  Removed "Spread" and replaced by "Sort patterns".
 * Changed Wav loading routines to use RIFF loader. This allows to see SoundForge's loops settings.
+* Changed machine graphics thanks to /\/\ark. Default colours changed too (Go to configuration-
+  settings, "visual" folder and click "Reset All Colours" to see them.)
+* Pattern editor now hides the "0000" value in effects column (when it is not used as twk or mcm)
+* Cleaned up a bit the Instrument editor Dialog (No new functionality yet) and fixed little errors
+  in the envelopes editor.
+! Fixed several problems with VST's and presets. (pooplog made changes to allow his plugins to
+  save extra data, but he didn't realize that VST's do save in .prs format too)
+! Fixed that annoying "param increased by 1" bug with some VST's. ( int(intvar-b) != intvar-(int)b )
+! Fixed Wave editor Pasting but where pasting to an empty slot overwrote the previous instrument.
+! Fixed Instrument editor. Changing Instrument number with arrows didn't update the main combobox.
+  Also, now it shows in HEX, to be like the combobox.
+! Fixed a crash when deleting a machine and playing back (removed bug from all possible places)
+! Fixed Native machines window now correctly shown in windows XP/nonstandard-titlebar-sizes.
+! Fixed Sampler Retrig Command. (Now it really behaves like it should)
+! Fixed a cause for crash when loading songs/closing Psycle. (paint updating while deleting song)
+! Fixed : Flanger Machine could become unstable and use all the CPU avaiable when
+		  the feedback was higher than 50% and the input sound stopped.
 ! Fixed : Loading bug that causes volumes to be damaged between native<->VST<->native connections.
           Generally, you won't notice it, but the file is damaged (meaning, not complying to what
 		  there should be in the file). The saving routine has been fixed and the loader routine
-		  has been modified to be aware of this problem. This is a fix to the
+		  has been modified to be aware of this problem. This should also fix the
 		  "In some rare cases, when opening a song, psycle produces noise." bug
 ! Fixed : Loading a sample with a name longer than 32chars, activated the "Tempo Syncronized Loop"
 ! Fixed : Rare "divide by zero" error at startup fixed ( thanks to Gulrak for this )
+
 
 V1.6plus
 --------
