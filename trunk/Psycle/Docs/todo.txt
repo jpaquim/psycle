@@ -8,7 +8,6 @@
 -"groove fill"
 *song name message box on load clear on loss of focus
 !DO NOT LOAD LIST VST list & database
-!value dialog in machines in hex so values can be used easily with rest of program
 <_sue_> hey poop....can we have something like a right double click for inserting the first not used patter (like before with left double click)?
 <_sue_> in the pattern sequencer with shift and the mouse you can select more than one pattern....but if you press del only the first one of the selection is deleted.....it would be nice if they were all deleted.... it would be nice if you could copy and paste pattern selections in the pattern seq too....(i mean blocks of patterns)
 <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in the one im using i have half of the tab where the pattern seq is completely free.....oki no more sugestions for today...hihihi

@@ -91,13 +91,13 @@ ON_COMMAND(ID_CONFIGURATION_KEYBOARD, OnConfigurationKeyboard)
 ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
 ON_BN_CLICKED(IDC_CENTERCURSOR, OnCentercursor)
 ON_BN_CLICKED(IDC_CURSORDOWN, OnCursordown)
+ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
+ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
 ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
 ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
 ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
 ON_BN_CLICKED(IDC_INCLONG, OnInclong)
-ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
-ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
-//}}AFX_MSG_MAP
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -1743,3 +1743,4 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	_pSong->playOrderSel[ls] = true;
 
 }
+
