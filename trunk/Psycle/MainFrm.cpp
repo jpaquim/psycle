@@ -20,6 +20,7 @@
 #include "gearFlanger.h"
 #include "FrameMachine.h"
 #include "VstEditorDlg.h"
+#include "Helpers.h"
 
 #include "Player.h"
 #include "MidiInput.h"
@@ -600,8 +601,8 @@ void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLOR
 	CClientDC canvasl(lv);
 	CClientDC canvasr(rv);
 
-	int log_l=(int)(100*log10(l));
-	int log_r=(int)(100*log10(r));
+	int log_l=f2i(100*log10f(l));
+	int log_r=f2i(100*log10f(r));
 	log_l=log_l-226;
 	if ( log_l < 0 )log_l=0;
 	log_r=log_r-226;

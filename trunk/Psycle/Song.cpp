@@ -579,7 +579,7 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 				toffset=pPatternData+pattern*MULTIPLY2+t*5;
 				for (int l=1;l<lines;l++)
 				{
-					memcpy(toffset+l*MULTIPLY,toffset+(int)(l*step)*MULTIPLY,5);
+					memcpy(toffset+l*MULTIPLY,toffset+f2i(l*step)*MULTIPLY,5);
 				}
 				while (l < patternLines[pattern])	// This wouldn't be necessary if we
 				{									// really allocate a new pattern.
@@ -603,8 +603,8 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 
 				for (int l=nl-1;l>0;l--)
 				{
-					memcpy(toffset+(int)(l*step)*MULTIPLY,toffset+l*MULTIPLY,5);
-					t=(int)(l*step)-1;
+					memcpy(toffset+f2i(l*step)*MULTIPLY,toffset+l*MULTIPLY,5);
+					t=f2i(l*step)-1;
 					while (t> (l-1)*step)
 					{
 						memcpy(toffset+t*MULTIPLY,blank,5);

@@ -106,7 +106,7 @@ void CPreset::Init(int num,char* newname,float* parameters)
 	{
 		params= new int[num];
 		numPars=num;
-		for(int x=0;x<num;x++) params[x]= (int)(parameters[x]*65535.0f);
+		for(int x=0;x<num;x++) params[x]= f2i(parameters[x]*65535.0f);
 	}
 	else
 	{
@@ -238,7 +238,7 @@ BOOL CPresetsDlg::OnInitDialog()
 		int i=0;
 		while (i < numParameters)
 		{
-			iniPreset.SetParam(i,(int)(((VSTPlugin*)_pMachine)->GetParameter(i)*65535));
+			iniPreset.SetParam(i,f2i(((VSTPlugin*)_pMachine)->GetParameter(i)*65535));
 			i++;
 		}
 

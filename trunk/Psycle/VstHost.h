@@ -4,6 +4,7 @@
 #include "Machine.h"
 #include "Vst\AEffectx.h"
 #include "Song.h"
+#include "Helpers.h"
 
 #define MAX_EVENTS		64
 #define MAX_INOUTS		8
@@ -56,7 +57,7 @@ public:
 	}
 	virtual int GetParamValue(int numparam)
 	{
-		if ( numparam < _pEffect->numParams ) return (int)(_pEffect->getParameter(_pEffect, numparam)*65535);
+		if ( numparam < _pEffect->numParams ) return f2i(_pEffect->getParameter(_pEffect, numparam)*65535);
 		else return -1;
 	}
 

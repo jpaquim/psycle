@@ -1389,7 +1389,7 @@ void CChildView::BlockParamInterpolate()
 
 		for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
 		{
-			int val=(int)(initvalue+addvalue*(l-blockSel.start.line));
+			int val=f2i(initvalue+addvalue*(l-blockSel.start.line));
 			toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
 			toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
 			displace2+=MULTIPLY;

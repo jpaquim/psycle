@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "WaveEdAmplifyDialog.h"
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,7 +68,7 @@ void CWaveEdAmplifyDialog::OnOK()
 	char db_t[6];
 	int db_i = 0;
 	m_dbedit.GetLine(0, db_t);
-	db_i = (int) (100*atof(db_t));
+	db_i = (int)(100*atof(db_t));
 	if (db_i) EndDialog( db_i );
 	else EndDialog( AMP_DIALOG_CANCEL);
 	
