@@ -732,7 +732,7 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 	
 	char szFile[_MAX_PATH];
 
-	strcpy(szFile,(LPCTSTR)if2);
+	strcpy(szFile,(LPCTSTR)if2); 
 	
 	// Initialize OPENFILENAME
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
