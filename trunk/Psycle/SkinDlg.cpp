@@ -1305,7 +1305,7 @@ void CSkinDlg::OnImportReg()
 					_effect_font_point=_httoi(q+1);
 				}
 			}
-}
+		}
 		fclose(hfile);
 //		m_linenumbers.SetCheck(_linenumbers);
 //		m_linenumbersHex.SetCheck(_linenumbersHex);

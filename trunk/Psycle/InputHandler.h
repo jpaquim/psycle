@@ -425,6 +425,7 @@ public:
 	bool SetCmd(CmdDef cmd, UINT key, UINT modifiers);
 	bool ConfigSave();
 	bool ConfigRestore();
+
 	
 public:	
 	// behaviour
@@ -439,9 +440,9 @@ public:
 	int notetrack[MAX_TRACKS]; // should be MAX TRACKS instead of 256
 	int outtrack;		// last track output to	
 
-private:
 	// LUT for command data
 	CmdDef cmdLUT[MOD_MAX][256];		
+private:
 };
 
 

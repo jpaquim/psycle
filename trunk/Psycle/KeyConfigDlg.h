@@ -21,6 +21,7 @@ public:
 	void FillCmdList();
 	void DoCommandList();
 	CKeyConfigDlg();   // standard constructor
+	char _skinPathBuf[MAX_PATH];
 
 // Dialog Data
 	//{{AFX_DATA(CKeyConfigDlg)
