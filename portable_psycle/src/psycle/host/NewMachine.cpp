@@ -414,11 +414,11 @@ namespace psycle
 				std::vector<std::string> vstPlugs;
 
 				CProgressDialog Progress;
-				host::loggers::info("Scanning plugins ... ");
+				host::loggers::info("Scanning plugins ... Listing ...");
 				if(progressOpen)
 				{
 					Progress.Create();
-					Progress.SetWindowText("Scanning plugins ... ");
+					Progress.SetWindowText("Scanning plugins ... Listing ...");
 					Progress.ShowWindow(SW_SHOW);
 				}
 
@@ -453,10 +453,10 @@ namespace psycle
 				
 				if(progressOpen)
 				{
-					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Natives ...";
+					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
-				host::loggers::info("Scanning plugins ... Natives");
+				host::loggers::info("Scanning plugins ... Testing Natives ...");
 				out
 					<< std::endl
 					<< "======================" << std::endl
@@ -467,10 +467,10 @@ namespace psycle
 				out.flush();
 				if(progressOpen)
 				{
-					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... VST ...";
+					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
-				host::loggers::info("Scanning plugins ... VST");
+				host::loggers::info("Scanning plugins ... Testing VSTs ...");
 				out
 					<< std::endl
 					<< "===================" << std::endl
