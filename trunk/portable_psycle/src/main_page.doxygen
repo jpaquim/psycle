@@ -3,18 +3,16 @@
 	http://psycle.sourceforge.net
 
 	\section news News
+		bohan, 2004, August, the 29th,
+		
+		A new native plugin, the psycle::plugin::Haas stereo time delay spatial localization.
+		
+		\n
+		
 		bohan, 2004, July, the 16th,
 		
 		Past month (or was that two months ago?), there's been a coding frenesy on Psycle involving alk, zealmange, me, and even JAZ at some point, to recode its internals and make it more stable.
 		The current code in the CVS has hence changed a lot since 1.7.6.2, but we can't release it yet because of an obscur bug that appears when we turn the compiler optimizations on.
-		On a side note, i've just been talking with Guillaume about porting psycle to GNU/Linux, we're both still motivated, and actually, i must say that's the only direction that motivates me,
-		i hate mswindows and programming in/for mswindows, with all my bones...
-		By developping in mswindows, we're loosing an incredible amount of time and an incredible amount of potential developpers
-		because there's no easy way to distribute a source package that everybody can compile:
-		we need a lot of work to integrate any third-party library in Psycle's package itself instead of just adding a dependency on an external lib, and people need to have MSVC 7.1, which is not free.
-		Guillaume? pointed out there's no need to drop compatibility with mswindows,
-		I wonder how hard it would be to get the GNU chain-tools to make a compilation targeted at the mswindows system without requiring much modifications of the build system.
-		Anyway, it looks fine to me if we tell people they need cygwin, but certainly not if we require them to get MSVC 7.1. </advocacy>
 
 	\section intro Introduction
 

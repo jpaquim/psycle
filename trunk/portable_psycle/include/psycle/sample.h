@@ -122,7 +122,8 @@ namespace psycle
 		class Sin_Sequence
 		{
 		public:
-			typedef double Real; ///< <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
+			/// <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
+			typedef double Real;
 			inline Sin_Sequence() : index_(0) {}
 			inline void operator()(const Real & phase, const Real & radians_per_sample) throw()
 			{
