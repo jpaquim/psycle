@@ -26,17 +26,13 @@ namespace psycle
 		private:
 			void ProcessCmdLine(CMainFrame*);
 			void LoadRecent(CMainFrame*);
-		public:
-			//Called from CMainFrm::OnClose()!
-			//That's why it's public :(
-			void SaveRecent(CMainFrame*);
+			void SaveRecent(CMainFrame*); friend /*afx_msg void*/ class CMainFrame/*::OnClose()*/;
 		public:
 			Global _global;
 			//{{AFX_MSG(CPsycleApp)
 			afx_msg void OnAboutpsycle();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-		private:
 		};
 
 		//{{AFX_INSERT_LOCATION}}
