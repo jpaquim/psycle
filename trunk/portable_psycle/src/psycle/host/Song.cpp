@@ -992,16 +992,16 @@ namespace psycle
 				}
 				if (size == 4) // Since "version" is used for File version, we use size as version identifier
 				{
-					
+					pFile->Read(&chunkcount,sizeof(chunkcount));
 				}
 				/*
-				else if (size == )
+				if (size == )
 				{
 				// This is left here if someday, extra data is added to the file version chunk.
 				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - 8);
 				}
 				*/
-				else pFile->Skip(size - 4/*Size of the current Header DATA*/); // This ensures that any extra data is skipped.
+				if ( size-4 > 0) pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
 
 				DestroyAllMachines();
 				_machineLock = true;
