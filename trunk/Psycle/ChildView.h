@@ -208,6 +208,7 @@ public:
 	void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
 	void MousePatternTweak(int machine, int command, int value);
 	void EnterNote(int note, int velocity=127, bool bTranspose=true);
+	void EnterNoteoffAny();
 	bool MSBPut(int nChar);
 	void PrevTrack(int x,bool wrap,bool updateDisplay=true);
 	void AdvanceTrack(int x,bool wrap,bool updateDisplay=true);
