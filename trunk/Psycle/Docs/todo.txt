@@ -3,6 +3,9 @@
 +=addition
 
 * psycle default theme sucks
++ <[JAZ]> pooplog : btw... the "Gear Rack" button, if you want to do so (I am quite busy this week), it is 
+	just a dialog with the list of machines and their respective slots ( meaning, it lists from 0 i 
+	MAX_MACHINES), with some "Add","Remove","Swap" and such buttons
 
 * Machines
 ------------
@@ -105,6 +108,7 @@ bug:	 New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn
 ! remove waits from play when in export mode
 ! longer sequences (256) [file format,maybe others]
 ! more tracks (64) [file format]
++ DirectX effects, intstruments
 + ALK tracker command to bypass an fx, mute command for machines
 + even if it isn't used specifically for volume, there should be a flag to allow machines to recieve command/instrument 
 	column data every tick with a SeqTick call (especially useful for effects, which are hurting with only being 
