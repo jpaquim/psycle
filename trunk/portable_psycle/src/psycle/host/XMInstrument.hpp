@@ -1,174 +1,130 @@
-#ifndef _XMXMInstrument_H
-#define _XMXMInstrument_H
-#pragma unmanaged
-/** @file
- *  @brief header file
- *  XMInstrument ***** [bohan] iso-(10)646 encoding only please! *****
- *  XMInstrument***** [bohan] iso-(10)646 encoding only please! *****
- *  $Date$
- *  $Revision$
- */
-#if defined(_WINAMP_PLUGIN_)
-//	#include <afxmt.h>
-#endif // _WINAMP_PLUGIN_
+#pragma once
+#include "Constants.hpp"
+#include "FileIO.hpp"
 
-#include "Constants.h"
-#include "FileIO.h"
-//namespace SF {
 namespace psycle
 {
 	namespace host
 	{
+	// Used as a Scale multiplier.
 	typedef float ValueType;
 	class XMInstrument
 	{
 	public:
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+		// Max number of samples per Instrument
 		static const int MAX_ASSIGNNABLE_SAMPLE = 32;
-		/// Noteç≈ëÂêî
-		static const int MAX_NOTES = 120;
+		/// Size of the Instrument's note mapping.
+		static const int MAX_SAMPLER_NOTES = 120;
 
-		/** Envelope Class
-		 *  ***** [bohan] iso-(10)646 encoding only please! *****
-		 *	EnvelopeGenarator***** [bohan] iso-(10)646 encoding only please! *****
-		 ****** [bohan] iso-(10)646 encoding only please! *****
-		 *Å@Envelope PointÇÕ16points
-		 *  Envelope 1 Tick = 1/44100 sec (***** [bohan] iso-(10)646 encoding only please! *****
-		 *  Envelope Value ÇÕ 0.0 - 1.0f
+		struct NewNoteAction {
+			enum {
+				N_STOP = 0x0,///< Cut currently playing note and start the new one in this voice (Usual method of old trackers)
+				N_OFF = 0x1,/// < Note off the currently playing note. And start a new voice.
+				N_CONTINUE = 0x2	 ///< Ignore currently playing note. Assing a new voice (wherever possible)
+				};
+			};
+		//////////////////////////////////////////////////////////////////////////
+		//  XMInstrument::Envelope Class declaration
+		 
+		 /*@Envelope PointÇ16points
+		 *  Envelope Step: 1 Tick = 1/44100 sec 
+		 *  Envelope Range: 0.0 .. 1.0f
 		 */
 		class Envelope {
 
 		public:
-			// static constants 
-			static const int MAX_POINT = 16;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			// Max number of points in an envelope
+			static const int MAX_POINT = 16;
 			static const int INVALID = -1;
 			typedef std::pair<int,ValueType> PointValue;
-			typedef std::vector< PointValue > Points;	
+			typedef std::vector< PointValue > Points;
 			// constructor & destructor
 			explicit Envelope()
 			{	Init();
-			};
+			}
 
 			// copy Constructor
 			Envelope(const Envelope& other)
-			{
-				Init();
+			{	Init();
 				operator=(other);
 			}
 
-			~Envelope(){;};
+			~Envelope(){;}
 
 			// Init
-			void Init(){
-				m_Enabled = false;
+			void Init()
+			{	m_Enabled = false;
 				m_SustainBegin = INVALID;
 				m_SustainEnd = INVALID;
 				m_LoopStart = INVALID;
 				m_LoopEnd = INVALID;
-
-//				m_NumOfPoints = 0;
-				
 			}
 
 			// property 
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
-			const bool IsEnabled(){ return m_Enabled;};
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
-			void IsEnabled(const bool value){ m_Enabled = value;};
+			/// If the envelope IsEnabled, it is used and triggered. Else, it is not.
+			const bool IsEnabled(){ return m_Enabled;}
+			void IsEnabled(const bool value){ m_Enabled = value;}
 
 			
-			/** ***** [bohan] iso-(10)646 encoding only please! *****
-			 * @param index ***** [bohan] iso-(10)646 encoding only please! *****
-			 * @return ***** [bohan] iso-(10)646 encoding only please! *****
-			 */
-			const int Point(const int index)
+			//////////////////////////////////////////////////////////////////////////
+			// Point Functions. Helpers to get and set the values for them.
+
+			// Gets the time at which the pointIndex point is located.
+			const int GetTime(const int pointIndex)
 			{	
-				if(index >= 0 && index < (int)m_Points.size()){
-					return m_Points[index].first;
+				if(pointIndex >= 0 && pointIndex < (int)m_Points.size()){
+					return m_Points[pointIndex].first;
 				}
 				return INVALID;
-			};
-
-			const int Point(const int index,const int value)
+			}
+			// Sets a new time for an existing pointIndex point.
+			const int SetTime(const int pointIndex,const int pointTime)
 			{ 
-				ATLASSERT(index >= 0 && index < (int)m_Points.size());
-				m_Points[index].first = value;
-				return PointAndValue(index,value,m_Points[index].second);
-			};
-			
-			const ValueType Value(const int index)
-			{ //return m_Value[index];
-				ATLASSERT(index >= 0 && index < (int)m_Points.size());
-				return m_Points[index].second;
-			};
-
-			void Value(const int index,const ValueType value)
+				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				m_Points[pointIndex].first = pointTime;
+				return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
+			}
+			// Gets the value of the pointIndex point.
+			const ValueType GetValue(const int pointIndex)
+			{ 
+				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				return m_Points[pointIndex].second;
+			}
+			// Sets the value pointVal to pointIndex point.
+			void SetValue(const int pointIndex,const ValueType pointVal)
 			{
-				ATLASSERT(index >= 0 && index < (int)m_Points.size());
-				m_Points[index].second = value;
-			};
+				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				m_Points[pointIndex].second = pointVal;
+			}
 			
-			/// Point***** [bohan] iso-(10)646 encoding only please! *****
-			const int PointAndValue(const int index,const int point,const ValueType value);
-			
-			/// Point***** [bohan] iso-(10)646 encoding only please! *****
-			const int Insert(const int point,const ValueType value);
-			
-			/// Point***** [bohan] iso-(10)646 encoding only please! *****
-			void Append(const int point,const ValueType value)
-			{
-				PointValue _value;
-				_value.first = point;
-				_value.second = value;
-				m_Points.push_back(_value);
-			};
-
-			/// index***** [bohan] iso-(10)646 encoding only please! *****
-			void Delete(const int index)
-			{
-				ATLASSERT(index < (int)m_Points.size());
-				if(index < (int)m_Points.size())
+			/// Appends a new point at the end of the array.
+			/// Note: Be sure that the pointTime is the highest of the points, or use "Insert" instead.
+			void Append(const int pointTime,const ValueType pointVal)
 				{
-					m_Points.erase(m_Points.begin() + index);
-					if(index == m_SustainBegin || index == m_SustainEnd)
-					{
-						m_SustainBegin = INVALID;
-						m_SustainEnd = INVALID;
-					} else {
-						if(m_SustainBegin > index)
-						{
-							m_SustainBegin--;
-						}
-						if(m_SustainEnd > index)
-						{
-							m_SustainEnd--;
-						}
-					}
+				PointValue _value;
+				_value.first = pointTime;
+				_value.second = pointVal;
+				m_Points.push_back(_value);
+				};
 
-					if(index == m_LoopStart || index == m_LoopEnd)
-					{
-						m_LoopStart = INVALID;
-						m_LoopEnd = INVALID;
-					} else {
-						if(m_LoopStart > index)
-						{
-							m_LoopStart--;
-						}
-						if(m_LoopEnd > index)
-						{
-							m_LoopEnd--;
-						}
-					}
+			/// Helper to set a new time for an existing index.
+			const int SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal);
 
-				}
-			};
+			/// Inserts a new point to the points Array.
+			const int Insert(const int pointIndex,const ValueType pointVal);
 
-			/// Point,Value***** [bohan] iso-(10)646 encoding only please! *****
+			/// Removes a point from the points Array.
+			void Delete(const int pointIndex);
+
+			
+		
+			/// Clears the points Array
 			void Clear()
 			{
 				m_Points.clear();
 			};
-
+			
+			// Set or Get the point Index for Sustain and Loop.
 			const int SustainBegin(){ return m_SustainBegin;};
 			void SustainBegin(const int value){m_SustainBegin = value;};
 
@@ -186,9 +142,9 @@ namespace psycle
 			void Load(RiffFile& riffFile,const UINT version);
 			void Save(RiffFile& riffFile,const UINT version);
 
-			/// = ***** [bohan] iso-(10)646 encoding only please! *****
-			Envelope& operator=(const Envelope& other){
-				
+			// overloaded copy function
+			Envelope& operator=(const Envelope& other)
+			{
 				if(this == &other){ return *this;};
 
 				m_Enabled = other.m_Enabled;
@@ -199,30 +155,31 @@ namespace psycle
 					m_Points.push_back(*it);
 				}
 				m_SustainBegin = other.m_SustainBegin;
-				m_SustainEnd = other.m_SustainEnd; 
+				m_SustainEnd = other.m_SustainEnd;
 				m_LoopStart = other.m_LoopStart;
 				m_LoopEnd = other.m_LoopEnd;
 
 				return *this;
-			};
+			}
 
 		private:
-			
-			bool m_Enabled;///< Envelope is enable or disable
-			//? ***** [bohan] iso-(10)646 encoding only please! *****
+			///< Envelope is enabled or disabled
+			bool m_Enabled;
+			//Array of Points of the envelope.
 			Points m_Points; 
-			//int m_Points[MAX_POINT]; ///< Position [in Samples at 44.1KHz]
-			//ValueType m_Value[MAX_POINT];///< Value [0 - 1.0f]
-			int m_SustainBegin;///< Sustain Start Point
-			int m_SustainEnd;///< Sustain End Point
-			int m_LoopStart;///< Loop Start Point
-			int m_LoopEnd;///< Loop End Point
-			
-			//int m_NumOfPoints;///< Number Of Envelope Points
+			///< Sustain Start Point
+			int m_SustainBegin;
+			///< Sustain End Point
+			int m_SustainEnd;
+			///< Loop Start Point
+			int m_LoopStart;
+			///< Loop End Point
+			int m_LoopEnd;
 		};// class Envelope
 
 
-		/// Wave Data ***** [bohan] iso-(10)646 encoding only please! *****
+		//////////////////////////////////////////////////////////////////////////
+		//  XMInstrument::WaveData Class declaration
 		class WaveData {
 		public:
 			/** Wave Loop Type */
@@ -250,15 +207,15 @@ namespace psycle
 				m_WaveLoopEnd = 0;
 				m_WaveTune = 0;
 				m_WaveFineTune = 0;	
-				m_WaveLoopType = false;
-				m_WaveStereo = false;;
+				m_WaveStereo = false;
 				m_WaveLoopType = LoopType::DO_NOT;
+				///\todo: really clean the wavename;
+				memset(m_WaveName,0,sizeof(m_WaveName)*sizeof(TCHAR));
 			};
 
 			/// Destructor
 			~WaveData(){
-				if(m_pWaveDataL)  delete [] m_pWaveDataL;
-				if(m_pWaveDataR)  delete [] m_pWaveDataR;
+				DeleteWaveData();
 			};
 			
 			const UINT WaveLength(){ return m_WaveLength;};
@@ -297,29 +254,16 @@ namespace psycle
 			void WaveDataR(const int index,const signed short value){ *(m_pWaveDataR + index) = value;};
 
 			void DeleteWaveData(){
-				if(m_pWaveDataL != NULL){
-					delete []  m_pWaveDataL;
-					m_pWaveDataL = NULL;
-				}
-
-				if(m_pWaveDataR != NULL){
-					delete [] m_pWaveDataR;
-					m_pWaveDataR = NULL;
-				}
+				zapArray(m_pWaveDataL);
+				zapArray(m_pWaveDataR);
 			};
 
 			void AllocWaveData(const int iLen,const bool bStereo)
 			{
 				DeleteWaveData();
-				if(bStereo){
-					m_pWaveDataR = new signed short[iLen];
-					m_pWaveDataL = new signed short[iLen];
-					m_WaveStereo = true;
-				} else {
-					m_pWaveDataL = new signed short[iLen];
-					m_pWaveDataR = NULL;
-					m_WaveStereo = false;
-				}
+				m_pWaveDataL = new signed short[iLen];
+				m_pWaveDataR = bStereo?new signed short[iLen]:NULL;
+				m_WaveStereo = bStereo;
 				m_WaveLength  = iLen;
 			};
 
@@ -331,7 +275,7 @@ namespace psycle
 			{
 				Init();
 				m_WaveLength = source.m_WaveLength;
-				m_WaveVolume = source.m_WaveLength;
+				m_WaveVolume = source.m_WaveVolume;
 				m_WaveLoopStart = source.m_WaveLoopStart;
 				m_WaveLoopEnd = source.m_WaveLoopEnd;
 				m_WaveTune = source.m_WaveTune;
@@ -346,7 +290,6 @@ namespace psycle
 				if(source.m_WaveStereo){
 					memcpy(m_pWaveDataR,source.m_pWaveDataR,source.m_WaveLength * sizeof(short));
 				}
-
 			};
 
 		private:
@@ -365,27 +308,26 @@ namespace psycle
 
 		};// WaveData()
 
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+
+		//////////////////////////////////////////////////////////////////////////
+		//  XMInstrument Class declaration
 		XMInstrument();
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		~XMInstrument();
 
 		void Init();
 		void DeleteLayer(int c);
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
+
 		void Load(RiffFile& riffFile,const UINT version);
-		/// ***** [bohan] iso-(10)646 encoding only please! *****
 		void Save(RiffFile& riffFile,const UINT version);
 
 		// Property //
 		
-		// New Note Action (New?)
-		const int NNA() { return m_NNA;};///< Get NNA
-		void NNA(const int value){ m_NNA = value;};///< Set NNA
-		
 		Envelope* const AmpEnvelope(){ return &m_AmpEnvelope;};
 		Envelope* const FilterEnvelope(){ return &m_FilterEnvelope;};
 		
+		Envelope* const PanEnvelope(){return &m_PanEnvelope;};
+		Envelope* const PitchEnvelope(){return &m_PitchEnvelope;};
+
 		const int FilterCutoff(){ return m_FilterCutoff;};
 		void FilterCutoff(const int value){m_FilterCutoff = value;};
 
@@ -398,11 +340,11 @@ namespace psycle
 		const int FilterType(){ return m_FilterType;};
 		void FilterType(const int value){ m_FilterType = value;};
 
-		Envelope* const PanEnvelope(){return &m_PanEnvelope;};
-		Envelope* const PitchEnvelope(){return &m_PitchEnvelope;};
+		const int NNA() { return m_NNA;};
+		void NNA(const int value){ m_NNA = value;};
 
 		const bool IsRandomPanning(){return  m_RandomPanning;};///< Random Panning
-		void IsRandomPanning(const bool value){m_RandomPanning = value;};///< Random Panning
+		void IsRandomPanning(const bool value){m_RandomPanning = value;};
 
 		const bool IsRandomCutoff(){return m_RandomCutoff;};///< Random CutOff
 		void IsRandomCutoff(const bool value){m_RandomCutoff = value;};
@@ -412,20 +354,7 @@ namespace psycle
 		
 		const bool IsRandomSampleStart(){return m_RandomSampleStart;};///< Random Sample Start
 		void IsRandomSampleStart(const bool value){m_RandomSampleStart = value;};
-		
 
-#if defined psycleWTL
-		SF::string& Name(){return m_Name;};
-		void Name(const SF::string& name);
-#else
-		std::string& Name(){return m_Name;};
-		void Name(const std::string& name);
-#endif	
-
-		// 
-		WaveData& rWaveData(const int index){ return m_WaveData[index];};
-
-	
 		const bool IsLoop(){ return m_Loop;};
 		void IsLoop(const bool value){m_Loop = value;};
 
@@ -463,12 +392,16 @@ namespace psycle
 		const int NoteToSample(const int note){return m_AssignNoteToSample[note];};
 		void NoteToSample(const int note,const int sampleNo){m_AssignNoteToSample[note] = sampleNo;};
 
+		std::string& Name(){return m_Name;};
+		void Name(const std::string& name) { m_Name= name; }
+
+		WaveData& rWaveLayer(const int index){ return m_WaveLayer[index];};
+
 		void operator= (const XMInstrument & other)
 		{
-			
 			for(int i = 0;i < MAX_ASSIGNNABLE_SAMPLE;i++)
 			{
-				m_WaveData[i] = other.m_WaveData[i];
+				m_WaveLayer[i] = other.m_WaveLayer[i];
 			}
 
 			m_Loop = other.m_Loop;
@@ -513,12 +446,12 @@ namespace psycle
 			// 
 			m_bEnabled = other.m_bEnabled;
 
-			memcpy(m_AssignNoteToSample,other.m_AssignNoteToSample,sizeof(int) * MAX_NOTES);
+			memcpy(m_AssignNoteToSample,other.m_AssignNoteToSample,sizeof(int) * MAX_SAMPLER_NOTES);
 
 		};
 
 	private:
-		WaveData m_WaveData[MAX_ASSIGNNABLE_SAMPLE];
+		WaveData m_WaveLayer[MAX_ASSIGNNABLE_SAMPLE];
 
 		//////////////////////////////////////////////////////////////////
 		// Loop stuff
@@ -577,11 +510,8 @@ namespace psycle
 		bool m_RandomResonance;///< Random Resonance
 		bool m_RandomSampleStart;///< Random SampleStart
 
-#if defined psycleWTL
-		SF::string m_Name;
-#else
 		std::string m_Name;
-#endif
+
 		bool m_bVolumeFade;
 		float m_VolumeFadeSpeed;
 
@@ -594,10 +524,8 @@ namespace psycle
 		// 
 		bool m_bEnabled;
 
-		int m_AssignNoteToSample[MAX_NOTES];/// table of assign note to sample number
+		int m_AssignNoteToSample[MAX_SAMPLER_NOTES];/// table of assign note to sample number
 		
 	};
 	}
-}// namespace SF
-
-#endif
+}

@@ -9,6 +9,7 @@
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
+#include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VSTHost.hpp"
 #include "DataCompression.hpp"
@@ -56,6 +57,7 @@ namespace psycle
 			Machine* pMachine;
 			Master* pMaster;
 			Sampler* pSampler;
+			XMSampler* pXMSampler;
 			Plugin* pPlugin;
 			vst::plugin* pVstPlugin;
 			switch (type)
@@ -67,6 +69,9 @@ namespace psycle
 				break;
 			case MACH_SAMPLER:
 				pMachine = pSampler = new Sampler(index);
+				break;
+			case MACH_XMSAMPLER:
+				pMachine = pXMSampler = new XMSampler(index);
 				break;
 			case MACH_PLUGIN:
 				{
@@ -1506,6 +1511,7 @@ namespace psycle
 				for (i=0; i<128; i++)
 				{
 					Sampler* pSampler;
+					XMSampler* pXMSampler;
 					Plugin* pPlugin;
 					vst::plugin * pVstPlugin(0);
 					int x,y,type;
@@ -1530,6 +1536,11 @@ namespace psycle
 							break;
 						case MACH_SAMPLER:
 							pMac[i] = pSampler = new Sampler(i);
+							pMac[i]->Init();
+							pMac[i]->Load(pFile);
+							break;
+						case MACH_XMSAMPLER:
+							pMac[i] = pXMSampler = new XMSampler(i);
 							pMac[i]->Init();
 							pMac[i]->Load(pFile);
 							break;

@@ -1,83 +1,50 @@
-#if !defined(XM_SAMPLER_UI)
-#define XM_SAMPLER_UI
-/** @file
- *  @brief implementation file
- *  $Date$
- *  $Revision$
- */
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// GearTracker.h : header file
-//
+#include "constants.hpp"
+#include "XMSamplerUIGeneral.hpp"
+#include "XMSamplerUIInst.hpp"
+#include "XMSamplerUISample.hpp"
 
-#include "constants.h"
-#include "XMSamplerUIGeneral.h"
-#include "XMSamplerUIInst.h"
-#include "XMSamplerUISample.h"
-
-namespace SF {
+NAMESPACE__BEGIN(psycle)
+NAMESPACE__BEGIN(host)
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
 class XMSampler;
-class XMSamplerUI : public CPropertySheetImpl<XMSamplerUI>
-{
-// Construction
-public:
-XMSamplerUI( CPsycleWTLView* const parent,XMSampler * const pMachine,ATL::_U_STRINGorID title = (LPCTSTR) NULL, 
-                        UINT uStartPage = 0, HWND hWndParent = NULL );
 
-void OnCancel();
-enum { IDD = IDD_XM_SAMPLER };
-
-void pMachine(XMSampler *p){_pMachine = p;};
-XMSampler * const pMachine(){return _pMachine;};
-
-private:
-
-//	XMSamplerUI();   // standard constructor
-//	XMSamplerUI(CPsycleWTLView* parent) {m_pParent = parent;}
-	XMSampler* _pMachine;
-	SF::XMSamplerUIGeneral m_General;
-	SF::XMSamplerUIInst m_Instrument;
-	SF::XMSamplerUISample m_Sample;
-
-//	BOOL Create();
-	
-// Implementation
-protected:
-	CPsycleWTLView* m_pParent;
-
-public:
-
-	// Generated message map functions
-    BEGIN_MSG_MAP_EX(XMSamplerUI)
-		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-		MESSAGE_HANDLER(WM_CLOSE,OnClose)
-		COMMAND_HANDLER_EX(IDOK,BN_CLICKED,OnOk);
-		COMMAND_HANDLER_EX(IDCANCEL,BN_CLICKED,OnCancelEvent);
-		CHAIN_MSG_MAP(CPropertySheetImpl<XMSamplerUI>)
-    END_MSG_MAP()
-	
-	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	
-	virtual void OnFinalMessage(HWND hWnd);
-
-	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-	void OnOk(UINT wID,int commandId,HWND hwnd)
+class XMSamplerUI : public CPropertySheet
 	{
-		OnCancel();
+	DECLARE_DYNAMIC(XMSamplerUI)
+	public:
+		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+		// Attributes
+	private:
+		XMSampler* _pMachine;
+		XMSamplerUIGeneral m_General;
+		XMSamplerUIInst m_Instrument;
+		XMSamplerUISample m_Sample;
+		// Operations
+	public:
+		void Init(Configuration* pConfig);
+		// Overrides
+		// ClassWizard generated virtual function overrides
+		//{{AFX_VIRTUAL(CConfigDlg)
+	public:
+		virtual int DoModal();
+		//}}AFX_VIRTUAL
+		// Implementation
+	public:
+		virtual ~XMSamplerUI();
+		void Init(XMSampler* pMachine);
+		// Generated message map functions
+	protected:
+		Configuration* _pConfig;
+		//{{AFX_MSG(CConfigDlg)
+		// NOTE - the ClassWizard will add and remove member functions here.
+		//}}AFX_MSG
+		DECLARE_MESSAGE_MAP()
 	};
 
-	void OnCancelEvent(UINT wID,int commandId,HWND hwnd)
-	{
-		OnCancel();
-	};
-
-};
-
-}
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_GEARTRACKER_H__B1BFFCE0_0D6E_11D4_8913_98C1EA960D7C__INCLUDED_)
+NAMESPACE__END
+NAMESPACE__END

@@ -6,6 +6,7 @@
 #include "WavFileDlg.hpp"
 #include "MasterDlg.hpp"
 #include "gearTracker.hpp"
+#include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
 #include "VstEditorDlg.hpp"
 #include "Helpers.hpp"
@@ -1398,6 +1399,13 @@ NAMESPACE__BEGIN(psycle)
 							m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
 						}
 						break;
+					case MACH_XMSAMPLER:
+						{
+						XMSamplerUI dlg(ma->_editName);
+						dlg.Init((XMSampler*)ma);
+						dlg.DoModal();
+						break;
+						}
 					case MACH_PLUGIN:
 						{
 							m_pWndMac[tmac] = new CFrameMachine(tmac);

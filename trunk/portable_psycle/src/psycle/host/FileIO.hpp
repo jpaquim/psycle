@@ -48,7 +48,7 @@ namespace psycle
 			virtual void Read(float &value){float _t;Read(&_t,sizeof(float));value =  _t;};
 			virtual void Read(double &value){double _t;Read(&_t,sizeof(double));value =  _t;};
 
-			virtual const int ReadInt(){int _t;Read(&_t,sizeof(int));return _t;};
+			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t;};
 			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
 			virtual const unsigned short ReadUShort(){unsigned short _t;Read(&_t,sizeof(unsigned short));return _t;};
 			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
@@ -91,7 +91,7 @@ namespace psycle
 			virtual BOOL Error();
 			virtual bool Read(void* pData, ULONG numBytes);
 
-			virtual const int ReadInt(){int _t;Read(&_t,sizeof(int));return _t;};
+			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t&int(pow(256,numbytes)-1);};
 			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
 			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
 			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};

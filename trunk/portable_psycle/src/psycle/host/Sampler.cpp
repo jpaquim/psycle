@@ -631,7 +631,7 @@ namespace psycle
 					pVoice->_filter._q = Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RQ;
 				}
 
-				pVoice->_filter._type = (FilterType)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_TP;
+				pVoice->_filter._type = (TFilterType)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_TP;
 				pVoice->_coModify = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_EA;
 				pVoice->_filterEnv._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
 

@@ -1,15 +1,14 @@
 #pragma once
 #pragma unmanaged
 /** @file
- *  @brief ***** [bohan] iso-(10)646 encoding only please! *****.
+ *  @brief 
  *  $Date$
  *  $Revision$
- *  ***** [bohan] iso-(10)646 encoding only please! *****
  */
 
 #pragma pack(1)
-namespace SF {
-
+namespace psycle{
+	namespace host{
 	struct XMFILEHEADER
 	{
 		DWORD size;
@@ -62,5 +61,6 @@ namespace SF {
 		BYTE res;
 		char name[22];
 	};
+}
 }
 #pragma pack()

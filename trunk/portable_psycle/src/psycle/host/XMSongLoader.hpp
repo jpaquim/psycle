@@ -1,25 +1,22 @@
 #pragma once
-#pragma unmanaged
-/** @file
- *  @brief XMSongLoader Implement Class.
- *  $Date$
- *  $Revision$
- *  参考:MPT のソース
- */
 
-#include "isongloader.h"
-#include "XMFile.h"
+//#include "isongloader.h"
+#include "SongStructs.hpp"
+#include "FileIO.hpp"
+#include "XMFile.hpp"
+class Song;
+class XMSampler;
+class XMInstrument;
 
-class OldPsyFile;
-
-namespace SF {
-	class XMSongLoader : public ISongLoader
+namespace psycle{
+namespace host{
+	class XMSongLoader : public OldPsyFile
 	{
 	public:
 		XMSongLoader(void);
 		virtual ~XMSongLoader(void);
-		/// RIFF ***** [bohan] iso-(10)646 encoding only please! *****
-		virtual void Load(SF::string& fileName,Song& song,const bool fullopen = true);
+		/// RIFF 
+		virtual void Load(Song& song,const bool fullopen = true);
 	private:
 		const bool IsValid();
 
@@ -37,31 +34,31 @@ namespace SF {
 		const char ReadInt1(LONG start=-1)
 		{	
 			char i;
-			if(start>=0) m_File.Seek(start);
-			return m_File.Read(&i,1)?i:0;
+			if(start>=0) Seek(start);
+			return Read(&i,1)?i:0;
 		}
 
 		const short ReadInt2(LONG start=-1)
 		{
 			short i;
-			if(start>=0) m_File.Seek(start);
-			return m_File.Read(&i,2)?i:0;
+			if(start>=0) Seek(start);
+			return Read(&i,2)?i:0;
 		}
 
 		const int ReadInt4(LONG start=-1)
 		{
 			int i;
-			if(start>=0) m_File.Seek(start);
-			return m_File.Read(&i,4)?i:0;
+			if(start>=0) Seek(start);
+			return Read(&i,4)?i:0;
 		}
 
 		int m_iInstrCnt;
 		int smpLen[256];
 		char smpFlags[256];
-		OldPsyFile m_File;
 		short m_iTempoTicks;
 		short m_iTempoBPM;
 		XMFILEHEADER m_Header;
 		XMSampler* m_pSampler;
 	};
+}
 }

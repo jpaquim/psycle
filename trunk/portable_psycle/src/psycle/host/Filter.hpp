@@ -9,14 +9,13 @@ namespace psycle
 	{
 		#define TPI 6.28318530717958647692528676655901
 
-		typedef enum
-		{
+		typedef enum TFilterType{
 			FILTER_LP = 0,
 			FILTER_HP = 1,
 			FILTER_BP = 2,
-			FILTER_BR = 3
-		}
-		FilterType;
+			FILTER_BR = 3,
+			FILTER_NONE = 4
+		};
 
 		class FilterCoeff
 		{
@@ -127,7 +126,7 @@ namespace psycle
 		class Filter
 		{
 		public:
-			FilterType _type;
+			TFilterType _type;
 			int _cutoff;
 			int _q;
 

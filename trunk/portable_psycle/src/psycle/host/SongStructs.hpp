@@ -71,17 +71,17 @@ namespace psycle
 		class PatternCmd
 		{
 			public:
-				static const compiler::uint8 PCMD_VELOCITY = 0xc;
-				static const compiler::uint8 PCMD_PATTERNBREAK = 0xd;
-				static const compiler::uint8 PCMD_OLD_MIDI = 0x10;
-				static const compiler::uint8 PCMD_NOTECUT = 0xe;
-				static const compiler::uint8 PCMD_PAN = 0xf8; 
-				static const compiler::uint8 PCMD_RETRIG_CONTINUE = 0xfa; 
-				static const compiler::uint8 PCMD_RETRIG = 0xfb; 
-				static const compiler::uint8 PCMD_VOLCHG = 0xfc;
-				static const compiler::uint8 PCMD_DELAY = 0xfd;
-				static const compiler::uint8 PCMD_CHGTPB = 0xfe;
-				static const compiler::uint8 PCMD_CHGBPM = 0xff;
+				static const compiler::uint8 VELOCITY = 0xc;
+				static const compiler::uint8 PATTERNBREAK = 0xd;
+				static const compiler::uint8 OLD_MIDI = 0x10;
+				static const compiler::uint8 NOTECUT = 0xe;
+				static const compiler::uint8 PAN = 0xf8; 
+				static const compiler::uint8 RETRIG_CONTINUE = 0xfa; 
+				static const compiler::uint8 RETRIG = 0xfb; 
+				static const compiler::uint8 VOLCHG = 0xfc;
+				static const compiler::uint8 DELAY = 0xfd;
+				static const compiler::uint8 CHGTPB = 0xfe;
+				static const compiler::uint8 CHGBPM = 0xff;
 		};
 
 		#pragma pack(pop)

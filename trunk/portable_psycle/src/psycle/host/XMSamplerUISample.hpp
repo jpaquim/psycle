@@ -1,61 +1,40 @@
-/** @file
- *  @brief implementation file
- *  $Date$
- *  $Revision$
- */
-
 #pragma once
 
-#include "resource.h"       // ***** [bohan] iso-(10)646 encoding only please! *****
-#include <atlhost.h>
+#include "constants.hpp"       // ***** [bohan] iso-(10)646 encoding only please! *****
 
+NAMESPACE__BEGIN(psycle)
+NAMESPACE__BEGIN(host)
 
-// XMSamplerUISample
-
-namespace SF {
 class XMSampler;
-class XMSamplerUISample : 
-	public CPropertyPageImpl<XMSamplerUISample>
+class XMSamplerUISample : public CPropertyPage
 {
 public:
-	XMSamplerUISample()
-	{
-	}
+	DECLARE_DYNCREATE(XMSamplerUISample)
+	// Construction
+public:
+	XMSamplerUISample();
+	~XMSamplerUISample();
 
-	~XMSamplerUISample()
-	{
-	}
-
+	// Dialog Data
+	//{{AFX_DATA(XMSamplerUISample)
 	enum { IDD = IDD_XMSAMPLERUISAMPLE };
+	//}}AFX_DATA
 
-BEGIN_MSG_MAP(XMSamplerUISample)
-	MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-	//COMMAND_HANDLER(IDOK, BN_CLICKED, OnClickedOK)
-	//COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnClickedCancel)
-	CHAIN_MSG_MAP(CPropertyPageImpl<XMSamplerUISample>)
-END_MSG_MAP()
+	// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(XMSamplerUISample)
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
 
-// Handler prototypes:
-//  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL bHandled);
-//  LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL bHandled);
-//  LRESULT NotifyHandler(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);(& )
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(XMSaplerUIGeneral)
+	virtual BOOL OnInitDialog();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
 
-	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
-	{
-		return 1;  // ***** [bohan] iso-(10)646 encoding only please! *****
-	}
-
-	//LRESULT OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
-	//{
-	//	EndDialog(wID);
-	//	return 0;
-	//}
-
-	//LRESULT OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
-	//{
-	//	EndDialog(wID);
-	//	return 0;
-	//}
+public:
 	void pMachine(XMSampler * const p){m_pMachine = p;};
 	XMSampler * const pMachine(){return m_pMachine;};
 
@@ -64,4 +43,5 @@ private:
 
 };
 
-}
+NAMESPACE__END
+NAMESPACE__END

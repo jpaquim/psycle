@@ -39,10 +39,10 @@ namespace psycle
 			zapObject(pPlayer);
 			zapObject(pResampler);
 			zapObject(pConfig);
-			zapObject(pLogWindow);
 			zapObject(pInputHandler);
 			#ifndef NDEBUG
 				operating_system::console::close();
+				zapObject(pLogWindow);
 			#endif
 		}
 

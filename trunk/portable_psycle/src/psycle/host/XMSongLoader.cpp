@@ -3,54 +3,42 @@
  *  $Date$
  *  $Revision$
  */
-#include "stdafx.h"
-#include "NewMachine.h"
+#include <project.private.hpp>
+/*#include "NewMachine.h"
 #include "MainFrm.h"
 #if defined WTL
 	#include "PsycleWTLView.h"
 #else
 	#include "ChildView.h"
 #endif
-#include "ProgressDialog.h"
+*/
+#include "ProgressDialog.hpp"
 
 //	extern CPsycleApp theApp;
-#include "Song.h"
+#include "Song.hpp"
 //#include "IPsySongLoader.h"
-#include "Instrument.h"
-#include "Machine.h" // It wouldn't be needed, since it is already included in "song.h"
-#include "Sampler.h"
-#include "XMInstrument.h"
-#include "XMSampler.h"
-#include "Plugin.h"
-#include "VSTHost.h"
-#include "DataCompression.h"
-#include "Psy3SongLoader.h"
-#include "Psy2SongLoader.h"
-#include "PsyFSongLoader.h"
-#include ".\XMSongLoader.h"
+//#include "Instrument.h"
+#include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
+//#include "Sampler.h"
+#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
+#include "XMSongLoader.hpp"
+//#include "Plugin.h"
+//#include "VSTHost.h"
+//#include "DataCompression.h"
 
 //#include <sstream>
 
 #ifdef CONVERT_INTERNAL_MACHINES
-	#include "convert_internal_machines.h" // conversion
+	#include "convert_internal_machines.hpp" // conversion
 #endif
 
-#include "Riff.h"	 // For Wave file loading.
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
-#include "crtdbg.h"
-#define malloc(a) _malloc_dbg(a,_NORMAL_BLOCK,__FILE__,__LINE__)
-    inline void*  operator new(size_t size, LPCSTR strFileName, INT iLine)
-        {return _malloc_dbg(size, _NORMAL_BLOCK, strFileName, iLine);}
-    inline void operator delete(void *pVoid, LPCSTR strFileName, INT iLine)
-        {_free_dbg(pVoid, _NORMAL_BLOCK);}
-#define new  ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
+#include "Riff.hpp"	 // For Wave file loading.
 
 
-namespace SF {
+namespace psycle{
+namespace host{
+
 	static const char * XM_HEADER = "extended module: ";
 	
 	static const UCHAR VOLCMD_EXG_TABLE[16] = 
@@ -83,16 +71,12 @@ namespace SF {
 
 	}
 	
-	void XMSongLoader::Load(SF::string& fileName,Song& song,const bool fullopen)
+	void XMSongLoader::Load(Song& song,const bool fullopen)
 	{
-
-		if(!m_File.Open(fileName.c_str())){
-			throw ISongLoader::Exception(SF::string(SF::CResourceString(IDS_ERR_MSG0059)));
-		};
 
 		// check validity
 		if(!IsValid()){
-			throw ISongLoader::Exception(SF::string(SF::CResourceString(IDS_ERR_MSG0060)));
+			return;
 		}
 
 		// clear existing data
@@ -100,9 +84,9 @@ namespace SF {
 
 		Global::_pSong->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
 		Global::_pSong->InsertConnection(0,MASTER_INDEX,0.5f);
-		Global::_pSong->SeqBus(0);
+		Global::_pSong->seqBus=0;
 		// build sampler
-		m_pSampler = (SF::XMSampler *)(Global::_pSong->pMachine(0));
+		m_pSampler = (XMSampler *)(Global::_pSong->_pMachine[0]);
 
 		LONG iInstrStart = LoadPatterns(song);
 
@@ -133,8 +117,8 @@ namespace SF {
 		char * pTrackerVer = AllocReadStr(2,58);	
 
 		// process
-		ATLTRACE(_T("Header: %s\n"),pID);
-		ATLTRACE(_T("Tracker: %s v%i.%i\n"),pTrackerName,int(pTrackerVer[1]),int(pTrackerVer[0]));	
+		TRACE(_T("Header: %s\n"),pID);
+		TRACE(_T("Tracker: %s v%i.%i\n"),pTrackerName,int(pTrackerVer[1]),int(pTrackerVer[0]));	
 
 		// check header
 		bIsValid = (!stricmp(pID,XM_HEADER));
@@ -157,15 +141,14 @@ namespace SF {
 		
 		if(pSongName==NULL)
 			return 0;
-		song.Name(SF::string(CA2T(pSongName)));	
-		song.Author(SF::string(_T("")));
-		song.Comment(SF::string(SF::CResourceString(IDS_MSG0013)));
-
-		delete[] pSongName;
+		strcpy(song.Name,pSongName);	
+		strcpy(song.Author,"");
+		strcpy(song.Comment,"Imported from Fasttracker II module.");
+		zapArray(pSongName);
 
 		// get data
-		m_File.Seek(60);
-		m_File.Read(&m_Header,sizeof(XMFILEHEADER));
+		Seek(60);
+		Read(&m_Header,sizeof(XMFILEHEADER));
 /*
 		int iHeaderLen = ReadInt4(60);
 		short iSongLen = ReadInt2();
@@ -185,19 +168,19 @@ namespace SF {
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < 256;i++)
 		{
 			if ( m_Header.order[i] < MAX_PATTERNS ){
-				song.PlayOrder(i,m_Header.order[i]);
+				song.playOrder[i]=m_Header.order[i];
 			} else { 
-				song.PlayOrder(i,0);
+				song.playOrder[i]=0;
 			}
 		}
 
 		if ( m_Header.norder > MAX_SONG_POSITIONS ){
-			song.PlayLength(MAX_SONG_POSITIONS);
+			song.playLength=MAX_SONG_POSITIONS;
 		} else {
-			song.PlayLength(m_Header.norder);
+			song.playLength=m_Header.norder;
 		}
 
-		song.SongTracks(m_Header.channels);
+		song.SONGTRACKS=m_Header.channels;
 		
 		// tempo
 		// BPM = 6 * iTempoBPM / iTempoTicks;
@@ -221,7 +204,7 @@ namespace SF {
 	{	
 		for(int i = 1;i <= m_iInstrCnt;i++){
 			iInstrStart = LoadInstrument(sampler,iInstrStart,i);
-			ATLTRACE2("%d %s\n",i,sampler.Instrument(i).Name().c_str());
+			TRACE2("%d %s\n",i,sampler.Instrument(i).Name().c_str());
 		}
 
 		return true;
@@ -239,10 +222,10 @@ namespace SF {
 		
 		// go to offset
 		if(start>=0)
-			m_File.Seek(start);
+			Seek(start);
 
 		// read data
-		if(m_File.Read(pData,size))
+		if(Read(pData,size))
 			return pData;
 
 		delete[] pData;
@@ -263,20 +246,20 @@ namespace SF {
 		short iPackedSize = ReadInt2();
 
 		if(patIdx < MAX_PATTERNS)
-			song.PatternLines(patIdx,iNumRows);
+			song.patternLines[patIdx]=iNumRows;
 
 		PatternEntry e;
 
 		if(iPackedSize == 0)
 		{
 			// build empty PatternEntry
-			e._note = -1;
-			e._inst = -1;
-			e._mach = -1;
+			e._note = 255;
+			e._inst = 255;
+			e._mach = 255;
 			e._cmd=0;
 			e._parameter=0;
-			e._volume = 0;
-			e._volcmd = 0;
+//			e._volume = 0;
+//			e._volcmd = 0;
 
 			// build empty pattern
 			for(int row=0;row<iNumRows;row++)
@@ -328,8 +311,8 @@ namespace SF {
 					// translate
 					e._inst = instr;	
 					e._mach = 0;
-					e._volume = 0;
-					e._volcmd = 0;
+//					e._volume = 0;
+//					e._volcmd = 0;
 
 					
 					
@@ -337,19 +320,20 @@ namespace SF {
 					if(vol >= 0x10 && vol <= 0x50)
 					{
 						// translate volume
-						//e._cmd = 0x0C;
-						//e._parameter = 4*(vol-0x10);
+						type=0x0C;
+						param=vol-0x10;
 						
-						if(vol == 0x50) 
+/*						if(vol == 0x50) 
 						{ e._volume = 255;
 						} else {
 							e._volume = 4 * (vol - 0x10);
 						}
 						e._volcmd = XMSampler::CMD::VOLUME;
+*/
 					} else {
 
 //						if(vol >= 0x60){						
-						e._volcmd = VOLCMD_EXG_TABLE[(vol & 0xf0) >> 4];
+/*						e._volcmd = VOLCMD_EXG_TABLE[(vol & 0xf0) >> 4];
 						e._volume = vol & 0xf;
 
 						switch(e._volcmd){
@@ -367,7 +351,7 @@ namespace SF {
 								e._volume *=  4;
 								break;
 						}
-
+*/
 
 					}
 	//				else
@@ -382,7 +366,10 @@ namespace SF {
 							}
 							break;
 						case XMSampler::CMD::VOLUME:
-							e._parameter = param * 4;
+							if (param== 64)
+								{e._parameter=255;
+								}
+							else e._parameter = param * 4;
 							break;
 						case XMSampler::CMD::VIBRATO_SPEED:
 						case XMSampler::CMD::PORTADOWN:
@@ -563,14 +550,14 @@ namespace SF {
 
 						case 0x61:
 							e._note = 120;
-							e._inst = -1;
+							e._inst = 255;
 							e._mach = 0;
 							break;// noteoff		
 						
 						default: 
 							if(note >= 96 || note < 0)
-								ATLTRACE(_T("‚Í‚ŸH\n"));
-							e._note  = note;
+								TRACE(_T("invalid note\n"));
+							e._note  = note-1;
 				/*		
 
 							// force note into range
@@ -587,9 +574,10 @@ namespace SF {
 							break;	// transpose
 					}
 
-					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 0) && (e._volcmd == 0))
+//					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 0) && (e._volcmd == 0))
+					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
 					{
-						e._mach = -1;
+						e._mach = 255;
 					}
 					WritePatternEntry(song,patIdx,row,col,e);	
 				}
@@ -618,23 +606,23 @@ namespace SF {
 	const LONG XMSongLoader::LoadInstrument(XMSampler & sampler, LONG iStart, const int idx)
 	{
 		// read header
-		m_File.Seek(iStart);
+		Seek(iStart);
 		
 		int iInstrSize = ReadInt4();
-		ATLASSERT(iInstrSize==0x107||iInstrSize==0x21);
+		ASSERT(iInstrSize==0x107||iInstrSize==0x21);
 		TCHAR sInstrName[23];
 		ZeroMemory(sInstrName,sizeof(sInstrName) * sizeof(TCHAR));
-		m_File.Read(sInstrName,22);
+		Read(sInstrName,22);
 
 		int iInstrType = ReadInt1();
 		int iSampleCount = ReadInt2();
 
 		if(iSampleCount>1)
- 			ATLTRACE(_T("ssmple count = %d\n"),iSampleCount);
+ 			TRACE(_T("ssmple count = %d\n"),iSampleCount);
 
 		// store instrument name
 		//std::string& _tmp1 = 
-		sampler.Instrument(idx).Name(SF::string(sInstrName));
+		sampler.Instrument(idx).Name(sInstrName);
 
 		//strcpy(song.pInstrument(idx)->_sName,sInstrName);
 
@@ -644,14 +632,14 @@ namespace SF {
 		if( iSampleCount > 0) {
 			XMSAMPLEHEADER _samph;
 			ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
-			m_File.Read(&_samph,sizeof(XMSAMPLEHEADER));
+			Read(&_samph,sizeof(XMSAMPLEHEADER));
 			
 			sampler.Instrument(idx).AutoVibratoDepth(_samph.vibdepth);
 			sampler.Instrument(idx).AutoVibratoRate(_samph.vibrate);
 			sampler.Instrument(idx).AutoVibratoSweep(_samph.vibsweep);
 			sampler.Instrument(idx).AutoVibratoType(_samph.vibtype);
 			
-			for(int i = 0;i < XMInstrument::MAX_NOTES;i++){
+			for(int i = 0;i < XMInstrument::MAX_SAMPLER_NOTES;i++){
 				if(i < 96){
 					sampler.Instrument(idx).NoteToSample(i,_samph.snum[i]);
 				} else {
@@ -670,7 +658,8 @@ namespace SF {
 		// read instrument data	
 		
 		// load individual samples
-		for(int i=0;i<iSampleCount;i++)
+		int i;
+		for(i=0;i<iSampleCount;i++)
 			iStart = LoadSampleHeader(sampler,iStart,idx,i);
 		for(i=0;i<iSampleCount;i++)
 			iStart = LoadSampleData(sampler,iStart,idx,i);
@@ -682,7 +671,7 @@ namespace SF {
 	const LONG XMSongLoader::LoadSampleHeader(XMSampler & sampler, LONG iStart, const int iInstrIdx, const int iSampleIdx)
 	{
 		// get sample header
-		m_File.Seek(iStart);
+		Seek(iStart);
 		int iLen = ReadInt4();
 
 		// loop data
@@ -707,10 +696,10 @@ namespace SF {
 	
 		// alloc wave memory
 
-		ATLASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
+		ASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 
 	
-		XMInstrument::WaveData& _wave = sampler.Instrument(iInstrIdx).rWaveData(iSampleIdx);
+		XMInstrument::WaveData& _wave = sampler.Instrument(iInstrIdx).rWaveLayer(iSampleIdx);
 		
 		_wave.Init();
 		_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
@@ -740,7 +729,7 @@ namespace SF {
 				_wave.WaveLoopEnd(iLoopLength + iLoopStart);
 			}
 			
-			ATLTRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
+//			TRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
 
 		} else {
 			_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
@@ -763,13 +752,13 @@ namespace SF {
 		// parse
 		
 		BOOL b16Bit = smpFlags[iSampleIdx] & 0x10;
-		XMInstrument::WaveData& _wave =  sampler.Instrument(iInstrIdx).rWaveData(iSampleIdx);
+		XMInstrument::WaveData& _wave =  sampler.Instrument(iInstrIdx).rWaveLayer(iSampleIdx);
 		short wNew=0;
 
 		// cache sample data
-		m_File.Seek(iStart);
+		Seek(iStart);
 		char * smpbuf = new char[smpLen[iSampleIdx]];
-		m_File.Read(smpbuf,smpLen[iSampleIdx]);
+		Read(smpbuf,smpLen[iSampleIdx]);
 
 		int sampleCnt = smpLen[iSampleIdx];
 
@@ -895,5 +884,5 @@ namespace SF {
 		//inst.
 
 	};		
-
+}
 }
