@@ -273,14 +273,14 @@ namespace psycle
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void NewMachine(int x = -1, int y = -1, int mac = -1);
 			void DoMacPropDialog(int propMac);
-			void CChildView::FileLoadsongNamed(char* fName);
+			void CChildView::FileLoadsongNamed(std::string fName);
 			
 		public:
 
 		//	char m_appdir[_MAX_PATH];
 
 			//RECENT!!!//
-			void OnFileLoadsongNamed(char* fName, int fType);
+			void OnFileLoadsongNamed(std::string fName, int fType);
 			HMENU hRecentMenu;
 
 			CFrameWnd* pParentFrame;
@@ -346,7 +346,7 @@ namespace psycle
 		private:
 
 			//Recent Files!!!!//
-			void AppendToRecent(char* fName);
+			void AppendToRecent(std::string fName);
 			void CallOpenRecent(int pos);
 			
 			//Recent Files!!!!//
@@ -358,8 +358,8 @@ namespace psycle
 			inline void OutNote(CDC *devc,int x,int y,int note);
 			inline void OutData(CDC *devc,int x,int y,unsigned char data,bool trflag);
 			inline void OutData4(CDC *devc,int x,int y,unsigned char data,bool trflag);
-			inline void TXT(CDC *devc,char *txt, int x,int y,int w,int h);
-			inline void TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h);
+			inline void TXT(CDC *devc,char const *txt, int x,int y,int w,int h);
+			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			inline void BOX(CDC *devc,int x,int y, int w, int h);
 			inline void BOX(CDC *devc,CRect rect);
 			void DrawMachineVol(int c, CDC *devc);
@@ -380,16 +380,16 @@ namespace psycle
 			void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
 			void DrawSeqEditor(CDC *devc);
 
-			inline int _ps();
-			inline unsigned char * _ptrack(int ps, int track);
-			inline unsigned char * _ptrack(int ps);
-			inline unsigned char * _ptrack();
-			inline unsigned char * _ptrackline(int ps, int track, int line);
-			inline unsigned char * _ptrackline(int ps);
-			inline unsigned char * _ptrackline();
-			inline unsigned char * _ppattern(int ps);
-			inline unsigned char * _ppattern();
-			inline int _xtoCol(int pointpos);
+			int _ps();
+			unsigned char * _ptrack(int ps, int track);
+			unsigned char * _ptrack(int ps);
+			unsigned char * _ptrack();
+			unsigned char * _ptrackline(int ps, int track, int line);
+			unsigned char * _ptrackline(int ps);
+			unsigned char * _ptrackline();
+			unsigned char * _ppattern(int ps);
+			unsigned char * _ppattern();
+			int _xtoCol(int pointpos);
 
 
 		private:
@@ -490,7 +490,7 @@ namespace psycle
 		public:
 			
 			void SelectMachineUnderCursor(void);
-			BOOL CheckUnsavedSong(char* szTitle);
+			BOOL CheckUnsavedSong(std::string szTitle);
 			// Generated message map functions
 			//{{AFX_MSG(CChildView)
 			afx_msg void OnPaint();
@@ -841,7 +841,7 @@ namespace psycle
 			devc->Rectangle(rect);
 		}
 
-		inline void CChildView::TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h)
+		inline void CChildView::TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h)
 		{
 			CRect Rect;
 			Rect.left=x;
@@ -851,7 +851,7 @@ namespace psycle
 			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,FLATSIZES);
 		}
 
-		inline void CChildView::TXT(CDC *devc,char *txt, int x,int y,int w,int h)
+		inline void CChildView::TXT(CDC *devc,char const *txt, int x,int y,int w,int h)
 		{
 			CRect Rect;
 			Rect.left=x;
