@@ -1110,6 +1110,11 @@ BEGIN
                     UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,229,11,12
     CTEXT           "",IDC_TEXT_DEFLINES,270,229,42,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
+    CONTROL         "Show Song Info on Load",IDC_SHOW_INFO_ON_LOAD,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE,138,215,172,10
+    CONTROL         "Save File Reminders on Load, New or Exit",
+                    IDC_FILE_SAVE_REMINDERS,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE,138,203,172,10
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
