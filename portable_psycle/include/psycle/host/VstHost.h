@@ -251,6 +251,7 @@ namespace psycle
 			inline void proxy::operator()(AEffect * plugin) throw(host::exceptions::function_error)
 			{
 				if((*this)()) user(0);
+				if(this->plugin_) user(0);
 				delete this->plugin_;
 				this->plugin_ = plugin;
 				//if((*this)()) user(&host());

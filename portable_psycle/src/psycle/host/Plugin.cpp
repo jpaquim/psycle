@@ -99,6 +99,7 @@ namespace psycle
 			catch(const long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
+			Init();
 		}
 
 		void Plugin::Init()
@@ -112,7 +113,7 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
-					return;
+					throw;
 				}
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
 				{
@@ -122,7 +123,7 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
-						return;
+						throw;
 					}
 				}
 			}
