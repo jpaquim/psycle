@@ -382,8 +382,8 @@ bool Machine::Load(
 	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junk[0], sizeof(int)); // interpol
 
-	pFile->Read(&junk[0], sizeof(int)); // outwet
 	pFile->Read(&junk[0], sizeof(int)); // outdry
+	pFile->Read(&junk[0], sizeof(int)); // outwet
 
 	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
@@ -720,8 +720,6 @@ void Master::Work(
 	CPUCOST_INIT(cost);
 #endif // ndef _WINAMP_PLUGIN
 
-	sampleCount++;
-	
 //	if (!_mute)
 //	{
 	
@@ -840,6 +838,9 @@ void Master::Work(
 
 #endif // _WINAMP_PLUGIN_
 //	}
+
+	sampleCount+=numSamples;
+	
 #if !defined(_WINAMP_PLUGIN_)
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;
@@ -875,8 +876,8 @@ bool Master::Load(
 	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junk[0], sizeof(int)); // interpol
 	
-	pFile->Read(&junk[0], sizeof(int)); // outwet
 	pFile->Read(&_outDry, sizeof(int)); // outdry
+	pFile->Read(&junk[0], sizeof(int)); // outwet
 	
 	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junk[0], sizeof(int)); // distPosClamp

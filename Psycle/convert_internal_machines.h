@@ -202,6 +202,15 @@ private:
 			(*this)[gainer] = new std::string("gainer");
 			(*this)[flanger] = new std::string("flanger");
 		}
+		~Plugin_Names()
+		{
+			delete (*this)[sine];
+			delete (*this)[distortion];
+			delete (*this)[delay];
+			delete (*this)[filter_2_poles];
+			delete (*this)[gainer];
+			delete (*this)[flanger];
+		}
 		const bool exists(const int & type) const throw()
 		{
 			return find(type) != end();

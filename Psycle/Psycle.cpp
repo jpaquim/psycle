@@ -92,6 +92,7 @@ BOOL CPsycleApp::InitInstance()
 	// Sets Icon
 	HICON tIcon;
 	tIcon=LoadIcon(IDR_MAINFRAME);
+	pFrame->SetIcon(tIcon,true);
 	pFrame->SetIcon(tIcon,false);
 	
 	pFrame->m_wndView.LoadMachineSkin();

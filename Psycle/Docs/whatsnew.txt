@@ -6,12 +6,14 @@ V1.7.3 (Final)
 ! VSTs that call the psycle host callback with a NULL pointer can't crash psycle any more (pooplog)
 ! XM import doesn't spam machine columns with 00 any more. (pooplog)
 ! Old Fileformat songs did not load the master volume (was set always to 0)
-! Crash with Linplug's VST's when loading songs with the
+! Crash with Linplug's VST's when loading songs with the new fileformat.
+! Bug with VST's GetTimeInfo. This affected VST's that try to sync with the host.
 ! small Memory leak fixed (had to do with new ASIO implementation)
-! Bug with Machine exchange (wolumes where messed when the change was native for VST)
+! Bug with Machine exchange (wolumes where messed for several reasons)
 ! asio hard clips for the babies who don't leave any headroom (pooplog)
 ! some memory leaks and access violation [JAZ]
 ! cloning locates the new machine better and numbers it correctly (pooplog)
+! Icon in "alt-tab" now shows correctly (looks like there was a missing line!)
 ! fix for trying to allocate patterns greater than 7F (pooplog)
 ! fix for panning not being properly set on load (pooplog)
 * changed so that 255 unique patterns can be stored, although only 127 can be sequenced (pooplog)

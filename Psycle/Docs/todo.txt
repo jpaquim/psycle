@@ -339,8 +339,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 *	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
 	 range bigger]
-*	<alk> there's a bug where when u alt-tab the icon is not correct
-		[ cannot find the reason, older version had this too ]
 *	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you
 	move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
