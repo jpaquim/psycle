@@ -48,6 +48,7 @@ V1.7RC1
   (as opposed to silent) and disabled the DX "exclusive mode" by default.
 * Changed double click on pattern (in sequence) to open that pattern in patternview for edit (pooplog)
 * Many small Optimizations and improvements
+* Plugin Enumeration Log (pooplog)
 ! When having "autostop Machines" and recording to wav, some machines could become muted.
 ! Manually editing sample name didn't update the combobox.
 ! When the "MIDI/Params/Waves" combobox was showing "Params", and the user tried to decrease the selected
