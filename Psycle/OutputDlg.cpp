@@ -6,6 +6,8 @@
 #include "OutputDlg.h"
 #include "MidiInput.h"
 #include "Configuration.h"
+#include "Player.h"
+#include "Song.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -149,5 +151,13 @@ void COutputDlg::OnConfig()
 
 	int index = m_driverComboBox.GetCurSel();
 	m_ppDrivers[index]->Configure();
+	if (Global::pPlayer->_playing)
+	{
+		Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+	}
+	else
+	{
+		Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+	}
 }
 

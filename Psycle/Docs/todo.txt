@@ -10,7 +10,6 @@ X low priority
 
 [blah]  <- Notes written by developers
 
-
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
@@ -28,8 +27,6 @@ X low priority
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
 *	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
-*	bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets.
-		[[JAZ] : I believe It's not needed.]
 !	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
 ++	<[JAZ]> Internals still miss mouse tweak, right?
 +	<alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
@@ -81,7 +78,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
 		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
 		next row in my start column?
-++	velocity should be able to store data to instrument column. So should other midi messages
 +	how about option to switch the instrument and machine columns?
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
@@ -124,7 +120,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 + Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 + Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
-+ Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 + Internal Fx Gui to Native Gui Conversion (including wiredialog, or not...)
 		 Create a new "universal" MachineFrame class, for all plugins
 		 (Needs a few more changes in the class definitions)
@@ -139,11 +134,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Player Engine:
 ----------------
-***	Midiout is NOT solid...
 **	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
 **	<sue> playbar should take latency into account - same as ^
-**	song speed alters if i alter sampling rate while playing.
-		[Configuration does not notify plugins of samplingrate change.]
 **	<_sue_> (autostop) now it also behaves weird with internal delays even if not in record mode....just 
 		playng
 		[Might be fixed already, if the problem was that machines remained muted]
@@ -205,6 +197,18 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(
 !	List of "VST's not to load".
 
+* MIDI related
+------------
+***	Midiout is NOT solid...
+*	MIDI out only works with Waveout
+++	midi control commands learn
+++	velocity should be able to store data to instrument column. So should other midi messages
+++ <lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change 
+	the active machine to machine number [program number] ...this enables psycle for live use without screen
++ <lastfutur> future feature requests for the controllers tab: midi routing presets; 
+	checkbox: binding which machine is active to incoming program changes; 
+	binding midi routing presets to machines; (possibly: save the presets in the psy)
+
 * Interface (contains pattern stuff too):
 ------------
 ***	<alk> after I leave a song open for some time, I try and do save and it says "error creating file"
@@ -242,7 +246,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ++	<alk_> another thought: "revert to saved" - filemenu
 		[Isn't it the same as Load?]
 ++	<wayfinder> alk, i'm also missing keys for soloing channels(in IT it's alt-F10 for solo) 
-++	midi control commands learn
 ++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. 
 		[because machine view does not track changes yet]
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
@@ -292,11 +295,12 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Driver Issues:
 ------------
+** <_sue_> just a small issue ive noticed with this build....when i select asio psycle crashes...wich doesnt 
+	amazes me since i dont have asio.....but software should be "crash free"...
 *	Output gets weird after a bit and start playing all crackly and doubletime
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
 *	DirectSound Output is a bit buggy.Crashes and bad sound reported. 
-*	MIDI only works with Waveout
 
 * Importing:
 ------------
