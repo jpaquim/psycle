@@ -26,7 +26,7 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 
 * GUI (pattern):
 ----------------
-**  select with keyboard while playing and follow mode on sucks
+*  select with keyboard while playing and follow mode on sucks
 * <bdzld> block double should be contrained to block
 * <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
 	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
