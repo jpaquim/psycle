@@ -38,6 +38,9 @@ Configuration::Configuration()
 	_showAboutAtStart = true;
 	_followSong = false;
 	strcpy(pattern_fontface,"Tahoma");
+	pattern_font_point = 95;
+	pattern_font_x = 10;
+	pattern_font_y = 14;
 
 	mv_colour =	0x009a887c;
 	mv_wirecolour =	0x00000000;
@@ -650,14 +653,21 @@ Configuration::Read(
 
 	numData = sizeof(pattern_fontface);
 	reg.QueryValue("pattern_fontface", &type, (BYTE*)&pattern_fontface, &numData);
-	if (!seqFont.CreatePointFont(80,pattern_fontface))
+	numData = sizeof(pattern_font_point);
+	reg.QueryValue("pattern_font_point", &type, (BYTE*)&pattern_font_point, &numData);
+	numData = sizeof(pattern_font_x);
+	reg.QueryValue("pattern_font_x", &type, (BYTE*)&pattern_font_x, &numData);
+	numData = sizeof(pattern_font_y);
+	reg.QueryValue("pattern_font_y", &type, (BYTE*)&pattern_font_y, &numData);
+
+	if (!seqFont.CreatePointFont(pattern_font_point,pattern_fontface))
 	{
 		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
-		if (!seqFont.CreatePointFont(80,"Tahoma"))
+		if (!seqFont.CreatePointFont(pattern_font_point,"Tahoma"))
 		{
-			if (!seqFont.CreatePointFont(80,"MS Sans Seriff"))
+			if (!seqFont.CreatePointFont(pattern_font_point,"MS Sans Seriff"))
 			{
-				seqFont.CreatePointFont(80,"Verdana");
+				seqFont.CreatePointFont(pattern_font_point,"Verdana");
 			}
 		}
 	}
@@ -987,6 +997,9 @@ Configuration::Write(
 	reg.SetValue("vu3", REG_DWORD, (BYTE*)&vu3, sizeof(vu3));	
 
 	reg.SetValue("pattern_fontface", REG_SZ, (BYTE*)pattern_fontface, strlen(pattern_fontface));
+	reg.SetValue("pattern_font_point", REG_DWORD, (BYTE*)&pattern_font_point, sizeof(pattern_font_point));	
+	reg.SetValue("pattern_font_x", REG_DWORD, (BYTE*)&pattern_font_x, sizeof(pattern_font_x));	
+	reg.SetValue("pattern_font_y", REG_DWORD, (BYTE*)&pattern_font_y, sizeof(pattern_font_y));	
 	
 	if (_psInitialInstrumentDir != NULL)
 	{

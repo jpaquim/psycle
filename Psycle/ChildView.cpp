@@ -105,8 +105,8 @@ CChildView::CChildView()
 	newplaypos=-1; 
 	selpos.bottom=0;
 	newselpos.bottom=0;
+	numPatternDraw=0;
 
-	pPatternDraw=NULL;
 //	drawTrackStart=-1;
 
 //	scrollT=0;
@@ -116,8 +116,13 @@ CChildView::CChildView()
 	ntOff=0;
 	nlOff=0;
 
-	XOFFSET = Global::pConfig->_linenumbers?LINE_XOFFSET:1;
+	XOFFSET = Global::pConfig->_linenumbers?33:1;
+	YOFFSET = 18;
 	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
+	TEXTHEIGHT = Global::pConfig->pattern_font_y;
+	ROWHEIGHT = TEXTHEIGHT+1;
+	TEXTWIDTH = 10;
+	ROWWIDTH = 111;
 
 	Global::pInputHandler->SetChildView(this);
 	Global::pResampler->SetQuality(RESAMPLE_LINEAR);
@@ -145,13 +150,7 @@ CChildView::~CChildView()
 	stuffbmp.DeleteObject(); // The CBitmap destructor does it, but just in case..
 	KillRedo();
 	KillUndo();
-	while (pPatternDraw)
-	{
-		SPatternDraw* temp = pPatternDraw->pPrev;
-		delete pPatternDraw;
-		pPatternDraw = temp;
-	}
-	
+
 	if ( bmpDC != NULL )
 	{
 		char buf[100];
@@ -855,8 +854,8 @@ void CChildView::OnPatternView()
 {
 	if (viewMode != VMPattern)
 	{
-		XOFFSET = Global::pConfig->_linenumbers?LINE_XOFFSET:1;
-		VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
+		RecalcMetrics();
+
 		viewMode = VMPattern;
 //		ShowScrollBar(SB_BOTH,FALSE);
 		
@@ -1824,4 +1823,53 @@ void CChildView::OnHelpTweaking()
 void CChildView::OnHelpWhatsnew() 
 {
 	ShellExecute(pParentMain->m_hWnd,"open","Docs\\whatsnew.txt",NULL,"",SW_SHOW);
+}
+
+void CChildView::RecalcMetrics()
+{
+	TEXTHEIGHT = Global::pConfig->pattern_font_y;
+	ROWHEIGHT = TEXTHEIGHT+1;
+
+	TEXTWIDTH = Global::pConfig->pattern_font_x;
+	for (int c=0; c<256; c++)	
+	{ 
+		FLATSIZES[c]=Global::pConfig->pattern_font_x; 
+	}
+	COLX[0] = 0;
+	COLX[1] = (TEXTWIDTH*3)+2;
+	COLX[2] = COLX[1]+TEXTWIDTH;
+	COLX[3] = COLX[2]+TEXTWIDTH+1;
+	COLX[4] = COLX[3]+TEXTWIDTH;
+	COLX[5] = COLX[4]+TEXTWIDTH+1;
+	COLX[6] = COLX[5]+TEXTWIDTH;
+	COLX[7] = COLX[6]+TEXTWIDTH;
+	COLX[8] = COLX[7]+TEXTWIDTH;
+	COLX[9] = COLX[8]+TEXTWIDTH+1;
+	ROWWIDTH = COLX[9];
+	if (ROWWIDTH < HEADER_ROWWIDTH)
+	{
+		int temp = (HEADER_ROWWIDTH-ROWWIDTH)/2;
+		ROWWIDTH = HEADER_ROWWIDTH;
+		for (int i = 0; i < 10; i++)
+		{
+			COLX[i] += temp;
+		}
+	}
+	HEADER_INDENT = (ROWWIDTH - HEADER_ROWWIDTH)/2;
+	if (Global::pConfig->_linenumbers)
+	{
+		XOFFSET = (4*TEXTWIDTH);
+		YOFFSET = TEXTHEIGHT+2;
+		if (YOFFSET < HEADER_HEIGHT)
+		{
+			YOFFSET = HEADER_HEIGHT;
+		}
+	}
+	else
+	{
+		XOFFSET = 1;
+		YOFFSET = HEADER_HEIGHT;
+	}
+	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
+	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
 }

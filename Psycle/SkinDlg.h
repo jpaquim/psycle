@@ -53,15 +53,25 @@ public:
 	int _wirewidth;
 	char _pattern_fontface[64];
 	static CComboBox* pm_pattern_fontface;
+	static HDC hDC;
+//	static int numFonts;
+
+	int _pattern_font_point;
+	int _pattern_font_x;
+	int _pattern_font_y;
 
 	CSkinDlg();
 	~CSkinDlg();
 
+	HWND m_hWnd;
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
 	CComboBox	m_wirewidth;
 	CComboBox	m_pattern_fontface;
+	CComboBox	m_pattern_font_point;
+	CComboBox	m_pattern_font_x;
+	CComboBox	m_pattern_font_y;
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
@@ -124,6 +134,9 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnImportReg();
 	afx_msg void OnExportReg();
+	afx_msg void OnSelchangePatternFontPoint();
+	afx_msg void OnSelchangePatternFontX();
+	afx_msg void OnSelchangePatternFontY();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

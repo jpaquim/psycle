@@ -22,6 +22,7 @@ CPatDlg::CPatDlg(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CPatDlg)
 	m_adaptsize = FALSE;
 	//}}AFX_DATA_INIT
+	bInit = FALSE;
 }
 
 
@@ -69,6 +70,8 @@ BOOL CPatDlg::OnInitDialog()
 	// Pass the focus to the texbox
 	m_patname.SetFocus();
 	m_patname.SetSel(0,-1);
+	bInit = TRUE;
+	OnUpdateNumLines();
 	return FALSE;
 }
 
@@ -103,17 +106,20 @@ void CPatDlg::OnUpdateNumLines()
 {
 	// TODO: Add your control notification handler code here
 	char buffer[256];
-	m_numlines.GetWindowText(buffer,16);
-	int val=atoi(buffer);
+	if (bInit)
+	{
+		m_numlines.GetWindowText(buffer,16);
+		int val=atoi(buffer);
 
-	if (val < 0)
-	{
-		val = 0;
+		if (val < 0)
+		{
+			val = 0;
+		}
+		else if(val > MAX_LINES)
+		{
+			val = MAX_LINES-1;
+		}
+		sprintf(buffer,"HEX: %x",val);
+		m_text.SetWindowText(buffer);
 	}
-	else if(val > MAX_LINES)
-	{
-		val = MAX_LINES-1;
-	}
-	sprintf(buffer,"HEX: %x",val);
-	m_text.SetWindowText(buffer);
 }

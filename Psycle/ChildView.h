@@ -11,10 +11,10 @@
 #include "Song.h"
 #include "Configuration.h"
 
-#define YOFFSET 18
-#define LINE_XOFFSET 33
-#define ROWHEIGHT 13
-#define ROWWIDTH 111
+#define HEADER_HEIGHT 18
+#define HEADER_ROWWIDTH 111
+
+#define MAX_DRAW_MESSAGES 32
 
 class CMasterDlg;
 
@@ -109,7 +109,6 @@ enum {
 
 struct SPatternDraw
 {
-	SPatternDraw* pPrev;
 	int drawTrackStart;
 	int drawTrackEnd;
 	int drawLineStart;
@@ -194,6 +193,7 @@ public:
 	void SelectNextTrack();  // for armed tracks recording
 	void SetTitleBarText();
 	void RecalculateColourGrid();
+	void RecalcMetrics();
 
 public:
 
@@ -223,9 +223,16 @@ public:
 	int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
 	int viewMode;
 	int XOFFSET;
+	int YOFFSET;
+	int ROWWIDTH;
+	int ROWHEIGHT; // textheight+1
+	int TEXTWIDTH;
+	int TEXTHEIGHT;
+	int HEADER_INDENT;
+
 	int VISTRACKS;
 	int CW;
-
+	int COLX[10];
 	bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 						// Its function is to prevent audio (and midi) operations while it is not
 						// initialized, or while song is being modified (New(),Load()..).
@@ -275,8 +282,6 @@ private:
 	inline unsigned char * _offset(int ps);
 	inline unsigned char * _toffset(int ps);
 	inline int _xtoCol(int pointpos);
-	inline int _coltox(int col);
-
 
 private:
 	// GDI Stuff
@@ -292,7 +297,8 @@ private:
 	CRect newselpos;	// Selection Block in Screen that is gonna be drawn.
 	CCursor editlast;	// Edit Cursor Position in Pattern.
 
-	SPatternDraw* pPatternDraw;
+	SPatternDraw pPatternDraw[MAX_DRAW_MESSAGES];
+	int numPatternDraw;
 
 	int maxt;		// num of tracks shown
 	int maxl;		// num of lines shown
@@ -441,8 +447,8 @@ public:
 // Pattern data display functions
 inline void CChildView::OutNote(CDC *devc,int x,int y,int note)
 {
-	int const srx=27;
-	int const sry=ROWHEIGHT-1;
+	int const srx=(TEXTWIDTH*3)+1;
+	int const sry=TEXTHEIGHT;
 	
 	switch(note)
 	{
@@ -580,14 +586,15 @@ inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool t
 	CRect Rect;
 	Rect.left=x;
 	Rect.top=y;
-	Rect.right=x+10;
-	Rect.bottom=y+ROWHEIGHT-1;
+	Rect.right=x+TEXTWIDTH;
+	Rect.bottom=y+TEXTHEIGHT;
 	
 	if (trflag)
 	{
 		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
-		Rect.left+=10; Rect.right+=10;
-		devc->ExtTextOut(x+12,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
+		Rect.left+=TEXTWIDTH; 
+		Rect.right+=TEXTWIDTH;
+		devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,".",FLATSIZES);
 
 //		Rect.right+=10;
 //		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"  ",FLATSIZES);
@@ -596,44 +603,45 @@ inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool t
 	
 	switch(data>>4)
 	{
-	case 0x0: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
-	case 0x1: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
-	case 0x2: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
-	case 0x3: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
-	case 0x4: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
-	case 0x5: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
-	case 0x6: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
-	case 0x7: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
-	case 0x8: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
-	case 0x9: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
-	case 0xA: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
-	case 0xB: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
-	case 0xC: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
-	case 0xD: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
-	case 0xE: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
-	case 0xF: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
+	case 0x0: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
+	case 0x1: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
+	case 0x2: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
+	case 0x3: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
+	case 0x4: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
+	case 0x5: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
+	case 0x6: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
+	case 0x7: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
+	case 0x8: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
+	case 0x9: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
+	case 0xA: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
+	case 0xB: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
+	case 0xC: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
+	case 0xD: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
+	case 0xE: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
+	case 0xF: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
 	}
 	
-	Rect.left+=10;Rect.right+=10;
+	Rect.left+=TEXTWIDTH;
+	Rect.right+=TEXTWIDTH;
 	
 	switch(data&0xf)
 	{
-	case 0x0: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
-	case 0x1: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
-	case 0x2: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
-	case 0x3: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
-	case 0x4: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
-	case 0x5: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
-	case 0x6: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
-	case 0x7: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
-	case 0x8: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
-	case 0x9: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
-	case 0xA: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
-	case 0xB: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
-	case 0xC: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
-	case 0xD: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
-	case 0xE: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
-	case 0xF: devc->ExtTextOut(x+13,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
+	case 0x0: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
+	case 0x1: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
+	case 0x2: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
+	case 0x3: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
+	case 0x4: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
+	case 0x5: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
+	case 0x6: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
+	case 0x7: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
+	case 0x8: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
+	case 0x9: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
+	case 0xA: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
+	case 0xB: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
+	case 0xC: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
+	case 0xD: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
+	case 0xE: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
+	case 0xF: devc->ExtTextOut(x+TEXTWIDTH+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
 	}
 }
 
@@ -642,8 +650,8 @@ inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool 
 	CRect Rect;
 	Rect.left=x;
 	Rect.top=y;
-	Rect.right=x+10;
-	Rect.bottom=y+ROWHEIGHT-1;
+	Rect.right=x+TEXTWIDTH;
+	Rect.bottom=y+TEXTHEIGHT;
 	
 	if (trflag)
 	{
@@ -653,22 +661,22 @@ inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool 
 	
 	switch(data&0xf)
 	{
-	case 0x0: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
-	case 0x1: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
-	case 0x2: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
-	case 0x3: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
-	case 0x4: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
-	case 0x5: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
-	case 0x6: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
-	case 0x7: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
-	case 0x8: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
-	case 0x9: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
-	case 0xA: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
-	case 0xB: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
-	case 0xC: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
-	case 0xD: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
-	case 0xE: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
-	case 0xF: devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
+	case 0x0: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
+	case 0x1: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
+	case 0x2: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
+	case 0x3: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
+	case 0x4: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
+	case 0x5: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
+	case 0x6: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
+	case 0x7: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
+	case 0x8: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
+	case 0x9: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
+	case 0xA: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
+	case 0xB: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
+	case 0xC: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
+	case 0xD: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
+	case 0xE: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
+	case 0xF: devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
 	}
 }
 
@@ -696,7 +704,7 @@ inline void CChildView::TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h)
 	Rect.top=y;
 	Rect.right=x+w;
 	Rect.bottom=y+h;
-	devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,FLATSIZES);
+	devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,FLATSIZES);
 }
 
 inline void CChildView::TXT(CDC *devc,char *txt, int x,int y,int w,int h)
@@ -706,7 +714,7 @@ inline void CChildView::TXT(CDC *devc,char *txt, int x,int y,int w,int h)
 	Rect.top=y;
 	Rect.right=x+w;
 	Rect.bottom=y+h;
-	devc->ExtTextOut(x+3,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
+	devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
 }
 
 // song data
@@ -725,14 +733,14 @@ inline unsigned char * CChildView::_toffset(int ps)
 }
 inline int CChildView::_xtoCol(int pointpos)
 {
-	if ( pointpos < 28 ) return 0;
-	else if ( pointpos < 38 ) return 1;
-	else if ( pointpos < 49 ) return 2;
-	else if ( pointpos < 59 ) return 3;
-	else if ( pointpos < 70 ) return 4;
-	else if ( pointpos < 80 ) return 5;
-	else if ( pointpos < 90 ) return 6;
-	else if ( pointpos < 100 ) return 7;
+	if ( pointpos < COLX[1] ) return 0;
+	else if ( pointpos < COLX[2] ) return 1;
+	else if ( pointpos < COLX[3] ) return 2;
+	else if ( pointpos < COLX[4] ) return 3;
+	else if ( pointpos < COLX[5] ) return 4;
+	else if ( pointpos < COLX[6] ) return 5;
+	else if ( pointpos < COLX[7] ) return 6;
+	else if ( pointpos < COLX[8] ) return 7;
 	else return 8;
 /*	if ( pointpos < 28 ) return 0;
 	else if ( pointpos < 40 ) return 1;
@@ -744,19 +752,6 @@ inline int CChildView::_xtoCol(int pointpos)
 	else if ( pointpos < 100 ) return 7;
 */
 
-}
-inline int CChildView::_coltox(int col)
-{
-	if ( col == 0 ) return 0;
-	else if ( col == 1 ) return 28;
-	else if ( col == 2 ) return 38;
-	else if ( col == 3 ) return 49;
-	else if ( col == 4 ) return 59;
-	else if ( col == 5 ) return 70;
-	else if ( col == 6 ) return 80;
-	else if ( col == 7 ) return 90;
-	else if ( col == 8 ) return 100;
-	else return ROWWIDTH;
 }
 
 //{{AFX_INSERT_LOCATION}}

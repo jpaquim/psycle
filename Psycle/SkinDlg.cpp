@@ -12,6 +12,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define MAX_FONTS 512
+
 /////////////////////////////////////////////////////////////////////////////
 // CSkinDlg property page
 
@@ -37,6 +39,9 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_AAWIRE, m_wireaa);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	DDX_Control(pDX, IDC_PATTERN_FONTFACE, m_pattern_fontface);
+	DDX_Control(pDX, IDC_PATTERN_FONT_POINT, m_pattern_font_point);
+	DDX_Control(pDX, IDC_PATTERN_FONT_X, m_pattern_font_x);
+	DDX_Control(pDX, IDC_PATTERN_FONT_Y, m_pattern_font_y);
 	
 
 	//}}AFX_DATA_MAP
@@ -82,6 +87,9 @@ ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
 	ON_BN_CLICKED(IDC_EXPORTREG, OnExportReg)
+	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_POINT, OnSelchangePatternFontPoint)
+	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_X, OnSelchangePatternFontX)
+	ON_CBN_SELCHANGE(IDC_PATTERN_FONT_Y, OnSelchangePatternFontY)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -118,19 +126,24 @@ int CALLBACK CSkinDlg::EnumFontFamExProc(
 	lf.lfCharSet = DEFAULT_CHARSET;
 	strcpy(lf.lfFaceName,(char*)lpelfe->elfFullName);
 	char* p = strchr(lf.lfFaceName,32); // space
-	if (p)
+	if ((p) && (p!=lf.lfFaceName))
 	{
 		p[0] = 0;
 	}
-	HDC hDC = ::GetDC( NULL );
 
 	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
-	::ReleaseDC( NULL, hDC );
 	if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
 	{
 		pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
+//		numFonts++;
 	}
-
+	/*
+	if (numFonts >= MAX_FONTS)
+	{
+		::MessageBox(0,"You have more than 512 fonts, you are crazy!","font enumeration error",0);
+		return 0;
+	}
+	*/
 	return 1;
 }
 
@@ -144,16 +157,26 @@ int CALLBACK CSkinDlg::EnumFontFamExProc2(
 	if(pm_pattern_fontface->FindStringExact(0,(char*)lpelfe->elfFullName)==CB_ERR)
 	{
 		pm_pattern_fontface->AddString((char*)lpelfe->elfFullName);
+//		numFonts++;
 	}
+	/*
+	if (numFonts >= MAX_FONTS)
+	{
+		return 0;
+	}
+	*/
 	return 1;
 }
 
 CComboBox * CSkinDlg::pm_pattern_fontface;
+HDC CSkinDlg::hDC;
+//int CSkinDlg::numFonts;
 
 BOOL CSkinDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 
+	m_hWnd = GetParent()->m_hWnd;
 	m_gfxbuffer.SetCheck(_gfxbuffer);
 	m_wireaa.SetCheck(_wireaa);
 	m_linenumbers.SetCheck(_linenumbers);
@@ -161,21 +184,24 @@ BOOL CSkinDlg::OnInitDialog()
 	SetTimer(2345,50,0);
 
 	char s[4];
-	for (int i = 1; i < 17; i++)
+	for (int i = 1; i <= 16; i++)
 	{
-		_snprintf(s,4,"%2i",i);
+		sprintf(s,"%2i",i);
 		m_wirewidth.AddString(s);
 	}
-	_snprintf(s,4,"%2i",_wirewidth);
-	m_wirewidth.SelectString(0,s);
+	m_wirewidth.SetCurSel(_wirewidth-1);
+//	sprintf(s,"%2i",_wirewidth);
+//	m_wirewidth.SelectString(0,s);
 
 	LOGFONT lf;
 	memset(&lf,0,sizeof(lf));
 //	lf.lfCharSet = ANSI_CHARSET;
 	lf.lfCharSet = DEFAULT_CHARSET;
-	HDC hDC = ::GetDC( NULL );
+	hDC = ::GetDC( NULL );
 
 	pm_pattern_fontface = &m_pattern_fontface;
+//	numFonts = 0;
+//	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc2, 0, 0);
 	EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)EnumFontFamExProc, 0, 0);
 	::ReleaseDC( NULL, hDC );
 
@@ -195,6 +221,31 @@ BOOL CSkinDlg::OnInitDialog()
 		}
 	}
 	m_pattern_fontface.SetCurSel(sel);
+
+	for(i=4;i<=64;i++)
+	{
+		char s[4];
+		sprintf(s,"%2i",i);
+		m_pattern_font_x.AddString(s);
+		m_pattern_font_y.AddString(s);
+	}
+	m_pattern_font_x.SetCurSel(_pattern_font_x-4);
+	m_pattern_font_y.SetCurSel(_pattern_font_y-4);
+
+	for (i = 50; i <= 320; i+=5)
+	{
+		char s[8];
+		if (i < 100)
+		{
+			sprintf(s," %.1f",float(i)/10.0f);
+		}
+		else
+		{
+			sprintf(s,"%.1f",float(i)/10.0f);
+		}
+		m_pattern_font_point.AddString(s);
+	}
+	m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -658,6 +709,30 @@ void CSkinDlg::OnImportReg()
 					}
 				}
 			}
+			else if (strstr(buf,"\"pattern_font_point\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_pattern_font_point=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pattern_font_x\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_pattern_font_x=_httoi(q+1);
+				}
+			}
+			else if (strstr(buf,"\"pattern_font_y\"=dword:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_pattern_font_y=_httoi(q+1);
+				}
+			}
 			/*
 			else if (strstr(buf,"\"DisplayLineNumbers\"=hex:"))
 			{
@@ -957,6 +1032,9 @@ void CSkinDlg::OnImportReg()
 			}
 		}
 		m_pattern_fontface.SetCurSel(sel);
+		m_pattern_font_x.SetCurSel(_pattern_font_x-4);
+		m_pattern_font_y.SetCurSel(_pattern_font_y-4);
+		m_pattern_font_point.SetCurSel((_pattern_font_point-50)/5);
 	}
 }
 
@@ -1001,6 +1079,9 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"[Psycle Display Presets v1.0]\n\n");
 
 		fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface);
+		fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n",_pattern_font_point);
+		fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n",_pattern_font_x);
+		fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n",_pattern_font_y);
 //		fprintf(hfile,"\"DisplayLineNumbers\"=hex:%.2X\n",_linenumbers?1:0);
 //		fprintf(hfile,"\"DisplayLineNumbersHex\"=hex:%.2X\n",_linenumbersHex?1:0);
 		fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n",_patternSeparatorColor);
@@ -1040,3 +1121,22 @@ void CSkinDlg::OnExportReg()
 	}
 }
 
+void CSkinDlg::OnSelchangePatternFontPoint() 
+{
+	// TODO: Add your control notification handler code here
+	_pattern_font_point=(m_pattern_font_point.GetCurSel()*5)+50;
+}
+
+void CSkinDlg::OnSelchangePatternFontX() 
+{
+	// TODO: Add your control notification handler code here
+	_pattern_font_x=m_pattern_font_x.GetCurSel()+4;
+	
+}
+
+void CSkinDlg::OnSelchangePatternFontY() 
+{
+	// TODO: Add your control notification handler code here
+	_pattern_font_y=m_pattern_font_y.GetCurSel()+4;
+	
+}

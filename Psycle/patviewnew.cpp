@@ -238,7 +238,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 	}
 	////////////////////////////////////////////////////////////////////
 	// Determines if background Scroll is needed or not.
-	
+
 	if (drawMode != DMAll && drawMode != DMPattern)
 	{
 		if ( rnlOff != lOff )
@@ -793,20 +793,12 @@ void CChildView::PreparePatternRefresh(int drawMode)
 		break;
 	case DMData: 
 		{
-			int drawTrackStart = pPatternDraw->drawTrackStart-rntOff;
-//			if ( drawTrackStart < 0 ) drawTrackStart = 0;
-			int drawTrackEnd = pPatternDraw->drawTrackEnd-(rntOff-1);
-//			if ( drawTrackEnd > maxt ) drawTrackEnd = maxt;
-
-			int drawLineStart = pPatternDraw->drawLineStart-rnlOff;
-//			if ( drawLineStart < 0 ) drawLineStart = 0;
-			int drawLineEnd = pPatternDraw->drawLineEnd-(rnlOff-1);
-//			if ( drawLineEnd > maxl ) drawLineEnd = maxl;
+			SPatternDraw* pPD = &pPatternDraw[numPatternDraw-1];
 			
-			rect.left=XOFFSET+ drawTrackStart*ROWWIDTH;
-			rect.right=XOFFSET+drawTrackEnd*ROWWIDTH;
-			rect.top=YOFFSET+	drawLineStart*ROWHEIGHT;
-			rect.bottom=YOFFSET+drawLineEnd*ROWHEIGHT;
+			rect.left=XOFFSET+  ((pPD->drawTrackStart-rntOff)*ROWWIDTH);
+			rect.right=XOFFSET+ ((pPD->drawTrackEnd-(rntOff-1))*ROWWIDTH);
+			rect.top=YOFFSET+	((pPD->drawLineStart-rnlOff)*ROWHEIGHT);
+			rect.bottom=YOFFSET+((pPD->drawLineEnd-(rnlOff-1))*ROWHEIGHT);
 			updatePar |= DRAW_DATA;
 			InvalidateRect(rect,false);
 		}
@@ -947,18 +939,18 @@ void CChildView::DrawPatEditor(CDC *devc)
 			const int track0x = i%10;
 
 			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			devc->BitBlt(xOffset+1,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-			devc->BitBlt(xOffset+35-11, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-			devc->BitBlt(xOffset+42-11, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+			devc->BitBlt(xOffset+1 +HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
+			devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+			devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 			if (Global::_pSong->_trackMuted[i])
-				devc->BitBlt(xOffset+71+5, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+				devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 			if (Global::_pSong->_trackArmed[i])
-				devc->BitBlt(xOffset+71-18, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+				devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 			if (Global::_pSong->_trackSoloed == i )
-				devc->BitBlt(xOffset+97, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+				devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 			xOffset += ROWWIDTH;
 		}
@@ -997,12 +989,7 @@ void CChildView::DrawPatEditor(CDC *devc)
 		}
 		DrawPatternData(devc,0,VISTRACKS+1,0,VISLINES+1);
 		// wipe todo list
-		while (pPatternDraw)
-		{
-			SPatternDraw* temp = pPatternDraw->pPrev;
-			delete pPatternDraw;
-			pPatternDraw = temp;
-		}
+		numPatternDraw = 0;
 		// Fill Bottom Space with Background colour if needed
 		if (maxl < VISLINES+1)
 		{
@@ -1207,18 +1194,18 @@ void CChildView::DrawPatEditor(CDC *devc)
 						const int track0x = i%10;
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(xOffset+1,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-						devc->BitBlt(xOffset+35-11, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-						devc->BitBlt(xOffset+42-11, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+						devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
+						devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+						devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 						if (Global::_pSong->_trackMuted[i])
-							devc->BitBlt(xOffset+71+5, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+							devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 						if (Global::_pSong->_trackArmed[i])
-							devc->BitBlt(xOffset+71-18, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+							devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 						if (Global::_pSong->_trackSoloed == i )
-							devc->BitBlt(xOffset+97, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+							devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1286,18 +1273,18 @@ void CChildView::DrawPatEditor(CDC *devc)
 						const int track0x = i%10;
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(xOffset+1,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-						devc->BitBlt(xOffset+35-11, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-						devc->BitBlt(xOffset+42-11, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+						devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
+						devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+						devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 						if (Global::_pSong->_trackMuted[i])
-							devc->BitBlt(xOffset+71+5, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+							devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 						if (Global::_pSong->_trackArmed[i])
-							devc->BitBlt(xOffset+71-18, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+							devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 						if (Global::_pSong->_trackSoloed == i )
-							devc->BitBlt(xOffset+97, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+							devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 						xOffset += ROWWIDTH;
 					}
@@ -1436,18 +1423,18 @@ void CChildView::DrawPatEditor(CDC *devc)
 							const int track0x = i%10;
 
 							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							devc->BitBlt(xOffset+1,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-							devc->BitBlt(xOffset+35-11, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-							devc->BitBlt(xOffset+42-11, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+							devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
+							devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+							devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 							if (Global::_pSong->_trackMuted[i])
-								devc->BitBlt(xOffset+71+5, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+								devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 							if (Global::_pSong->_trackArmed[i])
-								devc->BitBlt(xOffset+71-18, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+								devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 							if (Global::_pSong->_trackSoloed == i )
-								devc->BitBlt(xOffset+97, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+								devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1492,18 +1479,18 @@ void CChildView::DrawPatEditor(CDC *devc)
 							const int track0x = i%10;
 
 							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							devc->BitBlt(xOffset+1,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
-							devc->BitBlt(xOffset+35-11, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
-							devc->BitBlt(xOffset+42-11, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
+							devc->BitBlt(xOffset+1+HEADER_INDENT,		19-18, 110, 16, &memDC, 148,			65, SRCCOPY);
+							devc->BitBlt(xOffset+35-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+trackx0*7, 81, SRCCOPY);
+							devc->BitBlt(xOffset+42-11+HEADER_INDENT, 21-18, 7,	 12, &memDC, 148+track0x*7, 81, SRCCOPY);
 
 							if (Global::_pSong->_trackMuted[i])
-								devc->BitBlt(xOffset+71+5, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
+								devc->BitBlt(xOffset+71+5+HEADER_INDENT, 24-18, 7, 7, &memDC, 258, 49, SRCCOPY);
 
 							if (Global::_pSong->_trackArmed[i])
-								devc->BitBlt(xOffset+71-18, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
+								devc->BitBlt(xOffset+71-18+HEADER_INDENT, 24-18, 7, 7, &memDC, 276, 49, SRCCOPY);
 
 							if (Global::_pSong->_trackSoloed == i )
-								devc->BitBlt(xOffset+97, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
+								devc->BitBlt(xOffset+97+HEADER_INDENT, 24-18, 7, 7, &memDC, 267, 49, SRCCOPY);
 
 							xOffset += ROWWIDTH;
 						}
@@ -1600,28 +1587,26 @@ void CChildView::DrawPatEditor(CDC *devc)
 			TRACE("DRAW_DATA\n");
 			////////////////////////////////////////////////
 			// Draw Data Changed (DMDataChange)
-			while (pPatternDraw)
+			for (int i = 0; i < numPatternDraw; i++)
 			{
-				pPatternDraw->drawTrackStart-=tOff;
-				if ( pPatternDraw->drawTrackStart < 0 ) 
-					pPatternDraw->drawTrackStart = 0;
-				pPatternDraw->drawTrackEnd -=(tOff-1);
-				if ( pPatternDraw->drawTrackEnd > maxt ) 
-					pPatternDraw->drawTrackEnd = maxt;
 
-				pPatternDraw->drawLineStart-=lOff;
-				if ( pPatternDraw->drawLineStart < 0 ) 
-					pPatternDraw->drawLineStart = 0;
-				pPatternDraw->drawLineEnd-=(lOff-1);
-				if ( pPatternDraw->drawLineEnd > maxl ) 
-					pPatternDraw->drawLineEnd = maxl;
+				int ts = pPatternDraw[i].drawTrackStart-tOff;
+				if ( ts < 0 ) 
+					ts = 0;
+				int te = pPatternDraw[i].drawTrackEnd -(tOff-1);
+				if ( te > maxt ) 
+					te = maxt;
 
-				DrawPatternData(devc,pPatternDraw->drawTrackStart,pPatternDraw->drawTrackEnd,pPatternDraw->drawLineStart,pPatternDraw->drawLineEnd);
-				
-				SPatternDraw* temp = pPatternDraw->pPrev;
-				delete pPatternDraw;
-				pPatternDraw = temp;
+				int ls = pPatternDraw[i].drawLineStart-lOff;
+				if ( ls < 0 ) 
+					ls = 0;
+				int le = pPatternDraw[i].drawLineEnd-(lOff-1);
+				if ( le > maxl ) 
+					le = maxl;
+
+				DrawPatternData(devc,ts,te,ls,le);
 			}
+			numPatternDraw = 0;
 		}
 	}
 
@@ -1727,7 +1712,7 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 			}
 			else
 			{
-				sprintf(tBuf,"%d",linecount);
+				sprintf(tBuf,"%3i",linecount);
 				TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
 			}
 		}
@@ -1736,7 +1721,7 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 									_pSong->playOrder[editPosition]*MULTIPLY2 +
 									(linecount*MULTIPLY) + 	(tstart+tOff)*5;
 
-		int xOffset= XOFFSET+tstart*ROWWIDTH;
+		int xOffset= XOFFSET+(tstart*ROWWIDTH);
 
 		int trackcount = tstart+tOff;
 		for (int t=tstart;t<tend;t++)
@@ -1771,37 +1756,37 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 				devc->SetBkColor(pBkg[trackcount]);
 				devc->SetTextColor(pTxt[trackcount]);
 			}
-			OutNote(devc,xOffset,yOffset,*patOffset);
+			OutNote(devc,xOffset+COLX[0],yOffset,*patOffset);
 			if (*++patOffset == 255 )
 			{
-				OutData(devc,xOffset+28,yOffset,0,true);
+				OutData(devc,xOffset+COLX[1],yOffset,0,true);
 			}
 			else
 			{
-				OutData(devc,xOffset+28,yOffset,*patOffset,false);
+				OutData(devc,xOffset+COLX[1],yOffset,*patOffset,false);
 			}
 
 			if (*++patOffset == 255 )
 			{
-				OutData(devc,xOffset+49,yOffset,0,true);
+				OutData(devc,xOffset+COLX[3],yOffset,0,true);
 			}
 			else 
 			{
-				OutData(devc,xOffset+49,yOffset,*patOffset,false);
+				OutData(devc,xOffset+COLX[3],yOffset,*patOffset,false);
 			}
 
 			if (*++patOffset == 0 && *(patOffset+1) == 0 && 
 				(*(patOffset-3) <= 120 || *(patOffset-3) == 255 ))
 			{
-				OutData(devc,xOffset+70,yOffset,0,true);
+				OutData(devc,xOffset+COLX[5],yOffset,0,true);
 				patOffset++;
-				OutData(devc,xOffset+90,yOffset,0,true);
+				OutData(devc,xOffset+COLX[7],yOffset,0,true);
 			}
 			else
 			{
-				OutData(devc,xOffset+70,yOffset,*patOffset,false);
+				OutData(devc,xOffset+COLX[5],yOffset,*patOffset,false);
 				patOffset++;
-				OutData(devc,xOffset+90,yOffset,*patOffset,false);
+				OutData(devc,xOffset+COLX[7],yOffset,*patOffset,false);
 			}
 			// could optimize this check some, make separate loops
 			if ((linecount == editcur.line) && (trackcount == editcur.track))
@@ -1811,90 +1796,90 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 				switch (editcur.col)
 				{
 				case 0:
-					OutNote(devc,xOffset,yOffset,*(patOffset-4));
+					OutNote(devc,xOffset+COLX[0],yOffset,*(patOffset-4));
 					break;
 				case 1:
 					if (*(patOffset-3) == 255 )
 					{
-						OutData4(devc,xOffset+28,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[1],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+28,yOffset,(*(patOffset-3))>>4,false);
+						OutData4(devc,xOffset+COLX[1],yOffset,(*(patOffset-3))>>4,false);
 					}
 					break;
 				case 2:
 					if (*(patOffset-3) == 255 )
 					{
-						OutData4(devc,xOffset+38,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[2],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+38,yOffset,*(patOffset-3),false);
+						OutData4(devc,xOffset+COLX[2],yOffset,*(patOffset-3),false);
 					}
 					break;
 				case 3:
 					if (*(patOffset-2) == 255 )
 					{
-						OutData4(devc,xOffset+49,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[3],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+49,yOffset,(*(patOffset-2))>>4,false);
+						OutData4(devc,xOffset+COLX[3],yOffset,(*(patOffset-2))>>4,false);
 					}
 					break;
 				case 4:
 					if (*(patOffset-2) == 255 )
 					{
-						OutData4(devc,xOffset+59,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[4],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+59,yOffset,*(patOffset-2),false);
+						OutData4(devc,xOffset+COLX[4],yOffset,*(patOffset-2),false);
 					}
 					break;
 				case 5:
 					if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
 						(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
 					{
-						OutData4(devc,xOffset+70,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[5],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+70,yOffset,(*(patOffset-1))>>4,false);
+						OutData4(devc,xOffset+COLX[5],yOffset,(*(patOffset-1))>>4,false);
 					}
 					break;
 				case 6:
 					if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
 						(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
 					{
-						OutData4(devc,xOffset+80,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[6],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+80,yOffset,(*(patOffset-1)),false);
+						OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset-1)),false);
 					}
 					break;
 				case 7:
 					if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
 						(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
 					{
-						OutData4(devc,xOffset+90,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[7],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+90,yOffset,(*(patOffset))>>4,false);
+						OutData4(devc,xOffset+COLX[7],yOffset,(*(patOffset))>>4,false);
 					}
 					break;
 				case 8:
 					if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
 						(*(patOffset-4) <= 120 || *(patOffset-4) == 255 ))
 					{
-						OutData4(devc,xOffset+100,yOffset,0,true);
+						OutData4(devc,xOffset+COLX[8],yOffset,0,true);
 					}
 					else
 					{
-						OutData4(devc,xOffset+100,yOffset,(*(patOffset)),false);
+						OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset)),false);
 					}
 					break;
 				}
@@ -1908,121 +1893,42 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 	}
 }
 
-/*
-
-// ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
-void CChildView::DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
-{
-	int c_4beat = Global::pConfig->pvc_row4beat;
-	int c_beat = Global::pConfig->pvc_rowbeat;
-	int c_row = Global::pConfig->pvc_row;
-	devc->SetTextColor(Global::pConfig->pvc_font);
-
-	int editPattern , lines , linecount;
-	int ordercount=editPosition-1;
-	if ( lstart+lOff < 0 )
-	{
-		editPattern= _pSong->playOrder[ordercount];
-		lines= _pSong->patternLines[editPattern];
-		linecount = lines+lstart+lOff;
-	}
-	else
-	{
-		editPattern= _pSong->playOrder[++ordercount];
-		lines= _pSong->patternLines[editPattern];
-		if ( lstart+lOff >= lines )
-		{
-			linecount = lstart+lOff-lines;
-			editPattern=_pSong->playOrder[++ordercount];
-			lines= _pSong->patternLines[editPattern];
-		}
-		else linecount = lstart+lOff;
-	}
-
-	int yOffset=lstart*ROWHEIGHT+YOFFSET;
-	char tBuf[32];
-
-	for (int i=lstart;i<lend;i++) // Lines
-	{
-		if ( linecount >= lines )
-		{
-			editPattern=_pSong->playOrder[++ordercount];
-			lines= _pSong->patternLines[editPattern];
-			linecount=0;
-		}
-		if((linecount%_pSong->_ticksPerBeat) == 0)
-		{
-			if ((linecount%(_pSong->_ticksPerBeat*4)) == 0) devc->SetBkColor(c_4beat);
-			else devc->SetBkColor(c_beat);
-		}
-		else devc->SetBkColor(c_row);
-
-		if (XOFFSET!=1)
-		{
-			sprintf(tBuf,"%d",linecount);
-			TXTFLAT(devc,tBuf,0,yOffset,XOFFSET-2,12);	// Print Line Number.
-		}
-
-		unsigned char *patOffset = _pSong->pPatternData +	(editPattern*MULTIPLY2) +
-									(linecount*MULTIPLY) +	(tstart+tOff)*5;
-		for (int t=tstart;t<tend;t++)
-		{
-			const int xOffset= XOFFSET+t*ROWWIDTH;
-
-			OutNote(devc,xOffset,yOffset,*patOffset);
-			if (*++patOffset == 255 )
-			{
-				OutData(devc,xOffset+28,yOffset,*patOffset,true);
-			}else OutData(devc,xOffset+28,yOffset,*patOffset,false);
-
-			if (*++patOffset == 255 )
-			{
-				OutData(devc,xOffset+49,yOffset,*patOffset,true);
-			}else OutData(devc,xOffset+49,yOffset,*patOffset,false);
-
-			if (*++patOffset == 0 && *(patOffset+1) == 0 && 
-				(*(patOffset-3) <= 120 || *(patOffset-3) == 255 ))
-			{
-				OutData(devc,xOffset+70,yOffset,*patOffset,true);
-				patOffset++;
-				OutData(devc,xOffset+90,yOffset,*patOffset,true);
-			}
-			else
-			{
-				OutData(devc,xOffset+70,yOffset,*patOffset,false);
-				patOffset++;
-				OutData(devc,xOffset+90,yOffset,*patOffset,false);
-			}
-			
-			patOffset++;
-		}
-		linecount++;
-		yOffset+=ROWHEIGHT;
-	}
-}
-*/
-
 void CChildView::NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd)
 {
 	if (viewMode == VMPattern)
 	{
-		// inserts pattern data to be drawn into the list
-		SPatternDraw* pNew = new SPatternDraw;
-		pNew->pPrev = pPatternDraw;
-		pPatternDraw = pNew;
-		pNew->drawTrackStart = drawTrackStart;
-		pNew->drawTrackEnd = drawTrackEnd;
-		pNew->drawLineStart = drawLineStart;
-		pNew->drawLineEnd = drawLineEnd;
+		if (!(updatePar & DRAW_FULL_DATA))
+		{
+			// inserts pattern data to be drawn into the list
+			if (numPatternDraw < MAX_DRAW_MESSAGES)
+			{
+				for (int i=0; i < numPatternDraw; i++)
+				{
+					if ((pPatternDraw[i].drawTrackStart <= drawTrackStart) &&
+						(pPatternDraw[i].drawTrackEnd >= drawTrackEnd) &&
+						(pPatternDraw[i].drawLineStart <= drawLineStart) &&
+						(pPatternDraw[i].drawLineEnd >= drawLineEnd))
+					{
+						return;
+					}
+				}
+				pPatternDraw[numPatternDraw].drawTrackStart = drawTrackStart;
+				pPatternDraw[numPatternDraw].drawTrackEnd = drawTrackEnd;
+				pPatternDraw[numPatternDraw].drawLineStart = drawLineStart;
+				pPatternDraw[numPatternDraw].drawLineEnd = drawLineEnd;
+				numPatternDraw++;
+			}
+			else if (numPatternDraw == MAX_DRAW_MESSAGES)
+			{
+				// this should never have to happen with a 32 message buffer, but just incase....
+				numPatternDraw++;
+				PreparePatternRefresh(DMAll);
+			}
+		}
 	}
 	else
 	{
-		while (pPatternDraw)
-		{
-			SPatternDraw* temp = pPatternDraw->pPrev;
-			delete pPatternDraw;
-			pPatternDraw = temp;
-		}
+		numPatternDraw=0;
 	}
 }
 

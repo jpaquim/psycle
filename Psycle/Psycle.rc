@@ -620,43 +620,43 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,7,135,226,15
 END
 
-IDD_SKIN DIALOG DISCARDABLE  0, 0, 282, 259
+IDD_SKIN DIALOG DISCARDABLE  0, 0, 282, 286
 STYLE WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Visual"
 FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Pattern View ",IDC_STATIC,1,1,144,252
+    GROUPBOX        "Pattern View ",IDC_STATIC,1,1,144,284
     LTEXT           "Font Face",IDC_STATIC,7,11,45,10
-    GROUPBOX        "Machine View ",IDC_STATIC,149,1,127,61
+    GROUPBOX        "Machine View ",IDC_STATIC,149,1,127,79
     PUSHBUTTON      "BackGround",IDC_BG_COLOUR,154,12,46,13
-    GROUPBOX        "VU Colors",IDC_STATIC,149,64,127,64
-    PUSHBUTTON      "Vu Bar",IDC_BUTTON23,154,91,46,12
-    PUSHBUTTON      "BackGround",IDC_BUTTON24,154,74,46,13
-    PUSHBUTTON      "OnClip",IDC_BUTTON25,154,108,46,13
-    GROUPBOX        "Colours ",IDC_STATIC,5,53,134,197
-    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC,14,142,39,12
-    PUSHBUTTON      "Row",IDC_ROWC,14,157,39,12
-    PUSHBUTTON      "Beat",IDC_BEATC,14,172,39,12
-    PUSHBUTTON      "Font",IDC_FONTC,14,62,39,12
-    PUSHBUTTON      "4 Beats",IDC_4BEAT,14,187,39,12
-    GROUPBOX        "Global Options ",IDC_STATIC,150,130,127,30
+    GROUPBOX        "VU Colors",IDC_STATIC,149,82,127,64
+    PUSHBUTTON      "Vu Bar",IDC_BUTTON23,154,109,46,12
+    PUSHBUTTON      "BackGround",IDC_BUTTON24,154,92,46,13
+    PUSHBUTTON      "OnClip",IDC_BUTTON25,154,126,46,13
+    GROUPBOX        "Colours ",IDC_STATIC,5,85,134,197
+    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC,14,174,39,12
+    PUSHBUTTON      "Row",IDC_ROWC,14,189,39,12
+    PUSHBUTTON      "Beat",IDC_BEATC,14,204,39,12
+    PUSHBUTTON      "Font",IDC_FONTC,14,94,39,12
+    PUSHBUTTON      "4 Beats",IDC_4BEAT,14,219,39,12
+    GROUPBOX        "Global Options ",IDC_STATIC,150,148,127,30
     CONTROL         "Graphics Double Buffering",IDC_DOUBLEBUFFER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,155,143,99,12
-    CONTROL         "",IDC_PBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,143,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,155,161,99,12
+    CONTROL         "",IDC_PBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,175,
                     12,9
-    CONTROL         "",IDC_ROW_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,159,
+    CONTROL         "",IDC_ROW_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,191,
                     12,9
-    CONTROL         "",IDC_BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,174,
+    CONTROL         "",IDC_BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,206,
                     12,9
-    CONTROL         "",IDC_FONT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,64,
+    CONTROL         "",IDC_FONT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,96,
                     12,9
-    CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,189,
+    CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,221,
                     12,9
-    CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,93,
+    CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,111,
                     12,9
-    CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,77,
+    CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,95,
                     12,9
-    CONTROL         "",IDC_VU3_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,110,
+    CONTROL         "",IDC_VU3_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,128,
                     12,9
     CONTROL         "",IDC_MBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,15,
                     12,9
@@ -672,71 +672,88 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Width",IDC_STATIC,247,28,22,13,SS_CENTERIMAGE
     CONTROL         "Display Line Numbers",IDC_LINE_NUMBERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,39,81,12
-    PUSHBUTTON      "Separator",IDC_PATSEPARATORC,14,126,39,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,56,81,12
+    PUSHBUTTON      "Separator",IDC_PATSEPARATORC,14,158,39,12
     CONTROL         "",IDC_PBG_SEPARATOR,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    128,12,9
-    PUSHBUTTON      "Row",IDC_ROWC2,92,157,39,12
-    CONTROL         "",IDC_ROW_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,159,
+                    160,12,9
+    PUSHBUTTON      "Row",IDC_ROWC2,92,189,39,12
+    CONTROL         "",IDC_ROW_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,191,
                     12,9
-    PUSHBUTTON      "Beat",IDC_BEATC2,92,172,39,12
-    CONTROL         "",IDC_BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,174,
+    PUSHBUTTON      "Beat",IDC_BEATC2,92,204,39,12
+    CONTROL         "",IDC_BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,206,
                     12,9
-    PUSHBUTTON      "4 Beats",IDC_4BEAT2,92,187,39,12
+    PUSHBUTTON      "4 Beats",IDC_4BEAT2,92,219,39,12
     CONTROL         "",IDC_4BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    189,12,9
-    PUSHBUTTON      "Playbar",IDC_PLAYBARC,14,202,39,12
+                    221,12,9
+    PUSHBUTTON      "Playbar",IDC_PLAYBARC,14,234,39,12
     CONTROL         "",IDC_PLAYBAR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    204,11,9
-    PUSHBUTTON      "Playbar",IDC_PLAYBARC2,92,202,39,12
+                    236,11,9
+    PUSHBUTTON      "Playbar",IDC_PLAYBARC2,92,234,39,12
     CONTROL         "",IDC_PLAYBAR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    204,12,9
-    PUSHBUTTON      "Font Play",IDC_FONTPLAYC,14,78,39,12
+                    236,12,9
+    PUSHBUTTON      "Font Play",IDC_FONTPLAYC,14,110,39,12
     CONTROL         "",IDC_FONTPLAY_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    80,12,9
-    PUSHBUTTON      "Selection",IDC_SELECTIONC,14,217,39,12
+                    112,12,9
+    PUSHBUTTON      "Selection",IDC_SELECTIONC,14,249,39,12
     CONTROL         "",IDC_SELECTION_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    219,12,9
-    PUSHBUTTON      "Cursor",IDC_CURSORC,14,232,39,12
+                    251,12,9
+    PUSHBUTTON      "Cursor",IDC_CURSORC,14,264,39,12
     CONTROL         "",IDC_CURSOR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    234,12,9
-    PUSHBUTTON      "Selection",IDC_SELECTIONC2,92,217,39,12
+                    266,12,9
+    PUSHBUTTON      "Selection",IDC_SELECTIONC2,92,249,39,12
     CONTROL         "",IDC_SELECTION_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    74,219,12,9
-    PUSHBUTTON      "Cursor",IDC_CURSORC2,92,232,39,12
+                    74,251,12,9
+    PUSHBUTTON      "Cursor",IDC_CURSORC2,92,264,39,12
     CONTROL         "",IDC_CURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    234,12,9
-    PUSHBUTTON      "Font Sel",IDC_FONTSELC,14,94,39,12
+                    266,12,9
+    PUSHBUTTON      "Font Sel",IDC_FONTSELC,14,126,39,12
     CONTROL         "",IDC_FONTSEL_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
-                    96,12,9
-    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC,14,110,39,12
+                    128,12,9
+    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC,14,142,39,12
     CONTROL         "",IDC_FONTCURSOR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    60,112,12,9
-    PUSHBUTTON      "Separator",IDC_PATSEPARATORC2,92,126,39,12
+                    60,144,12,9
+    PUSHBUTTON      "Separator",IDC_PATSEPARATORC2,92,158,39,12
     CONTROL         "",IDC_PBG_SEPARATOR2,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    74,128,12,9
-    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC2,92,142,39,12
-    CONTROL         "",IDC_PBG_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,143,
+                    74,160,12,9
+    PUSHBUTTON      "BackGnd",IDC_PATTERNBACKC2,92,174,39,12
+    CONTROL         "",IDC_PBG_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,175,
                     12,9
-    PUSHBUTTON      "Font",IDC_FONTC2,92,62,39,12
-    CONTROL         "",IDC_FONT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,64,
+    PUSHBUTTON      "Font",IDC_FONTC2,92,94,39,12
+    CONTROL         "",IDC_FONT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,96,
                     12,9
-    PUSHBUTTON      "Font Play",IDC_FONTPLAYC2,92,78,39,12
+    PUSHBUTTON      "Font Play",IDC_FONTPLAYC2,92,110,39,12
     CONTROL         "",IDC_FONTPLAY_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    80,12,9
-    PUSHBUTTON      "Font Sel",IDC_FONTSELC2,92,94,39,12
+                    112,12,9
+    PUSHBUTTON      "Font Sel",IDC_FONTSELC2,92,126,39,12
     CONTROL         "",IDC_FONTSEL_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
-                    96,12,9
-    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC2,92,110,39,12
+                    128,12,9
+    PUSHBUTTON      "Font Cur",IDC_FONTCURSORC2,92,142,39,12
     CONTROL         "",IDC_FONTCURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
-                    74,112,12,9
+                    74,144,12,9
     CONTROL         "in HEX",IDC_LINE_NUMBERS_HEX,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,97,39,35,12
-    PUSHBUTTON      "Save",IDC_EXPORTREG,215,235,55,12
-    PUSHBUTTON      "Load",IDC_IMPORTREG,156,235,55,12
-    GROUPBOX        "File Options",IDC_STATIC,150,223,127,30
+                    WS_TABSTOP,104,56,36,12
+    PUSHBUTTON      "Save",IDC_EXPORTREG,215,267,55,12
+    PUSHBUTTON      "Load",IDC_IMPORTREG,156,267,55,12
+    GROUPBOX        "File Options",IDC_STATIC,150,255,127,30
     COMBOBOX        IDC_PATTERN_FONTFACE,7,22,132,227,CBS_DROPDOWN | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Point",IDC_STATIC,42,40,20,15,SS_CENTERIMAGE
+    LTEXT           "X",IDC_STATIC,92,40,8,15,SS_CENTERIMAGE
+    LTEXT           "Y",IDC_STATIC,132,40,8,15,SS_CENTERIMAGE
+    COMBOBOX        IDC_PATTERN_FONT_Y,105,40,25,104,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_PATTERN_FONT_X,65,40,25,104,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_PATTERN_FONT_POINT,7,40,32,104,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_PATTERN_HEADER_SKIN,55,70,85,227,CBS_DROPDOWN | 
+                    CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Header Skin",IDC_STATIC,8,72,40,10,SS_CENTERIMAGE | 
+                    WS_DISABLED
+    COMBOBOX        IDC_PATTERN_HEADER_SKIN2,187,61,85,227,CBS_DROPDOWN | 
+                    CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Skin",IDC_STATIC,157,63,20,10,SS_CENTERIMAGE | 
+                    WS_DISABLED
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
@@ -1439,7 +1456,7 @@ BEGIN
     BEGIN
         LEFTMARGIN, 1
         RIGHTMARGIN, 280
-        BOTTOMMARGIN, 257
+        BOTTOMMARGIN, 284
     END
 
     IDD_SONGPROP, DIALOG
