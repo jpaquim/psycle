@@ -2112,11 +2112,12 @@ void CChildView::SetTitleBarText()
 {
 	CString titlename = "[";
 	titlename+=Global::_pSong->fileName;
-	if (!(Global::_pSong->_saved))
+/*	if (!(Global::_pSong->_saved))
 	{
 		titlename+=" *";
 	}
-	else if (pUndoList)
+	else */ 
+	if (pUndoList)
 	{
 		if (UndoSaved != pUndoList->counter)
 		{
@@ -2134,8 +2135,7 @@ void CChildView::SetTitleBarText()
 			titlename+=" *";
 		}
 	}
-	titlename+="] ";
-	titlename+="Psycle Modular Music Creation Studio";	// I don't know how to access to the
+	titlename+="] Psycle Modular Music Creation Studio";	// I don't know how to access to the
 	pParentMain->SetWindowText(titlename);				// IDR_MAINFRAME String Title.
 }
 
