@@ -146,8 +146,8 @@ void Flanger::parameter(const int & parameter)
 		break;
 	case modulation_radians_per_second:
 		modulation_radians_per_sample_ = (*this)(modulation_radians_per_second) * seconds_per_sample();
-		sin_sequences_[left] .set(modulation_phase_, modulation_radians_per_sample_);
-		sin_sequences_[right].set(modulation_phase_ + (*this)(modulation_stereo_dephase), modulation_radians_per_sample_);
+		sin_sequences_[left](modulation_phase_, modulation_radians_per_sample_);
+		sin_sequences_[right](modulation_phase_ + (*this)(modulation_stereo_dephase), modulation_radians_per_sample_);
 		break;
 	case interpolation:
 		switch((*this)[interpolation])
