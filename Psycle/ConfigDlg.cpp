@@ -220,7 +220,22 @@ int CConfigDlg::DoModal()
 				{
 					if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Verdana"))
 					{
-						_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Arial Bold");
+						if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Arial Bold"))
+						{
+							if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"Arial"))
+							{
+								if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"tahoma"))
+								{
+									if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"verdana"))
+									{
+										if (!_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"arial bold"))
+										{
+											_pConfig->seqFont.CreatePointFont(_pConfig->pattern_font_point,"arial");
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -244,7 +259,22 @@ int CConfigDlg::DoModal()
 				{
 					if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Verdana"))
 					{
-						_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Arial Bold");
+						if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Arial Bold"))
+						{
+							if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"Arial"))
+							{
+								if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"tahoma"))
+								{
+									if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"verdana"))
+									{
+										if (!_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"arial bold"))
+										{
+											_pConfig->generatorFont.CreatePointFont(_pConfig->generator_font_point,"arial");
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -262,7 +292,22 @@ int CConfigDlg::DoModal()
 				{
 					if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Verdana"))
 					{
-						_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Arial Bold");
+						if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Arial Bold"))
+						{
+							if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"Arial"))
+							{
+								if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"tahoma"))
+								{
+									if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"verdana"))
+									{
+										if (!_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"arial bold"))
+										{
+											_pConfig->effectFont.CreatePointFont(_pConfig->effect_font_point,"arial");
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}

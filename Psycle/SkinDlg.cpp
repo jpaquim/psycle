@@ -268,7 +268,27 @@ BOOL CSkinDlg::OnInitDialog()
 				sel = m_pattern_fontface.FindStringExact(0,"Arial Black");
 				if (sel==CB_ERR)
 				{
-					sel=0;
+					sel = m_pattern_fontface.FindStringExact(0,"Arial");
+					if (sel==CB_ERR)
+					{
+						sel = m_pattern_fontface.FindStringExact(0,"tahoma");
+						if (sel==CB_ERR)
+						{
+							sel = m_pattern_fontface.FindStringExact(0,"verdana");
+							if (sel==CB_ERR)
+							{
+								sel = m_pattern_fontface.FindStringExact(0,"arial black");
+								if (sel==CB_ERR)
+								{
+									sel = m_pattern_fontface.FindStringExact(0,"arial");
+									if (sel==CB_ERR)
+									{
+										sel=0;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -289,7 +309,27 @@ BOOL CSkinDlg::OnInitDialog()
 				sel = m_generator_fontface.FindStringExact(0,"Arial Black");
 				if (sel==CB_ERR)
 				{
-					sel=0;
+					sel = m_generator_fontface.FindStringExact(0,"Arial");
+					if (sel==CB_ERR)
+					{
+						sel = m_generator_fontface.FindStringExact(0,"tahoma");
+						if (sel==CB_ERR)
+						{
+							sel = m_generator_fontface.FindStringExact(0,"verdana");
+							if (sel==CB_ERR)
+							{
+								sel = m_generator_fontface.FindStringExact(0,"arial black");
+								if (sel==CB_ERR)
+								{
+									sel = m_generator_fontface.FindStringExact(0,"arial");
+									if (sel==CB_ERR)
+									{
+										sel=0;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -310,7 +350,27 @@ BOOL CSkinDlg::OnInitDialog()
 				sel = m_effect_fontface.FindStringExact(0,"Arial Black");
 				if (sel==CB_ERR)
 				{
-					sel=0;
+					sel = m_effect_fontface.FindStringExact(0,"Arial");
+					if (sel==CB_ERR)
+					{
+						sel = m_effect_fontface.FindStringExact(0,"tahoma");
+						if (sel==CB_ERR)
+						{
+							sel = m_effect_fontface.FindStringExact(0,"verdana");
+							if (sel==CB_ERR)
+							{
+								sel = m_effect_fontface.FindStringExact(0,"arial black");
+								if (sel==CB_ERR)
+								{
+									sel = m_effect_fontface.FindStringExact(0,"arial");
+									if (sel==CB_ERR)
+									{
+										sel=0;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1339,7 +1399,27 @@ void CSkinDlg::OnImportReg()
 					sel = m_pattern_fontface.FindStringExact(0,"Arial Black");
 					if (sel==CB_ERR)
 					{
-						sel=0;
+						sel = m_pattern_fontface.FindStringExact(0,"Arial");
+						if (sel==CB_ERR)
+						{
+							sel = m_pattern_fontface.FindStringExact(0,"tahoma");
+							if (sel==CB_ERR)
+							{
+								sel = m_pattern_fontface.FindStringExact(0,"verdana");
+								if (sel==CB_ERR)
+								{
+									sel = m_pattern_fontface.FindStringExact(0,"arial black");
+									if (sel==CB_ERR)
+									{
+										sel = m_pattern_fontface.FindStringExact(0,"arial");
+										if (sel==CB_ERR)
+										{
+											sel=0;
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1368,7 +1448,27 @@ void CSkinDlg::OnImportReg()
 					sel = m_generator_fontface.FindStringExact(0,"Arial Black");
 					if (sel==CB_ERR)
 					{
-						sel=0;
+						sel = m_generator_fontface.FindStringExact(0,"Arial");
+						if (sel==CB_ERR)
+						{
+							sel = m_generator_fontface.FindStringExact(0,"tahoma");
+							if (sel==CB_ERR)
+							{
+								sel = m_generator_fontface.FindStringExact(0,"verdana");
+								if (sel==CB_ERR)
+								{
+									sel = m_generator_fontface.FindStringExact(0,"arial black");
+									if (sel==CB_ERR)
+									{
+										sel = m_generator_fontface.FindStringExact(0,"arial");
+										if (sel==CB_ERR)
+										{
+											sel=0;
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1389,7 +1489,27 @@ void CSkinDlg::OnImportReg()
 					sel = m_effect_fontface.FindStringExact(0,"Arial Black");
 					if (sel==CB_ERR)
 					{
-						sel=0;
+						sel = m_effect_fontface.FindStringExact(0,"Arial");
+						if (sel==CB_ERR)
+						{
+							sel = m_effect_fontface.FindStringExact(0,"tahoma");
+							if (sel==CB_ERR)
+							{
+								sel = m_effect_fontface.FindStringExact(0,"verdana");
+								if (sel==CB_ERR)
+								{
+									sel = m_effect_fontface.FindStringExact(0,"arial black");
+									if (sel==CB_ERR)
+									{
+										sel = m_effect_fontface.FindStringExact(0,"arial");
+										if (sel==CB_ERR)
+										{
+											sel=0;
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
