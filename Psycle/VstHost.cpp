@@ -908,7 +908,8 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 			else return 1;
 		}
 //		return 0;	// inquire if an input or output is beeing connected;
-
+		break;
+		
 	case audioMasterWantMidi:			
 		return 0;
 
