@@ -9,6 +9,7 @@
 #include "Vst\AEffEditor.h"
 #include "PresetsDlg.h"
 #include "inputhandler.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,6 +21,8 @@ static char THIS_FILE[] = __FILE__;
 #define VST_PARAMETRIC_HEIGHT 338
 #define VST_PARAM_PANE 1
 #define VST_UI_PANE 0
+
+extern CPsycleApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CVstEditorDlg
@@ -192,5 +195,6 @@ void CVstEditorDlg::OnClose()
 	_pMachine->editorWnd=NULL;
 	
 	CFrameWnd::OnClose();
+	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.SetFocus();
 }
 
