@@ -286,7 +286,7 @@ namespace psycle
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
 						"frown\t\t\t\tAdditional Graphics" "\r\n"
 						"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
-						"Michael Haralabos [Athlon]\t\tInstaller and Debugging help"
+						"Haralabos Michael\t\tInstaller and Debugging help"
 					);
 			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
 
@@ -294,9 +294,9 @@ namespace psycle
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
 
 			std::ostringstream s;
-			s << "$Date$"
+			s << "Version " VERSION_NUMBER ""
 				//VERSION_NUMBER
-				" [built on " __DATE__ "]";
+				" [built on " __DATE__ ", " __TIME__ "]";
 			m_versioninfo.SetWindowText(s.str().c_str());
 
 			// return TRUE unless you set the focus to a control
