@@ -689,13 +689,6 @@ namespace psycle
 								out << vstPlug.GetName() << " - successfully instanciated";
 								out.flush();
 							}
-							else
-							{
-								_pPlugsInfo[currentPlugsCount]->allow = false;
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->name,"???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc,"???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"???");
-							}
 							++currentPlugsCount;
 							// <bohan> vstPlug is a stack object, so its destructor is called
 							// <bohan> at the end of its scope (this cope actually).
