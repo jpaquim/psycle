@@ -23,7 +23,6 @@ CGearfilter::CGearfilter(CChildView* pParent /*=NULL*/)
 	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearfilter)
 	//}}AFX_DATA_INIT
-	doit=false;
 }
 
 
@@ -87,8 +86,6 @@ BOOL CGearfilter::OnInitDialog()
 	m_lfo_amp_slider.SetPos(_pMachine->_lfoAmp);
 	m_lfo_phase_slider.SetPos(_pMachine->_lfoPhase);
 
-	doit = true;
-
 	UpdateStatus();
 
 	return TRUE;
@@ -96,22 +93,18 @@ BOOL CGearfilter::OnInitDialog()
 
 void CGearfilter::OnCustomdrawFCS(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_cutoff = m_filter_cutoff_slider.GetPos();
-		UpdateStatus();
-	}
+	_pMachine->_cutoff = m_filter_cutoff_slider.GetPos();
+	UpdateStatus();
+
 	_pMachine->Update();
 	*pResult = 0;
 }
 
 void CGearfilter::OnCustomdrawFRS(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_resonance = m_filter_reso_slider.GetPos();
-		UpdateStatus();
-	}
+	_pMachine->_resonance = m_filter_reso_slider.GetPos();
+	UpdateStatus();
+
 	_pMachine->Update();
 	char buf[64];
 	_pMachine->GetParamValue(1,buf);
@@ -120,43 +113,34 @@ void CGearfilter::OnCustomdrawFRS(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearfilter::OnCustomdrawLSS(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_lfoSpeed = m_lfo_speed_slider.GetPos();
-		UpdateStatus();
-	}
+	_pMachine->_lfoSpeed = m_lfo_speed_slider.GetPos();
+	UpdateStatus();
 	_pMachine->Update();
 	*pResult = 0;
 }
 
 void CGearfilter::OnCustomdrawLAS(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_lfoAmp = m_lfo_amp_slider.GetPos();
-		UpdateStatus();
-	}
+	_pMachine->_lfoAmp = m_lfo_amp_slider.GetPos();
+	UpdateStatus();
+
 	_pMachine->Update();
 	*pResult = 0;
 }
 
 void CGearfilter::OnCustomdrawSliderPhase(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_lfoPhase = m_lfo_phase_slider.GetPos();	
-		UpdateStatus();
-	}
+	_pMachine->_lfoPhase = m_lfo_phase_slider.GetPos();	
+	UpdateStatus();
+
 	_pMachine->Update();
 	*pResult = 0;
 }
 
 void CGearfilter::OnSelchangeFilter() 
 {
-	if (doit)
-	{
-		_pMachine->_filterMode = m_filtercombo.GetCurSel();
-	}
+	_pMachine->_filterMode = m_filtercombo.GetCurSel();
+
 }
 
 void CGearfilter::UpdateStatus()

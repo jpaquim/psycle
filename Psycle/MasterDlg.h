@@ -21,7 +21,10 @@ public:
 	CMasterDlg(CChildView* pParent = NULL);   // standard constructor
 	BOOL Create();
 	void PaintNumbers(int val, int x, int y);
+	void PaintNumbersDC(CDC* dc,CDC* memDC,int val,int x,int y);
+	void PaintNames(char* name,int x,int y);
 	CBitmap m_numbers;
+	CFont namesFont;
 	Master* _pMachine;
 	char macname[MAX_CONNECTIONS][15];
 	afx_msg void OnCancel();

@@ -21,7 +21,6 @@ class CGearfilter : public CDialog
 public:
 	CGearfilter(CChildView* pParent = NULL);   // standard constructor
 	Filter2p* _pMachine;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 

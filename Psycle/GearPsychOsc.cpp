@@ -57,10 +57,7 @@ END_MESSAGE_MAP()
 
 void CGearPsychOsc::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_sineSpeed = 129-m_oscspeed.GetPos();
-	}
+	_pMachine->_sineSpeed = 129-m_oscspeed.GetPos();
 	_pMachine->Update();
 	
 	char buffer[32];
@@ -73,10 +70,8 @@ void CGearPsychOsc::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearPsychOsc::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_sineGlide = 129-m_glidespeed.GetPos();
-	}
+	_pMachine->_sineGlide = 129-m_glidespeed.GetPos();
+
 	_pMachine->Update();
 
 	char buffer[32];
@@ -88,10 +83,8 @@ void CGearPsychOsc::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearPsychOsc::OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_sineLfoSpeed = 129-m_lfofrequency.GetPos();
-	}
+	_pMachine->_sineLfoSpeed = 129-m_lfofrequency.GetPos();
+
 	_pMachine->Update();
 
 	char buffer[32];
@@ -104,10 +97,8 @@ void CGearPsychOsc::OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearPsychOsc::OnCustomdrawSlider4(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_sineLfoAmp = 129-m_lfoamplitude.GetPos();
-	}
+	_pMachine->_sineLfoAmp = 129-m_lfoamplitude.GetPos();
+
 	_pMachine->Update();
 
 	char buffer[32];
@@ -140,8 +131,6 @@ BOOL CGearPsychOsc::OnInitDialog()
 	char buffer[64];
 	sprintf(buffer, "%s [PsychOsc AM]", _pMachine->_editName);
 	SetWindowText(buffer);
-
-	doit = true;
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

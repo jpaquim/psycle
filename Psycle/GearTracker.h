@@ -21,7 +21,6 @@ class CGearTracker : public CDialog
 public:
 	CGearTracker(CChildView* pParent = NULL);   // standard constructor
 	Sampler* _pMachine;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 

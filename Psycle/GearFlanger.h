@@ -21,7 +21,6 @@ class CGearFlanger : public CDialog
 public:
 	CGearFlanger(CChildView* pParent = NULL);   // standard constructor
 	Flanger* _pMachine;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 

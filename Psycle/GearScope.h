@@ -21,7 +21,7 @@ class CGearScope : public CDialog
 public:
 	CGearScope(CChildView* pParent = NULL);   // standard constructor
 	Scope* _pMachine;
-	bool doit;
+
 	BOOL Create();
 	afx_msg void OnCancel();
 	int div;

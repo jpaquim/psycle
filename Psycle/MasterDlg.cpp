@@ -22,6 +22,7 @@ CMasterDlg::CMasterDlg(CChildView* pParent /*=NULL*/)
 	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CMasterDlg)
 	//}}AFX_DATA_INIT
+	memset(macname,0,15*MAX_CONNECTIONS);
 }
 
 
@@ -75,6 +76,9 @@ END_MESSAGE_MAP()
 BOOL CMasterDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
+	
+	namesFont.CreatePointFont(80,"Tahoma");
+	m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
 	
 	m_slidermaster.SetRange(0, 256);
 	m_sliderm1.SetRange(0, 256);
@@ -154,12 +158,8 @@ BOOL CMasterDlg::OnInitDialog()
 		m_sliderm12.SetPos(256-f2i(val*256));
 	}
 	
-	
 	if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 	else m_autodec.SetCheck(0);
-
-	m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
-	
 	return TRUE;
 }
 
@@ -215,31 +215,47 @@ void CMasterDlg::PaintNumbers(int val, int x, int y)
 	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(dc);
 	oldbmp = memDC.SelectObject(&m_numbers);
+	
+	PaintNumbersDC(dc,&memDC,val,x,y);
+	
+	memDC.SelectObject(oldbmp);
+	memDC.DeleteDC();
+}
 
-//  val*=0.390625f // Percentage ( 0% ..100% )
+void CMasterDlg::PaintNumbersDC(CDC *dc, CDC *memDC, int val, int x, int y)
+{
+	//  val*=0.390625f // Percentage ( 0% ..100% )
 	if (val > 0 ) // dB (-99.9dB .. 0dB)
 	{
 		val = f2i(-200.0f * log10f(val*0.00390625f)); // better don't aproximate with log2
 	}
 	else val = 999;
 	
-
+	
 	if ( val < 100)
 	{
-		dc->BitBlt(x,y,4,8,&memDC,50,0,SRCCOPY);
+		dc->BitBlt(x,y,4,8,memDC,50,0,SRCCOPY);
 	}
 	else
 	{
-		dc->BitBlt(x,y,4,8,&memDC,val/100*5,0,SRCCOPY);
+		dc->BitBlt(x,y,4,8,memDC,val/100*5,0,SRCCOPY);
 		val = val%100;
 	}
 	const int vx0 = val/10;
 	const int v0x = val%10;
-	dc->BitBlt(x+5,y,4,8,&memDC,vx0*5,0,SRCCOPY);
-	dc->BitBlt(x+12,y,4,8,&memDC,v0x*5,0,SRCCOPY);
+	dc->BitBlt(x+5,y,4,8,memDC,vx0*5,0,SRCCOPY);
+	dc->BitBlt(x+12,y,4,8,memDC,v0x*5,0,SRCCOPY);
+	
+}
 
-	memDC.SelectObject(oldbmp);
-	memDC.DeleteDC();
+void CMasterDlg::PaintNames(char *name, int x, int y)
+{
+	CDC *dc = m_mixerview.GetDC();
+	CFont* oldfont = dc->SelectObject(&namesFont);
+	dc->SetTextColor(0x00FFFFFF); // White
+	dc->SetBkColor(0x00000000); // Black
+	dc->TextOut(x,y,name);
+	dc->SelectObject(oldfont);
 }
 
 void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -353,23 +369,51 @@ void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult)
 void CMasterDlg::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
-
-	if ( dc.m_ps.rcPaint.top >= 145 && dc.m_ps.rcPaint.bottom <= 155)
+	
+	if ( dc.m_ps.rcPaint.bottom >= 145 && dc.m_ps.rcPaint.top <= 155)
 	{
-		PaintNumbers(256-m_slidermaster.GetPos(),32,142);
-		PaintNumbers(256-m_sliderm1.GetPos(),92,142);
-		PaintNumbers(256-m_sliderm2.GetPos(),112,142);
-		PaintNumbers(256-m_sliderm3.GetPos(),132,142);
-		PaintNumbers(256-m_sliderm4.GetPos(),152,142);
-		PaintNumbers(256-m_sliderm5.GetPos(),172,142);
-		PaintNumbers(256-m_sliderm6.GetPos(),192,142);
-		PaintNumbers(256-m_sliderm7.GetPos(),212,142);
-		PaintNumbers(256-m_sliderm8.GetPos(),232,142);
-		PaintNumbers(256-m_sliderm9.GetPos(),252,142);
-		PaintNumbers(256-m_sliderm10.GetPos(),272,142);
-		PaintNumbers(256-m_sliderm11.GetPos(),292,142);
-		PaintNumbers(256-m_sliderm12.GetPos(),312,142);
-	}
+		CDC *dcm = m_mixerview.GetDC();
+		CDC memDC;
+		CBitmap* oldbmp;
+		memDC.CreateCompatibleDC(dcm);
+		oldbmp = memDC.SelectObject(&m_numbers);
+		
+		PaintNumbersDC(dcm,&memDC,256-m_slidermaster.GetPos(),32,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm1.GetPos(),92,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm2.GetPos(),112,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm3.GetPos(),132,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm4.GetPos(),152,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm5.GetPos(),172,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm6.GetPos(),192,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm7.GetPos(),212,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm8.GetPos(),232,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm9.GetPos(),252,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm10.GetPos(),272,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm11.GetPos(),292,142);
+		PaintNumbersDC(dcm,&memDC,256-m_sliderm12.GetPos(),312,142);
 
+		memDC.SelectObject(oldbmp);
+		memDC.DeleteDC();
+	}
+	if ( dc.m_ps.rcPaint.bottom >=25 && dc.m_ps.rcPaint.top<=155 && dc.m_ps.rcPaint.right >=350)
+	{
+		CDC *dcm = m_mixerview.GetDC();
+		CFont* oldfont = dcm->SelectObject(&namesFont);
+		dcm->SetTextColor(0x00FFFFFF); // White
+		dcm->SetBkColor(0x00000000); // Black
+		dcm->TextOut(353,24,macname[0]);
+		dcm->TextOut(428,24,macname[1]);
+		dcm->TextOut(353,46,macname[2]);
+		dcm->TextOut(428,46,macname[3]);
+		dcm->TextOut(353,68,macname[4]);
+		dcm->TextOut(428,68,macname[5]);
+		dcm->TextOut(353,90,macname[6]);
+		dcm->TextOut(428,90,macname[7]);
+		dcm->TextOut(353,112,macname[8]);
+		dcm->TextOut(428,112,macname[9]);
+		dcm->TextOut(353,134,macname[10]);
+		dcm->TextOut(428,134,macname[11]);
+		dcm->SelectObject(oldfont);
+	}
 	// Do not call CDialog::OnPaint() for painting messages
 }

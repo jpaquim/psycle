@@ -21,7 +21,6 @@ class CGearDistort : public CDialog
 public:
 	CGearDistort(CChildView* pParent = NULL);   // standard constructor
 	Distortion* _pMachine;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 

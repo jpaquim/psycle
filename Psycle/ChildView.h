@@ -261,7 +261,6 @@ public:
 	void RecalcMetrics();
 	void LoadPatternHeaderSkin();
 	void LoadMachineSkin();
-	void KillModelessMachines();
 
 public:
 

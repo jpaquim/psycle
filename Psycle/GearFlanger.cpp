@@ -22,7 +22,6 @@ CGearFlanger::CGearFlanger(CChildView* pParent /*=NULL*/)
 	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CGearFlanger)
 	//}}AFX_DATA_INIT
-	doit=false;
 }
 
 
@@ -70,10 +69,8 @@ END_MESSAGE_MAP()
 
 void CGearFlanger::OnCustomdrawFlangerDelaySlider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_time = m_flanger_delay_slider.GetPos();
-	}
+	_pMachine->_time = m_flanger_delay_slider.GetPos();
+
 	char buffer[16];
 	sprintf(buffer,"%d",_pMachine->_time);
 	m_delay_time_label.SetWindowText(buffer);
@@ -91,10 +88,8 @@ void CGearFlanger::OnCustomdrawAmpSlider(NMHDR* pNMHDR, LRESULT* pResult)
 
 	_pMachine->Update();
 
-	if (doit)
-	{
-		_pMachine->_lfoAmp = m_amp_slider.GetPos();
-	}
+	_pMachine->_lfoAmp = m_amp_slider.GetPos();
+
 	*pResult = 0;
 }
 
@@ -135,18 +130,14 @@ BOOL CGearFlanger::OnInitDialog()
 	m_wet_slider.SetRange(0,512);	// Don't use (-,+) range. It fucks up with the "0"
 	m_wet_slider.SetPos(_pMachine->_outWet+256);
 
-	doit = true;
-
 	return TRUE;
 }
 
 
 void CGearFlanger::OnCustomdrawSliderSpeed(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_lfoSpeed=m_speed_slider.GetPos();
-	}
+	_pMachine->_lfoSpeed=m_speed_slider.GetPos();
+
 	char buffer[16];
 	sprintf(buffer,"%d",_pMachine->_lfoSpeed);
 	m_speed_label.SetWindowText(buffer);
@@ -158,10 +149,7 @@ void CGearFlanger::OnCustomdrawSliderSpeed(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearFlanger::OnCustomdrawLfSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_feedbackL=m_lf_slider.GetPos()-100;
-	}
+	_pMachine->_feedbackL=m_lf_slider.GetPos()-100;
 	
 	char buffer[16];
 	sprintf(buffer,"%d%%",_pMachine->_feedbackL);
@@ -172,11 +160,8 @@ void CGearFlanger::OnCustomdrawLfSlider(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearFlanger::OnCustomdrawSliderFr(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_feedbackR=m_rf_slider.GetPos()-100;
-	}
-	
+	_pMachine->_feedbackR=m_rf_slider.GetPos()-100;
+
 	char buffer[16];
 	sprintf(buffer,"%d%%",_pMachine->_feedbackR);
 	m_rf_label.SetWindowText(buffer);
@@ -186,10 +171,7 @@ void CGearFlanger::OnCustomdrawSliderFr(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearFlanger::OnCustomdrawSliderPhase(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_lfoPhase=m_phase_slider.GetPos();
-	}
+	_pMachine->_lfoPhase=m_phase_slider.GetPos();
 	
 	char buffer[16];
 	sprintf(buffer,"%d",_pMachine->_lfoPhase);
@@ -203,10 +185,7 @@ void CGearFlanger::OnCustomdrawSliderPhase(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearFlanger::OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_outDry = m_dry_slider.GetPos()-256;
-	}
+	_pMachine->_outDry = m_dry_slider.GetPos()-256;
 
 	char buffer[8];
 	sprintf(buffer, "%.1f%%", (float)_pMachine->_outDry*0.390625f);
@@ -217,10 +196,7 @@ void CGearFlanger::OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearFlanger::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (doit)
-	{
-		_pMachine->_outWet = m_wet_slider.GetPos()-256;
-	}
+	_pMachine->_outWet = m_wet_slider.GetPos()-256;
 
 	char buffer[8];
 	sprintf(buffer,"%.1f%%",(float)_pMachine->_outWet*0.390625f);
@@ -231,10 +207,7 @@ void CGearFlanger::OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGearFlanger::OnSelchangePresetcombo() 
 {
-	if (doit)
-	{
-		_pMachine->SetPreset(m_presetcombo.GetCurSel());
-	}
+	_pMachine->SetPreset(m_presetcombo.GetCurSel());
 
 	m_flanger_delay_slider.SetPos(_pMachine->_time);
 	m_amp_slider.SetPos(_pMachine->_lfoAmp);

@@ -860,7 +860,7 @@ IDD_MASTERDLG DIALOGEX 0, 0, 338, 123
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle Master and Minimixer"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Decrease Master Volume automatically when Clipping",
                     IDC_AUTODEC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,108,
@@ -880,7 +880,7 @@ BEGIN
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,89,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM4,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,103,28,13,57,
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM5,"msctls_trackbar32",TBS_VERT | 
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,116,28,13,57,
@@ -889,25 +889,25 @@ BEGIN
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,129,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM7,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,143,28,13,57,
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,142,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM8,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,156,28,13,57,
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,155,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM9,"msctls_trackbar32",TBS_VERT | 
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,169,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM10,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,183,28,13,57,
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,182,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM11,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,196,28,13,57,
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,195,28,13,57,
                     WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM12,"msctls_trackbar32",TBS_VERT | 
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,209,28,13,57,
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,208,28,13,57,
                     WS_EX_TRANSPARENT
     LTEXT           "Current Peak:",IDC_STATIC,254,111,48,10
-    RTEXT           "-40.1dB",IDC_MASTERPEAK,304,109,31,12,SS_CENTERIMAGE | 
+    RTEXT           "-90.0dB",IDC_MASTERPEAK,304,109,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
 END
 
@@ -1360,7 +1360,7 @@ IDD_GEAR_SCOPE DIALOGEX 0, 0, 174, 96
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Pooplog-o-Scope"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,83,136,11
@@ -1951,8 +1951,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,6,4
- PRODUCTVERSION 1,6,6,4
+ FILEVERSION 1,6,6,5
+ PRODUCTVERSION 1,6,6,5
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1970,14 +1970,14 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "Psycledelics\0"
             VALUE "FileDescription", "Psycle Digital Audio Studio\0"
-            VALUE "FileVersion", "1, 6, 6, 4\0"
+            VALUE "FileVersion", "1, 6, 6, 5\0"
             VALUE "InternalName", "Psycle\0"
             VALUE "LegalCopyright", "Copyright (C) 2000-2002\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Psycle.EXE\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Psycle Application\0"
-            VALUE "ProductVersion", "1, 6, 6, 4\0"
+            VALUE "ProductVersion", "1, 6, 6, 5\0"
             VALUE "SpecialBuild", "\0"
         END
     END

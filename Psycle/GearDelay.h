@@ -22,7 +22,6 @@ public:
 	CGearDelay(CChildView* pParent = NULL);   // standard constructor
 	Delay* _pMachine;
 	int* SPT;
-	bool doit;
 	BOOL Create();
 	afx_msg void OnCancel();
 

@@ -1,5 +1,6 @@
 V1.67
 -----
+! When having "autostop Machines" and recording to wav, some machines could become muted.
 ! Manually editing sample name didn't update the combobox.
 ! When the "MIDI/Params/Waves" combobox was showing "Params", and the user tried to decrease the selected
   one with the arrows, the position 0 was unreachable ( it stopped at 1 ).
