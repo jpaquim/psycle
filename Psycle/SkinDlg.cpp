@@ -681,7 +681,7 @@ void CSkinDlg::OnImportReg()
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-	
+	ofn.lpstrInitialDir = _skinPathBuf;
 	// Display the Open dialog box. 
 	
 	if (GetOpenFileName(&ofn)==TRUE)

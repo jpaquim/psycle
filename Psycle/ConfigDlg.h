@@ -12,6 +12,7 @@
 #include "OutputDlg.h"
 #include "MidiInputDlg.h"
 #include "Configuration.h"
+#include "KeyConfigDlg.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CConfigDlg
@@ -31,6 +32,7 @@ public:
 	CSkinDlg _skinDlg;
 	COutputDlg _outputDlg;
 	CMidiInputDlg _midiDlg;
+	CKeyConfigDlg _keyDlg;
 
 // Operations
 public:

@@ -5,6 +5,7 @@
 #include "psycle2.h"
 #include "KeyConfigDlg.h"
 #include "inputhandler.h"
+#include "Configuration.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,8 +17,9 @@ static char THIS_FILE[] = __FILE__;
 // CKeyConfigDlg dialog
 
 
-CKeyConfigDlg::CKeyConfigDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CKeyConfigDlg::IDD, pParent)
+IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
+
+CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
 {
 	m_prvIdx = 0;
 	
@@ -37,6 +39,9 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PLAY_R_CTRL, m_cmdCtrlPlay);
 	DDX_Control(pDX, IDC_CMDLIST, m_lstCmds);
 	DDX_Control(pDX, IDC_KEY0, m_hotkey0);
+	DDX_Control(pDX, IDC_WRAP, m_wrap);
+	DDX_Control(pDX, IDC_CENTERCURSOR, m_centercursor);
+	DDX_Control(pDX, IDC_CURSORDOWN, m_cursordown);
 	//}}AFX_DATA_MAP
 }
 
@@ -90,6 +95,10 @@ BOOL CKeyConfigDlg::OnInitDialog()
 	WORD subst=0;
 
 	m_hotkey0.SetRules(rules,subst);
+
+	m_wrap.SetCheck(Global::pConfig->_wrapAround?1:0);
+	m_centercursor.SetCheck(Global::pConfig->_centerCursor?1:0);
+	m_cursordown.SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
 
 	FillCmdList();
 	
@@ -200,6 +209,9 @@ void CKeyConfigDlg::OnOK()
 	// save settings
 	Global::pInputHandler->ConfigSave();
 	
+	Global::pConfig->_wrapAround = m_wrap.GetCheck()?true:false;
+	Global::pConfig->_centerCursor = m_centercursor.GetCheck()?true:false;
+	Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
 
 	CDialog::OnOK();
 }

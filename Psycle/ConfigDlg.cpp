@@ -116,9 +116,20 @@ void CConfigDlg::Init(
 	{
 		sprintf(_dirDlg._vstPathBuf, ps);
 	}
-
-	AddPage(&_dirDlg);
+	ps = pConfig->GetInitialSkinDir();
+	if (ps != NULL)
+	{
+		sprintf(_dirDlg._skinPathBuf, ps);
+		sprintf(_skinDlg._skinPathBuf, ps);
+	}
+	else
+	{
+		_skinDlg._skinPathBuf[0] = 0;
+	}
+	
 	AddPage(&_skinDlg);
+	AddPage(&_keyDlg);
+	AddPage(&_dirDlg);
 	AddPage(&_outputDlg);
 	AddPage(&_midiDlg);
 }
@@ -220,6 +231,12 @@ int CConfigDlg::DoModal()
 			_pConfig->SetInitialVstDir(_dirDlg._vstPathBuf);
 			_pConfig->SetVstDir(_dirDlg._vstPathBuf);
 		}
+		if (_dirDlg._skinPathChanged)
+		{
+			_pConfig->SetInitialSkinDir(_dirDlg._skinPathBuf);
+			_pConfig->SetSkinDir(_dirDlg._skinPathBuf);
+		}
+
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 	}

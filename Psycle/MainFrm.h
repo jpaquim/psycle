@@ -174,7 +174,6 @@ protected:
 	afx_msg void OnSelchangeBarGenfx();
 	afx_msg void OnCloseupBarGenfx();
 	afx_msg void OnWrap();
-	afx_msg void OnConfigurationKeyboard();
 	afx_msg void OnMultichannelAudition();
 	afx_msg void OnCentercursor();
 	afx_msg void OnCursordown();

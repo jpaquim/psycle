@@ -29,6 +29,8 @@ CDirectoryDlg::CDirectoryDlg() : CPropertyPage(CDirectoryDlg::IDD)
 	_pluginPathBuf[0] = '\0';
 	_vstPathChanged = false;
 	_vstPathBuf[0] = '\0';
+	_skinPathChanged = false;
+	_skinPathBuf[0] = '\0';
 }
 
 CDirectoryDlg::~CDirectoryDlg()
@@ -43,6 +45,7 @@ void CDirectoryDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PLUGINEDIT, m_pluginEdit);
 	DDX_Control(pDX, IDC_SONGEDIT, m_songEdit);
 	DDX_Control(pDX, IDC_INSTEDIT, m_instEdit);
+	DDX_Control(pDX, IDC_SKINEDIT, m_skinEdit);
 	//}}AFX_DATA_MAP
 }
 
@@ -57,6 +60,8 @@ BEGIN_MESSAGE_MAP(CDirectoryDlg, CPropertyPage)
 	ON_EN_CHANGE(IDC_INSTEDIT, OnChangeInstedit)
 	ON_EN_CHANGE(IDC_PLUGINEDIT, OnChangePluginedit)
 	ON_EN_CHANGE(IDC_VSTEDIT, OnChangeVstedit)
+	ON_BN_CLICKED(IDC_BROWSESKIN, OnBrowseSkin)
+	ON_EN_CHANGE(IDC_SKINEDIT, OnChangeSkinedit)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -149,6 +154,7 @@ BOOL CDirectoryDlg::OnInitDialog()
 	m_songEdit.SetWindowText(_songPathBuf);
 	m_pluginEdit.SetWindowText(_pluginPathBuf);
 	m_vstEdit.SetWindowText(_vstPathBuf);
+	m_skinEdit.SetWindowText(_skinPathBuf);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -176,4 +182,19 @@ void CDirectoryDlg::OnChangeVstedit()
 {
 		_vstPathChanged = true;
 		m_vstEdit.GetWindowText(_vstPathBuf,MAX_PATH);
+}
+
+void CDirectoryDlg::OnBrowseSkin() 
+{
+	if (BrowseForFolder(_skinPathBuf))
+	{
+		_skinPathChanged = true;
+		m_skinEdit.SetWindowText(_skinPathBuf);
+	}
+}
+
+void CDirectoryDlg::OnChangeSkinedit() 
+{
+	_skinPathChanged = true;
+	m_skinEdit.GetWindowText(_skinPathBuf,MAX_PATH);
 }

@@ -12,6 +12,7 @@
 #define DEFAULT_SONG_DIR "Songs"
 #define DEFAULT_PLUGIN_DIR "Plugins"
 #define DEFAULT_VST_DIR "Vst"
+#define DEFAULT_SKIN_DIR "Skins"
 
 #if !defined(_WINAMP_PLUGIN_)
 	class CMidiInput;	// MIDI IMPLEMENTATION 
@@ -223,50 +224,35 @@ public:
 	Configuration();
 	~Configuration();
 
-	bool Initialized(
-		void) { return _initialized; }
-	bool Read(
-		void);
-	void Write(
-		void);
+	bool Initialized() { return _initialized; }
+	bool Read();
+	void Write();
 
 #if !defined(_WINAMP_PLUGIN_)
 
-	char* GetInstrumentDir(
-		void) { return _psInstrumentDir; }
-	char* GetInitialInstrumentDir(
-		void) { return _psInitialInstrumentDir; }
-	void SetInstrumentDir(
-		const char* psDir);
-	void SetInitialInstrumentDir(
-		const char* psDir);
-	char* GetSongDir(
-		void) { return _psSongDir; }
-	char* GetInitialSongDir(
-		void) { return _psInitialSongDir; }
-	void SetSongDir(
-		const char* psDir);
-	void SetInitialSongDir(
-		const char* psDir);
+	char* GetInstrumentDir() { return _psInstrumentDir; }
+	char* GetInitialInstrumentDir() { return _psInitialInstrumentDir; }
+	void SetInstrumentDir(const char* psDir);
+	void SetInitialInstrumentDir(const char* psDir);
+	char* GetSongDir(void) { return _psSongDir; }
+	char* GetInitialSongDir(void) { return _psInitialSongDir; }
+	void SetSongDir(const char* psDir);
+	void SetInitialSongDir(const char* psDir);
+	void SetSkinDir(const char* psDir);
+	void SetInitialSkinDir(const char* psDir);
+	char* GetSkinDir(void) { return _psSkinDir; }
+	char* GetInitialSkinDir(void) { return _psInitialSkinDir; }
 
 #endif // ndef _WINAMP_PLUGIN_
 
-	void SetPluginDir(
-		const char* psDir);
-	void SetInitialPluginDir(
-		const char* psDir);
-	char* GetPluginDir(
-		void) { return _psPluginDir; }
-	char* GetInitialPluginDir(
-		void) { return _psInitialPluginDir; }
-	void SetVstDir(
-		const char* psDir);
-	void SetInitialVstDir(
-		const char* psDir);
-	char* GetVstDir(
-		void) { return _psVstDir; }
-	char* GetInitialVstDir(
-		void) { return _psInitialVstDir; }
+	void SetPluginDir(const char* psDir);
+	void SetInitialPluginDir(const char* psDir);
+	char* GetPluginDir(void) { return _psPluginDir; }
+	char* GetInitialPluginDir(void) { return _psInitialPluginDir; }
+	void SetVstDir(const char* psDir);
+	void SetInitialVstDir(const char* psDir);
+	char* GetVstDir(void) { return _psVstDir; }
+	char* GetInitialVstDir(void) { return _psInitialVstDir; }
 
 protected:
 	bool _initialized;
@@ -276,6 +262,8 @@ protected:
 	char* _psInstrumentDir;
 	char* _psInitialSongDir;
 	char* _psSongDir;
+	char* _psInitialSkinDir;
+	char* _psSkinDir;
 #endif // ndef _WINAMP_PLUGIN_
 
 	char* _psInitialPluginDir;

@@ -595,9 +595,7 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 	
 	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 	{
-		char buf[100];
-		sprintf(buf,"CChildView::OnResize(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
-		TRACE(buf);
+		TRACE("CChildView::OnResize(). Deleted bmpDC");
 		bmpDC->DeleteObject();
 		delete bmpDC;
 		bmpDC=NULL;

@@ -12,13 +12,15 @@
 /////////////////////////////////////////////////////////////////////////////
 // CKeyConfigDlg dialog
 
-class CKeyConfigDlg : public CDialog
+class CKeyConfigDlg : public CPropertyPage
 {
+	DECLARE_DYNCREATE(CKeyConfigDlg)
+
 // Construction
 public:
 	void FillCmdList();
 	void DoCommandList();
-	CKeyConfigDlg(CWnd* pParent = NULL);   // standard constructor
+	CKeyConfigDlg();   // standard constructor
 
 // Dialog Data
 	//{{AFX_DATA(CKeyConfigDlg)
@@ -29,6 +31,10 @@ public:
 	CButton	m_cmdCtrlPlay;
 	CListBox	m_lstCmds;
 	CHotKeyCtrl	m_hotkey0;
+	CButton	m_wrap;
+	CButton	m_centercursor;
+	CButton	m_cursordown;
+
 	//}}AFX_DATA
 
 
