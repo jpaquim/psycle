@@ -2102,6 +2102,12 @@ BEGIN
         MENUITEM "Pattern &Mix Paste",          ID_EDIT_MIXPASTE
         MENUITEM "Pattern &Delete",             ID_EDIT_DELETE
         MENUITEM SEPARATOR
+        MENUITEM "Block Cut",                   ID_POP_CUT
+        MENUITEM "Block Copy",                  ID_POP_COPY
+        MENUITEM "Block Paste",                 ID_POP_PASTE
+        MENUITEM "Block Mix Paste",             ID_POP_MIXPASTE
+        MENUITEM "Block Delete",                ID_POP_DELETE
+        MENUITEM SEPARATOR
         MENUITEM "Sequence Cut",                IDC_SEQCUT
         MENUITEM "Sequence Copy",               IDC_SEQCOPY
         MENUITEM "Sequence Paste",              IDC_SEQPASTE

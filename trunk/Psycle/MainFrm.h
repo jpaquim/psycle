@@ -210,6 +210,11 @@ protected:
 	afx_msg void OnUpdateViewSongbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewSequencerbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMachinebar(CCmdUI* pCmdUI);
+	afx_msg void OnEditBlockCopy();
+	afx_msg void OnEditBlockCut();
+	afx_msg void OnEditBlockDelete();
+	afx_msg void OnEditBlockMixpaste();
+	afx_msg void OnEditBlockPaste();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
