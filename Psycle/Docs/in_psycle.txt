@@ -1,0 +1,108 @@
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$.........
+$             $$      $$$      $$$     $.........
+$$    $$       $        $     $$.$   $$..........
+.$    $$$     $$       $$     $.$   $$...........
+.$    $.$     $       $$$$    $.$  $$ $..........
+.$    $.$     $  $    $$$$    $$$  $$$ $$........
+.$    $$$     $  $$$$  $$      $         $$......
+.$    $$$$$$$$$    $$$$$$$$$              $......
+.$    $....$$              $$     $$$    $.......
+.$     $$...$$$$$$$$       $$$$ $$$     $........
+.$$     $$..$$   $$$      $$..$$$$    $$.........
+$$$$     $$$$             $$..$$$    $$..........
+$$      $$$$              $..$$     $$...........
+.$$    $$..$$$          $$...$       $...........
+..$$$$$$.....$$$$$$$$$$$$....$      $$...........
+..$$$$$$$$...................$$    $$............
+..$$     $$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$.....
+...$        $$         $$     $$$$         $$....
+...$       $$$         $$     $$.$$         $$...
+..$$      $$ $          $     $$.$$  $       $$..
+..$       $  $      $   $     $$$$   $$$$     $..
+.$$       $  $      $$  $$$     $$    $.$$     $.
+.$       $$$  $$$    $$   $$     $$   $$$$     $$
+.$       $.$   $$    $$$  $$      $$   $$   $$$$.
+.$       $.$$   $$   $$$$$$$       $$   $$$$$....
+.$       $..$    $    $.$$.$       $$    $$......
+.$       $$$$  $$     $$...$     $$$     $$......
+.$       $..$ $$       $...$    $$      $$.......
+.$$$$$$$$$..$$ $$$$$$$$$...$$$$$$      $$........
+................................$$$$$$$..........
+( Thanks _Tao_ )
+
+\/ Description
+---------------
+
+	This Plugin allows you to play .psy files containing Psycle Songs.
+
+	It is based on the source code of Psycle 1.66 released on 2-Sep-2002
+	It is faster than psycle (since this code doesn't calculate the CPU usage
+	nor the vumeters) but it is slower if you use the eq and Vis stuff.
+
+	On a side note:
+	---------------
+	Winamp GENERIC EQ destroys high frequencies as reported for other plugin developers.
+
+	If you want to see/hear it, connect the eq, put it on zero (all frequencies as well
+	as the PreAmp). In this position, the eq is internally disabled by winamp.
+	Now, move any slider a little up or down and you'll hear the big difference in the
+	high spectrum (and you'll be able to see it in the Vis as well).
+
+
+\/ Limitations
+---------------
+
+	This version of the plugin has the following limitations:
+
+	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
+	· No Configuration avaiable. It reads the configuration from psycle.
+	· No Info Dialog.
+	· Maybe others that I can't think of right now.
+
+
+\/ Version Revision
+--------------------
+Beta 4 (30-03-2002)
+--------------------
+·Engine Update to Psycle 1.66
+
+
+Beta 4 (30-03-2002)
+--------------------
+·Engine Update to Psycle 1.6Plus
+
+
+Beta 4 (20-03-2002)
+--------------------
+·Engine Update to Psycle 1.6Final
+·Source Code shared between the Plugin and the Tracker.
+
+
+Beta 3 (12-12-2001)
+--------------------
+·Engine Update to Psycle 1.6 RC1
+·Now it unloads the song when it finishes (frees memory)
+
+Beta 2 (13-06-2001)
+--------------------
+·Engine Update to Psycle 1.5 b3 R5
+
+Beta 1 (30-05-2001)
+--------------------
+·Initial Release
+
+
+\/ Ending
+----------
+
+	Plugin Coded by Josep Mª [JAZ] on 13-June-2001
+
+	For any questions, suggestions or bugreports, use the boards on psycledelics:
+
+		http://www.pastnotecut.org/psycle
+
+	or Contact me at jaz_e@terra.es
+
+	Source Code is avaiable on Psycle's SourceForge site:
+
+		http://sourceforge.net/projects/psycle/
