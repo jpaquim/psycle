@@ -47,6 +47,7 @@ namespace psycle
 					}
 				} // End nFlags & MK_RBUTTON
 			}
+			CWnd::OnRButtonDown(nFlags,point);
 		}
 		
 		void CChildView::OnRButtonUp( UINT nFlags, CPoint point )
@@ -123,6 +124,7 @@ namespace psycle
 			wiresource = -1;
 			wiredest = -1;
 			Repaint();
+			CWnd::OnRButtonUp(nFlags,point);
 		}
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
 		{
@@ -137,6 +139,7 @@ namespace psycle
 				menu.DestroyMenu();
 		//		Repaint(DMCursor);
 			}
+			CWnd::OnContextMenu(pWnd,point);
 		}
 
 
@@ -408,6 +411,7 @@ namespace psycle
 					}
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE if statement
+			CWnd::OnLButtonDown(nFlags,point);
 		}
 
 		void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
@@ -502,6 +506,7 @@ namespace psycle
 					}
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
+			CWnd::OnLButtonUp(nFlags,point);
 		}
 
 
@@ -773,6 +778,7 @@ namespace psycle
 					}
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
+			CWnd::OnMouseMove(nFlags,point);
 		}
 
 
@@ -961,6 +967,7 @@ namespace psycle
 
 
 			} // <-- End switch(viewMode)
+			CWnd::OnLButtonDblClk(nFlags,point);
 		}
 
 
