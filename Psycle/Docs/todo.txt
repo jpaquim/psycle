@@ -27,7 +27,8 @@ X low priority
 + <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
 	lists one for gen, one for fx
 	[JAZ: And a third one for Instruments. Time to time]
-
+* <Z-Matrix> any idea how do I set the BUS output in the ASIO Driver? I Use Digi9652 RME Hammerfall, 
+	it got 8 outputs
 
 + <AF> I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
 	to allow the user to speficy a "different than default" fadeout.
