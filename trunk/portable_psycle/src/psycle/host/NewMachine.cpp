@@ -767,7 +767,7 @@ namespace psycle
 							}
 							catch(...)
 							{
-								fprintf(hfile," ... ouch, exception when freeing the temporary instance");
+								fprintf(hfile, " ... ouch, exception when freeing the temporary instance");
 							}
 						}
 					}

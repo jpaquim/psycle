@@ -14,11 +14,8 @@ namespace psycle
 		{
 		public:
 			WaveOut();
-			virtual ~WaveOut();
-			virtual void Initialize(
-				HWND hwnd,
-				AUDIODRIVERWORKFN pCallback,
-				void* context);
+			virtual ~WaveOut() throw();
+			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);	
 			virtual int GetWritePos();
@@ -62,7 +59,7 @@ namespace psycle
 			static void PollerThread(void *pWaveOut);
 			void ReadConfig();
 			void WriteConfig();
-			void Error(char const *msg);
+			void Error(const char msg[]);
 			void DoBlocks();
 			bool Start();
 			bool Stop();

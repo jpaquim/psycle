@@ -4,7 +4,7 @@
 #include "MainFrm.h"
 #include "midiinput.h"
 #include "NewMachine.h"
-#include <exception>
+#include <operating_system/exception.h>
 #include <sstream>
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
@@ -20,38 +20,17 @@ namespace psycle
 
 		CPsycleApp::CPsycleApp() throw(std::runtime_error)
 		{
+			operating_system::exceptions::translated::new_thread();
 			// support for unicode characters on mswin98
 			{
-				/*
-				class exceptions
-				{
-				public:
-					static const std::string code_description(const unsigned long int & code = ::GetLastError()) throw()
+				#if 0
+					if(!::LoadLibrary("unicows"))
 					{
-						char * error_message_pointer;
-						::FormatMessage // ouch! plain old c api style, this is ugly...
-						(
-							FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-							0, // module to get message from. 0 means system.
-							code,
-							MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),
-							reinterpret_cast<char*>(&error_message_pointer), // we *must* hard-cast! this seems to be a hack to extend an originally badly designed api... there is no other way to do it
-							0,
-							0
-						);
-						std::ostringstream s;
-						s << "microsoft api error: " << code << " 0x" << std::hex << code << ": " << error_message_pointer;
-						::LocalFree(error_message_pointer);
-						return s.str();
+						std::runtime_error e("could not load library unicows: " + operating_system::exceptions::code_description());
+						::MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
+						throw e;
 					}
-				};
-				if(!::LoadLibrary("unicows"))
-				{
-					std::runtime_error e("could not load library unicows: " + exceptions::code_description());
-					::MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
-					throw e;
-				}
-				*/
+				#endif // 0
 			}
 		}
 

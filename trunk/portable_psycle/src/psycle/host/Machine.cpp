@@ -322,6 +322,7 @@ namespace psycle
 			#endif
 		}
 
+		// <bohan> This is the OLD fucking file format!
 		bool Machine::Load(RiffFile* pFile)
 		{
 			char junk[256];
@@ -376,6 +377,7 @@ namespace psycle
 			return true;
 		}
 
+		// <bohan> This is the NEW file format.
 		Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen)
 		{
 			// assume version 0 for now
@@ -461,6 +463,7 @@ namespace psycle
 				}
 				break;
 			default:
+				::MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
 				pMachine = new Dummy(index);
 				break;
 			}

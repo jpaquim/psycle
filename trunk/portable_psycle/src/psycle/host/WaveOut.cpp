@@ -7,6 +7,7 @@
 #include "Configuration.h"
 #include "MidiInput.h"
 #include <process.h>
+#include <operating_system/exception.h>
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
 namespace psycle
@@ -19,37 +20,43 @@ namespace psycle
 		AudioDriverEvent WaveOut::_event;
 		CCriticalSection WaveOut::_lock;
 
+		void WaveOut::Error(char const msg[])
+		{
+			::MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
+		}
+
 		WaveOut::WaveOut()
+			: _initialized(false)
+			, _configured(false)
+			, _running(false)
+			, _pCallback(0)
 		{
-			_initialized = false;
-			_configured = false;
+		}
+
+		void WaveOut::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
+		{
+			_callbackContext = context;
+			_pCallback = pCallback;
 			_running = false;
-			_pCallback = NULL;
+			ReadConfig();
+			_initialized = true;
 		}
 
-
-		WaveOut::~WaveOut()
+		void WaveOut::Reset()
 		{
-			if (_initialized) Reset();
+			if (_running) Stop();
 		}
 
-		void WaveOut::Error(char const *msg)
+		WaveOut::~WaveOut() throw()
 		{
-			MessageBox(NULL, msg, "WaveOut driver", MB_OK);
+			if(_initialized) Reset();
 		}
 
 		bool WaveOut::Start()
 		{
 			CSingleLock lock(&_lock, TRUE);
-			if (_running)
-			{
-				return true;
-			}
-
-			if (_pCallback == NULL)
-			{
-				return false;
-			}
+			if(_running) return true;
+			if(!_pCallback) return false;
 
 			WAVEFORMATEX format;
 			format.wFormatTag = WAVE_FORMAT_PCM;
@@ -61,7 +68,7 @@ namespace psycle
 			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 
-			if (waveOutOpen(&_handle, _deviceID, &format, NULL, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)
+			if(::waveOutOpen(&_handle, _deviceID, &format, 0, 0, 0) != MMSYSERR_NOERROR)
 			{
 				Error("waveOutOpen() failed");
 				return false;
@@ -71,14 +78,14 @@ namespace psycle
 			_writePos = 0;
 
 			// allocate blocks
-			for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
+			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 			{
 				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSize);
 				pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
 			}
 
 			// allocate block headers
-			for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
+			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 			{
 				pBlock->HeaderHandle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, sizeof(WAVEHDR));
 				pBlock->pHeader = (WAVEHDR *)GlobalLock(pBlock->HeaderHandle);
@@ -94,97 +101,82 @@ namespace psycle
 
 			_stopPolling = false;
 			_event.ResetEvent();
-			_beginthread(PollerThread, 0, this);
+			::_beginthread(PollerThread, 0, this);
 			_running = true;
 			CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
 			return true;
 		}
 
-		bool WaveOut::Stop()
+		void WaveOut::PollerThread(void * pWaveOut)
 		{
-			CSingleLock lock(&_lock, TRUE);
-			if (!_running)
-			{
-				return true;
-			}
-
-			_stopPolling = true;
-			CSingleLock event(&_event, TRUE);
-
-			if (waveOutReset(_handle) != MMSYSERR_NOERROR)
-			{
-				Error("waveOutReset() failed");
-				return false;
-			}
-
-			while (1)
-			{
-				bool alldone = true;
-
-				for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
-				{
-					if ((pBlock->pHeader->dwFlags & WHDR_DONE) == 0)
-					{
-						alldone = false;
-					}
-				}
-				if (alldone)
-				{
-					break;
-				}
-				Sleep(20);
-			}
-			for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
-			{
-				if (pBlock->Prepared)
-				{
-					if (waveOutUnprepareHeader(_handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-					{
-						Error("waveOutUnprepareHeader() failed");
-					}
-				}
-			}
-			if (waveOutClose(_handle) != MMSYSERR_NOERROR)
-			{
-				Error("waveOutClose() failed");
-				return false;
-			}
-			for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
-			{
-				GlobalUnlock(pBlock->Handle);
-				GlobalFree(pBlock->Handle);
-				GlobalUnlock(pBlock->HeaderHandle);
-				GlobalFree(pBlock->HeaderHandle);
-			}
-			_running = false;
-			return true;
-		}
-
-		void
-		WaveOut::PollerThread(
-			void *pWaveOut)
-		{
-			WaveOut* pThis = (WaveOut*)pWaveOut;
-			SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-
-			while (!pThis->_stopPolling)
+			operating_system::exceptions::translated::new_thread();
+			WaveOut * pThis = (WaveOut*) pWaveOut;
+			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+			while(!pThis->_stopPolling)
 			{
 				pThis->DoBlocks();
 				::Sleep(pThis->_pollSleep);
 			}
 			_event.SetEvent();
-			_endthread();
+			::_endthread();
+		}
+
+		bool WaveOut::Stop()
+		{
+			CSingleLock lock(&_lock, TRUE);
+			if(!_running) return true;
+			_stopPolling = true;
+			CSingleLock event(&_event, TRUE);
+			// Once we get here, the PollerThread should have stopped
+			if(::waveOutReset(_handle) != MMSYSERR_NOERROR)
+			{
+				Error("waveOutReset() failed");
+				return false;
+			}
+			for(;;)
+			{
+				bool alldone = true;
+				for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
+				{
+					if((pBlock->pHeader->dwFlags & WHDR_DONE) == 0) alldone = false;
+				}
+				if(alldone) break;
+				::Sleep(20);
+			}
+			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
+			{
+				if(pBlock->Prepared)
+				{
+					if(::waveOutUnprepareHeader(_handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+					{
+						Error("waveOutUnprepareHeader() failed");
+					}
+				}
+			}
+			if(::waveOutClose(_handle) != MMSYSERR_NOERROR)
+			{
+				Error("waveOutClose() failed");
+				return false;
+			}
+			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
+			{
+				::GlobalUnlock(pBlock->Handle);
+				::GlobalFree(pBlock->Handle);
+				::GlobalUnlock(pBlock->HeaderHandle);
+				::GlobalFree(pBlock->HeaderHandle);
+			}
+			_running = false;
+			return true;
 		}
 
 		void WaveOut::DoBlocks()
 		{
 			CBlock *pb = _blocks + _currentBlock;
-
 			while(pb->pHeader->dwFlags & WHDR_DONE)
 			{
-				if (pb->Prepared)
+				if(pb->Prepared)
 				{
-					if (waveOutUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+					if(::waveOutUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 					{
 						Error("waveOutUnprepareHeader() failed");
 					}
@@ -192,25 +184,17 @@ namespace psycle
 				}
 				int *pOut = (int *)pb->pData;
 				int bs = _blockSize / BYTES_PER_SAMPLE;
-
 				do
 				{
 					int n = bs;
-					float *pBuf = _pCallback(_callbackContext, n);
-					if (_dither)
-					{
-						QuantizeWithDither(pBuf, pOut, n);
-					}
-					else
-					{
-						Quantize(pBuf, pOut, n);
-					}
+					float * pBuf = _pCallback(_callbackContext, n);
+					if(_dither) QuantizeWithDither(pBuf, pOut, n); else Quantize(pBuf, pOut, n);
 					pOut += n;
 					bs -= n;
 				}
-				while (bs > 0);
+				while(bs > 0);
 
-				_writePos += _blockSize/BYTES_PER_SAMPLE;
+				_writePos += _blockSize / BYTES_PER_SAMPLE;
 
 				pb->pHeader->dwFlags = 0;
 				pb->pHeader->lpData = (char *)pb->pData;
@@ -218,21 +202,18 @@ namespace psycle
 				pb->pHeader->dwFlags = 0;
 				pb->pHeader->dwLoops = 0;
 
-				if (waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+				if(::waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 				{
 					Error("waveOutPrepareHeader() failed");
 				}
 				pb->Prepared = true;
 
-				if (waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+				if(::waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 				{
 					Error("waveOutWrite() failed");
 				}
-				pb++;
-				if (pb == _blocks + _numBlocks)
-				{
-					pb = _blocks;
-				}
+				++pb;
+				if(pb == _blocks + _numBlocks) pb = _blocks;
 			}
 			_currentBlock = pb - _blocks;
 		}
@@ -245,7 +226,6 @@ namespace psycle
 			Registry reg;
 
 			// Default configuration
-			//
 			_samplesPerSec=44100;
 			_deviceID=0;
 			_numBlocks = 7;
@@ -255,29 +235,29 @@ namespace psycle
 			_channelmode = 3;
 			_bitDepth = 16;
 
-			if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
 			{
 				return;
 			}
-			if (reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+			if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
 			{
 				return;
 			}
 			configured = true;
-			numData = sizeof(_numBlocks);
+			numData = sizeof _numBlocks;
 			configured &= (reg.QueryValue("NumBlocks", &type, (BYTE*)&_numBlocks, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_blockSize);
+			numData = sizeof _blockSize;
 			configured &= (reg.QueryValue("BlockSize", &type, (BYTE*)&_blockSize, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_deviceID);
+			numData = sizeof _deviceID;
 			configured &= (reg.QueryValue("DeviceID", &type, (BYTE*)&_deviceID, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_pollSleep);
+			numData = sizeof _pollSleep;
 			configured &= (reg.QueryValue("PollSleep", &type, (BYTE*)&_pollSleep, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_dither);
+			numData = sizeof _dither;
 			configured &= (reg.QueryValue("Dither", &type, (BYTE*)&_dither, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_samplesPerSec);
+			numData = sizeof _samplesPerSec;
 			configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
-		//	numData = sizeof(_bitDepth);
-		//	(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
+			//numData = sizeof _bitDepth;
+			//(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
 			reg.CloseKey();
 			reg.CloseRootKey();
 			_configured = configured;
@@ -286,12 +266,12 @@ namespace psycle
 		void WaveOut::WriteConfig()
 		{
 			Registry reg;
-			if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
 			{
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if (reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+			if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
 			{
 				if (reg.CreateKey("WaveOut") != ERROR_SUCCESS)
 				{
@@ -299,33 +279,15 @@ namespace psycle
 					return;
 				}
 			}
-			reg.SetValue("NumBlocks", REG_DWORD, (BYTE*)&_numBlocks, sizeof(_numBlocks));
-			reg.SetValue("BlockSize", REG_DWORD, (BYTE*)&_blockSize, sizeof(_blockSize));
-			reg.SetValue("DeviceID", REG_DWORD, (BYTE*)&_deviceID, sizeof(_deviceID));
-			reg.SetValue("PollSleep", REG_DWORD, (BYTE*)&_pollSleep, sizeof(_pollSleep));
-			reg.SetValue("Dither", REG_DWORD, (BYTE*)&_dither, sizeof(_dither));
-			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
-		//	reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof(_bitDepth));
+			reg.SetValue("NumBlocks", REG_DWORD, (BYTE*)&_numBlocks, sizeof _numBlocks);
+			reg.SetValue("BlockSize", REG_DWORD, (BYTE*)&_blockSize, sizeof _blockSize);
+			reg.SetValue("DeviceID", REG_DWORD, (BYTE*)&_deviceID, sizeof _deviceID);
+			reg.SetValue("PollSleep", REG_DWORD, (BYTE*)&_pollSleep, sizeof _pollSleep);
+			reg.SetValue("Dither", REG_DWORD, (BYTE*)&_dither, sizeof _dither);
+			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof _samplesPerSec);
+			//reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof _bitDepth);
 			reg.CloseKey();
 			reg.CloseRootKey();
-		}
-
-
-		void WaveOut::Initialize(
-			HWND hwnd,
-			AUDIODRIVERWORKFN pCallback,
-			void* context)
-		{
-			_callbackContext = context;
-			_pCallback = pCallback;
-			_running = false;
-			ReadConfig();
-			_initialized = true;
-		}
-
-		void WaveOut::Reset()
-		{
-			if (_running) Stop();
 		}
 
 		void WaveOut::Configure()
@@ -339,10 +301,7 @@ namespace psycle
 			dlg.m_Dither = _dither;
 			dlg.m_SampleRate = _samplesPerSec;
 
-			if (dlg.DoModal() != IDOK)
-			{
-				return;
-			}
+			if(dlg.DoModal() != IDOK) return;
 			
 			int oldnb = _numBlocks;
 			int oldbs = _blockSize;
@@ -350,10 +309,7 @@ namespace psycle
 			int olddither = _dither;
 			int oldsps = _samplesPerSec;
 
-			if (_initialized)
-			{
-				Stop();
-			}
+			if(_initialized) Stop();
 
 			_numBlocks = dlg.m_BufNum;
 			_blockSize = dlg.m_BufSize;
@@ -363,12 +319,9 @@ namespace psycle
 
 			_configured = true;
 
-			if (_initialized)
+			if(_initialized)
 			{
-				if (Start())
-				{
-					WriteConfig();
-				}
+				if(Start()) WriteConfig();
 				else
 				{
 					_numBlocks = oldnb;
@@ -376,44 +329,32 @@ namespace psycle
 					_deviceID = olddid;
 					_dither = olddither;
 					_samplesPerSec = oldsps;
-
 					Start();
 				}
 			}
-			else
-			{
-				WriteConfig();
-			}
-			
+			else WriteConfig();
 		}
 
 		int WaveOut::GetPlayPos()
 		{
-			if (!_running)
-			{
-				return 0;
-			}
+			if(!_running) return 0;
 			MMTIME time;
 			time.wType = TIME_SAMPLES;
-
-			if (waveOutGetPosition(_handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
+			if(::waveOutGetPosition(_handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
 			{
 				Error("waveOutGetPosition() failed");
 			}
-			if (time.wType != TIME_SAMPLES)
+			if(time.wType != TIME_SAMPLES)
 			{
 				Error("waveOutGetPosition() doesn't support TIME_SAMPLES");
 			}
-			return (time.u.sample & ((1 << 23) - 1));
+			return time.u.sample & ((1 << 23) - 1);
 		}
 
 		int WaveOut::GetWritePos()
 		{
-			if (!_running)
-			{
-				return 0;
-			}
-			return (_writePos & ((1 << 23) - 1));
+			if(!_running) return 0;
+			return _writePos & ((1 << 23) - 1);
 		}
 
 		bool WaveOut::Enable(bool e)

@@ -1,5 +1,6 @@
 #pragma once
 #include "resource.h" // main symbols
+#include <operating_system/logger.h>
 ///\file
 ///\brief interface file for psycle::host::CPsycleApp.
 namespace psycle
@@ -35,6 +36,10 @@ namespace psycle
 			afx_msg void OnAboutpsycle();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+		private:
+			#if !defined NDEUG
+				operating_system::console console;
+			#endif
 		};
 
 		//{{AFX_INSERT_LOCATION}}
