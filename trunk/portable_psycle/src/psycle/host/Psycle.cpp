@@ -56,7 +56,7 @@ namespace psycle
 			Global::pLogWindow = new CLoggingWindow(pFrame);
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
 //			Global::pLogWindow->Validate();
-			host::loggers::info("alk's logger initialised ;p");
+			host::loggers::info("Psycle version: " VERSION_NUMBER);
 
 			if (!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
