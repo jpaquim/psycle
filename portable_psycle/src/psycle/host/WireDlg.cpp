@@ -8,10 +8,8 @@
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -1195,5 +1193,5 @@ namespace psycle
 				m_volslider.SetPos(256*4-t);
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

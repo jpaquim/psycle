@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "DirectoryDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CDirectoryDlg, CPropertyPage)
 
 		CDirectoryDlg::CDirectoryDlg() : CPropertyPage(CDirectoryDlg::IDD)
@@ -218,5 +216,5 @@ namespace psycle
 				_skinPathBuf=temp;
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

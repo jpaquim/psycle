@@ -1,10 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CVolumeDlg.
 #pragma once
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		/// volume window.
 		class CVolumeDlg : public CDialog
 		{
@@ -40,5 +38,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "ASIOConfig.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define MIN_NUMBUF 1
 		#define MAX_NUMBUF 16
 
@@ -200,5 +198,5 @@ namespace psycle
 			FillBufferBox();
 
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -1,10 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CSkinDlg.
 #pragma once
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		/// skin config window.
 		class CSkinDlg : public CPropertyPage
 		{
@@ -184,5 +182,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

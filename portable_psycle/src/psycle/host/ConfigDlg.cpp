@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNAMIC(CConfigDlg, CPropertySheet)
@@ -297,5 +295,5 @@ namespace psycle
 			}
 			return retVal;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

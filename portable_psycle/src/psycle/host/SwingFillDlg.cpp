@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "psycle.hpp"
 #include "SwingFillDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CSwingFillDlg)
@@ -86,5 +84,5 @@ namespace psycle
 
 			CDialog::OnOK();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

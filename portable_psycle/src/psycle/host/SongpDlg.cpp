@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "SongpDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CSongpDlg::CSongpDlg(CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CSongpDlg)
@@ -66,5 +64,5 @@ namespace psycle
 		{
 			CDialog::OnOK();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "DSoundConfig.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define MIN_NUMBUF 2
 		#define MAX_NUMBUF 16
 
@@ -204,5 +202,5 @@ namespace psycle
 		{
 			m_exclusive = (m_exclusiveCheck.GetState() & 0x0001);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

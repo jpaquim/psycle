@@ -5,10 +5,8 @@
 #include "SkinDlg.hpp"
 #include "Helpers.hpp"
 #include "Configuration.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define MAX_FONTS 256
 
 		IMPLEMENT_DYNCREATE(CSkinDlg, CPropertyPage)
@@ -1623,5 +1621,5 @@ namespace psycle
 		{
 			_triangle_size=m_triangle_size.GetCurSel()+8;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -1,9 +1,7 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
@@ -1155,5 +1153,5 @@ namespace psycle
 
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

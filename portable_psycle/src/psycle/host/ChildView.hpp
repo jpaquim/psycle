@@ -4,10 +4,8 @@
 #include "Song.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define MAX_DRAW_MESSAGES 32
 
 		class CMasterDlg;
@@ -949,5 +947,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

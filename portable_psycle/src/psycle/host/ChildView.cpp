@@ -26,10 +26,8 @@
 #include "masterdlg.hpp"
 #include "SaveWavDlg.hpp"
 #include <cmath> // SwingFill
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define rdtsc __asm __emit 0fh __asm __emit 031h
 		#define cpuid __asm __emit 0fh __asm __emit 0a2h
 		CMainFrame		*pParentMain;
@@ -3511,8 +3509,8 @@ namespace psycle
 				}
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END
 
 // graphics operations, private headers
 #include "machineview.private.hpp"

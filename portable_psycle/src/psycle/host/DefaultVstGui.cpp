@@ -6,11 +6,9 @@
 #include "Helpers.hpp"
 #include "ChildView.hpp"
 #include "configuration.hpp"
-namespace psycle
-{
-	namespace host
-	{
-		IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
+IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 
 		CDefaultVstGui::CDefaultVstGui() : CFormView(CDefaultVstGui::IDD)
 		{
@@ -280,5 +278,5 @@ namespace psycle
 			if(CFormView::OnCreate(lpCreateStruct) == -1) return -1;
 			return 0;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

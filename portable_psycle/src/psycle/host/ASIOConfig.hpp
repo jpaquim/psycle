@@ -2,10 +2,8 @@
 ///\brief interface file for psycle::host::CASIOConfig.
 #pragma once
 #include "ASIOInterface.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		/// asio config window.
 		class CASIOConfig : public CDialog
 		{
@@ -50,5 +48,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

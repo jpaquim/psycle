@@ -6,17 +6,15 @@
 #include "Plugin.hpp"
 #include "VstHost.hpp"
 #include "ProgressDialog.hpp"
-#undef min
-#undef max
+#undef min // ???
+#undef max // ???
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		int CNewMachine::pluginOrder = 1;
 		bool CNewMachine::pluginName = 1;
 		int CNewMachine::_numPlugins = -1;
@@ -987,5 +985,5 @@ namespace psycle
 			}
 			return false;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -3,10 +3,8 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "NewVal.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CNewVal::CNewVal(CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)
 		{
@@ -72,5 +70,5 @@ namespace psycle
 			}
 			m_text.SetWindowText(buffer);
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

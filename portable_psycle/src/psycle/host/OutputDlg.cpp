@@ -7,11 +7,9 @@
 #include "Configuration.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
-namespace psycle
-{
-	namespace host
-	{
-		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
+IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
 		COutputDlg::COutputDlg() : CPropertyPage(COutputDlg::IDD)
 		{
@@ -147,5 +145,5 @@ namespace psycle
 				Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

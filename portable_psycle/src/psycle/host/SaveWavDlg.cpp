@@ -13,11 +13,9 @@
 #include "MainFrm.hpp"
 #include <iostream>
 #include <iomanip>
-#undef max
-namespace psycle
-{
-	namespace host
-	{
+#undef max // ???
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 		DWORD WINAPI __stdcall RecordThread(void *b);
 		int CSaveWavDlg::channelmode = -1;
@@ -812,5 +810,5 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				savewires = FALSE;
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

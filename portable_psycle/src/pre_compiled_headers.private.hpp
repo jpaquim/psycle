@@ -52,8 +52,7 @@
 	#if !defined VC_EXTRA_LEAN
 		#define VC_EXTRA_LEAN
 	#endif
-	#if !defined _AFXDLL
-		// when mfc is used we must not do the following ("explained" below)
+	#if !defined _AFXDLL // when mfc is used we must not do the following ("explained" below)
 		#if !defined WIN32_EXTRA_LEAN
 			#define WIN32_EXTRA_LEAN // for mfc apps, we would get unresolved symbols
 		#endif

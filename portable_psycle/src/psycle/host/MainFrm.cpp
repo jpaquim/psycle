@@ -18,10 +18,8 @@
 #include "KeyConfigDlg.hpp"
 #include <sstream>
 #include <iomanip>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define WM_SETMESSAGESTRING 0x0362
 
 		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
@@ -2567,5 +2565,5 @@ namespace psycle
 				pGearRackDialog->RedrawList();
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

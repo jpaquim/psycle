@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "GearTracker.hpp"
 #include "ChildView.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CGearTracker::CGearTracker(CChildView* pParent)
 			: CDialog(CGearTracker::IDD, pParent)
 		{
@@ -93,5 +91,5 @@ namespace psycle
 			DestroyWindow();
 			delete this;
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -7,10 +7,8 @@
 #include "Configuration.hpp"
 #include "MidiInputDlg.hpp"
 #include "Helpers.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 
 		CMidiInputDlg::CMidiInputDlg() : CPropertyPage(CMidiInputDlg::IDD)
@@ -641,5 +639,5 @@ namespace psycle
 
 			CPropertyPage::OnOK();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "constants.hpp"
 #include "PatDlg.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CPatDlg)
@@ -104,5 +102,5 @@ namespace psycle
 				m_text.SetWindowText(buffer);
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

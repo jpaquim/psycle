@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "WaveEdAmplifyDialog.hpp"
 #include "Helpers.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CWaveEdAmplifyDialog::CWaveEdAmplifyDialog(CWnd* pParent)
 			: CDialog(CWaveEdAmplifyDialog::IDD, pParent)
 		{
@@ -67,5 +65,5 @@ namespace psycle
 			EndDialog( AMP_DIALOG_CANCEL );
 			//CDialog::OnCancel();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

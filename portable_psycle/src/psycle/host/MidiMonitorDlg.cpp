@@ -6,10 +6,8 @@
 #include "MidiInput.hpp"
 #include "song.hpp"
 #include "machine.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
@@ -420,5 +418,5 @@ namespace psycle
 				m_channelMap.InsertItem( ch, txtBuffer, NULL );
 			}
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

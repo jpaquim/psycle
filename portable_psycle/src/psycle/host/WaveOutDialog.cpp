@@ -4,10 +4,8 @@
 #include "Psycle.hpp"
 #include "WaveOutDialog.hpp"
 #include <mmsystem.h>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CWaveOutDialog)
@@ -181,5 +179,5 @@ namespace psycle
 			
 			RecalcLatency();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

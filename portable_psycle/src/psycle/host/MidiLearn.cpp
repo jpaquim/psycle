@@ -6,10 +6,8 @@
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
 #include "MidiLearn.hpp"
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		CMidiLearn::CMidiLearn(CWnd* pParent) : CDialog(CMidiLearn::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CMidiLearn)
@@ -38,5 +36,5 @@ namespace psycle
 			Message = -1;
 			CDialog::OnCancel();
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

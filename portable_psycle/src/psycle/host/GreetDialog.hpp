@@ -1,10 +1,8 @@
 #pragma once
 ///\file
 ///\brief interface file for psycle::host::CGreetDialog.
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		/// greeting window.
 		class CGreetDialog : public CDialog
 		{
@@ -38,5 +36,5 @@ namespace psycle
 		
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

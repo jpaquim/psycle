@@ -1,9 +1,7 @@
 ///\file
 ///\brief pattern view graphic operations for psycle::host::CChildView, private header
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		#define DRAW_DATA		1
 		#define DRAW_HSCROLL	2
 		#define DRAW_VSCROLL	4
@@ -2695,5 +2693,5 @@ namespace psycle
 			RecalculateColour(pvc_selectionbeat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_rowbeat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_rowbeat2, Global::pConfig->pvc_selection2));
 			RecalculateColour(pvc_selection4beat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_row4beat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_row4beat2, Global::pConfig->pvc_selection2));
 		}
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END

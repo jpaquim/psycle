@@ -3,10 +3,8 @@
 #pragma once
 #include <mmsystem.h>
 #include <dsound.h>
-namespace psycle
-{
-	namespace host
-	{
+NAMESPACE__BEGIN(psycle)
+	NAMESPACE__BEGIN(host)
 		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
@@ -64,5 +62,5 @@ namespace psycle
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}
-}
+	NAMESPACE__END
+NAMESPACE__END
