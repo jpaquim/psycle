@@ -17,11 +17,14 @@ public:
 	CNewVal(CWnd* pParent = NULL);   // standard constructor
 	int m_Value;
 	char Title[1024];
+	int min;
+	int max;
 
 // Dialog Data
 	//{{AFX_DATA(CNewVal)
 	enum { IDD = IDD_NEWVAL };
 	CEdit	m_value;
+	CStatic m_text;
 	//}}AFX_DATA
 
 
@@ -41,6 +44,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	afx_msg void OnSetfocusEdit1();
+	afx_msg void OnUpdateEdit1();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

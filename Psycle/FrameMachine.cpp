@@ -415,6 +415,8 @@ void CFrameMachine::OnRButtonDown(UINT nFlags, CPoint point)
 			,name
 			,min_v
 			,max_v);
+		dlg.min = min_v;
+		dlg.max = max_v;
 
 		dlg.DoModal();
 		int nv = dlg.m_Value;

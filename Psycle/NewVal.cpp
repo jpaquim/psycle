@@ -30,12 +30,14 @@ void CNewVal::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CNewVal)
 	DDX_Control(pDX, IDC_EDIT1, m_value);
+	DDX_Control(pDX, IDC_TEXT, m_text);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CNewVal, CDialog)
 	//{{AFX_MSG_MAP(CNewVal)
+	ON_EN_UPDATE(IDC_EDIT1, OnUpdateEdit1)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -65,4 +67,28 @@ void CNewVal::OnOK()
 	m_Value=atoi(buffer);
 	
 	CDialog::OnOK();
+}
+
+void CNewVal::OnUpdateEdit1() 
+{
+	// TODO: Add your control notification handler code here
+	char buffer[256];
+	m_value.GetWindowText(buffer,16);
+	m_Value=atoi(buffer);
+
+	if (m_Value < min)
+	{
+		m_Value = min;
+		sprintf(buffer,"Below Range. Use this HEX value for twk: %x",m_Value-min);
+	}
+	else if(m_Value > max)
+	{
+		m_Value = max;
+		sprintf(buffer,"Above Range. Use this HEX value for twk: %x",m_Value-min);
+	}
+	else
+	{
+		sprintf(buffer,"Use this HEX value for twk: %x",m_Value-min);
+	}
+	m_text.SetWindowText(buffer);
 }
