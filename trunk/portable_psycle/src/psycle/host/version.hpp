@@ -3,6 +3,13 @@
 #if 0
 /*
 $Log$
+Revision 1.12  2005/02/19 20:51:13  jaz001
+* fix bug in song.hpp "_ptrack" and "_ptrackline" functions where it didn't return the correct value
+* fix bug in XMSampler/XMInstrument where "&" and  "|" were being used erroneously in place of "&&"and "||".
+* Added IT loader
+* Converted XMSampler "Layers (waves) per instrument" to independent sample bank and instrument bank.
+* Work in progress -> Convert XMSampler to the default Psycle sampler. (Psampler)
+
 Revision 1.11  2005/02/07 10:48:20  johan-boule
 bug fix
 
@@ -72,7 +79,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 30 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 31 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
