@@ -316,7 +316,7 @@ LONG CFileXM::ImportInstrument(Song *s, LONG iStart, int idx)
  		TRACE("samplecount = %d\n",iSampleCount);
 
 	// store instrument name
-	strcpy(s->_instruments[idx]._sName,sInstrName);
+	strcpy(s->_pInstrument[idx]->_sName,sInstrName);
 	delete [] sInstrName;
 
 	int iSampleHeader = ReadInt4();
@@ -374,24 +374,24 @@ LONG CFileXM::ImportSampleHeader(Song *s, LONG iStart, int iInstrIdx, int iSampl
 
 	if(bLoop)
 	{
-		s->_instruments[iInstrIdx].waveLoopType[iSampleIdx]=true;
+		s->_pInstrument[iInstrIdx]->waveLoopType[iSampleIdx]=true;
 		if(b16Bit)
 		{
-			s->_instruments[iInstrIdx].waveLoopStart[iSampleIdx]=iLoopStart/2;
-			s->_instruments[iInstrIdx].waveLoopEnd[iSampleIdx]=(iLoopLength+iLoopStart)/2;
+			s->_pInstrument[iInstrIdx]->waveLoopStart[iSampleIdx]=iLoopStart/2;
+			s->_pInstrument[iInstrIdx]->waveLoopEnd[iSampleIdx]=(iLoopLength+iLoopStart)/2;
 		}
 		else
 		{
-			s->_instruments[iInstrIdx].waveLoopStart[iSampleIdx]=iLoopStart;
-			s->_instruments[iInstrIdx].waveLoopEnd[iSampleIdx]=iLoopLength+iLoopStart;
+			s->_pInstrument[iInstrIdx]->waveLoopStart[iSampleIdx]=iLoopStart;
+			s->_pInstrument[iInstrIdx]->waveLoopEnd[iSampleIdx]=iLoopLength+iLoopStart;
 		}
 	}
 
 
-	s->_instruments[iInstrIdx].waveVolume[iSampleIdx]= iVol;
-	s->_instruments[iInstrIdx].waveTune[iSampleIdx] = iRelativeNote;	
-//	s->_instruments[iInstrIdx].waveFinetune[iSampleIdx] = int((100.0*iFineTune)/128);
-	s->_instruments[iInstrIdx].waveFinetune[iSampleIdx] = iFineTune*2;
+	s->_pInstrument[iInstrIdx]->waveVolume[iSampleIdx]= iVol;
+	s->_pInstrument[iInstrIdx]->waveTune[iSampleIdx] = iRelativeNote;	
+//	s->_pInstrument[iInstrIdx]->waveFinetune[iSampleIdx] = int((100.0*iFineTune)/128);
+	s->_pInstrument[iInstrIdx]->waveFinetune[iSampleIdx] = iFineTune*2;
 
 	smpLen[iSampleIdx] = iLen;
 	smpFlags[iSampleIdx] = iFlags;
@@ -423,7 +423,7 @@ LONG CFileXM::ImportSampleData(Song *s, LONG iStart, int iInstrIdx, int iSampleI
 		for(int j=0;j<sampleCnt;j+=2)
 		{
 			wNew += 0xFF & smpbuf[j] | smpbuf[j+1]<<8;				
-			s->_instruments[iInstrIdx].waveDataL[iSampleIdx][out] = wNew;
+			s->_pInstrument[iInstrIdx]->waveDataL[iSampleIdx][out] = wNew;
 			out++;
 		}   
 	}
@@ -433,7 +433,7 @@ LONG CFileXM::ImportSampleData(Song *s, LONG iStart, int iInstrIdx, int iSampleI
 		for(int j=0;j<sampleCnt;j++)
 		{			
 			wNew += (smpbuf[j]<<8);// | char(rand())); // scale + dither
-			s->_instruments[iInstrIdx].waveDataL[iSampleIdx][j] = wNew;
+			s->_pInstrument[iInstrIdx]->waveDataL[iSampleIdx][j] = wNew;
 		}
 	}
 

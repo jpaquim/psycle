@@ -104,13 +104,13 @@ void CWaveEdFrame::OnUpdateStatusBar(CCmdUI *pCmdUI)  {     pCmdUI->Enable ();  
 void CWaveEdFrame::AdjustStatusBar(int ins, int wav)
 {
 	char buff[32];
-	int	wl=_pSong->_instruments[ins].waveLength[wav];
+	int	wl=_pSong->_pInstrument[ins]->waveLength[wav];
 	sprintf(buff, "Size: %u", wl);
 	statusbar.SetPaneText(1, buff, TRUE);
 
 	if (wl)
 	{
-		if (_pSong->_instruments[ins].waveStereo[wav]) statusbar.SetPaneText(2, "Mode: Stereo", TRUE);
+		if (_pSong->_pInstrument[ins]->waveStereo[wav]) statusbar.SetPaneText(2, "Mode: Stereo", TRUE);
 		else statusbar.SetPaneText(2, "Mode: Mono", TRUE);
 	}
 	else statusbar.SetPaneText(2, "Mode: Empty", TRUE);
