@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.10  2005/01/23 09:04:48  johan-boule
+new version
+
 Revision 1.9  2005/01/19 23:16:55  johan-boule
 no more .rar binary distro, it's 7-zip now :-)
 
@@ -51,7 +54,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__VERSION__CODEBASE 1
 #define PSYCLE__VERSION__MAJOR 7
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 22 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 23 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
