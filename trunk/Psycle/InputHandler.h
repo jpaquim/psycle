@@ -363,8 +363,8 @@ struct CmdDef
 		case cdefInfoPattern:	return "Pattern Info";
 		case cdefInfoMachine:	return "Machine Info";
 
-		case cdefEditMachine:	return "Edit Machine Parameters";
-		case cdefEditPattern:	return "Edit Pattern";
+		case cdefEditMachine:	return "Screen of Machines";
+		case cdefEditPattern:	return "Screen of Patterns";
 		case cdefEditInstr:		return "Edit Instrument";
 		case cdefAddMachine:		return "Add New Machine";
 
