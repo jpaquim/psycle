@@ -11,11 +11,11 @@ namespace psycle
 	class XMInstrument
 	{
 	public:
-		// Max number of samples per Instrument
+		/// Max number of samples per Instrument
 		static const int MAX_INSTRUMENT_SAMPLES = 32;
 		/// Size of the Instrument's note mapping.
 		static const int NOTE_MAP_SIZE = 120; // C-0 .. B-9
-		// A Note pair (note number=first, and sample number=second)
+		/// A Note pair (note number=first, and sample number=second)
 		typedef std::pair<short,short> NotePair;
 		
 		/// When a note starts to play in a channel, and there is still a note playing in it,
@@ -26,6 +26,21 @@ namespace psycle
 			NOTEOFF = 0x2,		///  [Note off]
 			FADEOUT = 0x3		///  [Note fade]
 			};
+/*		enum DuplicateCheckType
+			{
+			 NONE=0x0,
+			 NOTE,
+			 SAMPLE,
+			 INSTRUMENT
+			};
+		enum DuplicateNoteAction
+			{
+			STOP=0x0,
+			NOTEOFF,
+			FADEOUT
+			};*/
+		// DCT duplicated check type
+		// DCA duplicated check action
 
 		//////////////////////////////////////////////////////////////////////////
 		//  XMInstrument::Envelope Class declaration
@@ -209,6 +224,8 @@ namespace psycle
 				m_WaveFineTune = 0;	
 				m_WaveStereo = false;
 				m_WaveLoopType = DO_NOT;
+				m_PanFactor = 0.5f;
+				m_PanEnabled = false;
 				memset(m_WaveName,0,sizeof(m_WaveName)*sizeof(TCHAR));
 			};
 
@@ -223,6 +240,12 @@ namespace psycle
 			const unsigned short WaveVolume(){ return m_WaveVolume;};
 			void WaveVolume(const unsigned short value){m_WaveVolume = value;};
 			
+			const float PanFactor(){ return m_PanFactor;};
+			void PanFactor(const float value){m_PanFactor = value;};
+
+			bool PanEnabled(){ return m_PanEnabled;};
+			void PanEnabled(bool pan){ m_PanEnabled=pan;};
+
 			const UINT WaveLoopStart(){ return m_WaveLoopStart;};
 			void WaveLoopStart(const UINT value){m_WaveLoopStart = value;};
 
@@ -298,12 +321,14 @@ namespace psycle
 			UINT m_WaveLoopStart;
 			UINT m_WaveLoopEnd;
 			int m_WaveTune;
-			int m_WaveFineTune;	
+			int m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			LoopType m_WaveLoopType;
 			bool m_WaveStereo;
 			TCHAR m_WaveName[32];
 			signed short *m_pWaveDataL;
 			signed short *m_pWaveDataR;
+			bool m_PanEnabled;
+			float m_PanFactor; // Default position for panning ( 0..1 ) 0right 1 left
 
 		};// WaveData()
 
@@ -364,6 +389,9 @@ namespace psycle
 		const float Pan() { return m_InitPan;};
 		void Pan(const float pan) { m_InitPan = pan;};
 
+		const bool PanEnabled() { return m_PanEnabled;};
+		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
+
 		/// Get Volume Fade Enable or Disable
 		const bool IsVolumeFade() { return m_bVolumeFade;};
 		/// Set Volume Fade Enable or Disable
@@ -419,6 +447,7 @@ namespace psycle
 
 			// Paninng
 			m_InitPan = other.m_InitPan;
+			m_PanEnabled=false;
 			m_PanEnvelope = other.m_PanEnvelope;
 
 			// Pitch Envelope
@@ -467,6 +496,7 @@ namespace psycle
 
 		// Paninng
 		float m_InitPan;
+		bool m_PanEnabled;
 		Envelope m_PanEnvelope;
 		// Pitch Envelope
 		Envelope m_PitchEnvelope;

@@ -418,6 +418,7 @@ namespace host{
 							case 0x50:
 								e._cmd = XMSampler::CMD::SET_FINE_TUNE;
 								e._parameter = param & 0xf;
+								break;
 							case 0x60:
 								e._cmd = XMSampler::CMD::PATTERN_LOOP;
 								e._parameter = param & 0xf;
@@ -690,7 +691,7 @@ namespace host{
 		char iVol = ReadInt1();
 		char iFineTune = ReadInt1();
 		char iFlags = ReadInt1();
-		char iPanning = ReadInt1();
+		unsigned char iPanning = ReadInt1();
 		char iRelativeNote = ReadInt1();
 		char iReserved = ReadInt1();	
 
@@ -712,6 +713,8 @@ namespace host{
 		_wave.Init();
 		_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
 		_wave.WaveLength(b16Bit?iLen / 2:iLen);
+		_wave.PanEnabled(true);
+		_wave.PanFactor(iPanning/256.0f);
 //		XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
 //		sampler.Instrument(iInstrIdx).rWaveData()..Name() = sName;
 		
@@ -746,7 +749,7 @@ namespace host{
 
 		_wave.WaveVolume(((int)iVol * 100) / 64);
 		_wave.WaveTune(iRelativeNote);
-		_wave.WaveFineTune(iFineTune*2);
+		_wave.WaveFineTune(iFineTune*2); // WaveFineTune has double range.
 
 		smpLen[iSampleIdx] = iLen;
 		smpFlags[iSampleIdx] = iFlags;

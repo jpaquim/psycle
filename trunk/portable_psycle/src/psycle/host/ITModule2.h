@@ -20,6 +20,14 @@ namespace psycle
 			bool LoadS3MSample(Song *s,int iInstrIdx,int iSampleIdx);
 			bool LoadS3MSampleData(Song *s,int iInstrIdx,int iSampleIdx,int iLen,bool bstereo,bool b16Bit,bool packed);
 			bool LoadS3MPattern(Song *s,int patIdx);
+			bool LoadS3MModuleX(Song *s);
+			bool LoadS3MInstX(Song *s,int iInstIdx);
+			bool LoadS3MSampleX(Song *s,int iInstrIdx,int iSampleIdx);
+			bool LoadS3MSampleDataX(Song *s,int iInstrIdx,int iSampleIdx,int iLen,bool bstereo,bool b16Bit,bool packed);
+			bool LoadS3MPatternX(Song *s,int patIdx);
+		private:
+			char smpFlags [256];
+			char moduleFlags;
 		};
 	}
 }

@@ -1975,7 +1975,7 @@ NAMESPACE__BEGIN(psycle)
 				//CXM XM;
 				char buffer[512];		
 				Global::_pSong->New();
-				if(!s3m.LoadS3MModule(_pSong))
+				if(!s3m.LoadS3MModuleX(_pSong))
 					{			
 					MessageBox("Load failed");
 					Global::_pSong->New();
@@ -1983,10 +1983,11 @@ NAMESPACE__BEGIN(psycle)
 					return;
 					}
 				s3m.Close();
-				// build sampler
+/*				// build sampler
 				_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",0);
 				_pSong->InsertConnection(0,MASTER_INDEX);
 				_pSong->seqBus = 0;
+*/
 				std::sprintf
 					(
 					buffer,"%s\n\n%s\n\n%s",
