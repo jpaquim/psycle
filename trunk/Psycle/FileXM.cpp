@@ -107,7 +107,9 @@ long CFileXM::ImportPatterns(Song *s)
 		if ( playOrder[i] < MAX_PATTERNS ) s->playOrder[i] = playOrder[i];
 		else s->playOrder[i] = 0;
 	}
-	s->playLength = iSongLen;
+	if ( iSongLen > MAX_PATTERNS ) s->playLength = MAX_PATTERNS;
+	else s->playLength = iSongLen;
+
 	s->SONGTRACKS = iNoChannels;
 	
 	// tempo

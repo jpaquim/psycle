@@ -133,9 +133,10 @@ void CFrameMachine::OnPaint()
 	int hsp=0;
 
 	CDC memDC;
+	CBitmap* oldbmp;
 
 	memDC.CreateCompatibleDC(&dc);
-	memDC.SelectObject(&b_knob);
+	oldbmp=memDC.SelectObject(&b_knob);
 
 	int y_knob = 0;
 	int x_knob = 0;
@@ -264,6 +265,8 @@ void CFrameMachine::OnPaint()
 			y_knob += K_YSIZE;
 		}
 	}
+	memDC.SelectObject(oldbmp);
+	memDC.DeleteDC();
 }
 
 void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
