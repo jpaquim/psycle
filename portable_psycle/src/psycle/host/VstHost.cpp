@@ -751,10 +751,32 @@ namespace psycle
 			}
 			*/
 
+			VstMidiEvent* plugin::reserveVstMidiEvent() {
+				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
+				if(queue_size >= MAX_VST_EVENTS) {
+					loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+					return NULL;
+				}
+				return &midievent[queue_size++];
+			}
+			
+			VstMidiEvent* plugin::reserveVstMidiEventAtFront() {
+				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
+				if(queue_size >= MAX_VST_EVENTS) {
+					loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+					return NULL;
+				}
+				for(int i=queue_size; i > 0 ; --i) midievent[i] = midievent[i - 1];
+				queue_size++;
+				return &midievent[0];
+			}
+
+
 			bool plugin::AddMIDI(unsigned char data0, unsigned char data1, unsigned char data2)
 			{
 				if(!instantiated) return false;
-				VstMidiEvent * pevent(&midievent[queue_size]);
+				VstMidiEvent * pevent(reserveVstMidiEvent());
+				if(!pevent) return false;
 				pevent->type = kVstMidiType;
 				pevent->byteSize = 24;
 				pevent->deltaFrames = 0;
@@ -769,20 +791,21 @@ namespace psycle
 				pevent->midiData[1] = data1;
 				pevent->midiData[2] = data2;
 				pevent->midiData[3] = 0;
-				if(queue_size < MAX_VST_EVENTS - 1) ++queue_size; else queue_size = MAX_VST_EVENTS - 1;
 				return true;
 			}
 
-
 			void plugin::SendMidi()
 			{
+				assert(queue_size >= 0 && queue_size <= MAX_VST_EVENTS);
+
 				if(instantiated && queue_size > 0)
 				{
 					// Prepare MIDI events and free queue dispatching all events
-					if(queue_size > MAX_VST_EVENTS - 1) queue_size = MAX_VST_EVENTS - 1;
 					events.numEvents = queue_size;
 					events.reserved = 0;
-					for(int q(0) ; q < queue_size ; ++q) events.events[q] = (VstEvent*) &midievent[q];
+					for(int q(0) ; q < queue_size ; ++q)
+						events.events[q] = (VstEvent*) &midievent[q];
+					queue_size = 0;
 					//Finally Send the events.
 					try
 					{
@@ -790,11 +813,10 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
-						queue_size = 0;
+						assert(false);
 						//throw;
 					}
 				}
-				queue_size = 0;
 			}
 
 			static std::string audioMaster_opcode_to_string(long opcode)
@@ -1253,74 +1275,62 @@ namespace psycle
 			{
 				if(instantiated)
 				{
-					if(trackNote[channel].key != 255) AddNoteOff(channel, trackNote[channel].key, true);
-					VstMidiEvent * pevent(&midievent[queue_size]);
-					pevent->type = kVstMidiType;
-					pevent->byteSize = 24;
-					pevent->deltaFrames = 0;
-					pevent->flags = 0;
-					pevent->detune = 0;
-					pevent->noteLength = 0;
-					pevent->noteOffset = 0;
-					pevent->reserved1 = 0;
-					pevent->reserved2 = 0;
-					pevent->noteOffVelocity = 0;
-					pevent->midiData[0] = 0x90 | midichannel; // Midi On
-					pevent->midiData[1] = key;
-					pevent->midiData[2] = velocity;
-					pevent->midiData[3] = 0;
-					if(queue_size < MAX_VST_EVENTS - 1) ++queue_size; else queue_size = MAX_VST_EVENTS - 1;
-					note thisnote;
-					thisnote.key = key;
-					thisnote.midichan = midichannel;
-					trackNote[channel] = thisnote;
-					return true;
+					if(trackNote[channel].key != 255)
+						AddNoteOff(channel, trackNote[channel].key, true);
+
+					if(AddMIDI(0x90 | midichannel /*Midi On*/, key, velocity)) {
+						note thisnote;
+						thisnote.key = key;
+						thisnote.midichan = midichannel;
+						trackNote[channel] = thisnote;
+						return true;
+					}
 				}
 				return false;
 			}
 
 			bool instrument::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart)
 			{
-				if(instantiated)
+				if(!instantiated)
+					return false;
+				if(trackNote[channel].key == 255)
+					return false;
+				VstMidiEvent * pevent;
+				if( addatStart)
 				{
-					if(trackNote[channel].key != 255)
-					{
-						VstMidiEvent * pevent;
-						if( addatStart)
-						{
-							// PATCH:
-							// When a new note enters, it adds a note-off for the previous note playing in
-							// the track (this is ok). But if you have like: A-4 C-5 and in the next line
-							// C-5 E-5 , you will only hear E-5.
-							// Solution: Move the NoteOffs at the beginning.
-							for(int i(MAX_VST_EVENTS - 1) ; i > 0 ; --i) midievent[i] = midievent[i - 1];
-							pevent = &midievent[0];
-						}
-						else pevent = &midievent[queue_size];
-						pevent->type = kVstMidiType;
-						pevent->byteSize = 24;
-						pevent->deltaFrames = 0;
-						pevent->flags = 0;
-						pevent->detune = 0;
-						pevent->noteLength = 0;
-						pevent->noteOffset = 0;
-						pevent->reserved1 = 0;
-						pevent->reserved2 = 0;
-						pevent->noteOffVelocity = 0;
-						pevent->midiData[0] = 0x80 | static_cast<unsigned char>(trackNote[channel].midichan); //midichannel; // Midi Off
-						pevent->midiData[1] = trackNote[channel].key;
-						pevent->midiData[2] = 0;
-						pevent->midiData[3] = 0;
-						if(queue_size < MAX_VST_EVENTS - 1) ++queue_size; else queue_size = MAX_VST_EVENTS - 1;
-						note thisnote;
-						thisnote.key = 255;
-						thisnote.midichan = 0;
-						trackNote[channel] = thisnote;
-						return true;
-					}
-					else return false;
+					// PATCH:
+					// When a new note enters, it adds a note-off for the previous note playing in
+					// the track (this is ok). But if you have like: A-4 C-5 and in the next line
+					// C-5 E-5 , you will only hear E-5.
+					// Solution: Move the NoteOffs at the beginning.
+					pevent = reserveVstMidiEventAtFront();
 				}
-				else return false;
+				else 
+				{
+					pevent = reserveVstMidiEvent();
+				}
+				if(!pevent)
+					return false;
+				pevent->type = kVstMidiType;
+				pevent->byteSize = 24;
+				pevent->deltaFrames = 0;
+				pevent->flags = 0;
+				pevent->detune = 0;
+				pevent->noteLength = 0;
+				pevent->noteOffset = 0;
+				pevent->reserved1 = 0;
+				pevent->reserved2 = 0;
+				pevent->noteOffVelocity = 0;
+				pevent->midiData[0] = 0x80 | static_cast<unsigned char>(trackNote[channel].midichan); //midichannel; // Midi Off
+				pevent->midiData[1] = trackNote[channel].key;
+				pevent->midiData[2] = 0;
+				pevent->midiData[3] = 0;
+
+				note thisnote;
+				thisnote.key = 255;
+				thisnote.midichan = 0;
+				trackNote[channel] = thisnote;
+				return true;
 			}
 
 			void instrument::Stop()
