@@ -10,7 +10,7 @@ A quick doc on skinning psycle
 
 2) What do I need in order to skin?
 
-	You need to do four files, two for graphics, and two for image information.
+	You need to make four files, two for graphics, and two for image information.
 	These files are the folowing:
 
 		your_machine_graphics_name.bmp
@@ -18,7 +18,7 @@ A quick doc on skinning psycle
 		your_machine_graphics_info_.psm
 		your_header_graphics_info.psh
 
-	You can put them in subdirectories if you like, but they have NOT to contaion dots "."
+	You can put them in subdirectories if you like, but they have NOT to contain dots "."
 	(this limitation might be removed at a later time).
 
 	Also, note that the .psm and the .psh files need to be on the same directory than the 
@@ -26,7 +26,7 @@ A quick doc on skinning psycle
 
 3) How do I make the files?
 
-	The best way to start is getting one skin and modifying it over it. Once you understand
+	The best way to start is getting one skin and modifying it. Once you understand
 	how everything works, you might be confident on starting from your own work.
 
 	Notes for graphics:
@@ -59,10 +59,10 @@ A quick doc on skinning psycle
 	"effect_mute_source"=197,51,19,11   <----- the mute highlighted graphic
 	"effect_bypass_source"=221,51,21,10 <----- the bypass highlighted graphic
 
-	If you do not want a vu on either machine you may set the height of the vu source 0.
+	If you do not want a vu on either machine you may set the height of the vu0_source to 0.
 
 
-	The following values tell psycle how has to draw the different objects.
+	The following values tell psycle how has it to draw the different objects.
 	Here, the coords are relative to the top left corner of the source graphic.
  	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)
 

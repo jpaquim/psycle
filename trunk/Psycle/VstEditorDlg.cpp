@@ -113,6 +113,8 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 	pParamGui= (CDefaultVstGui*)_splitter.GetPane(0,VST_PARAM_PANE);
 	pParamGui->_pMachine = _pMachine;
 	pParamGui->mainView=pGui;
+	pParamGui->childView=wndView;
+	pParamGui->MachineIndex=MachineIndex;
 	pParamGui->Init();
 
 	creatingwindow = false;
