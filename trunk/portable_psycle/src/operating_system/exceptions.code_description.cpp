@@ -13,7 +13,7 @@ namespace operating_system
 	{
 		const std::string code_description(const unsigned long int & code) throw()
 		{
-			char * error_message_pointer;
+			char * error_message_pointer(0);
 			::FormatMessage // ouch! plain old c api style, this is ugly...
 			(
 				FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
