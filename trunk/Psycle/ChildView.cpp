@@ -151,9 +151,12 @@ CChildView::~CChildView()
 		delete pPatternDraw;
 		pPatternDraw = temp;
 	}
-
+	
 	if ( bmpDC != NULL )
 	{
+		char buf[100];
+		sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
+		TRACE(buf);
 		bmpDC->DeleteObject();
 		delete bmpDC;
 	}
@@ -449,9 +452,21 @@ void CChildView::OnAppExit()
 
 #include "machineview.cpp"
 #include "patviewnew.cpp"
+/*
+void CChildView::OnPaint() 
+{
+	if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
+
+	CPaintDC dc(this);
+	CDC bufDC;
+	bufDC.CreateCompatibleDC(&dc);
+	bufDC.DeleteDC();
+}
+*/
 
 void CChildView::OnPaint() 
 {
+	if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 	CPaintDC dc(this);
 
 	if ( bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
@@ -460,10 +475,15 @@ void CChildView::OnPaint()
 		GetClientRect(&rc);
 		bmpDC = new CBitmap;
 		bmpDC->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
-
+		char buf[100];
+		sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%.8X\n",(int)bmpDC);
+		TRACE(buf);
 	}
 	else if ( bmpDC != NULL && !Global::pConfig->useDoubleBuffer ) // buffer deletion
 	{
+		char buf[100];
+		sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
+		TRACE(buf);
 		bmpDC->DeleteObject();
 		delete bmpDC;
 		bmpDC=NULL;
@@ -497,6 +517,7 @@ void CChildView::OnPaint()
 		{
 			DrawPatEditor(&bufDC);
 		}
+
 		CRect rc;
 		GetClientRect(&rc);
 		dc.BitBlt(0,0,rc.right-rc.left,rc.bottom-rc.top,&bufDC,0,0,SRCCOPY);
@@ -558,12 +579,12 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 	CH = cy;
 	_pSong->viewSize.x=cx-148; // Hack to move machines boxes inside of the visible area.
 	_pSong->viewSize.y=cy-48;
-
+	
 	const int oldvl = VISLINES;
 	const int oldvt = VISTRACKS;
 	VISLINES = (CH-YOFFSET)/ROWHEIGHT;
 	VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
-
+	
 	if (VISLINES < 1) 
 	{ 
 		VISLINES = 1; 
@@ -572,9 +593,12 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 	{ 
 		VISTRACKS = 1; 
 	}
-
+	
 	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 	{
+		char buf[100];
+		sprintf(buf,"CChildView::OnResize(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
+		TRACE(buf);
 		bmpDC->DeleteObject();
 		delete bmpDC;
 		bmpDC=NULL;
@@ -784,6 +808,7 @@ void CChildView::OnFileNew()
 		pParentMain->PsybarsUpdate(); // Updates all values of the bars
 		pParentMain->UpdatePlayOrder(false);
 		pParentMain->WaveEditorBackUpdate();
+		pParentMain->m_wndInst.WaveUpdate();
 		pParentMain->UpdateSequencer();
 		RecalculateColourGrid();
 		Repaint();
@@ -1473,6 +1498,7 @@ void CChildView::OnFileImportXmfile()
 		}
 		pParentMain->PsybarsUpdate();
 		pParentMain->WaveEditorBackUpdate();
+		pParentMain->m_wndInst.WaveUpdate();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 		RecalculateColourGrid();
@@ -1571,6 +1597,7 @@ void CChildView::OnFileImportItfile()
 		Repaint();
 		pParentMain->PsybarsUpdate();
 		pParentMain->WaveEditorBackUpdate();
+		pParentMain->m_wndInst.WaveUpdate();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 	}
@@ -1731,6 +1758,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 		Global::_pSong->seqBus=0;
 		pParentMain->PsybarsUpdate();
 		pParentMain->WaveEditorBackUpdate();
+		pParentMain->m_wndInst.WaveUpdate();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 		RecalculateColourGrid();

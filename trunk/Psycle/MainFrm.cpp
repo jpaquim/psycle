@@ -306,7 +306,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 
 	// Sequencer Bar
-	m_wndSeq.Create(this,IDD_SEQUENCER,CBRS_LEFT,0x9002);
+	m_wndSeq.Create(this,IDD_SEQUENCER,CBRS_LEFT,AFX_IDW_DIALOGBAR);
 
 	// set multichannel audition checkbox status
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MULTICHANNEL_AUDITION);
@@ -1250,7 +1250,8 @@ void CMainFrame::WaveEditorBackUpdate()
 void CMainFrame::ShowInstrumentEditor()
 {
 	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-	cc2->SetCurSel(2); // select Waves
+	cc2->SetCurSel(AUX_WAVES);
+	_pSong->auxcolSelected=_pSong->instSelected;
 	UpdateComboIns();
 	m_wndInst.ShowWindow(SW_SHOWNORMAL);
 	m_wndInst.SetActiveWindow();

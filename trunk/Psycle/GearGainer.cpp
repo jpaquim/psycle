@@ -53,7 +53,7 @@ BOOL CGearGainer::OnInitDialog()
 	sprintf(buffer,_pMachine->_editName);
 	SetWindowText(buffer);
 
-	m_volsider.SetRange(0, 1024, true);
+	m_volsider.SetRange(0, 1024);
 	m_volsider.SetPos(1024-_pMachine->_outWet);
 	m_volsider.SetTic(0);
 	m_volsider.SetTicFreq(64);

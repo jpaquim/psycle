@@ -65,7 +65,6 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CEnvDialog)
 	virtual BOOL OnInitDialog();
-	afx_msg void OnPaint();
 	afx_msg void OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDrawAmpDecaySlider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDrawAmpSustainSlider(NMHDR* pNMHDR, LRESULT* pResult);

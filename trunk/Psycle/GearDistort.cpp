@@ -57,10 +57,10 @@ BOOL CGearDistort::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_post.SetRange(0, 128, true);
-	m_posc.SetRange(0, 128, true);
-	m_negt.SetRange(0, 128, true);
-	m_negc.SetRange(0, 128, true);
+	m_post.SetRange(0, 128);
+	m_posc.SetRange(0, 128);
+	m_negt.SetRange(0, 128);
+	m_negc.SetRange(0, 128);
 	m_post.SetTicFreq(16);
 	m_posc.SetTicFreq(16);
 	m_negt.SetTicFreq(16);

@@ -51,7 +51,7 @@ BOOL CWireDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	
 	Inval = false;
-	m_volslider.SetRange(0,128,true);
+	m_volslider.SetRange(0,128);
 	m_volslider.SetTicFreq(16);
 	_dstWireIndex = _pSrcMachine->FindInputWire(_pDstMachine,isrcMac);
 

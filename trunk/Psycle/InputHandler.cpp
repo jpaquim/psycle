@@ -66,14 +66,14 @@ bool InputHandler::SetCmd(CmdDef cmd, UINT key, UINT modifiers)
 	}
 
 	// normal
-	TRACE("Imm. Command: '%s' (%d) has been set to key %d, modifiers = %d%d%d\n",
+/*	TRACE("Imm. Command: '%s' (%d) has been set to key %d, modifiers = %d%d%d\n",
 		cmd.GetName(),
 		int(cmd.ID),
 		key,
 		modifiers&MOD_S,
 		modifiers&MOD_C,
 		modifiers&MOD_E);
-
+*/
 	// remove last key def, if it exists
 	UINT i,j;
 	for(j=0;j<MOD_MAX;j++)

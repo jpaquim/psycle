@@ -76,19 +76,19 @@ BOOL CMasterDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	m_slidermaster.SetRange(0, 256, true);
-	m_sliderm1.SetRange(0, 256, true);
-	m_sliderm2.SetRange(0, 256, true);
-	m_sliderm3.SetRange(0, 256, true);
-	m_sliderm4.SetRange(0, 256, true);
-	m_sliderm5.SetRange(0, 256, true);
-	m_sliderm6.SetRange(0, 256, true);
-	m_sliderm7.SetRange(0, 256, true);
-	m_sliderm8.SetRange(0, 256, true);
-	m_sliderm9.SetRange(0, 256, true);
-	m_sliderm10.SetRange(0, 256, true);
-	m_sliderm11.SetRange(0, 256, true);
-	m_sliderm12.SetRange(0, 256, true);
+	m_slidermaster.SetRange(0, 256);
+	m_sliderm1.SetRange(0, 256);
+	m_sliderm2.SetRange(0, 256);
+	m_sliderm3.SetRange(0, 256);
+	m_sliderm4.SetRange(0, 256);
+	m_sliderm5.SetRange(0, 256);
+	m_sliderm6.SetRange(0, 256);
+	m_sliderm7.SetRange(0, 256);
+	m_sliderm8.SetRange(0, 256);
+	m_sliderm9.SetRange(0, 256);
+	m_sliderm10.SetRange(0, 256);
+	m_sliderm11.SetRange(0, 256);
+	m_sliderm12.SetRange(0, 256);
 	
 	m_slidermaster.SetPos(256-_pMachine->_outDry);
 

@@ -83,8 +83,8 @@ BOOL CInstrumentEditor::OnInitDialog()
 	
 	cando=false;
 	
-	m_volumebar.SetRange(0,512,true);
-	m_finetune.SetRange(-256,256,true);
+	m_volumebar.SetRange(0,512);
+	m_finetune.SetRange(0,512);	// Don't use (-,+) range. It fucks up with the "0"
 
 	m_instname.SetLimitText(31);
 	
@@ -94,7 +94,7 @@ BOOL CInstrumentEditor::OnInitDialog()
 	m_nna_combo.AddString("Note Release");
 	m_nna_combo.AddString("None");
 
-	_pSong->waveSelected=0;
+//	_pSong->waveSelected=0;
 
 	WaveUpdate();
 
@@ -145,7 +145,7 @@ void CInstrumentEditor::WaveUpdate()
 
 	// Volume bar
 	m_volumebar.SetPos(_pSong->waveVolume[si][sw]);
-	m_finetune.SetPos(_pSong->waveFinetune[si][sw]);
+	m_finetune.SetPos(_pSong->waveFinetune[si][sw]+256);
 
 	// Set looptype
 	if(_pSong->waveLoopType[si][sw])
@@ -364,7 +364,7 @@ void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 	char buffer[8];
 
 	if(cando)
-	_pSong->waveFinetune[si][sw]=m_finetune.GetPos();
+	_pSong->waveFinetune[si][sw]=m_finetune.GetPos()-256;
 	
 	sprintf(buffer,"%d",_pSong->waveFinetune[si][sw]);
 	m_finelabel.SetWindowText(buffer);
