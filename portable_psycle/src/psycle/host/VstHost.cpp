@@ -64,13 +64,13 @@ namespace psycle
 
 		}
 
-		int VSTPlugin::Instance(const char dllname[], bool overwriteName) throw(...)
+		void VSTPlugin::Instance(const char dllname[], bool overwriteName) throw(...)
 		{
 			try
 			{
 				_pEffect = 0;
 				instantiated = false;
-				if(!(h_dll = ::LoadLibrary(dllname));
+				if(!(h_dll = ::LoadLibrary(dllname)))
 				{
 					std::ostringstream s; s
 						<< "could not load library:" << dllname << std::endl
@@ -153,7 +153,7 @@ namespace psycle
 				// 10: Host to Plug, setBlockSize ( 512 ) 
 				Dispatch(effSetBlockSize, 0, STREAM_SIZE);
 				// 11: Host to Plug, getProgram returned: 0 
-				long int program(Dispatch(effGetProgram);
+				long int program(Dispatch(effGetProgram));
 				// 12: Host to Plug, getProgram returned: 0 
 				program = Dispatch( effGetProgram);
 				// 13: Host to Plug, getVstVersion returned: 2300 
@@ -180,15 +180,19 @@ namespace psycle
 						requiresRepl = true;
 					}
 				}
-				if(!_pEffect->dispatcher(_pEffect, effGetVendorString, 0, 0, &_sVendorName))
-					std::strcpy(_sVendorName, "Unknown vendor");
+				
+				if(!Dispatch(effGetVendorString, 0, 0, &_sVendorName, 0)) std::strcpy(_sVendorName, "Unknown vendor");
 				_isSynth = (_pEffect->flags & effFlagsIsSynth) ? true : false;
 				if(_sDllName) delete _sDllName;
 				_sDllName = new char[std::strlen(dllname) + 1];
 				std::strcpy(_sDllName, dllname);
 				TRACE("VST plugin dll filename : %s\n",_sDllName);
 				instantiated = true;
-				TRACE("VST plugin : Inputs = %d, Outputs = %d\n",_pEffect->numInputs,_pEffect->numOutputs);
+				TRACE("VST plugin : Inputs = %d, Outputs = %d\n", _pEffect->numInputs, _pEffect->numOutputs);
+			}
+			catch(...)
+			{
+				throw; // this is now all handled by parent calls
 			}
 		}
 

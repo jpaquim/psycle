@@ -99,7 +99,11 @@ namespace psycle
 							return false;
 						}
 					#endif
-					if(pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
+					try
+					{
+						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
+					}
+					catch(...)
 					{
 						delete pMachine; 
 						return false;
@@ -116,7 +120,11 @@ namespace psycle
 							return false;
 						}
 					#endif
-					if(pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
+					try
+					{
+						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
+					}
+					catch(...)
 					{
 						delete pMachine; 
 						return false;
@@ -1624,7 +1632,7 @@ namespace psycle
 									((Dummy*)pMac[i])->wasVST = true;
 								}
 			#else // if !_WINAMP_PLUGIN_
-								if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
+								if(CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
 								{
 									strcpy(sPath2,sPath);
 									if (!CNewMachine::TestFilename(sPath2))
@@ -1643,21 +1651,28 @@ namespace psycle
 										pMac[i]->_type = MACH_DUMMY;
 										((Dummy*)pMac[i])->wasVST = true;
 									}
-									else if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+									else
 									{
-										char sError[128];
-										sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-										::MessageBox(NULL,sError, "Loading Error", MB_OK);
+										try
+										{
+											pVstPlugin->Instance(sPath2, false); // <bohan> why not using Load?
+										}
+										catch(...)
+										{
+											char sError[128];
+											sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
+											::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-										Machine* pOldMachine = pMac[i];
-										pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-										pOldMachine->_pSamplesL = NULL;
-										pOldMachine->_pSamplesR = NULL;
-										// dummy name goes here
-										sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-										delete pOldMachine;
-										pMac[i]->_type = MACH_DUMMY;
-										((Dummy*)pMac[i])->wasVST = true;
+											Machine* pOldMachine = pMac[i];
+											pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+											pOldMachine->_pSamplesL = NULL;
+											pOldMachine->_pSamplesR = NULL;
+											// dummy name goes here
+											sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
+											delete pOldMachine;
+											pMac[i]->_type = MACH_DUMMY;
+											((Dummy*)pMac[i])->wasVST = true;
+										}
 									}
 								}
 								else
