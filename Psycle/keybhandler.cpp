@@ -666,9 +666,9 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 						}
 					}
 				}
-				Global::pInputHandler->StopNote(note,false);
 				if (i == _pSong->SONGTRACKS)
 				{
+					Global::pInputHandler->StopNote(note,false);
 					return;
 				}
 			}
@@ -768,6 +768,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	PatternEntry *entry = (PatternEntry*) toffset;
 	if (velocity==0)
 	{
+		Global::pInputHandler->StopNote(note,false);
 		if (entry->_note == note)
 		{
 			return;
