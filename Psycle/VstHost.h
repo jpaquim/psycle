@@ -40,8 +40,10 @@ public:
 	bool LoadChunk(RiffFile* pFile);	// To be removed when changing the fileformat.
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
+
 		UINT size;
 		pFile->Read(&size,sizeof(size));
+
 		if (size)
 		{
 			if (version > CURRENT_FILE_VERSION_MACD)
@@ -50,28 +52,46 @@ public:
 				pFile->Skip(size);
 				return FALSE;
 			}
-			else
-			{
-				pFile->Read(&_program,sizeof(_program));
-				// set the program
-				SetCurrentProgram(_program);
 
-				size -= sizeof(_program);
-				if (size > 0)
+			pFile->Read(&_program,sizeof(_program));
+			// set the program
+			SetCurrentProgram(_program);
+
+			UINT count;
+
+			pFile->Read(&count,sizeof(count));  // size of vars
+
+			for (UINT i = 0; i < count; i++)
+			{
+				float temp;
+				pFile->Read(&temp,sizeof(temp));
+				SetParameter(i,temp);
+			}
+
+			size -= sizeof(_program)+sizeof(count)+(sizeof(float)*count);
+
+			if (size)
+			{
+				if(_pEffect->flags & effFlagsProgramChunks)
 				{
-					if(_pEffect->flags & effFlagsProgramChunks)
+					char* pData = new char[size];
+					pFile->Read(pData, size); // Number of parameters
+					try 
 					{
-						char* pData = new char[size];
-						pFile->Read(pData, size); // Number of parameters
 						Dispatch(effSetChunk,0, size, pData,0.0f);
 						delete pData;
 					}
-					else
+					catch (...)
 					{
-						// there is a data chunk, but this machine does not want one.
-						pFile->Skip(size);
+						MessageBox(NULL,"Machine had an exception while loading it's chunk.\nIt has crashed and will be removed.",GetDllName(),NULL);
 						return FALSE;
 					}
+				}
+				else
+				{
+					// there is a data chunk, but this machine does not want one.
+					pFile->Skip(size);
+					return FALSE;
 				}
 			}
 		}
@@ -92,7 +112,7 @@ public:
 			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 			{
 				char sError[128];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				return FALSE;
 			}
@@ -100,7 +120,7 @@ public:
 		else
 		{
 			char sError[128];
-			sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+			sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
 			::MessageBox(NULL,sError, "Loading Error", MB_OK);
 			return FALSE;
 		}
@@ -111,7 +131,7 @@ public:
 			if (Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 			{
 				char sError[128];
-				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\"",sPath2);
+				sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with dummy.",sPath2);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
 				return FALSE;
 			}
@@ -119,7 +139,7 @@ public:
 		else
 		{
 			char sError[128];
-			sprintf(sError,"Missing VST plug-in \"%s\"",psFileName);
+			sprintf(sError,"Missing VST plug-in \"%s\" - replacing with dummy.",psFileName);
 			::MessageBox(NULL,sError, "Loading Error", MB_OK);
 			return FALSE;
 		}
@@ -134,17 +154,34 @@ public:
 	bool SaveChunk(RiffFile* pFile,bool &isfirst);	// "    "   "   " 
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
-		UINT size = sizeof(_program);
+		UINT count = GetNumParams();
+		UINT size = sizeof(_program)+sizeof(count)+(sizeof(float)*count);
 		char* pData = NULL;
 
 		if(_pEffect->flags & effFlagsProgramChunks)
 		{
-			size += Dispatch( effGetChunk,0,0, &pData,0.0f);
+			try 
+			{
+				size += Dispatch( effGetChunk,0,0, &pData,0.0f);
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
+			}
 		}
 
 		pFile->Write(&size,sizeof(size));
+
 		pFile->Write(&_program,sizeof(_program));
-		size-=sizeof(_program);
+
+		pFile->Write(&count,sizeof(count));
+		for (UINT i = 0; i < count; i++)
+		{
+			float temp = GetParameter(i);
+			pFile->Write(&temp,sizeof(temp));
+		}
+
+		size-=sizeof(_program)+sizeof(count)+(sizeof(float)*count);
 		if (size > 0)
 		{
 			pFile->Write(pData,size);

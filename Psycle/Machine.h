@@ -144,9 +144,20 @@ public:
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
 		UINT size;
-		pFile->Read(&size,sizeof(size));
-		// skip any data, there should be none anyway
-		pFile->Skip(size);
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+
+		UINT count;
+
+		pFile->Read(&count,sizeof(count)); // num params to load
+		for (UINT i = 0; i < count; i++)
+		{
+			int temp;
+			pFile->Read(&temp,sizeof(temp));
+			SetParameter(i,temp);
+		}
+
+		pFile->Skip(size-sizeof(count)-(count*sizeof(int)));
+
 		return TRUE;
 	};
 #if !defined(_WINAMP_PLUGIN_)
@@ -154,8 +165,15 @@ public:
 	void SaveFileChunk(RiffFile* pFile);
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
-		UINT size = 0;
+		UINT count = GetNumParams();
+		UINT size = sizeof(count)+(count*sizeof(int));
 		pFile->Write(&size,sizeof(size));
+		pFile->Write(&count,sizeof(count));
+		for (UINT i = 0; i < count; i++)
+		{
+			int temp = GetParamValue(i);
+			pFile->Write(&temp,sizeof(temp));
+		}
 	};
 	virtual void SaveDllName(RiffFile* pFile) 
 	{
@@ -213,20 +231,16 @@ public:
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
 		UINT size;
-		pFile->Read(&size,sizeof(size));
-		if (size)
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+
+		UINT count;
+
+		pFile->Read(&count,sizeof(count)); // num params to load
+		for (UINT i = 0; i < count; i++)
 		{
-			if (version > CURRENT_FILE_VERSION_MACD)
-			{
-				// data is from a newer format of psycle, it might be unsafe to load.
-				pFile->Skip(size);
-				return FALSE;
-			}
-			else
-			{
-				pFile->Read(&decreaseOnClip, sizeof(decreaseOnClip)); // numSubtracks
-			}
+			pFile->Read(&decreaseOnClip, sizeof(decreaseOnClip)); // numSubtracks
 		}
+
 		return TRUE;
 	};
 
@@ -241,8 +255,11 @@ public:
 
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
-		UINT size = sizeof(decreaseOnClip);
-		pFile->Write(&size,sizeof(size));
+		UINT count = 1;
+		UINT size = sizeof(count)+sizeof(decreaseOnClip);
+		pFile->Write(&size,sizeof(size)); // size of this part params to load
+
+		pFile->Write(&count,sizeof(count));
 		pFile->Write(&decreaseOnClip, sizeof(decreaseOnClip)); 
 	};
 
@@ -326,6 +343,18 @@ public:
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
+		UINT size;
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+
+		UINT count;
+		pFile->Read(&count,sizeof(count)); // num params to load
+		for (UINT i = 0; i < count; i++)
+		{
+			int temp;
+			pFile->Read(&temp,sizeof(temp));
+			SetParameter(i,temp);
+		}
+
 		Update();
 		return true;
 	}
@@ -484,6 +513,18 @@ public:
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
+		UINT size;
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+
+		UINT count;
+		pFile->Read(&count,sizeof(count)); // num params to load
+		for (UINT i = 0; i < count; i++)
+		{
+			int temp;
+			pFile->Read(&temp,sizeof(temp));
+			SetParameter(i,temp);
+		}
+
 		Update(_timeL,_timeR,_feedbackL,_feedbackR);
 		return true;
 	}
@@ -566,6 +607,18 @@ public:
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
+		UINT size;
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+
+		UINT count;
+		pFile->Read(&count,sizeof(count)); // num params to load
+		for (UINT i = 0; i < count; i++)
+		{
+			int temp;
+			pFile->Read(&temp,sizeof(temp));
+			SetParameter(i,temp);
+		}
+
 		Update();
 		return true;
 	}
@@ -657,6 +710,19 @@ public:
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
+		UINT size;
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+
+		UINT count;
+		pFile->Read(&count,sizeof(count)); // num params to load
+
+		for (UINT i = 0; i < count; i++)
+		{
+			int temp;
+			pFile->Read(&temp,sizeof(temp));
+			SetParameter(i,temp);
+		}
+
 		Update();
 		return true;
 	}

@@ -90,7 +90,8 @@ public:
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
 		UINT size;
-		pFile->Read(&size,sizeof(size));
+		pFile->Read(&size,sizeof(size)); // size of whole structure
+
 		if (size)
 		{
 			if (version > CURRENT_FILE_VERSION_MACD)
@@ -101,11 +102,39 @@ public:
 			}
 			else
 			{
-				byte* pData = new byte[size];
-				pFile->Read(pData, size); // Number of parameters
-				_pInterface->PutData(pData); // Internal load
-				delete pData;
-				return TRUE;
+				UINT count;
+				pFile->Read(&count,sizeof(count));  // size of vars
+				/*
+				if (count)
+				{
+					pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+				}
+				*/
+				for (UINT i = 0; i < count; i++)
+				{
+					int temp;
+					pFile->Read(&temp,sizeof(temp));
+					SetParameter(i,temp);
+				}
+
+				size -= sizeof(count) + sizeof(int)*count;
+
+				if (size)
+				{
+					byte* pData = new byte[size];
+					pFile->Read(pData, size); // Number of parameters
+					try 
+					{
+						_pInterface->PutData(pData); // Internal load
+						delete pData;
+					}
+					catch (...)
+					{
+						MessageBox(NULL,"Machine had an exception while loading it's chunk.\nIt has crashed and is being replaced by a dummy.",GetDllName(),NULL);
+						return FALSE;
+					}
+					return TRUE;
+				}
 			}
 		}
 		return TRUE;
@@ -115,14 +144,33 @@ public:
 	virtual bool Save(RiffFile* pFile);
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
 	{
-		UINT size = _pInterface->GetDataSize();
+		UINT count = GetNumParams();
+		UINT size2 = _pInterface->GetDataSize();
+		UINT size = size2 + sizeof(count) + sizeof(int)*count;
+
 		pFile->Write(&size,sizeof(size));
-		if (size)
+		pFile->Write(&count,sizeof(count));
+//		pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+
+		for (UINT i = 0; i < count; i++)
 		{
-			byte* pData = new byte[size];
-			_pInterface->GetData(pData); // Internal save
-			pFile->Write(pData, size); // Number of parameters
-			delete pData;
+			int temp = GetParamValue(i);
+			pFile->Write(&temp,sizeof(temp));
+		}
+
+		if (size2)
+		{
+			byte* pData = new byte[size2];
+			try 
+			{
+				_pInterface->GetData(pData); // Internal save
+				pFile->Write(pData, size2); // Number of parameters
+				delete pData;
+			}
+			catch (...)
+			{
+				MessageBox(NULL,"Machine had an exception while saving it's chunk.\nIt has crashed and will probably take psycle down with it.",GetDllName(),NULL);
+			}
 		}
 	};
 	virtual void SaveDllName(RiffFile* pFile) 
@@ -168,7 +216,7 @@ public:
 		if (!Instance(sPath2))
 		{
 			char sError[_MAX_PATH];
-			sprintf(sError,"Missing or corrupted native Plug-in \"%s\"",psFileName);
+			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with dummy.",psFileName);
 			::MessageBox(NULL,sError, "Error", MB_OK);
 			return FALSE;
 		}
