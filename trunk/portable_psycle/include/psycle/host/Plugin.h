@@ -125,7 +125,7 @@ namespace psycle
 			if(plugin)
 			{
 				callback();
-				//Init();
+				//Init(); // <bohan> i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
 			}
 		}
 		#pragma warning(push)

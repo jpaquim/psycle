@@ -535,6 +535,7 @@ namespace psycle
 							try
 							{
 								 plug.Instance((char*)(const char*)finder.GetFilePath());
+								 plug.Init(); // <bohan> hmm, this really isn't not object oriented. We should get rid of two-stepped constructions.
 							}
 							catch(const std::exception & e)
 							{
