@@ -36,6 +36,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 	if ( updateMode == DMNone ) updatePar=0; // Reinitializes the updatePar value
 	updateMode=drawMode;					// only after DrawPatEditor has been processed
 	
+	/*
 	switch (drawMode)
 	{
 	case DMAll: break;
@@ -51,7 +52,7 @@ void CChildView::PreparePatternRefresh(int drawMode)
 	case DMPatternHeader: break;
 	case DMNone: break;
 	}
-
+	*/
 	
 	if (drawMode == DMPatternHeader)
 	{

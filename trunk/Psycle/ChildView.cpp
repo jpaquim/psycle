@@ -361,7 +361,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 						editPosition=Global::pPlayer->_playPosition;
-						if ( viewMode == VMPattern ) Repaint(DMPlaybackChange);
+						if ( viewMode == VMPattern ) Repaint(DMPatternSwitch);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
 					}
 					else if( viewMode == VMPattern ) Repaint(DMPlayback);
 				}
