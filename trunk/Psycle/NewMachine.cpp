@@ -13,7 +13,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-int CNewMachine::pluginOrder = 0;
+int CNewMachine::pluginOrder = 1;
 bool CNewMachine::pluginName = 1;
 int CNewMachine::_numPlugins = -1;
 int CNewMachine::_numDirs = 0;

@@ -1150,6 +1150,7 @@ BOOL CWireDlg::PreTranslateMessage(MSG* pMsg)
 	}
 	else if (pMsg->message == WM_KEYUP)
 	{
+		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 	}
 	return CDialog::PreTranslateMessage(pMsg);
 }

@@ -154,7 +154,7 @@ END
 
 IDD_PSYBAR2 DIALOGEX 0, 0, 532, 16
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Pattern Step",IDC_STATIC,5,4,43,8
     COMBOBOX        IDC_SSCOMBO2,50,2,24,158,CBS_DROPDOWNLIST | WS_VSCROLL | 
@@ -181,8 +181,7 @@ BEGIN
                     WS_TABSTOP
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,238,2,1,12,
                     WS_EX_STATICEDGE
-    PUSHBUTTON      "Gear Rack",IDC_EDITMACS,190,2,43,12,WS_DISABLED,
-                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Gear Rack",IDC_GEAR_RACK,190,2,43,12,0,WS_EX_STATICEDGE
 END
 
 IDD_WAVEOUTCONFIG DIALOGEX 0, 0, 272, 79
@@ -809,7 +808,7 @@ END
 IDD_GEAR_FLANGER DIALOGEX 0, 0, 320, 227
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         170,IDC_STATIC,"Static",SS_BITMAP,4,2,217,20
     LTEXT           "Preset",IDC_STATIC,228,4,21,8
@@ -1096,7 +1095,7 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_MULTILINE,138,82,115,10
     PUSHBUTTON      "Save",IDC_EXPORTREG,197,257,55,12
     PUSHBUTTON      "Load",IDC_IMPORTREG,138,257,55,12
-    GROUPBOX        "Keyboard Options",IDC_STATIC,133,245,125,30
+    GROUPBOX        "Keymap Presets",IDC_STATIC,133,245,125,30
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
@@ -1137,7 +1136,7 @@ END
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 233
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Name\t\t\t\t\tContribution",IDC_HEADER,18,27,298,12,
                     SS_SUNKEN | NOT WS_VISIBLE | WS_BORDER
@@ -1647,6 +1646,22 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,220,24,50,14
 END
 
+IDD_GEAR_RACK DIALOG DISCARDABLE  0, 0, 262, 276
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Gear Rack"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_GEARLIST,11,10,179,257,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Machines",-1,5,0,252,272
+    PUSHBUTTON      "Create/Replace",IDC_CREATE,195,10,55,15
+    PUSHBUTTON      "Copy",IDC_COPY,195,70,55,15,WS_DISABLED
+    PUSHBUTTON      "Paste",IDC_PASTE,195,90,55,15,WS_DISABLED
+    PUSHBUTTON      "Delete",IDC_DELETE,195,30,55,15
+    PUSHBUTTON      "Swap",IDC_SWAP,195,50,55,15,WS_DISABLED
+    PUSHBUTTON      "Name",IDC_NAME,195,110,55,15,WS_DISABLED
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1942,6 +1957,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 72
     END
+
+    IDD_GEAR_RACK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 255
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 269
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1996,7 +2019,7 @@ BEGIN
     BEGIN
         MENUITEM "Reset parameters",            ID_PARAMETERS_RESETPARAMETERS
 
-        MENUITEM "Random parameters",   ID_PARAMETERS_RANDOMPARAMETERS
+        MENUITEM "Random parameters",           ID_PARAMETERS_RANDOMPARAMETERS
 
         MENUITEM SEPARATOR
         MENUITEM "Open Preset Dialog\tCtrl+P",  ID_PARAMETERS_SHOWPRESET
@@ -2009,7 +2032,7 @@ BEGIN
     BEGIN
         MENUITEM "Reset Parameters",            ID_PARAMETERS_RESETPARAMETERS
 
-        MENUITEM "Random Parameters",   ID_PARAMETERS_RANDOMPARAMETERS
+        MENUITEM "Random Parameters",           ID_PARAMETERS_RANDOMPARAMETERS
 
         MENUITEM SEPARATOR
         MENUITEM "Open Presets Dialog\tCtrl+P", ID_PARAMETERS_SHOWPRESET
@@ -2279,8 +2302,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,6,6,5
- PRODUCTVERSION 1,6,6,5
+ FILEVERSION 1,7,0,0
+ PRODUCTVERSION 1,7,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -2295,14 +2318,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
+            VALUE "Comments", "\0"
             VALUE "CompanyName", "Psycledelics\0"
             VALUE "FileDescription", "Psycle Digital Audio Studio\0"
-            VALUE "FileVersion", "1, 6, 6, 5\0"
+            VALUE "FileVersion", "1, 7, 0, 0\0"
             VALUE "InternalName", "Psycle\0"
             VALUE "LegalCopyright", "Copyright (C) 2000-2002\0"
+            VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Psycle.EXE\0"
+            VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Psycle Application\0"
-            VALUE "ProductVersion", "1, 6, 6, 5\0"
+            VALUE "ProductVersion", "1, 7, 0, 0\0"
+            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"

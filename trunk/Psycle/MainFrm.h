@@ -145,6 +145,7 @@ protected:
 	afx_msg void OnLoadwave();
 	afx_msg void OnSavewave();
 	afx_msg void OnEditwave();
+	afx_msg void OnGearRack();
 	afx_msg void OnWavebut();
 	afx_msg void OnDestroy();
 	afx_msg void OnBDecgen();
