@@ -33,6 +33,7 @@ namespace psycle
 						
 						switch(opcode)
 						{
+							// from AEffect.h
 							I(Open)
 							I(Close)
 							I(SetProgram)
@@ -64,6 +65,81 @@ namespace psycle
 							I(Identify)
 							I(GetChunk)
 							I(SetChunk)
+
+							// from aeffectx.h
+
+							// VstEvents
+							I(ProcessEvents)
+
+							// parameters and programs
+							I(CanBeAutomated)
+							I(String2Parameter)
+							I(GetNumProgramCategories)
+							I(GetProgramNameIndexed)
+							I(CopyProgram)
+
+							// connections, configuration
+							I(ConnectInput)
+							I(ConnectOutput)
+							I(GetInputProperties)
+							I(GetOutputProperties)
+							I(GetPlugCategory)
+
+							// realtime
+							I(GetCurrentPosition)
+							I(GetDestinationBuffer)
+
+							// offline
+							I(OfflineNotify)
+							I(OfflinePrepare)
+							I(OfflineRun)
+
+							// other
+							I(ProcessVarIo)
+							I(SetSpeakerArrangement)
+							I(SetBlockSizeAndSampleRate)
+							I(SetBypass)
+							I(GetEffectName)
+							I(GetErrorText)
+							I(GetVendorString)
+							I(GetProductString)
+							I(GetVendorVersion)
+							I(VendorSpecific)
+							I(CanDo)
+							I(GetTailSize)
+							I(Idle)
+							
+							// gui
+							I(GetIcon)
+							I(SetViewPosition)
+
+							// and...
+							I(GetParameterProperties)
+							I(KeysRequired)
+							I(GetVstVersion)
+							
+							// vst 2.1
+							I(EditKeyDown)
+							I(EditKeyUp)
+							I(SetEditKnobMode)
+							I(GetMidiProgramName)
+							I(GetCurrentMidiProgram)
+							I(GetMidiProgramCategory)
+							I(HasMidiProgramsChanged)
+							I(GetMidiKeyName)
+							I(BeginSetProgram)
+							I(EndSetProgram)
+
+							// vst2.3
+							I(GetSpeakerArrangement)
+							I(ShellGetNextPlugin)
+							I(StartProcess)
+							I(StopProcess)
+							I(SetTotalSampleToProcess)
+							I(SetPanLaw)
+							I(BeginLoadBank)
+							I(BeginLoadProgram)
+							
 						default:
 							{
 								std::ostringstream s;

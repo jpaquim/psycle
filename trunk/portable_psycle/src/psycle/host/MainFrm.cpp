@@ -14,6 +14,8 @@
 #include <math.h>
 #include "inputhandler.h"
 #include "KeyConfigDlg.h"
+#include <sstream>
+#include <iomanip>
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
 namespace psycle
@@ -1417,11 +1419,11 @@ namespace psycle
 								WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU,
 								this);
 						((vst::plugin*)ma)->editorWnd = m_pWndMac[tmac];
-						char winname[32];
-						sprintf(winname,"%.2X : %s",((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
-												,ma->_editName);
-
-						((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname);
+						std::ostringstream winname;
+						winname << std::hex << std::setw(2)
+							<< ((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
+							<< " : " << ma->_editName;
+						((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 						((CVstEditorDlg*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
 						isguiopen[tmac] = true;
 						CenterWindowOnPoint(m_pWndMac[tmac], point);
