@@ -468,8 +468,8 @@ public:
 	afx_msg void OnTimer( UINT nIDEvent );
 	afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 	afx_msg void OnFileNew();
-	afx_msg BOOL OnFileSave();
-	afx_msg BOOL OnFileSavesong();
+	afx_msg BOOL OnFileSave(UINT id);
+	afx_msg BOOL OnFileSavesong(UINT id);
 	afx_msg void OnFileLoadsong();
 	afx_msg void OnHelpSaludos();
 	afx_msg void OnUpdatePatternView(CCmdUI* pCmdUI);

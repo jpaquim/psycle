@@ -27,6 +27,7 @@
 #define WA_STREAM_SIZE 4096
 DWORD WINAPI __stdcall PlayThread(void *b);
 BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
+BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 
 Global _global;
 short stream_buffer[WA_STREAM_SIZE*2];
@@ -48,7 +49,7 @@ void config(HWND w)
 }
 void about(HWND hwndParent)
 {
-	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2\nBased on Psycle Engine " VERSION_NUMBER "\n\nCoded by [JAZ] on " __DATE__,"Psycle Winamp 2 Plugin",MB_OK);
+	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2\nBased on Psycle Engine " VERSION_NUMBER "\n\nCoded by Psycledelics on " __DATE__,"Psycle Winamp 2 Plugin",MB_OK);
 }
 
 void init()
@@ -182,6 +183,8 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 
 int infoDlg(char *fn, HWND hwnd)
 {
+	DialogBox(mod.hDllInstance,(char*)IDD_INFODLG,hwnd,InfoProc);
+	
 	return 0;
 }
 
@@ -438,28 +441,44 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		
 		return 1;
 		break;
-		case WM_COMMAND:
-			switch(wp)
-			{
-			case IDOK:
-				if (_global.pPlayer->_playing ) stop();
 
-				c = SendDlgItemMessage(wnd,IDC_SAMP_RATE,CB_GETCURSEL,0,0);
-				if ( (c % 2) == 0) _global.pConfig->_samplesPerSec = (int)(11025*powf(2.0f,(float)(c/2)));
-				else _global.pConfig->_samplesPerSec = (int)(12000*powf(2.0f,(float)(c/2)));
-				
-				GetDlgItemText(wnd,IDC_EDIT_NATIVE,tmptext,_MAX_PATH);
-				_global.pConfig->SetPluginDir(tmptext);
-				GetDlgItemText(wnd,IDC_EDIT_VST,tmptext,_MAX_PATH);
-				_global.pConfig->SetVstDir(tmptext);
-				EndDialog(wnd,1);
-				break;
-			case IDCANCEL:
-				EndDialog(wnd,0);
-				break;
-			}
+	case WM_COMMAND:
+		switch(wp)
+		{
+		case IDOK:
+			if (_global.pPlayer->_playing ) stop();
+
+			c = SendDlgItemMessage(wnd,IDC_SAMP_RATE,CB_GETCURSEL,0,0);
+			if ( (c % 2) == 0) _global.pConfig->_samplesPerSec = (int)(11025*powf(2.0f,(float)(c/2)));
+			else _global.pConfig->_samplesPerSec = (int)(12000*powf(2.0f,(float)(c/2)));
+			
+			GetDlgItemText(wnd,IDC_EDIT_NATIVE,tmptext,_MAX_PATH);
+			_global.pConfig->SetPluginDir(tmptext);
+			GetDlgItemText(wnd,IDC_EDIT_VST,tmptext,_MAX_PATH);
+			_global.pConfig->SetVstDir(tmptext);
+			EndDialog(wnd,1);
 			break;
+		case IDCANCEL:
+			EndDialog(wnd,0);
+			break;
+		}
+		break;
 	}
 	return 0;
 }
 
+BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
+{
+	switch(msg)
+	{
+	case WM_COMMAND:
+		switch(wp)
+		{
+		case IDCANCEL:
+			EndDialog(wnd,0);
+			break;
+		}
+		break;
+	}
+	return 0;
+}

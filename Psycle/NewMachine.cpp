@@ -81,7 +81,7 @@ BOOL CNewMachine::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	if (imgList.GetSafeHandle != 0)
+	if (imgList.GetSafeHandle() != 0)
 	{
 		imgList.DeleteImageList();
  	}
@@ -98,7 +98,7 @@ void CNewMachine::OnDestroy()
 {
 	CDialog::OnDestroy();
 	
-	if (imgList.GetSafeHandle != 0)	{
+	if (imgList.GetSafeHandle() != 0)	{
 		imgList.DeleteImageList();
 	}
 }
