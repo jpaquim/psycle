@@ -31,7 +31,6 @@
 #include "Gearfilter.h"
 #include "GearGainer.h"
 #include "GearFlanger.h"
-#include "GearScope.h"
 
 //#include "Dsp.h"
 //#include "Filter.h"
@@ -98,7 +97,7 @@ CChildView::CChildView()
 	FlangerMachineDialog = NULL;
 	for (c = 0; c < MAX_SCOPES; c++)
 	{
-		ScopeMachineDialog[c] = NULL;
+		WireDialog[c] = NULL;
 	}
 
 	updateMode=0;

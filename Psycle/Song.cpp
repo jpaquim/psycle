@@ -122,10 +122,6 @@ bool Song::CreateMachine(
 	case MACH_DUMMY:
 		pMachine = new Dummy;
 		break;
-	case MACH_SCOPE:
-		MessageBox(0,"DELETE THE SCOPE MACHINE BEFORE YOU SAVE YOUR SONG!\nDO NOT SAVE A SONG WITH A SCOPE MACHINE IN IT!!!\nTHE SCOPE MACHINE IS NOT GOING TO REMAIN AS A MACHINE!!!","WARNING!!!",0);
-		pMachine = new Scope;
-		break;
 	default:
 		return false;
 	}
@@ -1274,10 +1270,10 @@ bool Song::Load(
 				pMachine->Load(pFile);
 				break;
 			case MACH_SCOPE:
-				MessageBox(0,"DELETE THE SCOPE MACHINE AND RESAVE YOUR SONG!\nDO NOT SAVE A SONG WITH A SCOPE MACHINE IN IT!!!\nTHE SCOPE MACHINE IS NOT GOING TO REMAIN AS A MACHINE!!!","WARNING!!!",0);
-				pMachine = new Scope;
+				pMachine = new Dummy;
 				pMachine->Init();
 				pMachine->Load(pFile);
+				sprintf(pMachine->_editName,"Dummy");
 				break;
 			case MACH_PLUGIN:
 				{

@@ -274,35 +274,6 @@ protected:
 	static CIntMachParam pars[];
 };
 
-#define SCOPE_BUF_SIZE 2048
-
-class Scope : public Machine
-{
-public:
-	Scope();
-
-	virtual void Work(int numSamples);
-	virtual char* GetName(void) { return _psName; };
-	virtual void GetParamName(int numparam,char* name)
-	{
-		if ( numparam < _numPars ) strcpy(name,pars[numparam].name);
-		else strcpy(name,"Out of Range");
-	}
-	BOOL bCanDraw;
-	float bufL[SCOPE_BUF_SIZE];
-	float bufR[SCOPE_BUF_SIZE];
-	int num;
-
-	int scope_osc_freq;
-	int scope_osc_rate;
-	int scope_spec_bands;
-	int scope_spec_rate;
-	int scope_mode;
-
-protected:
-	static char* _psName;
-	static CIntMachParam pars[];
-};
 
 class CGearPsychOsc;
 
