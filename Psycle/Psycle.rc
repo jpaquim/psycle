@@ -1890,6 +1890,8 @@ BEGIN
     ID_SELECCION_ZOOM       "Zoom in view"
     ID_SELECCION_ZOOMOUT    "Zoom out view"
     ID_SELECTION_SHOWALL    "Show entire wave"
+	ID_POP_BLOCK_SWINGFILL	"Fill effects column of selected block with global BPM change commands (FFxx) to create a swing"
+	ID_POP_TRACK_SWINGFILL	"Fill effects column of current track with global BPM change commands (FFxx) to create a swing"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -1927,8 +1929,8 @@ BEGIN
     ID_EDIT_CUT             "Cut to clipboard"
     ID_EDIT_PASTE           "Paste from clipboard"
     ID_EDIT_SELECT_ALL      "Select whole wave"
-    ID_EDIT_UNDO            "Undo last action\\Undo"
-    ID_EDIT_REDO            "Redo last Undo\\Redo"
+    ID_EDIT_UNDO            "Undo last action"
+    ID_EDIT_REDO            "Redo last Undo"
 END
 
 #endif    // Neutral (Default) resources

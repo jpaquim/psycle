@@ -1,24 +1,25 @@
-I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
-
-
-
-
+*I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
 *remove waits from play when in export mode
+*<alk>I tried recordnig the wave out, the start gap is indeed fixed, but it seems the last line or two is not recorded (wave ends prematurely)
+*should be able to pick cursor colour rather than have it invert background 
+*lines between tracks should be definable, not black
 -midi control commands learn
 -longer sequences (256)
 -more tracks (64)
 -store state of follow song toggle
+-Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring pattern data and other settings, this possible? (yes, but will require new song parser...)
+-Vst hex values for parameters in gui
 !should make it so clicking on colour boxes pops up menu
 *screen flashes switching from machine to pattern view (new)
-*pattern display does not update properly while advancing through sequence when follow mode is on and song playing (new)
 *make master machine update display if it decides to change volume
 *dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today it is fine.  i think it has to do with cpu load.
 *pattern view does not refresh when skin dlg presets have changed.
 +actual skinning
 +visual preset saving/loading
 !DO NOT LOAD LIST VST list & database
+!<angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it when you want.
 <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default pattern length parameter
-<Alk^> do u think the recording with subtracting the buffer delay will be doable? <[JAZ]> pooplog : just to let you know it: the loop is wrongly done (on this "gap" wave thing) " on record
+<Alk^> do u think the recording with subtracting the buffer delay will be doable? 
 <Alk^> I think the line numbering should be optional
 <Alk^> I also think that the cursor movement after a paste should be optional to =)
 Alk* roll mouse wheel down, bug (past bottom)
