@@ -492,7 +492,7 @@ namespace psycle
 								exists = true;
 								const std::string * error(_pPlugsInfo[i]->error);
 								if(!error) out << "cached.";
-								else out << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
+								else out << "cache says it has previously been disabled because:" << std::endl << *error << std::endl;
 								out.flush();
 								break;
 							}
