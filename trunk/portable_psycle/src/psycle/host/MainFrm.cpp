@@ -1406,8 +1406,14 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_XMSAMPLER:
 						{
 						XMSamplerUI dlg(ma->_editName);
+						m_wndView.XMSamplerMachineDialog = &dlg;
+						isguiopen[tmac] = true;
 						dlg.Init((XMSampler*)ma);
+						//display the property sheet by calling CPropertySheet::DoModal for a modal property sheet,
+						//or CPropertySheet::Create for a modeless property sheet.						
 						dlg.DoModal();
+						isguiopen[tmac] = false;
+						m_wndView.XMSamplerMachineDialog = NULL;
 						break;
 						}
 					case MACH_PLUGIN:

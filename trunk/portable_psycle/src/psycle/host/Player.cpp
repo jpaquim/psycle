@@ -68,22 +68,22 @@ namespace psycle
 			SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*60)/(Global::_pSong->BeatsPerMin()*Global::_pSong->LinesPerBeat()));
 		}
 
-		void Player::SampleRate(const int sampleRate){
-			SamplesPerRow((sampleRate*60)/(bpm*tpb));
+		void Player::SampleRate(const int sampleRate)
+		{
 			///\todo update the source code of the plugins...
 			if(m_SampleRate != sampleRate)
 			{
+				RecalcSPR();
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
 					if(Global::_pSong->_pMachine[i]) Global::_pSong->_pMachine[i]->SetSampleRate(sampleRate);
 				}
 			}
-			m_SampleRate = sampleRate;
 		}
 		void Player::SetBPM(int _bpm,int _tpb)
 		{
-			tpb=_tpb;
-			bpm=_bpm;
+			if ( _tpb != 0) tpb=_tpb;
+			if ( _bpm != 0) bpm=_bpm;
 			RecalcSPR();
 			//\todo : Find out if we should notify the plugins of this change.
 		}

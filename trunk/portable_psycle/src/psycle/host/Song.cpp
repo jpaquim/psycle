@@ -1068,10 +1068,7 @@ namespace psycle
 								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
-							Global::pPlayer->bpm = m_BeatsPerMin;
-							Global::pPlayer->tpb = m_LinesPerBeat;
-							// calculate samples per tick
-							Global::pPlayer->RecalcSPR();
+							Global::pPlayer->SetBPM(m_BeatsPerMin,m_LinesPerBeat);
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)

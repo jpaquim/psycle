@@ -3,6 +3,7 @@
 #include "XMSamplerUIGeneral.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
+#include "XMSamplerMixerPage.h"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
@@ -22,9 +23,12 @@ class XMSamplerUI : public CPropertySheet
 		XMSamplerUIGeneral m_General;
 		XMSamplerUIInst m_Instrument;
 		XMSamplerUISample m_Sample;
+		XMSamplerMixerPage m_Mixer;
+		bool init;
 		// Operations
 	public:
 		void Init(Configuration* pConfig);
+		void UpdateUI(void);
 		// Overrides
 		// ClassWizard generated virtual function overrides
 		//{{AFX_VIRTUAL(CConfigDlg)
@@ -37,7 +41,6 @@ class XMSamplerUI : public CPropertySheet
 		void Init(XMSampler* pMachine);
 		// Generated message map functions
 	protected:
-		Configuration* _pConfig;
 		//{{AFX_MSG(CConfigDlg)
 		// NOTE - the ClassWizard will add and remove member functions here.
 		//}}AFX_MSG

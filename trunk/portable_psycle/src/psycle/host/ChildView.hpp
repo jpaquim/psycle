@@ -11,6 +11,7 @@ NAMESPACE__BEGIN(psycle)
 		class CMasterDlg;
 		class CWireDlg;
 		class CGearTracker;
+		class XMSamplerUI;
 
 		#define MAX_WIRE_DIALOGS 16
 
@@ -286,6 +287,7 @@ NAMESPACE__BEGIN(psycle)
 		//	bool multiPattern;
 			CMasterDlg * MasterMachineDialog;
 			CGearTracker * SamplerMachineDialog;
+			XMSamplerUI* XMSamplerMachineDialog;
 			CWireDlg * WireDialog[MAX_WIRE_DIALOGS];
 
 			bool blockSelected;

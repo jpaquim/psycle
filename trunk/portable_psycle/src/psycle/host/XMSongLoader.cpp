@@ -890,7 +890,7 @@ namespace host{
 			}
 			
 			// Format of FastTracker points is :
-			// Point : frame number. (frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
+			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 			// Value : 0..64. , divide by 64 to use it as a multiplier.
 			for(int i = 0; i < envelope_point_num;i++){
 //				inst.AmpEnvelope()->Point(i,((int)sampleHeader.venv[i * 2]) * _tickPerWave);

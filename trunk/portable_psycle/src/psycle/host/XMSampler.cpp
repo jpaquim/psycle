@@ -148,7 +148,7 @@ namespace psycle
 		void XMSampler::EnvelopeController::NoteOn()
 		{
 			m_Samples = 0;
-			m_PositionIndex = 0;
+			m_PositionIndex = -1;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
 
@@ -372,7 +372,7 @@ namespace psycle
 				if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 					m_AmplitudeEnvelope.Work();
 					volume *= m_AmplitudeEnvelope.ModulationAmount();
-					if (m_AmplitudeEnvelope.Stage()&EnvelopeController::EnvelopeStage::OFF)
+					if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF)
 					{
 						NoteFadeout();
 					}
@@ -412,8 +412,8 @@ namespace psycle
 
 						if (m_Filter._cutoff < 0) { m_Filter._cutoff = 0; }
 						else if (m_Filter._cutoff > 127) { m_Filter._cutoff = 127; }
+						m_Filter.Update();
 					}
-					m_Filter.Update();
 
 					if (m_WaveDataController.IsStereo())
 					{
@@ -582,6 +582,7 @@ namespace psycle
 		{
 			m_VolumeFadeSpeed = m_pInstrument->VolumeFadeSpeed();
 			m_VolumeFadeAmount = 1.0f;
+			if ( RealVolume()*m_AmplitudeEnvelope.ModulationAmount() == 0.0f ) IsPlaying(false);
 		}
 
 		void XMSampler::Voice::Slide2Note()

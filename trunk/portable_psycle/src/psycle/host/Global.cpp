@@ -55,7 +55,7 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// logger
 
-
+		//\todo : unnamed namespace?
 		namespace
 		{
 			/// Psycle's reimplementation of operating_system::logger that also outputs to the logging window.

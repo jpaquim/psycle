@@ -1742,7 +1742,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
 END
 
-IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 542, 412
+IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 295, 197
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Samples"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -1820,6 +1820,146 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,148,134,11,143
     CONTROL         "",IDC_SLIDER22,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,170,134,11,143
+END
+
+IDD_XMSAMPLER_MIXER DIALOGEX 0, 0, 455, 199
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Mixer"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LEFT_VU,"msctls_progress32",WS_BORDER | 0x4,422,0,
+                    6,55
+    CONTROL         "",IDC_SL_VOL_MASTER,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,422,67,17,100
+    CONTROL         "Mono",IDC_CH_MASTERMONO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,409,58,33,10
+    CONTROL         "",IDC_RIGHT_VU,"msctls_progress32",WS_BORDER | 0x4,431,
+                    0,6,55
+    LTEXT           "Master",IDC_STATIC,419,166,22,8
+    CONTROL         "",IDC_SL_VOL8,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,373,67,17,100
+    CONTROL         "Surround",IDC_CH_SURR8,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,358,48,45,10
+    CONTROL         "",IDC_SL_VOL7,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,327,67,17,100
+    CONTROL         "Surround",IDC_CH_SURR7,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,312,48,45,10
+    CONTROL         "",IDC_SL_VOL6,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,281,67,17,100
+    CONTROL         "Surround",IDC_CH_SURR6,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,266,48,45,10
+    CONTROL         "",IDC_SL_VOL5,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,235,67,17,100
+    CONTROL         "Surround",IDC_CH_SURR5,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,220,48,45,10
+    CONTROL         "",IDC_SL_VOL4,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,189,67,17,100
+    CONTROL         "",IDC_SL_VOL3,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,143,67,17,100
+    CONTROL         "",IDC_SL_VOL2,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,97,67,17,100
+    CONTROL         "Surround",IDC_CH_SURR2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,82,48,45,10
+    CTEXT           "2",IDC_NAME2,86,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CONTROL         "",IDC_SL_VOL1,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,51,67,17,100
+    CONTROL         "Surround",IDC_CH_SURR1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,36,48,45,10
+    CTEXT           "1",IDC_NAME1,40,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CTEXT           "4",IDC_NAME4,178,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CTEXT           "3",IDC_NAME3,132,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CTEXT           "6",IDC_NAME6,270,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CTEXT           "5",IDC_NAME5,224,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CTEXT           "8",IDC_NAME8,361,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CTEXT           "7",IDC_NAME7,316,166,40,8,SS_CENTERIMAGE | 
+                    SS_ENDELLIPSIS
+    CONTROL         "",IDC_SL_PAN8,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,357,38,45,8
+    CONTROL         "",IDC_SL_RES8,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,357,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF8,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,357,10,45,8
+    CONTROL         "Surround",IDC_CH_SURR3,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,128,48,45,10
+    CONTROL         "Surround",IDC_CH_SURR4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,174,48,45,10
+    CONTROL         "",IDC_SL_PAN1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,35,38,45,8
+    CONTROL         "",IDC_SL_RES1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,35,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,35,10,45,8
+    CONTROL         "",IDC_SL_PAN2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,81,38,45,8
+    CONTROL         "",IDC_SL_RES2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,81,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,81,10,45,8
+    CONTROL         "",IDC_SL_PAN3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,127,38,45,8
+    CONTROL         "",IDC_SL_RES3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,127,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,127,10,45,8
+    CONTROL         "",IDC_SL_PAN4,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,173,38,45,8
+    CONTROL         "",IDC_SL_RES4,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,173,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF4,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,173,10,45,8
+    CONTROL         "",IDC_SL_PAN5,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,219,38,45,8
+    CONTROL         "",IDC_SL_RES5,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,219,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF5,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,219,10,45,8
+    CONTROL         "",IDC_SL_PAN6,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,265,38,45,8
+    CONTROL         "",IDC_SL_RES6,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,265,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF6,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,265,10,45,8
+    CONTROL         "",IDC_SL_PAN7,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,311,38,45,8
+    CONTROL         "",IDC_SL_RES7,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,311,24,45,8
+    CONTROL         "",IDC_SL_CUTOFF7,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,311,10,45,8
+    LTEXT           "Panning",IDC_STATIC,5,38,26,8
+    LTEXT           "Fil. Cutoff",IDC_STATIC,5,10,31,8
+    LTEXT           "Fil. Resso",IDC_STATIC,5,24,29,8
+    CONTROL         "",IDC_SL_CHANNELS,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,44,179,352,13
+    CONTROL         "Mute",IDC_CH_MUTE8,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,358,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE7,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,312,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE6,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,266,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE5,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,220,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,82,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,36,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE3,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,128,60,32,10
+    CONTROL         "Mute",IDC_CH_MUTE4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,174,60,32,10
+    CONTROL         "Channel",IDC_R_SHOWCHAN,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,7,151,41,10
+    CONTROL         "Voice",IDC_R_SHOWVOICE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,7,163,33,10
+    LTEXT           "Show Values:",IDC_STATIC,0,139,43,8
+    LTEXT           "Voices:",IDC_STATIC,400,178,23,9
+    RTEXT           "0",IDC_VOICESPLAYING,428,178,11,8
 END
 
 
@@ -2149,9 +2289,9 @@ BEGIN
     IDD_XMSAMPLERUISAMPLE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 535
+        RIGHTMARGIN, 288
         TOPMARGIN, 7
-        BOTTOMMARGIN, 405
+        BOTTOMMARGIN, 190
     END
 
     IDD_INST_GENERAL, DIALOG
@@ -2168,6 +2308,13 @@ BEGIN
         RIGHTMARGIN, 394
         TOPMARGIN, 7
         BOTTOMMARGIN, 302
+    END
+
+    IDD_XMSAMPLER_MIXER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 448
+        BOTTOMMARGIN, 192
     END
 END
 #endif    // APSTUDIO_INVOKED

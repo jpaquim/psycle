@@ -15,6 +15,7 @@
 #include "Helpers.hpp"
 #include "MasterDlg.hpp"
 #include "GearTracker.hpp"
+#include "XMSamplerUI.hpp"
 #include "MainFrm.hpp"
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
@@ -59,6 +60,7 @@ NAMESPACE__BEGIN(psycle)
 			viewMode=VMMachine;
 			MasterMachineDialog = NULL;
 			SamplerMachineDialog = NULL;
+			XMSamplerMachineDialog = NULL;
 
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -322,6 +324,10 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (nIDEvent == 31)
 			{
+				//\todo : IMPORTANT! change this lock to a more flexible one
+				// It is causing skips on sound when there is a pattern change because
+				// it is not allowing the player to work. Do the same in the one inside
+				// Player::Work()
 				CSingleLock lock(&_pSong->door,TRUE);
 				if (Global::_pSong->_pMachine[MASTER_INDEX])
 				{
@@ -382,6 +388,7 @@ NAMESPACE__BEGIN(psycle)
 					}
 					Global::pPlayer->Tweaker = false;
 				}
+				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
 				if (Global::pPlayer->_playing)
 				{
 					if (Global::pPlayer->_lineChanged)
