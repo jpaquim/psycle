@@ -206,6 +206,7 @@ bool RiffFile::ReadString(char* pData, ULONG maxBytes)
 bool OldPsyFile::Open(
 	char* psFileName)
 {
+	strcpy(szName,psFileName);
 	_file = fopen(psFileName, "rb");
 	return (_file != NULL);
 }
