@@ -119,10 +119,12 @@ namespace psycle
 		inline const bool proxy::operator()() const throw() { return plugin_; }
 		inline void proxy::operator()(CMachineInterface * plugin) throw(exceptions::function_error)
 		{
-			delete &this->plugin();
+			delete this->plugin_;
 			this->plugin_ = plugin;
 			if((*this)()) callback();
 		}
+		#pragma warning(push)
+		#pragma warning(disable:4702) // unreachable code
 		inline void proxy::Init() throw(exceptions::function_error)
 		{
 			assert((*this)());
@@ -234,6 +236,7 @@ namespace psycle
 			catch(const long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(host(), function); }
+			return 0; // dummy return to avoid warning
 		}
 		inline void proxy::Command() throw(exceptions::function_error)
 		{
@@ -276,6 +279,7 @@ namespace psycle
 			catch(const long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(host(), function); }
+			return false; // dummy return to avoid warning
 		}
 		inline void proxy::MidiNote(const int channel, const int value, const int velocity) throw(exceptions::function_error)
 		{
@@ -318,6 +322,7 @@ namespace psycle
 			catch(const long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(host(), function); }
+			return false; // dummy return to avoid warning
 		}
 		inline bool proxy::PlayWave(const int wave, const int note, const float volume) throw(exceptions::function_error)
 		{
@@ -332,6 +337,7 @@ namespace psycle
 			catch(const long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(host(), function); }
+			return false; // dummy return to avoid warning
 		}
 		inline void proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw(exceptions::function_error)
 		{
@@ -374,6 +380,7 @@ namespace psycle
 			catch(const long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(host(), function); }
+			return 0; // dummy return to avoid warning
 		}
 		inline void proxy::callback() throw(exceptions::function_error)
 		{
@@ -389,5 +396,6 @@ namespace psycle
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(host(), function, &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(host(), function); }
 		}
+		#pragma warning(pop)
 	}
 }

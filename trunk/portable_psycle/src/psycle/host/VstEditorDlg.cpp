@@ -50,9 +50,7 @@ namespace psycle
 		BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) 
 		{
 			SIZE size;
-			int width=500;
-			int height=200;
-
+			int width, height;
 			creatingwindow = true;
 			_splitter.CreateStatic(this, 1, 2);
 			try
@@ -78,17 +76,19 @@ namespace psycle
 				{
 					// o_O`
 				}
-				ERect * er;
 				try
 				{
+					ERect * er;
 					_pMachine->proxy().dispatcher(effEditGetRect, 0, 0, &er);
+					width = er->right - er->left;
+					height = er->bottom - er->top;
 				}
 				catch(const std::exception &)
 				{
 					// o_O`
+					width = 500;
+					height = 200;
 				}
-				width = er->right - er->left;
-				height = er->bottom - er->top;
 
 				_splitter.SetColumnInfo(VST_UI_PANE,width,width);
 				
