@@ -2008,6 +2008,14 @@ void CChildView::SelectMachineUnderCursor()
 // undo/redo code
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void CChildView::AddMacViewUndo()
+{
+	// i have not written the undo code yet for machine and instruments
+	// however, for now it at least tracks changes for save/new/open/close warnings
+	UndoMacCounter++;
+	SetTitleBarText();
+}
+
 void CChildView::AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
 {
 	SPatternUndo* pNew = new SPatternUndo;
@@ -2591,6 +2599,10 @@ void CChildView::KillUndo()
 	}
 	UndoCounter = 0;
 	UndoSaved = 0;
+
+	UndoMacCounter=0;
+	UndoMacSaved=0;
+
 //	SetTitleBarText();
 }
 

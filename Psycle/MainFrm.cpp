@@ -1132,6 +1132,8 @@ void CMainFrame::OnLoadwave()
 	dlg.m_ofn.lpstrInitialDir = Global::pConfig->GetInstrumentDir();
 	if (dlg.DoModal() == IDOK)
 	{
+		m_wndView.AddMacViewUndo();
+
 		int si = _pSong->instSelected;
 		int sw = _pSong->waveSelected;
 
@@ -1245,6 +1247,9 @@ void CMainFrame::ShowInstrumentEditor()
 	cc2->SetCurSel(AUX_WAVES);
 	_pSong->auxcolSelected=_pSong->instSelected;
 	UpdateComboIns();
+
+	m_wndView.AddMacViewUndo();
+
 	m_wndInst.WaveUpdate();
 	m_wndInst.ShowWindow(SW_SHOWNORMAL);
 	m_wndInst.SetActiveWindow();
@@ -1308,6 +1313,8 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 		}
 		else
 		{
+			m_wndView.AddMacViewUndo();
+
 			switch (ma->_type)
 			{
 			case MACH_MASTER:

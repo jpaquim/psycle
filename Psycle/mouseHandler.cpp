@@ -401,6 +401,8 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 			wiredest = GetMachine(point);
 			if ((wiredest !=-1) && (wiredest != wiresource))
 			{
+				AddMacViewUndo();
+
 				// are we moving a wire?
 				if (wiremove >= 0)
 				{
@@ -444,6 +446,8 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		}
 		else if ( smacmode == 0 && smac != -1 )
 		{
+			AddMacViewUndo();
+
 			switch(_pSong->_pMachine[smac]->_mode)
 			{
 				case MACHMODE_GENERATOR:
@@ -594,21 +598,26 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 						break;
 					}
 
-					Global::_pSong->_pMachine[smac]->SetPan(newpan);
-					newpan= Global::_pSong->_pMachine[smac]->_panning;
-					
-					char buf[128];
-					if (newpan != 64)
+					if (Global::_pSong->_pMachine[smac]->_panning != newpan)
 					{
-						sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+						AddMacViewUndo();
+
+						Global::_pSong->_pMachine[smac]->SetPan(newpan);
+						newpan= Global::_pSong->_pMachine[smac]->_panning;
+						
+						char buf[128];
+						if (newpan != 64)
+						{
+							sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", Global::_pSong->_pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+						}
+						else
+						{
+							sprintf(buf, "%s Pan: Center", Global::_pSong->_pMachine[smac]->_editName);
+						}
+						pParentMain->StatusBarText(buf);
+						updatePar = smac;
+						Repaint(DMMacRefresh);
 					}
-					else
-					{
-						sprintf(buf, "%s Pan: Center", Global::_pSong->_pMachine[smac]->_editName);
-					}
-					pParentMain->StatusBarText(buf);
-					updatePar = smac;
-					Repaint(DMMacRefresh);
 				}
 			}
 		}
@@ -986,6 +995,8 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 									{
 										if (!WireDialog[i])
 										{
+											AddMacViewUndo();
+
 											WireDialog[i] = new CWireDlg(this);
 											WireDialog[i]->this_index = i;
 											WireDialog[i]->wireIndex = w;

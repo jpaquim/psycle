@@ -343,6 +343,7 @@ void CWaveEdChildView::OnRButtonDown(UINT nFlags, CPoint point)
 
 		if ( nFlags & MK_CONTROL )
 		{
+			pParent->m_wndView.AddMacViewUndo();
 			_pSong->Invalided=true;
 			Sleep(LOCK_LATENCY);
 
@@ -363,6 +364,7 @@ void CWaveEdChildView::OnRButtonDown(UINT nFlags, CPoint point)
 			drawwave=true;
 			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			Invalidate();
+
 		}
 		else
 		{
@@ -383,6 +385,7 @@ void CWaveEdChildView::OnLButtonDown(UINT nFlags, CPoint point)
 
 		if ( nFlags & MK_CONTROL )
 		{
+			pParent->m_wndView.AddMacViewUndo();
 			_pSong->Invalided=true;
 			Sleep(LOCK_LATENCY);
 
@@ -479,6 +482,8 @@ void CWaveEdChildView::OnSelectionFadeIn()
 {
 	if(blSelection && wdWave)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -510,6 +515,8 @@ void CWaveEdChildView::OnSelectionFadeOut()
 {
 	if(blSelection && wdWave)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -545,6 +552,8 @@ void CWaveEdChildView::OnSelectionNormalize() // (Fideloop's)
 
 	if (wdWave)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -607,6 +616,8 @@ void CWaveEdChildView::OnSelectionRemoveDC() // (Fideloop's)
 
 	if (wdWave)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -670,6 +681,8 @@ void CWaveEdChildView::OnSelectionAmplify()
 
 	if (wdWave && blSelection)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		pos = AmpDialog.DoModal();
 		if (pos != AMP_DIALOG_CANCEL)
 		{
@@ -720,6 +733,8 @@ void CWaveEdChildView::OnSelectionReverse()
 
 	if (wdWave && blSelection)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -755,6 +770,8 @@ void CWaveEdChildView::OnConvertMono()
 {
 	if (wdWave && wdStereo)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -780,6 +797,8 @@ void CWaveEdChildView::OnEditDelete()
 
 	if (wdWave && blSelection)
 	{
+		pParent->m_wndView.AddMacViewUndo();
+
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
@@ -978,6 +997,8 @@ void CWaveEdChildView::OnEditCut()
 void CWaveEdChildView::OnEditPaste() 
 {
 	unsigned long c = 0;
+
+	pParent->m_wndView.AddMacViewUndo();
 
 	char *pData;
 	DWORD lFmt, lData;

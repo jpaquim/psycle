@@ -24,7 +24,7 @@ aditional known vst bugs/buggy vsts: ~33
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
-++ undos for machine and wave edit? at least track changes for file changed flag
+++ undos for machine and wave edit? 
 
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
@@ -176,7 +176,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	Add Presets in a "tab" under Parameters (easy switching/testing)!
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
 		<pooplog> sliders, switches, and owner draw controls i say?
-EOF
 
 +	Option to disable vus (to save CPU)
 	[ you could easily make a skin with no vus.. just set the rects to size 0]
@@ -345,8 +344,6 @@ EOF
 !	JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
 ++	<alk> another idea, a keypress to toggle follow song
 ++	<alk_> alt-f5 - play song from start
-++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now..
-		[because machine view does not track changes yet]
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?

@@ -79,7 +79,10 @@ int CWaveEdFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CWaveEdFrame::PreCreateWindow(CREATESTRUCT& cs) 
 {
-	if( !CFrameWnd::PreCreateWindow(cs) ) return FALSE;
+	if( !CFrameWnd::PreCreateWindow(cs) )
+	{
+		return FALSE;
+	}
 
 //	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 //	cs.lpszClass = AfxRegisterWndClass(0,0,0, AfxGetApp()->LoadIcon(IDR_WAVEFRAME));
@@ -87,7 +90,10 @@ BOOL CWaveEdFrame::PreCreateWindow(CREATESTRUCT& cs)
 	return TRUE;	
 }
 
-void CWaveEdFrame::GenerateView() {	this->wavview.GenerateAndShow(); }
+void CWaveEdFrame::GenerateView() 
+{	
+	this->wavview.GenerateAndShow(); 
+}
 
 BOOL CWaveEdFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
 {
@@ -99,7 +105,10 @@ BOOL CWaveEdFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINF
 	return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 }
 
-void CWaveEdFrame::OnUpdateStatusBar(CCmdUI *pCmdUI)  {     pCmdUI->Enable ();  }
+void CWaveEdFrame::OnUpdateStatusBar(CCmdUI *pCmdUI)  
+{     
+	pCmdUI->Enable ();  
+}
 
 void CWaveEdFrame::AdjustStatusBar(int ins, int wav)
 {
