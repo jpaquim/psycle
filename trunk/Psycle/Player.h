@@ -42,7 +42,7 @@ public:
 #endif // _WINAMP_PLUGIN_
 
 	void StartRecording(char* psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
-	void StopRecording(void);
+	void StopRecording(bool bOk = TRUE);
 protected:
 	int prevMachines[MAX_TRACKS];
 
