@@ -83,12 +83,6 @@ BOOL CWireDlg::OnInitDialog()
 
 	hold = FALSE;
 
-	for (int i = 0; i < MAX_SCOPE_BANDS; i++)
-	{
-		bar_heightsl[i]=256;
-		bar_heightsr[i]=256;
-	}
-
 	memset(pSamplesL,0,sizeof(pSamplesL));
 	memset(pSamplesR,0,sizeof(pSamplesR));
 
@@ -239,7 +233,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.TextOut(4, 128-14, buf);
 				bufDC.SelectObject(oldFont);
 
-				CPen linepen(PS_SOLID, 8, 0x00202020);
+				CPen linepen(PS_SOLID, 8, 0x00303030);
 
 				CPen *oldpen = bufDC.SelectObject(&linepen);
 
@@ -305,6 +299,15 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 		case 2: // spectrum analyzer
 			{
+				char buf[64];
+				sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
+
+				CFont* oldFont= bufDC.SelectObject(&font);
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x606060);
+				bufDC.TextOut(4, 128-14, buf);
+				bufDC.SelectObject(oldFont);
+
 			   float aal[MAX_SCOPE_BANDS]; 
 			   float aar[MAX_SCOPE_BANDS]; 
 			   float bbl[MAX_SCOPE_BANDS]; 
@@ -432,12 +435,211 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				char buf[64];
 				sprintf(buf,"Phase Scope");
 
+				CPen linepen(PS_SOLID, 8, 0x00303030);
+
+				CPen *oldpen = bufDC.SelectObject(&linepen);
+
+				if (clip)
+				{
+					linepen.DeleteObject();
+					linepen.CreatePen(PS_SOLID, 8, 0x00101040);
+					bufDC.SelectObject(&linepen);
+				}
+
+				// now draw our scope
+
+				bufDC.MoveTo(32,32);
+				bufDC.LineTo(128,128);
+				bufDC.LineTo(128,0);
+				bufDC.MoveTo(128,128);
+				bufDC.LineTo(256-32,32);
+				bufDC.Arc(0,0,256,256,256,128,0,128);
+//				bufDC.Arc(32,32,256-32,256-32,256-32,128,32,128);
+//				bufDC.Arc(64,64,256-64,256-64,256-64,128,64,128);
+				bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
+
+				bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
+
+				linepen.DeleteObject();
+				if (clip)
+				{
+					linepen.CreatePen(PS_SOLID, 4, 0x00101080);
+				}
+				else
+				{
+					linepen.CreatePen(PS_SOLID, 4, 0x00404040);
+				}
+				bufDC.SelectObject(&linepen);
+//				bufDC.LineTo(128,128);
+//				bufDC.LineTo(128,0);
+//				bufDC.MoveTo(128,128);
+//				bufDC.LineTo(0,0);
+				bufDC.MoveTo(128,0);
+				bufDC.LineTo(128,128);
+
+//				bufDC.Arc(0,0,256,256,256,128,0,128);
+//				bufDC.Arc(32,32,256-32,256-32,256-32,128,32,128);
+//				bufDC.Arc(64,64,256-64,256-64,256-64,128,64,128);
+//				bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
+
+//				bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
+
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 2, 0xc08080);
+				bufDC.SelectObject(&linepen);
+				clip = FALSE;
+
+				// ok we need some points:
+
+				// max vol center
+				// max vol phase center
+				// max vol dif phase center
+				// max vol left
+				// max vol dif left
+				// max vol phase left
+				// max vol dif phase left
+				// max vol right
+				// max vol dif right
+				// max vol phase right
+				// max vol dif phase right
+
+				float mvc, mvpc, mvdpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
+				mvc = mvpc = mvdpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
+
+			   int index = _pSrcMachine->_scopeBufferIndex;
+			   for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
+			   { 
+					index--;
+					index&=(SCOPE_BUF_SIZE-1);
+					float wl=(pSamplesL[index]*invol);///32768; 
+					float wr=(pSamplesR[index]*invol);///32768; 
+					float awl=fabsf(wl);
+					float awr=fabsf(wr);
+					if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
+					{
+						// phase difference
+						if (awl > awr)
+						{
+							// left
+							if (awl+awr > mvpl)
+							{
+								mvpl = awl+awr;
+							}
+							if (awl-awr > mvdpl)
+							{
+								mvdpl = awl-awr; 
+							}
+						}
+						else if (awl < awr)
+						{
+							// right
+							if (awr+awl > mvpr)
+							{
+								mvpr = awr+awl;
+							}
+							if (awr-awl > mvdpr)
+							{
+								mvdpr = awr-awl; 
+							}
+						}
+						else
+						{
+							// center
+							if (awr+awl > mvpc)
+							{
+								mvpc = awr+awl;
+							}
+							if (awr-awl > mvdpc)
+							{
+								mvdpc = awr-awl; 
+							}
+						}
+					}
+					else if (awl > awr)
+					{
+						// left
+						if (awl > mvl)
+						{
+							mvl = awl;
+						}
+						if (awl-awr > mvdl)
+						{
+							mvdl = awl-awr;
+						}
+					}
+					else if (awl < awr)
+					{
+						// right
+						if (awr > mvr)
+						{
+							mvr = awr;
+						}
+						if (awr-awl > mvdr)
+						{
+							mvdr = awr-awl;
+						}
+					}
+					else 
+					{
+						// center
+						if (awl > mvc)
+						{
+							mvc = awl;
+						}
+					}
+					if (awl > 32768.0f || awr > 32768.0f)
+					{
+						clip = TRUE;
+					}
+				} 
+
+			   // ok we have some data, lets make some points and draw them
+			   // let's move left to right phase data first
+
+				int x,y;
+
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 3, 0xc08080);
+				bufDC.SelectObject(&linepen);
+
+				x=f2i(sinf(-(F_PI/4.0f)-(mvdpl*F_PI/(32768.0f*4.0f)))
+							*mvpl*(128.0f/32768.0f))+128;
+				y=f2i(-cosf(-(F_PI/4.0f)-(mvdpl*F_PI/(32768.0f*4.0f)))
+							*mvpl*(128.0f/32768.0f))+128;
+				bufDC.MoveTo(x,y);
+				bufDC.LineTo(128,128);
+				bufDC.LineTo(128,128-f2i(mvpc*(128.0f/32768.0f)));
+				bufDC.MoveTo(128,128);
+				x=f2i(sinf((F_PI/4.0f)+(mvdpr*F_PI/(32768.0f*4.0f)))
+							*mvpr*(128.0f/32768.0f))+128;
+				y=f2i(-cosf((F_PI/4.0f)+(mvdpr*F_PI/(32768.0f*4.0f)))
+							*mvpr*(128.0f/32768.0f))+128;
+				bufDC.LineTo(x,y);
+								
+				// panning data
+				linepen.DeleteObject();
+				linepen.CreatePen(PS_SOLID, 3, 0x80c080);
+				bufDC.SelectObject(&linepen);
+
+				x=f2i(sinf(-(mvdl*F_PI/(32768.0f*4.0f)))
+							*mvl*(128.0f/32768.0f))+128;
+				y=f2i(-cosf(-(mvdl*F_PI/(32768.0f*4.0f)))
+							*mvl*(128.0f/32768.0f))+128;
+				bufDC.MoveTo(x,y);
+				bufDC.LineTo(128,128);
+				bufDC.LineTo(128,128-f2i(mvc*(128.0f/32768.0f)));
+				bufDC.MoveTo(128,128);
+				x=f2i(sinf((mvdr*F_PI/(32768.0f*4.0f)))
+							*mvr*(128.0f/32768.0f))+128;
+				y=f2i(-cosf((mvdr*F_PI/(32768.0f*4.0f)))
+							*mvr*(128.0f/32768.0f))+128;
+				bufDC.LineTo(x,y);
+
 				CFont* oldFont= bufDC.SelectObject(&font);
 				bufDC.SetBkMode(TRANSPARENT);
 				bufDC.SetTextColor(0x606060);
 				bufDC.TextOut(4, 128-14, buf);
 				bufDC.SelectObject(oldFont);
-				KillTimer(2304+this_index);
 			}
 			break;
 		}
@@ -570,6 +772,13 @@ void CWireDlg::SetMode()
 		break;
 	case 2:
 		KillTimer(2304+this_index);
+		{
+			for (int i = 0; i < MAX_SCOPE_BANDS; i++)
+			{
+				bar_heightsl[i]=256;
+				bar_heightsr[i]=256;
+			}
+		}
 		m_slider.SetRange(4, MAX_SCOPE_BANDS);
 		m_slider.SetPos(scope_spec_bands);
 		m_slider2.SetRange(10,100);
@@ -581,8 +790,8 @@ void CWireDlg::SetMode()
 		break;
 	case 3:
 		KillTimer(2304+this_index);
-		_pSrcMachine->_pScopeBufferL = NULL;
-		_pSrcMachine->_pScopeBufferR = NULL;
+		_pSrcMachine->_pScopeBufferL = pSamplesL;
+		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		sprintf(buffer,"Stereo Phase");
 		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
