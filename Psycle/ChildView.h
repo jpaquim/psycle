@@ -208,6 +208,7 @@ public:
 	void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
 	void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
 	void MidiPatternTweakSlide(int command, int value); // called by midi to insert pattern commands
+	void MidiPatternMidiCommand(int command, int value); // called by midi to insert midi pattern commands
 	void MidiPatternInstrument(int value); // called by midi to insert pattern commands
 	void MousePatternTweak(int machine, int command, int value);
 	void MousePatternTweakSlide(int machine, int command, int value);
@@ -547,6 +548,8 @@ public:
 	afx_msg void OnHelpReadme();
 	afx_msg void OnHelpTweaking();
 	afx_msg void OnHelpWhatsnew();
+	afx_msg void OnConfigurationLoopplayback();
+	afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

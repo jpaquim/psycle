@@ -425,6 +425,100 @@ void CChildView::MidiPatternCommand(int command, int value)
 		pMachine->Tick(editcur.track,&entry);
 	}
 }
+void CChildView::MidiPatternMidiCommand(int command, int value)
+{
+	// UNDO CODE MIDI PATTERN TWEAK
+	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+	if(viewMode == VMPattern && bEditMode)
+	{ 
+		// write effect
+		int ps = _ps();
+		int line = Global::pPlayer->_lineCounter;
+		unsigned char * offset = _offset(ps);
+		unsigned char * toffset = _toffset(ps);
+		if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+		{
+			if(_pSong->_trackArmedCount)
+			{
+				SelectNextTrack();
+			}
+			else if (!Global::pConfig->_RecordUnarmed)
+			{		
+				PatternEntry entry;
+				entry._mach = _pSong->seqBus;
+				entry._cmd = (value>>8)&0xFF;
+				entry._parameter = value&0xFF;
+				entry._inst = command;
+				entry._note = cdefMIDICC;
+				
+				// play it
+				int mgn;
+				Machine* pMachine;
+				if ( _pSong->seqBus < MAX_BUSES )
+					mgn = _pSong->busMachine[_pSong->seqBus];
+				else
+					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+				
+				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+					pMachine = _pSong->_pMachines[mgn];
+				else return;
+				
+				// play
+				pMachine->Tick(editcur.track,&entry);
+				return;
+			}
+			toffset = offset+(line*MULTIPLY);
+		}
+		else
+		{
+			line = editcur.line;
+		}
+		
+		// build entry
+		PatternEntry *entry = (PatternEntry*) toffset;
+		if (entry->_note >= 120)
+		{
+			if ((entry->_mach != _pSong->seqBus) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+			{
+				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				entry->_mach = _pSong->seqBus;
+				entry->_cmd = (value>>8)&0xFF;
+				entry->_parameter = value&0xFF;
+				entry->_inst = command;
+				entry->_note = cdefMIDICC;
+				
+				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				Repaint(DMData);
+			}
+		}
+	}
+	//	else
+	{
+		// build entry
+		PatternEntry entry;
+		entry._mach = _pSong->seqBus;
+		entry._cmd = (value>>8)&0xFF;
+		entry._parameter = value&0xFF;
+		entry._inst = command;
+		entry._note = cdefMIDICC;
+		
+		// play it
+		int mgn;
+		Machine* pMachine;
+		if ( _pSong->seqBus < MAX_BUSES )
+			mgn = _pSong->busMachine[_pSong->seqBus];
+		else
+			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+		
+		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			pMachine = _pSong->_pMachines[mgn];
+		else return;
+		
+		// play
+		pMachine->Tick(editcur.track,&entry);
+	}
+}
 
 void CChildView::MidiPatternInstrument(int value)
 {
@@ -958,7 +1052,8 @@ bool CChildView::MSBPut(int nChar)
 	}
 	bScrollDetatch=false;
 	Global::pInputHandler->bDoingSelection = false;
-	Repaint(DMCursor);
+	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+	Repaint(DMData);
 	return true;
 }
 
@@ -2039,6 +2134,12 @@ void CChildView::IncPosition(bool bRepeat)
 			int const ep=_pSong->GetBlankPatternUnused();
 			_pSong->playLength=editPosition+1;
 			_pSong->playOrder[editPosition]=ep;
+			if (_pSong->patternLines[editPosition]!=Global::pConfig->defaultPatLines)
+			{
+				AddUndoLength(editPosition,_pSong->patternLines[editPosition],editcur.track,editcur.line,editcur.col,editPosition);
+				_pSong->patternLines[editPosition]=Global::pConfig->defaultPatLines;
+			}
+			
 			pParentMain->UpdateSequencer();
 		}
 

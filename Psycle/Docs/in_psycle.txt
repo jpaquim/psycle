@@ -63,7 +63,7 @@ $$      $$$$              $..$$     $$...........
 --------------------
 
 1.0 RC 2 (29-12-2002)
-·Fixed but where the plugin didn't close all files (when checking
+·Fixed bug where the plugin didn't close all files (when checking
 if it was a .psy file or not) which made those files uneditable until
 Winamp was closed.
 

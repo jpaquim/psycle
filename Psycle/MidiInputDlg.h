@@ -24,7 +24,6 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CMidiInputDlg)
 	enum { IDD = IDD_MIDI_INPUT };
-
 	CButton		m_midiRecordVelButton;
 	CComboBox	m_midiTypeVelComboBox;
 	CEdit		m_midiCommandVelEdit;
@@ -131,8 +130,6 @@ public:
 	CEdit		m_midiCommand15Edit;
 	CEdit		m_midiFrom15Edit;
 	CEdit		m_midiTo15Edit;
-		// NOTE - ClassWizard will add data members here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
 	//}}AFX_DATA
 
 

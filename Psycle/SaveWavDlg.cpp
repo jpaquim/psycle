@@ -212,6 +212,7 @@ void CSaveWavDlg::OnSavewave()
 		pSong->playOrderSel[cont]=true;
 		pPlayer->Start(pstart,0);
 		pPlayer->_playBlock=true;
+		pPlayer->_loopSong=false;
 		break;
 	case 2:
 		m_rangestart.GetWindowText(name);
@@ -229,6 +230,7 @@ void CSaveWavDlg::OnSavewave()
 		lastpostick=pstart;
 		pPlayer->Start(pstart,0);
 		pPlayer->_playBlock=true;
+		pPlayer->_loopSong=false;
 		break;
 	default:
 		SaveEnd();
