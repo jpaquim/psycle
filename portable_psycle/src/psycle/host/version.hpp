@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.10  2005/01/31 11:14:00  johan-boule
+new release
+
 Revision 1.9  2005/01/29 18:25:43  johan-boule
 fixing problems for msvc's resource editor
 
@@ -66,7 +69,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 28 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 29 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
