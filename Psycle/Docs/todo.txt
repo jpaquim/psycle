@@ -16,9 +16,7 @@
 	and shield the user from the nastiness
 * <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
-* <alk> move mouse over vu, black flickering (more noticable on the big vus)
-* <alk> double clicking mute or bypass should not bring up machine dialog
-* <alk> click solo, mute, solo (bug last solo does not get done)
+* <alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i 
 + <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"

@@ -148,8 +148,15 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							(mcd_y < MachineCoords.dGeneratorMute.y+MachineCoords.sGeneratorMute.height)) //Mute 
 					{
 						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
-						Global::_pSong->_pMachines[smac]->_volumeCounter=0;
-						Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+						if (Global::_pSong->_pMachines[smac]->_mute)
+						{
+							Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+							if (Global::_pSong->machineSoloed == smac )
+							{
+								Global::_pSong->machineSoloed = 0;
+							}
+						}
 						updatePar = smac;
 						Repaint(DMMacRefresh);
 					}
@@ -173,7 +180,8 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
 								if (( Global::_pSong->_machineActive[i] ) && 
-									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
+									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ) &&
+									(i != smac))
 								{
 									Global::_pSong->_pMachines[i]->_mute = true;
 									Global::_pSong->_pMachines[i]->_volumeCounter=0;
@@ -205,8 +213,11 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							(mcd_y < MachineCoords.dEffectMute.y+MachineCoords.sEffectMute.height)) //Mute 
 					{
 						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
-						Global::_pSong->_pMachines[smac]->_volumeCounter=0;
-						Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+						if (Global::_pSong->_pMachines[smac]->_mute)
+						{
+							Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+						}
 						updatePar = smac;
 						Repaint(DMMacRefresh);
 					}
@@ -216,8 +227,11 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							(mcd_y < MachineCoords.dEffectBypass.y+MachineCoords.sEffectBypass.height)) //Solo 
 					{
 						Global::_pSong->_pMachines[smac]->_bypass = !Global::_pSong->_pMachines[smac]->_bypass;
-						Global::_pSong->_pMachines[smac]->_volumeCounter = 0;
-						Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+						if (Global::_pSong->_pMachines[smac]->_bypass)
+						{
+							Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
+						}
 						updatePar = smac;
 						Repaint(DMMacRefresh);
 					}
@@ -773,27 +787,42 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 
 			if(tmac!=-1)
 			{
-				if ((mcd_x > 136) && ( mcd_x < 145) && (Global::_pSong->_pMachines[tmac]->_mode != MACHMODE_MASTER))
+				switch (Global::_pSong->_pMachines[tmac]->_mode)
 				{
-					if ((mcd_y> 3) && (mcd_y < 12)) //Mute 
+				case MACHMODE_GENERATOR:
+					if ((mcd_x >= MachineCoords.dGeneratorPan.x) && 
+						(mcd_x < MachineCoords.dGeneratorPan.x+MachineCoords.dGeneratorPan.width) && 
+						(mcd_y >= MachineCoords.dGeneratorPan.y) && 
+						(mcd_y < MachineCoords.dGeneratorPan.y+MachineCoords.sGeneratorPan.height)) //changing panning
+					{
+						smac=tmac;
+						smacmode = 1;
+						OnMouseMove(nFlags,point);
+						return;
+					}
+					else if ((mcd_x >= MachineCoords.dGeneratorMute.x) && 
+							(mcd_x < MachineCoords.dGeneratorMute.x+MachineCoords.sGeneratorMute.width) &&
+							(mcd_y >= MachineCoords.dGeneratorMute.y) && 
+							(mcd_y < MachineCoords.dGeneratorMute.y+MachineCoords.sGeneratorMute.height)) //Mute 
 					{
 						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
-						Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
-						Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+						if (Global::_pSong->_pMachines[tmac]->_mute)
+						{
+							Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+							if (Global::_pSong->machineSoloed == tmac )
+							{
+								Global::_pSong->machineSoloed = 0;
+							}
+						}
 						updatePar = tmac;
 						Repaint(DMMacRefresh);
+						return;
 					}
-					else if ((mcd_y> 14) && (mcd_y < 27) &&  //Bypass
-						(Global::_pSong->_pMachines[tmac]->_mode != MACHMODE_GENERATOR))
-					{
-						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
-						Global::_pSong->_pMachines[tmac]->_volumeCounter = 0;
-						Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
-						updatePar = tmac;
-						Repaint(DMMacRefresh);
-					}
-					else if ((mcd_y> 14) && (mcd_y < 23) &&  //Solo
-						(Global::_pSong->_pMachines[tmac]->_mode == MACHMODE_GENERATOR))
+					else if ((mcd_x >= MachineCoords.dGeneratorSolo.x) && 
+							(mcd_x < MachineCoords.dGeneratorSolo.x+MachineCoords.sGeneratorSolo.width) &&
+							(mcd_y >= MachineCoords.dGeneratorSolo.y) && 
+							(mcd_y < MachineCoords.dGeneratorSolo.y+MachineCoords.sGeneratorSolo.height)) //Solo 
 					{
 						if (Global::_pSong->machineSoloed == tmac )
 						{
@@ -801,7 +830,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
 								if (( Global::_pSong->_machineActive[i] ) && 
-								    ( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
+									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
 										Global::_pSong->_pMachines[i]->_mute = false;
 							}
 						}
@@ -810,7 +839,8 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
 								if (( Global::_pSong->_machineActive[i] ) && 
-								    ( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
+									( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ) &&
+									(i != tmac))
 								{
 									Global::_pSong->_pMachines[i]->_mute = true;
 									Global::_pSong->_pMachines[i]->_volumeCounter=0;
@@ -822,13 +852,58 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						}
 						updatePar = tmac;
 						Repaint(DMAllMacsRefresh);
+						return;
 					}
+					break;
+				case MACHMODE_FX:
+				case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+					if ((mcd_x >= MachineCoords.dEffectPan.x) && 
+						(mcd_x < MachineCoords.dEffectPan.x+MachineCoords.dEffectPan.width) && 
+						(mcd_y >= MachineCoords.dEffectPan.y) && 
+						(mcd_y < MachineCoords.dEffectPan.y+MachineCoords.sEffectPan.height)) //changing panning
+					{
+						smac=tmac;
+						smacmode = 1;
+						OnMouseMove(nFlags,point);
+						return;
+					}
+					else if ((mcd_x >= MachineCoords.dEffectMute.x) && 
+							(mcd_x < MachineCoords.dEffectMute.x+MachineCoords.sEffectMute.width) &&
+							(mcd_y >= MachineCoords.dEffectMute.y) && 
+							(mcd_y < MachineCoords.dEffectMute.y+MachineCoords.sEffectMute.height)) //Mute 
+					{
+						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
+						if (Global::_pSong->_pMachines[tmac]->_mute)
+						{
+							Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+						}
+						updatePar = tmac;
+						Repaint(DMMacRefresh);
+						return;
+					}
+					else if ((mcd_x >= MachineCoords.dEffectBypass.x) && 
+							(mcd_x < MachineCoords.dEffectBypass.x+MachineCoords.sEffectBypass.width) &&
+							(mcd_y >= MachineCoords.dEffectBypass.y) && 
+							(mcd_y < MachineCoords.dEffectBypass.y+MachineCoords.sEffectBypass.height)) //Solo 
+					{
+						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
+						if (Global::_pSong->_pMachines[tmac]->_bypass)
+						{
+							Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
+						}
+						updatePar = tmac;
+						Repaint(DMMacRefresh);
+						return;
+					}
+					break;
+
+				case MACHMODE_MASTER:
+					break;
 				}
-				else
-				{
-					pParentMain->ShowMachineGui(tmac, point);
+				pParentMain->ShowMachineGui(tmac, point);
 //					Repaint();
-				}
 			}
 
 			else
