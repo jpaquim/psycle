@@ -19,6 +19,10 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
++ the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
+
+* The play block feature doesn't work.
+* When 'cursor always down' is enabled u can't insert values on the last row
 
 * screen should be made so 800x600 works
 + <alk> some bastards want keyrepeat for notes back
@@ -90,6 +94,7 @@ X low priority
 +	pooplog synths don't have gain lfo phase cmd?
 ++	<[JAZ]> Internals still miss mouse tweak, right?
 +	alk/[JAZ] Add Osci/etc from wire dialog to Master Dialog.
+!!	all native machines should be made external except sampler and dummy
 +	<pooplog> it would be nice to have an internal wavein machine to get live input
 		<Druttis> Yes
 		<trylle> i mean that it records and plays back at the same time * record wave in too
@@ -101,6 +106,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[[JAZ] Works for me.]
 *	portamento to note, slides too much.
 		[[JAZ] can anyone test this for me?]
+*** sampler sometimes fucks up on long filenames
 +FF	just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
 +FF	Instruments Support ( *.xi , *.iti, *.sf2. Maybe more)
 		 * samples mapped by key

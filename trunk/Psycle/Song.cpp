@@ -1084,8 +1084,10 @@ int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
 				file.Read((void*)&le,4);
 				waveLoopStart[instrument][layer]=ls;
 				waveLoopEnd[instrument][layer]=le;
-				waveLoopType[instrument][layer]=true;
-
+				if (!((ls <= 0) && (le >= Datalen-1))) // **** only for my bad sample collection
+				{
+					waveLoopType[instrument][layer]=true;
+				}
 			}
 			file.Skip(9);
 		}
