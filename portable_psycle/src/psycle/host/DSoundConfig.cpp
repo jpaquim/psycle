@@ -195,10 +195,7 @@ namespace psycle
 			for (int i = m_deviceComboBox.GetCount()-1; i >= 0; i--)
 			{
 				LPGUID pGuid = (LPGUID)m_deviceComboBox.GetItemData(i);
-				if (pGuid != NULL)
-				{
-					delete pGuid;
-				}
+				zapObject(pGuid);
 			}
 			CDialog::OnDestroy();
 		}

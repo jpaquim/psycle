@@ -38,13 +38,13 @@ namespace psycle
 
 		Global::~Global()
 		{
-			delete _pSong;
-			delete pPlayer;
-			delete pResampler;
-			delete pConfig;
-			delete pLogWindow;
+			zapObject(_pSong);
+			zapObject(pPlayer);
+			zapObject(pResampler);
+			zapObject(pConfig);
+			zapObject(pLogWindow);
 			#if !defined _WINAMP_PLUGIN_
-				delete pInputHandler;
+				zapObject(pInputHandler);
 			#endif
 		}
 

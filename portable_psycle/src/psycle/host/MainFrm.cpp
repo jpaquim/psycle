@@ -1798,14 +1798,13 @@ namespace psycle
 		void CMainFrame::OnSeqduplicate() 
 		{
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
-			int *litems;
 			int counter=0, selcount = cc->GetSelCount();
 			if ( _pSong->playLength+selcount >= MAX_SONG_POSITIONS)
 			{
 				MessageBox("Cannot clone the pattern(s). The maximum sequence length would be exceeded.","Clone Patterns");
 				return;
 			}
-			litems = new int[selcount];
+			int* litems = new int[selcount];
 			cc->GetSelItems(selcount,litems);
 
   			// Moves all patterns after the selection, to make space.
@@ -1850,7 +1849,7 @@ namespace psycle
 
 				m_wndView.Repaint(DMPattern);
 			}
-			delete litems;
+			zapArray(litems);
 			m_wndView.SetFocus();
 		}
 

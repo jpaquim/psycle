@@ -252,8 +252,7 @@ namespace psycle
 			{
 				if((*this)()) user(0);
 				if(this->plugin_) user(0);
-				delete this->plugin_;
-				this->plugin_ = plugin;
+				zapObject(this->plugin_,plugin);
 				//if((*this)()) user(&host());
 				if(plugin) user(&host());
 			}

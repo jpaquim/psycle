@@ -23,15 +23,9 @@ namespace psycle
 		{
 			for (int c=0; c<MAX_WAVES; c++)
 			{
-				if(waveLength[c]>0)
-				{
-					delete waveDataL[c];
-					if(waveStereo[c])
-					{
-						delete waveDataR[c];
-					}
-					waveLength[c] = 0;
-				}
+				zapArray(waveDataL[c]);
+				zapArray(waveDataR[c]);
+				waveLength[c] = 0;
 			}
 		}
 
@@ -75,19 +69,9 @@ namespace psycle
 		{
 			sprintf(waveName[c],"empty");
 			
-			if(waveLength[c]>0)
-			{
-				delete waveDataL[c];
-				if(waveStereo[c])
-				{
-					delete waveDataR[c];
-				}
-				waveLength[c] = 0;
-			}
-
-			waveDataL[c] = NULL;
-			waveDataR[c] = NULL;
-			
+			zapArray(waveDataL[c]);
+			zapArray(waveDataR[c]);
+			waveLength[c] = 0;
 			waveStereo[c]=false;
 			waveLoopStart[c]=0;
 			waveLoopEnd[c]=0;
@@ -193,7 +177,7 @@ namespace psycle
 							pData = new byte[size];
 							pFile->Read(pData,size);
 							SoundDesquash(pData,&waveDataL[index]);
-							delete pData;
+							zapArray(pData);
 						}
 
 						if (waveStereo[index])
@@ -202,14 +186,14 @@ namespace psycle
 							if ( !fullopen )
 							{
 								pFile->Skip(size);
-								waveDataL[index]=new signed short[2];
+								zapArray(waveDataL[index],new signed short[2]);
 							}
 							else
 							{
 								pData = new byte[size];
 								pFile->Read(pData,size);
 								SoundDesquash(pData,&waveDataR[index]);
-								delete pData;
+								zapArray(pData);
 							}
 						}
 					}
@@ -266,7 +250,7 @@ namespace psycle
 			{
 				if (waveLength[i] > 0)
 				{
-					byte * pData1;
+					byte * pData1(0);
 					byte * pData2(0);
 					UINT size1=0,size2=0;
 					size1 = SoundSquash(waveDataL[i],&pData1,waveLength[i]);
@@ -321,13 +305,13 @@ namespace psycle
 
 					pFile->Write(&size1,sizeof(size1));
 					pFile->Write(pData1,size1);
-					delete pData1;
+					zapArray(pData1);
 					if (waveStereo[i])
 					{
 						pFile->Write(&size2,sizeof(size2));
 						pFile->Write(pData2,size2);
-						delete pData2;
 					}
+					zapArray(pData2);
 				}
 			}
 		}

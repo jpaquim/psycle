@@ -37,9 +37,9 @@ namespace psycle
 		Plugin::~Plugin() throw()
 		{
 			Free();
-			delete _psAuthor;
-			delete _psDllName;
-			delete _psName;
+			zapArray(_psAuthor);
+			zapArray(_psDllName);
+			zapArray(_psName);
 		}
 
 		void Plugin::Instance(const char file_name[]) throw(...)
@@ -297,7 +297,7 @@ namespace psycle
 						// so now we have to write the data, even if they are corrupted.
 					}
 					pFile->Write(pData, size2); // Number of parameters
-					delete pData;
+					zapArray(pData);
 				}
 			};
 		#endif
@@ -834,7 +834,7 @@ namespace psycle
 						catch(const std::exception &)
 						{
 						}
-						delete pData;
+						zapArray(pData);
 					}
 				}
 				catch(const std::exception &)
@@ -850,7 +850,7 @@ namespace psycle
 					{
 					}
 				}
-				delete Vals;
+				zapArray(Vals);
 			}
 			else
 			{
@@ -864,7 +864,7 @@ namespace psycle
 				{
 					byte* pData = new byte[size];
 					pFile->Read(pData, size); // Number of parameters
-					delete pData;
+					zapArray(pData);
 				}*/
 			}
 

@@ -86,8 +86,8 @@ namespace psycle
 
 		Machine::~Machine() throw()
 		{
-			delete _pSamplesL;
-			delete _pSamplesR;
+			zapArray(_pSamplesL);
+			zapArray(_pSamplesR);
 		}
 
 		void Machine::Init()

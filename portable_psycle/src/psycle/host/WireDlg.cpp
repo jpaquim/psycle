@@ -125,8 +125,8 @@ namespace psycle
 			linepenR.DeleteObject();
 			linepenbL.DeleteObject();
 			linepenbR.DeleteObject();
-			delete bufBM;
-			delete clearBM;
+			zapObject(bufBM);
+			zapObject(clearBM);
 			delete this;
 		}
 

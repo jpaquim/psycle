@@ -49,4 +49,30 @@ namespace psycle
 			logger(const int & level, const std::string & string) throw();
 		};
 	}
+
+	/// safer version of delete that clears the pointer. Don't use it for arrays!
+	/// automatically.
+	/// \param ptr pointer to single object to be deleted.
+	/// \param newValue the new value ptr will be set to. By default it is null.
+
+	template<class T>
+	T* zapObject(T*& ptr, T* newValue=NULL)
+	{
+		if(ptr)
+			delete ptr;
+		return ptr=newValue;
+	}
+
+	/// safer version of delete[] that clears the pointer. Only use it for arrays!
+	/// automatically.
+	/// \param ptr pointer to array to be deleted.
+	/// \param newValue the new value ptr will be set to. By default it is null.
+	template<class T>
+	T* zapArray(T *&ptr, T* newValue=NULL)
+	{
+		if(ptr)
+			delete [] ptr;
+		return ptr=newValue;
+	}
+
 }
