@@ -80,7 +80,7 @@ void CChildView::DrawSeqEditor(CDC *devc)
 	}
 	else
 	{
-		TXT(devc,"Beat \ Group ",0,0,SEQ_XOFFSET-1,SEQ_YOFFSET-1);
+		TXT(devc,"Beat \\ Group ",0,0,SEQ_XOFFSET-1,SEQ_YOFFSET-1);
 	}
 
 /////////////////////////// Draw Lines
