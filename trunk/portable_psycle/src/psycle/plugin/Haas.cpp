@@ -29,12 +29,13 @@ public:
 
 	enum Parameters
 	{
+		overall_dry_wet,
 		separator_direct,
-		direct_gain, direct_delay_stereo_delta, direct_pan,
+		direct_gain, direct_pan, direct_delay_stereo_delta,
 		separator_early_reflection,
-		early_reflection_gain, early_reflection_delay, early_reflection_delay_stereo_delta, early_reflection_pan,
+		early_reflection_gain, early_reflection_pan, early_reflection_delay, early_reflection_delay_stereo_delta,
 		separator_late_reflection,
-		late_reflection_gain, late_reflection_delay, late_reflection_pan,
+		late_reflection_gain, late_reflection_pan, late_reflection_delay,
 		separator,
 		channel_mix
 	};
@@ -45,19 +46,20 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
+			Information::Parameter::linear("dry/wet", 0, 1, 1),
 			Information::Parameter("direct"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
-			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter::linear("pan", -1, 0, 1),
+			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 			Information::Parameter("early reflection"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
+			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter::exponential("delay", .0005, .01, .045),
 			Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
-			Information::Parameter::linear("pan", -1, 0, 1),
 			Information::Parameter("late reflection"),
 			Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 0, std::pow(10., +24. / 20)),
-			Information::Parameter::exponential("delay", .015, .04, .100),
 			Information::Parameter::linear("pan", -1, 0, 1),
+			Information::Parameter::exponential("delay", .015, .04, .100),
 			Information::Parameter(),
 			Information::Parameter::discrete("channel mix", normal, mono)
 		};
@@ -117,6 +119,8 @@ public:
 
 	Haas() :
 		Plugin(information()),
+		overall_gain_dry(0),
+		overall_gain_wet(1),
 		direct_delay_stereo_delta_abs(0),
 		direct_delay_stereo_delta_positive(false),
 		direct_delay_stereo_delta_negative(false),
@@ -154,6 +158,7 @@ protected:
 	bool direct_delay_stereo_delta_positive, early_reflection_delay_stereo_delta_positive;
 	bool direct_delay_stereo_delta_negative, early_reflection_delay_stereo_delta_negative;
 	Real direct_delay_stereo_delta_abs, early_reflection_delay_stereo_delta_abs;
+	Real overall_gain_dry, overall_gain_wet;
 	Real direct_gain_left, direct_gain_right;
 	Real early_reflection_gain_left, early_reflection_gain_right;
 	Real late_reflection_gain_left, late_reflection_gain_right;
@@ -222,6 +227,10 @@ void Haas::parameter(const int & parameter)
 			resize(max);
 		}
 		break;
+	case overall_dry_wet:
+		overall_gain_dry = 1 - (*this)(direct_pan);
+		overall_gain_wet = (*this)(direct_pan);
+		break;
 	case direct_gain:
 	case direct_pan:
 		direct_gain_left = (*this)(direct_gain) * std::min(Real(1), (1 - (*this)(direct_pan)));
@@ -280,15 +289,23 @@ inline void Haas::process(Sample & left, Sample & right)
 	*buffer_iterators_[direct_first] = mono_input;
 	left = static_cast<Sample>
 	(
-		direct_gain_left * *buffer_iterators_[direct_left] +
-		early_reflection_gain_left * *buffer_iterators_[early_reflection_left] +
-		late_reflection_gain_left * *buffer_iterators_[late_reflection]
+		overall_gain_dry * left +
+		overall_gain_wet *
+		(
+			direct_gain_left * *buffer_iterators_[direct_left] +
+			early_reflection_gain_left * *buffer_iterators_[early_reflection_left] +
+			late_reflection_gain_left * *buffer_iterators_[late_reflection]
+		)
 	);
 	right = static_cast<Sample>
 	(
-		direct_gain_right * *buffer_iterators_[direct_right] +
-		early_reflection_gain_right * *buffer_iterators_[early_reflection_right] +
-		late_reflection_gain_right * *buffer_iterators_[late_reflection]
+		overall_gain_dry * right +
+		overall_gain_wet *
+		(
+			direct_gain_right * *buffer_iterators_[direct_right] +
+			early_reflection_gain_right * *buffer_iterators_[early_reflection_right] +
+			late_reflection_gain_right * *buffer_iterators_[late_reflection]
+		)
 	);
 	for(int stage(0) ; stage < stages ; ++stage)
 		if(++buffer_iterators_[stage] == buffer_.end())
