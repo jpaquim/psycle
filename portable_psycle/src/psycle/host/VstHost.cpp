@@ -162,39 +162,35 @@ namespace psycle
 
 			VstTimeInfo plugin::_timeInfo;
 
-			#pragma warning(push)
-				#pragma warning(disable:4355) // 'this' : used in base member initializer list
-				plugin::plugin()
-					: queue_size(0)
-					, wantidle(false)
-					, _sDllName("")
-					, h_dll(0)
-					, _program(0)
-					, instantiated(false)
-					, _instance(0)
-					, requiresProcess(false)
-					, requiresRepl(false)
-					, _version(0)
-					, _isSynth(false)
-					, proxy_(0)
-					#if !defined _WINAMP_PLUGIN_
-						, editorWnd(0)
-					#endif
+			plugin::plugin()
+				: queue_size(0)
+				, wantidle(false)
+				, _sDllName("")
+				, h_dll(0)
+				, _program(0)
+				, instantiated(false)
+				, _instance(0)
+				, requiresProcess(false)
+				, requiresRepl(false)
+				, _version(0)
+				, _isSynth(false)
+				, proxy_(0)
+				#if !defined _WINAMP_PLUGIN_
+					, editorWnd(0)
+				#endif
+			{
+				proxy_ = new vst::proxy(*this);
+				std::memset(junk, 0, STREAM_SIZE * sizeof(float));
+				for(int i(0) ; i < vst::max_io ; ++i)
 				{
-					std::memset(junk, 0, STREAM_SIZE * sizeof(float));
-					for(int i(0) ; i < vst::max_io ; ++i)
-					{
-						inputs[i]=junk;
-						outputs[i]=junk;
-					}
-					outputs[0] = _pSamplesL;
-					outputs[1] = _pSamplesR;
-					_sProductName[0]=0;
-					_sVendorName[0]=0;
-
-					proxy_ = new vst::proxy(*this);
+					inputs[i]=junk;
+					outputs[i]=junk;
 				}
-			#pragma warning(pop)
+				outputs[0] = _pSamplesL;
+				outputs[1] = _pSamplesR;
+				_sProductName[0]=0;
+				_sVendorName[0]=0;
+			}
 
 			plugin::~plugin() throw()
 			{
@@ -938,26 +934,30 @@ namespace psycle
 			}
 			long plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
-#ifndef NDEBUG
-				if(opcode!=audioMasterGetTime) {
-					std::ostringstream s;
-					s<< "VST plugin: call to host dispatcher: Eff: " << effect
-					<< " Opcode = " << audioMaster_opcode_to_string(opcode)
-					<< " Index = " << index
-					<< " Value = " << value
-					<< " Ptr = " << ptr
-					<< " Opt = " << opt;
-					host::loggers::trace(s.str());
-				}
-#endif
+				#ifndef NDEBUG
+					if(opcode!=audioMasterGetTime)
+					{
+						std::ostringstream s;
+						s<< "VST plugin: call to host dispatcher: Eff: " << effect
+						<< " Opcode = " << audioMaster_opcode_to_string(opcode)
+						<< " Index = " << index
+						<< " Value = " << value
+						<< " Ptr = " << ptr
+						<< " Opt = " << opt;
+						host::loggers::trace(s.str());
+					}
+				#endif
+				
 				// believe it or not, some plugs tried to call psycle with a null AEffect.
+				plugin & host(**reinterpret_cast<plugin**>(&effect->resvd1));
+				
 				// Support opcodes
 				switch(opcode)
 				{
 				case audioMasterAutomate:
 					#if !defined _WINAMP_PLUGIN_
 							Global::_pSong->Tweaker = true;
-							if(effect && effect->user)
+							if(effect && &host)
 							{
 								if(index<0 || index >= effect->numParams) {
 									host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
@@ -965,12 +965,12 @@ namespace psycle
 								if(Global::pConfig->_RecordTweaks)  
 								{
 									if(Global::pConfig->_RecordMouseTweaksSmooth)
-										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(reinterpret_cast<plugin *>(effect->user)->_macIndex, index, f2i(opt * vst::quantization));
+										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host._macIndex, index, f2i(opt * vst::quantization));
 									else
-										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(reinterpret_cast<plugin *>(effect->user)->_macIndex, index, f2i(opt * vst::quantization));
+										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host._macIndex, index, f2i(opt * vst::quantization));
 								}
-								if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
-									((CVstEditorDlg *) reinterpret_cast<plugin *>(effect->user)->editorWnd)->Refresh(index, opt);
+								if(host.editorWnd)
+									((CVstEditorDlg *) host.editorWnd)->Refresh(index, opt);
 							}
 							
 					#endif
@@ -980,17 +980,13 @@ namespace psycle
 				case audioMasterCurrentId:			
 					break;
 				case audioMasterIdle:
-					if(effect && effect->user)
+					if(effect && &host)
 					{
 						try
 						{
-							reinterpret_cast<plugin *>(effect->user)->proxy().dispatcher(effEditIdle);
+							host.proxy().dispatcher(effEditIdle);
 						}
 						catch(const std::exception &)
-						{
-							// o_O`
-						}
-						catch(...) // reinterpret_cast sucks
 						{
 							// o_O`
 						}
@@ -1103,17 +1099,13 @@ namespace psycle
 				case audioMasterGetParameterQuantization:	
 					return vst::quantization;
 				case audioMasterNeedIdle:
-					if(effect && effect->user)
+					if(effect && &host)
 					{
 						try
 						{
-							reinterpret_cast<plugin *>(effect->user)->wantidle = true;
+							host.wantidle = true;
 						}
 						catch(const std::exception &)
-						{
-							// o_O`
-						}
-						catch(...) // reinterpret_cast sucks
 						{
 							// o_O`
 						}
@@ -1121,18 +1113,14 @@ namespace psycle
 					return 1;
 				case audioMasterSizeWindow:
 					#if !defined _WINAMP_PLUGIN_
-							if(effect && effect->user)
+							if(effect && &host)
 							{
 								try
 								{
-									if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
-										reinterpret_cast<CVstEditorDlg *>(reinterpret_cast<plugin *>(effect->user)->editorWnd)->Resize(index, value);
+									if(host.editorWnd)
+										reinterpret_cast<CVstEditorDlg *>(host.editorWnd)->Resize(index, value);
 								}
 								catch(const std::exception &)
-								{
-									// o_O`
-								}
-								catch(...) // reinterpret_cast sucks
 								{
 									// o_O`
 								}
@@ -1142,13 +1130,14 @@ namespace psycle
 				case audioMasterGetSampleRate:
 					{
 						long sampleRate=Global::pConfig->GetSamplesPerSec();
-						if(effect && effect->user)
-							reinterpret_cast<plugin *>(effect->user)->proxy().setSampleRate(sampleRate);
+						if(effect && &host)
+							host.proxy().setSampleRate(sampleRate);
 						return sampleRate;
 					}
 				case audioMasterGetBlockSize:
-					if(effect && effect->user) {
-						reinterpret_cast<plugin *>(effect->user)->proxy().setBlockSize(STREAM_SIZE);
+					if(effect && &host)
+					{
+						host.proxy().setBlockSize(STREAM_SIZE);
 					}
 					return STREAM_SIZE;
 				case audioMasterGetVendorString:
@@ -1167,19 +1156,13 @@ namespace psycle
 					return 5000; // HOST version 5000
 					// <bohan> is that a Cubase VST version?
 				case audioMasterUpdateDisplay:
-					// <magnus> PSP EasyVerb calls this from main(),
-					// with effect->user=0x00000019
-					if(effect && effect->user > (void *)0x100)
+					if(effect && &host)
 					{
 						try
 						{
-							reinterpret_cast<plugin *>(effect->user)->proxy().dispatcher(effEditIdle);
+							host.proxy().dispatcher(effEditIdle);
 						}
 						catch(const std::exception &)
-						{
-							// o_O`
-						}
-						catch(...) // reinterpret_cast sucks
 						{
 							// o_O`
 						}
