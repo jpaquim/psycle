@@ -760,7 +760,7 @@ int Song::GetBlankPatternUnused(int rval)
 {
 	for (int i=0; i<MAX_PATTERNS; i++)
 	{
-		if (ppPatternData[i] == NULL)
+		if (!IsPatternUsed(i))
 		{
 			return i;
 		}
@@ -2441,7 +2441,7 @@ bool Song::Save(RiffFile* pFile)
 	for (int i = 0; i < MAX_PATTERNS; i++)
 	{
 		// check every pattern for validity
-		if (ppPatternData[i])
+		if (IsPatternUsed(i))
 		{
 			chunkcount++;
 		}
@@ -2472,9 +2472,6 @@ bool Song::Save(RiffFile* pFile)
 	FILE HEADER
 	===================
 	id = "PSY3SONG"; // PSY2 was 1.66
-	version = 0; // "total" version of all chunk versions
-	size = sizeof(UINT);
-	int chunkcount // number of chunks in this file.
 	*/
 
 	pFile->Write("PSY3SONG", 8);
@@ -2497,15 +2494,7 @@ bool Song::Save(RiffFile* pFile)
 	===================
 	SONG INFO TEXT
 	===================
-	HEADER:
 	id = "INFO"; 
-	version = 0;
-	size = strlen(Name)+strlen(Author)+strlen(Comment);
-
-	DATA:
-	char name[]; // null terminated string
-	char author[]; // null terminated string
-	char comment[]; // null terminated string
 	*/
 
 	pFile->Write("INFO",4);
@@ -2525,19 +2514,7 @@ bool Song::Save(RiffFile* pFile)
 	===================
 	SONG INFO
 	===================
-	HEADER:
 	id = "SNGI"; 
-	version = 0;
-	size = (6*sizeof(int));
-
-	DATA:
-	int numTracks; 
-		// Label: strk // Desc : Contains the number of tracks that the song has - multipattern would be total tracks
-		// Values: from 4 to 64
-	int bpm; // bpm of song (0-255) - int incase of future expansion?
-	int tpb; // ticks per beat of song (1-256) - int incase of future expansion?
-	int currentoctave; // curent octave on keyboard (0-9)
-	int sequenceWidth; // * number of sequence columns for multipattern
 	*/
 
 	pFile->Write("SNGI",4);
@@ -2585,16 +2562,7 @@ bool Song::Save(RiffFile* pFile)
 	===================
 	SEQUENCE DATA
 	===================
-	HEADER:
 	id = "SEQD"; 
-	version = 0;
-	size = ((sequenceLength+2)*sizeof(int))+sizeof(int)+strlen(sequenceColumnName);
-
-	DATA:
-	int index; // * column index for multipattern stuff
-	int sequenceLength
-	char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, but we will truncate on load
-	int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in position 3, it plays the pattern 5th. (zero based)
 	*/
 
 	char* pSequenceName = "seq0\0";
@@ -2625,37 +2593,15 @@ bool Song::Save(RiffFile* pFile)
 	===================
 	PATTERN DATA
 	===================
-	HEADER:
 	id = "PATD"; 
-	version = 0;
-	size = (3*sizeof(int))+(numlines*patterntracks*sizeof(PatternEntry));
-
-	typedef struct PatternEntry
-	{
-		UCHAR _note;
-		UCHAR _inst; // Aux column.  Instrument for sampler.
-		UCHAR _mach;
-		UCHAR _cmd;
-		UCHAR _parameter;
-	//	UCHAR _vol; // Volume Column - not implemented yet
-	}
-	PatternEntry;
-
-	DATA:
-	int index; // which pattern we are loading
-	int numlines; // how many lines in this pattern (1-512)
-	int patterntracks; // how many tracks in this pattern * for multipattern
-	char patternName[]; // null terminated string.
-	PatternEntry pe[numlines*patterntracks]; // data for this pattern- use numTracks until pattern tracks is implemented
-
 	*/
 
 	for (i = 0; i < MAX_PATTERNS; i++)
 	{
 		// check every pattern for validity
-		if (ppPatternData[i])
+		if (IsPatternUsed(i))
 		{
-			// we could also check to see if pattern is unused AND blank, but for now, don't worry about it.
+			// ok save it
 			byte* pSource=new byte[SONGTRACKS*patternLines[i]*EVENT_SIZE];
 			byte* pCopy = pSource;
 
@@ -3105,6 +3051,43 @@ bool Song::CloneIns(int src,int dst)
 	file.Close();
 	DeleteFile(filepath);
 	return true;
+}
+
+bool Song::IsPatternUsed(int i)
+{
+	bool bUsed = FALSE;
+	if (ppPatternData[i])
+	{
+		// we could also check to see if pattern is unused AND blank.
+		for (int j = 0; j < playLength; j++)
+		{
+			if (playOrder[j] == i)
+			{
+				bUsed = TRUE;
+				break;
+			}
+		}
+
+		if (!bUsed)
+		{
+			// check to see if it is empty
+			unsigned char blank[5]={255,255,255,0,0};
+			unsigned char * pData = ppPatternData[i];
+			for (j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
+			{
+				for (int k = 0; k < 5; k++)
+				{
+					if (pData[j+k] != blank[k])
+					{
+						bUsed = TRUE;
+						j = MULTIPLY2;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return bUsed;
 }
 
 

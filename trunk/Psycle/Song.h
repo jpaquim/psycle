@@ -133,6 +133,7 @@ public:
 	bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	bool Save(RiffFile* pFile);
+	bool IsPatternUsed(int i);
 
 	// Previews waving
 

@@ -24,7 +24,9 @@ V1.7.3
 * replace and exchange functions in gear rack maintain connections (pooplog)
 * Internal effects moved to native plugins and improved them in some cases. (bohan)
 * more work in the VstTimeInfo. samplePos is correctly indicated now and improved ppqPos. [JAZ]
+* psycle tracks changes to machines and instruments so it doesn't warn you if you haven't changed your file (pooplog)
 ! sampler doesn't crash when no instrument is specified any more (pooplog)
+! vst initializing improved, more vsts should work now (pooplog)
 ! save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
 ! error messages on file read/write problems (pooplog)
 ! vsts don't immediately crash psycle when they give an exception on save/load/instance any more (pooplog)
