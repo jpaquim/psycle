@@ -571,8 +571,8 @@ namespace psycle
 					{
 						toffset=_ptrackline(pattern,t,l);
 						memcpy(toffset,blank,EVENT_SIZE);
-						l++;
 					}
+					l++;
 				}
 				patternLines[pattern] = lines;
 			}

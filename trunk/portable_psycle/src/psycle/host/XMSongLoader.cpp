@@ -82,11 +82,11 @@ namespace host{
 		// clear existing data
 		song.DeleteAllPatterns();
 
-		Global::_pSong->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-		Global::_pSong->InsertConnection(0,MASTER_INDEX,0.5f);
-		Global::_pSong->seqBus=0;
+		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
+		song.InsertConnection(0,MASTER_INDEX,0.5f);
+		song.seqBus=0;
 		// build sampler
-		m_pSampler = (XMSampler *)(Global::_pSong->_pMachine[0]);
+		m_pSampler = (XMSampler *)(song._pMachine[0]);
 
 		LONG iInstrStart = LoadPatterns(song);
 
@@ -557,7 +557,7 @@ namespace host{
 						default: 
 							if(note >= 96 || note < 0)
 								TRACE(_T("invalid note\n"));
-							e._note  = note-1;
+							e._note  = note-1; // Note 0 means noteoff, whereas in psycle it is C-0.
 				/*		
 
 							// force note into range
@@ -639,11 +639,19 @@ namespace host{
 			sampler.Instrument(idx).AutoVibratoSweep(_samph.vibsweep);
 			sampler.Instrument(idx).AutoVibratoType(_samph.vibtype);
 			
-			for(int i = 0;i < XMInstrument::MAX_SAMPLER_NOTES;i++){
-				if(i < 96){
-					sampler.Instrument(idx).NoteToSample(i,_samph.snum[i]);
+			XMInstrument::NotePair npair;
+			npair.second=_samph.snum[0];
+			for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+				npair.first=i;
+				if (i< 12){
+					//npair.second=_samph.snum[0]; implicit.
+					sampler.Instrument(idx).NoteToSample(i,npair);
+				} else if(i < 108){
+					npair.second=_samph.snum[i-12];
+					sampler.Instrument(idx).NoteToSample(i,npair);
 				} else {
-					sampler.Instrument(idx).NoteToSample(i,_samph.snum[95]);
+					//npair.second=_samph.snum[95]; implicit.
+					sampler.Instrument(idx).NoteToSample(i,npair);
 				}
 			}
 
@@ -738,7 +746,7 @@ namespace host{
 
 		_wave.WaveVolume(((int)iVol * 100) / 64);
 		_wave.WaveTune(iRelativeNote);
-		_wave.WaveFineTune(iFineTune * 2);
+		_wave.WaveFineTune(iFineTune*2);
 
 		smpLen[iSampleIdx] = iLen;
 		smpFlags[iSampleIdx] = iFlags;
@@ -827,16 +835,17 @@ namespace host{
 			
 			//inst.AmpEnvelope()->NumOfPoints(envelope_point_num);
 
-			if(envelope_point_num > 12){
+			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.
 				envelope_point_num = 12;
 			}
 			
-			
+			// Format of FastTracker points is :
+			// Point : frame number. (frame= line*(24/TPB), samplepos= frame*(samplespertick*TPB/24))
+			// Value : 0..64. , divide by 64 to use it as a multiplier.
 			for(int i = 0; i < envelope_point_num;i++){
 //				inst.AmpEnvelope()->Point(i,((int)sampleHeader.venv[i * 2]) * _tickPerWave);
 //				inst.AmpEnvelope()->Value(i,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
 				inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] * _tickPerWave,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
-
 			}
 
 		} else {

@@ -21,34 +21,58 @@ public:
 	static const int TICK_PER_WAVE = 44100  /* samples/sec */ * 60 /* sec */  / (4 /*row */ * 6 /* tick  */ /* * BPM */ ); 
 
 	struct CMD {
-		static const UCHAR NONE			=		0x0;///< Do Nothing
-		static const UCHAR PORTAUP		=		0x01;///< Portamento Up
-		static const UCHAR PORTADOWN	=		0x02;///< Portamento Down
-		static const UCHAR PORTA2NOTE	=		0x03;///<  Tone Portamento
-		static const UCHAR VIBRATO =			0x04;///< Do Vibrato
-		static const UCHAR TONEPORTAVOL =		0x05;///< Tone Portament & Volume Slide 
-		static const UCHAR VIBRATOVOL =			0x06;///< Vibrato & Volume Slide
-		static const UCHAR TREMOLO =			0x07;///< Tremolo
+	//	(*) = If the command byte is zero, the last nonzero byte for the command should be used.
+		static const UCHAR ARPEGGIO		=		0x0; ///< Arpeggio
+		static const UCHAR PORTAUP		=		0x01;///< Portamento Up		 (*)
+		static const UCHAR PORTADOWN	=		0x02;///< Portamento Down	 (*)
+		static const UCHAR PORTA2NOTE	=		0x03;///<  Tone Portamento	 (*)
+		static const UCHAR VIBRATO =			0x04;///< Do Vibrato		 (*)
+		static const UCHAR TONEPORTAVOL =		0x05;///< Tone Portament & Volume Slide (*)
+		static const UCHAR VIBRATOVOL =			0x06;///< Vibrato & Volume Slide (*)
+		static const UCHAR TREMOLO =			0x07;///< Tremolo			 (*)
 		static const UCHAR PANNING	=			0x08;///< Set Panning Position
 		static const UCHAR OFFSET	=			0x09;///< Set Sample Offset
-		static const UCHAR VOLUMESLIDE	=		0x0a;///< Volume Slide
+		static const UCHAR VOLUMESLIDE	=		0x0a;///< Volume Slide		 (*)
 		static const UCHAR POSITION_JUMP	=	0x0b;///< Position Jump
 		static const UCHAR VOLUME	=			0x0c;///< Set Volume
 		static const UCHAR PATTERN_BREAK	=	0x0d;///< Pattern Break
 		static const UCHAR EXTENDED		=		0x0e;///< Extend Command
 		static const UCHAR SETSPEED	=			0x0f;///< Set Speed or BPM
 		static const UCHAR SET_GLOBAL_VOLUME =	0x10;///< Set Global Volume
-		static const UCHAR GLOBAL_VOLUME_SLIDE = 0x11;///< Global Volume Slide
+		static const UCHAR GLOBAL_VOLUME_SLIDE = 0x11;///< Global Volume Slide (*)
 		static const UCHAR NOTE_OFF			 =	0x14;///< Note Off
 		static const UCHAR SET_ENV_POSITION =	0x15;///< Set Envelope Position
-		static const UCHAR PANNINGSLIDE =		0x19;///< PANNING SLIDE
-		static const UCHAR RETRIG	=			0x1B;///< Retrigger Note
-		static const UCHAR TREMOR	=			0x1D;///< Retrigger Note
+		static const UCHAR PANNINGSLIDE =		0x19;///< PANNING SLIDE		 (*)
+		static const UCHAR RETRIG	=			0x1B;///< Retrigger Note	 (*)
+		static const UCHAR TREMOR	=			0x1D;///< Tremor
 		static const UCHAR EXTEND_XM_EFFECTS =	0x21;///< Extend XM Effects	
-		static const UCHAR PANBRELLO	=			0x22;///< Panbrello
+		static const UCHAR PANBRELLO	=		0x22;///< Panbrello
 
-		// Extend Command
-		
+/*  Extended Command
+*
+E1 (*) Fine porta up
+E2 (*) Fine porta down
+E3     Set gliss control
+E4     Set vibrato control
+E5     Set finetune
+E6     Set loop begin/loop
+E7     Set tremolo control
+E9     Retrig note
+EA (*) Fine volume slide up
+EB (*) Fine volume slide down
+EC     Note cut
+ED     Note delay
+EE     Pattern delay
+ */
+
+/* Extended XM Command
+*
+X1 (*) Extra fine porta up
+X2 (*) Extra fine porta down
+ */		// Extend Command
+
+		/// Volume Column commands
+ 
 		static const UCHAR VOLSLIDEDOWN =		0x40;
 		static const UCHAR VOLSLIDEUP	=		0x41;
 		static const UCHAR FINEVOLDOWN	=		0x42;
@@ -113,13 +137,10 @@ public:
 	};
 
 
-	enum InterpolationType
-	{
-		INTERPOL_NONE = 0,
-		INTERPOL_LINEAR = 1,
-		INTERPOL_SPLINE = 2
-	};
 	class Channel;
+
+	//////////////////////////////////////////////////////////////////////////
+	//  XMSampler::WaveDataController Declaration
 	class WaveDataController
 	{
 	public:
@@ -202,6 +223,8 @@ public:
 
 
 	};
+	//////////////////////////////////////////////////////////////////////////
+	//  XMSampler::EnvelopeController Declaration
 
 	class EnvelopeController {
 	public:
@@ -269,7 +292,7 @@ public:
 				return;
 			}
 
-			m_Tick++;// 1Tick  44100
+			m_Tick++;// 1Tick  1/44100sec
 
 			if((m_Tick >= m_pEnvelope->GetTime(m_PositionIndex + 1)))
 			{
@@ -302,11 +325,10 @@ public:
 					CalcStep(m_PositionIndex,m_PositionIndex + 1);
 				}
 			}
-
 		};
 
 		/// 
-		const ValueType ModulationAmount()
+		const XMInstrument::Envelope::ValueType ModulationAmount()
 		{
 			return m_ModulationAmount;
 		};
@@ -323,11 +345,14 @@ public:
 
 		XMInstrument::Envelope * m_pEnvelope;
 
-		ValueType m_ModulationAmount;
-		ValueType m_Step;
+		XMInstrument::Envelope::ValueType m_ModulationAmount;
+		XMInstrument::Envelope::ValueType m_Step;
 	};// EnvelopeController
+	
 	class Voice;
 
+	//////////////////////////////////////////////////////////////////////////
+	//  XMSampler::Channel Declaration
 	class Channel {
 	public:
 		struct EffectFlag
@@ -427,9 +452,14 @@ public:
 		
 		};
 
+		void pSampler(XMSampler * const pSampler){m_pSampler = pSampler;};
+
 		const int InstrumentNo(){return m_InstrumentNo;};
 		void InstrumentNo(const int no){m_InstrumentNo = no;};
 		
+		const int Index(){ return m_Index;};
+		void Index(const int value){m_Index = value;};
+
 		const float ChannelVolume(){return m_ChannelVolume;};
 		void ChannelVolume(const float value){m_ChannelVolume = value;};
 		
@@ -443,6 +473,31 @@ public:
 			m_bPeriodChange = true;
 		};
 
+		/// Note Cut command initialize
+		void NoteCut(const int ntick){
+			m_NoteCutCounter = ntick;
+			if(ntick == 0){
+				Volume(0);
+				m_bVolumeChange = true;
+				return;
+			}
+			m_EffectFlags |= EffectFlag::NOTECUT;
+		};
+
+		///  Do Note Cut
+		void NoteCut()
+		{
+			m_NoteCutCounter--;
+			if(m_NoteCutCounter == 0)
+			{
+				Volume(0);
+				m_bVolumeChange = true;
+				m_EffectFlags &= ~EffectFlag::NOTECUT;
+			}
+		};
+
+		/// Perform effect at first tick
+		void PerformEffect(Voice& voice,const int cmd,const int parameter);
 
 		// Channel Command
 		void VolumeDown(const int value){
@@ -466,6 +521,17 @@ public:
 
 		void Porta2Note(const UCHAR note,const int parameter,const int layer);
 		void Porta2Note(XMSampler::Voice& voice);
+
+		/// convert note to period
+		const double NoteToPeriod(const int note,const int layer);
+		/// convert period to note 
+		const int PeriodToNote(const double period,const int layer);
+
+		/// Get period
+		const double Period(){return m_Period;};
+		/// Set period
+		void Period(const double value){m_Period = value;};
+
 
 		void PortamentoUp(const int speed)
 		{ 
@@ -518,8 +584,6 @@ public:
 
 		const int EffectFlags(){return m_EffectFlags;};
 		void EffectFlags(const int value){m_EffectFlags = value;};
-
-		void pSampler(XMSampler * const pSampler){m_pSampler = pSampler;};
 
 		const bool IsGrissando(){return m_bGrissando;};
 		void IsGrissando(const bool value){m_bGrissando = value;};
@@ -660,33 +724,6 @@ public:
 			m_bPeriodChange = true;
 		};
 		
-		/// convert note to period
-		const double NoteToPeriod(const int note,const int layer);
-		/// convert period to note 
-		const int PeriodToNote(const double period,const int layer);
-
-		/// Note Cut command initialize
-		void NoteCut(const int ntick){
-			m_NoteCutCounter = ntick;
-			if(ntick == 0){
-				Volume(0);
-				m_bVolumeChange = true;
-				return;
-			}
-			m_EffectFlags |= EffectFlag::NOTECUT;
-		};
-		
-		///  Do Note Cut
-		void NoteCut()
-		{
-			m_NoteCutCounter--;
-			if(m_NoteCutCounter == 0)
-			{
-				Volume(0);
-				m_bVolumeChange = true;
-				m_EffectFlags &= ~EffectFlag::NOTECUT;
-			}
-		};
 		
 		/// Init Global Volume Slide
 		void GlobalVolumeSlide(const int speed)
@@ -753,25 +790,12 @@ public:
 		};
 
 
-
-
-		/// Get period
-		const double Period(){return m_Period;};
-		/// Set period
-		void Period(const double value){m_Period = value;};
-
-		const int Index(){ return m_Index;};
-		void Index(const int value){m_Index = value;};
-
 		const bool IsPeriodChange(){return m_bPeriodChange;};
 		void IsPeriodChange(const bool value){m_bPeriodChange = value;};
 		
 		const bool IsVolumeChange(){return m_bVolumeChange;};
 		void IsVolumeChange(const bool value){m_bVolumeChange = value;};
 
-
-		/// Perform effect at first tick
-		void PerformEffect(Voice& voice,const int cmd,const int parameter);
 
 	private:
 
@@ -859,7 +883,9 @@ public:
 		static const int m_RandomTable[64];///< Random
 	};
 
-	/// 
+
+	//////////////////////////////////////////////////////////////////////////
+	//  XMSampler::Voice Declaration
 	class Voice
 	{
 	public:
@@ -927,7 +953,7 @@ public:
 
 		void Retrigger(const int ticks,const int volumeModifier);
 		
-		void Work(int numSamples,float * pSampleL,float *pSamlpesR,Cubic& _resampler);
+		void Work(int numSamples,float * pSampleL,float *pSamlpesR,dsp::Cubic& _resampler);
 		
 		const int Instrument(){ return _instrument;};
 		void Instrument(const int value){_instrument = value;};
@@ -1005,7 +1031,7 @@ public:
 		
 		WaveDataController m_WaveDataController;///< 
 		
-		Filter _filter;///< 
+		dsp::Filter _filter;///< 
 		
 		int _cutoff;///< 
 		float _coModify;///< 
@@ -1030,6 +1056,10 @@ public:
 		static const int m_RandomTable[64];///< Random
 
 	};
+
+
+	//////////////////////////////////////////////////////////////////////////
+	//  XMSampler Declaration
 
 	XMSampler(int index);
 
@@ -1072,14 +1102,8 @@ public:
 	void NumVoices(const int value){_numVoices = value;};
 
 	/// set resampler quality 
-#if defined psycleWTL
-	void ResamplerQuality(const ::ResamplerQuality value);
-	/// get resampler quality 
-	const ::ResamplerQuality ResamplerQuality();
-#else
-	void ResamplerQuality(const psycle::host::ResamplerQuality value);
-	const psycle::host::ResamplerQuality ResamplerQuality();
-#endif
+	void ResamplerQuality(const dsp::ResamplerQuality value);
+	const dsp::ResamplerQuality ResamplerQuality();
 
 	/// BPM Speed
 	void CalcBPMAndTick();
@@ -1095,7 +1119,7 @@ protected:
 	int _numVoices;
 
 	Voice _voices[MAX_POLYPHONY];
-	Cubic _resampler;
+	dsp::Cubic _resampler;
 
 //	void VoiceWork(int numsamples, int voice);
 	unsigned char lastInstrument[MAX_TRACKS];

@@ -19,7 +19,7 @@ namespace psycle
 			_mode = MACHMODE_GENERATOR;
 			sprintf(_editName, "Sampler");
 
-			_resampler.SetQuality(RESAMPLE_LINEAR);
+			_resampler.SetQuality(dsp::R_LINEAR);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 			{
 				_voices[i]._envelope._stage = ENV_OFF;
@@ -232,14 +232,14 @@ namespace psycle
 			switch (i)
 			{
 			case 2:
-				_resampler.SetQuality(RESAMPLE_SPLINE);
+				_resampler.SetQuality(dsp::R_SPLINE);
 				break;
 			case 0:
-				_resampler.SetQuality(RESAMPLE_NONE);
+				_resampler.SetQuality(dsp::R_NONE);
 				break;
 			default:
 			case 1:
-				_resampler.SetQuality(RESAMPLE_LINEAR);
+				_resampler.SetQuality(dsp::R_LINEAR);
 				break;
 			}
 
@@ -275,7 +275,7 @@ namespace psycle
 
 		void Sampler::VoiceWork(int numsamples, int voice)
 		{
-			PRESAMPLERFN pResamplerWork;
+			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
 			float* pSamplesL = _pSamplesL;
 			float* pSamplesR = _pSamplesR;
@@ -353,10 +353,10 @@ namespace psycle
 
 					// Filter section
 					//
-					if (pVoice->_filter._type <= FILTER_BR)
+					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope(voice);
-						pVoice->_filter._cutoff = pVoice->_cutoff + Dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;
@@ -631,7 +631,7 @@ namespace psycle
 					pVoice->_filter._q = Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RQ;
 				}
 
-				pVoice->_filter._type = (TFilterType)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_TP;
+				pVoice->_filter._type = (dsp::FilterType)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_TP;
 				pVoice->_coModify = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_EA;
 				pVoice->_filterEnv._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
 

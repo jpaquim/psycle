@@ -35,14 +35,6 @@ namespace psycle
 		}
 		EnvelopeStage;
 
-		typedef enum
-		{
-			INTERPOL_NONE = 0,
-			INTERPOL_LINEAR = 1,
-			INTERPOL_SPLINE = 2
-		}
-		InterpolationType;
-
 		class WaveData
 		{
 		public:
@@ -84,7 +76,7 @@ namespace psycle
 			int _triggerNoteDelay;
 			int _instrument;
 			WaveData _wave;
-			Filter _filter;
+			dsp::Filter _filter;
 			int _cutoff;
 			float _coModify;
 			int _channel;
@@ -131,14 +123,14 @@ namespace psycle
 						switch (temp)
 						{
 						case 2:
-							_resampler.SetQuality(RESAMPLE_SPLINE);
+							_resampler.SetQuality(dsp::R_SPLINE);
 							break;
 						case 0:
-							_resampler.SetQuality(RESAMPLE_NONE);
+							_resampler.SetQuality(dsp::R_NONE);
 							break;
 						default:
 						case 1:
-							_resampler.SetQuality(RESAMPLE_LINEAR);
+							_resampler.SetQuality(dsp::R_LINEAR);
 							break;
 						}
 					}
@@ -148,22 +140,22 @@ namespace psycle
 
 			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
 			{
-				int temp;
+				UINT temp;
 				UINT size = 2*sizeof(temp);
 				pFile->Write(&size,sizeof(size));
 				temp = _numVoices;
 				pFile->Write(&temp, sizeof(temp)); // numSubtracks
 				switch (_resampler._quality)
 				{
-				case RESAMPLE_NONE:
-					temp = 0;
-					break;
-				case RESAMPLE_LINEAR:
-					temp = 1;
-					break;
-				case RESAMPLE_SPLINE:
-					temp = 2;
-					break;
+					case dsp::R_NONE:
+						temp = 0;
+						break;
+					case dsp::R_LINEAR:
+						temp = 1;
+						break;
+					case dsp::R_SPLINE:
+						temp = 2;
+						break;
 				}
 				pFile->Write(&temp, sizeof(temp)); // quality
 			};
@@ -176,7 +168,7 @@ namespace psycle
 			static char* _psName;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			Cubic _resampler;
+			dsp::Cubic _resampler;
 
 			void PerformFx(int voice);
 			void VoiceWork(int numsamples, int voice);

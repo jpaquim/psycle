@@ -75,7 +75,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			_pMachine->_resampler.SetQuality((ResamplerQuality)m_interpol.GetCurSel());
+			_pMachine->_resampler.SetQuality((dsp::ResamplerQuality)m_interpol.GetCurSel());
 
 		}
 

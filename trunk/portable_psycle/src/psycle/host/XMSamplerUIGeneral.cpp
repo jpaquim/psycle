@@ -42,7 +42,7 @@ XMSamplerUIGeneral::~XMSamplerUIGeneral()
 BOOL XMSamplerUIGeneral::OnInitDialog() 
 	{
 	CPropertyPage::OnInitDialog();
-	m_bInitialize=true;
+	m_bInitialize=false;
 	m_interpol.AddString(_T("No Interpolation"));
 	m_interpol.AddString(_T("Linear Interpolation"));
 	m_interpol.AddString(_T("Spline Interpolation"));
@@ -54,21 +54,21 @@ BOOL XMSamplerUIGeneral::OnInitDialog()
 	m_polyslider.SetRange(2, XMSampler::MAX_POLYPHONY);
 	m_polyslider.SetPos(_pMachine->NumVoices());
 
-	std::string tmp;
-	tmp=_pMachine->BPM();
-	m_Tempo.SetWindowText(tmp.c_str());
-	tmp=_pMachine->TicksPerRow();
-	m_Speed.SetWindowText(tmp.c_str());
+	char buffer[15];
+	sprintf(buffer,"%d",_pMachine->BPM());
+	m_Tempo.SetWindowText(buffer);
+	sprintf(buffer,"%d",_pMachine->TicksPerRow());
+	m_Speed.SetWindowText(buffer);
 
 
-	m_bInitialize=false;
+	m_bInitialize=true;
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 	}
 
 void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
 	{
-	_pMachine->ResamplerQuality((ResamplerQuality)m_interpol.GetCurSel());
+	_pMachine->ResamplerQuality((dsp::ResamplerQuality)m_interpol.GetCurSel());
 
 	}
 
@@ -108,9 +108,9 @@ void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 
 	// Label on dialog display
-	std::string tmp;
-	tmp = _pMachine->NumVoices();
-	m_polylabel.SetWindowText(tmp.c_str());
+	char buffer[15];
+	sprintf(buffer,"%d",_pMachine->NumVoices());
+	m_polylabel.SetWindowText(buffer);
 	*pResult = 0;
 	}
 NAMESPACE__END

@@ -33,7 +33,7 @@ namespace psycle
 
 		XMInstrument::~XMInstrument()
 		{
-
+			// No need to delete anything, since we don't allocate memory explicitely.
 		}
 
 		// other functions
@@ -43,7 +43,7 @@ namespace psycle
 		{
 			m_Loop = false;
 			m_Lines = 16;
-			m_NNA = NewNoteAction::N_STOP;
+			m_NNA = STOP;
 			m_InitPan = 0.5f;
 			m_AutoVibratoType = 0;
 			m_AutoVibratoSweep = 0;
@@ -57,7 +57,7 @@ namespace psycle
 			m_RandomResonance = false;///< Random Resonance
 			m_RandomSampleStart = false;///< Random SampleStart
 
-			m_FilterType = FILTER_NONE;
+			m_FilterType = dsp::F_NONE;
 			m_FilterCutoff = 127;
 			m_FilterResonance = 0;
 			m_FilterEnvAmount = 0;
@@ -66,8 +66,11 @@ namespace psycle
 
 			m_bEnabled = false;
 
-			for(int i = 0;i < MAX_SAMPLER_NOTES;i++){
-				m_AssignNoteToSample[i] = 0;
+			NotePair npair;
+			npair.first=0;
+			npair.second=0;
+			for(int i = 0;i < NOTE_MAP_SIZE;i++){
+				m_AssignNoteToSample[i] = npair;
 			}
 			// Envelopes and WaveData are automatically initialized when created.
 		}
@@ -75,7 +78,7 @@ namespace psycle
 		// delete layer
 		void XMInstrument::DeleteLayer(int c)
 		{
-			ASSERT(c<MAX_ASSIGNNABLE_SAMPLE);
+			ASSERT(c<MAX_INSTRUMENT_SAMPLES);
 			m_WaveLayer[c].Init();
 		}
 
@@ -89,10 +92,10 @@ namespace psycle
 			riffFile.Read(&m_Lines,sizeof(m_Lines));
 			riffFile.Read(&m_NNA,sizeof(m_NNA));
 
-			
-			
-			for(i = 0;i < MAX_SAMPLER_NOTES;i++){
-				NoteToSample(i,riffFile.ReadInt());
+			NotePair npair;
+			for(i = 0;i < NOTE_MAP_SIZE;i++){
+				riffFile.Read(&npair,sizeof(npair));
+				NoteToSample(i,npair);
 			}
 			
 			m_AmpEnvelope.Load(riffFile,version);
@@ -101,7 +104,7 @@ namespace psycle
 			m_PitchEnvelope.Load(riffFile,version);
 
 			riffFile.Read(m_FilterCutoff);
-			riffFile.Read(m_FilterType);
+			riffFile.Read(&m_FilterType,sizeof(m_FilterType));
 			riffFile.Read(m_FilterResonance);
 			riffFile.Read(m_FilterEnvAmount);
 
@@ -137,8 +140,10 @@ namespace psycle
 			riffFile.Write(m_Lines);
 			riffFile.Write(m_NNA);
 
-			for(i = 0;i < MAX_SAMPLER_NOTES;i++){
-				riffFile.Write(NoteToSample(i));
+			NotePair npair;
+			for(i = 0;i < NOTE_MAP_SIZE;i++){
+				npair=NoteToSample(i);
+				riffFile.Write(&npair,sizeof(NotePair));
 			}
 			
 			m_AmpEnvelope.Save(riffFile,version);
@@ -147,7 +152,7 @@ namespace psycle
 			m_PitchEnvelope.Save(riffFile,version);
 
 			riffFile.Write(m_FilterCutoff);
-			riffFile.Write(m_FilterType);
+			riffFile.Write(&m_FilterType,sizeof(m_FilterType));
 			riffFile.Write(m_FilterResonance);
 			riffFile.Write(m_FilterEnvAmount);
 
@@ -165,7 +170,7 @@ namespace psycle
 			// now we have to write out the waves, but only the valid ones
 
 			int numwaves = 0;
-			for (i = 0; i < MAX_ASSIGNNABLE_SAMPLE; i++)
+			for (i = 0; i < MAX_INSTRUMENT_SAMPLES; i++)
 			{
 				if (m_WaveLayer[i].WaveLength() > 0)
 				{
@@ -175,7 +180,7 @@ namespace psycle
 
 			riffFile.Write(numwaves);
 			
-			for (i = 0; i < MAX_ASSIGNNABLE_SAMPLE; i++)
+			for (i = 0; i < MAX_INSTRUMENT_SAMPLES; i++)
 			{
 				if (m_WaveLayer[i].WaveLength() > 0)
 				{
@@ -202,7 +207,7 @@ namespace psycle
 					
 			riffFile.Read(m_WaveTune);
 			riffFile.Read(m_WaveFineTune);
-			riffFile.Read(m_WaveLoopType);
+			riffFile.Read(&m_WaveLoopType,sizeof(m_WaveLoopType));
 			riffFile.Read(m_WaveStereo);
 					
 			riffFile.ReadStringA2T(m_WaveName,32);
@@ -259,7 +264,7 @@ namespace psycle
 
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
-			riffFile.Write(m_WaveLoopType);
+			riffFile.Write(&m_WaveLoopType,sizeof(m_WaveLoopType));
 			riffFile.Write(m_WaveStereo);
 
 			riffFile.Write(_wave_name,strlen(_wave_name) + 1);

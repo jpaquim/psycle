@@ -7,14 +7,16 @@ namespace psycle
 {
 	namespace host
 	{
+		namespace dsp
+			{
 		#define TPI 6.28318530717958647692528676655901
 
-		typedef enum TFilterType{
-			FILTER_LP = 0,
-			FILTER_HP = 1,
-			FILTER_BP = 2,
-			FILTER_BR = 3,
-			FILTER_NONE = 4
+		enum FilterType{
+			F_LOWPASS12 = 0,
+			F_HIGHPASS12 = 1,
+			F_BANDPASS12 = 2,
+			F_BANDREJECT12 = 3,
+			F_NONE = 4
 		};
 
 		class FilterCoeff
@@ -59,7 +61,7 @@ namespace psycle
 				float a0, a1, a2, b0, b1, b2;
 				switch (t)
 				{
-				case FILTER_LP:
+				case F_LOWPASS12:
 					b0 =  (1 - cs)/2;
 					b1 =   1 - cs;
 					b2 =  (1 - cs)/2;
@@ -67,7 +69,7 @@ namespace psycle
 					a1 =  -2*cs;
 					a2 =   1 - alpha;
 					break;
-				case FILTER_HP:
+				case F_HIGHPASS12:
 					b0 =  (1 + cs)/2;
 					b1 = -(1 + cs);
 					b2 =  (1 + cs)/2;
@@ -75,7 +77,7 @@ namespace psycle
 					a1 =  -2*cs;
 					a2 =   1 - alpha;
 					break;
-				case FILTER_BP:
+				case F_BANDPASS12:
 					b0 =   alpha;
 					b1 =   0;
 					b2 =  -alpha;
@@ -83,7 +85,7 @@ namespace psycle
 					a1 =  -2*cs;
 					a2 =   1 - alpha;
 					break;
-				case FILTER_BR:
+				case F_BANDREJECT12:
 					b0 =   1;
 					b1 =  -2*cs;
 					b2 =   1;
@@ -126,7 +128,7 @@ namespace psycle
 		class Filter
 		{
 		public:
-			TFilterType _type;
+			FilterType _type;
 			int _cutoff;
 			int _q;
 
@@ -168,5 +170,6 @@ namespace psycle
 			float _x1, _x2, _y1, _y2;
 			float _a1, _a2, _b1, _b2;
 		};
+		}
 	}
 }

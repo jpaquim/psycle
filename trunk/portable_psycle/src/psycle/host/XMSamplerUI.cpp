@@ -41,7 +41,7 @@ void XMSamplerUI::Init(XMSampler* pMachine)
 	m_Sample.pMachine(pMachine);
 	SetWindowText(_pMachine->_editName);
 	AddPage(&m_General);
-	AddPage(&m_Instrument);
+//	AddPage(&m_Instrument);
 	AddPage(&m_Sample);
 }
 int XMSamplerUI::DoModal() 

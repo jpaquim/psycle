@@ -111,7 +111,7 @@ NAMESPACE__BEGIN(psycle)
 			ChordModeOffs = 0;
 
 			Global::pInputHandler->SetChildView(this);
-			Global::pResampler->SetQuality(RESAMPLE_LINEAR);
+			Global::pResampler->SetQuality(dsp::R_LINEAR);
 			_outputActive = false;
 
 			// just give arbitrary values so OnSize doesn't give /0 error

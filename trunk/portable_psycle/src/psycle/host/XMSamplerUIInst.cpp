@@ -51,9 +51,10 @@ LRESULT XMSamplerUIInst::OnInitDialog(HWND hwnd,LPARAM lparam)
 
 	
 	m_NNA.Attach(GetDlgItem(IDC_XM_NNA_COMBO));
-	m_NNA.AddString(_T("Note ¶¯Ä"));
-	m_NNA.AddString(_T("Note ØØ°½"));
-	m_NNA.AddString(_T("–³‚µ"));
+	m_NNA.AddString(_T("Note Cut"));
+	m_NNA.AddString(_T("Note Continue"));
+	m_NNA.AddString(_T("Note Off"));
+	m_NNA.AddString(_T("Note Fadeout"));
 
 //	m_Pan.Initialize(GetDlgItem(IDC_PANSLIDER));
 	m_Pan.Attach(GetDlgItem(IDC_PANSLIDER));
@@ -144,9 +145,10 @@ void XMSamplerUIInst::SetNNACombo(const int nna)
 {
 	switch(nna)
 	{
-	case 0:m_NNA.SelectString(0,_T("Note ¶¯Ä"));break;
-	case 1:m_NNA.SelectString(0,_T("Note ØØ°½"));break;
-	case 2:m_NNA.SelectString(0,_T("–³‚µ"));break;
+	case 0:m_NNA.SelectString(0,_T("Note Cut"));break;
+	case 1:m_NNA.SelectString(0,_T("Note Continue"));break;
+	case 2:m_NNA.SelectString(0,_T("Note Off"));break;
+	case 2:m_NNA.SelectString(0,_T("Note Fadeout"));break;
 	}
 }
 
