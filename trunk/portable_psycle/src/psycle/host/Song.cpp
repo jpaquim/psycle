@@ -995,6 +995,7 @@ namespace psycle
 				_machineLock = true;
 				DeleteInstruments();
 				DeleteAllPatterns();
+				Reset(); //added by sampler mainly to reset current pattern showed.
 				while(pFile->Read(&Header, 4))
 				{
 					#if !defined _WINAMP_PLUGIN_
