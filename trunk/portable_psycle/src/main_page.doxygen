@@ -4,13 +4,13 @@
 
 	\section news News
 		bohan, 2004, August, the 29th,
-		
+
 		A new native plugin, the psycle::plugin::Haas stereo time delay spatial localization.
 		
 		\n
 		
 		bohan, 2004, July, the 16th,
-		
+
 		Past month (or was that two months ago?), there's been a coding frenesy on Psycle involving alk, zealmange, me, and even JAZ at some point, to recode its internals and make it more stable.
 		The current code in the CVS has hence changed a lot since 1.7.6.2, but we can't release it yet because of an obscur bug that appears when we turn the compiler optimizations on.
 
