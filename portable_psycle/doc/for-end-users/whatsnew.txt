@@ -19,9 +19,8 @@ Version | Type of release          | By
 ---------------------------------------------------------------------------------------
 
 (copied from version.h)
-/// Versions are composed this way:
-/// C.M.m.p , where:
-/// - C = codebase generation.
+/// Versions are composed this way since 1.7.24:
+/// M.m.p , where:
 /// - M = major version number.
 /// - m = minor version number:
 ///			- if even, then it's a stable release.
@@ -38,8 +37,8 @@ cvs commit messages
 -------------------
 
 $Log$
-Revision 1.23  2005/01/23 10:39:04  johan-boule
-version numbering again, huhu.
+Revision 1.24  2005/01/23 10:59:12  johan-boule
+version numbering again, huhu ha ho.
 
 Revision 1.22  2005/01/23 10:36:06  johan-boule
 version numbering again, huhu.
