@@ -45,11 +45,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CGearRackDlg)
 	afx_msg void OnCreate();
-	afx_msg void OnName();
 	afx_msg void OnDelete();
-	afx_msg void OnSwap();
-	afx_msg void OnCopy();
-	afx_msg void OnPaste();
 	afx_msg void OnDblclkGearlist();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

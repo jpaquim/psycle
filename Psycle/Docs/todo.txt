@@ -106,8 +106,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
 !?	alk - make wires square ended, like spec analyser
-++ alk: rightclick on vol slider in wire dialog to enter vol numerically (0.0db is imposibble to set once 
-	the slider has been moved)
 + Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 + Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry

@@ -8,6 +8,7 @@
 #include "Helpers.h"
 #include "ChildView.h"
 #include "InputHandler.h"
+#include "VolumeDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,7 +33,8 @@ void CWireDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CWireDlg)
-	DDX_Control(pDX, IDC_STATIC1, m_volabel);
+	DDX_Control(pDX, IDC_VOLUME_DB, m_volabel_db);
+	DDX_Control(pDX, IDC_VOLUME_PER, m_volabel_per);
 	DDX_Control(pDX, IDC_SLIDER1, m_volslider);
 	DDX_Control(pDX, IDC_SLIDER, m_slider);
 	DDX_Control(pDX, IDC_SLIDER2, m_slider2);
@@ -51,6 +53,8 @@ BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
 	ON_BN_CLICKED(IDC_BUTTON, OnMode)
 	ON_BN_CLICKED(IDC_BUTTON2, OnHold)
+	ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
+	ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -142,28 +146,34 @@ void CWireDlg::OnCancel()
 
 void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	char buffer[32];
+	char bufper[32];
+	char bufdb[32];
 //	invol = (128-m_volslider.GetPos())*0.0078125f;
 	invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
 
 	if (invol > 1.0f)
 	{	
-		sprintf(buffer,"+%.1f dB\n%.2f%%",20.0f * log10(invol),invol*100); 
+		sprintf(bufper,"%.2f%%",invol*100); 
+		sprintf(bufdb,"+%.1f dB",20.0f * log10(invol)); 
 	}
 	else if (invol == 1.0f)
 	{	
-		sprintf(buffer,"0.0 dB\n100.00%%"); 
+		sprintf(bufper,"100.00%%"); 
+		sprintf(bufdb,"0.0 dB"); 
 	}
 	else if (invol > 0.0f)
 	{	
-		sprintf(buffer,"%.1f dB\n%.2f%%",20.0f * log10(invol),invol*100); 
+		sprintf(bufper,"%.2f%%",invol*100); 
+		sprintf(bufdb,"%.1f dB",20.0f * log10(invol)); 
 	}
 	else 
 	{				
-		sprintf(buffer,"-Inf. dB\n0.00%%"); 
+		sprintf(bufper,"0.00%%"); 
+		sprintf(bufdb,"-Inf. dB"); 
 	}
 
-	m_volabel.SetWindowText(buffer);
+	m_volabel_per.SetWindowText(bufper);
+	m_volabel_db.SetWindowText(bufdb);
 
 	_pDstMachine->SetWireVolume(_dstWireIndex, invol );
 
@@ -1153,4 +1163,33 @@ BOOL CWireDlg::PreTranslateMessage(MSG* pMsg)
 		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 	}
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+
+void CWireDlg::OnVolumeDb() 
+{
+	// TODO: Add your control notification handler code here
+	CVolumeDlg dlg;
+	dlg.volume = invol;
+	dlg.edit_type = 0;
+	if (dlg.DoModal() == IDOK)
+	{
+		// update from dialog
+		int t = (int)sqrtf(dlg.volume*16384*4*4);
+		m_volslider.SetPos(256*4-t);
+	}
+}
+
+void CWireDlg::OnVolumePer() 
+{
+	// TODO: Add your control notification handler code here
+	CVolumeDlg dlg;
+	dlg.volume = invol;
+	dlg.edit_type = 1;
+	if (dlg.DoModal() == IDOK)
+	{
+		// update from dialog
+		int t = (int)sqrtf(dlg.volume*16384*4*4);
+		m_volslider.SetPos(256*4-t);
+	}
 }
