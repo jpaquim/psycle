@@ -125,7 +125,7 @@ namespace psycle
 			static int _numPlugins;
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 			static int _numDirs;
-			static void FindPluginsInDir(int & currentPlugsCount, int & currentBadPlugsCount, ::CString findDir, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);
+			static void FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);

@@ -210,7 +210,7 @@ namespace psycle
 				zapObject(proxy_);
 			}
 
-			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
+			void plugin::Instance(std::string dllname, bool overwriteName) throw(...)
 			{
 				Free();
 				_sDllName=dllname;

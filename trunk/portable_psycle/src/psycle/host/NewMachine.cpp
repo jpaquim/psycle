@@ -4,6 +4,8 @@
 #include "Plugin.h"
 #include "VstHost.h"
 #include "ProgressDialog.h"
+#undef min
+#undef max
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -371,18 +373,50 @@ namespace psycle
 
 		void CNewMachine::LoadPluginInfo()
 		{
-			class plugin_finder
-			{
-			public:
-			};
 			if(_numPlugins == -1)
 			{
 				host::loggers::info("Scanning plugins ...");
+
 				::AfxGetApp()->DoWaitCursor(1); 
 				int plugsCount(0);
 				int badPlugsCount(0);
 				_numPlugins = 0;
 				bool progressOpen = !LoadCacheFile(plugsCount, badPlugsCount);
+
+				class populate_plugin_list
+				{
+				public:
+					populate_plugin_list(std::vector<std::string> &result,
+						std::string directory)
+					{
+						::CFileFind finder;
+						int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
+						while(loop)
+						{
+							loop = finder.FindNextFile();
+							if(finder.IsDirectory()) {
+								if(!finder.IsDots())
+									populate_plugin_list(result,(LPCSTR)finder.GetFilePath());
+							}
+							else
+							{
+								CString filePath=finder.GetFilePath();
+								filePath.MakeLower();
+								if(filePath.Right(4) == ".dll")
+									result.push_back((LPCSTR)filePath);
+							}
+						}
+						finder.Close();
+					}
+				};
+
+				std::vector<std::string> nativePlugs;
+				std::vector<std::string> vstPlugs;
+
+				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
+				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
+
+
 				CProgressDialog Progress;
 				int plugin_count(0);
 				if(progressOpen)
@@ -391,34 +425,8 @@ namespace psycle
 					Progress.Create();
 					Progress.SetWindowText("Scanning plugins ... Counting ...");
 					Progress.ShowWindow(SW_SHOW);
-					class plugin_counter
-					{
-					public:
-						const int operator()(const std::string & directory)
-						{
-							int count(0);
-							::CFileFind finder;
-							int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
-							while(loop)
-							{								
-								loop = finder.FindNextFile();
-								if(finder.IsDirectory() && !finder.IsDots())
-									count += (*this)(std::string(finder.GetFilePath()));
-								else
-								{
-									if(finder.GetFilePath().Right(4) == ".dll")
-										++count;
-								}
-							}
-							finder.Close();
-							return count;
-						}
-					};
-					plugin_counter plugin_counter;
-					plugin_count =
-						plugin_counter(Global::pConfig->GetPluginDir()) +
-						plugin_counter(Global::pConfig->GetVstDir());
-					Progress.m_Progress.SetStep(16384 / plugin_count);
+					plugin_count = nativePlugs.size() + vstPlugs.size();
+					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
 					{
 						std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
 						host::loggers::info(s.str().c_str());
@@ -454,7 +462,7 @@ namespace psycle
 					<< "=== Native Plugins ===" << std::endl
 					<< std::endl;
 				out.flush();
-				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetPluginDir().c_str()), MACH_PLUGIN, out, progressOpen ? &Progress : 0);
+				FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, progressOpen ? &Progress : 0);
 				out.flush();
 				if(progressOpen)
 				{
@@ -468,7 +476,7 @@ namespace psycle
 					<< "=== VST Plugins ===" << std::endl
 					<< std::endl;
 				out.flush();
-				FindPluginsInDir(plugsCount, badPlugsCount, ::CString(Global::pConfig->GetVstDir().c_str()), MACH_VST, out, progressOpen ? &Progress : 0);
+				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, progressOpen ? &Progress : 0);
 				out.flush();
 				if(progressOpen)
 				{
@@ -491,39 +499,32 @@ namespace psycle
 			}
 		}
 
-		void CNewMachine::FindPluginsInDir(int & currentPlugsCount, int & currentBadPlugsCount, ::CString findDir, MachineType type, std::ostream & out, CProgressDialog * pProgress)
+		void CNewMachine::FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress)
 		{
-			::CFileFind finder;
-			int loop = finder.FindFile(findDir + "\\*"); // check for subfolders.
-			while(loop) 
-			{								
-				loop = finder.FindNextFile();
-				if(finder.IsDirectory() && !finder.IsDots()) FindPluginsInDir(currentPlugsCount, currentBadPlugsCount, finder.GetFilePath(), type, out, pProgress);
-			}
-			finder.Close();
-			int tmpCount = currentPlugsCount; tmpCount; // not used
-			loop = finder.FindFile(findDir + "\\*.dll"); // check if the directory is empty
-			while(loop)
+			for(unsigned fileIdx=0;fileIdx<list.size();fileIdx++)
 			{
 				if(pProgress)
 				{
 					pProgress->m_Progress.StepIt();
 					::Sleep(1);
 				}
+				std::string fileName = list[fileIdx];
 
-				loop = finder.FindNextFile();
-				::CString sDllName, tmpPath;
-				sDllName = finder.GetFileName();
-				sDllName.MakeLower();
-				
-				if(finder.IsDirectory()) continue;
-				/// workaround for a FindFile bug where short filenames are matched as well as long filenames.
-				if(sDllName.Right(4) != ".dll") continue;
-
-				out << finder.GetFilePath() << " ... ";
+				out << fileName << " ... ";
 				out.flush();
 				FILETIME time;
-				finder.GetLastWriteTime(&time);
+				ZeroMemory(&time,sizeof FILETIME);
+				HANDLE hFile=CreateFile(fileName.c_str(),
+					GENERIC_READ,
+					FILE_SHARE_READ,
+					NULL,
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL,
+					NULL);
+				if(hFile!=INVALID_HANDLE_VALUE) {
+					GetFileTime(hFile,0,0,&time);
+					CloseHandle(hFile);
+				}
 				bool exists(false);
 				for(int i(0) ; i < _numPlugins; ++i)
 				{
@@ -535,16 +536,16 @@ namespace psycle
 								_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime
 							)
 						{
-							if(_pPlugsInfo[i]->dllname.c_str() == finder.GetFilePath())
+							if(_pPlugsInfo[i]->dllname == fileName)
 							{
 								exists = true;
 								const std::string error(_pPlugsInfo[i]->error);
 								std::stringstream s;
 								if(error.empty()) s << "cached.";
 								else s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
-								out << s.str().c_str();
+								out << s.str();
 								out.flush();
-								host::loggers::info(std::string(finder.GetFilePath()) + '\n' + s.str().c_str());
+								host::loggers::info(fileName + '\n' + s.str());
 								break;
 							}
 						}
@@ -556,13 +557,11 @@ namespace psycle
 					{
 						out << "new plugin added to cache ; ";
 						out.flush();
-						host::loggers::info(std::string(finder.GetFilePath()) + "\nnew plugin added to cache");
+						host::loggers::info(fileName + "\nnew plugin added to cache");
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 						// <bohan> added proper constructor for the PluginInfo class. no need to zero it out now.
 						//::ZeroMemory(_pPlugsInfo[currentPlugsCount], sizeof(PluginInfo));
-						_pPlugsInfo[currentPlugsCount]->dllname = (LPCSTR)finder.GetFilePath();
-						FILETIME time;
-						finder.GetLastWriteTime(&time);
+						_pPlugsInfo[currentPlugsCount]->dllname = fileName;
 						_pPlugsInfo[currentPlugsCount]->FileTime = time;
 						if(type == MACH_PLUGIN)
 						{
@@ -570,7 +569,7 @@ namespace psycle
 							Plugin plug(0);
 							try
 							{
-								 plug.Instance((char*)(const char*)finder.GetFilePath());
+								 plug.Instance(fileName);
 								 plug.Init(); // <bohan> hmm, this really isn't not object oriented. We should get rid of two-stepped constructions.
 							}
 							catch(const std::exception & e)
@@ -592,7 +591,7 @@ namespace psycle
 								out << _pPlugsInfo[currentPlugsCount]->error;
 								out.flush();
 								std::stringstream title; title
-									<< "Machine crashed: " << finder.GetFilePath();
+									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
@@ -639,7 +638,7 @@ namespace psycle
 									<< s.str().c_str();
 								out.flush();
 								std::stringstream title; title
-									<< "Machine crashed: " << finder.GetFilePath();
+									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
@@ -654,7 +653,7 @@ namespace psycle
 									<< s.str().c_str();
 								out.flush();
 								std::stringstream title; title
-									<< "Machine crashed: " << finder.GetFilePath();
+									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
@@ -664,7 +663,7 @@ namespace psycle
 							vst::plugin vstPlug;
 							try
 							{
-								 vstPlug.Instance((char*)(const char*)finder.GetFilePath());
+								 vstPlug.Instance(fileName);
 							}
 							catch(const std::exception & e)
 							{
@@ -686,7 +685,7 @@ namespace psycle
 								out << _pPlugsInfo[currentPlugsCount]->error;
 								out.flush();
 								std::stringstream title; title
-									<< "Machine crashed: " << finder.GetFilePath();
+									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
@@ -740,7 +739,7 @@ namespace psycle
 									<< s.str().c_str();
 								out.flush();
 								std::stringstream title; title
-									<< "Machine crashed: " << finder.GetFilePath();
+									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
@@ -755,7 +754,7 @@ namespace psycle
 									<< s.str().c_str();
 								out.flush();
 								std::stringstream title; title
-									<< "Machine crashed: " << finder.GetFilePath();
+									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
@@ -788,7 +787,6 @@ namespace psycle
 				out.flush();
 			}
 			out.flush();
-			finder.Close();
 		}
 
 		void CNewMachine::DestroyPluginInfo()

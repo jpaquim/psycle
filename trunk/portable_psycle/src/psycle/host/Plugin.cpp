@@ -39,14 +39,11 @@ namespace psycle
 		Plugin::~Plugin() throw()
 		{
 			Free();
-			zapArray(_psAuthor);
-			zapArray(_psDllName);
-			zapArray(_psName);
 		}
 
-		void Plugin::Instance(const char file_name[]) throw(...)
+		void Plugin::Instance(std::string file_name) throw(...)
 		{
-			_dll = ::LoadLibrary(file_name);
+			_dll = ::LoadLibrary(file_name.c_str());
 			if(!_dll)
 			{
 				std::ostringstream s; s
@@ -78,12 +75,9 @@ namespace psycle
 			_psShortName[15]='\0';
 			strncpy(_editName, _pInfo->ShortName,31);
 			_editName[31]='\0';
-			_psAuthor = new char[strlen(_pInfo->Author)+1];
-			strcpy(_psAuthor,_pInfo->Author);
-			_psName = new char[strlen(_pInfo->Name)+1];
-			strcpy(_psName,_pInfo->Name);
-			_psDllName = new char[strlen(file_name)+1];
-			strcpy(_psDllName, file_name);
+			_psAuthor = _pInfo->Author;
+			_psName = _pInfo->Name;
+			_psDllName = file_name;
 			CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress(_dll, "CreateMachine");
 			if(!GetInterface)
 			{
@@ -204,7 +198,7 @@ namespace psycle
 
 		void Plugin::SaveDllName(RiffFile * pFile) 
 		{
-			CString str = _psDllName;
+			CString str = _psDllName.c_str();
 			char str2[256];
 			strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
 			pFile->Write(&str2,strlen(str2)+1);
