@@ -14,17 +14,18 @@ Version | Type of release          | By
 1.7.5   | beta                     | pooplog & [JAZ]
 1.7.6   | release                  | alk
 1.7.6.1 | bug fix                  | alk
-1.7.6.2 | microsoft bug fix        | alk, bohan
+1.7.6.2 | microsoft bug fix        | alk & bohan
 -----------------------------------------------------------------
 
 From now on, releases will be named this way:
-X.Y.z.a , where:
-X.Y = version number
-z = revision number, if even, release. if odd, beta.
-a = patch number.
+M.m.r.p , where:
+M = major version number.
+m = minor version number.
+r = revision number, if even, release. if odd, beta.
+p = patch number.
 
 ----------------------------------------------------------------
-Legend :	+=addition		*=change	!=bug
+Legend :       +=addition        *=change        !=bug
 ----------------------------------------------------------------
 
 v1.7.6.2
