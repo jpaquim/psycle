@@ -1,7 +1,7 @@
 #ifndef __CONSTANTS_H
 #define __CONSTANTS_H
 
-#define VERSION_NUMBER "1.7RC3TEST"
+#define VERSION_NUMBER "1.7RC4TEST"
 
 
 #define MAX_PLUGINS				256 // Legacy! It is used in File loading/saving

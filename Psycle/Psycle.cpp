@@ -107,7 +107,6 @@ BOOL CPsycleApp::InitInstance()
 	
 	pFrame->UpdateWindow();
 	
-	
 	CNewMachine::LoadPluginInfo();
 	// Show splash screen
 	if (Global::pConfig->_showAboutAtStart)
