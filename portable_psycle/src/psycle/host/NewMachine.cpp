@@ -559,7 +559,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::crash, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								host::logger(host::logger::exception, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
@@ -610,7 +610,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								host::logger(host::logger::exception, title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -625,7 +625,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								host::logger(host::logger::exception, title.str() + '\n' + s.str());
 							}
 						}
 						else if(type == MACH_VST)
@@ -659,7 +659,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::crash, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								host::logger(host::logger::exception, title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
 								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
@@ -712,7 +712,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								host::logger(host::logger::exception, title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -727,7 +727,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::logger(host::logger::crash, title.str() + '\n' + s.str());
+								host::logger(host::logger::exception, title.str() + '\n' + s.str());
 							}
 						}
 					}
@@ -737,7 +737,7 @@ namespace psycle
 							<< std::endl
 							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################";
 						out.flush();
-						host::logger(host::logger::crash, "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################");
+						host::logger(host::logger::exception, "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################");
 					}
 				}
 				out << std::endl;
