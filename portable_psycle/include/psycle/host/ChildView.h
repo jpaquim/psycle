@@ -366,6 +366,7 @@ namespace psycle
 			void DrawMachineVumeters(int c, CDC *devc);	
 			void DrawAllMachineVumeters(CDC *devc);	
 			void DrawMachineEditor(CDC *devc);
+			void DrawMachineHighlight(int macnum, CDC *devc, Machine *mac, int x, int y);
 			void DrawMachine(int macnum, CDC *devc);
 			void ClearMachineSpace(int macnum, CDC *devc);
 			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);

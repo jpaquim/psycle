@@ -626,6 +626,107 @@ namespace psycle
 			}
 		}
 
+		void CChildView::DrawMachineHighlight(int macnum, CDC *devc, Machine *mac, int x, int y)
+		{
+			//the code below draws the highlight around the selected machine (the corners)
+
+			CPoint pol[3];
+			CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+			CPen *oldpen = devc->SelectObject(&linepen);
+			devc->SelectObject(linepen);
+
+			int hlength = 9; //the length of the selected machine highlight
+			int hdistance = 5; //the distance of the highlight from the machine
+
+			switch (mac->_mode) 
+			{
+			case MACHMODE_GENERATOR:
+				if (macnum == _pSong->seqBus) {	
+
+					pol[0].x = x - hdistance;
+					pol[0].y = y - hdistance + hlength;
+					pol[1].x = x - hdistance;
+					pol[1].y = y - hdistance;
+					pol[2].x = x - hdistance + hlength;
+					pol[2].y = y - hdistance;
+
+					devc->Polyline(&pol[0], 3);
+
+					pol[0].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
+					pol[0].y = y - hdistance;
+					pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
+					pol[1].y = y - hdistance;
+					pol[2].x = x + MachineCoords.sGenerator.width + hdistance;
+					pol[2].y = y - hdistance + hlength;
+
+					devc->Polyline(&pol[0], 3);
+
+					pol[0].x = x + MachineCoords.sGenerator.width + hdistance;
+					pol[0].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
+					pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
+					pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
+					pol[2].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
+					pol[2].y = y + MachineCoords.sGenerator.height + hdistance;
+
+					devc->Polyline(&pol[0], 3);
+
+					pol[0].x = x - hdistance + hlength;
+					pol[0].y = y + MachineCoords.sGenerator.height + hdistance;
+					pol[1].x = x - hdistance;
+					pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
+					pol[2].x = x - hdistance;
+					pol[2].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
+
+					devc->Polyline(&pol[0], 3);
+
+				}
+				break;
+			case MACHMODE_FX:
+				if (macnum == _pSong->seqBus) {
+
+					pol[0].x = x - hdistance;
+					pol[0].y = y - hdistance + hlength;
+					pol[1].x = x - hdistance;
+					pol[1].y = y - hdistance;
+					pol[2].x = x - hdistance + hlength;
+					pol[2].y = y - hdistance;
+
+					devc->Polyline(&pol[0], 3);
+
+					pol[0].x = x + MachineCoords.sEffect.width + hdistance - hlength;
+					pol[0].y = y - hdistance;
+					pol[1].x = x + MachineCoords.sEffect.width + hdistance;
+					pol[1].y = y - hdistance;
+					pol[2].x = x + MachineCoords.sEffect.width + hdistance;
+					pol[2].y = y - hdistance + hlength;
+
+					devc->Polyline(&pol[0], 3);
+
+					pol[0].x = x + MachineCoords.sEffect.width + hdistance;
+					pol[0].y = y + MachineCoords.sEffect.height + hdistance - hlength;
+					pol[1].x = x + MachineCoords.sEffect.width + hdistance;
+					pol[1].y = y + MachineCoords.sEffect.height + hdistance;
+					pol[2].x = x + MachineCoords.sEffect.width + hdistance - hlength;
+					pol[2].y = y + MachineCoords.sEffect.height + hdistance;
+
+					devc->Polyline(&pol[0], 3);
+
+					pol[0].x = x - hdistance + hlength;
+					pol[0].y = y + MachineCoords.sEffect.height + hdistance;
+					pol[1].x = x - hdistance;
+					pol[1].y = y + MachineCoords.sEffect.height + hdistance;
+					pol[2].x = x - hdistance;
+					pol[2].y = y + MachineCoords.sEffect.height + hdistance - hlength;
+
+					devc->Polyline(&pol[0], 3);
+				}
+				break;
+			}
+			devc->SelectObject(oldpen);
+
+			//end of highlighting code
+		}
+
 		void CChildView::DrawMachine(int macnum, CDC *devc)
 		{
 			Machine* mac = _pSong->_pMachine[macnum];
@@ -640,6 +741,8 @@ namespace psycle
 			CDC memDC;
 			memDC.CreateCompatibleDC(devc);
 			CBitmap* oldbmp = memDC.SelectObject(&machineskin);
+
+			DrawMachineHighlight(macnum, devc, mac, x, y);
 
 			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 			if (MachineCoords.bHasTransparency)
@@ -990,105 +1093,7 @@ namespace psycle
 			}
 			memDC.SelectObject(oldbmp);
 			memDC.DeleteDC();
-
-			//the code below draws the highlight around the selected machine (the corners)
-
-			CPoint pol[3];
-			CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
-			CPen *oldpen = devc->SelectObject(&linepen);
-			devc->SelectObject(linepen);
-
-			int hlength = 9; //the length of the selected machine highlight
-			int hdistance = 5; //the distance of the highlight from the machine
-
-			switch (mac->_mode) 
-			{
-			case MACHMODE_GENERATOR:
-				if (macnum == _pSong->seqBus) {	
-
-					pol[0].x = x - hdistance;
-					pol[0].y = y - hdistance + hlength;
-					pol[1].x = x - hdistance;
-					pol[1].y = y - hdistance;
-					pol[2].x = x - hdistance + hlength;
-					pol[2].y = y - hdistance;
-
-					devc->Polyline(&pol[0], 3);
-
-					pol[0].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
-					pol[0].y = y - hdistance;
-					pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
-					pol[1].y = y - hdistance;
-					pol[2].x = x + MachineCoords.sGenerator.width + hdistance;
-					pol[2].y = y - hdistance + hlength;
-
-					devc->Polyline(&pol[0], 3);
-
-					pol[0].x = x + MachineCoords.sGenerator.width + hdistance;
-					pol[0].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
-					pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
-					pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
-					pol[2].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
-					pol[2].y = y + MachineCoords.sGenerator.height + hdistance;
-
-					devc->Polyline(&pol[0], 3);
-
-					pol[0].x = x - hdistance + hlength;
-					pol[0].y = y + MachineCoords.sGenerator.height + hdistance;
-					pol[1].x = x - hdistance;
-					pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
-					pol[2].x = x - hdistance;
-					pol[2].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
-
-					devc->Polyline(&pol[0], 3);
-
-				}
-				break;
-			case MACHMODE_FX:
-				if (macnum == _pSong->seqBus) {
-
-					pol[0].x = x - hdistance;
-					pol[0].y = y - hdistance + hlength;
-					pol[1].x = x - hdistance;
-					pol[1].y = y - hdistance;
-					pol[2].x = x - hdistance + hlength;
-					pol[2].y = y - hdistance;
-
-					devc->Polyline(&pol[0], 3);
-
-					pol[0].x = x + MachineCoords.sEffect.width + hdistance - hlength;
-					pol[0].y = y - hdistance;
-					pol[1].x = x + MachineCoords.sEffect.width + hdistance;
-					pol[1].y = y - hdistance;
-					pol[2].x = x + MachineCoords.sEffect.width + hdistance;
-					pol[2].y = y - hdistance + hlength;
-
-					devc->Polyline(&pol[0], 3);
-
-					pol[0].x = x + MachineCoords.sEffect.width + hdistance;
-					pol[0].y = y + MachineCoords.sEffect.height + hdistance - hlength;
-					pol[1].x = x + MachineCoords.sEffect.width + hdistance;
-					pol[1].y = y + MachineCoords.sEffect.height + hdistance;
-					pol[2].x = x + MachineCoords.sEffect.width + hdistance - hlength;
-					pol[2].y = y + MachineCoords.sEffect.height + hdistance;
-
-					devc->Polyline(&pol[0], 3);
-
-					pol[0].x = x - hdistance + hlength;
-					pol[0].y = y + MachineCoords.sEffect.height + hdistance;
-					pol[1].x = x - hdistance;
-					pol[1].y = y + MachineCoords.sEffect.height + hdistance;
-					pol[2].x = x - hdistance;
-					pol[2].y = y + MachineCoords.sEffect.height + hdistance - hlength;
-
-					devc->Polyline(&pol[0], 3);
-				}
-				break;
-			}
-			devc->SelectObject(oldpen);
-
-			//end of highlighting code
-
+			
 		}
 
 
