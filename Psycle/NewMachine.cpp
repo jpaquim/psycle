@@ -540,14 +540,17 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 			BOOL bExist = FALSE;
 			for (int i = 0; i < _numPlugins; i++)
 			{
-				if ((_pPlugsInfo[i]->FileTime.dwHighDateTime == time.dwHighDateTime)
-					&& (_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime))
+				if (_pPlugsInfo[i])
 				{
-					if (strcmp(finder.GetFilePath(),_pPlugsInfo[i]->dllname)==0)
+					if ((_pPlugsInfo[i]->FileTime.dwHighDateTime == time.dwHighDateTime)
+						&& (_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime))
 					{
-						bExist = TRUE;
-						fprintf(hfile,"already mapped");
-						break;
+						if (strcmp(finder.GetFilePath(),_pPlugsInfo[i]->dllname)==0)
+						{
+							bExist = TRUE;
+							fprintf(hfile,"already mapped");
+							break;
+						}
 					}
 				}
 			}

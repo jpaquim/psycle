@@ -72,9 +72,7 @@ BOOL CGearDistort::OnInitDialog()
 	m_negt.SetPos(128-_pMachine->_negThreshold);
 	m_negc.SetPos(128-_pMachine->_negClamp);
 
-	char buffer[64];
-	sprintf(buffer,_pMachine->_editName);
-	SetWindowText(buffer);
+	SetWindowText(_pMachine->_editName);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

@@ -100,9 +100,6 @@ void Machine::Init(void)
 {
 	// Standard gear initalization
 	//
-	_outDry = 256;
-//	_outWet = 64;
-	_outWet = 256;
 #if !defined(_WINAMP_PLUGIN_)
 	_cpuCost = 0;
 	_wireCost = 0;
@@ -359,7 +356,8 @@ bool Machine::Load(
 	char junk[256];
 	memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -376,8 +374,8 @@ bool Machine::Load(
 	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junk[0], sizeof(int)); // interpol
 
-	pFile->Read(&_outDry, sizeof(_outDry));
-	pFile->Read(&_outWet, sizeof(_outWet));
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&junk[0], sizeof(int)); // outdry
 
 	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
@@ -502,8 +500,6 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 	pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
 	pFile->Read(&pMachine->_mute,sizeof(pMachine->_mute));
 
-	pFile->Read(&pMachine->_outDry,sizeof(pMachine->_outDry)); // this should really be removed from machine class
-	pFile->Read(&pMachine->_outWet,sizeof(pMachine->_outWet));
 	pFile->Read(&pMachine->_panning,sizeof(pMachine->_panning));
 
 	pFile->Read(&pMachine->_x,sizeof(pMachine->_x));
@@ -519,7 +515,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		pFile->Read(&pMachine->_connection[i],sizeof(pMachine->_connection[i]));      // Outgoing connections activated
 		pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
 	}
-	pFile->ReadString(pMachine->_editName,sizeof(pMachine->_editName));
+	pFile->ReadString(pMachine->_editName,32);
 
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
@@ -535,8 +531,6 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version)
 		p->_bypass=pMachine->_bypass;
 		p->_mute=pMachine->_mute;
 
-		p->_outDry=pMachine->_outDry;
-		p->_outWet=pMachine->_outWet;
 		p->_panning=pMachine->_panning;
 
 		p->_x=pMachine->_x;
@@ -608,8 +602,6 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 	pFile->Write(&_bypass,sizeof(_bypass));
 	pFile->Write(&_mute,sizeof(_mute));
 
-	pFile->Write(&_outDry,sizeof(_outDry)); // this should really be removed from machine class
-	pFile->Write(&_outWet,sizeof(_outWet));
 	pFile->Write(&_panning,sizeof(_panning));
 
 	pFile->Write(&_x,sizeof(_x));
@@ -630,59 +622,6 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 	SaveSpecificChunk(pFile);
 }
 
-bool Machine::Save(RiffFile* pFile)
-{
-	char junk[256];
-	memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
-
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackR
-
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
-
-	return true;
-}
 #endif // ndef _WINAMP_PLUGIN_
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -721,6 +660,7 @@ float* Master::_pMasterSamples = NULL;
 Master::Master()
 {
 	_numPars = 0;
+	_outDry = 256;
 	decreaseOnClip=false;
 	_type = MACH_MASTER;
 	_mode = MACHMODE_MASTER;
@@ -1098,7 +1038,8 @@ bool Sine::Load(
 	char junk[256];
 	memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName, 16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -1115,8 +1056,8 @@ bool Sine::Load(
 	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junk[0], sizeof(int)); // interpol
 
-	pFile->Read(&_outDry, sizeof(_outDry));
-	pFile->Read(&_outWet, sizeof(_outWet));
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&junk[0], sizeof(int)); // outdry
 
 	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
@@ -1145,62 +1086,6 @@ bool Sine::Load(
 	return true;
 }
 
-#if !defined(_WINAMP_PLUGIN_)
-bool Sine::Save(
-	RiffFile* pFile)
-{
-	char junk[256];
-		memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&_sineSpeed, sizeof(_sineSpeed));
-	pFile->Write(&_sineGlide, sizeof(_sineGlide));
-	pFile->Write(&_sineVolume, sizeof(_sineVolume));
-	pFile->Write(&_sineLfoSpeed, sizeof(_sineLfoSpeed));
-	pFile->Write(&_sineLfoAmp, sizeof(_sineLfoAmp));
-
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackR
-
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
-
-	return true;
-}
-#endif // ndef _WINAMP_PLUGIN_
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
@@ -1301,7 +1186,8 @@ bool Distortion::Load(
 	char junk[256];
 		memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -1318,8 +1204,8 @@ bool Distortion::Load(
 	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junk[0], sizeof(int)); // interpol
 
-	pFile->Read(&_outDry, sizeof(_outDry));
-	pFile->Read(&_outWet, sizeof(_outWet));
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&junk[0], sizeof(int)); // outdry
 
 	pFile->Read(&_posThreshold, sizeof(_posThreshold));
 	pFile->Read(&_posClamp, sizeof(_posClamp));
@@ -1346,62 +1232,6 @@ bool Distortion::Load(
 
 	return true;
 }
-#if !defined(_WINAMP_PLUGIN_)
-bool Distortion::Save(
-	RiffFile* pFile)
-{
-	char junk[256];
-		memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&_posThreshold, sizeof(_posThreshold));
-	pFile->Write(&_posClamp, sizeof(_posClamp));
-	pFile->Write(&_negThreshold, sizeof(_negThreshold));
-	pFile->Write(&_negClamp, sizeof(_negClamp));
-
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
-
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackR
-
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
-
-	return true;
-}
-#endif // ndef _WINAMP_PLUGIN_
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
@@ -1595,7 +1425,8 @@ bool Delay::Load(
 	char junk[256];
 		memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -1645,62 +1476,6 @@ bool Delay::Load(
 	Update(timeL, timeR, feedbackL, feedbackR);
 	return true;
 }
-#if !defined(_WINAMP_PLUGIN_)
-bool Delay::Save(
-	RiffFile* pFile)
-{
-	char junk[256];
-		memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
-
-	pFile->Write(&_timeL, sizeof(_timeL));
-	pFile->Write(&_timeR, sizeof(_timeR));
-	pFile->Write(&_feedbackL, sizeof(_feedbackL));
-	pFile->Write(&_feedbackR, sizeof(_feedbackR));
-
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
-
-	return true;
-}
-#endif // _WINAMP_PLUGIN_
 
 void Delay::Tick(int channel, PatternEntry *pData)
 {
@@ -2053,7 +1828,8 @@ bool Flanger::Load(
 	char junk[256];
 		memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -2101,63 +1877,6 @@ bool Flanger::Load(
 	return true;
 }
 
-#if !defined(_WINAMP_PLUGIN_)
-bool Flanger::Save(
-	RiffFile* pFile)
-{
-	char junk[256];
-		memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-//	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp <- old meaning
-	pFile->Write(&useResample, sizeof(bool)); // <- new meaning
-	
-	pFile->Write(&_time, sizeof(_time));
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&_feedbackL, sizeof(_feedbackL));
-	pFile->Write(&_feedbackR, sizeof(_feedbackR));
-
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&_lfoSpeed, sizeof(_lfoSpeed));
-	pFile->Write(&_lfoAmp, sizeof(_lfoAmp));
-	pFile->Write(&_lfoPhase, sizeof(_lfoPhase));
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
-
-	return true;
-}
-#endif // _WINAMP_PLUGIN_
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
@@ -2365,7 +2084,8 @@ bool Filter2p::Load(
 	char junk[256];
 		memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -2382,8 +2102,8 @@ bool Filter2p::Load(
 	pFile->Read(&junk[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junk[0], sizeof(int)); // interpol
 
-	pFile->Read(&_outDry, sizeof(_outDry));
-	pFile->Read(&_outWet, sizeof(_outWet));
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&junk[0], sizeof(int)); // outdry
 
 	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
@@ -2412,59 +2132,3 @@ bool Filter2p::Load(
 	return true;
 }
 
-#if !defined(_WINAMP_PLUGIN_)
-bool Filter2p::Save(
-	RiffFile* pFile)
-{
-	char junk[256];
-		memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junk[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junk[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
-
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackR
-
-	pFile->Write(&_cutoff, sizeof(_cutoff));
-	pFile->Write(&_resonance, sizeof(_resonance));
-	pFile->Write(&_lfoSpeed, sizeof(_lfoSpeed));
-	pFile->Write(&_lfoAmp, sizeof(_lfoAmp));
-	pFile->Write(&_lfoPhase, sizeof(_lfoPhase));
-	pFile->Write(&_filterMode, sizeof(_filterMode));
-
-	return true;
-}
-#endif // ndef _WINAMP_PLUGIN_

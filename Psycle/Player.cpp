@@ -127,7 +127,7 @@ void Player::ExecuteLine(void)
 			case 0xFC:
 				if ( pEntry->_mach == 255 )
 				{
-					pSong->_pMachine[MASTER_INDEX]->_outDry = pEntry->_parameter;
+					((Master*)(pSong->_pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
 				}
 				else 
 				{

@@ -84,7 +84,7 @@ BOOL CWireDlg::OnInitDialog()
 	int t = (int)sqrtf(val*16384*4*4);
 	m_volslider.SetPos(256*4-t);
 
-	char buf[64];
+	char buf[128];
 	sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
 	SetWindowText(buf);
 

@@ -1397,7 +1397,32 @@ void CChildView::NewMachine(int x, int y, int mac)
 			{
 				((VSTPlugin*)(_pSong->_pMachine[fb]))->macindex = fb;
 			}
-			
+
+			// make sure that no 2 machines have the same name, because that is irritating
+
+			int number = 1;
+			char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
+			strcpy (buf,_pSong->_pMachine[fb]->_editName);
+
+			for (int i = 0; i < MAX_MACHINES-1; i++)
+			{
+				if (i!=fb)
+				{
+					if (_pSong->_pMachine[i])
+					{
+						if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
+						{
+							number++;
+							sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
+							i = -1;
+						}
+					}
+				}
+			}
+
+			buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
+			strcpy(_pSong->_pMachine[fb]->_editName,buf);
+
 			pParentMain->UpdateComboGen();
 			Repaint(DMAllMacsRefresh);
 //			Repaint(DMMacRefresh); // Seems that this doesn't always work (multiple calls to Repaint?)

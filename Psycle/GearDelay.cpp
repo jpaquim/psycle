@@ -77,9 +77,7 @@ BOOL CGearDelay::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	char buffer[64];
-	sprintf(buffer,_pMachine->_editName);
-	SetWindowText(buffer);
+	SetWindowText(_pMachine->_editName);
 
 	m_slidertime_l.SetTicFreq(4096);
 	m_slidertime_l.SetRange(1, MAX_DELAY_BUFFER-1);	

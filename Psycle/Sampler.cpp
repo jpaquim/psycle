@@ -210,7 +210,8 @@ bool Sampler::Load(RiffFile* pFile)
 	char junk[256];
 	memset(&junk, 0, sizeof(junk));
 
-	pFile->Read(&_editName, sizeof(_editName));
+	pFile->Read(&_editName,16);
+	_editName[15] = 0;
 
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -247,8 +248,8 @@ bool Sampler::Load(RiffFile* pFile)
 		break;
 	}
 
-	pFile->Read(&_outDry, sizeof(_outDry));
-	pFile->Read(&_outWet, sizeof(_outWet));
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&junk[0], sizeof(int)); // outdry
 
 	pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junk[0], sizeof(int)); // distPosClamp
@@ -276,76 +277,6 @@ bool Sampler::Load(RiffFile* pFile)
 	return true;
 }
 
-#if !defined(_WINAMP_PLUGIN_)
-bool Sampler::Save(
-	RiffFile* pFile)
-{
-	int i;
-	char junk[256];
-	memset(&junk, 0, sizeof(junk));
-
-	pFile->Write(&_x, sizeof(_x));
-	pFile->Write(&_y, sizeof(_y));
-	pFile->Write(&_type, sizeof(_type));
-
-	pFile->Write(&_editName, sizeof(_editName));
-
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junk[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&_numVoices, sizeof(_numVoices)); // numSubtracks
-
-	switch (_resampler._quality)
-	{
-	case RESAMPLE_NONE:
-		i = 0;
-		break;
-	case RESAMPLE_LINEAR:
-		i = 1;
-		break;
-	case RESAMPLE_SPLINE:
-		i = 2;
-		break;
-	}
-	pFile->Write(&i, sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junk[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junk[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junk[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&junk[0], sizeof(char)); // sinespeed
-	pFile->Write(&junk[0], sizeof(char)); // sineglide
-	pFile->Write(&junk[0], sizeof(char)); // sinevolume
-	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
-
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junk[0], sizeof(int)); // delayFeedbackR
-
-	pFile->Write(&junk[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junk[0], sizeof(int)); // filterResonance
-	pFile->Write(&junk[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junk[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junk[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junk[0], sizeof(int)); // filterMode
-
-	return true;
-}
-#endif // ndef _WINAMP_PLUGIN_
 
 void Sampler::VoiceWork(int numsamples, int voice)
 {

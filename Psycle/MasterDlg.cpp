@@ -22,7 +22,7 @@ CMasterDlg::CMasterDlg(CChildView* pParent /*=NULL*/)
 	m_pParent = pParent;
 	//{{AFX_DATA_INIT(CMasterDlg)
 	//}}AFX_DATA_INIT
-	memset(macname,0,15*MAX_CONNECTIONS);
+	memset(macname,0,32*MAX_CONNECTIONS);
 }
 
 

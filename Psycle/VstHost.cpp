@@ -173,8 +173,8 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		strcpy(_sProductName,str1);
 	}
 	
-	if ( overwriteName ) memcpy(_editName,_sProductName,15);
-	_editName[15]='\0';
+	if ( overwriteName ) memcpy(_editName,_sProductName,31);
+	_editName[31]='\0';
 
 // Compatibility hacks
 	if ( strcmp(_sProductName,"sc-101") == 0 ) 
@@ -350,7 +350,7 @@ bool VSTPlugin::Load(RiffFile* pFile)
 
 */
 
-/**/	pFile->Read(&_editName, sizeof(_editName));	//Remove when changing the fileformat.
+/**/	pFile->Read(&_editName, 16);	//Remove when changing the fileformat.
 	_editName[15]='\0';
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -367,8 +367,8 @@ bool VSTPlugin::Load(RiffFile* pFile)
 	pFile->Read(&junkdata[0], sizeof(int)); // numSubtracks
 	pFile->Read(&junkdata[0], sizeof(int)); // interpol
 
-	pFile->Read(&_outDry, sizeof(_outDry));
-	pFile->Read(&_outWet, sizeof(_outWet));
+	pFile->Read(&junk[0], sizeof(int)); // outwet
+	pFile->Read(&junk[0], sizeof(int)); // outdry
 
 	pFile->Read(&junkdata[0], sizeof(int)); // distPosThreshold
 	pFile->Read(&junkdata[0], sizeof(int)); // distPosClamp
@@ -409,102 +409,6 @@ bool VSTPlugin::Load(RiffFile* pFile)
 
 	return true;
 }
-#if !defined(_WINAMP_PLUGIN_)
-bool VSTPlugin::Save(RiffFile* pFile)
-{
-	char junkdata[256];
-	memset(&junkdata, 0, sizeof(junkdata));
-
-/*  This part is read when loading the song to detect the machine type.
-	Might change in the new fileformat (i.e. Moving this to Machine::Save(RiffFile* pFile).*/
-
-/**/	pFile->Write(&_x, sizeof(_x));
-/**/	pFile->Write(&_y, sizeof(_y));
-/**/	pFile->Write(&_type, sizeof(_type));
-
-	
-/*  Enable this when changing the File Format.
-
-	CString str = sDllName;
-	char str2[128];
-	strcpy(str2,str.Mid(str.ReverseFind('\\')+1));// if not found, -1+1 = 0 -> Starting letter
-	pFile->Write(&str2,sizeof(str2));
-*/
-	pFile->Write(&_editName, sizeof(_editName));
-
-/*	  Enable this when changing the File Format.
-	
-	const int num = _pEffect->numParams;
-	pFile->Write(&num,sizeof(int));
-	for(int p=0;p<num;p++)
-	{
-		const float value=_pEffect->getParameter(_pEffect,p);
-		pFile->Write(&value,sizeof(float));
-	}
-
-	const int cprog=Dispatch(effGetProgram,0,0,NULL,0.0f)
-	pFile->Write(&cprog,sizeof(int));
-
-	// Detect & Write additional VST cHunk data
-	if(_pEffect->flags & effFlagsProgramChunks)
-	{
-		char *chunk=NULL;
-		long chunk_size=Dispatch( effGetChunk,0,0, &chunk ,0.0f);
-		pFile->Write(&chunk_size,sizeof(long));
-		pFile->Write(chunk,chunk_size);
-	}
-*/
-	pFile->Write(&_inputMachines[0], sizeof(_inputMachines));
-	pFile->Write(&_outputMachines[0], sizeof(_outputMachines));
-	pFile->Write(&_inputConVol[0], sizeof(_inputConVol));
-	pFile->Write(&_connection[0], sizeof(_connection));
-	pFile->Write(&_inputCon[0], sizeof(_inputCon));
-	pFile->Write(&_connectionPoint[0], sizeof(_connectionPoint));
-	pFile->Write(&_numInputs, sizeof(_numInputs));
-	pFile->Write(&_numOutputs, sizeof(_numOutputs));
-
-	pFile->Write(&_panning, sizeof(_panning));
-	pFile->Write(&junkdata[0], 8*sizeof(int)); // SubTrack[]
-	pFile->Write(&junkdata[0], sizeof(int)); // numSubtracks
-	pFile->Write(&junkdata[0], sizeof(int)); // interpol
-
-	pFile->Write(&_outDry, sizeof(_outDry));
-	pFile->Write(&_outWet, sizeof(_outWet));
-
-	pFile->Write(&junkdata[0], sizeof(int)); // distPosThreshold
-	pFile->Write(&junkdata[0], sizeof(int)); // distPosClamp
-	pFile->Write(&junkdata[0], sizeof(int)); // distNegThreshold
-	pFile->Write(&junkdata[0], sizeof(int)); // distNegClamp
-
-	pFile->Write(&junkdata[0], sizeof(char)); // sinespeed
-	pFile->Write(&junkdata[0], sizeof(char)); // sineglide
-	pFile->Write(&junkdata[0], sizeof(char)); // sinevolume
-	pFile->Write(&junkdata[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junkdata[0], sizeof(char)); // sinelfoamp
-
-	pFile->Write(&junkdata[0], sizeof(int)); // delayTimeL
-	pFile->Write(&junkdata[0], sizeof(int)); // delayTimeR
-	pFile->Write(&junkdata[0], sizeof(int)); // delayFeedbackL
-	pFile->Write(&junkdata[0], sizeof(int)); // delayFeedbackR
-
-	pFile->Write(&junkdata[0], sizeof(int)); // filterCutoff
-	pFile->Write(&junkdata[0], sizeof(int)); // filterResonance
-	pFile->Write(&junkdata[0], sizeof(int)); // filterLfospeed
-	pFile->Write(&junkdata[0], sizeof(int)); // filterLfoamp
-	pFile->Write(&junkdata[0], sizeof(int)); // filterLfophase
-	pFile->Write(&junkdata[0], sizeof(int)); // filterMode
-
-		bool old = false;
-		pFile->Write(&old, sizeof(old)); // Is old format?
-		pFile->Write(&_instance, sizeof(_instance)); // ovst.instance
-		int p = GetCurrentProgram();
-		_program = p;
-		pFile->Write(&_program, sizeof(_program));
-
-	return true;
-
-}
-#endif // ndef _WINAMP_PLUGIN_
 
 bool VSTPlugin::LoadChunk(RiffFile *pFile)
 {
@@ -535,26 +439,6 @@ bool VSTPlugin::LoadChunk(RiffFile *pFile)
 	return false;
 }
 
-#if !defined(_WINAMP_PLUGIN_)
-bool VSTPlugin::SaveChunk(RiffFile *pFile,bool &isfirst)
-{
-	// Detect & Write additional VST cHunk data
-	if(_pEffect->flags & effFlagsProgramChunks)
-	{
-		char *chunk=NULL;
-		long chunk_size=Dispatch( effGetChunk,0,0, &chunk ,0.0f);
-		if ( isfirst )
-		{
-			pFile->Write(&isfirst,sizeof(bool));
-			isfirst=false;
-		}
-		pFile->Write(&chunk_size,sizeof(long));
-		pFile->Write(chunk,chunk_size);
-		return true;
-	}
-	return false;
-}
-#endif // ndef _WINAMP_PLUGIN_
 bool VSTPlugin::DescribeValue(int parameter,char* psTxt)
 {
 	if(instantiated)
