@@ -3,6 +3,7 @@
 +=addition
 ?=hmmm
 FF=requires file format update
+AF=API change
 
 XXX very important, top priority
 XX important
@@ -11,13 +12,12 @@ X low priority
 [blah]  <- Notes written by developers
 
 * New and unsorted and untested
-------------
-
 * psycle was being weird with drivers
 
 <Druttis_> can you have background picture in psycle somehow?
 <alk_> The "revert to saved" dialog shuold say: "Warning! You will lose everything done since song 
 	was saved!"
+
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 + option to show or not the dots "." and lines "---" in the pattern editor.
 	[Using a variable "char dot;" and another "char line[3];" is possibly the fastest approach]
@@ -26,6 +26,9 @@ X low priority
 	[JAZ: And a third one for Instruments. Time to time]
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
+*AF I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
+	to allow the user to speficy a "different than default" fadeout.
+
 
 * Machines
 ------------
