@@ -259,8 +259,7 @@ namespace psycle
 			m_filename.GetWindowText(name);
 
 			rootname=name;
-			name=name;
-			rootname=rootname.substr(
+			rootname=rootname.substr(0,
 				std::max(std::string::size_type(0),rootname.length()-4));
 
 			const int real_rate[]={8192,11025,22050,44100,48000,96000};
@@ -374,7 +373,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname,i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
@@ -420,7 +419,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname,i,pSong->_pMachine[i]->_editName);
+						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
@@ -645,7 +644,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname,i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
@@ -688,7 +687,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname,i,pSong->_pMachine[i]->_editName);
+						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
 						return;
 					}
