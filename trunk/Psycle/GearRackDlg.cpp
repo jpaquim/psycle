@@ -257,18 +257,16 @@ void CGearRackDlg::OnCreate()
 				{
 					outputMachines[i] = mac->_outputMachines[i];
 					inputMachines[i] = mac->_inputMachines[i];
-					inputConVol[i] = mac->_inputConVol[i];
+					inputConVol[i] = mac->_inputConVol[i]*mac->_wireMultiplier[i];
 					connection[i] = mac->_connection[i];
 					inputCon[i] = mac->_inputCon[i];
 					// store volumes coming back this way, they get destroyed by new machine
 					if (connection[i])
 					{
-						for (int j = 0; j < MAX_CONNECTIONS; j++)
+						int j = Global::_pSong->_pMachine[outputMachines[i]]->FindInputWire(tmac);
+						if (j >= 0)
 						{
-							if (Global::_pSong->_pMachine[outputMachines[i]]->_inputMachines[j] == tmac)
-							{
-								outputConVol[i] = Global::_pSong->_pMachine[outputMachines[i]]->_inputConVol[j];
-							}
+							Global::_pSong->_pMachine[outputMachines[i]]->GetWireVolume(j, outputConVol[i]);
 						}
 					}
 				}
@@ -276,20 +274,24 @@ void CGearRackDlg::OnCreate()
 				m_pParent->NewMachine(x,y,tmac);
 				// replace all the connection info
 
-				mac->_numOutputs = numOutputs;
-				mac->_numInputs = numInputs;
-
-				for (i = 0; i < MAX_CONNECTIONS; i++)
+				Machine * mac = Global::_pSong->_pMachine[tmac];
+				if (mac)
 				{
-					// restore input connections
-					if (inputCon[i])
+					mac->_numOutputs = numOutputs;
+					mac->_numInputs = numInputs;
+
+					for (i = 0; i < MAX_CONNECTIONS; i++)
 					{
-						Global::_pSong->InsertConnection(inputMachines[i], tmac, inputConVol[i]);
-					}
-					// restore output connections
-					if (connection[i])
-					{
-						Global::_pSong->InsertConnection(tmac, outputMachines[i], outputConVol[i]);
+						// restore input connections
+						if (inputCon[i])
+						{
+							Global::_pSong->InsertConnection(inputMachines[i], tmac, inputConVol[i]);
+						}
+						// restore output connections
+						if (connection[i])
+						{
+							Global::_pSong->InsertConnection(tmac, outputMachines[i], outputConVol[i]);
+						}
 					}
 				}
 			}
@@ -578,6 +580,10 @@ void CGearRackDlg::ExchangeMacs(int one,int two)
 			float ftemp = tmp1->_inputConVol[i];
 			tmp1->_inputConVol[i] = tmp2->_inputConVol[i];
 			tmp2->_inputConVol[i] = ftemp;
+
+			ftemp = tmp1->_wireMultiplier[i];
+			tmp1->_wireMultiplier[i] = tmp2->_wireMultiplier[i];
+			tmp2->_wireMultiplier[i] = ftemp;
 
 			bool btemp = tmp1->_connection[i];
 			tmp1->_connection[i] = tmp2->_connection[i];

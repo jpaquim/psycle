@@ -1130,6 +1130,7 @@ bool Song::Load(RiffFile* pFile)
 
 		CProgressDialog Progress;
 		Progress.Create();
+		Progress.SetWindowText("Loading...");
 		Progress.ShowWindow(SW_SHOW);
 
 		UINT version = 0;
@@ -1479,6 +1480,7 @@ bool Song::Load(RiffFile* pFile)
 
 		CProgressDialog Progress;
 		Progress.Create();
+		Progress.SetWindowText("Loading old format...");
 		Progress.ShowWindow(SW_SHOW);
 
 		int i;
@@ -2321,6 +2323,7 @@ bool Song::Save(RiffFile* pFile)
 
 	CProgressDialog Progress;
 	Progress.Create();
+	Progress.SetWindowText("Saving...");
 	Progress.ShowWindow(SW_SHOW);
 
 	int chunkcount = 3; // 3 chunks plus:

@@ -465,7 +465,15 @@ void CNewMachine::LoadPluginInfo()
 		int badPlugsCount =0;
 		_numPlugins = 0;
 		_numBadPlugins = 0;
-		LoadCacheFile(plugsCount,badPlugsCount);
+		BOOL bProgressOpen = !LoadCacheFile(plugsCount,badPlugsCount);
+		CProgressDialog Progress;
+
+		if (bProgressOpen)
+		{
+			Progress.Create();
+			Progress.SetWindowText("Scanning plugins...");
+			Progress.ShowWindow(SW_SHOW);
+		}
 
 		char logname[MAX_PATH];
 		GetModuleFileName(NULL,logname,MAX_PATH);
@@ -480,6 +488,11 @@ void CNewMachine::LoadPluginInfo()
 		fclose(hfile);
 		FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetPluginDir()),MACH_PLUGIN);
 
+		if (bProgressOpen)
+		{
+			Progress.m_Progress.SetPos(8192);
+		}
+
 		hfile=fopen(logname,"a");  
 		fprintf(hfile,"\n[VST Plugins]\n\n");
 		fclose(hfile);
@@ -487,7 +500,17 @@ void CNewMachine::LoadPluginInfo()
 		_numPlugins = plugsCount;
 		_numBadPlugins = badPlugsCount;
 
+		if (bProgressOpen)
+		{
+			Progress.m_Progress.SetPos(16384);
+		}
+
 		SaveCacheFile();
+
+		if (bProgressOpen)
+		{
+			Progress.OnCancel();
+		}
 
 		AfxGetApp()->DoWaitCursor(-1); 
 	}
