@@ -9,6 +9,7 @@ namespace psycle
 		class Player;
 		class Configuration;
 		class Resampler;
+		class CLoggingWindow;
 
 		#if defined _WINAMP_PLUGIN_
 			bool FindFileinDir(char *dllname,CString &path);
@@ -27,6 +28,7 @@ namespace psycle
 			static Player* pPlayer;
 			static Configuration* pConfig;
 			static Resampler* pResampler;
+			static CLoggingWindow* pLogWindow;
 			#if !defined _WINAMP_PLUGIN_
 				static unsigned int _cpuHz;
 				static InputHandler* pInputHandler;

@@ -46,7 +46,7 @@ namespace psycle
 			defaultCF.cbSize = sizeof(defaultCF);
 			defaultCF.dwMask = CFM_SIZE | CFM_FACE |  CFM_COLOR;
 			m_ErrorTxt.SetDefaultCharFormat(defaultCF);
-			m_ErrorTxt.HideSelection(FALSE, FALSE);
+			m_ErrorTxt.HideSelection(TRUE, TRUE);
 			return TRUE;
 		}
 

@@ -4,6 +4,7 @@
 #include <Player.h>
 #include <Dsp.h>
 #include <Configuration.h>
+#include "LoggingWindow.h"
 #if !defined _WINAMP_PLUGIN_
 	#include <InputHandler.h>
 #endif
@@ -17,6 +18,7 @@ namespace psycle
 		Player * Global::pPlayer(0);
 		Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
+		CLoggingWindow * Global::pLogWindow(0);
 		#if !defined _WINAMP_PLUGIN_
 			unsigned int Global::_cpuHz;
 			InputHandler * Global::pInputHandler(0);
@@ -29,6 +31,7 @@ namespace psycle
 			pConfig = new Configuration;
 			pResampler = new Cubic;
 			pResampler->SetQuality(RESAMPLE_LINEAR);
+			pLogWindow = new CLoggingWindow;
 			#if !defined _WINAMP_PLUGIN_
 				pInputHandler = new InputHandler;
 			#endif
@@ -40,6 +43,7 @@ namespace psycle
 			delete pPlayer;
 			delete pResampler;
 			delete pConfig;
+			delete pLogWindow;
 			#if !defined _WINAMP_PLUGIN_
 				delete pInputHandler;
 			#endif
