@@ -113,10 +113,12 @@ namespace psycle
 				}
 				long int getEffectName(char * buffer) {
 					assert(buffer);
+					buffer[0]=0;
 					return dispatcher(effGetEffectName, 0, 0, buffer);
 				}
 				long int getVendorString(char * buffer) {
 					assert(buffer);
+					buffer[0]=0;
 					return dispatcher(effGetVendorString, 0, 0, buffer);
 				}
 			};
@@ -132,9 +134,9 @@ namespace psycle
 			public:
 				plugin();
 				virtual ~plugin() throw();
-				inline virtual const char * const GetDllName() const throw() { return _sDllName; }
-				inline virtual char * GetName() throw() { return _sProductName; }
-				inline virtual void GetParamName(int numparam, char * name)
+				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
+				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
+				virtual void GetParamName(int numparam, char * name)
 														{
 															try
 															{
@@ -152,7 +154,7 @@ namespace psycle
 															}
 														}
 				virtual void GetParamValue(int numparam, char * parval);
-				inline virtual int GetParamValue(int numparam)
+				virtual int GetParamValue(int numparam)
 														{
 															try
 															{
@@ -181,11 +183,11 @@ namespace psycle
 				void Instance(const char dllname[], const bool overwriteName = true) throw(...);
 				void Free() throw(...);
 				bool DescribeValue(int parameter, char * psTxt);
-				bool LoadDll(char * psFileName);
+				bool LoadDll(char* psFileName);
 				///\todo To be removed when changing the fileformat.
 				bool LoadChunk(RiffFile* pFile);
 				inline const long int & GetVersion() const throw() { return _version; }
-				inline const char * const GetVendorName() const throw() { return _sVendorName; }
+				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
 				inline const bool & IsSynth() const throw() { return _isSynth; }
 				inline bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
 				inline void SendMidi();
@@ -223,9 +225,9 @@ namespace psycle
 			private:
 				HMODULE h_dll;
 				/// Contains dll name
-				char * _sDllName;
-				char _sProductName[64];
-				char _sVendorName[64];
+				std::string _sDllName;
+				std::string _sProductName;
+				std::string _sVendorName;
 				long _version;
 				bool _isSynth;
 				float junk[STREAM_SIZE];

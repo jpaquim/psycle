@@ -52,8 +52,9 @@ namespace psycle
 
 		void CLoggingWindow::AddEntry(const int & level, const std::string & string)
 		{	
-			LogVector.push_back(new LogEntry(level, string));
-			if(level > host::loggers::levels::info) Global::pLogWindow->ShowWindow(SW_SHOWNORMAL); /// <bohan> \todo can we bring it to topmost z-order too?
+			LogVector.push_back(LogEntry(level, string));
+			if(level > host::loggers::levels::info)
+				Global::pLogWindow->ShowWindow(SW_SHOWNORMAL); /// <bohan> \todo can we bring it to topmost z-order too?
 			// puts a separator
 			{
 				defaultCF.crTextColor = RGB(64, 64, 64);
@@ -78,7 +79,7 @@ namespace psycle
 				defaultCF.crTextColor = RGB(255, 0, 255);
 			}
 			m_ErrorTxt.SetSelectionCharFormat(defaultCF);
-			m_ErrorTxt.ReplaceSel((**--LogVector.end()).string.c_str());
+			m_ErrorTxt.ReplaceSel((--LogVector.end())->string.c_str());
 			m_ErrorTxt.ReplaceSel("\n");
 			m_ErrorTxt.SetSelectionCharFormat(defaultCF);
 		}
