@@ -696,19 +696,20 @@ namespace psycle
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
 								_pPlugsInfo[currentPlugsCount]->name = vstPlug.GetName();
-								
-								std::ostringstream tmp;
-								tmp << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect")
-									<< " by " << vstPlug.GetVendorName();
-								_pPlugsInfo[currentPlugsCount]->desc = tmp.str();
-								
-								tmp.clear();
-								tmp << vstPlug.GetVersion();
-								_pPlugsInfo[currentPlugsCount]->version = tmp.str();
+								{
+									std::ostringstream oss;
+									oss << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect")
+										<< " by " << vstPlug.GetVendorName();
+									_pPlugsInfo[currentPlugsCount]->desc = oss.str();
+								}
+								{
+									std::ostringstream oss;
+									oss << vstPlug.GetVersion();
+									_pPlugsInfo[currentPlugsCount]->version = oss.str();
+								}
 								
 								if(vstPlug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-
 
 								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
 								out << vstPlug.GetName() << " - successfully instanciated";

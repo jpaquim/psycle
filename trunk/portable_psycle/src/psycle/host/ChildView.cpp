@@ -949,6 +949,7 @@ namespace psycle
 					case IDYES:
 						if (!file.Create((char*)filepath.c_str(), true))
 						{
+							std::ostringstream szText;
 							szText.clear();
 							szText << "Error writing to \"" << filepath << "\"!!!";
 							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
