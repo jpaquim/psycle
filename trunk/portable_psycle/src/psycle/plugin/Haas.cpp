@@ -90,7 +90,7 @@ public:
 				<< " ("
 				<< std::setw(6) << 20 * std::log10(1 - (*this)(parameter))
 				<< ", "
-				<< 20 * std::log10((*this)(parameter))
+				<< std::setw(6) << 20 * std::log10((*this)(parameter))
 				<< " dB)";
 			break;
 		case overall_gain:
