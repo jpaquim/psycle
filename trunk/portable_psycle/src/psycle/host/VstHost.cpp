@@ -165,7 +165,6 @@ namespace psycle
 				plugin::plugin()
 					: queue_size(0)
 					, wantidle(false)
-					, _sDllName(0)
 					, h_dll(0)
 					, _program(0)
 					, instantiated(false)
