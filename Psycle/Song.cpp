@@ -136,7 +136,7 @@ bool Song::CreateMachine(
 	_pMachines[tmac] = pMachine;
 	if (pMachine->_type == MACH_VSTFX || pMachine->_type == MACH_VST ) // Do not call VST Init() function
 	{																	// after Instance.
-		((Machine*)pMachine)->Init();
+		pMachine->Machine::Init();
 	}
 	else pMachine->Init();
 	pMachine->_x = x;
