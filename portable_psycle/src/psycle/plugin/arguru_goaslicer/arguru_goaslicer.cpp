@@ -1,6 +1,7 @@
 #include "project.h"
 #include "../plugin.h"
-/// \brief arguru simple distortion/saturator plugin
+///\file
+///\brief arguru simple distortion/saturator plugin
 namespace psycle { namespace plugin {
 
 class Goaslicer : public Plugin
