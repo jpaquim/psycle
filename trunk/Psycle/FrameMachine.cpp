@@ -12,6 +12,8 @@
 #include "InputHandler.h"
 #include "Helpers.h"
 #include "MainFrm.h"
+#include "Machine.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -566,7 +568,11 @@ void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		case CT_Note:
 			{
 				const int outnote = cmd.GetNote();
-				Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+				{
+					Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+				}
+				else Global::pInputHandler->PlayNote(outnote,127,true,NULL);
 			}
 			break;
 
@@ -585,7 +591,14 @@ void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 	const int outnote = cmd.GetNote();
-	if(outnote>=0)	Global::pInputHandler->StopNote(outnote,true,_pMachine);
+	if(outnote>=0)
+	{
+		if ( _pMachine->_mode == GENERATOR ||Global::pConfig->_notesToEffects)
+		{
+			Global::pInputHandler->StopNote(outnote,true,_pMachine);
+		}
+		else Global::pInputHandler->StopNote(outnote,true);
+	}
 
 //	wndView->KeyUp(nChar, nRepCnt, nFlags);
 	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);

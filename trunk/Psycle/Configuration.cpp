@@ -32,6 +32,7 @@ Configuration::Configuration()
 	_cursorAlwaysDown = false;
 	_RecordNoteoff = false;
 	_RecordTweaks = false;
+	_notesToEffects = false;
 	_RecordMouseTweaksSmooth = FALSE;
 	_RecordUnarmed = true;
 	_midiMachineViewSeqMode = false;
@@ -401,6 +402,8 @@ Configuration::Read()
 	reg.QueryValue("RecordTweaks", &type, (BYTE*)&_RecordTweaks, &numData);
 	numData = sizeof(_RecordMouseTweaksSmooth);
 	reg.QueryValue("RecordMouseTweaksSmooth", &type, (BYTE*)&_RecordMouseTweaksSmooth, &numData);
+	numData = sizeof(_notesToEffects);
+	reg.QueryValue("notesToEffects", &type, (BYTE*)&_notesToEffects, &numData);
 	numData = sizeof(_RecordUnarmed);
 	reg.QueryValue("RecordUnarmed", &type, (BYTE*)&_RecordUnarmed, &numData);
 
@@ -961,6 +964,7 @@ Configuration::Write()
 	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
 	reg.SetValue("RecordTweaks", REG_BINARY, (BYTE*)&_RecordTweaks, sizeof(_RecordTweaks));
 	reg.SetValue("RecordMouseTweaksSmooth", REG_BINARY, (BYTE*)&_RecordMouseTweaksSmooth, sizeof(_RecordMouseTweaksSmooth));
+	reg.SetValue("notesToEffects", REG_BINARY, (BYTE*)&_notesToEffects, sizeof(_notesToEffects));
 	reg.SetValue("RecordUnarmed", REG_BINARY, (BYTE*)&_RecordUnarmed, sizeof(_RecordUnarmed));
 	reg.SetValue("MidiMachineViewSeqMode", REG_BINARY, (BYTE*)&_midiMachineViewSeqMode, sizeof(_midiMachineViewSeqMode));
 	reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&_outputDriverIndex, sizeof(_outputDriverIndex));

@@ -598,6 +598,7 @@
 #define IDC_SLIDERM10                   1470
 #define IDC_LINE_NUMBERS_CURSOR         1470
 #define IDC_SLIDERM11                   1471
+#define IDC_DRAW_EMPTY_DATA             1471
 #define IDC_SLIDERM12                   1472
 #define IDC_SEQCUT                      1473
 #define IDC_SEQCOPY                     1474
@@ -640,6 +641,14 @@
 #define IDC_AUTOSAVE_CURRENT_SONG       1514
 #define IDC_AUTOSAVE_MINS               1515
 #define IDC_AUTOSAVE_MINS_SPIN          1516
+#define IDC_CLONEMACHINE                1517
+#define IDC_EXCHANGE                    1520
+#define IDC_TWEAK_SMOOTH                1521
+#define IDC_RADIO_GEN                   1522
+#define IDC_RECORD_UNARMED              1522
+#define IDC_RADIO_EFX                   1523
+#define IDC_NOTESTOEFFECTS              1523
+#define IDC_RADIO_INS                   1524
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -714,6 +723,16 @@
 #define ID_BARREC                       32902
 #define ID_POP_DELETE                   32903
 #define ID_FILE_REVERT                  32905
+#define ID_CONFIGURATION_OPENONLYVISUALCONFIG 32906
+#define ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG 32907
+#define ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG 32908
+#define ID_CONFIGURATION_OPENONLYINPUTOUTPUTCONFIG 32909
+#define ID_CONFIGURATION_OPENONLYMIDIINPUTCONFIG 32910
+#define ID_VIEW_SONGBAR                 32911
+#define ID_VIEW_MACHINEBAR              32912
+#define ID_VIEW_SEQUENCER               32913
+#define ID_VIEW_SEQUENCERBAR            32914
+#define ID_TEXT                         65535
 
 // Next default values for new objects
 // 
@@ -721,8 +740,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        204
-#define _APS_NEXT_COMMAND_VALUE         32906
-#define _APS_NEXT_CONTROL_VALUE         1517
+#define _APS_NEXT_COMMAND_VALUE         32920
+#define _APS_NEXT_CONTROL_VALUE         1524
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif
