@@ -2,6 +2,7 @@
 !=change
 +=addition
 
+* velocity should be able to store data to instrument column
 ! <_sue_> hi...... all those loading/exit/save confirmations are anoying me a bit.....any chance to make 
 	them optional in the configs menu? when i start psycle and load a track it even asks me if i want to 
 	save the old psy (wich i havent even changed)
