@@ -213,9 +213,13 @@ namespace psycle
 			m_wndInst.Validate();
 
 			// Error Logging window
+			/*
 			m_wndLog.pParentMain=this;
 			m_wndLog.Create(IDD_ERRORLOGGER,this);
 			m_wndLog.Validate();
+			*/
+			Global::pLogWindow->Create(IDD_ERRORLOGGER,this);
+			Global::pLogWindow->Validate();
 
 			// Wave Editor Window
 			m_pWndWed=new CWaveEdFrame(this->_pSong,this);
@@ -1272,8 +1276,8 @@ namespace psycle
 
 		void CMainFrame::ShowErrorLogger()
 		{
-			m_wndLog.ShowWindow(SW_SHOWNORMAL);
-			m_wndLog.SetActiveWindow();
+			Global::pLogWindow->ShowWindow(SW_SHOWNORMAL);
+			Global::pLogWindow->SetActiveWindow();
 		}
 
 		void CMainFrame::ShowInstrumentEditor()
