@@ -1234,6 +1234,18 @@ void CChildView::NewMachine(int x, int y, int mac)
 {
 	// Show new machine dialog
 	CNewMachine dlg;
+
+	if (mac >= 0)
+	{
+		if (mac < MAX_BUSES)
+		{
+			dlg.LastType1 = 0;
+		}
+		else
+		{
+			dlg.LastType1 = 1;
+		}
+	}
 	
 	if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
 	{
