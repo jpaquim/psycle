@@ -89,7 +89,7 @@ CChildView::CChildView()
 	patBufferCopy=false;
 	blockNTracks=0;
 	blockNLines=0;
-
+	bScrollDetatch=false;
 	pUndoList=NULL;
 	pRedoList=NULL;
 

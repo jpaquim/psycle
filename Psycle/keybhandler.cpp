@@ -504,6 +504,7 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 	}
 
+	bScrollDetatch=false;
 	Repaint(DMData);
 }
 
@@ -570,6 +571,7 @@ bool CChildView::MSBPut(int nChar)
 			break;
 		}
 	}
+	bScrollDetatch=false;
 	Repaint(DMCursor);
 	return true;
 }
@@ -598,7 +600,7 @@ void CChildView::ClearCurr() // delete content at Cursor pos.
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 	AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
-
+	bScrollDetatch=false;
 	Repaint(DMData);
 }
 
@@ -631,6 +633,7 @@ void CChildView::DeleteCurr()
 //	drawLineEnd=patlines-1;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
+	bScrollDetatch=false;
 	Repaint(DMData);
 }
 
@@ -655,6 +658,7 @@ void CChildView::InsertCurr()
 //	drawLineEnd=patlines-1;
 	NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
+	bScrollDetatch=false;
 	Repaint(DMData);
 }
 
