@@ -1,15 +1,7 @@
-// SynthTrack.h: interface for the CSynthTrack class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_)
-#define AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 #include "filter.h"
-
+///\file SynthTrack.h
+///\brief interface for the CSynthTrack class.
 
 #define FILTER_CALC_TIME	64
 #define TWOPI				6.28318530717958647692528676655901f
@@ -50,22 +42,22 @@ class CSynthTrack
 {
 public:
 
-	InitEffect(int cmd,int val);
-	PerformFx();
-	DoGlide();
-	DisableVibrato();
-	ActiveVibrato(int speed,int depth);
-	Vibrate();
+	void InitEffect(int cmd,int val);
+	void PerformFx();
+	void DoGlide();
+	void DisableVibrato();
+	void ActiveVibrato(int speed,int depth);
+	void Vibrate();
 	float Filter(float x);
-	NoteOff(bool stop=false);
+	void NoteOff(bool stop=false);
 	float GetEnvAmp();
 	void GetEnvVcf();
 	float oscglide;
 	float GetSample();
 	float GetSampleOsc1();
 	float GetSampleOsc2();
-	NoteOn(int note, SYNPAR *tspar,int spd);
-	InitArpeggio();
+	void NoteOn(int note, SYNPAR *tspar,int spd);
+	void InitArpeggio();
 	
 	CSynthTrack();
 	virtual ~CSynthTrack();
@@ -80,10 +72,10 @@ private:
 	float lfo_freq;
 	float lfo_phase;
 
-	InitLfo(int freq,int amp);
+	void InitLfo(int freq,int amp);
 
 	short timetocompute;
-	InitEnvelopes(bool force=false);
+	void InitEnvelopes(bool force=false);
 
 	float VcfResonance;
 	int sp_cmd;
@@ -424,5 +416,3 @@ inline void CSynthTrack::GetEnvVcf()
 	break;
 	}
 }
-
-#endif // !defined(AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_)

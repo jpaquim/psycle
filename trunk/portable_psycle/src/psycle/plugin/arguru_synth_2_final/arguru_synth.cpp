@@ -1,10 +1,9 @@
 /////////////////////////////////////////////////////////////////////
 // Arguru Synth 2 plugin for PSYCLE
 
-#include "..\..\machineinterface.h"
-
-#include "synthtrack.h"
-#include <stdlib.h>
+#include <psycle/plugin/MachineInterface.h>
+#include <psycle/plugin/arguru_synth_2_final/SynthTrack.h>
+#include <stdlib.h> ///< should be <cstdlib>
 
 #define MAX_ENV_TIME	250000
 #define MAX_TRACKS	32
@@ -351,7 +350,7 @@ CMachineInfo const MacInfo =
 class mi : public CMachineInterface
 {
 public:
-	InitWaveTable();
+	void InitWaveTable();
 	mi();
 	virtual ~mi();
 
@@ -471,7 +470,7 @@ pCB->MessBox(buffer,"·-=<([aRgUrU's SYNTH 2 (Final)])>=-·",0);
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks)
 {
 	float sl=0;
-	float sr=0;
+	// not used: float sr=0;
 
 	for(int c=0;c<tracks;c++)
 	{
@@ -656,7 +655,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	track[channel].NoteOff();
 }
 
-mi::InitWaveTable()
+void mi::InitWaveTable()
 {
 	for(int c=0;c<2100;c++)
 	{

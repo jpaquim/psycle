@@ -1,12 +1,7 @@
-// SynthTrack.cpp: implementation of the CSynthTrack class.
-//
-//////////////////////////////////////////////////////////////////////
-#include <math.h>
-#include "SynthTrack.h"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#include <math.h> /// should be <cmath>
+#include <psycle/plugin/arguru_synth_2_final/SynthTrack.h>
+///\file SynthTrack.cpp
+///\brief implementation of the CSynthTrack class.
 
 CSynthTrack::CSynthTrack()
 {
@@ -57,7 +52,7 @@ CSynthTrack::~CSynthTrack()
 
 }
 
-CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
+void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 {
 	syntp=tspar;
 
@@ -106,7 +101,7 @@ CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 
 }
 
-CSynthTrack::InitEnvelopes(bool force)
+void CSynthTrack::InitEnvelopes(bool force)
 {
 	// Init Amplitude Envelope
 	VcfEnvMod=(float)syntp->vcf_envmod;
@@ -145,7 +140,7 @@ CSynthTrack::InitEnvelopes(bool force)
 	}
 }
 
-CSynthTrack::NoteOff(bool fast)
+void CSynthTrack::NoteOff(bool fast)
 {
 	float const unde = 0.00001f;
 
@@ -164,7 +159,7 @@ CSynthTrack::NoteOff(bool fast)
 	}
 }
 
-CSynthTrack::Vibrate()
+void CSynthTrack::Vibrate()
 {
 	if(vibrato)
 	{
@@ -176,19 +171,19 @@ CSynthTrack::Vibrate()
 	}
 }
 
-CSynthTrack::ActiveVibrato(int speed,int depth)
+void CSynthTrack::ActiveVibrato(int speed,int depth)
 {
 	VibratoSpeed=(float)depth/16.0f;
 	VibratoDepth=(float)speed/16.0f;
 	vibrato=true;
 }
 
-CSynthTrack::DisableVibrato()
+void CSynthTrack::DisableVibrato()
 {
 	vibrato=false;
 }
 
-CSynthTrack::InitArpeggio()
+void CSynthTrack::InitArpeggio()
 {
 	ArpNote[0][0]	=0;
 	ArpNote[0][1]	=3;
@@ -345,7 +340,7 @@ CSynthTrack::InitArpeggio()
 
 }
 
-CSynthTrack::DoGlide()
+void CSynthTrack::DoGlide()
 {
 	// Glide Handler
 	if(ROSC1Speed<OSC1Speed)
@@ -375,7 +370,7 @@ CSynthTrack::DoGlide()
 	}
 }
 
-CSynthTrack::PerformFx()
+void CSynthTrack::PerformFx()
 {
 	Vibrate();
 
@@ -425,7 +420,7 @@ CSynthTrack::PerformFx()
 	}
 }
 
-CSynthTrack::InitEffect(int cmd, int val)
+void CSynthTrack::InitEffect(int cmd, int val)
 {
 	sp_cmd=cmd;
 	sp_val=val;
@@ -449,7 +444,7 @@ CSynthTrack::InitEffect(int cmd, int val)
 
 }
 
-CSynthTrack::InitLfo(int freq,int amp)
+void CSynthTrack::InitLfo(int freq,int amp)
 {
 	lfo_freq=(float)freq*0.000005f;
 }
