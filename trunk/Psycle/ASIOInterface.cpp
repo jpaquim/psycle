@@ -238,8 +238,11 @@ void ASIOInterface::WriteConfig()
 
 void ASIOInterface::Configure()
 {
-	ReadConfig();
-
+	if (!_configured)
+	{
+		ReadConfig();
+	}
+	
 	CASIOConfig dlg;
 	dlg.pASIO = this;
 	dlg.m_bufferSize = _ASIObufferSize;
@@ -423,22 +426,19 @@ bool ASIOInterface::Stop()
 	{
 		return true;
 	}
+	_running = false;
 
 	ASIOStop();
 	ASIODisposeBuffers();
 //	ASIOExit();
 	asioDrivers.removeCurrentDriver();
 
-	_running = false;
 	return true;
 }
 
 void ASIOInterface::Reset()
 {
-	if (_running)
-	{
-		Stop();
-	}
+	Stop();
 }
 
 bool ASIOInterface::Enable(bool e)
@@ -698,15 +698,15 @@ ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processN
 
 			for (i = 0; i < _ASIObufferSize; i++)
 			{
-				t = SwapLong(f2i((*pBuf++)*256.0f));
-				*outl++ = pt[0];
-				*outl++ = pt[1];
+				t = f2i((*pBuf++)*256.0f);
 				*outl++ = pt[2];
+				*outl++ = pt[1];
+				*outl++ = pt[0];
 
-				t = SwapLong(f2i((*pBuf++)*256.0f));
-				*outr++ = pt[0];
-				*outr++ = pt[1];
+				t = f2i((*pBuf++)*256.0f);
 				*outr++ = pt[2];
+				*outr++ = pt[1];
+				*outr++ = pt[0];
 			}
 		}
 		break;
