@@ -33,6 +33,9 @@ public:
 	CEdit	m_patnumber;
 	CEdit	m_filename;
 	int		m_recmode;
+	CComboBox	m_rate;
+	CComboBox	m_bits;
+	CComboBox	m_channelmode;
 	//}}AFX_DATA
 
 
@@ -51,6 +54,10 @@ protected:
 	int lastlinetick;
 	int tickcont;
 
+	static int rate;
+	static int bits;
+	static int channelmode;
+
 	bool autostop;
 	bool playblock;
 	bool sel[MAX_SONG_POSITIONS];
@@ -65,6 +72,9 @@ protected:
 	afx_msg void OnSelPattern();
 	afx_msg void OnSavewave();
 	virtual void OnCancel();
+	afx_msg void OnSelchangeComboBits();
+	afx_msg void OnSelchangeComboChannels();
+	afx_msg void OnSelchangeComboRate();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

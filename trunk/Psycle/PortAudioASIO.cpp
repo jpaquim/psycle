@@ -54,7 +54,8 @@ void PortAudioASIO::ReadConfig()
 	_numBlocks = 2;
 	_blockSize = 512;
 	_dither = 0;
-	_flags = ADF_STEREO;
+	_channelmode = 3;
+	_bitDepth = 16; // asio don't care about bit depth
 
 	if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
 	{

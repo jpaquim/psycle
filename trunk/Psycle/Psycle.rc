@@ -1814,7 +1814,7 @@ BEGIN
         MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
         MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
         MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
-        MENUITEM "Save as Au&dio File...",      ID_FILE_SAVEAUDIO
+        MENUITEM "Render as &Wav File",         ID_FILE_SAVEAUDIO
         POPUP "I&mport"
         BEGIN
             MENUITEM "&XM File",                    ID_FILE_IMPORT_XMFILE
@@ -2364,9 +2364,9 @@ LANGUAGE 0x3, 0x1
 // Dialog
 //
 
-IDD_SAVEWAVDLG DIALOG DISCARDABLE  0, 0, 260, 161
+IDD_SAVEWAVDLG DIALOG DISCARDABLE  0, 0, 260, 220
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Dialog"
+CAPTION "Render as Wav File"
 FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Output Path",IDC_STATIC,7,9,39,10
@@ -2375,23 +2375,37 @@ BEGIN
     CONTROL         "Save each input to master as a separated wav (wire number will be appended to it)",
                     IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
                     BS_MULTILINE | WS_DISABLED | WS_TABSTOP,51,25,193,21
-    GROUPBOX        "Record:",IDC_STATIC,15,49,228,61
-    EDITTEXT        IDC_PATNUMBER,117,75,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(in HEX value)",IDC_STATIC,147,78,47,10
-    EDITTEXT        IDC_RANGESTART,117,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGEEND,159,90,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "to",IDC_STATIC,148,92,8,8
-    LTEXT           "(in HEX value)",IDC_STATIC,189,92,47,10
+    GROUPBOX        "Record:",IDC_STATIC,15,74,228,61
+    EDITTEXT        IDC_PATNUMBER,117,100,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(in HEX value)",IDC_STATIC,147,103,47,10
+    EDITTEXT        IDC_RANGESTART,117,115,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,159,115,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "to",IDC_STATIC,148,117,8,8
+    LTEXT           "(in HEX value)",IDC_STATIC,189,117,47,10
     CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | 
-                    WS_BORDER,7,119,246,12
-    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,161,140,50,14
-    PUSHBUTTON      "Close",IDCANCEL,212,140,41,14
-    CONTROL         "Record all the song",IDC_RECSONG,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,23,62,77,10
+                    WS_BORDER,5,188,250,9
+    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,155,200,50,14
+    PUSHBUTTON      "Close",IDCANCEL,210,200,41,14
+    CONTROL         "Record the entire song",IDC_RECSONG,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,23,87,112,10
     CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
-                    BS_AUTORADIOBUTTON,23,77,89,10
+                    BS_AUTORADIOBUTTON,23,102,89,10
     CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
-                    BS_AUTORADIOBUTTON,23,92,93,10
+                    BS_AUTORADIOBUTTON,23,117,93,10
+    RTEXT           "Sample Rate",IDC_STATIC,70,140,45,15,SS_CENTERIMAGE
+    RTEXT           "Channels",IDC_STATIC,65,170,50,15,SS_CENTERIMAGE
+    RTEXT           "Bit Depth",IDC_STATIC,65,155,50,15,SS_CENTERIMAGE
+    CONTROL         "Save each track as a separated wav (track number will be appended to it)",
+                    IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_DISABLED | WS_TABSTOP,50,50,193,21
+    COMBOBOX        IDC_COMBO_RATE,120,140,125,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_BITS,120,155,125,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_CHANNELS,120,170,125,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
+                    IDC_STATIC,13,140,50,45,WS_DISABLED
 END
 
 
@@ -2408,7 +2422,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 253
         TOPMARGIN, 7
-        BOTTOMMARGIN, 154
+        BOTTOMMARGIN, 213
     END
 END
 #endif    // APSTUDIO_INVOKED

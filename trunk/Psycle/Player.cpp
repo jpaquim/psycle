@@ -49,7 +49,10 @@ void Player::Start(int pos, int line)
 	bpm=Global::_pSong->BeatsPerMin;
 	tpb=Global::_pSong->_ticksPerBeat;
 	
-	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
+	for (int i=0;i<MAX_TRACKS;i++) 
+	{
+		prevMachines[i] = 255;
+	}
 	_playing = true;
 	ExecuteLine();
 }
@@ -413,21 +416,33 @@ float * Player::Work(
 //				float* pData = pThis->_pBuffer; <- this was fuxxxxing up
 				float* pL = pSong->_pMachine[MASTER_INDEX]->_pSamplesL;
 				float* pR = pSong->_pMachine[MASTER_INDEX]->_pSamplesR;
-				for (int i=0; i<amount; i++)
+				int i;
+				switch (Global::pConfig->_pOutputDriver->_channelmode)
 				{
-					
-					// It's an ugly solution, I know, but We are recording, so
-					// speed is not that crucial
-					//
-//					int sl = int(*pData++);
-					int sl = int(*pL++);
-					if ( sl > 32767) sl = 32767;
-					else if ( sl < -32768 ) sl = -32768;
-//					int sr = int(*pData++);
-					int sr = int(*pR++);
-					if ( sr > 32767) sr = 32767;
-					else if ( sr < -32768 ) sr = -32768;
-					pThis->_outputWaveFile.WriteStereoSample(WORD(sl),WORD(sr));
+				case 0: // mono mix
+					for (i=0; i<amount; i++)
+					{
+						pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2);
+					}
+					break;
+				case 1: // mono L
+					for (i=0; i<amount; i++)
+					{
+						pThis->_outputWaveFile.WriteMonoSample((*pL++));
+					}
+					break;
+				case 2: // mono R
+					for (i=0; i<amount; i++)
+					{
+						pThis->_outputWaveFile.WriteMonoSample((*pR++));
+					}
+					break;
+				default: // stereo
+					for (i=0; i<amount; i++)
+					{
+						pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++));
+					}
+					break;
 				}
 			}
 
@@ -450,13 +465,47 @@ float * Player::Work(
 
 void Player::StartRecording(
 	char *psFilename,
-	int bitdepth)
+	int bitdepth, int samplerate, int channelmode)
 {
 	if (!_recording)
 	{
-//		_outputWaveFile.OpenForWrite(psFilename, samplerate, bitdepth, 2);
-		_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, bitdepth, 2);
-		_recording = true;
+		backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
+		backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
+		backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
+
+
+		if (samplerate > 0)
+		{
+			Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate;
+		}
+
+		if (bitdepth > 0)
+		{
+			Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
+		}
+
+		if (channelmode >= 0)
+		{
+			Global::pConfig->_pOutputDriver->_channelmode = channelmode;
+		}
+
+		int channels = 2;
+		if (Global::pConfig->_pOutputDriver->_channelmode != 3)
+		{
+			channels = 1;
+		}
+
+		Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+
+		if (_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, 	Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+		{
+			_recording = true;
+		}
+		else
+		{
+			StopRecording();
+			MessageBox(NULL,psFilename,"FAILED",NULL);
+		}
 	}
 }
 
@@ -464,6 +513,11 @@ void Player::StopRecording(void)
 {
 	if (_recording)
 	{
+		Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
+		Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
+		Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
+		Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+
 		_outputWaveFile.Close();
 		_recording = false;
 	}

@@ -373,7 +373,7 @@ DDCRET WaveFile::OpenForWrite ( const char  *Filename,
    // Verify parameters...
 
    if ( !Filename ||
-        (BitsPerSample != 8 && BitsPerSample != 16) ||
+        (BitsPerSample != 8 && BitsPerSample != 16 && BitsPerSample != 24 && BitsPerSample != 32) ||
         NumChannels < 1 || NumChannels > 2 )
    {
       return DDC_INVALID_CALL;
@@ -481,35 +481,91 @@ DDCRET WaveFile::WriteSample ( const INT16 Sample [MAX_WAVE_CHANNELS] )
 }
 
 
-DDCRET WaveFile::WriteMonoSample ( INT16 SampleData )
+DDCRET WaveFile::WriteMonoSample ( float SampleData )
 {
+   int d;
+   if (SampleData > 32767.0f)
+   {
+	   SampleData = 32767.0f;
+   }
+   else if (SampleData < -32768.0f)
+   {
+	   SampleData = -32768.0f;
+   }
    switch ( wave_format.data.nBitsPerSample )
    {
       case 8:
            pcm_data.ckSize += 1;
-           return Write ( &SampleData, 1 );
+		   d = int(SampleData/256.0f);
+		   d += 128;
+
+           return Write ( &d, 1 );
 
       case 16:
            pcm_data.ckSize += 2;
-           return Write ( &SampleData, 2 );
+
+		   d = int(SampleData);
+
+           return Write ( &d, 2 );
+
+      case 24:
+           pcm_data.ckSize += 3;
+		   d = int(SampleData * 256.0f);
+
+           return Write ( &d, 3 );
+
+      case 32:
+           pcm_data.ckSize += 4;
+
+		   d = int(SampleData * 65536.0f);
+           return Write ( &SampleData, 4 );
    }
 
    return DDC_INVALID_CALL;
 }
 
 
-DDCRET WaveFile::WriteStereoSample ( INT16 LeftSample,
-                                     INT16 RightSample )
+DDCRET WaveFile::WriteStereoSample ( float LeftSample,
+                                     float RightSample )
 {
    DDCRET retcode = DDC_SUCCESS;
+
+   int l, r;
+
+   if (LeftSample > 32767.0f)
+   {
+	   LeftSample = 32767.0f;
+   }
+   else if (LeftSample < -32768.0f)
+   {
+	   LeftSample = -32768.0f;
+   }
+
+
+   if (RightSample > 32767.0f)
+   {
+	   RightSample = 32767.0f;
+   }
+   else if (RightSample < -32768.0f)
+   {
+	   RightSample = -32768.0f;
+   }
+
+
 
    switch ( wave_format.data.nBitsPerSample )
    {
       case 8:
-           retcode = Write ( &LeftSample, 1 );
+		   l = int(LeftSample/256.0f);
+		   r = int(RightSample/256.0f);
+
+		   l+= 128;
+		   r+= 128;
+
+           retcode = Write ( &l, 1 );
            if ( retcode == DDC_SUCCESS )
            {
-              retcode = Write ( &RightSample, 1 );
+              retcode = Write ( &r, 1 );
               if ( retcode == DDC_SUCCESS )
               {
                  pcm_data.ckSize += 2;
@@ -518,16 +574,50 @@ DDCRET WaveFile::WriteStereoSample ( INT16 LeftSample,
            break;
 
       case 16:
-           retcode = Write ( &LeftSample, 2 );
+		   l = int(LeftSample);
+		   r = int(RightSample);
+
+           retcode = Write ( &l, 2 );
            if ( retcode == DDC_SUCCESS )
            {
-              retcode = Write ( &RightSample, 2 );
+              retcode = Write ( &r, 2 );
               if ( retcode == DDC_SUCCESS )
               {
                  pcm_data.ckSize += 4;
               }
            }
            break;
+
+	  case 24:
+		   l = int(LeftSample*256.0f);
+		   r = int(RightSample*256.0f);
+
+           retcode = Write ( &l, 3 );
+           if ( retcode == DDC_SUCCESS )
+           {
+              retcode = Write ( &r, 3 );
+              if ( retcode == DDC_SUCCESS )
+              {
+                 pcm_data.ckSize += 6;
+              }
+           }
+           break;
+
+	  case 32:
+		   l = int(LeftSample*65536.0f);
+		   r = int(RightSample*65536.0f);
+
+           retcode = Write ( &l, 4 );
+           if ( retcode == DDC_SUCCESS )
+           {
+              retcode = Write ( &r, 4 );
+              if ( retcode == DDC_SUCCESS )
+              {
+                 pcm_data.ckSize += 8;
+              }
+           }
+           break;
+
 
       default:
            retcode = DDC_INVALID_CALL;

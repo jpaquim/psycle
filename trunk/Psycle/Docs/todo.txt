@@ -26,6 +26,8 @@ aditional known vst bugs/buggy vsts: ~33
 
 ++ undos for machine and wave edit? also track changes for file changed flag
 
+*** ctrl-n is the worst idea ever
+
 ** need save file? reminder on open file
 *** save as wave should alert when it runs out of space
 

@@ -804,7 +804,7 @@ bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCoun
 	char Temp[MAX_PATH];
 	file.Read(Temp,8);
 	Temp[8]=0;
-	if (strcmp(Temp,"PSYCACHE"))
+	if (strcmp(Temp,"PSYCACHE")!=0)
 	{
 		file.Close();
 		DeleteFile(cache);

@@ -1,8 +1,6 @@
 #ifndef _AUDIODRIVER_H
 #define _AUDIODRIVER_H
 
-#define ADF_STEREO 1
-
 typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
 
 class AudioDriverInfo
@@ -20,7 +18,7 @@ public:
 class AudioDriver
 {
 public:
-	AudioDriver() { _samplesPerSec = 44100; }
+	AudioDriver() { _samplesPerSec = 44100; _bitDepth = 16; _channelmode = 3;}
 	virtual ~AudioDriver() {};
 
 	virtual void Initialize(
@@ -59,7 +57,8 @@ public:
 
 public:
 	int _samplesPerSec;
-	int _flags;
+	int _channelmode;
+	int _bitDepth;
 
 protected:
 	static AudioDriverInfo _info;

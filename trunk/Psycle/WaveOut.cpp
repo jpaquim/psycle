@@ -49,12 +49,13 @@ bool WaveOut::Start()
 
 	WAVEFORMATEX format;
 	format.wFormatTag = WAVE_FORMAT_PCM;
-	format.nChannels = (_flags & ADF_STEREO) ? 2 : 1;
-	format.wBitsPerSample = 16;
+	format.wBitsPerSample = _bitDepth;
 	format.nSamplesPerSec = _samplesPerSec;
+	format.cbSize = 0;
+	format.nChannels = 2;
+
 	format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
-	format.cbSize = 0;
 
 	if (waveOutOpen(&_handle, _deviceID, &format, NULL, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)
 	{
@@ -247,7 +248,8 @@ void WaveOut::ReadConfig()
 	_blockSize = 4096;
 	_pollSleep = 20;
 	_dither = 0;
-	_flags = ADF_STEREO;
+	_channelmode = 3;
+	_bitDepth = 16;
 
 	if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
 	{
@@ -270,6 +272,8 @@ void WaveOut::ReadConfig()
 	configured &= (reg.QueryValue("Dither", &type, (BYTE*)&_dither, &numData) == ERROR_SUCCESS);
 	numData = sizeof(_samplesPerSec);
 	configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
+	numData = sizeof(_bitDepth);
+	(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
 	reg.CloseKey();
 	reg.CloseRootKey();
 	_configured = configured;
@@ -297,6 +301,7 @@ void WaveOut::WriteConfig()
 	reg.SetValue("PollSleep", REG_DWORD, (BYTE*)&_pollSleep, sizeof(_pollSleep));
 	reg.SetValue("Dither", REG_DWORD, (BYTE*)&_dither, sizeof(_dither));
 	reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
+	reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof(_bitDepth));
 	reg.CloseKey();
 	reg.CloseRootKey();
 }
