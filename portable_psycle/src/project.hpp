@@ -356,13 +356,17 @@
 #endif
 
 #if defined _AFXDLL // mfc
-	#if defined APPSTUDIO_INVOKED__THIS_MSVC_MFC_RESOURCE_EDITOR_IS_A_SHIT_AND_DOES_NOT_HANDLE_NAMESPACES_AND_WRONGLY_PARSES_PREPROCESSOR_DIRECTIVES
-		#define NAMESPACE__BEGIN(x)
-		#define NAMESPACE__END
-	#else
-		#define NAMESPACE__BEGIN(x) namespace x {
-		#define NAMESPACE__END }
-	#endif
+		#if defined COMPILER__RESOURCE //&& defined COMPILER__MICROSOFT
+			// msvc7.1's resource compiler freaks out: warning RC4011: identifier truncated to 'OPERATING_SYSTEM__VERSION__MICR'
+		#else
+			#if defined APPSTUDIO_INVOKED__THIS_MSVC_MFC_RESOURCE_EDITOR_IS_A_SHIT_AND_DOES_NOT_HANDLE_NAMESPACES_AND_WRONGLY_PARSES_PREPROCESSOR_DIRECTIVES
+				#define NAMESPACE__BEGIN(x)
+				#define NAMESPACE__END
+			#else
+				#define NAMESPACE__BEGIN(x) namespace x {
+				#define NAMESPACE__END }
+			#endif
+		#endif
 #endif
 
 #if !defined COMPILER && !defined COMPILER__RESOURCE
