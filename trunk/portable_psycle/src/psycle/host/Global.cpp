@@ -152,7 +152,7 @@ namespace psycle
 					// processing thread. Perhaps due to dependency on the main
 					// thread's event loop? Perhaps it needs it's own event loop?
 
-					//	if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string);
+						if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string);
 					
 				}
 			}
