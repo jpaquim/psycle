@@ -121,5 +121,6 @@ namespace operating_system
 		DWORD length=string.length();
 		::SetConsoleTextAttribute(output_handle, attributes);
 		::WriteConsole(output_handle,string.c_str(),length,&length,0);
+		::WriteConsole(output_handle,"\n",1,&length,0);
 	}
 }
