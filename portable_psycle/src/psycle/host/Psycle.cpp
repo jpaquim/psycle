@@ -439,6 +439,7 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // new gui ... just a test, anyone can freely throw this code away
+#if 0
 
 /*
 	in main class constructor add:
@@ -467,14 +468,6 @@ namespace psycle
 		void operator()() throw();
 	private:
 		boost::thread * thread_;
-		template<typename Functor> class Thread
-		{
-		public:
-			inline Thread(Functor & functor) : functor_(functor) {}
-			inline void operator()() throw() { functor_(); }
-		private:
-			Functor & functor_;
-		};
 	};
 
 	GUI::GUI() : thread_(0) {}
@@ -489,6 +482,14 @@ namespace psycle
 		if(thread_) return;
 		try
 		{
+			template<typename Functor> class Thread
+			{
+			public:
+				inline Thread(Functor & functor) : functor_(functor) {}
+				inline void operator()() throw() { functor_(); }
+			private:
+				Functor & functor_;
+			};
 			thread_ = new boost::thread(Thread<GUI>(*this));
 		}
 		catch(const boost::thread_resource_error & e)
@@ -498,3 +499,4 @@ namespace psycle
 		}
 	}
 #endif
+#endif // 0
