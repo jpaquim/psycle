@@ -114,11 +114,13 @@ bool Song::CreateMachine(
 	case MACH_PLUGIN:
 		{
 			pMachine = pPlugin = new Plugin(index);
+#if !defined(_WINAMP_PLUGIN_)
 			if ( !CNewMachine::TestFilename(psPluginDll) ) 
 			{
 				delete pMachine; 
 				return false;
 			}
+#endif
 			if (!pPlugin->Instance(psPluginDll))
 			{
 				delete pMachine; 
@@ -129,11 +131,13 @@ bool Song::CreateMachine(
 	case MACH_VST:
 		{
 			pMachine = pVstPlugin = new VSTInstrument(index);
+#if !defined(_WINAMP_PLUGIN_)
 			if ( !CNewMachine::TestFilename(psPluginDll) ) 
 			{
 				delete pMachine; 
 				return false;
 			}
+#endif
 			if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
 			{
 				delete pMachine; 
@@ -144,11 +148,13 @@ bool Song::CreateMachine(
 	case MACH_VSTFX:
 		{
 			pMachine = pVstPlugin = new VSTFX(index);
+#if !defined(_WINAMP_PLUGIN_)
 			if ( !CNewMachine::TestFilename(psPluginDll) ) 
 			{
 				delete pMachine; 
 				return false;
 			}
+#endif
 			if (pVstPlugin->Instance(psPluginDll) != VSTINSTANCE_NO_ERROR)
 			{
 				delete pMachine; 
@@ -1870,19 +1876,8 @@ bool Song::Load(RiffFile* pFile)
 						if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 						{
 							strcpy(sPath2,sPath);
-							if (!CNewMachine::TestFilename(sPath2))
-							{
-								Machine* pOldMachine = pMac[i];
-								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-								pOldMachine->_pSamplesL = NULL;
-								pOldMachine->_pSamplesR = NULL;
-								// dummy name goes here
-								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-								delete pOldMachine;
-								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
-							}
-							else if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
+
+							if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
 								Machine* pOldMachine = pMac[i];
 								pMac[i] = new Dummy(*((Dummy*)pOldMachine));

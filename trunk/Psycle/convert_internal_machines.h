@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include "scale.h"
+#include "InputHandler.h"
 namespace psycle { namespace convert_internal_machines {
 
 class Converter
@@ -197,7 +198,7 @@ private:
 			(*this)[gainer] = new std::string("gainer");
 			(*this)[flanger] = new std::string("flanger");
 		}
-		const boolean exists(const int & type) const throw()
+		const bool exists(const int & type) const throw()
 		{
 			return find(type) != end();
 		}
