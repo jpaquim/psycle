@@ -232,7 +232,7 @@ namespace psycle
 				bool _isSynth;
 				float junk[STREAM_SIZE];
 				static VstTimeInfo _timeInfo;
-				VstEvents events;
+				VstEvents mevents;
 				vst::proxy *proxy_;
 			};
 
@@ -353,7 +353,7 @@ namespace psycle
 					<< " Value = " << value
 					<< " Ptr = " << ptr
 					<< " Opt = " << opt;
-					host::loggers::trace(s.str());
+					//host::loggers::trace(s.str());
 				}
 				
 #endif
