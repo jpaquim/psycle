@@ -169,11 +169,11 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
-						// <bohan>
+						// [bohan]
 						// exception blocked here for now,
 						// but we really should do something...
 						//throw;
-						return 0; /// \todo <bohan> ???
+						return 0; /// \todo [bohan] ???
 					}
 				}
 				virtual void GetParamName(int numparam, char * name)
@@ -186,11 +186,11 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
-						// <bohan>
+						// [bohan]
 						// exception blocked here for now,
 						// but we really should do something...
 						//throw;
-						std::strcpy(name, "fucked up"); /// \todo <bohan> ???
+						std::strcpy(name, "fucked up"); /// \todo [bohan] ???
 					}
 				}
 				virtual void GetParamValue(int numparam, char * parval);
@@ -203,15 +203,15 @@ namespace psycle
 						if(numparam < proxy().numParams())
 							return f2i(proxy().getParameter(numparam) * 65535);
 						else
-							return 0; /// \todo <bohan> ???
+							return 0; /// \todo [bohan] ???
 					}
 					catch(const std::exception &)
 					{
-						// <bohan>
+						// [bohan]
 						// exception blocked here for now,
 						// but we really should do something...
 						//throw;
-						return 0; /// \todo <bohan> ???
+						return 0; /// \todo [bohan] ???
 					}
 				}
 				#pragma warning(pop)
@@ -309,7 +309,7 @@ namespace psycle
 							assert(channel >= 0 && channel < 16);
 							--note_on_count_[channel][note];
 							//assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding note-on!");
-							// <bohan> it happens!!!
+							// [bohan] it happens!!!
 							if(note_on_count_[channel][note] < 0) psycle::host::loggers::exception("there was a note-off without corresponding note-on!");
 						}
 					private:
