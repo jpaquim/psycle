@@ -32,6 +32,7 @@ item count
 New and unsorted and untested
 ##############################
 
+<kSh> For you, I have a little idea - trivial to do, very important to the users. Let Psycle save files to another name, then check if the file is OK, and then delete the old one and rename the new one.
 
 ** jmr2@macs.hw.ac.uk: * when loading a song it doesnt move to first order
 * jmr2@macs.hw.ac.uk: * when playing a song and pressing sort causes it to play the wrong pattern 
