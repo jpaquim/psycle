@@ -398,7 +398,8 @@ void CChildView::OnTimer( UINT nIDEvent )
 					CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 					editcur.line=Global::pPlayer->_lineCounter;
 					
-					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+					if (editPosition != Global::pPlayer->_playPosition)
+//					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);

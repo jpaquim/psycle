@@ -172,15 +172,9 @@ protected:
 	afx_msg void OnFollowSong();
 	afx_msg void OnSeqclr();
 	afx_msg void OnSeqsort();
-	afx_msg void OnGenerator();
-	afx_msg void OnBEffects();
-	afx_msg void OnBGenerators();
 	afx_msg void OnSelchangeBarGenfx();
 	afx_msg void OnCloseupBarGenfx();
-	afx_msg void OnWrap();
 	afx_msg void OnMultichannelAudition();
-	afx_msg void OnCentercursor();
-	afx_msg void OnCursordown();
 	afx_msg void OnRecordNoteoff();
 	afx_msg void OnRecordTweaks();
 	afx_msg void OnCloseupAuxselect();
@@ -199,7 +193,8 @@ protected:
 	afx_msg void OnCloseupCombooctave();
 	afx_msg void OnSelchangeCombooctave();
 	afx_msg void OnDropFiles(WPARAM wParam);
-
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

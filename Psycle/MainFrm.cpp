@@ -1652,13 +1652,20 @@ void CMainFrame::OnSelchangeSeqlist()
 	if(m_wndView.editPosition<0) m_wndView.editPosition = 0; // DAN FIXME
 	int const cpid=_pSong->playOrder[m_wndView.editPosition];
 
-	for (int c=0;c<maxitems;c++) {
+	for (int c=0;c<maxitems;c++) 
+	{
 		if ( cc->GetSel(c) != 0) _pSong->playOrderSel[c]=true;
 		else _pSong->playOrderSel[c]=false;
 	}
 	
 	if((ep!=m_wndView.editPosition))// && ( cc->GetSelCount() == 1))
 	{
+		if ((Global::pPlayer->_playing) && (Global::pConfig->_followSong))
+		{
+			bool b = Global::pPlayer->_playBlock;
+			Global::pPlayer->Start(ep,0);
+			Global::pPlayer->_playBlock = b;
+		}
 		m_wndView.editPosition=ep;
 		UpdatePlayOrder(false);
 		
@@ -1685,6 +1692,19 @@ void CMainFrame::OnDblclkSeqlist()
 	}
 	m_wndView.SetFocus();
 	*/		
+	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+	int const ep=cc->GetCurSel();
+	if (Global::pPlayer->_playing)
+	{
+		bool b = Global::pPlayer->_playBlock;
+		Global::pPlayer->Start(ep,0);
+		Global::pPlayer->_playBlock = b;
+	}
+	else
+	{
+		Global::pPlayer->Start(ep,0);
+	}
+	m_wndView.editPosition=ep;
 	m_wndView.OnPatternView();
 }
 
