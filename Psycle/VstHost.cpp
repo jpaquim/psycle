@@ -41,6 +41,7 @@ VSTPlugin::VSTPlugin()
 	_sDllName = NULL;
 	_pEffect=NULL;
 	h_dll=NULL;
+	editorWnd=NULL;
 	instantiated=false;		// Constructin' with no instance
 	macindex = 0;
 
@@ -720,7 +721,8 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	case 	audioMasterSizeWindow:
 #if !defined(_WINAMP_PLUGIN_)
 			if ( effect->user ) {
-				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
+				if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
+					((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
 			}
 #endif // !defined(_WINAMP_PLUGIN_)
 			return 0;
@@ -741,7 +743,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		
 //			"reportConnectionChanges",
 //			"acceptIOChanges",
-//			"sizeWindow",
+			if (!strcmp((char*)ptr,"sizeWindow")) return 1;
 			if (!strcmp((char*)ptr,"supplyIdle")) return 1;
 			return -1;
 		break;

@@ -370,8 +370,10 @@ void Master::Init(void)
 {
 	Machine::Init();
 #if !defined(_WINAMP_PLUGIN_)
-	_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
-	_RMAX = 1;
+//	_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
+//	_RMAX = 1;
+	currentpeak=0.0f;
+	peaktime=1;
 	_lMax = 1;
 	_rMax = 1;
 	vuupdated = false;
@@ -418,7 +420,7 @@ void Master::Work(
 //		_rMax -= numSamples*8;
 //		_lMax *= 0.5;
 //		_rMax *= 0.5;
-		if ( vuupdated ) { _lMax *= 0.5; _rMax *= 0.5;}
+		if ( vuupdated ) { _lMax *= 0.5; _rMax *= 0.5; }
 
 		int i = numSamples;
 		do
@@ -474,6 +476,11 @@ void Master::Work(
 		}
 		else if (_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }
 //		else _RMAX = Dsp::F2I(_rMax);
+
+		if ( _lMax > currentpeak ) currentpeak = _lMax;
+		if ( _rMax > currentpeak ) currentpeak = _rMax;
+
+
 #endif // _WINAMP_PLUGIN_
 //	}
 #if !defined(_WINAMP_PLUGIN_)

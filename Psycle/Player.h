@@ -26,7 +26,7 @@ public:
 	Player();
 	~Player();
 
-	void Start(int line);
+	void Start(int pos,int line);
 	void Stop(void);
 #if defined(_WINAMP_PLUGIN_)
 	float * Work(void* context, int& nsamples);

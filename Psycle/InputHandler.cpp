@@ -774,15 +774,13 @@ void InputHandler::Stop()
 void InputHandler::PlaySong() 
 {
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
-	Global::pPlayer->_playPosition = pChildView->editPosition;
-	Global::pPlayer->Start(0);
+	Global::pPlayer->Start(pChildView->editPosition,0);
 }
 
 void InputHandler::PlayFromCur() 
 {
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
-	Global::pPlayer->_playPosition = pChildView->editPosition;
-	Global::pPlayer->Start(pChildView->editcur.line);
+	Global::pPlayer->Start(pChildView->editPosition,pChildView->editcur.line);
 }
 
 

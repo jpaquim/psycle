@@ -23,6 +23,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CMasterDlg)
 	enum { IDD = IDD_MASTERDLG };
+	CStatic	m_masterpeak;
 	CSliderCtrl	m_slidermaster;
 	CSliderCtrl	m_sliderm9;
 	CSliderCtrl	m_sliderm8;

@@ -758,7 +758,7 @@ FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Decrease Master Volume automatically when Clipping",
                     IDC_AUTODEC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,108,
-                    135,14
+                    184,14
     CONTROL         190,IDC_MIXERVIEW,"Static",SS_BITMAP | WS_BORDER,1,1,336,
                     106
     CONTROL         "Slider1",IDC_SLIDERMASTER,"msctls_trackbar32",TBS_VERT | 
@@ -770,13 +770,13 @@ BEGIN
     CONTROL         "Slider1",IDC_SLIDERM3,"msctls_trackbar32",TBS_VERT | 
                     TBS_NOTICKS | WS_TABSTOP,89,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM4,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,102,28,13,57,WS_EX_TRANSPARENT
+                    TBS_NOTICKS | WS_TABSTOP,103,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM5,"msctls_trackbar32",TBS_VERT | 
                     TBS_NOTICKS | WS_TABSTOP,116,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM6,"msctls_trackbar32",TBS_VERT | 
                     TBS_NOTICKS | WS_TABSTOP,129,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM7,"msctls_trackbar32",TBS_VERT | 
-                    TBS_NOTICKS | WS_TABSTOP,142,28,13,57,WS_EX_TRANSPARENT
+                    TBS_NOTICKS | WS_TABSTOP,143,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM8,"msctls_trackbar32",TBS_VERT | 
                     TBS_NOTICKS | WS_TABSTOP,156,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM9,"msctls_trackbar32",TBS_VERT | 
@@ -787,6 +787,9 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,196,28,13,57,WS_EX_TRANSPARENT
     CONTROL         "Slider1",IDC_SLIDERM12,"msctls_trackbar32",TBS_VERT | 
                     TBS_NOTICKS | WS_TABSTOP,209,28,13,57,WS_EX_TRANSPARENT
+    LTEXT           "Current Peak:",IDC_STATIC,254,111,48,10
+    RTEXT           "-40.1dB",IDC_MASTERPEAK,304,109,31,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
 END
 
 IDD_NEWVAL DIALOGEX 0, 0, 264, 38
