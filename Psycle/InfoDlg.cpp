@@ -143,13 +143,13 @@ void CInfoDlg::OnTimer(UINT nIDEvent)
 		sprintf(buffer,"%d%%",100-lpBuffer.dwMemoryLoad);
 		m_mem_reso.SetWindowText(buffer);
 		
-		sprintf(buffer,"%d / %d K",lpBuffer.dwAvailPhys/1024,lpBuffer.dwTotalPhys/1024);
+		sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailPhys/1048576.0f,lpBuffer.dwTotalPhys/1048576.0f);
 		m_mem_phy.SetWindowText(buffer);
 		
-		sprintf(buffer,"%d / %d K",lpBuffer.dwAvailPageFile/1024,lpBuffer.dwTotalPageFile/1024);
+		sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailPageFile/1048576.0f,lpBuffer.dwTotalPageFile/1048576.0f);
 		m_mem_pagefile.SetWindowText(buffer);
 		
-		sprintf(buffer,"%d / %d K",lpBuffer.dwAvailVirtual/1024,lpBuffer.dwTotalVirtual/1024);
+		sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailVirtual/1048576.0f,lpBuffer.dwTotalVirtual/1048576.0f);
 		m_mem_virtual.SetWindowText(buffer);
 	}
 }

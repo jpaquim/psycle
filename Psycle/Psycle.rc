@@ -251,11 +251,11 @@ IDD_INFO DIALOGEX 0, 0, 316, 239
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle CPU/DSP Performance Monitor"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     GROUPBOX        "Core Info",IDC_STATIC,7,7,303,81
-    GROUPBOX        "Gear info and DSP CPU performance",IDC_STATIC,7,89,303,
-                    143
+    GROUPBOX        "Gear Information and CPU performance",IDC_STATIC,7,89,
+                    303,143
     CONTROL         "List2",IDC_MACHINELIST,"SysListView32",LVS_REPORT | 
                     LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
                     WS_TABSTOP,12,101,293,125
@@ -271,17 +271,15 @@ BEGIN
     CTEXT           "",IDC_MCPULABEL2,232,68,40,10,SS_CENTERIMAGE | 
                     SS_SUNKEN
     CONTROL         137,IDC_STATIC,"Static",SS_BITMAP,276,28,24,18
-    GROUPBOX        "Memory status",IDC_STATIC,13,16,168,68
-    CTEXT           "Available resources",IDC_STATIC,16,28,76,12,
+    GROUPBOX        "Avaiable Resources",IDC_STATIC,13,16,168,68
+    CTEXT           "Windows Resources",IDC_STATIC,16,29,76,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO,96,28,80,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Physical Memory (RAM)",IDC_STATIC,16,42,78,8,
                     SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO,96,28,80,12,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Physical memory status",IDC_STATIC,16,44,76,8,
-                    SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO2,96,44,80,10,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Page file status",IDC_STATIC,16,56,76,8,SS_CENTERIMAGE
-    CTEXT           "",IDC_MEM_RESO3,96,56,80,10,SS_CENTERIMAGE | SS_SUNKEN
-    CTEXT           "Virtual memory status",IDC_STATIC,16,68,76,8,
-                    SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO2,96,42,80,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Page File (Swap)",IDC_STATIC,16,55,76,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO3,96,55,80,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Virtual Memory",IDC_STATIC,16,68,76,8,SS_CENTERIMAGE
     CTEXT           "",IDC_MEM_RESO4,96,68,80,10,SS_CENTERIMAGE | SS_SUNKEN
 END
 
@@ -1687,8 +1685,8 @@ BEGIN
     PUSHBUTTON      "Properties",IDC_PROPERTIES,195,50,55,15
     PUSHBUTTON      "Parameters",IDC_PARAMETERS,195,70,55,15
     PUSHBUTTON      "Swap",IDC_SWAP,195,90,55,15,WS_DISABLED
-    PUSHBUTTON      "Copy",IDC_COPY,195,110,55,15,WS_DISABLED
-    PUSHBUTTON      "Paste",IDC_PASTE,195,130,55,15,WS_DISABLED
+    PUSHBUTTON      "Duplicate",IDC_CLONEMACHINE,195,130,55,15,WS_DISABLED
+    PUSHBUTTON      "Exchange",IDC_EXCHANGE,195,110,55,15,WS_DISABLED
 END
 
 

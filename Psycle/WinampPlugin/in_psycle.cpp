@@ -218,6 +218,7 @@ void stop()
 		CloseHandle(thread_handle);
 		thread_handle = INVALID_HANDLE_VALUE;
 	}
+	_global._pSong->New();
 	mod.outMod->Close();
 	mod.SAVSADeInit();
 
@@ -228,7 +229,7 @@ int play(char *fn)
 	int maxlatency;
 	unsigned long tmp;
 
-//	stop();
+	//	stop();
 
 	OldPsyFile file;
 	if (!file.Open(fn))
