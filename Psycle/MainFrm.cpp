@@ -18,7 +18,7 @@
 #include "gearFilter.h"
 #include "gearGainer.h"
 #include "gearFlanger.h"
-//#include "gearScope.h"
+#include "gearScope.h"
 #include "FrameMachine.h"
 #include "VstEditorDlg.h"
 #include "Helpers.h"
@@ -431,6 +431,7 @@ void CMainFrame::OnClose()
 {
 	if (m_wndView.CheckUnsavedSong("Exit Psycle"))
 	{
+		m_wndView.KillModelessMachines();
 		m_wndView._outputActive = false;
 		Global::pPlayer->Stop();
 		Global::pConfig->_pOutputDriver->Enable(false);
@@ -1404,7 +1405,6 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.FlangerMachineDialog->SetActiveWindow();
 			}
 			break;
-			/*
 		case MACH_SCOPE:
 			if (!m_wndView.ScopeMachineDialog)
 			{
@@ -1415,7 +1415,6 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				m_wndView.ScopeMachineDialog->SetActiveWindow();
 			}
 			break;
-			*/
 		case MACH_PLUGIN:
 			{
 			m_pWndMac[tmac] = new CFrameMachine(0);

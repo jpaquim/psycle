@@ -23,6 +23,7 @@ public:
 	Filter2p* _pMachine;
 	bool doit;
 	BOOL Create();
+	afx_msg void OnCancel();
 
 // Dialog Data
 	//{{AFX_DATA(CGearfilter)
@@ -62,7 +63,6 @@ protected:
 	afx_msg void OnCustomdrawLAS(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderPhase(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeFilter();
-	afx_msg void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -16,6 +16,7 @@ pen alpha
 	that doesn't exist or no write access..)
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
+* when native machines are deleted they should close their windows...
 
 * Machines
 ------------

@@ -23,6 +23,7 @@ public:
 	Sine* _pMachine;
 	bool doit;
 	BOOL Create();
+	afx_msg void OnCancel();
 
 	// Dialog Data
 	//{{AFX_DATA(CGearPsychOsc)
@@ -56,7 +57,6 @@ protected:
 	afx_msg void OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSlider4(NMHDR* pNMHDR, LRESULT* pResult);
 	virtual BOOL OnInitDialog();
-	afx_msg void OnCancel();
 	
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
