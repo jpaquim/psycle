@@ -28,4 +28,4 @@
 #portable_psycle (echo "" ; id --user --name ; echo %{sVv} ; date --universal +"%Z %Y %B %d %A %T" ; cat) >> $CVSROOT/CVSROOT/commitlog.portable_psycle
 #DEFAULT (echo "" ; id --user --name ; echo %{sVv} ; date --universal +"%Z %Y %B %d %A %T" ; cat) >> $CVSROOT/CVSROOT/commitlog
 Psycle (id --user --name ; echo %{sVv} ; cat) | mail johan-boule -s "[cvs.sourceforge.net] [psycle] a commit was done in an old unused directory by $(id --user --name)"
-DEFAULT (id --user --name ; echo %{sVv} ; cat) | mail alkenstein -s "[cvs.sourceforge.net] [psycle] a commit was done by $(id --user --name)"
+DEFAULT (id --user --name ; echo %{sVv} ; cat) | mail sampler -s "[cvs.sourceforge.net] [psycle] a commit was done by $(id --user --name)"
