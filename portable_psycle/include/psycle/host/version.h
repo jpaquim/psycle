@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.5  2005/01/13 23:18:50  johan-boule
+no message
+
 Revision 1.4  2005/01/07 22:27:47  johan-boule
 std::ostringstream.clear missuses fixed (3 occurences)
 
@@ -36,7 +39,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__VERSION__CODEBASE 1
 #define PSYCLE__VERSION__MAJOR 7
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 19 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 20 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
