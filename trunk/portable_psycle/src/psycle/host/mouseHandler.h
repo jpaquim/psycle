@@ -6,6 +6,59 @@ namespace psycle
 	{
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
+			//All right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) coded by sampler.
+
+			SetCapture();
+			
+			switch(viewMode)
+			{
+				
+			case VMMachine: // User is in machine view mode
+				if (Global::_pSong->_machineLock)
+				{
+					return;
+				}
+				smac = -1;
+				smacmode = 0;
+				
+				wiresource = -1;
+				wiredest = -1;
+
+				if (nFlags & MK_RBUTTON)
+				{
+					wiresource = GetMachine(point);
+					wiremove = -1;					
+					if (wiresource != -1)
+					{
+						switch (Global::_pSong->_pMachine[wiresource]->_mode)
+						{
+						case MACHMODE_GENERATOR:
+							wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
+							wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							break;
+						case MACHMODE_FX:
+							wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
+							wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							break;
+
+						case MACHMODE_MASTER:
+							wireSX = Global::_pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
+							wireSY = Global::_pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
+							break;
+						}
+					}
+				}			
+
+				break;			
+
+			}
+			
+		}
+		
+		void CChildView::OnRButtonUp( UINT nFlags, CPoint point )
+		{
+			ReleaseCapture();
+
 			if (viewMode == VMMachine)
 			{
 				// Check for right pressed connection
@@ -13,11 +66,32 @@ namespace psycle
 				
 				if (propMac != -1) 
 				{
-					// Shows machine properties dialog
-					DoMacPropDialog(propMac);
+					if (wiresource == propMac)
+					{						
+						// Shows machine properties dialog
+						DoMacPropDialog(propMac);						
+					}
+					else if (wiresource != -1)
+					{
+						wiredest = GetMachine(point);
+						if ((wiredest !=-1) && (wiredest != wiresource))
+						{
+							AddMacViewUndo();
+							
+							if (!Global::_pSong->InsertConnection(wiresource, wiredest))
+							{
+								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+							}
+
+						}
+						wiresource = -1;
+						wiredest = -1;
+						Repaint();
+					}
 				}
 				else
-				{
+				{					
+					
 					for (int c=0; c<MAX_MACHINES; c++)
 					{
 						Machine *tmac = Global::_pSong->_pMachine[c];
@@ -64,23 +138,12 @@ namespace psycle
 							}
 						}
 					}
+					
 				}
 			}
-			/*
-			else if (viewMode == VMPattern)
-			{
-				editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
-				if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
-				else if ( editcur.track < 0 ) editcur.track = 0;
-
-				int plines = _pSong->patternLines[_ps()];
-				editcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
-				if ( editcur.line >= plines ) {  editcur.line = plines - 1; }
-				else if ( editcur.line < 0 ) editcur.line = 0;
-
-				editcur.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
-			}
-		*/
+			wiresource = -1;
+			wiredest = -1;
+			Repaint();
 		}
 
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -759,11 +822,18 @@ namespace psycle
 					wireDY = point.y;
 					Repaint();
 				}
-						
+								
 				if ((nFlags == (MK_CONTROL | MK_LBUTTON)) && (wiredest != -1))
 				{
 					wireSX = point.x;
 					wireSY = point.y;
+					Repaint();
+				}
+
+				if ((nFlags == MK_RBUTTON) && (wiresource != -1))
+				{
+					wireDX = point.x;
+					wireDY = point.y;
 					Repaint();
 				}
 				
