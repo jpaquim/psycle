@@ -3,6 +3,10 @@
 #if 0
 /*
 $Log$
+Revision 1.15  2005/03/22 01:23:57  johan-boule
+increased version patch number and released alpha build
+(alk's fix for karlkox surround)
+
 Revision 1.14  2005/03/12 02:37:02  johan-boule
 increased version patch number and released alpha build (sampler's keyboard handler fix)
 
@@ -87,7 +91,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 33 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 34 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
