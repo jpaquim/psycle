@@ -96,7 +96,10 @@ CChildView::CChildView()
 	FilterMachineDialog = NULL;
 	GainerMachineDialog = NULL;
 	FlangerMachineDialog = NULL;
-	ScopeMachineDialog = NULL;
+	for (c = 0; c < MAX_SCOPES; c++)
+	{
+		ScopeMachineDialog[c] = NULL;
+	}
 
 	updateMode=0;
 	updatePar=0;

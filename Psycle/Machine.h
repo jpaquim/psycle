@@ -293,6 +293,12 @@ public:
 	float bufR[SCOPE_BUF_SIZE];
 	int num;
 
+	int scope_osc_freq;
+	int scope_osc_rate;
+	int scope_spec_bands;
+	int scope_spec_rate;
+	int scope_mode;
+
 protected:
 	static char* _psName;
 	static CIntMachParam pars[];

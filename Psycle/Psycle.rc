@@ -860,7 +860,7 @@ IDD_MASTERDLG DIALOGEX 0, 0, 338, 123
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle Master and Minimixer"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Decrease Master Volume automatically when Clipping",
                     IDC_AUTODEC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,108,
@@ -1356,15 +1356,18 @@ BEGIN
     PUSHBUTTON      "Remove",IDC_REMOVE,217,7,37,14
 END
 
-IDD_GEAR_SCOPE DIALOGEX 0, 0, 174, 96
+IDD_GEAR_SCOPE DIALOGEX 0, 0, 174, 107
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Pooplog-o-Scope"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,1,83,136,11
     PUSHBUTTON      "Mode",IDC_BUTTON,141,82,30,11
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,1,95,136,11
+    PUSHBUTTON      "Hold",IDC_BUTTON2,141,94,30,11
 END
 
 
