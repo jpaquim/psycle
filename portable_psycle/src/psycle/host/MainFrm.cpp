@@ -205,15 +205,6 @@ namespace psycle
 			m_wndInst.Create(IDD_INSTRUMENT,this);
 			m_wndInst.Validate();
 
-			// Error Logging window
-			/*
-			m_wndLog.pParentMain=this;
-			m_wndLog.Create(IDD_ERRORLOGGER,this);
-			m_wndLog.Validate();
-			*/
-			Global::pLogWindow->Create(IDD_ERRORLOGGER,this);
-			Global::pLogWindow->Validate();
-
 			// Wave Editor Window
 			m_pWndWed=new CWaveEdFrame(this->_pSong,this);
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
