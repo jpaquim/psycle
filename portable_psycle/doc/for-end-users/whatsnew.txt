@@ -18,12 +18,19 @@ Version | Type of release          | By
 1.7.7   | beta                     | alk & bohan & magnus & [JAZ] & logywang & sampler
 ---------------------------------------------------------------------------------------
 
-Versions are composed this way:
-C.M.m.p , where:
-	- C = codebase generation.
-	- M = major version number: if even, stable release, if odd, beta or release candidate for next major version number.
-	- m = minor version number: can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
-	- p = patch number: incremented very often, each cvs commit.
+(copied from version.h)
+/// Versions are composed this way:
+/// C.M.m.p , where:
+/// - C = codebase generation.
+/// - M = major version number:
+///			- if even, then it's a stable release.
+///			- if odd, then it's a beta or release candidate for next major version number.
+/// - m = minor version number:
+///			- if the major number is even (stable release), this minor version number must be 0.
+///			- if the major number is odd (beta or RC), this minor version number can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
+/// - p = patch number:
+///			- if the major version number is even (stable release), then the minor version number is always 0, and this patch number is used for bug fixes.
+///			- if the major version number is odd (beta or RC), incremented very often, each cvs commit.
 
 ----------------------------------------------------------------
 Legend :       +=addition        *=change        !=bug
@@ -33,7 +40,7 @@ cvs commit messages
 -------------------
 
 $Log$
-Revision 1.17  2005/01/23 09:41:25  johan-boule
+Revision 1.18  2005/01/23 10:03:01  johan-boule
 version numbering
 
 Revision 1.16  2004/12/22 22:42:20  johan-boule
