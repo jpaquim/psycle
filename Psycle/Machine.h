@@ -162,6 +162,7 @@ public:
 
 		return TRUE;
 	};
+	virtual void SetSampleRate(int sr) {};
 #if !defined(_WINAMP_PLUGIN_)
 	void SaveFileChunk(RiffFile* pFile);
 	virtual void SaveSpecificChunk(RiffFile* pFile) 

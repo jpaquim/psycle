@@ -543,10 +543,3 @@ void Player::StopRecording(bool bOk)
 }
 #endif // ndef _WINAMP_PLUGIN_
 
-void Player::SetSampleRate(int samprate)
-{
-	// TODO: Add notifications to all machines that the sample Rate has changed
-	// samplerate = samprate;
-	// for (Allmachines) change it
-}
-

@@ -737,10 +737,27 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 #endif // ndef _WINAMP_PLUGIN_
 void Song::SetBPM(int bpm, int tpb, int srate)
 {
+	static int sr = 0;
 	BeatsPerMin = bpm;
 	_ticksPerBeat = tpb;
 	SamplesPerTick = (srate*15*4)/(bpm*tpb);
+
+	// hey if our rate has changed, let everybody know!
+	if (sr != srate)
+	{
+		sr = srate;
+		for (int i=0; i<MAX_MACHINES; i++)
+		{
+			if(_pMachine[i])
+			{
+				_pMachine[i]->SetSampleRate(srate);
+			}
+		}
+	}
 }
+
+
+
 int Song::GetNumPatternsUsed()
 {
 	int rval=0;
