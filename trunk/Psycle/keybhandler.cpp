@@ -1385,14 +1385,14 @@ void CChildView::BlockParamInterpolate()
 			*(toffset+blockSel.start.track*5+blockSel.end.line*MULTIPLY+4);
 		const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
 		const unsigned char comd = *(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3);
+			int displace2=(blockSel.start.track*5)+((blockSel.start.line+1)*MULTIPLY);
 
 		for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
 		{
-			const int displace2=blockSel.start.track*5+l*MULTIPLY;
-			
-			const int val=(int)(initvalue+addvalue*(l-blockSel.start.line));
-			toffset[displace+3]=static_cast<unsigned char>(val/0x100);
-			toffset[displace+4]=static_cast<unsigned char>(val%0x100);
+			int val=(int)(initvalue+addvalue*(l-blockSel.start.line));
+			toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
+			toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
+			displace2+=MULTIPLY;
 		}
 		drawTrackStart=blockSel.start.track;
 		drawTrackEnd=blockSel.end.track;

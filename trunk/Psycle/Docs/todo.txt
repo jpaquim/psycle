@@ -4,10 +4,9 @@
 -longer sequences (256)
 -more tracks (64)
 -store state of follow song toggle
-*screen flashes switching from machine to pattern view
-*pattern display does not update properly while advancing through sequence when follow mode is on and song playing
+*screen flashes switching from machine to pattern view (new)
+*pattern display does not update properly while advancing through sequence when follow mode is on and song playing (new)
 *make master machine update display if it decides to change volume
-*<_sue_> hi poop......latest build youve sended me doesnt do control + i (interpolation)
 *dragging machines is not always the greatest pleasure of all.
 *pattern view does not refresh when skin dlg presets have changed.
 !DO NOT LOAD LIST VST list & database
