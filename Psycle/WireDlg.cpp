@@ -166,7 +166,7 @@ void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 
 	_pDstMachine->SetWireVolume(_dstWireIndex, invol );
 
-	m_pParent->SetFocus();	
+//	m_pParent->SetFocus();	
 	*pResult = 0;
 }
 
@@ -822,7 +822,7 @@ void CWireDlg::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult)
 		scope_spec_bands = m_slider.GetPos();
 		break;
 	}
-	m_pParent->SetFocus();	
+//	m_pParent->SetFocus();	
 	*pResult = 0;
 }
 
@@ -871,7 +871,7 @@ void CWireDlg::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 		break;
 	}
-	m_pParent->SetFocus();	
+//	m_pParent->SetFocus();	
 	*pResult = 0;
 }
 
@@ -883,7 +883,7 @@ void CWireDlg::OnMode()
 		scope_mode = 0;
 	}
 	SetMode();
-	m_pParent->SetFocus();	
+//	m_pParent->SetFocus();	
 }
 
 void CWireDlg::OnHold()
@@ -915,7 +915,7 @@ void CWireDlg::OnHold()
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
 	}
-	m_pParent->SetFocus();	
+//	m_pParent->SetFocus();	
 }
 
 void CWireDlg::SetMode()
