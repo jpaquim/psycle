@@ -45,12 +45,13 @@ typedef struct {
 }
 biquad;
 
-extern smp_type BiQuad(smp_type sample, biquad * b);
-extern void BiQuad_new(int type, smp_type dbGain, /* gain of filter */
-                          smp_type freq,             /* center frequency */
-                          smp_type srate,            /* sampling rate */
-                          smp_type bandwidth,        /* bandwidth in octaves */
-						  biquad *bq);
+smp_type BiQuad(smp_type sample, biquad * b);
+void BiQuad_new(int type, smp_type dbGain, /* gain of filter */
+				smp_type freq,             /* center frequency */
+				smp_type srate,            /* sampling rate */
+				smp_type bandwidth,        /* bandwidth in octaves */
+				biquad *bq,
+				bool resetmemory=true);
 
 /* filter types */
 enum {
@@ -62,6 +63,16 @@ enum {
     LSH, /* Low shelf filter */
     HSH /* High shelf filter */
 };
+
+// Modification with denormalization and memory NOT reset by [JAZ] 
+
+smp_type id = smp_type(1.0E-20);
+static inline smp_type Undenormalize(smp_type psamp)
+{
+	id = - id;
+	return psamp + id;
+}
+
 
 /* Below this would be biquad.c */
 /* Computes a BiQuad filter on a sample */
@@ -79,14 +90,14 @@ smp_type BiQuad(smp_type sample, biquad * b)
 
     /* shift y1 to y2, result to y1 */
     b->y2 = b->y1;
-    b->y1 = result;
+    b->y1 = Undenormalize(result);
 
     return result;
 }
 
 /* sets up a BiQuad Filter */
 void BiQuad_new(int type, smp_type dbGain, smp_type freq,
-smp_type srate, smp_type bandwidth, biquad *bq)
+smp_type srate, smp_type bandwidth, biquad *bq,bool reset_memory)
 {
     smp_type A, omega, sn, cs, alpha, beta;
     smp_type a0, a1, a2, b0, b1, b2;
@@ -168,8 +179,11 @@ smp_type srate, smp_type bandwidth, biquad *bq)
     bq->a3 = a1 /a0;
     bq->a4 = a2 /a0;
 
-    /* zero initial samples */
-    bq->x1 = bq->x2 = 0;
-    bq->y1 = bq->y2 = 0;
+	if ( reset_memory)
+	{
+		/* zero initial samples */
+		bq->x1 = bq->x2 = 0;
+		bq->y1 = bq->y2 = 0;
+	}
 }
 

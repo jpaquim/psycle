@@ -8,23 +8,33 @@
 #include "..\..\machineinterface.h"
 #include "biquad.h"
 
-
+#define VERNUM "v1.2"
 
 
 CMachineParameter const paraLength = 
 { 
-	"Length",
-	"Length",										// description
+	"Cutoff Frequency",
+	"Cutoff for HighPass Filter",					// description
 	0,												// MinValue	
 	1000,											// MaxValue
 	MPF_STATE,										// Flags
 	400,
 };
+CMachineParameter const paraMode = 
+{ 
+	"Work Mode",
+	"Working model for the surround",				// description
+	0,												// MinValue	
+	1,												// MaxValue
+	MPF_STATE,										// Flags
+	0,
+};
 
 CMachineParameter const *pParameters[] = 
 { 
 	// global
-	&paraLength
+	&paraLength,
+	&paraMode
 };
 
 
@@ -32,12 +42,12 @@ CMachineInfo const MacInfo =
 {
 	MI_VERSION,	
 	EFFECT,									// flags
-	1,										// numParameters
+	2,										// numParameters
 	pParameters,							// Pointer to parameters
 #ifdef _DEBUG
-	"KarLKoX Surround (Debug build)",		// name
+	"KarLKoX Surround (Debug build)" VERNUM,		// name
 #else
-	"KarLKoX Surround",						// name
+	"KarLKoX Surround" VERNUM,						// name
 #endif
 	"Surround",								// short name
 	"Saïd Bougribate",						// author
@@ -58,10 +68,11 @@ public:
 	virtual bool DescribeValue(char* txt,int const param, int const value);
 	virtual void Command();
 	virtual void ParameterTweak(int par, int val);
-
+	void Setup(bool clearfiltermemory);
+	
 private:
 	biquad bqleft, bqright;
-
+	int smprate;
 
 };
 
@@ -69,9 +80,8 @@ DLL_EXPORTS
 
 mi::mi()
 {
-
 	// The constructor zone
-	Vals = new int[1];
+	Vals = new int[2];
 }
 
 mi::~mi()
@@ -82,15 +92,26 @@ mi::~mi()
 
 void mi::Init()
 {
-// Initialize your stuff here
-
-
+	Setup(true);
 }
 
+void mi::Setup(bool clearfiltermemory)
+{
+	smprate=pCB->GetSamplingRate();
+	switch( Vals[1]  )
+	{
+	case 0:
+		BiQuad_new(LPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,clearfiltermemory);
+		break;
+	case 1:
+		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,clearfiltermemory);
+		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,clearfiltermemory);
+		break;
+	}
+}
 void mi::SequencerTick()
 {
-// Called on each tick while sequencer is playing
-
+	if (pCB->GetSamplingRate() != smprate ) Setup(false);
 }
 
 void mi::Command()
@@ -98,63 +119,73 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you to show your custom window here
 // or an about button
-pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!","-=KarLKoX=- [Surround]",0);
+	pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!\n\n Some modifications made by [JAZ] on Dec 2002\n Version" VERNUM,"-=KarLKoX=- [Surround]",0);
 }
 
 void mi::ParameterTweak(int par, int val)
 {
-	Vals[par]=val;
-
-	if (Vals[par] == 0)
-		Vals[par] = 1;
-	else if (Vals[par] == 1000)
-		Vals[par] = 999;
-	BiQuad_new(LPF, 1.0, (double)Vals[par], (double)(pCB->GetSamplingRate()), 1, &bqleft);
-	BiQuad_new(LPF, 1.0, (double)Vals[par], (double)(pCB->GetSamplingRate()), 1, &bqright);	
-
-
+	Vals[par] = val;
+	Setup(false);
 }
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-		
 	float xlb, xrb, xlt, xrt;
-
 	// over all samples 
-	do
+	switch(Vals[1])
+	{
+	case 0:
+		do
 		{
-		float xl = *psamplesleft;
-		float xr = *psamplesright;
+			float xl = *psamplesleft;
 
-		// extract base 
-		xlb = (float)BiQuad(xl, &bqleft);
-		xrb = (float)BiQuad(xr, &bqright);
+			*psamplesleft  = -xl + 2*(float)BiQuad(xl, &bqleft); //BQ is a Lowpass
 
-		// extract treble 
-		xlt = xl - xlb;
-		xrt = xr - xrb;
-		// phase left treble and recombine 
-		xl = -xlt+xlb;
-		xr = xrt+xrb;
-		// store 
-		if (xl < -32767) xl = -32767;
-		if (xl > 32767) xl = 32767;
-		if (xr < -32767) xr = -32767;
-		if (xr > 32767) xr = 32767;
-		
-		*psamplesleft = xl;
-		*psamplesright = xr;
+			++psamplesleft;
 
-		++psamplesleft;
-		++psamplesright;
+		} while(--numsamples);
+		break;
+	case 1:
+		do
+		{
+			float xl = *psamplesleft;
+			float xr = *psamplesleft;
+			
+			float xtl = (float)BiQuad(xl, &bqleft); // BQ is a HighPass
+			float xtr = (float)BiQuad(xl, &bqright); // BQ is a HighPass
 
-	} while(--numsamples);
-
+			*psamplesleft  = xl+xtl*0.5-xtr*0.5;
+			*psamplesright  = xr-xtl*0.5+xtr*0.5;
+			
+			++psamplesleft;
+			++psamplesright;
+			
+		} while(--numsamples);
+		break;
+	}
 }
 
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
+	switch (param)
+	{
+	case 0:
+		sprintf(txt,"%i Hz",value);
+		return true;
+	case 1:
+		switch(value)
+		{
+		case 0:
+			strcpy(txt,"Old Mode");
+			return true;
+		case 1:
+			strcpy(txt,"New Mode");
+			return true;
+		}
+		break;
+	}
 	return false;
 }
+
