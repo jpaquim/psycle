@@ -7,23 +7,24 @@ void CChildView::DrawMachineVumeters(CDC *devc)
 		return;
 	}
 	// Draw machine boxes
-	for (int c=1; c<MAX_MACHINES; c++)
+	for (int c=0; c<MAX_MACHINES-1; c++)
 	{
-		if (_pSong->_machineActive[c])
+		Machine* pMac = _pSong->_pMachine[c];
+		if (pMac)
 		{
-			_pSong->_pMachines[c]->_volumeMaxCounterLife--;
-			if ((_pSong->_pMachines[c]->_volumeDisplay > _pSong->_pMachines[c]->_volumeMaxDisplay)
-				|| (_pSong->_pMachines[c]->_volumeMaxCounterLife <= 0))
+			pMac->_volumeMaxCounterLife--;
+			if ((pMac->_volumeDisplay > pMac->_volumeMaxDisplay)
+				|| (pMac->_volumeMaxCounterLife <= 0))
 			{
-				_pSong->_pMachines[c]->_volumeMaxDisplay = _pSong->_pMachines[c]->_volumeDisplay-1;
-				_pSong->_pMachines[c]->_volumeMaxCounterLife = 60;
+				pMac->_volumeMaxDisplay = pMac->_volumeDisplay-1;
+				pMac->_volumeMaxCounterLife = 60;
 			}
-			DrawMachineVol(_pSong->_pMachines[c]->_x,
-						   _pSong->_pMachines[c]->_y,
+			DrawMachineVol(pMac->_x,
+						   pMac->_y,
 						   devc, 
-						   _pSong->_pMachines[c]->_volumeDisplay, 
-						   _pSong->_pMachines[c]->_volumeMaxDisplay,
-						   _pSong->_pMachines[c]->_mode);
+						   pMac->_volumeDisplay, 
+						   pMac->_volumeMaxDisplay,
+						   pMac->_mode);
 		}
 	}
 }
@@ -50,9 +51,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		// Draw wire [connections]
 		for(int c=0;c<MAX_MACHINES;c++)
 		{
-			if(_pSong->_machineActive[c])
+			Machine *tmac=_pSong->_pMachine[c];
+			if(tmac)
 			{
-				Machine *tmac=_pSong->_pMachines[c];
 				int oriX;
 				int oriY;
 				switch (tmac->_mode)
@@ -77,24 +78,28 @@ void CChildView::DrawMachineEditor(CDC *devc)
 				{
 					if (tmac->_connection[w])
 					{
-						int desX;
-						int desY;
-						switch (_pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_mode)
+						int desX = 0;
+						int desY = 0;
+						Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
+						if (pout)
 						{
-						case MACHMODE_GENERATOR:
-							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sGenerator.width/2);
-							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sGenerator.height/2);
-							break;
-						case MACHMODE_FX:
-						case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sEffect.width/2);
-							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sEffect.height/2);
-							break;
+							switch (pout->_mode)
+							{
+							case MACHMODE_GENERATOR:
+								desX = pout->_x+(MachineCoords.sGenerator.width/2);
+								desY = pout->_y+(MachineCoords.sGenerator.height/2);
+								break;
+							case MACHMODE_FX:
+							case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+								desX = pout->_x+(MachineCoords.sEffect.width/2);
+								desY = pout->_y+(MachineCoords.sEffect.height/2);
+								break;
 
-						case MACHMODE_MASTER:
-							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sMaster.width/2);
-							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sMaster.height/2);
-							break;
+							case MACHMODE_MASTER:
+								desX = pout->_x+(MachineCoords.sMaster.width/2);
+								desY = pout->_y+(MachineCoords.sMaster.height/2);
+								break;
+							}
 						}
 						
 						int const f1 = (desX+oriX)/2;
@@ -146,9 +151,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		// Draw wire [connections]
 		for(int c=0;c<MAX_MACHINES;c++)
 		{
-			if(_pSong->_machineActive[c])
+			Machine *tmac=_pSong->_pMachine[c];
+			if(tmac)
 			{
-				Machine *tmac=_pSong->_pMachines[c];
 				int oriX;
 				int oriY;
 				switch (tmac->_mode)
@@ -173,24 +178,28 @@ void CChildView::DrawMachineEditor(CDC *devc)
 				{
 					if (tmac->_connection[w])
 					{
-						int desX;
-						int desY;
-						switch (_pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_mode)
+						int desX = 0;
+						int desY = 0;
+						Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
+						if (pout)
 						{
-						case MACHMODE_GENERATOR:
-							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sGenerator.width/2);
-							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sGenerator.height/2);
-							break;
-						case MACHMODE_FX:
-						case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sEffect.width/2);
-							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sEffect.height/2);
-							break;
+							switch (pout->_mode)
+							{
+							case MACHMODE_GENERATOR:
+								desX = pout->_x+(MachineCoords.sGenerator.width/2);
+								desY = pout->_y+(MachineCoords.sGenerator.height/2);
+								break;
+							case MACHMODE_FX:
+							case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+								desX = pout->_x+(MachineCoords.sEffect.width/2);
+								desY = pout->_y+(MachineCoords.sEffect.height/2);
+								break;
 
-						case MACHMODE_MASTER:
-							desX = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_x+(MachineCoords.sMaster.width/2);
-							desY = _pSong->_pMachines[_pSong->_pMachines[c]->_outputMachines[w]]->_y+(MachineCoords.sMaster.height/2);
-							break;
+							case MACHMODE_MASTER:
+								desX = pout->_x+(MachineCoords.sMaster.width/2);
+								desY = pout->_y+(MachineCoords.sMaster.height/2);
+								break;
+							}
 						}
 						
 						int const f1 = (desX+oriX)/2;
@@ -232,9 +241,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 	// Draw machine boxes
 	for (int c=0; c<MAX_MACHINES; c++)
 	{
-		if(_pSong->_machineActive[c])
+		if(_pSong->_pMachine[c])
 		{
-			DrawMachine(_pSong->_pMachines[c],c , devc);
+			DrawMachine(_pSong->_pMachine[c],c , devc);
 		}// Machine exist
 	}
 
@@ -876,26 +885,27 @@ int CChildView::GetMachine(CPoint point)
 	
 	for (int c=MAX_MACHINES-1; c>=0; c--)
 	{
-		if (Global::_pSong->_machineActive[c])
+		Machine* pMac = Global::_pSong->_pMachine[c];
+		if (pMac)
 		{
-			int x1 = Global::_pSong->_pMachines[c]->_x;
-			int y1 = Global::_pSong->_pMachines[c]->_y;
+			int x1 = pMac->_x;
+			int y1 = pMac->_y;
 			int x2,y2;
-			switch (Global::_pSong->_pMachines[c]->_mode)
+			switch (pMac->_mode)
 			{
 			case MACHMODE_GENERATOR:
-				x2 = Global::_pSong->_pMachines[c]->_x+MachineCoords.sGenerator.width;
-				y2 = Global::_pSong->_pMachines[c]->_y+MachineCoords.sGenerator.height;
+				x2 = pMac->_x+MachineCoords.sGenerator.width;
+				y2 = pMac->_y+MachineCoords.sGenerator.height;
 				break;
 			case MACHMODE_FX:
 			case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-				x2 = Global::_pSong->_pMachines[c]->_x+MachineCoords.sEffect.width;
-				y2 = Global::_pSong->_pMachines[c]->_y+MachineCoords.sEffect.height;
+				x2 = pMac->_x+MachineCoords.sEffect.width;
+				y2 = pMac->_y+MachineCoords.sEffect.height;
 				break;
 
 			case MACHMODE_MASTER:
-				x2 = Global::_pSong->_pMachines[c]->_x+MachineCoords.sMaster.width;
-				y2 = Global::_pSong->_pMachines[c]->_y+MachineCoords.sMaster.height;
+				x2 = pMac->_x+MachineCoords.sMaster.width;
+				y2 = pMac->_y+MachineCoords.sMaster.height;
 				break;
 			}
 			

@@ -632,23 +632,20 @@ void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWOR
 				case 0x0C:
 				{
 					// program change -> map generator/effect to channel
-					int newBus;
-					if( program < 64 )
-					{
-						// map to generator
-						newBus = Global::_pSong->busMachine[ program ];
-					}
-					else
-					{
-						// map to effect
-						newBus = Global::_pSong->busEffect[ ( program & (MAX_BUSES - 1)) ];
-					}
 
 					// machine active?
-					if( newBus < MAX_MACHINES && Global::_pSong->_machineActive[ newBus ] )
-					{
-						// ok, map
-						SetGenMap( channel, newBus );
+					if( program < MAX_MACHINES )
+					{  
+						if (Global::_pSong->_pMachine[ program ] )
+						{
+							// ok, map
+							SetGenMap( channel, program );
+						}
+						else
+						{
+							// machine not active, can't map!
+							SetGenMap( channel, -1 );
+						}
 					}
 					else
 					{
@@ -891,7 +888,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWOR
 			}
 
 			// invalid machine/channel?
-			if( !Global::_pSong->_machineActive[ busMachine ] && note != 254 )
+			if( !Global::_pSong->_pMachine[ busMachine ] && note != 254 )
 			{
 				return;
 			}
@@ -1818,86 +1815,81 @@ TRACE( "*Lost Event*\n" );
 		int data1 = m_midiBuffer[ m_patOut ].entry._cmd;
 		int data2 = m_midiBuffer[ m_patOut ].entry._parameter;
 
+		// get the machine pointer
+		Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
 		// make sure machine is still valid
-		if( Global::_pSong->_machineActive[ machine ] || note == 254 )
+		if( pMachine || note == 254 )
 		{
-			// get the machine pointer
-			Plugin * pMachine = (Plugin*) Global::_pSong->_pMachines[ machine ];
-
-			if( pMachine || note == 254 )
+			// switch on note code
+			switch( note )
 			{
-				// switch on note code
-				switch( note )
+				// TWEAK
+				case cdefTweakS:
+					// *********
+					// midi doesn't get a tweak slide yet
+				case cdefTweakM:
 				{
-					// TWEAK
-					case cdefTweakS:
-						// *********
-						// midi doesn't get a tweak slide yet
-					case cdefTweakM:
+					int min, max;
+
+					// any info
+					if( pMachine->_type == MACH_PLUGIN )
 					{
-						int min, max;
-
-						// any info
-						if( pMachine->_type == MACH_PLUGIN )
+						// make sure parameter in range of machine
+						if( data1 > (pMachine->GetInfo()->numParameters-1) )
 						{
-							// make sure parameter in range of machine
-							if( data1 > (pMachine->GetInfo()->numParameters-1) )
-							{
-								break;
-							}
-
-							// get range
-							min = pMachine->GetInfo()->Parameters[ data1 ]->MinValue;
-							max = pMachine->GetInfo()->Parameters[ data1 ]->MaxValue;
-						}
-						else
-						{
-							// assume 0000..FFFF is the range (VST)
-							min = 0;
-							max = 0xFFFF;
+							break;
 						}
 
-						// create actual value
-						int value = min + f2i( (max-min) * (data2/127.f) );
-
-						// assign
-						m_midiBuffer[ m_patOut ].entry._inst = data1;
-						m_midiBuffer[ m_patOut ].entry._cmd = value / 256;
-						m_midiBuffer[ m_patOut ].entry._parameter = value % 256;
-
-						// and tweak!
-						pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
+						// get range
+						min = pMachine->GetInfo()->Parameters[ data1 ]->MinValue;
+						max = pMachine->GetInfo()->Parameters[ data1 ]->MaxValue;
 					}
-					break;
-
-
-					// SYNC TICK
-					case 254:
+					else
 					{
-						// simulate a tracker 'tick' (i.e. a line change for all machines)
-						for (int tc=0; tc<MAX_MACHINES; tc++)
+						// assume 0000..FFFF is the range (VST)
+						min = 0;
+						max = 0xFFFF;
+					}
+
+					// create actual value
+					int value = min + f2i( (max-min) * (data2/127.f) );
+
+					// assign
+					m_midiBuffer[ m_patOut ].entry._inst = data1;
+					m_midiBuffer[ m_patOut ].entry._cmd = value / 256;
+					m_midiBuffer[ m_patOut ].entry._parameter = value % 256;
+
+					// and tweak!
+					pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
+				}
+				break;
+
+
+				// SYNC TICK
+				case 254:
+				{
+					// simulate a tracker 'tick' (i.e. a line change for all machines)
+					for (int tc=0; tc<MAX_MACHINES; tc++)
+					{
+						if( Global::_pSong->_pMachine[tc])
 						{
-							if( Global::_pSong->_machineActive[tc])
-							{
-								Global::_pSong->_pMachines[tc]->Tick();
-							}
+							Global::_pSong->_pMachine[tc]->Tick();
 						}
-
-						m_stats.flags |= FSTAT_SYNC_TICK;
 					}
-					break;
-					
-					// NORMAL NOTE
-					default:
-					{
-						// normal note tick
-						pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
-					}
-					break;
 
-				}	// end of note switch
-			}
-		
+					m_stats.flags |= FSTAT_SYNC_TICK;
+				}
+				break;
+				
+				// NORMAL NOTE
+				default:
+				{
+					// normal note tick
+					pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
+				}
+				break;
+
+			}	// end of note switch
 		}	// end of if 'is machine still active?'
 
 		// advance OUT pointer
@@ -1909,6 +1901,6 @@ TRACE( "*Lost Event*\n" );
 
 	// Master machine initiates work
 	//
-	Global::_pSong->_pMachines[ 0 ]->Work( amount );
+	Global::_pSong->_pMachine[MASTER_INDEX]->Work( amount );
 	return true;
 }

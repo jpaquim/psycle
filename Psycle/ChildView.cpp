@@ -349,32 +349,32 @@ void CChildView::OnTimer( UINT nIDEvent )
 		CSingleLock lock(&_pSong->door,TRUE);
 
 		pParentMain->UpdateVumeters(
-//			((Master*)Global::_pSong->_pMachines[0])->_LMAX,
-//			((Master*)Global::_pSong->_pMachines[0])->_RMAX,
-			((Master*)Global::_pSong->_pMachines[0])->_lMax,
-			((Master*)Global::_pSong->_pMachines[0])->_rMax,
+//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
+//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
+			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
+			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
 			Global::pConfig->vu1,
 			Global::pConfig->vu2,
 			Global::pConfig->vu3,
-			((Master*)Global::_pSong->_pMachines[0])->_clip);
+			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip);
 
 		if ( MasterMachineDialog )
 		{
-			if (!--((Master*)Global::_pSong->_pMachines[0])->peaktime) 
+			if (!--((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime) 
 			{
 				char peak[10];
-				sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachines[0])->currentpeak)-90);
+				sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak)-90);
 				MasterMachineDialog->m_masterpeak.SetWindowText(peak);
-//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachines[0])->_outDry);
+//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 
-				float val = sqrtf(((Master*)Global::_pSong->_pMachines[0])->_outDry*64.0f);
+				float val = sqrtf(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry*64.0f);
 				MasterMachineDialog->m_slidermaster.SetPos(256-f2i(val));
 				
-				((Master*)Global::_pSong->_pMachines[0])->peaktime=25;
-				((Master*)Global::_pSong->_pMachines[0])->currentpeak=0.0f;
+				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
+				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
 			}
 		}
-		((Master*)Global::_pSong->_pMachines[0])->vuupdated = true;
+		((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 		
 		if (viewMode == VMMachine)
 		{
@@ -385,21 +385,24 @@ void CChildView::OnTimer( UINT nIDEvent )
 		{
 			for(int c=0; c<MAX_MACHINES; c++)
 			{
-				if (pParentMain->isguiopen[c])
+				if (_pSong->_pMachine[c])
 				{
-					if ( _pSong->_pMachines[c]->_type == MACH_PLUGIN )
+					if (pParentMain->isguiopen[c])
 					{
-						pParentMain->m_pWndMac[c]->Invalidate(false);
+						if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
+						{
+							pParentMain->m_pWndMac[c]->Invalidate(false);
+						}
+						else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
+								_pSong->_pMachine[c]->_type == MACH_VSTFX )
+						{
+							((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
+						}
+	/*					else
+						{
+						}
+	*/
 					}
-					else if ( _pSong->_pMachines[c]->_type == MACH_VST ||
-							_pSong->_pMachines[c]->_type == MACH_VSTFX )
-					{
-						((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
-					}
-/*					else
-					{
-					}
-*/
 				}
 			}
 			Global::_pSong->Tweaker = false;
@@ -434,6 +437,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 	}
 	if (nIDEvent == 159 && !Global::pPlayer->_recording)
 	{
+		return;
 		CString filepath = Global::pConfig->GetInitialSongDir();
 		filepath += "\\autosave.psy";
 		OldPsyFile file;
@@ -549,19 +553,19 @@ void CChildView::OnPaint()
 				break;
 			case DMMacRefresh:
 //				ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
-				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
+				DrawMachine(Global::_pSong->_pMachine[updatePar], updatePar, &bufDC);
 				DrawMachineVumeters(&bufDC);
 				updateMode=0;
 				break;
 			case DMAllMacsRefresh:
 				for (int i=0;i<MAX_MACHINES;i++)
 				{
-					if (_pSong->_machineActive[i])
+					if (_pSong->_pMachine[i])
 					{
-						DrawMachine(Global::_pSong->_pMachines[i], i, &bufDC);
-						DrawMachineVumeters(&bufDC);
+						DrawMachine(Global::_pSong->_pMachine[i], i, &bufDC);
 					}
 				}
+				DrawMachineVumeters(&bufDC);
 				break;
 			}
 		}
@@ -587,19 +591,19 @@ void CChildView::OnPaint()
 				break;
 			case DMMacRefresh:
 //				ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
-				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
+				DrawMachine(Global::_pSong->_pMachine[updatePar], updatePar, &dc);
 				DrawMachineVumeters(&dc);
 				updateMode=0;
 				break;
 			case DMAllMacsRefresh:
 				for (int i=0;i<MAX_MACHINES;i++)
 				{
-					if (_pSong->_machineActive[i]) 
+					if (_pSong->_pMachine[i]) 
 					{
-						DrawMachine(Global::_pSong->_pMachines[i], i, &dc);
-						DrawMachineVumeters(&dc);
+						DrawMachine(Global::_pSong->_pMachine[i], i, &dc);
 					}
 				}
+				DrawMachineVumeters(&dc);
 				break;
 			}
 		}
@@ -665,6 +669,8 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 
 BOOL CChildView::OnFileSave(UINT id) 
 {
+	MessageBox("Saving Disabled");
+	return false;
 	BOOL bResult = TRUE;
 	if ( Global::_pSong->_saved )
 	{
@@ -717,6 +723,8 @@ BOOL CChildView::OnFileSave(UINT id)
 
 BOOL CChildView::OnFileSavesong(UINT id) 
 {
+	MessageBox("Saving Disabled");
+	return false;
 	OPENFILENAME ofn;       // common dialog box structure
 	CString ifile = Global::_pSong->fileName;
 	CString if2 = ifile.SpanExcluding("\\/:*\"<>|");
@@ -890,6 +898,7 @@ void CChildView::OnFileSaveaudio()
 
 BOOL CChildView::CheckUnsavedSong(char* szTitle)
 {
+	return true;
 	// that method does not take machine changes into account
 	/*
 	BOOL bChecked = TRUE;
@@ -1146,9 +1155,9 @@ void CChildView::OnAutostop()
 		Global::pConfig->autoStopMachines = false;
 		for (int c=0; c<MAX_MACHINES; c++)
 		{
-			if (Global::_pSong->_machineActive[c])
+			if (Global::_pSong->_pMachine[c])
 			{
-				Global::_pSong->_pMachines[c]->_stopped=false;
+				Global::_pSong->_pMachine[c]->_stopped=false;
 			}
 		}
 	}
@@ -1271,16 +1280,16 @@ void CChildView::NewMachine(int x, int y, int mac)
 		{
 			if ((mac >= MAX_BUSES) && !(dlg.OutBus))
 			{
-				fb = mac - MAX_BUSES;
+				fb = mac;
 				xs = MachineCoords.sEffect.width;
 				ys = MachineCoords.sEffect.height;
 				// delete machine if it already exists
-				if (Global::_pSong->busEffect[fb] != 255)
+				if (Global::_pSong->_pMachine[fb])
 				{
-					x = Global::_pSong->_pMachines[Global::_pSong->busEffect[fb]]->_x;
-					y = Global::_pSong->_pMachines[Global::_pSong->busEffect[fb]]->_y;
-					pParentMain->CloseMacGui(Global::_pSong->busEffect[fb]);
-					Global::_pSong->DestroyMachine(Global::_pSong->busEffect[fb]);
+					x = Global::_pSong->_pMachine[fb]->_x;
+					y = Global::_pSong->_pMachine[fb]->_y;
+					pParentMain->CloseMacGui(fb);
+					Global::_pSong->DestroyMachine(fb);
 				}
 			}
 			else if ((mac < MAX_BUSES) && (dlg.OutBus))
@@ -1289,12 +1298,12 @@ void CChildView::NewMachine(int x, int y, int mac)
 				xs = MachineCoords.sGenerator.width;
 				ys = MachineCoords.sGenerator.height;
 				// delete machine if it already exists
-				if (Global::_pSong->busMachine[fb] != 255)
+				if (Global::_pSong->_pMachine[fb])
 				{
-					pParentMain->CloseMacGui(Global::_pSong->busMachine[fb]);
-					x = Global::_pSong->_pMachines[Global::_pSong->busMachine[fb]]->_x;
-					y = Global::_pSong->_pMachines[Global::_pSong->busMachine[fb]]->_y;
-					Global::_pSong->DestroyMachine(Global::_pSong->busMachine[fb]);
+					x = Global::_pSong->_pMachine[fb]->_x;
+					y = Global::_pSong->_pMachine[fb]->_y;
+					pParentMain->CloseMacGui(fb);
+					Global::_pSong->DestroyMachine(fb);
 				}
 			}
 			else
@@ -1315,10 +1324,10 @@ void CChildView::NewMachine(int x, int y, int mac)
 				bCovered = FALSE;
 				for (int i=0; i < MAX_MACHINES; i++)
 				{
-					if (Global::_pSong->_machineActive[i])
+					if (Global::_pSong->_pMachine[i])
 					{
-						if ((abs(Global::_pSong->_pMachines[i]->_x - x) < 32) &&
-							(abs(Global::_pSong->_pMachines[i]->_y - y) < 32))
+						if ((abs(Global::_pSong->_pMachine[i]->_x - x) < 32) &&
+							(abs(Global::_pSong->_pMachine[i]->_y - y) < 32))
 						{
 							bCovered = TRUE;
 							i = MAX_MACHINES;
@@ -1337,7 +1346,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 		Global::pConfig->_pMidiInput->Close();
 		*/
 
-		if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll))
+		if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll,fb))
 		{
 			MessageBox("Machine Creation Failed","Error!",MB_OK);
 		}
@@ -1346,29 +1355,22 @@ void CChildView::NewMachine(int x, int y, int mac)
 			if ( dlg.OutBus)
 			{
 				Global::_pSong->seqBus = fb;
-				Global::_pSong->busMachine[fb] = Global::_lbc;
-
-				if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
-					_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
-				{
-					((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb;
-				}
 			}
+			/*
 			else
 			{
 //				Global::_pSong->seqBus = fb+MAX_BUSES;
-				Global::_pSong->busEffect[fb] = Global::_lbc;
 
-				if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
-					_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
-				{
-					((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb+MAX_BUSES;
-				}
+			}
+			*/
+			if ( _pSong->_pMachine[fb]->_type == MACH_VST ||
+				_pSong->_pMachine[fb]->_type == MACH_VSTFX )
+			{
+				((VSTPlugin*)(_pSong->_pMachine[fb]))->macindex = fb;
 			}
 			
 			pParentMain->UpdateComboGen();
 			Repaint(DMAllMacsRefresh);
-//			updatePar = Global::_lbc;
 //			Repaint(DMMacRefresh); // Seems that this doesn't always work (multiple calls to Repaint?)
 		}
 		
@@ -1709,10 +1711,9 @@ void CChildView::OnFileImportXmfile()
 		}
 
 		// build sampler
-		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "");
+		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",1);
 		_pSong->InsertConnection(1,0);
-		_pSong->seqBus = _pSong->GetFreeBus();
-		_pSong->busMachine[_pSong->seqBus] = Global::_lbc;
+		_pSong->seqBus = 1;
 
 		sprintf(buffer,"%s\n\n%s\n\n%s"
 			,Global::_pSong->Name
@@ -1806,10 +1807,9 @@ void CChildView::OnFileImportItfile()
 		}
 
 		// build sampler
-		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "");
+		_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",1);
 		_pSong->InsertConnection(1,0);
-		_pSong->seqBus = _pSong->GetFreeBus();
-		_pSong->busMachine[_pSong->seqBus] = Global::_lbc;
+		_pSong->seqBus = 1;
 
 		sprintf(buffer,"%s\n\n%s\n\n%s"
 			,Global::_pSong->Name
@@ -3399,7 +3399,7 @@ void CChildView::DoMacPropDialog(int propMac)
 {
 	CMacProp dlg;
 	dlg.m_view=this;
-	dlg.pMachine = Global::_pSong->_pMachines[propMac];
+	dlg.pMachine = Global::_pSong->_pMachine[propMac];
 	dlg.pSong = Global::_pSong;
 	dlg.thisMac = propMac;
 	

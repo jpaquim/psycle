@@ -20,7 +20,6 @@ class Resampler;
 		static Player* pPlayer;
 		static Configuration* pConfig;
 		static Resampler* pResampler;
-		static int _lbc;
 	};
 
 #else
@@ -36,7 +35,6 @@ class Resampler;
 		static unsigned int _cpuHz;
 		static Song* _pSong;
 		static Player* pPlayer;
-		static int _lbc;
 		static Configuration* pConfig;
 		static Resampler* pResampler;
 		static InputHandler* pInputHandler;

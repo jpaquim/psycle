@@ -805,18 +805,16 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefInfoMachine:
-		int nmac;
-		if (Global::_pSong->seqBus<MAX_BUSES) // Generators
-			nmac = Global::_pSong->busMachine[Global::_pSong->seqBus];
-		else
-			nmac = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
 
-		if (nmac < MAX_MACHINES && Global::_pSong->_machineActive[nmac])
-		{	
-			CPoint point;
-			point.x = Global::_pSong->_pMachines[nmac]->_x;
-			point.y = Global::_pSong->_pMachines[nmac]->_y;
-			pMainFrame->ShowMachineGui(nmac, point);//, Global::_pSong->seqBus);
+		if (Global::_pSong->seqBus < MAX_MACHINES)
+		{
+			if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
+			{
+				CPoint point;
+				point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
+				point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
+				pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);//, Global::_pSong->seqBus);
+			}
 		}
 		break;
 
@@ -944,20 +942,19 @@ void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 			// play it
 			if(pMachine==NULL)
 			{
-				int mgn;
-				if ( Global::_pSong->seqBus < MAX_BUSES )
-					mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
-				else
-					mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+				int mgn = Global::_pSong->seqBus;
 
-				if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
-					pMachine = Global::_pSong->_pMachines[mgn];
-				else return;
+				if (mgn < MAX_MACHINES)
+				{
+					pMachine = Global::_pSong->_pMachine[mgn];
+				}
 			}
 
 			notetrack[i]=-1;
-			pMachine->Tick(i,&entry);
-			return;
+			if (pMachine)
+			{
+				pMachine->Tick(i,&entry);
+			}
 		}
 	}
 }
@@ -1019,27 +1016,26 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 	// play it
 	if(pMachine==NULL)
 	{
-		int mgn;
-		if ( Global::_pSong->seqBus < MAX_BUSES )
-			mgn = Global::_pSong->busMachine[Global::_pSong->seqBus];
-		else
-			mgn = Global::_pSong->busEffect[(Global::_pSong->seqBus & (MAX_BUSES-1))];
+		int mgn = Global::_pSong->seqBus;
 
-		if (mgn < MAX_MACHINES && Global::_pSong->_machineActive[mgn])
-			pMachine = Global::_pSong->_pMachines[mgn];
-		else return;
+		if (mgn < MAX_MACHINES)
+		{
+			pMachine = Global::_pSong->_pMachine[mgn];
+		}
 	}	
 
+	if (pMachine)
+	{
+		// pick a track to play it on	
+		if(bMultiKey)
+			outtrack++;
+		if(outtrack>=Global::_pSong->SONGTRACKS)
+			outtrack=0;
 
-	// pick a track to play it on	
-	if(bMultiKey)
-		outtrack++;
-	if(outtrack>=Global::_pSong->SONGTRACKS)
-		outtrack=0;
-
-	// play
-	notetrack[outtrack]=note;
-	pMachine->Tick(outtrack,&entry);
+		// play
+		notetrack[outtrack]=note;
+		pMachine->Tick(outtrack,&entry);
+	}
 }
 
 // configure default keys

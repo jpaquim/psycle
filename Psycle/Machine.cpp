@@ -211,16 +211,19 @@ bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,int value)
 {
 	// Get reference to the destination machine
 	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
+	Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
 
-	if ( value == 255 ) value =256; // FF = 255
-	const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
-	
-	int c;
-	if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+	if (_pDstMachine)
 	{
-		_pDstMachine->SetWireVolume(c,invol);
-		return true;
+		if ( value == 255 ) value =256; // FF = 255
+		const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
+		
+		int c;
+		if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+		{
+			_pDstMachine->SetWireVolume(c,invol);
+			return true;
+		}
 	}
 	return false;
 }
@@ -228,15 +231,18 @@ bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,int &value)
 {
 	// Get reference to the destination machine
 	if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-	Machine *_pDstMachine = Global::_pSong->_pMachines[_outputMachines[WireIndex]];
+	Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
 	
-	int c;
-	if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+	if (_pDstMachine)
 	{
-		float val;
-		_pDstMachine->GetWireVolume(c,val);
-		value = f2i(val*256.0f);
-		return true;
+		int c;
+		if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+		{
+			float val;
+			_pDstMachine->GetWireVolume(c,val);
+			value = f2i(val*256.0f);
+			return true;
+		}
 	}
 	
 	return false;
@@ -294,34 +300,40 @@ void Machine::Work(int numSamples)
 	{
 		if (_inputCon[i])
 		{
-			Machine* pInMachine = Global::_pSong->_pMachines[_inputMachines[i]];
-			if (!pInMachine->_worked && !pInMachine->_waitingForSound)
-			{ 
-				pInMachine->Work(numSamples);
-/*				This could be a different Undenormalize funtion, using the already calculated
-				"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
-				correctly.
-				if ( pInMachine->_volumeCounter*_inputConVol[i] < 0.004f ) //this gives for 24bit depth.
-				{
-					memset(pInMachine->_pSamplesL,0,numSamples*sizeof(float));
-					memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
-				}
-*/
-				pInMachine->_waitingForSound=false;
-			}
-			if ( !pInMachine->_stopped ) _stopped=false;
-			if ((!_mute) && ( !_stopped ))
+			Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+			if (pInMachine)
 			{
+				if (!pInMachine->_worked && !pInMachine->_waitingForSound)
+				{ 
+					pInMachine->Work(numSamples);
+	/*				This could be a different Undenormalize funtion, using the already calculated
+					"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
+					correctly.
+					if ( pInMachine->_volumeCounter*_inputConVol[i] < 0.004f ) //this gives for 24bit depth.
+					{
+						memset(pInMachine->_pSamplesL,0,numSamples*sizeof(float));
+						memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
+					}
+	*/
+					pInMachine->_waitingForSound=false;
+				}
+				if ( !pInMachine->_stopped ) 
+				{
+					_stopped=false;
+				}
+				if ((!_mute) && ( !_stopped ))
+				{
 #if defined( _WINAMP_PLUGIN_)
-				Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-				Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+					Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
+					Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
 #else
-				CPUCOST_INIT(wcost);
-				Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-				Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-				CPUCOST_CALC(wcost,numSamples);
-				_wireCost+=wcost;
+					CPUCOST_INIT(wcost);
+					Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
+					Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+					CPUCOST_CALC(wcost,numSamples);
+					_wireCost+=wcost;
 #endif // _WINAMP_PLUGIN_
+				}
 			}
 		}
 	}

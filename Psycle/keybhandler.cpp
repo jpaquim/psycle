@@ -170,19 +170,13 @@ void CChildView::MidiPatternTweak(int command, int value)
 			else if (!Global::pConfig->_RecordUnarmed)
 			{		
 				// play it
-				int mgn;
-				Machine* pMachine;
-				if ( _pSong->seqBus < MAX_BUSES )
-					mgn = _pSong->busMachine[_pSong->seqBus];
-				else
-					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-
-				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-					pMachine = _pSong->_pMachines[mgn];
-				else return;
+				Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
 				// play
-				pMachine->Tick(editcur.track,&entry);
+				if (pMachine)
+				{
+					pMachine->Tick(editcur.track,&entry);
+				}
 				return;
 			}
 			toffset = _ptrack(ps)+(line*MULTIPLY);
@@ -217,21 +211,14 @@ void CChildView::MidiPatternTweak(int command, int value)
 	}
 //	else
 	{
-
 		// play it
-		int mgn;
-		Machine* pMachine;
-		if ( _pSong->seqBus < MAX_BUSES )
-			mgn = _pSong->busMachine[_pSong->seqBus];
-		else
-			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+		Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-			pMachine = _pSong->_pMachines[mgn];
-		else return;
-
-		// play
-		pMachine->Tick(editcur.track,&entry);
+		if (pMachine)
+		{
+			// play
+			pMachine->Tick(editcur.track,&entry);
+		}
 	}
 }
 
@@ -264,20 +251,13 @@ void CChildView::MidiPatternTweakSlide(int command, int value)
 			}
 			else if (!Global::pConfig->_RecordUnarmed)
 			{		
-				// play it
-				int mgn;
-				Machine* pMachine;
-				if ( _pSong->seqBus < MAX_BUSES )
-					mgn = _pSong->busMachine[_pSong->seqBus];
-				else
-					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+				Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-					pMachine = _pSong->_pMachines[mgn];
-				else return;
-
-				// play
-				pMachine->Tick(editcur.track,&entry);
+				if (pMachine)
+				{
+					// play
+					pMachine->Tick(editcur.track,&entry);
+				}
 				return;
 			}
 			toffset = _ptrack(ps)+(line*MULTIPLY);
@@ -312,21 +292,13 @@ void CChildView::MidiPatternTweakSlide(int command, int value)
 	}
 //	else
 	{
+		Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-		// play it
-		int mgn;
-		Machine* pMachine;
-		if ( _pSong->seqBus < MAX_BUSES )
-			mgn = _pSong->busMachine[_pSong->seqBus];
-		else
-			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-
-		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-			pMachine = _pSong->_pMachines[mgn];
-		else return;
-
-		// play
-		pMachine->Tick(editcur.track,&entry);
+		if (pMachine)
+		{
+			// play
+			pMachine->Tick(editcur.track,&entry);
+		}
 	}
 }
 
@@ -359,20 +331,13 @@ void CChildView::MidiPatternCommand(int command, int value)
 			}
 			else if (!Global::pConfig->_RecordUnarmed)
 			{		
-				// play it
-				int mgn;
-				Machine* pMachine;
-				if ( _pSong->seqBus < MAX_BUSES )
-					mgn = _pSong->busMachine[_pSong->seqBus];
-				else
-					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+				Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-					pMachine = _pSong->_pMachines[mgn];
-				else return;
-
-				// play
-				pMachine->Tick(editcur.track,&entry);
+				if (pMachine)
+				{
+					// play
+					pMachine->Tick(editcur.track,&entry);
+				}
 				return;
 			}
 			toffset = _ptrack(ps)+(line*MULTIPLY);
@@ -403,19 +368,13 @@ void CChildView::MidiPatternCommand(int command, int value)
 //	else
 	{
 		// play it
-		int mgn;
-		Machine* pMachine;
-		if (_pSong->seqBus < MAX_BUSES)
-			mgn = _pSong->busMachine[_pSong->seqBus];
-		else
-			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+		Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-			pMachine = _pSong->_pMachines[mgn];
-		else return;
-
-		// play
-		pMachine->Tick(editcur.track,&entry);
+		if (pMachine)
+		{
+			// play
+			pMachine->Tick(editcur.track,&entry);
+		}
 	}
 }
 
@@ -447,20 +406,13 @@ void CChildView::MidiPatternMidiCommand(int command, int value)
 			}
 			else if (!Global::pConfig->_RecordUnarmed)
 			{		
-				// play it
-				int mgn;
-				Machine* pMachine;
-				if ( _pSong->seqBus < MAX_BUSES )
-					mgn = _pSong->busMachine[_pSong->seqBus];
-				else
-					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+				Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-					pMachine = _pSong->_pMachines[mgn];
-				else return;
-
-				// play
-				pMachine->Tick(editcur.track,&entry);
+				if (pMachine)
+				{
+					// play
+					pMachine->Tick(editcur.track,&entry);
+				}
 				return;
 			}
 			toffset = _ptrack(ps)+(line*MULTIPLY);
@@ -495,21 +447,13 @@ void CChildView::MidiPatternMidiCommand(int command, int value)
 	}
 //	else
 	{
+		Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-		// play it
-		int mgn;
-		Machine* pMachine;
-		if ( _pSong->seqBus < MAX_BUSES )
-			mgn = _pSong->busMachine[_pSong->seqBus];
-		else
-			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-
-		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-			pMachine = _pSong->_pMachines[mgn];
-		else return;
-
-		// play
-		pMachine->Tick(editcur.track,&entry);
+		if (pMachine)
+		{
+			// play
+			pMachine->Tick(editcur.track,&entry);
+		}
 	}
 }
 
@@ -542,21 +486,13 @@ void CChildView::MidiPatternInstrument(int value)
 			}
 			else if (!Global::pConfig->_RecordUnarmed)
 			{		
-				// play it
-				int mgn;
-				Machine* pMachine;
-				if (_pSong->seqBus < MAX_BUSES)
-					mgn = _pSong->busMachine[_pSong->seqBus];
-				else
-					mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+				Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-				if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-					pMachine = _pSong->_pMachines[mgn];
-				else return;
-
-				// play
-				pMachine->Tick(editcur.track,&entry);
-
+				if (pMachine)
+				{
+					// play
+					pMachine->Tick(editcur.track,&entry);
+				}
 				return;
 			}
 			toffset = _ptrack(ps)+(line*MULTIPLY);
@@ -582,20 +518,13 @@ void CChildView::MidiPatternInstrument(int value)
 	}
 //	else
 	{
-		// play it
-		int mgn;
-		Machine* pMachine;
-		if (_pSong->seqBus < MAX_BUSES)
-			mgn = _pSong->busMachine[_pSong->seqBus];
-		else
-			mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
+		Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
-		if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
-			pMachine = _pSong->_pMachines[mgn];
-		else return;
-
-		// play
-		pMachine->Tick(editcur.track,&entry);
+		if (pMachine)
+		{
+			// play
+			pMachine->Tick(editcur.track,&entry);
+		}
 	}
 }
 
@@ -778,25 +707,14 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 				}
 			}
 
-			int mgn;
-			if (_pSong->seqBus & MAX_BUSES) // If it is an effect
-			{
-				mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-			}
-			else
-			{
-				mgn = _pSong->busMachine[_pSong->seqBus];
-			}
-
 			if (note>120)
 			{
 				entry._inst = _pSong->auxcolSelected;
 			}
 
-			if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+			Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
+			if (tmac)
 			{
-				Machine *tmac = _pSong->_pMachines[mgn];
-
 				if (tmac->_type == MACH_SAMPLER)
 				{
 					entry._inst = _pSong->auxcolSelected;
@@ -883,25 +801,14 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 		}
 	}
 
-	int mgn;
-	if (_pSong->seqBus & MAX_BUSES) // If it is an effect
-	{
-		mgn = _pSong->busEffect[(_pSong->seqBus & (MAX_BUSES-1))];
-	}
-	else
-	{
-		mgn = _pSong->busMachine[_pSong->seqBus];
-	}
-
 	if (note>120)
 	{
 		entry->_inst = _pSong->auxcolSelected;
 	}
 
-	if (mgn < MAX_MACHINES && _pSong->_machineActive[mgn])
+	Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
+	if (tmac)
 	{
-		Machine *tmac = _pSong->_pMachines[mgn];
-
 		if (tmac->_type == MACH_SAMPLER)
 		{
 			entry->_inst = _pSong->auxcolSelected;
@@ -1135,18 +1042,15 @@ void CChildView::PlayCurrentRow(void)
 
 	for (int i=0; i<_pSong->SONGTRACKS;i++)
 	{
-		if (pEntry->_mach != 255 && !_pSong->_trackMuted[i])
+		if (pEntry->_mach < MAX_MACHINES && !_pSong->_trackMuted[i])
 		{
-			int mIndex;
-			if ( pEntry->_mach & MAX_BUSES ) mIndex = _pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
-			else if ( pEntry->_note == cdefTweakE ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
-			else mIndex = _pSong->busMachine[(pEntry->_mach & (MAX_BUSES-1))];
-			
-			if (mIndex < MAX_MACHINES && _pSong->_machineActive[mIndex])
+			Machine *pMachine = _pSong->_pMachine[pEntry->_mach];
+			if (pMachine)
 			{
-				Machine *pMachine = _pSong->_pMachines[mIndex];
-				
-				if ( !pMachine->_mute)	pMachine->Tick(i, pEntry);
+				if ( !pMachine->_mute)	
+				{
+					pMachine->Tick(i, pEntry);
+				}
 			}
 		}
 		pEntry++;
@@ -1161,18 +1065,15 @@ void CChildView::PlayCurrentNote(void)
 	}
 
 	PatternEntry* pEntry = (PatternEntry*)_ptrackline();
-	if (pEntry->_mach != 255)
+	if (pEntry->_mach < MAX_MACHINES)
 	{
-		int mIndex;
-		if ( pEntry->_mach & MAX_BUSES ) mIndex = _pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
-		else if ( pEntry->_note == cdefTweakE ) mIndex = _pSong->busEffect[(pEntry->_mach &(MAX_BUSES-1))];
-		else mIndex = _pSong->busMachine[(pEntry->_mach & (MAX_BUSES-1))];
-		
-		if (mIndex < MAX_MACHINES && _pSong->_machineActive[mIndex])
+		Machine *pMachine = _pSong->_pMachine[pEntry->_mach];
+		if (pMachine)
 		{
-			Machine *pMachine = _pSong->_pMachines[mIndex];
-			
-			if ( !pMachine->_mute)	pMachine->Tick(editcur.track, pEntry);
+			if ( !pMachine->_mute)	
+			{
+				pMachine->Tick(editcur.track, pEntry);
+			}
 		}
 	}
 }

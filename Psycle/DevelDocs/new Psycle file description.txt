@@ -20,7 +20,7 @@ Here are the proposed changes to each chunk:
 ===================
 FILE HEADER
 ===================
-id = "PSY3"; // PSY2 was 1.66
+id = "PSY3SONG"; // PSY2 was 1.66
 version = 0; // "total" version of all chunk versions
 size = 0;
 
@@ -99,30 +99,6 @@ int patterntracks; // how many tracks in this pattern * for multipattern
 PatternEntry pe[numlines*patterntracks]; // data for this pattern- use numTracks until pattern tracks is implemented
 
 ===================
-MACHINES INFO
-* i always wondered why things were routed like this?
-* it seems redundant and wasteful
-* why is there even a busmachine array, instead of just putting things in the right spot in 
-the machines array?
-* pmachines could be an array of pointers to machines if it's too hard to move things 
-around otherwise
-===================
-HEADER:
-id = "MACI"; 
-version = 0;
-//size = (sizeof(byte)*128)+(sizeof(bool)*128);
-size = (sizeof(bool)*128);
-
-DATA:
-//byte busmachine[64]; // mapping of generators to busses - Desc : Contains the values of the array that represent the machine
- 	// assignations for Generators.  What this means is, which machine in the “machines” array corresponds to the specified 
-	// position (used in the pattern) if busmachine[3] = 5 , it means that the machine numbered 3 in the pattern, is the machine 
-	// in machines[5] . (zero based) - Values: from 0 to 7F ( 127 )
-//byte buseffect[64]; // mapping of effects to busses - as above
-bool macactive[128]; // Desc: The array indicates if the pointer in the “machines” array is a valid machine, or not. Example if 
-	// macactive[5] = false , then machines[5] is NOT a valid machine.
-
-===================
 MACHINES DATA
 ===================
 HEADER:
@@ -159,8 +135,6 @@ int inputmachines[MAX_CONNECTIONS]; // Desc: The array that indicates the machin
 	// sound to the current one. *** -1 for no connection
 	// Values from 0 to 127
 float inputconvol[MAX_CONNECTIONS]; // Desc: The array that indicates the volumes of each input connection.
-int outputmachines[MAX_CONNECTIONS]; // Desc: The array that indicates the machines (in the machines array) that this 
-	// machine outputs sound to.  *** -1 for no connection
 char editname[]; // null terminated string, truncated to [16]
 uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain
 byte MachineSpecificData[datasize]; // data depends on type member

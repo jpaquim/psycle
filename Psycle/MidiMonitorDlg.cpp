@@ -366,39 +366,42 @@ void CMidiMonitorDlg::FillChannelMap( bool override )
 		int genFxIdx = pMidiInput->GetGenMap( ch );
 
 		// machine mapped & active?
-		if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES && Global::_pSong->_machineActive[ genFxIdx ] )
+		if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
 		{
-			// machine
-			Machine * pMachine = Global::_pSong->_pMachines[ genFxIdx ];
-			sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
-			m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+			if( Global::_pSong->_pMachine[ genFxIdx ] )
+			{
+				// machine
+				Machine * pMachine = Global::_pSong->_pMachine[ genFxIdx ];
+				sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
+				m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
-			// instrument
-			int instrument = pMidiInput->GetInstMap( ch );
-			
-			// required? (instruments only apply for samplers)
-			if( pMachine->_type == MACH_SAMPLER )
-			{
-				Instrument * pInstrument = &Global::_pSong->_instruments[ instrument ];
-				sprintf( txtBuffer, "%03d: %s\0", instrument, pInstrument->_sName );
-				m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-			}
-			else
-			{
-				// n/a
-				m_channelMap.SetItem( ch, 2, LVIF_TEXT, "n/a", 0, 0, 0, NULL );
-			}
+				// instrument
+				int instrument = pMidiInput->GetInstMap( ch );
+				
+				// required? (instruments only apply for samplers)
+				if( pMachine->_type == MACH_SAMPLER )
+				{
+					Instrument * pInstrument = &Global::_pSong->_instruments[ instrument ];
+					sprintf( txtBuffer, "%03d: %s\0", instrument, pInstrument->_sName );
+					m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+				}
+				else
+				{
+					// n/a
+					m_channelMap.SetItem( ch, 2, LVIF_TEXT, "n/a", 0, 0, 0, NULL );
+				}
 
-			// note on/off status
-			if( pMidiInput->GetNoteOffStatus( ch ) )
-			{
-				// recognised
-				m_channelMap.SetItem( ch, 3, LVIF_TEXT, "Yes", 0, 0, 0, NULL );
-			}
-			else
-			{
-				// ignoored
-				m_channelMap.SetItem( ch, 3, LVIF_TEXT, "No", 0, 0, 0, NULL );
+				// note on/off status
+				if( pMidiInput->GetNoteOffStatus( ch ) )
+				{
+					// recognised
+					m_channelMap.SetItem( ch, 3, LVIF_TEXT, "Yes", 0, 0, 0, NULL );
+				}
+				else
+				{
+					// ignoored
+					m_channelMap.SetItem( ch, 3, LVIF_TEXT, "No", 0, 0, 0, NULL );
+				}
 			}
 		}
 		else

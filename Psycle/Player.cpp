@@ -44,7 +44,7 @@ void Player::Start(int pos, int line)
 {
 	Stop(); // This causes all machines to reset, and samplespertick to init.
 
-	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
+	((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 	_lineChanged = true;
 	_lineCounter = line;
 	_playPosition= pos;
@@ -67,12 +67,12 @@ void Player::Stop(void)
 	
 	for (int i=0; i<MAX_MACHINES; i++)
 	{
-		if(Global::_pSong->_machineActive[i])
+		if(Global::_pSong->_pMachine[i])
 		{
-			Global::_pSong->_pMachines[i]->Stop();
-			for(int c = 0; c < MAX_TRACKS; c++)
+			Global::_pSong->_pMachine[i]->Stop();
+			for (int c = 0; c < MAX_TRACKS; c++)
 			{
-				Global::_pSong->_pMachines[i]->TriggerDelay[c]._cmd = 0;
+				Global::_pSong->_pMachine[i]->TriggerDelay[c]._cmd = 0;
 			}
 		}
 	}
@@ -125,25 +125,32 @@ void Player::ExecuteLine(void)
 				break;
 
 			case 0xFC:
-				if ( pEntry->_mach == 255 ) pSong->_pMachines[0]->_outDry = pEntry->_parameter;
+				if ( pEntry->_mach == 255 )
+				{
+					pSong->_pMachine[MASTER_INDEX]->_outDry = pEntry->_parameter;
+				}
 				else 
 				{
-					int mIndex;
-					if ( pEntry->_mach < MAX_BUSES ) /*Gen*/ mIndex = pSong->busMachine[pEntry->_mach];
-					else /*Fx*/ mIndex = pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
-
-					if ( mIndex < MAX_MACHINES && pSong->_machineActive[mIndex] )
-						pSong->_pMachines[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,pEntry->_parameter);
+					int mIndex = pEntry->_mach;
+					if (mIndex < MAX_MACHINES)
+					{
+						if (pSong->_pMachine[mIndex] )
+						{
+							pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,pEntry->_parameter);
+						}
+					}
 				}
 				break;
 
 			case  0xF8:
-				int mIndex;
-				if ( pEntry->_mach < MAX_BUSES ) /*Gen*/ mIndex = pSong->busMachine[pEntry->_mach];
-				else /*Fx*/ mIndex = pSong->busEffect[(pEntry->_mach & (MAX_BUSES-1))];
-
-				if ( mIndex < MAX_MACHINES && pSong->_machineActive[mIndex] )
-					pSong->_pMachines[mIndex]->SetPan(pEntry->_parameter>>1);
+				int mIndex = pEntry->_mach;
+				if (mIndex < MAX_MACHINES)
+				{
+					if (pSong->_pMachine[mIndex] )
+					{
+						pSong->_pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
+					}
+				}
 
 				break;
 
@@ -157,16 +164,13 @@ void Player::ExecuteLine(void)
 				if ( mac != 255 ) prevMachines[track] = mac;
 				else mac = prevMachines[track];
 
-				int mIndex;
-				if ( mac & MAX_BUSES ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
-				else if ( pEntry->_note == cdefTweakE ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
-				else mIndex = pSong->busMachine[(mac&(MAX_BUSES-1))];
-				
-				if (mIndex < MAX_MACHINES && pSong->_machineActive[mIndex])
+				if (mac < MAX_MACHINES)
 				{
-					Machine *pMachine = pSong->_pMachines[mIndex];
-					
-					pMachine->Tick(track, pEntry);
+					Machine *pMachine = pSong->_pMachine[mac];
+					if (pMachine)
+					{
+						pMachine->Tick(track, pEntry);
+					}
 				}
 			}
 		}
@@ -175,12 +179,12 @@ void Player::ExecuteLine(void)
 	// Notify all machines that a new Tick() comes.
 	for (int tc=0; tc<MAX_MACHINES; tc++)
 	{
-		if(pSong->_machineActive[tc])
+		if(pSong->_pMachine[tc])
 		{
-			pSong->_pMachines[tc]->Tick();
+			pSong->_pMachine[tc]->Tick();
 			for (int c = 0; c < MAX_TRACKS; c++)
 			{
-				pSong->_pMachines[tc]->TriggerDelay[c]._cmd = 0;
+				pSong->_pMachine[tc]->TriggerDelay[c]._cmd = 0;
 			}
 		}
 	}
@@ -201,41 +205,39 @@ void Player::ExecuteLine(void)
 				if ( mac != 255 ) prevMachines[track] = mac;
 				else mac = prevMachines[track];
 
-				int mIndex;
-				if ( mac & MAX_BUSES ) mIndex = pSong->busEffect[(mac&(MAX_BUSES-1))];
-				else mIndex = pSong->busMachine[(mac&(MAX_BUSES-1))];
-				
-				if (mIndex < MAX_MACHINES && pSong->_machineActive[mIndex])
+				if (mac < MAX_MACHINES)
 				{
-					Machine *pMachine = pSong->_pMachines[mIndex];
-					
-					if (pEntry->_cmd == 0xfd)
+					Machine *pMachine = pSong->_pMachine[mac];
+					if (pMachine)
 					{
-						// delay
-						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-						pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick)/256;
-					}
-					else if (pEntry->_cmd == 0xfb)
-					{
-						// retrigger
-						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-						pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
-						pMachine->TriggerDelayCounter[track] = 0;
-					}
-					else if (pEntry->_cmd == 0xfa)
-					{
-						// retrigger continue
-						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-						if (pEntry->_parameter&0xf0)
+						if (pEntry->_cmd == 0xfd)
 						{
-							pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+							// delay
+							memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+							pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick)/256;
 						}
-					}
-					else
-					{
-						pMachine->TriggerDelay[track]._cmd = 0;
-						pMachine->Tick(track, pEntry);
-						pMachine->TriggerDelayCounter[track] = 0;
+						else if (pEntry->_cmd == 0xfb)
+						{
+							// retrigger
+							memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+							pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
+							pMachine->TriggerDelayCounter[track] = 0;
+						}
+						else if (pEntry->_cmd == 0xfa)
+						{
+							// retrigger continue
+							memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+							if (pEntry->_parameter&0xf0)
+							{
+								pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+							}
+						}
+						else
+						{
+							pMachine->TriggerDelay[track]._cmd = 0;
+							pMachine->Tick(track, pEntry);
+							pMachine->TriggerDelayCounter[track] = 0;
+						}
 					}
 				}
 			}
@@ -348,7 +350,7 @@ float * Player::Work(
 					pSong->_pMachines[c]->PreWork(amount);
 				}
 			}
-			pSong->_pMachines[0]->Work(amount);
+			pSong->_pMachine[MASTER_INDEX]->Work(amount);
 
 #else
 			CSingleLock crit(&Global::_pSong->door, TRUE);
@@ -361,19 +363,19 @@ float * Player::Work(
 				pSong->_sampCount =0;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (pSong->_machineActive[c])
+					if (pSong->_pMachine[c])
 					{
-						pSong->_pMachines[c]->_wireCost = 0;
-						pSong->_pMachines[c]->_cpuCost = 0;
+						pSong->_pMachine[c]->_wireCost = 0;
+						pSong->_pMachine[c]->_cpuCost = 0;
 					}
 				}
 			}
 
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
-				if (pSong->_machineActive[c])
+				if (pSong->_pMachine[c])
 				{
-					pSong->_pMachines[c]->PreWork(amount);
+					pSong->_pMachine[c]->PreWork(amount);
 				}
 			}
 
@@ -381,7 +383,7 @@ float * Player::Work(
 			{
 			// Mixing preview WAV
 			//
-				pSong->PW_Work(pSong->_pMachines[0]->_pSamplesL,pSong->_pMachines[0]->_pSamplesR, amount);
+				pSong->PW_Work(pSong->_pMachine[MASTER_INDEX]->_pSamplesL,pSong->_pMachine[MASTER_INDEX]->_pSamplesR, amount);
 			}
 			
 			//////////////////////////////////////////////////////////////////////
@@ -392,7 +394,7 @@ float * Player::Work(
 
 				// Master machine initiates work
 				//
-				pSong->_pMachines[0]->Work(amount);
+				pSong->_pMachine[MASTER_INDEX]->Work(amount);
 			}
 
 			CPUCOST_CALC(idletime, amount);
@@ -403,8 +405,8 @@ float * Player::Work(
 			if ((pThis->_playing) && (pThis->_recording))
 			{
 //				float* pData = pThis->_pBuffer; <- this was fuxxxxing up
-				float* pL = pSong->_pMachines[0]->_pSamplesL;
-				float* pR = pSong->_pMachines[0]->_pSamplesR;
+				float* pL = pSong->_pMachine[MASTER_INDEX]->_pSamplesL;
+				float* pR = pSong->_pMachine[MASTER_INDEX]->_pSamplesR;
 				for (int i=0; i<amount; i++)
 				{
 					
