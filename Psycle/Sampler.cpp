@@ -76,9 +76,10 @@ void Sampler::Work(
 			PerformFx(voice);
 			VoiceWork(numSamples, voice);
 		}
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
@@ -86,7 +87,7 @@ void Sampler::Work(
 			}
 			else _stopped=false;
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 	}
 
 	CPUCOST_CALC(cost, numSamples);

@@ -157,9 +157,10 @@ void Plugin::Work(
 	if ((!_mute) && (_mode == MACHMODE_GENERATOR || (!_stopped && !_bypass)))
 	{
 		_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
+		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
 		{
-			Machine::SetVolumeCounterAccurate(numSamples);
+//			Machine::SetVolumeCounterAccurate(numSamples);
 			if (_volumeCounter < 8)	{
 				_volumeCounter = 0;
 				_volumeDisplay = 0;
@@ -167,7 +168,7 @@ void Plugin::Work(
 			}
 			else _stopped = false;
 		}
-		else Machine::SetVolumeCounter(numSamples);
+//		else Machine::SetVolumeCounter(numSamples);
 	}
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;

@@ -372,11 +372,11 @@ float * Player::Work(
 					//
 					if ( *pData > 32767.0) sl = 32767;
 					else if ( *pData < -32768.0 ) sl = -32768;
-					else sl = Dsp::F2I(*pData);
+					else sl = f2i(*pData);
 					*pData++;
 					if ( *pData > 32767.0) sr = 32767;
 					else if ( *pData < -32768.0 ) sr = -32768;
-					else sr = Dsp::F2I(*pData);
+					else sr = f2i(*pData);
 					*pData++;
 					pThis->_outputWaveFile.WriteStereoSample(sl,sr);
 				}

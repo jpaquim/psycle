@@ -4,6 +4,7 @@
 // Various signal processing utility functions and classes
 //
 #include <math.h>
+#include "Helpers.h"
 
 #define CUBIC_RESOLUTION 2048
 
@@ -81,9 +82,10 @@ public:
 		
 		return vol;
 	}
+	/*
 	static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		return F2I(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
+		return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
 	}
 	static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
@@ -100,29 +102,20 @@ public:
 			{
 				vol = volL;
 			}
-			else
-			{
-				float const nvolL = -volL;
-				if (nvolL > vol ) vol = nvolL;
-			}
 			
 			if (volR > vol)
 			{
 				vol = volR;
-			}
-			else
-			{
-				float const nvolR = -volR;
-				if (nvolR > vol ) vol = nvolR;
 			}
 		}
 		while (--numSamples);
 		
 		return vol;
 	}
+	*/
 	static inline int GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		return F2I(GetMaxVSTVol(pSamplesL,pSamplesR,numSamples));
+		return f2i(GetMaxVSTVol(pSamplesL,pSamplesR,numSamples)); // F2I is for doubles, f2i is for floats
 	}
 	static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 	{

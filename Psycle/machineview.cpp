@@ -15,12 +15,12 @@ void CChildView::DrawMachineVumeters(CClientDC *devc)
 			if ((_pSong->_pMachines[c]->_volumeDisplay > _pSong->_pMachines[c]->_volumeMaxDisplay)
 				|| (_pSong->_pMachines[c]->_volumeMaxCounterLife <= 0))
 			{
-				_pSong->_pMachines[c]->_volumeMaxDisplay = _pSong->_pMachines[c]->_volumeDisplay-2;
+				_pSong->_pMachines[c]->_volumeMaxDisplay = _pSong->_pMachines[c]->_volumeDisplay-1;
 				_pSong->_pMachines[c]->_volumeMaxCounterLife = 60;
 			}
 			DrawMachineVol(_pSong->_pMachines[c]->_x,
 						   _pSong->_pMachines[c]->_y,
-						   devc, _pSong->_pMachines[c]->_volumeDisplay/2, _pSong->_pMachines[c]->_volumeMaxDisplay/2);
+						   devc, _pSong->_pMachines[c]->_volumeDisplay, _pSong->_pMachines[c]->_volumeMaxDisplay);
 		}
 	}
 }
