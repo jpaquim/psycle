@@ -1,9 +1,13 @@
 //////////////////////////////////////////////////////////////////////
-//// Sartorius SDelayer effect plugin for PSYCLE
-#include <project.h>
-#include <psycle/plugin/machineinterface.h>
+// Sartorius SChorus effect plugin for PSYCLE
+//
+// Based on Digital Effects Algorithms
+// Alexey Smoli, http://st.karelia.ru/~smlalx
+// smlalx@yahoo.com
+
 #include <string.h>
 #include <stdlib.h>
+#include "..\machineinterface.h"
 
 #define MAXIMUM_DELAY   30000
 
@@ -98,12 +102,12 @@ CMachineInfo const MacInfo =
 	NUMPARAMETERS,								// numParameters
 	pParameters,								// Pointer to parameters
 #ifdef _DEBUG
-	"SDelayer (Debug build)",		// name
+	"SChorus (Debug build)",		// name
 #else
-	"SDelayer",						// name
+	"SChorus",						// name
 #endif
-	"SDelayer",							// short name
-	"Sartorius",							// author
+	"SChorus",							// short name
+	"Sartorius, Alexey Smoli",							// author
 	"About",								// A command, that could be use for open an editor, etc...
 	3
 };
@@ -168,7 +172,7 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you want to show your custom window here
 // or an about button
-pCB->MessBox("Sartorius Delayer","SDelayer",0);
+pCB->MessBox("Sartorius Chorus","SChorus",0);
 }
 
 void mi::ParameterTweak(int par, int val)
