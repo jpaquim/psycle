@@ -7,12 +7,13 @@ V1.7.3
 + double clicking on pattern highlights that track (pooplog)
 + new file format fixing a lot of problems, and incorporating lossless data compression (pooplog)
 + 64 tracks available! (might break some machines?) (pooplog)
-! better memory management of pattern data (up to 10mb savings) (pooplog)
-! optimized machine indexing (pooplog)
-* sampler doesn't crash when no instrument is specified any more (pooplog)
-* save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
-* error messages on file read/write problems (pooplog)
-* vsts don't immediately crash psycle when they give an exception on save/load any more (pooplog)
+* better memory management of pattern data (up to 10mb savings) (pooplog)
+* optimized machine indexing (pooplog)
+! sampler doesn't crash when no instrument is specified any more (pooplog)
+! save as - pick an existing song, and it now asks if it is ok to overwrite (pooplog)
+! error messages on file read/write problems (pooplog)
+! vsts don't immediately crash psycle when they give an exception on save/load any more (pooplog)
+
 
 V1.7.1
 ------

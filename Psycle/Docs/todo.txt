@@ -19,30 +19,19 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
-*** when recording mouse tweaks, it puts the mac # of the currently selected machine instead of the machine you are tweaking
 
-* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' button in the inst ed, and select some of the sample wav, the display goes blank
-* <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
-	<bdzld> yep, or if the sample rate is invalid
++ undos for machine and wave edit?
 
-*** sometimes psycle changes the length of a block for no reason
 ** The play block feature doesn't work.
-** When 'cursor always down' is enabled u can't insert values on the last row
+
 ** master volume decrease lets a clipping sample through while detecting
-* screen should be made so 800x600 works
-* <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
-* sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
-*	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
-	in the "note" column.
-	[Is it useful to enter numbers while playing and follow song? what about just adding notes
-	 wherever the position of the cursor is?]
 
 *** <YanniS> my settings directories always get corrupted somehow
 	<YanniS> psycle has a lisp
 	<YanniS> quit and restarted, and it's still
 	<YanniS> C:\Audio\Psycle\Skinss\
 	[ not recreated * yannis says it is still happening]
-** <alk_> when Psycle is open hibernate does not work (windows crashes)
+*** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 
 
@@ -131,6 +120,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Wave Editor:
 --------------------------
+* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' button in the inst ed, and select some of the sample wav, the display goes blank
 !	alk: escape to close wave ed
 		[JAZ : It's a window, not a dialog]
 +++	<_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
@@ -287,6 +277,9 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Interface (contains pattern stuff too):
 ------------
+*** when recording mouse tweaks, it puts the mac # of the currently selected machine instead of the machine you are tweaking
+	[not recreated]
+** When 'cursor always down' is enabled u can't insert values on the last row
 **	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
 	[ DDE ? mmmm... ]
@@ -295,6 +288,15 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	<[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
 	the info when new one.
 **	should save wire dialog settings
+* <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
+	<bdzld> yep, or if the sample rate is invalid
+* <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
+* sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
+*	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
+	in the "note" column.
+	[Is it useful to enter numbers while playing and follow song? what about just adding notes
+	 wherever the position of the cursor is?]
+* screen should be made so 800x600 works
 *	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
 	 range bigger]

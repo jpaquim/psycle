@@ -1266,9 +1266,8 @@ void CChildView::patPaste()
 			_pSong->AllocNewPattern(ps,"",patBufferLines,false);
 		}
 		memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
-		
-		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
-		Repaint(DMData);
+
+		Repaint(DMPattern);
 	}
 }
 
@@ -1299,8 +1298,7 @@ void CChildView::patMixPaste()
 			offset_source+= EVENT_SIZE;
 		}
 		
-		NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
-		Repaint(DMData);
+		Repaint(DMPattern);
 	}
 }
 
@@ -1641,8 +1639,7 @@ void CChildView::LoadBlock(FILE* file)
 				memcpy(offset_target,blank,EVENT_SIZE);
 			}
 		}
-		NewPatternDraw(0,nl-1,0,nt-1);
-		Repaint(DMData);
+		Repaint(DMPattern);
 	}
 }
 
