@@ -237,6 +237,7 @@ void VSTPlugin::Free() // Called also in destruction
 		TRACE("VST plugin : Free query 0x%.8X\n",(int)_pEffect);
 		_pEffect->user = NULL;
 		Dispatch( effMainsChanged, 0, 0, NULL, 0.0f);
+		// this crashes that piece of shit native instruments spektral delay 1.0
 		Dispatch( effClose,        0, 0, NULL, 0.0f);
 		_pEffect=NULL;	
 		FreeLibrary(h_dll);
@@ -349,8 +350,8 @@ bool VSTPlugin::Load(RiffFile* pFile)
 	}
 
 */
-
-/**/	pFile->Read(&_editName, 16);	//Remove when changing the fileformat.
+	
+	pFile->Read(&_editName, 16);	//Remove when changing the fileformat.
 	_editName[15]='\0';
 	pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
 	pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
@@ -393,19 +394,19 @@ bool VSTPlugin::Load(RiffFile* pFile)
 	pFile->Read(&junkdata[0], sizeof(int)); // filterLfophase
 	pFile->Read(&junkdata[0], sizeof(int)); // filterMode
 
-		bool old;
-		pFile->Read(&old, sizeof(old)); // old format
-		pFile->Read(&_instance, sizeof(_instance)); // ovst.instance
-		if ( old )
-		{
-			char mch;
-			pFile->Read(&mch,sizeof(mch));
-			_program=0;
-		}
-		else
-		{
-			pFile->Read(&_program, sizeof(_program));
-		}
+	bool old;
+	pFile->Read(&old, sizeof(old)); // old format
+	pFile->Read(&_instance, sizeof(_instance)); // ovst.instance
+	if ( old )
+	{
+		char mch;
+		pFile->Read(&mch,sizeof(mch));
+		_program=0;
+	}
+	else
+	{
+		pFile->Read(&_program, sizeof(_program));
+	}
 
 	return true;
 }
@@ -573,9 +574,11 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 #endif // ndef _WINAMP_PLUGIN_
 		return 0;		// index, value, returns 0
 		
-	case audioMasterVersion:			return 2;		// vst version, currently 7 (0 for older)
+	case audioMasterVersion:			
+		return 2;		// vst version, currently 7 (0 for older)
 		
-	case audioMasterCurrentId:			return 'AASH';	// returns the unique id of a plug that's currently loading
+	case audioMasterCurrentId:			
+		return 'AASH';	// returns the unique id of a plug that's currently loading
 
 	case audioMasterIdle:
 		effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
@@ -594,9 +597,11 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		}
 		return 0;	// inquire if an input or output is beeing connected;
 
-	case audioMasterWantMidi:			return 0;
+	case audioMasterWantMidi:			
+		return 0;
 
-	case audioMasterProcessEvents:		return 0; 	// Support of vst events to host is not available
+	case audioMasterProcessEvents:		
+		return 0; 	// Support of vst events to host is not available
 
 	case audioMasterGetTime:
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
@@ -635,46 +640,58 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		}
 		return (long)&_timeInfo;
 		
-	case audioMasterTempoAt:			return Global::pPlayer->bpm*10000;
+	case audioMasterTempoAt:			
+		return Global::pPlayer->bpm*10000;
 
 	case audioMasterNeedIdle:
-		if ( effect->user ) {
+		if ( effect->user ) 
+		{
 			((VSTPlugin*)effect->user)->wantidle = true;
 		}
 		return 1;
 #if defined(_WINAMP_PLUGIN_)
-	case audioMasterGetSampleRate:		return Global::pConfig->_samplesPerSec;	
+	case audioMasterGetSampleRate:		
+		return Global::pConfig->_samplesPerSec;	
 #else
-	case audioMasterGetSampleRate:		return Global::pConfig->_pOutputDriver->_samplesPerSec;	
+	case audioMasterGetSampleRate:		
+		return Global::pConfig->_pOutputDriver->_samplesPerSec;	
 #endif // _WINAMP_PLUGIN_
 	case audioMasterGetVendorString:	// Just fooling version string
 		strcpy((char*)ptr,"Steinberg");
 //		strcpy((char*)ptr,"Psycledelics");
 		return 0;
 	
-	case audioMasterGetVendorVersion:	return 5000;	// HOST version 5000
+	case audioMasterGetVendorVersion:	
+		return 5000;	// HOST version 5000
 
 	case audioMasterGetProductString:	// Just fooling product string
 		strcpy((char*)ptr,"Cubase VST");
 //		strcpy((char*)ptr,"Psycle");
 		return 0;
 
-	case audioMasterVendorSpecific:		return 0;
+	case audioMasterVendorSpecific:		
+		return 0;
 
-	case audioMasterGetLanguage:		return kVstLangEnglish;
+	case audioMasterGetLanguage:		
+		return kVstLangEnglish;
 	
 	case audioMasterUpdateDisplay:
+		// this crashes that piece of shit ni spektral delay 1.0
 		effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+
 		return 0;
 
 	case 	audioMasterSizeWindow:
 #if !defined(_WINAMP_PLUGIN_)
-			if ( effect->user ) {
-				if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
-					((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
+		if ( effect->user ) 
+		{
+			if ( ((VSTPlugin*)effect->user)->editorWnd != NULL )
+			{
+				((CVstEditorDlg*)((VSTPlugin*)effect->user)->editorWnd)->Resize(index,value);
 			}
+		}
 #endif // !defined(_WINAMP_PLUGIN_)
-			return 0;
+		return 0;
 				
 	case 	audioMasterGetParameterQuantization:	
 		return VST_QUANTIZATION;
@@ -683,44 +700,107 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		return STREAM_SIZE;
 
 	case 	audioMasterCanDo:
-			if (!strcmp((char*)ptr,"sendVstEvents")) return 1;
-			if (!strcmp((char*)ptr,"sendVstMidiEvent")) return 1;
-			if (!strcmp((char*)ptr,"sendVstTimeInfo")) return 1;
+		if (!strcmp((char*)ptr,"sendVstEvents")) 
+		{
+			return 1;
+		}
+		if (!strcmp((char*)ptr,"sendVstMidiEvent")) 
+		{
+			return 1;
+		}
+		if (!strcmp((char*)ptr,"sendVstTimeInfo")) 
+		{
+			return 1;
+		}
 //			"receiveVstEvents",
 //			"receiveVstMidiEvent",
 //			"receiveVstTimeInfo",
-		
+	
 //			"reportConnectionChanges",
 //			"acceptIOChanges",
-			if (!strcmp((char*)ptr,"sizeWindow")) return 1;
-			if (!strcmp((char*)ptr,"supplyIdle")) return 1;
-			return -1;
+		if (!strcmp((char*)ptr,"sizeWindow")) 
+		{
+			return 1;
+		}
+		if (!strcmp((char*)ptr,"supplyIdle")) 
+		{
+			return 1;
+		}
+		return -1;
 		break;
 		
-	case 	audioMasterSetTime:						TRACE("VST master dispatcher: Set Time\n");break;
-	case 	audioMasterGetNumAutomatableParameters:	TRACE("VST master dispatcher: GetNumAutPar\n");break;
-//	case 	audioMasterGetParameterQuantization:	TRACE("VST master dispatcher: ParamQuant\n");break;
-	case 	audioMasterIOChanged:					TRACE("VST master dispatcher: IOchanged\n");break;
-//	case 	audioMasterSizeWindow:					TRACE("VST master dispatcher: Size Window\n");break;
-	case 	audioMasterGetInputLatency:				TRACE("VST master dispatcher: GetInLatency\n");break;
-	case 	audioMasterGetOutputLatency:			TRACE("VST master dispatcher: GetOutLatency\n");break;
-	case 	audioMasterGetPreviousPlug:				TRACE("VST master dispatcher: PrevPlug\n");break;
-	case 	audioMasterGetNextPlug:					TRACE("VST master dispatcher: NextPlug\n");break;
-	case 	audioMasterWillReplaceOrAccumulate:		TRACE("VST master dispatcher: WillReplace\n");break;
-	case 	audioMasterGetCurrentProcessLevel:		TRACE("VST master dispatcher: GetProcessLevel\n");break;
-	case 	audioMasterGetAutomationState:			TRACE("VST master dispatcher: GetAutState\n");break;
-	case 	audioMasterOfflineStart:				TRACE("VST master dispatcher: Offlinestart\n");break;
-	case 	audioMasterOfflineRead:					TRACE("VST master dispatcher: Offlineread\n");break;
-	case 	audioMasterOfflineWrite:				TRACE("VST master dispatcher: Offlinewrite\n");break;
-	case 	audioMasterOfflineGetCurrentPass:		TRACE("VST master dispatcher: OfflineGetcurrentpass\n");break;
-	case 	audioMasterOfflineGetCurrentMetaPass:	TRACE("VST master dispatcher: OfflineGetCurrentMetapass\n");break;
-	case 	audioMasterSetOutputSampleRate:			TRACE("VST master dispatcher: SetOutputsamplerate\n");break;
-	case 	audioMasterGetSpeakerArrangement:		TRACE("VST master dispatcher: Getspeaker\n");break;
-	case 	audioMasterSetIcon:						TRACE("VST master dispatcher: SetIcon\n");break;
-	case 	audioMasterOpenWindow:					TRACE("VST master dispatcher: OpenWindow\n");break;
-	case 	audioMasterCloseWindow:					TRACE("VST master dispatcher: CloseWindow\n");break;
-	case 	audioMasterGetDirectory:				TRACE("VST master dispatcher: GetDirectory\n");break;
-	default: TRACE("VST master dispatcher: undefed: %d\n",opcode)	;break;
+	case 	audioMasterSetTime:						
+		TRACE("VST master dispatcher: Set Time\n");
+		break;
+	case 	audioMasterGetNumAutomatableParameters:	
+		TRACE("VST master dispatcher: GetNumAutPar\n");
+		break;
+//	case 	audioMasterGetParameterQuantization:	
+		TRACE("VST master dispatcher: ParamQuant\n");
+		break;
+	case 	audioMasterIOChanged:					
+		TRACE("VST master dispatcher: IOchanged\n");
+		break;
+//	case 	audioMasterSizeWindow:					
+		TRACE("VST master dispatcher: Size Window\n");
+		break;
+	case 	audioMasterGetInputLatency:				
+		TRACE("VST master dispatcher: GetInLatency\n");
+		break;
+	case 	audioMasterGetOutputLatency:			
+		TRACE("VST master dispatcher: GetOutLatency\n");
+		break;
+	case 	audioMasterGetPreviousPlug:				
+		TRACE("VST master dispatcher: PrevPlug\n");
+		break;
+	case 	audioMasterGetNextPlug:					
+		TRACE("VST master dispatcher: NextPlug\n");
+		break;
+	case 	audioMasterWillReplaceOrAccumulate:		
+		TRACE("VST master dispatcher: WillReplace\n");
+		break;
+	case 	audioMasterGetCurrentProcessLevel:		
+		TRACE("VST master dispatcher: GetProcessLevel\n");
+		break;
+	case 	audioMasterGetAutomationState:			
+		TRACE("VST master dispatcher: GetAutState\n");
+		break;
+	case 	audioMasterOfflineStart:				
+		TRACE("VST master dispatcher: Offlinestart\n");
+		break;
+	case 	audioMasterOfflineRead:					
+		TRACE("VST master dispatcher: Offlineread\n");
+		break;
+	case 	audioMasterOfflineWrite:				
+		TRACE("VST master dispatcher: Offlinewrite\n");
+		break;
+	case 	audioMasterOfflineGetCurrentPass:		
+		TRACE("VST master dispatcher: OfflineGetcurrentpass\n");
+		break;
+	case 	audioMasterOfflineGetCurrentMetaPass:	
+		TRACE("VST master dispatcher: OfflineGetCurrentMetapass\n");
+		break;
+	case 	audioMasterSetOutputSampleRate:			
+		TRACE("VST master dispatcher: SetOutputsamplerate\n");
+		break;
+	case 	audioMasterGetSpeakerArrangement:		
+		TRACE("VST master dispatcher: Getspeaker\n");
+		break;
+	case 	audioMasterSetIcon:						
+		TRACE("VST master dispatcher: SetIcon\n");
+		break;
+	case 	audioMasterOpenWindow:					
+		TRACE("VST master dispatcher: OpenWindow\n");
+		break;
+	case 	audioMasterCloseWindow:					
+		TRACE("VST master dispatcher: CloseWindow\n");
+		break;
+	case 	audioMasterGetDirectory:				
+		TRACE("VST master dispatcher: GetDirectory\n");
+		break;
+	default: 
+		TRACE("VST master dispatcher: undefed: %d\n",opcode);
+		break;
 	}	
 
 	

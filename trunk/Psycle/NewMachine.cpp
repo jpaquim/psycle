@@ -496,8 +496,6 @@ void CNewMachine::LoadPluginInfo()
 void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCount,CString findDir,MachineType type)
 {
 	CFileFind finder;
-	VSTPlugin* vstPlug;
-	Plugin* plug;
 
 	int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
 	while (loop) 
@@ -574,17 +572,17 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 				{
 					if (type == MACH_PLUGIN )
 					{
-						plug = new Plugin;
-						if (plug->Instance((char*)(const char*)finder.GetFilePath()))
+						Plugin plug;
+						if (plug.Instance((char*)(const char*)finder.GetFilePath()))
 						{
 							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 							ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
-							strcpy(_pPlugsInfo[currentPlugsCount]->name,plug->GetName());
+							strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
 							sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-									(plug->IsSynth()) ? "Psycle instrument" : "Psycle effect",
-									plug->GetAuthor());
+									(plug.IsSynth()) ? "Psycle instrument" : "Psycle effect",
+									plug.GetAuthor());
 							strcpy(_pPlugsInfo[currentPlugsCount]->version,"PsycleAPI 1.0");
-							if ( plug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+							if ( plug.IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 							else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
 							_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
 							_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
@@ -602,7 +600,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 
 							currentPlugsCount++;
 							fprintf(hfile,"*** NEW *** - ");
-							fprintf(hfile,plug->GetName());
+							fprintf(hfile,plug.GetName());
 						}
 						else
 						{
@@ -612,23 +610,23 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 							finder.GetLastWriteTime(&time);
 							_BadPluginFileTime[currentBadPlugsCount] = time;
 							currentBadPlugsCount++;
-							fprintf(hfile,"*** NOT NATIVE PLUGIN OR BUGGED ***");
+							fprintf(hfile,"*** ERROR - NOT NATIVE PLUGIN OR BUGGED ***");
 						}
-						delete plug;
 					}
 					else if (type == MACH_VST)
 					{
-						vstPlug = new VSTPlugin;
-						if (vstPlug->Instance((char*)(const char*)finder.GetFilePath()) == VSTINSTANCE_NO_ERROR)
+						VSTPlugin vstPlug;
+						int ret = vstPlug.Instance((char*)(const char*)finder.GetFilePath());
+						if (ret == VSTINSTANCE_NO_ERROR)
 						{
 							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-							strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug->GetName());
+							strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
 							sprintf(_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-								(vstPlug->IsSynth()) ? "VST2 instrument" : "VST2 effect",
-								vstPlug->GetVendorName());
-							sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug->GetVersion());
+								(vstPlug.IsSynth()) ? "VST2 instrument" : "VST2 effect",
+								vstPlug.GetVendorName());
+							sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d",vstPlug.GetVersion());
 							_pPlugsInfo[currentPlugsCount]->version[15]='\0';
-							if ( vstPlug->IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+							if ( vstPlug.IsSynth() ) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 							else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
 							_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
 							_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
@@ -646,7 +644,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 
 							currentPlugsCount++;
 							fprintf(hfile,"*** NEW *** - ");
-							fprintf(hfile,vstPlug->GetName());
+							fprintf(hfile,vstPlug.GetName());
 						}
 						else
 						{
@@ -656,9 +654,25 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 							finder.GetLastWriteTime(&time);
 							_BadPluginFileTime[currentBadPlugsCount] = time;
 							currentBadPlugsCount++;
-							fprintf(hfile,"*** NOT VST PLUGIN OR BUGGED ***");
+							switch (ret)
+							{
+							case VSTINSTANCE_ERR_NO_VALID_FILE:
+								fprintf(hfile,"*** ERROR - NO FILE ***");
+								break;
+							case VSTINSTANCE_ERR_NO_VST_PLUGIN:
+								fprintf(hfile,"*** ERROR - NOT VST PLUGIN ***");
+								break;
+							case VSTINSTANCE_ERR_REJECTED:
+								fprintf(hfile,"*** ERROR - REJECTED ***");
+								break;
+							case VSTINSTANCE_ERR_EXCEPTION:
+								fprintf(hfile,"*** ERROR - EXCEPTION ***");
+								break;
+							default:
+								fprintf(hfile,"*** ERROR - NOT VST PLUGIN OR BUGGED ***");
+								break;
+							}
 						}
-						delete vstPlug;
 					}
 				}
 			}
