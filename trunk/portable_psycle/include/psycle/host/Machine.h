@@ -64,7 +64,7 @@ namespace psycle
 			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return "built-in"; }
 			virtual char * GetName() = 0;
-			virtual int GetNumParams() { return _numPars; }
+			virtual int GetNumParams() /* = 0; */ { return _numPars; } // [bohan] was { return _numPars; } but there's no need for dummy body anymore ; msvc6 used to generate buggy code on pure virtual functions but it's not gone with msvc7.1 ;-)
 			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; }
 			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
 			virtual int GetParamValue(int numparam) { return 0; };
@@ -104,7 +104,7 @@ namespace psycle
 			int _x;
 			int _y;
 			char _editName[32];
-			int _numPars;
+			int _numPars; // [bohan] there's no need for dummy body anymore ; msvc6 used to generate buggy code on pure virtual functions but it's not gone with msvc7.1 ;-)
 			/// Incoming connections Machine number
 			int _inputMachines[MAX_CONNECTIONS];	
 			/// Outgoing connections Machine number
