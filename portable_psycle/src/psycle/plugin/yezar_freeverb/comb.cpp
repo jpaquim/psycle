@@ -1,5 +1,5 @@
 #include <project.h>
-#include <psycle/plugin/yezar_freverb/comb.hpp>
+#include <psycle/plugin/yezar_freeverb/comb.hpp>
 
 // Comb filter implementation
 //

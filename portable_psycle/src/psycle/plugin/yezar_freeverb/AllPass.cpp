@@ -1,5 +1,5 @@
 #include <project.h>
-#include <psycle/plugin/yezar_freverb/allpass.hpp>
+#include <psycle/plugin/yezar_freeverb/allpass.hpp>
 
 // Allpass filter implementation
 //
