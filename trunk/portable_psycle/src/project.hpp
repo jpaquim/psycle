@@ -1,5 +1,5 @@
 // This file is an exact copy of the following file from freepsycle:
-// http://bohan.dyndns.org/cgi-bin/archzoom.cgi/psycle@sourceforge.net/psycle--mainline--0--patch-286/src/project.hpp.in
+// http://bohan.dyndns.org/cgi-bin/archzoom.cgi/psycle@sourceforge.net/psycle--mainline--LATEST--LATEST/src/project.hpp.in
 ///\file
 ///\brief project-wide compiler, operating system, and processor specific tweaks.
 ///\meta generic
@@ -117,7 +117,7 @@
 	#define OPERATING_SYSTEM__APPLE
 	#undef OPERATING_SYSTEM__APPLE // was just defined to insert documentation.
 
-	/// mswind, autodetected via _WIN32 and _WIN64 (and __MINGW32__).
+	/// microsoft's windows, autodetected via _WIN32 and _WIN64 (and __MINGW32__).
 	/// version 5.1.2600 (xp service pack 1).
 	/// [bohan]
 	/// i don't know what to do with old versions (9x/me)...
@@ -500,7 +500,9 @@
 #if defined OPERATING_SYSTEM__APPLE
 	#define PROCESSOR
 	#define PROCESSOR__POWER_PC 5
-	// Implied because the version of apple's operating system for 68k processors has been discontinued, hence now, only power pc processors are supported by this operating system.
+	// Implied because the version of apple's operating system for 68k processors has been discontinued.
+	// Hence now, only power pc processors are supported by this operating system.
+	// [bohan] Actually it seems that darwin also runs on sparc and hppa processors.
 #endif
 
 #if !defined PROCESSOR && !defined COMPILER__FEATURE__NOT_CONCRETE
@@ -1045,7 +1047,7 @@
 			//
 			// [bohan] conclusion: the best mode is EHsc (==GX) even if we can have some memory leaks if hardware exceptions are raised
 			// [bohan] note:
-			// <obhan> there is a bug in msvc concerning synchronous exception handling model ... disable it locally where necessary
+			// [bohan] there is a bug in msvc concerning synchronous exception handling model ... disable it locally where necessary
 			// [bohan] problems appears when using synchronous exception handling model...
 			// [bohan] on msvc 6, i had to use asynchronous exception handling
 			// [bohan] this is still not fixed in msvc 7.1 (it's only fixed with global optimization).
