@@ -4,6 +4,7 @@
 class Song;
 class Player;
 class Configuration;
+class Resampler;
 
 #if defined(_WINAMP_PLUGIN_)
 
@@ -18,12 +19,12 @@ class Configuration;
 		static Song* _pSong;
 		static Player* pPlayer;
 		static Configuration* pConfig;
+		static Resampler* pResampler;
 		static int _lbc;
 	};
 
 #else
 
-	class Resampler;
 	class InputHandler;
 
 	class Global

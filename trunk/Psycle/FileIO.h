@@ -34,7 +34,8 @@ public:
 	virtual ULONG Seek(ULONG offset);
 	virtual ULONG Skip(ULONG numBytes);
 	virtual bool Eof(void);
-
+	virtual long FileSize(void);
+	
 	virtual FILE* GetFile(void) { return NULL; };
 
 	static ULONG FourCC(char *psName);
@@ -56,6 +57,7 @@ public:
 	virtual ULONG Seek(ULONG offset);
 	virtual ULONG Skip(ULONG numBytes);
 	virtual bool Eof(void);
+	virtual long FileSize(void);
 	
 
 	virtual FILE* GetFile(void) { return _file; };

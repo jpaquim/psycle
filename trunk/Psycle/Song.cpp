@@ -177,7 +177,9 @@ int Song::FindBusFromIndex(int smac)
 
 Song::Song()
 {
-#if !defined(_WINAMP_PLUGIN_)
+#if defined(_WINAMP_PLUGIN_)
+	filesize=0;
+#else
 	_machineLock = false;
 	Invalided = false;
 	Tweaker = false;
@@ -674,7 +676,6 @@ void Song::SetBPM(int bpm, int tpb, int srate)
 	_ticksPerBeat = tpb;
 	SamplesPerTick = (srate*15*4)/(bpm*tpb);
 }
-#if !defined(_WINAMP_PLUGIN_)
 int Song::GetNumPatternsUsed()
 {
 	int rval=0;
@@ -695,6 +696,7 @@ int Song::GetNumPatternsUsed()
 	}
 	return rval;
 }
+#if !defined(_WINAMP_PLUGIN_)
 
 int Song::GetBlankPatternUnused(int rval)
 {

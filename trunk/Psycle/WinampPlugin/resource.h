@@ -9,12 +9,12 @@
 #define IDC_EDIT_VST                    1002
 #define IDC_CHANGE_VST                  1003
 #define IDC_CHANGE_NATIVE               1004
-#define IDC_SONGNAME                    1005
-#define IDC_PLUGLIST                    1006
+#define IDC_SONGFILENAME                1005
+#define IDC_MACHINELIST                 1006
 #define IDC_EXTINFO                     1007
-#define IDC_EDIT2                       1008
-#define IDC_EDIT3                       1009
-#define IDC_EDIT4                       1010
+#define IDC_SONGARTIST                  1008
+#define IDC_SONGTITLE                   1009
+#define IDC_SONGCOMMENT                 1010
 
 // Next default values for new objects
 // 

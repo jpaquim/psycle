@@ -4,10 +4,12 @@
 //	#include "global.h"
 	#include "Song.h"
 	#include "Player.h"
+	#include "Dsp.h"
 	#include "Configuration.h"
 
 	Song* Global::_pSong = NULL;
 	Player* Global::pPlayer = NULL;
+	Resampler* Global::pResampler = NULL;
 	Configuration* Global::pConfig = NULL;
 	int Global::_lbc = -1;
 	
@@ -16,6 +18,8 @@
 		_pSong = new Song;
 		pPlayer = new Player;
 		pConfig = new Configuration;
+		pResampler = new Cubic;
+		pResampler->SetQuality(RESAMPLE_LINEAR);
 		_lbc = -1;
 	}
 
@@ -23,6 +27,7 @@
 	{
 		delete _pSong;
 		delete pPlayer;
+		delete pResampler;
 		delete pConfig;
 	}
 	bool FindFileinDir(char *dllname,CString &path)

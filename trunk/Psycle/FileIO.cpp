@@ -147,6 +147,14 @@ bool RiffFile::Eof(
 	return false;
 }
 
+long RiffFile::FileSize()
+{
+	const long init = SetFilePointer(_handle, 0, NULL, FILE_CURRENT);
+	const long end = SetFilePointer(_handle,0,NULL,FILE_END);
+	SetFilePointer(_handle,init,NULL,FILE_BEGIN);
+	return end;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -248,4 +256,13 @@ bool OldPsyFile::Eof(
 	void)
 {
 	return feof(_file)?true:false;
+}
+
+long OldPsyFile::FileSize()
+{
+	int init = ftell(_file);
+	fseek(_file, 0,SEEK_END);
+	int end = ftell(_file);
+	fseek(_file,init,SEEK_SET);
+	return end;
 }
