@@ -689,20 +689,17 @@ namespace psycle
 				case audioMasterAutomate:
 					#if !defined _WINAMP_PLUGIN_
 							Global::_pSong->Tweaker = true;
-							if(effect)
+							if(effect && effect->user)
 							{
-								if( effect->user) /// \todo ugly solution...
+								if(Global::pConfig->_RecordTweaks)  
 								{
-									if(Global::pConfig->_RecordTweaks)  
-									{
-										if(Global::pConfig->_RecordMouseTweaksSmooth)
-											((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(reinterpret_cast<plugin *>(effect->user)->_macIndex, index, f2i(opt * vst::quantization));
-										else
-											((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(reinterpret_cast<plugin *>(effect->user)->_macIndex, index, f2i(opt * vst::quantization));
-									}
-									if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
-										((CVstEditorDlg *) reinterpret_cast<plugin *>(effect->user)->editorWnd)->Refresh(index, opt);
+									if(Global::pConfig->_RecordMouseTweaksSmooth)
+										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(reinterpret_cast<plugin *>(effect->user)->_macIndex, index, f2i(opt * vst::quantization));
+									else
+										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(reinterpret_cast<plugin *>(effect->user)->_macIndex, index, f2i(opt * vst::quantization));
 								}
+								if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
+									((CVstEditorDlg *) reinterpret_cast<plugin *>(effect->user)->editorWnd)->Refresh(index, opt);
 							}
 							
 					#endif
@@ -712,7 +709,7 @@ namespace psycle
 				case audioMasterCurrentId:			
 					return 'AASH'; // returns the unique id of a plug that's currently loading
 				case audioMasterIdle:
-					if(effect)
+					if(effect && effect->user)
 					{
 						try
 						{
@@ -729,12 +726,12 @@ namespace psycle
 					}
 					return 0; // call application idle routine (this will call effEditIdle for all open editors too) 
 				case audioMasterPinConnected:
-					if(value == 0) //input
+					if(value == 0) // input
 					{
 						if(index < 2) return 0; // 0 means connected, 1 disconnected.
 						else return 1;
 					}
-					else //output
+					else // output
 					{
 						if(index < 2) return 0;
 						else return 1;
@@ -833,14 +830,11 @@ namespace psycle
 					// Declaration: virtual long tempoAt (long pos); // returns tempo (in bpm * 10000) at sample frame location <pos>
 					return Global::pPlayer->bpm * 10000;
 				case audioMasterNeedIdle:
-					if(effect)
+					if(effect && effect->user)
 					{
 						try
 						{
-							if( effect->user) 
-							{
-								reinterpret_cast<plugin *>(effect->user)->wantidle = true;
-							}
+							reinterpret_cast<plugin *>(effect->user)->wantidle = true;
 						}
 						catch(const std::exception &)
 						{
@@ -874,7 +868,7 @@ namespace psycle
 				case audioMasterGetLanguage:		
 					return kVstLangEnglish;
 				case audioMasterUpdateDisplay:
-					if(effect)
+					if(effect && effect->user)
 					{
 						try
 						{
@@ -892,15 +886,12 @@ namespace psycle
 					return 0;
 				case audioMasterSizeWindow:
 					#if !defined _WINAMP_PLUGIN_
-							if(effect)
+							if(effect && effect->user)
 							{
 								try
 								{
-									if( effect->user)
-									{
-										if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
-											reinterpret_cast<CVstEditorDlg *>(reinterpret_cast<plugin *>(effect->user)->editorWnd)->Resize(index, value);
-									}
+									if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
+										reinterpret_cast<CVstEditorDlg *>(reinterpret_cast<plugin *>(effect->user)->editorWnd)->Resize(index, value);
 								}
 								catch(const std::exception &)
 								{
