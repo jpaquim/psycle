@@ -3,17 +3,14 @@
 #if 0
 /*
 $Log$
+Revision 1.8  2005/01/29 16:12:06  johan-boule
+removed old cvs logs
+
 Revision 1.7  2005/01/29 16:10:44  johan-boule
 harcoded version info when APPSTUDIO is defined, and using defines from version.hpp otherwize
 
 Revision 1.6  2005/01/29 13:18:01  johan-boule
 disabled automatic version info in the resource file
-
-Revision 1.5  2005/01/27 09:03:15  johan-boule
-tagged the cvs HEAD revision set with release_1_7_27
-
-Revision 1.4  2005/01/24 17:36:59  johan-boule
-no message
 
 Revision 1.3  2005/01/24 17:36:22  johan-boule
 there was a nasty backslash at the end of a line preventing the psycle namespace to close and creating a nested psycle namespace inside the psycle namespace itself.
@@ -30,68 +27,14 @@ The include dir still contains header files for libraries that we don't compile 
 Other third-party code, namely, asio, winamp-2, foobar2000, and stk have .cpp files which we compile ourself, hence they are in the src dir.
 Of course, all of psycle's own code in the the src dir, nothing of it is in the include dir anymore.
 
-Revision 1.22  2005/01/23 11:24:26  johan-boule
-new version 1.7.25
-
 Revision 1.21  2005/01/23 11:04:13  johan-boule
 new version scheme 1.7.24
-
-Revision 1.20  2005/01/23 11:02:06  johan-boule
-new version scheme 1.7.24
-
-Revision 1.19  2005/01/23 10:59:12  johan-boule
-version numbering again, huhu ha ho.
-
-Revision 1.18  2005/01/23 10:39:04  johan-boule
-version numbering again, huhu.
-
-Revision 1.17  2005/01/23 10:36:05  johan-boule
-version numbering again, huhu.
-
-Revision 1.16  2005/01/23 10:07:17  johan-boule
-typo
-
-Revision 1.15  2005/01/23 10:06:16  johan-boule
-typo
-
-Revision 1.14  2005/01/23 10:05:13  johan-boule
-typo
-
-Revision 1.13  2005/01/23 10:03:01  johan-boule
-version numbering
-
-Revision 1.12  2005/01/23 09:41:25  johan-boule
-version numbering
-
-Revision 1.11  2005/01/23 09:32:32  johan-boule
-comments about version numbering.. we could go to 1.7.8 maybe?
-
-Revision 1.10  2005/01/23 09:04:48  johan-boule
-new version
 
 Revision 1.9  2005/01/19 23:16:55  johan-boule
 no more .rar binary distro, it's 7-zip now :-)
 
-Revision 1.8  2005/01/19 23:11:11  johan-boule
-no message
-
-Revision 1.7  2005/01/14 22:34:42  johan-boule
-new version
-
-Revision 1.6  2005/01/14 22:09:14  jaz001
-fix for resources not being editable inside MSVC
-
-Revision 1.5  2005/01/13 23:18:50  johan-boule
-no message
-
 Revision 1.4  2005/01/07 22:27:47  johan-boule
 std::ostringstream.clear missuses fixed (3 occurences)
-
-Revision 1.3  2005/01/01 20:13:48  johan-boule
-version patch 18
-
-Revision 1.2  2005/01/01 20:05:49  johan-boule
-no message
 
 Revision 1.1  2004/12/22 22:43:41  johan-boule
 fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
