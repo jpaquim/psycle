@@ -237,8 +237,10 @@ namespace psycle
 
 			int GetNote()
 			{
-				if(GetType()==CT_Note)
+				if(GetType()==CT_Note) {
+					assert(ID >= 0 && ID < 128);
 					return ID;
+				}
 				else
 					return -1;
 			}
@@ -386,7 +388,7 @@ namespace psycle
 				case cdefUndo:		return "Edit Undo";
 				case cdefRedo:		return "Edit Redo";
 
-				default: return "Invalid";
+				default: assert(false); return "Invalid";
 				}
 			}
 		};

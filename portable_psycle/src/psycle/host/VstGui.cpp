@@ -124,10 +124,12 @@ namespace psycle
 		{
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
-			if(_pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-				Global::pInputHandler->StopNote(outnote, true, _pMachine);
-			else
-				Global::pInputHandler->StopNote(outnote, true);
+			if(outnote != -1) {
+				if(_pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+					Global::pInputHandler->StopNote(outnote, true, _pMachine);
+				else
+					Global::pInputHandler->StopNote(outnote, true);
+			}
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
