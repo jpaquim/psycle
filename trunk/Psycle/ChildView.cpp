@@ -1953,6 +1953,8 @@ void CChildView::OnHelpWhatsnew()
 	ShellExecute(pParentMain->m_hWnd,"open","Docs\\whatsnew.txt",NULL,"",SW_SHOW);
 }
 
+#define _UGLY_DEFAULT_SKIN_
+
 void CChildView::LoadMachineSkin()
 {
 	static char szOld[64] = "";
@@ -1972,6 +1974,7 @@ void CChildView::LoadMachineSkin()
 		// load defaults
 		strcpy(szOld, DEFAULT_MACHINE_SKIN);
 		// and coords
+#ifdef _UGLY_DEFAULT_SKIN_
 		MachineCoords.sMaster.x = 0;
 		MachineCoords.sMaster.y = 0;
 		MachineCoords.sMaster.width = 148;
@@ -2057,7 +2060,93 @@ void CChildView::LoadMachineSkin()
 		MachineCoords.dEffectName.x = 10;
 		MachineCoords.dEffectName.y = 12;
 		MachineCoords.bHasTransparency = FALSE;
+#else
+		MachineCoords.sMaster.x = 0;
+		MachineCoords.sMaster.y = 0;
+		MachineCoords.sMaster.width = 148;
+		MachineCoords.sMaster.height = 47;//48;
 
+		MachineCoords.sGenerator.x = 0;
+		MachineCoords.sGenerator.y = 47;//48;
+		MachineCoords.sGenerator.width = 148;
+		MachineCoords.sGenerator.height = 47;//48;
+		MachineCoords.sGeneratorVu0.x = 0;
+		MachineCoords.sGeneratorVu0.y = 141;//144;
+		MachineCoords.sGeneratorVu0.width = 2;//6;
+		MachineCoords.sGeneratorVu0.height = 4;//5;
+		MachineCoords.sGeneratorVuPeak.x = 128;//96;
+		MachineCoords.sGeneratorVuPeak.y = 141;//144;
+		MachineCoords.sGeneratorVuPeak.width = 2;//6;
+		MachineCoords.sGeneratorVuPeak.height = 4;//5;
+		MachineCoords.sGeneratorPan.x = 45;//102;
+		MachineCoords.sGeneratorPan.y = 145;//144;
+		MachineCoords.sGeneratorPan.width = 16;//24;
+		MachineCoords.sGeneratorPan.height = 5;//9;
+		MachineCoords.sGeneratorMute.x = 0;//133;
+		MachineCoords.sGeneratorMute.y = 145;//144;
+		MachineCoords.sGeneratorMute.width = 15;//7;
+		MachineCoords.sGeneratorMute.height = 14;//7;
+		MachineCoords.sGeneratorSolo.x = 15;//140;
+		MachineCoords.sGeneratorSolo.y = 145;//144;
+		MachineCoords.sGeneratorSolo.width = 15;//7;
+		MachineCoords.sGeneratorSolo.height = 14;//7;
+
+		MachineCoords.sEffect.x = 0;
+		MachineCoords.sEffect.y = 94;//96;
+		MachineCoords.sEffect.width = 148;
+		MachineCoords.sEffect.height = 47;//48;
+		MachineCoords.sEffectVu0.x = 0;
+		MachineCoords.sEffectVu0.y = 141;//144;
+		MachineCoords.sEffectVu0.width = 2;//6;
+		MachineCoords.sEffectVu0.height = 4;//5;
+		MachineCoords.sEffectVuPeak.x = 128;//96;
+		MachineCoords.sEffectVuPeak.y = 141;//144;
+		MachineCoords.sEffectVuPeak.width = 2;//6;
+		MachineCoords.sEffectVuPeak.height = 4;//5;
+		MachineCoords.sEffectPan.x = 45;//102;
+		MachineCoords.sEffectPan.y = 145;//144;
+		MachineCoords.sEffectPan.width = 16;//24;
+		MachineCoords.sEffectPan.height = 5;//9;
+		MachineCoords.sEffectMute.x = 0;//133;
+		MachineCoords.sEffectMute.y = 145;//144;
+		MachineCoords.sEffectMute.width = 15;//7;
+		MachineCoords.sEffectMute.height = 14;//7;
+		MachineCoords.sEffectBypass.x = 30;//126;
+		MachineCoords.sEffectBypass.y = 145;//144;
+		MachineCoords.sEffectBypass.width = 15;//7;
+		MachineCoords.sEffectBypass.height = 14;//13;
+
+		MachineCoords.dGeneratorVu.x = 10;//8;
+		MachineCoords.dGeneratorVu.y = 35;//3;
+		MachineCoords.dGeneratorVu.width = 130;//96;
+		MachineCoords.dGeneratorVu.height = 0;
+		MachineCoords.dGeneratorPan.x = 39;//3;
+		MachineCoords.dGeneratorPan.y = 26;//35;
+		MachineCoords.dGeneratorPan.width = 91;//117;
+		MachineCoords.dGeneratorPan.height = 0;
+		MachineCoords.dGeneratorMute.x = 11;//137;
+		MachineCoords.dGeneratorMute.y = 5;//4;
+		MachineCoords.dGeneratorSolo.x = 26;//137;
+		MachineCoords.dGeneratorSolo.y = 5;//17;
+		MachineCoords.dGeneratorName.x = 49;//10;
+		MachineCoords.dGeneratorName.y = 7;//12;
+
+		MachineCoords.dEffectVu.x = 10;//8;
+		MachineCoords.dEffectVu.y = 35;//3;
+		MachineCoords.dEffectVu.width = 130;//96;
+		MachineCoords.dEffectVu.height = 0;
+		MachineCoords.dEffectPan.x = 39;//3;
+		MachineCoords.dEffectPan.y = 26;//35;
+		MachineCoords.dEffectPan.width = 91;//117;
+		MachineCoords.dEffectPan.height = 0;
+		MachineCoords.dEffectMute.x = 11;//137;
+		MachineCoords.dEffectMute.y = 5;//4;
+		MachineCoords.dEffectBypass.x = 26;//137;
+		MachineCoords.dEffectBypass.y = 5;//15;
+		MachineCoords.dEffectName.x = 49;//10;
+		MachineCoords.dEffectName.y = 7;//12;
+		MachineCoords.bHasTransparency = FALSE;
+#endif
 		machineskin.DeleteObject();
 		DeleteObject(hbmMachineSkin);
 		machineskinmask.DeleteObject();
@@ -2625,6 +2714,7 @@ void CChildView::LoadPatternHeaderSkin()
 		// load defaults
 		strcpy(szOld, DEFAULT_PATTERN_HEADER_SKIN);
 		// and coords
+#ifdef _UGLY_DEFAULT_SKIN_
 		PatHeaderCoords.sBackground.x=0;
 		PatHeaderCoords.sBackground.y=0;
 		PatHeaderCoords.sBackground.width=109;
@@ -2656,7 +2746,39 @@ void CChildView::LoadPatternHeaderSkin()
 		PatHeaderCoords.dSoloOn.x = 96;
 		PatHeaderCoords.dSoloOn.y = 5;
 		PatHeaderCoords.bHasTransparency = FALSE;
-
+#else
+		PatHeaderCoords.sBackground.x=0;
+		PatHeaderCoords.sBackground.y=0;
+		PatHeaderCoords.sBackground.width=109;
+		PatHeaderCoords.sBackground.height=18;//16
+		PatHeaderCoords.sNumber0.x = 0;
+		PatHeaderCoords.sNumber0.y = 18;//16
+		PatHeaderCoords.sNumber0.width = 7;
+		PatHeaderCoords.sNumber0.height = 12;
+		PatHeaderCoords.sRecordOn.x = 70;
+		PatHeaderCoords.sRecordOn.y = 18;//16
+		PatHeaderCoords.sRecordOn.width = 11;//7;
+		PatHeaderCoords.sRecordOn.height = 11;//7;
+		PatHeaderCoords.sMuteOn.x = 81;//77;
+		PatHeaderCoords.sMuteOn.y = 18;//16;
+		PatHeaderCoords.sMuteOn.width = 11;//7;
+		PatHeaderCoords.sMuteOn.height = 11;//7;
+		PatHeaderCoords.sSoloOn.x = 92;//84;
+		PatHeaderCoords.sSoloOn.y = 18;//16;
+		PatHeaderCoords.sSoloOn.width = 11;//7;
+		PatHeaderCoords.sSoloOn.height = 11;//7;
+		PatHeaderCoords.dDigitX0.x = 24;//22;
+		PatHeaderCoords.dDigitX0.y = 3;//2;
+		PatHeaderCoords.dDigit0X.x = 31;//29;
+		PatHeaderCoords.dDigit0X.y = 3;//2;
+		PatHeaderCoords.dRecordOn.x = 52;
+		PatHeaderCoords.dRecordOn.y = 3;//5;
+		PatHeaderCoords.dMuteOn.x = 75;
+		PatHeaderCoords.dMuteOn.y = 3;//5;
+		PatHeaderCoords.dSoloOn.x = 97;//96;
+		PatHeaderCoords.dSoloOn.y = 3;//5;
+		PatHeaderCoords.bHasTransparency = FALSE;
+#endif
 		patternheader.DeleteObject();
 		DeleteObject(hbmPatHeader);
 		patternheadermask.DeleteObject();
