@@ -78,10 +78,10 @@ rough bug count: ~60, many aren't really bugs though.
 * Machines
 ------------
 **	cyanphase vibrasynth has an access violation bug
-		[ I need source to fix]
+	[ I need source to fix]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
-*	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
+**	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 **	routing in pooplog synths for vcf->od modes only works when both vcfs are active?
 **  clicking in pooplog synths when vca sustain is off
 **  pooplog delay panning knobs fuck with my brain because they work counter-intuitively
@@ -116,7 +116,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Wave Editor:
 --------------------------
-* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' button in the inst ed, and select some of the sample wav, the display goes blank
+* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>' 
+	button in the inst ed, and select some of the sample wav, the display goes blank
 !	alk: escape to close wave ed
 		[JAZ : It's a window, not a dialog]
 +++	<_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
@@ -155,11 +156,12 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window,
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
+		[KeyToCmd() isn't called when a mouse button is down... ]
 *	preview check box in preset dialog stopped working? envelope dialog for sampler?
-	[ it works, but you can't test notes realtime because the dialog is modal unless you use midi ]
+	[ it works, but you can't test notes realtime because the dialog is modal - unless you use midi ]
 *	moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
 	on every frame - 
-	[ make bigger buffers and more of them to prevent this from happening ]
+	[ make bigger buffers and more of them to prevent this from happening * i tried to minimize this ]
 *	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
 	[ could try to set up some sort of clipping rect stack, at the cost of cpu... ]
 *	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
@@ -219,11 +221,15 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ------------
 ***	Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra and JAL7OH-)
 		[Fix:Basically, make ONLY .fxb for VST's.]
+**	The Winamp plugin shows a memory leak with modules that have VST's. I have overlooked but I
+	haven't found the cause yet. I will try later with a leak detector program.
 ** <_sue_> hey.....remember seeing someone at the boards sayn that psycles param bar went crazy with
 	 some plug.....im checking NI FM7 vsti.......with haves 881 params.......when i tweak a knob 
 	 sometimes the param bar takes ages to get to its postion.......maybe this is what he was 
 	 talking about......the first time it happened it scrolled for ages..i thought it had went 
 	 crazy too.....
+** ticky clav 1.1 causes random access violation crashes?
+** phatmatic causes crashes when you open the gui after loading a sample into it.
 ** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
 	minimize/refocus psycle or change the current view
 	this only seems to happen on the rgc audio z3ta+ and on nothing else
@@ -259,8 +265,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(
 !	List of "VST's not to load".
 
-**	The Winamp plugin shows a memory leak with modules that have VST's. I have overlooked but I
-	haven't found the cause yet. I will try later with a leak detector program.
 
 * MIDI related
 ------------
@@ -287,6 +291,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	<[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
 	the info when new one.
 **	should save wire dialog settings
+	[ are you sure? ]
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
 	<bdzld> yep, or if the sample rate is invalid
 * <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
@@ -297,12 +302,14 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 	[Is it useful to enter numbers while playing and follow song? what about just adding notes
 	 wherever the position of the cursor is?]
 * screen should be made so 800x600 works
+	[ detacheable sequence menu? ]
 *	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
 	 range bigger]
 *	<alk> there's a bug where when u alt-tab the icon is not correct 
 		[ cannot find the reason, older version had this too ]
-*	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
+*	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you 
+	move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps

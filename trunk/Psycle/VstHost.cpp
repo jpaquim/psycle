@@ -63,6 +63,9 @@ VSTPlugin::~VSTPlugin()
 
 int VSTPlugin::Instance(char *dllname,bool overwriteName)
 {
+	_pEffect=NULL;
+	instantiated=false;
+
 	h_dll=LoadLibrary(dllname);
 
 	if(h_dll==NULL)	
@@ -82,8 +85,6 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	if(!main)
 	{	
 		FreeLibrary(h_dll);
-		_pEffect=NULL;
-		instantiated=false;
 		return VSTINSTANCE_ERR_NO_VST_PLUGIN;
 	}
 
@@ -94,6 +95,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 	catch (...)
 	{
+		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 	
@@ -102,7 +104,6 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 		TRACE("VST plugin : Instance query rejected by 0x%.8X\n",(int)_pEffect);
 		FreeLibrary(h_dll);
 		_pEffect=NULL;
-		instantiated=false;
 		return VSTINSTANCE_ERR_REJECTED;
 	}
 
@@ -116,6 +117,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 	catch (...)
 	{
+		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 
@@ -129,6 +131,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 	catch (...)
 	{
+		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 
@@ -138,6 +141,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 	catch (...)
 	{
+		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 
@@ -147,6 +151,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 	catch (...)
 	{
+		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 
@@ -156,6 +161,7 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	}
 	catch (...)
 	{
+		_pEffect=NULL;
 		return VSTINSTANCE_ERR_EXCEPTION;
 	}
 	
