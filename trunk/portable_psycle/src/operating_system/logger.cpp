@@ -103,19 +103,19 @@ namespace operating_system
 		switch(level)
 		{
 		case ::psycle::host::loggers::levels::trace:
-			attributes=FOREGROUND_BLUE;
+			attributes=FOREGROUND_BLUE|FOREGROUND_INTENSITY;
 			break;
 		case ::psycle::host::loggers::levels::info:
-			attributes=FOREGROUND_GREEN;
+			attributes=FOREGROUND_GREEN|FOREGROUND_INTENSITY;
 			break;
 		case ::psycle::host::loggers::levels::exception:
-			attributes=FOREGROUND_RED;
+			attributes=FOREGROUND_RED|FOREGROUND_INTENSITY;
 			break;
 		case ::psycle::host::loggers::levels::crash:
 			attributes=BACKGROUND_RED;
 			break;
 		default:
-			attributes|=FOREGROUND_BLUE;
+			attributes|=FOREGROUND_BLUE|FOREGROUND_RED|FOREGROUND_INTENSITY;
 		};
 
 		DWORD length=string.length();
