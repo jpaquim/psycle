@@ -18,7 +18,7 @@ public:
 		out << std::endl;
 		out << "What we're doing here is essentially creating two Haas effects:" << std::endl;
 		out << "\t The first gives your ears direct spacialization between the sound source and the listener," << std::endl;
-		out << "\t and the second gives your brain indirect spacialization between the listener and the source via some reference point of which the sound reflected." << std::endl;
+		out << "\t and the second gives your brain indirect spacialization between the listener and the source via some reference point on which the sound reflected." << std::endl;
 		out << std::endl;
 		out << "A third delay can be used for late reflection, giving your brain a hint about the openess of the environement." << std::endl;
 		out << std::endl;
