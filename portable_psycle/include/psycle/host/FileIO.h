@@ -37,7 +37,7 @@ namespace psycle
 		{
 		public:
 			RiffChunkHeader _header;
-			virtual bool Open(char* psFileName);
+			virtual bool Open(char const* psFileName);
 			virtual bool Create(char* psFileName, bool overwrite);
 			virtual BOOL Close(void);
 			virtual bool Read(void* pData, ULONG numBytes);

@@ -16,7 +16,7 @@ namespace psycle
 			return retbuf;
 		}
 
-		bool RiffFile::Open(char* psFileName)
+		bool RiffFile::Open(char const* psFileName)
 		{
 			DWORD bytesRead;
 			std::strcpy(szName,psFileName);
@@ -127,10 +127,10 @@ namespace psycle
 			{
 				if (Read(&c, sizeof(c)))
 				{
-					result+=c;
 					if(c == 0) {
 						return true;
 					}
+					result+=c;
 				}
 				else return false;
 			}

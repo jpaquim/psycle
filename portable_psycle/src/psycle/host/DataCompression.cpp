@@ -521,14 +521,14 @@ namespace psycle
 						if (sign)
 						{
 							// we need to convert to negative
-							signed short error2 = 0xffff << numbits;
+							signed short error2 = (0xffff << numbits) & 0xffff;
 							error = error | error2;
 						}
 
 						// and then apply our error value to the prediction
 						// sample = last + (last - prev last)
 
-						signed short t = (prev+(prev-prevprev))+error;
+						signed short t = (prev+(prev-prevprev))+error & 0xffff;
 						// store our sample
 						*pDestPos++ = t;
 						// shuffle our previous values for next value
