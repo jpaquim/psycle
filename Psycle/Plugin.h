@@ -6,6 +6,7 @@
 #include "Configuration.h"
 #include "MachineInterface.h"
 #include "Player.h"
+#include "NewMachine.h"
 
 class PluginFxCallback : public CFxCallback
 {
@@ -86,13 +87,88 @@ public:
 		else return false;
 	}
 	virtual bool Load(RiffFile* pFile);
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		UINT size;
+		pFile->Read(&size,sizeof(size));
+		if (size)
+		{
+			byte* pData = new byte[size];
+			pFile->Read(pData, size); // Number of parameters
+			_pInterface->PutData(pData); // Internal load
+			delete pData;
+		}
+		return TRUE;
+	};
+
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
+	virtual void SaveSpecificChunk(RiffFile* pFile) 
+	{
+		UINT size = _pInterface->GetDataSize();
+		pFile->Write(&size,sizeof(size));
+		if (size)
+		{
+			byte* pData = new byte[size];
+			_pInterface->GetData(pData); // Internal save
+			pFile->Write(pData, size); // Number of parameters
+			delete pData;
+		}
+	};
+	virtual void SaveDllName(RiffFile* pFile) 
+	{
+		CString str = _psDllName;
+		char str2[256];
+		strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+		pFile->Write(&str2,strlen(str2)+1);
+	};
+
 #endif // ndef _WINAMP_PLUGIN_
 
 	bool Instance(char* psFileName);
 	void Free(void);
 //	bool Create(Plugin *plug);
+	bool LoadDll(char* psFileName)
+	{
+		_strlwr(psFileName);
+		char sPath2[_MAX_PATH];
+		CString sPath;
+#if defined(_WINAMP_PLUGIN_)
+		sPath = Global::pConfig->GetPluginDir();
+
+		if ( FindFileinDir(psFileName,sPath) )
+		{
+			strcpy(sPath2,sPath);
+			return Instance(sPath2);
+		}
+#else
+		if ( !CNewMachine::dllNames.Lookup(psFileName,sPath) ) 
+		{
+//			Check Compatibility Table.
+//			Probably could be done with the dllNames lockup.
+//
+//			GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+			strcpy(sPath2,psFileName);
+		}
+		else 
+		{ 
+			strcpy(sPath2,sPath); 
+		}
+
+		if (!Instance(sPath2))
+		{
+			char sError[_MAX_PATH];
+			sprintf(sError,"Missing or corrupted native Plug-in \"%s\"",psFileName);
+			::MessageBox(NULL,sError, "Error", MB_OK);
+			return FALSE;
+		}
+		else
+		{
+			return TRUE;
+		}
+#endif // _WINAMP_PLUGIN_	};
+		return FALSE;
+	};
 
 	bool IsSynth(void) { return _isSynth; }
 	char* GetDllName(void) { return _psDllName; }
@@ -102,6 +178,7 @@ public:
 	CMachineInfo* GetInfo(void) { return _pInfo; };
 	CMachineInterface* GetInterface(void) { return _pInterface; };
 	PluginFxCallback* GetCallback(void) { return &_callback; };
+
 
 protected:
 	HINSTANCE _dll;

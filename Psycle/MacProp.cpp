@@ -129,7 +129,7 @@ void CMacProp::OnSolo()
 	 }
 	 else
 	 {
-		pSong->machineSoloed = 0;
+		pSong->machineSoloed = -1;
 		for ( int i=0;i<MAX_BUSES;i++ )
 		{
 			if (pSong->_pMachine[i])

@@ -186,7 +186,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 							Global::_pSong->_pMachine[smac]->_volumeDisplay=0;
 							if (Global::_pSong->machineSoloed == smac )
 							{
-								Global::_pSong->machineSoloed = 0;
+								Global::_pSong->machineSoloed = -1;
 							}
 						}
 						updatePar = smac;
@@ -199,7 +199,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					{
 						if (Global::_pSong->machineSoloed == smac )
 						{
-							Global::_pSong->machineSoloed = 0;
+							Global::_pSong->machineSoloed = -1;
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
 								if ( Global::_pSong->_pMachine[i] )
@@ -800,7 +800,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 							Global::_pSong->_pMachine[tmac]->_volumeDisplay=0;
 							if (Global::_pSong->machineSoloed == tmac )
 							{
-								Global::_pSong->machineSoloed = 0;
+								Global::_pSong->machineSoloed = -1;
 							}
 						}
 						updatePar = tmac;
@@ -814,7 +814,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 					{
 						if (Global::_pSong->machineSoloed == tmac )
 						{
-							Global::_pSong->machineSoloed = 0;
+							Global::_pSong->machineSoloed = -1;
 							for ( int i=0;i<MAX_MACHINES;i++ )
 							{
 								if ( Global::_pSong->_pMachine[i] )

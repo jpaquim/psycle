@@ -35,12 +35,29 @@ public:
 //	void Create(VSTPlugin *plug);
 	virtual void Init(void);
 	virtual bool Load(RiffFile* pFile);
+
+	bool LoadChunk(RiffFile* pFile);	// To be removed when changing the fileformat.
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+	{
+		UINT size;
+		pFile->Read(&size,sizeof(size));
+		if (size)
+		{
+		// specific data for vst type
+		// chunk shit
+		}
+		return TRUE;
+	};
+
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
-#endif // ndef _WINAMP_PLUGIN_
-	bool LoadChunk(RiffFile* pFile);	// To be removed when changing the fileformat.
-#if !defined(_WINAMP_PLUGIN_)
 	bool SaveChunk(RiffFile* pFile,bool &isfirst);	// "    "   "   " 
+	virtual void SaveSpecificChunk(RiffFile* pFile) 
+	{
+		// specific data for vst type
+		// chunk shit
+	};
+
 #endif // ndef _WINAMP_PLUGIN_
 	virtual int GetNumParams(void) { return _pEffect->numParams; }
 	virtual void GetParamName(int numparam,char* name)

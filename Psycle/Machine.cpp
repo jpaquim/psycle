@@ -19,6 +19,10 @@
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
 
+#include "Sampler.h"
+#include "Plugin.h"
+#include "VSTHost.h"
+
 #include "InputHandler.h"
 
 char* Master::_psName = "Master";
@@ -399,9 +403,178 @@ bool Machine::Load(
 
 	return true;
 }
+
+Machine* Machine::LoadFileChunk(RiffFile* pFile, int version)
+{
+	// assume version 0 for now
+	// call setpan
+
+	Machine* pMachine;
+	MachineType type;
+	char dllName[256];
+	pFile->Read(&type,sizeof(type));
+	pFile->ReadString(dllName,256);
+	switch (type)
+	{
+	case MACH_MASTER:
+		pMachine = new Master;
+		break;
+	case MACH_SINE:
+		pMachine = new Sine;
+		break;
+	case MACH_DIST:
+		pMachine = new Distortion;
+		break;
+	case MACH_SAMPLER:
+		pMachine = new Sampler;
+		break;
+	case MACH_DELAY:
+		pMachine = new Delay;
+		break;
+	case MACH_2PFILTER:
+		pMachine = new Filter2p;
+		break;
+	case MACH_GAIN:
+		pMachine = new Gainer;
+		break;
+	case MACH_FLANGER:
+		pMachine = new Flanger;
+		break;
+	case MACH_PLUGIN:
+		{
+			Plugin * p;
+			pMachine = p = new Plugin;
+			if (!p->LoadDll(dllName))
+			{
+				delete pMachine;
+				pMachine = new Dummy;
+				type = MACH_DUMMY;
+			}
+		}
+		 break;
+	case MACH_VST:
+		 pMachine = new VSTInstrument;
+		// read dll name and load dll
+		 break;
+	case MACH_VSTFX:
+		 pMachine = new VSTFX;
+		// read dll name and load dll
+		 break;
+	default:
+		 pMachine = new Dummy;
+		 break;
+	}
+	pMachine->Init();
+
+	pFile->Read(&pMachine->_mode,sizeof(pMachine->_mode));
+
+	pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
+	pFile->Read(&pMachine->_mute,sizeof(pMachine->_mute));
+
+	pFile->Read(&pMachine->_outDry,sizeof(pMachine->_outDry)); // this should really be removed from machine class
+	pFile->Read(&pMachine->_outWet,sizeof(pMachine->_outWet));
+	pFile->Read(&pMachine->_panning,sizeof(pMachine->_panning));
+
+	pFile->Read(&pMachine->_x,sizeof(pMachine->_x));
+	pFile->Read(&pMachine->_y,sizeof(pMachine->_y));
+	pFile->Read(&pMachine->_numInputs,sizeof(pMachine->_numInputs));							// number of Incoming connections
+	pFile->Read(&pMachine->_numOutputs,sizeof(pMachine->_numOutputs));						// number of Outgoing connections
+	for (int i = 0; i < MAX_CONNECTIONS; i++)
+	{
+		pFile->Read(&pMachine->_inputMachines[i],sizeof(pMachine->_inputMachines[i]));	// Incoming connections Machine number
+		pFile->Read(&pMachine->_outputMachines[i],sizeof(pMachine->_outputMachines[i]));	// Outgoing connections Machine number
+		pFile->Read(&pMachine->_inputConVol[i],sizeof(pMachine->_inputConVol[i]));	// Incoming connections Machine vol
+		pFile->Read(&pMachine->_wireMultiplier[i],sizeof(pMachine->_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		pFile->Read(&pMachine->_connection[i],sizeof(pMachine->_connection[i]));      // Outgoing connections activated
+		pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
+//		pFile->Read(&pMachine->_connectionPoint[i],sizeof(pMachine->_connectionPoint[i]));// point for wire? 
+	}
+	pFile->ReadString(pMachine->_editName,sizeof(pMachine->_editName));
+	pFile->Read(&pMachine->_numPars,sizeof(pMachine->_numPars));
+	for (i = 0; i < pMachine->_numPars; i++)
+	{
+		int temp;
+		pFile->Read(&temp,sizeof(temp));
+		pMachine->SetParameter(i,temp);
+	}
+
+	if (!pMachine->LoadSpecificFileChunk(pFile,version))
+	{
+		Machine* p = new Dummy;
+		p->Init();
+		p->_type=MACH_DUMMY;
+		p->_mode=pMachine->_mode;
+
+		p->_bypass=pMachine->_bypass;
+		p->_mute=pMachine->_mute;
+
+		p->_outDry=pMachine->_outDry;
+		p->_outWet=pMachine->_outWet;
+		p->_panning=pMachine->_panning;
+
+		p->_x=pMachine->_x;
+		p->_y=pMachine->_y;
+		p->_numInputs=pMachine->_numInputs;							// number of Incoming connections
+		p->_numOutputs=pMachine->_numOutputs;						// number of Outgoing connections
+		for (int i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			p->_inputMachines[i]=pMachine->_inputMachines[i];
+			p->_outputMachines[i]=pMachine->_outputMachines[i];
+			p->_inputConVol[i]=pMachine->_inputConVol[i];
+			p->_wireMultiplier[i]=pMachine->_wireMultiplier[i];
+			p->_connection[i]=pMachine->_connection[i];
+			p->_inputCon[i]=pMachine->_inputCon[i];
+	//		p->_connectionPoint[i]=pMachine->_connectionPoint[i];
+		}
+		strcpy(p->_editName,pMachine->_editName);
+		p->_numPars=0;
+
+		delete pMachine;
+		pMachine=p;
+	}
+
+	return pMachine;
+}
+
 #if !defined(_WINAMP_PLUGIN_)
-bool Machine::Save(
-	RiffFile* pFile)
+
+void Machine::SaveFileChunk(RiffFile* pFile)
+{
+	pFile->Write(&_type,sizeof(_type));
+	SaveDllName(pFile);
+	pFile->Write(&_mode,sizeof(_mode));
+	pFile->Write(&_bypass,sizeof(_bypass));
+	pFile->Write(&_mute,sizeof(_mute));
+
+	pFile->Write(&_outDry,sizeof(_outDry)); // this should really be removed from machine class
+	pFile->Write(&_outWet,sizeof(_outWet));
+	pFile->Write(&_panning,sizeof(_panning));
+
+	pFile->Write(&_x,sizeof(_x));
+	pFile->Write(&_y,sizeof(_y));
+	pFile->Write(&_numInputs,sizeof(_numInputs));							// number of Incoming connections
+	pFile->Write(&_numOutputs,sizeof(_numOutputs));						// number of Outgoing connections
+	for (int i = 0; i < MAX_CONNECTIONS; i++)
+	{
+		pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
+		pFile->Write(&_outputMachines[i],sizeof(_outputMachines[i]));	// Outgoing connections Machine number
+		pFile->Write(&_inputConVol[i],sizeof(_inputConVol[i]));	// Incoming connections Machine vol
+		pFile->Write(&_wireMultiplier[i],sizeof(_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		pFile->Write(&_connection[i],sizeof(_connection[i]));      // Outgoing connections activated
+		pFile->Write(&_inputCon[i],sizeof(_inputCon[i]));		// Incoming connections activated
+//		pFile->Write(&_connectionPoint[i],sizeof(_connectionPoint[i]));// point for wire? 
+	}
+	pFile->Write(_editName,strlen(_editName)+1);
+	pFile->Write(&_numPars,sizeof(_numPars));
+	for (i = 0; i < _numPars; i++)
+	{
+		int temp = GetParamValue(i);
+		pFile->Write(&temp,sizeof(temp));
+	}
+	SaveSpecificChunk(pFile);
+}
+
+bool Machine::Save(RiffFile* pFile)
 {
 	char junk[256];
 	memset(&junk, 0, sizeof(junk));

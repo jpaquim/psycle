@@ -13,12 +13,12 @@ Filter::Filter()
 {
 	_coeffs.Init();
 	Init();
+	_x1 = _x2 = _y1 = _y2 = 0;
+	_a1 = _a2 = _b1 = _b2 = 0;
 }
 
 void Filter::Init(void)
 {
-	_x1 = _x2 = _y1 = _y2 = 0;
-	_a1 = _a2 = _b1 = _b2 = 0;
 }
 
 void Filter::Update(void)
