@@ -93,9 +93,9 @@ namespace psycle
 					assert(bs>0);
 					return dispatcher(effSetBlockSize,0,bs);
 				}
-				long int setSpeakerArrangement(VstSpeakerArrangement* VSTsa) {
-					assert(VSTsa);
-					return dispatcher(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement) {
+					assert(inputArrangement && outputArrangement);
+					return dispatcher(effSetSpeakerArrangement, 0, (long) inputArrangement, outputArrangement);
 				}
 				long int getProgram() {
 					return dispatcher(effGetProgram);

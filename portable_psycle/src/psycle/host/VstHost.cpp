@@ -178,7 +178,7 @@ namespace psycle
 					VSTsa.numChannels = 2;
 					VSTsa.speakers[0].type = kSpeakerL;
 					VSTsa.speakers[1].type = kSpeakerR;
-					proxy().setSpeakerArrangement(&VSTsa);
+					proxy().setSpeakerArrangement(&VSTsa,&VSTsa);
 				}
 
 				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
@@ -186,12 +186,13 @@ namespace psycle
 				// 7: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(STREAM_SIZE);
 				// 8: Host to Plug, setSpeakerArrangement returned: false 
-				proxy().setSpeakerArrangement(&VSTsa);
+				proxy().setSpeakerArrangement(&VSTsa,&VSTsa);
 				// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
 				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 				// 10: Host to Plug, setBlockSize ( 512 ) 
 				proxy().setBlockSize(STREAM_SIZE);
 				// 11: Host to Plug, getProgram returned: 0 
+				
 				long int program = proxy().getProgram();
 				// 12: Host to Plug, getProgram returned: 0 
 				program = proxy().getProgram();
@@ -285,7 +286,7 @@ namespace psycle
 				instantiated = false;
 				if(exception) throw *exception;
 			}
-
+			
 			bool plugin::LoadSpecificFileChunk(RiffFile * pFile, int version)
 			{
 				UINT size;
@@ -703,10 +704,96 @@ namespace psycle
 				queue_size = 0;
 			}
 
+			static const char *audioMaster_opcode_to_string(long opcode)
+			{
+				#ifdef I
+					#error "macro clash"
+				#else
+					#define I(OPCODE) case audioMaster##OPCODE: return "audioMaster"#OPCODE;
+
+				switch(opcode)
+				{
+					// from AEffect.h
+					I(Automate)
+					I(Version)
+					I(CurrentId)
+					I(Idle)
+					I(PinConnected)
+					// from AEffectX.h
+					I(WantMidi)
+					I(GetTime)
+					I(ProcessEvents)
+					I(SetTime)
+					I(TempoAt)
+					I(GetNumAutomatableParameters)
+					I(GetParameterQuantization)
+					I(IOChanged)
+					I(NeedIdle)
+					I(SizeWindow)
+					I(GetSampleRate)
+					I(GetBlockSize)
+					I(GetInputLatency)
+					I(GetOutputLatency)
+					I(GetPreviousPlug)
+					I(GetNextPlug)
+					I(WillReplaceOrAccumulate)
+					I(GetCurrentProcessLevel)
+					I(GetAutomationState)
+					I(OfflineStart)
+					I(OfflineRead)
+					I(OfflineWrite)
+					I(OfflineGetCurrentPass)
+					I(OfflineGetCurrentMetaPass)
+					I(SetOutputSampleRate)
+					I(GetOutputSpeakerArrangement)
+					I(GetVendorString)
+					I(GetProductString)
+					I(GetVendorVersion)
+					I(VendorSpecific)
+					I(SetIcon)
+					I(CanDo)
+					I(GetLanguage)
+					I(OpenWindow)
+					I(CloseWindow)
+					I(GetDirectory)
+					I(UpdateDisplay)
+
+					// vst 2.1
+
+					I(BeginEdit)
+					I(EndEdit)
+					I(OpenFileSelector)
+
+					// vst 2.2
+
+					I(CloseFileSelector)
+					I(EditFile)
+					I(GetChunkFile)
+
+					// vst 2.3
+					I(GetInputSpeakerArrangement)
+				default:
+					static char temp[256];
+					sprintf(temp, "unknown opcode %i", opcode);
+					return temp;
+				}
+					#undef I
+				#endif
+			}
 			long plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
-				if(opcode!=audioMasterGetTime)
-					TRACE("VST plugin: call to host dispatcher: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n", (int) effect, opcode, index, value, (int) ptr, opt);
+#ifndef NDEBUG
+				if(opcode!=audioMasterGetTime) {
+					std::ostringstream s;
+					s<< "VST plugin: call to host dispatcher: Eff: " << effect
+					<< " Opcode = " << audioMaster_opcode_to_string(opcode)
+					<< " Index = " << index
+					<< " Value = " << value
+					<< " Ptr = " << ptr
+					<< " Opt = " << opt << std::endl;
+					host::loggers::trace(s.str());
+				}
+#endif
 				// believe it or not, some plugs tried to call psycle with a null AEffect.
 				// Support opcodes
 				switch(opcode)
@@ -716,6 +803,9 @@ namespace psycle
 							Global::_pSong->Tweaker = true;
 							if(effect && effect->user)
 							{
+								if(index<0 || index >= effect->numParams) {
+									host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
+								}
 								if(Global::pConfig->_RecordTweaks)  
 								{
 									if(Global::pConfig->_RecordMouseTweaksSmooth)
@@ -730,7 +820,7 @@ namespace psycle
 					#endif
 					return 0; // index, value, returns 0
 				case audioMasterVersion:			
-					return 2; // vst version, currently 7 (0 for older)
+					return 9; // vst version, currently 7 (0 for older)
 				case audioMasterCurrentId:			
 					break;
 				case audioMasterIdle:
@@ -761,8 +851,6 @@ namespace psycle
 						if(index < 2) return 0;
 						else return 1;
 					}
-				case audioMasterWantMidi:			
-					return 0;
 				case audioMasterGetTime:
 					std::memset(&_timeInfo, 0, sizeof _timeInfo);
 					/*

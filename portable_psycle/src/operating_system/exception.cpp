@@ -45,7 +45,30 @@ namespace operating_system
 				case EXCEPTION_PRIV_INSTRUCTION: s << "priv instruction: The thread tried to execute an instruction whose operation is not allowed in the current machine mode."; break;
 				case EXCEPTION_SINGLE_STEP: s << "single step: A trace trap or other single-instruction mechanism signaled that one instruction has been executed."; break;
 				case EXCEPTION_STACK_OVERFLOW: s << "stack overflow: The thread used up its stack."; break;
-				default: s << "unkown exception code: 0x" << std::hex << code << " !!!";
+				default:
+					// <magnus> FormatMessage doesn't really seem to succeed but it couldn't hurt, could it?
+					// is there any other system routine that can format a nice message?
+					LPVOID lpMsgBuf;
+					if (!FormatMessage( 
+						FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+						FORMAT_MESSAGE_FROM_SYSTEM | 
+						FORMAT_MESSAGE_IGNORE_INSERTS,
+						NULL,
+						code,
+						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+						(LPTSTR) &lpMsgBuf,
+						0,
+						NULL ))
+					{
+						s << "unkown exception code: 0x" << std::hex << code << " !!!";
+					}
+					else {
+						s << lpMsgBuf;
+						// Free the buffer.
+						LocalFree( lpMsgBuf );
+					}
+
+
 				}
 				return s.str();
 			}
