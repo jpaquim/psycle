@@ -76,6 +76,7 @@ ON_BN_CLICKED(IDC_INCPOS2, OnIncpos2)
 ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
 ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
+ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
 ON_BN_CLICKED(IDC_SEQDEL, OnSeqdel)
 ON_BN_CLICKED(IDC_SEQSPR, OnSeqspr)
 ON_WM_ACTIVATE()
@@ -1313,6 +1314,7 @@ void CMainFrame::OnSelchangeSeqlist()
 
 void CMainFrame::OnDblclkSeqlist() 
 {
+/*
 	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 	int const ep=_pSong->GetNumPatternsUsed();
 	int const sep=m_wndView.editPosition;
@@ -1326,8 +1328,11 @@ void CMainFrame::OnDblclkSeqlist()
 		m_wndView.OnActivate();
 	}
 	else {
+		
 		m_wndView.SetFocus();
 	}
+*/		
+	m_wndView.OnPatternView();
 }
 
 void CMainFrame::OnIncshort() 
@@ -1364,12 +1369,18 @@ void CMainFrame::OnDeclong()
 		m_wndView.Repaint(DMPatternChange);
 //		m_wndView.SetActiveWindow();
 	}
+	else if (_pSong->playOrder[pop]>0)
+	{
+		_pSong->playOrder[pop]=0;
+		UpdatePlayOrder(true);
+		m_wndView.Repaint(DMPatternChange);
+//		m_wndView.SetActiveWindow();
+	}
 	m_wndView.SetFocus();	
 	m_wndView.OnActivate();	
-	
 }
 
-void CMainFrame::OnSeqins() 
+void CMainFrame::OnSeqnew() 
 {
 	if ( m_wndView.editPosition < MAX_PATTERNS )
 	{
@@ -1390,6 +1401,32 @@ void CMainFrame::OnSeqins()
 		{
 			_pSong->playOrder[pop]=MAX_PATTERNS-1;
 		}
+
+		UpdatePlayOrder(false);
+		UpdateSequencer();
+
+		m_wndView.Repaint(DMPatternChange);
+	}
+	m_wndView.SetFocus();
+	m_wndView.OnActivate();
+}
+
+void CMainFrame::OnSeqins() 
+{
+	if ( m_wndView.editPosition < MAX_PATTERNS )
+	{
+		m_wndView.editPosition++;
+		if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+		{
+			++_pSong->playLength;
+		}
+
+		int const pop=m_wndView.editPosition;
+		for(int c=(_pSong->playLength-1);c>pop;c--)
+		{
+			_pSong->playOrder[c]=_pSong->playOrder[c-1];
+		}
+		_pSong->playOrder[pop]=_pSong->playOrder[pop-1];
 
 		UpdatePlayOrder(false);
 		UpdateSequencer();

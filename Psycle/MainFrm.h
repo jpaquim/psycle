@@ -152,6 +152,7 @@ protected:
 	afx_msg void OnIncshort();
 	afx_msg void OnDecshort();
 	afx_msg void OnSeqins();
+	afx_msg void OnSeqnew();
 	afx_msg void OnSeqdel();
 	afx_msg void OnSeqspr();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
