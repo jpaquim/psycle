@@ -297,10 +297,10 @@ void Plugin::Tick(
 	int channel,
 	PatternEntry* pData)
 {
-	if (_mode == MACHMODE_GENERATOR)
-	{
+//	if (_mode == MACHMODE_GENERATOR) <- effects want command data too please
+//	{
 		_pInterface->SeqTick(channel ,pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
-	}
+//	}
 
 	if (pData->_note == 121 || pData->_note == 122 )
 	{

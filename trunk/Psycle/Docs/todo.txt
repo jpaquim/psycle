@@ -2,7 +2,7 @@
 !=change
 +=addition
 
-* psycle default theme sucks
+* psycle default theme sucks (cursor, selection, etc.)
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
@@ -11,6 +11,7 @@
 ! alk - make wires square ended, like spec analyser?
 * alk - gap in audio when add new machine?
 + alk - mute current track keypress (alt-f9)
++ <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
 
 * Machines
 ------------

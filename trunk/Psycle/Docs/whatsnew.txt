@@ -30,10 +30,10 @@ V1.67
 * Fixed minusminus button to decrease to 0 (pooplog)
 + UNDO/REDO for pattern and sequence editing!!! (pooplog)
 ! slight reordering of interface due to user request for more intuitive use (pooplog)
-+ Native and VST Plugins realtime mouse tweak recording!!! (pooplog&JAZ)
++ Native and VST Plugins realtime mouse tweak recording!!! (pooplog&[JAZ])
 + Value Dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
 + Added "Xerox" button to seq editor (named that until someone suggests a good 5 letter word for duplicate) 
-  [Alk] (poolog)
+  [Alk] (poolog) -> who suggested CLONE? i forgot
 + Added Swing Fill command (pooplog)
 ! Increased max lines/pattern to 256 (pooplog)
 + Basic Mousewheel support for pattern edit mode (pooplog)
@@ -58,6 +58,7 @@ V1.67
 + Wire Dialog contains some diagnostic tools, and has a more functional +12db->-inf range (pooplog)
 + in the plugs gui: control + right mouse button on a knob to capture respective param in the pulldown menu [sue] (pooplog)
 + You can drag songs onto the window to load them now (pooplog)
+! All native machines can now recieve pattern data, not just generators (pooplog) [Druttis]
 
 V1.66
 -----
