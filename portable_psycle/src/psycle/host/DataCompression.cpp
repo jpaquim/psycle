@@ -210,10 +210,10 @@ namespace psycle
 
 				memset(pDestPos, 0, (size*12/4)+5);
 				*pDestPos++ = 0x01; // file version
-				*pDestPos++ = (byte)size & 0xff; // size
-				*pDestPos++ = (byte)(size>>8) & 0xff;
-				*pDestPos++ = (byte)(size>>16) & 0xff;
-				*pDestPos++ = (byte)(size>>24) & 0xff;
+				*pDestPos++ = (byte)(size & 0xff); // size
+				*pDestPos++ = (byte)((size>>8) & 0xff);
+				*pDestPos++ = (byte)((size>>16) & 0xff);
+				*pDestPos++ = (byte)((size>>24) & 0xff);
 
 				// init predictor
 				signed short prevprev = 0;
