@@ -11,6 +11,7 @@
 #include "../configuration.h"
 #include "../Song.h"
 #include "../player.h"
+#include "../machine.h"
 #include "../helpers.h"
 #include <math.h>
 
@@ -38,6 +39,7 @@ HANDLE thread_handle=INVALID_HANDLE_VALUE;
 
 int paused;
 int worked;
+char infofileName[_MAX_PATH];
 
 //
 // InModule Functions:
@@ -49,7 +51,7 @@ void config(HWND w)
 }
 void about(HWND hwndParent)
 {
-	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2\nBased on Psycle Engine " VERSION_NUMBER "\n\nCoded by Psycledelics on " __DATE__,"Psycle Winamp 2 Plugin",MB_OK);
+	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2\nBased on Psycle Engine " VERSION_NUMBER "\n\nCoded by Psycledelics on " __DATE__ "\n\nSome of the code has been gathered from out_wave and in_mpc plugins.\nThanks to their authors.","Psycle Winamp 2 Plugin",MB_OK);
 }
 
 void init()
@@ -182,6 +184,12 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 
 int infoDlg(char *fn, HWND hwnd)
 {
+	if ( strcmp(fn,_global._pSong->fileName) ) // if not the current one
+	{
+		strcpy(infofileName,fn);
+	}
+	else infofileName[0]='\0';
+
 	DialogBox(mod.hDllInstance,(char*)IDD_INFODLG,hwnd,InfoProc);
 	
 	return 0;
@@ -228,6 +236,7 @@ int play(char *fn)
 		return -1;
 	}
 	_global._pSong->Load(&file);
+	_global._pSong->filesize=file.FileSize();
 	file.Close();
 	strcpy(_global._pSong->fileName,fn);
 	_global._pSong->SetBPM(_global._pSong->BeatsPerMin, _global._pSong->_ticksPerBeat, _global.pConfig->_samplesPerSec);
@@ -468,8 +477,77 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 
 BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 {
+	int i,j=0;
+	Song* pSong;
+	
 	switch(msg)
 	{
+	case WM_INITDIALOG:
+		if ( infofileName[0]!='\0' )
+		{
+			pSong=new Song;
+			OldPsyFile file;
+			pSong->New(); // this is NOT done in Load for the winamp plugin.
+			if (file.Open(infofileName))
+			{
+				pSong->Load(&file);
+				pSong->filesize=file.FileSize();
+				file.Close();
+			}
+		}
+		else pSong= _global._pSong;
+		
+		SetWindowText(wnd,"Psycle Winamp Plugin Info Dialog");
+		char valstr[255];
+		char tmp2[20];
+		SetDlgItemText(wnd,IDC_SONGFILENAME,pSong->fileName);
+		SetDlgItemText(wnd,IDC_SONGARTIST,pSong->Author);
+		SetDlgItemText(wnd,IDC_SONGTITLE,pSong->Name);
+		SetDlgItemText(wnd,IDC_SONGCOMMENT,pSong->Comment);
+
+		for( i=0;i<MAX_MACHINES;i++)
+		{
+			if (pSong->_machineActive[i])
+			{
+				switch( pSong->_pMachines[i]->_type )
+				{
+				case MACH_VST: strcpy(tmp2,"VSTi");break;
+				case MACH_VSTFX: strcpy(tmp2,"VSTf");break;
+				case MACH_PLUGIN: strcpy(tmp2,"NatP");break;
+				default: strcpy(tmp2,"IntM.");break;
+				}
+				
+				if ( pSong->_pMachines[i]->wasVST )
+				{
+					sprintf(valstr,"[!%s] %.02i:%s",tmp2,i,pSong->_pMachines[i]->_editName);
+				}
+				else if ( pSong->_pMachines[i]->_type == MACH_DUMMY)
+				{
+					sprintf(valstr,"[?%s] %.02i: %s",tmp2,i,pSong->_pMachines[i]->_editName);
+				}
+				else sprintf(valstr,"[ %s] %.02i: %s",tmp2,i,pSong->_pMachines[i]->_editName);
+				
+				SendDlgItemMessage(wnd,IDC_MACHINELIST,LB_ADDSTRING,0,(long)valstr);
+				j++;
+			}
+		}
+		
+		i=CalcSongLength(pSong)/1000;
+
+		sprintf(valstr,"Filesize: %i\nBeatsPerMin: %i\nLinesPerBeat: %i\n\
+Song Length: %02i:%02i\nPatternsUsed: %i\nMachines Used: %i",
+			pSong->filesize,
+			pSong->BeatsPerMin,
+			pSong->_ticksPerBeat,
+			i / 60, i % 60,
+			pSong->GetNumPatternsUsed(),
+			j);
+		SetDlgItemText(wnd,IDC_EXTINFO,valstr);
+		
+		
+		if ( infofileName[0]!='\0' ) delete pSong;
+			
+		break;
 	case WM_COMMAND:
 		switch(wp)
 		{

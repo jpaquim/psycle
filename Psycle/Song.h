@@ -62,6 +62,7 @@ public:
 
 #if defined(_WINAMP_PLUGIN_)
 	char fileName[_MAX_PATH];
+	long filesize;
 #else
 	int machineSoloed;
 	CString fileName;
@@ -166,12 +167,12 @@ public:
 	bool CreateMachine(MachineType type, int x, int y, char* psPluginDll);
 	void DestroyMachine(int mac);
 	void DestroyAllMachines();
+	int GetNumPatternsUsed();
 #if !defined(_WINAMP_PLUGIN_)
 	bool InsertConnection(int src,int dst);
 	int GetFreeBus();
 	int GetFreeFxBus();
 	int FindBusFromIndex(int smac);
-	int GetNumPatternsUsed();
 	int GetBlankPatternUnused(int rval = 0);
 	bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
 #endif // ndef _WINAMP_PLUGIN_
