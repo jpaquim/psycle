@@ -1,10 +1,11 @@
-// Arguru xfilter
-
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "..\..\machineinterface.h"
+
+// Arguru xfilter
 
 #define MAX_DELAY_SAMPLES	80000
 

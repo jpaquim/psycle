@@ -1,9 +1,5 @@
-// mi.cpp: implementation of the mi class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#include "ymidi.h"
-
+#include <project.h>
+#include <psycle/plugin/y_midi/ymidi.h>
 
 DWORD midichannel::BuildEvent2(const int eventtype, const int channel, const int p1, const int p2)
 {
@@ -41,11 +37,6 @@ void midichannel::StopMidi()
 	Playnote = false;
 }
 
-
-///////////////////////////////
-// mi Function Definitions
-///////////////////////////////
-
 void mi::InitMidi()
 {
 
@@ -68,15 +59,10 @@ void mi::CloseMidi()
 	}
 }
 
-
 //////////////////////////////////////////////////////////////////////
 DLL_EXPORTS
 //////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 midichannel::midichannel()
 {
 	Vol = 0;
@@ -88,10 +74,6 @@ midichannel::~midichannel()
 {
 	Stop();
 }
-
-///////////////////////////////
-// midichannel Function Definitions
-///////////////////////////////
 
 void midichannel::Init(HMIDIOUT handle_in)
 {
@@ -141,10 +123,6 @@ void midichannel::Play(const int note, const int vol)
 	StartMidi();
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 mi::mi()
 {
 	int i;
@@ -240,6 +218,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		default : return false;
 	}
 }
+
 // Process each sequence tick if note on or note off is pressed.
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {

@@ -1,9 +1,10 @@
+#include <project.h>
+#include "Filterx.h"
+#include "math.h"
 // Filterx.cpp: implementation of the CFilterx class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "Filterx.h"
-#include "math.h"
 #define PI	3.1415926535897932384626433832795f
 
 //////////////////////////////////////////////////////////////////////

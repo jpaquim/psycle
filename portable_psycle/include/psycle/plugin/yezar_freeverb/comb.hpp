@@ -1,13 +1,11 @@
+#pragma once
+#include "denormals.h"
+
 // Comb filter class declaration
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#ifndef _comb_
-#define _comb_
-
-#include "denormals.h"
 
 class comb
 {
@@ -30,7 +28,6 @@ private:
 	int		bufidx;
 };
 
-
 // Big to inline - but crucial for speed
 
 inline float comb::process(float input)
@@ -49,7 +46,3 @@ inline float comb::process(float input)
 
 	return output;
 }
-
-#endif //_comb_
-
-//ends

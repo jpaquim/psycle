@@ -1,3 +1,12 @@
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
+//
+// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling 
+// requirements.
+//
+#include "M3Track.h"
+#include <string.h>
+
 // M3 Buzz plugin by MAKK makk@gmx.de
 // released on 04-21-99
 // Thanks must go to Robert Bristow-Johnson pbjrbj@viconet.com
@@ -15,15 +24,10 @@
 // Original Author sources are under:
 // http://www.fortunecity.com/skyscraper/rsi/76/plugins.htm
 
-#include "..\..\machineinterface.h"
-
-
 float freqTab[120];
 float coefsTab[4*128*128*8];
 float LFOOscTab[0x10000];
 signed short WaveTable[5][2100];
-
-
 
 #define MAX_PSYCLE_TRACKS	32   // This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
 						 // Leave it like it is. Your Plugin NEEDS TO support it.
@@ -32,18 +36,15 @@ signed short WaveTable[5][2100];
 #define NUMPARAMETERS 34 // Change this number to the number of parameters of your machine
 						 // Remember that Psycle ONLY have GLOBAL parameters.
 
-
-
-
 CMachineParameter const paraWave1 =
 {
 	"Osc1Wav", "Oscillator 1 Waveform", 0, 5, MPF_STATE, 0
 };
+
 CMachineParameter const paraPulseWidth1 =
 {
 	"PulseWidth1", "Oscillator 1 Pulse Width", 0, 127, MPF_STATE, 0x40
 };
-
 
 CMachineParameter const paraWave2 =
 {
@@ -54,7 +55,6 @@ CMachineParameter const paraPulseWidth2 =
 	"PulseWidth2", "Oscillator 2 Pulse Width", 0, 127, MPF_STATE, 0x40
 };
 
-
 CMachineParameter const paraDetuneSemi=
 {
 	"Semi Detune", "Semi Detune in Halfnotes", 0, 127, MPF_STATE, 0x40
@@ -64,52 +64,50 @@ CMachineParameter const paraDetuneFine=
 	"Fine Detune", "Fine Detune", 0, 127, MPF_STATE, 0x40
 };
 
-
 CMachineParameter const paraSync =
 {
 	"Oscs Synced", "Sync: Osc2 synced by Osc1", 0, 1, MPF_STATE, 0
 };
 
-
 CMachineParameter const paraMixType =
 {
 	"MixType", "MixType", 0, 8, MPF_STATE, 0
 };
+
 CMachineParameter const paraMix =
 {
 	"Osc Mix", "Mix Osc1 <-> Osc2", 0, 127, MPF_STATE, 0x40
 };
 
-
 CMachineParameter const paraSubOscWave =
 {
 	"SubOscWav", "Sub Oscillator Waveform", 0, 4, MPF_STATE, 0
 };
+
 CMachineParameter const paraSubOscVol =
 {
 	"SubOscVol", "Sub Oscillator Volume", 0, 127, MPF_STATE, 0x40
 };
 
-
 CMachineParameter const paraPEGAttackTime =
 {
 	"Pitch Env Attack", "Pitch Envelope Attack Time", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraPEGDecayTime =
 {
 	"Pitch Env Release", "Pitch Envelope Release Time", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraPEnvMod =
 {
 	"Pitch Env Mod", "Pitch Envelope Modulation", 0, 127, MPF_STATE, 0x40
 };
 
-
 CMachineParameter const paraGlide =
 {
 	"Glide", "Glide", 0, 127, MPF_STATE, 0
 };
-
 
 CMachineParameter const paraVolume =
 {
@@ -135,64 +133,76 @@ CMachineParameter const paraFilterType =
 {
 	"FilterType", "Filter Type ... 0=LP 1=HP 2=BP 3=BR", 0, 3, MPF_STATE, 0
 };
+
 CMachineParameter const paraCutoff =
 {
 	"Cutoff", "Filter Cutoff Frequency", 0, 127, MPF_STATE, 127
 };
+
 CMachineParameter const paraResonance =
 {
 	"Res./Bandw.", "Filter Resonance/Bandwidth", 0, 127, MPF_STATE, 32
 };
 
-
 CMachineParameter const paraFEGAttackTime =
 {
 	"Filter Env Attack", "Filter Envelope Attack Time", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraFEGSustainTime =
 {
 	"Filter Env Sustain", "Filter Envelope Sustain Time", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraFEGReleaseTime =
 {
 	"Filter Env Release", "Filter Envelope Release Time", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraFEnvMod =
 {
 	"Filter Env Mod", "Filter Envelope Modulation", 0, 127, MPF_STATE, 0x40
 };
 
 // LFOs
+
 CMachineParameter const paraLFO1Dest =
 {
 	"LFO1 Dest", "LFO1 Destination", 0, 15, MPF_STATE, 0
 };
+
 CMachineParameter const paraLFO1Wave =
 {
 	"LFO1 Wav", "LFO1 Waveform", 0, 4, MPF_STATE, 0
 };
+
 CMachineParameter const paraLFO1Freq =
 {
 	"LFO1 Freq", "LFO1 Frequency", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraLFO1Amount =
 {
 	"LFO1 Amount", "LFO1 Amount", 0, 127, MPF_STATE, 0
 };
 
 // lfo2
+
 CMachineParameter const paraLFO2Dest =
 {
 	"LFO2 Dest", "LFO2 Destination", 0, 15, MPF_STATE, 0
 };
+
 CMachineParameter const paraLFO2Wave =
 {
 	"LFO2 Wav", "LFO2 Waveform", 0, 4, MPF_STATE, 0
 };
+
 CMachineParameter const paraLFO2Freq =
 {
 	"LFO2 Freq", "LFO2 Frequency", 0, 127, MPF_STATE, 0
 };
+
 CMachineParameter const paraLFO2Amount =
 {
 	"LFO2 Amount", "LFO2 Amount", 0, 127, MPF_STATE, 0
@@ -241,7 +251,6 @@ CMachineParameter const *pParameters[] =
         &paraLFO2Amount,
 };
 
-
 CMachineInfo const MacInfo =
 {
         MI_VERSION,
@@ -258,15 +267,6 @@ CMachineInfo const MacInfo =
         "About",
 		5
 };
-
-//
-// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling 
-// requirements.
-//
-#include "M3Track.h"
-#include <string.h>
-
-
 
 DLL_EXPORTS		// To export DLL functions to host
 

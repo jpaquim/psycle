@@ -1,10 +1,11 @@
+#include <project.h>
+#include <psycle/plugin/yezar_freverb/allpass.hpp>
+
 // Allpass filter implementation
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#include "allpass.hpp"
 
 allpass::allpass()
 {
@@ -32,5 +33,3 @@ float allpass::getfeedback()
 {
 	return feedback;
 }
-
-//ends

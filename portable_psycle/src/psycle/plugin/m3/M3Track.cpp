@@ -1,8 +1,6 @@
+#include <project.h>
+
 // CTrack Definition file (M3Track.cpp)
-
-
-#include "..\..\machineinterface.h"
-
 
 extern float freqTab[120];
 extern float coefsTab[4*128*128*8];

@@ -1,15 +1,14 @@
+#pragma once
+
+#include "comb.hpp"
+#include "allpass.hpp"
+#include "tuning.h"
+
 // Reverb model declaration
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#ifndef _revmodel_
-#define _revmodel_
-
-#include "comb.hpp"
-#include "allpass.hpp"
-#include "tuning.h"
 
 class revmodel
 {
@@ -81,7 +80,3 @@ private:
 	float	bufallpassL4[allpasstuningL4];
 	float	bufallpassR4[allpasstuningR4];
 };
-
-#endif//_revmodel_
-
-//ends

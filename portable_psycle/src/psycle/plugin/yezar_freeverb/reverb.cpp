@@ -1,13 +1,13 @@
-/////////////////////////////////////////////////////////////////////
-// Arguru reverb plugin for PSYCLE
-
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
+#include <psycle/plugin/yezar_freeverb/revmodel.hpp>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "revmodel.hpp"
 
-#include "..\..\machineinterface.h"
+/////////////////////////////////////////////////////////////////////
+// Arguru's psycle port of Yezar freeverb
 
 #define NCOMBS	1
 #define NALLS	12

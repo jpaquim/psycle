@@ -1,11 +1,10 @@
+#pragma once
+
 // Reverb model tuning values
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#ifndef _tuning_
-#define _tuning_
 
 const int	numcombs		= 8;
 const int	numallpasses	= 4;
@@ -53,8 +52,3 @@ const int allpasstuningL3	= 341;
 const int allpasstuningR3	= 341+stereospread;
 const int allpasstuningL4	= 225;
 const int allpasstuningR4	= 225+stereospread;
-
-#endif//_tuning_
-
-//ends
-
