@@ -155,7 +155,7 @@ namespace psycle
 				typedef AEffect * (* PVSTMAIN) (audioMasterCallback audioMaster);
 			public:
 				/// Host callback dispatcher.
-				static long AudioMaster(AEffect * effect, long int opcode, long int index, long int value, void * ptr, float opt);
+				static long int AudioMaster(AEffect * effect, long int opcode, long int index, long int value, void * ptr, float opt);
 			public:
 				plugin();
 				virtual ~plugin() throw();
