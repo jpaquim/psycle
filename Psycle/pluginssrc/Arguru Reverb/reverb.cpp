@@ -256,10 +256,10 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 //			l_revresult=all[c].left_output;
 //			r_revresult=all[c].right_output;
 			float const l_out = (l_revresult*-g)+audioBuffer[c][counter[c][2]][0];
-			audioBuffer[c][counter[c][2]][0]=l_revresult+l_out*g;
+			audioBuffer[c][counter[c][0]][0]=l_revresult+l_out*g;
 			l_revresult=l_out;
 			float const r_out = (r_revresult*-g)+audioBuffer[c][counter[c][3]][1];
-			audioBuffer[c][counter[c][3]][1]=r_revresult+r_out*g;
+			audioBuffer[c][counter[c][1]][1]=r_revresult+r_out*g;
 			r_revresult=r_out;
 			
 			if(++counter[c][0]>=MAX_ALLPASS_DELAY)counter[c][0]=0;
