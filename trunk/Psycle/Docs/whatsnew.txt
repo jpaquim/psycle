@@ -1,4 +1,4 @@
-V1.67
+V1.7
 -----
 ! When having "autostop Machines" and recording to wav, some machines could become muted.
 ! Manually editing sample name didn't update the combobox.
@@ -66,6 +66,7 @@ V1.67
 * fixed wave header reading (pooplog) [Druttis]
 * fix for chord entering (shift+note) so it works correctly (pooplog)
 + added record button that sets edit and follow mode (pooplog)
++ added "Save to wav..." (offline mode) so that you don't need to play all the song.
 
 
 
