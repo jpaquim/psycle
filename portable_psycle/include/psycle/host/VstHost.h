@@ -474,6 +474,7 @@ namespace psycle
 			{	assert((*this)()); try { return plugin().uniqueID; } $catch$("uniqueId") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::version() throw(host::exceptions::function_error)
 			{	assert((*this)()); try { return plugin().version; } $catch$("version") return 0; /* dummy return to avoid warning */ }
+
 			#pragma warning(pop)
 			#undef $catch$
 		}
