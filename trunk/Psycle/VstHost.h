@@ -11,7 +11,7 @@
 	#include "NewMachine.h"
 #endif
 
-#define MAX_INOUTS		8
+#define MAX_INOUTS		16
 
 #define VST_QUANTIZATION 65535 // Dialog max ticks for parameters.
 

@@ -982,17 +982,19 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 		{
 			_timeInfo.flags |= kVstPpqPosValid;
 
-// Code in "else" should work always, but looks like it causes problems.
-			if ( (Global::pPlayer)->_playing) 
+// Code in "else" is preferable. code in if = old code
+/*			if ( (Global::pPlayer)->_playing) 
 			{
 				const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb*4))/Global::pPlayer->tpb;
 				const float linestep = (((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining))/Global::_pSong->SamplesPerTick)/Global::pPlayer->tpb;
 				_timeInfo.ppqPos = currentline+linestep;
 			}
 			else
-			{
-				_timeInfo.ppqPos = (((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount / _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60 );
-			}
+			{*/
+//				const double ppq = ((((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount/ _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60.0f ));
+//				_timeInfo.ppqPos =  ppq - 4*((int)ppq/4);
+				_timeInfo.ppqPos = ((((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount/ _timeInfo.sampleRate ) * (Global::pPlayer->bpm / 60.0f ));
+//			}
 		}
 		if (value & kVstTempoValid)
 		{
@@ -1670,6 +1672,8 @@ VSTFX::VSTFX(int index)
 	sprintf(_editName, "Vst2 Fx");
 	_pOutSamplesL = new float[STREAM_SIZE];
 	_pOutSamplesR = new float[STREAM_SIZE];
+	Dsp::Clear(_pOutSamplesL,STREAM_SIZE);
+	Dsp::Clear(_pOutSamplesR,STREAM_SIZE);
 	inputs[0]=_pSamplesL;
 	inputs[1]=_pSamplesR;
 	outputs[0]=_pOutSamplesL;
