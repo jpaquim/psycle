@@ -69,22 +69,30 @@ namespace psycle
 				void user(void * user) throw(host::exceptions::function_error);
 
 				// some common dispatch calls
-				long int open() {
+				long int open()
+				{
 					return dispatcher(effOpen);
 				}
-				long int close() {
-					try {
+				#pragma warning(push)
+				#pragma warning(disable:4702) // unreachable code
+				long int close()
+				{
+					try
+					{
 						/// also clears plugin_ pointer since it is no longer valid after effClose.
-						long int retval=dispatcher(effClose);
-						plugin_=0;
+						long int retval = dispatcher(effClose);
+						plugin_ = 0;
 						return retval;
 					}
-					catch(...) {
-						plugin_=0;
+					catch(...)
+					{
+						plugin_ = 0;
 						throw;
 					}
 				}
-				long int setSampleRate(float sr) {
+				#pragma warning(pop)
+				long int setSampleRate(float sr)
+				{
 					assert(sr>0.0f);
 					return dispatcher(effSetSampleRate,0,0,0,sr);
 				}
@@ -93,30 +101,37 @@ namespace psycle
 					assert(bs>0);
 					return dispatcher(effSetBlockSize,0,bs);
 				}
-				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement) {
+				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement)
+				{
 					assert(inputArrangement && outputArrangement);
 					return dispatcher(effSetSpeakerArrangement, 0, (long) inputArrangement, outputArrangement);
 				}
-				long int getProgram() {
+				long int getProgram()
+				{
 					return dispatcher(effGetProgram);
 				}
-				long int setProgram(int program) {
+				long int setProgram(int program)
+				{
 					assert(program>=0);
 					assert(program<numPrograms() || numPrograms()==0);
 					return dispatcher(effSetProgram,0,program);
 				}
-				long int getVstVersion() {
+				long int getVstVersion()
+				{
 					return dispatcher(effGetVstVersion);
 				}
-				long int mainsChanged(bool on) {
+				long int mainsChanged(bool on)
+				{
 					return dispatcher(effMainsChanged, 0, on ? 1 : 0);
 				}
-				long int getEffectName(char * buffer) {
+				long int getEffectName(char * buffer)
+				{
 					assert(buffer);
 					buffer[0]=0;
 					return dispatcher(effGetEffectName, 0, 0, buffer);
 				}
-				long int getVendorString(char * buffer) {
+				long int getVendorString(char * buffer)
+				{
 					assert(buffer);
 					buffer[0]=0;
 					return dispatcher(effGetVendorString, 0, 0, buffer);
@@ -154,6 +169,8 @@ namespace psycle
 															}
 														}
 				virtual void GetParamValue(int numparam, char * parval);
+				#pragma warning(push)
+				#pragma warning(disable:4702) // unreachable code
 				virtual int GetParamValue(int numparam)
 														{
 															try
@@ -172,6 +189,7 @@ namespace psycle
 																return 0; /// \todo <bohan> ???
 															}
 														}
+				#pragma warning(pop)
 				virtual bool Load(RiffFile * pFile);
 				virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
 
@@ -235,38 +253,44 @@ namespace psycle
 				VstEvents mevents;
 				vst::proxy *proxy_;
 
-#ifndef NDEBUG
-				class note_checker {
-				public:
-					note_checker() {
-						for(int channel=0;channel<16;channel++)
-							for(int note=0;note<128;note++)
-								note_on_count_[channel][note]=0;
-					}
-					~note_checker() {
-/*						for(int channel=0;channel<16;channel++)
-							for(int note=0;note<128;note++)
-								assert(note_on_count_[channel][note]==0);
-*/
-					}
-					void note_on(int note, int channel) {
-						assert(note >= 0 && note < 128);
-						assert(channel >= 0 && channel < 16);
-						assert(note_on_count_[channel][note]>=0);
-						++note_on_count_[channel][note];
-					}
-					void note_off(int note, int channel) {
-						assert(note >= 0 && note < 128);
-						assert(channel >= 0 && channel < 16);
-						--note_on_count_[channel][note];
-						assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding a note-on!");
-					}
-				private:
-					// 16 channels, 128 keys
-					short note_on_count_[16][128];
-				};
-				note_checker note_checker_;
-#endif
+				#ifndef NDEBUG
+					class note_checker
+					{
+					public:
+						note_checker()
+						{
+							for(int channel=0;channel<16;channel++)
+								for(int note=0;note<128;note++)
+									note_on_count_[channel][note]=0;
+						}
+						~note_checker()
+						{
+							/*
+							for(int channel=0;channel<16;channel++)
+								for(int note=0;note<128;note++)
+									assert(note_on_count_[channel][note]==0);
+							*/
+						}
+						void note_on(int note, int channel)
+						{
+							assert(note >= 0 && note < 128);
+							assert(channel >= 0 && channel < 16);
+							assert(note_on_count_[channel][note]>=0);
+							++note_on_count_[channel][note];
+						}
+						void note_off(int note, int channel)
+						{
+							assert(note >= 0 && note < 128);
+							assert(channel >= 0 && channel < 16);
+							--note_on_count_[channel][note];
+							assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding a note-on!");
+						}
+					private:
+						// 16 channels, 128 keys
+						short int note_on_count_[16][128];
+					};
+					note_checker note_checker_;
+				#endif
 			};
 
 			/// vst note for an instrument.
@@ -346,19 +370,17 @@ namespace psycle
 			{
 				if(this->plugin_)
 				{
-//					user(0);
+					//user(0);
 					close();
 				}
 				// <magnus> we shouldn't delete plugin_ because the AEffect is allocated
 				// by the plugin's DLL by some unknown means. Dispatching effClose will
 				// automatically free up the AEffect structure.
 				this->plugin_ = plugin;
-
-				if(plugin_)
-					user(&host());
+				if(plugin_) user(&host());
 			}
-//			#pragma warning(push)
-//			#pragma warning(disable:4702) // unreachable code
+			#pragma warning(push)
+			#pragma warning(disable:4702) // unreachable code
 			inline long int proxy::magic() throw(host::exceptions::function_error)
 			{
 				assert((*this)());
@@ -376,20 +398,19 @@ namespace psycle
 			}
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
-#ifndef NDEBUG
-				
+				#ifndef NDEBUG
 				{
 					std::ostringstream s;
-					s<< "VST plugin: call to plugin dispatcher: Eff: " << &plugin()
+					s
+						<< "VST plugin: call to plugin dispatcher: Eff: " << &plugin()
 						<< " Opcode = " << exceptions::dispatch_errors::operation_description(operation)
-					<< " Index = " << index
-					<< " Value = " << value
-					<< " Ptr = " << ptr
-					<< " Opt = " << opt;
+						<< " Index = " << index
+						<< " Value = " << value
+						<< " Ptr = " << ptr
+						<< " Opt = " << opt;
 					host::loggers::trace(s.str());
 				}
-				
-#endif
+				#endif
 				assert((*this)());
 				try
 				{
@@ -578,7 +599,7 @@ namespace psycle
 				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); }
 				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 			}
-//			#pragma warning(pop)
+			#pragma warning(pop)
 		}
 	}
 }
