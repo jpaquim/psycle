@@ -5,7 +5,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		// Check for right pressed connection
 		int propMac = GetMachine(point);
 		
-		if (propMac != -1)
+		if (propMac != -1) 
 		{
 			// Shows machine properties dialog
 			DoMacPropDialog(propMac);

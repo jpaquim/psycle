@@ -3442,6 +3442,10 @@ void CChildView::patTrackRecord()
 
 void CChildView::DoMacPropDialog(int propMac)
 {
+	if ((propMac < 0 ) || (propMac >= MAX_MACHINES-1))
+	{
+		return;
+	}
 	CMacProp dlg;
 	dlg.m_view=this;
 	dlg.pMachine = Global::_pSong->_pMachine[propMac];
