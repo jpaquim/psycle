@@ -14,7 +14,6 @@
 	does not track changes yet)
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
-* <alk> my new skin, can u make it possible to change the fonts of the gen and fx separately?
 * <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> move mouse over vu, black flickering (more noticable on the big vus)
@@ -24,6 +23,7 @@
 + <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 * <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
+* new machine dialog should save preferred sorting method
 
 * Machines
 ------------

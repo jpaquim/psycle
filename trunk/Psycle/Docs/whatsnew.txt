@@ -55,6 +55,7 @@ V1.67
 + SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
 + Visual Presets load and saving (pooplog)
 + Machine and Pattern Header Skinning (pooplog)
++ Wire Dialog contains some diagnostic tools, and has a more functional +6db->-inf range (pooplog)
 
 V1.66
 -----

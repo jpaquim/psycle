@@ -32,7 +32,8 @@ public:
 	COLORREF mv_wireaacolour;
 	COLORREF mv_wireaacolour2;
 	COLORREF mv_polycolour;
-	COLORREF mv_fontcolour;
+	COLORREF mv_generator_fontcolour;
+	COLORREF mv_effect_fontcolour;
 
 	COLORREF pvc_separator;
 	COLORREF pvc_separator2;
@@ -80,12 +81,16 @@ public:
 	int pattern_font_x;
 	int pattern_font_y;
 
-	char machine_fontface[64];
+	char generator_fontface[64];
+	int generator_font_point;
+	char effect_fontface[64];
+	int effect_font_point;
+
 	char machine_skin[64];
-	int machine_font_point;
 
 	CFont seqFont;
-	CFont machineFont;
+	CFont generatorFont;
+	CFont effectFont;
 
 	bool _midiRecordVel;
 	int _midiCommandVel;
