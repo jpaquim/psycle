@@ -20,8 +20,8 @@ public:
 	Song* _pSong;
 	char szFile[260];       // buffer for file name
 	int OpenMode;
-	void SaveSong();
-	void LoadSong();
+	void SaveSong(bool silent=false);
+	void LoadSong(bool silent=false);
 
 // Dialog Data
 	//{{AFX_DATA(CSaveDlg)

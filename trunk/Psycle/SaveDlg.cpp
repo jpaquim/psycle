@@ -51,17 +51,17 @@ BOOL CSaveDlg::OnInitDialog()
 	return TRUE;
 }
 
-void CSaveDlg::SaveSong() 
+void CSaveDlg::SaveSong(bool silent) 
 {
 	OldPsyFile file;
 	if (!file.Create(szFile, true))
 	{
-		MessageBox("Error creating file", "Error", MB_OK);
+		if (!silent) MessageBox("Error creating file", "Error", MB_OK);
 		return;
 	}
 	if (!_pSong->Save(&file))
 	{
-		MessageBox("Error saving file", "Error", MB_OK);
+		if (!silent) MessageBox("Error saving file", "Error", MB_OK);
 	}
 	else _pSong->_saved=true;
 	file.Close();
@@ -293,7 +293,7 @@ void CSaveDlg::SaveSong()
 	
 }
 
-void CSaveDlg::LoadSong() 
+void CSaveDlg::LoadSong(bool silent) 
 {
 //	char fbuffer[32][512];
 	
@@ -310,7 +310,7 @@ void CSaveDlg::LoadSong()
 	OldPsyFile file;
 	if (!file.Open(szFile))
 	{
-		MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+		if (!silent) MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 		return;
 	}
 	_pSong->Load(&file);
