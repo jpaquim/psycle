@@ -2,6 +2,15 @@
 !=change
 +=addition
 
+* JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already sorted by the authors
+* JAL7OH- psycle crashes when i try to load a .fxb containing more patches than the maximum allowed number, load up crystal and try to import both of the banks available at greenoak.com
+* JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
+* JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded; 
+	docked toolbars in reaktor are invisible when running as a vst plug in psycle so to become visible again i had to run reaktor in buzz (where they are visible) undock them and then run reaktorvst in psycle;
+	psycle crashes when i get the 'cpu overload' warning in reaktor
+! JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
+* JAL7OH- JMdrum.dll crashes psycle when i use FBxx and/or FAxx, works fine with other machines and vsts
+* flanger clicks
 * velocity should be able to store data to instrument column
 ! <_sue_> hi...... all those loading/exit/save confirmations are anoying me a bit.....any chance to make 
 	them optional in the configs menu? when i start psycle and load a track it even asks me if i want to 
@@ -24,24 +33,22 @@
 + <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
 + <trylle> i mean that it records and plays back at the same time * record wave in too
 + <_sue_> (wire dialog) also i cant use the keyb to set the db level like before (cursor keys)
-* <_sue_> the gainer machine doesnt work and the sliders in the minimixer are set to -99
+* <_sue_> the gainer machine doesnt work (getting stuck bug i have not been able to recreate)
 * <_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
 	depending on the place where theyr box was placed...
 +? alk-make single click/drag move wire from one machine to another (preserving vol)
 + pooplog-we should just make a new slider class that uses shift and ctrl like knobs
+* <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
+* song speed alters if i alter sampling rate while playing
 
 * Machines
 ------------
-* <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)  
-	<ksn> this happens only with moog alp and hp nd xstage phaser filters... 
-* <Alk^^> in pooplog filter tweak inertia doesnt work
 * cyanphase vibrasynth has an access violation bug
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 bug:	 JMDrum is buggy (Crashes sometimes)
-* James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
+! James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
 * <mstr_> btw, the xExx command (note cut) has got an issue on your synths, prolly on others, too
 	when a value is not set ie 0E00, it mutes all notes
-* <alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 * bohan - knowledge: bug arguru_distortion saturator line 92 missing brackets
 + <_sue_> it would be cool if you could give names to the channels in the minimixer
 + <[JAZ]> Internals still miss mouse tweak, right?
@@ -154,16 +161,17 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 ------------
 * <_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all..... <pooplog> are you able to 
 	control 	the tweaks of it from the pattern? <_sue_> yes i am (in pro52)
-+ <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
-	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
-	require a file format change though :(
-! DO NOT LOAD LIST VST list & database
 * many vsts freeze the childview from updating while Left mouse button is down, which makes it so pattern does
 	not draw, so it appears that tweak recording is not working, such as:
 	-juno X2
 	-externalizer
 	-leveler
 	-tools one
++ <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
+	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
+	require a file format change though :(
+! DO NOT LOAD LIST VST list & database
+
 
 
 * Interface:

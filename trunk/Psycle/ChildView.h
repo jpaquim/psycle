@@ -459,9 +459,9 @@ public:
 	afx_msg void OnKeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 	afx_msg void OnBarplay();
 	afx_msg void OnBarstop();
-	afx_msg void OnRecordb();
+	afx_msg void OnRecordWav();
 	afx_msg void OnTimer( UINT nIDEvent );
-	afx_msg void OnUpdateRecordb(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 	afx_msg void OnFileNew();
 	afx_msg BOOL OnFileSave();
 	afx_msg BOOL OnFileSavesong();

@@ -201,9 +201,9 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_WM_KEYUP()
 	ON_COMMAND(ID_BARPLAY, OnBarplay)
 	ON_COMMAND(ID_BARSTOP, OnBarstop)
-	ON_COMMAND(ID_RECORDB, OnRecordb)
+	ON_COMMAND(ID_RECORDB, OnRecordWav)
 	ON_WM_TIMER()
-	ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordb)
+	ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
 	ON_COMMAND(ID_FILE_SAVE, OnFileSave)
 	ON_COMMAND(ID_FILE_SAVESONG, OnFileSavesong)
@@ -1004,7 +1004,7 @@ void CChildView::OnBarstop()
 	Global::pInputHandler->Stop();
 }
 
-void CChildView::OnRecordb() 
+void CChildView::OnRecordWav() 
 {
 	if (!Global::pPlayer->_recording)
 	{
@@ -1019,7 +1019,7 @@ void CChildView::OnRecordb()
 		Global::pPlayer->StopRecording();
 	}
 }
-void CChildView::OnUpdateRecordb(CCmdUI* pCmdUI) 
+void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) 
 {
 	if (Global::pPlayer->_recording)
 	{

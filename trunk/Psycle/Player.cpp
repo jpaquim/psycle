@@ -397,23 +397,24 @@ float * Player::Work(
 
 			if ((pThis->_playing) && (pThis->_recording))
 			{
-				short sl,sr;
-				float* pData = pThis->_pBuffer;
+//				float* pData = pThis->_pBuffer; <- this was fuxxxxing up
+				float* pL = pSong->_pMachines[0]->_pSamplesL;
+				float* pR = pSong->_pMachines[0]->_pSamplesR;
 				for (int i=0; i<amount; i++)
 				{
 					
 					// It's an ugly solution, I know, but We are recording, so
 					// speed is not that crucial
 					//
-					if ( *pData > 32767.0) sl = 32767;
-					else if ( *pData < -32768.0 ) sl = -32768;
-					else sl = f2i(*pData);
-					*pData++;
-					if ( *pData > 32767.0) sr = 32767;
-					else if ( *pData < -32768.0 ) sr = -32768;
-					else sr = f2i(*pData);
-					*pData++;
-					pThis->_outputWaveFile.WriteStereoSample(sl,sr);
+//					int sl = int(*pData++);
+					int sl = int(*pL++);
+					if ( sl > 32767) sl = 32767;
+					else if ( sl < -32768 ) sl = -32768;
+//					int sr = int(*pData++);
+					int sr = int(*pR++);
+					if ( sr > 32767) sr = 32767;
+					else if ( sr < -32768 ) sr = -32768;
+					pThis->_outputWaveFile.WriteStereoSample(WORD(sl),WORD(sr));
 				}
 			}
 
