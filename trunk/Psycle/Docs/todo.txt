@@ -3,14 +3,12 @@
 +=addition
 
 * psycle default theme sucks
-+ James says: how hard would it be to put nodes in the wires, so you can bend them?
-+ James says: i have an idea for that actually... seeing as there are so many configurable 
-	keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight 
-	what was assigned to it
-* waves list did not enum waves on song load
-+ gear rack
 * <alk> there's a bug where when u alt-tab the icon is not correct
-+ song not saved dialog on load or exit
++ <_sue_> it would be cool if you could give names to the channels in the minimixer
++ <[JAZ]> gear rack The description was : " a dialog with 
+	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
+	exchange, and don't know if anything more... maybe some information (wires used... don't know)
++ <[JAZ]> Internals still miss mouse tweak, right?
 
 * Machines
 ------------
@@ -18,6 +16,7 @@
 * <Alk^^> in pooplog filter tweak inertia doesnt work
 * cyanphase vibrasynth has an access violation bug
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
+bug:	 JMDrum is buggy (Crashes sometimes)
 
 * Sampler Machine/Wave Ed:
 --------------------------
@@ -71,7 +70,6 @@ feature: First, I'd like to see the Generator or Effect name in one of these pla
 * moving machines makes playback pop - machine interface takes too long to redraw
 bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
 		 Fix:Basically, make ONLY .fxb for VST's.
-bug:	 JMDrum is buggy (Crashes sometimes)
 ! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
 	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
 ! <_sue_> another thing....the lfo knob on your filter should be moving all the time....but it isnt....its only 
@@ -83,7 +81,8 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 	but labelled volume sliders for each of the machines connected to it? -> this would suck as you would get names
 	for only the effects
 + how about nice looking bmp windows for machine link and master machine dialogs?
-*: Saving all the missing settings to registry (like class of plugin..)
++ James says: how hard would it be to put nodes in the wires, so you can bend them?
+* Saving all the missing settings to registry (like class of plugin..)
 feature: Replace Machine by another (right click menu? new button?).
 feature: Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
 feature: Directories in "Add new machine" (Sorting with directories)
@@ -104,7 +103,6 @@ feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
 	is pressed down again, etc.
 * <Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command 
 * <sue> playbar should take latency into account - same as ^
-* song length calculation does not take ffxx/fexx commands into account
 * when changing octave, notes playing should be stopped (because if not, notes playing don't stop)
 bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
 bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
@@ -145,13 +143,15 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 * Flanger feedback slider
 * Instrument filter envelope slider. (check differences with finetune slider)+ midi control commands learn
 * <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
-! Have exit warning on modified file
 ! should make it so clicking on colour boxes pops up menu
 ! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
 	when you want.
 ! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! record button should set edit mode and follow mode on, should have new export wav button
 ! <alk> increase pattern step (to 64?) (to go with the 256 row  patterns)
++ James says: i have an idea for that actually... seeing as there are so many configurable 
+	keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight 
+	what was assigned to it
 + <alk> song properties (allow carriage returns, make box bigger?)
 + <alk> be able to save/load key config
 + <_sue_> centering psycle master machine would be cool also...as well as centering the open file menus....

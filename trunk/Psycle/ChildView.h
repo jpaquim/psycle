@@ -138,6 +138,8 @@ struct SPatternHeaderCoords
 	SSkinDest dRecordOn;
 	SSkinDest dMuteOn;
 	SSkinDest dSoloOn;
+	BOOL bHasTransparency;
+	COLORREF cTransparency;
 };
 
 struct SMachineCoords
@@ -165,6 +167,8 @@ struct SMachineCoords
 	SSkinDest dEffectMute;
 	SSkinDest dEffectBypass;
 	SSkinDest dEffectName;
+	BOOL bHasTransparency;
+	COLORREF cTransparency;
 };
 
 
@@ -328,8 +332,8 @@ private:
 	inline void TXTFLAT(CDC *devc,char *txt, int x,int y,int w,int h);
 	inline void BOX(CDC *devc,int x,int y, int w, int h);
 	inline void BOX(CDC *devc,CRect rect);
-	void DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max, int mode);
-	void DrawMachineVumeters(CClientDC *devc);	
+	void DrawMachineVol(int x,int y,CDC *devc, int vol, int max, int mode);
+	void DrawMachineVumeters(CDC *devc);	
 	void DrawMachineEditor(CDC *devc);
 	void DrawMachine(Machine* mac, int macnum, CDC *devc);
 	void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
@@ -339,6 +343,8 @@ private:
 	COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
 	void FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result);
 	void FindMachineSkin(CString findDir, CString findName, BOOL *result);
+	void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
+	void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
 
 	inline int _ps();
 	inline unsigned char * _offset(int ps);
@@ -348,8 +354,10 @@ private:
 private:
 	// GDI Stuff
 	CBitmap patternheader;
+	CBitmap patternheadermask;
 	HBITMAP hbmPatHeader;
 	CBitmap machineskin;
+	CBitmap machineskinmask;
 	HBITMAP hbmMachineSkin;
 	CBitmap* bmpDC;
 	int FLATSIZES[256];
@@ -415,6 +423,7 @@ private:
 
 public:
 	void SelectMachineUnderCursor(void);
+	BOOL CheckUnsavedSong(char* szTitle);
 	// Generated message map functions
 	//{{AFX_MSG(CChildView)
 	afx_msg void OnPaint();
@@ -437,8 +446,8 @@ public:
 	afx_msg void OnTimer( UINT nIDEvent );
 	afx_msg void OnUpdateRecordb(CCmdUI* pCmdUI);
 	afx_msg void OnFileNew();
-	afx_msg void OnFileSave();
-	afx_msg void OnFileSavesong();
+	afx_msg BOOL OnFileSave();
+	afx_msg BOOL OnFileSavesong();
 	afx_msg void OnFileLoadsong();
 	afx_msg void OnHelpSaludos();
 	afx_msg void OnUpdatePatternView(CCmdUI* pCmdUI);

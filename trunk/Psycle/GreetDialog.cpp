@@ -90,9 +90,10 @@ BOOL CGreetDialog::OnInitDialog()
 	m_greetz.AddString("Krzysztof Foltman / fsm [Coding help]");
 	m_greetz.AddString("krokpitr");
 	m_greetz.AddString("dj_d [Beta testing]");
-	m_greetz.AddString("pooplog [Some Synths and Code]");
-
-	
+	m_greetz.AddString("pooplog [Machines and Code]");
+	m_greetz.AddString("Alk");
+	m_greetz.AddString("_sue_ [testing]");
+	m_greetz.AddString("Druttis [Machines]");
 
 	return TRUE;
 }

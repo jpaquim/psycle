@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 // Machine view GDI operations
-void CChildView::DrawMachineVumeters(CClientDC *devc)
+void CChildView::DrawMachineVumeters(CDC *devc)
 {
 	if (_pSong->_machineLock)
 	{
@@ -254,7 +254,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 //////////////////////////////////////////////////////////////////////
 // Draws a single machine
 
-void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max, int mode)
+void CChildView::DrawMachineVol(int x,int y,CDC *devc, int vol, int max, int mode)
 {
 	CDC memDC;
 	CBitmap* oldbmp;
@@ -271,55 +271,116 @@ void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max, i
 		max *= MachineCoords.dGeneratorVu.width;
 		max /= 96;
 
-		// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-		if (vol > 0)
+		if (MachineCoords.bHasTransparency)
 		{
-			if (MachineCoords.sGeneratorVu0.width)
+			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+			if (vol > 0)
 			{
-				vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
-				vol *= MachineCoords.sGeneratorVu0.width;
+				if (MachineCoords.sGeneratorVu0.width)
+				{
+					vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
+					vol *= MachineCoords.sGeneratorVu0.width;
+				}
 			}
-		}
-		else
-		{
-			vol = 0;
-		}
-		devc->BitBlt(x+vol+MachineCoords.dGeneratorVu.x, 
+			else
+			{
+				vol = 0;
+			}
+
+			TransparentBlt(devc,
+						x+vol+MachineCoords.dGeneratorVu.x, 
 						y+MachineCoords.dGeneratorVu.y, 
 						MachineCoords.dGeneratorVu.width-vol, 
 						MachineCoords.sGeneratorVu0.height, 
 						&memDC, 
+						&machineskinmask,
 						MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x, 
-						MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y, 
-						SRCCOPY); //background
+						MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y);
 
-		if (max > 0)
-		{
-			if (MachineCoords.sGeneratorVuPeak.width)
+			if (max > 0)
 			{
-				max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
-				max *= MachineCoords.sGeneratorVuPeak.width;
-				devc->BitBlt(x+max+MachineCoords.dGeneratorVu.x, 
+				if (MachineCoords.sGeneratorVuPeak.width)
+				{
+					max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
+					max *= MachineCoords.sGeneratorVuPeak.width;
+					TransparentBlt(devc,
+								x+max+MachineCoords.dGeneratorVu.x, 
+								y+MachineCoords.dGeneratorVu.y, 
+								MachineCoords.sGeneratorVuPeak.width, 
+								MachineCoords.sGeneratorVuPeak.height, 
+								&memDC, 
+								&machineskinmask,
+								MachineCoords.sGeneratorVuPeak.x, 
+								MachineCoords.sGeneratorVuPeak.y);
+				}
+			}
+
+			if (vol > 0)
+			{
+				TransparentBlt(devc,
+							x+MachineCoords.dGeneratorVu.x, 
 							y+MachineCoords.dGeneratorVu.y, 
-							MachineCoords.sGeneratorVuPeak.width, 
-							MachineCoords.sGeneratorVuPeak.height, 
+							vol, 
+							MachineCoords.sGeneratorVu0.height, 
 							&memDC, 
-							MachineCoords.sGeneratorVuPeak.x, 
-							MachineCoords.sGeneratorVuPeak.y, 
-							SRCCOPY); //peak
+							&machineskinmask,
+							MachineCoords.sGeneratorVu0.x, 
+							MachineCoords.sGeneratorVu0.y);
 			}
 		}
-
-		if (vol > 0)
+		else
 		{
-			devc->BitBlt(x+MachineCoords.dGeneratorVu.x, 
-						y+MachineCoords.dGeneratorVu.y, 
-						vol, 
-						MachineCoords.sGeneratorVu0.height, 
-						&memDC, 
-						MachineCoords.sGeneratorVu0.x, 
-						MachineCoords.sGeneratorVu0.y, 
-						SRCCOPY); // leds
+			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+			if (vol > 0)
+			{
+				if (MachineCoords.sGeneratorVu0.width)
+				{
+					vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
+					vol *= MachineCoords.sGeneratorVu0.width;
+				}
+			}
+			else
+			{
+				vol = 0;
+			}
+
+			devc->BitBlt(x+vol+MachineCoords.dGeneratorVu.x, 
+							y+MachineCoords.dGeneratorVu.y, 
+							MachineCoords.dGeneratorVu.width-vol, 
+							MachineCoords.sGeneratorVu0.height, 
+							&memDC, 
+							MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x, 
+							MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y, 
+							SRCCOPY); //background
+
+			if (max > 0)
+			{
+				if (MachineCoords.sGeneratorVuPeak.width)
+				{
+					max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
+					max *= MachineCoords.sGeneratorVuPeak.width;
+					devc->BitBlt(x+max+MachineCoords.dGeneratorVu.x, 
+								y+MachineCoords.dGeneratorVu.y, 
+								MachineCoords.sGeneratorVuPeak.width, 
+								MachineCoords.sGeneratorVuPeak.height, 
+								&memDC, 
+								MachineCoords.sGeneratorVuPeak.x, 
+								MachineCoords.sGeneratorVuPeak.y, 
+								SRCCOPY); //peak
+				}
+			}
+
+			if (vol > 0)
+			{
+				devc->BitBlt(x+MachineCoords.dGeneratorVu.x, 
+							y+MachineCoords.dGeneratorVu.y, 
+							vol, 
+							MachineCoords.sGeneratorVu0.height, 
+							&memDC, 
+							MachineCoords.sGeneratorVu0.x, 
+							MachineCoords.sGeneratorVu0.y, 
+							SRCCOPY); // leds
+			}
 		}
 
 		break;
@@ -406,128 +467,266 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 	CBitmap* oldbmp = memDC.SelectObject(&machineskin);
 
 	// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-	switch (mac->_mode)
+	if (MachineCoords.bHasTransparency)
 	{
-	case MACHMODE_GENERATOR:
-		devc->BitBlt(x, 
-					y, 
-					MachineCoords.sGenerator.width, 
-					MachineCoords.sGenerator.height, 
-					&memDC, 
-					MachineCoords.sGenerator.x, 
-					MachineCoords.sGenerator.y, 
-					SRCCOPY);
-		// Draw pan
+		switch (mac->_mode)
 		{
-			int panning = mac->_panning*MachineCoords.dGeneratorPan.width;
-			panning /= 128;
-			devc->BitBlt(x+panning+MachineCoords.dGeneratorPan.x, 
-						y+MachineCoords.dGeneratorPan.y, 
-						MachineCoords.sGeneratorPan.width, 
-						MachineCoords.sGeneratorPan.height, 
+		case MACHMODE_GENERATOR:
+			TransparentBlt(devc,
+						x, 
+						y, 
+						MachineCoords.sGenerator.width, 
+						MachineCoords.sGenerator.height, 
 						&memDC, 
-						MachineCoords.sGeneratorPan.x, 
-						MachineCoords.sGeneratorPan.y, 
-						SRCCOPY);
-		}
-		if (mac->_mute)
-		{
-			devc->BitBlt(x+MachineCoords.dGeneratorMute.x, 
-						y+MachineCoords.dGeneratorMute.y, 
-						MachineCoords.sGeneratorMute.width, 
-						MachineCoords.sGeneratorMute.height, 
+						&machineskinmask,
+						MachineCoords.sGenerator.x, 
+						MachineCoords.sGenerator.y);
+			// Draw pan
+			{
+				int panning = mac->_panning*MachineCoords.dGeneratorPan.width;
+				panning /= 128;
+				TransparentBlt(devc,
+							x+panning+MachineCoords.dGeneratorPan.x, 
+							y+MachineCoords.dGeneratorPan.y, 
+							MachineCoords.sGeneratorPan.width, 
+							MachineCoords.sGeneratorPan.height, 
+							&memDC, 
+							&machineskinmask,
+							MachineCoords.sGeneratorPan.x, 
+							MachineCoords.sGeneratorPan.y);
+			}
+			if (mac->_mute)
+			{
+				TransparentBlt(devc,
+							x+MachineCoords.dGeneratorMute.x, 
+							y+MachineCoords.dGeneratorMute.y, 
+							MachineCoords.sGeneratorMute.width, 
+							MachineCoords.sGeneratorMute.height, 
+							&memDC, 
+							&machineskinmask,
+							MachineCoords.sGeneratorMute.x, 
+							MachineCoords.sGeneratorMute.y);
+			}
+			else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
+			{
+				TransparentBlt(devc,
+							x+MachineCoords.dGeneratorSolo.x, 
+							y+MachineCoords.dGeneratorSolo.y, 
+							MachineCoords.sGeneratorSolo.width, 
+							MachineCoords.sGeneratorSolo.height, 
+							&memDC, 
+							&machineskinmask,
+							MachineCoords.sGeneratorSolo.x, 
+							MachineCoords.sGeneratorSolo.y);
+			}
+			// Draw text
+			{
+				CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
+				devc->SetBkMode(TRANSPARENT);
+				devc->SetTextColor(Global::pConfig->mv_fontcolour);
+				devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+				devc->SetBkMode(OPAQUE);
+				devc->SelectObject(oldFont);
+			}
+			break;
+		case MACHMODE_FX:
+		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+			TransparentBlt(devc,
+						x, 
+						y,
+						MachineCoords.sEffect.width, 
+						MachineCoords.sEffect.height, 
 						&memDC, 
-						MachineCoords.sGeneratorMute.x, 
-						MachineCoords.sGeneratorMute.y, 
-						SRCCOPY);
-		}
-		else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
-		{
-			devc->BitBlt(x+MachineCoords.dGeneratorSolo.x, 
-						y+MachineCoords.dGeneratorSolo.y, 
-						MachineCoords.sGeneratorSolo.width, 
-						MachineCoords.sGeneratorSolo.height, 
-						&memDC, 
-						MachineCoords.sGeneratorSolo.x, 
-						MachineCoords.sGeneratorSolo.y, 
-						SRCCOPY);
-		}
-		// Draw text
-		{
-			CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
-			devc->SetBkMode(TRANSPARENT);
-			devc->SetTextColor(Global::pConfig->mv_fontcolour);
-			devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
-			devc->SetBkMode(OPAQUE);
-			devc->SelectObject(oldFont);
-		}
-		break;
-	case MACHMODE_FX:
-	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-		devc->BitBlt(x, 
-					y,
-					MachineCoords.sEffect.width, 
-					MachineCoords.sEffect.height, 
-					&memDC, 
-					MachineCoords.sEffect.x, 
-					MachineCoords.sEffect.y, 
-					SRCCOPY);
-		// Draw pan
-		{
-			int panning = mac->_panning*MachineCoords.dEffectPan.width;
-			panning /= 128;
-			devc->BitBlt(x+panning+MachineCoords.dEffectPan.x, 
-						y+MachineCoords.dEffectPan.y, 
-						MachineCoords.sEffectPan.width, 
-						MachineCoords.sEffectPan.height, 
-						&memDC, 
-						MachineCoords.sEffectPan.x, 
-						MachineCoords.sEffectPan.y, 
-						SRCCOPY);
-		}
-		if (mac->_mute)
-		{
-			devc->BitBlt(x+MachineCoords.dEffectMute.x, 
-						y+MachineCoords.dEffectMute.y, 
-						MachineCoords.sEffectMute.width, 
-						MachineCoords.sEffectMute.height, 
-						&memDC, 
-						MachineCoords.sEffectMute.x, 
-						MachineCoords.sEffectMute.y, 
-						SRCCOPY);
-		}
-		if (mac->_bypass)
-		{
-			devc->BitBlt(x+MachineCoords.dEffectBypass.x, 
-						y+MachineCoords.dEffectBypass.y, 
-						MachineCoords.sEffectBypass.width, 
-						MachineCoords.sEffectBypass.height, 
-						&memDC, 
-						MachineCoords.sEffectBypass.x, 
-						MachineCoords.sEffectBypass.y, 
-						SRCCOPY);
-		}
-		// Draw text
-		{
-			CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
-			devc->SetBkMode(TRANSPARENT);
-			devc->SetTextColor(Global::pConfig->mv_fontcolour);
-			devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
-			devc->SetBkMode(OPAQUE);
-			devc->SelectObject(oldFont);
-		}
-		break;
+						&machineskinmask,
+						MachineCoords.sEffect.x, 
+						MachineCoords.sEffect.y);
+			// Draw pan
+			{
+				int panning = mac->_panning*MachineCoords.dEffectPan.width;
+				panning /= 128;
+				TransparentBlt(devc,
+							x+panning+MachineCoords.dEffectPan.x, 
+							y+MachineCoords.dEffectPan.y, 
+							MachineCoords.sEffectPan.width, 
+							MachineCoords.sEffectPan.height, 
+							&memDC, 
+							&machineskinmask,
+							MachineCoords.sEffectPan.x, 
+							MachineCoords.sEffectPan.y);
+			}
+			if (mac->_mute)
+			{
+				TransparentBlt(devc,
+							x+MachineCoords.dEffectMute.x, 
+							y+MachineCoords.dEffectMute.y, 
+							MachineCoords.sEffectMute.width, 
+							MachineCoords.sEffectMute.height, 
+							&memDC, 
+							&machineskinmask,
+							MachineCoords.sEffectMute.x, 
+							MachineCoords.sEffectMute.y);
+			}
+			if (mac->_bypass)
+			{
+				TransparentBlt(devc,
+							x+MachineCoords.dEffectBypass.x, 
+							y+MachineCoords.dEffectBypass.y, 
+							MachineCoords.sEffectBypass.width, 
+							MachineCoords.sEffectBypass.height, 
+							&memDC, 
+							&machineskinmask,
+							MachineCoords.sEffectBypass.x, 
+							MachineCoords.sEffectBypass.y);
+			}
+			// Draw text
+			{
+				CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
+				devc->SetBkMode(TRANSPARENT);
+				devc->SetTextColor(Global::pConfig->mv_fontcolour);
+				devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+				devc->SetBkMode(OPAQUE);
+				devc->SelectObject(oldFont);
+			}
+			break;
 
-	case MACHMODE_MASTER:
-		devc->BitBlt(x, 
-					y,
-					MachineCoords.sMaster.width, 
-					MachineCoords.sMaster.height, 
-					&memDC, 
-					MachineCoords.sMaster.x, 
-					MachineCoords.sMaster.y, 
-					SRCCOPY);
-		break;
+		case MACHMODE_MASTER:
+			TransparentBlt(devc,
+						x, 
+						y,
+						MachineCoords.sMaster.width, 
+						MachineCoords.sMaster.height, 
+						&memDC, 
+						&machineskinmask,
+						MachineCoords.sMaster.x, 
+						MachineCoords.sMaster.y);
+			break;
+		}
+	}
+	else
+	{
+		switch (mac->_mode)
+		{
+		case MACHMODE_GENERATOR:
+			devc->BitBlt(x, 
+						y, 
+						MachineCoords.sGenerator.width, 
+						MachineCoords.sGenerator.height, 
+						&memDC, 
+						MachineCoords.sGenerator.x, 
+						MachineCoords.sGenerator.y, 
+						SRCCOPY);
+			// Draw pan
+			{
+				int panning = mac->_panning*MachineCoords.dGeneratorPan.width;
+				panning /= 128;
+				devc->BitBlt(x+panning+MachineCoords.dGeneratorPan.x, 
+							y+MachineCoords.dGeneratorPan.y, 
+							MachineCoords.sGeneratorPan.width, 
+							MachineCoords.sGeneratorPan.height, 
+							&memDC, 
+							MachineCoords.sGeneratorPan.x, 
+							MachineCoords.sGeneratorPan.y, 
+							SRCCOPY);
+			}
+			if (mac->_mute)
+			{
+				devc->BitBlt(x+MachineCoords.dGeneratorMute.x, 
+							y+MachineCoords.dGeneratorMute.y, 
+							MachineCoords.sGeneratorMute.width, 
+							MachineCoords.sGeneratorMute.height, 
+							&memDC, 
+							MachineCoords.sGeneratorMute.x, 
+							MachineCoords.sGeneratorMute.y, 
+							SRCCOPY);
+			}
+			else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
+			{
+				devc->BitBlt(x+MachineCoords.dGeneratorSolo.x, 
+							y+MachineCoords.dGeneratorSolo.y, 
+							MachineCoords.sGeneratorSolo.width, 
+							MachineCoords.sGeneratorSolo.height, 
+							&memDC, 
+							MachineCoords.sGeneratorSolo.x, 
+							MachineCoords.sGeneratorSolo.y, 
+							SRCCOPY);
+			}
+			// Draw text
+			{
+				CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
+				devc->SetBkMode(TRANSPARENT);
+				devc->SetTextColor(Global::pConfig->mv_fontcolour);
+				devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+				devc->SetBkMode(OPAQUE);
+				devc->SelectObject(oldFont);
+			}
+			break;
+		case MACHMODE_FX:
+		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+			devc->BitBlt(x, 
+						y,
+						MachineCoords.sEffect.width, 
+						MachineCoords.sEffect.height, 
+						&memDC, 
+						MachineCoords.sEffect.x, 
+						MachineCoords.sEffect.y, 
+						SRCCOPY);
+			// Draw pan
+			{
+				int panning = mac->_panning*MachineCoords.dEffectPan.width;
+				panning /= 128;
+				devc->BitBlt(x+panning+MachineCoords.dEffectPan.x, 
+							y+MachineCoords.dEffectPan.y, 
+							MachineCoords.sEffectPan.width, 
+							MachineCoords.sEffectPan.height, 
+							&memDC, 
+							MachineCoords.sEffectPan.x, 
+							MachineCoords.sEffectPan.y, 
+							SRCCOPY);
+			}
+			if (mac->_mute)
+			{
+				devc->BitBlt(x+MachineCoords.dEffectMute.x, 
+							y+MachineCoords.dEffectMute.y, 
+							MachineCoords.sEffectMute.width, 
+							MachineCoords.sEffectMute.height, 
+							&memDC, 
+							MachineCoords.sEffectMute.x, 
+							MachineCoords.sEffectMute.y, 
+							SRCCOPY);
+			}
+			if (mac->_bypass)
+			{
+				devc->BitBlt(x+MachineCoords.dEffectBypass.x, 
+							y+MachineCoords.dEffectBypass.y, 
+							MachineCoords.sEffectBypass.width, 
+							MachineCoords.sEffectBypass.height, 
+							&memDC, 
+							MachineCoords.sEffectBypass.x, 
+							MachineCoords.sEffectBypass.y, 
+							SRCCOPY);
+			}
+			// Draw text
+			{
+				CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
+				devc->SetBkMode(TRANSPARENT);
+				devc->SetTextColor(Global::pConfig->mv_fontcolour);
+				devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+				devc->SetBkMode(OPAQUE);
+				devc->SelectObject(oldFont);
+			}
+			break;
+
+		case MACHMODE_MASTER:
+			devc->BitBlt(x, 
+						y,
+						MachineCoords.sMaster.width, 
+						MachineCoords.sMaster.height, 
+						&memDC, 
+						MachineCoords.sMaster.x, 
+						MachineCoords.sMaster.y, 
+						SRCCOPY);
+			break;
+		}
 	}
 	memDC.SelectObject(oldbmp);
 	memDC.DeleteDC();

@@ -1220,6 +1220,11 @@ void CChildView::LoadBlock(FILE* file)
 	fread(&blockNTracks,sizeof(int),1,file);
 	fread(&blockNLines,sizeof(int),1,file);
 
+	int patNum = _pSong->playOrder[editPosition];
+	int nlines = _pSong->patternLines[patNum];
+	AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+	AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+
 	for (int t=0;t<blockNTracks;t++)
 	{
 		for (int l=0;l<blockNLines;l++)
@@ -1386,14 +1391,14 @@ void CChildView::BlockGenChange(int x)
 			{
 				const int displace2=t*5+l*MULTIPLY+2;
 				
-				int gen=*(toffset+displace2);
+				unsigned char gen=*(toffset+displace2);
 				
 				if ( gen != 255 )
 				{
 					gen=x;
 					if(gen<0)gen=0;
 					if(gen>63)gen=63;
-					toffset[displace2]=static_cast<unsigned char>(gen);
+					toffset[displace2]=gen;
 				}
 			}
 		}
@@ -1422,14 +1427,14 @@ void CChildView::BlockInsChange(int x)
 			{
 				const int displace2=t*5+l*MULTIPLY+1;
 				
-				int ins=*(toffset+displace2);
+				unsigned char ins=*(toffset+displace2);
 			
 				if (ins != 255 )
 				{
 					ins=x;
 					if(ins<0)ins=0;
 					if(ins>255)ins=255;
-					toffset[displace]=static_cast<unsigned char>(ins);
+					toffset[displace2]=ins;
 				}
 			}
 		}

@@ -157,6 +157,8 @@ CChildView::~CChildView()
 	DeleteObject(hbmPatHeader);
 	machineskin.DeleteObject();
 	DeleteObject(hbmMachineSkin);
+	patternheadermask.DeleteObject();
+	machineskinmask.DeleteObject();
 }
 
 BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -500,12 +502,17 @@ void CChildView::OnPaint()
 				break;
 			case DMMacRefresh:
 				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
+				DrawMachineVumeters(&bufDC);
 				updateMode=0;
 				break;
 			case DMAllMacsRefresh:
 				for (int i=0;i<MAX_MACHINES;i++)
 				{
-					if (_pSong->_machineActive[i]) DrawMachine(Global::_pSong->_pMachines[i], i, &bufDC);
+					if (_pSong->_machineActive[i])
+					{
+						DrawMachine(Global::_pSong->_pMachines[i], i, &bufDC);
+						DrawMachineVumeters(&bufDC);
+					}
 				}
 				break;
 			}
@@ -532,12 +539,17 @@ void CChildView::OnPaint()
 				break;
 			case DMMacRefresh:
 				DrawMachine(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
+				DrawMachineVumeters(&dc);
 				updateMode=0;
 				break;
 			case DMAllMacsRefresh:
 				for (int i=0;i<MAX_MACHINES;i++)
 				{
-					if (_pSong->_machineActive[i]) DrawMachine(Global::_pSong->_pMachines[i], i, &dc);
+					if (_pSong->_machineActive[i]) 
+					{
+						DrawMachine(Global::_pSong->_pMachines[i], i, &dc);
+						DrawMachineVumeters(&dc);
+					}
 				}
 				break;
 			}
@@ -602,8 +614,9 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 //////////////////////////////////////////////////////////////////////
 // "Save Song" Function
 
-void CChildView::OnFileSave() 
+BOOL CChildView::OnFileSave() 
 {
+	BOOL bResult = TRUE;
 	if ( Global::_pSong->_saved )
 	{
 		if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
@@ -616,11 +629,12 @@ void CChildView::OnFileSave()
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{
 				MessageBox("Error creating file", "Error", MB_OK);
-				return;
+				return FALSE;
 			}
 			if (!_pSong->Save(&file))
 			{
 				MessageBox("Error saving file", "Error", MB_OK);
+				bResult = FALSE;
 			}
 			else _pSong->_saved=true;
 			file.Close();
@@ -635,14 +649,22 @@ void CChildView::OnFileSave()
 			}
 			SetTitleBarText();
 		}
+		else 
+		{
+			return FALSE;
+		}
 	}
-	else OnFileSavesong();
+	else 
+	{
+		return OnFileSavesong();
+	}
+	return bResult;
 }
 
 //////////////////////////////////////////////////////////////////////
 // "Save Song As" Function
 
-void CChildView::OnFileSavesong() 
+BOOL CChildView::OnFileSavesong() 
 {
 	OPENFILENAME ofn;       // common dialog box structure
 	CString ifile = Global::_pSong->fileName;
@@ -664,12 +686,14 @@ void CChildView::OnFileSavesong()
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
 	ofn.Flags = OFN_PATHMUSTEXIST;
+	BOOL bResult = TRUE;
 	
 	// Display the Open dialog box. 
 	if (GetSaveFileName(&ofn) == TRUE)
 	{
 		CString str = ofn.lpstrFile;
-		if ( ofn.nFilterIndex == 2 ) {
+		if ( ofn.nFilterIndex == 2 ) 
+		{
 			CString str2 = str.Right(4);
 			if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb");
 			sprintf(szFile,str);
@@ -678,7 +702,8 @@ void CChildView::OnFileSavesong()
 			fflush(hFile);
 			fclose(hFile);
 		}
-		else { 
+		else 
+		{ 
 			CString str2 = str.Right(4);
 			if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
 			int index = str.ReverseFind('\\');
@@ -696,13 +721,17 @@ void CChildView::OnFileSavesong()
 			if (!file.Create(str.GetBuffer(1), true))
 			{
 				MessageBox("Error creating file", "Error", MB_OK);
-				return;
+				return FALSE;
 			}
 			if (!_pSong->Save(&file))
 			{
 				MessageBox("Error saving file", "Error", MB_OK);
+				bResult = FALSE;
 			}
-			else _pSong->_saved=true;
+			else 
+			{
+				_pSong->_saved=true;
+			}
 			file.Close();
 
 			AppendToRecent(str.GetBuffer(1));
@@ -716,10 +745,13 @@ void CChildView::OnFileSavesong()
 				UndoSaved = 0;
 			}
 		}
-
 		SetTitleBarText();
 	}
-//	Repaint();
+	else
+	{
+		return FALSE;
+	}
+	return bResult;
 }
 
 void CChildView::OnFileLoadsong()
@@ -752,7 +784,7 @@ void CChildView::OnFileLoadsong()
 
 void CChildView::OnFileNew() 
 {
-	if (MessageBox("Are you sure?","New song",MB_YESNO | MB_ICONWARNING)==IDYES)
+	if (CheckUnsavedSong("New Song"))
 	{
 		KillUndo();
 		KillRedo();
@@ -784,6 +816,7 @@ void CChildView::OnFileNew()
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->m_wndInst.WaveUpdate();
 		pParentMain->UpdateSequencer();
+		pParentMain->UpdateComboIns();
 		RecalculateColourGrid();
 		Repaint();
 	}
@@ -798,7 +831,47 @@ void CChildView::OnFileSaveaudio()
 	
 }
 
+BOOL CChildView::CheckUnsavedSong(char* szTitle)
+{
+	// that method does not take machine changes into account
+	/*
+	BOOL bChecked = TRUE;
+	if (pUndoList)
+	{
+		if (UndoSaved != pUndoList->counter)
+		{
+			bChecked = FALSE;
+		}
+	}
+	else
+	{
+		if (UndoSaved != 0)
+		{
+			bChecked = FALSE;
+		}
+	}
 
+	if (!bChecked)
+	*/
+	{
+		char szText[128];
+		sprintf(szText,"Save changes to %s?",Global::_pSong->fileName);
+		int result = MessageBox(szText,szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+		switch (result)
+		{
+		case IDYES:
+			return OnFileSave();
+			break;
+		case IDNO:
+			return TRUE;
+			break;
+		case IDCANCEL:
+			return FALSE;
+			break;
+		}
+	}
+	return TRUE;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Tool bar buttons and View Commands
@@ -1679,74 +1752,77 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	}
 	else
 	{
-		pParentMain->CloseAllMacGuis();
-		Global::pPlayer->Stop();
-		Sleep(LOCK_LATENCY);
-		_outputActive = false;
-		Global::pConfig->_pOutputDriver->Enable(false);
-		// MIDI IMPLEMENTATION
-		Global::pConfig->_pMidiInput->Close();
-		Sleep(LOCK_LATENCY);
-		
-		OldPsyFile file;
-		if (!file.Open(fName))
+		if (CheckUnsavedSong("Load Song"))
 		{
-			MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
-			return;
-		}
-		_pSong->Load(&file);
-		file.Close();
-		
-		_pSong->_saved=true;
-
-		char buffer[512];
-		sprintf(buffer,"'%s'\n\n%s\n\n%s"
-			,_pSong->Name
-			,_pSong->Author
-			,_pSong->Comment);
-		
-		MessageBox(buffer,"Psycle song loaded",MB_OK);
-		
-		
-		//!Fidelooop!!//
-		AppendToRecent(fName);
-		CString str = fName;
-		int index = str.ReverseFind('\\');
-		if (index != -1)
-		{
-			Global::pConfig->SetSongDir(str.Left(index));
-			Global::_pSong->fileName = str.Mid(index+1);
-		}
-		else
-		{
-			Global::_pSong->fileName = str;
-		}
-		
-		Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
-
-		_outputActive = true;
-		if (!Global::pConfig->_pOutputDriver->Enable(true))
-		{
+			pParentMain->CloseAllMacGuis();
+			Global::pPlayer->Stop();
+			Sleep(LOCK_LATENCY);
 			_outputActive = false;
-		}
-		else
-		{
+			Global::pConfig->_pOutputDriver->Enable(false);
 			// MIDI IMPLEMENTATION
-			Global::pConfig->_pMidiInput->Open();
+			Global::pConfig->_pMidiInput->Close();
+			Sleep(LOCK_LATENCY);
+			
+			OldPsyFile file;
+			if (!file.Open(fName))
+			{
+				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+				return;
+			}
+			_pSong->Load(&file);
+			file.Close();
+			
+			_pSong->_saved=true;
+
+			//!Fidelooop!!//
+			AppendToRecent(fName);
+			CString str = fName;
+			int index = str.ReverseFind('\\');
+			if (index != -1)
+			{
+				Global::pConfig->SetSongDir(str.Left(index));
+				Global::_pSong->fileName = str.Mid(index+1);
+			}
+			else
+			{
+				Global::_pSong->fileName = str;
+			}
+			
+			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+
+			_outputActive = true;
+			if (!Global::pConfig->_pOutputDriver->Enable(true))
+			{
+				_outputActive = false;
+			}
+			else
+			{
+				// MIDI IMPLEMENTATION
+				Global::pConfig->_pMidiInput->Open();
+			}
+			editPosition=0;
+			Global::_pSong->seqBus=0;
+			pParentMain->PsybarsUpdate();
+			pParentMain->WaveEditorBackUpdate();
+			pParentMain->m_wndInst.WaveUpdate();
+			pParentMain->UpdateSequencer();
+			pParentMain->UpdatePlayOrder(false);
+			pParentMain->UpdateComboIns();
+			RecalculateColourGrid();
+			Repaint();
+			KillUndo();
+			KillRedo();
+			SetTitleBarText();
+
+			char buffer[512];
+			sprintf(buffer,"'%s'\n\n%s\n\n%s"
+				,_pSong->Name
+				,_pSong->Author
+				,_pSong->Comment);
+			
+			MessageBox(buffer,"Psycle song loaded",MB_OK);
 		}
-		editPosition=0;
-		Global::_pSong->seqBus=0;
-		pParentMain->PsybarsUpdate();
-		pParentMain->WaveEditorBackUpdate();
-		pParentMain->m_wndInst.WaveUpdate();
-		pParentMain->UpdateSequencer();
-		pParentMain->UpdatePlayOrder(false);
-		RecalculateColourGrid();
-		Repaint();
 	}
-	KillUndo();
-	KillRedo();
-	SetTitleBarText();
 }
 
 void CChildView::CallOpenRecent(int pos)
@@ -1909,9 +1985,11 @@ void CChildView::LoadMachineSkin()
 		MachineCoords.dEffectBypass.y = 15;
 		MachineCoords.dEffectName.x = 10;
 		MachineCoords.dEffectName.y = 12;
+		MachineCoords.bHasTransparency = FALSE;
 
 		machineskin.DeleteObject();
 		DeleteObject(hbmMachineSkin);
+		machineskinmask.DeleteObject();
 		machineskin.LoadBitmap(IDB_MACHINE_SKIN);
 	}
 }
@@ -1947,6 +2025,7 @@ void CChildView::FindMachineSkin(CString findDir, CString findName, BOOL *result
 
 			machineskin.DeleteObject();
 			DeleteObject(hbmMachineSkin);
+			machineskinmask.DeleteObject();
 			hbmMachineSkin = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 			if (hbmMachineSkin)
 			{
@@ -2433,6 +2512,19 @@ void CChildView::FindMachineSkin(CString findDir, CString findName, BOOL *result
 								}
 							}
 						}
+						else if (strstr(buf,"\"transparency\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								MachineCoords.cTransparency = _httoi(q+1);
+								MachineCoords.bHasTransparency = TRUE;
+							}
+						}
+					}
+					if (MachineCoords.bHasTransparency)
+					{
+						PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
 					}
 					*result = TRUE;
 					break;
@@ -2492,9 +2584,11 @@ void CChildView::LoadPatternHeaderSkin()
 		PatHeaderCoords.dMuteOn.y = 5;
 		PatHeaderCoords.dSoloOn.x = 96;
 		PatHeaderCoords.dSoloOn.y = 5;
+		PatHeaderCoords.bHasTransparency = FALSE;
 
 		patternheader.DeleteObject();
 		DeleteObject(hbmPatHeader);
+		patternheadermask.DeleteObject();
 		patternheader.LoadBitmap(IDB_PATTERN_HEADER_SKIN);
 	}
 }
@@ -2530,6 +2624,7 @@ void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *
 
 			patternheader.DeleteObject();
 			DeleteObject(hbmPatHeader);
+			patternheadermask.DeleteObject();
 			hbmPatHeader = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 			if (hbmPatHeader)
 			{
@@ -2727,8 +2822,20 @@ void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *
 								}
 							}
 						}
+						else if (strstr(buf,"\"transparency\"="))
+						{
+							char *q = strchr(buf,61); // =
+							if (q)
+							{
+								PatHeaderCoords.cTransparency = _httoi(q+1);
+								PatHeaderCoords.bHasTransparency = TRUE;
+							}
+						}
 					}
-
+					if (PatHeaderCoords.bHasTransparency)
+					{
+						PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
+					}
 					*result = TRUE;
 					break;
 				}
@@ -2798,3 +2905,95 @@ void CChildView::RecalcMetrics()
 	}
 }
 
+
+void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
+{
+   BITMAP bm;
+
+   // Get the dimensions of the source bitmap
+   pBmpSource->GetObject(sizeof(BITMAP), &bm);
+
+   // Create the mask bitmap
+   pBmpMask->DeleteObject();
+   pBmpMask->CreateBitmap( bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+
+   // We will need two DCs to work with. One to hold the Image
+   // (the source), and one to hold the mask (destination).
+   // When blitting onto a monochrome bitmap from a color, pixels
+   // in the source color bitmap that are equal to the background
+   // color are blitted as white. All the remaining pixels are
+   // blitted as black.
+
+   CDC hdcSrc, hdcDst;
+
+   hdcSrc.CreateCompatibleDC(NULL);
+   hdcDst.CreateCompatibleDC(NULL);
+
+   // Load the bitmaps into memory DC
+   CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
+   CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
+
+   // Change the background to trans color
+   hdcSrc.SetBkColor(clrTrans);
+
+   // This call sets up the mask bitmap.
+   hdcDst.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcSrc,0,0,SRCCOPY);
+
+   // Now, we need to paint onto the original image, making
+   // sure that the "transparent" area is set to black. What
+   // we do is AND the monochrome image onto the color Image
+   // first. When blitting from mono to color, the monochrome
+   // pixel is first transformed as follows:
+   // if  1 (black) it is mapped to the color set by SetTextColor().
+   // if  0 (white) is is mapped to the color set by SetBkColor().
+   // Only then is the raster operation performed.
+
+   hdcSrc.SetTextColor(RGB(255,255,255));
+   hdcSrc.SetBkColor(RGB(0,0,0));
+
+   hdcSrc.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcDst,0,0,SRCAND);
+
+   // Clean up by deselecting any objects, and delete the
+   // DC's.
+   hdcSrc.SelectObject(hbmSrcT);
+   hdcDst.SelectObject(hbmDstT);
+
+   hdcSrc.DeleteDC();
+   hdcDst.DeleteDC();
+}
+
+void CChildView::TransparentBlt(CDC* pDC,
+                                   int xStart,  int yStart,
+                                   int wWidth,  int wHeight,
+                                   CDC* pTmpDC,
+								   CBitmap* bmpMask,
+                                   int xSource, // = 0
+                                   int ySource)  // = 0)
+{
+
+   // We are going to paint the two DDB's in sequence to the destination.
+   // 1st the monochrome bitmap will be blitted using an AND operation to
+   // cut a hole in the destination. The color image will then be ORed
+   // with the destination, filling it into the hole, but leaving the
+   // surrounding area untouched.
+
+   CDC hdcMem;
+   hdcMem.CreateCompatibleDC(pDC);
+
+   CBitmap* hbmT = hdcMem.SelectObject(bmpMask);
+
+   pDC->SetTextColor(RGB(0,0,0));
+   pDC->SetBkColor(RGB(255,255,255));
+
+   pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
+	   SRCAND);
+
+   // Also note the use of SRCPAINT rather than SRCCOPY.
+
+   pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
+		SRCPAINT);
+
+   // Now, clean up.
+   hdcMem.SelectObject(hbmT);
+   hdcMem.DeleteDC();
+}

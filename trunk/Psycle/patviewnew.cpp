@@ -927,82 +927,162 @@ void CChildView::DrawPatEditor(CDC *devc)
 		oldbmp = memDC.SelectObject(&patternheader);
 		int xOffset = XOFFSET-1;
 
-		for(int i=tOff;i<tOff+maxt;i++)
+		if (PatHeaderCoords.bHasTransparency)
 		{
-			rect.left = xOffset;
-			rect.right = xOffset+1;
-			devc->FillSolidRect(&rect,pvc_separator[i+1]);
-			rect.left++;
-			rect.right+= ROWWIDTH-1;
-			devc->FillSolidRect(&rect,pvc_background[i+1]);
+			for(int i=tOff;i<tOff+maxt;i++)
+			{
+				rect.left = xOffset;
+				rect.right = xOffset+1;
+				devc->FillSolidRect(&rect,pvc_separator[i+1]);
+				rect.left++;
+				rect.right+= ROWWIDTH-1;
+				devc->FillSolidRect(&rect,pvc_background[i+1]);
 
-			const int trackx0 = i/10;
-			const int track0x = i%10;
+				const int trackx0 = i/10;
+				const int track0x = i%10;
 
-			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			devc->BitBlt(
-				xOffset+1+HEADER_INDENT,
-				1,
-				PatHeaderCoords.sBackground.width, 
-				PatHeaderCoords.sBackground.height,
-				&memDC, 
-				PatHeaderCoords.sBackground.x,
-				PatHeaderCoords.sBackground.y, 
-				SRCCOPY);
-			devc->BitBlt(
-				xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-				1+PatHeaderCoords.dDigitX0.y, 
-				PatHeaderCoords.sNumber0.width,	 
-				PatHeaderCoords.sNumber0.height, 
-				&memDC, 
-				PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-				PatHeaderCoords.sNumber0.y, 
-				SRCCOPY);
-			devc->BitBlt(
-				xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-				1+PatHeaderCoords.dDigit0X.y, 
-				PatHeaderCoords.sNumber0.width,	 
-				PatHeaderCoords.sNumber0.height, 
-				&memDC, 
-				PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-				PatHeaderCoords.sNumber0.y, 
-				SRCCOPY);
-
-			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			if (Global::_pSong->_trackMuted[i])
-				devc->BitBlt(
-					xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-					1+PatHeaderCoords.dMuteOn.y, 
-					PatHeaderCoords.sMuteOn.width, 
-					PatHeaderCoords.sMuteOn.height, 
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				TransparentBlt(devc,
+					xOffset+1+HEADER_INDENT,
+					1,
+					PatHeaderCoords.sBackground.width, 
+					PatHeaderCoords.sBackground.height,
 					&memDC, 
-					PatHeaderCoords.sMuteOn.x, 
-					PatHeaderCoords.sMuteOn.y, 
+					&patternheadermask,
+					PatHeaderCoords.sBackground.x,
+					PatHeaderCoords.sBackground.y);
+				TransparentBlt(devc,
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+					1+PatHeaderCoords.dDigitX0.y, 
+					PatHeaderCoords.sNumber0.width,	 
+					PatHeaderCoords.sNumber0.height, 
+					&memDC, 
+					&patternheadermask,
+					PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+					PatHeaderCoords.sNumber0.y);
+				TransparentBlt(devc,
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+					1+PatHeaderCoords.dDigit0X.y, 
+					PatHeaderCoords.sNumber0.width,	 
+					PatHeaderCoords.sNumber0.height, 
+					&memDC, 
+					&patternheadermask,
+					PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+					PatHeaderCoords.sNumber0.y);
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				if (Global::_pSong->_trackMuted[i])
+					TransparentBlt(devc,
+						xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+						1+PatHeaderCoords.dMuteOn.y, 
+						PatHeaderCoords.sMuteOn.width, 
+						PatHeaderCoords.sMuteOn.height, 
+						&memDC, 
+						&patternheadermask,
+						PatHeaderCoords.sMuteOn.x, 
+						PatHeaderCoords.sMuteOn.y);
+
+				if (Global::_pSong->_trackArmed[i])
+					TransparentBlt(devc,
+						xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+						1+PatHeaderCoords.dRecordOn.y, 
+						PatHeaderCoords.sRecordOn.width, 
+						PatHeaderCoords.sRecordOn.height, 
+						&memDC, 
+						&patternheadermask,
+						PatHeaderCoords.sRecordOn.x, 
+						PatHeaderCoords.sRecordOn.y);
+
+				if (Global::_pSong->_trackSoloed == i )
+					TransparentBlt(devc,
+						xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+						1+PatHeaderCoords.dSoloOn.y, 
+						PatHeaderCoords.sSoloOn.width, 
+						PatHeaderCoords.sSoloOn.height, 
+						&memDC, 
+						&patternheadermask,
+						PatHeaderCoords.sSoloOn.x, 
+						PatHeaderCoords.sSoloOn.y);
+				xOffset += ROWWIDTH;
+			}
+		}
+		else
+		{
+			for(int i=tOff;i<tOff+maxt;i++)
+			{
+				rect.left = xOffset;
+				rect.right = xOffset+1;
+				devc->FillSolidRect(&rect,pvc_separator[i+1]);
+				rect.left++;
+				rect.right+= ROWWIDTH-1;
+				devc->FillSolidRect(&rect,pvc_background[i+1]);
+
+				const int trackx0 = i/10;
+				const int track0x = i%10;
+
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				devc->BitBlt(
+					xOffset+1+HEADER_INDENT,
+					1,
+					PatHeaderCoords.sBackground.width, 
+					PatHeaderCoords.sBackground.height,
+					&memDC, 
+					PatHeaderCoords.sBackground.x,
+					PatHeaderCoords.sBackground.y, 
+					SRCCOPY);
+				devc->BitBlt(
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+					1+PatHeaderCoords.dDigitX0.y, 
+					PatHeaderCoords.sNumber0.width,	 
+					PatHeaderCoords.sNumber0.height, 
+					&memDC, 
+					PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+					PatHeaderCoords.sNumber0.y, 
+					SRCCOPY);
+				devc->BitBlt(
+					xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+					1+PatHeaderCoords.dDigit0X.y, 
+					PatHeaderCoords.sNumber0.width,	 
+					PatHeaderCoords.sNumber0.height, 
+					&memDC, 
+					PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+					PatHeaderCoords.sNumber0.y, 
 					SRCCOPY);
 
-			if (Global::_pSong->_trackArmed[i])
-				devc->BitBlt(
-					xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-					1+PatHeaderCoords.dRecordOn.y, 
-					PatHeaderCoords.sRecordOn.width, 
-					PatHeaderCoords.sRecordOn.height, 
-					&memDC, 
-					PatHeaderCoords.sRecordOn.x, 
-					PatHeaderCoords.sRecordOn.y, 
-					SRCCOPY);
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				if (Global::_pSong->_trackMuted[i])
+					devc->BitBlt(
+						xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+						1+PatHeaderCoords.dMuteOn.y, 
+						PatHeaderCoords.sMuteOn.width, 
+						PatHeaderCoords.sMuteOn.height, 
+						&memDC, 
+						PatHeaderCoords.sMuteOn.x, 
+						PatHeaderCoords.sMuteOn.y, 
+						SRCCOPY);
 
-			if (Global::_pSong->_trackSoloed == i )
-				devc->BitBlt(
-					xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-					1+PatHeaderCoords.dSoloOn.y, 
-					PatHeaderCoords.sSoloOn.width, 
-					PatHeaderCoords.sSoloOn.height, 
-					&memDC, 
-					PatHeaderCoords.sSoloOn.x, 
-					PatHeaderCoords.sSoloOn.y, 
-					SRCCOPY);
+				if (Global::_pSong->_trackArmed[i])
+					devc->BitBlt(
+						xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+						1+PatHeaderCoords.dRecordOn.y, 
+						PatHeaderCoords.sRecordOn.width, 
+						PatHeaderCoords.sRecordOn.height, 
+						&memDC, 
+						PatHeaderCoords.sRecordOn.x, 
+						PatHeaderCoords.sRecordOn.y, 
+						SRCCOPY);
 
-			xOffset += ROWWIDTH;
+				if (Global::_pSong->_trackSoloed == i )
+					devc->BitBlt(
+						xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+						1+PatHeaderCoords.dSoloOn.y, 
+						PatHeaderCoords.sSoloOn.width, 
+						PatHeaderCoords.sSoloOn.height, 
+						&memDC, 
+						PatHeaderCoords.sSoloOn.x, 
+						PatHeaderCoords.sSoloOn.y, 
+						SRCCOPY);
+				xOffset += ROWWIDTH;
+			}
 		}
 		memDC.SelectObject(oldbmp);
 		memDC.DeleteDC();
@@ -1233,75 +1313,148 @@ void CChildView::DrawPatEditor(CDC *devc)
 					oldbmp = memDC.SelectObject(&patternheader);
 					xOffset = XOFFSET-1;
 
-					for(i=tOff;i<tOff+scrollT;i++)
+					if (PatHeaderCoords.bHasTransparency)
 					{
-						const int trackx0 = i/10;
-						const int track0x = i%10;
+						for(int i=tOff;i<tOff+scrollT;i++)
+						{
+							const int trackx0 = i/10;
+							const int track0x = i%10;
 
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT,
-							1,
-							PatHeaderCoords.sBackground.width, 
-							PatHeaderCoords.sBackground.height,
-							&memDC, 
-							PatHeaderCoords.sBackground.x,
-							PatHeaderCoords.sBackground.y, 
-							SRCCOPY);
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-							1+PatHeaderCoords.dDigitX0.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
-							&memDC, 
-							PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y, 
-							SRCCOPY);
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-							1+PatHeaderCoords.dDigit0X.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
-							&memDC, 
-							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y, 
-							SRCCOPY);
-
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::_pSong->_trackMuted[i])
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-								1+PatHeaderCoords.dMuteOn.y, 
-								PatHeaderCoords.sMuteOn.width, 
-								PatHeaderCoords.sMuteOn.height, 
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT,
+								1,
+								PatHeaderCoords.sBackground.width, 
+								PatHeaderCoords.sBackground.height,
 								&memDC, 
-								PatHeaderCoords.sMuteOn.x, 
-								PatHeaderCoords.sMuteOn.y, 
+								&patternheadermask,
+								PatHeaderCoords.sBackground.x,
+								PatHeaderCoords.sBackground.y);
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+								1+PatHeaderCoords.dDigitX0.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								&patternheadermask,
+								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y);
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+								1+PatHeaderCoords.dDigit0X.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								&patternheadermask,
+								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y);
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							if (Global::_pSong->_trackMuted[i])
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+									1+PatHeaderCoords.dMuteOn.y, 
+									PatHeaderCoords.sMuteOn.width, 
+									PatHeaderCoords.sMuteOn.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sMuteOn.x, 
+									PatHeaderCoords.sMuteOn.y);
+
+							if (Global::_pSong->_trackArmed[i])
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+									1+PatHeaderCoords.dRecordOn.y, 
+									PatHeaderCoords.sRecordOn.width, 
+									PatHeaderCoords.sRecordOn.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sRecordOn.x, 
+									PatHeaderCoords.sRecordOn.y);
+
+							if (Global::_pSong->_trackSoloed == i )
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+									1+PatHeaderCoords.dSoloOn.y, 
+									PatHeaderCoords.sSoloOn.width, 
+									PatHeaderCoords.sSoloOn.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sSoloOn.x, 
+									PatHeaderCoords.sSoloOn.y);
+							xOffset += ROWWIDTH;
+						}
+					}
+					else
+					{
+						for(int i=tOff;i<tOff+scrollT;i++)
+						{
+							const int trackx0 = i/10;
+							const int track0x = i%10;
+
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT,
+								1,
+								PatHeaderCoords.sBackground.width, 
+								PatHeaderCoords.sBackground.height,
+								&memDC, 
+								PatHeaderCoords.sBackground.x,
+								PatHeaderCoords.sBackground.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+								1+PatHeaderCoords.dDigitX0.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+								1+PatHeaderCoords.dDigit0X.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
 								SRCCOPY);
 
-						if (Global::_pSong->_trackArmed[i])
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-								1+PatHeaderCoords.dRecordOn.y, 
-								PatHeaderCoords.sRecordOn.width, 
-								PatHeaderCoords.sRecordOn.height, 
-								&memDC, 
-								PatHeaderCoords.sRecordOn.x, 
-								PatHeaderCoords.sRecordOn.y, 
-								SRCCOPY);
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							if (Global::_pSong->_trackMuted[i])
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+									1+PatHeaderCoords.dMuteOn.y, 
+									PatHeaderCoords.sMuteOn.width, 
+									PatHeaderCoords.sMuteOn.height, 
+									&memDC, 
+									PatHeaderCoords.sMuteOn.x, 
+									PatHeaderCoords.sMuteOn.y, 
+									SRCCOPY);
 
-						if (Global::_pSong->_trackSoloed == i )
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-								1+PatHeaderCoords.dSoloOn.y, 
-								PatHeaderCoords.sSoloOn.width, 
-								PatHeaderCoords.sSoloOn.height, 
-								&memDC, 
-								PatHeaderCoords.sSoloOn.x, 
-								PatHeaderCoords.sSoloOn.y, 
-								SRCCOPY);
+							if (Global::_pSong->_trackArmed[i])
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+									1+PatHeaderCoords.dRecordOn.y, 
+									PatHeaderCoords.sRecordOn.width, 
+									PatHeaderCoords.sRecordOn.height, 
+									&memDC, 
+									PatHeaderCoords.sRecordOn.x, 
+									PatHeaderCoords.sRecordOn.y, 
+									SRCCOPY);
 
-						xOffset += ROWWIDTH;
+							if (Global::_pSong->_trackSoloed == i )
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+									1+PatHeaderCoords.dSoloOn.y, 
+									PatHeaderCoords.sSoloOn.width, 
+									PatHeaderCoords.sSoloOn.height, 
+									&memDC, 
+									PatHeaderCoords.sSoloOn.x, 
+									PatHeaderCoords.sSoloOn.y, 
+									SRCCOPY);
+							xOffset += ROWWIDTH;
+						}
 					}
 					memDC.SelectObject(oldbmp);
 					memDC.DeleteDC();
@@ -1354,75 +1507,148 @@ void CChildView::DrawPatEditor(CDC *devc)
 					oldbmp = memDC.SelectObject(&patternheader);
 					xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
-					for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+					if (PatHeaderCoords.bHasTransparency)
 					{
-						const int trackx0 = i/10;
-						const int track0x = i%10;
+						for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+						{
+							const int trackx0 = i/10;
+							const int track0x = i%10;
 
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT,
-							1,
-							PatHeaderCoords.sBackground.width, 
-							PatHeaderCoords.sBackground.height,
-							&memDC, 
-							PatHeaderCoords.sBackground.x,
-							PatHeaderCoords.sBackground.y, 
-							SRCCOPY);
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-							1+PatHeaderCoords.dDigitX0.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
-							&memDC, 
-							PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y, 
-							SRCCOPY);
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-							1+PatHeaderCoords.dDigit0X.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
-							&memDC, 
-							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y, 
-							SRCCOPY);
-
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::_pSong->_trackMuted[i])
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-								1+PatHeaderCoords.dMuteOn.y, 
-								PatHeaderCoords.sMuteOn.width, 
-								PatHeaderCoords.sMuteOn.height, 
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT,
+								1,
+								PatHeaderCoords.sBackground.width, 
+								PatHeaderCoords.sBackground.height,
 								&memDC, 
-								PatHeaderCoords.sMuteOn.x, 
-								PatHeaderCoords.sMuteOn.y, 
+								&patternheadermask,
+								PatHeaderCoords.sBackground.x,
+								PatHeaderCoords.sBackground.y);
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+								1+PatHeaderCoords.dDigitX0.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								&patternheadermask,
+								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y);
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+								1+PatHeaderCoords.dDigit0X.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								&patternheadermask,
+								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y);
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							if (Global::_pSong->_trackMuted[i])
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+									1+PatHeaderCoords.dMuteOn.y, 
+									PatHeaderCoords.sMuteOn.width, 
+									PatHeaderCoords.sMuteOn.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sMuteOn.x, 
+									PatHeaderCoords.sMuteOn.y);
+
+							if (Global::_pSong->_trackArmed[i])
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+									1+PatHeaderCoords.dRecordOn.y, 
+									PatHeaderCoords.sRecordOn.width, 
+									PatHeaderCoords.sRecordOn.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sRecordOn.x, 
+									PatHeaderCoords.sRecordOn.y);
+
+							if (Global::_pSong->_trackSoloed == i )
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+									1+PatHeaderCoords.dSoloOn.y, 
+									PatHeaderCoords.sSoloOn.width, 
+									PatHeaderCoords.sSoloOn.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sSoloOn.x, 
+									PatHeaderCoords.sSoloOn.y);
+							xOffset += ROWWIDTH;
+						}
+					}
+					else
+					{
+						for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+						{
+							const int trackx0 = i/10;
+							const int track0x = i%10;
+
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT,
+								1,
+								PatHeaderCoords.sBackground.width, 
+								PatHeaderCoords.sBackground.height,
+								&memDC, 
+								PatHeaderCoords.sBackground.x,
+								PatHeaderCoords.sBackground.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+								1+PatHeaderCoords.dDigitX0.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
+								SRCCOPY);
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+								1+PatHeaderCoords.dDigit0X.y, 
+								PatHeaderCoords.sNumber0.width,	 
+								PatHeaderCoords.sNumber0.height, 
+								&memDC, 
+								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+								PatHeaderCoords.sNumber0.y, 
 								SRCCOPY);
 
-						if (Global::_pSong->_trackArmed[i])
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-								1+PatHeaderCoords.dRecordOn.y, 
-								PatHeaderCoords.sRecordOn.width, 
-								PatHeaderCoords.sRecordOn.height, 
-								&memDC, 
-								PatHeaderCoords.sRecordOn.x, 
-								PatHeaderCoords.sRecordOn.y, 
-								SRCCOPY);
+							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+							if (Global::_pSong->_trackMuted[i])
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+									1+PatHeaderCoords.dMuteOn.y, 
+									PatHeaderCoords.sMuteOn.width, 
+									PatHeaderCoords.sMuteOn.height, 
+									&memDC, 
+									PatHeaderCoords.sMuteOn.x, 
+									PatHeaderCoords.sMuteOn.y, 
+									SRCCOPY);
 
-						if (Global::_pSong->_trackSoloed == i )
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-								1+PatHeaderCoords.dSoloOn.y, 
-								PatHeaderCoords.sSoloOn.width, 
-								PatHeaderCoords.sSoloOn.height, 
-								&memDC, 
-								PatHeaderCoords.sSoloOn.x, 
-								PatHeaderCoords.sSoloOn.y, 
-								SRCCOPY);
+							if (Global::_pSong->_trackArmed[i])
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+									1+PatHeaderCoords.dRecordOn.y, 
+									PatHeaderCoords.sRecordOn.width, 
+									PatHeaderCoords.sRecordOn.height, 
+									&memDC, 
+									PatHeaderCoords.sRecordOn.x, 
+									PatHeaderCoords.sRecordOn.y, 
+									SRCCOPY);
 
-						xOffset += ROWWIDTH;
+							if (Global::_pSong->_trackSoloed == i )
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+									1+PatHeaderCoords.dSoloOn.y, 
+									PatHeaderCoords.sSoloOn.width, 
+									PatHeaderCoords.sSoloOn.height, 
+									&memDC, 
+									PatHeaderCoords.sSoloOn.x, 
+									PatHeaderCoords.sSoloOn.y, 
+									SRCCOPY);
+							xOffset += ROWWIDTH;
+						}
 					}
 					memDC.SelectObject(oldbmp);
 					memDC.DeleteDC();
@@ -1549,75 +1775,148 @@ void CChildView::DrawPatEditor(CDC *devc)
 						oldbmp = memDC.SelectObject(&patternheader);
 						xOffset = XOFFSET-1;
 
-						for(i=tOff;i<tOff+scrollT;i++)
+						if (PatHeaderCoords.bHasTransparency)
 						{
-							const int trackx0 = i/10;
-							const int track0x = i%10;
+							for(i=tOff;i<tOff+scrollT;i++)
+							{
+								const int trackx0 = i/10;
+								const int track0x = i%10;
 
-							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT,
-								1,
-								PatHeaderCoords.sBackground.width, 
-								PatHeaderCoords.sBackground.height,
-								&memDC, 
-								PatHeaderCoords.sBackground.x,
-								PatHeaderCoords.sBackground.y, 
-								SRCCOPY);
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-								1+PatHeaderCoords.dDigitX0.y, 
-								PatHeaderCoords.sNumber0.width,	 
-								PatHeaderCoords.sNumber0.height, 
-								&memDC, 
-								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-								PatHeaderCoords.sNumber0.y, 
-								SRCCOPY);
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-								1+PatHeaderCoords.dDigit0X.y, 
-								PatHeaderCoords.sNumber0.width,	 
-								PatHeaderCoords.sNumber0.height, 
-								&memDC, 
-								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-								PatHeaderCoords.sNumber0.y, 
-								SRCCOPY);
-
-							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							if (Global::_pSong->_trackMuted[i])
-								devc->BitBlt(
-									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-									1+PatHeaderCoords.dMuteOn.y, 
-									PatHeaderCoords.sMuteOn.width, 
-									PatHeaderCoords.sMuteOn.height, 
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT,
+									1,
+									PatHeaderCoords.sBackground.width, 
+									PatHeaderCoords.sBackground.height,
 									&memDC, 
-									PatHeaderCoords.sMuteOn.x, 
-									PatHeaderCoords.sMuteOn.y, 
+									&patternheadermask,
+									PatHeaderCoords.sBackground.x,
+									PatHeaderCoords.sBackground.y);
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+									1+PatHeaderCoords.dDigitX0.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y);
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+									1+PatHeaderCoords.dDigit0X.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y);
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								if (Global::_pSong->_trackMuted[i])
+									TransparentBlt(devc,
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+										1+PatHeaderCoords.dMuteOn.y, 
+										PatHeaderCoords.sMuteOn.width, 
+										PatHeaderCoords.sMuteOn.height, 
+										&memDC, 
+										&patternheadermask,
+										PatHeaderCoords.sMuteOn.x, 
+										PatHeaderCoords.sMuteOn.y);
+
+								if (Global::_pSong->_trackArmed[i])
+									TransparentBlt(devc,
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+										1+PatHeaderCoords.dRecordOn.y, 
+										PatHeaderCoords.sRecordOn.width, 
+										PatHeaderCoords.sRecordOn.height, 
+										&memDC, 
+										&patternheadermask,
+										PatHeaderCoords.sRecordOn.x, 
+										PatHeaderCoords.sRecordOn.y);
+
+								if (Global::_pSong->_trackSoloed == i )
+									TransparentBlt(devc,
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+										1+PatHeaderCoords.dSoloOn.y, 
+										PatHeaderCoords.sSoloOn.width, 
+										PatHeaderCoords.sSoloOn.height, 
+										&memDC, 
+										&patternheadermask,
+										PatHeaderCoords.sSoloOn.x, 
+										PatHeaderCoords.sSoloOn.y);
+								xOffset += ROWWIDTH;
+							}
+						}
+						else
+						{
+							for(i=tOff;i<tOff+scrollT;i++)
+							{
+								const int trackx0 = i/10;
+								const int track0x = i%10;
+
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT,
+									1,
+									PatHeaderCoords.sBackground.width, 
+									PatHeaderCoords.sBackground.height,
+									&memDC, 
+									PatHeaderCoords.sBackground.x,
+									PatHeaderCoords.sBackground.y, 
+									SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+									1+PatHeaderCoords.dDigitX0.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y, 
+									SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+									1+PatHeaderCoords.dDigit0X.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y, 
 									SRCCOPY);
 
-							if (Global::_pSong->_trackArmed[i])
-								devc->BitBlt(
-									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-									1+PatHeaderCoords.dRecordOn.y, 
-									PatHeaderCoords.sRecordOn.width, 
-									PatHeaderCoords.sRecordOn.height, 
-									&memDC, 
-									PatHeaderCoords.sRecordOn.x, 
-									PatHeaderCoords.sRecordOn.y, 
-									SRCCOPY);
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								if (Global::_pSong->_trackMuted[i])
+									devc->BitBlt(
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+										1+PatHeaderCoords.dMuteOn.y, 
+										PatHeaderCoords.sMuteOn.width, 
+										PatHeaderCoords.sMuteOn.height, 
+										&memDC, 
+										PatHeaderCoords.sMuteOn.x, 
+										PatHeaderCoords.sMuteOn.y, 
+										SRCCOPY);
 
-							if (Global::_pSong->_trackSoloed == i )
-								devc->BitBlt(
-									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-									1+PatHeaderCoords.dSoloOn.y, 
-									PatHeaderCoords.sSoloOn.width, 
-									PatHeaderCoords.sSoloOn.height, 
-									&memDC, 
-									PatHeaderCoords.sSoloOn.x, 
-									PatHeaderCoords.sSoloOn.y, 
-									SRCCOPY);
+								if (Global::_pSong->_trackArmed[i])
+									devc->BitBlt(
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+										1+PatHeaderCoords.dRecordOn.y, 
+										PatHeaderCoords.sRecordOn.width, 
+										PatHeaderCoords.sRecordOn.height, 
+										&memDC, 
+										PatHeaderCoords.sRecordOn.x, 
+										PatHeaderCoords.sRecordOn.y, 
+										SRCCOPY);
 
-							xOffset += ROWWIDTH;
+								if (Global::_pSong->_trackSoloed == i )
+									devc->BitBlt(
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+										1+PatHeaderCoords.dSoloOn.y, 
+										PatHeaderCoords.sSoloOn.width, 
+										PatHeaderCoords.sSoloOn.height, 
+										&memDC, 
+										PatHeaderCoords.sSoloOn.x, 
+										PatHeaderCoords.sSoloOn.y, 
+										SRCCOPY);
+								xOffset += ROWWIDTH;
+							}
 						}
 						memDC.SelectObject(oldbmp);
 						memDC.DeleteDC();
@@ -1647,75 +1946,148 @@ void CChildView::DrawPatEditor(CDC *devc)
 						oldbmp = memDC.SelectObject(&patternheader);
 						xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
-						for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+						if (PatHeaderCoords.bHasTransparency)
 						{
-							const int trackx0 = i/10;
-							const int track0x = i%10;
+							for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+							{
+								const int trackx0 = i/10;
+								const int track0x = i%10;
 
-							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT,
-								1,
-								PatHeaderCoords.sBackground.width, 
-								PatHeaderCoords.sBackground.height,
-								&memDC, 
-								PatHeaderCoords.sBackground.x,
-								PatHeaderCoords.sBackground.y, 
-								SRCCOPY);
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-								1+PatHeaderCoords.dDigitX0.y, 
-								PatHeaderCoords.sNumber0.width,	 
-								PatHeaderCoords.sNumber0.height, 
-								&memDC, 
-								PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-								PatHeaderCoords.sNumber0.y, 
-								SRCCOPY);
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-								1+PatHeaderCoords.dDigit0X.y, 
-								PatHeaderCoords.sNumber0.width,	 
-								PatHeaderCoords.sNumber0.height, 
-								&memDC, 
-								PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-								PatHeaderCoords.sNumber0.y, 
-								SRCCOPY);
-
-							// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-							if (Global::_pSong->_trackMuted[i])
-								devc->BitBlt(
-									xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-									1+PatHeaderCoords.dMuteOn.y, 
-									PatHeaderCoords.sMuteOn.width, 
-									PatHeaderCoords.sMuteOn.height, 
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT,
+									1,
+									PatHeaderCoords.sBackground.width, 
+									PatHeaderCoords.sBackground.height,
 									&memDC, 
-									PatHeaderCoords.sMuteOn.x, 
-									PatHeaderCoords.sMuteOn.y, 
+									&patternheadermask,
+									PatHeaderCoords.sBackground.x,
+									PatHeaderCoords.sBackground.y);
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+									1+PatHeaderCoords.dDigitX0.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y);
+								TransparentBlt(devc,
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+									1+PatHeaderCoords.dDigit0X.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									&patternheadermask,
+									PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y);
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								if (Global::_pSong->_trackMuted[i])
+									TransparentBlt(devc,
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+										1+PatHeaderCoords.dMuteOn.y, 
+										PatHeaderCoords.sMuteOn.width, 
+										PatHeaderCoords.sMuteOn.height, 
+										&memDC, 
+										&patternheadermask,
+										PatHeaderCoords.sMuteOn.x, 
+										PatHeaderCoords.sMuteOn.y);
+
+								if (Global::_pSong->_trackArmed[i])
+									TransparentBlt(devc,
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+										1+PatHeaderCoords.dRecordOn.y, 
+										PatHeaderCoords.sRecordOn.width, 
+										PatHeaderCoords.sRecordOn.height, 
+										&memDC, 
+										&patternheadermask,
+										PatHeaderCoords.sRecordOn.x, 
+										PatHeaderCoords.sRecordOn.y);
+
+								if (Global::_pSong->_trackSoloed == i )
+									TransparentBlt(devc,
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+										1+PatHeaderCoords.dSoloOn.y, 
+										PatHeaderCoords.sSoloOn.width, 
+										PatHeaderCoords.sSoloOn.height, 
+										&memDC, 
+										&patternheadermask,
+										PatHeaderCoords.sSoloOn.x, 
+										PatHeaderCoords.sSoloOn.y);
+								xOffset += ROWWIDTH;
+							}
+						}
+						else
+						{
+							for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+							{
+								const int trackx0 = i/10;
+								const int track0x = i%10;
+
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT,
+									1,
+									PatHeaderCoords.sBackground.width, 
+									PatHeaderCoords.sBackground.height,
+									&memDC, 
+									PatHeaderCoords.sBackground.x,
+									PatHeaderCoords.sBackground.y, 
+									SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
+									1+PatHeaderCoords.dDigitX0.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y, 
+									SRCCOPY);
+								devc->BitBlt(
+									xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
+									1+PatHeaderCoords.dDigit0X.y, 
+									PatHeaderCoords.sNumber0.width,	 
+									PatHeaderCoords.sNumber0.height, 
+									&memDC, 
+									PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
+									PatHeaderCoords.sNumber0.y, 
 									SRCCOPY);
 
-							if (Global::_pSong->_trackArmed[i])
-								devc->BitBlt(
-									xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-									1+PatHeaderCoords.dRecordOn.y, 
-									PatHeaderCoords.sRecordOn.width, 
-									PatHeaderCoords.sRecordOn.height, 
-									&memDC, 
-									PatHeaderCoords.sRecordOn.x, 
-									PatHeaderCoords.sRecordOn.y, 
-									SRCCOPY);
+								// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+								if (Global::_pSong->_trackMuted[i])
+									devc->BitBlt(
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
+										1+PatHeaderCoords.dMuteOn.y, 
+										PatHeaderCoords.sMuteOn.width, 
+										PatHeaderCoords.sMuteOn.height, 
+										&memDC, 
+										PatHeaderCoords.sMuteOn.x, 
+										PatHeaderCoords.sMuteOn.y, 
+										SRCCOPY);
 
-							if (Global::_pSong->_trackSoloed == i )
-								devc->BitBlt(
-									xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-									1+PatHeaderCoords.dSoloOn.y, 
-									PatHeaderCoords.sSoloOn.width, 
-									PatHeaderCoords.sSoloOn.height, 
-									&memDC, 
-									PatHeaderCoords.sSoloOn.x, 
-									PatHeaderCoords.sSoloOn.y, 
-									SRCCOPY);
+								if (Global::_pSong->_trackArmed[i])
+									devc->BitBlt(
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
+										1+PatHeaderCoords.dRecordOn.y, 
+										PatHeaderCoords.sRecordOn.width, 
+										PatHeaderCoords.sRecordOn.height, 
+										&memDC, 
+										PatHeaderCoords.sRecordOn.x, 
+										PatHeaderCoords.sRecordOn.y, 
+										SRCCOPY);
 
-							xOffset += ROWWIDTH;
+								if (Global::_pSong->_trackSoloed == i )
+									devc->BitBlt(
+										xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
+										1+PatHeaderCoords.dSoloOn.y, 
+										PatHeaderCoords.sSoloOn.width, 
+										PatHeaderCoords.sSoloOn.height, 
+										&memDC, 
+										PatHeaderCoords.sSoloOn.x, 
+										PatHeaderCoords.sSoloOn.y, 
+										SRCCOPY);
+								xOffset += ROWWIDTH;
+							}
 						}
 						memDC.SelectObject(oldbmp);
 						memDC.DeleteDC();
