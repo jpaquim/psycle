@@ -214,6 +214,14 @@ public:
 	void Work(int numSamples);
 	Dummy(int index);
 	virtual char* GetName(void) { return _psName; };
+	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version) // versions can only be older than current or this won't get called 
+	{
+		UINT size;
+		pFile->Read(&size,sizeof(size)); // size of this part params to load
+		pFile->Skip(size);
+
+		return TRUE;
+	};
 
 protected:
 	static char* _psName;
