@@ -1,13 +1,8 @@
+#pragma once
+
 // CombFilter.h: interface for the CCombFilter class.
 //
 //////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_COMBFILTER_H__588D20C2_3565_11D4_8913_DD4E36C5D249__INCLUDED_)
-#define AFX_COMBFILTER_H__588D20C2_3565_11D4_8913_DD4E36C5D249__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 
 #define MAX_COMB_DELAY			88200
 
@@ -30,5 +25,3 @@ private:
 	int r_Counter;
 
 };
-
-#endif // !defined(AFX_COMBFILTER_H__588D20C2_3565_11D4_8913_DD4E36C5D249__INCLUDED_)

@@ -1,10 +1,11 @@
+#include <project.h>
+#include <psycle/plugin/yezar_freverb/comb.hpp>
+
 // Comb filter implementation
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#include "comb.hpp"
 
 comb::comb()
 {
@@ -44,5 +45,3 @@ float comb::getfeedback()
 {
 	return feedback;
 }
-
-// ends

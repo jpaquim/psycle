@@ -1,15 +1,15 @@
-//////////////////////////////////////////////////////////////////////
-// KarLKoX "Surround" plugin for PSYCLE
-
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "..\..\machineinterface.h"
 #include "biquad.h"
 
-#define VERNUM "v1.2"
+//////////////////////////////////////////////////////////////////////
+// KarLKoX "Surround" plugin for PSYCLE
 
+#define VERNUM "v1.2"
 
 CMachineParameter const paraLength = 
 { 
@@ -37,7 +37,6 @@ CMachineParameter const *pParameters[] =
 	&paraMode
 };
 
-
 CMachineInfo const MacInfo = 
 {
 	MI_VERSION,	
@@ -54,7 +53,6 @@ CMachineInfo const MacInfo =
 	"About",								// A command, that could be use for open an editor, etc...
 	2										// must be 2 else we can't see the knob (??)
 };
-
 
 class mi : public CMachineInterface
 {

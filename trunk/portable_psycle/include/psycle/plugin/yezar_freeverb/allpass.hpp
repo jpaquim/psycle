@@ -1,12 +1,11 @@
+#pragma once
+#include "denormals.h"
+
 // Allpass filter declaration
 //
 // Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
-
-#ifndef _allpass_
-#define _allpass_
-#include "denormals.h"
 
 class allpass
 {
@@ -23,7 +22,6 @@ public:
 	int		bufsize;
 	int		bufidx;
 };
-
 
 // Big to inline - but crucial for speed
 
@@ -42,7 +40,3 @@ inline float allpass::process(float input)
 
 	return output;
 }
-
-#endif//_allpass
-
-//ends

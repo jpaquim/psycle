@@ -1,22 +1,12 @@
-// mi.h: interface for the mi class.
-//
-//////////////////////////////////////////////////////////////////////
-
-#if !defined(AFX_mi_H__E6FCA427_B715_11D4_8B11_9FFC09C4A814__INCLUDED_)
-#define AFX_mi_H__E6FCA427_B715_11D4_8B11_9FFC09C4A814__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
+#include <windows.h>
+#include <mmsystem.h>
+#include <stdio.h>
+#include "../MachineInterface.h"
 
 #define YMIDI_VERSION "1.0a"
 #define NUMPARAMETERS 1
 #define MAX_TRACKS 16					// Maximum tracks allowed.
-
-#include <windows.h>
-#include <mmsystem.h>
-#include <stdio.h>
-#include "../../MachineInterface.h"
 
 //===================================================================
 // TWO BYTE PARAMETER MIDI EVENTS
@@ -129,5 +119,3 @@ private:
 	void InitMidi();
 	void CloseMidi();
 };
-
-#endif // !defined(AFX_mi_H__E6FCA427_B715_11D4_8B11_9FFC09C4A814__INCLUDED_)

@@ -1,11 +1,12 @@
-//////////////////////////////////////////////////////////////////////
-// Arguru simple distortion/saturator plugin for PSYCLE
-
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "..\..\machineinterface.h"
+
+//////////////////////////////////////////////////////////////////////
+// Arguru simple distortion/saturator plugin for PSYCLE
 
 CMachineParameter const paraThreshold = 
 { 

@@ -1,5 +1,5 @@
-
-#include "..\..\machineinterface.h"
+#include <project.h>
+#include <psycle/plugin/MachineInterface.h>
 #include "drum.h"
 
 #define DRUM_VERSION "2.2"
