@@ -2023,11 +2023,11 @@ void CMainFrame::OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI)
     CString str;
 	if (Global::pPlayer->_playing)
 	{
-	    str.Format("Pos: %.2X", Global::pPlayer->_playPosition); 
+	    str.Format("Pos %.2X", Global::pPlayer->_playPosition); 
 	}
 	else
 	{
-	    str.Format("Pos: %.2X", m_wndView.editPosition); 
+	    str.Format("Pos %.2X", m_wndView.editPosition); 
 	}
     pCmdUI->SetText(str); 
 }
@@ -2038,11 +2038,11 @@ void CMainFrame::OnUpdateIndicatorPattern(CCmdUI *pCmdUI)
     CString str;
 	if (Global::pPlayer->_playing)
 	{
-	    str.Format("Pat: %.2X", Global::pPlayer->_playPattern); 
+	    str.Format("Pat %.2X", Global::pPlayer->_playPattern); 
 	}
 	else
 	{
-	    str.Format("Pat: %.2X", Global::_pSong->playOrder[m_wndView.editPosition]); 
+	    str.Format("Pat %.2X", Global::_pSong->playOrder[m_wndView.editPosition]); 
 	}
     pCmdUI->SetText(str); 
 }
@@ -2053,11 +2053,11 @@ void CMainFrame::OnUpdateIndicatorLine(CCmdUI *pCmdUI)
     CString str;
 	if (Global::pPlayer->_playing)
 	{
-	    str.Format("Line: %3d", Global::pPlayer->_lineCounter); 
+	    str.Format("Line %u", Global::pPlayer->_lineCounter); 
 	}
 	else
 	{
-	    str.Format("Line: %3d", m_wndView.editcur.line); 
+	    str.Format("Line %u", m_wndView.editcur.line); 
 	}
     pCmdUI->SetText(str); 
 }
@@ -2068,7 +2068,7 @@ void CMainFrame::OnUpdateIndicatorTime(CCmdUI *pCmdUI)
 	if (Global::pPlayer->_playing)
 	{
 		CString str;
-	    str.Format( "%.2d:%.2d:%.2d.%.2d", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, f2i(Global::pPlayer->_playTime), f2i(Global::pPlayer->_playTime*100)-(f2i(Global::pPlayer->_playTime)*100)); 
+	    str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, f2i(Global::pPlayer->_playTime), f2i(Global::pPlayer->_playTime*100)-(f2i(Global::pPlayer->_playTime)*100)); 
 		pCmdUI->SetText(str); 
 	}
 }
@@ -2120,4 +2120,5 @@ void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI)
 		pCmdUI->Enable(FALSE);
 	}
 }
+
 
