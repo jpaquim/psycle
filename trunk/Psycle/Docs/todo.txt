@@ -19,6 +19,10 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
+*** change generator changes notes to d-0 instead of changeing generator
+*** psycle doesn't give an error message when save fails due to lack of space
++ humanizer
++ global volume fades
 + <bdzld> poop: can you make mcm interpolated? (like a midi tweak smooth)
 + the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
 
@@ -33,7 +37,7 @@ X low priority
 * The play block feature doesn't work.
 * When 'cursor always down' is enabled u can't insert values on the last row
 
-http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
+* drumatic 2 vst: http://psycle.pastnotecut.org/thread.php?threadid=871&boardid=2&styleid=1
 
 * screen should be made so 800x600 works
 + <alk> some bastards want keyrepeat for notes back

@@ -1780,7 +1780,7 @@ void CChildView::BlockGenChange(int x)
 		{
 			for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
 			{
-				unsigned char *toffset=_ptrackline(ps,t,l);
+				unsigned char *toffset=_ptrackline(ps,t,l)+2;
 				
 				unsigned char gen=*(toffset);
 				
@@ -1811,7 +1811,7 @@ void CChildView::BlockInsChange(int x)
 		{
 			for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
 			{
-				unsigned char *toffset=_ptrackline(ps,t,l);
+				unsigned char *toffset=_ptrackline(ps,t,l)+1;
 				unsigned char ins=*(toffset);
 			
 				if (ins != 255 )
