@@ -7,7 +7,12 @@ V1.67
   not update the sample in the instrument editor, which in turn made the wave loader function to
   load over an incorrect position.
 ! Loading songs with VST plugins didn't restore the name of them (was set back to default one). Fixed
-
++ Added functioning Track record arm buttons- new graphics required (pooplog)
++ Added midi velocity, modwheel, pitchbend mapping to twks/cmds (pooplog)
++ Added new button in sequencer, changed insert button to behave as an insert button should (pooplog)
+! Changed double click on pattern to open that pattern in patternview for edit (pooplog)
+! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles (pooplog)
+* Fixed minusminus button to decrease to 0 (pooplog)
 
 V1.66
 -----
