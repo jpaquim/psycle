@@ -63,7 +63,6 @@ Isn't that simple?
 
 
 
-** jmr2@macs.hw.ac.uk: * when loading a song it doesnt move to first order
 * jmr2@macs.hw.ac.uk: * when playing a song and pressing sort causes it to play the wrong pattern 
 
 ** MIDI clock sync - does it work, or is it unsupported?
