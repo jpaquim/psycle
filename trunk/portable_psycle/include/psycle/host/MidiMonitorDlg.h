@@ -77,7 +77,7 @@ namespace psycle
 		private:
 			void SetStaticFlag( CStatic * pStatic, DWORD flags, DWORD flagMask );	// used for dot control
 			void CreateChannelMap( void );	// create the channel map table
-			void FillChannelMap( bool override = false );	// update the channel map table
+			void FillChannelMap( bool overridden = false );	// update the channel map table
 
 			int m_clearCounter;		// use for the 'clear lost events' button
 			CFont m_symbolFont;		// custom graphic font

@@ -2121,7 +2121,7 @@ namespace psycle
 				}
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
-			titlename += "] Psycle Modular Music Creation Studio";
+			titlename += "] Psycle Modular Music Creation Studio " PSYCLE__VERSION;
 			pParentMain->SetWindowText(titlename.c_str());
 		}
 

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "psycle.h"
+#include "version.h"
 #include "ConfigDlg.h"
 #include "MainFrm.h"
 #include "midiinput.h"
@@ -56,7 +57,7 @@ namespace psycle
 			Global::pLogWindow = new CLoggingWindow(pFrame);
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
 			//Global::pLogWindow->Validate();
-			host::loggers::info("Psycle version: " VERSION_NUMBER);
+			host::loggers::info("Psycle version: " PSYCLE__VERSION);
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
@@ -271,7 +272,7 @@ namespace psycle
 			std::ostringstream s;
 			s << "Version "
 				//" $Date$"
-				VERSION_NUMBER
+				PSYCLE__VERSION
 #				if !defined NDEBUG
 					" debug"
 #				endif

@@ -6,7 +6,7 @@
 #include <project.h> // project-wide compiler, operating system, and processor specific tweaks.
 
 /// this is needed for compatibility of mfc with mswin98.
-#define WINVER 0x410
+#define WINVER 0x410 // [bohan] can we use GDI+ on mswin98?
 
 /// mswinxp.
 //#define WINVER 0x501
@@ -17,9 +17,9 @@
 
 #if defined _WINAMP_PLUGIN_
 	#if defined FOO_INPUT_STD_EXPORTS
-		#include "FoobarPlugin\resource.h"
+		#include "FoobarPlugin/resource.h"
 	#else
-		#include "WinampPlugin\resource.h"
+		#include "WinampPlugin/resource.h"
 	#endif
 #else
 	#include <afxext.h> // MFC extensions.
