@@ -637,12 +637,12 @@ namespace psycle
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
 				{
-					CString filepath = Global::pConfig->GetSongDir().c_str();
-					filepath += "\\";
+					std::string filepath = Global::pConfig->GetSongDir();
+					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					
 					OldPsyFile file;
-					if (!file.Create(filepath.GetBuffer(1), true))
+					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
 						return FALSE;
@@ -688,12 +688,13 @@ namespace psycle
 			//MessageBox("Saving Disabled");
 			//return false;
 			OPENFILENAME ofn; // common dialog box structure
-			CString ifile = Global::_pSong->fileName;
-			CString if2 = ifile.SpanExcluding("\\/:*\"<>|");
+			std::string ifile = Global::_pSong->fileName;
+			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
 
-			strcpy(szFile,(LPCTSTR)if2); 
+			szFile[_MAX_PATH-1]=0;
+			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
 			
 			// Initialize OPENFILENAME
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -931,22 +932,22 @@ namespace psycle
 			{
 				if (Global::pConfig->bFileSaveReminders)
 				{
-					char szText[128];
-					CString filepath = Global::pConfig->GetSongDir().c_str();
-					filepath += "\\";
+					std::string filepath = Global::pConfig->GetSongDir();
+					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					OldPsyFile file;
-					
-					sprintf(szText,"Save changes to \"%s\"?",Global::_pSong->fileName);
-					int result = MessageBox(szText,szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+					std::ostringstream szText;
+					szText << "Save changes to \"" << Global::_pSong->fileName
+						<< "\"?";
+					int result = MessageBox(szText.str().c_str(),szTitle,MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 					switch (result)
 					{
 					case IDYES:
-						strcpy(szText,filepath);
-						if (!file.Create(szText, true))
+						if (!file.Create((char*)filepath.c_str(), true))
 						{
-							sprintf(szText,"Error writing to \"%s\"!!!",filepath);
-							MessageBox(szText,szTitle,MB_ICONEXCLAMATION);
+							szText.clear();
+							szText << "Error writing to \"" << filepath << "\"!!!";
+							MessageBox(szText.str().c_str(),szTitle,MB_ICONEXCLAMATION);
 							return FALSE;
 						}
 						_pSong->Save(&file);
@@ -1409,7 +1410,7 @@ namespace psycle
 				Global::pConfig->_pMidiInput->Close();
 				*/
 
-				if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll,fb))
+				if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb))
 				{
 					MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
@@ -2086,7 +2087,7 @@ namespace psycle
 
 		void CChildView::SetTitleBarText()
 		{
-			CString titlename = "[";
+			std::string titlename = "[";
 			titlename+=Global::_pSong->fileName;
 			/*
 			if(!(Global::_pSong->_saved))
@@ -2115,7 +2116,7 @@ namespace psycle
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
 			titlename += "] Psycle Modular Music Creation Studio";
-			pParentMain->SetWindowText(titlename);
+			pParentMain->SetWindowText(titlename.c_str());
 		}
 
 		void CChildView::OnHelpKeybtxt() 

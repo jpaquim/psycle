@@ -5,6 +5,7 @@
 #include <afxcoll.h>
 #include <iostream>
 #include <typeinfo>
+#include <map>
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 namespace psycle
@@ -17,25 +18,23 @@ namespace psycle
 		class PluginInfo
 		{
 		public:
-			inline PluginInfo() : dllname(0), error(0), allow(true)
+			PluginInfo()
+				: mode(MACHMODE_UNDEFINED)
+				, type(MACH_UNDEFINED)
+				, allow(true)
 			{
-				name[0] = '\0';
-				desc[0] = '\0';
-				version[0] = '\0';
 				std::memset(&FileTime, 0, sizeof FileTime);
 			}
-			inline ~PluginInfo() throw()
+			~PluginInfo() throw()
 			{
-				zapArray(dllname);
-				zapObject(error);
 			}
-			char * dllname;
-			std::string * error;
+			std::string dllname;
+			std::string error;
 			MachineMode mode;
 			MachineType type;
-			char name[64];
-			char desc[64];
-			char version[16];
+			std::string name;
+			std::string desc;
+			std::string version;
 			FILETIME FileTime;
 			bool allow;
 			/*
@@ -71,16 +70,17 @@ namespace psycle
 			CImageList imgList;
 			HTREEITEM tHand;
 			int Outputmachine;
-			char* psOutputDll;
+			std::string psOutputDll;
 			int OutBus;
 			static int pluginOrder;
 			static bool pluginName;
-			static CMapStringToString dllNames;
+			static void learnDllName(std::string fullpath);
+			static bool lookupDllName(std::string, std::string & result);
 			static void DestroyPluginInfo();
 			static void LoadPluginInfo(void);
 			static int LastType0;
 			static int LastType1;
-			static bool TestFilename(char* name);
+			static bool TestFilename(std::string name);
 		// Dialog Data
 			//{{AFX_DATA(CNewMachine)
 			enum { IDD = IDD_NEWMACHINE };
@@ -101,6 +101,7 @@ namespace psycle
 			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
+			static std::map<std::string,std::string> dllNames;
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
 			HTREEITEM hInt[3];

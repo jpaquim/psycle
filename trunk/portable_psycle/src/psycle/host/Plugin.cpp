@@ -3,6 +3,8 @@
 #include "Plugin.h"
 #include "InputHandler.h"
 #include <operating_system/exceptions/code_description.h>
+#include <algorithm>
+#include <cctype>
 #if !defined _WINAMP_PLUGIN_
 	#include "psycle.h"
 	#include "NewMachine.h"
@@ -128,43 +130,40 @@ namespace psycle
 			}
 		}
 
-		bool Plugin::LoadDll(char* psFileName)
+		bool Plugin::LoadDll(std::string psFileName)
 		{
-			_strlwr(psFileName);
-			char sPath2[_MAX_PATH];
-			CString sPath;
+			std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
+			std::string sPath2;
 			#if defined _WINAMP_PLUGIN_
+				CString sPath;
 				sPath = Global::pConfig->GetPluginDir();
 				if( FindFileinDir(psFileName,sPath) )
 				{
-					strcpy(sPath2,sPath);
 					return Instance(sPath2);
 				}
 				return false;
 			#else
-				if(!CNewMachine::dllNames.Lookup(psFileName,sPath)) 
+				std::string sPath;
+				if(!CNewMachine::lookupDllName(psFileName,sPath)) 
 				{
 					// Check Compatibility Table.
 					// Probably could be done with the dllNames lockup.
 					//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
-					std::strcpy(sPath2, psFileName);
+					sPath = psFileName;
 				}
-				else 
-				{ 
-					std::strcpy(sPath2,sPath); 
-				}
-				if(!CNewMachine::TestFilename(sPath2) ) 
+
+				if(!CNewMachine::TestFilename(sPath) ) 
 				{
 					return false;
 				}
 				try
 				{
-					Instance(sPath2);
+					Instance(sPath.c_str());
 				}
 				catch(const std::exception & e)
 				{
 					std::ostringstream s; s
-						<< "Exception while instanciating: " << sPath2 << std::endl
+						<< "Exception while instanciating: " << sPath << std::endl
 						<< "Replacing with dummy." << std::endl
 						<< typeid(e).name() << std::endl
 						<< e.what();
@@ -734,16 +733,15 @@ namespace psycle
 				strcpy(sDllName,"arguru synth 2f.dll");
 			if (!strcmp(sDllName,"synth21.dll" ))
 				strcpy(sDllName,"arguru synth 2f.dll");
-			char sPath2[_MAX_PATH];
+			std::string sPath2;
 			CString sPath;
 			#if defined _WINAMP_PLUGIN_
 				sPath = Global::pConfig->GetPluginDir();
 				if ( FindFileinDir(sDllName,sPath) )
 				{
-					strcpy(sPath2,sPath);
 					try
 					{
-						Instance(sPath2);
+						Instance(sPath);
 					}
 					catch(...)
 					{
@@ -755,16 +753,12 @@ namespace psycle
 					result = false;
 				}
 			#else
-				if ( !CNewMachine::dllNames.Lookup(sDllName,sPath) ) 
+				if ( !CNewMachine::lookupDllName(sDllName,sPath2) ) 
 				{
 					// Check Compatibility Table.
 					// Probably could be done with the dllNames lockup.
 					//GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
-					strcpy(sPath2,sDllName);
-				}
-				else 
-				{ 
-					strcpy(sPath2,sPath); 
+					sPath2 = sDllName;
 				}
 				
 				if ( !CNewMachine::TestFilename(sPath2) ) 
@@ -775,7 +769,7 @@ namespace psycle
 				{
 					try
 					{
-						Instance(sPath2);
+						Instance(sPath2.c_str());
 					}
 					catch(...)
 					{

@@ -7,6 +7,8 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <algorithm> //std::transform
+#include <cctype>	// std::tolower
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
 namespace psycle
@@ -21,7 +23,34 @@ namespace psycle
 
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
 
-		CMapStringToString CNewMachine::dllNames(MAX_BROWSER_PLUGINS);
+		std::map<std::string,std::string> CNewMachine::dllNames;
+
+
+		void CNewMachine::learnDllName(std::string fullname)
+		{
+			std::string str=fullname;
+			// strip off path
+			std::string::size_type pos=str.rfind('\\');
+			if(pos != std::string::npos)
+				str=str.substr(pos+1);
+
+			// transform string to lower case
+			std::transform(str.begin(),str.end(),str.begin(),std::tolower);
+
+			dllNames[str]=fullname;
+		}
+
+		bool CNewMachine::lookupDllName(std::string name, std::string & result)
+		{
+			std::map<std::string,std::string>::iterator iterator
+				= dllNames.find(name);
+			if(iterator != dllNames.end())
+			{
+				result=iterator->second;
+				return true;
+			}
+			return false;
+		}
 
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
@@ -31,14 +60,12 @@ namespace psycle
 			m_showdllName = pluginName;
 			//}}AFX_DATA_INIT
 			OutBus = false;
-			psOutputDll = 0;
 			//pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
 				// It is initialized above, where it is declared.
 		}
 
 		CNewMachine::~CNewMachine()
 		{
-			zapArray(psOutputDll);
 		}
 
 		void CNewMachine::DoDataExchange(CDataExchange* pDX)
@@ -119,7 +146,7 @@ namespace psycle
 				*/
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i)
 				{
-					if(!_pPlugsInfo[i]->error)
+					if(_pPlugsInfo[i]->error.empty())
 					{
 						int imgindex;
 						HTREEITEM hitem;
@@ -150,9 +177,9 @@ namespace psycle
 							}
 						}
 						if(pluginName)
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
+							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 						else
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
+							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					}
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
@@ -167,7 +194,7 @@ namespace psycle
 				nodeindex=2;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
 				{
-					if(!_pPlugsInfo[i]->error)
+					if(_pPlugsInfo[i]->error.empty())
 					{
 						int imgindex;
 						HTREEITEM hitem;
@@ -198,9 +225,9 @@ namespace psycle
 							}
 						}
 						if(pluginName)
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name, imgindex, imgindex, hitem, TVI_SORT);
+							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 						else
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname, imgindex, imgindex, hitem, TVI_SORT);
+							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					}
 
 				}
@@ -246,13 +273,14 @@ namespace psycle
 			{
 				if (tHand == hPlug[i])
 				{
-					CString str = _pPlugsInfo[i]->dllname;
-					char str2[256];
-					strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-					m_dllnameLabel.SetWindowText(str2);
-					m_nameLabel.SetWindowText(_pPlugsInfo[i]->name);
-					m_descLabel.SetWindowText(_pPlugsInfo[i]->desc);
-					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version);
+					std::string str = _pPlugsInfo[i]->dllname;
+					std::string::size_type pos = str.rfind('\\');
+					if(pos != std::string::npos)
+						str=str.substr(pos+1);
+					m_dllnameLabel.SetWindowText(str.c_str());
+					m_nameLabel.SetWindowText(_pPlugsInfo[i]->name.c_str());
+					m_descLabel.SetWindowText(_pPlugsInfo[i]->desc.c_str());
+					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
 					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
 					{
 						Outputmachine = MACH_PLUGIN;
@@ -283,8 +311,7 @@ namespace psycle
 						}
 					}
 
-					zapArray(psOutputDll,new char[strlen(_pPlugsInfo[i]->dllname)+1]);
-					strcpy(psOutputDll,_pPlugsInfo[i]->dllname);
+					psOutputDll = _pPlugsInfo[i]->dllname;
 
 					m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
 					m_Allow.EnableWindow(TRUE);
@@ -508,13 +535,13 @@ namespace psycle
 								_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime
 							)
 						{
-							if(std::strcmp(finder.GetFilePath(), _pPlugsInfo[i]->dllname) == 0)
+							if(_pPlugsInfo[i]->dllname.c_str() == finder.GetFilePath())
 							{
 								exists = true;
-								const std::string * error(_pPlugsInfo[i]->error);
+								const std::string error(_pPlugsInfo[i]->error);
 								std::stringstream s;
-								if(!error) s << "cached.";
-								else s << "cache says it has previously been disabled because:" << std::endl << *error << std::endl;
+								if(error.empty()) s << "cached.";
+								else s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
 								out << s.str().c_str();
 								out.flush();
 								host::loggers::info(std::string(finder.GetFilePath()) + '\n' + s.str().c_str());
@@ -533,8 +560,7 @@ namespace psycle
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 						// <bohan> added proper constructor for the PluginInfo class. no need to zero it out now.
 						//::ZeroMemory(_pPlugsInfo[currentPlugsCount], sizeof(PluginInfo));
-						_pPlugsInfo[currentPlugsCount]->dllname = new char[finder.GetFilePath().GetLength()+1];
-						std::strcpy(_pPlugsInfo[currentPlugsCount]->dllname,finder.GetFilePath());
+						_pPlugsInfo[currentPlugsCount]->dllname = (LPCSTR)finder.GetFilePath();
 						FILETIME time;
 						finder.GetLastWriteTime(&time);
 						_pPlugsInfo[currentPlugsCount]->FileTime = time;
@@ -551,46 +577,42 @@ namespace psycle
 							{
 								std::ostringstream s; s << typeid(e).name() << std::endl;
 								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
 							catch(...)
 							{
 								std::ostringstream s; s
 									<< "Type of exception is unknown, cannot display any further information." << std::endl;
-								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
-							if(_pPlugsInfo[currentPlugsCount]->error)
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
 							{
 								out << "### ERRONEOUS ###" << std::endl;
 								out.flush();
-								out << *_pPlugsInfo[currentPlugsCount]->error;
+								out << _pPlugsInfo[currentPlugsCount]->error;
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::loggers::exception(title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->version, "???");
+								_pPlugsInfo[currentPlugsCount]->name = "???";
+								_pPlugsInfo[currentPlugsCount]->desc = "???";
+								_pPlugsInfo[currentPlugsCount]->version = "???";
 							}
 							else
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
-								std::strcpy(_pPlugsInfo[currentPlugsCount]->name,plug.GetName());
-								std::sprintf
-									(
-										_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-										plug.IsSynth() ? "Psycle instrument" : "Psycle effect",
-										plug.GetAuthor()
-									);
-								std::strcpy(_pPlugsInfo[currentPlugsCount]->version, "could be any");
+								_pPlugsInfo[currentPlugsCount]->name = plug.GetName();
+								std::ostringstream tmp;
+								tmp << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect")
+									<< " by " << plug.GetAuthor();
+								_pPlugsInfo[currentPlugsCount]->desc = tmp.str();
+								_pPlugsInfo[currentPlugsCount]->version = "could be any";
 								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-								char str2[1 << 10];
-								::CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-								str.MakeLower();
-								std::strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-								dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+								CString str2;
+
+								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
 								out << plug.GetName() << " - successfully instanciated";
 								out.flush();
 							}
@@ -649,47 +671,47 @@ namespace psycle
 								std::ostringstream s; s
 									<< typeid(e).name() << std::endl;
 								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
 							catch(...)
 							{
 								std::ostringstream s; s
 									<< "Type of exception is unknown, cannot display any further information." << std::endl;
-								_pPlugsInfo[currentPlugsCount]->error = new std::string(s.str());
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
-							if(_pPlugsInfo[currentPlugsCount]->error)
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
 							{
 								out << "### ERRONEOUS ###" << std::endl;
 								out.flush();
-								out << *_pPlugsInfo[currentPlugsCount]->error;
+								out << _pPlugsInfo[currentPlugsCount]->error;
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
-								host::loggers::exception(title.str() + '\n' + *_pPlugsInfo[currentPlugsCount]->error);
+								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->name, "???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->desc, "???");
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->version, "???");
+								_pPlugsInfo[currentPlugsCount]->name = "???";
+								_pPlugsInfo[currentPlugsCount]->desc = "???";
+								_pPlugsInfo[currentPlugsCount]->version = "???";
 							}
 							else
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
-								std::strcpy(_pPlugsInfo[currentPlugsCount]->name,vstPlug.GetName());
-								std::sprintf
-									(
-										_pPlugsInfo[currentPlugsCount]->desc, "%s by %s",
-										vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect",
-										vstPlug.GetVendorName()
-									);
-								std::sprintf(_pPlugsInfo[currentPlugsCount]->version,"%d", vstPlug.GetVersion());
-								_pPlugsInfo[currentPlugsCount]->version[15]='\0';
+								_pPlugsInfo[currentPlugsCount]->name = vstPlug.GetName();
+								
+								std::ostringstream tmp;
+								tmp << (vstPlug.IsSynth() ? "VST2 instrument" : "VST2 effect")
+									<< " by " << vstPlug.GetVendorName();
+								_pPlugsInfo[currentPlugsCount]->desc = tmp.str();
+								
+								tmp.clear();
+								tmp << vstPlug.GetVersion();
+								_pPlugsInfo[currentPlugsCount]->version = tmp.str();
+								
 								if(vstPlug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
 								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-								char str2[1 << 10];
-								::CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-								str.MakeLower();
-								std::strcpy(str2, str.Mid(str.ReverseFind('\\') + 1));
-								dllNames.SetAt(str2, _pPlugsInfo[currentPlugsCount]->dllname);
+
+
+								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
 								out << vstPlug.GetName() << " - successfully instanciated";
 								out.flush();
 							}
@@ -775,7 +797,7 @@ namespace psycle
 			{
 				zapObject(_pPlugsInfo[i]);
 			}
-			dllNames.RemoveAll();
+			dllNames.clear();
 			_numPlugins = -1;
 		}
 
@@ -825,18 +847,19 @@ namespace psycle
 					file.Read(&size, sizeof size);
 					if(size)
 					{
-						char * const chars(new char[size] + 1);
+						char *chars(new char[size + 1]);
 						file.Read(chars, size);
 						chars[size] = '\0';
-						p.error = new std::string(chars);
+						p.error = chars;
+						zapArray(chars);
 					}
 				}
 				file.Read(&p.allow,sizeof(p.allow));
 				file.Read(&p.mode,sizeof(p.mode));
 				file.Read(&p.type,sizeof(p.type));
-				file.ReadString(p.name,sizeof(p.name));
-				file.ReadString(p.desc,sizeof(p.desc));
-				file.ReadString(p.version,sizeof(p.version));
+				file.ReadString(p.name);
+				file.ReadString(p.desc);
+				file.ReadString(p.version);
 				if(finder.FindFile(Temp))
 				{
 					FILETIME time;
@@ -850,39 +873,31 @@ namespace psycle
 							)
 						{
 							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-							ZeroMemory(_pPlugsInfo[currentPlugsCount],sizeof(PluginInfo));
 
-							_pPlugsInfo[currentPlugsCount]->dllname = new char[strlen(Temp)+1];
-							strcpy(_pPlugsInfo[currentPlugsCount]->dllname,Temp);
-
+							_pPlugsInfo[currentPlugsCount]->dllname = Temp;
 							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
 
 							///\todo this cool be better handled
-							if(_pPlugsInfo[currentPlugsCount]->error)
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
 							{
-								delete _pPlugsInfo[currentPlugsCount]->error;
-								_pPlugsInfo[currentPlugsCount]->error = 0;
+								_pPlugsInfo[currentPlugsCount]->error = "";
 							}
-							if(p.error)
+							if(!p.error.empty())
 							{
-								_pPlugsInfo[currentPlugsCount]->error = new std::string(*p.error);
+								_pPlugsInfo[currentPlugsCount]->error = p.error;
 							}
 
 							_pPlugsInfo[currentPlugsCount]->allow = p.allow;
 
 							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
 							_pPlugsInfo[currentPlugsCount]->type = p.type;
-							strcpy(_pPlugsInfo[currentPlugsCount]->name,p.name);
-							strcpy(_pPlugsInfo[currentPlugsCount]->desc,p.desc);
-							strcpy(_pPlugsInfo[currentPlugsCount]->version,p.version);
+							_pPlugsInfo[currentPlugsCount]->name = p.name;
+							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
+							_pPlugsInfo[currentPlugsCount]->version = p.version;
 
-							if(!p.error)
+							if(p.error.empty())
 							{
-								char str2[MAX_PATH];
-								CString str = _pPlugsInfo[currentPlugsCount]->dllname;
-								str.MakeLower();
-								strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-								dllNames.SetAt(str2,_pPlugsInfo[currentPlugsCount]->dllname);
+								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
 							}
 							++currentPlugsCount;
 						}
@@ -911,20 +926,20 @@ namespace psycle
 			file.Write(&_numPlugins,sizeof(_numPlugins));
 			for (int i=0; i<_numPlugins; i++ )
 			{
-				file.Write(_pPlugsInfo[i]->dllname,strlen(_pPlugsInfo[i]->dllname)+1);
+				file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
 				file.Write(&_pPlugsInfo[i]->FileTime,sizeof(_pPlugsInfo[i]->FileTime));
 				{
-					const std::string * const error(_pPlugsInfo[i]->error);
-					UINT size(error ? error->size() : 0);
+					const std::string error(_pPlugsInfo[i]->error);
+					UINT size(error.size());
 					file.Write(&size, sizeof size);
-					if(size) file.Write(error->data(), size);
+					if(size) file.Write(error.data(), size);
 				}
 				file.Write(&_pPlugsInfo[i]->allow,sizeof(_pPlugsInfo[i]->allow));
 				file.Write(&_pPlugsInfo[i]->mode,sizeof(_pPlugsInfo[i]->mode));
 				file.Write(&_pPlugsInfo[i]->type,sizeof(_pPlugsInfo[i]->type));
-				file.Write(_pPlugsInfo[i]->name,strlen(_pPlugsInfo[i]->name)+1);
-				file.Write(_pPlugsInfo[i]->desc,strlen(_pPlugsInfo[i]->desc)+1);
-				file.Write(_pPlugsInfo[i]->version,strlen(_pPlugsInfo[i]->version)+1);
+				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
+				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
+				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
 			}
 			file.Close();
 			return true;
@@ -954,11 +969,11 @@ namespace psycle
 			}
 		}
 
-		bool CNewMachine::TestFilename(char* name)
+		bool CNewMachine::TestFilename(std::string name)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{
-				if(!std::strcmp(name, _pPlugsInfo[i]->dllname))
+				if(name == _pPlugsInfo[i]->dllname)
 				{
 					// bad plugins always have allow = false
 					if(_pPlugsInfo[i]->allow) return true;
