@@ -2,7 +2,6 @@
 !=change
 +=addition
 
-* I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
 ! remove waits from play when in export mode
 ! should be able to pick cursor colour rather than have it invert background 
 ! lines between tracks should be definable, not black
@@ -74,6 +73,7 @@
 + how about nice looking bmp windows for machine link and master machine dialogs?
 + how about option to switch the instrument and machine columns?
 + how about making instrument column data available to all machines?
+* record button should set edit mode and follow mode on, should have new export wav button
 
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)

@@ -182,6 +182,14 @@ protected:
 	afx_msg void OnSelchangeAuxselect();
 	afx_msg void OnDeclong();
 	afx_msg void OnInclong();
+	afx_msg void OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorPattern(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorLine(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorTime(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorEdit(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorFollow(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateIndicatorTweaks(CCmdUI *pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
