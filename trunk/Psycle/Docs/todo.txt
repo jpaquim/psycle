@@ -2,6 +2,8 @@
 !=change
 +=addition
 
+* <sue> playbar should take latency into account
+
 * Other crap
 ------------
 <Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
