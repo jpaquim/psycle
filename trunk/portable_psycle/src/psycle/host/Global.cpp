@@ -163,7 +163,7 @@ namespace psycle
 				//operating_system::logger::operator()(level, string);
 				if((*this)(level))
 				{
-					ostream << "=== " << std::endl;
+					ostream << "=== "
 					switch(level)
 					{
 					case trace: ostream() << "trace"; break;
