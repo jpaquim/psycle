@@ -113,7 +113,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(1,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm2.SetPos(256-f2i(val*256));
+		m_sliderm2.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -124,7 +124,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(2,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm3.SetPos(256-f2i(val*256));
+		m_sliderm3.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -135,7 +135,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(3,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm4.SetPos(256-f2i(val*256));
+		m_sliderm4.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -146,7 +146,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(4,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm5.SetPos(256-f2i(val*256));
+		m_sliderm5.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -157,7 +157,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(5,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm6.SetPos(256-f2i(val*256));
+		m_sliderm6.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -168,7 +168,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(6,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm7.SetPos(256-f2i(val*256));
+		m_sliderm7.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -179,7 +179,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(7,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm8.SetPos(256-f2i(val*256));
+		m_sliderm8.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -190,7 +190,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(8,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm9.SetPos(256-f2i(val*256));
+		m_sliderm9.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -201,7 +201,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(9,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm10.SetPos(256-f2i(val*256));
+		m_sliderm10.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -212,7 +212,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(10,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm11.SetPos(256-f2i(val*256));
+		m_sliderm11.SetPos(256-f2i(val));
 	}
 	else
 	{
@@ -223,7 +223,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		_pMachine->GetWireVolume(11,val);
 		val = sqrtf(val*16384.0f);
-		m_sliderm12.SetPos(256-f2i(val*256));
+		m_sliderm12.SetPos(256-f2i(val));
 	}
 	else
 	{
