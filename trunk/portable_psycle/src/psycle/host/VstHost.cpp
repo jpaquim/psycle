@@ -167,6 +167,7 @@ namespace psycle
 				plugin::plugin()
 					: queue_size(0)
 					, wantidle(false)
+					, _sDllName("")
 					, h_dll(0)
 					, _program(0)
 					, instantiated(false)
@@ -813,15 +814,15 @@ namespace psycle
 				if(instantiated && queue_size > 0)
 				{
 					// Prepare MIDI events and free queue dispatching all events
-					events.numEvents = queue_size;
-					events.reserved = 0;
+					mevents.numEvents = queue_size;
+					mevents.reserved = 0;
 					for(int q(0) ; q < queue_size ; ++q)
-						events.events[q] = (VstEvent*) &midievent[q];
+						mevents.events[q] = (VstEvent*) &midievent[q];
 					queue_size = 0;
 					//Finally Send the events.
 					try
 					{
-						proxy().dispatcher(effProcessEvents, 0, 0, &events);
+						proxy().dispatcher(effProcessEvents, 0, 0, &mevents);
 					}
 					catch(const std::exception &)
 					{
@@ -1025,8 +1026,8 @@ namespace psycle
 					}
 					else _timeInfo.samplePos = 0;
 					_timeInfo.sampleRate = Global::pConfig->GetSamplesPerSec();
-					/*
-					// msvc6: "error C2065: 'timeGetTime' : undeclared identifier" @#~!"%&$!"!!!!
+					
+					/* WTF?! error C3861: 'timeGetTime': identifier not found, even with argument-dependent lookup
 					if(value & kVstNanosValid)
 					{
 						_timeInfo.flags |= kVstNanosValid;
