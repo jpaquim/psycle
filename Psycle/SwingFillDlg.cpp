@@ -33,6 +33,7 @@ void CSwingFillDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_WIDTH, m_Width);
 	DDX_Control(pDX, IDC_VARIANCE, m_Variance);
 	DDX_Control(pDX, IDC_PHASE, m_Phase);
+	DDX_Control(pDX, IDC_OFFSET, m_Offset);
 	//}}AFX_DATA_MAP
 }
 
@@ -67,6 +68,9 @@ BOOL CSwingFillDlg::OnInitDialog()
 	sprintf(buf,"%.2f",phase);
 	m_Phase.SetWindowText(buf);
 	m_Phase.SetSel(-1,-1,false);
+
+	m_Offset.SetCheck(offset?1:0);
+
 	return FALSE;
 }
 
@@ -91,6 +95,8 @@ void CSwingFillDlg::OnOK()
 
 	m_Phase.GetWindowText(buf,32);
 	phase=float(atof(buf));
+
+	offset = m_Offset.GetCheck()?true:false;
 
 	CDialog::OnOK();
 }

@@ -29,9 +29,10 @@ V1.67
 + value dialog in machines shows offset hex values so they can be used easily with rest of program (pooplog)
 + Added "Xerox" button to seq editor (named that until someone suggests a good 5 letter word for duplicate) [Alk] (poolog)
 + Added Swing Fill command (pooplog)
-! Increased max lines/pattern to 256 (pooplog)
+! Increased max lines/pattern to 256 (pooplog) * pending further tests
 ! Basic Mousewheel support for pattern edit mode (pooplog)
 * Fixed song bpm being misreported to machines if they used FF command
+! VU Meters are all nicer
 
 
 V1.66

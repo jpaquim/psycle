@@ -12,6 +12,7 @@
 	#include "FileIO.h"
 	#include "Configuration.h"
 #endif // _WINAMP_PLUGIN_
+#include "Helpers.h"
 
 
 char* Master::_psName = "Master";
@@ -437,7 +438,7 @@ void Master::Work(
 		if (_lMax > 32768.0f)
 		{
 			_clip=true;
-			if (decreaseOnClip) _outDry = int((float)_outDry * 32768.0f / _lMax);
+			if (decreaseOnClip) _outDry = f2i((float)_outDry * 32768.0f / _lMax);
 			_lMax = 32768.0f; //_LMAX = 32768;
 		}
 		else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
@@ -446,7 +447,7 @@ void Master::Work(
 		if (_rMax > 32768.0f)
 		{
 			_clip=true;
-			if (decreaseOnClip) _outDry = int((float)_outDry * 32768.0f / _rMax);
+			if (decreaseOnClip) _outDry = f2i((float)_outDry * 32768.0f / _rMax);
 			_rMax = 32768.0f; //_RMAX = 32768;
 		}
 		else if (_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }

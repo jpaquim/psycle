@@ -4,6 +4,10 @@
 -longer sequences (256)
 -more tracks (64)
 -store state of follow song toggle
+-make wires 1 pixel wider
+*screen flashes switching from machine to pattern view
+*pattern display does not update properly while advancing through sequence when follow mode is on and song playing
+*make master machine update display if it decides to change volume
 !DO NOT LOAD LIST VST list & database
 <Alk^> do u think the recording with subtracting the buffer delay will be doable? <[JAZ]> pooplog : just to let you know it: the loop is wrongly done (on this "gap" wave thing) " on record
 <Alk^> I think the line numbering should be optional
