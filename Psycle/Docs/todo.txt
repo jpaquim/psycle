@@ -9,10 +9,11 @@ X low priority
 
 
 * psycle default theme sucks (cursor, selection, etc.)
+** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 * Machines
 ------------
-*** alk - gap in audio when add new machine?
+** alk - gap in audio when add new machine?
 ** <_sue_> the gainer machine doesnt work (getting stuck bug i have been able to recreate once but not 
 	debug-when i recreated it, song was fucking up bad due to not enough buffers (and too small))
 ** flanger clicks
@@ -54,16 +55,16 @@ X low priority
 ----------------
 *** <alk> block select a channel. record some tweak to it live. before the end of the pattern press stop. 
 	then do ctrl-x. It does not cut. [cannot reproduce]
-*** <wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
-		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
-		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
-		next row in my start column?
 ** <alk> somehow I managed to get the row number highlighted in two places, could not reproduce it - 
 	will keep trying * to cause the bug of more than one line number highlighted:
 	select a line.
 	then lower down click and drag to select a block. cause the window to scroll by making the block 
 	go off the ottom of the screen. (notice the previous highlight moving up) now click another place. 
 	[cannot reproduce]
+** <wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
+		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
+		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
+		next row in my start column?
 ** select with keyboard while playing and follow mode on sucks
 ++ velocity should be able to store data to instrument column * so should other midi messages
 ++ how about option to switch the instrument and machine columns?
@@ -204,6 +205,7 @@ X low priority
 +++ <[JAZ]> gear rack The description was : " a dialog with 
 	a list of machines (from 00: to 7F, that is, Gens and Fx), and buttons of : Add new, remove, swap, 
 	exchange, and don't know if anything more... maybe some information (wires used... don't know)
++++ <_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
 ++ <alk> another idea, a keypress to toggle follow song
 ++ <alk_> alt-f5 - play song from start
 ++ <alk_> another thought: "revert to saved" - filemenu 
