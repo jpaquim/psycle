@@ -408,7 +408,7 @@ namespace psycle
 						}
 						else if ( viewMode == VMPattern ) Repaint(DMPlayback);
 						if ( viewMode == VMSequence ) Repaint(DMPlayback);
-
+						if ( viewMode == VMMachine ) Repaint(DMAllMacsRefresh);
 					}
 				}
 			}
