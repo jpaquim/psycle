@@ -19,7 +19,7 @@ X low priority
 
 * New and unsorted and untested
 -------------------------------
-+ <bdzld> poop: can you make mcm interpolated?
++ <bdzld> poop: can you make mcm interpolated? (like a midi tweak smooth)
 + the ability to define the vol of the sample previewing would be excellent, at the moment you must alter the vol every time manually
 
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
