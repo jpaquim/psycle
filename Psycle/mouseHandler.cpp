@@ -415,7 +415,7 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 						if (Global::_pSong->_pMachine[dm])
 						{
 							w = Global::_pSong->_pMachine[dm]->FindInputWire(wiresource);
-							volume = Global::_pSong->_pMachine[dm]->_inputConVol[w];
+							Global::_pSong->_pMachine[dm]->GetWireVolume(w,volume);
 							if (Global::_pSong->InsertConnection(wiresource, wiredest,volume))
 							{
 								// delete the old wire
