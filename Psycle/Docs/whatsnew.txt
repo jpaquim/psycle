@@ -21,6 +21,7 @@ V1.7.3
 ! error messages on file read/write problems (pooplog)
 ! vsts don't immediately crash psycle when they give an exception on save/load/instance any more (pooplog)
 ! master machine does not let clipping samples through when decrease on clip is set (pooplog)
+! folders with .s are now working for plugins, vsts, skins, etc. (pooplog)
 
 
 V1.7.1

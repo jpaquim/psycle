@@ -55,6 +55,7 @@ BEGIN_MESSAGE_MAP(CGearRackDlg, CDialog)
 	ON_BN_CLICKED(IDC_RADIO_GEN, OnRadioGen)
 	ON_BN_CLICKED(IDC_RADIO_INS, OnRadioIns)
 	ON_BN_CLICKED(IDC_EXCHANGE, OnExchange)
+	ON_BN_CLICKED(IDC_CLONEMACHINE, OnClonemachine)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -231,13 +232,78 @@ void CGearRackDlg::OnCreate()
 	case 1:
 		tmac += MAX_BUSES;
 	case 0:
-		Global::_pSong->seqBus = tmac;
-		m_pParent->NewMachine(-1,-1,tmac);
-		pParentMain->UpdateEnvInfo();
-		pParentMain->UpdateComboGen();
-		if (m_pParent->viewMode==VMMachine)
 		{
-			m_pParent->Repaint();
+			Global::_pSong->seqBus = tmac;
+
+			Machine * mac = Global::_pSong->_pMachine[tmac];
+			if (mac)
+			{
+				int x = mac->_x;
+				int y = mac->_y;
+
+				// buffer all the connection info
+
+				int outputMachines[MAX_CONNECTIONS];
+				int inputMachines[MAX_CONNECTIONS];
+				float inputConVol[MAX_CONNECTIONS];
+				float outputConVol[MAX_CONNECTIONS];
+				bool connection[MAX_CONNECTIONS];
+				bool inputCon[MAX_CONNECTIONS];
+
+				int numOutputs = mac->_numOutputs;
+				int numInputs = mac->_numInputs;
+
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					outputMachines[i] = mac->_outputMachines[i];
+					inputMachines[i] = mac->_inputMachines[i];
+					inputConVol[i] = mac->_inputConVol[i];
+					connection[i] = mac->_connection[i];
+					inputCon[i] = mac->_inputCon[i];
+					// store volumes coming back this way, they get destroyed by new machine
+					if (connection[i])
+					{
+						for (int j = 0; j < MAX_CONNECTIONS; j++)
+						{
+							if (Global::_pSong->_pMachine[outputMachines[i]]->_inputMachines[j] == tmac)
+							{
+								outputConVol[i] = Global::_pSong->_pMachine[outputMachines[i]]->_inputConVol[j];
+							}
+						}
+					}
+				}
+
+				m_pParent->NewMachine(x,y,tmac);
+				// replace all the connection info
+
+				mac->_numOutputs = numOutputs;
+				mac->_numInputs = numInputs;
+
+				for (i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					// restore input connections
+					if (inputCon[i])
+					{
+						Global::_pSong->InsertConnection(inputMachines[i], tmac, inputConVol[i]);
+					}
+					// restore output connections
+					if (connection[i])
+					{
+						Global::_pSong->InsertConnection(tmac, outputMachines[i], outputConVol[i]);
+					}
+				}
+			}
+			else
+			{
+				m_pParent->NewMachine(-1,-1,tmac);
+			}
+
+			pParentMain->UpdateEnvInfo();
+			pParentMain->UpdateComboGen();
+			if (m_pParent->viewMode==VMMachine)
+			{
+				m_pParent->Repaint();
+			}
 		}
 		break;
 	case 2:
@@ -427,25 +493,30 @@ void CGearRackDlg::OnExchange()
 		return;
 	}
 	int sel[2],j=0;
+	sel[2] = 0;
 	const int maxitems=m_list.GetCount();
 	for (int c=0;c<maxitems;c++) 
 	{
 		if ( m_list.GetSel(c) != 0) sel[j++]=c;
 	}
-	Machine* tmp;
+
 	switch (DisplayMode) // should be necessary to rename opened parameter windows.
 	{
 	case 0:
-		tmp = Global::_pSong->_pMachine[sel[0]];
-		Global::_pSong->_pMachine[sel[0]] = Global::_pSong->_pMachine[sel[1]];
-		Global::_pSong->_pMachine[sel[1]] = tmp;
+		ExchangeMacs(sel[0],sel[1]);
 		pParentMain->UpdateComboGen(true);
+		if (m_pParent->viewMode==VMMachine)
+		{
+			m_pParent->Repaint();
+		}
 		break;
 	case 1:
-		tmp = Global::_pSong->_pMachine[sel[0]+MAX_BUSES];
-		Global::_pSong->_pMachine[sel[0]+MAX_BUSES] = Global::_pSong->_pMachine[sel[1]+MAX_BUSES];
-		Global::_pSong->_pMachine[sel[1]+MAX_BUSES] = tmp;
+		ExchangeMacs(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 		pParentMain->UpdateComboGen(true);
+		if (m_pParent->viewMode==VMMachine)
+		{
+			m_pParent->Repaint();
+		}
 		break;
 	case 2:
 		Global::_pSong->Invalided=true;
@@ -457,6 +528,127 @@ void CGearRackDlg::OnExchange()
 	}
 	
 	pParentMain->RedrawGearRackList();
+}
+
+void CGearRackDlg::ExchangeMacs(int one,int two)
+{
+	Machine * tmp1 = Global::_pSong->_pMachine[one];
+	Machine * tmp2 = Global::_pSong->_pMachine[two];
+
+	// if they are both valid
+
+	if (tmp1 && tmp2)
+	{
+		Global::_pSong->_pMachine[one] = tmp2;
+		Global::_pSong->_pMachine[two] = tmp1;
+
+		tmp1->_macIndex = two;
+		tmp2->_macIndex = one;
+
+		// gotta exchange positions
+
+		int temp = tmp1->_x;
+		tmp1->_x = tmp2->_x;
+		tmp2->_x = temp;
+
+		temp = tmp1->_y;
+		tmp1->_y = tmp2->_y;
+		tmp2->_y = temp;
+
+		// gotta exchange all connections
+
+		temp = tmp1->_numOutputs;
+		tmp1->_numOutputs = tmp2->_numOutputs;
+		tmp2->_numOutputs = temp;
+
+		temp = tmp1->_numInputs;
+		tmp1->_numInputs = tmp2->_numInputs;
+		tmp2->_numInputs = temp;
+
+		for (int i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			temp = tmp1->_outputMachines[i];
+			tmp1->_outputMachines[i] = tmp2->_outputMachines[i];
+			tmp2->_outputMachines[i] = temp;
+
+			temp = tmp1->_inputMachines[i];
+			tmp1->_inputMachines[i] = tmp2->_inputMachines[i];
+			tmp2->_inputMachines[i] = temp;
+
+			float ftemp = tmp1->_inputConVol[i];
+			tmp1->_inputConVol[i] = tmp2->_inputConVol[i];
+			tmp2->_inputConVol[i] = ftemp;
+
+			bool btemp = tmp1->_connection[i];
+			tmp1->_connection[i] = tmp2->_connection[i];
+			tmp2->_connection[i] = btemp;
+
+			btemp = tmp1->_inputCon[i];
+			tmp1->_inputCon[i] = tmp2->_inputCon[i];
+			tmp2->_inputCon[i] = btemp;
+		}
+		return;
+	}
+	if (tmp1)
+	{
+		// ok we gotta swap this one for a null one
+		Global::_pSong->_pMachine[one] = NULL;
+		Global::_pSong->_pMachine[two] = tmp1;
+
+		tmp1->_macIndex = two;
+
+		// and any machine that pointed to this one needs to be swapped
+		for (int i = 0; i < MAX_MACHINES; i++)
+		{
+			Machine*cmp = Global::_pSong->_pMachine[i];
+			if (cmp)
+			{
+				for (int j=0; j < MAX_CONNECTIONS; j++)
+				{
+					if (cmp->_inputMachines[j] == one)
+					{
+						cmp->_inputMachines[j] = two;
+					}
+
+					if (cmp->_outputMachines[j] == one)
+					{
+						cmp->_outputMachines[j] = two;
+					}
+				}
+			}
+		}
+		return;
+	}
+	if (tmp2)
+	{
+		// ok we gotta swap this one for a null one
+		Global::_pSong->_pMachine[two] = NULL;
+		Global::_pSong->_pMachine[one] = tmp2;
+
+		tmp2->_macIndex = one;
+
+		// and any machine that pointed to this one needs to be swapped
+		for (int i = 0; i < MAX_MACHINES; i++)
+		{
+			Machine*cmp = Global::_pSong->_pMachine[i];
+			if (cmp)
+			{
+				for (int j=0; j < MAX_CONNECTIONS; j++)
+				{
+					if (cmp->_inputMachines[j] == two)
+					{
+						cmp->_inputMachines[j] = one;
+					}
+
+					if (cmp->_outputMachines[j] == two)
+					{
+						cmp->_outputMachines[j] = one;
+					}
+				}
+			}
+		}
+		return;
+	}
 }
 
 void CGearRackDlg::ExchangeIns(int one,int two)
@@ -472,4 +664,10 @@ void CGearRackDlg::ExchangeIns(int one,int two)
 	//copied. If not, we would have had to define the operator=() function and take
 	//care of it.
 
+}
+
+void CGearRackDlg::OnClonemachine() 
+{
+	// TODO: Add your control notification handler code here
+	
 }

@@ -149,7 +149,7 @@ bool Song::CreateMachine(
 
 	if (_pMachine[index])
 	{
-
+		DestroyMachine(index);
 	}
 
 	if (pMachine->_type == MACH_VSTFX || pMachine->_type == MACH_VST ) // Do not call VST Init() function
@@ -426,7 +426,7 @@ int Song::GetFreeMachine(void)
 
 
 #if !defined(_WINAMP_PLUGIN_)
-bool Song::InsertConnection(int src,int dst)
+bool Song::InsertConnection(int src,int dst,float value)
 {
 	int freebus=-1;
 	int dfreebus=-1;
@@ -435,6 +435,11 @@ bool Song::InsertConnection(int src,int dst)
 	
 	Machine *srcMac = _pMachine[src];
 	Machine *dstMac = _pMachine[dst];
+
+	if (!srcMac || !dstMac)
+	{
+		return false;
+	}
 	
 	if (dstMac->_mode == MACHMODE_GENERATOR)
 	{
@@ -488,7 +493,7 @@ bool Song::InsertConnection(int src,int dst)
 	dstMac->_inputCon[dfreebus] = true;
 	dstMac->_numInputs++;
 	
-	dstMac->InitWireVolume(srcMac->_type,dfreebus,1.0f);
+	dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
 	
 	return true;
 }

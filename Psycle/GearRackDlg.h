@@ -17,6 +17,7 @@ class CGearRackDlg : public CDialog
 // Construction
 public:
 	void ExchangeIns(int one,int two);
+	void ExchangeMacs(int one,int two);
 	CGearRackDlg(CChildView* pParent, CMainFrame* pMain);   // standard constructor
 	CChildView* m_pParent;
 	CMainFrame* pParentMain;
@@ -62,6 +63,7 @@ protected:
 	afx_msg void OnRadioGen();
 	afx_msg void OnRadioIns();
 	afx_msg void OnExchange();
+	afx_msg void OnClonemachine();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

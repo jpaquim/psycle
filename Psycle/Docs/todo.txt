@@ -34,6 +34,14 @@ rough bug count: ~60, many aren't really bugs though.
 	[ * tried a fix, need to talk to yannis to see if it worked]
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
+
+*** gear rack stuff:
+	1) cloning - trick it to save to ram, then make a new and load from ram * add to right click menu too
+	3) replacing """
+
++++ bmps for background of machine view?
++++ moving wires, preserving volume, dragging triangles with shift moves destination.
+
 ++ volume slide command
 
 ++ <sampler> mmmm, i miss another feature. Show with a different colour the notes of the actual Generator/effect in patterns
@@ -235,9 +243,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ** phatmatic causes crashes when you open the gui after loading a sample into it.
 	[ also, when opening/closing the directory pane, it tries to change the window size and does a poor job. 
 	  after a few tries it fucks up.  if you re-open it after it has fucked up, it crashes. ]
-** <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
-	minimize/refocus psycle or change the current view
-	this only seems to happen on the rgc audio z3ta+ and on nothing else
 ** <photonamp> i dont understand why sampletank notes are getting stuck in v1.7rc5 and while in 1.66 
 	it works fine?
 **	JAL7OH- reaktor 3.05 - psy crashes on exiting when reaktor is loaded;
@@ -256,7 +261,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ** ni fm7 locks up psycle on parameter change midi command with gui open
 ** ni pro53 sometimes crashes when loading a song that uses it.
 ** ni spektral delay 1.0 crashes on effClose or effEditIdle messages.  notice a trend with NI plugins yet?
-** synth 1 crashes with exception error on instance in debug build.
+** synth 1 1.05a crashes with exception error on instance in debug build.
 *	Many vsts randomly loose keyboard focus
 *	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
 		sorted by the authors.

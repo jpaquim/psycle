@@ -111,7 +111,7 @@ public:
 	void DestroyAllMachines();
 	int GetNumPatternsUsed();
 #if !defined(_WINAMP_PLUGIN_)
-	bool InsertConnection(int src,int dst);
+	bool InsertConnection(int src,int dst,float value = 1.0f);
 	int GetFreeBus();
 	int GetFreeFxBus();
 	int FindBusFromIndex(int smac);
