@@ -317,8 +317,10 @@ DDCRET WaveFile::OpenForRead ( const char *Filename )
 /// Modified by [JAZ]
 		 while ( wave_format.header.ckID != FourCC("fmt "))
 		 { 
-			 Skip (wave_format.header.ckSize);// read each block until we find the correct one
-			 
+		//	 Skip (wave_format.header.ckSize);// read each block until we find the correct one
+			 // we didn't find our header, so move back and try again
+			Skip (1-sizeof(wave_format.header));
+		 
 			 retcode = Read ( &wave_format.header, sizeof(wave_format.header) );
 			 if ( retcode != DDC_SUCCESS ) return retcode;
 		 }
@@ -345,7 +347,10 @@ DDCRET WaveFile::OpenForRead ( const char *Filename )
 			
 			while ( pcm_data.ckID != FourCC("data") || pcm_data.ckSize == 0)
 			{
-				Skip (pcm_data.ckSize);// read each block until we find the correct one
+			//	Skip (pcm_data.ckSize);// read each block until we find the correct one
+				// this is not our block, so move back and search for our header
+				Skip (1-sizeof(pcm_data));
+
 		        pcm_data_offset = CurrentFilePosition();
 
 				retcode = Read ( &pcm_data, sizeof(pcm_data) );
