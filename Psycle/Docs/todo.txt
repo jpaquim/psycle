@@ -5,9 +5,12 @@
 -more tracks (64)
 -store state of follow song toggle
 !DO NOT LOAD LIST VST list & database
-!MOUSEWHEEL SUPPORT
 <Alk^> do u think the recording with subtracting the buffer delay will be doable?
-<pooplog> i mean follow song, mulit aud, noteoffs, tweaks, etc. could be buttons perhaps
+<Alk^> I think the line numbering should be optional
+<Alk^> I also think that the cursor movement after a paste should be optional to =)<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
+<[JAZ]> pooplog : just to let you know it: the loop is wrongly done (on this "gap" wave thing) " on record
+<bohan`> aha, yep, cause, for the machine ones, it'd be really better if it could have a log scale and be centered at "0dB"
+<Pikari> oh. and I hate it when I choose skip=0 and the cursor goes to the next column :(
 <_sue_> hey poop....can we have something like a right double click for inserting the first not used patter (like before with left double click)?
 <_sue_> in the pattern sequencer with shift and the mouse you can select more than one pattern....but if you press del only the first one of the selection is deleted.....it would be nice if they were all deleted.... it would be nice if you could copy and paste pattern selections in the pattern seq too....(i mean blocks of patterns)
 <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in the one im using i have half of the tab where the pattern seq is completely free.....oki no more sugestions for today...hihihi

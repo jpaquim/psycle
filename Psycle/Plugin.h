@@ -5,6 +5,7 @@
 #include "Song.h"
 #include "Configuration.h"
 #include "MachineInterface.h"
+#include "Player.h"
 
 
 class PluginFxCallback : public CFxCallback
@@ -30,7 +31,7 @@ public:
 	}
 	virtual int GetBPM(void)
 	{
-		return Global::_pSong->BeatsPerMin;
+		return Global::pPlayer->bpm;
 	}
 	virtual int GetTPB(void)
 	{

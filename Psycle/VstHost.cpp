@@ -659,7 +659,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		if (value & kVstTempoValid)
 		{
 			_timeInfo.flags |= kVstTempoValid;
-			_timeInfo.tempo = Global::_pSong->BeatsPerMin;
+			_timeInfo.tempo = Global::pPlayer->bpm;
 		}
 		if (value & kVstTimeSigValid)
 		{
@@ -669,7 +669,7 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		}
 		return (long)&_timeInfo;
 		
-	case audioMasterTempoAt:			return Global::_pSong->BeatsPerMin*10000;
+	case audioMasterTempoAt:			return Global::pPlayer->bpm*10000;
 
 	case audioMasterNeedIdle:
 		if ( effect->user ) {

@@ -232,6 +232,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_FILE_IMPORT_ITFILE, OnFileImportItfile)
 	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 	ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
+	ON_WM_MOUSEWHEEL()
+	ON_WM_MBUTTONDOWN()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1042,7 +1044,7 @@ void CChildView::SetPatStep(int stp)
 
 void CChildView::ShowSwingFillDlg(bool bTrackMode)
 {
-	static int st = Global::_pSong->BeatsPerMin;
+	int st = Global::_pSong->BeatsPerMin;
 	static int sw = 2;
 	static float sv = 50.0f;
 	static float sp = 90.0f;
