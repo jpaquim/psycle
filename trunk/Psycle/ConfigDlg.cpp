@@ -49,6 +49,11 @@ void CConfigDlg::Init(
 	_skinDlg._4beatColor = pConfig->pvc_row4beat;
 	
 	_skinDlg._machineViewColor = pConfig->mv_colour;
+	_skinDlg._machineViewWireColor = pConfig->mv_wirecolour;
+	_skinDlg._machineViewPolyColor = pConfig->mv_polycolour;
+	_skinDlg._wireaa = pConfig->mv_wireaa;
+	_skinDlg._wirewidth = pConfig->mv_wirewidth;
+
 	_skinDlg._vubColor = pConfig->vu1;
 	_skinDlg._vugColor = pConfig->vu2;
 	_skinDlg._vucColor = pConfig->vu3;
@@ -94,6 +99,11 @@ int CConfigDlg::DoModal()
 	if (retVal == IDOK)
 	{
 		_pConfig->mv_colour = _skinDlg._machineViewColor;
+		_pConfig->mv_wirecolour = _skinDlg._machineViewWireColor;
+		_pConfig->mv_wireaacolour = ((((_pConfig->mv_wirecolour&0x00ff0000) + ((_pConfig->mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
+									((((_pConfig->mv_wirecolour&0x00ff00) + ((_pConfig->mv_colour&0x00ff00)*2))/3)&0x00ff00) +
+									((((_pConfig->mv_wirecolour&0x00ff) + ((_pConfig->mv_colour&0x00ff)*2))/3)&0x00ff);
+		_pConfig->mv_polycolour = _skinDlg._machineViewPolyColor;
 		_pConfig->pvc_background = _skinDlg._patternViewColor;
 		_pConfig->pvc_font = _skinDlg._fontColor;
 		_pConfig->pvc_row = _skinDlg._rowColor;
@@ -102,6 +112,9 @@ int CConfigDlg::DoModal()
 		_pConfig->vu1 = _skinDlg._vubColor;
 		_pConfig->vu2 = _skinDlg._vugColor;
 		_pConfig->vu3 = _skinDlg._vucColor;
+		_pConfig->mv_wireaa = _skinDlg._wireaa;
+		_pConfig->mv_wirewidth = _skinDlg._wirewidth;
+
 		_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
 
 		_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
@@ -109,6 +122,8 @@ int CConfigDlg::DoModal()
 		_pConfig->_syncDriverIndex = _outputDlg.m_syncDriverIndex;
 		_pConfig->_midiHeadroom = _outputDlg.m_midiHeadroom;
 		_pConfig->_pOutputDriver = _pConfig->_ppOutputDrivers[_pConfig->_outputDriverIndex];
+
+
 		if (_dirDlg._instPathChanged)
 		{
 			_pConfig->SetInitialInstrumentDir(_dirDlg._instPathBuf);

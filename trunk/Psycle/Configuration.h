@@ -25,6 +25,9 @@ public:
 
 	bool autoStopMachines;
 	COLORREF mv_colour;
+	COLORREF mv_wirecolour;
+	COLORREF mv_wireaacolour;
+	COLORREF mv_polycolour;
 	COLORREF pvc_background;
 	COLORREF pvc_row4beat;
 	COLORREF pvc_rowbeat;
@@ -38,6 +41,8 @@ public:
 	COLORREF vu2;
 	COLORREF vu3;
 	int _keyboardMode; // Currently Not Used (was used for hardcoded keyb types)
+	bool mv_wireaa;
+	int mv_wirewidth;
 	bool _wrapAround;
 	bool _centerCursor;
 	bool _cursorAlwaysDown;
