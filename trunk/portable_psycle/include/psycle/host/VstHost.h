@@ -7,6 +7,8 @@
 #if !defined(_WINAMP_PLUGIN_)
 	#include "NewMachine.h"
 #endif
+#include <operating_system/exception.h>
+#include <operating_system/exceptions/code_description.h>
 ///\file
 ///\brief interface file for psycle::host::VSTPlugin
 namespace psycle
@@ -44,7 +46,7 @@ namespace psycle
 			~VSTPlugin() throw();
 
 			void Free() throw(...);
-			int Instance(const char dllname[], const bool overwriteName = true) throw(...);
+			void Instance(const char dllname[], const bool overwriteName = true) throw(...);
 			//void Create(VSTPlugin *plug);
 			//virtual void Init(void);
 			virtual bool Load(RiffFile* pFile);

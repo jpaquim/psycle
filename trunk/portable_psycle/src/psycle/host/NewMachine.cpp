@@ -678,7 +678,8 @@ namespace psycle
 
 							try
 							{
-								_pPlugsInfo[currentPlugsCount]->error_type = vstPlug.Instance((char*)(const char*)finder.GetFilePath());
+								 vstPlug.Instance((char*)(const char*)finder.GetFilePath());
+								_pPlugsInfo[currentPlugsCount]->error_type = VSTINSTANCE_NO_ERROR;
 							}
 							catch(const std::exception & e)
 							{
