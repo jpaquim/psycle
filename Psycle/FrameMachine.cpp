@@ -410,7 +410,7 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 	{
 		if (nFlags & MK_CONTROL)
 		{
-			Global::_pSong->seqBus = Global::_pSong->FindBusFromIndex(MachineIndex);
+			Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
 			((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 			CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 			cb2->SetCurSel(1); // PARAMS
