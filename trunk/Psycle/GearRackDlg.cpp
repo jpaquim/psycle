@@ -17,6 +17,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CGearRackDlg dialog
 
+BOOL CGearRackDlg::bShowGenerators = TRUE;
 
 CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain /*=NULL*/)
 	: CDialog(CGearRackDlg::IDD, pParent)
@@ -33,8 +34,9 @@ void CGearRackDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGearRackDlg)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
+	DDX_Control(pDX, ID_TEXT, m_text);
 	DDX_Control(pDX, IDC_GEARLIST, m_list);
+	DDX_Control(pDX, IDC_MACHINETYPE, m_machinetype);
 	//}}AFX_DATA_MAP
 }
 
@@ -46,6 +48,7 @@ BEGIN_MESSAGE_MAP(CGearRackDlg, CDialog)
 	ON_LBN_DBLCLK(IDC_GEARLIST, OnDblclkGearlist)
 	ON_BN_CLICKED(IDC_PROPERTIES, OnProperties)
 	ON_BN_CLICKED(IDC_PARAMETERS, OnParameters)
+	ON_BN_CLICKED(IDC_MACHINETYPE, OnMachineType)
 	ON_LBN_SELCHANGE(IDC_GEARLIST, OnSelchangeGearlist)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -90,43 +93,59 @@ void CGearRackDlg::RedrawList()
 	char buffer[64];
 	
 	m_list.ResetContent();
-	
-	for (int b=0; b<MAX_BUSES; b++) // Check Generators
+	int selected = Global::_pSong->seqBus;
+
+	if (bShowGenerators)
 	{
-		const int mac = Global::_pSong->busMachine[b]; 
-		if( mac != 255 && Global::_pSong->_machineActive[mac])
+		m_machinetype.SetWindowText("Type: Generators");
+		m_text.SetWindowText("Machines: Generators");
+		if (selected >= MAX_BUSES)
 		{
-			sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachines[mac]->_editName);
-			m_list.AddString(buffer);
+			selected = 0;
 		}
-		else
+		for (int b=0; b<MAX_BUSES; b++) // Check Generators
 		{
-			sprintf(buffer,"%.2X",b);
-			m_list.AddString(buffer);
+			const int mac = Global::_pSong->busMachine[b]; 
+			if( mac != 255 && Global::_pSong->_machineActive[mac])
+			{
+				sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachines[mac]->_editName);
+				m_list.AddString(buffer);
+			}
+			else
+			{
+				sprintf(buffer,"%.2X",b);
+				m_list.AddString(buffer);
+			}
 		}
 	}
-	m_list.AddString("--------------------------------------------------------------------------------------------------------");
-	
-	for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
+	else
 	{
-		const int mac = Global::_pSong->busEffect[b-MAX_BUSES];
-		if(mac != 255 && Global::_pSong->_machineActive[mac])
+		m_machinetype.SetWindowText("Type: Effects");
+		m_text.SetWindowText("Machines: Effects");
+		if (selected < MAX_BUSES)
 		{
-			sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachines[mac]->_editName);
-			m_list.AddString(buffer);
+			selected = 0;
 		}
 		else
 		{
-			sprintf(buffer,"%.2X",b);
-			m_list.AddString(buffer);
+			selected -= MAX_BUSES;
+		}
+		for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
+		{
+			const int mac = Global::_pSong->busEffect[b-MAX_BUSES];
+			if(mac != 255 && Global::_pSong->_machineActive[mac])
+			{
+				sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachines[mac]->_editName);
+				m_list.AddString(buffer);
+			}
+			else
+			{
+				sprintf(buffer,"%.2X",b);
+				m_list.AddString(buffer);
+			}
 		}
 	}
 
-	int selected = Global::_pSong->seqBus;
-	if (selected >= MAX_BUSES)
-	{
-		selected++;
-	}
 	m_list.SetCurSel(selected);
 }
 
@@ -134,13 +153,9 @@ void CGearRackDlg::OnSelchangeGearlist()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (tmac == MAX_BUSES)
+	if (!bShowGenerators)
 	{
-		return;
-	}
-	if (tmac > MAX_BUSES)
-	{
-		tmac--;
+		tmac += MAX_BUSES;
 	}
 	Global::_pSong->seqBus = tmac;
 	pParentMain->UpdateComboGen();
@@ -150,13 +165,9 @@ void CGearRackDlg::OnCreate()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (tmac == MAX_BUSES)
+	if (!bShowGenerators)
 	{
-		return;
-	}
-	if (tmac > MAX_BUSES)
-	{
-		tmac--;
+		tmac += MAX_BUSES;
 	}
 	Global::_pSong->seqBus = tmac;
 	m_pParent->NewMachine(-1,-1,tmac);
@@ -172,15 +183,11 @@ void CGearRackDlg::OnDelete()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (tmac == MAX_BUSES)
+	if (!bShowGenerators)
 	{
-		return;
-	}
-	if (tmac > MAX_BUSES)
-	{
+		tmac += MAX_BUSES;
 		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 		{
-			tmac--;
 			if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
 			{
 				pParentMain->CloseMacGui(tmac-MAX_BUSES);
@@ -226,13 +233,9 @@ void CGearRackDlg::OnProperties()
 {
 	// TODO: Add your control notification handler code here
 	int tmac = m_list.GetCurSel();
-	if (tmac == MAX_BUSES)
+	if (!bShowGenerators)
 	{
-		return;
-	}
-	if (tmac > MAX_BUSES)
-	{
-		tmac--;
+		tmac += MAX_BUSES;
 		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
 		{
 			m_pParent->DoMacPropDialog(Global::_pSong->busEffect[tmac-MAX_BUSES]);
@@ -265,13 +268,9 @@ void CGearRackDlg::OnParameters()
 	POINT point;
 	GetCursorPos(&point);
 	int tmac = m_list.GetCurSel();
-	if (tmac == MAX_BUSES)
+	if (!bShowGenerators)
 	{
-		return;
-	}
-	if (tmac > MAX_BUSES)
-	{
-		tmac--;
+		tmac += MAX_BUSES;
 		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
 		{
 			pParentMain->ShowMachineGui(Global::_pSong->busEffect[tmac-MAX_BUSES],point);
@@ -286,3 +285,8 @@ void CGearRackDlg::OnParameters()
 	}
 }
 
+void CGearRackDlg::OnMachineType()
+{
+	bShowGenerators = !bShowGenerators;
+	RedrawList();
+}

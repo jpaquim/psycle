@@ -21,10 +21,6 @@ X low priority
 	[ not recreated ]
 
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
-+ <alk_> re: gear rack - either gen and fx buttons which move the view to that part of the list, or 2 
-	lists one for gen, one for fx
-	[JAZ: And a third one for Instruments. Time to time]
-
 
 + <AF> I am thinking on using the unused "aux" column for the "off" note ( key "1" as you mention)
 	to allow the user to speficy a "different than default" fadeout.
@@ -283,6 +279,8 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 +	 MORE Keyboard shortcuts
 		[ We've added some more actually]
 		[ and most the needed ones are listed up there ^^ ]
++ <alk_> re: gear rack
+	[JAZ: And a third one for Instruments. Time to time]
 
 * Driver Issues:
 ------------
