@@ -184,7 +184,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
 						if (Global::_pSong->_pMachines[smac]->_mute)
 						{
-							Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[smac]->_volumeCounter=0.0f;
 							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
 							if (Global::_pSong->machineSoloed == smac )
 							{
@@ -218,7 +218,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 									(i != smac))
 								{
 									Global::_pSong->_pMachines[i]->_mute = true;
-									Global::_pSong->_pMachines[i]->_volumeCounter=0;
+									Global::_pSong->_pMachines[i]->_volumeCounter=0.0f;
 									Global::_pSong->_pMachines[i]->_volumeDisplay=0;
 								}
 							}
@@ -249,7 +249,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
 						if (Global::_pSong->_pMachines[smac]->_mute)
 						{
-							Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[smac]->_volumeCounter=0.0f;
 							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
 						}
 						updatePar = smac;
@@ -263,7 +263,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[smac]->_bypass = !Global::_pSong->_pMachines[smac]->_bypass;
 						if (Global::_pSong->_pMachines[smac]->_bypass)
 						{
-							Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[smac]->_volumeCounter=0.0f;
 							Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
 						}
 						updatePar = smac;
@@ -790,7 +790,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
 						if (Global::_pSong->_pMachines[tmac]->_mute)
 						{
-							Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[tmac]->_volumeCounter=0.0f;
 							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
 							if (Global::_pSong->machineSoloed == tmac )
 							{
@@ -825,7 +825,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 									(i != tmac))
 								{
 									Global::_pSong->_pMachines[i]->_mute = true;
-									Global::_pSong->_pMachines[i]->_volumeCounter=0;
+									Global::_pSong->_pMachines[i]->_volumeCounter=0.0f;
 									Global::_pSong->_pMachines[i]->_volumeDisplay=0;
 								}
 							}
@@ -857,7 +857,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
 						if (Global::_pSong->_pMachines[tmac]->_mute)
 						{
-							Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[tmac]->_volumeCounter=0.0f;
 							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
 						}
 						updatePar = tmac;
@@ -872,7 +872,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
 						if (Global::_pSong->_pMachines[tmac]->_bypass)
 						{
-							Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+							Global::_pSong->_pMachines[tmac]->_volumeCounter=0.0f;
 							Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
 						}
 						updatePar = tmac;

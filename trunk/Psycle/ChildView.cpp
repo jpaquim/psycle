@@ -323,9 +323,20 @@ void CChildView::ValidateParent()
 
 void CChildView::InitTimer()
 {
-	if (!SetTimer(31,20,NULL) || !SetTimer(159,600000,NULL)) // 1st Timer: GUI update. 2nd Timer: AutoSave
+	KillTimer(31);
+	KillTimer(159);
+	
+	if (!SetTimer(31,20,NULL)) // GUI update. 
 	{
 		AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
+	}
+	if ( Global::pConfig->autosaveSong )
+	{
+		if (!SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL)) // Autosave Song
+		{
+			AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
+			
+		}
 	}
 }
 //////////////////////////////////////////////////////////////////////
@@ -497,17 +508,7 @@ void CChildView::OnAppExit()
 
 #include "machineview.cpp"
 #include "patviewnew.cpp"
-/*
-void CChildView::OnPaint() 
-{
-	if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 
-	CPaintDC dc(this);
-	CDC bufDC;
-	bufDC.CreateCompatibleDC(&dc);
-	bufDC.DeleteDC();
-}
-*/
 
 void CChildView::OnPaint() 
 {
@@ -1380,6 +1381,11 @@ void CChildView::OnConfigurationSettings()
 	dlg.Init(Global::pConfig);
 	if (dlg.DoModal() == IDOK)
 	{
+		KillTimer(159);
+		if ( Global::pConfig->autosaveSong )
+		{
+			SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL);
+		}
 		_outputActive = true;
 		EnableSound();
 	}

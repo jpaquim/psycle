@@ -89,7 +89,7 @@ void CMacProp::OnButton1()
 void CMacProp::OnMute() 
 {
 	pMachine->_mute = (m_muteCheck.GetCheck() == 1);
-	pMachine->_volumeCounter=0;
+	pMachine->_volumeCounter=0.0f;
 	pMachine->_volumeDisplay = 0;
 	if ( m_view != NULL )
 	{
@@ -117,7 +117,7 @@ void CMacProp::OnSolo()
 				( pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
 			{
 				pSong->_pMachines[i]->_mute = true;
-				pSong->_pMachines[i]->_volumeCounter=0;
+				pSong->_pMachines[i]->_volumeCounter=0.0f;
 				pSong->_pMachines[i]->_volumeDisplay =0;
 			}
 		}

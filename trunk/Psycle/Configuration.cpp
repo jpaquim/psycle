@@ -248,6 +248,8 @@ Configuration::Configuration()
 	defaultPatLines = 64;
 	bShowSongInfoOnLoad = true;
 	bFileSaveReminders = true;
+	autosaveSong = true;
+	autosaveSongTime = 10;
 
 #endif // _WINAMP_PLUGIN
 }
@@ -633,6 +635,13 @@ Configuration::Read()
 	reg.QueryValue("bShowSongInfoOnLoad", &type, (BYTE*)&bShowSongInfoOnLoad, &numData);
 	numData = sizeof(bFileSaveReminders);
 	reg.QueryValue("bFileSaveReminders", &type, (BYTE*)&bFileSaveReminders, &numData);
+	
+
+	numData = sizeof(autosaveSong);
+	reg.QueryValue("autosaveSong", &type, (BYTE*)&autosaveSong, &numData);
+	numData = sizeof(autosaveSongTime);
+	reg.QueryValue("autosaveSongTime", &type, (BYTE*)&autosaveSongTime, &numData);
+	
 	
 	numData = sizeof(mv_colour);
 	reg.QueryValue("mv_colour", &type, (BYTE*)&mv_colour, &numData);

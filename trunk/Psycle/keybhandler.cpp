@@ -801,6 +801,7 @@ void CChildView::PrevCol(bool wrap,bool updateDisplay)
 	if(--editcur.col < 0)
 	{
 		editcur.col=8;
+		pParentMain->StatusBarIdle();
 		if (editcur.track == 0)
 		{
 			if ( wrap ) 
@@ -822,6 +823,7 @@ void CChildView::NextCol(bool wrap,bool updateDisplay)
 	if (++editcur.col > 8)
 	{
 		editcur.col = 0;
+		pParentMain->StatusBarIdle();
 		if (editcur.track == _pSong->SONGTRACKS-1)
 		{
 			if ( wrap ) 

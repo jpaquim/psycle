@@ -2577,7 +2577,7 @@ BOOL CMainFrame::StatusBarIdleText()
 			}
 			else if (toffset[2]<MAX_BUSES*2)
 			{
-				machine = _pSong->busEffect[toffset[2]];
+				machine = _pSong->busEffect[toffset[2]&~MAX_BUSES];
 			}
 			/*
 			else if ((toffset[0]<255)||(toffset[1]<255)||(toffset[3]<255))

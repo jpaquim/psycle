@@ -1054,12 +1054,12 @@ void VSTInstrument::Work(int numSamples)
 			Dsp::Add(outputs[0],outputs[1],numSamples,1);
 		}
 #if !defined(_WINAMP_PLUGIN_)	
-		_volumeCounter = f2i(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
-		if (_volumeCounter > 32768)
+		_volumeCounter = Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f;
+		if (_volumeCounter > 32768.0f)
 		{
-			_volumeCounter = 32768;
+			_volumeCounter = 32768.0f;
 		}
-		int temp = (f2i(fast_log2(float(_volumeCounter))*78.0f*4/14.0f) - (78*3));//*2;// not 100% accurate, but looks as it sounds
+		int temp = (f2i(fast_log2(_volumeCounter)*78.0f*4/14.0f) - (78*3));//*2;// not 100% accurate, but looks as it sounds
 		// prevent downward jerkiness
 		if (temp > 97)
 		{
@@ -1072,9 +1072,9 @@ void VSTInstrument::Work(int numSamples)
 		_volumeDisplay--;
 		if ( Global::pConfig->autoStopMachines )
 		{
-			if (_volumeCounter < 8)	
+			if (_volumeCounter < 8.0f)
 			{
-				_volumeCounter = 0;
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}
@@ -1195,12 +1195,12 @@ void VSTFX::Work(int numSamples)
 
 		}
 #if !defined(_WINAMP_PLUGIN_)
-		_volumeCounter = f2i(Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f);
-		if (_volumeCounter > 32768)
+		_volumeCounter = Dsp::GetMaxVSTVol(_pSamplesL,_pSamplesR,numSamples)*32768.0f;
+		if (_volumeCounter > 32768.0f)
 		{
-			_volumeCounter = 32768;
+			_volumeCounter = 32768.0f;
 		}
-		int temp = (f2i(fast_log2(float(_volumeCounter))*78.0f*4/14.0f) - (78*3));//*2;// not 100% accurate, but looks as it sounds
+		int temp = (f2i(fast_log2(_volumeCounter)*78.0f*4/14.0f) - (78*3));//*2;// not 100% accurate, but looks as it sounds
 		// prevent downward jerkiness
 		if (temp > 97)
 		{
@@ -1213,8 +1213,8 @@ void VSTFX::Work(int numSamples)
 		_volumeDisplay--;
 		if ( Global::pConfig->autoStopMachines )
 		{
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}

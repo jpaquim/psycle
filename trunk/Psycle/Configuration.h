@@ -229,6 +229,8 @@ public:
 	int defaultPatLines;
 	bool bShowSongInfoOnLoad;
 	bool bFileSaveReminders;
+	bool autosaveSong;
+	int autosaveSongTime;
 
 	AudioDriver** _ppOutputDrivers;
 	AudioDriver* _pOutputDriver;

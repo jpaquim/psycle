@@ -174,8 +174,8 @@ void Sampler::Work(
 		if ( Global::pConfig->autoStopMachines )
 		{
 //			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
+			if (_volumeCounter < 8.0f)	{
+				_volumeCounter = 0.0f;
 				_volumeDisplay = 0;
 				_stopped = true;
 			}

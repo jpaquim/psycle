@@ -74,10 +74,10 @@ public:
 	float _rVol;							// right chan volume
 	int _panning;							// numerical value of panning.
 #if !defined(_WINAMP_PLUGIN_)
-	int _volumeCounter;						// output peak level.
-	int _volumeDisplay;						// output peak level.
-	int _volumeMaxDisplay;					// output peak level.
-	int _volumeMaxCounterLife;				// output peak level.
+	float _volumeCounter;					// output peak level for DSP
+	int _volumeDisplay;						// output peak level for display
+	int _volumeMaxDisplay;					// output peak level for display
+	int _volumeMaxCounterLife;				// output peak level for display
 	unsigned long int _cpuCost;
 	unsigned long int _wireCost;
 	int	_scopeBufferIndex;
@@ -138,11 +138,11 @@ protected:
 	inline void SetVolumeCounter(int numSamples)
 	{
 		_volumeCounter = Dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
-		if (_volumeCounter > 32768)
+		if (_volumeCounter > 32768.0f)
 		{
-			_volumeCounter = 32768;
+			_volumeCounter = 32768.0f;
 		}
-		int temp = (f2i(fast_log2(float(_volumeCounter))*78.0f*4/14.0f) - (78*3));// not 100% accurate, but looks as it sounds
+		int temp = (f2i(fast_log2(_volumeCounter)*78.0f*4/14.0f) - (78*3));// not 100% accurate, but looks as it sounds
 		// prevent downward jerkiness
 		if (temp > 97)
 		{

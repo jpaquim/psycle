@@ -26,6 +26,9 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CKeyConfigDlg)
 	enum { IDD = IDD_KEYCONFIG };
+	CSpinButtonCtrl	m_autosave_spin;
+	CEdit	m_autosave_mins;
+	CButton	m_autosave;
 	CButton	m_save_reminders;
 	CButton	m_show_info;
 	CButton	m_cmdShiftArrows;
