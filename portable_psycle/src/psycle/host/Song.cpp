@@ -1844,6 +1844,30 @@ namespace psycle
 							{
 								Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
 								int d = pOrigMachine->FindOutputWire(i);
+//////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+
+\todo [bohan] crash on the line above
+
+cvs revision set tag: release_1_7_26
+tune: http://bohan.dyndns.org/~bohan/working-dir/psycle.bugging-tunes/heat-seeker.modular-expression.psy
+	
+crashes on load.
+
+i is 255. <-- huh? pMac is a array of size 127!!! for (i=0; i<128; i++) !!!
+c is 7.
+pMac[i] is a null pointer.
+
+
+stack trace:
+>	psycle.exe!psycle::host::Song::Load(psycle::host::RiffFile * pFile=0x0012f944, bool fullopen=true)  Line 1846 + 0xf	C++
+ 	psycle.exe!psycle::host::CChildView::FileLoadsongNamed(std::basic_string<char,std::char_traits<char>,std::allocator<char> > fName={...})  Line 2041	C++
+ 	psycle.exe!psycle::host::CChildView::OnFileLoadsongNamed(std::basic_string<char,std::char_traits<char>,std::allocator<char> > fName={...}, int fType=1)  Line 2019	C++
+ 	psycle.exe!psycle::host::CChildView::CallOpenRecent(int pos=3)  Line 2096	C++
+ 	psycle.exe!psycle::host::CChildView::OnFileRecent_04()  Line 2002	C++
+
+*/
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 								float val = volMatrix[pMac[i]->_inputMachines[c]][d];
 								if( val >= 4.000001f ) 
