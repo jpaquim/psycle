@@ -4,6 +4,10 @@
 
 * psycle default theme sucks
 + James says: how hard would it be to put nodes in the wires, so you can bend them?
++ James says: i have an idea for that actually... seeing as there are so many configurable 
+	keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight 
+	what was assigned to it
+
 
 * Machines
 ------------

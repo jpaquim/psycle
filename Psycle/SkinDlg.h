@@ -55,7 +55,7 @@ public:
 	COLORREF _vugColor;
 	COLORREF _vucColor;
 	bool _gfxbuffer;
-	bool _wireaa;
+	int _wireaa;
 	bool _linenumbers;
 	bool _linenumbersHex;
 	int _wirewidth;
@@ -96,7 +96,7 @@ public:
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
-	CButton	m_wireaa;
+	CComboBox	m_wireaa;
 	//}}AFX_DATA
 
 
@@ -161,11 +161,11 @@ protected:
 	afx_msg void OnSelchangePatternFontFace();
 	afx_msg void OnSelchangePatternHeaderSkin();
 	afx_msg void OnSelchangeWireWidth();
-	afx_msg void OnWireAA();
 	afx_msg void OnSelchangeMachineFontPoint();
 	afx_msg void OnSelchangeMachineFontFace();
 	afx_msg void OnSelchangeMachineSkin();
 	afx_msg void OnMVFontColour();
+	afx_msg void OnSelchangeWireAA();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

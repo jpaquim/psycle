@@ -665,10 +665,8 @@ BEGIN
                     12,9
     CONTROL         "",IDC_MPOLY_COL,"Static",SS_GRAYRECT | SS_SUNKEN,205,92,
                     12,9
-    CONTROL         "Anti-Alias",IDC_AAWIRE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,222,90,48,13
-    COMBOBOX        IDC_WIRE_WIDTH,221,73,24,104,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_WIRE_WIDTH,221,73,24,104,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
     LTEXT           "Width",IDC_STATIC,247,72,22,13,SS_CENTERIMAGE
     CONTROL         "Display Line Numbers",IDC_LINE_NUMBERS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,56,81,12
@@ -760,6 +758,9 @@ BEGIN
     PUSHBUTTON      "Names",IDC_MV_FONT_COLOUR,154,39,46,13
     CONTROL         "",IDC_MBG_MV_FONT,"Static",SS_GRAYRECT | SS_SUNKEN,205,
                     42,12,9
+    COMBOBOX        IDC_WIREAA,221,90,24,104,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "AntiAlias halo",IDC_STATIC,247,89,44,13,SS_CENTERIMAGE
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135

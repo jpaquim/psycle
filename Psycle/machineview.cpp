@@ -43,8 +43,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 
 	if (Global::pConfig->mv_wireaa)
 	{
-		CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+2, Global::pConfig->mv_wireaacolour);
-		CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+		CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour);
+		CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2); 
+		CPen linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
 		CPen *oldpen = devc->SelectObject(&linepen1);
 		// Draw wire [connections]
 		for(int c=0;c<MAX_MACHINES;c++)
@@ -123,6 +124,9 @@ void CChildView::DrawMachineEditor(CDC *devc)
 						devc->SelectObject(&linepen2);
 						amosDraw(devc, oriX, oriY, desX, desY);
 						devc->Polygon(&pol[1], 3);
+						devc->SelectObject(&linepen3);
+						amosDraw(devc, oriX, oriY, desX, desY);
+						devc->Polygon(&pol[1], 3);
 
 						tmac->_connectionPoint[w].x = f1-10;
 						tmac->_connectionPoint[w].y = f2-10;
@@ -133,6 +137,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 		devc->SelectObject(oldpen);
 		linepen1.DeleteObject();
 		linepen2.DeleteObject();
+		linepen3.DeleteObject();
 	}
 	else
 	{

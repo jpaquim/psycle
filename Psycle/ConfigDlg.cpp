@@ -147,9 +147,13 @@ int CConfigDlg::DoModal()
 	{
 		_pConfig->mv_colour = _skinDlg._machineViewColor;
 		_pConfig->mv_wirecolour = _skinDlg._machineViewWireColor;
-		_pConfig->mv_wireaacolour = ((((_pConfig->mv_wirecolour&0x00ff0000) + ((_pConfig->mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
-									((((_pConfig->mv_wirecolour&0x00ff00) + ((_pConfig->mv_colour&0x00ff00)*2))/3)&0x00ff00) +
-									((((_pConfig->mv_wirecolour&0x00ff) + ((_pConfig->mv_colour&0x00ff)*2))/3)&0x00ff);
+		_pConfig->mv_wireaacolour = ((((_pConfig->mv_wirecolour&0x00ff0000) + ((_pConfig->mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
+									((((_pConfig->mv_wirecolour&0x00ff00) + ((_pConfig->mv_colour&0x00ff00)*4))/5)&0x00ff00) +
+									((((_pConfig->mv_wirecolour&0x00ff) + ((_pConfig->mv_colour&0x00ff)*4))/5)&0x00ff);
+
+		_pConfig->mv_wireaacolour2 = (((((_pConfig->mv_wirecolour&0x00ff0000)) + ((_pConfig->mv_colour&0x00ff0000)))/2)&0x00ff0000) +
+									(((((_pConfig->mv_wirecolour&0x00ff00)) + ((_pConfig->mv_colour&0x00ff00)))/2)&0x00ff00) +
+									(((((_pConfig->mv_wirecolour&0x00ff)) + ((_pConfig->mv_colour&0x00ff)))/2)&0x00ff);
 
 		_pConfig->mv_polycolour = _skinDlg._machineViewPolyColor;
 		_pConfig->mv_fontcolour = _skinDlg._machineViewFontColor;
