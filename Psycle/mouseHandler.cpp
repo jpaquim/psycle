@@ -122,6 +122,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					{
 						Global::_pSong->_pMachines[smac]->_mute = !Global::_pSong->_pMachines[smac]->_mute;
 						Global::_pSong->_pMachines[smac]->_volumeCounter=0;
+						Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
 						updatePar = smac;
 						Repaint(DMMacRefresh);
 					}
@@ -130,6 +131,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 					{
 						Global::_pSong->_pMachines[smac]->_bypass = !Global::_pSong->_pMachines[smac]->_bypass;
 						Global::_pSong->_pMachines[smac]->_volumeCounter = 0;
+						Global::_pSong->_pMachines[smac]->_volumeDisplay=0;
 						updatePar = smac;
 						Repaint(DMMacRefresh);
 					}
@@ -155,6 +157,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 								{
 									Global::_pSong->_pMachines[i]->_mute = true;
 									Global::_pSong->_pMachines[i]->_volumeCounter=0;
+									Global::_pSong->_pMachines[i]->_volumeDisplay=0;
 								}
 							}
 							Global::_pSong->_pMachines[smac]->_mute = false;
@@ -535,6 +538,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 					{
 						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
 						Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+						Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
 						updatePar = tmac;
 						Repaint(DMMacRefresh);
 					}
@@ -543,6 +547,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 					{
 						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
 						Global::_pSong->_pMachines[tmac]->_volumeCounter = 0;
+						Global::_pSong->_pMachines[tmac]->_volumeDisplay=0;
 						updatePar = tmac;
 						Repaint(DMMacRefresh);
 					}
@@ -568,6 +573,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 								{
 									Global::_pSong->_pMachines[i]->_mute = true;
 									Global::_pSong->_pMachines[i]->_volumeCounter=0;
+									Global::_pSong->_pMachines[i]->_volumeDisplay=0;
 								}
 							}
 							Global::_pSong->_pMachines[tmac]->_mute = false;

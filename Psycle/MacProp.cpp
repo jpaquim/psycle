@@ -90,6 +90,7 @@ void CMacProp::OnMute()
 {
 	pMachine->_mute = (m_muteCheck.GetCheck() == 1);
 	pMachine->_volumeCounter=0;
+	pMachine->_volumeDisplay = 0;
 	if ( m_view != NULL )
 	{
 		m_view->updatePar=thisMac;
@@ -117,6 +118,7 @@ void CMacProp::OnSolo()
 			{
 				pSong->_pMachines[i]->_mute = true;
 				pSong->_pMachines[i]->_volumeCounter=0;
+				pSong->_pMachines[i]->_volumeDisplay =0;
 			}
 		}
 		pMachine->_mute = false;
