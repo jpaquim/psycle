@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by i:\home\bohan\projects\cvs.sourceforge.net\psycle\portable_psycle\src\psycle\host\resources\Psycle.rc
+// Used by c:\cvs.sourceforge.net\psycle\portable_psycle\src\psycle\host\resources\Psycle.rc
 //
 #define IDC_COPY                        3
 #define IDC_PASTE                       4

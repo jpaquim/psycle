@@ -2527,7 +2527,7 @@ BEGIN
     CONTROL         "",IDC_ERRORLOG_TXT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
                     WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,29,29,278,120,
-                    WS_EX_CLIENTEDGE | WS_EX_LEFTSCROLLBAR
+                    WS_EX_CLIENTEDGE
 END
 
 
