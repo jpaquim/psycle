@@ -900,7 +900,7 @@ void CChildView::patMixPaste()
 	{
 		const int ps = _ps();
 		unsigned char* offset_target = _pSong->pPatternData + (ps*MULTIPLY2);
-		unsigned char* offset_source = blockBufferData;
+		unsigned char* offset_source = patBufferData;
 		// **************** funky shit goin on here yo with the pattern resize or some shit
 		AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 		if ( patBufferLines != _pSong->patternLines[_ps()] )
