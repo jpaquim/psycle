@@ -101,6 +101,9 @@ X low priority
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
 *	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
+**	routing in pooplog synths for vcf->od modes only works when both vcfs are active?
+**  clicking in pooplog synths when vca sustain is off
+**  pooplog delay panning knobs fuck with my brain because they work counter-intuitively
 !	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
 !	alk: dalay delay is not precise enough (in terms of time)
 		[JAZ: Ehem... use the keyboard arrows for sample-precise tweaking]
