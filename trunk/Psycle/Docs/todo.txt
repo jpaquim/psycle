@@ -2,7 +2,6 @@
 !=change
 +=addition
 
-+ <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * psycle default theme sucks (cursor, selection, etc.)
 
 * Machines

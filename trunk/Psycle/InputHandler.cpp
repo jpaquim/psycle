@@ -796,7 +796,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefSongPosInc:
-		if ( !brepeat || pChildView->editPosition+1 < Global::_pSong->playLength) pChildView->IncPosition();
+		pChildView->IncPosition();
 		break;
 
 	case cdefSongPosDec:
@@ -1062,6 +1062,7 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefBlockInterpolate,'I',MOD_C);
 	SetCmd(cdefBlockSetMachine,'G',MOD_C);
 	SetCmd(cdefBlockSetInstr,'T',MOD_C);
+	SetCmd(cdefBlockDelete,'X',MOD_C|MOD_S);
 
 	SetCmd(cdefSelectAll,'A',MOD_C);
 	SetCmd(cdefSelectCol,'R',MOD_C);
@@ -1130,6 +1131,7 @@ void InputHandler::BuildCmdLUT()
 	// undo/redo
 	SetCmd(cdefUndo,'Z',MOD_C);
 	SetCmd(cdefRedo,'Z',MOD_C|MOD_S);
+
 }
 
 
