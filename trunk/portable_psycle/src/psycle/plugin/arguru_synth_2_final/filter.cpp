@@ -1,3 +1,4 @@
+#include <project.h>
 #include <psycle/plugin/arguru_synth_2_final/filter.h>
 ///\file filter.cpp
 ///\brief implementation of the filter class.

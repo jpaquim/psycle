@@ -1,3 +1,4 @@
+#include <project.h>
 #include <math.h> /// should be <cmath>
 #include <psycle/plugin/arguru_synth_2_final/SynthTrack.h>
 ///\file SynthTrack.cpp
