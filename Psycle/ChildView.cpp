@@ -350,33 +350,37 @@ void CChildView::OnTimer( UINT nIDEvent )
 	{
 		CSingleLock lock(&_pSong->door,TRUE);
 
-		pParentMain->UpdateVumeters(
-//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
-//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
-			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
-			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
-			Global::pConfig->vu1,
-			Global::pConfig->vu2,
-			Global::pConfig->vu3,
-			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip);
-
-		if ( MasterMachineDialog )
+		if (Global::_pSong->_pMachine[MASTER_INDEX])
 		{
-			if (!--((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime) 
-			{
-				char peak[10];
-				sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak)-90);
-				MasterMachineDialog->m_masterpeak.SetWindowText(peak);
-//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 
-				float val = sqrtf(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry*64.0f);
-				MasterMachineDialog->m_slidermaster.SetPos(256-f2i(val));
-				
-				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
-				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
+			pParentMain->UpdateVumeters(
+	//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
+	//			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
+				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
+				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
+				Global::pConfig->vu1,
+				Global::pConfig->vu2,
+				Global::pConfig->vu3,
+				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip);
+
+			if ( MasterMachineDialog )
+			{
+				if (!--((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime) 
+				{
+					char peak[10];
+					sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak)-90);
+					MasterMachineDialog->m_masterpeak.SetWindowText(peak);
+	//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
+
+					float val = sqrtf(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry*64.0f);
+					MasterMachineDialog->m_slidermaster.SetPos(256-f2i(val));
+					
+					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
+					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
+				}
 			}
+			((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 		}
-		((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 		
 		if (viewMode == VMMachine)
 		{
