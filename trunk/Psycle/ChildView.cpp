@@ -84,8 +84,6 @@ CChildView::CChildView()
 	editPosition=0;
 	bEditMode = true;
 
-	_followSong = true;
-	
 	blockSelected=false;
 	isBlockCopied=false;
 	patBufferCopy=false;
@@ -353,7 +351,7 @@ void CChildView::OnTimer( UINT nIDEvent )
 				pParentMain->SetAppSongBpm(0);
 				pParentMain->SetAppSongTpb(0);
 
-				if (_followSong)
+				if (Global::pConfig->_followSong)
 				{
 					CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 					editcur.line=Global::pPlayer->_lineCounter;
@@ -823,7 +821,7 @@ void CChildView::OnPatternView()
 		
 		GetParent()->SetActiveWindow();
 
-		if (( _followSong ) && ( editPosition  != Global::pPlayer->_playPosition )
+		if (( Global::pConfig->_followSong ) && ( editPosition  != Global::pPlayer->_playPosition )
 			&& (Global::pPlayer->_playing) )
 		{
 			editPosition=Global::pPlayer->_playPosition;

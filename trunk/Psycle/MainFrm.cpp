@@ -328,7 +328,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	cb->SetCheck(Global::pConfig->_RecordTweaks?1:0);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW);
-	cb->SetCheck(m_wndView._followSong?1:0);
+	cb->SetCheck(Global::pConfig->_followSong?1:0);
 
 	cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCSHORT);
 	hi = (HBITMAP)bplus; cb->SetBitmap(hi);
@@ -1927,10 +1927,10 @@ void CMainFrame::OnRecordTweaks()
 
 void CMainFrame::OnFollowSong() 
 {
-	*(char*)&m_wndView._followSong = (char)((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck();
+	Global::pConfig->_followSong = ((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck();
 	CListBox* pSeqList = (CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 
-	if (( m_wndView._followSong ) && ( Global::pPlayer->_playing ))
+	if (( Global::pConfig->_followSong ) && ( Global::pPlayer->_playing ))
 	{
 		if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 		{
@@ -2082,7 +2082,7 @@ void CMainFrame::OnUpdateIndicatorEdit(CCmdUI *pCmdUI)
 
 void CMainFrame::OnUpdateIndicatorFollow(CCmdUI *pCmdUI) 
 {
-	if (m_wndView._followSong)
+	if (Global::pConfig->_followSong)
 	{
 		pCmdUI->Enable(); 
 	}
