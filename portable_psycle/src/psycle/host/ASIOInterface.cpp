@@ -18,6 +18,7 @@ namespace psycle
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 
+		//\todo: what is this (the unnamed namespace and its content)?
 		namespace
 		{
 			#define ALLOW_NON_ASIO

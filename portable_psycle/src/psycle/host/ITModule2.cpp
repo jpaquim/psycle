@@ -138,10 +138,16 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (stereo)
 				{
-					sampler->rChannel(i).DefaultPanFactor(itFileH.chanPan[i]);
+					if (itFileH.chanPan[i]==ChanFlags::IS_SURROUND )
+					{
+						sampler->rChannel(i).IsSurround(true);
+						sampler->rChannel(i).DefaultPanFactor(32);
+					}
+					else sampler->rChannel(i).DefaultPanFactor(itFileH.chanPan[i]&0x7F);
+
 				}
 				else
-					sampler->rChannel(i).DefaultPanFactor(0.5f);
+					sampler->rChannel(i).DefaultPanFactor(32);
 				
 				if ( !(itFileH.chanPan[i]&ChanFlags::IS_DISABLED) ) 
 				{
@@ -648,6 +654,7 @@ Special:  Bit 0: On = song message attached.
 			int unused=ReadInt();
 //			char* packedpattern = new char[packedSize];
 //			Read(packedpattern,packedSize);
+			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			for (int row=0;row<rowCount;row++)
 			{
 				Read(&newEntry,1);
@@ -845,11 +852,13 @@ Special:  Bit 0: On = song message attached.
 					pent._cmd = XMSampler::CMD::FINE_VIBRATO;
 					break;
 				case CMD::SET_GLOBAL_VOLUME: 
-					pent._cmd = Player::CMD::SET_VOLUME;
+/*					pent._cmd = Player::CMD::SET_VOLUME;
 					if (param== 64)
 					{	
 						pent._parameter=255;
 					} else pent._parameter = param * 4;
+*/
+					pent._cmd = XMSampler::CMD::NONE;
 					break;
 				case CMD::GLOBAL_VOLUME_SLIDE: // IT
 					//\todo: implement when it is done.
@@ -861,6 +870,7 @@ Special:  Bit 0: On = song message attached.
 					pent._cmd = XMSampler::CMD::PANBRELLO;
 					break;
 				default:
+					pent._cmd = XMSampler::CMD::NONE;
 					break;
 			}
 		}
@@ -949,8 +959,8 @@ Special:  Bit 0: On = song message attached.
 					{
 						if (chansettings[i]&S3MChanType::HASCUSTOMPOS)
 						{
-							char chtmp=chansettings[i]&0x0F;
-							sampler->rChannel(i).DefaultPanFactor(chtmp*4);
+							float flttmp=(chansettings[i]&0x0F)/15.0f;
+							sampler->rChannel(i).DefaultPanFactor(int(flttmp*64.0f));
 						}
 					}
 				}

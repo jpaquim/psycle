@@ -42,9 +42,9 @@ namespace psycle
 			void AdvancePosition();
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
-			/// the line currently being played in the pattern currently being played
+			/// the line currently being played in the current pattern
 			int _lineCounter;
-			/// the position currently being played in the sequence of patterns
+			/// the sequence position currently being played
 			int _playPosition;
 			/// the pattern currently being played.
 			int _playPattern;
@@ -74,13 +74,14 @@ namespace psycle
 			/// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int& nsamples);
 			
-			void SetBPM(int _bpm,int _tpb);
+			void SetBPM(int _bpm,int _tpb=0);
+
+			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
+
 			/// Returns the number of samples that it takes for each row of the pattern to be played
 			const int SamplesPerRow(){ return m_SamplesPerRow;};
 			/// Sets the number of samples that it takes for each row of the pattern to be played
 			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
-			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
-
 			const int SampleRate() { return m_SampleRate; }
 			void SampleRate(const int sampleRate);
 
@@ -98,7 +99,7 @@ namespace psycle
 		protected:
 			/// Indicates to the playback engine that starts to process the current line in the pattern and send the events to machines.
 			void ExecuteLine();
-			/// Stores which machine played last in each track. this allows you to not specify the machine number in the pattern.
+			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 			int prevMachines[MAX_TRACKS];
 			/// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
 			int backup_rate;

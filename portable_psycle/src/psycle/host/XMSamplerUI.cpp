@@ -16,11 +16,13 @@ IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)
 XMSamplerUI::XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 : CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 	{
+		init=false;
 	}
 
 XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 :CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 	{
+		init=false;
 	}
 
 XMSamplerUI::~XMSamplerUI()
@@ -39,10 +41,17 @@ void XMSamplerUI::Init(XMSampler* pMachine)
 	m_General.pMachine(pMachine);
 //	m_Instrument.pMachine(pMachine);
 	m_Sample.pMachine(pMachine);
-	SetWindowText(_pMachine->_editName);
+	m_Mixer.pMachine(pMachine);
 	AddPage(&m_General);
 //	AddPage(&m_Instrument);
 	AddPage(&m_Sample);
+	AddPage(&m_Mixer);
+	init = true;
+}
+void XMSamplerUI::UpdateUI(void)
+{
+	if ( !init ) return;
+	if (GetActivePage() == &m_Mixer ) m_Mixer.UpdateAllChannels();
 }
 int XMSamplerUI::DoModal() 
 	{

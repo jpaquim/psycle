@@ -175,6 +175,7 @@ XMSampler::Channel::PerformFX().
 			}
 
 			// Update Position
+			//\todo : What about sample vibrato? Should we put it here or in voice? (there is the pitch envelope)
 			if(CurrentLoopDirection() == LoopDirection::FORWARD){
 				m_Position.QuadPart+=Speed();
 			} else {
@@ -183,7 +184,6 @@ XMSampler::Channel::PerformFX().
 
 			// Loop handler
 			//\todo : Implement Sustain Loop Control
-			//\todo : What about sample vibrato? Should we put it here or in voice?
 			const int curIntPos = m_Position.HighPart;
 			switch(LoopType())
 			{
@@ -487,11 +487,15 @@ XMSampler::Channel::PerformFX().
 			m_Volume = vol;
 			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/256.0f);
 		};
+		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
+		const float RealVolume() { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; };
 		void PanFactor(float pan)
 		{
 			m_PanFactor = pan;
 			m_PanRange = 1.0f -(fabs(0.5-m_PanFactor)*2);
 		}
+		float PanFactor() { return m_PanFactor; }
+
 		const int CutOff() { return m_CutOff; };
 		void CutOff(int co)	{	m_CutOff = co;	m_Filter._cutoff = co;	m_Filter.Update();	};
 		
@@ -504,8 +508,6 @@ XMSampler::Channel::PerformFX().
 		double VibratoAmount() { return m_VibratoAmount; };
 
 	protected:
-		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-		const float RealVolume() { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; };
 		// Gets the delta between the points of the wavetables for tremolo/panbrello/vibrato
 		int GetDelta(int wavetype,int wavepos);	
 		float PanRange() { return m_PanRange; };
@@ -713,7 +715,7 @@ XMSampler::Channel::PerformFX().
 		const float Volume(){return m_Volume;};
 		void Volume(const float value){m_Volume = value;};
 		const int DefaultVolume(){return m_ChannelDefVolume;};
-		void DefaultVolume(const int value){m_ChannelDefVolume = value;};
+		void DefaultVolume(const int value){m_ChannelDefVolume = value; Volume(value/64.0f);};
 
 		//\todo: Reset PanFactor to DeFaultPanFactor when Stopping.
 		const float PanFactor(){return 	m_PanFactor;};
@@ -722,7 +724,7 @@ XMSampler::Channel::PerformFX().
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
 		};
 		const int DefaultPanFactor(){return m_DefaultPanFactor;};
-		void DefaultPanFactor(const int value){m_DefaultPanFactor = value; PanFactor(value); };
+		void DefaultPanFactor(const int value){m_DefaultPanFactor = value; PanFactor(value/64.0f); };
 
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
@@ -765,7 +767,7 @@ XMSampler::Channel::PerformFX().
 		int m_ChannelDefVolume;///< (0.0f - 64)
 
 		float m_PanFactor;// value used for Playback
-		int m_DefaultPanFactor; // value used for Storage //  0..64 .  80 == Surround.
+		int m_DefaultPanFactor; // value used for Storage //  0..64 .  80 == Surround. 127 = Mute.
 		bool m_bSurround;
 
 		bool m_bGrissando;
@@ -915,6 +917,15 @@ XMSampler::Channel::PerformFX().
 			}
 		}
 		return NULL;
+	}
+	int GetPlayingVoices(void)
+	{
+		int c=0;
+		for (int i=0;i<MAX_POLYPHONY;i++)
+		{
+			if (m_Voices[i].IsPlaying()) c++;
+		}
+		return c;
 	}
 
 protected:
