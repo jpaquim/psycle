@@ -75,7 +75,7 @@ namespace psycle
 				long int close() {
 					long int retval=dispatcher(effClose);
 					/// also clears plugin_ pointer since it is no longer valid after effClose.
-					(*this)(0);
+					plugin_=0;
 					return retval;
 				}
 				long int setSampleRate(float sr) {
