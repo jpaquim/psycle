@@ -34,6 +34,7 @@ Configuration::Configuration()
 	useDoubleBuffer = true;
 	_linenumbers = true;
 	_linenumbersHex = false;
+	_linenumbersCursor = false;
 	_showAboutAtStart = true;
 	_followSong = false;
 	strcpy(pattern_fontface,"Tahoma");
@@ -366,6 +367,8 @@ Configuration::Read()
 	reg.QueryValue("DisplayLineNumbers", &type, (BYTE*)&_linenumbers, &numData);
 	numData = sizeof(_linenumbersHex);
 	reg.QueryValue("DisplayLineNumbersHex", &type, (BYTE*)&_linenumbersHex, &numData);
+	numData = sizeof(_linenumbersCursor);
+	reg.QueryValue("DisplayLineNumbersCursor", &type, (BYTE*)&_linenumbersCursor, &numData);
 	numData = sizeof(_showAboutAtStart);
 	reg.QueryValue("showAboutAtStart", &type, (BYTE*)&_showAboutAtStart, &numData);
 	numData = sizeof(_RecordNoteoff);
@@ -923,6 +926,7 @@ Configuration::Write()
 	reg.SetValue("useDoubleBuffer", REG_BINARY, (BYTE*)&useDoubleBuffer, sizeof(useDoubleBuffer));
 	reg.SetValue("DisplayLineNumbers", REG_BINARY, (BYTE*)&_linenumbers, sizeof(_linenumbers));
 	reg.SetValue("DisplayLineNumbersHex", REG_BINARY, (BYTE*)&_linenumbersHex, sizeof(_linenumbersHex));
+	reg.SetValue("DisplayLineNumbersCursor", REG_BINARY, (BYTE*)&_linenumbersCursor, sizeof(_linenumbersCursor));
 	reg.SetValue("showAboutAtStart", REG_BINARY, (BYTE*)&_showAboutAtStart, sizeof(_showAboutAtStart));
 	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
 	reg.SetValue("RecordTweaks", REG_BINARY, (BYTE*)&_RecordTweaks, sizeof(_RecordTweaks));

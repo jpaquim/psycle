@@ -2286,7 +2286,7 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 
 		if ((XOFFSET!=1))// && (tstart == 0))
 		{
-			if (linecount == editcur.line)
+			if ((linecount == editcur.line) && (Global::pConfig->_linenumbersCursor))
 			{
 				devc->SetBkColor(pvc_cursor[0]);
 				devc->SetTextColor(pvc_fontCur[0]);

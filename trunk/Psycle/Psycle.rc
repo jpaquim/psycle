@@ -677,8 +677,8 @@ BEGIN
     COMBOBOX        IDC_WIRE_WIDTH,221,106,24,104,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Width",IDC_STATIC,247,105,22,13,SS_CENTERIMAGE
-    CONTROL         "Display Line Numbers",IDC_LINE_NUMBERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,56,81,12
+    CONTROL         "Line Numbers",IDC_LINE_NUMBERS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,56,56,12
     PUSHBUTTON      "Separator",IDC_PATSEPARATORC,14,158,39,12
     CONTROL         "",IDC_PBG_SEPARATOR,"Static",SS_GRAYRECT | SS_SUNKEN,60,
                     160,12,9
@@ -737,7 +737,7 @@ BEGIN
     CONTROL         "",IDC_FONTCURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
                     74,144,12,9
     CONTROL         "in HEX",IDC_LINE_NUMBERS_HEX,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,104,56,36,12
+                    WS_TABSTOP,105,56,34,12
     PUSHBUTTON      "Save",IDC_EXPORTREG,215,267,55,12
     PUSHBUTTON      "Load",IDC_IMPORTREG,156,267,55,12
     GROUPBOX        "Theme Options",IDC_STATIC,150,255,143,30
@@ -778,6 +778,8 @@ BEGIN
                     74,12,9
     COMBOBOX        IDC_MACHINE_FONTFACE2,155,55,132,227,CBS_DROPDOWN | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Cursor",IDC_LINE_NUMBERS_CURSOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,66,56,36,12
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 196, 135
@@ -1170,7 +1172,7 @@ END
 IDD_SEQUENCER DIALOGEX 0, 0, 70, 335
 STYLE WS_CHILD
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX,5,266,
                     62,8
@@ -2345,7 +2347,6 @@ BEGIN
     ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
     ID_BARSTOP              "Stop song\nStop"
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
-    ID_BARREC               "Record sequence\nRecord sequence"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -2353,6 +2354,7 @@ BEGIN
     ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
     ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
     ID_HELP_KEYBTXT         "Open the keys.txt,which describes the default keyboard configuration\nOpen keys"
+    ID_BARREC               "Record sequence\nRecord sequence"
 END
 
 STRINGTABLE DISCARDABLE 

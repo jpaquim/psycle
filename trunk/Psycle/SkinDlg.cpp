@@ -37,6 +37,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
 	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
 	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
+	DDX_Control(pDX, IDC_LINE_NUMBERS_CURSOR, m_linenumbersCursor);
 	DDX_Control(pDX, IDC_WIREAA, m_wireaa);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	DDX_Control(pDX, IDC_PATTERN_FONTFACE, m_pattern_fontface);
@@ -89,6 +90,7 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
+	ON_BN_CLICKED(IDC_LINE_NUMBERS_CURSOR, OnLineNumbersCursor)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
@@ -208,6 +210,7 @@ BOOL CSkinDlg::OnInitDialog()
 	m_gfxbuffer.SetCheck(_gfxbuffer);
 	m_linenumbers.SetCheck(_linenumbers);
 	m_linenumbersHex.SetCheck(_linenumbersHex);
+	m_linenumbersCursor.SetCheck(_linenumbersCursor);
 	SetTimer(2345,50,0);
 
 	char s[4];
@@ -775,6 +778,10 @@ void CSkinDlg::OnLineNumbersHex()
 	_linenumbersHex = m_linenumbersHex.GetCheck() >0?true:false;
 }
 
+void CSkinDlg::OnLineNumbersCursor() 
+{
+	_linenumbersCursor = m_linenumbersCursor.GetCheck() >0?true:false;
+}
 
 void CSkinDlg::RepaintAllCanvas()
 {

@@ -30,7 +30,7 @@ X low priority
 
 * Sampler Machine/Wave Ed:
 --------------------------
-******************** NEW SAMPLER NEEDS TO BE CODED ***********************
++++FF******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 * Sample loop not works - is it possible to fix it in next Psycle release?
 * {alk} fit sample to match 256 rows (in sampler) doesnt seem to work [JAZ] Are you sure? Code seems OK.
 * internal max of 2megs/channel is too small.
@@ -53,7 +53,7 @@ X low priority
 * GUI (pattern):
 ----------------
 *** <alk> block select a channel. record some tweak to it live. before the end of the pattern press stop. 
-	then do ctrl-x. It does not cut. [not tested]
+	then do ctrl-x. It does not cut. [cannot reproduce]
 *** <wayfinder> and yet another thing: when i enter notes with shift, i progress not down a row, but to 
 		the next column. so far, so cool (another IT feature :D) but when i let go of the shift key, the 
 		cursor stays in the last column i made a note in - wouldnt it be cooler if it jumped back to the 
@@ -63,10 +63,8 @@ X low priority
 	select a line.
 	then lower down click and drag to select a block. cause the window to scroll by making the block 
 	go off the ottom of the screen. (notice the previous highlight moving up) now click another place. 
-	[not tested]
+	[cannot reproduce]
 ** select with keyboard while playing and follow mode on sucks
-+++ <_sue_> how about the line numbering cursor marker being optional? .....it missleds me lots of 
-	times....i confuse it with the cursor because it moves and its the same colour
 ++ velocity should be able to store data to instrument column * so should other midi messages
 ++ how about option to switch the instrument and machine columns?
 + option to see waveform instead of notes in pattern editor for acid mode
