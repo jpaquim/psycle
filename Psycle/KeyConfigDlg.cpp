@@ -376,7 +376,7 @@ void CKeyConfigDlg::OnExportreg()
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	ofn.Flags = OFN_PATHMUSTEXIST;	
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 	ofn.lpstrInitialDir = _skinPathBuf;
 
 	if (GetSaveFileName(&ofn)==TRUE)

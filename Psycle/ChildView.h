@@ -415,6 +415,10 @@ private:
 
 	int bkgx;
 	int bkgy;
+
+	int triangle_size_tall;
+	int triangle_size_center;
+	int triangle_size_wide;
 	
 	int playpos;		// Play Cursor Position in Screen // left and right are unused
 	int newplaypos;		// Play Cursor Position in Screen that is gonna be drawn.

@@ -159,14 +159,14 @@ void CChildView::DrawMachineEditor(CDC *devc)
 								
 						CPoint pol[4];
 						
-						pol[0].x = f1 - Dsp::F2I(modX*(10+Global::pConfig->mv_wirewidth));
-						pol[0].y = f2 - Dsp::F2I(modY*(10+Global::pConfig->mv_wirewidth));
-						pol[1].x = pol[0].x + Dsp::F2I(modX*(20+2*Global::pConfig->mv_wirewidth));
-						pol[1].y = pol[0].y + Dsp::F2I(modY*(20+2*Global::pConfig->mv_wirewidth));
-						pol[2].x = pol[0].x - Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
-						pol[2].y = pol[0].y + Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
-						pol[3].x = pol[0].x + Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
-						pol[3].y = pol[0].y - Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
+						pol[0].x = f1 - Dsp::F2I(modX*triangle_size_center);
+						pol[0].y = f2 - Dsp::F2I(modY*triangle_size_center);
+						pol[1].x = pol[0].x + Dsp::F2I(modX*triangle_size_tall);
+						pol[1].y = pol[0].y + Dsp::F2I(modY*triangle_size_tall);
+						pol[2].x = pol[0].x - Dsp::F2I(modY*triangle_size_wide);
+						pol[2].y = pol[0].y + Dsp::F2I(modX*triangle_size_wide);
+						pol[3].x = pol[0].x + Dsp::F2I(modY*triangle_size_wide);
+						pol[3].y = pol[0].y - Dsp::F2I(modX*triangle_size_wide);
 
 						devc->SelectObject(&linepen1);
 						amosDraw(devc, oriX, oriY, desX, desY);
@@ -178,8 +178,8 @@ void CChildView::DrawMachineEditor(CDC *devc)
 						amosDraw(devc, oriX, oriY, desX, desY);
 						devc->Polygon(&pol[1], 3);
 
-						tmac->_connectionPoint[w].x = f1-(10+Global::pConfig->mv_wirewidth);
-						tmac->_connectionPoint[w].y = f2-(10+Global::pConfig->mv_wirewidth);
+						tmac->_connectionPoint[w].x = f1-triangle_size_center;
+						tmac->_connectionPoint[w].y = f2-triangle_size_center;
 					}
 				}
 			}// Machine actived
@@ -259,19 +259,19 @@ void CChildView::DrawMachineEditor(CDC *devc)
 								
 						CPoint pol[4];
 						
-						pol[0].x = f1 - Dsp::F2I(modX*(10+Global::pConfig->mv_wirewidth));
-						pol[0].y = f2 - Dsp::F2I(modY*(10+Global::pConfig->mv_wirewidth));
-						pol[1].x = pol[0].x + Dsp::F2I(modX*(20+2*Global::pConfig->mv_wirewidth));
-						pol[1].y = pol[0].y + Dsp::F2I(modY*(20+2*Global::pConfig->mv_wirewidth));
-						pol[2].x = pol[0].x - Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
-						pol[2].y = pol[0].y + Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
-						pol[3].x = pol[0].x + Dsp::F2I(modY*(12+Global::pConfig->mv_wirewidth));
-						pol[3].y = pol[0].y - Dsp::F2I(modX*(12+Global::pConfig->mv_wirewidth));
+						pol[0].x = f1 - Dsp::F2I(modX*triangle_size_center);
+						pol[0].y = f2 - Dsp::F2I(modY*triangle_size_center);
+						pol[1].x = pol[0].x + Dsp::F2I(modX*triangle_size_tall);
+						pol[1].y = pol[0].y + Dsp::F2I(modY*triangle_size_tall);
+						pol[2].x = pol[0].x - Dsp::F2I(modY*triangle_size_wide);
+						pol[2].y = pol[0].y + Dsp::F2I(modX*triangle_size_wide);
+						pol[3].x = pol[0].x + Dsp::F2I(modY*triangle_size_wide);
+						pol[3].y = pol[0].y - Dsp::F2I(modX*triangle_size_wide);
 
 						devc->Polygon(&pol[1], 3);
 
-						tmac->_connectionPoint[w].x = f1-(10+Global::pConfig->mv_wirewidth);
-						tmac->_connectionPoint[w].y = f2-(10+Global::pConfig->mv_wirewidth);
+						tmac->_connectionPoint[w].x = f1-triangle_size_center;
+						tmac->_connectionPoint[w].y = f2-triangle_size_center;
 					}
 				}
 			}// Machine actived

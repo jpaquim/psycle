@@ -60,6 +60,7 @@ public:
 	int _pattern_font_point;
 	int _pattern_font_x;
 	int _pattern_font_y;
+	int _triangle_size;
 	bool _pattern_draw_empty_data;
 	bool _draw_mac_index;
 
@@ -84,6 +85,8 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CSkinDlg)
 	enum { IDD = IDD_SKIN };
+	CButton	m_machine_background_bitmap;
+	CComboBox	m_triangle_size;
 	CComboBox	m_wirewidth;
 	CButton	m_pattern_fontface;
 	CComboBox	m_pattern_font_point;
@@ -178,6 +181,7 @@ protected:
 	afx_msg void OnDrawEmptyData();
 	afx_msg void OnDrawMacIndex();
 	afx_msg void OnMachineBitmap();
+	afx_msg void OnSelchangeTrianglesize();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -24,7 +24,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 							int xt = tmac->_connectionPoint[w].x;
 							int yt = tmac->_connectionPoint[w].y;
 							
-							if ((point.x > xt) && (point.x < xt+20+(2*Global::pConfig->mv_wirewidth)) && (point.y > yt) && (point.y < yt+20+(2*Global::pConfig->mv_wirewidth)))
+							if ((point.x > xt) && (point.x < xt+triangle_size_tall) && (point.y > yt) && (point.y < yt+triangle_size_tall))
 							{
 								for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 								{
@@ -142,7 +142,7 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 								int xt = tmac->_connectionPoint[w].x;
 								int yt = tmac->_connectionPoint[w].y;
 								
-								if ((point.x > xt) && (point.x < xt+20+(2*Global::pConfig->mv_wirewidth)) && (point.y > yt) && (point.y < yt+20+(2*Global::pConfig->mv_wirewidth)))
+								if ((point.x > xt) && (point.x < xt+triangle_size_tall) && (point.y > yt) && (point.y < yt+triangle_size_tall))
 								{
 									// we found it
 									wiremove = w;
@@ -969,7 +969,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 								int xt = tmac->_connectionPoint[w].x;
 								int yt = tmac->_connectionPoint[w].y;
 								
-								if ((point.x > xt) && (point.x < xt+20+(2*Global::pConfig->mv_wirewidth)) && (point.y > yt) && (point.y < yt+20+(2*Global::pConfig->mv_wirewidth)))
+								if ((point.x > xt) && (point.x < xt+triangle_size_tall) && (point.y > yt) && (point.y < yt+triangle_size_tall))
 								{
 									for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 									{
