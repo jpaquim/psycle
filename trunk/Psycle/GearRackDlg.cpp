@@ -695,11 +695,7 @@ void CGearRackDlg::OnClonemachine()
 	switch (DisplayMode) // should be necessary to rename opened parameter windows.
 	{
 	case 0:
-		if (tmac2 >= 0)
-		{
-			CloneMac(tmac1,tmac2);
-		}
-		else
+		if (tmac2 < 0)
 		{
 			// we need to find an empty slot
 			for (int i = 0; i < MAX_BUSES; i++)
@@ -710,9 +706,12 @@ void CGearRackDlg::OnClonemachine()
 					break;
 				}
 			}
-			if (tmac2 >= 0)
+		}
+		if (tmac2 >= 0)
+		{
+			if (!Global::_pSong->CloneMac(tmac1,tmac2))
 			{
-				CloneMac(tmac1,tmac2);
+				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 			}
 		}
 		pParentMain->UpdateComboGen(true);
@@ -722,9 +721,10 @@ void CGearRackDlg::OnClonemachine()
 		}
 		break;
 	case 1:
+		tmac1+=MAX_BUSES;
 		if (tmac2 >= 0)
 		{
-			CloneMac(tmac1+MAX_BUSES,tmac2+MAX_BUSES);
+			tmac2+=MAX_BUSES;
 		}
 		else
 		{
@@ -737,9 +737,12 @@ void CGearRackDlg::OnClonemachine()
 					break;
 				}
 			}
-			if (tmac2 >= 0)
+		}
+		if (tmac2 >= 0)
+		{
+			if (!Global::_pSong->CloneMac(tmac1,tmac2))
 			{
-				CloneMac(tmac1+MAX_BUSES,tmac2);
+				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 			}
 		}
 		pParentMain->UpdateComboGen(true);
@@ -750,11 +753,7 @@ void CGearRackDlg::OnClonemachine()
 		break;
 	case 2:
 		Global::_pSong->Invalided=true;
-		if (tmac2 >=0)
-		{
-			CloneIns(tmac1,tmac2);
-		}
-		else
+		if (tmac2 < 0)
 		{
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
@@ -764,9 +763,12 @@ void CGearRackDlg::OnClonemachine()
 					break;
 				}
 			}
-			if (tmac2 >=0)
+		}
+		if (tmac2 >=0)
+		{
+			if (!Global::_pSong->CloneIns(tmac1,tmac2))
 			{
-				CloneIns(tmac1,tmac2);
+				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 			}
 		}
 		
@@ -779,52 +781,5 @@ void CGearRackDlg::OnClonemachine()
 }
 
 
-void CGearRackDlg::CloneMac(int src,int dst)
-{
-	// src has to be occupied and dst must be empty
-	if (!Global::_pSong->_instruments[src].Empty() && !Global::_pSong->_instruments[dst].Empty())
-	{
-		MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
-		return;
-	}
-	if (!Global::_pSong->_instruments[dst].Empty())
-	{
-		int temp = src;
-		src = dst;
-		dst = temp;
-	}
-	if (Global::_pSong->_instruments[src].Empty())
-	{
-		MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
-		return;
-	}
-	// ok now we get down to business
-	// *****
-	// put int the machine class a fetch/store from ram algo
-	// have the load/save load that and then call the fetch/store
-
-}
 
 
-void CGearRackDlg::CloneIns(int src,int dst)
-{
-	// src has to be occupied and dst must be empty
-	if (Global::_pSong->_pMachine[src] && Global::_pSong->_pMachine[dst])
-	{
-		MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
-		return;
-	}
-	if (Global::_pSong->_pMachine[dst])
-	{
-		int temp = src;
-		src = dst;
-		dst = temp;
-	}
-	if (!Global::_pSong->_pMachine[src])
-	{
-		MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
-		return;
-	}
-	// ok now we get down to business
-
-}

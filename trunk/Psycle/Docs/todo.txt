@@ -35,8 +35,7 @@ rough bug count: ~60, many aren't really bugs though.
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 
-*** gear rack stuff:
-	1) cloning - trick it to save to ram, then make a new and load from ram * add to right click menu too
+*** gear rack stuff: exchange - is it backwards?
 
 ** parameter name lengths in plugs: http://psycle.pastnotecut.org/thread.php?threadid=938&boardid=2&styleid=1
 

@@ -10,6 +10,7 @@ V1.7.3
 + psycle now appends names of new machines with a counter if duplicate name exists (pooplog)
 + psycle can display machines' number (ie 02:Sampler) - toggleable (pooplog)
 + psycle now marks missing machines that were replaced by dummy with an X (pooplog)
++ machine and instrument cloning (from gear rack or right-click window) (pooplog)
 * new file format fixing a lot of problems, and incorporating FAST lossless data compression (pooplog)
 * better memory management of pattern data (up to 10mb savings!) (pooplog)
 * optimized machine indexing and also machine view rendering (pooplog)
