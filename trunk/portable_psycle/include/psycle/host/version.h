@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.19  2005/01/23 10:59:12  johan-boule
+version numbering again, huhu ha ho.
+
 Revision 1.18  2005/01/23 10:39:04  johan-boule
 version numbering again, huhu.
 
@@ -62,9 +65,8 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 ///\file
 ///\brief the version number of the psycle host application.
 
-/// Versions are composed this way:
-/// C.M.m.p , where:
-/// - C = codebase generation.
+/// Versions are composed this way since 1.7.24:
+/// M.m.p , where:
 /// - M = major version number.
 /// - m = minor version number:
 ///			- if even, then it's a stable release.
@@ -79,15 +81,15 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 /// - doc/for-end-users/whatsnew.txt
 /// [bohan] ... if only we were using a programmable build system like autoconf.
 			
-#define PSYCLE__VERSION__CODEBASE 1
-#define PSYCLE__VERSION__MAJOR 7
+#define PSYCLE__BRANCH "" // mainline (psycledelics)
+#define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
 #define PSYCLE__VERSION__PATCH 23 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
+	PSYCLE__BRANCH " " \
 	PSYCLE__VERSION__QUALITY " " \
-	STRINGIZED(PSYCLE__VERSION__CODEBASE) "." \
 	STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
 	STRINGIZED(PSYCLE__VERSION__MINOR) "." \
 	STRINGIZED(PSYCLE__VERSION__PATCH)
