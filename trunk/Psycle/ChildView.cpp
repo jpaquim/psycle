@@ -950,7 +950,7 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 
 void CChildView::OnFileRevert()
 {
-	if (MessageBox("Warning! You will lose all changes since song was last saved!","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+	if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 	{
 		if (Global::_pSong->_saved)
 		{
