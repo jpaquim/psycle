@@ -83,7 +83,11 @@ BOOL CPsycleApp::InitInstance()
 		{
 			pFrame->m_wndView._outputActive = true;
 		}
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
+
 	}
 
 	// create and load the frame with its resources

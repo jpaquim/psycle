@@ -41,10 +41,14 @@ Configuration::Configuration()
 	pattern_font_point = 95;
 	pattern_font_x = 10;
 	pattern_font_y = 14;
+	strcpy(machine_fontface,"Tahoma Bold");
+	strcpy(machine_skin,DEFAULT_MACHINE_SKIN);
+	machine_font_point = 90;
 
 	mv_colour =	0x009a887c;
 	mv_wirecolour =	0x00000000;
 	mv_polycolour =	0x00ffffff;
+	mv_fontcolour = 0x00000000;
 	mv_wireaa = false;
 	mv_wirewidth = 1;
 	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
@@ -237,6 +241,7 @@ Configuration::~Configuration()
 #if !defined(_WINAMP_PLUGIN_)
 
 	seqFont.DeleteObject();
+	machineFont.DeleteObject();
 	if (_ppOutputDrivers != NULL)
 	{
 		for (int i=0; i<_numOutputDrivers; i++)
@@ -599,6 +604,8 @@ Configuration::Read()
 	reg.QueryValue("mv_wireaa", &type, (BYTE*)&mv_wireaa, &numData);
 	numData = sizeof(mv_wirewidth);
 	reg.QueryValue("mv_wirewidth", &type, (BYTE*)&mv_wirewidth, &numData);
+	numData = sizeof(mv_fontcolour);
+	reg.QueryValue("mv_fontcolour", &type, (BYTE*)&mv_fontcolour, &numData);
 
 	numData = sizeof(pvc_background);
 	reg.QueryValue("pvc_background", &type, (BYTE*)&pvc_background, &numData);
@@ -671,6 +678,13 @@ Configuration::Read()
 	numData = sizeof(pattern_font_y);
 	reg.QueryValue("pattern_font_y", &type, (BYTE*)&pattern_font_y, &numData);
 
+	numData = sizeof(machine_fontface);
+	reg.QueryValue("machine_fontface", &type, (BYTE*)&machine_fontface, &numData);
+	numData = sizeof(machine_skin);
+	reg.QueryValue("machine_skin", &type, (BYTE*)&machine_skin, &numData);
+	numData = sizeof(machine_font_point);
+	reg.QueryValue("machine_font_point", &type, (BYTE*)&machine_font_point, &numData);
+
 	if (!seqFont.CreatePointFont(pattern_font_point,pattern_fontface))
 	{
 		MessageBox(NULL,pattern_fontface,"Could not find this font!",0);
@@ -679,6 +693,18 @@ Configuration::Read()
 			if (!seqFont.CreatePointFont(pattern_font_point,"Verdana"))
 			{
 				seqFont.CreatePointFont(pattern_font_point,"Arial Bold");
+			}
+		}
+	}
+
+	if (!machineFont.CreatePointFont(machine_font_point,machine_fontface))
+	{
+		MessageBox(NULL,machine_fontface,"Could not find this font!",0);
+		if (!machineFont.CreatePointFont(machine_font_point,"Tahoma"))
+		{
+			if (!machineFont.CreatePointFont(machine_font_point,"Verdana"))
+			{
+				machineFont.CreatePointFont(machine_font_point,"Arial Bold");
 			}
 		}
 	}
@@ -999,6 +1025,7 @@ Configuration::Write()
 	reg.SetValue("mv_polycolour", REG_DWORD, (BYTE*)&mv_polycolour, sizeof(mv_polycolour));	
 	reg.SetValue("mv_wireaa", REG_BINARY, (BYTE*)&mv_wireaa, sizeof(mv_wireaa));	
 	reg.SetValue("mv_wirewidth", REG_DWORD, (BYTE*)&mv_wirewidth, sizeof(mv_wirewidth));	
+	reg.SetValue("mv_fontcolour", REG_DWORD, (BYTE*)&mv_fontcolour, sizeof(mv_fontcolour));	
 
 	reg.SetValue("pvc_separator", REG_DWORD, (BYTE*)&pvc_separator, sizeof(pvc_separator));	
 	reg.SetValue("pvc_separator2", REG_DWORD, (BYTE*)&pvc_separator2, sizeof(pvc_separator2));	
@@ -1035,6 +1062,10 @@ Configuration::Write()
 	reg.SetValue("pattern_font_y", REG_DWORD, (BYTE*)&pattern_font_y, sizeof(pattern_font_y));	
 
 	reg.SetValue("pattern_header_skin", REG_SZ, (BYTE*)pattern_header_skin, strlen(pattern_header_skin));
+
+	reg.SetValue("machine_fontface", REG_SZ, (BYTE*)machine_fontface, strlen(machine_fontface));
+	reg.SetValue("machine_font_point", REG_DWORD, (BYTE*)&machine_font_point, sizeof(machine_font_point));	
+	reg.SetValue("machine_skin", REG_SZ, (BYTE*)machine_skin, strlen(machine_skin));
 	
 	if (_psInitialInstrumentDir != NULL)
 	{

@@ -51,7 +51,8 @@ V1.67
 ! Fixed two memory leaks when loading songs with plugins (native as well as VST)
 * Litte redesign in the Toolbar and control bars. Pending "Next/Previous" Machine to select the correct one.
 + SHIFT+Left mouse button moves cursor with selection drags, or drops cursor without disturbing selection (pooplog)
-
++ Visual Presets load and saving (pooplog)
++ Machine and Pattern Header Skinning (pooplog)
 
 V1.66
 -----

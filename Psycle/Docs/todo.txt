@@ -140,8 +140,6 @@ feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 	when you want.
 ! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! record button should set edit mode and follow mode on, should have new export wav button
-+ actual skinning
-+ visual preset saving/loading
 + <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
 	pattern length parameter
 + <Alk^> I also think that the cursor movement after a paste should be optional to =)

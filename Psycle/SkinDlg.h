@@ -50,6 +50,7 @@ public:
 	COLORREF _machineViewColor;
 	COLORREF _machineViewWireColor;
 	COLORREF _machineViewPolyColor;
+	COLORREF _machineViewFontColor;
 	COLORREF _vubColor;
 	COLORREF _vugColor;
 	COLORREF _vucColor;
@@ -60,13 +61,20 @@ public:
 	int _wirewidth;
 	char _pattern_fontface[64];
 	char _pattern_header_skin[64];
-	static CComboBox* pm_pattern_fontface;
-	static HDC hDC;
-	static SFontName* pNameStruct;
-
 	int _pattern_font_point;
 	int _pattern_font_x;
 	int _pattern_font_y;
+
+	char _machine_fontface[64];
+	char _machine_skin[64];
+	int _machine_font_point;
+
+	static CComboBox* pm_pattern_fontface;
+	static CComboBox* pm_machine_fontface;
+
+	static HDC hDC;
+	static SFontName* pNameStruct;
+
 
 	CSkinDlg();
 	~CSkinDlg();
@@ -82,6 +90,9 @@ public:
 	CComboBox	m_pattern_font_x;
 	CComboBox	m_pattern_font_y;
 	CComboBox	m_pattern_header_skin;
+	CComboBox	m_machine_skin;
+	CComboBox	m_machine_fontface;
+	CComboBox	m_machine_font_point;
 	CButton	m_gfxbuffer;
 	CButton	m_linenumbers;
 	CButton	m_linenumbersHex;
@@ -151,6 +162,10 @@ protected:
 	afx_msg void OnSelchangePatternHeaderSkin();
 	afx_msg void OnSelchangeWireWidth();
 	afx_msg void OnWireAA();
+	afx_msg void OnSelchangeMachineFontPoint();
+	afx_msg void OnSelchangeMachineFontFace();
+	afx_msg void OnSelchangeMachineSkin();
+	afx_msg void OnMVFontColour();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

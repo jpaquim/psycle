@@ -20,7 +20,10 @@ void CChildView::DrawMachineVumeters(CClientDC *devc)
 			}
 			DrawMachineVol(_pSong->_pMachines[c]->_x,
 						   _pSong->_pMachines[c]->_y,
-						   devc, _pSong->_pMachines[c]->_volumeDisplay, _pSong->_pMachines[c]->_volumeMaxDisplay);
+						   devc, 
+						   _pSong->_pMachines[c]->_volumeDisplay, 
+						   _pSong->_pMachines[c]->_volumeMaxDisplay,
+						   _pSong->_pMachines[c]->_mode);
 		}
 	}
 }
@@ -175,35 +178,139 @@ void CChildView::DrawMachineEditor(CDC *devc)
 //////////////////////////////////////////////////////////////////////
 // Draws a single machine
 
-void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max)
+void CChildView::DrawMachineVol(int x,int y,CClientDC *devc, int vol, int max, int mode)
 {
 	CDC memDC;
 	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(devc);
-	oldbmp=memDC.SelectObject(&stuffbmp);
+	oldbmp=memDC.SelectObject(&machineskin);
 
-	if (vol > 0)
+	switch (mode)
 	{
-		vol /= 6;// restrict to leds
-		vol *= 6;
-	}
-	else 
-	{
-		vol = 0;
-	}
-	devc->BitBlt(x+8+vol, y+3, 96-vol, 5, &memDC, 8, 51, SRCCOPY); //background
+	case MACHMODE_GENERATOR:
+		// scale our volumes
+		vol *= MachineCoords.dGeneratorVu.width;
+		vol /= 96;
 
-	if (max > 0)
-	{
-		max /= 6;// restrict to leds
-		max *= 6;
-		devc->BitBlt(x+8+max, y+3, 6, 5, &memDC, 96, 96, SRCCOPY); //peak
+		max *= MachineCoords.dGeneratorVu.width;
+		max /= 96;
+
+		// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+		if (vol > 0)
+		{
+			if (MachineCoords.sGeneratorVu0.width)
+			{
+				vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
+				vol *= MachineCoords.sGeneratorVu0.width;
+			}
+		}
+		else
+		{
+			vol = 0;
+		}
+		devc->BitBlt(x+vol+MachineCoords.dGeneratorVu.x, 
+						y+MachineCoords.dGeneratorVu.y, 
+						MachineCoords.dGeneratorVu.width-vol, 
+						MachineCoords.sGeneratorVu0.height, 
+						&memDC, 
+						MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x, 
+						MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y, 
+						SRCCOPY); //background
+
+		if (max > 0)
+		{
+			if (MachineCoords.sGeneratorVuPeak.width)
+			{
+				max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
+				max *= MachineCoords.sGeneratorVuPeak.width;
+				devc->BitBlt(x+max+MachineCoords.dGeneratorVu.x, 
+							y+MachineCoords.dGeneratorVu.y, 
+							MachineCoords.sGeneratorVuPeak.width, 
+							MachineCoords.sGeneratorVuPeak.height, 
+							&memDC, 
+							MachineCoords.sGeneratorVuPeak.x, 
+							MachineCoords.sGeneratorVuPeak.y, 
+							SRCCOPY); //peak
+			}
+		}
+
+		if (vol > 0)
+		{
+			devc->BitBlt(x+MachineCoords.dGeneratorVu.x, 
+						y+MachineCoords.dGeneratorVu.y, 
+						vol, 
+						MachineCoords.sGeneratorVu0.height, 
+						&memDC, 
+						MachineCoords.sGeneratorVu0.x, 
+						MachineCoords.sGeneratorVu0.y, 
+						SRCCOPY); // leds
+		}
+
+		break;
+	case MACHMODE_FX:
+	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+		// scale our volumes
+		vol *= MachineCoords.dEffectVu.width;
+		vol /= 96;
+
+		max *= MachineCoords.dEffectVu.width;
+		max /= 96;
+
+		// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+		if (vol > 0)
+		{
+			if (MachineCoords.sEffectVu0.width)
+			{
+				vol /= MachineCoords.sEffectVu0.width;// restrict to leds
+				vol *= MachineCoords.sEffectVu0.width;
+			}
+		}
+		else
+		{
+			vol = 0;
+		}
+		devc->BitBlt(x+vol+MachineCoords.dEffectVu.x, 
+						y+MachineCoords.dEffectVu.y, 
+						MachineCoords.dEffectVu.width-vol, 
+						MachineCoords.sEffectVu0.height, 
+						&memDC, 
+						MachineCoords.sEffect.x+MachineCoords.dEffectVu.x, 
+						MachineCoords.sEffect.y+MachineCoords.dEffectVu.y, 
+						SRCCOPY); //background
+
+		if (max > 0)
+		{
+			if (MachineCoords.sEffectVuPeak.width)
+			{
+				max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
+				max *= MachineCoords.sEffectVuPeak.width;
+				devc->BitBlt(x+max+MachineCoords.dEffectVu.x, 
+							y+MachineCoords.dEffectVu.y, 
+							MachineCoords.sEffectVuPeak.width, 
+							MachineCoords.sEffectVuPeak.height, 
+							&memDC, 
+							MachineCoords.sEffectVuPeak.x, 
+							MachineCoords.sEffectVuPeak.y, 
+							SRCCOPY); //peak
+			}
+		}
+
+		if (vol > 0)
+		{
+			devc->BitBlt(x+MachineCoords.dEffectVu.x, 
+						y+MachineCoords.dEffectVu.y, 
+						vol, 
+						MachineCoords.sEffectVu0.height, 
+						&memDC, 
+						MachineCoords.sEffectVu0.x, 
+						MachineCoords.sEffectVu0.y, 
+						SRCCOPY); // leds
+		}
+
+		break;
+
 	}
 
-	if (vol)
-	{
-		devc->BitBlt(x+8, y+3, vol, 5, &memDC, 0, 96, SRCCOPY); // leds
-	}
 	memDC.SelectObject(oldbmp);
 	memDC.DeleteDC();
 }
@@ -220,50 +327,131 @@ void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
 
 	CDC memDC;
 	memDC.CreateCompatibleDC(devc);
-	CBitmap* oldbmp = memDC.SelectObject(&stuffbmp);
+	CBitmap* oldbmp = memDC.SelectObject(&machineskin);
 
-	int panning = mac->_panning;
-	panning -= 3;
-
-	if (panning < 6) panning = 6;
-	if (panning > 117) panning = 117;
-
+	// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 	switch (mac->_mode)
 	{
 	case MACHMODE_GENERATOR:
-		devc->BitBlt(x, y, 148, 48, &memDC, 0, 48, SRCCOPY);
+		devc->BitBlt(x, 
+					y, 
+					MachineCoords.sGenerator.width, 
+					MachineCoords.sGenerator.height, 
+					&memDC, 
+					MachineCoords.sGenerator.x, 
+					MachineCoords.sGenerator.y, 
+					SRCCOPY);
 		// Draw pan
-		devc->BitBlt(x+panning, y+36, 24, 9, &memDC, 257, 65, SRCCOPY);
-		break;
-	case MACHMODE_FX:
-	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-		devc->BitBlt(x, y, 148, 48, &memDC, 148, 0, SRCCOPY);
-		// Draw pan
-		devc->BitBlt(x+panning, y+36, 24, 9, &memDC, 257, 74, SRCCOPY);
-		break;
-
-	case MACHMODE_MASTER:
-		devc->BitBlt(x, y, 148, 48, &memDC, 0, 0, SRCCOPY);
-		break;
-	}
-	if (mac->_mode != MACHMODE_MASTER)
-	{
+		{
+			int panning = mac->_panning*MachineCoords.dGeneratorPan.width;
+			panning /= 128;
+			devc->BitBlt(x+panning+MachineCoords.dGeneratorPan.x, 
+						y+MachineCoords.dGeneratorPan.y, 
+						MachineCoords.sGeneratorPan.width, 
+						MachineCoords.sGeneratorPan.height, 
+						&memDC, 
+						MachineCoords.sGeneratorPan.x, 
+						MachineCoords.sGeneratorPan.y, 
+						SRCCOPY);
+		}
 		if (mac->_mute)
 		{
-			devc->BitBlt(x+137, y+4, 7, 7, &memDC, 258, 49, SRCCOPY);
+			devc->BitBlt(x+MachineCoords.dGeneratorMute.x, 
+						y+MachineCoords.dGeneratorMute.y, 
+						MachineCoords.sGeneratorMute.width, 
+						MachineCoords.sGeneratorMute.height, 
+						&memDC, 
+						MachineCoords.sGeneratorMute.x, 
+						MachineCoords.sGeneratorMute.y, 
+						SRCCOPY);
 		}
 		else if (_pSong->machineSoloed > 0 && _pSong->machineSoloed == macnum )
 		{
-			devc->BitBlt(x+137, y+17, 7, 7, &memDC, 267, 49, SRCCOPY);
+			devc->BitBlt(x+MachineCoords.dGeneratorSolo.x, 
+						y+MachineCoords.dGeneratorSolo.y, 
+						MachineCoords.sGeneratorSolo.width, 
+						MachineCoords.sGeneratorSolo.height, 
+						&memDC, 
+						MachineCoords.sGeneratorSolo.x, 
+						MachineCoords.sGeneratorSolo.y, 
+						SRCCOPY);
+		}
+		// Draw text
+		{
+			CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
+			devc->SetBkMode(TRANSPARENT);
+			devc->SetTextColor(Global::pConfig->mv_fontcolour);
+			devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+			devc->SetBkMode(OPAQUE);
+			devc->SelectObject(oldFont);
+		}
+		break;
+	case MACHMODE_FX:
+	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+		devc->BitBlt(x, 
+					y,
+					MachineCoords.sEffect.width, 
+					MachineCoords.sEffect.height, 
+					&memDC, 
+					MachineCoords.sEffect.x, 
+					MachineCoords.sEffect.y, 
+					SRCCOPY);
+		// Draw pan
+		{
+			int panning = mac->_panning*MachineCoords.dEffectPan.width;
+			panning /= 128;
+			devc->BitBlt(x+panning+MachineCoords.dEffectPan.x, 
+						y+MachineCoords.dEffectPan.y, 
+						MachineCoords.sEffectPan.width, 
+						MachineCoords.sEffectPan.height, 
+						&memDC, 
+						MachineCoords.sEffectPan.x, 
+						MachineCoords.sEffectPan.y, 
+						SRCCOPY);
+		}
+		if (mac->_mute)
+		{
+			devc->BitBlt(x+MachineCoords.dEffectMute.x, 
+						y+MachineCoords.dEffectMute.y, 
+						MachineCoords.sEffectMute.width, 
+						MachineCoords.sEffectMute.height, 
+						&memDC, 
+						MachineCoords.sEffectMute.x, 
+						MachineCoords.sEffectMute.y, 
+						SRCCOPY);
 		}
 		if (mac->_bypass)
 		{
-			devc->BitBlt(x+137, y+16, 7, 12, &memDC, 249, 49, SRCCOPY);
+			devc->BitBlt(x+MachineCoords.dEffectBypass.x, 
+						y+MachineCoords.dEffectBypass.y, 
+						MachineCoords.sEffectBypass.width, 
+						MachineCoords.sEffectBypass.height, 
+						&memDC, 
+						MachineCoords.sEffectBypass.x, 
+						MachineCoords.sEffectBypass.y, 
+						SRCCOPY);
 		}
 		// Draw text
-		devc->SetBkMode(TRANSPARENT);
-		devc->TextOut(x+8, y+10, mac->_editName);
-		devc->SetBkMode(OPAQUE);
+		{
+			CFont* oldFont= devc->SelectObject(&Global::pConfig->machineFont);
+			devc->SetBkMode(TRANSPARENT);
+			devc->SetTextColor(Global::pConfig->mv_fontcolour);
+			devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+			devc->SetBkMode(OPAQUE);
+			devc->SelectObject(oldFont);
+		}
+		break;
+
+	case MACHMODE_MASTER:
+		devc->BitBlt(x, 
+					y,
+					MachineCoords.sMaster.width, 
+					MachineCoords.sMaster.height, 
+					&memDC, 
+					MachineCoords.sMaster.x, 
+					MachineCoords.sMaster.y, 
+					SRCCOPY);
+		break;
 	}
 	memDC.SelectObject(oldbmp);
 	memDC.DeleteDC();
@@ -295,8 +483,24 @@ int CChildView::GetMachine(CPoint point)
 		{
 			int x1 = Global::_pSong->_pMachines[c]->_x;
 			int y1 = Global::_pSong->_pMachines[c]->_y;
-			int x2 = Global::_pSong->_pMachines[c]->_x+148;
-			int y2 = Global::_pSong->_pMachines[c]->_y+48;
+			int x2,y2;
+			switch (Global::_pSong->_pMachines[c]->_mode)
+			{
+			case MACHMODE_GENERATOR:
+				x2 = Global::_pSong->_pMachines[c]->_x+MachineCoords.sGenerator.width;
+				y2 = Global::_pSong->_pMachines[c]->_y+MachineCoords.sGenerator.height;
+				break;
+			case MACHMODE_FX:
+			case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+				x2 = Global::_pSong->_pMachines[c]->_x+MachineCoords.sEffect.width;
+				y2 = Global::_pSong->_pMachines[c]->_y+MachineCoords.sEffect.height;
+				break;
+
+			case MACHMODE_MASTER:
+				x2 = Global::_pSong->_pMachines[c]->_x+MachineCoords.sMaster.width;
+				y2 = Global::_pSong->_pMachines[c]->_y+MachineCoords.sMaster.height;
+				break;
+			}
 			
 			if (point.x > x1 && point.x < x2 && point.y > y1 && point.y < y2)
 			{
