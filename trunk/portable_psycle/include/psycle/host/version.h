@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.20  2005/01/23 11:02:06  johan-boule
+new version scheme 1.7.24
+
 Revision 1.19  2005/01/23 10:59:12  johan-boule
 version numbering again, huhu ha ho.
 
@@ -84,7 +87,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 23 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 24 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
