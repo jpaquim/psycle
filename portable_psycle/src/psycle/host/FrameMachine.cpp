@@ -192,7 +192,7 @@ NAMESPACE__BEGIN(psycle)
 			int x_knob = 0;
 			int knob_c = 0;
 			char parName[64];
-			memset(parName,0,64);
+			std::memset(parName,0,64);
 
 			for (int c=0; c<numParameters; c++)
 			{
@@ -202,15 +202,16 @@ NAMESPACE__BEGIN(psycle)
 				int min_v=1;
 				int max_v=1;
 				int val_v=1;
-				if ( _pMachine->_type == MACH_PLUGIN )
+				if( _pMachine->_type == MACH_PLUGIN )
 				{
-					if (((Plugin*)_pMachine)->GetInfo()->Parameters[c]->Flags & MPF_STATE)
+					Plugin & plugin(*static_cast<Plugin*>(_pMachine));
+					if(plugin.GetInfo()->Parameters[c]->Flags & MPF_STATE)
 					{
-						min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
-						max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
+						min_v = plugin.GetInfo()->Parameters[c]->MinValue;
+						max_v = plugin.GetInfo()->Parameters[c]->MaxValue;
 						try
 						{
-							val_v = ((Plugin*)_pMachine)->proxy().Vals()[c];
+							val_v = plugin.proxy().Vals()[c];
 						}
 						catch(const std::exception &)
 						{
@@ -218,7 +219,7 @@ NAMESPACE__BEGIN(psycle)
 						}
 						try
 						{
-							if(!((Plugin*)_pMachine)->proxy().DescribeValue(buffer, c, val_v))
+							if(!plugin.proxy().DescribeValue(buffer, c, val_v))
 								std::sprintf(buffer,"%d",val_v);
 						}
 						catch(const std::exception &)
@@ -230,28 +231,29 @@ NAMESPACE__BEGIN(psycle)
 					{
 						bDrawKnob = FALSE;
 					}
-					std::strcpy(parName, ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->Name);
+					std::strcpy(parName, plugin.GetInfo()->Parameters[c]->Name);
 				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+				else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 				{
+					vst::plugin & plugin(*static_cast<vst::plugin*>(_pMachine));
 					min_v = 0;
 					max_v = vst::quantization;
 					try
 					{
-						val_v = f2i(((vst::plugin*)_pMachine)->proxy().getParameter(c) * vst::quantization);
+						val_v = f2i(plugin.proxy().getParameter(c) * vst::quantization);
 					}
 					catch(const std::exception &)
 					{
 						val_v = 0; // hmm
 					}
 					std::memset(buffer,0,sizeof(buffer));
-					if(!((vst::plugin*)_pMachine)->DescribeValue(c, buffer))
+					if(!plugin.DescribeValue(c, buffer))
 					{
 						std::sprintf(buffer,"%d",val_v);
 					}
 					try
 					{
-						((vst::plugin*)_pMachine)->proxy().dispatcher(effGetParamName, c, 0, parName);
+						plugin.proxy().dispatcher(effGetParamName, c, 0, parName);
 					}
 					catch(const std::exception &)
 					{
@@ -265,8 +267,6 @@ NAMESPACE__BEGIN(psycle)
 
 					int const frame = (K_NUMFRAMES*rel_v)/amp_v;
 					int const xn = frame*K_XSIZE;
-
-
 
 					dc.BitBlt(x_knob,y_knob,K_XSIZE,K_YSIZE,&memDC,xn,0,SRCCOPY);
 				

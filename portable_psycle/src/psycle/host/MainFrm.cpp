@@ -14,9 +14,10 @@
 #include "GearRackDlg.hpp"
 #include "Player.hpp"
 #include "MidiInput.hpp"
-#include <math.h>
 #include "inputhandler.hpp"
 #include "KeyConfigDlg.hpp"
+#include "Plugin.hpp"
+#include <cmath>
 #include <sstream>
 #include <iomanip>
 NAMESPACE__BEGIN(psycle)
@@ -1031,9 +1032,19 @@ NAMESPACE__BEGIN(psycle)
 						for (i=0;i<tmac->GetNumParams();i++)
 						{
 							char buffer[64],buffer2[64];
-							memset(buffer2,0,64);
+							std::memset(buffer2,0,64);
 							tmac->GetParamName(i,buffer2);
-							sprintf(buffer, "%.2X:  %s", i, buffer2);
+							bool label(false);
+							if(tmac->_type == MACH_PLUGIN)
+							{
+								if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & MPF_STATE))
+									label = true;
+							}
+							if(label)
+								// just a label
+								sprintf(buffer, "------ %s ------", buffer2);
+							else
+								sprintf(buffer, "%.2X:  %s", i, buffer2);
 							cc->AddString(buffer);
 							listlen++;
 						}
