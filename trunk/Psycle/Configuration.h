@@ -81,6 +81,8 @@ public:
 	int pattern_font_x;
 	int pattern_font_y;
 
+	bool pattern_draw_empty_data;
+
 	char generator_fontface[64];
 	int generator_font_point;
 	char effect_fontface[64];

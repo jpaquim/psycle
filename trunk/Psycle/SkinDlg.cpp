@@ -50,6 +50,7 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MACHINE_FONTFACE2, m_effect_fontface);
 	DDX_Control(pDX, IDC_MACHINE_FONT_POINT2, m_effect_font_point);
 	DDX_Control(pDX, IDC_MACHINE_SKIN, m_machine_skin);
+	DDX_Control(pDX, IDC_DRAW_EMPTY_DATA, m_pattern_draw_empty_data);
 
 	//}}AFX_DATA_MAP
 }
@@ -91,6 +92,7 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
 	ON_BN_CLICKED(IDC_LINE_NUMBERS_CURSOR, OnLineNumbersCursor)
+	ON_BN_CLICKED(IDC_DRAW_EMPTY_DATA, OnDrawEmptyData)
 	ON_WM_CLOSE()
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
@@ -211,6 +213,7 @@ BOOL CSkinDlg::OnInitDialog()
 	m_linenumbers.SetCheck(_linenumbers);
 	m_linenumbersHex.SetCheck(_linenumbersHex);
 	m_linenumbersCursor.SetCheck(_linenumbersCursor);
+	m_pattern_draw_empty_data.SetCheck(_pattern_draw_empty_data);
 	SetTimer(2345,50,0);
 
 	char s[4];
@@ -1704,4 +1707,9 @@ void CSkinDlg::OnMVEffectFontColour()
 		_machineViewEffectFontColor = dlg.GetColor();
 		UpdateCanvasColour(IDC_MBG_MV_FONT2,_machineViewEffectFontColor);
 	}
+}
+
+void CSkinDlg::OnDrawEmptyData()
+{
+	_pattern_draw_empty_data = m_pattern_draw_empty_data.GetCheck() >0?true:false;
 }

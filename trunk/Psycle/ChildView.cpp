@@ -946,7 +946,7 @@ BOOL CChildView::CheckUnsavedSong(char* szTitle)
 
 void CChildView::OnFileRevert()
 {
-	if (MessageBox("Warning! You will lose everything done since song was saved!","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+	if (MessageBox("Warning! You will lose all changes since song was last saved!","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 	{
 		if (Global::_pSong->_saved)
 		{
@@ -3211,6 +3211,16 @@ void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *
 
 void CChildView::RecalcMetrics()
 {
+	if (Global::pConfig->pattern_draw_empty_data)
+	{
+		sprintf(szBlankParam,".");
+		sprintf(szBlankNote,"---");
+	}
+	else
+	{
+		sprintf(szBlankParam," ");
+		sprintf(szBlankNote,"   ");
+	}
 	TEXTHEIGHT = Global::pConfig->pattern_font_y;
 	ROWHEIGHT = TEXTHEIGHT+1;
 
