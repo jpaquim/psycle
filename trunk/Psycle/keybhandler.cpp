@@ -120,8 +120,8 @@ void CChildView::MidiPatternNote(int outnote, int velocity)
 void CChildView::MidiPatternTweak(int command, int value)
 {
 	// UNDO CODE MIDI PATTERN TWEAK
-	if (value < 0) value = 0;
-	else if (value > 65535) value = 65535;
+	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
 		if (Global::pPlayer->_playing&&_followSong)
@@ -222,8 +222,8 @@ void CChildView::MidiPatternTweak(int command, int value)
 void CChildView::MidiPatternCommand(int command, int value)
 {
 	// UNDO CODE MIDI PATTERN
-	if (value < 0) value = 0;
-	else if (value > 255) value = 255;
+	if (value < 0) value = (0x80-value);// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xff) value = 0xff; // no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
 		if (Global::pPlayer->_playing&&_followSong)
@@ -319,8 +319,8 @@ void CChildView::MidiPatternCommand(int command, int value)
 void CChildView::MousePatternTweak(int machine, int command, int value)
 {
 	// UNDO CODE MIDI PATTERN TWEAK
-	if (value < 0) value = 0;
-	else if (value > 65535) value = 65535;
+	if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+	if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 	if(viewMode == VMPattern && bEditMode)
 	{ 
 		if (Global::pPlayer->_playing&&_followSong)
