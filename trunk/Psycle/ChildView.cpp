@@ -801,7 +801,7 @@ void CChildView::OnFileLoadsong()
 	{
 		OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
 	}
-	pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
+	pParentMain->StatusBarIdle();
 }
 
 void CChildView::OnFileNew() 
@@ -842,7 +842,7 @@ void CChildView::OnFileNew()
 		RecalculateColourGrid();
 		Repaint();
 	}
-	pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
+	pParentMain->StatusBarIdle();
 }
 
 
@@ -911,6 +911,7 @@ void CChildView::OnMachineview()
 			CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 		Repaint();
+		pParentMain->StatusBarIdle();
 	}
 }
 void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 
@@ -941,6 +942,7 @@ void CChildView::OnPatternView()
 			editPosition=Global::pPlayer->_playPosition;
 		}
 		Repaint();
+		pParentMain->StatusBarIdle();
 	}
 	SetFocus();
 }
@@ -962,6 +964,7 @@ void CChildView::OnBarplay()
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 
 	Global::pPlayer->Start(editPosition,0);
+	pParentMain->StatusBarIdle();
 }
 void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 {
@@ -983,6 +986,7 @@ void CChildView::OnButtonplayseqblock()
 	while ( Global::_pSong->playOrderSel[i] == false ) i++;
 	Global::pPlayer->Start(i,0);
 	Global::pPlayer->_playBlock=true;
+	pParentMain->StatusBarIdle();
 	if ( viewMode == VMPattern ) Repaint(DMPattern);
 }
 void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
@@ -1051,7 +1055,7 @@ void CChildView::OnFileSongproperties()
 {	CSongpDlg dlg;
 	dlg._pSong=Global::_pSong;
 	dlg.DoModal();
-	pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
+	pParentMain->StatusBarIdle();
 //	Repaint();
 }
 
@@ -1097,14 +1101,14 @@ void CChildView::ShowPatternDlg(void)
 			if ( strcmp(name,dlg.patName) != 0 )
 			{
 				strcpy(_pSong->patternName[patNum],dlg.patName);
-				pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
+				pParentMain->StatusBarIdle();
 			}
 			Repaint();
 		}
 		else if ( strcmp(name,dlg.patName) != 0 )
 		{
 			strcpy(_pSong->patternName[patNum],dlg.patName);
-			pParentMain->OnSetMessageString(AFX_IDS_IDLEMESSAGE, 0);
+			pParentMain->StatusBarIdle();
 //			Repaint(DMPatternHeader);
 		}
 	}

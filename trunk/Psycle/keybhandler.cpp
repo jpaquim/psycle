@@ -783,6 +783,7 @@ void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 		if(wrap){ editcur.line = nl + editcur.line % nl; }
 		else	{ editcur.line = 0;	}
 	}
+	pParentMain->StatusBarIdle();
 	if (updateDisplay) Repaint(DMCursor);
 }
 
@@ -807,6 +808,7 @@ void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 		else	{ editcur.line = nl-1; }
 	}
 
+	pParentMain->StatusBarIdle();
 	if (updateDisplay) Repaint(DMCursor);
 }
 
@@ -821,6 +823,7 @@ void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
 		else editcur.track=_pSong->SONGTRACKS-1;
 	}
 	
+	pParentMain->StatusBarIdle();
 	if (updateDisplay) Repaint(DMCursor);
 }
 
@@ -835,6 +838,7 @@ void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
 		else editcur.track=0;
 	}
 	
+	pParentMain->StatusBarIdle();
 	if (updateDisplay) Repaint(DMCursor);
 }
 

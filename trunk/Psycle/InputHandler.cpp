@@ -812,12 +812,14 @@ void InputHandler::PlaySong()
 {
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 	Global::pPlayer->Start(pChildView->editPosition,0);
+	pMainFrame->StatusBarIdle();
 }
 
 void InputHandler::PlayFromCur() 
 {
 	((Master*)(Global::_pSong->_pMachines[0]))->_clip = false;
 	Global::pPlayer->Start(pChildView->editPosition,pChildView->editcur.line);
+	pMainFrame->StatusBarIdle();
 }
 
 

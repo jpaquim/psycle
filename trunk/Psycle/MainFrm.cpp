@@ -2461,14 +2461,68 @@ LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == AFX_IDS_IDLEMESSAGE)
 	{
-		if (_pSong)
+		if (StatusBarIdleText())
 		{
-			sprintf(szStatusIdle,"%s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
 			return CFrameWnd::OnSetMessageString (0,(LPARAM)szStatusIdle);
 		}
 	}
 	return CFrameWnd::OnSetMessageString (wParam, lParam);
 
+}
+
+void CMainFrame::StatusBarIdle()
+{
+	if (StatusBarIdleText())
+	{
+		m_wndStatusBar.SetWindowText(szStatusIdle);
+	}
+}
+
+BOOL CMainFrame::StatusBarIdleText()
+{
+	if (_pSong)
+	{
+		if ((m_wndView.viewMode==VMPattern)	&& (!Global::pPlayer->_playing))
+		{
+			unsigned char *toffset=_pSong->pPatternData+(_pSong->playOrder[m_wndView.editPosition]*MULTIPLY2)+(m_wndView.editcur.line*MULTIPLY)+(m_wndView.editcur.track*5);
+			int machine = 255;
+			if (toffset[2]<MAX_BUSES)
+			{
+				machine = _pSong->busMachine[toffset[2]];
+			}
+			else if (toffset[2]<MAX_BUSES*2)
+			{
+				machine = _pSong->busEffect[toffset[2]];
+			}
+			if (machine<255)
+			{
+				if (_pSong->_machineActive[machine])
+				{
+					char buf[64];
+					buf[0]=0;
+					_pSong->_pMachines[machine]->GetParamName(toffset[1],buf);
+					if (buf[0])
+					{
+						sprintf(szStatusIdle,"%s - %s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName,buf);
+						return TRUE;
+					}
+					else
+					{
+						sprintf(szStatusIdle,"%s - %s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]],_pSong->_pMachines[machine]->_editName);
+						return TRUE;
+					}
+				}
+				else
+				{
+					sprintf(szStatusIdle,"%s - %s - Machine Out of Range",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
+					return TRUE;
+				}
+			}
+		}
+		sprintf(szStatusIdle,"%s - %s",_pSong->Name,_pSong->patternName[_pSong->playOrder[m_wndView.editPosition]]);
+		return TRUE;
+	}
+	return FALSE;
 }
 
 void CMainFrame::OnDropFiles(WPARAM wParam)
