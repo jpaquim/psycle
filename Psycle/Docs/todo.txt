@@ -3,9 +3,9 @@
 +=addition
 
 * I realize this is minor, but, when panning machines while a song is playing: The position overwrites the % in ine starus bar. Is there any way of either giving the panning position priority over the song position, or moving the panning position to, say, a tooltip box below the mouse pointer?
-* remove waits from play when in export mode
-* should be able to pick cursor colour rather than have it invert background 
-* lines between tracks should be definable, not black
+! remove waits from play when in export mode
+! should be able to pick cursor colour rather than have it invert background 
+! lines between tracks should be definable, not black
 + midi control commands learn
 ! longer sequences (256)
 ! more tracks (64)
