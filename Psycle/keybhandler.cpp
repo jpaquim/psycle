@@ -177,19 +177,22 @@ void CChildView::MidiPatternTweak(int command, int value)
 		PatternEntry *entry = (PatternEntry*) toffset;
 		if (entry->_note >= 120)
 		{
-			AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-			entry->_mach = _pSong->seqBus;
-			entry->_cmd = (value>>8)&255;
-			entry->_parameter = value&255;
-			entry->_inst = command;
-			entry->_note = 121;
+			if ((entry->_mach != _pSong->seqBus) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || (entry->_note != 121))
+			{
+				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				entry->_mach = _pSong->seqBus;
+				entry->_cmd = (value>>8)&255;
+				entry->_parameter = value&255;
+				entry->_inst = command;
+				entry->_note = 121;
 
-			drawTrackStart=editcur.track;
-			drawTrackEnd=editcur.track;
-			drawLineStart=editcur.line;
-			drawLineEnd=editcur.line;
+				drawTrackStart=editcur.track;
+				drawTrackEnd=editcur.track;
+				drawLineStart=editcur.line;
+				drawLineEnd=editcur.line;
 
-			Repaint(DMDataChange);
+				Repaint(DMDataChange);
+			}
 		}
 	}
 	else
@@ -275,20 +278,23 @@ void CChildView::MidiPatternCommand(int command, int value)
 			line = editcur.track;
 		}
 
-		AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 		// build entry
 		PatternEntry *entry = (PatternEntry*) toffset;
-		entry->_mach = _pSong->seqBus;
-		entry->_inst = _pSong->auxcolSelected;
-		entry->_cmd = command;
-		entry->_parameter = value;
+		if ((entry->_mach != _pSong->seqBus) || (entry->_inst != _pSong->auxcolSelected) || (entry->_cmd != command) || (entry->_parameter != value))
+		{
+			AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			entry->_mach = _pSong->seqBus;
+			entry->_inst = _pSong->auxcolSelected;
+			entry->_cmd = command;
+			entry->_parameter = value;
 
-		drawTrackStart=editcur.track;
-		drawTrackEnd=editcur.track;
-		drawLineStart=editcur.line;
-		drawLineEnd=editcur.line;
+			drawTrackStart=editcur.track;
+			drawTrackEnd=editcur.track;
+			drawLineStart=editcur.line;
+			drawLineEnd=editcur.line;
 
-		Repaint(DMDataChange);
+			Repaint(DMDataChange);
+		}
 	}
 	else
 	{
@@ -355,19 +361,22 @@ void CChildView::MousePatternTweak(int machine, int command, int value)
 		PatternEntry *entry = (PatternEntry*) toffset;
 		if (entry->_note >= 120)
 		{
-			AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-			entry->_mach = machine;
-			entry->_cmd = (value>>8)&255;
-			entry->_parameter = value&255;
-			entry->_inst = command;
-			entry->_note = 121;
+			if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || (entry->_note != 121))
+			{
+				AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				entry->_mach = machine;
+				entry->_cmd = (value>>8)&255;
+				entry->_parameter = value&255;
+				entry->_inst = command;
+				entry->_note = 121;
 
-			drawTrackStart=editcur.track;
-			drawTrackEnd=editcur.track;
-			drawLineStart=editcur.line;
-			drawLineEnd=editcur.line;
+				drawTrackStart=editcur.track;
+				drawTrackEnd=editcur.track;
+				drawLineStart=editcur.line;
+				drawLineEnd=editcur.line;
 
-			Repaint(DMDataChange);
+				Repaint(DMDataChange);
+			}
 		}
 	}
 }
