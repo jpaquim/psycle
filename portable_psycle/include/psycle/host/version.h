@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.18  2005/01/23 10:39:04  johan-boule
+version numbering again, huhu.
+
 Revision 1.17  2005/01/23 10:36:05  johan-boule
 version numbering again, huhu.
 
@@ -65,7 +68,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 /// - M = major version number.
 /// - m = minor version number:
 ///			- if even, then it's a stable release.
-///			- if odd, then it's a beta or release candidate for next major version number, can be incremented at will to extol important changes that might be worth upgrading (contrary to patches).
+///			- if odd, then it's a beta or release candidate for next major version number.
 /// - p = patch number:
 ///			- if the major version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
 ///			- if the major version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
