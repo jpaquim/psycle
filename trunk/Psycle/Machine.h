@@ -140,7 +140,7 @@ public:
 	virtual int GetParamValue(int numparam) { return 0; };
 	virtual bool SetParameter(int numparam,int value) { return false;}; 
 	virtual bool Load(RiffFile* pFile);
-	static Machine* LoadFileChunk(RiffFile* pFile, int version);
+	static Machine* LoadFileChunk(RiffFile* pFile, int index, int version);
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
 		UINT size;

@@ -820,7 +820,7 @@ Configuration::Read()
 	numData = sizeof(string);
 	if (reg.QueryValue("InstrumentDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 	{
-		_psInitialInstrumentDir = new char[numData];
+		_psInitialInstrumentDir = new char[numData+1];
 		strcpy(_psInitialInstrumentDir, &string[0]);
 	}
 	else
@@ -842,7 +842,7 @@ Configuration::Read()
 	numData = sizeof(string);
 	if (reg.QueryValue("SongDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 	{
-		_psInitialSongDir = new char[numData];
+		_psInitialSongDir = new char[numData+1];
 		strcpy(_psInitialSongDir, &string[0]);
 	}
 	else
@@ -864,7 +864,7 @@ Configuration::Read()
 	numData = sizeof(string);
 	if (reg.QueryValue("SkinDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 	{
-		_psInitialSkinDir = new char[numData];
+		_psInitialSkinDir = new char[numData+1];
 		strcpy(_psInitialSkinDir, &string[0]);
 	}
 	else
@@ -888,7 +888,7 @@ Configuration::Read()
 	numData = sizeof(string);
 	if (reg.QueryValue("PluginDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 	{
-		_psInitialPluginDir = new char[numData];
+		_psInitialPluginDir = new char[numData+1];
 		strcpy(_psInitialPluginDir, &string[0]);
 	}
 	else
@@ -910,7 +910,7 @@ Configuration::Read()
 	numData = sizeof(string);
 	if (reg.QueryValue("VstDir", &type, (BYTE*)&string, &numData) == ERROR_SUCCESS)
 	{
-		_psInitialVstDir = new char[numData];
+		_psInitialVstDir = new char[numData+1];
 		strcpy(_psInitialVstDir, &string[0]);
 	}
 	else

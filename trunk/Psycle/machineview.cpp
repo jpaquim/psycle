@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 // Machine view GDI operations
-void CChildView::DrawMachineVumeters(CDC *devc)
+void CChildView::DrawAllMachineVumeters(CDC *devc)
 {
 	if (_pSong->_machineLock)
 	{
@@ -19,15 +19,33 @@ void CChildView::DrawMachineVumeters(CDC *devc)
 				pMac->_volumeMaxDisplay = pMac->_volumeDisplay-1;
 				pMac->_volumeMaxCounterLife = 60;
 			}
-			DrawMachineVol(pMac->_x,
-						   pMac->_y,
-						   devc, 
-						   pMac->_volumeDisplay, 
-						   pMac->_volumeMaxDisplay,
-						   pMac->_mode);
+			DrawMachineVol(c, devc);
 		}
 	}
 }
+
+void CChildView::DrawMachineVumeters(int c, CDC *devc)
+{
+	if (_pSong->_machineLock)
+	{
+		return;
+	}
+	// Draw machine boxes
+
+	Machine* pMac = _pSong->_pMachine[c];
+	if (pMac)
+	{
+		pMac->_volumeMaxCounterLife--;
+		if ((pMac->_volumeDisplay > pMac->_volumeMaxDisplay)
+			|| (pMac->_volumeMaxCounterLife <= 0))
+		{
+			pMac->_volumeMaxDisplay = pMac->_volumeDisplay-1;
+			pMac->_volumeMaxCounterLife = 60;
+		}
+		DrawMachineVol(c, devc);
+	}
+}
+
 
 void CChildView::DrawMachineEditor(CDC *devc)
 {
@@ -243,12 +261,12 @@ void CChildView::DrawMachineEditor(CDC *devc)
 	{
 		if(_pSong->_pMachine[c])
 		{
-			DrawMachine(_pSong->_pMachine[c],c , devc);
+			DrawMachine(c , devc);
 		}// Machine exist
 	}
 
 	// draw vumeters
-	DrawMachineVumeters((CClientDC*)devc);
+	DrawAllMachineVumeters((CClientDC*)devc);
 
 	if (wiresource != -1)
 	{
@@ -263,283 +281,293 @@ void CChildView::DrawMachineEditor(CDC *devc)
 //////////////////////////////////////////////////////////////////////
 // Draws a single machine
 
-void CChildView::DrawMachineVol(int x,int y,CDC *devc, int vol, int max, int mode)
+void CChildView::DrawMachineVol(int c,CDC *devc)
 {
-	CDC memDC;
-	CBitmap* oldbmp;
-	memDC.CreateCompatibleDC(devc);
-	oldbmp=memDC.SelectObject(&machineskin);
-
-	switch (mode)
+	Machine* pMac = Global::_pSong->_pMachine[c];
+	if (pMac)
 	{
-	case MACHMODE_GENERATOR:
-		// scale our volumes
-		vol *= MachineCoords.dGeneratorVu.width;
-		vol /= 96;
+		CDC memDC;
+		CBitmap* oldbmp;
+		memDC.CreateCompatibleDC(devc);
+		oldbmp=memDC.SelectObject(&machineskin);
 
-		max *= MachineCoords.dGeneratorVu.width;
-		max /= 96;
+		int vol = pMac->_volumeDisplay;
+		int max = pMac->_volumeMaxDisplay;
 
-		if (MachineCoords.bHasTransparency)
+		switch (pMac->_mode)
 		{
-			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			if (vol > 0)
+		case MACHMODE_GENERATOR:
+			// scale our volumes
+			vol *= MachineCoords.dGeneratorVu.width;
+			vol /= 96;
+
+			max *= MachineCoords.dGeneratorVu.width;
+			max /= 96;
+
+			if (MachineCoords.bHasTransparency)
 			{
-				if (MachineCoords.sGeneratorVu0.width)
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				if (vol > 0)
 				{
-					vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
-					vol *= MachineCoords.sGeneratorVu0.width;
+					if (MachineCoords.sGeneratorVu0.width)
+					{
+						vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
+						vol *= MachineCoords.sGeneratorVu0.width;
+					}
 				}
-			}
-			else
-			{
-				vol = 0;
-			}
-
-			RECT r;
-			r.left = x+vol+MachineCoords.dGeneratorVu.x;
-			r.top = y+MachineCoords.dGeneratorVu.y;
-			r.right = r.left + MachineCoords.dGeneratorVu.width-vol;
-			r.bottom = r.top + MachineCoords.sGeneratorVu0.height;
-			devc->FillSolidRect(&r,Global::pConfig->mv_colour);
-
-			TransparentBlt(devc,
-						r.left, 
-						r.top, 
-						MachineCoords.dGeneratorVu.width-vol, 
-						MachineCoords.sGeneratorVu0.height, 
-						&memDC, 
-						&machineskinmask,
-						MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x, 
-						MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y);
-
-			if (max > 0)
-			{
-				if (MachineCoords.sGeneratorVuPeak.width)
+				else
 				{
-					max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
-					max *= MachineCoords.sGeneratorVuPeak.width;
-					TransparentBlt(devc,
-								x+max+MachineCoords.dGeneratorVu.x, 
-								y+MachineCoords.dGeneratorVu.y, 
-								MachineCoords.sGeneratorVuPeak.width, 
-								MachineCoords.sGeneratorVuPeak.height, 
-								&memDC, 
-								&machineskinmask,
-								MachineCoords.sGeneratorVuPeak.x, 
-								MachineCoords.sGeneratorVuPeak.y);
+					vol = 0;
 				}
-			}
 
-			if (vol > 0)
-			{
+				RECT r;
+				r.left = pMac->_x+vol+MachineCoords.dGeneratorVu.x;
+				r.top = pMac->_y+MachineCoords.dGeneratorVu.y;
+				r.right = r.left + MachineCoords.dGeneratorVu.width-vol;
+				r.bottom = r.top + MachineCoords.sGeneratorVu0.height;
+				devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+
 				TransparentBlt(devc,
-							x+MachineCoords.dGeneratorVu.x, 
-							y+MachineCoords.dGeneratorVu.y, 
-							vol, 
-							MachineCoords.sGeneratorVu0.height, 
-							&memDC, 
-							&machineskinmask,
-							MachineCoords.sGeneratorVu0.x, 
-							MachineCoords.sGeneratorVu0.y);
-			}
-		}
-		else
-		{
-			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			if (vol > 0)
-			{
-				if (MachineCoords.sGeneratorVu0.width)
-				{
-					vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
-					vol *= MachineCoords.sGeneratorVu0.width;
-				}
-			}
-			else
-			{
-				vol = 0;
-			}
-
-			devc->BitBlt(x+vol+MachineCoords.dGeneratorVu.x, 
-							y+MachineCoords.dGeneratorVu.y, 
+							r.left, 
+							r.top, 
 							MachineCoords.dGeneratorVu.width-vol, 
 							MachineCoords.sGeneratorVu0.height, 
 							&memDC, 
+							&machineskinmask,
 							MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x, 
-							MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y, 
-							SRCCOPY); //background
+							MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y);
 
-			if (max > 0)
-			{
-				if (MachineCoords.sGeneratorVuPeak.width)
+				if (max > 0)
 				{
-					max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
-					max *= MachineCoords.sGeneratorVuPeak.width;
-					devc->BitBlt(x+max+MachineCoords.dGeneratorVu.x, 
-								y+MachineCoords.dGeneratorVu.y, 
-								MachineCoords.sGeneratorVuPeak.width, 
-								MachineCoords.sGeneratorVuPeak.height, 
-								&memDC, 
-								MachineCoords.sGeneratorVuPeak.x, 
-								MachineCoords.sGeneratorVuPeak.y, 
-								SRCCOPY); //peak
+					if (MachineCoords.sGeneratorVuPeak.width)
+					{
+						max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
+						max *= MachineCoords.sGeneratorVuPeak.width;
+						TransparentBlt(devc,
+									pMac->_x+max+MachineCoords.dGeneratorVu.x, 
+									pMac->_y+MachineCoords.dGeneratorVu.y, 
+									MachineCoords.sGeneratorVuPeak.width, 
+									MachineCoords.sGeneratorVuPeak.height, 
+									&memDC, 
+									&machineskinmask,
+									MachineCoords.sGeneratorVuPeak.x, 
+									MachineCoords.sGeneratorVuPeak.y);
+					}
 				}
-			}
 
-			if (vol > 0)
-			{
-				devc->BitBlt(x+MachineCoords.dGeneratorVu.x, 
-							y+MachineCoords.dGeneratorVu.y, 
-							vol, 
-							MachineCoords.sGeneratorVu0.height, 
-							&memDC, 
-							MachineCoords.sGeneratorVu0.x, 
-							MachineCoords.sGeneratorVu0.y, 
-							SRCCOPY); // leds
-			}
-		}
-
-		break;
-	case MACHMODE_FX:
-	case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
-		// scale our volumes
-		vol *= MachineCoords.dEffectVu.width;
-		vol /= 96;
-
-		max *= MachineCoords.dEffectVu.width;
-		max /= 96;
-
-		if (MachineCoords.bHasTransparency)
-		{
-			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			if (vol > 0)
-			{
-				if (MachineCoords.sEffectVu0.width)
+				if (vol > 0)
 				{
-					vol /= MachineCoords.sEffectVu0.width;// restrict to leds
-					vol *= MachineCoords.sEffectVu0.width;
-				}
-			}
-			else
-			{
-				vol = 0;
-			}
-
-			RECT r;
-			r.left = x+vol+MachineCoords.dEffectVu.x;
-			r.top = y+MachineCoords.dEffectVu.y;
-			r.right = r.left + MachineCoords.dEffectVu.width-vol;
-			r.bottom = r.top + MachineCoords.sEffectVu0.height;
-			devc->FillSolidRect(&r,Global::pConfig->mv_colour);
-
-			TransparentBlt(devc,
-						r.left, 
-						r.top, 
-						MachineCoords.dEffectVu.width-vol, 
-						MachineCoords.sEffectVu0.height, 
-						&memDC, 
-						&machineskinmask,
-						MachineCoords.sEffect.x+MachineCoords.dEffectVu.x, 
-						MachineCoords.sEffect.y+MachineCoords.dEffectVu.y);
-
-			if (max > 0)
-			{
-				if (MachineCoords.sEffectVuPeak.width)
-				{
-					max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
-					max *= MachineCoords.sEffectVuPeak.width;
 					TransparentBlt(devc,
-								x+max+MachineCoords.dEffectVu.x, 
-								y+MachineCoords.dEffectVu.y, 
-								MachineCoords.sEffectVuPeak.width, 
-								MachineCoords.sEffectVuPeak.height, 
+								pMac->_x+MachineCoords.dGeneratorVu.x, 
+								pMac->_y+MachineCoords.dGeneratorVu.y, 
+								vol, 
+								MachineCoords.sGeneratorVu0.height, 
 								&memDC, 
 								&machineskinmask,
-								MachineCoords.sEffectVuPeak.x, 
-								MachineCoords.sEffectVuPeak.y);
-				}
-			}
-
-			if (vol > 0)
-			{
-				TransparentBlt(devc,
-							x+MachineCoords.dEffectVu.x, 
-							y+MachineCoords.dEffectVu.y, 
-							vol, 
-							MachineCoords.sEffectVu0.height, 
-							&memDC, 
-							&machineskinmask,
-							MachineCoords.sEffectVu0.x, 
-							MachineCoords.sEffectVu0.y);
-			}
-		}
-		else
-		{
-			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			if (vol > 0)
-			{
-				if (MachineCoords.sEffectVu0.width)
-				{
-					vol /= MachineCoords.sEffectVu0.width;// restrict to leds
-					vol *= MachineCoords.sEffectVu0.width;
+								MachineCoords.sGeneratorVu0.x, 
+								MachineCoords.sGeneratorVu0.y);
 				}
 			}
 			else
 			{
-				vol = 0;
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				if (vol > 0)
+				{
+					if (MachineCoords.sGeneratorVu0.width)
+					{
+						vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
+						vol *= MachineCoords.sGeneratorVu0.width;
+					}
+				}
+				else
+				{
+					vol = 0;
+				}
+
+				devc->BitBlt(pMac->_x+vol+MachineCoords.dGeneratorVu.x, 
+								pMac->_y+MachineCoords.dGeneratorVu.y, 
+								MachineCoords.dGeneratorVu.width-vol, 
+								MachineCoords.sGeneratorVu0.height, 
+								&memDC, 
+								MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x, 
+								MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y, 
+								SRCCOPY); //background
+
+				if (max > 0)
+				{
+					if (MachineCoords.sGeneratorVuPeak.width)
+					{
+						max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
+						max *= MachineCoords.sGeneratorVuPeak.width;
+						devc->BitBlt(pMac->_x+max+MachineCoords.dGeneratorVu.x, 
+									pMac->_y+MachineCoords.dGeneratorVu.y, 
+									MachineCoords.sGeneratorVuPeak.width, 
+									MachineCoords.sGeneratorVuPeak.height, 
+									&memDC, 
+									MachineCoords.sGeneratorVuPeak.x, 
+									MachineCoords.sGeneratorVuPeak.y, 
+									SRCCOPY); //peak
+					}
+				}
+
+				if (vol > 0)
+				{
+					devc->BitBlt(pMac->_x+MachineCoords.dGeneratorVu.x, 
+								pMac->_y+MachineCoords.dGeneratorVu.y, 
+								vol, 
+								MachineCoords.sGeneratorVu0.height, 
+								&memDC, 
+								MachineCoords.sGeneratorVu0.x, 
+								MachineCoords.sGeneratorVu0.y, 
+								SRCCOPY); // leds
+				}
 			}
 
-			devc->BitBlt(x+vol+MachineCoords.dEffectVu.x, 
-							y+MachineCoords.dEffectVu.y, 
+			break;
+		case MACHMODE_FX:
+		case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+			// scale our volumes
+			vol *= MachineCoords.dEffectVu.width;
+			vol /= 96;
+
+			max *= MachineCoords.dEffectVu.width;
+			max /= 96;
+
+			if (MachineCoords.bHasTransparency)
+			{
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				if (vol > 0)
+				{
+					if (MachineCoords.sEffectVu0.width)
+					{
+						vol /= MachineCoords.sEffectVu0.width;// restrict to leds
+						vol *= MachineCoords.sEffectVu0.width;
+					}
+				}
+				else
+				{
+					vol = 0;
+				}
+
+				RECT r;
+				r.left = pMac->_x+vol+MachineCoords.dEffectVu.x;
+				r.top = pMac->_y+MachineCoords.dEffectVu.y;
+				r.right = r.left + MachineCoords.dEffectVu.width-vol;
+				r.bottom = r.top + MachineCoords.sEffectVu0.height;
+				devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+
+				TransparentBlt(devc,
+							r.left, 
+							r.top, 
 							MachineCoords.dEffectVu.width-vol, 
 							MachineCoords.sEffectVu0.height, 
 							&memDC, 
+							&machineskinmask,
 							MachineCoords.sEffect.x+MachineCoords.dEffectVu.x, 
-							MachineCoords.sEffect.y+MachineCoords.dEffectVu.y, 
-							SRCCOPY); //background
+							MachineCoords.sEffect.y+MachineCoords.dEffectVu.y);
 
-			if (max > 0)
-			{
-				if (MachineCoords.sEffectVuPeak.width)
+				if (max > 0)
 				{
-					max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
-					max *= MachineCoords.sEffectVuPeak.width;
-					devc->BitBlt(x+max+MachineCoords.dEffectVu.x, 
-								y+MachineCoords.dEffectVu.y, 
-								MachineCoords.sEffectVuPeak.width, 
-								MachineCoords.sEffectVuPeak.height, 
+					if (MachineCoords.sEffectVuPeak.width)
+					{
+						max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
+						max *= MachineCoords.sEffectVuPeak.width;
+						TransparentBlt(devc,
+									pMac->_x+max+MachineCoords.dEffectVu.x, 
+									pMac->_y+MachineCoords.dEffectVu.y, 
+									MachineCoords.sEffectVuPeak.width, 
+									MachineCoords.sEffectVuPeak.height, 
+									&memDC, 
+									&machineskinmask,
+									MachineCoords.sEffectVuPeak.x, 
+									MachineCoords.sEffectVuPeak.y);
+					}
+				}
+
+				if (vol > 0)
+				{
+					TransparentBlt(devc,
+								pMac->_x+MachineCoords.dEffectVu.x, 
+								pMac->_y+MachineCoords.dEffectVu.y, 
+								vol, 
+								MachineCoords.sEffectVu0.height, 
 								&memDC, 
-								MachineCoords.sEffectVuPeak.x, 
-								MachineCoords.sEffectVuPeak.y, 
-								SRCCOPY); //peak
+								&machineskinmask,
+								MachineCoords.sEffectVu0.x, 
+								MachineCoords.sEffectVu0.y);
+				}
+			}
+			else
+			{
+				// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
+				if (vol > 0)
+				{
+					if (MachineCoords.sEffectVu0.width)
+					{
+						vol /= MachineCoords.sEffectVu0.width;// restrict to leds
+						vol *= MachineCoords.sEffectVu0.width;
+					}
+				}
+				else
+				{
+					vol = 0;
+				}
+
+				devc->BitBlt(pMac->_x+vol+MachineCoords.dEffectVu.x, 
+								pMac->_y+MachineCoords.dEffectVu.y, 
+								MachineCoords.dEffectVu.width-vol, 
+								MachineCoords.sEffectVu0.height, 
+								&memDC, 
+								MachineCoords.sEffect.x+MachineCoords.dEffectVu.x, 
+								MachineCoords.sEffect.y+MachineCoords.dEffectVu.y, 
+								SRCCOPY); //background
+
+				if (max > 0)
+				{
+					if (MachineCoords.sEffectVuPeak.width)
+					{
+						max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
+						max *= MachineCoords.sEffectVuPeak.width;
+						devc->BitBlt(pMac->_x+max+MachineCoords.dEffectVu.x, 
+									pMac->_y+MachineCoords.dEffectVu.y, 
+									MachineCoords.sEffectVuPeak.width, 
+									MachineCoords.sEffectVuPeak.height, 
+									&memDC, 
+									MachineCoords.sEffectVuPeak.x, 
+									MachineCoords.sEffectVuPeak.y, 
+									SRCCOPY); //peak
+					}
+				}
+
+				if (vol > 0)
+				{
+					devc->BitBlt(pMac->_x+MachineCoords.dEffectVu.x, 
+								pMac->_y+MachineCoords.dEffectVu.y, 
+								vol, 
+								MachineCoords.sEffectVu0.height, 
+								&memDC, 
+								MachineCoords.sEffectVu0.x, 
+								MachineCoords.sEffectVu0.y, 
+								SRCCOPY); // leds
 				}
 			}
 
-			if (vol > 0)
-			{
-				devc->BitBlt(x+MachineCoords.dEffectVu.x, 
-							y+MachineCoords.dEffectVu.y, 
-							vol, 
-							MachineCoords.sEffectVu0.height, 
-							&memDC, 
-							MachineCoords.sEffectVu0.x, 
-							MachineCoords.sEffectVu0.y, 
-							SRCCOPY); // leds
-			}
+			break;
+
 		}
 
-		break;
-
+		memDC.SelectObject(oldbmp);
+		memDC.DeleteDC();
 	}
-
-	memDC.SelectObject(oldbmp);
-	memDC.DeleteDC();
 }
 
-void CChildView::ClearMachineSpace(Machine* mac,int macnum, CDC *devc)
+void CChildView::ClearMachineSpace(int macnum, CDC *devc)
 {
+	Machine* mac = _pSong->_pMachine[macnum];
 	if(!mac)
+	{
 	    return;
+	}
 
 	if (MachineCoords.bHasTransparency)
 	{
@@ -565,12 +593,13 @@ void CChildView::ClearMachineSpace(Machine* mac,int macnum, CDC *devc)
 	}
 }
 
-void CChildView::DrawMachine(Machine* mac,int macnum, CDC *devc)
+void CChildView::DrawMachine(int macnum, CDC *devc)
 {
-	// BUGFIX by Dan: don't draw invalid machines 
-	// valid machine?
+	Machine* mac = _pSong->_pMachine[macnum];
 	if(!mac)
+	{
 	    return;
+	}
 
 	int x=mac->_x;
 	int y=mac->_y;
