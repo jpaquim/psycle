@@ -21,6 +21,7 @@ Player::Player()
 	_playBlock = false;
 	_recording = false;
 	_ticksRemaining=0;
+	_lineCounter=0;
 	tpb=4;
 	bpm=125;
 	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;

@@ -537,19 +537,19 @@ void CMainFrame::SetAppSongTpb(int x)
 {
 	char buffer[16];
 
-	if (Global::pPlayer->_playing ) Global::_pSong->_ticksPerBeat = Global::pPlayer->tpb+x;
-	else Global::_pSong->_ticksPerBeat += x;
-
-	if (Global::_pSong->_ticksPerBeat < 1) 	Global::_pSong->_ticksPerBeat = 1;
-	else if (Global::_pSong->_ticksPerBeat > 32) Global::_pSong->_ticksPerBeat = 32;
-
 	if ( x != 0)
 	{
+		Global::_pSong->_ticksPerBeat += x;
+		
+		if (Global::_pSong->_ticksPerBeat < 1) 	Global::_pSong->_ticksPerBeat = 1;
+		else if (Global::_pSong->_ticksPerBeat > 32) Global::_pSong->_ticksPerBeat = 32;
+
 		Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin, Global::_pSong->_ticksPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 		Global::pPlayer->tpb=Global::_pSong->_ticksPerBeat;
 	}
 	
-	sprintf(buffer, "%d", Global::_pSong->_ticksPerBeat);
+	if (Global::pPlayer->_playing ) sprintf(buffer, "%d", Global::pPlayer->tpb);
+	else sprintf(buffer, "%d", Global::_pSong->_ticksPerBeat);
 	((CStatic *)m_wndControl.GetDlgItem(IDC_TPBLABEL))->SetWindowText(buffer);
 }
 

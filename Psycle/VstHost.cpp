@@ -651,8 +651,8 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 		{
 			_timeInfo.flags |= kVstPpqPosValid;
 
-			const float currentline = (float)(Global::pPlayer->_lineCounter%Global::pPlayer->tpb);
-			const float linestep = ((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining)*4.0f)/(Global::_pSong->SamplesPerTick*Global::pPlayer->tpb);
+			const float currentline = (float)(Global::pPlayer->_lineCounter%(Global::pPlayer->tpb*4))/Global::pPlayer->tpb;
+			const float linestep = (((float)(Global::_pSong->SamplesPerTick-Global::pPlayer->_ticksRemaining))/Global::_pSong->SamplesPerTick)/Global::pPlayer->tpb;
 			_timeInfo.ppqPos = currentline+linestep;
 			
 		}
