@@ -89,11 +89,6 @@ SourceForge Site (link above)
 A Buzz2Psycle SDK is avaiable at the site, but it is untested.
 Hint: Check M3 sources too, which are derived from a buzz plugin.
 
-Sources for a Fast sinus calculation used in the Flanger are extracted from
-
-	http://www.musicdsp.org/
-
-
 --------------------------------------------------------------------------------------------
 3. Development:
 
