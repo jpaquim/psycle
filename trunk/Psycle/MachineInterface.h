@@ -1,5 +1,5 @@
 // Psycle FX PLUGIN API
-   
+
 #ifndef __MACHINE_INTERFACE_H
 #define __MACHINE_INTERFACE_H
 
@@ -24,7 +24,7 @@ double const PI = 3.14159265358979323846;
 
 // CMachineParameter flags
 #define MPF_NULL				0
-#define MPF_STATE				2	
+#define MPF_STATE				2
 
 class CMachineParameter
 {
@@ -43,7 +43,7 @@ class CMachineInfo
 public:
 	int Version;							// VERSION
 	int Flags;								// Flags
-	int numParameters;				
+	int numParameters;
 	CMachineParameter const **Parameters;
 	char const *Name;						// "Rambo Delay"
 	char const *ShortName;					// "Delay"
@@ -78,14 +78,14 @@ public:
 
 	// Work function
 	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
-	
+
 	virtual void Stop() {}
 
 	// Export / Import
 	virtual void PutData(byte* pData) {}
 	virtual void GetData(byte* pData) {}
 	virtual int GetDataSize() { return 0; }
-	
+
 	virtual void Command() {}
 
 	virtual void MuteTrack(int const i) {}	// Not used (yet?)
@@ -98,14 +98,14 @@ public:
 
 	virtual bool PlayWave(int const wave, int const note, float const volume) { return false; } 	// Not used (prolly never)
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val) {}
-	
+
 	virtual void StopWave() {} 	// Not used (prolly never)
 
 public:
-	// initialize these members in the constructor 
+	// initialize these members in the constructor
 	int *Vals;
-	
-	// these members are initialized by the 
+
+	// these members are initialized by the
 	// engine right after it calls CreateMachine()
 	// don't touch them in the constructor
 
@@ -122,5 +122,5 @@ __declspec(dllexport) CMachineInterface * __cdecl CreateMachine() \
 { \
 	return new mi; \
 } \
-} 
+}
 #endif

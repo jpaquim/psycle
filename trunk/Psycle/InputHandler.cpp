@@ -796,7 +796,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		break;
 
 	case cdefSongPosInc:
-		pChildView->IncPosition(brepeat);
+		pChildView->IncPosition(brepeat?true:false);
 		break;
 
 	case cdefSongPosDec:

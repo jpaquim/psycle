@@ -28,6 +28,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CGearFlanger)
 	enum { IDD = IDD_GEAR_FLANGER };
+	CButton	m_resample;
 	CComboBox	m_presetcombo;
 	CSliderCtrl	m_wet_slider;
 	CSliderCtrl	m_dry_slider;
@@ -71,6 +72,7 @@ protected:
 	afx_msg void OnCustomdrawWetslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawDryslider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangePresetcombo();
+	afx_msg void OnCheckResampler();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

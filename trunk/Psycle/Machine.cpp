@@ -3,12 +3,14 @@
 #if defined(_WINAMP_PLUGIN_)
 //	#include "global.h"
 	#include "Machine.h"
+	#include "Dsp.h"
 	#include "Song.h"
 //	#include "FileIO.h"
 	#include "Configuration.h"
 #else
 	#include "Psycle2.h"
 	#include "Machine.h"
+	#include "Dsp.h"
 	#include "Song.h"
 //	#include "FileIO.h"
 	#include "Configuration.h"
@@ -295,18 +297,17 @@ void Machine::Work(int numSamples)
 #if defined( _WINAMP_PLUGIN_)
 				Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 				Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-				Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 #else
 				CPUCOST_INIT(wcost);
 				Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 				Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-				Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 				CPUCOST_CALC(wcost,numSamples);
 				_wireCost+=wcost;
 #endif // _WINAMP_PLUGIN_
 			}
 		}
 	}
+	Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 }
 
 bool Machine::Load(
@@ -1407,7 +1408,9 @@ Flanger::Flanger()
 	_type = MACH_FLANGER;
 	_mode = MACHMODE_FX;
 	sprintf(_editName, "Flanger");
-
+	_resampler.SetQuality(RESAMPLE_LINEAR);// ADVISE!!!! Only linear resample can be done. SPLINE needs samples ahead
+	useResample=false;
+	
 	_pBufferL = NULL;
 	_pBufferR = NULL;
 }
@@ -1486,16 +1489,17 @@ void Flanger::Work(
 	CPUCOST_INIT(cost);
 #endif // ndef _WINAMP_PLUGIN_
 
+	static float const TWOPI = 6.28318530717958647692528676655901f;
+
 	if ((!_mute) && (!_stopped) && (!_bypass))
 	{
-		static float const TWOPI = 6.28318530717958647692528676655901f;
+		PRESAMPLERFN pResamplerWork;
+		pResamplerWork = _resampler._pWorkFn;
 		
-		float inputL;
-		float inputR;
-		float fdbkL =(float)_feedbackL*0.01f;
-		float fdbkR =(float)_feedbackR*0.01f;
-		float dry =(float)_outDry*0.00390625f;
-		float wet =(float)_outWet*0.00390625f;
+		const float fdbkL =(float)_feedbackL*0.01f;
+		const float fdbkR =(float)_feedbackR*0.01f;
+		const float dry =(float)_outDry*0.00390625f;
+		const float wet =(float)_outWet*0.00390625f;
 		
 		float* pSamplesL = _pSamplesL;
 		float* pSamplesR = _pSamplesR;
@@ -1512,51 +1516,115 @@ void Flanger::Work(
 		double y1R= sin(ipR-_dLfoSpeed);
 		double y2R= sin(ipR-2*_dLfoSpeed);
 
-		int i = numSamples;
-		do
+		if ( useResample)
 		{
-			y0L = b1*y1L - y2L;
-			y2L = y1L;
-			y1L = y0L;
-			y0R = b1*y1R - y2R;
-			y2R = y1R;
-			y1R = y0R;
-			
-			const float acc_timeL = (float)_time + (float)(y0L*_fLfoAmp);
-			const float acc_timeR = (float)_time + (float)(y0R*_fLfoAmp);
-//			const float acc_timeL = _time + (float)(sin(_fLfoDegree)*_fLfoAmp);	// 0 <= _fLfoDegree <= TWOPI
-//			const float acc_timeR = _time + (float)(sin(_fLfoDegree+_fLfoPhase)*_fLfoAmp); // 0 <= _fLfoPhase <= PI
-
-			if (++_counter >= 2048)	{ _counter = 0; }
-			
-			int _delayedCounterL = _counter-f2i(acc_timeL);
-			if (_delayedCounterL < 0) _delayedCounterL += 2048;
-
-			int _delayedCounterR = _counter-f2i(acc_timeR);
-			if (_delayedCounterR < 0) _delayedCounterR += 2048;
-
-			float y_l = _pBufferL[_delayedCounterL];
-			if (IS_DENORMAL(y_l) ) y_l=0.0f;
-
-			float y_r = _pBufferR[_delayedCounterR];
-			if (IS_DENORMAL(y_r) ) y_r=0.0f;
-			
-			inputL = *++pSamplesL;
-			inputR = *++pSamplesR;
-
-			_pBufferL[_counter] = inputL + y_l*fdbkL;
-			_pBufferR[_counter] = inputR + y_r*fdbkR;
-			
-			*pSamplesL = inputL*dry + y_l*wet;
-			*pSamplesR = inputR*dry + y_r*wet;
-			
-			_dLfoPos += _dLfoSpeed;
-			if (_dLfoPos > TWOPI)
+			int i = numSamples;
+			do
 			{
-				_dLfoPos -= TWOPI;
+				y0L = b1*y1L - y2L;
+				y2L = y1L;
+				y1L = y0L;
+				y0R = b1*y1R - y2R;
+				y2R = y1R;
+				y1R = y0R;
+				
+				ULARGE_INTEGER tmposcL;
+				tmposcL.QuadPart = (__int64)((y0L*_fLfoAmp) *0x100000000);
+				int _delayedCounterL = _counter - _time + tmposcL.HighPart;
+				
+				if (_delayedCounterL < 0) _delayedCounterL += 2048;
+				int c = (_delayedCounterL==2047) ? 0 : _delayedCounterL+1;
+				
+				float y_l = pResamplerWork( 0 ,
+					_pBufferL[_delayedCounterL],
+					_pBufferL[c], 0,
+					tmposcL.LowPart, _delayedCounterL, 2050); // Since we already take care or buffer overrun, we set the length bigger.
+				if (IS_DENORMAL(y_l) ) y_l=0.0f;
+				
+				ULARGE_INTEGER tmposcR;
+				tmposcR.QuadPart = (__int64)((y0R*_fLfoAmp) *0x100000000);
+				int _delayedCounterR = _counter - _time + tmposcR.HighPart;
+				
+				if (_delayedCounterR < 0) _delayedCounterR += 2048;
+				c = (_delayedCounterR==2047) ? 0 : _delayedCounterR+1;
+				
+				float y_r = pResamplerWork(	0,
+					_pBufferR[_delayedCounterR],
+					_pBufferR[c], 0,
+					tmposcR.LowPart, _delayedCounterR, 2050); // Since we already take care or buffer overrun, we set the length bigger.
+				if (IS_DENORMAL(y_r) ) y_r=0.0f;
+				
+				const float inputL = *++pSamplesL;
+				const float inputR = *++pSamplesR;
+				
+				_pBufferL[_counter] = inputL + y_l*fdbkL;
+				_pBufferR[_counter] = inputR + y_r*fdbkR;
+				
+				*pSamplesL = inputL*dry + y_l*wet;
+				*pSamplesR = inputR*dry + y_r*wet;
+				
+				_dLfoPos += _dLfoSpeed;
+				if (_dLfoPos >= TWOPI)
+				{
+					_dLfoPos -= TWOPI;
+				}
+				if (++_counter >= 2048)	{ _counter = 0; }
 			}
+			while (--i);
 		}
-		while (--i);
+		else
+		{
+			int i = numSamples;
+			do
+			{
+				y0L = b1*y1L - y2L;
+				y2L = y1L;
+				y1L = y0L;
+				y0R = b1*y1R - y2R;
+				y2R = y1R;
+				y1R = y0R;
+				
+//		Unoptimized ones
+//			sin(_fLfoDegree)*_fLfoAmp;	// 0 <= _fLfoDegree <= TWOPI
+//			sin(_fLfoDegree+_fLfoPhase)*_fLfoAmp; // 0 <= _fLfoPhase <= 3PI/2
+//		Optimized ones
+//			y0L*_fLfoAmp;
+//			y0R*_fLfoAmp;
+				
+				int _delayedCounterL, _delayedCounterR;
+				if ( y0L< 0 ) _delayedCounterL = _counter - _time + (int)(y0L*_fLfoAmp)-1; //  (int)0.9 = (int)-0.9
+				else _delayedCounterL = _counter - _time + (int)(y0L*_fLfoAmp);
+				if (_delayedCounterL < 0) _delayedCounterL += 2048;
+
+				if ( y0R< 0 ) _delayedCounterR = _counter - _time + (int)(y0R*_fLfoAmp)-1;
+				else _delayedCounterR = _counter - _time + (int)(y0R*_fLfoAmp);
+				if (_delayedCounterR < 0) _delayedCounterR += 2048;
+
+
+				float y_l = _pBufferL[_delayedCounterL];
+				if (IS_DENORMAL(y_l) ) y_l=0.0f;
+
+				float y_r = _pBufferR[_delayedCounterR];
+				if (IS_DENORMAL(y_r) ) y_r=0.0f;
+	
+				const float inputL = *++pSamplesL;
+				const float inputR = *++pSamplesR;
+				
+				_pBufferL[_counter] = inputL + y_l*fdbkL;
+				_pBufferR[_counter] = inputR + y_r*fdbkR;
+				
+				*pSamplesL = inputL*dry + y_l*wet;
+				*pSamplesR = inputR*dry + y_r*wet;
+
+				_dLfoPos += _dLfoSpeed;
+				if (_dLfoPos >= TWOPI)
+				{
+					_dLfoPos -= TWOPI;
+				}
+				if (++_counter >= 2048)	{ _counter = 0; }
+			}
+			while (--i);
+		}
 #if !defined(_WINAMP_PLUGIN_)
 		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
@@ -1573,12 +1641,14 @@ void Flanger::Work(
 	}
 	else
 	{
-		static float const TWOPI = 6.28318530717958647692528676655901f;
 		_dLfoPos += _dLfoSpeed*numSamples;
 		while (_dLfoPos > TWOPI)
 		{
 			_dLfoPos -= TWOPI;
 		}
+		memset(_pBufferL,0,numSamples*sizeof(float));
+		memset(_pBufferR,0,numSamples*sizeof(float));
+		_counter = 0;
 	}
 #if !defined(_WINAMP_PLUGIN_)
 	CPUCOST_CALC(cost, numSamples);
@@ -1596,8 +1666,8 @@ void Flanger::Tick(int channel, PatternEntry *pData)
 	if ( pData->_note == 121 || pData->_note == 122 ) {
 		switch(pData->_inst)
 		{
-		case 1: _time=cmd;Update();break;
-		case 2: _lfoAmp=cmd & 0x7F;Update();break;
+		case 1: _time=cmd & 0x400;Update();break;
+		case 2: _lfoAmp=(cmd & 0x7F)+1;Update();break;
 		case 3: _lfoSpeed=cmd;Update();break;
 		case 4:
 			if ( cmd < -100 || cmd > 100 ) _feedbackL=100;
@@ -1620,7 +1690,7 @@ void Flanger::Tick(int channel, PatternEntry *pData)
 void Flanger::Update(void)
 {
 	_dLfoSpeed = _lfoSpeed*0.000000003f;
-	_fLfoAmp = (float)_lfoAmp*0.00390625f*float(_time-1);
+	_fLfoAmp = (float)_lfoAmp*0.00390625f*(float)(_time-1);
 	_fLfoPhase = (float)_lfoPhase*0.012271846f;
 }
 
@@ -1700,8 +1770,9 @@ bool Flanger::Load(
 	pFile->Read(&junk[0], sizeof(char)); // sineglide
 	pFile->Read(&junk[0], sizeof(char)); // sinevolume
 	pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
-
+//	pFile->Read(&junk[0], sizeof(char)); // sinelfoamp <- old meaning
+	pFile->Read(&useResample, sizeof(bool)); // <- new meaning
+	
 	pFile->Read(&_time, sizeof(_time));
 	pFile->Read(&junk[0], sizeof(int)); // delayTimeR
 	pFile->Read(&_feedbackL, sizeof(_feedbackL));
@@ -1757,8 +1828,9 @@ bool Flanger::Save(
 	pFile->Write(&junk[0], sizeof(char)); // sineglide
 	pFile->Write(&junk[0], sizeof(char)); // sinevolume
 	pFile->Write(&junk[0], sizeof(char)); // sinelfospeed
-	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp
-
+//	pFile->Write(&junk[0], sizeof(char)); // sinelfoamp <- old meaning
+	pFile->Write(&useResample, sizeof(bool)); // <- new meaning
+	
 	pFile->Write(&_time, sizeof(_time));
 	pFile->Write(&junk[0], sizeof(int)); // delayTimeR
 	pFile->Write(&_feedbackL, sizeof(_feedbackL));

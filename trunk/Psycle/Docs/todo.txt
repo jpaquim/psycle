@@ -20,8 +20,6 @@ X low priority
 **	<_sue_> the gainer machine doesnt work
 		[ getting stuck bug i have been able to recreate once but not debug-when i recreated it,
 		song was fucking up bad due to not enough buffers (and too small)]
-**	Flanger clicks : 
-		[ http://psycle.pastnotecut.org/thread.php?threadid=626&boardid=2&styleid=1 ]
 **	cyanphase vibrasynth has an access violation bug
 		[ I need source to fix]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.

@@ -117,13 +117,13 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 void CFrameMachine::OnDestroy() 
 {
 	if ( _pActive != NULL ) *_pActive = false;
-	KillTimer(2104+index);
+	KillTimer(2104+MachineIndex);
 	CFrameWnd::OnDestroy();
 }
 
 void CFrameMachine::OnTimer(UINT nIDEvent) 
 {
-	if ( nIDEvent == 2104+index )
+	if ( nIDEvent == 2104+MachineIndex )
 	{
 		Invalidate(false);
 	}
@@ -377,7 +377,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			// well, this isn't so hard... just put the twk record here
 			if (Global::pConfig->_RecordTweaks)
 			{
-				wndView->MousePatternTweak(index, tweakpar, ((int)nv)-min_v);
+				wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
 			}
 		}
 		else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
@@ -386,7 +386,7 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 			// well, this isn't so hard... just put the twk record here
 			if (Global::pConfig->_RecordTweaks)
 			{
-				wndView->MousePatternTweak(index, tweakpar, (int)nv);
+				wndView->MousePatternTweak(MachineIndex, tweakpar, (int)nv);
 			}
 		}
 
@@ -449,7 +449,7 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 				,max_v);
 			dlg.min = min_v;
 			dlg.max = max_v;
-			dlg.macindex = Global::_pSong->FindBusFromIndex(MachineIndex);
+			dlg.macindex = MachineIndex;
 			dlg.paramindex = tweakpar;
 
 			dlg.DoModal();
@@ -536,7 +536,7 @@ int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		return -1;
 	}
-	SetTimer(2104+index,100,0);
+	SetTimer(2104+MachineIndex,100,0);
 	return 0;
 }
 
