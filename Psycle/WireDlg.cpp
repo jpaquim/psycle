@@ -1131,6 +1131,8 @@ void CWireDlg::SetMode()
 BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
 {
 	// TODO: Add your specialized code here and/or call the base class
+
+	/*
 	if (pMsg->message == WM_KEYDOWN)
 	{
 		if (pMsg->wParam == VK_UP)
@@ -1142,6 +1144,7 @@ BOOL CWireDlg::PreTranslateMessage(MSG* pMsg)
 				v = 0;
 			}
 			m_volslider.SetPos(v);
+			return TRUE;
 		}
 		else if (pMsg->wParam == VK_DOWN)
 		{
@@ -1152,6 +1155,7 @@ BOOL CWireDlg::PreTranslateMessage(MSG* pMsg)
 				v = 256*4;
 			}
 			m_volslider.SetPos(v);
+			return TRUE;
 		}
 		else
 		{
@@ -1159,6 +1163,11 @@ BOOL CWireDlg::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	else if (pMsg->message == WM_KEYUP)
+	{
+		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+	}
+	*/
+	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
 	{
 		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 	}

@@ -16,8 +16,9 @@ class CGearRackDlg : public CDialog
 {
 // Construction
 public:
-	CGearRackDlg(CChildView* pParent);   // standard constructor
+	CGearRackDlg(CChildView* pParent, CMainFrame* pMain);   // standard constructor
 	CChildView* m_pParent;
+	CMainFrame* pParentMain;
 	void RedrawList();
 	BOOL Create();
 	afx_msg void OnCancel();
@@ -47,6 +48,9 @@ protected:
 	afx_msg void OnCreate();
 	afx_msg void OnDelete();
 	afx_msg void OnDblclkGearlist();
+	afx_msg void OnProperties();
+	afx_msg void OnParameters();
+	afx_msg void OnSelchangeGearlist();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -14,19 +14,18 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-extern CPsycleApp theApp;
-
 /////////////////////////////////////////////////////////////////////////////
 // CGearRackDlg dialog
 
 
-CGearRackDlg::CGearRackDlg(CChildView* pParent /*=NULL*/)
+CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain /*=NULL*/)
 	: CDialog(CGearRackDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CGearRackDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 	m_pParent = pParent;
+	pParentMain = pMain;
 }
 
 
@@ -45,6 +44,9 @@ BEGIN_MESSAGE_MAP(CGearRackDlg, CDialog)
 	ON_BN_CLICKED(IDC_CREATE, OnCreate)
 	ON_BN_CLICKED(IDC_DELETE, OnDelete)
 	ON_LBN_DBLCLK(IDC_GEARLIST, OnDblclkGearlist)
+	ON_BN_CLICKED(IDC_PROPERTIES, OnProperties)
+	ON_BN_CLICKED(IDC_PARAMETERS, OnParameters)
+	ON_LBN_SELCHANGE(IDC_GEARLIST, OnSelchangeGearlist)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -68,7 +70,7 @@ BOOL CGearRackDlg::OnInitDialog()
 
 void CGearRackDlg::OnCancel()
 {
-	((CMainFrame *)theApp.m_pMainWnd)->pGearRackDialog = NULL;
+	pParentMain->pGearRackDialog = NULL;
 	DestroyWindow();
 	delete this;
 }
@@ -128,6 +130,22 @@ void CGearRackDlg::RedrawList()
 	m_list.SetCurSel(selected);
 }
 
+void CGearRackDlg::OnSelchangeGearlist() 
+{
+	// TODO: Add your control notification handler code here
+	int tmac = m_list.GetCurSel();
+	if (tmac == MAX_BUSES)
+	{
+		return;
+	}
+	if (tmac > MAX_BUSES)
+	{
+		tmac--;
+	}
+	Global::_pSong->seqBus = tmac;
+	pParentMain->UpdateComboGen();
+}
+
 void CGearRackDlg::OnCreate() 
 {
 	// TODO: Add your control notification handler code here
@@ -142,9 +160,12 @@ void CGearRackDlg::OnCreate()
 	}
 	Global::_pSong->seqBus = tmac;
 	m_pParent->NewMachine(-1,-1,tmac);
-	RedrawList();
-//	m_pParent->Invalidate();
-//	m_pParent->Repaint(DMAllMacsRefresh);
+	pParentMain->UpdateEnvInfo();
+	pParentMain->UpdateComboGen();
+	if (m_pParent->viewMode==VMMachine)
+	{
+		m_pParent->Repaint();
+	}
 }
 
 void CGearRackDlg::OnDelete() 
@@ -157,25 +178,37 @@ void CGearRackDlg::OnDelete()
 	}
 	if (tmac > MAX_BUSES)
 	{
-		tmac--;
-		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
+		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 		{
-			Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac-MAX_BUSES]);
-			Global::_pSong->seqBus = tmac;
-			RedrawList();
-//			m_pParent->Invalidate();
-//			m_pParent->Repaint(DMAllMacsRefresh);
+			tmac--;
+			if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
+			{
+				Global::_pSong->DestroyMachine(Global::_pSong->busEffect[tmac-MAX_BUSES]);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				RedrawList();
+				if (m_pParent->viewMode==VMMachine)
+				{
+					m_pParent->Repaint();
+				}
+			}
 		}
 	}
 	else
 	{
-		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+		if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 		{
-			Global::_pSong->DestroyMachine(Global::_pSong->busMachine[tmac]);
-			Global::_pSong->seqBus = tmac;
-			RedrawList();
-//			m_pParent->Invalidate();
-//			m_pParent->Repaint(DMAllMacsRefresh);
+			if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+			{
+				Global::_pSong->DestroyMachine(Global::_pSong->busMachine[tmac]);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				RedrawList();
+				if (m_pParent->viewMode==VMMachine)
+				{
+					m_pParent->Repaint();
+				}
+			}
 		}
 	}
 }
@@ -184,5 +217,70 @@ void CGearRackDlg::OnDblclkGearlist()
 {
 	// TODO: Add your control notification handler code here
 	OnCreate();	
+}
+
+
+void CGearRackDlg::OnProperties() 
+{
+	// TODO: Add your control notification handler code here
+	int tmac = m_list.GetCurSel();
+	if (tmac == MAX_BUSES)
+	{
+		return;
+	}
+	if (tmac > MAX_BUSES)
+	{
+		tmac--;
+		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
+		{
+			m_pParent->DoMacPropDialog(Global::_pSong->busEffect[tmac-MAX_BUSES]);
+			pParentMain->UpdateEnvInfo();
+			pParentMain->UpdateComboGen();
+			if (m_pParent->viewMode==VMMachine)
+			{
+				m_pParent->Repaint();
+			}
+		}
+	}
+	else
+	{
+		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+		{
+			m_pParent->DoMacPropDialog(Global::_pSong->busMachine[tmac]);
+			pParentMain->UpdateEnvInfo();
+			pParentMain->UpdateComboGen();
+			if (m_pParent->viewMode==VMMachine)
+			{
+				m_pParent->Repaint();
+			}
+		}
+	}
+}
+
+void CGearRackDlg::OnParameters() 
+{
+	// TODO: Add your control notification handler code here
+	POINT point;
+	GetCursorPos(&point);
+	int tmac = m_list.GetCurSel();
+	if (tmac == MAX_BUSES)
+	{
+		return;
+	}
+	if (tmac > MAX_BUSES)
+	{
+		tmac--;
+		if (Global::_pSong->_machineActive[Global::_pSong->busEffect[tmac-MAX_BUSES]])
+		{
+			pParentMain->ShowMachineGui(Global::_pSong->busEffect[tmac-MAX_BUSES],point);
+		}
+	}
+	else
+	{
+		if (Global::_pSong->_machineActive[Global::_pSong->busMachine[tmac]])
+		{
+			pParentMain->ShowMachineGui(Global::_pSong->busMachine[tmac],point);
+		}
+	}
 }
 
