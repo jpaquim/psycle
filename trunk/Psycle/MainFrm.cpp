@@ -245,14 +245,14 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	hi = (HBITMAP)blittleright; cb->SetBitmap(hi);
 
 
-//	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-//	for(int i=4;i<=32;i++)
-//	{
-//		char s[4];
-//		_snprintf(s,4,"%i",i);
-//		cc2->AddString(s);
-//	}
-//	cc2->SetCurSel(_pSong->SONGTRACKS-4);
+	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
+	for(int i=4;i<=MAX_TRACKS;i++)
+	{
+		char s[4];
+		_snprintf(s,4,"%i",i);
+		cc2->AddString(s);
+	}
+	cc2->SetCurSel(_pSong->SONGTRACKS-4);
 
 //	SetAppSongBpm(0);
 //	SetAppSongTpb(0);
