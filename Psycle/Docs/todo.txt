@@ -16,6 +16,8 @@ X low priority
 
 **** Psycle crash on settings dialog
 	[ pooplog - i cannot recreate this ]
+*** Psycle is not writing blocks correctly when saving blocks
+*** Psycle is not loading blocks correctly when loading blocks, infact, it does nothing
 ** Some skins not getting enumerated?
 	[ pooplog - i cannot recreate this ]
 * <discharge> when i close the gui for this one vsti, all keyboard shortcuts stop working until 
