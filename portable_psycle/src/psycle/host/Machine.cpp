@@ -28,25 +28,36 @@ namespace psycle
 		char* Master::_psName = "Master";
 		char* Dummy::_psName = "DummyPlug";
 
+		void Machine::crashed(const std::exception & e) throw()
+		{
+			///\todo do we need thread synchronization?
+			///\todo gui needs to update
+			crashed_ = true;
+			_bypass = true;
+			std::ostringstream title; title
+				<< _editName << " crashed.";
+			::MessageBox(0, title.str().c_str(), e.what(), MB_OK | MB_ICONWARNING);
+		}
+
 		Machine::Machine()
+			: crashed_(false)
+			, _numPars(0)
+			, TWSSamples(0)
+			, TWSActive(false)
+			#if !defined _WINAMP_PLUGIN_
+				, _volumeCounter(0.0f)
+				, _volumeDisplay(0)
+				, _volumeMaxDisplay(0)
+				, _volumeMaxCounterLife(0)
+				, _pScopeBufferL(0)
+				, _pScopeBufferR(0)
+				, _scopeBufferIndex(0)
+				, _scopePrevNumSamples(0)
+			#endif
 		{
 			_editName[0] = '\0';
-
-			_numPars = 0;
-			#if !defined _WINAMP_PLUGIN_
-				_volumeCounter = 0.0f;
-				_volumeDisplay = 0;
-				_volumeMaxDisplay = 0;
-				_volumeMaxCounterLife = 0;
-				_pScopeBufferL = NULL;
-				_pScopeBufferR = NULL;
-				_scopeBufferIndex = 0;
-				_scopePrevNumSamples = 0;
-			#endif
-
 			_pSamplesL = new float[STREAM_SIZE];
 			_pSamplesR = new float[STREAM_SIZE];
-			
 			// Clear machine buffer samples
 			for (int c=0; c<STREAM_SIZE; c++)
 			{
@@ -66,17 +77,15 @@ namespace psycle
 				TWSCurrent[c] = 0;
 				TWSDestination[c] = 0;
 			}
-			TWSSamples = 0;
-			TWSActive = FALSE;
 		}
 
-		Machine::~Machine()
+		Machine::~Machine() throw()
 		{
 			delete _pSamplesL;
 			delete _pSamplesR;
 		}
 
-		void Machine::Init(void)
+		void Machine::Init()
 		{
 			// Standard gear initalization
 			#if !defined _WINAMP_PLUGIN_
@@ -87,12 +96,10 @@ namespace psycle
 			_stopped = false;
 			_bypass = false;
 			_waitingForSound = false;
-
 			// Centering volume and panning
 			SetPan(64);
-
 			// Clearing connections
-			for (int i=0; i<MAX_CONNECTIONS; i++)
+			for(int i=0; i<MAX_CONNECTIONS; i++)
 			{
 				_inputConVol[i] = 1.0f;
 				_wireMultiplier[i] = 1.0f;
@@ -125,6 +132,7 @@ namespace psycle
 			}
 			_panning = newPan;
 		}
+
 		void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
 		{
 			if ( mType == MACH_VST || mType == MACH_VSTFX )
@@ -156,6 +164,7 @@ namespace psycle
 			// but since it already needs to multiply the output by inputConVol, I decided to remove
 			// that extra conversion and use directly the volume to do so.
 		}
+
 		int Machine::FindInputWire(int macIndex)
 		{
 			for (int c=0; c<MAX_CONNECTIONS; c++)
@@ -206,6 +215,7 @@ namespace psycle
 			}
 			return false;
 		}
+
 		bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,float &value)
 		{
 			// Get reference to the destination machine
@@ -295,7 +305,7 @@ namespace psycle
 								std::memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
 							}
 							*/
-							pInMachine->_waitingForSound=false;
+							pInMachine->_waitingForSound = false;
 						}
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
@@ -324,67 +334,26 @@ namespace psycle
 			#endif
 		}
 
-		// <bohan> This is the OLD fucking file format!
-		bool Machine::Load(RiffFile* pFile)
+		bool Machine::LoadSpecificFileChunk(RiffFile* pFile, int version)
 		{
-			char junk[256];
-			std::memset(&junk, 0, sizeof(junk));
-			pFile->Read(&_editName,16);
-			_editName[15] = 0;
-			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
-			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
-			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
-			pFile->Read(&_connection[0], sizeof(_connection));
-			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-			#if defined (_WINAMP_PLUGIN_)
-				pFile->Skip(96) ; // sizeof(CPoint) = 8.
-			#else
-				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			#endif
-			pFile->Read(&_numInputs, sizeof(_numInputs));
-			pFile->Read(&_numOutputs, sizeof(_numOutputs));
-
-			pFile->Read(&_panning, sizeof(_panning));
-			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-			pFile->Read(&junk[0], sizeof(int)); // numSubtracks
-			pFile->Read(&junk[0], sizeof(int)); // interpol
-
-			pFile->Read(&junk[0], sizeof(int)); // outdry
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
-
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
-
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
-
+			UINT size;
+			pFile->Read(&size,sizeof(size)); // size of this part params to load
+			UINT count;
+			pFile->Read(&count,sizeof(count)); // num params to load
+			for (UINT i = 0; i < count; i++)
+			{
+				int temp;
+				pFile->Read(&temp,sizeof(temp));
+				SetParameter(i,temp);
+			}
+			pFile->Skip(size-sizeof(count)-(count*sizeof(int)));
 			return true;
-		}
+		};
 
-		// <bohan> This is the NEW file format.
 		Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen)
 		{
 			// assume version 0 for now
-			BOOL bDeleted = FALSE;
-
+			bool bDeleted(false);
 			Machine* pMachine;
 			MachineType type;//,oldtype;
 			char dllName[256];
@@ -403,33 +372,32 @@ namespace psycle
 				break;
 			case MACH_PLUGIN:
 				{
-					if ( !fullopen ) pMachine = new Dummy(index);
+					if(!fullopen) pMachine = new Dummy(index);
 					else 
 					{
 						Plugin * p;
 						pMachine = p = new Plugin(index);
-						if (!p->LoadDll(dllName))
+						if(!p->LoadDll(dllName))
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
 							::MessageBox(NULL,sError, "Loading Error", MB_OK);
-
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
-							bDeleted = TRUE;
+							bDeleted = true;
 						}
 					}
 				}
 				break;
 			case MACH_VST:
 				{
-					if ( !fullopen ) pMachine = new Dummy(index);
+					if(!fullopen) pMachine = new Dummy(index);
 					else 
 					{
 						vst::instrument * p;
 						pMachine = p = new vst::instrument(index);
-						if (!p->LoadDll(dllName))
+						if(!p->LoadDll(dllName))
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
@@ -444,21 +412,20 @@ namespace psycle
 				break;
 			case MACH_VSTFX:
 				{
-					if ( !fullopen ) pMachine = new Dummy(index);
+					if(!fullopen) pMachine = new Dummy(index);
 					else 
 					{
 						vst::fx * p;
 						pMachine = p = new vst::fx(index);
-						if (!p->LoadDll(dllName))
+						if(!p->LoadDll(dllName))
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
 							::MessageBox(NULL,sError, "Loading Error", MB_OK);
-
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
-							bDeleted = TRUE;
+							bDeleted = true;
 						}
 					}
 				}
@@ -470,17 +437,14 @@ namespace psycle
 			}
 			pMachine->Init();
 			pMachine->_type = type;
-
 			pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
 			pFile->Read(&pMachine->_mute,sizeof(pMachine->_mute));
-
 			pFile->Read(&pMachine->_panning,sizeof(pMachine->_panning));
-
 			pFile->Read(&pMachine->_x,sizeof(pMachine->_x));
 			pFile->Read(&pMachine->_y,sizeof(pMachine->_y));
 			pFile->Read(&pMachine->_numInputs,sizeof(pMachine->_numInputs));							// number of Incoming connections
 			pFile->Read(&pMachine->_numOutputs,sizeof(pMachine->_numOutputs));						// number of Outgoing connections
-			for (int i = 0; i < MAX_CONNECTIONS; i++)
+			for(int i = 0; i < MAX_CONNECTIONS; i++)
 			{
 				pFile->Read(&pMachine->_inputMachines[i],sizeof(pMachine->_inputMachines[i]));	// Incoming connections Machine number
 				pFile->Read(&pMachine->_outputMachines[i],sizeof(pMachine->_outputMachines[i]));	// Outgoing connections Machine number
@@ -490,37 +454,31 @@ namespace psycle
 				pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
 			}
 			pFile->ReadString(pMachine->_editName,32);
-			if (bDeleted)
+			if(bDeleted)
 			{
 				char buf[34];
 				sprintf(buf,"X %s",pMachine->_editName);
 				buf[31]=0;
 				strcpy(pMachine->_editName,buf);
 			}
-			
-			if ( !fullopen ) return pMachine;
-			
-			if (!pMachine->LoadSpecificFileChunk(pFile,version))
+			if(!fullopen) return pMachine;
+			if(!pMachine->LoadSpecificFileChunk(pFile,version))
 			{
 				char sError[MAX_PATH + 100];
 				sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
 				::MessageBox(NULL,sError, "Loading Error", MB_OK);
-
 				Machine* p = new Dummy(index);
 				p->Init();
 				p->_type=MACH_DUMMY;
 				p->_mode=pMachine->_mode;
-
 				p->_bypass=pMachine->_bypass;
 				p->_mute=pMachine->_mute;
-
 				p->_panning=pMachine->_panning;
-
 				p->_x=pMachine->_x;
 				p->_y=pMachine->_y;
 				p->_numInputs=pMachine->_numInputs;							// number of Incoming connections
 				p->_numOutputs=pMachine->_numOutputs;						// number of Outgoing connections
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				for(int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					p->_inputMachines[i]=pMachine->_inputMachines[i];
 					p->_outputMachines[i]=pMachine->_outputMachines[i];
@@ -532,85 +490,83 @@ namespace psycle
 				// dummy name goes here
 				sprintf(p->_editName,"X %s",pMachine->_editName);
 				p->_numPars=0;
-
 				delete pMachine;
 				pMachine=p;
 			}
-
-		#if !defined(_WINAMP_PLUGIN_)
-			
-			if (index < MAX_BUSES)
-			{
-				pMachine->_mode = MACHMODE_GENERATOR;
-				if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) 
+			#if !defined _WINAMP_PLUGIN_
+				if(index < MAX_BUSES)
 				{
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+					pMachine->_mode = MACHMODE_GENERATOR;
+					if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
+						pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+					if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
+						pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 				}
-				if ( pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) 
+				else if (index < MAX_BUSES*2)
 				{
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+					pMachine->_mode = MACHMODE_FX;
+					if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
+						pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+					if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
+						pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
 				}
-			}
-			else if (index < MAX_BUSES*2)
-			{
-				pMachine->_mode = MACHMODE_FX;
-				if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) 
+				else
 				{
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+					pMachine->_mode = MACHMODE_MASTER;
+					if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
+						pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
+					if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
+						pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 				}
-				if ( pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) 
-				{
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
-				}
-			}
-			else
-			{
-				pMachine->_mode = MACHMODE_MASTER;
-				if ( pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) 
-				{
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-				}
-				if ( pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) 
-				{
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
-				}
-			}
-
-		#endif // !defined(_WINAMP_PLUGIN_)
-
+			#endif
 			pMachine->SetPan(pMachine->_panning);
 			return pMachine;
 		}
 
-		#if !defined(_WINAMP_PLUGIN_)
+		#if !defined _WINAMP_PLUGIN_
 
-		void Machine::SaveFileChunk(RiffFile* pFile)
-		{
-			pFile->Write(&_type,sizeof(_type));
-			SaveDllName(pFile);
-		//	pFile->Write(&_mode,sizeof(_mode));
-			pFile->Write(&_bypass,sizeof(_bypass));
-			pFile->Write(&_mute,sizeof(_mute));
-
-			pFile->Write(&_panning,sizeof(_panning));
-
-			pFile->Write(&_x,sizeof(_x));
-			pFile->Write(&_y,sizeof(_y));
-			pFile->Write(&_numInputs,sizeof(_numInputs));							// number of Incoming connections
-			pFile->Write(&_numOutputs,sizeof(_numOutputs));						// number of Outgoing connections
-			for (int i = 0; i < MAX_CONNECTIONS; i++)
+			void Machine::SaveFileChunk(RiffFile* pFile)
 			{
-				pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
-				pFile->Write(&_outputMachines[i],sizeof(_outputMachines[i]));	// Outgoing connections Machine number
-				pFile->Write(&_inputConVol[i],sizeof(_inputConVol[i]));	// Incoming connections Machine vol
-				pFile->Write(&_wireMultiplier[i],sizeof(_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-				pFile->Write(&_connection[i],sizeof(_connection[i]));      // Outgoing connections activated
-				pFile->Write(&_inputCon[i],sizeof(_inputCon[i]));		// Incoming connections activated
-		//		pFile->Write(&_connectionPoint[i],sizeof(_connectionPoint[i]));// point for wire? 
+				pFile->Write(&_type,sizeof(_type));
+				SaveDllName(pFile);
+				pFile->Write(&_bypass,sizeof(_bypass));
+				pFile->Write(&_mute,sizeof(_mute));
+				pFile->Write(&_panning,sizeof(_panning));
+				pFile->Write(&_x,sizeof(_x));
+				pFile->Write(&_y,sizeof(_y));
+				pFile->Write(&_numInputs,sizeof(_numInputs));							// number of Incoming connections
+				pFile->Write(&_numOutputs,sizeof(_numOutputs));						// number of Outgoing connections
+				for(int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
+					pFile->Write(&_outputMachines[i],sizeof(_outputMachines[i]));	// Outgoing connections Machine number
+					pFile->Write(&_inputConVol[i],sizeof(_inputConVol[i]));	// Incoming connections Machine vol
+					pFile->Write(&_wireMultiplier[i],sizeof(_wireMultiplier[i]));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+					pFile->Write(&_connection[i],sizeof(_connection[i]));      // Outgoing connections activated
+					pFile->Write(&_inputCon[i],sizeof(_inputCon[i]));		// Incoming connections activated
+				}
+				pFile->Write(_editName,strlen(_editName)+1);
+				SaveSpecificChunk(pFile);
 			}
-			pFile->Write(_editName,strlen(_editName)+1);
-			SaveSpecificChunk(pFile);
-		}
+
+			void Machine::SaveSpecificChunk(RiffFile* pFile) 
+			{
+				UINT count = GetNumParams();
+				UINT size = sizeof(count)+(count*sizeof(int));
+				pFile->Write(&size,sizeof(size));
+				pFile->Write(&count,sizeof(count));
+				for(UINT i = 0; i < count; i++)
+				{
+					int temp = GetParamValue(i);
+					pFile->Write(&temp,sizeof(temp));
+				}
+			};
+
+			void Machine::SaveDllName(RiffFile* pFile)
+			{
+				char temp=0;
+				pFile->Write(&temp,1);
+			};
 
 		#endif // ndef _WINAMP_PLUGIN_
 
@@ -653,6 +609,14 @@ namespace psycle
 			_worked = true;
 		}
 
+		bool Dummy::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(&size, sizeof size); // size of this part params to load
+			pFile->Skip(size);
+			return true;
+		};
+		
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -815,6 +779,92 @@ namespace psycle
 			_worked = true;
 		}
 
+		bool Master::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(&size, sizeof size ); // size of this part params to load
+			pFile->Read(&_outDry,sizeof _outDry);
+			pFile->Read(&decreaseOnClip, sizeof decreaseOnClip); // numSubtracks
+			return true;
+		};
+
+		#if !defined _WINAMP_PLUGIN_
+
+			void Master::SaveSpecificChunk(RiffFile* pFile)
+			{
+				UINT size = sizeof _outDry + sizeof decreaseOnClip;
+				pFile->Write(&size, sizeof size); // size of this part params to load
+				pFile->Write(&_outDry,sizeof _outDry);
+				pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
+			};
+
+		#endif
+
+
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// old file format vomit. don't look at it!
+
+
+
+		// old file format vomit. don't look at it!
+		bool Machine::Load(RiffFile* pFile)
+		{
+			char junk[256];
+			std::memset(&junk, 0, sizeof(junk));
+			pFile->Read(&_editName,16);
+			_editName[15] = 0;
+			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
+			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
+			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
+			pFile->Read(&_connection[0], sizeof(_connection));
+			pFile->Read(&_inputCon[0], sizeof(_inputCon));
+			#if defined (_WINAMP_PLUGIN_)
+				pFile->Skip(96) ; // sizeof(CPoint) = 8.
+			#else
+				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+			#endif
+			pFile->Read(&_numInputs, sizeof(_numInputs));
+			pFile->Read(&_numOutputs, sizeof(_numOutputs));
+
+			pFile->Read(&_panning, sizeof(_panning));
+			Machine::SetPan(_panning);
+			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
+			pFile->Read(&junk[0], sizeof(int)); // numSubtracks
+			pFile->Read(&junk[0], sizeof(int)); // interpol
+
+			pFile->Read(&junk[0], sizeof(int)); // outdry
+			pFile->Read(&junk[0], sizeof(int)); // outwet
+
+			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
+			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
+			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
+			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
+
+			pFile->Read(&junk[0], sizeof(char)); // sinespeed
+			pFile->Read(&junk[0], sizeof(char)); // sineglide
+			pFile->Read(&junk[0], sizeof(char)); // sinevolume
+			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
+			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
+
+			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
+			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
+			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
+			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
+
+			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
+			pFile->Read(&junk[0], sizeof(int)); // filterResonance
+			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
+			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
+			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
+			pFile->Read(&junk[0], sizeof(int)); // filterMode
+
+			return true;
+		}
+
+		// old file format vomit. don't look at it!
 		bool Master::Load(RiffFile* pFile)
 		{
 			char junk[256];

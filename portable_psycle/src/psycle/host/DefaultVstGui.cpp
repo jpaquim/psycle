@@ -74,45 +74,81 @@ namespace psycle
 		{
 			m_program.ResetContent();
 
-			const int nump = _pMachine->NumPrograms();
-			for (int i=0; i<nump; i++)
+			int nump;
+			try
+			{
+				nump = _pMachine->proxy().numPrograms();
+			}
+			catch(const std::exception &)
+			{
+				nump = 0;
+			}
+			for(int i(0) ; i < nump; ++i)
 			{
 				char s1[256];
 				char s2[256];
-				strcpy(s2, "<unnamed>");
-
-				int categories = _pMachine->Dispatch(effGetNumProgramCategories, 0, 0, NULL, 0); categories; // not used
-				_pMachine->Dispatch(effGetProgramNameIndexed, i, -1, s2, 0);
-
-				sprintf(s1,"%d: %s",i+1,s2);
+				std::strcpy(s2, "<unnamed>");
+				try
+				{
+					int categories = _pMachine->proxy().dispatcher(effGetNumProgramCategories); categories; // not used
+					_pMachine->proxy().dispatcher(effGetProgramNameIndexed, i, -1, s2);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				std::sprintf(s1,"%d: %s",i+1,s2);
 				m_program.AddString(s1);
 			}
-			m_program.SetCurSel(_pMachine->Dispatch(effGetProgram, 0, 0, NULL, 0));
+			try
+			{
+				m_program.SetCurSel(_pMachine->proxy().dispatcher(effGetProgram));
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
 		}
 
 		void CDefaultVstGui::UpdateParList()
 		{
 			m_parlist.ResetContent();
 
-			const long params = _pMachine->NumParameters();
-			for (int i=0; i<params; i++)
+			long int params;
+			try
+			{
+				params = _pMachine->proxy().numParams();
+			}
+			catch(const std::exception &)
+			{
+				params = 0;
+			}
+			for(int i(0) ; i < params; ++i)
 			{
 				char str[128], buf[128];
-
-				memset(str,0,64);
-				_pMachine->Dispatch(effGetParamName, i, 0, str, 0);
-				if (_pMachine->Dispatch(effCanBeAutomated, i, 0, NULL, 0))
+				std::memset(str, 0, 64);
+				try
 				{
-					sprintf(buf, "(A)%.3X: %s", i, str);
+					_pMachine->proxy().dispatcher(effGetParamName, i, 0, str);
 				}
-				else
+				catch(const std::exception &)
 				{
-					sprintf(buf, "(_)%.3X: %s", i, str);
+					// o_O`
 				}
+				bool b;
+				try
+				{
+					b = _pMachine->proxy().dispatcher(effCanBeAutomated, i);
+				}
+				catch(const std::exception &)
+				{
+					b = false;
+				}
+				if(b) std::sprintf(buf, "(A)%.3X: %s", i, str);
+				else std::sprintf(buf, "(_)%.3X: %s", i, str);
 				m_parlist.AddString(buf);
 			}
-			
-			nPar=0;
+			nPar = 0;
 			m_parlist.SetCurSel(0);
 		}
 
@@ -128,7 +164,15 @@ namespace psycle
 		void CDefaultVstGui::UpdateOne()
 		{
 			//update scroll bar with initial value
-			float value = _pMachine->GetParameter(nPar);
+			float value;
+			try
+			{
+				value = _pMachine->proxy().getParameter(nPar);
+			}
+			catch(const std::exception &)
+			{
+				value = 0; // hmm
+			}
 			UpdateText(value);
 			value *= vst::quantization;
 			updatingvalue =true;
@@ -163,7 +207,14 @@ namespace psycle
 			{
 				int val1(vst::quantization - m_slider.GetPos());
 				float value = static_cast<float>(val1) / vst::quantization;
-				_pMachine->SetParameter(nPar, value);
+				try
+				{
+					_pMachine->proxy().setParameter(nPar, value);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 				UpdateText(value);
 				// well, this isn't so hard... just put the twk record here
 				if(Global::pConfig->_RecordTweaks)
@@ -186,7 +237,14 @@ namespace psycle
 		void CDefaultVstGui::OnSelchangeCombo1() 
 		{
 			int const se=m_program.GetCurSel();
-			_pMachine->SetCurrentProgram(se);
+			try
+			{
+				_pMachine->proxy().dispatcher(effSetProgram, 0, se);
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
 			UpdateOne();
 		}
 
@@ -203,7 +261,14 @@ namespace psycle
 			if(se >= 0)
 			{
 				m_program.SetCurSel(se);
-				_pMachine->SetCurrentProgram(se);
+				try
+				{
+					_pMachine->proxy().dispatcher(effSetProgram, 0, se);
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 			}
 			*pResult = 0;
 			mainView->SetFocus();

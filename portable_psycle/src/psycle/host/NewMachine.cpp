@@ -406,7 +406,7 @@ namespace psycle
 					<< "==========================================" << std::endl
 					<< "=== Psycle Plugin Scan Enumeration Log ===" << std::endl
 					<< std::endl
-					<< "If psycle is crashing on load, chances are it's a bad plugin,"
+					<< "If psycle is crashing on load, chances are it's a bad plugin, "
 					<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
 				if(progressOpen)
 				{
@@ -569,11 +569,11 @@ namespace psycle
 								out.flush();
 							}
 							++currentPlugsCount;
-							// <bohan> vstPlug is a stack object, so its destructor is called
+							// <bohan> plug is a stack object, so its destructor is called
 							// <bohan> at the end of its scope (this cope actually).
 							// <bohan> The problem with destructors of any object of any class is that
 							// <bohan> they are never allowed to throw any exception.
-							// <bohan> So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+							// <bohan> So, we catch exceptions here by calling plug.Free(); explicitly.
 							try
 							{
 								plug.Free();

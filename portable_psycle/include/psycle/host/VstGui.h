@@ -1,6 +1,6 @@
 #pragma once
-#include "Vst\Aeffect.h"
-#include "childView.h"
+#include "VstHost.h"
+#include "ChildView.h"
 ///\file
 ///\brief interface file for psycle::host::CVstGui.
 namespace psycle
@@ -12,7 +12,7 @@ namespace psycle
 		{
 			DECLARE_DYNCREATE(CVstGui)
 			CVstGui(int n){};
-			AEffect * effect;
+			vst::proxy * proxy;
 			Machine* _pMachine;
 		protected:
 			CVstGui(); // protected constructor used by dynamic creation

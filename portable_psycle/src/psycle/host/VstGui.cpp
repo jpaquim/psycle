@@ -37,8 +37,15 @@ namespace psycle
 
 		void CVstGui::DoTheInit()
 		{
-			effect->dispatcher(effect, effEditTop, 0, 0, NULL, 0.0f);
-			SetTimer(0,25,NULL);
+			try
+			{
+				proxy->dispatcher(effEditTop);
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
+			SetTimer(0, 25, 0);
 		}
 
 		void CVstGui::OnPaint() 
@@ -48,19 +55,40 @@ namespace psycle
 
 		void CVstGui::OnDestroy()
 		{
-			effect->dispatcher(effect,effEditClose,0,0,NULL,0.f);
+			try
+			{
+				proxy->dispatcher(effEditClose);
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
 			CFrameWnd::OnDestroy();
 		}
 
 		void CVstGui::OnEnterIdle(UINT nWhy, CWnd* pWho) 
 		{
 			CFrameWnd::OnEnterIdle(nWhy, pWho);
-			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+			try
+			{
+				proxy->dispatcher(effEditIdle);
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
 		}
 
 		void CVstGui::OnTimer(UINT nIDEvent)
 		{
-			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+			try
+			{
+				proxy->dispatcher(effEditIdle);
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
 			CFrameWnd::OnTimer(nIDEvent);
 		}
 
@@ -82,7 +110,6 @@ namespace psycle
 						else Global::pInputHandler->PlayNote(outnote,127,true);
 					}
 					break;
-
 				case CT_Immediate:
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					break;
@@ -95,23 +122,18 @@ namespace psycle
 
 		void CVstGui::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-
-			CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
-			if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
-			{
-				Global::pInputHandler->StopNote(outnote,true,_pMachine);
-			}
-			else Global::pInputHandler->StopNote(outnote,true);
-
-		//	((CMainFrame *)theApp.m_pMainWnd)->m_wndView.KeyUp(nChar, nRepCnt, nFlags);
+			if(_pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+				Global::pInputHandler->StopNote(outnote, true, _pMachine);
+			else
+				Global::pInputHandler->StopNote(outnote, true);
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CVstGui::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
 			this->SetFocus();
-			
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
 	}

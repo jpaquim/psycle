@@ -13,23 +13,26 @@ namespace psycle
 {
 	namespace host
 	{
-		typedef CMachineInfo * (*GETINFO)(void);
-		typedef CMachineInterface * (*CREATEMACHINE)(void);
+		typedef CMachineInfo * (* GETINFO) ();
+		typedef CMachineInterface * (* CREATEMACHINE) ();
 
 		PluginFxCallback Plugin::_callback;
 
-		Plugin::Plugin(int index)
-		{
-			_macIndex = index;
-			_type = MACH_PLUGIN;
-			_mode = MACHMODE_FX;
-			sprintf(_editName, "Plugin");
-			_dll = NULL;
-			_pInterface = NULL;
-			_psAuthor=NULL;
-			_psDllName=NULL;
-			_psName=NULL;
-		}
+		#pragma warning(push)
+			#pragma warning(disable:4355) // 'this' : used in base member initializer list
+			Plugin::Plugin(int index)
+				: _dll(0)
+				, proxy_(*this)
+				, _psAuthor(0)
+				, _psDllName(0)
+				, _psName(0)
+			{
+				_macIndex = index;
+				_type = MACH_PLUGIN;
+				_mode = MACHMODE_FX;
+				std::sprintf(_editName, "native plugin");
+			}
+		#pragma warning(pop)
 
 		Plugin::~Plugin() throw()
 		{
@@ -37,7 +40,6 @@ namespace psycle
 			delete _psAuthor;
 			delete _psDllName;
 			delete _psName;
-			delete _pInterface;
 		}
 
 		void Plugin::Instance(const char file_name[]) throw(...)
@@ -90,40 +92,215 @@ namespace psycle
 			}
 			try
 			{
-				_pInterface = GetInterface();
+				proxy()(GetInterface());
 			}
 			catch(const std::exception & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(const char * const e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(const long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
-			_pInterface->pCB = &_callback;
-		}
-
-		void Plugin::Free()
-		{
-			if(_pInterface)
-			{
-				delete _pInterface;
-				_pInterface = 0;
-			}
-			if(_dll)
-			{
-				FreeLibrary(_dll);
-				_dll = 0;
-			}
 		}
 
 		void Plugin::Init()
 		{
 			Machine::Init();
-			if(_pInterface) 
+			if(proxy()()) 
 			{
-				_pInterface->Init();
-				for(int gbp = 0; gbp<_pInfo->numParameters; gbp++)
-					_pInterface->ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
+				try
+				{
+					proxy().Init();
+				}
+				catch(const std::exception &)
+				{
+					return;
+				}
+				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
+				{
+					try
+					{
+						proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
+					}
+					catch(const std::exception &)
+					{
+						return;
+					}
+				}
 			}
 		}
+
+		bool Plugin::LoadDll(char* psFileName)
+		{
+			_strlwr(psFileName);
+			char sPath2[_MAX_PATH];
+			CString sPath;
+			#if defined _WINAMP_PLUGIN_
+				sPath = Global::pConfig->GetPluginDir();
+				if( FindFileinDir(psFileName,sPath) )
+				{
+					strcpy(sPath2,sPath);
+					return Instance(sPath2);
+				}
+				return false;
+			#else
+				if(!CNewMachine::dllNames.Lookup(psFileName,sPath)) 
+				{
+					// Check Compatibility Table.
+					// Probably could be done with the dllNames lockup.
+					//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+					std::strcpy(sPath2, psFileName);
+				}
+				else 
+				{ 
+					std::strcpy(sPath2,sPath); 
+				}
+				if(!CNewMachine::TestFilename(sPath2) ) 
+				{
+					return false;
+				}
+				try
+				{
+					Instance(sPath2);
+				}
+				catch(const std::exception & e)
+				{
+					std::ostringstream s; s
+						<< "Exception while instanciating: " << sPath2 << std::endl
+						<< "Replacing with dummy." << std::endl
+						<< typeid(e).name() << std::endl
+						<< e.what();
+					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					return false;
+				}
+				catch(...)
+				{
+					std::ostringstream s; s
+						<< "Exception while instanciating: " << sPath2 << std::endl
+						<< "Replacing with dummy." << std::endl
+						<< "Unkown type of exception";
+					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					return false;
+				}
+				return true;
+			#endif
+		};
+
+		void Plugin::Free() throw(...)
+		{
+			const std::exception * exception(0);
+			try
+			{
+				proxy()(0);
+			}
+			catch(const std::exception & e)
+			{
+				if(!exception) exception = &e;
+			}
+			if(_dll)
+			{
+				::FreeLibrary(_dll);
+				_dll = 0;
+			}
+			if(exception) throw *exception;
+		}
+
+		void Plugin::SaveDllName(RiffFile * pFile) 
+		{
+			CString str = _psDllName;
+			char str2[256];
+			strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+			pFile->Write(&str2,strlen(str2)+1);
+		};
+
+		bool Plugin::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(&size,sizeof(size)); // size of whole structure
+			if(size)
+			{
+				if(version > CURRENT_FILE_VERSION_MACD)
+				{
+					pFile->Skip(size);
+					std::ostringstream s; s
+						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
+						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
+					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					return false;
+				}
+				else
+				{
+					UINT count;
+					pFile->Read(&count,sizeof(count));  // size of vars
+					/*
+					if (count)
+					{
+						pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+					}
+					*/
+					for (UINT i = 0; i < count; i++)
+					{
+						int temp;
+						pFile->Read(&temp,sizeof(temp));
+						SetParameter(i,temp);
+					}
+					size -= sizeof(count) + sizeof(int)*count;
+					if(size)
+					{
+						byte* pData = new byte[size];
+						pFile->Read(pData, size); // Number of parameters
+						try
+						{
+							proxy().PutData(pData); // Internal load
+						}
+						catch(const std::exception &)
+						{
+							return false;
+						}
+						return true;
+					}
+				}
+			}
+			return true;
+		};
+
+		#if !defined _WINAMP_PLUGIN_
+			void Plugin::SaveSpecificChunk(RiffFile* pFile)
+			{
+				UINT count = GetNumParams();
+				UINT size2(0);
+				try
+				{
+					size2 = proxy().GetDataSize();
+				}
+				catch(const std::exception &)
+				{
+					// data won't be saved
+				}
+				UINT size = size2 + sizeof(count) + sizeof(int)*count;
+				pFile->Write(&size,sizeof(size));
+				pFile->Write(&count,sizeof(count));
+				//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+				for (UINT i = 0; i < count; i++)
+				{
+					int temp = GetParamValue(i);
+					pFile->Write(&temp,sizeof temp);
+				}
+				if(size2)
+				{
+					byte * pData = new byte[size2];
+					try
+					{
+						proxy().GetData(pData); // Internal save
+					}
+					catch(const std::exception &)
+					{
+						// this sucks because we already wrote the size,
+						// so now we have to write the data, even if they are corrupted.
+					}
+					pFile->Write(pData, size2); // Number of parameters
+					delete pData;
+				}
+			};
+		#endif
 
 		void Plugin::Work(int numSamples)
 		{
@@ -173,16 +350,27 @@ namespace psycle
 									TriggerDelayCounter[i] -= ns;
 								}
 							}
-							_pInterface->Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
-
+							try
+							{
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
+							}
+							catch(const std::exception &)
+							{
+							}
 							ns = 0;
 						}
 						else
 						{
-							if (nextevent)
+							if(nextevent)
 							{
 								ns -= nextevent;
-								_pInterface->Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
+								try
+								{
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
+								}
+								catch(const std::exception &)
+								{
+								}
 								us += nextevent;
 							}
 							if (TWSActive)
@@ -207,13 +395,16 @@ namespace psycle
 											{
 												activecount++;
 											}
-											_pInterface->ParameterTweak(TWSInst[i],int(TWSCurrent[i]));
+											try
+											{
+												proxy().ParameterTweak(TWSInst[i], int(TWSCurrent[i]));
+											}
+											catch(const std::exception &)
+											{
+											}
 										}
 									}
-									if (activecount == 0)
-									{
-										TWSActive = FALSE;
-									}
+									if(!activecount) TWSActive = false;
 								}
 							}
 							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
@@ -224,7 +415,13 @@ namespace psycle
 									if (TriggerDelayCounter[i] == nextevent)
 									{
 										// do event
-										_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										try
+										{
+											proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										}
+										catch(const std::exception &)
+										{
+										}
 										TriggerDelay[i]._cmd = 0;
 									}
 									else
@@ -237,7 +434,13 @@ namespace psycle
 									if (TriggerDelayCounter[i] == nextevent)
 									{
 										// do event
-										_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										try
+										{
+											proxy().SeqTick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										}
+										catch(const std::exception &)
+										{
+										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
 									}
 									else
@@ -250,7 +453,13 @@ namespace psycle
 									if (TriggerDelayCounter[i] == nextevent)
 									{
 										// do event
-										_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										try
+										{
+											proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										}
+										catch(const std::exception &)
+										{
+										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
 										if (parameter < 9)
@@ -296,60 +505,132 @@ namespace psycle
 			_worked = true;
 		}
 
-		void Plugin::Stop(void)
+		bool Plugin::SetParameter(int numparam,int value)
 		{
-			_pInterface->Stop();
-		}
-
-		void Plugin::Tick(void)
-		{
-			_pInterface->SequencerTick();
-		}
-
-		void Plugin::Tick(int channel, PatternEntry* pData)
-		{
-			//	if (_mode == MACHMODE_GENERATOR) <- effects want command data too please
-			//	{
-					_pInterface->SeqTick(channel ,pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
-			//	}
-
-			if (pData->_note == cdefTweakM || pData->_note == cdefTweakE)
+			if(numparam < _pInfo->numParameters)
 			{
-				if (pData->_inst < _pInfo->numParameters)
+				try
+				{
+					proxy().ParameterTweak(numparam,value);
+				}
+				catch(const std::exception &)
+				{
+					return false;
+				}
+				return true;
+			}
+			else return false;
+		}
+
+		void Plugin::GetParamName(int numparam, char * name)
+		{
+			if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);
+			else std::strcpy(name, "Out of Range");
+
+		}
+
+		int Plugin::GetParamValue(int numparam)
+		{
+			if(numparam < _pInfo->numParameters)
+			{
+				try
+				{
+					return proxy().Vals()[numparam];
+				}
+				catch(const std::exception &)
+				{
+					return -1; // hmm
+				}
+			}
+			else return -1; // hmm
+		}
+
+		void Plugin::GetParamValue(int numparam, char * parval)
+		{
+			if(numparam < _pInfo->numParameters)
+			{
+				try
+				{
+					if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
+						std::sprintf(parval, "%i", proxy().Vals()[numparam]);
+				}
+				catch(const std::exception &)
+				{
+				}
+			}
+			else std::strcpy(parval,"Out of Range");
+		}
+
+		void Plugin::Stop()
+		{
+			try
+			{
+				proxy().Stop();
+			}
+			catch(const std::exception &)
+			{
+			}
+		}
+
+		void Plugin::Tick()
+		{
+			try
+			{
+				proxy().SequencerTick();
+			}
+			catch(const std::exception &)
+			{
+			}
+		}
+
+		void Plugin::Tick(int channel, PatternEntry * pData)
+		{
+			try
+			{
+				proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
+			}
+			catch(const std::exception &)
+			{
+				return;
+			}
+			if(pData->_note == cdefTweakM || pData->_note == cdefTweakE)
+			{
+				if(pData->_inst < _pInfo->numParameters)
 				{
 					int nv = (pData->_cmd<<8)+pData->_parameter;
 					int const min = _pInfo->Parameters[pData->_inst]->MinValue;
 					int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
-
 					nv += min;
-					if (nv > max)
+					if(nv > max) nv = max;
+					try
 					{
-						nv = max;
+						proxy().ParameterTweak(pData->_inst, nv);
 					}
-
-					_pInterface->ParameterTweak(pData->_inst, nv);
-					#if !defined(_WINAMP_PLUGIN_)
-								Global::_pSong->Tweaker = true;
-					#endif // ndef _WINAMP_PLUGIN_
+					catch(const std::exception &)
+					{
+					}
+					#if !defined _WINAMP_PLUGIN_
+						Global::_pSong->Tweaker = true;
+					#endif
 				}
 			}
-			else if (pData->_note == cdefTweakS)
+			else if(pData->_note == cdefTweakS)
 			{
-				if (pData->_inst < _pInfo->numParameters)
+				if(pData->_inst < _pInfo->numParameters)
 				{
 					int i;
-					if (TWSActive)
+					if(TWSActive)
 					{
 						// see if a tweak slide for this parameter is already happening
-						for (i = 0; i < MAX_TWS; i++)
+						for(i = 0; i < MAX_TWS; i++)
 						{
-							if ((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+							if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
 							{
 								// yes
 								break;
 							}
 						}
-						if (i == MAX_TWS)
+						if(i == MAX_TWS)
 						{
 							// nope, find an empty slot
 							for (i = 0; i < MAX_TWS; i++)
@@ -374,14 +655,19 @@ namespace psycle
 						TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
 						float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
 						float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
-
 						TWSDestination[i] += min;
 						if (TWSDestination[i] > max)
 						{
 							TWSDestination[i] = max;
 						}
 						TWSInst[i] = pData->_inst;
-						TWSCurrent[i] = float(_pInterface->Vals[TWSInst[i]]);
+						try
+						{
+							TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
+						}
+						catch(const std::exception &)
+						{
+						}
 						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::_pSong->SamplesPerTick;
 						TWSSamples = 0;
 						TWSActive = TRUE;
@@ -392,14 +678,15 @@ namespace psycle
 						int nv = (pData->_cmd<<8)+pData->_parameter;
 						int const min = _pInfo->Parameters[pData->_inst]->MinValue;
 						int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
-
 						nv += min;
-						if (nv > max)
+						if (nv > max) nv = max;
+						try
 						{
-							nv = max;
+							proxy().ParameterTweak(pData->_inst, nv);
 						}
-
-						_pInterface->ParameterTweak(pData->_inst, nv);
+						catch(const std::exception &)
+						{
+						}
 					}
 				}
 				#if !defined(_WINAMP_PLUGIN_)
@@ -443,22 +730,24 @@ namespace psycle
 				strcpy(sDllName,"arguru synth 2f.dll");
 				wasAS1=true;
 			}
-			if (strcmp(sDllName,"arguru synth 2.dll" ) == 0)
+			if (!strcmp(sDllName,"arguru synth 2.dll" ))
 				strcpy(sDllName,"arguru synth 2f.dll");
-			if (strcmp(sDllName,"synth21.dll" ) == 0)
+			if (!strcmp(sDllName,"synth21.dll" ))
 				strcpy(sDllName,"arguru synth 2f.dll");
-
 			char sPath2[_MAX_PATH];
 			CString sPath;
-			#if defined(_WINAMP_PLUGIN_)
+			#if defined _WINAMP_PLUGIN_
 				sPath = Global::pConfig->GetPluginDir();
-
 				if ( FindFileinDir(sDllName,sPath) )
 				{
 					strcpy(sPath2,sPath);
-					if (!Instance(sPath2)) 
+					try
 					{
-						result=false;
+						Instance(sPath2);
+					}
+					catch(...)
+					{
+						result = false;
 					}
 				}
 				else 
@@ -468,10 +757,9 @@ namespace psycle
 			#else
 				if ( !CNewMachine::dllNames.Lookup(sDllName,sPath) ) 
 				{
-					//			Check Compatibility Table.
-					//			Probably could be done with the dllNames lockup.
-					//
-					//			GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
+					// Check Compatibility Table.
+					// Probably could be done with the dllNames lockup.
+					//GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
 					strcpy(sPath2,sDllName);
 				}
 				else 
@@ -497,50 +785,70 @@ namespace psycle
 						result = false;
 					}
 				}
-			#endif // _WINAMP_PLUGIN_
+			#endif
 			Init();
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
-
 			pFile->Read(&numParameters, sizeof(numParameters));
-			if (result)
+			if(result)
 			{
 				int *Vals = new int[numParameters];
 				pFile->Read(Vals, numParameters*sizeof(int));
-
-				if ( wasAB ) // Patch to replace Arguru Bass by Arguru Synth 2f
+				try
 				{
-					_pInterface->ParameterTweak(0,Vals[0]);
-					for (int i=1;i<15;i++)
+					if ( wasAB ) // Patch to replace Arguru Bass by Arguru Synth 2f
 					{
-						_pInterface->ParameterTweak(i+4,Vals[i]);
+						proxy().ParameterTweak(0,Vals[0]);
+						for (int i=1;i<15;i++)
+						{
+							proxy().ParameterTweak(i+4,Vals[i]);
+						}
+						proxy().ParameterTweak(19,0);
+						proxy().ParameterTweak(20,Vals[15]);
+						if (numParameters>16)
+						{
+							proxy().ParameterTweak(24,Vals[16]);
+							proxy().ParameterTweak(25,Vals[17]);
+						}
 					}
-					_pInterface->ParameterTweak(19,0);
-					_pInterface->ParameterTweak(20,Vals[15]);
-
-					if (numParameters>16)
+					else for (int i=0; i<numParameters; i++)
 					{
-						_pInterface->ParameterTweak(24,Vals[16]);
-						_pInterface->ParameterTweak(25,Vals[17]);
+						proxy().ParameterTweak(i,Vals[i]);
 					}
 				}
-				else for (int i=0; i<numParameters; i++)
+				catch(const std::exception &)
 				{
-					_pInterface->ParameterTweak(i,Vals[i]);
 				}
-				int size = _pInterface->GetDataSize();
-				//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
-				if (size)
+				try
 				{
-					byte* pData = new byte[size];
-					pFile->Read(pData, size); // Number of parameters
-					_pInterface->PutData(pData); // Internal load
-					delete pData;
+					int size = proxy().GetDataSize();
+					//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
+					if(size)
+					{
+						byte* pData = new byte[size];
+						pFile->Read(pData, size); // Number of parameters
+						try
+						{
+							proxy().PutData(pData); // Internal load
+						}
+						catch(const std::exception &)
+						{
+						}
+						delete pData;
+					}
 				}
-				
-				if ( wasAS1 )	// Patch to replace Synth1 by Arguru Synth 2f
+				catch(const std::exception &)
 				{
-					_pInterface->ParameterTweak(17,Vals[17]+10);
+				}
+				if(wasAS1) // Patch to replace Synth1 by Arguru Synth 2f
+				{
+					try
+					{
+						proxy().ParameterTweak(17,Vals[17]+10);
+					}
+					catch(const std::exception &)
+					{
+					}
 				}
 				delete Vals;
 			}

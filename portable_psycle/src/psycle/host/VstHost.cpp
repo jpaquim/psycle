@@ -21,185 +21,10 @@ namespace psycle
 
 		namespace vst
 		{
-			VstTimeInfo plugin::_timeInfo;
-
-			plugin::plugin()
-				: queue_size(0)
-				, wantidle(false)
-				, _sDllName(0)
-				, _pEffect(0)
-				, h_dll(0)
-				, instantiated(false)
-				, requiresProcess(false)
-				, requiresRepl(false)
-				#if !defined _WINAMP_PLUGIN_
-					, editorWnd(0)
-				#endif
-			{
-				outputs[0] = _pSamplesL;
-				outputs[1] = _pSamplesR;
-				std::memset(junk, 0, STREAM_SIZE * sizeof(float));
-				for(int i(0) ; i < vst::max_io ; ++i)
-				{
-					inputs[i]=junk;
-					outputs[i]=junk;
-				}
-			}
-
-			plugin::~plugin() throw()
-			{
-				try
-				{
-					Free();
-				}
-				catch(...)
-				{
-					// wow.. cannot do anything in a destructor
-				}
-				delete _sDllName;
-			}
-
-			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
-			{
-				try
-				{
-					if(_sDllName) delete _sDllName;
-					_sDllName = new char[std::strlen(dllname) + 1];
-					std::strcpy(_sDllName, dllname);
-					TRACE("VST plugin: library file name: %s\n", _sDllName);
-					_pEffect = 0;
-					instantiated = false;
-					if(!(h_dll = ::LoadLibrary(dllname)))
-					{
-						std::ostringstream s; s
-							<< "could not load library: " << dllname << std::endl
-							<< operating_system::exceptions::code_description();
-						throw host::exceptions::library_errors::loading_error(s.str());
-					}
-					PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
-					if(!main)
-					{	
-						std::ostringstream s; s
-							<< "could not resolve symbol 'main' in library: " << dllname << std::endl
-							<< operating_system::exceptions::code_description();
-						throw host::exceptions::library_errors::symbol_resolving_error(s.str());
-					}
-					// 1: calls the "main" function and receives the pointer to the AEffect structure.
-					{
-						try 
-						{
-							_pEffect = main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
-						}
-						catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-						catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
-					}
-					if(!_pEffect || _pEffect->magic!=kEffectMagic)
-					{
-						std::ostringstream s; s << "call to function 'main' returned a bad value";
-						if(_pEffect) s << std::endl << "returned value signature: " << _pEffect->magic;
-						_pEffect = 0;
-						throw host::exceptions::function_errors::bad_returned_value(s.str());
-					}
-					TRACE("VST plugin: instanciated at (Effect*): %.8X\n", (int) _pEffect);
-					// 2: Host to Plug, setSampleRate ( 44100.000000 )
-					Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
-					// 3: Host to Plug, setBlockSize ( 512 ) 
-					Dispatch(effSetBlockSize, 0, STREAM_SIZE);
-					// 4: Host to Plug, open
-					{
-						//init plugin (probably a call to "Init()" function should be done here)
-						_pEffect->user = this;
-						Dispatch(effOpen);
-					}
-					// 5: Host to Plug, setSpeakerArrangement returned: false 
-					VstSpeakerArrangement VSTsa;
-					{
-						VSTsa.type = kSpeakerArrStereo;
-						VSTsa.numChannels = 2;
-						VSTsa.speakers[0].type = kSpeakerL;
-						VSTsa.speakers[1].type = kSpeakerR;
-						Dispatch(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
-					}
-					// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
-					Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
-					// 7: Host to Plug, setBlockSize ( 512 ) 
-					Dispatch(effSetBlockSize,  0, STREAM_SIZE);
-					// 8: Host to Plug, setSpeakerArrangement returned: false 
-					Dispatch(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
-					// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
-					Dispatch(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
-					// 10: Host to Plug, setBlockSize ( 512 ) 
-					Dispatch(effSetBlockSize, 0, STREAM_SIZE);
-					// 11: Host to Plug, getProgram returned: 0 
-					long int program(Dispatch(effGetProgram));
-					// 12: Host to Plug, getProgram returned: 0 
-					program = Dispatch( effGetProgram);
-					// 13: Host to Plug, getVstVersion returned: 2300 
-					{
-						_version = Dispatch(effGetVstVersion);
-						if(!_version) _version=1;
-					}
-					// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
-					Dispatch(effSetProgram);
-					Dispatch(effMainsChanged, 0, 1);
-					if(!Dispatch(effGetEffectName, 0, 0, &_sProductName))
-					{
-						CString str1(dllname);
-						CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
-						str1 = str2.Left(str2.Find('.'));
-						std::strcpy(_sProductName,str1);
-					}
-					if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
-					_editName[31]='\0'; // <bohan> \todo why is that 31 ?
-					// Compatibility hacks
-					{
-						if(std::strcmp(_sProductName, "sc-101") == 0)
-						{
-							requiresRepl = true;
-						}
-					}
-					if(!Dispatch(effGetVendorString, 0, 0, &_sVendorName)) std::strcpy(_sVendorName, "Unknown vendor");
-					_isSynth = (_pEffect->flags & effFlagsIsSynth) ? true : false;
-					instantiated = true;
-					TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", _pEffect->numInputs, _pEffect->numOutputs);
-				}
-				catch(...)
-				{
-					throw; // this is now all handled by parent calls
-				}
-			}
-
-			void plugin::Free() throw(...) // called also in destructor
-			{
-				if(instantiated)
-				{
-					TRACE("VST plugin: freeing");
-					if(_pEffect)
-					{
-						TRACE("VST plugin: querying free 0x%.8X\n", (int) _pEffect);
-						_pEffect->user = 0;
-						Dispatch(effMainsChanged);
-						Dispatch(effClose);
-						_pEffect = 0;
-					}
-					if(h_dll)
-					{
-						TRACE("VST plugin: freeing library 0x%.8X\n", (int) _pEffect);
-						FreeLibrary(h_dll);
-						h_dll = 0;
-					}
-					instantiated = false;
-				}
-			}
-
 			namespace exceptions
 			{
 				namespace dispatch_errors
 				{
-					/// Dispatcher operation code descriptions.
 					const std::string operation_description(const long int & code) throw()
 					{
 						std::ostringstream s; s << code << ": ";
@@ -237,33 +62,204 @@ namespace psycle
 						}
 						return s.str();
 					}
-
-					template<typename e> void rethrow(const plugin & plugin, const long int operation, const e * const e = 0) throw(dispatch_error)
-					{
-						std::ostringstream title; title << "VST Plugin: " << plugin._editName << ": " << plugin.GetDllName();
-						std::ostringstream s; s
-							<< title.str().c_str() << std::endl
-							<< "VST plugin had an exception on dispatcher operation: " << operation_description(operation) << '.' << std::endl
-							<< typeid(*e).name() << std::endl
-							<< host::exceptions::function_errors::string(*e);
-						::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
-						throw dispatch_error(s.str());
-					}
 				}
 			}
 
-			long int plugin::Dispatch(long int operation, long int index, long int value, void * ptr, float opt) throw(exceptions::dispatch_error)
+			VstTimeInfo plugin::_timeInfo;
+
+			#pragma warning(push)
+				#pragma warning(disable:4355) // 'this' : used in base member initializer list
+				plugin::plugin()
+					: queue_size(0)
+					, wantidle(false)
+					, _sDllName(0)
+					, h_dll(0)
+					, instantiated(false)
+					, proxy_(*this)
+					, requiresProcess(false)
+					, requiresRepl(false)
+					#if !defined _WINAMP_PLUGIN_
+						, editorWnd(0)
+					#endif
+				{
+					outputs[0] = _pSamplesL;
+					outputs[1] = _pSamplesR;
+					std::memset(junk, 0, STREAM_SIZE * sizeof(float));
+					for(int i(0) ; i < vst::max_io ; ++i)
+					{
+						inputs[i]=junk;
+						outputs[i]=junk;
+					}
+				}
+			#pragma warning(pop)
+
+			plugin::~plugin() throw()
 			{
 				try
 				{
-					return _pEffect->dispatcher(_pEffect, operation, index, value, ptr, opt);
+					Free();
 				}
-				///<bohan> \todo i don't know why we get a "warning C4702: unreachable code" with msvc7.1 here...
-				catch(const std::exception & e) { exceptions::dispatch_errors::rethrow(*this, operation, &e); }
-				catch(const char e[]) { exceptions::dispatch_errors::rethrow(*this, operation, &e); }
-				catch(const long int & e) { exceptions::dispatch_errors::rethrow(*this, operation, &e); }
-				catch(const unsigned long int & e) { exceptions::dispatch_errors::rethrow(*this, operation, &e); }
-				catch(...) { exceptions::dispatch_errors::rethrow<void*>(*this, operation); }
+				catch(...)
+				{
+					// wow.. cannot do anything in a destructor
+				}
+				delete _sDllName;
+			}
+
+			void plugin::Instance(const char dllname[], bool overwriteName) throw(...)
+			{
+				try
+				{
+					if(_sDllName) delete _sDllName;
+					_sDllName = new char[std::strlen(dllname) + 1];
+					std::strcpy(_sDllName, dllname);
+					TRACE("VST plugin: library file name: %s\n", _sDllName);
+					proxy()(0);
+					instantiated = false;
+					if(!(h_dll = ::LoadLibrary(dllname)))
+					{
+						std::ostringstream s; s
+							<< "could not load library: " << dllname << std::endl
+							<< operating_system::exceptions::code_description();
+						throw host::exceptions::library_errors::loading_error(s.str());
+					}
+					PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
+					if(!main)
+					{	
+						std::ostringstream s; s
+							<< "could not resolve symbol 'main' in library: " << dllname << std::endl
+							<< operating_system::exceptions::code_description();
+						throw host::exceptions::library_errors::symbol_resolving_error(s.str());
+					}
+					// 1: calls the "main" function and receives the pointer to the AEffect structure.
+					{
+						try 
+						{
+							proxy()(main(reinterpret_cast<audioMasterCallback>(&AudioMaster)));
+						}
+						catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+						catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+						catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+						catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+						catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
+					}
+					if(!proxy()() || proxy().magic() != kEffectMagic)
+					{
+						std::ostringstream s; s << "call to function 'main' returned a bad value";
+						if(proxy()()) s << std::endl << "returned value signature: " << proxy().magic();
+						throw host::exceptions::function_errors::bad_returned_value(s.str());
+					}
+					TRACE("VST plugin: instanciated.");
+					// 2: Host to Plug, setSampleRate ( 44100.000000 )
+					proxy().dispatcher(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+					// 3: Host to Plug, setBlockSize ( 512 ) 
+					proxy().dispatcher(effSetBlockSize, 0, STREAM_SIZE);
+					// 4: Host to Plug, open
+					{
+						//init plugin (probably a call to "Init()" function should be done here)
+						proxy().dispatcher(effOpen);
+					}
+					// 5: Host to Plug, setSpeakerArrangement returned: false 
+					VstSpeakerArrangement VSTsa;
+					{
+						VSTsa.type = kSpeakerArrStereo;
+						VSTsa.numChannels = 2;
+						VSTsa.speakers[0].type = kSpeakerL;
+						VSTsa.speakers[1].type = kSpeakerR;
+						proxy().dispatcher(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+					}
+					// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
+					proxy().dispatcher(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+					// 7: Host to Plug, setBlockSize ( 512 ) 
+					proxy().dispatcher(effSetBlockSize,  0, STREAM_SIZE);
+					// 8: Host to Plug, setSpeakerArrangement returned: false 
+					proxy().dispatcher(effSetSpeakerArrangement, 0, (long) &VSTsa, &VSTsa);
+					// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
+					proxy().dispatcher(effSetSampleRate, 0, 0, 0, (float) Global::pConfig->GetSamplesPerSec());
+					// 10: Host to Plug, setBlockSize ( 512 ) 
+					proxy().dispatcher(effSetBlockSize, 0, STREAM_SIZE);
+					// 11: Host to Plug, getProgram returned: 0 
+					long int program(proxy().dispatcher(effGetProgram));
+					// 12: Host to Plug, getProgram returned: 0 
+					program = proxy().dispatcher(effGetProgram);
+					// 13: Host to Plug, getVstVersion returned: 2300 
+					{
+						_version = proxy().dispatcher(effGetVstVersion);
+						if(!_version) _version = 1;
+					}
+					// 14: Host to Plug, getProgramNameIndexed ( -1 , 0 , ptr to char ) 
+					proxy().dispatcher(effSetProgram);
+					proxy().dispatcher(effMainsChanged, 0, 1);
+					if(!proxy().dispatcher(effGetEffectName, 0, 0, &_sProductName))
+					{
+						CString str1(dllname);
+						CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
+						str1 = str2.Left(str2.Find('.'));
+						std::strcpy(_sProductName,str1);
+					}
+					if(overwriteName) std::memcpy(_editName, _sProductName, 31); // <bohan> \todo why is that 31 ?
+					_editName[31]='\0'; // <bohan> \todo why is that 31 ?
+					// Compatibility hacks
+					{
+						if(std::strcmp(_sProductName, "sc-101") == 0)
+						{
+							requiresRepl = true;
+						}
+					}
+					if(!proxy().dispatcher(effGetVendorString, 0, 0, &_sVendorName)) std::strcpy(_sVendorName, "Unknown vendor");
+					_isSynth = proxy().flags() & effFlagsIsSynth;
+					instantiated = true;
+					TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
+				}
+				catch(...)
+				{
+					throw; // this is now all handled by parent calls
+				}
+			}
+
+			void plugin::Free() throw(...) // called also in destructor
+			{
+				if(instantiated)
+				{
+					TRACE("VST plugin: freeing ...");
+					const std::exception * exception(0);
+					if(proxy()())
+					{
+						TRACE("VST plugin: freeing ... dispatcher");
+						try
+						{
+							proxy().dispatcher(effMainsChanged);
+						}
+						catch(const std::exception & e)
+						{
+							if(!exception) exception = &e;
+						}
+						try
+						{
+							proxy().dispatcher(effClose);
+						}
+						catch(const std::exception & e)
+						{
+							if(!exception) exception = &e;
+						}
+						try
+						{
+							proxy()(0);
+						}
+						catch(const std::exception & e)
+						{
+							if(!exception) exception = &e;
+						}
+					}
+					if(h_dll)
+					{
+						TRACE("VST plugin: freeing ... library");
+						::FreeLibrary(h_dll);
+						h_dll = 0;
+					}
+					instantiated = false;
+					if(exception) throw *exception;
+				}
 			}
 
 			bool plugin::LoadSpecificFileChunk(RiffFile * pFile, int version)
@@ -283,7 +279,14 @@ namespace psycle
 					}
 					pFile->Read(&_program, sizeof _program);
 					// set the program
-					SetCurrentProgram(_program);
+					try
+					{
+						proxy().dispatcher(effSetProgram, 0, _program);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 					UINT count;
 					pFile->Read(&count, sizeof count);
 					for(UINT i(0) ; i < count ; ++i)
@@ -297,13 +300,13 @@ namespace psycle
 					{
 						// <bohan> why don't we just call LoadChunk?
 						// <bohan> hmm, shit, LoadCunk actually reads the chunk size too.
-						if(_pEffect->flags & effFlagsProgramChunks)
+						if(proxy().flags() & effFlagsProgramChunks)
 						{
 							char * const data(new char[size]);
 							pFile->Read(data, size); // Number of parameters
 							try 
 							{
-								Dispatch(effSetChunk, 0, size, data);
+								proxy().dispatcher(effSetChunk, 0, size, data);
 							}
 							catch(...)
 							{
@@ -326,28 +329,34 @@ namespace psycle
 
 			bool plugin::LoadChunk(RiffFile * pFile)
 			{
-				if(_pEffect->flags & effFlagsProgramChunks)
+				bool b;
+				try
 				{
-					// read chunk size
-					long chunk_size;
-					pFile->Read(&chunk_size, sizeof chunk_size);
-					// read chunk data
-					char * chunk(new char[chunk_size]);
-					pFile->Read(chunk, chunk_size);
-					try
-					{
-						Dispatch(effSetChunk, 0, chunk_size, chunk);
-					}
-					catch (...)
-					{
-						// <bohan> hmm, so, data just gets lost?
-						delete chunk;
-						return false;
-					}
-					delete chunk;
-					return true;
+					b = proxy().flags() & effFlagsProgramChunks;
 				}
-				return false;
+				catch(const std::exception &)
+				{
+					b = false;
+				}
+				if(!b) return false;
+				// read chunk size
+				long chunk_size;
+				pFile->Read(&chunk_size, sizeof chunk_size);
+				// read chunk data
+				char * chunk(new char[chunk_size]);
+				pFile->Read(chunk, chunk_size);
+				try
+				{
+					proxy().dispatcher(effSetChunk, 0, chunk_size, chunk);
+				}
+				catch(const std::exception &)
+				{
+					// <bohan> hmm, so, data just gets lost?
+					delete chunk;
+					return false;
+				}
+				delete chunk;
+				return true;
 			}
 
 			void plugin::SaveDllName(RiffFile * pFile) 
@@ -363,13 +372,22 @@ namespace psycle
 				UINT count(GetNumParams());
 				UINT size(sizeof _program + sizeof count + sizeof(float) * count);
 				char * pData(0);
-				if(_pEffect->flags & effFlagsProgramChunks)
+				bool b;
+				try
+				{
+					b = proxy().flags() & effFlagsProgramChunks;
+				}
+				catch(const std::exception &)
+				{
+					b = false;
+				}
+				if(b)
 				{
 					try 
 					{
-						size += Dispatch(effGetChunk, 0, 0, &pData);
+						size += proxy().dispatcher(effGetChunk, 0, 0, &pData);
 					}
-					catch(...)
+					catch(const std::exception &)
 					{
 						// <bohan>
 						// i think it's not necessary to set the size to the same value again.
@@ -382,8 +400,16 @@ namespace psycle
 				pFile->Write(&count, sizeof count);
 				for(UINT i(0); i < count; ++i)
 				{
-					float temp(GetParameter(i));
-					pFile->Write(&temp,sizeof(temp));
+					float temp;
+					try
+					{
+						temp = proxy().getParameter(i);
+					}
+					catch(const std::exception &)
+					{
+						temp = 0; // hmm
+					}
+					pFile->Write(&temp, sizeof temp);
 				}
 				size -= sizeof _program + sizeof count + sizeof(float) * count;
 				if(size > 0)
@@ -475,32 +501,66 @@ namespace psycle
 				return true;
 			};
 
+			void plugin::GetParamValue(int numparam, char * parval)
+			{
+				try
+				{
+					if(numparam < proxy().numParams()) DescribeValue(numparam, parval);
+					else std::strcpy(parval,"Out of Range");
+				}
+				catch(const std::exception &)
+				{
+					// <bohan>
+					// exception blocked here for now,
+					// but we really should do something...
+					//throw;
+					std::strcpy(parval, "fucked up");
+				}
+			}
+
 			bool plugin::DescribeValue(int parameter, char * psTxt)
 			{
 				if(instantiated)
 				{
-					if(parameter < _pEffect->numParams)
+					bool b;
+					try
+					{
+						b = parameter < proxy().numParams();
+					}
+					catch(const std::exception &)
+					{
+						b = false;
+					}
+					if(b)
 					{
 						char par_display[64]={0};
 						char par_label[64]={0};
 						try
 						{
-							Dispatch(effGetParamDisplay, parameter, 0, par_display);
+							proxy().dispatcher(effGetParamDisplay, parameter, 0, par_display);
 						}
-						catch (...)
+						catch(const std::exception &)
 						{
-							// o_O`
+							// <bohan>
+							// exception blocked here for now,
+							// but we really should do something...
+							//throw;
+							std::strcpy(par_display, "fucked up");
 						}
 						try
 						{
-							Dispatch(effGetParamLabel, parameter, 0, par_label);
+							proxy().dispatcher(effGetParamLabel, parameter, 0, par_label);
 						}
-						catch (...)
+						catch(const std::exception &)
 						{
-							// o_O`
+							// <bohan>
+							// exception blocked here for now,
+							// but we really should do something...
+							//throw;
+							std::strcpy(par_label, "fucked up");
 						}
 						std::sprintf(psTxt, "%s(%s)", par_display, par_label);
-						return true;
+						return true; // maybe we could return false on error instead of writing errors in the description
 					}
 					else std::sprintf(psTxt, "Invalid NumParams Value");
 				}
@@ -510,15 +570,26 @@ namespace psycle
 
 			bool plugin::SetParameter(int parameter, float value)
 			{
-				if(instantiated)
+				if(!instantiated) return false;
+				bool b;
+				try
 				{
-					if(parameter < _pEffect->numParams)
-					{
-						_pEffect->setParameter(_pEffect, parameter, value);
-						return true;
-					}
+					b = parameter < proxy().numParams();
 				}
-				return false;
+				catch(const std::exception &)
+				{
+					b = false;
+				}
+				if(!b) return false;
+				try
+				{
+					proxy().setParameter(parameter, value);
+				}
+				catch(const std::exception &)
+				{
+					return false;
+				}
+				return true;
 			}
 
 			bool plugin::SetParameter(int parameter, int value)
@@ -526,15 +597,16 @@ namespace psycle
 				return SetParameter(parameter, value / 65535.0f);
 			}
 
+			/*
 			int plugin::GetCurrentProgram()
 			{
 				if(instantiated)
 				{
 					try
 					{
-						return Dispatch(effGetProgram);
+						return proxy().dispatcher(effGetProgram);
 					}
-					catch (...)
+					catch(const std::exception &)
 					{
 						return 0; // <bohan> well, what to return if it fails? 0 is wrong..
 					}
@@ -551,39 +623,36 @@ namespace psycle
 				{
 					try
 					{
-						Dispatch(effSetProgram, 0, prg);
+						proxy().dispatcher(effSetProgram, 0, prg);
 					}
-					catch (...)
+					catch(const std::exception &)
 					{
 						// o_O`
 					}
 				}
 			}
+			*/
 
 			bool plugin::AddMIDI(unsigned char data0, unsigned char data1, unsigned char data2)
 			{
-				if(instantiated)
-				{
-					VstMidiEvent * pevent(&midievent[queue_size]);
-					pevent->type = kVstMidiType;
-					pevent->byteSize = 24;
-					pevent->deltaFrames = 0;
-					pevent->flags = 0;
-					pevent->detune = 0;
-					pevent->noteLength = 0;
-					pevent->noteOffset = 0;
-					pevent->reserved1 = 0;
-					pevent->reserved2 = 0;
-					pevent->noteOffVelocity = 0;
-					pevent->midiData[0] = data0;
-					pevent->midiData[1] = data1;
-					pevent->midiData[2] = data2;
-					pevent->midiData[3] = 0;
-					if(queue_size < MAX_VST_EVENTS - 1) ++queue_size;
-					else queue_size = MAX_VST_EVENTS - 1;
-					return true;
-				}
-				else return false;
+				if(!instantiated) return false;
+				VstMidiEvent * pevent(&midievent[queue_size]);
+				pevent->type = kVstMidiType;
+				pevent->byteSize = 24;
+				pevent->deltaFrames = 0;
+				pevent->flags = 0;
+				pevent->detune = 0;
+				pevent->noteLength = 0;
+				pevent->noteOffset = 0;
+				pevent->reserved1 = 0;
+				pevent->reserved2 = 0;
+				pevent->noteOffVelocity = 0;
+				pevent->midiData[0] = data0;
+				pevent->midiData[1] = data1;
+				pevent->midiData[2] = data2;
+				pevent->midiData[3] = 0;
+				if(queue_size < MAX_VST_EVENTS - 1) ++queue_size; else queue_size = MAX_VST_EVENTS - 1;
+				return true;
 			}
 
 
@@ -599,9 +668,9 @@ namespace psycle
 					//Finally Send the events.
 					try
 					{
-						Dispatch(effProcessEvents, 0, 0, &events);
+						proxy().dispatcher(effProcessEvents, 0, 0, &events);
 					}
-					catch(...)
+					catch(const std::exception &)
 					{
 						queue_size = 0;
 						//throw;
@@ -647,9 +716,13 @@ namespace psycle
 					{
 						try
 						{
-							reinterpret_cast<plugin *>(effect->user)->Dispatch(effEditIdle);
+							reinterpret_cast<plugin *>(effect->user)->proxy().dispatcher(effEditIdle);
 						}
-						catch (...)
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+						catch(...) // reinterpret_cast sucks
 						{
 							// o_O`
 						}
@@ -762,9 +835,20 @@ namespace psycle
 				case audioMasterNeedIdle:
 					if(effect)
 					{
-						if( effect->user) 
+						try
 						{
-							reinterpret_cast<plugin *>(effect->user)->wantidle = true;
+							if( effect->user) 
+							{
+								reinterpret_cast<plugin *>(effect->user)->wantidle = true;
+							}
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+						catch(...) // reinterpret_cast sucks
+						{
+							// o_O`
 						}
 					}
 					return 1;
@@ -794,9 +878,13 @@ namespace psycle
 					{
 						try
 						{
-							reinterpret_cast<plugin *>(effect->user)->Dispatch(effEditIdle);
+							reinterpret_cast<plugin *>(effect->user)->proxy().dispatcher(effEditIdle);
 						}
-						catch (...)
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+						catch(...) // reinterpret_cast sucks
 						{
 							// o_O`
 						}
@@ -806,10 +894,21 @@ namespace psycle
 					#if !defined _WINAMP_PLUGIN_
 							if(effect)
 							{
-								if( effect->user)
+								try
 								{
-									if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
-										reinterpret_cast<CVstEditorDlg *>(reinterpret_cast<plugin *>(effect->user)->editorWnd)->Resize(index, value);
+									if( effect->user)
+									{
+										if(reinterpret_cast<plugin *>(effect->user)->editorWnd)
+											reinterpret_cast<CVstEditorDlg *>(reinterpret_cast<plugin *>(effect->user)->editorWnd)->Resize(index, value);
+									}
+								}
+								catch(const std::exception &)
+								{
+									// o_O`
+								}
+								catch(...) // reinterpret_cast sucks
+								{
+									// o_O`
 								}
 							}
 					#endif
@@ -987,7 +1086,14 @@ namespace psycle
 						{
 							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
 							TWSInst[i] = pData->_inst;
-							TWSCurrent[i] = GetParameter(TWSInst[i]);
+							try
+							{
+								TWSCurrent[i] = proxy().getParameter(TWSInst[i]);
+							}
+							catch(const std::exception &)
+							{
+								TWSCurrent[i] = 0;
+							}
 							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::_pSong->SamplesPerTick;
 							TWSSamples = 0;
 							TWSActive = true;
@@ -1091,7 +1197,14 @@ namespace psycle
 					for(int i(0) ; i < 16 ; ++i) AddMIDI(0xb0 + i, 0x7b); // Reset all controllers
 					SendMidi();
 					*/
-					_pEffect->process(_pEffect, inputs, inputs, 64);
+					try
+					{
+						proxy().process(inputs, inputs, 64);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 				}
 			}
 
@@ -1106,9 +1219,9 @@ namespace psycle
 					{
 						try
 						{
-							Dispatch(effIdle);
+							proxy().dispatcher(effIdle);
 						}
-						catch (...)
+						catch(const std::exception &)
 						{
 							// o_O`
 						}
@@ -1138,10 +1251,17 @@ namespace psycle
 								// come back to this
 								if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
 							}
-							if(!requiresRepl) 
-								_pEffect->process(_pEffect, tempinputs, tempoutputs, ns);
-							else
-								_pEffect->processReplacing(_pEffect, tempinputs, tempoutputs, ns);
+							try
+							{
+								if(!requiresRepl) 
+									proxy().process(tempinputs, tempoutputs, ns);
+								else
+									proxy().processReplacing(tempinputs, tempoutputs, ns);
+							}
+							catch(const std::exception &)
+							{
+								// o_O`
+							}
 							ns = 0;
 						}
 						else
@@ -1149,10 +1269,17 @@ namespace psycle
 							if(nextevent)
 							{
 								ns -= nextevent;
-								if(!requiresRepl) 
-									_pEffect->process(_pEffect, tempinputs, tempoutputs, nextevent);
-								else 
-									_pEffect->processReplacing(_pEffect, tempinputs, tempoutputs, nextevent);
+								try
+								{
+									if(!requiresRepl)
+										proxy().process(tempinputs, tempoutputs, nextevent);
+									else 
+										proxy().processReplacing(tempinputs, tempoutputs, nextevent);
+								}
+								catch(const std::exception &)
+								{
+									// o_O`
+								}
 								for(int i(0) ; i < vst::max_io; ++i)
 								{
 									tempinputs[i] += nextevent;
@@ -1229,7 +1356,14 @@ namespace psycle
 							}
 						}
 					}
-					if( _pEffect->numOutputs == 1) Dsp::Add(outputs[0], outputs[1], numSamples, 1);
+					try
+					{
+						if(proxy().numOutputs() == 1) Dsp::Add(outputs[0], outputs[1], numSamples, 1);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 					#if !defined _WINAMP_PLUGIN_
 					// volume "counter"
 					{
@@ -1330,7 +1464,14 @@ namespace psycle
 						{
 							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
 							TWSInst[i] = pData->_inst;
-							TWSCurrent[i] = GetParameter(TWSInst[i]);
+							try
+							{
+								TWSCurrent[i] = proxy().getParameter(TWSInst[i]);
+							}
+							catch(const std::exception &)
+							{
+								TWSCurrent[i] = 0;
+							}
 							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::_pSong->SamplesPerTick;
 							TWSSamples = 0;
 							TWSActive = true;
@@ -1362,7 +1503,7 @@ namespace psycle
 						{
 							try
 							{
-								Dispatch(effIdle, 0, 0, NULL, 0.0f);
+								proxy().dispatcher(effIdle, 0, 0, NULL, 0.0f);
 							}
 							catch (...)
 							{
@@ -1371,14 +1512,28 @@ namespace psycle
 						}
 						SendMidi();
 						Dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
-						if(_pEffect->numInputs == 1)
+						try
 						{
-							///\todo MIX input0 and input1!
+							if(proxy().numInputs() == 1)
+							{
+								///\todo MIX input0 and input1!
+							}
 						}
-						if(!(_pEffect->flags & effFlagsCanReplacing || requiresRepl))
+						catch(const std::exception &)
 						{
-							Dsp::Clear(_pOutSamplesL, numSamples);
-							Dsp::Clear(_pOutSamplesR, numSamples);
+							// o_O`
+						}
+						try
+						{
+							if(!(proxy().flags() & effFlagsCanReplacing || requiresRepl))
+							{
+								Dsp::Clear(_pOutSamplesL, numSamples);
+								Dsp::Clear(_pOutSamplesR, numSamples);
+							}
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
 						}
 						float * tempinputs[vst::max_io];
 						float * tempoutputs[vst::max_io];
@@ -1404,10 +1559,17 @@ namespace psycle
 									// come back to this
 									if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
 								}
-								if((_pEffect->flags & effFlagsCanReplacing) || requiresRepl)
-									_pEffect->processReplacing(_pEffect, tempinputs, tempoutputs, ns);
-								else
-									_pEffect->process(_pEffect, tempinputs, tempoutputs, ns);
+								try
+								{
+									if((proxy().flags() & effFlagsCanReplacing) || requiresRepl)
+										proxy().processReplacing(tempinputs, tempoutputs, ns);
+									else
+										proxy().process(tempinputs, tempoutputs, ns);
+								}
+								catch(const std::exception &)
+								{
+									// o_O`
+								}
 								ns = 0;
 							}
 							else
@@ -1415,10 +1577,17 @@ namespace psycle
 								if(nextevent)
 								{
 									ns -= nextevent;
-									if((_pEffect->flags & effFlagsCanReplacing) || requiresRepl)
-										_pEffect->processReplacing(_pEffect, tempinputs, tempoutputs, nextevent);
-									else
-										_pEffect->process(_pEffect, tempinputs, tempoutputs, nextevent);
+									try
+									{
+										if((proxy().flags() & effFlagsCanReplacing) || requiresRepl)
+											proxy().processReplacing(tempinputs, tempoutputs, nextevent);
+										else
+											proxy().process(tempinputs, tempoutputs, nextevent);
+									}
+									catch(const std::exception &)
+									{
+										// o_O`
+									}
 									for(int i(0) ; i < vst::max_io ; ++i)
 									{
 										tempinputs[i]+=nextevent;
@@ -1493,7 +1662,14 @@ namespace psycle
 								}
 							}
 						}
-						if( _pEffect->numOutputs == 1) std::memcpy(outputs[1], outputs[0], numSamples * sizeof(float));
+						try
+						{
+							if(proxy().numOutputs() == 1) std::memcpy(outputs[1], outputs[0], numSamples * sizeof(float));
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
 						// Just an inversion of the pointers
 						// so that i don't need to copy the
 						// whole _pOutSamples to _pSamples

@@ -1893,16 +1893,32 @@ namespace psycle
 						else if (( pMac[i]->_type == MACH_VST ) || 
 								( pMac[i]->_type == MACH_VSTFX))
 						{
-							bool chunkread=false;
-							if( chunkpresent )	chunkread=((vst::plugin*)pMac[i])->LoadChunk(pFile);
-							((vst::plugin*)pMac[i])->SetCurrentProgram(((vst::plugin*)pMac[i])->_program);
-							if ( !chunkpresent || !chunkread )
+							bool chunkread = false;
+							try
 							{
-								const int vi = ((vst::plugin*)pMac[i])->_instance;
-								const int numpars=vstL[vi].numpars;
-								for (int c=0; c<numpars; c++)
+								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
+								if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
+								plugin.proxy().dispatcher(effSetProgram, 0, plugin._program);
+							}
+							catch(const std::exception &)
+							{
+								// o_O`
+							}
+							if(!chunkpresent || !chunkread)
+							{
+								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
+								const int vi = plugin._instance;
+								const int numpars = vstL[vi].numpars;
+								for (int c(0) ; c < numpars; ++c)
 								{
-									((vst::plugin*)pMac[i])->SetParameter(c, vstL[vi].pars[c]);
+									try
+									{
+										plugin.proxy().setParameter(c, vstL[vi].pars[c]);
+									}
+									catch(const std::exception &)
+									{
+										// o_O`
+									}
 								}
 							}
 						}
