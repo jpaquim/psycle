@@ -132,6 +132,10 @@ void CWireDlg::OnCancel()
 	DestroyWindow();
 	bufBM->DeleteObject();
 	clearBM->DeleteObject();
+	linepenL.DeleteObject();
+	linepenR.DeleteObject();
+	linepenbL.DeleteObject();
+	linepenbR.DeleteObject();
 	delete this;
 }
 
@@ -222,7 +226,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 		{
 		case 0: // off
 			{
-
 				// now draw our scope
 
 				int index = _pSrcMachine->_scopeBufferIndex;
@@ -233,8 +236,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				{ 
 					index--;
 					index&=(SCOPE_BUF_SIZE-1);
-					float awl=fabsf(pSamplesL[index]*invol*mult);///32768; 
-					float awr=fabsf(pSamplesR[index]*invol*mult);///32768; 
+					float awl=fabsf(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
+					float awr=fabsf(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
 
 					if (awl>tawl)
 					{
@@ -409,9 +412,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					clip = FALSE;
 				}
 
-				CPen linepen;
-				linepen.CreatePen(PS_SOLID, 2, 0xc08080);
-				CPen *oldpen = bufDC.SelectObject(&linepen);
+				CPen *oldpen = bufDC.SelectObject(&linepenL);
 
 				// ok this is a little tricky - it chases the wrapping buffer, starting at the last sample 
 				// buffered and working backwards - it does it this way to minimize chances of drawing 
@@ -420,28 +421,24 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 				float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
+				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 				for (int x = 256-4; x >= 0; x-=4)
 				{
 					n -= add;
-					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
+					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 //					bufDC.LineTo(x,GetY(32768/2));
 				}
-
-				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 2, 0x80c080);
-				bufDC.SelectObject(&linepen);
+				bufDC.SelectObject(&linepenR);
 
 				n = float(_pSrcMachine->_scopeBufferIndex-pos);
-				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
+				bufDC.MoveTo(256,GetY(pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 				for (x = 256-4; x >= 0; x-=4)
 				{
 					n -= add;
-					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult));
+					bufDC.LineTo(x,GetY(pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 				}
 
 				bufDC.SelectObject(oldpen);
-				linepen.DeleteObject();
 
 				char buf[64];
 				sprintf(buf,"Frequency %dhz Refresh %.2fhz",freq,1000.0f/scope_osc_rate);
@@ -473,8 +470,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			   { 
 					index--;
 					index&=(SCOPE_BUF_SIZE-1);
-					float wl=(pSamplesL[index]*invol*mult);///32768; 
-					float wr=(pSamplesR[index]*invol*mult);///32768; 
+					float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
+					float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
 					int im = i-(SCOPE_SPEC_SAMPLES/2); 
 					for(int h=0;h<scope_spec_bands;h++) 
 					{ 
@@ -496,9 +493,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				COLORREF cl = 0xa06060;
 				COLORREF cr = 0x60a060;
 
-				int x = 0;
-
 				RECT rect;
+				rect.left = 0;
 
 				// draw our bands
 
@@ -515,7 +511,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 						bar_heightsl[i]=aml;
 					}
 
-					rect.left = x;
 					rect.right = rect.left+width;
 					rect.top = bar_heightsl[i];
 					rect.bottom = aml;
@@ -525,7 +520,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					rect.bottom = 128;
 					bufDC.FillSolidRect(&rect,cl+0x303030);
 					
-					x+=width;
+					rect.left+=width;
 
 //					int amr = 128-f2i((sqrtf(ampr[i]*16384)));
 					int amr = 128-f2i(sqrtf(ampr[i]));
@@ -538,7 +533,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 						bar_heightsr[i]=amr;
 					}
 
-					rect.left = x;
 					rect.right = rect.left+width;
 					rect.top = bar_heightsr[i];
 					rect.bottom = amr;
@@ -548,7 +542,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					rect.bottom = 128;
 					bufDC.FillSolidRect(&rect,cr+0x303030);
 
-					x+=width;
+					rect.left+=width;
 
 					int add=0x000001*MAX_SCOPE_BANDS/scope_spec_bands;
 
@@ -582,35 +576,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			break;
 		case 3: // phase scope
 			{
-				CPen linepen(PS_SOLID, 8, 0x00202040);
-
-				CPen *oldpen = bufDC.SelectObject(&linepen);
-
-				if (clip)
-				{
-					// now draw our scope
-
-					bufDC.MoveTo(32,32);
-					bufDC.LineTo(128,128);
-					bufDC.LineTo(128,0);
-					bufDC.MoveTo(128,128);
-					bufDC.LineTo(256-32,32);
-					bufDC.Arc(0,0,256,256,256,128,0,128);
-					bufDC.Arc(96,96,256-96,256-96,256-96,128,96,128);
-
-					bufDC.Arc(48,48,256-48,256-48,256-48,128,48,128);
-
-					linepen.DeleteObject();
-					linepen.CreatePen(PS_SOLID, 4, 0x00101080);
-					bufDC.SelectObject(&linepen);
-					bufDC.MoveTo(32,32);
-					bufDC.LineTo(128,128);
-					bufDC.LineTo(128,0);
-					bufDC.MoveTo(128,128);
-					bufDC.LineTo(256-32,32);
-
-					clip = FALSE;
-				}
 
 				// ok we need some points:
 
@@ -634,8 +599,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 			   { 
 					index--;
 					index&=(SCOPE_BUF_SIZE-1);
-					float wl=(pSamplesL[index]*invol*mult);///32768; 
-					float wr=(pSamplesR[index]*invol*mult);///32768; 
+					float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
+					float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
 					float awl=fabsf(wl);
 					float awr=fabsf(wr);
 					if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -747,9 +712,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				int x,y;
 
-				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 5, 0x806060);
-				bufDC.SelectObject(&linepen);
+				CPen* oldpen = bufDC.SelectObject(&linepenbL);
 
 				x=f2i(sinf(-(F_PI/4.0f)-(o_mvdpl*F_PI/(32768.0f*4.0f)))
 							*o_mvpl*(128.0f/32768.0f))+128;
@@ -766,9 +729,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.LineTo(x,y);
 								
 				// panning data
-				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 5, 0x608060);
-				bufDC.SelectObject(&linepen);
+				bufDC.SelectObject(&linepenbR);
 
 				x=f2i(sinf(-(o_mvdl*F_PI/(32768.0f*4.0f)))
 							*o_mvl*(128.0f/32768.0f))+128;
@@ -784,9 +745,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 							*o_mvr*(128.0f/32768.0f))+128;
 				bufDC.LineTo(x,y);
 
-				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 3, 0xc08080);
-				bufDC.SelectObject(&linepen);
+				bufDC.SelectObject(&linepenL);
 
 				x=f2i(sinf(-(F_PI/4.0f)-(mvdpl*F_PI/(32768.0f*4.0f)))
 							*mvpl*(128.0f/32768.0f))+128;
@@ -803,9 +762,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.LineTo(x,y);
 								
 				// panning data
-				linepen.DeleteObject();
-				linepen.CreatePen(PS_SOLID, 3, 0x80c080);
-				bufDC.SelectObject(&linepen);
+				bufDC.SelectObject(&linepenR);
 
 				x=f2i(sinf(-(mvdl*F_PI/(32768.0f*4.0f)))
 							*mvl*(128.0f/32768.0f))+128;
@@ -831,7 +788,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					o_mvr -= scope_phase_rate*32.0f;
 				}
 				bufDC.SelectObject(oldpen);
-				linepen.DeleteObject();
 
 				char buf[64];
 				sprintf(buf,"Refresh %.2fhz",1000.0f/scope_phase_rate);
@@ -974,6 +930,11 @@ void CWireDlg::SetMode()
 
 	bufDC.FillSolidRect(0,0,rc.right-rc.left,rc.bottom-rc.top,0);
 
+	linepenL.DeleteObject();
+	linepenR.DeleteObject();
+	linepenbL.DeleteObject();
+	linepenbR.DeleteObject();
+
 	char buf[64];
 	switch (scope_mode)
 	{
@@ -1066,6 +1027,9 @@ void CWireDlg::SetMode()
 			rect.bottom = rect.top+4;
 			bufDC.FillSolidRect(&rect,0x00404040);
 		}
+		linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
+		linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
+
 		m_slider.SetRange(1, 148);
 		m_slider.SetPos(scope_osc_freq);
 		m_slider2.SetRange(10,100);
@@ -1126,6 +1090,10 @@ void CWireDlg::SetMode()
 
 			bufDC.SelectObject(oldpen);
 		}
+		linepenbL.CreatePen(PS_SOLID, 5, 0x806060);
+		linepenbR.CreatePen(PS_SOLID, 5, 0x608060);
+		linepenL.CreatePen(PS_SOLID, 3, 0xc08080);
+		linepenR.CreatePen(PS_SOLID, 3, 0x80c080);
 
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
