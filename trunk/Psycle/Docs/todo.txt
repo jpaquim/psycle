@@ -7,6 +7,10 @@
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
 ! machine param enter dialog should be modeless
+* alk - when opening master dialog centre on mouse?
+! alk - make wires square ended, like spec analyser?
+* alk - gap in audio when add new machine?
++ alk - mute current track keypress (alt-f9)
 
 * Machines
 ------------
