@@ -20,6 +20,9 @@ namespace psycle
 
 		CPsycleApp::CPsycleApp() throw(std::runtime_error)
 		{
+			// Error Logging window
+			Global::pLogWindow->Create(IDD_ERRORLOGGER,0);
+			Global::pLogWindow->Validate();
 			operating_system::exceptions::translated::new_thread();
 			// support for unicode characters on mswin98
 			{
