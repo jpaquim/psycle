@@ -40,7 +40,6 @@ public:
 	int		m_deviceIndex;
 	BOOL	m_dither;
 	BOOL	m_exclusive;
-	int		m_bitDepth;
 	//}}AFX_DATA
 
 
