@@ -1723,12 +1723,12 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 			if (Global::pConfig->_linenumbersHex)
 			{
 				sprintf(tBuf," %.2X",linecount);
-				TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,12);	// Print Line Number.
+				TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
 			}
 			else
 			{
 				sprintf(tBuf,"%d",linecount);
-				TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,12);	// Print Line Number.
+				TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
 			}
 		}
 

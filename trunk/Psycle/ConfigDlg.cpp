@@ -170,15 +170,18 @@ int CConfigDlg::DoModal()
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET = _pConfig->_linenumbers?LINE_XOFFSET:1;
 		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.VISTRACKS = (((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.XOFFSET)/ROWWIDTH;
 
-		strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
-		_pConfig->seqFont.DeleteObject();
-		if (!_pConfig->seqFont.CreatePointFont(80,_pConfig->pattern_fontface))
+		if (strcmp(_pConfig->pattern_fontface, _skinDlg._pattern_fontface))
 		{
-			if (!_pConfig->seqFont.CreatePointFont(80,"Tahoma"))
+			strcpy(_pConfig->pattern_fontface, _skinDlg._pattern_fontface);
+			_pConfig->seqFont.DeleteObject();
+			if (!_pConfig->seqFont.CreatePointFont(80,_pConfig->pattern_fontface))
 			{
-				if (!_pConfig->seqFont.CreatePointFont(80,"MS Sans Seriff"))
+				if (!_pConfig->seqFont.CreatePointFont(80,"Tahoma"))
 				{
-					_pConfig->seqFont.CreatePointFont(80,"Verdana");
+					if (!_pConfig->seqFont.CreatePointFont(80,"MS Sans Seriff"))
+					{
+						_pConfig->seqFont.CreatePointFont(80,"Verdana");
+					}
 				}
 			}
 		}

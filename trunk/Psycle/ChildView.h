@@ -440,7 +440,7 @@ public:
 inline void CChildView::OutNote(CDC *devc,int x,int y,int note)
 {
 	int const srx=27;
-	int const sry=12;
+	int const sry=ROWHEIGHT-1;
 	
 	switch(note)
 	{
@@ -579,7 +579,7 @@ inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool t
 	Rect.left=x;
 	Rect.top=y;
 	Rect.right=x+10;
-	Rect.bottom=y+12;
+	Rect.bottom=y+ROWHEIGHT-1;
 	
 	if (trflag)
 	{
@@ -641,7 +641,7 @@ inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool 
 	Rect.left=x;
 	Rect.top=y;
 	Rect.right=x+10;
-	Rect.bottom=y+12;
+	Rect.bottom=y+ROWHEIGHT-1;
 	
 	if (trflag)
 	{
