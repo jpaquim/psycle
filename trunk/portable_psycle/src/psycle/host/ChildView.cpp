@@ -2888,7 +2888,7 @@ namespace psycle
 		void CChildView::LoadPatternHeaderSkin()
 		{
 			std::string szOld;
-			if (Global::pConfig->pattern_header_skin.empty())
+			if (!Global::pConfig->pattern_header_skin.empty())
 			{
 				szOld = Global::pConfig->pattern_header_skin;
 				// ok so...
