@@ -89,7 +89,6 @@
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
 	bug:	 New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn't happen on freebase)
 	bug:	 DirectSound Output is a bit buggy.Crashes and bad sound reported. 
-		 ->Won’t Fix. Waiting for new code for Psycle 2<-
 	feature: Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)

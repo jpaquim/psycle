@@ -13,7 +13,6 @@ V1.67
 ! Changed double click on pattern to open that pattern in patternview for edit (pooplog)
 ! Fixed noteoff recording to work correctly, moved toggle to seq menu with other commonly accessed toggles (pooplog)
 * Fixed minusminus button to decrease to 0 (pooplog)
-! Removed that evil, evil, sequence sort button that destroyed sequences (pooplog)
 ! undo/redo for pattern and sequence editing!!! (pooplog)
 ! slight reordering of interface due to user request for more intuitive use (pooplog)
 

@@ -83,6 +83,7 @@ ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
 ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
 ON_BN_CLICKED(IDC_FOLLOW, OnFollowSong)
 ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
+ON_BN_CLICKED(IDC_SEQSRT, OnSeqsort)
 ON_CBN_SELCHANGE(IDC_BAR_GENFX, OnSelchangeBarGenfx)
 ON_CBN_CLOSEUP(IDC_BAR_GENFX, OnCloseupBarGenfx)
 ON_BN_CLICKED(IDC_WRAP, OnWrap)
@@ -1445,14 +1446,9 @@ void CMainFrame::OnSeqclr()
 	m_wndView.SetFocus();
 	
 }
-//// Changed to " Resort patterns "
-// this trashes your whole sequence in one press of a button-> who wants that?
-// this is the stupidest function of all, bohan, pikari agree
-// removed for user sanity
-/*
-void CMainFrame::OnSeqspr()
+void CMainFrame::OnSeqsort()
 {
-	m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+	m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 	unsigned char oldtonew[MAX_PATTERNS];
 	unsigned char newtoold[MAX_PATTERNS];
 	memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
@@ -1532,7 +1528,6 @@ void CMainFrame::OnSeqspr()
 	m_wndView.Repaint(DMPatternChange);
 	m_wndView.SetFocus();
 }
-*/
 
 void CMainFrame::OnIncpos2() 
 {

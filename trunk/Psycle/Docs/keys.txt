@@ -91,6 +91,8 @@ NOTE:	Most of these keys can be changed from the "Keyboard Settings" DialogBox.
 	CTRL + T			Change block insTrument to current selected
 	CTRL + LEFT/RIGHT		Dec/Inc current selected Generator/Effect
 	CTRL + UP/DOWN			Dec/Inc current selected Instrument
+	CTRL + Z			Undo Pattern/Sequencer edit
+	CTRL + SHIFT + Z		Redo Pattern/Sequencer edit
 	RETURN			Select the machine and instrument specified in the current Cursor position.
 	
 

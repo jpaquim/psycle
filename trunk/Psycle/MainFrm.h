@@ -159,6 +159,7 @@ protected:
 	afx_msg void OnIncTPB();
 	afx_msg void OnFollowSong();
 	afx_msg void OnSeqclr();
+	afx_msg void OnSeqsort();
 	afx_msg void OnGenerator();
 	afx_msg void OnBEffects();
 	afx_msg void OnBGenerators();
