@@ -92,6 +92,7 @@ bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItali
 	UINT effect_font_flags;
 
 	bool pattern_draw_empty_data;
+	bool draw_mac_index;
 
 	char generator_fontface[64];
 	int generator_font_point;

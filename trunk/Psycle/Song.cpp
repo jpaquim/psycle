@@ -2107,7 +2107,7 @@ bool Song::Load(RiffFile* pFile)
 		{
 			if (_pMachine[i])
 			{
-				_pMachine[i]->macIndex = i;
+				_pMachine[i]->_macIndex = i;
 			}
 		}
 

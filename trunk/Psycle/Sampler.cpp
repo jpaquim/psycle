@@ -13,11 +13,11 @@ char* Sampler::_psName = "Sampler";
 
 Sampler::Sampler(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars=0;
 	_type = MACH_SAMPLER;
 	_mode = MACHMODE_GENERATOR;
-	sprintf(_editName, "%.2X:Sampler",macIndex);
+	sprintf(_editName, "Sampler");
 
 	_resampler.SetQuality(RESAMPLE_LINEAR);
 	for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)

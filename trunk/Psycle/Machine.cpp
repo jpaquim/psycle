@@ -634,11 +634,11 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 //////////////////////////////////////////////////////////////////////
 Dummy::Dummy(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 0;
 	_type = MACH_DUMMY;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:Dummy",macIndex);
+	sprintf(_editName, "Dummy");
 }
 void Dummy::Work(int numSamples)
 {
@@ -667,13 +667,13 @@ float* Master::_pMasterSamples = NULL;
 
 Master::Master(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 0;
 	_outDry = 256;
 	decreaseOnClip=false;
 	_type = MACH_MASTER;
 	_mode = MACHMODE_MASTER;
-	sprintf(_editName, "%.2X:Master",macIndex);
+	sprintf(_editName, "Master");
 }
 
 void Master::Init(void)
@@ -829,11 +829,11 @@ void Master::Work(
 
 Gainer::Gainer(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 2;
 	_type = MACH_GAIN;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:Gainer",macIndex);
+	sprintf(_editName, "Gainer");
 }
 
 void Gainer::Work(
@@ -893,11 +893,11 @@ void Gainer::Tick(int channel, PatternEntry *pData)
 
 Sine::Sine(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 5;
 	_type = MACH_SINE;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:Psychosc",macIndex);
+	sprintf(_editName, "Psychosc");
 }
 
 void Sine::Init(void)
@@ -1102,11 +1102,11 @@ bool Sine::Load(
 
 Distortion::Distortion(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 5;
 	_type = MACH_DIST;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:Distortion",macIndex);
+	sprintf(_editName, "Distortion");
 }
 
 void Distortion::Init(void)
@@ -1249,11 +1249,11 @@ bool Distortion::Load(
 
 Delay::Delay(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 7;
 	_type = MACH_DELAY;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:Delay",macIndex);
+	sprintf(_editName, "Delay");
 
 	_pBufferL = NULL;
 	_pBufferR = NULL;
@@ -1504,11 +1504,11 @@ void Delay::Tick(int channel, PatternEntry *pData)
 
 Flanger::Flanger(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 9;
 	_type = MACH_FLANGER;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:Flanger",macIndex);
+	sprintf(_editName, "Flanger");
 //	_resampler.SetQuality(RESAMPLE_LINEAR);// ADVISE!!!! Only linear resample can be done. SPLINE needs samples ahead
 	useResample=true;
 	
@@ -1896,11 +1896,11 @@ bool Flanger::Load(
 
 Filter2p::Filter2p(int index)
 {
-	macIndex = index;
+	_macIndex = index;
 	_numPars = 7;
 	_type = MACH_2PFILTER;
 	_mode = MACHMODE_FX;
-	sprintf(_editName, "%.2X:2p Filter",macIndex);
+	sprintf(_editName, "2p Filter");
 }
 
 void Filter2p::Init(void)
