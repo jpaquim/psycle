@@ -24,7 +24,7 @@ public:
 		out << std::endl;
 		out << "Note: The stereo input signal left and right channels are first summed to form a mono input signal." << std::endl;
 		out << std::endl;
-		out << "Beware if you tweak any delay length with a factor > 2 that the memory buffer gets resized." << std::endl;
+		out << "Beware if you tweak the global (max) delay length with a factor > 2 that the memory buffer gets resized." << std::endl;
 	}
 
 	enum Parameters
