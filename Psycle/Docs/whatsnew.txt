@@ -35,7 +35,7 @@ V1.67
 + Added "Xerox" button to seq editor (named that until someone suggests a good 5 letter word for duplicate) 
   [Alk] (poolog)
 + Added Swing Fill command (pooplog)
-! Increased max lines/pattern to 256 (pooplog) * pending further tests
+! Increased max lines/pattern to 256 (pooplog)
 + Basic Mousewheel support for pattern edit mode (pooplog)
 * Fixed song bpm and tpb being misreported to machines if they used FF or FE command
 ! VU Meters are all nicer

@@ -53,7 +53,8 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 *  select with keyboard while playing and follow mode on sucks
 * <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
 	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
-	rec tweaks when you do a refresh.......like closing the plugs  gui... 
+	rec tweaks when you do a refresh.......like closing the plugs  gui... * the pattern client rect 
+	doesn't seem to update when you have the mouse button down on a vst dialog!  repaint messages are lost!!!!!
 ++ how about option to switch the instrument and machine columns?
 + D says: maybe have some of the effects in a drop down or available by right clicking
 + D says: When you highlight something in Psycle would it be possible to make it so you can drag and 

@@ -68,9 +68,6 @@ BOOL CWireDlg::OnInitDialog()
 	scope_spec_rate = 25;
 	scope_phase_rate = 20;
 
-	peakL = peakR = peak2L = peak2R =
-	o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
-
 	Inval = false;
 	m_volslider.SetRange(0,256);
 	m_volslider.SetTicFreq(16);
@@ -558,8 +555,8 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])/(SCOPE_SPEC_SAMPLES/2); 
 				}
 				int width = 128/scope_spec_bands;
-				COLORREF cl = 0xb07070;
-				COLORREF cr = 0x70b070;
+				COLORREF cl = 0xa06060;
+				COLORREF cr = 0x60a060;
 				CPen linepen(PS_SOLID, width, cl);
 
 				CPen *oldpen = bufDC.SelectObject(&linepen);
@@ -590,15 +587,13 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,width,&lb,0,0);
 					bufDC.SelectObject(&linepen);
 					bufDC.MoveTo(x,bar_heightsl[i]);
-					bufDC.LineTo(x,128);
+					bufDC.LineTo(x,aml);
 					linepen.DeleteObject();
 
-					lb.lbColor = cl+0x202020;
+					lb.lbColor = cl+0x303030;
 					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT,width,&lb,0,0);
 					bufDC.SelectObject(&linepen);
-					bufDC.LineTo(x,aml);
-					linepen.DeleteObject();
-					bufDC.LineTo(x,aml);
+					bufDC.LineTo(x,128);
 					linepen.DeleteObject();
 
 					x+=width;
@@ -618,12 +613,13 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT ,width,&lb,0,0);
 					bufDC.SelectObject(&linepen);
 					bufDC.MoveTo(x,bar_heightsr[i]);
-					bufDC.LineTo(x,128);
+					bufDC.LineTo(x,amr);
 					linepen.DeleteObject();
-					lb.lbColor = cr+0x202020;
+
+					lb.lbColor = cr+0x303030;
 					linepen.CreatePen(PS_GEOMETRIC|PS_ENDCAP_FLAT ,width,&lb,0,0);
 					bufDC.SelectObject(&linepen);
-					bufDC.LineTo(x,amr);
+					bufDC.LineTo(x,128);
 					linepen.DeleteObject();
 
 					x+=width;
@@ -1076,15 +1072,18 @@ void CWireDlg::SetMode()
 	switch (scope_mode)
 	{
 	case 0:
+		// vu
 		KillTimer(2304+this_index);
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_peak_rate);
 		sprintf(buffer,"Scope Mode");
+		peakL = peakR = peak2L = peak2R = 0.0f;
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		SetTimer(2304+this_index,scope_peak_rate,0);
 		break;
 	case 1:
+		// oscilloscope
 		KillTimer(2304+this_index);
 		m_slider.SetRange(1, 148);
 		m_slider.SetPos(scope_osc_freq);
@@ -1096,6 +1095,7 @@ void CWireDlg::SetMode()
 		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
 	case 2:
+		// spectrum analyzer
 		KillTimer(2304+this_index);
 		{
 			for (int i = 0; i < MAX_SCOPE_BANDS; i++)
@@ -1114,10 +1114,12 @@ void CWireDlg::SetMode()
 		SetTimer(2304+this_index,scope_osc_rate,0);
 		break;
 	case 3:
+		// phase
 		KillTimer(2304+this_index);
 		_pSrcMachine->_pScopeBufferL = pSamplesL;
 		_pSrcMachine->_pScopeBufferR = pSamplesR;
 		sprintf(buffer,"Stereo Phase");
+		o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
 		m_slider2.SetRange(10,100);
 		m_slider2.SetPos(scope_phase_rate);
 		SetTimer(2304+this_index,scope_phase_rate,0);
