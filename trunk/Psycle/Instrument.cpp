@@ -6,6 +6,7 @@
 
 
 #include "Instrument.h"
+#include "DataCompression.h"
 
 // constructor
 
@@ -88,14 +89,15 @@ void Instrument::DeleteLayer(int c)
 	if(waveLength[c]>0)
 	{
 		delete waveDataL[c];
-		waveDataL[c] = NULL;
 		if(waveStereo[c])
 		{
 			delete waveDataR[c];
-			waveDataR[c] = NULL;
 		}
 		waveLength[c] = 0;
 	}
+
+	waveDataL[c] = NULL;
+	waveDataR[c] = NULL;
 	
 	waveStereo[c]=false;
 	waveLoopStart[c]=0;
@@ -193,12 +195,19 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version)
 
 				pFile->ReadString(waveName[index],sizeof(waveName[index]));
 
-				waveDataL[index] = new short[waveLength[index]];
-				pFile->Read(waveDataL[index],sizeof(short)*waveLength[index]);
+				pFile->Read(&size,sizeof(size));
+				byte* pData = new byte[size];
+				pFile->Read(pData,size);
+				SoundDesquash(pData,&waveDataL[index]);
+				delete pData;
+
 				if (waveStereo[index])
 				{
-					waveDataR[index] = new short[waveLength[index]];
-					pFile->Read(waveDataR[index],sizeof(short)*waveLength[index]);
+					pFile->Read(&size,sizeof(size));
+					pData = new byte[size];
+					pFile->Read(pData,size);
+					SoundDesquash(pData,&waveDataR[index]);
+					delete pData;
 				}
 			}
 		}
@@ -255,6 +264,28 @@ void Instrument::SaveFileChunk(RiffFile* pFile)
 	{
 		if (waveLength[i] > 0)
 		{
+			byte * pData1;
+			byte * pData2;
+			UINT size1,size2;
+			size1 = SoundSquash(waveDataL[i],&pData1,waveLength[i]);
+
+			/*  test for accuracy of compress/decompress - it's 100%
+			SoundDesquash(pData1,&waveDataR[i]);
+			for (int c = 0; c < waveLength[i]; c++)
+			{
+				if (waveDataL[i][c] != waveDataR[i][c])
+				{
+					int z = 2000; // error
+				}
+			}
+			*/
+
+			if (waveStereo[i])
+			{
+				size2 = SoundSquash(waveDataR[i],&pData2,waveLength[i]);
+			}
+
+
 			UINT index = i;
 			pFile->Write("WAVE",4);
 			UINT version = CURRENT_FILE_VERSION_PATD;
@@ -267,7 +298,8 @@ void Instrument::SaveFileChunk(RiffFile* pFile)
 						+sizeof(waveFinetune[i])
 						+sizeof(waveStereo[i])
 						+strlen(waveName[i])+1
-						+sizeof(short)*waveLength[i]*(waveStereo[i]?2:1);
+						+size1
+						+size2;
 
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
@@ -285,10 +317,14 @@ void Instrument::SaveFileChunk(RiffFile* pFile)
 
 			pFile->Write(waveName[i],strlen(waveName[i])+1);
 
-			pFile->Write(waveDataL[i],sizeof(short)*waveLength[i]);
+			pFile->Write(&size1,sizeof(size1));
+			pFile->Write(pData1,size1);
+			delete pData1;
 			if (waveStereo[i])
 			{
-				pFile->Write(waveDataR[i],sizeof(short)*waveLength[i]);
+				pFile->Write(&size2,sizeof(size2));
+				pFile->Write(pData2,size2);
+				delete pData2;
 			}
 		}
 	}

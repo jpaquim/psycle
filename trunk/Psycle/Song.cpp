@@ -1123,6 +1123,16 @@ bool Song::Load(RiffFile* pFile)
 			// there is currently no data in this segment
 		}
 		*/
+		for(int c=0; c<MAX_MACHINES-1; c++)
+		{
+			if(_pMachine[c])
+			{
+				DestroyMachine(c);
+			}
+			_pMachine[c] = NULL;
+		}
+		DeleteInstruments();
+		DeleteAllPatterns();
 
 		while(pFile->Read(&Header, 4))
 		{
