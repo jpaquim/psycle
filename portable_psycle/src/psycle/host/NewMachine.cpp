@@ -611,7 +611,6 @@ namespace psycle
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
 								host::logger(host::logger::crash, title.str() + '\n' + s.str());
-								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 							catch(...)
 							{
@@ -627,7 +626,6 @@ namespace psycle
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
 								host::logger(host::logger::crash, title.str() + '\n' + s.str());
-								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 						}
 						else if(type == MACH_VST)
@@ -715,7 +713,6 @@ namespace psycle
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
 								host::logger(host::logger::crash, title.str() + '\n' + s.str());
-								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 							catch(...)
 							{
@@ -731,7 +728,6 @@ namespace psycle
 								std::stringstream title; title
 									<< "Machine crashed: " << finder.GetFilePath();
 								host::logger(host::logger::crash, title.str() + '\n' + s.str());
-								//::MessageBox(0, s.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 							}
 						}
 					}
