@@ -2,6 +2,11 @@
 !=change
 +=addition
 
+* Other crap
+------------
+<Alk^^> bug in pooplog filter see shuffle_me.psy , try muting the sampler (fitler goes to 80% cpu)
+<Alk^^> in pooplog filter tweak inertia doesnt work
+
 * Sampler Machine/Wave Ed:
 --------------------------
 bug: 	 portamento to note, slides too much. (can anyone test this for me?)
@@ -21,27 +26,28 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 
 * GUI (pattern):
 ----------------
+** trying to select past the visible area with the mouse sucks
+** bug:	 Select with mouse when playing gives problems
+**  select with keyboard while playing and follow mode on sucks
+**	when scrolling does x and y it sometimes fucks up when center mode is on
+* when shift block select mode is active, entering notes does not break the block selection
+* <bdzld> block double should be contrained to block
 * <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
 	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
 	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
 * <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
 	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
 	rec tweaks when you do a refresh.......like closing the plugs  gui... 
-* screen flashes switching from machine to pattern view (new)
-* pattern view does not refresh when skin dlg presets have changed.
-* Alk* place cursor on last line, change to machine screen and back to pattern, bug
-* <bdzld> when you're in pattern edit and you maximise the window it blacks out -> sizing down too
-* switched a pattern length to 2 and the empty space was not cleared, it looped 0 1 0 1 0 1
-* trying to select past the visible area with the mouse sucks
-* did some transpose selection and display got fucking crazy i was very confused - undo did same.
-* keyboard notes/noteoffs are not always displayed as they are recorded until you switch patterns back and forth
-bug:	 Select with mouse when playing gives problems
-! should be able to pick cursor colour rather than have it invert background 
-! lines between tracks should be definable, not black
+++ how about option to switch the instrument and machine columns?
+! <_sue_> when on follow song mode play the shift + cursor right and shift + cursor left should work the same 
+	way (to navigate in the pattern sequencer).....like hapens on fast tracker 2 .....
+! change CUT seq button to DELETE seq button, cut sucks
 ! <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in 
 	the one im using i have half of the tab where the pattern seq is completely free.
-+ how about option to switch the instrument and machine columns?
-+ <Alk^> I think the line numbering should be optional
++ add current octave to indicators
++ Xerox replace, allow multiple - it replaces the selected pattern(s) with an identical new one
++ Xerox multiple
++ <bdzld> block delete
 feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
 feature: maybe: MultiPattern View (The code is not made in the best way)
 feature: MORE Keyboard shortcuts 
@@ -50,6 +56,8 @@ feature: First, I'd like to see the Generator or Effect name in one of these pla
 
 * GUI (machines):
 -----------------
+* alk:  note gets stuck bug, open a machine dialog, play a note, move the machine window, before releasing mouse button  
+	release note, then release mouse.
 * preview check box in preset dialog stopped working?
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
 bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
@@ -57,6 +65,9 @@ bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  
 bug:	 JMDrum is buggy (Crashes sometimes)
 ! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
 	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
+! <_sue_> another thing....the lfo knob on your filter should be moving all the time....but it isnt....its only 
+	refreshed when it receives tweaks.... <pooplog> it doesn't update knobs unless they are tweaked... then it 
+	updates ALL the knobs
 + <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
 	owner draw controls i say?
 + What if master machine looked like a mixer and you could double click it to bring up not only the master volume,
@@ -105,6 +116,8 @@ feature: Maybe: New command "twc" which will send a machine command (like note d
 		 (asked by Pikari)
 feature: pattern repeat (loop) and song repeat (asked by Vir|us)
 feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
++ new file format: (machines save custom data length, patterns stored according to # tracks, sequence length stored
+		according to length, vst multi-out, etc.)
 
 * Vsts:
 ------------

@@ -83,6 +83,7 @@ BOOL CPsycleApp::InitInstance()
 		{
 			pFrame->m_wndView._outputActive = true;
 		}
+		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
 	}
 
 	// create and load the frame with its resources

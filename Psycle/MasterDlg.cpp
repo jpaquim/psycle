@@ -219,7 +219,7 @@ void CMasterDlg::PaintNumbers(int val, int x, int y)
 //  val*=0.390625f // Percentage ( 0% ..100% )
 	if (val > 0 ) // dB (-99.9dB .. 0dB)
 	{
-		val = f2i(-200.0f * log10(val*0.00390625f)); // better don't aproximate with log2
+		val = f2i(-200.0f * log10f(val*0.00390625f)); // better don't aproximate with log2
 	}
 	else val = 999;
 	

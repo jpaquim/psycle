@@ -365,7 +365,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	UpdateSequencer();
 	m_wndView.InitTimer();
 //	m_wndView.Repaint();
-//	m_wndView.SetFocus();
+	m_wndView.SetFocus();
 //	m_wndView.EnableSound();
 	
 	return 0;
@@ -489,6 +489,7 @@ void CMainFrame::OnSelchangeTrackcombo()
 	if (m_wndView.editcur.track >= _pSong->SONGTRACKS )
 		m_wndView.editcur.track= _pSong->SONGTRACKS-1;
 
+	m_wndView.RecalculateColourGrid();
 	m_wndView.Repaint();
 	m_wndView.SetFocus();
 }
@@ -1363,7 +1364,7 @@ void CMainFrame::OnSelchangeSeqlist()
 		
 		if(cpid!=_pSong->playOrder[ep])
 		{
-			m_wndView.Repaint(DMPatternSwitch);
+			m_wndView.Repaint(DMPattern);
 		}		
 	}
 	m_wndView.SetFocus();
@@ -1380,7 +1381,7 @@ void CMainFrame::OnDblclkSeqlist()
 	{
 		_pSong->playOrder[sep]=ep;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();
 	*/		
@@ -1405,7 +1406,7 @@ void CMainFrame::OnIncshort()
 	}
 	UpdatePlayOrder(false);
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.Repaint(DMPattern);
 	m_wndView.SetFocus();
 }
 
@@ -1427,7 +1428,7 @@ void CMainFrame::OnDecshort()
 	}
 	UpdatePlayOrder(false);
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.Repaint(DMPattern);
 	m_wndView.SetFocus();
 }
 
@@ -1453,7 +1454,7 @@ void CMainFrame::OnInclong()
 	}
 	UpdatePlayOrder(false);
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.Repaint(DMPattern);
 	m_wndView.SetFocus();
 }
 
@@ -1479,7 +1480,7 @@ void CMainFrame::OnDeclong()
 	}
 	UpdatePlayOrder(false);
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.Repaint(DMPattern);
 	m_wndView.SetFocus();
 }
 
@@ -1506,7 +1507,7 @@ void CMainFrame::OnSeqnew()
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();
 }
@@ -1528,7 +1529,7 @@ void CMainFrame::OnSeqins()
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 
-		m_wndView.Repaint(DMPatternChange);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();
 }
@@ -1566,7 +1567,7 @@ void CMainFrame::OnSeqduplicate()
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();
 }
@@ -1620,7 +1621,7 @@ void CMainFrame::OnSeqcut()
 
 	UpdatePlayOrder(true);
 	UpdateSequencer(m_wndView.editPosition);
-	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.Repaint(DMPattern);
 	m_wndView.SetFocus();
 }
 
@@ -1683,7 +1684,7 @@ void CMainFrame::OnSeqpaste()
 					_pSong->playOrderSel[i] = true;
 				}
 				UpdateSequencer(m_wndView.editPosition);
-				m_wndView.Repaint(DMPatternChange);
+				m_wndView.Repaint(DMPattern);
 				m_wndView.SetFocus();
 			}
 		}
@@ -1713,7 +1714,7 @@ void CMainFrame::OnSeqclr()
 		_pSong->playLength=1;
 		UpdatePlayOrder(true);
 		UpdateSequencer();
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();
 	
@@ -1798,7 +1799,7 @@ void CMainFrame::OnSeqsort()
 
 	seqcopybufferlength = 0;
 	UpdateSequencer();
-	m_wndView.Repaint(DMPatternSwitch);
+	m_wndView.Repaint(DMPattern);
 	m_wndView.SetFocus();
 }
 
@@ -1809,7 +1810,7 @@ void CMainFrame::OnIncpos2()
 	{
 		++m_wndView.editPosition;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
@@ -1822,7 +1823,7 @@ void CMainFrame::OnDecpos2()
 	{
 		--m_wndView.editPosition;
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 		m_wndView.SetActiveWindow();
 	}
 	m_wndView.SetFocus();
@@ -1836,7 +1837,7 @@ void CMainFrame::OnIncpat2()
 	{
 		++_pSong->playOrder[pop];
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();	
 }
@@ -1849,7 +1850,7 @@ void CMainFrame::OnDecpat2()
 	{
 		--_pSong->playOrder[pop];
 		UpdatePlayOrder(true);
-		m_wndView.Repaint(DMPatternSwitch);
+		m_wndView.Repaint(DMPattern);
 	}
 	m_wndView.SetFocus();	
 }
@@ -1897,7 +1898,7 @@ void CMainFrame::OnCentercursor()
 {
 	if ( ((CButton*)m_wndSeq.GetDlgItem(IDC_CENTERCURSOR))->GetCheck() ) Global::pConfig->_centerCursor=true;
 	else Global::pConfig->_centerCursor=false;
-	m_wndView.Repaint(DMCursorMove);
+	m_wndView.Repaint(DMCursor);
 	m_wndView.SetFocus();
 }
 
@@ -1937,7 +1938,7 @@ void CMainFrame::OnFollowSong()
 		if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
 		{
 			m_wndView.editPosition=Global::pPlayer->_playPosition;
-			m_wndView.Repaint(DMPatternSwitch);
+			m_wndView.Repaint(DMPattern);
 		}
 	}
 	else if ( !Global::pPlayer->_playing )

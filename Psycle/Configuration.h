@@ -28,11 +28,32 @@ public:
 	COLORREF mv_wirecolour;
 	COLORREF mv_wireaacolour;
 	COLORREF mv_polycolour;
+
+	COLORREF pvc_separator;
+	COLORREF pvc_separator2;
 	COLORREF pvc_background;
+	COLORREF pvc_background2;
 	COLORREF pvc_row4beat;
+	COLORREF pvc_row4beat2;
 	COLORREF pvc_rowbeat;
+	COLORREF pvc_rowbeat2;
 	COLORREF pvc_row;
+	COLORREF pvc_row2;
 	COLORREF pvc_font;
+	COLORREF pvc_font2;
+	COLORREF pvc_fontPlay;
+	COLORREF pvc_fontPlay2;
+	COLORREF pvc_fontCur;
+	COLORREF pvc_fontCur2;
+	COLORREF pvc_fontSel;
+	COLORREF pvc_fontSel2;
+	COLORREF pvc_selection;
+	COLORREF pvc_selection2;
+	COLORREF pvc_playbar;
+	COLORREF pvc_playbar2;
+	COLORREF pvc_cursor;
+	COLORREF pvc_cursor2;
+
 	COLORREF gen_colour;
 	COLORREF eff_colour;
 	COLORREF mas_colour;
@@ -40,6 +61,7 @@ public:
 	COLORREF vu1;
 	COLORREF vu2;
 	COLORREF vu3;
+
 	bool mv_wireaa;
 	int mv_wirewidth;
 	bool _wrapAround;
@@ -174,6 +196,7 @@ public:
 	int _midiFrom15;
 	int _midiTo15;
 
+	bool _linenumbers;
 
 	int _numOutputDrivers;
 	int _outputDriverIndex;

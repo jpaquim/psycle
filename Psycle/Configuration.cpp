@@ -33,6 +33,7 @@ Configuration::Configuration()
 	_midiMachineViewSeqMode = false;
 	autoStopMachines = false;
 	useDoubleBuffer = true;
+	_linenumbers = true;
 	_showAboutAtStart = true;
 	mv_colour =	0x009a887c;
 	mv_wirecolour =	0x00000000;
@@ -42,11 +43,32 @@ Configuration::Configuration()
 	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*2))/3)&0x00ff0000) +
 			((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*2))/3)&0x00ff00) +
 			((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*2))/3)&0x00ff);
-	pvc_background = 0x009a887c;
-	pvc_row4beat = 0x00d5ccc6;
-	pvc_rowbeat = 0x00c9beb8;
-	pvc_row = 0x00c1b5aa;
-	pvc_font = 0x00000000;
+
+	pvc_separator  = 0x00400000;
+	pvc_separator2  = 0x00004000;
+	pvc_background  = 0x009a887c;
+	pvc_background2  = 0x00aa786c;
+	pvc_row4beat  = 0x00d5ccc6;
+	pvc_row4beat2 = 0x00fdfcf6;
+	pvc_rowbeat  = 0x00c9beb8;
+	pvc_rowbeat2 = 0x00f9eee8;
+	pvc_row  = 0x00c1b5aa;
+	pvc_row2 = 0x00f1e5da;
+	pvc_font  = 0x00000000;
+	pvc_font2  = 0x00000000;
+	pvc_fontPlay  = 0x00ffffff;
+	pvc_fontPlay2  = 0x00ffffff;
+	pvc_fontCur  = 0x00ffffff;
+	pvc_fontCur2  = 0x00ffffff;
+	pvc_fontSel  = 0x00ffffff;
+	pvc_fontSel2  = 0x00ffffff;
+	pvc_selection  = 0x00e00000;
+	pvc_selection2 = 0x00ff5050;
+	pvc_playbar  = 0x0000e000;
+	pvc_playbar2 = 0x005050e0;
+	pvc_cursor  = 0x000000e0;
+	pvc_cursor2 = 0x005050ff;
+
 	// If you change the initial colour values, change it also in "CSkinDlg::OnResetcolours()"
 	vu1 = 0x00f1c992;
 	vu2 = 0x00403731;
@@ -297,6 +319,7 @@ Configuration::Read(
 		}
 	}
 #if !defined(_WINAMP_PLUGIN_)
+
 	numData = sizeof(_wrapAround);
 	reg.QueryValue("WrapAround", &type, (BYTE*)&_wrapAround, &numData);
 	numData = sizeof(_centerCursor);
@@ -305,6 +328,8 @@ Configuration::Read(
 	reg.QueryValue("CursorAlwaysDown", &type, (BYTE*)&_cursorAlwaysDown, &numData);
 	numData = sizeof(useDoubleBuffer);
 	reg.QueryValue("useDoubleBuffer", &type, (BYTE*)&useDoubleBuffer, &numData);
+	numData = sizeof(_linenumbers);
+	reg.QueryValue("DisplayLineNumbers", &type, (BYTE*)&_linenumbers, &numData);
 	numData = sizeof(_showAboutAtStart);
 	reg.QueryValue("showAboutAtStart", &type, (BYTE*)&_showAboutAtStart, &numData);
 	numData = sizeof(_RecordNoteoff);
@@ -552,16 +577,56 @@ Configuration::Read(
 	reg.QueryValue("mv_wireaa", &type, (BYTE*)&mv_wireaa, &numData);
 	numData = sizeof(mv_wirewidth);
 	reg.QueryValue("mv_wirewidth", &type, (BYTE*)&mv_wirewidth, &numData);
+
 	numData = sizeof(pvc_background);
 	reg.QueryValue("pvc_background", &type, (BYTE*)&pvc_background, &numData);
+	numData = sizeof(pvc_background2);
+	reg.QueryValue("pvc_background2", &type, (BYTE*)&pvc_background2, &numData);
+	numData = sizeof(pvc_separator);
+	reg.QueryValue("pvc_separator", &type, (BYTE*)&pvc_separator, &numData);
+	numData = sizeof(pvc_separator2);
+	reg.QueryValue("pvc_separator2", &type, (BYTE*)&pvc_separator2, &numData);
 	numData = sizeof(pvc_row4beat);
 	reg.QueryValue("pvc_row4beat", &type, (BYTE*)&pvc_row4beat, &numData);
+	numData = sizeof(pvc_row4beat2);
+	reg.QueryValue("pvc_row4beat2", &type, (BYTE*)&pvc_row4beat2, &numData);
 	numData = sizeof(pvc_rowbeat);
 	reg.QueryValue("pvc_rowbeat", &type, (BYTE*)&pvc_rowbeat, &numData);
+	numData = sizeof(pvc_rowbeat2);
+	reg.QueryValue("pvc_rowbeat2", &type, (BYTE*)&pvc_rowbeat2, &numData);
 	numData = sizeof(pvc_row);
 	reg.QueryValue("pvc_row", &type, (BYTE*)&pvc_row, &numData);
+	numData = sizeof(pvc_row2);
+	reg.QueryValue("pvc_row2", &type, (BYTE*)&pvc_row2, &numData);
 	numData = sizeof(pvc_font);
 	reg.QueryValue("pvc_font", &type, (BYTE*)&pvc_font, &numData);
+	numData = sizeof(pvc_font2);
+	reg.QueryValue("pvc_font2", &type, (BYTE*)&pvc_font2, &numData);
+	numData = sizeof(pvc_fontPlay);
+	reg.QueryValue("pvc_fontPlay", &type, (BYTE*)&pvc_fontPlay, &numData);
+	numData = sizeof(pvc_fontPlay2);
+	reg.QueryValue("pvc_fontPlay2", &type, (BYTE*)&pvc_fontPlay2, &numData);
+	numData = sizeof(pvc_fontCur);
+	reg.QueryValue("pvc_fontCur", &type, (BYTE*)&pvc_fontCur, &numData);
+	numData = sizeof(pvc_fontCur2);
+	reg.QueryValue("pvc_fontCur2", &type, (BYTE*)&pvc_fontCur2, &numData);
+	numData = sizeof(pvc_fontSel);
+	reg.QueryValue("pvc_fontSel", &type, (BYTE*)&pvc_fontSel, &numData);
+	numData = sizeof(pvc_fontSel2);
+	reg.QueryValue("pvc_fontSel2", &type, (BYTE*)&pvc_fontSel2, &numData);
+	numData = sizeof(pvc_selection);
+	reg.QueryValue("pvc_selection", &type, (BYTE*)&pvc_selection, &numData);
+	numData = sizeof(pvc_selection2);
+	reg.QueryValue("pvc_selection2", &type, (BYTE*)&pvc_selection2, &numData);
+	numData = sizeof(pvc_playbar);
+	reg.QueryValue("pvc_playbar", &type, (BYTE*)&pvc_playbar, &numData);
+	numData = sizeof(pvc_playbar2);
+	reg.QueryValue("pvc_playbar2", &type, (BYTE*)&pvc_playbar2, &numData);
+	numData = sizeof(pvc_cursor);
+	reg.QueryValue("pvc_cursor", &type, (BYTE*)&pvc_cursor, &numData);
+	numData = sizeof(pvc_cursor2);
+	reg.QueryValue("pvc_cursor2", &type, (BYTE*)&pvc_cursor2, &numData);
+
 	numData = sizeof(vu1);
 	reg.QueryValue("vu1", &type, (BYTE*)&vu1, &numData);
 	numData = sizeof(vu2);
@@ -727,6 +792,7 @@ Configuration::Write(
 	reg.SetValue("CenterCursor", REG_BINARY, (BYTE*)&_centerCursor, sizeof(_centerCursor));
 	reg.SetValue("CursorAlwaysDown", REG_BINARY, (BYTE*)&_cursorAlwaysDown, sizeof(_cursorAlwaysDown));
 	reg.SetValue("useDoubleBuffer", REG_BINARY, (BYTE*)&useDoubleBuffer, sizeof(useDoubleBuffer));
+	reg.SetValue("DisplayLineNumbers", REG_BINARY, (BYTE*)&_linenumbers, sizeof(_linenumbers));
 	reg.SetValue("showAboutAtStart", REG_BINARY, (BYTE*)&_showAboutAtStart, sizeof(_showAboutAtStart));
 	reg.SetValue("RecordNoteoff", REG_BINARY, (BYTE*)&_RecordNoteoff, sizeof(_RecordNoteoff));
 	reg.SetValue("RecordTweaks", REG_BINARY, (BYTE*)&_RecordTweaks, sizeof(_RecordTweaks));
@@ -864,11 +930,32 @@ Configuration::Write(
 	reg.SetValue("mv_polycolour", REG_DWORD, (BYTE*)&mv_polycolour, sizeof(mv_polycolour));	
 	reg.SetValue("mv_wireaa", REG_DWORD, (BYTE*)&mv_wireaa, sizeof(mv_wireaa));	
 	reg.SetValue("mv_wirewidth", REG_DWORD, (BYTE*)&mv_wirewidth, sizeof(mv_wirewidth));	
+
+	reg.SetValue("pvc_separator", REG_DWORD, (BYTE*)&pvc_separator, sizeof(pvc_separator));	
+	reg.SetValue("pvc_separator2", REG_DWORD, (BYTE*)&pvc_separator2, sizeof(pvc_separator2));	
 	reg.SetValue("pvc_background", REG_DWORD, (BYTE*)&pvc_background, sizeof(pvc_background));	
+	reg.SetValue("pvc_background2", REG_DWORD, (BYTE*)&pvc_background2, sizeof(pvc_background2));	
 	reg.SetValue("pvc_row4beat", REG_DWORD, (BYTE*)&pvc_row4beat, sizeof(pvc_row4beat));	
+	reg.SetValue("pvc_row4beat2", REG_DWORD, (BYTE*)&pvc_row4beat2, sizeof(pvc_row4beat2));	
 	reg.SetValue("pvc_rowbeat", REG_DWORD, (BYTE*)&pvc_rowbeat, sizeof(pvc_rowbeat));	
+	reg.SetValue("pvc_rowbeat2", REG_DWORD, (BYTE*)&pvc_rowbeat2, sizeof(pvc_rowbeat2));	
 	reg.SetValue("pvc_row", REG_DWORD, (BYTE*)&pvc_row, sizeof(pvc_row));	
+	reg.SetValue("pvc_row2", REG_DWORD, (BYTE*)&pvc_row2, sizeof(pvc_row2));	
 	reg.SetValue("pvc_font", REG_DWORD, (BYTE*)&pvc_font, sizeof(pvc_font));	
+	reg.SetValue("pvc_font2", REG_DWORD, (BYTE*)&pvc_font2, sizeof(pvc_font2));	
+	reg.SetValue("pvc_fontPlay", REG_DWORD, (BYTE*)&pvc_fontPlay, sizeof(pvc_fontPlay));	
+	reg.SetValue("pvc_fontPlay2", REG_DWORD, (BYTE*)&pvc_fontPlay2, sizeof(pvc_fontPlay2));	
+	reg.SetValue("pvc_fontCur", REG_DWORD, (BYTE*)&pvc_fontCur, sizeof(pvc_fontCur));	
+	reg.SetValue("pvc_fontCur2", REG_DWORD, (BYTE*)&pvc_fontCur2, sizeof(pvc_fontCur2));	
+	reg.SetValue("pvc_fontSel", REG_DWORD, (BYTE*)&pvc_fontSel, sizeof(pvc_fontSel));	
+	reg.SetValue("pvc_fontSel2", REG_DWORD, (BYTE*)&pvc_fontSel2, sizeof(pvc_fontSel2));	
+	reg.SetValue("pvc_selection", REG_DWORD, (BYTE*)&pvc_selection, sizeof(pvc_selection));	
+	reg.SetValue("pvc_selection2", REG_DWORD, (BYTE*)&pvc_selection2, sizeof(pvc_selection2));	
+	reg.SetValue("pvc_playbar", REG_DWORD, (BYTE*)&pvc_playbar, sizeof(pvc_playbar));	
+	reg.SetValue("pvc_playbar2", REG_DWORD, (BYTE*)&pvc_playbar2, sizeof(pvc_playbar2));	
+	reg.SetValue("pvc_cursor", REG_DWORD, (BYTE*)&pvc_cursor, sizeof(pvc_cursor));	
+	reg.SetValue("pvc_cursor2", REG_DWORD, (BYTE*)&pvc_cursor2, sizeof(pvc_cursor2));	
+
 	reg.SetValue("vu1", REG_DWORD, (BYTE*)&vu1, sizeof(vu1));	
 	reg.SetValue("vu2", REG_DWORD, (BYTE*)&vu2, sizeof(vu2));	
 	reg.SetValue("vu3", REG_DWORD, (BYTE*)&vu3, sizeof(vu3));	
