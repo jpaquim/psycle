@@ -23,6 +23,12 @@ a = compile number.
 Legend :	+=addition		*=change	!=bug
 ---------------------------------------------------
 
+v1.7.5
+------
++"MIDI RAW" recording mode - records incoming midi to noteons and mcms, passes them to vst (pooplog)
+! fixes for multichannel jamming and recording and mcm recording loosing held notes (pooplog)
+! vst window layout for machines with way too many parameters and using the default gui (pooplog)
+
 V1.7.4
 ------
 + Added seminote tunning to sample instruments.
