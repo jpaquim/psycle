@@ -6,6 +6,7 @@
 #include "NewMachine.h"
 #include "Plugin.h"
 #include "VstHost.h"
+#include "ProgressDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -458,6 +459,8 @@ void CNewMachine::LoadPluginInfo()
 {
 	if (_numPlugins == -1)
 	{
+		AfxGetApp()->DoWaitCursor(1); 
+
 		int plugsCount=0;
 		int badPlugsCount =0;
 		_numPlugins = 0;
@@ -476,13 +479,17 @@ void CNewMachine::LoadPluginInfo()
 		fprintf(hfile,"[Native Plugins]\n\n");
 		fclose(hfile);
 		FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetPluginDir()),MACH_PLUGIN);
+
 		hfile=fopen(logname,"a");  
 		fprintf(hfile,"\n[VST Plugins]\n\n");
 		fclose(hfile);
 		FindPluginsInDir(plugsCount,badPlugsCount,CString(Global::pConfig->GetVstDir()),MACH_VST);
 		_numPlugins = plugsCount;
 		_numBadPlugins = badPlugsCount;
+
 		SaveCacheFile();
+
+		AfxGetApp()->DoWaitCursor(-1); 
 	}
 }
 
