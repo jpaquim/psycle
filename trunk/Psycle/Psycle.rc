@@ -926,7 +926,7 @@ END
 
 IDD_VSTRACK DIALOGEX 0, 0, 142, 203
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
                     16
@@ -1071,7 +1071,7 @@ END
 
 IDD_KEYCONFIG DIALOG DISCARDABLE  0, 0, 322, 276
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Key Configuration"
+CAPTION "Keyboard and Miscel.laneous"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Keymap",IDC_STATIC,3,3,125,272
@@ -1082,7 +1082,7 @@ BEGIN
                     WS_TABSTOP,29,239,95,15
     PUSHBUTTON      "None",IDC_NONE,8,258,55,12
     PUSHBUTTON      "Lookup",IDC_DEFAULTS3,68,258,55,12,WS_DISABLED
-    GROUPBOX        "Behaviour",IDC_STATIC,133,3,184,242
+    GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,94
     CONTROL         "Right CTRL play / Space stop",IDC_PLAY_R_CTRL,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
     CONTROL         "FT2 Style Home/End Behaviour",IDC_FT2_HOME_END,"Button",
@@ -1097,24 +1097,32 @@ BEGIN
                     BS_AUTOCHECKBOX,138,70,172,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE,138,82,172,10
+    GROUPBOX        "Miscellaneous Options",IDC_STATIC,133,102,183,142
+    CONTROL         "Autosave current song after (mins)",
+                    IDC_AUTOSAVE_CURRENT_SONG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,138,116,121,10
+    EDITTEXT        IDC_AUTOSAVE_MINS,262,115,36,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Spin1",IDC_AUTOSAVE_MINS_SPIN,"msctls_updown32",
+                    UDS_ALIGNRIGHT | UDS_ARROWKEYS,286,115,10,12
     CONTROL         "Save File Reminders on Load, New or Exit",
                     IDC_FILE_SAVE_REMINDERS,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE,138,203,172,10
+                    BS_MULTILINE,138,128,172,10
     CONTROL         "Show Song Info on Load",IDC_SHOW_INFO_ON_LOAD,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE,138,215,172,10
-    RTEXT           "Default New Pattern Lines:",IDC_STATIC,136,229,87,12,
+                    BS_AUTOCHECKBOX | BS_MULTILINE,138,140,172,10
+    RTEXT           "Default New Pattern Lines:",IDC_STATIC,136,154,87,12,
                     SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT_DEFLINES,226,229,41,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_EDIT_DEFLINES,226,154,41,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    CTEXT           "",IDC_TEXT_DEFLINES,270,229,42,12,SS_CENTERIMAGE | 
+    CONTROL         "Spin1",IDC_SPIN_DEFLINES,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,154,11,12
+    CTEXT           "",IDC_TEXT_DEFLINES,270,154,42,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     GROUPBOX        "Keymap Presets",IDC_STATIC,133,247,184,28
     PUSHBUTTON      "Defaults",IDC_DEFAULTS,138,258,55,12
     PUSHBUTTON      "Load",IDC_IMPORTREG,197,258,55,12
     PUSHBUTTON      "Save",IDC_EXPORTREG,257,258,55,12
-    CONTROL         "Spin1",IDC_SPIN_DEFLINES,"msctls_updown32",
-                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,229,11,12
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263

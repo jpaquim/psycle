@@ -437,11 +437,13 @@ float * Player::Work(
 #if !defined(_WINAMP_PLUGIN_)
 
 void Player::StartRecording(
-	char *psFilename)
+	char *psFilename,
+	int bitdepth)
 {
 	if (!_recording)
 	{
-		_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, 16, 2);
+//		_outputWaveFile.OpenForWrite(psFilename, samplerate, bitdepth, 2);
+		_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, bitdepth, 2);
 		_recording = true;
 	}
 }
@@ -456,4 +458,10 @@ void Player::StopRecording(void)
 }
 #endif // ndef _WINAMP_PLUGIN_
 
+void Player::SetSampleRate(int samprate)
+{
+	// TODO: Add notifications to all machines that the sample Rate has changed
+	// samplerate = samprate;
+	// for (Allmachines) change it
+}
 

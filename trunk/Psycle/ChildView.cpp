@@ -877,11 +877,13 @@ void CChildView::OnFileSaveaudio()
 {
 	OnBarstop();
 	KillTimer(31);
+	KillTimer(159);
+	OnTimer(159); // Autosave
 	
 	CSaveWavDlg dlg;
 	dlg.DoModal();
 
-	SetTimer(31,20,NULL);
+	InitTimer();
 }
 
 BOOL CChildView::CheckUnsavedSong(char* szTitle)

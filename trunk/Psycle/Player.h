@@ -14,6 +14,7 @@ class Machine;
 class Player
 {
 public:
+	void SetSampleRate(int samprate);
 	void AdvancePosition();
 	bool _playBlock;
 	bool _playing;
@@ -39,7 +40,7 @@ public:
 	static float * Work(void* context, int& nsamples);
 #endif // _WINAMP_PLUGIN_
 
-	void StartRecording(char* psFilename);
+	void StartRecording(char* psFilename,int bitdepth=16);
 	void StopRecording(void);
 protected:
 	int prevMachines[MAX_TRACKS];

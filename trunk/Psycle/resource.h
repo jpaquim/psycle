@@ -3,6 +3,7 @@
 // Used by Psycle.rc
 //
 #define IDC_COPY                        3
+#define IDC_PASTE                       4
 #define ID_INDICATOR_SEQPOS             52
 #define ID_INDICATOR_PATTERN            53
 #define ID_INDICATOR_LINE               54
@@ -85,6 +86,9 @@
 #define IDB_MACHINE_SKIN                195
 #define IDD_GEAR_SCOPE                  196
 #define IDB_ASIO                        198
+#define IDD_GEAR_RACK                   201
+#define IDD_NEW_VOLUME                  202
+#define IDD_SAVEWAVDLG                  203
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -327,12 +331,15 @@
 #define IDC_CENTERCURSOR                1231
 #define IDC_CURSORDOWN                  1232
 #define IDC_MUTE                        1233
+#define IDC_SHOW_INFO_ON_LOAD           1233
 #define IDC_BYPASS                      1234
+#define IDC_FILE_SAVE_REMINDERS         1234
 #define IDC_SOLO                        1235
 #define IDC_PRESETSCOMBO                1236
 #define IDC_SAVE                        1237
 #define IDC_DELETE                      1238
 #define IDC_IMPORT                      1239
+#define IDC_SWAP                        1239
 #define IDC_PREVIEW                     1240
 #define IDC_EXPORT                      1241
 #define IDC_PRESETSLIST                 1242
@@ -534,6 +541,7 @@
 #define IDC_COMBOOCTAVE                 1428
 #define IDC_PATSEPARATORC2              1429
 #define IDC_EDITMACS                    1429
+#define IDC_GEAR_RACK                   1429
 #define IDC_SELECTION_CAN               1430
 #define IDC_CURSOR_CAN                  1431
 #define IDC_SELECTION_CAN2              1432
@@ -566,10 +574,13 @@
 #define IDC_IMPORTREG                   1459
 #define IDC_SLIDERMASTER                1460
 #define IDC_PATTERN_FONT_Y              1460
+#define IDC_DEFAULTS                    1460
 #define IDC_SLIDERM1                    1461
 #define IDC_PATTERN_FONT_X              1461
+#define IDC_NONE                        1461
 #define IDC_SLIDERM2                    1462
 #define IDC_PATTERN_FONT_POINT          1462
+#define IDC_DEFAULTS3                   1462
 #define IDC_SLIDERM3                    1463
 #define IDC_MACHINE_FONT_POINT          1463
 #define IDC_SLIDERM4                    1464
@@ -604,6 +615,31 @@
 #define IDC_PORTAUDIO_ASIO_BUFSIZE_EDIT 1490
 #define IDC_PORTAUDIO_ASIO_BUFSIZE_SPIN 1491
 #define IDC_PORTAUDIO_ASIO_LATENCY      1492
+#define IDC_GEARLIST                    1493
+#define IDC_CREATE                      1494
+#define IDC_NAME                        1495
+#define IDC_VOLUME_DB                   1495
+#define IDC_PROPERTIES                  1495
+#define IDC_VOLUME_PER                  1496
+#define IDC_EDIT_DB                     1496
+#define IDC_PARAMETERS                  1496
+#define IDC_EDIT_PER                    1497
+#define IDC_EDIT_DEFLINES               1498
+#define IDC_SPIN_DEFLINES               1499
+#define IDC_TEXT_DEFLINES               1500
+#define IDC_FILEBROWSE                  1501
+#define IDC_FILENAME                    1502
+#define IDC_PROGRESS                    1503
+#define IDC_RANGESTART                  1506
+#define IDC_RANGEEND                    1507
+#define IDC_PATNUMBER                   1509
+#define IDC_SAVEWIRESSEPARATED          1510
+#define IDC_RECSONG                     1511
+#define IDC_RECPATTERN                  1512
+#define IDC_RECRANGE                    1513
+#define IDC_AUTOSAVE_CURRENT_SONG       1514
+#define IDC_AUTOSAVE_MINS               1515
+#define IDC_AUTOSAVE_MINS_SPIN          1516
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_SAVESONG                32776
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -677,15 +713,16 @@
 #define ID_HELP_KEYBTXT                 32898
 #define ID_BARREC                       32902
 #define ID_POP_DELETE                   32903
+#define ID_FILE_REVERT                  32905
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        201
-#define _APS_NEXT_COMMAND_VALUE         32904
-#define _APS_NEXT_CONTROL_VALUE         1493
+#define _APS_NEXT_RESOURCE_VALUE        204
+#define _APS_NEXT_COMMAND_VALUE         32906
+#define _APS_NEXT_CONTROL_VALUE         1517
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif
