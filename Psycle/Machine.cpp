@@ -66,6 +66,10 @@ Machine::Machine()
 		_pSamplesL[c] = 0;
 		_pSamplesR[c] = 0;
 	}
+	for (c = 0; c<MAX_TRACKS; c++)
+	{
+		TriggerDelay[c]._cmd = 0;
+	}
 }
 
 Machine::~Machine()

@@ -7,7 +7,6 @@
 #include "MachineInterface.h"
 #include "Player.h"
 
-
 class PluginFxCallback : public CFxCallback
 {
 public:
@@ -114,6 +113,8 @@ protected:
 	static PluginFxCallback _callback;
 	CMachineInfo* _pInfo;
 	CMachineInterface* _pInterface;
+
 };
+
 
 #endif

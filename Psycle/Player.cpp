@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "machineinterface.h"
 
 #if defined(_WINAMP_PLUGIN_)
 	#include "global.h"
@@ -66,6 +67,10 @@ void Player::Stop(void)
 		if(Global::_pSong->_machineActive[i])
 		{
 			Global::_pSong->_pMachines[i]->Stop();
+			for(int c = 0; c < MAX_TRACKS; c++)
+			{
+				Global::_pSong->_pMachines[i]->TriggerDelay[c]._cmd = 0;
+			}
 		}
 	}
 #if defined(_WINAMP_PLUGIN_)
@@ -138,6 +143,7 @@ void Player::ExecuteLine(void)
 					pSong->_pMachines[mIndex]->SetPan(pEntry->_parameter>>1);
 
 				break;
+
 			}
 		}
 		else if ( !pSong->_trackMuted[track] ) // Check For Tweak or MIDI CC
@@ -169,6 +175,10 @@ void Player::ExecuteLine(void)
 		if(pSong->_machineActive[tc])
 		{
 			pSong->_pMachines[tc]->Tick();
+			for (int c = 0; c < MAX_TRACKS; c++)
+			{
+				pSong->_pMachines[tc]->TriggerDelay[c]._cmd = 0;
+			}
 		}
 	}
 
@@ -196,7 +206,23 @@ void Player::ExecuteLine(void)
 				{
 					Machine *pMachine = pSong->_pMachines[mIndex];
 					
-					pMachine->Tick(track, pEntry);
+					if (pEntry->_cmd == 0xfd)
+					{
+						// delay
+						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+						pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick)/256;
+					}
+					else if (pEntry->_cmd == 0xfb)
+					{
+						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+						pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick)/256;
+						pMachine->Tick(track, pEntry);
+					}
+					else
+					{
+						pMachine->TriggerDelay[track]._cmd = 0;
+						pMachine->Tick(track, pEntry);
+					}
 				}
 			}
 		}
@@ -418,3 +444,5 @@ void Player::StopRecording(void)
 	}
 }
 #endif // ndef _WINAMP_PLUGIN_
+
+

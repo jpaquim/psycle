@@ -142,8 +142,7 @@ void Plugin::Init(void)
 	}
 }
 
-void Plugin::Work(
-	int numSamples)
+void Plugin::Work(int numSamples)
 {
 	if (_mode != MACHMODE_GENERATOR)
 	{
@@ -154,21 +153,102 @@ void Plugin::Work(
 	_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
 #else
 	CPUCOST_INIT(cost);
-	if ((!_mute) && (_mode == MACHMODE_GENERATOR || (!_stopped && !_bypass)))
+	if (!_mute)
 	{
-		_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
-		Machine::SetVolumeCounter(numSamples);
-		if ( Global::pConfig->autoStopMachines )
+		if (_mode == MACHMODE_GENERATOR)
 		{
-//			Machine::SetVolumeCounterAccurate(numSamples);
-			if (_volumeCounter < 8)	{
-				_volumeCounter = 0;
-				_volumeDisplay = 0;
-				_stopped = true;
+			int ns = numSamples;
+			while (ns)
+			{
+				int nextevent = numSamples+1;
+				for (int i=0; i < MAX_TRACKS; i++)
+				{
+					if (TriggerDelay[i]._cmd)
+					{
+						if (TriggerDelayCounter[i] < nextevent)
+						{
+							nextevent = TriggerDelayCounter[i];
+						}
+					}
+				}
+				if (nextevent > ns)
+				{
+					for (int i=0; i < MAX_TRACKS; i++)
+					{
+						// come back to this
+						if (TriggerDelay[i]._cmd)
+						{
+							TriggerDelayCounter[i] -= ns;
+						}
+					}
+					_pInterface->Work(_pSamplesL, _pSamplesR, ns, Global::_pSong->SONGTRACKS);
+					ns = 0;
+				}
+				else
+				{
+					ns -= nextevent;
+					_pInterface->Work(_pSamplesL, _pSamplesR, nextevent, Global::_pSong->SONGTRACKS);
+					for (i=0; i < MAX_TRACKS; i++)
+					{
+						// come back to this
+						if (TriggerDelay[i]._cmd == 0xfd)
+						{
+							if (TriggerDelayCounter[i] == nextevent)
+							{
+								// do event
+								_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+								TriggerDelay[i]._cmd = 0;
+							}
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
+							}
+						}
+						else if (TriggerDelay[i]._cmd == 0xfb)
+						{
+							if (TriggerDelayCounter[i] == nextevent)
+							{
+								// do event
+								_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+								TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+							}
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
+							}
+						}
+					}
+				}
 			}
-			else _stopped = false;
+			Machine::SetVolumeCounter(numSamples);
+			if ( Global::pConfig->autoStopMachines )
+			{
+	//			Machine::SetVolumeCounterAccurate(numSamples);
+				if (_volumeCounter < 8)	{
+					_volumeCounter = 0;
+					_volumeDisplay = 0;
+					_stopped = true;
+				}
+				else _stopped = false;
+			}
+	//		else Machine::SetVolumeCounter(numSamples);
 		}
-//		else Machine::SetVolumeCounter(numSamples);
+		else if (!_stopped && !_bypass)
+		{
+			_pInterface->Work(_pSamplesL, _pSamplesR, numSamples, Global::_pSong->SONGTRACKS);
+			Machine::SetVolumeCounter(numSamples);
+			if ( Global::pConfig->autoStopMachines )
+			{
+	//			Machine::SetVolumeCounterAccurate(numSamples);
+				if (_volumeCounter < 8)	{
+					_volumeCounter = 0;
+					_volumeDisplay = 0;
+					_stopped = true;
+				}
+				else _stopped = false;
+			}
+	//		else Machine::SetVolumeCounter(numSamples);
+		}
 	}
 	CPUCOST_CALC(cost, numSamples);
 	_cpuCost += cost;

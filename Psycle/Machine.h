@@ -4,6 +4,7 @@
 #include "SongStructs.h"
 #include "Dsp.h"
 #include "Helpers.h"
+#include "Constants.h"
 
 #define MAX_DELAY_BUFFER		65536 // Dalay Delay and Flanger
 #define OVERLAPTIME				128  // Sampler
@@ -141,6 +142,8 @@ public:
 	virtual bool Load(RiffFile* pFile);
 #if !defined(_WINAMP_PLUGIN_)
 	virtual bool Save(RiffFile* pFile);
+	PatternEntry	TriggerDelay[MAX_TRACKS];
+	int				TriggerDelayCounter[MAX_TRACKS];
 protected:
 	inline void SetVolumeCounter(int numSamples)
 	{

@@ -2,173 +2,176 @@
 !=change
 +=addition
 
-! remove waits from play when in export mode
-! should be able to pick cursor colour rather than have it invert background 
-! lines between tracks should be definable, not black
-+ midi control commands learn
-! longer sequences (256) [file format,maybe others]
-! more tracks (64) [file format]
-+ store state of follow song toggle
-+ Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
-	pattern data and other settings, this possible? (yes, but will require new song parser...)
-! should make it so clicking on colour boxes pops up menu
-* screen flashes switching from machine to pattern view (new)
-* dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
-	it is fine.  i think it has to do with cpu load.
-* pattern view does not refresh when skin dlg presets have changed.
-+ actual skinning
-* song length calculation does not take ffxx/fexx commands into account
-+ visual preset saving/loading
-! DO NOT LOAD LIST VST list & database
-! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
-	when you want.
-+ <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
-	pattern length parameter
-* <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
-+ <Alk^> I think the line numbering should be optional
-+ <Alk^> I also think that the cursor movement after a paste should be optional to =)
-* Alk* place cursor on last line, change to machine screen and back to pattern, bug
-+ Alk* would be useful to put dialogs like wire vol into separate tasks (modeless) so psycle is not disabled 
-	when they are open
-! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
-+ <_sue_> hey poop....can we have something like a right double click for inserting the first not used pattern
-	 (like instert button)?
-! <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in 
-	the one im using i have half of the tab where the pattern seq is completely free.
-+ <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
-	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
-! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
-	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
-+ <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
-	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
-+ <sue> hotkeys for seq edit cut, copy, paste, etc?
-* <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
-	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
-	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
-* <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
-	happens to native plugs)
-+ <sue>in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
-	(many vsts use control + left mouse button to reset knobs/params....maybe any other alike key 
-	combination.... )
-* <bdzld> when you're in pattern edit and you maximise the window it blacks out -> sizing down too
-+ <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
-	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
-	require a file format change though :(
-* <bdzld> when you put a machine on top of each other, the vus always pop to the top?
-+ pooplog - dragging files onto psycle window would be nice, hmm?
-* switched a pattern length to 2 and the empty space was not cleared, it looped 0 1 0 1 0 1
-* trying to select past the visible area with the mouse sucks
-* preview check box in preset dialog stopped working?
-* did some transpose selection and display got fucking crazy i was very confused - undo did same.
-* moving machines makes playback pop
-* waveoutMME gets weird after a bit and start playing all crackly and doubletime
-* psycle crashed after changing waveout/directx settings around
-+ songs should save master decrease flag
-+ What if master machine looked like a mixer and you could double click it to bring up not only the master volume,
-	but labelled volume sliders for each of the machines connected to it? -> this would suck as you would get names
-	for only the effects
-+ how about nice looking bmp windows for machine link and master machine dialogs?
-+ how about option to switch the instrument and machine columns?
-* record button should set edit mode and follow mode on, should have new export wav button
-+ global note delay effects command
-* <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
-	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
-	rec tweaks when you do a refresh.......like closing the plugs  gui...
-* <_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all..... <pooplog> are you able to 
-	control 	the tweaks of it from the pattern? <_sue_> yes i am (in pro52)
-+ ALK You may have coinsidered this already, making machines have a right click menu (from the 
-	machines view) with one of the items benig duplicate machine.
-* <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
-	psycle opens..
-+ ALK tracker command to bypass an fx, mute command for machines
-+ ALK waveed: remove silence from start and end of wave
-* keyboard notes/noteoffs are not always displayed as they are recorded until you switch patterns back and forth
-! Have exit warning on modified file
-+ even if it isn't used specifically for volume, there should be a flag to allow machines to recieve command/instrument 
-	column data every tick with a SeqTick call (especially useful for effects, which are hurting with only being 
-	able to recieve tweaks)
-
-
-	*Flanger feedback slider
-	 Instrument filter envelope slider. (check differences with finetune slider)
-
-	*changing octave, make notes stop (because if not, notes playing don't stop)
-
-
-
--- Psycle 1.67
---------------
-
 * Sampler Machine/Wave Ed:
 --------------------------
-	bug: 	 portamento to note slides too much. (can anyone test this for me?)
-	feature: just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
-	feature: Instruments Support ( *.xi , *.iti, *.sf2. Maybe more)
+bug: 	 portamento to note slides too much. (can anyone test this for me?)
++ ALK waveed: remove silence from start and end of wave
+feature: just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
+feature: Instruments Support ( *.xi , *.iti, *.sf2. Maybe more)
 		 * samples mapped by key
 		 * maybe: samples mapped by velocity?
-	feature: Improve Filter support.
+feature: Improve Filter support.
 		 * twk Control
 		 * maybe: allow filter cutoff/res mapping to velocity
-	feature: volume slides/arpeggio
-	feature: better way to set loop points. (+ ping-pong loops)
-	feature: Easier way to load Samples.
-	feature: Toolbar for the Wave Editor.
-	feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave preview is not adecuated)
+feature: volume slides/arpeggio
+feature: better way to set loop points. (+ ping-pong loops)
+feature: Easier way to load Samples.
+feature: Toolbar for the Wave Editor.
+feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave preview is not adecuated)
 
 * GUI (pattern):
 ----------------
-	bug:	 Select with mouse when playing gives problems
-	feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
-	feature: maybe: MultiPattern View (The code is not made in the best way)
-	feature: MORE Keyboard shortcuts 
-	feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
-	feature: First, I'd like to see the Generator or Effect name in one of these places
+* <sue> when pressing enter on a generator tweak, the generator number is captured, but that doesnt happen if  
+	you press enter on an effect tweak. <_sue_> the first point in my txt is not true.....enter captures 
+	native fx tweaks.....and even vsts fx tweaks.....but it doesnt shows it in the pull down menu (only in vsts)
+* <_sue_> vst tweak rec still stalls...its like it stops follow song... it happens with reFX junox2 it stalls 
+	but it recs the tweaks......it just doesnt refresh or something.... with refx junox2 it only shows the 
+	rec tweaks when you do a refresh.......like closing the plugs  gui... 
+* screen flashes switching from machine to pattern view (new)
+* pattern view does not refresh when skin dlg presets have changed.
+* Alk* place cursor on last line, change to machine screen and back to pattern, bug
+* <bdzld> when you're in pattern edit and you maximise the window it blacks out -> sizing down too
+* switched a pattern length to 2 and the empty space was not cleared, it looped 0 1 0 1 0 1
+* trying to select past the visible area with the mouse sucks
+* did some transpose selection and display got fucking crazy i was very confused - undo did same.
+* keyboard notes/noteoffs are not always displayed as they are recorded until you switch patterns back and forth
+bug:	 Select with mouse when playing gives problems
+! should be able to pick cursor colour rather than have it invert background 
+! lines between tracks should be definable, not black
+! <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in 
+	the one im using i have half of the tab where the pattern seq is completely free.
++ how about option to switch the instrument and machine columns?
++ <Alk^> I think the line numbering should be optional
+feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
+feature: maybe: MultiPattern View (The code is not made in the best way)
+feature: MORE Keyboard shortcuts 
+feature: First, I'd like to see the Generator or Effect name in one of these places
 		 when I hover over a note in the Pattern Editor ( MrToast )
 
 * GUI (machines):
 -----------------
-	feature: Saving all the missing settings to registry (like follow song, class of plugin..)
-	feature: Clone Machine Button
-	feature: Replace Machine by another.
-	feature: Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
-	feature: Directories in "Add new machine" (Sorting with directories)
+* preview check box in preset dialog stopped working?
+* <bdzld> when you put a machine on top of each other, the vus always pop to the top?
+bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
+		 Fix:Basically, make ONLY .fxb for VST's.
+bug:	 JMDrum is buggy (Crashes sometimes)
+! <_sue_> and also being able to select the slot in wich you load a generator.....it goes by defaul to the first 
+	not used....sometimes i wanna switch generators and the new one goes to the wrong slot....
++ <_sue_> native mahcines gui should have sliders...it would change a lot.... <pooplog> sliders, switches, and 
+	owner draw controls i say?
++ What if master machine looked like a mixer and you could double click it to bring up not only the master volume,
+	but labelled volume sliders for each of the machines connected to it? -> this would suck as you would get names
+	for only the effects
++ ALK You may have coinsidered this already, making machines have a right click menu (from the 
+	machines view) with one of the items benig duplicate machine.
++ how about nice looking bmp windows for machine link and master machine dialogs?
+feature: Saving all the missing settings to registry (like follow song, class of plugin..)
+feature: Clone Machine Button
+feature: Replace Machine by another.
+feature: Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
+feature: Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
-	feature: Internal Fx Gui to Native Gui Conversion (including wiredialog)
+feature: Internal Fx Gui to Native Gui Conversion (including wiredialog)
 		 Create a new "universal" MachineFrame class, for all plugins
 		 (Needs a few more changes in the class definitions)
-	feature: VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
-	feature: Option to hide Parameters in VST GUI.
-	feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
-	bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
-		 Fix:Basically, make ONLY .fxb for VST's.
-	feature: Really good looking new Master Machine.(Graphics under res\MasterMachine)
-	bug:	 JMDrum is buggy (Crashes sometimes)
+feature: VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
+feature: Option to hide Parameters in VST GUI.
+feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
+feature: Really good looking new Master Machine.(Graphics under res\MasterMachine)
 
 
 * Player Engine:
 ----------------
-	bug:	 In some rare cases, when opening a song, psycle produces noise. (See "fly to the moon [non vocal].psy")
+* <Alk^> do u think the recording with subtracting the buffer delay will be doable? 
+* song length calculation does not take ffxx/fexx commands into account
+* changing octave, make notes stop (because if not, notes playing don't stop)
+bug:	 In some rare cases, when opening a song, psycle produces noise. (See "fly to the moon [non vocal].psy")
 		 When opening it, a noise is produced by one machine and passed to the others. The bug doesn't happen
 		 when debugging!
-	bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
-	bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
+bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
+bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
-	bug:	 New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn't happen on freebase)
-	bug:	 DirectSound Output is a bit buggy.Crashes and bad sound reported. 
-	feature: Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
+bug:	 New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn't happen on freebase)
+! remove waits from play when in export mode
+! longer sequences (256) [file format,maybe others]
+! more tracks (64) [file format]
++ ALK tracker command to bypass an fx, mute command for machines
++ even if it isn't used specifically for volume, there should be a flag to allow machines to recieve command/instrument 
+	column data every tick with a SeqTick call (especially useful for effects, which are hurting with only being 
+	able to recieve tweaks)
++ option for record to take command FD into account like ft2
+feature: Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)
-	feature: pattern repeat (loop) and song repeat (asked by Vir|us)
-	feature: Note Delay to VST's
+feature: pattern repeat (loop) and song repeat (asked by Vir|us)
+feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 
+* Vsts:
+------------
+* <_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all..... <pooplog> are you able to 
+	control 	the tweaks of it from the pattern? <_sue_> yes i am (in pro52)
++ <bdzld> which is support for multiout vsti? <pooplog> if psycle was smart enough to detect mutli-out vst, when 
+	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
+	require a file format change though :(
+! DO NOT LOAD LIST VST list & database
+
+* Interface:
+------------
+* <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
+	psycle opens..
+* <sue> when selecting vsts the midi/params/waves pull down menu should go automaticly to "params" (this already 
+	happens to native plugs)
+* Flanger feedback slider
+* Instrument filter envelope slider. (check differences with finetune slider)+ midi control commands learn
+* dragging machines is not always the greatest pleasure of all. *** the other day it was being weird but today 
+	it is fine.  i think it has to do with cpu load.
+! Have exit warning on modified file
+! should make it so clicking on colour boxes pops up menu
+! <angelus>What about an option to select the visibility of this pattern-sequence menu. You can hide or show it 
+	when you want.
+! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
+! record button should set edit mode and follow mode on, should have new export wav button
++ actual skinning
++ visual preset saving/loading
++ <doktor1> "how can i make all paterns 128 lenght , not by modifing 1 by 1" -> we should store a default 
+	pattern length parameter
++ <Alk^> I also think that the cursor movement after a paste should be optional to =)
++ Alk* would be useful to put dialogs like wire vol into separate tasks (modeless) so psycle is not disabled 
+	when they are open
++ <_sue_> hey poop....can we have something like a right double click for inserting the first not used pattern
+	 (like instert button)?
++ <_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
+	like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this -> for the entire song
++ pooplog - dragging files onto psycle window would be nice, hmm?
++ songs should save master decrease flag
++ <sue>in the plugs gui: control + left mouse button on a knob to capture respective param in the pulldown menu 
+	(many vsts use control + left mouse button to reset knobs/params....maybe any other alike key 
+	combination.... )
++ <sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data 
+	into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
++ <sue> hotkeys for seq edit cut, copy, paste, etc?
+
+* Driver Issues:
+------------
+* moving machines makes playback pop
+* waveoutMME gets weird after a bit and start playing all crackly and doubletime
+* psycle crashed after changing waveout/directx settings around
+bug:	 DirectSound Output is a bit buggy.Crashes and bad sound reported. 
++ ASIO?
 
 * Importing:
 ------------
+bug: It doesn't add the machines necessary to play all notes.
+bug: if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
+feature: Add option for the user to create samplers for instruments
+feature: IT importing
++ Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring 
+	pattern data and other settings, this possible? (yes, but will require new song parser...)
 
-	bug: It doesn't add the machines necessary to play all notes.
-	bug: if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
-	feature: Add option for the user to create samplers for instruments
-	feature: IT importing
+
+
+
+
 
 
 
