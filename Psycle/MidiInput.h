@@ -117,7 +117,7 @@ public:
 	MIDI_CONFIG * GetConfigPtr( void ){ return &m_config; };	// for external access
 
 	int GetNumDevices( void );	// returns the number of midi devices on the system
-	UINT FindDevByName( CString nameString );	// convert a name identifier into a index identifier (or -1 if fail)
+	int FindDevByName( CString nameString );	// convert a name identifier into a index identifier (or -1 if fail)
 	UINT PopulateListbox( CComboBox * listbox );	// fill a listbox with a list of the available input devices
 
 	HMIDIIN GetHandle( int driver ){ assert( driver < MAX_DRIVERS ); return m_midiInHandle[ driver ]; };	// return the current device handle
