@@ -145,7 +145,7 @@ void CVolumeDlg::OnChangeEditDb()
 		m_db.GetWindowText(buf,31);
 
 		float val = atof(buf);
-		volume = pow(10.0,val/20.0);
+		volume = powf(10.0,val/20.0);
 		DrawPer();	
 	}
 	

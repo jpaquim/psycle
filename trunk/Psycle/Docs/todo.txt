@@ -13,6 +13,11 @@ X low priority
 * New and unsorted and untested
 ------------
 
+* psycle was being weird with drivers
+
+<Druttis_> can you have background picture in psycle somehow?
+<alk_> The "revert to saved" dialog shuold say: "Warning! You will lose everything done since song 
+	was saved!"
 + <Fabrice> a button (or many ones) to clean the unused samples, patterns, machines, effect etc....
 + option to show or not the dots "." and lines "---" in the pattern editor.
 	[Using a variable "char dot;" and another "char line[3];" is possibly the fastest approach]
@@ -79,6 +84,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	Can't select with keyboard while follow song on, and playing.
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
 +	how about option to switch the instrument and machine columns?
++ <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
 +	D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
