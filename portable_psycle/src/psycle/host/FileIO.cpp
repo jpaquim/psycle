@@ -116,7 +116,7 @@ bool RiffFile::Expect(
 	ULONG numBytes)
 {
 	DWORD bytesRead;
-	UCHAR c;
+	unsigned char c;
 
 	while (numBytes-- != 0)
 	{
@@ -187,13 +187,13 @@ bool RiffFile::ReadString(char* pData, ULONG maxBytes)
 				return false;
 			}
 		}
-		while (c != 0)
+		do
 		{
 			if (!Read(&c, sizeof(c)))
 			{
 				return false;
 			}
-		}
+		} while (c != 0);
 		return true;
 	}
 	return false;

@@ -267,6 +267,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	cs->SetPos(512);
 	cs->SetTicFreq(64);
 
+/*	cs->SetRange(0,256);
+	cs->SetPos(128);
+	cs->SetTicFreq(16);
+*/
+	cs->SetPageSize(4);
 
 	m_wndControl2.SetWindowText("Psycle control bar 2");
 
@@ -291,6 +296,29 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		cc2->AddString(s);
 	}
 	cc2->SetCurSel(_pSong->SONGTRACKS-4);
+
+//	SetAppSongBpm(0);
+//	SetAppSongTpb(0);
+
+//	cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
+
+//	for(int i=0;i<=16;i++)
+//	{
+//		char s[4];
+//		_snprintf(s,4,"%i",i);
+//		cc2->AddString(s);
+//	}
+//	cc2->SetCurSel(1);
+	
+//	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
+//   cc->SetCurSel(0);
+	
+//	cc =(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+//	cc->AddString("MIDI");
+//	cc->AddString("Params");
+//	cc->AddString("Waves");
+	
+//	UpdateComboGen(); // Initializes Gen and Ins combobox.
 
 	PsybarsUpdate();
 	CComboBox *cc =(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
@@ -603,7 +631,9 @@ void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult)
 	if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
 	{
 		cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
-		((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
+		//((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
+		((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos();
+		m_wndView.SetFocus();
 	}
 	
 	*pResult = 0;
@@ -615,6 +645,7 @@ void CMainFrame::OnClipbut()
 	m_wndView.SetFocus();
 }
 
+//l and r are the left and right vu meter values
 void CMainFrame::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
 {
 	if (Global::pConfig->draw_vus)
@@ -922,6 +953,9 @@ void CMainFrame::OnSelchangeBarCombogen()
 			UpdateComboGen(false);
 		}
 		RedrawGearRackList();
+		//Added by J.Redfern, repaints main view after changing selection in combo
+		m_wndView.Repaint();
+
 	}
 }
 
@@ -1190,7 +1224,6 @@ void CMainFrame::OnLoadwave()
 
 void CMainFrame::OnSavewave()
 {
-	int c=0;
 	WaveFile output;
 	static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 	
@@ -1588,6 +1621,9 @@ void CMainFrame::OnSelchangeSeqlist()
 		if(cpid!=_pSong->playOrder[ep])
 		{
 			m_wndView.Repaint(DMPattern);
+			if (Global::pPlayer->_playing) {
+				m_wndView.Repaint(DMPlayback);
+			}
 		}		
 	}
 	m_wndView.SetFocus();
@@ -1776,21 +1812,22 @@ void CMainFrame::OnSeqduplicate()
 {
 	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 	int *litems;
-	int i,counter=0, selcount = cc->GetSelCount();
+	int counter=0, selcount = cc->GetSelCount();
 	if ( _pSong->playLength+selcount >= MAX_SONG_POSITIONS)
 	{
-		MessageBox("Cannot clone the pattern(s). The maximum sequence length would be excessed.","Clone Patterns");
+		MessageBox("Cannot clone the pattern(s). The maximum sequence length would be exceeded.","Clone Patterns");
 		return;
 	}
 	litems = new int[selcount];
 	cc->GetSelItems(selcount,litems);
 
-	for(i=(_pSong->playLength-1);i>=litems[0];i--)
-		{
+  	// Moves all patterns after the selection, to make space.
+	for(int i(_pSong->playLength-1) ; i >= litems[selcount-1] ;--i)
+	{
 		_pSong->playOrder[i+selcount]=_pSong->playOrder[i];
-		}
+	}
 
-	for (i=0;i<selcount;i++)
+	for(int i(0) ; i < selcount ; ++i)
 	{
 		int newpat = _pSong->GetBlankPatternUnused();
 		if (newpat < MAX_PATTERNS-1)
@@ -1809,18 +1846,18 @@ void CMainFrame::OnSeqduplicate()
 
 			++_pSong->playLength;
 
-			_pSong->playOrder[litems[i]]=newpat;
+			_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
 
 			counter++;
 		}
 		else 
 		{
-			_pSong->playOrder[litems[i]]=0;
+			_pSong->playOrder[litems[selcount-1]+i+1]=0;
 		}
 	}
-	if ( counter > 0)
+	if(counter > 0)
 	{
-		m_wndView.editPosition++;
+		m_wndView.editPosition=litems[selcount-1]+1;
 		UpdatePlayOrder(true);
 		UpdateSequencer(m_wndView.editPosition);
 
@@ -1850,7 +1887,7 @@ void CMainFrame::OnSeqdelete()
 	for (int i=0; i < num; i++)
 	{
 		int c;
-		for(c=indexes[i];c<_pSong->playLength-1;c++)
+		for(c = indexes[i] ; c < _pSong->playLength - 1 ; ++c)
 		{
 			_pSong->playOrder[c]=_pSong->playOrder[c+1];
 		}
@@ -1860,7 +1897,7 @@ void CMainFrame::OnSeqdelete()
 		{
 			_pSong->playLength =1;
 		}
-		for (int j=i+1;j<num;j++)
+		for(int j(i + 1) ; j < num ; ++j)
 		{
 			if (indexes[j] > indexes[i])
 			{
@@ -1933,7 +1970,7 @@ void CMainFrame::OnSeqpaste()
 					m_wndView.editPosition++;
 					pastedcount++;
 					int c;
-					for(c=(_pSong->playLength-1);c>=m_wndView.editPosition;c--)
+					for(c = _pSong->playLength - 1 ; c >= m_wndView.editPosition ; --c)
 					{
 						_pSong->playOrder[c]=_pSong->playOrder[c-1];
 					}
@@ -1944,7 +1981,7 @@ void CMainFrame::OnSeqpaste()
 			if (pastedcount>0)
 			{
 				UpdatePlayOrder(true);
-				for (int i=m_wndView.editPosition+1-pastedcount; i<m_wndView.editPosition;i++)
+				for(int i(m_wndView.editPosition + 1 - pastedcount) ; i < m_wndView.editPosition ; ++i)
 				{
 					_pSong->playOrderSel[i] = true;
 				}
@@ -2002,7 +2039,7 @@ void CMainFrame::OnSeqsort()
 		}
 	}
 // Part one and a half. End filling the order numbers.
-	for(int i=0; i<MAX_PATTERNS ; i++ )
+	for(int i(0) ; i < MAX_PATTERNS ; ++i)
 	{
 		if ( oldtonew[i] == 255 )
 		{
@@ -2021,7 +2058,7 @@ void CMainFrame::OnSeqsort()
 
 	int idx=0;
 	int idx2=0;
-	for (int i=0 ; i < MAX_PATTERNS ; i++ )
+	for(int i(0) ; i < MAX_PATTERNS ; ++i)
 	{
 		if ( newtoold[i] != i ) // check if this place belongs to another pattern
 		{
@@ -2052,7 +2089,7 @@ void CMainFrame::OnSeqsort()
 	}
 // Part three. Update the sequence
 
-	for (int i=0 ; i<_pSong->playLength ; i++ )
+	for(int i(0) ; i < _pSong->playLength ; ++i)
 	{
 		_pSong->playOrder[i]=oldtonew[_pSong->playOrder[i]];
 	}

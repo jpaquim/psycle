@@ -91,11 +91,11 @@ long CFileXM::ImportPatterns(Song *s)
 	// get data
 	int iHeaderLen = ReadInt4(60);
 	short iSongLen = ReadInt2();
-	short iRestartPos = ReadInt2();
+	short iRestartPos = ReadInt2(); iRestartPos; // not used
 	short iNoChannels = ReadInt2();
 	short iNoPatterns = ReadInt2();
 	short iNoInstruments = ReadInt2();
-	short iFlags = ReadInt2();		// ignored
+	short iFlags = ReadInt2(); iFlags; // not used
 	short iTempoTicks = ReadInt2();
 	short iTempoBPM = ReadInt2();
 	
@@ -166,20 +166,19 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 {
 
 	int iHeaderLen = ReadInt4(start);
-	char iPackingType = ReadInt1();
+	char iPackingType = ReadInt1(); iPackingType; // not used
 	short iNumRows = ReadInt2();
 	short iPackedSize = ReadInt2();
 
 	if(patIdx<MAX_PATTERNS) s->patternLines[patIdx] = iNumRows;
 
-	PatternEntry e;
-
 	if(iPackedSize==0)
 	{
 		// build empty PatternEntry
-		e._note=-1;
-		e._inst=-1;
-		e._mach=-1;
+		PatternEntry e;
+		e._note = static_cast<unsigned char>(-1);
+		e._inst = static_cast<unsigned char>(-1);
+		e._mach = static_cast<unsigned char>(-1);
 		e._cmd=0;
 		e._parameter=0;
 
@@ -230,6 +229,8 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 					param = ReadInt1();				
 				}								
 
+				PatternEntry e;
+
 				// translate
 				e._inst = instr;	
 				e._mach = 0;				
@@ -257,7 +258,7 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 
 					case 0x61:
 						e._note=120;
-						e._inst=-1;
+						e._inst = static_cast<unsigned char>(-1);
 						e._mach=0;
 						break;// noteoff		
 					
@@ -274,13 +275,15 @@ LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
 							e._note = note - (30-24);
 						else if (note>=30-36)
 							e._note = note - (30-36);
+						else
+							throw note;
 
 						break;	// transpose
 				}
 
-				if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+				if((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
 				{
-					e._mach = -1;
+					e._mach = static_cast<unsigned char>(-1);
 				}
 				WritePatternEntry(s,patIdx,row,col,e);	
 			}
@@ -313,7 +316,7 @@ LONG CFileXM::ImportInstrument(Song *s, LONG iStart, int idx)
 	ASSERT(iInstrSize==0x107||iInstrSize==0x21);
 
 	char * sInstrName = AllocReadStr(22);
-	int iInstrType = ReadInt1();
+	int iInstrType = ReadInt1(); iInstrType; // not used
 	int iSampleCount = ReadInt2();
 
 	if(iSampleCount>1)
@@ -357,16 +360,16 @@ LONG CFileXM::ImportSampleHeader(Song *s, LONG iStart, int iInstrIdx, int iSampl
 	char iVol = ReadInt1();
 	char iFineTune = ReadInt1();
 	char iFlags = ReadInt1();
-	char iPanning = ReadInt1();
+	char iPanning = ReadInt1(); iPanning; // not used
 	char iRelativeNote = ReadInt1();
-	char iReserved = ReadInt1();	
+	char iReserved = ReadInt1(); iReserved; // not used
 
 	// sample name
 	char * sName = AllocReadStr(22);
 	
 	// parse
 	BOOL bLoop = (iFlags & 0x01 || iFlags & 0x02) && (iLoopLength>0);
-	BOOL bPingPong = iFlags & 0x02;
+	BOOL bPingPong = iFlags & 0x02; bPingPong; // not used
 	BOOL b16Bit = iFlags & 0x10;
 
 	// alloc wave memory

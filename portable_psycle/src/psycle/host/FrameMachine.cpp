@@ -86,7 +86,7 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 	int const cxsize=134;
 
 	// Get NumParameters
-	int ncol;
+	int ncol=1;
 	if ( _pMachine->_type == MACH_PLUGIN )
 	{
 		numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
@@ -96,10 +96,19 @@ void CFrameMachine::SelectMachine(Machine* pMachine)
 	else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 	{
 		numParameters = ((VSTPlugin*)_pMachine)->NumParameters();
-		ncol = 1;
+//		ncol = 1;
 		while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 	}
 	parspercol = numParameters/ncol;
+	if (parspercol>24)	
+	{
+		parspercol=24;
+		ncol=numParameters/24;
+		if (ncol*24 != numParameters)
+		{
+			ncol++;
+		}
+	}
 	if ( parspercol*ncol < numParameters) parspercol++;
 	
 	int const winh = parspercol*K_YSIZE;
@@ -147,7 +156,7 @@ void CFrameMachine::OnPaint()
 	int const cxsize=134;
 	int const K_XSIZE2=K_XSIZE+8;
 	int const K_YSIZE2=K_YSIZE/2;
-	int hsp=0;
+//	int hsp=0;
 
 	CDC memDC;
 	CBitmap* oldbmp;
@@ -166,9 +175,9 @@ void CFrameMachine::OnPaint()
 		char buffer[128];
 
 		BOOL bDrawKnob = TRUE;
-		int min_v;
-		int max_v;
-		int val_v;
+		int min_v=1;
+		int max_v=1;
+		int val_v=1;
 		if ( _pMachine->_type == MACH_PLUGIN )
 		{
 			if (((Plugin*)_pMachine)->GetInfo()->Parameters[c]->Flags & MPF_STATE)
@@ -255,7 +264,7 @@ void CFrameMachine::OnPaint()
 		}
 	}
 
-	int exess;
+	int exess=0;
 	if ( _pMachine->_type == MACH_PLUGIN )
 	{
 		exess = parspercol*((Plugin*)_pMachine)->GetInfo()->numCols;
@@ -265,8 +274,20 @@ void CFrameMachine::OnPaint()
 		int ncol = 1;
 		while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 
+		parspercol = numParameters/ncol;
+		if (parspercol>24)	
+		{
+			parspercol=24;
+			ncol=numParameters/24;
+			if (ncol*24 != numParameters)
+			{
+				ncol++;
+			}
+		}
+
 		exess = parspercol*ncol;
 	}
+
 	if ( exess > numParameters )
 	{
 		for (int c=numParameters; c<exess; c++)
@@ -315,8 +336,8 @@ void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (istweak)
 	{
-		int min_v;
-		int max_v;
+		int min_v=1;
+		int max_v=1;
 		if ( _pMachine->_type == MACH_PLUGIN )
 		{
 			min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue;
@@ -437,8 +458,8 @@ void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point)
 		else 
 		{		
 			int const thispar = (point.y/K_YSIZE) + ((point.x/134)*parspercol);
-			int min_v;
-			int max_v;
+			int min_v=1;
+			int max_v=1;
 			char name[64];
 			memset(name,0,64);
 			CNewVal dlg;

@@ -298,6 +298,7 @@ public:
 
 	bool blockSelected;
 	bool blockStart;
+	int blockSelectBarState; //This is used to remember the state of the select bar function
 	bool bScrollDetatch;
 	CCursor editcur;	// Edit Cursor Position in Pattern.
 	CCursor detatchpoint;
@@ -333,6 +334,8 @@ public:
 
 	SPatternHeaderCoords PatHeaderCoords;
 	SMachineCoords	MachineCoords;
+
+	bool maxView;	//maximise pattern state
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -900,6 +903,9 @@ inline unsigned char * CChildView::_ptrackline()
 {
 	return _pSong->_ptrackline(_ps(),editcur.track,editcur.line);
 }
+
+//_ppattern think it either returns a requested pattern or creates one
+//if none exists and returns that (as an unsigned char pointer?)
 
 inline unsigned char * CChildView::_ppattern(int ps)
 {

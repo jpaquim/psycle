@@ -1,6 +1,4 @@
-#ifndef _DIRECTSOUND_H
-#define _DIRECTSOUND_H
-
+#pragma once
 #include <mmsystem.h>
 #include <dsound.h>
 #include "AudioDriver.h"
@@ -68,5 +66,3 @@ private:
 	bool Stop();
 
 };
-
-#endif

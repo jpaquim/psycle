@@ -1,9 +1,4 @@
-#ifndef _SONG_H
-#define _SONG_H
-
-#if defined(_WINAMP_PLUGIN_)
-//	#include <afxmt.h>
-#endif // _WINAMP_PLUGIN_
+#pragma once
 
 #include "Constants.h"
 #include "FileIO.h"
@@ -57,6 +52,8 @@ public:
 	bool LineChanged;
 	
 	char currentOctave;
+
+	float preview_vol; //the volume of the preview wave in the wave load dialog
 
 	// Buses data
 //	unsigned char busEffect[MAX_BUSES];
@@ -157,6 +154,9 @@ protected:
 };
 
 
+//_ppattern think it either returns a requested pattern or creates one
+//if none exists and returns that (as an unsigned char pointer?)
+
 inline unsigned char * Song::_ppattern(int ps)
 {
 	if (!ppPatternData[ps])
@@ -183,5 +183,3 @@ inline unsigned char * Song::_ptrackline(int ps, int track, int line)
 	}
 	return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
 }
-
-#endif

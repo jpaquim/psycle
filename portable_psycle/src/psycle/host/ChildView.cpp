@@ -75,6 +75,8 @@ CChildView::CChildView()
 	wireDX=0;
 	wireDY=0;
 
+	maxView = false;
+
 	for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 	bmpDC = NULL;
 
@@ -102,6 +104,9 @@ CChildView::CChildView()
 	blockNTracks=0;
 	blockNLines=0;
 	bScrollDetatch=false;
+
+	blockSelectBarState = 1;
+
 	pUndoList=NULL;
 	pRedoList=NULL;
 
@@ -356,8 +361,9 @@ void CChildView::OnTimer( UINT nIDEvent )
 				Global::pConfig->vu3,
 				((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip);
 			
-			float val = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry;
-			pParentMain->UpdateMasterValue(f2i(sqrtf(val*1024.0f)));
+			float val = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry; val; // not used
+			//pParentMain->UpdateMasterValue(f2i(sqrtf(val*1024.0f)));
+			pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 
 			if ( MasterMachineDialog )
 			{
@@ -368,7 +374,8 @@ void CChildView::OnTimer( UINT nIDEvent )
 					MasterMachineDialog->m_masterpeak.SetWindowText(peak);
 	//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 
-					MasterMachineDialog->m_slidermaster.SetPos(256-f2i(sqrtf(val*64.0f)));
+	//				MasterMachineDialog->m_slidermaster.SetPos(256-f2i(sqrtf(val*64.0f)));
+					MasterMachineDialog->m_slidermaster.SetPos(1024-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);				
 					
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
@@ -428,7 +435,11 @@ void CChildView::OnTimer( UINT nIDEvent )
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 						editPosition=Global::pPlayer->_playPosition;
-						if ( viewMode == VMPattern ) Repaint(DMPattern);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+						if ( viewMode == VMPattern ) 
+						{ 
+							Repaint(DMPattern);//DMPlaybackChange);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+							Repaint(DMPlayback);
+						}
 					}
 					else if( viewMode == VMPattern ) Repaint(DMPlayback);
 				}
@@ -1053,6 +1064,7 @@ void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI)
 
 void CChildView::OnShowPatternSeq() 
 {
+	/*
 	if (viewMode != VMSequence)
 	{
 		viewMode = VMSequence;
@@ -1065,6 +1077,7 @@ void CChildView::OnShowPatternSeq()
 		Repaint();
 		pParentMain->StatusBarIdle();
 	}	
+	*/
 	SetFocus();
 }
 
@@ -1532,8 +1545,8 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 {
 	int st = Global::_pSong->BeatsPerMin;
 	static int sw = 2;
-	static float sv = 50.0f;
-	static float sp = 90.0f;
+	static float sv = 13.0f;
+	static float sp = -90.0f;
 	static BOOL of = true;
 	CSwingFillDlg dlg;
 	dlg.tempo = st;

@@ -196,11 +196,12 @@ public:
 #if defined(_WINAMP_PLUGIN_)
 		sPath = Global::pConfig->GetPluginDir();
 
-		if ( FindFileinDir(psFileName,sPath) )
+		if( FindFileinDir(psFileName,sPath) )
 		{
 			strcpy(sPath2,sPath);
 			return Instance(sPath2);
 		}
+		return false;
 #else
 		if ( !CNewMachine::dllNames.Lookup(psFileName,sPath) ) 
 		{
@@ -215,23 +216,19 @@ public:
 			strcpy(sPath2,sPath); 
 		}
 
-		if ( !CNewMachine::TestFilename(sPath2) ) 
+		if(!CNewMachine::TestFilename(sPath2) ) 
 		{
 			return false;
 		}
-		if (!Instance(sPath2))
+		if(!Instance(sPath2))
 		{
-			char sError[_MAX_PATH];
+			char sError[_MAX_PATH + 100];
 			sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",psFileName);
 			::MessageBox(NULL,sError, "Error", MB_OK);
-			return FALSE;
+			return false;
 		}
-		else
-		{
-			return TRUE;
-		}
+		return true;
 #endif // _WINAMP_PLUGIN_	};
-		return FALSE;
 	};
 
 	bool IsSynth(void) { return _isSynth; }

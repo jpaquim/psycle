@@ -1,11 +1,4 @@
-#if !defined(AFX_MASTERDLG_H__F83FC440_4A98_11D4_8913_E55936BE8F41__INCLUDED_)
-#define AFX_MASTERDLG_H__F83FC440_4A98_11D4_8913_E55936BE8F41__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// MasterDlg.h : header file
-//
 
 #include "Machine.h"
 #include "constants.h"
@@ -69,7 +62,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnAutodec();
 	afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult);
+/*	afx_msg void OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult);
@@ -80,14 +73,14 @@ protected:
 	afx_msg void OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);*/
 	afx_msg void OnPaint();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnStnClickedMixerview();
 };
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MASTERDLG_H__F83FC440_4A98_11D4_8913_E55936BE8F41__INCLUDED_)

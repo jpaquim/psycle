@@ -1,5 +1,3 @@
-#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
-#define PSYCLE__CONVERT_INTERNAL_MACHINES
 #pragma once
 #include <string>
 #include <exception>
@@ -179,7 +177,7 @@ public:
 						std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 						if(i != machine_converted_from.end())
 						{
-							Machine & machine(*i->first);
+							//Machine & machine(*i->first);
 							const int & type(*i->second);
 							int parameter(event._inst);
 							int value((event._cmd << 8) + event._parameter);
@@ -205,6 +203,15 @@ private:
 			(*this)[filter_2_poles] = new std::string("filter_2_poles");
 			(*this)[gainer] = new std::string("gainer");
 			(*this)[flanger] = new std::string("flanger");
+		}
+		~Plugin_Names()
+		{
+			delete (*this)[ring_modulator];
+			delete (*this)[distortion];
+			delete (*this)[delay];
+			delete (*this)[filter_2_poles];
+			delete (*this)[gainer];
+			delete (*this)[flanger];
 		}
 		const bool exists(const int & type) const throw()
 		{
@@ -376,4 +383,3 @@ private:
 };
 
 }}
-#endif

@@ -1,6 +1,4 @@
-#ifndef _DSP_H
-#define _DSP_H
-
+#pragma once
 // Various signal processing utility functions and classes
 //
 #include <cmath>
@@ -241,5 +239,3 @@ private:
 	static float _dTable[CUBIC_RESOLUTION];
 	static float _lTable[CUBIC_RESOLUTION];
 };
-
-#endif

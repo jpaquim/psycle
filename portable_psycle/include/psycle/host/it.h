@@ -1,4 +1,4 @@
-
+#pragma once
 // Impulse Tracker File Format Loading/Saving/Editing code
 // version 0.11b
 // Copyright 1997-2001 Austin Luminais
@@ -31,9 +31,6 @@
 //  0.11b - removed some unnecessary defines.
 //
 // Thanks to Christopher Micali for debugging help.
-
-#ifndef IT_H
-#define IT_H
 
 #include <stdio.h>
 #include <string.h>
@@ -695,7 +692,3 @@ public:
     bool GrowIfNeeded(int pattern, int channel, int row);
 
 };
-
-
-
-#endif

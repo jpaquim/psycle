@@ -93,6 +93,15 @@ BOOL CVstEditorDlg::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext
 		int ncol = 1;
 		while ( (numParameters/ncol)*28 > ncol*134) ncol++;
 		int parspercol = numParameters/ncol;
+		if (parspercol>24)	
+		{
+			parspercol=24;
+			ncol=numParameters/24;
+			if (ncol*24 != numParameters)
+			{
+				ncol++;
+			}
+		}
 		if ( parspercol*ncol < numParameters) parspercol++;
 		size.cx=ncol*134;
 		size.cy=parspercol*28;

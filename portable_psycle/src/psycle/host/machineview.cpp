@@ -107,8 +107,8 @@ void CChildView::DrawMachineEditor(CDC *devc)
 			Machine *tmac=_pSong->_pMachine[c];
 			if(tmac)
 			{
-				int oriX;
-				int oriY;
+				int oriX=0;
+				int oriY=0;
 				switch (tmac->_mode)
 				{
 				case MACHMODE_GENERATOR:
@@ -205,8 +205,8 @@ void CChildView::DrawMachineEditor(CDC *devc)
 			Machine *tmac=_pSong->_pMachine[c];
 			if(tmac)
 			{
-				int oriX;
-				int oriY;
+				int oriX=0;
+				int oriY=0;
 				switch (tmac->_mode)
 				{
 				case MACHMODE_GENERATOR:
@@ -299,7 +299,7 @@ void CChildView::DrawMachineEditor(CDC *devc)
 	// draw vumeters
 	DrawAllMachineVumeters((CClientDC*)devc);
 
-	if (wiresource != -1)
+	if ((wiresource != -1) | (wiredest != -1))
 	{
 		int prevROP = devc->SetROP2(R2_NOT);
 		amosDraw(devc, wireSX, wireSY, wireDX, wireDY);
@@ -706,8 +706,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
+					//code to visually mark a machine as being selected
+					char name[sizeof(mac->_editName)+6+3];
+		//			if (macnum == _pSong->seqBus) {						
+		//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+		//			else {
 					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+
+
 					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
 				}
 				else
@@ -782,8 +790,15 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
+					//code to visually mark a machine as being selected
+					char name[sizeof(mac->_editName)+6+3];
+		//			if (macnum == _pSong->seqBus) {						
+		//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+		//			else {
 					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+
 					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
 				}
 				else
@@ -863,8 +878,18 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
+
+					//code to visually mark a machine as being selected
+					// no longer needed
+					char name[sizeof(mac->_editName)+6+3];
+		//			if (macnum == _pSong->seqBus) {						
+		//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+		//			else {
 					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+
+
 					devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
 				}
 				else
@@ -926,8 +951,16 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 				devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 				if (Global::pConfig->draw_mac_index)
 				{
-					char name[sizeof(mac->_editName)+6];
+					//code to visually mark a machine as being selected
+					//no longer needed as a box is drawn around the machine
+					char name[sizeof(mac->_editName)+6+3];
+		//			if (macnum == _pSong->seqBus) {						
+		//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+		//			else {
 					sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+		//			}
+
 					devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
 				}
 				else
@@ -953,6 +986,105 @@ void CChildView::DrawMachine(int macnum, CDC *devc)
 	}
 	memDC.SelectObject(oldbmp);
 	memDC.DeleteDC();
+
+	//the code below draws the highlight around the selected machine (the corners)
+
+	CPoint pol[3];
+	CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+	CPen *oldpen = devc->SelectObject(&linepen);
+	devc->SelectObject(linepen);
+
+	int hlength = 9; //the length of the selected machine highlight
+	int hdistance = 5; //the distance of the highlight from the machine
+
+	switch (mac->_mode) 
+	{
+	case MACHMODE_GENERATOR:
+		if (macnum == _pSong->seqBus) {	
+
+			pol[0].x = x - hdistance;
+			pol[0].y = y - hdistance + hlength;
+			pol[1].x = x - hdistance;
+			pol[1].y = y - hdistance;
+			pol[2].x = x - hdistance + hlength;
+			pol[2].y = y - hdistance;
+
+			devc->Polyline(&pol[0], 3);
+
+			pol[0].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
+			pol[0].y = y - hdistance;
+			pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
+			pol[1].y = y - hdistance;
+			pol[2].x = x + MachineCoords.sGenerator.width + hdistance;
+			pol[2].y = y - hdistance + hlength;
+
+			devc->Polyline(&pol[0], 3);
+
+			pol[0].x = x + MachineCoords.sGenerator.width + hdistance;
+			pol[0].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
+			pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
+			pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
+			pol[2].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
+			pol[2].y = y + MachineCoords.sGenerator.height + hdistance;
+
+			devc->Polyline(&pol[0], 3);
+
+			pol[0].x = x - hdistance + hlength;
+			pol[0].y = y + MachineCoords.sGenerator.height + hdistance;
+			pol[1].x = x - hdistance;
+			pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
+			pol[2].x = x - hdistance;
+			pol[2].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
+
+			devc->Polyline(&pol[0], 3);
+
+		}
+		break;
+	case MACHMODE_FX:
+		if (macnum == _pSong->seqBus) {
+
+			pol[0].x = x - hdistance;
+			pol[0].y = y - hdistance + hlength;
+			pol[1].x = x - hdistance;
+			pol[1].y = y - hdistance;
+			pol[2].x = x - hdistance + hlength;
+			pol[2].y = y - hdistance;
+
+			devc->Polyline(&pol[0], 3);
+
+			pol[0].x = x + MachineCoords.sEffect.width + hdistance - hlength;
+			pol[0].y = y - hdistance;
+			pol[1].x = x + MachineCoords.sEffect.width + hdistance;
+			pol[1].y = y - hdistance;
+			pol[2].x = x + MachineCoords.sEffect.width + hdistance;
+			pol[2].y = y - hdistance + hlength;
+
+			devc->Polyline(&pol[0], 3);
+
+			pol[0].x = x + MachineCoords.sEffect.width + hdistance;
+			pol[0].y = y + MachineCoords.sEffect.height + hdistance - hlength;
+			pol[1].x = x + MachineCoords.sEffect.width + hdistance;
+			pol[1].y = y + MachineCoords.sEffect.height + hdistance;
+			pol[2].x = x + MachineCoords.sEffect.width + hdistance - hlength;
+			pol[2].y = y + MachineCoords.sEffect.height + hdistance;
+
+			devc->Polyline(&pol[0], 3);
+
+			pol[0].x = x - hdistance + hlength;
+			pol[0].y = y + MachineCoords.sEffect.height + hdistance;
+			pol[1].x = x - hdistance;
+			pol[1].y = y + MachineCoords.sEffect.height + hdistance;
+			pol[2].x = x - hdistance;
+			pol[2].y = y + MachineCoords.sEffect.height + hdistance - hlength;
+
+			devc->Polyline(&pol[0], 3);
+		}
+		break;
+	}
+	devc->SelectObject(oldpen);
+
+	//end of highlighting code
+
 }
 
 
@@ -982,7 +1114,7 @@ int CChildView::GetMachine(CPoint point)
 		{
 			int x1 = pMac->_x;
 			int y1 = pMac->_y;
-			int x2,y2;
+			int x2=0,y2=0;
 			switch (pMac->_mode)
 			{
 			case MACHMODE_GENERATOR:

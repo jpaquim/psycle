@@ -190,6 +190,7 @@ Song::Song()
 	PW_Phase = 0;
 	PW_Stage = 0;
 	PW_Length = 0;
+	preview_vol = 0.25f;	//setting the preview wave volume to 25%
 
 #ifndef _CYRIX_PROCESSOR_
 
@@ -706,10 +707,27 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 #endif // ndef _WINAMP_PLUGIN_
 void Song::SetBPM(int bpm, int tpb, int srate)
 {
+	static int sr = 0;
 	BeatsPerMin = bpm;
 	_ticksPerBeat = tpb;
 	SamplesPerTick = (srate*15*4)/(bpm*tpb);
+
+	// hey if our rate has changed, let everybody know!
+	if (sr != srate)
+	{
+		sr = srate;
+		for (int i=0; i<MAX_MACHINES; i++)
+		{
+			if(_pMachine[i])
+			{
+				_pMachine[i]->SetSampleRate(srate);
+			}
 }
+	}
+}
+
+
+
 int Song::GetNumPatternsUsed()
 {
 	int rval=0;
@@ -1170,7 +1188,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 		UINT size = 0;
 		UINT index = 0;
 		int temp;
-		int solo;
+		int solo(0);
 		int chunkcount;
 
 		Header[4]=0;
@@ -1405,7 +1423,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 			}
 			else if (strcmp(Header,"INSD")==0)
 			{
-				int curpos=0;
+				int curpos=0; curpos; // not used
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				chunkcount--;
@@ -1753,7 +1771,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
 			Sampler* pSampler;
 			Plugin* pPlugin;
-			VSTPlugin* pVstPlugin;
+			VSTPlugin* pVstPlugin(0);
 
 			int x,y,type;
 			if (_machineActive[i])
@@ -1831,7 +1849,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
+								((Dummy*)pMac[i])->wasVST = true;
 							}
 						}
 						else
@@ -1844,7 +1862,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 							sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 							delete pOldMachine;
 							pMac[i]->_type = MACH_DUMMY;
-							pMac[i]->wasVST = true;
+							((Dummy*)pMac[i])->wasVST = true;
 						}
 	#else // if !_WINAMP_PLUGIN_
 						if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
@@ -1864,7 +1882,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
+								((Dummy*)pMac[i])->wasVST = true;
 							}
 							else if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 							{
@@ -1880,7 +1898,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 								delete pOldMachine;
 								pMac[i]->_type = MACH_DUMMY;
-								pMac[i]->wasVST = true;
+								((Dummy*)pMac[i])->wasVST = true;
 							}
 						}
 						else
@@ -1897,7 +1915,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 							sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 							delete pOldMachine;
 							pMac[i]->_type = MACH_DUMMY;
-							pMac[i]->wasVST = true;
+							((Dummy*)pMac[i])->wasVST = true;
 						}
 	#endif // _WINAMP_PLUGIN_
 					}
@@ -1911,7 +1929,7 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 						sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
 						delete pOldMachine;
 						pMac[i]->_type = MACH_DUMMY;
-						pMac[i]->wasVST = true;
+						((Dummy*)pMac[i])->wasVST = true;
 					}
 					break;
 					}
@@ -2085,12 +2103,15 @@ bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
 			if (_machineActive[i])
 			{
-				if ( pMac[i]->wasVST && chunkpresent )
+				if ( pMac[i]->_type == MACH_DUMMY ) 
 				{
-					// Since we don't know if the plugin saved it or not, 
-					// we're stuck on letting the loading crash/behave incorrectly.
-					// There should be a flag, like in the VST loading Section to be correct.
-					::MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
+					if (((Dummy*)pMac[i])->wasVST && chunkpresent )
+					{
+						// Since we don't know if the plugin saved it or not, 
+						// we're stuck on letting the loading crash/behave incorrectly.
+						// There should be a flag, like in the VST loading Section to be correct.
+						::MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
+					}
 				}
 				else if (( pMac[i]->_type == MACH_VST ) || 
 						( pMac[i]->_type == MACH_VSTFX))
@@ -2717,10 +2738,10 @@ void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 		
 	do
 	{
-		ld=*(wl+PW_Phase);
+		ld=(*(wl+PW_Phase))*preview_vol;
 		
 		if(stereo)
-			rd=*(wr+PW_Phase);
+			rd=(*(wr+PW_Phase))*preview_vol;
 		else
 			rd=ld;
 			

@@ -2,17 +2,20 @@
 intro
 =====
 
-<bohan> this directory contains psycle 1.7.4 ported to msvc7.1
-<bohan> i'll try to merge in here the changes jaz currently makes in the Psycle dir (msvc 6) to keep it up-to-date.
-<bohan> i put this in a separate dir because it's impossible to know if some sources that compile under msvc 7.1 will also compile under msvc6.
-<bohan> so, rather than breaking anything in the msvc6 Psycle dir by commiting something which hasn't been tested with msvc 6 (which i don't have anymore),
-<bohan> i thought it would be preferrable to have two distincts sources, and merging like if we had two branches.
-<bohan> although, i don't plan at all to make this directory compilable under msvc 6.
-<bohan> actually, since there are some syntax changes here (but no real difference introduced), i'm pretty sure it already wouldn't compile anymore.
-<bohan> i called it portable_psycle because i'll try to be carefull that everything here in standard (iso) c++
-<bohan> or at least that the syntax is understood by both gcc msvc 7.1.
-<bohan> of course, it's currently not compilable under cygwin/mingwin versions of gcc. the big thing which hinders portability is the use of mfc.
-<bohan> there are only 25 .cpp files which doesn't use the mfc, and can be ported, but it's a first step to portability.
+We're in 2004 and msvc 7.1 has been release for some time now,
+so, this is now going to be the official version of psycle sources... 
+
+(old) <bohan> this directory contains psycle 1.7.4 ported to msvc7.1
+(old) <bohan> i'll try to merge in here the changes jaz+pooplog+alk currently makes in the Psycle dir (msvc 6) to keep it up-to-date.
+(old) <bohan> i put this in a separate dir because it's impossible to know if some sources that compile under msvc 7.1 will also compile under msvc6.
+(old) <bohan> so, rather than breaking anything in the msvc6 Psycle dir by commiting something which hasn't been tested with msvc 6 (which i don't have anymore),
+(old) <bohan> i thought it would be preferrable to have two distincts sources, and merging like if we had two branches.
+(old) <bohan> although, i don't plan at all to make this directory compilable under msvc 6.
+(old) <bohan> actually, since there are some syntax changes here (but no real difference introduced), i'm pretty sure it already wouldn't compile anymore.
+(old) <bohan> i called it portable_psycle because i'll try to be carefull that everything here in standard (iso) c++
+(old) <bohan> or at least that the syntax is understood by both gcc msvc 7.1.
+(old) <bohan> of course, it's currently not compilable under cygwin/mingwin versions of gcc. the big thing which hinders portability is the use of mfc.
+(old) <bohan> there are only 25 .cpp files which doesn't use the mfc, and can be ported, but it's a first step to portability.
 
 ===================
 directory structure

@@ -1,12 +1,4 @@
-#if !defined(AFX_KEYCONFIGDLG_H__14EA3837_809C_4274_9DE0_B3FF909E898A__INCLUDED_)
-#define AFX_KEYCONFIGDLG_H__14EA3837_809C_4274_9DE0_B3FF909E898A__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// KeyConfigDlg.h : header file
-//
-
 #include "InputHandler.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -32,6 +24,7 @@ public:
 	CButton	m_save_reminders;
 	CButton	m_tweak_smooth;
 	CButton	m_record_unarmed;
+	CButton m_move_cursor_paste;
 	CButton	m_show_info;
 	CButton	m_cmdShiftArrows;
 	CButton	m_cmdFT2Del;
@@ -82,5 +75,3 @@ protected:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_KEYCONFIGDLG_H__14EA3837_809C_4274_9DE0_B3FF909E898A__INCLUDED_)

@@ -1,15 +1,6 @@
-#if !defined(AFX_DSOUNDCONFIG_H__C1ED2948_8437_11D4_937A_E78B9D175439__INCLUDED_)
-#define AFX_DSOUNDCONFIG_H__C1ED2948_8437_11D4_937A_E78B9D175439__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// DSoundConfig.h : header file
-//
-
 #include <mmsystem.h>
 #include <dsound.h>
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CDSoundConfig dialog
@@ -74,5 +65,3 @@ protected:
 };
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_DSOUNDCONFIG_H__C1ED2948_8437_11D4_937A_E78B9D175439__INCLUDED_)

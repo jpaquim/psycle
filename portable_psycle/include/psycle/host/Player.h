@@ -1,6 +1,4 @@
-
-#ifndef _PLAYER_H
-#define _PLAYER_H
+#pragma once
 #include "constants.h"
 
 #if !defined(_WINAMP_PLUGIN_)
@@ -14,7 +12,6 @@ class Machine;
 class Player
 {
 public:
-	void SetSampleRate(int samprate);
 	void AdvancePosition();
 	bool _playBlock;
 	bool _playing;
@@ -35,11 +32,11 @@ public:
 
 	void Start(int pos,int line);
 	void Stop(void);
-#if defined(_WINAMP_PLUGIN_)
-	float * Work(void* context, int& nsamples);
-#else
-	static float * Work(void* context, int& nsamples);
-#endif // _WINAMP_PLUGIN_
+	#if defined(_WINAMP_PLUGIN_)
+		float * Work(void* context, int& nsamples);
+	#else
+		static float * Work(void* context, int& nsamples);
+	#endif // _WINAMP_PLUGIN_
 
 	void StartRecording(char* psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
 	void StopRecording(bool bOk = TRUE);
@@ -51,10 +48,8 @@ protected:
 	int backup_channelmode;
 
 	float _pBuffer[MAX_DELAY_BUFFER];
-#if !defined(_WINAMP_PLUGIN_)
-	WaveFile _outputWaveFile;
-#endif // ndef _WINAMP_PLUGIN_
+	#if !defined(_WINAMP_PLUGIN_)
+		WaveFile _outputWaveFile;
+	#endif // ndef _WINAMP_PLUGIN_
 	void ExecuteLine(void);
 };
-
-#endif

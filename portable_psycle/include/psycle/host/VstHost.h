@@ -1,6 +1,4 @@
-#ifndef _VSTPLUGIN_HOST
-#define _VSTPLUGIN_HOST
-
+#pragma once
 #include "Machine.h"
 #include "Vst\AEffectx.h"
 #include "constants.h"
@@ -224,6 +222,9 @@ public:
 	}
 
 	virtual char* GetName(void) { return _sProductName; }
+
+	virtual void SetSampleRate(int sr) {Dispatch( effSetSampleRate, 0, 0, NULL, (float)sr);};
+
 	long GetVersion() { return _version; }
 	char* GetVendorName(void) { return _sVendorName; }
 	char* GetDllName(void) { return _sDllName; }
@@ -308,6 +309,3 @@ protected:
 	float *_pOutSamplesL;
 	float *_pOutSamplesR;
 };
-
-#endif // _VSTPLUGIN_HOST
-

@@ -1,5 +1,3 @@
-#if !defined(AFX_DIRECTORYDLG_H__E34FBFE3_98A4_11D4_937A_B3D2C98D5E39__INCLUDED_)
-#define AFX_DIRECTORYDLG_H__E34FBFE3_98A4_11D4_937A_B3D2C98D5E39__INCLUDED_
 #pragma once
 class CDirectoryDlg : public CPropertyPage
 {
@@ -64,5 +62,3 @@ protected:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_DIRECTORYDLG_H__E34FBFE3_98A4_11D4_937A_B3D2C98D5E39__INCLUDED_)

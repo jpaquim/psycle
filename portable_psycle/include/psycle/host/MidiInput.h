@@ -1,10 +1,8 @@
+#pragma once
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // MidiInput.h : CMidiInput class
 //
 // 21st April 2001 - v2.2b
-
-#ifndef	_MIDIINPUT_H
-#define	_MIDIINPUT_H
 
 #include <mmsystem.h>
 #include <assert.h>
@@ -190,5 +188,3 @@ private:
 	int m_wraps;
 	int m_adjustedPlayPos;	// adjusted play position
 };
-
-#endif

@@ -93,7 +93,7 @@ void CDefaultVstGui::InitializePrograms()
 		char s2[256];
 		strcpy(s2, "<unnamed>");
 
-		int categories = _pMachine->Dispatch(effGetNumProgramCategories, 0, 0, NULL, 0);
+		int categories = _pMachine->Dispatch(effGetNumProgramCategories, 0, 0, NULL, 0); categories; // not used
 		_pMachine->Dispatch(effGetProgramNameIndexed, i, -1, s2, 0);
 
 		sprintf(s1,"%d: %s",i+1,s2);

@@ -19,6 +19,7 @@
 #include "Player.h"
 #include "Configuration.h"
 #include "Plugin.h"
+#include "VstHost.h"
 
 #include "ChildView.h"
 #include "MainFrm.h"
@@ -565,7 +566,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWOR
 		case MIM_DATA:
 		{
 			// split the first parameter DWORD into bytes
-			int p1HiWordHB = (dwParam1 & 0xFF000000) >>24;
+			int p1HiWordHB = (dwParam1 & 0xFF000000) >>24; p1HiWordHB; // not used
 			int p1HiWordLB = (dwParam1 & 0xFF0000) >>16;
 			int p1LowWordHB = (dwParam1 & 0xFF00) >>8;
 			int p1LowWordLB = (dwParam1 & 0xFF);
@@ -942,8 +943,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 {
 	// pipe MIDI note on messages into the pattern entry window
 
-	bool insertNote = false;
-	bool noteOff = false;
+	bool noteOff = false; noteOff; // not used
 	int note = 0;
 
 	// branch on type of midi message
@@ -953,47 +953,59 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 		case MIM_DATA:
 		{
 			// split the first parameter DWORD into bytes
-			int p1HiWordHB = (dwParam1 & 0xFF000000) >>24;
+			int p1HiWordHB = (dwParam1 & 0xFF000000) >>24; p1HiWordHB; // not used
 			int p1HiWordLB = (dwParam1 & 0xFF0000) >>16;
 			int p1LowWordHB = (dwParam1 & 0xFF00) >>8;
 			int p1LowWordLB = (dwParam1 & 0xFF);
 
 			// assign uses
 			int status = p1LowWordLB;
-			int program = p1LowWordHB;
+			int program = p1LowWordHB; program; // not used
 			int noteOn = p1HiWordLB;
 			int data1 = p1LowWordHB;
 			int data2 = p1HiWordLB;
 			int data = ((data2&0x7f)<<7)|(data1&0x7f);
 
-			int cmd = 0;
-			int parameter = 0;
+			int cmd = 0; cmd; // not used
+			int parameter = 0; parameter; // not used
 			note = p1LowWordHB;
 			
 			// and a bit more...
 			int statusHN = (status & 0xF0) >> 4;
 			int statusLN = (status & 0x0F);
-			int channel = statusLN;
+			int channel = statusLN; channel; // not used
 
 			// branch on status code
 			switch( statusHN )
 			{
-				// note on/off
-				case 0x09:
-					insertNote = true;											
-					break;
-
 				// (also) note off
 				case 0x08:		
 					noteOn=0;
-					insertNote = true;
-					break;
+				// note on/off
+				case 0x09:
+    				// limit to playable range (above this is special codes)
+    				if(note>119) 
+    					note=119;
+					
+					// TODO: watch this, it should be OK as long as we don't change things too much
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternNote(note,noteOn);
+					return;
+			}
+
+			if (Global::pConfig->_RecordTweaks)
+			{
+				if (Global::pConfig->_midiRawMcm)
+				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
+					return;
+				}
+				// branch on status code
+				switch( statusHN )
+				{
 
 				case 11:
 					// mods
 					// data 2 contains the info
-					if (Global::pConfig->_RecordTweaks)
-					{
 						if (Global::pConfig->_midiRecord0)
 						{
 							if (Global::pConfig->_midiMessage0 == data1)
@@ -1016,7 +1028,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1049,7 +1061,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1082,7 +1094,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1113,7 +1125,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1146,7 +1158,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1179,7 +1191,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1212,7 +1224,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1245,7 +1257,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1279,7 +1291,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1313,7 +1325,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1347,7 +1359,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1381,7 +1393,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1415,7 +1427,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1450,7 +1462,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1484,7 +1496,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1518,7 +1530,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
 									break;
 								case 3:
-									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 									break;
 								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1529,7 +1541,6 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 							}
 						}
 					}
-					break;
 
 				case 14:
 					// pitch wheel
@@ -1556,7 +1567,7 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 											(((Global::pConfig->_midiToPit - Global::pConfig->_midiFromPit) * data)/0x3fff));
 								break;
 							case 3:
-								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 								break;
 							case 4:
 								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
@@ -1571,15 +1582,20 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 
 			}	// end of.. statusHN switch
 
-			// insert note?
-			if( insertNote )
+			// midi controllers pass-through
+			int mgn = Global::_pSong->seqBus;
+
+			if (mgn < MAX_MACHINES)
 			{
-    			// limit to playable range (above this is special codes)
-    			if(note>119) 
-    				note=119;
-				
-				// TODO: watch this, it should be OK as long as we don't change things too much
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternNote(note,noteOn);
+				Machine* pMachine = Global::_pSong->_pMachine[mgn];
+				if (pMachine)
+				{
+					if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
+			{
+						((VSTPlugin*)pMachine)->AddMIDI(status,data1,data2);
+						return;
+					}
+				}
 			}
 		
 		}	// end of.. case NIM_DATA

@@ -278,8 +278,8 @@ void Instrument::SaveFileChunk(RiffFile* pFile)
 		if (waveLength[i] > 0)
 		{
 			byte * pData1;
-			byte * pData2;
-			UINT size1,size2;
+			byte * pData2(0);
+			UINT size1=0,size2=0;
 			size1 = SoundSquash(waveDataL[i],&pData1,waveLength[i]);
 
 			/*  test for accuracy of compress/decompress - it's 100%

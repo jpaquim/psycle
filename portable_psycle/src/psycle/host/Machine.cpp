@@ -13,14 +13,17 @@
 	#include "Configuration.h"
 	#include "WireDlg.h"
 	#include "MainFrm.h"
+	#include "InputHandler.h"
+
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
 
+// The inclusion of the following headers is needed because of a bad design.
+// The use of these subclasses in a function of the base class should be 
+// moved to the Song loader.
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
-	
-#include "InputHandler.h"
 
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
@@ -30,8 +33,6 @@ char* Dummy::_psName = "DummyPlug";
 
 Machine::Machine()
 {
-	wasVST = false;
-
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
 	_volumeCounter = 0.0f;
@@ -418,7 +419,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 				pMachine = p = new Plugin(index);
 				if (!p->LoadDll(dllName))
 				{
-					char sError[MAX_PATH];
+					char sError[MAX_PATH + 100];
 					sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
 					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -439,7 +440,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 				pMachine = p = new VSTInstrument(index);
 				if (!p->LoadDll(dllName))
 				{
-					char sError[MAX_PATH];
+					char sError[MAX_PATH + 100];
 					sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
 					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -460,7 +461,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 				pMachine = p = new VSTFX(index);
 				if (!p->LoadDll(dllName))
 				{
-					char sError[MAX_PATH];
+					char sError[MAX_PATH + 100];
 					sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
 					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -510,7 +511,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 	
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
-		char sError[MAX_PATH];
+		char sError[MAX_PATH + 100];
 		sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
 		::MessageBox(NULL,sError, "Loading Error", MB_OK);
 

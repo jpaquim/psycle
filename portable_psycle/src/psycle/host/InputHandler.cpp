@@ -37,8 +37,8 @@ InputHandler::InputHandler()
 	bDoingSelection = false;
 
 	// set up multi-channel playback
-	for(UINT i=0;i<256;i++)
-		notetrack[i]=-1;
+	for(UINT i=0;i<MAX_TRACKS;i++)
+		notetrack[i]=120;
 	outtrack=0;
 	bMultiKey=true;
 
@@ -419,6 +419,22 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->patTrackRecord();
 		break;
 
+	case cdefFollowSong:	
+
+		//used by song follow toggle
+		//CButton*cb=(CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW);
+
+		if (((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck() == 0) 
+		{
+			((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->SetCheck(1);
+		} 
+		else
+		{
+			((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->SetCheck(0);
+		}
+		pMainFrame->OnFollowSong();
+		break;
+
 	case cdefKeyStopAny:
 		pChildView->EnterNoteoffAny();
 		break;
@@ -482,7 +498,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 		}
-		pChildView->PrevLine(1,Global::pConfig->_wrapAround);
+		pChildView->PrevLine(pChildView->patStep,Global::pConfig->_wrapAround);
 		if ( bDoingSelection )
 		{
 			pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -497,7 +513,7 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		{
 			pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 		}
-		pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
+		pChildView->AdvanceLine(pChildView->patStep,Global::pConfig->_wrapAround);
 		if ( bDoingSelection )
 		{
 			pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
@@ -638,6 +654,35 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 			const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
 			pChildView->StartBlock(pChildView->editcur.track,0,0);
 			pChildView->EndBlock(pChildView->editcur.track,nl-1,8);
+		}
+		break;
+
+	case cdefSelectBar:
+	//selects 4*tpb lines, 8*tpb lines 16*tpb lines, etc. up to number of lines in pattern
+		{
+			const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];			
+						
+			pChildView->bScrollDetatch=false;
+			pChildView->ChordModeOffs = 0;
+			
+			if (pChildView->blockSelectBarState == 1) 
+			{
+				pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+			}
+
+			int blockLength = (4 * pChildView->blockSelectBarState * Global::_pSong->_ticksPerBeat)-1;
+
+			if ((pChildView->editcur.line + blockLength) >= nl-1)
+			{
+				pChildView->EndBlock(pChildView->editcur.track,nl-1,8);	
+				pChildView->blockSelectBarState = 1;
+			}
+			else
+			{
+				pChildView->EndBlock(pChildView->editcur.track,pChildView->editcur.line + blockLength,8);
+				pChildView->blockSelectBarState *= 2;
+			}	
+			
 		}
 		break;
 
@@ -834,6 +879,22 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->OnNewmachine();
 		break;
 
+	case cdefMaxPattern:		
+		if (pChildView->maxView == true) 
+		{
+			pChildView->maxView = false;
+			pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,TRUE,FALSE);
+			pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,TRUE,FALSE);
+			pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
+		} 
+		else
+		{			
+			pChildView->maxView = true;
+			pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,FALSE,FALSE);
+			pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,FALSE,FALSE);
+			pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
+		}
+		break;
 
 	case cdefPatternInc:
 		pChildView->ChordModeOffs = 0;
@@ -893,7 +954,7 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		// get command
 		CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
 
-		BOOL bRepeat = nFlags&0x4000;
+//		BOOL bRepeat = nFlags&0x4000;
 		if ( cmd.GetType() == CT_Note )
 		{
 //			if ((!bRepeat) || (cmd.GetNote() == cdefTweakM) || (cmd.GetNote() == cdefTweakS) || (cmd.GetNote() == cdefMIDICC))
@@ -926,10 +987,21 @@ void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 			note = 119;
 	}
 
+	if(pMachine==NULL)
+	{
+		int mgn = Global::_pSong->seqBus;
+
+		if (mgn < MAX_MACHINES)
+		{
+			pMachine = Global::_pSong->_pMachine[mgn];
+		}
+	}
+
 	for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
 	{
 		if(notetrack[i]==note)
 		{
+			notetrack[i]=120;
 			// build entry
 			PatternEntry entry;
 			entry._note = 120;
@@ -939,17 +1011,7 @@ void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
 			entry._parameter = 0;	
 
 			// play it
-			if(pMachine==NULL)
-			{
-				int mgn = Global::_pSong->seqBus;
 
-				if (mgn < MAX_MACHINES)
-				{
-					pMachine = Global::_pSong->_pMachine[mgn];
-				}
-			}
-
-			notetrack[i]=-1;
 			if (pMachine)
 			{
 				pMachine->Tick(i,&entry);
@@ -1027,9 +1089,36 @@ void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachi
 	{
 		// pick a track to play it on	
 		if(bMultiKey)
-			outtrack++;
-		if(outtrack>=Global::_pSong->SONGTRACKS)
+		{
+			int i;
+			for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
+			{
+				if (notetrack[i] == 120)
+				{
+					break;
+				}
+			}
+			if (i >= Global::_pSong->SONGTRACKS)
+			{
+				for (i = 0; i <= outtrack; i++)
+				{
+					if (notetrack[i] == 120)
+					{
+						break;
+					}
+				}
+			}
+			outtrack = i;
+		}
+		else 
+		{
 			outtrack=0;
+		}
+		// this should check to see if a note is playing on that track
+		if (notetrack[outtrack] < 120)
+		{
+			StopNote(notetrack[outtrack], bTranspose, pMachine);
+		}
 
 		// play
 		notetrack[outtrack]=note;
@@ -1060,6 +1149,7 @@ void InputHandler::BuildCmdLUT()
 												// Remove it from there when making a new system.
 	SetCmd(cdefAddMachine,VK_F9,0);
 	SetCmd(cdefEditInstr,VK_F10,0);
+	SetCmd(cdefMaxPattern,VK_TAB,MOD_C);
 
 	SetCmd(cdefOctaveUp,VK_MULTIPLY,0);
 	SetCmd(cdefOctaveDn,VK_DIVIDE,MOD_E);
@@ -1117,6 +1207,7 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefPatternTrackMute,VK_F9,MOD_C);
 	SetCmd(cdefPatternTrackSolo,VK_F8,MOD_C);
 	SetCmd(cdefPatternTrackRecord,VK_F7,MOD_C);
+	SetCmd(cdefFollowSong,'F',MOD_C);
 	SetCmd(cdefPatternDelete,VK_F3,MOD_C|MOD_S);
 
 	SetCmd(cdefRowInsert,VK_INSERT,MOD_E);
@@ -1139,6 +1230,7 @@ void InputHandler::BuildCmdLUT()
 
 	SetCmd(cdefSelectAll,'A',MOD_C);
 	SetCmd(cdefSelectCol,'R',MOD_C);
+	SetCmd(cdefSelectBar,'K',MOD_C);
 
 	SetCmd(cdefEditQuantizeInc,221,0);    // lineskip + 1
 	SetCmd(cdefEditQuantizeDec,219,0);    // lineskip - 1

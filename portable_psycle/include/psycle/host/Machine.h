@@ -1,6 +1,4 @@
-#ifndef _MACHINE_H
-#define _MACHINE_H
-
+#pragma once
 
 #if defined(_WINAMP_PLUGIN_)
 	#include <stdio.h>
@@ -57,7 +55,6 @@ class RiffFile;
 class Machine
 {
 public:
-	bool wasVST;  // THIS NEVER EVER GETS RESET TO FALSE, SO WHAT DOES IT DO?  IT IS ALWAYS TRUE
 	int _macIndex;
 
 	MachineType _type;
@@ -163,6 +160,7 @@ public:
 
 		return TRUE;
 	};
+	virtual void SetSampleRate(int sr) {};
 #if !defined(_WINAMP_PLUGIN_)
 	void SaveFileChunk(RiffFile* pFile);
 	virtual void SaveSpecificChunk(RiffFile* pFile) 
@@ -215,6 +213,8 @@ protected:
 class Dummy : public Machine
 {
 public:
+	bool wasVST;  // Marks that the Dummy was in fact a VST plugin that couldn't be loaded
+
 	void Work(int numSamples);
 	Dummy(int index);
 	virtual char* GetName(void) { return _psName; };
@@ -254,6 +254,8 @@ public:
 	};
 
 #if !defined(_WINAMP_PLUGIN_)
+//	int _LMAX;
+//	int _RMAX;
 	int peaktime;
 	float currentpeak;
 	float _lMax;
@@ -278,10 +280,3 @@ protected:
 	static char* _psName;
 
 };
-
-
-
-
-
-
-#endif
