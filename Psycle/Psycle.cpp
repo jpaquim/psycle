@@ -1,6 +1,9 @@
 // Psycle.cpp : Defines the class behaviors for the application.
 //
 
+
+// this is a test.ignore this line
+
 #include "stdafx.h"
 #include "Psycle2.h"
 #include "ConfigDlg.h"
