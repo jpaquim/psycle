@@ -1500,30 +1500,33 @@ void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		}
 
 		// now fill the pattern
-		AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
-		int displace=_ps()*MULTIPLY2;
-		for (l=y;l<y+ny;l++)
+		unsigned char *base = _ppattern();
+		if (base)
 		{
-			int const displace2=x*5+l*MULTIPLY;
-			
-			unsigned char *offset=_pSong->pPatternData+displace+displace2;
-			
-			PatternEntry *entry = (PatternEntry*) offset;
-			entry->_cmd = 0xff;
-			int val = f2i(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
-			if (val < 1)
+			AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
+			for (l=y;l<y+ny;l++)
 			{
-				val = 1;
+				int const displace=x*EVENT_SIZE+l*MULTIPLY;
+				
+				unsigned char *offset=base+displace;
+				
+				PatternEntry *entry = (PatternEntry*) offset;
+				entry->_cmd = 0xff;
+				int val = f2i(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+				if (val < 1)
+				{
+					val = 1;
+				}
+				else if (val > 255)
+				{
+					val = 255;
+				}
+				entry->_parameter = unsigned char (val);
+				index+=step;
 			}
-			else if (val > 255)
-			{
-				val = 255;
-			}
-			entry->_parameter = unsigned char (val);
-			index+=step;
+			NewPatternDraw(x,x,y,y+ny);	
+			Repaint(DMData);
 		}
-		NewPatternDraw(x,x,y,y+ny);	
-		Repaint(DMData);
 	}
 }
 

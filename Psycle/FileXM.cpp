@@ -294,16 +294,9 @@ BOOL CFileXM::WritePatternEntry(Song * s, int patIdx, int row, int col,PatternEn
 	// don't overflow song buffer 
 	if(patIdx>=MAX_PATTERNS) return false;
 
-	const int displace = 		
-		patIdx * MULTIPLY2 + 
-		row * MULTIPLY + 
-		col * 5;
+	PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,col,row);
 
-	s->pPatternData[displace]=e._note;
-	s->pPatternData[displace+1]=e._inst;
-	s->pPatternData[displace+2]=e._mach;
-	s->pPatternData[displace+3]=e._cmd;
-	s->pPatternData[displace+4]=e._parameter;
+	*pData = e;
 
 	return true;
 }	

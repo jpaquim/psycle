@@ -206,6 +206,12 @@ Song::Song()
 
 #endif // ndef _WINAMP_PLUGIN_
 
+	for (int i=0; i<MAX_PATTERNS; i++)
+	{
+		ppPatternData[i] = NULL;
+	}
+	CreateNewPattern(0);
+
 	Reset();
 }
 
@@ -602,16 +608,40 @@ void Song::DestroyMachine(int mac)
 	
 }
 
-void Song::DeleteAllPatterns(void)
+void Song::DeleteAllPatterns()
 {
 	SONGTRACKS = 16;
-	
-	unsigned char blank[5]={255,255,255,0,0};
-	for(int c=0; c<MAX_PATTERN_BUFFER_LEN; c+=5)
+
+	for (int i=0; i<MAX_PATTERNS; i++)
 	{
-		memcpy(pPatternData+c,blank,5);
+		RemovePattern(i);
 	}
 }
+
+void Song::RemovePattern(int ps)
+{
+	if (ppPatternData[ps])
+	{
+		delete ppPatternData[ps];
+		ppPatternData[ps] = NULL;
+	}
+}
+
+unsigned char * Song::CreateNewPattern(int ps)
+{
+	RemovePattern(ps);
+	ppPatternData[ps] = new unsigned char[MULTIPLY2];
+	unsigned char blank[5]={255,255,255,0,0};
+
+	unsigned char * pData = ppPatternData[ps];
+	for (int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
+	{
+		memcpy(pData,blank,5*sizeof(unsigned char));
+		pData+= EVENT_SIZE;
+	}
+	return ppPatternData[ps];
+}
+
 #if !defined(_WINAMP_PLUGIN_)
 bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 {
@@ -627,14 +657,14 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 
 			for (int t=0;t<SONGTRACKS;t++)
 			{
-				toffset=pPatternData+pattern*MULTIPLY2+t*5;
+				toffset=_ptrack(pattern,t);
 				for (int l=1;l<lines;l++)
 				{
-					memcpy(toffset+l*MULTIPLY,toffset+f2i(l*step)*MULTIPLY,5);
+					memcpy(toffset+l*MULTIPLY,toffset+f2i(l*step)*MULTIPLY,EVENT_SIZE);
 				}
 				while (l < patternLines[pattern])	// This wouldn't be necessary if we
 				{									// really allocate a new pattern.
-					memcpy(toffset+(l*MULTIPLY),blank,5);
+					memcpy(toffset+(l*MULTIPLY),blank,EVENT_SIZE);
 					l++;
 				}
 			}
@@ -645,24 +675,22 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 			step= (float)lines/patternLines[pattern];
 			int nl= patternLines[pattern];
 			
-			patternLines[pattern] = lines;	// This represents the allocation of the new pattern
-
 			for (int t=0;t<SONGTRACKS;t++)
 			{
-				toffset=pPatternData+pattern*MULTIPLY2+t*5;
-				int t;
+				toffset=_ptrack(pattern,t);
 
 				for (int l=nl-1;l>0;l--)
 				{
-					memcpy(toffset+f2i(l*step)*MULTIPLY,toffset+l*MULTIPLY,5);
-					t=f2i(l*step)-1;
-					while (t> (l-1)*step)
+					memcpy(toffset+f2i(l*step)*MULTIPLY,toffset+l*MULTIPLY,EVENT_SIZE);
+					int tz=f2i(l*step)-1;
+					while (tz> (l-1)*step)
 					{
-						memcpy(toffset+t*MULTIPLY,blank,5);
-						t--;
+						memcpy(toffset+tz*MULTIPLY,blank,EVENT_SIZE);
+						tz--;
 					}
 				}
 			}
+			patternLines[pattern] = lines;	// This represents the allocation of the new pattern
 		}
 	}
 	else
@@ -672,8 +700,8 @@ bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 		{									// really allocate a new pattern.
 			for (int t=0;t<SONGTRACKS;t++)
 			{
-				toffset=pPatternData+pattern*MULTIPLY2+t*5;
-				memcpy(toffset+(l*MULTIPLY),blank,5);
+				toffset=_ptrackline(pattern,t,l);
+				memcpy(toffset,blank,EVENT_SIZE);
 				l++;
 			}
 		}
@@ -715,6 +743,14 @@ int Song::GetNumPatternsUsed()
 
 int Song::GetBlankPatternUnused(int rval)
 {
+	for (int i=0; i<MAX_PATTERNS; i++)
+	{
+		if (ppPatternData[i] == NULL)
+		{
+			return i;
+		}
+	}
+
 	const unsigned char blank[5]={255,255,255,0,0};
 	BOOL bTryAgain = TRUE;
 
@@ -731,20 +767,20 @@ int Song::GetBlankPatternUnused(int rval)
 		// now test to see if data is really blank
 		bTryAgain = FALSE;
 
-		int displace=rval*MULTIPLY2;
+		unsigned char *offset_source=_ppattern(rval);
 		
-		for (int t=0;t<MULTIPLY2;t+=5)
+		for (int t=0;t<MULTIPLY2;t+=EVENT_SIZE)
 		{
-			unsigned char *offset_source=pPatternData+displace+t;
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < EVENT_SIZE; i++)
 			{
 				if (offset_source[i] != blank[i])
 				{
 					rval++;
 					bTryAgain = TRUE;
 					t=MULTIPLY2;
-					i=5;
+					i=EVENT_SIZE;
 				}
+				offset_source+=EVENT_SIZE;
 			}
 		}
 	}
@@ -1157,7 +1193,16 @@ bool Song::Load(
 	{
 		pFile->Read(&patternLines[i], sizeof(patternLines[0]));
 		pFile->Read(&patternName[i][0], sizeof(patternName[0]));
-		pFile->Read((char*)pPatternData+MULTIPLY2*i, patternLines[i]*MAX_TRACKS*sizeof(PatternEntry));
+		if (patternLines[i] > 0)
+		{
+			unsigned char * pData = CreateNewPattern(i);
+			pFile->Read((char*)pData, patternLines[i]*MAX_TRACKS*sizeof(PatternEntry));
+		}
+		else
+		{
+			patternLines[i] = 64;
+			RemovePattern(i);
+		}
 	}
 
 	// Instruments
@@ -1646,9 +1691,18 @@ bool Song::Save(
 	pFile->Write(&i, sizeof(i));
 	for (int p=0; p<i; p++)
 	{
-		pFile->Write(&patternLines[p], sizeof(patternLines[0]));
-		pFile->Write(&patternName[p][0], sizeof(patternName[0]));
-		pFile->Write(pPatternData+MULTIPLY2*p, patternLines[p]*MAX_TRACKS*sizeof(PatternEntry));
+		if (ppPatternData[p])
+		{
+			pFile->Write(&patternLines[p], sizeof(patternLines[0]));
+			pFile->Write(&patternName[p][0], sizeof(patternName[0]));
+			pFile->Write(_ppattern(p), patternLines[p]*MAX_TRACKS*sizeof(PatternEntry));
+		}
+		else
+		{
+			int nnn = 0;
+			pFile->Write(&nnn, sizeof(patternLines[0]));
+			pFile->Write(&patternName[p][0], sizeof(patternName[0]));
+		}
 	}
 
 	// Instruments
