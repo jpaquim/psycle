@@ -45,7 +45,6 @@ feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave pre
 ! change CUT seq button to DELETE seq button, cut sucks
 ! <_sue_> the pattern sequencer "mini" window could really be longer.....depending on windows screen res....in 
 	the one im using i have half of the tab where the pattern seq is completely free.
-+ add current octave to indicators
 + Xerox replace, allow multiple - it replaces the selected pattern(s) with an identical new one
 + Xerox multiple
 + <bdzld> block delete
@@ -77,7 +76,7 @@ bug:	 JMDrum is buggy (Crashes sometimes)
 + ALK You may have coinsidered this already, making machines have a right click menu (from the 
 	machines view) with one of the items benig duplicate machine.
 + how about nice looking bmp windows for machine link and master machine dialogs?
-feature: Saving all the missing settings to registry (like follow song, class of plugin..)
+*: Saving all the missing settings to registry (like follow song, class of plugin..)
 feature: Clone Machine Button
 feature: Replace Machine by another.
 feature: Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)

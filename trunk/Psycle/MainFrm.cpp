@@ -109,6 +109,7 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_EDIT, OnUpdateIndicatorEdit)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_FOLLOW, OnUpdateIndicatorFollow)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_NOTEOFF, OnUpdateIndicatorNoteoff)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
+ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -120,6 +121,7 @@ static UINT indicators[] =
 	ID_INDICATOR_LINE,
 	ID_INDICATOR_TIME,
     ID_INDICATOR_EDIT,
+    ID_INDICATOR_OCTAVE,
     ID_INDICATOR_FOLLOW,
     ID_INDICATOR_NOTEOFF,
     ID_INDICATOR_TWEAKS,
@@ -2113,5 +2115,14 @@ void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI)
 		pCmdUI->Enable(FALSE);
 	}
 }
+
+void CMainFrame::OnUpdateIndicatorOctave(CCmdUI *pCmdUI) 
+{
+	pCmdUI->Enable(); 
+	CString str;
+	str.Format("Oct %d", Global::_pSong->currentOctave); 
+    pCmdUI->SetText(str); 
+}
+
 
 
