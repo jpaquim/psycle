@@ -54,7 +54,10 @@ namespace psycle
 		{
 			try
 			{
-				std::cerr << string << std::endl;
+				if(level > info)
+					std::cerr << string << std::endl;
+				else
+					std::cout << string << std::endl;
 				if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string);
 			}
 			catch(...)

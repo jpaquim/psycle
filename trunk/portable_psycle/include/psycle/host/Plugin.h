@@ -121,7 +121,8 @@ namespace psycle
 		{
 			delete this->plugin_;
 			this->plugin_ = plugin;
-			if((*this)()) callback();
+			//if((*this)()) callback();
+			if(plugin) callback();
 		}
 		#pragma warning(push)
 		#pragma warning(disable:4702) // unreachable code
