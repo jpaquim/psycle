@@ -830,6 +830,7 @@ void Master::Work(
 Gainer::Gainer(int index)
 {
 	_macIndex = index;
+	_outWet = 256;
 	_numPars = 2;
 	_type = MACH_GAIN;
 	_mode = MACHMODE_FX;
@@ -1251,6 +1252,8 @@ Delay::Delay(int index)
 {
 	_macIndex = index;
 	_numPars = 7;
+	_outWet = 256;
+	_outDry = 256;
 	_type = MACH_DELAY;
 	_mode = MACHMODE_FX;
 	sprintf(_editName, "Delay");
@@ -1506,6 +1509,8 @@ Flanger::Flanger(int index)
 {
 	_macIndex = index;
 	_numPars = 9;
+	_outWet = 256;
+	_outDry = 256;
 	_type = MACH_FLANGER;
 	_mode = MACHMODE_FX;
 	sprintf(_editName, "Flanger");
