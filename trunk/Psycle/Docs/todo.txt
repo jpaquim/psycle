@@ -19,6 +19,7 @@ pen alpha
 	arrays!!!
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
+* <pooplog> it only seems to save/load the values for ONE wire for each machines
 
 * Machines
 ------------
@@ -27,6 +28,7 @@ pen alpha
 * cyanphase vibrasynth has an access violation bug
 * <_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 bug:	 JMDrum is buggy (Crashes sometimes)
+* James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
 
 * Sampler Machine/Wave Ed:
 --------------------------
