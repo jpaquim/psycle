@@ -1,0 +1,42 @@
+=====
+intro
+=====
+
+<bohan> this directory contains psycle 1.7.4 ported to msvc7.1
+<bohan> i'll try to merge in here the changes jaz currently makes in the Psycle dir (msvc 6) to keep it up-to-date.
+<bohan> i put this in a separate dir because it's impossible to know if some sources that compile under msvc 7.1 will also compile under msvc6.
+<bohan> so, rather than breaking anything in the msvc6 Psycle dir by commiting something which hasn't been tested with msvc 6 (which i don't have anymore),
+<bohan> i thought it would be preferrable to have two distincts sources, and merging like if we had two branches.
+<bohan> although, i don't plan at all to make this directory compilable under msvc 6.
+<bohan> actually, since there are some syntax changes here (but no real difference introduced), i'm pretty sure it already wouldn't compile anymore.
+<bohan> i called it portable_psycle because i'll try to be carefull that everything here in standard (iso) c++
+<bohan> or at least that the syntax is understood by both gcc msvc 7.1.
+<bohan> of course, it's currently not compilable under cygwin/mingwin versions of gcc. the big thing which hinders portability is the use of mfc.
+<bohan> there are only 25 .cpp files which doesn't use the mfc, and can be ported, but it's a first step to portability.
+
+===================
+directory structure
+===================
+
+	include/: public headers
+		psycle/: psycle public headers, some are shared between the psycle host and its plugins
+			host/: psycle host public headers
+			plugins/: psycle plugins public headers
+	src/: sources and private headers
+		project.h: private header #included by all source files to centralize compiler tweaking
+		precompiled_headers.h: private header included by project.h (and hence all source files) that #include what is precompiled
+		psycle/: sources and private headers
+			host/: psycle host sources and private headers
+			plugins/: psycle plugins sources and private headers
+	make/: build systems for various compilers (only msvc 7.1 so far!)
+		msvc_7.1/: solution and project files for msvc 7.1
+			solution.sln: solution (.sln) file
+			projects/: project (.vcproj) files (note that these projects are set up so that pathes to source files and header files are relative to the solution file)
+			debug/: output files produced by the debug config of the projects (not included in the cvs)
+				intermediate_output/: intermediate files (.pch, .obj, .ilk, .idb, ...) produced during compilation (not included in the cvs)
+				lib/: .lib and .exp files (not included in the cvs)
+				bin/: .dll and .exe (and .pdb) files (not included in the cvs)
+			release/: output files produced by the release config of the projects (not included in the cvs)
+				intermediate_output/: intermediate files (.pch, .obj, .ilk, .idb, ...) produced during compilation (not included in the cvs)
+				lib/: .lib and .exp files (not included in the cvs)
+				bin/: .dll and .exe (and .pdb) files (not included in the cvs)
