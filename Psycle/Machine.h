@@ -10,10 +10,6 @@
 #include "Helpers.h"
 #include "Constants.h"
 
-#define MAX_DELAY_BUFFER		65536 // Dalay Delay and Flanger
-#define OVERLAPTIME				128  // Sampler
-#define STREAM_SIZE				256	// If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, if needed.
-
 #if !defined(_CYRIX_PROCESSOR_) && !defined(_WINAMP_PLUGIN_)
 #define CPUCOST_INIT(cost)	\
 	ULONG cost;				\

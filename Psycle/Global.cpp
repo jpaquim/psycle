@@ -1,22 +1,22 @@
 #include "stdafx.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include "global.h"
+//	#include "global.h"
 	#include "Song.h"
 	#include "Player.h"
 	#include "Configuration.h"
 
 	Song* Global::_pSong = NULL;
 	Player* Global::pPlayer = NULL;
-	int Global::_lbc = -1;
 	Configuration* Global::pConfig = NULL;
-
+	int Global::_lbc = -1;
+	
 	Global::Global()
 	{
 		_pSong = new Song;
 		pPlayer = new Player;
-		_lbc = -1;
 		pConfig = new Configuration;
+		_lbc = -1;
 	}
 
 	Global::~Global()
@@ -25,11 +25,10 @@
 		delete pPlayer;
 		delete pConfig;
 	}
-	bool FindFileinDir(char *dllname,char* path)
+	bool FindFileinDir(char *dllname,CString &path)
 	{
-/*		CFileFind finder;
-		strcat(path,"\\*.");
-		int loop = finder.FindFile(path);	// check for subfolders.
+		CFileFind finder;
+		int loop = finder.FindFile(path + "\\*.");	// check for subfolders.
 		while (loop) {								// Note: Subfolders with dots won't work.
 			loop = finder.FindNextFile();
 			if (finder.IsDirectory() && !finder.IsDots())
@@ -43,19 +42,19 @@
 			}
 		}
 		finder.Close();
-
+		
 		if (finder.FindFile(path + "\\" + dllname)) //not found in subdirectories, lets see if it's here
 		{
 			finder.Close();
 			path= (path + "\\") + dllname;
 			return true;
 		}
-		finder.Close();*/
+		finder.Close();
 		return false;
 	}
 
 #else
-	#include "global.h"
+//	#include "global.h"
 	#include "Song.h"
 	#include "Player.h"
 	#include "Configuration.h"
@@ -63,9 +62,9 @@
 	#include "InputHandler.h"
 
 	unsigned int Global::_cpuHz;
+	int Global::_lbc = -1;
 	Song* Global::_pSong = NULL;
 	Player* Global::pPlayer = NULL;
-	int Global::_lbc = -1;
 	Configuration* Global::pConfig = NULL;
 	Resampler* Global::pResampler = NULL;
 	InputHandler* Global::pInputHandler = NULL;

@@ -2,33 +2,34 @@
 
   "Winamp .psy Player input plugin"
 
-  This plugin plays Psycle Song files with Winamp.
+  This plugin plays Psycle Song files with Winamp 2.
 
 */
 
-#include "..\Global.h"
-
-#include "..\configuration.h"
-#include "..\Song.h"
-#include "..\player.h"
+//#include "..\Global.h"
+#include "stdafx.h"
+#include "../configuration.h"
+#include "../Song.h"
+#include "../player.h"
+#include "../helpers.h"
 #include <math.h>
-#include "..\helpers.h"
-
 
 #include "in2.h"	// Winamp Input plugin header file
 
+#define WA_PLUGIN_VERSION "Beta 6"
+
 // post this to the main window at end of file (after playback has stopped)
-#define WM_WA_MPEG_EOF WM_USER+2
+#define WM_WA_PSY_EOF WM_USER+2
 
 //
 // Global Variables.
 //
-
+#define WA_STREAM_SIZE 4096
 DWORD WINAPI __stdcall PlayThread(void *b);
 BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 
 Global _global;
-short stream_buffer[576<<2];
+short stream_buffer[WA_STREAM_SIZE*2];
 extern In_Module mod;
 
 int killDecodeThread=0;
@@ -47,7 +48,7 @@ void config(HWND w)
 }
 void about(HWND hwndParent)
 {
-	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp\nBased on Psycle Engine 1.6Plus\n\nCoded by [JAZ] on " __DATE__,"Psycle Winamp 2 Plugin",MB_OK);
+	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2\nBased on Psycle Engine " VERSION_NUMBER "\n\nCoded by [JAZ] on " __DATE__,"Psycle Winamp 2 Plugin",MB_OK);
 }
 
 void init()
@@ -184,7 +185,15 @@ int infoDlg(char *fn, HWND hwnd)
 	return 0;
 }
 
-int isourfile(char *fn) {  return 0;  }
+int isourfile(char *fn)
+{
+	OldPsyFile file;
+	if (!file.Open(fn) || !file.Expect("PSY2SONG", 8))
+	{
+		return 0;
+	}
+	return 1;
+}
 
 void stop()
 { 
@@ -199,11 +208,9 @@ void stop()
 		CloseHandle(thread_handle);
 		thread_handle = INVALID_HANDLE_VALUE;
 	}
-	_global.pPlayer->_playing=false;
 	mod.outMod->Close();
 	mod.SAVSADeInit();
-	
-	_global._pSong->New();
+
 }
 
 int play(char *fn)
@@ -279,7 +286,7 @@ void eq_set(int on, char data[10], int preamp) { }
 In_Module mod = 
 {
 	IN_VER,
-	"Psycle Winamp 2 Plugin beta 5",
+	"Psycle Winamp 2 Plugin " WA_PLUGIN_VERSION ,
 	NULL,
 	NULL,
 	"psy\0Psycle Song (*.psy)\0",
@@ -333,12 +340,14 @@ BOOL WINAPI _DllMainCRTStartup(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lp
 
 void Quantize(float *pin, short *piout, int c)
 {
+	float* inb =pin;
+	short* outb =piout;
 	for (int i=0; i<c; i++)
 	{
-		if ( *pin > 32767.0f) *piout = 32767;
-		else if ( *pin < -32767.0f ) *piout = -32768;
-		else *piout = f2i(*pin);
-		*pin++; piout++;
+		if ( *inb > 32767.0f) *outb = 32767;
+		else if ( *inb < -32767.0f ) *outb = -32768;
+		else *outb = f2i(*inb);
+		*inb++; outb++;
 	}
 }
 
@@ -347,17 +356,17 @@ DWORD WINAPI __stdcall PlayThread(void *b)
 	float *float_buffer;
 	Player* pPlayer = _global.pPlayer;
 	int samprate = _global.pConfig->_samplesPerSec;
-	int plug_stream_size = 1152;
+	int plug_stream_size = samprate/40;
 
 	while (! *((int *)b) )  // While !killDecodeThread
 	{
 		if ( !worked)
 		{
 			if (pPlayer->_playing)
-			{
+			{	int bmp = _global._pSong->BeatsPerMin;
 				float_buffer = pPlayer->Work(pPlayer,plug_stream_size);
-				Quantize(float_buffer,stream_buffer,plug_stream_size<<1);
-				mod.SetInfo(_global.pPlayer->bpm,_global.pConfig->_samplesPerSec/1000,2,1);
+				Quantize(float_buffer,stream_buffer,plug_stream_size*2);
+				if ( bmp != _global._pSong->BeatsPerMin ) mod.SetInfo(_global.pPlayer->bpm,_global.pConfig->_samplesPerSec/1000,2,1);
 				worked=true;
 			}
 			else
@@ -365,7 +374,7 @@ DWORD WINAPI __stdcall PlayThread(void *b)
 				mod.outMod->CanWrite();
 				if (!mod.outMod->IsPlaying())
 				{
-					PostMessage(mod.hMainWindow,WM_WA_MPEG_EOF,0,0);
+					PostMessage(mod.hMainWindow,WM_WA_PSY_EOF,0,0);
 					return 0;
 				}
 				Sleep(10);
@@ -433,7 +442,8 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			switch(wp)
 			{
 			case IDOK:
-				stop();
+				if (_global.pPlayer->_playing ) stop();
+
 				c = SendDlgItemMessage(wnd,IDC_SAMP_RATE,CB_GETCURSEL,0,0);
 				if ( (c % 2) == 0) _global.pConfig->_samplesPerSec = (int)(11025*powf(2.0f,(float)(c/2)));
 				else _global.pConfig->_samplesPerSec = (int)(12000*powf(2.0f,(float)(c/2)));

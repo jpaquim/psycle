@@ -60,7 +60,7 @@ public:
 
 	void ClosePsycle();
 	void WaveEditorBackUpdate();
-	void CloseMacGui(int mac);
+	void CloseMacGui(int mac,bool closewiredialogs=true);
 	void CloseAllMacGuis();
 	void ShowMachineGui(int tmac, CPoint point);
 	void UpdateEnvInfo();

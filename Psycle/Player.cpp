@@ -2,7 +2,7 @@
 //#include "machineinterface.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include "global.h"
+//	#include "global.h"
 	#include "player.h"
 	#include "Song.h"
 	#include "Machine.h"
@@ -313,7 +313,7 @@ float * Player::Work(
 
 		//////////////////////////////////////////////////////////////////////
 		// Tick handler function
-
+		
 		if ((pThis->_playing) && (amount >= pThis->_ticksRemaining))
 		{
 			amount = pThis->_ticksRemaining;
@@ -398,7 +398,7 @@ float * Player::Work(
 			if ((pThis->_playing) && (pThis->_recording))
 			{
 				short sl,sr;
-				float* pData = Master::_pMasterSamples;
+				float* pData = pThis->_pBuffer;
 				for (int i=0; i<amount; i++)
 				{
 					
@@ -427,8 +427,8 @@ float * Player::Work(
 			pThis->_ticksRemaining -= amount;
 		}
 	}
-	while (numSamplex);
-	
+	while (numSamplex>0);
+
 	return pThis->_pBuffer;
 }
 

@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
-#if defined(_WINAMP_PLUGIN_)
+/*#if defined(_WINAMP_PLUGIN_)
 	#include <windows.h>
-#endif // _WINAMP_PLUGIN_
+#endif // _WINAMP_PLUGIN_*/
 #include "Registry.h"
 
 Registry::Registry()

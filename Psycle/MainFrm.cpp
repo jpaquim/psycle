@@ -1553,16 +1553,22 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 
 void CMainFrame::CloseAllMacGuis()
 {
-//	m_wndView->KillWireDialogs();
+	for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+	{
+		if (m_wndView.WireDialog[i])
+		{
+			m_wndView.WireDialog[i]->OnCancel();
+		}
+	}
 	for (int c=0; c<MAX_MACHINES; c++)
 	{
-		if ( _pSong->_machineActive[c] ) CloseMacGui(c);
+		if ( _pSong->_machineActive[c] ) CloseMacGui(c,false);
 	}
 }
 
-void CMainFrame::CloseMacGui(int mac)
+void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
 {
-	for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+	if (closewiredialogs ) for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 	{
 		if (m_wndView.WireDialog[i])
 		{

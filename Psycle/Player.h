@@ -1,6 +1,7 @@
 
 #ifndef _PLAYER_H
 #define _PLAYER_H
+#include "constants.h"
 
 #if !defined(_WINAMP_PLUGIN_)
 	#include "Riff.h"
@@ -43,7 +44,7 @@ public:
 protected:
 	int prevMachines[MAX_TRACKS];
 
-	float _pBuffer[65536];
+	float _pBuffer[MAX_DELAY_BUFFER];
 #if !defined(_WINAMP_PLUGIN_)
 	WaveFile _outputWaveFile;
 #endif // ndef _WINAMP_PLUGIN_

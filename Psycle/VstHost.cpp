@@ -1,8 +1,9 @@
 #include "stdafx.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include "global.h"
-	#include <string>
+//	#include "global.h"
+//	#define TRACE //
+
 #else
 	#include "psycle2.h"
 	#include "MainFrm.h"
@@ -105,14 +106,10 @@ int VSTPlugin::Instance(char *dllname,bool overwriteName)
 	
 	if (!Dispatch( effGetEffectName, 0, 0, &_sProductName, 0.0f))
 	{
-#if defined(_WINAMP_PLUGIN_)
-		strcpy(_sProductName,"\0");
-#else
 		CString str1(dllname);
 		CString str2 = str1.Mid(str1.ReverseFind('\\')+1);
 		str1 = str2.Left(str2.Find('.'));
 		strcpy(_sProductName,str1);
-#endif // _WINAMP_PLUGIN
 	}
 	
 	if ( overwriteName ) memcpy(_editName,_sProductName,15);

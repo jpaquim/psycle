@@ -343,7 +343,11 @@ void CChildView::OnTimer( UINT nIDEvent )
 				char peak[10];
 				sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachines[0])->currentpeak)-90);
 				MasterMachineDialog->m_masterpeak.SetWindowText(peak);
-				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachines[0])->_outDry);
+//				MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachines[0])->_outDry);
+
+				float val = sqrtf(((Master*)Global::_pSong->_pMachines[0])->_outDry*64.0f);
+				MasterMachineDialog->m_slidermaster.SetPos(256-f2i(val));
+				
 				((Master*)Global::_pSong->_pMachines[0])->peaktime=25;
 				((Master*)Global::_pSong->_pMachines[0])->currentpeak=0.0f;
 			}

@@ -15,18 +15,20 @@
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
-#if !defined(_WINAMP_PLUGIN_)
-#include <afxwin.h>         // MFC core and standard components
-#include <afxext.h>         // MFC extensions
-#include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
-#ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>			// MFC support for Windows Common Controls
-#endif // _AFX_NO_AFXCMN_SUPPORT
-#include <afxmt.h>
+#if defined(_WINAMP_PLUGIN_)
+	#include <afxwin.h>         // MFC core and standard components
+	#include "WinampPlugin\resource.h"
+#else
+	#include <afxwin.h>         // MFC core and standard components
+	#include <afxext.h>         // MFC extensions
+	#include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
+	#ifndef _AFX_NO_AFXCMN_SUPPORT
+	#include <afxcmn.h>			// MFC support for Windows Common Controls
+	#endif // _AFX_NO_AFXCMN_SUPPORT
+	#include <afxmt.h>
+#endif !defined(_WINAMP_PLUGIN_)
 
 #include "Global.h"
-#endif // !defined(_WINAMP_PLUGIN_)
-
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

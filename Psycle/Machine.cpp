@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include "global.h"
+//	#include "global.h"
 	#include "Machine.h"
 	#include "Song.h"
 //	#include "FileIO.h"

@@ -35,7 +35,13 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
-
+private:
+	void ProcessCmdLine(CMainFrame*);
+	void LoadRecent(CMainFrame*);
+public:
+	void SaveRecent(CMainFrame*);	//Called from CMainFrm::OnClose()!
+									//That's why it's public :(
+		
 public:
 	Global _global;
 
@@ -43,12 +49,6 @@ public:
 	afx_msg void OnAboutpsycle();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-private:
-	void ProcessCmdLine(CMainFrame*);
-	void LoadRecent(CMainFrame*);
-public:
-	void SaveRecent(CMainFrame*);	//Called from CMainFrm::OnClose()!
-									//That's why it's public :(
 };
 
 

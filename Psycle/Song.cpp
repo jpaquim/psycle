@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include "global.h"
+//	#include "global.h"
 #else
 	#include "psycle2.h"
 	#include "NewMachine.h"
@@ -46,7 +46,6 @@ typedef struct
 
 //////////////////////////////////////////////////////////////////////
 // Create machine member
-
 
 bool Song::CreateMachine(
 	MachineType type,
@@ -150,8 +149,8 @@ bool Song::CreateMachine(
 	_machineActive[tmac] = true;
 	return true;
 }
-
 #if !defined(_WINAMP_PLUGIN_)
+	
 int Song::FindBusFromIndex(int smac)
 {
 	int i;
@@ -1321,10 +1320,12 @@ bool Song::Load(
 				if ((pMachine->Load(pFile)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 				{
 					char sPath2[_MAX_PATH];
+					CString sPath;
 #if defined(_WINAMP_PLUGIN_)
-					strcpy(sPath2,Global::pConfig->GetVstDir());
-					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath2) )
+					sPath = Global::pConfig->GetVstDir();
+					if ( FindFileinDir(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
+						strcpy(sPath2,sPath);
 						if (pVstPlugin->Instance(sPath2,false) != VSTINSTANCE_NO_ERROR)
 						{
 							Machine* pOldMachine = pMachine;
@@ -1347,7 +1348,6 @@ bool Song::Load(
 						pMachine->wasVST = true;
 					}
 #else // if !_WINAMP_PLUGIN_
-					CString sPath;
 					if ( CNewMachine::dllNames.Lookup(vstL[pVstPlugin->_instance].dllName,sPath) )
 					{
 						strcpy(sPath2,sPath);

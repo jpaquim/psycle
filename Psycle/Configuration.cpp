@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #if defined(_WINAMP_PLUGIN_)
-	#include <windows.h>
+//	#include <windows.h>
 	#include "Configuration.h"
 	#include "Registry.h"
 #else
