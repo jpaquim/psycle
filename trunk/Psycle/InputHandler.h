@@ -184,6 +184,8 @@ enum CmdSet
 	cdefKeyStopAny,	// NOTE STOP
 	cdefPatternDelete,
 	cdefBlockDelete,
+	cdefPatternTrackSolo,
+	cdefPatternTrackRecord,
 
 };
 
@@ -304,6 +306,8 @@ struct CmdDef
 		case cdefPatternPaste:	return "Pattern Paste";
 		case cdefPatternMixPaste:	return "Pattern Mix Paste";
 		case cdefPatternTrackMute:	return "Pattern Track Mute";
+		case cdefPatternTrackSolo:	return "Pattern Track Solo";
+		case cdefPatternTrackRecord:	return "Pattern Track Record";
 		case cdefPatternDelete:	return "Pattern Delete";
 				
 		case cdefBlockCut:		return "Block Cut";

@@ -399,6 +399,14 @@ void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
 		pChildView->patTrackMute();
 		break;
 
+	case cdefPatternTrackSolo:
+		pChildView->patTrackSolo();
+		break;
+
+	case cdefPatternTrackRecord:
+		pChildView->patTrackRecord();
+		break;
+
 	case cdefKeyStopAny:
 		pChildView->EnterNoteoffAny();
 		break;
@@ -1062,6 +1070,8 @@ void InputHandler::BuildCmdLUT()
 	SetCmd(cdefPatternPaste,VK_F5,MOD_C);
 	SetCmd(cdefPatternMixPaste,VK_F5,MOD_C|MOD_S);
 	SetCmd(cdefPatternTrackMute,VK_F9,MOD_C);
+	SetCmd(cdefPatternTrackSolo,VK_F8,MOD_C);
+	SetCmd(cdefPatternTrackRecord,VK_F7,MOD_C);
 	SetCmd(cdefPatternDelete,VK_F3,MOD_C|MOD_S);
 
 	SetCmd(cdefRowInsert,VK_INSERT,MOD_E);

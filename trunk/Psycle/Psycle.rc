@@ -1067,35 +1067,38 @@ BEGIN
     CTEXT           "",IDC_CH16,283,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
 END
 
-IDD_KEYCONFIG DIALOG DISCARDABLE  0, 0, 262, 276
+IDD_KEYCONFIG DIALOG DISCARDABLE  0, 0, 322, 276
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Key Configuration"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LISTBOX         IDC_CMDLIST,8,13,115,237,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+    LISTBOX         IDC_CMDLIST,8,13,115,222,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Commands",IDC_STATIC,3,3,125,272
     CONTROL         "HotKey1",IDC_KEY0,"msctls_hotkey32",WS_BORDER | 
-                    WS_TABSTOP,29,255,95,15
-    LTEXT           "Key:",IDC_STATIC,9,255,15,10
-    GROUPBOX        "Behaviour",IDC_STATIC,133,3,125,92
+                    WS_TABSTOP,29,239,95,15
+    LTEXT           "Key:",IDC_STATIC,9,242,15,10
+    GROUPBOX        "Behaviour",IDC_STATIC,133,3,184,92
     CONTROL         "Right CTRL play / Space stop",IDC_PLAY_R_CTRL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,138,13,110,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
     CONTROL         "FT2 Style Home/End Behaviour",IDC_FT2_HOME_END,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,138,24,115,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,24,172,10
     CONTROL         "FT2 Style Delete Behaviour",IDC_FT2DEL,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,138,35,114,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,35,172,10
     CONTROL         "Use Shift+Arrows for Selection",IDC_SHIFTARROWS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,138,45,116,13
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,45,172,13
     CONTROL         "Wrap Around",IDC_WRAP,"Button",BS_AUTOCHECKBOX,138,58,
-                    115,11
+                    172,11
     CONTROL         "Center Cursor",IDC_CENTERCURSOR,"Button",
-                    BS_AUTOCHECKBOX,138,70,115,10
+                    BS_AUTOCHECKBOX,138,70,172,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE,138,82,115,10
-    PUSHBUTTON      "Save",IDC_EXPORTREG,197,257,55,12
-    PUSHBUTTON      "Load",IDC_IMPORTREG,138,257,55,12
-    GROUPBOX        "Keymap Presets",IDC_STATIC,133,245,125,30
+                    BS_AUTOCHECKBOX | BS_MULTILINE,138,82,172,10
+    PUSHBUTTON      "Save",IDC_EXPORTREG,257,258,55,12
+    PUSHBUTTON      "Load",IDC_IMPORTREG,197,258,55,12
+    GROUPBOX        "Keymap Presets",IDC_STATIC,133,247,184,28
+    PUSHBUTTON      "Defaults",IDC_DEFAULTS,138,258,55,12
+    PUSHBUTTON      "None",IDC_NONE,8,258,55,12
+    PUSHBUTTON      "Lookup",IDC_DEFAULTS3,68,258,55,12,WS_DISABLED
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
@@ -1854,7 +1857,7 @@ BEGIN
     IDD_KEYCONFIG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 255
+        RIGHTMARGIN, 316
         TOPMARGIN, 7
         BOTTOMMARGIN, 269
     END

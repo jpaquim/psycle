@@ -14,21 +14,12 @@ X low priority
 * New and unsorted and untested
 ------------
 
-Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to vol+panning for the gui for the user.
-
 <alk> 'play current block' loops current pattern -should it just play the selected block?
 <alk> 'play current pattern' plays song from current order (which is the same function as 'play song (normal)' -should it just play the current pattern?
 <alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you move to another function and back it displays f12
-<alk> in keyboard settings make a button to set keypress to 'none'
 
-DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
-	machines ....
-alk: global Delay Trigger, that affects every note (not just the one on this channel)
-alk: escape to close wave ed
-alk: dalay delay is not precise enough (in terms of time)
 
-alk: keypress arm current channel
-alk: rightclick on vol slider in wire dialog to enter vol numerically (0.0db is imposibble to set once 
+++ alk: rightclick on vol slider in wire dialog to enter vol numerically (0.0db is imposibble to set once 
 	the slider has been moved)
 
 alk:
@@ -60,6 +51,7 @@ move to channel 1, goto the last row, do select end of block
 **	JMDrum is buggy (Crashes after changing settings sometimes)
 *	<_sue_> are there any bugless ported machines? m3 in 22050 mode just makes a click..nothing more....
 !	James says: i noticed that the appegiator in the lab causes constant retriggering of VCA
+! alk: dalay delay is not precise enough (in terms of time)
 ++	<[JAZ]> Internals still miss mouse tweak, right?
 +	<alk_> make the master dialog an adaptation of the wire dialog, same but with a slider for each input
 +	<pooplog> it would be nice to have an internal wavein machine to get live input
@@ -85,6 +77,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 
 * Wave Editor:
 --------------------------
+! alk: escape to close wave ed
 +++ <_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
 		[Problem: Needs a sampler Machine. The wave preview is not adecuated]
 		[<pooplog> Could preview just like the load dialog does...]
@@ -179,9 +172,17 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
 		 (asked by Pikari)
 ++	tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
+++ DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
+	machines ....
 +	pattern repeat (loop) and song repeat (asked by Vir|us)
++ alk: global Delay Trigger, that affects every note (not just the one on this channel)
+	[this seems hard, because the player will have to scan all tracks for this command, then go back and
+		play the tracks]
 +FF	<pooplog> again i ask why the connection limit is 12 and not 16 or 24
 		[should use linked lists instead of arrays]
++FF Angelus: <pooplog>Adding panning to the wire dialog would be very easy, other than the changes to 
+	file format.  Psycle could be sneaky and just store it as a leftvol rightvol and convert to 
+	vol+panning for the gui for the user.
 
 * Vsts:
 ------------
@@ -263,7 +264,6 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 ++	<alk_> alt-f5 - play song from start
 ++	<alk_> another thought: "revert to saved" - filemenu
 		[Isn't it the same as Load?]
-++	<wayfinder> alk, i'm also missing keys for soloing channels(in IT it's alt-F10 for solo) 
 ++	<[JAZ]> pooplog : Mmmmm... Seems that the "song modified" code doesn't work now.. 
 		[because machine view does not track changes yet]
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)  
