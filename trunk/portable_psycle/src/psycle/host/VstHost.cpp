@@ -932,7 +932,7 @@ namespace psycle
 					#undef I
 				#endif
 			}
-			long plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
+			long int plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
 				#ifndef NDEBUG
 					if(opcode!=audioMasterGetTime)
@@ -949,7 +949,7 @@ namespace psycle
 				#endif
 				
 				// believe it or not, some plugs tried to call psycle with a null AEffect.
-				plugin & host(**reinterpret_cast<plugin**>(&effect->resvd1));
+				plugin * host(effect ? *reinterpret_cast<plugin**>(&effect->resvd1) : 0);
 				
 				// Support opcodes
 				switch(opcode)
@@ -957,7 +957,7 @@ namespace psycle
 				case audioMasterAutomate:
 					#if !defined _WINAMP_PLUGIN_
 							Global::_pSong->Tweaker = true;
-							if(effect && &host)
+							if(effect && host)
 							{
 								if(index<0 || index >= effect->numParams) {
 									host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
@@ -965,12 +965,12 @@ namespace psycle
 								if(Global::pConfig->_RecordTweaks)  
 								{
 									if(Global::pConfig->_RecordMouseTweaksSmooth)
-										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host._macIndex, index, f2i(opt * vst::quantization));
+										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->_macIndex, index, f2i(opt * vst::quantization));
 									else
-										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host._macIndex, index, f2i(opt * vst::quantization));
+										((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->_macIndex, index, f2i(opt * vst::quantization));
 								}
-								if(host.editorWnd)
-									((CVstEditorDlg *) host.editorWnd)->Refresh(index, opt);
+								if(host->editorWnd)
+									((CVstEditorDlg *) host->editorWnd)->Refresh(index, opt);
 							}
 							
 					#endif
@@ -980,11 +980,11 @@ namespace psycle
 				case audioMasterCurrentId:			
 					break;
 				case audioMasterIdle:
-					if(effect && &host)
+					if(effect && host)
 					{
 						try
 						{
-							host.proxy().dispatcher(effEditIdle);
+							host->proxy().dispatcher(effEditIdle);
 						}
 						catch(const std::exception &)
 						{
@@ -1099,11 +1099,11 @@ namespace psycle
 				case audioMasterGetParameterQuantization:	
 					return vst::quantization;
 				case audioMasterNeedIdle:
-					if(effect && &host)
+					if(effect && host)
 					{
 						try
 						{
-							host.wantidle = true;
+							host->wantidle = true;
 						}
 						catch(const std::exception &)
 						{
@@ -1113,12 +1113,12 @@ namespace psycle
 					return 1;
 				case audioMasterSizeWindow:
 					#if !defined _WINAMP_PLUGIN_
-							if(effect && &host)
+							if(effect && host)
 							{
 								try
 								{
-									if(host.editorWnd)
-										reinterpret_cast<CVstEditorDlg *>(host.editorWnd)->Resize(index, value);
+									if(host->editorWnd)
+										reinterpret_cast<CVstEditorDlg *>(host->editorWnd)->Resize(index, value);
 								}
 								catch(const std::exception &)
 								{
@@ -1130,14 +1130,14 @@ namespace psycle
 				case audioMasterGetSampleRate:
 					{
 						long sampleRate=Global::pConfig->GetSamplesPerSec();
-						if(effect && &host)
-							host.proxy().setSampleRate(sampleRate);
+						if(effect && host)
+							host->proxy().setSampleRate(sampleRate);
 						return sampleRate;
 					}
 				case audioMasterGetBlockSize:
-					if(effect && &host)
+					if(effect && host)
 					{
-						host.proxy().setBlockSize(STREAM_SIZE);
+						host->proxy().setBlockSize(STREAM_SIZE);
 					}
 					return STREAM_SIZE;
 				case audioMasterGetVendorString:
@@ -1156,11 +1156,11 @@ namespace psycle
 					return 5000; // HOST version 5000
 					// <bohan> is that a Cubase VST version?
 				case audioMasterUpdateDisplay:
-					if(effect && &host)
+					if(effect && host)
 					{
 						try
 						{
-							host.proxy().dispatcher(effEditIdle);
+							host->proxy().dispatcher(effEditIdle);
 						}
 						catch(const std::exception &)
 						{
