@@ -1290,6 +1290,19 @@ bool Song::Load(RiffFile* pFile)
 							_trackArmedCount++;
 						}
 					}
+
+
+					Global::pPlayer->bpm = BeatsPerMin;
+					Global::pPlayer->tpb = _ticksPerBeat;
+					Global::pPlayer->_playPosition= 0;
+					// calculate samples per tick
+		
+#if defined(_WINAMP_PLUGIN_)
+					SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+#else
+					SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+#endif
+
 				}
 			}
 			else if (strcmp(Header,"SEQD")==0)
@@ -1498,16 +1511,7 @@ bool Song::Load(RiffFile* pFile)
 		}
 
 		// translate any data that is required
-
-		Global::pPlayer->bpm = BeatsPerMin;
-		Global::pPlayer->tpb = _ticksPerBeat;
-		Global::pPlayer->_playPosition= 0;
-		// calculate samples per tick
-		
-#if defined(_WINAMP_PLUGIN_)
-		SamplesPerTick = (Global::pConfig->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
-#else
-		SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
+#ifndef _WINAMP_PLUGIN_
 		((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen();
 		machineSoloed = solo;
 #endif
