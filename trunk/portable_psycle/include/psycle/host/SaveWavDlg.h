@@ -57,7 +57,7 @@ namespace psycle
 
 			int current;
 
-			char rootname[MAX_PATH];
+			std::string rootname;
 
 			static BOOL savetracks;
 			static BOOL savewires;
@@ -70,7 +70,7 @@ namespace psycle
 			bool sel[MAX_SONG_POSITIONS];
 			bool saving;
 
-			void SaveWav(char* file, int bits, int rate, int channelmode);
+			void SaveWav(std::string file, int bits, int rate, int channelmode);
 			
 			// Generated message map functions
 			//{{AFX_MSG(CSaveWavDlg)

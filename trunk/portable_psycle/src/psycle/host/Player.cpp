@@ -374,7 +374,7 @@ namespace psycle
 		}
 
 		#if !defined _WINAMP_PLUGIN_
-			void Player::StartRecording(char *psFilename, int bitdepth, int samplerate, int channelmode)
+			void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
 			{
 				if(!_recording)
 				{
@@ -388,12 +388,12 @@ namespace psycle
 					if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
 					Global::_pSong->SamplesPerTick = (Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb);
 					Stop();
-					if(_outputWaveFile.OpenForWrite(psFilename, Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
 						_recording = true;
 					else
 					{
 						StopRecording();
-						::MessageBox(0, psFilename, "FAILED", 0);
+						::MessageBox(0, psFilename.c_str(), "FAILED", 0);
 					}
 				}
 			}

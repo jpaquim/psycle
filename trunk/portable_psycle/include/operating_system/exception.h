@@ -38,6 +38,6 @@ namespace operating_system
 		};
 	}
 }
-
-#include <sstream>
-inline std::ostringstream & operator<<(std::ostringstream & out, const operating_system::exception & e) { out << e.what(); return out; }
+// causes clash with operator<<(std::ostringstream &,std::string)
+//#include <sstream>
+//inline std::ostringstream & operator<<(std::ostringstream & out, const operating_system::exception & e) { out << e.what(); return out; }
