@@ -4,6 +4,7 @@
 // Various signal processing utility functions and classes
 //
 #include <math.h>
+#include <memory.h>
 #include "Helpers.h"
 
 #define CUBIC_RESOLUTION 2048

@@ -9,7 +9,7 @@
 
 void CChildView::DrawSeqEditor(CDC *devc)
 {
-/// outside (childview)
+/// the following vars go outside (childview)
 	
  int seqTracksHoriz = 1;
  int seqSteps = 4;
@@ -18,8 +18,8 @@ void CChildView::DrawSeqEditor(CDC *devc)
  int seqGenOffs = 0;  // Scroll
  int seqTickOffs = 0; // ^ ^ ^
 	
- int SEQ_XOFFSET = 96;
- int SEQ_ROWWIDTH = 40;
+ int SEQ_XOFFSET = 96;   // These two are variables, since changing from 
+ int SEQ_ROWWIDTH = 40;  // horizontal to vertical, makes them different.
  int seqNumRows=CH/SEQ_ROWHEIGHT;
  int seqNumCols=CW/SEQ_ROWWIDTH;
 
@@ -28,8 +28,8 @@ void CChildView::DrawSeqEditor(CDC *devc)
 ////
 	
  CRect rect;
- int curXoffset;
- int curYoffset;
+ int curXoffset=SEQ_XOFFSET;
+ int curYoffset=SEQ_YOFFSET;
 	
  int i,j,k,m;
  float curcolf;

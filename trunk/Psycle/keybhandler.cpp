@@ -1866,14 +1866,14 @@ void CChildView::BlockParamInterpolate()
 			*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+3) * 0x100 +
 			*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+4);
 		const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
-		const unsigned char comd = *(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3);
+		const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 		int displace2=(blockSel.start.track*EVENT_SIZE)+((blockSel.start.line+1)*MULTIPLY);
 		
-		if ( toffset[displace2] == cdefTweakM || toffset[displace2] == cdefTweakE || toffset[displace2] == cdefTweakS)
+		if ( toffset[firstrow] == cdefTweakM || toffset[firstrow] == cdefTweakE || toffset[firstrow] == cdefTweakS ||toffset[firstrow] == cdefMIDICC)
 		{
-			unsigned char note = toffset[displace2];
-			unsigned char aux = toffset[displace2+1];
-			unsigned char mac = toffset[displace2+2];
+			unsigned char note = toffset[firstrow];
+			unsigned char aux = toffset[firstrow+1];
+			unsigned char mac = toffset[firstrow+2];
 			for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
 			{
 				toffset[displace2]=note;

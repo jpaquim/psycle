@@ -107,8 +107,8 @@ void CChildView::DrawMachineEditor(CDC *devc)
 			Machine *tmac=_pSong->_pMachine[c];
 			if(tmac)
 			{
-				int oriX;
-				int oriY;
+				int oriX=0;
+				int oriY=0;
 				switch (tmac->_mode)
 				{
 				case MACHMODE_GENERATOR:
@@ -205,8 +205,8 @@ void CChildView::DrawMachineEditor(CDC *devc)
 			Machine *tmac=_pSong->_pMachine[c];
 			if(tmac)
 			{
-				int oriX;
-				int oriY;
+				int oriX=0;
+				int oriY=0;
 				switch (tmac->_mode)
 				{
 				case MACHMODE_GENERATOR:
@@ -982,7 +982,7 @@ int CChildView::GetMachine(CPoint point)
 		{
 			int x1 = pMac->_x;
 			int y1 = pMac->_y;
-			int x2,y2;
+			int x2=0,y2=0;
 			switch (pMac->_mode)
 			{
 			case MACHMODE_GENERATOR:

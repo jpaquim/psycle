@@ -92,7 +92,9 @@ typedef struct
 }
 Voice;
 
+#if !defined(_WINAMP_PLUGIN_)
 class CGearTracker;
+#endif
 
 class Sampler : public Machine
 {
@@ -170,7 +172,9 @@ public:
 	void Update(void);
 
 protected:
+#if !defined(_WINAMP_PLUGIN_)
 	friend CGearTracker;
+#endif
 
 	static char* _psName;
 	int _numVoices;

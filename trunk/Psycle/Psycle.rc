@@ -213,7 +213,7 @@ IDD_INFO DIALOGEX 0, 0, 316, 239
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle CPU/DSP Performance Monitor"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     GROUPBOX        "Core Info",IDC_STATIC,7,7,303,81
     GROUPBOX        "Gear Information and CPU performance",IDC_STATIC,7,89,
@@ -233,7 +233,7 @@ BEGIN
     CTEXT           "",IDC_MCPULABEL2,232,68,40,10,SS_CENTERIMAGE | 
                     SS_SUNKEN
     CONTROL         137,IDC_STATIC,"Static",SS_BITMAP,276,28,24,18
-    GROUPBOX        "Avaiable Resources",IDC_STATIC,13,16,168,68
+    GROUPBOX        "Available Resources",IDC_STATIC,13,16,168,68
     CTEXT           "Windows Resources",IDC_STATIC,16,29,76,8,SS_CENTERIMAGE
     CTEXT           "",IDC_MEM_RESO,96,28,80,10,SS_CENTERIMAGE | SS_SUNKEN
     CTEXT           "Physical Memory (RAM)",IDC_STATIC,16,42,78,8,

@@ -17,15 +17,19 @@
 	#include "Configuration.h"
 	#include "WireDlg.h"
 	#include "MainFrm.h"
+	#include "InputHandler.h"
 
 	extern CPsycleApp theApp;
 #endif // _WINAMP_PLUGIN_
+
+// The inclusion of the following headers is needed because of a bad design.
+// The use of these subclasses in a function of the base class should be 
+// moved to the Song loader.
 
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
 	
-#include "InputHandler.h"
 
 char* Master::_psName = "Master";
 char* Dummy::_psName = "DummyPlug";
@@ -55,7 +59,6 @@ CIntMachParam Filter2p::pars[] = {{"Reserved",0,0},{"Filter Type",0,1},{"Filter 
 //////////////////////////////////////////////////////////
 Machine::Machine()
 {
-	wasVST = false;
 
 	_numPars = 0;
 #if !defined(_WINAMP_PLUGIN_)
@@ -72,8 +75,9 @@ Machine::Machine()
 	_pSamplesL = new float[STREAM_SIZE];
 	_pSamplesR = new float[STREAM_SIZE];
 	
+	int c;
 	// Clear machine buffer samples
-	for (int c=0; c<STREAM_SIZE; c++)
+	for (c=0; c<STREAM_SIZE; c++)
 	{
 		_pSamplesL[c] = 0;
 		_pSamplesR[c] = 0;
@@ -470,7 +474,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 				pMachine = p = new Plugin(index);
 				if (!p->LoadDll(dllName))
 				{
-					char sError[MAX_PATH];
+					char sError[256];
 					sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
 					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -491,7 +495,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 				pMachine = p = new VSTInstrument(index);
 				if (!p->LoadDll(dllName))
 				{
-					char sError[MAX_PATH];
+					char sError[256];
 					sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
 					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -512,7 +516,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 				pMachine = p = new VSTFX(index);
 				if (!p->LoadDll(dllName))
 				{
-					char sError[MAX_PATH];
+					char sError[256];
 					sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
 					::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -562,7 +566,7 @@ Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool ful
 	
 	if (!pMachine->LoadSpecificFileChunk(pFile,version))
 	{
-		char sError[MAX_PATH];
+		char sError[256];
 		sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
 		::MessageBox(NULL,sError, "Loading Error", MB_OK);
 
@@ -677,6 +681,7 @@ void Machine::SaveFileChunk(RiffFile* pFile)
 //////////////////////////////////////////////////////////////////////
 Dummy::Dummy(int index)
 {
+	wasVST = false;
 	_macIndex = index;
 	_numPars = 0;
 	_type = MACH_DUMMY;

@@ -20,7 +20,8 @@ Sampler::Sampler(int index)
 	sprintf(_editName, "Sampler");
 
 	_resampler.SetQuality(RESAMPLE_LINEAR);
-	for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+	int i;
+	for (i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 	{
 		_voices[i]._envelope._stage = ENV_OFF;
 		_voices[i]._envelope._sustain = 0;
@@ -70,7 +71,9 @@ void Sampler::Work(
 	if (!_mute)
 	{
 #endif //!defined(_WINAMP_PLUGIN_)		
-		for (int voice=0; voice<_numVoices; voice++)
+		int voice;
+		int i;
+		for (voice=0; voice<_numVoices; voice++)
 		{
 			PerformFx(voice); //<- needs to take numsamples into account
 		}
@@ -78,7 +81,7 @@ void Sampler::Work(
 		while (ns)
 		{
 			int nextevent = ns+1;
-			for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+			for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 			{
 				if (TriggerDelay[i]._cmd)
 				{
@@ -90,7 +93,7 @@ void Sampler::Work(
 			}
 			if (nextevent > ns)
 			{
-				for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+				for (i=0; i < Global::_pSong->SONGTRACKS; i++)
 				{
 					// come back to this
 					if (TriggerDelay[i]._cmd)

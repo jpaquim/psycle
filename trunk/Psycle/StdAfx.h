@@ -12,17 +12,23 @@
 #endif // _MSC_VER > 1000
 
 #define WIN32_MEAN_AND_LEAN
-
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
+
+
 #if defined(_WINAMP_PLUGIN_)
-	#include <afxwin.h>         // MFC core and standard components
-#if defined(FOO_INPUT_STD_EXPORTS)
-	#include "FoobarPlugin\resource.h"
+
+//	#include <afxwin.h>         // MFC core and standard components
+	#include <windows.h>
+
+	#if defined(FOO_INPUT_STD_EXPORTS)
+		#include "FoobarPlugin\resource.h"
+	#else
+		#include "WinampPlugin\resource.h"
+	#endif	
+
 #else
-	#include "WinampPlugin\resource.h"
-#endif
-#else
+
 	#include <afxwin.h>         // MFC core and standard components
 	#include <afxext.h>         // MFC extensions
 	#include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
@@ -30,6 +36,7 @@
 	#include <afxcmn.h>			// MFC support for Windows Common Controls
 	#endif // _AFX_NO_AFXCMN_SUPPORT
 	#include <afxmt.h>
+
 #endif //!defined(_WINAMP_PLUGIN_)
 
 #include "Global.h"

@@ -892,7 +892,7 @@ bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		// get command
 		CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
 
-		BOOL bRepeat = nFlags&0x4000;
+//		BOOL bRepeat = nFlags&0x4000;
 		if ( cmd.GetType() == CT_Note )
 		{
 //			if ((!bRepeat) || (cmd.GetNote() == cdefTweakM) || (cmd.GetNote() == cdefTweakS) || (cmd.GetNote() == cdefMIDICC))

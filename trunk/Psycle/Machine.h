@@ -57,7 +57,6 @@ class RiffFile;
 class Machine
 {
 public:
-	bool wasVST;  // THIS NEVER EVER GETS RESET TO FALSE, SO WHAT DOES IT DO?  IT IS ALWAYS TRUE
 	int _macIndex;
 
 	MachineType _type;
@@ -215,6 +214,8 @@ protected:
 class Dummy : public Machine
 {
 public:
+	bool wasVST;  // Marks that the Dummy was in fact a VST plugin that couldn't be loaded
+
 	void Work(int numSamples);
 	Dummy(int index);
 	virtual char* GetName(void) { return _psName; };
