@@ -1,5 +1,5 @@
 ///\file
-///\brief machine view graphic operations
+///\brief machine view graphic operations for psycle::host::CChildView, private header
 namespace psycle
 {
 	namespace host

@@ -1,10 +1,18 @@
-#ifndef _DATA_COMPRESSION_H
-#define _DATA_COMPRESSION_H
+#pragma once
+///\file
+///\brief interface file for beerz77-2 algorithm.
+namespace psycle
+{
+	namespace host
+	{
+		/// compresses.
+		int BEERZ77Comp2(byte * pSource, byte ** pDestination, int size);
+		/// decompresses.
+		bool BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination);
 
-int BEERZ77Comp2(byte * pSource, byte ** pDestination, int size);
-bool BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination);
-
-int SoundSquash(signed short * pSource, byte ** pDestination, int size);
-bool SoundDesquash(byte * pSourcePos, signed short ** pDestination);
-
-#endif
+		/// squashes.
+		int SoundSquash(signed short * pSource, byte ** pDestination, int size);
+		/// desquashes.
+		bool SoundDesquash(byte * pSourcePos, signed short ** pDestination);
+	}
+}
