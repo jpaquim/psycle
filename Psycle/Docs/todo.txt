@@ -6,6 +6,7 @@
 * <_sue_> (autostop) no it also behaves weird with internal delays even if not in record mode....just playng
 + <bohan> hmm, is there a keyb shortcut to seek backs and forwards in a song ? while playing...
 * <alk> after I leave a song open for some time, I try and do save and it says "error creating file"
+! machine param enter dialog should show actual twk command and be modeless
 
 * Machines
 ------------
@@ -120,7 +121,7 @@ feature: Maybe: New command "twc" which will send a machine command (like note d
 feature: pattern repeat (loop) and song repeat (asked by Vir|us)
 feature: tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
 + new file format: (machines save custom data length, patterns stored according to # tracks, sequence length stored
-		according to length, vst multi-out, connections as linked lists, etc.)
+		according to length, vst multi-out, connections as linked lists, wire nodes, etc.)
 
 * Vsts:
 ------------
