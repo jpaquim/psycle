@@ -6,9 +6,6 @@
 * Taika-Kim - Whenever I have the red ! pressed and I set wave export it gets depressed and I get no sound 
 	from Psycle until I press it down again, or sometimes only one instrument is played until the button 
 	is pressed down again, etc.
-+ <_sue_> do as you wish....one thing you could put there is the pattern name .....tho i dont use it...
-	eheh.....but since you can name patterns in the pattern properties it would be nice to see the name 
-	of the one youre editing.... * re: status bar
 + <_sue_> centering psycle master machine would be cool also...as well as centering the open file menus....
 	and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its 
 	convenient for when you have folders with many files as you usually do with samples
