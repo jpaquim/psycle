@@ -210,7 +210,33 @@ void Plugin::Work(int numSamples)
 							{
 								// do event
 								_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-								TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+								TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+							}
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
+							}
+						}
+						else if (TriggerDelay[i]._cmd == 0xfa)
+						{
+							if (TriggerDelayCounter[i] == nextevent)
+							{
+								// do event
+								_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+								TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+								int parameter = TriggerDelay[i]._parameter&0x0f;
+								if (parameter < 9)
+								{
+									RetriggerRate[i]+= 4*parameter;
+								}
+								else
+								{
+									RetriggerRate[i]-= 2*(16-parameter);
+									if (RetriggerRate[i] < 16)
+									{
+										RetriggerRate[i] = 16;
+									}
+								}
 							}
 							else
 							{

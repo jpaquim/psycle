@@ -65,6 +65,8 @@ Machine::Machine()
 	for (c = 0; c<MAX_TRACKS; c++)
 	{
 		TriggerDelay[c]._cmd = 0;
+		TriggerDelayCounter[c]=0;
+		RetriggerRate[c]=256;
 	}
 }
 

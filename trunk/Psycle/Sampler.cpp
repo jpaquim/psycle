@@ -124,7 +124,33 @@ void Sampler::Work(
 						{
 							// do event
 							Tick(i,&TriggerDelay[i]);
-							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+					else if (TriggerDelay[i]._cmd == 0xfa)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+							int parameter = TriggerDelay[i]._parameter&0f;
+							if (parameter < 9)
+							{
+								RetriggerRate[i]+= 4*parameter;
+							}
+							else
+							{
+								RetriggerRate[i]-= 2*(16-parameter);
+								if (RetriggerRate[i] < 16)
+								{
+									RetriggerRate[i] = 16;
+								}
+							}
 						}
 						else
 						{
@@ -201,7 +227,33 @@ void Sampler::Work(
 						{
 							// do event
 							Tick(i,&TriggerDelay[i]);
-							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+					else if (TriggerDelay[i]._cmd == 0xfa)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelayCounter[i] = (RetriggerRate[i]*Global::_pSong->SamplesPerTick)/256;
+							int parameter = TriggerDelay[i]._parameter&0x0f;
+							if (parameter < 9)
+							{
+								RetriggerRate[i]+= 4*parameter;
+							}
+							else
+							{
+								RetriggerRate[i]-= 2*(16-parameter);
+								if (RetriggerRate[i] < 16)
+								{
+									RetriggerRate[i] = 16;
+								}
+							}
 						}
 						else
 						{

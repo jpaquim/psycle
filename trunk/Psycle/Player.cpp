@@ -214,14 +214,25 @@ void Player::ExecuteLine(void)
 					}
 					else if (pEntry->_cmd == 0xfb)
 					{
+						// retrigger
 						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-						pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*Global::_pSong->SamplesPerTick)/256;
-						pMachine->Tick(track, pEntry);
+						pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
+						pMachine->TriggerDelayCounter[track] = 0;
+					}
+					else if (pEntry->_cmd == 0xfa)
+					{
+						// retrigger continue
+						memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+						if (pEntry->_parameter&0xf0)
+						{
+							pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+						}
 					}
 					else
 					{
 						pMachine->TriggerDelay[track]._cmd = 0;
 						pMachine->Tick(track, pEntry);
+						pMachine->TriggerDelayCounter[track] = 0;
 					}
 				}
 			}
