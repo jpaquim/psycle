@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.73 RC 1 ------
+				------------------------------- 1.7.4 ----------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -19,13 +19,13 @@ PSYCLE is a free OpenSource Music Production Studio
 that offers unlimited (opinions may vary) possibilites
 for creating your own music in a professional way.
 
-PSYCLE has an Old-School Tracker interface, but it 
+PSYCLE has an Old-School Tracker interface, but it
 supports VST Plugins and VST Instruments in addition
 to samples, to let your wildest music ideas come true.
 
 Here some facts about Psycle:
 
-- 64Tracks Pattern Editor 
+- 64Tracks Pattern Editor
 - Internal Stereo Sampler unit, that supports high quality
   stereo .wav files and .iff samples as well (more formats will eventually come)
 - 20+ Native Plugins (Generators & effects), with open API for third party plugins.
@@ -82,8 +82,8 @@ If you need to contact specifically the developers, write an e-mail to
 	[JAZ] at jaz@pastnotecut.org for that matter.
 
 
-You are allowed to develop psycle Machines without any restriction 
-There's no SDK ready, but you can download Psycle plugins' sourcecode from 
+You are allowed to develop psycle Machines without any restriction
+There's no SDK ready, but you can download Psycle plugins' sourcecode from
 SourceForge Site (link above)
 
 A Buzz2Psycle SDK is avaiable at the site, but it is untested.
@@ -99,7 +99,7 @@ Sources for a Fast sinus calculation used in the Flanger are extracted from
 
 Psycle 1: (The only active one right now)
 
-	Many improvements have been done in this new version ( 1.73 ) making it better in
+	Many improvements have been done in this new version ( 1.7.3/1.7.4 ) making it better in
 	many ways ( more stable, better looking, more powerful,... are just some of them).
 
 	Still, the main goals for a definitive Psycle 1 version haven't been reached, which
@@ -107,7 +107,7 @@ Psycle 1: (The only active one right now)
 	are being designed currently.
 
 
-For up to date information, don't forget to visit the Developement forums on Psycledelics 
+For up to date information, don't forget to visit the Developement forums on Psycledelics
 site.
 
 --------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ The Psycledelics community is still small but growing.
 
 Feel free to ask other users for help, publish your tunes, download tunes made by other
 PSYCLE users, find usefull links to VST & other Audio related resources, or simply discuss
-in the PSY-Boards. 
+in the PSY-Boards.
 
 Also, chat with other PSYCLE users or developers in our IRC - Channel:
 Join #psycle on EFNet network

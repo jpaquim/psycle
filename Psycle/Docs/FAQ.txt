@@ -31,6 +31,11 @@ A)	The Edit Mode is Deactivated. The default key to switch it on/off is the "Spa
 	Also, now you have a Red Dot next to the "Undo/Redo" buttons, which allows you to change it
 	as well.
 
+Q)  Why Bohan's plugins don't work under Win 95/98 (Me?)?
+A)  We've found that the reason of this is the lack of a .dll in the system. We don't know why
+    it isn't there. Its name is  msvcp60.dll . Get it from someone who has it, and put it in
+    your windows\system directory.
+
 
 (There are some more, but I forgot about them)
 
@@ -41,7 +46,7 @@ A)	The Edit Mode is Deactivated. The default key to switch it on/off is the "Spa
 Q)	How can I develop a Psycle Machine?
 A)	There's no SDK yet, and format will change in Psycle 2, but right now,you can download
 	Psycle plugins' sourcecode and using one of them as a template for your plugin.
-	You can download them from Psycle's Source Forge Site at: 
+	You can download them from Psycle's Source Forge Site at:
 	http:www.sourceforge.net/projects/psycle
 
 Q)	How can I port a Buzz machine to Psycle?
@@ -84,6 +89,7 @@ A)	"History" :
 	It was initially stated being coded by Majick_ / MJK, he had most of the core
 	ready, but left for work too. Dilvie, on the other hand, started working on the GUI,
 	trying Mozilla XUL language as a start. Unfortunately, he's busy with work too
-	(yep... one more). He hopes to have more free time over february 2003 to continue
-	on that. Let's hope so.
-	
+	(yep... one more).
+    The latest news, unluckily, are that this branch is vaporware. So let's put our efforts
+    on the "1" branch, and reget the "PsyClean" Idea :)))
+

@@ -16,7 +16,7 @@ public:
 	~Instrument();
 	void Delete();
 	void DeleteLayer(int c);
-	void LoadFileChunk(RiffFile* pFile,int version);
+	void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);
 	void SaveFileChunk(RiffFile* pFile);
 	bool Empty();
 

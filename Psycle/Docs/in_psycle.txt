@@ -35,18 +35,20 @@ $$      $$$$              $..$$     $$...........
 
 	This Plugin allows you to play .psy files containing Psycle Songs.
 
-	It is based on the source code of Psycle 1.7.
+	It is based on the source code of Psycle 1.7.4.
 	It is faster than psycle (since this code doesn't calculate the CPU usage
 	nor the vumeters) but with winamp's eq and vis, it can become slower.
 
 	On a side note:
 	---------------
-	Winamp GENERIC EQ destroys high frequencies as reported for other plugin developers.
+	Winamp GENERIC EQ from versions previous to 2.9 destroys high frequencies,
+    as reported by other plugin developers.
 
 	If you want to see/hear it, connect the eq, put it on zero (all frequencies as well
 	as the PreAmp). In this position, the eq is internally disabled by winamp.
 	Now, move any slider a little up or down and you'll hear the big difference in the
 	high spectrum (and you'll be able to see it in the Vis as well).
+
 
 
 \/ Limitations
@@ -57,12 +59,21 @@ $$      $$$$              $..$$     $$...........
 	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
 	· Cannot save the info.
 	· Maybe others that I can't think of right now.
+	· It is known that it crashes a bit frequently, when loading a new song. We haven't
+	  been able to fix this for long, and now the only solution will come from the
+	  recoding of Psycle, which will start shortly.
 
 
 \/ Version Revision
 --------------------
+1.1 (15-07-2003)
+----------------
+· Engine update to 1.7.4. This allows the playback of old and new fileformat,
+  as well as the many improvements made to the host in this period of time.
+
 
 1.0 RC 2 (29-12-2002)
+---------------------
 ·Fixed bug where the plugin didn't close all files (when checking
 if it was a .psy file or not) which made those files uneditable until
 Winamp was closed.
@@ -118,13 +129,13 @@ Beta 1 (30-05-2001)
 \/ Ending
 ----------
 
-	Plugin Coded by Josep Mª [JAZ] on 13-June-2001
+	Plugin Created by Josep Mª [JAZ] on 13-June-2001
 
 	For any questions, suggestions or bugreports, use the boards on psycledelics:
 
-		http://www.pastnotecut.org/psycle
+		http://psycle.pastnotecut.org/
 
-	or Contact me at jaz_e@terra.es
+	or Contact me at jaz@pastnotecut.org
 
 	Source Code is avaiable on Psycle's SourceForge site:
 

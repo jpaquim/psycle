@@ -16,7 +16,7 @@
 
 #include "in2.h"	// Winamp Input plugin header file
 
-#define WA_PLUGIN_VERSION "1.0 RC2"
+#define WA_PLUGIN_VERSION "1.1"
 
 // post this to the main window at end of file (after playback has stopped)
 #define WM_WA_PSY_EOF WM_USER+2
@@ -38,6 +38,7 @@ HANDLE thread_handle=INVALID_HANDLE_VALUE;
 
 int paused;
 int worked;
+bool loading=false;
 char infofileName[_MAX_PATH];
 
 //
@@ -136,16 +137,13 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 				pSong=new Song;
 				pSong->New();
 				file.Seek(0);
-//////////////// Maybe a modification of Song::Load to not load the machines would
-//////////////// be nice, to speed up the info loading.
 
-				pSong->Load(&file);
+				pSong->Load(&file,false);
 				if (title) { sprintf(title,"%s - %s\0",pSong->Author,pSong->Name); }
 				if (length_in_ms)
 				{
 					*length_in_ms = CalcSongLength(pSong);
 				}
-					
 //				file.Close(); <- load handles this
 				return;
 			}
@@ -247,6 +245,7 @@ int isourfile(char *fn)
 
 void stop()
 { 
+	while (loading) Sleep(10);
 	if (thread_handle != INVALID_HANDLE_VALUE)
 	{
 		killDecodeThread=1;
@@ -276,12 +275,17 @@ int play(char *fn)
 	{
 		return -1;
 	}
+	while ( mod.outMod->IsPlaying())
+	{
+		Sleep(10);
+	}
 	_global._pSong->filesize=file.FileSize();
+	loading = true;
+//	_global._pSong->New();
 	_global._pSong->Load(&file);
-//	file.Close(); <- load handles this
+	file.Close(); //<- load handles this (but maybe nto always)
 	strcpy(_global._pSong->fileName,fn);
 	_global._pSong->SetBPM(_global._pSong->BeatsPerMin, _global._pSong->_ticksPerBeat, _global.pConfig->_samplesPerSec);
-
 	int val=64;
 	_global.pPlayer->Work(_global.pPlayer,val); // Some plugins don't like to receive data without making first a
 								// work call. (for example, Phantom)
@@ -303,6 +307,7 @@ int play(char *fn)
 
 	killDecodeThread=0;
 	thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) PlayThread,(void *) &killDecodeThread,0,&tmp);
+	loading = false;
 	return 0;
 }
 
@@ -531,6 +536,7 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 	switch(msg)
 	{
 	case WM_INITDIALOG:
+		char valstr[255];
 		if ( infofileName[0]!='\0' )
 		{
 			pSong=new Song;
@@ -539,7 +545,7 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			if (file.Open(infofileName))
 			{
 				pSong->filesize=file.FileSize();
-				pSong->Load(&file);
+				pSong->Load(&file,false);
 				strcpy(pSong->fileName,infofileName);
 //				file.Close(); <- load handles this
 			}
@@ -547,7 +553,6 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		else pSong= _global._pSong;
 		
 		SetWindowText(wnd,"Psycle Winamp Plugin Info Dialog");
-		char valstr[255];
 		char tmp2[20];
 		SetDlgItemText(wnd,IDC_SONGFILENAME,pSong->fileName);
 		SetDlgItemText(wnd,IDC_SONGARTIST,pSong->Author);

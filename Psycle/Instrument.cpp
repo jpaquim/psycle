@@ -124,7 +124,7 @@ bool Instrument::Empty()
 
 // load instrument
 
-void Instrument::LoadFileChunk(RiffFile* pFile,int version)
+void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 {
 	Delete();
 	// assume version 0 for now
@@ -187,27 +187,45 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version)
 				pFile->Read(&waveVolume[index],sizeof(waveVolume[index]));
 				pFile->Read(&waveLoopStart[index],sizeof(waveLoopStart[index]));
 				pFile->Read(&waveLoopEnd[index],sizeof(waveLoopEnd[index]));
-
+				
 				pFile->Read(&waveTune[index],sizeof(waveTune[index]));
 				pFile->Read(&waveFinetune[index],sizeof(waveFinetune[index]));
 				pFile->Read(&waveLoopType[index],sizeof(waveLoopType[index]));
 				pFile->Read(&waveStereo[index],sizeof(waveStereo[index]));
-
+				
 				pFile->ReadString(waveName[index],sizeof(waveName[index]));
-
+				
 				pFile->Read(&size,sizeof(size));
-				byte* pData = new byte[size];
-				pFile->Read(pData,size);
-				SoundDesquash(pData,&waveDataL[index]);
-				delete pData;
+				byte* pData;
+				
+				if ( !fullopen )
+				{
+					pFile->Skip(size);
+					waveDataL[index]=new signed short[2];
+				}
+				else
+				{
+					pData = new byte[size];
+					pFile->Read(pData,size);
+					SoundDesquash(pData,&waveDataL[index]);
+					delete pData;
+				}
 
 				if (waveStereo[index])
 				{
 					pFile->Read(&size,sizeof(size));
-					pData = new byte[size];
-					pFile->Read(pData,size);
-					SoundDesquash(pData,&waveDataR[index]);
-					delete pData;
+					if ( !fullopen )
+					{
+						pFile->Skip(size);
+						waveDataL[index]=new signed short[2];
+					}
+					else
+					{
+						pData = new byte[size];
+						pFile->Read(pData,size);
+						SoundDesquash(pData,&waveDataR[index]);
+						delete pData;
+					}
 				}
 			}
 		}

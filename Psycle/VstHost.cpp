@@ -855,9 +855,9 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 		if (effect)
 		{
 
-			if ( effect->user ) 
+			if ( effect->user ) // ugly solution...
 			{
-				if (Global::pConfig->_RecordTweaks)  // ugly solution...
+				if (Global::pConfig->_RecordTweaks)  
 				{
 					if (Global::pConfig->_RecordMouseTweaksSmooth)
 					{
