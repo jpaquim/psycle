@@ -2861,6 +2861,7 @@ void CChildView::FindMachineSkin(CString findDir, CString findName, BOOL *result
 					{
 						PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
 					}
+					fclose(hfile);
 					*result = TRUE;
 					break;
 				}
@@ -3204,6 +3205,7 @@ void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *
 					{
 						PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
 					}
+					fclose(hfile);
 					*result = TRUE;
 					break;
 				}

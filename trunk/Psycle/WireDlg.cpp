@@ -141,6 +141,8 @@ void CWireDlg::OnCancel()
 	linepenR.DeleteObject();
 	linepenbL.DeleteObject();
 	linepenbR.DeleteObject();
+	delete bufBM;
+	delete clearBM;
 	delete this;
 }
 
