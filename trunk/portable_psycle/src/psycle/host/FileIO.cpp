@@ -215,7 +215,7 @@ namespace psycle
 			return (bytesRead == numBytes);
 		}
 
-		bool OldPsyFile::Write(void* pData, ULONG numBytes)
+		bool OldPsyFile::Write(const void* pData, ULONG numBytes)
 		{
 			fflush(_file);
 			DWORD bytesWritten = fwrite(pData, sizeof(char), numBytes, _file);
