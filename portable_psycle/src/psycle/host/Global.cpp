@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::Global.
 #include <project.private.hpp>
 #include "global.hpp"
+#include "Dsp.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
-#include "Dsp.hpp"
 #include "Configuration.hpp"
 #include <operating_system/logger.hpp>
 #include "InputHandler.hpp"
@@ -14,7 +14,7 @@ namespace psycle
 	{
 		Song * Global::_pSong(0);
 		Player * Global::pPlayer(0);
-		Resampler * Global::pResampler(0);
+		dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
 		CLoggingWindow * Global::pLogWindow(0);
 		unsigned int Global::_cpuHz;
@@ -28,8 +28,8 @@ namespace psycle
 			_pSong = new Song;
 			pPlayer = new Player;
 			pConfig = new Configuration;
-			pResampler = new Cubic;
-			pResampler->SetQuality(RESAMPLE_LINEAR);
+			pResampler = new dsp::Cubic;
+			pResampler->SetQuality(dsp::R_LINEAR);
 			pInputHandler = new InputHandler;
 		}
 

@@ -167,14 +167,14 @@ NAMESPACE__BEGIN(psycle)
 										
 								CPoint pol[4];
 								
-								pol[0].x = f1 - Dsp::F2I(modX*triangle_size_center);
-								pol[0].y = f2 - Dsp::F2I(modY*triangle_size_center);
-								pol[1].x = pol[0].x + Dsp::F2I(modX*triangle_size_tall);
-								pol[1].y = pol[0].y + Dsp::F2I(modY*triangle_size_tall);
-								pol[2].x = pol[0].x - Dsp::F2I(modY*triangle_size_wide);
-								pol[2].y = pol[0].y + Dsp::F2I(modX*triangle_size_wide);
-								pol[3].x = pol[0].x + Dsp::F2I(modY*triangle_size_wide);
-								pol[3].y = pol[0].y - Dsp::F2I(modX*triangle_size_wide);
+								pol[0].x = f1 - dsp::F2I(modX*triangle_size_center);
+								pol[0].y = f2 - dsp::F2I(modY*triangle_size_center);
+								pol[1].x = pol[0].x + dsp::F2I(modX*triangle_size_tall);
+								pol[1].y = pol[0].y + dsp::F2I(modY*triangle_size_tall);
+								pol[2].x = pol[0].x - dsp::F2I(modY*triangle_size_wide);
+								pol[2].y = pol[0].y + dsp::F2I(modX*triangle_size_wide);
+								pol[3].x = pol[0].x + dsp::F2I(modY*triangle_size_wide);
+								pol[3].y = pol[0].y - dsp::F2I(modX*triangle_size_wide);
 
 								devc->SelectObject(&linepen1);
 								amosDraw(devc, oriX, oriY, desX, desY);
@@ -267,14 +267,14 @@ NAMESPACE__BEGIN(psycle)
 										
 								CPoint pol[4];
 								
-								pol[0].x = f1 - Dsp::F2I(modX*triangle_size_center);
-								pol[0].y = f2 - Dsp::F2I(modY*triangle_size_center);
-								pol[1].x = pol[0].x + Dsp::F2I(modX*triangle_size_tall);
-								pol[1].y = pol[0].y + Dsp::F2I(modY*triangle_size_tall);
-								pol[2].x = pol[0].x - Dsp::F2I(modY*triangle_size_wide);
-								pol[2].y = pol[0].y + Dsp::F2I(modX*triangle_size_wide);
-								pol[3].x = pol[0].x + Dsp::F2I(modY*triangle_size_wide);
-								pol[3].y = pol[0].y - Dsp::F2I(modX*triangle_size_wide);
+								pol[0].x = f1 - dsp::F2I(modX*triangle_size_center);
+								pol[0].y = f2 - dsp::F2I(modY*triangle_size_center);
+								pol[1].x = pol[0].x + dsp::F2I(modX*triangle_size_tall);
+								pol[1].y = pol[0].y + dsp::F2I(modY*triangle_size_tall);
+								pol[2].x = pol[0].x - dsp::F2I(modY*triangle_size_wide);
+								pol[2].y = pol[0].y + dsp::F2I(modX*triangle_size_wide);
+								pol[3].x = pol[0].x + dsp::F2I(modY*triangle_size_wide);
+								pol[3].y = pol[0].y - dsp::F2I(modX*triangle_size_wide);
 
 								devc->Polygon(&pol[1], 3);
 

@@ -376,7 +376,7 @@ NAMESPACE__BEGIN(psycle)
 		void CEnvDialog::OnSelchangeCombo1() 
 		{
 			int si=_pSong->instSelected;
-			_pSong->_pInstrument[si]->ENV_F_TP = m_filtercombo.GetCurSel();	
+			_pSong->_pInstrument[si]->ENV_F_TP = m_filtercombo.GetCurSel();
 		}
 
 		void CEnvDialog::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult) 

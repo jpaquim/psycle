@@ -39,10 +39,11 @@ namespace psycle
 			virtual BOOL Close(void);
 
 			virtual bool Read(void* pData, ULONG numBytes);
-			virtual void Read(unsigned short &value){int _t;Read(&_t,sizeof(unsigned short));value =  _t;};
 			virtual void Read(int &value){int _t;Read(&_t,sizeof(int));value =  _t;};
 			virtual void Read(char &value){char _t;Read(&_t,sizeof(char));value =  _t;};
 			virtual void Read(unsigned char &value){unsigned char _t;Read(&_t,sizeof(unsigned char));value =  _t;};
+			virtual void Read(short &value){int _t;Read(&_t,sizeof(short));value =  _t;};
+			virtual void Read(unsigned short &value){int _t;Read(&_t,sizeof(unsigned short));value =  _t;};
 			virtual void Read(bool &value){bool _t;Read(&_t,sizeof(bool));value =  _t;};
 			virtual void Read(UINT &value){UINT _t;Read(&_t,sizeof(UINT));value =  _t;};
 			virtual void Read(float &value){float _t;Read(&_t,sizeof(float));value =  _t;};
@@ -50,6 +51,8 @@ namespace psycle
 
 			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t;};
 			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
+			virtual const unsigned char ReadUChar(){ unsigned char _t;Read(&_t,sizeof(unsigned char));return _t;};
+			virtual const short ReadShort(){ short _t;Read(&_t,sizeof(short));return _t;};
 			virtual const unsigned short ReadUShort(){unsigned short _t;Read(&_t,sizeof(unsigned short));return _t;};
 			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
 			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};
@@ -59,6 +62,8 @@ namespace psycle
 			virtual bool Write(const void * pData, ULONG numBytes);
 			virtual void Write(const int value){Write((void *)(&value),sizeof(int));};
 			virtual void Write(const char value){Write((void *)(&value),sizeof(char));};
+			virtual void Write(const unsigned char value){Write((void *)(&value),sizeof(unsigned char));};
+			virtual void Write(const short value){Write((void *)(&value),sizeof(short));};
 			virtual void Write(const unsigned short value){Write((void *)(&value),sizeof(unsigned short));};
 			virtual void Write(const bool value){Write((void *)(&value),sizeof(bool));};
 			virtual void Write(const UINT value){Write((void *)(&value),sizeof(UINT));};

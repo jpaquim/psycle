@@ -293,8 +293,8 @@ namespace psycle
 				} 
 			}
 			_scopePrevNumSamples=numSamples;
-			Dsp::Clear(_pSamplesL, numSamples);
-			Dsp::Clear(_pSamplesR, numSamples);
+			dsp::Clear(_pSamplesL, numSamples);
+			dsp::Clear(_pSamplesR, numSamples);
 			CPUCOST_CALC(cost, numSamples);
 			//_cpuCost = cost;
 			_wireCost+= cost;
@@ -331,8 +331,8 @@ namespace psycle
 						if(!_mute && !_stopped)
 						{
 							CPUCOST_INIT(wcost);
-							Dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-							Dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
+							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
 							CPUCOST_CALC(wcost,numSamples);
 							_wireCost+=wcost;
 						}
@@ -340,7 +340,7 @@ namespace psycle
 				}
 			}
 			CPUCOST_INIT(wcost);
-			Dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 			CPUCOST_CALC(wcost,numSamples);
 			_wireCost+=wcost;
 		}

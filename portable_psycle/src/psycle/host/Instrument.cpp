@@ -3,6 +3,7 @@
 #include <project.private.hpp>
 #include "Instrument.hpp"
 #include "DataCompression.hpp"
+#include "filter.hpp"
 namespace psycle
 {
 	namespace host
@@ -45,7 +46,7 @@ namespace psycle
 			ENV_F_CO = 64;
 			ENV_F_RQ = 64;
 			ENV_F_EA = 128;
-			ENV_F_TP = 4;
+			ENV_F_TP = dsp::F_NONE;
 			
 			_loop = false;
 			_lines = 16;

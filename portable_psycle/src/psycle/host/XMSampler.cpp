@@ -1,19 +1,12 @@
 
-/** @file 
- *  @brief implementation file
- *  $Date$
- *  $Revision$
- */
 #include <project.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Song.hpp"
 #include "FileIO.hpp"
-//#include "IPsySongLoader.h"
 #include "Configuration.hpp"
 #pragma unmanaged
 
-//namespace SF {
 namespace psycle
 {
 	namespace host
@@ -95,7 +88,7 @@ namespace psycle
 			_mode = MACHMODE_GENERATOR;
 			_stprintf(_editName, _T("XMSampler"));
 
-			_resampler.SetQuality(RESAMPLE_LINEAR);
+			_resampler.SetQuality(dsp::R_LINEAR);
 			
 			m_TicksPerRow = 6;// 
 			m_BPM = Global::_pSong->BeatsPerMin();
@@ -327,14 +320,14 @@ namespace psycle
 			switch (i)
 			{
 			case 2:
-				_resampler.SetQuality(RESAMPLE_SPLINE);
+				_resampler.SetQuality(dsp::R_SPLINE);
 				break;
 			case 0:
-				_resampler.SetQuality(RESAMPLE_NONE);
+				_resampler.SetQuality(dsp::R_NONE);
 				break;
 			default:
 			case 1:
-				_resampler.SetQuality(RESAMPLE_LINEAR);
+				_resampler.SetQuality(dsp::R_LINEAR);
 				break;
 			}
 
@@ -377,13 +370,13 @@ namespace psycle
 			riffFile.Write(_numVoices); // numSubtracks
 			switch (_resampler._quality)
 			{
-			case RESAMPLE_NONE:
+				case dsp::R_NONE:
 				temp = 0;
 				break;
-			case RESAMPLE_LINEAR:
+				case dsp::R_LINEAR:
 				temp = 1;
 				break;
-			case RESAMPLE_SPLINE:
+				case dsp::R_SPLINE:
 				temp = 2;
 				break;
 			}
@@ -426,14 +419,14 @@ namespace psycle
 			switch (temp)
 			{
 			case 2:
-				_resampler.SetQuality(RESAMPLE_SPLINE);
+				_resampler.SetQuality(dsp::R_SPLINE);
 				break;
 			case 0:
-				_resampler.SetQuality(RESAMPLE_NONE);
+				_resampler.SetQuality(dsp::R_NONE);
 				break;
 			default:
 			case 1:
-				_resampler.SetQuality(RESAMPLE_LINEAR);
+				_resampler.SetQuality(dsp::R_LINEAR);
 				break;
 			}
 
@@ -558,7 +551,7 @@ namespace psycle
 							// ***** [bohan] iso-(10)646 encoding only please! *****
 							_currentVoice->NoteOffFast();
 							break;
-						case 1:
+						case 2:
 							// NNA
 							_currentVoice->NoteOff();
 							break;
@@ -646,12 +639,12 @@ namespace psycle
 
 
 				if(_bNotPorta2Note ){
-					_layer = _inst.NoteToSample(data._note);
+					_layer = _inst.NoteToSample(data._note).second;
 					_channel.Note(_note,_layer);
 				}
 				
 				
-				_layer = _inst.NoteToSample(_channel.Note());
+				_layer = _inst.NoteToSample(_channel.Note()).second;
 				
 				int twlength = _inst.rWaveLayer(_layer).WaveLength();
 
@@ -662,8 +655,8 @@ namespace psycle
 						_bNoteOn = false; // ***** [bohan] iso-(10)646 encoding only please! *****
 						if((_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::RELEASE) | (_newVoice->AmplitudeEnvelope().Stage() == EnvelopeController::END))
 						{
-							_channel.Note(data._note,_inst.NoteToSample(data._note));
-							_layer = _inst.NoteToSample(_channel.Note());
+							_channel.Note(data._note,_inst.NoteToSample(data._note).second);
+							_layer = _inst.NoteToSample(_channel.Note()).second;
 							_newVoice->Wave().Layer(_layer);
 							_newVoice->NoteOn();
 						} else {
@@ -835,7 +828,7 @@ namespace psycle
 				_filter._q = _inst.FilterResonance();
 			}
 
-			_filter._type = (TFilterType)_inst.FilterType();
+			_filter._type = (dsp::FilterType)_inst.FilterType();
 			_coModify = (float)_inst.FilterEnvAmount();
 			
 	//		_filterEnv.Sustain(
@@ -859,9 +852,9 @@ namespace psycle
 
 		}// XMSampler::Voice::VoiceInit) 
 
-		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR,Cubic& _resampler)
+		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR,dsp::Cubic& _resampler)
 		{
-			PRESAMPLERFN pResamplerWork;
+			dsp::PRESAMPLERFN pResamplerWork;
 			pResamplerWork = _resampler._pWorkFn;
 
 			float left_output = 0.0f;
@@ -962,12 +955,12 @@ namespace psycle
 
 				// Filter section
 				//
-				if (_filter._type <= FILTER_BR)
+				if (_filter._type < dsp::F_NONE)
 				{
 					m_FilterEnvelope.Work();
 
 	//					TickFilterEnvelope();
-					_filter._cutoff = _cutoff + Dsp::F2I(m_FilterEnvelope.ModulationAmount() * _coModify);
+					_filter._cutoff = _cutoff + dsp::F2I(m_FilterEnvelope.ModulationAmount() * _coModify);
 
 					if (_filter._cutoff < 0)
 					{
@@ -1425,13 +1418,13 @@ namespace psycle
 		void XMSampler::EnvelopeController::CalcStep(const int start,const int  end)
 		{
 			m_Step = (m_pEnvelope->GetValue(end) - m_pEnvelope->GetValue(start))
-				/ (ValueType)(m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
+				/ (XMInstrument::Envelope::ValueType)(m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
 	//			* ( (ValueType)(44100.0) / (ValueType)(Global::pConfig->_pOutputDriver->_samplesPerSec));
 		};// XMSampler::EnvelopeController::CalcStep() ----------------------------------
 
 		void XMSampler::WaveDataController::Init(XMInstrument & instrument,Channel& channel,const int note){
 			
-			m_Layer = instrument.NoteToSample(note);
+			m_Layer = instrument.NoteToSample(note).second;
 			int _layer = m_Layer;
 
 			m_pL = const_cast<short *>(instrument.rWaveLayer(_layer).pWaveDataL());
@@ -1915,31 +1908,24 @@ namespace psycle
 			}
 
 		}
-#if defined WTL
-		void XMSampler::ResamplerQuality(const ::ResamplerQuality value){
+		void XMSampler::ResamplerQuality(const dsp::ResamplerQuality value){
 			_resampler._quality = value;
 		}
 
-		const ::ResamplerQuality XMSampler::ResamplerQuality(){
+		const dsp::ResamplerQuality XMSampler::ResamplerQuality(){
 			return _resampler._quality;
 		}
-#else
-		void XMSampler::ResamplerQuality(const psycle::host::ResamplerQuality value){
-			_resampler._quality = value;
-		}
-
-		const psycle::host::ResamplerQuality XMSampler::ResamplerQuality(){
-			return _resampler._quality;
-		}
-#endif
 
 		/// XM‚ÌTempo‚ÆSpeed ***** [bohan] iso-(10)646 encoding only please! ***** delta tick ***** [bohan] iso-(10)646 encoding only please! *****
 		void XMSampler::CalcBPMAndTick()
 		{
 			Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow());
+			int t= Global::pConfig->_pOutputDriver->_samplesPerSec * 15 * 4;
+			int v=Global::_pSong->BeatsPerMin();
+			int z=Global::_pSong->TicksPerBeat();
 			Global::_pSong->SamplesPerTick(
-				(Global::pConfig->_pOutputDriver->_samplesPerSec * 15 * 4)
-				/ (Global::_pSong->BeatsPerMin() * Global::_pSong->TicksPerBeat())
+				(t)
+				/ (v * z)
 			);
 			m_DeltaTick = 
 				Global::_pSong->SamplesPerTick() 

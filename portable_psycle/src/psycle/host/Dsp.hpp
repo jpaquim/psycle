@@ -7,154 +7,151 @@ namespace psycle
 {
 	namespace host
 	{
+		namespace dsp
+			{
 		/// Funky denormal check
 		#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))	
 
 		/// various signal processing utility functions.
-		class Dsp
+		/// mixes two signals.
+		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
-		public:
-			/// mixes two signals.
-			static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
+			--pSrcSamples;
+			--pDstSamples;
+			do
 			{
-				--pSrcSamples;
-				--pDstSamples;
-				do
-				{
-					*++pDstSamples += *++pSrcSamples * vol;
-				}
-				while (--numSamples);
+				*++pDstSamples += *++pSrcSamples * vol;
 			}
-			/// multiply a signal by a ratio, inplace.
-			///\see MovMul()
-			static inline void Mul(float *pDstSamples, int numSamples, float mul)
+			while (--numSamples);
+		}
+		/// multiply a signal by a ratio, inplace.
+		///\see MovMul()
+		static inline void Mul(float *pDstSamples, int numSamples, float mul)
+		{
+			--pDstSamples;
+			do
 			{
-				--pDstSamples;
-				do
-				{
-					*++pDstSamples *= mul;
-				}
-				while (--numSamples);
+				*++pDstSamples *= mul;
 			}
-			/// multiply a signal by a ratio.
-			///\see Mul()
-			static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
+			while (--numSamples);
+		}
+		/// multiply a signal by a ratio.
+		///\see Mul()
+		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
+		{
+			--pSrcSamples;
+			--pDstSamples;
+			do
 			{
-				--pSrcSamples;
-				--pDstSamples;
-				do
-				{
-					*++pDstSamples = *++pSrcSamples*mul;
-				}
-				while (--numSamples);
+				*++pDstSamples = *++pSrcSamples*mul;
 			}
-			/// zero-out a signal buffer.
-			static inline void Clear(float *pDstSamples, int numSamples)
-			{
-				std::memset(pDstSamples, 0, numSamples * sizeof(float));
-			}
-			/// converts a double to an int.
-			static inline int F2I(double d)
-			{
-				const double magic(6755399441055744.0); /// 2^51 + 2^52
-				/*const*/ double tmp((d-0.5) + magic);
-				return *reinterpret_cast<int*>(&tmp);
-			};
-			/// finds the maximum amplitude in a signal buffer.
-			/// It contains "VST" because initially the return type for native machines 
-			/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
-			static inline float GetMaxVSTVol(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				return GetMaxVol(pSamplesL,pSamplesR,numSamples);
-			}
-			/*
-			static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
-			}
-			static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				--pSamplesL;
-				--pSamplesR;
-				
-				float vol = 0.0f;
-				do
-				{
-					const float volL = fabsf(*++pSamplesL); // not all waves are symmetrical
-					const float volR = fabsf(*++pSamplesR);
-					
-					if (volL > vol)
-					{
-						vol = volL;
-					}
-					
-					if (volR > vol)
-					{
-						vol = volR;
-					}
-				}
-				while (--numSamples);
-				
-				return vol;
-			}
-			*/
-			/// finds the maximum amplitude in a signal buffer.
-			static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				--pSamplesL;
-				--pSamplesR;
-				
-				float vol = 0.0f;
-				do
-				{
-					/// not all waves are symmetrical
-					const float volL = fabsf(*++pSamplesL);
-					const float volR = fabsf(*++pSamplesR);
-					
-					if (volL > vol)
-					{
-						vol = volL;
-					}
-					if (volR > vol)
-					{
-						vol = volR;
-					}
-				}
-				while (--numSamples);
-				
-				return vol;
-			}
-			/// undenormalize (renormalize) samples in a signal buffer.
-			///\todo make a template version that accept both float and doubles
-			static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
-			{
-				float id(float(1.0E-20));
-				for(int s(0) ; s < numsamples ; ++s)
-				{
-					/* Old denormal code. Now we use a 1bit sinus.
-					if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
-					if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
-					const float is1=pSamplesL[s];
-					const float is2=pSamplesR[s];
-					pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
-					pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
-					*/
-					pSamplesL[s] += id;
-					pSamplesR[s] += id;
-					id = - id;
-				}
-			}
+			while (--numSamples);
+		}
+		/// zero-out a signal buffer.
+		static inline void Clear(float *pDstSamples, int numSamples)
+		{
+			std::memset(pDstSamples, 0, numSamples * sizeof(float));
+		}
+		/// converts a double to an int.
+		static inline int F2I(double d)
+		{
+			const double magic(6755399441055744.0); /// 2^51 + 2^52
+			/*const*/ double tmp((d-0.5) + magic);
+			return *reinterpret_cast<int*>(&tmp);
 		};
+		/// finds the maximum amplitude in a signal buffer.
+		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+			{
+			--pSamplesL;
+			--pSamplesR;
+
+			float vol = 0.0f;
+			do
+				{
+				/// not all waves are symmetrical
+				const float volL = fabsf(*++pSamplesL);
+				const float volR = fabsf(*++pSamplesR);
+
+				if (volL > vol)
+					{
+					vol = volL;
+					}
+				if (volR > vol)
+					{
+					vol = volR;
+					}
+				}
+			while (--numSamples);
+
+			return vol;
+			}
+		/// finds the maximum amplitude in a signal buffer.
+		/// It contains "VST" because initially the return type for native machines 
+		/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
+		static inline float GetMaxVSTVol(float *pSamplesL, float *pSamplesR, int numSamples)
+		{
+			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
+		}
+		/*
+		static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
+		{
+			return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
+		}
+		static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
+		{
+			--pSamplesL;
+			--pSamplesR;
+			
+			float vol = 0.0f;
+			do
+			{
+				const float volL = fabsf(*++pSamplesL); // not all waves are symmetrical
+				const float volR = fabsf(*++pSamplesR);
+				
+				if (volL > vol)
+				{
+					vol = volL;
+				}
+				
+				if (volR > vol)
+				{
+					vol = volR;
+				}
+			}
+			while (--numSamples);
+			
+			return vol;
+		}
+		*/
+		/// undenormalize (renormalize) samples in a signal buffer.
+		///\todo make a template version that accept both float and doubles
+		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
+		{
+			float id(float(1.0E-20));
+			for(int s(0) ; s < numsamples ; ++s)
+			{
+				/* Old denormal code. Now we use a 1bit sinus.
+				if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
+				if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
+				const float is1=pSamplesL[s];
+				const float is2=pSamplesR[s];
+				pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
+				pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
+				*/
+				pSamplesL[s] += id;
+				pSamplesR[s] += id;
+				id = - id;
+			}
+		}
 
 		/// sample interpolator kinds.
 		///\todo typdef should be inside the Resampler or Cubic class itself.
-		typedef enum
-		{
-			RESAMPLE_NONE,
-			RESAMPLE_LINEAR,
-			RESAMPLE_SPLINE,
-		}
-		ResamplerQuality;
+			enum ResamplerQuality
+			{
+				R_NONE  = 0,
+				R_LINEAR,
+				R_SPLINE
+			};
 
 		/// interpolator work function.
 		///\todo typdef should be inside the Resampler class itself.
@@ -167,7 +164,7 @@ namespace psycle
 			/// constructor
 			Resampler()
 			{ 
-				_quality = RESAMPLE_NONE;
+				_quality = R_NONE;
 				_pWorkFn = None;
 			};
 			/// kind of interpolation.
@@ -196,13 +193,13 @@ namespace psycle
 				_quality = quality;
 				switch (quality)
 				{
-				case RESAMPLE_NONE:
+					case R_NONE:
 					_pWorkFn = None;
 					break;
-				case RESAMPLE_LINEAR:
+				case R_LINEAR:
 					_pWorkFn = Linear;
 					break;
-				case RESAMPLE_SPLINE:
+				case R_SPLINE:
 					_pWorkFn = Spline;
 					break;
 				}
@@ -261,5 +258,6 @@ namespace psycle
 			static float _dTable[CUBIC_RESOLUTION];
 			static float _lTable[CUBIC_RESOLUTION];
 		};
+		}
 	}
 }

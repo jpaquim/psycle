@@ -1411,7 +1411,7 @@ namespace psycle
 					}
 					try
 					{
-						if(proxy().numOutputs() == 1) Dsp::Add(outputs[0], outputs[1], numSamples, 1);
+						if(proxy().numOutputs() == 1) dsp::Add(outputs[0], outputs[1], numSamples, 1);
 					}
 					catch(const std::exception &)
 					{
@@ -1419,7 +1419,7 @@ namespace psycle
 					}
 					// volume "counter"
 					{
-						_volumeCounter = Dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR, numSamples) * 32768.0f;
+						_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR, numSamples) * 32768.0f;
 						if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
 						int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
 						// prevent downward jerkiness
@@ -1462,8 +1462,8 @@ namespace psycle
 				std::sprintf(_editName, "Vst2 Fx");
 				_pOutSamplesL = new float[STREAM_SIZE];
 				_pOutSamplesR = new float[STREAM_SIZE];
-				Dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-				Dsp::Clear(_pOutSamplesR, STREAM_SIZE);
+				dsp::Clear(_pOutSamplesL, STREAM_SIZE);
+				dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 				inputs[0] = _pSamplesL;
 				inputs[1] = _pSamplesR;
 				outputs[0] = _pOutSamplesL;
@@ -1554,7 +1554,7 @@ namespace psycle
 							}
 						}
 						SendMidi();
-						Dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
+						dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
 						try
 						{
 							if(proxy().numInputs() == 1)
@@ -1570,8 +1570,8 @@ namespace psycle
 						{
 							if(!(proxy().flags() & effFlagsCanReplacing || requiresRepl))
 							{
-								Dsp::Clear(_pOutSamplesL, numSamples);
-								Dsp::Clear(_pOutSamplesR, numSamples);
+								dsp::Clear(_pOutSamplesL, numSamples);
+								dsp::Clear(_pOutSamplesR, numSamples);
 							}
 						}
 						catch(const std::exception &)
@@ -1729,7 +1729,7 @@ namespace psycle
 					}
 					// volume "counter"
 					{
-						_volumeCounter = Dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
+						_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
 						if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
 						int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
 						// prevent downward jerkiness

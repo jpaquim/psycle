@@ -9,8 +9,11 @@ namespace psycle
 		class Song;
 		class Player;
 		class Configuration;
-		class Resampler;
 		class InputHandler;
+		namespace dsp
+		{
+			class Resampler;
+		}
 
 		class Global
 		{
@@ -22,7 +25,7 @@ namespace psycle
 			static Song * _pSong;
 			static Player * pPlayer;
 			static Configuration * pConfig;
-			static Resampler * pResampler;
+			static dsp::Resampler * pResampler;
 			static unsigned int _cpuHz;
 			static InputHandler* pInputHandler;
 		};

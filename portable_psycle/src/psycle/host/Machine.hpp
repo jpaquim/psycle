@@ -287,7 +287,7 @@ namespace psycle
 
 		inline void Machine::SetVolumeCounter(int numSamples)
 		{
-			_volumeCounter = Dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
 			if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
 			int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
 			// prevent downward jerkiness
