@@ -76,6 +76,7 @@
 		_lbc = -1;
 		pConfig = new Configuration;
 		pResampler = new Cubic;
+		pResampler->SetQuality(RESAMPLE_LINEAR);
 		pInputHandler = new InputHandler;
 	}
 

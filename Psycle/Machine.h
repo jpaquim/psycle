@@ -480,8 +480,6 @@ protected:
 	float* _pBufferR;
 };
 
-class Cubic;
-
 class Flanger : public Machine
 {
 public:
@@ -560,10 +558,6 @@ protected:
 	float* _pBufferL;
 	float* _pBufferR;
 
-	Cubic _resampler;
-	ULARGE_INTEGER _pos;
-	signed __int64 _speed;
-	
 	int _counter;
 
 	double _dLfoSpeed;
