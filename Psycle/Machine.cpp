@@ -1409,7 +1409,7 @@ Flanger::Flanger()
 	_mode = MACHMODE_FX;
 	sprintf(_editName, "Flanger");
 //	_resampler.SetQuality(RESAMPLE_LINEAR);// ADVISE!!!! Only linear resample can be done. SPLINE needs samples ahead
-	useResample=false;
+	useResample=true;
 	
 	_pBufferL = NULL;
 	_pBufferR = NULL;
