@@ -428,7 +428,7 @@ void CMainFrame::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
 
 void CMainFrame::OnClose() 
 {
-	if (MessageBox("Are you sure?","Quit Psycle",MB_YESNO) == IDYES)
+	if (m_wndView.CheckUnsavedSong("Exit Psycle"))
 	{
 		m_wndView._outputActive = false;
 		Global::pPlayer->Stop();
@@ -2100,6 +2100,7 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	sprintf(buffer,"%.2X",ll);
 	ll_l->SetWindowText(buffer);
 
+	/*
 	int songLength = 0;
 	for (int i=0; i <ll; i++)
 	{
@@ -2109,6 +2110,45 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 	}
 
 	sprintf(buffer, "%02d:%02d", songLength / 60, songLength % 60);
+	*/
+
+	// take ff and fe commands into account
+
+	float songLength = 0;
+	int bpm = _pSong->BeatsPerMin;
+	int tpb = _pSong->_ticksPerBeat;
+	for (int i=0; i <ll; i++)
+	{
+		int pattern = _pSong->playOrder[i];
+		// this should parse each line for ffxx commands if you want it to be truly accurate
+		unsigned char* const plineOffset = _pSong->pPatternData + pattern*MULTIPLY2;
+		for (int l = 0; l < _pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
+		{
+			for (int t = 0; t < _pSong->SONGTRACKS*5; t+=5)
+			{
+				PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
+				switch (pEntry->_cmd)
+				{
+				case 0xFF:
+					if ( pEntry->_parameter != 0 )
+					{
+						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+					}
+					break;
+			
+				case 0xFE:
+					if ( pEntry->_parameter != 0 )
+					{
+						tpb=pEntry->_parameter;
+					}
+				}
+			}
+			songLength += (60.0f/(bpm * tpb));
+		}
+	}
+
+	sprintf(buffer, "%02d:%02d", f2i(songLength / 60), f2i(songLength) % 60);
+
 	pLength->SetWindowText(buffer);
 
 // Update sequencer line
@@ -2299,4 +2339,5 @@ void CMainFrame::OnDropFiles(WPARAM wParam)
 	DragFinish((HDROP)  wParam);	// handle of structure for dropped files
 	SetForegroundWindow();
 }
+
 
