@@ -7,6 +7,7 @@
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 	#include <fstream>
+	#include <psycle/host/Global.h> // for psycle::host::logger
 #endif
 ///\file
 ///\brief implementation file for operating_system::exception
@@ -19,6 +20,7 @@ namespace operating_system
 			{
 				std::ostringstream s; s << "exception: " << typeid(*this).name() << ": " << this->what() << std::endl;
 				TRACE("%s", s.str().c_str());
+				psycle::host::logger(psycle::host::logger::trace, s.str());
 			}
 			/*
 			{
