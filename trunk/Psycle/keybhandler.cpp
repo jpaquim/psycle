@@ -908,7 +908,6 @@ void CChildView::patMixPaste()
 			AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 			_pSong->AllocNewPattern(_ps(),"",patBufferLines,false);
 		}
-		// **************** uhoh shit here
 
 		for (int i = 0; i < MAX_TRACKS*patBufferLines; i++)
 		{
