@@ -83,10 +83,10 @@ BOOL CPsycleApp::InitInstance()
 		{
 			pFrame->m_wndView._outputActive = true;
 		}
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
+		pFrame->m_wndView.LoadMachineSkin();
+		pFrame->m_wndView.LoadPatternHeaderSkin();
+		pFrame->m_wndView.RecalcMetrics();
+		pFrame->m_wndView.RecalculateColourGrid();
 
 	}
 
@@ -100,6 +100,11 @@ BOOL CPsycleApp::InitInstance()
 
 	// The one and only window has been initialized, so show and update it.
 	pFrame->ShowWindow(SW_MAXIMIZE);
+
+	// center master machine
+	pFrame->m_wndView._pSong->_pMachines[0]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+	pFrame->m_wndView._pSong->_pMachines[0]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+
 	pFrame->UpdateWindow();
 	// Sets Icon
 	HICON tIcon;

@@ -609,8 +609,8 @@ void CChildView::OnSize(UINT nType, int cx, int cy)
 
 	CW = cx;
 	CH = cy;
-	_pSong->viewSize.x=cx-148; // Hack to move machines boxes inside of the visible area.
-	_pSong->viewSize.y=cy-48;
+	_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
+	_pSong->viewSize.y=cy;
 	
 	if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 	{

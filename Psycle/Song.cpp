@@ -11,6 +11,10 @@
 #include "Sampler.h"
 #include "Plugin.h"
 #include "VSTHost.h"
+#include "MainFrm.h"
+#include "ChildView.h"
+
+extern CPsycleApp theApp;
 
 #if !defined(_WINAMP_PLUGIN_)
 
@@ -401,7 +405,20 @@ void Song::New(void)
 #else
 	fileName ="Untitled.psy";
 #endif // _WINAMP_PLUGIN_
-	CreateMachine(MACH_MASTER, 320, 200, NULL);
+	if ((CMainFrame *)theApp.m_pMainWnd)
+	{
+		CreateMachine(MACH_MASTER, 
+			(viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)/2, 
+			(viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)/2, 
+			NULL);
+	}
+	else
+	{
+		CreateMachine(MACH_MASTER, 
+			320, 
+			200, 
+			NULL);
+	}
 }
 
 int Song::GetFreeMachine(void)
@@ -1220,10 +1237,6 @@ bool Song::Load(
 		{
 			pFile->Read(&x, sizeof(x));
 			pFile->Read(&y, sizeof(y));
-#if !defined(_WINAMP_PLUGIN_)
-			if ( x > viewSize.x ) x = viewSize.x;
-			if ( y > viewSize.y ) y = viewSize.y;
-#endif // _WINAMP_PLUGIN_
 
 			pFile->Read(&type, sizeof(type));
 
@@ -1385,6 +1398,27 @@ bool Song::Load(
 			}
 
 			_pMachines[i] = pMachine;
+
+#if !defined(_WINAMP_PLUGIN_)
+			switch (Global::_pSong->_pMachines[i]->_mode)
+			{
+			case MACHMODE_GENERATOR:
+				if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+				if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+				break;
+			case MACHMODE_FX:
+			case MACHMODE_PLUGIN: // Plugins which are generators are MACHMODE_GENERATOR
+				if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+				if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+				break;
+
+			case MACHMODE_MASTER:
+				if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
+				if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+				break;
+			}
+#endif // _WINAMP_PLUGIN_
+
 			pMachine->_x = x;
 			pMachine->_y = y;
 		}
