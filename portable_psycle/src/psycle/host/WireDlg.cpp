@@ -443,21 +443,21 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 				float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-				bufDC.MoveTo(256,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
+				bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 				for (int x = 256-2; x >= 0; x-=2)
 				{
 					n -= add;
-					bufDC.LineTo(x,GetY(pSamplesL[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
+					bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 //					bufDC.LineTo(x,GetY(32768/2));
 				}
 				bufDC.SelectObject(&linepenR);
 
 				n = float(_pSrcMachine->_scopeBufferIndex-pos);
-				bufDC.MoveTo(256,GetY(pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
+				bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 				for (int x = 256-2; x >= 0; x-=2)
 				{
 					n -= add;
-					bufDC.LineTo(x,GetY(pSamplesR[int(n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
+					bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 				}
 
 				bufDC.SelectObject(oldpen);
@@ -1051,7 +1051,7 @@ void CWireDlg::SetMode()
 		linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
 		linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
 
-		m_slider.SetRange(1, 148);
+		m_slider.SetRange(5, 100);
 		m_slider.SetPos(scope_osc_freq);
 		pos = 1;
 		m_slider2.SetRange(10,100);
