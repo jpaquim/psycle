@@ -1155,6 +1155,7 @@ void CChildView::OnNewmachine()
 			}
 			else
 			{
+				Global::_pSong->seqBus = fb+MAX_BUSES;
 				Global::_pSong->busEffect[fb] = Global::_lbc;
 
 				if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||

@@ -1504,7 +1504,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 				((CFrameMachine*)m_pWndMac[tmac])->Generate();
 				((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 				char winname[32];
-				sprintf(winname,"%x : %s",((CFrameMachine*)m_pWndMac[tmac])->index
+				sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->index
 										 ,Global::_pSong->_pMachines[tmac]->_editName);
 				((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 				isguiopen[tmac] = true;
@@ -1525,7 +1525,7 @@ void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 					this);
 			((VSTPlugin*)ma)->editorWnd = m_pWndMac[tmac];
 			char winname[32];
-			sprintf(winname,"%x : %s",((CVstEditorDlg*)m_pWndMac[tmac])->index
+			sprintf(winname,"%.2X : %s",((CVstEditorDlg*)m_pWndMac[tmac])->index
 									,Global::_pSong->_pMachines[tmac]->_editName);
 
 			((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname);
