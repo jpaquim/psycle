@@ -577,7 +577,7 @@ void Sampler::Tick(
 					if ( _voices[voice]._triggerNoteDelay == 0 ) 
 					{ 
 						useVoice=voice; 
-						voice=_numVoices; 
+						voice=_numVoices; // Ok, we can go out from the loop already.
 					}
 					break;
 				case ENV_FASTRELEASE: 
@@ -589,6 +589,9 @@ void Sampler::Tick(
 					break;
 				default:break;
 			}
+		}
+		for ( voice=0; voice<_numVoices; voice++)
+		{
 			if ( _voices[voice]._channel == channel ) // NoteOff previous Notes in this channel.
 			{
 				switch (Global::_pSong->_instruments[_voices[voice]._instrument]._NNA)
