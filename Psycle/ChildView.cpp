@@ -163,7 +163,7 @@ CChildView::CChildView()
 
 CChildView::~CChildView()
 {
-	KillWireDialogs();
+//	KillWireDialogs();
 	Global::pInputHandler->SetChildView(NULL);
 	KillRedo();
 	KillUndo();
@@ -809,7 +809,7 @@ void CChildView::OnFileNew()
 {
 	if (CheckUnsavedSong("New Song"))
 	{
-		KillWireDialogs();
+//		KillWireDialogs();
 		KillUndo();
 		KillRedo();
 		pParentMain->CloseAllMacGuis();
@@ -1778,7 +1778,7 @@ void CChildView::OnFileLoadsongNamed(char* fName, int fType)
 	{
 		if (CheckUnsavedSong("Load Song"))
 		{
-			KillWireDialogs();
+//			KillWireDialogs();
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
 			Sleep(LOCK_LATENCY);
