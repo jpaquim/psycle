@@ -228,7 +228,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				CFont* oldFont= bufDC.SelectObject(&font);
 				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x606060);
+				bufDC.SetTextColor(0x505050);
 				bufDC.TextOut(4, 128-14, buf);
 
 				CPen linepen(PS_SOLID, 1, 0x00606060);
@@ -400,17 +400,20 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.LineTo(192-32,128);
 				linepen.DeleteObject();
 
-				peakL -= (scope_peak_rate*scope_peak_rate);///2;
-				peakR -= (scope_peak_rate*scope_peak_rate);///2;
-				peakLifeL -= scope_peak_rate;
-				peakLifeR -= scope_peak_rate;
-				if (peakLifeL < 0)
+				if (!hold)
 				{
-					peak2L = 0;
-				}
-				if (peakLifeR < 0)
-				{
-					peak2R = 0;
+					peakL -= (scope_peak_rate*scope_peak_rate);///2;
+					peakR -= (scope_peak_rate*scope_peak_rate);///2;
+					peakLifeL -= scope_peak_rate;
+					peakLifeR -= scope_peak_rate;
+					if (peakLifeL < 0)
+					{
+						peak2L = 0;
+					}
+					if (peakLifeR < 0)
+					{
+						peak2R = 0;
+					}
 				}
 
 				bufDC.SelectObject(oldpen);
@@ -427,7 +430,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				CFont* oldFont= bufDC.SelectObject(&font);
 				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x606060);
+				bufDC.SetTextColor(0x505050);
 				bufDC.TextOut(4, 128-14, buf);
 
 				CPen linepen(PS_SOLID, 2, 0x00202020);
@@ -507,7 +510,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				bufDC.SelectObject(oldpen);
 				bufDC.SelectObject(oldFont);
 				linepen.DeleteObject();
-
 			}
 			break;
 
@@ -517,9 +519,6 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 				sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
 
 				CFont* oldFont= bufDC.SelectObject(&font);
-				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x606060);
-				bufDC.TextOut(4, 128-14, buf);
 
 			   float aal[MAX_SCOPE_BANDS]; 
 			   float aar[MAX_SCOPE_BANDS]; 
@@ -636,17 +635,24 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 					cr += add;
 					cr -= add<<16|add<<8;
 
-					bar_heightsl[i]+=scope_spec_rate/10;
-					if (bar_heightsl[i] > 128)
+					if (!hold)
 					{
-						bar_heightsl[i] = 128+1;
-					}
-					bar_heightsr[i]+=scope_spec_rate/10;
-					if (bar_heightsr[i] > 128)
-					{
-						bar_heightsr[i] = 128+1;
+						bar_heightsl[i]+=scope_spec_rate/10;
+						if (bar_heightsl[i] > 128)
+						{
+							bar_heightsl[i] = 128+1;
+						}
+						bar_heightsr[i]+=scope_spec_rate/10;
+						if (bar_heightsr[i] > 128)
+						{
+							bar_heightsr[i] = 128+1;
+						}
 					}
 				}
+				bufDC.SetBkMode(TRANSPARENT);
+				bufDC.SetTextColor(0x505050);
+				bufDC.TextOut(4, 128-14, buf);
+
 				bufDC.SelectObject(oldFont);
 				bufDC.SelectObject(oldpen);
 				linepen.DeleteObject();
@@ -712,7 +718,7 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 
 				CFont* oldFont= bufDC.SelectObject(&font);
 				bufDC.SetBkMode(TRANSPARENT);
-				bufDC.SetTextColor(0x606060);
+				bufDC.SetTextColor(0x505050);
 				bufDC.TextOut(4, 128-14, buf);
 
 				// ok we need some points:
@@ -929,13 +935,18 @@ void CWireDlg::OnTimer(UINT nIDEvent)
 							*mvr*(128.0f/32768.0f))+128;
 				bufDC.LineTo(x,y);
 
-				o_mvpl -= scope_phase_rate*32.0f;
-				o_mvpc -= scope_phase_rate*32.0f;
-				o_mvpr -= scope_phase_rate*32.0f;
-				o_mvl -= scope_phase_rate*32.0f;
-				o_mvc -= scope_phase_rate*32.0f;
-				o_mvr -= scope_phase_rate*32.0f;
+				if (!hold)
+				{
+					o_mvpl -= scope_phase_rate*32.0f;
+					o_mvpc -= scope_phase_rate*32.0f;
+					o_mvpr -= scope_phase_rate*32.0f;
+					o_mvl -= scope_phase_rate*32.0f;
+					o_mvc -= scope_phase_rate*32.0f;
+					o_mvr -= scope_phase_rate*32.0f;
+				}
 				bufDC.SelectObject(oldFont);
+				bufDC.SelectObject(oldpen);
+				linepen.DeleteObject();
 			}
 			break;
 		}
