@@ -28,6 +28,7 @@ public:
 	int bpm;
 	int tpb;
 	int _ticksRemaining;
+	bool _loopSong;
 
 	Player();
 	~Player();

@@ -2,6 +2,18 @@
 Legend :	+=addition		*=change	!=bug	
 ---------------------------------------------------
 
+V1.7.1
+------
+
++ Added option (not) to loop the Song/block at the end.
++ (NEEDS TESTING!)Added "mcm" option in the MidiInput dialog, to record midi commands directly.
+! Crash bug when opening the minimixer when it had connected machines with a name of 15 letters.
+! New default size not working with the keyboard shortcut of moving next (which adds a new pattern)
+! Values not being shown when adding them at the last line of pattern, with wrap around disabled.
+! Play block now does work correctly
+! Fixed Saving to wav. options "save pattern" and "save sequence position" didn't ever stop.
+
+
 V1.7RC6
 -------
 

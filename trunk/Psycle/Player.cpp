@@ -24,6 +24,7 @@ Player::Player()
 	_recording = false;
 	_ticksRemaining=0;
 	_lineCounter=0;
+	_loopSong=true;
 	tpb=4;
 	bpm=125;
 	for (int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
@@ -263,30 +264,34 @@ void Player::AdvancePosition()
 
 		if(!_playBlock)
 			_playPosition++;
-		
-#if defined(_WINAMP_PLUGIN_)
-		if (_playPosition >= pSong->playLength)
+		else
 		{
-			_playing= false;
+			_playPosition++;
+			while (_playPosition< pSong->playLength && (!pSong->playOrderSel[_playPosition]))
+				_playPosition++;
 		}
-#else
 		
-		if ((!_playBlock && _playPosition >= pSong->playLength) ||
-			(_playBlock && _playPosition == MAX_SONG_POSITIONS))
-		{	// Don't loop the recording
-			//
-			if (_recording)
+		if ( _playPosition >= pSong->playLength)
+		{	
+			if (_recording) // Don't loop the recording
 			{
 				StopRecording();
 			}
-			_playPosition = 0;
-			if (( _playBlock ) && (pSong->playOrderSel[_playPosition] == false)) {
-				while ( (!pSong->playOrderSel[_playPosition]) &&
-					( _playPosition< pSong->playLength)) _playPosition++;
+			if ( _loopSong )
+			{
+				_playPosition = 0;
+				if (( _playBlock ) && (pSong->playOrderSel[_playPosition] == false))
+				{
+					while ( (!pSong->playOrderSel[_playPosition]) &&
+						( _playPosition< pSong->playLength)) _playPosition++;
+				}
+			}
+			else 
+			{
+				_playing = false;
+				_playBlock =false;
 			}
 		}
-#endif // _WINAMP_PLUGIN_
-		
 		_playPattern = pSong->playOrder[_playPosition];
 	}
 }

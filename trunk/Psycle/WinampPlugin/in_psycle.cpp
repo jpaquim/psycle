@@ -249,6 +249,7 @@ int play(char *fn)
 	_global.pPlayer->Work(_global.pPlayer,val); // Some plugins don't like to receive data without making first a
 								// work call. (for example, Phantom)
 	_global.pPlayer->Start(0,0);
+	_global.pPlayer->_loopSong=false;
 
 	paused=0; worked=false;
 	memset(stream_buffer,0,sizeof(stream_buffer));

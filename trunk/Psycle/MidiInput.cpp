@@ -1017,6 +1017,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom0 + 
 												(((Global::pConfig->_midiTo0 - Global::pConfig->_midiFrom0) * data2)/127));
@@ -1047,6 +1050,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom1 + 
 												(((Global::pConfig->_midiTo1 - Global::pConfig->_midiFrom1) * data2)/127));
@@ -1077,6 +1083,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom2 + 
 												(((Global::pConfig->_midiTo2 - Global::pConfig->_midiFrom2) * data2)/127));
@@ -1105,6 +1114,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom3 + 
 												(((Global::pConfig->_midiTo3 - Global::pConfig->_midiFrom3) * data2)/127));
@@ -1135,6 +1147,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom4 + 
 												(((Global::pConfig->_midiTo4 - Global::pConfig->_midiFrom4) * data2)/127));
@@ -1165,6 +1180,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom5 + 
 												(((Global::pConfig->_midiTo5 - Global::pConfig->_midiFrom5) * data2)/127));
@@ -1195,6 +1213,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom6 + 
 												(((Global::pConfig->_midiTo6 - Global::pConfig->_midiFrom6) * data2)/127));
@@ -1225,6 +1246,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom7 + 
 												(((Global::pConfig->_midiTo7 - Global::pConfig->_midiFrom7) * data2)/127));
@@ -1256,6 +1280,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom8 + 
 												(((Global::pConfig->_midiTo8 - Global::pConfig->_midiFrom8) * data2)/127));
@@ -1287,6 +1314,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom9 + 
 												(((Global::pConfig->_midiTo9 - Global::pConfig->_midiFrom9) * data2)/127));
@@ -1318,6 +1348,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom10 + 
 												(((Global::pConfig->_midiTo10 - Global::pConfig->_midiFrom10) * data2)/127));
@@ -1349,6 +1382,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom11 + 
 												(((Global::pConfig->_midiTo11 - Global::pConfig->_midiFrom11) * data2)/127));
@@ -1380,6 +1416,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom12 + 
 												(((Global::pConfig->_midiTo12 - Global::pConfig->_midiFrom12) * data2)/127));
@@ -1412,6 +1451,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom13 + 
 												(((Global::pConfig->_midiTo13 - Global::pConfig->_midiFrom13) * data2)/127));
@@ -1443,6 +1485,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom14 + 
 												(((Global::pConfig->_midiTo14 - Global::pConfig->_midiFrom14) * data2)/127));
@@ -1474,6 +1519,9 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 												(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
 									break;
 								case 3:
+									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+									break;
+								case 4:
 									((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
 													Global::pConfig->_midiFrom15 + 
 												(((Global::pConfig->_midiTo15 - Global::pConfig->_midiFrom15) * data2)/127));
@@ -1509,8 +1557,11 @@ void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD 
 											(((Global::pConfig->_midiToPit - Global::pConfig->_midiFromPit) * data)/0x3fff));
 								break;
 							case 3:
+								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternMidiCommand(status,(data2<<8) | data1);
+								break;
+							case 4:
 								((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MidiPatternInstrument(
-												Global::pConfig->_midiFromPit + 
+									Global::pConfig->_midiFromPit + 
 											(((Global::pConfig->_midiToPit - Global::pConfig->_midiFromPit) * data)/0x3fff));
 								break;
 							}

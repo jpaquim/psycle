@@ -178,6 +178,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiTypePitComboBox.AddString("twk");
 	m_midiTypePitComboBox.AddString("tws");
 	m_midiTypePitComboBox.AddString("ins");
+	m_midiTypePitComboBox.AddString("mcm");
 	m_midiTypePitComboBox.SetCurSel(Global::pConfig->_midiTypePit);
 	str.Format("%x", Global::pConfig->_midiCommandPit);
 	m_midiCommandPitEdit.SetWindowText(str);
@@ -193,6 +194,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType0ComboBox.AddString("twk");
 	m_midiType0ComboBox.AddString("tws");
 	m_midiType0ComboBox.AddString("ins");
+	m_midiType0ComboBox.AddString("mcm");
 	m_midiType0ComboBox.SetCurSel(Global::pConfig->_midiType0);
 	str.Format("%x", Global::pConfig->_midiCommand0);
 	m_midiCommand0Edit.SetWindowText(str);
@@ -208,6 +210,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType1ComboBox.AddString("twk");
 	m_midiType1ComboBox.AddString("tws");
 	m_midiType1ComboBox.AddString("ins");
+	m_midiType1ComboBox.AddString("mcm");
 	m_midiType1ComboBox.SetCurSel(Global::pConfig->_midiType1);
 	str.Format("%x", Global::pConfig->_midiCommand1);
 	m_midiCommand1Edit.SetWindowText(str);
@@ -223,6 +226,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType2ComboBox.AddString("twk");
 	m_midiType2ComboBox.AddString("tws");
 	m_midiType2ComboBox.AddString("ins");
+	m_midiType2ComboBox.AddString("mcm");
 	m_midiType2ComboBox.SetCurSel(Global::pConfig->_midiType2);
 	str.Format("%x", Global::pConfig->_midiCommand2);
 	m_midiCommand2Edit.SetWindowText(str);
@@ -238,6 +242,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType3ComboBox.AddString("twk");
 	m_midiType3ComboBox.AddString("tws");
 	m_midiType3ComboBox.AddString("ins");
+	m_midiType3ComboBox.AddString("mcm");
 	m_midiType3ComboBox.SetCurSel(Global::pConfig->_midiType3);
 	str.Format("%x", Global::pConfig->_midiCommand3);
 	m_midiCommand3Edit.SetWindowText(str);
@@ -253,6 +258,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType4ComboBox.AddString("twk");
 	m_midiType4ComboBox.AddString("tws");
 	m_midiType4ComboBox.AddString("ins");
+	m_midiType4ComboBox.AddString("mcm");
 	m_midiType4ComboBox.SetCurSel(Global::pConfig->_midiType4);
 	str.Format("%x", Global::pConfig->_midiCommand4);
 	m_midiCommand4Edit.SetWindowText(str);
@@ -268,6 +274,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType5ComboBox.AddString("twk");
 	m_midiType5ComboBox.AddString("tws");
 	m_midiType5ComboBox.AddString("ins");
+	m_midiType5ComboBox.AddString("mcm");
 	m_midiType5ComboBox.SetCurSel(Global::pConfig->_midiType5);
 	str.Format("%x", Global::pConfig->_midiCommand5);
 	m_midiCommand5Edit.SetWindowText(str);
@@ -283,6 +290,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType6ComboBox.AddString("twk");
 	m_midiType6ComboBox.AddString("tws");
 	m_midiType6ComboBox.AddString("ins");
+	m_midiType6ComboBox.AddString("mcm");
 	m_midiType6ComboBox.SetCurSel(Global::pConfig->_midiType6);
 	str.Format("%x", Global::pConfig->_midiCommand6);
 	m_midiCommand6Edit.SetWindowText(str);
@@ -298,6 +306,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType7ComboBox.AddString("twk");
 	m_midiType7ComboBox.AddString("tws");
 	m_midiType7ComboBox.AddString("ins");
+	m_midiType7ComboBox.AddString("mcm");
 	m_midiType7ComboBox.SetCurSel(Global::pConfig->_midiType7);
 	str.Format("%x", Global::pConfig->_midiCommand7);
 	m_midiCommand7Edit.SetWindowText(str);
@@ -313,6 +322,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType8ComboBox.AddString("twk");
 	m_midiType8ComboBox.AddString("tws");
 	m_midiType8ComboBox.AddString("ins");
+	m_midiType8ComboBox.AddString("mcm");
 	m_midiType8ComboBox.SetCurSel(Global::pConfig->_midiType8);
 	str.Format("%x", Global::pConfig->_midiCommand8);
 	m_midiCommand8Edit.SetWindowText(str);
@@ -328,6 +338,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType9ComboBox.AddString("twk");
 	m_midiType9ComboBox.AddString("tws");
 	m_midiType9ComboBox.AddString("ins");
+	m_midiType9ComboBox.AddString("mcm");
 	m_midiType9ComboBox.SetCurSel(Global::pConfig->_midiType9);
 	str.Format("%x", Global::pConfig->_midiCommand9);
 	m_midiCommand9Edit.SetWindowText(str);
@@ -343,6 +354,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType10ComboBox.AddString("twk");
 	m_midiType10ComboBox.AddString("tws");
 	m_midiType10ComboBox.AddString("ins");
+	m_midiType10ComboBox.AddString("mcm");
 	m_midiType10ComboBox.SetCurSel(Global::pConfig->_midiType10);
 	str.Format("%x", Global::pConfig->_midiCommand10);
 	m_midiCommand10Edit.SetWindowText(str);
@@ -358,6 +370,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType11ComboBox.AddString("twk");
 	m_midiType11ComboBox.AddString("tws");
 	m_midiType11ComboBox.AddString("ins");
+	m_midiType11ComboBox.AddString("mcm");
 	m_midiType11ComboBox.SetCurSel(Global::pConfig->_midiType11);
 	str.Format("%x", Global::pConfig->_midiCommand11);
 	m_midiCommand11Edit.SetWindowText(str);
@@ -373,6 +386,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType12ComboBox.AddString("twk");
 	m_midiType12ComboBox.AddString("tws");
 	m_midiType12ComboBox.AddString("ins");
+	m_midiType12ComboBox.AddString("mcm");
 	m_midiType12ComboBox.SetCurSel(Global::pConfig->_midiType12);
 	str.Format("%x", Global::pConfig->_midiCommand12);
 	m_midiCommand12Edit.SetWindowText(str);
@@ -388,6 +402,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType13ComboBox.AddString("twk");
 	m_midiType13ComboBox.AddString("tws");
 	m_midiType13ComboBox.AddString("ins");
+	m_midiType13ComboBox.AddString("mcm");
 	m_midiType13ComboBox.SetCurSel(Global::pConfig->_midiType13);
 	str.Format("%x", Global::pConfig->_midiCommand13);
 	m_midiCommand13Edit.SetWindowText(str);
@@ -403,6 +418,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType14ComboBox.AddString("twk");
 	m_midiType14ComboBox.AddString("tws");
 	m_midiType14ComboBox.AddString("ins");
+	m_midiType14ComboBox.AddString("mcm");
 	m_midiType14ComboBox.SetCurSel(Global::pConfig->_midiType14);
 	str.Format("%x", Global::pConfig->_midiCommand14);
 	m_midiCommand14Edit.SetWindowText(str);
@@ -418,6 +434,7 @@ BOOL CMidiInputDlg::OnInitDialog()
 	m_midiType15ComboBox.AddString("twk");
 	m_midiType15ComboBox.AddString("tws");
 	m_midiType15ComboBox.AddString("ins");
+	m_midiType15ComboBox.AddString("mcm");
 	m_midiType15ComboBox.SetCurSel(Global::pConfig->_midiType15);
 	str.Format("%x", Global::pConfig->_midiCommand15);
 	m_midiCommand15Edit.SetWindowText(str);

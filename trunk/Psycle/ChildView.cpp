@@ -284,6 +284,8 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
 	ON_COMMAND(ID_EDIT_DELETE, patDelete)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
+	ON_COMMAND(ID_CONFIGURATION_LOOPPLAYBACK, OnConfigurationLoopplayback)
+	ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_LOOPPLAYBACK, OnUpdateConfigurationLoopplayback)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -3423,3 +3425,16 @@ void CChildView::DoMacPropDialog(int propMac)
 }
 
 
+
+void CChildView::OnConfigurationLoopplayback() 
+{
+	Global::pPlayer->_loopSong = !Global::pPlayer->_loopSong;
+}
+
+void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) 
+{
+	if (Global::pPlayer->_loopSong)
+		pCmdUI->SetCheck(1);
+	else
+		pCmdUI->SetCheck(0);	
+}

@@ -20,14 +20,11 @@ X low priority
 * New and unsorted and untested
 -------------------------------
 
-* default pattern length doesnt seem to work
-* <+Schitz0> Hey, I notice that whenever I play a song in psycle it always loops, where can I change that?
 * screen should be made so 800x600 works
 + <alk> some bastards want keyrepeat for notes back
 * <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
 
 * sometimes even tho edit is on I cant enter notes, fixed by changing to machine screen and back, alt tabbing to another app and back
-* play block of patterns broken
 ? in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 + volume slide in sampler, so that you can cut the vol of a sample without a click
 + option to not move cursor when pasting
@@ -42,9 +39,6 @@ X low priority
 + Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
 + 'Free wave' button that sets driver to silent
 + release audio when psycle looses focus option
-! Dunno if i mentioned this before: reaktorvst v3.05 crashes psycle when it generates the 'CPU overload' popup
-! Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions 
-
 
 ?+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
 	[50MB to clipboard? ehem...]
@@ -53,7 +47,6 @@ X low priority
 	[And we will get lots of people again of why does psycle do that]
 ?! Dunno if i mentioned this before: reaktorvst v3.05 crashes psycle when it generates the 'CPU overload' popup
 ! Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
-
 
 
 
@@ -82,6 +75,7 @@ X low priority
 	it works fine?
 
 ** <alk_> when Psycle is open hibernate does not work (windows crashes)
+
 
 * Machines
 ------------

@@ -2131,6 +2131,8 @@ BEGIN
     BEGIN
         MENUITEM "Free Audio\tCtrl+F",          ID_CONFIGURATION_FREEAUDIO
         MENUITEM "AutoStop Machines",           ID_AUTOSTOP
+        MENUITEM "Loop Playback",               ID_CONFIGURATION_LOOPPLAYBACK
+
         MENUITEM SEPARATOR
         MENUITEM "&Settings...",                ID_CONFIGURATION_SETTINGS
     END
@@ -2596,6 +2598,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_VIEW_SEQUENCER       "Show/Hide Sequencer Bar"
+    ID_CONFIGURATION_LOOPPLAYBACK 
+                            "Switches between looping the song,once it has finished, or stop."
 END
 
 #endif    // Neutral (Default) resources

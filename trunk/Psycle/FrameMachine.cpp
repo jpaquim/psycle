@@ -593,11 +593,11 @@ void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	const int outnote = cmd.GetNote();
 	if(outnote>=0)
 	{
-		if ( _pMachine->_mode == GENERATOR ||Global::pConfig->_notesToEffects)
+		if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
 		{
 			Global::pInputHandler->StopNote(outnote,true,_pMachine);
 		}
-		else Global::pInputHandler->StopNote(outnote,true);
+		else Global::pInputHandler->StopNote(outnote,true,NULL);
 	}
 
 //	wndView->KeyUp(nChar, nRepCnt, nFlags);
