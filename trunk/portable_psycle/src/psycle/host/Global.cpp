@@ -4,7 +4,6 @@
 #include <Player.h>
 #include <Dsp.h>
 #include <Configuration.h>
-#include "LoggingWindow.h"
 #include <operating_system/logger.h>
 #if !defined _WINAMP_PLUGIN_
 	#include <InputHandler.h>

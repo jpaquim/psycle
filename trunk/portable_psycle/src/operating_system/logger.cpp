@@ -4,18 +4,18 @@
 #include <operating_system/logger.h>
 #include <operating_system/exceptions/code_description.h>
 #if defined OPERATING_SYSTEM__MICROSOFT
-#include <io.h>
-#include <fcntl.h>
-/*
-#if !defined WINVER
-/// mswin2k
-#define WINVER 0x0500
-#endif
-#if !defined _WIN32_WINNT
-/// mswin2k
-#define _WIN32_WINNT 0x0500
-#endif
-*/
+	#include <io.h>
+	#include <fcntl.h>
+	/*
+	#if !defined WINVER
+		/// mswin2k
+		#define WINVER 0x0500
+	#endif
+	#if !defined _WIN32_WINNT
+		/// mswin2k
+		#define _WIN32_WINNT 0x0500
+	#endif
+	*/
 #endif
 namespace operating_system
 {
@@ -23,10 +23,11 @@ namespace operating_system
 	logger logger::default_logger_(logger::default_threshold_level(), std::cout);
 
 
-	bool console::got_a_console_window_=false;
+	bool console::got_a_console_window_ = false;
+
 	console::console()
 	{
-		got_a_console_window_=false;
+		got_a_console_window_ = false;
 	}
 
 	console::~console()
@@ -36,11 +37,10 @@ namespace operating_system
 
 	void console::close()
 	{
-#if defined OPERATING_SYSTEM__MICROSOFT
-		if(got_a_console_window_)
-			FreeConsole();
-		got_a_console_window_=false;
-#endif
+		#if defined OPERATING_SYSTEM__MICROSOFT
+			if(got_a_console_window_) ::FreeConsole();
+			got_a_console_window_ = false;
+		#endif
 	}
 
 	void console::open() throw(exception)
@@ -48,9 +48,9 @@ namespace operating_system
 		assert(!got_a_console_window_);
 		close();
 
-#if !defined OPERATING_SYSTEM__MICROSOFT
-		// nothing to do when the operating system is not microsoft's
-#else
+		#if !defined OPERATING_SYSTEM__MICROSOFT
+			// nothing to do when the operating system is not microsoft's
+		#else
 		{
 			::HANDLE output_handle=0;
 			if(!AllocConsole() || !(output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE))) {
@@ -89,7 +89,7 @@ namespace operating_system
 				::SetConsoleCursorInfo(output_handle, &cursor);
 			}
 		}
-#endif
+		#endif
 	}
 
 	void console::log(int level, const std::string & string)
