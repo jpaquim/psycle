@@ -65,29 +65,22 @@ BOOL CPsycleApp::InitInstance()
 	CMainFrame* pFrame = new CMainFrame;
 	m_pMainWnd = pFrame;
 	
-	if (!Global::pConfig->Initialized())
-	{
-		if (!Global::pConfig->Read())
+		if (!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 		{
+			Global::pConfig->_initialized = false;
 			CConfigDlg dlg("Psycle configuration");
-			Global::pConfig->_outputDriverIndex=1; // Set waveout as default.
 			dlg.Init(Global::pConfig);
 			if (dlg.DoModal() == IDOK)
 			{
 				pFrame->m_wndView._outputActive = true;
+				Global::pConfig->_initialized = true;
 			}
 		}
 		else
 		{
 			pFrame->m_wndView._outputActive = true;
 		}
-		pFrame->m_wndView.LoadMachineSkin();
-		pFrame->m_wndView.LoadPatternHeaderSkin();
-		pFrame->m_wndView.RecalcMetrics();
-		pFrame->m_wndView.RecalculateColourGrid();
 		
-	}
-	// LOAD THE REGISTRY SETTINGS FIRST UNLESS YOU WANT BIG TROUBLE
 	// create and load the frame with its resources
 	// For some reason, there'a First-Chance exception when
 	// another pFrame member is called after this LoadFrame
@@ -101,6 +94,10 @@ BOOL CPsycleApp::InitInstance()
 	tIcon=LoadIcon(IDR_MAINFRAME);
 	pFrame->SetIcon(tIcon,false);
 	
+	pFrame->m_wndView.LoadMachineSkin();
+	pFrame->m_wndView.LoadPatternHeaderSkin();
+	pFrame->m_wndView.RecalcMetrics();
+	pFrame->m_wndView.RecalculateColourGrid();
 	// The one and only window has been initialized, so show and update it.
 	pFrame->ShowWindow(SW_MAXIMIZE);
 	

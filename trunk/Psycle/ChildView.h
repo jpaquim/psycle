@@ -552,6 +552,11 @@ public:
 	afx_msg void OnHelpReadme();
 	afx_msg void OnHelpTweaking();
 	afx_msg void OnHelpWhatsnew();
+	afx_msg void OnConfigurationOpenonlydirectoriesconfig();
+	afx_msg void OnConfigurationOpenonlyinputoutputconfig();
+	afx_msg void OnConfigurationOpenonlykeyboardconfig();
+	afx_msg void OnConfigurationOpenonlymidiinputconfig();
+	afx_msg void OnConfigurationOpenonlyvisualconfig();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

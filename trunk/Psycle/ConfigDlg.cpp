@@ -42,7 +42,7 @@ END_MESSAGE_MAP()
 
 
 void CConfigDlg::Init(
-	Configuration* pConfig) 
+	Configuration* pConfig,int dlgnum) 
 {
 	_pConfig = pConfig;
 	_skinDlg._patternSeparatorColor = pConfig->pvc_separator;
@@ -143,11 +143,11 @@ void CConfigDlg::Init(
 		_keyDlg._skinPathBuf[0] = 0;
 	}
 	
-	AddPage(&_skinDlg);
-	AddPage(&_keyDlg);
-	AddPage(&_dirDlg);
-	AddPage(&_outputDlg);
-	AddPage(&_midiDlg);
+	if ( dlgnum == 1 || dlgnum == 0 ) AddPage(&_skinDlg);
+	if ( dlgnum == 2 || dlgnum == 0 ) AddPage(&_keyDlg);
+	if ( dlgnum == 3 || dlgnum == 0 ) AddPage(&_dirDlg);
+	if ( dlgnum == 4 || dlgnum == 0 ) AddPage(&_outputDlg);
+	if ( dlgnum == 5 || dlgnum == 0 ) AddPage(&_midiDlg);
 }
 
 int CConfigDlg::DoModal() 
@@ -246,7 +246,7 @@ int CConfigDlg::DoModal()
 		{
 			strcpy(_pConfig->pattern_header_skin, _skinDlg._pattern_header_skin);
 			// LOAD HEADER SKIN
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
+			if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 		}
 
 		if ((strcmp(_pConfig->generator_fontface, _skinDlg._generator_fontface)) ||
@@ -319,10 +319,10 @@ int CConfigDlg::DoModal()
 		{
 			strcpy(_pConfig->machine_skin, _skinDlg._machine_skin);
 			// LOAD HEADER SKIN
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
+			if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
 		}
 
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
+		if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
 
 		_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
 		_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;	// MIDI IMPLEMENTATION
@@ -356,8 +356,11 @@ int CConfigDlg::DoModal()
 			_pConfig->SetSkinDir(_dirDlg._skinPathBuf);
 		}
 
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
-		((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
+		if (_pConfig->Initialized() ) 
+		{
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
+			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
+		}
 	}
 	return retVal;
 }

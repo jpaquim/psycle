@@ -31,6 +31,7 @@ CDirectoryDlg::CDirectoryDlg() : CPropertyPage(CDirectoryDlg::IDD)
 	_vstPathBuf[0] = '\0';
 	_skinPathChanged = false;
 	_skinPathBuf[0] = '\0';
+	initializingDlg = false;
 }
 
 CDirectoryDlg::~CDirectoryDlg()
@@ -150,38 +151,51 @@ bool CDirectoryDlg::BrowseForFolder(char *rpath)
 BOOL CDirectoryDlg::OnInitDialog() 
 {
 	CPropertyPage::OnInitDialog();
+	initializingDlg=true;
 	m_instEdit.SetWindowText(_instPathBuf);
 	m_songEdit.SetWindowText(_songPathBuf);
 	m_pluginEdit.SetWindowText(_pluginPathBuf);
 	m_vstEdit.SetWindowText(_vstPathBuf);
 	m_skinEdit.SetWindowText(_skinPathBuf);
-
+	initializingDlg=false;
+	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CDirectoryDlg::OnChangeSongedit() 
 {
+	if (!initializingDlg)
+	{
 		_songPathChanged = true;
 		m_songEdit.GetWindowText(_songPathBuf,MAX_PATH);
+	}
 }
 
 void CDirectoryDlg::OnChangeInstedit() 
 {
+	if (!initializingDlg)
+	{
 		_instPathChanged = true;
 		m_instEdit.GetWindowText(_instPathBuf,MAX_PATH);
-}
+	}
 
 void CDirectoryDlg::OnChangePluginedit() 
 {
+	if (!initializingDlg)
+	{
 		_pluginPathChanged = true;
 		m_pluginEdit.GetWindowText(_pluginPathBuf,MAX_PATH);
+	}
 }
 
 void CDirectoryDlg::OnChangeVstedit() 
 {
+	if (!initializingDlg)
+	{
 		_vstPathChanged = true;
 		m_vstEdit.GetWindowText(_vstPathBuf,MAX_PATH);
+	}
 }
 
 void CDirectoryDlg::OnBrowseSkin() 
@@ -195,6 +209,9 @@ void CDirectoryDlg::OnBrowseSkin()
 
 void CDirectoryDlg::OnChangeSkinedit() 
 {
-	_skinPathChanged = true;
-	m_skinEdit.GetWindowText(_skinPathBuf,MAX_PATH);
+	if (!initializingDlg)
+	{
+		_skinPathChanged = true;
+		m_skinEdit.GetWindowText(_skinPathBuf,MAX_PATH);
+	}
 }
