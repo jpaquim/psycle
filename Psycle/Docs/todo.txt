@@ -1,3 +1,8 @@
+*Noteoffs on edit with keyboard
+-undo/redo
+-copy paste in edit menu
+-more midi control commands
+
 	*Flanger feedback slider
 	 Instrument filter envelope slider. (check differences with finetune slider)
 
@@ -7,8 +12,8 @@
 
 
 
--- Psycle 1.67 (If it Comes. If not, many of these will come with Psycle 2) --
-------------------------------------------------------------------------------
+-- Psycle 1.67
+--------------
 
 * Sampler Machine/Wave Ed:
 --------------------------

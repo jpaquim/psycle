@@ -329,12 +329,12 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	entry->_inst = _pSong->auxcolSelected;
 	if ( note < 120)
 	{
-		if (Global::pConfig->_midiRecordVelocity)
+		if (Global::pConfig->_midiRecordVel)
 		{
 			// command
-			entry->_cmd = Global::pConfig->_midiVelocityCommand;
-			entry->_parameter = Global::pConfig->_midiVelocityFrom + 
-								(((Global::pConfig->_midiVelocityTo - Global::pConfig->_midiVelocityFrom) * velocity)/127);
+			entry->_cmd = Global::pConfig->_midiCommandVel;
+			entry->_parameter = Global::pConfig->_midiFromVel + 
+								(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
 			if (entry->_parameter > 255) entry->_parameter = 255;
 			else if (entry->_parameter < 0) entry->_parameter = 0;
 		}					

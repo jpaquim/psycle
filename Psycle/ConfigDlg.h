@@ -10,6 +10,7 @@
 #include "DirectoryDlg.h"
 #include "SkinDlg.h"
 #include "OutputDlg.h"
+#include "MidiInputDlg.h"
 #include "Configuration.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,7 @@ public:
 	CDirectoryDlg _dirDlg;
 	CSkinDlg _skinDlg;
 	COutputDlg _outputDlg;
+	CMidiInputDlg _midiDlg;
 
 // Operations
 public:

@@ -46,23 +46,123 @@ public:
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
 
-	bool _midiRecordVelocity;
-	bool _midiRecordPitchBend;
-	bool _midiRecordModWheel;
+	bool _midiRecordVel;
+	int _midiCommandVel;
+	int _midiFromVel;
+	int _midiToVel;
 
-	int _midiVelocityCommand;
-	int _midiVelocityFrom;
-	int _midiVelocityTo;
+	bool _midiRecord0;
+	int _midiType0;
+	int _midiMessage0;
+	int _midiCommand0;
+	int _midiFrom0;
+	int _midiTo0;
 
-	int _midiPitchBendType;
-	int _midiPitchBendCommand;
-	int _midiPitchBendFrom;
-	int _midiPitchBendTo;
+	bool _midiRecord1;
+	int _midiType1;
+	int _midiMessage1;
+	int _midiCommand1;
+	int _midiFrom1;
+	int _midiTo1;
 
-	int _midiModWheelType;
-	int _midiModWheelCommand;
-	int _midiModWheelFrom;
-	int _midiModWheelTo;
+	bool _midiRecord2;
+	int _midiType2;
+	int _midiMessage2;
+	int _midiCommand2;
+	int _midiFrom2;
+	int _midiTo2;
+
+	bool _midiRecord3;
+	int _midiType3;
+	int _midiMessage3;
+	int _midiCommand3;
+	int _midiFrom3;
+	int _midiTo3;
+
+	bool _midiRecord4;
+	int _midiType4;
+	int _midiMessage4;
+	int _midiCommand4;
+	int _midiFrom4;
+	int _midiTo4;
+
+	bool _midiRecord5;
+	int _midiType5;
+	int _midiMessage5;
+	int _midiCommand5;
+	int _midiFrom5;
+	int _midiTo5;
+
+	bool _midiRecord6;
+	int _midiType6;
+	int _midiMessage6;
+	int _midiCommand6;
+	int _midiFrom6;
+	int _midiTo6;
+
+	bool _midiRecord7;
+	int _midiType7;
+	int _midiMessage7;
+	int _midiCommand7;
+	int _midiFrom7;
+	int _midiTo7;
+
+	bool _midiRecord8;
+	int _midiType8;
+	int _midiMessage8;
+	int _midiCommand8;
+	int _midiFrom8;
+	int _midiTo8;
+
+	bool _midiRecord9;
+	int _midiType9;
+	int _midiMessage9;
+	int _midiCommand9;
+	int _midiFrom9;
+	int _midiTo9;
+
+	bool _midiRecord10;
+	int _midiType10;
+	int _midiMessage10;
+	int _midiCommand10;
+	int _midiFrom10;
+	int _midiTo10;
+
+	bool _midiRecord11;
+	int _midiType11;
+	int _midiMessage11;
+	int _midiCommand11;
+	int _midiFrom11;
+	int _midiTo11;
+
+	bool _midiRecord12;
+	int _midiType12;
+	int _midiMessage12;
+	int _midiCommand12;
+	int _midiFrom12;
+	int _midiTo12;
+
+	bool _midiRecord13;
+	int _midiType13;
+	int _midiMessage13;
+	int _midiCommand13;
+	int _midiFrom13;
+	int _midiTo13;
+
+	bool _midiRecord14;
+	int _midiType14;
+	int _midiMessage14;
+	int _midiCommand14;
+	int _midiFrom14;
+	int _midiTo14;
+
+	bool _midiRecord15;
+	int _midiType15;
+	int _midiMessage15;
+	int _midiCommand15;
+	int _midiFrom15;
+	int _midiTo15;
+
 
 	int _numOutputDrivers;
 	int _outputDriverIndex;
