@@ -135,7 +135,6 @@ public:
 	void BlockInsChange(int x);
 	void BlockGenChange(int x);
 	int SongIncBpm(int x);
-	void SetPatStep(int stp);
 	void ShowSwingFillDlg(bool bTrackMode);
 
 	void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes
@@ -156,8 +155,6 @@ public:
 
 	void PlayCurrentRow(void);
 	void PlayCurrentNote(void);
-
-	void ShiftOctave(int x);
 
 	void patCopy();
 	void patPaste();
@@ -427,6 +424,11 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnMButtonDown( UINT nFlags, CPoint point );
 	afx_msg void OnUpdatePatternCutCopyPaste(CCmdUI* pCmdUI);
+	afx_msg void OnFileSaveaudio();
+	afx_msg void OnHelpKeybtxt();
+	afx_msg void OnHelpReadme();
+	afx_msg void OnHelpTweaking();
+	afx_msg void OnHelpWhatsnew();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -838,18 +838,6 @@ void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
 	if (updateDisplay) Repaint(DMCursor);
 }
 
-//////////////////////////////////////////////////////////////////////
-// Function that shift the current editing octave
-
-void CChildView::ShiftOctave(int x)
-{
-
-	_pSong->currentOctave += x;
-	if ( _pSong->currentOctave < 0 )	 { _pSong->currentOctave = 0; }
-	else if ( _pSong->currentOctave > 8 ){ _pSong->currentOctave = 8; }
-
-//	Repaint(DMPatternHeader);
-}
 
 //////////////////////////////////////////////////////////////////////
 // Pattern Modifier functions ( Copy&paste , Transpose, ... )

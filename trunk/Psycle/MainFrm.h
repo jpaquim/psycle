@@ -87,6 +87,7 @@ private:
 #endif
 
 public:  // control bar embedded members
+	int GetNumFromCombo(CComboBox* cb);
 	void ChangeIns(int i);
 	void ChangeGen(int i);
 	CStatusBar  m_wndStatusBar;
@@ -98,7 +99,8 @@ public:  // control bar embedded members
 	CReBar      m_wndReBar;
 	
 	void EditQuantizeChange(int diff);
-
+	void ShiftOctave(int x);
+	
 	CInstrumentEditor	m_wndInst;
 	CInfoDlg	m_wndInfo;
 	CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
@@ -190,7 +192,8 @@ protected:
 	afx_msg void OnUpdateIndicatorFollow(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateIndicatorTweaks(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateIndicatorOctave(CCmdUI *pCmdUI);
+	afx_msg void OnCloseupCombooctave();
+	afx_msg void OnSelchangeCombooctave();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

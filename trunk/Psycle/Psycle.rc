@@ -114,70 +114,73 @@ END
 // Dialog
 //
 
-IDD_PSYBAR DIALOGEX 0, 0, 524, 16
+IDD_PSYBAR DIALOGEX 0, 0, 533, 16
 STYLE WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    CTEXT           "Tempo",IDC_STATIC,67,4,22,8,SS_CENTERIMAGE
-    PUSHBUTTON      "<<",IDC_BUTTON15,94,2,20,12,BS_BITMAP | BS_CENTER | 
-                    BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      "<",IDC_BUTTON14,114,2,20,12,BS_BITMAP | BS_CENTER | 
-                    BS_VCENTER,WS_EX_STATICEDGE
-    CTEXT           "",IDC_BPMLABEL,134,2,32,12,SS_CENTERIMAGE | SS_SUNKEN
-    PUSHBUTTON      ">",IDC_BUTTON1,166,2,20,12,BS_BITMAP | BS_CENTER | 
-                    BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      ">>",IDC_BUTTON3,186,2,20,12,BS_BITMAP | BS_CENTER | 
-                    BS_VCENTER,WS_EX_STATICEDGE
-    LTEXT           "Ticks per beat",IDC_STATIC,211,4,45,8,SS_CENTERIMAGE | 
+    RTEXT           "Tracks",IDC_STATIC,4,5,21,8
+    COMBOBOX        IDC_TRACKCOMBO,28,2,29,158,CBS_DROPDOWNLIST | WS_VSCROLL
+    CTEXT           "Tempo",IDC_STATIC,63,4,22,8,SS_CENTERIMAGE
+    PUSHBUTTON      "<<",IDC_BUTTON15,87,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    PUSHBUTTON      "<",IDC_BUTTON14,103,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    CTEXT           "",IDC_BPMLABEL,120,2,24,12,SS_CENTERIMAGE | SS_SUNKEN
+    PUSHBUTTON      ">",IDC_BUTTON1,145,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    PUSHBUTTON      ">>",IDC_BUTTON3,162,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "Lines per beat",IDC_STATIC,183,4,45,8,SS_CENTERIMAGE | 
                     NOT WS_GROUP
-    PUSHBUTTON      "<",IDC_DEC_TPB,260,2,20,12,BS_BITMAP | BS_CENTER | 
-                    BS_VCENTER,WS_EX_STATICEDGE
-    CTEXT           "",IDC_TPBLABEL,280,2,24,12,SS_CENTERIMAGE | SS_SUNKEN
-    PUSHBUTTON      ">",IDC_INC_TPB,304,2,20,12,BS_BITMAP | BS_CENTER | 
-                    BS_VCENTER,WS_EX_STATICEDGE
-    LTEXT           "VU",IDC_STATIC,335,4,10,8
-    CONTROL         "",IDC_LVUM,"Static",SS_BLACKRECT | SS_SUNKEN,348,3,152,
+    PUSHBUTTON      "<",IDC_DEC_TPB,231,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    CTEXT           "",IDC_TPBLABEL,248,2,16,12,SS_CENTERIMAGE | SS_SUNKEN
+    PUSHBUTTON      ">",IDC_INC_TPB,265,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "VU",IDC_STATIC,345,4,10,8
+    CONTROL         "",IDC_LVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,3,152,
                     4
-    CONTROL         "",IDC_RVUM,"Static",SS_BLACKRECT | SS_SUNKEN,348,10,152,
+    CONTROL         "",IDC_RVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,10,152,
                     4
-    CONTROL         "",IDC_FRAMECLIP,"Static",SS_BLACKRECT | SS_SUNKEN,502,3,
+    CONTROL         "",IDC_FRAMECLIP,"Static",SS_BLACKRECT | SS_SUNKEN,512,3,
                     7,11
-    PUSHBUTTON      "",IDC_CLIPBUT,511,3,8,11,0,WS_EX_STATICEDGE
-    RTEXT           "Tracks",IDC_STATIC,5,5,21,8
-    COMBOBOX        IDC_TRACKCOMBO,31,2,29,158,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
+    PUSHBUTTON      "",IDC_CLIPBUT,521,3,8,11,NOT WS_TABSTOP,
+                    WS_EX_STATICEDGE
+    LTEXT           "Octave",IDC_STATIC,286,4,24,8
+    COMBOBOX        IDC_COMBOOCTAVE,311,2,28,132,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_PSYBAR2 DIALOGEX 0, 0, 537, 17
+IDD_PSYBAR2 DIALOGEX 0, 0, 532, 17
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Pattern Step",IDC_STATIC,6,4,43,8
-    COMBOBOX        IDC_SSCOMBO2,51,3,24,158,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Pattern Step",IDC_STATIC,5,4,43,8
+    COMBOBOX        IDC_SSCOMBO2,50,3,24,158,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,80,3,1,12,
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,78,3,1,12,
                     WS_EX_STATICEDGE
-    COMBOBOX        IDC_BAR_GENFX,86,3,52,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
-    PUSHBUTTON      "<",IDC_B_DECGEN,216,3,10,13,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      "<",IDC_B_DECGEN,167,3,10,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      ">",IDC_B_INCGEN,226,3,10,13,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      ">",IDC_B_INCGEN,177,3,10,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    COMBOBOX        IDC_BAR_COMBOGEN,140,3,74,158,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_BAR_COMBOGEN,83,3,82,158,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "<",IDC_B_DECWAV,392,3,10,13,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      "<",IDC_B_DECWAV,389,3,10,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    PUSHBUTTON      ">",IDC_B_INCWAV,402,3,10,13,BS_BITMAP | BS_CENTER | 
+    PUSHBUTTON      ">",IDC_B_INCWAV,399,3,10,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER,WS_EX_STATICEDGE
-    COMBOBOX        IDC_BAR_COMBOINS,295,3,95,158,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_BAR_COMBOINS,292,3,95,158,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Load",IDC_LOADWAVE,415,3,24,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Edit",IDC_EDITWAVE,465,3,24,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Load",IDC_LOADWAVE,412,3,24,12,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "Edit",IDC_EDITWAVE,464,3,24,12,0,WS_EX_STATICEDGE
     PUSHBUTTON      "Wave Ed",IDC_WAVEBUT,489,3,37,12,0,WS_EX_STATICEDGE
-    PUSHBUTTON      "Save",IDC_SAVEWAVE,440,3,24,12,0,WS_EX_STATICEDGE
-    COMBOBOX        IDC_AUXSELECT,247,3,45,46,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    PUSHBUTTON      "Save",IDC_SAVEWAVE,438,3,24,12,0,WS_EX_STATICEDGE
+    COMBOBOX        IDC_AUXSELECT,244,3,45,46,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,241,3,1,12,
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,238,3,1,12,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Gear Rack",IDC_EDITMACS,190,3,43,12,WS_DISABLED,
                     WS_EX_STATICEDGE
 END
 
@@ -248,14 +251,14 @@ IDD_INFO DIALOGEX 0, 0, 316, 239
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle CPU/DSP Performance Monitor"
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     GROUPBOX        "Core Info",IDC_STATIC,7,7,303,81
     GROUPBOX        "Gear info and DSP CPU performance",IDC_STATIC,7,89,303,
                     143
     CONTROL         "List2",IDC_MACHINELIST,"SysListView32",LVS_REPORT | 
                     LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,12,101,293,130
+                    WS_TABSTOP,12,101,293,125
     GROUPBOX        "CPU Performance Monitor",IDC_STATIC,185,16,120,68
     CTEXT           "Total",IDC_STATIC,192,44,32,8,SS_CENTERIMAGE
     CTEXT           "",IDC_CPUIDLE_LABEL,232,44,40,10,SS_CENTERIMAGE | 
@@ -347,7 +350,7 @@ IDD_PATDLG DIALOGEX 0, 0, 186, 50
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Pattern Properties"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Name",IDC_STATIC,7,5,20,12,SS_CENTERIMAGE
     EDITTEXT        IDC_EDIT1,28,5,96,12,ES_AUTOHSCROLL
@@ -1124,8 +1127,8 @@ FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Follow song",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX,5,251,
                     62,8
-    LISTBOX         IDC_SEQLIST,2,5,38,188,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
-                    LBS_EXTENDEDSEL | LBS_DISABLENOSCROLL | WS_VSCROLL
+    LISTBOX         IDC_SEQLIST,2,5,38,190,LBS_SORT | LBS_EXTENDEDSEL | 
+                    LBS_DISABLENOSCROLL | WS_VSCROLL
     PUSHBUTTON      "+",IDC_INCSHORT,43,5,23,12,BS_BITMAP | BS_CENTER | 
                     BS_VCENTER | NOT WS_TABSTOP,WS_EX_STATICEDGE
     PUSHBUTTON      "-",IDC_DECSHORT,43,21,23,12,BS_BITMAP | BS_CENTER | 
@@ -1320,13 +1323,13 @@ GUIDELINES DESIGNINFO DISCARDABLE
 BEGIN
     IDD_PSYBAR, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 517
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 529
     END
 
     IDD_PSYBAR2, DIALOG
     BEGIN
-        RIGHTMARGIN, 527
+        RIGHTMARGIN, 526
     END
 
     IDD_WAVEOUTCONFIG, DIALOG
@@ -1655,15 +1658,16 @@ BEGIN
         MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
         MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
         MENUITEM "Save &as...",                 ID_FILE_SAVESONG
-        POPUP "Import"
+        MENUITEM "Save as Au&dio File...",      ID_FILE_SAVEAUDIO
+        POPUP "I&mport"
         BEGIN
-            MENUITEM "XM File",                     ID_FILE_IMPORT_XMFILE
-            MENUITEM "IT File",                     ID_FILE_IMPORT_ITFILE
+            MENUITEM "&XM File",                    ID_FILE_IMPORT_XMFILE
+            MENUITEM "&IT File",                    ID_FILE_IMPORT_ITFILE
         END
         MENUITEM SEPARATOR
-        MENUITEM "Song properties...",          ID_FILE_SONGPROPERTIES
+        MENUITEM "Song &properties",            ID_FILE_SONGPROPERTIES
         MENUITEM SEPARATOR
-        POPUP "Recent Files"
+        POPUP "&Recent Files"
         BEGIN
             MENUITEM "No recent file",              ID_FILE_RECENT_NONE
             , GRAYED
@@ -1676,9 +1680,9 @@ BEGIN
         MENUITEM "&Undo",                       ID_EDIT_UNDO
         MENUITEM "&Redo",                       ID_EDIT_REDO
         MENUITEM SEPARATOR
-        MENUITEM "Pattern Cu&t",                ID_EDIT_CUT
-        MENUITEM "Pattern &Copy",               ID_EDIT_COPY
-        MENUITEM "Pattern &Paste",              ID_EDIT_PASTE
+        MENUITEM "Pattern Cu&t\tCTRL+F3",       ID_EDIT_CUT
+        MENUITEM "Pattern &Copy\tCTRL+F4",      ID_EDIT_COPY
+        MENUITEM "Pattern &Paste\tCTRL+F5",     ID_EDIT_PASTE
         MENUITEM "Pattern &Mix Paste",          ID_EDIT_MIXPASTE
         MENUITEM SEPARATOR
         MENUITEM "Sequence Cut",                IDC_SEQCUT
@@ -1697,25 +1701,30 @@ BEGIN
         MENUITEM "Add machine\tF9",             ID_NEWMACHINE
         MENUITEM "Instrument Editor\tF10",      ID_VIEW_INSTRUMENTEDITOR
     END
-    POPUP "Configuration"
+    POPUP "&Configuration"
     BEGIN
         MENUITEM "Free Audio\tCtrl+F",          ID_CONFIGURATION_FREEAUDIO
         MENUITEM "AutoStop Machines",           ID_AUTOSTOP
         MENUITEM SEPARATOR
-        MENUITEM "Settings...",                 ID_CONFIGURATION_SETTINGS
+        MENUITEM "&Settings...",                ID_CONFIGURATION_SETTINGS
         MENUITEM "Configure Keyboard...",       ID_CONFIGURATION_KEYBOARD
     END
-    POPUP "Performance"
+    POPUP "&Performance"
     BEGIN
-        MENUITEM "CPU Monitor...",              ID_CPUPERFORMANCE
-        MENUITEM "MIDI Monitor...",             ID_MIDI_MONITOR
+        MENUITEM "&CPU Monitor...",             ID_CPUPERFORMANCE
+        MENUITEM "&MIDI Monitor...",            ID_MIDI_MONITOR
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "Help\tF1",                    ID_PSYHELP, GRAYED
+        MENUITEM "&Help\tF1",                    ID_PSYHELP, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&keys.txt",                    ID_HELP_KEYBTXT
+        MENUITEM "&ReadMe.txt",                  ID_HELP_README
+        MENUITEM "&Tweakings and Commands.txt",  ID_HELP_TWEAKING
+        MENUITEM "&WhatsNew.txt",                ID_HELP_WHATSNEW
         MENUITEM SEPARATOR
         MENUITEM "&About Psycle...",            ID_ABOUTPSYCLE
-        MENUITEM "Greetings",                   ID_HELP_SALUDOS
+        MENUITEM "&Greetings",                   ID_HELP_SALUDOS
     END
 END
 
@@ -1802,10 +1811,6 @@ BEGIN
 0x3531, "\000" 
     IDC_SSCOMBO2, 0x403, 3, 0
 0x3631, "\000" 
-    IDC_BAR_GENFX, 0x403, 11, 0
-0x6547, 0x656e, 0x6172, 0x6f74, 0x7372, "\000" 
-    IDC_BAR_GENFX, 0x403, 8, 0
-0x6645, 0x6566, 0x7463, 0x0073, 
     IDC_AUXSELECT, 0x403, 5, 0
 0x494d, 0x4944, "\000" 
     IDC_AUXSELECT, 0x403, 7, 0
@@ -1828,6 +1833,29 @@ BEGIN
     0
 END
 
+IDD_PSYBAR DLGINIT
+BEGIN
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0030, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0031, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0032, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0033, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0034, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0035, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0036, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0037, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0038, 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1839,8 +1867,12 @@ BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_LOADSONG
     BUTTON      ID_FILE_SAVE
+    BUTTON      ID_FILE_SAVEAUDIO
     SEPARATOR
     BUTTON      ID_RECORDB
+    SEPARATOR
+    BUTTON      ID_EDIT_UNDO
+    BUTTON      ID_EDIT_REDO
     SEPARATOR
     BUTTON      ID_BARPLAY
     BUTTON      ID_BUTTONPLAYSEQBLOCK
@@ -1944,7 +1976,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_ABOUTPSYCLE          "Logo\nLogo"
+    ID_ABOUTPSYCLE          "Information and Logo\nLogo"
+    ID_HELP_SALUDOS         "Greetings to People\nGreetings"
     ID_RECORDB              "Disk record\nRecord"
     ID_BARPLAY              "Play song\nPlay"
     ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
@@ -1956,24 +1989,33 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_LOADSONG        "Open song\nOpen"
     ID_FILE_SAVESONG        "Save song\nSave"
-    ID_FILE_IMPORT_ITFILE   "Import Impulse Tracker File"
+    ID_FILE_IMPORT_XMFILE   "Imports Songs in XM (FT2) format\nImport XM"
+    ID_FILE_IMPORT_ITFILE   "Imports Songs in IT (Impulse Tracker) format\nImport IT"
+    ID_FILE_SONGPROPERTIES  "Shows the Song Properties Dialog\nShow Song Properties"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_MACHINEVIEW          "Machine view\nMachines"
-    ID_PATTERNVIEW          "Pattern view\nPatterns"
-    ID_SHOWPSEQ             "Pattern sequencer\nSequencer"
+    ID_MACHINEVIEW          "Show Machine view\nMachines"
+    ID_PATTERNVIEW          "Show Pattern view\nPatterns"
+    ID_SHOWPSEQ             "Show Pattern sequencer\nSequencer"
     ID_NEWMACHINE           "Insert new machine\nNew machine"
     ID_VIEW_INSTRUMENTEDITOR 
                             "Opens Instruments/Samples Editor\nOpen Instruments Editor"
+    ID_CONFIGURATION_FREEAUDIO "Disables the Audio output\nDisable Audio"
+    ID_CONFIGURATION_SETTINGS 
+                            "Opens the General Configuration Dialog\nOpen Configuration"
+    ID_CONFIGURATION_KEYBOARD 
+                            "Opens the Keyboard Configuration Dialog\nConfigure Keyboard"
+    ID_CPUPERFORMANCE       "Shows the CPU Performance Monitor\nShow CPU monitor"
+    ID_MIDI_MONITOR         "Shows the MIDI Monitor\nShow Midi Monitor"
     ID_PSYHELP              "Open online help\nHelp"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_POP_PATTENPROPERTIES "Pops Up the Pattern Properties Dialog\nShow Pattern Properties"
-    ID_POP_MIXPASTE         "Paste, Mixing the content of the buffer with the pattern\\Mix Paste"
+    ID_POP_MIXPASTE         "Paste, Mixing the content of the buffer with the pattern\nMix Paste"
     ID_POP_TRANSPOSE_1      "Transposes the notes 1 seminote down\nTraspose -1"
     ID_SELECTION_AMPLIFY    "Volume adjust..."
     ID_SELECTION_REVERSE    "Reverse sample direction"
@@ -1993,7 +2035,9 @@ BEGIN
     IDS_ARE_YOU_SURE        "Are you Sure?"
     ID_POP_BLOCK_SWINGFILL  "Fill effects column of selected block with global BPM change commands (FFxx) to create a swing"
     ID_POP_TRACK_SWINGFILL  "Fill effects column of current track with global BPM change commands (FFxx) to create a swing"
-    ID_EDIT_MIXPASTE        "Mix Paste from clipboard"
+    ID_EDIT_MIXPASTE        "Pattern Mix Paste from clipboard\\Pattern Mix"
+    ID_FILE_SAVEAUDIO       "Save the file to Wav or to a compressed format\nSave as Audio File"
+    ID_HELP_WHATSNEW        "Opens the WhatsNew.txt file\nOpen whatsnew.txt"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -2007,9 +2051,9 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_POP_CUT              "Cut the selected rows (delete them) and puts them to the buffer\\Cut"
-    ID_POP_COPY             "Copy the selected rows to the buffer\\Copy"
-    ID_POP_PASTE            "Paste (overwriting) the content the buffer to the pattern"
+    ID_POP_CUT              "Cut the selected rows (delete them) and puts them to the buffer\nCut Selection"
+    ID_POP_COPY             "Copy the selected rows to the buffer\nCopy Selection"
+    ID_POP_PASTE            "Paste (overwriting) the content the buffer to the pattern\nPaste Selection"
     ID_POP_INTERPOLATE      "Interpolates the values from first selected to last selected\nInterpolate values"
     ID_POP_CHANGEGENERATOR  "Changes the Generator to the current selected\nChange Generator"
     ID_POP_CHANGEINSTRUMENT "Changes the Instrument to the current selected\nChange Instrument"
@@ -2020,12 +2064,41 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_EDIT_COPY            "Copy to clipboard"
-    ID_EDIT_CUT             "Cut to clipboard"
-    ID_EDIT_PASTE           "Paste from clipboard"
+    ID_EDIT_COPY            "Pattern Copy to clipboard\nPattern Copy"
+    ID_EDIT_CUT             "Cut Pattern to clipboard\nCut Pattern"
+    ID_EDIT_PASTE           "Pattern Paste from clipboard\nPattern Paste"
     ID_EDIT_SELECT_ALL      "Select whole wave"
-    ID_EDIT_UNDO            "Undo last action"
-    ID_EDIT_REDO            "Redo last Undo"
+    ID_EDIT_UNDO            "Undo last action\nUndo"
+    ID_EDIT_REDO            "Redo last Undo\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
+    ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
+    ID_HELP_KEYBTXT         "Open the keys.txt,which describes the default keyboard configuration\nOpen keys"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_EXIT             "Exits Psycle\nExit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_SEQCUT              "Sequence Cut to Clipboard\nCut Sequence"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_SEQCOPY             "Sequence Copy to Clipboard\nCopy Sequence"
+    IDC_SEQPASTE            "Sequence Paste to Clipboard\nPaste Sequence"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show/Hide Toolbar"
+    ID_VIEW_STATUS_BAR      "Show/Hide Status Bar"
 END
 
 #endif    // Neutral (Default) resources
@@ -2369,7 +2442,6 @@ BEGIN
     ID_INDICATOR_FOLLOW     "Follow"
     ID_INDICATOR_NOTEOFF    "NoteOffs"
     ID_INDICATOR_TWEAKS     "Tweaks"
-    ID_INDICATOR_OCTAVE     "Oct 0"
 END
 
 #endif    // English (U.S.) resources

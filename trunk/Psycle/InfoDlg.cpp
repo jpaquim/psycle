@@ -57,12 +57,12 @@ BOOL CInfoDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,128,0);
-	m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,80,1);
+	m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
+	m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
 	m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
-	m_machlist.InsertColumn(3,"WireIns",LVCFMT_LEFT,48,1);
-	m_machlist.InsertColumn(4,"WireOuts",LVCFMT_LEFT,56,1);
-	m_machlist.InsertColumn(5,"CPU",LVCFMT_LEFT,56,1);
+	m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,48,1);
+	m_machlist.InsertColumn(4,"OutWir",LVCFMT_RIGHT,48,1);
+	m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 	
 	char buffer[64];
 	sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);

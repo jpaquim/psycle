@@ -37,6 +37,8 @@
 #include "VstEditorDlg.h"
 #include "masterdlg.h"
 
+#include <math.h> // SwingFill
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -140,7 +142,7 @@ CChildView::CChildView()
 CChildView::~CChildView()
 {
 	Global::pInputHandler->SetChildView(NULL);
-//	stuffbmp.DeleteObject(); // Not needed. the CBitmap destructor does it.
+	stuffbmp.DeleteObject(); // The CBitmap destructor does it, but just in case..
 	KillRedo();
 	KillUndo();
 	while (pPatternDraw)
@@ -231,19 +233,24 @@ BEGIN_MESSAGE_MAP(CChildView,CWnd )
 	ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
 	ON_COMMAND(ID_FILE_IMPORT_ITFILE, OnFileImportItfile)
 	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateUndo)
 	ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateRedo)
+	ON_WM_MOUSEWHEEL()
+	ON_WM_MBUTTONDOWN()
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopyPaste)
+	ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
 	ON_COMMAND(ID_EDIT_CUT, patCut)
 	ON_COMMAND(ID_EDIT_COPY, patCopy)
 	ON_COMMAND(ID_EDIT_PASTE, patPaste)
 	ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternCutCopyPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternCutCopyPaste)
-	ON_WM_MOUSEWHEEL()
-	ON_WM_MBUTTONDOWN()
+	ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
+	ON_COMMAND(ID_HELP_README, OnHelpReadme)
+	ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
+	ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -784,6 +791,13 @@ void CChildView::OnFileNew()
 }
 
 
+void CChildView::OnFileSaveaudio() 
+{
+	MessageBox("Option not developed yet","Save to wav file",MB_OK);
+	// TODO: Add your command handler code here
+	
+}
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1101,16 +1115,6 @@ int CChildView::SongIncBpm(int x)
 	return Global::_pSong->BeatsPerMin;
 }
 
-void CChildView::SetPatStep(int stp)
-{
-	patStep=stp;
-/*	if (viewMode == VMPattern) // why did I do this?
-	{
-		Repaint();
-	}*/
-}
-
-#include <math.h>
 
 #define TWOPI_F (2.0f*3.141592665f)
 
@@ -1479,6 +1483,8 @@ void CChildView::OnFileImportXmfile()
 
 void CChildView::OnFileImportItfile() 
 {
+	MessageBox("Option not developed yet","Import IT file",MB_OK);
+	
 /*	OPENFILENAME ofn;       // common dialog box structure
 	char szFile[_MAX_PATH];       // buffer for file name
 	
@@ -1591,7 +1597,7 @@ void CChildView::AppendToRecent(char* fName)
 //	pRootMenuBar = this->GetParent()->GetMenu();
 //	hRootMenuBar = HMENU (*pRootMenuBar);
 	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	hRecentMenu = GetSubMenu(hFileMenu, 8);
+	hRecentMenu = GetSubMenu(hFileMenu, 9);
 
 	//Remove initial empty element, if present.
 	if (GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)
@@ -1772,3 +1778,22 @@ void CChildView::SetTitleBarText()
 }
 
 
+void CChildView::OnHelpKeybtxt() 
+{
+	ShellExecute(pParentMain->m_hWnd,"open","Docs\\keys.txt",NULL,"",SW_SHOW);
+}
+
+void CChildView::OnHelpReadme() 
+{
+	ShellExecute(pParentMain->m_hWnd,"open","Docs\\readme.txt",NULL,"",SW_SHOW);
+}
+
+void CChildView::OnHelpTweaking() 
+{
+	ShellExecute(pParentMain->m_hWnd,"open","Docs\\tweaking.txt",NULL,"",SW_SHOW);
+}
+
+void CChildView::OnHelpWhatsnew() 
+{
+	ShellExecute(pParentMain->m_hWnd,"open","Docs\\whatsnew.txt",NULL,"",SW_SHOW);
+}

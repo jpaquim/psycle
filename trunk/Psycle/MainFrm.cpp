@@ -109,7 +109,8 @@ ON_UPDATE_COMMAND_UI(ID_INDICATOR_EDIT, OnUpdateIndicatorEdit)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_FOLLOW, OnUpdateIndicatorFollow)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_NOTEOFF, OnUpdateIndicatorNoteoff)
 ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
-ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
+	ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
+	ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -121,7 +122,6 @@ static UINT indicators[] =
 	ID_INDICATOR_LINE,
 	ID_INDICATOR_TIME,
     ID_INDICATOR_EDIT,
-    ID_INDICATOR_OCTAVE,
     ID_INDICATOR_FOLLOW,
     ID_INDICATOR_NOTEOFF,
     ID_INDICATOR_TWEAKS,
@@ -476,6 +476,9 @@ void CMainFrame::PsybarsUpdate()
 	cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
 	cc2->SetCurSel(_pSong->SONGTRACKS-4);
 
+	cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
+	cc2->SetCurSel(_pSong->currentOctave);
+	
 	UpdateComboGen();
 	
 }
@@ -579,6 +582,32 @@ void CMainFrame::SetAppSongTpb(int x)
 	if (Global::pPlayer->_playing ) sprintf(buffer, "%d", Global::pPlayer->tpb);
 	else sprintf(buffer, "%d", Global::_pSong->_ticksPerBeat);
 	((CStatic *)m_wndControl.GetDlgItem(IDC_TPBLABEL))->SetWindowText(buffer);
+}
+
+
+void CMainFrame::OnCloseupCombooctave() 
+{
+	m_wndView.SetFocus();
+}
+
+void CMainFrame::OnSelchangeCombooctave() 
+{
+	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
+	_pSong->currentOctave=cc2->GetCurSel();
+	m_wndView.Repaint();
+	m_wndView.SetFocus();
+}
+//////////////////////////////////////////////////////////////////////
+// Function that shift the current editing octave
+
+void CMainFrame::ShiftOctave(int x)
+{
+	_pSong->currentOctave += x;
+	if ( _pSong->currentOctave < 0 )	 { _pSong->currentOctave = 0; }
+	else if ( _pSong->currentOctave > 8 ){ _pSong->currentOctave = 8; }
+
+	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
+	cc2->SetCurSel(_pSong->currentOctave);
 }
 
 void CMainFrame::OnClipbut() 
@@ -693,7 +722,7 @@ void CMainFrame::OnSelchangeSscombo2()  // OnChangePatternStep
 {
 	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
 	int sel=cc->GetCurSel();
-	m_wndView.SetPatStep(sel);
+	m_wndView.patStep=sel;
 	m_wndView.SetFocus();
 }
 
@@ -708,7 +737,7 @@ void CMainFrame::EditQuantizeChange(int diff) // User Called (Hotkey)
 	const int total = cc->GetCount();
 	const int nextsel = (total + cc->GetCurSel() + diff) % total;
 	cc->SetCurSel(nextsel);
-	m_wndView.SetPatStep(nextsel);
+	m_wndView.patStep=nextsel;
 }
 
 void CMainFrame::OnSelchangeBarGenfx() 
@@ -729,21 +758,123 @@ void CMainFrame::OnCloseupBarGenfx()
 
 void CMainFrame::OnBDecgen() 
 {
-	int si=_pSong->seqBus;
-	ChangeGen(si-1);
+	//	ChangeGen(_pSong->seqBus-1);
+	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
+	const int val = cc->GetCurSel();
+	if ( val > 0 ) cc->SetCurSel(val-1);
 	m_wndView.SetFocus();
 }
 
 void CMainFrame::OnBIncgen() 
 {
-	int si=_pSong->seqBus;
-	ChangeGen(si+1);
+	//	ChangeGen(_pSong->seqBus+1);
+	CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
+	const int val = cc->GetCurSel();
+	if ( val < cc->GetCount()-1 ) cc->SetCurSel(val+1);
 	m_wndView.SetFocus();
 }
 
 void CMainFrame::UpdateComboGen(bool updatelist)
 {
-	if ( _pSong == NULL ) return;
+	bool filled=false;
+	bool found=false;
+	int selected = -1;
+	int line = -1;
+	char buffer[64];
+	
+	if ( _pSong == NULL ) return; // why should this happen?
+	CComboBox *cb=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
+	CComboBox *cb2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+	
+	macComboInitialized = false;
+	if (updatelist) cb->ResetContent();
+	
+	for (int b=0; b<MAX_BUSES; b++) // Check Generators
+	{
+		const int mac = _pSong->busMachine[b]; 
+		if( mac != 255 && _pSong->_machineActive[mac])
+		{
+			if (updatelist)
+			{	
+				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[mac]->_editName);
+				cb->AddString(buffer);
+			}
+			if (!found) selected++;
+			if ( _pSong->seqBus == b) found = true;
+			filled = true;
+		}
+	}
+	if ( updatelist) cb->AddString("-------------");
+	if (!found) 
+	{
+		selected++;
+		line = selected;
+	}
+	
+	for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
+	{
+		const int mac = _pSong->busEffect[b-MAX_BUSES];
+		if( mac != 255 && _pSong->_machineActive[mac])
+		{
+			if (updatelist)
+			{	
+				sprintf(buffer,"%.2X: %s",b,_pSong->_pMachines[mac]->_editName);
+				cb->AddString(buffer);
+			}
+			if (!found) selected++;
+			if ( _pSong->seqBus == b) found = true;
+			filled = true;
+		}
+	}
+	if (!filled)
+	{
+		cb->ResetContent();
+		cb->AddString("No Machines Loaded");
+		selected = 0;
+	}
+	else if (!found) selected=line;
+	
+	cb->SetCurSel(selected);
+
+	if (found && selected < MAX_BUSES) // Generator
+	{
+		// Select the appropiate Option in Aux Combobox.
+		if (_pSong->busMachine[selected] == 255 || !_pSong->_machineActive[_pSong->busMachine[selected]])
+		{
+			cb2->SetCurSel(2); // WAVES
+			_pSong->auxcolSelected = _pSong->instSelected;
+			UpdateComboIns();
+		}
+		else if (_pSong->_pMachines[_pSong->busMachine[selected]]->_type == MACH_VST)
+		{
+			if (cb2->GetCurSel() == AUX_WAVES)
+			{
+				cb2->SetCurSel(0); //MIDI
+				_pSong->auxcolSelected = _pSong->midiSelected;
+				UpdateComboIns();
+			}
+		}
+		else if (_pSong->_pMachines[_pSong->busMachine[selected]]->_type == MACH_SAMPLER)
+		{
+			if ( cb2->GetCurSel() != AUX_WAVES)
+			{
+				cb2->SetCurSel(2); // WAVES
+				_pSong->auxcolSelected = _pSong->instSelected;
+				UpdateComboIns();
+			}
+		}
+		else
+		{
+			cb2->SetCurSel(1); // PARAMS
+			UpdateComboIns();
+		}
+	}
+	else if (updatelist) UpdateComboIns();
+	macComboInitialized = true;
+	
+/*
+
+  if ( _pSong == NULL ) return;
 	CComboBox *cc1=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
 	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 	CComboBox *cc3=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
@@ -823,6 +954,8 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 
 	UpdateComboIns();
 	macComboInitialized = true;
+
+  */
 }
 
 void CMainFrame::OnSelchangeBarCombogen() 
@@ -830,7 +963,15 @@ void CMainFrame::OnSelchangeBarCombogen()
 	if(macComboInitialized)
 	{
 		CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
-		CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
+		int nsb = GetNumFromCombo(cc);
+
+		if(_pSong->seqBus!=nsb)
+		{
+			_pSong->seqBus=nsb;
+			UpdateComboGen(false);
+		}
+		
+/*		CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
 
 		int nsb=cc->GetCurSel();
 		if (cc2->GetCurSel() == 1 ) nsb+=MAX_BUSES;
@@ -840,6 +981,7 @@ void CMainFrame::OnSelchangeBarCombogen()
 			_pSong->seqBus=nsb;
 			UpdateComboGen(false);
 		}
+*/
 	}
 }
 
@@ -848,22 +990,6 @@ void CMainFrame::OnCloseupBarCombogen()
 	m_wndView.SetFocus();
 }
 
-void CMainFrame::OnCloseupAuxselect() 
-{
-	m_wndView.SetFocus();
-}
-
-void CMainFrame::OnSelchangeAuxselect() 
-{
-	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-
-	if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
-		_pSong->auxcolSelected=_pSong->midiSelected;
-	else if ( cc2->GetCurSel() == AUX_WAVES )	// WAVES
-		_pSong->auxcolSelected=_pSong->instSelected;
-
-	UpdateComboIns();
-}
 
 void CMainFrame::ChangeGen(int i)	// User Called (Hotkey)
 {
@@ -882,6 +1008,22 @@ void CMainFrame::ChangeGen(int i)	// User Called (Hotkey)
 	}
 }
 
+void CMainFrame::OnCloseupAuxselect() 
+{
+	m_wndView.SetFocus();
+}
+
+void CMainFrame::OnSelchangeAuxselect() 
+{
+	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+
+	if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
+		_pSong->auxcolSelected=_pSong->midiSelected;
+	else if ( cc2->GetCurSel() == AUX_WAVES )	// WAVES
+		_pSong->auxcolSelected=_pSong->instSelected;
+
+	UpdateComboIns();
+}
 void CMainFrame::OnBDecwav() 
 {
 	ChangeIns(_pSong->auxcolSelected-1);
@@ -1107,6 +1249,9 @@ void CMainFrame::WaveEditorBackUpdate()
 
 void CMainFrame::ShowInstrumentEditor()
 {
+	CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+	cc2->SetCurSel(2); // select Waves
+	UpdateComboIns();
 	m_wndInst.ShowWindow(SW_SHOWNORMAL);
 	m_wndInst.SetActiveWindow();
 }
@@ -1927,7 +2072,7 @@ void CMainFrame::OnRecordTweaks()
 
 void CMainFrame::OnFollowSong() 
 {
-	Global::pConfig->_followSong = ((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck();
+	Global::pConfig->_followSong = ((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck()?true:false;
 	CListBox* pSeqList = (CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 
 	if (( Global::pConfig->_followSong ) && ( Global::pPlayer->_playing ))
@@ -2117,13 +2262,10 @@ void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI)
 	}
 }
 
-void CMainFrame::OnUpdateIndicatorOctave(CCmdUI *pCmdUI) 
+
+int CMainFrame::GetNumFromCombo(CComboBox *cb)
 {
-	pCmdUI->Enable(); 
 	CString str;
-	str.Format("Oct %d", Global::_pSong->currentOctave); 
-    pCmdUI->SetText(str); 
+	cb->GetWindowText(str);
+	return _httoi(str.Left(2).GetBuffer(2));
 }
-
-
-
