@@ -60,11 +60,7 @@
 	you drag a wire to it, it could pop up a dialog asking what you ouput want it to connect to - this will 
 	require a file format change though :(
 * <bdzld> when you put a machine on top of each other, the vus always pop to the top?
-! <[JAZ]> pooplog : btw... the leds should be improved still a bit. first, the decrease speed should be changed 
-	(the refresh rate is now the half) also, some improvements, like not having to recalc the "peak" (meaning, 
-	storing the pixel data, instead of the volume data)
 + pooplog - dragging files onto psycle window would be nice, hmm?
-* vu meters seem to sometimes draw wrong info - are they processing wrong data?
 * machine numbers in dialog headers should be in hex
 
 	*Flanger feedback slider
