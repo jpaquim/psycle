@@ -23,6 +23,8 @@ class CGearGainer;
 class CGearFlanger;
 class CGearScope;
 
+#define MAX_SCOPES 16
+
 enum 
 {
 	DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
@@ -282,7 +284,7 @@ public:
 	CGearfilter * FilterMachineDialog;
 	CGearGainer * GainerMachineDialog;
 	CGearFlanger * FlangerMachineDialog;
-	CGearScope * ScopeMachineDialog;
+	CGearScope * ScopeMachineDialog[MAX_SCOPES];
 
 	bool blockSelected;
 	bool blockStart;

@@ -12,6 +12,9 @@
 
 class CChildView;
 
+#define MAX_SCOPE_BANDS 32
+#define SCOPE_SPEC_SAMPLES	256
+
 /////////////////////////////////////////////////////////////////////////////
 // CGearScope dialog
 
@@ -24,12 +27,13 @@ public:
 
 	BOOL Create();
 	afx_msg void OnCancel();
-	int div;
+	UINT this_index;
 
 // Dialog Data
 	//{{AFX_DATA(CGearScope)
 	enum { IDD = IDD_GEAR_SCOPE };
 	CSliderCtrl	m_slider;
+	CSliderCtrl	m_slider2;
 	//}}AFX_DATA
 
 
@@ -43,15 +47,25 @@ public:
 // Implementation
 protected:
 	inline int GetY(float f);
+	void SetMode();
 	CChildView* m_pParent;
 	CBitmap* bmpDC;
 	CRect rc;
+	CFont font;
+	CFont* oldFont;
+	int pos;
+	BOOL hold;
+	int bar_heightsl[MAX_SCOPE_BANDS];
+	int bar_heightsr[MAX_SCOPE_BANDS];
 
 	// Generated message map functions
 	//{{AFX_MSG(CGearScope)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMode();
+	afx_msg void OnHold();
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

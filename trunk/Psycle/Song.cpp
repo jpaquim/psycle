@@ -123,6 +123,7 @@ bool Song::CreateMachine(
 		pMachine = new Dummy;
 		break;
 	case MACH_SCOPE:
+		MessageBox(0,"DELETE THE SCOPE MACHINE BEFORE YOU SAVE YOUR SONG!\nDO NOT SAVE A SONG WITH A SCOPE MACHINE IN IT YET!!!","WARNING!!!",0);
 		pMachine = new Scope;
 		break;
 	default:
@@ -1269,6 +1270,12 @@ bool Song::Load(
 				break;
 			case MACH_FLANGER:
 				pMachine = pFlanger = new Flanger;
+				pMachine->Init();
+				pMachine->Load(pFile);
+				break;
+			case MACH_SCOPE:
+				MessageBox(0,"DELETE THE SCOPE MACHINE AND RESAVE YOUR SONG!\nDO NOT SAVE A SONG WITH A SCOPE MACHINE IN IT YET!!!","WARNING!!!",0);
+				pMachine = new Scope;
 				pMachine->Init();
 				pMachine->Load(pFile);
 				break;

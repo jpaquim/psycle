@@ -16,6 +16,8 @@ pen alpha
 	does not track changes yet)
 + <dp|away> you could setup some standard buffers you know are solid and do like setting low -> high 
 	and shield the user from the nastiness
+* <alk> my new skin, can u make it possible to change the fonts of the gen and fx separately?
+* <_sue_> no it also behaves weird with internal delays even if not in record mode....just playng
 
 * Machines
 ------------

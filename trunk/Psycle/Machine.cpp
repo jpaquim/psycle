@@ -616,6 +616,11 @@ Scope::Scope()
 {
 	_numPars = 0;
 	num = 0;
+	scope_osc_freq = 5;
+	scope_osc_rate = 25;
+	scope_spec_bands = 5;
+	scope_spec_rate = 25;
+	scope_mode = 0;
 	_type = MACH_SCOPE;
 	_mode = MACHMODE_FX;
 	sprintf(_editName, "Scope");

@@ -1,6 +1,8 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#define F_PI 3.14159265358979323846f
+
 int _httoi(const TCHAR *value);
 
 inline float fast_log2(float f) 
