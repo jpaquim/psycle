@@ -9,6 +9,7 @@
 
 * Machines
 ------------
+* Flanger feedback slider
 * alk - gap in audio when add new machine?
 * <_sue_> the gainer machine doesnt work (getting stuck bug i have been able to recreate once but not 
 	debug-when i recreated it, song was fucking up bad due to not enough buffers (and too small))
@@ -59,8 +60,6 @@
 + D says: maybe have some of the effects in a drop down or available by right clicking
 + D says: When you highlight something in Psycle would it be possible to make it so you can drag and 
 	drop that highlighted area?
-! <_sue_> when on follow song mode play the shift + cursor right and shift + cursor left should work the same 
-	way (to navigate in the pattern sequencer).....like hapens on fast tracker 2 .....
 + Xerox replace, allow multiple - it replaces the selected pattern(s) with an identical new one
 + Xerox multiple
 +? FT2 Jumps to the top of a pattern when you move from one to another (Kris)
@@ -113,7 +112,6 @@
 * "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
 *  plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
 		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
-* New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn't happen on freebase)
 ! remove waits from play when in export mode
 ! longer sequences (256) [file format,maybe others]
 ! more tracks (64) [file format]
@@ -145,6 +143,7 @@
 	psycle crashes when i get the 'cpu overload' warning in reaktor
 * <_sue_> but with native intruments pro-52 it doesnt rec the tweaks at all..... <pooplog> are you able to 
 	control 	the tweaks of it from the pattern? <_sue_> yes i am (in pro52)
+* New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn't happen on freebase)
 * many vsts freeze the childview from updating while Left mouse button is down, which makes it so pattern does
 	not draw, so it appears that tweak recording is not working, such as:
 	-juno X2
@@ -165,9 +164,9 @@
 	old versions and they were all like this too...
 * <Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new 
 	psycle opens..
-* Flanger feedback slider
-* Instrument filter envelope slider. (check differences with finetune slider)+ midi control commands learn
-* <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config?
+* Instrument filter envelope slider. (check differences with finetune slider)
+* <lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key 
+	combinations don't work either, like ctrl+pageup etc.
 * <[JAZ]> "fixing" the cache.map file so that it can include dates of dll's and update automatically 
 	the info when new one.
 * new machine dialog should save preferred sorting method
@@ -182,6 +181,7 @@
 	when you want.
 ! <pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 ! JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
++ midi control commands learn
 + pooplog-we should just make a new slider class that uses shift and ctrl like knobs
 + <alk_> the 'Apply' button is not implemented in the config dialog
 + <alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)

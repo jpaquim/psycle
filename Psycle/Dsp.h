@@ -119,7 +119,7 @@ public:
 	}
 	static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 	{
-		float id = float(1.0E-25);
+		float id = float(1.0E-20);
 		for(int s=0;s<numsamples;s++)
 		{
 //			if ( IS_DENORMAL(pSamplesL[s]) ) pSamplesL[s]=0.0f;

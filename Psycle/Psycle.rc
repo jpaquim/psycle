@@ -2340,11 +2340,12 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_ABOUTPSYCLE          "Information and Logo\nLogo"
     ID_HELP_SALUDOS         "Greetings to People\nGreetings"
-    ID_RECORDB              "Disk record\nRecord"
+    ID_RECORDB              "Disk record\nRecord to .wav"
     ID_BARPLAY              "Play song\nPlay"
     ID_BUTTONPLAYSEQBLOCK   "Plays the Block of the sequence currently selected\nPlay Block"
     ID_BARSTOP              "Stop song\nStop"
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
+    ID_BARREC               "Record sequence\nRecord sequence"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -2352,7 +2353,6 @@ BEGIN
     ID_HELP_README          "Opens the Readme.txt File\nOpen Readme.txt"
     ID_HELP_TWEAKING        "Opens the Tweakings and Commands.txt\nOpen tweakings and Commands"
     ID_HELP_KEYBTXT         "Open the keys.txt,which describes the default keyboard configuration\nOpen keys"
-    ID_BARREC               "Record song\nRecord"
 END
 
 STRINGTABLE DISCARDABLE 
