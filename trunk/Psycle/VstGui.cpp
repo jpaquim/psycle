@@ -86,7 +86,7 @@ void CVstGui::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 
 		case CT_Immediate:
-			Global::pInputHandler->PerformCmd(cmd);
+			Global::pInputHandler->PerformCmd(cmd,bRepeat);
 			break;
 		}
 	}

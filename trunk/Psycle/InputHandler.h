@@ -394,7 +394,7 @@ public:
 
 public:
 	// control 	
-	void PerformCmd(CmdDef cmd);
+	void PerformCmd(CmdDef cmd,BOOL repeat);
 	
 	// commands
 	bool EnterData(UINT nChar,UINT nFlags);
