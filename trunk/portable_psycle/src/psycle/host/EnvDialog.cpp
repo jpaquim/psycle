@@ -293,12 +293,13 @@ void CEnvDialog::DrawADSR(int AX,int BX,int CX,int DX)
 	DX/=420;
 
 	int CH=100;
-	int CW=512;
+//	int CW=512;
 
 	CClientDC dc(&m_ampframe);
 	CPoint pol[5];
 
-	dc.FillSolidRect(0,0,494,CH+1,0xCC7788);
+	//dc.FillSolidRect(0,0,494,CH+1,0xCC7788);
+	dc.FillSolidRect(0,0,494,CH+1,RGB(50, 50, 50));
 	pol[0].x=0;
 	pol[0].y=CH;
 
@@ -314,6 +315,9 @@ void CEnvDialog::DrawADSR(int AX,int BX,int CX,int DX)
 	pol[4].x=AX+BX+DX;
 	pol[4].y=CH;
 	
+	//CBrush newBrush(RGB(255, 128, 64));
+	//dc.SelectObject(&newBrush);	
+
 	dc.Polygon(&pol[0],5);
 
 	dc.MoveTo(AX+BX,0);
@@ -329,12 +333,13 @@ void CEnvDialog::DrawADSRFil(int AX,int BX,int CX,int DX)
 	DX/=420;
 
 	int CH=100;
-	int CW=512;
+//	int CW=512;
 
 	CClientDC dc(&m_filframe);
 	CPoint pol[5];
 
-	dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
+	//dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
+	dc.FillSolidRect(0,0,494,CH+1,RGB(50, 50, 50));
 	pol[0].x=0;
 	pol[0].y=CH;
 
@@ -350,6 +355,9 @@ void CEnvDialog::DrawADSRFil(int AX,int BX,int CX,int DX)
 	pol[4].x=AX+BX+DX;
 	pol[4].y=CH;
 	
+	//CBrush newBrush(RGB(255, 128, 64));
+	//dc.SelectObject(&newBrush);		
+
 	dc.Polygon(&pol[0],5);
 
 	dc.MoveTo(AX+BX,0);

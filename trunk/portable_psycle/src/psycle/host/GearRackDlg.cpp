@@ -100,7 +100,7 @@ void CGearRackDlg::RedrawList()
 	
 	m_list.ResetContent();
 
-	int selected;
+	int selected=0;
 	int b;
 
 	switch (DisplayMode)

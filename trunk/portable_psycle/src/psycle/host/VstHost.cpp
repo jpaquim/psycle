@@ -742,7 +742,7 @@ int VSTPlugin::GetCurrentProgram()
 {
 	if(instantiated)
 	{
-		int ret;
+		int ret=0;
 		try
 		{
 			ret = Dispatch(effGetProgram,0,0,NULL,0.0f);
@@ -907,7 +907,7 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 			if ( index < 2) return 0;
 			else return 1;
 		}
-		return 0;	// inquire if an input or output is beeing connected;
+//		return 0;	// inquire if an input or output is beeing connected;
 
 	case audioMasterWantMidi:			
 		return 0;
@@ -1124,14 +1124,14 @@ long VSTPlugin::AudioMaster(AEffect *effect, long opcode, long index, long value
 		TRACE("VST master dispatcher: GetNumAutPar\n");
 		break;
 //	case 	audioMasterGetParameterQuantization:	
-		TRACE("VST master dispatcher: ParamQuant\n");
-		break;
+//		TRACE("VST master dispatcher: ParamQuant\n");
+//		break;
 	case 	audioMasterIOChanged:					
 		TRACE("VST master dispatcher: IOchanged\n");
 		break;
 //	case 	audioMasterSizeWindow:					
-		TRACE("VST master dispatcher: Size Window\n");
-		break;
+//		TRACE("VST master dispatcher: Size Window\n");
+//		break;
 	case 	audioMasterGetInputLatency:				
 		TRACE("VST master dispatcher: GetInLatency\n");
 		break;
@@ -1325,7 +1325,7 @@ bool VSTInstrument::AddNoteOn(unsigned char channel, unsigned char note,unsigned
 		pevent->reserved1 = 0;
 		pevent->reserved2 = 0;
 		pevent->noteOffVelocity = 0;
-		pevent->midiData[0] = (char)0x90 | midichannel; // Midi On
+		pevent->midiData[0] = 0x90 | static_cast<unsigned char>(midichannel); // Midi On
 		pevent->midiData[1] = note;
 		pevent->midiData[2] = speed;
 		pevent->midiData[3] = 0;
@@ -1379,7 +1379,7 @@ bool VSTInstrument::AddNoteOff(unsigned char channel,unsigned char midichannel,b
 			pevent->reserved1 = 0;
 			pevent->reserved2 = 0;
 			pevent->noteOffVelocity = 0;
-			pevent->midiData[0] = (char)0x80 | trackNote[channel].midichan; //midichannel; // Midi Off
+			pevent->midiData[0] = 0x80 | static_cast<unsigned char>(trackNote[channel].midichan); //midichannel; // Midi Off
 			pevent->midiData[1] = trackNote[channel].note;
 			pevent->midiData[2] = 0;
 			pevent->midiData[3] = 0;

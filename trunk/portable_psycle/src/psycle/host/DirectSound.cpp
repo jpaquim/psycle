@@ -1,6 +1,5 @@
-// DirectSound stuff based on buzz code
-
 #include "stdafx.h"
+// DirectSound stuff based on buzz code
 #include "DirectSound.h"
 #pragma comment(lib, "dsound")
 #include "resource.h"

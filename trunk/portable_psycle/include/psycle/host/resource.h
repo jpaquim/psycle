@@ -505,6 +505,7 @@
 #define IDC_LEARN_14                    1399
 #define IDC_LEARN_15                    1400
 #define IDC_PBG_CAN                     1401
+#define IDC_MIDI_RAW                    1401
 #define IDC_ROW_CAN                     1402
 #define IDC_BEAT_CAN                    1403
 #define IDC_FONT_CAN                    1404
@@ -658,6 +659,8 @@
 #define IDC_RECORD_UNARMED              1522
 #define IDC_RADIO_EFX                   1523
 #define IDC_NOTESTOEFFECTS              1523
+#define IDC_RECORD_UNARMED2             1523
+#define IDC_MOVE_CURSOR_PASTE           1523
 #define IDC_RADIO_INS                   1524
 #define IDC_PROGRESS1                   1524
 #define IDC_CLONE                       1525
@@ -764,7 +767,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        205
+#define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         32924
 #define _APS_NEXT_CONTROL_VALUE         1537
 #define _APS_NEXT_SYMED_VALUE           60

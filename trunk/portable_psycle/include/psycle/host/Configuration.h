@@ -76,6 +76,7 @@ public:
 	bool _RecordTweaks;
 	bool _notesToEffects;
 	bool _RecordUnarmed;
+	bool _MoveCursorPaste;
 	bool _RecordMouseTweaksSmooth;
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
@@ -233,6 +234,8 @@ public:
 	int _midiCommand15;
 	int _midiFrom15;
 	int _midiTo15;
+
+	bool _midiRawMcm;
 
 	bool _linenumbers;
 	bool _linenumbersHex;

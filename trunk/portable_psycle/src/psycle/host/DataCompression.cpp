@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "constants.h"
+#include <cstring>
 // beerz77-2 algorithm by jeremy evers, loosely based on lz77 
 // -2 designates the smaller window, faster compression version
 // designed for decompression on gameboy advance

@@ -1,5 +1,4 @@
-#ifndef _SAMPLER_H
-#define _SAMPLER_H
+#pragma once
 
 #include "Machine.h"
 #include "Filter.h"
@@ -92,7 +91,9 @@ typedef struct
 }
 Voice;
 
-class CGearTracker;
+#if !defined(_WINAMP_PLUGIN_)
+	class CGearTracker;
+#endif
 
 class Sampler : public Machine
 {
@@ -170,7 +171,9 @@ public:
 	void Update(void);
 
 protected:
-	friend CGearTracker;
+	#if !defined(_WINAMP_PLUGIN_)
+		friend CGearTracker;
+	#endif
 
 	static char* _psName;
 	int _numVoices;
@@ -190,5 +193,3 @@ protected:
 		return (x*rand())/32768;
 	};
 };
-
-#endif

@@ -361,7 +361,7 @@ void CPresetsDlg::OnImport()
 			if (numpresets >= 0)
 			{
 				int i=0;
-				int init=m_preslist.GetCount();
+//				int init=m_preslist.GetCount();
 				char cbuf[32];
 				int* ibuf = new int[filenumpars];
 				byte* dbuf = new byte[sizeDataStruct];
@@ -425,7 +425,7 @@ void CPresetsDlg::OnImport()
 				fread(&filepresetsize,sizeof(int),1,hfile);
 				// we are importing new format! this should be fun!
 				int i=0;
-				int init=m_preslist.GetCount();
+//				int init=m_preslist.GetCount();
 				char cbuf[32];
 				int* ibuf = new int[filenumpars];
 				byte* dbuf = new byte[sizeDataStruct > filepresetsize ? sizeDataStruct : filepresetsize];
@@ -531,7 +531,7 @@ void CPresetsDlg::OnImport()
 				fxb.Read(&filenumpars,0);
 
 				int i=0;
-				int init=m_preslist.GetCount();
+//				int init=m_preslist.GetCount();
 				char cbuf[29]; cbuf[28]='\0';
 				float* fbuf;
 				fbuf= new float[numParameters];

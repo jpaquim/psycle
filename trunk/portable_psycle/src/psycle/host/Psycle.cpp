@@ -4,10 +4,10 @@
 #if defined OPERATING_SYSTEM__CROSSPLATFORM
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// new gui
-#	include <operating_system/Logger.h>
-#	include <softsynth/gui/gui.h>
-#	include <boost/thread/thread.hpp>
-#	include <boost/thread/mutex.hpp>
+	#include <operating_system/logger.h>
+	#include <softsynth/gui/gui.h>
+	#include <boost/thread/thread.hpp>
+	#include <boost/thread/mutex.hpp>
 	class GUI
 	{
 	public:
@@ -74,19 +74,14 @@ END_MESSAGE_MAP()
 
 CPsycleApp::CPsycleApp()
 {
-#	if defined OPERATING_SYSTEM__CROSSPLATFORM
+	#if defined OPERATING_SYSTEM__CROSSPLATFORM
 	{
-		try
-		{
-//			operating_system::Console console;
-		}
-		catch(...)
-		{
-			// we failed to get or create a console... continue anyway
-		}
+		#if !defined NDEBUG
+			operating_system::console console;
+		#endif
 		(*new GUI).start(); // starts the new gui in parallel with the mfc one, each in their own thread
 	}
-#	endif
+	#endif
 }
 
 CPsycleApp::~CPsycleApp()
@@ -97,11 +92,18 @@ CPsycleApp theApp; /// The one and only CPsycleApp object
 
 BOOL CPsycleApp::InitInstance()
 {
-#	ifdef _AFXDLL
-		Enable3dControls();			// Call this when using MFC in a shared DLL
-#	else
-		Enable3dControlsStatic();	// Call this when linking to MFC statically
-#	endif
+	// Standard initialization
+	// If you are not using these features and wish to reduce the size
+	//  of your final executable, you should remove from the following
+	//  the specific initialization routines you do not need.
+
+	/* deprecated
+		#if defined _AFXDLL
+			Enable3dControls();			// Call this when using MFC in a shared DLL
+		#else
+			Enable3dControlsStatic();	// Call this when linking to MFC statically
+		#endif
+	*/
 
 	SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
 	
@@ -300,25 +302,25 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_contrib.SetWindowText
 			(
-				"Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5\r\n"
-				"Jeremy Evers (pooplog)\t\tDeveloper since version 1.7\r\n"
-				"Johan Boulé\t\t\tDeveloper in version 1.73\r\n"
-				"Daniel Arena\t\t\tDeveloper in 1.5&1.6\r\n"
-				"Marcin Kowalski / FideLoop\t\tDeveloper in 1.6\r\n"
-				"Mark McCormack\t\t\tMIDI (in) Support\r\n"
-				"Mats Höjlund\t\t\tMain developer until 1.5 (Internal Recoding)\r\n"
-				"Juan Antonio Arguelles. Arguru\tCreator and Main Developer until 1.0\r\n"
-				"Hamarr Heylen\t\t\tInitial Graphics\r\n"
-				"James Redfern [yoji]\t\tAdditional Graphics\r\n"
-				"David Buist\t\t\tAdditional Graphics\r\n"
-				"frown\t\t\t\tAdditional Graphics\r\n"
-				"/\\/\\ark\t\t\t\tAdditional Graphics\r\n"
-				"Michael Haralabos\t\t\tInstaller and Debugging help"
+				"Josep Mª Antolín. [JAZ]\t\tDeveloper since version 1.5\n"
+				"Jeremy Evers [pooplog]\t\tDeveloper since version 1.7\n"
+				"James Redfern [alk]\t\tDevelopper since version 1.7.6\n"				
+				"Johan Boulé [bohan]\t\tDeveloper since version 1.73\n"
+				"Daniel Arena\t\t\tDeveloper in 1.5&1.6\n"
+				"Marcin Kowalski [FideLoop]\t\tDeveloper in 1.6\n"
+				"Mark McCormack\t\t\tMIDI (in) Support\n"
+				"Mats Höjlund\t\t\tMain developer until 1.5 (Internal Recoding)\n"
+				"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until 1.0\n"
+				"Hamarr Heylen\t\t\tInitial Graphics\n"
+				"David Buist\t\t\tAdditional Graphics\n"
+				"frown\t\t\t\tAdditional Graphics\n"
+				"/\\/\\ark\t\t\t\tAdditional Graphics\n"
+				"Michael Haralabos [Athlon]\t\t\tInstaller and Debugging help"
 			);
 	m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
 
 	m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
-	m_sourceforge.SetWindowText("http://sourceforge.net/projects/psycle");
+	m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
 
 	char buf[256];
 	sprintf(buf,"Version %s  [%s]",VERSION_NUMBER,__DATE__);

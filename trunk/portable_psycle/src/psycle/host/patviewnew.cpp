@@ -1,4 +1,4 @@
-
+///\todo this is a private header file... should be named .h rather than .cpp
 
 #define DRAW_DATA		1
 #define DRAW_HSCROLL	2

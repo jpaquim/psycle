@@ -1,16 +1,9 @@
+#pragma once
 // InputHandler.h: interface for the CInputHandler class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_InputHandler_H__BE3B4B0C_C330_46B6_A52E_75F094503556__INCLUDED_)
-#define AFX_InputHandler_H__BE3B4B0C_C330_46B6_A52E_75F094503556__INCLUDED_
-
 #include "constants.h"
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
 
 // key modifiers
 const int MOD_S = 1<<0;
@@ -142,6 +135,8 @@ enum CmdSet
 	cdefSelectMachine,	// Enter
 	cdefUndo,
 	cdefRedo,
+	cdefFollowSong,
+	cdefMaxPattern,
 
 	cdefTransposeChannelInc = CS_EDT_START,	
 	cdefTransposeChannelDec,
@@ -187,6 +182,7 @@ enum CmdSet
 	cdefBlockDelete,
 	cdefPatternTrackSolo,
 	cdefPatternTrackRecord,
+	cdefSelectBar,
 
 };
 
@@ -310,6 +306,7 @@ struct CmdDef
 		case cdefPatternTrackMute:	return "Pattern Track Mute";
 		case cdefPatternTrackSolo:	return "Pattern Track Solo";
 		case cdefPatternTrackRecord:	return "Pattern Track Record";
+		case cdefFollowSong:	return "Toggle Follow Song";
 		case cdefPatternDelete:	return "Pattern Delete";
 				
 		case cdefBlockCut:		return "Block Cut";
@@ -329,6 +326,7 @@ struct CmdDef
 
 		case cdefSelectAll:		return "Block Select All";
 		case cdefSelectCol:		return "Block Select Column";
+		case cdefSelectBar:		return "Block Select Bar";
 
 		case cdefEditQuantizeDec:	return "Row-skip -1";
 		case cdefEditQuantizeInc:	return "Row-skip +1";
@@ -369,6 +367,7 @@ struct CmdDef
 		case cdefEditPattern:	return "Screen of Patterns";
 		case cdefEditInstr:		return "Edit Instrument";
 		case cdefAddMachine:		return "Add New Machine";
+		case cdefMaxPattern:		return "Maximise Pattern View";
 
 		case cdefPatternInc:		return "Current Pattern +1";
 		case cdefPatternDec:		return "Current Pattern -1";
@@ -452,34 +451,4 @@ public:
 
 	// LUT for command data
 	CmdDef cmdLUT[MOD_MAX][256];		
-private:
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif // !defined(AFX_InputHandler_H__BE3B4B0C_C330_46B6_A52E_75F094503556__INCLUDED_)

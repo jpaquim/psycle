@@ -117,12 +117,76 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 			smac=GetMachine(point);
 			if ( smac != -1 )
 			{
+				switch (Global::_pSong->_pMachine[smac]->_mode)
+				{
+				case MACHMODE_GENERATOR:
+				case MACHMODE_FX:
 				mcd_x = point.x - Global::_pSong->_pMachine[smac]->_x;
 				mcd_y = point.y - Global::_pSong->_pMachine[smac]->_y;
+					_pSong->seqBus = _pSong->FindBusFromIndex(smac);
+					pParentMain->UpdateComboGen();
+					Repaint();	
+					break;
+				}
+			} 
+			else
+			{						
+				wiresource = GetMachine(point);
+				wiremove = -1;
+				if (wiresource == -1)
+				{
+
+					for (int c=0; c<MAX_MACHINES; c++)
+					{
+						Machine *tmac = Global::_pSong->_pMachine[c];
+						if (tmac)
+						{
+							for (int w = 0; w<MAX_CONNECTIONS; w++)
+							{
+								if (tmac->_connection[w])
+								{
+									int xt = tmac->_connectionPoint[w].x;
+									int yt = tmac->_connectionPoint[w].y;
+									
+									if ((point.x > xt) && (point.x < xt+triangle_size_tall) && (point.y > yt) && (point.y < yt+triangle_size_tall))
+									{
+										// we found it																		
+										wiredest = tmac->_outputMachines[w];
+										wiremove = Global::_pSong->_pMachine[wiredest]->FindInputWire(c);
+										wiresource = -1;
+										break;
+									}
+								}
+							}
+						}
+			}
+				}
+				if (wiredest != -1)
+				{
+					switch (Global::_pSong->_pMachine[wiredest]->_mode)
+					{
+					case MACHMODE_GENERATOR:
+						wireDX = Global::_pSong->_pMachine[wiredest]->_x+(MachineCoords.sGenerator.width/2);
+						wireDY = Global::_pSong->_pMachine[wiredest]->_y+(MachineCoords.sGenerator.height/2);
+						break;
+					case MACHMODE_FX:
+						wireDX = Global::_pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
+						wireDY = Global::_pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+						break;
+
+					case MACHMODE_MASTER:
+						wireDX = Global::_pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
+						wireDY = Global::_pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+						break;
+					}		
+
+					OnMouseMove(nFlags,point);
+				}
 			}
 
-			_pSong->seqBus = _pSong->FindBusFromIndex(smac);
-			pParentMain->UpdateComboGen();
+			//end of added by J. Redfern
+
+
 		}
 		else if (nFlags & MK_SHIFT)
 		{
@@ -175,13 +239,23 @@ void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 				OnMouseMove(nFlags,point);
 			}
 		}// Shift
-		
 		else if (nFlags & MK_LBUTTON)
 		{
 			smac=GetMachine(point);
 
 			if ( smac != -1 )
 			{
+				switch (Global::_pSong->_pMachine[smac]->_mode)
+				{
+					case MACHMODE_GENERATOR:
+						mcd_x = point.x - Global::_pSong->_pMachine[smac]->_x;
+						mcd_y = point.y - Global::_pSong->_pMachine[smac]->_y;
+						_pSong->seqBus = _pSong->FindBusFromIndex(smac);
+						pParentMain->UpdateComboGen();
+						Repaint();	
+						break;
+				}
+
 				mcd_x = point.x - Global::_pSong->_pMachine[smac]->_x;
 				mcd_y = point.y - Global::_pSong->_pMachine[smac]->_y;
 
@@ -407,7 +481,7 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 				if (wiremove >= 0)
 				{
 					// buffer the volume
-					int dm,w;
+					int dm,w;		//dm is the old destination machine
 					float volume = 1.0f;
 
 					if (Global::_pSong->_pMachine[wiresource])
@@ -442,8 +516,59 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 
 			}
 			wiresource = -1;
+			wiredest = -1;
 			Repaint();
 		}
+
+		//Added by J. Redfern
+		else if (wiredest != -1)
+		{
+			wiresource = GetMachine(point);
+			if ((wiresource !=-1) && (wiresource != wiredest))
+			{
+				AddMacViewUndo();
+
+				// are we moving a wire?
+				if (wiremove >= 0)
+				{
+					// buffer the volume
+					int sm,w;		//sm is the old source machine
+					float volume = 1.0f;
+
+					if (Global::_pSong->_pMachine[wiredest])
+					{					
+
+						sm = Global::_pSong->_pMachine[wiredest]->_inputMachines[wiremove];
+						
+						if (Global::_pSong->_pMachine[sm])
+						{
+							w = Global::_pSong->_pMachine[wiredest]->FindInputWire(sm);
+							Global::_pSong->_pMachine[wiredest]->GetWireVolume(w,volume);
+							if (Global::_pSong->InsertConnection(wiresource, wiredest,volume))
+							{
+								// delete the old wire
+
+								w = Global::_pSong->_pMachine[sm]->FindOutputWire(wiredest);
+
+								Global::_pSong->_pMachine[sm]->_connection[w] = FALSE;
+								Global::_pSong->_pMachine[sm]->_numOutputs--;
+
+								Global::_pSong->_pMachine[wiredest]->_inputCon[wiremove] = FALSE;
+								Global::_pSong->_pMachine[wiredest]->_numInputs--;
+							}
+							else
+							{
+								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+							}
+						}
+					}
+				}
+			}
+			wiresource = -1;
+			wiredest = -1;
+			Repaint();
+
+		} //end of added by J. Redfern
 		else if ( smacmode == 0 && smac != -1 )
 		{
 			AddMacViewUndo();
@@ -628,6 +753,14 @@ void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 			wireDY = point.y;
 			Repaint();
 		}
+				
+		if ((nFlags == (MK_CONTROL | MK_LBUTTON)) && (wiredest != -1))
+		{
+			wireSX = point.x;
+			wireSY = point.y;
+			Repaint();
+		}
+		
 		break;
 
 	case VMPattern:

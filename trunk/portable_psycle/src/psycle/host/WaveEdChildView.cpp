@@ -86,7 +86,8 @@ void CWaveEdChildView::OnPaint(void)
 	CPaintDC dc(this);
 	CPaintDC *pDC = &dc;
 
-	int wrHeight = 0, wrHeight_R = 0, yLow = 0, yHi = 0, absBuf = 0, abs_yBuf = 0;
+//	int wrHeight = 0, wrHeight_R = 0, yLow = 0, yHi = 0, absBuf = 0, abs_yBuf = 0;
+	int wrHeight = 0, yLow = 0, yHi = 0;
 	double OffsetStep = 0;
 	__int32 c, d;
 //	LOGPEN _pen;
@@ -688,7 +689,7 @@ void CWaveEdChildView::OnSelectionAmplify()
 		{
 			_pSong->Invalided=true;
 			Sleep(LOCK_LATENCY);
-			ratio = pow(10., (double) pos / (double) 2000);
+			ratio = pow(10.0, (double) pos / (double) 2000.0);
 		
 			for (c=blStart; c<blStart+blLength; c++)
 			{
@@ -738,7 +739,7 @@ void CWaveEdChildView::OnSelectionReverse()
 		_pSong->Invalided=true;
 		Sleep(LOCK_LATENCY);
 
-		halved = (int) floor((double)blLength/2);
+		halved = (int) floor(blLength/2.0);
 
 		for (c = 0; c < halved; c++)
 		{

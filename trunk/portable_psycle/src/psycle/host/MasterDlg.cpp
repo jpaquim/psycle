@@ -55,7 +55,7 @@ BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
 	//{{AFX_MSG_MAP(CMasterDlg)
 	ON_BN_CLICKED(IDC_AUTODEC, OnAutodec)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERMASTER, OnCustomdrawSlidermaster)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM1, OnCustomdrawSliderm1)
+/*	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM1, OnCustomdrawSliderm1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM10, OnCustomdrawSliderm10)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM11, OnCustomdrawSliderm11)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM12, OnCustomdrawSliderm12)
@@ -66,9 +66,10 @@ BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM6, OnCustomdrawSliderm6)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM7, OnCustomdrawSliderm7)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM8, OnCustomdrawSliderm8)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM9, OnCustomdrawSliderm9)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM9, OnCustomdrawSliderm9)*/
 	ON_WM_PAINT()
 	//}}AFX_MSG_MAP
+	ON_STN_CLICKED(IDC_MIXERVIEW, OnStnClickedMixerview)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -81,7 +82,7 @@ BOOL CMasterDlg::OnInitDialog()
 	namesFont.CreatePointFont(80,"Tahoma");
 	m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
 	
-	m_slidermaster.SetRange(0, 256);
+	m_slidermaster.SetRange(0, 1024);
 	m_sliderm1.SetRange(0, 256);
 	m_sliderm2.SetRange(0, 256);
 	m_sliderm3.SetRange(0, 256);
@@ -95,10 +96,28 @@ BOOL CMasterDlg::OnInitDialog()
 	m_sliderm11.SetRange(0, 256);
 	m_sliderm12.SetRange(0, 256);
 	
-	float val;
-	val = sqrtf(_pMachine->_outDry*64.0f);
-	m_slidermaster.SetPos(256-f2i(val));
+	m_slidermaster.SetPageSize(4);
+	m_sliderm1.SetPageSize(0);
+	m_sliderm2.SetPageSize(0);
+	m_sliderm3.SetPageSize(0);
+	m_sliderm4.SetPageSize(0);
+	m_sliderm5.SetPageSize(0);
+	m_sliderm6.SetPageSize(0);
+	m_sliderm7.SetPageSize(0);
+	m_sliderm8.SetPageSize(0);
+	m_sliderm9.SetPageSize(0);
+	m_sliderm10.SetPageSize(0);
+	m_sliderm11.SetPageSize(0);
+	m_sliderm12.SetPageSize(0);
 
+
+	//float val;
+	//val = sqrtf(_pMachine->_outDry*64.0f);
+	//m_slidermaster.SetPos(256-f2i(val));
+
+	m_slidermaster.SetPos(1024 - _pMachine->_outDry);
+
+	/*
 	if (_pMachine->_inputCon[0])
 	{
 		_pMachine->GetWireVolume(0,val);
@@ -230,6 +249,7 @@ BOOL CMasterDlg::OnInitDialog()
 	{
 		m_sliderm12.SetPos(256);
 	}
+	*/
 	
 	if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 	else m_autodec.SetCheck(0);
@@ -260,8 +280,8 @@ void CMasterDlg::OnCancel()
 
 void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	_pMachine->_outDry = 256-m_slidermaster.GetPos();
-	_pMachine->_outDry = ((256-m_slidermaster.GetPos())*(256-m_slidermaster.GetPos()))/64;
+	_pMachine->_outDry = 1024-m_slidermaster.GetPos();
+//	_pMachine->_outDry = ((256-m_slidermaster.GetPos())*(256-m_slidermaster.GetPos()))/64;
 
 	PaintNumbers(_pMachine->_outDry,32,142);
 	
@@ -344,6 +364,7 @@ void CMasterDlg::PaintNames(char *name, int x, int y)
 	dc->SelectObject(oldfont);
 }
 
+/*
 void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	int val = f2i(((256-m_sliderm1.GetPos())*(256-m_sliderm1.GetPos()))/64.0f);
@@ -491,6 +512,7 @@ void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	*pResult = 0;
 }
+*/
 
 void CMasterDlg::OnPaint() 
 {
@@ -504,8 +526,8 @@ void CMasterDlg::OnPaint()
 		memDC.CreateCompatibleDC(dcm);
 		oldbmp = memDC.SelectObject(&m_numbers);
 		
-		PaintNumbersDC(dcm,&memDC,256-m_slidermaster.GetPos(),32,142);
-		PaintNumbersDC(dcm,&memDC,256-m_sliderm1.GetPos(),92,142);
+		PaintNumbersDC(dcm,&memDC,1024-m_slidermaster.GetPos(),32,142);
+/*		PaintNumbersDC(dcm,&memDC,256-m_sliderm1.GetPos(),92,142);
 		PaintNumbersDC(dcm,&memDC,256-m_sliderm2.GetPos(),112,142);
 		PaintNumbersDC(dcm,&memDC,256-m_sliderm3.GetPos(),132,142);
 		PaintNumbersDC(dcm,&memDC,256-m_sliderm4.GetPos(),152,142);
@@ -517,7 +539,7 @@ void CMasterDlg::OnPaint()
 		PaintNumbersDC(dcm,&memDC,256-m_sliderm10.GetPos(),272,142);
 		PaintNumbersDC(dcm,&memDC,256-m_sliderm11.GetPos(),292,142);
 		PaintNumbersDC(dcm,&memDC,256-m_sliderm12.GetPos(),312,142);
-
+*/
 		memDC.SelectObject(oldbmp);
 		memDC.DeleteDC();
 	}
@@ -553,4 +575,9 @@ BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg)
 	}
 	
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+void CMasterDlg::OnStnClickedMixerview()
+{
+	// TODO: Add your control notification handler code here
 }

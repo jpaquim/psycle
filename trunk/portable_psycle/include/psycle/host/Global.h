@@ -1,5 +1,3 @@
-#ifndef PSYCLE__GLOBAL
-#define PSYCLE__GLOBAL
 #pragma once
 class Song;
 class Player;
@@ -23,9 +21,8 @@ public:
 	static Player* pPlayer;
 	static Configuration* pConfig;
 	static Resampler* pResampler;
-#	if !defined _WINAMP_PLUGIN_
+	#if !defined _WINAMP_PLUGIN_
 		static unsigned int _cpuHz;
 		static InputHandler* pInputHandler;
-#	endif
+	#endif
 };
-#endif

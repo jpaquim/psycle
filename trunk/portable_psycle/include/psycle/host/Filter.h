@@ -1,7 +1,5 @@
-#ifndef _FILTER_H
-#define _FILTER_H
-
-#include <math.h>
+#pragma once
+#include <cmath>
 #include "Configuration.h"
 
 #define TPI 6.28318530717958647692528676655901
@@ -186,5 +184,3 @@ protected:
 	float _x1, _x2, _y1, _y2;
 	float _a1, _a2, _b1, _b2;
 };
-
-#endif

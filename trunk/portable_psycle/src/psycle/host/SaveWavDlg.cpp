@@ -533,7 +533,7 @@ DWORD WINAPI __stdcall RecordThread(void *b)
 			((CSaveWavDlg*)b)->SaveEnd();
 			((CSaveWavDlg*)b)->threadopen--;
 			ExitThread(0);
-			return 0;
+			//return 0;
 		}
 		pPlayer->Work(pPlayer,stream_size);
 		((CSaveWavDlg*)b)->SaveTick();
@@ -544,7 +544,7 @@ DWORD WINAPI __stdcall RecordThread(void *b)
 	((CSaveWavDlg*)b)->SaveEnd();
 	((CSaveWavDlg*)b)->threadopen--;
 	ExitThread(0);
-	return 0;
+	//return 0;
 }
 
 void CSaveWavDlg::OnCancel() 

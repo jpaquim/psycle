@@ -701,7 +701,12 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 			{
 				if (Global::pConfig->_RecordTweaks)
 				{
-					if (Global::pConfig->_midiRecordVel)
+					if (Global::pConfig->_midiRawMcm)
+					{
+						entry._cmd = 0x0c;
+						entry._parameter = velocity*2;
+					}
+					else if (Global::pConfig->_midiRecordVel)
 					{
 						// command
 						entry._cmd = Global::pConfig->_midiCommandVel;
@@ -796,7 +801,12 @@ void CChildView::EnterNote(int note, int velocity, bool bTranspose)
 	{
 		if (Global::pConfig->_RecordTweaks)
 		{
-			if (Global::pConfig->_midiRecordVel)
+			if (Global::pConfig->_midiRawMcm)
+			{
+				entry->_cmd = 0x0c;
+				entry->_parameter = velocity*2;
+			}
+			else if (Global::pConfig->_midiRecordVel)
 			{
 				// command
 				entry->_cmd = Global::pConfig->_midiCommandVel;
@@ -1099,6 +1109,9 @@ void CChildView::PlayCurrentNote(void)
 // Cursor Moving Functions
 void CChildView::PrevCol(bool wrap,bool updateDisplay)
 {
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	if(--editcur.col < 0)
 	{
 		editcur.col=8;
@@ -1121,6 +1134,9 @@ void CChildView::PrevCol(bool wrap,bool updateDisplay)
 
 void CChildView::NextCol(bool wrap,bool updateDisplay)
 {
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	if (++editcur.col > 8)
 	{
 		editcur.col = 0;
@@ -1143,6 +1159,9 @@ void CChildView::NextCol(bool wrap,bool updateDisplay)
 
 void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 {
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	const int nl = _pSong->patternLines[_ps()];
 
 	editcur.line -= x;
@@ -1164,6 +1183,9 @@ void CChildView::PrevLine(int x, bool wrap,bool updateDisplay)
 
 void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 {
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	const int nl = _pSong->patternLines[_ps()];
 
 	if ( x >= 0)	
@@ -1192,6 +1214,9 @@ void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
 
 void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
 {
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	editcur.track+=x;
 	editcur.col=0;
 	
@@ -1207,6 +1232,9 @@ void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
 
 void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
 {
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	editcur.track-=x;
 	editcur.col=0;
 	
@@ -1376,6 +1404,10 @@ void CChildView::patTranspose(int trp)
 
 void CChildView::StartBlock(int track,int line, int col)
 {
+
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
+
 	blockSel.start.track=track;
 	blockSel.start.line=line;
 	iniSelec = blockSel.start;
@@ -1475,6 +1507,9 @@ void CChildView::EndBlock(int track,int line, int col)
 void CChildView::BlockUnmark()
 {
 	blockSelected=false;
+
+	//reinitialise the select bar state
+	CChildView::blockSelectBarState = 1;
 
 	Repaint(DMSelection);
 }
@@ -1586,8 +1621,11 @@ void CChildView::PasteBlock(int tx,int lx,bool mix)
 			++ts;
 		}
 		
-		if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
-		else editcur.line = nl-1;
+		if (Global::pConfig->_MoveCursorPaste)
+		{
+			if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
+			else editcur.line = nl-1;
+		}
 
 		bScrollDetatch=false;
 		NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
@@ -1860,14 +1898,14 @@ void CChildView::BlockParamInterpolate()
 			*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+3) * 0x100 +
 			*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+4);
 		const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
-		const unsigned char comd = *(toffset+blockSel.start.track*5+blockSel.start.line*MULTIPLY+3);
+		const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 		int displace2=(blockSel.start.track*EVENT_SIZE)+((blockSel.start.line+1)*MULTIPLY);
 		
-		if ( toffset[displace2] == cdefTweakM || toffset[displace2] == cdefTweakE || toffset[displace2] == cdefTweakS)
+		if ( toffset[firstrow] == cdefTweakM || toffset[firstrow] == cdefTweakE || toffset[firstrow] == cdefTweakS ||toffset[firstrow] == cdefMIDICC)
 		{
-			unsigned char note = toffset[displace2];
-			unsigned char aux = toffset[displace2+1];
-			unsigned char mac = toffset[displace2+2];
+			unsigned char note = toffset[firstrow];
+			unsigned char aux = toffset[firstrow+1];
+			unsigned char mac = toffset[firstrow+2];
 			for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
 			{
 				toffset[displace2]=note;
@@ -1956,6 +1994,9 @@ void CChildView::DecPosition()
 
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPattern);
+		if (Global::pPlayer->_playing) {
+			Repaint(DMPlayback);
+		}
 	}
 }
 
@@ -2005,6 +2046,9 @@ void CChildView::IncPosition(bool bRepeat)
 
 		pParentMain->UpdatePlayOrder(true);
 		Repaint(DMPattern);
+		if (Global::pPlayer->_playing) {
+			Repaint(DMPlayback);
+		}
 	}
 }
 
@@ -2645,8 +2689,31 @@ void CChildView::KillUndo()
 
 void CChildView::SelectNextTrack()
 {
-	if(++editcur.track >= _pSong->SONGTRACKS)
-		editcur.track=0;
+	int i;
+	for (i = editcur.track+1; i < _pSong->SONGTRACKS; i++)
+	{
+		if (_pSong->_trackArmed[i])
+		{
+			if (Global::pInputHandler->notetrack[i] == 120)
+			{
+				break;
+			}
+		}
+	}
+	if (i >= _pSong->SONGTRACKS)
+	{
+		for (i = 0; i <= editcur.track; i++)
+		{
+			if (_pSong->_trackArmed[i])
+			{
+				if (Global::pInputHandler->notetrack[i] == 120)
+				{
+					break;
+				}
+			}
+		}
+	}
+	editcur.track = i;
 	while(_pSong->_trackArmed[editcur.track] == 0)
 	{
 		if(++editcur.track >= _pSong->SONGTRACKS)

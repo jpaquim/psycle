@@ -345,8 +345,7 @@ float * Player::Work(
 			// Advance position in the sequencer
 			//
 			pThis->AdvancePosition();
-			pThis->ExecuteLine();
-	
+			if (pThis->_playing) pThis->ExecuteLine();
 		}
 
 		//////////////////////////////////////////////////////////////////////
@@ -542,11 +541,4 @@ void Player::StopRecording(bool bOk)
 	}
 }
 #endif // ndef _WINAMP_PLUGIN_
-
-void Player::SetSampleRate(int samprate)
-{
-	// TODO: Add notifications to all machines that the sample Rate has changed
-	// samplerate = samprate;
-	// for (Allmachines) change it
-}
 

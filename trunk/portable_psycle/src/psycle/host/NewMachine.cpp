@@ -255,7 +255,7 @@ void CNewMachine::UpdateList(bool bInit)
 
 void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
+	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 
 	tHand = m_browser.GetSelectedItem();
 
@@ -572,7 +572,7 @@ void CNewMachine::FindPluginsInDir(int& currentPlugsCount,int& currentBadPlugsCo
 	strcpy(last,"\\pluginlog.txt");
 	FILE* hfile;
 	hfile=fopen(logname,"a");  
-	int tmpCount = currentPlugsCount;
+	int tmpCount = currentPlugsCount; tmpCount; // not used
 
 	loop = finder.FindFile(findDir + "\\*.dll"); // check if the directory is empty
 	while (loop)

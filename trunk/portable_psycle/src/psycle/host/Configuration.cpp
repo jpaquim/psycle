@@ -35,6 +35,7 @@ Configuration::Configuration()
 	_notesToEffects = false;
 	_RecordMouseTweaksSmooth = FALSE;
 	_RecordUnarmed = true;
+	_MoveCursorPaste = false;
 	_midiMachineViewSeqMode = false;
 	autoStopMachines = false;
 	useDoubleBuffer = true;
@@ -265,6 +266,8 @@ Configuration::Configuration()
 	_midiFrom15 = 0;
 	_midiTo15 = 0xff;
 
+	_midiRawMcm = FALSE;
+
 	defaultPatLines = 64;
 	bShowSongInfoOnLoad = true;
 	bFileSaveReminders = true;
@@ -420,6 +423,8 @@ Configuration::Read()
 	reg.QueryValue("notesToEffects", &type, (BYTE*)&_notesToEffects, &numData);
 	numData = sizeof(_RecordUnarmed);
 	reg.QueryValue("RecordUnarmed", &type, (BYTE*)&_RecordUnarmed, &numData);
+	numData = sizeof(_MoveCursorPaste);
+	reg.QueryValue("MoveCursorPaste", &type, (BYTE*)&_MoveCursorPaste, &numData);
 
 	numData = sizeof(_midiMachineViewSeqMode);
 	reg.QueryValue("MidiMachineViewSeqMode", &type, (BYTE*)&_midiMachineViewSeqMode, &numData);
@@ -653,6 +658,9 @@ Configuration::Read()
 	reg.QueryValue("MidiFrom15", &type, (BYTE*)&_midiFrom15, &numData);
 	numData = sizeof(_midiTo15);
 	reg.QueryValue("MidiTo15", &type, (BYTE*)&_midiTo15, &numData);
+
+	numData = sizeof(_midiRawMcm);
+	reg.QueryValue("MidiRawMcm", &type, (BYTE*)&_midiRawMcm, &numData);
 
 	numData = sizeof(defaultPatLines);
 	reg.QueryValue("defaultPatLines", &type, (BYTE*)&defaultPatLines, &numData);
@@ -992,6 +1000,7 @@ Configuration::Write()
 	reg.SetValue("RecordMouseTweaksSmooth", REG_BINARY, (BYTE*)&_RecordMouseTweaksSmooth, sizeof(_RecordMouseTweaksSmooth));
 	reg.SetValue("notesToEffects", REG_BINARY, (BYTE*)&_notesToEffects, sizeof(_notesToEffects));
 	reg.SetValue("RecordUnarmed", REG_BINARY, (BYTE*)&_RecordUnarmed, sizeof(_RecordUnarmed));
+	reg.SetValue("MoveCursorPaste", REG_BINARY, (BYTE*)&_MoveCursorPaste, sizeof(_MoveCursorPaste));
 	reg.SetValue("MidiMachineViewSeqMode", REG_BINARY, (BYTE*)&_midiMachineViewSeqMode, sizeof(_midiMachineViewSeqMode));
 	reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&_outputDriverIndex, sizeof(_outputDriverIndex));
 	reg.SetValue("MidiInputDriver", REG_DWORD, (BYTE*)&_midiDriverIndex, sizeof(_midiDriverIndex));	// MIDI IMPLEMENTATION
@@ -1121,6 +1130,8 @@ Configuration::Write()
 	reg.SetValue("MidiCommand15", REG_DWORD, (BYTE*)&_midiCommand15, sizeof(_midiCommand15));	
 	reg.SetValue("MidiFrom15", REG_DWORD, (BYTE*)&_midiFrom15, sizeof(_midiFrom15));	
 	reg.SetValue("MidiTo15", REG_DWORD, (BYTE*)&_midiTo15, sizeof(_midiTo15));	
+
+	reg.SetValue("MidiRawMcm", REG_BINARY, (BYTE*)&_midiRawMcm, sizeof(_midiRawMcm));
 
 	reg.SetValue("defaultPatLines", REG_DWORD, (BYTE*)&defaultPatLines, sizeof(defaultPatLines));	
 
