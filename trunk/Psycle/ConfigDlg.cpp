@@ -77,6 +77,7 @@ void CConfigDlg::Init(
 	_skinDlg._machineViewEffectFontColor = pConfig->mv_effect_fontcolour;
 	_skinDlg._wireaa = pConfig->mv_wireaa;
 	_skinDlg._wirewidth = pConfig->mv_wirewidth;
+	_skinDlg._triangle_size = pConfig->mv_triangle_size;
 
 	_skinDlg._vubColor = pConfig->vu1;
 	_skinDlg._vugColor = pConfig->vu2;
@@ -207,6 +208,8 @@ int CConfigDlg::DoModal()
 		_pConfig->vu3 = _skinDlg._vucColor;
 		_pConfig->mv_wireaa = _skinDlg._wireaa;
 		_pConfig->mv_wirewidth = _skinDlg._wirewidth;
+
+		_pConfig->mv_triangle_size = _skinDlg._triangle_size;
 
 		_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
 		_pConfig->_linenumbers = _skinDlg._linenumbers;

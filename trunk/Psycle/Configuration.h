@@ -81,6 +81,8 @@ bool CreatePsyFont(CFont&f, char*sFontFace,int HeightPx, bool bBold, bool bItali
 	bool useDoubleBuffer;
 	bool _showAboutAtStart;
 
+	int mv_triangle_size;
+
 	bool bBmpBkg;
 	char szBmpBkgFilename[MAX_PATH];
 

@@ -67,6 +67,7 @@ Configuration::Configuration()
 	mv_generator_fontcolour = 0x00000000;
 	mv_effect_fontcolour = 0x00000000;
 	mv_wireaa = 1;
+	mv_triangle_size = 24;
 	mv_wirewidth = 1;
 	mv_wireaacolour = ((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
 			((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
@@ -680,6 +681,8 @@ Configuration::Read()
 	reg.QueryValue("mv_generator_fontcolour", &type, (BYTE*)&mv_generator_fontcolour, &numData);
 	numData = sizeof(mv_effect_fontcolour);
 	reg.QueryValue("mv_effect_fontcolour", &type, (BYTE*)&mv_effect_fontcolour, &numData);
+	numData = sizeof(mv_triangle_size);
+	reg.QueryValue("mv_triangle_size", &type, (BYTE*)&mv_triangle_size, &numData);
 
 	numData = sizeof(bBmpBkg);
 	reg.QueryValue("bBmpBkg", &type, (BYTE*)&bBmpBkg, &numData);
@@ -1121,10 +1124,12 @@ Configuration::Write()
 	reg.SetValue("mv_wirecolour", REG_DWORD, (BYTE*)&mv_wirecolour, sizeof(mv_wirecolour));	
 	reg.SetValue("mv_polycolour", REG_DWORD, (BYTE*)&mv_polycolour, sizeof(mv_polycolour));	
 	reg.SetValue("mv_wireaa", REG_BINARY, (BYTE*)&mv_wireaa, sizeof(mv_wireaa));	
+
 	reg.SetValue("mv_wirewidth", REG_DWORD, (BYTE*)&mv_wirewidth, sizeof(mv_wirewidth));	
 	reg.SetValue("mv_generator_fontcolour", REG_DWORD, (BYTE*)&mv_generator_fontcolour, sizeof(mv_generator_fontcolour));	
 	reg.SetValue("mv_effect_fontcolour", REG_DWORD, (BYTE*)&mv_effect_fontcolour, sizeof(mv_effect_fontcolour));	
 
+	reg.SetValue("mv_triangle_size", REG_BINARY, (BYTE*)&mv_triangle_size, sizeof(mv_triangle_size));	
 
 	reg.SetValue("bBmpBkg", REG_DWORD, (BYTE*)&bBmpBkg, sizeof(bBmpBkg));	
 	reg.SetValue("szBmpBkgFilename", REG_DWORD, (BYTE*)&szBmpBkgFilename, sizeof(szBmpBkgFilename));

@@ -34,25 +34,26 @@ void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSkinDlg)
-	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
-	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
-	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
-	DDX_Control(pDX, IDC_LINE_NUMBERS_CURSOR, m_linenumbersCursor);
-	DDX_Control(pDX, IDC_WIREAA, m_wireaa);
+	DDX_Control(pDX, IDC_MACHINE_BITMAP, m_machine_background_bitmap);
+	DDX_Control(pDX, IDC_TRIANGLESIZE, m_triangle_size);
 	DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 	DDX_Control(pDX, IDC_PATTERN_FONTFACE, m_pattern_fontface);
 	DDX_Control(pDX, IDC_PATTERN_FONT_POINT, m_pattern_font_point);
 	DDX_Control(pDX, IDC_PATTERN_FONT_X, m_pattern_font_x);
 	DDX_Control(pDX, IDC_PATTERN_FONT_Y, m_pattern_font_y);
 	DDX_Control(pDX, IDC_PATTERN_HEADER_SKIN, m_pattern_header_skin);
+	DDX_Control(pDX, IDC_MACHINE_SKIN, m_machine_skin);
 	DDX_Control(pDX, IDC_MACHINE_FONTFACE, m_generator_fontface);
 	DDX_Control(pDX, IDC_MACHINE_FONT_POINT, m_generator_font_point);
 	DDX_Control(pDX, IDC_MACHINE_FONTFACE2, m_effect_fontface);
 	DDX_Control(pDX, IDC_MACHINE_FONT_POINT2, m_effect_font_point);
-	DDX_Control(pDX, IDC_MACHINE_SKIN, m_machine_skin);
+	DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
+	DDX_Control(pDX, IDC_LINE_NUMBERS, m_linenumbers);
+	DDX_Control(pDX, IDC_LINE_NUMBERS_HEX, m_linenumbersHex);
+	DDX_Control(pDX, IDC_LINE_NUMBERS_CURSOR, m_linenumbersCursor);
 	DDX_Control(pDX, IDC_DRAW_EMPTY_DATA, m_pattern_draw_empty_data);
 	DDX_Control(pDX, IDC_DRAW_MAC_INDEX, m_draw_mac_index);
-
+	DDX_Control(pDX, IDC_WIREAA, m_wireaa);
 	//}}AFX_DATA_MAP
 }
 
@@ -114,6 +115,7 @@ BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
 	ON_BN_CLICKED(IDC_DRAW_EMPTY_DATA, OnDrawEmptyData)
 	ON_BN_CLICKED(IDC_DRAW_MAC_INDEX, OnDrawMacIndex)
 	ON_BN_CLICKED(IDC_MACHINE_BITMAP, OnMachineBitmap)
+	ON_CBN_SELCHANGE(IDC_TRIANGLESIZE, OnSelchangeTrianglesize)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -203,6 +205,25 @@ BOOL CSkinDlg::OnInitDialog()
 		sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
 	}
 	m_machine_skin.SetCurSel(sel);
+
+	if (bBmpBkg)
+	{
+		CString str1(szBmpBkgFilename);
+		int i = str1.ReverseFind('\\')+1;
+		CString str2 = str1.Mid(i);
+		m_machine_background_bitmap.SetWindowText(str2);
+	}
+	else
+	{
+		m_machine_background_bitmap.SetWindowText("Bitmap");
+	}
+
+	for (i = 8; i <= 64; i++)
+	{
+		sprintf(s,"%2i",i);
+		m_triangle_size.AddString(s);
+	}
+	m_triangle_size.SetCurSel(_triangle_size-8);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -718,7 +739,6 @@ void CSkinDlg::OnImportReg()
 		_pattern_font_flags = 0;
 		_generator_font_flags = 0;
 		_effect_font_flags = 0;
-		bBmpBkg = FALSE;
 
 		char buf[512];
 		while (fgets(buf, 512, hfile))
@@ -1163,6 +1183,14 @@ void CSkinDlg::OnImportReg()
 					_machineViewEffectFontColor=_httoi(q+1);
 				}
 			}
+			else if (strstr(buf,"\"mv_triangle_size\"=hex:"))
+			{
+				char *q = strchr(buf,58); // :
+				if (q)
+				{
+					_triangle_size=_httoi(q+1);
+				}
+			}
 
 			//
 			//
@@ -1232,6 +1260,20 @@ void CSkinDlg::OnImportReg()
 			sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
 		}
 		m_machine_skin.SetCurSel(sel);
+
+		if (bBmpBkg)
+		{
+			CString str1(szBmpBkgFilename);
+			int i = str1.ReverseFind('\\')+1;
+			CString str2 = str1.Mid(i);
+			m_machine_background_bitmap.SetWindowText(str2);
+		}
+		else
+		{
+			m_machine_background_bitmap.SetWindowText("Bitmap");
+		}
+
+		m_triangle_size.SetCurSel(_triangle_size-8);
 	}
 }
 
@@ -1251,7 +1293,7 @@ void CSkinDlg::OnExportReg()
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	ofn.Flags = OFN_PATHMUSTEXIST;	
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 	ofn.lpstrInitialDir = _skinPathBuf;
 
 	if (GetSaveFileName(&ofn)==TRUE)
@@ -1322,6 +1364,7 @@ void CSkinDlg::OnExportReg()
 		fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
 		fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
 		fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename);
+		fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n",_triangle_size);
 
 		fclose(hfile);
 	}
@@ -1602,9 +1645,21 @@ void CSkinDlg::OnMachineBitmap()
 	{
 		strcpy(szBmpBkgFilename,szFile);
 		bBmpBkg = TRUE;
+
+		CString str1(szBmpBkgFilename);
+		int i = str1.ReverseFind('\\')+1;
+		CString str2 = str1.Mid(i);
+		m_machine_background_bitmap.SetWindowText(str2);
 	}
 	else
 	{
 		bBmpBkg = FALSE;
+		m_machine_background_bitmap.SetWindowText("Bitmap");
 	}
+}
+
+void CSkinDlg::OnSelchangeTrianglesize() 
+{
+	// TODO: Add your control notification handler code here
+	_triangle_size=m_triangle_size.GetCurSel()+8;
 }

@@ -752,7 +752,7 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
-	ofn.Flags = OFN_PATHMUSTEXIST;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 	BOOL bResult = TRUE;
 	
 	// Display the Open dialog box. 
@@ -775,14 +775,6 @@ BOOL CChildView::OnFileSaveAs(UINT id)
 			if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
 			int index = str.ReverseFind('\\');
 			OldPsyFile file;
-			if (file.Open(str.GetBuffer(1)))
-			{
-				file.Close();
-				if (MessageBox(str.GetBuffer(1),"Overwrite this file?",MB_YESNO) != IDYES)
-				{
-					return FALSE;
-				}
-			}
 
 			if (index != -1)
 			{
@@ -3289,6 +3281,11 @@ void CChildView::RecalcMetrics()
 	{ 
 		VISTRACKS = 1; 
 	}
+
+	triangle_size_tall = Global::pConfig->mv_triangle_size+((46*Global::pConfig->mv_wirewidth)/32);
+	triangle_size_center = triangle_size_tall/2;
+	triangle_size_wide = (triangle_size_tall*5)/8;
+
 }
 
 

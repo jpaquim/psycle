@@ -597,7 +597,7 @@ void CPresetsDlg::OnExport()
 	{
 		ofn.lpstrInitialDir = Global::pConfig->GetVstDir();
 	}
-	ofn.Flags = OFN_PATHMUSTEXIST;	
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 
 	// Display the Open dialog box. 
 	
