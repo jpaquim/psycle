@@ -44,6 +44,7 @@ V1.67
 ! Cleaned up Status Bar (pooplog)
 ! Made Master Machine Dialog modeless, updates display if volume attenuated
 + VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
++ Added commands FDxx and FBxx (trigger delay and retrigger, xx/256 lines speed) for all generator types. (pooplog)
 
 
 V1.66

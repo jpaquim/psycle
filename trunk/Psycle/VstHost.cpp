@@ -958,8 +958,71 @@ void VSTInstrument::Work(int numSamples)
 		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 		SendMidi();
 
-		if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,numSamples);
-		else _pEffect->processReplacing(_pEffect,inputs,outputs,numSamples);
+		int ns = numSamples;
+		while (ns)
+		{
+			int nextevent = numSamples+1;
+			for (int i=0; i < MAX_TRACKS; i++)
+			{
+				if (TriggerDelay[i]._cmd)
+				{
+					if (TriggerDelayCounter[i] < nextevent)
+					{
+						nextevent = TriggerDelayCounter[i];
+					}
+				}
+			}
+			if (nextevent > ns)
+			{
+				for (int i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd)
+					{
+						TriggerDelayCounter[i] -= ns;
+					}
+				}
+				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,ns);
+				else _pEffect->processReplacing(_pEffect,inputs,outputs,ns);
+				ns = 0;
+			}
+			else
+			{
+				ns -= nextevent;
+				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,nextevent);
+				else _pEffect->processReplacing(_pEffect,inputs,outputs,nextevent);
+				for (i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd == 0xfd)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+							TriggerDelay[i]._cmd = 0;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+					else if (TriggerDelay[i]._cmd == 0xfb)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							_pInterface->SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+				}
+			}
+		}
 
 		if ( _pEffect->numOutputs == 1)
 		{
@@ -978,9 +1041,72 @@ void VSTInstrument::Work(int numSamples)
 		if ( wantidle ) Dispatch(effIdle, 0, 0, NULL, 0.0f);
 
 		SendMidi();
+		int ns = numSamples;
+		while (ns)
+		{
+			int nextevent = numSamples+1;
+			for (int i=0; i < MAX_TRACKS; i++)
+			{
+				if (TriggerDelay[i]._cmd)
+				{
+					if (TriggerDelayCounter[i] < nextevent)
+					{
+						nextevent = TriggerDelayCounter[i];
+					}
+				}
+			}
+			if (nextevent > ns)
+			{
+				for (int i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd)
+					{
+						TriggerDelayCounter[i] -= ns;
+					}
+				}
+				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,ns);
+				else _pEffect->processReplacing(_pEffect,inputs,outputs,ns);
+				ns = 0;
+			}
+			else
+			{
+				ns -= nextevent;
+				if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,nextevent);
+				else _pEffect->processReplacing(_pEffect,inputs,outputs,nextevent);
+				for (i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd == 0xfd)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelay[i]._cmd = 0;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+					else if (TriggerDelay[i]._cmd == 0xfb)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+				}
+			}
+		}
 
-		if (!requiresRepl ) _pEffect->process(_pEffect,inputs,outputs,numSamples);
-		else _pEffect->processReplacing(_pEffect,inputs,outputs,numSamples);
 		if ( _pEffect->numOutputs == 1)
 		{
 			Dsp::Add(outputs[0],outputs[1],numSamples,1);

@@ -63,18 +63,153 @@ void Sampler::Work(
 #if defined(_WINAMP_PLUGIN_)
 	for (int voice=0; voice<_numVoices; voice++)
 	{
-		PerformFx(voice);
-		VoiceWork(numSamples, voice);
+		int ns = numSamples;
+		while (ns)
+		{
+			int nextevent = numSamples+1;
+			for (int i=0; i < MAX_TRACKS; i++)
+			{
+				if (TriggerDelay[i]._cmd)
+				{
+					if (TriggerDelayCounter[i] < nextevent)
+					{
+						nextevent = TriggerDelayCounter[i];
+					}
+				}
+			}
+			if (nextevent > ns)
+			{
+				for (int i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd)
+					{
+						TriggerDelayCounter[i] -= ns;
+					}
+				}
+				for (int voice=0; voice<_numVoices; voice++)
+				{
+					PerformFx(voice);
+					VoiceWork(ns, voice);
+				}
+				ns = 0;
+			}
+			else
+			{
+				ns -= nextevent;
+				for (int voice=0; voice<_numVoices; voice++)
+				{
+					PerformFx(voice);
+					VoiceWork(nextevent, voice);
+				}
+				for (i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd == 0xfd)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelay[i]._cmd = 0;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+					else if (TriggerDelay[i]._cmd == 0xfb)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+				}
+			}
+		}
 	}
 	_worked = true;
 #else
 	CPUCOST_INIT(cost);
 	if (!_mute)
 	{
-		for (int voice=0; voice<_numVoices; voice++)
+		int ns = numSamples;
+		while (ns)
 		{
-			PerformFx(voice);
-			VoiceWork(numSamples, voice);
+			int nextevent = numSamples+1;
+			for (int i=0; i < MAX_TRACKS; i++)
+			{
+				if (TriggerDelay[i]._cmd)
+				{
+					if (TriggerDelayCounter[i] < nextevent)
+					{
+						nextevent = TriggerDelayCounter[i];
+					}
+				}
+			}
+			if (nextevent > ns)
+			{
+				for (int i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd)
+					{
+						TriggerDelayCounter[i] -= ns;
+					}
+				}
+				for (int voice=0; voice<_numVoices; voice++)
+				{
+					PerformFx(voice);
+					VoiceWork(ns, voice);
+				}
+				ns = 0;
+			}
+			else
+			{
+				ns -= nextevent;
+				for (int voice=0; voice<_numVoices; voice++)
+				{
+					PerformFx(voice);
+					VoiceWork(nextevent, voice);
+				}
+				for (i=0; i < MAX_TRACKS; i++)
+				{
+					// come back to this
+					if (TriggerDelay[i]._cmd == 0xfd)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelay[i]._cmd = 0;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+					else if (TriggerDelay[i]._cmd == 0xfb)
+					{
+						if (TriggerDelayCounter[i] == nextevent)
+						{
+							// do event
+							Tick(i,&TriggerDelay[i]);
+							TriggerDelayCounter[i] = ((TriggerDelay[i]._parameter+1)*Global::_pSong->SamplesPerTick)/256;
+						}
+						else
+						{
+							TriggerDelayCounter[i] -= nextevent;
+						}
+					}
+				}
+			}
 		}
 		Machine::SetVolumeCounter(numSamples);
 		if ( Global::pConfig->autoStopMachines )
@@ -933,3 +1068,4 @@ void Sampler::PerformFx(int voice)
 		break;
 	}
 }
+

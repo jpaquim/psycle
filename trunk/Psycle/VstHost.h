@@ -145,3 +145,4 @@ protected:
 };
 
 #endif // _VSTPLUGIN_HOST
+
