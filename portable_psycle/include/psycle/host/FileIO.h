@@ -8,7 +8,7 @@ namespace psycle
 {
 	namespace host
 	{
-		/// little endian 32-bit integer.
+		/// big-endian 32-bit unsigned integer.
 		class ULONGINV
 		{
 		public:
@@ -28,11 +28,11 @@ namespace psycle
 		/// riff file format.
 		/// RIFF has a counterpart, RIFX, that is used to define RIFF file formats
 		/// that use the Motorola integer byte-ordering format rather than the Intel format.
-		/// A RIFX file is the same as a RIFF file, except that the first four bytes are ‘RIFX’ instead of ‘RIFF’,
+		/// A RIFX file is the same as a RIFF file, except that the first four bytes are "RIFX" instead of "RIFF",
 		/// and integer byte ordering is represented in Motorola format.
 		/// <bohan> haha... now the problem is...
 		/// <bohan> " the first four bytes are "RIFX" instead of "RIFF" ",
-		/// <bohan> so, on x86 cpus, should we read "IRXF"?
+		/// <bohan> so, on x86 cpus, should we read "XFIR"?
 		class RiffFile
 		{
 		public:
