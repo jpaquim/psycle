@@ -1,6 +1,6 @@
------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
 Version | Type of release          | By
---------|--------------------------|-----------------------------------------
+--------|--------------------------|---------------------------------------------------
 0.x     | Alphas and betas         | arguru
 1.0/01  | release (bugfix)         | arguru
 1.1/11  | release (bugfix)         | Mats
@@ -15,8 +15,8 @@ Version | Type of release          | By
 1.7.6   | release                  | alk
 1.7.6.1 | bug fix                  | alk
 1.7.6.2 | microsoft bug fix        | alk & bohan
-1.7.7   | beta                     | alk & bohan & magnus & [JAZ] & logywang
------------------------------------------------------------------------------
+1.7.7   | beta                     | alk & bohan & magnus & [JAZ] & logywang & sampler
+---------------------------------------------------------------------------------------
 
 Since 1.7.3, releases are named this way:
 M.m.r.p , where:
@@ -33,6 +33,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.11  2004/12/05 00:41:09  johan-boule
+bug fix with psycle::Machine::GetNumParams() and its redefinition in derived classes
+
 Revision 1.10  2004/11/29 21:57:08  sampler
 no message
 
@@ -47,21 +50,21 @@ added commit log to whatsnew.txt
 
 release to come (v1.7.7.x)
 --------------------------
+*refactoring of the source code: cleaner internally, but no visible changes for the users (bohan & magnus)
 +rewriting of the native and vst plugin hosts (bohan & magnus)
 +added automatized compilation + packaging + update of psycle sourceforge site for faster and more frequent updates (bohan)
-*ported the open source native plugins to the new compiler (bohan)
-*refactoring of the source code: cleaner internally, but no visible changes for the users (bohan & magnus)
-!fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
 +added cpu specific builds for 6th and 7th generation x86 CPUs (bohan)
+*ported the open source native plugins to the new compiler (bohan)
++added crop command in the wave editor (lobywang)
+!fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
 +added a message/error logging system (see file output.log.txt) (bohan & alk & magnus)
 !fixed small problem with cursor jumping at bottom of pattern (when pattern step >1 and wrapping is disabled) (sampler)
 +added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
 
-
 v1.7.6.2
 --------
 !fixed bug in the flanger's optimized sine sequence generator: 32-bit floating point numbers were not accurate enough, now it's 64-bit (bohan)
-!back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you, but psycle still works on it. (alk, bohan)
+!back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you, but psycle still works on it. (alk & bohan)
 
 v1.7.6.1
 --------
