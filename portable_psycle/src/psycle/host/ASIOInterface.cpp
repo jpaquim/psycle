@@ -6,6 +6,7 @@
 #include <psycle/host/Configuration.h>
 #include <psycle/host/MidiInput.h>
 #include <psycle/host/helpers.h>
+#include <operating_system/exception.h>
 #include <asio/asiosys.h>
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
@@ -21,6 +22,7 @@ namespace psycle
 		{
 			#define ALLOW_NON_ASIO
 
+			bool structured_exception_translator_set = false;
 			void bufferSwitch(long index, ASIOBool processNow);
 			ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
 			void sampleRateChanged(ASIOSampleRate sRate);
@@ -159,6 +161,7 @@ namespace psycle
 		bool ASIOInterface::Start()
 		{
 			CSingleLock lock(&_lock, TRUE);
+			structured_exception_translator_set = false;
 			if(_running) return true;
 			if(_pASIOCallback == 0)
 			{
@@ -253,6 +256,7 @@ namespace psycle
 		bool ASIOInterface::Stop()
 		{
 			CSingleLock lock(&_lock, TRUE);
+			structured_exception_translator_set = false;
 			if(!_running) return true;
 			_running = false;
 			ASIOStop();
@@ -421,6 +425,11 @@ namespace psycle
 
 			ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 			{
+				if(!structured_exception_translator_set)
+				{
+					operating_system::exceptions::translated::new_thread("asio");
+					structured_exception_translator_set = true;
+				}
 				// the actual processing callback.
 				// Beware that this is normally in a seperate thread, hence be sure that you take care
 				// about thread synchronization. This is omitted here for simplicity.

@@ -20,7 +20,7 @@ namespace psycle
 
 		CPsycleApp::CPsycleApp() throw(std::runtime_error)
 		{
-			operating_system::exceptions::translated::new_thread();
+			operating_system::exceptions::translated::new_thread("mfc gui");
 			// support for unicode characters on mswin98
 			{
 				#if 0

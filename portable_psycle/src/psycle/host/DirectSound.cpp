@@ -158,7 +158,7 @@ namespace psycle
 
 		void DirectSound::PollerThread(void * pDirectSound)
 		{
-			operating_system::exceptions::translated::new_thread();
+			operating_system::exceptions::translated::new_thread("direct sound");
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 			while(pThis->_timerActive)
