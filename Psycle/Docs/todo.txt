@@ -20,6 +20,18 @@ X low priority
 * New and unsorted and untested
 -------------------------------
 
+** master volume decrease lets a clipping sample through while detecting
+
++ midi controllers should be able to send midi messages (pitchbend for example), not just tweaks or cmds
++ I agree that final output should be limited
+
++ i was wondering if it is possible to make a header skin that indicates when a track creates an output?? (like those small vu meters at the headers in mp-tracker, or something)
++ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
++ 'Free wave' button that sets driver to silent
++ release audio when psycle looses focus option
+! Dunno if i mentioned this before: reaktorvst v3.05 crashes psycle when it generates the 'CPU overload' popup
+! Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions 
+
 
 ?+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
 	[50MB to clipboard? ehem...]
@@ -33,6 +45,7 @@ X low priority
 
 
 +	Option to disable vus (to save CPU)
+
 +	SCK| PageUp/PageDown while "playing == true" skips 16rows Up/down.
 *	Numeric 0 to stop song could be used in 1.66, but in 1.7, it puts the value if its not in
 	in the "note" column.
@@ -114,6 +127,7 @@ FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
 **	Can't select with keyboard while follow song on, and playing.
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
 +	how about option to switch the instrument and machine columns?
+++ double clicking on pattern should highlight that track
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
