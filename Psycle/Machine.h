@@ -238,6 +238,7 @@ public:
 	bool _clip;
 	bool decreaseOnClip;
 	static float* _pMasterSamples;
+	virtual bool Load(RiffFile* pFile);
 	virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
 	{
 		UINT size;
