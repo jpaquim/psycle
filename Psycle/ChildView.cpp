@@ -867,6 +867,7 @@ void CChildView::OnFileNew()
 		pParentMain->PsybarsUpdate(); // Updates all values of the bars
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->m_wndInst.WaveUpdate();
+		pParentMain->RedrawGearRackList();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
 //		pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
@@ -1386,10 +1387,7 @@ void CChildView::NewMachine(int x, int y, int mac)
 		*/
 	}
 	//	Repaint();
-	if (pParentMain->pGearRackDialog)
-	{
-		pParentMain->pGearRackDialog->RedrawList();
-	}
+	pParentMain->RedrawGearRackList();
 }
 
 void CChildView::OnConfigurationSettings() 
@@ -1745,6 +1743,7 @@ void CChildView::OnFileImportXmfile()
 		pParentMain->PsybarsUpdate();
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->m_wndInst.WaveUpdate();
+		pParentMain->RedrawGearRackList();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 		RecalculateColourGrid();
@@ -1842,6 +1841,7 @@ void CChildView::OnFileImportItfile()
 		pParentMain->PsybarsUpdate();
 		pParentMain->WaveEditorBackUpdate();
 		pParentMain->m_wndInst.WaveUpdate();
+		pParentMain->pGearRackDialog.RedrawList();
 		pParentMain->UpdateSequencer();
 		pParentMain->UpdatePlayOrder(false);
 	}
@@ -2003,6 +2003,7 @@ void CChildView::FileLoadsongNamed(char* fName)
 	pParentMain->PsybarsUpdate();
 	pParentMain->WaveEditorBackUpdate();
 	pParentMain->m_wndInst.WaveUpdate();
+	pParentMain->RedrawGearRackList();
 	pParentMain->UpdateSequencer();
 	pParentMain->UpdatePlayOrder(false);
 //			pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
@@ -3406,7 +3407,7 @@ void CChildView::DoMacPropDialog(int propMac)
 		pParentMain->UpdateComboGen();
 		if (pParentMain->pGearRackDialog)
 		{
-			pParentMain->pGearRackDialog->RedrawList();
+			pParentMain->RedrawGearRackList();
 		}
 	}
 	if (dlg.deleted)
@@ -3417,7 +3418,7 @@ void CChildView::DoMacPropDialog(int propMac)
 		pParentMain->UpdateComboGen();
 		if (pParentMain->pGearRackDialog)
 		{
-			pParentMain->pGearRackDialog->RedrawList();
+			pParentMain->RedrawGearRackList();
 		}
 	}
 }

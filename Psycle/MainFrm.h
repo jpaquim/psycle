@@ -85,6 +85,7 @@ public:
 	void StatusBarIdle();
 	void LoadFonts();
 
+	void RedrawGearRackList();
 
 	virtual ~CMainFrame();
 
@@ -108,6 +109,7 @@ public:  // control bar embedded members
 	CDialogBar	m_wndSeq;
 	CReBar      m_wndReBar;
 	char		szStatusIdle[128];
+	afx_msg void OnLoadwave();
 	
 	void EditQuantizeChange(int diff);
 	void ShiftOctave(int x);
@@ -147,7 +149,6 @@ protected:
 	afx_msg void OnSelchangeTrackcombo();
 	afx_msg void OnCloseupTrackcombo();
 	afx_msg void OnPsyhelp();
-	afx_msg void OnLoadwave();
 	afx_msg void OnSavewave();
 	afx_msg void OnEditwave();
 	afx_msg void OnGearRack();

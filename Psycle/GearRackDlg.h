@@ -22,14 +22,16 @@ public:
 	void RedrawList();
 	BOOL Create();
 	afx_msg void OnCancel();
-	static BOOL bShowGenerators;
+	static int DisplayMode;
 
 // Dialog Data
 	//{{AFX_DATA(CGearRackDlg)
 	enum { IDD = IDD_GEAR_RACK };
+	CButton	m_radio_ins;
+	CButton	m_radio_gen;
+	CButton	m_radio_efx;
 	CButton	m_text;
 	CListBox	m_list;
-	CButton		m_machinetype;
 	//}}AFX_DATA
 
 
@@ -54,6 +56,9 @@ protected:
 	afx_msg void OnParameters();
 	afx_msg void OnSelchangeGearlist();
 	afx_msg void OnMachineType();
+	afx_msg void OnRadioEfx();
+	afx_msg void OnRadioGen();
+	afx_msg void OnRadioIns();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
