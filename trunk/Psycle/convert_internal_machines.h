@@ -1,11 +1,10 @@
-#ifndef _PSYCLE__CONVERT_INTERNAL_MACHINES
-#define _PSYCLE__CONVERT_INTERNAL_MACHINES
+#ifndef PSYCLE__CONVERT_INTERNAL_MACHINES
+#define PSYCLE__CONVERT_INTERNAL_MACHINES
 #pragma once
 #pragma warning(disable:4786) // identifier was truncated to '255' characters in the debug information
 #include <string>
 #include <map>
 #include "scale.h"
-
 namespace psycle { namespace convert_internal_machines {
 
 class Converter
