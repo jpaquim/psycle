@@ -33,6 +33,9 @@ cvs commit messages
 -------------------
 
 $Log$
+Revision 1.10  2004/11/29 21:57:08  sampler
+no message
+
 Revision 1.9  2004/05/27 03:11:52  johan-boule
 information about new release
 
@@ -47,9 +50,13 @@ release to come (v1.7.7.x)
 +rewriting of the native and vst plugin hosts (bohan & magnus)
 +added automatized compilation + packaging + update of psycle sourceforge site for faster and more frequent updates (bohan)
 *ported the open source native plugins to the new compiler (bohan)
-*refactoring of the source code: cleaner internally, but no visible changes for the users (bohan)
+*refactoring of the source code: cleaner internally, but no visible changes for the users (bohan & magnus)
 !fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
 +added cpu specific builds for 6th and 7th generation x86 CPUs (bohan)
++added a message/error logging system (see file output.log.txt) (bohan & alk & magnus)
+!fixed small problem with cursor jumping at bottom of pattern (when pattern step >1 and wrapping is disabled) (sampler)
++added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
+
 
 v1.7.6.2
 --------
