@@ -12,7 +12,7 @@
 
 AudioDriverInfo DirectSound::_info = { "DirectSound Output" };
 AudioDriverEvent DirectSound::_event;
-CCriticalSection DirectSound::_lock;
+//CCriticalSection DirectSound::_lock; // <bohan> fix-bug-id 1. made the static _lock object become member object
 
 DirectSound::DirectSound()
 {
@@ -154,7 +154,10 @@ bool DirectSound::Start()
 bool DirectSound::Stop()
 {
 	CSingleLock lock(&_lock, TRUE);
+		// <bohan> fix-bug-id 1. made the static _lock object become member object
+		// <bohan> it seems we should shun static objects like the plague!
 		/*
+		<bohan> description-bug-id 1.
 		<bohan> i put a comment here, because the lock above is violating an assertion when i compile and run psycle on msvc7.1.
 		<bohan> this is triggered when i close psycle, and always happens.
 		<bohan> it looks like the m_pObject pointer of the _lock object is null! (that 0xcccccccc looks like the debug value for null pointers)
