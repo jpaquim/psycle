@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -1906,7 +1906,7 @@ BEGIN
         MENUITEM "./doc/&tweaking.txt",         ID_HELP_TWEAKING
         MENUITEM "./doc/&whatsnew.txt",         ID_HELP_WHATSNEW
         MENUITEM SEPARATOR
-        MENUITEM "&About Psycle...",            ID_ABOUTPSYCLE
+        MENUITEM "&About Psycle...",            ID_APP_ABOUT
         MENUITEM "&Greetings",                  ID_HELP_SALUDOS
     END
 END
@@ -2364,12 +2364,12 @@ BEGIN
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Catalán resources
+// Catalan resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
 #ifdef _WIN32
@@ -2449,12 +2449,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Catalán resources
+#endif    // Catalan resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Inglés (Estados Unidos) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -2637,12 +2637,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Inglés (Estados Unidos) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Inglés (Reino Unido) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 #ifdef _WIN32
@@ -2694,7 +2694,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Inglés (Reino Unido) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
