@@ -81,6 +81,7 @@ public:
 	int _volumeMaxCounterLife;				// output peak level for display
 	unsigned long int _cpuCost;
 	unsigned long int _wireCost;
+	int _scopePrevNumSamples;
 	int	_scopeBufferIndex;
 	float *_pScopeBufferL;
 	float *_pScopeBufferR;
@@ -268,6 +269,7 @@ public:
 	};
 #endif // ndef _WINAMP_PLUGIN_
 	Master();
+
 	virtual void Init(void);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
@@ -276,5 +278,10 @@ protected:
 	static char* _psName;
 
 };
+
+
+
+
+
 
 #endif

@@ -41,6 +41,7 @@ Machine::Machine()
 	_pScopeBufferL = NULL;
 	_pScopeBufferR = NULL;
 	_scopeBufferIndex = 0;
+	_scopePrevNumSamples = 0;
 #endif // _WINAMP_PLUGIN_
 
 	_pSamplesL = new float[STREAM_SIZE];
@@ -243,16 +244,16 @@ void Machine::PreWork(int numSamples)
 	{
 		float *pSamplesL = _pSamplesL;   
 		float *pSamplesR = _pSamplesR;   
-		int i = numSamples;   
+		int i = _scopePrevNumSamples;
 		while (i > 0)   
 		{   
 			if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
 			{   
-				 memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex))*sizeof(float));   
-				 memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex))*sizeof(float));   
-				 pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex));   
-				 pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex));   
-				 i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex));   
+				 memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+				 memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+				 pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+				 pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+				 i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
 				 _scopeBufferIndex = 0;   
 			}   
 			else   
@@ -264,6 +265,7 @@ void Machine::PreWork(int numSamples)
 			}   
 		} 
 	}
+	_scopePrevNumSamples=numSamples;
 	Dsp::Clear(_pSamplesL, numSamples);
 	Dsp::Clear(_pSamplesR, numSamples);
 	CPUCOST_CALC(cost, numSamples);
