@@ -343,6 +343,13 @@ void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 
 			editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
 			Repaint(DMCursor);
+			if (!(nFlags & MK_SHIFT))
+			{
+				blockSelected=false;
+				blockSel.end.line=0;
+				blockSel.end.track=0;
+				Repaint(DMSelection);
+			}
 		}
 		break;
 	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
