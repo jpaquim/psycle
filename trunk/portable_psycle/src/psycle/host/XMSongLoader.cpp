@@ -265,11 +265,11 @@ namespace host{
 				for(int col=0;col<iTracks;col++)
 				{	
 					// reset
-					char note=-1;
-					char instr=-1;
-					char vol=0;
-					char type=0;
-					char param=0;
+					unsigned char note=255;
+					unsigned char instr=255;
+					unsigned char vol=0;
+					unsigned char type=0;
+					unsigned char param=0;
 
 					// read note
 					note = ReadInt1();
@@ -277,11 +277,11 @@ namespace host{
 					// is compression bit set?
 					if(note & 0x80)
 					{
-						char bReadNote = note&0x01;
-						char bReadInstr = note&0x02;
-						char bReadVol = note&0x04;
-						char bReadType = note&0x08;
-						char bReadParam  = note&0x10;
+						unsigned char bReadNote = note&0x01;
+						unsigned char bReadInstr = note&0x02;
+						unsigned char bReadVol = note&0x04;
+						unsigned char bReadType = note&0x08;
+						unsigned char bReadParam  = note&0x10;
 
 						note = 0;
 						if(bReadNote) note = ReadInt1(); 
@@ -477,7 +477,7 @@ namespace host{
 							}
 						case XMCMD::SET_GLOBAL_VOLUME:
 							e._cmd = Player::CMD::SET_VOLUME;
-							if (param== 64)
+							if (param>= 64)
 							{	
 								e._parameter=255;
 							} else e._parameter = param * 4;
