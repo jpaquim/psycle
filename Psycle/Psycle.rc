@@ -951,7 +951,7 @@ END
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 233
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP
 EXSTYLE WS_EX_STATICEDGE
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     DEFPUSHBUTTON   "Start Psycle",IDOK,105,209,221,17,WS_GROUP
     PUSHBUTTON      "Contributors && Credits",IDC_BUTTON1,7,209,97,17
@@ -973,8 +973,8 @@ BEGIN
                     WS_EX_STATICEDGE
     CONTROL         "Show About Dialog at Startup",IDC_SHOWATSTARTUP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,190,165,11
-    CTEXT           "Version 1.66a [Sometime in 2002]",IDC_STATIC,181,191,
-                    151,8,SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    CTEXT           "Version 1.66 [3 September 2002]",IDC_STATIC,181,191,151,
+                    8,SS_CENTERIMAGE,WS_EX_TRANSPARENT
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,8,203,320,1,
                     WS_EX_STATICEDGE
     CONTROL         106,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 

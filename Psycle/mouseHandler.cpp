@@ -33,7 +33,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 	}
 	else if (viewMode == VMPattern)
 	{
-		editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
+/*		editcur.track = tOff + (point.x-XOFFSET)/ROWWIDTH;
 		if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
 		else if ( editcur.track < 0 ) editcur.track = 0;
 
@@ -43,6 +43,7 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		else if ( editcur.line < 0 ) editcur.line = 0;
 
 		editcur.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
+*/
 	}
 }
 
@@ -470,8 +471,59 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 
 			if(tmac!=-1)
 			{
-				pParentMain->ShowMachineGui(tmac);
-				Repaint();
+				if ((mcd_x > 136) && ( mcd_x < 145) && (Global::_pSong->_pMachines[tmac]->_mode != MACHMODE_MASTER))
+				{
+					if ((mcd_y> 3) && (mcd_y < 12)) //Mute 
+					{
+						Global::_pSong->_pMachines[tmac]->_mute = !Global::_pSong->_pMachines[tmac]->_mute;
+						Global::_pSong->_pMachines[tmac]->_volumeCounter=0;
+						updatePar = tmac;
+						Repaint(1);
+					}
+					else if ((mcd_y> 14) && (mcd_y < 27) &&  //Bypass
+						(Global::_pSong->_pMachines[tmac]->_mode != MACHMODE_GENERATOR))
+					{
+						Global::_pSong->_pMachines[tmac]->_bypass = !Global::_pSong->_pMachines[tmac]->_bypass;
+						Global::_pSong->_pMachines[tmac]->_volumeCounter = 0;
+						updatePar = tmac;
+						Repaint(1);
+					}
+					else if ((mcd_y> 14) && (mcd_y < 23) &&  //Solo
+						(Global::_pSong->_pMachines[tmac]->_mode == MACHMODE_GENERATOR))
+					{
+						if (Global::_pSong->machineSoloed == tmac )
+						{
+							Global::_pSong->machineSoloed = 0;
+							for ( int i=0;i<MAX_MACHINES;i++ )
+							{
+								if (( Global::_pSong->_machineActive[i] ) && 
+								    ( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
+										Global::_pSong->_pMachines[i]->_mute = false;
+							}
+						}
+						else 
+						{
+							for ( int i=0;i<MAX_MACHINES;i++ )
+							{
+								if (( Global::_pSong->_machineActive[i] ) && 
+								    ( Global::_pSong->_pMachines[i]->_mode == MACHMODE_GENERATOR ))
+								{
+									Global::_pSong->_pMachines[i]->_mute = true;
+									Global::_pSong->_pMachines[i]->_volumeCounter=0;
+								}
+							}
+							Global::_pSong->_pMachines[tmac]->_mute = false;
+							Global::_pSong->machineSoloed = tmac;
+						}
+						updatePar = tmac;
+						Repaint();
+					}
+				}
+				else
+				{
+					pParentMain->ShowMachineGui(tmac);
+					Repaint();
+				}
 			}
 
 			else

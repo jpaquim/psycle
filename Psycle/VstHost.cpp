@@ -601,7 +601,6 @@ long VSTPlugin::Master(AEffect *effect, long opcode, long index, long value, voi
 	{
 	case audioMasterAutomate:
 
-
 		return 0;		// index, value, returns 0
 		
 	case audioMasterVersion:			return 7;		// vst version, currently 7 (0 for older)

@@ -507,48 +507,61 @@ void CPresetsDlg::OnImport()
 				MessageBox("Couldn't open File! Operation Aborted.",".fxb File Load Error",MB_OK);
 				return;
 			}
-			fxb.Skip(16);
-
-			ULONGINV numpresets;
-			fxb.Read(&numpresets,4);
-			int intpresets = (numpresets.lohi*256) + numpresets.lolo;
-
-			ULONGINV filenumpars;
-			fxb.Skip(128);
-			fxb.Read(&filenumpars,0);
-
-			int i=0;
-			int init=m_preslist.GetCount();
-			char cbuf[29]; cbuf[28]='\0';
-			float* fbuf;
-			fbuf= new float[numParameters];
-			
-			while ( i < intpresets)
+			if ( fxb._header._id != fxb.FourCC("CcnK") ) return;
+			RiffChunkHeader tmp;
+			fxb.Read(&tmp,8);
+			if ( tmp._id == fxb.FourCC("FBCh") ) // Bank Chunk
 			{
-				fxb.Skip(24);
-				fxb.Read(&filenumpars,4);
-
-				if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters)
-				{
-					MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
-					fxb.Close();
-					return;
-				}
-				fxb.Read(cbuf,28);
-				fxb.Read(fbuf,numParameters*sizeof(float));
-				for (int y=0;y<numParameters;y++)
-				{
-					float temp=fbuf[y];
-					((char*)&fbuf[y])[0]=((char*)&temp)[3];
-					((char*)&fbuf[y])[1]=((char*)&temp)[2];
-					((char*)&fbuf[y])[2]=((char*)&temp)[1];
-					((char*)&fbuf[y])[3]=((char*)&temp)[0];
-
-				}
-				AddPreset(cbuf,fbuf);
-				i++;
+				MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
+				// Possible structure
+				// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
+				// Can't be read program by program, so it has to be loaded directly.
 			}
-			delete fbuf;
+			else if ( tmp._id == fxb.FourCC("FxBk") )
+			{
+				fxb.Skip(8); // VST ID + VSTVersion
+
+				ULONGINV numpresets;
+				fxb.Read(&numpresets,4);
+				int intpresets = (numpresets.lohi*256) + numpresets.lolo;
+
+				ULONGINV filenumpars;
+				fxb.Skip(128);
+				fxb.Read(&filenumpars,0);
+
+				int i=0;
+				int init=m_preslist.GetCount();
+				char cbuf[29]; cbuf[28]='\0';
+				float* fbuf;
+				fbuf= new float[numParameters];
+				
+				while ( i < intpresets)
+				{
+					fxb.Skip(24);
+					fxb.Read(&filenumpars,4);
+
+					if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters)
+					{
+						MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
+						fxb.Close();
+						return;
+					}
+					fxb.Read(cbuf,28);
+					fxb.Read(fbuf,numParameters*sizeof(float));
+					for (int y=0;y<numParameters;y++)
+					{
+						float temp=fbuf[y];
+						((char*)&fbuf[y])[0]=((char*)&temp)[3];
+						((char*)&fbuf[y])[1]=((char*)&temp)[2];
+						((char*)&fbuf[y])[2]=((char*)&temp)[1];
+						((char*)&fbuf[y])[3]=((char*)&temp)[0];
+
+					}
+					AddPreset(cbuf,fbuf);
+					i++;
+				}
+				delete fbuf;
+			}
 			fxb.Close();
 		}
 
@@ -876,50 +889,61 @@ void CPresetsDlg::ReadPresets()
 		sprintf(filename,buffer);
 
 		if ( !fxb.Open(filename) ) return; // here it is read "CcnK" and its "size" (it is 0)
-
-		fxb.Skip(16); // FxBk header + fxbkVersion + VST ID + VSTVersion
-
-		ULONGINV numpresets;
-		fxb.Read(&numpresets,4);
-		int intpresets = (numpresets.lohi*256) + numpresets.lolo;
-		// well, I don't expect any file with more than 65535 presets.
-
-		ULONGINV filenumpars;
-		fxb.Skip(128);
-		fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another
-									// cause problems.
-
-		char cbuf[29]; cbuf[28]='\0';
-		float* fbuf;
-		fbuf= new float[numParameters];
-		
-		intpresets+=i; // Global "i" to prevent deleting presets previously read from .prs file
-		while ( i < intpresets)
+		if ( fxb._header._id != fxb.FourCC("CcnK") ) return;
+		RiffChunkHeader tmp;
+		fxb.Read(&tmp,8);
+		if ( tmp._id == fxb.FourCC("FBCh") ) // Bank Chunk
 		{
-			fxb.Skip(24); // CcnK header + "size" +  FxCk header + fxbkVersion + VST ID + VSTVersion
-			fxb.Read(&filenumpars,4);
-
-			if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters) // same here...
-			{
-				MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
-				fxb.Close();
-				return;
-			}
-			fxb.Read(cbuf,28); // Read Name
-			fxb.Read(fbuf,numParameters*sizeof(float)); // Read All params.
-			for (int y=0;y<numParameters;y++)
-			{
-				const float temp=fbuf[y];
-				((char*)&fbuf[y])[0]=((char*)&temp)[3];
-				((char*)&fbuf[y])[1]=((char*)&temp)[2];
-				((char*)&fbuf[y])[2]=((char*)&temp)[1];
-				((char*)&fbuf[y])[3]=((char*)&temp)[0];
-
-			}
-			AddPreset(cbuf,fbuf);
-			i++;
+			MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
+			// Possible structure
+			// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
+			// Can't be read program by program, so it has to be loaded directly.
 		}
-		delete fbuf;
+		else if ( tmp._id == fxb.FourCC("FxBk") )
+		{
+			fxb.Skip(8); // VST ID + VSTVersion
+			ULONGINV numpresets;
+			fxb.Read(&numpresets,4);
+			int intpresets = (numpresets.lohi*256) + numpresets.lolo;
+			// well, I don't expect any file with more than 65535 presets.
+			fxb.Skip(128);
+
+			ULONGINV filenumpars;
+			fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another
+										// cause problems.
+
+			char cbuf[29]; cbuf[28]='\0';
+			float* fbuf;
+			fbuf= new float[numParameters];
+			
+			intpresets+=i; // Global "i" to prevent deleting presets previously read from .prs file
+			while ( i < intpresets)
+			{
+				fxb.Skip(24); // CcnK header + "size" +  FxCk header + fxbkVersion + VST ID + VSTVersion
+				fxb.Read(&filenumpars,4);
+
+				if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters) // same here...
+				{
+					MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
+					fxb.Close();
+					return;
+				}
+				fxb.Read(cbuf,28); // Read Name
+				fxb.Read(fbuf,numParameters*sizeof(float)); // Read All params.
+				for (int y=0;y<numParameters;y++)
+				{
+					const float temp=fbuf[y];
+					((char*)&fbuf[y])[0]=((char*)&temp)[3];
+					((char*)&fbuf[y])[1]=((char*)&temp)[2];
+					((char*)&fbuf[y])[2]=((char*)&temp)[1];
+					((char*)&fbuf[y])[3]=((char*)&temp)[0];
+
+				}
+				AddPreset(cbuf,fbuf);
+				i++;
+			}
+			delete fbuf;
+		}
 		fxb.Close();
 	}
 }
