@@ -1153,7 +1153,8 @@ namespace psycle
 			
 			CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			dlg._pSong = _pSong;
-			dlg.m_ofn.lpstrInitialDir = Global::pConfig->GetInstrumentDir().c_str();
+			std::string tmpstr = Global::pConfig->GetInstrumentDir();
+			dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 			if (dlg.DoModal() == IDOK)
 			{
 				m_wndView.AddMacViewUndo();

@@ -711,7 +711,8 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir().c_str();
+			std::string tmpstr = Global::pConfig->GetSongDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
 			
@@ -800,7 +801,8 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir().c_str();
+			std::string tmpstr = Global::pConfig->GetSongDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
 			// Display the Open dialog box. 
@@ -1760,7 +1762,8 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir().c_str();
+			std::string tmpstr = Global::pConfig->GetSongDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
@@ -1849,7 +1852,8 @@ namespace psycle
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetSongDir();
+			std::string tmpstr = Global::pConfig->GetSongDir()
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
