@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.7.6 ----------
+				------------------------------- 1.7.7 ----------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -99,13 +99,14 @@ Sources for a Fast sinus calculation used in the Flanger are extracted from
 
 Psycle 1: (The only active one right now)
 
-	Many improvements have been done in this new version ( 1.7.3/1.7.4 ) making it better in
+	1.7.7:  prolly a beta, early access to bug fixes at http://psycle.sourceforge.net.
+
+	1.7.3/1.7.4: Many improvements have been done in these versions, making them better in
 	many ways ( more stable, better looking, more powerful,... are just some of them).
 
 	Still, the main goals for a definitive Psycle 1 version haven't been reached, which
 	are still multipattern sequence and a multisample instrument sampler.  These options
 	are being designed currently.
-
 
 For up to date information, don't forget to visit the Developement forums on Psycledelics
 site.
