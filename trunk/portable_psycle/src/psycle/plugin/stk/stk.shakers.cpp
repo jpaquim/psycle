@@ -8,8 +8,8 @@
 
 #include <project.h>
 #include <psycle/plugin/machineinterface.h>
-#include <stk/stk.h>
-#include <stk/shakers.h>
+#include <stk/psyStk.h>
+#include <stk/psyShakers.h>
 #include <stdlib.h>
 
 #define MAX_ENV_TIME	250000

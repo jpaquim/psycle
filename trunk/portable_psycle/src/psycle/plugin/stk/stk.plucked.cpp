@@ -8,8 +8,8 @@
 
 #include <project.h>
 #include <psycle/plugin/machineinterface.h>
-#include <stk/stk.h>
-#include <stk/plucked.h>
+#include <stk/psyStk.h>
+#include <stk/psyPlucked.h>
 #include <stdlib.h>
 
 #define MAX_ENV_TIME	250000
