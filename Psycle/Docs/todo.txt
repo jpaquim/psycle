@@ -23,13 +23,11 @@
 + alk - mute current track keypress (alt-f9)
 + <pooplog> it would be nice to have an internal wavein machine to get live input <Druttis> Yes
 + <trylle> i mean that it records and plays back at the same time * record wave in too
-+ <_sue_> (wire dialog) also i cant use the keyb to set the db level like before. it would be cool also to 
-	have that db level in % (cursor keys)
++ <_sue_> (wire dialog) also i cant use the keyb to set the db level like before (cursor keys)
 * <_sue_> the gainer machine doesnt work and the sliders in the minimixer are set to -99
 * <_sue_> theres also a strange bug in psycle that it increases/changes param 00 of the vst plug 
 	depending on the place where theyr box was placed...
 * James says: you have to click on delete connection twice? (in wire dialog)
-! alk-make wire dialog open on double click
 + alk-make single click/drag move wire from one machine to another (preserving vol)
 + alk-make wire vol slider more precise (bigger) (it has become less precise)
 	pooplog-we should just make a new slider class that uses shift and ctrl like knobs
