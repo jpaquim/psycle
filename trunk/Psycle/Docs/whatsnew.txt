@@ -43,7 +43,7 @@ V1.67
   pasted, etc. [sue] (pooplog)
 ! Cleaned up Status Bar (pooplog)
 ! Made Master Machine Dialog modeless, updates display if volume attenuated
-+ Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
++ VST:Added Hex display + Param list update when tweaking the GUI (indicates which param is being modified)
 
 
 V1.66
