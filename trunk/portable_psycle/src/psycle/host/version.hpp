@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.18  2005/03/29 19:57:53  johan-boule
+full rebuild fixes problem with sampler machine (was prolly a wrong file date)
+
 Revision 1.17  2005/03/26 13:31:05  johan-boule
 fixed an error in the description of the versioning scheme in <psycle/host/version.hpp>
 
@@ -67,7 +70,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__BRANCH "" // mainline (psycledelics)
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 35 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 36 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 #define PSYCLE__VERSION \
