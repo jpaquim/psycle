@@ -53,7 +53,7 @@ void Crasher::process(Sample l[], Sample r[], int sample, int)
 		process(l[sample]);
 		process(r[sample]);
 	}
-
+	crash(); ///////////////////////// <--- crash !!!
 }
 
 inline void Crasher::process(Sample & sample)
