@@ -593,7 +593,7 @@ typedef unsigned __int8 uint8;
 		// "A function is declared using exception specification, which Visual C++ accepts but does not implement.
 		// Code with exception specifications that are ignored during compilation may need to be
 		// recompiled and linked to be reused in future versions supporting exception specifications."
-	#if COMPILER__VERSION__MAJOR < 70
+	#if COMPILER__VERSION__MAJOR < 7
 		#pragma warning(disable:4786) // identifier was truncated to '255' characters in the debug information
 	#endif
 
