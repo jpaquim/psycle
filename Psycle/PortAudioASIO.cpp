@@ -266,7 +266,7 @@ int PortAudioASIO::GetPlayPos()
 	{
 		return 0;
 	}
-	int playPos = Pa_StreamTime(stream);
+	int playPos = int(Pa_StreamTime(stream));
 
 	return playPos;
 }

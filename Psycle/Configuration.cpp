@@ -11,6 +11,7 @@
 	#include "DirectSound.h"
 	#include "PortAudioASIO.h"
 	#include "MidiInput.h"
+#include "NewMachine.h"
 #endif //_WINAMP_PLUGIN_
 
 
@@ -353,6 +354,12 @@ Configuration::Read()
 		}
 	}
 #if !defined(_WINAMP_PLUGIN_)
+
+	
+	numData = sizeof(CNewMachine::pluginOrder);
+	reg.QueryValue("NewMacDlgpluginOrder", &type, (BYTE*)&CNewMachine::pluginOrder, &numData);
+	numData = sizeof(CNewMachine::pluginName);
+	reg.QueryValue("NewMacDlgpluginName", &type, (BYTE*)&CNewMachine::pluginName, &numData);
 
 	numData = sizeof(_wrapAround);
 	reg.QueryValue("WrapAround", &type, (BYTE*)&_wrapAround, &numData);
@@ -921,6 +928,9 @@ Configuration::Write()
 			return;
 		}
 	}
+
+	reg.SetValue("NewMacDlgpluginOrder", REG_BINARY, (BYTE*)&CNewMachine::pluginOrder, sizeof(CNewMachine::pluginOrder));
+	reg.SetValue("NewMacDlgpluginName", REG_BINARY, (BYTE*)&CNewMachine::pluginName, sizeof(CNewMachine::pluginName));
 	reg.SetValue("WrapAround", REG_BINARY, (BYTE*)&_wrapAround, sizeof(_wrapAround));
 	reg.SetValue("CenterCursor", REG_BINARY, (BYTE*)&_centerCursor, sizeof(_centerCursor));
 	reg.SetValue("FollowSong", REG_BINARY, (BYTE*)&_followSong, sizeof(_followSong));

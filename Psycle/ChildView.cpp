@@ -1178,22 +1178,93 @@ void CChildView::ShowPatternDlg(void)
 
 void CChildView::OnNewmachine() 
 {
+	NewMachine();
+}
+
+void CChildView::NewMachine(int x, int y, int mac) 
+{
 	// Show new machine dialog
 	CNewMachine dlg;
 	
 	if (dlg.DoModal() == IDOK)
 	{
+		int fb,xs,ys;
+		if (mac < 0)
+		{
+			if (dlg.OutBus) 
+			{
+				fb = Global::_pSong->GetFreeBus();
+				xs = MachineCoords.sGenerator.width;
+				ys = MachineCoords.sGenerator.height;
+			}
+			else 
+			{
+				fb = Global::_pSong->GetFreeFxBus();
+				xs = MachineCoords.sEffect.width;
+				ys = MachineCoords.sEffect.height;
+			}
+		}
+		else
+		{
+			if ((mac >= MAX_BUSES) && !(dlg.OutBus))
+			{
+				fb = mac - MAX_BUSES;
+				xs = MachineCoords.sEffect.width;
+				ys = MachineCoords.sEffect.height;
+				// delete machine if it already exists
+				if (Global::_pSong->busEffect[fb] != 255)
+				{
+					Global::_pSong->DestroyMachine(Global::_pSong->busEffect[fb]);
+				}
+			}
+			else if ((mac < MAX_BUSES) && (dlg.OutBus))
+			{
+				fb = mac;
+				xs = MachineCoords.sGenerator.width;
+				ys = MachineCoords.sGenerator.height;
+				// delete machine if it already exists
+				if (Global::_pSong->busMachine[fb] != 255)
+				{
+					Global::_pSong->DestroyMachine(Global::_pSong->busMachine[fb]);
+				}
+			}
+			else
+			{
+				MessageBox("Wrong Class of Machine!");
+				return;
+			}
+		}
+
+		// random position
+		if ((x < 0) || (y < 0))
+		{
+			bool bCovered = TRUE;
+			while (bCovered)
+			{
+				x = (rand())%(CW-xs);
+				y = (rand())%(CH-ys);
+				bCovered = FALSE;
+				for (int i=0; i < MAX_MACHINES; i++)
+				{
+					if (Global::_pSong->_machineActive[i])
+					{
+						if ((abs(Global::_pSong->_pMachines[i]->_x - x) < 32) &&
+							(abs(Global::_pSong->_pMachines[i]->_y - y) < 32))
+						{
+							bCovered = TRUE;
+							i = MAX_MACHINES;
+						}
+					}
+				}
+			}
+		}
 		// Stop driver to handle possible conflicts between threads.
 		_outputActive = false;
 		Global::pConfig->_pOutputDriver->Enable(false);
 		// MIDI IMPLEMENTATION
 		Global::pConfig->_pMidiInput->Close();
 
-		int fb;
-		if (dlg.OutBus) fb = Global::_pSong->GetFreeBus();
-		else fb = Global::_pSong->GetFreeFxBus();
-
-		if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, rand()/64, rand()/80, dlg.psOutputDll))
+		if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll))
 		{
 			MessageBox("Machine Creation Failed","Error!",MB_OK);
 		}
@@ -1240,7 +1311,7 @@ void CChildView::OnNewmachine()
 			Global::pConfig->_pMidiInput->Open();
 		}
 	}
-//	Repaint();
+	//	Repaint();
 }
 
 void CChildView::OnConfigurationSettings() 
@@ -1973,7 +2044,7 @@ void CChildView::OnHelpWhatsnew()
 	ShellExecute(pParentMain->m_hWnd,"open","Docs\\whatsnew.txt",NULL,"",SW_SHOW);
 }
 
-#define _UGLY_DEFAULT_SKIN_
+//#define _UGLY_DEFAULT_SKIN_
 
 void CChildView::LoadMachineSkin()
 {

@@ -958,65 +958,7 @@ void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 					}
 				}
 				// if no connection then Show new machine dialog
-				CNewMachine dlg;
-				
-				if (dlg.DoModal() == IDOK)
-				{
-					// Stop driver to handle possible conflicts
-					// between threads.
-					_outputActive = false;
-					Global::pConfig->_pOutputDriver->Enable(false);
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Close();
-					
-					int fb;
-					if (dlg.OutBus) fb = Global::_pSong->GetFreeBus();
-					else fb = Global::_pSong->GetFreeFxBus();
-
-					if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, point.x-74,point.y-24, dlg.psOutputDll))
-					{
-						MessageBox("Machine Creation Failed","Error!",MB_OK);
-					}
-					else
-					{
-						if ( dlg.OutBus)
-						{
-							Global::_pSong->seqBus = fb;
-							Global::_pSong->busMachine[fb] = Global::_lbc;
-
-							if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
-								_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
-							{
-								((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb;
-							}
-						}
-						else
-						{
-//							Global::_pSong->seqBus = fb+MAX_BUSES;
-							Global::_pSong->busEffect[fb] = Global::_lbc;
-
-							if ( _pSong->_pMachines[Global::_lbc]->_type == MACH_VST ||
-								_pSong->_pMachines[Global::_lbc]->_type == MACH_VSTFX )
-							{
-								((VSTPlugin*)(_pSong->_pMachines[Global::_lbc]))->macindex = fb+MAX_BUSES;
-							}
-						}
-						pParentMain->UpdateComboGen();
-					}
-
-					// Restarting the driver...
-					pParentMain->UpdateEnvInfo();
-					_outputActive = true;
-					if (!Global::pConfig->_pOutputDriver->Enable(true))
-					{
-						_outputActive = false;
-					}
-					else
-					{
-						// MIDI IMPLEMENTATION
-						Global::pConfig->_pMidiInput->Open();
-					}
-				}
+				NewMachine(point.x,point.y);
 //				Repaint();
 			}
 		

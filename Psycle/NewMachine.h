@@ -6,7 +6,7 @@
 #endif // _MSC_VER > 1000
 // NewMachine.h : header file
 //
-
+#include "resource.h"
 #include "machine.h"
 #include <afxcoll.h>
 

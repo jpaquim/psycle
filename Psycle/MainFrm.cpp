@@ -22,6 +22,7 @@
 #include "VstEditorDlg.h"
 #include "Helpers.h"
 #include "WireDlg.h"
+#include "GearRackDlg.h"
 
 #include "Player.h"
 #include "MidiInput.h"
@@ -60,6 +61,7 @@ ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
 ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
 ON_COMMAND(ID_PSYHELP, OnPsyhelp)
 ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
+ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
 ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
 ON_BN_CLICKED(IDC_EDITWAVE, OnEditwave)
 ON_BN_CLICKED(IDC_WAVEBUT, OnWavebut)
@@ -819,7 +821,7 @@ void CMainFrame::UpdateComboGen(bool updatelist)
 	}
 	if ( updatelist) 
 	{
-		cb->AddString("-------------");
+		cb->AddString("----------------------------------------------------");
 	}
 	if (!found) 
 	{
@@ -1204,6 +1206,12 @@ void CMainFrame::OnSavewave()
 		}
 	}
 	else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
+}
+
+void CMainFrame::OnGearRack() 
+{
+	CGearRackDlg dlg(&m_wndView);
+	dlg.DoModal();
 }
 
 void CMainFrame::OnEditwave() 

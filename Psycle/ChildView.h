@@ -270,6 +270,7 @@ public:
 	void patTrackMute();
 	void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 	void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
+	void NewMachine(int x = -1, int y = -1, int mac = -1);
 	
 public:
 
