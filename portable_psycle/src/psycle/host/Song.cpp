@@ -528,11 +528,11 @@ namespace psycle
 		{
 			RemovePattern(ps);
 			ppPatternData[ps] = new unsigned char[MULTIPLY2];
-			unsigned char blank[5]={255,255,255,0,0};
+			PatternEntry blank;
 			unsigned char * pData = ppPatternData[ps];
 			for(int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
 			{
-				memcpy(pData,blank,5*sizeof(unsigned char));
+				memcpy(pData,&blank,EVENT_SIZE);
 				pData+= EVENT_SIZE;
 			}
 			return ppPatternData[ps];
@@ -540,7 +540,7 @@ namespace psycle
 
 		bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 		{
-			unsigned char blank[5]={255,255,255,0,0};
+			PatternEntry blank;
 			unsigned char *toffset;
 			if(adaptsize)
 			{
@@ -559,7 +559,7 @@ namespace psycle
 						while(l < patternLines[pattern])
 						{
 							// This wouldn't be necessary if we really allocate a new pattern.
-							std::memcpy(toffset + (l * MULTIPLY), blank, EVENT_SIZE);
+							std::memcpy(toffset + (l * MULTIPLY), &blank, EVENT_SIZE);
 							++l;
 						}
 					}
@@ -578,7 +578,7 @@ namespace psycle
 							int tz(f2i(l * step) - 1);
 							while (tz > (l - 1) * step)
 							{
-								std::memcpy(toffset + tz * MULTIPLY, blank, EVENT_SIZE);
+								std::memcpy(toffset + tz * MULTIPLY, &blank, EVENT_SIZE);
 								--tz;
 							}
 						}
@@ -595,7 +595,7 @@ namespace psycle
 					for(int t(0) ; t < SONGTRACKS ; ++t)
 					{
 						toffset=_ptrackline(pattern,t,l);
-						memcpy(toffset,blank,EVENT_SIZE);
+						memcpy(toffset,&blank,EVENT_SIZE);
 					}
 					++l;
 				}
@@ -618,7 +618,7 @@ namespace psycle
 		int Song::GetBlankPatternUnused(int rval)
 		{
 			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
-			const unsigned char blank[5] = {255,255,255,0,0};
+			PatternEntry blank;
 			bool bTryAgain(true);
 			while(bTryAgain && rval < MAX_PATTERNS - 1)
 			{
@@ -637,16 +637,11 @@ namespace psycle
 					unsigned char *offset_source(_ppattern(rval));
 					for(int t(0) ; t < MULTIPLY2 ; t += EVENT_SIZE)
 					{
-						for(int i(0) ; i < EVENT_SIZE; ++i)
+						if(memcmp(offset_source+t,&blank,EVENT_SIZE) != 0 )
 						{
-							if(offset_source[i] != blank[i])
-							{
-								++rval;
-								bTryAgain = true;
-								t = MULTIPLY2;
-								i = EVENT_SIZE;
-							}
-							offset_source += EVENT_SIZE;
+							++rval;
+							bTryAgain = true;
+							t = MULTIPLY2;
 						}
 					}
 				}
@@ -2836,18 +2831,15 @@ stack trace:
 				if (!bUsed)
 				{
 					// check to see if it is empty
-					unsigned char blank[5]={255,255,255,0,0};
+					PatternEntry blank;
 					unsigned char * pData = ppPatternData[i];
 					for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
 					{
-						for (int k = 0; k < 5; k++)
+						if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
 						{
-							if (pData[j+k] != blank[k])
-							{
-								bUsed = TRUE;
-								j = MULTIPLY2;
-								break;
-							}
+							bUsed = TRUE;
+							j = MULTIPLY2;
+							break;
 						}
 					}
 				}

@@ -1017,10 +1017,10 @@ NAMESPACE__BEGIN(psycle)
 
 			int i;
 			for (i=editcur.line; i < patlines-1; i++)
-				memcpy(offset+(i*MULTIPLY), offset+((i+1)*MULTIPLY), 5);
+				memcpy(offset+(i*MULTIPLY), offset+((i+1)*MULTIPLY), EVENT_SIZE);
 
-			unsigned char blank[5]={255,255,255,0,0};
-			memcpy(offset+(i*MULTIPLY),blank,EVENT_SIZE);
+			PatternEntry blank;
+			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
@@ -1041,10 +1041,10 @@ NAMESPACE__BEGIN(psycle)
 
 			int i;
 			for (i=patlines-1; i > editcur.line; i--)
-				memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), 5);
+				memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), EVENT_SIZE);
 
-			unsigned char blank[5]={255,255,255,0,0};
-			memcpy(offset+(i*MULTIPLY),blank,5*sizeof(char));
+			PatternEntry blank;
+			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
@@ -1265,7 +1265,7 @@ NAMESPACE__BEGIN(psycle)
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
-				unsigned char blank[5]={255,255,255,0,0};
+				PatternEntry blank;
 
 				patBufferLines = _pSong->patternLines[ps];
 				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
@@ -1275,7 +1275,7 @@ NAMESPACE__BEGIN(psycle)
 				memcpy(patBufferData,soffset,length);
 				for	(int c=0; c<length; c+=EVENT_SIZE)
 				{
-					memcpy(soffset,blank,EVENT_SIZE);
+					memcpy(soffset,&blank,EVENT_SIZE);
 					soffset+=EVENT_SIZE;
 				}
 				patBufferCopy = true;
@@ -1359,7 +1359,7 @@ NAMESPACE__BEGIN(psycle)
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
-				unsigned char blank[5]={255,255,255,0,0};
+				PatternEntry blank;
 
 				patBufferLines = _pSong->patternLines[ps];
 				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
@@ -1368,7 +1368,7 @@ NAMESPACE__BEGIN(psycle)
 				
 				for	(int c=0; c<length; c+=EVENT_SIZE)
 				{
-					memcpy(soffset,blank,EVENT_SIZE);
+					memcpy(soffset,&blank,EVENT_SIZE);
 					soffset+=EVENT_SIZE;
 				}
 
@@ -1533,7 +1533,7 @@ NAMESPACE__BEGIN(psycle)
 				
 				int ls=0;
 				int ts=0;
-				unsigned char blank[5]={255,255,255,0,0};
+				PatternEntry blank;
 
 				if (cutit)
 				{
@@ -1550,7 +1550,7 @@ NAMESPACE__BEGIN(psycle)
 						memcpy(offset_target,offset_source,EVENT_SIZE);
 						
 						if(cutit)
-							memcpy(offset_source,blank,EVENT_SIZE);
+							memcpy(offset_source,&blank,EVENT_SIZE);
 						
 						++ls;
 					}
@@ -1572,14 +1572,14 @@ NAMESPACE__BEGIN(psycle)
 			{
 				int ps=_pSong->playOrder[editPosition];
 				
-				unsigned char blank[5]={255,255,255,0,0};
+				PatternEntry blank;
 
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
 					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
 					{
-						memcpy(_ptrackline(ps,t,l),blank,EVENT_SIZE);
+						memcpy(_ptrackline(ps,t,l),&blank,EVENT_SIZE);
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
@@ -1607,7 +1607,7 @@ NAMESPACE__BEGIN(psycle)
 					{
 						if(l<nl && t<_pSong->SONGTRACKS)
 						{
-							unsigned char* offset_source=blockBufferData+(ts*5+ls*MULTIPLY);
+							unsigned char* offset_source=blockBufferData+(ts*EVENT_SIZE+ls*MULTIPLY);
 							unsigned char* offset_target=_ptrackline(ps,t,l);
 							if ( mix )
 							{
@@ -1689,14 +1689,14 @@ NAMESPACE__BEGIN(psycle)
 						}
 					}
 				}
-				unsigned char blank[5]={255,255,255,0,0};
+				PatternEntry blank;
 
 				for (int t = nt; t < MAX_TRACKS;t++)
 				{
 					for (int l = nl; l < MAX_LINES; l++)
 					{
 						unsigned char* offset_target=_ptrackline(ps,t,l);
-						memcpy(offset_target,blank,EVENT_SIZE);
+						memcpy(offset_target,&blank,EVENT_SIZE);
 					}
 				}
 				Repaint(DMPattern);
@@ -1707,7 +1707,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			// UNDO CODE DOUBLE LENGTH
 			unsigned char *toffset;
-			unsigned char blank[5]={255,255,255,0,0};
+			PatternEntry blank;
 			int st, et, sl, el,nl;
 
 			int ps = _ps();
@@ -1734,11 +1734,11 @@ NAMESPACE__BEGIN(psycle)
 			for (int t=st;t<et;t++)
 			{
 				toffset=_ptrack(ps,t);
-				memcpy(toffset+el*MULTIPLY,blank,EVENT_SIZE);
+				memcpy(toffset+el*MULTIPLY,&blank,EVENT_SIZE);
 				for (int l=nl-1;l>0;l--)
 				{
 					memcpy(toffset+(sl+l*2)*MULTIPLY,toffset+(sl+l)*MULTIPLY,EVENT_SIZE);
-					memcpy(toffset+(sl+(l*2)-1)*MULTIPLY,blank,EVENT_SIZE);
+					memcpy(toffset+(sl+(l*2)-1)*MULTIPLY,&blank,EVENT_SIZE);
 				}
 			}
 
@@ -1752,7 +1752,7 @@ NAMESPACE__BEGIN(psycle)
 			unsigned char *toffset;
 			int st, et, sl, el,nl;
 			int ps = _ps();
-			unsigned char blank[5]={255,255,255,0,0};
+			PatternEntry blank;
 
 			if ( blockSelected )
 			{
@@ -1780,11 +1780,11 @@ NAMESPACE__BEGIN(psycle)
 				int l;
 				for (l=1;l<el;l++)
 				{
-					memcpy(toffset+(l+sl)*MULTIPLY,toffset+((l*2)+sl)*MULTIPLY,5);
+					memcpy(toffset+(l+sl)*MULTIPLY,toffset+((l*2)+sl)*MULTIPLY,EVENT_SIZE);
 				}
 				while (l < nl)
 				{
-					memcpy(toffset+((l+sl)*MULTIPLY),blank,5);
+					memcpy(toffset+((l+sl)*MULTIPLY),&blank,EVENT_SIZE);
 					l++;
 				}
 			}
@@ -1878,7 +1878,7 @@ NAMESPACE__BEGIN(psycle)
 							ins=x;
 							if(ins<0)ins=0;
 							if(ins>255)ins=255;
-							*toffset=ins;
+							*(toffset+1)=ins;
 						}
 					}
 				}
@@ -2091,7 +2091,7 @@ NAMESPACE__BEGIN(psycle)
 			pUndoList = pNew;
 
 			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*5*sizeof(char)];
+			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
 			pNew->pData = pData;
 			pNew->pattern = pattern;
 			pNew->x = x;
@@ -2142,7 +2142,7 @@ NAMESPACE__BEGIN(psycle)
 			pNew->pPrev = pRedoList;
 			pRedoList = pNew;
 			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*5*sizeof(char)];
+			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
 			pNew->pData = pData;
 			pNew->pattern = pattern;
 			pNew->x = x;
@@ -2407,8 +2407,8 @@ NAMESPACE__BEGIN(psycle)
 							{
 								unsigned char *offset_source=_ptrackline(pUndoList->pattern,t,l);
 								
-								memcpy(offset_source,pData,EVENT_SIZE*sizeof(char));
-								pData+=EVENT_SIZE*sizeof(char);
+								memcpy(offset_source,pData,EVENT_SIZE);
+								pData+=EVENT_SIZE;
 							}
 						}
 						// set up cursor
@@ -2547,8 +2547,8 @@ NAMESPACE__BEGIN(psycle)
 								unsigned char *offset_source=_ptrackline(pRedoList->pattern,t,l);
 
 								
-								memcpy(offset_source,pData,5*sizeof(char));
-								pData+=5*sizeof(char);
+								memcpy(offset_source,pData,EVENT_SIZE);
+								pData+=EVENT_SIZE;
 							}
 						}
 						// set up cursor
