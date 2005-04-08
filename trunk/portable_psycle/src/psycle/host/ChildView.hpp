@@ -451,11 +451,11 @@ NAMESPACE__BEGIN(psycle)
 			CPoint MBStart; 
 
 			bool isBlockCopied;
-			unsigned char blockBufferData[5*MAX_LINES*MAX_TRACKS];
+			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;
 			int	blockNLines;
 			
-			unsigned char patBufferData[5*MAX_LINES*MAX_TRACKS];
+			unsigned char patBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int patBufferLines;
 			bool patBufferCopy;
 

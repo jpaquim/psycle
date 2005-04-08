@@ -439,8 +439,9 @@ NAMESPACE__BEGIN(psycle)
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
 				_pSong->Save(&file,true);
-				/// \todo Save should not close a file which doesn't open.
-				//file.Close(); <- save now handles this
+				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
+				// line when fixed. There are other places which need this too.
+				//file.Close();
 			}
 		}
 
@@ -924,7 +925,8 @@ NAMESPACE__BEGIN(psycle)
 			InitTimer();
 		}
 
-		///\todo that method does not take machine changes into account
+		///\todo that method does not take machine changes into account  
+		//  <JosepMa> is this still the case? or what does "machine changes" mean?
 		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
 			BOOL bChecked = TRUE;
@@ -1802,12 +1804,12 @@ NAMESPACE__BEGIN(psycle)
 //
 				std::sprintf
 					(
-						buffer,"%s\n\n%s\n\n%s",
-						Global::_pSong->Name,
-						Global::_pSong->Author,
-						Global::_pSong->Comment
+					buffer,"%s\n\n%s\n\n%s",
+					Global::_pSong->Name,
+					Global::_pSong->Author,
+					Global::_pSong->Comment
 					);
-				::MessageBox(0, buffer, "XM file imported", MB_OK);
+				MessageBox(buffer, "IT file imported", MB_OK);
 				CString str = ofn.lpstrFile;
 				int index = str.ReverseFind('\\');
 				if (index != -1)
