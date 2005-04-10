@@ -150,9 +150,9 @@ namespace psycle
 			/// creates a new machine in this song.
 			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index);
 			/// destroy a machine of this song.
-			void DestroyMachine(int mac, boost::read_write_mutex::scoped_write_lock * lock = 0);
+			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
-			void DestroyAllMachines(boost::read_write_mutex::scoped_write_lock * lock = 0);
+			void DestroyAllMachines(bool write_locked = false);
 			/// the number of pattern used in this song.
 			int GetNumPatternsUsed();
 			/// creates a new connection between two machines.
