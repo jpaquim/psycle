@@ -202,7 +202,7 @@ namespace psycle
 			DeleteAllPatterns();
 		}
 
-		void Song::DestroyAllMachines(boost::read_write_mutex::scoped_write_lock * lock)
+		void Song::DestroyAllMachines(bool write_locked)
 		{
 			_machineLock = true;
 			for(int c(0) ;  c < MAX_MACHINES; ++c)
@@ -220,7 +220,7 @@ namespace psycle
 							_pMachine[j] = 0;
 						}
 					}
-					DestroyMachine(c, lock);
+					DestroyMachine(c, write_locked);
 				}
 				_pMachine[c] = 0;
 			}
@@ -310,7 +310,7 @@ namespace psycle
 //			LineChanged=false;
 			//::MessageBox(0, "Machines", 0, 0);
 			// Clean up allocated machines.
-			DestroyAllMachines(&lock);
+			DestroyAllMachines(true);
 			//::MessageBox(0, "Insts", 0, 0);
 			// Cleaning instruments
 			DeleteInstruments();
@@ -448,13 +448,13 @@ namespace psycle
 			return 0;
 		}
 
-		void Song::DestroyMachine(int mac, boost::read_write_mutex::scoped_write_lock * locked)
+		void Song::DestroyMachine(int mac, bool write_locked)
 		{
 			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
 				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 			#else
 				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !locked); // only lock if not already locked
+					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
 				#else // original implementation
 					CSingleLock lock(&door, TRUE);
 				#endif
