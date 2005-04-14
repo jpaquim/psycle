@@ -383,7 +383,7 @@ NAMESPACE__BEGIN(psycle)
 			return TRUE;
 		}
 
-		#if defined _DEBUG //\todo should be NDEBUG
+		#if !defined NDEBUG
 			void CMainFrame::AssertValid() const
 			{
 				CFrameWnd::AssertValid();
@@ -1611,6 +1611,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 			}
 			cc->SetTopIndex(top);
+			StatusBarIdle();
 		}
 
 		void CMainFrame::OnSelchangeSeqlist() 

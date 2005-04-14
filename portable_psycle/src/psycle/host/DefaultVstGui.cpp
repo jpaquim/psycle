@@ -46,7 +46,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 		/////////////////////////////////////////////////////////////////////////////
 		// CDefaultVstGui diagnostics
 
-		#ifdef _DEBUG
+		#if !defined  NDEBUG
 			void CDefaultVstGui::AssertValid() const
 			{
 				CFormView::AssertValid();
@@ -56,7 +56,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			{
 				CFormView::Dump(dc);
 			}
-		#endif //_DEBUG
+		#endif //!NDEBUG
 
 		void CDefaultVstGui::Init() 
 		{

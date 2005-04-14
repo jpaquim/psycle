@@ -39,7 +39,9 @@ NAMESPACE__BEGIN(psycle)
 
 			dllNames[str]=fullname;
 		}
-
+		//\todo : Important: There can exists dlls with the same name (there is a phantom.dll which is a VST).
+		//        what about adding a new parameter indicating if we want a VST or a Psycle plugin?
+		//		  or maybe if found more than one entry, ask the user which one he wants to use?
 		bool CNewMachine::lookupDllName(const std::string & name, std::string & result)
 		{
 			std::map<std::string,std::string>::iterator iterator

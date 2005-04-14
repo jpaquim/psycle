@@ -83,7 +83,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual ~CMainFrame();
 		private:
 			void SaveRecent();
-			#if defined _DEBUG ///\todo should be NDEBUG
+			#if !defined NDEBUG
 				virtual void AssertValid() const;
 				virtual void Dump(CDumpContext& dc) const;
 			#endif
