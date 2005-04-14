@@ -49,7 +49,7 @@ NAMESPACE__BEGIN(psycle)
 			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
-		#ifdef _DEBUG
+		#if !defined NDEBUG
 			virtual void AssertValid() const;
 			virtual void Dump(CDumpContext& dc) const;
 		#endif
