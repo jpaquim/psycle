@@ -13,9 +13,6 @@ namespace psycle
 {
 	namespace host
 	{
-		/// \todo Create a GetBytesPerSample() function for class AudioDriver, and derive in the subclasses.
-		#define BYTES_PER_SAMPLE 4
-
 		AudioDriverInfo WaveOut::_info = { "Windows WaveOut MME" };
 		AudioDriverEvent WaveOut::_event;
 		CCriticalSection WaveOut::_lock;
@@ -183,7 +180,7 @@ namespace psycle
 					pb->Prepared = false;
 				}
 				int *pOut = (int *)pb->pData;
-				int bs = _blockSize / BYTES_PER_SAMPLE;
+				int bs = _blockSize / GetSampleSize();
 				do
 				{
 					int n = bs;
@@ -194,7 +191,7 @@ namespace psycle
 				}
 				while(bs > 0);
 
-				_writePos += _blockSize / BYTES_PER_SAMPLE;
+				_writePos += _blockSize / GetSampleSize();
 
 				pb->pHeader->dwFlags = 0;
 				pb->pHeader->lpData = (char *)pb->pData;

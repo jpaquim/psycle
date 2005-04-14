@@ -22,6 +22,13 @@ namespace psycle
 			stat = (stat * 1103515245 + 12345) & 0x7fffffff;
 			return (double)stat * (1.0 / 0x7fffffff);
 		}
+		AudioDriver::AudioDriver()
+			: _samplesPerSec(44100)
+			, _bitDepth(16)
+			, _channelmode(3)
+			, _numBlocks(0)
+			, _blockSize(0)
+		{}
 
 		void AudioDriver::QuantizeWithDither(float *pin, int *piout, int c)
 		{

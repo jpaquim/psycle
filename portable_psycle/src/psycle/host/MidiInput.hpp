@@ -14,9 +14,6 @@ namespace psycle
 {
 	namespace host
 	{
-		/// \todo Create a GetBytesPerSample() function for class AudioDriver, and derive in the subclasses.
-		#define BYTES_PER_SAMPLE 4
-
 		#define	MAX_MIDI_CHANNELS	16
 		#define	MAX_CONTROLLERS		127
 		#define	MAX_PARAMETERS		127
