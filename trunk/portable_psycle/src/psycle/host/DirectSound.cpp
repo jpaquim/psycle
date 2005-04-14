@@ -12,9 +12,6 @@ namespace psycle
 {
 	namespace host
 	{
-		/// \todo Create a GetBytesPerSample() function for class AudioDriver, and derive in the subclasses.
-		#define BYTES_PER_SAMPLE 4
-
 		AudioDriverInfo DirectSound::_info = { "DirectSound Output" };
 		AudioDriverEvent DirectSound::_event;
 
@@ -255,7 +252,7 @@ namespace psycle
 						}
 						break;
 					}
-					int blockSize = blockSize1 / BYTES_PER_SAMPLE;
+					int blockSize = blockSize1 / GetSampleSize();
 					int* pBlock = pBlock1;
 					while(blockSize > 0)
 					{
@@ -265,7 +262,7 @@ namespace psycle
 						pBlock += n;
 						blockSize -= n;
 					}
-					blockSize = blockSize2 / BYTES_PER_SAMPLE;
+					blockSize = blockSize2 / GetSampleSize();
 					pBlock = pBlock2;
 					while(blockSize > 0)
 					{

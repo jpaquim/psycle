@@ -23,15 +23,17 @@ namespace psycle
 		class AudioDriver
 		{
 		public:
-			AudioDriver() { _samplesPerSec = 44100; _bitDepth = 16; _channelmode = 3;}
+			AudioDriver();
 			virtual ~AudioDriver() {};
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context) {};
 			virtual void Reset(void) {};
 			virtual bool Enable(bool e) { return false; };	
 			virtual int GetWritePos() { return 0; };
 			virtual int GetPlayPos() { return 0; };
-			virtual int GetNumBuffers() { return 0; };
-			virtual int GetBufferSize() { return 0; };
+			virtual int GetNumBuffers() { return _numBlocks; };
+			virtual int GetBufferSize() { return _blockSize; };
+			virtual int GetBufferSamples() { return _blockSize/GetSampleSize(); };
+			virtual int GetSampleSize() { return (_channelmode==3)?(_bitDepth/4):(_bitDepth/8); };
 			virtual void Configure(void) {};
 			virtual bool Initialized(void) { return true; };
 			virtual bool Configured(void) { return true; };
@@ -39,6 +41,8 @@ namespace psycle
 			static void QuantizeWithDither(float *pin, int *piout, int c);
 			static void Quantize(float *pin, int *piout, int c);
 		public:
+			int _numBlocks;
+			int _blockSize;
 			int _samplesPerSec;
 			int _channelmode;
 			int _bitDepth;

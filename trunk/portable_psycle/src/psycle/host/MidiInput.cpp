@@ -1739,7 +1739,7 @@ namespace psycle
 				// resync interrupt
 				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();
 				
-				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / BYTES_PER_SAMPLE;
+				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / Global::pConfig->_pOutputDriver->GetSampleSize();
 				int blocks = Global::pConfig->_pOutputDriver->GetNumBuffers();
 
 				// calculate our final adjuster

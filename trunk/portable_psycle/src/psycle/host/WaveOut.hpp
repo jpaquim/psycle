@@ -28,8 +28,6 @@ namespace psycle
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };
 			virtual AudioDriverInfo* GetInfo() { return &_info; };
-			virtual int GetNumBuffers( void ){ return _numBlocks; };
-			virtual int GetBufferSize( void ){ return _blockSize; };
 		private:
 			class CBlock
 			{
@@ -48,8 +46,6 @@ namespace psycle
 
 			HWAVEOUT _handle;
 			int _deviceID;
-			int _numBlocks;
-			int _blockSize;
 			int _currentBlock;
 			int _writePos;
 			int _pollSleep;
