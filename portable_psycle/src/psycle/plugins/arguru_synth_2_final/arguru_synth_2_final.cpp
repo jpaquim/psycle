@@ -262,8 +262,17 @@ CMachineParameter const paraGlobalDetune =
 	-36,											// MinValue	
 	36,											// MaxValue
 	MPF_STATE,										// Flags
-	-6 // [bohan] default value so that it's no more detuned.. haven't checked with ears. assumed that after quickly looking at the code.. seems it does actual_note = requested_note - 24 + 6
+	1 
 };
+// Why is the default tuning +1 +60? answer:
+// the wavetable contains one period of 2048 samples,
+// at 44100Hz (which Asynth assumes), this is a ~21.5Hz signal.
+// A standard tune is A#4 (i.e, note 69) to be 440Hz, which is
+// ~ 20.4335 times bigger. log2 of this value is ~ 4.3528.
+// Multiply this value by 12 (notes/octave) to get 52.2344,
+// which stands for note 52 and finetune 0.2344.
+// The value of note in SeqTick() is note-18 ( 69-18 = 51 ),
+// So we add one to Tune, and fine is 0.2344 * 256 ~ 60.01
 
 CMachineParameter const paraGlobalFinetune = 
 {
@@ -272,7 +281,7 @@ CMachineParameter const paraGlobalFinetune =
 	-256,											// MinValue	
 	256,											// MaxValue
 	MPF_STATE,										// Flags
-	0
+	60
 };
 
 CMachineParameter const paraGlide = 
@@ -363,7 +372,7 @@ public:
 
 private:
 
-	signed short WaveTable[5][2100];
+	signed short WaveTable[5][2050];
 	CSynthTrack track[MAX_TRACKS];
 	
 	SYNPAR globalpar;
@@ -646,7 +655,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Empty Note Row	== 255
 	// Less than note off value??? == NoteON!
 	if(note<120)
-	track[channel].NoteOn(note-24,&globalpar,60);
+	track[channel].NoteOn(note-18,&globalpar,60);
 
 	// Note off
 	if(note==120)
@@ -655,7 +664,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 void mi::InitWaveTable()
 {
-	for(int c=0;c<2100;c++)
+	for(int c=0;c<2050;c++)
 	{
 		double sval=(double)c*0.00306796157577128245943617517898389;
 
@@ -664,11 +673,12 @@ void mi::InitWaveTable()
 		if (c<2048) WaveTable[1][c]=(c*16)-16384;
 		else		WaveTable[1][c]=((c-2048)*16)-16384;
 
-		if (c<1024)	WaveTable[2][c]=-16384;
+		if (c<1024 || c>=2048)	WaveTable[2][c]=-16384;
 		else		WaveTable[2][c]=16384;
 
 		if (c<1024)	WaveTable[3][c]=(c*32)-16384;
-		else		WaveTable[3][c]=16384-((c-1024)*32);
+		else if (c<2048) WaveTable[3][c]=16384-((c-1024)*32);
+		else		WaveTable[3][c]=((c-2048)*32)-16384;
 
 					WaveTable[4][c]=rand()-16384;
 	}

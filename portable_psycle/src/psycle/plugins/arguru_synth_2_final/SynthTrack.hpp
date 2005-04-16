@@ -181,18 +181,18 @@ inline float CSynthTrack::GetSample()
 		{
 			int iOsc=f2i(OSC1Position);
 			float fractpart=OSC1Position-iOsc;
-			float d0=syntp->pWave[iOsc];
-			float d1=syntp->pWave[iOsc+1];
-			float d2=syntp->pWave[iOsc+2];
-			float d3=syntp->pWave[iOsc+3];
+			float d0=syntp->pWave[iOsc-1];
+			float d1=syntp->pWave[iOsc];
+			float d2=syntp->pWave[iOsc+1];
+			float d3=syntp->pWave[iOsc+2];
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
 			
 			iOsc=f2i(OSC2Position);
 			fractpart=OSC2Position-iOsc;
-			d0=syntp->pWave2[iOsc];
-			d1=syntp->pWave2[iOsc+1];
-			d2=syntp->pWave2[iOsc+2];
-			d3=syntp->pWave2[iOsc+3];
+			d0=syntp->pWave2[iOsc-1];
+			d1=syntp->pWave2[iOsc];
+			d2=syntp->pWave2[iOsc+1];
+			d3=syntp->pWave2[iOsc+2];
 			output+=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
 
 		}
@@ -243,10 +243,10 @@ inline float CSynthTrack::GetSampleOsc1()
 		{
 			int iOsc=f2i(OSC1Position);
 			float fractpart=OSC1Position-iOsc;
-			float d0=syntp->pWave[iOsc];
-			float d1=syntp->pWave[iOsc+1];
-			float d2=syntp->pWave[iOsc+2];
-			float d3=syntp->pWave[iOsc+3];
+			float d0=syntp->pWave[iOsc-1];
+			float d1=syntp->pWave[iOsc];
+			float d2=syntp->pWave[iOsc+1];
+			float d3=syntp->pWave[iOsc+2];
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
 		}
 		else
@@ -278,10 +278,10 @@ inline float CSynthTrack::GetSampleOsc2()
 		{
 			int iOsc=f2i(OSC2Position);
 			float fractpart=OSC2Position-iOsc;
-			float d0=syntp->pWave2[iOsc];
-			float d1=syntp->pWave2[iOsc+1];
-			float d2=syntp->pWave2[iOsc+2];
-			float d3=syntp->pWave2[iOsc+3];
+			float d0=syntp->pWave2[iOsc-1];
+			float d1=syntp->pWave2[iOsc];
+			float d2=syntp->pWave2[iOsc+1];
+			float d3=syntp->pWave2[iOsc+2];
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
 		}
 		else

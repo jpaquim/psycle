@@ -61,8 +61,6 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 
 	InitLfo(syntp->vcf_lfo_speed,syntp->vcf_lfo_amplitude);
 
-	note+=6;
-
 	float nnote=(float)note+
 				(float)tspar->globalfinetune*0.0038962f+
 				(float)tspar->globaldetune;
@@ -78,11 +76,18 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 	if ( AmpEnvStage == 0 ) {
 		ROSC1Speed = OSC1Speed;
 		ROSC2Speed = OSC2Speed;
+		if (syntp->osc2sync) OSC2Position = 0;
+		else { OSC2Position-= OSC1Position;
+				if (OSC2Position<0) OSC2Position+=2048.0f;
+		}
+		OSC1Position = 0;
 	}
 
 	OSC2Vol=(float)syntp->osc_mix*0.0039062f;
 	OSC1Vol=1.0f-OSC2Vol;
 	
+
+
 	float spdcoef;
 	
 	if(spd<65)	spdcoef=(float)spd*0.015625f;
