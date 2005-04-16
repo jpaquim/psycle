@@ -75,7 +75,6 @@ XMSampler::Channel::PerformFX().
 		E_FINETUNE			=	0x50, //E5     Set finetune
 		E_SET_PANBRELLO_WAVE=	0x60, //									(p)
 		E_TREMOLO_WAVE		=	0x70, //E7     Set tremolo control			(p)
-		//\todo: remove this duplicated command? 
 		E_SET_PAN			=	0x80,									//	(p)
 		E9					=	0x90,
 								//0xA0,
@@ -119,35 +118,34 @@ XMSampler::Channel::PerformFX().
 		EE_PITCHENVOFF			=	0x0C
 		};
 	};
-
-/*
-// this is unfinished (as one can see by the strange numbers)
+	
 	struct CMD_VOL
 	{
 		enum{
-		VOL_VOLUME			=	0x50 // 0x10..0x50 (64)
-		VOL_FINEVOLUP		=	0x90; //(0!)        (16)
-		VOL_FINEVOLDOWN		=	0x80//(0!)          (16)
-		VOL_VOLSLIDEUP		=	0x70;        //     (16)
-		VOL_VOLSLIDEDOWN	=	0x60;          //   (16)
-		VOL_PITCH_SLIDE_DOWN=	0x69,   //(10)
-		VOL_PITCH_SLIDE_UP	=	0x73,   //(10)
-		VOL_PAN_POSITION	=	0x80     // (64)
-		VOL_PANNING			=	0xC0;             //    (16)
-		VOL_VIBRATO_SPEED	=	0xA0; // Linked to Vibrato Sx = 4xy (16)
-		VOL_VIBRATO			=	0xB0;     // Linked to Vibrato Vy = 4xy (16)
-		VOL_PANSLIDELEFT	=	0xD0;           //  (16)
-		VOL_PANSLIDERIGHT	=	0xE0;        //     (16)
-		VOL_TONEPORTAMENTO	=	0xF0; // Linked to Porta2Note (16)
+		VOL_VOLUME0			=	0x00, // 0x00..0x0F (63)  ||
+		VOL_VOLUME1			=	0x10, // 0x10..0x1F (63)  || All are the same command.
+		VOL_VOLUME2			=	0x20, // 0x20..0x2F (63)  ||
+		VOL_VOLUME3			=	0x30, // 0x30..0x3F (63)  ||
+		VOL_VOLSLIDEUP		=	0x40, // 0x40..0x4F (16)
+		VOL_VOLSLIDEDOWN	=	0x50, // 0x50..0x5F (16)
+		VOL_PITCH_SLIDE_DOWN=	0x60, // 0x60..0x6F (16)
+		VOL_PITCH_SLIDE_UP	=	0x70, // 0x70..0x7F (16)
+		VOL_PANNING			=	0x80, // 0x80..0x8F (16)
+		VOL_PANSLIDELEFT	=	0x90, // 0x90..0x9F (16)
+		VOL_PANSLIDERIGHT	=	0xA0, // 0xA0..0xAF (16)
+							  //0xB0
+		VOL_VIBRATO_SPEED	=	0xC0, // 0xD0..0xFF (16) Linked to Vibrato Sx = 4xy
+		VOL_VIBRATO			=	0xD0, // 0xE0..0xFF (16) Linked to Vibrato Vy = 4xy 
+		VOL_TONEPORTAMENTO	=	0xE0 // 0xF0..0xFF (16) Linked to Porta2Note 
+								// 0xFF -> Blank.
 		};
 	};
-*/
 
 	class Channel;
 
 //////////////////////////////////////////////////////////////////////////
 //  XMSampler::WaveDataController Declaration
-	//\todo: WaveDateController Needs to update the speed if sampleRate change (but... would the samplerate change while
+	//\todo: WaveDateController Needs to update the speed if sampleRate changes (but... would the samplerate change while
 	//       there's a voice playing?)
 	class WaveDataController
 	{
@@ -175,7 +173,6 @@ XMSampler::Channel::PerformFX().
 			}
 
 			// Update Position
-			//\todo : What about sample vibrato? Should we put it here or in voice? (there is the pitch envelope)
 			if(CurrentLoopDirection() == LoopDirection::FORWARD){
 				m_Position.QuadPart+=Speed();
 			} else {
@@ -185,28 +182,28 @@ XMSampler::Channel::PerformFX().
 			// Loop handler
 			//\todo : Implement Sustain Loop Control
 			const int curIntPos = m_Position.HighPart;
-			switch(LoopType())
+			switch(m_CurrentLoopType)
 			{
 			case XMInstrument::WaveData::LoopType::NORMAL:
 
-				if(curIntPos >= LoopEnd())
+				if(curIntPos >= m_CurrentLoopEnd)
 				{
-					Position(LoopStart()+(curIntPos%LoopEnd()));
+					Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
 				}
 				break;
 			case XMInstrument::WaveData::LoopType::BIDI:
 
 				if(CurrentLoopDirection() == LoopDirection::FORWARD)
 				{
-					if(curIntPos  >= LoopEnd())
+					if(curIntPos  >= m_CurrentLoopEnd)
 					{
-						Position(LoopEnd()-(curIntPos%LoopEnd()));
+						Position(m_CurrentLoopEnd-(curIntPos-m_CurrentLoopEnd));
 						CurrentLoopDirection(LoopDirection::BACKWARD);
 					} 
 				} else {
-					if(curIntPos <= LoopStart())
+					if(curIntPos <= m_CurrentLoopStart)
 					{
-						Position(LoopStart()+(curIntPos%LoopEnd()));
+						Position(m_CurrentLoopStart+(m_CurrentLoopStart-curIntPos));
 						CurrentLoopDirection(LoopDirection::FORWARD);
 					} 
 				}
@@ -267,6 +264,10 @@ XMSampler::Channel::PerformFX().
 		ULARGE_INTEGER m_Position;
 		double m_Speed;
 		bool m_Playing;
+
+		int m_CurrentLoopType;
+		int m_CurrentLoopEnd;
+		int m_CurrentLoopStart;
 
 		bool _stereo;
 		int _length;
@@ -446,26 +447,26 @@ XMSampler::Channel::PerformFX().
 		void VolumeUp(const int value);
 		void Retrig();
 
-		/// Do Auto Vibrato
+		// Do Auto Vibrato
 		void AutoVibrato();
 		bool IsAutoVibrato() { return m_AutoVibratoAmount!=0; };
-		/// Get Auto Vibrato Amount
+		// Get Auto Vibrato Amount
 		const double AutoVibratoAmount(){return m_AutoVibratoAmount;};
 
 
 // Properties
 		const int InstrumentNum(){ return _instrument;};
 		void InstrumentNum(const int value){_instrument = value;};
-		XMInstrument &rInstrument() { return *m_pInstrument;};///< Get Instrument Pointer
-		void pInstrument(XMInstrument *p){m_pInstrument = p;};///< Set Instrument Pointer
+		XMInstrument &rInstrument() { return *m_pInstrument;};
+		void pInstrument(XMInstrument *p){m_pInstrument = p;};
 
 		const int ChannelNum(){ return m_ChannelNum;};
 		void ChannelNum(const int value){ m_ChannelNum = value;};
 		void pChannel(XMSampler::Channel *p){m_pChannel = p;}; 
 		XMSampler::Channel& rChannel(){return *m_pChannel;};
 
-		void pSampler(XMSampler * const p){m_pSampler = p;};///< 
-		XMSampler * const pSampler(){return m_pSampler;};///< 
+		void pSampler(XMSampler * const p){m_pSampler = p;};
+		XMSampler * const pSampler(){return m_pSampler;};
 
 		XMSampler::EnvelopeController& AmplitudeEnvelope(){return m_AmplitudeEnvelope;};
 		XMSampler::EnvelopeController& FilterEnvelope(){return m_FilterEnvelope;};
@@ -485,7 +486,8 @@ XMSampler::Channel::PerformFX().
 		void Volume(const compiler::uint16 vol)
 		{
 			m_Volume = vol;
-			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/256.0f);
+			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/128.0f);
+				//\todo :  rInstrument().RandomVolume() / 100.0f;
 		};
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 		const float RealVolume() { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; };
@@ -504,6 +506,10 @@ XMSampler::Channel::PerformFX().
 
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); };
 		int Period() { return m_Period; }
+		// convert note to period
+		const double NoteToPeriod(const int note);
+		// convert period to note 
+		const int PeriodToNote(const double period);
 
 		double VibratoAmount() { return m_VibratoAmount; };
 
@@ -521,7 +527,7 @@ XMSampler::Channel::PerformFX().
 		XMSampler::Channel* m_pChannel;
 		XMSampler *m_pSampler;
 
-		int _instrument;///< Instrument
+		int _instrument;// Instrument
 		XMInstrument *m_pInstrument;
 
 		// Todo: do we need 4 controllers? wouldn't it be better 1 controller for all 4 envelopes?
@@ -555,10 +561,10 @@ XMSampler::Channel::PerformFX().
 
 		int m_VolumeSlideSpeed;
 
-		int m_VibratoSpeed;///< vibrato speed 
-		int m_VibratoDepth;///< vibrato depth
-		int m_VibratoPos;///< vibrato position 
-		double m_VibratoAmount;///< vibrato amount
+		int m_VibratoSpeed;
+		int m_VibratoDepth;
+		int m_VibratoPos;
+		double m_VibratoAmount;
 
 		int m_TremoloSpeed;
 		int m_TremoloDepth;
@@ -588,11 +594,11 @@ XMSampler::Channel::PerformFX().
 		int m_RetrigOperation;
 
 
-		static const int m_SinTable[64];///< Sin
-		static const int m_RampDownTable[64];///< RampDown
-		static const int m_SquareTable[64];///< Square
-		static const int m_RandomTable[64];///< Random
-		static const int m_ft2VibratoTable[256];///< Vibrato Table
+		static const int m_SinTable[64];
+		static const int m_RampDownTable[64];
+		static const int m_SquareTable[64];
+		static const int m_RandomTable[64];
+		static const int m_ft2VibratoTable[256];
 	};
 
 
@@ -614,6 +620,7 @@ XMSampler::Channel::PerformFX().
 			static const int PANBRELLO		=	0x00000200;
 			static const int RETRIG 		=   0x00000400;
 			static const int TREMOR			=	0x00000800;
+			static const int NOTEDELAY		=	0x00001000;
 		};
 
 		Channel()
@@ -625,19 +632,14 @@ XMSampler::Channel::PerformFX().
 		void EffectInit();
 		void Restore();
 
-		/// Prepare the channel for the new effect (or execute if it's a one-shot one). This is executed on TrackerTick==0
-		void SetEffect(Voice* voice,int cmd,int parameter);
+		// Prepare the channel for the new effect (or execute if it's a one-shot one). This is executed on TrackerTick==0
+		void SetEffect(Voice* voice,int volcmd,int cmd,int parameter);
 
-		/// Executes the slide/change effects. This is executed on TrackerTick!=0
+		// Executes the slide/change effects. This is executed on TrackerTick!=0
 		void PerformFx();
 
 		const int EffectFlags(){return m_EffectFlags;};
 		void EffectFlags(const int value){m_EffectFlags = value;};
-
-		/// convert note to period
-		const double NoteToPeriod(const int note,const int layer);
-		/// convert period to note 
-		const int PeriodToNote(const double period,const int layer);
 
 
 // Effect-Related Object Functions
@@ -651,9 +653,10 @@ XMSampler::Channel::PerformFX().
 		void Vibrato(int depth,int speed = 0);
 		void Tremolo(int depth,int speed);
 		void Panbrello(int depth,int speed);
-		void Arpeggio(const int param,const int layer);
+		void Arpeggio(const int param);
 		void Retrigger(const int ticks,const int volumeModifier);
 		void NoteCut(const int ntick);
+		void DelayedNote(PatternEntry data);
 
 		// Tick n commands.
 		void PanningSlide();
@@ -705,9 +708,9 @@ XMSampler::Channel::PerformFX().
 		void ForegroundVoice(XMSampler::Voice* pVoice) { m_pForegroundVoice = pVoice; }
 
 		const int Note(){ return m_Note;};
-		void Note(const int note,const int layer)
+		void Note(const int note)
 		{	m_Note = note;
-			m_Period = NoteToPeriod(note,layer);
+			m_Period = ForegroundVoice()->NoteToPeriod(note);
 		};
 		const double Period(){return m_Period;};
 		void Period(const double value){m_Period = value;};
@@ -717,7 +720,6 @@ XMSampler::Channel::PerformFX().
 		const int DefaultVolume(){return m_ChannelDefVolume;};
 		void DefaultVolume(const int value){m_ChannelDefVolume = value; Volume(value/64.0f);};
 
-		//\todo: Reset PanFactor to DeFaultPanFactor when Stopping.
 		const float PanFactor(){return 	m_PanFactor;};
 		void PanFactor(const float value){
 			m_PanFactor = value;
@@ -786,11 +788,11 @@ XMSampler::Channel::PerformFX().
 		float m_ChanVolSlideSpeed;
 		float m_PanSlideSpeed;
 
-		int m_VibratoSpeed;///< vibrato speed 
-		int m_VibratoDepth;///< vibrato depth
-		int m_VibratoPos;///< vibrato position 
-		double m_VibratoAmount;///< vibrato amount
-		double m_AutoVibratoAmount;///< vibrato amount
+		int m_VibratoSpeed;
+		int m_VibratoDepth;
+		int m_VibratoPos;
+		double m_VibratoAmount;
+		double m_AutoVibratoAmount;
 
 		int m_TremoloSpeed;
 		int m_TremoloDepth;
@@ -808,6 +810,7 @@ XMSampler::Channel::PerformFX().
 		
 		// Note Cut Command 
 		int m_NoteCutTick;
+		PatternEntry m_DelayedNote;
 
 
 		int m_PanSlideMem;
@@ -836,9 +839,8 @@ XMSampler::Channel::PerformFX().
 
 	virtual void Init(void);
 	
-	//This tick is "NewLine()". The API needs to be renamed.
+	//This Tick() is "NewLine()". The API needs to be renamed.
 	void Tick();
-	/// numSamples
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
@@ -847,8 +849,6 @@ XMSampler::Channel::PerformFX().
 	virtual bool Load(RiffFile& riffFile);
 	virtual bool LoadSpecificFileChunk(RiffFile& riffFile, int version);
 	virtual void SaveSpecificChunk(RiffFile& riffFile);
-
-	void Update(void);
 
 	void BPM (const int value){m_BPM = value;};///< Beat Per Minutes
 	const int BPM (){return m_BPM;};///< Beat Per Minutes
@@ -859,40 +859,6 @@ XMSampler::Channel::PerformFX().
 
 	/// BPM Speed
 	void CalcBPMAndTick();
-
-	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];};///< Channel 
-	Voice& rVoice(const int index) { return m_Voices[index];};///< 
-
-	XMInstrument & rInstrument(const int index){return m_Instruments[index];};
-	XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];};
-	
-	const bool IsLinearFreq(){ return m_bLinearFreq;};
-	void IsLinearFreq(const bool value){ m_bLinearFreq = value;};
-
-	/// set current voice number
-	const int NumVoices(){ return _numVoices;};
-	/// get current voice number
-	void NumVoices(const int value){_numVoices = value;};
-
-	/// set resampler quality 
-	void ResamplerQuality(const dsp::ResamplerQuality value){
-		_resampler._quality = value;
-	}
-
-	const dsp::ResamplerQuality ResamplerQuality(){
-		return _resampler._quality;
-	}
-
-	boost::recursive_mutex & Mutex() {  return m_Mutex; };
-
-	const int SampleCounter(){return _sampleCounter;};// Sample pos since last linechange.
-	void SampleCounter(const int value){_sampleCounter = value;};// ""
-
-	void NextSampleTick(const int value){m_NextSampleTick = value;};// Sample Pos of the next (tracker) tick
-	const int NextSampleTick(){ return m_NextSampleTick;};// ""
-
-	void CurrentTick(const int value){m_TickCount = value;};// Current Tracker Tick number
-	const int CurrentTick(){ return m_TickCount;};// ""
 
 	Voice* GetCurrentVoice(int channelNum)
 	{
@@ -928,6 +894,42 @@ XMSampler::Channel::PerformFX().
 		return c;
 	}
 
+/// properties
+	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];};///< Channel 
+	Voice& rVoice(const int index) { return m_Voices[index];};///< 
+
+	XMInstrument & rInstrument(const int index){return m_Instruments[index];};
+	XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];};
+	
+	const bool IsLinearFreq(){ return m_bLinearFreq;};
+	void IsLinearFreq(const bool value){ m_bLinearFreq = value;};
+
+	/// set current voice number
+	const int NumVoices(){ return _numVoices;};
+	/// get current voice number
+	void NumVoices(const int value){_numVoices = value;};
+
+	/// set resampler quality 
+	void ResamplerQuality(const dsp::ResamplerQuality value){
+		_resampler._quality = value;
+	}
+
+	const dsp::ResamplerQuality ResamplerQuality(){
+		return _resampler._quality;
+	}
+
+	boost::recursive_mutex & Mutex() {  return m_Mutex; };
+
+	const int SampleCounter(){return _sampleCounter;};// Sample pos since last linechange.
+	void SampleCounter(const int value){_sampleCounter = value;};// ""
+
+	void NextSampleTick(const int value){m_NextSampleTick = value;};// Sample Pos of the next (tracker) tick
+	const int NextSampleTick(){ return m_NextSampleTick;};// ""
+
+	void CurrentTick(const int value){m_TickCount = value;};// Current Tracker Tick number
+	const int CurrentTick(){ return m_TickCount;};// ""
+
+	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 protected:
 
 	static TCHAR* _psName;

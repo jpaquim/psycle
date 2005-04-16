@@ -885,7 +885,10 @@ NAMESPACE__BEGIN(psycle)
 
 			SetScrollPos(SB_HORZ,rntOff);
 			SetScrollPos(SB_VERT,rnlOff);
-			UpdateWindow();
+			//\todo: This line has been commented out because it is what is causing the breaks in sound when
+			//  using follow song and the pattern changes. Commenting it out should only mean that the refresh
+			//	is delayed for the next idle time, and not forced now, inside the timer, (which has a lock).
+//			UpdateWindow();
 		}
 
 
@@ -2537,7 +2540,11 @@ NAMESPACE__BEGIN(psycle)
 						}
 					}
 					trackcount++;
+#if defined PSYCLE_OPTION_VOLUME_COLUMN
+					patOffset+=2;
+#else
 					patOffset++;
+#endif
 					xOffset+=ROWWIDTH;
 				}
 				linecount++;

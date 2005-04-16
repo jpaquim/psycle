@@ -1,40 +1,41 @@
 #pragma once
+#include "afxcmn.h"
+
 
 // XMSamplerUIInst
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
+
 class XMSampler;
-	/// XMInstrument ***** [bohan] iso-(10)646 encoding only please! *****
-class XMSamplerUIInst : public CPropertyPage
+	
+	class XMSamplerUIInst : public CPropertyPage
 	{
-
 #if 0
-
 		/** EnvelopeEditor Class 
-		 * Envelope Graph ***** [bohan] iso-(10)646 encoding only please! *****Edit***** [bohan] iso-(10)646 encoding only please! ***** */
+		 * Envelope Graph *****  *****Edit*****  */
 		class EnvelopeEditor : public CScrollView
 		{
 		public:
 			// constant
 			static const int MARGIN_RIGHT = 100 /* pixel */;
-			static const int POINT_SIZE = 6 /* pixel */;///< Envelope Point Ç***** [bohan] iso-(10)646 encoding only please! *****
+			static const int POINT_SIZE = 6 /* pixel */;///< Envelope Point 
 			static const int HITTEST_NOT_FOUND = -1;///< HitTest
 			// Exception
 			
 	
 			/// Window Class Definition
-			DECLARE_WND_SUPERCLASS(_T("EnvelopeEditor"),GetWndClassName())
+			DECLARE_WND_SUPERCLASS(_T("EnvelopeEditor"),GetWndClassName());
 			
 			/// Constructor
 			EnvelopeEditor();
 		
-			/// Initialize ***** [bohan] iso-(10)646 encoding only please! *****
+			/// Initialize 
 			void Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope);
 
-			/// Envelope***** [bohan] iso-(10)646 encoding only please! *****
+			/// Envelope
 			void EditEnvelope(XMInstrument::Envelope * const pEnvelope);
 			
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
+			/// 
 			void Color(const BYTE a,const BYTE r ,const BYTE g,const BYTE b)
 			{
 				m_Color.SetValue(::Gdiplus::Color::MakeARGB(a,r,g,b));
@@ -74,11 +75,11 @@ class XMSamplerUIInst : public CPropertyPage
 				Invalidate();
 			};
 
-			void DoPaint(CDCHandle dc);///< WM_PAINT Handler
-			void OnLButtonDown(const UINT vKey, WTL::CPoint position);
-			void OnLButtonUp(const UINT vKey, WTL::CPoint position);
-			void OnMouseMove(const UINT vKey, WTL::CPoint position);
-			void OnRButtonDown(const UINT vKey, WTL::CPoint position);
+			void DoPaint(CDC* dc);///< WM_PAINT Handler
+			void OnLButtonDown(const UINT vKey, CPoint position);
+			void OnLButtonUp(const UINT vKey, CPoint position);
+			void OnMouseMove(const UINT vKey, CPoint position);
+			void OnRButtonDown(const UINT vKey, CPoint position);
 		    void OnAddPoint(const UINT uNotifyCode, const int nID, const HWND hWndCtl);
 		    void OnDelPoint(const UINT uNotifyCode, const int nID, const HWND hWndCtl);
 		    void OnSetSustain(const UINT uNotifyCode, const int nID, const HWND hWndCtl);
@@ -90,9 +91,9 @@ class XMSamplerUIInst : public CPropertyPage
 			static LRESULT CALLBACK DummyWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		private:
-			typedef boost::optional<int> EnvelopePointIndex;
+			typedef int EnvelopePointIndex;
 
-			/** ***** [bohan] iso-(10)646 encoding only please! ***** */
+			/**  */
 			const EnvelopePointIndex GetEnvelopePointIndexAtPoint(const int x,const int y)
 			{
 				const int _points = m_pEnvelope->NumOfPoints();
@@ -108,10 +109,10 @@ class XMSamplerUIInst : public CPropertyPage
 					}
 				}
 
-				return EnvelopePointIndex();// ***** [bohan] iso-(10)646 encoding only please! *****
+				return EnvelopePointIndex();//
 			};
 
-			/** Scroll Size ***** [bohan] iso-(10)646 encoding only please! ***** */
+			/** Scroll Size  */
 			void AdjustScrollRect(const int maxPoint);
 			//const WTL::CPoint TickToPosition(const int index);///< convert Tick To Screen Position
 
@@ -120,14 +121,14 @@ class XMSamplerUIInst : public CPropertyPage
 			XMSampler* m_pXMSampler;///< XMSampler Pointer
 			bool m_bInitialized;///< Initialize Flag
 			float m_Zoom;///< Zoom
-			int m_CurrentScrollWidth;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			int m_CurrentScrollHeight;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			int m_CurrentScrollWidth;///< 
+			int m_CurrentScrollHeight;///<
 			
-			bool m_bPointEditing;///< ***** [bohan] iso-(10)646 encoding only please! ***** EnvelopePoint ***** [bohan] iso-(10)646 encoding only please! *****
-			int m_EditPoint;///< ***** [bohan] iso-(10)646 encoding only please! ***** Envelope Point Index
-			int m_EditPointOrig;///< ***** [bohan] iso-(10)646 encoding only please! ***** Envelope Point Index
-			int m_EditPointX;///< ***** [bohan] iso-(10)646 encoding only please! ***** Envelope PointÇÃXç¿ïW
-			int m_EditPointY;///< ***** [bohan] iso-(10)646 encoding only please! ***** Envelope PointÇÃYç¿ïW
+			bool m_bPointEditing;///< EnvelopePoint 
+			int m_EditPoint;///< ***** Envelope Point Index
+			int m_EditPointOrig;///< Envelope Point Index
+			int m_EditPointX;///< Envelope Point
+			int m_EditPointY;///< Envelope Point
 			Gdiplus::Color m_Color;///< Line Color  
 			
 			//CComPtr<ID3DXLine> m_pLine;
@@ -155,6 +156,7 @@ class XMSamplerUIInst : public CPropertyPage
 
 		};
 		
+
 		/** SamplerAssignEditor ÉNÉâÉX  */
 		class SampleAssignEditor : public CScrollWindowImpl<XMSamplerUIInst::SampleAssignEditor>
 		{
@@ -166,9 +168,9 @@ class XMSamplerUIInst : public CPropertyPage
 
 			/// Window Class Definition
 			DECLARE_WND_SUPERCLASS(_T("SampleAssignEditor"),GetWndClassName())
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
+			/// 
 			SampleAssignEditor();
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
+			/// 
 			virtual ~SampleAssignEditor();
 			void DoPaint(CDCHandle dc);///< WM_PAINT Handler
 			void Initialize(XMSampler* const pXMSampler,const int targetInstrumentNo);
@@ -263,7 +265,7 @@ class XMSamplerUIInst : public CPropertyPage
 
 			//BOOL SubclassWindow(const HWND hwnd)
 			//{
-			//	// ***** [bohan] iso-(10)646 encoding only please! *****
+			//	
 			//	::WNDCLASSEX _wc = GetWndClassInfo().m_wc;
 			//	_wc.lpfnWndProc = m_pWndProcBackup;
 			//	return CScrollWindowImpl<SampleAssignEditor>::SubclassWindow(hwnd);
@@ -276,36 +278,36 @@ class XMSamplerUIInst : public CPropertyPage
 				return 1;
 			};
 
-			/** ç∂É{É^ÉìÉ_ÉEÉìÉCÉxÉìÉgÉnÉìÉhÉâ */
+			/** */
 			void OnLButtonDown(const UINT vKey, WTL::CPoint position);
-			/** ç∂É{É^ÉìÉAÉbÉvÉCÉxÉìÉgÉnÉìÉhÉâ */
+			/** */
 			void OnLButtonUp(const UINT vKey, WTL::CPoint position);
-			/** MouseÉJÅ[É\Éãà⁄ìÆÉCÉxÉìÉgÉnÉìÉhÉâ */
+			/** */
 			void OnMouseMove(const UINT vKey, WTL::CPoint position);
-			/** âEÉ{É^ÉìÉ_ÉEÉìÉCÉxÉìÉgÉnÉìÉhÉâ */
+			/**  */
 			void OnRButtonDown(const UINT vKey, WTL::CPoint position);
 
 		private:
-			/// ***** [bohan] iso-(10)646 encoding only please! *****
+			/// 
 			void InitializeScrollWindow();
 
-			/// ***** [bohan] iso-(10)646 encoding only please! *****Index***** [bohan] iso-(10)646 encoding only please! *****
+			/// Index
 			const boost::optional<int> GetKeyIndexAtPoint(const int x,const int y,WTL::CRect& keyRect);
 	
-			XMSampler * m_pXMSampler;///< XMSampler***** [bohan] iso-(10)646 encoding only please! *****
-			int m_InstrumentNo;///< ***** [bohan] iso-(10)646 encoding only please! ***** Instrument***** [bohan] iso-(10)646 encoding only please! *****
-			bool m_bInitialized;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			//static boost::shared_ptr<Gdiplus::Image> m_pNoteKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			//static boost::shared_ptr<Gdiplus::Image> m_pSeminoteKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static Gdiplus::Bitmap * m_pNaturalKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static Gdiplus::Bitmap * m_pSharpKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static int m_CreateCount;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			static const int m_NoteAssign[KEY_PER_OCTAVE];/// ***** [bohan] iso-(10)646 encoding only please! *****
-			WNDPROC m_pWndProcBackup;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			boost::optional<int> m_FocusKeyIndex;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			CRect m_FocusKeyRect;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			WTL::CEdit m_EditSampleNo;///< ***** [bohan] iso-(10)646 encoding only please! *****
-			WTL::CUpDownCtrl m_UpDownSampleNo;///< ***** [bohan] iso-(10)646 encoding only please! *****
+			XMSampler * m_pXMSampler;///< XMSampler
+			int m_InstrumentNo;///< Instrument
+			bool m_bInitialized;///< 
+			//static boost::shared_ptr<Gdiplus::Image> m_pNoteKey;///< 
+			//static boost::shared_ptr<Gdiplus::Image> m_pSeminoteKey;///< 
+			static Gdiplus::Bitmap * m_pNaturalKey;///< 
+			static Gdiplus::Bitmap * m_pSharpKey;///< 
+			static int m_CreateCount;///< *
+			static const int m_NoteAssign[KEY_PER_OCTAVE];/// *
+			WNDPROC m_pWndProcBackup;///< 
+			boost::optional<int> m_FocusKeyIndex;///< 
+			CRect m_FocusKeyRect;///<
+			WTL::CEdit m_EditSampleNo;///< 
+			WTL::CUpDownCtrl m_UpDownSampleNo;///< 
 		public:
 			// Message Map
 			BEGIN_MSG_MAP_EX(XMSamplerUIInst::SampleAssignEditor)
@@ -330,19 +332,34 @@ class XMSamplerUIInst : public CPropertyPage
 
 		};// SampleAssignEditor
 
-	public:
-		/// Dialog ID
-		enum { IDD = IDD_XMSAMPLERUIINST };
 
+	DECLARE_DYNAMIC(XMSamplerUIInst)
+
+	public:
 		/// Constrcutor
 		XMSamplerUIInst();
 		/// Destructor
-		~XMSamplerUIInst()
-		{
-		};
+		virtual ~XMSamplerUIInst();
+
+		/// Dialog ID
+		enum { IDD = IDD_XMSAMPLERUIINST };
 		
+	protected:
+		virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
+
+	public:
+		DECLARE_MESSAGE_MAP()
+		afx_msg void OnNMCustomdrawGlobvol(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnNMCustomdrawFadeout(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnNMCustomdrawDefPan(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnNMCustomdrawPitchPanMod(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnNMCustomdrawCutoff(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnNMCustomdrawRessonance(NMHDR *pNMHDR, LRESULT *pResult);
+		afx_msg void OnNMCustomdrawFilterMod(NMHDR *pNMHDR, LRESULT *pResult);
+
 		void pMachine(XMSampler * const p){m_pMachine = p;};
 		XMSampler * const pMachine(){return m_pMachine;};
+
 
 	private:
 		void SetInstrumentData(const int instno);
@@ -351,17 +368,18 @@ class XMSamplerUIInst : public CPropertyPage
 //		void SetFilterModeCombo(const int mode);
 
 		
+		CSliderCtrl m_SlGlobVol;
+		CSliderCtrl m_SlFadeout;
+		CSliderCtrl m_SlDefPan;
+		CSliderCtrl m_SlPitchPanMod;
+		CSliderCtrl m_SlCutoff;
+		CSliderCtrl m_SlRessonance;
+		CSliderCtrl m_SlFilterMod;
+
 		WTL::CEdit m_InstNo;
 		WTL::CEdit m_InstName;
 //		WTL::CComboBox m_FilterType;
 		WTL::CComboBox m_NNA;
-		WTL::CTrackBarCtrl m_Pan;
-//		SF::UI::Volume m_Pan;
-		SF::UI::Volume<float> m_Test;
-		WTL::CTrackBarCtrl m_Cutoff;
-		WTL::CTrackBarCtrl m_Q;
-		WTL::CTrackBarCtrl m_Envelope;
-		WTL::CTrackBarCtrl m_FilterType;
 		
 		WTL::CButton m_RandomPanning;
 		WTL::CButton m_RandomVCFCuttoff;
@@ -385,23 +403,6 @@ class XMSamplerUIInst : public CPropertyPage
 		int m_CurrentInstNo;
 		bool m_bInitialized;
 	
-	public:
-			// Message Map
-		BEGIN_MSG_MAP_EX(XMSamplerUIInst)
-			MSG_WM_INITDIALOG(OnInitDialog)
-			COMMAND_HANDLER_EX(IDC_INST_NO,EN_CHANGE,OnChangeInstNo)
-			COMMAND_HANDLER_EX(IDC_CUSTOM1,EN_CHANGE,OnChangeCustom)
-			COMMAND_HANDLER_EX(IDC_INST_NAME, EN_CHANGE, OnChangeInstName)
-		
-			NOTIFY_HANDLER_EX(IDC_CUTOFF, NM_CUSTOMDRAW, OnCustomdrawSliderCutoff)
-			NOTIFY_HANDLER_EX(IDC_Q, NM_CUSTOMDRAW, OnCustomdrawSliderQ)
-			NOTIFY_HANDLER_EX(IDC_ENVELOPE, NM_CUSTOMDRAW, OnCustomdrawEnvelope)
-	//		NOTIFY_HANDLER_EX(IDC_PANSLIDER, NM_CUSTOMDRAW, OnCustomdrawPan)
-			NOTIFY_HANDLER_EX(IDC_SLIDER_MODE, NM_CUSTOMDRAW, OnCustomdrawMode)
-			REFLECT_NOTIFICATIONS()
-//			CHAIN_MSG_MAP(CPropertyPageImpl<XMSamplerUIInst>)
-		END_MSG_MAP()
-	private:
 
 	// Handler prototypes:
 	//  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL bHandled);
@@ -419,12 +420,13 @@ class XMSamplerUIInst : public CPropertyPage
 
 		void OnChangeInstNo(UINT id,int command,HWND hwnd);
 		void OnChangeInstName(UINT id,int command,HWND hwnd);
-		void OnChangeCustom(UINT id,int command,HWND hwnd){
+		void OnChangeCustom(UINT id,int command,HWND hwnd)
+		{
 			ATLTRACE2(_T("OnChangeCustom\n"));
 		};
-#endif 
-
+#endif
 };
+
 NAMESPACE__END
 NAMESPACE__END
 

@@ -67,21 +67,21 @@ namespace psycle
 		{
 			enum{
 			 S_SET_FILTER=				0, // Greyed out in IT...
-			 S_SET_GLISSANDO_CONTROL=	1, // Greyed out in IT...
-			 S_FINETUNE=				2, // Greyed out in IT...
-			 S_SET_VIBRATO_WAVEFORM=	3, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
-			 S_SET_TREMOLO_WAVEFORM=	4, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
-			 S_SET_PANBRELLO_WAVEFORM=	5, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
-			 S_FINE_PATTERN_DELAY=		6, // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
-			 S7=						7,
-			 S_SET_PAN=					8,
-			 S9=						9,
-			 S_SET_HIGH_OFFSET=			10,
-			 S_PATTERN_LOOP=			11,
-			 S_DELAYED_NOTE_CUT=		12,
-			 S_NOTE_DELAY=				13,
-			 S_PATTERN_DELAY=			14, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
-			 S_SET_MIDI_MACRO=			15
+			 S_SET_GLISSANDO_CONTROL=	0x10, // Greyed out in IT...
+			 S_FINETUNE=				0x20, // Greyed out in IT...
+			 S_SET_VIBRATO_WAVEFORM=	0x30, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
+			 S_SET_TREMOLO_WAVEFORM=	0x40, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
+			 S_SET_PANBRELLO_WAVEFORM=	0x50, // Check XMInstrument::WaveData::WaveForms! IT is sine, square, sawdown and random
+			 S_FINE_PATTERN_DELAY=		0x60, // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
+			 S7=						0x70,
+			 S_SET_PAN=					0x80,
+			 S9=						0x90,
+			 S_SET_HIGH_OFFSET=			0xA0,
+			 S_PATTERN_LOOP=			0xB0,
+			 S_DELAYED_NOTE_CUT=		0xC0,
+			 S_NOTE_DELAY=				0xD0,
+			 S_PATTERN_DELAY=			0xE0, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
+			 S_SET_MIDI_MACRO=			0xF0
 			};
 		};
 		struct CMD_S7
@@ -304,7 +304,7 @@ Ex/Fx.
 		{
 			enum
 			{
-				IS_SIGNED	= 0x01,	// Only this one is used by Impulse Tracker.
+				IS_SIGNED	= 0x01,	// Only this one is used by Impulse Tracker. The others were for its sample importer.
 				IS_MOTOROLA = 0x02,
 				IS_DELTA	= 0x04,
 				IS_BYTEDELTA= 0x08,
@@ -320,7 +320,11 @@ Ex/Fx.
 			bool LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
 			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit);
 			bool LoadITPattern(int patIdx);
-			void ParseEffect(PatternEntry&pent, int command,int param);
+			void ParseEffect(PatternEntry&pent, int command,int param,int channel);
+		private:
+			unsigned char highOffset[64];
+		public:
+
 			
 //////////////////////////////////////////////////////////////////////////
 ///    S3M Fileformat 

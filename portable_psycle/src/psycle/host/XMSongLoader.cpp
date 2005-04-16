@@ -4,38 +4,13 @@
  *  $Revision$
  */
 #include <project.private.hpp>
-/*#include "NewMachine.h"
-#include "MainFrm.h"
-#if defined WTL
-	#include "PsycleWTLView.h"
-#else
-	#include "ChildView.h"
-#endif
-*/
 #include "ProgressDialog.hpp"
-
-//	extern CPsycleApp theApp;
 #include "Song.hpp"
-//#include "IPsySongLoader.h"
-//#include "Instrument.h"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
-//#include "Sampler.h"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "XMSongLoader.hpp"
 #include "Player.hpp"
-//#include "Plugin.h"
-//#include "VSTHost.h"
-//#include "DataCompression.h"
-
-//#include <sstream>
-
-#ifdef CONVERT_INTERNAL_MACHINES
-	#include "convert_internal_machines.hpp" // conversion
-#endif
-
-#include "Riff.hpp"	 // For Wave file loading.
-
 
 namespace psycle{
 namespace host{
@@ -43,7 +18,10 @@ namespace host{
 
 	XMSongLoader::XMSongLoader(void)
 	{
-	
+		for (int i=0; i<32; i++)
+		{
+			highOffset[i]=0;
+		}
 	}
 
 	XMSongLoader::~XMSongLoader(void)
@@ -122,29 +100,16 @@ namespace host{
 		
 		if(pSongName==NULL)
 			return 0;
-		strcpy(song.Name,pSongName);	
+
+		strcpy(song.Name,pSongName);
 		strcpy(song.Author,"");
-		strcpy(song.Comment,"Imported from Fasttracker II module.");
+		strcpy(song.Comment,"Imported from FastTracker II Module: ");
+		strcat(song.Comment,szName.c_str());
 		zapArray(pSongName);
 
 		// get data
 		Seek(60);
 		Read(&m_Header,sizeof(XMFILEHEADER));
-/*
-		int iHeaderLen = ReadInt4(60);
-		short iSongLen = ReadInt2();
-		short iRestartPos = ReadInt2();
-		short iNoChannels = ReadInt2();
-		short iNoPatterns = ReadInt2();
-		short iNoInstruments = ReadInt2();
-		short iFlags = ReadInt2();		// ignored*/
-
-/*		m_iTempoTicks = ReadInt2();
-		m_iTempoBPM = ReadInt2();
-		
-		// get pattern order	
-		unsigned char playOrder[256];
-		m_File.Read(playOrder,256);*/
 
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < 256;i++)
 		{
@@ -162,21 +127,7 @@ namespace host{
 		}
 
 		song.SONGTRACKS=m_Header.channels;
-		
-		// tempo
-		// BPM = 6 * iTempoBPM / iTempoTicks;
-		// 
-/*		int tmp = 24 / ((m_Header.speed == 0)?6:m_Header.speed);
-		if (tmp*m_Header.speed == 24)
-		{
-			song.LinesPerBeat(tmp);
-			song.BeatPerMin(m_Header.tempo);
-		}
-		else
-		{
-			song.BeatsPerMin(6 * m_Header.tempo / ((m_Header.speed == 0)?6:m_Header.speed) );
-		}
-		*/
+
 		// instr count
 		m_iInstrCnt = m_Header.instruments;
 
@@ -243,16 +194,9 @@ namespace host{
 
 		if(iPackedSize == 0)
 		{
-			// build empty PatternEntry
-			e._note = 255;
-			e._inst = 255;
-			e._mach = 255;
-			e._cmd=0;
-			e._parameter=0;
-//			e._volume = 0;
-//			e._volcmd = 0;
 
-			// build empty pattern
+
+			// build empty pattern   (PatternEntry gets initialized at construction time)
 			for(int row=0;row<iNumRows;row++)
 				for(int col=0;col<iTracks;col++)
 					WritePatternEntry(song,patIdx,row,col,e);	
@@ -302,50 +246,53 @@ namespace host{
 					// translate
 					e._inst = instr;	
 					e._mach = 0;
-//					e._volume = 0;
-//					e._volcmd = 0;
+#if defined PSYCLE_OPTION_VOLUME_COLUMN
+					e._volume = 255;
 
-					
-					
 					// volume/command
 					if(vol >= 0x10 && vol <= 0x50)
 					{
-						// translate volume
-						type=XMSampler::CMD::VOLUME;
-						param=vol-0x10;
-						
-/*						if(vol == 0x50) 
-						{ e._volume = 255;
-						} else {
-							e._volume = 4 * (vol - 0x10);
+						e._volume=(vol == 0x50)?0x3F:(vol-0x10);
+
+					} else if(vol >= 0x60){						
+						switch(vol&0xF0)
+						{
+						case XMVOL_CMD::XMV_VOLUMESLIDEDOWN:
+							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_VOLUMESLIDEUP:
+							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEUP|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_FINEVOLUMESLIDEDOWN:
+							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_FINEVOLUMESLIDEUP:
+							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEUP|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_PANNING:
+							e._volume = XMSampler::CMD_VOL::VOL_PANNING|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_PANNINGSLIDELEFT:
+							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_PANNINGSLIDERIGHT:
+							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_VIBRATOSPEED:
+							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO_SPEED|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_VIBRATO:
+							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO|(vol&0x0F);
+							break;
+						case XMVOL_CMD::XMV_PORTA2NOTE:
+							e._volume = XMSampler::CMD_VOL::VOL_TONEPORTAMENTO|(vol&0x0F);
+							break;
+						default:
+							break;
 						}
-						e._volcmd = XMCMD::VOLUME;
-*/
-					} else {
-
-//						if(vol >= 0x60){						
-/*						e._volcmd = VOLCMD_EXG_TABLE[(vol & 0xf0) >> 4];
-						e._volume = vol & 0xf;
-
-						switch(e._volcmd){
-
-							case XMCMD::PORTA2NOTE:
-							case XMCMD::PANNING:
-								e._volume *= 16;
-								break;
-							case XMCMD::FINEVOLDOWN:
-							case XMCMD::FINEVOLUP:
-							case XMCMD::VOLSLIDEUP:
-							case XMCMD::VOLSLIDEDOWN:
-							case XMCMD::PANSLIDELEFT:
-							case XMCMD::PANSLIDERIGHT:
-								e._volume *=  4;
-								break;
-						}
-*/
-
 					}
-	//				else
+#endif
+
 					e._parameter = param;
 					switch(type){
 						case XMCMD::ARPEGGIO:
@@ -383,23 +330,20 @@ namespace host{
 							e._cmd = XMSampler::CMD::PANNING;
 							break;
 						case XMCMD::OFFSET:
-							e._cmd = XMSampler::CMD::OFFSET; //\todo: + mem[thischannel].highoffset; 
+							e._cmd = XMSampler::CMD::OFFSET | highOffset[col]; 
 							break;
 						case XMCMD::VOLUMESLIDE:
-							e._cmd = XMSampler::CMD::OFFSET;
+							e._cmd = XMSampler::CMD::VOLUMESLIDE;
 							break;
 						case XMCMD::POSITION_JUMP:
-							e._cmd = Player::CMD::JUMP_TO_ORDER;
+							e._cmd = PatternCmd::JUMP_TO_ORDER;
 							break;
 						case XMCMD::VOLUME:
 							e._cmd = XMSampler::CMD::VOLUME;
-							if (param== 64)
-								{e._parameter=255;
-								}
-							else e._parameter = param * 4;
+							e._parameter = param * 2;
 							break;
 						case XMCMD::PATTERN_BREAK:
-							e._cmd = Player::CMD::BREAK_TO_LINE;
+							e._cmd = PatternCmd::BREAK_TO_LINE;
 							e._parameter = (param&0xF0)*10 + (param&0x0F);
 							break;
 						case XMCMD::EXTENDED:
@@ -414,23 +358,23 @@ namespace host{
 								break;
 							case XMCMD_E::E_GLISSANDO_WAVE:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE + (param & 0xf);
+								e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | (param & 0xf);
 								break;
 							case XMCMD_E::E_VIBRATO_WAVE:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter =XMSampler::CMD_E::E_VIBRATO_WAVE + (param & 0xf);
+								e._parameter =XMSampler::CMD_E::E_VIBRATO_WAVE | (param & 0xf);
 								break;
 							case XMCMD_E::E_FINETUNE:
 								e._cmd = XMSampler::CMD::NONE;
 								e._parameter = 0;
 								break;
 							case XMCMD_E::E_PATTERN_LOOP:
-								e._cmd = Player::CMD::PATTERN_LOOP;
+								e._cmd = PatternCmd::PATTERN_LOOP;
 								e._parameter = param & 0xf;
 								break;
 							case XMCMD_E::E_TREMOLO_WAVE:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE + (param & 0xf);
+								e._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | (param & 0xf);
 								break;
 							case XMCMD_E::E_MOD_RETRIG:
 								e._cmd = XMSampler::CMD::RETRIG;
@@ -446,19 +390,19 @@ namespace host{
 								break;
 							case XMCMD_E::E_DELAYED_NOTECUT:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT + (param & 0xf);
+								e._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT | (param & 0xf);
 								break;
 							case XMCMD_E::E_NOTE_DELAY:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMSampler::CMD_E::E_NOTE_DELAY + ( param & 0xf);
+								e._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
 								break;
 							case XMCMD_E::E_PATTERN_DELAY:
-								e._cmd = Player::CMD::PATTERN_DELAY;
+								e._cmd = PatternCmd::PATTERN_DELAY;
 								e._parameter = param & 0xf;
 								break;
 							case XMCMD_E::E_SET_MIDI_MACRO:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMCMD::MIDI_MACRO + (param & 0x0f);
+								e._parameter = XMCMD::MIDI_MACRO | (param & 0x0f);
 								break;
 							default:
 								e._cmd = XMSampler::CMD::NONE;
@@ -468,15 +412,17 @@ namespace host{
 						case XMCMD::SETSPEED:
 							if ( param < 32)
 							{
-								//\todo: implement speed workaround.
-								XMSampler::CMD::NONE;
+								e._cmd=PatternCmd::EXTENDED;
+								e._parameter = 24 / ((param == 0)?6:param);
 							}
 							else
 							{
-								e._cmd = Player::CMD::SET_TEMPO;
+								e._cmd = PatternCmd::SET_TEMPO;
 							}
+							break;
 						case XMCMD::SET_GLOBAL_VOLUME:
-							e._cmd = Player::CMD::SET_VOLUME;
+							//\todo: implement global volume
+							e._cmd = PatternCmd::SET_VOLUME;
 							if (param>= 64)
 							{	
 								e._parameter=255;
@@ -505,53 +451,53 @@ namespace host{
 							switch(param & 0xf0){
 							case XMCMD_X::X_EXTRA_FINE_PORTA_DOWN:
 								e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
-								e._parameter = 0xE0 + (param & +0xf);
+								e._parameter = 0xE0 | (param & +0xf);
 								break;
 							case XMCMD_X::X_EXTRA_FINE_PORTA_UP:
 								e._cmd = XMSampler::CMD::PORTAMENTO_UP;
-								e._parameter = 0xE0 + (param & +0xf);
+								e._parameter = 0xE0 | (param & +0xf);
 								break;
 							case XMCMD_X::X9:
 								switch ( param & 0xf){
 								case XMCMD_X9::X9_SURROUND_OFF:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_SURROUND_OFF;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_SURROUND_OFF;
 									break;
 								case XMCMD_X9::X9_SURROUND_ON:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_SURROUND_ON;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_SURROUND_ON;
 									break;
 								case XMCMD_X9::X9_REVERB_OFF:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_REVERB_OFF;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_REVERB_OFF;
 									break;
 								case XMCMD_X9::X9_REVERB_FORCE:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_REVERB_FORCE;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_REVERB_FORCE;
 									break;
 								case XMCMD_X9::X9_STANDARD_SURROUND:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_STANDARD_SURROUND;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_STANDARD_SURROUND;
 									break;
 								case XMCMD_X9::X9_QUAD_SURROUND:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_QUAD_SURROUND;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_QUAD_SURROUND;
 									break;
 								case XMCMD_X9::X9_GLOBAL_FILTER:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_GLOBAL_FILTER;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_GLOBAL_FILTER;
 									break;
 								case XMCMD_X9::X9_LOCAL_FILTER:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_LOCAL_FILTER;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_LOCAL_FILTER;
 									break;
 								case XMCMD_X9::X9_PLAY_FORWARD:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_PLAY_FORWARD;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_PLAY_FORWARD;
 									break;
 								case XMCMD_X9::X9_PLAY_BACKWARD:
 									e._cmd = XMSampler::CMD::EXTENDED;
-									e._parameter = XMSampler::CMD_E::E9 + XMSampler::CMD_E9::E9_PLAY_BACKWARD;
+									e._parameter = XMSampler::CMD_E::E9 | XMSampler::CMD_E9::E9_PLAY_BACKWARD;
 									break;
 								default:
 									e._cmd = XMSampler::CMD::NONE;
@@ -559,7 +505,7 @@ namespace host{
 								}
 								break;
 							case XMCMD_X::X_HIGH_OFFSET:
-								//  mem[thischannel].highoffset = param &0xf;
+								highOffset[col] = param & 0x0F;
 								break;
 							default:
 								e._cmd = XMSampler::CMD::NONE;
@@ -594,24 +540,15 @@ namespace host{
 							if(note >= 96 || note < 0)
 								TRACE(_T("invalid note\n"));
 							e._note  = note+11; // +11 -> +12 ( FT2 C-0 is Psycle's C-1) -1 ( Ft2 C-0 is value 1)
-				/*		
 
-							// force note into range
-							if (note >= 30)
-								e._note = note - 30;
-							else if (note>=30-12)
-								e._note = note - (30-12);
-							else if (note>=30-24)
-								e._note = note - (30-24);
-							else if (note>=30-36)
-								e._note = note - (30-36);
-
-					*/
 							break;	// transpose
 					}
 
-//					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 0) && (e._volcmd == 0))
+#if defined PSYCLE_OPTION_VOLUME_COLUMN
+					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
+#else
 					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+#endif
 					{
 						e._mach = 255;
 					}
@@ -747,7 +684,6 @@ namespace host{
 
 		ASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 
-		//\todo: This needs to be changed
 		XMInstrument::WaveData& _wave = sampler.SampleData(iSampleIdx);
 		
 		_wave.Init();
@@ -787,7 +723,7 @@ namespace host{
 		}
 
 
-		_wave.WaveVolume(iVol * 4);
+		_wave.WaveVolume(iVol * 2);
 		_wave.WaveTune(iRelativeNote);
 		_wave.WaveFineTune(iFineTune*2); // WaveFineTune has double range.
 
@@ -803,7 +739,6 @@ namespace host{
 		// parse
 		
 		BOOL b16Bit = smpFlags[iSampleIdx] & 0x10;
-		//\todo : this needs to be changed
 		XMInstrument::WaveData& _wave =  sampler.SampleData(iSampleIdx);
 		short wNew=0;
 
@@ -847,10 +782,6 @@ namespace host{
 	
 	void XMSongLoader::ReadEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader)
 	{
-		/*
-			
-		*/
-
 		// volume envelope
 		inst.AmpEnvelope()->Init();
 		if(sampleHeader.vtype & 1){// enable volume envelope
@@ -882,9 +813,6 @@ namespace host{
 			}
 
             int envelope_point_num = sampleHeader.vnum;
-			
-			//inst.AmpEnvelope()->NumOfPoints(envelope_point_num);
-
 			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.
 				envelope_point_num = 12;
 			}
@@ -893,8 +821,6 @@ namespace host{
 			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 			// Value : 0..64. , divide by 64 to use it as a multiplier.
 			for(int i = 0; i < envelope_point_num;i++){
-//				inst.AmpEnvelope()->Point(i,((int)sampleHeader.venv[i * 2]) * _tickPerWave);
-//				inst.AmpEnvelope()->Value(i,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
 				inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
 			}
 
@@ -924,16 +850,11 @@ namespace host{
 				}
 			}
 			int envelope_point_num = sampleHeader.pnum;
-
-			//inst.PanEnvelope()->NumOfPoints(envelope_point_num);
-			
 			if(envelope_point_num > 12){
 				envelope_point_num = 12;
 			}
 
 			for(int i = 0; i < envelope_point_num;i++){
-//				inst.PanEnvelope()->Point(i,(int)sampleHeader.penv[i * 2] * _tickPerWave);
-//				inst.PanEnvelope()->Value(i,(float)sampleHeader.penv[i * 2 + 1] / 64.0f);
 				inst.PanEnvelope()->Append((int)sampleHeader.penv[i * 2] ,(float)sampleHeader.penv[i * 2 + 1] / 64.0f);
 			}
 

@@ -26,3 +26,8 @@
 	"read_write_mutex = " STRINGIZED(PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX) \
 	EOL \
 	"debugging = " PSYCLE__CONFIGURATION__OPTION__DEBUG
+
+///  JAZ: Define to enable the volume column for XMSampler. It will also make the machine column in the pattern to show
+///		the values of the volume column instead.
+
+// #define PSYCLE_OPTION_VOLUME_COLUMN

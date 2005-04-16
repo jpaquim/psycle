@@ -1,47 +1,35 @@
 #pragma once
 
-#include "constants.hpp"       // ***** [bohan] iso-(10)646 encoding only please! *****
-
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
 
 class XMSampler;
+
 class XMSamplerUISample : public CPropertyPage
 {
-public:
-	DECLARE_DYNCREATE(XMSamplerUISample)
-	// Construction
+	DECLARE_DYNAMIC(XMSamplerUISample)
+
 public:
 	XMSamplerUISample();
-	~XMSamplerUISample();
+	virtual ~XMSamplerUISample();
 
-	// Dialog Data
-	//{{AFX_DATA(XMSamplerUISample)
+	// Datos del cuadro de diálogo
 	enum { IDD = IDD_XMSAMPLERUISAMPLE };
-	//}}AFX_DATA
-
-	// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(XMSamplerUISample)
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(XMSaplerUIGeneral)
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
+	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
+
 	DECLARE_MESSAGE_MAP()
-
 public:
-	void pMachine(XMSampler * const p){m_pMachine = p;};
-	XMSampler * const pMachine(){return m_pMachine;};
+	afx_msg BOOL OnSetActive(void);
 
 private:
+
 	XMSampler *m_pMachine;
-
+public:
+	void pMachine(XMSampler *const p){m_pMachine = p;};
+	XMSampler * const pMachine(){return m_pMachine;};
+	afx_msg void OnLbnSelchangeSamplelist();
 };
-
 NAMESPACE__END
 NAMESPACE__END

@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "isongloader.h"
 #include "SongStructs.hpp"
 #include "FileIO.hpp"
 #include "XMFile.hpp"
@@ -55,6 +54,7 @@ namespace host{
 		int m_iInstrCnt;
 		int smpLen[256];
 		char smpFlags[256];
+		unsigned char highOffset[32];
 		short m_iTempoTicks;
 		short m_iTempoBPM;
 		XMFILEHEADER m_Header;

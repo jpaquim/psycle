@@ -1,5 +1,6 @@
 #pragma once
 #include "constants.hpp"
+#include "afxwin.h"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
@@ -21,8 +22,6 @@ public:
 	// Dialog Data
 	//{{AFX_DATA(XMSamplerUIGeneral)
 	enum { IDD = IDD_XM_GENERAL };
-	CEdit	m_Tempo;
-	CEdit	m_Speed;
 	CComboBox	m_interpol;
 	CSliderCtrl	m_polyslider;
 	CStatic m_polylabel;
@@ -42,8 +41,6 @@ private:
 //	CEdit m_GlobalVolume;
 public:
 	afx_msg void OnCbnSelchangeXminterpol();
-	afx_msg void OnEnChangeXmspeed();
-	afx_msg void OnEnChangeXmtempo();
 	afx_msg void OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult);
 
 protected:
@@ -52,6 +49,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+public:
+	CEdit m_ECommandInfo;
 };
 
 NAMESPACE__END

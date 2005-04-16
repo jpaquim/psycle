@@ -17,19 +17,16 @@ XMSamplerUIGeneral::XMSamplerUIGeneral() : CPropertyPage(XMSamplerUIGeneral::IDD
 
 void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
 	{
-	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CDirectoryDlg)
-	DDX_Control(pDX, IDC_XMTEMPO, m_Tempo);
-	DDX_Control(pDX, IDC_XMSPEED, m_Speed);
-	DDX_Control(pDX, IDC_XMINTERPOL, m_interpol);
-	DDX_Control(pDX, IDC_XMPOLY, m_polyslider);
-	DDX_Control(pDX, IDC_XMPOLYLABEL, m_polylabel);
-	//}}AFX_DATA_MAP
+		CPropertyPage::DoDataExchange(pDX);
+		//{{AFX_DATA_MAP(CDirectoryDlg)
+		DDX_Control(pDX, IDC_XMINTERPOL, m_interpol);
+		DDX_Control(pDX, IDC_XMPOLY, m_polyslider);
+		DDX_Control(pDX, IDC_XMPOLYLABEL, m_polylabel);
+		//}}AFX_DATA_MAP
+		DDX_Control(pDX, IDC_COMMANDINFO, m_ECommandInfo);
 	}
 BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
-	ON_EN_CHANGE(IDC_XMSPEED, OnEnChangeXmspeed)
-	ON_EN_CHANGE(IDC_XMTEMPO, OnEnChangeXmtempo)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
 END_MESSAGE_MAP()
 
@@ -49,19 +46,29 @@ BOOL XMSamplerUIGeneral::OnInitDialog()
 
 	m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 
-	SetWindowText(_pMachine->_editName);
 
 	m_polyslider.SetRange(2, XMSampler::MAX_POLYPHONY);
 	m_polyslider.SetPos(_pMachine->NumVoices());
 
-	char buffer[15];
-	sprintf(buffer,"%d",_pMachine->BPM());
-	m_Tempo.SetWindowText(buffer);
-	sprintf(buffer,"%d",_pMachine->TicksPerRow());
-	m_Speed.SetWindowText(buffer);
-
+	m_ECommandInfo.SetWindowText("Track Commands:\r\n\t\
+01xx: Portamento Up ( Fx = fine, Ex = Extra fine)\r\n\t\
+02xx: Portamento Down (Fx = fine, Ex = Extra fine)\r\n\t\
+03xx: Tone Portamento (Fx = fine, Ex = Extra fine)\r\n\t\
+04xy: Vibrato with speed y and depth x\r\n\t\
+05xx: Continue Portamento and Volume Slide with speed xx\r\n\t\
+06xx: Continue Vibrato and Volume Slide with speed xx\r\n\t\
+07xx: Tremolo\r\n\t\
+08xx: Panoramization. 0800 Leftmost 08FF rightmost\r\n\t\
+09xy: Panning slide x0 Left, 0x Right\r\n\t\
+0Axy: Channel Volume, 0x -> Down (Fx Fine)\r\n\t\
+0Bxx: Channel Volume Slide x0 -> Up (xF fine), 0x -> Down (Fx Fine)\r\n\t\
+0Cxx: Volume (0C80 : Normal)\r\n\t\
+0Dxx: Volume Slide x0 -> -> Up (xF fine), 0x -> Down (Fx Fine)\r\n\t\
+10xy: Arpeggio with note, note+x and note+y\r\n\t\
+9xxx: Sample Offset");
 
 	m_bInitialize=true;
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 	}
@@ -72,41 +79,16 @@ void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
 
 	}
 
-void XMSamplerUIGeneral::OnEnChangeXmspeed()
-	{
-	if(!m_bInitialize)
-		{
-		return;
-		}
-
-	TCHAR buf[256];
-	m_Speed.GetWindowText(buf,256);
-	_pMachine->TicksPerRow(atoi(buf));
-	_pMachine->CalcBPMAndTick();
-	}
-
-void XMSamplerUIGeneral::OnEnChangeXmtempo()
-	{
-	if(!m_bInitialize)
-		{
-		return;
-		}
-	TCHAR buf[256];
-	m_Tempo.GetWindowText(buf,256);
-	_pMachine->BPM(atoi(buf));
-	_pMachine->CalcBPMAndTick();
-	}
-
 void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	_pMachine->NumVoices(m_polyslider.GetPos());
 
-	for(int c = 0; c < XMSampler::MAX_POLYPHONY; c++)
+	for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
 		{
 		_pMachine->rVoice(c).NoteOffFast();
 		}
 
+		_pMachine->NumVoices(m_polyslider.GetPos());
 	// Label on dialog display
 	char buffer[15];
 	sprintf(buffer,"%d",_pMachine->NumVoices());

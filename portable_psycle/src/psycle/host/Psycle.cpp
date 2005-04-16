@@ -9,11 +9,12 @@
 #include "NewMachine.hpp"
 #include <operating_system/exception.hpp>
 #include <sstream>
+#include ".\psycle.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
-			ON_COMMAND(ID_ABOUTPSYCLE, OnAboutpsycle)
+			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 		END_MESSAGE_MAP()
 
 		CPsycleApp::CPsycleApp()
@@ -106,7 +107,7 @@ NAMESPACE__BEGIN(psycle)
 			// If has been commented out for BETA builds..
 			//if (Global::pConfig->_showAboutAtStart)
 			//{
-				OnAboutpsycle();
+				OnAppAbout();
 			//}
 			
 			ProcessCmdLine(pFrame); // Process Command Line
@@ -129,8 +130,6 @@ NAMESPACE__BEGIN(psycle)
 			CNewMachine::DestroyPluginInfo();
 			return CWinApp::ExitInstance();
 		}
-
-
 
 		/////////////////////////////////////////////////////////////////////////////
 		// CAboutDlg dialog used for App About
@@ -201,16 +200,17 @@ NAMESPACE__BEGIN(psycle)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-		// App command to run the dialog
 
 		/////////////////////////////////////////////////////////////////////////////
 		// CPsycleApp message handlers
 
-		void CPsycleApp::OnAboutpsycle() /// Shows About Box
+
+		void CPsycleApp::OnAppAbout()
 		{
 			CAboutDlg dlg;
 			dlg.DoModal();
 		}
+
 
 		void CAboutDlg::OnContributors() 
 		{

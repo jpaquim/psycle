@@ -11,6 +11,7 @@ namespace psycle
 	{
 		ITModule2::ITModule2(void)
 		{
+			for (int i=0;i<64;i++) highOffset[i]=0;
 		}
 
 		ITModule2::~ITModule2(void)
@@ -390,7 +391,6 @@ Special:  Bit 0: On = song message attached.
 		{
 			itSampleHeader curH;
 			Read(&curH,sizeof(curH));
-//\TODO: THIS NEEDS TO BE CHANGED!!!
 			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
@@ -453,7 +453,7 @@ Special:  Bit 0: On = song message attached.
 					_wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
 				}
 
-				_wave.WaveVolume(curH.vol * 4);
+				_wave.WaveVolume(curH.vol *2);
 				_wave.WaveGlobVolume(curH.gVol /64.0f);
 
 				double tune = log(double(curH.c5Speed)/8363.0f)/log(double(2));
@@ -476,7 +476,6 @@ Special:  Bit 0: On = song message attached.
 		}
 		bool ITModule2::LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
-//\TODO: THIS NEEDS TO BE CHANGED!!!
 			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
 			signed short wNew,wTmp;
@@ -538,7 +537,6 @@ Special:  Bit 0: On = song message attached.
 			} else {
 				topsize=0x8000;		packsize=3;	maxbitsize=8;
 			}
-			//\TODO: THIS NEEDS TO BE CHANGED!!!
 			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 			
 			j=0;
@@ -680,15 +678,10 @@ Special:  Bit 0: On = song message attached.
 					if (mask[channel]&4 || mask[channel]&64)
 					{
 						unsigned char tmp;
+						pent._mach=0;
 						if (mask[channel]&64 ) tmp=lastvol[channel];
 						else tmp=ReadChar();
-						if ( tmp<=64)
-						{
-							tmp=tmp*255/64;
-							pent._mach=0;
-							pent._cmd=0x0C;
-							pent._parameter=unsigned char(tmp);
-						}
+						lastvol[channel]=tmp;
 						// Volume ranges from 0->64
 						// Panning ranges from 0->64, mapped onto 128->192
 						// Prepare for the following also:
@@ -700,7 +693,49 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-						lastvol[channel]=tmp;
+#if defined PSYCLE_OPTION_VOLUME_COLUMN
+						if ( tmp<=64)
+						{
+							pent._volume=tmp<64?tmp:63;
+						}
+						else if (tmp<75)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-65);
+						}
+						else if (tmp<85)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-75);
+						}
+						else if (tmp<95)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-85);
+						}
+						else if (tmp<105)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-95);
+						}
+						else if (tmp<115)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_DOWN | (tmp-105);
+						}
+						else if (tmp<125)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_UP | (tmp-115);
+						}
+						else if (tmp<193)
+						{
+							tmp= (tmp==192)?15:(tmp-128)/4;
+							pent._volume=XMSampler::CMD_VOL::VOL_PANNING | tmp;
+						}
+						else if (tmp<203)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_TONEPORTAMENTO | (tmp-193);
+						}
+						else if (tmp<213)
+						{
+							pent._volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
+						}
+#endif
 					}
 					if(mask[channel]&8)
 					{
@@ -708,7 +743,7 @@ Special:  Bit 0: On = song message attached.
 						unsigned char command=ReadInt(1);
 						unsigned char param=ReadInt(1);
 						if ( command != 0 ) pent._parameter = param;
-						ParseEffect(pent,command,param);
+						ParseEffect(pent,command,param,channel);
 						lastcom[channel]=pent._cmd;
 						lasteff[channel]=pent._parameter;
 
@@ -732,19 +767,19 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param)
+		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param,int channel)
 		{
 			switch(command){
 				case ITModule2::CMD::SET_SPEED:
 					// This function will not always work.
-					pent._cmd=Player::CMD::EXTENDED;
+					pent._cmd=PatternCmd::EXTENDED;
 					pent._parameter = 24 / ((param == 0)?6:param);;
 					break;
 				case ITModule2::CMD::JUMP_TO_ORDER:
-					pent._cmd = Player::CMD::JUMP_TO_ORDER;
+					pent._cmd = PatternCmd::JUMP_TO_ORDER;
 					break;
 				case ITModule2::CMD::BREAK_TO_ROW:
-					pent._cmd = Player::CMD::BREAK_TO_LINE;
+					pent._cmd = PatternCmd::BREAK_TO_LINE;
 					break;
 				case ITModule2::CMD::VOLUME_SLIDE:
 					pent._cmd = XMSampler::CMD::VOLUMESLIDE;
@@ -757,6 +792,7 @@ Special:  Bit 0: On = song message attached.
 					break;
 				case ITModule2::CMD::TONE_PORTAMENTO:
 					pent._cmd = XMSampler::CMD::PORTA2NOTE;
+					if ( param >= 0xE0) pent._parameter=0xDF;
 					break;
 				case ITModule2::CMD::VIBRATO:
 					pent._cmd = XMSampler::CMD::VIBRATO;
@@ -780,7 +816,7 @@ Special:  Bit 0: On = song message attached.
 					pent._cmd = XMSampler::CMD::CHANNEL_VOLUME_SLIDE;
 					break;
 				case CMD::SET_SAMPLE_OFFSET:
-					pent._cmd = XMSampler::CMD::OFFSET; //\todo: + mem[thischannel].highoffset; 
+					pent._cmd = XMSampler::CMD::OFFSET | highOffset[channel];
 					break;
 				case ITModule2::CMD::PANNING_SLIDE: // IT
 					pent._cmd = XMSampler::CMD::PANNINGSLIDE;
@@ -796,57 +832,57 @@ Special:  Bit 0: On = song message attached.
 						case CMD_S::S_SET_FILTER:
 							break;
 						case CMD_S::S_SET_GLISSANDO_CONTROL:
-							pent._cmd = XMSampler::CMD_E::E_GLISSANDO_TYPE;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | (param & 0xf);
 							break;
 						case CMD_S::S_FINETUNE:
-							pent._cmd = XMSampler::CMD_E::E_FINETUNE;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::NONE;
 							break;
 						case CMD_S::S_SET_VIBRATO_WAVEFORM:
-							pent._cmd = XMSampler::CMD_E::E_VIBRATO_WAVE;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | (param & 0xf);
 							break;
 						case CMD_S::S_SET_TREMOLO_WAVEFORM:
-							pent._cmd = XMSampler::CMD_E::E_TREMOLO_WAVE;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | (param & 0xf);
 							break;
 						case CMD_S::S_SET_PANBRELLO_WAVEFORM: // IT
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_SET_PANBRELLO_WAVE | (param & 0xf);
 							break;
 						case CMD_S::S_FINE_PATTERN_DELAY: // IT
 							break;
 						case CMD_S::S7: // IT
 							break;
 						case CMD_S::S_SET_PAN:
-							pent._cmd = XMSampler::CMD_E::E_SET_PAN;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_SET_PAN | (param & 0xf);
 							break;
 						case CMD_S::S9: // IT
 							break;
 						case CMD_S::S_SET_HIGH_OFFSET: // IT
-							//\todo : memorize high offset. and use it in offset command.
-							// param & 0xf;
+							highOffset[channel] = param &0x0F;
 							break;
 						case CMD_S::S_PATTERN_LOOP:
-							pent._cmd = Player::CMD::PATTERN_LOOP;
+							pent._cmd = PatternCmd::PATTERN_LOOP;
 							pent._parameter = param & 0xf;
 							break;
 						case CMD_S::S_DELAYED_NOTE_CUT:
-							pent._cmd = XMSampler::CMD_E::E_DELAYED_NOTECUT;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT  | (param & 0xf);
 							break;
 						case CMD_S::S_NOTE_DELAY:
-							pent._cmd = XMSampler::CMD_E::E_NOTE_DELAY;
-							pent._parameter = param & 0xf;
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
 							break;
 						case CMD_S::S_PATTERN_DELAY:
-							pent._cmd = Player::CMD::PATTERN_DELAY;
+							pent._cmd = PatternCmd::PATTERN_DELAY;
 							pent._parameter = param & 0xf;
 							break;
 					}
 					break;
 				case CMD::SET_SONG_TEMPO:
-					pent._cmd = Player::CMD::SET_TEMPO;
+					pent._cmd = PatternCmd::SET_TEMPO;
 					break;
 				case CMD::FINE_VIBRATO:
 					pent._cmd = XMSampler::CMD::FINE_VIBRATO;
@@ -1051,8 +1087,6 @@ OFFSET              Count TYPE   Description
 			bool b16Bit=currHeader->flags&S3MSampleFlags::IS16BIT;
 
 			_wave.Init();
-			_wave.AllocWaveData(currHeader->length,bstereo);
-			_wave.WaveLength(currHeader->length);
 
 			_wave.WaveLoopStart(currHeader->loopb);
 			_wave.WaveLoopEnd(currHeader->loope);
@@ -1062,7 +1096,7 @@ OFFSET              Count TYPE   Description
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
 			}
 
-			_wave.WaveVolume(currHeader->vol * 4);
+			_wave.WaveVolume(currHeader->vol * 2);
 
 			double tune = log(double(currHeader->c2speed)/8363.0f)/log(double(2));
 			double maintune = floor(tune*12);
@@ -1108,7 +1142,7 @@ OFFSET              Count TYPE   Description
 
 		bool ITModule2::LoadS3MSampleDataX(XMSampler *sampler,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed)
 		{
-			if (!packed) // Looks like the packed format has never existed.
+			if (!packed) // Looks like the packed format never existed.
 			{
 				XMInstrument::WaveData& _wave =  sampler->SampleData(iInstIdx);
 				char * smpbuf = new char[iLen];
@@ -1121,42 +1155,47 @@ OFFSET              Count TYPE   Description
 				if(b16Bit) {
 					int out=0;
 					if (bstereo) { // \todo : The storage of stereo samples needs to be checked.
+						_wave.AllocWaveData(iLen/2,true);
 						unsigned int j;
 						for(j=0;j<iLen;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
-							out++;
 						}
 						out=0;
+						Read(smpbuf,iLen);
 						for(j=0;j<iLen;j+=2)
 						{
-							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;				
+							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
 							*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
 					} else {
+						_wave.AllocWaveData(iLen/2,false);
 						unsigned int j;
 						for(j=0;j<iLen;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
 							out++;
-						}   
+						}
 					}
 				} else {// 8 bit sample
 					if (bstereo) {
-						int out=0;
+						_wave.AllocWaveData(iLen,true);
 						unsigned int j;
-						for(j=0;j<iLen;j+=2)
+						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+						}
+						for(j=0;j<iLen;j++)
+						{			
 							wNew = (smpbuf[j+1]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew; //| char(rand()); // Add dither;
-							out++;
+							*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					} else {
+						_wave.AllocWaveData(iLen,false);
 						unsigned int j;
 						for(j=0;j<iLen;j++)
 						{			
@@ -1194,21 +1233,20 @@ OFFSET              Count TYPE   Description
 						int note=ReadInt(1);  // hi=oct, lo=note, 255=empty note,	254=key off
 						if (note==254) pent._note = 120;
 						else if (note==255) pent._note=255;
-						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psylce's C-5
+						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psycle's C-5
 						pent._inst=ReadInt(1)-1;
 						pent._mach=0;
 					}
 					if(newEntry&64)
 					{
 						int tmp=ReadInt(1);
+#if defined PSYCLE_OPTION_VOLUME_COLUMN
 						if ( tmp<=64)
 						{
-							tmp=tmp*255/64;
-							pent._mach=0;
-							pent._cmd=0x0C;
-							pent._parameter=unsigned char(tmp);
-
+							pent._mach =0;
+							pent._volume=(tmp<64)?tmp:63;
 						}
+#endif
 					}
 					if(newEntry&128)
 					{
@@ -1216,7 +1254,7 @@ OFFSET              Count TYPE   Description
 						unsigned char command=ReadInt(1);
 						unsigned char param=ReadInt(1);
 						if ( command != 0 ) pent._parameter = param;
-						ParseEffect(pent,command,param);
+						ParseEffect(pent,command,param,channel);
 					}
 					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
 

@@ -63,9 +63,10 @@ namespace psycle
 			/// Initialize
 			void Init(){
 				DeleteWaveData();
+				m_WaveName= _T("");
 				m_WaveLength = 0;
 				m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
-				m_WaveDefVolume = 256; // Default volume ( volume at which it starts to play. corresponds to 0Cxx )
+				m_WaveDefVolume = 128; // Default volume ( volume at which it starts to play. corresponds to 0Cxx/volume command )
 				m_WaveLoopStart = 0;
 				m_WaveLoopEnd = 0;
 				m_WaveLoopType = DO_NOT;
@@ -83,7 +84,6 @@ namespace psycle
 				m_VibratoSweep = 0;
 				m_VibratoDepth = 0;
 				m_VibratoType = 0;
-				m_WaveName= _T("");
 			};
 
 			/// Destructor
@@ -113,6 +113,7 @@ namespace psycle
 			void operator= (const WaveData& source)
 			{
 				Init();
+				m_WaveName = source.m_WaveName;
 				m_WaveLength = source.m_WaveLength;
 				m_WaveGlobVolume = source.m_WaveGlobVolume;
 				m_WaveDefVolume = source.m_WaveDefVolume;
@@ -125,7 +126,6 @@ namespace psycle
 				m_WaveTune = source.m_WaveTune;
 				m_WaveFineTune = source.m_WaveFineTune;	
 				m_WaveStereo = source.m_WaveStereo;
-				m_WaveName = source.m_WaveName;
 				m_VibratoRate = source.m_VibratoRate;
 				m_VibratoSweep = source.m_VibratoSweep;
 				m_VibratoDepth = source.m_VibratoDepth;
@@ -141,6 +141,8 @@ namespace psycle
 
 
 			// Properties
+			const std::string WaveName(){ return m_WaveName;};
+
 			const compiler::uint32 WaveLength(){ return m_WaveLength;};
 			void WaveLength (const compiler::uint32 value){m_WaveLength = value;};
 
@@ -168,10 +170,10 @@ namespace psycle
 			const LoopType WaveSusLoopType(){ return m_WaveSusLoopType;};
 			void WaveSusLoopType(const LoopType value){ m_WaveSusLoopType = value;};
 
-			const short WaveTune(){return m_WaveTune;};
-			void WaveTune(const short value){m_WaveTune = value;};
-			const short WaveFineTune(){return m_WaveFineTune;};
-			void WaveFineTune(const short value){m_WaveFineTune = value;};
+			const compiler::sint16 WaveTune(){return m_WaveTune;};
+			void WaveTune(const compiler::sint16 value){m_WaveTune = value;};
+			const compiler::sint16 WaveFineTune(){return m_WaveFineTune;};
+			void WaveFineTune(const compiler::sint16 value){m_WaveFineTune = value;};
 
 			const bool IsWaveStereo(){ return m_WaveStereo;};
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
@@ -188,8 +190,6 @@ namespace psycle
 
 			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoRate;};
 
-			const std::string WaveName(){ return m_WaveName;};
-
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
 			
@@ -201,19 +201,19 @@ namespace psycle
 
 		private:
 
-			compiler::uint32 m_WaveLength;
+			std::string m_WaveName;
+			compiler::uint32 m_WaveLength;		// Wave length in Samples.
 			float m_WaveGlobVolume;
-			unsigned short m_WaveDefVolume;
+			compiler::uint16 m_WaveDefVolume;
 			compiler::uint32 m_WaveLoopStart;
 			compiler::uint32 m_WaveLoopEnd;
 			LoopType m_WaveLoopType;
 			compiler::uint32 m_WaveSusLoopStart;
 			compiler::uint32 m_WaveSusLoopEnd;
 			LoopType m_WaveSusLoopType;
-			short m_WaveTune;
-			short m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
+			compiler::sint16 m_WaveTune;
+			compiler::sint16 m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			bool m_WaveStereo;
-			std::string m_WaveName;
 			signed short *m_pWaveDataL;
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
@@ -377,15 +377,15 @@ namespace psycle
 			//Array of Points of the envelope.
 			// first : time at which to set the value. Unit can be different things depending on the context.
 			// second : 0 .. 1.0f . (or -1.0 1.0 or whatever else) Use it as a multiplier.
-			Points m_Points; 
+			Points m_Points;
+			// Loop Start Point
+			int m_LoopStart;
+			// Loop End Point
+			int m_LoopEnd; 
 			// Sustain Start Point
 			int m_SustainBegin;
 			// Sustain End Point
 			int m_SustainEnd;
-			// Loop Start Point
-			int m_LoopStart;
-			// Loop End Point
-			int m_LoopEnd;
 		};// class Envelope
 
 
@@ -395,7 +395,6 @@ namespace psycle
 		~XMInstrument();
 
 		void Init();
-//		void DeleteLayer(int c);
 
 		void Load(RiffFile& riffFile,const UINT version);
 		void Save(RiffFile& riffFile,const UINT version);
@@ -407,46 +406,33 @@ namespace psycle
 
 			m_Name = other.m_Name;
 
-			m_LinesMode = other.m_LinesMode;
 			m_Lines = other.m_Lines;
 
+			// Volume
 			m_AmpEnvelope = other.m_AmpEnvelope;
+			m_GlobVol = other.m_GlobVol;
+			m_VolumeFadeSpeed = other.m_VolumeFadeSpeed;
+
+			// Paninng
+			m_PanEnvelope = other.m_PanEnvelope;
+			m_InitPan = other.m_InitPan;
+			m_PanEnabled=other.m_PanEnabled;
+			m_PitchPanCenter=other.m_PitchPanCenter;
+			m_PitchPanSep=other.m_PitchPanSep;
+
+			// Pitch/Filter Envelope
+			m_PitchEnvelope = other.m_PitchEnvelope;
 			m_FilterEnvelope = other.m_FilterEnvelope;
 			m_FilterCutoff = other.m_FilterCutoff;
 			m_FilterResonance = other.m_FilterResonance;
 			m_FilterEnvAmount = other.m_FilterEnvAmount;
 			m_FilterType = other.m_FilterType;
 
-			// Paninng
-			m_InitPan = other.m_InitPan;
-			m_PanEnabled=other.m_PanEnabled;
-			m_PanEnvelope = other.m_PanEnvelope;
-			m_PitchPanCenter=other.m_PitchPanCenter;
-			m_PitchPanSep=other.m_PitchPanSep;
-
-			// Pitch Envelope
-			m_PitchEnvelope = other.m_PitchEnvelope;
-
 			m_RandomVolume = other.m_RandomVolume;
 			m_RandomPanning = other.m_RandomPanning;
 			m_RandomCutoff = other.m_RandomCutoff;
 			m_RandomResonance = other.m_RandomResonance;
-			m_RandomSampleStart = other.m_RandomSampleStart;
 
-			m_GlobVol = other.m_GlobVol;
-			m_VolumeFadeSpeed = other.m_VolumeFadeSpeed;
-
-/*			// Auto Vibrato
-			m_AutoVibratoType = other.m_AutoVibratoType;
-			m_AutoVibratoSweep = other.m_AutoVibratoSweep;
-			m_AutoVibratoDepth = other.m_AutoVibratoDepth;
-			m_AutoVibratoRate = other.m_AutoVibratoRate;
-
-*/			// 
-/*			m_MidiChannel=other.m_MidiChannel;
-			m_MidiProgram=other.m_MidiProgram;
-			m_MidiBank=other.m_MidiBank;
-*/			
 			m_NNA = other.m_NNA;
 			m_DCT = other.m_DCT;
 			m_DCA = other.m_DCA;
@@ -465,72 +451,46 @@ namespace psycle
 		std::string& Name(){return m_Name;};
 		void Name(const std::string& name) { m_Name= name; }
 
-		const bool IsLinesMode(){ return m_LinesMode;};
-		void IsLinesMode(const bool value){m_LinesMode = value;};
-		const int Lines(){ return m_Lines;};
-		void Lines(const int value){ m_Lines = value;};
+		const compiler::uint16 Lines(){ return m_Lines;};
+		void Lines(const compiler::uint16 value){ m_Lines = value;};
 
 		Envelope* const AmpEnvelope(){ return &m_AmpEnvelope;};
 		Envelope* const PanEnvelope(){return &m_PanEnvelope;};
 		Envelope* const FilterEnvelope(){ return &m_FilterEnvelope;};
 		Envelope* const PitchEnvelope(){return &m_PitchEnvelope;};
 
-		const int FilterCutoff(){ return m_FilterCutoff;};
-		void FilterCutoff(const int value){m_FilterCutoff = value;};
-		const int FilterResonance() { return m_FilterResonance;};
-		void FilterResonance(const int value){m_FilterResonance = value;};
-		const int FilterEnvAmount() { return m_FilterEnvAmount;};
-		void FilterEnvAmount(const int value){ m_FilterEnvAmount = value;};
-		const dsp::FilterType FilterType(){ return m_FilterType;};
-		void FilterType(const dsp::FilterType value){ m_FilterType = value;};
-
-		const unsigned char RandomVolume(){return  m_RandomVolume;};///< Random Volume
-		void RandomVolume(const unsigned char value){m_RandomVolume = value;};
-		const unsigned char RandomPanning(){return  m_RandomPanning;};///< Random Panning
-		void RandomPanning(const unsigned char value){m_RandomPanning = value;};
-		const unsigned char RandomCutoff(){return m_RandomCutoff;};///< Random CutOff
-		void RandomCutoff(const unsigned char value){m_RandomCutoff = value;};
-		const unsigned char RandomResonance(){return m_RandomResonance;};///< Random Resonance
-		void RandomResonance(const unsigned char value){m_RandomResonance = value;};
-		//\todo : worth it?
-		const unsigned char RandomSampleStart(){return m_RandomSampleStart;};///< Random Sample Start
-		void RandomSampleStart(const unsigned char value){m_RandomSampleStart = value;};
+		const float GlobVol() { return m_GlobVol;};
+		void GlobVol(const float value){m_GlobVol = value;};
+		const float VolumeFadeSpeed() { return m_VolumeFadeSpeed;};
+		void VolumeFadeSpeed(const float value){ m_VolumeFadeSpeed = value;};
 
 		const float Pan() { return m_InitPan;};
 		void Pan(const float pan) { m_InitPan = pan;};
 		const bool PanEnabled() { return m_PanEnabled;};
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
-		const char PitchPanSep() { return m_PitchPanSep;};
-		void PitchPanSep(const char pan) { m_PitchPanSep = pan;};
-		const unsigned char PitchPanCenter() { return m_PitchPanCenter;};
-		void PitchPanCenter(const unsigned char pan) { m_PitchPanCenter = pan;};
+		const compiler::uint8 PitchPanCenter() { return m_PitchPanCenter;};
+		void PitchPanCenter(const compiler::uint8 pan) { m_PitchPanCenter = pan;};
+		const compiler::sint8 PitchPanSep() { return m_PitchPanSep;};
+		void PitchPanSep(const compiler::sint8 pan) { m_PitchPanSep = pan;};
 
-		const float GlobVol() { return m_GlobVol;};
-		void GlobVol(const float value){m_GlobVol = value;};
-		const float VolumeFadeSpeed() { return m_VolumeFadeSpeed;};
-		void VolumeFadeSpeed(const float value){ m_VolumeFadeSpeed = value;};
-/*
-		const int AutoVibratoType(){return m_AutoVibratoType;};
-		const int AutoVibratoSweep(){return m_AutoVibratoSweep;};
-		const int AutoVibratoDepth(){return m_AutoVibratoDepth;};
-		const int AutoVibratoRate(){return m_AutoVibratoRate;};
+		const compiler::uint8 FilterCutoff(){ return m_FilterCutoff;};
+		void FilterCutoff(const compiler::uint8 value){m_FilterCutoff = value;};
+		const compiler::uint8 FilterResonance() { return m_FilterResonance;};
+		void FilterResonance(const compiler::uint8 value){m_FilterResonance = value;};
+		const compiler::sint16 FilterEnvAmount() { return m_FilterEnvAmount;};
+		void FilterEnvAmount(const compiler::sint16 value){ m_FilterEnvAmount = value;};
+		const dsp::FilterType FilterType(){ return m_FilterType;};
+		void FilterType(const dsp::FilterType value){ m_FilterType = value;};
 
-		void AutoVibratoType(const int value){m_AutoVibratoType = value ;};
-		void AutoVibratoSweep(const int value){m_AutoVibratoSweep = value ;};
-		void AutoVibratoDepth(const int value){m_AutoVibratoDepth = value ;};
-		void AutoVibratoRate(const int value){m_AutoVibratoRate = value ;};
+		const compiler::uint8 RandomVolume(){return  m_RandomVolume;};
+		void RandomVolume(const compiler::uint8 value){m_RandomVolume = value;};
+		const compiler::uint8 RandomPanning(){return  m_RandomPanning;};
+		void RandomPanning(const compiler::uint8 value){m_RandomPanning = value;};
+		const compiler::uint8 RandomCutoff(){return m_RandomCutoff;};
+		void RandomCutoff(const compiler::uint8 value){m_RandomCutoff = value;};
+		const compiler::uint8 RandomResonance(){return m_RandomResonance;};
+		void RandomResonance(const compiler::uint8 value){m_RandomResonance = value;};
 
-		const bool IsAutoVibrato(){return m_AutoVibratoDepth && m_AutoVibratoRate;};
-*/
-/*
-		This would better be implemented as a separate machine (like yannis midi)
-		const char MidiChannel() { return m_MidiChannel;};
-		void MidiChannel(const char value){ m_MidiChannel = value;};
-		const char MidiProgram() { return m_MidiProgram;};
-		void MidiProgram(const char value){ m_MidiProgram = value;};
-		const char MidiBank() { return m_MidiBank;};
-		void MidiBank(const char value){ m_MidiBank = value;};
-*/
 		const NewNoteAction NNA() { return m_NNA;};
 		void NNA(const NewNoteAction value){ m_NNA = value;};
 		const DCType DCT() { return m_DCT;};
@@ -546,46 +506,33 @@ namespace psycle
 
 		std::string m_Name;
 
-		bool m_LinesMode;
-		unsigned char m_Lines;
+		compiler::uint16 m_Lines;			// If m_Lines > 0 use tickduration*m_Lines to determine the wave speed instead of the note.
 
-		Envelope m_AmpEnvelope;			// envelope range = 0.0f ... 1.0f
-		Envelope m_FilterEnvelope;		// envelope range = 0.0f ... 1.0f
-		unsigned short m_FilterCutoff;	// Cutoff Frequency [0-127]
-		unsigned short m_FilterResonance;	// Resonance [0-127]
-		short m_FilterEnvAmount;		// EnvAmount [-128,128]
-		dsp::FilterType m_FilterType;	// Filter Type [0-4]
+		Envelope m_AmpEnvelope;				// envelope range = [0.0f..1.0f]
+		Envelope m_PanEnvelope;				// envelope range = [-1.0f..1.0f]
+		Envelope m_PitchEnvelope;			// envelope range = [-1.0f..1.0f]
+		Envelope m_FilterEnvelope;			// envelope range = [0.0f..1.0f]
+
+		float m_GlobVol;					// [0..1.0f] Global volume affecting all samples of the instrument.
+		float m_VolumeFadeSpeed;			// [0..1.0f] Fadeout speed. Decreasing amount for each tracker tick.
 
 		// Paninng
-		float m_InitPan;				// Initial pan (if enabled)
 		bool m_PanEnabled;
-		short m_PitchPanCenter;			// Note for pan= center
-		short m_PitchPanSep;			// -32..32. 1/256th of pan change per seminote.
+		float m_InitPan;					// Initial panFactor (if enabled) [-1..1]
+		compiler::uint8 m_PitchPanCenter;	// Note number for center pan position
+		compiler::sint8 m_PitchPanSep;		// -32..32. 1/256th of panFactor change per seminote.
 
-		
-		Envelope m_PanEnvelope;			// envelope range = -1.0f ... 1.0f
-		Envelope m_PitchEnvelope;		// envelope range = -1.0f ... 1.0f
+		compiler::uint8 m_FilterCutoff;		// Cutoff Frequency [0..127]
+		compiler::uint8 m_FilterResonance;	// Resonance [0..127]
+		compiler::sint16 m_FilterEnvAmount;	// EnvAmount [-128..128]
+		dsp::FilterType m_FilterType;		// Filter Type [0..4]
 
-		// LFO
-		unsigned char m_RandomVolume;	// Random Volume % [ 0 -> No randomize. 100 = randomize full scale.]
-		unsigned char m_RandomPanning;	// Random Panning  (same)
-		unsigned char m_RandomCutoff;	// Random CutOff	(same)
-		unsigned char m_RandomResonance;	// Random Resonance	(same)
-		unsigned char m_RandomSampleStart;// Random SampleStart	(same)
+		// Randomness. Applies on new notes.
+		compiler::uint8 m_RandomVolume;		// Random Volume % [ 0 -> No randomize. 100 = randomize full scale.]
+		compiler::uint8 m_RandomPanning;	// Random Panning  (same)
+		compiler::uint8 m_RandomCutoff;		// Random CutOff	(same)
+		compiler::uint8 m_RandomResonance;	// Random Resonance	(same)
 
-		float m_GlobVol;				// 0..1.0f Global volume affecting all samples of the instrument.
-		float m_VolumeFadeSpeed;		// 0..1.0f Fadeout speed. Decreasing amount for each tracker tick.
-
-		// Auto Vibrato
-/*		int m_AutoVibratoType;
-		int m_AutoVibratoSweep;
-		int m_AutoVibratoDepth;
-		int m_AutoVibratoRate;
-*/
-/*		char m_MidiChannel;
-		char m_MidiProgram;
-		short m_MidiBank;
-*/
 		NewNoteAction m_NNA;
 		DCType m_DCT;
 		DCAction m_DCA;
@@ -594,7 +541,6 @@ namespace psycle
 		// (note number=first, sample number=second)
 		///\todo: Could it be interesting to map other things like volume,panning, cutoff...?
 		NotePair m_AssignNoteToSample[NOTE_MAP_SIZE];
-		
 	};
 
 
