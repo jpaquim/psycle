@@ -104,7 +104,7 @@ namespace psycle
 				{
 					switch(pEntry->_cmd)
 					{
-					case CMD::SET_TEMPO:
+					case PatternCmd::SET_TEMPO:
 						if(pEntry->_parameter != 0)
 						{	//\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
@@ -112,17 +112,17 @@ namespace psycle
 							RecalcSPR();
 						}
 						break;
-					case CMD::EXTENDED:
+					case PatternCmd::EXTENDED:
 						if(pEntry->_parameter != 0)
 						{
-							if ( (pEntry->_parameter&0xF0) == CMD::PATTERN_DELAY )
+							if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-							//\todo: finish the implementation of these two commands.
+							//\todo: finish the implementation of these commands.
 							}
-							else if ( (pEntry->_parameter&0xF0) == CMD::FINE_PATTERN_DELAY)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
 							}
-							else if ( (pEntry->_parameter&0xF0) == CMD::PATTERN_LOOP)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
 							{
 							}
 							else if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
@@ -132,13 +132,13 @@ namespace psycle
 							}
 						}
 						break;
-					case CMD::JUMP_TO_ORDER:
+					case PatternCmd::JUMP_TO_ORDER:
 						if ( pEntry->_parameter < pSong->playLength ){
 							_patternjump=pEntry->_parameter;
 							_linejump=0;
 						}
 						break;
-					case CMD::BREAK_TO_LINE:
+					case PatternCmd::BREAK_TO_LINE:
 						if (_patternjump ==-1) 
 						{
 							_patternjump=(_playPosition+1>=pSong->playLength)?0:_playPosition+1;
@@ -147,7 +147,7 @@ namespace psycle
 						{
 							_linejump = pSong->patternLines[_patternjump];
 						} else { _linejump= pEntry->_parameter; }
-					case CMD::SET_VOLUME:
+					case PatternCmd::SET_VOLUME:
 						if(pEntry->_mach == 255)
 						{
 							((Master*)(pSong->_pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
@@ -161,7 +161,7 @@ namespace psycle
 							}
 						}
 						break;
-					case  CMD::SET_PANNING:
+					case  PatternCmd::SET_PANNING:
 						int mIndex = pEntry->_mach;
 						if(mIndex < MAX_MACHINES)
 						{
@@ -201,39 +201,40 @@ namespace psycle
 			// Finally, loop again checking for Notes
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
-				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*5);
+				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
 				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
 				{
 					int mac = pEntry->_mach;
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
-					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
+//					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
+					if( mac != 255 ) // is there a machine number and it is either a note or a command?
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{
 							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
-								if(pEntry->_cmd == CMD::NOTE_DELAY)
+								if(pEntry->_cmd == PatternCmd::NOTE_DELAY)
 								{
 									// delay
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
 									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
 								}
-								else if(pEntry->_cmd == CMD::RETRIGGER)
+								else if(pEntry->_cmd == PatternCmd::RETRIGGER)
 								{
 									// retrigger
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
 									pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
 									pMachine->TriggerDelayCounter[track] = 0;
 								}
-								else if(pEntry->_cmd == CMD::RETR_CONT)
+								else if(pEntry->_cmd == PatternCmd::RETR_CONT)
 								{
 									// retrigger continue
 									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
 									if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
 								}
-								else if (pEntry->_cmd == CMD::ARPEGGIO)
+								else if (pEntry->_cmd == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
 									//\todo : Add Memory.
@@ -317,6 +318,15 @@ namespace psycle
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = pThis->_pBuffer;
 			int numSamplex = numSamples;
+			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#else
+				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+			boost::read_write_mutex::scoped_read_write_lock lock(pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
+				#else // original implementation
+					CSingleLock crit(&Global::_pSong->door, TRUE);
+				#endif
+			#endif
 			do
 			{
 				if(numSamplex > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamplex;
@@ -332,15 +342,7 @@ namespace psycle
 				// Processing plant
 				if(amount > 0)
 				{
-					#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-						#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-					#else
-						#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-							boost::read_write_mutex::scoped_read_lock lock(Global::_pSong->read_write_mutex());
-						#else // original implementation
-							CSingleLock crit(&Global::_pSong->door, TRUE);
-						#endif
-					#endif
+
 
 					CPUCOST_INIT(idletime);
 					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
@@ -377,7 +379,6 @@ namespace psycle
 					pSong->_sampCount += amount;
 					if((pThis->_playing) && (pThis->_recording))
 					{
-						//float* pData(pThis->_pBuffer); ///\todo <- this was fuxxxxing up
 						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
 						float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
 						int i;
@@ -413,7 +414,8 @@ namespace psycle
 					numSamplex -= amount;
 				}
 				if(pThis->_playing) pThis->_ticksRemaining -= amount;
-			} while(numSamplex>0);
+			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
+
 			return pThis->_pBuffer;
 		}
 

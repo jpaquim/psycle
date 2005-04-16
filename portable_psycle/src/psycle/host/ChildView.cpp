@@ -329,7 +329,7 @@ NAMESPACE__BEGIN(psycle)
 					#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 				#else
 					#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-						boost::read_write_mutex::scoped_read_lock lock(Global::_pSong->read_write_mutex());
+						boost::read_write_mutex::scoped_read_write_lock lock(Global::_pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
 					#else // original implementation
 						//\todo : IMPORTANT! change this lock to a more flexible one
 						// It is causing skips on sound when there is a pattern change because
@@ -363,6 +363,7 @@ NAMESPACE__BEGIN(psycle)
 							MasterMachineDialog->m_masterpeak.SetWindowText(peak);
 							//MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 							//MasterMachineDialog->m_slidermaster.SetPos(256-f2i(sqrtf(val*64.0f)));
+							//\todo : I am not sure of what exactly does the following line do here.
 							MasterMachineDialog->m_slidermaster.SetPos(1024-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);				
 							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
 							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
@@ -574,7 +575,7 @@ NAMESPACE__BEGIN(psycle)
 						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
 						DrawMachine(updatePar, &dc);
 						DrawMachineVumeters(updatePar, &dc);
-						updateMode=0;
+						updateMode=DMAll;
 						break;
 					case DMAllMacsRefresh:
 						for (int i=0;i<MAX_MACHINES;i++)
@@ -585,6 +586,7 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 						DrawAllMachineVumeters(&dc);
+						updateMode=DMAll;
 						break;
 					}
 				}

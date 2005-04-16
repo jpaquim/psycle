@@ -1369,7 +1369,7 @@ namespace psycle
 							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
 							{
 								// come back to this
-								if(TriggerDelay[i]._cmd == 0xfd)
+								if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
 								{
 									if(TriggerDelayCounter[i] == nextevent)
 									{
@@ -1379,7 +1379,7 @@ namespace psycle
 									}
 									else TriggerDelayCounter[i] -= nextevent;
 								}
-								else if(TriggerDelay[i]._cmd == 0xfb)
+								else if(TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
 								{
 									if(TriggerDelayCounter[i] == nextevent)
 									{
@@ -1389,7 +1389,7 @@ namespace psycle
 									}
 									else TriggerDelayCounter[i] -= nextevent;
 								}
-								else if(TriggerDelay[i]._cmd == 0xfa)
+								else if(TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
 								{
 									if(TriggerDelayCounter[i] == nextevent)
 									{
@@ -1405,6 +1405,35 @@ namespace psycle
 										}
 									}
 									else TriggerDelayCounter[i] -= nextevent;
+								}
+								else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
+								{
+									if (TriggerDelayCounter[i] == nextevent)
+									{
+										PatternEntry entry =TriggerDelay[i];
+										switch(ArpeggioCount[i])
+										{
+										case 0: 
+											Tick(i,&TriggerDelay[i]);
+											ArpeggioCount[i]++;
+											break;
+										case 1:
+											entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
+											Tick(i,&entry);
+											ArpeggioCount[i]++;
+											break;
+										case 2:
+											entry._note+=(TriggerDelay[i]._parameter&0x0F);
+											Tick(i,&entry);
+											ArpeggioCount[i]=0;
+											break;
+										}
+										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+									}
+									else
+									{
+										TriggerDelayCounter[i] -= nextevent;
+									}
 								}
 							}
 						}
@@ -1665,7 +1694,7 @@ namespace psycle
 								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
 								{
 									// come back to this
-									if(TriggerDelay[i]._cmd == 0xfd)
+									if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
 									{
 										if(TriggerDelayCounter[i] == nextevent)
 										{
@@ -1675,7 +1704,7 @@ namespace psycle
 										}
 										else TriggerDelayCounter[i] -= nextevent;
 									}
-									else if(TriggerDelay[i]._cmd == 0xfb)
+									else if(TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
 									{
 										if(TriggerDelayCounter[i] == nextevent)
 										{
@@ -1685,7 +1714,7 @@ namespace psycle
 										}
 										else TriggerDelayCounter[i] -= nextevent;
 									}
-									else if(TriggerDelay[i]._cmd == 0xfa)
+									else if(TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
 									{
 										if(TriggerDelayCounter[i] == nextevent)
 										{
@@ -1701,35 +1730,6 @@ namespace psycle
 											}
 										}
 										else TriggerDelayCounter[i] -= nextevent;
-									}
-									else if (TriggerDelay[i]._cmd == 0xf0)
-									{
-										if (TriggerDelayCounter[i] == nextevent)
-										{
-											PatternEntry entry =TriggerDelay[i];
-											switch(ArpeggioCount[i])
-											{
-											case 0: 
-												Tick(i,&TriggerDelay[i]);
-												ArpeggioCount[i]++;
-												break;
-											case 1:
-												entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
-												Tick(i,&entry);
-												ArpeggioCount[i]++;
-												break;
-											case 2:
-												entry._note+=(TriggerDelay[i]._parameter&0x0F);
-												Tick(i,&entry);
-												ArpeggioCount[i]=0;
-												break;
-											}
-											TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
-										}
-										else
-										{
-											TriggerDelayCounter[i] -= nextevent;
-										}
 									}
 								}
 							}
