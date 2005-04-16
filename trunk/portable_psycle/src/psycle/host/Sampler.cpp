@@ -118,7 +118,7 @@ namespace psycle
 						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 						{
 							// come back to this
-							if (TriggerDelay[i]._cmd == 0xfd)
+							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -131,7 +131,7 @@ namespace psycle
 									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
-							else if (TriggerDelay[i]._cmd == 0xfb)
+							else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -144,7 +144,7 @@ namespace psycle
 									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
-							else if (TriggerDelay[i]._cmd == 0xfa)
+							else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
