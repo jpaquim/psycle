@@ -95,7 +95,6 @@ public:
 
 	void pMachine(XMSampler* mac) { sampler = mac; };
 private:
-	BOOL m_ShowChan;
 };
 NAMESPACE__END
 NAMESPACE__END

@@ -21,10 +21,10 @@ NAMESPACE__BEGIN(psycle)
 			void LoadRecent(CMainFrame*);
 			void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;
 		public:
-			afx_msg void OnAboutpsycle();
 			DECLARE_MESSAGE_MAP()
 		public:
 			Global _global;
+			afx_msg void OnAppAbout();
 		};
 	NAMESPACE__END
 NAMESPACE__END

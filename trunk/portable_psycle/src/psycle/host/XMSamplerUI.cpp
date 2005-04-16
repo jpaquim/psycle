@@ -42,10 +42,10 @@ void XMSamplerUI::Init(XMSampler* pMachine)
 //	m_Instrument.pMachine(pMachine);
 	m_Sample.pMachine(pMachine);
 	m_Mixer.pMachine(pMachine);
-	AddPage(&m_General);
+	AddPage(&m_Mixer);
 //	AddPage(&m_Instrument);
 	AddPage(&m_Sample);
-	AddPage(&m_Mixer);
+	AddPage(&m_General);
 	init = true;
 }
 void XMSamplerUI::UpdateUI(void)

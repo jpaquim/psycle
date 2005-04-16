@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -1012,7 +1012,7 @@ BEGIN
                     WS_EX_LEFTSCROLLBAR | WS_EX_STATICEDGE
 END
 
-IDD_SEQUENCER DIALOGEX 0, 0, 73, 331
+IDD_SEQUENCER DIALOGEX 0, 0, 73, 351
 STYLE DS_SETFONT | WS_CHILD | WS_CLIPSIBLINGS
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
@@ -1065,6 +1065,8 @@ BEGIN
     LTEXT           "Len",IDC_STATIC,6,212,12,8
     CONTROL         "Allow Notes to Effects",IDC_NOTESTOEFFECTS,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,4,307,59,17
+    CONTROL         "Show Volume Colum",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | NOT WS_VISIBLE | WS_TABSTOP,4,326,65,17
 END
 
 IDD_DSOUNDCONFIG DIALOGEX 0, 0, 274, 113
@@ -1702,15 +1704,6 @@ BEGIN
                     WS_EX_CLIENTEDGE
 END
 
-IDD_CONFIGURATION1 DIALOGEX 0, 0, 398, 156
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Configuration"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,341,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,341,24,50,14
-END
-
 IDD_XM_SAMPLER DIALOGEX 0, 0, 375, 188
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -1721,34 +1714,148 @@ BEGIN
     PUSHBUTTON      "Cancelar",IDCANCEL,318,24,50,14
 END
 
-IDD_XM_GENERAL DIALOGEX 0, 0, 361, 214
+IDD_XM_GENERAL DIALOGEX 0, 0, 471, 228
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
-CAPTION "Dialog"
+CAPTION "Miscellaneous and Help."
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     COMBOBOX        IDC_XMINTERPOL,89,19,93,43,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Interpolation",IDC_STATIC,21,20,66,13
-    EDITTEXT        IDC_XMSPEED,76,57,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_XMTEMPO,75,76,40,14,ES_AUTOHSCROLL
     CONTROL         "",IDC_XMPOLY,"msctls_trackbar32",TBS_TOP | TBS_NOTICKS | 
-                    WS_TABSTOP,149,59,100,15
-    CTEXT           "Estático",IDC_XMPOLYLABEL,262,59,31,18,SS_CENTERIMAGE,
+                    WS_TABSTOP,16,43,100,15
+    CTEXT           "Estático",IDC_XMPOLYLABEL,129,43,31,18,SS_CENTERIMAGE,
                     WS_EX_STATICEDGE
+    CONTROL         "Use Amiga Slides",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,39,76,107,12
+    EDITTEXT        IDC_COMMANDINFO,251,6,220,215,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_READONLY
 END
 
-IDD_XMSAMPLERUIINST DIALOGEX 0, 0, 389, 238
+IDD_XMSAMPLERUIINST DIALOGEX 0, 0, 503, 238
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
 CAPTION "Instruments"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
+    LTEXT           "New Note Action",IDC_STATIC,8,13,55,8
+    COMBOBOX        IDC_COMBO3,76,11,74,57,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Filter Type",IDC_STATIC,7,123,34,8
+    COMBOBOX        IDC_COMBO4,75,121,74,57,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Global Volume",IDC_STATIC,7,29,45,8
+    CONTROL         "",IDC_GLOBVOL,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,28,100,13
+    LTEXT           "Fadeout",IDC_STATIC,7,48,27,8
+    CONTROL         "",IDC_FADEOUT,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,47,100,13
+    CONTROL         "Default Pan",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,66,52,12
+    CONTROL         "",IDC_DEFPAN,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,66,100,13
+    LTEXT           "Pitch Pan Center Note",IDC_STATIC,8,85,71,8
+    COMBOBOX        IDC_COMBO1,92,84,34,142,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Octave",IDC_STATIC,130,85,23,8
+    COMBOBOX        IDC_COMBO2,157,84,24,114,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Pitch Pan Modifier",IDC_STATIC,7,105,56,8
+    CONTROL         "",IDC_PITCHPANMOD,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,104,100,13
+    LTEXT           "Filter Cutoff",IDC_STATIC,7,143,38,8
+    CONTROL         "",IDC_CUTOFF,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,142,100,13
+    LTEXT           "Filter Ressonance",IDC_STATIC,7,162,55,8
+    CONTROL         "",IDC_RESSONANCE,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,161,100,13
+    LTEXT           "Pitch Filter Modifier",IDC_STATIC,7,200,60,8
+    CONTROL         "",IDC_FILTERMOD,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,67,199,100,13
+    LTEXT           "Pitch Filter Center Note",IDC_STATIC,7,179,75,8
+    COMBOBOX        IDC_COMBO5,91,178,34,142,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Octave",IDC_STATIC,129,179,23,8
+    COMBOBOX        IDC_COMBO6,156,178,24,114,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_ENVFRAME,"Static",SS_BLACKRECT | WS_BORDER,223,20,
+                    273,64
+    PUSHBUTTON      "Button1",IDC_BUTTON1,212,7,70,11
+    PUSHBUTTON      "Button1",IDC_BUTTON2,282,7,70,11
+    PUSHBUTTON      "Button1",IDC_BUTTON3,355,7,70,11
+    PUSHBUTTON      "Button1",IDC_BUTTON4,426,7,70,11
+    CONTROL         " Envelope Enabled",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,222,87,74,10
+    LTEXT           "And here... somewhere... it will go the note mapping :B",
+                    IDC_STATIC,295,186,150,34
+    CONTROL         "Personalizar1",IDC_XM_EDIT_ENVELOPE,"",WS_TABSTOP,222,
+                    106,274,63
 END
 
-IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 295, 197
+IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 519, 209
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Samples"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
+    LISTBOX         IDC_SAMPLELIST,7,7,159,177,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Load",IDC_LOAD,7,188,39,13
+    PUSHBUTTON      "Save",IDC_SAVE,47,188,39,13
+    PUSHBUTTON      "Duplicate",IDC_DUPE,87,188,39,13
+    PUSHBUTTON      "Delete",IDC_DELETE,127,188,39,13
+    LTEXT           "Wave Name",IDC_STATIC,201,20,39,8
+    EDITTEXT        IDC_WAVENAME,245,17,77,14,ES_AUTOHSCROLL
+    LTEXT           "Sample Rate",IDC_STATIC,326,19,40,8
+    EDITTEXT        IDC_SAMPLERATE,368,17,40,13,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPINSAMPLERATE,"msctls_updown32",UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS,410,16,10,14
+    CTEXT           "Length",IDC_WAVELENGTH,429,16,34,15,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Stereo",IDC_WAVESTEREO,468,16,36,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    LTEXT           "Default Volume",IDC_STATIC,238,51,49,8
+    CONTROL         "",IDC_DEFVOLUME,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,291,51,70,11
+    LTEXT           "Global Volume",IDC_STATIC,238,71,45,8
+    CONTROL         "",IDC_GLOBVOLUME,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,291,71,70,11
+    CONTROL         "Pan Position",IDC_PANENABLED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,228,91,54,10
+    CONTROL         "",IDC_PAN,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
+                    WS_TABSTOP,291,91,70,11
+    GROUPBOX        "Vibrato",IDC_STATIC,236,113,124,78
+    LTEXT           "Rate",IDC_STATIC,253,127,15,8
+    CONTROL         "",IDC_VIBRATORATE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,283,127,70,11
+    LTEXT           "Sweep",IDC_STATIC,253,142,23,8
+    CONTROL         "",IDC_VIBRATOSPEED,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,283,141,70,11
+    LTEXT           "Depth",IDC_STATIC,253,157,20,8
+    CONTROL         "",IDC_VIBRATODEPTH,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,283,155,70,11
+    LTEXT           "Type",IDC_STATIC,253,172,17,8
+    COMBOBOX        IDC_VIBRATOTYPE,286,171,56,58,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Wave Loop",IDC_STATIC,383,45,116,145
+    CONTROL         "Sustain Loop",IDC_SUSTAINLOOP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,397,62,56,10
+    LTEXT           "Start",IDC_STATIC,410,79,16,8
+    EDITTEXT        IDC_SUSTAINSTART,429,77,40,13,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPINSUSTAINSTART,"msctls_updown32",UDS_ARROWKEYS,
+                    470,76,10,14
+    LTEXT           "End",IDC_STATIC,414,100,13,8
+    EDITTEXT        IDC_SUSTAINEND,429,98,40,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPINSUSTAINEND,"msctls_updown32",UDS_ARROWKEYS,
+                    470,97,10,14
+    CONTROL         "Continuous Loop",IDC_LOOP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,397,126,69,10
+    LTEXT           "Start",IDC_STATIC,409,144,16,8
+    EDITTEXT        IDC_LOOPSTART,429,142,40,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPINLOOPSTART,"msctls_updown32",UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS,470,141,10,14
+    LTEXT           "End",IDC_STATIC,412,164,13,8
+    EDITTEXT        IDC_LOOPEND,429,163,40,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPINLOOPEND,"msctls_updown32",UDS_ARROWKEYS,470,
+                    162,10,14
 END
 
 IDD_INST_GENERAL DIALOGEX 0, 0, 453, 395
@@ -1758,70 +1865,43 @@ BEGIN
     LTEXT           "New Note Action",IDC_STATIC,8,13,55,8
     COMBOBOX        IDC_COMBO3,67,11,74,57,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Resample Quality",IDC_STATIC,8,30,54,8
-    COMBOBOX        IDC_COMBO4,67,28,74,57,CBS_DROPDOWN | CBS_SORT | 
+    LTEXT           "Filter Type",IDC_STATIC,7,123,34,8
+    COMBOBOX        IDC_COMBO4,66,121,74,57,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Global Volume",IDC_STATIC,7,49,45,8
+    LTEXT           "Global Volume",IDC_STATIC,7,29,45,8
     CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,48,100,13
-    LTEXT           "Fadeout",IDC_STATIC,7,68,27,8
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,28,100,13
+    LTEXT           "Fadeout",IDC_STATIC,7,48,27,8
     CONTROL         "",IDC_SLIDER7,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,67,100,13
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,47,100,13
     CONTROL         "Default Pan",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,86,52,12
+                    WS_TABSTOP,7,66,52,12
     CONTROL         "",IDC_SLIDER8,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,86,100,13
-    LTEXT           "Pitch Pan Center Note",IDC_STATIC,8,105,71,8
-    COMBOBOX        IDC_COMBO1,83,104,34,142,CBS_DROPDOWN | CBS_SORT | 
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,66,100,13
+    LTEXT           "Pitch Pan Center Note",IDC_STATIC,8,85,71,8
+    COMBOBOX        IDC_COMBO1,83,84,34,142,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Octave",IDC_STATIC,121,105,23,8
-    COMBOBOX        IDC_COMBO2,148,104,24,114,CBS_DROPDOWN | CBS_SORT | 
+    LTEXT           "Octave",IDC_STATIC,121,85,23,8
+    COMBOBOX        IDC_COMBO2,148,84,24,114,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Pitch Pan Septn.",IDC_STATIC,7,125,54,8
+    LTEXT           "Pitch Pan Modif.",IDC_STATIC,7,105,51,8
     CONTROL         "",IDC_SLIDER12,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,124,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,144,45,8
-    CONTROL         "",IDC_SLIDER13,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,143,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,163,45,8
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,104,100,13
+    LTEXT           "Filter Cutoff",IDC_STATIC,7,143,38,8
     CONTROL         "",IDC_SLIDER14,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,162,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,182,45,8
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,142,100,13
+    LTEXT           "Filter Ressonance",IDC_STATIC,7,162,55,8
     CONTROL         "",IDC_SLIDER15,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,181,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,201,45,8
-    CONTROL         "",IDC_SLIDER16,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,200,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,220,45,8
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,161,100,13
+    LTEXT           "Pitch Filter Mod.",IDC_STATIC,7,200,51,8
     CONTROL         "",IDC_SLIDER17,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,219,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,239,45,8
-    CONTROL         "",IDC_SLIDER18,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,238,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,258,45,8
-    CONTROL         "",IDC_SLIDER19,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,257,100,13
-    LTEXT           "Global Volume",IDC_STATIC,7,277,45,8
-    CONTROL         "",IDC_SLIDER20,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,276,99,13
-END
-
-IDD_INST_MIXER DIALOGEX 0, 0, 401, 319
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_HSCROLL | WS_SYSMENU
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,31,143,11,143
-    CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,97,135,11,143
-    CONTROL         "",IDC_SLIDER3,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,112,134,11,143
-    CONTROL         "",IDC_SLIDER4,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,127,134,11,143
-    CONTROL         "",IDC_SLIDER21,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,148,134,11,143
-    CONTROL         "",IDC_SLIDER22,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,170,134,11,143
+                    TBS_TOP | TBS_NOTICKS | WS_TABSTOP,58,199,100,13
+    LTEXT           "Pitch Filter Center Note",IDC_STATIC,7,179,75,8
+    COMBOBOX        IDC_COMBO5,82,178,34,142,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Octave",IDC_STATIC,120,179,23,8
+    COMBOBOX        IDC_COMBO6,147,178,24,114,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_XMSAMPLER_MIXER DIALOGEX 0, 0, 455, 199
@@ -1834,7 +1914,7 @@ BEGIN
     CONTROL         "",IDC_SL_VOL_MASTER,"msctls_trackbar32",TBS_VERT | 
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,422,67,17,100
     CONTROL         "Mono",IDC_CH_MASTERMONO,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,409,58,33,10
+                    WS_TABSTOP,411,60,33,10
     CONTROL         "",IDC_RIGHT_VU,"msctls_progress32",WS_BORDER | 0x4,431,
                     0,6,55
     LTEXT           "Master",IDC_STATIC,419,166,22,8
@@ -1957,8 +2037,8 @@ BEGIN
                     WS_TABSTOP,174,60,32,10
     CONTROL         "Channel",IDC_R_SHOWCHAN,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,7,151,41,10
-    CONTROL         "Voice",IDC_R_SHOWVOICE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,7,163,33,10
+    CONTROL         "Voice",IDC_R_SHOWVOICE,"Button",BS_AUTORADIOBUTTON,7,
+                    163,33,10
     LTEXT           "Show Values:",IDC_STATIC,0,139,43,8
     LTEXT           "Voices:",IDC_STATIC,400,178,23,9
     RTEXT           "0",IDC_VOICESPLAYING,428,178,11,8
@@ -2135,7 +2215,7 @@ BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 69
         TOPMARGIN, 7
-        BOTTOMMARGIN, 326
+        BOTTOMMARGIN, 346
     END
 
     IDD_DSOUNDCONFIG, DIALOG
@@ -2256,14 +2336,6 @@ BEGIN
         BOTTOMMARGIN, 188
     END
 
-    IDD_CONFIGURATION1, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 391
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 149
-    END
-
     IDD_XM_SAMPLER, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2275,15 +2347,15 @@ BEGIN
     IDD_XM_GENERAL, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 354
+        RIGHTMARGIN, 464
         TOPMARGIN, 6
-        BOTTOMMARGIN, 207
+        BOTTOMMARGIN, 221
     END
 
     IDD_XMSAMPLERUIINST, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 382
+        RIGHTMARGIN, 496
         TOPMARGIN, 7
         BOTTOMMARGIN, 231
     END
@@ -2291,9 +2363,9 @@ BEGIN
     IDD_XMSAMPLERUISAMPLE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 288
+        RIGHTMARGIN, 512
         TOPMARGIN, 7
-        BOTTOMMARGIN, 190
+        BOTTOMMARGIN, 202
     END
 
     IDD_INST_GENERAL, DIALOG
@@ -2302,14 +2374,6 @@ BEGIN
         RIGHTMARGIN, 446
         TOPMARGIN, 7
         BOTTOMMARGIN, 388
-    END
-
-    IDD_INST_MIXER, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 394
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 302
     END
 
     IDD_XMSAMPLER_MIXER, DIALOG
@@ -2660,7 +2724,7 @@ BEGIN
     BUTTON      ID_VIEW_INSTRUMENTEDITOR
     BUTTON      ID_VIEW_MIXER
     SEPARATOR
-    BUTTON      ID_ABOUTPSYCLE
+    BUTTON      ID_APP_ABOUT
     SEPARATOR
     BUTTON      ID_PSYHELP
 END
@@ -2863,6 +2927,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    ID_APP_ABOUT            "Information and Logo"
     ID_APP_EXIT             "Exits Psycle\nExit"
 END
 
@@ -2898,7 +2963,7 @@ BEGIN
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

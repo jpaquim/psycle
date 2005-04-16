@@ -40,7 +40,6 @@ IMPLEMENT_DYNAMIC(XMSamplerMixerPage, CPropertyPage)
 XMSamplerMixerPage::XMSamplerMixerPage()
 	: CPropertyPage(XMSamplerMixerPage::IDD)
 	, m_ChannelOffset(0)
-	, m_ShowChan(FALSE)
 {
 }
 
@@ -51,7 +50,6 @@ XMSamplerMixerPage::~XMSamplerMixerPage()
 void XMSamplerMixerPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	DDX_Radio(pDX, IDC_R_SHOWCHAN, m_ShowChan);
 }
 
 
@@ -114,6 +112,18 @@ END_MESSAGE_MAP()
 // Controladores de mensajes de XMSamplerMixerPage
 BOOL XMSamplerMixerPage::OnSetActive()
 {
+	for (int i=0;i<8;i++)
+	{
+		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(64);
+		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(64);
+		((CSliderCtrl*)GetDlgItem(dlgRes[i]))->SetRangeMax(127);
+		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(127);
+		UpdateChannel(i);
+	}
+	((CSliderCtrl*)GetDlgItem(IDC_SL_VOL_MASTER))->SetRangeMax(128);
+	((CProgressCtrl*)GetDlgItem(IDC_LEFT_VU))->SetRange(0,97);
+	((CSliderCtrl*)GetDlgItem(IDC_SL_CHANNELS))->SetRangeMax(MAX_TRACKS-8); // maxchans-visiblechans
+	((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->SetCheck(1);
 	UpdateAllChannels();
 	return CPropertyPage::OnSetActive();
 }
@@ -123,34 +133,28 @@ void XMSamplerMixerPage::UpdateAllChannels(void)
 {
 	for (int i=0;i<8;i++)
 	{
-		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(64);
-		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(64);
-		/* ((CSliderCtrl*)GetDlgItem(dlgRes[i]))->SetRangeMax(127);
-		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(127);
-		*/
 		UpdateChannel(i);
 	}
-	((CSliderCtrl*)GetDlgItem(IDC_SL_VOL_MASTER))->SetRangeMax(128);
-	((CProgressCtrl*)GetDlgItem(IDC_LEFT_VU))->SetRange(0,97);
 	UpdateMaster();
-	((CSliderCtrl*)GetDlgItem(IDC_SL_CHANNELS))->SetRangeMax(56); // maxchans-visiblechans
 }
 // Refreshes the values of the controls of a specific channel.
 void XMSamplerMixerPage::UpdateChannel(int index)
 {
-	char chname[8];
-	if ( m_ShowChan ) 
+	XMSampler::Channel &rChan = sampler->rChannel(index+m_ChannelOffset);
+	XMSampler::Voice *voice = rChan.ForegroundVoice();
+	char chname[32];
+	CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
+	if ( ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck() ) 
 	{
-		CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
 		sprintf(chname,"%d",index+m_ChannelOffset+1);
 		name->SetWindowText(chname);
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
 
-		sld->SetPos(64-int(sampler->rChannel(index+m_ChannelOffset).Volume()*64.0f));
+		sld->SetPos(64-int(rChan.Volume()*64.0f));
 		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
-		int defpos = int(sampler->rChannel(index+m_ChannelOffset).PanFactor()*64.0f);
+		int defpos = int(rChan.PanFactor()*64.0f);
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
-		if ( sampler->rChannel(index+m_ChannelOffset).IsSurround() )
+		if ( rChan.IsSurround()) //rChan.DefaultSurround())
 		{
 			surr->SetCheck(true);
 		} else {
@@ -159,35 +163,45 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		}
 
 		/*	sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
-		sld->SetPos(int(sampler->rChannel(index+m_ChannelOffset).DefaultRessonance()*64.0f));
+		sld->SetPos(rChan.DefaultRessonance());
 		sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
-		sld->SetPos(int(sampler->rChannel(index+m_ChannelOffset).DefaultCuttof()*64.0f));
+		sld->SetPos(rChan.DefaultCuttof());
 		*/
 	}
-	else
+	else 
 	{
-		CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
-		sprintf(chname,"%d",index+m_ChannelOffset+1);
-		name->SetWindowText(chname);
+		int defpos;
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
+		if (voice)
+		{
+			std::string tmpstr = voice->rInstrument().Name();
+			sprintf(chname,"%d (%s)",index+m_ChannelOffset+1,tmpstr.c_str());
+			name->SetWindowText(chname);
+			sld->SetPos(64-int(voice->RealVolume()*64.0f));
+			sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
+			sld->SetPos(voice->Ressonance());
+			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
+			sld->SetPos(voice->CutOff()); 
+			sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
+			defpos = int(voice->PanFactor()*64.0f);
+		}
+		else 
+		{
+			sprintf(chname,"%d",index+m_ChannelOffset+1);
+			name->SetWindowText(chname);
+			sld->SetPos(64);
+			sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
+			defpos = 32;
+		}
 
-		sld->SetPos(64-int(sampler->rChannel(index+m_ChannelOffset).Volume()*64.0f));
-		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
-		int defpos = int(sampler->rChannel(index+m_ChannelOffset).PanFactor()*64.0f);
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
-		if ( sampler->rChannel(index+m_ChannelOffset).IsSurround() )
+		if ( rChan.IsSurround() )
 		{
 			surr->SetCheck(true);
 		} else {
 			sld->SetPos(defpos);
 			surr->SetCheck(false);
 		}
-
-		/*	sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
-		sld->SetPos(int(sampler->rChannel(index+m_ChannelOffset).DefaultRessonance()*64.0f));
-		sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
-		sld->SetPos(int(sampler->rChannel(index+m_ChannelOffset).DefaultCuttof()*64.0f));
-		*/
 
 	}
 }
@@ -319,106 +333,154 @@ void XMSamplerMixerPage::OnNMCustomdrawSlRes8(NMHDR *pNMHDR, LRESULT *pResult)
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan1(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN1);
-	sampler->rChannel(m_ChannelOffset).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN1);
+		sampler->rChannel(m_ChannelOffset).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan2(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN2);
-	sampler->rChannel(m_ChannelOffset+1).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN2);
+		sampler->rChannel(m_ChannelOffset+1).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan3(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN3);
-	sampler->rChannel(m_ChannelOffset+2).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN3);
+		sampler->rChannel(m_ChannelOffset+2).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan4(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN4);
-	sampler->rChannel(m_ChannelOffset+3).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN4);
+		sampler->rChannel(m_ChannelOffset+3).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan5(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN5);
-	sampler->rChannel(m_ChannelOffset+4).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN5);
+		sampler->rChannel(m_ChannelOffset+4).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan6(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN6);
-	sampler->rChannel(m_ChannelOffset+5).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN6);
+		sampler->rChannel(m_ChannelOffset+5).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan7(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN7);
-	sampler->rChannel(m_ChannelOffset+6).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN7);
+		sampler->rChannel(m_ChannelOffset+6).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlPan8(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN8);
-	sampler->rChannel(m_ChannelOffset+7).DefaultPanFactor(slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_PAN8);
+		sampler->rChannel(m_ChannelOffset+7).DefaultPanFactor(slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr1()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR1);
-	sampler->rChannel(m_ChannelOffset).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR1);
+		sampler->rChannel(m_ChannelOffset).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr2()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR2);
-	sampler->rChannel(m_ChannelOffset+1).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR2);
+		sampler->rChannel(m_ChannelOffset+1).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr3()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR3);
-	sampler->rChannel(m_ChannelOffset+2).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR3);
+		sampler->rChannel(m_ChannelOffset+2).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr4()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR4);
-	sampler->rChannel(m_ChannelOffset+3).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR4);
+		sampler->rChannel(m_ChannelOffset+3).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr5()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR5);
-	sampler->rChannel(m_ChannelOffset+4).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR5);
+		sampler->rChannel(m_ChannelOffset+4).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr6()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR6);
-	sampler->rChannel(m_ChannelOffset+5).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR6);
+		sampler->rChannel(m_ChannelOffset+5).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr7()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR7);
-	sampler->rChannel(m_ChannelOffset+6).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR7);
+		sampler->rChannel(m_ChannelOffset+6).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr8()
 {
-	CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR8);
-	sampler->rChannel(m_ChannelOffset+7).IsSurround(surr->GetCheck()?true:false);
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CButton* surr = (CButton*)GetDlgItem(IDC_CH_SURR8);
+		sampler->rChannel(m_ChannelOffset+7).IsSurround(surr->GetCheck()?true:false);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChMute1()
@@ -468,57 +530,81 @@ void XMSamplerMixerPage::OnBnClickedChMastermono()
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol1(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL1);
-	sampler->rChannel(m_ChannelOffset).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL1);
+		sampler->rChannel(m_ChannelOffset).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol2(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL2);
-	sampler->rChannel(m_ChannelOffset+1).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL2);
+		sampler->rChannel(m_ChannelOffset+1).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol3(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL3);
-	sampler->rChannel(m_ChannelOffset+2).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL3);
+		sampler->rChannel(m_ChannelOffset+2).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol4(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL4);
-	sampler->rChannel(m_ChannelOffset+3).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL4);
+		sampler->rChannel(m_ChannelOffset+3).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol5(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL5);
-	sampler->rChannel(m_ChannelOffset+4).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL5);
+		sampler->rChannel(m_ChannelOffset+4).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol6(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL6);
-	sampler->rChannel(m_ChannelOffset+5).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL6);
+		sampler->rChannel(m_ChannelOffset+5).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol7(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL7);
-	sampler->rChannel(m_ChannelOffset+6).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL7);
+		sampler->rChannel(m_ChannelOffset+6).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 
 void XMSamplerMixerPage::OnNMCustomdrawSlVol8(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL8);
-	sampler->rChannel(m_ChannelOffset+7).DefaultVolume(64-slid->GetPos());
+	if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
+	{
+		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL8);
+		sampler->rChannel(m_ChannelOffset+7).DefaultVolume(64-slid->GetPos());
+	}
 	*pResult = 0;
 }
 

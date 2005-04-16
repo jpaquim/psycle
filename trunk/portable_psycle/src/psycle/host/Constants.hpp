@@ -29,7 +29,11 @@ namespace psycle
 		/// harcoded maximal number of lines per pattern
 		#define MAX_LINES				256
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
+#if defined PSYCLE_OPTION_VOLUME_COLUMN
+		#define EVENT_SIZE				6
+#else
 		#define EVENT_SIZE				5
+#endif
 		/// PSY2-fileformat Constants
 		#define OLD_MAX_TRACKS			32
 		#define OLD_MAX_WAVES			16
@@ -39,7 +43,7 @@ namespace psycle
 		#define LOCK_LATENCY			256
 		/// \todo changing this breaks file format
 		#define MAX_SONG_POSITIONS		128
-		/// Max input connections and output connections a machine can have. (should be replaced by a dynamic array)
+		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
 		#define MAX_CONNECTIONS		12
 
 		/// Miscellaneous offset data.

@@ -89,25 +89,25 @@ namespace psycle{
 			};
 		};
 
-
-		static const UINT XMVOLCMD_EXG_TABLE[16] = 
+		struct XMVOL_CMD
 		{
-			0,
-				XMCMD::VOLUME,
-				XMCMD::VOLUME,
-				XMCMD::VOLUME,
-				XMCMD::VOLUME,
-				XMCMD::VOLUME,
-				XMCMD::VOLUMESLIDE, //down
-				XMCMD::VOLUMESLIDE, //up
-				XMCMD::VOLUMESLIDE, //down
-				XMCMD::VOLUMESLIDE, //up
-				XMCMD::VIBRATO, // speed
-				XMCMD::VIBRATO, // depth  ( vibrato trigger )
-				XMCMD::PANNING,
-				XMCMD::PANNINGSLIDE,
-				XMCMD::PANNINGSLIDE,
-				XMCMD::PORTA2NOTE
+			enum{
+				XMV_VOLUME0			=	0x10,
+				XMV_VOLUME1			=	0x20,
+				XMV_VOLUME2			=	0x30,
+				XMV_VOLUME3			=	0x40,
+				XMV_VOLUME4			=	0x50,
+				XMV_VOLUMESLIDEDOWN =	0x60,
+				XMV_VOLUMESLIDEUP	=	0x70,
+				XMV_FINEVOLUMESLIDEDOWN=0x80,
+				XMV_FINEVOLUMESLIDEUP=	0x90,
+				XMV_VIBRATOSPEED	=	0xA0,
+				XMV_VIBRATO			=	0xB0, // depth  ( vibrato trigger )
+				XMV_PANNING			=	0xC0,
+				XMV_PANNINGSLIDELEFT=	0xD0,
+				XMV_PANNINGSLIDERIGHT=	0xE0,
+				XMV_PORTA2NOTE		=	0xF0
+			};
 		};
 
 	struct XMFILEHEADER

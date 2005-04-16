@@ -4,7 +4,6 @@ namespace psycle
 {
 	namespace host
 	{
-		//#define PSYCLE_OPTION_VOLUME_COLUMN
 		#pragma pack(push, 1)
 
 		class PatternEntry

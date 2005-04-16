@@ -10,21 +10,90 @@
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "XMSamplerUIInst.hpp"
+#include ".\xmsampleruiinst.hpp"
 
 using namespace Gdiplus;
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
-
 #if 0
-
-// Constructor
+// XMSamplerUIInst
+IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
+: CPropertyPage(XMSamplerUIInst::IDD)
+, m_bInitialized(false)
+, m_CurrentInstNo(0)
 {
-	m_bInitialized = false;
-	m_CurrentInstNo = 0;
+}
 
+XMSamplerUIInst::~XMSamplerUIInst()
+{
+}
 
+void XMSamplerUIInst::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_GLOBVOL, m_SlGlobVol);
+	DDX_Control(pDX, IDC_FADEOUT, m_SlFadeout);
+	DDX_Control(pDX, IDC_DEFPAN, m_SlDefPan);
+	DDX_Control(pDX, IDC_PITCHPANMOD, m_SlPitchPanMod);
+	DDX_Control(pDX, IDC_CUTOFF, m_SlCutoff);
+	DDX_Control(pDX, IDC_RESSONANCE, m_SlRessonance);
+	DDX_Control(pDX, IDC_FILTERMOD, m_SlFilterMod);
+}
+
+BEGIN_MESSAGE_MAP(XMSamplerUIInst, CPropertyPage)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_GLOBVOL, OnNMCustomdrawGlobvol)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FADEOUT, OnNMCustomdrawFadeout)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_DEFPAN, OnNMCustomdrawDefPan)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PITCHPANMOD, OnNMCustomdrawPitchPanMod)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_CUTOFF, OnNMCustomdrawCutoff)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_RESSONANCE, OnNMCustomdrawRessonance)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FILTERMOD, OnNMCustomdrawFilterMod)
+END_MESSAGE_MAP()
+
+void XMSamplerUIInst::OnNMCustomdrawGlobvol(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawFadeout(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawDefPan(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+
+void XMSamplerUIInst::OnNMCustomdrawPitchPanMod(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawCutoff(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawRessonance(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawFilterMod(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
 }
 
 
@@ -60,13 +129,6 @@ LRESULT XMSamplerUIInst::OnInitDialog(HWND hwnd,LPARAM lparam)
 	m_Pan.Attach(GetDlgItem(IDC_PANSLIDER));
 	m_Pan.SetRange(0,100);
 
-	m_Test.SubclassWindow(GetDlgItem(IDC_CUSTOM1));
-	m_Test.Initialize();
-	m_Test.Min(0.0f);
-	m_Test.Max(1.0f);
-	m_Test.Tick(0.1f);
-
-	
 	m_Cutoff.Attach(GetDlgItem(IDC_CUTOFF));
 	m_Cutoff.SetRange(0,127);
 
@@ -1095,6 +1157,7 @@ void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMIn
 		return ::DefWindowProc(hWnd,msg,wParam,lParam);
 	}
 
+#if 0
 	//////////////////////////////////////////////////////////////////////////////
 	// SampleAssignEditor ------------------------------------------------------------
 	//////////////////////////////////////////////////////////////////////////////
@@ -1429,8 +1492,7 @@ void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMIn
 		return boost::optional<int>();//ñ≥å¯Ç»ílÇï‘Ç∑ÅB
 	};
 #endif
+#endif
 NAMESPACE__END
 NAMESPACE__END
-
-// XMSamplerUIInst
 
