@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.22  2005/04/18 02:00:41  johan-boule
+added src/configuration.hpp to psycle.vcproj
+
 Revision 1.21  2005/04/10 20:11:37  johan-boule
 releasing alpha version 1.7.39 -- with voskomo's gamefx plugin
 
@@ -86,7 +89,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 39 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 40 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
