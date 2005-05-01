@@ -95,7 +95,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 			{
-				this->AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
+				this->AdjustStatusBar(_pSong->instSelected);
 				return TRUE;	
 			}
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
@@ -106,16 +106,16 @@ NAMESPACE__BEGIN(psycle)
 			pCmdUI->Enable ();  
 		}
 
-		void CWaveEdFrame::AdjustStatusBar(int ins, int wav)
+		void CWaveEdFrame::AdjustStatusBar(int ins)
 		{
 			char buff[32];
-			int	wl=_pSong->_pInstrument[ins]->waveLength[wav];
+			int	wl=_pSong->_pInstrument[ins]->waveLength;
 			sprintf(buff, "Size: %u", wl);
 			statusbar.SetPaneText(1, buff, TRUE);
 
 			if (wl)
 			{
-				if (_pSong->_pInstrument[ins]->waveStereo[wav]) statusbar.SetPaneText(2, "Mode: Stereo", TRUE);
+				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(2, "Mode: Stereo", TRUE);
 				else statusbar.SetPaneText(2, "Mode: Mono", TRUE);
 			}
 			else statusbar.SetPaneText(2, "Mode: Empty", TRUE);
@@ -132,8 +132,8 @@ NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdFrame::Notify(void)
 		{
-			wavview.SetViewData(_pSong->instSelected, _pSong->waveSelected);
-			AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
+			wavview.SetViewData(_pSong->instSelected);
+			AdjustStatusBar(_pSong->instSelected);
 		}
 	NAMESPACE__END
 NAMESPACE__END

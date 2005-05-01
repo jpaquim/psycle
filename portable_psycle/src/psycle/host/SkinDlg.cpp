@@ -1305,12 +1305,12 @@ NAMESPACE__BEGIN(psycle)
 
 				fprintf(hfile,"[Psycle Display Presets v1.0]\n\n");
 
-				fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface);
+				fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface.c_str());
 				fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n",_pattern_font_point);
 				fprintf(hfile,"\"pattern_font_flags\"=dword:%.8X\n",_pattern_font_flags);
 				fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n",_pattern_font_x);
 				fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n",_pattern_font_y);
-				fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n",_pattern_header_skin);
+				fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n",_pattern_header_skin.c_str());
 		//		fprintf(hfile,"\"DisplayLineNumbers\"=hex:%.2X\n",_linenumbers?1:0);
 		//		fprintf(hfile,"\"DisplayLineNumbersHex\"=hex:%.2X\n",_linenumbersHex?1:0);
 				fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n",_patternSeparatorColor);
@@ -1340,13 +1340,13 @@ NAMESPACE__BEGIN(psycle)
 				fprintf(hfile,"\"vu1\"=dword:%.8X\n",_vubColor);
 				fprintf(hfile,"\"vu2\"=dword:%.8X\n",_vugColor);
 				fprintf(hfile,"\"vu3\"=dword:%.8X\n",_vucColor);
-				fprintf(hfile,"\"generator_fontface\"=\"%s\"\n",_generator_fontface);
+				fprintf(hfile,"\"generator_fontface\"=\"%s\"\n",_generator_fontface.c_str());
 				fprintf(hfile,"\"generator_font_point\"=dword:%.8X\n",_generator_font_point);
 				fprintf(hfile,"\"generator_font_flags\"=dword:%.8X\n",_generator_font_flags);
-				fprintf(hfile,"\"effect_fontface\"=\"%s\"\n",_effect_fontface);
+				fprintf(hfile,"\"effect_fontface\"=\"%s\"\n",_effect_fontface.c_str());
 				fprintf(hfile,"\"effect_font_point\"=dword:%.8X\n",_effect_font_point);
 				fprintf(hfile,"\"effect_font_flags\"=dword:%.8X\n",_effect_font_flags);
-				fprintf(hfile,"\"machine_skin\"=\"%s\"\n",_machine_skin);
+				fprintf(hfile,"\"machine_skin\"=\"%s\"\n",_machine_skin.c_str());
 				fprintf(hfile,"\"mv_colour\"=dword:%.8X\n",_machineViewColor);
 				fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n",_machineViewWireColor);
 				fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n",_machineViewPolyColor);
@@ -1354,7 +1354,7 @@ NAMESPACE__BEGIN(psycle)
 				fprintf(hfile,"\"mv_effect_fontcolour\"=dword:%.8X\n",_machineViewEffectFontColor);
 				fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
 				fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
-				fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename);
+				fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename.c_str());
 				fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n",_triangle_size);
 				fclose(hfile);
 			}

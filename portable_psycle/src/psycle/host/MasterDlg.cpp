@@ -347,7 +347,7 @@ NAMESPACE__BEGIN(psycle)
 			dc->SelectObject(oldfont);
 		}
 
-		/*
+		
 		void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			int val = f2i(((256-m_sliderm1.GetPos())*(256-m_sliderm1.GetPos()))/64.0f);
@@ -495,7 +495,6 @@ NAMESPACE__BEGIN(psycle)
 			
 			*pResult = 0;
 		}
-		*/
 
 		void CMasterDlg::OnPaint() 
 		{
@@ -510,7 +509,7 @@ NAMESPACE__BEGIN(psycle)
 				oldbmp = memDC.SelectObject(&m_numbers);
 				
 				PaintNumbersDC(dcm,&memDC,1024-m_slidermaster.GetPos(),32,142);
-		/*		PaintNumbersDC(dcm,&memDC,256-m_sliderm1.GetPos(),92,142);
+				PaintNumbersDC(dcm,&memDC,256-m_sliderm1.GetPos(),92,142);
 				PaintNumbersDC(dcm,&memDC,256-m_sliderm2.GetPos(),112,142);
 				PaintNumbersDC(dcm,&memDC,256-m_sliderm3.GetPos(),132,142);
 				PaintNumbersDC(dcm,&memDC,256-m_sliderm4.GetPos(),152,142);
@@ -522,7 +521,7 @@ NAMESPACE__BEGIN(psycle)
 				PaintNumbersDC(dcm,&memDC,256-m_sliderm10.GetPos(),272,142);
 				PaintNumbersDC(dcm,&memDC,256-m_sliderm11.GetPos(),292,142);
 				PaintNumbersDC(dcm,&memDC,256-m_sliderm12.GetPos(),312,142);
-		*/
+		
 				memDC.SelectObject(oldbmp);
 				memDC.DeleteDC();
 			}

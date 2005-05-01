@@ -11,23 +11,17 @@ namespace psycle
 		Instrument::Instrument()
 		{
 			// clear everythingout
-			for (int c=0; c<MAX_WAVES; c++)
-			{
-				waveDataL[c] = NULL;
-				waveDataR[c] = NULL;
-				waveLength[c] = 0;
-			}
+			waveDataL = NULL;
+			waveDataR = NULL;
+			waveLength = 0;
 			Delete();
 		}
 
 		Instrument::~Instrument()
 		{
-			for (int c=0; c<MAX_WAVES; c++)
-			{
-				zapArray(waveDataL[c]);
-				zapArray(waveDataR[c]);
-				waveLength[c] = 0;
-			}
+			zapArray(waveDataL);
+			zapArray(waveDataR);
+			waveLength = 0;
 		}
 
 		void Instrument::Delete()
@@ -58,38 +52,32 @@ namespace psycle
 			_RCUT = false;
 			_RRES = false;
 			
-			for (int c=0; c<MAX_WAVES; c++)
-			{
-				DeleteLayer(c);
-			}
+			DeleteLayer();
 			
 			sprintf(_sName,"empty");
 		}
 
-		void Instrument::DeleteLayer(int c)
+		void Instrument::DeleteLayer(void)
 		{
-			sprintf(waveName[c],"empty");
+			sprintf(waveName,"empty");
 			
-			zapArray(waveDataL[c]);
-			zapArray(waveDataR[c]);
-			waveLength[c] = 0;
-			waveStereo[c]=false;
-			waveLoopStart[c]=0;
-			waveLoopEnd[c]=0;
-			waveLoopType[c]=0;
-			waveVolume[c]=100;
-			waveFinetune[c]=0;
-			waveTune[c]=0;
+			zapArray(waveDataL);
+			zapArray(waveDataR);
+			waveLength = 0;
+			waveStereo=false;
+			waveLoopStart=0;
+			waveLoopEnd=0;
+			waveLoopType=0;
+			waveVolume=100;
+			waveFinetune=0;
+			waveTune=0;
 		}
 
 		bool Instrument::Empty()
 		{
-			for (int i = 0; i < MAX_WAVES; i++)
+			if (waveLength > 0)
 			{
-				if (waveLength[i] > 0)
-				{
-					return FALSE;
-				}
+				return FALSE;
 			}
 			return TRUE;
 		}
@@ -124,7 +112,7 @@ namespace psycle
 
 			pFile->ReadString(_sName,sizeof(_sName));
 
-			// now we have to write out the waves, but only the valid ones
+			// now we have to read waves
 
 			int numwaves;
 			pFile->Read(&numwaves, sizeof(numwaves));
@@ -134,15 +122,16 @@ namespace psycle
 
 				pFile->Read(&Header,4);
 				Header[4] = 0;
+				UINT version;
+				UINT size;
 
 				if (strcmp(Header,"WAVE")==0)
 				{
-					UINT version;
-					UINT size;
 
 					pFile->Read(&version,sizeof(version));
 					pFile->Read(&size,sizeof(size));
-					if (version > CURRENT_FILE_VERSION_WAVE)
+					//fileformat supports several waves, but sampler only supports one.
+					if (version > CURRENT_FILE_VERSION_WAVE || i > 0)
 					{
 						// there is an error, this file is newer than this build of psycle
 						//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
@@ -153,17 +142,17 @@ namespace psycle
 						UINT index;
 						pFile->Read(&index,sizeof(index));
 
-						pFile->Read(&waveLength[index],sizeof(waveLength[index]));
-						pFile->Read(&waveVolume[index],sizeof(waveVolume[index]));
-						pFile->Read(&waveLoopStart[index],sizeof(waveLoopStart[index]));
-						pFile->Read(&waveLoopEnd[index],sizeof(waveLoopEnd[index]));
+						pFile->Read(&waveLength,sizeof(waveLength));
+						pFile->Read(&waveVolume,sizeof(waveVolume));
+						pFile->Read(&waveLoopStart,sizeof(waveLoopStart));
+						pFile->Read(&waveLoopEnd,sizeof(waveLoopEnd));
 						
-						pFile->Read(&waveTune[index],sizeof(waveTune[index]));
-						pFile->Read(&waveFinetune[index],sizeof(waveFinetune[index]));
-						pFile->Read(&waveLoopType[index],sizeof(waveLoopType[index]));
-						pFile->Read(&waveStereo[index],sizeof(waveStereo[index]));
+						pFile->Read(&waveTune,sizeof(waveTune));
+						pFile->Read(&waveFinetune,sizeof(waveFinetune));
+						pFile->Read(&waveLoopType,sizeof(waveLoopType));
+						pFile->Read(&waveStereo,sizeof(waveStereo));
 						
-						pFile->ReadString(waveName[index],sizeof(waveName[index]));
+						pFile->ReadString(waveName,sizeof(waveName));
 						
 						pFile->Read(&size,sizeof(size));
 						byte* pData;
@@ -171,29 +160,29 @@ namespace psycle
 						if ( !fullopen )
 						{
 							pFile->Skip(size);
-							waveDataL[index]=new signed short[2];
+							waveDataL=new signed short[2];
 						}
 						else
 						{
 							pData = new byte[size];
 							pFile->Read(pData,size);
-							SoundDesquash(pData,&waveDataL[index]);
+							SoundDesquash(pData,&waveDataL);
 							zapArray(pData);
 						}
 
-						if (waveStereo[index])
+						if (waveStereo)
 						{
 							pFile->Read(&size,sizeof(size));
 							if ( !fullopen )
 							{
 								pFile->Skip(size);
-								zapArray(waveDataL[index],new signed short[2]);
+								zapArray(waveDataR,new signed short[2]);
 							}
 							else
 							{
 								pData = new byte[size];
 								pFile->Read(pData,size);
-								SoundDesquash(pData,&waveDataR[index]);
+								SoundDesquash(pData,&waveDataR);
 								zapArray(pData);
 							}
 						}
@@ -201,8 +190,11 @@ namespace psycle
 				}
 				else
 				{
-					// file error!
-					///\todo do something damnit!
+					pFile->Read(&version,sizeof(version));
+					pFile->Read(&size,sizeof(size));
+					// there is an error, this file is newer than this build of psycle
+					//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
+					pFile->Skip(size);
 				}
 			}
 		}
@@ -235,85 +227,62 @@ namespace psycle
 
 			pFile->Write(_sName,strlen(_sName)+1);
 
-			// now we have to write out the waves, but only the valid ones
+			// now we have to write out the waves, but only if valid
 
-			int numwaves = 0;
-			for (int i = 0; i < MAX_WAVES; i++)
-			{
-				if (waveLength[i] > 0)
-				{
-					numwaves++;
-				}
-			}
+			int numwaves = (waveLength > 0)?1:0;
 
 			pFile->Write(&numwaves, sizeof(numwaves));
-			for (int i = 0; i < MAX_WAVES; i++)
+			if (waveLength > 0)
 			{
-				if (waveLength[i] > 0)
+				byte * pData1(0);
+				byte * pData2(0);
+				UINT size1=0,size2=0;
+				size1 = SoundSquash(waveDataL,&pData1,waveLength);
+				if (waveStereo)
 				{
-					byte * pData1(0);
-					byte * pData2(0);
-					UINT size1=0,size2=0;
-					size1 = SoundSquash(waveDataL[i],&pData1,waveLength[i]);
-
-					/*  test for accuracy of compress/decompress - it's 100%
-					SoundDesquash(pData1,&waveDataR[i]);
-					for (int c = 0; c < waveLength[i]; c++)
-					{
-						if (waveDataL[i][c] != waveDataR[i][c])
-						{
-							int z = 2000; // error
-						}
-					}
-					*/
-
-					if (waveStereo[i])
-					{
-						size2 = SoundSquash(waveDataR[i],&pData2,waveLength[i]);
-					}
-
-
-					UINT index = i;
-					pFile->Write("WAVE",4);
-					UINT version = CURRENT_FILE_VERSION_PATD;
-					UINT size = sizeof(index)
-								+sizeof(waveLength[i])
-								+sizeof(waveVolume[i])
-								+sizeof(waveLoopStart[i])
-								+sizeof(waveLoopEnd[i])
-								+sizeof(waveTune[i])
-								+sizeof(waveFinetune[i])
-								+sizeof(waveStereo[i])
-								+strlen(waveName[i])+1
-								+size1
-								+size2;
-
-					pFile->Write(&version,sizeof(version));
-					pFile->Write(&size,sizeof(size));
-					pFile->Write(&index,sizeof(index));
-
-					pFile->Write(&waveLength[i],sizeof(waveLength[i]));
-					pFile->Write(&waveVolume[i],sizeof(waveVolume[i]));
-					pFile->Write(&waveLoopStart[i],sizeof(waveLoopStart[i]));
-					pFile->Write(&waveLoopEnd[i],sizeof(waveLoopEnd[i]));
-
-					pFile->Write(&waveTune[i],sizeof(waveTune[i]));
-					pFile->Write(&waveFinetune[i],sizeof(waveFinetune[i]));
-					pFile->Write(&waveLoopType[i],sizeof(waveLoopType[i]));
-					pFile->Write(&waveStereo[i],sizeof(waveStereo[i]));
-
-					pFile->Write(waveName[i],strlen(waveName[i])+1);
-
-					pFile->Write(&size1,sizeof(size1));
-					pFile->Write(pData1,size1);
-					zapArray(pData1);
-					if (waveStereo[i])
-					{
-						pFile->Write(&size2,sizeof(size2));
-						pFile->Write(pData2,size2);
-					}
-					zapArray(pData2);
+					size2 = SoundSquash(waveDataR,&pData2,waveLength);
 				}
+
+				UINT index = 0;
+				pFile->Write("WAVE",4);
+				UINT version = CURRENT_FILE_VERSION_PATD;
+				UINT size = sizeof(index)
+							+sizeof(waveLength)
+							+sizeof(waveVolume)
+							+sizeof(waveLoopStart)
+							+sizeof(waveLoopEnd)
+							+sizeof(waveTune)
+							+sizeof(waveFinetune)
+							+sizeof(waveStereo)
+							+strlen(waveName)+1
+							+size1
+							+size2;
+
+				pFile->Write(&version,sizeof(version));
+				pFile->Write(&size,sizeof(size));
+				pFile->Write(&index,sizeof(index));
+
+				pFile->Write(&waveLength,sizeof(waveLength));
+				pFile->Write(&waveVolume,sizeof(waveVolume));
+				pFile->Write(&waveLoopStart,sizeof(waveLoopStart));
+				pFile->Write(&waveLoopEnd,sizeof(waveLoopEnd));
+
+				pFile->Write(&waveTune,sizeof(waveTune));
+				pFile->Write(&waveFinetune,sizeof(waveFinetune));
+				pFile->Write(&waveLoopType,sizeof(waveLoopType));
+				pFile->Write(&waveStereo,sizeof(waveStereo));
+
+				pFile->Write(waveName,strlen(waveName)+1);
+
+				pFile->Write(&size1,sizeof(size1));
+				pFile->Write(pData1,size1);
+				zapArray(pData1);
+				if (waveStereo)
+				{
+					pFile->Write(&size2,sizeof(size2));
+					pFile->Write(pData2,size2);
+				}
+				zapArray(pData2);
 			}
 		}
 	}

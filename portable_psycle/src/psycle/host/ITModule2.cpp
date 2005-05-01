@@ -1,5 +1,5 @@
 #include "project.private.hpp"
-#include ".\itmodule2.h"
+#include "ITModule2.h"
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
@@ -11,11 +11,13 @@ namespace psycle
 	{
 		ITModule2::ITModule2(void)
 		{
+			embeddedData = NULL;
 			for (int i=0;i<64;i++) highOffset[i]=0;
 		}
 
 		ITModule2::~ITModule2(void)
 		{
+			delete embeddedData;
 		}
 		bool ITModule2::BitsBlock::ReadBlock(OldPsyFile *pFile)
 		{
@@ -79,18 +81,15 @@ namespace psycle
 			strcat(s->Comment,szName.c_str());
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-			s->InsertConnection(0,MASTER_INDEX,itFileH.gVol/128.0f);
+			s->InsertConnection(0,MASTER_INDEX,(itFileH.mVol&0x7F)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
-			sampler->BPM(itFileH.iTempo);
-			if(itFileH.iSpeed == 0){
-				sampler->TicksPerRow(6);
-			} else {
-				sampler->TicksPerRow(itFileH.iSpeed);
-			}
-			sampler->CalcBPMAndTick();
-			sampler->IsLinearFreq(itFileH.flags&Flags::LINEARSLIDES?true:false);
+			song->BeatsPerMin(itFileH.iTempo);
+			song->LinesPerBeat(sampler->Speed2LPB(itFileH.iSpeed));
+
+			sampler->IsAmigaSlides(itFileH.flags&Flags::LINEARSLIDES?false:true);
+			sampler->GlobalVolume(itFileH.gVol);
 /*
 Flags:    Bit 0: On = Stereo, Off = Mono
 			Bit 1: Vol0MixOptimizations - If on, no mixing occurs if
@@ -189,6 +188,51 @@ Special:  Bit 0: On = song message attached.
 			unsigned long * pointersp = new unsigned long[itFileH.patNum];
 			Read(pointersp,itFileH.patNum*sizeof(unsigned long));
 
+			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
+			{
+				embeddedData = new EmbeddedMIDIData;
+				EmbeddedMIDIData mdata;
+				short skipnum;
+				Read(&skipnum,sizeof(short));
+				Skip(skipnum*8); // This is some strange data. It is not documented.
+
+				Read(&mdata,sizeof(mdata));
+
+				for ( int i=0; i<128; i++ )
+				{
+					char tmp[4];
+					CString zxx = mdata.Zxx[i];
+					CString zxx2 = zxx.Left(5);
+					if ( strcmp("F0F00",zxx2) == 0)
+					{
+						int tmp;
+						if (mdata.Zxx[i][5] >= '0' && mdata.Zxx[i][5] <= '9')
+							tmp = mdata.Zxx[i][5] - '0';
+						else if (mdata.Zxx[i][5] >= 'A' && mdata.Zxx[i][5] <= 'F')
+							tmp = mdata.Zxx[i][5] - 'A' + 0xA;
+
+						int mode = tmp;
+
+						if (mdata.Zxx[i][6] >= '0' && mdata.Zxx[i][6] <= '9')
+							tmp = (mdata.Zxx[i][6] - '0') * 10;
+						else if (mdata.Zxx[i][6] >= 'A' && mdata.Zxx[i][6] <= 'F')
+							tmp = (mdata.Zxx[i][6] - 'A' + 0xA) * 10;
+						if (mdata.Zxx[i][7] >= '0' && mdata.Zxx[i][7] <= '9')
+							tmp += (mdata.Zxx[i][7] - '0');
+						else if (mdata.Zxx[i][7] >= 'A' && mdata.Zxx[i][7] <= 'F')
+							tmp += (mdata.Zxx[i][7] - 'A' + 0xA);
+
+						sampler->SetZxxMacro(i,mode,tmp);
+					}
+				}
+			}
+			if ( itFileH.special&SpecialFlags::HASMESSAGE)
+			{
+				Seek(itFileH.msgOffset);
+				// read itFileH.msgLen
+				// NewLine = 0Dh (13 dec)
+				// EndOfMsg = 0
+			}
 
 
 			for (i=0;i<itFileH.insNum;i++)
@@ -206,12 +250,13 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (pointersp[i]==0)
 				{
-					//Create/use an empty pattern.
+					s->AllocNewPattern(i,"unnamed",64,false);
 				} else {
 					Seek(pointersp[i]);
 					LoadITPattern(i);
 				}
 			}
+
 			zapArray(pointersi);
 			zapArray(pointerss);
 			zapArray(pointersp);
@@ -294,12 +339,11 @@ Special:  Bit 0: On = song message attached.
 
             Read(&curH,sizeof(curH));
 
-			if (!(curH.defPan&128)) xins.Pan(curH.defPan);
 			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
 			xins.DCT(XMInstrument::DCType(curH.DCT));
 			xins.DCA(XMInstrument::DCAction(curH.DCA));
 
-			xins.Pan((curH.defPan & 0x7F)/64);
+			xins.Pan((curH.defPan & 0x7F)/64.0f);
 			xins.PanEnabled((curH.defPan & 0x80)?false:true);
 			xins.PitchPanCenter(curH.pPanCenter);
 			xins.PitchPanSep(curH.pPanSep);
@@ -307,10 +351,15 @@ Special:  Bit 0: On = song message attached.
 			xins.VolumeFadeSpeed(curH.fadeout*32);
 			xins.RandomVolume(curH.randVol);
 			xins.RandomPanning(curH.randPan);
-			xins.FilterCutoff(curH.inFC);
-			xins.FilterResonance(curH.inFR);
+			if ( curH.inFC != 0)
+			{
+				//\todo: inFC/inFR is unclear... in some files, there are values higher than 128, but others seem to be "on the
+				//        correct side..
+				xins.FilterType(dsp::F_LOWPASS12);
+				xins.FilterCutoff(curH.inFC/2);
+				xins.FilterResonance(curH.inFR/2);
+			}
 
-			// MIDI
 
 			XMInstrument::NotePair npair;
 			int i;
@@ -319,7 +368,6 @@ Special:  Bit 0: On = song message attached.
 				npair.second=curH.notes[i].second-1;
 				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
-//////////////////////////////////////////////////////////////////////////
 
 			// volume envelope
 			xins.AmpEnvelope()->Init();
@@ -351,7 +399,7 @@ Special:  Bit 0: On = song message attached.
 				xins.AmpEnvelope()->IsEnabled(false);
 			}
 
-			// volume envelope
+			// Pan envelope
 			xins.PanEnvelope()->Init();
 
 			if(curH.panEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
@@ -380,13 +428,62 @@ Special:  Bit 0: On = song message attached.
 			} else {
 				xins.PanEnvelope()->IsEnabled(false);
 			}
+			// Pitch/Filter envelope
 			xins.PitchEnvelope()->Init();
 			xins.FilterEnvelope()->Init();
-//////////////////////////////////////////////////////////////////////////
-			xins.IsEnabled(true);
 
+			if(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
+				xins.FilterType(dsp::F_LOWPASS12);
+				int envelope_point_num = curH.pitchEnv.numP;
+				if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.
+					envelope_point_num = 25;
+				}
+
+				if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
+				{
+					xins.FilterEnvelope()->IsEnabled(true);
+					xins.PitchEnvelope()->IsEnabled(false);
+					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
+						xins.FilterEnvelope()->SustainBegin(curH.panEnv.sustainS);
+						xins.FilterEnvelope()->SustainEnd(curH.panEnv.sustainE);
+					}
+
+					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
+						xins.FilterEnvelope()->LoopStart(curH.panEnv.loopS);
+						xins.FilterEnvelope()->LoopEnd(curH.panEnv.loopE);
+					}
+
+					for(int i = 0; i < envelope_point_num;i++){
+						short pitchtmp = curH.pitchEnv.nodes[i].secondlo || curH.pitchEnv.nodes[i].secondhi <<8;
+						xins.FilterEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
+					}
+				} else {
+					xins.PitchEnvelope()->IsEnabled(true);
+					xins.FilterEnvelope()->IsEnabled(false);
+					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
+						xins.PitchEnvelope()->SustainBegin(curH.panEnv.sustainS);
+						xins.PitchEnvelope()->SustainEnd(curH.panEnv.sustainE);
+					}
+
+					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
+						xins.PitchEnvelope()->LoopStart(curH.panEnv.loopS);
+						xins.PitchEnvelope()->LoopEnd(curH.panEnv.loopE);
+					}
+
+					for(int i = 0; i < envelope_point_num;i++){
+						short pitchtmp = curH.pitchEnv.nodes[i].secondlo || curH.pitchEnv.nodes[i].secondhi <<8;
+						xins.PitchEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
+					}
+				}
+			} else {
+				xins.PitchEnvelope()->IsEnabled(false);
+				xins.FilterEnvelope()->IsEnabled(false);
+			}
+
+			xins.IsEnabled(true);
 			return true;
 		}
+
 		bool ITModule2::LoadITSample(XMSampler *sampler,int iSampleIdx)
 		{
 			itSampleHeader curH;
@@ -650,6 +747,7 @@ Special:  Bit 0: On = song message attached.
 			int packedSize=ReadInt(2);
 			int rowCount=ReadInt(2);
 			int unused=ReadInt();
+			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
 //			char* packedpattern = new char[packedSize];
 //			Read(packedpattern,packedSize);
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
@@ -769,9 +867,13 @@ Special:  Bit 0: On = song message attached.
 
 		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param,int channel)
 		{
+			int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
+				XMInstrument::WaveData::WaveForms::SAWDOWN,
+				XMInstrument::WaveData::WaveForms::SQUARE,
+				XMInstrument::WaveData::WaveForms::RANDOM
+			};
 			switch(command){
 				case ITModule2::CMD::SET_SPEED:
-					// This function will not always work.
 					pent._cmd=PatternCmd::EXTENDED;
 					pent._parameter = 24 / ((param == 0)?6:param);;
 					break;
@@ -830,6 +932,7 @@ Special:  Bit 0: On = song message attached.
 				case ITModule2::CMD::S:
 					switch(param & 0xf0){
 						case CMD_S::S_SET_FILTER:
+							pent._cmd = XMSampler::CMD::NONE;
 							break;
 						case CMD_S::S_SET_GLISSANDO_CONTROL:
 							pent._cmd = XMSampler::CMD::EXTENDED;
@@ -840,32 +943,36 @@ Special:  Bit 0: On = song message attached.
 							break;
 						case CMD_S::S_SET_VIBRATO_WAVEFORM:
 							pent._cmd = XMSampler::CMD::EXTENDED;
-							pent._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | (param & 0xf);
+							pent._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[(param & 0xf)];
 							break;
 						case CMD_S::S_SET_TREMOLO_WAVEFORM:
 							pent._cmd = XMSampler::CMD::EXTENDED;
-							pent._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | (param & 0xf);
+							pent._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[(param & 0xf)];
 							break;
 						case CMD_S::S_SET_PANBRELLO_WAVEFORM: // IT
 							pent._cmd = XMSampler::CMD::EXTENDED;
-							pent._parameter = XMSampler::CMD_E::E_SET_PANBRELLO_WAVE | (param & 0xf);
+							pent._parameter = XMSampler::CMD_E::E_PANBRELLO_WAVE | exchwave[(param & 0xf)];
 							break;
 						case CMD_S::S_FINE_PATTERN_DELAY: // IT
 							break;
 						case CMD_S::S7: // IT
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::EE | (param&0x0F);
 							break;
 						case CMD_S::S_SET_PAN:
 							pent._cmd = XMSampler::CMD::EXTENDED;
 							pent._parameter = XMSampler::CMD_E::E_SET_PAN | (param & 0xf);
 							break;
 						case CMD_S::S9: // IT
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E9 | (param&0x0F);
 							break;
 						case CMD_S::S_SET_HIGH_OFFSET: // IT
 							highOffset[channel] = param &0x0F;
 							break;
 						case CMD_S::S_PATTERN_LOOP:
-							pent._cmd = PatternCmd::PATTERN_LOOP;
-							pent._parameter = param & 0xf;
+							pent._cmd = PatternCmd::EXTENDED;
+							pent._parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
 							break;
 						case CMD_S::S_DELAYED_NOTE_CUT:
 							pent._cmd = XMSampler::CMD::EXTENDED;
@@ -876,8 +983,15 @@ Special:  Bit 0: On = song message attached.
 							pent._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
 							break;
 						case CMD_S::S_PATTERN_DELAY:
-							pent._cmd = PatternCmd::PATTERN_DELAY;
-							pent._parameter = param & 0xf;
+							pent._cmd = PatternCmd::EXTENDED;
+							pent._parameter = PatternCmd::PATTERN_DELAY | (param & 0xf);
+							break;
+						case CMD_S::S_SET_MIDI_MACRO:
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							if ( embeddedData)
+							{
+								pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xf)][5]-48);
+							}
 							break;
 					}
 					break;
@@ -888,22 +1002,19 @@ Special:  Bit 0: On = song message attached.
 					pent._cmd = XMSampler::CMD::FINE_VIBRATO;
 					break;
 				case CMD::SET_GLOBAL_VOLUME: 
-/*					pent._cmd = Player::CMD::SET_VOLUME;
-					if (param== 64)
-					{	
-						pent._parameter=255;
-					} else pent._parameter = param * 4;
-*/
-					pent._cmd = XMSampler::CMD::NONE;
+					pent._cmd = XMSampler::CMD::SET_GLOBAL_VOLUME;
 					break;
 				case CMD::GLOBAL_VOLUME_SLIDE: // IT
-					//\todo: implement when it is done.
+					pent._cmd = XMSampler::CMD::GLOBAL_VOLUME_SLIDE;
 					break;
 				case CMD::SET_PANNING: // IT
 					pent._cmd = XMSampler::CMD::PANNING;
 					break;
 				case CMD::PANBRELLO: // IT
 					pent._cmd = XMSampler::CMD::PANBRELLO;
+					break;
+				case CMD::MIDI_MACRO:
+					pent._cmd = XMSampler::CMD::MIDI_MACRO;
 					break;
 				default:
 					pent._cmd = XMSampler::CMD::NONE;
@@ -928,18 +1039,14 @@ Special:  Bit 0: On = song message attached.
 			strcat(s->Comment,szName.c_str());
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-			s->InsertConnection(0,MASTER_INDEX,s3mFileH.gVol/128.0f);
+			s->InsertConnection(0,MASTER_INDEX,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
-			sampler->BPM(s3mFileH.iTempo);
-			if(s3mFileH.iSpeed == 0){
-				sampler->TicksPerRow(6);
-			} else {
-				sampler->TicksPerRow(s3mFileH.iSpeed);
-			}
-			sampler->CalcBPMAndTick();
-			sampler->IsLinearFreq(false);
+			song->BeatsPerMin(s3mFileH.iTempo);
+			song->LinesPerBeat(sampler->Speed2LPB(s3mFileH.iSpeed));
+			sampler->IsAmigaSlides(true);
+			sampler->GlobalVolume((s3mFileH.gVol&0x7F)*2);
 			
 			int j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
@@ -1220,6 +1327,7 @@ OFFSET              Count TYPE   Description
 			PatternEntry pent=pempty;
 
 			int packedsize=ReadInt(2);
+			s->AllocNewPattern(patIdx,"unnamed",64,false);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
@@ -1255,6 +1363,10 @@ OFFSET              Count TYPE   Description
 						unsigned char param=ReadInt(1);
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
+						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )
+						{
+							pent._parameter = ((pent._parameter&0xF0)>>4)*10 + (pent._parameter&0x0F);
+						}
 					}
 					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
 

@@ -57,7 +57,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnAutodec();
 			afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
-		/*	afx_msg void OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult);
@@ -68,7 +68,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);*/
+			afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnPaint();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()

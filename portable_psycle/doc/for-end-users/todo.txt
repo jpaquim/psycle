@@ -33,12 +33,6 @@ New and unsorted and untested
 ##############################
 
 
----------- nolwenn -------------
-
-I tested the "record midi raw data as mcm" in psycle 1.7.6.2 :
-Some hardware devices send continuous MIDI messages : midi cc FE "active sensing" , a cyclic midi test. So the pattern are continuously filled with mcmFE000000, preventing the insertion of normal cc tweaking .
-Psycle have to implement simple MIDI filtering input (i'm not into coding & i hope this is not difficult to do)
-About the MIDI CC : now that they are transmitted directly as MCM it could be nice to replace the old "midi controllers" setting windows and implement a MIDI learn (like in chainer standalone) for VSTs that are not cc mapped.
 
 --------------------------------
 
@@ -52,13 +46,7 @@ Paranoia works well and if I get no problems with it through the upcoming weeken
 Regards,
 kSh
 
-2)
-Can someone at last do something with the little disturbing behaviour of opening new Psycle instances for files opened from the command line? If DDE is too complex then you could implement something very simple and still effective:
-- when Psycle runs, it pops a mutex
-- when another instance is launched, it sees that there is already one opened because there is already a mutex
-- then it passes the command line arguments to the first instance by throwing a windows message and exits
-- the first one receives the message and optionally asks user: "Save changes?", and then opens the new file
-Isn't that simple?
+
 --------------------------------
 
 
@@ -73,40 +61,24 @@ Isn't that simple?
 <GabeCrowe> and quickly find a note in a haze of patterns.
 <GabeCrowe> thats not complicated is it?
 <GabeCrowe> and, so that samples, of voice and such split over the patterns, can be easily located.
+
+++ <sampler> Show with a different colour the notes of the actual Generator/effect in patterns
+
+
 //////////////////////
 
 
-///////////////////////
 
-ok: This is all pure "Waves + the b0rG" 100% VST nightmare.
-I'll try to explain all of this with my lame english.
-First of all, when you instance the scary Waveshell plugin, one of the first thing it will do is query your host audioMaster callback asking for a return value for dispatcher "audioMasterGetUniqueID" thing.
-What your host should return. Well, just a "0" if WE DONT KNOW what of the waves goodies we'll instance from the pack (C1,Enigma,etc,etc), this usually is just when user wants to instance a new plug.
-- If you dont return the 0 nor a one of the valids Waves plugin's IDs, waveshell will crash -
-When the "0" is returned, Waves will open a popup menu for plugin selection, the plugin instances, and everything "should" work right. (just pray)
-The funny thing starts now: when you save your song/project/whatever vst data, you must get the uniqueID again from this (Well, each) plugin wich will be not 0, depending what Waves goodie was instanced before, pre-write this value in your file/stream, so when user/host loads the song later, at the moment the Waves plugin ask for audioMasterGetUniqueID explained above, the host should return this value, so it will not popup the menu again asking for plugin selection, but it will load the plugin with the ID given below.
-Hope this makes stuff clear.
-
-/////////////////
 
 ! problem with directories http://psycle.pastnotecut.org/thread.php?threadid=1088&boardid=2&styleid=&page=1#5
-
-!! panning command does not refresh the panning graphic.
 
 
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
-+++ add a mode to dump each GENERATOR's signal path to wav
 *** songs saved with quadrasid sometimes freak out after loading...
 ++ undos for machine and wave edit? 
 
-*** <YanniS> my settings directories always get corrupted somehow
-	<YanniS> psycle has a lisp
-	<YanniS> quit and restarted, and it's still
-	<YanniS> C:\Audio\Psycle\Skinss\
-	[ not recreated * yannis says it is still happening]
-	[ * tried a fix, need to talk to yannis to see if it worked]
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
 *** when you drag pan handle over transparency, it leaves trails.
@@ -114,8 +86,6 @@ Hope this makes stuff clear.
 ++ an option to merge in another song...
 
 ++ volume slide command
-
-++ <sampler> Show with a different colour the notes of the actual Generator/effect in patterns
 
 + humanizer
 + global volume fades
@@ -126,8 +96,6 @@ Hope this makes stuff clear.
 + add an editing mode that does not enter the istrument or machine
 
 + <alk> some bastards want keyrepeat for notes back
-+ volume slide in sampler, so that you can cut the vol of a sample without a click
-+ option to not move cursor when pasting
 + save bar hide/unhide settings
 
 + I agree that final output should be limited
@@ -182,24 +150,14 @@ Machines
 		<trylle> i mean that it records and plays back at the same time * record wave in too
 
 ===============
-Sampler Machine
+Sampulse Machine
 ===============
 
-FF ******************* NEW SAMPLER NEEDS TO BE CODED ***********************
-*	Sample loop not works - is it possible to fix it in next Psycle release?
-		[[JAZ] Works for me.]
-*	portamento to note, slides too much.
-		[[JAZ] can anyone test this for me?]
-*** sampler sometimes fucks up on long filenames
-+FF	just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
 +FF	Instruments Support ( *.xi , *.iti, *.sf2. Maybe more)
-		 * samples mapped by key
 		 * maybe: samples mapped by velocity?
 +	Improve Filter support.
 		 * twk Control
 		 * maybe: allow filter cutoff/res mapping to velocity
-+	volume slides/arpeggio
-+	better way to set loop points. (+ ping-pong loops)
 
 ===========
 Wave Editor
@@ -218,6 +176,8 @@ Wave Editor
 +	Easier way to load Samples.
 +	Toolbar for the Wave Editor.
 +       Wave-Editor Paste at the end (or any other part) of the current sample.
++	better way to set loop points. (+ ping-pong loops)
+
 
 =============
 GUI (pattern)
@@ -232,7 +192,6 @@ GUI (pattern)
 *	Can't select with keyboard while follow song on, and playing.
 		[pooplog -  DUH The cursor is following the song, how are you going to select?!]
 		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
-+	how about option to switch the instrument and machine columns?
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
@@ -251,6 +210,11 @@ GUI (machines)
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
 		[KeyToCmd() isn't called when a mouse button is down... ]
+*	When changing octave, notes playing should be stopped (because if not, notes playing don't stop)
+		[Problem!!! All key processing is done by InputHandler, so machines don't know when it happens,
+		 and neither does Inputhandler know which machines are playing.
+		 Doing a "player::Stop()" would be a bit hardcore.
+		 I agree]
 *	moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
 	on every frame -
 	[ make bigger buffers and more of them to prevent this from happening * i tried to minimize this ]
@@ -271,7 +235,6 @@ GUI (machines)
 +	Add Presets in a "tab" under Parameters (easy switching/testing)!
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
 		<pooplog> sliders, switches, and owner draw controls i say?
-!?	alk - make wires square ended, like spec analyser
 +	Directories in "Add new machine" (Sorting with directories)
 		 Remember previous used and add "class/type" selection to registry
 +	James says: how hard would it be to put nodes in the wires, so you can bend them?
@@ -282,14 +245,9 @@ Player Engine
 =============
 
 **	<sue> playbar should take latency into account
-*	When changing octave, notes playing should be stopped (because if not, notes playing don't stop)
-		[Problem!!! All key processing is done by InputHandler, so machines don't know when it happens,
-		 and neither does Inputhandler know which machines are playing.
-		 Doing a "player::Stop()" would be a bit hardcore.
-		 I agree]
 +++	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command
-+++FF?	DirectX effects, intstruments
 +++	option for note-record to take command FD into account like ft2
++++FF?	DirectX effects, intstruments
 ++	ALK tracker command to bypass an fx, mute command for machines
 		[Currently machines are disconnected when doing so. If we do the commands, they should be just muted]
 ++	Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
@@ -394,12 +352,23 @@ Vsts
 		<pooplog> if psycle was smart enough to detect mutli-out vst, when you drag a wire to it, it could pop up a
 		dialog asking what you ouput want it to connect to - this will require a file format change though :(
 
+///////////////////////
 
+ok: This is all pure "Waves + the b0rG" 100% VST nightmare.
+I'll try to explain all of this with my lame english.
+First of all, when you instance the scary Waveshell plugin, one of the first thing it will do is query your host audioMaster callback asking for a return value for dispatcher "audioMasterGetUniqueID" thing.
+What your host should return. Well, just a "0" if WE DONT KNOW what of the waves goodies we'll instance from the pack (C1,Enigma,etc,etc), this usually is just when user wants to instance a new plug.
+- If you dont return the 0 nor a one of the valids Waves plugin's IDs, waveshell will crash -
+When the "0" is returned, Waves will open a popup menu for plugin selection, the plugin instances, and everything "should" work right. (just pray)
+The funny thing starts now: when you save your song/project/whatever vst data, you must get the uniqueID again from this (Well, each) plugin wich will be not 0, depending what Waves goodie was instanced before, pre-write this value in your file/stream, so when user/host loads the song later, at the moment the Waves plugin ask for audioMasterGetUniqueID explained above, the host should return this value, so it will not popup the menu again asking for plugin selection, but it will load the plugin with the ID given below.
+Hope this makes stuff clear.
+
+/////////////////
 ============
 MIDI related
 ============
 
-***	MIDI in only works with Waveout
+***	MIDI in only works with Waveout (and ASIO).
 ++	MIDI out
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages
@@ -408,6 +377,12 @@ MIDI related
 +	<lastfutur> future feature requests for the controllers tab: midi routing presets;
 	checkbox: binding which machine is active to incoming program changes;
 	binding midi routing presets to machines; (possibly: save the presets in the psy)
+---------- nolwenn -------------
+
+I tested the "record midi raw data as mcm" in psycle 1.7.6.2 :
+Some hardware devices send continuous MIDI messages : midi cc FE "active sensing" , a cyclic midi test. So the pattern are continuously filled with mcmFE000000, preventing the insertion of normal cc tweaking .
+Psycle have to implement simple MIDI filtering input (i'm not into coding & i hope this is not difficult to do)
+About the MIDI CC : now that they are transmitted directly as MCM it could be nice to replace the old "midi controllers" setting windows and implement a MIDI learn (like in chainer standalone) for VSTs that are not cc mapped.
 
 ======================================
 Interface (contains pattern stuff too)
@@ -416,10 +391,16 @@ Interface (contains pattern stuff too)
 **	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new
 	psycle opens..
 	[ DDE ? mmmm... ]
+<Ksh>
+Can someone at last do something with the little disturbing behaviour of opening new Psycle instances for files opened from the command line? If DDE is too complex then you could implement something very simple and still effective:
+- when Psycle runs, it pops a mutex
+- when another instance is launched, it sees that there is already one opened because there is already a mutex
+- then it passes the command line arguments to the first instance by throwing a windows message and exits
+- the first one receives the message and optionally asks user: "Save changes?", and then opens the new file
+Isn't that simple?
+
 **	<lipid> so is there any way to make 'Delete' an assignable key in the keyboard config? * some other key
 	combinations don't work either, like ctrl+pageup etc.
-**	should save wire dialog settings
-	[ are you sure? ]
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
 	<bdzld> yep, or if the sample rate is invalid
 * <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
@@ -441,7 +422,6 @@ Interface (contains pattern stuff too)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 !	JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
-++	<alk_> alt-f5 - play song from start
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?
@@ -499,7 +479,6 @@ Importing
 
 *	It doesn't add the machines necessary to play all notes.
 ++ .mid import/export
-+	IT importing
 +	.mid import
 +	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring
 		pattern data and other settings, this possible? (yes, but will require new song parser...)
@@ -511,6 +490,7 @@ File Format
 ===========
 
 **	should save wire dialog settings
+	[ are you sure? ]
 +++FF	new file format: (vst multi-out, volume column, direct x stuff, etc.)
 
 
@@ -529,7 +509,7 @@ Editing Capabilities
 	* Velocity/Panning/other_weird column to pattern data
 	* Appregiator: One "template" note, notes "produced" by the appregiator in a different colour.
 	* "zip"-able columns.
-	* Tracker track? (for bpm, global volume...)
+	* Global track? (for bpm, global volume...)
 	? Notes of current selected machine marked with a different colour
 	? Maybe notes/etc, of muted machines shown in grey
 	? Time signatures
@@ -543,7 +523,6 @@ Machines
 	* Sequencers: Posibility to control more than one machine at the same time
 	* Compressor/limiter
 	* Flanger/Chorus
-	! default value for detuned generators like arguru's synth should be set so that there're not detuned.
 
 =============
 Audio/Control

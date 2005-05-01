@@ -100,13 +100,17 @@ protected:
 
 PSYCLE__PLUGIN__INSTANCIATOR(Filter_2_Poles)
 
-void Filter_2_Poles::sequencer_note_event(const int, const int, const int, const int command, const int value)
+void Filter_2_Poles::sequencer_note_event(const int note, const int, const int, const int command, const int value)
 {
 	switch(command)
 	{
 	case 1:
 		modulation_phase_ = math::pi * 2 * value / 0x100;
 		break;
+	}
+	if ( note < 120 )
+	{
+
 	}
 }
 

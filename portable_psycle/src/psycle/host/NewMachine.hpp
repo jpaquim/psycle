@@ -102,7 +102,7 @@ NAMESPACE__BEGIN(psycle)
 			static std::map<std::string,std::string> dllNames;
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
-			HTREEITEM hInt[3];
+			HTREEITEM hInt[4];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 			// Generated message map functions
 			//{{AFX_MSG(CNewMachine)

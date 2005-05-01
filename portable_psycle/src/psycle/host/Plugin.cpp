@@ -109,6 +109,7 @@ namespace psycle
 				{
 					throw;
 				}
+				Work(1);
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
 				{
 					try
@@ -294,16 +295,7 @@ namespace psycle
 					int us = 0;
 					while (ns)
 					{
-						int nextevent;
-						nextevent = ns+1;
-						if (TWSActive)
-						{
-							nextevent = TWSSamples;
-						}
-						else
-						{
-							nextevent = ns+1;
-						}
+						int nextevent = (TWSActive)?TWSSamples:ns+1;
 						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 						{
 							if (TriggerDelay[i]._cmd)
@@ -737,6 +729,7 @@ namespace psycle
 			//Patch: Automatically replace old AS's by AS2F.
 			bool wasAB=false;
 			bool wasAS1=false;
+			bool wasAS2=false;
 			if (strcmp(sDllName,"arguru bass.dll" ) == 0)
 			{
 				strcpy(sDllName,"arguru synth 2f.dll");
@@ -748,9 +741,15 @@ namespace psycle
 				wasAS1=true;
 			}
 			if (!strcmp(sDllName,"arguru synth 2.dll" ))
+			{
 				strcpy(sDllName,"arguru synth 2f.dll");
+				wasAS2=true;
+			}
 			if (!strcmp(sDllName,"synth21.dll" ))
+			{
 				strcpy(sDllName,"arguru synth 2f.dll");
+				wasAS2=true;
+			}
 			std::string sPath2;
 			CString sPath;
 			if ( !CNewMachine::lookupDllName(sDllName,sPath2) ) 
@@ -803,6 +802,11 @@ namespace psycle
 							proxy().ParameterTweak(24,Vals[16]);
 							proxy().ParameterTweak(25,Vals[17]);
 						}
+						else
+						{
+							proxy().ParameterTweak(24,0);
+							proxy().ParameterTweak(25,0);
+						}
 					}
 					else for (int i=0; i<numParameters; i++)
 					{
@@ -838,8 +842,21 @@ namespace psycle
 					try
 					{
 						proxy().ParameterTweak(17,Vals[17]+10);
+						proxy().ParameterTweak(24,0);
+						proxy().ParameterTweak(25,0);
 					}
 					catch(const std::exception &)
+					{
+					}
+				}
+				if(wasAS2)
+				{
+					try
+					{
+						proxy().ParameterTweak(24,0);
+						proxy().ParameterTweak(25,0);
+					}
+					catch(const std::exception&)
 					{
 					}
 				}

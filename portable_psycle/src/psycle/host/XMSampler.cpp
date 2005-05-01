@@ -12,69 +12,64 @@ namespace psycle
 {
 	namespace host
 	{
-		TCHAR* XMSampler::_psName = _T("XMSampler");
-/*		
-		FineSineData       Label   Byte
-			DB       0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23
-			DB      24, 26, 27, 29, 30, 32, 33, 34, 36, 37, 38, 39, 41, 42, 43, 44
-			DB      45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 56, 57, 58, 59
-			DB      59, 60, 60, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 64, 64
-			DB      64, 64, 64, 64, 64, 64, 63, 63, 63, 62, 62, 62, 61, 61, 60, 60
-			DB      59, 59, 58, 57, 56, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46
-			DB      45, 44, 43, 42, 41, 39, 38, 37, 36, 34, 33, 32, 30, 29, 27, 26
-			DB      24, 23, 22, 20, 19, 17, 16, 14, 12, 11,  9,  8,  6,  5,  3,  2
-			DB       0, -2, -3, -5, -6, -8, -9,-11,-12,-14,-16,-17,-19,-20,-22,-23
-			DB     -24,-26,-27,-29,-30,-32,-33,-34,-36,-37,-38,-39,-41,-42,-43,-44
-			DB     -45,-46,-47,-48,-49,-50,-51,-52,-53,-54,-55,-56,-56,-57,-58,-59
-			DB     -59,-60,-60,-61,-61,-62,-62,-62,-63,-63,-63,-64,-64,-64,-64,-64
-			DB     -64,-64,-64,-64,-64,-64,-63,-63,-63,-62,-62,-62,-61,-61,-60,-60
-			DB     -59,-59,-58,-57,-56,-56,-55,-54,-53,-52,-51,-50,-49,-48,-47,-46
-			DB     -45,-44,-43,-42,-41,-39,-38,-37,-36,-34,-33,-32,-30,-29,-27,-26
-			DB     -24,-23,-22,-20,-19,-17,-16,-14,-12,-11, -9, -8, -6, -5, -3, -2
+		TCHAR* XMSampler::_psName = _T("Sampulse");
 
-			FineRampDownData   Label   Byte
-			DB      64, 63, 63, 62, 62, 61, 61, 60, 60, 59, 59, 58, 58, 57, 57, 56
-			DB      56, 55, 55, 54, 54, 53, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48
-			DB      48, 47, 47, 46, 46, 45, 45, 44, 44, 43, 43, 42, 42, 41, 41, 40
-			DB      40, 39, 39, 38, 38, 37, 37, 36, 36, 35, 35, 34, 34, 33, 33, 32
-			DB      32, 31, 31, 30, 30, 29, 29, 28, 28, 27, 27, 26, 26, 25, 25, 24
-			DB      24, 23, 23, 22, 22, 21, 21, 20, 20, 19, 19, 18, 18, 17, 17, 16
-			DB      16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10,  9,  9,  8
-			DB       8,  7,  7,  6,  6,  5,  5,  4,  4,  3,  3,  2,  2,  1,  1,  0
-			DB       0, -1, -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6, -7, -7, -8
-			DB      -8, -9, -9,-10,-10,-11,-11,-12,-12,-13,-13,-14,-14,-15,-15,-16
-			DB     -16,-17,-17,-18,-18,-19,-19,-20,-20,-21,-21,-22,-22,-23,-23,-24
-			DB     -24,-25,-25,-26,-26,-27,-27,-28,-28,-29,-29,-30,-30,-31,-31,-32
-			DB     -32,-33,-33,-34,-34,-35,-35,-36,-36,-37,-37,-38,-38,-39,-39,-40
-			DB     -40,-41,-41,-42,-42,-43,-43,-44,-44,-45,-45,-46,-46,-47,-47,-48
-			DB     -48,-49,-49,-50,-50,-51,-51,-52,-52,-53,-53,-54,-54,-55,-55,-56
-			DB     -56,-57,-57,-58,-58,-59,-59,-60,-60,-61,-61,-62,-62,-63,-63,-64
-
-			FineSquareWave     Label   Byte
-			DB      128 Dup (64), 128 Dup (0)
-*/			
-		const int XMSampler::Voice::m_SinTable[64] = {
-			0 ,12 ,25 ,37 ,49 ,60 ,71 ,81 ,90 ,98 ,106 ,112 ,117 ,122 ,125 ,126 ,
-			127 ,126 ,125 ,122 ,117 ,112 ,106 ,98 ,90 ,81 ,71 ,60 ,49 ,37 ,25 ,12 ,
-			0 ,-12 ,-25 ,-37 ,-49 ,-60 ,-71 ,-81 ,-90 ,-98 ,-106 ,-112 ,-117 ,-122 ,-125 ,-126 ,
-			-127 ,-126 ,-125 ,-122 ,-117 ,-112 ,-106 ,-98 ,-90 ,-81 ,-71 ,-60 ,-49 ,-37 ,-25 ,-12 
+		const int XMSampler::Voice::m_FineSineData[256] = {
+			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
+			24, 26, 27, 29, 30, 32, 33, 34, 36, 37, 38, 39, 41, 42, 43, 44,
+			45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 56, 57, 58, 59,
+			59, 60, 60, 61, 61, 62, 62, 62, 63, 63, 63, 64, 64, 64, 64, 64,
+			64, 64, 64, 64, 64, 64, 63, 63, 63, 62, 62, 62, 61, 61, 60, 60,
+			59, 59, 58, 57, 56, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46,
+			45, 44, 43, 42, 41, 39, 38, 37, 36, 34, 33, 32, 30, 29, 27, 26,
+			24, 23, 22, 20, 19, 17, 16, 14, 12, 11,  9,  8,  6,  5,  3,  2,
+			0, -2, -3, -5, -6, -8, -9,-11,-12,-14,-16,-17,-19,-20,-22,-23,
+			-24,-26,-27,-29,-30,-32,-33,-34,-36,-37,-38,-39,-41,-42,-43,-44,
+			-45,-46,-47,-48,-49,-50,-51,-52,-53,-54,-55,-56,-56,-57,-58,-59,
+			-59,-60,-60,-61,-61,-62,-62,-62,-63,-63,-63,-64,-64,-64,-64,-64,
+			-64,-64,-64,-64,-64,-64,-63,-63,-63,-62,-62,-62,-61,-61,-60,-60,
+			-59,-59,-58,-57,-56,-56,-55,-54,-53,-52,-51,-50,-49,-48,-47,-46,
+			-45,-44,-43,-42,-41,-39,-38,-37,-36,-34,-33,-32,-30,-29,-27,-26,
+			-24,-23,-22,-20,-19,-17,-16,-14,-12,-11, -9, -8, -6, -5, -3, -2
 		};
 
-		// Triangle wave table (ramp down)
-		const int XMSampler::Voice::m_RampDownTable[64] = {
-			0 ,-4 ,-8 ,-12 ,-16 ,-20 ,-24 ,-28 ,-32 ,-36 ,-40 ,-44 ,-48 ,-52 ,-56 ,-60 ,
-			-64 ,-68 ,-72 ,-76 ,-80 ,-84 ,-88 ,-92 ,-96 ,-100 ,-104 ,-108 ,-112 ,-116 ,-120 ,-124 ,
-			127 ,123 ,119 ,115 ,111 ,107 ,103 ,99 ,95 ,91 ,87 ,83 ,79 ,75 ,71 ,67 ,
-			63 ,59 ,55 ,51 ,47 ,43 ,39 ,35 ,31 ,27 ,23 ,19 ,15 ,11 ,7 ,3 
+		const int XMSampler::Voice::m_FineRampDownData[256] = {
+			64, 63, 63, 62, 62, 61, 61, 60, 60, 59, 59, 58, 58, 57, 57, 56,
+			56, 55, 55, 54, 54, 53, 53, 52, 52, 51, 51, 50, 50, 49, 49, 48,
+			48, 47, 47, 46, 46, 45, 45, 44, 44, 43, 43, 42, 42, 41, 41, 40,
+			40, 39, 39, 38, 38, 37, 37, 36, 36, 35, 35, 34, 34, 33, 33, 32,
+			32, 31, 31, 30, 30, 29, 29, 28, 28, 27, 27, 26, 26, 25, 25, 24,
+			24, 23, 23, 22, 22, 21, 21, 20, 20, 19, 19, 18, 18, 17, 17, 16,
+			16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10,  9,  9,  8,
+			8,  7,  7,  6,  6,  5,  5,  4,  4,  3,  3,  2,  2,  1,  1,  0,
+			0, -1, -1, -2, -2, -3, -3, -4, -4, -5, -5, -6, -6, -7, -7, -8,
+			-8, -9, -9,-10,-10,-11,-11,-12,-12,-13,-13,-14,-14,-15,-15,-16,
+			-16,-17,-17,-18,-18,-19,-19,-20,-20,-21,-21,-22,-22,-23,-23,-24,
+			-24,-25,-25,-26,-26,-27,-27,-28,-28,-29,-29,-30,-30,-31,-31,-32,
+			-32,-33,-33,-34,-34,-35,-35,-36,-36,-37,-37,-38,-38,-39,-39,-40,
+			-40,-41,-41,-42,-42,-43,-43,-44,-44,-45,-45,-46,-46,-47,-47,-48,
+			-48,-49,-49,-50,-50,-51,-51,-52,-52,-53,-53,-54,-54,-55,-55,-56,
+			-56,-57,-57,-58,-58,-59,-59,-60,-60,-61,-61,-62,-62,-63,-63,-64
+		};
+		const int XMSampler::Voice::m_FineSquareTable[256] =	{
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,
+			-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 ,-64 
 		};
 
-		// Square wave table
-		const int XMSampler::Voice::m_SquareTable[64] =	{
-			127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,
-			127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,127 ,
-			-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,
-			-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 ,-127 
-		};
 
 		// Random wave table
 		const int XMSampler::Voice::m_RandomTable[64] =	{
@@ -84,24 +79,7 @@ namespace psycle
 			42 ,-34 ,89 ,-4 ,-51 ,-72 ,21 ,-29 ,112 ,123 ,84 ,-101 ,-92 ,98 ,-54 ,-95 
 		};
 
-		const int XMSampler::Voice::m_ft2VibratoTable[256] = {
-			0,-2,-3,-5,-6,-8,-9,-11,-12,-14,-16,-17,-19,-20,-22,-23,
-			-24,-26,-27,-29,-30,-32,-33,-34,-36,-37,-38,-39,-41,-42,
-			-43,-44,-45,-46,-47,-48,-49,-50,-51,-52,-53,-54,-55,-56,
-			-56,-57,-58,-59,-59,-60,-60,-61,-61,-62,-62,-62,-63,-63,
-			-63,-64,-64,-64,-64,-64,-64,-64,-64,-64,-64,-64,-63,-63,
-			-63,-62,-62,-62,-61,-61,-60,-60,-59,-59,-58,-57,-56,-56,
-			-55,-54,-53,-52,-51,-50,-49,-48,-47,-46,-45,-44,-43,-42,
-			-41,-39,-38,-37,-36,-34,-33,-32,-30,-29,-27,-26,-24,-23,
-			-22,-20,-19,-17,-16,-14,-12,-11,-9,-8,-6,-5,-3,-2,0,
-			2,3,5,6,8,9,11,12,14,16,17,19,20,22,23,24,26,27,29,30,
-			32,33,34,36,37,38,39,41,42,43,44,45,46,47,48,49,50,51,
-			52,53,54,55,56,56,57,58,59,59,60,60,61,61,62,62,62,63,
-			63,63,64,64,64,64,64,64,64,64,64,64,64,63,63,63,62,62,
-			62,61,61,60,60,59,59,58,57,56,56,55,54,53,52,51,50,49,
-			48,47,46,45,44,43,42,41,39,38,37,36,34,33,32,30,29,27,
-			26,24,23,22,20,19,17,16,14,12,11,9,8,6,5,3,2 
-		};
+
 
 		// calculated table from the following formula:
 		// period =  pow(2.0,double(15.74154-(note/12.0f)));
@@ -121,7 +99,7 @@ namespace psycle
 			856,	808,	763,	720,	679,	641,	605,	571,	539,	509,	480,	453,
 			428,	404,	381,	360,	340,	321,	303,	286,	270,	255,	240,	227,
 			214,	202,	191,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-			107,	101,	95,		90,		85,		80,		76,		71,		67,		64,		60,		57 
+			107,	101,	95,		90,		85,		80,		76,		71,		67,		63,		60,		57 
 
 		};
 		// Original table
@@ -272,7 +250,6 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::Voice  Implementation 
-		//\todo: cleanup this function (add/remove as needed)
 		void XMSampler::Voice::Reset()
 		{
 			m_ChannelNum = -1;
@@ -286,7 +263,8 @@ namespace psycle
 			m_PitchEnvelope.Init();
 			m_PanEnvelope.Init();
 
-			m_Filter.Init();
+//			m_Filter.Init();
+			m_Filter.Reset();
 			m_CutOff = 127;
 			m_Ressonance = 0;
 			_coModify = 0;
@@ -361,19 +339,33 @@ namespace psycle
 			m_PitchEnvelope.Init(_inst.PitchEnvelope());
 			m_FilterEnvelope.Init(_inst.FilterEnvelope());
 
-			m_Filter.Init();
+//			m_Filter.Init();
+			m_Filter.Reset();
+			m_Filter.SampleRate(Global::pPlayer->SampleRate());
 
 			//\todo: add the missing  Random options
-			if (_inst.RandomCutoff())
+/*			if (_inst.RandomCutoff())
 			{
-				m_CutOff = _inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f;
+				CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
+			}
+			else*/ if (_inst.FilterCutoff() < 127 || _inst.FilterResonance() > 0)
+			{
+				CutOff(_inst.FilterCutoff());
+				Ressonance(_inst.FilterResonance());
+//				m_Filter._type = (dsp::FilterType)_inst.FilterType();
+			} else if ( rChannel().Cutoff() < 127)
+			{
+				FilterType(rChannel().FilterType());
+				CutOff(rChannel().Cutoff());
+				Ressonance(rChannel().Ressonance());
 			}
 			else
 			{
-				m_CutOff = _inst.FilterCutoff();
+				CutOff(127);Ressonance(0);
 			}
+
 			
-			if (_inst.RandomResonance())
+/*			if (_inst.RandomResonance())
 			{
 				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
 			}
@@ -381,10 +373,9 @@ namespace psycle
 			{
 				m_Filter._q = _inst.FilterResonance();
 			}
-
-			m_Filter._type = (dsp::FilterType)_inst.FilterType();
+*/
 			_coModify = (float)_inst.FilterEnvAmount();
-			m_Filter.Update();
+//			m_Filter.Update();
 
 			ResetEffects();
 			
@@ -453,15 +444,16 @@ namespace psycle
 				float lvol = 1.0f - rvol;
 
 				// Filter section
-				if (m_Filter._type != dsp::F_NONE)
-				{
+//				if (m_Filter._type != dsp::F_NONE)
+//				{
 					if(m_FilterEnvelope.Envelope().IsEnabled()){
 						m_FilterEnvelope.Work();
-						m_Filter._cutoff = m_CutOff + dsp::F2I(m_FilterEnvelope.ModulationAmount() * _coModify);
-
-						if (m_Filter._cutoff < 0) { m_Filter._cutoff = 0; }
-						else if (m_Filter._cutoff > 127) { m_Filter._cutoff = 127; }
-						m_Filter.Update();
+//						m_Filter._cutoff = m_CutOff + dsp::F2I(m_FilterEnvelope.ModulationAmount() * _coModify);
+//						m_Filter.Update();
+						int tmpCO = m_CutOff + dsp::F2I(m_FilterEnvelope.ModulationAmount() * _coModify);
+						if (tmpCO < 0) { tmpCO = 0; }
+						else if (tmpCO > 127) { tmpCO = 127; }
+						m_Filter.Cutoff(tmpCO);
 					}
 
 					if (m_WaveDataController.IsStereo())
@@ -470,9 +462,10 @@ namespace psycle
 					}
 					else
 					{
-						left_output = m_Filter.Work(left_output);
+//						left_output = m_Filter.Work(left_output);
+						m_Filter.Work(left_output);
 					}
-				}
+//				}
 
 				// Picth Envelope
 
@@ -532,6 +525,7 @@ namespace psycle
 			m_WaveDataController.Init(&(pSampler()->SampleData(wavelayer)),wavelayer);
 			m_Note = note;
 			m_Period=NoteToPeriod(rInstrument().NoteToSample(note).first);
+			m_NNA = rInstrument().NNA();
 			//\todo : add pInstrument().LinesMode
 			UpdateSpeed();
 
@@ -625,7 +619,7 @@ namespace psycle
 			m_PitchEnvelope.NoteOff();
 		}
 
-		//\todo : see if this function realy does what Impulse Tracker means by "NNA fadeout"
+		//\todo : see if this function really does what Impulse Tracker means by "NNA fadeout"
 		void XMSampler::Voice::NoteFadeout()
 		{
 			m_VolumeFadeSpeed = m_pInstrument->VolumeFadeSpeed()/65535.0f;
@@ -658,31 +652,40 @@ namespace psycle
 		{
 			int vdelta = GetDelta(rChannel().VibratoType(),m_VibratoPos);
 
-			vdelta = ((vdelta * m_VibratoDepth) >> 6);
-			m_VibratoAmount=(double)vdelta;
-			m_VibratoPos = (m_VibratoPos + m_VibratoSpeed) & 0x3F;
+			vdelta = vdelta * m_VibratoDepth;
+			m_VibratoAmount=(double)vdelta/32.0f;
+			m_VibratoPos = (m_VibratoPos - m_VibratoSpeed) & 0xFF;
 			UpdateSpeed();
 
 		}// Vibrato() -------------------------------------
 
 		void XMSampler::Voice::Tremolo()
 		{
+
 			int vdelta = GetDelta(rChannel().TremoloType(),m_TremoloPos);
 
-			vdelta = ((vdelta * m_TremoloDepth) >> 5);
-			m_TremoloAmount = vdelta / 128.0f;
-			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0x3F;
+			vdelta = (vdelta * m_TremoloDepth);
+			m_TremoloAmount = vdelta / 2048.0f;
+			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0xFF;
 
 
 		};// Tremolo() -------------------------------------------
 
 		void XMSampler::Voice::Panbrello()
 		{
+/*
+\todo:
+The random pan position can be achieved by setting the
+waveform to 3 (ie. a S53 command). In this case *ONLY*, the
+speed actually is interpreted as a delay in frames before
+another random value is found. so S14 will be a very QUICK
+panbrello, and S44 will be a slower panbrello.
+*/
 			int vdelta = GetDelta(rChannel().PanbrelloType(),m_PanbrelloPos);
 
-			vdelta = ((vdelta * m_PanbrelloDepth) >> 5);
-			m_PanbrelloAmount = vdelta / 128.0f;
-			m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0x3F;
+			vdelta = vdelta * m_PanbrelloDepth;
+			m_PanbrelloAmount = vdelta / 2048.0f; // 64*16*2
+			m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0xFF;
 
 
 		}// Panbrello() -------------------------------------------
@@ -764,16 +767,16 @@ namespace psycle
 			switch (wavetype)
 			{
 			case XMInstrument::WaveData::WaveForms::SAWDOWN:
-				return m_RampDownTable[wavepos];
+				return m_FineRampDownData[wavepos];
 			case XMInstrument::WaveData::WaveForms::SAWUP:
-				return m_RampDownTable[0x3F - wavepos];
+				return m_FineRampDownData[0x3F - wavepos];
 			case XMInstrument::WaveData::WaveForms::SQUARE:
-				return m_SquareTable[wavepos];
+				return m_FineSquareTable[wavepos];
 			case XMInstrument::WaveData::WaveForms::RANDOM:
 				return m_RandomTable[wavepos];
 			case XMInstrument::WaveData::WaveForms::SINUS:
 			default:
-				return m_SinTable[wavepos];
+				return m_FineSineData[wavepos];
 			}
 		}
 
@@ -796,7 +799,15 @@ namespace psycle
 		double XMSampler::Voice::PeriodToSpeed(int period)
 		{
 			//\todo : update this. 64steps between a seminote is (maybe) not enough.
-			if(m_pSampler->IsLinearFreq()){
+			if(m_pSampler->IsAmigaSlides()){
+				// amiga period mode
+				// 14317456 = 8363Hz* 1712(center-period), got from xm-form.txt
+				// In fs3mdoc there's the value 14317056 , which i assume wrong.
+				// and still, in fmoddoc there's the value 7159090.5, which attains for
+				//  856 (center-period/2) * 8363.42....Hz.
+				// So the question is if mod is incorrect or XM is rounded.
+				return ( 14317456  / period ) / (double)Global::pPlayer->SampleRate();
+			} else {
 				// Linear Frequency
 				// 8363*2^((5*12*64 - Period) / (12*64))
 				// 8363=Hz for Middle-C note
@@ -806,14 +817,6 @@ namespace psycle
 							(3840 - period ) /768.0
 						)
 						* 8363 / (double)Global::pPlayer->SampleRate();
-			} else {
-				// amiga period mode
-				// 14317456 = 8363Hz* 1712(center-period), got from xm-form.txt
-				// In fs3mdoc there's the value 14317056 , which i assume wrong.
-				// and still, in fmoddoc there's the value 7159090.5, which attains for
-				//  856 (center-period/2) * 8363.42....Hz.
-				// So the question is if mod is incorrect or XM is rounded.
-				return ( 14317456  / period ) / (double)Global::pPlayer->SampleRate();
 			}
 		}
 
@@ -821,17 +824,17 @@ namespace psycle
 		{
 			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[rWave().Layer()];
 
-			if(m_pSampler->IsLinearFreq())
+			if(m_pSampler->IsAmigaSlides())
 			{
+				// Amiga Period . Nonstandard table, but *maybe* more accurate.
+				double speedfactor =  pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()/256.0))/12.0);
+//				double c5speed =  8363.0*speedfactor;
+				return AmigaPeriod[note]/speedfactor;
+			} else {
 				//\todo: FT2 linear frequency is actually limited to 64 finetune values!Should we enlarge this?
 				// 7680 = 12notes*10octaves*64fine.
 				return 7680 - ((double)(note + _wave.WaveTune()) * 64.0)
 					- ((double)(_wave.WaveFineTune()) * 0.25); // 0.25 since the range is +-256 for XMSampler as opposed to +-128 for FT.
-			} else {
-				// Amiga Period . Nonstandard table, but *maybe* more accurate.
-				double speedfactor =  pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()/256.0))/12.0);
-				//				double c5speed =  8363.0*speedfactor;
-				return AmigaPeriod[note]/speedfactor;
 			}
 		};
 
@@ -839,14 +842,12 @@ namespace psycle
 		{
 			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[rWave().Layer()];
 
-			if(m_pSampler->IsLinearFreq()){
-				// period = ((10.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
-				//	- (_wave.WaveFineTune() / 256.0) * 64.0);
-				// period / 64.0 = 10.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
-				// note = (int)(10.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5);
-
-				return (int)(120 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0)  - (period / 64.0)); // Apparently,  (int)(x.5) rounds to x+1, so no need for +0.5
-			} else {
+			if(m_pSampler->IsAmigaSlides()){
+				// f1
+				//period =  pow(2.0,double(15.74154-(note/12.0f)))
+				// log2(period) = 15.74154 - (note+wavetune+(finetune/256.0f))/12.0f
+				// note = (15.74154 - log2(period))*12 - tune - (fine/256)
+				//f2
 				//period = pow(2.0,(116.898 - ((double)(note + _wave.WaveTune()) + ((double)_wave.WaveFineTune() / 128.0))/12.0) * 32;
 				//log2(period/32) = (116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune() / 128.0))/12.0;
 				//log2(period/32)*12 =  116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune() / 128.0)
@@ -854,6 +855,13 @@ namespace psycle
 				int _note = (int)(116.898 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0) 
 					-(12.0 * log((double)period / 32.0)/(0.301029995f /*log(2)*/ )));
 				return _note+12;
+			} else {
+				// period = ((10.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
+				//	- (_wave.WaveFineTune() / 256.0) * 64.0);
+				// period / 64.0 = 10.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
+				// note = (int)(10.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5);
+
+				return (int)(120 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0)  - (period / 64.0)); // Apparently,  (int)(x.5) rounds to x+1, so no need for +0.5
 			}
 		}
 
@@ -862,7 +870,6 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 		void XMSampler::Channel::Init()
 		{
-			m_Index = 0;
 			m_InstrumentNo = 255;
 			m_pForegroundVoice = NULL;
 
@@ -901,16 +908,16 @@ namespace psycle
 			m_PitchSlideSpeed = 0;
 			m_Slide2NoteDestNote = 0;
 
-//			m_GlobalVolumeSlideSpeed = 0.0f;
+			m_GlobalVolSlideSpeed = 0.0f;
 			m_ChanVolSlideSpeed = 0.0f;
 			m_PanSlideSpeed = 0.0f;
 
-			m_VibratoSpeed = 0;
+/*			m_VibratoSpeed = 0;
 			m_VibratoDepth = 0;
 			m_VibratoPos = 0;
 			m_VibratoAmount = 0;
 			m_AutoVibratoAmount = 0;
-
+*/
 			m_TremoloSpeed = 0;
 			m_TremoloDepth = 0;
 			m_TremoloDelta = 0;
@@ -926,23 +933,25 @@ namespace psycle
 
 			m_NoteCutTick = 0;
 
+			m_MIDI_Set = 0;
+
 		}
 
 		void XMSampler::Channel::EffectInit()
 		{
-			m_VibratoPos = 0;
+/*			m_VibratoPos = 0;
 			m_TremoloPos = 0;
 			m_TremoloDepth = 0;
 			m_VibratoAmount = 0;
 			m_AutoVibratoAmount = 0;
 			m_PanbrelloPos = 0;
-
+*/
 		}
 		void XMSampler::Channel::Restore()
 		{
 			m_Volume = m_ChannelDefVolume/64.0f;
 
-			if ( m_DefaultPanFactor < 80 ) m_PanFactor = m_DefaultPanFactor/64.0f;
+			if ( m_DefaultPanFactor != 80 ) m_PanFactor = (m_DefaultPanFactor&0x7F)/64.0f;
 			else if ( m_DefaultPanFactor == 80) m_bSurround = true;
 
 			m_PanSlideMem = 0;
@@ -959,10 +968,17 @@ namespace psycle
 			m_PanbrelloSpeedMem = 0;
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
+			m_GlobalVolSlideMem = 0;
+			m_Cutoff = 127;
+			m_Ressonance = 0;
+			m_FilterType = dsp::F_NONE;
 
 		}
 		void XMSampler::Channel::SetEffect(Voice* voice,int volcmd,int cmd,int parameter)
 		{
+			int realSet=0;
+			int	realValue=0;
+
 			//1st check: Channel ( They can appear without an existing playing note and are persistent when a new one comes)
 			switch(volcmd&0xF0)
 			{
@@ -985,15 +1001,19 @@ namespace psycle
 				PanFactor(parameter/255.0f);
 				break;
 			case CMD::SET_CHANNEL_VOLUME:
-				Volume(parameter/64.0f);
-				break;
-			case CMD::MIDI_MACRO:
+				Volume((parameter<64)?(parameter/64.0f):1.0f);
 				break;
 			case CMD::PANNINGSLIDE:
 				PanningSlide(parameter);
 				break;
 			case CMD::CHANNEL_VOLUME_SLIDE:
 				ChannelVolumeSlide(parameter);
+				break;
+			case CMD::SET_GLOBAL_VOLUME:
+				m_pSampler->GlobalVolume(parameter<80?parameter:80);
+				break;
+			case CMD::GLOBAL_VOLUME_SLIDE:
+				GlobalVolSlide(parameter);
 				break;
 			case CMD::EXTENDED:
 				switch(parameter&0xF0)
@@ -1027,6 +1047,8 @@ namespace psycle
 					PanFactor((parameter&0xf)/15.0f);
 					break;
 				case CMD_E::E_SET_MIDI_MACRO:
+					m_MIDI_Set = parameter;
+					//\todo : implement.
 					break;
 				case CMD_E::E_GLISSANDO_TYPE:
 					IsGrissando(parameter != 0);
@@ -1034,11 +1056,46 @@ namespace psycle
 				case CMD_E::E_VIBRATO_WAVE:
 					VibratoType(parameter);
 					break;
-				case CMD_E::E_SET_PANBRELLO_WAVE:
+				case CMD_E::E_PANBRELLO_WAVE:
 					PanbrelloType(parameter);
 					break;
 				case CMD_E::E_TREMOLO_WAVE:
 					TremoloType(parameter);
+					break;
+				default:
+					break;
+				}
+				break;
+			case CMD::MIDI_MACRO:
+				if ( parameter < 0x80)
+				{
+					realSet = m_MIDI_Set;
+					realValue = parameter;
+				}
+				else
+				{
+					realSet = m_pSampler->GetMap(parameter-0x80).mode;
+					realValue = m_pSampler->GetMap(parameter-0x80).value;
+				}
+				switch(realSet)
+				{
+				case 0:
+					m_Cutoff=realValue;
+					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_LOWPASS12;
+					if ( voice ) 
+					{
+						voice->FilterType(m_FilterType);
+						voice->CutOff(m_Cutoff);
+					}
+					break;
+				case 1:
+					m_Ressonance=realValue;
+					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_LOWPASS12;
+					if ( voice )
+					{
+						voice->FilterType(m_FilterType);
+						voice->Ressonance(m_Ressonance);
+					}
 					break;
 				default:
 					break;
@@ -1072,10 +1129,10 @@ namespace psycle
 					PitchSlide(true,volcmd&0x0F);
 					break;
 				case CMD_VOL::VOL_VIBRATO_SPEED:
-					Vibrato(0,volcmd&0x0F); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
+					Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
 					break;
 				case CMD_VOL::VOL_VIBRATO:
-					Vibrato((volcmd & 0x0F)<<2,0);
+					Vibrato(0,(volcmd & 0x0F)<<2);
 					break;
 				case CMD_VOL::VOL_TONEPORTAMENTO:
 					PitchSlide(voice->Period()>voice->NoteToPeriod(Slide2NoteDestNote()),volcmd&0x0F,Slide2NoteDestNote());
@@ -1114,16 +1171,16 @@ namespace psycle
 						switch(parameter&0x0F)
 						{
 						case CMD_EE::EE_SETNOTECUT:
-							NoteCut(0);
+							voice->NNA(XMInstrument::NewNoteAction::STOP);
 							break;
 						case CMD_EE::EE_SETNOTECONTINUE:
-							// set notecontinue mode for current note
+							voice->NNA(XMInstrument::NewNoteAction::CONTINUE);
 							break;
 						case CMD_EE::EE_SETNOTEOFF:
-							// set noteoff mode for current note
+							voice->NNA(XMInstrument::NewNoteAction::NOTEOFF);
 							break;
 						case CMD_EE::EE_SETNOTEFADE:
-							// set notefade mode for current note
+							voice->NNA(XMInstrument::NewNoteAction::FADEOUT);
 							break;
 						case CMD_EE::EE_BACKGROUNDNOTECUT:
 							// search bacground notes on this channel and notecut them
@@ -1165,24 +1222,22 @@ namespace psycle
 					Vibrato(0);
 					break;
 				case CMD::VIBRATO:
-					Vibrato((parameter & 0x0F)<<2,((parameter >> 4) & 0x0F));
+					Vibrato(((parameter >> 4) & 0x0F),(parameter & 0x0F)<<2);
 					break;
 				case CMD::FINE_VIBRATO:
-					Vibrato((parameter & 0x0F),((parameter >> 4) & 0x0F));
+					Vibrato(((parameter >> 4) & 0x0F),(parameter & 0x0F));
 					break;
 				case CMD::TREMOR:
 					Tremor(parameter);
 					break;
 				case CMD::TREMOLO:
-					Tremolo((parameter & 0x0F) << 2,(parameter>> 4) & 0x0F);
+					Tremolo((parameter>> 4) & 0x0F,(parameter & 0x0F));
 					break;
 				case CMD::RETRIG:
 					Retrigger((parameter & 0x0F),(parameter>> 4) & 0x0F);
 					break;
-				case CMD::RETRIG_OLD:
-					break;
 				case CMD::PANBRELLO:
-					Panbrello((parameter & 0x0F) << 2,(parameter>> 5) & 0x0F);
+					Panbrello((parameter>> 4) & 0x0F,(parameter & 0x0F));
 					break;
 				case CMD::ARPEGGIO:
 					Arpeggio(parameter);
@@ -1190,7 +1245,7 @@ namespace psycle
 				}
 			}
 			//3nd check: It is not needed that the voice is playing, but it applies to the last instrument.
-			if ( InstrumentNo() != 255 && cmd == CMD::EXTENDED && parameter&0xF0 == CMD_E::EE)
+			if ( InstrumentNo() != 255 && cmd == CMD::EXTENDED && (parameter&0xF0) == CMD_E::EE)
 			{
 				switch(parameter&0x0F)
 				{
@@ -1225,11 +1280,6 @@ namespace psycle
 			{
 			AutoVibrato();
 			}
-*/
-/*				//\todo: think about these commands. Modify the already existing globals, or implement at the machine level?
-			E_NOTE_DELAY		=	0x0D, //ED     Note delay
-
-			//\todo: to replace the old sampler, portamento up and portamento down need an *OLD command too
 */
 			if(ForegroundVoice()) // Effects that need a voice to be active.
 			{
@@ -1289,9 +1339,42 @@ namespace psycle
 					m_pSampler->Tick(m_Index,&m_DelayedNote);
 				}
 			}
+			if(EffectFlags() & EffectFlag::GLOBALVOLSLIDE)
+			{
+				m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			}
 
 		}
 
+		void XMSampler::Channel::GlobalVolSlide(int speed)
+		{
+			if(speed == 0){
+				if ( m_GlobalVolSlideMem == 0 ) return;
+				speed = m_GlobalVolSlideMem;
+			}
+			else m_GlobalVolSlideMem = speed;
+
+			if ( (speed & 0x0F) == 0 ){ // Slide Left
+				speed = (speed & 0xF0)>>4;
+				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
+				m_GlobalVolSlideSpeed = -speed/128.0f;
+				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			}
+			else if ( (speed & 0xF0) == 0 )  { // Slide Right
+				speed = (speed & 0x0F);
+				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
+				m_GlobalVolSlideSpeed = speed/128.0f;
+				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			}
+			else if ( (speed & 0x0F) == 0xF ) { // FineSlide up
+				m_GlobalVolSlideSpeed = ((speed & 0xF0)>>4);
+				m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			} 
+			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide down
+				m_GlobalVolSlideSpeed = -(speed & 0x0F);
+				m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
+			}
+		};
 		void XMSampler::Channel::PanningSlide(int speed)
 		{
 			if(speed == 0){
@@ -1316,7 +1399,7 @@ namespace psycle
 				m_PanSlideSpeed = -((speed & 0xF0)>>4)/64.0f;
 				PanningSlide();
 			} 
-			else if ( (speed & 0xF0) == 0xF ) { // FineSlide right
+			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide right
 				m_PanSlideSpeed = (speed & 0x0F)/64.0f;
 				PanningSlide();
 			}
@@ -1345,7 +1428,7 @@ namespace psycle
 				m_ChanVolSlideSpeed = -((speed & 0xF0)>>4)/64.0f;
 				ChannelVolumeSlide();
 			} 
-			else if ( (speed & 0xF0) == 0xF ) { // FineSlide right
+			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide right
 				m_ChanVolSlideSpeed = (speed & 0x0F)/64.0f;
 				ChannelVolumeSlide();
 			}
@@ -1403,7 +1486,7 @@ namespace psycle
 				ForegroundVoice()->m_VolumeSlideSpeed = (speed & 0xF0)>>3;
 				ForegroundVoice()->VolumeSlide();
 			} 
-			else if ( (speed & 0xF0) == 0xF ) { // FineSlide Down
+			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide Down
 				ForegroundVoice()->m_VolumeSlideSpeed = -((speed & 0x0F)<<1);
 				ForegroundVoice()->VolumeSlide();
 			}
@@ -1422,7 +1505,7 @@ namespace psycle
 			ForegroundVoice()->m_TremorTickChange = ForegroundVoice()->m_TremorOnTicks;
 			m_EffectFlags |= EffectFlag::TREMOR;
 		};
-		void XMSampler::Channel::Vibrato(int depth,int speed)
+		void XMSampler::Channel::Vibrato(int speed,int depth)
 		{
 			if(depth == 0){
 				if ( m_VibratoDepthMem == 0 ) return;
@@ -1436,12 +1519,12 @@ namespace psycle
 			}
 			else m_VibratoSpeedMem = speed;
 
-			ForegroundVoice()->m_VibratoSpeed=speed;
+			ForegroundVoice()->m_VibratoSpeed=speed<<2;
 			ForegroundVoice()->m_VibratoDepth=depth;
 			m_EffectFlags |= EffectFlag::VIBRATO;
 
 		}// XMSampler::Voice::Vibrato(const int depth,const int speed) ------------------------
-		void XMSampler::Channel::Tremolo(int depth,int speed)
+		void XMSampler::Channel::Tremolo(int speed,int depth)
 		{
 			if(depth == 0){
 				if ( m_TremoloDepthMem == 0 ) return;
@@ -1455,11 +1538,11 @@ namespace psycle
 			}
 			else m_TremoloSpeedMem = speed;
 
-			ForegroundVoice()->m_TremoloSpeed=speed;
-			ForegroundVoice()->m_TremoloDepth=depth<<1;
+			ForegroundVoice()->m_TremoloSpeed=speed<<2;
+			ForegroundVoice()->m_TremoloDepth=depth;
 			m_EffectFlags |= EffectFlag::TREMOLO;
 		};
-		void XMSampler::Channel::Panbrello(int depth,int speed)
+		void XMSampler::Channel::Panbrello(int speed,int depth)
 		{
 			if(depth == 0){
 				if ( m_PanbrelloDepthMem == 0 ) return;
@@ -1473,7 +1556,7 @@ namespace psycle
 			}
 			else m_PanbrelloSpeedMem = speed;
 
-			ForegroundVoice()->m_PanbrelloSpeed=speed;
+			ForegroundVoice()->m_PanbrelloSpeed=speed<<2;
 			ForegroundVoice()->m_PanbrelloDepth=depth;
 			m_EffectFlags |= EffectFlag::PANBRELLO;
 		};
@@ -1494,8 +1577,6 @@ namespace psycle
 			int effretVol,effretMode;
 			switch (volumeModifier) 
 			{
-			case 0:
-			case 8:	effretVol = 0; effretMode=0; break;
 			case 1:
 			case 2:
 			case 3:
@@ -1510,6 +1591,9 @@ namespace psycle
 			case 13: effretVol = (int)pow(2,volumeModifier - 9); effretMode=1; break;
 			case 14: effretVol = 1.5f;effretMode = 2; break;
 			case 15: effretVol = 2.0f;effretMode = 2; break;
+			case 0:
+			case 8:	
+			default: effretVol = 0; effretMode=0; break;
 			}
 			ForegroundVoice()->m_RetrigTicks = ticks;
 			ForegroundVoice()->m_RetrigVol = effretVol;
@@ -1548,10 +1632,9 @@ namespace psycle
 		{
 			if(m_pSampler->CurrentTick() == m_NoteCutTick)
 			{
-				Volume(0);
-/*				if (ForegroundVoice()) ForegroundVoice()->NoteOffFast();
+				if (ForegroundVoice()) ForegroundVoice()->Volume(0);
 				m_EffectFlags &= ~EffectFlag::NOTECUT;
-*/
+
 			}
 		}
 
@@ -1566,16 +1649,18 @@ namespace psycle
 			_numPars = 0;
 			_type = MACH_XMSAMPLER;
 			_mode = MACHMODE_GENERATOR;
-			_stprintf(_editName, _T("XMSampler"));
+			_stprintf(_editName, _T(_psName));
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 
-			m_TicksPerRow = 6;// 
-			m_BPM = Global::_pSong->BeatsPerMin();
+//			m_TicksPerRow = 6;// 
+//			m_BPM = Global::_pSong->BeatsPerMin();
 
+			m_GlobalVolume = 128;
 			_sampleCounter = 0;
 			m_NextSampleTick = 0;
 			m_TickCount = 0;
+			m_bAmigaSlides = false;
 
 			int i;
 			for (i = 0; i < XMSampler::MAX_POLYPHONY; i++)
@@ -1590,10 +1675,11 @@ namespace psycle
 				m_Channel[i].Index(i);
 			}
 
-			//for(i = 0; i < MAX_INSTRUMENT;i++)
-			//{
-			//		m_Instruments[i].Init();
-			//		}
+			for(i = 0; i < 128;i++)
+			{
+				zxxMap[i].mode=0;
+				zxxMap[i].value=0;
+			}
 		}
 
 
@@ -1676,13 +1762,8 @@ namespace psycle
 				// Is a new note coming? Then apply the NNA to the playing one.
 				if (bNoteOn)
 				{	
-					//\todo: Implement the commands
-					//EE_SETNOTECUT			=	0x03,
-					//EE_SETNOTECONTINUE		=	0x04,
-					//EE_SETNOTEOFF			=	0x05,
-					//EE_SETNOTEFADE			=	0x06,
 					//\todo: Implement DCType (Duplicate check type)
-					switch (m_Instruments[currentVoice->InstrumentNum()].NNA())
+					switch (currentVoice->NNA())
 					{
 					case XMInstrument::NewNoteAction::STOP:
 						currentVoice->NoteOffFast();
@@ -1710,7 +1791,6 @@ namespace psycle
 			// STEP B: Get a Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
-				//\todo: Implement this. correctly... (it is not working now)
 				if (( pData->_cmd == CMD::EXTENDED) && ((pData->_parameter & 0xf0) == CMD_E::E_NOTE_DELAY))
 				{
 					thisChannel.DelayedNote(*pData);
@@ -1754,10 +1834,6 @@ namespace psycle
 									newVoice->rWave().Position(offset);
 								}
 								else { newVoice->rWave().Position(0);	}
-							} else if (pData->_cmd == CMD::OFFSET_OLD)
-							{
-								int offset = (pData->_parameter<101)?pData->_parameter*twlength:0;
-								newVoice->rWave().Position(offset);
 							}else{ newVoice->rWave().Position(0); }
 						}
 						else 
@@ -1780,11 +1856,11 @@ namespace psycle
 				{
 					thisChannel.Slide2NoteDestNote(pData->_note);
 				}
-				if (bInstrumentSet)
+				if (bInstrumentSet && currentVoice)
 				{
-					newVoice->ResetVolAndPan(-1);
-					newVoice->rWave().Playing(true);
-					newVoice->IsPlaying(true);
+					currentVoice->ResetVolAndPan(-1);
+					currentVoice->rWave().Playing(true);
+					currentVoice->IsPlaying(true);
 				}
 			}
 
@@ -1807,8 +1883,8 @@ namespace psycle
 
 			if (!_mute)
 			{
-				int ns = numSamples;
 				int _songtracks = Global::_pSong->SongTracks();
+				int ns = numSamples;
 				int nextevent;
 
 				while (ns)
@@ -1836,7 +1912,7 @@ namespace psycle
 								TriggerDelayCounter[i] -= ns;
 							}
 						}
-						WorkB(ns);
+						WorkVoices(ns);
 						ns = 0;
 					}
 					else
@@ -1844,7 +1920,7 @@ namespace psycle
 						if (nextevent)
 						{
 							ns -= nextevent;
-							WorkB(nextevent);
+							WorkVoices(nextevent);
 						}
 
 						for (i = 0; i < _songtracks; i++)
@@ -1954,10 +2030,11 @@ namespace psycle
 			_worked = true;
 		}// XMSampler::Work()
 
-		void XMSampler::WorkB(int numsamples)
+		void XMSampler::WorkVoices(int numsamples)
 		{
 			float* psamL = _pSamplesL;
 			float* psamR = _pSamplesR;
+			int tmpsamples = numsamples;
 			//////////////////////////////////////////////////////////////////////////
 			//  If there is a tick change in this "numsamples" period, process it.
 			if ( _sampleCounter + numsamples > NextSampleTick())
@@ -1994,11 +2071,21 @@ namespace psycle
 					}
 				}
 			}
+			// To do this here is faster than in voice, because it is done once per voice then.
+			float multip = m_GlobalVolume/128.0f;
+			psamL = _pSamplesL;
+			psamR = _pSamplesR;
+			for (int i=0; i<tmpsamples;i++)
+			{
+				*psamL = *(psamL++)*multip;
+				*psamR = *(psamR++)*multip;
+			}
 			_sampleCounter+=numsamples;
 		}
 
 		void XMSampler::Stop(void)
 		{
+			//\todo: check that all needed variables/objects are reset.
 			int i;
 			for (i = 0; i < _numVoices; i++)
 			{
@@ -2008,10 +2095,14 @@ namespace psycle
 			{
 				rChannel(i).Restore();
 			}
-			//\todo: reset several variables to default (maybe create a ::Reset() function?)
 		}// XMSampler::Stop(void)
 
-		/// XM‚Tempo‚Speed   delta tick  
+/*		// Deprecated function.
+		While this allows a good reproduction of the files that use arbitrary Speed values ( TicksPerRow()),
+		it does so messing with the BeatsPerMin. Since the objective of importing a Module is to modify and
+		"Modularize" it, this trick could potentially mess with delays or other sincronized plugins, so the only
+		good thing to do is let the user fix it by himself and just approximate it to LinesPerBeat.
+
 		void XMSampler::CalcBPMAndTick()
 		{
 			int tmp = 24 / ((TicksPerRow() == 0)?6:TicksPerRow());
@@ -2030,83 +2121,14 @@ namespace psycle
 			int v=Global::_pSong->BeatsPerMin();
 			int z=Global::_pSong->LinesPerBeat();
 			Global::pPlayer->SamplesPerRow(	t / (v * z) );
-			m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24/*ticksPerBeat*/);
+			m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
 		}
-
+*/
 		bool XMSampler::Load(RiffFile& riffFile)
 		{
-			int i;
-			char junk[256];
-			memset(&junk, 0, sizeof(junk));
-
-			riffFile.Read(&_editName,16);
-			_editName[15] = 0;
-
-			riffFile.Read(&_inputMachines[0], sizeof(_inputMachines));
-			riffFile.Read(&_outputMachines[0], sizeof(_outputMachines));
-			riffFile.Read(&_inputConVol[0], sizeof(_inputConVol));
-			riffFile.Read(&_connection[0], sizeof(_connection));
-			riffFile.Read(&_inputCon[0], sizeof(_inputCon));
-#if defined (_WINAMP_PLUGIN_)
-			riffFile.Skip(96) ; // sizeof(CPoint) = 8.
-#else
-			riffFile.Read(&_connectionPoint[0], sizeof(_connectionPoint));
-#endif
-			riffFile.Read(&_numInputs, sizeof(_numInputs));
-			riffFile.Read(&_numOutputs, sizeof(_numOutputs));
-
-			riffFile.Read(&_panning, sizeof(_panning));
-			Machine::SetPan(_panning);
-			riffFile.Read(&junk[0], 8 * sizeof(int)); // SubTrack[]
-			riffFile.Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
-
-			/*	if (_numVoices < 4)  // No more need for this code.
-			{
-			// Most likely an old polyphony
-			_numVoices = 8;
-			}
-			*/
-			riffFile.Read(&i, sizeof(int)); // interpol
-			switch (i)
-			{
-			case 2:
-				_resampler.SetQuality(dsp::R_SPLINE);
-				break;
-			case 0:
-				_resampler.SetQuality(dsp::R_NONE);
-				break;
-			default:
-			case 1:
-				_resampler.SetQuality(dsp::R_LINEAR);
-				break;
-			}
-
-			riffFile.Read(&junk[0], sizeof(int)); // outwet
-			riffFile.Read(&junk[0], sizeof(int)); // outdry
-
-			riffFile.Read(&junk[0], sizeof(int)); // distPosThreshold
-			riffFile.Read(&junk[0], sizeof(int)); // distPosClamp
-			riffFile.Read(&junk[0], sizeof(int)); // distNegThreshold
-			riffFile.Read(&junk[0], sizeof(int)); // distNegClamp
-
-			riffFile.Read(&junk[0], sizeof(char)); // sinespeed
-			riffFile.Read(&junk[0], sizeof(char)); // sineglide
-			riffFile.Read(&junk[0], sizeof(char)); // sinevolume
-			riffFile.Read(&junk[0], sizeof(char)); // sinelfospeed
-			riffFile.Read(&junk[0], sizeof(char)); // sinelfoamp
-
-			riffFile.Read(&junk[0], sizeof(int)); // delayTimeL
-			riffFile.Read(&junk[0], sizeof(int)); // delayTimeR
-			riffFile.Read(&junk[0], sizeof(int)); // delayFeedbackL
-			riffFile.Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			riffFile.Read(&junk[0], sizeof(int)); // filterCutoff
-			riffFile.Read(&junk[0], sizeof(int)); // filterResonance
-			riffFile.Read(&junk[0], sizeof(int)); // filterLfospeed
-			riffFile.Read(&junk[0], sizeof(int)); // filterLfoamp
-			riffFile.Read(&junk[0], sizeof(int)); // filterLfophase
-			riffFile.Read(&junk[0], sizeof(int)); // filterMode
-
+			ASSERT(false);
+			//The function "Load()" is used for Songs made with Psycle earlier than 1.7
+			// It cannot happen that one of those has this new Sampler.
 			return true;
 		}
 
@@ -2118,7 +2140,7 @@ namespace psycle
 			//		riffFile.Write(&size,sizeof(size));
 			riffFile.Write(VERSION);
 			riffFile.Write(_numVoices); // numSubtracks
-			switch (_resampler._quality)
+			switch (_resampler.GetQuality())
 			{
 			case dsp::R_NONE:
 				temp = 0;
@@ -2134,9 +2156,9 @@ namespace psycle
 			riffFile.Write(temp); // quality
 			//
 
-			riffFile.Write(m_bLinearFreq);
-			riffFile.Write(m_BPM);
-			riffFile.Write(m_TicksPerRow);
+			riffFile.Write(m_bAmigaSlides);
+//			riffFile.Write(m_BPM);
+//			riffFile.Write(m_TicksPerRow);
 
 			// Instrument Data Save
 			int numInstruments = 0;		
@@ -2181,9 +2203,9 @@ namespace psycle
 				break;
 			}
 
-			riffFile.Read(m_bLinearFreq);
-			riffFile.Read(m_BPM);
-			riffFile.Read(m_TicksPerRow);
+			riffFile.Read(m_bAmigaSlides);
+//			riffFile.Read(m_BPM);
+//			riffFile.Read(m_TicksPerRow);
 
 			// Instrument Data Load
 			int numInstruments;

@@ -295,7 +295,6 @@ LRESULT XMSamplerUIInst::OnCustomdrawSliderQ(NMHDR* pNMHDR)
 
 	_inst.FilterResonance(m_Q.GetPos());
 
-	//_stprintf(buffer,_T("%.0f%%"),_pSong->pInstrument(si)->ENV_F_RQ * 0.78740);
 	m_QLabel.SetWindowText
 		((SF::format(_T("%.0f%%")) % ((float)m_Q.GetPos() * 0.78740f )).str().c_str());
 

@@ -16,7 +16,7 @@ NAMESPACE__BEGIN(psycle)
 			void SetParent(CMainFrame*);
 			virtual ~CWaveEdChildView();
 			void GenerateAndShow();
-			void SetViewData(int ins, int wav);
+			void SetViewData(int ins);
 		// Overrides
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CWaveEdChildView)
@@ -102,7 +102,6 @@ NAMESPACE__BEGIN(psycle)
 			unsigned long selx, selx2;
 
 			int wsInstrument;
-			int wsWave;
 
 			bool drawwave;
 

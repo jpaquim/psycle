@@ -24,6 +24,7 @@ namespace psycle
 
 		char* Master::_psName = "Master";
 		char* Dummy::_psName = "DummyPlug";
+		char* DuplicatorMac::_psName = "Dupe it!";
 
 		void Machine::crashed(const std::exception & e) throw()
 		{
@@ -313,6 +314,12 @@ namespace psycle
 					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
+						/*
+						* Change the sound routing to understand what a feedback loop is,
+						* creating a special type of wire that will have a buffer which will give as output,
+						* and which will be (internally) connected to master, 
+						* to fill again the buffer once all the other machines have done its job.
+						*/
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
 							pInMachine->Work(numSamples);
@@ -385,6 +392,10 @@ namespace psycle
 			case MACH_XMSAMPLER:
 				if ( !fullopen ) pMachine = new Dummy(index);
 				else pMachine = new XMSampler(index);
+				break;
+			case MACH_DUPLICATOR:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new DuplicatorMac(index);
 				break;
 			case MACH_PLUGIN:
 				{
@@ -627,6 +638,125 @@ namespace psycle
 		};
 		
 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// NoteDuplicator
+		DuplicatorMac::DuplicatorMac(int index)
+		{
+			_macIndex = index;
+			_numPars = 16;
+			_type = MACH_DUPLICATOR;
+			_mode = MACHMODE_GENERATOR;
+			strcpy(_editName, "Dupe it!");
+			for (int i=0;i<8;i++)
+			{
+				macOutput[i]=-1;
+				noteOffset[i]=0;
+			}
+		}
+		void DuplicatorMac::Init()
+		{
+			Machine::Init();
+			for (int i=0;i<8;i++)
+			{
+				macOutput[i]=-1;
+				noteOffset[i]=0;
+			}
+		}
+		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
+		{
+			for (int i=0;i<8;i++)
+			{
+				PatternEntry pTemp = *pData;
+				if ( pTemp._note < 120 )
+				{
+					pTemp._note+=noteOffset[i];
+				}
+				if (macOutput[i] != -1) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
+			}
+		}
+		void DuplicatorMac::GetParamName(int numparam,char *name)
+		{
+			if (numparam >=0 && numparam<8)
+			{
+				sprintf(name,"Output Machine %d",numparam);
+			} else if (numparam >=8 && numparam<16) {
+				sprintf(name,"Note Offset %d",numparam-8);
+			}
+			else name = "\0";
+		}
+		int DuplicatorMac::GetParamValue(int numparam)
+		{
+			if (numparam >=0 && numparam<8)
+			{
+				return macOutput[numparam];
+			} else if (numparam >=8 && numparam <16) {
+				return noteOffset[numparam-8];
+			}
+			else return 0;
+		}
+		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
+		{
+			if (numparam >=0 && numparam <8)
+			{
+				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
+				{
+					sprintf(parVal,"%d -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
+				}else sprintf(parVal,"%d (none)",macOutput[numparam]);
+
+			} else if (numparam >=8 && numparam <16) {
+				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-8]+60)%12],(noteOffset[numparam-8]+60)/12);
+			}
+			else parVal = "\0";
+		}
+		bool DuplicatorMac::SetParameter(int numparam, int value)
+		{
+			if (numparam >=0 && numparam<8)
+			{
+				macOutput[numparam]=value;
+				return true;
+			} else if (numparam >=8 && numparam<16) {
+				noteOffset[numparam-8]=value;
+				return true;
+			}
+			else return false;
+		}
+
+		void DuplicatorMac::Work(int numSamples)
+		{
+			Machine::Work(numSamples);
+			CPUCOST_INIT(cost);
+			Machine::SetVolumeCounter(numSamples);
+			if ( Global::pConfig->autoStopMachines )
+			{
+				if (_volumeCounter < 8.0f)	{
+					_volumeCounter = 0.0f;
+					_volumeDisplay = 0;
+					_stopped = true;
+				}
+			}
+			CPUCOST_CALC(cost, numSamples);
+			_cpuCost += cost;
+			_worked = true;
+		}
+		bool DuplicatorMac::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(&size, sizeof size); // size of this part params to load
+			pFile->Read(macOutput,sizeof macOutput);
+			pFile->Read(macOutput,sizeof noteOffset);
+			return true;
+		}
+
+		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile)
+		{
+			UINT size = sizeof macOutput+ sizeof noteOffset;
+			pFile->Write(&size, sizeof size); // size of this part params to load
+			pFile->Write(macOutput,sizeof macOutput);
+			pFile->Write(noteOffset,sizeof noteOffset);
+		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

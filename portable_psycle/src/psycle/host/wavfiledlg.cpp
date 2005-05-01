@@ -43,7 +43,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			{
 				_lastFile=GetFileName();
 				
-				if (_pSong->WavAlloc(PREV_WAV_INS,0, _lastFile) == 1)
+				if (_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
 					_pSong->PW_Play();
 				}
@@ -52,7 +52,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			{
 				_lastFile=GetFileName();
 				
-				if (_pSong->IffAlloc(PREV_WAV_INS,0, _lastFile) == 1)
+				if (_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
 					_pSong->PW_Play();
 				}

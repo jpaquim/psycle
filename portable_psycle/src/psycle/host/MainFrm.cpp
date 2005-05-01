@@ -885,7 +885,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if ( _pSong->seqBus < MAX_BUSES ) // it's a Generator
 					{
-						if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_SAMPLER)
+						if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_SAMPLER ||_pSong->_pMachine[_pSong->seqBus]->_type == MACH_XMSAMPLER  )
 						{
 							cb2->SetCurSel(AUX_WAVES);
 							_pSong->auxcolSelected = _pSong->instSelected;
@@ -1163,14 +1163,13 @@ NAMESPACE__BEGIN(psycle)
 				m_wndView.AddMacViewUndo();
 
 				int si = _pSong->instSelected;
-				int sw = _pSong->waveSelected;
 
 				CString CurrExt=dlg.GetFileExt();
 				CurrExt.MakeLower();
 				
 				if ( CurrExt == "wav" )
 				{
-					if (_pSong->WavAlloc(si,sw,dlg.GetFileName()))
+					if (_pSong->WavAlloc(si,dlg.GetFileName()))
 					{
 						UpdateComboIns();
 						m_wndStatusBar.SetWindowText("New wave loaded");
@@ -1180,7 +1179,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else if ( CurrExt == "iff" )
 				{
-					if (_pSong->IffAlloc(si,sw,dlg.GetFileName()))
+					if (_pSong->IffAlloc(si,dlg.GetFileName()))
 					{
 						UpdateComboIns();
 						m_wndStatusBar.SetWindowText("New wave loaded");
@@ -1196,7 +1195,7 @@ NAMESPACE__BEGIN(psycle)
 					Global::pConfig->SetInstrumentDir((LPCSTR)str.Left(index));
 				}
 			}
-			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength[0] > 0)
+			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
 				// Stopping wavepreview if not stopped.
 				if(_pSong->PW_Stage)
@@ -1207,7 +1206,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 
 				//Delete it.
-				_pSong->DeleteLayer(PREV_WAV_INS,0);
+				_pSong->DeleteLayer(PREV_WAV_INS);
 				_pSong->Invalided=false;
 			}
 			m_wndView.SetFocus();
@@ -1218,22 +1217,22 @@ NAMESPACE__BEGIN(psycle)
 			WaveFile output;
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 			
-			if (_pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected])
+			if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
 			{
-				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName[_pSong->waveSelected], OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 				if (dlg.DoModal() == IDOK)
 				{
-					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo[_pSong->waveSelected]) ? (2) : (1) );
-					if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo[_pSong->waveSelected])
+					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
+					if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo)
 					{
-						for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected]; c++)
+						for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength; c++)
 						{
-							output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL[_pSong->waveSelected] + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR[_pSong->waveSelected] + c) );
+							output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR + c) );
 						}
 					}
 					else
 					{
-						output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL[_pSong->waveSelected], _pSong->_pInstrument[_pSong->instSelected]->waveLength[_pSong->waveSelected]);
+						output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL, _pSong->_pInstrument[_pSong->instSelected]->waveLength);
 					}
 
 					output.Close();
@@ -1417,6 +1416,7 @@ NAMESPACE__BEGIN(psycle)
 						break;
 						}
 					case MACH_PLUGIN:
+					case MACH_DUPLICATOR:
 						{
 							m_pWndMac[tmac] = new CFrameMachine(tmac);
 							((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
@@ -2250,7 +2250,7 @@ NAMESPACE__BEGIN(psycle)
 				unsigned char* const plineOffset = _pSong->_ppattern(pattern);
 				for (int l = 0; l < _pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
 				{
-					for (int t = 0; t < _pSong->SONGTRACKS*5; t+=5)
+					for (int t = 0; t < _pSong->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE)
 					{
 						PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
 						switch (pEntry->_cmd)

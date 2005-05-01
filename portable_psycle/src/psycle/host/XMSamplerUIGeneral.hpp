@@ -51,6 +51,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CEdit m_ECommandInfo;
+	CButton m_bAmigaSlides;
+	afx_msg void OnBnClickedCheck1();
 };
 
 NAMESPACE__END

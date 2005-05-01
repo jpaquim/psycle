@@ -34,6 +34,18 @@ namespace psycle
 				_coeff3 = _coeffs._coeffs[_type][_cutoff][_q][3];
 				_coeff4 = _coeffs._coeffs[_type][_cutoff][_q][4];
 			}
+
+			void ITFilter::Update()
+			{
+				const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
+				const double dLoss = (float)exp(iRes*(-LOG10*1.2/128.0));
+
+				const double d = dLoss*(dInvAngle+1.0) - 1;
+				const double e = dInvAngle* dInvAngle;
+				fCoeff[0]= 1.0f / (1.0f + d + e);
+				fCoeff[2]= -e * fCoeff[0];
+				fCoeff[1]= 1.0f - fCoeff[0] - fCoeff[2];
+			}
 		}
 	}
 }

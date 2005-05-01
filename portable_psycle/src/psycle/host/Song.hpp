@@ -31,35 +31,6 @@ namespace psycle
 		class Song
 		{
 		public:
-			/// The file name this song was loaded from.
-			std::string fileName;
-			/// The index of the machine which plays in solo.
-			int machineSoloed;
-			/// ???
-			CPoint viewSize;
-			/// Is this song saved to a file?
-			bool _saved;
-			/// The index of the track which plays in solo.
-			int _trackSoloed;
-
-
-
-		#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-			#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-		#else
-			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-				private:
-					boost::read_write_mutex mutable  read_write_mutex_;
-				public:
-					boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
-			#else // original implementation
-				CCriticalSection mutable door;
-			#endif
-		#endif
-
-
-
-		public:
 			/// constructor.
 			Song();
 			/// destructor.
@@ -106,9 +77,6 @@ namespace psycle
 			///
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
 			///\}
-			/// The index of the selected waveform in the wavetable.
-			/// \todo This is a gui thing... should not be here.
-			int waveSelected;
 			/// The index of the selected MIDI program for note entering
 			/// \todo This is a gui thing... should not be here.
 			int midiSelected;
@@ -135,11 +103,11 @@ namespace psycle
 			///\name wavetable
 			///\{
 			/// ???
-			int WavAlloc(int iInstr,int iLayer,const char * str);
+			int WavAlloc(int iInstr,const char * str);
 			/// ???
-			int WavAlloc(int iInstr,int iLayer,bool bStereo,long iSamplesPerChan,const char * sName);
+			int WavAlloc(int iInstr,bool bStereo,long iSamplesPerChan,const char * sName);
 			/// ???
-			int IffAlloc(int instrument,int layer,const char * str);
+			int IffAlloc(int instrument,const char * str);
 			///\}
 			/// Initializes the song to an empty one.
 			void New();
@@ -181,8 +149,8 @@ namespace psycle
 			void DeleteInstrument(int i);
 			/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses. (all instruments)
 			void DeleteInstruments();
-			// Removes the sample/layer "layer" of the instrument "instrument"
-			void DeleteLayer(int instrument, int layer);
+			// Removes the sample/layer of the instrument "instrument"
+			void DeleteLayer(int instrument);
 			/// destroy all instruments in this song.
 			/// \todo ZapObject ??? What does this function really do?
 			void DestroyAllInstruments();
@@ -208,13 +176,22 @@ namespace psycle
 			///\}
 			/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 			/// This function now is the same as doing &pPatternData[ps]
-			inline unsigned char * _ppattern(int ps);
+			inline unsigned char * _ppattern(int ps){
+				if(!ppPatternData[ps]) return CreateNewPattern(ps);
+				return ppPatternData[ps];
+			};
 			/// Returns the start offset of the requested track of pattern ps in the
 			/// pPatternData Array and creates one if none exists.
-			inline unsigned char * _ptrack(int ps, int track);
+			inline unsigned char * _ptrack(int ps, int track){
+				if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
+				return ppPatternData[ps] + (track*EVENT_SIZE);
+			};
 			/// Returns the start offset of the requested line of the track of pattern ps in
 			/// the pPatternData Array and creates one if none exists.
-			inline unsigned char * _ptrackline(int ps, int track, int line);
+			inline unsigned char * _ptrackline(int ps, int track, int line){
+				if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
+				return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+			};
 			/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
 			unsigned char * CreateNewPattern(int ps);
 			/// removes a pattern from this song.
@@ -241,24 +218,33 @@ namespace psycle
 
 			const bool IsInvalided(){return Invalided;};
 			void IsInvalided(const bool value){Invalided = value;};
-};
+			/// The file name this song was loaded from.
+			std::string fileName;
+			/// The index of the machine which plays in solo.
+			int machineSoloed;
+			/// ???
+			CPoint viewSize;
+			/// Is this song saved to a file?
+			bool _saved;
+			/// The index of the track which plays in solo.
+			int _trackSoloed;
 
-		inline unsigned char * Song::_ppattern(int ps)
-		{
-			if(!ppPatternData[ps]) return CreateNewPattern(ps);
-			return ppPatternData[ps];
-		}
 
-		inline unsigned char * Song::_ptrack(int ps, int track)
-		{
-			if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
-			return ppPatternData[ps] + (track*EVENT_SIZE);
-		}	
 
-		inline unsigned char * Song::_ptrackline(int ps, int track, int line)
-		{
-			if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
-			return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
-		}
+#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
+#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+#else
+#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+				private:
+					boost::read_write_mutex mutable  read_write_mutex_;
+				public:
+					boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
+#else // original implementation
+			CCriticalSection mutable door;
+#endif
+#endif
+
+
+		};
 	}
 }

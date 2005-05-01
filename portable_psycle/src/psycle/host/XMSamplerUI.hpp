@@ -29,6 +29,7 @@ class XMSamplerUI : public CPropertySheet
 	public:
 		void Init(Configuration* pConfig);
 		void UpdateUI(void);
+		XMSampler* GetMachine(){ return _pMachine; }
 		// Overrides
 		// ClassWizard generated virtual function overrides
 		//{{AFX_VIRTUAL(CConfigDlg)

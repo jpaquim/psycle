@@ -49,7 +49,7 @@ namespace psycle{
 			enum{
 			  E_FINE_PORTA_UP	=	0x10, //E1 (*) Fine porta up
 			  E_FINE_PORTA_DOWN	=	0x20, //E2 (*) Fine porta down
-			  E_GLISSANDO_WAVE	=	0x30, //E3     Set gliss control 
+			  E_GLISSANDO_STATUS=	0x30, //E3     Set gliss control 
 			  E_VIBRATO_WAVE	=	0x40, //E4     Set vibrato control
 			  E_FINETUNE		=	0x50, //E5     Set finetune
 			  E_PATTERN_LOOP	=	0x60, //E6     Set loop begin/loop
