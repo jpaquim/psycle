@@ -14,7 +14,7 @@ namespace psycle
 			Instrument();
 			~Instrument();
 			void Delete();
-			void DeleteLayer(int c);
+			void DeleteLayer(void);
 			void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);
 			void SaveFileChunk(RiffFile* pFile);
 			bool Empty();
@@ -76,17 +76,17 @@ namespace psycle
 
 			///\name wave stuff
 			///\{
-			unsigned int waveLength[MAX_WAVES];
-			unsigned short waveVolume[MAX_WAVES];
-			unsigned int waveLoopStart[MAX_WAVES];
-			unsigned int waveLoopEnd[MAX_WAVES];
-			int waveTune[MAX_WAVES];
-			int waveFinetune[MAX_WAVES];	
-			bool waveLoopType[MAX_WAVES];
-			bool waveStereo[MAX_WAVES];
-			char waveName[MAX_WAVES][32];
-			signed short *waveDataL[MAX_WAVES];
-			signed short *waveDataR[MAX_WAVES];
+			unsigned int waveLength;
+			unsigned short waveVolume;
+			unsigned int waveLoopStart;
+			unsigned int waveLoopEnd;
+			int waveTune;
+			int waveFinetune;
+			bool waveLoopType;
+			bool waveStereo;
+			char waveName[32];
+			signed short *waveDataL;
+			signed short *waveDataR;
 			///\}
 
 		};

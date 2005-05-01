@@ -47,15 +47,10 @@ namespace host{
 		m_pSampler = (XMSampler *)(song._pMachine[0]);
 
 		LONG iInstrStart = LoadPatterns(song);
+		song.BeatsPerMin(m_Header.tempo);
+		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
 
-		m_pSampler->BPM(m_Header.tempo);
-		if(m_Header.speed == 0){
-			m_pSampler->TicksPerRow(6);
-		} else {
-			m_pSampler->TicksPerRow(m_Header.speed);
-		}
-		m_pSampler->CalcBPMAndTick();
-		m_pSampler->IsLinearFreq((m_Header.flags & 0x01) == 1);
+		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 
 		LoadInstruments(*m_pSampler,iInstrStart);
 
@@ -187,19 +182,13 @@ namespace host{
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
 
-		if(patIdx < MAX_PATTERNS)
-			song.patternLines[patIdx]=iNumRows;
+		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
 
 		PatternEntry e;
 
 		if(iPackedSize == 0)
 		{
-
-
-			// build empty pattern   (PatternEntry gets initialized at construction time)
-			for(int row=0;row<iNumRows;row++)
-				for(int col=0;col<iTracks;col++)
-					WritePatternEntry(song,patIdx,row,col,e);	
+			//Pattern is emtpy.
 		}	
 		else
 		{
@@ -294,15 +283,16 @@ namespace host{
 #endif
 
 					e._parameter = param;
+					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
+						XMInstrument::WaveData::WaveForms::SAWDOWN,
+						XMInstrument::WaveData::WaveForms::SQUARE
+					};
 					switch(type){
 						case XMCMD::ARPEGGIO:
 							if(param != 0){
 								e._cmd = XMSampler::CMD::ARPEGGIO;
-							}
-							else
-							{
-								// if check for the volume column.
-								if ( vol == 0 ) e._cmd = XMSampler::CMD::NONE;
+							} else {
+								e._cmd = XMSampler::CMD::NONE;
 							}
 							break;
 						case XMCMD::PORTAUP:
@@ -344,7 +334,7 @@ namespace host{
 							break;
 						case XMCMD::PATTERN_BREAK:
 							e._cmd = PatternCmd::BREAK_TO_LINE;
-							e._parameter = (param&0xF0)*10 + (param&0x0F);
+							e._parameter = ((param&0xF0)>>4)*10 + (param&0x0F);
 							break;
 						case XMCMD::EXTENDED:
 							switch(param & 0xf0){
@@ -356,13 +346,13 @@ namespace host{
 								e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
 								e._parameter= 0xF0+(param&0x0F);
 								break;
-							case XMCMD_E::E_GLISSANDO_WAVE:
+							case XMCMD_E::E_GLISSANDO_STATUS:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | (param & 0xf);
+								e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | ((param==0)?0:1);
 								break;
 							case XMCMD_E::E_VIBRATO_WAVE:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter =XMSampler::CMD_E::E_VIBRATO_WAVE | (param & 0xf);
+								e._parameter =XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[param & 0x3];
 								break;
 							case XMCMD_E::E_FINETUNE:
 								e._cmd = XMSampler::CMD::NONE;
@@ -374,7 +364,7 @@ namespace host{
 								break;
 							case XMCMD_E::E_TREMOLO_WAVE:
 								e._cmd = XMSampler::CMD::EXTENDED;
-								e._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | (param & 0xf);
+								e._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[param & 0x3];
 								break;
 							case XMCMD_E::E_MOD_RETRIG:
 								e._cmd = XMSampler::CMD::RETRIG;
@@ -421,15 +411,11 @@ namespace host{
 							}
 							break;
 						case XMCMD::SET_GLOBAL_VOLUME:
-							//\todo: implement global volume
-							e._cmd = PatternCmd::SET_VOLUME;
-							if (param>= 64)
-							{	
-								e._parameter=255;
-							} else e._parameter = param * 4;
+							e._cmd = XMSampler::CMD::SET_GLOBAL_VOLUME;
+							e._parameter = param*2;
 							break;
 						case XMCMD::GLOBAL_VOLUME_SLIDE:
-							//\todo: implement when it is done.
+							e._cmd = XMSampler::CMD::GLOBAL_VOLUME_SLIDE;
 							break;
 						case XMCMD::NOTE_OFF:
 							e._cmd = XMSampler::CMD::VOLUME;
@@ -597,8 +583,6 @@ namespace host{
 		// store instrument name
 		//std::string& _tmp1 = 
 		sampler.rInstrument(idx).Name(sInstrName);
-
-		//strcpy(song.pInstrument(idx)->_sName,sInstrName);
 
 		//int iSampleHeader = ReadInt4();
 		//ATLASSERT(iSampleHeader==0x28);

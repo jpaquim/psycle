@@ -120,6 +120,11 @@ namespace psycle
 				outputs[1] = _pSamplesR;
 				_sProductName[0]=0;
 				_sVendorName[0]=0;
+				for(int i(0) ; i < MAX_TRACKS; ++i)
+				{
+					trackNote[i].key = 255; // No Note.
+					trackNote[i].midichan = 0;
+				}
 			}
 
 			plugin::~plugin() throw()
@@ -691,7 +696,67 @@ namespace psycle
 				pevent->midiData[3] = 0;
 				return true;
 			}
+			bool plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel)
+			{
+				if(instantiated)
+				{
+					if(trackNote[channel].key != 255)
+						AddNoteOff(channel, trackNote[channel].key, true);
 
+					if(AddMIDI(0x90 | midichannel /*Midi On*/, key, velocity)) {
+						note thisnote;
+						thisnote.key = key;
+						thisnote.midichan = midichannel;
+						trackNote[channel] = thisnote;
+						return true;
+					}
+				}
+				return false;
+			}
+
+			bool plugin::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart)
+			{
+				if(!instantiated)
+					return false;
+				if(trackNote[channel].key == 255)
+					return false;
+				VstMidiEvent * pevent;
+				if( addatStart)
+				{
+					// PATCH:
+					// When a new note enters, it adds a note-off for the previous note playing in
+					// the track (this is ok). But if you have like: A-4 C-5 and in the next line
+					// C-5 E-5 , you will only hear E-5.
+					// Solution: Move the NoteOffs at the beginning.
+					pevent = reserveVstMidiEventAtFront();
+				}
+				else 
+				{
+					pevent = reserveVstMidiEvent();
+				}
+				if(!pevent)
+					return false;
+				pevent->type = kVstMidiType;
+				pevent->byteSize = 24;
+				pevent->deltaFrames = 0;
+				pevent->flags = 0;
+				pevent->detune = 0;
+				pevent->noteLength = 0;
+				pevent->noteOffset = 0;
+				pevent->reserved1 = 0;
+				pevent->reserved2 = 0;
+				pevent->noteOffVelocity = 0;
+				pevent->midiData[0] = 0x80 | static_cast<unsigned char>(trackNote[channel].midichan); //midichannel; // Midi Off
+				pevent->midiData[1] = trackNote[channel].key;
+				pevent->midiData[2] = 0;
+				pevent->midiData[3] = 0;
+
+				note thisnote;
+				thisnote.key = 255;
+				thisnote.midichan = 0;
+				trackNote[channel] = thisnote;
+				return true;
+			}
 			void plugin::SendMidi()
 			{
 				assert(queue_size >= 0 && queue_size <= MAX_VST_EVENTS);
@@ -1074,7 +1139,7 @@ namespace psycle
 				}	
 				return 0;
 			}
-
+	
 
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1091,11 +1156,6 @@ namespace psycle
 				_mode = MACHMODE_GENERATOR;
 				std::sprintf(_editName, "Vst2 Instr.");
 				_program = 0;
-				for(int i(0) ; i < MAX_TRACKS; ++i)
-				{
-					trackNote[i].key = 255; // No Note.
-					trackNote[i].midichan = 0;
-				}
 			}
 
 			void instrument::Tick(int channel, PatternEntry * pData)
@@ -1173,68 +1233,6 @@ namespace psycle
 						Global::pPlayer->Tweaker = true;
 					}
 				}
-			}
-
-			bool instrument::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel)
-			{
-				if(instantiated)
-				{
-					if(trackNote[channel].key != 255)
-						AddNoteOff(channel, trackNote[channel].key, true);
-
-					if(AddMIDI(0x90 | midichannel /*Midi On*/, key, velocity)) {
-						note thisnote;
-						thisnote.key = key;
-						thisnote.midichan = midichannel;
-						trackNote[channel] = thisnote;
-						return true;
-					}
-				}
-				return false;
-			}
-
-			bool instrument::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart)
-			{
-				if(!instantiated)
-					return false;
-				if(trackNote[channel].key == 255)
-					return false;
-				VstMidiEvent * pevent;
-				if( addatStart)
-				{
-					// PATCH:
-					// When a new note enters, it adds a note-off for the previous note playing in
-					// the track (this is ok). But if you have like: A-4 C-5 and in the next line
-					// C-5 E-5 , you will only hear E-5.
-					// Solution: Move the NoteOffs at the beginning.
-					pevent = reserveVstMidiEventAtFront();
-				}
-				else 
-				{
-					pevent = reserveVstMidiEvent();
-				}
-				if(!pevent)
-					return false;
-				pevent->type = kVstMidiType;
-				pevent->byteSize = 24;
-				pevent->deltaFrames = 0;
-				pevent->flags = 0;
-				pevent->detune = 0;
-				pevent->noteLength = 0;
-				pevent->noteOffset = 0;
-				pevent->reserved1 = 0;
-				pevent->reserved2 = 0;
-				pevent->noteOffVelocity = 0;
-				pevent->midiData[0] = 0x80 | static_cast<unsigned char>(trackNote[channel].midichan); //midichannel; // Midi Off
-				pevent->midiData[1] = trackNote[channel].key;
-				pevent->midiData[2] = 0;
-				pevent->midiData[3] = 0;
-
-				note thisnote;
-				thisnote.key = 255;
-				thisnote.midichan = 0;
-				trackNote[channel] = thisnote;
-				return true;
 			}
 
 			void instrument::Stop()
@@ -1521,6 +1519,33 @@ namespace psycle
 					{
 						AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 					}
+					else if(pData->_note < 120) // Note on
+					{
+						if(pData->_cmd == 0x10) // _OLD_ MIDI Command
+						{
+							if((pData->_inst & 0xF0) == 0x80 || (pData->_inst & 0xF0) == 0x90)
+							{
+								AddMIDI(pData->_inst, pData->_note, pData->_parameter);
+							}
+							else AddMIDI(pData->_inst,pData->_parameter);
+						}
+						else if(pData->_cmd == 0x0C) 
+						{
+							if(pData->_inst == 0xFF) AddNoteOn(channel, pData->_note, pData->_parameter / 2);
+							else AddNoteOn(channel,pData->_note,pData->_parameter/2,pData->_inst&0x0F);
+						}
+						else 
+						{
+							if(pData->_inst == 0xFF) AddNoteOn(channel, pData->_note, 127); // should be 100, but previous host used 127
+							else AddNoteOn(channel, pData->_note, 127, pData->_inst & 0x0F);
+						}
+					}
+					else if(pData->_note == 120) // Note Off.
+					{
+						if(pData->_inst == 0xFF) AddNoteOff(channel);
+						else AddNoteOff(channel, pData->_inst & 0x0F);
+					}
+
 					else if(pData->_note == cdefTweakM || pData->_note == cdefTweakE) // Tweak command
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
@@ -1583,6 +1608,7 @@ namespace psycle
 							}
 						}
 						SendMidi();
+						//\todo: why this duplicated undenormalize? it is done in Machine::Work() above.
 						dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
 						try
 						{

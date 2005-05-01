@@ -63,7 +63,6 @@ public:
 	afx_msg void OnBnClickedChMute6();
 	afx_msg void OnBnClickedChMute7();
 	afx_msg void OnBnClickedChMute8();
-	afx_msg void OnBnClickedChMastermono();
 	afx_msg void OnNMCustomdrawSlVol1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSlVol2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSlVol3(NMHDR *pNMHDR, LRESULT *pResult);
@@ -75,16 +74,25 @@ public:
 	afx_msg void OnNMCustomdrawSlVolMaster(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSlChannels(NMHDR *pNMHDR, LRESULT *pResult);
 private:
+	void SliderVolume(NMHDR *pNMHDR, LRESULT *pResult, int offset);
+	void SliderPanning(NMHDR *pNMHDR, LRESULT *pResult, int offset);
+	void SliderCutoff(NMHDR *pNMHDR, LRESULT *pResult, int offset);
+	void SliderRessonance(NMHDR *pNMHDR, LRESULT *pResult, int offset);
+	void ClickSurround(int offset);
+	void ClickMute(int offset);
+
 	static const int dlgName[8];
 	static const int dlgVol[8];
 	static const int dlgSurr[8];
 	static const int dlgPan[8];
 	static const int dlgRes[8];
 	static const int dlgCut[8];
+	static const int dlgMute[8];
 
 	XMSampler *sampler;
 	// Indicates the index of the first channel shown (controlled by IDC_SL_CHANNELS)
 	int m_ChannelOffset;
+	bool m_UpdatingGraphics;
 public:
 	// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS, IDC_LEFTVU and IDC_RIGHTVU
 	void UpdateAllChannels(void);

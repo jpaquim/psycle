@@ -60,6 +60,24 @@ NAMESPACE__BEGIN(psycle)
 
 		void CSwingFillDlg::OnOK() 
 		{
+//\todo: Redo the SwingFillDlg so that it does this:
+/*
+* Swing depth : will determine how much time from the second line is given to the first line. negative values would do the opposite (I am unsure of the option range right now).
+
+Optional options:
+
+* Swing LFO: an LFO over the swing depth. This means that the swing depth would be variable over time.
+
+* Swing LFO speed: the speed of this LFO. determines how fast it would do a cycle.
+
+
+Several notes:
+
+This procedure does not mess with BPM nor with LPB so it shouldn't cause any problem to the other plugins. Just remember that delays will not swing.
+
+The beat is always at the same place if not using the LFO with special values
+ */
+
 			bGo = TRUE;
 			char buf[32];
 			m_Tempo.GetWindowText(buf,32);

@@ -4,37 +4,32 @@
 #include "version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
-#include "FileXM.hpp"
-#include "XMSongLoader.hpp"
-#include "FileIT.hpp" //re-add when it.cpp and it.hpp work.
-#include "ITModule2.h"
-#include "ChildView.hpp"
-#include "Bitmap.hpp"
 #include "Player.hpp"
-#include "MidiInput.hpp"
-#include "SwingFillDlg.hpp"
-#include "Helpers.hpp"
-#include "MasterDlg.hpp"
-#include "GearTracker.hpp"
-#include "XMSamplerUI.hpp"
+//#include "Helpers.hpp"
 #include "MainFrm.hpp"
+#include "ChildView.hpp"
+//#include "Bitmap.hpp"
+#include "Inputhandler.hpp"
+#include "MidiInput.hpp"
+#include "ConfigDlg.hpp"
+#include "GreetDialog.hpp"
+#include "SaveWavDlg.hpp"
+#include "SongpDlg.hpp"
+#include "XMSongLoader.hpp"
+#include "ITModule2.h"
+#include "MasterDlg.hpp"
+#include "XMSamplerUI.hpp"
+#include "VstEditorDlg.hpp"
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
 #include "NewMachine.hpp"
 #include "PatDlg.hpp"
-#include "GreetDialog.hpp"
-#include "ConfigDlg.hpp"
-#include "SongpDlg.hpp"
-#include "inputhandler.hpp"
-#include "VstEditorDlg.hpp"
-#include "masterdlg.hpp"
-#include "SaveWavDlg.hpp"
 #include <cmath> // SwingFill
+#include "SwingFillDlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		#define rdtsc __asm __emit 0fh __asm __emit 031h
-		#define cpuid __asm __emit 0fh __asm __emit 0a2h
 		CMainFrame		*pParentMain;
+		//\todo: Investigate this variable ( and especially pSong->cpuIdle ). See if it is doing what it is supposed to.
 		unsigned idletime = 0;
 
 		CChildView::CChildView()
@@ -227,12 +222,11 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_CONTEXTMENU()
 			ON_WM_HSCROLL()
 			ON_WM_VSCROLL()
-			ON_COMMAND(ID_FILE_IMPORT_XMFILE, OnFileImportXmfile)
+			ON_COMMAND(ID_FILE_IMPORT_XMFILE, OnFileImportModulefile)
 			ON_COMMAND(ID_FILE_RECENT_01, OnFileRecent_01)
 			ON_COMMAND(ID_FILE_RECENT_02, OnFileRecent_02)
 			ON_COMMAND(ID_FILE_RECENT_03, OnFileRecent_03)
 			ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
-			ON_COMMAND(ID_FILE_IMPORT_ITFILE, OnFileImportItfile)
 			ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 			ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateUndo)
@@ -270,7 +264,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 			//}}AFX_MSG_MAP
-			ON_COMMAND(ID_IMPORT_S3MFILE, OnImportS3mfile)
 			END_MESSAGE_MAP()
 
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
@@ -1746,7 +1739,7 @@ NAMESPACE__BEGIN(psycle)
 			else pCmdUI->Enable(FALSE);
 		}
 
-		void CChildView::OnFileImportXmfile() 
+		void CChildView::OnFileImportModulefile() 
 		{
 			OPENFILENAME ofn; // common dialog box structure
 			char szFile[_MAX_PATH]; // buffer for file name
@@ -1757,7 +1750,7 @@ NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "XM Songs\0*.xm\0All\0*.*\0";
+			ofn.lpstrFilter = "Module Songs\0*.xm;*.it;*.s3m\0FastTracker II Songs\0*.xm\0Impulse Tracker Songs\0*.it\0Scream Tracker Songs\0*.s3m\0All\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -1777,43 +1770,77 @@ NAMESPACE__BEGIN(psycle)
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
 				Sleep(LOCK_LATENCY);
-/*	Old loader
-				CFileXM XM;
-				XM.Open(ofn.lpstrFile);
-				//CXM XM;
-				char buffer[512];		
-				Global::_pSong->New();
- 				if(!XM.Import(_pSong))
-				{			
-					MessageBox("Load failed");
-					Global::_pSong->New();
-					XM.Close();
-					return;
-				}
-				XM.Close();
-				// build sampler
-				_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",0);
-				_pSong->InsertConnection(0,MASTER_INDEX);
-				_pSong->seqBus = 0;
-*/
-// New Loader
-				XMSongLoader xmfile;
-				xmfile.Open(ofn.lpstrFile);
-				char buffer[512];
-				Global::_pSong->New();
-				xmfile.Load(*_pSong);
-				xmfile.Close();
-//
-				std::sprintf
-					(
-					buffer,"%s\n\n%s\n\n%s",
-					Global::_pSong->Name,
-					Global::_pSong->Author,
-					Global::_pSong->Comment
-					);
-				MessageBox(buffer, "IT file imported", MB_OK);
+
 				CString str = ofn.lpstrFile;
-				int index = str.ReverseFind('\\');
+				int index = str.ReverseFind('.');
+				if (index != -1)
+				{
+					CString ext = str.Mid(index+1);
+					if (ext.CompareNoCase("XM") == 0)
+					{
+						XMSongLoader xmfile;
+						xmfile.Open(ofn.lpstrFile);
+						Global::_pSong->New();
+						xmfile.Load(*_pSong);
+						xmfile.Close();
+						char buffer[512];		
+						std::sprintf
+							(
+							buffer,"%s\n\n%s\n\n%s",
+							Global::_pSong->Name,
+							Global::_pSong->Author,
+							Global::_pSong->Comment
+							);
+						MessageBox(buffer, "XM file imported", MB_OK);
+					} else if (ext.CompareNoCase("IT") == 0)
+					{
+						ITModule2 it;
+						it.Open(ofn.lpstrFile);
+						Global::_pSong->New();
+						if(!it.LoadITModule(_pSong))
+						{			
+							MessageBox("Load failed");
+							Global::_pSong->New();
+							it.Close();
+							return;
+						}
+						it.Close();
+						char buffer[512];		
+						std::sprintf
+							(
+							buffer,"%s\n\n%s\n\n%s",
+							Global::_pSong->Name,
+							Global::_pSong->Author,
+							Global::_pSong->Comment
+							);
+						MessageBox(buffer, "IT file imported", MB_OK);
+					} else if (ext.CompareNoCase("S3M") == 0)
+					{
+						ITModule2 s3m;
+						s3m.Open(ofn.lpstrFile);
+						Global::_pSong->New();
+						if(!s3m.LoadS3MModuleX(_pSong))
+						{			
+							MessageBox("Load failed");
+							Global::_pSong->New();
+							s3m.Close();
+							return;
+						}
+						s3m.Close();
+						char buffer[512];		
+						std::sprintf
+							(
+							buffer,"%s\n\n%s\n\n%s",
+							Global::_pSong->Name,
+							Global::_pSong->Author,
+							Global::_pSong->Comment
+							);
+						MessageBox(buffer, "S3M file imported", MB_OK);
+					}
+				}
+
+				str = ofn.lpstrFile;
+				index = str.ReverseFind('\\');
 				if (index != -1)
 				{
 					Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
@@ -1842,185 +1869,6 @@ NAMESPACE__BEGIN(psycle)
 				RecalculateColourGrid();
 				Repaint();
 			}
-			SetTitleBarText();
-		}
-
-		void CChildView::OnFileImportItfile() 
-		{
-//			MessageBox("Option not developed yet","Import IT file",MB_OK);
-
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
-			szFile[0]='\0';
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Impulse Tracker Songs\0*.it\0All\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE)
-				{
-				KillUndo();
-				KillRedo();
-				pParentMain->CloseAllMacGuis();
-				Global::pPlayer->Stop();
-				Sleep(LOCK_LATENCY);
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				Sleep(LOCK_LATENCY);
-				ITModule2 it;
-				it.Open(ofn.lpstrFile);
-				//CXM XM;
-				char buffer[512];		
-				Global::_pSong->New();
-				if(!it.LoadITModule(_pSong))
-					{			
-					MessageBox("Load failed");
-					Global::_pSong->New();
-					it.Close();
-					return;
-					}
-				it.Close();
-
-				std::sprintf
-					(
-					buffer,"%s\n\n%s\n\n%s",
-					Global::_pSong->Name,
-					Global::_pSong->Author,
-					Global::_pSong->Comment
-					);
-				MessageBox(buffer, "IT file imported", MB_OK);
-				CString str = ofn.lpstrFile;
-				int index = str.ReverseFind('\\');
-				if (index != -1)
-					{
-					Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
-					Global::_pSong->fileName = str.Mid(index+1)+".psy";
-					}
-				else
-					{
-					Global::_pSong->fileName = str+".psy";
-					}
-				//Global::_pSong->SetBPM(XM.default_BPM, XM.default_tempo, Global::pConfig->_pOutputDriver->_samplesPerSec);
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-					{
-					_outputActive = false;
-					}
-				else
-					{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-					}
-				pParentMain->PsybarsUpdate();
-				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
-				pParentMain->RedrawGearRackList();
-				pParentMain->UpdateSequencer();
-				pParentMain->UpdatePlayOrder(false);
-				RecalculateColourGrid();
-				Repaint();
-				}
-			SetTitleBarText();
-		}
-		void CChildView::OnImportS3mfile()
-		{
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
-			szFile[0]='\0';
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "ScreamTracker 3 Songs\0*.s3m\0All\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE)
-				{
-				KillUndo();
-				KillRedo();
-				pParentMain->CloseAllMacGuis();
-				Global::pPlayer->Stop();
-				Sleep(LOCK_LATENCY);
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				Sleep(LOCK_LATENCY);
-				ITModule2 s3m;
-				s3m.Open(ofn.lpstrFile);
-				//CXM XM;
-				char buffer[512];		
-				Global::_pSong->New();
-				if(!s3m.LoadS3MModuleX(_pSong))
-					{			
-					MessageBox("Load failed");
-					Global::_pSong->New();
-					s3m.Close();
-					return;
-					}
-				s3m.Close();
-/*				// build sampler
-				_pSong->CreateMachine(MACH_SAMPLER, rand()/64, rand()/80, "",0);
-				_pSong->InsertConnection(0,MASTER_INDEX);
-				_pSong->seqBus = 0;
-*/
-				std::sprintf
-					(
-					buffer,"%s\n\n%s\n\n%s",
-					Global::_pSong->Name,
-					Global::_pSong->Author,
-					Global::_pSong->Comment
-					);
-				MessageBox(buffer, "S3M file imported", MB_OK);
-				CString str = ofn.lpstrFile;
-				int index = str.ReverseFind('\\');
-				if (index != -1)
-					{
-					Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
-					Global::_pSong->fileName = str.Mid(index+1)+".psy";
-					}
-				else
-					{
-					Global::_pSong->fileName = str+".psy";
-					}
-				//Global::_pSong->SetBPM(XM.default_BPM, XM.default_tempo, Global::pConfig->_pOutputDriver->_samplesPerSec);
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-					{
-					_outputActive = false;
-					}
-				else
-					{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-					}
-				pParentMain->PsybarsUpdate();
-				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
-				pParentMain->RedrawGearRackList();
-				pParentMain->UpdateSequencer();
-				pParentMain->UpdatePlayOrder(false);
-				RecalculateColourGrid();
-				Repaint();
-				}
 			SetTitleBarText();
 		}
 

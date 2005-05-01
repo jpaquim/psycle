@@ -3,6 +3,12 @@
 #if 0
 /*
 $Log$
+Revision 1.23  2005/05/01 14:10:59  jaz001
+More Work on Sampulse (IT Filtering, improving commands, bugfixing).
+Removed an cleaned (a bit) old sample sources (removed the never used sample layers)
+Added a new internal machine "Note Duplicator". It just resends the Tick comand to the specificed machines
+Some other small changes ( Changed the way interpolation is modified, and others)
+
 Revision 1.22  2005/04/18 02:00:41  johan-boule
 added src/configuration.hpp to psycle.vcproj
 
@@ -89,7 +95,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 40 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 41 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.

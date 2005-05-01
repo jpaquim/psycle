@@ -557,12 +557,11 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-			afx_msg void OnFileImportXmfile();
+			afx_msg void OnFileImportModulefile();
 			afx_msg void OnFileRecent_01();
 			afx_msg void OnFileRecent_02();
 			afx_msg void OnFileRecent_03();
 			afx_msg void OnFileRecent_04();
-			afx_msg void OnFileImportItfile();
 			afx_msg void OnEditUndo();
 			afx_msg void OnEditRedo();
 			afx_msg void OnUpdateUndo(CCmdUI* pCmdUI);
@@ -582,7 +581,6 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-			afx_msg void OnImportS3mfile();
 };
 
 

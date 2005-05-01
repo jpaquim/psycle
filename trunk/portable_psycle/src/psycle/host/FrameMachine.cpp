@@ -91,6 +91,11 @@ NAMESPACE__BEGIN(psycle)
 				}
 				while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
 			}
+			else if ( _pMachine->_type == MACH_DUPLICATOR)
+			{
+				numParameters = _pMachine->GetNumParams();
+				ncol = 2;
+			}
 			parspercol = numParameters/ncol;
 			if (parspercol>24)	
 			{
@@ -260,6 +265,14 @@ NAMESPACE__BEGIN(psycle)
 						std::strcpy(buffer,"fucked up");
 					}
 				}
+				else if ( _pMachine->_type == MACH_DUPLICATOR)
+				{
+					if ( c < 8) { min_v = -1; max_v = MAX_BUSES*2;}
+					else if ( c < 16) { min_v = -48; max_v = 48; }
+					val_v = _pMachine->GetParamValue(c);
+					_pMachine->GetParamValue(c,buffer);
+					_pMachine->GetParamName(c,parName);
+				}
 				if(bDrawKnob)
 				{
 					int const amp_v = max_v - min_v;
@@ -423,6 +436,11 @@ NAMESPACE__BEGIN(psycle)
 					min_v = 0;
 					max_v = vst::quantization;
 				}
+				else if ( _pMachine->_type == MACH_DUPLICATOR)
+				{
+					if ( tweakpar < 8) { min_v = -1; max_v = MAX_BUSES*2;}
+					else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
+				}
 
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
@@ -448,6 +466,10 @@ NAMESPACE__BEGIN(psycle)
 						{
 							tweakbase = 0;
 						}
+					}
+					else if ( _pMachine->_type == MACH_DUPLICATOR)
+					{
+						tweakbase = _pMachine->GetParamValue(tweakpar);
 					}
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
@@ -476,6 +498,10 @@ NAMESPACE__BEGIN(psycle)
 						{
 							tweakbase = 0;
 						}
+					}
+					else if ( _pMachine->_type == MACH_DUPLICATOR)
+					{
+						tweakbase = _pMachine->GetParamValue(tweakpar);
 					}
 					sourcepoint=point.y;
 					finetweak=!finetweak;
@@ -544,6 +570,23 @@ NAMESPACE__BEGIN(psycle)
 						else
 						{
 							wndView->MousePatternTweak(MachineIndex, tweakpar, (int)nv);
+						}
+					}
+				}
+				else if ( _pMachine->_type == MACH_DUPLICATOR)
+				{
+					_pMachine->SetParameter(tweakpar,(int) nv);
+
+					// well, this isn't so hard... just put the twk record here
+					if (Global::pConfig->_RecordTweaks)
+					{
+						if (Global::pConfig->_RecordMouseTweaksSmooth)
+						{
+							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-min_v);
+						}
+						else
+						{
+							wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
 						}
 					}
 				}
@@ -619,6 +662,13 @@ NAMESPACE__BEGIN(psycle)
 							dlg.m_Value = 0;
 						}
 					}
+					else if ( _pMachine->_type == MACH_DUPLICATOR)
+					{
+						if ( tweakpar < 8) { min_v = -1; max_v = MAX_BUSES*2;}
+						else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
+						_pMachine->GetParamName(thispar,name);
+						dlg.m_Value = _pMachine->GetParamValue(thispar);
+					}
 					std::sprintf
 						(
 							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
@@ -665,6 +715,10 @@ NAMESPACE__BEGIN(psycle)
 						}
 						SetFocus();
 					}
+					else if ( _pMachine->_type == MACH_DUPLICATOR)
+					{
+						_pMachine->SetParameter(thispar,(int)nv);
+					}
 					Invalidate(false);
 				}
 			}
@@ -673,48 +727,52 @@ NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersRandomparameters() 
 		{
-			// Randomize controls
-			for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
-				int minran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
-				int maxran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
-
-				int dif = (maxran-minran)+1;
-
-				float randsem = (float)rand()*0.000030517578125f;
-
-				float roffset = randsem*(float)dif;
-
-				wndView->AddMacViewUndo();
-				try
+				// Randomize controls
+				for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
 				{
-					((Plugin*)_pMachine)->proxy().ParameterTweak(c, minran+int(roffset));
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
+					int minran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
+					int maxran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
+
+					int dif = (maxran-minran)+1;
+
+					float randsem = (float)rand()*0.000030517578125f;
+
+					float roffset = randsem*(float)dif;
+
+					wndView->AddMacViewUndo();
+					try
+					{
+						((Plugin*)_pMachine)->proxy().ParameterTweak(c, minran+int(roffset));
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 				}
 			}
-
 			Invalidate(false);
 		}
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-			for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
-				int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
-				wndView->AddMacViewUndo();
-				try
+				for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
 				{
-					((Plugin*)_pMachine)->proxy().ParameterTweak(c,dv);
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
+					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
+					wndView->AddMacViewUndo();
+					try
+					{
+						((Plugin*)_pMachine)->proxy().ParameterTweak(c,dv);
+					}
+					catch(const std::exception &)
+					{
+						// o_O`
+					}
 				}
 			}
-
 			if (istweak)
 			{
 				istweak = false;
@@ -724,14 +782,17 @@ NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersCommand() 
 		{
-			((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
-			try
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
-				((Plugin*)_pMachine)->proxy().Command();
-			}
-			catch(const std::exception &)
-			{
-				// o_O`
+				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
+				try
+				{
+					((Plugin*)_pMachine)->proxy().Command();
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
 			}
 		}
 
@@ -741,11 +802,14 @@ NAMESPACE__BEGIN(psycle)
 			{
 				istweak = false;
 			}
-			MessageBox
-				(
-					"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
-					"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
-				);
+			if ( _pMachine->_type == MACH_PLUGIN)
+			{
+				MessageBox
+					(
+						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
+						"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
+					);
+			}
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 

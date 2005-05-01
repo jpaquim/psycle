@@ -100,6 +100,8 @@
 #define IDD_XMSAMPLERUISAMPLE           218
 #define IDD_INST_GENERAL                220
 #define IDD_XMSAMPLER_MIXER             222
+#define IDB_BITMAP2                     226
+#define IDB_SAMPULSE                    226
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -986,8 +988,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        226
-#define _APS_NEXT_COMMAND_VALUE         32938
+#define _APS_NEXT_RESOURCE_VALUE        227
+#define _APS_NEXT_COMMAND_VALUE         32939
 #define _APS_NEXT_CONTROL_VALUE         1653
 #define _APS_NEXT_SYMED_VALUE           60
 #endif

@@ -40,7 +40,7 @@ NAMESPACE__BEGIN(psycle)
 			m_interpol.AddString("Linear [Medium quality]");
 			m_interpol.AddString("Spline [Higher Quality]");
 
-			m_interpol.SetCurSel(_pMachine->_resampler._quality);
+			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
 
 			SetWindowText(_pMachine->_editName);
 

@@ -146,6 +146,14 @@ namespace psycle
 				}
 			};
 
+			/// vst note for an instrument.
+			class note
+			{
+			public:
+				unsigned char key;
+				unsigned char midichan;
+			};
+
 			/// VST plugin.
 			class plugin : public Machine
 			{
@@ -229,6 +237,8 @@ namespace psycle
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
 				inline const bool & IsSynth() const throw() { return _isSynth; }
 				inline bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
+				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0);
+				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false);
 				inline void SendMidi();
 				inline proxy & proxy() throw() { return *proxy_; };
 				bool SetParameter(int parameter, float value);
@@ -248,6 +258,7 @@ namespace psycle
 
 			protected:
 				/// midi events queue, is sent to processEvents.
+				note trackNote[MAX_TRACKS];
 				VstMidiEvent midievent[MAX_VST_EVENTS];
 				int	queue_size;
 
@@ -314,13 +325,6 @@ namespace psycle
 				#endif
 			};
 
-			/// vst note for an instrument.
-			class note
-			{
-			public:
-				unsigned char key;
-				unsigned char midichan;
-			};
 
 			/// vst "instrument" (input) plugin.
 			class instrument : public plugin
@@ -333,10 +337,6 @@ namespace psycle
 				instrument(int index);
 				virtual void Tick(int channel, PatternEntry * pEntry);
 				virtual void Stop(void);
-				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0);
-				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false);
-			protected:
-				note trackNote[MAX_TRACKS];
 			};
 
 			/// vst "fx" (filter) plugin.

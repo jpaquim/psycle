@@ -95,10 +95,6 @@ NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::WaveUpdate()
 		{
-			if(_pSong->waveSelected<0)_pSong->waveSelected=0;
-			if(_pSong->waveSelected>=MAX_WAVES)_pSong->waveSelected=MAX_WAVES-1;
-
-			const int sw = _pSong->waveSelected;
 			const int si = _pSong->instSelected;
 
 			char buffer[64];
@@ -130,14 +126,14 @@ NAMESPACE__BEGIN(psycle)
 			m_loopedit.SetWindowText(buffer);
 
 			// Volume bar
-			m_volumebar.SetPos(_pSong->_pInstrument[si]->waveVolume[sw]);
-			m_finetune.SetPos(_pSong->_pInstrument[si]->waveFinetune[sw]+256);
+			m_volumebar.SetPos(_pSong->_pInstrument[si]->waveVolume);
+			m_finetune.SetPos(_pSong->_pInstrument[si]->waveFinetune+256);
 
 			UpdateNoteLabel();	
 			
 			
 			// Set looptype
-			if(_pSong->_pInstrument[si]->waveLoopType[sw])
+			if(_pSong->_pInstrument[si]->waveLoopType)
 			sprintf(buffer,"Forward");
 			else
 			sprintf(buffer,"Off");
@@ -146,13 +142,13 @@ NAMESPACE__BEGIN(psycle)
 
 			// Display Loop Points & Wave Length
 			
-			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveLoopStart[sw]);
+			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveLoopStart);
 			m_loopstart.SetWindowText(buffer);
 
-			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveLoopEnd[sw]);
+			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveLoopEnd);
 			m_loopend.SetWindowText(buffer);
 
-			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveLength[sw]);
+			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveLength);
 			m_wlen.SetWindowText(buffer);
 
 		}
@@ -163,23 +159,21 @@ NAMESPACE__BEGIN(psycle)
 		void CInstrumentEditor::OnLoopoff() 
 		{
 		int si = _pSong->instSelected;
-		int sw = _pSong->waveSelected;
 
-			if(_pSong->_pInstrument[si]->waveLoopType[sw])
+			if(_pSong->_pInstrument[si]->waveLoopType)
 			{
-			_pSong->_pInstrument[si]->waveLoopType[sw]=0;
+			_pSong->_pInstrument[si]->waveLoopType=0;
 			WaveUpdate();
 			}
 		}
 
 		void CInstrumentEditor::OnLoopforward() 
 		{
-		int sw=_pSong->waveSelected;
 		int si=_pSong->instSelected;
 
-			if(!_pSong->_pInstrument[si]->waveLoopType[sw])
+			if(!_pSong->_pInstrument[si]->waveLoopType)
 			{
-			_pSong->_pInstrument[si]->waveLoopType[sw]=1;
+			_pSong->_pInstrument[si]->waveLoopType=1;
 			WaveUpdate();
 			}
 		}
@@ -190,12 +184,11 @@ NAMESPACE__BEGIN(psycle)
 		void CInstrumentEditor::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 		int si=_pSong->instSelected;
-		int sw=_pSong->waveSelected;
 		char buffer[8];
 
-			_pSong->_pInstrument[si]->waveVolume[sw]=m_volumebar.GetPos();
+			_pSong->_pInstrument[si]->waveVolume=m_volumebar.GetPos();
 			
-			sprintf(buffer,"%d%%",_pSong->_pInstrument[si]->waveVolume[sw]);
+			sprintf(buffer,"%d%%",_pSong->_pInstrument[si]->waveVolume);
 			m_volabel.SetWindowText(buffer);
 
 			*pResult = 0;
@@ -344,22 +337,17 @@ NAMESPACE__BEGIN(psycle)
 			{
 				_pSong->_pInstrument[si]->_lines = 1;
 			}
-		/*	if (_pSong->_pInstrument[si]->_lines > MAX_LINES)
-			{
-				_pSong->_pInstrument[si]->_lines = MAX_LINES;
-			}*/
 		}
 
 		void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			int si=_pSong->instSelected;
-			int sw=_pSong->waveSelected;
 			char buffer[8];
 			
 			if(cando)
-				_pSong->_pInstrument[si]->waveFinetune[sw]=m_finetune.GetPos()-256;
+				_pSong->_pInstrument[si]->waveFinetune=m_finetune.GetPos()-256;
 			
-			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveFinetune[sw]);
+			sprintf(buffer,"%d",_pSong->_pInstrument[si]->waveFinetune);
 			m_finelabel.SetWindowText(buffer);
 			
 			*pResult = 0;
@@ -376,51 +364,46 @@ NAMESPACE__BEGIN(psycle)
 		void CInstrumentEditor::OnInsDecoctave() 
 		{
 			const int si=_pSong->instSelected;
-			const int sw=_pSong->waveSelected;
-			if ( _pSong->_pInstrument[si]->waveTune[sw]>-37)
-				_pSong->_pInstrument[si]->waveTune[sw]-=12;
-			else _pSong->_pInstrument[si]->waveTune[sw]=-48;
+			if ( _pSong->_pInstrument[si]->waveTune>-37)
+				_pSong->_pInstrument[si]->waveTune-=12;
+			else _pSong->_pInstrument[si]->waveTune=-48;
 			UpdateNoteLabel();	
 		}
 
 		void CInstrumentEditor::OnInsDecnote() 
 		{
 			const int si=_pSong->instSelected;
-			const int sw=_pSong->waveSelected;
-			if ( _pSong->_pInstrument[si]->waveTune[sw]>-47)
-				_pSong->_pInstrument[si]->waveTune[sw]-=1;
-			else _pSong->_pInstrument[si]->waveTune[sw]=-48;
+			if ( _pSong->_pInstrument[si]->waveTune>-47)
+				_pSong->_pInstrument[si]->waveTune-=1;
+			else _pSong->_pInstrument[si]->waveTune=-48;
 			UpdateNoteLabel();	
 		}
 
 		void CInstrumentEditor::OnInsIncnote() 
 		{
 			const int si=_pSong->instSelected;
-			const int sw=_pSong->waveSelected;
-			if ( _pSong->_pInstrument[si]->waveTune[sw] < 71)
-				_pSong->_pInstrument[si]->waveTune[sw]+=1;
-			else _pSong->_pInstrument[si]->waveTune[sw]=71;
+			if ( _pSong->_pInstrument[si]->waveTune < 71)
+				_pSong->_pInstrument[si]->waveTune+=1;
+			else _pSong->_pInstrument[si]->waveTune=71;
 			UpdateNoteLabel();	
 		}
 
 		void CInstrumentEditor::OnInsIncoctave() 
 		{
 			const int si=_pSong->instSelected;
-			const int sw=_pSong->waveSelected;
-			if ( _pSong->_pInstrument[si]->waveTune[sw] < 60)
-				_pSong->_pInstrument[si]->waveTune[sw]+=12;
-			else _pSong->_pInstrument[si]->waveTune[sw]=71;
+			if ( _pSong->_pInstrument[si]->waveTune < 60)
+				_pSong->_pInstrument[si]->waveTune+=12;
+			else _pSong->_pInstrument[si]->waveTune=71;
 			UpdateNoteLabel();	
 		}
 
 		void CInstrumentEditor::UpdateNoteLabel()
 		{
-			const int sw = _pSong->waveSelected;
 			const int si = _pSong->instSelected;
 			char buffer[64];
 			
-			const int octave= ((_pSong->_pInstrument[si]->waveTune[sw]+48)/12);
-			switch ((_pSong->_pInstrument[si]->waveTune[sw]+48)%12)
+			const int octave= ((_pSong->_pInstrument[si]->waveTune+48)/12);
+			switch ((_pSong->_pInstrument[si]->waveTune+48)%12)
 			{
 			case 0:  sprintf(buffer,"C-%i",octave);break;
 			case 1:  sprintf(buffer,"C#%i",octave);break;

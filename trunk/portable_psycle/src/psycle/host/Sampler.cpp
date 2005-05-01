@@ -71,7 +71,9 @@ namespace psycle
 			{
 				for (int voice=0; voice<_numVoices; voice++)
 				{
-					PerformFx(voice); //<- needs to take numsamples into account
+					// A correct implementation needs to take numsamples into account.
+					// This will not be fixed to leave sampler compatible with old songs.
+					PerformFx(voice);
 				}
 				int ns = numSamples;
 				while (ns)
@@ -99,7 +101,6 @@ namespace psycle
 						}
 						for (int voice=0; voice<_numVoices; voice++)
 						{
-		//					PerformFx(voice); <- needs to take numsamples into account
 							VoiceWork(ns, voice);
 						}
 						ns = 0;
@@ -111,7 +112,6 @@ namespace psycle
 							ns -= nextevent;
 							for (int voice=0; voice<_numVoices; voice++)
 							{
-		//						PerformFx(voice); <- needs to take numsamples into account
 								VoiceWork(nextevent, voice);
 							}
 						}
@@ -176,7 +176,6 @@ namespace psycle
 				Machine::SetVolumeCounter(numSamples);
 				if ( Global::pConfig->autoStopMachines )
 				{
-		//			Machine::SetVolumeCounterAccurate(numSamples);
 					if (_volumeCounter < 8.0f)	{
 						_volumeCounter = 0.0f;
 						_volumeDisplay = 0;
@@ -184,7 +183,6 @@ namespace psycle
 					}
 					else _stopped=false;
 				}
-		//		else Machine::SetVolumeCounter(numSamples);
 			}
 
 			CPUCOST_CALC(cost, numSamples);
@@ -223,12 +221,12 @@ namespace psycle
 			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
 			pFile->Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
 
-		/*	if (_numVoices < 4)  // No more need for this code.
+			if (_numVoices < 4)
 			{
-				// Most likely an old polyphony
+				// Psycle versions < 1.1b2 had polyphony per channel,not per machine.
 				_numVoices = 8;
 			}
-		*/
+
 			pFile->Read(&i, sizeof(int)); // interpol
 			switch (i)
 			{
@@ -295,8 +293,8 @@ namespace psycle
 				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 				{
 					pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
-					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer->SampleRate());
+					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer->SampleRate());
 					pVoice->effretTicks--;
 					pVoice->_wave._pos.QuadPart = 0;
 					if ( pVoice->effretMode == 1 )
@@ -346,22 +344,6 @@ namespace psycle
 							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
 					}
 
-/*					left_output = pResamplerWork(
-						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart-1),
-						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart),
-						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart+1),
-						*(pVoice->_wave._pL + pVoice->_wave._pos.HighPart+2), // Attention, this can (and does)go out of range 
-						pVoice->_wave._pos.LowPart, pVoice->_wave._pos.HighPart, pVoice->_wave._length);// It is not a problem since
-					if (pVoice->_wave._stereo)								 // the resample function already takes care of it
-					{
-						right_output = pResamplerWork(
-							*(pVoice->_wave._pR + pVoice->_wave._pos.HighPart-1),
-							*(pVoice->_wave._pR + pVoice->_wave._pos.HighPart),
-							*(pVoice->_wave._pR + pVoice->_wave._pos.HighPart+1),
-							*(pVoice->_wave._pR + pVoice->_wave._pos.HighPart+2), // Attention, this can (and does)go out of range 
-							pVoice->_wave._pos.LowPart, pVoice->_wave._pos.HighPart, pVoice->_wave._length);// It is not a problem since
-						}															// the resample function already takes care of it
-*/
 					// Filter section
 					//
 					if (pVoice->_filter._type < dsp::F_NONE)
@@ -472,45 +454,10 @@ namespace psycle
 				data._inst = lastInstrument[channel] = pData->_inst;
 			}
 
-			// Check some special commands like Portamento to note. Wasn't fully implemented, this is why
-			// it is disabled.
-		/*	if ( data._cmd == SAMPLER_CMD_PORTA2NOTE )
-			{
-				for (voice=0;voice<_numVoices; voice++)  // Find the...
-				{
-					if (( _voices[voice]._channel == channel ) && // ...playing voice on current channel.
-						(_voices[voice]._envelope._stage != ENV_OFF ) &&
-						(_voices[voice]._envelope._stage != ENV_RELEASE ) &&
-						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
-					{
-						useVoice=voice;
-					}
-				}
-				if (useVoice == -1) return; // No playing note found.
-				if ( data._parameter == 0 ) {
-					_voices[useVoice].effCmd=_voices[useVoice].effOld;
-					return;
-				}
-				else if (( data._note < 120 ))
-				{
-					_voices[useVoice].effCmd=SAMPLER_CMD_PORTA2NOTE;
-					_voices[useVoice].effVal=(float)(data._parameter*data._parameter)*0.001f;
 
-					int layer = 0; // Change this when adding working Layering code.
-					float const finetune = Global::_pSong->waveFinetune[data._inst][layer]*0.00390625f;
-					_voices[useVoice].effPortaNote= (int)(pow(2.0f, (data._note-48 +finetune)/12.0f)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-				}
-				else {
-					_voices[useVoice].effCmd=SAMPLER_CMD_PORTA2NOTE;
-					_voices[useVoice].effVal=(float)(data._parameter*data._parameter)*0.001f;
-				}
-				return;
-			}
-			else if (effCmd== SAMPLER_CMD_PORTA2NOTE) effCmd=SAMPLER_CMD_NONE;
-		*/
 			if ( data._note < 120 )	// Handle Note On.
 			{
-				if ( Global::_pSong->_pInstrument[data._inst]->waveLength[0] == 0 ) return; // if no wave, return.
+				if ( Global::_pSong->_pInstrument[data._inst]->waveLength == 0 ) return; // if no wave, return.
 
 				for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
 				{
@@ -612,8 +559,7 @@ namespace psycle
 
 		//  All this mess should be really changed with classes using the "operator=" to "copy" values.
 
-			int layer = 0; // Change this when adding working Layering code.
-			int twlength = Global::_pSong->_pInstrument[pEntry->_inst]->waveLength[layer];
+			int twlength = Global::_pSong->_pInstrument[pEntry->_inst]->waveLength;
 			
 			if (pEntry->_note < 120 && twlength > 0)
 			{
@@ -650,22 +596,22 @@ namespace psycle
 				{
 					pVoice->_filterEnv._stage = ENV_ATTACK;
 				}
-				pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+				pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer->SampleRate());
 				pVoice->_filterEnv._value = 0;
 				
 				// Init Wave
 				//
-				pVoice->_wave._pL = Global::_pSong->_pInstrument[pVoice->_instrument]->waveDataL[layer];
-				pVoice->_wave._pR = Global::_pSong->_pInstrument[pVoice->_instrument]->waveDataR[layer];
-				pVoice->_wave._stereo = Global::_pSong->_pInstrument[pVoice->_instrument]->waveStereo[layer];
+				pVoice->_wave._pL = Global::_pSong->_pInstrument[pVoice->_instrument]->waveDataL;
+				pVoice->_wave._pR = Global::_pSong->_pInstrument[pVoice->_instrument]->waveDataR;
+				pVoice->_wave._stereo = Global::_pSong->_pInstrument[pVoice->_instrument]->waveStereo;
 				pVoice->_wave._length = twlength;
 				
 				// Init loop
-				if (Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopType[layer])
+				if (Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopType)
 				{
 					pVoice->_wave._loop = true;
-					pVoice->_wave._loopStart = Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopStart[layer];
-					pVoice->_wave._loopEnd = Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopEnd[layer];
+					pVoice->_wave._loopStart = Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopStart;
+					pVoice->_wave._loopEnd = Global::_pSong->_pInstrument[pVoice->_instrument]->waveLoopEnd;
 				}
 				else
 				{
@@ -677,13 +623,12 @@ namespace psycle
 				if (Global::_pSong->_pInstrument[pVoice->_instrument]->_loop)
 				{
 					double const totalsamples = double(Global::pPlayer->SamplesPerRow()*Global::_pSong->_pInstrument[pVoice->_instrument]->_lines);
-		//			pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f*44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
 					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}	
 				else
 				{
-					float const finetune = CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune[layer]);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune[layer])-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec));
+					float const finetune = CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune);
+					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
 				}
 				
 
@@ -701,7 +646,7 @@ namespace psycle
 
 				// Calculating volume coef ---------------------------------------
 				//
-				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume[layer]*0.01f;
+				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
 				if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
 				{
@@ -741,7 +686,7 @@ namespace psycle
 
 				// Init Amplitude Envelope
 				//
-				pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+				pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer->SampleRate());
 				pVoice->_envelope._value = 0.0f;
 				pVoice->_envelope._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
@@ -755,7 +700,6 @@ namespace psycle
 					{
 						pVoice->effretTicks=(pEntry->_parameter&0x0f); // number of Ticks.
 						pVoice->effVal= (Global::pPlayer->SamplesPerRow()/(pVoice->effretTicks+1));
-			//			pVoice->retTime=(Global::_pSong->SamplesPerRow()/pVoice->effVal); // Number of samples for each retrig.
 						
 						int volmod = (pEntry->_parameter&0xf0)>>4; // Volume modifier.
 						switch (volmod) 
@@ -783,9 +727,6 @@ namespace psycle
 					{
 						pVoice->_triggerNoteDelay=0;
 					}
-					// This must be last, or the voice could be started by VoiceWork before all
-					// elements are initialized
-					//
 					pVoice->_envelope._stage = ENV_ATTACK;
 				}
 				
@@ -796,7 +737,7 @@ namespace psycle
 			{
 				// Calculating volume coef ---------------------------------------
 				//
-				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume[layer]*0.01f;
+				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
 				if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry->_parameter);
 				
@@ -850,7 +791,7 @@ namespace psycle
 				{
 					pVoice->_filterEnv._stage = ENV_DECAY;
 					pVoice->_filterEnv._value = 1.0f;
-					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+					pVoice->_filterEnv._step = ((1.0f - pVoice->_filterEnv._sustain) / Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_DT) * (44100.0f/Global::pPlayer->SampleRate());
 				}
 				break;
 			case ENV_DECAY:
@@ -886,7 +827,7 @@ namespace psycle
 				{
 					pVoice->_envelope._value = 1.0f;
 					pVoice->_envelope._stage = ENV_DECAY;
-					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+					pVoice->_envelope._step = ((1.0f - pVoice->_envelope._sustain)/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_DT)*(44100.0f/Global::pPlayer->SampleRate());
 				}
 				break;
 			case ENV_DECAY:
@@ -918,8 +859,8 @@ namespace psycle
 			{
 				pVoice->_envelope._stage = ENV_RELEASE;
 				pVoice->_filterEnv._stage = ENV_RELEASE;
-				pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
-				pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pConfig->_pOutputDriver->_samplesPerSec);
+				pVoice->_envelope._step = (pVoice->_envelope._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_RT)*(44100.0f/Global::pPlayer->SampleRate());
+				pVoice->_filterEnv._step = (pVoice->_filterEnv._value/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_RT)*(44100.0f/Global::pPlayer->SampleRate());
 			}
 		}
 
@@ -954,7 +895,8 @@ namespace psycle
 					_voices[voice]._wave._speed-=shift;
 					if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
 				break;
-				case 0x03:
+				
+				default:
 				break;
 			}
 		}

@@ -63,6 +63,7 @@ namespace psycle
 			MACH_VSTFX = 10,
 			MACH_SCOPE = 11,
 			MACH_XMSAMPLER = 12,
+			MACH_DUPLICATOR = 13,
 			MACH_DUMMY = 255
 		};
 

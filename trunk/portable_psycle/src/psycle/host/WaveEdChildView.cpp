@@ -19,7 +19,6 @@ NAMESPACE__BEGIN(psycle)
 			
 			wdWave=false;
 			wsInstrument=-1;
-			wsWave=-1;
 
 			selx=0;selx2=0;
 		}
@@ -253,24 +252,23 @@ NAMESPACE__BEGIN(psycle)
 			UpdateWindow();
 		}
 
-		void  CWaveEdChildView::SetViewData(int ins, int wav)
+		void  CWaveEdChildView::SetViewData(int ins)
 		{
-			int wl=_pSong->_pInstrument[ins]->waveLength[wav];
+			int wl=_pSong->_pInstrument[ins]->waveLength;
 
 			wsInstrument=ins;	// Do not put inside of "if(wl)". Pasting needs this.
-			wsWave=wav;
 
 			if(wl)
 			{
 				wdWave=true;
 					
 				wdLength=wl;
-				wdLeft=_pSong->_pInstrument[ins]->waveDataL[wav];
-				wdRight=_pSong->_pInstrument[ins]->waveDataR[wav];
-				wdStereo=_pSong->_pInstrument[ins]->waveStereo[wav];
-				wdLoop=_pSong->_pInstrument[ins]->waveLoopType[wav];
-				wdLoopS=_pSong->_pInstrument[ins]->waveLoopStart[wav];
-				wdLoopE=_pSong->_pInstrument[ins]->waveLoopEnd[wav];
+				wdLeft=_pSong->_pInstrument[ins]->waveDataL;
+				wdRight=_pSong->_pInstrument[ins]->waveDataR;
+				wdStereo=_pSong->_pInstrument[ins]->waveStereo;
+				wdLoop=_pSong->_pInstrument[ins]->waveLoopType;
+				wdLoopS=_pSong->_pInstrument[ins]->waveLoopStart;
+				wdLoopE=_pSong->_pInstrument[ins]->waveLoopEnd;
 
 				diStart=0;
 				diLength=wl;
@@ -349,15 +347,15 @@ NAMESPACE__BEGIN(psycle)
 					CRect rect;
 					GetClientRect(&rect);
 					wdLoopE = diStart+((x*diLength)/rect.Width());
-					_pSong->_pInstrument[wsInstrument]->waveLoopEnd[wsWave]=wdLoopE;
-					if (_pSong->_pInstrument[wsInstrument]->waveLoopStart[wsWave]> wdLoopE )
+					_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+					if (_pSong->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
 					{
-						_pSong->_pInstrument[wsInstrument]->waveLoopStart[wsWave]=wdLoopE;
+						_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
 					}
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						_pSong->_pInstrument[wsInstrument]->waveLoopType[wsWave]=true;
+						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
 					_pSong->Invalided=false;
 					drawwave=true;
@@ -391,15 +389,15 @@ NAMESPACE__BEGIN(psycle)
 					CRect rect;
 					GetClientRect(&rect);
 					wdLoopS = diStart+((x*diLength)/rect.Width());
-					_pSong->_pInstrument[wsInstrument]->waveLoopStart[wsWave]=wdLoopS;
-					if (_pSong->_pInstrument[wsInstrument]->waveLoopEnd[wsWave] < wdLoopS )
+					_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+					if (_pSong->_pInstrument[wsInstrument]->waveLoopEnd < wdLoopS )
 					{
-						_pSong->_pInstrument[wsInstrument]->waveLoopEnd[wsWave]=wdLoopS;
+						_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
 					}
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						_pSong->_pInstrument[wsInstrument]->waveLoopType[wsWave]=true;
+						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
 					_pSong->Invalided=false;
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
@@ -780,9 +778,9 @@ NAMESPACE__BEGIN(psycle)
 					*(wdLeft + c) = ( *(wdLeft + c) + *(wdRight + c) ) / 2;
 				}
 
-				_pSong->_pInstrument[wsInstrument]->waveStereo[wsWave] = false;
+				_pSong->_pInstrument[wsInstrument]->waveStereo = false;
 				wdStereo = false;
-				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave]);
+				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR);
 				Invalidate(true);
 				_pSong->Invalided=false;
 			}
@@ -811,20 +809,20 @@ NAMESPACE__BEGIN(psycle)
 						pTmpR= new signed short[datalen];
 						CopyMemory(pTmpR, wdRight, blStart*sizeof(short));
 						CopyMemory( (pTmpR+blStart), (wdRight + blStart + blLength), (wdLength - blStart - blLength)*sizeof(short) );
-						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave],pTmpR);
+						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 						wdRight = pTmpR;
 					}
 
 					CopyMemory( pTmp, wdLeft, blStart*sizeof(short) );
 					CopyMemory( (pTmp+blStart), (wdLeft + blStart + blLength), (wdLength - blStart - blLength)*sizeof(short) );
-					zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave],pTmp);
+					zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
 					wdLeft = pTmp;
-					_pSong->_pInstrument[wsInstrument]->waveLength[wsWave] = datalen;
+					_pSong->_pInstrument[wsInstrument]->waveLength = datalen;
 					wdLength = datalen;
 				}
 				else
 				{
-					_pSong->DeleteLayer(wsInstrument, wsWave);
+					_pSong->DeleteLayer(wsInstrument);
 					wdLength = 0;
 					wdWave   = false;
 				}
@@ -1040,24 +1038,24 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (pFmt->wBitsPerSample == 16)
 				{
-					_pSong->WavAlloc(wsInstrument, wsWave, (pFmt->nChannels==2) ? true : false, (pFmt->nChannels==2) ? (DWORD)(lData*0.25) : (DWORD)(lData*0.5), "Clipboard");
+					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, (pFmt->nChannels==2) ? (DWORD)(lData*0.25) : (DWORD)(lData*0.5), "Clipboard");
 					if (pFmt->nChannels == 1)
 					{
-						memcpy(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave], pData, lData);
+						memcpy(_pSong->_pInstrument[wsInstrument]->waveDataL, pData, lData);
 						wdLength = (DWORD)(lData*0.5);
-						wdLeft  = _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave];
+						wdLeft  = _pSong->_pInstrument[wsInstrument]->waveDataL;
 						wdStereo = false;
 					}
 					else if (pFmt->nChannels == 2)
 					{
 						for (c = 0; c < lData*0.5; c += 2)
 						{
-							*(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave] + (long)(c*0.5)) = *((signed short*)pData + c);
-							*(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave] + (long)(c*0.5)) = *((signed short*)pData + c + 1);
+							*(_pSong->_pInstrument[wsInstrument]->waveDataL + (long)(c*0.5)) = *((signed short*)pData + c);
+							*(_pSong->_pInstrument[wsInstrument]->waveDataR + (long)(c*0.5)) = *((signed short*)pData + c + 1);
 						}
 						wdLength = (DWORD)(lData *0.25);
-						wdLeft = _pSong->_pInstrument[wsInstrument]->waveDataL[wsWave];
-						wdRight = _pSong->_pInstrument[wsInstrument]->waveDataR[wsWave];
+						wdLeft = _pSong->_pInstrument[wsInstrument]->waveDataL;
+						wdRight = _pSong->_pInstrument[wsInstrument]->waveDataR;
 						wdStereo = true;
 					}
 					wdWave = true;
@@ -1074,8 +1072,8 @@ NAMESPACE__BEGIN(psycle)
 						memcpy(pTmp + blStart, pData, lData);
 						memcpy((BYTE*)pTmp + blStart*2 + lData, wdLeft + blStart, 2*(wdLength - blStart));
 
-						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave],pTmp);
-						_pSong->_pInstrument[wsInstrument]->waveLength[wsWave] = wdLength + (DWORD)(lData*0.5);
+						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
+						_pSong->_pInstrument[wsInstrument]->waveLength = wdLength + (DWORD)(lData*0.5);
 						wdLength = wdLength + (DWORD)(lData*0.5);
 					}
 					else if ( (pFmt->nChannels == 2) && (wdStereo == true) )
@@ -1093,9 +1091,9 @@ NAMESPACE__BEGIN(psycle)
 						memcpy((BYTE*)pTmp + blStart*2 + (unsigned long)(lData*0.5), wdLeft + blStart, 2*(wdLength - blStart));
 						memcpy((BYTE*)pTmpR+ blStart*2 + (unsigned long)(lData*0.5), wdRight + blStart, 2*(wdLength - blStart));
 
-						wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL[wsWave], pTmp);
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR[wsWave],pTmpR);
-						_pSong->_pInstrument[wsInstrument]->waveLength[wsWave] = wdLength + (DWORD)(lData*0.25);
+						wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						_pSong->_pInstrument[wsInstrument]->waveLength = wdLength + (DWORD)(lData*0.25);
 						wdLength = wdLength + (DWORD)(lData*0.25);
 					}
 				}

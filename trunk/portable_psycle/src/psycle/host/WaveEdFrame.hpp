@@ -31,7 +31,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			//}}AFX_VIRTUAL	
 		private:
-			void AdjustStatusBar(int ins, int wav);
+			void AdjustStatusBar(int ins);
 			CStatusBar statusbar;
 			CWaveEdChildView wavview;
 		// Implementation

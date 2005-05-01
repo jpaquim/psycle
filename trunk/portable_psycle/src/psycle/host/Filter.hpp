@@ -170,6 +170,127 @@ namespace psycle
 			float _x1, _x2, _y1, _y2;
 			float _a1, _a2, _b1, _b2;
 		};
+
+
+		class ITFilter
+		{
+		#define LOG10 2.30258509299 // neperian log10
+		public:
+			ITFilter()
+				:  iSampleRate(44100)
+			{
+				Reset();
+			};
+			virtual ~ITFilter(){};
+			void Reset(void)
+			{
+				iCutoff=127;
+				iRes=0;
+				fLastSampleLeft[0]=0.0f;
+				fLastSampleLeft[1]=0.0f;
+				fLastSampleRight[0]=0.0f;
+				fLastSampleRight[1]=0.0f;
+				Update();
+			};
+			void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }};
+			void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }};
+			void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }};
+			inline void Work(float& _fSample)
+			{
+				const float ftemp = fLastSampleLeft[1];
+				fLastSampleLeft[1] = (_fSample* fCoeff[0]) + (fLastSampleLeft[1]* fCoeff[1]) + (fLastSampleLeft[0]* fCoeff[2]);
+				fLastSampleLeft[0] = ftemp;
+				_fSample=fLastSampleLeft[1];
+			}
+			inline void WorkStereo(float& _fLeft, float& _fRight)
+			{
+				const float ftempL = fLastSampleLeft[1];
+				const float ftempR = fLastSampleRight[1];
+
+				fLastSampleLeft[1] = (_fLeft* fCoeff[0]) + (fLastSampleLeft[1]* fCoeff[1]) + (fLastSampleLeft[0]* fCoeff[2]);
+				fLastSampleLeft[0] = ftempL;
+				fLastSampleRight[1] = (_fRight* fCoeff[0]) + (fLastSampleRight[1]* fCoeff[1]) + (fLastSampleRight[0]* fCoeff[2]);
+				fLastSampleRight[0] = ftempR;
+				_fLeft=fLastSampleLeft[1];
+				_fRight=fLastSampleRight[1];
+			}
+		protected:
+			void Update(void);
+
+			int iSampleRate;
+			int iCutoff;
+			int iRes;
+			float fCoeff[3];
+			float fLastSampleLeft[2];
+			float fLastSampleRight[2];
+		};
 	}
 	}
 }
+/*
+static void it_reset_filter_state(IT_FILTER_STATE *state)
+{
+	state->currsample = 0;
+	state->prevsample = 0;
+}
+
+
+
+*/
+/* IMPORTANT: This function expects one extra sample in 'src' so it can apply
+* click removal. It reads size samples, starting from src[0], and writes its
+* output starting at dst[pos]. The pos parameter is required for getting
+* click removal right.
+*/
+/*
+static void it_filter( IT_FILTER_STATE *state, sample_t *dst, long pos, sample_t *src, long size, int sampfreq, int cutoff, int resonance)
+{
+	float currsample = state->currsample;
+	float prevsample = state->prevsample;
+
+	float a, b, c;
+
+	{
+		float inv_angle = (float)(sampfreq * pow(0.5, 0.25 + cutoff*(1.0/(24<<IT_ENVELOPE_SHIFT))) * (1.0/(2*3.14159265358979323846*110.0)));
+		float loss = (float)exp(resonance*(-LOG10*1.2/128.0));
+		float d, e;
+
+		d = (1.0f - loss) / inv_angle;
+		if (d > 2.0f) d = 2.0f;
+		d = (loss - d) * inv_angle;
+		e = inv_angle * inv_angle;
+		a = 1.0f / (1.0f + d + e);
+		c = -e * a;
+		b = 1.0f - a - c;
+	}
+
+	dst += pos;
+
+#define MULSCA(a, b) ((int)((LONG_LONG)((a) << 4) * (b) >> 32))
+#define SCALEB 12
+	{
+		int ai = (int)(a * (1 << (16+SCALEB)));
+		int bi = (int)(b * (1 << (16+SCALEB)));
+		int ci = (int)(c * (1 << (16+SCALEB)));
+		sample_t csi = (sample_t)currsample;
+		sample_t psi = (sample_t)prevsample;
+		sample_t *dst_end = dst + size;
+		while (dst < dst_end) {
+			{
+				sample_t nsi = MULSCA(*src++, ai) + MULSCA(csi, bi) + MULSCA(psi, ci);
+				psi = csi;
+				csi = nsi;
+			}
+			*dst++ += csi;
+		}
+		currsample = csi;
+		prevsample = psi;
+	}
+
+	state->currsample = currsample;
+	state->prevsample = prevsample;
+}
+
+#undef LOG10
+
+*/

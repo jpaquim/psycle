@@ -127,7 +127,7 @@ namespace psycle
 		///\todo make a template version that accept both float and doubles
 		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
-			float id(float(1.0E-20));
+			float id(float(1.0E-7));
 			for(int s(0) ; s < numsamples ; ++s)
 			{
 				/* Old denormal code. Now we use a 1bit sinus.
@@ -167,13 +167,14 @@ namespace psycle
 				_quality = R_NONE;
 				_pWorkFn = None;
 			};
-			/// kind of interpolation.
-			ResamplerQuality _quality;
 			/// work function corresponding to the selected kind.
 			PRESAMPLERFN _pWorkFn;
 			/// sets the kind of interpolation.
 			virtual void SetQuality(ResamplerQuality quality) = 0;
+			virtual ResamplerQuality GetQuality(void) = 0;
 		protected:
+			/// kind of interpolation.
+			ResamplerQuality _quality;
 			/// interpolation work function which does nothing.
 			static float None(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
 			{
@@ -204,6 +205,7 @@ namespace psycle
 					break;
 				}
 			}
+			virtual ResamplerQuality GetQuality(void) { return _quality; }
 		protected:
 			/// interpolation work function which does linear interpolation.
 			static float Linear(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)

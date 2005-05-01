@@ -52,17 +52,17 @@ namespace psycle
 			virtual void Tick(int track, PatternEntry * pData) {};
 			virtual void Stop() {};
 			virtual void SetPan(int newpan);
-			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
-			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; }
+			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
+			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
 			virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
 			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
 			virtual int FindInputWire(int macIndex);
 			virtual int FindOutputWire(int macIndex);
-			virtual const char * const GetDllName() const throw() { return "built-in"; }
+			virtual const char * const GetDllName() const throw() { return "built-in"; };
 			virtual char * GetName() = 0;
-			virtual int GetNumParams() /* = 0; */ { return _numPars; } // [bohan] was { return _numPars; } but there's no need for dummy body anymore ; msvc6 used to generate buggy code on pure virtual functions but it's not gone with msvc7.1 ;-)
-			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; }
+			virtual int GetNumParams() { return _numPars; };
+			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
 			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
 			virtual int GetParamValue(int numparam) { return 0; };
 			virtual bool SetParameter(int numparam, int value) { return false;}; 
@@ -99,7 +99,7 @@ namespace psycle
 			int _x;
 			int _y;
 			char _editName[32];
-			int _numPars; // [bohan] there's no need for dummy body anymore ; msvc6 used to generate buggy code on pure virtual functions but it's not gone with msvc7.1 ;-)
+			int _numPars;
 			/// Incoming connections Machine number
 			int _inputMachines[MAX_CONNECTIONS];	
 			/// Outgoing connections Machine number
@@ -157,6 +157,29 @@ namespace psycle
 		protected:
 			static char * _psName;
 		};
+
+		class DuplicatorMac : public Machine
+		{
+		public:
+			DuplicatorMac();
+			DuplicatorMac(int index);
+			virtual void Init(void);
+			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Work(int numSamples);
+			virtual char* GetName(void) { return _psName; };
+			virtual void GetParamName(int numparam,char *name);
+			virtual void GetParamValue(int numparam,char *parVal);
+			virtual int GetParamValue(int numparam);
+			virtual bool SetParameter(int numparam,int value);
+			virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+
+		protected:
+			short macOutput[8];
+			short noteOffset[8];
+			static char* _psName;
+		};
+
 
 		/// master machine.
 		class Master : public Machine

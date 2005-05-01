@@ -145,7 +145,7 @@ namespace psycle
 				pFile->Write(&size,sizeof(size));
 				temp = _numVoices;
 				pFile->Write(&temp, sizeof(temp)); // numSubtracks
-				switch (_resampler._quality)
+				switch (_resampler.GetQuality())
 				{
 					case dsp::R_NONE:
 						temp = 0;

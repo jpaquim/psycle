@@ -45,8 +45,8 @@ namespace psycle
 			_playPattern = Global::_pSong->playOrder[_playPosition];
 			_playTime = 0;
 			_playTimem = 0;
-			bpm=Global::_pSong->BeatsPerMin();
-			tpb=Global::_pSong->LinesPerBeat();
+			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			ExecuteLine();
@@ -65,7 +65,8 @@ namespace psycle
 					for(int c = 0; c < MAX_TRACKS; c++) Global::_pSong->_pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*60)/(Global::_pSong->BeatsPerMin()*Global::_pSong->LinesPerBeat()));
+			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 		}
 
 		void Player::SampleRate(const int sampleRate)
@@ -73,6 +74,7 @@ namespace psycle
 			///\todo update the source code of the plugins...
 			if(m_SampleRate != sampleRate)
 			{
+				m_SampleRate = sampleRate;
 				RecalcSPR();
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
@@ -124,6 +126,26 @@ namespace psycle
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
 							{
+/*
+*					case IT_S_PATTERN_LOOP:
+{
+unsigned char v = effectvalue & 15;
+if (v == 0)
+channel->pat_loop_row = sigrenderer->processrow;
+else {
+if (channel->pat_loop_count == 0) {
+channel->pat_loop_count = v;
+sigrenderer->pat_loop_row = channel->pat_loop_row;
+} else {
+if (--channel->pat_loop_count)
+sigrenderer->pat_loop_row = channel->pat_loop_row;
+else if (!(sigrenderer->sigdata->flags & IT_WAS_AN_XM))
+channel->pat_loop_row = sigrenderer->processrow + 1;
+}
+}
+}
+break;
+ */
 							}
 							else if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
 							{

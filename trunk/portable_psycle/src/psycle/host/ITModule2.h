@@ -225,6 +225,21 @@ Ex/Fx.
 				IS_DISABLED=	0x80
 			};
 		};
+		typedef struct
+		{
+			char Start[32];
+			char Stop[32];
+			char Tick[32];
+			char NoteOn[32];
+			char NoteOff[32];
+			char Volume[32];
+			char Pan[32];
+			char BankChange[32];
+			char ProgramChange[32];
+			char SFx[16][32];
+			char Zxx[128][32];
+		} EmbeddedMIDIData;
+
 		typedef std::pair<char,char> ITNotePair;
 		typedef std::pair<char,char> ITNodePair1x;
 //		typedef std::pair<short,char> ITNodePair;
@@ -323,6 +338,7 @@ Ex/Fx.
 			void ParseEffect(PatternEntry&pent, int command,int param,int channel);
 		private:
 			unsigned char highOffset[64];
+			EmbeddedMIDIData* embeddedData;
 		public:
 
 			

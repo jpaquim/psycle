@@ -58,6 +58,7 @@ namespace psycle
 			Master* pMaster;
 			Sampler* pSampler;
 			XMSampler* pXMSampler;
+			DuplicatorMac* pDuplicator;
 			Plugin* pPlugin;
 			vst::plugin* pVstPlugin;
 			switch (type)
@@ -72,6 +73,9 @@ namespace psycle
 				break;
 			case MACH_XMSAMPLER:
 				pMachine = pXMSampler = new XMSampler(index);
+				break;
+			case MACH_DUPLICATOR:
+				pMachine = pDuplicator = new DuplicatorMac(index);
 				break;
 			case MACH_PLUGIN:
 				{
@@ -227,9 +231,9 @@ namespace psycle
 			_machineLock = false;
 		}
 
-		void Song::DeleteLayer(int i,int c)
+		void Song::DeleteLayer(int i)
 		{
-			_pInstrument[i]->DeleteLayer(c);
+			_pInstrument[i]->DeleteLayer();
 		}
 
 		void Song::DeleteInstruments()
@@ -254,7 +258,7 @@ namespace psycle
 			cpuIdle=0;
 			_sampCount=0;
 			// Cleaning pattern allocation info
-			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) for(int c(0) ; c < MAX_WAVES; ++c) _pInstrument[i]->waveLength[c]=0;
+			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
 					zapObject(_pMachine[i]);
@@ -319,7 +323,6 @@ namespace psycle
 			DeleteAllPatterns();
 			// Clear sequence
 			Reset();
-			waveSelected = 0;
 			instSelected = 0;
 			midiSelected = 0;
 			auxcolSelected = 0;
@@ -715,7 +718,7 @@ namespace psycle
 
 		*/
 
-		int Song::IffAlloc(int instrument,int layer,const char * str)
+		int Song::IffAlloc(int instrument,const char * str)
 		{
 			if(instrument != PREV_WAV_INS)
 			{
@@ -733,19 +736,16 @@ namespace psycle
 				Invalided = false;
 				return 0;
 			}
-			DeleteLayer(instrument,layer);
+			DeleteLayer(instrument);
 			file.Read(&data,4);
 			if( data == file.FourCC("16SV")) bits = 16;
 			else if(data == file.FourCC("8SVX")) bits = 8;
 			file.Read(&hd,sizeof hd);
 			if(hd._id == file.FourCC("NAME"))
 			{
-				file.Read(_pInstrument[instrument]->waveName[layer], 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
-				if( strcmp(_pInstrument[instrument]->_sName,"empty") == 0)
-				{
-					strncpy(_pInstrument[instrument]->_sName,str,31);
-					_pInstrument[instrument]->_sName[31]='\0';
-				}
+				file.Read(_pInstrument[instrument]->waveName, 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
+				strncpy(_pInstrument[instrument]->_sName,str,31);
+				_pInstrument[instrument]->_sName[31]='\0';
 				file.Read(&hd,sizeof hd);
 			}
 			if ( hd._id == file.FourCC("VHDR"))
@@ -763,12 +763,12 @@ namespace psycle
 					ls >>= 1;
 					le >>= 1;
 				}
-				_pInstrument[instrument]->waveLength[layer]=Datalen;
+				_pInstrument[instrument]->waveLength=Datalen;
 				if(ls != le)
 				{
-					_pInstrument[instrument]->waveLoopStart[layer] = ls;
-					_pInstrument[instrument]->waveLoopEnd[layer] = ls + le;
-					_pInstrument[instrument]->waveLoopType[layer] = true;
+					_pInstrument[instrument]->waveLoopStart = ls;
+					_pInstrument[instrument]->waveLoopEnd = ls + le;
+					_pInstrument[instrument]->waveLoopType = true;
 				}
 				file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
 				file.Read(&hd,sizeof hd);
@@ -776,10 +776,10 @@ namespace psycle
 			if(hd._id == file.FourCC("BODY"))
 			{
 				short * csamples;
-				const unsigned int Datalen(_pInstrument[instrument]->waveLength[layer]);
-				_pInstrument[instrument]->waveStereo[layer] = false;
-				_pInstrument[instrument]->waveDataL[layer] = new signed short[Datalen];
-				csamples = _pInstrument[instrument]->waveDataL[layer];
+				const unsigned int Datalen(_pInstrument[instrument]->waveLength);
+				_pInstrument[instrument]->waveStereo = false;
+				_pInstrument[instrument]->waveDataL = new signed short[Datalen];
+				csamples = _pInstrument[instrument]->waveDataL;
 				if(bits == 16)
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
@@ -804,34 +804,27 @@ namespace psycle
 			return 1;
 		}
 
-		int Song::WavAlloc(int iInstr, int iLayer, bool bStereo, long iSamplesPerChan, const char * sName)
+		int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
 		{
 			///\todo what is ASSERT? some msicrosoft thingie?
 			ASSERT(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
-			DeleteLayer(iInstr,iLayer);
+			DeleteLayer(iInstr);
+			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
 			if(bStereo)
-			{
-				_pInstrument[iInstr]->waveDataL[iLayer] = new signed short[iSamplesPerChan];
-				_pInstrument[iInstr]->waveDataR[iLayer] = new signed short[iSamplesPerChan];
-				_pInstrument[iInstr]->waveStereo[iLayer] = true;
+			{	_pInstrument[iInstr]->waveDataR = new signed short[iSamplesPerChan];
+				_pInstrument[iInstr]->waveStereo = true;
+			} else {
+				_pInstrument[iInstr]->waveStereo = false;
 			}
-			else
-			{
-				_pInstrument[iInstr]->waveDataL[iLayer] = new signed short[iSamplesPerChan];
-				_pInstrument[iInstr]->waveStereo[iLayer] = false;
-			}
-			_pInstrument[iInstr]->waveLength[iLayer] = iSamplesPerChan;
-			std::strncpy(_pInstrument[iInstr]->waveName[iLayer], sName, 31);
-			_pInstrument[iInstr]->waveName[iLayer][31] = '\0';
-			if(iLayer == 0)
-			{
-				std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
-				_pInstrument[iInstr]->_sName[31]='\0';
-			}
+			_pInstrument[iInstr]->waveLength = iSamplesPerChan;
+			std::strncpy(_pInstrument[iInstr]->waveName, sName, 31);
+			_pInstrument[iInstr]->waveName[31] = '\0';
+			std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
+			_pInstrument[iInstr]->_sName[31]='\0';
 			return true;
 		}
 
-		int Song::WavAlloc(int instrument,int layer,const char * Wavfile)
+		int Song::WavAlloc(int instrument,const char * Wavfile)
 		{ 
 			///\todo what is ASSERT? some msicrosoft thingie?
 			ASSERT(Wavfile != 0);
@@ -851,11 +844,11 @@ namespace psycle
 			int bits(file.BitsPerSample());
 			long Datalen(file.NumSamples());
 			// Initializes the layer.
-			WavAlloc(instrument, layer, st_type == 2, Datalen, Wavfile);
+			WavAlloc(instrument, st_type == 2, Datalen, Wavfile);
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-			short * sampL(_pInstrument[instrument]->waveDataL[layer]);
+			short * sampL(_pInstrument[instrument]->waveDataL);
 
 			///\todo use template code for all this semi-repetitive code.
 
@@ -892,7 +885,7 @@ namespace psycle
 			// stereo
 			else
 			{
-				short *sampR(_pInstrument[instrument]->waveDataR[layer]);
+				short *sampR(_pInstrument[instrument]->waveDataR);
 				UINT8 smp8;
 				switch(bits)
 				{
@@ -946,12 +939,12 @@ namespace psycle
 						unsigned int le(0);
 						file.Read(static_cast<void*>(&ls), 4);
 						file.Read(static_cast<void*>(&le), 4);
-						_pInstrument[instrument]->waveLoopStart[layer] = ls;
-						_pInstrument[instrument]->waveLoopEnd[layer] = le;
+						_pInstrument[instrument]->waveLoopStart = ls;
+						_pInstrument[instrument]->waveLoopEnd = le;
 						// only for my bad sample collection
 						//if(!((ls <= 0) && (le >= Datalen - 1)))
 						{
-							_pInstrument[instrument]->waveLoopType[layer] = true;
+							_pInstrument[instrument]->waveLoopType = true;
 						}
 					}
 					file.Skip(9);
@@ -1371,7 +1364,7 @@ namespace psycle
 				::Sleep(1); ///< ???
 				// Instruments
 				pFile->Read(&instSelected, sizeof instSelected);
-				for(int i(0) ; i < OLD_MAX_INSTRUMENTS ; ++i)
+				for(i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
 					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
 				}
@@ -1448,30 +1441,51 @@ namespace psycle
 				::Sleep(1);
 				// Waves
 				//
-				pFile->Read(&waveSelected, sizeof(waveSelected));
+				int tmpwvsl;
+				pFile->Read(&tmpwvsl, sizeof(int));
 
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
 					for (int w=0; w<OLD_MAX_WAVES; w++)
 					{
-						pFile->Read(&_pInstrument[i]->waveLength[w], sizeof(_pInstrument[0]->waveLength[0]));
-						if (_pInstrument[i]->waveLength[w] > 0)
+						int wltemp;
+						pFile->Read(&wltemp, sizeof(_pInstrument[0]->waveLength));
+						if (wltemp > 0)
 						{
-							short tmpFineTune;
-							pFile->Read(&_pInstrument[i]->waveName[w], 32);
-							pFile->Read(&_pInstrument[i]->waveVolume[w], sizeof(_pInstrument[0]->waveVolume[0]));
-							pFile->Read(&tmpFineTune, sizeof(short));
-							_pInstrument[i]->waveFinetune[w]=(int)tmpFineTune;
-							pFile->Read(&_pInstrument[i]->waveLoopStart[w], sizeof(_pInstrument[0]->waveLoopStart[0]));
-							pFile->Read(&_pInstrument[i]->waveLoopEnd[w], sizeof(_pInstrument[0]->waveLoopEnd[0]));
-							pFile->Read(&_pInstrument[i]->waveLoopType[w], sizeof(_pInstrument[0]->waveLoopType[0]));
-							pFile->Read(&_pInstrument[i]->waveStereo[w], sizeof(_pInstrument[0]->waveStereo[0]));
-							_pInstrument[i]->waveDataL[w] = new signed short[_pInstrument[i]->waveLength[w]];
-							pFile->Read(_pInstrument[i]->waveDataL[w], _pInstrument[i]->waveLength[w]*sizeof(short));
-							if (_pInstrument[i]->waveStereo[w])
+							if ( w == 0 )
 							{
-								_pInstrument[i]->waveDataR[w] = new signed short[_pInstrument[i]->waveLength[w]];
-								pFile->Read(_pInstrument[i]->waveDataR[w], _pInstrument[i]->waveLength[w]*sizeof(short));
+								short tmpFineTune;
+								_pInstrument[i]->waveLength=wltemp;
+								pFile->Read(&_pInstrument[i]->waveName, 32);
+								pFile->Read(&_pInstrument[i]->waveVolume, sizeof(_pInstrument[0]->waveVolume));
+								pFile->Read(&tmpFineTune, sizeof(short));
+								_pInstrument[i]->waveFinetune=(int)tmpFineTune;
+								pFile->Read(&_pInstrument[i]->waveLoopStart, sizeof(_pInstrument[0]->waveLoopStart));
+								pFile->Read(&_pInstrument[i]->waveLoopEnd, sizeof(_pInstrument[0]->waveLoopEnd));
+								pFile->Read(&_pInstrument[i]->waveLoopType, sizeof(_pInstrument[0]->waveLoopType));
+								pFile->Read(&_pInstrument[i]->waveStereo, sizeof(_pInstrument[0]->waveStereo));
+								_pInstrument[i]->waveDataL = new signed short[_pInstrument[i]->waveLength];
+								pFile->Read(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength*sizeof(short));
+								if (_pInstrument[i]->waveStereo)
+								{
+									_pInstrument[i]->waveDataR = new signed short[_pInstrument[i]->waveLength];
+									pFile->Read(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength*sizeof(short));
+								}
+							}
+							else 
+							{
+								bool stereo;
+								char *junk =new char[42+sizeof(bool)];
+								pFile->Read(junk,sizeof(junk));
+								delete junk;
+								pFile->Read(&stereo,sizeof(bool));
+								short *junk2 = new signed short[wltemp];
+								pFile->Read(junk2, sizeof(junk2));
+								if ( stereo )
+								{
+									pFile->Read(junk2, sizeof(junk2));
+								}
+								delete junk2;
 							}
 						}
 					}
@@ -1733,30 +1747,6 @@ namespace psycle
 							{
 								Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
 								int d = pOrigMachine->FindOutputWire(i);
-//////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-
-\todo [bohan] crash on the line above
-
-cvs revision set tag: release_1_7_26
-tune: http://bohan.dyndns.org/~bohan/working-dir/psycle.bugging-tunes/heat-seeker.modular-expression.psy
-	
-crashes on load.
-
-i is 255. <-- huh? pMac is a array of size 127!!! for (i=0; i<128; i++) !!!
-c is 7.
-pMac[i] is a null pointer.
-
-
-stack trace:
->	psycle.exe!psycle::host::Song::Load(psycle::host::RiffFile * pFile=0x0012f944, bool fullopen=true)  Line 1846 + 0xf	C++
- 	psycle.exe!psycle::host::CChildView::FileLoadsongNamed(std::basic_string<char,std::char_traits<char>,std::allocator<char> > fName={...})  Line 2041	C++
- 	psycle.exe!psycle::host::CChildView::OnFileLoadsongNamed(std::basic_string<char,std::char_traits<char>,std::allocator<char> > fName={...}, int fType=1)  Line 2019	C++
- 	psycle.exe!psycle::host::CChildView::CallOpenRecent(int pos=3)  Line 2096	C++
- 	psycle.exe!psycle::host::CChildView::OnFileRecent_04()  Line 2002	C++
-
-*/
-//////////////////////////////////////////////////////////////////////////////////////////////////
 
 								float val = volMatrix[pMac[i]->_inputMachines[c]][d];
 								if( val >= 4.000001f ) 
@@ -2459,7 +2449,7 @@ stack trace:
 		{
 			if (PW_Stage==0)
 			{
-				PW_Length=_pInstrument[PREV_WAV_INS]->waveLength[0];
+				PW_Length=_pInstrument[PREV_WAV_INS]->waveLength;
 				if (PW_Length>0 )
 				{
 					PW_Stage=1;
@@ -2475,9 +2465,9 @@ stack trace:
 			--pSamplesL;
 			--pSamplesR;
 			
-			signed short *wl=_pInstrument[PREV_WAV_INS]->waveDataL[0];
-			signed short *wr=_pInstrument[PREV_WAV_INS]->waveDataR[0];
-			bool const stereo=_pInstrument[PREV_WAV_INS]->waveStereo[0];
+			signed short *wl=_pInstrument[PREV_WAV_INS]->waveDataL;
+			signed short *wr=_pInstrument[PREV_WAV_INS]->waveDataR;
+			bool const stereo=_pInstrument[PREV_WAV_INS]->waveStereo;
 			float ld=0;
 			float rd=0;
 				
