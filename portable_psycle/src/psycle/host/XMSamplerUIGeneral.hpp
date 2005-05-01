@@ -14,7 +14,7 @@ class XMSamplerUIGeneral : public CPropertyPage
 // Construction
 public:
 	XMSamplerUIGeneral();
-	~XMSamplerUIGeneral();
+	virtual ~XMSamplerUIGeneral();
 
 	XMSampler * const pMachine() { return _pMachine;};
 	void pMachine(XMSampler * const p) { _pMachine = p;};
