@@ -267,7 +267,7 @@ CMachineParameter const paraGlobalDetune =
 // Why is the default tuning +1 +60? answer:
 // the wavetable contains one period of 2048 samples,
 // at 44100Hz (which Asynth assumes), this is a ~21.5Hz signal.
-// A standard tune is A#4 (i.e, note 69) to be 440Hz, which is
+// A standard tune is A-5 (i.e, note 69) to be 440Hz, which is
 // ~ 20.4335 times bigger. log2 of this value is ~ 4.3528.
 // Multiply this value by 12 (notes/octave) to get 52.2344,
 // which stands for note 52 and finetune 0.2344.
