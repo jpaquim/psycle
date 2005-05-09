@@ -54,7 +54,9 @@
 	#if !defined VC_EXTRA_LEAN
 		#define VC_EXTRA_LEAN
 	#endif
-	#if !defined _AFXDLL // when mfc is used we must not do the following ("explained" below)
+	#if defined _AFXDLL // when mfc is used
+		#include "pre_compiled_headers.mfc.private.hpp"
+	#else // when mfc is used we must not do the following ("explained" below)
 		#if !defined WIN32_EXTRA_LEAN
 			#define WIN32_EXTRA_LEAN // for mfc apps, we would get unresolved symbols
 		#endif
@@ -176,42 +178,6 @@
 
 
 
-////////////////////////
-// fltk http://fltk.org
-////////////////////////
-/*
-#if defined OPERATING_SYSTEM__CROSSPLATFORM
-	// when compiling fltk dynamic shared library
-		//#define USE_CONF
-		//#define FL_DLL
-		//#define FL_LIBRARY
-		//#define FL_GL_LIBRARY
-		//#pragma comment(lib, "OpenGL32")
-		//#define FL_IMAGES_LIBRARY
-		//#define _MSC_DLL
-		//#define WIN32
-		//#define _WINDOWS
-		//#pragma comment(lib, "wsock32")
-	#if !defined FL_SHARED
-		#define FL_SHARED // when using fltk dynamic shared library
-	#endif
-	#if !defined _WIN32_WINNT
-		#define _WIN32_WINNT 0x0500
-	#endif
-	#if !defined LIBRARY__FLTK__PATH
-		#define LIBRARY__FLTK__PATH ""
-	#endif
-	#if defined NDEBUG
-		#pragma comment(lib, LIBRARY__FLTK__PATH "fltkdll")
-	#else
-		#pragma comment(lib, LIBRARY__FLTK__PATH "fltkdlld")
-	#endif
-	#endif
-#endif
-*/
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -219,17 +185,6 @@
 
 #if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR < 7
 	#pragma warning(pop)
-#endif
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-#if defined _AFXDLL
-	#include "pre_compiled_headers.mfc.private.hpp"
 #endif
 
 
