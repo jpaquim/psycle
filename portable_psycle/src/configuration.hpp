@@ -42,15 +42,6 @@
 
 
 
-// value to show in the string describing the configuration options.
-#if defined NDEBUG
-	#define PSYCLE__CONFIGURATION__OPTION__ENABLE__DEBUG "off"
-#else
-	#define PSYCLE__CONFIGURATION__OPTION__ENABLE__DEBUG "on"
-#endif
-
-
-
 /// the compiler used to build ... should be autodetermined, but we don't have autoconf.
 #define PSYCLE__COMPILER__BUILD "msvc"
 
