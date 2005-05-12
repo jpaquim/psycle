@@ -398,11 +398,11 @@ namespace psycle
 			#define $catch$(function) \
 				catch(        std::exception const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(                  char const e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(         long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(              long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(                   int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(             short int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(                  char const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(  signed long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(  signed      long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(  signed           int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(  signed     short int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(  signed          char const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(unsigned long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(unsigned      long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(unsigned           int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
