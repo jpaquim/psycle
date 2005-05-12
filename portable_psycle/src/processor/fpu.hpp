@@ -29,8 +29,8 @@ namespace processor
 					public:
 						inline operator underlying () const throw() { return value; }
 						inline type(underlying const & value) : value(value) {}
-						/// by default, inexact exceptions are masked.
-						inline type() : value() { inexact(true); }
+						/// by default, inexact and underflow exceptions are masked.
+						inline type() : value() { inexact(true); underflow(true); }
 						bool inline denormal() const throw()
 						{
 							#if defined OPERATING_SYSTEM__MICROSOFT
