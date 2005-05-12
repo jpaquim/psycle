@@ -564,8 +564,7 @@ namespace host{
 	{
 		// read header
 		Seek(iStart);
-		unsigned char sRemap[16];
-		
+
 		int iInstrSize = ReadInt4();
 		ASSERT(iInstrSize==0x107||iInstrSize==0x21);
 		TCHAR sInstrName[23];
@@ -577,6 +576,8 @@ namespace host{
 
 		if(iSampleCount>1)
  			TRACE(_T("ssmple count = %d\n"),iSampleCount);
+
+		unsigned char *sRemap = new unsigned char[iSampleCount];
 
 		// store instrument name
 		//std::string& _tmp1 = 
@@ -630,7 +631,7 @@ namespace host{
 				sampler.rInstrument(idx).NoteToSample(i,npair);
 			}
 		}
-
+		delete[] sRemap;
 		sampler.rInstrument(idx).IsEnabled(true);
 		return iStart;
 	}
