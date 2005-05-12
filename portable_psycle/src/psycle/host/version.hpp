@@ -3,6 +3,11 @@
 #if 0
 /*
 $Log$
+Revision 1.25  2005/05/12 22:18:39  johan-boule
+increased version number for alpha release
+includes jaz's bug fixes
+fpu exceptions disabled in the configuration "by default" as it's only useful for crazy debugging hell
+
 Revision 1.24  2005/05/12 14:55:49  johan-boule
 Added handling of fpu exceptions.
 It's a build configuration option, so it can be disabled.
@@ -104,7 +109,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 42 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 43 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.

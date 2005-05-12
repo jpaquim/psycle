@@ -28,7 +28,7 @@
 #define PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN 1
 
 /// unmasks fpu exceptions
-#define PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS 1
+#define PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS 0
 
 
 /// the compiler used to build ... should be autodetermined, but we don't have autoconf.
