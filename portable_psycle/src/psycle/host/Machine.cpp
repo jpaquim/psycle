@@ -26,24 +26,72 @@ namespace psycle
 		char* Dummy::_psName = "DummyPlug";
 		char* DuplicatorMac::_psName = "Dupe it!";
 
-		void Machine::crashed(const std::exception & e) throw()
+		void Machine::crashed(std::exception const & e) throw()
 		{
-			///\todo do we need thread synchronization?
-			///\todo gui needs to update
-			crashed_ = true;
-			_bypass = true;
-			_mute = true;
-			std::ostringstream title; title
-				<< "Machine crashed: "
-				<< _editName;
-			if(GetDllName()) title
-				<< ": " << GetDllName();
-			host::loggers::exception(title.str() + '\n' + e.what());
-			//::MessageBox(0, e.what(), title.str().c_str(), MB_OK | MB_ICONWARNING);
+			bool minor_problem(false);
+			bool crash(false);
+			{
+				exceptions::function_error const * const function_error(dynamic_cast<exceptions::function_error const * const>(&e));
+				if(function_error)
+				{
+					operating_system::exceptions::translated const * const translated(dynamic_cast<operating_system::exceptions::translated const * const>(function_error->exception()));
+					if(translated)
+					{
+						crash = true;
+						switch(translated->code())
+						{
+							// grows the fpu exception mask so that each type of exception is only reported once
+							case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
+							case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
+							case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
+							case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
+							case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
+							case STATUS_FLOAT_STACK_CHECK:                                                                       break;
+							case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
+						}
+					}
+				}
+			}
+			if(!minor_problem)
+			{
+				///\todo do we need thread synchronization?
+				///\todo gui needs to update
+				crashed_ = true;
+				_bypass = true;
+				_mute = true;
+			}
+			std::ostringstream s;
+			s << "Machine: " << _editName;
+			if(GetDllName()) s << ": " << GetDllName();
+			s << std::endl << e.what() << std::endl;
+			if(minor_problem)
+			{
+				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
+				host::loggers::warning(s.str());
+			}
+			else
+			{
+				s
+					<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash."
+					<< std::endl
+					<< "You should save your work to a new file, and restart the host.";
+				if(crash)
+				{
+					//host::loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
+					host::loggers::exception(s.str());
+				}
+				else
+				{
+					host::loggers::exception(s.str());
+				}
+			}
+			::MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
+			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 		}
 
 		Machine::Machine()
-			: crashed_(false)
+			: crashed_()
+			, fpu_exception_mask_()
 			, _macIndex(0)
 			, _type(MACH_UNDEFINED)
 			, _mode(MACHMODE_UNDEFINED)
@@ -322,7 +370,12 @@ namespace psycle
 						*/
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
-							pInMachine->Work(numSamples);
+							{
+								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+									processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
+								pInMachine->Work(numSamples);
+							}
 							/*
 							This could be a different Undenormalize funtion, using the already calculated
 							"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
@@ -795,6 +848,9 @@ namespace psycle
 
 		void Master::Work(int numSamples)
 		{
+			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+				processor::fpu::exception_mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+			#endif
 			Machine::Work(numSamples);
 			CPUCOST_INIT(cost);
 			//if(!_mute)

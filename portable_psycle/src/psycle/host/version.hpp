@@ -3,6 +3,15 @@
 #if 0
 /*
 $Log$
+Revision 1.24  2005/05/12 14:55:49  johan-boule
+Added handling of fpu exceptions.
+It's a build configuration option, so it can be disabled.
+It only catches fpu exceptions in the machines' work functions, but this could be extended to other functions as well.
+Each exception type is reported only once per machine it occurs, by growing the fpu exception mask.
+"Inexact result" fpu exceptions are initially already masked.
+
+Also, made exceptions which happen in machines appear not only in the lof, but also in a message box, because many people wondered why some machines were automagically set to bypassed/muted (The message box wouldn't be needed if the MFC logging window worked.)
+
 Revision 1.23  2005/05/01 14:10:59  jaz001
 More Work on Sampulse (IT Filtering, improving commands, bugfixing).
 Removed an cleaned (a bit) old sample sources (removed the never used sample layers)
@@ -95,7 +104,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 41 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 42 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
@@ -108,17 +117,9 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
-	"version: " PSYCLE__VERSION \
-	EOL \
-	"build configuration options:" EOL PSYCLE__CONFIGURATION__OPTIONS(EOL) \
-	EOL \
+	"version: " PSYCLE__VERSION EOL \
+	"build configuration options:" EOL PSYCLE__CONFIGURATION__OPTIONS(EOL) EOL \
 	"built on: " PSYCLE__BUILD__DATE
-
-#if defined NDEBUG
-	#define PSYCLE__CONFIGURATION__OPTION__DEBUG "off"
-#else
-	#define PSYCLE__CONFIGURATION__OPTION__DEBUG "on"
-#endif
 
 #if defined COMPILER__RESOURCE
 	/// [bohan] __DATE__ and __TIME__ doesn't seem to work with msvc's resource compiler

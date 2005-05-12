@@ -6,11 +6,101 @@
 #include "Helpers.hpp"
 #include "Constants.hpp"
 #include "FileIO.hpp"
+#include <processor/fpu.hpp>
+#include <stdexcept>
 namespace psycle
 {
 	namespace host
 	{
+		class Machine; // forward declaration
 		class RiffFile; // forward declaration
+
+		/// Base class for exceptions thrown from plugins.
+		class exception : public std::runtime_error
+		{
+			public:
+				exception(std::string const & what) : std::runtime_error(what) {}
+		};
+
+		/// Classes derived from exception.
+		namespace exceptions
+		{
+			/// Base class for exceptions caused by errors on library operation.
+			class library_error : public exception
+			{
+				public:
+					library_error(std::string const & what) : exception(what) {}
+			};
+
+			/// Classes derived from library.
+			namespace library_errors
+			{
+				/// Exception caused by library loading failure.
+				class loading_error : public library_error
+				{
+					public:
+						loading_error(std::string const & what) : library_error(what) {}
+				};
+
+				/// Exception caused by symbol resolving failure in a library.
+				class symbol_resolving_error : public library_error
+				{
+					public:
+						symbol_resolving_error(std::string const & what) : library_error(what) {}
+				};
+			}
+
+			/// Base class for exceptions caused by an error in a library function.
+			class function_error : public exception
+			{
+				public:
+					function_error(std::string const & what, std::exception const * const exception = 0) : host::exception(what), exception_(exception) {}
+				public:
+					std::exception const inline * const exception() const throw() { return exception_; }
+				private:
+					std::exception const * const        exception_;
+			};
+			
+			///\relates function_error.
+			namespace function_errors
+			{
+				namespace
+				{
+					template<typename e> const std::string string(e const & e) { std::ostringstream s; s << e; return s.str(); }
+					template<> const std::string string<std::exception>(std::exception const & e) { return e.what(); }
+					template<> const std::string string<void const *>(void const * const &) { return "Type of exception is unkown, cannot display any further information."; }
+				}
+
+				template<typename e> void rethrow(Machine & machine, std::string const & function, e const * const e, std::exception const * const standard) throw(function_error)
+				{
+					std::ostringstream s;
+					s
+						<< "Machine had an exception in function '" << function << "'." << std::endl
+						<< typeid(*e).name() << std::endl
+						<< string(*e);
+					function_error const function_error(s.str(), standard);
+					machine.crashed(function_error);
+					throw function_error;
+				}
+
+				template<typename e> void inline rethrow(Machine & machine, std::string const & function, e const * const e = 0) throw(function_error)
+				{
+					rethrow(machine, function, e, 0);
+				}
+
+				template<> void inline rethrow<std::exception>(Machine & machine, std::string const & function, std::exception const * const e) throw(function_error)
+				{
+					rethrow(machine, function, e, e);
+				}
+
+				/// Exception caused by a bad returned value from a library function.
+				class bad_returned_value : public function_error
+				{
+					public:
+						bad_returned_value(std::string const & what) : function_error(what) {}
+				};
+			}
+		}
 
 		/// Internal Machines' Parameters' Class.
 		class CIntMachParam			
@@ -29,16 +119,24 @@ namespace psycle
 		{
 			///\name crash handling
 			///\{
-		private:
-			bool crashed_;
-		public:
-			/// This function should be called when an exception was thrown from the machine.
-			/// This will mark the machine as crashed, i.e. crashed() will return true,
-			/// and it will be disabled.
-			///\param e the exception that occured, converted to a std::exception if needed.
-			void crashed(const std::exception & e) throw();
-			/// Tells wether this machine has crashed.
-			const bool & crashed() const throw() { return crashed_; }
+				public:
+					/// This function should be called when an exception was thrown from the machine.
+					/// This will mark the machine as crashed, i.e. crashed() will return true,
+					/// and it will be disabled.
+					///\param e the exception that occured, converted to a std::exception if needed.
+					void crashed(std::exception const & e) throw();
+
+				public:
+					/// Tells wether this machine has crashed.
+					bool const inline & crashed() const throw() { return crashed_; }
+				private:
+					bool                crashed_;
+
+				public:
+					processor::fpu::exception_mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+					processor::fpu::exception_mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+				private:
+					processor::fpu::exception_mask::type                fpu_exception_mask_;
 			///\}
 
 		public:
@@ -231,83 +329,6 @@ namespace psycle
 			__asm sub eax, cost					\
 			__asm mov cost, eax
 
-
-		/// Base class for exceptions thrown from plugins.
-		class exception : public std::runtime_error
-		{
-		public:
-			 exception(const std::string & what) : std::runtime_error(what) {}
-		};
-
-		/// Classes derived from exception.
-		namespace exceptions
-		{
-			/// Base class for exceptions caused by errors on library operation.
-			class library_error : public exception
-			{
-			public:
-				library_error(const std::string & what) : exception(what) {}
-			};
-
-			/// Classes derived from library.
-			namespace library_errors
-			{
-				/// Exception caused by library loading failure.
-				class loading_error : public library_error
-				{
-				public:
-					loading_error(const std::string & what) : library_error(what) {}
-				};
-
-				/// Exception caused by symbol resolving failure in a library.
-				class symbol_resolving_error : public library_error
-				{
-				public:
-					symbol_resolving_error(const std::string & what) : library_error(what) {}
-				};
-			}
-
-			/// Base class for exceptions caused by an error in a library function.
-			class function_error : public exception
-			{
-			public:
-				function_error(const std::string & what) : exception(what) {}
-			};
-			
-			/// Classes derived from function.
-			namespace function_errors
-			{
-				namespace
-				{
-					template<typename e> const std::string string(const e & e) { std::ostringstream s; s << e; return s.str(); }
-					template<> const std::string string<std::exception>(const std::exception & e) { return e.what(); }
-					template<> const std::string string<const void *>(const void * const &) { return "Type of exception is unkown, cannot display any further information."; }
-				}
-
-				template<typename e> void rethrow(Machine & machine, const std::string & function, const e * const e = 0) throw(function_error)
-				{
-					std::ostringstream s; s
-						<< "Machine crashed: " << machine._editName;
-					if(machine.GetDllName()) s
-						<< ": " << machine.GetDllName();
-					s
-						<< std::endl
-						<< "Machine had an exception in function '" << function << "'." << std::endl
-						<< typeid(*e).name() << std::endl
-						<< string(*e);
-					const function_error function_error(s.str());
-					machine.crashed(function_error);
-					throw function_error;
-				}
-
-				/// Exception caused by a bad returned value from a library function.
-				class bad_returned_value : public function_error
-				{
-				public:
-					bad_returned_value(const std::string & what) : function_error(what) {}
-				};
-			}
-		}
 
 		inline void Machine::SetVolumeCounter(int numSamples)
 		{

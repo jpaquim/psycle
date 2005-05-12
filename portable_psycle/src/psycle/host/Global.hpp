@@ -38,6 +38,9 @@ namespace psycle
 			/// normal, informative output.
 			///\see levels::info
 			void info(const std::string & string) throw();
+			/// warnings.
+			///\see levels::warning
+			void warning(const std::string & string) throw();
 			/// exceptions thrown from software, via "throw some_exception;".
 			///\see levels::exception
 			void exception(const std::string & string) throw();
@@ -52,6 +55,7 @@ namespace psycle
 				{
 					trace, ///< very low level, debug, flooding output.
 					info, ///< normal, informative output.
+					warning, ///< warnings.
 					exception, ///< exceptions thrown from software, via "throw some_exception;".
 					crash ///< exceptions thrown from cpu/os. They are translated into c++ exceptions, see operating_system::exceptions::translated.
 				};
