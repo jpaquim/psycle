@@ -17,11 +17,13 @@ namespace psycle
 			_playBlock = false;
 			_recording = false;
 			Tweaker = false;
-			_ticksRemaining=0;
+			_samplesRemaining=0;
 			_lineCounter=0;
 			_loopSong=true;
 			_patternjump=-1;
 			_linejump=-1;
+			_loop_count=0;
+			_loop_line=0;
 			m_SampleRate=44100;
 			m_SamplesPerRow=(44100*60)/(125*4);
 			tpb=4;
@@ -45,6 +47,8 @@ namespace psycle
 			_playPattern = Global::_pSong->playOrder[_playPosition];
 			_playTime = 0;
 			_playTimem = 0;
+			_loop_count =0;
+			_loop_line = 0;
 			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
@@ -119,13 +123,27 @@ namespace psycle
 						{
 							if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-							//\todo: finish the implementation of these commands.
+								_samplesRemaining+=SamplesPerRow()*(pEntry->_parameter&0x0F);
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
+								_samplesRemaining+=SamplesPerRow()*(pEntry->_parameter&0x0F)*tpb/24;
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
 							{
+								int value = pEntry->_parameter&0x0F;
+								if (value == 0 )
+								{
+									_loop_line = _lineCounter;
+								} else {
+									if ( _loop_count == 0 )
+									{ 
+										_loop_count = value;
+										_linejump = _loop_line;
+									} else {
+										if (--_loop_count) _linejump = _loop_line;
+									}
+								}
 /*
 *					case IT_S_PATTERN_LOOP:
 {
@@ -280,7 +298,7 @@ break;
 					}
 				}
 			}
-			_ticksRemaining = SamplesPerRow();
+			_samplesRemaining = SamplesPerRow();
 		}	
 
 
@@ -353,9 +371,9 @@ break;
 			{
 				if(numSamplex > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamplex;
 				// Tick handler function
-				if((pThis->_playing) && (amount >= pThis->_ticksRemaining)) amount = pThis->_ticksRemaining;
+				if((pThis->_playing) && (amount >= pThis->_samplesRemaining)) amount = pThis->_samplesRemaining;
 				// Song play
-				if((pThis->_ticksRemaining <=0) && (pThis->_playing))
+				if((pThis->_samplesRemaining <=0) && (pThis->_playing))
 				{
 					// Advance position in the sequencer
 					pThis->AdvancePosition();
@@ -435,7 +453,7 @@ break;
 					Master::_pMasterSamples += amount * 2;
 					numSamplex -= amount;
 				}
-				if(pThis->_playing) pThis->_ticksRemaining -= amount;
+				if(pThis->_playing) pThis->_samplesRemaining -= amount;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
 
 			return pThis->_pBuffer;

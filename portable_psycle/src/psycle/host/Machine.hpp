@@ -166,7 +166,7 @@ namespace psycle
 			virtual bool SetParameter(int numparam, int value) { return false;}; 
 			virtual void SetSampleRate(int sr) {};
 			virtual bool Load(RiffFile * pFile);
-			virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version);
+			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 
 			virtual void SaveFileChunk(RiffFile * pFile);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
@@ -249,7 +249,7 @@ namespace psycle
 			Dummy(int index);
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
-			virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version);
+			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
 			bool wasVST;
 		protected:
@@ -269,7 +269,7 @@ namespace psycle
 			virtual void GetParamValue(int numparam,char *parVal);
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
-			virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 		protected:
@@ -289,7 +289,7 @@ namespace psycle
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
 			virtual bool Load(RiffFile * pFile);
-			virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 			/// this is for the VstHost

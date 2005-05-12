@@ -143,6 +143,14 @@ namespace psycle
 				id = - id;
 			}
 		}
+		static inline float dB(float amplitude) // amplitude normalized to 1.0f.
+		{
+			return 20.0f * log10f(amplitude);
+		}
+		static inline float dB2Amp(float db)
+		{
+			return pow(10.0f,db/20.0f);
+		}
 
 		/// sample interpolator kinds.
 		///\todo typdef should be inside the Resampler or Cubic class itself.

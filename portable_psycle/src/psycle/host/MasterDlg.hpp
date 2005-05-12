@@ -13,9 +13,10 @@ NAMESPACE__BEGIN(psycle)
 		public:
 			CMasterDlg(CChildView * pParent);
 			BOOL Create();
-			void PaintNumbers(int val, int x, int y);
-			void PaintNumbersDC(CDC* dc,CDC* memDC,int val,int x,int y);
+			void PaintNumbers(float val, int x, int y);
+			void PaintNumbersDC(CDC* dc,CDC* memDC,float val,int x,int y);
 			void PaintNames(char* name,int x,int y);
+			void UpdateUI(void);
 			CBitmap m_numbers;
 			CFont namesFont;
 			Master* _pMachine;

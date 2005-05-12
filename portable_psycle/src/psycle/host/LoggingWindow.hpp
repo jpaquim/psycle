@@ -9,6 +9,7 @@ NAMESPACE__BEGIN(psycle)
 class CMainFrame;
 
 		/// logging window.
+/// machine window.
 		class CLoggingWindow : public CDialog
 		{
 		public:
@@ -28,7 +29,7 @@ class CMainFrame;
 			std::vector<LogEntry> LogVector;
 
 		public:
-			CLoggingWindow(CWnd * pParent = 0);
+			CLoggingWindow(CWnd* pParent = 0);
 			//void Validate();
 			CMainFrame * pParentMain;
 			// Dialog Data

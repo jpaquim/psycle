@@ -1,4 +1,4 @@
-#include "project.private.hpp"
+#include <project.private.hpp>
 #include "ITModule2.h"
 #include "Configuration.hpp"
 #include "Song.hpp"
@@ -158,6 +158,7 @@ Special:  Bit 0: On = song message attached.
 					; //  Disable channel.
 				}
 				sampler->rChannel(i).DefaultVolume(itFileH.chanVol[i]);
+				sampler->rChannel(i).DefaultFilterType(dsp::F_LOWPASS12);
 			}
 			song->SONGTRACKS=numchans;
 
@@ -200,7 +201,6 @@ Special:  Bit 0: On = song message attached.
 
 				for ( int i=0; i<128; i++ )
 				{
-					char tmp[4];
 					CString zxx = mdata.Zxx[i];
 					CString zxx2 = zxx.Left(5);
 					if ( strcmp("F0F00",zxx2) == 0)
@@ -222,9 +222,30 @@ Special:  Bit 0: On = song message attached.
 						else if (mdata.Zxx[i][7] >= 'A' && mdata.Zxx[i][7] <= 'F')
 							tmp += (mdata.Zxx[i][7] - 'A' + 0xA);
 
+						// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
+						if ( mode == 0 && tmp != 127) tmp = int(tmp*100.0f/127.0f);
 						sampler->SetZxxMacro(i,mode,tmp);
 					}
 				}
+			}
+			else // initializing with the default midi.cfg values.
+			{
+				sampler->SetZxxMacro(0,1,0x00);
+				sampler->SetZxxMacro(1,1,0x08);
+				sampler->SetZxxMacro(2,1,0x10);
+				sampler->SetZxxMacro(3,1,0x18);
+				sampler->SetZxxMacro(4,1,0x20);
+				sampler->SetZxxMacro(5,1,0x28);
+				sampler->SetZxxMacro(6,1,0x30);
+				sampler->SetZxxMacro(7,1,0x38);
+				sampler->SetZxxMacro(8,1,0x40);
+				sampler->SetZxxMacro(9,1,0x48);
+				sampler->SetZxxMacro(10,1,0x50);
+				sampler->SetZxxMacro(11,1,0x58);
+				sampler->SetZxxMacro(12,1,0x60);
+				sampler->SetZxxMacro(13,1,0x68);
+				sampler->SetZxxMacro(14,1,0x70);
+				sampler->SetZxxMacro(15,1,0x78);
 			}
 			if ( itFileH.special&SpecialFlags::HASMESSAGE)
 			{
@@ -273,7 +294,7 @@ Special:  Bit 0: On = song message attached.
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
-			xins.VolumeFadeSpeed(curH.fadeout*64);
+			xins.VolumeFadeSpeed(curH.fadeout*128);
 
 			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
 			if ( curH.DNC )
@@ -303,7 +324,6 @@ Special:  Bit 0: On = song message attached.
 				}
 
 /*
-*
 			// load IT 1xx volume envelope
 				_mm_read_UBYTES (ih.volenv, 200, modreader);
 				for (lp = 0; lp < ITENVCNT; lp++)
@@ -348,16 +368,28 @@ Special:  Bit 0: On = song message attached.
 			xins.PitchPanCenter(curH.pPanCenter);
 			xins.PitchPanSep(curH.pPanSep);
 			xins.GlobVol(curH.gVol/127.0f);
-			xins.VolumeFadeSpeed(curH.fadeout*32);
+			xins.VolumeFadeSpeed(curH.fadeout*64);
 			xins.RandomVolume(curH.randVol);
 			xins.RandomPanning(curH.randPan);
-			if ( curH.inFC != 0)
+			if ( (curH.inFC&0x80) != 0)
 			{
-				//\todo: inFC/inFR is unclear... in some files, there are values higher than 128, but others seem to be "on the
-				//        correct side..
 				xins.FilterType(dsp::F_LOWPASS12);
-				xins.FilterCutoff(curH.inFC/2);
-				xins.FilterResonance(curH.inFR/2);
+				int fc = curH.inFC&0x7F;
+				// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
+				if ( fc != 127) fc = int((fc)*100.0f/127.0f);
+				xins.FilterCutoff(fc);
+			}
+			if ((curH.inFR&0x80) != 0)
+			{
+				if ( xins.FilterCutoff() == 127 )
+				{
+					xins.FilterType(dsp::F_LOWPASS12);
+					int fc = curH.inFC&0x7F;
+					// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
+					if ( fc != 127) fc = int((fc)*100.0f/127.0f);
+					xins.FilterCutoff(fc);
+				}
+				xins.FilterResonance(curH.inFR&0x7F);
 			}
 
 
@@ -391,7 +423,7 @@ Special:  Bit 0: On = song message attached.
 				}
 
 				for(int i = 0; i < envelope_point_num;i++){
-					short envtmp = curH.volEnv.nodes[i].secondlo | curH.volEnv.nodes[i].secondhi <<8;
+					short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
 					xins.AmpEnvelope()->Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
 				}
 
@@ -421,8 +453,8 @@ Special:  Bit 0: On = song message attached.
 				}
 
 				for(int i = 0; i < envelope_point_num;i++){
-					short pantmp = curH.panEnv.nodes[i].secondlo || curH.panEnv.nodes[i].secondhi <<8;
-					xins.PanEnvelope()->Append(pantmp,(float)(curH.panEnv.nodes[i].first+32)/ 64.0f);
+					short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
+					xins.PanEnvelope()->Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
 				}
 
 			} else {
@@ -432,8 +464,7 @@ Special:  Bit 0: On = song message attached.
 			xins.PitchEnvelope()->Init();
 			xins.FilterEnvelope()->Init();
 
-			if(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
-				xins.FilterType(dsp::F_LOWPASS12);
+			if(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE){// enable pitch/filter envelope
 				int envelope_point_num = curH.pitchEnv.numP;
 				if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.
 					envelope_point_num = 25;
@@ -441,38 +472,43 @@ Special:  Bit 0: On = song message attached.
 
 				if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
 				{
+					xins.FilterType(dsp::F_LOWPASS12);
 					xins.FilterEnvelope()->IsEnabled(true);
 					xins.PitchEnvelope()->IsEnabled(false);
 					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
-						xins.FilterEnvelope()->SustainBegin(curH.panEnv.sustainS);
-						xins.FilterEnvelope()->SustainEnd(curH.panEnv.sustainE);
+						xins.FilterEnvelope()->SustainBegin(curH.pitchEnv.sustainS);
+						xins.FilterEnvelope()->SustainEnd(curH.pitchEnv.sustainE);
 					}
 
 					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
-						xins.FilterEnvelope()->LoopStart(curH.panEnv.loopS);
-						xins.FilterEnvelope()->LoopEnd(curH.panEnv.loopE);
+						xins.FilterEnvelope()->LoopStart(curH.pitchEnv.loopS);
+						xins.FilterEnvelope()->LoopEnd(curH.pitchEnv.loopE);
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo || curH.pitchEnv.nodes[i].secondhi <<8;
+						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
 						xins.FilterEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
 					}
+					if ( xins.FilterCutoff() < 127 )
+					{
+						xins.FilterEnvAmount((-1)*xins.FilterCutoff());
+					} else { xins.FilterEnvAmount(-128); }
 				} else {
 					xins.PitchEnvelope()->IsEnabled(true);
 					xins.FilterEnvelope()->IsEnabled(false);
 					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
-						xins.PitchEnvelope()->SustainBegin(curH.panEnv.sustainS);
-						xins.PitchEnvelope()->SustainEnd(curH.panEnv.sustainE);
+						xins.PitchEnvelope()->SustainBegin(curH.pitchEnv.sustainS);
+						xins.PitchEnvelope()->SustainEnd(curH.pitchEnv.sustainE);
 					}
 
 					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
-						xins.PitchEnvelope()->LoopStart(curH.panEnv.loopS);
-						xins.PitchEnvelope()->LoopEnd(curH.panEnv.loopE);
+						xins.PitchEnvelope()->LoopStart(curH.pitchEnv.loopS);
+						xins.PitchEnvelope()->LoopEnd(curH.pitchEnv.loopE);
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo || curH.pitchEnv.nodes[i].secondhi <<8;
-						xins.PitchEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
+						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+						xins.PitchEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
 					}
 				}
 			} else {
@@ -557,8 +593,21 @@ Special:  Bit 0: On = song message attached.
 				double maintune = floor(tune*12);
 				double finetune = floor(((tune*12)-maintune)*256);
 
+				int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
+					XMInstrument::WaveData::WaveForms::SAWDOWN,
+					XMInstrument::WaveData::WaveForms::SQUARE,
+					XMInstrument::WaveData::WaveForms::RANDOM
+				};
 				_wave.WaveTune(maintune);
 				_wave.WaveFineTune(finetune);
+				std::string sName = curH.sName;
+				_wave.WaveName(sName);
+				_wave.PanEnabled(curH.dfp&0x80);
+				_wave.PanFactor((curH.dfp&0x7F)/64.0f);
+				_wave.VibratoDepth(curH.vibD);
+				_wave.VibratoRate(curH.vibR);
+				_wave.VibratoSweep(curH.vibS);
+				_wave.VibratoType(exchwave[curH.vibT]);
 
 				if (curH.length == 0)
 					curH.flg &= ~SampleFlags::HAS_SAMPLE;
@@ -692,7 +741,6 @@ Special:  Bit 0: On = song message attached.
 								v = (short)val;
 
 							//And integrate the sample value
-							//(It always has to end with integration doesn't it ? ;-)
 							d1 += v;
 							d2 += d1;
 							wNew = deltapack?d2:d1;
@@ -747,10 +795,10 @@ Special:  Bit 0: On = song message attached.
 			int packedSize=ReadInt(2);
 			int rowCount=ReadInt(2);
 			int unused=ReadInt();
+			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
 //			char* packedpattern = new char[packedSize];
 //			Read(packedpattern,packedSize);
-			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			for (int row=0;row<rowCount;row++)
 			{
 				Read(&newEntry,1);
@@ -791,7 +839,10 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
 							pent._volume=tmp<64?tmp:63;
@@ -833,6 +884,7 @@ Special:  Bit 0: On = song message attached.
 						{
 							pent._volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
 						}
+	#endif
 #endif
 					}
 					if(mask[channel]&8)
@@ -894,7 +946,6 @@ Special:  Bit 0: On = song message attached.
 					break;
 				case ITModule2::CMD::TONE_PORTAMENTO:
 					pent._cmd = XMSampler::CMD::PORTA2NOTE;
-					if ( param >= 0xE0) pent._parameter=0xDF;
 					break;
 				case ITModule2::CMD::VIBRATO:
 					pent._cmd = XMSampler::CMD::VIBRATO;
@@ -1014,6 +1065,11 @@ Special:  Bit 0: On = song message attached.
 					pent._cmd = XMSampler::CMD::PANBRELLO;
 					break;
 				case CMD::MIDI_MACRO:
+					if ( param < 127)
+					{
+						// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
+						pent._parameter = int((param)*100.0f/127.0f);
+					}
 					pent._cmd = XMSampler::CMD::MIDI_MACRO;
 					break;
 				default:
@@ -1212,6 +1268,9 @@ OFFSET              Count TYPE   Description
 			_wave.WaveTune(maintune);
 			_wave.WaveFineTune(finetune);
 
+			std::string sName = currHeader->sName;
+			_wave.WaveName(sName);
+
 /*|4|
 			+-+In your MOD loader, when loading in the fine tune value, convert it to
 			C2SPD.  You do this by looking up what finetune matches what C2SPD.
@@ -1348,12 +1407,16 @@ OFFSET              Count TYPE   Description
 					if(newEntry&64)
 					{
 						int tmp=ReadInt(1);
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
 							pent._mach =0;
 							pent._volume=(tmp<64)?tmp:63;
 						}
+	#endif
 #endif
 					}
 					if(newEntry&128)
@@ -1366,6 +1429,20 @@ OFFSET              Count TYPE   Description
 						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )
 						{
 							pent._parameter = ((pent._parameter&0xF0)>>4)*10 + (pent._parameter&0x0F);
+						}
+						else if ( pent._cmd == XMSampler::CMD::SET_GLOBAL_VOLUME )
+						{
+							pent._parameter = (pent._parameter<0x40)?pent._parameter*2:0x80;
+						}
+						else if ( pent._cmd == XMSampler::CMD::PANNING )
+						{
+							if ( pent._parameter < 0x80) pent._parameter = pent._parameter*2;
+							else if ( pent._parameter == 0x80 ) pent._parameter = 255;
+							else if ( pent._parameter == 0xA4) 
+							{
+								pent._cmd = XMSampler::CMD::EXTENDED;
+								pent._parameter = XMSampler::CMD_E::E9 | 1;
+							}
 						}
 					}
 					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);

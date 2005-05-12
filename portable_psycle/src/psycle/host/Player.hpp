@@ -40,8 +40,8 @@ namespace psycle
 			/// the current ticks per beat at which to play the song.
 			/// can be changed from the song itself using commands.
 			int tpb;
-			/// Contains the number of *samples* until a line change comes in.
-			int _ticksRemaining;
+			/// Contains the number of samples until a line change comes in.
+			int _samplesRemaining;
 			/// starts to play.
 			void Start(int pos,int line);
 			/// wether this player has been started.
@@ -97,6 +97,8 @@ namespace psycle
 			int m_SampleRate;
 			short _patternjump;
 			short _linejump;
+			short _loop_count;
+			short _loop_line;
 		};
 	}
 }

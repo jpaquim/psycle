@@ -23,57 +23,57 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
 
-		void XMInstrument::WaveData::Load(RiffFile& riffFile,const UINT version)
+		void XMInstrument::WaveData::Load(RiffFile* riffFile,const UINT version)
 		{	
 			compiler::uint32 size1,size2;
 
 			CT2A _wave_name("");
-			riffFile.ReadStringA2T(_wave_name,32);
+			riffFile->ReadStringA2T(_wave_name,32);
 			m_WaveName=_wave_name;
 
-			riffFile.Read(m_WaveLength);
-			riffFile.Read(m_WaveGlobVolume);
-			riffFile.Read(m_WaveDefVolume);
+			riffFile->Read(m_WaveLength);
+			riffFile->Read(m_WaveGlobVolume);
+			riffFile->Read(m_WaveDefVolume);
 
-			riffFile.Read(m_WaveLoopStart);
-			riffFile.Read(m_WaveLoopEnd);
-			riffFile.Read(&m_WaveLoopType,sizeof(m_WaveLoopType));
+			riffFile->Read(m_WaveLoopStart);
+			riffFile->Read(m_WaveLoopEnd);
+			riffFile->Read(&m_WaveLoopType,sizeof(m_WaveLoopType));
 
-			riffFile.Read(m_WaveSusLoopStart);
-			riffFile.Read(m_WaveSusLoopEnd);
-			riffFile.Read(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
+			riffFile->Read(m_WaveSusLoopStart);
+			riffFile->Read(m_WaveSusLoopEnd);
+			riffFile->Read(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
 
-			riffFile.Read(m_WaveTune);
-			riffFile.Read(m_WaveFineTune);
+			riffFile->Read(m_WaveTune);
+			riffFile->Read(m_WaveFineTune);
 
-			riffFile.Read(m_WaveStereo);
-			riffFile.Read(m_PanEnabled);
-			riffFile.Read(m_PanFactor);
+			riffFile->Read(m_WaveStereo);
+			riffFile->Read(m_PanEnabled);
+			riffFile->Read(m_PanFactor);
 
-			riffFile.Read(m_VibratoRate);
-			riffFile.Read(m_VibratoSweep);
-			riffFile.Read(m_VibratoDepth);
-			riffFile.Read(m_VibratoType);
+			riffFile->Read(m_VibratoRate);
+			riffFile->Read(m_VibratoSweep);
+			riffFile->Read(m_VibratoDepth);
+			riffFile->Read(m_VibratoType);
 
-			riffFile.Read(size1);
+			riffFile->Read(size1);
 			byte* pData;
 			pData = new byte[size1];
-			riffFile.Read((void *)pData,size1);
+			riffFile->Read((void *)pData,size1);
 			SoundDesquash(pData,&m_pWaveDataL);
 			
 			if (m_WaveStereo)
 			{
 				delete pData;
-				riffFile.Read(size2);
+				riffFile->Read(size2);
 				pData = new byte[size2];
-				riffFile.Read(pData,size2);
+				riffFile->Read(pData,size2);
 				SoundDesquash(pData,&m_pWaveDataR);
 			}
 			delete pData;
 
 		}
 
-		void XMInstrument::WaveData::Save(RiffFile& riffFile,const UINT version)
+		void XMInstrument::WaveData::Save(RiffFile* riffFile,const UINT version)
 		{
 			byte * pData1;
 			byte * pData2;
@@ -93,43 +93,43 @@ namespace psycle
 				+size1
 				+size2;
 
-			riffFile.Write("SMPD");
-			riffFile.Write(size);
+			riffFile->Write("SMPD");
+			riffFile->Write(size);
 
-			riffFile.Write(_wave_name,strlen(_wave_name) + 1);
+			riffFile->Write(_wave_name,strlen(_wave_name) + 1);
 
-			riffFile.Write(m_WaveLength);
-			riffFile.Write(m_WaveGlobVolume);
-			riffFile.Write(m_WaveDefVolume);
+			riffFile->Write(m_WaveLength);
+			riffFile->Write(m_WaveGlobVolume);
+			riffFile->Write(m_WaveDefVolume);
 
-			riffFile.Write(m_WaveLoopStart);
-			riffFile.Write(m_WaveLoopEnd);
-			riffFile.Write(&m_WaveLoopType,sizeof(m_WaveLoopType));
+			riffFile->Write(m_WaveLoopStart);
+			riffFile->Write(m_WaveLoopEnd);
+			riffFile->Write(&m_WaveLoopType,sizeof(m_WaveLoopType));
 
-			riffFile.Write(m_WaveSusLoopStart);
-			riffFile.Write(m_WaveSusLoopEnd);
-			riffFile.Write(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
+			riffFile->Write(m_WaveSusLoopStart);
+			riffFile->Write(m_WaveSusLoopEnd);
+			riffFile->Write(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
 
-			riffFile.Write(m_WaveTune);
-			riffFile.Write(m_WaveFineTune);
+			riffFile->Write(m_WaveTune);
+			riffFile->Write(m_WaveFineTune);
 
-			riffFile.Write(m_WaveStereo);
-			riffFile.Write(m_PanEnabled);
-			riffFile.Write(m_PanFactor);
+			riffFile->Write(m_WaveStereo);
+			riffFile->Write(m_PanEnabled);
+			riffFile->Write(m_PanFactor);
 
-			riffFile.Write(m_VibratoRate);
-			riffFile.Write(m_VibratoSweep);
-			riffFile.Write(m_VibratoDepth);
-			riffFile.Write(m_VibratoType);
+			riffFile->Write(m_VibratoRate);
+			riffFile->Write(m_VibratoSweep);
+			riffFile->Write(m_VibratoDepth);
+			riffFile->Write(m_VibratoType);
 
-			riffFile.Write(size1);
-			riffFile.Write((void*)pData1,size1);
+			riffFile->Write(size1);
+			riffFile->Write((void*)pData1,size1);
 			delete pData1;
 			
 			if (m_WaveStereo)
 			{
-				riffFile.Write(size2);
-				riffFile.Write((void*)pData2,size2);
+				riffFile->Write(size2);
+				riffFile->Write((void*)pData2,size2);
 				delete pData2;
 			}
 		}
@@ -348,41 +348,41 @@ namespace psycle
 		}
 	
 		// Loading Procedure
-		void XMInstrument::Envelope::Load(RiffFile& riffFile,const UINT version)
+		void XMInstrument::Envelope::Load(RiffFile* riffFile,const UINT version)
 		{
-			riffFile.Read(m_Enabled);
-			riffFile.Read(m_Carry);
-			riffFile.Read(m_LoopStart);
-			riffFile.Read(m_LoopEnd);
-			riffFile.Read(m_SustainBegin);
-			riffFile.Read(m_SustainEnd);
+			riffFile->Read(m_Enabled);
+			riffFile->Read(m_Carry);
+			riffFile->Read(m_LoopStart);
+			riffFile->Read(m_LoopEnd);
+			riffFile->Read(m_SustainBegin);
+			riffFile->Read(m_SustainEnd);
 
 			int _num_of_points = 0;
-			riffFile.Read(_num_of_points);
+			riffFile->Read(_num_of_points);
 			for(int i = 0;i < _num_of_points ;i++)
 			{
 				PointValue _value;
 
-				riffFile.Read(_value.first);
-				riffFile.Read(_value.second);
+				riffFile->Read(_value.first);
+				riffFile->Read(_value.second);
 				m_Points.push_back(_value);
 			}
 		}
 		// Saving Procedure
-		void XMInstrument::Envelope::Save(RiffFile& riffFile,const UINT version)
+		void XMInstrument::Envelope::Save(RiffFile* riffFile,const UINT version)
 		{
-			riffFile.Write(m_Enabled);
-			riffFile.Write(m_Carry);
-			riffFile.Write(m_LoopStart);
-			riffFile.Write(m_LoopEnd);
-			riffFile.Write(m_SustainBegin);
-			riffFile.Write(m_SustainEnd);
-			riffFile.Write(m_Points.size());
+			riffFile->Write(m_Enabled);
+			riffFile->Write(m_Carry);
+			riffFile->Write(m_LoopStart);
+			riffFile->Write(m_LoopEnd);
+			riffFile->Write(m_SustainBegin);
+			riffFile->Write(m_SustainEnd);
+			riffFile->Write(m_Points.size());
 
 			for(UINT i = 0;i < m_Points.size() ;i++)
 			{
-				riffFile.Write(m_Points[i].first);// point
-				riffFile.Write(m_Points[i].second);//value
+				riffFile->Write(m_Points[i].first);// point
+				riffFile->Write(m_Points[i].second);//value
 			}
 		}
 
@@ -445,41 +445,41 @@ namespace psycle
 		}
 
 		// load XMInstrument
-		void XMInstrument::Load(RiffFile& riffFile,const UINT version)
+		void XMInstrument::Load(RiffFile* riffFile,const UINT version)
 		{
 			m_bEnabled = true;
 
 			CT2A _name("");
-			riffFile.ReadStringA2T(_name,32);
+			riffFile->ReadStringA2T(_name,32);
 			m_Name=_name;
 
-			riffFile.Read(m_Lines);
+			riffFile->Read(m_Lines);
 
-			riffFile.Read(m_GlobVol);
-			riffFile.Read(m_VolumeFadeSpeed);
+			riffFile->Read(m_GlobVol);
+			riffFile->Read(m_VolumeFadeSpeed);
 
-			riffFile.Read(m_InitPan);
-			riffFile.Read(m_PanEnabled);
-			riffFile.Read(m_PitchPanCenter);
-			riffFile.Read(&m_PitchPanSep,sizeof(compiler::sint8));
+			riffFile->Read(m_InitPan);
+			riffFile->Read(m_PanEnabled);
+			riffFile->Read(m_PitchPanCenter);
+			riffFile->Read(&m_PitchPanSep,sizeof(compiler::sint8));
 
-			riffFile.Read(m_FilterCutoff);
-			riffFile.Read(m_FilterResonance);
-			riffFile.Read(m_FilterEnvAmount);
-			riffFile.Read(&m_FilterType,sizeof(m_FilterType));
+			riffFile->Read(m_FilterCutoff);
+			riffFile->Read(m_FilterResonance);
+			riffFile->Read(m_FilterEnvAmount);
+			riffFile->Read(&m_FilterType,sizeof(m_FilterType));
 
-			riffFile.Read(m_RandomVolume);
-			riffFile.Read(m_RandomPanning);
-			riffFile.Read(m_RandomCutoff);
-			riffFile.Read(m_RandomResonance);
+			riffFile->Read(m_RandomVolume);
+			riffFile->Read(m_RandomPanning);
+			riffFile->Read(m_RandomCutoff);
+			riffFile->Read(m_RandomResonance);
 
-			riffFile.Read(&m_NNA,sizeof(m_NNA));
-			riffFile.Read(&m_DCT,sizeof(m_DCT));
-			riffFile.Read(&m_DCA,sizeof(m_DCA));
+			riffFile->Read(&m_NNA,sizeof(m_NNA));
+			riffFile->Read(&m_DCT,sizeof(m_DCT));
+			riffFile->Read(&m_DCA,sizeof(m_DCA));
 
 			NotePair npair;
 			for(int i = 0;i < NOTE_MAP_SIZE;i++){
-				riffFile.Read(&npair,sizeof(npair));
+				riffFile->Read(&npair,sizeof(npair));
 				NoteToSample(i,npair);
 			}
 
@@ -490,7 +490,7 @@ namespace psycle
 		}
 
 		// save XMInstrument
-		void XMInstrument::Save(RiffFile& riffFile,const UINT version)
+		void XMInstrument::Save(RiffFile* riffFile,const UINT version)
 		{
 			int i;
 			int size = sizeof(XMInstrument)
@@ -499,42 +499,42 @@ namespace psycle
 				-sizeof(m_PitchEnvelope)
 				-sizeof(m_FilterEnvelope);
 
-			riffFile.Write("INST");
-			riffFile.Write(size);
+			riffFile->Write("INST");
+			riffFile->Write(size);
 
 			CT2A _name(m_Name.c_str());
-			riffFile.Write(_name,strlen(_name) + 1);
+			riffFile->Write(_name,strlen(_name) + 1);
 
-			riffFile.Write(m_bEnabled);
+			riffFile->Write(m_bEnabled);
 
-			riffFile.Write(m_Lines);
+			riffFile->Write(m_Lines);
 
-			riffFile.Write(m_GlobVol);
-			riffFile.Write(m_VolumeFadeSpeed);
+			riffFile->Write(m_GlobVol);
+			riffFile->Write(m_VolumeFadeSpeed);
 
-			riffFile.Write(m_InitPan);
-			riffFile.Write(m_PanEnabled);
-			riffFile.Write(m_PitchPanCenter);
-			riffFile.Write(m_PitchPanSep);
+			riffFile->Write(m_InitPan);
+			riffFile->Write(m_PanEnabled);
+			riffFile->Write(m_PitchPanCenter);
+			riffFile->Write(m_PitchPanSep);
 
-			riffFile.Write(m_FilterCutoff);
-			riffFile.Write(m_FilterResonance);
-			riffFile.Write(m_FilterEnvAmount);
-			riffFile.Write(&m_FilterType,sizeof(m_FilterType));
+			riffFile->Write(m_FilterCutoff);
+			riffFile->Write(m_FilterResonance);
+			riffFile->Write(m_FilterEnvAmount);
+			riffFile->Write(&m_FilterType,sizeof(m_FilterType));
 
-			riffFile.Write(m_RandomVolume);
-			riffFile.Write(m_RandomPanning);
-			riffFile.Write(m_RandomCutoff);
-			riffFile.Write(m_RandomResonance);
+			riffFile->Write(m_RandomVolume);
+			riffFile->Write(m_RandomPanning);
+			riffFile->Write(m_RandomCutoff);
+			riffFile->Write(m_RandomResonance);
 
-			riffFile.Write(&m_NNA,sizeof(m_NNA));
-			riffFile.Write(&m_DCT,sizeof(m_DCT));
-			riffFile.Write(&m_DCA,sizeof(m_DCA));
+			riffFile->Write(&m_NNA,sizeof(m_NNA));
+			riffFile->Write(&m_DCT,sizeof(m_DCT));
+			riffFile->Write(&m_DCA,sizeof(m_DCA));
 
 			NotePair npair;
 			for(i = 0;i < NOTE_MAP_SIZE;i++){
-				riffFile.Write(&npair,sizeof(npair));
-				NoteToSample(i,npair);
+				npair = NoteToSample(i);
+				riffFile->Write(&npair,sizeof(npair));
 			}
 
 			m_AmpEnvelope.Save(riffFile,version);

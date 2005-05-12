@@ -101,7 +101,7 @@ namespace psycle
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual char* GetName(void) { return _psName; };
 			virtual bool Load(RiffFile* pFile);
-			inline virtual bool LoadSpecificFileChunk(RiffFile* pFile, int version)
+			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
 				UINT size;
 				pFile->Read(&size,sizeof(size));

@@ -212,7 +212,7 @@ NAMESPACE__BEGIN(psycle)
 			m_wndInst.Validate();
 
 			// Wave Editor Window
-			m_pWndWed=new CWaveEdFrame(this->_pSong,this);
+			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
 			m_pWndWed->GenerateView();
 
@@ -643,7 +643,7 @@ NAMESPACE__BEGIN(psycle)
 			//	bool draw_r=true;
 
 			//	float log_l=20*(float)log10(l/baselevel);				// Standard formula
-			//  float log_l=20*(float)log10(l) - 20*log10(vaselevel);	// simplified (speedwise) formula.
+			//  float log_l=20*(float)log10(l) - 20*log10(baselevel);	// simplified (speedwise) formula.
 			//  float log_l=(226pixels/90db)*20*(float)log10(l) // Formula for 16bit precision. (15bit, in fact)
 
 			/*	float log_l=50.0f*(float)log10((0.000030517578125f*(float)l));
@@ -662,9 +662,9 @@ NAMESPACE__BEGIN(psycle)
 				int cr=226+(int)log_r;
 			*/	
 				CStatic *lv=(CStatic *)m_wndControl.GetDlgItem(IDC_LVUM);
-				CStatic *rv=(CStatic *)m_wndControl.GetDlgItem(IDC_RVUM);
+//				CStatic *rv=(CStatic *)m_wndControl.GetDlgItem(IDC_RVUM);
 				CClientDC canvasl(lv);
-				CClientDC canvasr(rv);
+//				CClientDC canvasr(rv);
 
 				int log_l=f2i(100*log10f(l));
 				int log_r=f2i(100*log10f(r));

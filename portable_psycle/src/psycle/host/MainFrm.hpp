@@ -108,7 +108,6 @@ NAMESPACE__BEGIN(psycle)
 			
 			CInstrumentEditor	m_wndInst;
 			CMixerDlg			m_wndMixer;
-			//CLoggingWindow m_wndLog;
 			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
 			CWaveEdFrame	*m_pWndWed;

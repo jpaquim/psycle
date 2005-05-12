@@ -426,14 +426,20 @@ NAMESPACE__BEGIN(psycle)
 							loop = finder.FindNextFile();
 							if(finder.IsDirectory()) {
 								if(!finder.IsDots())
-									populate_plugin_list(result,(LPCSTR)finder.GetFilePath());
+								{
+									std::string sfilePath = finder.GetFilePath();
+									populate_plugin_list(result,sfilePath);
+								}
 							}
 							else
 							{
 								CString filePath=finder.GetFilePath();
 								filePath.MakeLower();
 								if(filePath.Right(4) == ".dll")
-									result.push_back((LPCSTR)filePath);
+								{
+									std::string sfilePath = filePath;
+									result.push_back(sfilePath);
+								}
 							}
 						}
 						finder.Close();
@@ -881,7 +887,7 @@ NAMESPACE__BEGIN(psycle)
 						char *chars(new char[size + 1]);
 						file.Read(chars, size);
 						chars[size] = '\0';
-						p.error = chars;
+						p.error = (const char*)chars;
 						zapArray(chars);
 					}
 				}

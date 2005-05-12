@@ -22,29 +22,17 @@
 /// [bohan] #define PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX 0
 #define PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX 0
 
+///  JAZ: Define to 1 to enable the volume column for XMSampler. It will also make the machine column in the pattern to show
+///		the values of the volume column instead.
 
+#define PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN 1
 
 /// unmasks fpu exceptions
 #define PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS 1
 
 
-
-/// JAZ: Define to enable the volume column for XMSampler.
-///      It will also make the machine column in the pattern to show the values of the volume column instead.
-// #define PSYCLE_OPTION_VOLUME_COLUMN
-
-// value to show in the string describing the configuration options.
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
-	#define PSYCLE__CONFIGURATION__OPTION__ENABLE__VOLUME_COLUMN 1
-#else
-	#define PSYCLE__CONFIGURATION__OPTION__ENABLE__VOLUME_COLUMN 0
-#endif
-
-
-
 /// the compiler used to build ... should be autodetermined, but we don't have autoconf.
 #define PSYCLE__COMPILER__BUILD "msvc"
-
 
 
 /// string describing the configuration options.
@@ -52,5 +40,6 @@
 	"compiler build tool chain = " PSYCLE__COMPILER__BUILD EOL \
 	"read_write_mutex = " STRINGIZED(PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX) EOL \
 	"fpu exceptions = " STRINGIZED(PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS) EOL \
-	"volume column = " STRINGIZED(PSYCLE__CONFIGURATION__OPTION__ENABLE__VOLUME_COLUMN) EOL \
+	"volume column = " STRINGIZED(PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN) EOL \
 	"debugging = " PSYCLE__CONFIGURATION__OPTION__ENABLE__DEBUG
+

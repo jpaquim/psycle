@@ -98,9 +98,7 @@
 #define IDD_XM_GENERAL                  215
 #define IDD_XMSAMPLERUIINST             217
 #define IDD_XMSAMPLERUISAMPLE           218
-#define IDD_INST_GENERAL                220
 #define IDD_XMSAMPLER_MIXER             222
-#define IDB_BITMAP2                     226
 #define IDB_SAMPULSE                    226
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
@@ -861,8 +859,6 @@
 #define IDC_SUSTAINLOOP                 1620
 #define IDC_LOOP                        1621
 #define IDC_SPINLOOPSTART               1622
-#define IDC_SPINSUSTAINEND              1623
-#define IDC_SPINSUSTAINSTART            1624
 #define IDC_SPINSAMPLERATE              1625
 #define IDC_SAMPLELIST                  1626
 #define IDC_LOAD                        1627
@@ -878,7 +874,6 @@
 #define IDC_VIBRATOTYPE                 1637
 #define IDC_SUSTAINSTART                1638
 #define IDC_SUSTAINEND                  1639
-#define IDC_SPINLOOPEND                 1640
 #define IDC_CHECK2                      1641
 #define IDC_COMMANDINFO                 1642
 #define IDC_ENVFRAME                    1643
@@ -890,6 +885,12 @@
 #define IDC_CUTOFF                      1650
 #define IDC_RESSONANCE                  1651
 #define IDC_FILTERMOD                   1652
+#define IDC_LDEFVOL                     1653
+#define IDC_LGLOBVOL                    1654
+#define IDC_LPAN                        1655
+#define IDC_LVIBRATORATE                1656
+#define IDC_LVIBRATOSWEEP               1657
+#define IDC_LVIBRATODEPTH               1658
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -988,9 +989,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        227
+#define _APS_NEXT_RESOURCE_VALUE        228
 #define _APS_NEXT_COMMAND_VALUE         32939
-#define _APS_NEXT_CONTROL_VALUE         1653
+#define _APS_NEXT_CONTROL_VALUE         1659
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

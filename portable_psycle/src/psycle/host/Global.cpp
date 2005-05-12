@@ -42,7 +42,6 @@ namespace psycle
 			zapObject(pInputHandler);
 			#ifndef NDEBUG
 				operating_system::console::close();
-				zapObject(pLogWindow);
 			#endif
 		}
 
@@ -183,6 +182,7 @@ namespace psycle
 							module_directory = module_directory.substr(0, module_directory.rfind('\\'));
 						}
 						// this overwrites the file if it already exists.
+						//\todo : devpartner says this "new" leaks.
 						return *new std::ofstream((module_directory + "/psycle.log.txt").c_str());
 					}
 				};

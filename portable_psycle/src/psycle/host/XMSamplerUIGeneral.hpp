@@ -53,6 +53,8 @@ public:
 	CEdit m_ECommandInfo;
 	CButton m_bAmigaSlides;
 	afx_msg void OnBnClickedCheck1();
+	afx_msg void OnBnClickedCheck2();
+	CButton m_ckFilter;
 };
 
 NAMESPACE__END

@@ -243,7 +243,7 @@ Ex/Fx.
 		typedef std::pair<char,char> ITNotePair;
 		typedef std::pair<char,char> ITNodePair1x;
 //		typedef std::pair<short,char> ITNodePair;
-		class ITNodePair { public: __int8 first; __int8 secondlo; _int8 secondhi; };
+		class ITNodePair { public: compiler::sint8 first; compiler::uint8 secondlo; compiler::uint8 secondhi; };
 
 		typedef struct {
 			unsigned long tag;
@@ -264,6 +264,7 @@ Ex/Fx.
 		typedef struct {
 			unsigned char flg,numP,loopS,loopE,sustainS,sustainE;
 			ITNodePair nodes[25];
+			unsigned char unused;
 		}ITEnvStruct;
 
 		typedef struct {

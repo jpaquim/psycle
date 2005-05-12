@@ -83,7 +83,7 @@ namespace psycle
 			virtual void GetParamValue(int numparam,char* parval);
 			virtual bool SetParameter(int numparam,int value);
 			virtual bool Load(RiffFile * pFile);
-			virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			virtual void SaveDllName(RiffFile * pFile);
 

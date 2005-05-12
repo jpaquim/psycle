@@ -13,8 +13,12 @@ namespace psycle
 				:
 					_note(255),
 					_inst(255),
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 					_volume(255),
+	#endif
 #endif
 					_mach(255),
 					_cmd(0),
@@ -23,15 +27,19 @@ namespace psycle
 				}
 				compiler::uint8 _note;
 				compiler::uint8 _inst;
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 				compiler::uint8 _volume;
 				compiler::uint8 _cmd;
 				compiler::uint8 _parameter;
 				compiler::uint8 _mach;
-#else
+	#else
 				compiler::uint8 _mach;
 				compiler::uint8 _cmd;
 				compiler::uint8 _parameter;
+	#endif
 #endif
 		};
 
