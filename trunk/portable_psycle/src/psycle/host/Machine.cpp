@@ -406,7 +406,7 @@ namespace psycle
 			_wireCost+=wcost;
 		}
 
-		bool Machine::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
 			pFile->Read(&size,sizeof(size)); // size of this part params to load
@@ -542,7 +542,7 @@ namespace psycle
 				strcpy(pMachine->_editName,buf);
 			}
 			if(!fullopen) return pMachine;
-			if(!pMachine->LoadSpecificFileChunk(pFile,version))
+			if(!pMachine->LoadSpecificChunk(pFile,version))
 			{
 				char sError[MAX_PATH + 100];
 				sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
@@ -682,7 +682,7 @@ namespace psycle
 			_worked = true;
 		}
 
-		bool Dummy::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
@@ -794,7 +794,7 @@ namespace psycle
 			_cpuCost += cost;
 			_worked = true;
 		}
-		bool DuplicatorMac::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
@@ -958,7 +958,7 @@ namespace psycle
 			_worked = true;
 		}
 
-		bool Master::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size ); // size of this part params to load

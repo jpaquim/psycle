@@ -344,24 +344,8 @@ NAMESPACE__BEGIN(psycle)
 							Global::pConfig->vu3,
 							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip
 						);
-					//float val = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry; // not used
-					//pParentMain->UpdateMasterValue(f2i(sqrtf(val*1024.0f)));
 					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
-					if ( MasterMachineDialog )
-					{
-						if (!--((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime) 
-						{
-							char peak[10];
-							sprintf(peak,"%.2fdB",20*log10f(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak)-90);
-							MasterMachineDialog->m_masterpeak.SetWindowText(peak);
-							//MasterMachineDialog->m_slidermaster.SetPos(256-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
-							//MasterMachineDialog->m_slidermaster.SetPos(256-f2i(sqrtf(val*64.0f)));
-							//\todo : I am not sure of what exactly does the following line do here.
-							MasterMachineDialog->m_slidermaster.SetPos(1024-((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);				
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->peaktime=25;
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->currentpeak=0.0f;
-						}
-					}
+					if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI();
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 				}
 				if (viewMode == VMMachine)
@@ -1781,6 +1765,7 @@ NAMESPACE__BEGIN(psycle)
 						XMSongLoader xmfile;
 						xmfile.Open(ofn.lpstrFile);
 						Global::_pSong->New();
+						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
 						char buffer[512];		
@@ -1797,6 +1782,7 @@ NAMESPACE__BEGIN(psycle)
 						ITModule2 it;
 						it.Open(ofn.lpstrFile);
 						Global::_pSong->New();
+						editPosition=0;
 						if(!it.LoadITModule(_pSong))
 						{			
 							MessageBox("Load failed");
@@ -1819,6 +1805,7 @@ NAMESPACE__BEGIN(psycle)
 						ITModule2 s3m;
 						s3m.Open(ofn.lpstrFile);
 						Global::_pSong->New();
+						editPosition=0;
 						if(!s3m.LoadS3MModuleX(_pSong))
 						{			
 							MessageBox("Load failed");
@@ -1906,7 +1893,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
 				}
-				delete nameBuff;
+				delete[] nameBuff;
 			}
 			// Ensure menu size doesn't exceed 4 positions.
 			if (GetMenuItemCount(hRecentMenu) == 4)
@@ -2010,7 +1997,6 @@ NAMESPACE__BEGIN(psycle)
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Open();
 			}
-			editPosition=0;
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
 			pParentMain->m_wndInst.WaveUpdate();
@@ -2315,6 +2301,7 @@ NAMESPACE__BEGIN(psycle)
 				if (finder.IsDirectory() && !finder.IsDots())
 				{
 					FindMachineSkin(finder.GetFilePath(),findName,result);
+					if ( *result == TRUE) return;
 				}
 			}
 			finder.Close();
@@ -2333,7 +2320,7 @@ NAMESPACE__BEGIN(psycle)
 					sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
 
 					machineskin.DeleteObject();
-					DeleteObject(hbmMachineSkin);
+					if( hbmMachineSkin) DeleteObject(hbmMachineSkin);
 					machineskinmask.DeleteObject();
 					hbmMachineSkin = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 					if (hbmMachineSkin)
@@ -2963,7 +2950,7 @@ NAMESPACE__BEGIN(psycle)
 					char szOpenName[MAX_PATH];
 					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
 					patternheader.DeleteObject();
-					DeleteObject(hbmPatHeader);
+					if (hbmPatHeader)DeleteObject(hbmPatHeader);
 					patternheadermask.DeleteObject();
 					hbmPatHeader = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 					if (hbmPatHeader)
@@ -3437,7 +3424,7 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::LoadMachineBackground()
 		{
 			machinebkg.DeleteObject();
-			DeleteObject(hbmMachineBkg);
+			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
 			if (Global::pConfig->bBmpBkg)
 			{
 				Global::pConfig->bBmpBkg=FALSE;

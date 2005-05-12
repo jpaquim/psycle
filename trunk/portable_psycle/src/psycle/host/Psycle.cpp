@@ -35,6 +35,8 @@ NAMESPACE__BEGIN(psycle)
 
 		CPsycleApp::~CPsycleApp()
 		{
+			Global::pLogWindow->DestroyWindow();
+			delete Global::pLogWindow;
 		}
 
 		CPsycleApp theApp; /// The one and only CPsycleApp object
@@ -52,7 +54,7 @@ NAMESPACE__BEGIN(psycle)
 			m_pMainWnd = pFrame;
 
 			// Error Logging window
-			Global::pLogWindow = new CLoggingWindow(pFrame);
+			Global::pLogWindow = new CLoggingWindow(m_pMainWnd);
 			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
 			//Global::pLogWindow->Validate();
 			host::loggers::info("build identifier: " EOL PSYCLE__BUILD__IDENTIFIER(EOL));

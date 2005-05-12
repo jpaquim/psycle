@@ -631,7 +631,6 @@ NAMESPACE__BEGIN(psycle)
 			CPoint pol[3];
 			CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
 			CPen *oldpen = devc->SelectObject(&linepen);
-			devc->SelectObject(linepen);
 
 			int hlength = 9; //the length of the selected machine highlight
 			int hdistance = 5; //the distance of the highlight from the machine

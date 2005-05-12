@@ -332,7 +332,6 @@ class XMSampler;
 
 		};// SampleAssignEditor
 
-
 	DECLARE_DYNAMIC(XMSamplerUIInst)
 
 	public:

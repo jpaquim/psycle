@@ -25,11 +25,13 @@ void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
 		//}}AFX_DATA_MAP
 		DDX_Control(pDX, IDC_COMMANDINFO, m_ECommandInfo);
 		DDX_Control(pDX, IDC_CHECK1, m_bAmigaSlides);
+		DDX_Control(pDX, IDC_CHECK2, m_ckFilter);
 	}
 BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
 	ON_BN_CLICKED(IDC_CHECK1, OnBnClickedCheck1)
+	ON_BN_CLICKED(IDC_CHECK2, OnBnClickedCheck2)
 END_MESSAGE_MAP()
 
 XMSamplerUIGeneral::~XMSamplerUIGeneral()
@@ -55,7 +57,7 @@ BOOL XMSamplerUIGeneral::OnInitDialog()
 	m_ECommandInfo.SetWindowText("Track Commands:\r\n\t\
 01xx: Portamento Up ( Fx = fine, Ex = Extra fine)\r\n\t\
 02xx: Portamento Down (Fx = fine, Ex = Extra fine)\r\n\t\
-03xx: Tone Portamento (Fx = fine, Ex = Extra fine)\r\n\t\
+03xx: Tone Portamento\r\n\t\
 04xy: Vibrato with speed y and depth x\r\n\t\
 05xx: Continue Portamento and Volume Slide with speed xx\r\n\t\
 06xx: Continue Vibrato and Volume Slide with speed xx\r\n\t\
@@ -81,6 +83,7 @@ BOOL XMSamplerUIGeneral::OnInitDialog()
 	m_bInitialize=true;
 
 	m_bAmigaSlides.SetCheck(_pMachine->IsAmigaSlides()?1:0);
+	m_ckFilter.SetCheck(_pMachine->UseFilters()?1:0);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -111,6 +114,11 @@ void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
 void XMSamplerUIGeneral::OnBnClickedCheck1()
 {
 	_pMachine->IsAmigaSlides(( m_bAmigaSlides.GetCheck() == 1 )?true:false);
+}
+
+void XMSamplerUIGeneral::OnBnClickedCheck2()
+{
+	_pMachine->UseFilters(m_ckFilter.GetCheck()?true:false);
 }
 
 NAMESPACE__END

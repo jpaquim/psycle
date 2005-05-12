@@ -154,7 +154,7 @@ XMSampler::Channel::PerformFX().
 		};
 
 		void Init(XMInstrument::WaveData* wave, const int layer);
-
+		void NoteOff(void);
 		void Work(float *pLeftw,float *pRightw,dsp::PRESAMPLERFN pResamplerWork)
 		{
 			//Process sample
@@ -176,7 +176,6 @@ XMSampler::Channel::PerformFX().
 			}
 
 			// Loop handler
-			//\todo : Implement Sustain Loop Control
 			const int curIntPos = m_Position.HighPart;
 			switch(m_CurrentLoopType)
 			{
@@ -336,6 +335,13 @@ XMSampler::Channel::PerformFX().
 								return;
 							}
 						}
+						else if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
+						{
+							m_Stage = EnvelopeStage::OFF;
+							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
+							m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
+							return;
+						}
 					}
 					else if( m_PositionIndex == m_pEnvelope->LoopEnd() && !(m_Stage&EnvelopeStage::HASSUSTAIN))
 					{
@@ -375,9 +381,9 @@ XMSampler::Channel::PerformFX().
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 		inline void CalcStep(const int start,const int  end);
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Samples= m_NextEventSample; }
+		void RecalcDeviation();
 	private:
 		inline float SRateDeviation() { return m_sRateDeviation; };
-		void RecalcDeviation();
 
 		int m_Samples;
 		float m_sRateDeviation;
@@ -415,12 +421,16 @@ XMSampler::Channel::PerformFX().
 		void VoiceInit(int channelNum,int instrumentNum);
 		void Work(int numSamples,float * pSampleL,float *pSamlpesR,dsp::Cubic& _resampler);
 
+		// This one is Tracker Tick (Mod-tick)
+		void Tick();
+		// This one is Psycle's "Tick"
 		void NewLine();
 
 		void NoteOn(const compiler::uint8 note,const compiler::sint16 playvol=-1,bool reset=true);
 		void NoteOff();
 		void NoteOffFast();
 		void NoteFadeout();
+		void UpdateFadeout();
 		const XMInstrument::NewNoteAction NNA() { return m_NNA;};
 		void NNA(const XMInstrument::NewNoteAction value){ m_NNA = value;};
 		
@@ -516,7 +526,7 @@ XMSampler::Channel::PerformFX().
 			m_Ressonance = res; m_Filter.Ressonance(res);
 		};
 
-		void FilterType(dsp::FilterType ftype) { /*m_Filter._type = ftype;*/};
+		void FilterType(dsp::FilterType ftype) { m_Filter.Type(ftype);};
 
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); };
 		int Period() { return m_Period; }
@@ -553,7 +563,6 @@ XMSampler::Channel::PerformFX().
 
 		WaveDataController m_WaveDataController;
 
-//		dsp::Filter m_Filter;
 		dsp::ITFilter m_Filter;
 		int m_CutOff;
 		int m_Ressonance;
@@ -613,7 +622,7 @@ XMSampler::Channel::PerformFX().
 		static const int m_FineSineData[256];
 		static const int m_FineRampDownData[256];
 		static const int m_FineSquareTable[256];
-		static const int m_RandomTable[64];
+		static const int m_RandomTable[256];
 	};
 
 
@@ -738,6 +747,13 @@ XMSampler::Channel::PerformFX().
 		const int Ressonance() { return m_Ressonance;};
 		const dsp::FilterType FilterType() { return m_FilterType;};
 
+		const int DefaultCutoff(){return m_DefaultCutoff;};
+		void DefaultCutoff(const int value){m_DefaultCutoff = value; m_Cutoff = value; };
+		const int DefaultRessonance(){return m_DefaultRessonance; };
+		void DefaultRessonance(const int value){m_DefaultRessonance = value; m_Ressonance = value; };
+		const dsp::FilterType DefaultFilterType(){return m_DefaultFilterType;};
+		void DefaultFilterType(const dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; };
+
 		const bool IsGrissando(){return m_bGrissando;};
 		void IsGrissando(const bool value){m_bGrissando = value;};
 		void VibratoType(const int value){	m_VibratoType = value;};
@@ -834,6 +850,9 @@ XMSampler::Channel::PerformFX().
 		int m_Cutoff;
 		int m_Ressonance;
 		dsp::FilterType m_FilterType;
+		int m_DefaultCutoff;
+		int m_DefaultRessonance;
+		dsp::FilterType m_DefaultFilterType;
 	};
 
 
@@ -851,10 +870,11 @@ XMSampler::Channel::PerformFX().
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
 	virtual TCHAR* GetName(void) { return _psName; };
+	virtual void SetSampleRate(int sr);
 
 	virtual bool Load(RiffFile& riffFile);
-	virtual bool LoadSpecificFileChunk(RiffFile& riffFile, int version);
-	virtual void SaveSpecificChunk(RiffFile& riffFile);
+	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
+	virtual void SaveSpecificChunk(RiffFile* riffFile);
 
 /*	Deprecated. See why in the body of "CalcBPMAndTick()"
 
@@ -935,6 +955,8 @@ XMSampler::Channel::PerformFX().
 	const dsp::ResamplerQuality ResamplerQuality(){
 		return _resampler.GetQuality();
 	}
+	const bool UseFilters(void) { return m_UseFilters; };
+	void UseFilters(bool usefilters) { m_UseFilters = usefilters; };
 	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; };
 	ZxxMacro GetMap(int index) { return zxxMap[index]; };
 
@@ -968,6 +990,7 @@ protected:
 private:
 
 	bool m_bAmigaSlides;// Using Linear or Amiga Slides.
+	bool m_UseFilters;
 	int m_GlobalVolume;
 /*	int m_BPM;
 	int m_TicksPerRow;	// Tracker Ticks. Also called "speed".

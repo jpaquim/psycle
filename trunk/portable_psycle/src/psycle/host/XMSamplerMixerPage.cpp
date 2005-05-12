@@ -134,7 +134,7 @@ BOOL XMSamplerMixerPage::OnSetActive()
 	return CPropertyPage::OnSetActive();
 }
 
-// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS, IDC_LEFTVU and IDC_RIGHTVU
+// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS, IDC_LEFTVU
 void XMSamplerMixerPage::UpdateAllChannels(void)
 {
 	m_UpdatingGraphics=true;
@@ -276,9 +276,6 @@ void XMSamplerMixerPage::OnNMCustomdrawSlPan7(NMHDR *pNMHDR, LRESULT *pResult) {
 void XMSamplerMixerPage::OnNMCustomdrawSlPan8(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,7); }
 void XMSamplerMixerPage::SliderPanning(NMHDR *pNMHDR, LRESULT *pResult, int offset)
 {
-	char buffer[16];
-	sprintf(buffer,"ev: %d\n",pNMHDR->code);
-	TRACE(buffer);
 	if ( !m_UpdatingGraphics)
 	{
 		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
@@ -305,9 +302,8 @@ void XMSamplerMixerPage::ClickSurround(int offset)
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[offset]);
 		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
 		{
-			sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor(
-				(sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor()&0x7F) |
-				(surr->GetCheck()?80:0));
+			if ( surr->GetCheck()) sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor(80);
+			else sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor(32);
 		}
 		else
 		{

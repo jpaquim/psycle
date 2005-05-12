@@ -167,6 +167,8 @@ namespace psycle
 				virtual ~plugin() throw();
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
+				virtual void SetSampleRate(int sr){ proxy().setSampleRate((float)sr); };
+
 				virtual int GetNumParams()
 				{
 					try
@@ -222,7 +224,7 @@ namespace psycle
 				}
 				#pragma warning(pop)
 				virtual bool Load(RiffFile * pFile);
-				virtual bool LoadSpecificFileChunk(RiffFile * pFile, int version);
+				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 
 				virtual void SaveSpecificChunk(RiffFile* pFile) ;
 				virtual void SaveDllName(RiffFile* pFile);
@@ -231,12 +233,12 @@ namespace psycle
 				void Free() throw(...);
 				bool DescribeValue(int parameter, char * psTxt);
 				bool LoadDll(std::string psFileName);
-				///\todo To be removed when changing the fileformat.
+				// Loader for old psycle fileformat.
 				bool LoadChunk(RiffFile* pFile);
 				inline const long int & GetVersion() const throw() { return _version; }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
 				inline const bool & IsSynth() const throw() { return _isSynth; }
-				inline bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
+				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
 				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0);
 				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false);
 				inline void SendMidi();

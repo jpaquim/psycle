@@ -103,7 +103,6 @@ namespace psycle
 				{
 					throw;
 				}
-//				Work(1);
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
 				{
 					try
@@ -188,7 +187,7 @@ namespace psycle
 			pFile->Write(&str2,strlen(str2)+1);
 		};
 
-		bool Plugin::LoadSpecificFileChunk(RiffFile* pFile, int version)
+		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
 			pFile->Read(&size,sizeof(size)); // size of whole structure

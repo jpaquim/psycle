@@ -29,10 +29,14 @@ namespace psycle
 		/// harcoded maximal number of lines per pattern
 		#define MAX_LINES				256
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
-		#define EVENT_SIZE				6
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+		#define EVENT_SIZE				6
+	#else
 		#define EVENT_SIZE				5
+	#endif
 #endif
 		/// PSY2-fileformat Constants
 		#define OLD_MAX_TRACKS			32

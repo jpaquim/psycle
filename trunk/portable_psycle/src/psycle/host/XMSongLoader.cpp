@@ -36,22 +36,25 @@ namespace host{
 		if(!IsValid()){
 			return;
 		}
-
-		// clear existing data
-		song.DeleteAllPatterns();
-
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
 		song.InsertConnection(0,MASTER_INDEX,0.5f);
 		song.seqBus=0;
 		// build sampler
 		m_pSampler = (XMSampler *)(song._pMachine[0]);
+		// get song name
+
+		char * pSongName = AllocReadStr(20,17);
+
+		if(pSongName==NULL)
+			return;
+
+		strcpy(song.Name,pSongName);
+		strcpy(song.Author,"");
+		strcpy(song.Comment,"Imported from FastTracker II Module: ");
+		strcat(song.Comment,szName.c_str());
+		zapArray(pSongName);
 
 		LONG iInstrStart = LoadPatterns(song);
-		song.BeatsPerMin(m_Header.tempo);
-		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
-
-		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
-
 		LoadInstruments(*m_pSampler,iInstrStart);
 
 	}
@@ -88,23 +91,15 @@ namespace host{
 
 	const long XMSongLoader::LoadPatterns(Song & song)
 	{
-
-		// get song name
-		
-		char * pSongName = AllocReadStr(20,17);
-		
-		if(pSongName==NULL)
-			return 0;
-
-		strcpy(song.Name,pSongName);
-		strcpy(song.Author,"");
-		strcpy(song.Comment,"Imported from FastTracker II Module: ");
-		strcat(song.Comment,szName.c_str());
-		zapArray(pSongName);
-
 		// get data
 		Seek(60);
 		Read(&m_Header,sizeof(XMFILEHEADER));
+
+		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
+		song.SONGTRACKS=m_Header.channels;
+		m_iInstrCnt = m_Header.instruments;
+		song.BeatsPerMin(m_Header.tempo);
+		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
 
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < 256;i++)
 		{
@@ -120,11 +115,6 @@ namespace host{
 		} else {
 			song.playLength=m_Header.norder;
 		}
-
-		song.SONGTRACKS=m_Header.channels;
-
-		// instr count
-		m_iInstrCnt = m_Header.instruments;
 
 		// get pattern data
 		int nextPatStart = m_Header.size + 60;
@@ -235,7 +225,10 @@ namespace host{
 					// translate
 					e._inst = instr;	
 					e._mach = 0;
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 					e._volume = 255;
 
 					// volume/command
@@ -280,6 +273,7 @@ namespace host{
 							break;
 						}
 					}
+	#endif
 #endif
 
 					e._parameter = param;
@@ -530,10 +524,14 @@ namespace host{
 							break;	// transpose
 					}
 
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
-					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
+	#else
 					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+	#endif
 #endif
 					{
 						e._mach = 255;
@@ -605,7 +603,6 @@ namespace host{
 
 		ReadEnvelopes(sampler.rInstrument(idx),_samph);
 
-		
 		int i;
 		// read instrument data	
 		for(i=0;i<iSampleCount;i++)
@@ -657,8 +654,8 @@ namespace host{
 		char iReserved = ReadInt1();	
 
 		// sample name
-		char * sName = AllocReadStr(22);
-		
+		char * cName = AllocReadStr(22);
+
 		// parse
 		BOOL bLoop = (iFlags & 0x01 || iFlags & 0x02) && (iLoopLength>0);
 		BOOL bPingPong = iFlags & 0x02;
@@ -678,8 +675,6 @@ namespace host{
 //		XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
 //		sampler.Instrument(iInstrIdx).rWaveData()..Name() = sName;
 		
-		delete[] sName;
-
 		if(bLoop)
 		{
 			if((iFlags & 0x1) == XMInstrument::WaveData::LoopType::NORMAL){
@@ -710,6 +705,9 @@ namespace host{
 		_wave.WaveVolume(iVol * 2);
 		_wave.WaveTune(iRelativeNote);
 		_wave.WaveFineTune(iFineTune*2); // WaveFineTune has double range.
+		std::string sName = cName;
+		_wave.WaveName(sName);
+		delete[] cName;
 
 		smpLen[iSampleIdx] = iLen;
 		smpFlags[iSampleIdx] = iFlags;

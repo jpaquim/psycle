@@ -524,7 +524,7 @@ namespace psycle
 
 		void Song::RemovePattern(int ps)
 		{
-			zapObject(ppPatternData[ps]);
+			zapArray(ppPatternData[ps]);
 		}
 
 		unsigned char * Song::CreateNewPattern(int ps)
@@ -1150,14 +1150,14 @@ namespace psycle
 								pFile->Read(pSource, size);
 								byte* pDest;
 								BEERZ77Decomp2(pSource, &pDest);
-								zapObject(pSource,pDest);
+								zapArray(pSource,pDest);
 								for(int y(0) ; y < patternLines[index] ; ++y)
 								{
 									unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
 									std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
 									pSource += SONGTRACKS * EVENT_SIZE;
 								}
-								zapObject(pDest);
+								zapArray(pDest);
 							}
 							else
 							{
@@ -2334,7 +2334,7 @@ namespace psycle
 					}
 
 					size = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE)+(3*sizeof(temp))+strlen(patternName[i])+1;
-					zapObject(pSource);
+					zapArray(pSource);
 
 					pFile->Write("PATD",4);
 					version = CURRENT_FILE_VERSION_PATD;
@@ -2354,7 +2354,7 @@ namespace psycle
 					size -= (3*sizeof(temp))+strlen(patternName[i])+1;
 					pFile->Write(&size,sizeof(size));
 					pFile->Write(pCopy,size);
-					zapObject(pCopy);
+					zapArray(pCopy);
 
 					if ( !autosave ) 
 					{

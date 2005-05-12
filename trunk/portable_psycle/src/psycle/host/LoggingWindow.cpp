@@ -8,7 +8,8 @@
 #include <cstring>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		CLoggingWindow::CLoggingWindow(CWnd * pParent) : CDialog(CLoggingWindow::IDD, pParent)
+
+		CLoggingWindow::CLoggingWindow(CWnd * pParent)
 		{
 			AfxInitRichEdit();
 			pParentMain=(CMainFrame*)pParent;

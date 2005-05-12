@@ -320,7 +320,7 @@ namespace psycle
 				if(exception) throw *exception;
 			}
 			
-			bool plugin::LoadSpecificFileChunk(RiffFile * pFile, int version)
+			bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 			{
 				UINT size;
 				pFile->Read(&size, sizeof size );
@@ -384,7 +384,7 @@ namespace psycle
 				}
 				return true;
 			};
-
+			// Load for Old Psycle fileformat
 			bool plugin::LoadChunk(RiffFile * pFile)
 			{
 				bool b;

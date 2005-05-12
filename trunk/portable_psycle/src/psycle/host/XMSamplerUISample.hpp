@@ -1,4 +1,5 @@
 #pragma once
+#include "afxwin.h"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
@@ -21,15 +22,33 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg BOOL OnSetActive(void);
-
-private:
-
-	XMSampler *m_pMachine;
-public:
 	void pMachine(XMSampler *const p){m_pMachine = p;};
 	XMSampler * const pMachine(){return m_pMachine;};
+
+	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnLbnSelchangeSamplelist();
+	afx_msg void OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawGlobvolume(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnCbnSelendokVibratotype();
+	afx_msg void OnNMCustomdrawVibratorate(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnCbnSelendokLoop();
+	afx_msg void OnCbnSelendokSustainloop();
+	afx_msg void OnEnChangeLoopstart();
+	afx_msg void OnEnChangeLoopend();
+	afx_msg void OnEnChangeSustainstart();
+	afx_msg void OnEnChangeSustainend();
+	afx_msg void OnEnChangeWavename();
+	afx_msg void OnEnChangeSamplerate();
+	afx_msg void OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult);
+
+private:
+	XMSampler *m_pMachine;
+
+protected:
+	CListBox m_SampleList;
 };
 NAMESPACE__END
 NAMESPACE__END

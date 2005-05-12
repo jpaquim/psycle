@@ -106,8 +106,8 @@ namespace psycle
 				m_WaveLength  = iLen;
 			};
 
-			void Load(RiffFile& riffFile,const UINT version);
-			void Save(RiffFile& riffFile,const UINT version);
+			void Load(RiffFile* riffFile,const UINT version);
+			void Save(RiffFile* riffFile,const UINT version);
 
 			/// Wave Data Copy Operator
 			void operator= (const WaveData& source)
@@ -142,6 +142,7 @@ namespace psycle
 
 			// Properties
 			const std::string WaveName(){ return m_WaveName;};
+			void WaveName(std::string newname){ m_WaveName = newname;};
 
 			const compiler::uint32 WaveLength(){ return m_WaveLength;};
 			void WaveLength (const compiler::uint32 value){m_WaveLength = value;};
@@ -334,8 +335,8 @@ namespace psycle
 
 			const int NumOfPoints(){ return m_Points.size();};
 
-			void Load(RiffFile& riffFile,const UINT version);
-			void Save(RiffFile& riffFile,const UINT version);
+			void Load(RiffFile* riffFile,const UINT version);
+			void Save(RiffFile* riffFile,const UINT version);
 
 			// overloaded copy function
 			Envelope& operator=(const Envelope& other)
@@ -396,8 +397,8 @@ namespace psycle
 
 		void Init();
 
-		void Load(RiffFile& riffFile,const UINT version);
-		void Save(RiffFile& riffFile,const UINT version);
+		void Load(RiffFile* riffFile,const UINT version);
+		void Save(RiffFile* riffFile,const UINT version);
 
 		void operator= (const XMInstrument & other)
 		{
@@ -506,7 +507,7 @@ namespace psycle
 
 		std::string m_Name;
 
-		compiler::uint16 m_Lines;			// If m_Lines > 0 use tickduration*m_Lines to determine the wave speed instead of the note.
+		compiler::uint16 m_Lines;			// If m_Lines > 0 use samplelen/(tickduration*m_Lines) to determine the wave speed instead of the note.
 
 		Envelope m_AmpEnvelope;				// envelope range = [0.0f..1.0f]
 		Envelope m_PanEnvelope;				// envelope range = [-1.0f..1.0f]

@@ -2540,10 +2540,14 @@ NAMESPACE__BEGIN(psycle)
 						}
 					}
 					trackcount++;
-#if defined PSYCLE_OPTION_VOLUME_COLUMN
-					patOffset+=2;
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
+	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+					patOffset+=2;
+	#else
 					patOffset++;
+	#endif
 #endif
 					xOffset+=ROWWIDTH;
 				}
