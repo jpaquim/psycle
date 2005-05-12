@@ -62,10 +62,7 @@ namespace psycle
 			{
 				_pInfo = GetInfo();
 			}
-			catch(const std::exception & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
-			catch(const char * const e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
-			catch(const long int & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
-			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
+			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetInfo"); }
 			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
 			_isSynth = _pInfo->Flags == 3;
@@ -89,10 +86,7 @@ namespace psycle
 			{
 				proxy()(GetInterface());
 			}
-			catch(const std::exception & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-			catch(const char * const e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-			catch(const long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-			catch(const unsigned long int & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
+			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
 		}
 
@@ -109,7 +103,7 @@ namespace psycle
 				{
 					throw;
 				}
-				Work(1);
+//				Work(1);
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
 				{
 					try

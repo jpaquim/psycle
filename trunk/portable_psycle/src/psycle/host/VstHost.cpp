@@ -30,7 +30,7 @@ namespace psycle
 							#if defined $
 								#error "macro clash"
 							#endif
-							#define $(OPCODE) case eff##OPCODE: return "eff"#OPCODE;
+							#define $(code) case eff##code: return "eff"#code;
 
 							// from AEffect.h
 							$(Open) $(Close)
@@ -170,10 +170,7 @@ namespace psycle
 					{
 						effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
 					}
-					catch(const std::exception & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-					catch(const char * const e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-					catch(const long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-					catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
+					catch(std::exception const & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
 					catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
 					proxy()(effect);
 				}
@@ -811,71 +808,64 @@ namespace psycle
 			#if !defined NDEBUG
 				static std::string audioMaster_opcode_to_string(long opcode)
 				{
-					#ifdef I
+					#if defined $
 						#error "macro clash"
 					#else
-						#define I(OPCODE) case audioMaster##OPCODE: return "audioMaster"#OPCODE;
+						#define $(code) case audioMaster##code: return "audioMaster"#code;
 						switch(opcode)
 						{
 							// from AEffect.h
-							I(Automate)
-							I(Version)
-							I(CurrentId)
-							I(Idle)
-							I(PinConnected)
+							$(Automate) $(Version) $(CurrentId) $(Idle) $(PinConnected)
+
 							// from AEffectX.h
-							I(WantMidi)
-							I(GetTime)
-							I(ProcessEvents)
-							I(SetTime)
-							I(TempoAt)
-							I(GetNumAutomatableParameters)
-							I(GetParameterQuantization)
-							I(IOChanged)
-							I(NeedIdle)
-							I(SizeWindow)
-							I(GetSampleRate)
-							I(GetBlockSize)
-							I(GetInputLatency)
-							I(GetOutputLatency)
-							I(GetPreviousPlug)
-							I(GetNextPlug)
-							I(WillReplaceOrAccumulate)
-							I(GetCurrentProcessLevel)
-							I(GetAutomationState)
-							I(OfflineStart)
-							I(OfflineRead)
-							I(OfflineWrite)
-							I(OfflineGetCurrentPass)
-							I(OfflineGetCurrentMetaPass)
-							I(SetOutputSampleRate)
-							I(GetOutputSpeakerArrangement)
-							I(GetVendorString)
-							I(GetProductString)
-							I(GetVendorVersion)
-							I(VendorSpecific)
-							I(SetIcon)
-							I(CanDo)
-							I(GetLanguage)
-							I(OpenWindow)
-							I(CloseWindow)
-							I(GetDirectory)
-							I(UpdateDisplay)
+							$(GetTime) $(SetTime)
+
+							$(OfflineStart) $(OfflineRead) $(OfflineWrite)$(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
+
+							$(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
+
+							$(OpenWindow) $(CloseWindow)
+
+							$(SetOutputSampleRate)
+							$(GetSampleRate)
+							$(GetBlockSize)
+							$(GetInputLatency) $(GetOutputLatency)
+
+							$(GetParameterQuantization)
+
+							$(GetOutputSpeakerArrangement)
+
+							$(GetPreviousPlug) $(GetNextPlug)
+
+							$(WantMidi)
+							$(ProcessEvents)
+							$(TempoAt)
+							$(GetNumAutomatableParameters)
+							$(IOChanged)
+							$(NeedIdle)
+							$(SizeWindow)
+							$(WillReplaceOrAccumulate)
+							$(GetCurrentProcessLevel)
+							$(GetAutomationState)
+							$(SetIcon)
+							$(CanDo)
+							$(GetLanguage)
+							$(GetDirectory)
+							$(UpdateDisplay)
 
 							// vst 2.1
 
-							I(BeginEdit)
-							I(EndEdit)
-							I(OpenFileSelector)
+							$(BeginEdit) $(EndEdit)
+							$(OpenFileSelector)
 
 							// vst 2.2
 
-							I(CloseFileSelector)
-							I(EditFile)
-							I(GetChunkFile)
+							$(CloseFileSelector)
+							$(EditFile)
+							$(GetChunkFile)
 
 							// vst 2.3
-							I(GetInputSpeakerArrangement)
+							$(GetInputSpeakerArrangement)
 						default:
 							{
 								std::ostringstream s;
@@ -890,7 +880,7 @@ namespace psycle
 
 			long int plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
-				#ifndef NDEBUG
+				#if !defined NDEBUG
 					if(opcode!=audioMasterGetTime)
 					{
 						std::ostringstream s;

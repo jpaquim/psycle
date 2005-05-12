@@ -97,7 +97,7 @@ namespace psycle
 				// Tells the VST plugin the desired samplerate.
 				long int setSampleRate(float sr)
 				{
-					assert(sr>0.0f);
+					assert(sr > 0);
 					return dispatcher(effSetSampleRate,0,0,0,sr);
 				}
 				// Tels the VST plugin the MAX block size of data that it will request.
@@ -394,11 +394,20 @@ namespace psycle
 				#error "macro clash"
 			#endif
 			#define $catch$(function) \
-				catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-				catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+				catch(        std::exception const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(                  char const e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(         long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(              long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(                   int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(             short int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(                  char const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(unsigned long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(unsigned      long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(unsigned           int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(unsigned     short int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(unsigned          char const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(            void const * const e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+				catch(               ...              ) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 
 			inline void proxy::operator()(AEffect * const plugin) throw(host::exceptions::function_error)
 			{
@@ -416,7 +425,7 @@ namespace psycle
 					try
 					{
 						// AEffect's resvd2 data member is right after the resvd1 data member in memory,
-						// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address,
+						// so, we can use those two 32-bit data members together as a single, potentially 64-bit, address
 						*reinterpret_cast<vst::plugin**>(&plugin->resvd1) = &host();
 					}
 					$catch$("operator()(AEffect * const plugin)")
@@ -442,29 +451,30 @@ namespace psycle
 				#endif
 				assert((*this)()); try { return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt); } $catch$("dispatcher") return 0; /* dummy return to avoid warning */
 			}
-			inline long int proxy::magic() throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().magic; } $catch$("magic") return 0; /* dummy return to avoid warning */ }
+			inline long int proxy::magic() throw(host::exceptions::function_error)
+			{ assert((*this)()); try { return plugin().magic; } $catch$("magic") return 0; /* dummy return to avoid warning */ }
 			inline void proxy::process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
-			{	assert((*this)()); try { plugin().process(&plugin(), inputs, outputs, sampleframes); } $catch$("process") }
+			{ assert((*this)()); try { plugin().process(&plugin(), inputs, outputs, sampleframes); } $catch$("process") }
 			inline void proxy::processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error)
-			{	assert((*this)()); try { plugin().processReplacing(&plugin(), inputs, outputs, sampleframes); } $catch$("processReplacing") }
+			{ assert((*this)()); try { plugin().processReplacing(&plugin(), inputs, outputs, sampleframes); } $catch$("processReplacing") }
 			inline void proxy::setParameter(long int index, float parameter) throw(host::exceptions::function_error)
-			{	assert((*this)()); try { plugin().setParameter(&plugin(), index, parameter); } $catch$("setParameter") }
+			{ assert((*this)()); try { plugin().setParameter(&plugin(), index, parameter); } $catch$("setParameter") }
 			inline float proxy::getParameter(long int index) throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().getParameter(&plugin(), index); } $catch$("getParameter") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().getParameter(&plugin(), index); } $catch$("getParameter") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numPrograms() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().numPrograms; } $catch$("numPrograms") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().numPrograms; } $catch$("numPrograms") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numParams() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().numParams; } $catch$("numParams") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().numParams; } $catch$("numParams") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numInputs() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().numInputs; } $catch$("numInputs") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().numInputs; } $catch$("numInputs") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::numOutputs() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().numOutputs; } $catch$("numOutputs") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().numOutputs; } $catch$("numOutputs") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::flags() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().flags; } $catch$("flags") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().flags; } $catch$("flags") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::uniqueId() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().uniqueID; } $catch$("uniqueId") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().uniqueID; } $catch$("uniqueId") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::version() throw(host::exceptions::function_error)
-			{	assert((*this)()); try { return plugin().version; } $catch$("version") return 0; /* dummy return to avoid warning */ }
+			{ assert((*this)()); try { return plugin().version; } $catch$("version") return 0; /* dummy return to avoid warning */ }
 
 			#pragma warning(pop)
 

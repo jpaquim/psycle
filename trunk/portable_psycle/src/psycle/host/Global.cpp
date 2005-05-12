@@ -23,7 +23,7 @@ namespace psycle
 		Global::Global()
 		{
 			#ifndef NDEBUG
-			operating_system::console::open();
+				operating_system::console::open();
 			#endif
 			_pSong = new Song;
 			pPlayer = new Player;
@@ -84,6 +84,11 @@ namespace psycle
 				logger::default_logger()(levels::info, string);
 			}
 
+			void warning(const std::string & string) throw()
+			{
+				logger::default_logger()(levels::warning, string);
+			}
+
 			void exception(const std::string & string) throw()
 			{
 				logger::default_logger()(levels::exception, string);
@@ -107,11 +112,12 @@ namespace psycle
 					ostream() << "=== ";
 					switch(level)
 					{
-					case loggers::levels::trace: ostream() << "trace"; break;
-					case loggers::levels::info: ostream() << "info"; break;
-					case loggers::levels::exception: ostream() << "exception"; break;
-					case loggers::levels::crash: ostream() << "crash"; break;
-					default: ostream() << "default"; break;
+						case loggers::levels::trace: ostream() << "trace"; break;
+						case loggers::levels::info: ostream() << "information"; break;
+						case loggers::levels::warning: ostream() << "warning"; break;
+						case loggers::levels::exception: ostream() << "exception"; break;
+						case loggers::levels::crash: ostream() << "crash"; break;
+						default: ostream() << "default"; break;
 					}
 					ostream() << " ===" << std::endl;
 					ostream() << string << std::endl;
@@ -129,9 +135,10 @@ namespace psycle
 			catch(...)
 			{
 				// oh dear!
-				// fallback to std::cerr
+				// output and error message to std::cerr and
+				// fallback to std::clog
 				std::cerr << "logger crashed" << std::endl;
-				std::cerr << "logger: " << level << ": " << string;
+				std::clog << "logger: " << level << ": " << string << std::endl;
 			}
 		}
 
@@ -164,7 +171,7 @@ namespace psycle
 				class once
 				{
 				public:
-					// <bohan> hmm, someone told me it is disallowed to have static functions in local classes, although msvc7.1 seems to allow it.
+					// [bohan] hmm, someone told me it is disallowed to have static functions in local classes, although msvc7.1 seems to allow it.
 					//static std::ostream & instanciate() throw(...)
 					std::ostream & instanciate() throw(...)
 					{
@@ -190,8 +197,8 @@ namespace psycle
 			}
 			catch(...)
 			{
-				std::cerr << "could not create logger output stream" << std::endl;
-				return std::cout;
+				std::cerr << "could not create logger output stream ; will use standard log output instead" << std::endl;
+				return std::clog;
 			}
 		}
 	}

@@ -17,11 +17,11 @@ namespace operating_system
 	/// generic exception thrown by functions of the namespace operating_system.
 	class LIBRARY exception : public std::runtime_error
 	{
-	public:
-		exception(const std::string &) throw();
-		/// returns the message describing the cause of the exception.
-		/// same as what() but returns a std::string.
-		virtual operator const std::string() const throw();
+		public:
+			exception(std::string const &) throw();
+			/// returns the message describing the cause of the exception.
+			/// same as what() but returns a std::string.
+			virtual operator std::string const () const throw();
 	};
 
 	/// some subclasses of operating_system::exception.
@@ -30,11 +30,17 @@ namespace operating_system
 		/// external cpu/os exception translated into a c++ one.
 		class LIBRARY translated : public exception
 		{
-		public:
-			translated(const unsigned int & code) throw();
-			/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
-			/// <bohan> This is needed for microsoft, i don't know about linux/gcc.
-			static void new_thread(const std::string & = "");
+			public:
+				translated(unsigned int const & code) throw();
+
+			public:
+				unsigned int const inline & code() const throw() { return code_; }
+			private:
+				unsigned int const          code_;
+
+			public:
+				/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
+				static void new_thread(std::string const & = "");
 		};
 	}
 }

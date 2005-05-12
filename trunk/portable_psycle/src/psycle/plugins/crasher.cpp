@@ -36,8 +36,11 @@ protected:
 		//throw "crash on purpose!";
 		//throw std::runtime_error("crash on purpose!");
 
-		// division by 0:
-		volatile int i(0); i = 0 / i; // trick so that the compiler does not remove the code when optimizing
+		// integer division by 0:
+		//volatile int i(0); i = 0 / i; // trick so that the compiler does not remove the code when optimizing
+
+		// floating point division by 0:
+		volatile float i(0); i = 0 / i; // trick so that the compiler does not remove the code when optimizing
 
 		// infinite loop so that we can test interruption signal:
 		//while(true);

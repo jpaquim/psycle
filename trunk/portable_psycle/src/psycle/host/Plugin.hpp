@@ -120,7 +120,7 @@ namespace psycle
 			if(plugin)
 			{
 				callback();
-				//Init(); // <bohan> i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+				//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
 			}
 		}
 
@@ -128,33 +128,61 @@ namespace psycle
 			#error "macro clash"
 		#endif
 		#define $catch$(function) \
-			catch(const std::exception & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-			catch(const char e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-			catch(const long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-			catch(const unsigned long int & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
-			catch(...) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
+			catch(        std::exception const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(                  char const e[]) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(  signed long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(  signed      long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(  signed           int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(  signed     short int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(  signed          char const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(unsigned long long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(unsigned      long int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(unsigned           int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(unsigned     short int const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(unsigned          char const & e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(            void const * const e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
+			catch(               ...              ) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 
 		#pragma warning(push)
 		#pragma warning(disable:4702) // unreachable code
-		inline void proxy::Init() throw(exceptions::function_error) { assert((*this)()); try { plugin().Init(); } $catch$("Init") }
-		inline void proxy::SequencerTick() throw(exceptions::function_error) { assert((*this)()); try { plugin().SequencerTick(); } $catch$("SequencerTick") }
-		inline void proxy::ParameterTweak(int par, int val) throw(exceptions::function_error) { assert((*this)()); try { plugin().ParameterTweak(par, val); } $catch$("ParameterTweak") }
-		inline void proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(exceptions::function_error) { assert((*this)()); try { plugin().Work(psamplesleft, psamplesright, numsamples, tracks); } $catch$("Work") }
-		inline void proxy::Stop() throw(exceptions::function_error) { assert((*this)()); try { plugin().Stop(); } $catch$("Stop") }
-		inline void proxy::PutData(byte * pData) throw(exceptions::function_error) { assert((*this)()); try { plugin().PutData(pData); } $catch$("PutData") }
-		inline void proxy::GetData(byte * pData) throw(exceptions::function_error) { assert((*this)()); try { plugin().GetData(pData); } $catch$("GetData") }
-		inline int proxy::GetDataSize() throw(exceptions::function_error) { assert((*this)()); try { return plugin().GetDataSize(); } $catch$("GetDataSize") return 0; /* dummy return to avoid warning */ }
-		inline void proxy::Command() throw(exceptions::function_error) { assert((*this)()); try { plugin().Command(); } $catch$("Command") }
-		inline void proxy::MuteTrack(const int i) throw(exceptions::function_error) { assert((*this)()); try { plugin().MuteTrack(i); } $catch$("MuteTrack") }
-		inline bool proxy::IsTrackMuted(const int i) throw(exceptions::function_error) { assert((*this)()); try { return const_cast<const CMachineInterface &>(plugin()).IsTrackMuted(i); } $catch$("IsTrackMuted") return false; /* dummy return to avoid warning */ }
-		inline void proxy::MidiNote(const int channel, const int value, const int velocity) throw(exceptions::function_error) { assert((*this)()); try { plugin().MidiNote(channel, value, velocity); } $catch$("MidiNote") }
-		inline void proxy::Event(const dword data) throw(exceptions::function_error) { assert((*this)()); try { plugin().Event(data); } $catch$("Event") }
-		inline bool proxy::DescribeValue(char * txt, const int param, const int value) throw(exceptions::function_error) { assert((*this)()); try { return plugin().DescribeValue(txt, param, value); } $catch$("DescribeValue") return false; /* dummy return to avoid warning */ }
-		inline bool proxy::PlayWave(const int wave, const int note, const float volume) throw(exceptions::function_error) { assert((*this)()); try { plugin().PlayWave(wave, note, volume); } $catch$("PlayWave") return false; /* dummy return to avoid warning */ }
-		inline void proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw(exceptions::function_error) { assert((*this)()); try { plugin().SeqTick(channel, note, ins, cmd, val); } $catch$("SeqTick") }
-		inline void proxy::StopWave() throw(exceptions::function_error) { assert((*this)()); try { plugin().StopWave(); } $catch$("StopWave") }
-		inline int * proxy::Vals() throw(exceptions::function_error) { assert((*this)()); try { return plugin().Vals; } $catch$("Vals") return 0; /* dummy return to avoid warning */ }
-		inline void proxy::callback() throw(exceptions::function_error) { assert((*this)()); try { plugin().pCB = host().GetCallback(); } $catch$("callback") }
+		inline void proxy::Init() throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().Init(); } $catch$("Init") }
+		inline void proxy::SequencerTick() throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().SequencerTick(); } $catch$("SequencerTick") }
+		inline void proxy::ParameterTweak(int par, int val) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().ParameterTweak(par, val); } $catch$("ParameterTweak") }
+		inline void proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().Work(psamplesleft, psamplesright, numsamples, tracks); } $catch$("Work") }
+		inline void proxy::Stop() throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().Stop(); } $catch$("Stop") }
+		inline void proxy::PutData(byte * pData) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().PutData(pData); } $catch$("PutData") }
+		inline void proxy::GetData(byte * pData) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().GetData(pData); } $catch$("GetData") }
+		inline int proxy::GetDataSize() throw(exceptions::function_error)
+		{ assert((*this)()); try { return plugin().GetDataSize(); } $catch$("GetDataSize") return 0; /* dummy return to avoid warning */ }
+		inline void proxy::Command() throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().Command(); } $catch$("Command") }
+		inline void proxy::MuteTrack(const int i) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().MuteTrack(i); } $catch$("MuteTrack") }
+		inline bool proxy::IsTrackMuted(const int i) throw(exceptions::function_error)
+		{ assert((*this)()); try { return const_cast<const CMachineInterface &>(plugin()).IsTrackMuted(i); } $catch$("IsTrackMuted") return false; /* dummy return to avoid warning */ }
+		inline void proxy::MidiNote(const int channel, const int value, const int velocity) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().MidiNote(channel, value, velocity); } $catch$("MidiNote") }
+		inline void proxy::Event(const dword data) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().Event(data); } $catch$("Event") }
+		inline bool proxy::DescribeValue(char * txt, const int param, const int value) throw(exceptions::function_error)
+		{ assert((*this)()); try { return plugin().DescribeValue(txt, param, value); } $catch$("DescribeValue") return false; /* dummy return to avoid warning */ }
+		inline bool proxy::PlayWave(const int wave, const int note, const float volume) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().PlayWave(wave, note, volume); } $catch$("PlayWave") return false; /* dummy return to avoid warning */ }
+		inline void proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().SeqTick(channel, note, ins, cmd, val); } $catch$("SeqTick") }
+		inline void proxy::StopWave() throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().StopWave(); } $catch$("StopWave") }
+		inline int * proxy::Vals() throw(exceptions::function_error)
+		{ assert((*this)()); try { return plugin().Vals; } $catch$("Vals") return 0; /* dummy return to avoid warning */ }
+		inline void proxy::callback() throw(exceptions::function_error)
+		{ assert((*this)()); try { plugin().pCB = host().GetCallback(); } $catch$("callback") }
 		#pragma warning(pop)
 
 		#undef $catch$

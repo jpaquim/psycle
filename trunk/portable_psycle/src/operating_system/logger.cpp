@@ -139,6 +139,9 @@ namespace operating_system
 		case ::psycle::host::loggers::levels::info:
 			attributes |= FOREGROUND_GREEN;
 			break;
+		case ::psycle::host::loggers::levels::warning:
+			attributes |= FOREGROUND_RED | FOREGROUND_GREEN;
+			break;
 		case ::psycle::host::loggers::levels::exception:
 			attributes |= FOREGROUND_RED;
 			break;
