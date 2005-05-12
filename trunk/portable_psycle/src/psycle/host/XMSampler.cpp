@@ -837,9 +837,9 @@ panbrello, and S44 will be a slower panbrello.
 				// 8363*2^((5*12*64 - Period) / (12*64))
 				// 8363=Hz for Middle-C note
 				// 12*64 = 12 notes * 64 finetune steps.
-				// 5 = 10-middle_C ( if C-4 is middle_C, then, 6*12*64, if C-3, then 7*12*64, etc..)
+				// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
 				return	pow(2.0,
-							(3840 - period ) /768.0
+							(5376 - period ) /768.0
 						)
 						* 8363 / (double)Global::pPlayer->SampleRate();
 			}
@@ -856,8 +856,8 @@ panbrello, and S44 will be a slower panbrello.
 //				double c5speed =  8363.0*speedfactor;
 				return AmigaPeriod[note]/speedfactor;
 			} else {
-				// 7680 = 12notes*10octaves*64fine.
-				return 7680 - ((double)(note + _wave.WaveTune()) * 64.0)
+				// 9216 = 12notes*12octaves*64fine.
+				return 9216 - ((double)(note + _wave.WaveTune()) * 64.0)
 					- ((double)(_wave.WaveFineTune()) * 0.25); // 0.25 since the range is +-256 for XMSampler as opposed to +-128 for FT.
 			}
 		};
@@ -880,12 +880,12 @@ panbrello, and S44 will be a slower panbrello.
 					-(12.0 * log((double)period / 32.0)/(0.301029995f /*log(2)*/ )));
 				return _note+12;
 			} else {
-				// period = ((10.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
+				// period = ((12.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
 				//	- (_wave.WaveFineTune() / 256.0) * 64.0);
-				// period / 64.0 = 10.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
-				// note = (int)(10.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5);
+				// period / 64.0 = 12.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
+				// note = (int)(12.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5);
 
-				return (int)(120 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0)  - (period / 64.0)); // Apparently,  (int)(x.5) rounds to x+1, so no need for +0.5
+				return (int)(144 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0)  - (period / 64.0)); // Apparently,  (int)(x.5) rounds to x+1, so no need for +0.5
 			}
 		}
 
@@ -2207,6 +2207,9 @@ panbrello, and S44 will be a slower panbrello.
 			riffFile->Write(temp); // quality
 
 			riffFile->Write(m_bAmigaSlides);
+			riffFile->Write(m_UseFilters);
+
+			//\todo : Save default Channel Parameters!
 
 			// Instrument Data Save
 			int numInstruments = 0;		
@@ -2252,6 +2255,9 @@ panbrello, and S44 will be a slower panbrello.
 			}
 
 			riffFile->Read(m_bAmigaSlides);
+			riffFile->Read(m_UseFilters);
+
+			//\todo : Save default Channel Parameters!
 
 			// Instrument Data Load
 			int numInstruments;

@@ -75,8 +75,8 @@ namespace psycle
 
 		void XMInstrument::WaveData::Save(RiffFile* riffFile,const UINT version)
 		{
-			byte * pData1;
-			byte * pData2;
+			byte * pData1(0);
+			byte * pData2(0);
 			UINT size1= SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
 			UINT size2(0);
 
