@@ -24,27 +24,23 @@ namespace operating_system
 			virtual operator std::string const () const throw();
 	};
 
-	/// some subclasses of operating_system::exception.
 	namespace exceptions
 	{
-		/// external cpu/os exception translated into a c++ one.
-		class LIBRARY translated : public exception
+		/// external cpu/os exception translated into a c++ one, with deferred querying of the human-readable message.
+		class LIBRARY translated : public std::exception
 		{
 			public:
-				translated(unsigned int const & code) throw();
+				/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
+				void static new_thread(std::string const & = "");
+
+			public:
+				inline translated(unsigned int const & code) throw() : code_(code) {}
+				virtual /* overrides */ char const * what() const;
 
 			public:
 				unsigned int const inline & code() const throw() { return code_; }
 			private:
 				unsigned int const          code_;
-
-			public:
-				/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
-				static void new_thread(std::string const & = "");
 		};
 	}
 }
-
-// causes clash with operator<<(std::ostringstream &,std::string)
-//#include <sstream>
-//inline std::ostringstream & operator<<(std::ostringstream & out, const operating_system::exception & e) { out << e.what(); return out; }

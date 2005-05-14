@@ -109,7 +109,15 @@ namespace operating_system
 				///\todo adds more information using EXCEPTION_POINTERS *
 				switch(code)
 				{
-					case STATUS_BREAKPOINT: return; // [bohan] not sure what to do with break points...
+					////////////////////
+					// things to ignore
+
+					case STATUS_BREAKPOINT: // [bohan] not sure what to do with break points...
+					case STATUS_SINGLE_STEP:
+						 return;
+
+					/////////////////////////////
+					// floating point exceptions
 
 					case STATUS_FLOAT_INEXACT_RESULT:
 					case STATUS_FLOAT_DENORMAL_OPERAND:
@@ -119,24 +127,34 @@ namespace operating_system
 					case STATUS_FLOAT_STACK_CHECK:
 					case STATUS_FLOAT_DIVIDE_BY_ZERO:
 					case STATUS_FLOAT_INVALID_OPERATION:
+						throw translated(code);
+
+					///////////
+					// default
+
 					default:
+						{
+							// This type of exception is usually likely followed by a bad crash of the whole program,
+							// because it is caused by really bad things like wrong memory access, etc...
+							// So, we automatically log them as soon as they are created, that is, even before they are thrown.
+							std::ostringstream s;
+							s << "crash: ";
+							#if defined OPERATING_SYSTEM__MICROSOFT
+								s << "thread id: " << ::GetCurrentThreadId() << ", ";
+							#endif
+							s << typeid(translated).name() << std::endl << code_description(code);
+							psycle::host::loggers::crash(s.str());
+						}
 						throw translated(code);
 				}
 			}
 		}
 
-		translated::translated(const unsigned int & code) throw() : exception(code_description(code)), code_(code)
+		char const * translated::what() const
 		{
-			// This type of exception is usually likely followed by a bad crash of the whole program,
-			// because it is caused by really bad things like wrong memory access, etc...
-			// So, we automatically log them as soon as they are created, that is, even before they are thrown.
 			std::ostringstream s;
-			s << "crash: ";
-			#if defined OPERATING_SYSTEM__MICROSOFT
-				s << "thread id: " << ::GetCurrentThreadId() << ", ";
-			#endif
-			s << typeid(*this).name() << ": " << what();
-			psycle::host::loggers::crash(s.str());
+			s << code_description(code());
+			return s.str().c_str();
 		}
 
 		void translated::new_thread(const std::string & name)
