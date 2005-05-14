@@ -89,7 +89,7 @@ namespace processor
 								#error todo
 							#endif
 						}
-						void inline divide_by_0(bool b = false) throw()
+						void inline divide_by_0(bool b) throw()
 						{
 							#if defined OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_ZERODIVIDE, b);
@@ -105,7 +105,7 @@ namespace processor
 								#error todo
 							#endif
 						}
-						void inline overflow(bool b = false) throw()
+						void inline overflow(bool b) throw()
 						{
 							#if defined OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_OVERFLOW, b);
@@ -121,7 +121,7 @@ namespace processor
 								#error todo
 							#endif
 						}
-						void inline underflow(bool b = false) throw()
+						void inline underflow(bool b) throw()
 						{
 							#if defined OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_UNDERFLOW, b);
@@ -137,7 +137,7 @@ namespace processor
 								#error todo
 							#endif
 						}
-						void inline invalid(bool b = false) throw()
+						void inline invalid(bool b) throw()
 						{
 							#if defined OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_INVALID, b);
