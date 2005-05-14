@@ -34,13 +34,17 @@ namespace operating_system
 				void static new_thread(std::string const & = "");
 
 			public:
-				inline translated(unsigned int const & code) throw() : code_(code) {}
-				virtual /* overrides */ char const * what() const;
+				inline translated(unsigned int const & code) throw() : code_(code), what_(0) {}
 
 			public:
 				unsigned int const inline & code() const throw() { return code_; }
 			private:
 				unsigned int const          code_;
+
+			public:
+				       char const virtual /* overrides */ * what() const;
+			private:
+				std::string const mutable                 * what_;
 		};
 	}
 }

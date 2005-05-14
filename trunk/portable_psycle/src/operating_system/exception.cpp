@@ -154,9 +154,13 @@ namespace operating_system
 
 		char const * translated::what() const
 		{
-			std::ostringstream s;
-			s << code_description(code());
-			return s.str().c_str();
+			if(!what_)
+			{
+				std::ostringstream s;
+				s << code_description(code());
+				this->what_ = new std::string(s.str());
+			}
+			return what_->c_str();
 		}
 
 		void translated::new_thread(const std::string & name)
