@@ -1300,9 +1300,11 @@ namespace psycle
 				Progress.OnCancel();
 				if((!pFile->Close()) || (chunkcount))
 				{
-					char error[MAX_PATH];
-					std::sprintf(error,"Error reading from \"%s\"!!!", pFile->szName);
-					::MessageBox(0, error, "File Error!!!", 0);
+					std::ostringstream s;
+					s << "Error reading from file '" << pFile->szName << "'" << std::endl;
+					if(chunkcount) s << "some chunks were missing in the file";
+					else s << "could not close the file";
+					::MessageBox(0, s.str().c_str(), "File Error!!!", 0);
 					return false;
 				}
 				return true;
