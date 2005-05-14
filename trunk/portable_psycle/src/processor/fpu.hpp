@@ -7,6 +7,20 @@ namespace processor
 	/// name processor's floating point unit
 	namespace fpu
 	{
+		/// fpu exception status
+		class exception_status
+		{
+			public:
+				void static inline clear() throw()
+				{
+					#if defined OPERATING_SYSTEM__MICROSOFT
+						::_clearfp();
+					#else
+						#error todo
+					#endif
+				}
+		};
+
 		/// fpu exception mask
 		class exception_mask
 		{

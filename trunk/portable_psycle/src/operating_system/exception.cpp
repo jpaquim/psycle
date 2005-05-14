@@ -127,6 +127,7 @@ namespace operating_system
 					case STATUS_FLOAT_STACK_CHECK:
 					case STATUS_FLOAT_DIVIDE_BY_ZERO:
 					case STATUS_FLOAT_INVALID_OPERATION:
+						processor::fpu::exception_status::clear();
 						throw translated(code);
 
 					///////////
@@ -134,7 +135,7 @@ namespace operating_system
 
 					default:
 						{
-							// This type of exception is usually likely followed by a bad crash of the whole program,
+							// This type of exception is usually likely followed by a bad crash of the whole process,
 							// because it is caused by really bad things like wrong memory access, etc...
 							// So, we automatically log them as soon as they are created, that is, even before they are thrown.
 							std::ostringstream s;
