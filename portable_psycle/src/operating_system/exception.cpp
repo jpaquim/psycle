@@ -29,47 +29,42 @@ namespace operating_system
 			{
 				std::ostringstream s;
 				s << "microsoft nt structured exception (external cpu/os exception): 0x" << std::hex << code << ": ";
-				/*
 				switch(code)
 				{
-				
 					#if defined $
 						#error "macro clash"
 					#endif
 					#define $(exception, description) case exception: s << #exception ": " description; break;
-
-					// see http://www.iseran.com/Win32/FAQ/except.html
-					// warnings
-					$(STATUS_GUARD_PAGE_VIOLATION,"")
-					$(STATUS_DATATYPE_MISALIGNMENT, "The thread tried to read or write data that is misaligned on hardware that does not provide alignment. For example, 16-bit values must be aligned on 2-byte boundaries; 32-bit values on 4-byte boundaries, and so on.")
-					$(STATUS_BREAKPOINT, "A breakpoint was encountered.")
-					$(STATUS_SINGLE_STEP, "A trace trap or other single-instruction mechanism signaled that one instruction has been executed.")
-					// errors
-					$(STATUS_ACCESS_VIOLATION, "The thread tried to read from or write to a virtual address for which it does not have the appropriate access.")
-					$(STATUS_IN_PAGE_ERROR, "The thread tried to access a page that was not present, and the system was unable to load the page. For example, this exception might occur if a network connection is lost while running a program over the network.")
-					$(STATUS_INVALID_HANDLE,"An invalid handle was used in an api function call.")
-					$(STATUS_NO_MEMORY,"")
-					$(STATUS_ILLEGAL_INSTRUCTION, "The thread tried to execute an invalid instruction.")
-					$(STATUS_NONCONTINUABLE_EXCEPTION, "The thread tried to continue execution after a noncontinuable exception occurred.")
-					$(STATUS_INVALID_DISPOSITION, "An exception handler returned an invalid disposition to the exception dispatcher. Programmers using a high-level language such as C should never encounter this exception.")
-					$(STATUS_ARRAY_BOUNDS_EXCEEDED, "The thread tried to access an array element that is out of bounds and the underlying hardware supports bounds checking.")
-					$(STATUS_FLOAT_DENORMAL_OPERAND, "One of the operands in a floating-point operation is denormal. A denormal value is one that is too small to represent as a standard floating-point value.")
-					$(STATUS_FLOAT_INEXACT_RESULT, "The result of a floating-point operation cannot be represented exactly as a decimal fraction.")
-					$(STATUS_FLOAT_DIVIDE_BY_ZERO, "The thread tried to divide a floating-point value by a floating-point divisor of zero.")
-					$(STATUS_FLOAT_OVERFLOW, "The exponent of a floating-point operation is greater than the magnitude allowed by the corresponding type.")
-					$(STATUS_FLOAT_UNDERFLOW, "The exponent of a floating-point operation is less than the magnitude allowed by the corresponding type.")
-					$(STATUS_FLOAT_STACK_CHECK, "The stack overflowed or underflowed as the result of a floating-point operation.")
-					$(STATUS_FLOAT_INVALID_OPERATION, "This exception represents any floating-point exception not included in this list.")
-					$(STATUS_INTEGER_DIVIDE_BY_ZERO, "The thread tried to divide an integer value by an integer divisor of zero.")
-					$(STATUS_INTEGER_OVERFLOW, "The result of an integer operation caused a carry out of the most significant bit of the result.")
-					$(STATUS_PRIVILEGED_INSTRUCTION, "The thread tried to execute an instruction whose operation is not allowed in the current machine mode.")
-					$(STATUS_STACK_OVERFLOW, "The thread used up its stack.")
-					$(STATUS_CONTROL_C_EXIT,"")
-					$(0xE06D7363,"Visual C++ exception: The SEH exception used by the c++ try/catch/throw mechanism in Visual C++")
-				
+						// see http://www.iseran.com/Win32/FAQ/except.html
+						// warnings
+						//$(STATUS_GUARD_PAGE_VIOLATION,"")
+						//$(STATUS_DATATYPE_MISALIGNMENT, "The thread tried to read or write data that is misaligned on hardware that does not provide alignment. For example, 16-bit values must be aligned on 2-byte boundaries; 32-bit values on 4-byte boundaries, and so on.")
+						//$(STATUS_BREAKPOINT, "A breakpoint was encountered.")
+						//$(STATUS_SINGLE_STEP, "A trace trap or other single-instruction mechanism signaled that one instruction has been executed.")
+						// errors
+						$(STATUS_ACCESS_VIOLATION, "The thread tried to read from or write to a virtual address for which it does not have the appropriate access.")
+						//$(STATUS_IN_PAGE_ERROR, "The thread tried to access a page that was not present, and the system was unable to load the page. For example, this exception might occur if a network connection is lost while running a program over the network.")
+						//$(STATUS_INVALID_HANDLE,"An invalid handle was used in an api function call.")
+						//$(STATUS_NO_MEMORY,"")
+						//$(STATUS_ILLEGAL_INSTRUCTION, "The thread tried to execute an invalid instruction.")
+						//$(STATUS_NONCONTINUABLE_EXCEPTION, "The thread tried to continue execution after a noncontinuable exception occurred.")
+						//$(STATUS_INVALID_DISPOSITION, "An exception handler returned an invalid disposition to the exception dispatcher. Programmers using a high-level language such as C should never encounter this exception.")
+						//$(STATUS_ARRAY_BOUNDS_EXCEEDED, "The thread tried to access an array element that is out of bounds and the underlying hardware supports bounds checking.")
+						//$(STATUS_FLOAT_DENORMAL_OPERAND, "One of the operands in a floating-point operation is denormal. A denormal value is one that is too small to represent as a standard floating-point value.")
+						//$(STATUS_FLOAT_INEXACT_RESULT, "The result of a floating-point operation cannot be represented exactly as a decimal fraction.")
+						//$(STATUS_FLOAT_DIVIDE_BY_ZERO, "The thread tried to divide a floating-point value by a floating-point divisor of zero.")
+						//$(STATUS_FLOAT_OVERFLOW, "The exponent of a floating-point operation is greater than the magnitude allowed by the corresponding type.")
+						//$(STATUS_FLOAT_UNDERFLOW, "The exponent of a floating-point operation is less than the magnitude allowed by the corresponding type.")
+						//$(STATUS_FLOAT_STACK_CHECK, "The stack overflowed or underflowed as the result of a floating-point operation.")
+						//$(STATUS_FLOAT_INVALID_OPERATION, "This exception represents any floating-point exception not included in this list.")
+						//$(STATUS_INTEGER_DIVIDE_BY_ZERO, "The thread tried to divide an integer value by an integer divisor of zero.")
+						//$(STATUS_INTEGER_OVERFLOW, "The result of an integer operation caused a carry out of the most significant bit of the result.")
+						//$(STATUS_PRIVILEGED_INSTRUCTION, "The thread tried to execute an instruction whose operation is not allowed in the current machine mode.")
+						//$(STATUS_STACK_OVERFLOW, "The thread used up its stack.")
+						//$(STATUS_CONTROL_C_EXIT,"")
+						//$(0xE06D7363,"Visual C++ exception: The SEH exception used by the c++ try/catch/throw mechanism in Visual C++")
 					#undef C
 				default:
-				*/
 					DWORD flags
 					(
 						FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -101,7 +96,7 @@ namespace operating_system
 					}
 					if(error_message_pointer) ::LocalFree(error_message_pointer);
 					if(module) ::FreeLibrary(module);
-				//}
+				}
 				return s.str();
 			}
 
