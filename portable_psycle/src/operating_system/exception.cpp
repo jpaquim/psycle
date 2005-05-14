@@ -4,6 +4,7 @@
 #define OPERATING_SYSTEM__EXCEPTION
 #include "exception.hpp"
 #include "logger.hpp"
+#include <processor/fpu.hpp>
 #include <iostream>
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
