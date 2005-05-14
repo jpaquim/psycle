@@ -154,12 +154,7 @@ namespace operating_system
 
 		char const * translated::what() const
 		{
-			if(!what_)
-			{
-				std::ostringstream s;
-				s << code_description(code());
-				this->what_ = new std::string(s.str());
-			}
+			if(!what_) what_ = new std::string(code_description(code()));
 			return what_->c_str();
 		}
 
