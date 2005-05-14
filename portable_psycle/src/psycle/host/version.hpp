@@ -3,6 +3,10 @@
 #if 0
 /*
 $Log$
+Revision 1.26  2005/05/14 15:32:57  johan-boule
+bug fix
+operating_system::exceptions::translated::what() returned the address of a temporary stack object
+
 Revision 1.25  2005/05/12 22:18:39  johan-boule
 increased version number for alpha release
 includes jaz's bug fixes
@@ -109,7 +113,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 43 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 44 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
