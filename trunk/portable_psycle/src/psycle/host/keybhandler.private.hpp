@@ -1600,6 +1600,14 @@ NAMESPACE__BEGIN(psycle)
 				int ls=0;
 				int ts=0;
 				
+				//added by sampler. There is a problem. The paste action can be undo but the lines are not reverted back.
+				if (blockNLines > nl) 
+					if (MessageBox("Do you want to autoincrease this pattern lines?","Block doesn't fit in current pattern",MB_YESNO) == IDYES)
+					{
+						_pSong->patternLines[ps] = blockNLines;						
+					}
+				//end of added by sampler
+				
 				for (int t=tx;t<tx+blockNTracks;t++)
 				{
 					ls=0;
