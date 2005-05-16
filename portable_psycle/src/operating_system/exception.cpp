@@ -9,6 +9,9 @@
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 #endif
+#if defined COMPILER__MICROSOFT
+	#include <eh.h>
+#endif
 namespace operating_system
 {
 	exception::exception(const std::string & what) throw() : std::runtime_error(what)
