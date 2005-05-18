@@ -24,7 +24,7 @@
 	int const MAX_BUFFER_LENGTH = 256;
 
 	/// CMachineParameter flags.
-	int const MPF_NULL = 0;
+	int const MPF_LABEL = 0;
 
 	/// CMachineParameter flags.
 	int const MPF_STATE = 2;
