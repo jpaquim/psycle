@@ -212,18 +212,15 @@ void mi::ParameterTweak(int par, int val)
 	}
 }
 
-
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 
 	float frequency, omega, sn, cs, alpha;
-//	static float const anti_denormal = 1e-18f;
+	static float anti_denormal = 1.0e-20f;
 
 		do
 			{
-//			*psamplesleft += anti_denormal;	*psamplesleft -= anti_denormal;
-//			*psamplesright += anti_denormal; *psamplesright -= anti_denormal;
 
 			float in_l = *psamplesleft * 0.000030517578125f;  // divide by 32768 =>  -1..1
 			float in_r = *psamplesright * 0.000030517578125f; 
@@ -262,14 +259,14 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			xn2_l = xn1_l;
 			xn1_l = in_l;
 			yn2_l = yn1_l;
-			yn1_l = out_l;
+			yn1_l = out_l+anti_denormal;
 
 			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) / a0_r;
 
 			xn2_r = xn1_r;
 			xn1_r = in_r;
 			yn2_r = yn1_r;
-			yn1_r = out_r;
+			yn1_r = out_r+anti_denormal;
 
 
 			// Prevents clipping
@@ -290,6 +287,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 			++psamplesleft;
 			++psamplesright;
+
+			anti_denormal = -anti_denormal;
 		
 		} while(--numsamples);
 	
