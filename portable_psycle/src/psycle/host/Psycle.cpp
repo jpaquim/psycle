@@ -9,7 +9,6 @@
 #include "NewMachine.hpp"
 #include <operating_system/exception.hpp>
 #include <sstream>
-#include ".\psycle.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 

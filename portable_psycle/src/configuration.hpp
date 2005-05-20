@@ -25,7 +25,10 @@
 ///  JAZ: Define to 1 to enable the volume column for XMSampler. It will also make the machine column in the pattern to show
 ///		the values of the volume column instead.
 
-#define PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN 0
+#define PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN 1
+
+/// Test for RMS Vu's
+//#defile PSYCLE__CONFIGURATION__RMS_VUS 1
 
 /// unmasks fpu exceptions
 #define PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS 0

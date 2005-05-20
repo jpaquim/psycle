@@ -97,7 +97,7 @@ void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
 
 void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
 	{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 
 	for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
 		{

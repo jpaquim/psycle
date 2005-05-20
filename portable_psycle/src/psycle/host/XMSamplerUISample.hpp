@@ -46,6 +46,7 @@ public:
 
 private:
 	XMSampler *m_pMachine;
+	bool m_Init;
 
 protected:
 	CListBox m_SampleList;

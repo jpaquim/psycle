@@ -1907,26 +1907,18 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,106,67,17,100
     CONTROL         "Surround",IDC_CH_SURR2,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,91,44,45,10
-    CTEXT           "2",IDC_NAME2,95,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
+    CTEXT           "2",IDC_NAME2,95,166,40,8,SS_CENTERIMAGE
     CONTROL         "",IDC_SL_VOL1,"msctls_trackbar32",TBS_VERT | TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,60,67,17,100
     CONTROL         "Surround",IDC_CH_SURR1,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,45,44,45,10
-    CTEXT           "1",IDC_NAME1,49,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
-    CTEXT           "4",IDC_NAME4,187,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
-    CTEXT           "3",IDC_NAME3,141,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
-    CTEXT           "6",IDC_NAME6,279,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
-    CTEXT           "5",IDC_NAME5,233,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
-    CTEXT           "8",IDC_NAME8,370,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
-    CTEXT           "7",IDC_NAME7,325,166,40,8,SS_CENTERIMAGE | 
-                    SS_ENDELLIPSIS
+    CTEXT           "1",IDC_NAME1,49,166,40,8,SS_CENTERIMAGE
+    CTEXT           "4",IDC_NAME4,187,166,40,8,SS_CENTERIMAGE
+    CTEXT           "3",IDC_NAME3,141,166,40,8,SS_CENTERIMAGE
+    CTEXT           "6",IDC_NAME6,279,166,40,8,SS_CENTERIMAGE
+    CTEXT           "5",IDC_NAME5,233,166,40,8,SS_CENTERIMAGE
+    CTEXT           "8",IDC_NAME8,370,166,40,8,SS_CENTERIMAGE
+    CTEXT           "7",IDC_NAME7,325,166,40,8,SS_CENTERIMAGE
     CONTROL         "",IDC_SL_PAN8,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,366,34,45,8
     CONTROL         "",IDC_SL_RES8,"msctls_trackbar32",TBS_BOTH | 

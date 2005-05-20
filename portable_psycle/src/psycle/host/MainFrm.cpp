@@ -129,12 +129,12 @@ NAMESPACE__BEGIN(psycle)
 			seqcopybufferlength = 0;
 			_pSong = 0;
 			pGearRackDialog = 0;
-			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
+//			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
 		}
 
 		CMainFrame::~CMainFrame()
 		{
-			Gdiplus::GdiplusShutdown(gdiplusToken); // GDI+ stuff
+//			Gdiplus::GdiplusShutdown(gdiplusToken); // GDI+ stuff
 			Global::pInputHandler->SetMainFrame(NULL);
 			if(pGearRackDialog) pGearRackDialog->OnCancel();
 		}

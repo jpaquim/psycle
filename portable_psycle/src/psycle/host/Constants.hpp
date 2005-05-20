@@ -14,8 +14,6 @@ namespace psycle
 		#define MAX_MACHINES			129
 		/// Index of MasterMachine
 		#define MASTER_INDEX			128
-		/// Max number of waves per instrument.
-		#define MAX_WAVES				32
 		/// Max number of instruments.
 		#define MAX_INSTRUMENTS			256
 		/// Instrument index of the wave preview.
@@ -23,7 +21,7 @@ namespace psycle
 		/// Number of tracks of the sequence (psycle just support one sequence now). Modify this, CURRENT_FILE_VERSION_SEQD and add the appropiated load and save code.
 		#define MAX_SEQUENCES			1
 		/// harcoded maximal number different patterns.
-		#define MAX_PATTERNS			255
+		#define MAX_PATTERNS			256
 		/// Max number of pattern tracks
 		#define MAX_TRACKS				64
 		/// harcoded maximal number of lines per pattern

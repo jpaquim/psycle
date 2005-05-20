@@ -4,6 +4,7 @@
 #include "Machine.hpp"
 #include "Filter.hpp"
 #include "XMInstrument.hpp"
+//#include "../../../include/xdsp/xdsp.h"
 
 namespace psycle
 {
@@ -12,6 +13,7 @@ namespace psycle
 class XMSampler : public Machine
 {
 public:
+
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const compiler::uint32 VERSION = 0x00010000;
@@ -118,8 +120,8 @@ XMSampler::Channel::PerformFX().
 		VOL_VOLUME3			=	0x30, // 0x30..0x3F (63)  ||
 		VOL_VOLSLIDEUP		=	0x40, // 0x40..0x4F (16)
 		VOL_VOLSLIDEDOWN	=	0x50, // 0x50..0x5F (16)
-		VOL_PITCH_SLIDE_DOWN=	0x60, // 0x60..0x6F (16)
-		VOL_PITCH_SLIDE_UP	=	0x70, // 0x70..0x7F (16)
+		VOL_PITCH_SLIDE_UP	=	0x60, // 0x60..0x6F (16)
+		VOL_PITCH_SLIDE_DOWN=	0x70, // 0x70..0x7F (16)
 		VOL_PANNING			=	0x80, // 0x80..0x8F (16)
 		VOL_PANSLIDELEFT	=	0x90, // 0x90..0x9F (16)
 		VOL_PANSLIDERIGHT	=	0xA0, // 0xA0..0xAF (16)
@@ -153,9 +155,9 @@ XMSampler::Channel::PerformFX().
 			};
 		};
 
-		void Init(XMInstrument::WaveData* wave, const int layer);
-		void NoteOff(void);
-		void Work(float *pLeftw,float *pRightw,dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Init(XMInstrument::WaveData* wave, const int layer);
+		virtual void NoteOff(void);
+		virtual void Work(float *pLeftw,float *pRightw,dsp::PRESAMPLERFN pResamplerWork)
 		{
 			//Process sample
 			*pLeftw = pResamplerWork(
@@ -215,45 +217,45 @@ XMSampler::Channel::PerformFX().
 		};
 
 		// Properties
-		const int Layer() { return m_Layer;};
-		XMInstrument::WaveData &Wave() { return *m_pWave; };
+		virtual const int Layer() { return m_Layer;};
+		virtual XMInstrument::WaveData &Wave() { return *m_pWave; };
 
-		bool Playing(){ return m_Playing;};
-		void Playing(bool play){ m_Playing=play; };
+		virtual bool Playing(){ return m_Playing;};
+		virtual void Playing(bool play){ m_Playing=play; };
 
 		// Current sample position 
-		const __int64  Position(){ return m_Position.HighPart;};
-		void Position(const	__int64 value){ 
+		virtual const __int64  Position(){ return m_Position.HighPart;};
+		virtual void Position(const	__int64 value){ 
 			if ( value < Length()) m_Position.HighPart = value;
 			else m_Position.HighPart = Length()-1;
 		};
 		
 		// Current sample Speed
-		const __int64 Speed(){return m_Speed;};
-		void Speed(const double value){m_Speed = value * 4294967296.0f;}; // 4294967296 is a left shift of 32bits
+		virtual const __int64 Speed(){return m_Speed;};
+		virtual void Speed(const double value){m_Speed = value * 4294967296.0f;}; // 4294967296 is a left shift of 32bits
 
-		void CurrentLoopDirection(const int dir){m_LoopDirection = dir;};
-		const int CurrentLoopDirection(){return m_LoopDirection;};
+		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;};
+		virtual const int CurrentLoopDirection(){return m_LoopDirection;};
 
-		const int LoopType(){return m_pWave->WaveLoopType();};
-		const int LoopStart(){return m_pWave->WaveLoopStart();};
-		const int LoopEnd(){ return m_pWave->WaveLoopEnd();};
+		virtual const int LoopType(){return m_pWave->WaveLoopType();};
+		virtual const int LoopStart(){return m_pWave->WaveLoopStart();};
+		virtual const int LoopEnd(){ return m_pWave->WaveLoopEnd();};
 
-		const int SustainLoopType(){return m_pWave->WaveSusLoopType();};
-		const int SustainLoopStart(){return m_pWave->WaveSusLoopStart();};
-		const int SustainLoopEnd(){ return m_pWave->WaveSusLoopEnd();};
+		virtual const int SustainLoopType(){return m_pWave->WaveSusLoopType();};
+		virtual const int SustainLoopStart(){return m_pWave->WaveSusLoopStart();};
+		virtual const int SustainLoopEnd(){ return m_pWave->WaveSusLoopEnd();};
 
-		const int Length(){return m_pWave->WaveLength();};
+		virtual const int Length(){return m_pWave->WaveLength();};
 
-		const bool IsStereo(){ return m_pWave->IsWaveStereo();};
+		virtual const bool IsStereo(){ return m_pWave->IsWaveStereo();};
 
 		// pointer to Start of Left sample
-		const short* pLeft(){return m_pL;};
+		virtual const short* pLeft(){return m_pL;};
 		// pointer to Start of Right sample
-		const short* pRight(){return m_pR;};
+		virtual const short* pRight(){return m_pR;};
 
 
-	private:
+	protected:
 		int m_Layer;
 		XMInstrument::WaveData *m_pWave;
 		ULARGE_INTEGER m_Position;
@@ -271,8 +273,21 @@ XMSampler::Channel::PerformFX().
 		short* m_pL;
 		short* m_pR;
 	};
-
-
+/*
+	class XDSPWaveController : public WaveDataController
+	{
+	public:
+		XDSPWaveController(){};
+		virtual ~XDSPWaveController();
+		void Init(XMInstrument::WaveData* wave, const int layer);
+		static void Workxdsp(int numSamples);
+		void Speed(const double value);
+	protected:
+		void XMSampler::XDSPWaveController::RecreateResampler(void);
+	private:
+		int m_Speed1x;
+	};
+*/
 //////////////////////////////////////////////////////////////////////////
 //  XMSampler::EnvelopeController Declaration
 	//\todo: Recall "CalcStep" after a SampleRate change, and also after a Tempo Change.
@@ -318,13 +333,27 @@ XMSampler::Channel::PerformFX().
 					{
 						if (m_Stage&EnvelopeStage::HASSUSTAIN)
 						{
+							if ( m_NoteOff)
+							{ 
+								if ( m_Stage&EnvelopeStage::HASLOOP )
+								{
+									m_PositionIndex = m_pEnvelope->LoopStart();
+									if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
+									{
+										m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+										return;
+									}
+								}
+								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::HASSUSTAIN);
+								m_SustainEnd = false;
+							}
 							// if the begin==end, pause the envelope.
-							if ( m_pEnvelope->SustainBegin() == m_PositionIndex )
+							else if ( m_pEnvelope->SustainBegin() == m_PositionIndex )
 							{
 								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
 								return;
 							}
-							else m_PositionIndex = m_pEnvelope->SustainBegin();
+							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
 						}
 						else if (m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->LoopEnd() <= m_PositionIndex)
 						{
@@ -382,6 +411,7 @@ XMSampler::Channel::PerformFX().
 		inline void CalcStep(const int start,const int  end);
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Samples= m_NextEventSample; }
 		void RecalcDeviation();
+		bool HasSustainEnded() { return m_SustainEnd; }
 	private:
 		inline float SRateDeviation() { return m_sRateDeviation; };
 
@@ -391,6 +421,8 @@ XMSampler::Channel::PerformFX().
 		int m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage m_Stage;
+		bool m_NoteOff;
+		bool m_SustainEnd; // m_Sustain is used to detect when the sustain loop has ended.
 
 		XMInstrument::Envelope * m_pEnvelope;
 
@@ -489,6 +521,9 @@ XMSampler::Channel::PerformFX().
 		const bool IsBackground() { return m_Background; };
 		void IsBackground(const bool background){ m_Background = background; };
 
+		const bool IsStopping() { return m_Stopping; };
+		void IsStopping(const bool stop) { m_Stopping = stop; };
+
 		// Volume of the current note.
 		const compiler::uint16 Volume() { return m_Volume; };
 		void Volume(const compiler::uint16 vol)
@@ -562,6 +597,7 @@ XMSampler::Channel::PerformFX().
 		EnvelopeController m_PitchEnvelope;
 
 		WaveDataController m_WaveDataController;
+//		XDSPWaveController m_WaveDataController;
 
 		dsp::ITFilter m_Filter;
 		int m_CutOff;
@@ -570,6 +606,7 @@ XMSampler::Channel::PerformFX().
 
 		bool m_bPlay;
 		bool m_Background;
+		bool m_Stopping;
 		int m_Note;
 		int m_Period;
 		float m_Volume;
@@ -689,6 +726,7 @@ XMSampler::Channel::PerformFX().
 		void PanningSlide();
 		void ChannelVolumeSlide();
 		void NoteCut();
+		void StopBackgroundNotes(XMInstrument::NewNoteAction action);
 
 		const double ArpeggioPeriod()
 		{
@@ -744,13 +782,15 @@ XMSampler::Channel::PerformFX().
 		};
 
 		const int Cutoff() { return m_Cutoff;};
+		void Cutoff(const int cut) { m_Cutoff =cut;  if ( ForegroundVoice() ) ForegroundVoice()->CutOff(cut); };
 		const int Ressonance() { return m_Ressonance;};
+		void Ressonance(const int res) { m_Ressonance=res; if ( ForegroundVoice() ) ForegroundVoice()->Ressonance(res);};
 		const dsp::FilterType FilterType() { return m_FilterType;};
 
 		const int DefaultCutoff(){return m_DefaultCutoff;};
-		void DefaultCutoff(const int value){m_DefaultCutoff = value; m_Cutoff = value; };
+		void DefaultCutoff(const int value){m_DefaultCutoff = value; Cutoff(value);};
 		const int DefaultRessonance(){return m_DefaultRessonance; };
-		void DefaultRessonance(const int value){m_DefaultRessonance = value; m_Ressonance = value; };
+		void DefaultRessonance(const int value){m_DefaultRessonance = value; Ressonance(value); };
 		const dsp::FilterType DefaultFilterType(){return m_DefaultFilterType;};
 		void DefaultFilterType(const dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; };
 

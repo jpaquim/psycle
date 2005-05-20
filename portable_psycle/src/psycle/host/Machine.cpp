@@ -726,7 +726,7 @@ namespace psycle
 				{
 					pTemp._note+=noteOffset[i];
 				}
-				if (macOutput[i] != -1) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
+				if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL ) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 			}
 		}
 		void DuplicatorMac::GetParamName(int numparam,char *name)
@@ -779,7 +779,7 @@ namespace psycle
 
 		void DuplicatorMac::Work(int numSamples)
 		{
-			Machine::Work(numSamples);
+/*			Machine::Work(numSamples);
 			CPUCOST_INIT(cost);
 			Machine::SetVolumeCounter(numSamples);
 			if ( Global::pConfig->autoStopMachines )
@@ -792,6 +792,7 @@ namespace psycle
 			}
 			CPUCOST_CALC(cost, numSamples);
 			_cpuCost += cost;
+*/
 			_worked = true;
 		}
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)

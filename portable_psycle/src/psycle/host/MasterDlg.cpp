@@ -214,7 +214,11 @@ NAMESPACE__BEGIN(psycle)
 			if (!--_pMachine->peaktime) 
 			{
 				char peak[10];
-				sprintf(peak,"%.2fdB",dsp::dB(_pMachine->currentpeak*0.00003051f));
+				if ( _pMachine->currentpeak > 0)
+				{
+					sprintf(peak,"%.2fdB",dsp::dB(_pMachine->currentpeak*0.00003051f));
+				}
+				else strcpy(peak,"-99dB");
 				m_masterpeak.SetWindowText(peak);
 
 				float db = dsp::dB(_pMachine->_outDry/256.0f);

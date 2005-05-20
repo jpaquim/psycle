@@ -26,7 +26,7 @@ namespace host{
 		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const LONG LoadSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
-		void ReadEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
+		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
 		// inlines

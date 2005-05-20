@@ -8,7 +8,15 @@ namespace psycle
 	namespace host
 	{
 		namespace dsp
-			{
+		{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+			extern int numRMSSamples;
+			extern int countRMSSamples;
+			extern double RMSAccumulatedLeft;
+			extern double RMSAccumulatedRight;
+			extern float previousRMSLeft;
+			extern float previousRMSRight;
+#endif
 		/// Funky denormal check
 		#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))	
 
@@ -59,9 +67,41 @@ namespace psycle
 			/*const*/ double tmp((d-0.5) + magic);
 			return *reinterpret_cast<int*>(&tmp);
 		};
+
 		/// finds the maximum amplitude in a signal buffer.
 		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+		{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+			// This is just a test to get RMS dB values.
+			// Doesn't look that better, and uses more CPU. 
+			float *pL = pSamplesL;
+			float *pR = pSamplesR;
+			int ns = numSamples;
+			int count =(numRMSSamples- countRMSSamples);
+			--pL;
+			--pR;
+			if ( ns >= count)
 			{
+				ns -= count;
+				while (count--) {
+					RMSAccumulatedLeft +=  *(++pL)**(pL);
+					RMSAccumulatedRight +=  *(++pR)**(pR);
+				};
+				previousRMSLeft =  sqrt(dsp::RMSAccumulatedLeft/dsp::numRMSSamples);
+				previousRMSRight =  sqrt(dsp::RMSAccumulatedRight/dsp::numRMSSamples);
+				RMSAccumulatedLeft = 0;
+				RMSAccumulatedRight = 0;
+				countRMSSamples = 0;
+			}
+			while(ns--) {
+				RMSAccumulatedLeft +=  *(++pL)**(pL);
+				RMSAccumulatedRight +=  *(++pR)**(pR);
+				countRMSSamples++;
+			};
+			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
+
+#else
+			// This is the usual code, peak value
 			--pSamplesL;
 			--pSamplesR;
 
@@ -82,9 +122,9 @@ namespace psycle
 					}
 				}
 			while (--numSamples);
-
 			return vol;
-			}
+#endif
+		}
 		/// finds the maximum amplitude in a signal buffer.
 		/// It contains "VST" because initially the return type for native machines 
 		/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
@@ -127,7 +167,7 @@ namespace psycle
 		///\todo make a template version that accept both float and doubles
 		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
-			float id(float(1.0E-7));
+			float id(float(1.0E-18));
 			for(int s(0) ; s < numsamples ; ++s)
 			{
 				/* Old denormal code. Now we use a 1bit sinus.

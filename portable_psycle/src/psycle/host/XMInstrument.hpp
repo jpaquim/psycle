@@ -29,11 +29,14 @@ namespace psycle
 			 DCT_SAMPLE,
 			 DCT_INSTRUMENT
 			};
+/*
+		Using NewNoteAction so that we can convert easily from DCA to NNA.
 		enum DCAction {
 			DCA_STOP=0x0,
 			DCA_NOTEOFF,
 			DCA_FADEOUT
 			};
+*/
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Class declaration
@@ -106,8 +109,8 @@ namespace psycle
 				m_WaveLength  = iLen;
 			};
 
-			void Load(RiffFile* riffFile,const UINT version);
-			void Save(RiffFile* riffFile,const UINT version);
+			void Load(RiffFile* riffFile);
+			void Save(RiffFile* riffFile);
 
 			/// Wave Data Copy Operator
 			void operator= (const WaveData& source)
@@ -397,8 +400,8 @@ namespace psycle
 
 		void Init();
 
-		void Load(RiffFile* riffFile,const UINT version);
-		void Save(RiffFile* riffFile,const UINT version);
+		void Load(RiffFile* riffFile);
+		void Save(RiffFile* riffFile);
 
 		void operator= (const XMInstrument & other)
 		{
@@ -496,8 +499,8 @@ namespace psycle
 		void NNA(const NewNoteAction value){ m_NNA = value;};
 		const DCType DCT() { return m_DCT;};
 		void DCT(const DCType value){ m_DCT = value;};
-		const DCAction DCA() { return m_DCA;};
-		void DCA(const DCAction value){ m_DCA = value;};
+		const NewNoteAction DCA() { return m_DCA;};
+		void DCA(const NewNoteAction value){ m_DCA = value;};
 
 		const NotePair NoteToSample(const int note){return m_AssignNoteToSample[note];};
 		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;};
@@ -536,7 +539,7 @@ namespace psycle
 
 		NewNoteAction m_NNA;
 		DCType m_DCT;
-		DCAction m_DCA;
+		NewNoteAction m_DCA;
 
 		/// Table of mapped notes to samples
 		// (note number=first, sample number=second)

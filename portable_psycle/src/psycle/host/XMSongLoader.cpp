@@ -22,6 +22,11 @@ namespace host{
 		{
 			highOffset[i]=0;
 		}
+		for (int i=0; i<256; i++)
+		{
+			smpLen[i]=0;
+			smpFlags[i]=0;
+		}
 	}
 
 	XMSongLoader::~XMSongLoader(void)
@@ -75,7 +80,8 @@ namespace host{
 
 		// process
 		TRACE(_T("Header: %s\n"),pID);
-		TRACE(_T("Tracker: %s v%i.%i\n"),pTrackerName,int(pTrackerVer[1]),int(pTrackerVer[0]));	
+		TRACE(_T("Tracker: %s\n"),pTrackerName);
+		TRACE(_T("Fileformat Version %i.%i\n"),int(pTrackerVer[1]),int(pTrackerVer[0]));
 
 		// check header
 		bIsValid = (!stricmp(pID,XM_HEADER));
@@ -566,10 +572,11 @@ namespace host{
 		Seek(iStart);
 
 		int iInstrSize = ReadInt4();
-		ASSERT(iInstrSize==0x107||iInstrSize==0x21);
+//		ASSERT(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
 		TCHAR sInstrName[23];
 		ZeroMemory(sInstrName,sizeof(sInstrName) * sizeof(TCHAR));
 		Read(sInstrName,22);
+		sInstrName[22]= 0;
 
 		int iInstrType = ReadInt1();
 		int iSampleCount = ReadInt2();
@@ -577,15 +584,7 @@ namespace host{
 		if(iSampleCount>1)
  			TRACE(_T("ssmple count = %d\n"),iSampleCount);
 
-		unsigned char *sRemap = new unsigned char[iSampleCount];
-
-		// store instrument name
-		//std::string& _tmp1 = 
 		sampler.rInstrument(idx).Name(sInstrName);
-
-		//int iSampleHeader = ReadInt4();
-		//ATLASSERT(iSampleHeader==0x28);
-		
 		iStart += iInstrSize;
 
 		if(iSampleCount==0)
@@ -602,29 +601,39 @@ namespace host{
 		sampler.rInstrument(idx).AutoVibratoType(_samph.vibtype);
 */			
 
-		ReadEnvelopes(sampler.rInstrument(idx),_samph);
+		SetEnvelopes(sampler.rInstrument(idx),_samph);
 
+		unsigned char *sRemap = new unsigned char[iSampleCount];
 		int i;
 		// read instrument data	
 		for(i=0;i<iSampleCount;i++)
 		{
-			sRemap[i]=curSample;
 			iStart = LoadSampleHeader(sampler,iStart,idx,curSample);
-			curSample++;
+			 // Only get REAL samples.
+			if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {	sRemap[i]=curSample++; }
+			else { sRemap[i]=MAX_INSTRUMENTS-1; }
 		}
 		// load individual samples
 		for(i=0;i<iSampleCount;i++)
-			iStart = LoadSampleData(sampler,iStart,idx,sRemap[i]);
+		{
+			if ( sRemap[i] < MAX_INSTRUMENTS-1)
+			{
+				sampler.rInstrument(idx).IsEnabled(true);
+				iStart = LoadSampleData(sampler,iStart,idx,sRemap[i]);
+			}
+		}
 
 		XMInstrument::NotePair npair;
-		npair.second=sRemap[_samph.snum[0]];
+		if ( _samph.snum[0] < iSampleCount) npair.second=sRemap[_samph.snum[0]];
+		else npair.second=0;
 		for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 			npair.first=i;
 			if (i< 12){
 				//npair.second=_samph.snum[0]; implicit.
 				sampler.rInstrument(idx).NoteToSample(i,npair);
 			} else if(i < 108){
-				npair.second=sRemap[_samph.snum[i-12]];
+				if ( _samph.snum[i] < iSampleCount) npair.second=sRemap[_samph.snum[i-12]];
+				else npair.second=curSample-1;
 				sampler.rInstrument(idx).NoteToSample(i,npair);
 			} else {
 				//npair.second=_samph.snum[95]; implicit.
@@ -632,7 +641,6 @@ namespace host{
 			}
 		}
 		delete[] sRemap;
-		sampler.rInstrument(idx).IsEnabled(true);
 		return iStart;
 	}
 
@@ -669,8 +677,12 @@ namespace host{
 		XMInstrument::WaveData& _wave = sampler.SampleData(iSampleIdx);
 		
 		_wave.Init();
-		_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
-		_wave.WaveLength(b16Bit?iLen / 2:iLen);
+		if ( iLen > 0 ) // Sounds Stupid, but it isn't. Some modules save sample header when there is no sample.
+		{
+			_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
+			_wave.WaveLength(b16Bit?iLen / 2:iLen);
+		}
+		else _wave.WaveLength(0);
 		_wave.PanEnabled(true);
 		_wave.PanFactor(iPanning/255.0f);
 //		XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
@@ -678,13 +690,12 @@ namespace host{
 		
 		if(bLoop)
 		{
-			if((iFlags & 0x1) == XMInstrument::WaveData::LoopType::NORMAL){
-				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
-			} else if((iFlags & 0x2) == XMInstrument::WaveData::LoopType::BIDI){
+			if(bPingPong){
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::BIDI);
+			}else {
+				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
 		
-
 			if(b16Bit)
 			{
 				_wave.WaveLoopStart(iLoopStart / 2);
@@ -763,7 +774,7 @@ namespace host{
 	}
 
 	
-	void XMSongLoader::ReadEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader)
+	void XMSongLoader::SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader)
 	{
 		// volume envelope
 		inst.AmpEnvelope()->Init();
