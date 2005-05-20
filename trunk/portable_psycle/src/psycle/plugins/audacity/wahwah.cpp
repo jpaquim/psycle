@@ -27,7 +27,7 @@
 #include <math.h>
 
 #define lfoskipsamples 30
-#define M_PI 3.14159265359
+#define M_PI 3.14159265359f
 #define NUMPARAMETERS 5
 
 CMachineParameter const paraLFOFreq = 
@@ -123,13 +123,14 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 private:
-	float phase_l,phase_r;
+	float phase;
 	float lfoskip;
 	unsigned long skipcount;
 	float xn1_l, xn2_l, yn1_l, yn2_l;
 	float xn1_r, xn2_r, yn1_r, yn2_r;
-	float b0, b1, b2, a0, a1, a2;
-	float freq, startphase;
+	float b0_l, b1_l, b2_l, a0_l, a1_l, a2_l;
+	float b0_r, b1_r, b2_r, a0_r, a1_r, a2_r;
+	float freq;
 	float depth, freqofs, res;
 
 };
@@ -151,7 +152,7 @@ void mi::Init()
 {
 // Initialize your stuff here
    freq = 1.5f;
-   startphase = .0f;
+   phase = 0;
    depth = .7f;
    freqofs = .3f;
    res = 2.5f;
@@ -168,16 +169,19 @@ void mi::Init()
    yn1_r = 0;
    yn2_r = 0;
 
-   b0 = 0;
-   b1 = 0;
-   b2 = 0;
-   a0 = 0;
-   a1 = 0;
-   a2 = 0;
+   b0_l = 0;
+   b1_l = 0;
+   b2_l = 0;
+   a0_l = 0;
+   a1_l = 0;
+   a2_l = 0;
 
-   phase_l = startphase;
-   phase_r = phase_l+M_PI;
-
+   b0_r = 0;
+   b1_r = 0;
+   b2_r = 0;
+   a0_r = 0;
+   a1_r = 0;
+   a2_r = 0;
 }
 
 void mi::SequencerTick()
@@ -198,66 +202,69 @@ void mi::ParameterTweak(int par, int val)
 	Vals[par]=val;
 	switch(par)
 	{
-		case 0: freq = val * .1f; lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate(); break;
-		case 1: startphase = val  * 0.0055555555555555555555555555555556f * M_PI;  break;
-		case 2: depth = val * .01f;  break;
-		case 3: res = val * .1f;  break;
-		case 4: freqofs = val * .01f; break;
+		case 0: freq = float(val * .1f); lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate(); break;
+		case 1: phase = float(val  * 0.0055555555555555555555555555555556f * M_PI); break;
+		case 2: depth = float(val * .01f);  break;
+		case 3: res = float(val * .1f);  break;
+		case 4: freqofs = float(val * .01f); break;
 		default:
 			 break;
 	}
 }
 
+
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 
-   float frequency, omega, sn, cs, alpha;
-
+	float frequency, omega, sn, cs, alpha;
+//	static float const anti_denormal = 1e-18f;
 
 		do
-		{
+			{
+//			*psamplesleft += anti_denormal;	*psamplesleft -= anti_denormal;
+//			*psamplesright += anti_denormal; *psamplesright -= anti_denormal;
+
 			float in_l = *psamplesleft * 0.000030517578125f;  // divide by 32768 =>  -1..1
 			float in_r = *psamplesright * 0.000030517578125f; 
 
-	        if ((skipcount++) % lfoskipsamples == 0) {
-				frequency = (1 + cos(skipcount * lfoskip + phase_l)) * .5f;
+			if ((skipcount++) % lfoskipsamples == 0) {
+				frequency = (1 + cos(skipcount * lfoskip + phase)) * .5f; // Left channel
 				frequency = frequency * depth * (1 - freqofs) + freqofs;
 				frequency = exp((frequency - 1) * 6);
 				omega = M_PI * frequency;
 				sn = sin(omega);
 				cs = cos(omega);
 				alpha = sn / (2 * res);
-				b0 = (1 - cs) / 2;
-				b1 = 1 - cs;
-				b2 = (1 - cs) / 2;
-				a0 = 1 + alpha;
-				a1	= -2 * cs;
-				a2 = 1 - alpha;
+				b0_l = (1 - cs) * .5f;
+				b1_l = 1 - cs;
+				b2_l = (1 - cs) * .5f;
+				a0_l = 1 + alpha;
+				a1_l = -2 * cs;
+				a2_l = 1 - alpha;
+				
+				frequency = (1 + cos(skipcount * lfoskip + phase + M_PI)) * .5f; // Right channel
+				frequency = frequency * depth * (1 - freqofs) + freqofs;
+				frequency = exp((frequency - 1) * 6);
+				omega = M_PI * frequency;
+				sn = sin(omega);
+				cs = cos(omega);
+				alpha = sn / (2 * res);
+				b0_r = (1 - cs) * .5f;
+				b1_r = 1 - cs;
+				b2_r = (1 - cs) * .5f;
+				a0_r = 1 + alpha;
+				a1_r = -2 * cs;
+				a2_r = 1 - alpha;
 			};
-			float out_l = (b0 * in_l + b1 * xn1_l + b2 * xn2_l - a1 * yn1_l - a2 * yn2_l) / a0;
+			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) / a0_l;
 
 			xn2_l = xn1_l;
 			xn1_l = in_l;
 			yn2_l = yn1_l;
 			yn1_l = out_l;
 
-	        if ((skipcount++) % lfoskipsamples == 0) {
-				frequency = (1 + cos(skipcount * lfoskip + phase_r)) * .5f;
-				frequency = frequency * depth * (1 - freqofs) + freqofs;
-				frequency = exp((frequency - 1) * 6);
-				omega = M_PI * frequency;
-				sn = sin(omega);
-				cs = cos(omega);
-				alpha = sn / (2 * res);
-				b0 = (1 - cs) / 2;
-				b1 = 1 - cs;
-				b2 = (1 - cs) / 2;
-				a0 = 1 + alpha;
-				a1	= -2 * cs;
-				a2 = 1 - alpha;
-			};
-			float out_r = (b0 * in_r + b1 * xn1_r + b2 * xn2_r - a1 * yn1_r - a2 * yn2_r) / a0;
+			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) / a0_r;
 
 			xn2_r = xn1_r;
 			xn1_r = in_r;
@@ -272,14 +279,14 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			else if (out_l > 1.0)
 				out_l = float(1.0);                   
 			
-			*psamplesleft = out_l * 32767.0f;
+			*psamplesleft = out_l * 32767.0f;  // Amplify
 			
 			if (out_r < -1.0) 
 				out_r = float(-1.0);
 			else if (out_r > 1.0)
 				out_r = float(1.0); 
 
-			*psamplesright = out_r * 32767.0f;
+			*psamplesright = out_r * 32767.0f; // Amplify
 
 			++psamplesleft;
 			++psamplesright;
