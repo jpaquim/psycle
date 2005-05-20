@@ -10,7 +10,6 @@ NAMESPACE__BEGIN(psycle)
 				{
 					return;
 				}
-				// Draw machine boxes
 				for (int c=0; c<MAX_MACHINES-1; c++)
 				{
 					Machine* pMac = _pSong->_pMachine[c];
@@ -37,8 +36,6 @@ NAMESPACE__BEGIN(psycle)
 				{
 					return;
 				}
-				// Draw machine boxes
-
 				Machine* pMac = _pSong->_pMachine[c];
 				if (pMac)
 				{

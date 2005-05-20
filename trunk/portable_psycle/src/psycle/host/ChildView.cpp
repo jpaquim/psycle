@@ -450,6 +450,15 @@ NAMESPACE__BEGIN(psycle)
 					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
 				else
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
+
+				// Test to use RMS values for Vumeters.
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+				dsp::numRMSSamples=pOut->_samplesPerSec*0.05f;
+				dsp::countRMSSamples=0;
+				dsp::RMSAccumulatedLeft=0;
+				dsp::RMSAccumulatedRight=0;
+#endif
+
 			}
 		}
 

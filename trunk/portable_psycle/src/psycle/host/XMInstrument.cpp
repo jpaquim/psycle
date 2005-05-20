@@ -23,9 +23,12 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
 
-		void XMInstrument::WaveData::Load(RiffFile* riffFile,const UINT version)
+		void XMInstrument::WaveData::Load(RiffFile* riffFile)
 		{	
 			compiler::uint32 size1,size2;
+			
+			//\todo: add version
+			//riffFile->Read(version);
 
 			CT2A _wave_name("");
 			riffFile->ReadStringA2T(_wave_name,32);
@@ -73,7 +76,7 @@ namespace psycle
 
 		}
 
-		void XMInstrument::WaveData::Save(RiffFile* riffFile,const UINT version)
+		void XMInstrument::WaveData::Save(RiffFile* riffFile)
 		{
 			byte * pData1(0);
 			byte * pData2(0);
@@ -95,6 +98,7 @@ namespace psycle
 
 			riffFile->Write("SMPD");
 			riffFile->Write(size);
+			//\todo: add version
 
 			riffFile->Write(_wave_name,strlen(_wave_name) + 1);
 
@@ -369,8 +373,9 @@ namespace psycle
 			}
 		}
 		// Saving Procedure
-		void XMInstrument::Envelope::Save(RiffFile* riffFile,const UINT version)
+		void XMInstrument::Envelope::Save(RiffFile* riffFile, const UINT version)
 		{
+			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 			riffFile->Write(m_Enabled);
 			riffFile->Write(m_Carry);
 			riffFile->Write(m_LoopStart);
@@ -428,7 +433,7 @@ namespace psycle
 
 			m_NNA = NewNoteAction::STOP;
 			m_DCT = DCType::DCT_NONE;
-			m_DCA = DCAction::DCA_STOP;
+			m_DCA = NewNoteAction::STOP;
 
 			NotePair npair;
 			npair.second=255;
@@ -445,9 +450,12 @@ namespace psycle
 		}
 
 		// load XMInstrument
-		void XMInstrument::Load(RiffFile* riffFile,const UINT version)
+		void XMInstrument::Load(RiffFile* riffFile)
 		{
 			m_bEnabled = true;
+
+			//\todo: add version
+			//riffFile->Read(version);
 
 			CT2A _name("");
 			riffFile->ReadStringA2T(_name,32);
@@ -483,6 +491,7 @@ namespace psycle
 				NoteToSample(i,npair);
 			}
 
+			int version = 0;
 			m_AmpEnvelope.Load(riffFile,version);
 			m_PanEnvelope.Load(riffFile,version);
 			m_PitchEnvelope.Load(riffFile,version);
@@ -490,8 +499,10 @@ namespace psycle
 		}
 
 		// save XMInstrument
-		void XMInstrument::Save(RiffFile* riffFile,const UINT version)
+		void XMInstrument::Save(RiffFile* riffFile)
 		{
+			if ( ! m_bEnabled ) return;
+
 			int i;
 			int size = sizeof(XMInstrument)
 				-sizeof(m_AmpEnvelope)
@@ -501,11 +512,12 @@ namespace psycle
 
 			riffFile->Write("INST");
 			riffFile->Write(size);
+			//\todo : add version.
 
 			CT2A _name(m_Name.c_str());
 			riffFile->Write(_name,strlen(_name) + 1);
 
-			riffFile->Write(m_bEnabled);
+//			riffFile->Write(m_bEnabled);
 
 			riffFile->Write(m_Lines);
 
@@ -537,6 +549,7 @@ namespace psycle
 				riffFile->Write(&npair,sizeof(npair));
 			}
 
+			int version = 0;
 			m_AmpEnvelope.Save(riffFile,version);
 			m_FilterEnvelope.Save(riffFile,version);
 			m_PanEnvelope.Save(riffFile,version);

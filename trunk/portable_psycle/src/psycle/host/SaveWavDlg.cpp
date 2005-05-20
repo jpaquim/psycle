@@ -3,7 +3,7 @@
 #include <project.private.hpp>
 #include "psycle.hpp"
 #include "SaveWavDlg.hpp"
-#include "Global.hpp"
+//#include "Global.hpp"
 #include "Song.hpp"
 #include "configuration.hpp"
 #include "MidiInput.hpp"

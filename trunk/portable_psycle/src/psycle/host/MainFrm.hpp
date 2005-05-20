@@ -123,8 +123,8 @@ NAMESPACE__BEGIN(psycle)
 			CBitmap blittleleft;
 			CBitmap blittleright;
 
-			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
-			ULONG_PTR gdiplusToken; // GDI+ stuff
+//			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
+//			ULONG_PTR gdiplusToken; // GDI+ stuff
 
 		protected:
 			// Generated message map functions

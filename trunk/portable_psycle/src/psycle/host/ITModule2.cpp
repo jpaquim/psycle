@@ -294,13 +294,13 @@ Special:  Bit 0: On = song message attached.
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
-			xins.VolumeFadeSpeed(curH.fadeout*128);
+			xins.VolumeFadeSpeed(curH.fadeout/512.0f);
 
 			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
 			if ( curH.DNC )
 			{	
 				xins.DCT(XMInstrument::DCType::DCT_NOTE);
-				xins.DCA(XMInstrument::DCAction::DCA_STOP);
+				xins.DCA(XMInstrument::NewNoteAction::STOP);
 			}
 			XMInstrument::NotePair npair;
 			int i;
@@ -361,14 +361,21 @@ Special:  Bit 0: On = song message attached.
 
 			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
 			xins.DCT(XMInstrument::DCType(curH.DCT));
-			xins.DCA(XMInstrument::DCAction(curH.DCA));
+			switch (curH.DCA)
+			{
+			case 1:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF);break;
+			case 2:xins.DCA(XMInstrument::NewNoteAction::FADEOUT);break;
+			case 0:
+			default:xins.DCA(XMInstrument::NewNoteAction::STOP);break;
+			}
+			xins.DCA(XMInstrument::NewNoteAction(curH.DCA));
 
 			xins.Pan((curH.defPan & 0x7F)/64.0f);
 			xins.PanEnabled((curH.defPan & 0x80)?false:true);
 			xins.PitchPanCenter(curH.pPanCenter);
 			xins.PitchPanSep(curH.pPanSep);
 			xins.GlobVol(curH.gVol/127.0f);
-			xins.VolumeFadeSpeed(curH.fadeout*64);
+			xins.VolumeFadeSpeed(curH.fadeout/1024.0f);
 			xins.RandomVolume(curH.randVol);
 			xins.RandomPanning(curH.randPan);
 			if ( (curH.inFC&0x80) != 0)
@@ -1195,10 +1202,13 @@ Special:  Bit 0: On = song message attached.
 				npair.first=i;
 				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
-			sampler->rInstrument(iInstIdx).IsEnabled(true);
-
-			if ( curH.type == 1) return LoadS3MSampleX(sampler,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,0);
-			else
+			
+			if ( curH.type == 1) 
+			{
+				sampler->rInstrument(iInstIdx).IsEnabled(true);
+				return LoadS3MSampleX(sampler,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,iInstIdx);
+			}
+			else if ( curH.type != 0)
 			{
 /*
 *
@@ -1244,7 +1254,7 @@ OFFSET              Count TYPE   Description
 		bool ITModule2::LoadS3MSampleX(XMSampler *sampler,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx)
 		{
 
-			XMInstrument::WaveData& _wave = sampler->SampleData(iInstIdx);
+			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
 			bool b16Bit=currHeader->flags&S3MSampleFlags::IS16BIT;
@@ -1310,7 +1320,7 @@ OFFSET              Count TYPE   Description
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{
-				XMInstrument::WaveData& _wave =  sampler->SampleData(iInstIdx);
+				XMInstrument::WaveData& _wave =  sampler->SampleData(iSampleIdx);
 				char * smpbuf = new char[iLen];
 				Read(smpbuf,iLen);
 				signed short wNew;
@@ -1385,7 +1395,7 @@ OFFSET              Count TYPE   Description
 			pempty._note=255; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
-			int packedsize=ReadInt(2);
+			int packedSize=ReadInt(2);
 			s->AllocNewPattern(patIdx,"unnamed",64,false);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);

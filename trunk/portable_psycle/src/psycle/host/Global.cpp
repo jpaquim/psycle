@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Global.
 #include <project.private.hpp>
-#include "global.hpp"
+//#include "global.hpp" //(already i n project.private.hpp)
 #include "Dsp.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
@@ -54,22 +54,18 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// logger
 
-		//\todo : unnamed namespace?
-		namespace
+		/// Psycle's reimplementation of operating_system::logger that also outputs to the logging window.
+		/// This is just a reimplementation, it is better documented in the base class itself.
+		class logger : public operating_system::logger
 		{
-			/// Psycle's reimplementation of operating_system::logger that also outputs to the logging window.
-			/// This is just a reimplementation, it is better documented in the base class itself.
-			class logger : public operating_system::logger
-			{
-			public:
-				static logger & default_logger() throw();
-				logger(const int & threshold_level, std::ostream & ostream) : operating_system::logger(threshold_level, ostream) {}
-				const bool operator()(const int & level) const throw() { return operating_system::logger::operator()(level); }
-				/*redefine*/ void operator()(const int & level, const std::string & string) throw();
-			private:
-				static std::ostream & default_logger_ostream() throw();
-			};
-		}
+		public:
+			static logger & default_logger() throw();
+			logger(const int & threshold_level, std::ostream & ostream) : operating_system::logger(threshold_level, ostream) {}
+			const bool operator()(const int & level) const throw() { return operating_system::logger::operator()(level); }
+			/*redefine*/ void operator()(const int & level, const std::string & string) throw();
+		private:
+			static std::ostream & default_logger_ostream() throw();
+		};
 
 		namespace loggers
 		{

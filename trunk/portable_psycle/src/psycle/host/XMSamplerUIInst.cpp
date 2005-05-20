@@ -12,7 +12,7 @@
 #include "XMSamplerUIInst.hpp"
 #include ".\xmsampleruiinst.hpp"
 
-using namespace Gdiplus;
+//using namespace Gdiplus;
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)

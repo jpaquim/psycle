@@ -97,45 +97,51 @@ namespace psycle
 
 			void ITFilter::Update()
 			{
-#define PI 3.1415926535897932384626433832795
-				/*				pole[0]=pole[1]=pole[2]=pole[3]=0;
-				float fSampleRate = (float)iSampleRate;
-				float fCutoff = fSampleRate* (pow(2.0f,iCutoff/127.0f)-1.0f)/2.0f;
+				double d,e;
+				if ( iRes >0 || iCutoff < 127 )
+				{
+					//#define PI 3.1415926535897932384626433832795
+					/*				pole[0]=pole[1]=pole[2]=pole[3]=0;
+					float fSampleRate = (float)iSampleRate;
+					float fCutoff = fSampleRate* (pow(2.0f,iCutoff/127.0f)-1.0f)/2.0f;
+	
+					fCoeff[1] =			((fSampleRate) - (fCutoff * TPI))
+					/ (	(fSampleRate) + (fCutoff * TPI));
+					fCoeff[0] =
+					fCoeff[2] = (fCutoff * TPI)
+					/ ( (fCutoff * TPI) + ( fSampleRate));
+					*/
+	
+	/*				fc *= (float)(2.0*3.14159265358/fs);
+					float dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
+	
+	*/
+						
+	
+	//				const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
+					const double dLoss = (float)exp(iRes*(-LOG10*1.2/128.0));
+	
+	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/96.0)-1.0;
+	//				const double dLoss = pow(10.0f, -((float)iRes / 256.0f));
+	//				const double dLoss = pow(0.5, iRes/32.0);
+	
+	//				const double dInvAngle = 1.0 /((pow(2.0f,(iCutoff+1)/128.0f)-1.0f)  * PI);
+	//				const double dLoss = pow (10.0 , -((3.0*iRes) / 320.0)); // approx [1...0]  | -(iRes/128.0) * (24.0/20.0)
+	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-0.93; // approx [60..0]
+	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-1.0; // approx [60..0]
+					const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
+	//				const double dLoss = pow (2.0,(127.0-iCutoff)/127.0)-1.0;	// [1..0]
+				
+					e = dInvAngle* dInvAngle;
+					d = 1.4*( 1.0- dLoss) / dInvAngle;
+					if (d > 2.0f) d = 2.0f;
+					d = (dLoss - d) * dInvAngle;
+	//				if ( d + e*2.0 < 0.0 ) d = -e*2.0;
+	
+	//				const double d = (dLoss)*(dInvAngle+1.4)-1.4;
+				}
+				else { e = 0; d = 0; }
 
-				fCoeff[1] =			((fSampleRate) - (fCutoff * TPI))
-				/ (	(fSampleRate) + (fCutoff * TPI));
-				fCoeff[0] =
-				fCoeff[2] = (fCutoff * TPI)
-				/ ( (fCutoff * TPI) + ( fSampleRate));
-				*/
-
-/*				fc *= (float)(2.0*3.14159265358/fs);
-				float dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
-
-*/
-					
-
-//				const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
-				const double dLoss = (float)exp(iRes*(-LOG10*1.2/128.0));
-
-//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/96.0)-1.0;
-//				const double dLoss = pow(10.0f, -((float)iRes / 256.0f));
-//				const double dLoss = pow(0.5, iRes/32.0);
-
-//				const double dInvAngle = 1.0 /((pow(2.0f,(iCutoff+1)/128.0f)-1.0f)  * PI);
-//				const double dLoss = pow (10.0 , -((3.0*iRes) / 320.0)); // approx [1...0]  | -(iRes/128.0) * (24.0/20.0)
-//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-0.93; // approx [60..0]
-//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-1.0; // approx [60..0]
-				const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
-//				const double dLoss = pow (2.0,(127.0-iCutoff)/127.0)-1.0;	// [1..0]
-			
-				const double e = dInvAngle* dInvAngle;
-				double d = 1.2*( 1.0- dLoss) / dInvAngle;
-				if (d > 2.0f) d = 2.0f;
-				d = (dLoss - d) * dInvAngle;
-//				if ( d + e*2.0 < 0.0 ) d = -e*2.0;
-
-//				const double d = (dLoss)*(dInvAngle+1.4)-1.4;
 				if ( ftFilter == F_LOWPASS12) { fCoeff[0]= 1.0f / (1.0f + d + e); fCoeff[3] = 0; }
 				else if (ftFilter == F_HIGHPASS12) { fCoeff[0] = 1.0f - (1.0f / (1.0f + d + e)); fCoeff[3] = -1; }
 				fCoeff[2]= -e * fCoeff[0];

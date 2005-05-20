@@ -13,6 +13,7 @@ IMPLEMENT_DYNAMIC(XMSamplerUISample, CPropertyPage)
 XMSamplerUISample::XMSamplerUISample()
 : CPropertyPage(XMSamplerUISample::IDD)
 {
+	m_Init=false;
 }
 
 XMSamplerUISample::~XMSamplerUISample()
@@ -68,7 +69,8 @@ BOOL XMSamplerUISample::OnSetActive()
 	((CComboBox*)GetDlgItem(IDC_LOOP))->AddString("Forward");
 	((CComboBox*)GetDlgItem(IDC_LOOP))->AddString("Bidirection");
 
-	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
+	
+	if (!m_Init ) for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 	{
 		char line[48];
 		XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
@@ -78,6 +80,7 @@ BOOL XMSamplerUISample::OnSetActive()
 	}
 	m_SampleList.SetCurSel(0);
 	OnLbnSelchangeSamplelist();
+	m_Init=true;
 
 	return CPropertyPage::OnSetActive();
 }
@@ -129,7 +132,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 
 void XMSamplerUISample::OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
@@ -142,7 +145,7 @@ void XMSamplerUISample::OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult)
 
 void XMSamplerUISample::OnNMCustomdrawGlobvolume(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
@@ -155,7 +158,7 @@ void XMSamplerUISample::OnNMCustomdrawGlobvolume(NMHDR *pNMHDR, LRESULT *pResult
 
 void XMSamplerUISample::OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_PAN);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
@@ -176,7 +179,7 @@ void XMSamplerUISample::OnCbnSelendokVibratotype()
 
 void XMSamplerUISample::OnNMCustomdrawVibratorate(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
@@ -190,7 +193,7 @@ void XMSamplerUISample::OnNMCustomdrawVibratorate(NMHDR *pNMHDR, LRESULT *pResul
 
 void XMSamplerUISample::OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
@@ -203,7 +206,7 @@ void XMSamplerUISample::OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResu
 
 void XMSamplerUISample::OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);

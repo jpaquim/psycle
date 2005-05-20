@@ -2,6 +2,9 @@
 ///\brief interface file for psycle::host::Filter.
 #pragma once
 #include <cmath>
+#include <operating_system/exception.hpp>
+#include <operating_system/exceptions/code_description.hpp>
+#include <cfloat>
 namespace psycle
 {
 	namespace host
@@ -143,22 +146,44 @@ namespace psycle
 			
 			inline void Work(float& _fSample)
 			{
-				const float fy = (_fSample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
-				fLastSampleLeft[0] = fLastSampleLeft[1];
-				fLastSampleLeft[1] = fy - (_fSample * fCoeff[3]);
-				_fSample = fy;
+				try
+				{
+					const float fy = (_fSample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+					fLastSampleLeft[0] = fLastSampleLeft[1];
+					fLastSampleLeft[1] = fy - (_fSample * fCoeff[3]);
+					_fSample = fy;
+				} catch(operating_system::exceptions::translated const & e){switch(e.code())
+				{ 
+					case STATUS_FLOAT_DENORMAL_OPERAND:
+					case STATUS_FLOAT_INVALID_OPERATION:
+						fLastSampleLeft[1] = fLastSampleLeft[0]=0;
+						break;
+					default: throw;
+				}}
 			}
 			inline void WorkStereo(float& _fLeft, float& _fRight)
 			{
-				const float fyL = (_fLeft * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
-				fLastSampleLeft[0] = fLastSampleLeft[1];
-				fLastSampleLeft[1] = fyL - (_fLeft * fCoeff[3]);
-				_fLeft = fyL;
+				try
+				{
+					const float fyL = (_fLeft * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+					fLastSampleLeft[0] = fLastSampleLeft[1];
+					fLastSampleLeft[1] = fyL - (_fLeft * fCoeff[3]);
+					_fLeft = fyL;
 
-				const float fyR = (_fRight * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
-				fLastSampleRight[0] = fLastSampleRight[1];
-				fLastSampleRight[1] = fyR - (_fRight * fCoeff[3]);
-				_fRight = fyR;
+					const float fyR = (_fRight * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
+					fLastSampleRight[0] = fLastSampleRight[1];
+					fLastSampleRight[1] = fyR - (_fRight * fCoeff[3]);
+					_fRight = fyR;
+				} catch(operating_system::exceptions::translated const & e){switch(e.code())
+				{ 
+					case STATUS_FLOAT_DENORMAL_OPERAND:
+						fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
+						_fLeft = _fLeft * fCoeff[0];
+						_fRight = _fRight * fCoeff[0];
+						break;
+					default: throw;
+
+				}}
 			}
 		protected:
 			void Update(void);
