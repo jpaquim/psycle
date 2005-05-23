@@ -721,7 +721,7 @@ NAMESPACE__BEGIN(psycle)
 			case 120: TXTFLAT(devc,"off",x,y,srx,sry);break;
 			case cdefTweakM: TXTFLAT(devc,"twk",x,y,srx,sry);break;
 			case cdefTweakE: TXTFLAT(devc,"twf",x,y,srx,sry);break;
-			case cdefMIDICC: TXTFLAT(devc,"Mcm",x,y,srx,sry);break;
+			case cdefMIDICC: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
 			case cdefTweakS: TXTFLAT(devc,"tws",x,y,srx,sry);break;
 			}
 		}

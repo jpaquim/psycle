@@ -222,7 +222,26 @@ break;
 						if(mac < MAX_MACHINES)
 						{
 							Machine *pMachine = pSong->_pMachine[mac];
-							if(pMachine) pMachine->Tick(track, pEntry);
+							if(pMachine)
+							{
+								int voice;
+								if(pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								{
+									// for native machines,
+									// use the value in the "instrument" field of the event as a voice number
+									voice = pEntry->_inst;
+									pEntry->_inst = 0;
+									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
+									if(voice >= pSong->SONGTRACKS) voice = pSong->SONGTRACKS - 1;
+								}
+								else // vst
+								{
+									// for vst machines,
+									// classic tracking, simply use the track number as the channel/voice number
+									voice = track;
+								}
+								pMachine->Tick(voice, pEntry);
+							}
 						}
 					}
 				}

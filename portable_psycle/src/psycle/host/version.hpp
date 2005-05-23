@@ -3,6 +3,19 @@
 #if 0
 /*
 $Log$
+Revision 1.28  2005/05/23 23:41:23  johan-boule
+to be tested...
+change that allows the player to send commands (Machine::Tick function) from any pattern track with a given channel (or "voice") number:
+
+if the machine is not a vst, and if the note is a "mcm" (hmm, poor name if it's not related with midi),
+then, the fields in the event are interpreted as <channel> <machine> <command> <parameter>.
+for example, 1122334444, means:
+11 is the channel (or "voice"),
+22 is the machine,
+33 is the command, and
+4444 is the parameter
+The player calls the Machine::Tick function with those values, and the instrument value set to 0.
+
 Revision 1.27  2005/05/18 06:55:47  johan-boule
 releasing voskomo's blitz plugin
 
@@ -116,7 +129,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 45 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 46 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
