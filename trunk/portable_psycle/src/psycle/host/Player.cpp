@@ -224,23 +224,33 @@ break;
 							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine)
 							{
-								int voice;
-								if(pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								if(pEntry->_note == cdefMIDICC && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
 								{
 									// for native machines,
 									// use the value in the "instrument" field of the event as a voice number
-									voice = pEntry->_inst;
+									int voice = pEntry->_inst;
 									pEntry->_inst = 0;
 									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
-									if(voice >= pSong->SONGTRACKS) voice = pSong->SONGTRACKS - 1;
+									if(voice < pSong->SONGTRACKS)
+									{
+										pMachine->Tick(voice, pEntry);
+									}
+									else if(voice == 0xff)
+									{
+										// special voice value which means we want to send the same command to all voices
+										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
+										{
+											pMachine->Tick(voice, pEntry);
+										}
+									}
+									else ; // probably an out of range voice value (with the classic tracker way, it's limited to the number of pattern tracks)
 								}
 								else // vst
 								{
 									// for vst machines,
-									// classic tracking, simply use the track number as the channel/voice number
-									voice = track;
+									// classic tracking, use the track number as the channel/voice number
+									pMachine->Tick(track, pEntry);
 								}
-								pMachine->Tick(voice, pEntry);
 							}
 						}
 					}
