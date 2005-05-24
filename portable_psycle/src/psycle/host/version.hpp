@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.29  2005/05/24 01:09:17  johan-boule
+bug fix + special 0xff voice to send the same command to all voices
+
 Revision 1.28  2005/05/23 23:41:23  johan-boule
 to be tested...
 change that allows the player to send commands (Machine::Tick function) from any pattern track with a given channel (or "voice") number:
@@ -129,7 +132,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 46 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 47 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
