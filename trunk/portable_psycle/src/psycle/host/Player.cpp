@@ -245,7 +245,7 @@ break;
 									}
 									else ; // probably an out of range voice value (with the classic tracker way, it's limited to the number of pattern tracks)
 								}
-								else // vst
+								else // midi cc for vst, or other commands
 								{
 									// for vst machines,
 									// classic tracking, use the track number as the channel/voice number
