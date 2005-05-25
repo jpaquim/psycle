@@ -66,14 +66,7 @@ NAMESPACE__BEGIN(psycle)
 			)
 		{
 			CComboBox* pBox = (CComboBox*)context;
-			LPGUID guid_copy(0);
-		 
-			if (lpGUID)
-			{
-				guid_copy = new GUID;
-				*guid_copy = *lpGUID;
-			}
-
+			LPGUID guid_copy(lpGUID ? *lpGUID : new GUID);
 			pBox->AddString(psDesc);
 			pBox->SetItemData(pBox->FindString(0, psDesc), (DWORD)guid_copy);
 			return TRUE;
@@ -144,14 +137,7 @@ NAMESPACE__BEGIN(psycle)
 				m_sampleRate = atoi(str);
 
 				m_pDeviceGuid = (LPCGUID)m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel());
-				if (m_pDeviceGuid)
-				{
-					m_deviceGuid = *m_pDeviceGuid;
-				}
-				else
-				{
-					m_deviceGuid = GUID();
-				}
+				m_deviceGuid = m_pDeviceGuid ? *m_pDeviceGuid : GUID();
 				CDialog::OnOK();
 				return;
 			}
