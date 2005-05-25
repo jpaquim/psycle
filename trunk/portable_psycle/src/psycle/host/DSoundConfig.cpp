@@ -66,10 +66,8 @@ NAMESPACE__BEGIN(psycle)
 			)
 		{
 			CComboBox* pBox = (CComboBox*)context;
-			LPGUID guid_copy(new GUID);
-			if(lpGUID) *guid_copy = *lpGUID;
 			pBox->AddString(psDesc);
-			pBox->SetItemData(pBox->FindString(0, psDesc), (DWORD)guid_copy);
+			pBox->SetItemData(pBox->FindString(0, psDesc), reinterpret_cast<DWORD_PTR>(lpGUID ? new GUID(*lpGUID) : 0));
 			return TRUE;
 		}
 
