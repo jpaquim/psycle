@@ -3,6 +3,11 @@
 #if 0
 /*
 $Log$
+Revision 1.31  2005/05/25 20:20:35  johan-boule
+version 1.7.49
+removed scary pointer and index stuff from the directsound config
+(the device index value in the registry can be deleted as it's not used anymore)
+
 Revision 1.30  2005/05/25 04:02:17  johan-boule
 verson 1.7.48
 fixed bug for fingersoup's directsound driver (null GUID)
@@ -136,7 +141,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 48 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 49 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
