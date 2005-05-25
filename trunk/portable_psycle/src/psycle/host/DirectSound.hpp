@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::DirectSound.
+///\interface psycle::host::DirectSound.
 #pragma once
 #pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
@@ -42,24 +42,23 @@ namespace psycle
 			static AudioDriverEvent _event;
 			CCriticalSection _lock;
 
-			GUID _dsGuid;
-			LPCGUID _pDsGuid;
-			LPDIRECTSOUND _pDs;
-			LPDIRECTSOUNDBUFFER _pBuffer;
-			void* _callbackContext;
-			AUDIODRIVERWORKFN _pCallback;
-
-			int _deviceIndex;
+			GUID device_guid;
+			bool _exclusive;
+			bool _dither;
 			int _bytesPerSample;
-			int _numBuffers;
 			int _bufferSize;
+			int _numBuffers;
+
 			int _dsBufferSize;
 			int _currentOffset;
 			int _lowMark;
 			int _highMark;
 			int _buffersToDo;
-			bool _exclusive;
-			bool _dither;
+
+			LPDIRECTSOUND _pDs;
+			LPDIRECTSOUNDBUFFER _pBuffer;
+			void* _callbackContext;
+			AUDIODRIVERWORKFN _pCallback;
 
 			static void PollerThread(void* pDirectSound);
 		//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);

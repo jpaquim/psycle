@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::DirectSound.
+///\implementation psycle::host::DirectSound.
 #include <project.private.hpp>
 #include "DirectSound.hpp"
 #include "resources/resources.hpp"
@@ -21,14 +21,16 @@ namespace psycle
 		}
 
 		DirectSound::DirectSound()
-			: _initialized(false)
-			, _configured(false)
-			, _running(false)
-			, _playing(false)
-			, _timerActive(false)
-			, _pDs(0)
-			, _pBuffer(0)
-			, _pCallback(0)
+		:
+			device_guid(), // DSDEVID_DefaultPlayback <-- undersolved external symbol
+			_initialized(),
+			_configured(),
+			_running(),
+			_playing(),
+			_timerActive(),
+			_pDs(),
+			_pBuffer(),
+			_pCallback()
 		{
 		}
 
@@ -57,7 +59,7 @@ namespace psycle
 			CSingleLock lock(&_lock, TRUE);
 			if(_running) return true;
 			if(!_pCallback) return false;
-			if(FAILED(::DirectSoundCreate(_pDsGuid, &_pDs, 0)))
+			if(FAILED(::DirectSoundCreate(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
 			{
 				Error("Failed to create DirectSound object");
 				return false;
@@ -293,54 +295,57 @@ namespace psycle
 
 		void DirectSound::ReadConfig()
 		{
-			bool configured;
-			DWORD type;
-			DWORD numData;
-			Registry reg;
-
-			// Default configuration
-			_numBuffers = 4;
-			_bufferSize = 4096;
-			_deviceIndex = 0;
-			_pDsGuid = 0;
+			// default configuration
+			device_guid = GUID(); // DSDEVID_DefaultPlayback <-- unresolved external symbol
+			_exclusive = false;
 			_dither = false;
-			_samplesPerSec = 44100;
 			_bitDepth = 16;
 			_channelmode = 3;
-			_exclusive = false;
+			_samplesPerSec = 44100;
+			_bufferSize = 4096;
+			_numBuffers = 4;
+			_configured = true;
 
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			// read from registry
+			Registry reg;
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS) return;
+			if(reg.OpenKey("DirectSound") != ERROR_SUCCESS) return;
 			{
-				return;
+				bool configured(true);
+				DWORD type;
+				DWORD numData;
+				{
+					numData = sizeof device_guid;
+					configured &= (reg.QueryValue("DeviceGuid", &type, reinterpret_cast<BYTE*>(&device_guid), &numData) == ERROR_SUCCESS);
+				}
+				{
+					numData = sizeof _exclusive;
+					configured &= (reg.QueryValue("Exclusive", &type, reinterpret_cast<BYTE*>(&_exclusive), &numData) == ERROR_SUCCESS);
+				}
+				{
+					numData = sizeof _dither;
+					configured &= (reg.QueryValue("Dither", &type, reinterpret_cast<BYTE*>(&_dither), &numData) == ERROR_SUCCESS);
+				}
+				{
+					//numData = sizeof _bitDepth;
+					//configured &= (reg.QueryValue("BitDepth", &type, reinterpret_cast<BYTE*>(&_bitDepth), &numData) == ERROR_SUCCESS);
+				}
+				{
+					numData = sizeof _numBuffers;
+					configured &= (reg.QueryValue("NumBuffers", &type, reinterpret_cast<BYTE*>(&_numBuffers), &numData) == ERROR_SUCCESS);
+				}
+				{
+					numData = sizeof _bufferSize;
+					configured &= (reg.QueryValue("BufferSize", &type, reinterpret_cast<BYTE*>(&_bufferSize), &numData) == ERROR_SUCCESS);
+				}
+				{
+					numData = sizeof _samplesPerSec;
+					configured &= (reg.QueryValue("SamplesPerSec", &type, reinterpret_cast<BYTE*>(&_samplesPerSec), &numData) == ERROR_SUCCESS);
+				}
+				_configured = configured;
 			}
-			if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
-			{
-				return;
-			}
-			configured = true;
-			numData = sizeof(_numBuffers);
-			configured &= (reg.QueryValue("NumBuffers", &type, (BYTE*)&_numBuffers, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_bufferSize);
-			configured &= (reg.QueryValue("BufferSize", &type, (BYTE*)&_bufferSize, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_deviceIndex);
-			configured &= (reg.QueryValue("DeviceIndex", &type, (BYTE*)&_deviceIndex, &numData) == ERROR_SUCCESS);
-			numData = sizeof(GUID);
-			if(reg.QueryValue("DeviceGuid", &type, (BYTE*)&_dsGuid, &numData) == ERROR_SUCCESS)
-			{
-				_pDsGuid = &_dsGuid;
-			}
-			numData = sizeof _dither;
-			configured &= (reg.QueryValue("Dither", &type, (BYTE*)&_dither, &numData) == ERROR_SUCCESS);
-			numData = sizeof _exclusive;
-			configured &= (reg.QueryValue("Exclusive", &type, (BYTE*)&_exclusive, &numData) == ERROR_SUCCESS);
-			numData = sizeof _samplesPerSec;
-			configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
-			//numData = sizeof _bitDepth;
-			//(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
-
 			reg.CloseKey();
 			reg.CloseRootKey();
-			_configured = configured;
 		}
 
 		void DirectSound::WriteConfig()
@@ -359,72 +364,66 @@ namespace psycle
 					return;
 				}
 			}
-			reg.SetValue("NumBuffers", REG_DWORD, (BYTE*)&_numBuffers, sizeof _numBuffers);
-			reg.SetValue("BufferSize", REG_DWORD, (BYTE*)&_bufferSize, sizeof _bufferSize);
-			reg.SetValue("DeviceIndex", REG_DWORD, (BYTE*)&_deviceIndex, sizeof _deviceIndex);
-			if(_pDsGuid != 0) reg.SetValue("DeviceGuid", REG_BINARY, (BYTE*)_pDsGuid, sizeof *_pDsGuid);
-			else reg.DeleteValue("DeviceGuid");
-			reg.SetValue("Dither", REG_BINARY, (BYTE*)&_dither, sizeof _dither);
-			reg.SetValue("Exclusive", REG_BINARY, (BYTE*)&_exclusive, sizeof _exclusive);
-			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof _samplesPerSec);
-			//reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof _bitDepth);
+			reg.SetValue("DeviceGuid"   , REG_BINARY, reinterpret_cast<BYTE*>(&device_guid)   , sizeof device_guid   );
+			reg.SetValue("Exclusive"    , REG_BINARY, reinterpret_cast<BYTE*>(&_exclusive)    , sizeof _exclusive    );
+			reg.SetValue("Dither"       , REG_BINARY, reinterpret_cast<BYTE*>(&_dither)       , sizeof _dither       );
+			//reg.SetValue("BitDepth"   , REG_DWORD , reinterpret_cast<BYTE*>&_bitDepth       , sizeof _bitDepth     );
+			reg.SetValue("SamplesPerSec", REG_DWORD , reinterpret_cast<BYTE*>(&_samplesPerSec), sizeof _samplesPerSec);
+			reg.SetValue("BufferSize"   , REG_DWORD , reinterpret_cast<BYTE*>(&_bufferSize)   , sizeof _bufferSize   );
+			reg.SetValue("NumBuffers"   , REG_DWORD , reinterpret_cast<BYTE*>(&_numBuffers)   , sizeof _numBuffers   );
 			reg.CloseKey();
 			reg.CloseRootKey();
 		}
 
 		void DirectSound::Configure()
 		{
+			// 1. reads the config from persistent storage
+			// 2. opens the gui to let the user edit the settings
+			// 3. writes the config to persistent storage
+
 			ReadConfig();
 
 			CDSoundConfig dlg;
-			dlg.m_numBuffers = _numBuffers;
-			dlg.m_bufferSize = _bufferSize;
-			dlg.m_deviceIndex = _deviceIndex;
-			dlg.m_dither = _dither;
-			dlg.m_exclusive = _exclusive;
-			dlg.m_sampleRate = _samplesPerSec;
+			dlg.device_guid = device_guid;
+			dlg.exclusive = _exclusive;
+			dlg.dither = _dither;
+			dlg.sample_rate = _samplesPerSec;
+			dlg.buffer_size = _bufferSize;
+			dlg.buffer_count = _numBuffers;
 
 			if(dlg.DoModal() != IDOK) return;
-			
-			int numBuffers = _numBuffers;
-			int bufferSize = _bufferSize;
-			int deviceIndex = _deviceIndex;
-			bool dither = _dither;
-			bool exclusive = _exclusive;
-			int samplesPerSec = _samplesPerSec;
-			
+
 			_configured = true;
-
-			GUID dsGuid;
-			std::memcpy(&dsGuid, &_dsGuid, sizeof dsGuid);
-
+			
+			// save the settings to be able to rollback if it doesn't work
+			GUID device_guid = this->device_guid;
+			bool exclusive = _exclusive;
+			bool dither = _dither;
+			int samplesPerSec = _samplesPerSec;
+			int bufferSize = _bufferSize;
+			int numBuffers = _numBuffers;
+			
 			if(_initialized) Stop();
 
-			_numBuffers = dlg.m_numBuffers;
-			_bufferSize = dlg.m_bufferSize;
-			_deviceIndex = dlg.m_deviceIndex;
-			_pDsGuid = dlg.m_pDeviceGuid; // ¿!!¿¿!¿!¿!¿¿!¿!
-			if(_pDsGuid != 0) // This pointer is temporary!!!
-			{
-				std::memcpy(&_dsGuid, &dlg.m_deviceGuid, sizeof _dsGuid);
-				_pDsGuid = &_dsGuid;
-			}
-			_dither = *(bool*)(&dlg.m_dither);
-			_exclusive = *(bool*)(&dlg.m_exclusive);
-			_samplesPerSec = dlg.m_sampleRate;
+			this->device_guid = dlg.device_guid;
+			_exclusive = dlg.exclusive;
+			_dither = dlg.dither;
+			_samplesPerSec = dlg.sample_rate;
+			_bufferSize = dlg.buffer_size;
+			_numBuffers = dlg.buffer_count;
 
 			if(_initialized)
 			{
 				if(Start()) WriteConfig();
 				else
 				{
-					_numBuffers = numBuffers;
-					_bufferSize = bufferSize;
-					_deviceIndex = deviceIndex;
-					_dither = dither;
+					// rollback
+					this->device_guid = device_guid;
 					_exclusive = exclusive;
+					_dither = dither;
 					_samplesPerSec = samplesPerSec;
-					std::memcpy(&_dsGuid, &dsGuid, sizeof _dsGuid);
+					_bufferSize = bufferSize;
+					_numBuffers = numBuffers;
 					Start();
 				}
 			}

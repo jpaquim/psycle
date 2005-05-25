@@ -1,31 +1,33 @@
 ///\file
-///\brief implementation file for psycle::host::CDSoundConfig.
+///\implementation psycle::host::CDSoundConfig.
 #include <project.private.hpp>
-#include "Psycle.hpp"
 #include "DSoundConfig.hpp"
+#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#include <mmsystem.h>
+	#pragma comment(lib, "winmm")
+#pragma warning(pop)
+#include <dsound.h>
+#pragma comment(lib, "dsound")
+#include <iomanip>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		#define MIN_NUMBUF 2
-		#define MAX_NUMBUF 16
 
-		#define MIN_BUFSIZE 512
-		#define MAX_BUFSIZE 32768
-
-		CDSoundConfig::CDSoundConfig(CWnd* pParent) : CDialog(CDSoundConfig::IDD, pParent)
+		CDSoundConfig::CDSoundConfig(CWnd* pParent)
+		:
+			CDialog(CDSoundConfig::IDD, pParent),
+			device_guid(), // DSDEVID_DefaultPlayback <-- unresolved external symbol
+			exclusive(),
+			dither(),
+			sample_rate(44100),
+			buffer_count(4),
+			buffer_size(4096)
 		{
-			//{{AFX_DATA_INIT(CDSoundConfig)
-			m_numBuffers = 0;
-			m_bufferSize = 0;
-			m_deviceIndex = -1;
-			m_dither = FALSE;
-			m_exclusive = FALSE;
-			//}}AFX_DATA_INIT
 		}
 
 		void CDSoundConfig::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CDSoundConfig)
 			DDX_Control(pDX, IDC_EXCLUSIVE, m_exclusiveCheck);
 			DDX_Control(pDX, IDC_DSOUND_LATENCY, m_latency);
 			DDX_Control(pDX, IDC_DSOUND_BUFNUM_SPIN, m_numBuffersSpin);
@@ -35,92 +37,86 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_DSOUND_BUFNUM_EDIT, m_numBuffersEdit);
 			DDX_Control(pDX, IDC_DSOUND_SAMPLERATE_COMBO, m_sampleRateCombo);
 			DDX_Control(pDX, IDC_DSOUND_DEVICE, m_deviceComboBox);
-			DDX_Text(pDX, IDC_DSOUND_BUFNUM_EDIT, m_numBuffers);
-			DDV_MinMaxInt(pDX, m_numBuffers, 2, 16);
-			DDX_Text(pDX, IDC_DSOUND_BUFSIZE_EDIT, m_bufferSize);
-			DDV_MinMaxInt(pDX, m_bufferSize, 512, 32768);
-			DDX_CBIndex(pDX, IDC_DSOUND_DEVICE, m_deviceIndex);
-			DDX_Check(pDX, IDC_DSOUND_DITHER, m_dither);
-			DDX_Check(pDX, IDC_EXCLUSIVE, m_exclusive);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CDSoundConfig, CDialog)
-			//{{AFX_MSG_MAP(CDSoundConfig)
 			ON_CBN_SELENDOK(IDC_DSOUND_SAMPLERATE_COMBO, OnSelendokSamplerate)
 			ON_EN_CHANGE(IDC_DSOUND_BUFNUM_EDIT, OnChangeBufnumEdit)
 			ON_EN_CHANGE(IDC_DSOUND_BUFSIZE_EDIT, OnChangeBufsizeEdit)
 			ON_CBN_SELCHANGE(IDC_DSOUND_DEVICE, OnSelchangeDevice)
 			ON_WM_DESTROY()
 			ON_BN_CLICKED(IDC_EXCLUSIVE, OnExclusive)
-			//}}AFX_MSG_MAP
+			ON_BN_CLICKED(IDC_DSOUND_DITHER, OnDither)
 		END_MESSAGE_MAP()
-
-		BOOL CALLBACK
-		CDSoundConfig::EnumDSoundDevices
-			(
-				LPGUID lpGUID,
-				const char* psDesc,
-				const char* psDrvName,
-				void* context
-			)
-		{
-			CComboBox* pBox = (CComboBox*)context;
-			pBox->AddString(psDesc);
-			pBox->SetItemData(pBox->FindString(0, psDesc), reinterpret_cast<DWORD_PTR>(lpGUID ? new GUID(*lpGUID) : 0));
-			return TRUE;
-		}
-
-		void CDSoundConfig::RecalcLatency()
-		{
-			CString str;
-			m_numBuffersEdit.GetWindowText(str);
-			int nbuf = atoi(str);
-			m_bufferSizeEdit.GetWindowText(str);
-			int sbuf = atoi(str);
-			m_sampleRateCombo.GetWindowText(str);
-			int sr = atoi(str);
-			int totalbytes = nbuf * sbuf;
-			int lat = (totalbytes * (1000 / 4)) / sr;
-			str.Format("Latency: %dms", lat);
-			m_latency.SetWindowText(str);
-		}
 
 		BOOL CDSoundConfig::OnInitDialog() 
 		{
-			CString str;
 			CDialog::OnInitDialog();
-			// DirectSound devices
-			DirectSoundEnumerate(EnumDSoundDevices, &m_deviceComboBox);
-			if (m_deviceIndex >= m_deviceComboBox.GetCount())
+			// displays the DirectSound device in the combo box
 			{
-				m_deviceIndex = 0;
+				class callback
+				{
+					public:
+						BOOL static CALLBACK DirectSoundEnumerateCallback(GUID * device_guid, char const * description, char const * name, void * context)
+						{
+							CDSoundConfig & enclosing(*reinterpret_cast<CDSoundConfig*>(context));
+							// add the entry to the combo box, making a copy of the guid and the description
+							name; // unused
+							enclosing.m_deviceComboBox.AddString(description);
+							enclosing.m_deviceComboBox.SetItemData
+								(
+									enclosing.m_deviceComboBox.FindString(0, description),
+									reinterpret_cast<DWORD_PTR>(device_guid ? new GUID(*device_guid) : new GUID(GUID())) // DSDEVID_DefaultPlayback <-- unresolved external symbol
+								);
+							return TRUE;
+						}
+				};
+				/*directsound*/::DirectSoundEnumerate(callback::DirectSoundEnumerateCallback, this);
+				m_deviceComboBox.SetCurSel(0);
+				for(int i(m_deviceComboBox.GetCount() - 1) ; i >= 0 ; --i)
+				{
+					if(this->device_guid == *reinterpret_cast<GUID const * const>(m_deviceComboBox.GetItemData(i)))
+					{
+						m_deviceComboBox.SetCurSel(i);
+						#if defined NDEBUG
+							break;
+						#endif
+					}
+				}
 			}
-			m_deviceComboBox.SetCurSel(m_deviceIndex);
-			// Sample rate
-			str.Format("%d", m_sampleRate);
-			int i = m_sampleRateCombo.SelectString(-1, str);
-			if (i == CB_ERR)
+			// displays the driver options (boolean values) in the check boxes
 			{
-				i = m_sampleRateCombo.SelectString(-1, "44100");
+				m_ditherCheck.SetCheck(dither);
+				m_exclusiveCheck.SetCheck(exclusive);
 			}
-			// Check boxes
-			m_ditherCheck.SetCheck(m_dither ? 1 : 0);
-			m_exclusiveCheck.SetCheck(m_exclusive ? 1 : 0);
-
-			str.Format("%d", m_numBuffers);
-			m_numBuffersEdit.SetWindowText(str);
-			m_numBuffersSpin.SetRange(MIN_NUMBUF, MAX_NUMBUF);
-
-			str.Format("%d", m_bufferSize);
-			m_bufferSizeEdit.SetWindowText(str);
-			m_bufferSizeSpin.SetRange32(MIN_BUFSIZE, MAX_BUFSIZE);
-
-			UDACCEL acc;
-			acc.nSec = 0;
-			acc.nInc = 512;
-			m_bufferSizeSpin.SetAccel(1, &acc);
-
+			// displays the sample rate
+			{
+				CString str;
+				str.Format("%d", sample_rate);
+				int const i(m_sampleRateCombo.SelectString(-1, str));
+				if(i == CB_ERR) m_sampleRateCombo.SelectString(-1, "44100");
+			}
+			// displays the buffer count
+			{
+				CString str;
+				str.Format("%d", buffer_count);
+				m_numBuffersEdit.SetWindowText(str);
+				m_numBuffersSpin.SetRange(buffer_count_min, buffer_count_max);
+			}
+			// displays the buffer size
+			{
+				CString str;
+				str.Format("%d", buffer_size);
+				m_bufferSizeEdit.SetWindowText(str);
+				m_bufferSizeSpin.SetRange32(buffer_size_min, buffer_size_max);
+				// sets the spin button increments
+				{
+					UDACCEL accel;
+					accel.nSec = 0;
+					accel.nInc = 512;
+					m_bufferSizeSpin.SetAccel(1, &accel);
+				}
+			}
 			return TRUE;
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
@@ -128,65 +124,86 @@ NAMESPACE__BEGIN(psycle)
 
 		void CDSoundConfig::OnOK() 
 		{
-
-			if (m_deviceComboBox.GetCount() > 0)
+			if(!m_deviceComboBox.GetCount())
 			{
-				CString str;
-				m_sampleRateCombo.GetWindowText(str);
-				m_sampleRate = atoi(str);
-
-				m_pDeviceGuid = (LPCGUID)m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel());
-				m_deviceGuid = m_pDeviceGuid ? *m_pDeviceGuid : GUID();
-				CDialog::OnOK();
+				// no DirectSound driver ...
+				::MessageBox(0, "no DirectSound driver", "Warning", MB_ICONWARNING);
+				// we cancel instead.
+				CDialog::OnCancel();
 				return;
 			}
-			CDialog::OnCancel();
+			CDialog::OnOK();
 		}
 
-		void CDSoundConfig::OnSelendokSamplerate() 
+		void CDSoundConfig::RecalcLatency()
 		{
-			if (!IsWindow(m_sampleRateCombo.GetSafeHwnd()))
+			// computes the latency
+			float latency_time_seconds;
 			{
-				return;
+				int const latency_bytes(buffer_size * buffer_count);
+				int const latency_samples(latency_bytes / 4); ///\todo hardcoded to stereo 16-bit
+				latency_time_seconds = float(latency_samples) / sample_rate;
+			};
+			// displays the latency in the gui
+			{
+				std::ostringstream s;
+				s << "Latency: "
+					//<< std::setprecision(0)
+					<< static_cast<int>(latency_time_seconds * 1e3) << "ms";
+				m_latency.SetWindowText(s.str().c_str());
 			}
+		}
+
+		void CDSoundConfig::OnSelchangeDevice() 
+		{
+			// read the selected device guid from the gui
+			device_guid = *reinterpret_cast<GUID const *>(m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel()));
+		}
+		void CDSoundConfig::OnExclusive()
+		{
+			exclusive = m_exclusiveCheck.GetState() & 1;
+		}
+
+		void CDSoundConfig::OnDither()
+		{
+			dither = m_ditherCheck.GetState() & 1;
+		}
+
+		void CDSoundConfig::OnChangeBufsizeEdit() 
+		{
+			if(!IsWindow(m_bufferSizeEdit.GetSafeHwnd())) return;
+			// read the buffer size from the gui
+			CString s;
+			m_bufferSizeEdit.GetWindowText(s);
+			buffer_size = std::atoi(s);
 			RecalcLatency();
 		}
 
 		void CDSoundConfig::OnChangeBufnumEdit() 
 		{
-			if (!IsWindow(m_numBuffersEdit.GetSafeHwnd()))
-			{
-				return;
-			}
+			if(!IsWindow(m_numBuffersEdit.GetSafeHwnd())) return;
+			// read the buffer count from the gui
+			CString s;
+			m_numBuffersEdit.GetWindowText(s);
+			buffer_count = std::atoi(s);
 			RecalcLatency();
 		}
 
-		void CDSoundConfig::OnChangeBufsizeEdit() 
+		void CDSoundConfig::OnSelendokSamplerate() 
 		{
-			if (!IsWindow(m_bufferSizeEdit.GetSafeHwnd()))
-			{
-				return;
-			}
+			if(!IsWindow(m_sampleRateCombo.GetSafeHwnd())) return;
+			// read the sample rate from the gui
+			CString s;
+			m_sampleRateCombo.GetWindowText(s);
+			sample_rate = std::atoi(s);
 			RecalcLatency();
-		}
-
-		void CDSoundConfig::OnSelchangeDevice() 
-		{
 		}
 
 		void CDSoundConfig::OnDestroy() 
 		{
-			for (int i = m_deviceComboBox.GetCount()-1; i >= 0; i--)
-			{
-				LPGUID pGuid = (LPGUID)m_deviceComboBox.GetItemData(i);
-				zapObject(pGuid);
-			}
+			for(int i(m_deviceComboBox.GetCount()) ; i > 0 ; delete reinterpret_cast<void*>(m_deviceComboBox.GetItemData(--i))); // must hard cast due to mfc's design
 			CDialog::OnDestroy();
 		}
 
-		void CDSoundConfig::OnExclusive() 
-		{
-			m_exclusive = (m_exclusiveCheck.GetState() & 0x0001);
-		}
 	NAMESPACE__END
 NAMESPACE__END
