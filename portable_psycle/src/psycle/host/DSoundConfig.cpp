@@ -66,19 +66,16 @@ NAMESPACE__BEGIN(psycle)
 			)
 		{
 			CComboBox* pBox = (CComboBox*)context;
-			LPGUID pTemp = NULL;
+			LPGUID guid_copy(0);
 		 
-			if (lpGUID != NULL)
+			if (lpGUID)
 			{
-				if ((pTemp = new GUID) == NULL)
-				{
-					return TRUE;
-				}
-				memcpy(pTemp, lpGUID, sizeof(GUID));
+				guid_copy = new GUID;
+				*guid_copy = *lpGUID;
 			}
 
 			pBox->AddString(psDesc);
-			pBox->SetItemData(pBox->FindString(0, psDesc), (DWORD)pTemp);
+			pBox->SetItemData(pBox->FindString(0, psDesc), (DWORD)guid_copy);
 			return TRUE;
 		}
 
@@ -147,12 +144,16 @@ NAMESPACE__BEGIN(psycle)
 				m_sampleRate = atoi(str);
 
 				m_pDeviceGuid = (LPCGUID)m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel());
-				if (m_pDeviceGuid != NULL)
+				if (m_pDeviceGuid)
 				{
-					memcpy(&m_deviceGuid, m_pDeviceGuid, sizeof(GUID));
-					CDialog::OnOK();
-					return;
+					m_deviceGuid = *m_pDeviceGuid;
 				}
+				else
+				{
+					m_deviceGuid = GUID();
+				}
+				CDialog::OnOK();
+				return;
 			}
 			CDialog::OnCancel();
 		}
