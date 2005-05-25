@@ -3,6 +3,10 @@
 #if 0
 /*
 $Log$
+Revision 1.30  2005/05/25 04:02:17  johan-boule
+verson 1.7.48
+fixed bug for fingersoup's directsound driver (null GUID)
+
 Revision 1.29  2005/05/24 01:09:17  johan-boule
 bug fix + special 0xff voice to send the same command to all voices
 
@@ -132,7 +136,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 47 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 48 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
