@@ -3,6 +3,9 @@
 #if 0
 /*
 $Log$
+Revision 1.32  2005/05/29 00:34:58  johan-boule
+cvs $File -> $Id
+
 Revision 1.31  2005/05/25 20:20:35  johan-boule
 version 1.7.49
 removed scary pointer and index stuff from the directsound config
@@ -174,7 +177,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 
 	#define RC__InternalName PSYCLE__TAR_NAME
 	#define RC__ProductName PSYCLE__NAME
-	#define RC__ProductVersion PSYCLE__VERSION EOL "$File: $" EOL "$Revision$" EOL "$Date$"
+	#define RC__ProductVersion PSYCLE__VERSION EOL "$Id$" EOL "$Revision$" EOL "$Date$"
 
 	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
 	#define RC__FileDescription RC__ProductName " - Host"
