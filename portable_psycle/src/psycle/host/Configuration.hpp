@@ -261,7 +261,7 @@ namespace psycle
 			AudioDriver* _pOutputDriver;
 			CMidiInput* _pMidiInput;	// MIDI IMPLEMENTATION
 
-			std::string appPath; //char[_MAX_PATH];
+			std::string appPath;
 
 			bool Initialized() { return _initialized; }
 			bool Read();

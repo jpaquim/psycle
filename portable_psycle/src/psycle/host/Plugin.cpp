@@ -42,7 +42,7 @@ namespace psycle
 
 		void Plugin::Instance(std::string file_name) throw(...)
 		{
-			_dll = ::LoadLibrary(file_name.c_str());
+			_dll = ::LoadLibraryEx(file_name.c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
 			if(!_dll)
 			{
 				std::ostringstream s; s
