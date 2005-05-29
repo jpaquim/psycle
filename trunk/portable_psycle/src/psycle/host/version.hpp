@@ -3,6 +3,11 @@
 #if 0
 /*
 $Log$
+Revision 1.33  2005/05/29 23:21:23  johan-boule
+1.7.50
+change to let plugins find other .dll files that are in the same dir as their own .dll
+for example, blwtbl.dll can be put along with druttis plugins instead of psycle.exe's dir.
+
 Revision 1.32  2005/05/29 00:34:58  johan-boule
 cvs $File -> $Id
 
@@ -144,7 +149,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 49 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 50 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
@@ -177,7 +182,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 
 	#define RC__InternalName PSYCLE__TAR_NAME
 	#define RC__ProductName PSYCLE__NAME
-	#define RC__ProductVersion PSYCLE__VERSION EOL "$Id$" EOL "$Revision$" EOL "$Date$"
+	#define RC__ProductVersion PSYCLE__VERSION EOL "$Revision$" EOL "$Date$"
 
 	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
 	#define RC__FileDescription RC__ProductName " - Host"
