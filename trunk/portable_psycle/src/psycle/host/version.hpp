@@ -3,6 +3,10 @@
 #if 0
 /*
 $Log$
+Revision 1.34  2005/05/30 05:13:43  johan-boule
+1.7.51
+change to let plugins find other .dll files that are in any intermediate dir between their own dir and the configured root dir for plugins
+
 Revision 1.33  2005/05/29 23:21:23  johan-boule
 1.7.50
 change to let plugins find other .dll files that are in the same dir as their own .dll
@@ -149,7 +153,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 50 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 51 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.

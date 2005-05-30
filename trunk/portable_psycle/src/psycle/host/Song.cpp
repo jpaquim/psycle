@@ -89,6 +89,12 @@ namespace psycle
 					{
 						pPlugin->Instance(psPluginDll);
 					}
+					catch(std::exception const & e)
+					{
+						loggers::exception(e.what());
+						zapObject(pMachine); 
+						return false;
+					}
 					catch(...)
 					{
 						zapObject(pMachine); 
@@ -108,6 +114,12 @@ namespace psycle
 					{
 						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
 					}
+					catch(std::exception const & e)
+					{
+						loggers::exception(e.what());
+						zapObject(pMachine); 
+						return false;
+					}
 					catch(...)
 					{
 						zapObject(pMachine);
@@ -126,6 +138,12 @@ namespace psycle
 					try
 					{
 						pVstPlugin->Instance(psPluginDll); // <bohan> why not using Load?
+					}
+					catch(std::exception const & e)
+					{
+						loggers::exception(e.what());
+						zapObject(pMachine); 
+						return false;
 					}
 					catch(...)
 					{

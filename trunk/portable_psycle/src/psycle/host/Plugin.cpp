@@ -10,6 +10,11 @@
 #include <cctype>
 //#include "psycle.hpp"
 #include "NewMachine.hpp"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <cstdlib> // for environment variables functions
+#include <string>
+#include <sstream>
 namespace psycle
 {
 	namespace host
@@ -40,9 +45,55 @@ namespace psycle
 			Free();
 		}
 
-		void Plugin::Instance(std::string file_name) throw(...)
+		void Plugin::Instance(std::string file_name)
 		{
-			_dll = ::LoadLibraryEx(file_name.c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
+			//_dll = ::LoadLibraryEx(file_name.c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
+			// Or better, add all intermediate dirs from the root plugin dir down to this plugin's dir to the search path
+			// ::SetDllDirectory only exists since XP SP1 and doesn't let us add more than one path.. it's hence as poor as LOAD_WITH_ALTERED_SEARCH_PATH.
+			// So, we simply locally alter the PATH environment variable, it's more sane than wapi.
+			{
+				boost::filesystem::path path(file_name, boost::filesystem::native);
+				// the base name, i.e. just the file name compound of the path
+				std::string base_name(path.leaf());
+				// save the original path env var
+				std::string old_path;
+				{
+					char const * const env(std::getenv("PATH"));
+					if(env) old_path = env;
+				}
+				std::ostringstream new_path;
+				// grows the search path with intermediate dirs between the configured root dir for plugins and the dir of this plugin
+				{
+					// configured root dir for plugins
+					boost::filesystem::path root_path(Global::pConfig->GetPluginDir(), boost::filesystem::native);
+					// grow the search path with each compound of the sub dir until we reached the root dir
+					// first, normalize the path so we don't have
+					// dirs that are not intermediate because of things like foo/../bar
+					// or useless repetitions because of things like foo/./bar
+					path.normalize();
+					// then, loop
+					do
+					{
+						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
+						path = path.branch_path();
+						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
+						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
+						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
+						// appends the intermediate dir to the list of paths
+						new_path << path.native_directory_string() << ";";
+					}
+					while(!boost::filesystem::equivalent(path, root_path));
+					// append the old path value, at the end so it's searched last
+					new_path << old_path;
+				}
+				// set the new path env var
+				if(::putenv(("PATH="+ new_path.str()).c_str())) throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
+				loggers::trace("PATH env var: " + new_path.str());
+				// load the library passing just the base file name and relying on the search path env var
+				_dll = ::LoadLibrary(base_name.c_str());
+				// set the path env var back to its original value
+				if(::putenv(("PATH=" + old_path).c_str())) throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
+			}
 			if(!_dll)
 			{
 				std::ostringstream s; s
