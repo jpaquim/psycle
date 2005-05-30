@@ -19,7 +19,15 @@ namespace operating_system
 		static const int & default_threshold_level() throw() { return default_threshold_level_; }
 	private:
 		static logger default_logger_;
-		static const int default_threshold_level_ = 1;
+		static const int default_threshold_level_ =
+			#if defined OPERATING_SYSTEM__LOGGERS__THRESHOLD_LEVEL
+				OPERATING_SYSTEM__LOGGERS__THRESHOLD_LEVEL
+			#elif defined NDEBUG
+				0
+			#else
+				1
+			#endif
+			;
 	public:
 		logger(const int & threshold_level, std::ostream &);
 		const int & threshold_level() const throw() { return threshold_level_; }
