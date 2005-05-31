@@ -1239,6 +1239,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 			}
 			else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
+			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnGearRack() 

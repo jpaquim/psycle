@@ -104,7 +104,7 @@ NAMESPACE__BEGIN(psycle)
 					numParameters = 0;
 				}
 				int ncol = 1;
-				while ( (numParameters/ncol)*28 > ncol*134) ncol++;
+				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH) ncol++;
 				int parspercol = numParameters/ncol;
 				if (parspercol>24)	
 				{
@@ -116,8 +116,8 @@ NAMESPACE__BEGIN(psycle)
 					}
 				}
 				if ( parspercol*ncol < numParameters) parspercol++;
-				size.cx=ncol*134;
-				size.cy=parspercol*28;
+				size.cx=ncol*W_ROWWIDTH;
+				size.cy=parspercol*K_YSIZE;
 				height=size.cy;
 				width=size.cx;
 
@@ -129,6 +129,7 @@ NAMESPACE__BEGIN(psycle)
 				((CFrameMachine*)pGui)->SelectMachine(_pMachine);
 				((CFrameMachine*)pGui)->_pActive = 0;
 			}
+			// \todo : Sizes for this case are wrong. The length of the last column is shortened.
 			size.cx = VST_PARAMETRIC_WIDTH;
 			size.cy = VST_PARAMETRIC_HEIGHT;
 			width += size.cx;
@@ -136,8 +137,8 @@ NAMESPACE__BEGIN(psycle)
 			{
 				height = size.cy;
 			}
-			width += GetSystemMetrics(SM_CXEDGE)*3;
-			height += 9+GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE);
+			width += GetSystemMetrics(SM_CXEDGE)*4;
+			height += 9+GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENU) + (GetSystemMetrics(SM_CYEDGE)*2);
 
 			_splitter.CreateView(0, VST_PARAM_PANE, RUNTIME_CLASS(CDefaultVstGui), size, pContext);
 			pParamGui= (CDefaultVstGui*)_splitter.GetPane(0,VST_PARAM_PANE);
@@ -153,7 +154,7 @@ NAMESPACE__BEGIN(psycle)
 			CRect rClient;
 			dsk->GetClientRect(&rClient);
 
-			MoveWindow(rClient.Width()/2-(width/2), rClient.Height()/2-(height/2), width, height, true);	
+			MoveWindow((rClient.Width()-width)/2, (rClient.Height()-height)/2, width, height, true);	
 
 		//	SetWindowPos(this, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
 
