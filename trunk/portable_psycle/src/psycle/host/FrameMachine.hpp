@@ -4,8 +4,15 @@
 #include "Machine.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-class Song;
-		class CChildView;
+
+	class Song;
+	class CChildView;
+
+#define K_XSIZE				28
+#define K_YSIZE				28
+#define K_NUMFRAMES			63
+#define W_ROWWIDTH			150
+
 
 		/// machine window.
 		class CFrameMachine : public CFrameWnd

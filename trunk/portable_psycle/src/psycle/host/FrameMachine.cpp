@@ -16,10 +16,6 @@ NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
-		#define K_XSIZE				28
-		#define K_YSIZE				28
-		#define K_NUMFRAMES			63
-
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
 
 		CFrameMachine::CFrameMachine()
@@ -69,7 +65,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 			_pMachine = pMachine;
 			me = true;
-			int const cxsize=150;
 
 			// Get NumParameters
 			int ncol=1;
@@ -89,7 +84,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					numParameters = 0;
 				}
-				while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
+				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
 			}
 			else if ( _pMachine->_type == MACH_DUPLICATOR)
 			{
@@ -97,7 +92,7 @@ NAMESPACE__BEGIN(psycle)
 				ncol = 2;
 			}
 			parspercol = numParameters/ncol;
-			if (parspercol>24)	
+			if (parspercol>24)	// check for "too big" windows
 			{
 				parspercol=24;
 				ncol=numParameters/24;
@@ -106,7 +101,7 @@ NAMESPACE__BEGIN(psycle)
 					ncol++;
 				}
 			}
-			if ( parspercol*ncol < numParameters) parspercol++;
+			if ( parspercol*ncol < numParameters) parspercol++; // check for missing parameters.
 			
 			int const winh = parspercol*K_YSIZE;
 
@@ -114,7 +109,8 @@ NAMESPACE__BEGIN(psycle)
 			CRect rClient;
 			dsk->GetClientRect(&rClient);
 
-			if(true)
+
+/*			if(true)
 			{
 				// <bohan>
 				// Dilvie reported it doesn't work with non default size fonts.
@@ -122,34 +118,63 @@ NAMESPACE__BEGIN(psycle)
 				// hence, GetSystemMetrics(SM_CYMENUSIZE) is wrong.
 				MoveWindow
 					(
-						rClient.Width() / 2 - cxsize * ncol / 2,
+						rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
 						rClient.Height() / 2 - (48 + winh) / 2,
-						cxsize * ncol,
-						9 + GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENUSIZE) + GetSystemMetrics(SM_CYEDGE) + winh,
+						W_ROWWIDTH * ncol + GetSystemMetrics(SM_CXFRAME),
+						GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYFRAME) + winh,
 						true
 					);
 			}
+			*/
+			/*
 			else
 			{
+				\todo: For some reason, the compiler doesn't see PMENUBARINFO nor GetMenuBarInfo(). They are defined in Winuser.h (PlatformSDK).
+
+				PMENUBARINFO pinfo;
+				GetMenuBarInfo(OBJID_MENU,0,pinfo);
 				CRect rect
 					(
 						CPoint
 						(
-							rClient.Width() / 2 - cxsize * ncol / 2,
-							rClient.Height() / 2 - 48 + winh / 2
+						rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
+						rClient.Height() / 2 - (48 + winh) / 2
 						),
 						CSize
 						(
-							cxsize * ncol,
-							9 + winh
+							W_ROWWIDTH * ncol + GetSystemMetrics(SM_CXFRAME),
+							winh + GetSystemMetrics(SM_CYCAPTION) +  (pinfo->rcBar.bottom-pinfo->rcBar.top) + GetSystemMetrics(SM_CYEDGE)
 						)
 					);
 
-				CalcWindowRect(&rect, adjustOutside);
+				CalcWindowRect(&rect, adjustBorder);
 				MoveWindow(&rect, true);
 			}
-			
-			ShowWindow(SW_SHOWNORMAL);
+			*/
+			CRect rect,rect2;
+			//Show the window in the usual way, without worrying about the exact sizes.
+			MoveWindow
+				(
+				rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
+				rClient.Height() / 2 - winh / 2,
+				W_ROWWIDTH * ncol,
+				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
+				false
+				);
+			ShowWindow(SW_SHOW);
+			//Get the coordinates (sizes) of the client area, and the frame.
+			GetClientRect(&rect);
+			GetWindowRect(&rect2);
+			//Using the previous values, resize the window to the desired sizes.
+			MoveWindow
+				(
+				0,
+				0,
+				(rect2.right-rect2.left)+((W_ROWWIDTH*ncol)-rect.right),
+				(rect2.bottom-rect2.top)+(winh-rect.bottom),
+				true
+				);
+		
 			//SetActiveWindow();
 			//UpdateWindow();
 		}
@@ -182,7 +207,6 @@ NAMESPACE__BEGIN(psycle)
 
 			CRect rect;
 			GetClientRect(&rect);
-			int const cxsize=150;
 			int const K_XSIZE2=K_XSIZE+8;
 			int const K_YSIZE2=K_YSIZE/2;
 		//	int hsp=0;
@@ -296,11 +320,11 @@ NAMESPACE__BEGIN(psycle)
 					
 					dc.SetBkColor(0x00788D93 + nc*2);
 					dc.SetTextColor(0x00CCDDEE + nc);
-					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
+					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
 					
 					dc.SetBkColor(0x00687D83 + nc*2);
 					dc.SetTextColor(0x0044EEFF + nc);
-					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
+					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
 				
 				}
 				else
@@ -308,22 +332,22 @@ NAMESPACE__BEGIN(psycle)
 					if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
 					{
 						dc.SetBkColor(0x00788D93);
-						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), "", 0);
+						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 
 						dc.SetBkColor(0x00687D83);
-						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", 0);
+						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 					}
 					else
 					{
 						dc.SetBkColor(0x00788D93);
-						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize + x_knob, y_knob + K_YSIZE / 4), "", 0);
+						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
 
 						dc.SetBkColor(0x0088a8b4);
 						dc.SetTextColor(0x00FFFFFF);
-						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, cxsize + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
+						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
 
 						dc.SetBkColor(0x00687D83);
-						dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, cxsize + x_knob, y_knob + K_YSIZE), "", 0);
+						dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
 					}
 				}
 				y_knob += K_YSIZE;
@@ -333,7 +357,7 @@ NAMESPACE__BEGIN(psycle)
 				if (knob_c >= parspercol)
 				{
 					knob_c = 0;
-					x_knob += cxsize;
+					x_knob += W_ROWWIDTH;
 					y_knob = 0;
 				}
 			}
@@ -346,7 +370,7 @@ NAMESPACE__BEGIN(psycle)
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
 				int ncol = 1;
-				while ( (numParameters/ncol)*K_YSIZE > ncol*cxsize ) ncol++;
+				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
 
 				parspercol = numParameters/ncol;
 				if (parspercol>24)	
@@ -368,11 +392,11 @@ NAMESPACE__BEGIN(psycle)
 				{
 					dc.SetBkColor(0x00788D93);
 					dc.SetTextColor(0x00CCDDEE);
-					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, cxsize+x_knob, y_knob+K_YSIZE2), "", 0);
+					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 
 					dc.SetBkColor(0x00687D83);
 					dc.SetTextColor(0x0044EEFF);
-					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, cxsize+x_knob, y_knob+K_YSIZE), "", 0);
+					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 
 					y_knob += K_YSIZE;
 				}
