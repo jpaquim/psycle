@@ -6,9 +6,10 @@
 #include "VstEditorDlg.hpp"
 #include "VstHost.hpp"
 #include "song.hpp"
-#include "Configuration.hpp"
+//#include "Configuration.hpp"
 #include "Player.hpp"
 #include "InputHandler.hpp"
+#include "NewMachine.hpp"
 #include <algorithm>
 #include <cctype>
 namespace psycle
@@ -381,41 +382,11 @@ namespace psycle
 							return false;
 						}
 					}
+
 				}
 				return true;
 			};
-			// Load for Old Psycle fileformat
-			bool plugin::LoadChunk(RiffFile * pFile)
-			{
-				bool b;
-				try
-				{
-					b = proxy().flags() & effFlagsProgramChunks;
-				}
-				catch(const std::exception &)
-				{
-					b = false;
-				}
-				if(!b) return false;
-				// read chunk size
-				long chunk_size;
-				pFile->Read(&chunk_size, sizeof chunk_size);
-				// read chunk data
-				char * chunk(new char[chunk_size]);
-				pFile->Read(chunk, chunk_size);
-				try
-				{
-					proxy().dispatcher(effSetChunk, 0, chunk_size, chunk);
-				}
-				catch(const std::exception &)
-				{
-					// [bohan] hmm, so, data just gets lost?
-					zapArray(chunk);
-					return false;
-				}
-				zapArray(chunk);
-				return true;
-			}
+
 
 			void plugin::SaveDllName(RiffFile * pFile) 
 			{
@@ -454,6 +425,7 @@ namespace psycle
 					}
 				}
 				pFile->Write(&size, sizeof size);
+				_program = proxy().getProgram();
 				pFile->Write(&_program, sizeof _program);
 				pFile->Write(&count, sizeof count);
 				for(UINT i(0); i < count; ++i)
@@ -900,6 +872,7 @@ namespace psycle
 				// Support opcodes
 				switch(opcode)
 				{
+				//  Version 1.0
 				case audioMasterAutomate:
 					Global::pPlayer->Tweaker = true;
 					if(effect && host)
@@ -946,6 +919,7 @@ namespace psycle
 						if(index < 2) return 0;
 						else return 1;
 					}
+				//  Version 2.0
 				case audioMasterGetTime:
 					std::memset(&_timeInfo, 0, sizeof _timeInfo);
 					/*
@@ -1805,7 +1779,38 @@ namespace psycle
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// old file format vomit, don't look at it.
 
-
+			// Load for Old Psycle fileformat
+			bool plugin::LoadChunk(RiffFile * pFile)
+			{
+				bool b;
+				try
+				{
+					b = proxy().flags() & effFlagsProgramChunks;
+				}
+				catch(const std::exception &)
+				{
+					b = false;
+				}
+				if(!b) return false;
+				// read chunk size
+				long chunk_size;
+				pFile->Read(&chunk_size, sizeof chunk_size);
+				// read chunk data
+				char * chunk(new char[chunk_size]);
+				pFile->Read(chunk, chunk_size);
+				try
+				{
+					proxy().dispatcher(effSetChunk, 0, chunk_size, chunk);
+				}
+				catch(const std::exception &)
+				{
+					// [bohan] hmm, so, data just gets lost?
+					zapArray(chunk);
+					return false;
+				}
+				zapArray(chunk);
+				return true;
+			}
 
 			/// old file format vomit, don't look at it.
 			bool plugin::Load(RiffFile * pFile)

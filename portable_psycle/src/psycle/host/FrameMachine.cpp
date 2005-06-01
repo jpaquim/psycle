@@ -67,7 +67,7 @@ NAMESPACE__BEGIN(psycle)
 			me = true;
 
 			// Get NumParameters
-			int ncol=1;
+			ncol=1;
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
 				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
@@ -101,7 +101,7 @@ NAMESPACE__BEGIN(psycle)
 					ncol++;
 				}
 			}
-			if ( parspercol*ncol < numParameters) parspercol++; // check for missing parameters.
+			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
 			
 			int const winh = parspercol*K_YSIZE;
 
@@ -110,47 +110,27 @@ NAMESPACE__BEGIN(psycle)
 			dsk->GetClientRect(&rClient);
 
 
-/*			if(true)
-			{
-				// <bohan>
-				// Dilvie reported it doesn't work with non default size fonts.
-				// Especially, the menu bar can be spanned on several lines,
-				// hence, GetSystemMetrics(SM_CYMENUSIZE) is wrong.
-				MoveWindow
+/*			\todo: For some reason, the compiler doesn't see PMENUBARINFO nor GetMenuBarInfo(). They are defined in Winuser.h (PlatformSDK).
+
+			PMENUBARINFO pinfo;
+			GetMenuBarInfo(OBJID_MENU,0,pinfo);
+			CRect rect
+				(
+					CPoint
 					(
-						rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
-						rClient.Height() / 2 - (48 + winh) / 2,
+					rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
+					rClient.Height() / 2 - (48 + winh) / 2
+					),
+					CSize
+					(
 						W_ROWWIDTH * ncol + GetSystemMetrics(SM_CXFRAME),
-						GetSystemMetrics(SM_CYCAPTION) + GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYFRAME) + winh,
-						true
-					);
-			}
-			*/
-			/*
-			else
-			{
-				\todo: For some reason, the compiler doesn't see PMENUBARINFO nor GetMenuBarInfo(). They are defined in Winuser.h (PlatformSDK).
+						winh + GetSystemMetrics(SM_CYCAPTION) +  (pinfo->rcBar.bottom-pinfo->rcBar.top) + GetSystemMetrics(SM_CYEDGE)
+					)
+				);
 
-				PMENUBARINFO pinfo;
-				GetMenuBarInfo(OBJID_MENU,0,pinfo);
-				CRect rect
-					(
-						CPoint
-						(
-						rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
-						rClient.Height() / 2 - (48 + winh) / 2
-						),
-						CSize
-						(
-							W_ROWWIDTH * ncol + GetSystemMetrics(SM_CXFRAME),
-							winh + GetSystemMetrics(SM_CYCAPTION) +  (pinfo->rcBar.bottom-pinfo->rcBar.top) + GetSystemMetrics(SM_CYEDGE)
-						)
-					);
-
-				CalcWindowRect(&rect, adjustBorder);
-				MoveWindow(&rect, true);
-			}
-			*/
+			CalcWindowRect(&rect, adjustBorder);
+			MoveWindow(&rect, true);
+*/
 			CRect rect,rect2;
 			//Show the window in the usual way, without worrying about the exact sizes.
 			MoveWindow
@@ -174,9 +154,6 @@ NAMESPACE__BEGIN(psycle)
 				(rect2.bottom-rect2.top)+(winh-rect.bottom),
 				true
 				);
-		
-			//SetActiveWindow();
-			//UpdateWindow();
 		}
 
 		void CFrameMachine::OnDestroy() 
@@ -362,30 +339,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-			int exess=0;
-			if ( _pMachine->_type == MACH_PLUGIN )
-			{
-				exess = parspercol*((Plugin*)_pMachine)->GetInfo()->numCols;
-			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-			{
-				int ncol = 1;
-				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
-
-				parspercol = numParameters/ncol;
-				if (parspercol>24)	
-				{
-					parspercol=24;
-					ncol=numParameters/24;
-					if (ncol*24 != numParameters)
-					{
-						ncol++;
-					}
-				}
-
-				exess = parspercol*ncol;
-			}
-
+			int exess= parspercol*ncol;
 			if ( exess > numParameters )
 			{
 				for (int c=numParameters; c<exess; c++)
