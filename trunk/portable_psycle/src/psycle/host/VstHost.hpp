@@ -1,61 +1,52 @@
 ///\file
 ///\brief interface file for psycle::host::VSTPlugin
 #pragma once
-#include "Machine.hpp"
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "Helpers.hpp"
-#include "Configuration.hpp"
 #include <operating_system/exception.hpp>
 #include <operating_system/exceptions/code_description.hpp>
+#include "Machine.hpp"
 #include <vst/AEffectx.h>
-#include "NewMachine.hpp"
 namespace psycle
 {
 	namespace host
 	{
-		/// VST Host.
+		// VST Host.
 		namespace vst
 		{
-			/// Classes derived from exception thrown by vst plugins.
-			namespace exceptions
-			{
-				/// Exception caused by an error in a call to the vst dispatch function.
-				class dispatch_error : public host::exceptions::function_error
-				{
-				public:
-					inline dispatch_error(const std::string & what) : function_error(what) {}
-				};
-			}
-
-			/// Maximum number of Audio Input/outputs
-			/// \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
+			// Maximum number of Audio Input/outputs
+			// \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
 			const int max_io = 16;
-
-			/// Dialog max ticks for parameters.
+			// Dialog max ticks for parameters.
 			const int quantization = 65535;
+			// forward declaration
+			class plugin;
 
-			class plugin; // forward declaration
-
-			/// Proxy between the host and a plugin.
+//////////////////////////////////////////////////////////////////////////
+//		Class vst::proxy .
+//		Proxy between the host and a plugin.
+//////////////////////////////////////////////////////////////////////////
 			class proxy
 			{
 			public:
-				proxy(vst::plugin & host, AEffect * const plugin = 0);
-				~proxy() throw();
-
-			private:
-				plugin & host_;
-				plugin & host() throw();
-				const plugin & host() const throw();
-
-			private:
-				AEffect * plugin_;
-				AEffect & plugin() throw();
-				const AEffect & plugin() const throw();
+				proxy(vst::plugin & host, AEffect * const plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
+				~proxy() throw() { (*this)(0); }
 			public:
 				void operator()(AEffect * const plugin) throw(host::exceptions::function_error);
-				const bool operator()() const throw();
+				const bool operator()() const throw() { return plugin_; }
+			private:
+				plugin & host_;
+				plugin & host() throw() { return host_; }
+				const plugin & host() const throw() { return host_; }
+			private:
+				AEffect * plugin_;
+				AEffect & plugin() throw() { assert(plugin_); return *plugin_; }
+				const AEffect & plugin() const throw() { assert(plugin_); return *plugin_; }
 
+			public:
+				//////////////////////////////////////////////////////////////////////////
+				// AEffect Properties
+				//////////////////////////////////////////////////////////////////////////
 				long int magic() throw(host::exceptions::function_error);
 				long int dispatcher(long int operation = 0, long int index = 0, long int value = 0, void * ptr = 0, float opt = 0) throw(host::exceptions::function_error);
 				void process(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error);
@@ -66,98 +57,99 @@ namespace psycle
 				long int numParams() throw(host::exceptions::function_error);
 				long int numInputs() throw(host::exceptions::function_error);
 				long int numOutputs() throw(host::exceptions::function_error);
+				//\todo: maybe exchange "flags()" with functions for each flag.
 				long int flags() throw(host::exceptions::function_error);
 				long int uniqueId() throw(host::exceptions::function_error);
 				long int version() throw(host::exceptions::function_error);
+				long int initialDelay() throw(host::exceptions::function_error);
 
-				/// Create and initialize the VST plugin ( plugin Side ). Call this before using it. (except for string data)
-				long int open()
-				{
-					return dispatcher(effOpen);
-				}
-				#pragma warning(push)
-				#pragma warning(disable:4702) // unreachable code
-				/// Destroys the VST plugin instance ( plugin side ).
-				long int close()
-				{
-					try
-					{
-						/// also clears plugin_ pointer since it is no longer valid after effClose.
-						long int retval = dispatcher(effClose);
-						plugin_ = 0;
-						return retval;
-					}
-					catch(...)
-					{
-						plugin_ = 0;
-						throw;
-					}
-				}
-				#pragma warning(pop)
-				// Tells the VST plugin the desired samplerate.
-				long int setSampleRate(float sr)
-				{
-					assert(sr > 0);
-					return dispatcher(effSetSampleRate,0,0,0,sr);
-				}
-				// Tels the VST plugin the MAX block size of data that it will request.
-			
-				long int setBlockSize(int bs)
-				{
-					assert(bs>0);
-					return dispatcher(effSetBlockSize,0,bs);
-				}
-				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement)
-				{
-					assert(inputArrangement && outputArrangement);
-					return dispatcher(effSetSpeakerArrangement, 0, (long) inputArrangement, outputArrangement);
-				}
-				long int getProgram()
-				{
-					return dispatcher(effGetProgram);
-				}
+				//////////////////////////////////////////////////////////////////////////
+				// AEffect "eff" OpCodes. Version 1.0
+				//////////////////////////////////////////////////////////////////////////
+				// Create and initialize the VST plugin ( plugin Side ). Call this before using it. (except for string data)
+				long int open() { return dispatcher(effOpen); }
+				// Destroys the VST plugin instance ( plugin side ). Also clears plugin_ pointer since it is no longer valid after effClose.
+				long int close() { int retval = dispatcher(effClose); plugin_=0; return retval;	}
+				long int getProgram() { return dispatcher(effGetProgram); }
 				long int setProgram(int program)
 				{
 					assert(program>=0);
 					assert(program<numPrograms() || numPrograms()==0);
 					return dispatcher(effSetProgram,0,program);
 				}
-				/// Gets the VST implementation's Version that the plugin uses. ( 1.0,2.0,2.1,2.2 or 2.3)
-				long int getVstVersion()
+/*				effSetProgramName,	// user changed program name (max 24 char + 0) to as passed in string 
+*				effGetProgramName,	// stuff program name (max 24 char + 0) into string 
+*				effGetParamLabel,	// stuff parameter <index> label (max 8 char + 0) into string
+*									// (examples: sec, dB, type)
+*				effGetParamDisplay,	// stuff parameter <index> textual representation into string
+*									// (examples: 0.5, -3, PLATE)
+*				effGetParamName,	// stuff parameter <index> label (max 8 char + 0) into string
+*									// (examples: Time, Gain, RoomType) 
+*				effGetVu,			// called if (flags & (effFlagsHasClip | effFlagsHasVu))
+*/
+				// Tells the VST plugin the desired samplerate.
+				long int setSampleRate(float sr)
 				{
-					return dispatcher(effGetVstVersion);
+					assert(sr > 0);
+					return dispatcher(effSetSampleRate,0,0,0,sr);
+				}
+				// Tells the VST plugin the MAX block size of data that it will request. (default value for VST's is 1024)
+				long int setBlockSize(int bs)
+				{
+					assert(bs>0);
+					return dispatcher(effSetBlockSize,0,bs);
 				}
 				/// Turns on or off the plugin. If it is disabled, it won't produce output, but should behave without errors.
-				long int mainsChanged(bool on)
+				long int mainsChanged(bool on) { return dispatcher(effMainsChanged, 0, on ? 1 : 0); }
+/*
+*				effEditGetRect,		// stuff rect (top, left, bottom, right) into ptr
+*				effEditOpen,		// system dependant Window pointer in ptr
+*				effEditClose,		// no arguments
+*				effEditKey,			// system keycode in value
+*				effEditIdle,		// no arguments. Be gentle!
+*				effEditTop,			// window has topped, no arguments
+*				effEditSleep,		// window goes to background
+*
+*				effIdentify,		// returns 'NvEf'
+*				effGetChunk,		// host requests pointer to chunk into (void**)ptr, byteSize returned
+*				effSetChunk,		// plug-in receives saved chunk, byteSize passed
+*/
+				//////////////////////////////////////////////////////////////////////////
+				// AEffect "eff" OpCodes. Version 2.0
+				//////////////////////////////////////////////////////////////////////////
+
+				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement)
 				{
-					return dispatcher(effMainsChanged, 0, on ? 1 : 0);
+					assert(inputArrangement && outputArrangement);
+					return dispatcher(effSetSpeakerArrangement, 0, (long) inputArrangement, outputArrangement);
 				}
+				/// Gets the VST implementation's Version that the plugin uses. ( 1.0,2.0,2.1,2.2 or 2.3)
+				long int getVstVersion() {	return dispatcher(effGetVstVersion); }
 				long int getEffectName(char * buffer)
 				{
-					assert(buffer);
-					buffer[0]=0;
+					assert(buffer);		buffer[0]=0;
 					return dispatcher(effGetEffectName, 0, 0, buffer);
 				}
 				long int getVendorString(char * buffer)
 				{
-					assert(buffer);
-					buffer[0]=0;
+					assert(buffer);		buffer[0]=0;
 					return dispatcher(effGetVendorString, 0, 0, buffer);
 				}
 			};
 
-			/// vst note for an instrument.
-			class note
-			{
-			public:
-				unsigned char key;
-				unsigned char midichan;
-			};
-
-			/// VST plugin.
+///////////////////////////////////////////////////////////////////////////////////
+//		Class vst::plugin .
+//		Base Class VST plugin. Implements the functions common to VST Fx and VSTi's
+///////////////////////////////////////////////////////////////////////////////////
 			class plugin : public Machine
 			{
 			private:
+				class note
+				{
+				public:
+					unsigned char key;
+					unsigned char midichan;
+				};
 				typedef AEffect * (* PVSTMAIN) (audioMasterCallback audioMaster);
 			public:
 				/// Host callback dispatcher.
@@ -165,10 +157,19 @@ namespace psycle
 			public:
 				plugin();
 				virtual ~plugin() throw();
+				virtual bool Load(RiffFile * pFile);
+				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+				virtual void SaveSpecificChunk(RiffFile* pFile) ;
+				virtual void SaveDllName(RiffFile* pFile);
+				bool LoadDll(std::string psFileName);
+				// Loader for old psycle fileformat.
+				bool LoadChunk(RiffFile* pFile);
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
-				virtual void SetSampleRate(int sr){ proxy().setSampleRate((float)sr); };
+				virtual void SetSampleRate(int sr)	{	proxy().setSampleRate((float)sr); };
 
+				void Instance(std::string dllname, const bool overwriteName = true) throw(...);
+				void Free() throw(...);
 				virtual int GetNumParams()
 				{
 					try
@@ -223,18 +224,8 @@ namespace psycle
 					}
 				}
 				#pragma warning(pop)
-				virtual bool Load(RiffFile * pFile);
-				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 
-				virtual void SaveSpecificChunk(RiffFile* pFile) ;
-				virtual void SaveDllName(RiffFile* pFile);
-
-				void Instance(std::string dllname, const bool overwriteName = true) throw(...);
-				void Free() throw(...);
 				bool DescribeValue(int parameter, char * psTxt);
-				bool LoadDll(std::string psFileName);
-				// Loader for old psycle fileformat.
-				bool LoadChunk(RiffFile* pFile);
 				inline const long int & GetVersion() const throw() { return _version; }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
 				inline const bool & IsSynth() const throw() { return _isSynth; }
@@ -248,9 +239,12 @@ namespace psycle
 				//void SetCurrentProgram(int prg);
 				//int GetCurrentProgram();
 
+				//\todo: this variable is just used in load/save. 
 				unsigned char _program;
+				//\todo: Having exception checking, this variable could be removed.
 				bool instantiated;
 				///\todo Remove when Changing the FileFormat.
+				///      It is used in song load only. Probably it comes from an old fileformat ( 0.x )
 				int _instance;
 				/// It needs to use Process
 				bool requiresProcess;
@@ -317,7 +311,7 @@ namespace psycle
 							--note_on_count_[channel][note];
 							//assert(note_on_count_[channel][note]>=0 && "there was a note-off without corresponding note-on!");
 							// [bohan] it happens!!!
-							if(note_on_count_[channel][note] < 0) psycle::host::loggers::exception("there was a note-off without corresponding note-on!");
+							if(note_on_count_[channel][note] < 0) psycle::host::loggers::warning("there was a note-off without corresponding note-on!");
 						}
 					private:
 						// 16 channels, 128 keys
@@ -327,8 +321,10 @@ namespace psycle
 				#endif
 			};
 
-
-			/// vst "instrument" (input) plugin.
+///////////////////////////////////////////////////////////////////////////////////
+//		Class vst::instrument .
+//		VST Instrument ( input plugin )
+///////////////////////////////////////////////////////////////////////////////////
 			class instrument : public plugin
 			{
 			public:
@@ -341,7 +337,11 @@ namespace psycle
 				virtual void Stop(void);
 			};
 
-			/// vst "fx" (filter) plugin.
+///////////////////////////////////////////////////////////////////////////////////
+//		Class vst::fx .
+//		VST Effect ( effect plugin )
+//		\todo :  [JAZ] i think this class isn't really needed anymore.
+///////////////////////////////////////////////////////////////////////////////////
 			class fx : public plugin
 			{
 			public:
@@ -357,8 +357,19 @@ namespace psycle
 				float * _pOutSamplesR;
 			};
 
+///////////////////////////////////////////////////////////////////////////////////
+//		Class vst::exceptions::dispatch_error
+//		Exception handling.
+///////////////////////////////////////////////////////////////////////////////////
 			namespace exceptions
 			{
+				/// Exception caused by an error in a call to the vst dispatch function.
+				class dispatch_error : public host::exceptions::function_error
+				{
+				public:
+					inline dispatch_error(const std::string & what) : function_error(what) {}
+				};
+
 				namespace dispatch_errors
 				{
 					/// Dispatcher operation code descriptions.
@@ -382,16 +393,9 @@ namespace psycle
 				}
 			}
 
-			inline proxy::proxy(vst::plugin & host, AEffect * const plugin) : host_(host), plugin_(0) { (*this)(plugin); }
-			inline proxy::~proxy() throw() { (*this)(0); }
-
-			inline plugin & proxy::host() throw() { return host_; }
-			inline const plugin & proxy::host() const throw() { return host_; }
-
-			inline AEffect & proxy::plugin() throw() { assert(plugin_); return *plugin_; }
-			inline const AEffect & proxy::plugin() const throw() { assert(plugin_); return *plugin_; }
-			inline const bool proxy::operator()() const throw() { return plugin_; }
-
+///////////////////////////////////////////////////////////////////////////////////
+//		Inline Implementations.
+///////////////////////////////////////////////////////////////////////////////////
 			#if defined $catch$
 				#error "macro clash"
 			#endif
@@ -411,11 +415,12 @@ namespace psycle
 				catch(            void const * const e) { host::exceptions::function_errors::rethrow(host(), function, &e); } \
 				catch(               ...              ) { host::exceptions::function_errors::rethrow<void*>(host(), function); }
 
+
+
 			inline void proxy::operator()(AEffect * const plugin) throw(host::exceptions::function_error)
 			{
 				if(this->plugin_)
 				{
-					//user(0);
 					close();
 				}
 				// [magnus] we shouldn't delete plugin_ because the AEffect is allocated
@@ -477,6 +482,8 @@ namespace psycle
 			{ assert((*this)()); try { return plugin().uniqueID; } $catch$("uniqueId") return 0; /* dummy return to avoid warning */ }
 			inline long int proxy::version() throw(host::exceptions::function_error)
 			{ assert((*this)()); try { return plugin().version; } $catch$("version") return 0; /* dummy return to avoid warning */ }
+			inline long int proxy::initialDelay() throw(host::exceptions::function_error)
+			{ assert((*this)()); try { return plugin().initialDelay; } $catch$("initialDelay") return 0; /* dummy return to avoid warning */ }
 
 			#pragma warning(pop)
 
