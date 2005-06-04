@@ -304,105 +304,115 @@ NAMESPACE__BEGIN(psycle)
 			//
 			//Fideloop.
 			//
-			HKEY RegKey;
-			HMENU hRootMenuBar, hFileMenu;
-			MENUITEMINFO hNewItemInfo;
-			UINT ids[] = {ID_FILE_RECENT_01,
-						ID_FILE_RECENT_02,
-						ID_FILE_RECENT_03,
-						ID_FILE_RECENT_04};
-
-			int iCount =0;
-			char nameBuff[256];
-			char cntBuff[3];
-			DWORD cntSize = sizeof(cntBuff);
-			DWORD nameSize = sizeof(nameBuff);
-			DWORD nValues = 0;
-
+			::HMENU hRootMenuBar, hFileMenu;
 			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
+			hFileMenu = ::GetSubMenu(hRootMenuBar, 0);
+			pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 10);
 
-			char key[72]=CONFIG_ROOT_KEY;
-			strcat(key,"\\RecentFiles");
-			if (RegOpenKeyEx(HKEY_CURRENT_USER , key, 0, KEY_READ, &RegKey) == ERROR_SUCCESS)
+			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
+			key += "\\recent-files";
+			HKEY RegKey;
+			if(::RegOpenKeyEx(HKEY_CURRENT_USER , key.c_str(), 0, KEY_READ, &RegKey) == ERROR_SUCCESS)
 			{
-				RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
-				if (nValues)
+				DWORD nValues = 0;
+				::RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
+				if(nValues)
 				{
-					DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
-					while (RegEnumValue(RegKey,
-									iCount,
-									cntBuff,
-									&cntSize,
-									NULL,
-									NULL,
-									(unsigned char*)nameBuff,
-									&nameSize) == ERROR_SUCCESS)
+					::MENUITEMINFO hNewItemInfo;
+					int iCount = 0;
+					char cntBuff[3];
+					DWORD cntSize = sizeof cntBuff;
+					char nameBuff[1 << 10];
+					DWORD nameSize = sizeof nameBuff;
+					::DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
+					while
+					(
+						::RegEnumValue
+						(
+							RegKey,
+							iCount,
+							cntBuff,
+							&cntSize,
+							0,
+							0,
+							reinterpret_cast<unsigned char*>(nameBuff),
+							&nameSize
+						) == ERROR_SUCCESS
+					)
 					{
-								
-						hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
-						hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
-						hNewItemInfo.fType		= MFT_STRING;
-						hNewItemInfo.wID		= ids[iCount];
-						hNewItemInfo.cch		= strlen(nameBuff);
+						::UINT ids[] =
+						{
+							ID_FILE_RECENT_01,
+							ID_FILE_RECENT_02,
+							ID_FILE_RECENT_03,
+							ID_FILE_RECENT_04
+						};
+						hNewItemInfo.cbSize = sizeof hNewItemInfo;
+						hNewItemInfo.fMask = MIIM_ID | MIIM_TYPE;
+						hNewItemInfo.fType = MFT_STRING;
+						hNewItemInfo.wID = ids[iCount];
+						hNewItemInfo.cch = std::strlen(nameBuff);
 						hNewItemInfo.dwTypeData = nameBuff;
-
-						InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
-						cntSize = sizeof(cntBuff);
-						nameSize = sizeof(nameBuff);
-						iCount++;
+						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
+						cntSize = sizeof cntBuff;
+						nameSize = sizeof nameBuff;
+						++iCount;
 					}
-					RegCloseKey(RegKey);
+					::RegCloseKey(RegKey);
 				}
 			}
 		}
 
 		void CPsycleApp::SaveRecent(CMainFrame* pFrame)
 		{
-			HKEY RegKey;
 			HMENU hRootMenuBar, hFileMenu;
-			DWORD Effect;
-			
-			int iCount;
-			char nameBuff[256];
-			char cntBuff[3];
-			UINT nameSize;
-			
 			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 			hFileMenu = GetSubMenu(hRootMenuBar, 0);
 			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
-			
-			if (RegOpenKeyEx(HKEY_CURRENT_USER, CONFIG_ROOT_KEY, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
+		
 			{
-				RegDeleteKey(RegKey, "RecentFiles");
-			}
-			RegCloseKey(RegKey);
-			
-			char key[72]=CONFIG_ROOT_KEY;
-			strcat(key,"\\RecentFiles");	
-			if (RegCreateKeyEx(HKEY_CURRENT_USER,
-								key,
-								0,
-								0,
-								REG_OPTION_NON_VOLATILE,
-								KEY_ALL_ACCESS,
-								NULL,
-								&RegKey,
-								&Effect) == ERROR_SUCCESS)
-			{
-				for (iCount = 0; iCount<GetMenuItemCount(pFrame->m_wndView.hRecentMenu);iCount++)
+				HKEY RegKey;
+				if(::RegOpenKeyEx(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
 				{
-					nameSize = GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-					GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-					if (strcmp(nameBuff, "No recent files"))
+					::RegDeleteKey(RegKey, "recent-files");
+				}
+				::RegCloseKey(RegKey);
+			}
+
+			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
+			key += "\\recent-files";
+			HKEY RegKey;
+			DWORD Effect;
+			if
+			(
+				::RegCreateKeyEx
+				(
+					HKEY_CURRENT_USER,
+					key.c_str(),
+					0,
+					0,
+					REG_OPTION_NON_VOLATILE,
+					KEY_ALL_ACCESS,
+					0,
+					&RegKey,
+					&Effect
+				) == ERROR_SUCCESS
+			)
+			{
+				for(int iCount(0) ; iCount < ::GetMenuItemCount(pFrame->m_wndView.hRecentMenu) ; ++iCount)
+				{
+					UINT nameSize = ::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
+					char nameBuff[1 << 10];
+					::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
+					if(std::strcmp(nameBuff, "No recent files"))
 					{
-						itoa(iCount, cntBuff, 10);
-						RegSetValueEx(RegKey, cntBuff, 0, REG_SZ, (const unsigned char*)nameBuff, nameSize);
+						std::ostringstream s;
+						s << iCount;
+						::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
 					}
 
 				}
-				RegCloseKey(RegKey);
+				::RegCloseKey(RegKey);
 			}
 		}
 	NAMESPACE__END

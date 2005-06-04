@@ -7,7 +7,7 @@ namespace psycle
 	{
 		#define F_PI 3.14159265358979323846f
 
-		int _httoi(const TCHAR *value);
+		template<typename x> void hexstring_to_integer(std::string const &, x &);
 
 		/// linearly maps a byte (0 to 255) to a float (0 to 1).
 		class CValueMapper

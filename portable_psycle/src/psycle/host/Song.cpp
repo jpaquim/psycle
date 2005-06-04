@@ -2544,9 +2544,9 @@ namespace psycle
 			// save our file
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
 
-			CString filepath = Global::pConfig->GetInitialSongDir().c_str();
+			CString filepath = Global::pConfig->GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
-			DeleteFile(filepath);
+			::DeleteFile(filepath);
 			OldPsyFile file;
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{
@@ -2745,9 +2745,9 @@ namespace psycle
 
 			// save our file
 
-			CString filepath = Global::pConfig->GetInitialSongDir().c_str();
+			CString filepath = Global::pConfig->GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
-			DeleteFile(filepath);
+			::DeleteFile(filepath);
 			OldPsyFile file;
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{

@@ -702,17 +702,16 @@ NAMESPACE__BEGIN(psycle)
 					{
 						if (Global::pConfig->_RecordTweaks)
 						{
-							if (Global::pConfig->_midiRawMcm)
+							if (Global::pConfig->midi().raw())
 							{
 								entry._cmd = 0x0c;
 								entry._parameter = velocity*2;
 							}
-							else if (Global::pConfig->_midiRecordVel)
+							else if (Global::pConfig->midi().velocity().record())
 							{
 								// command
-								entry._cmd = Global::pConfig->_midiCommandVel;
-								int par = Global::pConfig->_midiFromVel + 
-													(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
+								entry._cmd = Global::pConfig->midi().velocity().command();
+								int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
 								if (par > 255) 
 								{
 									par = 255;
@@ -802,17 +801,16 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (Global::pConfig->_RecordTweaks)
 				{
-					if (Global::pConfig->_midiRawMcm)
+					if (Global::pConfig->midi().raw())
 					{
 						entry->_cmd = 0x0c;
-						entry->_parameter = velocity*2;
+						entry->_parameter = velocity * 2;
 					}
-					else if (Global::pConfig->_midiRecordVel)
+					else if (Global::pConfig->midi().velocity().record())
 					{
 						// command
-						entry->_cmd = Global::pConfig->_midiCommandVel;
-						int par = Global::pConfig->_midiFromVel + 
-											(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
+						entry->_cmd = Global::pConfig->midi().velocity().command();
+						int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
 						if (par > 255) 
 						{
 							par = 255;

@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::Registry.
+///\implementation psycle::host::Registry.
 #include <project.private.hpp>
 #include "Registry.hpp"
 namespace psycle
@@ -7,112 +7,140 @@ namespace psycle
 	namespace host
 	{
 		Registry::Registry()
+		:
+			root(),
+			current()
 		{
-			_root = (HKEY)0;
-			_key = (HKEY)0;
 		}
 
 		Registry::~Registry()
 		{
-			if (_key != (HKEY)0)
-			{
-				RegCloseKey(_key);
-			}
-			if (_root != (HKEY)0)
-			{
-				RegCloseKey(_root);
-			}
+			if(current) ::RegCloseKey(current);
+			if(root) ::RegCloseKey(root);
 		}
 
-		LONG
-		Registry::OpenRootKey(HKEY key, LPTSTR psName)
+		Registry::result
+		Registry::OpenRootKey(Registry::key const & key, Registry::name const & name)
 		{
-			LONG result = RegOpenKeyEx(key, psName, 0, KEY_ALL_ACCESS, &_root);
-			if (result != ERROR_SUCCESS)
-			{
-				if (result == ERROR_FILE_NOT_FOUND)
-				{
-					result = RegCreateKey(key, psName, &_root);
-				}
-			}
+			result result(::RegOpenKeyEx(key, name.c_str(), 0, KEY_ALL_ACCESS, &root));
+			if(result == ERROR_FILE_NOT_FOUND) result = ::RegCreateKey(key, name.c_str(), &root);
 			return result;
 		}
 
-		LONG
-		Registry::CloseRootKey()
+		Registry::result
+		Registry::OpenKey(Registry::name const & name)
 		{
-			LONG result = RegCloseKey(_root);
-			if (result == ERROR_SUCCESS)
-			{
-				_root = (HKEY)0;
-			}
-			return result;
+			return ::RegOpenKeyEx(root, name.c_str(), 0, KEY_ALL_ACCESS, &current);
 		}
 
-		LONG
-		Registry::OpenKey(LPTSTR psName)
-		{
-			return RegOpenKeyEx(_root, psName, 0, KEY_ALL_ACCESS, &_key);
-		}
-
-		LONG
+		Registry::result
 		Registry::CloseKey()
 		{
-			LONG result = RegCloseKey(_key);
-			if (result == ERROR_SUCCESS)
-			{
-				_key = (HKEY)0;
-			}
+			result result(::RegCloseKey(current));
+			if(result == ERROR_SUCCESS) current = key();
 			return result;
 		}
 
-		LONG
-		Registry::CreateKey(LPTSTR psName)
+		Registry::result
+		Registry::CloseRootKey()
 		{
-			return RegCreateKey(_root, psName, &_key);
+			result result(::RegCloseKey(root));
+			if(result == ERROR_SUCCESS) root = key();
+			return result;
 		}
 
-		LONG
-		Registry::QueryValue(LPTSTR psName, LPDWORD pType, LPBYTE pData, LPDWORD pNumData)
+		Registry::result
+		Registry::CreateKey(Registry::name const & name)
 		{
-			return RegQueryValueEx(_key, psName, 0, pType, pData, pNumData);
+			return ::RegCreateKey(root, name.c_str(), &current);
 		}
-		
-		LONG
-		Registry::QueryStringValue(LPTSTR psName, std::string &value)
+
+		Registry::result
+		Registry::DeleteValue(Registry::name const & name)
 		{
-			DWORD numChars=0;
-			DWORD type;
+			return ::RegDeleteValue(current, name.c_str());
+		}
+
+		Registry::result
+		Registry::QueryTypeAndSize(Registry::name const & name, type & type, std::size_t & size)
+		{
+			BOOST_STATIC_ASSERT((sizeof(long int) == sizeof(int))); // microsoft likes using unsigned long int, aka their DWORD typedef, instead of std::size_t
+			type = REG_NONE;
+			size = 0;
+			return ::RegQueryValueEx(current, name.c_str(), 0, &type, 0, reinterpret_cast<unsigned long int*>(&size));
+		}
+
+		Registry::result
+		Registry::QueryValue(Registry::name const & name,              bool & b)
+		{
+			return QueryValue(name, b, REG_BINARY);
+		}
+		Registry::result
+		Registry::QueryValue(Registry::name const & name, unsigned      int & i)
+		{
+			return QueryValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::QueryValue(Registry::name const & name,   signed      int & i)
+		{
+			return QueryValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::QueryValue(Registry::name const & name, unsigned long int & i)
+		{
+			return QueryValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::QueryValue(Registry::name const & name,   signed long int & i)
+		{
+			return QueryValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::QueryValue(Registry::name const & name,       std::string & s)
+		{
+			std::size_t size;
+			type type;
 			// get length of string
-			LONG error=QueryValue(psName,&type,NULL,&numChars);
-			if(error != ERROR_SUCCESS)
-				return error;
-			if(type != REG_SZ)
-				return ERROR;
+			result error(QueryTypeAndSize(name, type, size));
+			if(error != ERROR_SUCCESS) return error;
+			if(type != REG_SZ) return ERROR_FILE_CORRUPT;
 			// allocate a buffer
-			BYTE* buffer = new BYTE[numChars];
-			error=QueryValue(psName,&type,buffer,&numChars);
-			if(error == ERROR_SUCCESS && type==REG_SZ)
-				value = (char const*)buffer;
+			char * buffer(new char[size]);
+			error = ::RegQueryValueEx(current, name.c_str(), 0, &type, reinterpret_cast<unsigned char *>(buffer), reinterpret_cast<unsigned long int*>(&size));
+			if(error == ERROR_SUCCESS) s = buffer;
 			delete[] buffer;
-			return type==REG_SZ ? error : ERROR;
+			return error;
 		}
 
-		LONG
-		Registry::SetValue(LPTSTR psName, DWORD type, LPBYTE pData, DWORD numData)
+		Registry::result
+		Registry::SetValue(Registry::name const & name,              bool const & b)
 		{
-			return RegSetValueEx(_key, psName, 0, type, pData, numData);
+			return SetValue(name, b, REG_BINARY);
 		}
-		
-		LONG Registry::SetStringValue(LPTSTR psName, std::string value)
+		Registry::result
+		Registry::SetValue(Registry::name const & name, unsigned      int const & i)
 		{
-			return SetValue(psName, REG_SZ, (BYTE*)value.c_str(),value.length());
+			return SetValue(name, i, REG_DWORD);
 		}
-
-		LONG
-		Registry::DeleteValue(LPTSTR psName)
+		Registry::result
+		Registry::SetValue(Registry::name const & name,   signed      int const & i)
 		{
-			return RegDeleteValue(_key, psName);
+			return SetValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::SetValue(Registry::name const & name, unsigned long int const & i)
+		{
+			return SetValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::SetValue(Registry::name const & name,   signed long int const & i)
+		{
+			return SetValue(name, i, REG_DWORD);
+		}
+		Registry::result
+		Registry::SetValue(Registry::name const & name,       std::string const & s)
+		{
+			return ::RegSetValueEx(current, name.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(s.c_str()), s.length() + 1);
 		}
 	}
 }

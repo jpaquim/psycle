@@ -1156,7 +1156,7 @@ NAMESPACE__BEGIN(psycle)
 			
 			CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			dlg._pSong = _pSong;
-			std::string tmpstr = Global::pConfig->GetInstrumentDir();
+			std::string tmpstr = Global::pConfig->GetCurrentInstrumentDir();
 			dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1192,7 +1192,7 @@ NAMESPACE__BEGIN(psycle)
 				int index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::pConfig->SetInstrumentDir((LPCSTR)str.Left(index));
+					Global::pConfig->SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 				}
 			}
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
@@ -2422,7 +2422,9 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CString str;
 			cb->GetWindowText(str);
-			return _httoi(str.Left(2).GetBuffer(2));
+			int result;
+			hexstring_to_integer(str.Left(2).GetBuffer(2), result);
+			return result;
 		}
 
 		LRESULT CMainFrame::OnSetMessageString(WPARAM wParam, LPARAM lParam)

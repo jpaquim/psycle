@@ -217,11 +217,6 @@ namespace psycle
 
 		void WaveOut::ReadConfig()
 		{
-			bool configured;
-			DWORD type;
-			DWORD numData;
-			Registry reg;
-
 			// Default configuration
 			_samplesPerSec=44100;
 			_deviceID=0;
@@ -232,29 +227,23 @@ namespace psycle
 			_channelmode = 3;
 			_bitDepth = 16;
 
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			Registry reg;
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
 			{
 				return;
 			}
-			if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+			if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
 			{
 				return;
 			}
-			configured = true;
-			numData = sizeof _numBlocks;
-			configured &= (reg.QueryValue("NumBlocks", &type, (BYTE*)&_numBlocks, &numData) == ERROR_SUCCESS);
-			numData = sizeof _blockSize;
-			configured &= (reg.QueryValue("BlockSize", &type, (BYTE*)&_blockSize, &numData) == ERROR_SUCCESS);
-			numData = sizeof _deviceID;
-			configured &= (reg.QueryValue("DeviceID", &type, (BYTE*)&_deviceID, &numData) == ERROR_SUCCESS);
-			numData = sizeof _pollSleep;
-			configured &= (reg.QueryValue("PollSleep", &type, (BYTE*)&_pollSleep, &numData) == ERROR_SUCCESS);
-			numData = sizeof _dither;
-			configured &= (reg.QueryValue("Dither", &type, (BYTE*)&_dither, &numData) == ERROR_SUCCESS);
-			numData = sizeof _samplesPerSec;
-			configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
-			//numData = sizeof _bitDepth;
-			//(reg.QueryValue("BitDepth", &type, (BYTE*)&_bitDepth, &numData) == ERROR_SUCCESS);
+			bool configured(true);
+			configured &= ERROR_SUCCESS == reg.QueryValue("NumBlocks", _numBlocks);
+			configured &= ERROR_SUCCESS == reg.QueryValue("BlockSize", _blockSize);
+			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceID", _deviceID);
+			configured &= ERROR_SUCCESS == reg.QueryValue("PollSleep", _pollSleep);
+			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
+			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
+			//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
 			reg.CloseKey();
 			reg.CloseRootKey();
 			_configured = configured;
@@ -263,26 +252,26 @@ namespace psycle
 		void WaveOut::WriteConfig()
 		{
 			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
 			{
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+			if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
 			{
-				if (reg.CreateKey("WaveOut") != ERROR_SUCCESS)
+				if (reg.CreateKey("configuration\\devices\\mme") != ERROR_SUCCESS)
 				{
 					Error("Unable to write configuration to the registry");
 					return;
 				}
 			}
-			reg.SetValue("NumBlocks", REG_DWORD, (BYTE*)&_numBlocks, sizeof _numBlocks);
-			reg.SetValue("BlockSize", REG_DWORD, (BYTE*)&_blockSize, sizeof _blockSize);
-			reg.SetValue("DeviceID", REG_DWORD, (BYTE*)&_deviceID, sizeof _deviceID);
-			reg.SetValue("PollSleep", REG_DWORD, (BYTE*)&_pollSleep, sizeof _pollSleep);
-			reg.SetValue("Dither", REG_DWORD, (BYTE*)&_dither, sizeof _dither);
-			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof _samplesPerSec);
-			//reg.SetValue("BitDepth", REG_DWORD, (BYTE*)&_bitDepth, sizeof _bitDepth);
+			reg.SetValue("NumBlocks", _numBlocks);
+			reg.SetValue("BlockSize", _blockSize);
+			reg.SetValue("DeviceID", _deviceID);
+			reg.SetValue("PollSleep", _pollSleep);
+			reg.SetValue("Dither", _dither);
+			reg.SetValue("SamplesPerSec", _samplesPerSec);
+			//reg.SetValue("BitDepth", _bitDepth);
 			reg.CloseKey();
 			reg.CloseRootKey();
 		}

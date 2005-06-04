@@ -1,5 +1,5 @@
 %~d0
-cd "%~d0%~p0"
+cd %~p0
 
 echo .cvsignore> make\msvc_7.1\.cvsignore
 echo *.suo>> make\msvc_7.1\.cvsignore

@@ -1142,27 +1142,19 @@ namespace psycle
 			entry._inst = Global::_pSong->auxcolSelected;
 			entry._mach = Global::_pSong->seqBus;	// Not really needed.
 
-			if ((velocity != 127) &&  (Global::pConfig->_midiRecordVel))
+			if(velocity != 127 && Global::pConfig->midi().velocity().record())
 			{
-				int par = Global::pConfig->_midiFromVel + 
-					(((Global::pConfig->_midiToVel - Global::pConfig->_midiFromVel) * velocity)/127);
-				if (par > 255) 
+				int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+				if (par > 255) par = 255; else if (par < 0) par = 0;
+				switch(Global::pConfig->midi().velocity().type())
 				{
-					par = 255;
-				}
-				else if (par < 0) 
-				{
-					par = 0;
-				}
-				switch(Global::pConfig->_midiTypeVel)
-				{
-				case 0:
-					entry._cmd = Global::pConfig->_midiCommandVel;
-					entry._parameter = par;
-					break;
-				case 3:
-					entry._inst = par;
-					break;
+					case 0:
+						entry._cmd = Global::pConfig->midi().velocity().command();
+						entry._parameter = par;
+						break;
+					case 3:
+						entry._inst = par;
+						break;
 				}
 			}
 			else

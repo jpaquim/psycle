@@ -133,31 +133,39 @@ namespace operating_system
 		unsigned short attributes(base_attributes);
 		switch(level)
 		{
-		case ::psycle::host::loggers::levels::trace:
-			attributes |= FOREGROUND_BLUE;
-			break;
-		case ::psycle::host::loggers::levels::info:
-			attributes |= FOREGROUND_GREEN;
-			break;
-		case ::psycle::host::loggers::levels::warning:
-			attributes |= FOREGROUND_RED | FOREGROUND_GREEN;
-			break;
-		case ::psycle::host::loggers::levels::exception:
-			attributes |= FOREGROUND_RED;
-			break;
-		case ::psycle::host::loggers::levels::crash:
-			attributes |= FOREGROUND_RED | FOREGROUND_INTENSITY;
-			break;
-		default:
-			attributes |= 0;
-		};
+			case ::psycle::host::loggers::levels::trace:
+				attributes |= FOREGROUND_BLUE;
+				break;
+			case ::psycle::host::loggers::levels::info:
+				attributes |= FOREGROUND_GREEN;
+				break;
+			case ::psycle::host::loggers::levels::warning:
+				attributes |= FOREGROUND_RED | FOREGROUND_GREEN;
+				break;
+			case ::psycle::host::loggers::levels::exception:
+				attributes |= FOREGROUND_RED;
+				break;
+			case ::psycle::host::loggers::levels::crash:
+				attributes |= FOREGROUND_RED | FOREGROUND_INTENSITY;
+				break;
+			default:
+				attributes |= 0;
+		}
 		::DWORD length(string.length());
 		::SetConsoleTextAttribute(output_handle, attributes);
 		::WriteConsole(output_handle, string.c_str(), length, &length, 0);
 		// <bohan> "reset" the attributes before new line because otherwize we have
 		// <bohan> the cells of the whole next line set with attributes, up to the rightmost column.
 		// <bohan> i haven't checked, but it is possible that this only happens when the buffer scrolls due to the new line.
-		attributes = base_attributes;
+		::SetConsoleTextAttribute(output_handle, base_attributes);
 		::WriteConsole(output_handle, "\n", 1, &length, 0);
+		// beep on problems
+		switch(level)
+		{
+			case ::psycle::host::loggers::levels::warning:
+			case ::psycle::host::loggers::levels::exception:
+			case ::psycle::host::loggers::levels::crash:
+				::WriteConsole(output_handle, "\a", 1, &length, 0);
+		}
 	}
 }
