@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CValueMapper.
 #include <project.private.hpp>
 #include "helpers.hpp"
+#include <cctype>
 namespace psycle
 {
 	namespace host
@@ -57,49 +58,51 @@ namespace psycle
 			99.21875, 99.609375, 100};
 
 
-		int _httoi(const TCHAR *value)
+		namespace
 		{
-			struct CHexMap
+			void hexstring_to_vector(std::string const & string, std::vector<unsigned char> & vector)
 			{
-				TCHAR chr;
-				int value;
-			};
-			const int HexMapL = 16;
-			CHexMap HexMap[HexMapL] =
-			{
-				{'0', 0}, {'1', 1},
-				{'2', 2}, {'3', 3},
-				{'4', 4}, {'5', 5},
-				{'6', 6}, {'7', 7},
-				{'8', 8}, {'9', 9},
-				{'A', 10}, {'B', 11},
-				{'C', 12}, {'D', 13},
-				{'E', 14}, {'F', 15}
-			};
-			TCHAR *mstr = _tcsupr(_tcsdup(value));
-			TCHAR *s = mstr;
-			int result = 0;
-			if (*s == '0' && *(s + 1) == 'X') s += 2;
-			bool firsttime = true;
-			while (*s != '\0')
-			{
-				bool found = false;
-				for (int i = 0; i < HexMapL; i++)
+				std::stringstream s(string);
+				vector.reserve(string.length());
+				for(std::size_t i(0) ; i < string.length() ; ++i)
 				{
-				if (*s == HexMap[i].chr)
-				{
-					if (!firsttime) result <<= 4;
-					result |= HexMap[i].value;
-					found = true;
-					break;
+					char c;
+					s >> c;
+					unsigned char v;
+					if(std::isdigit(c)) v = c - '0';
+					else
+					{
+						c = std::tolower(c);
+						if('a' <= c && c <= 'f') v = 10 + c - 'a';
+						else v = 0;
+					}
+					vector.push_back(v);
 				}
-				}
-				if (!found) break;
-				s++;
-				firsttime = false;
 			}
-			free(mstr);
-			return result;
 		}
+
+		template<typename x>
+		void hexstring_to_integer(std::string const & string, x & result)
+		{
+			std::vector<unsigned char> v;
+			hexstring_to_vector(string, v);
+			result = x();
+			int r(1);
+			for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()) ; i != v.rend() ; ++i)
+			{
+				result += *i * r;
+				r *= 0x10;
+			}
+		}
+		template void hexstring_to_integer<  signed          char>(std::string const &,   signed          char &);
+		template void hexstring_to_integer<unsigned          char>(std::string const &, unsigned          char &);
+		template void hexstring_to_integer<  signed short     int>(std::string const &,   signed short     int &);
+		template void hexstring_to_integer<unsigned short     int>(std::string const &, unsigned short     int &);
+		template void hexstring_to_integer<  signed           int>(std::string const &,   signed           int &);
+		template void hexstring_to_integer<unsigned           int>(std::string const &, unsigned           int &);
+		template void hexstring_to_integer<  signed long      int>(std::string const &,   signed long      int &);
+		template void hexstring_to_integer<unsigned long      int>(std::string const &, unsigned long      int &);
+		template void hexstring_to_integer<  signed long long int>(std::string const &,   signed long long int &);
+		template void hexstring_to_integer<unsigned long long int>(std::string const &, unsigned long long int &);
 	}
 }

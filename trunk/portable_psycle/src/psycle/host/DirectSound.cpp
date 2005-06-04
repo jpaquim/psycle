@@ -308,40 +308,17 @@ namespace psycle
 
 			// read from registry
 			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS) return;
-			if(reg.OpenKey("DirectSound") != ERROR_SUCCESS) return;
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS) return;
+			if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS) return;
 			{
 				bool configured(true);
-				DWORD type;
-				DWORD numData;
-				{
-					numData = sizeof device_guid;
-					configured &= (reg.QueryValue("DeviceGuid", &type, reinterpret_cast<BYTE*>(&device_guid), &numData) == ERROR_SUCCESS);
-				}
-				{
-					numData = sizeof _exclusive;
-					configured &= (reg.QueryValue("Exclusive", &type, reinterpret_cast<BYTE*>(&_exclusive), &numData) == ERROR_SUCCESS);
-				}
-				{
-					numData = sizeof _dither;
-					configured &= (reg.QueryValue("Dither", &type, reinterpret_cast<BYTE*>(&_dither), &numData) == ERROR_SUCCESS);
-				}
-				{
-					//numData = sizeof _bitDepth;
-					//configured &= (reg.QueryValue("BitDepth", &type, reinterpret_cast<BYTE*>(&_bitDepth), &numData) == ERROR_SUCCESS);
-				}
-				{
-					numData = sizeof _numBuffers;
-					configured &= (reg.QueryValue("NumBuffers", &type, reinterpret_cast<BYTE*>(&_numBuffers), &numData) == ERROR_SUCCESS);
-				}
-				{
-					numData = sizeof _bufferSize;
-					configured &= (reg.QueryValue("BufferSize", &type, reinterpret_cast<BYTE*>(&_bufferSize), &numData) == ERROR_SUCCESS);
-				}
-				{
-					numData = sizeof _samplesPerSec;
-					configured &= (reg.QueryValue("SamplesPerSec", &type, reinterpret_cast<BYTE*>(&_samplesPerSec), &numData) == ERROR_SUCCESS);
-				}
+				configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
+				configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", _exclusive);
+				configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
+				//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
+				configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", _numBuffers);
+				configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _bufferSize);
+				configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
 				_configured = configured;
 			}
 			reg.CloseKey();
@@ -351,26 +328,26 @@ namespace psycle
 		void DirectSound::WriteConfig()
 		{
 			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
 			{
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
+			if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
 			{
-				if(reg.CreateKey("DirectSound") != ERROR_SUCCESS)
+				if(reg.CreateKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
 				{
 					Error("Unable to write configuration to the registry");
 					return;
 				}
 			}
-			reg.SetValue("DeviceGuid"   , REG_BINARY, reinterpret_cast<BYTE*>(&device_guid)   , sizeof device_guid   );
-			reg.SetValue("Exclusive"    , REG_BINARY, reinterpret_cast<BYTE*>(&_exclusive)    , sizeof _exclusive    );
-			reg.SetValue("Dither"       , REG_BINARY, reinterpret_cast<BYTE*>(&_dither)       , sizeof _dither       );
-			//reg.SetValue("BitDepth"   , REG_DWORD , reinterpret_cast<BYTE*>&_bitDepth       , sizeof _bitDepth     );
-			reg.SetValue("SamplesPerSec", REG_DWORD , reinterpret_cast<BYTE*>(&_samplesPerSec), sizeof _samplesPerSec);
-			reg.SetValue("BufferSize"   , REG_DWORD , reinterpret_cast<BYTE*>(&_bufferSize)   , sizeof _bufferSize   );
-			reg.SetValue("NumBuffers"   , REG_DWORD , reinterpret_cast<BYTE*>(&_numBuffers)   , sizeof _numBuffers   );
+			reg.SetValue("DeviceGuid", device_guid);
+			reg.SetValue("Exclusive", _exclusive);
+			reg.SetValue("Dither", _dither);
+			//reg.SetValue("BitDepth", _bitDepth);
+			reg.SetValue("SamplesPerSec", _samplesPerSec);
+			reg.SetValue("BufferSize", _bufferSize);
+			reg.SetValue("NumBuffers", _numBuffers);
 			reg.CloseKey();
 			reg.CloseRootKey();
 		}

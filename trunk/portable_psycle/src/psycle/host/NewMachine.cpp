@@ -415,41 +415,48 @@ NAMESPACE__BEGIN(psycle)
 
 				class populate_plugin_list
 				{
-				public:
-					populate_plugin_list(std::vector<std::string> &result,
-						std::string directory)
-					{
-						::CFileFind finder;
-						int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
-						while(loop)
+					public:
+						populate_plugin_list(std::vector<std::string> & result, std::string directory)
 						{
-							loop = finder.FindNextFile();
-							if(finder.IsDirectory()) {
-								if(!finder.IsDots())
-								{
-									std::string sfilePath = finder.GetFilePath();
-									populate_plugin_list(result,sfilePath);
-								}
-							}
-							else
+							::CFileFind finder;
+							int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
+							while(loop)
 							{
-								CString filePath=finder.GetFilePath();
-								filePath.MakeLower();
-								if(filePath.Right(4) == ".dll")
+								loop = finder.FindNextFile();
+								if(finder.IsDirectory()) {
+									if(!finder.IsDots())
+									{
+										std::string sfilePath = finder.GetFilePath();
+										populate_plugin_list(result,sfilePath);
+									}
+								}
+								else
 								{
-									std::string sfilePath = filePath;
-									result.push_back(sfilePath);
+									CString filePath=finder.GetFilePath();
+									filePath.MakeLower();
+									if(filePath.Right(4) == ".dll")
+									{
+										std::string sfilePath = filePath;
+										result.push_back(sfilePath);
+									}
 								}
 							}
+							finder.Close();
 						}
-						finder.Close();
-					}
 				};
 
 				std::vector<std::string> nativePlugs;
 				std::vector<std::string> vstPlugs;
 
 				CProgressDialog Progress;
+				{
+					char c[1 << 10];
+					::GetCurrentDirectory(sizeof c, c);
+					std::string s(c);
+					host::loggers::info("Scanning plugins ... Current Directory: " + s);
+				}
+				host::loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
+				host::loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
 				host::loggers::info("Scanning plugins ... Listing ...");
 				if(progressOpen)
 				{

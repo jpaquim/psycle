@@ -173,23 +173,23 @@ NAMESPACE__BEGIN(psycle)
 
 			SetFontNames();
 
-			m_pattern_header_skin.AddString(DEFAULT_PATTERN_HEADER_SKIN);
-			m_machine_skin.AddString(DEFAULT_MACHINE_SKIN);
+			m_pattern_header_skin.AddString(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
+			m_machine_skin.AddString(PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
 			
 			// ok now browse our folder for skins
-			FindSkinsInDir(Global::pConfig->GetInitialSkinDir().c_str());
+			FindSkinsInDir(Global::pConfig->GetSkinDir().c_str());
 
 			int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin.c_str());
 			if (sel==CB_ERR)
 			{
-				sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
+				sel = m_pattern_header_skin.FindStringExact(0,PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
 			}
 			m_pattern_header_skin.SetCurSel(sel);
 
 			sel = m_machine_skin.FindStringExact(0,_machine_skin.c_str());
 			if (sel==CB_ERR)
 			{
-				sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
+				sel = m_machine_skin.FindStringExact(0,PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
 			}
 			m_machine_skin.SetCurSel(sel);
 
@@ -225,7 +225,7 @@ NAMESPACE__BEGIN(psycle)
 			while (loop) 
 			{								// Note: Subfolders with dots won't work.
 				loop = finder.FindNextFile();
-				if (finder.IsDirectory() && !finder.IsDots())
+				if(finder.IsDirectory() && !finder.IsDots())
 				{
 					FindSkinsInDir(finder.GetFilePath());
 				}
@@ -236,7 +236,7 @@ NAMESPACE__BEGIN(psycle)
 			while (loop)
 			{
 				loop = finder.FindNextFile();
-				if (!finder.IsDirectory())
+				if(!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
 					sName = finder.GetFileName();
@@ -258,7 +258,7 @@ NAMESPACE__BEGIN(psycle)
 			while (loop)
 			{
 				loop = finder.FindNextFile();
-				if (!finder.IsDirectory())
+				if(!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
 					sName = finder.GetFileName();
@@ -699,49 +699,51 @@ NAMESPACE__BEGIN(psycle)
 			CPropertyPage::OnTimer(nIDEvent);
 		}
 
-
 		void CSkinDlg::OnImportReg() 
 		{
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
+			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
+			char szFile[1 << 10]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.lStructSize = sizeof ofn;
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
+			ofn.nMaxFile = sizeof szFile;
 			ofn.lpstrFilter = "Psycle Display Presets\0*.psv\0";
 			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
+			ofn.lpstrFileTitle = 0;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 			// Display the Open dialog box. 
-			
-			if (GetOpenFileName(&ofn)==TRUE)
+			if(::GetOpenFileName(&ofn))
 			{
-				FILE* hfile;
-				if ((hfile=fopen(szFile,"rw")) == NULL )
+				std::FILE * hfile;
+				if(!(hfile=std::fopen(szFile,"rw")))
 				{
-					MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
+					::MessageBox(0, "Couldn't open File for Reading. Operation Aborted", "File Open Error", MB_ICONERROR | MB_OK);
 					return;
 				}
 				_pattern_font_flags = 0;
 				_generator_font_flags = 0;
 				_effect_font_flags = 0;
 
-				char buf[512];
-				while (fgets(buf, 512, hfile))
+				char buf[1 << 10];
+				while(std::fgets(buf, sizeof buf, hfile))
 				{
-					// <bohan> this is a horror of repetitive code :-(
-					if (strstr(buf,"\"pattern_fontface\"=\""))
+					#if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR <= 7
+						// msvc 7.1 crashes because of the number of 'else if' statements
+						// so, we can't use 'else'
+						#define else
+					#endif
+					// [bohan] this is a horror of repetitive code :-(
+					if (std::strstr(buf,"\"pattern_fontface\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
-							char *p = strrchr(q,34); // "
+							char *p = std::strrchr(q,34); // "
 							if (p)
 							{
 								p[0]=0;
@@ -749,41 +751,41 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (strstr(buf,"\"pattern_font_point\"=dword:"))
+					else if (std::strstr(buf,"\"pattern_font_point\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_pattern_font_point=_httoi(q+1);
+							hexstring_to_integer(q+1, _pattern_font_point);
 						}
 					}
-					else if (strstr(buf,"\"pattern_font_flags\"=dword:"))
+					else if (std::strstr(buf,"\"pattern_font_flags\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_pattern_font_flags=_httoi(q+1);
+							hexstring_to_integer(q+1, _pattern_font_flags);
 						}
 					}
-					else if (strstr(buf,"\"pattern_font_x\"=dword:"))
+					else if (std::strstr(buf,"\"pattern_font_x\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_pattern_font_x=_httoi(q+1);
+							hexstring_to_integer(q+1, _pattern_font_x);
 						}
 					}
-					else if (strstr(buf,"\"pattern_font_y\"=dword:"))
+					else if (std::strstr(buf,"\"pattern_font_y\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_pattern_font_y=_httoi(q+1);
+							hexstring_to_integer(q+1, _pattern_font_y);
 						}
 					}
-					else if (strstr(buf,"\"pattern_header_skin\"=\""))
+					else if (std::strstr(buf,"\"pattern_header_skin\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
@@ -795,9 +797,9 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (strstr(buf,"\"generator_fontface\"=\""))
+					else if (std::strstr(buf,"\"generator_fontface\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
@@ -809,25 +811,25 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (strstr(buf,"\"generator_font_point\"=dword:"))
+					else if (std::strstr(buf,"\"generator_font_point\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_generator_font_point=_httoi(q+1);
+							hexstring_to_integer(q+1, _generator_font_point);
 						}
 					}
-					else if (strstr(buf,"\"generator_font_flags\"=dword:"))
+					else if (std::strstr(buf,"\"generator_font_flags\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_generator_font_flags=_httoi(q+1);
+							hexstring_to_integer(q+1, _generator_font_flags);
 						}
 					}
-					else if (strstr(buf,"\"effect_fontface\"=\""))
+					else if (std::strstr(buf,"\"effect_fontface\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
@@ -839,25 +841,25 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (strstr(buf,"\"effect_font_point\"=dword:"))
+					else if (std::strstr(buf,"\"effect_font_point\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_effect_font_point=_httoi(q+1);
+							hexstring_to_integer(q+1, _effect_font_point);
 						}
 					}
-					else if (strstr(buf,"\"effect_font_flags\"=dword:"))
+					else if (std::strstr(buf,"\"effect_font_flags\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_effect_font_flags=_httoi(q+1);
+							hexstring_to_integer(q+1, _effect_font_flags);
 						}
 					}
-					else if (strstr(buf,"\"machine_skin\"=\""))
+					else if (std::strstr(buf,"\"machine_skin\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
@@ -869,9 +871,9 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (strstr(buf,"\"machine_background\"=\""))
+					else if (std::strstr(buf,"\"machine_background\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
@@ -886,304 +888,303 @@ NAMESPACE__BEGIN(psycle)
 						}
 					}
 					/*
-					else if (strstr(buf,"\"DisplayLineNumbers\"=hex:"))
+					else if (std::strstr(buf,"\"DisplayLineNumbers\"=hex:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_linenumbers=_httoi(q+1)?1:0;
+							hexstring_to_integer(q+1, _linenumbers) ? 1 : 0;
 						}
 					}
-					else if (strstr(buf,"\"DisplayLineNumbersHex\"=hex:"))
+					else if (std::strstr(buf,"\"DisplayLineNumbersHex\"=hex:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_linenumbersHex=_httoi(q+1)?1:0;
+							hexstring_to_integer(q+1, _linenumbersHex) ? 1 : 0;
 						}
 					}
 					*/
-					else if (strstr(buf,"\"pvc_separator\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_separator\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_patternSeparatorColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _patternSeparatorColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_separator2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_separator2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_patternSeparatorColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _patternSeparatorColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_background\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_background\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_patternViewColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _patternViewColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_background2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_background2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_patternViewColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _patternViewColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_font\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_font\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_font2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_font2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_fontCur\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_fontCur\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColorCur=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColorCur);
 						}
 					}
-					else if (strstr(buf,"\"pvc_fontCur2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_fontCur2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColorCur2=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColorCur2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_fontSel\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_fontSel\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColorSel=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColorSel);
 						}
 					}
-					else if (strstr(buf,"\"pvc_fontSel2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_fontSel2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColorSel2=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColorSel2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_fontPlay\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_fontPlay\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColorPlay=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColorPlay);
 						}
 					}
-					else if (strstr(buf,"\"pvc_fontPlay2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_fontPlay2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_fontColorPlay2=_httoi(q+1);
+							hexstring_to_integer(q+1, _fontColorPlay2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_row\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_row\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_rowColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _rowColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_row2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_row2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_rowColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _rowColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_rowbeat\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_rowbeat\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_beatColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _beatColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_rowbeat2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_rowbeat2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_beatColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _beatColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_row4beat\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_row4beat\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_4beatColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _4beatColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_row4beat2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_row4beat2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_4beatColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _4beatColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_selection\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_selection\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_selectionColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _selectionColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_selection2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_selection2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_selectionColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _selectionColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_playbar\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_playbar\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_playbarColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _playbarColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_playbar2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_playbar2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_playbarColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _playbarColor2);
 						}
 					}
-					else if (strstr(buf,"\"pvc_cursor\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_cursor\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_cursorColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _cursorColor);
 						}
 					}
-					else if (strstr(buf,"\"pvc_cursor2\"=dword:"))
+					else if (std::strstr(buf,"\"pvc_cursor2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_cursorColor2=_httoi(q+1);
+							hexstring_to_integer(q+1, _cursorColor2);
 						}
 					}
-					else if (strstr(buf,"\"vu1\"=dword:"))
+					else if (std::strstr(buf,"\"vu1\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_vubColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _vubColor);
 						}
 					}
-					else if (strstr(buf,"\"vu2\"=dword:"))
+					else if (std::strstr(buf,"\"vu2\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_vugColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _vugColor);
 						}
 					}
-					else if (strstr(buf,"\"vu3\"=dword:"))
+					else if (std::strstr(buf,"\"vu3\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_vucColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _vucColor);
 						}
 					}
-					else if (strstr(buf,"\"mv_colour\"=dword:"))
+					else if (std::strstr(buf,"\"mv_colour\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_machineViewColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _machineViewColor);
 						}
 					}
-					else if (strstr(buf,"\"mv_wirecolour\"=dword:"))
+					else if (std::strstr(buf,"\"mv_wirecolour\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_machineViewWireColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _machineViewWireColor);
 						}
 					}
-					else if (strstr(buf,"\"mv_polycolour\"=dword:"))
+					else if (std::strstr(buf,"\"mv_polycolour\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_machineViewPolyColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _machineViewPolyColor);
 						}
 					}
-					else if (strstr(buf,"\"mv_wirewidth\"=dword:"))
+					else if (std::strstr(buf,"\"mv_wirewidth\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_wirewidth=_httoi(q+1);
+							hexstring_to_integer(q+1, _wirewidth);
 						}
 					}
-					else if (strstr(buf,"\"mv_wireaa\"=hex:"))
+					else if (std::strstr(buf,"\"mv_wireaa\"=hex:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_wireaa=_httoi(q+1);
+							hexstring_to_integer(q+1, _wireaa);
 						}
 					}
-					else if (strstr(buf,"\"mv_generator_fontcolour\"=dword:"))
+					else if (std::strstr(buf,"\"mv_generator_fontcolour\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_machineViewGeneratorFontColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _machineViewGeneratorFontColor);
 						}
 					}
-					else if (strstr(buf,"\"mv_effect_fontcolour\"=dword:"))
+					else if (std::strstr(buf,"\"mv_effect_fontcolour\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_machineViewEffectFontColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _machineViewEffectFontColor);
 						}
 					}
-					else if (strstr(buf,"\"mv_triangle_size\"=hex:"))
+					else if (std::strstr(buf,"\"mv_triangle_size\"=hex:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_triangle_size=_httoi(q+1);
+							hexstring_to_integer(q+1, _triangle_size);
 						}
 					}
-
 					//
 					//
 					//
@@ -1191,18 +1192,18 @@ NAMESPACE__BEGIN(psycle)
 					//
 					//
 					//
-					else if (strstr(buf,"\"mv_fontcolour\"=dword:"))
+					else if (std::strstr(buf,"\"mv_fontcolour\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_machineViewGeneratorFontColor=_httoi(q+1);
-							_machineViewEffectFontColor=_httoi(q+1);
+							hexstring_to_integer(q+1, _machineViewGeneratorFontColor);
+							hexstring_to_integer(q+1, _machineViewEffectFontColor);
 						}
 					}
-					else if (strstr(buf,"\"machine_fontface\"=\""))
+					else if (std::strstr(buf,"\"machine_fontface\"=\""))
 					{
-						char *q = strchr(buf,61); // =
+						char *q = std::strchr(buf,61); // =
 						if (q)
 						{
 							q+=2;
@@ -1215,44 +1216,44 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (strstr(buf,"\"machine_font_point\"=dword:"))
+					else if (std::strstr(buf,"\"machine_font_point\"=dword:"))
 					{
-						char *q = strchr(buf,58); // :
+						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							_generator_font_point=_httoi(q+1);
-							_effect_font_point=_httoi(q+1);
+							hexstring_to_integer(q+1, _generator_font_point);
+							hexstring_to_integer(q+1, _effect_font_point);
 						}
 					}
+					#if defined else // this is the case for COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR <= 7
+						// msvc 7.1 crashes because of the number of 'else if' statements
+						// so, we can't use 'else'
+						#undef else
+					#endif
 				}
-				fclose(hfile);
-		//		m_linenumbers.SetCheck(_linenumbers);
-		//		m_linenumbersHex.SetCheck(_linenumbersHex);
-		//		_snprintf(buf,4,"%2i",_wirewidth);
-		//		m_wirewidth.SelectString(0,buf);
+				std::fclose(hfile);
+				//m_linenumbers.SetCheck(_linenumbers);
+				//m_linenumbersHex.SetCheck(_linenumbersHex);
+				//::snprintf(buf,4,"%2i",_wirewidth);
+				//m_wirewidth.SelectString(0,buf);
 				m_wirewidth.SetCurSel(_wirewidth-1);
 				m_wireaa.SetCurSel(_wireaa);
 				RepaintAllCanvas();
-
 				SetFontNames();
-
 				m_pattern_font_x.SetCurSel(_pattern_font_x-4);
 				m_pattern_font_y.SetCurSel(_pattern_font_y-4);
-
 				int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin.c_str());
 				if (sel==CB_ERR)
 				{
-					sel = m_pattern_header_skin.FindStringExact(0,DEFAULT_PATTERN_HEADER_SKIN);
+					sel = m_pattern_header_skin.FindStringExact(0,PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
 				}
 				m_pattern_header_skin.SetCurSel(sel);
-
 				sel = m_machine_skin.FindStringExact(0,_machine_skin.c_str());
 				if (sel==CB_ERR)
 				{
-					sel = m_machine_skin.FindStringExact(0,DEFAULT_MACHINE_SKIN);
+					sel = m_machine_skin.FindStringExact(0,PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
 				}
 				m_machine_skin.SetCurSel(sel);
-
 				if (bBmpBkg)
 				{
 					CString str1(szBmpBkgFilename.c_str());
@@ -1264,99 +1265,92 @@ NAMESPACE__BEGIN(psycle)
 				{
 					m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 				}
-
 				m_triangle_size.SetCurSel(_triangle_size-8);
 			}
 		}
 
 		void CSkinDlg::OnExportReg() 
 		{
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
+			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
+			char szFile[1 << 10]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.lStructSize = sizeof ofn;
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
+			ofn.nMaxFile = sizeof szFile;
 			ofn.lpstrFilter = "Psycle Display Presets\0*.psv\0";
 			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
+			ofn.lpstrFileTitle = 0;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 			ofn.lpstrInitialDir = _skinPathBuf.c_str();
-
-			if (GetSaveFileName(&ofn)==TRUE)
+			if(::GetSaveFileName(&ofn))
 			{
-				FILE* hfile;
-
-				CString str = szFile;
-				CString str2 = str.Right(4);
-				if ( str2.CompareNoCase(".psv") != 0 ) str.Insert(str.GetLength(),".psv");
-				sprintf(szFile,str);
-				DeleteFile(szFile);
-
-				if ((hfile=fopen(szFile,"wa")) == NULL ) // file does not exist.
+				std::FILE * hfile;
+				::CString str = szFile;
+				::CString str2 = str.Right(4);
+				if(str2.CompareNoCase(".psv")) str.Insert(str.GetLength(),".psv");
+				std::sprintf(szFile,str);
+				::DeleteFile(szFile);
+				if(!(hfile=std::fopen(szFile,"wa"))) // file does not exist.
 				{
-					MessageBox("Couldn't open File for Writing. Operation Aborted","File Save Error",MB_OK);
+					::MessageBox(0, "Couldn't open File for Writing. Operation Aborted", "File Save Error", MB_ICONERROR | MB_OK);
 					return;
 				}
-
-				fprintf(hfile,"[Psycle Display Presets v1.0]\n\n");
-
-				fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface.c_str());
-				fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n",_pattern_font_point);
-				fprintf(hfile,"\"pattern_font_flags\"=dword:%.8X\n",_pattern_font_flags);
-				fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n",_pattern_font_x);
-				fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n",_pattern_font_y);
-				fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n",_pattern_header_skin.c_str());
-		//		fprintf(hfile,"\"DisplayLineNumbers\"=hex:%.2X\n",_linenumbers?1:0);
-		//		fprintf(hfile,"\"DisplayLineNumbersHex\"=hex:%.2X\n",_linenumbersHex?1:0);
-				fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n",_patternSeparatorColor);
-				fprintf(hfile,"\"pvc_separator2\"=dword:%.8X\n",_patternSeparatorColor2);
-				fprintf(hfile,"\"pvc_background\"=dword:%.8X\n",_patternViewColor);
-				fprintf(hfile,"\"pvc_background2\"=dword:%.8X\n",_patternViewColor2);
-				fprintf(hfile,"\"pvc_font\"=dword:%.8X\n",_fontColor);
-				fprintf(hfile,"\"pvc_font2\"=dword:%.8X\n",_fontColor2);
-				fprintf(hfile,"\"pvc_fontCur\"=dword:%.8X\n",_fontColorCur);
-				fprintf(hfile,"\"pvc_fontCur2\"=dword:%.8X\n",_fontColorCur2);
-				fprintf(hfile,"\"pvc_fontSel\"=dword:%.8X\n",_fontColorSel);
-				fprintf(hfile,"\"pvc_fontSel2\"=dword:%.8X\n",_fontColorSel2);
-				fprintf(hfile,"\"pvc_fontPlay\"=dword:%.8X\n",_fontColorPlay);
-				fprintf(hfile,"\"pvc_fontPlay2\"=dword:%.8X\n",_fontColorPlay2);
-				fprintf(hfile,"\"pvc_row\"=dword:%.8X\n",_rowColor);
-				fprintf(hfile,"\"pvc_row2\"=dword:%.8X\n",_rowColor2);
-				fprintf(hfile,"\"pvc_rowbeat\"=dword:%.8X\n",_beatColor);
-				fprintf(hfile,"\"pvc_rowbeat2\"=dword:%.8X\n",_beatColor2);
-				fprintf(hfile,"\"pvc_row4beat\"=dword:%.8X\n",_4beatColor);
-				fprintf(hfile,"\"pvc_row4beat2\"=dword:%.8X\n",_4beatColor2);
-				fprintf(hfile,"\"pvc_selection\"=dword:%.8X\n",_selectionColor);
-				fprintf(hfile,"\"pvc_selection2\"=dword:%.8X\n",_selectionColor2);
-				fprintf(hfile,"\"pvc_playbar\"=dword:%.8X\n",_playbarColor);
-				fprintf(hfile,"\"pvc_playbar2\"=dword:%.8X\n",_playbarColor2);
-				fprintf(hfile,"\"pvc_cursor\"=dword:%.8X\n",_cursorColor);
-				fprintf(hfile,"\"pvc_cursor2\"=dword:%.8X\n",_cursorColor2);
-				fprintf(hfile,"\"vu1\"=dword:%.8X\n",_vubColor);
-				fprintf(hfile,"\"vu2\"=dword:%.8X\n",_vugColor);
-				fprintf(hfile,"\"vu3\"=dword:%.8X\n",_vucColor);
-				fprintf(hfile,"\"generator_fontface\"=\"%s\"\n",_generator_fontface.c_str());
-				fprintf(hfile,"\"generator_font_point\"=dword:%.8X\n",_generator_font_point);
-				fprintf(hfile,"\"generator_font_flags\"=dword:%.8X\n",_generator_font_flags);
-				fprintf(hfile,"\"effect_fontface\"=\"%s\"\n",_effect_fontface.c_str());
-				fprintf(hfile,"\"effect_font_point\"=dword:%.8X\n",_effect_font_point);
-				fprintf(hfile,"\"effect_font_flags\"=dword:%.8X\n",_effect_font_flags);
-				fprintf(hfile,"\"machine_skin\"=\"%s\"\n",_machine_skin.c_str());
-				fprintf(hfile,"\"mv_colour\"=dword:%.8X\n",_machineViewColor);
-				fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n",_machineViewWireColor);
-				fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n",_machineViewPolyColor);
-				fprintf(hfile,"\"mv_generator_fontcolour\"=dword:%.8X\n",_machineViewGeneratorFontColor);
-				fprintf(hfile,"\"mv_effect_fontcolour\"=dword:%.8X\n",_machineViewEffectFontColor);
-				fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
-				fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
-				fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename.c_str());
-				fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n",_triangle_size);
-				fclose(hfile);
+				std::fprintf(hfile,"[Psycle Display Presets v1.0]\n\n");
+				std::fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n",_pattern_fontface.c_str());
+				std::fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n",_pattern_font_point);
+				std::fprintf(hfile,"\"pattern_font_flags\"=dword:%.8X\n",_pattern_font_flags);
+				std::fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n",_pattern_font_x);
+				std::fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n",_pattern_font_y);
+				std::fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n",_pattern_header_skin.c_str());
+				//std::fprintf(hfile,"\"DisplayLineNumbers\"=hex:%.2X\n",_linenumbers?1:0);
+				//std::fprintf(hfile,"\"DisplayLineNumbersHex\"=hex:%.2X\n",_linenumbersHex?1:0);
+				std::fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n",_patternSeparatorColor);
+				std::fprintf(hfile,"\"pvc_separator2\"=dword:%.8X\n",_patternSeparatorColor2);
+				std::fprintf(hfile,"\"pvc_background\"=dword:%.8X\n",_patternViewColor);
+				std::fprintf(hfile,"\"pvc_background2\"=dword:%.8X\n",_patternViewColor2);
+				std::fprintf(hfile,"\"pvc_font\"=dword:%.8X\n",_fontColor);
+				std::fprintf(hfile,"\"pvc_font2\"=dword:%.8X\n",_fontColor2);
+				std::fprintf(hfile,"\"pvc_fontCur\"=dword:%.8X\n",_fontColorCur);
+				std::fprintf(hfile,"\"pvc_fontCur2\"=dword:%.8X\n",_fontColorCur2);
+				std::fprintf(hfile,"\"pvc_fontSel\"=dword:%.8X\n",_fontColorSel);
+				std::fprintf(hfile,"\"pvc_fontSel2\"=dword:%.8X\n",_fontColorSel2);
+				std::fprintf(hfile,"\"pvc_fontPlay\"=dword:%.8X\n",_fontColorPlay);
+				std::fprintf(hfile,"\"pvc_fontPlay2\"=dword:%.8X\n",_fontColorPlay2);
+				std::fprintf(hfile,"\"pvc_row\"=dword:%.8X\n",_rowColor);
+				std::fprintf(hfile,"\"pvc_row2\"=dword:%.8X\n",_rowColor2);
+				std::fprintf(hfile,"\"pvc_rowbeat\"=dword:%.8X\n",_beatColor);
+				std::fprintf(hfile,"\"pvc_rowbeat2\"=dword:%.8X\n",_beatColor2);
+				std::fprintf(hfile,"\"pvc_row4beat\"=dword:%.8X\n",_4beatColor);
+				std::fprintf(hfile,"\"pvc_row4beat2\"=dword:%.8X\n",_4beatColor2);
+				std::fprintf(hfile,"\"pvc_selection\"=dword:%.8X\n",_selectionColor);
+				std::fprintf(hfile,"\"pvc_selection2\"=dword:%.8X\n",_selectionColor2);
+				std::fprintf(hfile,"\"pvc_playbar\"=dword:%.8X\n",_playbarColor);
+				std::fprintf(hfile,"\"pvc_playbar2\"=dword:%.8X\n",_playbarColor2);
+				std::fprintf(hfile,"\"pvc_cursor\"=dword:%.8X\n",_cursorColor);
+				std::fprintf(hfile,"\"pvc_cursor2\"=dword:%.8X\n",_cursorColor2);
+				std::fprintf(hfile,"\"vu1\"=dword:%.8X\n",_vubColor);
+				std::fprintf(hfile,"\"vu2\"=dword:%.8X\n",_vugColor);
+				std::fprintf(hfile,"\"vu3\"=dword:%.8X\n",_vucColor);
+				std::fprintf(hfile,"\"generator_fontface\"=\"%s\"\n",_generator_fontface.c_str());
+				std::fprintf(hfile,"\"generator_font_point\"=dword:%.8X\n",_generator_font_point);
+				std::fprintf(hfile,"\"generator_font_flags\"=dword:%.8X\n",_generator_font_flags);
+				std::fprintf(hfile,"\"effect_fontface\"=\"%s\"\n",_effect_fontface.c_str());
+				std::fprintf(hfile,"\"effect_font_point\"=dword:%.8X\n",_effect_font_point);
+				std::fprintf(hfile,"\"effect_font_flags\"=dword:%.8X\n",_effect_font_flags);
+				std::fprintf(hfile,"\"machine_skin\"=\"%s\"\n",_machine_skin.c_str());
+				std::fprintf(hfile,"\"mv_colour\"=dword:%.8X\n",_machineViewColor);
+				std::fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n",_machineViewWireColor);
+				std::fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n",_machineViewPolyColor);
+				std::fprintf(hfile,"\"mv_generator_fontcolour\"=dword:%.8X\n",_machineViewGeneratorFontColor);
+				std::fprintf(hfile,"\"mv_effect_fontcolour\"=dword:%.8X\n",_machineViewEffectFontColor);
+				std::fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
+				std::fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
+				std::fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename.c_str());
+				std::fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n",_triangle_size);
+				std::fclose(hfile);
 			}
 		}
 

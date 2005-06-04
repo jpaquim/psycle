@@ -82,7 +82,7 @@ NAMESPACE__BEGIN(psycle)
 			lastlinetick=0;
 			saving=false;
 
-			std::string name = Global::pConfig->GetSongDir();
+			std::string name = Global::pConfig->GetCurrentSongDir();
 			name+='\\';
 			name+=pSong->fileName;
 			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
@@ -478,7 +478,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				break;
 			case 1:
 				m_patnumber.GetWindowText(name);
-				pstart=_httoi(name.GetBuffer(2));
+				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_progress.SetRange(0,pSong->patternLines[pstart]);
 				for (cont=0;cont<pSong->playLength;cont++)
 				{
@@ -496,9 +496,9 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				break;
 			case 2:
 				m_rangestart.GetWindowText(name);
-				pstart=_httoi(name.GetBuffer(2));
+				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_rangeend.GetWindowText(name);
-				tmp=_httoi(name.GetBuffer(2));
+				hexstring_to_integer(name.GetBuffer(2), tmp);
 				j=0;
 				for (cont=pstart;cont<=tmp;cont++)
 				{

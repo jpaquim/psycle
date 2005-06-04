@@ -3,6 +3,33 @@
 #if 0
 /*
 $Log$
+Revision 1.35  2005/06/04 00:20:25  johan-boule
+1)
+closing sourceforge bug #1087788.
+rearranged the midi variables which had the channel
+number appended to their names into arrays, and replaced the
+related repetitive code with loops.
+
+2)
+The interface of the registry class used to require we
+specify the type and size of the each value we read or
+write. I've changed it to use function overloading for types
+like bool, all variants of int, and std::string, and to use
+a template for other types so they just use REG_BINARY
+(which means any type). So we can simply pass the variable
+to load/save and its type and size are implicit ; it's less
+error prone and looks nicer.
+
+It works correctly, but i've noticed problems loading my
+existing registry settings because some of the types used to
+be REG_BINARY for values that should have been REG_DWORD
+(and iirc vice-versa), and the registry class complains
+about type missmatch. To work around it i've changed the
+path of the "root" key to software/psycle/psycledelics-1.7
+(it's actually determined from the values in
+version.hpp).... the drawback is that people "loose" their
+old settings.
+
 Revision 1.34  2005/05/30 05:13:43  johan-boule
 1.7.51
 change to let plugins find other .dll files that are in any intermediate dir between their own dir and the configured root dir for plugins
@@ -148,12 +175,12 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
-#define PSYCLE__BRANCH "Psycledelics (mainline)"
+#define PSYCLE__BRANCH "psycledelics"
 #define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 51 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 53 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.

@@ -99,33 +99,33 @@ NAMESPACE__BEGIN(psycle)
 			_skinDlg.bBmpBkg = pConfig->bBmpBkg;
 
 			_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
-			_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;	// MIDI IMPLEMENTATION
+			_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;
 			_outputDlg.m_syncDriverIndex = pConfig->_syncDriverIndex;
 			_outputDlg.m_midiHeadroom = pConfig->_midiHeadroom;
 			_outputDlg._numDrivers = pConfig->_numOutputDrivers;
 			_outputDlg.m_ppDrivers = pConfig->_ppOutputDrivers;
 
-			std::string ps = pConfig->GetInitialInstrumentDir();
+			std::string ps = pConfig->GetInstrumentDir();
 			if (!ps.empty())
 			{
 				_dirDlg._instPathBuf = ps;
 			}
-			ps = pConfig->GetInitialSongDir();
+			ps = pConfig->GetSongDir();
 			if (!ps.empty())
 			{
 				_dirDlg._songPathBuf = ps;
 			}
-			ps = pConfig->GetInitialPluginDir();
+			ps = pConfig->GetPluginDir();
 			if (!ps.empty())
 			{
 				_dirDlg._pluginPathBuf = ps;
 			}
-			ps = pConfig->GetInitialVstDir();
+			ps = pConfig->GetVstDir();
 			if (!ps.empty())
 			{
 				_dirDlg._vstPathBuf = ps;
 			}
-			ps = pConfig->GetInitialSkinDir();
+			ps = pConfig->GetSkinDir();
 			if (!ps.empty())
 			{
 				_dirDlg._skinPathBuf = ps;
@@ -256,36 +256,16 @@ NAMESPACE__BEGIN(psycle)
 				}
 
 				_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
-				_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;	// MIDI IMPLEMENTATION
+				_pConfig->_midiDriverIndex = _outputDlg.m_midiDriverIndex;
 				_pConfig->_syncDriverIndex = _outputDlg.m_syncDriverIndex;
 				_pConfig->_midiHeadroom = _outputDlg.m_midiHeadroom;
 				_pConfig->_pOutputDriver = _pConfig->_ppOutputDrivers[_pConfig->_outputDriverIndex];
 
-				if (_dirDlg._instPathChanged)
-				{
-					_pConfig->SetInitialInstrumentDir(_dirDlg._instPathBuf);
-					_pConfig->SetInstrumentDir(_dirDlg._instPathBuf);
-				}
-				if (_dirDlg._songPathChanged)
-				{
-					_pConfig->SetInitialSongDir(_dirDlg._songPathBuf);
-					_pConfig->SetSongDir(_dirDlg._songPathBuf);
-				}
-				if (_dirDlg._pluginPathChanged)
-				{
-					_pConfig->SetInitialPluginDir(_dirDlg._pluginPathBuf);
-					_pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
-				}
-				if (_dirDlg._vstPathChanged)
-				{
-					_pConfig->SetInitialVstDir(_dirDlg._vstPathBuf);
-					_pConfig->SetVstDir(_dirDlg._vstPathBuf);
-				}
-				if (_dirDlg._skinPathChanged)
-				{
-					_pConfig->SetInitialSkinDir(_dirDlg._skinPathBuf);
-					_pConfig->SetSkinDir(_dirDlg._skinPathBuf);
-				}
+				if (_dirDlg._instPathChanged) _pConfig->SetInstrumentDir(_dirDlg._instPathBuf);
+				if (_dirDlg._songPathChanged) _pConfig->SetSongDir(_dirDlg._songPathBuf);
+				if (_dirDlg._pluginPathChanged) _pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
+				if (_dirDlg._vstPathChanged) _pConfig->SetVstDir(_dirDlg._vstPathBuf);
+				if (_dirDlg._skinPathChanged) _pConfig->SetSkinDir(_dirDlg._skinPathBuf);
 
 				if (_pConfig->Initialized() ) 
 				{

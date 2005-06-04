@@ -269,25 +269,19 @@ namespace psycle
 
 		void ASIOInterface::ReadConfig()
 		{
-			bool configured;
-			DWORD type;
-			DWORD numData;
-			Registry reg;
 			// Default configuration
 			_samplesPerSec=44100;
 			_driverID=0;
 			_ASIObufferSize = 1024;
 			_channelmode = 3; // always stereo
 			_bitDepth = 16; // asio don't care about bit depth
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS) return;
-			if(reg.OpenKey("ASIOOut") != ERROR_SUCCESS) return;
-			configured = true;
-			numData = sizeof(_ASIObufferSize);
-			configured &= (reg.QueryValue("BufferSize", &type, (BYTE*)&_ASIObufferSize, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_driverID);
-			configured &= (reg.QueryValue("DriverID", &type, (BYTE*)&_driverID, &numData) == ERROR_SUCCESS);
-			numData = sizeof(_samplesPerSec);
-			configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
+			Registry reg;
+			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS) return;
+			if(reg.OpenKey("configuration\\devices\\asio") != ERROR_SUCCESS) return;
+			bool configured(true);
+			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _ASIObufferSize);
+			configured &= ERROR_SUCCESS == reg.QueryValue("DriverID", _driverID);
+			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
 			reg.CloseKey();
 			reg.CloseRootKey();
 			_configured = configured;
@@ -297,22 +291,22 @@ namespace psycle
 		void ASIOInterface::WriteConfig()
 		{
 			Registry reg;
-			if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+			if (reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
 			{
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if (reg.OpenKey("ASIOOut") != ERROR_SUCCESS)
+			if (reg.OpenKey("configuration\\devices\\asio") != ERROR_SUCCESS)
 			{
-				if (reg.CreateKey("ASIOOut") != ERROR_SUCCESS)
+				if (reg.CreateKey("configuration\\devices\\asio") != ERROR_SUCCESS)
 				{
 					Error("Unable to write configuration to the registry");
 					return;
 				}
 			}
-			reg.SetValue("BufferSize", REG_DWORD, (BYTE*)&_ASIObufferSize, sizeof(_ASIObufferSize));
-			reg.SetValue("DriverID", REG_DWORD, (BYTE*)&_driverID, sizeof(_driverID));
-			reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
+			reg.SetValue("BufferSize", _ASIObufferSize);
+			reg.SetValue("DriverID", _driverID);
+			reg.SetValue("SamplesPerSec", _samplesPerSec);
 			reg.CloseKey();
 			reg.CloseRootKey();
 		}

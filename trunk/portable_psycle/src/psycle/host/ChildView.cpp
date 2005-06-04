@@ -412,7 +412,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				//MessageBox("Saving Disabled");
 				//return;
-				CString filepath = Global::pConfig->GetInitialSongDir().c_str();
+				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
@@ -642,7 +642,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
 				{
-					std::string filepath = Global::pConfig->GetSongDir();
+					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					
@@ -711,7 +711,7 @@ NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetSongDir();
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
@@ -739,7 +739,7 @@ NAMESPACE__BEGIN(psycle)
 
 					if (index != -1)
 					{
-						Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
+						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 						Global::_pSong->fileName = str.Mid(index+1);
 					}
 					else
@@ -801,7 +801,7 @@ NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetSongDir();
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
@@ -940,7 +940,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (Global::pConfig->bFileSaveReminders)
 				{
-					std::string filepath = Global::pConfig->GetSongDir();
+					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					OldPsyFile file;
@@ -981,7 +981,7 @@ NAMESPACE__BEGIN(psycle)
 				if (Global::_pSong->_saved)
 				{
 					std::ostringstream fullpath;
-					fullpath << Global::pConfig->GetSongDir().c_str()
+					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
 						<< '\\' << Global::_pSong->fileName.c_str();
 					FileLoadsongNamed(fullpath.str());
 				}
@@ -1747,7 +1747,7 @@ NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetSongDir();
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
@@ -1839,7 +1839,7 @@ NAMESPACE__BEGIN(psycle)
 				index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::pConfig->SetSongDir((LPCSTR)str.Left(index));
+					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
 					Global::_pSong->fileName = str.Mid(index+1)+".psy";
 				}
 				else
@@ -1988,7 +1988,7 @@ NAMESPACE__BEGIN(psycle)
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
 			{
-				Global::pConfig->SetSongDir(fName.substr(0,index));
+				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
 				Global::_pSong->fileName = fName.substr(index+1);
 			}
 			else
@@ -2108,19 +2108,19 @@ NAMESPACE__BEGIN(psycle)
 			if (!Global::pConfig->machine_skin.empty())
 			{
 				szOld = Global::pConfig->machine_skin;
-				if (szOld != DEFAULT_MACHINE_SKIN)
+				if (szOld != PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
 				{
 					BOOL result = FALSE;
-					FindMachineSkin(Global::pConfig->GetInitialSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
+					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
 					if(result)
 					{
 						return;
 					}
 				}
 				// load defaults
-				szOld = DEFAULT_MACHINE_SKIN;
+				szOld = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
 				// and coords
-				#if defined _UGLY_DEFAULT_SKIN_
+				#if defined PSYCLE__CONFIGURATION__SKIN__UGLY_DEFAULT
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
 					MachineCoords.sMaster.width = 148;
@@ -2822,7 +2822,7 @@ NAMESPACE__BEGIN(psycle)
 									char *q = strchr(buf,61); // =
 									if (q)
 									{
-										MachineCoords.cTransparency = _httoi(q+1);
+										hexstring_to_integer(q+1, MachineCoords.cTransparency);
 										MachineCoords.bHasTransparency = TRUE;
 									}
 								}
@@ -2848,19 +2848,19 @@ NAMESPACE__BEGIN(psycle)
 			{
 				szOld = Global::pConfig->pattern_header_skin;
 				// ok so...
-				if (szOld != DEFAULT_PATTERN_HEADER_SKIN)
+				if (szOld != std::string(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN))
 				{
 					BOOL result = FALSE;
-					FindPatternHeaderSkin(Global::pConfig->GetInitialSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
+					FindPatternHeaderSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
 					if (result)
 					{
 						return;
 					}
 				}
 				// load defaults
-				szOld = DEFAULT_PATTERN_HEADER_SKIN;
+				szOld = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
 				// and coords
-				#if defined _UGLY_DEFAULT_SKIN_
+				#if defined PSYCLE__PATH__CONFIGURATION__SKIN__UGLY_DEFAULT
 					PatHeaderCoords.sBackground.x=0;
 					PatHeaderCoords.sBackground.y=0;
 					PatHeaderCoords.sBackground.width=109;
@@ -3163,7 +3163,7 @@ NAMESPACE__BEGIN(psycle)
 									char *q = strchr(buf,61); // =
 									if (q)
 									{
-										PatHeaderCoords.cTransparency = _httoi(q+1);
+										hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
 										PatHeaderCoords.bHasTransparency = TRUE;
 									}
 								}
