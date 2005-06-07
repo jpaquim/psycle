@@ -118,6 +118,8 @@ namespace psycle
 				_numMidiDrivers = CMidiInput::Instance()->GetNumDevices();
 				_midiDriverIndex = 0;
 				_syncDriverIndex = 0;
+				CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
+				CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				_midiHeadroom = 100;
 			}
 			// pattern height
@@ -310,12 +312,12 @@ namespace psycle
 			{
 				{
 					reg.QueryValue("MidiInputDriver", _midiDriverIndex);
-					if(0 > _midiDriverIndex || _midiDriverIndex >= _numMidiDrivers) _midiDriverIndex = 0;
+					if(0 > _midiDriverIndex || _midiDriverIndex > _numMidiDrivers) _midiDriverIndex = 0;
 					CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
 				}
 				{
 					reg.QueryValue("MidiSyncDriver", _syncDriverIndex);
-					if(0 > _syncDriverIndex || _syncDriverIndex >= _numMidiDrivers) _syncDriverIndex = 0;
+					if(0 > _syncDriverIndex || _syncDriverIndex > _numMidiDrivers) _syncDriverIndex = 0;
 					CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				}
 				{
