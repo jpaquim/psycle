@@ -147,13 +147,13 @@ namespace psycle
 					program_executable_dir_ = program_executable_dir_.substr(0, program_executable_dir_.rfind('\\')) + '\\';
 				}
 				{
-					SetInstrumentDir("instruments");
+					SetInstrumentDir(appPath()+"instruments");
 					SetCurrentInstrumentDir(GetInstrumentDir());
-					SetSongDir("songs");
+					SetSongDir(appPath()+"songs");
 					SetCurrentSongDir(GetSongDir());
-					SetSkinDir("skins");
-					SetPluginDir("native-psycle-plugins");
-					SetVstDir("vst-plugins");
+					SetSkinDir(appPath()+"skins");
+					SetPluginDir(appPath()+"native-psycle-plugins");
+					SetVstDir(appPath()+"vst-plugins");
 				}
 			}
 		}

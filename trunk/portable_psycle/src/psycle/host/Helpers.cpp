@@ -88,7 +88,7 @@ namespace psycle
 			hexstring_to_vector(string, v);
 			result = x();
 			int r(1);
-			for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()) ; i != v.rend() ; ++i)
+			for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()+1) ; i != v.rend() ; ++i)
 			{
 				result += *i * r;
 				r *= 0x10;
