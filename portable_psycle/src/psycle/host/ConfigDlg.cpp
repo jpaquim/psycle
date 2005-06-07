@@ -25,9 +25,6 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 		BEGIN_MESSAGE_MAP(CConfigDlg, CPropertySheet)
-			//{{AFX_MSG_MAP(CConfigDlg)
-				// NOTE - the ClassWizard will add and remove mapping macros here.	
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		void CConfigDlg::Init(Configuration* pConfig,int dlgnum) 
@@ -105,44 +102,27 @@ NAMESPACE__BEGIN(psycle)
 			_outputDlg._numDrivers = pConfig->_numOutputDrivers;
 			_outputDlg.m_ppDrivers = pConfig->_ppOutputDrivers;
 
-			std::string ps = pConfig->GetInstrumentDir();
-			if (!ps.empty())
+			if(!pConfig->GetInstrumentDir().empty()) _dirDlg._instPathBuf   = pConfig->GetInstrumentDir();
+			if(!pConfig->GetSongDir()      .empty()) _dirDlg._songPathBuf   = pConfig->GetSongDir();
+			if(!pConfig->GetPluginDir()    .empty()) _dirDlg._pluginPathBuf = pConfig->GetPluginDir();
+			if(!pConfig->GetVstDir()       .empty()) _dirDlg._vstPathBuf    = pConfig->GetVstDir();
+			if(!pConfig->GetSkinDir()      .empty())
 			{
-				_dirDlg._instPathBuf = ps;
-			}
-			ps = pConfig->GetSongDir();
-			if (!ps.empty())
-			{
-				_dirDlg._songPathBuf = ps;
-			}
-			ps = pConfig->GetPluginDir();
-			if (!ps.empty())
-			{
-				_dirDlg._pluginPathBuf = ps;
-			}
-			ps = pConfig->GetVstDir();
-			if (!ps.empty())
-			{
-				_dirDlg._vstPathBuf = ps;
-			}
-			ps = pConfig->GetSkinDir();
-			if (!ps.empty())
-			{
-				_dirDlg._skinPathBuf = ps;
-				_skinDlg._skinPathBuf = ps;
-				_keyDlg._skinPathBuf = ps;
+				_dirDlg ._skinPathBuf =
+				_skinDlg._skinPathBuf =
+				_keyDlg ._skinPathBuf = pConfig->GetSkinDir();
 			}
 			else
 			{
-				_dirDlg._skinPathBuf.clear();
+				_dirDlg ._skinPathBuf.clear();
 				_skinDlg._skinPathBuf.clear();
-				_keyDlg._skinPathBuf.clear();
+				_keyDlg ._skinPathBuf.clear();
 			}
-			if ( dlgnum == 1 || dlgnum == 0 ) AddPage(&_skinDlg);
-			if ( dlgnum == 2 || dlgnum == 0 ) AddPage(&_keyDlg);
-			if ( dlgnum == 3 || dlgnum == 0 ) AddPage(&_dirDlg);
-			if ( dlgnum == 4 || dlgnum == 0 ) AddPage(&_outputDlg);
-			if ( dlgnum == 5 || dlgnum == 0 ) AddPage(&_midiDlg);
+			if(dlgnum == 1 || dlgnum == 0) AddPage(&_skinDlg);
+			if(dlgnum == 2 || dlgnum == 0) AddPage(&_keyDlg);
+			if(dlgnum == 3 || dlgnum == 0) AddPage(&_dirDlg);
+			if(dlgnum == 4 || dlgnum == 0) AddPage(&_outputDlg);
+			if(dlgnum == 5 || dlgnum == 0) AddPage(&_midiDlg);
 		}
 
 		int CConfigDlg::DoModal() 
@@ -211,7 +191,6 @@ NAMESPACE__BEGIN(psycle)
 
 				if (_pConfig->pattern_header_skin != _skinDlg._pattern_header_skin)
 				{
-					// LOAD HEADER SKIN
 					_pConfig->pattern_header_skin = _skinDlg._pattern_header_skin;
 					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 				}
@@ -233,7 +212,6 @@ NAMESPACE__BEGIN(psycle)
 				if (_pConfig->machine_skin != _skinDlg._machine_skin)
 				{
 					_pConfig->machine_skin = _skinDlg._machine_skin;
-					// LOAD HEADER SKIN
 					if (_pConfig->Initialized() ) 
 					{
 						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
@@ -244,7 +222,6 @@ NAMESPACE__BEGIN(psycle)
 				if (_pConfig->bBmpBkg)
 				{
 					_pConfig->szBmpBkgFilename = _skinDlg.szBmpBkgFilename;
-					// LOAD HEADER SKIN
 					if (_pConfig->Initialized() ) 
 					{
 						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();

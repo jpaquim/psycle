@@ -3,6 +3,10 @@
 #if 0
 /*
 $Log$
+Revision 1.36  2005/06/07 18:16:55  johan-boule
+version 1.7.54
+oops, fix for bug introduced in 1.7.53 concerning midi device selection in the configuration
+
 Revision 1.35  2005/06/04 00:20:25  johan-boule
 1)
 closing sourceforge bug #1087788.
@@ -180,7 +184,7 @@ fix closing bug [ 1087782 ] psycle MFC's version number is spread in several pla
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 53 /* $Revision$ $Date$ */
+#define PSYCLE__VERSION__PATCH 54 /* $Revision$ $Date$ */
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
