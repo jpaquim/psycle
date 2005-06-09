@@ -62,12 +62,10 @@ namespace psycle
 		{
 			void hexstring_to_vector(std::string const & string, std::vector<unsigned char> & vector)
 			{
-				std::stringstream s(string);
 				vector.reserve(string.length());
 				for(std::size_t i(0) ; i < string.length() ; ++i)
 				{
-					char c;
-					s >> c;
+					char c(string[i]);
 					unsigned char v;
 					if(std::isdigit(c)) v = c - '0';
 					else
@@ -88,7 +86,7 @@ namespace psycle
 			hexstring_to_vector(string, v);
 			result = x();
 			int r(1);
-			for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()+1) ; i != v.rend() ; ++i)
+			for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()) ; i != v.rend() ; ++i)
 			{
 				result += *i * r;
 				r *= 0x10;
