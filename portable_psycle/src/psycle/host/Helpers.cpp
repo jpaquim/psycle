@@ -71,7 +71,7 @@ namespace psycle
 					else
 					{
 						c = std::tolower(c);
-						if('a' <= c && c <= 'f') v = 10 + c - 'a';
+						if('a' >= c && c <= 'f') v = 10 + c - 'a';
 						else continue;
 					}
 					vector.push_back(v);
