@@ -1591,9 +1591,9 @@ NAMESPACE__BEGIN(psycle)
 			if(isBlockCopied)
 			{
 				int ps=_pSong->playOrder[editPosition];
-				const int nl = _pSong->patternLines[ps];
+				int nl = _pSong->patternLines[ps];
 
-				AddUndo(ps,tx,lx,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+				AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int ls=0;
 				int ts=0;
@@ -1602,10 +1602,11 @@ NAMESPACE__BEGIN(psycle)
 				if (blockNLines > nl) 
 					if (MessageBox("Do you want to autoincrease this pattern lines?","Block doesn't fit in current pattern",MB_YESNO) == IDYES)
 					{
-						_pSong->patternLines[ps] = blockNLines;						
+						_pSong->patternLines[ps] = blockNLines;
+						nl = blockNLines;
 					}
 				//end of added by sampler
-				
+
 				for (int t=tx;t<tx+blockNTracks;t++)
 				{
 					ls=0;
@@ -2107,7 +2108,9 @@ NAMESPACE__BEGIN(psycle)
 				tracks = _pSong->SONGTRACKS-x;
 			}
 			pNew->tracks = tracks;
+						
 			const int nl = _pSong->patternLines[pattern];
+			
 			if (lines+y > nl)
 			{
 				lines = nl-y;
