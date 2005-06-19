@@ -726,7 +726,8 @@ namespace psycle
 				{
 					pTemp._note+=noteOffset[i];
 				}
-				if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL ) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
+				if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
+					&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 			}
 		}
 		void DuplicatorMac::GetParamName(int numparam,char *name)
@@ -799,8 +800,8 @@ namespace psycle
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
-			pFile->Read(macOutput,sizeof macOutput);
-			pFile->Read(macOutput,sizeof noteOffset);
+			pFile->Read(&macOutput,sizeof macOutput);
+			pFile->Read(&noteOffset,sizeof noteOffset);
 			return true;
 		}
 
@@ -808,8 +809,8 @@ namespace psycle
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset;
 			pFile->Write(&size, sizeof size); // size of this part params to load
-			pFile->Write(macOutput,sizeof macOutput);
-			pFile->Write(noteOffset,sizeof noteOffset);
+			pFile->Write(&macOutput,sizeof macOutput);
+			pFile->Write(&noteOffset,sizeof noteOffset);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

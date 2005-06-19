@@ -274,7 +274,7 @@ NAMESPACE__BEGIN(psycle)
 					_pMachine->GetParamValue(c,buffer);
 					_pMachine->GetParamName(c,parName);
 				}
-				if(bDrawKnob)
+				if(bDrawKnob && (max_v - min_v)>0)
 				{
 					int const amp_v = max_v - min_v;
 					int const rel_v = val_v - min_v;
