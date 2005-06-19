@@ -1,13 +1,94 @@
 #include "../../project.hpp"
 
+///\file
+///\brief the version number of the psycle host application.
+
+/// Versions are composed this way since 1.7.24:
+/// M.m.p , where:
+/// - M = major version number.
+/// - m = minor version number:
+///			- if even, then it's a stable release.
+///			- if odd, then it's a beta or release candidate for next minor version number.
+/// - p = patch number:
+///			- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
+///			- if the minor version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
+
+/// Other files that need to be updated accordingly:
+/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
+/// - doc/for-end-users/readme.txt
+/// - doc/for-end-users/whatsnew.txt
+/// ... if only we were using a programmable build system like autoconf.
+
+#define PSYCLE__TAR_NAME "psycle"
+#define PSYCLE__NAME "Psycle Modular Music Creation Studio"
+#define PSYCLE__BRANCH "psycledelics"
+#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
+#define PSYCLE__LICENSE "none, public domain"
+#define PSYCLE__VERSION__MAJOR 1
+#define PSYCLE__VERSION__MINOR 7
+#define PSYCLE__VERSION__PATCH 56
+#define PSYCLE__VERSION__QUALITY "pre-release 1 of 1.8 :"
+
+/// identifies what sources the build comes from.
+#define PSYCLE__VERSION \
+	PSYCLE__BRANCH " " \
+	PSYCLE__VERSION__QUALITY " " \
+	STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
+	STRINGIZED(PSYCLE__VERSION__MINOR) "." \
+	STRINGIZED(PSYCLE__VERSION__PATCH)
+
+/// identifies both what sources the build comes from, and what build options were used.
+#define PSYCLE__BUILD__IDENTIFIER(EOL) \
+	"version: " PSYCLE__VERSION EOL \
+	"build configuration options:" EOL PSYCLE__CONFIGURATION__OPTIONS(EOL) EOL \
+	"built on: " PSYCLE__BUILD__DATE
+
+#if defined COMPILER__RESOURCE
+	/// __DATE__ and __TIME__ doesn't seem to work with msvc's resource compiler
+	#define PSYCLE__BUILD__DATE "a sunny day"
+#else
+	#define PSYCLE__BUILD__DATE __DATE__ ", " __TIME__
+#endif
+
+#if defined COMPILER__RESOURCE
+	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
+
+	#define RC__CompanyName PSYCLE__BRANCH
+	#define RC__LegalCopyright PSYCLE__COPYRIGHT
+	#define RC__License PSYCLE__LICENSE
+
+	#define RC__InternalName PSYCLE__TAR_NAME
+	#define RC__ProductName PSYCLE__NAME
+	#define RC__ProductVersion PSYCLE__VERSION EOL "$Revision$" EOL "$Date$"
+
+	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
+	#define RC__FileDescription RC__ProductName " - Host"
+	#define RC__FileVersion RC__ProductVersion
+
+	#define RC__SpecialBuild PSYCLE__CONFIGURATION__OPTIONS(EOL)
+	#define RC__PrivateBuild PSYCLE__BUILD__DATE
+
+	// Actual resource version info code is in resources.rc.
+	// Using msvc's resource compiler, #including this file from it doesn't create the version info.
+	// There's no reason this wouldn't work, it's weird.
+	// Anyway, all the version information is set via the above parameters,
+	// so that there's no need to change the resources.rc file.
+#endif
+
 #if 0
 /*
 $Log$
+Revision 1.38  2005/06/19 21:04:29  johan-boule
+Version 1.7.56 (pre-release 1 of 1.8)
+[jaz] fix bugs with Note Duplicator (load/save and deadlock).
+[jaz] fix bug with render to wav, where in some specific situations where playing some instruments incorrectly.
+
 Revision 1.37  2005/06/09 22:49:00  johan-boule
+Version 1.7.55 (alpha)
 just increasing the version number to reflect the presence of a bug fix concerning loading of skins
 
 Revision 1.36  2005/06/07 18:16:55  johan-boule
-version 1.7.54
+Version 1.7.54 (alpha)
 oops, fix for bug introduced in 1.7.53 concerning midi device selection in the configuration
 
 Revision 1.35  2005/06/04 00:20:25  johan-boule
@@ -38,11 +119,11 @@ version.hpp).... the drawback is that people "loose" their
 old settings.
 
 Revision 1.34  2005/05/30 05:13:43  johan-boule
-1.7.51
+Version 1.7.51 (alpha)
 change to let plugins find other .dll files that are in any intermediate dir between their own dir and the configured root dir for plugins
 
 Revision 1.33  2005/05/29 23:21:23  johan-boule
-1.7.50
+Version 1.7.50 (alpha)
 change to let plugins find other .dll files that are in the same dir as their own .dll
 for example, blwtbl.dll can be put along with druttis plugins instead of psycle.exe's dir.
 
@@ -50,12 +131,12 @@ Revision 1.32  2005/05/29 00:34:58  johan-boule
 cvs $File -> $Id
 
 Revision 1.31  2005/05/25 20:20:35  johan-boule
-version 1.7.49
+Version 1.7.49 (alpha)
 removed scary pointer and index stuff from the directsound config
 (the device index value in the registry can be deleted as it's not used anymore)
 
 Revision 1.30  2005/05/25 04:02:17  johan-boule
-verson 1.7.48
+Version 1.7.48 (alpha)
 fixed bug for fingersoup's directsound driver (null GUID)
 
 Revision 1.29  2005/05/24 01:09:17  johan-boule
@@ -159,80 +240,4 @@ std::ostringstream.clear missuses fixed (3 occurences)
 Revision 1.1  2004/12/22 22:43:41  johan-boule
 fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
 */
-#endif
-
-///\file
-///\brief the version number of the psycle host application.
-
-/// Versions are composed this way since 1.7.24:
-/// M.m.p , where:
-/// - M = major version number.
-/// - m = minor version number:
-///			- if even, then it's a stable release.
-///			- if odd, then it's a beta or release candidate for next minor version number.
-/// - p = patch number:
-///			- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
-///			- if the minor version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
-
-/// Other files that need to be updated accordingly:
-/// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
-/// - doc/for-end-users/readme.txt
-/// - doc/for-end-users/whatsnew.txt
-/// [bohan] ... if only we were using a programmable build system like autoconf.
-
-#define PSYCLE__TAR_NAME "psycle"
-#define PSYCLE__NAME "Psycle Modular Music Creation Studio"
-#define PSYCLE__BRANCH "psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
-#define PSYCLE__LICENSE "none, public domain"
-#define PSYCLE__VERSION__MAJOR 1
-#define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 55 /* $Revision$ $Date$ */
-#define PSYCLE__VERSION__QUALITY "alpha"
-
-/// identifies what sources the build comes from.
-#define PSYCLE__VERSION \
-	PSYCLE__BRANCH " " \
-	PSYCLE__VERSION__QUALITY " " \
-	STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
-	STRINGIZED(PSYCLE__VERSION__MINOR) "." \
-	STRINGIZED(PSYCLE__VERSION__PATCH)
-
-/// identifies both what sources the build comes from, and what build options were used.
-#define PSYCLE__BUILD__IDENTIFIER(EOL) \
-	"version: " PSYCLE__VERSION EOL \
-	"build configuration options:" EOL PSYCLE__CONFIGURATION__OPTIONS(EOL) EOL \
-	"built on: " PSYCLE__BUILD__DATE
-
-#if defined COMPILER__RESOURCE
-	/// [bohan] __DATE__ and __TIME__ doesn't seem to work with msvc's resource compiler
-	#define PSYCLE__BUILD__DATE "a sunny day"
-#else
-	#define PSYCLE__BUILD__DATE __DATE__ ", " __TIME__
-#endif
-
-#if defined COMPILER__RESOURCE
-	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
-
-	#define RC__CompanyName PSYCLE__BRANCH
-	#define RC__LegalCopyright PSYCLE__COPYRIGHT
-	#define RC__License PSYCLE__LICENSE
-
-	#define RC__InternalName PSYCLE__TAR_NAME
-	#define RC__ProductName PSYCLE__NAME
-	#define RC__ProductVersion PSYCLE__VERSION EOL "$Revision$" EOL "$Date$"
-
-	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
-	#define RC__FileDescription RC__ProductName " - Host"
-	#define RC__FileVersion RC__ProductVersion
-
-	#define RC__SpecialBuild PSYCLE__CONFIGURATION__OPTIONS(EOL)
-	#define RC__PrivateBuild PSYCLE__BUILD__DATE
-
-	// [bohan]
-	// Actual resource code moved back to resources.rc ...
-	// Dunno why, using msvc's resource compiler, #including this file from it doesn't create the version info ...
-	// There's no reason this wouldn't work, it's weird.
-	// Anyway, all the version information is set via the above parameters,
-	// so that there's no need to change the resources.rc file.
 #endif
