@@ -496,19 +496,17 @@ break;
 				backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 				backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
 				backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
-				if(samplerate > 0) Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate;
+				if(samplerate > 0) { SampleRate(samplerate); Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate; }
 				if(bitdepth > 0) Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
 				if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
-				SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*60)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 				Stop();
 				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
 					_recording = true;
 				else
 				{
-					StopRecording();
-					::MessageBox(0, psFilename.c_str(), "FAILED", 0);
+					StopRecording(false);
 				}
 			}
 		}
@@ -518,9 +516,9 @@ break;
 			if(_recording)
 			{
 				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
+				SampleRate(backup_rate);
 				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
 				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
-				SamplesPerRow((Global::pConfig->_pOutputDriver->_samplesPerSec*15*4)/(Global::pPlayer->bpm*Global::pPlayer->tpb));
 				_outputWaveFile.Close();
 				_recording = false;
 				if(!bOk)

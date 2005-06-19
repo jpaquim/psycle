@@ -526,7 +526,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 		{
 			((CSaveWavDlg*)b)->threadopen++;
 			Player* pPlayer = Global::pPlayer;
-			int stream_size = 576; // Player has just a single buffer of 65535 samples to allocate both channels
+			int stream_size = 8192; // Player has just a single buffer of 65535 samples to allocate both channels
 			//int stream_buffer[65535];
 			while(!((CSaveWavDlg*)b)->kill_thread)
 			{
@@ -757,10 +757,10 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			lastlinetick = pPlayer->_lineCounter;
 			lastpostick = pPlayer->_playPosition;
 
-		if (!kill_thread ) 
-		{
-			m_progress.SetPos(tickcont);
-		}
+			if (!kill_thread ) 
+			{
+				m_progress.SetPos(tickcont);
+			}
 		}
 
 		void CSaveWavDlg::OnSelchangeComboBits() 
