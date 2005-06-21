@@ -2278,7 +2278,7 @@ NAMESPACE__BEGIN(psycle)
 			// fill data
 			// count used patterns
 			unsigned char count = 0;
-			for (unsigned char i = 0; i < MAX_PATTERNS; i++)
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (_pSong->ppPatternData[i])
 				{
@@ -2293,7 +2293,7 @@ NAMESPACE__BEGIN(psycle)
 			memcpy(pWrite, &count, sizeof(count));
 			pWrite+=sizeof(count);
 
-			for (unsigned char i = 0; i < MAX_PATTERNS; i++)
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (_pSong->ppPatternData[i])
 				{
@@ -2336,7 +2336,7 @@ NAMESPACE__BEGIN(psycle)
 			// fill data
 			// count used patterns
 			unsigned char count = 0;
-			for (unsigned char i = 0; i < MAX_PATTERNS; i++)
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (_pSong->ppPatternData[i])
 				{
@@ -2351,7 +2351,7 @@ NAMESPACE__BEGIN(psycle)
 			memcpy(pWrite, &count, sizeof(count));
 			pWrite+=sizeof(count);
 
-			for (unsigned char i = 0; i < MAX_PATTERNS; i++)
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (_pSong->ppPatternData[i])
 				{
