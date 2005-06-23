@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov stk Plucked plugin for PSYCLE
-// v0.2a
+// v0.3
 //
 // Based on The Synthesis ToolKit in C++ (STK)
 // By Perry R. Cook and Gary P. Scavone, 1995-2004.
@@ -10,24 +10,12 @@
 #include <psycle/plugin_interface.hpp>
 #include <stk/stk.h>
 #include <stk/Plucked.h>
+#include <stk/ADSR.h>
 #include <stdlib.h>
 
-#define MAX_ENV_TIME	250000
 #define MAX_TRACKS	32
-#define NUMPARAMETERS 1
+#define NUMPARAMETERS 5
 
-/*
-CMachineParameter const paraTuner = 
-{
-	"Detune",
-	"Detune",									// description
-	1,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
-	1
-};
-
-*/
 CMachineParameter const paraVolume = 
 {
 	"Volume",
@@ -38,9 +26,55 @@ CMachineParameter const paraVolume =
 	32767
 };
 
+CMachineParameter const paraAttack = 
+{
+	"Attack",
+	"Attack",									// description
+	32,											// MinValue	
+	32767,											// MaxValue
+	MPF_STATE,										// Flags
+	32
+};
+
+CMachineParameter const paraDecay = 
+{
+	"Decay",
+	"Decay",									// description
+	32,											// MinValue	
+	32767,											// MaxValue
+	MPF_STATE,										// Flags
+	32
+};
+
+CMachineParameter const paraSustain = 
+{
+	"Sustain",
+	"Sustain",									// description
+	0,											// MinValue	
+	32767,											// MaxValue
+	MPF_STATE,										// Flags
+	16768
+};
+
+CMachineParameter const paraRelease = 
+{
+	"Release",
+	"Release",									// description
+	32,											// MinValue	
+	32767,											// MaxValue
+	MPF_STATE,										// Flags
+	328
+};
+
+
 CMachineParameter const *pParameters[] = 
 { 
-	&paraVolume
+	&paraVolume,
+	&paraAttack,
+	&paraDecay,
+	&paraSustain,
+	&paraRelease
+
 };
 
 
@@ -79,9 +113,7 @@ public:
 private:
 
 	Plucked track[MAX_TRACKS];
-	bool noteonoff[MAX_TRACKS];
-
-
+	ADSR	adsr[MAX_TRACKS];
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -100,12 +132,15 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-	Stk::setSampleRate(44100);
+	Stk::setSampleRate(44100.);
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
 		track[i].clear();
 		track[i].noteOff(0.0);
-		noteonoff[i]=true;
+		adsr[i].setAllTimes(StkFloat(Vals[1]*0.000030517578125),
+									StkFloat(Vals[2]*0.000030517578125),
+									StkFloat(Vals[3]*0.000030517578125),
+									StkFloat(Vals[4]*0.000030517578125));
 	}
 }
 
@@ -115,7 +150,6 @@ void mi::Stop()
 	{
 		track[c].noteOff(0.0);
 		track[c].clear();
-		noteonoff[c]=false;
 	}
 }
 
@@ -128,6 +162,13 @@ void mi::ParameterTweak(int par, int val)
 {
 	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
+	for(int c=0;c<MAX_TRACKS;c++)
+		{
+			adsr[c].setAllTimes(StkFloat(Vals[1]*0.000030517578125),
+									StkFloat(Vals[2]*0.000030517578125),
+									StkFloat(Vals[3]*0.000030517578125),
+									StkFloat(Vals[4]*0.000030517578125));
+		}
 }
 
 void mi::Command()
@@ -150,12 +191,10 @@ pCB->MessBox(buffer,"stk Plucked",0);
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks)
 {
 	float sl=0;
-//	float sr=0;
 	float const vol=(float)Vals[0];
+
 	for(int c=0;c<tracks;c++)
 	{
-		if(noteonoff[c])
-		{
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
 			--xpsamplesleft;
@@ -164,17 +203,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 			int xnumsamples=numsamples;
 
 			Plucked *ptrack=&track[c];
-					
+			ADSR	*padsr=&adsr[c];		
 			do
 				{
-					
-					sl=(float)ptrack->tick()*vol;
+					sl=float(padsr->tick()*ptrack->tick())*vol;
 					if (sl<-vol)sl=-vol;
 					if (sl>vol)sl=vol;
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
-		}
 	}
 
 }
@@ -195,19 +232,25 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Note Off			== 120
 	// Empty Note Row	== 255
 	// Less than note off value??? == NoteON!
-
-	// Note off
-	if(note==120)
+	
+	if(note!=255)
 	{
-		track[channel].noteOff(0.0);
-		noteonoff[channel]=false;
+		// Note off
+		if(note==120)
+		{
+			adsr[channel].keyOff();
+//			track[channel].noteOff(0.0);
+		}
+		else 
+		// Note on
+		{
+			adsr[channel].keyOn();
+			StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
+			StkFloat const frequency = std::pow(2., (note - offset) / 12);
+			track[channel].noteOff(0.0);
+			track[channel].noteOn(frequency,1.0);
+		}
+		track[channel].tick();
 	}
-	else
-	{
-		StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
-		StkFloat const frequency = std::pow(2., (note - offset) / 12);
-		track[channel].noteOn(frequency,1.0);
-		noteonoff[channel]=true;
-	}
-	track[channel].tick();
+	adsr[channel].tick();
 }
