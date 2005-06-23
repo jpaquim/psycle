@@ -4,15 +4,18 @@
 // Based on Digital Effects Algorithms
 // Alexey Smoli, http://st.karelia.ru/~smlalx
 // smlalx@yahoo.com
+//
+// and Toby Kurien's Audio Effects Algorithms
+// http://toby.za.net/dsp/index.htm
 
 #include <project.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cstring>
 
-#define MAXIMUM_DELAY   30000
+#define MAXIMUM_DELAY   40000
 
-#define NUMPARAMETERS 7
+#define NUMPARAMETERS 8
 
 CMachineParameter const paraDry = 
 { 
@@ -84,6 +87,16 @@ CMachineParameter const paraRate =
 	1,
 };
 
+CMachineParameter const paraDelay = 
+{ 
+	"Delayer",
+	"Delayer",										// description
+	1,												// MinValue	
+	MAXIMUM_DELAY,												// MaxValue
+	MPF_STATE,										// Flags
+	MAXIMUM_DELAY,
+};
+
 CMachineParameter const *pParameters[] = 
 { 
 	// global
@@ -93,8 +106,10 @@ CMachineParameter const *pParameters[] =
 	&paraFBR,
 	&paraMinD,
 	&paraMaxD,
-	&paraRate
+	&paraRate,
+	&paraDelay
 };
+
 
 CMachineInfo const MacInfo = 
 {
@@ -108,7 +123,7 @@ CMachineInfo const MacInfo =
 	"SChorus",						// name
 #endif
 	"SChorus",							// short name
-	"Sartorius, Alexey Smoli",							// author
+	"Sartorius",							// author
 	"About",								// A command, that could be use for open an editor, etc...
 	4
 };
@@ -159,7 +174,7 @@ void mi::Init()
 	buf_count=0;
 	min_sweep = Vals[4] * 0.00029675445556640625;
     max_sweep = Vals[5] * 0.00029675445556640625;
-    step = Vals[6]/1000.0;
+    step = Vals[6]*.001;
     sweep = min_sweep;
 }
 
@@ -173,7 +188,7 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you want to show your custom window here
 // or an about button
-pCB->MessBox("Sartorius Chorus","SChorus",0);
+pCB->MessBox("Sartorius Chorus\nBe carefull with wet and delayer!!!","SChorus",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -182,7 +197,7 @@ void mi::ParameterTweak(int par, int val)
 
 	min_sweep = Vals[4] * 0.00029675445556640625;
     max_sweep = Vals[5] * 0.00029675445556640625;
-    step = Vals[6]/1000.0;
+    step = Vals[6]*.001;
     sweep = min_sweep;
 
 }
@@ -194,15 +209,16 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	float const wet		=(float)(Vals[1])*0.00006103515625f;
 	float const fbl		=(float)(Vals[2])*0.000030517578125f;
 	float const fbr		=(float)(Vals[3])*0.000030517578125f;
+	int const del		=Vals[7];
 
 		do
 		{
 			float sl = *psamplesleft;
 			float sr = *psamplesright; 
 
-	        outval[0] = sl*fbl + DM_l[(buf_count+MAXIMUM_DELAY-(int)sweep) % MAXIMUM_DELAY]*wet;
+	        outval[0] = sl*fbl + DM_l[(buf_count+del /*MAXIMUM_DELAY*/-(int)sweep) % del /*MAXIMUM_DELAY*/]*wet;
 		    outval[0] += sl*dry;
-			outval[1] = sr*fbr + DM_r[(buf_count+MAXIMUM_DELAY-(int)max_sweep+(int)sweep)%MAXIMUM_DELAY]*wet;
+			outval[1] = sr*fbr + DM_r[(buf_count+del /*MAXIMUM_DELAY*/-(int)max_sweep+(int)sweep)%del /*MAXIMUM_DELAY*/]*wet;
 			outval[1] += sr*dry;
 			
 			if(outval[0] > 32767.0)
@@ -221,7 +237,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			DM_l[buf_count] = (int)sl;
 			DM_r[buf_count] = (int)sr;
 			
-			buf_count = (buf_count + 1) % MAXIMUM_DELAY;
+			buf_count = (buf_count + 1) % del /*MAXIMUM_DELAY*/;
 
 			*psamplesleft=sl;
 			*psamplesright=sr;
@@ -248,11 +264,11 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	{
 		case 0:
 		case 1:
-			std::sprintf(txt,"%.6f",(float)value/16384.0);
+			std::sprintf(txt,"%.6f",(float)value*0.00006103515625f);
 			return true;
 		case 2:
 		case 3:
-			std::sprintf(txt,"%.6f",(float)value/32768.0);
+			std::sprintf(txt,"%.6f",(float)value*0.000030517578125f);
 			return true;
 		case 4:
 		case 5:
