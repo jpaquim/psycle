@@ -117,6 +117,9 @@ PSYCLE users, find usefull links to VST & other Audio related resources, or simp
 in the PSY-Boards.
 
 Also, chat with other PSYCLE users or developers in our IRC - Channel:
-Join #psycle on EFNet network
- (some servers : irc.prison.net , irc.efnet.pl , irc.homelien.no)
- (<bohan> note: irc.isdnet.fr doesn't exist anymore. now it is irc.efnet.fr)
+/join #psycle on EFNet network (servers list of EFNet: http://www.efnet.org/servers.html)
+If you don't have an irc client, you can use:
+	http://psycle.sourceforge.net/irc.html
+or
+	http://psycle.free.fr/irc
+with any "web" browser.
