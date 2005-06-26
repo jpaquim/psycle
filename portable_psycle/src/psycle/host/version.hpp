@@ -26,8 +26,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 56
-#define PSYCLE__VERSION__QUALITY "pre-release 1 of 1.8 :"
+#define PSYCLE__VERSION__PATCH 57
+#define PSYCLE__VERSION__QUALITY "pre-release 1.1 of 1.8 :"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -78,6 +78,9 @@
 #if 0
 /*
 $Log$
+Revision 1.39  2005/06/26 11:08:29  jaz001
+1.8 RC1.1
+
 Revision 1.38  2005/06/19 21:04:29  johan-boule
 Version 1.7.56 (pre-release 1 of 1.8)
 [jaz] fix bugs with Note Duplicator (load/save and deadlock).
