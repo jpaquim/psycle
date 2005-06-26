@@ -414,7 +414,6 @@ namespace psycle
 		{
 			int w;
 			float volume = 1.0f;
-
 			if (_pMachine[wiresource])
 			{
 				Machine *dmac = _pMachine[_pMachine[wiresource]->_outputMachines[wireindex]];
@@ -1012,7 +1011,7 @@ namespace psycle
 				if (size == )
 				{
 				// This is left here if someday, extra data is added to the file version chunk.
-				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - 8);
+				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
 				}
 				*/
 				if ( size-4 > 0) pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
@@ -2253,7 +2252,7 @@ namespace psycle
 
 			pFile->Write("SNGI",4);
 			version = CURRENT_FILE_VERSION_SNGI;
-			size = (6*sizeof(temp));
+			size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
@@ -2352,14 +2351,15 @@ namespace psycle
 						memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
 						pCopy+=EVENT_SIZE*SONGTRACKS;
 					}
-
-					size = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE)+(3*sizeof(temp))+strlen(patternName[i])+1;
+					
+					int sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
 					zapArray(pSource);
 
 					pFile->Write("PATD",4);
 					version = CURRENT_FILE_VERSION_PATD;
 
 					pFile->Write(&version,sizeof(version));
+					size = sizez77+(4*sizeof(temp))+strlen(patternName[i])+1;
 					pFile->Write(&size,sizeof(size));
 
 					index = i; // index
@@ -2383,7 +2383,12 @@ namespace psycle
 					}
 				}
 			}
-
+			/*
+			===================
+			MACHINE DATA
+			===================
+			id = "MACD"; 
+			*/
 			// machine and instruments handle their save and load in their respective classes
 
 			for (int i = 0; i < MAX_MACHINES; i++)
@@ -2415,7 +2420,12 @@ namespace psycle
 					}
 				}
 			}
-
+			/*
+			===================
+			Instrument DATA
+			===================
+			id = "INSD"; 
+			*/
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
 				if (!_pInstrument[i]->Empty())

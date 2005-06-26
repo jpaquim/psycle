@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.7.7 ----------
+				------------------------------- 1.8  -----------
 --------------------------------------------------------------------------------------------
 
 contents:
@@ -50,7 +50,7 @@ Plans for supporting DXi are there, but it's not a primary work.
 
 PSYCLE is OpenSource. This Means: Everyone who thinks that he/she is the right person/alien
 for coding on PSYCLE can contact the Team of developers and ask/tell what he/she can do for
-Psycle.
+Psycle. 
 
 Source Page is set at SourceForge site following this link:
 
@@ -94,14 +94,12 @@ Hint: Check M3 sources too, which are derived from a buzz plugin.
 
 Psycle 1: (The only active one right now)
 
-	1.7.7:  prolly a beta, early access to bug fixes at http://psycle.sourceforge.net.
+	1.8: Current labeled stable version. Development will follow in bugfixing and adding
+			needed features which doesn't correspond to big changes.
 
-	1.7.3/1.7.4: Many improvements have been done in these versions, making them better in
-	many ways ( more stable, better looking, more powerful,... are just some of them).
+	1.9/2.0: Current development branch. It is expected to be a big change from current
+				sources, separating them on different libs, and moving to other toolkits.
 
-	Still, the main goals for a definitive Psycle 1 version haven't been reached, which
-	are still multipattern sequence and a multisample instrument sampler.  These options
-	are being designed currently.
 
 For up to date information, don't forget to visit the Developement forums on Psycledelics
 site.
@@ -113,8 +111,6 @@ This is the place to find the answers for your burning questions.
 The Psycledelics community is still small but growing.
 
 	http://psycle.pastnotecut.org/
-	Mirror: psycle.project-psy.com/
-
 
 Feel free to ask other users for help, publish your tunes, download tunes made by other
 PSYCLE users, find usefull links to VST & other Audio related resources, or simply discuss
@@ -122,4 +118,5 @@ in the PSY-Boards.
 
 Also, chat with other PSYCLE users or developers in our IRC - Channel:
 Join #psycle on EFNet network
- (some servers : irc.prison.net , irc.efnet.pl , irc.homelien.no) (<bohan> note: irc.isdnet.fr doesn't exist anymore)
+ (some servers : irc.prison.net , irc.efnet.pl , irc.homelien.no)
+ (<bohan> note: irc.isdnet.fr doesn't exist anymore. now it is irc.efnet.fr)

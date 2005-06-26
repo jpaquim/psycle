@@ -298,7 +298,7 @@ NAMESPACE__BEGIN(psycle)
 			// draw vumeters
 			DrawAllMachineVumeters((CClientDC*)devc);
 
-			if ((wiresource != -1) | (wiredest != -1))
+			if ((wiresource != -1) || (wiredest != -1))
 			{
 				int prevROP = devc->SetROP2(R2_NOT);
 				amosDraw(devc, wireSX, wireSY, wireDX, wireDY);
@@ -1167,6 +1167,7 @@ NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
+			wiresource = -1;
 			return -1;
 		}
 	NAMESPACE__END

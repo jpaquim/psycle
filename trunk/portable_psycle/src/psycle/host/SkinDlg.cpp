@@ -728,7 +728,8 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::OnImportReg() 
 		{
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
-			char szFile[1 << 10]; // buffer for file name
+//			char szFile[1 << 10]; <- we are not working with bits. This is nonsense.
+			char szFile[1024];// buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
