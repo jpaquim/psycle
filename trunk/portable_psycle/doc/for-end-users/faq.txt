@@ -64,8 +64,8 @@ A)	"History" Part one:
 	Mats (the one that made the 1.1 versions ) started developing what was called Psycle 2.
 	When he had to left, Psycle 2 stopped, and Psycle 1.5 was done by [JAZ].
 	After some months, it was clear that Psycle needed a change to be improved further more
-   so it was time to think with Psycle 2 again, but instead of continuing Mats's work,
-   [JAZ] started to think on a newer design.
+	so it was time to think with Psycle 2 again, but instead of continuing Mats's work,
+	[JAZ] started to think on a newer design.
 	This design has been codenamed PsyClean, but has never really started to be
 	developed.
 
@@ -91,7 +91,7 @@ A)	"History" Part one:
 	ready, but left for work too. Dilvie, on the other hand, started working on the GUI,
 	trying Mozilla XUL language as a start. Unfortunately, he was busy with work too
 	(yep... one more).
-    The latest news, unluckily, are that this branch is vapourware.
+	The latest news, unluckily, are that this branch is vapourware.
 
 
 	"Nowadays"
@@ -107,7 +107,7 @@ A)	"History" Part one:
 	Psycledelics since early 2004.
 
 	Psycle 1 has undergone many internal changes, most of them thanks to Bohan aswell,
-	others, by [JAZ] and several other small contributions by alk, sampler and others.
+	others, by [JAZ] and several other contributions by alk, sampler, zealmange and others.
 
 	Psycle 1.8 is released. This is mostly a maintenance version. It contains internal
 	code changes to a more standard way of coding, bugfixes and small additions in
