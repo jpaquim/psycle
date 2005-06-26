@@ -45,6 +45,31 @@ namespace psycle
 			Free();
 		}
 
+		#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+			namespace boost
+			{
+				namespace filesystem
+				{
+					using namespace ::boost::filesystem;
+					/// blergh, dos/win9x needs a work around for boost::filesystem::equivalent
+					bool equivalent(path const & path1, path const & path2)
+					{
+						class unique
+						{
+							public:
+								path operator()(path const & input)
+								{
+									std::string s((input.is_complete() ? input : current_path() / input).string());
+									std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+									return path(s, no_check);
+								}
+						} unique;
+						return unique(path1) == unique(path2);
+					}
+				}
+			}
+		#endif
+
 		void Plugin::Instance(std::string file_name)
 		{
 			char const static path_env_var_name[] =
@@ -82,48 +107,18 @@ namespace psycle
 					// or useless repetitions because of things like foo/./bar
 					path.normalize();
 					// then, loop
-					#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-						// blergh, dos/win9x needs a work around...
-						if(!root_path.is_complete()) root_path = boost::filesystem::current_path() / root_path;
-						{
-							std::string s(root_path.string());
-							std::transform(s.begin(), s.end(), s.begin(), std::tolower);
-							root_path = boost::filesystem::path(s, boost::filesystem::no_check);
-						}
-						loggers::trace("root path: " +       root_path.string());
-						boost::filesystem::path lower_case_path;
-						{
-							std::string s(path.string());
-							std::transform(s.begin(), s.end(), s.begin(), std::tolower);
-							lower_case_path = boost::filesystem::path(s, boost::filesystem::no_check);
-						}
-					#endif
 					do
 					{
 						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
 						path = path.branch_path();
-						#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-							// blergh, dos/win9x needs a work around...
-							lower_case_path = lower_case_path.branch_path();
-							loggers::trace("     path: " + lower_case_path.string());
-						#else
-							loggers::trace("path: " + path.string());
-						#endif
+						loggers::trace("path: " + path.string());
 						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
 						// appends the intermediate dir to the list of paths
 						new_path << path.native_directory_string() << ";";
 					}
-					while
-					(
-						#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-							// blergh, dos/win9x needs a work around...
-							lower_case_path.string() != root_path.string()
-						#else
-							!boost::filesystem::equivalent(path, root_path)
-						#endif
-					);
+					while(!boost::filesystem::equivalent(path, root_path));
 					// append the old path value, at the end so it's searched last
 					new_path << old_path;
 				}
