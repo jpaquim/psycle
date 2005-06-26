@@ -47,6 +47,16 @@ namespace psycle
 
 		void Plugin::Instance(std::string file_name)
 		{
+			char const static path_env_var_name[] =
+			{
+				#if defined OPERATING_SYSTEM__LINUX
+					"LD_LIBRARY_PATH"
+				#elif defined OPERATING_SYSTEM__MICROSOFT
+					"PATH"
+				#else
+					#error unknown dynamic linker
+				#endif
+			};
 			//_dll = ::LoadLibraryEx(file_name.c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
 			// Or better, add all intermediate dirs from the root plugin dir down to this plugin's dir to the search path
 			// ::SetDllDirectory only exists since XP SP1 and doesn't let us add more than one path.. it's hence as poor as LOAD_WITH_ALTERED_SEARCH_PATH.
@@ -58,7 +68,7 @@ namespace psycle
 				// save the original path env var
 				std::string old_path;
 				{
-					char const * const env(std::getenv("PATH"));
+					char const * const env(std::getenv(path_env_var_name));
 					if(env) old_path = env;
 				}
 				std::ostringstream new_path;
@@ -72,27 +82,58 @@ namespace psycle
 					// or useless repetitions because of things like foo/./bar
 					path.normalize();
 					// then, loop
+					#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+						// blergh, dos/win9x needs a work around...
+						if(!root_path.is_complete()) root_path = boost::filesystem::current_path() / root_path;
+						{
+							std::string s(root_path.string());
+							std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+							root_path = boost::filesystem::path(s, boost::filesystem::no_check);
+						}
+						loggers::trace("root path: " +       root_path.string());
+						boost::filesystem::path lower_case_path;
+						{
+							std::string s(path.string());
+							std::transform(s.begin(), s.end(), s.begin(), std::tolower);
+							lower_case_path = boost::filesystem::path(s, boost::filesystem::no_check);
+						}
+					#endif
 					do
 					{
 						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
 						path = path.branch_path();
+						#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+							// blergh, dos/win9x needs a work around...
+							lower_case_path = lower_case_path.branch_path();
+							loggers::trace("     path: " + lower_case_path.string());
+						#else
+							loggers::trace("path: " + path.string());
+						#endif
 						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
 						// appends the intermediate dir to the list of paths
 						new_path << path.native_directory_string() << ";";
 					}
-					while(!boost::filesystem::equivalent(path, root_path));
+					while
+					(
+						#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+							// blergh, dos/win9x needs a work around...
+							lower_case_path.string() != root_path.string()
+						#else
+							!boost::filesystem::equivalent(path, root_path)
+						#endif
+					);
 					// append the old path value, at the end so it's searched last
 					new_path << old_path;
 				}
 				// set the new path env var
-				if(::putenv(("PATH="+ new_path.str()).c_str())) throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
-				loggers::trace("PATH env var: " + new_path.str());
+				if(::putenv((path_env_var_name + ("="+ new_path.str())).c_str())) throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
+				loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
-				if(::putenv(("PATH=" + old_path).c_str())) throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
+				if(::putenv((path_env_var_name + ("=" + old_path)).c_str())) throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
 			}
 			if(!_dll)
 			{
