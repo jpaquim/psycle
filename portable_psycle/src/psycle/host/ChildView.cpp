@@ -3430,6 +3430,36 @@ NAMESPACE__BEGIN(psycle)
 				pCmdUI->SetCheck(0);	
 		}
 
+		void CChildView::LoadMachineDial()
+		{
+			machinedial.DeleteObject();
+			if ( hbmMachineDial) DeleteObject(hbmMachineDial);
+			if (Global::pConfig->bBmpDial)
+			{
+				Global::pConfig->bBmpDial=FALSE;
+				hbmMachineDial = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpDialFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+				if (hbmMachineDial)
+				{
+					if (machinedial.Attach(hbmMachineDial))
+					{	
+						BITMAP bm;
+						GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
+
+						bkgx=bm.bmWidth;
+						bkgy=bm.bmHeight;
+
+						if ((bkgx == 1792) && (bkgy == 28))
+						{
+							Global::pConfig->bBmpDial=TRUE;
+						}
+						else
+							machinedial.LoadBitmap(IDB_KNOB);
+					}
+				}
+			}
+		}
+
+
 		void CChildView::LoadMachineBackground()
 		{
 			machinebkg.DeleteObject();
@@ -3456,6 +3486,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 			}
 		}
+
 	NAMESPACE__END
 NAMESPACE__END
 

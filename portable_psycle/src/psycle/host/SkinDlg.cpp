@@ -5,6 +5,7 @@
 #include "SkinDlg.hpp"
 #include "Helpers.hpp"
 #include "Configuration.hpp"
+#include ".\skindlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		#define MAX_FONTS 256
@@ -26,6 +27,7 @@ NAMESPACE__BEGIN(psycle)
 			CPropertyPage::DoDataExchange(pDX);
 			//{{AFX_DATA_MAP(CSkinDlg)
 			DDX_Control(pDX, IDC_MACHINE_BITMAP, m_machine_background_bitmap);
+			DDX_Control(pDX, IDC_MACHINEGUI_BITMAP, m_machine_GUI_bitmap);
 			DDX_Control(pDX, IDC_TRIANGLESIZE, m_triangle_size);
 			DDX_Control(pDX, IDC_WIRE_WIDTH, m_wirewidth);
 			DDX_Control(pDX, IDC_PATTERN_FONTFACE, m_pattern_fontface);
@@ -109,6 +111,13 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_MACHINE_BITMAP, OnMachineBitmap)
 			ON_CBN_SELCHANGE(IDC_TRIANGLESIZE, OnSelchangeTrianglesize)
 			//}}AFX_MSG_MAP
+			ON_BN_CLICKED(IDC_MACHINEGUI_TOPFONTC, OnBnClickedMachineguiFontc)
+			ON_BN_CLICKED(IDC_MACHINEGUI_TOPC, OnBnClickedMachineguiTopc)
+			ON_BN_CLICKED(IDC_MACHINEGUI_BOTTOMC, OnBnClickedMachineguiBottomc)
+			ON_BN_CLICKED(IDC_MACHINEGUI_BOTTOMFONTC, OnBnClickedMachineguiBottomfontc)
+			ON_BN_CLICKED(IDC_MACHINEGUI_TITLEC, OnBnClickedMachineguiTitlec)
+			ON_BN_CLICKED(IDC_MACHINEGUI_TITLEFONTC2, OnBnClickedMachineguiTitlefontc2)
+			ON_BN_CLICKED(IDC_MACHINEGUI_BITMAP, OnBnClickedMachineguiBitmap)
 		END_MESSAGE_MAP()
 
 		void CSkinDlg::OnOK()
@@ -203,6 +212,18 @@ NAMESPACE__BEGIN(psycle)
 			else
 			{
 				m_machine_background_bitmap.SetWindowText("No Background Bitmap");
+			}
+
+			if (bBmpDial)
+			{
+				CString str1(szBmpDialFilename.c_str());
+				int i = str1.ReverseFind('\\')+1;
+				CString str2 = str1.Mid(i);
+				m_machine_GUI_bitmap.SetWindowText(str2);
+			}
+			else
+			{
+				m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
 			}
 
 			for (int i = 8; i <= 64; i++)
@@ -671,7 +692,12 @@ NAMESPACE__BEGIN(psycle)
 			UpdateCanvasColour(IDC_PLAYBAR_CAN2,_playbarColor2);
 			UpdateCanvasColour(IDC_SELECTION_CAN,_selectionColor);
 			UpdateCanvasColour(IDC_SELECTION_CAN2,_selectionColor2);
-
+			UpdateCanvasColour(IDC_MACHINETOP_CAN,_machineGUITopColor);
+			UpdateCanvasColour(IDC_MACHINEFONTTOP_CAN,_machineGUIFontTopColor);
+			UpdateCanvasColour(IDC_MACHINEBOTTOM_CAN,_machineGUIBottomColor);
+			UpdateCanvasColour(IDC_MACHINEFONTBOTTOM_CAN,_machineGUIFontBottomColor);
+			UpdateCanvasColour(IDC_MACHINETITLE_CAN,_machineGUITitleColor);
+			UpdateCanvasColour(IDC_MACHINEFONTTITLE_CAN,_machineGUITitleFontColor);		
 		}
 
 		void CSkinDlg::UpdateCanvasColour(int id,COLORREF col)
@@ -884,6 +910,22 @@ NAMESPACE__BEGIN(psycle)
 								szBmpBkgFilename = q;
 								// check for no \ in which case search for it?
 								bBmpBkg = TRUE;
+							}
+						}
+					}
+					else if (std::strstr(buf,"\"machine_GUI_bitmap\"=\""))
+					{
+						char *q = std::strchr(buf,61); // =
+						if (q)
+						{
+							q+=2;
+							char *p = strrchr(q,34); // "
+							if (p)
+							{
+								p[0]=0;
+								szBmpDialFilename = q;
+								// check for no \ in which case search for it?
+								bBmpDial = TRUE;
 							}
 						}
 					}
@@ -1185,6 +1227,62 @@ NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _triangle_size);
 						}
 					}
+					else if (std::strstr(buf,"\"mv_effect_fontcolour\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineViewEffectFontColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUIFontTopColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUIFontTopColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUIFontBottomColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUIFontBottomColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUITopColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUITopColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUIBottomColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUIBottomColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUITitleColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUITitleColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUITitleFontColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUITitleFontColor);
+						}
+					}
 					//
 					//
 					//
@@ -1264,6 +1362,17 @@ NAMESPACE__BEGIN(psycle)
 				else
 				{
 					m_machine_background_bitmap.SetWindowText("No Background Bitmap");
+				}
+				if (bBmpDial)
+				{
+					CString str1(szBmpDialFilename.c_str());
+					int i = str1.ReverseFind('\\')+1;
+					CString str2 = str1.Mid(i);
+					m_machine_GUI_bitmap.SetWindowText(str2);
+				}
+				else
+				{
+					m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
 				}
 				m_triangle_size.SetCurSel(_triangle_size-8);
 			}
@@ -1349,7 +1458,14 @@ NAMESPACE__BEGIN(psycle)
 				std::fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n",_wirewidth);
 				std::fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n",_wireaa);
 				std::fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename.c_str());
+				std::fprintf(hfile,"\"machine_GUI_bitmap\"=\"%s\"\n",szBmpDialFilename.c_str());
 				std::fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n",_triangle_size);
+				std::fprintf(hfile,"\"machineGUIFontTopColor\"=dword:%.8X\n",_machineGUIFontTopColor);
+				std::fprintf(hfile,"\"machineGUIFontBottomColor\"=dword:%.8X\n",_machineGUIFontBottomColor);
+				std::fprintf(hfile,"\"machineGUITopColor\"=dword:%.8X\n",_machineGUITopColor);
+				std::fprintf(hfile,"\"machineGUIBottomColor\"=dword:%.8X\n",_machineGUIBottomColor);
+				std::fprintf(hfile,"\"machineGUITitleColor\"=dword:%.8X\n",_machineGUITitleColor);
+				std::fprintf(hfile,"\"machineGUITitleFontColor\"=dword:%.8X\n",_machineGUITitleFontColor);
 				std::fclose(hfile);
 			}
 		}
@@ -1559,6 +1675,72 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
+		void CSkinDlg::OnBnClickedMachineguiFontc()
+		{
+			CColorDialog dlg(_machineGUIFontTopColor);
+
+			if(dlg.DoModal() == IDOK)
+			{
+				_machineGUIFontTopColor = dlg.GetColor();
+				UpdateCanvasColour(IDC_MACHINEFONTTOP_CAN,_machineGUIFontTopColor);
+			}	
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiBottomfontc()
+		{
+				CColorDialog dlg(_machineGUIFontBottomColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUIFontBottomColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINEFONTBOTTOM_CAN,_machineGUIFontBottomColor);
+				}	
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiTopc()
+		{
+			CColorDialog dlg(_machineGUITopColor);
+
+			if(dlg.DoModal() == IDOK)
+			{
+				_machineGUITopColor = dlg.GetColor();
+				UpdateCanvasColour(IDC_MACHINETOP_CAN,_machineGUITopColor);
+			}	
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiBottomc()
+		{
+			CColorDialog dlg(_machineGUIBottomColor);
+
+			if(dlg.DoModal() == IDOK)
+			{
+				_machineGUIBottomColor = dlg.GetColor();
+				UpdateCanvasColour(IDC_MACHINEBOTTOM_CAN,_machineGUIBottomColor);
+			}	
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiTitlec()
+		{
+				CColorDialog dlg(_machineGUITitleColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUITitleColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINETITLE_CAN,_machineGUITitleColor);
+				}
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiTitlefontc2()
+		{
+				CColorDialog dlg(_machineGUITitleFontColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUITitleFontColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINEFONTTITLE_CAN,_machineGUITitleFontColor);
+				}
+		}
+
 		void CSkinDlg::OnDrawEmptyData()
 		{
 			_pattern_draw_empty_data = m_pattern_draw_empty_data.GetCheck() >0?true:false;
@@ -1567,6 +1749,48 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::OnDrawMacIndex()
 		{
 			_draw_mac_index = m_draw_mac_index.GetCheck() >0?true:false;
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiBitmap()
+		{
+				OPENFILENAME ofn; // common dialog box structure
+				char szFile[_MAX_PATH]; // buffer for file name
+				char szPath[_MAX_PATH]; // buffer for file name
+				szFile[0]='\0';
+				szPath[0]='\0';
+				CString str1(szBmpDialFilename.c_str());
+				int i = str1.ReverseFind('\\')+1;
+				CString str2 = str1.Mid(i);
+				std::strcpy(szFile,str2);
+				std::strcpy(szPath,str1);
+				szPath[i]=0;
+				// Initialize OPENFILENAME
+				::ZeroMemory(&ofn, sizeof(OPENFILENAME));
+				ofn.lStructSize = sizeof(OPENFILENAME);
+				ofn.hwndOwner = GetParent()->m_hWnd;
+				ofn.lpstrFile = szFile;
+				ofn.nMaxFile = sizeof(szFile);
+				ofn.lpstrFilter = "Bitmaps (*.bmp)\0*.bmp\0";
+				ofn.nFilterIndex = 0;
+				ofn.lpstrFileTitle = NULL;
+				ofn.nMaxFileTitle = 0;
+				ofn.lpstrInitialDir = szPath;
+				ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+				// Display the Open dialog box. 
+				if(GetOpenFileName(&ofn)==TRUE)
+				{
+					szBmpDialFilename = szFile;
+					bBmpDial = TRUE;
+					CString str1(szBmpDialFilename.c_str());
+					int i = str1.ReverseFind('\\')+1;
+					CString str2 = str1.Mid(i);
+					m_machine_GUI_bitmap.SetWindowText(str2);
+				}
+				else
+				{
+					bBmpDial = FALSE;
+					m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
+				}
 		}
 
 		void CSkinDlg::OnMachineBitmap() 

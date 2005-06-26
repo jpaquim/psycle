@@ -602,6 +602,7 @@
 #define IDC_WIRE_COLOUR                 1418
 #define IDC_POLY_COLOUR                 1419
 #define IDC_AAWIRE                      1420
+#define IDC_MACHINEFONTTOP_CAN          1420
 #define IDC_PLAYBAR_CAN                 1421
 #define IDC_PLAYBAR_CAN2                1422
 #define IDC_WIRE_WIDTH                  1423
@@ -678,9 +679,16 @@
 #define IDC_SEQCUT                      1473
 #define IDC_TRIANGLESIZE                1473
 #define IDC_SEQCOPY                     1474
+#define IDC_MACHINETOP_CAN              1474
 #define IDC_SEQPASTE                    1475
 #define IDC_MACHINE_BITMAP              1475
 #define IDC_SEQDELETE                   1476
+#define IDC_MACHINETOP_CAN2             1476
+#define IDC_MACHINEBOTTOM_CAN           1476
+#define IDC_MACHINEFONTBOTTOM_CAN       1477
+#define IDC_MACHINETITLE_CAN            1478
+#define IDC_MACHINEFONTBOTTOM_CAN2      1479
+#define IDC_MACHINEFONTTITLE_CAN        1479
 #define IDC_BUTTON                      1481
 #define IDC_SLIDER                      1482
 #define IDC_VOLSLIDER                   1484
@@ -891,6 +899,13 @@
 #define IDC_LVIBRATORATE                1656
 #define IDC_LVIBRATOSWEEP               1657
 #define IDC_LVIBRATODEPTH               1658
+#define IDC_MACHINEGUI_BITMAP           1659
+#define IDC_MACHINEGUI_TOPFONTC         1660
+#define IDC_MACHINEGUI_TOPC             1661
+#define IDC_MACHINEGUI_BOTTOMC          1662
+#define IDC_MACHINEGUI_BOTTOMFONTC      1663
+#define IDC_MACHINEGUI_TITLEC           1664
+#define IDC_MACHINEGUI_TITLEFONTC2      1665
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -991,7 +1006,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        228
 #define _APS_NEXT_COMMAND_VALUE         32939
-#define _APS_NEXT_CONTROL_VALUE         1659
+#define _APS_NEXT_CONTROL_VALUE         1663
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

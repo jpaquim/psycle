@@ -263,6 +263,7 @@ NAMESPACE__BEGIN(psycle)
 			void LoadPatternHeaderSkin();
 			void LoadMachineSkin();
 			void LoadMachineBackground();
+			void LoadMachineDial();
 			void KillWireDialogs();
 			void patTrackMute();
 			void patTrackSolo();
@@ -280,6 +281,8 @@ NAMESPACE__BEGIN(psycle)
 			//RECENT!!!//
 			void OnFileLoadsongNamed(std::string fName, int fType);
 			HMENU hRecentMenu;
+
+			CBitmap machinedial; //the machine dial bitmap
 
 			CFrameWnd* pParentFrame;
 			Song* _pSong;
@@ -402,6 +405,10 @@ NAMESPACE__BEGIN(psycle)
 			CBitmap machinebkg;
 			HBITMAP hbmMachineSkin;
 			HBITMAP hbmMachineBkg;
+
+			
+			HBITMAP hbmMachineDial;
+
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
 			int VISLINES;
