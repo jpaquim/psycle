@@ -93,12 +93,16 @@ namespace psycle
 			pvc_cursor  = 0x000000e0;
 			pvc_cursor2 = 0x005050ff;
 
-			machineGUITopColor = 0x00788D93;
+			machineGUITopColor = 0x00788D93;		
 			machineGUIFontTopColor = 0x00CCDDEE; 
-
 			machineGUIBottomColor = 0x00687D83;
 			machineGUIFontBottomColor = 0x0044EEFF; 
-						
+
+			machineGUIHTopColor = 0x00BCAF93;	//highlighted param colours
+			machineGUIHFontTopColor = 0x00CCDDEE; 
+			machineGUIHBottomColor = 0x00AC9F83;
+			machineGUIHFontBottomColor = 0x0044EEFF; 
+
 			machineGUITitleColor = 0x0088a8b4;
 			machineGUITitleFontColor = 0x00FFFFFF;
 
@@ -295,6 +299,10 @@ namespace psycle
 			reg.QueryValue("machineGUIFontTopColor", machineGUIFontTopColor);
 			reg.QueryValue("machineGUIBottomColor", machineGUIBottomColor);
 			reg.QueryValue("machineGUIFontBottomColor", machineGUIFontBottomColor);
+			reg.QueryValue("machineGUIHTopColor", machineGUIHTopColor);
+			reg.QueryValue("machineGUIHFontTopColor", machineGUIHFontTopColor);
+			reg.QueryValue("machineGUIHBottomColor", machineGUIHBottomColor);
+			reg.QueryValue("machineGUIHFontBottomColor", machineGUIHFontBottomColor);
 			reg.QueryValue("machineGUITitleColor", machineGUITitleColor);
 			reg.QueryValue("machineGUITitleFontColor", machineGUITitleFontColor);
 			mv_wireaacolour =
@@ -470,6 +478,10 @@ namespace psycle
 			reg.SetValue("machineGUIFontTopColor", machineGUIFontTopColor);
 			reg.SetValue("machineGUIBottomColor", machineGUIBottomColor);
 			reg.SetValue("machineGUIFontBottomColor", machineGUIFontBottomColor);
+			reg.SetValue("machineGUIHTopColor", machineGUIHTopColor);
+			reg.SetValue("machineGUIHFontTopColor", machineGUIHFontTopColor);
+			reg.SetValue("machineGUIHBottomColor", machineGUIHBottomColor);
+			reg.SetValue("machineGUIHFontBottomColor", machineGUIHFontBottomColor);
 			reg.SetValue("machineGUITitleColor", machineGUITitleColor);
 			reg.SetValue("machineGUITitleFontColor", machineGUITitleFontColor);
 			reg.SetValue("pattern_fontface", pattern_fontface);

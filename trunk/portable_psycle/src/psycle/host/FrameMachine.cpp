@@ -289,7 +289,8 @@ NAMESPACE__BEGIN(psycle)
 
 					dc.BitBlt(x_knob,y_knob,K_XSIZE,K_YSIZE,&memDC,xn,0,SRCCOPY);
 				
-					int nc;
+					//the old code which did the parameter highlight
+					/*int nc;
 					
 					if ((tweakpar == c) && (istweak))
 					{
@@ -298,20 +299,36 @@ NAMESPACE__BEGIN(psycle)
 					else
 					{
 						nc = 0;
-					}
+					}*/
 					
 					//commented out by Alk when enabling custom colours
 					//and all throughout this function
 					//dc.SetBkColor(0x00788D93 + nc*2);
 					//dc.SetTextColor(0x00CCDDEE + nc);
-					dc.SetBkColor(Global::pConfig->machineGUITopColor + nc*2);
-					dc.SetTextColor(Global::pConfig->machineGUIFontTopColor + nc);
+					if ((tweakpar == c) && (istweak))
+					{
+						dc.SetBkColor(Global::pConfig->machineGUIHTopColor);
+						dc.SetTextColor(Global::pConfig->machineGUIHFontTopColor);
+					}
+					else
+					{
+						dc.SetBkColor(Global::pConfig->machineGUITopColor);
+						dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
+					}
 					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
 					
 					//dc.SetBkColor(0x00687D83 + nc*2);
 					//dc.SetTextColor(0x0044EEFF + nc);
-					dc.SetBkColor(Global::pConfig->machineGUIBottomColor + nc*2);
-					dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor + nc);
+					if ((tweakpar == c) && (istweak))
+					{
+						dc.SetBkColor(Global::pConfig->machineGUIHBottomColor);
+						dc.SetTextColor(Global::pConfig->machineGUIHFontBottomColor);
+					}
+					else
+					{
+						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+						dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+					}
 					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
 				
 				}
