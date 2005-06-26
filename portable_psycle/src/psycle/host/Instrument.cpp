@@ -229,7 +229,7 @@ namespace psycle
 
 			// now we have to write out the waves, but only if valid
 
-			int numwaves = (waveLength > 0)?1:0;
+			int numwaves = (waveLength > 0)?1:0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
 
 			pFile->Write(&numwaves, sizeof(numwaves));
 			if (waveLength > 0)

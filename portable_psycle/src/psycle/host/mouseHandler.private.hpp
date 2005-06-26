@@ -15,11 +15,12 @@ NAMESPACE__BEGIN(psycle)
 				smac = -1; 		smacmode = 0;
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
-				if (nFlags & MK_CONTROL)
+				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
 					{
-					smac=GetMachine(point);
+/*					smac=GetMachine(point);
 					if ( smac == -1 )
-						{						
+						{
+*/
 						int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
 						if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
 							{
@@ -44,19 +45,18 @@ NAMESPACE__BEGIN(psycle)
 									break;
 								}		
 							wiresource=-1;
-							//							OnMouseMove(nFlags,point);
+//							OnMouseMove(nFlags,point);
 							}
-						}
+//						}
 					}
-				else if (nFlags == MK_RBUTTON) // Right click alone. Action: Create connection or move wire.
+				else if (nFlags == MK_RBUTTON) // Right click alone. Action: Create a new wire or move wire destination.
 				{
-					wiremove = -1;					
 					wiresource = GetMachine(point); //See if we have clicked over a machine.
 					if ( wiresource == -1 ) // not a machine. Let's see if it is a wire
 					{
 						wiremove = GetWire(point,wiresource); // wiresource = origin machine *index*. wiremove = wire connection point in origin machine
 					}
-					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable origin-wire creation/move
+					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable wire creation/move
 					{
 						switch (_pSong->_pMachine[wiresource]->_mode)
 						{
@@ -110,7 +110,7 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if ( wiremove != -1) //where we moving a wire then?
+					else if ( wiremove != -1) //were we moving a wire then?
 						{
 							_pSong->ChangeWireSourceMac(propMac,wiredest,wiremove);
 						}
@@ -118,7 +118,7 @@ NAMESPACE__BEGIN(psycle)
 				else
 				{					
 					int w = GetWire(point,wiresource);
-					if ( w != -1 )
+					if ( w != -1 )	// Are we over a wire?
 					{
 						Machine *tmac = _pSong->_pMachine[wiresource];
 						Machine *dmac = _pSong->_pMachine[tmac->_outputMachines[w]];
@@ -130,6 +130,10 @@ NAMESPACE__BEGIN(psycle)
 								if ((WireDialog[i]->_pSrcMachine == tmac) &&
 								(WireDialog[i]->_pDstMachine == dmac))  // If this is true, the dialog is already open
 								{
+									wiresource = -1;
+									wiredest = -1;
+									wiremove = -1;
+									CWnd::OnRButtonUp(nFlags,point);
 									return;
 								}
 							}
@@ -158,6 +162,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 			wiresource = -1;
 			wiredest = -1;
+			wiremove = -1;
 			Repaint();
 			CWnd::OnRButtonUp(nFlags,point);
 		}
@@ -456,7 +461,7 @@ NAMESPACE__BEGIN(psycle)
 			if (viewMode == VMMachine )
 			{
 				int propMac = GetMachine(point);
-				if ( propMac != -1) // \todo this If sentence might not be correct.
+				if ( propMac != -1)
 				{
 					if (wiremove >= 0) // are we moving a wire?
 					{
@@ -470,8 +475,7 @@ NAMESPACE__BEGIN(psycle)
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
 						AddMacViewUndo();
-						wiredest = GetMachine(point);
-						if (!Global::_pSong->InsertConnection(wiresource, wiredest))
+						if (!Global::_pSong->InsertConnection(wiresource, propMac))
 						{
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}
@@ -509,6 +513,7 @@ NAMESPACE__BEGIN(psycle)
 	
 				smac = -1;		smacmode = 0;
 				wiresource = -1;wiredest = -1;
+				wiremove = -1;
 				Repaint();
 
 			}
@@ -954,11 +959,11 @@ NAMESPACE__BEGIN(psycle)
 									if ((WireDialog[i]->_pSrcMachine == tmac) &&
 										(WireDialog[i]->_pDstMachine == dmac))  // If this is true, the dialog is already open
 									{
+										wiresource = -1;
 										return;
 									}
 								}
 								else free = i;
-
 							}
 							if (free != -1) //If there is any dialog slot open
 							{
@@ -972,6 +977,7 @@ NAMESPACE__BEGIN(psycle)
 								wdlg->Create();
 								pParentMain->CenterWindowOnPoint(wdlg, point);
 								wdlg->ShowWindow(SW_SHOW);
+								wiresource = -1;
 								return;
 							}
 							else
@@ -979,6 +985,7 @@ NAMESPACE__BEGIN(psycle)
 								MessageBox("Cannot show the wire dialog. Too many of them opened!","Error!", MB_ICONERROR);
 							}
 						}
+						wiresource = -1;
 						// if no connection then Show new machine dialog
 						NewMachine(point.x,point.y);
 		//				Repaint();

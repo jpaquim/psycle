@@ -413,6 +413,10 @@ NAMESPACE__BEGIN(psycle)
 						tweakbase = 0;
 					}
 				}
+				else if ( _pMachine->_type == MACH_DUPLICATOR )
+				{
+					tweakbase = tweakbase = _pMachine->GetParamValue(tweakpar);
+				}
 				istweak = true;
 				SetCapture();
 			}

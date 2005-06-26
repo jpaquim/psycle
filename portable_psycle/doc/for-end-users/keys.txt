@@ -2,7 +2,9 @@
 
 NOTE:	Most of these keys can be changed from the "Keyboard Settings" DialogBox.
 -----	If you want to set them to default ones again, please, go to your Windows folder
-	(usually C:\Windows) and delete the file "Psyclekeys.ini"
+	(usually C:\Windows) and delete the file "Psyclekeys.ini".
+	Alternatively, use the "Default" button inside Psycle's "keyboard and misc" configuration
+	tab, and reopen Psycle.
 
 
 
