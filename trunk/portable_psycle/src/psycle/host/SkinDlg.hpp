@@ -40,6 +40,13 @@ NAMESPACE__BEGIN(psycle)
 			COLORREF _vubColor;
 			COLORREF _vugColor;
 			COLORREF _vucColor;
+			COLORREF _machineGUIFontTopColor;
+			COLORREF _machineGUIFontBottomColor;
+			COLORREF _machineGUITopColor;
+			COLORREF _machineGUIBottomColor;
+			COLORREF _machineGUITitleColor;
+			COLORREF _machineGUITitleFontColor;			
+
 			bool _gfxbuffer;
 			int _wireaa;
 			bool _linenumbers;
@@ -72,11 +79,14 @@ NAMESPACE__BEGIN(psycle)
 			std::string _skinPathBuf;
 
 			bool bBmpBkg;
+			bool bBmpDial;
 			std::string szBmpBkgFilename;
+			std::string szBmpDialFilename;
 		// Dialog Data
 			//{{AFX_DATA(CSkinDlg)
 			enum { IDD = IDD_SKIN };
 			CButton	m_machine_background_bitmap;
+			CButton	m_machine_GUI_bitmap;
 			CComboBox	m_triangle_size;
 			CComboBox	m_wirewidth;
 			CButton	m_pattern_fontface;
@@ -178,7 +188,15 @@ NAMESPACE__BEGIN(psycle)
 			void UpdateCanvasColour(int id,COLORREF col);
 			void FindSkinsInDir(CString findDir);
 			void SetFontNames();
-		};
+		public:
+			afx_msg void OnBnClickedMachineguiFontc();
+			afx_msg void OnBnClickedMachineguiTopc();
+			afx_msg void OnBnClickedMachineguiBottomc();
+			afx_msg void OnBnClickedMachineguiBottomfontc();
+			afx_msg void OnBnClickedMachineguiTitlec();
+			afx_msg void OnBnClickedMachineguiTitlefontc2();
+			afx_msg void OnBnClickedMachineguiBitmap();
+};
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.

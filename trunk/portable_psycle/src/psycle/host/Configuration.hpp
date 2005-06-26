@@ -62,6 +62,15 @@ namespace psycle
 			COLORREF vu2;
 			COLORREF vu3;
 
+			COLORREF machineGUITopColor;
+			COLORREF machineGUIFontTopColor;
+
+			COLORREF machineGUIBottomColor;
+			COLORREF machineGUIFontBottomColor;
+			
+			COLORREF machineGUITitleColor;
+			COLORREF machineGUITitleFontColor;
+
 			bool mv_wireaa;
 			int  mv_wirewidth;
 			bool _wrapAround;
@@ -81,7 +90,9 @@ namespace psycle
 			int mv_triangle_size;
 
 			bool bBmpBkg;
+			bool bBmpDial;
 			std::string szBmpBkgFilename;
+			std::string szBmpDialFilename;
 
 			std::string pattern_fontface;
 			std::string pattern_header_skin;
@@ -107,6 +118,7 @@ namespace psycle
 			CFont seqFont;
 			CFont generatorFont;
 			CFont effectFont;
+
 
 		public:
 			class midi_type

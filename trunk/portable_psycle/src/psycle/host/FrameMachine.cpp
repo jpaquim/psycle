@@ -55,8 +55,12 @@ NAMESPACE__BEGIN(psycle)
 			finetweak=false;
 			ultrafinetweak=false;
 			
-			b_knob.LoadBitmap(IDB_KNOB);
+			if (Global::pConfig->bBmpDial)
+				wndView->LoadMachineDial();
+			else
+				wndView->machinedial.LoadBitmap(IDB_KNOB);
 			b_font.CreatePointFont(80,"Tahoma");
+			b_font_bold.CreatePointFont(80,"Tahoma Bold");
 
 			UpdateWindow();
 		}
@@ -172,6 +176,7 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnTimer(nIDEvent);
 		}
 
+
 		///////////////////////////////////////////////////////////////////////
 		// PAINT GUI HERE
 		///////////////////////////////////////////////////////////////////////
@@ -192,7 +197,7 @@ NAMESPACE__BEGIN(psycle)
 			CBitmap* oldbmp;
 
 			memDC.CreateCompatibleDC(&dc);
-			oldbmp=memDC.SelectObject(&b_knob);
+			oldbmp=memDC.SelectObject(&wndView->machinedial);
 
 			int y_knob = 0;
 			int x_knob = 0;
@@ -295,12 +300,18 @@ NAMESPACE__BEGIN(psycle)
 						nc = 0;
 					}
 					
-					dc.SetBkColor(0x00788D93 + nc*2);
-					dc.SetTextColor(0x00CCDDEE + nc);
+					//commented out by Alk when enabling custom colours
+					//and all throughout this function
+					//dc.SetBkColor(0x00788D93 + nc*2);
+					//dc.SetTextColor(0x00CCDDEE + nc);
+					dc.SetBkColor(Global::pConfig->machineGUITopColor + nc*2);
+					dc.SetTextColor(Global::pConfig->machineGUIFontTopColor + nc);
 					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
 					
-					dc.SetBkColor(0x00687D83 + nc*2);
-					dc.SetTextColor(0x0044EEFF + nc);
+					//dc.SetBkColor(0x00687D83 + nc*2);
+					//dc.SetTextColor(0x0044EEFF + nc);
+					dc.SetBkColor(Global::pConfig->machineGUIBottomColor + nc*2);
+					dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor + nc);
 					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
 				
 				}
@@ -308,22 +319,32 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
 					{
-						dc.SetBkColor(0x00788D93);
+						//dc.SetBkColor(0x00788D93);
+						dc.SetBkColor(Global::pConfig->machineGUITopColor);
 						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
+						
 
-						dc.SetBkColor(0x00687D83);
+						//dc.SetBkColor(0x00687D83);
+						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
 						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 					}
 					else
 					{
-						dc.SetBkColor(0x00788D93);
+						//dc.SetBkColor(0x00788D93);
+						dc.SetBkColor(Global::pConfig->machineGUITopColor);
 						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
+					
+						//dc.SetBkColor(0x0088a8b4);
+						//dc.SetTextColor(0x00FFFFFF);
+						dc.SetBkColor(Global::pConfig->machineGUITitleColor);
+						dc.SetTextColor(Global::pConfig->machineGUITitleFontColor);
 
-						dc.SetBkColor(0x0088a8b4);
-						dc.SetTextColor(0x00FFFFFF);
+						dc.SelectObject(&b_font_bold);
 						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
+						dc.SelectObject(&b_font);
 
-						dc.SetBkColor(0x00687D83);
+						//dc.SetBkColor(0x00687D83);
+						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
 						dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
 					}
 				}
@@ -344,12 +365,16 @@ NAMESPACE__BEGIN(psycle)
 			{
 				for (int c=numParameters; c<exess; c++)
 				{
-					dc.SetBkColor(0x00788D93);
-					dc.SetTextColor(0x00CCDDEE);
+					//dc.SetBkColor(0x00788D93);
+					//dc.SetTextColor(0x00CCDDEE);
+					dc.SetBkColor(Global::pConfig->machineGUITopColor);
+					dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
 					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
 
-					dc.SetBkColor(0x00687D83);
-					dc.SetTextColor(0x0044EEFF);
+					//dc.SetBkColor(0x00687D83);
+					//dc.SetTextColor(0x0044EEFF);
+					dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+					dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
 					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
 
 					y_knob += K_YSIZE;

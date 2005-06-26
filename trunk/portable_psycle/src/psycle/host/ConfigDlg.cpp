@@ -54,7 +54,14 @@ NAMESPACE__BEGIN(psycle)
 			_skinDlg._cursorColor2 = pConfig->pvc_cursor2;
 			_skinDlg._playbarColor = pConfig->pvc_playbar;
 			_skinDlg._playbarColor2 = pConfig->pvc_playbar2;
-			
+
+			_skinDlg._machineGUITopColor = pConfig->machineGUITopColor;
+			_skinDlg._machineGUIFontTopColor = pConfig->machineGUIFontTopColor;
+			_skinDlg._machineGUIBottomColor = pConfig->machineGUIBottomColor;
+			_skinDlg._machineGUIFontBottomColor = pConfig->machineGUIFontBottomColor;
+			_skinDlg._machineGUITitleColor = pConfig->machineGUITitleColor;
+			_skinDlg._machineGUITitleFontColor = pConfig->machineGUITitleFontColor;
+
 			_skinDlg._machineViewColor = pConfig->mv_colour;
 			_skinDlg._machineViewWireColor = pConfig->mv_wirecolour;
 			_skinDlg._machineViewPolyColor = pConfig->mv_polycolour;
@@ -93,7 +100,9 @@ NAMESPACE__BEGIN(psycle)
 			_skinDlg._machine_skin = pConfig->machine_skin;
 
 			_skinDlg.szBmpBkgFilename = pConfig->szBmpBkgFilename;
+			_skinDlg.szBmpDialFilename = pConfig->szBmpDialFilename;
 			_skinDlg.bBmpBkg = pConfig->bBmpBkg;
+			_skinDlg.bBmpDial = pConfig->bBmpDial;
 
 			_outputDlg.m_driverIndex = pConfig->_outputDriverIndex;
 			_outputDlg.m_midiDriverIndex = pConfig->_midiDriverIndex;
@@ -176,6 +185,15 @@ NAMESPACE__BEGIN(psycle)
 				_pConfig->mv_wireaa = _skinDlg._wireaa;
 				_pConfig->mv_wirewidth = _skinDlg._wirewidth;
 
+				_pConfig->machineGUITopColor = _skinDlg._machineGUITopColor;
+				_pConfig->machineGUIFontTopColor = _skinDlg._machineGUIFontTopColor;
+				
+				_pConfig->machineGUIBottomColor = _skinDlg._machineGUIBottomColor;
+				_pConfig->machineGUIFontBottomColor = _skinDlg._machineGUIFontBottomColor;
+				
+				_pConfig->machineGUITitleColor = _skinDlg._machineGUITitleColor;
+				_pConfig->machineGUITitleFontColor = _skinDlg._machineGUITitleFontColor;
+
 				_pConfig->mv_triangle_size = _skinDlg._triangle_size;
 
 				_pConfig->useDoubleBuffer = _skinDlg._gfxbuffer;
@@ -225,6 +243,16 @@ NAMESPACE__BEGIN(psycle)
 					if (_pConfig->Initialized() ) 
 					{
 						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();
+					}
+				}
+
+				_pConfig->bBmpDial = _skinDlg.bBmpDial;
+				if (_pConfig->bBmpDial)
+				{
+					_pConfig->szBmpDialFilename = _skinDlg.szBmpDialFilename;
+					if (_pConfig->Initialized() ) 
+					{
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
 					}
 				}
 				if (_pConfig->Initialized() ) 

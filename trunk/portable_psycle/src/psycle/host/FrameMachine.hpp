@@ -25,8 +25,10 @@ NAMESPACE__BEGIN(psycle)
 			CFrameMachine(int dum){MachineIndex = dum;};
 		private:
 			Machine* _pMachine;
-			CBitmap b_knob;
+			//CBitmap b_knob;
 			CFont	b_font;
+			CFont	b_font_bold;
+
 		// Enviroment
 			int numParameters;
 			bool me;
@@ -42,6 +44,7 @@ NAMESPACE__BEGIN(psycle)
 			int parspercol;
 		// Operations
 		public:
+			void LoadMachineDial();
 			void SelectMachine(Machine* pMachine);
 			void Generate();
 			CChildView *wndView;

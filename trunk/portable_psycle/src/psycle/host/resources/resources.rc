@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -476,10 +476,10 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,5,134,231,15
 END
 
-IDD_SKIN DIALOG  0, 0, 298, 286
+IDD_SKIN DIALOGEX 0, 0, 298, 359
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Visual"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Pattern View ",IDC_STATIC,1,1,144,284
     LTEXT           "Font Face",IDC_STATIC,7,11,45,10
@@ -606,7 +606,7 @@ BEGIN
     LTEXT           "Skin",IDC_STATIC,155,142,17,10,SS_CENTERIMAGE
     COMBOBOX        IDC_MACHINE_SKIN,176,140,113,227,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "VU Colors",IDC_STATIC,150,179,145,43
+    GROUPBOX        "VU Colors",IDC_STATIC,149,179,145,43
     PUSHBUTTON      "BackGround",IDC_BUTTON24,154,188,46,13
     CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,191,
                     12,9
@@ -624,7 +624,7 @@ BEGIN
     PUSHBUTTON      "Save",IDC_EXPORTREG,216,267,55,12
     CONTROL         "Draw Empty Data",IDC_DRAW_EMPTY_DATA,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,59,8,79,12
-    PUSHBUTTON      "pattern fontface",IDC_PATTERN_FONTFACE,5,20,135,15
+    PUSHBUTTON      "pattern fontface",IDC_PATTERN_FONTFACE,1,20,135,15
     PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE,154,20,135,15
     PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE2,154,55,135,15
     CONTROL         "Draw Machine Indexes",IDC_DRAW_MAC_INDEX,"Button",
@@ -635,6 +635,26 @@ BEGIN
     LTEXT           "Polygon Size",IDC_STATIC,248,122,44,13,SS_CENTERIMAGE
     CONTROL         "Draw VU Meters",IDC_CHECK_VUS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,223,188,66,11
+    GROUPBOX        "Native Machine GUI",IDC_STATIC,1,288,143,59
+    PUSHBUTTON      "Machine GUI Bitmap",IDC_MACHINEGUI_BITMAP,8,329,129,13
+    PUSHBUTTON      "Font",IDC_MACHINEGUI_TOPFONTC,8,314,26,11
+    PUSHBUTTON      "Param",IDC_MACHINEGUI_TOPC,8,299,26,11
+    PUSHBUTTON      "Value",IDC_MACHINEGUI_BOTTOMC,54,299,26,11
+    CONTROL         "",IDC_MACHINEFONTTOP_CAN,"Static",SS_GRAYRECT | 
+                    SS_SUNKEN,33,314,12,11
+    CONTROL         "",IDC_MACHINETOP_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,
+                    33,299,12,11
+    CONTROL         "",IDC_MACHINEBOTTOM_CAN,"Static",SS_GRAYRECT | 
+                    SS_SUNKEN,80,300,12,9
+    PUSHBUTTON      "Font",IDC_MACHINEGUI_BOTTOMFONTC,54,315,26,10
+    CONTROL         "",IDC_MACHINEFONTBOTTOM_CAN,"Static",SS_GRAYRECT | 
+                    SS_SUNKEN,80,316,12,9
+    PUSHBUTTON      "Title",IDC_MACHINEGUI_TITLEC,100,300,26,11
+    PUSHBUTTON      "Font",IDC_MACHINEGUI_TITLEFONTC2,100,316,26,10
+    CONTROL         "",IDC_MACHINETITLE_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,
+                    126,301,12,9
+    CONTROL         "",IDC_MACHINEFONTTITLE_CAN,"Static",SS_GRAYRECT | 
+                    SS_SUNKEN,126,316,12,9
 END
 
 IDD_SONGPROP DIALOGEX 0, 0, 198, 135
@@ -2097,8 +2117,8 @@ BEGIN
     IDD_SKIN, DIALOG
     BEGIN
         LEFTMARGIN, 1
-        RIGHTMARGIN, 297
-        BOTTOMMARGIN, 284
+        RIGHTMARGIN, 294
+        BOTTOMMARGIN, 354
     END
 
     IDD_SONGPROP, DIALOG
@@ -2906,7 +2926,7 @@ BEGIN
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

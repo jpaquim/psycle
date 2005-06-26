@@ -92,6 +92,16 @@ namespace psycle
 			pvc_playbar2 = 0x005050e0;
 			pvc_cursor  = 0x000000e0;
 			pvc_cursor2 = 0x005050ff;
+
+			machineGUITopColor = 0x00788D93;
+			machineGUIFontTopColor = 0x00CCDDEE; 
+
+			machineGUIBottomColor = 0x00687D83;
+			machineGUIFontBottomColor = 0x0044EEFF; 
+						
+			machineGUITitleColor = 0x0088a8b4;
+			machineGUITitleFontColor = 0x00FFFFFF;
+
 			// If you change the initial colour values, change it also in "CSkinDlg::OnResetcolours()"
 			vu1 = 0x00f1c992;
 			vu2 = 0x00403731;
@@ -136,7 +146,9 @@ namespace psycle
 			autosaveSong = true;
 			autosaveSongTime = 10;
 			bBmpBkg = false;
+			bBmpDial = false;
 			szBmpBkgFilename = "psycle.bmp";
+			szBmpDialFilename = "dial.bmp";
 			// paths
 			{
 				{
@@ -249,7 +261,9 @@ namespace psycle
 			reg.QueryValue("mv_effect_fontcolour", mv_effect_fontcolour);
 			reg.QueryValue("mv_triangle_size", mv_triangle_size);
 			reg.QueryValue("bBmpBkg", bBmpBkg);
+			reg.QueryValue("bBmpDial", bBmpDial);
 			reg.QueryValue("szBmpBkgFilename", szBmpBkgFilename);
+			reg.QueryValue("szBmpDialFilename", szBmpDialFilename);
 			reg.QueryValue("pvc_background", pvc_background);
 			reg.QueryValue("pvc_background2", pvc_background2);
 			reg.QueryValue("pvc_separator", pvc_separator);
@@ -277,6 +291,12 @@ namespace psycle
 			reg.QueryValue("vu1", vu1);
 			reg.QueryValue("vu2", vu2);
 			reg.QueryValue("vu3", vu3);
+			reg.QueryValue("machineGUITopColor", machineGUITopColor);
+			reg.QueryValue("machineGUIFontTopColor", machineGUIFontTopColor);
+			reg.QueryValue("machineGUIBottomColor", machineGUIBottomColor);
+			reg.QueryValue("machineGUIFontBottomColor", machineGUIFontBottomColor);
+			reg.QueryValue("machineGUITitleColor", machineGUITitleColor);
+			reg.QueryValue("machineGUITitleFontColor", machineGUITitleFontColor);
 			mv_wireaacolour =
 				((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
 				((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
@@ -416,7 +436,9 @@ namespace psycle
 			reg.SetValue("mv_effect_fontcolour", mv_effect_fontcolour, mv_effect_fontcolour);
 			reg.SetValue("mv_triangle_size", mv_triangle_size);
 			reg.SetValue("bBmpBkg", bBmpBkg);
+			reg.SetValue("bBmpDial", bBmpDial);
 			reg.SetValue("szBmpBkgFilename", szBmpBkgFilename);
+			reg.SetValue("szBmpDialFilename", szBmpDialFilename);
 			reg.SetValue("pvc_separator", pvc_separator);
 			reg.SetValue("pvc_separator2", pvc_separator2);
 			reg.SetValue("pvc_background", pvc_background);
@@ -444,6 +466,12 @@ namespace psycle
 			reg.SetValue("vu1", vu1);
 			reg.SetValue("vu2", vu2);
 			reg.SetValue("vu3", vu3);
+			reg.SetValue("machineGUITopColor", machineGUITopColor);
+			reg.SetValue("machineGUIFontTopColor", machineGUIFontTopColor);
+			reg.SetValue("machineGUIBottomColor", machineGUIBottomColor);
+			reg.SetValue("machineGUIFontBottomColor", machineGUIFontBottomColor);
+			reg.SetValue("machineGUITitleColor", machineGUITitleColor);
+			reg.SetValue("machineGUITitleFontColor", machineGUITitleFontColor);
 			reg.SetValue("pattern_fontface", pattern_fontface);
 			reg.SetValue("pattern_font_point", pattern_font_point);
 			reg.SetValue("pattern_font_flags", pattern_font_flags);
