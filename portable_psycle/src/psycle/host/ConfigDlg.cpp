@@ -59,6 +59,12 @@ NAMESPACE__BEGIN(psycle)
 			_skinDlg._machineGUIFontTopColor = pConfig->machineGUIFontTopColor;
 			_skinDlg._machineGUIBottomColor = pConfig->machineGUIBottomColor;
 			_skinDlg._machineGUIFontBottomColor = pConfig->machineGUIFontBottomColor;
+
+			_skinDlg._machineGUIHTopColor = pConfig->machineGUIHTopColor;
+			_skinDlg._machineGUIHFontTopColor = pConfig->machineGUIHFontTopColor;
+			_skinDlg._machineGUIHBottomColor = pConfig->machineGUIHBottomColor;
+			_skinDlg._machineGUIHFontBottomColor = pConfig->machineGUIHFontBottomColor;
+
 			_skinDlg._machineGUITitleColor = pConfig->machineGUITitleColor;
 			_skinDlg._machineGUITitleFontColor = pConfig->machineGUITitleFontColor;
 
@@ -187,10 +193,14 @@ NAMESPACE__BEGIN(psycle)
 
 				_pConfig->machineGUITopColor = _skinDlg._machineGUITopColor;
 				_pConfig->machineGUIFontTopColor = _skinDlg._machineGUIFontTopColor;
-				
 				_pConfig->machineGUIBottomColor = _skinDlg._machineGUIBottomColor;
 				_pConfig->machineGUIFontBottomColor = _skinDlg._machineGUIFontBottomColor;
 				
+				_pConfig->machineGUIHTopColor = _skinDlg._machineGUIHTopColor;
+				_pConfig->machineGUIHFontTopColor = _skinDlg._machineGUIHFontTopColor;
+				_pConfig->machineGUIHBottomColor = _skinDlg._machineGUIHBottomColor;
+				_pConfig->machineGUIHFontBottomColor = _skinDlg._machineGUIHFontBottomColor;
+
 				_pConfig->machineGUITitleColor = _skinDlg._machineGUITitleColor;
 				_pConfig->machineGUITitleFontColor = _skinDlg._machineGUITitleFontColor;
 

@@ -44,6 +44,11 @@ NAMESPACE__BEGIN(psycle)
 			COLORREF _machineGUIFontBottomColor;
 			COLORREF _machineGUITopColor;
 			COLORREF _machineGUIBottomColor;
+			COLORREF _machineGUIHFontTopColor;
+			COLORREF _machineGUIHFontBottomColor;
+			COLORREF _machineGUIHTopColor;
+			COLORREF _machineGUIHBottomColor;
+
 			COLORREF _machineGUITitleColor;
 			COLORREF _machineGUITitleFontColor;			
 
@@ -196,6 +201,10 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnBnClickedMachineguiTitlec();
 			afx_msg void OnBnClickedMachineguiTitlefontc2();
 			afx_msg void OnBnClickedMachineguiBitmap();
+			afx_msg void OnBnClickedMachineguiTopc2();
+			afx_msg void OnBnClickedMachineguiTopfontc2();
+			afx_msg void OnBnClickedMachineguiBottomc2();
+			afx_msg void OnBnClickedMachineguiBottomfontc2();
 };
 
 		//{{AFX_INSERT_LOCATION}}

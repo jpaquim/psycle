@@ -118,6 +118,10 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_MACHINEGUI_TITLEC, OnBnClickedMachineguiTitlec)
 			ON_BN_CLICKED(IDC_MACHINEGUI_TITLEFONTC2, OnBnClickedMachineguiTitlefontc2)
 			ON_BN_CLICKED(IDC_MACHINEGUI_BITMAP, OnBnClickedMachineguiBitmap)
+			ON_BN_CLICKED(IDC_MACHINEGUI_TOPC2, OnBnClickedMachineguiTopc2)
+			ON_BN_CLICKED(IDC_MACHINEGUI_TOPFONTC2, OnBnClickedMachineguiTopfontc2)
+			ON_BN_CLICKED(IDC_MACHINEGUI_BOTTOMC2, OnBnClickedMachineguiBottomc2)
+			ON_BN_CLICKED(IDC_MACHINEGUI_BOTTOMFONTC2, OnBnClickedMachineguiBottomfontc2)
 		END_MESSAGE_MAP()
 
 		void CSkinDlg::OnOK()
@@ -696,6 +700,10 @@ NAMESPACE__BEGIN(psycle)
 			UpdateCanvasColour(IDC_MACHINEFONTTOP_CAN,_machineGUIFontTopColor);
 			UpdateCanvasColour(IDC_MACHINEBOTTOM_CAN,_machineGUIBottomColor);
 			UpdateCanvasColour(IDC_MACHINEFONTBOTTOM_CAN,_machineGUIFontBottomColor);
+			UpdateCanvasColour(IDC_MACHINETOP_CAN2,_machineGUIHTopColor);
+			UpdateCanvasColour(IDC_MACHINEFONTTOP_CAN2,_machineGUIHFontTopColor);
+			UpdateCanvasColour(IDC_MACHINEBOTTOM_CAN2,_machineGUIHBottomColor);
+			UpdateCanvasColour(IDC_MACHINEFONTBOTTOM_CAN2,_machineGUIHFontBottomColor);
 			UpdateCanvasColour(IDC_MACHINETITLE_CAN,_machineGUITitleColor);
 			UpdateCanvasColour(IDC_MACHINEFONTTITLE_CAN,_machineGUITitleFontColor);		
 		}
@@ -1236,12 +1244,28 @@ NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _machineViewEffectFontColor);
 						}
 					}
+					else if (std::strstr(buf,"\"machineGUITopColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUITopColor);
+						}
+					}
 					else if (std::strstr(buf,"\"machineGUIFontTopColor\"=dword:"))
 					{
 						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
 							hexstring_to_integer(q+1, _machineGUIFontTopColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUIBottomColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUIBottomColor);
 						}
 					}
 					else if (std::strstr(buf,"\"machineGUIFontBottomColor\"=dword:"))
@@ -1252,20 +1276,36 @@ NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _machineGUIFontBottomColor);
 						}
 					}
-					else if (std::strstr(buf,"\"machineGUITopColor\"=dword:"))
+					else if (std::strstr(buf,"\"machineGUIHTopColor\"=dword:"))
 					{
 						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							hexstring_to_integer(q+1, _machineGUITopColor);
+							hexstring_to_integer(q+1, _machineGUIHTopColor);
 						}
 					}
-					else if (std::strstr(buf,"\"machineGUIBottomColor\"=dword:"))
+					else if (std::strstr(buf,"\"machineGUIHFontTopColor\"=dword:"))
 					{
 						char *q = std::strchr(buf,58); // :
 						if (q)
 						{
-							hexstring_to_integer(q+1, _machineGUIBottomColor);
+							hexstring_to_integer(q+1, _machineGUIHFontTopColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUIHBottomColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUIHBottomColor);
+						}
+					}
+					else if (std::strstr(buf,"\"machineGUIHFontBottomColor\"=dword:"))
+					{
+						char *q = std::strchr(buf,58); // :
+						if (q)
+						{
+							hexstring_to_integer(q+1, _machineGUIHFontBottomColor);
 						}
 					}
 					else if (std::strstr(buf,"\"machineGUITitleColor\"=dword:"))
@@ -1461,10 +1501,14 @@ NAMESPACE__BEGIN(psycle)
 				std::fprintf(hfile,"\"machine_background\"=\"%s\"\n",szBmpBkgFilename.c_str());
 				std::fprintf(hfile,"\"machine_GUI_bitmap\"=\"%s\"\n",szBmpDialFilename.c_str());
 				std::fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n",_triangle_size);
-				std::fprintf(hfile,"\"machineGUIFontTopColor\"=dword:%.8X\n",_machineGUIFontTopColor);
-				std::fprintf(hfile,"\"machineGUIFontBottomColor\"=dword:%.8X\n",_machineGUIFontBottomColor);
 				std::fprintf(hfile,"\"machineGUITopColor\"=dword:%.8X\n",_machineGUITopColor);
+				std::fprintf(hfile,"\"machineGUIFontTopColor\"=dword:%.8X\n",_machineGUIFontTopColor);
 				std::fprintf(hfile,"\"machineGUIBottomColor\"=dword:%.8X\n",_machineGUIBottomColor);
+				std::fprintf(hfile,"\"machineGUIFontBottomColor\"=dword:%.8X\n",_machineGUIFontBottomColor);
+				std::fprintf(hfile,"\"machineGUIHTopColor\"=dword:%.8X\n",_machineGUIHTopColor);
+				std::fprintf(hfile,"\"machineGUIHFontTopColor\"=dword:%.8X\n",_machineGUIHFontTopColor);
+				std::fprintf(hfile,"\"machineGUIHBottomColor\"=dword:%.8X\n",_machineGUIHBottomColor);
+				std::fprintf(hfile,"\"machineGUIHFontBottomColor\"=dword:%.8X\n",_machineGUIHFontBottomColor);
 				std::fprintf(hfile,"\"machineGUITitleColor\"=dword:%.8X\n",_machineGUITitleColor);
 				std::fprintf(hfile,"\"machineGUITitleFontColor\"=dword:%.8X\n",_machineGUITitleFontColor);
 				std::fclose(hfile);
@@ -1741,6 +1785,51 @@ NAMESPACE__BEGIN(psycle)
 					UpdateCanvasColour(IDC_MACHINEFONTTITLE_CAN,_machineGUITitleFontColor);
 				}
 		}
+
+		void CSkinDlg::OnBnClickedMachineguiTopc2()
+		{
+				CColorDialog dlg(_machineGUIHTopColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUIHTopColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINETOP_CAN2,_machineGUIHTopColor);
+				}
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiTopfontc2()
+		{
+				CColorDialog dlg(_machineGUIHFontTopColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUIHFontTopColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINEFONTTOP_CAN2,_machineGUIHFontTopColor);
+				}
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiBottomc2()
+		{
+				CColorDialog dlg(_machineGUIHBottomColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUIHBottomColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINEBOTTOM_CAN2,_machineGUIHBottomColor);
+				}
+		}
+
+		void CSkinDlg::OnBnClickedMachineguiBottomfontc2()
+		{
+				CColorDialog dlg(_machineGUIHFontBottomColor);
+
+				if(dlg.DoModal() == IDOK)
+				{
+					_machineGUIHFontBottomColor = dlg.GetColor();
+					UpdateCanvasColour(IDC_MACHINEFONTBOTTOM_CAN2,_machineGUIHFontBottomColor);
+				}
+		}
+
 
 		void CSkinDlg::OnDrawEmptyData()
 		{

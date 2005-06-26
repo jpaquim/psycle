@@ -64,10 +64,14 @@ namespace psycle
 
 			COLORREF machineGUITopColor;
 			COLORREF machineGUIFontTopColor;
-
 			COLORREF machineGUIBottomColor;
 			COLORREF machineGUIFontBottomColor;
-			
+
+			COLORREF machineGUIHTopColor;
+			COLORREF machineGUIHFontTopColor;
+			COLORREF machineGUIHBottomColor;
+			COLORREF machineGUIHFontBottomColor;
+
 			COLORREF machineGUITitleColor;
 			COLORREF machineGUITitleFontColor;
 
