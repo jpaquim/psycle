@@ -101,8 +101,9 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_VIEW_SEQUENCERBAR, OnUpdateViewSequencerbar)
 			ON_UPDATE_COMMAND_UI(ID_VIEW_MACHINEBAR, OnUpdateViewMachinebar)
 			ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
-		ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
-		ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
+			ON_BN_CLICKED(IDC_MOVECURSORPASTE, OnMoveCursorPaste)
+			ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
+			ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_MASTERSLIDER, OnCustomdrawMasterslider)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
@@ -323,6 +324,9 @@ NAMESPACE__BEGIN(psycle)
 			// set multichannel audition checkbox status
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MULTICHANNEL_AUDITION);
 			cb->SetCheck(Global::pInputHandler->bMultiKey?1:0);
+
+			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MOVECURSORPASTE);
+			cb->SetCheck(Global::pInputHandler->bMoveCursorPaste?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
 			cb->SetCheck(Global::pConfig->_RecordNoteoff?1:0);
@@ -2154,6 +2158,12 @@ NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnMultichannelAudition() 
 		{
 			Global::pInputHandler->bMultiKey = !Global::pInputHandler->bMultiKey;
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnMoveCursorPaste()
+		{
+			Global::pInputHandler->bMoveCursorPaste = !Global::pInputHandler->bMoveCursorPaste;
 			m_wndView.SetFocus();
 		}
 

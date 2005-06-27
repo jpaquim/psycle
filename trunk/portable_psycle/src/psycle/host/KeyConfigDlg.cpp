@@ -5,6 +5,7 @@
 #include "KeyConfigDlg.hpp"
 #include "inputhandler.hpp"
 #include "Configuration.hpp"
+#include ".\keyconfigdlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
@@ -19,6 +20,8 @@ NAMESPACE__BEGIN(psycle)
 
 		void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 		{
+			//removed by alk
+			//DDX_Control(pDX, IDC_MOVE_CURSOR_PASTE, m_move_cursor_paste);
 			CDialog::DoDataExchange(pDX);
 			//{{AFX_DATA_MAP(CKeyConfigDlg)
 			DDX_Control(pDX, IDC_AUTOSAVE_MINS_SPIN, m_autosave_spin);
@@ -26,8 +29,7 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_AUTOSAVE_CURRENT_SONG, m_autosave);
 			DDX_Control(pDX, IDC_FILE_SAVE_REMINDERS, m_save_reminders);
 			DDX_Control(pDX, IDC_TWEAK_SMOOTH, m_tweak_smooth);
-			DDX_Control(pDX, IDC_RECORD_UNARMED, m_record_unarmed);
-			DDX_Control(pDX, IDC_MOVE_CURSOR_PASTE, m_move_cursor_paste);
+			DDX_Control(pDX, IDC_RECORD_UNARMED, m_record_unarmed);			
 			DDX_Control(pDX, IDC_NAVIGATION_IGNORES_STEP, m_navigation_ignores_step);
 			DDX_Control(pDX, IDC_SHOW_INFO_ON_LOAD, m_show_info);
 			DDX_Control(pDX, IDC_SHIFTARROWS, m_cmdShiftArrows);
@@ -54,6 +56,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_NONE, OnNone)
 			ON_EN_UPDATE(IDC_EDIT_DEFLINES, OnUpdateNumLines)
 			//}}AFX_MSG_MAP
+			//ON_BN_CLICKED(IDC_MOVE_CURSOR_PASTE, OnBnClickedMoveCursorPaste)
 		END_MESSAGE_MAP()
 
 		void CKeyConfigDlg::DoCommandList()
@@ -93,7 +96,7 @@ NAMESPACE__BEGIN(psycle)
 			m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
 			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
 			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
-			m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
+			//m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
 			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
 			m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
 			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
@@ -239,7 +242,7 @@ NAMESPACE__BEGIN(psycle)
 			Global::pConfig->bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
 			Global::pConfig->_RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
 			Global::pConfig->_RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
-			Global::pConfig->_MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
+			//Global::pConfig->_MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
 			Global::pConfig->_NavigationIgnoresStep = m_navigation_ignores_step.GetCheck()?true:false;
 			
 			Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;

@@ -25,7 +25,6 @@ namespace psycle
 			_notesToEffects = false;
 			_RecordMouseTweaksSmooth = FALSE;
 			_RecordUnarmed = true;
-			_MoveCursorPaste = false;
 			_NavigationIgnoresStep = false;
 			_midiMachineViewSeqMode = false;
 			autoStopMachines = false;
@@ -220,7 +219,7 @@ namespace psycle
 			reg.QueryValue("RecordMouseTweaksSmooth", _RecordMouseTweaksSmooth);
 			reg.QueryValue("notesToEffects", _notesToEffects);
 			reg.QueryValue("RecordUnarmed", _RecordUnarmed);
-			reg.QueryValue("MoveCursorPaste", _MoveCursorPaste);
+			//reg.QueryValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.QueryValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.QueryValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.QueryValue("MidiRecordVel" , midi().velocity().record() );
@@ -400,7 +399,7 @@ namespace psycle
 			reg.SetValue("RecordMouseTweaksSmooth", _RecordMouseTweaksSmooth);
 			reg.SetValue("notesToEffects", _notesToEffects);
 			reg.SetValue("RecordUnarmed", _RecordUnarmed);
-			reg.SetValue("MoveCursorPaste", _MoveCursorPaste);
+			//reg.SetValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.SetValue("OutputDriver", _outputDriverIndex);

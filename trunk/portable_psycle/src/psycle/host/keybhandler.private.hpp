@@ -1634,7 +1634,7 @@ NAMESPACE__BEGIN(psycle)
 					++ts;
 				}
 				
-				if (Global::pConfig->_MoveCursorPaste)
+				if (Global::pInputHandler->bMoveCursorPaste)
 				{
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
