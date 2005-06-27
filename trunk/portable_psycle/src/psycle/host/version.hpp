@@ -26,8 +26,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 57
-#define PSYCLE__VERSION__QUALITY "pre-release 1.1 of 1.8 :"
+#define PSYCLE__VERSION__PATCH 58
+#define PSYCLE__VERSION__QUALITY "codename clandestine" // "pre-release 1.1.1 of 1.8 :"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -78,6 +78,10 @@
 #if 0
 /*
 $Log$
+Revision 1.40  2005/06/27 15:52:39  johan-boule
+Version 1.7.58
+<alk> moved the checkbox for move cursor when pasting to the sequencer panel
+
 Revision 1.39  2005/06/26 11:08:29  jaz001
 1.8 RC1.1
 
