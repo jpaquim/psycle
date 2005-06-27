@@ -466,6 +466,8 @@ namespace psycle
 			bool bCtrlPlay;		
 			/// multikey playback?
 			bool bMultiKey;		
+			/// Move cursor when paste?
+			bool bMoveCursorPaste;		
 			/// FT2 style Home/End?
 			bool bFT2HomeBehaviour;	
 			/// FT2 style Delete line?

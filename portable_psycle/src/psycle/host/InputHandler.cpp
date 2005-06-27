@@ -20,6 +20,7 @@ namespace psycle
 			// init bools
 			bCtrlPlay = true;
 			bMultiKey = true;
+			bMoveCursorPaste = true;
 			bFT2HomeBehaviour = true;
 			bFT2DelBehaviour = true;
 			bShiftArrowsDoSelect = false;
@@ -29,7 +30,6 @@ namespace psycle
 			for(UINT i=0;i<MAX_TRACKS;i++)
 				notetrack[i]=120;
 			outtrack=0;
-			bMultiKey=true;
 
 			if(!ConfigRestore())
 			{
@@ -264,6 +264,10 @@ namespace psycle
 			data.Format("%d",bMultiKey);
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
 
+			key = "bMoveCursorPaste";
+			data.Format("%d",bMoveCursorPaste);
+			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
+
 			key = "bFt2DelBehaviour";
 			data.Format("%d",bFT2DelBehaviour);
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
@@ -324,6 +328,9 @@ namespace psycle
 
 			key = "bMultiKey";
 			bMultiKey = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
+
+			key = "bMoveCursorPaste";
+			bMoveCursorPaste = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
 
 			key = "bFT2DelBehaviour";
 			bFT2DelBehaviour = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;

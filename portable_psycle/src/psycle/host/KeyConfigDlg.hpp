@@ -13,6 +13,8 @@ NAMESPACE__BEGIN(psycle)
 			void DoCommandList();
 			CKeyConfigDlg();
 			std::string _skinPathBuf;
+			//removed by alk
+			//CButton m_move_cursor_paste;
 		// Dialog Data
 			//{{AFX_DATA(CKeyConfigDlg)
 			enum { IDD = IDD_KEYCONFIG };
@@ -21,8 +23,7 @@ NAMESPACE__BEGIN(psycle)
 			CButton	m_autosave;
 			CButton	m_save_reminders;
 			CButton	m_tweak_smooth;
-			CButton	m_record_unarmed;
-			CButton m_move_cursor_paste;
+			CButton	m_record_unarmed;			
 			CButton m_navigation_ignores_step;
 			CButton	m_show_info;
 			CButton	m_cmdShiftArrows;
@@ -65,6 +66,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateNumLines();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+		public:
+			//afx_msg void OnBnClickedMoveCursorPaste();
 		};
 
 		//{{AFX_INSERT_LOCATION}}

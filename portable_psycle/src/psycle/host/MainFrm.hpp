@@ -209,6 +209,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnEditBlockMixpaste();
 			afx_msg void OnEditBlockPaste();
 			afx_msg void OnNotestoeffects();
+			afx_msg void OnMoveCursorPaste();
 			afx_msg void OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()

@@ -271,6 +271,7 @@
 #define IDC_EDIT6                       1113
 #define IDC_BROWSER                     1114
 #define IDC_EDIT7                       1114
+#define IDC_CHECK3                      1114
 #define IDC_NAMELABEL                   1115
 #define IDC_EDIT8                       1115
 #define IDC_DESCLABEL                   1116
@@ -766,7 +767,6 @@
 #define IDC_RADIO_EFX                   1523
 #define IDC_NOTESTOEFFECTS              1523
 #define IDC_RECORD_UNARMED2             1523
-#define IDC_MOVE_CURSOR_PASTE           1523
 #define IDC_VOLUME_DB15                 1523
 #define IDC_RADIO_INS                   1524
 #define IDC_PROGRESS1                   1524
@@ -913,6 +913,7 @@
 #define IDC_MACHINEGUI_TOPC2            1667
 #define IDC_MACHINEGUI_BOTTOMC2         1668
 #define IDC_MACHINEGUI_BOTTOMFONTC2     1669
+#define IDC_MOVECURSORPASTE             1670
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1013,7 +1014,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        228
 #define _APS_NEXT_COMMAND_VALUE         32939
-#define _APS_NEXT_CONTROL_VALUE         1663
+#define _APS_NEXT_CONTROL_VALUE         1664
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif
