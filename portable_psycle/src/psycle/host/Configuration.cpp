@@ -134,6 +134,14 @@ namespace psycle
 				CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
 				CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				_midiHeadroom = 100;
+				// enable velocity by default
+				{
+					midi().velocity().record()  = true;
+					midi().velocity().type()    = 0; // 0 is cmd
+					midi().velocity().command() = 0xc;
+					midi().velocity().from()    = 0;
+					midi().velocity().to()      = 0xff;
+				}
 			}
 			// pattern height
 			{
@@ -221,30 +229,39 @@ namespace psycle
 			reg.QueryValue("RecordUnarmed", _RecordUnarmed);
 			//reg.QueryValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.QueryValue("NavigationIgnoresStep", _NavigationIgnoresStep);
-			reg.QueryValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
-			reg.QueryValue("MidiRecordVel" , midi().velocity().record() );
-			reg.QueryValue("MidiTypeVel"   , midi().velocity().type()   );
-			reg.QueryValue("MidiCommandVel", midi().velocity().command());
-			reg.QueryValue("MidiFromVel"   , midi().velocity().from()   );
-			reg.QueryValue("MidiToVel"     , midi().velocity().to()     );
-			reg.QueryValue("MidiRecordPit" , midi().pitch()   .record() );
-			reg.QueryValue("MidiTypePit"   , midi().pitch()   .type()   );
-			reg.QueryValue("MidiCommandPit", midi().pitch()   .command());
-			reg.QueryValue("MidiFromPit"   , midi().pitch()   .from()   );
-			reg.QueryValue("MidiToPit"     , midi().pitch()   .to()     );
-			for(std::size_t i(0) ; i < midi().groups().size() ; ++i)
+			// midi
 			{
-				std::ostringstream oss;
-				oss << i;
-				std::string s(oss.str());
-				reg.QueryValue("MidiMessage" + s, midi().group(i).message());
-				reg.QueryValue("MidiRecord"  + s, midi().group(i).record() );
-				reg.QueryValue("MidiType"    + s, midi().group(i).type()   );
-				reg.QueryValue("MidiCommand" + s, midi().group(i).command());
-				reg.QueryValue("MidiFrom"    + s, midi().group(i).from()   );
-				reg.QueryValue("MidiTo"      + s, midi().group(i).to()     );
+				reg.QueryValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
+				// velocity
+				{
+					reg.QueryValue("MidiRecordVel" , midi().velocity().record() );
+					reg.QueryValue("MidiTypeVel"   , midi().velocity().type()   );
+					reg.QueryValue("MidiCommandVel", midi().velocity().command());
+					reg.QueryValue("MidiFromVel"   , midi().velocity().from()   );
+					reg.QueryValue("MidiToVel"     , midi().velocity().to()     );
+				}
+				// pitch
+				{
+					reg.QueryValue("MidiRecordPit" , midi().pitch()   .record() );
+					reg.QueryValue("MidiTypePit"   , midi().pitch()   .type()   );
+					reg.QueryValue("MidiCommandPit", midi().pitch()   .command());
+					reg.QueryValue("MidiFromPit"   , midi().pitch()   .from()   );
+					reg.QueryValue("MidiToPit"     , midi().pitch()   .to()     );
+				}
+				for(std::size_t i(0) ; i < midi().groups().size() ; ++i)
+				{
+					std::ostringstream oss;
+					oss << i;
+					std::string s(oss.str());
+					reg.QueryValue("MidiMessage" + s, midi().group(i).message());
+					reg.QueryValue("MidiRecord"  + s, midi().group(i).record() );
+					reg.QueryValue("MidiType"    + s, midi().group(i).type()   );
+					reg.QueryValue("MidiCommand" + s, midi().group(i).command());
+					reg.QueryValue("MidiFrom"    + s, midi().group(i).from()   );
+					reg.QueryValue("MidiTo"      + s, midi().group(i).to()     );
+				}
+				reg.QueryValue("MidiRawMcm", midi().raw());
 			}
-			reg.QueryValue("MidiRawMcm", midi().raw());
 			reg.QueryValue("defaultPatLines", defaultPatLines);
 			for(int c(0) ; c < MAX_PATTERNS; ++c)
 			{

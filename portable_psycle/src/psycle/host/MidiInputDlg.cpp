@@ -77,27 +77,27 @@ NAMESPACE__BEGIN(psycle)
 
 			raw.SetCheck(Global::pConfig->midi().raw());
 
-			write_to_gui(velocity, Global::pConfig->midi().velocity());
 			velocity.type.AddString("cmd");
 			velocity.type.AddString("ins");
+			write_to_gui(velocity, Global::pConfig->midi().velocity());
 
-			write_to_gui(pitch, Global::pConfig->midi().pitch());
 			pitch.type.AddString("cmd");
 			pitch.type.AddString("twk");
 			pitch.type.AddString("tws");
 			pitch.type.AddString("ins");
 			pitch.type.AddString("mcm");
+			write_to_gui(pitch, Global::pConfig->midi().pitch());
 
 			assert(groups.size() == Global::pConfig->midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
-				write_to_gui(*groups[i], Global::pConfig->midi().group(i));
-				write_to_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
 				groups[i]->type.AddString("cmd");
 				groups[i]->type.AddString("twk");
 				groups[i]->type.AddString("tws");
 				groups[i]->type.AddString("ins");
 				groups[i]->type.AddString("mcm");
+				write_to_gui(*groups[i], Global::pConfig->midi().group(i));
+				write_to_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
 			}
 
 			return TRUE;

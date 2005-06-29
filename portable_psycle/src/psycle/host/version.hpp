@@ -26,8 +26,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 58
-#define PSYCLE__VERSION__QUALITY "codename clandestine" // "pre-release 1.1.1 of 1.8 :"
+#define PSYCLE__VERSION__PATCH 59
+#define PSYCLE__VERSION__QUALITY "codename midi o'clock" // "pre-release 1.1.1 of 1.8 :"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -78,6 +78,9 @@
 #if 0
 /*
 $Log$
+Revision 1.41  2005/06/29 22:26:51  johan-boule
+closes bug: sourceforge bug tracker [ 1229490 ] Velocity / volume data with MIDI keyboard
+
 Revision 1.40  2005/06/27 15:52:39  johan-boule
 Version 1.7.58
 <alk> moved the checkbox for move cursor when pasting to the sequencer panel
