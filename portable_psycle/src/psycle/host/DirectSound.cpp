@@ -2,7 +2,7 @@
 ///\implementation psycle::host::DirectSound.
 #include <project.private.hpp>
 #include "DirectSound.hpp"
-#include "resources/resources.hpp"
+//#include "resources/resources.hpp"
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
@@ -296,6 +296,7 @@ namespace psycle
 		void DirectSound::ReadConfig()
 		{
 			// default configuration
+			bool saveatend(false);
 			device_guid = GUID(); // DSDEVID_DefaultPlayback <-- unresolved external symbol
 			_exclusive = false;
 			_dither = false;
@@ -308,21 +309,36 @@ namespace psycle
 
 			// read from registry
 			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS) return;
-			if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS) return;
+			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
+			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS) // settings in version 1.8
 			{
-				bool configured(true);
-				configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
-				configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", _exclusive);
-				configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
-				//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
-				configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", _numBuffers);
-				configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _bufferSize);
-				configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
-				_configured = configured;
+				reg.CloseRootKey();
+				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
+				if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
+				{
+					reg.CloseRootKey();
+					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
+					if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
+					{
+						reg.CloseRootKey();
+						return;
+					}
+				}
+				saveatend=true;
 			}
+			bool configured(true);
+			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
+			configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", _exclusive);
+			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
+			//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
+			configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", _numBuffers);
+			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _bufferSize);
+			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
+			_configured = configured;
+
 			reg.CloseKey();
 			reg.CloseRootKey();
+			if(saveatend) WriteConfig();
 		}
 
 		void DirectSound::WriteConfig()
@@ -333,9 +349,9 @@ namespace psycle
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
+			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS)
 			{
-				if(reg.CreateKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
+				if(reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS)
 				{
 					Error("Unable to write configuration to the registry");
 					return;

@@ -244,10 +244,10 @@ namespace psycle
 			// File version
 			sect = "Info";
 			key = "AppVersion";
-			data = PSYCLE__BUILD__IDENTIFIER(EOL);
+			data = PSYCLE__VERSION;
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
 			key = "Description";
-			data = "Psycle";	
+			data = "Psycle";
 			WritePrivateProfileString(sect,key,data,sDefaultCfgName);	
 
 			// option data
@@ -280,7 +280,7 @@ namespace psycle
 			UINT i,j;
 			
 			// note keys
-			sect = "Keys";
+			sect = "Keys2";
 			WritePrivateProfileString(sect,NULL,NULL,sDefaultCfgName); 	// clear
 			for(j=0;j<MOD_MAX;j++)
 			{
@@ -340,15 +340,22 @@ namespace psycle
 			
 			if (data== "N/A")
 			{
-				return ParseOldFileformat();
+				return ParseOldFileformat(); // 1.7.6 and older
 			}
 			else
 			{
-				// restore key data
-				sect = "Keys";
 				CmdDef cmd;
 				CString cmdDefn;
 				int cmddata, i,modi;
+				bool saveconfig(false);
+				// restore key data
+				sect = "Keys2"; // 1.8 onward
+				key.Format("n%03d",0);
+				if ( GetPrivateProfileInt(sect,key,-1,sDefaultCfgName) == -1 ) // trying to get key for command 0 (C-0)
+				{
+					sect = "Keys";  // 1.7 Alpha release.
+					saveconfig=true;
+				}
 				for(i=0;i<max_cmds;i++)
 				{
 					cmd.ID = CmdSet(i);
@@ -361,6 +368,7 @@ namespace psycle
 						SetCmd(cmd.ID,cmddata%256,modi);
 					}
 				}
+				if (saveconfig) ConfigSave();
 				return true;
 			}
 		}
@@ -388,6 +396,7 @@ namespace psycle
 			WORD tmpkey, tmpmods;
 			CmdToKey(cdefSelectMachine,tmpkey,tmpmods);
 			if ( !tmpkey ) SetCmd(cdefSelectMachine,VK_RETURN,0);
+			ConfigSave();
 			return true;
 		}
 

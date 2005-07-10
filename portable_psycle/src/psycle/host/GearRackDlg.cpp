@@ -3,6 +3,7 @@
 #include <project.private.hpp>
 #include "psycle.hpp"
 #include "GearRackDlg.hpp"
+#include "WaveEdFrame.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "MainFrm.hpp"

@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::ASIOInterface.
 #include <project.private.hpp>
 #include "ASIOInterface.hpp"
-#include "resources/resources.hpp"
+//#include "resources/resources.hpp"
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
@@ -270,14 +270,30 @@ namespace psycle
 		void ASIOInterface::ReadConfig()
 		{
 			// Default configuration
+			bool saveatend(false);
 			_samplesPerSec=44100;
 			_driverID=0;
 			_ASIObufferSize = 1024;
 			_channelmode = 3; // always stereo
 			_bitDepth = 16; // asio don't care about bit depth
 			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS) return;
-			if(reg.OpenKey("configuration\\devices\\asio") != ERROR_SUCCESS) return;
+			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
+			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS) // settings in version 1.8
+			{
+				reg.CloseRootKey();
+				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
+				if(reg.OpenKey("configuration\\devices\\asio") != ERROR_SUCCESS)
+				{
+					reg.CloseRootKey();
+					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
+					if(reg.OpenKey("ASIOOut") != ERROR_SUCCESS)
+					{
+						reg.CloseRootKey();
+						return;
+					}
+				}
+				saveatend=true;
+			}
 			bool configured(true);
 			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _ASIObufferSize);
 			configured &= ERROR_SUCCESS == reg.QueryValue("DriverID", _driverID);
@@ -286,6 +302,7 @@ namespace psycle
 			reg.CloseRootKey();
 			_configured = configured;
 			currentSamples[_driverID]=_ASIObufferSize;
+			if ( saveatend ) WriteConfig();
 		}
 
 		void ASIOInterface::WriteConfig()
@@ -296,9 +313,9 @@ namespace psycle
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if (reg.OpenKey("configuration\\devices\\asio") != ERROR_SUCCESS)
+			if (reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS)
 			{
-				if (reg.CreateKey("configuration\\devices\\asio") != ERROR_SUCCESS)
+				if (reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS)
 				{
 					Error("Unable to write configuration to the registry");
 					return;

@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::WaveOut.
 #include <project.private.hpp>
 #include "WaveOut.hpp"
-#include "resources/resources.hpp"
+//#include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
@@ -218,6 +218,7 @@ namespace psycle
 		void WaveOut::ReadConfig()
 		{
 			// Default configuration
+			bool saveatend(false);
 			_samplesPerSec=44100;
 			_deviceID=0;
 			_numBlocks = 7;
@@ -228,13 +229,22 @@ namespace psycle
 			_bitDepth = 16;
 
 			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
+			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
+			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS) // settings in version 1.8
 			{
-				return;
-			}
-			if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
-			{
-				return;
+				reg.CloseRootKey();
+				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
+				if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
+				{
+					reg.CloseRootKey();
+					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
+					if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+					{
+						reg.CloseRootKey();
+						return;
+					}
+				}
+				saveatend=true;
 			}
 			bool configured(true);
 			configured &= ERROR_SUCCESS == reg.QueryValue("NumBlocks", _numBlocks);
@@ -247,6 +257,7 @@ namespace psycle
 			reg.CloseKey();
 			reg.CloseRootKey();
 			_configured = configured;
+			if(saveatend) WriteConfig();
 		}
 
 		void WaveOut::WriteConfig()
@@ -257,9 +268,9 @@ namespace psycle
 				Error("Unable to write configuration to the registry");
 				return;
 			}
-			if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
+			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS)
 			{
-				if (reg.CreateKey("configuration\\devices\\mme") != ERROR_SUCCESS)
+				if (reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS)
 				{
 					Error("Unable to write configuration to the registry");
 					return;
