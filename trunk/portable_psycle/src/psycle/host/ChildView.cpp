@@ -193,7 +193,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
 			ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
-			ON_COMMAND(ID_VIEW_MIXER, OnViewMixer)
 			ON_COMMAND(ID_VIEW_ERRORLOGGER, OnViewErrorLogger)
 			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
 			ON_COMMAND(ID_BUTTONPLAYSEQBLOCK, OnButtonplayseqblock)
@@ -1055,6 +1054,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnShowPatternSeq() 
 		{
+			MessageBox("This feature is unimplemented in this release. Use the left side sequence for now.","Psycle Notice");
 			/*
 			if (viewMode != VMSequence)
 			{
@@ -1259,10 +1259,6 @@ NAMESPACE__BEGIN(psycle)
 			pParentMain->ShowInstrumentEditor();
 		}
 
-		void CChildView::OnViewMixer()
-		{
-			pParentMain->ShowMixer();
-		}		
 
 		void CChildView::OnViewErrorLogger()
 		{

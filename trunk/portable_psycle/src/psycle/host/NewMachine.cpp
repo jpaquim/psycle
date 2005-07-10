@@ -997,6 +997,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					SaveCacheFile();
 				}
+				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
 				CDialog::OnOK();
 			}
 		}

@@ -25,17 +25,17 @@
 #define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
-#define PSYCLE__VERSION__MINOR 7
-#define PSYCLE__VERSION__PATCH 59
-#define PSYCLE__VERSION__QUALITY "codename midi o'clock" // "pre-release 1.1.1 of 1.8 :"
+#define PSYCLE__VERSION__MINOR 8
+#define PSYCLE__VERSION__PATCH -1
+#define PSYCLE__VERSION__QUALITY "1.8 Candidate" // "pre-release 1.1.1 of 1.8 :"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
 	PSYCLE__BRANCH " " \
-	PSYCLE__VERSION__QUALITY " " \
 	STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
 	STRINGIZED(PSYCLE__VERSION__MINOR) "." \
-	STRINGIZED(PSYCLE__VERSION__PATCH)
+	STRINGIZED(PSYCLE__VERSION__PATCH) " " \
+	PSYCLE__VERSION__QUALITY 
 
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
@@ -78,6 +78,15 @@
 #if 0
 /*
 $Log$
+Revision 1.42  2005/07/10 21:08:20  jaz001
+New defaults for machine parameters
+New skin for machine parameters' knobs.
+Importing configuration from older psycle's and psycle alpha.
+removing unimplemented alk's mixer.
+added comments about unfinished features.
+fixed small but in "recent files".
+Note: this is labeled 1.8.-1, since configuration will be saved as 1.8, but it might have still small changes for the official 1.8
+
 Revision 1.41  2005/06/29 22:26:51  johan-boule
 closes bug: sourceforge bug tracker [ 1229490 ] Velocity / volume data with MIDI keyboard
 

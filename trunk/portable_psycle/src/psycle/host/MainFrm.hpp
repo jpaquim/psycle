@@ -3,15 +3,13 @@
 #pragma once
 #include "ChildView.hpp"
 #include "InstrumentEditor.hpp"
-#include "Mixer.hpp"
-#include "LoggingWindow.hpp"
 #include "InfoDlg.hpp"
-#include "WaveEdFrame.hpp"
 #include "MidiMonitorDlg.hpp"
-#include "GearRackDlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		class Song;
+		class CWaveEdFrame;
+		class CGearRackDlg;
 
 		enum
 		{
@@ -33,7 +31,6 @@ NAMESPACE__BEGIN(psycle)
 			int vuprevL;
 			int vuprevR;
 
-			CGearRackDlg* pGearRackDialog;
 		// Operations
 		public:
 			void SetAppSongBpm(int x);
@@ -66,8 +63,6 @@ NAMESPACE__BEGIN(psycle)
 			void ShowPerformanceDlg();
 			void HideMidiMonitorDlg();
 			void ShowMidiMonitorDlg();
-			void HideMixer();
-			void ShowMixer();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
 			void ShowErrorLogger();
@@ -107,10 +102,10 @@ NAMESPACE__BEGIN(psycle)
 			std::string		szStatusIdle;
 			
 			CInstrumentEditor	m_wndInst;
-			CMixerDlg			m_wndMixer;
 			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
 			CWaveEdFrame	*m_pWndWed;
+			CGearRackDlg* pGearRackDialog;
 
 			CBitmap blessless;
 			CBitmap bless;

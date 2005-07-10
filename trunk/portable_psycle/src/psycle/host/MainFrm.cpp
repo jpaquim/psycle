@@ -11,7 +11,9 @@
 #include "VstEditorDlg.hpp"
 #include "Helpers.hpp"
 #include "WireDlg.hpp"
+#include "LoggingWindow.hpp"
 #include "GearRackDlg.hpp"
+#include "WaveEdFrame.hpp"
 #include "Player.hpp"
 #include "MidiInput.hpp"
 #include "inputhandler.hpp"
@@ -202,10 +204,6 @@ NAMESPACE__BEGIN(psycle)
 			// MIDI monitor Dialog
 			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);
 			
-			//Mixer
-			//m_wndMixer = new CMixerDlg(this);
-			m_wndMixer.Create(IDD_MIXER,this);
-
 			// Instrument editor
 			m_wndInst._pSong=_pSong;
 			m_wndInst.pParentMain=this;
@@ -1278,16 +1276,6 @@ NAMESPACE__BEGIN(psycle)
 			Global::pLogWindow->SetActiveWindow();
 		}
 
-		void CMainFrame::ShowMixer()
-		{
-			m_wndMixer.ShowWindow(SW_SHOWNORMAL);
-			m_wndMixer.SetActiveWindow();
-		}
-
-		void CMainFrame::HideMixer()
-		{
-			m_wndMixer.ShowWindow(SW_HIDE);
-		}
 
 		void CMainFrame::ShowInstrumentEditor()
 		{

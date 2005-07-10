@@ -84,11 +84,11 @@ A)	"History" Part one:
 
 	Psycle 1 continued to be maintained by [JAZ] and pooplog. The aims where to continue
 	offering a version which was simple enough, stable and still powerfull, and to
-	fill the gap until PsycleII.
+	fill the gap until PsycleII came out.
 
-	PsycleII wanted to be an audio studio (audio and video mixing, mastering...
-	It was initially stated being coded by Majick_ / MJK, he had most of the core
-	ready, but left for work too. Dilvie, on the other hand, started working on the GUI,
+	PsycleII wanted to be an audio studio (audio and video mixing, mastering...)
+	It was initially coded by Majick_ / MJK. He had most of the core ready, but left
+	for work too. Dilvie, on the other hand, started working on the GUI,
 	trying Mozilla XUL language as a start. Unfortunately, he was busy with work too
 	(yep... one more).
 	The latest news, unluckily, are that this branch is vapourware.

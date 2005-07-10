@@ -272,7 +272,7 @@ NAMESPACE__BEGIN(psycle)
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void NewMachine(int x = -1, int y = -1, int mac = -1);
 			void DoMacPropDialog(int propMac);
-			void CChildView::FileLoadsongNamed(std::string fName);
+			void FileLoadsongNamed(std::string fName);
 			
 		public:
 
@@ -535,7 +535,6 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateBarrec(CCmdUI* pCmdUI);
 			afx_msg void OnFileSongproperties();
 			afx_msg void OnViewInstrumenteditor();
-			afx_msg void OnViewMixer();
 			afx_msg void OnViewErrorLogger();
 			afx_msg void OnNewmachine();
 			afx_msg void OnButtonplayseqblock();

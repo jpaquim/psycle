@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CLoggingWindow.
 #pragma once
 #include <project.hpp>
-//#include "resources/resources.hpp"
+#include "resources/resources.hpp"
 #include <vector>
 #include <string>
 NAMESPACE__BEGIN(psycle)

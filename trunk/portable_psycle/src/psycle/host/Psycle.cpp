@@ -106,10 +106,10 @@ NAMESPACE__BEGIN(psycle)
 
 			// Show splash screen
 			// If has been commented out for BETA builds..
-			//if (Global::pConfig->_showAboutAtStart)
-			//{
+			if (Global::pConfig->_showAboutAtStart)
+			{
 				OnAppAbout();
-			//}
+			}
 			
 			ProcessCmdLine(pFrame); // Process Command Line
 
@@ -399,18 +399,20 @@ NAMESPACE__BEGIN(psycle)
 				) == ERROR_SUCCESS
 			)
 			{
+				if(GetMenuItemID(pFrame->m_wndView.hRecentMenu, 0) == ID_FILE_RECENT_NONE)
+				{
+					::RegCloseKey(RegKey);
+					return;
+				}
+
 				for(int iCount(0) ; iCount < ::GetMenuItemCount(pFrame->m_wndView.hRecentMenu) ; ++iCount)
 				{
 					UINT nameSize = ::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
 					char nameBuff[1 << 10];
 					::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-					if(std::strcmp(nameBuff, "No recent files"))
-					{
-						std::ostringstream s;
-						s << iCount;
-						::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
-					}
-
+					std::ostringstream s;
+					s << iCount;
+					::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
 				}
 				::RegCloseKey(RegKey);
 			}
