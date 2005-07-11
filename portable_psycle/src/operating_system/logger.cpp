@@ -69,28 +69,6 @@ namespace operating_system
 			{
 				::CONSOLE_SCREEN_BUFFER_INFO buffer;
 				::GetConsoleScreenBufferInfo(output_handle, &buffer);
-				buffer.wAttributes = base_attributes;
-				const int width(10), height(10);
-				if(buffer.dwSize.X < width) buffer.dwSize.X = width;
-				if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
-				if(!(got_a_console_window_ = ::SetConsoleScreenBufferSize(output_handle, buffer.dwSize)))
-				{
-					::GetConsoleScreenBufferInfo(output_handle, &buffer);
-					buffer.wAttributes = base_attributes;
-					const int width(80), height(50); // on non nt systems, we can only have such a ridiculous size!
-					if(buffer.dwSize.X < width) buffer.dwSize.X = width;
-					if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
-					if(!(got_a_console_window_ = ::SetConsoleScreenBufferSize(output_handle, buffer.dwSize)))
-					{
-						// huh? giving up.
-					}
-				}
-			}
-
-			// change buffer size
-			{
-				::CONSOLE_SCREEN_BUFFER_INFO buffer;
-				::GetConsoleScreenBufferInfo(output_handle, &buffer);
 				const int width(256), height(1024);
 				if(buffer.dwSize.X < width) buffer.dwSize.X = width;
 				if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
