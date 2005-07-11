@@ -1,24 +1,25 @@
----------------------------------------------------------------------------------------
-Version | Type of release          | By
---------|--------------------------|---------------------------------------------------
-0.x     | Alphas and betas         | arguru
-1.0/01  | release (bugfix)         | arguru
-1.1/11  | release (bugfix)         | Mats
-1.5     | Alpha, beta, RC, release | [JAZ] & Mark
-1.6     | Alpha, beta, RC, release | [JAZ] & Dan/Dub & Fideloop
-1.6+/66 | maintenance releases     | [JAZ]
-1.7     | release                  | pooplog & [JAZ]
-1.7.1/2 | bugfix releases          | [JAZ]
-1.7.3   | beta                     | pooplog & [JAZ] & bohan
-1.7.4   | release                  | pooplog & [JAZ]
-1.7.5   | beta                     | pooplog & [JAZ]
-1.7.6   | release                  | alk
-1.7.6.1 | bug fix                  | alk
-1.7.6.2 | microsoft bug fix        | alk & bohan
-1.7.7   | beta                     | alk & bohan & magnus & [JAZ] & logywang & sampler
----------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+Version | Date | Type of release             | Authors
+--------|------|-----------------------------|------------------------------------------------------
+0.x     |      | alpha, beta                 | arguru
+1.0/01  | 2000 | bugfix                      | arguru
+1.1/11  |      | bugfix                      | Mats
+1.5     | 2001 | alpha, beta, stable         | [JAZ] & Mark
+1.6     | 2002 | alpha, beta, stable         | [JAZ] & Dan/Dub & Fideloop
+1.6+/66 |      | maintenance                 | [JAZ]
+1.7     |      | release                     | pooplog & [JAZ]
+1.7.1/2 |      | bugfix                      | [JAZ]
+1.7.3   |      | beta                        | pooplog & [JAZ] & bohan
+1.7.4   | 2003 | stable                      | pooplog & [JAZ]
+1.7.5   |      | beta                        | pooplog & [JAZ]
+1.7.6   |      | stable                      | alk
+1.7.6.1 |      | bug fix                     | alk
+1.7.6.2 | 2004 | bug fix (w98 compatibility) | alk & bohan
+1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
+1.8     |      | stable                      | psycledelics combined effort :-)
+----------------------------------------------------------------------------------------------------
 
-(copied from version.h)
+
 /// Versions are composed this way since 1.7.24:
 /// M.m.p , where:
 /// - M = major version number.
@@ -29,101 +30,115 @@ Version | Type of release          | By
 ///			- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
 ///			- if the minor version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
 
+
 ----------------------------------------------------------------
-Legend :       +=addition        *=change        !=bug
+Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
 
-cvs commit messages
--------------------
 
-$Log$
-Revision 1.28  2005/03/01 20:13:49  sampler
-added PgUp/PgDn (or assigned keys) to move backward/fordward 16 rows while playing
+v1.8
+----
 
-Revision 1.27  2005/02/26 12:36:35  sampler
-Added my last addition about Pattern Navigation (and deleted the other line about my fix i've reverted back)
++ added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
++ added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
++ added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)
++ added PgUp/PgDn (or assigned keys) to move backward/fordward 16 rows while playing (sampler)
++ skin for machine parameters' knobs (alk)
++ added crop command in the wave editor (lobywang)
+! fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
+! fixed bug where unmuting vsts produced note blasts (alk)
++ added a message/error logging system (see file psycle.log.txt) (bohan & alk & magnus)
+! fixed bug for some directsound drivers that are semi-bogus (the symptom was that the configuration dialog kept poping up asking you to reconfigure forever) (bohan)
+* moved the checkbox for move cursor when pasting to the sequencer panel (alk)
++ native machines can now have labels ("titles") to group several parameters that are related together. (bohan)
++ added a new internal machine "Note Duplicator". It just resends the Tick comand to the specificed machines (jaz)
++ allow the player to send commands to a machine from any pattern track with a given channel (or "voice") number (bohan)
+	(todo: move that to the documentation)
+	if the machine is not a vst, and if the note is a "mcm" (hmm, poor name if it's not related with midi),
+	then, the fields in the event are interpreted as <channel> <machine> <command> <parameter>.
+	for example, 1122334444, means:
+	11 is the channel (or "voice"),
+	22 is the machine,
+	33 is the command, and
+	4444 is the parameter
+	The player calls the Machine::Tick function with those values, and the instrument value set to 0.
+	The voice number 0xff is special and send the same command to all voices.
++ new sampler machine, "sampulse" (jaz):
+	+Added IT loader (jaz)
+	*Converted XMSampler "Layers (waves) per instrument" to independent sample bank and instrument bank. (jaz)
+	*Removed an cleaned (a bit) old sample sources (removed the never used sample layers) (jaz)
+	*More Work on Sampulse (IT Filtering, improving commands, bugfixing).
++ new native plugins:
+	+stk plugins (sartorius)
+	+chorus plugin (sartorius)
+	+whawha plugin (sartorius)
+	+gamefx plugin (voskomo)
+	+blitz plugin (voskomo)
++ some native plugins are now opensource (druttis & pooplog):
+	* all druttis' plugins now opensource
+	* all pooplog's plugins now opensource
+* the plugin host now resists to plugin crashes (both native and vsts)
+! fix for karlkox surround (alk)
 
-Revision 1.26  2005/01/27 14:31:45  sampler
-Right mouse button additions
 
-Revision 1.25  2005/01/23 11:04:13  johan-boule
-new version scheme 1.7.24
 
-Revision 1.24  2005/01/23 10:59:12  johan-boule
-version numbering again, huhu ha ho.
+v1.7.x
+______
 
-Revision 1.22  2005/01/23 10:36:06  johan-boule
-version numbering again, huhu.
+1.7.x were transitional versions, the changelog here keeps only the internal/technical details,
+and all the changes important from the point of view of the user are moved or summarized above in the v1.8 log.
 
-Revision 1.21  2005/01/23 10:07:17  johan-boule
-typo
+build and distribution process:
+	! fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
+	+ added automatized compilation + packaging + update of psycle sourceforge site for faster and more frequent updates (bohan)
+	* new versionning scheme, with three numbers
+	+ The version info and the about box is modified to show what build options were used (multiline text) (bohan)
+	+ added cpu specific builds for 6th and 7th generation x86 CPUs (bohan)
 
-Revision 1.19  2005/01/23 10:05:13  johan-boule
-typo
+internal changes in the source code:
+	* refactoring of the source code: cleaner internally, but no visible changes for the users (bohan & magnus)
+	* rewriting of the native and vst plugin hosts with exception handling (bohan & magnus)
+	* ported the open source native plugins to the new compiler (bohan)
+	+ let plugins find other .dll files that are in any intermediate dir between their own dir and the configured root dir for plugins (bohan)
+		plugins which need helper .dll files (like druttis' sublime), can now find it even if it's not placed in the same dir as psycle.exe ; it can be placed along with the plugin (or actually, in any "intermediate" dir). (bohan)
+		note from bohan:
+			i still think it would be better to simply disallow having a deep directory tree of libraries and rather put them all, flat, in the same dir.
+			it would be a lot simpler, and even have some technical advantages: what if a plugin depends on other plugins for example?
+	* attempt to use boost::read_write_mutex instead of an exclusive mutex for Song's lock. (bohan, doesn't work, dead locks)
+	+ added optional (masked otherwize) handling of fpu exceptions (bohan)
+	! rearranged the midi code ; closing sourceforge bug #1087788 (bohan)
+	* interface of the registry class more "c++ oriented" (if that term exist ;p) and independent from the winapi (bohan)
+	* Importing configuration from older psycle's and psycle alpha (jaz)
+	- removing unimplemented alk's mixer (jaz)
 
-Revision 1.18  2005/01/23 10:03:01  johan-boule
-version numbering
+bugfixes:
+	! bug fix with psycle::Machine::GetNumParams() and its redefinition in derived classes (the bug only existed in previous 1.7.x versions). (bohan)
+	+ added special handling of labels in the machine parameter combo box for native plugins (bohan)
+	! fixed bug for fingersoup's directsound driver (null GUID) and removed scary pointer and index stuff from the directsound config (bohan)
+	! fix bugs with Note Duplicator (load/save and deadlock). (jaz)
+	! fix bug with render to wav, where in some specific situations where playing some instruments incorrectly. (jaz)
+	! closes bug: sourceforge bug tracker [ 1229490 ] Velocity / volume data with MIDI keyboard (jaz & bohan)
+	! fixed small but in "recent files" (jaz)
+	* comments about unfinished features (jaz)
 
-Revision 1.16  2004/12/22 22:42:20  johan-boule
-fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places
-
-Revision 1.15  2004/12/18 14:48:39  johan-boule
-change by alk in order to stop the note blasts when un muting vsts
-
-Revision 1.14  2004/12/11 00:20:36  johan-boule
-no message
-
-Revision 1.13  2004/12/09 09:12:17  johan-boule
-note about latest bug fix
-
-Revision 1.12  2004/12/06 19:23:37  sampler
-information about latest fixed bug by bohan
-
-Revision 1.11  2004/12/05 00:41:09  johan-boule
-bug fix with psycle::Machine::GetNumParams() and its redefinition in derived classes
-
-Revision 1.10  2004/11/29 21:57:08  sampler
-information about new release
-
-Revision 1.9  2004/05/27 03:11:52  johan-boule
-information about new release
-
-Revision 1.8  2004/05/10 15:44:15  johan-boule
-added comments on upcoming release
-
-Revision 1.7  2004/05/10 15:15:47  johan-boule
-added commit log to whatsnew.txt
-
-release to come (v1.7.7.x)
---------------------------
-
-!fixed bug where unmuting vsts produced note blasts (alk)
-*refactoring of the source code: cleaner internally, but no visible changes for the users (bohan & magnus)
-+rewriting of the native and vst plugin hosts (bohan & magnus)
-+added automatized compilation + packaging + update of psycle sourceforge site for faster and more frequent updates (bohan)
-+added cpu specific builds for 6th and 7th generation x86 CPUs (bohan)
-*ported the open source native plugins to the new compiler (bohan)
-+added crop command in the wave editor (lobywang)
-!fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
-+added a message/error logging system (see file output.log.txt) (bohan & alk & magnus)
-+added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
-+added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
-!fixed bug (only existed in previous 1.7.7.x alphas) that made some VSTs didn't save good their parameters/presets (bohan)
-+added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)
-+added PgUp/PgDn (or assigned keys) to move backward/fordward 16 rows while playing (sampler)
 
 v1.7.6.2
 --------
+
 !fixed bug in the flanger's optimized sine sequence generator: 32-bit floating point numbers were not accurate enough, now it's 64-bit (bohan)
 !back in 1998, you were using mswin98, and nowadays? ... hmm, shame on you, but psycle still works on it. (alk & bohan)
 
+
 v1.7.6.1
 --------
+
 !fixed OLD bug, VSTi data slider would send data to the VSTi whenever the slider was repainted, if tweak record is enabled then the data gets written to the pattern (alk)
 *final port (merged again) of the source code to the latest microsoft compiler, msvc7.1. needs new dll to be distributed. (bohan)
 
+
 v1.7.6
 ------
+
 !fixed bug, master volume does not release focus! (alk)
 !realigned widgets and controls so they are neater ;) (alk)
 +added key "select bar" (ctrl-k, you need to reset keysettings or assign your own key) (quickselects 16, 32, 64 lines etc, ala 	IT, multiples of TPB) (alk)
@@ -142,14 +157,18 @@ v1.7.6
 !changed midi config default to not write mcm from midi data input (alk)
 +made move cursor when pasting optional (set in the config dialog) (alk)
 
+
 v1.7.5
 ------
+
 +"MIDI RAW" recording mode - records incoming midi to noteons and mcms, passes them to vst (pooplog)
 ! fixes for multichannel jamming and recording and mcm recording loosing held notes (pooplog)
 ! vst window layout for machines with way too many parameters and using the default gui (pooplog)
 
-V1.7.4
+
+v1.7.4
 ------
+
 + Added seminote tunning to sample instruments.
 ! VSTs that call the psycle host callback with a NULL pointer can't crash psycle any more (pooplog)
 ! XM import doesn't spam machine columns with 00 any more. (pooplog)
@@ -168,8 +187,10 @@ V1.7.4
 * changed so that 255 unique patterns can be stored, although only 127 can be sequenced (pooplog)
 + wave writer can write separate waves per generator now (pooplog)
 
-V1.7.3 RC2
+
+v1.7.3 RC2
 ----------
+
 ! whoops - fixed the dsound config dialog (pooplog)
 ! whoops - fixed the unable to load many types of wave files issue (pooplog)
 ! whoops - fixed the note-off bug while recording (pooplog)
@@ -180,8 +201,10 @@ V1.7.3 RC2
 + vu meter can be turned off from the theme dialog (pooplog)
 * All-new high-performance ASIO implementation - MSB float mode not done yet (pooplog)
 
-V1.7.3 RC1
+
+v1.7.3 RC1
 ----------
+
 + double clicking on pattern highlights that track (pooplog)
 + 64 tracks available! (might break some machines?) (pooplog)
 + play from start button (pooplog)
@@ -218,12 +241,13 @@ V1.7.3 RC1
 ! Sample loading routine is now more flexible.This allows to load files that previously didn't. [JAZ]
 
 
-V1.7.2
+v1.7.2
 ------
+
 ! bug where the sampler didn't stop the notes sometimes.
 
 
-V1.7.1
+v1.7.1
 ------
 
 + Added option (not) to loop the Song/block at the end.
@@ -235,7 +259,7 @@ V1.7.1
 ! Fixed Saving to wav. options "save pattern" and "save sequence position" didn't ever stop.
 
 
-V1.7RC6 (Official 1.7)
+v1.7RC6 (Official 1.7)
 -------
 
 + Tweak Slide command. Slides a Tweak to make it smoother. (pooplog)
@@ -249,7 +273,7 @@ V1.7RC6 (Official 1.7)
 ! Fixed Length (in time) counter error when FFxx or FExx values were present for Tweaks or mcm's
 
 
-V1.7RC1
+v1.7RC1
 -------
 + added ASIO support through "PortAudio" library (in its version 18). (LegoStar)
 + revert to saved option (pooplog) [alk]
@@ -318,8 +342,9 @@ V1.7RC1
 ! millions of other tiny bugfixes (pooplog & JAZ)
 
 
-V1.66
+v1.66
 -----
+
 + Added elapsed playtime (by KooPer)
 + Now loading songs with machines outside of the screen moves them to a visible area.
 + VST host correctly does "idle" calls to VST's now. This supposedly makes AbSynth work.
