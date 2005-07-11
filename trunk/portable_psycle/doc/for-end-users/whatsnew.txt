@@ -20,15 +20,15 @@ Version | Date | Type of release             | Authors
 ----------------------------------------------------------------------------------------------------
 
 
-/// Versions are composed this way since 1.7.24:
-/// M.m.p , where:
-/// - M = major version number.
-/// - m = minor version number:
-///			- if even, then it's a stable release.
-///			- if odd, then it's a beta or release candidate for next major version number.
-/// - p = patch number:
-///			- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
-///			- if the minor version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
+Versions are composed this way since 1.7.24:
+M.m.p , where:
+	- M = major version number.
+	- m = minor version number:
+		- if even, then it's a stable release.
+		- if odd, then it's an unstable build or release candidate for next stable minor version number.
+	- p = patch number:
+		- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
+		- if the minor version number is odd (unstable builds), then this patch number is incremented very often, each cvs commit.
 
 
 ----------------------------------------------------------------

@@ -3,15 +3,14 @@
 ///\file
 ///\brief the version number of the psycle host application.
 
-/// Versions are composed this way since 1.7.24:
 /// M.m.p , where:
-/// - M = major version number.
-/// - m = minor version number:
-///			- if even, then it's a stable release.
-///			- if odd, then it's a beta or release candidate for next minor version number.
-/// - p = patch number:
-///			- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
-///			- if the minor version number is odd (beta or RC), then this patch number is incremented very often, each cvs commit.
+/// 	- M = major version number.
+/// 	- m = minor version number:
+/// 		- if even, then it's a stable release.
+/// 		- if odd, then it's an unstable build or release candidate for next stable minor version number.
+/// 	- p = patch number:
+/// 		- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
+/// 		- if the minor version number is odd (unstable builds), then this patch number is incremented very often, each cvs commit.
 
 /// Other files that need to be updated accordingly:
 /// - make/doxygen/doxygen.configuration: PROJECT_NUMBER
@@ -27,7 +26,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH -1
-#define PSYCLE__VERSION__QUALITY "1.8 Candidate" // "pre-release 1.1.1 of 1.8 :"
+#define PSYCLE__VERSION__QUALITY "1.8 Candidate"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -78,6 +77,9 @@
 #if 0
 /*
 $Log$
+Revision 1.43  2005/07/11 01:22:01  johan-boule
+various little cleanup for 1.8 release
+
 Revision 1.42  2005/07/10 21:08:20  jaz001
 New defaults for machine parameters
 New skin for machine parameters' knobs.
