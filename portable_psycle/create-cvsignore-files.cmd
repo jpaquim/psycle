@@ -1,10 +1,12 @@
 %~d0
 cd %~p0
 
-echo .cvsignore> make\msvc_7.1\.cvsignore
-echo *.suo>> make\msvc_7.1\.cvsignore
-echo *.ncb>> make\msvc_7.1\.cvsignore
-echo output>> make\msvc_7.1\.cvsignore
+for %%i in (7.1 8.0) do (
+	echo .cvsignore> make\msvc_%%i\.cvsignore
+	echo *.suo>> make\msvc_%%i\.cvsignore
+	echo *.ncb>> make\msvc_%%i\.cvsignore
+	echo output>> make\msvc_%%i\.cvsignore
+)
 
 echo .cvsignore> include\.cvsignore
 echo boost>> include\.cvsignore
