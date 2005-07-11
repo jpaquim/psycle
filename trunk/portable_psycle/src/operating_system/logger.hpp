@@ -23,9 +23,9 @@ namespace operating_system
 			#if defined OPERATING_SYSTEM__LOGGERS__THRESHOLD_LEVEL
 				OPERATING_SYSTEM__LOGGERS__THRESHOLD_LEVEL
 			#elif defined NDEBUG
-				0
+				::psycle::host::loggers::levels::info
 			#else
-				1
+				::psycle::host::loggers::levels::trace
 			#endif
 			;
 	public:
@@ -58,13 +58,17 @@ namespace operating_system
 	// <bohan> msvc 7.1 crashes if we put this function in the implementation file instead of inlined in the header.
 	inline void logger::operator()(const int & level, const std::string & string) throw()
 	{
-		boost::mutex::scoped_lock lock(mutex()); // scope outside the try-catch statement so that it is freed in all cases if something goes wrong.
 		try
 		{
-			if((*this)(level)) ostream() << "logger: " << level << ": " << string;
+			if((*this)(level))
+			{
+				boost::mutex::scoped_lock lock(mutex());
+				ostream() << "logger: " << level << ": " << string;
+			}
 		}
 		catch(...)
 		{
+			boost::mutex::scoped_lock lock(mutex());
 			// oh dear!
 			// fallback to std::cerr
 			std::cerr << "logger crashed" << std::endl;
