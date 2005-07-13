@@ -43,6 +43,7 @@ v1.8
 + added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
 + added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)
 + added PgUp/PgDn (or assigned keys) to move backward/fordward 16 rows while playing (sampler)
++ added a question to autoincrease a pattern length if you paste a block bigger (sampler)
 + skin for machine parameters' knobs (alk)
 + added crop command in the wave editor (lobywang)
 ! fixed bug in the vst host that occured sending midi note offs + reset all controlers (alk & pooplog)
