@@ -146,6 +146,7 @@ enum MachineType
 	MACH_DUMMY	= 255
 };
 
+DATA:
 int index; 			// which machine we are loading
 int type; 			// The MachineType of the machine being loaded
 char dllname[]; 	// NULL terminated .dll name of the plugin (MACH_PLUGIN, MACH_VST, MACH:VSTFX). NULL in any other case. (truncated to 256)

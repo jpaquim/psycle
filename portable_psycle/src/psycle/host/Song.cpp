@@ -397,7 +397,7 @@ namespace psycle
 			{
 				if(!dstMac->_inputCon[c]) dfreebus = c;
 				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				else if((dstMac->_outputMachines[c] == src) && (dstMac->_connection[c])) error = true;
+				else if(dstMac->_outputMachines[c] == src) error = true;
 			}
 			if(dfreebus == -1 || error) return false;
 			// Calibrating in/out properties
