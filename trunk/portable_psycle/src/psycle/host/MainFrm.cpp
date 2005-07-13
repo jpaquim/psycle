@@ -1641,6 +1641,7 @@ NAMESPACE__BEGIN(psycle)
 					}
 				}		
 			}
+			StatusBarIdle();
 			m_wndView.SetFocus();
 		}
 
