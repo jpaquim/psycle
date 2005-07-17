@@ -26,7 +26,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH -1
-#define PSYCLE__VERSION__QUALITY "1.8 Candidate"
+#define PSYCLE__VERSION__QUALITY "1.8 Candidate (+ bugfix for midi controllers config dialog)"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -77,6 +77,9 @@
 #if 0
 /*
 $Log$
+Revision 1.44  2005/07/17 03:51:09  johan-boule
+bugfix for midi controllers config dialog
+
 Revision 1.43  2005/07/11 01:22:01  johan-boule
 various little cleanup for 1.8 release
 

@@ -112,10 +112,10 @@ NAMESPACE__BEGIN(psycle)
 				gui.GetWindowText(mfc);
 				hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
-			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model, int const & type = 0)
+			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
 			{
 				model.record() = gui.record.GetCheck();
-				model.type() = gui.type.GetCurSel() ? type : 0;
+				model.type() = gui.type.GetCurSel();
 				read_from_gui_text(gui.command, model.command());
 				read_from_gui_text(gui.from, model.from());
 				read_from_gui_text(gui.to, model.to());
@@ -126,7 +126,7 @@ NAMESPACE__BEGIN(psycle)
 		void CMidiInputDlg::OnOK() 
 		{
 			Global::pConfig->midi().raw() = raw.GetCheck();
-			read_from_gui(velocity, Global::pConfig->midi().velocity(), 3);
+			read_from_gui(velocity, Global::pConfig->midi().velocity());
 			read_from_gui(pitch, Global::pConfig->midi().pitch());
 			assert(groups.size() == Global::pConfig->midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
