@@ -1,30 +1,29 @@
-/*		GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
-		Programm is based on Arguru Bass. Filter seems to be Public Domain.
+/*
+	GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
+	Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
-        This plugin is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 2 of the License, or
-        (at your option) any later version.\n"\
+	This plugin is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.\n"\
 
-        This plugin is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
+	This plugin is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-        You should have received a copy of the GNU General Public License
-        along with this program; if not, write to the Free Software
-        Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "math.h"
+#include <project.private.hpp>
+#include <cmath>
+
 #include "voice.h"
 
-#define FILTER_CALC_TIME	64
-#define TWOPI				6.28318530717958647692528676655901f
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+#define FILTER_CALC_TIME 64
+#define TWOPI 6.28318530717958647692528676655901f
 
 CSynthTrack::CSynthTrack()
 {
@@ -80,7 +79,7 @@ CSynthTrack::~CSynthTrack()
 
 }
 
-CSynthTrack::NoteOn(int note, PERFORMANCE *perf, int spd)
+void CSynthTrack::NoteOn(int note, PERFORMANCE *perf, int spd)
 {
 	vpar=perf;
 	nextNote=note;
@@ -91,7 +90,7 @@ CSynthTrack::NoteOn(int note, PERFORMANCE *perf, int spd)
 	Retrig();
 }
 
-CSynthTrack::RealNoteOn()
+void CSynthTrack::RealNoteOn()
 {
 	if (trigger){
 		trigger=false;
@@ -107,7 +106,7 @@ CSynthTrack::RealNoteOn()
 	}
 }
 
-CSynthTrack::Retrig()
+void CSynthTrack::Retrig()
 {
 	// Init Amplitude Envelope
 	AmpEnvSustainLevel=(float)vpar->AEGSustain*0.0039062f;
@@ -158,8 +157,8 @@ float CSynthTrack::GetSample()
 				cur_transpose=vpar->Transpose[perf_index]-1;
 				cur_option=vpar->Option[perf_index];
 				cur_realnote = cur_transpose;
-				if ((cur_option & 1) == 0) cur_realnote+=cur_basenote;
-				if ((cur_option & 2 == true) & (keyrelease==false)) Retrig();
+				if (cur_option & 1) cur_realnote+=cur_basenote;
+				if ((cur_option & 2) && !keyrelease) Retrig();
 			}
 			cur_command=vpar->Command[perf_index];
 			cur_parameter=vpar->Parameter[perf_index];
@@ -337,7 +336,7 @@ void CSynthTrack::GetEnvVcf()
 	}
 }
 
-CSynthTrack::NoteOff()
+void CSynthTrack::NoteOff()
 {
 	keyrelease=true;
 	if((AmpEnvStage>0) & (AmpEnvStage!=0))
@@ -355,7 +354,7 @@ CSynthTrack::NoteOff()
 	}
 }
 
-CSynthTrack::DoGlide()
+void CSynthTrack::DoGlide()
 {
 	// Glide Handler
 	if(ROSCSpeed<OSCSpeed)
@@ -375,7 +374,7 @@ CSynthTrack::DoGlide()
 	OOSCSpeed=ROSCSpeed;
 }
 
-CSynthTrack::PerformFx()
+void CSynthTrack::PerformFx()
 {
 	// Perform tone glide
 	DoGlide();
@@ -383,7 +382,7 @@ CSynthTrack::PerformFx()
 	if(sp_cmd==12) nextvoicevol=(float)sp_val/255.0f;
 }
 
-CSynthTrack::InitEffect(int cmd, int val)
+void CSynthTrack::InitEffect(int cmd, int val)
 {
 sp_cmd=cmd;
 sp_val=val;
