@@ -1,191 +1,190 @@
-/*
-	GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
-	Programm is based on Arguru Bass. Filter seems to be Public Domain.
+/*		GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
+		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
-	This plugin is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.\n"\
+        This plugin is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 2 of the License, or
+        (at your option) any later version.\n"\
 
-	This plugin is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+        This plugin is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+        You should have received a copy of the GNU General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <project.private.hpp>
-#include <psycle/plugin_interface.hpp>
-#include "voice.h"
-#include <cstring>
-#include <cstdlib>
-#include <cassert>
-#include <cmath>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
 
-#define MAX_ENV_TIME 65536
-#define MAX_TRACKS 32
+#include "..\..\machineinterface.h"
+#include "voice.h"
+
+#define MAX_ENV_TIME	65536
+#define MAX_TRACKS		64
 
 
 CMachineParameter const paraVol1 = 
 { 
 	"Volume 1",
-	"Volume 1",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 1",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	129
 };
 
 CMachineParameter const paraVol2 = 
 { 
 	"Volume 2",
-	"Volume 2",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 2",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol3 = 
 { 
 	"Volume 3",
-	"Volume 3",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 3",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol4 = 
 { 
 	"Volume 4",
-	"Volume 4",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 4",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol5 = 
 { 
 	"Volume 5",
-	"Volume 5",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 5",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol6 = 
 { 
 	"Volume 6",
-	"Volume 6",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 6",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol7 = 
 { 
 	"Volume 7",
-	"Volume 7",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 7",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol8 = 
 { 
 	"Volume 8",
-	"Volume 8",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 8",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol9 = 
 { 
 	"Volume 9",
-	"Volume 9",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 9",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol10 = 
 { 
 	"Volume 10",
-	"Volume 10",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 10",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol11 = 
 { 
 	"Volume 11",
-	"Volume 11",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 11",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol12 = 
 { 
 	"Volume 12",
-	"Volume 12",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 12",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol13 = 
 { 
 	"Volume 13",
-	"Volume 13",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 13",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol14 = 
 { 
 	"Volume 14",
-	"Volume 14",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 14",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol15 = 
 { 
 	"Volume 15",
-	"Volume 15",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 15",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraVol16 = 
 { 
 	"Volume 16",
-	"Volume 16",
-	0,
-	255,
-	MPF_STATE,
+	"Volume 16",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
@@ -194,10 +193,10 @@ CMachineParameter const paraVol16 =
 CMachineParameter const paraWave1 = 
 { 
 	"Wave 1",
-	"Wave 1",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 1",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	1
 };
 
@@ -205,470 +204,470 @@ CMachineParameter const paraWave1 =
 CMachineParameter const paraWave2 = 
 { 
 	"Wave 2",
-	"Wave 2",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 2",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave3 = 
 { 
 	"Wave 3",
-	"Wave 3",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 3",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave4 = 
 { 
 	"Wave 4",
-	"Wave 4",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 4",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave5 = 
 { 
 	"Wave 5",
-	"Wave 5",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 5",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave6 = 
 { 
 	"Wave 6",
-	"Wave 6",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 6",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave7 = 
 { 
 	"Wave 7",
-	"Wave 7",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 7",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave8 = 
 { 
 	"Wave 8",
-	"Wave 8",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 8",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave9 = 
 { 
 	"Wave 9",
-	"Wave 9",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 9",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave10 = 
 { 
 	"Wave 10",
-	"Wave 10",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 10",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave11 = 
 { 
 	"Wave 11",
-	"Wave 11",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 11",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave12 = 
 { 
 	"Wave 12",
-	"Wave 12",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 12",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave13 = 
 { 
 	"Wave 13",
-	"Wave 13",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 13",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave14 = 
 { 
 	"Wave 14",
-	"Wave 14",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 14",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave15 = 
 { 
 	"Wave 15",
-	"Wave 15",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 15",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraWave16 = 
 { 
 	"Wave 16",
-	"Wave 16",
-	0,
-	9,	
-	MPF_STATE,
+	"Wave 16",									// description
+	0,											// MinValue	
+	9,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose1 = 
 { 
 	"Transpose 1",
-	"Transpose 1",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 1",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	1
 };
 
 CMachineParameter const paraTranspose2 = 
 { 
 	"Transpose 2",
-	"Transpose 2",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 2",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose3 = 
 { 
 	"Transpose 3",
-	"Transpose 3",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 3",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose4 = 
 { 
 	"Transpose 4",
-	"Transpose 4",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 4",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose5 = 
 { 
 	"Transpose 5",
-	"Transpose 5",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 5",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose6 = 
 { 
 	"Transpose 6",
-	"Transpose 6",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 6",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose7 = 
 { 
 	"Transpose 7",
-	"Transpose 7",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 7",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose8 = 
 { 
 	"Transpose 8",
-	"Transpose 8",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 8",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose9 = 
 { 
 	"Transpose 9",
-	"Transpose 9",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 9",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose10 = 
 { 
 	"Transpose 10",
-	"Transpose 10",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 10",							// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose11 = 
 { 
 	"Transpose 11",
-	"Transpose 11",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 11",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose12 = 
 { 
 	"Transpose 12",
-	"Transpose 12",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 12",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose13 = 
 { 
 	"Transpose 13",
-	"Transpose 13",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 13",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose14 = 
 { 
 	"Transpose 14",
-	"Transpose 14",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 14",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose15 = 
 { 
 	"Transpose 15",
-	"Transpose 15",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 15",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraTranspose16 = 
 { 
 	"Transpose 16",
-	"Transpose 16",
-	0,
-	96,	
-	MPF_STATE,
+	"Transpose 16",								// description
+	0,											// MinValue	
+	96,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption1 = 
 { 
 	"Option 1",
-	"Option 1",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 1",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption2 = 
 { 
 	"Option 2",
-	"Option 2",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 2",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption3 = 
 { 
 	"Option 3",
-	"Option 3",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 3",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption4 = 
 { 
 	"Option 4",
-	"Option 4",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 4",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption5 = 
 { 
 	"Option 5",
-	"Option 5",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 5",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption6 = 
 { 
 	"Option 6",
-	"Option 6",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 6",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption7 = 
 { 
 	"Option 7",
-	"Option 7",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 7",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption8 = 
 { 
 	"Option 8",
-	"Option 8",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 8",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption9 = 
 { 
 	"Option 9",
-	"Option 9",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 9",									// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption10 = 
 { 
 	"Option 10",
-	"Option 10",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 10",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption11 = 
 { 
 	"Option 11",
-	"Option 11",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 11",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption12 = 
 { 
 	"Option 12",
-	"Option 12",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 12",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption13 = 
 { 
 	"Option 13",
-	"Option 13",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 13",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption14 = 
 { 
 	"Option 14",
-	"Option 14",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 14",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption15 = 
 { 
 	"Option 15",
-	"Option 15",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 15",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraOption16 = 
 { 
 	"Option 16",
-	"Option 16",
-	0,
-	3,	
-	MPF_STATE,
+	"Option 16",								// description
+	0,											// MinValue	
+	3,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
@@ -676,467 +675,467 @@ CMachineParameter const paraOption16 =
 CMachineParameter const paraCommand1 = 
 { 
 	"Command 1",
-	"Command 1",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 1",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraCommand2 = 
 { 
 	"Command 2",
-	"Command 2",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 2",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraCommand3 = 
 { 
 	"Command 3",
-	"Command 3",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 3",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand4 = 
 { 
 	"Command 4",
-	"Command 4",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 4",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand5 = 
 { 
 	"Command 5",
-	"Command 5",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 5",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand6 = 
 { 
 	"Command 6",
-	"Command 6",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 6",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand7 = 
 { 
 	"Command 7",
-	"Command 7",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 7",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand8 = 
 { 
 	"Command 8",
-	"Command 8",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 8",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand9 = 
 { 
 	"Command 9",
-	"Command 9",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 9",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand10 = 
 { 
 	"Command 10",
-	"Command 10",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 10",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand11 = 
 { 
 	"Command 11",
-	"Command 11",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 11",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand12 = 
 { 
 	"Command 12",
-	"Command 12",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 12",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand13 = 
 { 
 	"Command 13",
-	"Command 13",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 13",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand14 = 
 { 
 	"Command 14",
-	"Command 14",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 14",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand15 = 
 { 
 	"Command 15",
-	"Command 15",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 15",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 CMachineParameter const paraCommand16 = 
 { 
 	"Command 16",
-	"Command 16",
-	0,
-	15,	
-	MPF_STATE,
+	"Command 16",								// description
+	0,											// MinValue	
+	15,											// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter1 = 
 { 
 	"Parameter 1",
-	"Parameter 1",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 1",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter2 = 
 { 
 	"Parameter 2",
-	"Parameter 2",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 2",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter3 = 
 { 
 	"Parameter 3",
-	"Parameter 3",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 3",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter4 = 
 { 
 	"Parameter 4",
-	"Parameter 4",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 4",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter5 = 
 { 
 	"Parameter 5",
-	"Parameter 5",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 5",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter6 = 
 { 
 	"Parameter 6",
-	"Parameter 6",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 6",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter7 = 
 { 
 	"Parameter 7",
-	"Parameter 7",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 7",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter8 = 
 { 
 	"Parameter 8",
-	"Parameter 8",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 8",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter9 = 
 { 
 	"Parameter 9",
-	"Parameter 9",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 9",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter10 = 
 { 
 	"Parameter 10",
-	"Parameter 10",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 10",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter11 = 
 { 
 	"Parameter 11",
-	"Parameter 11",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 11",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter12 = 
 { 
 	"Parameter 12",
-	"Parameter 12",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 12",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter13 = 
 { 
 	"Parameter 13",
-	"Parameter 13",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 13",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter14 = 
 { 
 	"Parameter 14",
-	"Parameter 14",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 14",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter15 = 
 {
 	"Parameter 15",
-	"Parameter 15",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 15",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraParameter16 = 
 { 
 	"Parameter 16",
-	"Parameter 16",
-	0,
-	255,
-	MPF_STATE,
+	"Parameter 16",								// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed1 = 
 { 
 	"Speed 1",
-	"Speed 1",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 1",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed2 = 
 { 
 	"Speed 2",
-	"Speed 2",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 2",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed3 = 
 { 
 	"Speed 3",
-	"Speed 3",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 3",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed4 = 
 { 
 	"Speed 4",
-	"Speed 4",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 4",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed5 = 
 { 
 	"Speed 5",
-	"Speed 5",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 5",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed6 = 
 { 
 	"Speed 6",
-	"Speed 6",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 6",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed7 = 
 { 
 	"Speed 7",
-	"Speed 7",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 7",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed8 = 
 { 
 	"Speed 8",
-	"Speed 8",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 8",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed9 = 
 { 
 	"Speed 9",
-	"Speed 9",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 9",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed10 = 
 { 
 	"Speed 10",
-	"Speed 10",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 10",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed11 = 
 { 
 	"Speed 11",
-	"Speed 11",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 11",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed12 = 
 { 
 	"Speed 12",
-	"Speed 12",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 12",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed13 = 
 { 
 	"Speed 13",
-	"Speed 13",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 13",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed14 = 
 { 
 	"Speed 14",
-	"Speed 14",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 14",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed15 = 
 { 
 	"Speed 15",
-	"Speed 15",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 15",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
 CMachineParameter const paraSpeed16 = 
 { 
 	"Speed 16",
-	"Speed 16",
-	0,
-	255,
-	MPF_STATE,
+	"Speed 16",									// description
+	0,											// MinValue	
+	255,										// MaxValue
+	MPF_STATE,									// Flags
 	0
 };
 
@@ -1144,20 +1143,20 @@ CMachineParameter const paraSpeed16 =
 CMachineParameter const paraStartPos = 
 { 
 	"Start Pos",
-	"Start Pos",
-	1,
-	16,	
-	MPF_STATE,
+	"Start Pos",								// description
+	1,											// MinValue	
+	16,											// MaxValue
+	MPF_STATE,									// Flags
 	1
 };
 
 CMachineParameter const paraLoopStart = 
 { 
 	"Loop Start",
-	"Loop Start",
-	1,	
-	16,		
-	MPF_STATE,	
+	"Loop Start",									// description
+	1,												// MinValue	
+	16,												// MaxValue
+	MPF_STATE,										// Flags
 	1
 };
 
@@ -1165,20 +1164,20 @@ CMachineParameter const paraLoopStart =
 CMachineParameter const paraLoopEnd = 
 { 
 	"Loop End",
-	"Loop End",	
-	1,	
-	16,		
-	MPF_STATE,	
+	"Loop End",										// description
+	1,												// MinValue	
+	16,												// MaxValue
+	MPF_STATE,										// Flags
 	1
 };
 
 CMachineParameter const paraReplaySpeed = 
 { 
 	"Replay Speed",
-	"Replay Speed",
-	1,	
-	255,	
-	MPF_STATE,	
+	"Replay Speed",									// description
+	1,												// MinValue	
+	255,											// MaxValue
+	MPF_STATE,										// Flags
 	128
 };
 
@@ -1186,10 +1185,10 @@ CMachineParameter const paraReplaySpeed =
 CMachineParameter const paraVCAattack = 
 { 
 	"VCA Attack",
-	"VCA Attack",
-	32,	
-	MAX_ENV_TIME,
-	MPF_STATE,	
+	"VCA Attack",									// description
+	32,												// MinValue	
+	MAX_ENV_TIME,									// MaxValue
+	MPF_STATE,										// Flags
 	32
 };
 
@@ -1197,20 +1196,20 @@ CMachineParameter const paraVCAattack =
 CMachineParameter const paraVCAdecay = 
 { 
 	"VCA Decay",
-	"VCA Decay",
-	32,	
-	MAX_ENV_TIME,
-	MPF_STATE,	
+	"VCA Decay",									// description
+	32,												// MinValue	
+	MAX_ENV_TIME,									// MaxValue
+	MPF_STATE,										// Flags
 	6341
 };
 
 CMachineParameter const paraVCAsustain =
 { 
 	"VCA Sustain",
-	"VCA Sustain level",
-	0,	
-	256,	
-	MPF_STATE,	
+	"VCA Sustain level",							// description
+	0,												// MinValue	
+	255,											// MaxValue
+	MPF_STATE,										// Flags
 	192
 };
 
@@ -1218,30 +1217,30 @@ CMachineParameter const paraVCAsustain =
 CMachineParameter const paraVCArelease = 
 { 
 	"VCA Release",
-	"VCA Release",
-	32,	
-	MAX_ENV_TIME,
-	MPF_STATE,	
+	"VCA Release",									// description
+	32,												// MinValue	
+	MAX_ENV_TIME,									// MaxValue
+	MPF_STATE,										// Flags
 	2630
 };
 
 CMachineParameter const paraVCFcutoff =
 { 
 	"VCF Cutoff",
-	"VCF Cutoff",
-	0,	
-	255,	
-	MPF_STATE,	
+	"VCF Cutoff",									// description
+	0,												// MinValue	
+	255,											// MaxValue
+	MPF_STATE,										// Flags
 	120
 };
 
 CMachineParameter const paraVCFresonance = 
 { 
 	"VCF Resonance",
-	"VCF Resonance",
-	1,	
-	240,	
-	MPF_STATE,	
+	"VCF Resonance",								// description
+	1,												// MinValue	
+	240,											// MaxValue
+	MPF_STATE,										// Flags
 	1
 };
 
@@ -1250,20 +1249,20 @@ CMachineParameter const paraVCFresonance =
 CMachineParameter const paraVCFenvmod = 
 { 
 	"VCF Envmod",
-	"VCF Envmod",
-	0,	
-	255,	
-	MPF_STATE,	
+	"VCF Envmod",									// description
+	0,												// MinValue	
+	255,											// MaxValue
+	MPF_STATE,										// Flags
 	80
 };
 
 CMachineParameter const paraVCFattack = 
 { 
 	"VCF Attack",
-	"VCF Attack",
-	32,	
-	MAX_ENV_TIME,
-	MPF_STATE,	
+	"VCF Attack",									// description
+	32,												// MinValue	
+	MAX_ENV_TIME,									// MaxValue
+	MPF_STATE,										// Flags
 	589
 };
 
@@ -1271,30 +1270,30 @@ CMachineParameter const paraVCFattack =
 CMachineParameter const paraVCFdecay = 
 { 
 	"VCF Decay",
-	"VCF Decay",
-	32,	
-	MAX_ENV_TIME,
-	MPF_STATE,	
+	"VCF Decay",									// description
+	32,												// MinValue	
+	MAX_ENV_TIME,									// MaxValue
+	MPF_STATE,										// Flags
 	2630
 };
 
 CMachineParameter const paraVCFsustain = 
 { 
 	"VCF Sustain",
-	"VCF Sustain level",
-	0,	
-	256,	
-	MPF_STATE,	
+	"VCF Sustain level",							// description
+	0,												// MinValue	
+	255,											// MaxValue
+	MPF_STATE,										// Flags
 	0
 };
 
 CMachineParameter const paraVCFrelease = 
 { 
 	"VCF Release",
-	"VCF Release",
-	32,	
-	MAX_ENV_TIME,
-	MPF_STATE,	
+	"VCF Release",									// description
+	32,												// MinValue	
+	MAX_ENV_TIME,									// MaxValue
+	MPF_STATE,										// Flags
 	2630
 };
 
@@ -1302,10 +1301,10 @@ CMachineParameter const paraVCFrelease =
 CMachineParameter const paraFinetune = 
 {
 	"Finetune",
-	"Finetune",	
-	-256,
-	256,	
-	MPF_STATE,	
+	"Finetune",										// description
+	-256,											// MinValue	
+	256,											// MaxValue
+	MPF_STATE,										// Flags
 	0
 };
 
@@ -1441,42 +1440,51 @@ CMachineParameter const *pParameters[] =
 	&paraFinetune,
 };
 
+#pragma pack(1)		
+
+#pragma pack()
+
 CMachineInfo const MacInfo = 
 {
 	MI_VERSION,	
-	GENERATOR,
-	128,
-	pParameters,
-	#ifndef NDEBUG
-		"GameFX (Debug build)",
-	#else
-		"GameFX 1.1",
-	#endif
-	"GameFX",
-	"Jan-Marco Edelmann [voskomo]",
-	"Help",
+	GENERATOR,								// flags
+	128,									// numParameters
+	pParameters,							// Pointer to parameters
+#ifdef _DEBUG
+	"GameFX (Debug build)",					// name
+#else
+	"GameFX 1.2",							// name
+#endif
+	"GameFX",								// short name
+	"Jan-Marco Edelmann [voskomo]",			// author
+	"Help",									// A command, that could be use for open an editor, etc...
 	8
 };
 
 class mi : public CMachineInterface
 {
 public:
-	void InitWaveTable();
+	InitWaveTable();
 	mi();
 	virtual ~mi();
+
 	virtual void Init();
+	virtual void SequencerTick();
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
 	virtual bool DescribeValue(char* txt,int const param, int const value);
 	virtual void Command();
 	virtual void ParameterTweak(int par, int val);
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Stop();
+
 private:
+
 	CSynthTrack track[MAX_TRACKS];
+
 	PERFORMANCE globals;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+DLL_EXPORTS		// To export DLL functions to host
 
 mi::mi()
 {
@@ -1487,11 +1495,14 @@ mi::mi()
 mi::~mi()
 {
 	delete Vals;
+
+// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init()
 {
-	globals.reg = 0x7ffff8; // init noise register
+// Initialize your stuff here
+	globals.reg = 0x7ffff8; //init noise register
 	globals.noiseindex = 0;
 }
 
@@ -1501,8 +1512,14 @@ void mi::Stop()
 	track[c].NoteOff();
 }
 
+void mi::SequencerTick()
+{
+// Called on each tick while sequencer is playing
+}
+
 void mi::ParameterTweak(int par, int val)
 {
+	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 	globals.Volume[0]=Vals[0];
 	globals.Volume[1]=Vals[1];
@@ -1636,20 +1653,27 @@ void mi::ParameterTweak(int par, int val)
 
 void mi::Command()
 {
-	char buffer[2048];
-	sprintf
-		(
-			buffer,"%s%s%s",
-			"Pattern commands\n",
-			"\n03xx : Glide",
-			"\n0Cxx : Volume"
+// Called when user presses editor button
+// Probably you want to show your custom window here
+// or an about button
+char buffer[2048];
+
+sprintf(
+		buffer,"%s%s%s",
+		"Pattern commands\n",
+		"\n03xx : Glide",
+		"\n0Cxx : Volume"
 		);
-	pCB->MessBox(buffer,"hello",0);
+
+pCB->MessBox(buffer,"hello",0);
+
 }
 
+// Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	float sl=0;
+	float sr=0;
 	globals.noiseused=false;
 	for(int c=0;c<tracks;c++)
 	{
@@ -1674,8 +1698,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			} while(--xnumsamples);
 		}
 	}
-	if (globals.noiseused)
-	{
+	if (globals.noiseused){
 		signed short noisework=0;
 		for (int i = 0; i < 256; i++){
 			globals.noise=(((globals.reg & (1<<22))? 1:0) << 7) |
@@ -1732,6 +1755,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	}
 }
 
+// Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	if(param<16)
@@ -1900,39 +1924,51 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	return false;
 }
 
+//////////////////////////////////////////////////////////////////////
+// The SeqTick function where your notes and pattern command handlers
+// should be processed. Called each tick.
+// Is called by the host sequencer
+	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	track[channel].InitEffect(cmd,val);
+	if (channel < MAX_TRACKS){
+
+		track[channel].InitEffect(cmd,val);
 	
-	// Global scope synth pattern commands
-	switch(cmd)
-	{
+		// Global scope synth pattern commands
+		switch(cmd)
+		{
 		case 7: // Change envmod
 			globals.EnvMod=val;
-			break;
+		break;
+	
 		case 8: // Change cutoff
 			globals.Cutoff=val/2;
-			break;
+		break;
+	
 		case 9: // Change reso
 			globals.Resonance=val/2;
-			break;
+		break;
+	
+		}
+
+		// Note Off			== 120
+		// Empty Note Row	== 255
+		// Less than note off value??? == NoteON!
+
+		if(note<120) track[channel].NoteOn(note-24,&globals,60);
+
+		// Note off
+		if(note==120) track[channel].NoteOff();
 	}
-
-	// Note Off == 120
-	// Empty Note Row == 255
-	// Less than note off value??? == NoteON!
-	if(note<120) track[channel].NoteOn(note-24,&globals,60);
-
-	// Note off
-	if(note==120) track[channel].NoteOff();
 }
 
-void mi::InitWaveTable()
+mi::InitWaveTable()
 {
 	int c=0;
 	for(c=0;c<2048;c++)
 	{
-		double sval=c*0.00306796157577128245943617517898389;
+		double sval=(double)c*0.00306796157577128245943617517898389;
 
 		//Sine
 		globals.Wavetable[0][c]=int(sin(sval)*16384.0f);
@@ -1952,26 +1988,23 @@ void mi::InitWaveTable()
 		//Saw
 		globals.Wavetable[6][c]=(c*16)-16384;
 	}
-	for (c=0;c<4096;c++)
-	{
+	for (c=0;c<4096;c++){
 		//Sine'n'back
-		if(c<1024)
-		{
+		if(c<1024){
 			globals.Wavetable[2][c]=globals.Wavetable[0][c+c];
 			globals.Wavetable[2][2047-c]=globals.Wavetable[2][c];
 		}
 
-		//Tri'n'back
-		if(c<1024)
-		{
+				//Tri'n'back
+		if(c<1024){
 			globals.Wavetable[3][c]=globals.Wavetable[1][(c+c+512)&2047];
 			globals.Wavetable[3][2047-c]=globals.Wavetable[3][c];
 		}
 
 		//Pulse
 		if(c<2048)
-			globals.Wavetable[5][c]=-16384;
+		globals.Wavetable[5][c]=-16384;
 		else
-			globals.Wavetable[5][c]=16384;
+		globals.Wavetable[5][c]=16384;
 	}
 }

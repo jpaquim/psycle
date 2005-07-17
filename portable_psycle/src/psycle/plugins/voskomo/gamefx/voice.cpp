@@ -1,35 +1,35 @@
-/*
-	GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
-	Programm is based on Arguru Bass. Filter seems to be Public Domain.
+/*		GameFX (C)2005 by Jan-Marco Edelmann [voskomo], voskomo_at_yahoo_dot_de
+		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
-	This plugin is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.\n"\
+        This plugin is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 2 of the License, or
+        (at your option) any later version.\n"\
 
-	This plugin is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+        This plugin is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+        You should have received a copy of the GNU General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <project.private.hpp>
-#include <cmath>
-
+#include "math.h"
 #include "voice.h"
 
-#define FILTER_CALC_TIME 64
-#define TWOPI 6.28318530717958647692528676655901f
+#define FILTER_CALC_TIME	64
+#define TWOPI				6.28318530717958647692528676655901f
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 CSynthTrack::CSynthTrack()
 {
 	replaycount=1;
 	perf_count=1;
-	perf_index=0;
 	perf_index=0;
 	timetocompute=FILTER_CALC_TIME;
 
@@ -37,6 +37,7 @@ CSynthTrack::CSynthTrack()
 	cur_realnote=0;
 	cur_volume=0;
 	voicevol=1.0f;
+	nextvoicevol=1.0f;
 	volmulti=0.0f;
 	cur_waveform=0;
 	cur_transpose=0;
@@ -46,7 +47,14 @@ CSynthTrack::CSynthTrack()
 	cur_parameter=0;
 	cur_speed=16;
 	cur_pw=512;
+	trigger=false;
 	keyrelease=true;
+	stopsend=false;
+	fastRelease=128.0f;
+	rcVolCutoff=0.25f;
+	rcVol=0.0f;
+
+	minFade=0.008f;
 
 	OSCVol=0;
 	oscglide=0;
@@ -56,6 +64,7 @@ CSynthTrack::CSynthTrack()
 
 	OSCSpeed=0.0f;
 	ROSCSpeed=0.0f;
+	OOSCSpeed=0.0f;
 	OSCPosition=0.0f;
 
 	AmpEnvStage=0;
@@ -71,63 +80,67 @@ CSynthTrack::~CSynthTrack()
 
 }
 
-void CSynthTrack::NoteOn(int note, PERFORMANCE *perf, int spd)
+CSynthTrack::NoteOn(int note, PERFORMANCE *perf, int spd)
 {
 	vpar=perf;
-	replaycount = 1;
-	perf_count = 1;
-	perf_index = vpar->StartPos;
-	note+=6;
-	speed=spd;
-	if(spd<65) spdcoef=(float)spd*0.015625f; else spdcoef=1.0f;
-	volmulti=0.0039062f*spdcoef;
-	if (sp_cmd != 12) voicevol=1.0f;
-	cur_basenote=note;
-	keyrelease=false;
-	InitEnvelopes();
+	nextNote=note;
+	nextSpd=spd;
+	trigger=true;
+	keyrelease=true;
+	nextvoicevol=1.0f;
+	Retrig();
 }
 
-void CSynthTrack::InitEnvelopes()
+CSynthTrack::RealNoteOn()
+{
+	if (trigger){
+		trigger=false;
+		speed=nextSpd;
+		if(nextSpd<65) spdcoef=(float)nextSpd*0.015625f; else spdcoef=1.0f;
+		volmulti=0.0039062f*spdcoef;
+		cur_basenote=nextNote;
+		replaycount = 1;
+		perf_count = 1;
+		perf_index = vpar->StartPos;
+		keyrelease=false;
+		stopsend=false;
+	}
+}
+
+CSynthTrack::Retrig()
 {
 	// Init Amplitude Envelope
-	VcfEnvMod=(float)vpar->EnvMod;
-	VcfCutoff=(float)vpar->Cutoff;
-
-	VcfResonance=(float)vpar->Resonance/256.0f;
-
 	AmpEnvSustainLevel=(float)vpar->AEGSustain*0.0039062f;
 	VcfEnvSustainLevel=(float)vpar->FEGSustain*0.0039062f;
-
-	if(AmpEnvStage==0)
-	{
+	if(AmpEnvStage==0){
+		RealNoteOn();
 		AmpEnvStage=1;
 		AmpEnvCoef=1.0f/(float)vpar->AEGAttack;
-	}
-	else
-	{
+		if (AmpEnvCoef>minFade) AmpEnvCoef=minFade;
+	}else{
 		AmpEnvStage=5;
-		AmpEnvCoef=AmpEnvValue/32.0f;
+		AmpEnvCoef=AmpEnvValue/fastRelease;
 		if(AmpEnvCoef<=0.0f)AmpEnvCoef=0.03125f;
 	}
-
 	// Init Filter Envelope
-	if(VcfEnvStage==0)
-	{
+	if(VcfEnvStage==0){
 		VcfEnvStage=1;
 		VcfEnvCoef=1.0f/(float)vpar->FEGAttack;
-	}
-	else
-	{
+		if (VcfEnvCoef>minFade) AmpEnvCoef=minFade;
+	}else{
 		VcfEnvStage=5;
-		VcfEnvCoef=VcfEnvValue/32.0f;
+		VcfEnvCoef=VcfEnvValue/fastRelease;
 		if(VcfEnvCoef<=0.0f)VcfEnvCoef=0.03125f;
 	}
 }
 
 float CSynthTrack::GetSample()
 {
+	VcfEnvMod=(float)vpar->EnvMod;
+	VcfCutoff=(float)vpar->Cutoff;
+	VcfResonance=(float)vpar->Resonance/256.0f;
 	float output=0;
-
+	if (trigger==false)	voicevol=nextvoicevol;
 	replaycount--;
 	if (replaycount == 0){
 		replaycount=vpar->ReplaySpeed;
@@ -144,10 +157,9 @@ float CSynthTrack::GetSample()
 				add_to_pitch=0.0f;
 				cur_transpose=vpar->Transpose[perf_index]-1;
 				cur_option=vpar->Option[perf_index];
-				if (cur_option & 1) cur_realnote = cur_transpose; else cur_realnote = cur_basenote-6+cur_transpose;
-				if (cur_option & 2){
-					 if (keyrelease==false) InitEnvelopes();
-				}
+				cur_realnote = cur_transpose;
+				if ((cur_option & 1) == 0) cur_realnote+=cur_basenote;
+				if ((cur_option & 2 == true) & (keyrelease==false)) Retrig();
 			}
 			cur_command=vpar->Command[perf_index];
 			cur_parameter=vpar->Parameter[perf_index];
@@ -155,7 +167,7 @@ float CSynthTrack::GetSample()
 				case 3: cur_realnote=(cur_realnote+cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
 				case 4: cur_realnote=(cur_realnote-cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
 				case 5: cur_pw=cur_parameter<<2; break;
-				case 15: NoteOff(); break;
+				case 15: if(stopsend==false) { stopsend=true; NoteOff(); } break;
 			}
 			if (vpar->Speed[perf_index]) {
 				cur_speed=vpar->Speed[perf_index];
@@ -171,23 +183,24 @@ float CSynthTrack::GetSample()
 		OSCSpeed=(float)pow(2.0, (55.235+cur_realnote+add_to_pitch+vpar->Finetune*0.0039062f)/12.0)*0.03125;
 		if (OSCSpeed > 370) OSCSpeed=370; //Limit C-0 to C-7 (8 octaves because sid also has 8)
 		if (cur_waveform > 6) OSCSpeed*=0.25;
+		OSCSpeed*=0.03125;
 	}
 
 	if(AmpEnvStage)
 	{
 
-		switch(cur_waveform)
-		{
-			case 5:		output=vpar->Wavetable[cur_waveform][f2i(OSCPosition)+cur_pw]*OSCVol*voicevol; break;
-			case 8:		output=vpar->shortnoise*OSCVol*voicevol; break;
-			default:	output=vpar->Wavetable[cur_waveform][f2i(OSCPosition)]*OSCVol*voicevol; break;
+		for (int i = 0; i<32; i++){
+			switch(cur_waveform)
+			{
+				case 5:		output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)+cur_pw]; break;
+				case 8:		output+=vpar->shortnoise; break;
+				default:	output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)]; break;
+			}
+			OSCPosition+=OOSCSpeed;
+			if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
 		}
+		output*=0.03125;
 		if (cur_waveform > 6) vpar->noiseused=true;
-		OSCPosition+=ROSCSpeed;
-		
-		if(OSCPosition>=2048.0f)
-		OSCPosition-=2048.0f;
-
 		GetEnvVcf();
 
 		if(!timetocompute--)
@@ -195,12 +208,13 @@ float CSynthTrack::GetSample()
 			int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
 
 			if(realcutoff<1)realcutoff=1;
-			if(realcutoff>240)realcutoff=240;
+			if(realcutoff>250)realcutoff=250;
 			m_filter.setfilter(0,realcutoff,vpar->Resonance); // 0 means lowpass
 			timetocompute=FILTER_CALC_TIME;
 		}
 
-		return m_filter.res(output)*GetEnvAmp();	
+		rcVol+=(((GetEnvAmp()*OSCVol*voicevol)-rcVol)*rcVolCutoff);
+		return m_filter.res(output)*rcVol;	
 	}
 	else
 	return 0;
@@ -216,6 +230,7 @@ float CSynthTrack::GetEnvAmp()
 		if(AmpEnvValue>1.0f)
 		{
 			AmpEnvCoef=(1.0f-AmpEnvSustainLevel)/(float)vpar->AEGDecay;
+			if (AmpEnvCoef>minFade) AmpEnvCoef=minFade;
 			AmpEnvStage=2;
 		}
 
@@ -230,8 +245,7 @@ float CSynthTrack::GetEnvAmp()
 			AmpEnvValue=AmpEnvSustainLevel;
 			AmpEnvStage=3;
 
-			if(!vpar->AEGSustain)
-			AmpEnvStage=0;
+			if(!vpar->AEGSustain) AmpEnvStage=0;
 		}
 
 		return AmpEnvValue;
@@ -259,8 +273,10 @@ float CSynthTrack::GetEnvAmp()
 		if(AmpEnvValue<0.0f)
 		{
 			AmpEnvValue=0.0f;
+			RealNoteOn();
 			AmpEnvStage=1;
 			AmpEnvCoef=1.0f/(float)vpar->AEGAttack;
+			if (AmpEnvCoef>minFade) AmpEnvCoef=minFade;
 		}
 
 		return AmpEnvValue;
@@ -281,6 +297,7 @@ void CSynthTrack::GetEnvVcf()
 		if(VcfEnvValue>1.0f)
 		{
 			VcfEnvCoef=(1.0f-VcfEnvSustainLevel)/(float)vpar->FEGDecay;
+			if (VcfEnvCoef>minFade) VcfEnvCoef=minFade;
 			VcfEnvStage=2;
 		}
 	break;
@@ -313,33 +330,32 @@ void CSynthTrack::GetEnvVcf()
 			VcfEnvValue=0.0f;
 			VcfEnvStage=1;
 			VcfEnvCoef=1.0f/(float)vpar->FEGAttack;
+			if (VcfEnvCoef>minFade) VcfEnvCoef=minFade;
 		}
 
 	break;
 	}
 }
 
-void CSynthTrack::NoteOff()
+CSynthTrack::NoteOff()
 {
-	float const unde = 0.00001f;
-
 	keyrelease=true;
-	if(AmpEnvStage)
+	if((AmpEnvStage>0) & (AmpEnvStage!=0))
 	{
-	AmpEnvStage=4;
-	VcfEnvStage=4;
-	AmpEnvCoef=AmpEnvValue/(float)vpar->AEGRelease;
-	VcfEnvCoef=VcfEnvValue/(float)vpar->FEGRelease;
-
-	if(AmpEnvCoef<unde)AmpEnvCoef=unde;
-	if(VcfEnvCoef<unde)VcfEnvCoef=unde;
-
-	if(!vpar->AEGSustain)
-	AmpEnvStage=0;
+		AmpEnvStage=4;
+		AmpEnvCoef=AmpEnvValue/(float)vpar->AEGRelease;
+		if (AmpEnvCoef>minFade) AmpEnvCoef=minFade;
+		if (!vpar->AEGSustain) AmpEnvStage=0;
+	}
+	if ((VcfEnvStage!=4) & (VcfEnvStage!=0)){
+		VcfEnvStage=4;
+		VcfEnvCoef=VcfEnvValue/(float)vpar->FEGRelease;
+		if (VcfEnvCoef>minFade) VcfEnvCoef=minFade;
+		if (!vpar->FEGSustain) VcfEnvStage=0;
 	}
 }
 
-void CSynthTrack::DoGlide()
+CSynthTrack::DoGlide()
 {
 	// Glide Handler
 	if(ROSCSpeed<OSCSpeed)
@@ -356,25 +372,27 @@ void CSynthTrack::DoGlide()
 		if(ROSCSpeed<OSCSpeed)
 			ROSCSpeed=OSCSpeed;
 	}
+	OOSCSpeed=ROSCSpeed;
 }
 
-void CSynthTrack::PerformFx()
+CSynthTrack::PerformFx()
 {
 	// Perform tone glide
 	DoGlide();
+	//Vol
+	if(sp_cmd==12) nextvoicevol=(float)sp_val/255.0f;
 }
 
-void CSynthTrack::InitEffect(int cmd, int val)
+CSynthTrack::InitEffect(int cmd, int val)
 {
-	sp_cmd=cmd;
-	sp_val=val;
+sp_cmd=cmd;
+sp_val=val;
 
-	// Init glide
-	if(cmd==3)
-	oscglide=(float)(val*val)*0.001f;
-	else
-	oscglide=256.0f;
-
-	//Vol
-	if(cmd==12)voicevol=(float)val/255.0f;
+// Init glide
+if(cmd==3)
+oscglide=(float)(val*val)*0.001f;
+else
+oscglide=99999.0f;
+//Vol
+if(sp_cmd==12)nextvoicevol=(float)sp_val/255.0f;
 }
