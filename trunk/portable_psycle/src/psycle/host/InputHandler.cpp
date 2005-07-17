@@ -1020,13 +1020,13 @@ namespace psycle
 			case cdefSongPosInc:
 				pChildView->ChordModeOffs = 0;
 				pChildView->IncPosition(brepeat?true:false);
-				pParentMain->StatusBarIdle();
+				pMainFrame->StatusBarIdle(); ///\todo check, was "parent frame"
 				break;
 
 			case cdefSongPosDec:
 				pChildView->ChordModeOffs = 0;
 				pChildView->DecPosition();
-				pParentMain->StatusBarIdle();
+				pMainFrame->StatusBarIdle(); ///\todo check, was "parent frame"
 				break;
 
 			case cdefUndo:
