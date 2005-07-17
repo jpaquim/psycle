@@ -16,9 +16,8 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <project.private.hpp>
+#include "math.h"
 #include "voice.h"
-#include <cmath>
 #define FILTER_CALC_TIME	64
 #define TWOPI				6.28318530717958647692528676655901f
 
@@ -38,32 +37,32 @@ CSynthTrack::CSynthTrack()
 	osc4Vol=0;
 	DCOglide=0.0f;
 	semiglide=0.0f;
-	DefGlide=256.0f;
+	DefGlide=99999999.0f;
 	semitone=0.0f;
 	rsemitone=0.0f;
 
 	sp_cmd=0;
 	sp_val=0;
 
-	DCO1Pitch=0.0f;
-	RDCO1Pitch=0.0f;
-	DCO1Position=0.0f;
-	DCO1Last=0.0f;
+	dco1Pitch=0.0f;
+	rdco1Pitch=0.0f;
+	dco1Position=0.0f;
+	dco1Last=0.0f;
 
-	DCO2Pitch=0.0f;
-	RDCO2Pitch=0.0f;
-	DCO2Position=0.0f;
-	DCO2Last=0.0f;
+	dco2Pitch=0.0f;
+	rdco2Pitch=0.0f;
+	dco2Position=0.0f;
+	dco2Last=0.0f;
 
-	DCO3Pitch=0.0f;
-	RDCO3Pitch=0.0f;
-	DCO3Position=0.0f;
-	DCO3Last=0.0f;
+	dco3Pitch=0.0f;
+	rdco3Pitch=0.0f;
+	dco3Position=0.0f;
+	dco3Last=0.0f;
 
-	DCO4Pitch=0.0f;
-	RDCO4Pitch=0.0f;
-	DCO4Position=0.0f;
-	DCO4Last=0.0f;
+	dco4Pitch=0.0f;
+	rdco4Pitch=0.0f;
+	dco4Position=0.0f;
+	dco4Last=0.0f;
 
 	modEnvStage=0;
 	modEnvValue=0.0f;
@@ -75,8 +74,10 @@ CSynthTrack::CSynthTrack()
 	fxcount=0;
 	m_filter.init(44100);
 	voiceVol=1.0f;
-	rcVolCutoff=0.2f;
-	rcCutCutoff=0.2f;
+	minFade=0.008f;
+	fastRelease=128.0f;
+	rcVolCutoff=0.25f;
+	rcCutCutoff=0.25f;
 	rcVol=0.0f;
 	rcCut=0.0f;
 
@@ -84,6 +85,15 @@ CSynthTrack::CSynthTrack()
 
 	nextNote=1;
 	nextSpd=0;
+
+	curBuf[0]=0;
+	curBuf[1]=0;
+	curBuf[2]=0;
+	curBuf[3]=0;
+	nextBuf[0]=0;
+	nextBuf[1]=0;
+	nextBuf[2]=0;
+	nextBuf[3]=0;
 }
 
 CSynthTrack::~CSynthTrack(){
@@ -110,72 +120,99 @@ void CSynthTrack::NoteTie(int note){
 	basenote=note+1.235f;
 	rsemitone=0.0f;
 	semiglide=0.0f;
-	Bend=0;
+	bend=0;
 }
 
-void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd){
+void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity){
+	stopRetrig=true;
 	vpar=voicePar;
 	nextNote=note;
 	nextSpd=spd;
+	nextVol=velocity;
 	ampEnvSustainLevel=(float)vpar->ampS*0.0039062f;
 	if(ampEnvStage==0){
-		RealNoteOn();
+		RealNoteOn(); // THIS LINE DIFFERS FROM RETRIG()
 		ampEnvStage=1;
 		ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
+		if (ampEnvCoef>minFade) ampEnvCoef=minFade;
 	}else{
 		ampEnvStage=5;
-		ampEnvCoef=ampEnvValue/128.0f;
+		ampEnvCoef=ampEnvValue/fastRelease;
 		if(ampEnvCoef<=0.0f) ampEnvCoef=0.03125f;
 	}
 	fltEnvSustainLevel=(float)vpar->fltS*0.0039062f;
 	if(fltEnvStage==0){
 		fltEnvStage=1;
 		fltEnvCoef=(1.0f/(float)vpar->fltA)*speedup2;
+		if (fltEnvCoef>minFade) fltEnvCoef=minFade;
 	}else{
 		fltEnvStage=5;
-		fltEnvCoef=fltEnvValue/128.0f;
+		fltEnvCoef=fltEnvValue/fastRelease;
 		if(fltEnvCoef<=0.0f)fltEnvCoef=0.03125f;
 	}
 }
 
 void CSynthTrack::RealNoteOn(){
+	voiceVol=nextVol;
+	stopRetrig=false;
 	updateCount=1;
 	int note=nextNote;
 	int spd=nextSpd;
 	vpar->stereoPos=1-vpar->stereoPos;
 	currentStereoPos=vpar->stereoPos;
-	
+
 	fltResonance=(float)vpar->fltResonance/256.0f;
 	modEnvStage=1;
 	modEnvCoef=(1.0f/(float)vpar->modA);
-	
+
 	ResetSym();
+	pwmcount=500;
+	synposLast[0]=9999;
+	synposLast[1]=9999;
+	synposLast[2]=9999;
+	synposLast[3]=9999;
+	synbase[0]=vpar->initposition[0];
+	synbase[1]=vpar->initposition[1];
+	synbase[2]=vpar->initposition[2];
+	synbase[3]=vpar->initposition[3];
+	curBuf[0]=4;
+	curBuf[1]=4;
+	curBuf[2]=4;
+	curBuf[3]=4;
+	calcWaves(15);
+	nextBuf[0]=0;
+	nextBuf[1]=0;
+	nextBuf[2]=0;
+	nextBuf[3]=0;
+	curBuf[0]=0;
+	curBuf[1]=0;
+	curBuf[2]=0;
+	curBuf[3]=0;
+
 	lfoViberSample=0;
 	lfoViber.setLevel(vpar->lfoDepth);
 	lfoViber.setSpeed(vpar->lfoSpeed);
 	lfoViber.setDelay(vpar->lfoDelay);
 	lfoViber.reset();
 
-	softenHighNotes=1.0f - ((float)pow(2.0,note/12.0)*vpar->ampTrack*0.015625);
+	softenHighNotes=1.0f-((float)pow(2.0,note/12.0)*vpar->ampTrack*0.015625);
 	if (softenHighNotes < 0.0f) softenHighNotes = 0.0f;
 
 	fxcount=0;
 	if (vpar->globalGlide == 0) { DefGlide=256.0f; }
 	else DefGlide=float((vpar->globalGlide*vpar->globalGlide)*0.0000625f);
-	note+=6;
-	basenote=note+1.235f;
+	basenote=note+7.235f;
 	rsemitone=0.0f;
 	semiglide=0.0f;
-	Bend=0;
+	bend=0;
 
 	modEnvValue=0.0f;
 	modEnvLast=0.0f;
-	stopRetrig=false;
 
 	arpShuffle=0;
 	arpCount=0;
 	arpLen=2;
-	arpIndex=0;
+	arpIndex=-1;
 	curArp=0;
 	arpInput[1]=0;arpInput[2]=0;arpInput[3]=0;
 	arpList[0]=0;arpList[1]=0;arpList[2]=0;
@@ -192,22 +229,13 @@ void CSynthTrack::RealNoteOn(){
 
 	volMulti = 0.0039062f*spdcoef;
 
-	synposLast[0]=9999;
-	synposLast[1]=9999;
-	synposLast[2]=9999;
-	synposLast[3]=9999;
-	synbase[0]=vpar->initposition[0];
-	synbase[1]=vpar->initposition[1];
-	synbase[2]=vpar->initposition[2];
-	synbase[3]=vpar->initposition[3];
-
 	speedup=((float)vpar->ampScaling*basenote*0.0015f)+1.0f;
 	speedup2=((float)vpar->fltScaling*basenote*0.0015f)+1.0f;
 	if (speedup<1.0f) speedup=1.0f;
 	if (speedup2<1.0f) speedup2=1.0f;
 }
 
-void CSynthTrack::UpdateTuning() {
+void CSynthTrack::updateTuning() {
 	tuningChange=false;
 	float modEnv = modEnvValue*vpar->modEnvAmount;
 	float vibadd;
@@ -226,92 +254,91 @@ void CSynthTrack::UpdateTuning() {
 	}
 	switch (vpar->lfoDestination) {
 	case 0:	//all osc
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 1: // osc 2+3+4
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 2: // osc 2+3
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 3: // osc 2+4
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 4: // osc 3+4
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 5: // osc 2
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 6: // osc 3
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 7: // osc 4
-		DCO1Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		DCO2Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		DCO3Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		DCO4Pitch=(float)pow(2.0,(Bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		break;
 	}
-	RDCO1Pitch=freqChange(DCO1Pitch);
-	RDCO2Pitch=freqChange(DCO2Pitch);
-	RDCO3Pitch=freqChange(DCO3Pitch);
-	RDCO4Pitch=freqChange(DCO4Pitch);
+	rdco1Pitch=freqChange(dco1Pitch);
+	rdco2Pitch=freqChange(dco2Pitch);
+	rdco3Pitch=freqChange(dco3Pitch);
+	rdco4Pitch=freqChange(dco4Pitch);
 }
 
-void CSynthTrack::InitEnvelopes()
-{
+void CSynthTrack::Retrig(){
 	ampEnvSustainLevel=(float)vpar->ampS*0.0039062f;
 	if(ampEnvStage==0){
 		ampEnvStage=1;
 		ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
+		if (ampEnvCoef>minFade) ampEnvCoef=minFade;
 	}else{
-		ampEnvStage=5;
-		ampEnvCoef=ampEnvValue/512.0f;
+		ampEnvStage=6;
+		ampEnvCoef=ampEnvValue/fastRelease;
 		if(ampEnvCoef<=0.0f) ampEnvCoef=0.03125f;
 	}
 	fltEnvSustainLevel=(float)vpar->fltS*0.0039062f;
 	if(fltEnvStage==0){
 		fltEnvStage=1;
 		fltEnvCoef=(1.0f/(float)vpar->fltA)*speedup2;
+		if (fltEnvCoef>minFade) fltEnvCoef=minFade;
 	}else{
 		fltEnvStage=5;
-		fltEnvCoef=fltEnvValue/512.0f;
+		fltEnvCoef=fltEnvValue/fastRelease;
 		if(fltEnvCoef<=0.0f)fltEnvCoef=0.03125f;
 	}
-
 }
 
-void CSynthTrack::GetSample(float* slr)
-{
+void CSynthTrack::GetSample(float* slr){
 	float output=0.0f;
 	float output1=0.0f;
 	float output2=0.0f;
 	float output3=0.0f;
 	float output4=0.0f;
-	//float outputRM1=0.0f;
-	//float outputRM2=0.0f;
+	float outputRM1=0.0f;
+	float outputRM2=0.0f;
 
 	updateCount--;
 	if (updateCount < 1){
@@ -330,250 +357,37 @@ void CSynthTrack::GetSample(float* slr)
 
 	if(ampEnvStage)	{
 		pwmcount--;
-		int c;
 		if (pwmcount < 0){
 			pwmcount = 500;
-
-			synfx[0].setRange(vpar->oscSymLfoRange[0]);
-			synfx[0].setSpeed(vpar->oscSymLfoSpeed[0]);
-			synfx[1].setRange(vpar->oscSymLfoRange[1]);
-			synfx[1].setSpeed(vpar->oscSymLfoSpeed[1]);
-			synfx[2].setRange(vpar->oscSymLfoRange[2]);
-			synfx[2].setSpeed(vpar->oscSymLfoSpeed[2]);
-			synfx[3].setRange(vpar->oscSymLfoRange[3]);
-			synfx[3].setSpeed(vpar->oscSymLfoSpeed[3]);
-
-			float float1, float2, float3, float4, float5 = 0;
-			float size1, size2, step1, step2, phase;
-			int work1, work2 = 0;
-			for (int i=0; i<4; i++) {
-				int pos = (synbase[i]+synfx[i].getPosition()+vpar->oscFuncSym[i])&2047;
-				if (pos != synposLast[i]) {
-					synposLast[i]=pos;
-					switch (vpar->oscFuncType[i]) {
-					case 0: break; // no function
-					case 1: // stretch&squash
-						size1 = float(pos); size2 = float(2047-pos);
-						if (size1!=0) { step1 = 1024.0f/(size1+1.0f); } else { step1 = 1024.0f; }
-						if (size2!=0) { step2 = 1024.0f/(size2+1.0f); } else { step2 = 0.0f; }
-						phase = 0.0f; if (size1 == 0.0f) phase+=1024.0f;
-						for(c=0;c<2050;c++){
-							WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][int(phase)];
-							if (phase < 1024.0f) phase+=step1; else phase+=step2;
-						}
-						break;
-					case 2: // stretch&squash 2
-						size1 = float(pos); size2 = float(2047-pos);
-						if (size1!=0) { step1 = 1024.0f/(size1+1.0f); } else { step1 = 1024.0f; }
-						if (size2!=0) { step2 = 1024.0f/(size2+1.0f); } else { step2 = 0.0f; }
-						phase = 0.0f; if (size1 == 0.0f) phase+=1024.0f;
-						for(c=0;c<2050;c++){
-							WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][int(phase+phase)];
-							if (phase < 1024.0f) phase+=step1; else phase+=step2;
-						}
-						break;
-					case 3: // pw am
-						for(c=0;c<2048;c++){
-							if (c < pos) WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-							else WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]>>1;
-						}
-						break;
-					case 4: // squash&squash
-						float1 = 0;
-						float2 = 0;
-						float4 = (2047-pos)/2.0f;   // 1st halve size in byte
-						float5 = 1024-float4;    // 2nd halve size in byte
-						if (float4!=0) { float1 = 1024/float4; // 1st halve step
-						} else { float1 = 1024; }
-						if (float5!=0) { float2 = 1024/float5; // 2nd halve step
-						} else { float2 = 0; }
-						float3 = 0;			  //source phase
-						for(c=0;c<2100;c++){
-							if (c<1024) {
-								if (float3<1024) {
-										if (float4) {
-											WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float3];
-											float3+=float1;
-										} else {
-											WaveBuffer[i][c]=0;
-											float3=1024;
-										}
-								} else {
-									if (float5) {
-										WaveBuffer[i][c]=0;
-										float3=1024;
-									}
-								}
-							} else {
-								if (float3<2048) {
-									if (float4 != 0) {
-										WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float3];
-										float3+=float1;
-									} else WaveBuffer[i][c]=0;
-								} else {
-									if (float5 != 0) WaveBuffer[i][c]=0;
-								}
-							}
-						}
-						break;
-					case 5: // Muted Synce
-						float1 = 0;
-						float2 = float(pos*6)/2047+1;
-						for(c=0;c<2048;c++){
-							if (float1<2047){
-								WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float1];
-								float1+=float2;
-								if (float1 > 2047) float1=2048;
-							} else WaveBuffer[i][c]=0;
-						}
-						break;
-					case 6: // Syncfake
-						float1 = 0;
-						float2 = float(pos*6)/2047+1;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float1];
-							float1+=float2;
-							if (float1 > 2047) float1-=2048;
-						}
-						break;
-					case 7: // Restart
-						work1 = 0;
-						work2 = 2047-pos;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][work1];
-							work1++; if (work1 > work2) work1 = 0;
-						}
-						break;
-					case 8: // Negator
-						for(c=0;c<2048;c++){
-							if (c<pos)WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-							else WaveBuffer[i][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
-						}
-						break;
-					case 9: // Double Negator
-						if (pos > 1023) pos = 2047-pos;
-						for(c=0;c<1024;c++){
-							if (c<pos){
-								WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-								WaveBuffer[i][2047-c]=vpar->WaveTable[vpar->oscWaveform[i]][2047-c];
-							} else {
-								WaveBuffer[i][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
-								WaveBuffer[i][2047-c]=0-vpar->WaveTable[vpar->oscWaveform[i]][2047-c];
-							}
-						}
-						break;
-					case 10: // Rect Negator
-						for(c=0;c<2048;c++){
-							if (((pos+c)&2047)<1024)WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-							else WaveBuffer[i][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
-						}
-						break;
-					case 11: // Octaving
-						float1 = (2047-float(pos))/2047;
-						float2 = float(pos)/2047;
-						for (c=0;c<2048;c++){
-							WaveBuffer[i][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2));
-						}
-						break;
-					case 12: // FSK
-						work1=0;
-						work2=2047-pos;
-						for (c=0;c<2048;c++){
-							if (c<work2){
-								WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-								work1=c+1;
-							}
-							else {
-								WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][work1];
-								work1+=2; if (work1>2047) work1 -= 2048;
-							}
-						}
-						break;
-					case 13: // Mixer
-						for (c=0;c<2048;c++){
-							WaveBuffer[i][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]>>1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
-						}
-						break;
-					case 14: // Dual Mixer
-						for (c=0;c<2048;c++){
-							WaveBuffer[i][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*0.3333333)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*0.3333333)+(vpar->WaveTable[vpar->oscWaveform[i]][(c-pos)&2047]*0.3333333));
-						}
-						break;
-					case 15: // Fbk.Mixer
-						for (c=0;c<2048;c++){
-							WaveBuffer[i][c]=(WaveBuffer[i][c]>>1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
-						}
-						break;
-					case 16: // Inv.Mixer
-						for (c=0;c<2048;c++){
-							WaveBuffer[i][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]>>1)-(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
-						}
-						break;
-					case 17: // TriMix
-						float1 = (2047-float(pos))/2047;
-						float2 = float(pos)/2047;
-						work1 = 0;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[WAVE_TRIANGLE][c]*float2));
-						}
-						break;
-					case 18: // SawMix
-						float1 = (2047-float(pos))/2047;
-						float2 = float(pos)/2047;
-						work1 = 0;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+((work1-16384)*float2));
-							work1+=16;
-						}
-						break;
-					case 19: // SqrMix
-						float1 = (2047-float(pos))/2047;
-						float2 = float(pos)/2047;
-						work1 = 0;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[WAVE_SQUARE][c]*float2));
-							work1+=16;
-						}
-						break;
-					case 20: // Tremelo
-						float1 = (2047-float(pos))/2047;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=(signed short)((float)vpar->WaveTable[vpar->oscWaveform[i]][c]*float1);
-						}
-						break;
-					case 21: // Phase Mod
-						float2 = float(pos)/2047;
-						work1 = 0;
-						for(c=0;c<2048;c++){
-							WaveBuffer[i][c]=vpar->WaveTable[vpar->oscWaveform[i]][(short int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2*0.5))&2047];
-							work1+=16;
-						}
-						break;
-					}
-				}
-			}
-			synfx[0].next();
-			synfx[1].next();
-			synfx[2].next();
-			synfx[3].next();
+			calcWaves(15);
 		}
 
+		if (vpar->lfoDelay){
+			lfocount--;
+			if (lfocount < 0){
+				lfocount = 200;
+				lfoViber.next();
+				lfoViberLast=lfoViberSample;
+				lfoViberSample=(float)lfoViber.getPosition();
+				if (lfoViberSample != lfoViberLast) tuningChange=true;
+			}
+		} else {
+			if (lfoViberLast!=vpar->syncvibe){
+				lfoViberLast=vpar->syncvibe;
+				tuningChange=true;
+			}
+		}
 		//Arpeggio
 		fxcount--;
 		if (fxcount < 0){
 			fxcount = 50;
 			GetEnvMod();
 			if (modEnvValue != modEnvLast) tuningChange=true;
-			if (vpar->lfoDelay){
-				lfoViber.next();
-				lfoViberLast=lfoViberSample;
-				lfoViberSample=(float)lfoViber.getPosition();
-				if (lfoViberSample != lfoViberSample) tuningChange=true;
-			}
+
 			arpCount--;
 			if (arpCount < 0){
 				arpCount = arpSpeed[arpShuffle];
-				if ((stopRetrig == false)&((vpar->arpRetrig == 1)||((vpar->arpRetrig == 2)&(arpShuffle == 0)))) InitEnvelopes();
+				if ((stopRetrig == false)&((vpar->arpRetrig == 1)||((vpar->arpRetrig == 2)&(arpShuffle == 0)))) Retrig();
 				arpShuffle=1-arpShuffle;
 				arpIndex++;
 				if (arpIndex >= arpLen) arpIndex = 0;
@@ -582,37 +396,45 @@ void CSynthTrack::GetSample(float* slr)
 			}
 		}
 
-		if (tuningChange) UpdateTuning();
-
+		if (tuningChange) updateTuning();
+		int c = 0;
 		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 ){
 			if (vpar->oscFuncType[0]){
 				for (c=0; c<4; c++){
-					output1 += WaveBuffer[0][f2i(DCO1Position+DCO1Last)];
-					DCO1Last=(float)output1*vpar->oscFeedback[0];
-					DCO1Position+=RDCO1Pitch;
-					if(DCO1Position>=2048.0f){
-						DCO1Position-=2048.0f;
+					output1 += WaveBuffer[curBuf[0]][f2i(dco1Position+dco1Last)];
+					dco1Last=(float)output1*vpar->oscFeedback[0];
+					dco1Position+=rdco1Pitch;
+					if(dco1Position>=2048.0f){
+						dco1Position-=2048.0f;
+						if (nextBuf[0]){
+							curBuf[0]^=4;
+							nextBuf[0]=0;
+						}
 						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
-							DCO2Position=DCO1Position;
+							dco2Position=dco1Position;
 							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
-								DCO3Position=DCO1Position;
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)) DCO4Position=DCO1Position;
+								dco3Position=dco1Position;
+								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)) dco4Position=dco1Position;
 							}
 						}			
 					}
 				}
 			} else {
 				for (c=0; c<4; c++){
-					output1 += vpar->WaveTable[vpar->oscWaveform[0]][f2i(DCO1Position+DCO1Last)];
-					DCO1Last=(float)output1*vpar->oscFeedback[0];
-					DCO1Position+=RDCO1Pitch;
-					if(DCO1Position>=2048.0f){
-						DCO1Position-=2048.0f;
+					output1 += vpar->WaveTable[vpar->oscWaveform[0]][f2i(dco1Position+dco1Last)];
+					dco1Last=(float)output1*vpar->oscFeedback[0];
+					dco1Position+=rdco1Pitch;
+					if(dco1Position>=2048.0f){
+						dco1Position-=2048.0f;
+						if (nextBuf[0]){
+							curBuf[0]^=4;
+							nextBuf[0]=0;
+						}
 						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
-							DCO2Position=DCO1Position;
+							dco2Position=dco1Position;
 							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
-								DCO3Position=DCO1Position;
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)) DCO4Position=DCO1Position;
+								dco3Position=dco1Position;
+								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)) dco4Position=dco1Position;
 							}
 						}
 					}
@@ -624,32 +446,40 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2){
 			if (vpar->oscFuncType[1]){
 				for (c=0; c<4; c++){
-					output2 += WaveBuffer[1][f2i(DCO2Position+DCO2Last)];
-					DCO2Last=(float)output2*vpar->oscFeedback[1];
-					DCO2Position+=RDCO2Pitch;
-					if(DCO2Position>=2048.0f){
-						DCO2Position-=2048.0f;
+					output2 += WaveBuffer[1+curBuf[1]][f2i(dco2Position+dco2Last)];
+					dco2Last=(float)output2*vpar->oscFeedback[1];
+					dco2Position+=rdco2Pitch;
+					if(dco2Position>=2048.0f){
+						dco2Position-=2048.0f;
+						if (nextBuf[1]){
+							curBuf[1]^=4;
+							nextBuf[1]=0;
+						}
 						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
-							DCO3Position=DCO2Position;
+							dco3Position=dco2Position;
 							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
-								DCO4Position=DCO2Position;
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)) DCO1Position=DCO2Position;
+								dco4Position=dco2Position;
+								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)) dco1Position=dco2Position;
 							}
 						}
 					}
 				}
 			} else {
 				for (c=0; c<4; c++){
-					output2 += vpar->WaveTable[vpar->oscWaveform[1]][f2i(DCO2Position+DCO2Last)];
-					DCO2Last=(float)output2*vpar->oscFeedback[1];
-					DCO2Position+=RDCO2Pitch;
-					if(DCO2Position>=2048.0f){
-						DCO2Position-=2048.0f;
+					output2 += vpar->WaveTable[vpar->oscWaveform[1]][f2i(dco2Position+dco2Last)];
+					dco2Last=(float)output2*vpar->oscFeedback[1];
+					dco2Position+=rdco2Pitch;
+					if(dco2Position>=2048.0f){
+						dco2Position-=2048.0f;
+						if (nextBuf[1]){
+							curBuf[1]^=4;
+							nextBuf[1]=0;
+						}
 						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
-							DCO3Position=DCO2Position;
+							dco3Position=dco2Position;
 							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
-								DCO4Position=DCO2Position;
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)) DCO1Position=DCO2Position;
+								dco4Position=dco2Position;
+								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)) dco1Position=dco2Position;
 							}
 						}
 					}
@@ -661,32 +491,40 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 ){
 			if (vpar->oscFuncType[2]){
 				for (c=0; c<4; c++){
-					output3 += WaveBuffer[2][f2i(DCO3Position+DCO3Last)];
-					DCO3Last=(float)output3*vpar->oscFeedback[2];
-					DCO3Position+=RDCO3Pitch;
-					if(DCO3Position>=2048.0f){
-						DCO3Position-=2048.0f;
+					output3 += WaveBuffer[2+curBuf[2]][f2i(dco3Position+dco3Last)];
+					dco3Last=(float)output3*vpar->oscFeedback[2];
+					dco3Position+=rdco3Pitch;
+					if(dco3Position>=2048.0f){
+						dco3Position-=2048.0f;
+						if (nextBuf[2]){
+							curBuf[2]^=4;
+							nextBuf[2]=0;
+						}
 						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
-							DCO4Position=DCO3Position;
+							dco4Position=dco3Position;
 							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
-								DCO1Position=DCO3Position;
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)) DCO2Position=DCO3Position;
+								dco1Position=dco3Position;
+								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)) dco2Position=dco3Position;
 							}
 						}
 					}
 				}
 			} else {
 				for (c=0; c<4; c++){
-					output3 += vpar->WaveTable[vpar->oscWaveform[2]][f2i(DCO3Position+DCO3Last)];	
-					DCO3Last=(float)output3*vpar->oscFeedback[2];
-					DCO3Position+=RDCO3Pitch;
-					if(DCO3Position>=2048.0f){
-						DCO3Position-=2048.0f;
+					output3 += vpar->WaveTable[vpar->oscWaveform[2]][f2i(dco3Position+dco3Last)];	
+					dco3Last=(float)output3*vpar->oscFeedback[2];
+					dco3Position+=rdco3Pitch;
+					if(dco3Position>=2048.0f){
+						dco3Position-=2048.0f;
+						if (nextBuf[2]){
+							curBuf[2]^=4;
+							nextBuf[2]=0;
+						}
 						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
-							DCO4Position=DCO3Position;
+							dco4Position=dco3Position;
 							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
-								DCO1Position=DCO3Position;
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)) DCO2Position=DCO3Position;
+								dco1Position=dco3Position;
+								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)) dco2Position=dco3Position;
 							}
 						}
 					}
@@ -698,32 +536,40 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 ){
 			if (vpar->oscFuncType[3]){
 				for (c=0; c<4; c++){
-					output4 += WaveBuffer[3][f2i(DCO4Position+DCO4Last)];
-					DCO4Last=(float)output4*vpar->oscFeedback[3];
-					DCO4Position+=RDCO4Pitch;
-					if(DCO4Position>=2048.0f){
-						DCO4Position-=2048.0f;
+					output4 += WaveBuffer[3+curBuf[3]][f2i(dco4Position+dco4Last)];
+					dco4Last=(float)output4*vpar->oscFeedback[3];
+					dco4Position+=rdco4Pitch;
+					if(dco4Position>=2048.0f){
+						dco4Position-=2048.0f;
+						if (nextBuf[3]){
+							curBuf[3]^=4;
+							nextBuf[3]=0;
+						}
 						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
-							DCO1Position=DCO4Position;
+							dco1Position=dco4Position;
 							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
-								DCO2Position=DCO4Position;
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)) DCO3Position=DCO4Position;
+								dco2Position=dco4Position;
+								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)) dco3Position=dco4Position;
 							}
 						}
 					}
 				}
 			} else {
 				for (c=0; c<4; c++){
-					output4 += vpar->WaveTable[vpar->oscWaveform[3]][f2i(DCO4Position+DCO4Last)];
-					DCO4Last=(float)output4*vpar->oscFeedback[3];
-					DCO4Position+=RDCO4Pitch;
-					if(DCO4Position>=2048.0f){
-						DCO4Position-=2048.0f;
+					output4 += vpar->WaveTable[vpar->oscWaveform[3]][f2i(dco4Position+dco4Last)];
+					dco4Last=(float)output4*vpar->oscFeedback[3];
+					dco4Position+=rdco4Pitch;
+					if(dco4Position>=2048.0f){
+						dco4Position-=2048.0f;
+						if (nextBuf[3]){
+							curBuf[3]^=4;
+							nextBuf[3]=0;
+						}
 						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
-							DCO1Position=DCO4Position;
+							dco1Position=dco4Position;
 							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
-								DCO2Position=DCO4Position;
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)) DCO3Position=DCO4Position;
+								dco2Position=dco4Position;
+								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)) dco3Position=dco4Position;
 							}
 						}
 					}
@@ -750,6 +596,353 @@ void CSynthTrack::GetSample(float* slr)
 		output*=rcVol;
 		slr[0]=output*vpar->stereoLR[currentStereoPos];
 		slr[1]=output*vpar->stereoLR[1-currentStereoPos];
+	}
+}
+
+void CSynthTrack::calcOneWave(int osc){
+	synposLast[osc]=9999999;
+	calcWaves(1<<osc);
+}
+
+void CSynthTrack::calcWaves(int mask){
+	int c;
+	synfx[0].setRange(vpar->oscSymLfoRange[0]);
+	synfx[0].setSpeed(vpar->oscSymLfoSpeed[0]);
+	synfx[1].setRange(vpar->oscSymLfoRange[1]);
+	synfx[1].setSpeed(vpar->oscSymLfoSpeed[1]);
+	synfx[2].setRange(vpar->oscSymLfoRange[2]);
+	synfx[2].setSpeed(vpar->oscSymLfoSpeed[2]);
+	synfx[3].setRange(vpar->oscSymLfoRange[3]);
+	synfx[3].setSpeed(vpar->oscSymLfoSpeed[3]);
+	synfx[0].next();
+	synfx[1].next();
+	synfx[2].next();
+	synfx[3].next();
+
+	float float1, float2, float3, float4, float5 = 0;
+	float size1, size2, step1, step2, phase;
+	int work1, work2 = 0;
+	long long1 = 0;
+	int buf = 0;
+	for (int i=0; i<4; i++) {
+		if (1<<i & mask){
+			int pos = (synbase[i]+synfx[i].getPosition()+vpar->oscFuncSym[i])&2047;
+			if (pos != synposLast[i]) {
+				synposLast[i]=pos;
+				buf=4-curBuf[i]+i;
+				switch (vpar->oscFuncType[i]) {
+				case 0: break; // no function
+				case 1: // stretch&squash
+					size1 = float(pos+1); size2 = float(2048.0f-size1);
+					if (size1!=0.0f) { step1 = 1024.0f/(size1); phase=0.0f;} else { phase=1024.0f; }
+					if (size2!=0.0f) { step2 = 1024.0f/(size2); } else { step2 = 0.0f; }
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][int(phase)];
+						if (phase < 1023.0f) phase+=step1; else phase+=step2;
+					}
+					break;
+				case 2: // stretch&squash 2
+					size1 = float(pos+1); size2 = float(2048.0f-size1);
+					if (size1!=0.0f) { step1 = 1024.0f/(size1); phase = 0.0f; } else { phase=1024.0f; }
+					if (size2!=0.0f) { step2 = 1024.0f/(size2); } else { step2 = 0.0f; }
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][int(phase+phase)];
+						if (phase < 1023.0f) phase+=step1; else phase+=step2;
+					}
+					break;
+				case 3: // pw am
+					for(c=0;c<2048;c++){
+						if (c < pos) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+						else WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]>>1;
+					}
+					break;
+				case 4: // squash&squash
+					float1 = 0;
+					float2 = 0;
+					float4 = (2047-pos)/2.0f;   // 1st halve size in byte
+					float5 = 1024-float4;		// 2nd halve size in byte
+					if (float4!=0) float1 = 1024/float4; // 1st halve step
+					else float1 = 1024;
+					if (float5!=0) float2 = 1024/float5; // 2nd halve step
+					else float2 = 0;
+					float3 = 0;					//source phase
+					for(c=0;c<2100;c++){
+						if (c<1024) {
+							if (float3<1024) {
+								if (float4) {
+									WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float3];
+									float3+=float1;
+								} else {
+									WaveBuffer[buf][c]=0;
+									float3=1024;
+								}
+							} else {
+								if (float5) {
+									WaveBuffer[buf][c]=0;
+									float3=1024;
+								}
+							}
+						} else {
+							if (float3<2048) {
+								if (float4 != 0) {
+								WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float3];
+								float3+=float1;
+								} else WaveBuffer[buf][c]=0;
+							} else {
+								if (float5 != 0) WaveBuffer[buf][c]=0;
+							}
+						}
+					}
+					break;
+				case 5: // Muted Sync
+					float1 = 0;
+					float2 = float(pos*6)/2047+1;
+					for(c=0;c<2048;c++){
+						if (float1<2047){
+							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float1];
+							float1+=float2;
+						if (float1 > 2047) float1=2048;
+						} else WaveBuffer[buf][c]=0;
+					}
+					break;
+				case 6: // Syncfake
+					float1 = 0;
+					float2 = float(pos*6)/2047+1;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float1];
+						float1+=float2;
+						if (float1 > 2047) float1-=2048;
+					}
+					break;
+				case 7: // Restart
+					work1 = 0;
+					work2 = 2047-pos;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][work1];
+						work1++; if (work1 > work2) work1 = 0;
+					}
+					break;
+				case 8: // Negator
+					for(c=0;c<2048;c++){
+						if (c<pos)WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+						else WaveBuffer[buf][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
+					}
+					break;
+				case 9: // Double Negator
+					if (pos > 1023) pos = 2047-pos;
+					for(c=0;c<1024;c++){
+						if (c<pos){
+							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+							WaveBuffer[buf][2047-c]=vpar->WaveTable[vpar->oscWaveform[i]][2047-c];
+						} else {
+							WaveBuffer[buf][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
+							WaveBuffer[buf][2047-c]=0-vpar->WaveTable[vpar->oscWaveform[i]][2047-c];
+						}
+					}
+					break;
+				case 10: // Rect Negator
+					for(c=0;c<2048;c++){
+					if (((pos+c)&2047)<1024)WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+						else WaveBuffer[buf][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
+					}
+					break;
+				case 11: // Octaving
+					float1 = (2047-float(pos))/2047;
+					float2 = float(pos)/2047;
+					for (c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2));
+					}
+					break;
+				case 12: // FSK
+					work1=0;
+					work2=2047-pos;
+					for (c=0;c<2048;c++){
+						if (c<work2){
+							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+							work1=c+1;
+						}
+						else {
+							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][work1];
+							work1+=2; if (work1>2047) work1 -= 2048;
+						}
+					}
+					break;
+				case 13: // Mixer
+					for (c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]>>1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
+					}
+					break;
+				case 14: // Dual Mixer
+					for (c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*0.3333333)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*0.3333333)+(vpar->WaveTable[vpar->oscWaveform[i]][(c-pos)&2047]*0.3333333));
+					}
+					break;
+				case 15: // Fbk.Mixer
+					for (c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(WaveBuffer[buf][c]>>1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
+					}
+					break;
+				case 16: // Inv.Mixer
+					for (c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]>>1)-(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
+					}
+					break;
+				case 17: // TriMix
+					float1 = (2047-float(pos))/2047;
+					float2 = float(pos)/2047;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[WAVE_TRIANGLE][c]*float2));
+					}
+					break;
+				case 18: // SawMix
+					float1 = (2047-float(pos))/2047;
+					float2 = float(pos)/2047;
+					work1 = 0;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+((work1-16384)*float2));
+						work1+=16;
+					}
+					break;
+				case 19: // SqrMix
+					float1 = (2047-float(pos))/2047;
+					float2 = float(pos)/2047;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[WAVE_SQUARE][c]*float2));
+					}
+					break;
+				case 20: // Tremelo
+					float1 = (2047-float(pos))/2047;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=(signed short)((float)vpar->WaveTable[vpar->oscWaveform[i]][c]*float1);
+					}
+					break;
+				case 21: // PM Sine 1
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+					}
+					break;
+				case 22: // PM Sine 2
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+					}
+					break;
+				case 23: // PM Sine 3
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+					}
+					break;
+				case 24: // PM Adlib2 1
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+					}
+					break;
+				case 25: // PM Adlib2 2
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+					}
+					break;
+				case 26: // PM Adlib2 3
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+					}
+					break;
+				case 27: // PM Adlib3 1
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+					}
+					break;
+				case 28: // PM Adlib3 2
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+					}
+					break;
+				case 29: // PM Adlib3 3
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+					}
+					break;
+				case 30: // PM Adlib4 1
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+					}
+					break;
+				case 31: // PM Adlib4 2
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+					}
+					break;
+				case 32: // PM Adlib4 3
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+					}
+					break;			
+				case 33: // PM Wave 1
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+					}
+					break;
+				case 34: // PM Wave 2
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+					}
+					break;
+				case 35: // PM Wave 3
+					float2 = float(pos)*0.00025f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+					}
+					break;			
+				case 36: // Dual Fix PM
+					float2 = 0.125f; //16384:2048=1/8=0.125f
+					for (c=0;c<2048;c++) WaveBuffer[8][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*float2))];
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=WaveBuffer[8][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c-pos)&2047]*float2))];
+					break;
+				case 37: // Multiply
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]*vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*0.0001f;;
+					break;
+				case 38: // AND
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]&vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
+					break;
+				case 39: // EOR
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]^vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
+					break;
+				case 40: // Clipper
+					float1 = pos*pos*0.000000015*pos+1.0f;
+					for (c=0;c<2048;c++){
+						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]*float1;
+						if (long1 > 16384) long1=16384;
+						if (long1 < -16384) long1=-16384;
+						WaveBuffer[buf][c]=long1;
+					}
+					break;
+				case 41: // RM to AM (Upright)
+					float1 = (2047-float(pos))/2047*16384;
+					float2 = float(pos)/2047*0.5f;
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]+16384)*float2+float1;
+					break;
+				case 42: // RM to AM (Down)
+					float1 = (2047-float(pos))/2047*16384;
+					float2 = float(pos)/2047*0.5f;
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=float1-((vpar->WaveTable[vpar->oscWaveform[i]][c]-16384)*float2);
+					break;
+				}
+				nextBuf[i]=1; // a new buffer is now present
+			}
+		}
 	}
 }
 
@@ -781,6 +974,7 @@ float CSynthTrack::GetEnvAmp(){
 		if(ampEnvValue>1.0f)
 		{
 			ampEnvCoef=((1.0f-ampEnvSustainLevel)/(float)vpar->ampD)*speedup;
+			if (ampEnvCoef>minFade) ampEnvCoef=minFade;
 			ampEnvStage=2;
 		}
 
@@ -789,11 +983,12 @@ float CSynthTrack::GetEnvAmp(){
 
 	case 2: // Decay
 		ampEnvValue-=ampEnvCoef;
-		
+
 		if(ampEnvValue<ampEnvSustainLevel)
 		{
 			ampEnvValue=ampEnvSustainLevel;
 			ampEnvCoef=((ampEnvSustainLevel)/(float)vpar->ampD2)*speedup;
+			if (ampEnvCoef>minFade) ampEnvCoef=minFade;
 			ampEnvStage=3;
 
 			if(!vpar->ampS)
@@ -829,10 +1024,25 @@ float CSynthTrack::GetEnvAmp(){
 
 		if(ampEnvValue<0.0f)
 		{
-			ampEnvValue=0.0f;
 			RealNoteOn();
+			ampEnvValue=0.0f;
 			ampEnvStage=1;
 			ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
+			if (ampEnvCoef>minFade) ampEnvCoef=minFade;
+		}
+
+		return ampEnvValue;
+	break;
+
+	case 6: // FastRelease for Arpeggio
+		ampEnvValue-=ampEnvCoef;
+
+		if(ampEnvValue<0.0f)
+		{
+			ampEnvValue=0.0f;
+			ampEnvStage=1;
+			ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
+			if (ampEnvCoef>minFade) ampEnvCoef=minFade;
 		}
 
 		return ampEnvValue;
@@ -853,6 +1063,7 @@ void CSynthTrack::GetEnvFlt()
 		if(fltEnvValue>1.0f)
 		{
 			fltEnvCoef=((1.0f-fltEnvSustainLevel)/(float)vpar->fltD)*speedup2;
+			if (fltEnvCoef>minFade) fltEnvCoef=minFade;
 			fltEnvStage=2;
 		}
 	break;
@@ -864,6 +1075,7 @@ void CSynthTrack::GetEnvFlt()
 		{
 			fltEnvValue=fltEnvSustainLevel;
 			fltEnvCoef=((fltEnvSustainLevel)/(float)vpar->fltD2)*speedup2;
+			if (fltEnvCoef>minFade) fltEnvCoef=minFade;
 			fltEnvStage=3;
 		}
 	break;
@@ -897,6 +1109,7 @@ void CSynthTrack::GetEnvFlt()
 			fltEnvValue=0.0f;
 			fltEnvStage=1;
 			fltEnvCoef=(1.0f/(float)vpar->fltA)*speedup2;
+			if (fltEnvCoef>minFade) fltEnvCoef=minFade;
 		}
 	break;
 	}
@@ -905,11 +1118,15 @@ void CSynthTrack::GetEnvFlt()
 void CSynthTrack::NoteOff()
 {
 	stopRetrig=true;
-	if(ampEnvStage){
+	if((ampEnvStage!=4)&(ampEnvStage!=0)){
 		ampEnvStage=4;
-		fltEnvStage=4;
 		ampEnvCoef=(ampEnvValue/(float)vpar->ampR)*speedup;
+		if (ampEnvCoef>minFade) ampEnvCoef=minFade;
+	}
+	if((fltEnvStage!=4)&(fltEnvStage!=0)){
+		fltEnvStage=4;
 		fltEnvCoef=(fltEnvValue/(float)vpar->fltR)*speedup2;
+		if (fltEnvCoef>minFade) fltEnvCoef=minFade;
 	}
 }
 
@@ -918,8 +1135,10 @@ void CSynthTrack::NoteStop()
 	stopRetrig=true;
 	if(ampEnvStage){
 		ampEnvStage=4;
-		fltEnvStage=4;
 		ampEnvCoef=ampEnvValue/32.0f;
+	}
+	if (fltEnvStage){
+		fltEnvStage=4;
 		fltEnvCoef=fltEnvValue/32.0f;
 	}
 }
@@ -1271,39 +1490,47 @@ void CSynthTrack::PerformFx()
 				}			
 				break;
 			}
+			updateTuning(); // not very good here but still ok
 		}
 	} else {
 		switch (sp_cmd) {
 			/* 0xC1 : Pitch Up */
 			case 0xC1:
 				shift=(float)sp_val*0.001f;
-				Bend+=shift;
+				bend+=shift;
 			break;
 			/* 0xC2 : Pitch Down */
 			case 0xC2:
 				shift=(float)sp_val*0.001f;
-				Bend-=shift;
+				bend-=shift;
 			break;
 			/* 0xC5 Intervall */
 			case 0xC5:
 				arpList[0]=0;
-				if (sp_val > 127) arpList[1]=0-(sp_val & 0x7F);
+				if (sp_val > 127) arpList[1]=128-sp_val;
 				else arpList[1]=sp_val;
 				arpLen=2;
 			break;
 			/* 0xC6 Touchtaping */
 			case 0xC6:
-				if (sp_val > 127) arpList[0]=0-(sp_val & 0x7F);
+				if (sp_val > 127) arpList[0]=128-sp_val;
 				else arpList[0]=sp_val;
 				arpLen=1;
+				if (curArp != arpList[0]){
+					curArp=arpList[0];
+					updateTuning();
+				}
 			break;
 			/* 0xC7 Touchtaping with Retrig */
 			case 0xC7:
-				if (sp_val > 127) arpList[0]=0-(sp_val & 0x7F);
+				if (sp_val > 127) arpList[0]=128-sp_val;
 				else arpList[0]=sp_val;
 				arpLen=1;
+				if (curArp != arpList[0]){
+					curArp=arpList[0];
+					updateTuning();
+				}
 			break;
-
 			/* 0xCC Volume */
 			case 0xCC:
 				masterVolume=(float)sp_val*volMulti;
@@ -1337,6 +1564,6 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	// Touchtaping
 	if (cmd == 0xC6) { arpLen=1; arpCount=-1; }
 	// Touchtaping with Retrig
-	if (cmd == 0xC7) { InitEnvelopes(); arpLen=1; arpCount=-1; }
+	if (cmd == 0xC7) { Retrig(); arpLen=1; arpCount=-1; }
 	if (cmd == 0xCC) voiceVol=(float)val/255.0f;
 }

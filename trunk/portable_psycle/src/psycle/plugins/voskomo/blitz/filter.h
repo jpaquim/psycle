@@ -2,9 +2,14 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#if !defined(AFX_FILTER_H__29F337AA_DD24_4733_B417_2CEBE59DF85B__INCLUDED_)
+#define AFX_FILTER_H__29F337AA_DD24_4733_B417_2CEBE59DF85B__INCLUDED_
+
+#if _MSC_VER > 1000
 #pragma once
-#include <cmath>
-#include <psycle/plugin_interface.hpp>
+#endif // _MSC_VER > 1000
+#include <math.h>
+#include "..\..\machineinterface.h"
 typedef float SIG;
 #define TWOPI_F (2.0f*3.141592665f)
 //static const double PI=4*atan(1.0);
@@ -78,7 +83,7 @@ public:
   }
   void SetParametricEQ(float fc, float q, float v, float esr, float gain=1.0f)
   {
-    //float sq = (float)sqrt(2.0*(double)v);
+    float sq = (float)sqrt(2.0*(double)v);
     float omega = TWOPI_F*fc/esr;
     float k = (float) tan((double)omega*0.5);
     float kk = k*k;
@@ -213,3 +218,8 @@ private:
 	bool invert;
 	int sr;
 };
+
+
+
+
+#endif // !defined(AFX_FILTER_H__29F337AA_DD24_4733_B417_2CEBE59DF85B__INCLUDED_)

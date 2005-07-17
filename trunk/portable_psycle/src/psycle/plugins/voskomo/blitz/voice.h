@@ -16,7 +16,13 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#if !defined(AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_)
+#define AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_
+
+#if _MSC_VER > 1000
 #pragma once
+#endif // _MSC_VER > 1000
+
 #include "filter.h"
 #include "lfo.h"
 #include "pwm.h"
@@ -132,13 +138,15 @@ struct VOICEPAR
 class CSynthTrack  
 {
 public:
+	void calcOneWave(int osc);
+	void calcWaves(int mask);
 	float freqlimit(float freq) {
 		if (freq > 96) freq = 96;
 		return freq;
 	}
 	int pwmcount;
 	int fxcount;
-	signed short WaveBuffer[4][2100];
+	signed short WaveBuffer[9][2100]; // the last is only for temporary data
 	void InitEffect(int cmd,int val);
 	void PerformFx();
 	void DoGlide();
@@ -154,16 +162,22 @@ public:
 	void GetSample(float* slr);
 	void InitVoice(VOICEPAR *voicePar);
 	void ResetSym();
-	void NoteOn(int note, VOICEPAR *voicePar, int spd);
+	void NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity);
 	int nextNote;
 	int nextSpd;
 	void RealNoteOn();
+	void Retrig();
 	void NoteTie(int note);
 	CSynthTrack();
 	virtual ~CSynthTrack();
 	int ampEnvStage;
 
 private:
+	int curBuf[4];
+	int nextBuf[4];
+	float nextVol;
+	float fastRelease;
+	float minFade;
 	float rcVol;
 	float rcVolCutoff;
 	float rcCut;
@@ -193,6 +207,7 @@ private:
 	int synposLast[4];
 	int currentStereoPos;
 
+	int lfocount;
 	lfo lfoViber;
 	float lfoViberSample;
 	float lfoViberLast;
@@ -200,8 +215,7 @@ private:
 
 	int updateCount;
 	short timetocompute;
-	void UpdateTuning();
-	void InitEnvelopes();
+	void updateTuning();
 
 	float fltResonance;
 	int sp_cmd;
@@ -209,28 +223,28 @@ private:
 	float sp_gl;
 
 	int last_mod[2];
-	float DCO1Position;
-	float DCO1Pitch;
-	float RDCO1Pitch;
-	float DCO1Last;
+	float dco1Position;
+	float dco1Pitch;
+	float rdco1Pitch;
+	float dco1Last;
 
-	float DCO2Position;
-	float DCO2Pitch;
-	float RDCO2Pitch;
-	float DCO2Last;
+	float dco2Position;
+	float dco2Pitch;
+	float rdco2Pitch;
+	float dco2Last;
 
-	float DCO3Position;
-	float DCO3Pitch;
-	float RDCO3Pitch;
-	float DCO3Last;
+	float dco3Position;
+	float dco3Pitch;
+	float rdco3Pitch;
+	float dco3Last;
 
-	float DCO4Position;
-	float DCO4Pitch;
-	float RDCO4Pitch;
-	float DCO4Last;
+	float dco4Position;
+	float dco4Pitch;
+	float rdco4Pitch;
+	float dco4Last;
 
 	// ChanFX
-	float Bend;
+	float bend;
 
 	// Mod Envelope
 	int modEnvStage;
@@ -270,7 +284,11 @@ private:
 
 	inline float freqChange(float freq)
 	{
+		if (freq > 666.0f) freq = 666.0f;
 		return freq*0.25f; //4x oversampling
 	};
 
 };
+
+#endif // !defined(AFX_SYNTHTRACK_H__3D2712C1_36AD_11D4_8913_AE42C3A28249__INCLUDED_)
+

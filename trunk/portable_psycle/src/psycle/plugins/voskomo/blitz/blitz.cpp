@@ -16,7 +16,6 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <project.private.hpp>
 #include "blitz.h"
 
 CMachineParameter const paraGlobal = 
@@ -43,8 +42,8 @@ CMachineParameter const paraGlobalCourse =
 { 
 	"Course",
 	"Course",									// description
-	-36,										// MinValue	
-	36,											// MaxValue
+	-60,										// MinValue	
+	60,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -203,8 +202,8 @@ CMachineParameter const paraOsc1Course =
 { 
 	"Course",
 	"Course",									// description
-	-36,										// MinValue	
-	36,											// MaxValue
+	-60,										// MinValue	
+	60,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -226,7 +225,7 @@ CMachineParameter const paraOsc1Waveform =
 	0,											// MinValue	
 	33,											// MaxValue
 	MPF_STATE,									// Flags
-	16
+	0
 };
 
 CMachineParameter const paraOsc1Feedback = 
@@ -264,7 +263,7 @@ CMachineParameter const paraOsc1FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	21,											// MaxValue
+	42,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -296,7 +295,7 @@ CMachineParameter const paraOsc1SymDriftRange =
 	-2047,										// MinValue	
 	2047,										// MaxValue
 	MPF_STATE,									// Flags
-	800
+	0
 };
 
 CMachineParameter const paraOsc1SymDriftSpeed = 
@@ -306,7 +305,7 @@ CMachineParameter const paraOsc1SymDriftSpeed =
 	0,											// MinValue	
 	256,										// MaxValue
 	MPF_STATE,									// Flags
-	180
+	0
 };
 
 CMachineParameter const paraOsc1SymLfo = 
@@ -316,7 +315,7 @@ CMachineParameter const paraOsc1SymLfo =
 	0,											// MinValue	
 	1,											// MaxValue
 	MPF_STATE||MPF_LABEL,						// Flags
-	1
+	0
 };
 
 CMachineParameter const paraOsc1SymLfoRange = 
@@ -326,7 +325,7 @@ CMachineParameter const paraOsc1SymLfoRange =
 	-2047,										// MinValue	
 	2047,										// MaxValue
 	MPF_STATE,									// Flags
-	128
+	0
 };
 
 CMachineParameter const paraOsc1SymLfoSpeed = 
@@ -336,7 +335,7 @@ CMachineParameter const paraOsc1SymLfoSpeed =
 	0,											// MinValue	
 	256,										// MaxValue
 	MPF_STATE,									// Flags
-	64
+	0
 };
 
 CMachineParameter const paraOsc2 = 
@@ -363,13 +362,11 @@ CMachineParameter const paraOsc2Course =
 { 
 	"Course",
 	"Course",									// description
-	-36,										// MinValue	
-	36,											// MaxValue
+	-60,										// MinValue	
+	60,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
-
-
 
 CMachineParameter const paraOsc2Fine = 
 {
@@ -388,7 +385,7 @@ CMachineParameter const paraOsc2Waveform =
 	0,											// MinValue	
 	33,											// MaxValue
 	MPF_STATE,									// Flags
-	16
+	0
 };
 
 CMachineParameter const paraOsc2Feedback = 
@@ -426,7 +423,7 @@ CMachineParameter const paraOsc2FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	21,											// MaxValue
+	42,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -526,8 +523,8 @@ CMachineParameter const paraOsc3Course =
 { 
 	"Course",
 	"Course",									// description
-	-36,										// MinValue	
-	36,											// MaxValue
+	-60,										// MinValue	
+	60,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -549,7 +546,7 @@ CMachineParameter const paraOsc3Waveform =
 	0,											// MinValue	
 	33,											// MaxValue
 	MPF_STATE,									// Flags
-	16
+	0
 };
 
 CMachineParameter const paraOsc3Feedback = 
@@ -587,7 +584,7 @@ CMachineParameter const paraOsc3FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	21,											// MaxValue
+	42,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -687,8 +684,8 @@ CMachineParameter const paraOsc4Course =
 {
 	"Course",
 	"Course",									// description
-	-36,										// MinValue	
-	36,											// MaxValue
+	-60,										// MinValue	
+	60,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -710,7 +707,7 @@ CMachineParameter const paraOsc4Waveform =
 	0,											// MinValue	
 	33,											// MaxValue
 	MPF_STATE,									// Flags
-	16
+	0
 };
 
 CMachineParameter const paraOsc4Feedback = 
@@ -748,7 +745,7 @@ CMachineParameter const paraOsc4FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	21,											// MaxValue
+	42,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -1302,7 +1299,7 @@ CMachineInfo const MacInfo =
 #ifdef _DEBUG
 	"Blitz (Debug build)",					// name
 #else
-	"Blitz",								// name
+	"Blitz 1.0",							// name
 #endif
 	"Blitz",								// short name
 	"Jan-Marco Edelmann [voskomo]",			// author
@@ -1310,35 +1307,9 @@ CMachineInfo const MacInfo =
 	7
 };
 
-class mi : public CMachineInterface
-{
-public:
-	void InitWaveTable();
-	mi();
-	virtual ~mi();
+DLL_EXPORTS		// To export DLL functions to host
 
-	virtual void Init();
-	virtual void SequencerTick();
-	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
-	virtual bool DescribeValue(char* txt,int const param, int const value);
-	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
-	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
-	virtual void Stop();
-
-private:
-	CSynthTrack track[MAX_TRACKS];
-	VOICEPAR globals;
-	int InitPos[4];
-	int slomo;
-	pwm InitLoop[4];
-	lfo SyncViber;
-	lfo FiltViber;
-};
-
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo) // To export DLL functions to host
-
-mi::mi() {
+mi::mi(){
 	Vals=new int[112];
 	InitWaveTable();
 }
@@ -1372,108 +1343,83 @@ void mi::Init(){
 }
 
 void mi::Stop(){
-	for(int c=0;c<MAX_TRACKS;c++)
-	track[c].NoteStop();
+	for(int c=0;c<MAX_TRACKS;c++) track[c].NoteStop();
 }
 
 void mi::SequencerTick(){
 // Called on each tick while sequencer is playing
 }
 
+void mi::updateOsc(int osc){
+	for(int c=0;c<MAX_TRACKS;c++){
+		if(track[c].ampEnvStage) track[c].calcOneWave(osc);
+	}
+}
+
 void mi::ParameterTweak(int par, int val){
 	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 
-	switch (par) {
+	switch (par){
 		case 1: globals.globalVolume=val; break;
 		case 2: globals.globalCourse=val; break;
 		case 3: globals.globalFine=val; break;
-		case 4: globals.globalGlide=val;
-			    break;
-		case 5: globals.globalStereo=val;
-				if (globals.globalStereo) globals.stereoLR[0]=1.0f-(globals.globalStereo*0.00390625f);
-				else globals.stereoLR[0]=1.0f;
-				globals.stereoLR[1]=1.0f;
-			    break;
+		case 4: globals.globalGlide=val; break;
+		case 5: globals.globalStereo=val; if (globals.globalStereo) globals.stereoLR[0]=1.0f-(globals.globalStereo*0.00390625f); else globals.stereoLR[0]=1.0f; globals.stereoLR[1]=1.0f; break;
 		case 7: globals.arpPattern=val; break;
 		case 8: globals.arpSpeed=val; break;
 		case 9: globals.arpShuffle=val; break;
 		case 10: globals.arpRetrig=val; break;
 		case 12: globals.lfoDelay=val<<3; break;
-		case 13: globals.lfoDepth=val;
-			     SyncViber.setLevel(val); break;
-		case 14: globals.lfoSpeed=val;
-			     SyncViber.setSpeed(val); break;
+		case 13: globals.lfoDepth=val; SyncViber.setLevel(val); break;
+		case 14: globals.lfoSpeed=val; SyncViber.setSpeed(val); break;
 		case 15: globals.lfoDestination=val; break;
 		case 17: globals.oscVolume[0]=val; break;
 		case 18: globals.oscCourse[0]=val; break;
 		case 19: globals.oscFine[0]=val; break;
-		case 20: globals.oscWaveform[0]=val; break;
+		case 20: globals.oscWaveform[0]=val; updateOsc(0); break;
 		case 21: globals.oscFeedback[0]=(float)val*0.00025f; break;
 		case 22: globals.oscOptions[0]=val; break;
-		case 24: globals.oscFuncType[0]=val; break;
-		case 25: globals.oscFuncSym[0]=val;
-		break;
-		case 27: globals.oscSymDriftRange[0]=val;
-		InitLoop[0].setRange(globals.oscSymDriftRange[0]);
-		//InitLoop[0].reset();
-		break;
-		case 28: globals.oscSymDriftSpeed[0]=val;
-		InitLoop[0].setSpeed(globals.oscSymDriftSpeed[0]);
-		break;
+		case 24: globals.oscFuncType[0]=val; updateOsc(0); break;
+		case 25: globals.oscFuncSym[0]=val; break;
+		case 27: globals.oscSymDriftRange[0]=val; InitLoop[0].setRange(globals.oscSymDriftRange[0]); break;
+		case 28: globals.oscSymDriftSpeed[0]=val; InitLoop[0].setSpeed(globals.oscSymDriftSpeed[0]); break;
 		case 30: globals.oscSymLfoRange[0]=val; break;
 		case 31: globals.oscSymLfoSpeed[0]=val; break;
 		case 33: globals.oscVolume[1]=val; break;
 		case 34: globals.oscCourse[1]=val; break;
 		case 35: globals.oscFine[1]=val; break;
-		case 36: globals.oscWaveform[1]=val; break;
+		case 36: globals.oscWaveform[1]=val; updateOsc(1); break;
 		case 37: globals.oscFeedback[1]=(float)val*0.00025f; break;
 		case 38: globals.oscOptions[1]=val; break;
-		case 40: globals.oscFuncType[1]=val; break;
+		case 40: globals.oscFuncType[1]=val; updateOsc(1); break;
 		case 41: globals.oscFuncSym[1]=val;	break;
-		case 43: globals.oscSymDriftRange[1]=val;
-		InitLoop[1].setRange(globals.oscSymDriftRange[1]);
-		//InitLoop[1].reset();
-		break;
-		case 44: globals.oscSymDriftSpeed[1]=val;
-		InitLoop[1].setSpeed(globals.oscSymDriftSpeed[1]);
-		break;
+		case 43: globals.oscSymDriftRange[1]=val; InitLoop[1].setRange(globals.oscSymDriftRange[1]); break;
+		case 44: globals.oscSymDriftSpeed[1]=val; InitLoop[1].setSpeed(globals.oscSymDriftSpeed[1]); break;
 		case 46: globals.oscSymLfoRange[1]=val; break;
 		case 47: globals.oscSymLfoSpeed[1]=val; break;
 		case 49: globals.oscVolume[2]=val; break;
 		case 50: globals.oscCourse[2]=val; break;
 		case 51: globals.oscFine[2]=val; break;
-		case 52: globals.oscWaveform[2]=val; break;
+		case 52: globals.oscWaveform[2]=val; updateOsc(2); break;
 		case 53: globals.oscFeedback[2]=(float)val*0.00025f; break;
 		case 54: globals.oscOptions[2]=val; break;
-		case 56: globals.oscFuncType[2]=val; break;
-		case 57: globals.oscFuncSym[2]=val;
-		break;
-		case 59: globals.oscSymDriftRange[2]=val;
-		InitLoop[2].setRange(globals.oscSymDriftRange[2]);
-		//InitLoop[2].reset();
-		break;
-		case 60: globals.oscSymDriftSpeed[2]=val;
-		InitLoop[2].setSpeed(globals.oscSymDriftSpeed[2]);
-		break;
+		case 56: globals.oscFuncType[2]=val; updateOsc(2); break;
+		case 57: globals.oscFuncSym[2]=val;	break;
+		case 59: globals.oscSymDriftRange[2]=val; InitLoop[2].setRange(globals.oscSymDriftRange[2]); break;
+		case 60: globals.oscSymDriftSpeed[2]=val; InitLoop[2].setSpeed(globals.oscSymDriftSpeed[2]); break;
 		case 62: globals.oscSymLfoRange[2]=val; break;
 		case 63: globals.oscSymLfoSpeed[2]=val; break;
 		case 65: globals.oscVolume[3]=val; break;
 		case 66: globals.oscCourse[3]=val; break;
 		case 67: globals.oscFine[3]=val; break;
-		case 68: globals.oscWaveform[3]=val; break;
+		case 68: globals.oscWaveform[3]=val; updateOsc(3); break;
 		case 69: globals.oscFeedback[3]=(float)val*0.00025f; break;
 		case 70: globals.oscOptions[3]=val; break;
-		case 72: globals.oscFuncType[3]=val; break;
-		case 73: globals.oscFuncSym[3]=val;
-		break;
-		case 75: globals.oscSymDriftRange[3]=val;
-		InitLoop[3].setRange(globals.oscSymDriftRange[3]);
-		//InitLoop[3].reset();
-		break;
-		case 76: globals.oscSymDriftSpeed[3]=val;
-		InitLoop[3].setSpeed(globals.oscSymDriftSpeed[3]);
-		break;
+		case 72: globals.oscFuncType[3]=val; updateOsc(3); break;
+		case 73: globals.oscFuncSym[3]=val; break;
+		case 75: globals.oscSymDriftRange[3]=val; InitLoop[3].setRange(globals.oscSymDriftRange[3]); break;
+		case 76: globals.oscSymDriftSpeed[3]=val; InitLoop[3].setSpeed(globals.oscSymDriftSpeed[3]); break;
 		case 78: globals.oscSymLfoRange[3]=val; break;
 		case 79: globals.oscSymLfoSpeed[3]=val; break;
 		case 81: globals.rm1=val; break;
@@ -1493,12 +1439,8 @@ void mi::ParameterTweak(int par, int val){
 		case 98: globals.fltCutoff=(float)val; break;
 		case 99: globals.fltResonance=val; break;
 		case 100: globals.fltTrack=val; break;
-		case 101: globals.fltSweep=val;
-			      FiltViber.setLevel(val);
-				  break;
-		case 102: globals.fltSpeed=val;
-				  FiltViber.setSpeed(val);
-			      break;
+		case 101: globals.fltSweep=val; FiltViber.setLevel(val); break;
+		case 102: globals.fltSpeed=val; FiltViber.setSpeed(val); break;
 		case 104: globals.fltA=val<<7; break;
 		case 105: globals.fltD=val<<7; break;
 		case 106: globals.fltS=val; break;
@@ -1523,10 +1465,10 @@ sprintf(
 		"\nC2xx : Slide Down",
 		"\nC3xx : Tone Portamento",
 		"\nC4xx : Tone Portamento with Retrig",
-		"\nC5xx : Interval (> 127 == minus)",
-		"\nC6xx : Touchtaping (> 127 == minus)",
+		"\nC5xx : Interval (> 128 == minus)",
+		"\nC6xx : Touchtaping (> 128 == minus)",
 		"\nC7xx : Touchtaping with Retrig",
-		"\nC8xx : Retrig Bits (1:Drift, 2:SyncVib, 4:FltVib)",
+		"\nC8xx : Init Strobe (+1:Drift, +2:SyncVib, +4:FltVib)",
 		"\nCCxx : Set Volume",
 		"\nDxyy : Semi Portamento (x tones down with rate yy)",
 		"\nExyy : Semi Portamento (x tones up with rate yy)",
@@ -1539,41 +1481,26 @@ pCB->MessBox(buffer,"hello",0);
 
 // Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks){
-	//float sl=0;
-	//float sr=0;
+	float sl=0;
+	float sr=0;
 	float slr[2];
-	for(int c=0;c<tracks;c++)
-	{
-		if(track[c].ampEnvStage)
-		{
+	for(int c=0;c<tracks;c++){
+		if(track[c].ampEnvStage){
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
 			int xnumsamples=numsamples;
-
 			--xpsamplesleft;
 			--xpsamplesright;
-
 			track[c].PerformFx();
-			do
-			{
-				/*
-				sl=0;		
-				sl+=track[c].GetSample();
-
-				*++xpsamplesleft+=sl;
-				*++xpsamplesright+=sl;
-				*/
-
+			do{
 				track[c].GetSample(&slr[0]);
 				*++xpsamplesleft+=slr[0];
 				*++xpsamplesright+=slr[1];
-				
-			
-			} while(--xnumsamples);
+			}while(--xnumsamples);
 		}
 	}
 	slomo++;
-	if (slomo > 20) {
+	if (slomo > 10){
 		slomo=0;
 		InitPos[0]=InitLoop[0].getPosition();
 		InitPos[1]=InitLoop[1].getPosition();
@@ -1587,8 +1514,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		globals.initposition[1]=InitPos[1];
 		globals.initposition[2]=InitPos[2];
 		globals.initposition[3]=InitPos[3];		
-	} slomo++;
-
+	}
 	SyncViber.next();
 	globals.syncvibe=(float)SyncViber.getPosition();
 	FiltViber.next();
@@ -1773,13 +1699,36 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 18:sprintf(txt,"Sawtooth Mixer");return true;break;
 			case 19:sprintf(txt,"Square Mixer");return true;break;
 			case 20:sprintf(txt,"Tremelo");return true;break;
-			case 21:sprintf(txt,"Phase Mod");return true;break;
+			case 21:sprintf(txt,"Sine PM 1");return true;break;
+			case 22:sprintf(txt,"Sine PM 2");return true;break;
+			case 23:sprintf(txt,"Sine PM 3");return true;break;
+			case 24:sprintf(txt,"Adlib2 PM 1");return true;break;
+			case 25:sprintf(txt,"Adlib2 PM 2");return true;break;
+			case 26:sprintf(txt,"Adlib2 PM 3");return true;break;
+			case 27:sprintf(txt,"Adlib3 PM 1");return true;break;
+			case 28:sprintf(txt,"Adlib3 PM 2");return true;break;
+			case 29:sprintf(txt,"Adlib3 PM 3");return true;break;
+			case 30:sprintf(txt,"Adlib4 PM 1");return true;break;
+			case 31:sprintf(txt,"Adlib4 PM 2");return true;break;
+			case 32:sprintf(txt,"Adlib4 PM 3");return true;break;
+			case 33:sprintf(txt,"Wave PM 1");return true;break;
+			case 34:sprintf(txt,"Wave PM 2");return true;break;
+			case 35:sprintf(txt,"Wave PM 3");return true;break;
+			case 36:sprintf(txt,"Dual Fix PM");return true;break;
+			case 37:sprintf(txt,"Multiply");return true;break;
+			case 38:sprintf(txt,"AND Gate");return true;break;
+			case 39:sprintf(txt,"XOR Gate");return true;break;
+			case 40:sprintf(txt,"Clipper");return true;break;
+			case 41:sprintf(txt,"RM to AM (Upright)");return true;break;
+			case 42:sprintf(txt,"RM to AM (Flipped)");return true;break;
 		}
 	}
 
 	//Symmetry
 	if(param==25||param==41||param==57||param==73||param==27||param==43||param==59||param==75||param==30||param==46||param==62||param==78){
-		sprintf(txt,"%3.2f%%",(float)value*100/2047);
+		float fnord=(float)value;
+		if (fnord==1024.0f) fnord=1023.5f;
+		sprintf(txt,"%3.2f%%",(float)fnord*100/2047);
 		return true;
 	}
 
@@ -1812,7 +1761,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 
-	if (cmd == 0xC8) {
+	if (cmd == 0xC8){
 		if (val&1){
 			InitLoop[0].reset();
 			InitLoop[1].reset();
@@ -1844,13 +1793,15 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 		}
 	}
 
-	if (channel < MAX_TRACKS) {
-		track[channel].InitEffect(cmd,val);
+	if (channel < MAX_TRACKS){
+		float nextVol = 1.0f;
+		if ((note<120) & (cmd == 0xCC)) nextVol=(float)val/255.0f;
+		else track[channel].InitEffect(cmd,val);
 		// Note Off			== 120
 		// Empty Note Row	== 255
 		// Less than note off value??? == NoteON!
-		if(note<120) { 
-			if (cmd != 0xC3) track[channel].NoteOn(note-24,&globals,60);
+		if(note<120){ 
+			if (cmd != 0xC3) track[channel].NoteOn(note-24,&globals,60,nextVol);
 			else track[channel].NoteTie(note-24);
 		}
 		// Note off
@@ -1863,7 +1814,7 @@ void mi::InitWaveTable(){
 	int cp = 0;
 	float float1 = 16384;
 	double quarter = 512*0.00306796157577128245943617517898389;
-	for(int c=0;c<2100;c++){
+	for(int c=0;c<2048;c++){
 		double sval=(double)c*0.00306796157577128245943617517898389;
 
 		//MidSine
@@ -1933,7 +1884,7 @@ void mi::InitWaveTable(){
 	}
 	//Sawtooth (Phase+0.5)
 	co=16384;
-	for(int c=0;c<2100;c++)
+	for(c=0;c<2048;c++)
 	{
 		if (co>=32768) co-=32768;
 		globals.WaveTable[WAVE_SAWTOOTH][c]=co-16384;
@@ -1941,7 +1892,7 @@ void mi::InitWaveTable(){
 	}
 	//Triangle
 	co = 512;
-	for(int c=0; c<2100;c++)
+	for(c=0; c<2048;c++)
 	{
 		globals.WaveTable[WAVE_TRIANGLE][c]=globals.WaveTable[WAVE_UPDOWN][co];
 		co++;
@@ -1949,29 +1900,29 @@ void mi::InitWaveTable(){
 
 	}
 	//Sawsquare
-	for(int c=0; c<1024;c++)
+	for(c=0; c<1024;c++)
 	{
 		globals.WaveTable[WAVE_SAWSQUARE][c]=globals.WaveTable[WAVE_SAWTOOTH][c];
 	} 
-	for(int c=0; c<1024;c++)
+	for(c=0; c<1024;c++)
 	{
 		globals.WaveTable[WAVE_SAWSQUARE][c+1024]=0-globals.WaveTable[WAVE_SAWTOOTH][c];
 	}
 	//Sine Cosine
-	for(int c=0; c<1024;c++) {
+	for(c=0; c<1024;c++) {
 		globals.WaveTable[WAVE_SINECOSINE][c]=globals.WaveTable[WAVE_SINE][c+c];
 		globals.WaveTable[WAVE_SINECOSINE][2047-c]=globals.WaveTable[WAVE_SINE][c+c];
 	}
 
-	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c]=globals.WaveTable[WAVE_SINE][c+c]; }
-	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+512]=globals.WaveTable[WAVE_SINE][c+c]; }
-	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1024]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
-	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1536]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
+	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c]=globals.WaveTable[WAVE_SINE][c+c]; }
+	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+512]=globals.WaveTable[WAVE_SINE][c+c]; }
+	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1024]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
+	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1536]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
 
 	//PolyDIGITAL Sine
 	co = 256;
 	cp = 0;
-	for(int c=0;c<2048;c++)
+	for(c=0;c<2048;c++)
 	{
 		if (cp == 1){
 			globals.WaveTable[WAVE_POLYNEG][c]=globals.WaveTable[WAVE_SINE][c];
@@ -1987,7 +1938,7 @@ void mi::InitWaveTable(){
 	//PolyDIGITAL Sine 2
 	co = 128;
 	cp = 0;
-	for(int c=0;c<2048;c++)
+	for(c=0;c<2048;c++)
 	{
 		if (cp == 1){
 			globals.WaveTable[WAVE_POLYNEG2][c]=globals.WaveTable[WAVE_SINE][c];
@@ -2003,7 +1954,7 @@ void mi::InitWaveTable(){
 	//PolyDIGITAL Sine 3
 	co = 64;
 	cp = 0;
-	for(int c=0;c<2048;c++)
+	for(c=0;c<2048;c++)
 	{
 		if (cp == 1){
 			globals.WaveTable[WAVE_POLYNEG3][c]=globals.WaveTable[WAVE_SINE][c];
@@ -2016,7 +1967,7 @@ void mi::InitWaveTable(){
 			 cp = 1-cp;
 		}
 	}
-	for(int c=0;c<2048;c++){
+	for(c=0;c<2048;c++){
 		if(c<1024){ globals.WaveTable[WAVE_ADLIB2][c]=globals.WaveTable[WAVE_SINE][c]*2 -16384; //ADLIB2
 		} else {		globals.WaveTable[WAVE_ADLIB2][c]=0-16384;}
 		if(c<1024){ globals.WaveTable[WAVE_ADLIB3][c]=globals.WaveTable[WAVE_SINE][c]*2 -16384; //ADLIB3
