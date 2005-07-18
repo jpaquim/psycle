@@ -16,8 +16,9 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "math.h"
+#include <project.private.hpp>
 #include "voice.h"
+#include <cmath>
 #define FILTER_CALC_TIME	64
 #define TWOPI				6.28318530717958647692528676655901f
 
@@ -331,14 +332,15 @@ void CSynthTrack::Retrig(){
 	}
 }
 
-void CSynthTrack::GetSample(float* slr){
+void CSynthTrack::GetSample(float* slr)
+{
 	float output=0.0f;
 	float output1=0.0f;
 	float output2=0.0f;
 	float output3=0.0f;
 	float output4=0.0f;
-	float outputRM1=0.0f;
-	float outputRM2=0.0f;
+	//float outputRM1=0.0f;
+	//float outputRM2=0.0f;
 
 	updateCount--;
 	if (updateCount < 1){
@@ -620,7 +622,7 @@ void CSynthTrack::calcWaves(int mask){
 	synfx[3].next();
 
 	float float1, float2, float3, float4, float5 = 0;
-	float size1, size2, step1, step2, phase;
+	float size1, size2, step1(0), step2, phase;
 	int work1, work2 = 0;
 	long long1 = 0;
 	int buf = 0;

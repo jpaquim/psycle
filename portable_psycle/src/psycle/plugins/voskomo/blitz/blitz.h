@@ -16,12 +16,13 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
+#pragma once
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
 
-#include "..\..\machineinterface.h"
+#include <psycle/plugin_interface.hpp>
 #include "voice.h"
 #include "lfo.h"
 #include "pwm.h"

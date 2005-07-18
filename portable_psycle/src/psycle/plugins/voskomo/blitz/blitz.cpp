@@ -16,6 +16,7 @@
         Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <project.private.hpp>
 #include "blitz.h"
 
 CMachineParameter const paraGlobal = 
@@ -1307,21 +1308,21 @@ CMachineInfo const MacInfo =
 	7
 };
 
-DLL_EXPORTS		// To export DLL functions to host
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo) // To export DLL functions to host
 
-mi::mi(){
+mi::mi()
+{
 	Vals=new int[112];
 	InitWaveTable();
 }
 
-mi::~mi(){
+mi::~mi()
+{
 	delete Vals;
-
-// Destroy dinamically allocated objects/memory here
 }
 
-void mi::Init(){
-// Initialize your stuff here
+void mi::Init()
+{
 	slomo=0;
 	InitLoop[0].setRange(globals.oscSymDriftRange[0]);
 	InitLoop[0].setSpeed(globals.oscSymDriftSpeed[0]);
@@ -1481,8 +1482,8 @@ pCB->MessBox(buffer,"hello",0);
 
 // Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks){
-	float sl=0;
-	float sr=0;
+	//float sl=0;
+	//float sr=0;
 	float slr[2];
 	for(int c=0;c<tracks;c++){
 		if(track[c].ampEnvStage){
@@ -1884,7 +1885,7 @@ void mi::InitWaveTable(){
 	}
 	//Sawtooth (Phase+0.5)
 	co=16384;
-	for(c=0;c<2048;c++)
+	for(int c=0;c<2048;c++)
 	{
 		if (co>=32768) co-=32768;
 		globals.WaveTable[WAVE_SAWTOOTH][c]=co-16384;
@@ -1892,7 +1893,7 @@ void mi::InitWaveTable(){
 	}
 	//Triangle
 	co = 512;
-	for(c=0; c<2048;c++)
+	for(int c=0; c<2048;c++)
 	{
 		globals.WaveTable[WAVE_TRIANGLE][c]=globals.WaveTable[WAVE_UPDOWN][co];
 		co++;
@@ -1900,29 +1901,29 @@ void mi::InitWaveTable(){
 
 	}
 	//Sawsquare
-	for(c=0; c<1024;c++)
+	for(int c=0; c<1024;c++)
 	{
 		globals.WaveTable[WAVE_SAWSQUARE][c]=globals.WaveTable[WAVE_SAWTOOTH][c];
 	} 
-	for(c=0; c<1024;c++)
+	for(int c=0; c<1024;c++)
 	{
 		globals.WaveTable[WAVE_SAWSQUARE][c+1024]=0-globals.WaveTable[WAVE_SAWTOOTH][c];
 	}
 	//Sine Cosine
-	for(c=0; c<1024;c++) {
+	for(int c=0; c<1024;c++) {
 		globals.WaveTable[WAVE_SINECOSINE][c]=globals.WaveTable[WAVE_SINE][c+c];
 		globals.WaveTable[WAVE_SINECOSINE][2047-c]=globals.WaveTable[WAVE_SINE][c+c];
 	}
 
-	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c]=globals.WaveTable[WAVE_SINE][c+c]; }
-	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+512]=globals.WaveTable[WAVE_SINE][c+c]; }
-	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1024]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
-	for(c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1536]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
+	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c]=globals.WaveTable[WAVE_SINE][c+c]; }
+	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+512]=globals.WaveTable[WAVE_SINE][c+c]; }
+	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1024]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
+	for(int c=0; c<512;c++) { globals.WaveTable[WAVE_SINECOSINE][c+1536]=globals.WaveTable[WAVE_SINE][c+c+1024]; }
 
 	//PolyDIGITAL Sine
 	co = 256;
 	cp = 0;
-	for(c=0;c<2048;c++)
+	for(int c=0;c<2048;c++)
 	{
 		if (cp == 1){
 			globals.WaveTable[WAVE_POLYNEG][c]=globals.WaveTable[WAVE_SINE][c];
@@ -1938,7 +1939,7 @@ void mi::InitWaveTable(){
 	//PolyDIGITAL Sine 2
 	co = 128;
 	cp = 0;
-	for(c=0;c<2048;c++)
+	for(int c=0;c<2048;c++)
 	{
 		if (cp == 1){
 			globals.WaveTable[WAVE_POLYNEG2][c]=globals.WaveTable[WAVE_SINE][c];
@@ -1954,7 +1955,7 @@ void mi::InitWaveTable(){
 	//PolyDIGITAL Sine 3
 	co = 64;
 	cp = 0;
-	for(c=0;c<2048;c++)
+	for(int c=0;c<2048;c++)
 	{
 		if (cp == 1){
 			globals.WaveTable[WAVE_POLYNEG3][c]=globals.WaveTable[WAVE_SINE][c];
@@ -1967,7 +1968,7 @@ void mi::InitWaveTable(){
 			 cp = 1-cp;
 		}
 	}
-	for(c=0;c<2048;c++){
+	for(int c=0;c<2048;c++){
 		if(c<1024){ globals.WaveTable[WAVE_ADLIB2][c]=globals.WaveTable[WAVE_SINE][c]*2 -16384; //ADLIB2
 		} else {		globals.WaveTable[WAVE_ADLIB2][c]=0-16384;}
 		if(c<1024){ globals.WaveTable[WAVE_ADLIB3][c]=globals.WaveTable[WAVE_SINE][c]*2 -16384; //ADLIB3

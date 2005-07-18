@@ -20,12 +20,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_PWM_H__933E674D_0C6A_47A8_BFB2_A1FC6B2BC62E__INCLUDED_)
-#define AFX_PWM_H__933E674D_0C6A_47A8_BFB2_A1FC6B2BC62E__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
 
 class pwm  
 {
@@ -48,5 +43,3 @@ private:
 	int move;
 	int direction;
 };
-
-#endif // !defined(AFX_PWM_H__933E674D_0C6A_47A8_BFB2_A1FC6B2BC62E__INCLUDED_)

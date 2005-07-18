@@ -2,6 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <project.private.hpp>
 #include "filter.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -21,7 +22,7 @@ filter::~filter()
 
 void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(564*powf(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<11) cf=(float)(11.0);
@@ -44,23 +45,23 @@ void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
 
 void filter::SetFilter_4PoleEQ1(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(564*powf(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
-	float ScaleResonance=1.0;
-	float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
+	//float ScaleResonance=1.0;
+	//float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
 	Biquad.SetParametricEQ(cf,(float)(1.0+Resonance/12.0),float(6+Resonance/30.0),sr,0.4f/(1+(240-Resonance)/120.0f));
 }
 
 void filter::SetFilter_4PoleEQ2(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(564*powf(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
-	float ScaleResonance=1.0;
-	float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
+	//float ScaleResonance=1.0;
+	//float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
 	Biquad.SetParametricEQ(cf,8.0f,9.0f,sr,0.5f);
 }
 
@@ -70,7 +71,7 @@ void filter::SetFilter_Vocal1(int CurCutoff, int Resonance)
 {
 	float CutoffFreq=CurCutoff;
 	float Cutoff1=THREESEL(CutoffFreq,270,400,800);
-	float Cutoff2=THREESEL(CutoffFreq,2140,800,1150);
+	//float Cutoff2=THREESEL(CutoffFreq,2140,800,1150);
 	Biquad.SetParametricEQ(Cutoff1,2.0f+Resonance/48.0f,6.0f+Resonance/24.0f,sr,0.3f);
 }
 
