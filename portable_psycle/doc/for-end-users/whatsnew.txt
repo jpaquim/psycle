@@ -56,14 +56,15 @@ v1.8
 + allow the player to send commands to a machine from any pattern track with a given channel (or "voice") number (bohan)
 	(todo: move that to the documentation)
 	if the machine is not a vst, and if the note is a "mcm" (hmm, poor name if it's not related with midi),
-	then, the fields in the event are interpreted as <channel> <machine> <command> <parameter>.
+	then, the fields in the event are interpreted as <voice> <machine> <command> <parameter>.
 	for example, 1122334444, means:
-	11 is the channel (or "voice"),
+	11 is the voice,
 	22 is the machine,
 	33 is the command, and
-	4444 is the parameter
-	The player calls the Machine::Tick function with those values, and the instrument value set to 0.
+	4444 is the parameter.
+	The voice number being 11, the command affects notes that were triggered on the same voice, that is, with the classic tracking way, notes that were entered on the track 11 (that is 17 in decimal)
 	The voice number 0xff is special and send the same command to all voices.
+	(internally the player calls the Machine::Tick function with the given values, and the instrument value set to 0.)
 + new sampler machine, "sampulse" (jaz):
 	+Added IT loader (jaz)
 	*Converted XMSampler "Layers (waves) per instrument" to independent sample bank and instrument bank. (jaz)
