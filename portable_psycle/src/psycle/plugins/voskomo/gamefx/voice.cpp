@@ -157,7 +157,7 @@ float CSynthTrack::GetSample()
 				cur_transpose=vpar->Transpose[perf_index]-1;
 				cur_option=vpar->Option[perf_index];
 				cur_realnote = cur_transpose;
-				if (cur_option & 1) cur_realnote+=cur_basenote;
+				if ((cur_option & 1) == 0) cur_realnote+=cur_basenote;
 				if ((cur_option & 2) && !keyrelease) Retrig();
 			}
 			cur_command=vpar->Command[perf_index];
