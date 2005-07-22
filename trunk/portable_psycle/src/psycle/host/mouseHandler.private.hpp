@@ -1153,9 +1153,11 @@ NAMESPACE__BEGIN(psycle)
 						{
 							ntOff=tOff+1;
 //	Disabled, since people find it as a bug, not as a feature.
-//							bScrollDetatch=true;
-//							detatchpoint.track = ntOff+1;
-//							detatchpoint.line = nlOff+1;
+//  Reenabled, because else, when the cursor jumps to next line, it gets redrawn 
+//   and the scrollbar position reseted.
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
 							Repaint(DMHScroll);
 						}
 						break;
@@ -1165,9 +1167,11 @@ NAMESPACE__BEGIN(psycle)
 						{
 							ntOff=tOff-1;
 //	Disabled, since people find it as a bug, not as a feature.
-//							bScrollDetatch=true;
-//							detatchpoint.track = ntOff+1;
-//							detatchpoint.line = nlOff+1;
+//  Reenabled, because else, when the cursor jumps to next line, it gets redrawn 
+//   and the scrollbar position reseted.
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
 							Repaint(DMHScroll);
 						}
 						else PrevTrack(1,false);
@@ -1187,9 +1191,11 @@ NAMESPACE__BEGIN(psycle)
 								ntOff = 0;
 							}
 //	Disabled, since people find it as a bug, not as a feature.
-//							bScrollDetatch=true;
-//							detatchpoint.track = ntOff+1;
-//							detatchpoint.line = nlOff+1;
+//  Reenabled, because else, when the cursor jumps to next line, it gets redrawn 
+//   and the scrollbar position reseted.
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
 							Repaint(DMHScroll);
 						}
 						break;
