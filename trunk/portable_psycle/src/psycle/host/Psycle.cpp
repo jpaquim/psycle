@@ -257,6 +257,7 @@ NAMESPACE__BEGIN(psycle)
 						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
 						"Satoshi Fujiwara\t\t\tInitial code on the XM sampler support\r\n"
 						"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
+						"Patrick Haworth [TranceMyriad]\t Author of the Help File" "\r\n"
 						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
 						"frown\t\t\t\tAdditional Graphics" "\r\n"
