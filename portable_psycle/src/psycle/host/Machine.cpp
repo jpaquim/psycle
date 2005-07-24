@@ -719,15 +719,18 @@ namespace psycle
 		}
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
-			for (int i=0;i<8;i++)
+			if ( !_mute )
 			{
-				PatternEntry pTemp = *pData;
-				if ( pTemp._note < 120 )
+				for (int i=0;i<8;i++)
 				{
-					pTemp._note+=noteOffset[i];
+					PatternEntry pTemp = *pData;
+					if ( pTemp._note < 120 )
+					{
+						pTemp._note+=noteOffset[i];
+					}
+					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
+						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 				}
-				if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
-					&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 			}
 		}
 		void DuplicatorMac::GetParamName(int numparam,char *name)

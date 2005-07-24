@@ -2214,7 +2214,7 @@ NAMESPACE__BEGIN(psycle)
 					MachineCoords.sGenerator.height = 47;//48;
 					MachineCoords.sGeneratorVu0.x = 0;
 					MachineCoords.sGeneratorVu0.y = 141;//144;
-					MachineCoords.sGeneratorVu0.width = 2;//6;
+					MachineCoords.sGeneratorVu0.width = 7;//6;
 					MachineCoords.sGeneratorVu0.height = 4;//5;
 					MachineCoords.sGeneratorVuPeak.x = 128;//96;
 					MachineCoords.sGeneratorVuPeak.y = 141;//144;
@@ -2239,7 +2239,7 @@ NAMESPACE__BEGIN(psycle)
 					MachineCoords.sEffect.height = 47;//48;
 					MachineCoords.sEffectVu0.x = 0;
 					MachineCoords.sEffectVu0.y = 141;//144;
-					MachineCoords.sEffectVu0.width = 2;//6;
+					MachineCoords.sEffectVu0.width = 7;//6;
 					MachineCoords.sEffectVu0.height = 4;//5;
 					MachineCoords.sEffectVuPeak.x = 128;//96;
 					MachineCoords.sEffectVuPeak.y = 141;//144;
@@ -3441,10 +3441,7 @@ NAMESPACE__BEGIN(psycle)
 						BITMAP bm;
 						GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
 
-						bkgx=bm.bmWidth;
-						bkgy=bm.bmHeight;
-
-						if ((bkgx == 1792) && (bkgy == 28))
+						if ((bm.bmWidth == 1792) && (bm.bmHeight == 28))
 						{
 							Global::pConfig->bBmpDial=TRUE;
 						}

@@ -246,6 +246,7 @@ namespace psycle
 			bool Read();
 			void Write();
 			bool ReadVersion17();
+			void SetSkinDefaults();
 
 			inline int GetSamplesPerSec() const throw()
 			{
