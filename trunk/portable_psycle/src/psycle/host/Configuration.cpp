@@ -29,85 +29,14 @@ namespace psycle
 			_midiMachineViewSeqMode = false;
 			autoStopMachines = false;
 			useDoubleBuffer = true;
-			_linenumbers = true;
-			_linenumbersHex = false;
-			_linenumbersCursor = false;
 			_showAboutAtStart = true;
 			_followSong = false;
-			pattern_fontface = "Tahoma";
-			pattern_header_skin = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
-			pattern_font_point = 85;
-			pattern_font_x = 9;
-			pattern_font_y = 12;
-			pattern_draw_empty_data = TRUE;
-			draw_mac_index = TRUE;
-			draw_vus = TRUE;
-			generator_fontface = "Tahoma";
-			generator_font_point = 90;
-			effect_fontface = "Tahoma";
-			effect_font_point = 90;
-			pattern_font_flags = 0;
-			generator_font_flags = 0;
-			effect_font_flags = 0;
-			machine_skin = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
-			mv_colour =	0x009a887c;
-			mv_wirecolour =	0x00000000;
-			mv_polycolour =	0x00ffffff;
-			mv_generator_fontcolour = 0x00000000;
-			mv_effect_fontcolour = 0x00000000;
-			mv_wireaa = 1;
-			mv_triangle_size = 22;
-			mv_wirewidth = 1;
-			mv_wireaacolour =
-					((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
-					((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
-					((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*4))/5)&0x00ff);
+			bShowSongInfoOnLoad = true;
+			bFileSaveReminders = true;
+			autosaveSong = true;
+			autosaveSongTime = 10;
 
-			mv_wireaacolour2 =
-					(((((mv_wirecolour&0x00ff0000)) + ((mv_colour&0x00ff0000)))/2)&0x00ff0000) +
-					(((((mv_wirecolour&0x00ff00)) + ((mv_colour&0x00ff00)))/2)&0x00ff00) +
-					(((((mv_wirecolour&0x00ff)) + ((mv_colour&0x00ff)))/2)&0x00ff);
-			pvc_separator  = 0x00400000;
-			pvc_separator2  = 0x00004000;
-			pvc_background  = 0x009a887c;
-			pvc_background2  = 0x00aa786c;
-			pvc_row4beat  = 0x00d5ccc6;
-			pvc_row4beat2 = 0x00fdfcf6;
-			pvc_rowbeat  = 0x00c9beb8;
-			pvc_rowbeat2 = 0x00f9eee8;
-			pvc_row  = 0x00c1b5aa;
-			pvc_row2 = 0x00f1e5da;
-			pvc_font  = 0x00000000;
-			pvc_font2  = 0x00000000;
-			pvc_fontPlay  = 0x00ffffff;
-			pvc_fontPlay2  = 0x00ffffff;
-			pvc_fontCur  = 0x00ffffff;
-			pvc_fontCur2  = 0x00ffffff;
-			pvc_fontSel  = 0x00ffffff;
-			pvc_fontSel2  = 0x00ffffff;
-			pvc_selection  = 0x00e00000;
-			pvc_selection2 = 0x00ff5050;
-			pvc_playbar  = 0x0000e000;
-			pvc_playbar2 = 0x005050e0;
-			pvc_cursor  = 0x000000e0;
-			pvc_cursor2 = 0x005050ff;
-
-			machineGUITopColor = 0x00D2C2BD;		
-			machineGUIFontTopColor = 0x00000000; 
-			machineGUIBottomColor = 0x0099766C;
-			machineGUIFontBottomColor = 0x00FFFFFF; 
-
-			machineGUIHTopColor = 0x00BC94A9;	//highlighted param colours
-			machineGUIHFontTopColor = 0x00000000; 
-			machineGUIHBottomColor = 0x008B5A72;
-			machineGUIHFontBottomColor = 0x0044EEFF; 
-
-			machineGUITitleColor = 0x00000000;
-			machineGUITitleFontColor = 0x00FFFFFF;
-
-			vu1 = 0x00f1c992;
-			vu2 = 0x00403731;
-			vu3 = 0x00262bd7;
+			SetSkinDefaults();
 			// soundcard output device
 			{
 				_numOutputDrivers = 4;
@@ -151,14 +80,6 @@ namespace psycle
 					Global::_pSong->patternLines[c] = defaultPatLines;
 				}
 			}
-			bShowSongInfoOnLoad = true;
-			bFileSaveReminders = true;
-			autosaveSong = true;
-			autosaveSongTime = 10;
-			bBmpBkg = false;
-			bBmpDial = false;
-			szBmpBkgFilename = "psycle.bmp";
-			szBmpDialFilename = "dial.bmp";
 			// paths
 			{
 				{
@@ -621,7 +542,92 @@ namespace psycle
 			}
 		}
 
+		void Configuration::SetSkinDefaults()
+		{
+			_linenumbers = true;
+			_linenumbersHex = false;
+			_linenumbersCursor = true;
+			pattern_fontface = "Tahoma";
+			pattern_header_skin = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
+			pattern_font_point = 80;
+			pattern_font_x = 9;
+			pattern_font_y = 11;
+			pattern_draw_empty_data = FALSE;
+			draw_mac_index = TRUE;
+			draw_vus = TRUE;
+			generator_fontface = "Tahoma";
+			generator_font_point = 80;
+			effect_fontface = "Tahoma";
+			effect_font_point = 80;
+			pattern_font_flags = 1;
+			generator_font_flags = 0;
+			effect_font_flags = 0;
+			machine_skin = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
+			mv_colour =	0x0099766C;
+			mv_wirecolour =	0x00000000;
+			mv_polycolour =	0x00ffffff;
+			mv_generator_fontcolour = 0x00000000;
+			mv_effect_fontcolour = 0x00000000;
+			mv_wireaa = 1;
+			mv_triangle_size = 22;
+			mv_wirewidth = 1;
+			mv_wireaacolour =
+				((((mv_wirecolour&0x00ff0000) + ((mv_colour&0x00ff0000)*4))/5)&0x00ff0000) +
+				((((mv_wirecolour&0x00ff00) + ((mv_colour&0x00ff00)*4))/5)&0x00ff00) +
+				((((mv_wirecolour&0x00ff) + ((mv_colour&0x00ff)*4))/5)&0x00ff);
 
+			mv_wireaacolour2 =
+				(((((mv_wirecolour&0x00ff0000)) + ((mv_colour&0x00ff0000)))/2)&0x00ff0000) +
+				(((((mv_wirecolour&0x00ff00)) + ((mv_colour&0x00ff00)))/2)&0x00ff00) +
+				(((((mv_wirecolour&0x00ff)) + ((mv_colour&0x00ff)))/2)&0x00ff);
+			pvc_separator  = 0x00400000;
+			pvc_separator2  = 0x00800000;
+			pvc_background  = 0x0099766C;
+			pvc_background2  = 0x00AA786C;
+			pvc_row4beat  = 0x00AF958B;
+			pvc_row4beat2 = 0x00AF958B;
+			pvc_rowbeat  = 0x00C0ACA5;
+			pvc_rowbeat2 = 0x00C0ACA5;
+			pvc_row  = 0x00D0C4BF;
+			pvc_row2 = 0x00D0C4BF;
+			pvc_font  = 0x00000000;
+			pvc_font2  = 0x00000000;
+			pvc_fontPlay  = 0x00ffffff;
+			pvc_fontPlay2  = 0x00ffffff;
+			pvc_fontCur  = 0x00ffffff;
+			pvc_fontCur2  = 0x00ffffff;
+			pvc_fontSel  = 0x00ffffff;
+			pvc_fontSel2  = 0x00ffffff;
+			pvc_selection  = 0x00e00000;
+			pvc_selection2 = 0x00ff5050;
+			pvc_playbar  = 0x0080FF00;
+			pvc_playbar2 = 0x0080FF00;
+			pvc_cursor  = 0x000000e0;
+			pvc_cursor2 = 0x000000e0;
+
+			machineGUITopColor = 0x00D2C2BD;		
+			machineGUIFontTopColor = 0x00000000; 
+			machineGUIBottomColor = 0x009C796D;
+			machineGUIFontBottomColor = 0x00FFFFFF; 
+
+			machineGUIHTopColor = 0x00BC94A9;	//highlighted param colours
+			machineGUIHFontTopColor = 0x00000000; 
+			machineGUIHBottomColor = 0x008B5A72;
+			machineGUIHFontBottomColor = 0x0044EEFF; 
+
+			machineGUITitleColor = 0x00000000;
+			machineGUITitleFontColor = 0x00FFFFFF;
+
+			vu1 = 0x0080FF80;
+			vu2 = 0x00403731;
+			vu3 = 0x00262bd7;
+
+			bBmpBkg = false;
+			bBmpDial = false;
+			szBmpBkgFilename = "No Background Bitmap";
+			szBmpDialFilename = "No Dial Bitmap";
+
+		}
 
 
 

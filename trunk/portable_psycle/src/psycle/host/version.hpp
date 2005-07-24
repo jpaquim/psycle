@@ -25,8 +25,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH -1
-#define PSYCLE__VERSION__QUALITY "1.8 Candidate (+ bugfix for midi controllers config dialog)"
+#define PSYCLE__VERSION__PATCH 0
+#define PSYCLE__VERSION__QUALITY "Release"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -77,6 +77,13 @@
 #if 0
 /*
 $Log$
+Revision 1.45  2005/07/24 16:59:02  jaz001
+* fixed baground bitmap bug.
+* changed default colours for new release
+* rearranged the skin dialog buttons
+* fixed but with skin vu-meters.
+* muting note duplicator stops sending events.
+
 Revision 1.44  2005/07/17 03:51:09  johan-boule
 bugfix for midi controllers config dialog
 
