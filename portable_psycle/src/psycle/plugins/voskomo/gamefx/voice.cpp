@@ -29,7 +29,7 @@ CSynthTrack::CSynthTrack()
 {
 	replaycount=1;
 	perf_count=1;
-	perf_index=0;
+	perf_index=1;
 	timetocompute=FILTER_CALC_TIME;
 
 	cur_basenote=0;
