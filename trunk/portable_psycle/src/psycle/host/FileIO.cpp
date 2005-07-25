@@ -154,7 +154,7 @@ namespace psycle
 				}
 				do
 				{
-					if(!Read(&c, sizeof(c))) return false;
+					if(!Read(&c, sizeof(c))) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
 				} while(c != 0);
 				return true;
 			}

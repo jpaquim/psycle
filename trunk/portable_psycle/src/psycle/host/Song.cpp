@@ -2371,9 +2371,8 @@ namespace psycle
 
 					pFile->Write(&patternName[i],strlen(patternName[i])+1);
 
-					size -= (3*sizeof(temp))+strlen(patternName[i])+1;
-					pFile->Write(&size,sizeof(size));
-					pFile->Write(pCopy,size);
+					pFile->Write(&sizez77,sizeof(sizez77));
+					pFile->Write(pCopy,sizez77);
 					zapArray(pCopy);
 
 					if ( !autosave ) 

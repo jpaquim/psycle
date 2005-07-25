@@ -19,6 +19,7 @@
 #include "inputhandler.hpp"
 #include "KeyConfigDlg.hpp"
 #include "Plugin.hpp"
+#include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
@@ -1333,8 +1334,9 @@ NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnPsyhelp() 
 		{
-			MessageBox("No one has done the Help file yet, sorry","Psycle");
-		//	HtmlHelp(NULL, "psycle.chm", HH_DISPLAY_TOPIC, 0);
+			CString helppath(Global::pConfig->appPath().c_str());
+			helppath +=  "Docs\\psycle.chm";
+			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
 
 		void CMainFrame::ShowMachineGui(int tmac, CPoint point)

@@ -405,11 +405,11 @@ NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					else if (InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sRecordOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sMuteOn))
 					{
 						_pSong->_trackMuted[ttm] = !_pSong->_trackMuted[ttm];
 					}
-					else if (InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sRecordOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
 					{
 						if (Global::_pSong->_trackSoloed != ttm )
 						{

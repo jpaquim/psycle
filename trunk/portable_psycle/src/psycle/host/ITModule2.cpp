@@ -891,6 +891,12 @@ Special:  Bit 0: On = song message attached.
 						{
 							pent._volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
 						}
+	#else
+						if ( tmp<=64)
+						{
+							pent._cmd=0x0C;
+							pent._parameter= tmp*2;
+						}
 	#endif
 #endif
 					}
@@ -1425,6 +1431,13 @@ OFFSET              Count TYPE   Description
 						{
 							pent._mach =0;
 							pent._volume=(tmp<64)?tmp:63;
+						}
+	#else
+						if ( tmp<=64)
+						{
+							pent._mach =0;
+							pent._cmd = 0x0C;
+							pent._parameter = tmp*2;
 						}
 	#endif
 #endif

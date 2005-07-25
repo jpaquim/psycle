@@ -499,7 +499,7 @@ BEGIN
     CONTROL         "in HEX",IDC_LINE_NUMBERS_HEX,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,105,56,34,12
     LTEXT           "Skin",IDC_STATIC,8,72,17,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_PATTERN_HEADER_SKIN,29,70,111,227,CBS_DROPDOWN | 
+    COMBOBOX        IDC_PATTERN_HEADER_SKIN,29,70,111,227,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Colours ",IDC_STATIC,6,85,134,197
     PUSHBUTTON      "Font",IDC_FONTC,14,94,39,12
@@ -604,8 +604,8 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "AntiAlias halo",IDC_STATIC,248,105,44,13,SS_CENTERIMAGE
     LTEXT           "Skin",IDC_STATIC,155,142,17,10,SS_CENTERIMAGE
-    COMBOBOX        IDC_MACHINE_SKIN,176,140,113,227,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_MACHINE_SKIN,176,140,113,227,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "VU Colors",IDC_STATIC,149,179,145,43
     PUSHBUTTON      "BackGround",IDC_BUTTON24,154,188,46,13
     CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,191,
@@ -927,8 +927,9 @@ BEGIN
                     172,11
     CONTROL         "Center Cursor",IDC_CENTERCURSOR,"Button",
                     BS_AUTOCHECKBOX,138,70,172,10
-    CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE,138,82,172,10
+    CONTROL         "Cursor Always Moves Down in Effect Column",
+                    IDC_CURSORDOWN,"Button",BS_AUTOCHECKBOX | BS_MULTILINE,
+                    138,82,172,10
     GROUPBOX        "Miscellaneous Options",IDC_STATIC,133,178,183,64
     CONTROL         "Autosave Current Song After (mins)",
                     IDC_AUTOSAVE_CURRENT_SONG,"Button",BS_AUTOCHECKBOX | 
