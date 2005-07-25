@@ -492,7 +492,7 @@ NAMESPACE__BEGIN(psycle)
 									MachineCoords.sEffectVu0.height, 
 									&memDC, 
 									&machineskinmask,
-									MachineCoords.sEffect.x+MachineCoords.dEffectVu.x, 
+									MachineCoords.sEffect.x+MachineCoords.dEffectVu.x+vol, 
 									MachineCoords.sEffect.y+MachineCoords.dEffectVu.y);
 
 						if (max > 0)
@@ -547,7 +547,7 @@ NAMESPACE__BEGIN(psycle)
 										MachineCoords.dEffectVu.width-vol, 
 										MachineCoords.sEffectVu0.height, 
 										&memDC, 
-										MachineCoords.sEffect.x+MachineCoords.dEffectVu.x, 
+										MachineCoords.sEffect.x+MachineCoords.dEffectVu.x+vol, 
 										MachineCoords.sEffect.y+MachineCoords.dEffectVu.y, 
 										SRCCOPY); //background
 

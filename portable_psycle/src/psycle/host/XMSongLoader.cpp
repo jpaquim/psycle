@@ -279,15 +279,27 @@ namespace host{
 							break;
 						}
 					}
-	#endif
-#endif
-
 					e._parameter = param;
 					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
 						XMInstrument::WaveData::WaveForms::SAWDOWN,
 						XMInstrument::WaveData::WaveForms::SQUARE
 					};
 					switch(type){
+	#else
+					e._parameter = param;
+					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
+						XMInstrument::WaveData::WaveForms::SAWDOWN,
+						XMInstrument::WaveData::WaveForms::SQUARE
+					};
+					// volume/command
+					if(vol >= 0x10 && vol <= 0x50)
+					{
+						e._cmd = 0x0C;
+						e._parameter = (vol-0x10)*2;
+					}
+					else switch(type){
+	#endif
+#endif
 						case XMCMD::ARPEGGIO:
 							if(param != 0){
 								e._cmd = XMSampler::CMD::ARPEGGIO;
