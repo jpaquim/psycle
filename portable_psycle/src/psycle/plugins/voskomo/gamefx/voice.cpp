@@ -125,7 +125,7 @@ void CSynthTrack::Retrig()
 	if(VcfEnvStage==0){
 		VcfEnvStage=1;
 		VcfEnvCoef=1.0f/(float)vpar->FEGAttack;
-		if (VcfEnvCoef>minFade) AmpEnvCoef=minFade;
+		if (VcfEnvCoef>minFade) VcfEnvCoef=minFade;
 	}else{
 		VcfEnvStage=5;
 		VcfEnvCoef=VcfEnvValue/fastRelease;
@@ -141,16 +141,15 @@ float CSynthTrack::GetSample()
 	float output=0;
 	if (trigger==false)	voicevol=nextvoicevol;
 	replaycount--;
-	if (replaycount == 0){
+	if (replaycount <= 0){
 		replaycount=vpar->ReplaySpeed;
 		perf_count--;
-		if (perf_count == 0){
+		if (perf_count <= 0){
 			perf_count = cur_speed;
 			if (vpar->Volume[perf_index]){
 				cur_volume=vpar->Volume[perf_index];
 				OSCVol=(float)cur_volume*volmulti;
 			}
-
 			if (vpar->Waveform[perf_index]) cur_waveform=vpar->Waveform[perf_index]-1;
 			if (vpar->Transpose[perf_index]) {
 				add_to_pitch=0.0f;
@@ -182,41 +181,33 @@ float CSynthTrack::GetSample()
 		OSCSpeed=(float)pow(2.0, (55.235+cur_realnote+add_to_pitch+vpar->Finetune*0.0039062f)/12.0)*0.03125;
 		if (OSCSpeed > 370) OSCSpeed=370; //Limit C-0 to C-7 (8 octaves because sid also has 8)
 		if (cur_waveform > 6) OSCSpeed*=0.25;
-		OSCSpeed*=0.03125;
+		OSCSpeed*=0.0625;
 	}
 
-	if(AmpEnvStage)
-	{
-
-		for (int i = 0; i<32; i++){
-			switch(cur_waveform)
-			{
-				case 5:		output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)+cur_pw]; break;
-				case 8:		output+=vpar->shortnoise; break;
-				default:	output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)]; break;
-			}
-			OSCPosition+=OOSCSpeed;
-			if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-		}
-		output*=0.03125;
-		if (cur_waveform > 6) vpar->noiseused=true;
-		GetEnvVcf();
-
-		if(!timetocompute--)
+	for (int i = 0; i<16; i++){
+		switch(cur_waveform)
 		{
-			int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
-
-			if(realcutoff<1)realcutoff=1;
-			if(realcutoff>250)realcutoff=250;
-			m_filter.setfilter(0,realcutoff,vpar->Resonance); // 0 means lowpass
-			timetocompute=FILTER_CALC_TIME;
+			case 5:		output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)+cur_pw]; break;
+			case 8:		output+=vpar->shortnoise; break;
+			default:	output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)]; break;
 		}
-
-		rcVol+=(((GetEnvAmp()*OSCVol*voicevol)-rcVol)*rcVolCutoff);
-		return m_filter.res(output)*rcVol;	
+		OSCPosition+=OOSCSpeed;
+		if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
 	}
-	else
-	return 0;
+	output*=0.0625;
+	if (cur_waveform > 6) vpar->noiseused=true;
+	GetEnvVcf();
+
+	if(!timetocompute--)
+	{
+		int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
+		if(realcutoff<1)realcutoff=1;
+		if(realcutoff>250)realcutoff=250;
+		m_filter.setfilter(0,realcutoff,vpar->Resonance); // 0 means lowpass
+		timetocompute=FILTER_CALC_TIME;
+	}
+	rcVol+=(((GetEnvAmp()*OSCVol*voicevol)-rcVol)*rcVolCutoff);
+	return m_filter.res(output)*rcVol;	
 }
 
 float CSynthTrack::GetEnvAmp()
@@ -308,6 +299,8 @@ void CSynthTrack::GetEnvVcf()
 		{
 			VcfEnvValue=VcfEnvSustainLevel;
 			VcfEnvStage=3;
+
+			if(!vpar->FEGSustain) VcfEnvStage=0;
 		}
 	break;
 
@@ -339,18 +332,16 @@ void CSynthTrack::GetEnvVcf()
 void CSynthTrack::NoteOff()
 {
 	keyrelease=true;
-	if((AmpEnvStage>0) & (AmpEnvStage!=0))
+	if((AmpEnvStage>0) && (AmpEnvStage<4))
 	{
 		AmpEnvStage=4;
 		AmpEnvCoef=AmpEnvValue/(float)vpar->AEGRelease;
 		if (AmpEnvCoef>minFade) AmpEnvCoef=minFade;
-		if (!vpar->AEGSustain) AmpEnvStage=0;
 	}
-	if ((VcfEnvStage!=4) & (VcfEnvStage!=0)){
+	if ((VcfEnvStage>0) && (VcfEnvStage<4)){
 		VcfEnvStage=4;
 		VcfEnvCoef=VcfEnvValue/(float)vpar->FEGRelease;
 		if (VcfEnvCoef>minFade) VcfEnvCoef=minFade;
-		if (!vpar->FEGSustain) VcfEnvStage=0;
 	}
 }
 
