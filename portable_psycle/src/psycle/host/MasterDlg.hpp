@@ -16,6 +16,7 @@ NAMESPACE__BEGIN(psycle)
 			void PaintNumbers(float val, int x, int y);
 			void PaintNumbersDC(CDC* dc,CDC* memDC,float val,int x,int y);
 			void PaintNames(char* name,int x,int y);
+			void SetSliderValues();
 			void UpdateUI(void);
 			CBitmap m_numbers;
 			CFont namesFont;

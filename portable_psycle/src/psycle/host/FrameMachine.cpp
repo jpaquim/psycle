@@ -273,7 +273,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else if ( _pMachine->_type == MACH_DUPLICATOR)
 				{
-					if ( c < 8) { min_v = -1; max_v = MAX_BUSES*2;}
+					if ( c < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
 					else if ( c < 16) { min_v = -48; max_v = 48; }
 					val_v = _pMachine->GetParamValue(c);
 					_pMachine->GetParamValue(c,buffer);
@@ -462,7 +462,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else if ( _pMachine->_type == MACH_DUPLICATOR)
 				{
-					if ( tweakpar < 8) { min_v = -1; max_v = MAX_BUSES*2;}
+					if ( tweakpar < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
 					else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
 				}
 
@@ -688,7 +688,7 @@ NAMESPACE__BEGIN(psycle)
 					}
 					else if ( _pMachine->_type == MACH_DUPLICATOR)
 					{
-						if ( tweakpar < 8) { min_v = -1; max_v = MAX_BUSES*2;}
+						if ( tweakpar < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
 						else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
 						_pMachine->GetParamName(thispar,name);
 						dlg.m_Value = _pMachine->GetParamValue(thispar);

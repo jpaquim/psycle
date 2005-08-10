@@ -94,7 +94,14 @@ NAMESPACE__BEGIN(psycle)
 			m_sliderm11.SetPageSize(16);
 			m_sliderm12.SetPageSize(16);
 
+			SetSliderValues();
+			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
+			else m_autodec.SetCheck(0);
+			return TRUE;
+		}
 
+		void CMasterDlg::SetSliderValues()
+		{
 			float val;
 			float db = dsp::dB(_pMachine->_outDry/256.0f);
 			m_slidermaster.SetPos(208-(int)((db+40.0f)*4.0f));
@@ -166,7 +173,7 @@ NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[8])
 			{
 				_pMachine->GetWireVolume(8,val);
-				m_sliderm8.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
+				m_sliderm9.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
 			} else {
 				m_sliderm9.SetPos(208);
 			}
@@ -194,10 +201,6 @@ NAMESPACE__BEGIN(psycle)
 			} else {
 				m_sliderm12.SetPos(208);
 			}
-			
-			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
-			else m_autodec.SetCheck(0);
-			return TRUE;
 		}
 
 		void CMasterDlg::OnAutodec() 
@@ -220,9 +223,8 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else strcpy(peak,"-99dB");
 				m_masterpeak.SetWindowText(peak);
-
-				float db = dsp::dB(_pMachine->_outDry/256.0f);
-				m_slidermaster.SetPos(208-(int)((db+40.0f)*4.0f));
+				
+				SetSliderValues();
 
 				_pMachine->peaktime=25;
 				_pMachine->currentpeak=0.0f;
