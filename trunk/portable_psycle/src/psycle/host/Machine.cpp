@@ -759,8 +759,9 @@ namespace psycle
 			{
 				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%d -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
-				}else sprintf(parVal,"%d (none)",macOutput[numparam]);
+					sprintf(parVal,"%X -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
+				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
+				else sprintf(parVal,"(disabled)");
 
 			} else if (numparam >=8 && numparam <16) {
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
