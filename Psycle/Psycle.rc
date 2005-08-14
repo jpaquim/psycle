@@ -541,12 +541,12 @@ BEGIN
     CONTROL         "",IDC_BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,206,
                     12,9
     PUSHBUTTON      "Beat",IDC_BEATC2,92,204,39,12
-    PUSHBUTTON      "4 Beats",IDC_4BEAT,14,219,39,12
+    PUSHBUTTON      "Measure",IDC_4BEAT,14,219,39,12
     CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,221,
                     12,9
     CONTROL         "",IDC_4BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
                     221,12,9
-    PUSHBUTTON      "4 Beats",IDC_4BEAT2,92,219,39,12
+    PUSHBUTTON      "Measure",IDC_4BEAT2,92,219,39,12
     PUSHBUTTON      "Playbar",IDC_PLAYBARC,14,234,39,12
     CONTROL         "",IDC_PLAYBAR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
                     236,11,9
@@ -920,7 +920,7 @@ BEGIN
                     138,104,172,10
     COMBOBOX        IDC_PATTERN_4_BEATS,226,225,41,104,CBS_DROPDOWN | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    RTEXT           "Beats per Highlight:",IDC_STATIC,136,225,87,12,
+    RTEXT           "Beats per Measure:",IDC_STATIC,136,225,87,12,
                     SS_CENTERIMAGE
 END
 
