@@ -52,6 +52,7 @@ void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_DEFLINES, m_numlines);
 	DDX_Control(pDX, IDC_SPIN_DEFLINES, m_spinlines);
 	DDX_Control(pDX, IDC_TEXT_DEFLINES, m_textlines);
+	DDX_Control(pDX, IDC_PATTERN_4_BEATS, m_4beats);
 	
 	//}}AFX_DATA_MAP
 }
@@ -140,7 +141,14 @@ BOOL CKeyConfigDlg::OnInitDialog()
 	OnUpdateNumLines();
 
 	FillCmdList();
-	
+
+	for (int i = 1; i <= 24; i++) {
+		char s[4];
+		sprintf(s,"%2i",i);
+		m_4beats.AddString(s);
+	}
+	m_4beats.SetCurSel(Global::pConfig->pv_row4beats-1);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -258,6 +266,7 @@ void CKeyConfigDlg::OnOK()
 	
 	Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
 	Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
+	Global::pConfig->pv_row4beats = m_4beats.GetCurSel()+1;
 	
 	char buffer[32];
 	m_numlines.GetWindowText(buffer,16);
@@ -470,3 +479,5 @@ void CKeyConfigDlg::OnUpdateNumLines()
 		m_textlines.SetWindowText(buffer);
 	}
 }
+
+

@@ -608,6 +608,7 @@
 #define IDC_SEQCUT                      1473
 #define IDC_TRIANGLESIZE                1473
 #define IDC_SEQCOPY                     1474
+#define IDC_PATTERN_4_BEATS             1474
 #define IDC_SEQPASTE                    1475
 #define IDC_MACHINE_BITMAP              1475
 #define IDC_SEQDELETE                   1476
@@ -765,7 +766,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        205
+#define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         32924
 #define _APS_NEXT_CONTROL_VALUE         1537
 #define _APS_NEXT_SYMED_VALUE           60

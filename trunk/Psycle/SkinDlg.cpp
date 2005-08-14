@@ -753,11 +753,11 @@ void CSkinDlg::OnImportReg()
 		{
 			if (strstr(buf,"\"pattern_fontface\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -767,7 +767,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pattern_font_point\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_pattern_font_point=_httoi(q+1);
@@ -775,7 +775,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pattern_font_flags\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_pattern_font_flags=_httoi(q+1);
@@ -783,7 +783,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pattern_font_x\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_pattern_font_x=_httoi(q+1);
@@ -791,7 +791,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pattern_font_y\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_pattern_font_y=_httoi(q+1);
@@ -799,11 +799,11 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pattern_header_skin\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -813,11 +813,11 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"generator_fontface\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -827,7 +827,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"generator_font_point\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_generator_font_point=_httoi(q+1);
@@ -835,7 +835,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"generator_font_flags\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_generator_font_flags=_httoi(q+1);
@@ -843,11 +843,11 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"effect_fontface\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -857,7 +857,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"effect_font_point\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_effect_font_point=_httoi(q+1);
@@ -865,7 +865,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"effect_font_flags\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_effect_font_flags=_httoi(q+1);
@@ -873,11 +873,11 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"machine_skin\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -887,11 +887,11 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"machine_background\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -904,7 +904,7 @@ void CSkinDlg::OnImportReg()
 			/*
 			else if (strstr(buf,"\"DisplayLineNumbers\"=hex:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_linenumbers=_httoi(q+1)?1:0;
@@ -912,7 +912,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"DisplayLineNumbersHex\"=hex:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_linenumbersHex=_httoi(q+1)?1:0;
@@ -921,7 +921,7 @@ void CSkinDlg::OnImportReg()
 			*/
 			else if (strstr(buf,"\"pvc_separator\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_patternSeparatorColor=_httoi(q+1);
@@ -929,7 +929,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_separator2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_patternSeparatorColor2=_httoi(q+1);
@@ -937,7 +937,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_background\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_patternViewColor=_httoi(q+1);
@@ -945,7 +945,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_background2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_patternViewColor2=_httoi(q+1);
@@ -953,7 +953,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_font\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColor=_httoi(q+1);
@@ -961,7 +961,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_font2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColor2=_httoi(q+1);
@@ -969,7 +969,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_fontCur\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColorCur=_httoi(q+1);
@@ -977,7 +977,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_fontCur2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColorCur2=_httoi(q+1);
@@ -985,7 +985,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_fontSel\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColorSel=_httoi(q+1);
@@ -993,7 +993,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_fontSel2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColorSel2=_httoi(q+1);
@@ -1001,7 +1001,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_fontPlay\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColorPlay=_httoi(q+1);
@@ -1009,7 +1009,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_fontPlay2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_fontColorPlay2=_httoi(q+1);
@@ -1017,7 +1017,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_row\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_rowColor=_httoi(q+1);
@@ -1025,7 +1025,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_row2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_rowColor2=_httoi(q+1);
@@ -1033,7 +1033,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_rowbeat\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_beatColor=_httoi(q+1);
@@ -1041,7 +1041,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_rowbeat2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_beatColor2=_httoi(q+1);
@@ -1049,7 +1049,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_row4beat\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_4beatColor=_httoi(q+1);
@@ -1057,7 +1057,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_row4beat2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_4beatColor2=_httoi(q+1);
@@ -1065,7 +1065,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_selection\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_selectionColor=_httoi(q+1);
@@ -1073,7 +1073,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_selection2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_selectionColor2=_httoi(q+1);
@@ -1081,7 +1081,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_playbar\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_playbarColor=_httoi(q+1);
@@ -1089,7 +1089,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_playbar2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_playbarColor2=_httoi(q+1);
@@ -1097,7 +1097,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_cursor\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_cursorColor=_httoi(q+1);
@@ -1105,7 +1105,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"pvc_cursor2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_cursorColor2=_httoi(q+1);
@@ -1113,7 +1113,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"vu1\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_vubColor=_httoi(q+1);
@@ -1121,7 +1121,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"vu2\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_vugColor=_httoi(q+1);
@@ -1129,7 +1129,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"vu3\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_vucColor=_httoi(q+1);
@@ -1137,7 +1137,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_colour\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_machineViewColor=_httoi(q+1);
@@ -1145,7 +1145,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_wirecolour\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_machineViewWireColor=_httoi(q+1);
@@ -1153,7 +1153,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_polycolour\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_machineViewPolyColor=_httoi(q+1);
@@ -1161,7 +1161,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_wirewidth\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_wirewidth=_httoi(q+1);
@@ -1169,7 +1169,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_wireaa\"=hex:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_wireaa=_httoi(q+1);
@@ -1177,7 +1177,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_generator_fontcolour\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_machineViewGeneratorFontColor=_httoi(q+1);
@@ -1185,7 +1185,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_effect_fontcolour\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_machineViewEffectFontColor=_httoi(q+1);
@@ -1193,7 +1193,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"mv_triangle_size\"=hex:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_triangle_size=_httoi(q+1);
@@ -1209,7 +1209,7 @@ void CSkinDlg::OnImportReg()
 			//
 			else if (strstr(buf,"\"mv_fontcolour\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_machineViewGeneratorFontColor=_httoi(q+1);
@@ -1218,11 +1218,11 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"machine_fontface\"=\""))
 			{
-				char *q = strchr(buf,61); // =
+				char *q = strchr(buf,'=');
 				if (q)
 				{
 					q+=2;
-					char *p = strrchr(q,34); // "
+					char *p = strrchr(q,'\"');
 					if (p)
 					{
 						p[0]=0;
@@ -1233,7 +1233,7 @@ void CSkinDlg::OnImportReg()
 			}
 			else if (strstr(buf,"\"machine_font_point\"=dword:"))
 			{
-				char *q = strchr(buf,58); // :
+				char *q = strchr(buf,':');
 				if (q)
 				{
 					_generator_font_point=_httoi(q+1);
