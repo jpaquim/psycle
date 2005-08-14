@@ -84,6 +84,7 @@ Configuration::Configuration()
 	pvc_background2  = 0x00aa786c;
 	pvc_row4beat  = 0x00d5ccc6;
 	pvc_row4beat2 = 0x00fdfcf6;
+	pv_row4beats = 4;
 	pvc_rowbeat  = 0x00c9beb8;
 	pvc_rowbeat2 = 0x00f9eee8;
 	pvc_row  = 0x00c1b5aa;
@@ -718,6 +719,8 @@ Configuration::Read()
 	reg.QueryValue("pvc_row4beat", &type, (BYTE*)&pvc_row4beat, &numData);
 	numData = sizeof(pvc_row4beat2);
 	reg.QueryValue("pvc_row4beat2", &type, (BYTE*)&pvc_row4beat2, &numData);
+	numData = sizeof(pv_row4beats);
+	reg.QueryValue("pv_row4beats", &type, (BYTE*)&pv_row4beats, &numData);
 	numData = sizeof(pvc_rowbeat);
 	reg.QueryValue("pvc_rowbeat", &type, (BYTE*)&pvc_rowbeat, &numData);
 	numData = sizeof(pvc_rowbeat2);
@@ -1160,6 +1163,7 @@ Configuration::Write()
 	reg.SetValue("pvc_background2", REG_DWORD, (BYTE*)&pvc_background2, sizeof(pvc_background2));	
 	reg.SetValue("pvc_row4beat", REG_DWORD, (BYTE*)&pvc_row4beat, sizeof(pvc_row4beat));	
 	reg.SetValue("pvc_row4beat2", REG_DWORD, (BYTE*)&pvc_row4beat2, sizeof(pvc_row4beat2));	
+	reg.SetValue("pv_row4beats", REG_DWORD, (BYTE*)&pv_row4beats, sizeof(pv_row4beats));	
 	reg.SetValue("pvc_rowbeat", REG_DWORD, (BYTE*)&pvc_rowbeat, sizeof(pvc_rowbeat));	
 	reg.SetValue("pvc_rowbeat2", REG_DWORD, (BYTE*)&pvc_rowbeat2, sizeof(pvc_rowbeat2));	
 	reg.SetValue("pvc_row", REG_DWORD, (BYTE*)&pvc_row, sizeof(pvc_row));	

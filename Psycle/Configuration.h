@@ -66,6 +66,7 @@ public:
 	COLORREF vu2;
 	COLORREF vu3;
 
+	int pv_row4beats;
 	int mv_wireaa;
 	int mv_wirewidth;
 	bool _wrapAround;
@@ -81,7 +82,6 @@ public:
 	bool _showAboutAtStart;
 
 	int mv_triangle_size;
-
 	bool bBmpBkg;
 	char szBmpBkgFilename[MAX_PATH];
 

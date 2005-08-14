@@ -45,6 +45,8 @@ public:
 	CEdit	m_numlines;
 	CSpinButtonCtrl	m_spinlines;
 	CStatic m_textlines;
+	CComboBox	m_4beats;
+
 	//}}AFX_DATA
 
 
@@ -63,7 +65,6 @@ protected:
 	void SaveHotKey(long idx,WORD & key,WORD & mods);
 	void FindKey(long idx,WORD & key,WORD & mods);
 	CmdDef FindCmd(long idx);
-	
 
 	// Generated message map functions
 	//{{AFX_MSG(CKeyConfigDlg)

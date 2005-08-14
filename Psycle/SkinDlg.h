@@ -185,6 +185,7 @@ protected:
 	afx_msg void OnMachineBitmap();
 	afx_msg void OnSelchangeTrianglesize();
 	afx_msg void OnCheckVus();
+	afx_msg void OnSelchangePattern4Beats();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

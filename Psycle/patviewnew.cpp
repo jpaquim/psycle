@@ -2329,7 +2329,7 @@ void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int 
 		// break this up into several more general loops for speed
 		if((linecount%_pSong->_ticksPerBeat) == 0)
 		{
-			if ((linecount%(_pSong->_ticksPerBeat*4)) == 0) 
+			if ((linecount%(_pSong->_ticksPerBeat*Global::pConfig->pv_row4beats)) == 0) 
 				pBkg = pvc_row4beat;
 			else 
 				pBkg = pvc_rowbeat;

@@ -213,7 +213,7 @@ IDD_INFO DIALOGEX 0, 0, 316, 239
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle CPU/DSP Performance Monitor"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Core Info",IDC_STATIC,7,7,303,81
     GROUPBOX        "Gear Information and CPU performance",IDC_STATIC,7,89,
@@ -609,7 +609,7 @@ BEGIN
                     12,9
     GROUPBOX        "Global Options ",IDC_STATIC,150,223,144,30
     CONTROL         "Graphics Double Buffering",IDC_DOUBLEBUFFER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,155,236,99,12
+                    BS_AUTOCHECKBOX | WS_TABSTOP,155,236,134,12
     GROUPBOX        "Theme Options",IDC_STATIC,150,255,144,30
     PUSHBUTTON      "Load",IDC_IMPORTREG,156,267,55,12
     PUSHBUTTON      "Save",IDC_EXPORTREG,216,267,55,12
@@ -870,7 +870,7 @@ BEGIN
                     WS_TABSTOP,29,239,95,15
     PUSHBUTTON      "None",IDC_NONE,8,258,55,12
     PUSHBUTTON      "Lookup",IDC_DEFAULTS3,68,258,55,12,WS_DISABLED
-    GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,169
+    GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,162
     CONTROL         "Right CTRL= play . Edit Toggle = stop",IDC_PLAY_R_CTRL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
     CONTROL         "FT2 Style Home/End Behaviour",IDC_FT2_HOME_END,"Button",
@@ -885,28 +885,28 @@ BEGIN
                     BS_AUTOCHECKBOX,138,70,172,10
     CONTROL         "Cursor Always Down",IDC_CURSORDOWN,"Button",
                     BS_AUTOCHECKBOX | BS_MULTILINE,138,82,172,10
-    GROUPBOX        "Miscellaneous Options",IDC_STATIC,133,178,183,64
+    GROUPBOX        "Miscellaneous Options",IDC_STATIC,133,166,183,76
     CONTROL         "Autosave Current Song After (mins)",
                     IDC_AUTOSAVE_CURRENT_SONG,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,138,191,126,10
-    EDITTEXT        IDC_AUTOSAVE_MINS,276,190,36,12,ES_AUTOHSCROLL | 
+                    WS_TABSTOP,138,176,126,10
+    EDITTEXT        IDC_AUTOSAVE_MINS,276,175,36,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Spin1",IDC_AUTOSAVE_MINS_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,286,190,10,12
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,286,175,10,12
     CONTROL         """Save File?"" Reminders on Load, New or Exit",
                     IDC_FILE_SAVE_REMINDERS,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE,138,203,172,10
+                    BS_MULTILINE,138,188,172,10
     CONTROL         "Show Song Info on Load",IDC_SHOW_INFO_ON_LOAD,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE,138,215,172,10
-    RTEXT           "Default New Pattern Lines:",IDC_STATIC,136,226,87,12,
+                    BS_AUTOCHECKBOX | BS_MULTILINE,138,200,172,10
+    RTEXT           "Default New Pattern Lines:",IDC_STATIC,136,211,87,12,
                     SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT_DEFLINES,226,226,41,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_EDIT_DEFLINES,226,211,41,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN_DEFLINES,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,226,11,12
-    CTEXT           "",IDC_TEXT_DEFLINES,270,226,42,12,SS_CENTERIMAGE | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,211,11,12
+    CTEXT           "",IDC_TEXT_DEFLINES,270,211,42,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     GROUPBOX        "Keymap Presets",IDC_STATIC,133,247,184,28
     PUSHBUTTON      "Defaults",IDC_DEFAULTS,138,258,55,12
@@ -918,6 +918,10 @@ BEGIN
     CONTROL         "FT2 Style Record Behaviour in Unarmed Track",
                     IDC_RECORD_UNARMED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     138,104,172,10
+    COMBOBOX        IDC_PATTERN_4_BEATS,226,225,41,104,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Beats per Highlight:",IDC_STATIC,136,225,87,12,
+                    SS_CENTERIMAGE
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
@@ -929,8 +933,7 @@ BEGIN
     LTEXT           "Gear Browser",IDC_STATIC,7,2,88,9
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    TVS_TRACKSELECT | WS_BORDER | 
-                    WS_TABSTOP,7,13,187,223
+                    TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP,7,13,187,223
     GROUPBOX        "Machine Properties",IDC_STATIC,201,7,176,111
     LTEXT           "Name",IDC_STATIC,223,19,20,8
     LTEXT           "",IDC_NAMELABEL,246,18,125,12,SS_SUNKEN
