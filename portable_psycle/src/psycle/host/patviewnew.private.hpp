@@ -2334,7 +2334,7 @@ NAMESPACE__BEGIN(psycle)
 				// break this up into several more general loops for speed
 				if((linecount%_pSong->LinesPerBeat()) == 0)
 				{
-					if ((linecount%(_pSong->LinesPerBeat()*4)) == 0) 
+					if ((linecount%(_pSong->LinesPerBeat()*Global::pConfig->pv_timesig)) == 0) 
 						pBkg = pvc_row4beat;
 					else 
 						pBkg = pvc_rowbeat;

@@ -94,7 +94,8 @@ protected:
 	inline void update_coefficients();
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
-	inline const Real process(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+    void erase_NaNs_Infinities_And_Denormals( float* inSample );
+    inline const Real process(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 
@@ -127,6 +128,26 @@ void Filter_2_Poles::parameter(const int & parameter)
 	update_coefficients();
 }
 
+/***********************************************************************
+Cure for malicious samples
+Type : Filters Denormals, NaNs, Infinities
+References : Posted by urs[AT]u-he[DOT]com
+***********************************************************************/
+void Filter_2_Poles::erase_NaNs_Infinities_And_Denormals( float* inSample )
+{
+	unsigned int* inFloat = (unsigned int*) inSample;
+
+	unsigned int sample = *inFloat;
+	unsigned int exponent = sample & 0x7F800000;
+	// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
+	// exponent > 0 is 0 if denormalized, otherwise 1
+	int aNaN = exponent < 0x7F800000;
+	int aDen = exponent > 0;
+	*inFloat = sample * ( aNaN & aDen );
+}
+
+
+
 void Filter_2_Poles::update_coefficients()
 {
 	update_coefficients(coefficients_[left]);
@@ -138,8 +159,17 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 	const Real minimum(static_cast<Real>(1e-2));
 	const Real maximum(1 - minimum);
 	coefficients[0] = math::clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
+	float tmp = static_cast<Sample>(coefficients[0]);
+	erase_NaNs_Infinities_And_Denormals(&tmp);
+	coefficients[0] = tmp;
 	coefficients[1] = 1 - coefficients[0];
+	tmp = static_cast<Sample>(coefficients[1]);
+	erase_NaNs_Infinities_And_Denormals(&tmp);
+	coefficients[1] = tmp;
 	coefficients[2] = (*this)(resonance) * (1 + 1 / coefficients[1]);
+	tmp = static_cast<Sample>(coefficients[2]);
+	erase_NaNs_Infinities_And_Denormals(&tmp);
+	coefficients[2] = tmp;
 }
 
 void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
@@ -159,7 +189,13 @@ void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 inline const Real Filter_2_Poles::process(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
+	float tmp = static_cast<Sample>(buffer[0]);
+	erase_NaNs_Infinities_And_Denormals(&tmp);
+	buffer[0] = tmp;
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
+	tmp = static_cast<Sample>(buffer[1]);
+	erase_NaNs_Infinities_And_Denormals(&tmp);
+	buffer[1] = tmp;
 	switch((*this)[response])
 	{
 	case low:
