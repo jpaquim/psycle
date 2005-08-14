@@ -198,6 +198,7 @@ namespace psycle
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
 			reg.QueryValue("autosaveSong", autosaveSong);
 			reg.QueryValue("autosaveSongTime", autosaveSongTime);
+			reg.QueryValue("pv_timesig",pv_timesig);
 			reg.QueryValue("mv_colour", mv_colour);
 			reg.QueryValue("mv_wirecolour", mv_wirecolour);
 			reg.QueryValue("mv_polycolour", mv_polycolour);
@@ -377,6 +378,7 @@ namespace psycle
 			reg.SetValue("bFileSaveReminders", bFileSaveReminders);
 			reg.SetValue("autosaveSong", autosaveSong);
 			reg.SetValue("autosaveSongTime", autosaveSongTime);
+			reg.SetValue("pv_timesig",pv_timesig);
 			reg.SetValue("mv_colour", mv_colour);
 			reg.SetValue("mv_wirecolour", mv_wirecolour);
 			reg.SetValue("mv_polycolour", mv_polycolour);
@@ -547,6 +549,7 @@ namespace psycle
 			_linenumbers = true;
 			_linenumbersHex = false;
 			_linenumbersCursor = true;
+			pv_timesig = 4;
 			pattern_fontface = "Tahoma";
 			pattern_header_skin = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
 			pattern_font_point = 80;

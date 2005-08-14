@@ -966,6 +966,9 @@ BEGIN
     CONTROL         "Pattern navigation ignores step (Always jumps one)",
                     IDC_NAVIGATION_IGNORES_STEP,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,138,115,175,11
+    LTEXT           "Time Signature (beats)",IDC_STATIC,150,130,72,8
+    COMBOBOX        IDC_COMBO1,229,129,37,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 390, 303
@@ -2538,6 +2541,43 @@ BEGIN
 0x3434, 0x3031, 0x0030, 
     IDC_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
 0x3232, 0x3530, 0x0030, 
+    0
+END
+
+IDD_KEYCONFIG DLGINIT
+BEGIN
+    IDC_COMBO1, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0033, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0034, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0035, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0036, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0037, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0038, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0039, 
+    IDC_COMBO1, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_COMBO1, 0x403, 3, 0
+0x3131, "\000" 
+    IDC_COMBO1, 0x403, 3, 0
+0x3231, "\000" 
+    IDC_COMBO1, 0x403, 3, 0
+0x3331, "\000" 
+    IDC_COMBO1, 0x403, 3, 0
+0x3431, "\000" 
+    IDC_COMBO1, 0x403, 3, 0
+0x3531, "\000" 
+    IDC_COMBO1, 0x403, 3, 0
+0x3631, "\000" 
     0
 END
 

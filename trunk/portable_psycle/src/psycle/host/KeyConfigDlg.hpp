@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
 #include "InputHandler.hpp"
+#include "afxwin.h"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		/// key config window.
@@ -68,6 +69,8 @@ NAMESPACE__BEGIN(psycle)
 			DECLARE_MESSAGE_MAP()
 		public:
 			//afx_msg void OnBnClickedMoveCursorPaste();
+			// number of beats to show a full row in the pattern editor.
+			CComboBox m_timesig;
 		};
 
 		//{{AFX_INSERT_LOCATION}}

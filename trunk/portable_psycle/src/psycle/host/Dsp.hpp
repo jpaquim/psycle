@@ -163,26 +163,52 @@ namespace psycle
 			return vol;
 		}
 		*/
+		/***********************************************************************
+		Cure for malicious samples
+		Type : Filters Denormals, NaNs, Infinities
+		References : Posted by urs[AT]u-he[DOT]com
+		***********************************************************************/
+		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const & inNumberOfSamples )
+		{
+			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
+			for ( int i = 0; i < inNumberOfSamples; i++ )
+			{
+				unsigned int sample = *inArrayOfFloats;
+				unsigned int exponent = sample & 0x7F800000;
+
+				// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
+				// exponent > 0 is 0 if denormalized, otherwise 1
+
+				int aNaN = exponent < 0x7F800000;
+				int aDen = exponent > 0;
+
+				*inArrayOfFloats++ = sample * ( aNaN & aDen );
+			}
+		}
 		/// undenormalize (renormalize) samples in a signal buffer.
 		///\todo make a template version that accept both float and doubles
 		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
-			float id(float(1.0E-18));
+/*			float id(float(1.0E-18));
 			for(int s(0) ; s < numsamples ; ++s)
 			{
-				/* Old denormal code. Now we use a 1bit sinus.
-				if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
-				if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
-				const float is1=pSamplesL[s];
-				const float is2=pSamplesR[s];
-				pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
-				pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
-				*/
+//			Old denormal code. Now we use a 1bit sinus.
+//				if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
+//				if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
+//				const float is1=pSamplesL[s];
+//				const float is2=pSamplesR[s];
+//				pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
+//				pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
 				pSamplesL[s] += id;
 				pSamplesR[s] += id;
 				id = - id;
 			}
+*/
+			erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
+			erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
+
 		}
+
 		static inline float dB(float amplitude) // amplitude normalized to 1.0f.
 		{
 			return 20.0f * log10f(amplitude);

@@ -45,6 +45,7 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_SPIN_DEFLINES, m_spinlines);
 			DDX_Control(pDX, IDC_TEXT_DEFLINES, m_textlines);
 			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_COMBO1, m_timesig);
 		}
 
 		BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
@@ -122,6 +123,7 @@ NAMESPACE__BEGIN(psycle)
 			m_numlines.SetWindowText(buffer);
 			itoa(Global::pConfig->autosaveSongTime,buffer,10);
 			m_autosave_mins.SetWindowText(buffer);
+			m_timesig.SetCurSel(Global::pConfig->pv_timesig-1);
 			
 			UDACCEL acc;
 			acc.nSec = 4;
@@ -247,6 +249,7 @@ NAMESPACE__BEGIN(psycle)
 			
 			Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
 			Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
+			Global::pConfig->pv_timesig = m_timesig.GetCurSel()+1;
 			
 			char buffer[32];
 			m_numlines.GetWindowText(buffer,16);

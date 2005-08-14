@@ -92,6 +92,7 @@ namespace psycle
 			bool _showAboutAtStart;
 
 			int mv_triangle_size;
+			int pv_timesig;
 
 			bool bBmpBkg;
 			bool bBmpDial;
