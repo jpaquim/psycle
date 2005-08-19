@@ -6,6 +6,7 @@
 #include "Song.hpp"
 #include "InfoDlg.hpp"
 #include "Machine.hpp"
+#include ".\infodlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CInfoDlg::CInfoDlg(CWnd* pParent)

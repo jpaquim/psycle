@@ -14,8 +14,8 @@
 #include "VSTHost.hpp"
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
-
 #include "Riff.hpp" // for Wave file loading.
+
 namespace psycle
 {
 	namespace host
@@ -201,15 +201,7 @@ namespace psycle
 			PW_Length = 0;
 			// setting the preview wave volume to 25%
 			preview_vol = 0.25f;
-			ULONG cpuHz;
-			__asm rdtsc ///< read time stamp to EAX
-			__asm mov cpuHz, eax
-			Sleep(1000);
-			__asm rdtsc
-			__asm sub eax, cpuHz ///< Find the difference
-			__asm mov cpuHz, eax
-			Global::_cpuHz = cpuHz;
-
+			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			CreateNewPattern(0);
