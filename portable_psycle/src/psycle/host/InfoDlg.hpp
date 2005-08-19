@@ -41,6 +41,7 @@ class Song;
 			afx_msg void OnTimer(UINT nIDEvent);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+		public:
 		};
 
 		//{{AFX_INSERT_LOCATION}}
