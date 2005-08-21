@@ -3,7 +3,6 @@
 #include "drum.hpp"
 
 #define DRUM_VERSION "2.2"
-#define MAX_TRACKS 32
 #define MAX_SIMUL_TRACKS 16
 #define NUMPARAMETERS 16
 
@@ -425,11 +424,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			
 			} while(--xnumsamples);
 			
-			if(DTrack[c].AmpEnvStage == 0)
+			if(DTrack[c].AmpEnvStage == ST_NONOTE)
 			{
 				DTrack[c].Started = false;
-				if (numT[DTrack[c].Chan] == c ) // "free" current channel.
-				{
+				if (numT[DTrack[c].Chan] == c ) // if this voice is the active voice
+				{								// on the channel where it plays, mark current channel as not playing.
 					numT[DTrack[c].Chan] = -1;
 				}
 				DTrack[c]=DTrack[numtracks-1];
@@ -438,7 +437,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			}
 			else
 				DTrack[c].Started = true;
-
 		}
 	}
 }
@@ -498,22 +496,22 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 		numT[channel]=numtracks;					// Get an avaiable voice
 		if (numtracks < MAX_SIMUL_TRACKS-1) numtracks++; //and mark it as unavaiable.
-														//(List gestionated in ::Work())
+														//(List maintained in ::Work())
 		
-		DTrack[numT[channel]].Chan=channel; // setup it
+		DTrack[numT[channel]].Chan=channel; // set it up
 		globalpar.samplerate=pCB->GetSamplingRate();
 
 		float tmp=globalpar.OutVol;
 
 		if ( Vals[8] == 0 )	// If Mode 1.x
 		{
-			if ( cmd == 12 ) globalpar.OutVol=(val*Vals[3]/8388352.0);  // (val*(Vals[3]/32767))/256
+			if ( cmd == 0x0C ) globalpar.OutVol=(val*Vals[3]/8388352.0);  // (val*(Vals[3]/32767))/256
 
 			DTrack[numT[channel]].NoteOn(48,&globalpar); // C-4 always
 		}
 		else
 		{
-			if ( cmd == 12 ) globalpar.OutVol=(val*tmp/256.0);
+			if ( cmd == 0x0C ) globalpar.OutVol=(val*tmp/256.0);
 
 			DTrack[numT[channel]].NoteOn(note,&globalpar);
 		}
@@ -533,7 +531,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			{
 				DTrack[numT[channel]].NoteOff(); // Note off
 			}
-			else if ( cmd == 12 )
+			else if ( cmd == 0x0C )
 			{
 				if ( Vals[8]==0 ) DTrack[numT[channel]].OutVol=(val/256.0); // Comp 1.x
 				else DTrack[numT[channel]].OutVol=(val*globalpar.OutVol/256.0); // Comp 2.x

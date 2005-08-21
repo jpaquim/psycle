@@ -11,7 +11,6 @@
 #include <stk/stk.h>
 #include <stk/Shakers.h>
 
-int const MAX_TRACKS = 32;
 int const NUMPARAMETERS = 6;
 
 CMachineParameter const paraShakeEnergy = 

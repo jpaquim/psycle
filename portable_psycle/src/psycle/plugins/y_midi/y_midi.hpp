@@ -10,7 +10,7 @@
 
 #define YMIDI_VERSION "1.0a"
 #define NUMPARAMETERS 1
-#define MAX_TRACKS 16					// Maximum tracks allowed.
+#define MIDI_TRACKS 16					// Maximum tracks allowed.
 
 //===================================================================
 // TWO BYTE PARAMETER MIDI EVENTS
@@ -114,8 +114,8 @@ public:
 	virtual void MidiNote(int const channel, int const value, int const velocity);
 
 private:
-	midichannel numChannel[MAX_TRACKS];	// List of MAX_TRACKS (16 usually) which hold channel note information
-	int numC[MAX_TRACKS];	// Keep track of which channels are playing.
+	midichannel numChannel[MIDI_TRACKS];	// List of MAX_TRACKS (16 usually) which hold channel note information
+//	int numC[MIDI_TRACKS];	// Keep track of which channels are playing.
 	int numchannels;
 	bool midiopen;
 	HMIDIOUT handle;

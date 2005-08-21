@@ -4,8 +4,7 @@
 
 Coscillator::Coscillator()
 {
-	hz = 44100;
-	hztosamples = static_cast<float>(MAX_ENVPOS / 44100.);
+	setSampleRate(44100);
 	incremspeed = 0.015;
 	envpos = 0;
 }

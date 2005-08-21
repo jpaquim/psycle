@@ -13,6 +13,10 @@
 	int const NOTE_NO = 120;
 	int const NOTE_OFF = 255;
 
+#if !defined MAX_TRACKS
+#define MAX_TRACKS 64
+#endif
+
 	// todo use #include <inttypes.h> for that!
 	typedef unsigned char uint8;
 	typedef unsigned short int uint16;

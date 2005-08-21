@@ -13,7 +13,6 @@
 #include <stk/ADSR.h>
 #include <stdlib.h>
 
-#define MAX_TRACKS	32
 #define NUMPARAMETERS 5
 
 CMachineParameter const paraVolume = 
