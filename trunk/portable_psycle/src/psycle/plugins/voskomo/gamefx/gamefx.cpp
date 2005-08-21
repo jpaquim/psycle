@@ -26,7 +26,6 @@
 #include <cmath>
 
 #define MAX_ENV_TIME 65536
-#define MAX_TRACKS 64
 
 
 CMachineParameter const paraVol1 = 
@@ -1923,7 +1922,11 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Note Off == 120
 	// Empty Note Row == 255
 	// Less than note off value??? == NoteON!
-	if(note<120) track[channel].NoteOn(note-24,&globals,60);
+	if(note<120) 
+	{
+		if ( cmd == 0x0C ) track[channel].NoteOn(note-24,&globals,val&0x3F);
+		else track[channel].NoteOn(note-24,&globals,60);
+	}
 
 	// Note off
 	if(note==120) track[channel].NoteOff();

@@ -127,7 +127,7 @@ mi::mi()
 	Vals=new int[NUMPARAMETERS];
 
 	InitMidi();
-	for(i=0;i<MAX_TRACKS; i++)
+	for(i=0;i<MIDI_TRACKS; i++)
 	{
 		numChannel[i].Init(handle);
 		numChannel[i].SetChannel(i);
@@ -196,7 +196,7 @@ void mi::ParameterTweak(int par, int val)
 void mi::Stop()
 {
 	int i;
-	for (i=0;i<MAX_TRACKS;i++)
+	for (i=0;i<MIDI_TRACKS;i++)
 	{
 		numChannel[i].Stop();
 	}
@@ -204,7 +204,7 @@ void mi::Stop()
 
 void mi::MidiNote(int const channel, int const value, int const velocity)
 {
-	numChannel[channel].Play(value, velocity);		// start new note
+	numChannel[channel&0x0F].Play(value, velocity);		// start new note
 }
 
 

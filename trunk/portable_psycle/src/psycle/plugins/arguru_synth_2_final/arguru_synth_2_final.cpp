@@ -4,7 +4,6 @@
 #include <stdlib.h> ///\todo should be <cstdlib>
 
 #define MAX_ENV_TIME	250000
-#define MAX_TRACKS	32
 #define NUMPARAMETERS 28
 
 CMachineParameter const paraOSC1wave = 
