@@ -1166,6 +1166,13 @@ NAMESPACE__BEGIN(psycle)
 				m_wndView.AddMacViewUndo();
 
 				int si = _pSong->instSelected;
+				
+				//added by sampler
+				if ( _pSong->_pInstrument[si]->waveLength != 0)
+				{
+					if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;					
+				}
+				//end of added by sampler
 
 				CString CurrExt=dlg.GetFileExt();
 				CurrExt.MakeLower();
@@ -1212,6 +1219,8 @@ NAMESPACE__BEGIN(psycle)
 				_pSong->DeleteLayer(PREV_WAV_INS);
 				_pSong->Invalided=false;
 			}
+
+
 			m_wndView.SetFocus();
 		}
 
