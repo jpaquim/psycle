@@ -121,6 +121,7 @@ private:
 
 	Shakers track[MAX_TRACKS];
 	bool noteonoff[MAX_TRACKS];
+	float	vol_ctrl[MAX_TRACKS];
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -144,6 +145,7 @@ void mi::Init()
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
 		noteonoff[i]=false;
+		vol_ctrl[i]=1.f;
 	}
 
 }
@@ -232,6 +234,9 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 					sl=(float)ptrack->tick()*vol;
 					if (sl<-vol)sl=-vol;
 					if (sl>vol)sl=vol;
+
+					sl*=vol_ctrl[c];
+
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
@@ -255,6 +260,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Note Off			== 120
 	// Empty Note Row	== 255
 	// Less than note off value??? == NoteON!
+	
 	if((note>=48) && (note<=71))
 	{
 	// 
@@ -271,4 +277,5 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 	track[channel].tick();
 
+	if( cmd == 0x0C) vol_ctrl[channel] = val * .003921568627450980392156862745098f; // 1/255
 }
