@@ -113,6 +113,7 @@ private:
 
 	Plucked track[MAX_TRACKS];
 	ADSR	adsr[MAX_TRACKS];
+	float	vol_ctrl[MAX_TRACKS];
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -140,6 +141,7 @@ void mi::Init()
 									StkFloat(Vals[2]*0.000030517578125),
 									StkFloat(Vals[3]*0.000030517578125),
 									StkFloat(Vals[4]*0.000030517578125));
+		vol_ctrl[i] = 1.f;
 	}
 }
 
@@ -208,8 +210,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 					sl=float(padsr->tick()*ptrack->tick())*vol;
 					if (sl<-vol)sl=-vol;
 					if (sl>vol)sl=vol;
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
+
+					sl*=vol_ctrl[c];
+
+					*++xpsamplesleft+=sl*vol_ctrl[c];
+					*++xpsamplesright+=sl*vol_ctrl[c];
 				} while(--xnumsamples);
 	}
 
@@ -252,4 +257,6 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		track[channel].tick();
 	}
 	adsr[channel].tick();
+	
+	if( cmd == 0x0C) vol_ctrl[channel] = val * .003921568627450980392156862745098f; // 1/255
 }
