@@ -1204,7 +1204,7 @@ void CSynthTrack::PerformFx()
 				arpList[1]=arpInput[1];
 				arpList[2]=arpInput[2];
 				if (arpInput[3] == 0) {
-					arpLen=3;
+					arpLen=6;
 					arpList[3]=arpInput[0]+12;
 					arpList[4]=arpInput[1]+12;
 					arpList[5]=arpInput[2]+12;
