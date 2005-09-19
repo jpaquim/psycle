@@ -150,6 +150,8 @@ public:
 	void GetEnvMod();
 	float GetEnvAmp();
 	void GetEnvFlt();
+	float NextGlide;
+	float LastGlide;
 	float DefGlide;
 	float DCOglide;
 	float semiglide;
