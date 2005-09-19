@@ -39,6 +39,8 @@ CSynthTrack::CSynthTrack()
 	DCOglide=0.0f;
 	semiglide=0.0f;
 	DefGlide=99999999.0f;
+	NextGlide=0.0f;
+	LastGlide=0.0f;
 	semitone=0.0f;
 	rsemitone=0.0f;
 
@@ -200,8 +202,14 @@ void CSynthTrack::RealNoteOn(){
 	if (softenHighNotes < 0.0f) softenHighNotes = 0.0f;
 
 	fxcount=0;
-	if (vpar->globalGlide == 0) { DefGlide=256.0f; }
-	else DefGlide=float((vpar->globalGlide*vpar->globalGlide)*0.0000625f);
+	if (NextGlide){
+		DCOglide = NextGlide;
+		NextGlide = 0;
+	} else {
+		if (vpar->globalGlide == 0) { DefGlide=256.0f; }
+		else DefGlide=float((vpar->globalGlide*vpar->globalGlide)*0.0000625f);
+		DCOglide = DefGlide;
+	}
 	basenote=note+7.235f;
 	rsemitone=0.0f;
 	semiglide=0.0f;
@@ -1548,8 +1556,12 @@ void CSynthTrack::InitEffect(int cmd, int val)
 
 	// Init glide
 	if (cmd == 0xC3 || cmd == 0xC4) {
-		DCOglide=(float)(val*val)*0.0000625f;
-	} else 	DCOglide=DefGlide;
+		if (!val) NextGlide = LastGlide;
+		else {
+			NextGlide=(float)(val*val)*0.0000625f;
+			LastGlide=NextGlide;
+		}
+	}
 
 	//SemiGlide
 	if ( ((cmd & 0xF0) == 0xD0) || ((cmd & 0xF0) == 0xE0)){
