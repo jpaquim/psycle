@@ -47,7 +47,7 @@ namespace psycle
 		// in: command def, key, modifiers
 		// out: true if we had to remove another definition
 		///\todo more warnings if we are changing existing defs
-		bool InputHandler::SetCmd(CmdDef cmd, UINT key, UINT modifiers)
+		bool InputHandler::SetCmd(CmdDef cmd, UINT key, UINT modifiers,bool checkforduplicates)
 		{	
 			// clear note?
 			if(!cmd.IsValid())
@@ -66,25 +66,27 @@ namespace psycle
 				modifiers&MOD_E);
 		*/
 			// remove last key def, if it exists
-			UINT i,j;
-			for(j=0;j<MOD_MAX;j++)
+			bool bCmdReplaced=false;
+			if ( checkforduplicates)
 			{
-				for(i=0;i<256;i++)
+				UINT i,j;
+				for(j=0;j<MOD_MAX;j++)
 				{
-					if(cmdLUT[j][i]==cmd)
+					for(i=0;i<256;i++)
 					{
-						TRACE("--> removing from [%d][%d]\n",j,i);
-						cmdLUT[j][i]=cdefNull;					
+						if(cmdLUT[j][i]==cmd && ((j!=modifiers)|| (i!=key)))
+						{
+							TRACE("--> removing from [%d][%d]\n",j,i);
+							cmdLUT[j][i]=cdefNull;
+							bCmdReplaced=true;
+						}
 					}
 				}
 			}
 
 			// add new
-			bool bCmdDeleted;
-			bCmdDeleted = cmdLUT[modifiers][key].IsValid();
 			cmdLUT[modifiers][key] = cmd;
-
-			return bCmdDeleted;
+			return bCmdReplaced;
 		}
 
 
@@ -187,17 +189,17 @@ namespace psycle
 				{
 					ret=cmdLUT[j][i];
 					if(ret.IsValid())
-			{
-				if(!strcmp(ret.GetName(),str))
-					return ret;
-			}
+					{
+						if(!strcmp(ret.GetName(),str))
+							return ret;
+					}
 				}
 			}
 			ret.ID = cdefNull;
 			return ret;
 		}
 
-		// StringToCmd
+		// CmdToKey
 		// IN: command def
 		// OUT: key/mod command is defined for, 0/0 if not defined
 		void InputHandler::CmdToKey(CmdDef cmd,WORD & key,WORD &mods)
@@ -282,6 +284,7 @@ namespace psycle
 			// note keys
 			sect = "Keys2";
 			WritePrivateProfileString(sect,NULL,NULL,sDefaultCfgName); 	// clear
+
 			for(j=0;j<MOD_MAX;j++)
 			{
 				for(i=0;i<256;i++)
@@ -363,9 +366,12 @@ namespace psycle
 					if(cmdDefn!="Invalid")
 					{
 						key.Format("n%03d",i);
-						cmddata= GetPrivateProfileInt(sect,key,-1,sDefaultCfgName);
-						modi=cmddata/256;
-						SetCmd(cmd.ID,cmddata%256,modi);
+						cmddata= GetPrivateProfileInt(sect,key,cdefNull,sDefaultCfgName);
+						if (cmddata != cdefNull)
+						{
+							modi=cmddata/256;
+							SetCmd(cmd.ID,cmddata%256,modi,false);
+						}
 					}
 				}
 				if (saveconfig) ConfigSave();
@@ -1235,6 +1241,8 @@ namespace psycle
 
 		// configure default keys
 		// messy, but not really any way around it
+// This is also called in ConfigRestore().
+// Remove it from there when/if making a new system.
 		void InputHandler::BuildCmdLUT()
 		{
 			// initialize
@@ -1247,145 +1255,144 @@ namespace psycle
 					SetCmd(cmdNull,j,i);			
 
 			// immediate commands
-			SetCmd(cdefEditMachine,VK_F2,0);
-			SetCmd(cdefEditPattern,VK_F3,0);
+			SetCmd(cdefEditMachine,VK_F2,0,false);
+			SetCmd(cdefEditPattern,VK_F3,0,false);
 
-			SetCmd(cdefInfoMachine,VK_RETURN,MOD_S);
-			SetCmd(cdefInfoPattern,VK_RETURN,MOD_C);
-			SetCmd(cdefSelectMachine,VK_RETURN,0);		// This is also called in ConfigRestore().
-														// Remove it from there when making a new system.
-			SetCmd(cdefAddMachine,VK_F9,0);
-			SetCmd(cdefEditInstr,VK_F10,0);
-			SetCmd(cdefMaxPattern,VK_TAB,MOD_C);
-			SetCmd(cdefErrorLog,VK_F11,0);			
+			SetCmd(cdefInfoMachine,VK_RETURN,MOD_S,false);
+			SetCmd(cdefInfoPattern,VK_RETURN,MOD_C,false);
+			SetCmd(cdefSelectMachine,VK_RETURN,0,false);		
+			SetCmd(cdefAddMachine,VK_F9,0,false);
+			SetCmd(cdefEditInstr,VK_F10,0,false);
+			SetCmd(cdefMaxPattern,VK_TAB,MOD_C,false);
+			SetCmd(cdefErrorLog,VK_F11,0,false);			
 
-			SetCmd(cdefOctaveUp,VK_MULTIPLY,0);
-			SetCmd(cdefOctaveDn,VK_DIVIDE,MOD_E);
+			SetCmd(cdefOctaveUp,VK_MULTIPLY,0,false);
+			SetCmd(cdefOctaveDn,VK_DIVIDE,MOD_E,false);
 
-			SetCmd(cdefMachineDec,VK_LEFT,MOD_C|MOD_E);
-			SetCmd(cdefMachineInc,VK_RIGHT,MOD_C|MOD_E);
+			SetCmd(cdefMachineDec,VK_LEFT,MOD_C|MOD_E,false);
+			SetCmd(cdefMachineInc,VK_RIGHT,MOD_C|MOD_E,false);
 
-			SetCmd(cdefInstrDec,VK_DOWN,MOD_C|MOD_E);
-			SetCmd(cdefInstrInc,VK_UP,MOD_C|MOD_E);
+			SetCmd(cdefInstrDec,VK_DOWN,MOD_C|MOD_E,false);
+			SetCmd(cdefInstrInc,VK_UP,MOD_C|MOD_E,false);
 
-			SetCmd(cdefPlayRowTrack,'4',0);
-			SetCmd(cdefPlayRowPattern,'8',0);
+			SetCmd(cdefPlayRowTrack,'4',0,false);
+			SetCmd(cdefPlayRowPattern,'8',0,false);
 			
-			SetCmd(cdefPlayStart,VK_F5,MOD_S);
-			SetCmd(cdefPlaySong,VK_F5,0);
-			SetCmd(cdefPlayBlock,VK_F6,0);
-			SetCmd(cdefPlayFromPos,VK_F7,0);
-			SetCmd(cdefPlayStop,VK_F8,0);
+			SetCmd(cdefPlayStart,VK_F5,MOD_S,false);
+			SetCmd(cdefPlaySong,VK_F5,0,false);
+			SetCmd(cdefPlayBlock,VK_F6,0,false);
+			SetCmd(cdefPlayFromPos,VK_F7,0,false);
+			SetCmd(cdefPlayStop,VK_F8,0,false);
 
-			SetCmd(cdefPatternInc,VK_UP,MOD_S|MOD_E);
-			SetCmd(cdefPatternDec,VK_DOWN,MOD_S|MOD_E);
-			SetCmd(cdefSongPosInc,VK_RIGHT,MOD_S|MOD_E);
-			SetCmd(cdefSongPosDec,VK_LEFT,MOD_S|MOD_E);
+			SetCmd(cdefPatternInc,VK_UP,MOD_S|MOD_E,false);
+			SetCmd(cdefPatternDec,VK_DOWN,MOD_S|MOD_E,false);
+			SetCmd(cdefSongPosInc,VK_RIGHT,MOD_S|MOD_E,false);
+			SetCmd(cdefSongPosDec,VK_LEFT,MOD_S|MOD_E,false);
 
-			SetCmd(cdefEditToggle,' ',0);
+			SetCmd(cdefEditToggle,' ',0,false);
 
 			// editor commands
-			SetCmd(cdefColumnNext,VK_TAB,0);
-			SetCmd(cdefColumnPrev,VK_TAB,MOD_S);
+			SetCmd(cdefColumnNext,VK_TAB,0,false);
+			SetCmd(cdefColumnPrev,VK_TAB,MOD_S,false);
 
-			SetCmd(cdefNavUp,VK_UP,MOD_E);
-			SetCmd(cdefNavDn,VK_DOWN,MOD_E);
-			SetCmd(cdefNavLeft,VK_LEFT,MOD_E);
-			SetCmd(cdefNavRight,VK_RIGHT,MOD_E);
+			SetCmd(cdefNavUp,VK_UP,MOD_E,false);
+			SetCmd(cdefNavDn,VK_DOWN,MOD_E,false);
+			SetCmd(cdefNavLeft,VK_LEFT,MOD_E,false);
+			SetCmd(cdefNavRight,VK_RIGHT,MOD_E,false);
 
-			SetCmd(cdefNavPageUp,VK_PRIOR,MOD_E);
-			SetCmd(cdefNavPageDn,VK_NEXT,MOD_E);
-			SetCmd(cdefNavTop,VK_HOME,MOD_E);
-			SetCmd(cdefNavBottom,VK_END,MOD_E);
+			SetCmd(cdefNavPageUp,VK_PRIOR,MOD_E,false);
+			SetCmd(cdefNavPageDn,VK_NEXT,MOD_E,false);
+			SetCmd(cdefNavTop,VK_HOME,MOD_E,false);
+			SetCmd(cdefNavBottom,VK_END,MOD_E,false);
 
-			SetCmd(cdefTransposeChannelDec,VK_F1,MOD_C);	
-			SetCmd(cdefTransposeChannelInc,VK_F2,MOD_C);	
-			SetCmd(cdefTransposeChannelDec12,VK_F1,MOD_C|MOD_S);
-			SetCmd(cdefTransposeChannelInc12,VK_F2,MOD_C|MOD_S);
+			SetCmd(cdefTransposeChannelDec,VK_F1,MOD_C,false);	
+			SetCmd(cdefTransposeChannelInc,VK_F2,MOD_C,false);	
+			SetCmd(cdefTransposeChannelDec12,VK_F1,MOD_C|MOD_S,false);
+			SetCmd(cdefTransposeChannelInc12,VK_F2,MOD_C|MOD_S,false);
 
-			SetCmd(cdefTransposeBlockDec,VK_F11,MOD_C);
-			SetCmd(cdefTransposeBlockInc,VK_F12,MOD_C);
-			SetCmd(cdefTransposeBlockDec12,VK_F11,MOD_C|MOD_S);
-			SetCmd(cdefTransposeBlockInc12,VK_F12,MOD_C|MOD_S);	
+			SetCmd(cdefTransposeBlockDec,VK_F11,MOD_C,false);
+			SetCmd(cdefTransposeBlockInc,VK_F12,MOD_C,false);
+			SetCmd(cdefTransposeBlockDec12,VK_F11,MOD_C|MOD_S,false);
+			SetCmd(cdefTransposeBlockInc12,VK_F12,MOD_C|MOD_S,false);	
 
-			SetCmd(cdefPatternCut,VK_F3,MOD_C);
-			SetCmd(cdefPatternCopy,VK_F4,MOD_C);
-			SetCmd(cdefPatternPaste,VK_F5,MOD_C);
-			SetCmd(cdefPatternMixPaste,VK_F5,MOD_C|MOD_S);
-			SetCmd(cdefPatternTrackMute,VK_F9,MOD_C);
-			SetCmd(cdefPatternTrackSolo,VK_F8,MOD_C);
-			SetCmd(cdefPatternTrackRecord,VK_F7,MOD_C);
-			SetCmd(cdefFollowSong,'F',MOD_C);
-			SetCmd(cdefPatternDelete,VK_F3,MOD_C|MOD_S);
+			SetCmd(cdefPatternCut,VK_F3,MOD_C,false);
+			SetCmd(cdefPatternCopy,VK_F4,MOD_C,false);
+			SetCmd(cdefPatternPaste,VK_F5,MOD_C,false);
+			SetCmd(cdefPatternMixPaste,VK_F5,MOD_C|MOD_S,false);
+			SetCmd(cdefPatternTrackMute,VK_F9,MOD_C,false);
+			SetCmd(cdefPatternTrackSolo,VK_F8,MOD_C,false);
+			SetCmd(cdefPatternTrackRecord,VK_F7,MOD_C,false);
+			SetCmd(cdefFollowSong,'F',MOD_C,false);
+			SetCmd(cdefPatternDelete,VK_F3,MOD_C|MOD_S,false);
 
-			SetCmd(cdefRowInsert,VK_INSERT,MOD_E);
-			SetCmd(cdefRowDelete,VK_BACK,0);
-			SetCmd(cdefRowClear,VK_DELETE,MOD_E);
+			SetCmd(cdefRowInsert,VK_INSERT,MOD_E,false);
+			SetCmd(cdefRowDelete,VK_BACK,0,false);
+			SetCmd(cdefRowClear,VK_DELETE,MOD_E,false);
 
-			SetCmd(cdefBlockStart,'B',MOD_C);
-			SetCmd(cdefBlockEnd,'E',MOD_C);
-			SetCmd(cdefBlockUnMark,'U',MOD_C);
-			SetCmd(cdefBlockDouble,'D',MOD_C);
-			SetCmd(cdefBlockHalve,'H',MOD_C);
-			SetCmd(cdefBlockCut,'X',MOD_C);
-			SetCmd(cdefBlockCopy,'C',MOD_C);
-			SetCmd(cdefBlockPaste,'V',MOD_C);
-			SetCmd(cdefBlockMix,'M',MOD_C);
-			SetCmd(cdefBlockInterpolate,'I',MOD_C);
-			SetCmd(cdefBlockSetMachine,'G',MOD_C);
-			SetCmd(cdefBlockSetInstr,'T',MOD_C);
-			SetCmd(cdefBlockDelete,'X',MOD_C|MOD_S);
+			SetCmd(cdefBlockStart,'B',MOD_C,false);
+			SetCmd(cdefBlockEnd,'E',MOD_C,false);
+			SetCmd(cdefBlockUnMark,'U',MOD_C,false);
+			SetCmd(cdefBlockDouble,'D',MOD_C,false);
+			SetCmd(cdefBlockHalve,'H',MOD_C,false);
+			SetCmd(cdefBlockCut,'X',MOD_C,false);
+			SetCmd(cdefBlockCopy,'C',MOD_C,false);
+			SetCmd(cdefBlockPaste,'V',MOD_C,false);
+			SetCmd(cdefBlockMix,'M',MOD_C,false);
+			SetCmd(cdefBlockInterpolate,'I',MOD_C,false);
+			SetCmd(cdefBlockSetMachine,'G',MOD_C,false);
+			SetCmd(cdefBlockSetInstr,'T',MOD_C,false);
+			SetCmd(cdefBlockDelete,'X',MOD_C|MOD_S,false);
 
-			SetCmd(cdefSelectAll,'A',MOD_C);
-			SetCmd(cdefSelectCol,'R',MOD_C);
-			SetCmd(cdefSelectBar,'D',MOD_C);
+			SetCmd(cdefSelectAll,'A',MOD_C,false);
+			SetCmd(cdefSelectCol,'R',MOD_C,false);
+			SetCmd(cdefSelectBar,'D',MOD_C,false);
 
-			SetCmd(cdefEditQuantizeInc,221,0);    // lineskip + 1
-			SetCmd(cdefEditQuantizeDec,219,0);    // lineskip - 1
+			SetCmd(cdefEditQuantizeInc,221,0,false);    // lineskip + 1
+			SetCmd(cdefEditQuantizeDec,219,0,false);    // lineskip - 1
 
 			// note keys
 
 			// octave 0
-			SetCmd(cdefKeyC_0,'Z',0);
-			SetCmd(cdefKeyCS0,'S',0);
-			SetCmd(cdefKeyD_0,'X',0);
-			SetCmd(cdefKeyDS0,'D',0);
-			SetCmd(cdefKeyE_0,'C',0);
-			SetCmd(cdefKeyF_0,'V',0);
-			SetCmd(cdefKeyFS0,'G',0);
-			SetCmd(cdefKeyG_0,'B',0);
-			SetCmd(cdefKeyGS0,'H',0);
-			SetCmd(cdefKeyA_1,'N',0);
-			SetCmd(cdefKeyAS1,'J',0);
-			SetCmd(cdefKeyB_1,'M',0);
+			SetCmd(cdefKeyC_0,'Z',0,false);
+			SetCmd(cdefKeyCS0,'S',0,false);
+			SetCmd(cdefKeyD_0,'X',0,false);
+			SetCmd(cdefKeyDS0,'D',0,false);
+			SetCmd(cdefKeyE_0,'C',0,false);
+			SetCmd(cdefKeyF_0,'V',0,false);
+			SetCmd(cdefKeyFS0,'G',0,false);
+			SetCmd(cdefKeyG_0,'B',0,false);
+			SetCmd(cdefKeyGS0,'H',0,false);
+			SetCmd(cdefKeyA_0,'N',0,false);
+			SetCmd(cdefKeyAS0,'J',0,false);
+			SetCmd(cdefKeyB_0,'M',0,false);
 
 			// octave 1
-			SetCmd(cdefKeyC_1,'Q',0);
-			SetCmd(cdefKeyCS1,'2',0);
-			SetCmd(cdefKeyD_1,'W',0);
-			SetCmd(cdefKeyDS1,'3',0);
-			SetCmd(cdefKeyE_1,'E',0);
-			SetCmd(cdefKeyF_1,'R',0);
-			SetCmd(cdefKeyFS1,'5',0);
-			SetCmd(cdefKeyG_1,'T',0);
-			SetCmd(cdefKeyGS1,'6',0);
-			SetCmd(cdefKeyA_2,'Y',0);
-			SetCmd(cdefKeyAS2,'7',0);
-			SetCmd(cdefKeyB_2,'U',0);
+			SetCmd(cdefKeyC_1,'Q',0,false);
+			SetCmd(cdefKeyCS1,'2',0,false);
+			SetCmd(cdefKeyD_1,'W',0,false);
+			SetCmd(cdefKeyDS1,'3',0,false);
+			SetCmd(cdefKeyE_1,'E',0,false);
+			SetCmd(cdefKeyF_1,'R',0,false);
+			SetCmd(cdefKeyFS1,'5',0,false);
+			SetCmd(cdefKeyG_1,'T',0,false);
+			SetCmd(cdefKeyGS1,'6',0,false);
+			SetCmd(cdefKeyA_1,'Y',0,false);
+			SetCmd(cdefKeyAS1,'7',0,false);
+			SetCmd(cdefKeyB_1,'U',0,false);
 
 			// octave 2
-			SetCmd(cdefKeyC_2,'I',0);
-			SetCmd(cdefKeyCS2,'9',0);
-			SetCmd(cdefKeyD_2,'O',0);
-			SetCmd(cdefKeyDS2,'0',0);
-			SetCmd(cdefKeyE_2,'P',0);
+			SetCmd(cdefKeyC_2,'I',0,false);
+			SetCmd(cdefKeyCS2,'9',0,false);
+			SetCmd(cdefKeyD_2,'O',0,false);
+			SetCmd(cdefKeyDS2,'0',0,false);
+			SetCmd(cdefKeyE_2,'P',0,false);
 
 			// special
-			SetCmd(cdefKeyStop,'1',0);
-			SetCmd(cdefKeyStopAny,'1',MOD_C);
-			SetCmd(cdefTweakM,192,0);        // tweak machine (`)
-			SetCmd(cdefTweakS,192,MOD_C);        // tweak machine (`)
-			SetCmd(cdefMIDICC,192,MOD_S);    // Previously Tweak Effect. Now Mcm Command (~)
+			SetCmd(cdefKeyStop,'1',0,false);
+			SetCmd(cdefKeyStopAny,'1',MOD_C,false);
+			SetCmd(cdefTweakM,192,0,false);        // tweak machine (`)
+			SetCmd(cdefTweakS,192,MOD_C,false);        // tweak machine (`)
+			SetCmd(cdefMIDICC,192,MOD_S,false);    // Previously Tweak Effect. Now Mcm Command (~)
 
 			/*
 			outnoteLUT[188]	= 12;	// , = C 
@@ -1403,8 +1410,8 @@ namespace psycle
 			*/
 
 			// undo/redo
-			SetCmd(cdefUndo,'Z',MOD_C);
-			SetCmd(cdefRedo,'Z',MOD_C|MOD_S);
+			SetCmd(cdefUndo,'Z',MOD_C,false);
+			SetCmd(cdefRedo,'Z',MOD_C|MOD_S,false);
 		}
 	}
 }

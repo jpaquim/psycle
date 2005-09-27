@@ -299,7 +299,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			KillTimer(31);
 			KillTimer(159);
-			if (!SetTimer(31,20,NULL)) // GUI update. 
+			if (!SetTimer(31,30,NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
@@ -349,9 +349,11 @@ NAMESPACE__BEGIN(psycle)
 				}
 				if (viewMode == VMMachine)
 				{
-					CClientDC dc(this);
-					DrawAllMachineVumeters(&dc);
+					Repaint(DMAllMacsRefresh);
+//					CClientDC dc(this);
+//					DrawAllMachineVumeters(&dc);
 				}
+
 				if (Global::pPlayer->Tweaker)
 				{
 					for(int c=0; c<MAX_MACHINES; c++)
@@ -403,7 +405,6 @@ NAMESPACE__BEGIN(psycle)
 						}
 						else if ( viewMode == VMPattern ) Repaint(DMPlayback);
 						if ( viewMode == VMSequence ) Repaint(DMPlayback);
-						if ( viewMode == VMMachine ) Repaint(DMAllMacsRefresh);
 					}
 				}
 			}
@@ -518,7 +519,7 @@ NAMESPACE__BEGIN(psycle)
 						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
 						DrawMachine(updatePar, &bufDC);
 						DrawMachineVumeters(updatePar, &bufDC);
-						updateMode=0;
+						updateMode=DMAll;
 						break;
 					case DMAllMacsRefresh:
 						for (int i=0;i<MAX_MACHINES;i++)

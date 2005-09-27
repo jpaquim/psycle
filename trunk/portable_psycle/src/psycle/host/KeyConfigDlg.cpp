@@ -60,18 +60,16 @@ NAMESPACE__BEGIN(psycle)
 			//ON_BN_CLICKED(IDC_MOVE_CURSOR_PASTE, OnBnClickedMoveCursorPaste)
 		END_MESSAGE_MAP()
 
-		void CKeyConfigDlg::DoCommandList()
-		{
-		}
-
 		void CKeyConfigDlg::FillCmdList()
 		{
-			// clear list box
-			m_lstCmds.ResetContent();
-
 			// add command definitions
 			InputHandler* pinp = Global::pInputHandler;
-			int j,i;
+			bool written[max_cmds];
+			int j,i,pos;
+
+			// clear list box
+			m_lstCmds.ResetContent();
+			for (i=0;i<max_cmds;i++)written[i]=false;
 
 			for(j=0;j<MOD_MAX;j++)
 			{
@@ -79,7 +77,26 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if(pinp->cmdLUT[j][i].IsValid())
 					{
-						m_lstCmds.AddString(LPCTSTR(pinp->cmdLUT[j][i].GetName()));
+						pos = m_lstCmds.AddString(LPCTSTR(pinp->cmdLUT[j][i].GetName()));
+						m_lstCmds.SetItemData(pos,j*256+i);
+						written[int(pinp->cmdLUT[j][i].ID)]=true;
+					}
+				}
+			}
+			for (i=0;i<max_cmds;i++) // This second loop adds the strings which don't have a hotkey assigned.
+			{
+				if ( !written[i] )
+				{
+					CmdDef cmd;
+					CString cmdDefn;
+					char bla[64];
+					cmd.ID = CmdSet(i);
+					cmdDefn = cmd.GetName();
+					if(cmdDefn!="Invalid")
+					{
+						strncpy(bla,cmdDefn,64);
+						pos = m_lstCmds.AddString(LPCTSTR(bla));
+						m_lstCmds.SetItemData(pos,0);
 					}
 				}
 			}
@@ -149,7 +166,8 @@ NAMESPACE__BEGIN(psycle)
 			// save key settings for key we've just moved from
 			FindKey(m_prvIdx,key,mods);
 			SaveHotKey(m_prvIdx,key,mods);
-			
+			key=0;
+			mods=0;
 			// update display for new key
 			m_prvIdx = m_lstCmds.GetCurSel();
 			FindKey(m_prvIdx,key,mods);
@@ -166,44 +184,57 @@ NAMESPACE__BEGIN(psycle)
 			// nothing selected? abort
 			if(!hotkey_key)
 				return;		
-			
-			UINT nKey=hotkey_key;
-			UINT nMod=0;
-			if(hotkey_mods&HOTKEYF_SHIFT)
-				nMod|=MOD_S;
-			if(hotkey_mods&HOTKEYF_CONTROL)
-				nMod|=MOD_C;
-			if(hotkey_mods&HOTKEYF_EXT)
-				nMod|=MOD_E;
 
 			// same as previous? do nothing
-			if(nKey==key && nMod==mods)
+			if(hotkey_key==key && hotkey_mods==mods)
 				return;
+			UINT nMod=0;
+			if(mods&HOTKEYF_SHIFT)
+				nMod|=MOD_S;
+			if(mods&HOTKEYF_CONTROL)
+				nMod|=MOD_C;	
+			if(mods&HOTKEYF_EXT)
+				nMod|=MOD_E;
+
+			m_lstCmds.SetItemData(idx,nMod*256+key);
 
 			// what command is selected?
 			CmdDef cmd = FindCmd(idx);
 			
 			// save key definition
 			if(cmd.IsValid())
-				Global::pInputHandler->SetCmd(cmd,nKey,nMod);
+				Global::pInputHandler->SetCmd(cmd,key,nMod);
 		}
 
 		void CKeyConfigDlg::FindKey(long idx,WORD&key,WORD&mods)
 		{
 			// what command is selected?
-			CmdDef cmd = FindCmd(idx);
-			
+//			CmdDef cmd = FindCmd(idx);
 			// locate which key is that command
-			if(cmd.IsValid())
-				Global::pInputHandler->CmdToKey(cmd,key,mods);
+//			if(cmd.IsValid())
+//				Global::pInputHandler->CmdToKey(cmd,key,mods);
+
+			int j = m_lstCmds.GetItemData(idx)/256;
+			key = m_lstCmds.GetItemData(idx)%256;
+			if(j&MOD_S)
+				mods|=HOTKEYF_SHIFT;
+			if(j&MOD_C)
+				mods|=HOTKEYF_CONTROL;				
+			if(j&MOD_E)
+				mods|=HOTKEYF_EXT;
+
 		}
 
 		CmdDef CKeyConfigDlg::FindCmd(long idx)
 		{	
 			// init
-			CmdDef cmd;
+			InputHandler* pinp = Global::pInputHandler;
+			int j = m_lstCmds.GetItemData(idx)/256;
+			int i = m_lstCmds.GetItemData(idx)%256;
+			CmdDef cmd = pinp->cmdLUT[j][i];
 
-			// sanity check
+
+/*			// sanity check
 			if(idx<0) 
 				return cmd;				
 
@@ -213,6 +244,7 @@ NAMESPACE__BEGIN(psycle)
 
 			// convert string to cmd
 			cmd = Global::pInputHandler->StringToCmd(cmdDesc);
+*/
 			return cmd;
 		}
 
@@ -400,12 +432,12 @@ NAMESPACE__BEGIN(psycle)
 
 		void CKeyConfigDlg::OnDefaults() 
 		{
-			Global::pInputHandler->BuildCmdLUT();
 			WORD key = 0;
-			WORD mods = 0;	
-			// update display for new key
-			m_prvIdx = m_lstCmds.GetCurSel();
-			FindKey(m_prvIdx,key,mods);
+			WORD mods = 0;
+			Global::pInputHandler->BuildCmdLUT();
+			FillCmdList();
+			m_lstCmds.SetCurSel(0);
+			FindKey(0,key,mods);
 			m_hotkey0.SetHotKey(key,mods);
 		}
 

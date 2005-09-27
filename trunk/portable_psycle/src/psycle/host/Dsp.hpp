@@ -171,18 +171,17 @@ namespace psycle
 		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const & inNumberOfSamples )
 		{
 			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
+			unsigned int sample;
+			unsigned int exponent;
 			for ( int i = 0; i < inNumberOfSamples; i++ )
 			{
-				unsigned int sample = *inArrayOfFloats;
-				unsigned int exponent = sample & 0x7F800000;
+				sample = *inArrayOfFloats;
+				exponent = sample & 0x7F800000;
 
 				// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
 				// exponent > 0 is 0 if denormalized, otherwise 1
 
-				int aNaN = exponent < 0x7F800000;
-				int aDen = exponent > 0;
-
-				*inArrayOfFloats++ = sample * ( aNaN & aDen );
+				*inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
 			}
 		}
 		/// undenormalize (renormalize) samples in a signal buffer.

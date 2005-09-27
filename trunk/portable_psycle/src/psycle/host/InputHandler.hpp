@@ -62,9 +62,9 @@ namespace psycle
 			cdefKeyFS0,
 			cdefKeyG_0,
 			cdefKeyGS0,
-			cdefKeyA_1,
-			cdefKeyAS1,
-			cdefKeyB_1,
+			cdefKeyA_0,
+			cdefKeyAS0,
+			cdefKeyB_0,
 			cdefKeyC_1, ///< 12
 			cdefKeyCS1,
 			cdefKeyD_1,
@@ -74,9 +74,9 @@ namespace psycle
 			cdefKeyFS1,
 			cdefKeyG_1,
 			cdefKeyGS1,
-			cdefKeyA_2,
-			cdefKeyAS2,
-			cdefKeyB_2,
+			cdefKeyA_1,
+			cdefKeyAS1,
+			cdefKeyB_1,
 			cdefKeyC_2, ///< 24
 			cdefKeyCS2,
 			cdefKeyD_2,
@@ -86,7 +86,7 @@ namespace psycle
 			cdefKeyFS2,
 			cdefKeyG_2,
 			cdefKeyGS2,
-			cdefKeyA_3,	
+			cdefKeyA_2,	
 
 			cdefKeyStop = 120,	///< NOTE STOP
 			cdefTweakM = 121,	///< tweak
@@ -259,9 +259,9 @@ namespace psycle
 				case cdefKeyFS0: return "Key (Oct.0) F#";
 				case cdefKeyG_0: return "Key (Oct.0) G";
 				case cdefKeyGS0: return "Key (Oct.0) G#";
-				case cdefKeyA_1: return "Key (Oct.0) A";
-				case cdefKeyAS1: return "Key (Oct.0) A#";
-				case cdefKeyB_1: return "Key (Oct.0) B";
+				case cdefKeyA_0: return "Key (Oct.0) A";
+				case cdefKeyAS0: return "Key (Oct.0) A#";
+				case cdefKeyB_0: return "Key (Oct.0) B";
 				case cdefKeyC_1: return "Key (Oct.1) C";
 				case cdefKeyCS1: return "Key (Oct.1) C#";
 				case cdefKeyD_1: return "Key (Oct.1) D";
@@ -271,9 +271,9 @@ namespace psycle
 				case cdefKeyFS1: return "Key (Oct.1) F#";
 				case cdefKeyG_1: return "Key (Oct.1) G";
 				case cdefKeyGS1: return "Key (Oct.1) G#";
-				case cdefKeyA_2: return "Key (Oct.1) A";
-				case cdefKeyAS2: return "Key (Oct.1) A#";
-				case cdefKeyB_2: return "Key (Oct.1) B";
+				case cdefKeyA_1: return "Key (Oct.1) A";
+				case cdefKeyAS1: return "Key (Oct.1) A#";
+				case cdefKeyB_1: return "Key (Oct.1) B";
 				case cdefKeyC_2: return "Key (Oct.2) C";
 				case cdefKeyCS2: return "Key (Oct.2) C#";
 				case cdefKeyD_2: return "Key (Oct.2) D";
@@ -283,12 +283,12 @@ namespace psycle
 				case cdefKeyFS2: return "Key (Oct.2) F#";
 				case cdefKeyG_2: return "Key (Oct.2) G";
 				case cdefKeyGS2: return "Key (Oct.2) G#";
-				case cdefKeyA_3: return "Key (Oct.2) A";
+				case cdefKeyA_2: return "Key (Oct.2) A";
 
 				case cdefKeyStop: return "Key Stop";
 				case cdefKeyStopAny: return "Key Stop Current";
-				case cdefTweakM:  return "Tweak (Machine)";
-				case cdefTweakS:  return "Tweak Smooth (Machine)";
+				case cdefTweakM:  return "Tweak (Parameter)";
+				case cdefTweakS:  return "Tweak Smooth (Parameter)";
 				case cdefMIDICC:  return "Mcm (MIDI CC)";
 
 				case cdefColumnPrev:	return "Prev column";
@@ -391,7 +391,7 @@ namespace psycle
 				case cdefNull:
 				default:
 					// This is a valid point. It is used when doing searches for name.
-					return "Invalid";
+					return "Invalid" ;
 				}
 			}
 		};
@@ -451,7 +451,7 @@ namespace psycle
 			///\name store/load
 			///\{
 			/// .
-			bool SetCmd(CmdDef cmd, UINT key, UINT modifiers);
+			bool SetCmd(CmdDef cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
 			/// .
 			bool ConfigSave();
 			/// .

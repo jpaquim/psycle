@@ -66,11 +66,12 @@ public:
 	virtual bool DescribeValue(char* txt,int const param, int const value);
 	virtual void Command();
 	virtual void ParameterTweak(int par, int val);
-	void Setup(bool clearfiltermemory);
+	void Setup();
 	
 private:
 	biquad bqleft, bqright;
 	int smprate;
+	bool initialized;
 
 };
 
@@ -80,6 +81,7 @@ mi::mi()
 {
 	// The constructor zone
 	Vals = new int[2];
+	initialized=false;
 }
 
 mi::~mi()
@@ -90,28 +92,30 @@ mi::~mi()
 
 void mi::Init()
 {
-	Setup(true);
+	Setup();
 }
 
-void mi::Setup(bool clearfiltermemory)
+void mi::Setup()
 {
 	smprate=pCB->GetSamplingRate();
 	switch( Vals[1]  )
 	{
 	case 0:
-		BiQuad_new(LPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,clearfiltermemory);
+		BiQuad_new(LPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,!initialized);
+		initialized=true;
 		break;
 	case 1:
-		/*
-		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,clearfiltermemory);
-		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,clearfiltermemory);
-		*/
+/*
+		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,!initialized);
+		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,!initialized);
+		initialized=true;
+*/
 		break;
 	}
 }
 void mi::SequencerTick()
 {
-	if (pCB->GetSamplingRate() != smprate ) Setup(false);
+	if (pCB->GetSamplingRate() != smprate ) Setup();
 }
 
 void mi::Command()
@@ -125,44 +129,43 @@ void mi::Command()
 void mi::ParameterTweak(int par, int val)
 {
 	Vals[par] = val;
-	Setup(false);
+	Setup();
 }
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	//float xlb, xrb, xlt, xrt;
-
+	if (!initialized) Setup();
+	--psamplesleft;
+	--psamplesright;
 	// over all samples 
 	switch(Vals[1])
 	{
 	case 0:
 		do
 		{
-			float xl = *psamplesleft;
+			float xl = *++psamplesleft;
 
 			*psamplesleft  = -xl + 2*(float)BiQuad(xl, &bqleft); //BQ is a Lowpass
-
-			++psamplesleft;
 
 		} while(--numsamples);
 		break;
 	case 1:
+/*		This code was meant to make surround just out of the stereo part of a signal
+		concretely it means that it doesn't affect the mono components of the signal.
 		do
-		{/*
-			float xl = *psamplesleft;
-			float xr = *psamplesleft;
+		{
+			float xl = *++psamplesleft;
+			float xr = *++psamplesright;
 			
 			float xtl = (float)BiQuad(xl, &bqleft); // BQ is a HighPass
-			float xtr = (float)BiQuad(xl, &bqright); // BQ is a HighPass
+			float xtr = (float)BiQuad(xr, &bqright); // BQ is a HighPass
 
 			*psamplesleft  = xl+xtl*0.5-xtr*0.5;
 			*psamplesright  = xr-xtl*0.5+xtr*0.5;
-			
-			++psamplesleft;
-			++psamplesright;
-		*/	
 		} while(--numsamples);
+*/
 		break;
 	}
 }
