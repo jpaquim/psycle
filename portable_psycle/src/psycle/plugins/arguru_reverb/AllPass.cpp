@@ -11,6 +11,8 @@ CAllPass::CAllPass()
 
 	left_output=0;
 	right_output=0;
+	smpleft = reinterpret_cast<unsigned int*>(&tmpleft);
+	smpright = reinterpret_cast<unsigned int*>(&tmpright);
 
 }
 
@@ -28,4 +30,5 @@ void CAllPass::Initialize(int time, int stph)
 	
 	if(l_delayedCounter<0)l_delayedCounter=0;
 	if(r_delayedCounter<0)r_delayedCounter=0;
+
 }

@@ -205,7 +205,7 @@ Special:  Bit 0: On = song message attached.
 					CString zxx2 = zxx.Left(5);
 					if ( strcmp("F0F00",zxx2) == 0)
 					{
-						int tmp;
+						int tmp=0;
 						if (mdata.Zxx[i][5] >= '0' && mdata.Zxx[i][5] <= '9')
 							tmp = mdata.Zxx[i][5] - '0';
 						else if (mdata.Zxx[i][5] >= 'A' && mdata.Zxx[i][5] <= 'F')

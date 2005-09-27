@@ -137,7 +137,7 @@ NAMESPACE__BEGIN(psycle)
 								}
 								else
 								{
-									IWbemClassObject *pclsObj;
+									IWbemClassObject *pclsObj=0;
 									ULONG uReturn = 0;
 
 									Global::_cpuHz = 0;

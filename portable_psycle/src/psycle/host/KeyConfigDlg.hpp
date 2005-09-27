@@ -11,7 +11,6 @@ NAMESPACE__BEGIN(psycle)
 			DECLARE_DYNCREATE(CKeyConfigDlg)
 		public:
 			void FillCmdList();
-			void DoCommandList();
 			CKeyConfigDlg();
 			std::string _skinPathBuf;
 			//removed by alk
