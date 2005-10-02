@@ -55,6 +55,10 @@ namespace psycle
 			}
 			while (--numSamples);
 		}
+		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
+		{
+			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+		}
 		/// zero-out a signal buffer.
 		static inline void Clear(float *pDstSamples, int numSamples)
 		{
