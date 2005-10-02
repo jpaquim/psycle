@@ -521,7 +521,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				m_pParent->AddMacViewUndo();
 				
-				// gotta exchange positions
+				// exchange positions
 				
 				int temp = tmp1->_x;
 				tmp1->_x = tmp2->_x;
@@ -531,22 +531,17 @@ NAMESPACE__BEGIN(psycle)
 				tmp1->_y = tmp2->_y;
 				tmp2->_y = temp;
 				
-				// gotta exchange all connections
+				// exchange all connections
 				
 				float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
 				
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
-					if (tmp1->_connection[i])
-					{
-						tmp1->GetDestWireVolume(one,i,tmp1ovol[i]); //OutputConVol
-					}
-					if (tmp2->_connection[i])
-					{
-						tmp2->GetDestWireVolume(two,i,tmp2ovol[i]); //OutputConVol
-					}				
-					tmp1->GetWireVolume(i,tmp1ivol[i]); // InputConVol
-					tmp2->GetWireVolume(i,tmp2ivol[i]); // InputConVol
+					// Store the volumes of each wire and exchange.
+					if (tmp1->_connection[i]) {	tmp1->GetDestWireVolume(one,i,tmp1ovol[i]);	}
+					if (tmp2->_connection[i]) {	tmp2->GetDestWireVolume(two,i,tmp2ovol[i]); }				
+					tmp1->GetWireVolume(i,tmp1ivol[i]);
+					tmp2->GetWireVolume(i,tmp2ivol[i]);
 
 					temp = tmp1->_outputMachines[i];
 					tmp1->_outputMachines[i] = tmp2->_outputMachines[i];
@@ -556,6 +551,7 @@ NAMESPACE__BEGIN(psycle)
 					tmp1->_inputMachines[i] = tmp2->_inputMachines[i];
 					tmp2->_inputMachines[i] = temp;
 					
+
 					bool btemp = tmp1->_connection[i];
 					tmp1->_connection[i] = tmp2->_connection[i];
 					tmp2->_connection[i] = btemp;
@@ -574,39 +570,32 @@ NAMESPACE__BEGIN(psycle)
 				tmp1->_numInputs = tmp2->_numInputs;
 				tmp2->_numInputs = temp;
 
+				// Exchange the Machine number.
 				Global::_pSong->_pMachine[one] = tmp2;
 				Global::_pSong->_pMachine[two] = tmp1;
 				
 				tmp1->_macIndex = two;
 				tmp2->_macIndex = one;
 
-				/// \todo There is a problem in this function with the volumes. You can't swap them because the connection index may differ
-				/// \todo and definitely it would be if they don't have the same number of inputs/outputs. So for now I've made that 
-				/// \todo the wire volume values remain unchanged.
+				// Finally, Reinitialize the volumes of the wires. Remember that we have exchanged the wires, so the volume indexes are the opposite ones.
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					if (tmp1->_inputCon[i])
 					{
-/// \todo				tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
-						tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp1ivol[i]);
+						tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
 					}
-		//			else tmp1->SetWireVolume(i,0);
 					if (tmp2->_inputCon[i])
 					{
-/// \todo 				tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
-						tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp2ivol[i]);
+						tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
 					}
-		//			else tmp2->SetWireVolume(i,0);
 
 					if (tmp1->_connection[i])
 					{
-/// \todo				Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,tmp1->FindOutputWire(tmp1->_outputMachines[i]),tmp2ovol[i]);
-						Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,tmp1->FindOutputWire(tmp1->_outputMachines[i]),tmp1ovol[i]);
+						Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2ovol[i]);
 					}
 					if (tmp2->_connection[i])
 					{
-/// \todo				Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,tmp2->FindOutputWire(tmp2->_outputMachines[i]),tmp1ovol[i]);
-						Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,tmp2->FindOutputWire(tmp2->_outputMachines[i]),tmp2ovol[i]);
+						Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1ovol[i]);
 					}					
 				}
 
@@ -621,24 +610,18 @@ NAMESPACE__BEGIN(psycle)
 
 				tmp1->_macIndex = two;
 
-				// and any machine that pointed to this one needs to be swapped
-				for (int i = 0; i < MAX_MACHINES; i++)
+				// and replace the index in any machine that pointed to this one.
+				for (int i=0; i < MAX_CONNECTIONS; i++)
 				{
-					Machine*cmp = Global::_pSong->_pMachine[i];
-					if (cmp)
+					if ( tmp1->_inputCon[i])
 					{
-						for (int j=0; j < MAX_CONNECTIONS; j++)
-						{
-							if (cmp->_inputMachines[j] == one)
-							{
-								cmp->_inputMachines[j] = two;
-							}
-
-							if (cmp->_outputMachines[j] == one)
-							{
-								cmp->_outputMachines[j] = two;
-							}
-						}
+						Machine* cmp = Global::_pSong->_pMachine[tmp1->_inputMachines[i]];
+						cmp->_outputMachines[cmp->FindOutputWire(one)]=two;
+					}
+					if ( tmp1->_connection[i])
+					{
+						Machine* cmp = Global::_pSong->_pMachine[tmp1->_outputMachines[i]];
+						cmp->_inputMachines[cmp->FindInputWire(one)]=two;
 					}
 				}
 				return;
@@ -647,29 +630,23 @@ NAMESPACE__BEGIN(psycle)
 			{
 				m_pParent->AddMacViewUndo();
 				// ok we gotta swap this one for a null one
-				Global::_pSong->_pMachine[two] = NULL;
 				Global::_pSong->_pMachine[one] = tmp2;
+				Global::_pSong->_pMachine[two] = NULL;
 
 				tmp2->_macIndex = one;
 
-				// and any machine that pointed to this one needs to be swapped
-				for (int i = 0; i < MAX_MACHINES; i++)
+				// and replace the index in any machine that pointed to this one.
+				for (int i=0; i < MAX_CONNECTIONS; i++)
 				{
-					Machine*cmp = Global::_pSong->_pMachine[i];
-					if (cmp)
+					if ( tmp1->_inputCon[i])
 					{
-						for (int j=0; j < MAX_CONNECTIONS; j++)
-						{
-							if (cmp->_inputMachines[j] == two)
-							{
-								cmp->_inputMachines[j] = one;
-							}
-
-							if (cmp->_outputMachines[j] == two)
-							{
-								cmp->_outputMachines[j] = one;
-							}
-						}
+						Machine* cmp = Global::_pSong->_pMachine[tmp1->_inputMachines[i]];
+						cmp->_outputMachines[cmp->FindOutputWire(two)]=one;
+					}
+					if ( tmp1->_connection[i])
+					{
+						Machine* cmp = Global::_pSong->_pMachine[tmp1->_outputMachines[i]];
+						cmp->_inputMachines[cmp->FindInputWire(two)]=one;
 					}
 				}
 				return;
