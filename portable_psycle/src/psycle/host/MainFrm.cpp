@@ -1684,7 +1684,10 @@ NAMESPACE__BEGIN(psycle)
 				Global::pPlayer->Start(ep,0);
 			}
 			m_wndView.editPosition=ep;
-			m_wndView.OnPatternView();
+			//Following two lines by alk to disable view change to pattern mode when 
+			//double clicking on a pattern in the sequencer list
+			//m_wndView.OnPatternView();
+			SetFocus();
 		}
 
 		void CMainFrame::OnIncshort() 
