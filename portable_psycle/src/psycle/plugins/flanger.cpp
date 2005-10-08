@@ -227,7 +227,8 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 				input_sample += (*this)(wet) * buffer_read;
 				// NaN and Den remover :
 				unsigned int corrected_sample = *((unsigned int*)&input_sample);
-				corrected_sample *= ((corrected_sample < 0x7F800000) && ((corrected_sample & 0x7F800000) > 0));
+				unsigned int exponent = corrected_sample & 0x7F800000;
+				corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
 				input_sample = *((float*)&corrected_sample);
 			}
 		}
