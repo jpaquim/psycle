@@ -1460,8 +1460,9 @@ void mi::Command(){
 char buffer[2048];
 
 sprintf(
-		buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s",
+		buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 		"Pattern commands\n",
+		"\n0Cxx : Set Volume (new!)",
 		"\nC1xx : Slide Up",
 		"\nC2xx : Slide Down",
 		"\nC3xx : Tone Portamento",
@@ -1470,7 +1471,7 @@ sprintf(
 		"\nC6xx : Touchtaping (> 128 == minus)",
 		"\nC7xx : Touchtaping with Retrig",
 		"\nC8xx : Init Strobe (+1:Drift, +2:SyncVib, +4:FltVib)",
-		"\nCCxx : Set Volume",
+		"\nCCxx : Set Volume (obsolete)",
 		"\nDxyy : Semi Portamento (x tones down with rate yy)",
 		"\nExyy : Semi Portamento (x tones up with rate yy)",
 		"\nBFFF and lower: Arpeggio (xyzz, x=2nd, y=3rd, zz=optional 4th tone)\n"
@@ -1796,7 +1797,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 
 	if (channel < MAX_TRACKS){
 		float nextVol = 1.0f;
-		if ((note<120) & (cmd == 0xCC)) nextVol=(float)val/255.0f;
+		if ((note<120) & ((cmd == 0xCC)||cmd == 0x0C )) nextVol=(float)val/255.0f;
 		else track[channel].InitEffect(cmd,val);
 		// Note Off			== 120
 		// Empty Note Row	== 255
