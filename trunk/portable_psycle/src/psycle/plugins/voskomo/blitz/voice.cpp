@@ -1302,7 +1302,7 @@ void CSynthTrack::PerformFx()
 
 	if ( ((sp_cmd & 0xF0) == 0xD0) || ((sp_cmd & 0xF0) == 0xE0)) semiglide=sp_gl;
 
-	if ( ((sp_cmd & 0xF0) < 0xC0) || (sp_cmd != 0x0C)) {
+	if ( ((sp_cmd & 0xF0) < 0xC0) & (sp_cmd != 0x0C)) {
 		if (sp_cmd != 0) {
 			arpInput[1] = sp_cmd>>4;
 			arpInput[2] = sp_cmd&0x0f;
