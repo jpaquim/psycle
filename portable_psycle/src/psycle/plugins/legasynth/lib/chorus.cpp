@@ -1,3 +1,6 @@
+/////////////////////////////////////////////////////////////////////
+// Dmitry "Sartorius" Kulikov LegaSynth plugins for PSYCLE
+
 /***************************************************************************
                           cpp  -  description
                              -------------------
@@ -32,15 +35,15 @@ Chorus::Chorus(){
 	ring_buffer_index=0;
 }
 
-void Chorus::set_chorus_params(float p_delay, float p_lfo_speed, float p_lfo_depth, float p_feedback, float p_width) {
-
-	delay=p_delay;
-	lfo_speed=p_lfo_speed;
- 	lfo_depth=p_lfo_depth;
-  	feedback=p_feedback;
-   	width=p_width;
-
-}
+//void Chorus::set_chorus_params(float p_delay, float p_lfo_speed, float p_lfo_depth, float p_feedback, float p_width) {
+//
+//	delay=p_delay;
+//	lfo_speed=p_lfo_speed;
+// 	lfo_depth=p_lfo_depth;
+//  	feedback=p_feedback;
+//   	width=p_width;
+//
+//}
 /*
 void Chorus::get_chorus_params(float &p_delay, float &p_lfo_speed, float &p_lfo_depth, float &p_feedback, float &p_width) {
 
@@ -88,57 +91,81 @@ void Chorus::process(float *p_left,float *p_right,int p_amount) {
 
     float *p_s_left = p_left;
 	float *p_s_right = p_right;
-	--p_s_left;
-	--p_s_right;
 
-	float delay_samples = (delay/1000.0) * (float)mixfreq;
-	float depth_samples = (lfo_depth/1000.0) * (float)mixfreq;
+	//--p_s_left;
+	//--p_s_right;
+
+	int delay_samples = (delay/1000.0) * (float)mixfreq;
+	int depth_samples = (lfo_depth/10000.0) * (float)mixfreq;
+
+	if (delay_samples+depth_samples*2>=BUFFER_SIZE){
+		delay_samples = BUFFER_SIZE - (depth_samples + 10);
+		if (delay_samples<0) {
+
+              		delay_samples=0;
+                	depth_samples=BUFFER_SIZE-10;
+                 }
+	}
 
         int copy_amount=p_amount;
-        int aux_idx=0;
+//        int aux_idx=0;
 
         float real_feedback=feedback/*127.0*//100.0;
         float real_width=width/127.0/*/100.0*/;
 
+		//++copy_amount;
+   //     while (copy_amount--) {
 
-        while (copy_amount--) {
-
-        	ringbuffer_l[(ring_buffer_index+aux_idx) % BUFFER_SIZE] = *++p_s_left;
-			ringbuffer_r[(ring_buffer_index+aux_idx) % BUFFER_SIZE] = *++p_s_right;
-        	aux_idx++;	
-        }
+   //     	ringbuffer_l[(ring_buffer_index+aux_idx) % BUFFER_SIZE] = (int)*++p_s_left;
+			//ringbuffer_r[(ring_buffer_index+aux_idx) % BUFFER_SIZE] = (int)*++p_s_right;
+   //     	aux_idx++;	
+   //     }
 	
         
-	copy_amount=p_amount;
-    --p_left;
-	--p_right;
+//	copy_amount=p_amount;
+ //   --p_left;
+	//--p_right;
 
         while (copy_amount--) {
+                
+				int final_index_l=delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI)/mixfreq ));
+				int final_index_r=delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI+M_PI/4)/mixfreq ));
 
-                float read_index=((float)index*lfo_speed*M_PI)/*256.0*//(float)mixfreq;
-				int final_index=delay_samples+(depth_samples+std::sin(read_index/**M_PI/256.0*/)*depth_samples);
+                final_index_l = (BUFFER_SIZE+ring_buffer_index-final_index_l) % BUFFER_SIZE;
+				final_index_r = (BUFFER_SIZE+ring_buffer_index-final_index_r) % BUFFER_SIZE;
 
+                /*float*/ int val = ringbuffer_l[final_index_l];//.at(final_index_l); //take left val
                 
-                float val = ringbuffer_l[ (BUFFER_SIZE+(ring_buffer_index-final_index)) % BUFFER_SIZE ];//take left val
+                /*float*/ int left=val*real_feedback+(int)*p_s_left; //apply the feedback thing
                 
-                float left=(val*real_feedback); //apply the feedback thing
+                val = ringbuffer_r[final_index_r]; //.at(final_index_r); //take right val
                 
-                val = ringbuffer_r[ (BUFFER_SIZE+(ring_buffer_index-final_index)) % BUFFER_SIZE  ] ; //take right val
-                
-                float right=(val*real_feedback); //apply the feedback thing
+                /*float*/ int right=val*real_feedback+(int)*p_s_right; //apply the feedback thing
 
-                val=right;
+				ringbuffer_l[ring_buffer_index]=left;
+				ringbuffer_r[ring_buffer_index]=right;
+				
+				val=right;
                 right=(right*(1/*27*/-real_width)/*>>7*/) + (left*(real_width)/*>>7*/);
                 left=(val*(real_width)/*>>7*/) + (left*(1/*27*/-real_width)/*>>7*/);
+				//if (left>32767) left=32767;
+				//if (left<-32767) left=-32767;
+				//if (right>32767) right=32767;
+				//if (right<-32767) right=-32767;
 
 
-		*++p_left +=left;
-		*++p_right +=right;
+			*p_s_left =left;
+			*p_s_right =right;
 
-  		index++;
-    
-		ring_buffer_index++;
-		ring_buffer_index%=ringbuffer_l.size();
+  			//if (index++==44100)index=0;
+			index++;
+
+	    
+			ring_buffer_index++;
+			ring_buffer_index%=BUFFER_SIZE;
+			++p_s_left;
+			++p_s_right;
+
         }
 
 

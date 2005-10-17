@@ -20,12 +20,9 @@
 
 #ifndef VOICE_H
 #define VOICE_H
+
 #include <vector>
 
-#define MIX_BUFFER_SIZE 30000
-#define DECLICKER_BUFFER_SIZE 20
-#define DECLICKER_THRESHOLD (1<<16) //if higher than this, might click i guess
-  
 #define M_PI 3.14159265359f
 
 
@@ -66,8 +63,8 @@ class Voice {
    	bool sustaining;
     char sustain_noteoff_velocity;
 
-    float last_val_l;
-    float last_val_r;
+    //float last_val_l;
+    //float last_val_r;
 /*
 	std::vector<float> buffer_l;
 	std::vector<float> buffer_r;
@@ -99,14 +96,14 @@ public: /* STATUS */
 		
         	/* Channel Default Stuff */
 		
-		int vibrato_depth;
-		int vibrato_speed;
+		//int vibrato_depth;
+		//int vibrato_speed;
 
 		int channel_pan;
 
 		int main_volume;
 	
-		int default_chorus;
+		//int default_chorus;
 		//int default_reverb;
 
 		//int portamento_time_coarse;
@@ -143,7 +140,8 @@ public: /* STATUS */
 
 
 protected:
-	virtual void mix_internal(int p_amount,float* p_where_l,float* p_where_r)=0; //set where to mix
+	//virtual void mix_internal(int p_amount,float* p_where_l,float* p_where_r)=0; //set where to mix
+	virtual void mix_internal(int p_amount,int *p_where_l,int *p_where_r)=0; //set where to mix
 	virtual void mix_modifier_call(); //mixer modifier call, if you want to something between mixblocks
     virtual void set_note_internal(char p_note,char p_velocity)=0; //noteon
 	virtual void set_note_off_internal(char p_velocity)=0;
@@ -194,13 +192,14 @@ public: /* COMMANDS */
 
 public: /* METADATA */
 
-	void set_channel(char p_channel);
-	char get_channel();
+	//void set_channel(char p_channel);
+	//char get_channel();
 
 public: /* MIXING! */
 
 	void set_mix_frequency(int p_mixfreq);
-	void mix(int p_amount,float *p_where_l,float *p_where_r); //set where to mix
+	//void mix(int p_amount,float *p_where_l,float *p_where_r); //set where to mix
+	void mix(int p_amount,int *p_where_l,int *p_where_r);
     float get_last_value_L(); //used for declicker	
     float get_last_value_R(); //used for declicker
 	//void process_declicker();

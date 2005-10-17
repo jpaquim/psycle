@@ -175,12 +175,14 @@ void TB303_Voice::set_mix_frequency_internal(int p_mixfreq){ //stuff we need to 
 
 }
 
-void TB303_Voice::mix_internal(int p_amount,float *p_where_l,float *p_where_r){
+//void TB303_Voice::mix_internal(int p_amount,float *p_where_l,float *p_where_r){
+void TB303_Voice::mix_internal(int p_amount,int *p_where_l,int *p_where_r){
 
     float mix_volume_left;
     float mix_volume_right;
     float mix_volume;
-    float val,left_c,right_c;
+    float val;//,left_c,right_c;
+	int left_c,right_c;
     left_c=right_c=0;
 
     mix_volume=get_total_volume()*0.007874015748031496062992125984252f; // (/ 127.0) get_total_volume returns the TOTAL volume in a range from 0 to 1, it inclues main volume, preamp, expression, velocity, tremolo, etc
@@ -209,16 +211,19 @@ void TB303_Voice::mix_internal(int p_amount,float *p_where_l,float *p_where_r){
 
        		// compute sample
        		val=vcf_a*vcf_d1 + vcf_b*vcf_d2 + vcf_c*vco_k*vca_a;
-			undenormalise(val);
+			//undenormalise(val);
 			//anti-denormal code from Jazz
 			//unsigned int corrected_sample = *((unsigned int*)&val);
   			//corrected_sample *= ((corrected_sample < 0x7F800000) && ((corrected_sample & 0x7F800000) > 0));
   			//val = *((float*)&corrected_sample);
-
-			left_c = val * mix_volume_left;
-			right_c = val * mix_volume_right;
-            left_c*=REQUESTED_MAX_SAMPLE_VALUE; //this is the max value for the voice, it's actually (1<<29)
-            right_c*=REQUESTED_MAX_SAMPLE_VALUE;
+			unsigned int corrected_sample = *((unsigned int*)&val);
+ 			unsigned int exponent = corrected_sample & 0x7F800000;
+ 			corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+ 			val = *((float*)&corrected_sample);
+			left_c = val * mix_volume_left*REQUESTED_MAX_SAMPLE_VALUE;
+			right_c = val * mix_volume_right*REQUESTED_MAX_SAMPLE_VALUE;
+            //left_c*=REQUESTED_MAX_SAMPLE_VALUE; //this is the max value for the voice, it's actually (1<<29)
+            //right_c*=REQUESTED_MAX_SAMPLE_VALUE;
     		*++p_where_l += left_c; //mix to channel buffer, left sample
     		*++p_where_r += right_c; //mix to channel buffer, right sample
 
