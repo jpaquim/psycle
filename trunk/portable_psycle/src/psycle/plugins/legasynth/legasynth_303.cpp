@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov LegaSynth TB303 plugin for PSYCLE
-// v0.1 beta
+// v0.2 beta
 //
 
 #include <project.private.hpp>
@@ -34,14 +34,24 @@ CMachineParameter const paraFine =
 };
 
 
-CMachineParameter const paraDiv1 = 
+CMachineParameter const paraPB = 
 {
-	"",
-	"",									// description
+	"Pitch bend",
+	"Pitch bend",									// description
 	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE||MPF_LABEL,										// Flags
-	0
+	0x2000*2,											// MaxValue
+	MPF_STATE,										// Flags
+	0x2000
+};
+
+CMachineParameter const paraPD = 
+{
+	"Pitch depth",
+	"Pitch depth",									// description
+	0,											// MinValue	
+	12,											// MaxValue
+	MPF_STATE,										// Flags
+	12
 };
 
 CMachineParameter const paraExpression = 
@@ -54,13 +64,13 @@ CMachineParameter const paraExpression =
 	127
 };
 
-CMachineParameter const paraDiv2 = 
+CMachineParameter const paraDist = 
 {
-	"",
-	"",									// description
+	"Distortion",
+	"Distortion",									// description
 	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE||MPF_LABEL,										// Flags
+	100,											// MaxValue
+	MPF_STATE,										// Flags
 	0
 };
 
@@ -145,17 +155,6 @@ CMachineParameter const paraDecay =
 	0
 };
 
-
-CMachineParameter const paraDiv3 = 
-{
-	"",
-	"",									// description
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE||MPF_LABEL,										// Flags
-	0
-};
-
 CMachineParameter const paraLFO = 
 {
 	"LFO&Sweep",
@@ -220,8 +219,8 @@ CMachineParameter const paraSweepValue =
 {
 	"Sweep value",
 	"Sweep value",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
+	-127,											// MinValue	
+	127,											// MaxValue
 	MPF_STATE,										// Flags
 	0
 };
@@ -249,7 +248,7 @@ CMachineParameter const paraChorusDelay =
 	"Delay",
 	"Delay",									// description
 	0,											// MinValue	
-	255,											// MaxValue
+	127,											// MaxValue
 	MPF_STATE,										// Flags
 	3
 };
@@ -259,7 +258,7 @@ CMachineParameter const paraChorusLFOSpeed =
 	"LFO Speed",
 	"LFO Speed",									// description
 	0,											// MinValue	
-	256,											// MaxValue
+	127,											// MaxValue
 	MPF_STATE,										// Flags
 	2
 };
@@ -300,9 +299,10 @@ CMachineParameter const *pParameters[] =
 { 
 	&paraCoarse,
 	&paraFine,
-	&paraDiv1,
+	&paraPB,
+	&paraPD,
 	&paraExpression,
-	&paraDiv2,
+	&paraDist,
 	&paraFilter,
 	&paraCutOff,
 	&paraCutSweep,
@@ -311,7 +311,6 @@ CMachineParameter const *pParameters[] =
 	&paraResonance,
 	&paraMod,
 	&paraDecay,
-	&paraDiv3,
 	&paraLFO,
 	&paraSpeed,
 	&paraDepth,
@@ -446,45 +445,54 @@ void mi::SequencerTick()
 void mi::ParameterTweak(int par, int val)
 {
 	// Called when a parameter is changed by the host app / user gui
-	char expr = Vals[3];
+	int pb = Vals[2];
+	int pd = Vals[3];
+	char expr = (Vals[4]&0xFF);
 	Vals[par]=val;
 	switch (par) {
-		case 0:track_data.coarse = Vals[par]; break;
-		case 1:track_data.fine = Vals[par]; break;
-		case 2: break;
-		case 3:expr = Vals[par];break;
-		case 4: break;
+		case 0:track_data.coarse = val; break;
+		case 1:track_data.fine = val; break;
+		case 2:pb = val; break;
+		case 3:pd = val; break;
+		case 4:expr = (val&0xFF); break;
 		case 5: break;
-		case 6:track_data.envelope_cutoff = Vals[par]; break;
-		case 7:track_data.cutoff_sweep = Vals[par]; break;
-		case 8:track_data.cutoff_lfo_speed = Vals[par]; break;
-		case 9:track_data.cutoff_lfo_depth = Vals[par]; break;
-		case 10:track_data.resonance = Vals[par]; break;
-		case 11:track_data.envelope_mod = Vals[par]; break;
-		case 12:track_data.envelope_decay = Vals[par]; break;
-		case 13:break;
+		case 6: break;
+		case 7:track_data.envelope_cutoff = val; break;
+		case 8:track_data.cutoff_sweep = val; break;
+		case 9:track_data.cutoff_lfo_speed = val; break;
+		case 10:track_data.cutoff_lfo_depth = val; break;
+		case 11:track_data.resonance = val; break;
+		case 12:track_data.envelope_mod = val; break;
+		case 13:track_data.envelope_decay = val;break;
 		case 14:break;
-		case 15:track_def_data.LFO_speed = Vals[par];break;
-		case 16:track_def_data.LFO_depth = Vals[par];break;
-		case 17:track_def_data.LFO_type = Vals[par];break;
-		case 18:track_def_data.LFO_delay = Vals[par];break;
-		case 19:track_def_data.sweep_delay = Vals[par];break;
-		case 20:track_def_data.sweep_value = Vals[par];break;
+		case 15:track_def_data.LFO_speed = val;break;
+		case 16:track_def_data.LFO_depth = val;break;
+		case 17:track_def_data.LFO_type = val;break;
+		case 18:track_def_data.LFO_delay = val;break;
+		case 19:track_def_data.sweep_delay = val;break;
+		case 20:track_def_data.sweep_value = val;break;
 		case 21:break;
 		case 22:break;
-		case 23:chorus.set_delay(Vals[par]);break;
-		case 24:chorus.set_lfo_speed(Vals[par]);break;
-		case 25:chorus.set_lfo_depth(Vals[par]);break;
-		case 26:chorus.set_feedback(Vals[par]);break;
-		case 27:chorus.set_width(Vals[par]);break;
+		case 23:chorus.set_delay(val);break;
+		case 24:chorus.set_lfo_speed(val);break;
+		case 25:chorus.set_lfo_depth(val);break;
+		case 26:chorus.set_feedback(val);break;
+		case 27:chorus.set_width(val);break;
 	}
-	if (par<20){
+	if (par<14){
 		for(int c=0;c<MAX_TRACKS;c++)
 			{
 				track[c].set_data(&track_data);
-				track[c].set_default_data(&track_def_data);
+				track[c].set_pitch_bend(pb);
+				track[c].set_pitch_depth(pd);
 				track[c].set_expression(expr);
 			}
+	} else if (par>14&&par<21) {
+		for(int c=0;c<MAX_TRACKS;c++)
+			{
+				track[c].set_default_data(&track_def_data);
+			}
+
 	}
 }
 
@@ -507,10 +515,10 @@ pCB->MessBox(buffer,"LegaSynth TB303",0);
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks)
 {
-	//float sl=0;
 	bool const use_chorus=(Vals[22]==1);
-
-	std::vector<float> s_l(numsamples), s_r(numsamples);
+	float const dist=(float)Vals[5]*.01*.0000015;
+	//std::vector<float> s_l(numsamples), s_r(numsamples);
+	std::vector<int> s_l(numsamples), s_r(numsamples);
 
 	for(int c=0;c<tracks;c++)
 	{
@@ -528,10 +536,10 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 
 		for(int k=0;k<numsamples;k++)
 		{
-			float &sl = s_l.at(k);
-			float &sr = s_r.at(k);
-			*++xpsamplesleft+=sl;
-			*++xpsamplesright+=sr;
+			/*float*/ int &sl = s_l.at(k);
+			/*float*/ int &sr = s_r.at(k);
+			*++xpsamplesleft+=(dist>0?(float)(sl-dist*(sl*sl+sl*sl*sl)):(float)sl);
+			*++xpsamplesright+=(dist>0?(float)(sr-dist*(sr*sr+sr*sr*sr)):(float)sr);
 		}
 	}
 	if (use_chorus){
@@ -544,6 +552,17 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
+	if(param==1)
+	{
+		sprintf(txt,"%.6f",(float)value/65535.f);
+		return true;
+	}
+
+	if(param==5)
+	{
+		sprintf(txt,"%i %%",value);
+		return true;
+	}
 	if(param==17)
 	{
 		switch(value)
@@ -585,7 +604,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		// Note on
 		{
 			//track[channel].set_note_off(127);
-			track[channel].set_note(note,Vals[3]);
+			track[channel].set_note(note,Vals[4]);
 		}
 	}
 }

@@ -20,7 +20,6 @@
 
 #ifndef TB303_VOICE_H
 #define TB303_VOICE_H
-#include "../lib/denormals.hpp"
 #include "../lib/voice.h"
 
 /**
@@ -106,7 +105,8 @@ public:
 public: /* MIXING! */
 
 	void set_mix_frequency_internal(int p_mixfreq); //this will be called to configure the frequency
-	void mix_internal(int p_amount,float *p_where_l,float *p_where_r); //and this will ask us to mix the voice
+	//void mix_internal(int p_amount,float *p_where_l,float *p_where_r); //and this will ask us to mix the voice
+	void mix_internal(int p_amount,int *p_where_l,int *p_where_r);
 
 	TB303_Voice();
 	~TB303_Voice();

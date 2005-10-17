@@ -1,3 +1,6 @@
+/////////////////////////////////////////////////////////////////////
+// Dmitry "Sartorius" Kulikov LegaSynth plugins for PSYCLE
+
 /***************************************************************************
                           chorus.h  -  description
                              -------------------
@@ -36,8 +39,10 @@ class Chorus {
   	int index; //osc index
     int ring_buffer_index;
 
-	std::vector<float> ringbuffer_l;
-	std::vector<float> ringbuffer_r;
+	//std::vector<float> ringbuffer_l;
+	//std::vector<float> ringbuffer_r;
+	std::vector<int> ringbuffer_l;
+	std::vector<int> ringbuffer_r;
 
     int mixfreq;
    
@@ -46,8 +51,9 @@ public:
 	void set_mixfreq(int p_mixfreq);
 
 	void process(float *p_lest,float *p_right,int p_amount);
+	//void process(int *p_lest,int *p_right,int p_amount);
 
-	void set_chorus_params(float p_delay, float p_lfo_speed, float p_lfo_depth, float p_feedback, float p_width);
+	//void set_chorus_params(float p_delay, float p_lfo_speed, float p_lfo_depth, float p_feedback, float p_width);
 	void set_delay(float p_delay);
 	void set_lfo_speed(float p_lfo_speed);
 	void set_lfo_depth(float p_lfo_depth);

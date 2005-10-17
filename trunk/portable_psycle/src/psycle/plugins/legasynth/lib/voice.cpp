@@ -22,26 +22,14 @@
 
 #include <cmath>
 
-/*
-void Voice::add_buffer(float* p_dst, float *p_src, int p_amount) {
-
-	while (p_amount--) {
-
-         	*p_dst++ += *p_src;
-          	p_src++;
-	}        	
-}
-*/
-
 void Voice::mix_modifier() {
 
 	if (update_count>sweep_delay*4) {
-		sweep_level+=(std::pow(sweep_value,2)*0.0025)*((sweep_value<0)?-1.0:1.0); //exponential curve for sweeping
+		sweep_level+=(sweep_value*sweep_value*0.0025)*((sweep_value<0)?-1.0:1.0); //exponential curve for sweeping
 	    recalculate_pitch_internal();		
 	}
 
 	if (update_count>LFO_delay*4) {
-
 
         int phase=(LFO_speed*update_count*10)&0xFFF;
 		
@@ -71,8 +59,6 @@ void Voice::mix_modifier() {
 	
     mix_modifier_call();
 }
-
-
 
 float Voice::get_fnote() {
 
@@ -104,26 +90,22 @@ int Voice::get_update_count() {
 	return update_count;
 }
 
-
-void Voice::store_last_values(float p_left,float p_right) {
-
-	last_val_l=p_left;
-	last_val_r=p_right;
-}
-
-
-void Voice::mix(int p_amount,float *p_where_l,float *p_where_r) {
+void Voice::mix(int p_amount,int *p_where_l,int *p_where_r) {
 
     if (update_count==0) mix_modifier();
 
 			int amount=(update_ofs<p_amount)?update_ofs:p_amount;
          	update_ofs-=amount;
 
-			mix_internal(p_amount,p_where_l,p_where_r);
-			//mix_internal(amount,&buffer_l.front(),&buffer_r.front());
 
 			poll_for_dead_staus();
 			if (get_status()==DEAD) return;
+
+			mix_internal(p_amount,p_where_l,p_where_r);
+			//mix_internal(amount,&buffer_l.front(),&buffer_r.front());
+
+			//poll_for_dead_staus();
+			//if (get_status()==DEAD) return;
 
 
 			if (update_ofs<=0) {
@@ -134,19 +116,14 @@ void Voice::mix(int p_amount,float *p_where_l,float *p_where_r) {
 
 }
 
-
-
 void Voice::set_sustain(bool p_sustain) {
 
        	sustain=p_sustain;
 
 	if (!sustain && sustaining) {
-
-		
 		set_note_off(sustain_noteoff_velocity);
 		sustaining=false;
 	}
-
 }
 
 void Voice::set_note(char p_note,char p_velocity) {
@@ -157,7 +134,6 @@ void Voice::set_note(char p_note,char p_velocity) {
 	recalculate_pitch_internal();
 }
 
-
 void Voice::set_note_off(char p_velocity) {
 
 	if (sustain) {
@@ -166,7 +142,6 @@ void Voice::set_note_off(char p_velocity) {
 		sustain_noteoff_velocity=p_velocity;
 		return;
 	}
-
 
 	set_note_off_internal(p_velocity);		
 }
@@ -252,15 +227,15 @@ void Voice::mix_modifier_call() {
 
 
 }
-void Voice::set_channel(char p_channel) {
-
-	channel=p_channel;
-
-}
-char Voice::get_channel() {
-
-	return channel;
-}
+//void Voice::set_channel(char p_channel) {
+//
+//	channel=p_channel;
+//
+//}
+//char Voice::get_channel() {
+//
+//	return channel;
+//}
 void Voice::set_default_data(Default_Data *p_data) {
 
 	pan_relative=p_data->relative_pan;
@@ -309,20 +284,20 @@ Voice::Voice(){
    	//sustain=true;
    	sustain=false;
    	sustaining=false;
-	last_val_l = 0;
-	last_val_r = 0;
+	//last_val_l = 0;
+	//last_val_r = 0;
 }
 
-float Voice::get_last_value_L() {
-
-	return last_val_l;
-}
-
-float Voice::get_last_value_R() {
-
-	return last_val_r;
-
-}
+//float Voice::get_last_value_L() {
+//
+//	return last_val_l;
+//}
+//
+//float Voice::get_last_value_R() {
+//
+//	return last_val_r;
+//
+//}
 
 void Voice::set_preamp(float p_preamp) {
 
