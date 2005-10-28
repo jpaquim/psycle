@@ -108,6 +108,7 @@ protected:
 	enum Channels { left, right, channels };
 	std::vector<Real> buffers_[channels];
 	int delay_in_samples_, writes_[channels];
+	Real weight; //<Sartorius> for interpolation
 	Real modulation_amplitude_in_samples_, modulation_radians_per_sample_, modulation_phase_;
 	math::Sin_Sequence sin_sequences_[channels];
 };
@@ -165,6 +166,7 @@ void Flanger::parameter(const int & parameter)
 inline Flanger::resize(const Real & delay)
 {
 	delay_in_samples_ = static_cast<int>(delay * samples_per_second());
+	weight = delay * samples_per_second() - floor(delay * samples_per_second()); //<Sartorius> for interpolation
 	modulation_amplitude_in_samples_ = (*this)(modulation_amplitude) * delay_in_samples_;
 	for(int channel(0) ; channel < channels ; ++channel)
 	{
@@ -185,23 +187,13 @@ void Flanger::process(Sample l[], Sample r[], int samples, int)
 
 inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw()
 {
-	switch((*this)[interpolation])
-	{
-	case yes: /// \todo interpolation not done for now
-	case no:
-	default:
-		{
+
+//<Sartorius> linear interpolation
 			const size(buffer.size());
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
 				const Real sin(sin_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
-				/* test without optimized sin sequence...
-				Real sin;
-				if(&sin_sequence == &sin_sequences_[left])
-					sin = std::sin(modulation_phase_);
-				else
-					sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
-				*/
+
 
 				assert(-1 <= sin);
 				assert(sin <= 1);
@@ -218,8 +210,15 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 
 				assert(0 <= read);
 				assert(read < static_cast<int>(buffer.size()));
-
-				const Real buffer_read(buffer[read]);
+				
+				/*const */ Real buffer_read(0);
+				if ((*this)[interpolation]==yes) 
+				{
+					assert(read+1 < static_cast<int>(buffer.size()));
+					buffer_read = buffer[read] * (1.0 - weight) + buffer[read+1] * weight;
+				} else {
+					buffer_read = buffer[read];
+				}
 				Sample & input_sample = input[sample];
 				buffer[write] = /*math::renormalized*/(input_sample + feedback * buffer_read);
 				++write %= size;
@@ -231,9 +230,57 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 				corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
 				input_sample = *((float*)&corrected_sample);
 			}
-		}
-		break;
-	}
+
+
+	//switch((*this)[interpolation])
+	//{
+	//case yes: /// \todo interpolation not done for now
+	//case no:
+	//default:
+	//	{
+	//		const size(buffer.size());
+	//		for(int sample(0) ; sample < samples ; ++sample)
+	//		{
+	//			const Real sin(sin_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+	//			/* test without optimized sin sequence...
+	//			Real sin;
+	//			if(&sin_sequence == &sin_sequences_[left])
+	//				sin = std::sin(modulation_phase_);
+	//			else
+	//				sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
+	//			*/
+
+	//			assert(-1 <= sin);
+	//			assert(sin <= 1);
+	//			assert(0 <= write);
+	//			assert(write < static_cast<int>(buffer.size()));
+	//			assert(0 <= modulation_amplitude_in_samples_);
+	//			assert(modulation_amplitude_in_samples_ <= delay_in_samples_);
+
+	//			int read;
+	//			//if(sin < 0) read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin);
+	//			//else read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin) - 1;
+	//			read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
+	//			if(read < 0) read += size; else if(read >= size) read -= size;
+
+	//			assert(0 <= read);
+	//			assert(read < static_cast<int>(buffer.size()));
+
+	//			const Real buffer_read(buffer[read]);
+	//			Sample & input_sample = input[sample];
+	//			buffer[write] = /*math::renormalized*/(input_sample + feedback * buffer_read);
+	//			++write %= size;
+	//			input_sample *= (*this)(dry);
+	//			input_sample += (*this)(wet) * buffer_read;
+	//			// NaN and Den remover :
+	//			unsigned int corrected_sample = *((unsigned int*)&input_sample);
+	//			unsigned int exponent = corrected_sample & 0x7F800000;
+	//			corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+	//			input_sample = *((float*)&corrected_sample);
+	//		}
+	//	}
+	//	break;
+	//}
 }
 
 }}
