@@ -27,5 +27,3 @@ Psycle (date --universal ; id --user --name ; echo %{vVst} ; cat) | mail johan-b
 DEFAULT (date --universal ; id --user --name ; echo t: %t xxx s: %s xxx v: %v xxx V: %V ; cat) | mail johan-boule  -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
 
 #-b jaz001,sampler,alkenstein,sartorius,voskomo
-
-
