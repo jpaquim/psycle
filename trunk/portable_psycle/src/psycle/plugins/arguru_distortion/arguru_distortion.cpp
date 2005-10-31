@@ -1,9 +1,9 @@
 #include <project.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
 
 //////////////////////////////////////////////////////////////////////
 // Arguru simple distortion/saturator plugin for PSYCLE
