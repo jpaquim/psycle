@@ -20,10 +20,12 @@
 #   V = old version number (pre-checkin)
 #   v = new version number (post-checkin)
 
-#portable_psycle (echo "" ; date --universal ; id --user --name ; echo %{vVst} ; cat) >> $CVSROOT/CVSROOT/commitlog.portable_psycle
-#DEFAULT (echo "" ; date --universal  ; id --user --name ; echo %{vVst} ; cat) >> $CVSROOT/CVSROOT/commitlog
+# e.g.: echo %{tsVv}
 
-Psycle (date --universal ; id --user --name ; echo %{vVst} ; cat) | mail johan-boule -s "[cvs.sourceforge.net] [psycle] a commit was done in an old unused directory by `id --user --name`"
-DEFAULT (date --universal ; id --user --name ; echo t: %t xxx s: %s xxx v: %v xxx V: %V ; cat) | mail johan-boule  -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
+#portable_psycle (echo "" ; date --universal ; id --user --name ; cat) >> $CVSROOT/CVSROOT/commitlog.portable_psycle
+#DEFAULT (echo "" ; date --universal  ; id --user --name ; cat) >> $CVSROOT/CVSROOT/commitlog
+
+Psycle (date --universal ; id --user --name ; cat) | mail johan-boule -s "[cvs.sourceforge.net] [psycle] a commit was done in an old unused directory by `id --user --name`"
+DEFAULT (date --universal ; id --user --name ; cat) | mail johan-boule  -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
 
 #-b jaz001,sampler,alkenstein,sartorius,voskomo
