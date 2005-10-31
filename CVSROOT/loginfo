@@ -19,14 +19,9 @@
 #   s = file name
 #   V = old version number (pre-checkin)
 #   v = new version number (post-checkin)
-#
-# For example:
-#DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
-# or
-#DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
-#portable_psycle (echo "" ; id --user --name ; echo %{tsVv} ; date --universal +"%Z %Y %B %d %A %T" ; cat) >> $CVSROOT/CVSROOT/commitlog.portable_psycle
-#DEFAULT (echo "" ; id --user --name ; echo %{tsVv} ; date --universal +"%Z %Y %B %d %A %T" ; cat) >> $CVSROOT/CVSROOT/commitlog
+#portable_psycle (echo "" ; id --user --name ; echo %{vVst} ; date --universal +"%Z %Y %B %d %A %T" ; cat) >> $CVSROOT/CVSROOT/commitlog.portable_psycle
+#DEFAULT (echo "" ; id --user --name ; echo %{vVst} ; date --universal +"%Z %Y %B %d %A %T" ; cat) >> $CVSROOT/CVSROOT/commitlog
 
-Psycle (id --user --name ; echo %{tsVv} ; cat) | mail johan-boule -s "[cvs.sourceforge.net] [psycle] a commit was done in an old unused directory by `id --user --name`"
-DEFAULT (id --user --name ; echo %{tsVv} ; cat) | mail johan-boule -b alkenstein,jaz001,sampler -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
+Psycle (id --user --name ; echo %{vVst} ; cat) | mail johan-boule -s "[cvs.sourceforge.net] [psycle] a commit was done in an old unused directory by `id --user --name`"
+DEFAULT (id --user --name ; echo %{vVst} ; cat) | mail johan-boule -b jaz001,sampler,alkenstein,sartorius,voskomo -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
