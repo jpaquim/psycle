@@ -987,12 +987,12 @@ namespace psycle
 						// branch on status code
 						switch(statusHN)
 						{
-							case 11:
+							case 0x0B:
 								// mods
 								// data 2 contains the info
 								for(int i(0) ; i < 16 ; ++i)
 								{
-									if(Global::pConfig->midi().group(i).record() & (Global::pConfig->midi().group(i).message() == data1 ))
+									if(Global::pConfig->midi().group(i).record() && (Global::pConfig->midi().group(i).message() == data1 ))
 									{
 										int const value(Global::pConfig->midi().group(i).from() + (Global::pConfig->midi().group(i).to() - Global::pConfig->midi().group(i).from()) * data2 / 127);
 										switch(Global::pConfig->midi().group(i).type())
@@ -1015,7 +1015,7 @@ namespace psycle
 									}
 								}
 								break;
-							case 14:
+							case 0x0E:
 								// pitch wheel
 								// data 2 contains the info
 								if (Global::pConfig->_RecordTweaks)

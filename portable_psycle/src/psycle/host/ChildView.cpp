@@ -303,6 +303,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
+
 			if ( Global::pConfig->autosaveSong )
 			{
 				if (!SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL)) // Autosave Song
@@ -349,9 +350,16 @@ NAMESPACE__BEGIN(psycle)
 				}
 				if (viewMode == VMMachine)
 				{
-					Repaint(DMAllMacsRefresh);
-//					CClientDC dc(this);
-//					DrawAllMachineVumeters(&dc);
+/*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
+					{
+						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
+						Repaint(DMAllMacsRefresh);
+					}
+					else
+					{*/
+						CClientDC dc(this);
+						DrawAllMachineVumeters(&dc);
+//					}
 				}
 
 				if (Global::pPlayer->Tweaker)
@@ -2074,28 +2082,28 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdoc\\keys.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath);
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdoc\\readme.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath);
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdoc\\tweaking.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath);
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdoc\\whatsnew.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath);
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
