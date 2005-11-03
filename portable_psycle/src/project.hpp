@@ -770,7 +770,8 @@
 			// [bohan] in the project settings, it's hidden under General Properties / Whole Program Optimization.
 		#pragma inline_depth(255)
 		#pragma inline_recursion(on)
-		#define inline __forceinline
+		//#define inline __forceinline
+			// [bohan] disabled, because it can make the compiler/linker eat awesome amounts of RAM and CPU time.
 	#endif
 #endif
 
