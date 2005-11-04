@@ -34,11 +34,12 @@
 
 // version 0.2 - threshold now defaults to 32768 rather than to 512
 
+#include <project.private.hpp>
+#include <psycle/plugin_interface.hpp>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include "MachineInterface.h"
 
 CMachineParameter const paraThreshold =
 {
@@ -72,7 +73,7 @@ CMachineInfo const MacInfo =
 	0,                                     // flags
 	2,                                     // numParameters
 	pParameters,                           // Pointer to parameters
-#ifdef _DEBUG
+#ifndef NDEBUG
 	"ThunderPalace SoftSat (Debug build)", // name
 #else
 	"ThunderPalace SoftSat",               // name
@@ -100,7 +101,7 @@ public:
 private:
 };
 
-DLL_EXPORTS
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -141,8 +142,6 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int tra
 {
 	const float gradation = ((float) Vals[1]) / 2049.0f;       // paraHardness
 	const float range = ((float) Vals[0]) / ((gradation+1)/2); // paraThreshold
-
-	float const wet =(float)Vals[1]*0.00390625f;
 
 	do
 	{
