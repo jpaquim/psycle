@@ -11,5 +11,5 @@ But for other plugins, we have not much contact with their authors, and we don't
    NEWS
 ============
 
-we now have the sources of druttis' and pooplog's plugins :-)
+we now have the sources of druttis' plugins :-)
 As soon as we are sure we can compile them correctly, we'll remove the .dll from here.

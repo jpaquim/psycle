@@ -25,8 +25,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 0
-#define PSYCLE__VERSION__QUALITY "Release"
+#define PSYCLE__VERSION__PATCH 1
+#define PSYCLE__VERSION__QUALITY "Release with bugfixes"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -77,6 +77,9 @@
 #if 0
 /*
 $Log$
+Revision 1.45.2.1  2005/11/05 15:36:15  johan-boule
+added new plugins
+
 Revision 1.45  2005/07/24 16:59:02  jaz001
 * fixed baground bitmap bug.
 * changed default colours for new release
