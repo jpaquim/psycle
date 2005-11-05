@@ -1,6 +1,3 @@
-//#define PREVIEW
-#define FILEVERSION 4
-
 /*
 
 Version History
@@ -183,6 +180,9 @@ TODO LIST
  
 #include "synthtrack.h"
 #include <memory.h>
+
+//#define PREVIEW
+#define FILEVERSION 4
 
 #define THREESEL(sel,a,b,c) ((sel)<120)?((a)+((b)-(a))*(sel)/120):((b)+((c)-(b))*((sel)-120)/120)
 
