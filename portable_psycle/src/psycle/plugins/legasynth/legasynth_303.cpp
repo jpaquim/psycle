@@ -210,7 +210,7 @@ CMachineParameter const paraSweepDelay =
 	"Sweep delay",
 	"Sweep delay",									// description
 	0,											// MinValue	
-	0xFFFF,											// MaxValue
+	1/*xFFFF*/,											// MaxValue
 	MPF_STATE,										// Flags
 	0
 };
@@ -219,8 +219,10 @@ CMachineParameter const paraSweepValue =
 {
 	"Sweep value",
 	"Sweep value",									// description
-	-127,											// MinValue	
-	127,											// MaxValue
+	//-127,											// MinValue	
+	//127,											// MaxValue
+	0,											// MinValue	
+	1,											// MaxValue
 	MPF_STATE,										// Flags
 	0
 };
@@ -469,8 +471,8 @@ void mi::ParameterTweak(int par, int val)
 		case 16:track_def_data.LFO_depth = val;break;
 		case 17:track_def_data.LFO_type = val;break;
 		case 18:track_def_data.LFO_delay = val;break;
-		case 19:track_def_data.sweep_delay = val;break;
-		case 20:track_def_data.sweep_value = val;break;
+		case 19:track_def_data.sweep_delay = 0;break; // Not yet available
+		case 20:track_def_data.sweep_value = 0;break; // Not yet available
 		case 21:break;
 		case 22:break;
 		case 23:chorus.set_delay(val);break;
@@ -572,6 +574,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		case 2:sprintf(txt,"Square");return true;break;
 		}
 	}
+	
+	if (param==19 || param==20)
+	{
+		sprintf(txt,"N/A");
+		return true;
+	}
+
 
 	if (param==22)
 	{

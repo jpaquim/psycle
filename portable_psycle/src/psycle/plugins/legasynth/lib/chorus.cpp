@@ -128,17 +128,28 @@ void Chorus::process(float *p_left,float *p_right,int p_amount) {
 
         while (copy_amount--) {
                 
-				int final_index_l=delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI)/mixfreq ));
-				int final_index_r=delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI+M_PI/4)/mixfreq ));
+				float weight_l = delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI)/mixfreq ));
+				float weight_r = delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI+M_PI/4)/mixfreq ));
+				
+				//int final_index_l=(int)weight_l;
+				//int final_index_r=(int)weight_r;
 
-                final_index_l = (BUFFER_SIZE+ring_buffer_index-final_index_l) % BUFFER_SIZE;
-				final_index_r = (BUFFER_SIZE+ring_buffer_index-final_index_r) % BUFFER_SIZE;
 
-                /*float*/ int val = ringbuffer_l[final_index_l];//.at(final_index_l); //take left val
+				//int final_index_l=intdelay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI)/mixfreq ));
+				//int final_index_r=delay_samples+depth_samples*(1.0+std::sin( index*lfo_speed*(M_PI+M_PI/4)/mixfreq ));
+
+                int final_index_l = (BUFFER_SIZE+ring_buffer_index-(int)weight_l) % BUFFER_SIZE;
+				int final_index_r = (BUFFER_SIZE+ring_buffer_index-(int)weight_r) % BUFFER_SIZE;
+
+				weight_l = weight_l - std::floor(weight_l);
+				weight_r = weight_r - std::floor(weight_r);
+
+
+				/*float*/ int val = ringbuffer_l[final_index_l]*(1.0-weight_l) + ringbuffer_l[(final_index_l+1==BUFFER_SIZE ? 0 : final_index_l+1)] * weight_l;//.at(final_index_l); //take left val
                 
                 /*float*/ int left=val*real_feedback+(int)*p_s_left; //apply the feedback thing
                 
-                val = ringbuffer_r[final_index_r]; //.at(final_index_r); //take right val
+                val = ringbuffer_r[final_index_r]*(1.0-weight_r) + ringbuffer_r[(final_index_r+1==BUFFER_SIZE ? 0 : final_index_r+1)] * weight_l;//.at(final_index_l); //.at(final_index_r); //take right val
                 
                 /*float*/ int right=val*real_feedback+(int)*p_s_right; //apply the feedback thing
 
