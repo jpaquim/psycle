@@ -190,7 +190,7 @@ public: /* COMMANDS */
 	char get_main_volume();
 
 
-public: /* METADATA */
+//public: /* METADATA */
 
 	//void set_channel(char p_channel);
 	//char get_channel();
