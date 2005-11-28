@@ -1407,18 +1407,19 @@ NAMESPACE__BEGIN(psycle)
 						}
 						break;
 					case MACH_XMSAMPLER:
+						if (m_wndView.XMSamplerMachineDialog)
 						{
-						XMSamplerUI dlg(ma->_editName);
-						m_wndView.XMSamplerMachineDialog = &dlg;
-						isguiopen[tmac] = true;
-						dlg.Init((XMSampler*)ma);
-						//display the property sheet by calling CPropertySheet::DoModal for a modal property sheet,
-						//or CPropertySheet::Create for a modeless property sheet.						
-						dlg.DoModal();
-						isguiopen[tmac] = false;
-						m_wndView.XMSamplerMachineDialog = NULL;
-						break;
+							if (m_wndView.XMSamplerMachineDialog->GetMachine() != (XMSampler*)ma)
+							{
+								m_wndView.XMSamplerMachineDialog->DestroyWindow();
+							}
 						}
+						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->_editName,&m_wndView);
+						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
+						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
+						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
+//						m_wndView.XMSamplerMachineDialog->ShowWindow(SW_SHOW);
+						break;
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
 						{
@@ -1563,6 +1564,9 @@ NAMESPACE__BEGIN(psycle)
 						break;
 					case MACH_SAMPLER:
 						if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
+						break;
+					case MACH_XMSAMPLER:
+						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
 						break;
 					case MACH_PLUGIN:
 					case MACH_VST:

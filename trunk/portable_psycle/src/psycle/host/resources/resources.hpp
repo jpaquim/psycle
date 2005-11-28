@@ -207,6 +207,7 @@
 #define IDC_BUTTON16                    1097
 #define IDC_BUTTON17                    1098
 #define IDC_BUTTON11                    1099
+#define IDC_OPENWAVEEDITOR              1099
 #define IDC_BUTTON18                    1100
 #define IDC_BUTTON19                    1101
 #define IDC_BUTTON20                    1102
@@ -742,7 +743,9 @@
 #define IDC_LEFT_VU                     1554
 #define IDC_COMBO6                      1554
 #define IDC_RIGHT_VU                    1555
+#define IDC_COMBO7                      1555
 #define IDC_SL_VOL_MASTER               1556
+#define IDC_COMBO8                      1556
 #define IDC_CH_MASTERMONO               1557
 #define IDC_SL_VOL1                     1558
 #define IDC_SL_VOL2                     1559
@@ -823,7 +826,9 @@
 #define IDC_VIBRATOTYPE                 1637
 #define IDC_SUSTAINSTART                1638
 #define IDC_SUSTAINEND                  1639
+#define IDC_SAMPLENOTE                  1640
 #define IDC_CHECK2                      1641
+#define IDC_FINETUNE                    1641
 #define IDC_COMMANDINFO                 1642
 #define IDC_ENVFRAME                    1643
 #define IDC_XM_EDIT_ENVELOPE            1645
@@ -835,21 +840,36 @@
 #define IDC_RESSONANCE                  1651
 #define IDC_FILTERMOD                   1652
 #define IDC_LDEFVOL                     1653
+#define IDC_PITCHPANMOD2                1653
 #define IDC_LGLOBVOL                    1654
+#define IDC_GLOBVOL2                    1654
 #define IDC_LPAN                        1655
+#define IDC_GLOBVOL3                    1655
 #define IDC_LVIBRATORATE                1656
+#define IDC_FADEOUT2                    1656
 #define IDC_LVIBRATOSWEEP               1657
+#define IDC_GLOBVOL4                    1657
 #define IDC_LVIBRATODEPTH               1658
+#define IDC_GLOBVOL5                    1658
 #define IDC_MACHINEGUI_BITMAP           1659
+#define IDC_FADEOUT3                    1659
+#define IDC_LSAMPLENOTE                 1659
 #define IDC_MACHINEGUI_TOPFONTC         1660
+#define IDC_GLOBVOL6                    1660
+#define IDC_LFINETUNE                   1660
 #define IDC_MACHINEGUI_TOPC             1661
 #define IDC_MACHINEGUI_BOTTOMC          1662
 #define IDC_MACHINEGUI_BOTTOMFONTC      1663
 #define IDC_MACHINEGUI_TITLEC           1664
+#define IDC_INSTRUMENTNAME              1664
+#define IDC_LVIBRATODEPTH2              1664
 #define IDC_MACHINEGUI_TITLEFONTC       1665
+#define IDC_RADIO1                      1665
 #define IDC_MACHINEGUI_TOPFONTC2        1666
+#define IDC_RADIO2                      1666
 #define IDC_MACHINEGUI_TOPC2            1667
 #define IDC_MACHINEGUI_BOTTOMC2         1668
+#define IDC_CHECK3                      1668
 #define IDC_MACHINEGUI_BOTTOMFONTC2     1669
 #define IDC_MOVECURSORPASTE             1670
 #define ID_FILE_LOADSONG                32775
@@ -950,9 +970,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        228
+#define _APS_NEXT_RESOURCE_VALUE        229
 #define _APS_NEXT_COMMAND_VALUE         32939
-#define _APS_NEXT_CONTROL_VALUE         1664
+#define _APS_NEXT_CONTROL_VALUE         1674
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

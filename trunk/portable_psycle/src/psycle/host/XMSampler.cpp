@@ -99,12 +99,12 @@ namespace psycle
 
 
 		// calculated table from the following formula:
-		// period =  pow(2.0,double(15.74154-(note/12.0f)));
-		// 15.74154 comes from  5 + 10.7415, being 5 = the middle octave, and
-		// 10.74154 = log2(2*7159090.5/8363) , being 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate.
-		// why multiplied by 2? well.. it should be a 4 (the amiga period was shifted two octaves up in newer trackers),
-		// so i am not sure. The rest of the logic is perfectly clear.
-		// 5 also represents the middle octave, and pow(2,10.74146698) = 1712 ( middle C period )
+		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
+		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
+		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
+		// Why multiplied by 2? well.. I really don't know, but it's on the docs.
+		// The original table looks like getting the lower octave values and multiplying by two. 
+		// This just forgets the roundings of the values.
 
 		const float XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			54787,	51712,	48809,	46070,	43484,	41044,	38740,	36566,	34514,	32576,	30748,	29022,
@@ -929,12 +929,10 @@ panbrello, and S44 will be a slower panbrello.
 		{
 			if(m_pSampler->IsAmigaSlides()){
 				// amiga period mode
-				// 14317456 = 8363Hz* 1712(center-period), got from xm-form.txt
-				// In fs3mdoc there's the value 14317056 , which i assume wrong.
-				// and still, in fmoddoc there's the value 7159090.5, which attains for
-				//  856 (center-period/2) * 8363.42....Hz.
-				// So the question is if mod is incorrect or XM is rounded.
-				return ( 14317456  / period ) / (double)Global::pPlayer->SampleRate();
+				// 14318181 = 7159090.5*2 (clockspeed*2)
+				// in xm-form.txt, there is 14317456 = 8363Hz* 1712(center-period),
+				// and in fs3mdoc there's the value 14317056 , which i assume wrong.
+				return ( 14318181  / period ) / (double)Global::pPlayer->SampleRate();
 			} else {
 				// Linear Frequency
 				// 8363*2^((5*12*64 - Period) / (12*64))

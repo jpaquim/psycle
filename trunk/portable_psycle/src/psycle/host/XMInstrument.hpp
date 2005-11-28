@@ -76,8 +76,9 @@ namespace psycle
 				m_WaveSusLoopStart = 0;
 				m_WaveSusLoopEnd = 0;
 				m_WaveSusLoopType = DO_NOT;
-				//todo: replace tune and finetune by samplerate. 
+				//todo: Add SampleRate functionality, and change WaveTune's one.
 				// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
+				m_WaveSampleRate = 8363;
 				m_WaveTune = 0;
 				m_WaveFineTune = 0;	
 				m_WaveStereo = false;
@@ -178,6 +179,8 @@ namespace psycle
 			void WaveTune(const compiler::sint16 value){m_WaveTune = value;};
 			const compiler::sint16 WaveFineTune(){return m_WaveFineTune;};
 			void WaveFineTune(const compiler::sint16 value){m_WaveFineTune = value;};
+			const compiler::uint32 WaveSampleRate(){return m_WaveSampleRate;};
+			void WaveSampleRate(const compiler::uint32 value){m_WaveSampleRate = value;};
 
 			const bool IsWaveStereo(){ return m_WaveStereo;};
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
@@ -215,6 +218,7 @@ namespace psycle
 			compiler::uint32 m_WaveSusLoopStart;
 			compiler::uint32 m_WaveSusLoopEnd;
 			LoopType m_WaveSusLoopType;
+			compiler::uint32 m_WaveSampleRate;    // SampleRate of the sample. \\todo . We will have to rework NotetoPeriod,PeriodtoNote and PeriodtoSpeed.
 			compiler::sint16 m_WaveTune;
 			compiler::sint16 m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			bool m_WaveStereo;
@@ -526,8 +530,8 @@ namespace psycle
 		compiler::uint8 m_PitchPanCenter;	// Note number for center pan position
 		compiler::sint8 m_PitchPanSep;		// -32..32. 1/256th of panFactor change per seminote.
 
-		compiler::uint8 m_FilterCutoff;		// Cutoff Frequency [0..127]
-		compiler::uint8 m_FilterResonance;	// Resonance [0..127]
+		compiler::uint8 m_FilterCutoff;		// Cutoff Frequency [0..127] If the value is higher than 127, it is disabled.
+		compiler::uint8 m_FilterResonance;	// Resonance [0..127] If the value is higher than 127, it is disabled.
 		compiler::sint16 m_FilterEnvAmount;	// EnvAmount [-128..128]
 		dsp::FilterType m_FilterType;		// Filter Type [0..4]
 
@@ -537,9 +541,10 @@ namespace psycle
 		compiler::uint8 m_RandomCutoff;		// Random CutOff	(same)
 		compiler::uint8 m_RandomResonance;	// Random Resonance	(same)
 
-		NewNoteAction m_NNA;
+		NewNoteAction m_NNA; // Action to take on the playing voice when any new note comes in the same channel.
 		DCType m_DCT;
-		NewNoteAction m_DCA;
+		NewNoteAction m_DCA; // Action to take on the playing voice when a new note comes in the same channel 
+							 // and the element defined by m_DCT is the same. (like the same note value).
 
 		/// Table of mapped notes to samples
 		// (note number=first, sample number=second)

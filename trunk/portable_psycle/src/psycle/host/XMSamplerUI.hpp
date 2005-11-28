@@ -17,6 +17,10 @@ class XMSamplerUI : public CPropertySheet
 	public:
 		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+
+		// Datos del cuadro de diálogo
+		enum { IDD = IDD_XM_SAMPLER };
+
 		// Attributes
 	private:
 		XMSampler* _pMachine;
@@ -27,23 +31,15 @@ class XMSamplerUI : public CPropertySheet
 		bool init;
 		// Operations
 	public:
-		void Init(Configuration* pConfig);
+		void Init(XMSampler* pMachine);
 		void UpdateUI(void);
 		XMSampler* GetMachine(){ return _pMachine; }
-		// Overrides
-		// ClassWizard generated virtual function overrides
-		//{{AFX_VIRTUAL(CConfigDlg)
-	public:
-		virtual int DoModal();
-		//}}AFX_VIRTUAL
+
 		// Implementation
-	public:
-		virtual ~XMSamplerUI();
-		void Init(XMSampler* pMachine);
 		// Generated message map functions
 	protected:
-		//{{AFX_MSG(CConfigDlg)
-		// NOTE - the ClassWizard will add and remove member functions here.
+		//{{AFX_MSG(XMSamplerUI)
+		afx_msg void OnClose();
 		//}}AFX_MSG
 		DECLARE_MESSAGE_MAP()
 	};
