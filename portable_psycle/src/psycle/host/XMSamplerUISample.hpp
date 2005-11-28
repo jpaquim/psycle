@@ -50,6 +50,14 @@ private:
 
 protected:
 	CListBox m_SampleList;
+public:
+	afx_msg void OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawFinetune(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedOpenwaveeditor();
+	afx_msg void OnBnClickedLoad();
+	afx_msg void OnBnClickedSave();
+	afx_msg void OnBnClickedDupe();
+	afx_msg void OnBnClickedDelete();
 };
 NAMESPACE__END
 NAMESPACE__END

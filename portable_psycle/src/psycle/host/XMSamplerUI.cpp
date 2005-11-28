@@ -2,7 +2,7 @@
 #include "Psycle.hpp"
 #include "XMSamplerUI.hpp"
 #include "XMSampler.hpp"
-
+#include "ChildView.hpp"
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
@@ -25,15 +25,18 @@ XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 		init=false;
 	}
 
-XMSamplerUI::~XMSamplerUI()
-	{
-	}
-
 BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
 	//{{AFX_MSG_MAP(XMSamplerUI)
-	// NOTE - the ClassWizard will add and remove mapping macros here.	
+		ON_WM_CLOSE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+void XMSamplerUI::OnClose()
+{
+	((CChildView*)m_pParentWnd)->XMSamplerMachineDialog = NULL;
+	CPropertySheet::OnClose();
+}
+
 
 void XMSamplerUI::Init(XMSampler* pMachine) 
 	{
@@ -53,16 +56,6 @@ void XMSamplerUI::UpdateUI(void)
 	if ( !init ) return;
 	if (GetActivePage() == &m_Mixer ) m_Mixer.UpdateAllChannels();
 }
-int XMSamplerUI::DoModal() 
-	{
-	int retVal = CPropertySheet::DoModal();
-	if (retVal == IDOK)
-		{
-
-		}
-	return retVal;
-	}
-
 
 NAMESPACE__END
 NAMESPACE__END
