@@ -132,7 +132,7 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-	Stk::setSampleRate(44100.);
+	Stk::setSampleRate((StkFloat)pCB->GetSamplingRate());
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
 		track[i].clear();
