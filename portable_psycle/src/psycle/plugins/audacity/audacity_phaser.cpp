@@ -244,7 +244,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-
+	static float anti_denormal = 1.0e-20f;
 	float m_l, m_r, tmp;
 
 		do
@@ -268,11 +268,12 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			// phasing routine
 			for (int j = 0; j < stages; j++) {
 				tmp = old_l[j];
-				old_l[j] = gain_l * tmp + m_l;
+				old_l[j] = gain_l * tmp + m_l+anti_denormal;
 				m_l = tmp - gain_l * old_l[j];
 				tmp = old_r[j];
-				old_r[j] = gain_r * tmp + m_r;
+				old_r[j] = gain_r * tmp + m_r+anti_denormal;
 				m_r = tmp - gain_r * old_r[j];
+				anti_denormal=-anti_denormal;
 			}
 			fbout_l = m_l; fbout_r = m_r;
 			*psamplesleft = m_l * drywet + in_l * (1 - drywet);
