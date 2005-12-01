@@ -100,6 +100,7 @@ namespace psycle
 			_lineChanged = true;
 			_patternjump = -1;
 			_linejump = -1;
+			int mIndex = 0;
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
 			// Initial Loop. Check for Tracker Commands.
@@ -121,7 +122,35 @@ namespace psycle
 					case PatternCmd::EXTENDED:
 						if(pEntry->_parameter != 0)
 						{
-							if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
+							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
+							{
+								tpb=pEntry->_parameter;
+								RecalcSPR();
+							}
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_BYPASS )
+							{
+								mIndex = pEntry->_mach;
+								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode == MACHMODE_FX )
+								{
+									if ( pEntry->_parameter&0x0F )
+										pSong->_pMachine[mIndex]->_bypass = true;
+									else
+										pSong->_pMachine[mIndex]->_bypass = false;
+								}
+							}
+
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_MUTE )
+							{
+								mIndex = pEntry->_mach;
+								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode == MACHMODE_FX )
+								{
+									if ( pEntry->_parameter&0x0F )
+										pSong->_pMachine[mIndex]->_mute = true;
+									else
+										pSong->_pMachine[mIndex]->_mute = false;
+								}
+							}
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
 								_samplesRemaining+=SamplesPerRow()*(pEntry->_parameter&0x0F);
 							}
@@ -142,33 +171,9 @@ namespace psycle
 										_linejump = _loop_line;
 									} else {
 										if (--_loop_count) _linejump = _loop_line;
+										else _loop_line = _lineCounter+1; //This prevents infinite loop in specific cases.
 									}
 								}
-/*
-*					case IT_S_PATTERN_LOOP:
-{
-unsigned char v = effectvalue & 15;
-if (v == 0)
-channel->pat_loop_row = sigrenderer->processrow;
-else {
-if (channel->pat_loop_count == 0) {
-channel->pat_loop_count = v;
-sigrenderer->pat_loop_row = channel->pat_loop_row;
-} else {
-if (--channel->pat_loop_count)
-sigrenderer->pat_loop_row = channel->pat_loop_row;
-else if (!(sigrenderer->sigdata->flags & IT_WAS_AN_XM))
-channel->pat_loop_row = sigrenderer->processrow + 1;
-}
-}
-}
-break;
- */
-							}
-							else if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
-							{
-								tpb=pEntry->_parameter;
-								RecalcSPR();
 							}
 						}
 						break;
@@ -202,13 +207,14 @@ break;
 						}
 						break;
 					case  PatternCmd::SET_PANNING:
-						int mIndex = pEntry->_mach;
+						mIndex = pEntry->_mach;
 						if(mIndex < MAX_MACHINES)
 						{
 							if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
 						}
 
 						break;
+
 					}
 				}
 				// Check For Tweak or MIDI CC
