@@ -86,7 +86,7 @@ namespace psycle
 		struct PatternCmd
 		{
 			enum{
-				EXTENDED	= 0xFE,
+				EXTENDED	= 0xFE, //(see below)
 				SET_TEMPO	= 0xFF,
 				NOTE_DELAY	= 0xFD,
 				RETRIGGER   = 0xFB,
@@ -98,6 +98,10 @@ namespace psycle
 				ARPEGGIO	  = 0xF0,
 
 				// Extended Commands from 0xFE
+				SET_LINESPERBEAT0 = 0x00,  // 
+				SET_LINESPERBEAT1 = 0x10, // Range from FE00 to FE1F is reserved for changing lines per beat.
+				SET_BYPASS = 0x20,
+				SET_MUTE = 0x30,
 				PATTERN_LOOP  = 0xB0, // Loops the current pattern x times. 0xFEB0 sets the loop start point.
 				PATTERN_DELAY =	0xD0, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
 				FINE_PATTERN_DELAY=	0xF0 // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
