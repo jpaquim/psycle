@@ -425,8 +425,8 @@ namespace psycle
 			m_PanEnvelope = other.m_PanEnvelope;
 			m_InitPan = other.m_InitPan;
 			m_PanEnabled=other.m_PanEnabled;
-			m_PitchPanCenter=other.m_PitchPanCenter;
-			m_PitchPanSep=other.m_PitchPanSep;
+			m_NoteModPanCenter=other.m_NoteModPanCenter;
+			m_NoteModPanSep=other.m_NoteModPanSep;
 
 			// Pitch/Filter Envelope
 			m_PitchEnvelope = other.m_PitchEnvelope;
@@ -476,10 +476,10 @@ namespace psycle
 		void Pan(const float pan) { m_InitPan = pan;};
 		const bool PanEnabled() { return m_PanEnabled;};
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
-		const compiler::uint8 PitchPanCenter() { return m_PitchPanCenter;};
-		void PitchPanCenter(const compiler::uint8 pan) { m_PitchPanCenter = pan;};
-		const compiler::sint8 PitchPanSep() { return m_PitchPanSep;};
-		void PitchPanSep(const compiler::sint8 pan) { m_PitchPanSep = pan;};
+		const compiler::uint8 NoteModPanCenter() { return m_NoteModPanCenter;};
+		void NoteModPanCenter(const compiler::uint8 pan) { m_NoteModPanCenter = pan;};
+		const compiler::sint8 NoteModPanSep() { return m_NoteModPanSep;};
+		void NoteModPanSep(const compiler::sint8 pan) { m_NoteModPanSep = pan;};
 
 		const compiler::uint8 FilterCutoff(){ return m_FilterCutoff;};
 		void FilterCutoff(const compiler::uint8 value){m_FilterCutoff = value;};
@@ -490,14 +490,14 @@ namespace psycle
 		const dsp::FilterType FilterType(){ return m_FilterType;};
 		void FilterType(const dsp::FilterType value){ m_FilterType = value;};
 
-		const compiler::uint8 RandomVolume(){return  m_RandomVolume;};
-		void RandomVolume(const compiler::uint8 value){m_RandomVolume = value;};
-		const compiler::uint8 RandomPanning(){return  m_RandomPanning;};
-		void RandomPanning(const compiler::uint8 value){m_RandomPanning = value;};
-		const compiler::uint8 RandomCutoff(){return m_RandomCutoff;};
-		void RandomCutoff(const compiler::uint8 value){m_RandomCutoff = value;};
-		const compiler::uint8 RandomResonance(){return m_RandomResonance;};
-		void RandomResonance(const compiler::uint8 value){m_RandomResonance = value;};
+		const float RandomVolume(){return  m_RandomVolume;};
+		void RandomVolume(const float value){m_RandomVolume = value;};
+		const float RandomPanning(){return  m_RandomPanning;};
+		void RandomPanning(const float value){m_RandomPanning = value;};
+		const float RandomCutoff(){return m_RandomCutoff;};
+		void RandomCutoff(const float value){m_RandomCutoff = value;};
+		const float RandomResonance(){return m_RandomResonance;};
+		void RandomResonance(const float value){m_RandomResonance = value;};
 
 		const NewNoteAction NNA() { return m_NNA;};
 		void NNA(const NewNoteAction value){ m_NNA = value;};
@@ -527,8 +527,8 @@ namespace psycle
 		// Paninng
 		bool m_PanEnabled;
 		float m_InitPan;					// Initial panFactor (if enabled) [-1..1]
-		compiler::uint8 m_PitchPanCenter;	// Note number for center pan position
-		compiler::sint8 m_PitchPanSep;		// -32..32. 1/256th of panFactor change per seminote.
+		compiler::uint8 m_NoteModPanCenter;	// Note number for center pan position
+		compiler::sint8 m_NoteModPanSep;		// -32..32. 1/256th of panFactor change per seminote.
 
 		compiler::uint8 m_FilterCutoff;		// Cutoff Frequency [0..127] If the value is higher than 127, it is disabled.
 		compiler::uint8 m_FilterResonance;	// Resonance [0..127] If the value is higher than 127, it is disabled.
@@ -536,10 +536,10 @@ namespace psycle
 		dsp::FilterType m_FilterType;		// Filter Type [0..4]
 
 		// Randomness. Applies on new notes.
-		compiler::uint8 m_RandomVolume;		// Random Volume % [ 0 -> No randomize. 100 = randomize full scale.]
-		compiler::uint8 m_RandomPanning;	// Random Panning  (same)
-		compiler::uint8 m_RandomCutoff;		// Random CutOff	(same)
-		compiler::uint8 m_RandomResonance;	// Random Resonance	(same)
+		float m_RandomVolume;		// Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
+		float m_RandomPanning;		// Random Panning  (same)
+		float m_RandomCutoff;		// Random CutOff	(same)
+		float m_RandomResonance;	// Random Resonance	(same)
 
 		NewNoteAction m_NNA; // Action to take on the playing voice when any new note comes in the same channel.
 		DCType m_DCT;

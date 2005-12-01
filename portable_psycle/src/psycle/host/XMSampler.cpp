@@ -522,7 +522,7 @@ namespace psycle
 				if(m_PanEnvelope.Envelope().IsEnabled()){
 					m_PanEnvelope.Work();
 
-					// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, pitchpan sep, and channel pan)
+					// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
 					// PanRange() is a Range delimiter, which is set when at voice init and when a panning command comes in.
 					rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 				}
@@ -663,8 +663,8 @@ namespace psycle
 			else if ( rInstrument().PanEnabled() ) m_PanFactor = rInstrument().Pan();
 			else m_PanFactor = m_pChannel->PanFactor();
 
-			//\todo : pitchpansep is in the range -32..32, being 8=one step (0..64) each seminote.
-			m_PanFactor += (m_Note-rInstrument().PitchPanCenter())*rInstrument().PitchPanSep()/512.0f;
+			//\todo : NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
+			m_PanFactor += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
 			m_PanFactor += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
 
 			if ( m_PanFactor > 1.0f ) m_PanFactor = 1.0f;
