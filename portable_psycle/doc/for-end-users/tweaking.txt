@@ -179,11 +179,22 @@
 	Psycle also allows to use some "old school" commands in the command row.
 	The currently supported ones are:
 
+				BREAK_TO_LINE = 0xF2,
+				JUMP_TO_ORDER = 0xF3,
+				ARPEGGIO	  = 0xF0,
 
 	* Global/Tracker Commands: 
 
 	  FFxx	-	Change BPM
-	  FExx	-	Change Tick Per Beat
+	  FExx	-	Extended Command :
+			
+			FE00-FE1F	Change Tick Per Beat
+			FE2x		Set Bypass mode on/off for the specificed machine ( --- .. 02 FE20 )
+			FE3x		Set Mute mode on/off for the specificed machine ( --- .. 02 FE30 )
+			FEBx		Loops the current pattern x times. FEB0 sets the loop start point.
+			FEDx		Causes a "pause" of x rows ( the current row becomes x rows longer )
+			FEFx		Same as FEDx, but the unit is Tracker Ticks.
+	  
 	  FDxx  -	Delay Trigger (xx/256 ticks) (works with noteoffs too)
 	  FCxx	-	Change Global/Wire Volume
 			Examples:
@@ -204,6 +215,11 @@
 	  F8xx	-	Sets the indicated Machine's Panning
 			Example:
 			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle)
+			
+	  F3xx	-	Jump to order (Jumps to the pattern *order* specified by xx)
+
+	  F2xx	-	Break to Line  (Jumps to the next pattern, to the line specified by xx)
+
 
 	* VST Commands:
 
