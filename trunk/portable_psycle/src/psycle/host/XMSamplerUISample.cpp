@@ -11,8 +11,8 @@ NAMESPACE__BEGIN(host)
 IMPLEMENT_DYNAMIC(XMSamplerUISample, CPropertyPage)
 XMSamplerUISample::XMSamplerUISample()
 : CPropertyPage(XMSamplerUISample::IDD)
+, m_Init(false)
 {
-	m_Init=false;
 }
 
 XMSamplerUISample::~XMSamplerUISample()
@@ -29,29 +29,29 @@ void XMSamplerUISample::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_SAMPLELIST, OnLbnSelchangeSamplelist)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_DEFVOLUME, OnNMCustomdrawDefvolume)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_GLOBVOLUME, OnNMCustomdrawGlobvolume)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_PAN, OnNMCustomdrawPan)
-ON_CBN_SELENDOK(IDC_VIBRATOTYPE, OnCbnSelendokVibratotype)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATORATE, OnNMCustomdrawVibratorate)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATOSPEED, OnNMCustomdrawVibratospeed)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATODEPTH, OnNMCustomdrawVibratodepth)
-ON_CBN_SELENDOK(IDC_LOOP, OnCbnSelendokLoop)
-ON_CBN_SELENDOK(IDC_SUSTAINLOOP, OnCbnSelendokSustainloop)
-ON_EN_CHANGE(IDC_LOOPSTART, OnEnChangeLoopstart)
-ON_EN_CHANGE(IDC_LOOPEND, OnEnChangeLoopend)
-ON_EN_CHANGE(IDC_SUSTAINSTART, OnEnChangeSustainstart)
-ON_EN_CHANGE(IDC_SUSTAINEND, OnEnChangeSustainend)
-ON_EN_CHANGE(IDC_WAVENAME, OnEnChangeWavename)
-ON_EN_CHANGE(IDC_SAMPLERATE, OnEnChangeSamplerate)
-ON_NOTIFY(UDN_DELTAPOS, IDC_SPINSAMPLERATE, OnDeltaposSpinsamplerate)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_SAMPLENOTE, OnNMCustomdrawSamplenote)
-ON_NOTIFY(NM_CUSTOMDRAW, IDC_FINETUNE, OnNMCustomdrawFinetune)
-ON_BN_CLICKED(IDC_OPENWAVEEDITOR, OnBnClickedOpenwaveeditor)
-ON_BN_CLICKED(IDC_LOAD, OnBnClickedLoad)
-ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
-ON_BN_CLICKED(IDC_DUPE, OnBnClickedDupe)
-ON_BN_CLICKED(IDC_DELETE, OnBnClickedDelete)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_DEFVOLUME, OnNMCustomdrawDefvolume)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_GLOBVOLUME, OnNMCustomdrawGlobvolume)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PAN, OnNMCustomdrawPan)
+	ON_CBN_SELENDOK(IDC_VIBRATOTYPE, OnCbnSelendokVibratotype)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATORATE, OnNMCustomdrawVibratorate)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATOSPEED, OnNMCustomdrawVibratospeed)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATODEPTH, OnNMCustomdrawVibratodepth)
+	ON_CBN_SELENDOK(IDC_LOOP, OnCbnSelendokLoop)
+	ON_CBN_SELENDOK(IDC_SUSTAINLOOP, OnCbnSelendokSustainloop)
+	ON_EN_CHANGE(IDC_LOOPSTART, OnEnChangeLoopstart)
+	ON_EN_CHANGE(IDC_LOOPEND, OnEnChangeLoopend)
+	ON_EN_CHANGE(IDC_SUSTAINSTART, OnEnChangeSustainstart)
+	ON_EN_CHANGE(IDC_SUSTAINEND, OnEnChangeSustainend)
+	ON_EN_CHANGE(IDC_WAVENAME, OnEnChangeWavename)
+	ON_EN_CHANGE(IDC_SAMPLERATE, OnEnChangeSamplerate)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPINSAMPLERATE, OnDeltaposSpinsamplerate)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SAMPLENOTE, OnNMCustomdrawSamplenote)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FINETUNE, OnNMCustomdrawFinetune)
+	ON_BN_CLICKED(IDC_OPENWAVEEDITOR, OnBnClickedOpenwaveeditor)
+	ON_BN_CLICKED(IDC_LOAD, OnBnClickedLoad)
+	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
+	ON_BN_CLICKED(IDC_DUPE, OnBnClickedDupe)
+	ON_BN_CLICKED(IDC_DELETE, OnBnClickedDelete)
 END_MESSAGE_MAP()
 
 // Controladores de mensajes de XMSamplerUISample
@@ -119,7 +119,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
 
 	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(int(wave.WaveTune()));
-//	sprintf(tmp,"TODO",wave.WaveFineTune());
+//	sprintf(tmp,"TODO",wave.WaveTune());
 	((CStatic*)GetDlgItem(IDC_LSAMPLENOTE))->SetWindowText("TODO");
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(int(wave.WaveFineTune()));
 	sprintf(tmp,"%.02f",wave.WaveFineTune()/256.0f);

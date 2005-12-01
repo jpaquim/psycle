@@ -418,8 +418,8 @@ namespace psycle
 
 			m_PanEnabled=false;
 			m_InitPan = 0.5f;
-			m_PitchPanCenter = 60;
-			m_PitchPanSep = 0;
+			m_NoteModPanCenter = 60;
+			m_NoteModPanSep = 0;
 
 			m_FilterCutoff = 127;
 			m_FilterResonance = 0;
@@ -468,8 +468,8 @@ namespace psycle
 
 			riffFile->Read(m_InitPan);
 			riffFile->Read(m_PanEnabled);
-			riffFile->Read(m_PitchPanCenter);
-			riffFile->Read(&m_PitchPanSep,sizeof(compiler::sint8));
+			riffFile->Read(m_NoteModPanCenter);
+			riffFile->Read(&m_NoteModPanSep,sizeof(compiler::sint8));
 
 			riffFile->Read(m_FilterCutoff);
 			riffFile->Read(m_FilterResonance);
@@ -526,8 +526,8 @@ namespace psycle
 
 			riffFile->Write(m_InitPan);
 			riffFile->Write(m_PanEnabled);
-			riffFile->Write(m_PitchPanCenter);
-			riffFile->Write(m_PitchPanSep);
+			riffFile->Write(m_NoteModPanCenter);
+			riffFile->Write(m_NoteModPanSep);
 
 			riffFile->Write(m_FilterCutoff);
 			riffFile->Write(m_FilterResonance);

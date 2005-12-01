@@ -21,6 +21,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
 	DECLARE_MESSAGE_MAP()
+
 public:
 	void pMachine(XMSampler *const p){m_pMachine = p;};
 	XMSampler * const pMachine(){return m_pMachine;};
@@ -43,14 +44,6 @@ public:
 	afx_msg void OnEnChangeWavename();
 	afx_msg void OnEnChangeSamplerate();
 	afx_msg void OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult);
-
-private:
-	XMSampler *m_pMachine;
-	bool m_Init;
-
-protected:
-	CListBox m_SampleList;
-public:
 	afx_msg void OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawFinetune(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedOpenwaveeditor();
@@ -58,6 +51,13 @@ public:
 	afx_msg void OnBnClickedSave();
 	afx_msg void OnBnClickedDupe();
 	afx_msg void OnBnClickedDelete();
+
+protected:
+	XMSampler *m_pMachine;
+	bool m_Init;
+
+	CListBox m_SampleList;
+
 };
 NAMESPACE__END
 NAMESPACE__END

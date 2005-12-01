@@ -359,6 +359,9 @@ Special:  Bit 0: On = song message attached.
 
             Read(&curH,sizeof(curH));
 
+			std::string itname(curH.sName);
+			xins.Name(itname);
+
 			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
 			xins.DCT(XMInstrument::DCType(curH.DCT));
 			switch (curH.DCA)
@@ -372,8 +375,8 @@ Special:  Bit 0: On = song message attached.
 
 			xins.Pan((curH.defPan & 0x7F)/64.0f);
 			xins.PanEnabled((curH.defPan & 0x80)?false:true);
-			xins.PitchPanCenter(curH.pPanCenter);
-			xins.PitchPanSep(curH.pPanSep);
+			xins.NoteModPanCenter(curH.pPanCenter);
+			xins.NoteModPanSep(curH.pPanSep);
 			xins.GlobVol(curH.gVol/127.0f);
 			xins.VolumeFadeSpeed(curH.fadeout/1024.0f);
 			xins.RandomVolume(curH.randVol);
