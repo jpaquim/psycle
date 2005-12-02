@@ -60,5 +60,71 @@ namespace host{
 		XMFILEHEADER m_Header;
 		XMSampler* m_pSampler;
 	};
+
+	struct MODHEADER
+	{
+		unsigned char songlength;
+		unsigned char unused;
+		unsigned char order[128];
+		unsigned char pID[4];
+	};
+	struct MODSAMPLEHEADER
+	{
+		char sampleName[22];
+		unsigned short sampleLength;
+		unsigned char finetune;
+		unsigned char volume;
+		unsigned short loopStart;
+		unsigned short loopLength;
+	};
+
+
+
+	class MODSongLoader : public OldPsyFile
+	{
+	public:
+		MODSongLoader(void);
+		virtual ~MODSongLoader(void);
+		/// RIFF 
+		virtual void Load(Song& song,const bool fullopen = true);
+	private:
+		const bool IsValid();
+
+		const void LoadPatterns(Song & song);
+		const void LoadSinglePattern(Song & song, const int patIdx,const int iTracks);	
+		const unsigned char ConvertPeriodtoNote(const unsigned short period);
+		const void LoadInstrument(XMSampler & sampler, const int idx);
+		const void LoadSampleHeader(XMSampler & sampler, const int InstrIdx);
+		const void LoadSampleData(XMSampler & sampler, const int InstrIdx);
+		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
+		char * AllocReadStr(const LONG size, const LONG start=-1);
+
+		// inlines
+		const unsigned char ReadUInt1(LONG start=-1)
+		{	
+			unsigned char i;
+			if(start>=0) Seek(start);
+			return Read(&i,1)?i:0;
+		}
+
+		const unsigned short ReadUInt2(LONG start=-1)
+		{
+			unsigned short i;
+			if(start>=0) Seek(start);
+			return Read(&i,2)?i:0;
+		}
+
+		const unsigned int ReadUInt4(LONG start=-1)
+		{
+			unsigned int i;
+			if(start>=0) Seek(start);
+			return Read(&i,4)?i:0;
+		}
+		static const short BIGMODPERIODTABLE[37*8];
+		unsigned short smpLen[32];
+		MODHEADER m_Header;
+		MODSAMPLEHEADER m_Samples[32];
+		XMSampler* m_pSampler;
+	};
 }
 }

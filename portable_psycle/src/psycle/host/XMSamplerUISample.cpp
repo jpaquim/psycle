@@ -84,7 +84,7 @@ BOOL XMSamplerUISample::OnSetActive()
 	{
 		char line[48];
 		XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
-		sprintf(line,"%03d%s: ",i,wave.WaveLength()>0?"s":" ");
+		sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 		strcat(line,wave.WaveName().c_str());
 		m_SampleList.AddString(line);
 	}

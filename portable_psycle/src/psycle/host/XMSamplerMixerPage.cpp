@@ -154,7 +154,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 	CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
 	if ( ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck()) 
 	{
-		sprintf(chname,"%d",index+m_ChannelOffset+1);
+		sprintf(chname,"%d",index+m_ChannelOffset);
 		name->SetWindowText(chname);
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
 		sld->SetPos(64-int(rChan.DefaultVolume()));
@@ -181,7 +181,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		int defpos;
 		if ( !voice )
 		{
-			sprintf(chname,"(%d)",index+m_ChannelOffset+1);
+			sprintf(chname,"(%d)",index+m_ChannelOffset);
 			name->SetWindowText(chname);
 			sld->SetPos(64);
 			defpos = int(rChan.PanFactor()*64.0f);
@@ -191,7 +191,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			sld->SetPos(rChan.Cutoff());
 		} else {
 			std::string tmpstr = voice->rInstrument().Name();
-			sprintf(chname,"%02d:%s",voice->InstrumentNum(),tmpstr.c_str());
+			sprintf(chname,"%02X:%s",voice->InstrumentNum(),tmpstr.c_str());
 			name->SetWindowText(chname);
 			sld->SetPos(64-int(voice->RealVolume()*64.0f));
 			defpos = int(voice->PanFactor()*64.0f);
