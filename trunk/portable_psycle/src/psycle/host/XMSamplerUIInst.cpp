@@ -316,7 +316,7 @@ BOOL XMSamplerUIInst::OnSetActive()
 		{
 			char line[48];
 			XMInstrument& inst = m_pMachine->rInstrument(i);
-			sprintf(line,"%03d%s: ",i,inst.IsEnabled()?"s":" ");
+			sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
 			strcat(line,inst.Name().c_str());
 			m_InstrumentList.AddString(line);
 		}
