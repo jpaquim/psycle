@@ -14,10 +14,9 @@
     used in fixed delay-length applications, such
     as for reverberation.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
 #include <project.private.hpp>
 #include "Delay.h"
 
@@ -37,7 +36,6 @@ Delay :: Delay(unsigned long delay, unsigned long maxDelay)
   // Writing before reading allows delays from 0 to length-1. 
   // If we want to allow a delay of maxDelay, we need a
   // delay-line of length = maxDelay+1.
-/*
   if ( maxDelay < 1 ) {
     errorString_ << "Delay::Delay: maxDelay must be > 0!\n";
     handleError( StkError::FUNCTION_ARGUMENT );
@@ -47,7 +45,7 @@ Delay :: Delay(unsigned long delay, unsigned long maxDelay)
     errorString_ << "Delay::Delay: maxDelay must be > than delay argument!\n";
     handleError( StkError::FUNCTION_ARGUMENT );
   }
-*/
+
   if ( maxDelay > inputs_.size()-1 ) {
     inputs_.resize( maxDelay+1 );
     this->clear();
@@ -73,9 +71,13 @@ void Delay :: setMaximumDelay(unsigned long delay)
   if ( delay < inputs_.size() ) return;
 
   if ( delay < 0 ) {
+    errorString_ << "Delay::setMaximumDelay: argument (" << delay << ") less than zero!\n";
+    handleError( StkError::WARNING );
     return;
   }
   else if (delay < delay_ ) {
+    errorString_ << "Delay::setMaximumDelay: argument (" << delay << ") less than current delay setting (" << delay_ << ")!\n";
+    handleError( StkError::WARNING );
     return;
   }
 
@@ -85,6 +87,8 @@ void Delay :: setMaximumDelay(unsigned long delay)
 void Delay :: setDelay(unsigned long delay)
 {
   if ( delay > inputs_.size() - 1 ) { // The value is too big.
+    errorString_ << "Delay::setDelay: argument (" << delay << ") too big ... setting to maximum!\n";
+    handleError( StkError::WARNING );
 
     // Force delay to maximum length.
     outPoint_ = inPoint_ + 1;
@@ -92,6 +96,8 @@ void Delay :: setDelay(unsigned long delay)
     delay_ = inputs_.size() - 1;
   }
   else if ( delay < 0 ) {
+    errorString_ << "Delay::setDelay: argument (" << delay << ") less than zero ... setting to zero!\n";
+    handleError( StkError::WARNING );
 
     outPoint_ = inPoint_;
     delay_ = 0;
@@ -134,9 +140,13 @@ StkFloat Delay :: contentsAt(unsigned long tapDelay)
 {
   unsigned long i = tapDelay;
   if (i < 1) {
+    errorString_ << "Delay::contentsAt: argument (" << tapDelay << ") too small!";
+    handleError( StkError::WARNING );
     return 0.0;
   }
   else if (i > delay_) {
+    errorString_ << "Delay::contentsAt: argument (" << tapDelay << ") too big!";
+    handleError( StkError::WARNING );
     return 0.0;
   }
 
@@ -157,9 +167,9 @@ StkFloat Delay :: nextOut(void)
   return inputs_[outPoint_];
 }
 
-StkFloat Delay :: tick(StkFloat sample)
+StkFloat Delay :: computeSample( StkFloat input )
 {
-  inputs_[inPoint_++] = sample;
+  inputs_[inPoint_++] = input;
 
   // Check for end condition
   if (inPoint_ == inputs_.size())
@@ -174,9 +184,9 @@ StkFloat Delay :: tick(StkFloat sample)
   return outputs_[0];
 }
 
-StkFloat *Delay :: tick(StkFloat *vector, unsigned int vectorSize)
+StkFloat Delay :: tick( StkFloat input )
 {
-  return Filter::tick( vector, vectorSize );
+  return computeSample( input );
 }
 
 StkFrames& Delay :: tick( StkFrames& frames, unsigned int channel )
