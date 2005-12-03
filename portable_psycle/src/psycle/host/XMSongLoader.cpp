@@ -923,7 +923,7 @@ namespace host{
 			return;
 		}
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-		song.InsertConnection(0,MASTER_INDEX,0.5f);
+//		song.InsertConnection(0,MASTER_INDEX,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=0;
 		// build sampler
 		m_pSampler = (XMSampler *)(song._pMachine[0]);
@@ -941,7 +941,7 @@ namespace host{
 
 		// get data
 		Seek(20);
-		for (int i=0;i<30;i++) LoadSampleHeader(*m_pSampler,i);
+		for (int i=0;i<31;i++) LoadSampleHeader(*m_pSampler,i);
 		Seek(950);
 		Read(&m_Header,sizeof(MODHEADER));
 		
@@ -950,14 +950,21 @@ namespace host{
 		
 		
 		m_pSampler->IsAmigaSlides(true);
-		if ( !stricmp(pID,"M.K.")) song.SONGTRACKS=4;
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp); }
-		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); }
+		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS=4; song.InsertConnection(0,MASTER_INDEX,0.75f); }
+		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnection(0,MASTER_INDEX,0.5f); }
+		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnection(0,MASTER_INDEX,0.35f);}
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
 
+		for (int i = 0; i< song.SONGTRACKS; i++ )
+		{
+			if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactor(12);
+			else m_pSampler->rChannel(i).DefaultPanFactor(48);
+		}
+
+
 		LoadPatterns(song);
-		for(int i = 0;i < 30;i++){
+		for(int i = 0;i < 31;i++){
 			LoadInstrument(*m_pSampler,i);
 		}
 	}

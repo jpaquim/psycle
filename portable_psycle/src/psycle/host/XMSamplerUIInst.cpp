@@ -334,8 +334,6 @@ BOOL XMSamplerUIInst::OnSetActive()
 void XMSamplerUIInst::OnBnClickedInsTgeneral()
 {
 	m_bInitialized = false;
-	int i= m_InstrumentList.GetCurSel();
-	XMInstrument& inst = m_pMachine->rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_SHOW);
 	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_SHOW);//Instrument Name

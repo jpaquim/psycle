@@ -225,7 +225,7 @@ namespace psycle
 			signed short *m_pWaveDataL;
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
-			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right
+			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right . > 1 == Surround!
 			compiler::uint8 m_VibratoRate;
 			compiler::uint8 m_VibratoSweep;
 			compiler::uint8 m_VibratoDepth;

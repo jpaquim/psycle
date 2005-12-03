@@ -927,6 +927,7 @@
 #define IDC_LADSRSUS                    1713
 #define IDC_LADSRREL                    1714
 #define IDC_ENV_SCROLLBAR               1715
+#define IDC_WAVESCOPE                   1716
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1027,7 +1028,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        230
 #define _APS_NEXT_COMMAND_VALUE         32939
-#define _APS_NEXT_CONTROL_VALUE         1716
+#define _APS_NEXT_CONTROL_VALUE         1717
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

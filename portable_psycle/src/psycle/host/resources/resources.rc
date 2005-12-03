@@ -1769,10 +1769,10 @@ BEGIN
     CTEXT           "Estático",IDC_LADSRREL,467,275,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     SCROLLBAR       IDC_ENV_SCROLLBAR,185,230,315,11
-    LTEXT           "Temporary ""IDC_INS_ENVELOPE"" object",IDC_INS_ENVELOPE,
-                    223,173,149,8
     LTEXT           "Temporary ""IDC_INS_NOTEMAP"" object",IDC_INS_NOTEMAP,
                     259,191,154,17
+    CONTROL         "",IDC_INS_ENVELOPE,"Static",SS_BLACKRECT | SS_NOTIFY,
+                    186,160,314,70,WS_EX_STATICEDGE
 END
 
 IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 524, 304
@@ -1780,7 +1780,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Samples"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LISTBOX         IDC_SAMPLELIST,7,6,159,276,WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_SAMPLELIST,7,6,159,266,WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Load",IDC_LOAD,7,283,39,14
     PUSHBUTTON      "Save",IDC_SAVE,47,283,39,14
     PUSHBUTTON      "Duplicate",IDC_DUPE,87,283,39,14
@@ -1801,7 +1801,7 @@ BEGIN
     LTEXT           "Global Volume",IDC_STATIC,191,53,45,8
     CONTROL         "",IDC_GLOBVOLUME,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,243,53,70,11
-    CONTROL         "Pan Position",IDC_PANENABLED,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Pan Position",IDC_PANENABLED,"Button",BS_AUTO3STATE | 
                     WS_TABSTOP,179,71,54,10
     CONTROL         "",IDC_PAN,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
                     WS_TABSTOP,243,71,70,11
@@ -1847,8 +1847,8 @@ BEGIN
     CTEXT           "Estático",IDC_LVIBRATODEPTH,478,87,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Samples",IDC_STATIC,416,8,26,13
-    CONTROL         "",IDC_STATIC,"Static",SS_OWNERDRAW | SS_NOTIFY,173,127,
-                    344,120,WS_EX_STATICEDGE
+    CONTROL         "",IDC_WAVESCOPE,"Static",SS_OWNERDRAW | SS_NOTIFY | 
+                    SS_REALSIZEIMAGE | SS_SUNKEN,173,126,344,120
     PUSHBUTTON      "Open Wave Editor",IDC_OPENWAVEEDITOR,355,107,162,16
     LTEXT           "Sampled Note",IDC_STATIC,191,89,45,8
     CONTROL         "",IDC_SAMPLENOTE,"msctls_trackbar32",TBS_BOTH | 
