@@ -2033,15 +2033,15 @@ panbrello, and S44 will be a slower panbrello.
 						{	//this is a note to an undefined instrument. we can't continue.
 							return;
 						}
-						//\todo: if the instrument is not set, some initializations do not take effect.
-						newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
 						thisChannel.EffectInit();
 
-						XMInstrument & _inst = m_Instruments[newVoice->InstrumentNum()];
+						XMInstrument & _inst = m_Instruments[thisChannel.InstrumentNo()];
 						int _layer = _inst.NoteToSample(pData->_note).second;
 						int twlength = m_rWaveLayer[_layer].WaveLength();
 						if(twlength > 0)
 						{
+							//\todo: if the instrument is not set, some initializations do not take effect.
+							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
@@ -2085,6 +2085,8 @@ panbrello, and S44 will be a slower panbrello.
 				newVoice = currentVoice;
 				if ( bPorta2Note ) 
 				{
+					//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
+					//		  and the position reset to 0.
 					thisChannel.Slide2NoteDestNote(pData->_note);
 				}
 				if (bInstrumentSet && currentVoice)
@@ -2095,8 +2097,6 @@ panbrello, and S44 will be a slower panbrello.
 				}
 			}
 
-			//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
-			//		  and the position reset to 0.
 			// Effect Command
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.

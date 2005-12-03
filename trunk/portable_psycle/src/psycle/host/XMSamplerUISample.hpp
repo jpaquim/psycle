@@ -1,10 +1,34 @@
 #pragma once
 #include "afxwin.h"
+#include "XMInstrument.hpp"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
 
 class XMSampler;
+class CWaveScopeCtrl : public CStatic
+{
+public:
+	CWaveScopeCtrl();
+	virtual ~CWaveScopeCtrl();
+
+	void SetWave(XMInstrument::WaveData *pWave) { m_pWave = pWave; };
+	XMInstrument::WaveData& rWave() { return *m_pWave; };
+
+	virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
+
+protected:
+	XMInstrument::WaveData* m_pWave;
+	CPen cpen_lo;
+	CPen cpen_med;
+	CPen cpen_hi;
+	CPen cpen_sus;
+	CBrush brush;
+
+};
+
+
+
 
 class XMSamplerUISample : public CPropertyPage
 {
@@ -25,6 +49,9 @@ protected:
 public:
 	void pMachine(XMSampler *const p){m_pMachine = p;};
 	XMSampler * const pMachine(){return m_pMachine;};
+	void pWave(XMInstrument::WaveData *const p){m_pWave = p;};
+	XMInstrument::WaveData& rWave(){return *m_pWave;};
+	void DrawScope(void);
 
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnLbnSelchangeSamplelist();
@@ -51,13 +78,18 @@ public:
 	afx_msg void OnBnClickedSave();
 	afx_msg void OnBnClickedDupe();
 	afx_msg void OnBnClickedDelete();
+	afx_msg void OnBnClickedPanenabled();
+	afx_msg void OnStnClickedWavescope();
 
 protected:
 	XMSampler *m_pMachine;
+	XMInstrument::WaveData *m_pWave;
 	bool m_Init;
 
 	CListBox m_SampleList;
-
+	CWaveScopeCtrl m_WaveScope;
 };
+
+
 NAMESPACE__END
 NAMESPACE__END
