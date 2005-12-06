@@ -121,15 +121,21 @@ StkFloat Delay :: energy(void) const
   if (inPoint_ >= outPoint_) {
     for (i=outPoint_; i<inPoint_; i++) {
       register StkFloat t = inputs_[i];
+	  //t += anti;
+	  //anti = -anti;
       e += t*t;
     }
   } else {
     for (i=outPoint_; i<inputs_.size(); i++) {
       register StkFloat t = inputs_[i];
+	  //t += anti;
+	  //anti = -anti;
       e += t*t;
     }
     for (i=0; i<inPoint_; i++) {
       register StkFloat t = inputs_[i];
+	  //t += anti;
+	  //anti = -anti;
       e += t*t;
     }
   }
