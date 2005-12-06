@@ -38,6 +38,8 @@ typedef double StkFloat;
 #endif
 
 
+
+static StkFloat anti = 1.e-18;
 //! STK error handling class.
 /*!
   This is a fairly abstract exception handling class.  There could

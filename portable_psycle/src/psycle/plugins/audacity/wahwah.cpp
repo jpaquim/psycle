@@ -102,7 +102,7 @@ CMachineInfo const MacInfo =
 	"Audacity WahWah",						// name
 #endif
 	"WahWah",							// short name
-	"Nasca Octavian Paul, wrapper by Sartorius",							// author
+	"Nasca Octavian Paul/Sartorius",							// author
 	"About",								// A command, that could be use for open an editor, etc...
 	1
 };
