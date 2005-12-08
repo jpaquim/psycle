@@ -1526,6 +1526,7 @@ NAMESPACE__BEGIN(psycle)
 				isBlockCopied=true;
 				blockNTracks=(blockSel.end.track-blockSel.start.track)+1;
 				blockNLines=(blockSel.end.line-blockSel.start.line)+1;
+				blockLastOrigin = blockSel;
 				
 				int ps=_pSong->playOrder[editPosition];
 				
@@ -1565,13 +1566,13 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::DeleteBlock()
 		{
-			// UNDO CODE HERE CUT
 			if(blockSelected)
 			{
 				int ps=_pSong->playOrder[editPosition];
 				
 				PatternEntry blank;
 
+				// UNDO CODE HERE CUT
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1585,15 +1586,15 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CChildView::PasteBlock(int tx,int lx,bool mix)
+		void CChildView::PasteBlock(int tx,int lx,bool mix,bool save)
 		{
-			// UNDO CODE PASTE AND MIX PASTE
 			if(isBlockCopied)
 			{
 				int ps=_pSong->playOrder[editPosition];
 				int nl = _pSong->patternLines[ps];
 
-				AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				// UNDO CODE PASTE AND MIX PASTE
+				if (save) AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int ls=0;
 				int ts=0;
@@ -1607,27 +1608,24 @@ NAMESPACE__BEGIN(psycle)
 					}
 				//end of added by sampler
 
-				for (int t=tx;t<tx+blockNTracks;t++)
+				for (int t=tx;t<tx+blockNTracks && t<_pSong->SONGTRACKS;t++)
 				{
 					ls=0;
-					for (int l=lx;l<lx+blockNLines;l++)
+					for (int l=lx;l<lx+blockNLines && l<nl;l++)
 					{
-						if(l<nl && t<_pSong->SONGTRACKS)
+						unsigned char* offset_source=blockBufferData+(ts*EVENT_SIZE+ls*MULTIPLY);
+						unsigned char* offset_target=_ptrackline(ps,t,l);
+						if ( mix )
 						{
-							unsigned char* offset_source=blockBufferData+(ts*EVENT_SIZE+ls*MULTIPLY);
-							unsigned char* offset_target=_ptrackline(ps,t,l);
-							if ( mix )
-							{
-								if (*offset_target == 0xFF) *(offset_target)=*offset_source;
-								if (*(offset_target+1)== 0xFF) *(offset_target+1)=*(offset_source+1);
-								if (*(offset_target+2)== 0xFF) *(offset_target+2)=*(offset_source+2);
-								if (*(offset_target+3)== 0) *(offset_target+3)=*(offset_source+3);
-								if (*(offset_target+4)== 0) *(offset_target+4)=*(offset_source+4);
-							}
-							else
-							{
-								memcpy(offset_target,offset_source,EVENT_SIZE);
-							}
+							if (*offset_target == 0xFF) *(offset_target)=*offset_source;
+							if (*(offset_target+1)== 0xFF) *(offset_target+1)=*(offset_source+1);
+							if (*(offset_target+2)== 0xFF) *(offset_target+2)=*(offset_source+2);
+							if (*(offset_target+3)== 0) *(offset_target+3)=*(offset_source+3);
+							if (*(offset_target+4)== 0) *(offset_target+4)=*(offset_source+4);
+						}
+						else
+						{
+							memcpy(offset_target,offset_source,EVENT_SIZE);
 						}
 						++ls;
 					}
@@ -1644,8 +1642,162 @@ NAMESPACE__BEGIN(psycle)
 				NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
 				Repaint(DMData);
 			}
-			
 		}
+
+		void CChildView::SwitchBlock(int tx, int lx)
+		{
+			if(blockSelected || isBlockCopied)// With shift+arrows, moving the cursor unselects the block, so in this case it is a three step
+			{									// operation: select, copy, switch, instead of select, switch.
+				int ps=_pSong->playOrder[editPosition];
+				int nl = _pSong->patternLines[ps];
+				bool bOverlapTrack = false;
+				bool bOverlapLine = false;
+				int ls=0;
+				int ts=0;
+				int startRT=0;
+				int startRL=0;
+				int startWT=0;
+				int startWL=0;
+				int stopT=0;
+				int stopL=0;
+				PatternEntry blank;
+
+				// Copy block(1) if not done already.
+				if (blockSelected) CopyBlock(false);
+
+				// We backup the data of the whole block.
+				AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+
+				// Detect Block sizes and see if they overlap, 
+				if (abs(blockLastOrigin.start.track-tx) < blockNTracks	&& abs(blockLastOrigin.start.line-lx) < blockNLines )
+				{
+					if 	( blockLastOrigin.start.track != tx )  //If they are equal, we don't need to move tracks.
+					{
+						//Tracks overlap
+						bOverlapTrack = true;
+
+						if ( blockLastOrigin.start.track > tx)
+						{
+							startRT=blockLastOrigin.start.track+blockNTracks;	startRL=lx;
+							startWT=blockLastOrigin.start.track;				startWL=blockLastOrigin.start.line;
+							stopT=tx;											stopL=blockLastOrigin.start.line+blockNLines;
+						}
+						else 
+						{
+							startRT=tx;							startRL=lx;
+							startWT=tx+blockNTracks;			startWL=blockLastOrigin.start.line;
+							stopT=blockLastOrigin.start.track;	stopL=lx+blockNLines;
+						}
+					}
+					if ( blockLastOrigin.start.line != lx )//If they are equal, we don't need to move lines.
+					{
+						//lines overlap
+						bOverlapLine = true;
+
+						if (bOverlapTrack)
+						{
+							int startRT2, startRL2, startWT2, startWL2, stopT2, stopL2;
+							//Most of the work Prepared. Only missing is moving some lines.
+							if ( blockLastOrigin.start.track > tx)
+							{
+								startRT2=blockLastOrigin.start.track; startWT2=blockLastOrigin.start.track; stopT2=tx+blockNTracks;
+								if ( blockLastOrigin.start.line > lx)
+								{
+									startRL2=lx;
+									startWL2=lx+blockNLines;
+									stopL2=blockLastOrigin.start.line;
+								}
+								else
+								{
+									startRL2=blockLastOrigin.start.line+blockNLines;
+									startWL2=blockLastOrigin.start.line;
+									stopL2=lx+blockNLines;
+								}
+							}
+							else
+							{
+								startRT2=tx;	startWT2=tx; stopT2=blockLastOrigin.start.track+blockNTracks;
+								if ( blockLastOrigin.start.line > lx)
+								{
+									startRL2=lx;
+									startWL2=+blockNLines;
+									stopL2=blockLastOrigin.start.line;
+								}
+								else
+								{
+									startRL2=blockLastOrigin.start.line+blockNLines;
+									startWL2=blockLastOrigin.start.line;
+									stopL2=lx+blockNLines;
+								}
+							}
+							ts = startWT2;
+							for (int t=startRT2;t<stopT2 && t<_pSong->SONGTRACKS;t++)
+							{
+								ls=startWL2;
+								for (int l=startRL2;l<stopL2 && l<nl;l++)
+								{
+									unsigned char *offset_target=_ptrackline(ps,ts,ls);
+									unsigned char *offset_source=_ptrackline(ps,t,l);
+
+									memcpy(offset_target,offset_source,EVENT_SIZE);
+
+									++ls;
+								}
+								++ts;
+							}
+						}
+						else
+						{
+							if ( blockLastOrigin.start.line > lx)
+							{
+								startRT=tx;								startRL=lx;
+								startWT=tx;								startWL=lx+blockNLines;
+								stopT=tx+blockNTracks;					stopL=blockLastOrigin.start.line;
+							}
+							else
+							{
+								startRT=tx;					startRL=blockLastOrigin.start.line+blockNLines;
+								startWT=tx;					startWL=blockLastOrigin.start.line;
+								stopT=tx+blockNTracks;		stopL=lx+blockNLines;
+							}
+						}
+					}
+					if (!bOverlapLine && !bOverlapTrack) return; // There is nothing to Swap. blocks are the same.
+				}
+			
+				if (!bOverlapLine && !bOverlapTrack)
+				{
+					// No overlapping, 
+					startRT=tx;								startRL=lx;
+					startWT=blockLastOrigin.start.track;	startWL=blockLastOrigin.start.line;
+					stopT=tx+blockNTracks;					stopL=lx+blockNLines;
+				}
+
+				// do Swap "inplace".
+				ts = startWT;
+				for (int t=startRT;t<stopT && t<_pSong->SONGTRACKS;t++)
+				{
+					ls=startWL;
+					for (int l=startRL;l<stopL && l<nl;l++)
+					{
+						unsigned char *offset_target=_ptrackline(ps,ts,ls);
+						unsigned char *offset_source=_ptrackline(ps,t,l);
+
+						memcpy(offset_target,offset_source,EVENT_SIZE);
+
+						++ls;
+					}
+					++ts;
+				}
+
+				// Finally, paste the Original selected block on the freed space.
+				PasteBlock(tx, lx, false,false);
+				
+				NewPatternDraw(0,_pSong->SONGTRACKS-1,0,nl-1);
+				Repaint(DMData);
+			}
+		}
+
 
 		void CChildView::SaveBlock(FILE* file)
 		{

@@ -232,7 +232,8 @@ NAMESPACE__BEGIN(psycle)
 												// Result: Update the selected region depending on the new and old values.
 			void EndBlock(int track,int line, int col);
 			void CopyBlock(bool cutit);
-			void PasteBlock(int tx,int lx,bool mix);
+			void PasteBlock(int tx,int lx,bool mix,bool save=true);
+			void SwitchBlock(int tx, int lx);
 			void DeleteBlock();
 			void BlockUnmark(void);
 			void SaveBlock(FILE* file);
@@ -295,6 +296,7 @@ NAMESPACE__BEGIN(psycle)
 
 			bool blockSelected;
 			bool blockStart;
+			bool blockswitch;
 			int blockSelectBarState; //This is used to remember the state of the select bar function
 			bool bScrollDetatch;
 			CCursor editcur;	// Edit Cursor Position in Pattern.
@@ -461,6 +463,7 @@ NAMESPACE__BEGIN(psycle)
 			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;
 			int	blockNLines;
+			CSelection blockLastOrigin;
 			
 			unsigned char patBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int patBufferLines;
@@ -587,6 +590,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnPopBlockswitch();
+			afx_msg void OnUpdatePopBlockswitch(CCmdUI *pCmdUI);
 };
 
 

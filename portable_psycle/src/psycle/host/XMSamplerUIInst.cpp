@@ -687,7 +687,10 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
 	{
-		sprintf(tmp,"%.0fms",(float)m_SlFadeoutRes.GetPos() / (24.0f * Global::pPlayer->bpm/60000.0f));
+//		1024 / getpos() = number of ticks that needs to decrease to 0.
+//		(24.0f * Global::pPlayer->bpm/60.0f) = number of ticks in a second.
+//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::pPlayer->bpm/60.0f));
+		sprintf(tmp,"%.0fms",(float) ((0.4096f * Global::pPlayer->bpm) /m_SlFadeoutRes.GetPos()) );
 		_inst.VolumeFadeSpeed(m_SlFadeoutRes.GetPos()/1024.0f);
 	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
