@@ -174,6 +174,7 @@ namespace psycle
 			cdefBlockCopy,
 			cdefBlockPaste,
 			cdefBlockMix,
+			cdefBlockSwitch,
 			cdefBlockInterpolate,
 			cdefBlockSetMachine,
 			cdefBlockSetInstr,
@@ -329,6 +330,7 @@ namespace psycle
 				case cdefBlockDouble:	return "Block Double";
 				case cdefBlockHalve:	return "Block Halve";
 				case cdefBlockMix:		return "Block Mix";
+				case cdefBlockSwitch:	return "Block Switch";
 				case cdefBlockInterpolate:	return "Block Interpolate";
 				case cdefBlockSetMachine:	return "Block Set Machine";
 				case cdefBlockSetInstr:		return "Block Set Instrument";

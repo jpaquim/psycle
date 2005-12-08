@@ -869,6 +869,10 @@ namespace psycle
 				pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,true);
 				break;
 
+			case cdefBlockSwitch:
+				pChildView->SwitchBlock(pChildView->editcur.track,pChildView->editcur.line);
+				break;
+
 			case cdefBlockDelete:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
@@ -1338,6 +1342,7 @@ namespace psycle
 			SetCmd(cdefBlockCopy,'C',MOD_C,false);
 			SetCmd(cdefBlockPaste,'V',MOD_C,false);
 			SetCmd(cdefBlockMix,'M',MOD_C,false);
+			SetCmd(cdefBlockSwitch,'Y',MOD_C,false);
 			SetCmd(cdefBlockInterpolate,'I',MOD_C,false);
 			SetCmd(cdefBlockSetMachine,'G',MOD_C,false);
 			SetCmd(cdefBlockSetInstr,'T',MOD_C,false);

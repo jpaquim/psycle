@@ -443,7 +443,15 @@ NAMESPACE__BEGIN(psycle)
 
 					oldm.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
 
-					blockStart = TRUE;
+					if (blockSelected
+						&& oldm.track >=blockSel.start.track && oldm.track <= blockSel.end.track
+						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line)
+					{
+						blockswitch=true;
+						CopyBlock(false);
+						editcur = oldm;
+					}
+					else blockStart = TRUE;
 					if (nFlags & MK_SHIFT)
 					{
 						editcur = oldm;
@@ -519,7 +527,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 			else if (viewMode == VMPattern)
 			{
-				
 				if ( (blockStart) &&
 					( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT)) &&
 					(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
@@ -545,6 +552,18 @@ NAMESPACE__BEGIN(psycle)
 						bScrollDetatch=false;
 						Repaint(DMSelection);
 					}
+				}
+				else if (blockswitch)
+				{
+					CCursor tmpcur;
+					tmpcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
+					tmpcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
+					blockSelected=false;//the block to swap is already in copyblock. It is not the currently selected one.
+					blockSel.end.line=0;
+					blockSel.end.track=0;
+					SwitchBlock(blockLastOrigin.start.track+(tmpcur.track-editcur.track),blockLastOrigin.start.line+(tmpcur.line-editcur.line));
+					blockswitch=false;
+					Repaint(DMSelection);
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnLButtonUp(nFlags,point);
@@ -723,7 +742,17 @@ NAMESPACE__BEGIN(psycle)
 							blockSel.end.track=0;
 							StartBlock(oldm.track,oldm.line,oldm.col);
 						}
-						ChangeBlock(ttm,llm,ccm);
+						else if ( blockswitch ) 
+						{
+							blockSelectBarState = 1;
+
+							blockSel.start.track=blockLastOrigin.start.track+(ttm-editcur.track);
+							blockSel.start.line=blockLastOrigin.start.line+(llm-editcur.line);
+							iniSelec = blockSel.start;
+
+							ChangeBlock(blockLastOrigin.end.track+(ttm-editcur.track),blockLastOrigin.end.line+(llm-editcur.line),ccm);
+						}
+						else ChangeBlock(ttm,llm,ccm);
 						oldm.track=ttm;
 						oldm.line=llm;
 						oldm.col=ccm;

@@ -99,7 +99,6 @@
 #define IDD_XMSAMPLERUISAMPLE           218
 #define IDD_XMSAMPLER_MIXER             222
 #define IDB_SAMPULSE                    226
-#define IDD_DIALOG1                     229
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -873,21 +872,15 @@
 #define IDC_MACHINEGUI_BOTTOMFONTC      1663
 #define IDC_MACHINEGUI_TITLEC           1664
 #define IDC_INSTRUMENTNAME              1664
-#define IDC_LENVBASE                    1664
 #define IDC_MACHINEGUI_TITLEFONTC       1665
 #define IDC_ENVADSR                     1665
 #define IDC_MACHINEGUI_TOPFONTC2        1666
 #define IDC_ENVFREEFORM                 1666
 #define IDC_MACHINEGUI_TOPC2            1667
-#define IDC_LENVMOD                     1667
 #define IDC_MACHINEGUI_BOTTOMC2         1668
 #define IDC_CUTOFFPAN                   1668
 #define IDC_MACHINEGUI_BOTTOMFONTC2     1669
-#define IDC_LENVATT                     1669
 #define IDC_MOVECURSORPASTE             1670
-#define IDC_LENVDEC                     1670
-#define IDC_LENVSUS                     1671
-#define IDC_LENVREL                     1672
 #define IDC_LVOLCUTOFFPAN               1673
 #define IDC_LFADEOUTRES                 1674
 #define IDC_LNOTEMOD                    1675
@@ -900,7 +893,6 @@
 #define IDC_LSWING2                     1682
 #define IDC_ENVCHECK                    1685
 #define IDC_ADSRBASE                    1687
-#define IDC_SCROLLENV                   1688
 #define IDC_STATIC5                     1689
 #define IDC_STATIC6                     1690
 #define IDC_STATIC7                     1691
@@ -1019,6 +1011,7 @@
 #define ID_MIXER                        32934
 #define ID_VIEW_MIXER                   32934
 #define ID_IMPORT_S3MFILE               32937
+#define ID_POP_BLOCKSWITCH              32940
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1027,7 +1020,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        230
-#define _APS_NEXT_COMMAND_VALUE         32939
+#define _APS_NEXT_COMMAND_VALUE         32941
 #define _APS_NEXT_CONTROL_VALUE         1717
 #define _APS_NEXT_SYMED_VALUE           60
 #endif

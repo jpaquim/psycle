@@ -73,6 +73,7 @@ NAMESPACE__BEGIN(psycle)
 			bEditMode = true;
 
 			blockSelected=false;
+			blockswitch=false;
 			isBlockCopied=false;
 			patBufferCopy=false;
 			blockNTracks=0;
@@ -263,6 +264,8 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 			//}}AFX_MSG_MAP
+			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
+			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
 			END_MESSAGE_MAP()
 
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
@@ -350,6 +353,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				if (viewMode == VMMachine)
 				{
+					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
 /*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
 					{
 						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
@@ -1630,6 +1634,16 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPopMixpaste() { PasteBlock(editcur.track,editcur.line,true); }
 
+		void CChildView::OnPopBlockswitch()
+		{
+			SwitchBlock(editcur.track,editcur.line);
+		}
+
+		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
+		{
+			if (isBlockCopied && (viewMode == VMPattern)) pCmdUI->Enable(TRUE);
+			else  pCmdUI->Enable(FALSE);
+		}
 		void CChildView::OnPopDelete() { DeleteBlock(); }
 
 		void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }
@@ -1748,7 +1762,7 @@ NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Module Songs\0*.xm;*.it;*.s3m\0FastTracker II Songs\0*.xm\0Impulse Tracker Songs\0*.it\0Scream Tracker Songs\0*.s3m\0All\0*.*\0";
+			ofn.lpstrFilter = "Module Songs\0*.xm;*.it;*.s3m;*.mod\0FastTracker II Songs\0*.xm\0Impulse Tracker Songs\0*.it\0Scream Tracker Songs\0*.s3m\0Original .Mod Songs\0*.mod\0All\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -1837,6 +1851,23 @@ NAMESPACE__BEGIN(psycle)
 							Global::_pSong->Comment
 							);
 						MessageBox(buffer, "S3M file imported", MB_OK);
+					} else if (ext.CompareNoCase("MOD") == 0)
+					{
+						MODSongLoader modfile;
+						modfile.Open(ofn.lpstrFile);
+						Global::_pSong->New();
+						editPosition=0;
+						modfile.Load(*_pSong);
+						modfile.Close();
+						char buffer[512];		
+						std::sprintf
+							(
+							buffer,"%s\n\n%s\n\n%s",
+							Global::_pSong->Name,
+							Global::_pSong->Author,
+							Global::_pSong->Comment
+							);
+						MessageBox(buffer, "MOD file imported", MB_OK);
 					}
 				}
 
@@ -3500,4 +3531,3 @@ NAMESPACE__END
 // User/Mouse Responses, private headers
 #include "keybhandler.private.hpp"
 #include "mouseHandler.private.hpp"
-

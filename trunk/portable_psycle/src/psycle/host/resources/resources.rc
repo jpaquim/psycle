@@ -1681,7 +1681,7 @@ BEGIN
                     BS_PUSHLIKE,447,7,68,13
     GROUPBOX        "",IDC_STATIC,169,15,348,282
     LTEXT           "Filter Type",IDC_STATIC1,187,32,34,8
-    COMBOBOX        IDC_FILTERTYPE,267,30,100,57,CBS_DROPDOWN | CBS_SORT | 
+    COMBOBOX        IDC_FILTERTYPE,267,30,100,57,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Filter Cutoff",IDC_CUTOFFPAN,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,187,47,67,8
@@ -1696,11 +1696,11 @@ BEGIN
     CTEXT           "Estático",IDC_LFADEOUTRES,334,75,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Note Mod Center Note",IDC_STATIC3,187,107,75,8
-    COMBOBOX        IDC_NOTEMODNOTE,267,105,37,142,CBS_DROPDOWN | WS_VSCROLL | 
-                    WS_TABSTOP
-    LTEXT           "Octave",IDC_STATIC4,307,107,23,8
-    COMBOBOX        IDC_NOTEMODOCTAVE,335,105,29,114,CBS_DROPDOWN | CBS_SORT | 
+    COMBOBOX        IDC_NOTEMODNOTE,267,105,37,142,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Octave",IDC_STATIC4,307,107,23,8
+    COMBOBOX        IDC_NOTEMODOCTAVE,335,105,29,114,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Note Mod Amount",IDC_STATIC5,187,122,58,8
     CONTROL         "",IDC_NOTEMOD,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,263,122,70,11
@@ -1713,14 +1713,14 @@ BEGIN
                     SS_SUNKEN
     GROUPBOX        "",IDC_FRAMENNA,232,66,214,49
     LTEXT           "Action on New Notes",IDC_STATIC15,240,80,67,8
-    COMBOBOX        IDC_INS_NNACOMBO,311,78,74,57,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INS_NNACOMBO,311,78,74,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "If the same...",IDC_STATIC16,240,96,61,8
     COMBOBOX        IDC_INS_DCTCOMBO,311,95,58,57,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "do",IDC_STATIC17,372,97,9,8
-    COMBOBOX        IDC_INS_DCACOMBO,383,95,58,57,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INS_DCACOMBO,383,95,58,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Global Volume",IDC_STATIC12,187,47,45,8
     LTEXT           "Fadeout",IDC_STATIC13,187,77,27,8
     LTEXT           "Instrument Name",IDC_STATIC14,240,51,56,8
@@ -2488,6 +2488,7 @@ BEGIN
         MENUITEM "Block C&opy",                 ID_POP_COPY
         MENUITEM "Block &Paste",                ID_POP_PASTE
         MENUITEM "Block &Mix Paste",            ID_POP_MIXPASTE
+        MENUITEM "Block S&witch/Swap",          ID_POP_BLOCKSWITCH
         MENUITEM "Block &Delete",               ID_POP_DELETE
         MENUITEM SEPARATOR
         MENUITEM "&Interpolate Effect",         ID_POP_INTERPOLATE
@@ -2925,163 +2926,10 @@ STRINGTABLE
 BEGIN
     ID_EDIT_CROP            "Cut everything but selection"
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
+    ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
 #endif    // Neutral (predeterminado) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Catalán resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
-#ifdef _WIN32
-LANGUAGE LANG_CATALAN, SUBLANG_DEFAULT
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_DIALOG1 DIALOGEX 0, 0, 608, 443
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "Dialog"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    LISTBOX         IDC_INSTRUMENTLIST,7,6,159,277,WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Load",IDC_LOADINS,7,283,39,14
-    PUSHBUTTON      "Save",IDC_SAVEINS,47,283,39,14
-    PUSHBUTTON      "Duplicate",IDC_DUPEINS,87,283,39,14
-    PUSHBUTTON      "Delete",IDC_DELETEINS,127,283,39,14
-    CONTROL         "General",IDC_INS_TGENERAL,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_GROUP,171,7,68,13
-    CONTROL         "Amplitude",IDC_INS_TAMP,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,240,7,68,13
-    CONTROL         "Panning",IDC_INS_TPAN,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,309,7,68,13
-    CONTROL         "Filtering",IDC_INS_TFILTER,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,378,7,68,13
-    CONTROL         "Pitch",IDC_INS_TPITCH,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,447,7,68,13
-    GROUPBOX        "",IDC_STATIC,169,15,348,282
-    GROUPBOX        "",IDC_STATIC,177,141,332,151
-    CONTROL         " Envelope Enabled",IDC_ENVCHECK,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,185,148,71,10
-    CONTROL         "ADSR",IDC_ENVADSR,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_GROUP,420,148,40,12
-    CONTROL         "Freeform",IDC_ENVFREEFORM,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,460,148,40,12
-    CONTROL         "Personalizar1",IDC_INS_NOTEMAP,"",WS_TABSTOP,184,161,
-                    319,126
-    LTEXT           "Base",IDC_STATIC6,187,246,16,8
-    CONTROL         "",IDC_ADSRBASE,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,239,246,70,11
-    CTEXT           "Estático",IDC_LENVBASE,311,244,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Envelope Mod.",IDC_STATIC7,187,261,52,8
-    CONTROL         "",IDC_ADSRMOD,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,239,261,70,11
-    CTEXT           "Estático",IDC_LENVMOD,311,259,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Attack Time",IDC_STATIC8,187,277,43,8
-    CONTROL         "",IDC_ADSRATT,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,239,277,70,11
-    CTEXT           "Estático",IDC_LENVATT,311,275,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Decay Time",IDC_STATIC9,351,246,42,8
-    CONTROL         "",IDC_ADSRDEC,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,395,246,70,11
-    CTEXT           "Estático",IDC_LENVDEC,467,244,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Sustain Value",IDC_STATIC10,351,261,44,8
-    CONTROL         "",IDC_ADSRSUS,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,395,261,70,11
-    CTEXT           "Estático",IDC_LENVSUS,467,259,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Release Time",IDC_STATIC11,351,277,43,8
-    CONTROL         "",IDC_ADSRREL,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,395,277,70,11
-    CTEXT           "Estático",IDC_LENVREL,467,275,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Filter Type",IDC_STATIC1,187,32,34,8
-    COMBOBOX        IDC_FILTERTYPE,267,30,100,57,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Filter Cutoff",IDC_CUTOFFPAN,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,187,47,60,8
-    CONTROL         "",IDC_VOLCUTOFFPAN,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,262,47,70,11
-    CTEXT           "Estático",IDC_LVOLCUTOFFPAN,334,45,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CONTROL         "Filter Ressonance",IDC_RESSONANCE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,187,77,69,8
-    CONTROL         "",IDC_FADEOUTRES,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,262,77,70,11
-    CTEXT           "Estático",IDC_LFADEOUTRES,334,75,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Note Mod Center Note",IDC_STATIC3,187,107,75,8
-    COMBOBOX        IDC_NOTEMODNOTE,267,105,37,142,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Octave",IDC_STATIC4,307,107,23,8
-    COMBOBOX        IDC_NOTEMODOCTAVE,335,105,29,114,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Note Mod Amount",IDC_STATIC5,187,122,58,8
-    CONTROL         "",IDC_NOTEMOD,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,263,122,70,11
-    CTEXT           "Estático",IDC_LNOTEMOD,335,120,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    LTEXT           "Swing (Randomize)",IDC_STATIC2,187,62,62,8
-    CONTROL         "",IDC_SWING1,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
-                    WS_TABSTOP,262,61,70,11
-    CTEXT           "Estático",IDC_LSWING,334,59,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    GROUPBOX        "",IDC_FRAMENNA,232,66,214,49
-    LTEXT           "Action on New Notes",IDC_STATIC15,240,80,67,8
-    COMBOBOX        IDC_INS_NNACOMBO,311,78,74,57,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "If the same...",IDC_STATIC16,240,96,61,8
-    COMBOBOX        IDC_INS_DCTCOMBO,311,95,58,57,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "do",IDC_STATIC17,372,97,9,8
-    COMBOBOX        IDC_INS_DCACOMBO,383,95,58,57,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Global Volume",IDC_STATIC12,187,47,45,8
-    LTEXT           "Fadeout",IDC_STATIC13,187,77,27,8
-    SCROLLBAR       IDC_SCROLLENV,185,230,315,11
-    LTEXT           "Instrument Name",IDC_STATIC14,240,51,56,8
-    EDITTEXT        IDC_INS_NAME,312,49,125,12,ES_AUTOHSCROLL
-    GROUPBOX        "",IDC_STATIC,177,22,332,118
-    LTEXT           "Swing (Randomize)",IDC_STATIC18,187,92,62,8
-    CONTROL         "",IDC_SWING2,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
-                    WS_TABSTOP,262,91,70,11
-    CTEXT           "Estático",IDC_LSWING2,334,89,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CONTROL         "Personalizar1",IDC_INS_ENVELOPE,"",WS_TABSTOP,185,161,
-                    315,69
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_DIALOG1, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 601
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 436
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Catalán resources
 /////////////////////////////////////////////////////////////////////////////
 
 
