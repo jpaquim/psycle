@@ -21,8 +21,10 @@
 	typedef unsigned char uint8;
 	typedef unsigned short int uint16;
 	typedef unsigned long int uint32;
-
+//<Sartorius> Druttis's plugins
+#ifndef PI
 	double const PI = 3.14159265358979323846;
+#endif
 
 	/// in number of samples (per channel).
 	int const MAX_BUFFER_LENGTH = 256;
