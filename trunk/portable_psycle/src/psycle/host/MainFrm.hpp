@@ -169,8 +169,6 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnFollowSong();
 			afx_msg void OnSeqclr();
 			afx_msg void OnSeqsort();
-			afx_msg void OnSelchangeBarGenfx();
-			afx_msg void OnCloseupBarGenfx();
 			afx_msg void OnMultichannelAudition();
 			afx_msg void OnRecordNoteoff();
 			afx_msg void OnRecordTweaks();

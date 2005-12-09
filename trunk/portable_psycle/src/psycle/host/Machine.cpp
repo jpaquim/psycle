@@ -701,6 +701,7 @@ namespace psycle
 			_numPars = 16;
 			_type = MACH_DUPLICATOR;
 			_mode = MACHMODE_GENERATOR;
+			bisTicking = false;
 			strcpy(_editName, "Dupe it!");
 			for (int i=0;i<8;i++)
 			{
@@ -719,8 +720,9 @@ namespace psycle
 		}
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
-			if ( !_mute )
+			if ( !_mute && !bisTicking)
 			{
+				bisTicking=true;
 				for (int i=0;i<8;i++)
 				{
 					PatternEntry pTemp = *pData;
@@ -732,6 +734,7 @@ namespace psycle
 						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 				}
 			}
+			bisTicking=false;
 		}
 		void DuplicatorMac::GetParamName(int numparam,char *name)
 		{
@@ -784,20 +787,6 @@ namespace psycle
 
 		void DuplicatorMac::Work(int numSamples)
 		{
-/*			Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
-			Machine::SetVolumeCounter(numSamples);
-			if ( Global::pConfig->autoStopMachines )
-			{
-				if (_volumeCounter < 8.0f)	{
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					_stopped = true;
-				}
-			}
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
-*/
 			_worked = true;
 		}
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)

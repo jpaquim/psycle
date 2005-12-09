@@ -76,8 +76,6 @@ NAMESPACE__BEGIN(psycle)
 		ON_BN_CLICKED(IDC_FOLLOW, OnFollowSong)
 		ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
 		ON_BN_CLICKED(IDC_SEQSRT, OnSeqsort)
-		ON_CBN_SELCHANGE(IDC_BAR_GENFX, OnSelchangeBarGenfx)
-		ON_CBN_CLOSEUP(IDC_BAR_GENFX, OnCloseupBarGenfx)
 		ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
 		ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
 		ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
@@ -761,38 +759,34 @@ NAMESPACE__BEGIN(psycle)
 			m_wndView.patStep=nextsel;
 		}
 
-		void CMainFrame::OnSelchangeBarGenfx() 
-		{
-			CComboBox *cc1=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_GENFX);
-			_pSong->seqBus &= (MAX_BUSES-1);
-			if ( cc1->GetCurSel() == 1 )
-			{
-				_pSong->seqBus |= MAX_BUSES;
-			}
-			UpdateComboGen();
-		}
-
-		void CMainFrame::OnCloseupBarGenfx() 
-		{
-			m_wndView.SetFocus();
-		}
-
-		void CMainFrame::OnBDecgen() 
+		void CMainFrame::OnBDecgen() // called by Button and Hotkey.
 		{
 			//	ChangeGen(_pSong->seqBus-1);
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 			const int val = cc->GetCurSel();
 			if ( val > 0 ) cc->SetCurSel(val-1);
+			else cc->SetCurSel(cc->GetCount()-1);
+			if ( cc->GetItemData() == -1 )
+			{
+				if ( val >1) cc->SetCurSel(val-2);
+				else cc->SetCurSel(val);
+			}
 			OnSelchangeBarCombogen();
 			m_wndView.SetFocus();
 		}
 
-		void CMainFrame::OnBIncgen() 
+		void CMainFrame::OnBIncgen() // called by Button and Hotkey.
 		{
 			//	ChangeGen(_pSong->seqBus+1);
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 			const int val = cc->GetCurSel();
 			if ( val < cc->GetCount()-1 ) cc->SetCurSel(val+1);
+			else cc->SetCurSel(0);
+			if ( cc->GetItemData() == -1 )
+			{
+				if ( val < cc->GetCount()-2) cc->SetCurSel(val+2);
+				else cc->SetCurSel(val);
+			}
 			OnSelchangeBarCombogen();
 			m_wndView.SetFocus();
 		}
@@ -826,6 +820,7 @@ NAMESPACE__BEGIN(psycle)
 					{	
 						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
 						cb->AddString(buffer);
+						cb-SetItemData(b);
 					}
 					if (!found) 
 					{
@@ -841,6 +836,7 @@ NAMESPACE__BEGIN(psycle)
 			if ( updatelist) 
 			{
 				cb->AddString("----------------------------------------------------");
+				cb-SetItemData(-1);
 			}
 			if (!found) 
 			{
@@ -856,6 +852,7 @@ NAMESPACE__BEGIN(psycle)
 					{	
 						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
 						cb->AddString(buffer);
+						cb-SetItemData(b);
 					}
 					if (!found) 
 					{
@@ -893,6 +890,7 @@ NAMESPACE__BEGIN(psycle)
 							cb2->SetCurSel(AUX_WAVES);
 							_pSong->auxcolSelected = _pSong->instSelected;
 						}
+						/* This code is disabled because the MIDI channels are rarely used.
 						else if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_VST)
 						{
 							if ( cb2->GetCurSel() == AUX_WAVES)
@@ -901,6 +899,7 @@ NAMESPACE__BEGIN(psycle)
 								_pSong->auxcolSelected = _pSong->midiSelected;
 							}
 						}
+						*/
 						else
 						{
 							cb2->SetCurSel(AUX_PARAMS);
@@ -948,7 +947,7 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 
-		void CMainFrame::ChangeGen(int i)	// User Called (Hotkey)
+		void CMainFrame::ChangeGen(int i)	// Used to set an specific seqBus (used in "CChildView::SelectMachineUnderCursor")
 		{
 			if(i>=0 && i <(MAX_BUSES*2))
 			{
