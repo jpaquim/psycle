@@ -60,6 +60,195 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Menu
+//
+
+IDR_WAVEFRAME MENU 
+BEGIN
+    POPUP "Process"
+    BEGIN
+        MENUITEM "Amplify selection...\tCTRL+M", ID_SELECTION_AMPLIFY
+        MENUITEM "Reverse\tCTRL+R",             ID_SELECTION_REVERSE
+        MENUITEM "Fade In\tCTRL+I",             ID_SELECTION_FADEIN
+        MENUITEM "Fade Out\tCTRL+O",            ID_SELECTION_FADEOUT
+        MENUITEM "Normalize\tCTRL+N",           ID_SELECTION_NORMALIZE
+        MENUITEM "Remove DC\tCTRL+D",           ID_SELECTION_REMOVEDC
+    END
+    POPUP "Edit"
+    BEGIN
+        MENUITEM "Select All\tCTRL+A",          ID_EDIT_SELECT_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "Cut\tCTRL+X",                 ID_EDIT_CUT
+        MENUITEM "Crop\tCTRL+P",                ID_EDIT_CROP
+        MENUITEM "Copy\tCTRL+C",                ID_EDIT_COPY
+        MENUITEM "Paste\tCTRL+V",               ID_EDIT_PASTE
+        MENUITEM "Delete\tDel",                 ID_EDIT_DELETE
+    END
+    POPUP "View"
+    BEGIN
+        MENUITEM "Zoom In\t+ [Kpd]",            ID_SELECCION_ZOOM
+        MENUITEM "Zoom Out\t- [Kpd]",           ID_SELECCION_ZOOMOUT
+        MENUITEM "Show All",                    ID_SELECTION_SHOWALL
+    END
+    POPUP "Convert"
+    BEGIN
+        MENUITEM "Convert to mono",             ID_CONVERT_MONO
+    END
+END
+
+IDR_MACHINEFRAME MENU 
+BEGIN
+    POPUP "About"
+    BEGIN
+        MENUITEM "Help",                        ID_MACHINE_COMMAND
+        MENUITEM SEPARATOR
+        MENUITEM "About this machine",          ID_MACHINE_ABOUTTHISMACHINE
+    END
+    POPUP "Parameters"
+    BEGIN
+        MENUITEM "Reset parameters",            ID_PARAMETERS_RESETPARAMETERS
+
+        MENUITEM "Random parameters",           ID_PARAMETERS_RANDOMPARAMETERS
+
+        MENUITEM SEPARATOR
+        MENUITEM "Open preset dialog\tCtrl+P",  ID_PARAMETERS_SHOWPRESET
+    END
+END
+
+IDR_VSTFRAME MENU 
+BEGIN
+    POPUP "Parameters"
+    BEGIN
+        MENUITEM "Reset Parameters",            ID_PARAMETERS_RESETPARAMETERS
+
+        MENUITEM "Random Parameters",           ID_PARAMETERS_RANDOMPARAMETERS
+
+        MENUITEM SEPARATOR
+        MENUITEM "Open Presets Dialog\tCtrl+P", ID_PARAMETERS_SHOWPRESET
+    END
+END
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New",                        ID_FILE_NEW
+        MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
+        MENUITEM "I&mport Module",              ID_FILE_IMPORT_XMFILE
+        MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
+        MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
+        MENUITEM "Render as &Wav...",           ID_FILE_SAVEAUDIO
+        MENUITEM SEPARATOR
+        MENUITEM "Song &properties",            ID_FILE_SONGPROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "Revert to Saved",             ID_FILE_REVERT
+        POPUP "&Recent Files"
+        BEGIN
+            MENUITEM "No recent file",              ID_FILE_RECENT_NONE
+            , GRAYED
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo",                       ID_EDIT_UNDO
+        MENUITEM "&Redo",                       ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Pattern Cu&t\tCTRL+F3",       ID_EDIT_CUT
+        MENUITEM "Pattern &Copy\tCTRL+F4",      ID_EDIT_COPY
+        MENUITEM "Pattern &Paste\tCTRL+F5",     ID_EDIT_PASTE
+        MENUITEM "Pattern &Mix Paste",          ID_EDIT_MIXPASTE
+        MENUITEM "Pattern &Delete",             ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Block Cut",                   ID_POP_CUT
+        MENUITEM "Block Copy",                  ID_POP_COPY
+        MENUITEM "Block Paste",                 ID_POP_PASTE
+        MENUITEM "Block Mix Paste",             ID_POP_MIXPASTE
+        MENUITEM "Block Delete",                ID_POP_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Sequence Cut",                IDC_SEQCUT
+        MENUITEM "Sequence Copy",               IDC_SEQCOPY
+        MENUITEM "Sequence Paste",              IDC_SEQPASTE
+        MENUITEM "Sequence Delete",             IDC_SEQDELETE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "Song Bar",                    ID_VIEW_SONGBAR
+        MENUITEM "Machine Bar",                 ID_VIEW_MACHINEBAR
+        MENUITEM "Sequencer Bar",               ID_VIEW_SEQUENCERBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Machine View\tF2",            ID_MACHINEVIEW
+        MENUITEM "Pattern Editor\tF3",          ID_PATTERNVIEW
+        MENUITEM "Pattern Sequencer\tF4",       ID_SHOWPSEQ
+        MENUITEM SEPARATOR
+        MENUITEM "Add machine\tF9",             ID_NEWMACHINE
+        MENUITEM "Instrument Editor\tF10",      ID_VIEW_INSTRUMENTEDITOR
+        MENUITEM "Logging Window\tF11",         ID_VIEW_ERRORLOGGER
+    END
+    POPUP "&Configuration"
+    BEGIN
+        MENUITEM "Free Audio\tCtrl+F",          ID_CONFIGURATION_FREEAUDIO
+        MENUITEM "AutoStop Machines",           ID_AUTOSTOP
+        MENUITEM "Loop Playback",               ID_CONFIGURATION_LOOPPLAYBACK
+
+        MENUITEM SEPARATOR
+        MENUITEM "&Settings...\tALT+S",         ID_CONFIGURATION_SETTINGS
+    END
+    POPUP "&Performance"
+    BEGIN
+        MENUITEM "&CPU Monitor...",             ID_CPUPERFORMANCE
+        MENUITEM "&MIDI Monitor...",            ID_MIDI_MONITOR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help\tF1",                   ID_PSYHELP, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "./doc/&readme.txt",           ID_HELP_README
+        MENUITEM "./doc/&keys.txt",             ID_HELP_KEYBTXT
+        MENUITEM "./doc/&tweaking.txt",         ID_HELP_TWEAKING
+        MENUITEM "./doc/&whatsnew.txt",         ID_HELP_WHATSNEW
+        MENUITEM SEPARATOR
+        MENUITEM "&About Psycle...",            ID_APP_ABOUT
+        MENUITEM "&Greetings",                  ID_HELP_SALUDOS
+    END
+END
+
+IDR_POPUPMENU MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "&Undo",                       ID_EDIT_UNDO
+        MENUITEM "&Redo",                       ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Block &Cut",                  ID_POP_CUT
+        MENUITEM "Block C&opy",                 ID_POP_COPY
+        MENUITEM "Block &Paste",                ID_POP_PASTE
+        MENUITEM "Block &Mix Paste",            ID_POP_MIXPASTE
+        MENUITEM "Block S&witch/Swap",          ID_POP_BLOCKSWITCH
+        MENUITEM "Block &Delete",               ID_POP_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "&Interpolate Effect",         ID_POP_INTERPOLATE
+        MENUITEM "Change &Generator",           ID_POP_CHANGEGENERATOR
+        MENUITEM "Change Ins&trument",          ID_POP_CHANGEINSTRUMENT
+        MENUITEM SEPARATOR
+        MENUITEM "Transpose +1",                ID_POP_TRANSPOSE1
+        MENUITEM "Transpose -1",                ID_POP_TRANSPOSE_1
+        MENUITEM "Transpose +12",               ID_POP_TRANSPOSE12
+        MENUITEM "Transpose -12",               ID_POP_TRANSPOSE_12
+        MENUITEM SEPARATOR
+        MENUITEM "Block Swing Fill",            ID_POP_BLOCK_SWINGFILL
+        MENUITEM "Track Swing Fill",            ID_POP_TRACK_SWINGFILL
+        MENUITEM SEPARATOR
+        MENUITEM "Pattern Properties",          ID_POP_PATTENPROPERTIES
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Icon
 //
 
@@ -1807,8 +1996,8 @@ BEGIN
                     SS_SUNKEN
     LTEXT           "Temporary ""IDC_INS_NOTEMAP"" object",IDC_INS_NOTEMAP,
                     259,191,154,17
-    CONTROL         "",IDC_INS_ENVELOPE,"Static",SS_OWNERDRAW | SS_NOTIFY,
-                    186,160,314,70,WS_EX_STATICEDGE
+    CONTROL         "",IDC_INS_ENVELOPE,"Static",SS_OWNERDRAW | SS_NOTIFY | 
+                    WS_TABSTOP,186,160,314,70,WS_EX_STATICEDGE
     CONTROL         "Sus. Begin",IDC_ENV_SUSBEGIN,"Button",BS_AUTOCHECKBOX | 
                     BS_PUSHLIKE | WS_TABSTOP,325,230,43,12
     CONTROL         "Sus. End",IDC_ENV_SUSEND,"Button",BS_AUTOCHECKBOX | 
@@ -2362,195 +2551,6 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_WAVEFRAME MENU 
-BEGIN
-    POPUP "Process"
-    BEGIN
-        MENUITEM "Amplify selection...\tCTRL+M", ID_SELECTION_AMPLIFY
-        MENUITEM "Reverse\tCTRL+R",             ID_SELECTION_REVERSE
-        MENUITEM "Fade In\tCTRL+I",             ID_SELECTION_FADEIN
-        MENUITEM "Fade Out\tCTRL+O",            ID_SELECTION_FADEOUT
-        MENUITEM "Normalize\tCTRL+N",           ID_SELECTION_NORMALIZE
-        MENUITEM "Remove DC\tCTRL+D",           ID_SELECTION_REMOVEDC
-    END
-    POPUP "Edit"
-    BEGIN
-        MENUITEM "Select All\tCTRL+A",          ID_EDIT_SELECT_ALL
-        MENUITEM SEPARATOR
-        MENUITEM "Cut\tCTRL+X",                 ID_EDIT_CUT
-        MENUITEM "Crop\tCTRL+P",                ID_EDIT_CROP
-        MENUITEM "Copy\tCTRL+C",                ID_EDIT_COPY
-        MENUITEM "Paste\tCTRL+V",               ID_EDIT_PASTE
-        MENUITEM "Delete\tDel",                 ID_EDIT_DELETE
-    END
-    POPUP "View"
-    BEGIN
-        MENUITEM "Zoom In\t+ [Kpd]",            ID_SELECCION_ZOOM
-        MENUITEM "Zoom Out\t- [Kpd]",           ID_SELECCION_ZOOMOUT
-        MENUITEM "Show All",                    ID_SELECTION_SHOWALL
-    END
-    POPUP "Convert"
-    BEGIN
-        MENUITEM "Convert to mono",             ID_CONVERT_MONO
-    END
-END
-
-IDR_MACHINEFRAME MENU 
-BEGIN
-    POPUP "About"
-    BEGIN
-        MENUITEM "Help",                        ID_MACHINE_COMMAND
-        MENUITEM SEPARATOR
-        MENUITEM "About this machine",          ID_MACHINE_ABOUTTHISMACHINE
-    END
-    POPUP "Parameters"
-    BEGIN
-        MENUITEM "Reset parameters",            ID_PARAMETERS_RESETPARAMETERS
-
-        MENUITEM "Random parameters",           ID_PARAMETERS_RANDOMPARAMETERS
-
-        MENUITEM SEPARATOR
-        MENUITEM "Open preset dialog\tCtrl+P",  ID_PARAMETERS_SHOWPRESET
-    END
-END
-
-IDR_VSTFRAME MENU 
-BEGIN
-    POPUP "Parameters"
-    BEGIN
-        MENUITEM "Reset Parameters",            ID_PARAMETERS_RESETPARAMETERS
-
-        MENUITEM "Random Parameters",           ID_PARAMETERS_RANDOMPARAMETERS
-
-        MENUITEM SEPARATOR
-        MENUITEM "Open Presets Dialog\tCtrl+P", ID_PARAMETERS_SHOWPRESET
-    END
-END
-
-IDR_MAINFRAME MENU 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&New",                        ID_FILE_NEW
-        MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
-        MENUITEM "I&mport Module",              ID_FILE_IMPORT_XMFILE
-        MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
-        MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
-        MENUITEM "Render as &Wav...",           ID_FILE_SAVEAUDIO
-        MENUITEM SEPARATOR
-        MENUITEM "Song &properties",            ID_FILE_SONGPROPERTIES
-        MENUITEM SEPARATOR
-        MENUITEM "Revert to Saved",             ID_FILE_REVERT
-        POPUP "&Recent Files"
-        BEGIN
-            MENUITEM "No recent file",              ID_FILE_RECENT_NONE
-            , GRAYED
-        END
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       ID_APP_EXIT
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "&Undo",                       ID_EDIT_UNDO
-        MENUITEM "&Redo",                       ID_EDIT_REDO
-        MENUITEM SEPARATOR
-        MENUITEM "Pattern Cu&t\tCTRL+F3",       ID_EDIT_CUT
-        MENUITEM "Pattern &Copy\tCTRL+F4",      ID_EDIT_COPY
-        MENUITEM "Pattern &Paste\tCTRL+F5",     ID_EDIT_PASTE
-        MENUITEM "Pattern &Mix Paste",          ID_EDIT_MIXPASTE
-        MENUITEM "Pattern &Delete",             ID_EDIT_DELETE
-        MENUITEM SEPARATOR
-        MENUITEM "Block Cut",                   ID_POP_CUT
-        MENUITEM "Block Copy",                  ID_POP_COPY
-        MENUITEM "Block Paste",                 ID_POP_PASTE
-        MENUITEM "Block Mix Paste",             ID_POP_MIXPASTE
-        MENUITEM "Block Delete",                ID_POP_DELETE
-        MENUITEM SEPARATOR
-        MENUITEM "Sequence Cut",                IDC_SEQCUT
-        MENUITEM "Sequence Copy",               IDC_SEQCOPY
-        MENUITEM "Sequence Paste",              IDC_SEQPASTE
-        MENUITEM "Sequence Delete",             IDC_SEQDELETE
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
-        MENUITEM "Song Bar",                    ID_VIEW_SONGBAR
-        MENUITEM "Machine Bar",                 ID_VIEW_MACHINEBAR
-        MENUITEM "Sequencer Bar",               ID_VIEW_SEQUENCERBAR
-        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM SEPARATOR
-        MENUITEM "Machine View\tF2",            ID_MACHINEVIEW
-        MENUITEM "Pattern Editor\tF3",          ID_PATTERNVIEW
-        MENUITEM "Pattern Sequencer\tF4",       ID_SHOWPSEQ
-        MENUITEM SEPARATOR
-        MENUITEM "Add machine\tF9",             ID_NEWMACHINE
-        MENUITEM "Instrument Editor\tF10",      ID_VIEW_INSTRUMENTEDITOR
-        MENUITEM "Logging Window\tF11",         ID_VIEW_ERRORLOGGER
-    END
-    POPUP "&Configuration"
-    BEGIN
-        MENUITEM "Free Audio\tCtrl+F",          ID_CONFIGURATION_FREEAUDIO
-        MENUITEM "AutoStop Machines",           ID_AUTOSTOP
-        MENUITEM "Loop Playback",               ID_CONFIGURATION_LOOPPLAYBACK
-
-        MENUITEM SEPARATOR
-        MENUITEM "&Settings...\tALT+S",         ID_CONFIGURATION_SETTINGS
-    END
-    POPUP "&Performance"
-    BEGIN
-        MENUITEM "&CPU Monitor...",             ID_CPUPERFORMANCE
-        MENUITEM "&MIDI Monitor...",            ID_MIDI_MONITOR
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&Help\tF1",                   ID_PSYHELP, GRAYED
-        MENUITEM SEPARATOR
-        MENUITEM "./doc/&readme.txt",           ID_HELP_README
-        MENUITEM "./doc/&keys.txt",             ID_HELP_KEYBTXT
-        MENUITEM "./doc/&tweaking.txt",         ID_HELP_TWEAKING
-        MENUITEM "./doc/&whatsnew.txt",         ID_HELP_WHATSNEW
-        MENUITEM SEPARATOR
-        MENUITEM "&About Psycle...",            ID_APP_ABOUT
-        MENUITEM "&Greetings",                  ID_HELP_SALUDOS
-    END
-END
-
-IDR_POPUPMENU MENU 
-BEGIN
-    POPUP ""
-    BEGIN
-        MENUITEM "&Undo",                       ID_EDIT_UNDO
-        MENUITEM "&Redo",                       ID_EDIT_REDO
-        MENUITEM SEPARATOR
-        MENUITEM "Block &Cut",                  ID_POP_CUT
-        MENUITEM "Block C&opy",                 ID_POP_COPY
-        MENUITEM "Block &Paste",                ID_POP_PASTE
-        MENUITEM "Block &Mix Paste",            ID_POP_MIXPASTE
-        MENUITEM "Block S&witch/Swap",          ID_POP_BLOCKSWITCH
-        MENUITEM "Block &Delete",               ID_POP_DELETE
-        MENUITEM SEPARATOR
-        MENUITEM "&Interpolate Effect",         ID_POP_INTERPOLATE
-        MENUITEM "Change &Generator",           ID_POP_CHANGEGENERATOR
-        MENUITEM "Change Ins&trument",          ID_POP_CHANGEINSTRUMENT
-        MENUITEM SEPARATOR
-        MENUITEM "Transpose +1",                ID_POP_TRANSPOSE1
-        MENUITEM "Transpose -1",                ID_POP_TRANSPOSE_1
-        MENUITEM "Transpose +12",               ID_POP_TRANSPOSE12
-        MENUITEM "Transpose -12",               ID_POP_TRANSPOSE_12
-        MENUITEM SEPARATOR
-        MENUITEM "Block Swing Fill",            ID_POP_BLOCK_SWINGFILL
-        MENUITEM "Track Swing Fill",            ID_POP_TRACK_SWINGFILL
-        MENUITEM SEPARATOR
-        MENUITEM "Pattern Properties",          ID_POP_PATTENPROPERTIES
-    END
-END
 
 
 /////////////////////////////////////////////////////////////////////////////

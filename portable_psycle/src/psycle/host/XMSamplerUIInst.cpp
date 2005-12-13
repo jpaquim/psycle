@@ -248,6 +248,9 @@ void CEnvelopeEditor::OnLButtonUp( UINT nFlags, CPoint point )
 		ReleaseCapture();
 		m_bPointEditing =  false;
 
+		if (point.x > m_WindowWidth ) m_Zoom = m_Zoom /2.0f;
+		else if ( m_pEnvelope->GetTime(m_pEnvelope->NumOfPoints()-1)*m_Zoom < m_WindowWidth/2 && m_Zoom < 8.0f) m_Zoom = m_Zoom *2.0f;
+
 /*
 //\todo: verify the necessity of this code, when it is already present in MouseMove.
 		int _new_point = (int)((float)point.x / m_Zoom);
