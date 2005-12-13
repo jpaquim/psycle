@@ -1,11 +1,49 @@
 #pragma once
 #include "afxwin.h"
+#include "XMInstrument.hpp"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
 
 class XMSampler;
-class XMInstrument;	
+class CEnvelopeEditor : public CStatic
+{
+public:
+	// constant
+	static const int MARGIN_RIGHT = 100 /* pixel */;
+	static const int POINT_SIZE = 6 /* pixel */;///< Envelope Point 
+	static const int HITTEST_NOT_FOUND = -1;///< HitTest
+
+
+	CEnvelopeEditor();
+	virtual ~CEnvelopeEditor();
+
+	void Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope);
+	virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
+
+protected:
+	XMInstrument::Envelope* m_pEnvelope;
+	XMInstrument::Envelope m_EnvelopeEditing;///< Envelope Data backup
+	XMSampler * m_pXMSampler;
+	bool m_bInitialized;
+	float m_Zoom;///< Zoom
+	int m_CurrentScrollWidth;///< 
+	int m_CurrentScrollHeight;///<
+
+	bool m_bPointEditing;
+	int m_EditPoint;///< ***** Envelope Point Index
+	int m_EditPointOrig;///< Envelope Point Index
+	int m_EditPointX;///< Envelope Point
+	int m_EditPointY;///< Envelope Point
+
+	CPen _line_pen;
+	CPen _gridpen;
+	CPen _gridpen1;
+	CPen _gridpen2;
+	CBrush brush;
+	CBrush  _point_brush;
+};
+
 class XMSamplerUIInst : public CPropertyPage
 {
 	/** EnvelopeEditor Class 
@@ -129,9 +167,6 @@ class XMSamplerUIInst : public CPropertyPage
 		int m_EditPointY;///< Envelope Point
 		Gdiplus::Color m_Color;///< Line Color  
 		
-		//CComPtr<ID3DXLine> m_pLine;
-		//CComPtr<IDirect3DTexture9>	m_pTexture;
-		//D3DXVECTOR2 m_Vect[16];
 	public:
 		// Message Map
 		BEGIN_MSG_MAP_EX(EnvelopeEditor)
@@ -429,6 +464,7 @@ protected:
 
 	CButton m_EnvEnabled;
 //	EnvelopeEditor m_EnvelopeEditor;
+	CEnvelopeEditor m_EnvelopeEditor;
 	CSliderCtrl m_SlADSRBase;
 	CSliderCtrl m_SlADSRMod;
 	CSliderCtrl m_SlADSRAttack;
