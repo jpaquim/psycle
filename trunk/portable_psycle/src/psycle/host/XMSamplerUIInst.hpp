@@ -1,6 +1,7 @@
 #pragma once
 #include "afxwin.h"
 #include "XMInstrument.hpp"
+#include "afxcmn.h"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
@@ -10,10 +11,7 @@ class CEnvelopeEditor : public CStatic
 {
 public:
 	// constant
-	static const int MARGIN_RIGHT = 100 /* pixel */;
 	static const int POINT_SIZE = 6 /* pixel */;///< Envelope Point 
-	static const int HITTEST_NOT_FOUND = -1;///< HitTest
-
 
 	CEnvelopeEditor();
 	virtual ~CEnvelopeEditor();
@@ -22,26 +20,68 @@ public:
 	virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
 
 protected:
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
+	afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
+	afx_msg void OnMouseMove( UINT nFlags, CPoint point );
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnPopAddPoint();
+	afx_msg void OnPopSustainStart();
+	afx_msg void OnPopSustainEnd();
+	afx_msg void OnPopLoopStart();
+	afx_msg void OnPopLoopEnd();
+	afx_msg void OnPopRemovePoint();
+	afx_msg void OnPopRemoveSustain();
+	afx_msg void OnPopRemoveLoop();
+	afx_msg void OnPopRemoveEnvelope();
+	afx_msg void OnUpdateSustainStart(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSustainEnd(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateLoopStart(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateLoopEnd(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateRemovePoint(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateRemoveSustain(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateRemoveLoop(CCmdUI* pCmdUI);
+
+protected:
+
+	/**  */
+	const int GetEnvelopePointIndexAtPoint(const int x,const int y)
+	{
+		const int _points = m_pEnvelope->NumOfPoints();
+		for(int i = 0;i < _points ;i++)
+		{
+			CPoint _pt_env;
+			_pt_env.y = (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
+			_pt_env.x = (int)(m_Zoom * (float)m_pEnvelope->GetTime(i));
+			if(((_pt_env.x - POINT_SIZE / 2) <= x) & ((_pt_env.x + POINT_SIZE / 2) >= x) &
+				((_pt_env.y - POINT_SIZE / 2) <= y) & ((_pt_env.y + POINT_SIZE / 2) >= y))
+			{
+				return i;
+			}
+		}
+
+		return _points; // return == _points -> Point not found.
+	};
+
 	XMInstrument::Envelope* m_pEnvelope;
 	XMInstrument::Envelope m_EnvelopeEditing;///< Envelope Data backup
 	XMSampler * m_pXMSampler;
 	bool m_bInitialized;
 	float m_Zoom;///< Zoom
-	int m_CurrentScrollWidth;///< 
-	int m_CurrentScrollHeight;///<
+	int m_WindowHeight;
+	int m_WindowWidth;
 
-	bool m_bPointEditing;
+	bool m_bPointEditing;///< EnvelopePoint 
 	int m_EditPoint;///< ***** Envelope Point Index
-	int m_EditPointOrig;///< Envelope Point Index
 	int m_EditPointX;///< Envelope Point
 	int m_EditPointY;///< Envelope Point
 
 	CPen _line_pen;
 	CPen _gridpen;
 	CPen _gridpen1;
-	CPen _gridpen2;
 	CBrush brush;
-	CBrush  _point_brush;
+	CBrush _point_brush;
 };
 
 class XMSamplerUIInst : public CPropertyPage
@@ -395,6 +435,7 @@ public:
 	afx_msg void OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult);
 	
 	afx_msg void OnNMCustomdrawADSRBase(NMHDR *pNMHDR, LRESULT *pResult);
@@ -407,8 +448,6 @@ public:
 	afx_msg void OnLbnSelchangeInstrumentlist();
 	afx_msg void OnEnChangeInsName();
 	afx_msg void OnCbnSelendokFiltertype();
-	afx_msg void OnCbnSelendokNotemodnote();
-	afx_msg void OnCbnSelendokNotemodoctave();
 	afx_msg void OnBnClickedEnvcheck();
 	afx_msg void OnCbnSelendokInsNnacombo();
 	afx_msg void OnCbnSelendokInsDctcombo();
@@ -441,14 +480,14 @@ private:
 	bool m_bInitialized;
 
 protected:
-	enum
+	enum TabPage
 	{
 		general=0,
 		amplitude,
 		panning,
 		filter,
 		pitch
-	}TabPage;
+	};
 
 	CListBox m_InstrumentList;
 	CComboBox m_FilterType;
@@ -458,8 +497,7 @@ protected:
 	CButton m_Ressonance;
 	CSliderCtrl m_SlFadeoutRes;
 	CSliderCtrl m_SlSwing2;
-	CComboBox m_NoteModNote;
-	CComboBox m_NoteModOctave;
+	CSliderCtrl m_SlNoteModNote;
 	CSliderCtrl m_SlNoteMod;
 
 	CButton m_EnvEnabled;

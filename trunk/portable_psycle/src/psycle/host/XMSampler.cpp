@@ -735,7 +735,6 @@ namespace psycle
 			m_WaveDataController.NoteOff();
 		}
 
-		//\todo : see if this function really does what Impulse Tracker means by "NNA fadeout"
 		void XMSampler::Voice::NoteFadeout()
 		{
 			IsStopping(true);

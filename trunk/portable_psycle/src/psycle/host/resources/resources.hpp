@@ -99,6 +99,7 @@
 #define IDD_XMSAMPLERUISAMPLE           218
 #define IDD_XMSAMPLER_MIXER             222
 #define IDB_SAMPULSE                    226
+#define IDR_MENU_ENV_EDIT               230
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -183,6 +184,7 @@
 #define IDC_A_A_LABEL                   1065
 #define IDC_SWING2                      1065
 #define IDC_A_D_LABEL                   1066
+#define IDC_NOTEMOD2                    1066
 #define IDC_A_R_LABEL                   1067
 #define IDC_A_S_LABEL                   1068
 #define IDC_AMPFRAME2                   1069
@@ -206,6 +208,7 @@
 #define IDC_STATIC2                     1087
 #define IDC_STATIC3                     1088
 #define IDC_STATIC4                     1089
+#define IDC_LNOTEMODNOTE                1089
 #define IDC_MACHINELIST                 1090
 #define IDC_STATIC18                    1090
 #define IDC_BUTTON1                     1091
@@ -235,7 +238,9 @@
 #define IDC_EDIT4                       1112
 #define IDC_CHECK1                      1113
 #define IDC_BROWSER                     1114
+#define IDC_ENV_SUSEND                  1114
 #define IDC_NAMELABEL                   1115
+#define IDC_ENV_LOOPSTART               1115
 #define IDC_DESCLABEL                   1116
 #define IDC_VERSIONLABEL                1117
 #define IDC_DLLNAMELABEL                1118
@@ -260,7 +265,6 @@
 #define IDC_COMBO1                      1137
 #define IDC_PANLABEL                    1138
 #define IDC_COMBO5                      1138
-#define IDC_NOTEMODNOTE                 1138
 #define IDC_NNA_COMBO                   1139
 #define IDC_RPAN                        1140
 #define IDC_RCUT                        1141
@@ -757,7 +761,6 @@
 #define IDC_FILTERTYPE                  1553
 #define IDC_LEFT_VU                     1554
 #define IDC_COMBO6                      1554
-#define IDC_NOTEMODOCTAVE               1554
 #define IDC_RIGHT_VU                    1555
 #define IDC_INS_DCTCOMBO                1555
 #define IDC_SL_VOL_MASTER               1556
@@ -920,6 +923,9 @@
 #define IDC_LADSRREL                    1714
 #define IDC_ENV_SCROLLBAR               1715
 #define IDC_WAVESCOPE                   1716
+#define IDC_SLNOTEMODNOTE               1718
+#define IDC_ENV_SUSBEGIN                1720
+#define IDC_ENV_LOOPEND                 1721
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1012,6 +1018,16 @@
 #define ID_VIEW_MIXER                   32934
 #define ID_IMPORT_S3MFILE               32937
 #define ID_POP_BLOCKSWITCH              32940
+#define ID__REMOVEPOINT                 32946
+#define ID__ENV_ADDNEWPOINT             32956
+#define ID__ENV_SETSUSTAINBEGIN         32957
+#define ID__ENV_SETSUSTAINEND           32958
+#define ID__ENV_SETLOOPSTART            32959
+#define ID__ENV_SETLOOPEND              32960
+#define ID__ENV_REMOVEPOINT             32961
+#define ID__ENV_REMOVESUSTAIN           32962
+#define ID__ENV_REMOVELOOP              32963
+#define ID__ENV_REMOVEENVELOPE          32964
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1019,9 +1035,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        230
-#define _APS_NEXT_COMMAND_VALUE         32941
-#define _APS_NEXT_CONTROL_VALUE         1717
+#define _APS_NEXT_RESOURCE_VALUE        231
+#define _APS_NEXT_COMMAND_VALUE         32965
+#define _APS_NEXT_CONTROL_VALUE         1722
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif
