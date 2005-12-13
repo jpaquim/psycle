@@ -164,8 +164,7 @@ namespace psycle
 
 
 				// Is the Time already between the previous and next?
-				if(    pointTime >= m_Points[pointIndex - 1].first 
-					&& pointTime <= m_Points[pointIndex + 1].first)
+				if( pointTime >= prevtime && pointTime <= nextime)
 				{
 					return pointIndex;
 				}

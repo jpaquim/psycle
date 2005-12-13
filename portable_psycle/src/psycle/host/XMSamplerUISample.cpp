@@ -212,8 +212,8 @@ BOOL XMSamplerUISample::OnSetActive()
 	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
 	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
 	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-64);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(64);
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-59);
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(59);
 	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(1);
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
@@ -504,7 +504,19 @@ void XMSamplerUISample::OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult)
 	if ( check->GetCheck() != 2 ) // 2 == SurrounD
 	{
 		char tmp[40];
-		sprintf(tmp,"%d",slid->GetPos());
+		switch(slid->GetPos()+64)
+		{
+		case 0: sprintf(tmp,"||%02d  ",slid->GetPos()); break;
+		case 64: sprintf(tmp," |%02d| ",slid->GetPos()); break;
+		case 128: sprintf(tmp,"  %02d||",slid->GetPos()); break;
+		default:
+			if ( slid->GetPos() < -32) sprintf(tmp,"<<%02d  ",slid->GetPos());
+			else if ( slid->GetPos() < 0) sprintf(tmp," <%02d< ",slid->GetPos());
+			else if ( slid->GetPos() <= 32) sprintf(tmp," >%02d> ",slid->GetPos());
+			else sprintf(tmp,"  %02d>>",slid->GetPos());
+			break;
+		}
+
 		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
 	}
 	else
@@ -522,9 +534,9 @@ void XMSamplerUISample::OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult
 		rWave().WaveTune(-1*slid->GetPos());
 	}
 	char tmp[40], tmp2[40];
-	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","B-","A#","A-","G#"};
-	sprintf(tmp,"%s",notes[abs(rWave().WaveTune())%12]);
-	sprintf(tmp2,"%s%d",tmp,5+(rWave().WaveTune()/12));
+	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+	sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
+	sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
 	((CStatic*)GetDlgItem(IDC_LSAMPLENOTE))->SetWindowText(tmp2);
 
 	*pResult = 0;

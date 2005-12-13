@@ -13,6 +13,43 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_ENV_EDIT MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Add New Point",               ID__ENV_ADDNEWPOINT
+        MENUITEM SEPARATOR
+        MENUITEM "Set as Sustain Begin",        ID__ENV_SETSUSTAINBEGIN
+        MENUITEM "Set as Sustain End",          ID__ENV_SETSUSTAINEND
+        MENUITEM "Set as Loop Start",           ID__ENV_SETLOOPSTART
+        MENUITEM "Set as Loop End",             ID__ENV_SETLOOPEND
+        MENUITEM SEPARATOR
+        MENUITEM "Remove Point",                ID__ENV_REMOVEPOINT
+        MENUITEM "Remove Sustain",              ID__ENV_REMOVESUSTAIN
+        MENUITEM "Remove Loop",                 ID__ENV_REMOVELOOP
+        MENUITEM SEPARATOR
+        MENUITEM "Remove Envelope",             ID__ENV_REMOVEENVELOPE
+    END
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
@@ -1682,7 +1719,7 @@ BEGIN
                     BS_PUSHLIKE,447,7,68,13
     GROUPBOX        "",IDC_STATIC,169,15,348,282
     LTEXT           "Filter Type",IDC_STATIC1,187,32,34,8
-    COMBOBOX        IDC_FILTERTYPE,267,30,100,57,CBS_DROPDOWNLIST | CBS_SORT | 
+    COMBOBOX        IDC_FILTERTYPE,267,30,100,57,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Filter Cutoff",IDC_CUTOFFPAN,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,187,47,67,8
@@ -1697,11 +1734,10 @@ BEGIN
     CTEXT           "Estático",IDC_LFADEOUTRES,334,75,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     LTEXT           "Note Mod Center Note",IDC_STATIC3,187,107,75,8
-    COMBOBOX        IDC_NOTEMODNOTE,267,105,37,142,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Octave",IDC_STATIC4,307,107,23,8
-    COMBOBOX        IDC_NOTEMODOCTAVE,335,105,29,114,CBS_DROPDOWNLIST | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_SLNOTEMODNOTE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,263,107,70,11
+    CTEXT           "Estático",IDC_LNOTEMODNOTE,335,107,31,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
     LTEXT           "Note Mod Amount",IDC_STATIC5,187,122,58,8
     CONTROL         "",IDC_NOTEMOD,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,263,122,70,11
@@ -1769,11 +1805,18 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,395,277,70,11
     CTEXT           "Estático",IDC_LADSRREL,467,275,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    SCROLLBAR       IDC_ENV_SCROLLBAR,185,230,315,11
     LTEXT           "Temporary ""IDC_INS_NOTEMAP"" object",IDC_INS_NOTEMAP,
                     259,191,154,17
     CONTROL         "",IDC_INS_ENVELOPE,"Static",SS_OWNERDRAW | SS_NOTIFY,
                     186,160,314,70,WS_EX_STATICEDGE
+    CONTROL         "Sus. Begin",IDC_ENV_SUSBEGIN,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,325,230,43,12
+    CONTROL         "Sus. End",IDC_ENV_SUSEND,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,370,230,43,12
+    CONTROL         "Loop Start",IDC_ENV_LOOPSTART,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,414,230,43,12
+    CONTROL         "Loop End",IDC_ENV_LOOPEND,"Button",BS_AUTOCHECKBOX | 
+                    BS_PUSHLIKE | WS_TABSTOP,457,230,43,12
 END
 
 IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 524, 304
