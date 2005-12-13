@@ -766,7 +766,7 @@ NAMESPACE__BEGIN(psycle)
 			const int val = cc->GetCurSel();
 			if ( val > 0 ) cc->SetCurSel(val-1);
 			else cc->SetCurSel(cc->GetCount()-1);
-			if ( cc->GetItemData() == -1 )
+			if ( cc->GetItemData(cc->GetCurSel()) == 65535 )
 			{
 				if ( val >1) cc->SetCurSel(val-2);
 				else cc->SetCurSel(val);
@@ -782,7 +782,7 @@ NAMESPACE__BEGIN(psycle)
 			const int val = cc->GetCurSel();
 			if ( val < cc->GetCount()-1 ) cc->SetCurSel(val+1);
 			else cc->SetCurSel(0);
-			if ( cc->GetItemData() == -1 )
+			if ( cc->GetItemData(cc->GetCurSel()) == 65535 )
 			{
 				if ( val < cc->GetCount()-2) cc->SetCurSel(val+2);
 				else cc->SetCurSel(val);
@@ -820,7 +820,7 @@ NAMESPACE__BEGIN(psycle)
 					{	
 						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
 						cb->AddString(buffer);
-						cb-SetItemData(b);
+						cb->SetItemData(cb->GetCount()-1,b);
 					}
 					if (!found) 
 					{
@@ -836,7 +836,7 @@ NAMESPACE__BEGIN(psycle)
 			if ( updatelist) 
 			{
 				cb->AddString("----------------------------------------------------");
-				cb-SetItemData(-1);
+				cb->SetItemData(cb->GetCount()-1,65535);
 			}
 			if (!found) 
 			{
@@ -852,7 +852,7 @@ NAMESPACE__BEGIN(psycle)
 					{	
 						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
 						cb->AddString(buffer);
-						cb-SetItemData(b);
+						cb->SetItemData(cb->GetCount()-1,b);
 					}
 					if (!found) 
 					{

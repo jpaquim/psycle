@@ -770,7 +770,12 @@ XMSampler::Channel::PerformFX().
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
 		};
 		const int DefaultPanFactor(){return m_DefaultPanFactor;};
-		void DefaultPanFactor(const int value){m_DefaultPanFactor = value; PanFactor(value/64.0f); };
+		void DefaultPanFactor(const int value){
+			m_DefaultPanFactor = value; 
+			if (value == 80 ) IsSurround(true);
+			else if (value < 0x7F ) PanFactor(value/64.0f);
+			//\todo : else  set mute.
+		};
 
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
