@@ -46,6 +46,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 		else wrHeight=my;
 
 		dc.FillRect(&rect,&brush);
+		dc.SetBkMode(TRANSPARENT);
 
 		if(rWave().WaveLength())
 		{
