@@ -76,7 +76,6 @@
 #define IDR_POPUPMENU                   180
 #define IDD_PRESETS                     181
 #define IDD_SAVESONG                    183
-#define IDD_INST_EDITOR                 185
 #define IDD_SWINGFILL                   187
 #define IDD_ASIO_CONFIG                 188
 #define IDB_MASTERBACK                  190
@@ -101,8 +100,8 @@
 #define IDB_SAMPULSE                    226
 #define IDR_MENU_ENV_EDIT               230
 #define IDB_KEYS_SHARP                  232
-#define IDB_BITMAP3                     233
 #define IDB_KEYS_NORMAL                 233
+#define IDB_KEYS_BACK                   234
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -929,7 +928,7 @@
 #define IDC_SLNOTEMODNOTE               1718
 #define IDC_ENV_SUSBEGIN                1720
 #define IDC_ENV_LOOPEND                 1721
-#define IDC_NOTEMAP                     1722
+#define IDC_INS_NOTESCROLL              1724
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1039,9 +1038,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        234
+#define _APS_NEXT_RESOURCE_VALUE        236
 #define _APS_NEXT_COMMAND_VALUE         32965
-#define _APS_NEXT_CONTROL_VALUE         1723
+#define _APS_NEXT_CONTROL_VALUE         1730
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

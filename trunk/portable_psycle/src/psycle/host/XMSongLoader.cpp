@@ -1120,7 +1120,7 @@ namespace host{
 							break;
 						case XMCMD::VOLUME:
 							e._cmd = XMSampler::CMD::VOLUME;
-							e._parameter = param * 2;
+							e._parameter = param<=0x40?param*2:0x80;
 							break;
 						case XMCMD::PATTERN_BREAK:
 							e._cmd = PatternCmd::BREAK_TO_LINE;
