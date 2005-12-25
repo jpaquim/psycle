@@ -15,7 +15,7 @@ public:
 	{
 	public:
 		// constant
-		static const int POINT_SIZE = 6 /* pixel */;///< Envelope Point 
+		static const int POINT_SIZE = 6;///< Envelope Point size, in pixels.
 
 		CEnvelopeEditor();
 		virtual ~CEnvelopeEditor();
@@ -80,11 +80,9 @@ public:
 		CBrush _point_brush;
 	};
 
-
-
-
 	class CSampleAssignEditor : public CStatic
 	{
+		friend class XMSamplerUIInst;
 	public:
 		enum TNoteKey
 		{
@@ -94,16 +92,23 @@ public:
 		CSampleAssignEditor();
 		virtual ~CSampleAssignEditor();
 
-		void Initialize(XMSampler * const pSampler,XMInstrument * const pInstrument);
+		void Initialize(XMSampler * const pSampler,XMInstrument * const pInstrument,CWnd *pParent);
 		virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
+		virtual BOOL UpdateScrollInfo();
 
 	protected:
 		DECLARE_MESSAGE_MAP()
 	public:
-		static const unsigned int m_Sharpkey_Xpos[5];
-		static const TNoteKey m_NoteAssign[12];
-		static const int m_NaturalKeysPerOctave;
-		static const int m_SharpKeysPerOctave;
+		afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
+		afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
+		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
+		afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+
+		static const int m_NaturalKeysPerOctave = 7;
+		static const int m_SharpKeysPerOctave = 5;
+		static const int m_KeysPerOctave = 12;
+		static const int m_SharpKey_Xpos[m_SharpKeysPerOctave];
+		static const TNoteKey m_NoteAssign[m_KeysPerOctave];
 
 		int GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect);
 		
@@ -112,10 +117,13 @@ public:
 		XMInstrument *m_pInst;
 		CBitmap m_NaturalKey;
 		CBitmap m_SharpKey;
+		CBitmap m_BackKey;
 		bool	m_bInitialized;
+		int		m_Octave;
 
 		int m_FocusKeyIndex;///< 
 		CRect m_FocusKeyRect;///<
+		CScrollBar m_scBar;
 
 	};
 
@@ -174,6 +182,8 @@ public:
 	afx_msg void OnBnClickedInsTpitch();
 	afx_msg void OnBnClickedEnvadsr();
 	afx_msg void OnBnClickedEnvfreeform();
+
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 private:
 

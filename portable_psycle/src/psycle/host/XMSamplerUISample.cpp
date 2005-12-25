@@ -505,15 +505,15 @@ void XMSamplerUISample::OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult)
 	if ( check->GetCheck() != 2 ) // 2 == SurrounD
 	{
 		char tmp[40];
-		switch(slid->GetPos()+64)
+		switch(slid->GetPos())
 		{
 		case 0: sprintf(tmp,"||%02d  ",slid->GetPos()); break;
 		case 64: sprintf(tmp," |%02d| ",slid->GetPos()); break;
 		case 128: sprintf(tmp,"  %02d||",slid->GetPos()); break;
 		default:
-			if ( slid->GetPos() < -32) sprintf(tmp,"<<%02d  ",slid->GetPos());
-			else if ( slid->GetPos() < 0) sprintf(tmp," <%02d< ",slid->GetPos());
-			else if ( slid->GetPos() <= 32) sprintf(tmp," >%02d> ",slid->GetPos());
+			if ( slid->GetPos() < 32) sprintf(tmp,"<<%02d  ",slid->GetPos());
+			else if ( slid->GetPos() < 64) sprintf(tmp," <%02d< ",slid->GetPos());
+			else if ( slid->GetPos() <= 96) sprintf(tmp," >%02d> ",slid->GetPos());
 			else sprintf(tmp,"  %02d>>",slid->GetPos());
 			break;
 		}
