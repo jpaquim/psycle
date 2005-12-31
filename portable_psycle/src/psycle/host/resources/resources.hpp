@@ -76,7 +76,7 @@
 #define IDR_POPUPMENU                   180
 #define IDD_PRESETS                     181
 #define IDD_SAVESONG                    183
-#define IDD_INST_EDITOR                 185
+
 #define IDD_SWINGFILL                   187
 #define IDD_ASIO_CONFIG                 188
 #define IDB_MASTERBACK                  190
@@ -100,7 +100,10 @@
 #define IDD_XMSAMPLER_MIXER             222
 #define IDB_SAMPULSE                    226
 #define IDR_MENU_ENV_EDIT               230
+#define IDB_KEYS_NORMAL                 231
+#define IDB_KEYS_SHARP                  232
 #define IDR_NEWMACHINESPOPUP            233
+#define IDB_KEYS_BACK                   234
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -929,6 +932,7 @@
 #define IDC_SLNOTEMODNOTE               1718
 #define IDC_ENV_SUSBEGIN                1720
 #define IDC_ENV_LOOPEND                 1721
+#define IDC_INS_NOTESCROLL              1724
 #define IDC_BROWSEDOWN                  1726
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
