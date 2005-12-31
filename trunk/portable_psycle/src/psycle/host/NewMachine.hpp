@@ -8,6 +8,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <map>
+#include "afxwin.h"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		const int MAX_BROWSER_NODES = 64;
@@ -35,6 +36,7 @@ NAMESPACE__BEGIN(psycle)
 			std::string version;
 			FILETIME FileTime;
 			bool allow;
+			std::string category;
 			/*
 			void operator=(PluginInfo& newinfo)
 			{
@@ -58,7 +60,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 			*/
 		};
-
+		
 		/// new machine dialog window.
 		class CNewMachine : public CDialog
 		{
@@ -79,6 +81,7 @@ NAMESPACE__BEGIN(psycle)
 			static int LastType0;
 			static int LastType1;
 			static bool TestFilename(const std::string & name);
+			
 		// Dialog Data
 			//{{AFX_DATA(CNewMachine)
 			enum { IDD = IDD_NEWMACHINE };
@@ -87,9 +90,9 @@ NAMESPACE__BEGIN(psycle)
 			CTreeCtrl	m_browser;
 			CStatic	m_versionLabel;
 			CStatic	m_descLabel;
-			int		m_orderby;
 			CStatic	m_dllnameLabel;
-			int		m_showdllName;
+			CComboBox comboListStyle;
+			CComboBox comboNameStyle;
 			//}}AFX_DATA
 		// Overrides
 			// ClassWizard generated virtual function overrides
@@ -100,23 +103,42 @@ NAMESPACE__BEGIN(psycle)
 		// Implementation
 		protected:
 			static std::map<std::string,std::string> dllNames;
+			static std::map<CString, int> CustomFolders;
 			bool bAllowChanged;
+			bool bCategoriesChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
 			HTREEITEM hInt[4];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
+			HTREEITEM m_hItemDrag;
 			// Generated message map functions
 			//{{AFX_MSG(CNewMachine)
 			afx_msg void OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 			virtual BOOL OnInitDialog();
 			afx_msg void OnRefresh();
-			afx_msg void OnByclass();
-			afx_msg void OnBytype();
 			virtual void OnOK();
 			afx_msg void OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnDestroy();
-			afx_msg void OnShowdllname();
-			afx_msg void OnShoweffname();
 			afx_msg void OnCheckAllow();
+			afx_msg void OnCbnSelendokListstyle();
+			afx_msg void OnCbnSelendokNamestyle();
+			afx_msg void BeginDrag(NMHDR *pNMHDR, LRESULT *pResult);
+			afx_msg void BeginRDrag(NMHDR *pNMHDR, LRESULT *pResult);
+			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+			afx_msg void NMPOPUP_AddSubFolder();
+			afx_msg void NMPOPUP_AddFolderSameLevel();
+			afx_msg void NMPOPUP_RenameFolder();
+			afx_msg void NMPOPUP_DeleteMoveToParent();
+			afx_msg void NMPOPUP_DeleteMoveUncat();
+			afx_msg void NMPOPUP_ExpandAll();
+			afx_msg void NMPOPUP_CollapseAll();
+			afx_msg void BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
+			afx_msg void EndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
+			afx_msg void AlterItemCaption(NMHDR *pNMHDR, LRESULT *pResult);
+
+			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+			afx_msg void OnCancelMode();
+			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+			afx_msg void OnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -127,7 +149,34 @@ NAMESPACE__BEGIN(psycle)
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);
-		};
+			HTREEITEM CategoryExists (HTREEITEM hParent, CString category);
+			void SortList() ;
+			
+
+		public:
+			//afx_msg void AddNewCustomFolder();
+			//CEdit txtNewFolderName;
+
+			void FinishDragging(BOOL bDraggingImageList);
+			void OnEndDrag(UINT nFlags, CPoint point);
+			
+			UINT nFlags;
+			CPoint point;
+			bool bEditing;
+
+			afx_msg void BrowserKeyDown(NMHDR *pNMHDR, LRESULT *pResult);		
+			HTREEITEM MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos = TVI_SORT, bool bAllowReplace = false);
+			afx_msg void NMPOPUP_MoveToTopLevel();
+			void SetPluginCategories(HTREEITEM hItem, CString Category);
+
+			HTREEITEM hCategory;
+
+			afx_msg void OnBnClickedCancel();
+			static int CALLBACK CNewMachine::NodeCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+};
+
+
+
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
