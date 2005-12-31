@@ -23,6 +23,8 @@ namespace psycle
 			void ExecuteLine();
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
+			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
+			bool _SPRChanged;
 			/// the line currently being played in the current pattern
 			int _lineCounter;
 			/// the sequence position currently being played
