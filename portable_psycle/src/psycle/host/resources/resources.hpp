@@ -76,6 +76,7 @@
 #define IDR_POPUPMENU                   180
 #define IDD_PRESETS                     181
 #define IDD_SAVESONG                    183
+#define IDD_INST_EDITOR                 185
 #define IDD_SWINGFILL                   187
 #define IDD_ASIO_CONFIG                 188
 #define IDB_MASTERBACK                  190
@@ -99,9 +100,7 @@
 #define IDD_XMSAMPLER_MIXER             222
 #define IDB_SAMPULSE                    226
 #define IDR_MENU_ENV_EDIT               230
-#define IDB_KEYS_SHARP                  232
-#define IDB_KEYS_NORMAL                 233
-#define IDB_KEYS_BACK                   234
+#define IDR_NEWMACHINESPOPUP            233
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -757,10 +756,12 @@
 #define IDC_XMPOLYLABEL                 1549
 #define IDC_NAVIGATION_IGNORES_STEP     1550
 #define IDC_COMBO2                      1551
+#define IDC_LISTSTYLE                   1551
 #define IDC_COMBO3                      1552
 #define IDC_INS_NNACOMBO                1552
 #define IDC_COMBO4                      1553
 #define IDC_FILTERTYPE                  1553
+#define IDC_NAMESTYLE                   1553
 #define IDC_LEFT_VU                     1554
 #define IDC_COMBO6                      1554
 #define IDC_RIGHT_VU                    1555
@@ -928,7 +929,7 @@
 #define IDC_SLNOTEMODNOTE               1718
 #define IDC_ENV_SUSBEGIN                1720
 #define IDC_ENV_LOOPEND                 1721
-#define IDC_INS_NOTESCROLL              1724
+#define IDC_BROWSEDOWN                  1726
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1031,6 +1032,34 @@
 #define ID__ENV_REMOVESUSTAIN           32962
 #define ID__ENV_REMOVELOOP              32963
 #define ID__ENV_REMOVEENVELOPE          32964
+#define ID_ASDFASDFASDF_ASDFASDF        32965
+#define ID_ASDFASDFASDF_ASDFASDF32966   32966
+#define ID__ADDNEWFOLDER                32967
+#define ID__DELETESELECTEDFOLDER        32968
+#define ID__ADDNEWFOLDER32969           32969
+#define ID__ADDNEWROOTFOLDER            32970
+#define ID__DELETESELECTEDFOLDER32971   32971
+#define ID__EXPANDSELECTEDFOLDERANDITSSUBFOLDERS 32972
+#define ID__EXPANDALLFOLDERS            32973
+#define ID__COLLAPSESELECTEDFOLDERANDITSSUBFOLDERS 32974
+#define ID__COLLAPSALLFOLDERS           32975
+#define ID__DELETESELECTEDFOLDER32976   32976
+#define ID_Menu                         32977
+#define ID__EXPANDSELECTEDFOLDERANDITSSUBFOLDERS32978 32978
+#define ID__EXPANDALLFOLDERS32979       32979
+#define ID__ADDSUBFOLDER                32980
+#define ID__ADDFOLDERONSAMELEVEL        32981
+#define ID__RENAMEFOLDER                32982
+#define ID__DELETEFOLDER                32983
+#define ID_DELETEFOLDER_MOVEFOLDER32985 32985
+#define ID__EXPANDFOLDER                32986
+#define ID__COLLAPSEFOLDER              32988
+#define ID__COLLAPSEALLFOLDERS          32989
+#define ID_DELETEFOLDER_MOVEUNCAT       32991
+#define ID_DELETEFOLDER_MOVEPARNT       32993
+#define ID__DELETE                      32994
+#define ID__MOVETOTOPLEVEL              32995
+#define ID_Menu32996                    32996
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1038,9 +1067,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        236
-#define _APS_NEXT_COMMAND_VALUE         32965
-#define _APS_NEXT_CONTROL_VALUE         1730
+#define _APS_NEXT_RESOURCE_VALUE        239
+#define _APS_NEXT_COMMAND_VALUE         32997
+#define _APS_NEXT_CONTROL_VALUE         1727
 #define _APS_NEXT_SYMED_VALUE           60
 #endif
 #endif

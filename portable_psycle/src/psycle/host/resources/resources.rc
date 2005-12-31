@@ -13,11 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #pragma code_page(1252)
 #endif //_WIN32
 
@@ -44,6 +44,24 @@ BEGIN
         MENUITEM "Remove Envelope",             ID__ENV_REMOVEENVELOPE
     END
 END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral (Default) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
 
 IDR_WAVEFRAME MENU 
 BEGIN
@@ -272,9 +290,6 @@ IDB_MACHINE_SKIN        BITMAP                  "./machine_skin.bmp"
 IDB_ASIO                BITMAP                  "./AsioLogo.bmp"
 IDB_BETASPLASH          BITMAP                  "./beta.bmp"
 IDB_SAMPULSE            BITMAP                  "sampulse.bmp"
-IDB_KEYS_SHARP          BITMAP                  "sharpkey.bmp"
-IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
-IDB_KEYS_BACK           BITMAP                  "keys_bac.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1182,45 +1197,39 @@ BEGIN
                     WS_TABSTOP
 END
 
-IDD_NEWMACHINE DIALOGEX 0, 0, 390, 303
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+IDD_NEWMACHINE DIALOGEX 0, 0, 475, 302
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CONTROL | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "New Machine"
+CAPTION "Add New Machine"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    LTEXT           "Gear Browser",IDC_STATIC,7,2,88,9,NOT WS_GROUP
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP,7,13,187,261
-    GROUPBOX        "Machine Properties",IDC_STATIC,201,7,182,112
-    LTEXT           "Name",IDC_STATIC,223,19,20,8,NOT WS_GROUP
-    LTEXT           "",IDC_NAMELABEL,246,18,125,12,SS_SUNKEN | NOT WS_GROUP
-    LTEXT           "Description",IDC_STATIC,206,34,35,8,NOT WS_GROUP
-    LTEXT           "",IDC_DESCLABEL,246,30,125,19,SS_SUNKEN | NOT WS_GROUP
-    LTEXT           "Dll Name",IDC_STATIC,212,54,30,8,NOT WS_GROUP
-    LTEXT           "",IDC_DLLNAMELABEL,246,49,125,21,SS_SUNKEN | NOT 
-                    WS_GROUP
-    LTEXT           "API Version",IDC_STATIC,206,71,38,8,NOT WS_GROUP
-    LTEXT           "",IDC_VERSIONLABEL,246,70,125,12,SS_SUNKEN | NOT 
-                    WS_GROUP
-    GROUPBOX        "List Machines by",IDC_STATIC,201,136,182,47
-    CONTROL         "Library Name (Dll)",IDC_SHOWDLLNAME,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,216,150,88,12
-    CONTROL         "Plugin's Name",IDC_SHOWEFFNAME,"Button",
-                    BS_AUTORADIOBUTTON,216,166,88,10
-    GROUPBOX        "Sort Machines",IDC_STATIC,201,188,182,49
-    CONTROL         "By Type of Plugin",IDC_BYTYPE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,216,202,85,10
-    CONTROL         "By Class of Machine",IDC_BYCLASS,"Button",
-                    BS_AUTORADIOBUTTON,216,217,86,10
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_EDITLABELS | 
+                    TVS_SHOWSELALWAYS | TVS_TRACKSELECT | WS_BORDER | 
+                    WS_TABSTOP,7,7,256,288
+    GROUPBOX        "Machine Properties",IDC_STATIC,272,47,196,112
+    LTEXT           "Name:",IDC_STATIC,281,67,20,8
+    LTEXT           "",IDC_NAMELABEL,328,63,125,12,SS_SUNKEN
+    LTEXT           "Description:",IDC_STATIC,281,81,41,8
+    LTEXT           "",IDC_DESCLABEL,328,76,125,19,SS_SUNKEN
+    LTEXT           "Filename:",IDC_STATIC,281,102,32,8
+    LTEXT           "",IDC_DLLNAMELABEL,328,95,125,21,SS_SUNKEN
+    LTEXT           "API Version:",IDC_STATIC,281,118,40,8
+    LTEXT           "",IDC_VERSIONLABEL,328,116,125,12,SS_SUNKEN
     PUSHBUTTON      "Rescan all Plugins and Reset all Warnings",IDC_REFRESH,
-                    7,280,188,16
-    DEFPUSHBUTTON   "OK",IDOK,202,280,82,16
-    PUSHBUTTON      "Cancel",IDCANCEL,297,280,86,16
-    CONTROL         "Popup Warning if this plugin tries to load",
+                    289,171,152,16
+    DEFPUSHBUTTON   "&OK",IDOK,278,279,82,16
+    PUSHBUTTON      "&Cancel",IDCANCEL,373,279,86,16
+    CONTROL         "Popup Warning if this plug-in tries to load",
                     IDC_CHECK_ALLOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    216,90,154,18
+                    292,133,154,18
+    COMBOBOX        IDC_LISTSTYLE,356,7,101,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_NAMESTYLE,356,24,101,52,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Sort Machines by:",IDC_STATIC,282,11,66,8
+    LTEXT           "Display Machines by:",IDC_STATIC,282,28,69,8
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 323
@@ -1427,6 +1436,29 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,5,20,200,15
     EDITTEXT        IDC_EDIT2,210,20,25,15,ES_AUTOHSCROLL
     CTEXT           "db",IDC_STATIC,242,20,15,15,SS_CENTERIMAGE
+END
+
+IDD_INST_EDITOR DIALOGEX 0, 0, 465, 388
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Instruments Editor"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "&Apply Changes",IDOK,332,368,65,14
+    PUSHBUTTON      "&Close",IDCANCEL,403,368,50,14
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",TCS_HOTTRACK,7,25,445,
+                    337
+    LTEXT           "Instrument",IDC_STATIC,8,9,39,8
+    LTEXT           "",IDC_INST_NUM,59,8,19,12,SS_SUNKEN
+    PUSHBUTTON      "Button1",IDC_INST_MORE,47,7,10,14,BS_BITMAP
+    PUSHBUTTON      "Button1",IDC_INST_LESS,80,7,10,14,BS_BITMAP
+    PUSHBUTTON      "Load",IDC_REMOVE,220,7,37,14
+    PUSHBUTTON      "Duplicate",IDC_REMOVE2,257,7,37,14
+    PUSHBUTTON      "Save",IDC_REMOVE3,295,7,37,14
+    PUSHBUTTON      "Clear",IDC_REMOVE4,333,7,37,14
+    COMBOBOX        IDC_INSTRUMENTNAME,95,7,121,30,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
 END
 
 IDD_MIDI_INPUT DIALOGEX 0, 0, 329, 295
@@ -1708,10 +1740,10 @@ BEGIN
                     IDC_STATIC,134,28,66,24,WS_DISABLED
 END
 
-IDD_GEAR_RACK DIALOGEX 0, 0, 263, 284
+IDD_GEAR_RACK DIALOG  0, 0, 263, 284
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Gear Rack"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Machines",ID_TEXT,5,2,252,277
     LISTBOX         IDC_GEARLIST,11,12,179,240,LBS_NOINTEGRALHEIGHT | 
@@ -1725,7 +1757,7 @@ BEGIN
     CONTROL         "Generators",IDC_RADIO_GEN,"Button",BS_AUTORADIOBUTTON | 
                     BS_PUSHLIKE | WS_GROUP,11,257,76,15
     CONTROL         "Effects",IDC_RADIO_EFX,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,93,257,76,15
+                    BS_PUSHLIKE | WS_GROUP,93,257,76,15
     CONTROL         "Instruments",IDC_RADIO_INS,"Button",BS_AUTORADIOBUTTON | 
                     BS_PUSHLIKE | WS_GROUP,175,257,76,15
 END
@@ -1861,18 +1893,16 @@ BEGIN
     PUSHBUTTON      "Duplicate",IDC_DUPEINS,87,283,39,14
     PUSHBUTTON      "Delete",IDC_DELETEINS,127,283,39,14
     CONTROL         "General",IDC_INS_TGENERAL,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_GROUP,171,6,68,13
+                    BS_PUSHLIKE | WS_GROUP,171,7,68,13
     CONTROL         "Amplitude",IDC_INS_TAMP,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,240,6,68,13
+                    BS_PUSHLIKE,240,7,68,13
     CONTROL         "Panning",IDC_INS_TPAN,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,309,6,68,13
+                    BS_PUSHLIKE,309,7,68,13
     CONTROL         "Filtering",IDC_INS_TFILTER,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,378,6,68,13
+                    BS_PUSHLIKE,378,7,68,13
     CONTROL         "Pitch",IDC_INS_TPITCH,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,447,6,68,13
+                    BS_PUSHLIKE,447,7,68,13
     GROUPBOX        "",IDC_STATIC,169,15,348,282
-    GROUPBOX        "",IDC_STATIC,177,22,332,118
-    GROUPBOX        "",IDC_STATIC,177,141,332,151
     LTEXT           "Filter Type",IDC_STATIC1,187,32,34,8
     COMBOBOX        IDC_FILTERTYPE,267,30,100,57,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
@@ -1906,28 +1936,30 @@ BEGIN
     GROUPBOX        "",IDC_FRAMENNA,232,66,214,49
     LTEXT           "Action on New Notes",IDC_STATIC15,240,80,67,8
     COMBOBOX        IDC_INS_NNACOMBO,311,78,74,57,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "If the same...",IDC_STATIC16,240,96,61,8
-    COMBOBOX        IDC_INS_DCTCOMBO,311,95,58,57,CBS_DROPDOWN | WS_VSCROLL | 
-                    WS_TABSTOP
+    COMBOBOX        IDC_INS_DCTCOMBO,311,95,58,57,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
     LTEXT           "do",IDC_STATIC17,372,97,9,8
     COMBOBOX        IDC_INS_DCACOMBO,383,95,58,57,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Global Volume",IDC_STATIC12,187,47,45,8
     LTEXT           "Fadeout",IDC_STATIC13,187,77,27,8
     LTEXT           "Instrument Name",IDC_STATIC14,240,51,56,8
     EDITTEXT        IDC_INS_NAME,312,49,125,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,177,22,332,118
     LTEXT           "Swing (Randomize)",IDC_STATIC18,187,92,62,8
     CONTROL         "",IDC_SWING2,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
                     WS_TABSTOP,262,91,70,11
     CTEXT           "Estático",IDC_LSWING2,334,89,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
+    GROUPBOX        "",IDC_STATIC,177,141,332,151
     CONTROL         " Envelope Enabled",IDC_ENVCHECK,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,185,148,71,10
     CONTROL         "ADSR",IDC_ENVADSR,"Button",BS_AUTORADIOBUTTON | 
                     BS_PUSHLIKE | WS_GROUP,420,148,40,12
     CONTROL         "Freeform",IDC_ENVFREEFORM,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_GROUP,460,148,40,12
+                    BS_PUSHLIKE,460,148,40,12
     LTEXT           "Base",IDC_STATIC6,187,246,16,8
     CONTROL         "",IDC_ADSRBASE,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,239,246,70,11
@@ -1938,7 +1970,7 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,239,261,70,11
     CTEXT           "Estático",IDC_LADSRMOD,311,259,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    LTEXT           "Attack Time",IDC_STATIC8,189,275,43,8
+    LTEXT           "Attack Time",IDC_STATIC8,187,277,43,8
     CONTROL         "",IDC_ADSRATT,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,239,277,70,11
     CTEXT           "Estático",IDC_LADSRATT,311,275,31,12,SS_CENTERIMAGE | 
@@ -1958,8 +1990,10 @@ BEGIN
                     TBS_NOTICKS | WS_TABSTOP,395,277,70,11
     CTEXT           "Estático",IDC_LADSRREL,467,275,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
+    LTEXT           "Temporary ""IDC_INS_NOTEMAP"" object",IDC_INS_NOTEMAP,
+                    259,191,154,17
     CONTROL         "",IDC_INS_ENVELOPE,"Static",SS_OWNERDRAW | SS_NOTIFY | 
-                    SS_SUNKEN | WS_TABSTOP,186,161,314,70
+                    WS_TABSTOP,186,160,314,70,WS_EX_STATICEDGE
     CONTROL         "Sus. Begin",IDC_ENV_SUSBEGIN,"Button",BS_AUTOCHECKBOX | 
                     BS_PUSHLIKE | WS_TABSTOP,325,230,43,12
     CONTROL         "Sus. End",IDC_ENV_SUSEND,"Button",BS_AUTOCHECKBOX | 
@@ -1968,9 +2002,6 @@ BEGIN
                     BS_PUSHLIKE | WS_TABSTOP,414,230,43,12
     CONTROL         "Loop End",IDC_ENV_LOOPEND,"Button",BS_AUTOCHECKBOX | 
                     BS_PUSHLIKE | WS_TABSTOP,457,230,43,12
-    CONTROL         "",IDC_INS_NOTEMAP,"Static",SS_OWNERDRAW | SS_NOTIFY | 
-                    WS_TABSTOP,183,161,318,59,WS_EX_STATICEDGE
-    SCROLLBAR       IDC_INS_NOTESCROLL,184,220,318,10,SBS_RIGHTALIGN
 END
 
 IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 524, 304
@@ -2347,9 +2378,12 @@ BEGIN
     IDD_NEWMACHINE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 383
+        RIGHTMARGIN, 468
+        VERTGUIDE, 263
+        VERTGUIDE, 272
+        VERTGUIDE, 360
         TOPMARGIN, 7
-        BOTTOMMARGIN, 296
+        BOTTOMMARGIN, 295
     END
 
     IDD_ABOUTBOX, DIALOG
@@ -2403,6 +2437,14 @@ BEGIN
         RIGHTMARGIN, 257
         TOPMARGIN, 7
         BOTTOMMARGIN, 50
+    END
+
+    IDD_INST_EDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 464
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 382
     END
 
     IDD_MIDI_INPUT, DIALOG
@@ -2931,7 +2973,48 @@ BEGIN
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_NEWMACHINESPOPUP MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Add Category on Same &Level", ID__ADDFOLDERONSAMELEVEL
+        MENUITEM "&Add Sub Category",           ID__ADDSUBFOLDER
+        MENUITEM "Rena&me Category",            ID__RENAMEFOLDER
+        POPUP "&Delete Category"
+        BEGIN
+            MENUITEM "And Move Items to Parent Folder", 
+                                                    ID_DELETEFOLDER_MOVEPARNT
+
+            MENUITEM "And Move Items to ""Uncategorised""", 
+                                                    ID_DELETEFOLDER_MOVEUNCAT
+
+        END
+        MENUITEM "&Move to Top Level (Root)",   ID__MOVETOTOPLEVEL
+        MENUITEM SEPARATOR
+        MENUITEM "Ex&pand All Categories",      ID__EXPANDALLFOLDERS
+        MENUITEM "C&ollapse All Categories",    ID__COLLAPSEALLFOLDERS
+    END
+END
+
+#endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
