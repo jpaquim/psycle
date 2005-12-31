@@ -55,11 +55,15 @@ namespace host{
 		int smpLen[256];
 		char smpFlags[256];
 		unsigned char highOffset[32];
+		unsigned char memPortaUp[32];
+		unsigned char memPortaDown[32];
 		short m_iTempoTicks;
 		short m_iTempoBPM;
 		XMFILEHEADER m_Header;
 		XMSampler* m_pSampler;
 	};
+
+
 
 	struct MODHEADER
 	{
@@ -77,8 +81,6 @@ namespace host{
 		unsigned short loopStart;
 		unsigned short loopLength;
 	};
-
-
 
 	class MODSongLoader : public OldPsyFile
 	{

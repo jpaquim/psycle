@@ -1761,7 +1761,7 @@ panbrello, and S44 will be a slower panbrello.
 				ForegroundVoice()->m_RetrigVol = effretVol;
 				ForegroundVoice()->m_RetrigOperation = effretMode;
 			}
-			m_EffectFlags &= EffectFlag::RETRIG;
+			m_EffectFlags |= EffectFlag::RETRIG;
 		}
 		void XMSampler::Channel::NoteCut(const int ntick){
 			m_NoteCutTick = ntick;
@@ -2003,7 +2003,7 @@ panbrello, and S44 will be a slower panbrello.
 				}
 				else if ( bPorta2Note && currentVoice->IsStopping())
 				{
-					bNoteOn = true;
+					//bNoteOn = true;
 					newVoice = currentVoice;
 				}
 			}

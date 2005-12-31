@@ -43,6 +43,7 @@ namespace psycle
 			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 			_lineChanged = true;
 			_lineCounter = line;
+			_SPRChanged = false;
 			_playPosition= pos;
 			_playPattern = Global::_pSong->playOrder[_playPosition];
 			_playTime = 0;
@@ -152,11 +153,13 @@ namespace psycle
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-								_samplesRemaining+=SamplesPerRow()*(pEntry->_parameter&0x0F);
+								SamplesPerRow(SamplesPerRow()*(1+(pEntry->_parameter&0x0F)));
+								_SPRChanged=true;
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
-								_samplesRemaining+=SamplesPerRow()*(pEntry->_parameter&0x0F)*tpb/24;
+								SamplesPerRow(SamplesPerRow()*(1.0f+((pEntry->_parameter&0x0F)*tpb/24.0f)));
+								_SPRChanged=true;
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
 							{
@@ -341,6 +344,7 @@ namespace psycle
 		{
 			Song* pSong = Global::_pSong;
 			if ( _patternjump!=-1 ) _playPosition= _patternjump;
+			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = true; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
 			else _lineCounter++;
 			_playTime += 60 / float (bpm * tpb);

@@ -45,6 +45,8 @@ namespace host{
 		for (int i=0; i<32; i++)
 		{
 			highOffset[i]=0;
+			memPortaUp[i]=0;
+			memPortaDown[i]=0;
 		}
 		for (int i=0; i<256; i++)
 		{
@@ -303,8 +305,6 @@ namespace host{
 							break;
 						}
 					}
-					char memPortaUp=0;
-					char memPortaDown=0;
 					e._parameter = param;
 					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
 						XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -312,8 +312,6 @@ namespace host{
 					};
 					switch(type){
 	#else
-					char memPortaUp=0;
-					char memPortaDown=0;
 					e._parameter = param;
 					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
 						XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -337,11 +335,19 @@ namespace host{
 							break;
 						case XMCMD::PORTAUP:
 							e._cmd = XMSampler::CMD::PORTAMENTO_UP;
-							if ( e._parameter == 0) { e._parameter = memPortaUp; }
+							if ( e._parameter == 0) { e._parameter = memPortaUp[col]; }
+							else {
+								if ( e._parameter > 0xDF ) { e._parameter = 0xDF; }
+								memPortaUp[col] = e._parameter;
+							}
 							break;
 						case XMCMD::PORTADOWN:
 							e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
-							if ( e._parameter == 0) { e._parameter = memPortaDown; }
+							if ( e._parameter == 0) { e._parameter = memPortaDown[col]; }
+							else {
+								if ( e._parameter > 0xDF ) { e._parameter = 0xDF; }
+								memPortaDown[col] = e._parameter;
+							}
 							break;
 						case XMCMD::PORTA2NOTE:
 							e._cmd = XMSampler::CMD::PORTA2NOTE;
@@ -429,8 +435,8 @@ namespace host{
 								e._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
 								break;
 							case XMCMD_E::E_PATTERN_DELAY:
-								e._cmd = PatternCmd::PATTERN_DELAY;
-								e._parameter = param & 0xf;
+								e._cmd = PatternCmd::EXTENDED;
+								e._parameter =  PatternCmd::PATTERN_DELAY | (param & 0xf);
 								break;
 							case XMCMD_E::E_SET_MIDI_MACRO:
 								e._cmd = XMSampler::CMD::EXTENDED;
