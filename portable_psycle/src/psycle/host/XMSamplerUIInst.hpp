@@ -94,7 +94,6 @@ public:
 
 		void Initialize(XMSampler * const pSampler,XMInstrument * const pInstrument,CWnd *pParent);
 		virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
-		virtual BOOL UpdateScrollInfo();
 
 	protected:
 		DECLARE_MESSAGE_MAP()
@@ -104,11 +103,17 @@ public:
 		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
 		afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
+		int m_naturalkey_width;
+		int m_naturalkey_height;
+		int m_sharpkey_width;
+		int m_sharpkey_height;
+		int m_octave_width;
 		static const int m_NaturalKeysPerOctave = 7;
 		static const int m_SharpKeysPerOctave = 5;
 		static const int m_KeysPerOctave = 12;
 		static const int m_SharpKey_Xpos[m_SharpKeysPerOctave];
 		static const TNoteKey m_NoteAssign[m_KeysPerOctave];
+		static const int m_noteAssignindex[m_KeysPerOctave];
 
 		int GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect);
 		

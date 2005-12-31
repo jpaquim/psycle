@@ -65,7 +65,6 @@ NAMESPACE__BEGIN(psycle)
 			void ShowMidiMonitorDlg();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
-			void ShowErrorLogger();
 			void StatusBarText(std::string txt);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);

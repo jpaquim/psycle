@@ -1360,6 +1360,7 @@ const int XMSamplerUIInst::CSampleAssignEditor::m_SharpKey_Xpos[]= {15,44,92,121
 const XMSamplerUIInst::CSampleAssignEditor::TNoteKey XMSamplerUIInst::CSampleAssignEditor::m_NoteAssign[]=
 {XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,
 XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey};
+const int XMSamplerUIInst::CSampleAssignEditor::m_noteAssignindex[m_KeysPerOctave] = {0,0,1,1,2,3,2,4,3,5,4,6};
 
 XMSamplerUIInst::CSampleAssignEditor::CSampleAssignEditor()
 : m_bInitialized(false)
@@ -1368,6 +1369,16 @@ XMSamplerUIInst::CSampleAssignEditor::CSampleAssignEditor()
 	m_NaturalKey.LoadBitmap(IDB_KEYS_NORMAL);
 	m_SharpKey.LoadBitmap(IDB_KEYS_SHARP);
 	m_BackKey.LoadBitmap(IDB_KEYS_BACK);
+
+	BITMAP _bmp, _bmp2;
+	m_NaturalKey.GetBitmap(&_bmp);
+	m_SharpKey.GetBitmap(&_bmp2);
+	m_naturalkey_width = _bmp.bmWidth;
+	m_naturalkey_height = _bmp.bmHeight;
+	m_sharpkey_width = _bmp2.bmWidth;
+	m_sharpkey_height = _bmp2.bmHeight;
+
+	m_octave_width = m_naturalkey_width * m_NaturalKeysPerOctave;
 }
 XMSamplerUIInst::CSampleAssignEditor::~CSampleAssignEditor()
 {
@@ -1405,11 +1416,6 @@ void XMSamplerUIInst::CSampleAssignEditor::Initialize(XMSampler * const pSampler
 	m_pSampler = pSampler;
 	m_pInst = pInstrument;
 	m_bInitialized=true;
-	UpdateScrollInfo();
-	Invalidate();
-}
-BOOL XMSamplerUIInst::CSampleAssignEditor::UpdateScrollInfo()
-{
 	SCROLLINFO info;
 	m_scBar.GetScrollInfo(&info, SIF_PAGE|SIF_RANGE);
 	info.fMask = SIF_RANGE|SIF_POS;
@@ -1417,7 +1423,7 @@ BOOL XMSamplerUIInst::CSampleAssignEditor::UpdateScrollInfo()
 	info.nMax  = 8;
 	info.nPos = m_Octave;
 	m_scBar.SetScrollInfo(&info, FALSE);
-	return FALSE;
+	Invalidate();
 }
 
 void XMSamplerUIInst::CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
@@ -1526,42 +1532,26 @@ void XMSamplerUIInst::CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItem
 
 int XMSamplerUIInst::CSampleAssignEditor::GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect)
 {
-	BITMAP _bmp, _bmp2;
-	m_NaturalKey.GetBitmap(&_bmp);
-	m_SharpKey.GetBitmap(&_bmp2);
-	const int _naturalkey_width = _bmp.bmWidth;
-	const int _naturalkey_height = _bmp.bmHeight;
-	const int _sharpkey_width = _bmp2.bmWidth;
-	const int _sharpkey_height = _bmp2.bmHeight;
-
-	const int _octave_width = _bmp.bmWidth * m_NaturalKeysPerOctave;
-	const int _noteAssignindex[m_KeysPerOctave] = {0,0,1,1,2,3,2,4,3,5,4,6};
-//	const int _SharpKey_index[m_SharpKeysPerOctave] = {1,3,6,8,10};
-
-	keyRect.top = 0;
-	keyRect.bottom = 0;
-	keyRect.left = 0;
-	keyRect.right = 0;
-
-	if ( y < 20 || y > 20+_naturalkey_height ) return 255;
+	if ( y < 20 || y > 20+m_naturalkey_height ) return 255;
 
 	//Get the X position in natural key notes.
-	int note = ((x/_octave_width)*m_KeysPerOctave);
-	int noteseven= ((x/_octave_width)*m_NaturalKeysPerOctave);
-	int indexnote =((x%_octave_width)/_naturalkey_width);
+	int notenatural= ((x/m_octave_width)*m_NaturalKeysPerOctave);
+	int indexnote = ((x%m_octave_width)/m_naturalkey_width);
+	notenatural+=indexnote;
 
 	keyRect.top = 20;
-	keyRect.bottom = 20+_naturalkey_height;
-	keyRect.left = (noteseven+indexnote)*_naturalkey_width;
-	keyRect.right = (noteseven+indexnote+1)*_naturalkey_width;
+	keyRect.bottom = 20+m_naturalkey_height;
+	keyRect.left = (notenatural)*m_naturalkey_width;
+	keyRect.right = keyRect.left+m_naturalkey_width;
 
 	//Adapt the index note to a 12note range instead of 7note.
+	int note = ((x/m_octave_width)*m_KeysPerOctave);
 	int cnt=0;
-	while(_noteAssignindex[cnt]!= indexnote) cnt++;
-	indexnote = cnt;
-	note +=indexnote;
+	while(m_noteAssignindex[cnt]!= indexnote) cnt++;
+	indexnote=cnt;
+	note += cnt;
 
-	if ( y > 20+_sharpkey_height ) 
+	if ( y > 20+m_sharpkey_height ) 
 	{
 		return note+(m_Octave*m_KeysPerOctave);
 	}
@@ -1570,30 +1560,30 @@ int XMSamplerUIInst::CSampleAssignEditor::GetKeyIndexAtPoint(const int x,const i
 	//If the code reaches here, we have to check if it is a sharp key or a natural one.
 
 	//Check previous sharp note
-	if (m_NoteAssign[indexnote-1]==SharpKey)
+	if (indexnote > 0 && m_NoteAssign[indexnote-1]==SharpKey)
 	{
-		const int _xpos = m_SharpKey_Xpos[_noteAssignindex[indexnote-1]] + ((note-1) / m_KeysPerOctave) * _octave_width;
-		if(x >= _xpos && x <= (_xpos + _sharpkey_width) && y >= 20 && y <= 20+_sharpkey_height)
+		const int _xpos = m_SharpKey_Xpos[m_noteAssignindex[indexnote-1]] + (note / m_KeysPerOctave) * m_octave_width;
+		if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
 		{
-			keyRect.bottom = _sharpkey_height;
+			keyRect.bottom = m_sharpkey_height;
 			keyRect.left = _xpos;
-			keyRect.right = _xpos + _sharpkey_width;
+			keyRect.right = _xpos + m_sharpkey_width;
 			return note-1+(m_Octave*m_KeysPerOctave);
 		}
 	}
 	//Check next sharp note
-	if ( m_NoteAssign[indexnote+1]==SharpKey)
+	if ( indexnote+1<m_KeysPerOctave && m_NoteAssign[indexnote+1]==SharpKey)
 	{
-		const int _xpos = m_SharpKey_Xpos[_noteAssignindex[indexnote+1]] + ((note+1) / m_KeysPerOctave) * _octave_width;
-		if(x >= _xpos && x <= (_xpos + _sharpkey_width) && y >= 20 && y <= 20+_sharpkey_height)
+		const int _xpos = m_SharpKey_Xpos[m_noteAssignindex[indexnote+1]] + (note / m_KeysPerOctave) * m_octave_width;
+		if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
 		{
-			keyRect.bottom = _sharpkey_height;
+			keyRect.bottom = m_sharpkey_height;
 			keyRect.left = _xpos;
-			keyRect.right = _xpos + _sharpkey_width;
+			keyRect.right = _xpos + m_sharpkey_width;
 			return note+1+(m_Octave*m_KeysPerOctave);
 		}
 	}
-	//No sharp note.Return the already found note.
+	//Not a valid sharp note. Return the already found note.
 	return note+(m_Octave*m_KeysPerOctave);
 }
 void XMSamplerUIInst::CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )

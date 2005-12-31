@@ -25,6 +25,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 //
 // Menu
 //
+
 IDR_NEWMACHINESPOPUP MENU 
 BEGIN
     POPUP ""
@@ -190,7 +191,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Add machine\tF9",             ID_NEWMACHINE
         MENUITEM "Instrument Editor\tF10",      ID_VIEW_INSTRUMENTEDITOR
-        MENUITEM "Logging Window\tF11",         ID_VIEW_ERRORLOGGER
     END
     POPUP "&Configuration"
     BEGIN
@@ -1205,8 +1205,8 @@ BEGIN
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 475, 302
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CONTROL | WS_POPUP | 
-    WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Add New Machine"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
@@ -1741,9 +1741,9 @@ BEGIN
     CONTROL         "Generators",IDC_RADIO_GEN,"Button",BS_AUTORADIOBUTTON | 
                     BS_PUSHLIKE | WS_GROUP,11,257,76,15
     CONTROL         "Effects",IDC_RADIO_EFX,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE ,93,257,76,15
+                    BS_PUSHLIKE,93,257,76,15
     CONTROL         "Instruments",IDC_RADIO_INS,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE ,175,257,76,15
+                    BS_PUSHLIKE,175,257,76,15
 END
 
 IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 252
@@ -1815,19 +1815,6 @@ FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",0x1,1,1,
                     250,8
-END
-
-IDD_ERRORLOGGER DIALOGEX 0, 0, 431, 218
-STYLE DS_SETFONT | DS_SETFOREGROUND | DS_NOFAILCREATE | DS_CENTER | 
-    WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU | 
-    WS_THICKFRAME
-CAPTION "Logging Window"
-FONT 7, "Lucida Console", 400, 0, 0x0
-BEGIN
-    CONTROL         "",IDC_ERRORLOG_TXT,"RichEdit20A",ES_MULTILINE | 
-                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
-                    WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,29,29,278,120,
-                    WS_EX_CLIENTEDGE
 END
 
 IDD_XM_SAMPLER DIALOGEX 0, 0, 375, 188
@@ -2481,14 +2468,6 @@ BEGIN
         BOTTOMMARGIN, 56
     END
 
-    IDD_ERRORLOGGER, DIALOG
-    BEGIN
-        LEFTMARGIN, 12
-        RIGHTMARGIN, 337
-        TOPMARGIN, 12
-        BOTTOMMARGIN, 188
-    END
-
     IDD_XM_SAMPLER, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2952,7 +2931,7 @@ BEGIN
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

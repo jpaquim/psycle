@@ -76,7 +76,6 @@
 #define IDR_POPUPMENU                   180
 #define IDD_PRESETS                     181
 #define IDD_SAVESONG                    183
-
 #define IDD_SWINGFILL                   187
 #define IDD_ASIO_CONFIG                 188
 #define IDB_MASTERBACK                  190
@@ -90,7 +89,6 @@
 #define IDD_NEW_VOLUME                  202
 #define IDD_SAVEWAVDLG                  203
 #define IDD_PROGRESS_DIALOG             204
-#define IDD_ERRORLOGGER                 206
 #define IDB_BITMAP1                     207
 #define IDB_BETASPLASH                  208
 #define IDD_XM_SAMPLER                  214

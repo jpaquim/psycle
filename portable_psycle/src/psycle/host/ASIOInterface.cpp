@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::ASIOInterface.
 #include <project.private.hpp>
 #include "ASIOInterface.hpp"
-//#include "resources/resources.hpp"
+#include "resources/resources.hpp"
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"

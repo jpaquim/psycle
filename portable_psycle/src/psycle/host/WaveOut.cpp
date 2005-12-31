@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::WaveOut.
 #include <project.private.hpp>
 #include "WaveOut.hpp"
-//#include "resources/resources.hpp"
+#include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
