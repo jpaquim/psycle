@@ -11,7 +11,6 @@
 #include "VstEditorDlg.hpp"
 #include "Helpers.hpp"
 #include "WireDlg.hpp"
-#include "LoggingWindow.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
 #include "Player.hpp"
@@ -1278,13 +1277,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 			m_pWndWed->Notify();
 		}
-
-		void CMainFrame::ShowErrorLogger()
-		{
-			Global::pLogWindow->ShowWindow(SW_SHOWNORMAL);
-			Global::pLogWindow->SetActiveWindow();
-		}
-
 
 		void CMainFrame::ShowInstrumentEditor()
 		{

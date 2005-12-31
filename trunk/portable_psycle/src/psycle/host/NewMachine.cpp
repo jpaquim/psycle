@@ -135,14 +135,14 @@ NAMESPACE__BEGIN(psycle)
 			UpdateList();
 			
 			//fill combo boxes
-			comboListStyle.AddString ("Custom Categories");
 			comboListStyle.AddString ("Type of Plugin");
 			comboListStyle.AddString ("Class of Machine");
-			comboListStyle.SetCurSel (0);
+			comboListStyle.AddString ("Custom Categories");
+			comboListStyle.SetCurSel (pluginOrder);
 
-			comboNameStyle.AddString ("Plugin Name");
 			comboNameStyle.AddString ("Filename and Path");
-            comboNameStyle.SetCurSel (0);
+			comboNameStyle.AddString ("Plugin Name");
+            comboNameStyle.SetCurSel ((int)pluginName);
 
 			//REMOVE THIS WHEN FINISHED TESTING
 //			bCategoriesChanged = true;
@@ -392,7 +392,7 @@ NAMESPACE__BEGIN(psycle)
 
 				}
 
-			SortList ();
+//			SortList ();
 			break;
 			}
 			Outputmachine = -1;
@@ -402,7 +402,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			bool bCatFound = false;
 			HTREEITEM hChild = m_browser.GetChildItem (hParent);
-			HTREEITEM hReturn;
+			HTREEITEM hReturn = NULL;
 			while ((hChild != NULL) && (bCatFound == false))
 			{
 				if ((m_browser.GetItemText (hChild) == category) && (m_browser.GetItemData (hChild) == IS_FOLDER))
@@ -574,15 +574,7 @@ NAMESPACE__BEGIN(psycle)
 				bCategoriesChanged = false;
 			}
 			//set view style from entry in combobox
-			switch (comboListStyle.GetCurSel())
-			{
-			case 0:
-				pluginOrder=2; break;
-			case 1:
-				pluginOrder=0; break;
-			case 2:
-				pluginOrder=1; break;
-			}
+			pluginOrder=comboListStyle.GetCurSel();
 
 			UpdateList();
 			m_browser.Invalidate();				  
@@ -590,10 +582,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnCbnSelendokNamestyle()
 		{
-			if (comboNameStyle.GetCurSel())
-				pluginName = false;
-			else
-				pluginName = true;
+			pluginName=comboNameStyle.GetCurSel()?true:false;
 
 			if (bCategoriesChanged)
 				{
@@ -1076,7 +1065,7 @@ NAMESPACE__BEGIN(psycle)
 
 			UINT version;
 			file.Read(&version,sizeof(version));
-			if (version > CURRENT_CACHE_MAP_VERSION)
+			if (version != CURRENT_CACHE_MAP_VERSION)
 			{
 				file.Close();
 				DeleteFile(cache.c_str());
@@ -1255,7 +1244,7 @@ NAMESPACE__BEGIN(psycle)
 			TVSORTCB tvs;
 			
 			// Sort the tree control's items using callback procedure.
-			tvs.hParent = hNodes[3];//TVI_ROOT;
+			tvs.hParent = TVI_ROOT;
 			tvs.lpfnCompare = NodeCompare;
 			tvs.lParam = (LPARAM) myTree;
 			

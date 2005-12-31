@@ -4,6 +4,7 @@
  *  $Revision$
  */
 #include <project.private.hpp>
+#include "resources/resources.hpp"
 #include "ProgressDialog.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
@@ -302,6 +303,8 @@ namespace host{
 							break;
 						}
 					}
+					char memPortaUp=0;
+					char memPortaDown=0;
 					e._parameter = param;
 					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
 						XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -309,6 +312,8 @@ namespace host{
 					};
 					switch(type){
 	#else
+					char memPortaUp=0;
+					char memPortaDown=0;
 					e._parameter = param;
 					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
 						XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -332,9 +337,11 @@ namespace host{
 							break;
 						case XMCMD::PORTAUP:
 							e._cmd = XMSampler::CMD::PORTAMENTO_UP;
+							if ( e._parameter == 0) { e._parameter = memPortaUp; }
 							break;
 						case XMCMD::PORTADOWN:
 							e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
+							if ( e._parameter == 0) { e._parameter = memPortaDown; }
 							break;
 						case XMCMD::PORTA2NOTE:
 							e._cmd = XMSampler::CMD::PORTA2NOTE;
@@ -884,7 +891,7 @@ namespace host{
 			}
 
 			for(int i = 0; i < envelope_point_num;i++){
-				inst.PanEnvelope()->Append((int)sampleHeader.penv[i * 2] ,(float)sampleHeader.penv[i * 2 + 1] / 64.0f);
+				inst.PanEnvelope()->Append((int)sampleHeader.penv[i * 2] ,(float)(sampleHeader.penv[i * 2 + 1]-32.0f) / 32.0f);
 			}
 
 		} else {

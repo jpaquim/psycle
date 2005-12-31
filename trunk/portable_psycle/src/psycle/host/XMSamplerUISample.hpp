@@ -23,7 +23,6 @@ protected:
 	CPen cpen_med;
 	CPen cpen_hi;
 	CPen cpen_sus;
-	CBrush brush;
 
 };
 
@@ -79,7 +78,6 @@ public:
 	afx_msg void OnBnClickedDupe();
 	afx_msg void OnBnClickedDelete();
 	afx_msg void OnBnClickedPanenabled();
-	afx_msg void OnStnClickedWavescope();
 
 protected:
 	XMSampler *m_pMachine;

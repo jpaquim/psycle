@@ -15,14 +15,12 @@ CWaveScopeCtrl::CWaveScopeCtrl()
 	cpen_med.CreatePen(PS_SOLID,0,0xCCCCCC);
 	cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
 	cpen_sus.CreatePen(PS_DOT,0,0xFF0000);
-	brush.CreateSolidBrush(RGB(255,255,255));
 }
 CWaveScopeCtrl::~CWaveScopeCtrl(){
 	cpen_lo.DeleteObject();
 	cpen_med.DeleteObject();
 	cpen_hi.DeleteObject();
 	cpen_sus.DeleteObject();
-	brush.DeleteObject();
 }
 
 void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
@@ -45,7 +43,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 		if(rWave().IsWaveStereo()) wrHeight=my/2;
 		else wrHeight=my;
 
-		dc.FillRect(&rect,&brush);
+		dc.FillSolidRect(&rect,RGB(255,255,255));
 		dc.SetBkMode(TRANSPARENT);
 
 		if(rWave().WaveLength())
@@ -90,7 +88,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					if (yLow > rWave().WaveDataL(d)) yLow = rWave().WaveDataL(d);
 					if (yHi < rWave().WaveDataL(d)) yHi = rWave().WaveDataL(d);
 				}
-				int const ryLow = (wrHeight * yLow)/32768; // 32767...
+				int const ryLow = (wrHeight * yLow)/32768;
 				int const ryHi = (wrHeight * yHi)/32768;
 
 				dc.MoveTo(c,wrHeight - ryLow);
@@ -111,7 +109,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 						if (yHi < rWave().WaveDataR(d)) yHi = rWave().WaveDataL(d);
 					}
 
-					int const ryLow = (wrHeight * yLow)/32768; // 32767...
+					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
 
 					dc.MoveTo(c,wrHeight_R - ryLow);
@@ -204,7 +202,6 @@ BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 	ON_BN_CLICKED(IDC_DUPE, OnBnClickedDupe)
 	ON_BN_CLICKED(IDC_DELETE, OnBnClickedDelete)
 	ON_BN_CLICKED(IDC_PANENABLED, OnBnClickedPanenabled)
-	ON_STN_CLICKED(IDC_WAVESCOPE, OnStnClickedWavescope)
 END_MESSAGE_MAP()
 
 // Controladores de mensajes de XMSamplerUISample
@@ -279,7 +276,18 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 		((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
 		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(int(wave.PanFactor()*128.0f));
 		char tmp[40];
-		sprintf(tmp,"%d",int(wave.PanFactor()*128.0f));
+		switch((int)(wave.PanFactor()*128.f))
+		{
+		case 0: sprintf(tmp,"||%02d  ",wave.PanFactor()*128.f); break;
+		case 64: sprintf(tmp," |%02d| ",wave.PanFactor()*128.f); break;
+		case 128: sprintf(tmp,"  %02d||",wave.PanFactor()*128.f); break;
+		default:
+			if ( wave.PanFactor()*128.f < 32) sprintf(tmp,"<<%02d  ",wave.PanFactor()*128.f);
+			else if ( wave.PanFactor()*128.f < 64) sprintf(tmp," <%02d< ",wave.PanFactor()*128.f);
+			else if ( wave.PanFactor()*128.f <= 96) sprintf(tmp," >%02d> ",wave.PanFactor()*128.f);
+			else sprintf(tmp,"  %02d>>",wave.PanFactor()*128.f);
+			break;
+		}
 		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
 	}
 
@@ -608,12 +616,6 @@ void XMSamplerUISample::OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResu
 	sprintf(tmp,"%d",slid->GetPos());
 	((CStatic*)GetDlgItem(IDC_LVIBRATODEPTH))->SetWindowText(tmp);
 	*pResult = 0;
-}
-
-void XMSamplerUISample::OnStnClickedWavescope()
-{
-	// TODO: Agregue aquí su código de controlador de notificación de control
-	//\todo : we've got a problem... no cursor position!
 }
 
 void XMSamplerUISample::OnCbnSelendokLoop()
