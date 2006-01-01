@@ -114,7 +114,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID__COLLAPSEALLFOLDERS, NMPOPUP_CollapseAll)
 			ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_BROWSER, BeginLabelEdit)
 			ON_NOTIFY(TVN_ENDLABELEDIT, IDC_BROWSER, EndLabelEdit)
-			ON_NOTIFY(TVN_KEYDOWN, IDC_BROWSER, BrowserKeyDown)
 			ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
 			//}}AFX_MSG_MAP
 			
@@ -129,7 +128,6 @@ NAMESPACE__BEGIN(psycle)
 			bAllowChanged = false;
 			bCategoriesChanged = false;
 			bEditing = false;
-			SortList();
 			LoadPluginInfo();
 			UpdateList();
 			
@@ -301,7 +299,7 @@ NAMESPACE__BEGIN(psycle)
 			
 			//sort into custom folders
 			case 2:
-				hNodes[0] = m_browser.InsertItem("UNCATEGORISED",8,9, TVI_ROOT, TVI_LAST);
+				hNodes[0] = m_browser.InsertItem("Uncategorised",8,9, TVI_ROOT, TVI_LAST);
 				m_browser.SetItemData (hNodes[0], IS_FOLDER);
 				numCustCategories = 1;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
@@ -356,7 +354,7 @@ NAMESPACE__BEGIN(psycle)
 								if (hCategory == NULL)
 								{
 									//category doesn't exist
-									hNodes[numCustCategories] = m_browser.InsertItem (curcategory, 6,7, hParent, TVI_SORT);
+									hNodes[numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,7, hParent, TVI_SORT);
 									hCategory = hNodes[numCustCategories];
 									m_browser.SetItemData (hNodes[numCustCategories], IS_FOLDER);
 									numCustCategories++;
@@ -390,8 +388,8 @@ NAMESPACE__BEGIN(psycle)
 					}
 
 				}
-
-//			SortList ();
+				// remove leading space from all folders
+				RemoveCatSpaces(NULL);
 			break;
 			}
 			Outputmachine = -1;
@@ -404,7 +402,7 @@ NAMESPACE__BEGIN(psycle)
 			HTREEITEM hReturn = NULL;
 			while ((hChild != NULL) && (bCatFound == false))
 			{
-				if ((m_browser.GetItemText (hChild) == category) && (m_browser.GetItemData (hChild) == IS_FOLDER))
+				if ((m_browser.GetItemText (hChild) == (" " + category)) && (m_browser.GetItemData (hChild) == IS_FOLDER))
 				{
 					hReturn = hChild;
 					bCatFound = true;
@@ -417,6 +415,58 @@ NAMESPACE__BEGIN(psycle)
 				return NULL;
 			else
 				return hReturn;
+		}
+
+		void CNewMachine::RemoveCatSpaces (HTREEITEM hParent)
+		{
+			HTREEITEM hChild;
+			if (hParent == NULL)
+                hChild = m_browser.GetChildItem (TVI_ROOT);
+			else
+				hChild = m_browser.GetChildItem (hParent);
+			while (hChild != NULL)
+			{
+				if ((hChild != hNodes[0]) && (m_browser.GetItemData (hChild) == IS_FOLDER))
+				{
+					CString tempstring = m_browser.GetItemText (hChild);
+					tempstring.Delete (0,1);
+					m_browser.SetItemText (hChild, tempstring);
+					RemoveCatSpaces (hChild);
+				}
+				hChild = m_browser.GetNextSiblingItem (hChild);
+			}
+
+		}
+
+		void CNewMachine::SortChildren (HTREEITEM hParent)
+		{
+			HTREEITEM hChild = m_browser.GetChildItem (hParent);
+			//add space to front of folders, to sort
+			while (hChild != NULL)
+			{
+				if (m_browser.GetItemData (hChild) == IS_FOLDER)
+				{
+					CString tempstring = m_browser.GetItemText (hChild);
+					m_browser.SetItemText (hChild, " " + tempstring);
+				}
+				hChild = m_browser.GetNextSiblingItem (hChild);
+			}
+			//sort alphabetically - folders will be at top because of the space
+			m_browser.SortChildren (hParent);
+			//remove the space
+			hChild = m_browser.GetChildItem (hParent);
+			while (hChild != NULL)
+			{
+				if (m_browser.GetItemData (hChild) == IS_FOLDER)
+				{
+					CString tempstring = m_browser.GetItemText (hChild);
+					tempstring.Delete (0,1);  //delete first char, which is the space
+					m_browser.SetItemText (hChild, tempstring);
+				}
+				hChild = m_browser.GetNextSiblingItem (hChild);
+			}
+
+
 		}
 
 		void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -495,7 +545,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				MessageBox (_pPlugsInfo[i]->category.c_str(),"AS");
+				//MessageBox (_pPlugsInfo[i]->category.c_str(),"Current Plugin Category");
 				std::string str = _pPlugsInfo[i]->dllname;
 				std::string::size_type pos = str.rfind('\\');
 				if(pos != std::string::npos)
@@ -1236,32 +1286,6 @@ NAMESPACE__BEGIN(psycle)
 			
 		}
 
-		void CNewMachine::SortList()
-		{
-			 // The pointer to my tree control.
-			CTreeCtrl * myTree = &m_browser;
-			TVSORTCB tvs;
-			// Sort the tree control's items using callback procedure.
-			tvs.hParent = TVI_ROOT;
-			tvs.lpfnCompare = NodeCompare;
-			tvs.lParam = (LPARAM) myTree;
-			
-			myTree->SortChildrenCB(&tvs);
-
-		}
-
-		int CALLBACK CNewMachine::NodeCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
-		{
-			// lParamSort contains a pointer to the tree control.
-			// The lParam of an item is just its handle, 
-			// as specified with SetItemData
-			CTreeCtrl* pmyTreeCtrl = (CTreeCtrl*) lParamSort;
-			CString    strItem1 = pmyTreeCtrl->GetItemText((HTREEITEM) lParam1);
-			CString    strItem2 = pmyTreeCtrl->GetItemText((HTREEITEM) lParam2);
-			printf ("asdfasdf");
-			//::MessageBox (, strItem1 + "   " + strItem2,"Asdf", 0);
-			return strcmp(strItem2, strItem1);
-		}
 
 		void CNewMachine::OnOK() 
 		{	
@@ -1351,7 +1375,6 @@ NAMESPACE__BEGIN(psycle)
 				CString tempstring;
 				CString currenttext = m_browser.GetItemText (hSelectedItem);
 				pEdit->GetWindowText(tempstring);
-				tempstring = tempstring.MakeUpper();
 				*pResult = false;
 				m_browser.SetItemText (hSelectedItem, tempstring);
 
@@ -1365,7 +1388,7 @@ NAMESPACE__BEGIN(psycle)
 
 					while ((hChild != NULL) && (intNameCount < 3))
 					{
-						if (tempstring == (m_browser.GetItemText (hChild)).MakeUpper())
+						if (tempstring == m_browser.GetItemText (hChild))
 							intNameCount++;
 						hChild = m_browser.GetNextSiblingItem (hChild);
 					}
@@ -1390,7 +1413,7 @@ NAMESPACE__BEGIN(psycle)
 							bEditing = false;
 							bCategoriesChanged = true;
 							//sort items
-							m_browser.SortChildren (hParent);
+							SortChildren (hParent);
 						}
 						else
 						{
@@ -1414,27 +1437,6 @@ NAMESPACE__BEGIN(psycle)
 			else 
 				*pResult = false;
 
-		}
-
-		void CNewMachine::BrowserKeyDown(NMHDR *pNMHDR, LRESULT *pResult)
-		{
-			MessageBox ("Asdfasdf","asdf");
-			LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
-			if (bEditing)
-			{
-				if (pTVKeyDown->wVKey == VK_RETURN)
-				{
-					HTREEITEM hSelected = m_browser.GetSelectedItem();
-					CEdit* pEdit = m_browser.GetEditControl();
-					//pEdit->SendMessage (TVN_ENDLABELEDIT);
-					MessageBox ("asdf","s");
-				}
-				if (pTVKeyDown->wVKey == VK_ESCAPE)
-				{	//stop editing
-				}
-			}
-				
-			*pResult = 0;
 		}
 
 		void CNewMachine::BeginDrag(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1703,9 +1705,15 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (!((m_browser.GetItemData(m_hItemDrag) == IS_FOLDER) && ((hItemDrop == hNodes[0]) || (m_browser.GetParentItem (hItemDrop) == hNodes[0]))))
 				{
+					HTREEITEM hItemDropped = hItemDrop;
 					MoveTreeItem (m_hItemDrag, hItemDrop == NULL ? TVI_ROOT : hItemDrop, TVI_SORT, false);
-				
+
 					bCategoriesChanged = true;
+
+					if (m_browser.GetItemData (hItemDropped) == IS_FOLDER)
+						SortChildren(hItemDropped);
+					else
+						SortChildren(m_browser.GetParentItem (hItemDropped));
 				}
 			}
 
@@ -1883,7 +1891,6 @@ NAMESPACE__BEGIN(psycle)
 			if ((bAllowChanged) || (bCategoriesChanged))
 			{
 				SaveCacheFile();
-				MessageBox ("saved","asdf");
 			}
 			OnCancel();
 		}

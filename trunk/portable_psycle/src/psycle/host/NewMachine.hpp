@@ -138,6 +138,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnCancelMode();
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+			afx_msg void OnBnClickedCancel();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -148,29 +149,19 @@ NAMESPACE__BEGIN(psycle)
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);
-			HTREEITEM CategoryExists (HTREEITEM hParent, CString category);
-			void SortList() ;
-			
-
-		public:
-			//afx_msg void AddNewCustomFolder();
-			//CEdit txtNewFolderName;
-
 			void FinishDragging(BOOL bDraggingImageList);
 			void OnEndDrag(UINT nFlags, CPoint point);
-			
+			HTREEITEM CategoryExists (HTREEITEM hParent, CString category);	
+			HTREEITEM MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos = TVI_SORT, bool bAllowReplace = false);
+			void SetPluginCategories(HTREEITEM hItem, CString Category);
+			void SortChildren (HTREEITEM hParent);
+			void RemoveCatSpaces(HTREEITEM hParent);
+		public:
+	
 			UINT nFlags;
 			CPoint point;
 			bool bEditing;
-
-			afx_msg void BrowserKeyDown(NMHDR *pNMHDR, LRESULT *pResult);		
-			HTREEITEM MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos = TVI_SORT, bool bAllowReplace = false);
-			void SetPluginCategories(HTREEITEM hItem, CString Category);
-
 			HTREEITEM hCategory;
-
-			afx_msg void OnBnClickedCancel();
-			static int CALLBACK CNewMachine::NodeCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 };
 
 
