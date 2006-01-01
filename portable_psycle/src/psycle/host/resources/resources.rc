@@ -42,7 +42,6 @@ BEGIN
                                                     ID_DELETEFOLDER_MOVEUNCAT
 
         END
-        MENUITEM "&Move to Top Level (Root)",   ID__MOVETOTOPLEVEL
         MENUITEM SEPARATOR
         MENUITEM "Ex&pand All Categories",      ID__EXPANDALLFOLDERS
         MENUITEM "C&ollapse All Categories",    ID__COLLAPSEALLFOLDERS
@@ -2411,6 +2410,14 @@ BEGIN
         RIGHTMARGIN, 257
         TOPMARGIN, 7
         BOTTOMMARGIN, 50
+    END
+
+    "IDD_INST_EDITOR", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 464
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 382
     END
 
     IDD_MIDI_INPUT, DIALOG

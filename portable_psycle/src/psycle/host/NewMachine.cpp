@@ -104,7 +104,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_MOUSEMOVE()
 			ON_WM_CANCELMODE()
 			ON_WM_LBUTTONUP()
-			ON_NOTIFY(TVN_DELETEITEM, IDC_BROWSER, OnDeleteItem)
 			ON_WM_CONTEXTMENU()
 			ON_COMMAND(ID__ADDSUBFOLDER, NMPOPUP_AddSubFolder)
 			ON_COMMAND(ID__ADDFOLDERONSAMELEVEL, NMPOPUP_AddFolderSameLevel)
@@ -116,9 +115,9 @@ NAMESPACE__BEGIN(psycle)
 			ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_BROWSER, BeginLabelEdit)
 			ON_NOTIFY(TVN_ENDLABELEDIT, IDC_BROWSER, EndLabelEdit)
 			ON_NOTIFY(TVN_KEYDOWN, IDC_BROWSER, BrowserKeyDown)
-			ON_COMMAND(ID__MOVETOTOPLEVEL, NMPOPUP_MoveToTopLevel)
-			//}}AFX_MSG_MAP
 			ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
+			//}}AFX_MSG_MAP
+			
 		END_MESSAGE_MAP()
 
 		BOOL CNewMachine::OnInitDialog() 
@@ -302,7 +301,7 @@ NAMESPACE__BEGIN(psycle)
 			
 			//sort into custom folders
 			case 2:
-				hNodes[0] = m_browser.InsertItem("Uncategorised",8,9, TVI_ROOT, TVI_LAST);
+				hNodes[0] = m_browser.InsertItem("UNCATEGORISED",8,9, TVI_ROOT, TVI_LAST);
 				m_browser.SetItemData (hNodes[0], IS_FOLDER);
 				numCustCategories = 1;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
@@ -496,7 +495,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				//MessageBox (_pPlugsInfo[i]->category.c_str(),"AS");
+				MessageBox (_pPlugsInfo[i]->category.c_str(),"AS");
 				std::string str = _pPlugsInfo[i]->dllname;
 				std::string::size_type pos = str.rfind('\\');
 				if(pos != std::string::npos)
@@ -543,7 +542,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			OnOK();	
+			OnOK();			
 			*pResult = 0;
 		}
 
@@ -1242,31 +1241,49 @@ NAMESPACE__BEGIN(psycle)
 			 // The pointer to my tree control.
 			CTreeCtrl * myTree = &m_browser;
 			TVSORTCB tvs;
-			
 			// Sort the tree control's items using callback procedure.
 			tvs.hParent = TVI_ROOT;
 			tvs.lpfnCompare = NodeCompare;
 			tvs.lParam = (LPARAM) myTree;
 			
-			m_browser.SortChildrenCB(&tvs);
+			myTree->SortChildrenCB(&tvs);
 
 		}
 
-		void CNewMachine::OnOK() 
+		int CALLBACK CNewMachine::NodeCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		{
-			if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
-			{
-				
-				if (bCategoriesChanged)
-				{
-					SetPluginCategories(NULL, NULL);
-					bCategoriesChanged = false;
-				}
+			// lParamSort contains a pointer to the tree control.
+			// The lParam of an item is just its handle, 
+			// as specified with SetItemData
+			CTreeCtrl* pmyTreeCtrl = (CTreeCtrl*) lParamSort;
+			CString    strItem1 = pmyTreeCtrl->GetItemText((HTREEITEM) lParam1);
+			CString    strItem2 = pmyTreeCtrl->GetItemText((HTREEITEM) lParam2);
+			printf ("asdfasdf");
+			//::MessageBox (, strItem1 + "   " + strItem2,"Asdf", 0);
+			return strcmp(strItem2, strItem1);
+		}
 
-				if ((bAllowChanged) || (bCategoriesChanged))
-					SaveCacheFile();
-				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
-				CDialog::OnOK();
+		void CNewMachine::OnOK() 
+		{	
+			if (bEditing)
+			{
+				// ADD CODE TO ALLOW USER TO PRESS <ENTER> TO FINISH EDITING CATEGORY NAME.
+			}
+			else
+			{
+				if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
+				{
+					
+					if (bCategoriesChanged)
+					{	
+						SetPluginCategories(NULL, NULL);
+					}
+	
+					if ((bAllowChanged) || (bCategoriesChanged))
+						SaveCacheFile();
+					if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
+					CDialog::OnOK();
+				}
 			}
 		}
 
@@ -1299,12 +1316,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 			return false;
 		}
-/*		void CNewMachine::BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
-	{
-		LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
-		// TODO: Add your control notification handler code here
-		*pResult = 0;
-	}*/
 
 		void CNewMachine::BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 		{
@@ -1318,7 +1329,6 @@ NAMESPACE__BEGIN(psycle)
 			//make sure item is a folder that is allowed to be edited
 			if ((m_browser.GetItemData (hSelectedItem) >= IS_FOLDER) && (m_browser.GetSelectedItem () != hNodes[0]))
 			{			
-				//TO DO:  add flag to make sure that _pluginfo etc is updated, plugin cache updated etc.
 				bEditing = true;
 
 				*pResult = 0;
@@ -1341,6 +1351,7 @@ NAMESPACE__BEGIN(psycle)
 				CString tempstring;
 				CString currenttext = m_browser.GetItemText (hSelectedItem);
 				pEdit->GetWindowText(tempstring);
+				tempstring = tempstring.MakeUpper();
 				*pResult = false;
 				m_browser.SetItemText (hSelectedItem, tempstring);
 
@@ -1354,10 +1365,9 @@ NAMESPACE__BEGIN(psycle)
 
 					while ((hChild != NULL) && (intNameCount < 3))
 					{
-						if (tempstring == m_browser.GetItemText (hChild))
+						if (tempstring == (m_browser.GetItemText (hChild)).MakeUpper())
 							intNameCount++;
 						hChild = m_browser.GetNextSiblingItem (hChild);
-						
 					}
 					
 					if (intNameCount >= 2)
@@ -1379,6 +1389,8 @@ NAMESPACE__BEGIN(psycle)
 							m_browser.SetItemText (hSelectedItem, tempstring);
 							bEditing = false;
 							bCategoriesChanged = true;
+							//sort items
+							m_browser.SortChildren (hParent);
 						}
 						else
 						{
@@ -1406,6 +1418,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::BrowserKeyDown(NMHDR *pNMHDR, LRESULT *pResult)
 		{
+			MessageBox ("Asdfasdf","asdf");
 			LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
 			if (bEditing)
 			{
@@ -1688,7 +1701,7 @@ NAMESPACE__BEGIN(psycle)
   			
 			if (hItemDrop != NULL)
 			{
-				if ((hItemDrop != hNodes[0]) && (m_browser.GetParentItem (hItemDrop) != hNodes[0]))
+				if (!((m_browser.GetItemData(m_hItemDrag) == IS_FOLDER) && ((hItemDrop == hNodes[0]) || (m_browser.GetParentItem (hItemDrop) == hNodes[0]))))
 				{
 					MoveTreeItem (m_hItemDrag, hItemDrop == NULL ? TVI_ROOT : hItemDrop, TVI_SORT, false);
 				
@@ -1716,17 +1729,6 @@ NAMESPACE__BEGIN(psycle)
     			m_browser.SelectDropTarget(NULL);
   			}
 		}
-
-		void CNewMachine::OnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult)
-		{
-			/*LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
-			*pResult = 0;
-
-			// delete the data
-			delete (CString*)lpnmtv->itemOld.lParam;
-			lpnmtv->itemOld.lParam = 0;*/
-		}
-
 
 		void CNewMachine::OnContextMenu(CWnd* pWnd, CPoint point)
 		{
@@ -1759,7 +1761,6 @@ NAMESPACE__BEGIN(psycle)
 						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
 						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
 						popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
-						popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
 					}
 
 					//check if selected item is a root folder
@@ -1780,9 +1781,6 @@ NAMESPACE__BEGIN(psycle)
 					popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
 				}
            		// TEMPORARY, UNTIL FUNCTIONS ARE COMPLETED!!!!
-				//popupmenu.EnableMenuItem (ID__ADDFOLDERONSAMELEVEL, MF_GRAYED);
-				//popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
-				//popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
 				popupmenu.EnableMenuItem (ID__EXPANDALLFOLDERS, MF_GRAYED);
 				popupmenu.EnableMenuItem (ID__COLLAPSEFOLDER, MF_GRAYED);
 				CMenu* pPopup = popupmenu.GetSubMenu(0);
@@ -1808,8 +1806,7 @@ NAMESPACE__BEGIN(psycle)
 			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem ());
 			numCustCategories++;
 			bEditing = true;
-
-		}
+		} 
 
 
 
@@ -1866,12 +1863,6 @@ NAMESPACE__BEGIN(psycle)
 			//delete category
 			m_browser.DeleteItem (hSelectedItem);
 		}
-
-		void CNewMachine::NMPOPUP_MoveToTopLevel()
-		{
-			MoveTreeItem (m_browser.GetSelectedItem(), TVI_ROOT, TVI_SORT);
-			//SortList ();
-		}
 		
 		void CNewMachine::NMPOPUP_ExpandAll()
 		{
@@ -1888,24 +1879,15 @@ NAMESPACE__BEGIN(psycle)
 			if (bCategoriesChanged)
 			{
 				SetPluginCategories(NULL, NULL);
-				bCategoriesChanged = false;
 			}
 			if ((bAllowChanged) || (bCategoriesChanged))
+			{
 				SaveCacheFile();
+				MessageBox ("saved","asdf");
+			}
 			OnCancel();
 		}
 
-		int CALLBACK CNewMachine::NodeCompare(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
-		{
-			// lParamSort contains a pointer to the tree control.
-			// The lParam of an item is just its handle, 
-			// as specified with SetItemData
-			CTreeCtrl* pmyTreeCtrl = (CTreeCtrl*) lParamSort;
-			CString    strItem1 = pmyTreeCtrl->GetItemText((HTREEITEM) lParam1);
-			CString    strItem2 = pmyTreeCtrl->GetItemText((HTREEITEM) lParam2);
-			//::MessageBox (, strItem1 + "   " + strItem2,"Asdf", 0);
-			return strcmp(strItem2, strItem1);
-		}
 	NAMESPACE__END
 NAMESPACE__END
 
