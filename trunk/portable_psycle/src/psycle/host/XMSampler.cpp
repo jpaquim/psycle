@@ -647,6 +647,7 @@ namespace psycle
 			m_WaveDataController.Playing(true);
 			IsPlaying(true);
 		}
+
 		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol)
 		{
 			if ( playvol != -1)
@@ -1925,9 +1926,9 @@ panbrello, and S44 will be a slower panbrello.
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-				if ((pData->_cmd == 0 && pData->_volume == 255) || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != 255 )return; // Return in everything but commands!
 	#else
-				if (pData->_cmd == 0 || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_volume == 255 ) || pData->_note != 255 )return; // Return in everything but commands!
 	#endif
 #endif
 			}
@@ -1950,11 +1951,10 @@ panbrello, and S44 will be a slower panbrello.
 			Voice* currentVoice = NULL;
 			Voice* newVoice = NULL;
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
-
+			if(bInstrumentSet)	{	thisChannel.InstrumentNo(pData->_inst); }
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
 			currentVoice = GetCurrentVoice(channelNum);
-//			currentVoice = thisChannel.ForegroundVoice();
 			if ( currentVoice )
 			{
 				// Is a new note coming? Then apply the NNA to the playing one.
@@ -2001,10 +2001,18 @@ panbrello, and S44 will be a slower panbrello.
 				} else if(pData->_note == 120 ){
 					currentVoice->NoteOff();
 				}
-				else if ( bPorta2Note && currentVoice->IsStopping())
+				else 
 				{
-					//bNoteOn = true;
-					newVoice = currentVoice;
+					if (bInstrumentSet)
+					{
+						currentVoice->ResetVolAndPan(-1);
+					}
+					if ( bPorta2Note ) 
+					{
+						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
+						//		  and the position reset to 0.
+						thisChannel.Slide2NoteDestNote(pData->_note);
+					}
 				}
 			}
 			else if ( bPorta2Note )
@@ -2023,16 +2031,13 @@ panbrello, and S44 will be a slower panbrello.
 				}
 				else
 				{
-					if ( !bPorta2Note ) newVoice = GetFreeVoice();
+					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{
-						if(bInstrumentSet){
-							thisChannel.InstrumentNo(pData->_inst);
-						} else if(thisChannel.InstrumentNo() == 255)
+						if(thisChannel.InstrumentNo() == 255)
 						{	//this is a note to an undefined instrument. we can't continue.
 							return;
 						}
-						thisChannel.EffectInit();
 
 						XMInstrument & _inst = m_Instruments[thisChannel.InstrumentNo()];
 						int _layer = _inst.NoteToSample(pData->_note).second;
@@ -2046,10 +2051,10 @@ panbrello, and S44 will be a slower panbrello.
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-							if ( pData->_volume<0x40) newVoice->NoteOn(pData->_note,pData->_volume<<1);
-							else newVoice->NoteOn(pData->_note);
+							if ( pData->_volume<0x40) newVoice->NoteOn(pData->_note,pData->_volume<<1,bInstrumentSet);
+							else newVoice->NoteOn(pData->_note,-1,bInstrumentSet);
 	#else
-							newVoice->NoteOn(pData->_note);
+							newVoice->NoteOn(pData->_note,-1,bInstrumentSet);
 	#endif
 #endif
 							thisChannel.Note(pData->_note);
@@ -2080,22 +2085,8 @@ panbrello, and S44 will be a slower panbrello.
 						if ( pData->_cmd == 0 ) return;
 					}
 				}
-			} else {
-				newVoice = currentVoice;
-				if ( bPorta2Note ) 
-				{
-					//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
-					//		  and the position reset to 0.
-					thisChannel.Slide2NoteDestNote(pData->_note);
-				}
-				if (bInstrumentSet && currentVoice)
-				{
-					currentVoice->ResetVolAndPan(-1);
-					currentVoice->rWave().Playing(true);
-					currentVoice->IsPlaying(true);
-				}
 			}
-
+			if ( newVoice == NULL ) newVoice = currentVoice;
 			// Effect Command
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.

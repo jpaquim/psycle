@@ -81,7 +81,7 @@ namespace psycle
 			strcat(s->Comment,szName.c_str());
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-			s->InsertConnection(0,MASTER_INDEX,(itFileH.mVol&0x7F)/128.0f);
+			s->InsertConnection(0,MASTER_INDEX,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
