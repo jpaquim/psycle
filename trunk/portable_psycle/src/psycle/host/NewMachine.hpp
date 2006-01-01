@@ -138,7 +138,6 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnCancelMode();
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			afx_msg void OnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -166,7 +165,6 @@ NAMESPACE__BEGIN(psycle)
 
 			afx_msg void BrowserKeyDown(NMHDR *pNMHDR, LRESULT *pResult);		
 			HTREEITEM MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos = TVI_SORT, bool bAllowReplace = false);
-			afx_msg void NMPOPUP_MoveToTopLevel();
 			void SetPluginCategories(HTREEITEM hItem, CString Category);
 
 			HTREEITEM hCategory;
