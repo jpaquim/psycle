@@ -96,6 +96,7 @@
 #define IDD_XMSAMPLERUIINST             217
 #define IDD_XMSAMPLERUISAMPLE           218
 #define IDD_XMSAMPLER_MIXER             222
+#define IDD_VSTRACK1                    223
 #define IDB_SAMPULSE                    226
 #define IDR_MENU_ENV_EDIT               230
 #define IDB_KEYS_NORMAL                 231
@@ -1070,7 +1071,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        239
-#define _APS_NEXT_COMMAND_VALUE         32997
+#define _APS_NEXT_COMMAND_VALUE         32998
 #define _APS_NEXT_CONTROL_VALUE         1727
 #define _APS_NEXT_SYMED_VALUE           60
 #endif

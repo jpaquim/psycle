@@ -112,10 +112,13 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_DELETEFOLDER_MOVEUNCAT, NMPOPUP_DeleteMoveUncat)
 			ON_COMMAND(ID__EXPANDALLFOLDERS, NMPOPUP_ExpandAll)
 			ON_COMMAND(ID__COLLAPSEALLFOLDERS, NMPOPUP_CollapseAll)
+			ON_COMMAND(ID__MOVETOTOPLEVEL, NMPOPUP_MoveToTopLevel)
 			ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_BROWSER, BeginLabelEdit)
 			ON_NOTIFY(TVN_ENDLABELEDIT, IDC_BROWSER, EndLabelEdit)
 			ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
+
 			//}}AFX_MSG_MAP
+			
 			
 		END_MESSAGE_MAP()
 
@@ -299,7 +302,7 @@ NAMESPACE__BEGIN(psycle)
 			
 			//sort into custom folders
 			case 2:
-				hNodes[0] = m_browser.InsertItem("Uncategorised",8,9, TVI_ROOT, TVI_LAST);
+				hNodes[0] = m_browser.InsertItem(" Uncategorised",8,9, TVI_ROOT, TVI_LAST);
 				m_browser.SetItemData (hNodes[0], IS_FOLDER);
 				numCustCategories = 1;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
@@ -426,7 +429,7 @@ NAMESPACE__BEGIN(psycle)
 				hChild = m_browser.GetChildItem (hParent);
 			while (hChild != NULL)
 			{
-				if ((hChild != hNodes[0]) && (m_browser.GetItemData (hChild) == IS_FOLDER))
+				if (m_browser.GetItemData (hChild) == IS_FOLDER)
 				{
 					CString tempstring = m_browser.GetItemText (hChild);
 					tempstring.Delete (0,1);
@@ -1759,7 +1762,7 @@ NAMESPACE__BEGIN(psycle)
 				VERIFY(popupmenu.LoadMenu(IDR_NEWMACHINESPOPUP));
 		
 				// TO DO:  Delete/Add menu items depending on selection.
-				if (m_browser.GetItemData(hItem) >= IS_FOLDER)
+				if (m_browser.GetItemData(hItem) == IS_FOLDER)
 				{
 					//Check if the "Uncategorised" folder has been selected
 					if (hItem == hNodes[0])
@@ -1769,6 +1772,7 @@ NAMESPACE__BEGIN(psycle)
 						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
 						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
 						popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
+						popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
 					}
 
 					//check if selected item is a root folder
@@ -1777,6 +1781,8 @@ NAMESPACE__BEGIN(psycle)
 						//prevent plugins from being moved to the root
 						//THIS SHOULD BE FIXED SO IT CAN WORK
 						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
+						popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+						
 					}
 				}
 				else
@@ -1787,10 +1793,11 @@ NAMESPACE__BEGIN(psycle)
 					popupmenu.EnableMenuItem (ID__COLLAPSEALLFOLDERS, MF_GRAYED);
 					popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
 					popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
+					popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
 				}
            		// TEMPORARY, UNTIL FUNCTIONS ARE COMPLETED!!!!
 				popupmenu.EnableMenuItem (ID__EXPANDALLFOLDERS, MF_GRAYED);
-				popupmenu.EnableMenuItem (ID__COLLAPSEFOLDER, MF_GRAYED);
+				popupmenu.EnableMenuItem (ID__COLLAPSEALLFOLDERS, MF_GRAYED);
 				CMenu* pPopup = popupmenu.GetSubMenu(0);
 				ASSERT(pPopup != NULL);
 		
@@ -1847,8 +1854,22 @@ NAMESPACE__BEGIN(psycle)
 			while (hChild != NULL)
 			{
 				//Add code to check if item already exists.
-//				MoveTreeItem (m_browser, hChild, hParent, 0,0, TVI_SORT);
+				/*if (m_browser.GetItemData (hChild) == IS_FOLDER)
+				{
+					//check if this folder exists in parent folder
+					HTREEITEM hChild2 = m_browser.GetChildItem (hParent);
+					CString CurCat = m_browser.GetItemText (hChild);
+                    bool bFound = false;
+					while ((hChild2 != NULL) && (!bFound))
+					{
+						if ((m_browser.GetItemData (hChild2) == IS_FOLDER) && (m_browser.GetItemData (hChild2) == CurCat))
+							bFound = true;
+						hChild2 = m_browser.GetNextSiblingItem (hChild2)
+					}
+				}*/
+				MoveTreeItem (hChild, hParent,TVI_SORT, false);
 				hChild = m_browser.GetChildItem (hSelectedItem);
+
 			}
 
 
@@ -1856,20 +1877,44 @@ NAMESPACE__BEGIN(psycle)
 
 			//delete category
 			m_browser.DeleteItem (hSelectedItem);
+			SortChildren(hParent);
 		}
 
+		void CNewMachine::NMPOPUP_MoveToTopLevel()
+		{
+			HTREEITEM hItem = m_browser.GetSelectedItem();
+			if (m_browser.GetItemData (hItem) == IS_FOLDER)
+				MoveTreeItem (hItem, TVI_ROOT, TVI_SORT, 0);
+		}
 
 		void CNewMachine::NMPOPUP_DeleteMoveUncat()
 		{
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem();
 			//add code to move items contained in the subfolder to the "Uncategorised" folder.
-			bool bStillMoving = true;
-			//move all subfolders to "Uncategorised", then remove the folders and move all the plugins.
-			
-			//DeleteMoveUncat(m_browser, hSelectedItem, hNodes[0], false, 0, TVI_LAST);
-
+			DeleteMoveUncat (hSelectedItem);
 			//delete category
 			m_browser.DeleteItem (hSelectedItem);
+			SortChildren(hNodes[0]);
+		}
+
+		void CNewMachine::DeleteMoveUncat (HTREEITEM hParent)
+		{
+			HTREEITEM hChild = m_browser.GetChildItem (hParent);
+			while (hChild != NULL)
+			{
+				if (m_browser.GetItemData (hChild) == IS_FOLDER)
+				{
+					//recurse into folder
+					DeleteMoveUncat (hChild);
+				}
+				else
+				{
+					//hChild is a plugin, move it
+					MoveTreeItem (hChild, hNodes[0], TVI_SORT, false);
+				}
+				hChild = m_browser.GetNextSiblingItem (hChild);
+			}
+			m_browser.DeleteItem (hParent);
 		}
 		
 		void CNewMachine::NMPOPUP_ExpandAll()
@@ -1897,8 +1942,3 @@ NAMESPACE__BEGIN(psycle)
 
 	NAMESPACE__END
 NAMESPACE__END
-
-
-
-
-

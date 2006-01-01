@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -33,6 +33,7 @@ BEGIN
         MENUITEM "Add Category on Same &Level", ID__ADDFOLDERONSAMELEVEL
         MENUITEM "&Add Sub Category",           ID__ADDSUBFOLDER
         MENUITEM "Rena&me Category",            ID__RENAMEFOLDER
+        MENUITEM "Mo&ve to Top Level",          ID__MOVETOTOPLEVEL
         POPUP "&Delete Category"
         BEGIN
             MENUITEM "And Move Items to Parent Folder", 
@@ -2196,6 +2197,22 @@ BEGIN
     GROUPBOX        "Master Vol.",IDC_STATIC,466,38,51,217
 END
 
+IDD_VSTRACK1 DIALOGEX 0, 0, 142, 203
+STYLE DS_SETFONT | WS_CHILD
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,5,3,11,
+                    16
+    COMBOBOX        IDC_COMBO1,23,4,115,136,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | 
+                    WS_TABSTOP,3,19,20,171
+    LISTBOX         IDC_LIST1,23,23,115,171,LBS_USETABSTOPS | 
+                    LBS_WANTKEYBOARDINPUT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_TEXT1,7,192,131,11,SS_CENTERIMAGE | NOT WS_GROUP,
+                    WS_EX_STATICEDGE
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2412,14 +2429,6 @@ BEGIN
         BOTTOMMARGIN, 50
     END
 
-    "IDD_INST_EDITOR", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 464
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 382
-    END
-
     IDD_MIDI_INPUT, DIALOG
     BEGIN
         RIGHTMARGIN, 322
@@ -2512,6 +2521,13 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 517
         BOTTOMMARGIN, 297
+    END
+
+    IDD_VSTRACK1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 16
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2938,7 +2954,7 @@ BEGIN
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
