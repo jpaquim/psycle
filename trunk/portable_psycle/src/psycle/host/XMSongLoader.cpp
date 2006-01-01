@@ -464,6 +464,18 @@ namespace host{
 							break;
 						case XMCMD::GLOBAL_VOLUME_SLIDE:
 							e._cmd = XMSampler::CMD::GLOBAL_VOLUME_SLIDE;
+							//Double the parameter, since FT2's range is 0-0x40.
+							if ( (param & 0x0F) == 0 || (param & 0x0F) == 0xF){ // Slide up
+								e._parameter = (param & 0xF0)>>4;
+								e._parameter = e._parameter>7?15:e._parameter*2;
+								e._parameter<<=4;
+								e._parameter |= (param & 0x0F);
+							}
+							else if ( (param & 0xF0) == 0 || (param & 0xF0) == 0xF0)  { // Slide down
+								e._parameter = (param & 0x0F);
+								e._parameter = e._parameter>7?15:e._parameter*2;
+								e._parameter |= (param & 0xF0);
+							}
 							break;
 						case XMCMD::NOTE_OFF:
 							e._cmd = XMSampler::CMD::VOLUME;

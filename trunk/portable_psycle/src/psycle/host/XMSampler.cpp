@@ -1487,13 +1487,13 @@ panbrello, and S44 will be a slower panbrello.
 			if ( (speed & 0x0F) == 0 ){ // Slide up
 				speed = (speed & 0xF0)>>4;
 				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
-				m_GlobalVolSlideSpeed = speed/128.0f;
+				m_GlobalVolSlideSpeed = speed;
 				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
 			else if ( (speed & 0xF0) == 0 )  { // Slide down
 				speed = (speed & 0x0F);
 				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
-				m_GlobalVolSlideSpeed = -speed/128.0f;
+				m_GlobalVolSlideSpeed = -speed;
 				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
 			else if ( (speed & 0x0F) == 0xF ) { // FineSlide up
