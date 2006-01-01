@@ -131,6 +131,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void NMPOPUP_DeleteMoveUncat();
 			afx_msg void NMPOPUP_ExpandAll();
 			afx_msg void NMPOPUP_CollapseAll();
+			afx_msg void NMPOPUP_MoveToTopLevel();
 			afx_msg void BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
 			afx_msg void EndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
 			afx_msg void AlterItemCaption(NMHDR *pNMHDR, LRESULT *pResult);
@@ -139,6 +140,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnCancelMode();
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 			afx_msg void OnBnClickedCancel();
+
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -156,13 +158,15 @@ NAMESPACE__BEGIN(psycle)
 			void SetPluginCategories(HTREEITEM hItem, CString Category);
 			void SortChildren (HTREEITEM hParent);
 			void RemoveCatSpaces(HTREEITEM hParent);
+			void DeleteMoveUncat (HTREEITEM hParent);
 		public:
 	
 			UINT nFlags;
 			CPoint point;
 			bool bEditing;
 			HTREEITEM hCategory;
-};
+			
+		};
 
 
 
