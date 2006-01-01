@@ -195,6 +195,7 @@ namespace psycle
 						{
 							_linejump = pSong->patternLines[_patternjump];
 						} else { _linejump= pEntry->_parameter; }
+						break;
 					case PatternCmd::SET_VOLUME:
 						if(pEntry->_mach == 255)
 						{
@@ -217,7 +218,6 @@ namespace psycle
 						}
 
 						break;
-
 					}
 				}
 				// Check For Tweak or MIDI CC
