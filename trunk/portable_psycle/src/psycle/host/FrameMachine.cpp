@@ -55,10 +55,6 @@ NAMESPACE__BEGIN(psycle)
 			finetweak=false;
 			ultrafinetweak=false;
 			
-			if (Global::pConfig->bBmpDial)
-				wndView->LoadMachineDial();
-			else
-				wndView->machinedial.LoadBitmap(IDB_KNOB);
 			b_font.CreatePointFont(80,"Tahoma");
 			b_font_bold.CreatePointFont(80,"Tahoma Bold");
 

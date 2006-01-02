@@ -44,7 +44,6 @@ NAMESPACE__BEGIN(psycle)
 			int parspercol;
 		// Operations
 		public:
-			void LoadMachineDial();
 			void SelectMachine(Machine* pMachine);
 			void Generate();
 			CChildView *wndView;

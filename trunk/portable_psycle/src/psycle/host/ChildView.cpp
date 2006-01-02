@@ -2135,6 +2135,7 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::LoadMachineSkin()
 		{
 			std::string szOld;
+			LoadMachineDial();
 			if (!Global::pConfig->machine_skin.empty())
 			{
 				szOld = Global::pConfig->machine_skin;
@@ -3484,6 +3485,8 @@ NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
+			else 
+				machinedial.LoadBitmap(IDB_KNOB);
 		}
 
 
