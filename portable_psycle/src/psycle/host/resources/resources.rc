@@ -43,9 +43,6 @@ BEGIN
                                                     ID_DELETEFOLDER_MOVEUNCAT
 
         END
-        MENUITEM SEPARATOR
-        MENUITEM "Ex&pand All Categories",      ID__EXPANDALLFOLDERS
-        MENUITEM "C&ollapse All Categories",    ID__COLLAPSEALLFOLDERS
     END
 END
 
@@ -1216,27 +1213,31 @@ BEGIN
                     TVS_SHOWSELALWAYS | TVS_TRACKSELECT | WS_BORDER | 
                     WS_TABSTOP,7,7,256,288
     GROUPBOX        "Machine Properties",IDC_STATIC,272,47,196,112
-    LTEXT           "Name:",IDC_STATIC,281,67,20,8
-    LTEXT           "",IDC_NAMELABEL,328,63,125,12,SS_SUNKEN
-    LTEXT           "Description:",IDC_STATIC,281,81,41,8
-    LTEXT           "",IDC_DESCLABEL,328,76,125,19,SS_SUNKEN
-    LTEXT           "Filename:",IDC_STATIC,281,102,32,8
-    LTEXT           "",IDC_DLLNAMELABEL,328,95,125,21,SS_SUNKEN
-    LTEXT           "API Version:",IDC_STATIC,281,118,40,8
-    LTEXT           "",IDC_VERSIONLABEL,328,116,125,12,SS_SUNKEN
+    LTEXT           "",IDC_NAMELABEL,328,61,125,11,SS_SUNKEN
+    CONTROL         "Description:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,281,82,41,8
+    LTEXT           "",IDC_DESCLABEL,328,77,125,19,SS_SUNKEN
+    CONTROL         "Filename:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,281,103,32,8
+    LTEXT           "",IDC_DLLNAMELABEL,328,99,125,18,SS_SUNKEN
+    CONTROL         "API Version:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,281,121,40,8
+    LTEXT           "",IDC_VERSIONLABEL,328,121,125,11,SS_SUNKEN
     PUSHBUTTON      "Rescan all Plugins and Reset all Warnings",IDC_REFRESH,
                     289,171,152,16
     DEFPUSHBUTTON   "&OK",IDOK,278,279,82,16
     PUSHBUTTON      "&Cancel",IDCANCEL,373,279,86,16
     CONTROL         "Popup Warning if this plug-in tries to load",
                     IDC_CHECK_ALLOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    292,133,154,18
+                    292,137,154,18
     COMBOBOX        IDC_LISTSTYLE,356,7,101,77,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     COMBOBOX        IDC_NAMESTYLE,356,24,101,52,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Sort Machines by:",IDC_STATIC,282,11,66,8
     LTEXT           "Display Machines by:",IDC_STATIC,282,28,69,8
+    CONTROL         "Name:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    281,62,20,8
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 323
