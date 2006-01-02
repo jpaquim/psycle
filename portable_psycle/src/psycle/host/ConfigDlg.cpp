@@ -260,13 +260,10 @@ NAMESPACE__BEGIN(psycle)
 				if (_pConfig->bBmpDial)
 				{
 					_pConfig->szBmpDialFilename = _skinDlg.szBmpDialFilename;
-					if (_pConfig->Initialized() ) 
-					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
-					}
 				}
 				if (_pConfig->Initialized() ) 
 				{
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
 				}
 
