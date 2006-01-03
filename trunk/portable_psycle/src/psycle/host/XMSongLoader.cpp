@@ -47,6 +47,8 @@ namespace host{
 			highOffset[i]=0;
 			memPortaUp[i]=0;
 			memPortaDown[i]=0;
+			memPortaNote[i]=0;
+			memPortaPos[i]=0;
 		}
 		for (int i=0; i<256; i++)
 		{
@@ -335,22 +337,44 @@ namespace host{
 							break;
 						case XMCMD::PORTAUP:
 							e._cmd = XMSampler::CMD::PORTAMENTO_UP;
-							if ( e._parameter == 0) { e._parameter = memPortaUp[col]; }
+							if ( e._parameter == 0) {
+								if ( memPortaPos[col] != 1 )
+								{
+									e._parameter = memPortaUp[col];
+								}
+							}
 							else {
 								if ( e._parameter > 0xDF ) { e._parameter = 0xDF; }
 								memPortaUp[col] = e._parameter;
 							}
+							memPortaPos[col] = 1;
 							break;
 						case XMCMD::PORTADOWN:
 							e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
-							if ( e._parameter == 0) { e._parameter = memPortaDown[col]; }
+							if ( e._parameter == 0) {
+								if ( memPortaPos[col] != 2 )
+								{
+									e._parameter = memPortaDown[col];
+								}
+							}
 							else {
 								if ( e._parameter > 0xDF ) { e._parameter = 0xDF; }
 								memPortaDown[col] = e._parameter;
 							}
+							memPortaPos[col] = 2;
 							break;
 						case XMCMD::PORTA2NOTE:
 							e._cmd = XMSampler::CMD::PORTA2NOTE;
+							if ( e._parameter == 0) {
+								if ( memPortaPos[col] != 3 )
+								{
+									e._parameter = memPortaNote[col];
+								}
+							}
+							else {
+								memPortaNote[col] = e._parameter;
+							}
+							memPortaPos[col] = 3;
 							break;
 						case XMCMD::VIBRATO:
 							e._cmd = XMSampler::CMD::VIBRATO;
@@ -799,6 +823,7 @@ namespace host{
 		// cache sample data
 		Seek(iStart);
 		char * smpbuf = new char[smpLen[iSampleIdx]];
+		memset(smpbuf,0,smpLen[iSampleIdx]);
 		Read(smpbuf,smpLen[iSampleIdx]);
 
 		int sampleCnt = smpLen[iSampleIdx];
