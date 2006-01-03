@@ -586,7 +586,6 @@ namespace psycle
 				}
 
 				if (!m_WaveDataController.Playing()) {
-					if ( rChannel().ForegroundVoice() == this) rChannel().ForegroundVoice(NULL);
 					IsPlaying(false); return; 
 				}
 
@@ -625,7 +624,7 @@ namespace psycle
 			{
 			}
 
-			if ( reset ) ResetVolAndPan(playvol);
+			ResetVolAndPan(playvol,reset);
 
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOn();
@@ -648,28 +647,36 @@ namespace psycle
 			IsPlaying(true);
 		}
 
-		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol)
+		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol,bool reset)
 		{
-			if ( playvol != -1)
+			if ( reset)
 			{
-				Volume(playvol);
-			} else { 
-				Volume(rWave().Wave().WaveVolume());
+				if ( playvol != -1)
+				{
+					Volume(playvol);
+				} else { 
+					Volume(rWave().Wave().WaveVolume());
+				}
+				// Impulse Tracker panning had the following pan controls: All these are bypassed if
+				// a panning command is explicitely put in a channel.
+				// Note : m_pChannel->PanFactor() returns the panFactor of the last panning command (if any) or
+				// in its absence, the pan position of the channel.
+				if ( rWave().Wave().PanEnabled() ) m_PanFactor = rWave().Wave().PanFactor();
+				else if ( rInstrument().PanEnabled() ) m_PanFactor = rInstrument().Pan();
+				else m_PanFactor = m_pChannel->PanFactor();
+
+				//\todo : NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
+				m_PanFactor += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
+				m_PanFactor += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
+
+				if ( m_PanFactor > 1.0f ) m_PanFactor = 1.0f;
+				else if ( m_PanFactor < 0.0f ) m_PanFactor = 0.0f;
 			}
-			// Impulse Tracker panning had the following pan controls: All these are bypassed if
-			// a panning command is explicitely put in a channel.
-			// Note : m_pChannel->PanFactor() returns the panFactor of the last panning command (if any) or
-			// in its absence, the pan position of the channel.
-			if ( rWave().Wave().PanEnabled() ) m_PanFactor = rWave().Wave().PanFactor();
-			else if ( rInstrument().PanEnabled() ) m_PanFactor = rInstrument().Pan();
-			else m_PanFactor = m_pChannel->PanFactor();
-
-			//\todo : NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
-			m_PanFactor += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
-			m_PanFactor += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
-
-			if ( m_PanFactor > 1.0f ) m_PanFactor = 1.0f;
-			else if ( m_PanFactor < 0.0f ) m_PanFactor = 0.0f;
+			else
+			{
+				Volume(rChannel().LastVoiceVolume());
+				m_PanFactor = rChannel().LastVoicePanFactor();
+			}
 
 			m_PanRange = 1.0f -(fabs(0.5-m_PanFactor)*2);
 
@@ -749,7 +756,6 @@ namespace psycle
 			if ( RealVolume() == 0.0f ) IsPlaying(false);
 			m_VolumeFadeAmount -= m_VolumeFadeSpeed;
 			if( m_VolumeFadeAmount <= 0){
-				if ( rChannel().ForegroundVoice() == this) rChannel().ForegroundVoice(NULL);
 				IsPlaying(false);
 			}
 		}
@@ -1003,9 +1009,11 @@ panbrello, and S44 will be a slower panbrello.
 
 			m_Volume = 1.0f;
 			m_ChannelDefVolume = 64;//
+			m_LastVoiceVolume = 0;
 
 			m_PanFactor = 0.5f;
 			m_DefaultPanFactor = 32;
+			m_LastVoicePanFactor = 0.0f;
 			m_bSurround = false;
 
 			m_bGrissando = false;
@@ -2047,6 +2055,11 @@ panbrello, and S44 will be a slower panbrello.
 							//\todo: if the instrument is not set, some initializations do not take effect.
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
+							if (currentVoice)
+							{
+								thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
+								thisChannel.LastVoiceVolume(currentVoice->Volume());
+							}
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else

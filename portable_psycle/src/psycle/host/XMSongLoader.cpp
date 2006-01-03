@@ -1227,8 +1227,8 @@ namespace host{
 							e._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
 							break;
 						case XMCMD_E::E_PATTERN_DELAY:
-							e._cmd = PatternCmd::PATTERN_DELAY;
-							e._parameter = param & 0xf;
+							e._cmd = PatternCmd::EXTENDED;
+							e._parameter =  PatternCmd::PATTERN_DELAY | (param & 0xf);
 							break;
 						case XMCMD_E::E_SET_MIDI_MACRO:
 							e._cmd = XMSampler::CMD::EXTENDED;

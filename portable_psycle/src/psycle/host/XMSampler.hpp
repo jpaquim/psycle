@@ -466,7 +466,7 @@ XMSampler::Channel::PerformFX().
 		const XMInstrument::NewNoteAction NNA() { return m_NNA;};
 		void NNA(const XMInstrument::NewNoteAction value){ m_NNA = value;};
 		
-		void ResetVolAndPan(compiler::sint16 playvol);
+		void ResetVolAndPan(compiler::sint16 playvol,bool reset=true);
 		void UpdateSpeed();
 		double PeriodToSpeed(int period);
 
@@ -516,7 +516,20 @@ XMSampler::Channel::PerformFX().
 		WaveDataController& rWave(){return m_WaveDataController;};
 
 		const bool IsPlaying(){ return m_bPlay;};
-		void IsPlaying(const bool value){ m_bPlay = value;};
+		void IsPlaying(const bool value)
+		{ 
+			if ( value == false )
+			{
+				if ( rChannel().ForegroundVoice() == this) 
+				{
+					rChannel().LastVoicePanFactor(m_PanFactor);
+					rChannel().LastVoiceVolume(m_Volume);
+					rChannel().ForegroundVoice(NULL);
+
+				}
+			}
+			m_bPlay = value;
+		};
 
 		const bool IsBackground() { return m_Background; };
 		void IsBackground(const bool background){ m_Background = background; };
@@ -763,6 +776,8 @@ XMSampler::Channel::PerformFX().
 		void Volume(const float value){m_Volume = value;};
 		const int DefaultVolume(){return m_ChannelDefVolume;};
 		void DefaultVolume(const int value){m_ChannelDefVolume = value; Volume(value/64.0f);};
+		const int LastVoiceVolume(){return m_LastVoiceVolume;};
+		void LastVoiceVolume(const int value){m_LastVoiceVolume = value;};
 
 		const float PanFactor(){return 	m_PanFactor;};
 		void PanFactor(const float value){
@@ -776,6 +791,8 @@ XMSampler::Channel::PerformFX().
 			else if (value < 0x7F ) PanFactor(value/64.0f);
 			//\todo : else  set mute.
 		};
+		const float LastVoicePanFactor(){return m_LastVoicePanFactor;};
+		void LastVoicePanFactor(const float value){m_LastVoicePanFactor = value;};
 
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
@@ -829,9 +846,11 @@ XMSampler::Channel::PerformFX().
 
 		float m_Volume;///<  (0 - 1.0f)
 		int m_ChannelDefVolume;///< (0.0f - 64)
+		int m_LastVoiceVolume;
 
 		float m_PanFactor;// value used for Playback
 		int m_DefaultPanFactor; // value used for Storage //  0..64 .  80 == Surround. >127 = Mute.
+		float m_LastVoicePanFactor;
 		bool m_bSurround;
 
 		bool m_bGrissando;
