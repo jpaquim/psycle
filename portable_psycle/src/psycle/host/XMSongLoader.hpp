@@ -57,6 +57,9 @@ namespace host{
 		unsigned char highOffset[32];
 		unsigned char memPortaUp[32];
 		unsigned char memPortaDown[32];
+		unsigned char memPortaNote[32];
+		unsigned char memPortaPos[32];
+
 		short m_iTempoTicks;
 		short m_iTempoBPM;
 		XMFILEHEADER m_Header;
