@@ -202,7 +202,7 @@ namespace host{
 	{
 
 		int iHeaderLen = ReadInt4(start);
-		char iPackingType = ReadInt1();
+		Skip(1); //char iPackingType = ReadInt1();
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
 
@@ -662,7 +662,7 @@ namespace host{
 		Read(sInstrName,22);
 		sInstrName[22]= 0;
 
-		int iInstrType = ReadInt1();
+		Skip(1); //int iInstrType = ReadInt1();
 		int iSampleCount = ReadInt2();
 
 		if(iSampleCount>1)
@@ -744,7 +744,7 @@ namespace host{
 		char iFlags = ReadInt1();
 		unsigned char iPanning = ReadInt1();
 		char iRelativeNote = ReadInt1();
-		char iReserved = ReadInt1();	
+		Skip(1); //char iReserved = ReadInt1();	
 
 		// sample name
 		char * cName = AllocReadStr(22);

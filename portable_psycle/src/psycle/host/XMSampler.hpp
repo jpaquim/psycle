@@ -409,9 +409,12 @@ XMSampler::Channel::PerformFX().
 		void Stage(const EnvelopeStage value){m_Stage = value;};
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 		inline void CalcStep(const int start,const int  end);
-		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Samples= m_NextEventSample; }
+		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Samples= m_NextEventSample; };
+		int GetPosition(void) { return m_PositionIndex; };
+		void SetPositionInTicks(const int posi,const int samplesPerTick);
+		int GetPositionInTicks(const int samplesPerTick);
 		void RecalcDeviation();
-		bool HasSustainEnded() { return m_SustainEnd; }
+		bool HasSustainEnded() { return m_SustainEnd; };
 	private:
 		inline float SRateDeviation() { return m_sRateDeviation; };
 
@@ -524,8 +527,11 @@ XMSampler::Channel::PerformFX().
 				{
 					rChannel().LastVoicePanFactor(m_PanFactor);
 					rChannel().LastVoiceVolume(m_Volume);
+					rChannel().LastAmpEnvelopePos(AmplitudeEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					rChannel().LastPanEnvelopePos(PanEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					rChannel().LastFilterEnvelopePos(FilterEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					rChannel().LastPitchEnvelopePos(PitchEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
 					rChannel().ForegroundVoice(NULL);
-
 				}
 			}
 			m_bPlay = value;
@@ -794,6 +800,18 @@ XMSampler::Channel::PerformFX().
 		const float LastVoicePanFactor(){return m_LastVoicePanFactor;};
 		void LastVoicePanFactor(const float value){m_LastVoicePanFactor = value;};
 
+		const int LastAmpEnvelopePos() { return m_LastAmpEnvelopePos; };
+		void LastAmpEnvelopePos(const int value) { m_LastAmpEnvelopePos = value; };
+
+		const int LastPanEnvelopePos() { return m_LastPanEnvelopePos; };
+		void LastPanEnvelopePos(const int value) { m_LastPanEnvelopePos = value; };
+
+		const int LastFilterEnvelopePos() { return m_LastFilterEnvelopePos; };
+		void LastFilterEnvelopePos(const int value) { m_LastFilterEnvelopePos = value; };
+
+		const int LastPitchEnvelopePos() { return m_LastPitchEnvelopePos; };
+		void LastPitchEnvelopePos(const int value) { m_LastPitchEnvelopePos = value; };
+
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
 			if ( value )
@@ -852,6 +870,11 @@ XMSampler::Channel::PerformFX().
 		int m_DefaultPanFactor; // value used for Storage //  0..64 .  80 == Surround. >127 = Mute.
 		float m_LastVoicePanFactor;
 		bool m_bSurround;
+
+		int m_LastAmpEnvelopePos;
+		int m_LastPanEnvelopePos;
+		int m_LastFilterEnvelopePos;
+		int m_LastPitchEnvelopePos;
 
 		bool m_bGrissando;
 		int m_VibratoType;///< vibrato type 
@@ -1034,6 +1057,8 @@ XMSampler::Channel::PerformFX().
 
 	void CurrentTick(const int value){m_TickCount = value;};// Current Tracker Tick number
 	const int CurrentTick(){ return m_TickCount;};// ""
+
+	int GetDeltaTick() { return m_DeltaTick; };
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 protected:

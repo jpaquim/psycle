@@ -244,6 +244,7 @@ namespace psycle
 			m_Step = 0;
 			m_NextEventSample=0;
 			m_Stage = EnvelopeStage::OFF;
+			m_sRateDeviation=0;
 		}
 
 		/// NoteOn EnvelopeStage
@@ -259,6 +260,7 @@ namespace psycle
 			m_Stage = EnvelopeStage::OFF;
 			m_NoteOff = false;
 			m_SustainEnd = false;
+			RecalcDeviation();
 
 			// if there are no points, there is nothing to do.
 			if ( m_pEnvelope->NumOfPoints() > 0 && m_pEnvelope->IsEnabled())
@@ -325,6 +327,21 @@ namespace psycle
 			RecalcDeviation();
 			m_NextEventSample = m_pEnvelope->GetTime(end)* SRateDeviation();
 			m_Step = ystep / (xstep * SRateDeviation());
+		}
+		void XMSampler::EnvelopeController::SetPositionInTicks(const int posi,const int samplesPerTick)
+		{
+			int newSamplePos=posi*samplesPerTick;
+			int i;
+			for (i=0;m_pEnvelope->GetTime(i) != XMInstrument::Envelope::INVALID;i++)
+			{
+				if (m_pEnvelope->GetTime(i)* SRateDeviation() >= newSamplePos ) break;
+			}
+			m_PositionIndex=i-1;
+			m_Samples=m_NextEventSample;
+		}
+		int XMSampler::EnvelopeController::GetPositionInTicks(const int samplesPerTick)
+		{
+			return m_Samples/samplesPerTick;
 		}
 
 
@@ -623,26 +640,11 @@ namespace psycle
 			if ( rWave().Wave().IsAutoVibrato())
 			{
 			}
+			//Important, put it after m_PitchEnvelope.NoteOn();
+			UpdateSpeed();
 
 			ResetVolAndPan(playvol,reset);
 
-			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
-				m_AmplitudeEnvelope.NoteOn();
-			}
-
-			if(m_PanEnvelope.Envelope().IsEnabled()){
-				m_PanEnvelope.NoteOn();
-			}
-
-			if(m_FilterEnvelope.Envelope().IsEnabled()){
-				m_FilterEnvelope.NoteOn();
-			}
-
-			if(m_PitchEnvelope.Envelope().IsEnabled()){
-				m_PitchEnvelope.NoteOn();
-			}
-			//Important, put it after m_PitchEnvelope.NoteOn();
-			UpdateSpeed();
 			m_WaveDataController.Playing(true);
 			IsPlaying(true);
 		}
@@ -682,18 +684,27 @@ namespace psycle
 
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOn();
+				if (m_AmplitudeEnvelope.Envelope().IsCarry())
+					m_AmplitudeEnvelope.SetPositionInTicks(rChannel().LastAmpEnvelopePos(),m_pSampler->GetDeltaTick());
 			}
 
 			if(m_PanEnvelope.Envelope().IsEnabled()){
 				m_PanEnvelope.NoteOn();
+				if (m_PanEnvelope.Envelope().IsCarry())
+					m_PanEnvelope.SetPositionInTicks(rChannel().LastPanEnvelopePos(),m_pSampler->GetDeltaTick());
 			}
 
 			if(m_FilterEnvelope.Envelope().IsEnabled()){
 				m_FilterEnvelope.NoteOn();
+				if (m_FilterEnvelope.Envelope().IsCarry())
+					m_FilterEnvelope.SetPositionInTicks(rChannel().LastFilterEnvelopePos(),m_pSampler->GetDeltaTick());
 			}
 
 			if(m_PitchEnvelope.Envelope().IsEnabled()){
 				m_PitchEnvelope.NoteOn();
+				if (m_PitchEnvelope.Envelope().IsCarry())
+					m_PitchEnvelope.SetPositionInTicks(rChannel().LastPitchEnvelopePos(),m_pSampler->GetDeltaTick());
+				UpdateSpeed();
 			}
 
 		}
@@ -858,8 +869,8 @@ panbrello, and S44 will be a slower panbrello.
 		}
 		void XMSampler::Voice::VolumeUp(const int value){
 			int vol = Volume() +value;
-			if(vol > 255){
-				vol = 255;
+			if(vol > 0x80){
+				vol = 0x80;
 			}
 			Volume(vol);	
 		}
@@ -1015,6 +1026,11 @@ panbrello, and S44 will be a slower panbrello.
 			m_DefaultPanFactor = 32;
 			m_LastVoicePanFactor = 0.0f;
 			m_bSurround = false;
+
+			m_LastAmpEnvelopePos=0;
+			m_LastPanEnvelopePos=0;
+			m_LastFilterEnvelopePos=0;
+			m_LastPitchEnvelopePos=0;
 
 			m_bGrissando = false;
 			m_VibratoType = XMInstrument::WaveData::WaveForms::SINUS;
@@ -1284,10 +1300,10 @@ panbrello, and S44 will be a slower panbrello.
 					voice->Volume(parameter);
 					break;
 				case CMD::SET_ENV_POSITION:
-					voice->AmplitudeEnvelope().SetPosition(parameter);
-					voice->PanEnvelope().SetPosition(parameter);
-					voice->PitchEnvelope().SetPosition(parameter);
-					voice->FilterEnvelope().SetPosition(parameter);
+					voice->AmplitudeEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
+					voice->PanEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
+					voice->PitchEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
+					voice->FilterEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
 					break;
 				case CMD::EXTENDED:
 					switch(parameter&0xF0)
@@ -2059,6 +2075,10 @@ panbrello, and S44 will be a slower panbrello.
 							{
 								thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
 								thisChannel.LastVoiceVolume(currentVoice->Volume());
+								thisChannel.LastAmpEnvelopePos(currentVoice->AmplitudeEnvelope().GetPositionInTicks(GetDeltaTick()));
+								thisChannel.LastPanEnvelopePos(currentVoice->PanEnvelope().GetPositionInTicks(GetDeltaTick()));
+								thisChannel.LastFilterEnvelopePos(currentVoice->FilterEnvelope().GetPositionInTicks(GetDeltaTick()));
+								thisChannel.LastPitchEnvelopePos(currentVoice->PitchEnvelope().GetPositionInTicks(GetDeltaTick()));
 							}
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
