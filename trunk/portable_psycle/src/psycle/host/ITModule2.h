@@ -290,6 +290,7 @@ Ex/Fx.
 				USE_ENVELOPE=	0x01,
 				USE_LOOP=		0x02,
 				USE_SUSTAIN=	0x04,
+				ENABLE_CARRY=   0x08,
 				ISFILTER=		0x80, // Only meaningful in a pitch envelope
 			};
 		};

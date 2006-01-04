@@ -132,6 +132,10 @@ namespace psycle
 				ftFilter= F_NONE;
 				iCutoff=127;
 				iRes=0;
+				dBand[0] = 0;
+				dBand[1] = 0;
+				dLow[0] = 0;
+				dLow[1] = 0;
 				fLastSampleLeft[0]=0.0f;
 				fLastSampleLeft[1]=0.0f;
 				fLastSampleRight[0]=0.0f;
@@ -145,6 +149,64 @@ namespace psycle
 			FilterType Type (void) { return ftFilter; };
 			
 			inline void Work(float& _fSample)
+			{
+				// This filter code comes from the musicdsp.org archive,
+				// State Variable Filter (Double Sampled, Stable)
+				// Type : 2 Pole Low, High, Band, Notch and Peaking
+				// References : Posted by Andrew Simper
+
+				double notch, high, out;
+
+				notch = _fSample - fCoeff[damp]*dBand[0];
+				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+				high = notch - dLow[0];
+				dBand[0] = fCoeff[freq]*high + dBand[0];
+//				out   = 0.5*(notch or low or high or band or peak);
+				out = 0.5*dLow[0];
+				notch = _fSample - fCoeff[damp]*dBand[0];
+				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+				high = notch - dLow[0];
+				dBand[0] = fCoeff[freq]*high + dBand[0];
+//				out  += 0.5*(same out as above);
+				out += 0.5*dLow[0];
+				_fSample = out;
+
+			}
+			inline void WorkStereo(float& _fLeft, float& _fRight)
+			{
+				double notch, high, out;
+
+				notch = _fLeft - fCoeff[damp]*dBand[0];
+				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+				high  = notch - dLow[0];
+				dBand[0] = fCoeff[freq]*high + dBand[0];
+				//				out   = 0.5*(notch or low or high or band or peak);
+				dLow[0] = 0.5*dLow[0];
+				notch = _fLeft - fCoeff[damp]*dBand[0];
+				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+				high  = notch - dLow[0];
+				dBand[0] = fCoeff[freq]*high + dBand[0];
+				//				out  += 0.5*(same out as above);
+				out += 0.5*dLow[0];
+				_fLeft = out;
+
+				notch = _fRight - fCoeff[damp]*dBand[1];
+				dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
+				high  = notch - dLow[1];
+				dBand[1] = fCoeff[freq]*high + dBand[1];
+				//				out   = 0.5*(notch or low or high or band or peak);
+				dLow[1] = 0.5*dLow[1];
+				notch = _fRight - fCoeff[damp]*dBand[1];
+				dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
+				high  = notch - dLow[1];
+				dBand[1] = fCoeff[freq]*high + dBand[1];
+				//				out  += 0.5*(same out as above);
+				out += 0.5*dLow[1];
+				_fRight = out;
+
+			}
+
+			inline void WorkOld(float& _fSample)
 			{
 				try
 				{
@@ -161,7 +223,7 @@ namespace psycle
 					default: throw;
 				}}
 			}
-			inline void WorkStereo(float& _fLeft, float& _fRight)
+			inline void WorkStereoOld(float& _fLeft, float& _fRight)
 			{
 				try
 				{
@@ -186,13 +248,22 @@ namespace psycle
 				}}
 			}
 		protected:
+			enum coeffNames
+			{
+				damp=0,
+				band,
+				freq
+			};
 			void Update(void);
+			void UpdateOld(void);
 
 			int iSampleRate;
 			int iCutoff;
 			int iRes;
 			FilterType ftFilter;
 			float fCoeff[4];
+			double dBand[2];
+			double dLow[2];
 			float fLastSampleLeft[2];
 			float fLastSampleRight[2];
 		};

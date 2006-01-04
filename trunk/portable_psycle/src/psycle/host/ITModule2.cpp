@@ -169,12 +169,14 @@ Special:  Bit 0: On = song message attached.
 				s->playOrder[i]=ReadInt(1); // 254 = ++ (skip), 255 = --- (end of tune).
 				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
 			}
+			Skip(itFileH.ordNum-j);
+/*
 			while (j<itFileH.ordNum)
 			{
 				char tmp=ReadInt(1);
 				j++;
 			}
-
+*/
 			s->playLength=i;
 			if ( s->playLength == 0) // Add at least one pattern to the sequence.
 			{
@@ -223,7 +225,7 @@ Special:  Bit 0: On = song message attached.
 							tmp += (mdata.Zxx[i][7] - 'A' + 0xA);
 
 						// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-						if ( mode == 0 && tmp != 127) tmp = int(tmp*100.0f/127.0f);
+						//if ( mode == 0 && tmp != 127) tmp = int(tmp*100.0f/127.0f);
 						sampler->SetZxxMacro(i,mode,tmp);
 					}
 				}
@@ -386,7 +388,7 @@ Special:  Bit 0: On = song message attached.
 				xins.FilterType(dsp::F_LOWPASS12);
 				int fc = curH.inFC&0x7F;
 				// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-				if ( fc != 127) fc = int((fc)*100.0f/127.0f);
+				//if ( fc != 127) fc = int((fc)*100.0f/127.0f);
 				xins.FilterCutoff(fc);
 			}
 			if ((curH.inFR&0x80) != 0)
@@ -396,7 +398,7 @@ Special:  Bit 0: On = song message attached.
 					xins.FilterType(dsp::F_LOWPASS12);
 					int fc = curH.inFC&0x7F;
 					// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-					if ( fc != 127) fc = int((fc)*100.0f/127.0f);
+					//if ( fc != 127) fc = int((fc)*100.0f/127.0f);
 					xins.FilterCutoff(fc);
 				}
 				xins.FilterResonance(curH.inFR&0x7F);
@@ -416,7 +418,7 @@ Special:  Bit 0: On = song message attached.
 			
 			if(curH.volEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
 				xins.AmpEnvelope()->IsEnabled(true);
-
+				if(curH.volEnv.flg& EnvFlags::ENABLE_CARRY) xins.AmpEnvelope()->IsCarry(true);
 				if(curH.volEnv.flg& EnvFlags::USE_SUSTAIN){
 					xins.AmpEnvelope()->SustainBegin(curH.volEnv.sustainS);
 					xins.AmpEnvelope()->SustainEnd(curH.volEnv.sustainE);
@@ -446,7 +448,7 @@ Special:  Bit 0: On = song message attached.
 
 			if(curH.panEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
 				xins.PanEnvelope()->IsEnabled(true);
-
+				if(curH.panEnv.flg& EnvFlags::ENABLE_CARRY) xins.PanEnvelope()->IsCarry(true);
 				if(curH.panEnv.flg& EnvFlags::USE_SUSTAIN){
 					xins.PanEnvelope()->SustainBegin(curH.panEnv.sustainS);
 					xins.PanEnvelope()->SustainEnd(curH.panEnv.sustainE);
@@ -485,6 +487,7 @@ Special:  Bit 0: On = song message attached.
 					xins.FilterType(dsp::F_LOWPASS12);
 					xins.FilterEnvelope()->IsEnabled(true);
 					xins.PitchEnvelope()->IsEnabled(false);
+					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.FilterEnvelope()->IsCarry(true);
 					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
 						xins.FilterEnvelope()->SustainBegin(curH.pitchEnv.sustainS);
 						xins.FilterEnvelope()->SustainEnd(curH.pitchEnv.sustainE);
@@ -506,6 +509,7 @@ Special:  Bit 0: On = song message attached.
 				} else {
 					xins.PitchEnvelope()->IsEnabled(true);
 					xins.FilterEnvelope()->IsEnabled(false);
+					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.PitchEnvelope()->IsCarry(true);
 					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
 						xins.PitchEnvelope()->SustainBegin(curH.pitchEnv.sustainS);
 						xins.PitchEnvelope()->SustainEnd(curH.pitchEnv.sustainE);
@@ -715,7 +719,7 @@ Special:  Bit 0: On = song message attached.
 
 					//Check if value contains a bitwidth change. If it does, change and proceed with next value.
 					if (bitwidth < 7) { //Method 1:
-						if (val == (1 << (bitwidth - 1))) { // if the value == topmost bit set.
+						if (val == unsigned(1 << (bitwidth - 1))) { // if the value == topmost bit set.
 							val = block.ReadBits(packsize) + 1;
 							bitwidth = (val < bitwidth) ? val : val + 1;
 							continue;
@@ -723,7 +727,7 @@ Special:  Bit 0: On = song message attached.
 					} else if (bitwidth < maxbitsize+1) { //Method 2
 						unsigned short border = (((1<<maxbitsize)-1) >> (maxbitsize+1 - bitwidth)) - (maxbitsize/2);
 
-						if ((val > border) && (val <= (border + maxbitsize))) {
+						if ((val > border) && (val <= unsigned(border + maxbitsize))) {
 							val -= border;
 							bitwidth = val < bitwidth ? val : val + 1;
 							continue;
@@ -802,9 +806,9 @@ Special:  Bit 0: On = song message attached.
 			pempty._note=255; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
-			int packedSize=ReadInt(2);
+			Skip(2);//int packedSize=ReadInt(2);
 			int rowCount=ReadInt(2);
-			int unused=ReadInt();
+			Skip(4);//int unused=ReadInt();
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
 //			char* packedpattern = new char[packedSize];
@@ -1084,7 +1088,8 @@ Special:  Bit 0: On = song message attached.
 					if ( param < 127)
 					{
 						// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-						pent._parameter = int((param)*100.0f/127.0f);
+					//	pent._parameter = int((param)*100.0f/127.0f);
+						pent._parameter = param;
 					}
 					pent._cmd = XMSampler::CMD::MIDI_MACRO;
 					break;
@@ -1404,7 +1409,7 @@ OFFSET              Count TYPE   Description
 			pempty._note=255; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
-			int packedSize=ReadInt(2);
+			Skip(2);//int packedSize=ReadInt(2);
 			s->AllocNewPattern(patIdx,"unnamed",64,false);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
