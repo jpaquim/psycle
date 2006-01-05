@@ -13,6 +13,7 @@ NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
+		const int NUM_INTERNAL_MACHINES = 4;
 
 		class PluginInfo
 		{
@@ -61,6 +62,29 @@ NAMESPACE__BEGIN(psycle)
 			*/
 		};
 		
+		class InternalMachineInfo
+		{
+		public:
+			InternalMachineInfo()
+				/*: mode(MACHMODE_UNDEFINED)
+				, type(MACH_UNDEFINED)
+				, allow(true)*/
+			{
+			}
+			~InternalMachineInfo() throw()
+			{
+			}
+			std::string name;
+			std::string desc;
+			std::string version;
+			std::string category;
+			int Outputmachine;
+			int OutBus;
+			int LastType0;
+			int LastType1;
+			bool machtype; //false = generator, true = effect
+		};
+
 		/// new machine dialog window.
 		class CNewMachine : public CDialog
 		{
@@ -122,51 +146,59 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnCbnSelendokListstyle();
 			afx_msg void OnCbnSelendokNamestyle();
 			afx_msg void BeginDrag(NMHDR *pNMHDR, LRESULT *pResult);
-			afx_msg void BeginRDrag(NMHDR *pNMHDR, LRESULT *pResult);
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 			afx_msg void NMPOPUP_AddSubFolder();
 			afx_msg void NMPOPUP_AddFolderSameLevel();
 			afx_msg void NMPOPUP_RenameFolder();
 			afx_msg void NMPOPUP_DeleteMoveToParent();
 			afx_msg void NMPOPUP_DeleteMoveUncat();
-			afx_msg void NMPOPUP_ExpandAll();
-			afx_msg void NMPOPUP_CollapseAll();
-			afx_msg void NMPOPUP_MoveToTopLevel();
 			afx_msg void BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
 			afx_msg void EndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
-			afx_msg void AlterItemCaption(NMHDR *pNMHDR, LRESULT *pResult);
 
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnCancelMode();
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			afx_msg void OnBnClickedCancel();
-
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
 			static int _numPlugins;
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
+			static InternalMachineInfo * _pInternalMachines[NUM_INTERNAL_MACHINES];
 			static int _numDirs;
 			static void FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
 			static bool SaveCacheFile();
+			static bool LoadCategoriesFile();
+			static bool SaveCategoriesFile();
 			void UpdateList(bool bInit = false);
+			HTREEITEM CategoryExists (HTREEITEM hParent, CString category);
+			void DeleteMoveUncat (HTREEITEM hParent);
+			void SortChildren (HTREEITEM hParent);
+			void RemoveCatSpaces (HTREEITEM hParent);
+
+		public:
+			//afx_msg void AddNewCustomFolder();
+			//CEdit txtNewFolderName;
+
 			void FinishDragging(BOOL bDraggingImageList);
 			void OnEndDrag(UINT nFlags, CPoint point);
-			HTREEITEM CategoryExists (HTREEITEM hParent, CString category);	
-			HTREEITEM MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos = TVI_SORT, bool bAllowReplace = false);
-			void SetPluginCategories(HTREEITEM hItem, CString Category);
-			void SortChildren (HTREEITEM hParent);
-			void RemoveCatSpaces(HTREEITEM hParent);
-			void DeleteMoveUncat (HTREEITEM hParent);
-		public:
-	
+			
 			UINT nFlags;
 			CPoint point;
 			bool bEditing;
-			HTREEITEM hCategory;
 			
-		};
+
+			HTREEITEM MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos = TVI_SORT, bool bAllowReplace = false);
+			afx_msg void NMPOPUP_MoveToTopLevel();
+			void SetPluginCategories(HTREEITEM hItem, CString Category);
+
+			HTREEITEM hCategory;
+			static int NumPlugsInCategories;
+			
+
+			afx_msg void OnBnClickedCancel();
+			afx_msg void OnTimer(UINT nIDEvent);
+};
 
 
 

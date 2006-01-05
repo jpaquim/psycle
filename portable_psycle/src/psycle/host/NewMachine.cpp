@@ -22,9 +22,11 @@ NAMESPACE__BEGIN(psycle)
 		int CNewMachine::_numPlugins = -1;
 		int CNewMachine::LastType0=0;
 		int CNewMachine::LastType1=0;
+		int CNewMachine::NumPlugsInCategories = 0;
 
 
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
+		InternalMachineInfo * CNewMachine::_pInternalMachines[NUM_INTERNAL_MACHINES];
 
 		std::map<std::string,std::string> CNewMachine::dllNames;
 		std::map<CString, int> CNewMachine::CustomFolders;
@@ -33,12 +35,27 @@ NAMESPACE__BEGIN(psycle)
 		CString tempCustomFolderName;
 		const int IS_FOLDER=2000000000;
 		const int IS_INTERNAL_MACHINE=1000000000;
-		const int INTERNAL_MACHINE_COUNT=4;
+
+		const int TIMER_INTERVAL = 600;
+
 		RECT UpPos;
 		bool bScrollUp;
 		bool bScrolling = false;
-		int listitemheight;
+		int ScrollCount = 0;
+		int itemheight;
+		bool bDragging = false;
+		CPoint MousePt;
 
+
+		
+		void ShowMessage (int var, CString title)
+		{
+			char buffer[100];  sprintf (buffer, "%d", var); MessageBox (0,buffer, title,0);
+		}
+		void ShowMessage (CString var, CString title)
+		{
+			MessageBox (0,var, title,0);
+		}
 		void CNewMachine::learnDllName(const std::string & fullname)
 		{
 			std::string str=fullname;
@@ -111,18 +128,16 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID__RENAMEFOLDER, NMPOPUP_RenameFolder)
 			ON_COMMAND(ID_DELETEFOLDER_MOVEPARNT, NMPOPUP_DeleteMoveToParent)
 			ON_COMMAND(ID_DELETEFOLDER_MOVEUNCAT, NMPOPUP_DeleteMoveUncat)
-			ON_COMMAND(ID__EXPANDALLFOLDERS, NMPOPUP_ExpandAll)
-			ON_COMMAND(ID__COLLAPSEALLFOLDERS, NMPOPUP_CollapseAll)
 			ON_COMMAND(ID__MOVETOTOPLEVEL, NMPOPUP_MoveToTopLevel)
 			ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_BROWSER, BeginLabelEdit)
 			ON_NOTIFY(TVN_ENDLABELEDIT, IDC_BROWSER, EndLabelEdit)
 			ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
-
+			
 			//}}AFX_MSG_MAP
 			
-			
+			ON_WM_TIMER()
 		END_MESSAGE_MAP()
-
+		
 		BOOL CNewMachine::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
@@ -132,9 +147,51 @@ NAMESPACE__BEGIN(psycle)
 			bAllowChanged = false;
 			bCategoriesChanged = false;
 			bEditing = false;
+			NumPlugsInCategories = 0;
 			LoadPluginInfo();
-			UpdateList();
+
+
+			_pInternalMachines[0] = new InternalMachineInfo;
+			_pInternalMachines[0]->name = "Sampler";
+			_pInternalMachines[0]->desc = "Stereo Sampler Unit. Inserts new sampler.";
+			_pInternalMachines[0]->version = "V0.5b";
+			_pInternalMachines[0]->machtype = false;
+			_pInternalMachines[0]->Outputmachine = MACH_SAMPLER;
+			_pInternalMachines[0]->OutBus = true;
+			_pInternalMachines[0]->LastType0 = 0;
+			_pInternalMachines[0]->LastType1 = 0;
 			
+			_pInternalMachines[1] = new InternalMachineInfo;
+			_pInternalMachines[1]->name = "Dummy";
+			_pInternalMachines[1]->desc = "Replaces inexistent plugins";
+			_pInternalMachines[1]->version = "V1.0";
+			_pInternalMachines[1]->machtype = true;
+			_pInternalMachines[1]->Outputmachine = MACH_DUMMY;
+			_pInternalMachines[1]->LastType0 = 0;
+			_pInternalMachines[1]->LastType1 = 1;
+			
+			_pInternalMachines[2] = new InternalMachineInfo;
+			_pInternalMachines[2]->name = "Sampulse Sampler V2";
+			_pInternalMachines[2]->desc = "Sampler with the essence of FastTracker II and Impulse Tracker 2";
+			_pInternalMachines[2]->version = "V0.5b";
+			_pInternalMachines[2]->machtype = false;
+			_pInternalMachines[2]->Outputmachine = MACH_XMSAMPLER;
+			_pInternalMachines[2]->OutBus = true;
+			_pInternalMachines[2]->LastType0 = 0;
+			_pInternalMachines[2]->LastType1 = 0;
+			
+			_pInternalMachines[3] = new InternalMachineInfo;
+			_pInternalMachines[3]->name = "Note Duplicator";
+			_pInternalMachines[3]->desc = "Repeats the Events received to the selected machines";
+			_pInternalMachines[3]->version = "V1.0";
+			_pInternalMachines[3]->machtype = false;
+			_pInternalMachines[3]->Outputmachine = MACH_DUPLICATOR;
+			_pInternalMachines[3]->OutBus = true;
+			_pInternalMachines[3]->LastType0 = 0;
+			_pInternalMachines[3]->LastType1 = 0;
+
+			LoadCategoriesFile();
+			UpdateList();
 			//fill combo boxes
 			comboListStyle.AddString ("Type of Plugin");
 			comboListStyle.AddString ("Class of Machine");
@@ -144,10 +201,13 @@ NAMESPACE__BEGIN(psycle)
 			comboNameStyle.AddString ("Filename and Path");
 			comboNameStyle.AddString ("Plugin Name");
             comboNameStyle.SetCurSel ((int)pluginName);
-
 			numCustCategories = 1;
+
+			itemheight = m_browser.GetItemHeight ();
 			
-			listitemheight = m_browser.GetItemHeight ();
+			// set internal machine properties
+			// THESE PROPERTIES SHOULD BE MOVED TO THE ACTUAL INTERNAL MACHINE CLASSES
+
 			//more properties
 			return TRUE;
 
@@ -161,7 +221,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::UpdateList(bool bInit)
 		{
-			int nodeindex;
+			//int nodeindex;
 			m_browser.DeleteAllItems();
 			HTREEITEM intFxNode;
 			switch(pluginOrder)
@@ -214,17 +274,17 @@ NAMESPACE__BEGIN(psycle)
 						}
 						HTREEITEM newitem;
 						if(pluginName)
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+							newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), 0, 0, hitem, TVI_SORT);
 						else
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+							newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), 0, 0, hitem, TVI_SORT);
 						//associate node with plugin number
 						m_browser.SetItemData (newitem, i);
 					}
 				}
 				HTREEITEM newitem;
 
-				newitem = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE);
+				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
+				m_browser.SetItemData (hInt[0], IS_INTERNAL_MACHINE);
 
 				newitem = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 1);
@@ -307,10 +367,11 @@ NAMESPACE__BEGIN(psycle)
 			
 			//sort into custom folders
 			case 2:
-				hNodes[0] = m_browser.InsertItem(" Uncategorised",8,9, TVI_ROOT, TVI_LAST);
+				hNodes[0] = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
 				m_browser.SetItemData (hNodes[0], IS_FOLDER);
 				m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
 				numCustCategories = 1;
+
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
 				{
 					if(_pPlugsInfo[i]->error.empty())
@@ -347,12 +408,10 @@ NAMESPACE__BEGIN(psycle)
 						}
 						else
 						{
-							// INCOMPLETE!!!!!
 							CString restofpath = _pPlugsInfo[i]->category.c_str ();
 							int barpos = restofpath.Find ("|",0);
 							CString curcategory = restofpath.Left (barpos);
 							curcategory = curcategory.TrimRight ("|");
-							//restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
 							hCategory = TVI_ROOT;
 							HTREEITEM hParent;
 							while (restofpath != "")
@@ -363,10 +422,10 @@ NAMESPACE__BEGIN(psycle)
 								if (hCategory == NULL)
 								{
 									//category doesn't exist
-									hNodes[numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,7, hParent, TVI_SORT);
+									hNodes[numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,6, hParent, TVI_SORT);
 									hCategory = hNodes[numCustCategories];
-									m_browser.SetItemState (hCategory, TVIS_BOLD, TVIS_BOLD);
 									m_browser.SetItemData (hNodes[numCustCategories], IS_FOLDER);
+									m_browser.SetItemState (hNodes[numCustCategories], TVIS_BOLD, TVIS_BOLD);
 									numCustCategories++;
 								}
 								else
@@ -398,7 +457,58 @@ NAMESPACE__BEGIN(psycle)
 					}
 
 				}
-				// remove leading space from all folders
+								
+				//add categories + entries for internal machines	
+				for(int i = 0 ; i < NUM_INTERNAL_MACHINES ; i++)
+				{
+					//determine internal machine folder
+					if (_pInternalMachines[i]->category == "")
+					{
+						hCategory = hNodes[0];
+					}
+					else
+					{
+						CString restofpath = _pInternalMachines[i]->category.c_str ();
+						int barpos = restofpath.Find ("|",0);
+						CString curcategory = restofpath.Left (barpos);
+						curcategory = curcategory.TrimRight ("|");
+						hCategory = TVI_ROOT;
+						HTREEITEM hParent;
+						while (restofpath != "")
+						{
+							hParent = hCategory;
+							hCategory = CategoryExists (hParent, curcategory);
+
+							if (hCategory == NULL)
+							{
+								//category doesn't exist
+								hNodes[numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,6, hParent, TVI_SORT);
+								hCategory = hNodes[numCustCategories];
+								m_browser.SetItemData (hNodes[numCustCategories], IS_FOLDER);
+								m_browser.SetItemState (hNodes[numCustCategories], TVIS_BOLD, TVIS_BOLD);
+								numCustCategories++;
+							}
+							restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
+							barpos = restofpath.Find ("|",0);
+							
+							if (barpos > -1)
+							{
+								curcategory = restofpath.Left (barpos);
+								curcategory = curcategory.TrimRight ("|");
+							}
+						}
+
+
+
+						
+					}
+					// add internal machine to appropriate node on tree
+					hInt[i] = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
+					m_browser.SetItemData (hInt[i],IS_INTERNAL_MACHINE + i);
+				}
+				
+				// remove leading space from all folders 
+				// (space was added at front of folder name to automatically sort folders to the top)
 				RemoveCatSpaces(NULL);
 			break;
 			}
@@ -488,78 +598,31 @@ NAMESPACE__BEGIN(psycle)
 			int i = m_browser.GetItemData (tHand);
 			
 			CString name, desc, dll, version;
-			bool allow;
+
 
 			if (i >= IS_FOLDER)
 			{
-				name = "";
-				desc = "";
-				dll = "";
-				version = "";
-
+				name = ""; desc = ""; dll = ""; version = "";
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
-			else if ((i >= IS_INTERNAL_MACHINE) && (i <= (IS_INTERNAL_MACHINE + INTERNAL_MACHINE_COUNT - 1)))
+			else if ((i >= IS_INTERNAL_MACHINE) && (i <= (IS_INTERNAL_MACHINE + NUM_INTERNAL_MACHINES - 1)))
 			{
-				switch (i - IS_INTERNAL_MACHINE)
-				{
-				case 0:
-					name = "Sampler";
-					desc = "Stereo Sampler Unit. Inserts new sampler.";
-					dll = "Internal Machine";
-					version = "V0.5b";
-					Outputmachine = MACH_SAMPLER;
-					OutBus = true;
-					LastType0 = 0;
-					LastType1 = 0;
+					name = _pInternalMachines[i - IS_INTERNAL_MACHINE]->name.c_str();
+					desc = _pInternalMachines[i - IS_INTERNAL_MACHINE]->desc.c_str();
+					dll = "None (Internal Machine)";
+					version = _pInternalMachines[i - IS_INTERNAL_MACHINE]->version.c_str();
+					Outputmachine = _pInternalMachines[i - IS_INTERNAL_MACHINE]->Outputmachine;
+					OutBus = _pInternalMachines[i - IS_INTERNAL_MACHINE]->OutBus;
+					LastType0 = _pInternalMachines[i - IS_INTERNAL_MACHINE]->LastType0;
+					LastType1 = _pInternalMachines[i - IS_INTERNAL_MACHINE]->LastType1;
 					m_Allow.SetCheck(FALSE);
 					m_Allow.EnableWindow(FALSE);
-					break;
-
-				case 1: 
-					name = "Dummy";
-					desc = "Replaces inexistent plugins";
-					dll = "Internal Machine";
-					version = "V1.0";
-					Outputmachine = MACH_DUMMY;
-					LastType0 = 0;
-					LastType1 = 1;
-					m_Allow.SetCheck(FALSE);
-					m_Allow.EnableWindow(FALSE);
-					break;
-
-				case 2:
-					name = "Sampulse Sampler V2";
-					desc = "Sampler with the essence of FastTracker II and Impulse Tracker 2";
-					dll = "Internal Machine";
-					version = "V0.5b";
-					Outputmachine = MACH_XMSAMPLER;
-					OutBus = true;
-					LastType0 = 0;
-					LastType1 = 0;
-					m_Allow.SetCheck(FALSE);
-					m_Allow.EnableWindow(FALSE);
-					break;
-
-				case 3:
-					name = "Note Duplicator";
-					desc = "Repeats the Events received to the selected machines";
-					dll = "Internal Machine";
-					version = "V1.0";
-					Outputmachine = MACH_DUPLICATOR;
-					OutBus = true;
-					LastType0 = 0;
-					LastType1 = 0;
-					m_Allow.SetCheck(FALSE);
-					m_Allow.EnableWindow(FALSE);
-					break;
-				}
 
 			}
 			else
 			{
-				//MessageBox (_pPlugsInfo[i]->category.c_str(),"Current Plugin Category");
+				//ShowMessage (i, _pPlugsInfo[i]->category.c_str ()) ;
 				std::string str = _pPlugsInfo[i]->dllname;
 				std::string::size_type pos = str.rfind('\\');
 				if(pos != std::string::npos)
@@ -601,17 +664,16 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
 				m_Allow.EnableWindow(TRUE);
 			}
-			//display plugin data
-			m_descLabel.SetWindowText (desc);
-			m_nameLabel.SetWindowText (name);
-			m_dllnameLabel.SetWindowText (dll);
-			m_versionLabel.SetWindowText (version);
+			m_nameLabel.SetWindowText(name);
+			m_descLabel.SetWindowText(desc);
+			m_dllnameLabel.SetWindowText(dll);
+			m_versionLabel.SetWindowText(version);
 			*pResult = 0;
 		}
 
 		void CNewMachine::OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			OnOK();			
+			OnOK();
 			*pResult = 0;
 		}
 
@@ -639,7 +701,6 @@ NAMESPACE__BEGIN(psycle)
 			if ((bCategoriesChanged) && (pluginOrder == 2))
 			{
 				SetPluginCategories(NULL, NULL);
-				bCategoriesChanged = false;
 			}
 			//set view style from entry in combobox
 			pluginOrder=comboListStyle.GetCurSel();
@@ -655,7 +716,6 @@ NAMESPACE__BEGIN(psycle)
 			if (bCategoriesChanged)
 				{
 					SetPluginCategories(NULL, NULL);
-					bCategoriesChanged = false;
 				}
 			UpdateList();
 			m_browser.Invalidate();	
@@ -1101,10 +1161,16 @@ NAMESPACE__BEGIN(psycle)
 			}
 			dllNames.clear();
 			_numPlugins = -1;
+			//clear internal machines class
+			for (int h=0; h<NUM_INTERNAL_MACHINES; h++)
+			{
+				zapObject(_pInternalMachines[h]);
+			}
 		}
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount)
 		{
+			//load plugin cache
 			char modulefilename[_MAX_PATH];
 			GetModuleFileName(NULL,modulefilename,_MAX_PATH);
 			std::string path=modulefilename;
@@ -1164,7 +1230,7 @@ NAMESPACE__BEGIN(psycle)
 				file.ReadString(p.name);
 				file.ReadString(p.desc);
 				file.ReadString(p.version);
-				file.ReadString(p.category);
+				//file.ReadString(p.category);
 				if(finder.FindFile(Temp))
 				{
 					FILETIME time;
@@ -1199,7 +1265,7 @@ NAMESPACE__BEGIN(psycle)
 							_pPlugsInfo[currentPlugsCount]->name = p.name;
 							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
 							_pPlugsInfo[currentPlugsCount]->version = p.version;
-							_pPlugsInfo[currentPlugsCount]->category = p.category;
+							//_pPlugsInfo[currentPlugsCount]->category = p.category;
 
 							if(p.error.empty())
 							{
@@ -1213,6 +1279,77 @@ NAMESPACE__BEGIN(psycle)
 			file.Close();
 
 			return true;
+		}
+
+		bool CNewMachine::LoadCategoriesFile ()
+		{
+			//load categories cache
+			char catfilename[_MAX_PATH];
+			GetModuleFileName(NULL,catfilename,_MAX_PATH);
+			std::string path=catfilename;
+			std::string::size_type pos=path.rfind('\\');
+			if(pos != std::string::npos)
+				path=path.substr(0,pos);
+			std::string catcache=path + "\\psycle.custom-categories.cache";
+
+			RiffFile file;
+			
+			if (!file.Open(catcache.c_str())) 
+			{
+				return false;
+			}
+			
+			char Temp[MAX_PATH];
+			file.Read(Temp,13);
+			Temp[13]=0;
+			if (strcmp(Temp,"PSYCATEGORIES")!=0)
+			{
+				file.Close();
+				DeleteFile(catcache.c_str());
+				return false;
+			}
+
+			UINT version;
+			file.Read(&version,sizeof(version));
+			if (version != CURRENT_CACHE_MAP_VERSION)
+			{
+				file.Close();
+				DeleteFile(catcache.c_str());
+				return false;
+			}
+			
+			for (int h=0; h < NUM_INTERNAL_MACHINES;h++)
+			{
+				file.Read (&h, sizeof(h));
+				file.ReadString (_pInternalMachines[h]->category);
+			}
+
+			file.Read(&NumPlugsInCategories,sizeof(NumPlugsInCategories));
+			PluginInfo p;
+
+			for (int i = 0; i < NumPlugsInCategories; i++)
+			{
+				//match up dll to _pPlugsInfo entry
+				bool bDllFound = false;
+
+				file.ReadString(p.dllname);
+				file.ReadString(p.category);
+				int j = 0;
+				
+				while ((bDllFound == false) && (j < _numPlugins))
+				{
+					//compare dll names - if dll is not in plugin cache, ignore its category entry.
+					if (p.dllname == _pPlugsInfo[j]->dllname)
+					{
+						_pPlugsInfo[j]->category = p.category;  //match up category to dll name
+						bDllFound = true;
+					}
+					j++;
+				}
+			}
+			file.Close();
+			return true;
+
 		}
 
 		bool CNewMachine::SaveCacheFile()
@@ -1247,12 +1384,49 @@ NAMESPACE__BEGIN(psycle)
 				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
 				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
 				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
-				file.Write(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
+				//file.Write(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
 			}
 			file.Close();
 			return true;
 		}
 
+		bool CNewMachine::SaveCategoriesFile()
+		{
+			char cache[_MAX_PATH];
+			GetModuleFileName(NULL,cache,_MAX_PATH);
+			char * last = strrchr(cache,'\\');
+			strcpy(last,"\\psycle.custom-categories.cache");
+			DeleteFile(cache);
+			RiffFile file;
+			if (!file.Create(cache,true)) 
+			{
+				return false;
+			}
+			file.Write("PSYCATEGORIES",13);
+			UINT version = CURRENT_CACHE_MAP_VERSION;
+			file.Write(&version,sizeof(version));
+	
+			//write categories of internal machines
+			for (int h=0; h < NUM_INTERNAL_MACHINES;h++)
+			{
+				file.Write (&h, sizeof(h));
+				file.Write (_pInternalMachines[h]->category.c_str (), _pInternalMachines[h]->category.length()+1);
+			}
+			
+			file.Write (&NumPlugsInCategories, sizeof(NumPlugsInCategories));
+			
+
+			for (int i=0; i<_numPlugins; i++ )
+			{
+				if (_pPlugsInfo[i]->category != "")
+				{
+					file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
+					file.Write(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
+				}
+			}
+			file.Close();
+			return true;
+		}
 
 		void CNewMachine::SetPluginCategories (HTREEITEM hItem, CString Category)
 		{
@@ -1260,13 +1434,16 @@ NAMESPACE__BEGIN(psycle)
 			// call this function with hItem = NULL to start right from the highest level
 			if (hItem == NULL)
 			{
-				//deal with "Uncategorised folder
+				//deal with "Uncategorised" folder
 				HTREEITEM hChild = m_browser.GetChildItem (hNodes[0]);
 
 				while (hChild != NULL)
 				{
 					int i = m_browser.GetItemData (hChild);
-					_pPlugsInfo[i]->category = "";
+					if (i < IS_INTERNAL_MACHINE)
+						_pPlugsInfo[i]->category = "";
+					else  //is an internal machine
+						_pInternalMachines[i - IS_INTERNAL_MACHINE]->category = "";
 					hChild = m_browser.GetNextSiblingItem (hChild);
 				}
 				//begin recursive saving
@@ -1290,10 +1467,19 @@ NAMESPACE__BEGIN(psycle)
 					{
 						//save plugin's position in tree to _pPlugsInfo[i]
 						int i = m_browser.GetItemData (hChild);
-						if (Category == "")
-							_pPlugsInfo[i]->category = "ROOT";
-						else
+						if (i < IS_INTERNAL_MACHINE)
 							_pPlugsInfo[i]->category = Category;
+						else  //is an internal machine
+						{
+							_pInternalMachines[i - IS_INTERNAL_MACHINE]->category = Category;
+						}
+						
+						if (m_browser.GetParentItem (hChild) == hNodes[0])
+							Category = "";
+
+						if (Category != "")
+							NumPlugsInCategories++;
+
 
 					}
 					hChild = m_browser.GetNextSiblingItem (hChild);
@@ -1305,28 +1491,26 @@ NAMESPACE__BEGIN(psycle)
 			
 		}
 
-
 		void CNewMachine::OnOK() 
-		{	
-			if (bEditing)
+		{
+			if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
 			{
-				// ADD CODE TO ALLOW USER TO PRESS <ENTER> TO FINISH EDITING CATEGORY NAME.
-			}
-			else
-			{
-				if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
+				
+				if (bCategoriesChanged)
 				{
-					
-					if (bCategoriesChanged)
-					{	
-						SetPluginCategories(NULL, NULL);
-					}
-	
-					if ((bAllowChanged) || (bCategoriesChanged))
-						SaveCacheFile();
-					if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
-					CDialog::OnOK();
+					SetPluginCategories(NULL, NULL);
 				}
+
+				if (bAllowChanged)
+					SaveCacheFile();
+
+				if (bCategoriesChanged)
+				{
+					SaveCategoriesFile();
+				}
+
+				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
+				CDialog::OnOK();
 			}
 		}
 
@@ -1410,6 +1594,7 @@ NAMESPACE__BEGIN(psycle)
 						if (tempstring == m_browser.GetItemText (hChild))
 							intNameCount++;
 						hChild = m_browser.GetNextSiblingItem (hChild);
+						
 					}
 					
 					if (intNameCount >= 2)
@@ -1429,10 +1614,8 @@ NAMESPACE__BEGIN(psycle)
 						{
 							//set folder name
 							m_browser.SetItemText (hSelectedItem, tempstring);
-							m_browser.SetItemState (hSelectedItem, TVIS_BOLD, TVIS_BOLD);
 							bEditing = false;
 							bCategoriesChanged = true;
-							//sort items
 							SortChildren (hParent);
 						}
 						else
@@ -1520,6 +1703,7 @@ NAMESPACE__BEGIN(psycle)
 				/* Hide the mouse cursor, and direct mouse input to this window */
 				SetCapture(); 
 				m_hItemDrag = lpnmtv->itemNew.hItem;
+				bDragging = true;
 			}
 
 		}
@@ -1632,7 +1816,7 @@ NAMESPACE__BEGIN(psycle)
 				}
     			else
     			{
-      			SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+      			//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
       			TVHITTESTINFO tvhti;
       			tvhti.pt = pt;
       			m_browser.ScreenToClient(&tvhti.pt);
@@ -1652,33 +1836,54 @@ NAMESPACE__BEGIN(psycle)
 			
 			
 			//sometime, fix this code to do automatic scrolling when user is dragging.
-
-/*			if ((UpPos.left < curpoint.x) && (UpPos.right > curpoint.x))
+			MousePt = point;
+			ClientToScreen (&MousePt);
+			if ((UpPos.left < curpoint.x) && (UpPos.right > curpoint.x))
 			{
 				if ((UpPos.top < curpoint.y) && ((UpPos.top + 20) > curpoint.y))
 				{
 					bScrollUp = true;
-					Sleep (600);
+					if (!bScrolling)
+					{
+						SetTimer (IDT_NEW_MACHINES_BROWSER_TIMER, TIMER_INTERVAL,NULL);
+						bScrolling = true;
+						ScrollCount = 0;
+					}
+
 				}
 				else if (((UpPos.bottom - 20) < curpoint.y) && (UpPos.bottom > curpoint.y))
 				{
 					bScrollUp = false;
-					Sleep (600);
-				}
 
-				if (bScrolling)
+					if (!bScrolling)
+					{
+						SetTimer (IDT_NEW_MACHINES_BROWSER_TIMER, TIMER_INTERVAL,NULL);
+						bScrolling = true;
+						ScrollCount = 0;
+					}
+				}
+				else 
+				{
+					//if (bScrolling)
+						KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
+					bScrolling = false;
+					
+				}
+				
+				/*if (bScrolling)
 				{
 					int ScrollPosition = m_browser.GetScrollPos (SB_VERT);
                     if (bScrollUp)
                         m_browser.SetScrollPos (SB_VERT, ScrollPosition - 5,0);
-				}
-				bScrolling = true;
+				}*/
+				
 
 			}
 			else
 			{
 				bScrolling = false;
-			}*/
+				KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
+			}
 			
 				
 			CDialog::OnMouseMove(nFlags, point);
@@ -1705,6 +1910,9 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnEndDrag(UINT nFlags, CPoint point)
 		{
+			bDragging = false;
+			bScrolling = false;
+			KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
 			if (m_hItemDrag == NULL)
 			return;
 
@@ -1723,13 +1931,12 @@ NAMESPACE__BEGIN(psycle)
   			
 			if (hItemDrop != NULL)
 			{
-				if (!((m_browser.GetItemData(m_hItemDrag) == IS_FOLDER) && ((m_hItemDrag == hNodes[0]) || (hItemDrop == hNodes[0]) || (m_browser.GetParentItem (hItemDrop) == hNodes[0]))))
+				if (!((m_hItemDrag == hNodes[0]) || ((m_browser.GetItemData(m_hItemDrag) == IS_FOLDER) &&((hItemDrop != hNodes[0]) || (m_browser.GetParentItem (hItemDrop) != hNodes[0])))))
 				{
 					HTREEITEM hItemDropped = hItemDrop;
 					MoveTreeItem (m_hItemDrag, hItemDrop == NULL ? TVI_ROOT : hItemDrop, TVI_SORT, false);
-
+				
 					bCategoriesChanged = true;
-
 					if (m_browser.GetItemData (hItemDropped) == IS_FOLDER)
 						SortChildren(hItemDropped);
 					else
@@ -1763,7 +1970,9 @@ NAMESPACE__BEGIN(psycle)
 			UINT nFlags;
 			CPoint newpoint = point;
 			ScreenToClient (&newpoint);
-			newpoint.y = newpoint.y - listitemheight / 1.2;   //arbitrary number, but it seems to work.
+			newpoint.y = newpoint.y - 13;   //compensate for shift (not sure why this happens, but it does)
+			//  ^^  this number should be fixed to be something relative to the height of an 
+			//      item/title bar/something like that, so it's accurate on ALL windows themes.
 			
 			HTREEITEM hItem = m_browser.HitTest(newpoint, &nFlags);
 			if (hItem != NULL)
@@ -1797,7 +2006,6 @@ NAMESPACE__BEGIN(psycle)
 						//THIS SHOULD BE FIXED SO IT CAN WORK
 						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
 						popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
-						
 					}
 				}
 				else
@@ -1808,7 +2016,6 @@ NAMESPACE__BEGIN(psycle)
 					popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
 					popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
 				}
-       
 				CMenu* pPopup = popupmenu.GetSubMenu(0);
 				ASSERT(pPopup != NULL);
 		
@@ -1833,7 +2040,8 @@ NAMESPACE__BEGIN(psycle)
 			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem ());
 			numCustCategories++;
 			bEditing = true;
-		} 
+
+		}
 
 
 
@@ -1866,26 +2074,24 @@ NAMESPACE__BEGIN(psycle)
 			HTREEITEM hChild = m_browser.GetChildItem (hSelectedItem);
 			while (hChild != NULL)
 			{
-				MoveTreeItem (hChild, hParent,TVI_SORT, false);
+				//Add code to check if item already exists.
+				MoveTreeItem (hChild, hParent, TVI_SORT, false);
 				hChild = m_browser.GetChildItem (hSelectedItem);
-
 			}
-
-
-			
-
 			//delete category
 			m_browser.DeleteItem (hSelectedItem);
 			SortChildren(hParent);
-			bCategoriesChanged = true;
 		}
 
 		void CNewMachine::NMPOPUP_MoveToTopLevel()
 		{
-			HTREEITEM hItem = m_browser.GetSelectedItem();
-			MoveTreeItem (hItem, TVI_ROOT, TVI_SORT, 0);
+			HTREEITEM hMovedItem = MoveTreeItem (m_browser.GetSelectedItem(), TVI_ROOT, TVI_SORT);
+			m_browser.SelectItem (hMovedItem);
+			SortChildren (hMovedItem);  //sort items in case two categories are merged
+			SortChildren (m_browser.GetParentItem (hMovedItem));  //sort category that item was moved to
 			bCategoriesChanged = true;
 		}
+
 
 		void CNewMachine::NMPOPUP_DeleteMoveUncat()
 		{
@@ -1893,15 +2099,12 @@ NAMESPACE__BEGIN(psycle)
 			//add code to move items contained in the subfolder to the "Uncategorised" folder.
 			DeleteMoveUncat (hSelectedItem);
 			//delete category
-			//m_browser.DeleteItem (hSelectedItem);
 			SortChildren(hNodes[0]);
-			bCategoriesChanged = true;
 		}
 
 		void CNewMachine::DeleteMoveUncat (HTREEITEM hParent)
 		{
 			HTREEITEM hChild = m_browser.GetChildItem (hParent);
-
 			while (hChild != NULL)
 			{
 				if (m_browser.GetItemData (hChild) == IS_FOLDER)
@@ -1916,19 +2119,11 @@ NAMESPACE__BEGIN(psycle)
 				}
 				hChild = m_browser.GetChildItem (hParent);
 			}
-
 			m_browser.DeleteItem (hParent);
 		}
-		
-		void CNewMachine::NMPOPUP_ExpandAll()
-		{
-			// TODO: Add your command handler code here
-		}
 
-		void CNewMachine::NMPOPUP_CollapseAll()
-		{
-			// TODO: Add your command handler code here
-		}
+
+	
 
 		void CNewMachine::OnBnClickedCancel()
 		{
@@ -1936,12 +2131,57 @@ NAMESPACE__BEGIN(psycle)
 			{
 				SetPluginCategories(NULL, NULL);
 			}
-			if ((bAllowChanged) || (bCategoriesChanged))
-			{
+			if (bAllowChanged)
 				SaveCacheFile();
-			}
+
+			if (bCategoriesChanged)
+				SaveCategoriesFile();
+
 			OnCancel();
 		}
 
+	void CNewMachine::OnTimer(UINT nIDEvent)
+	{
+		ScrollCount++;
+		if (ScrollCount > 0)
+		{
+			//scroll view, if possible
+			int ScrollPos;
+			ScrollPos = m_browser.GetScrollPos (SB_VERT);
+			if (bScrollUp)
+			{
+				if (ScrollPos > 0)
+				{
+					m_browser.ScrollWindow (0, itemheight, 0, 0);
+					HTREEITEM hTemp = m_browser.GetPrevVisibleItem(m_browser.GetFirstVisibleItem ());
+					m_browser.SelectSetFirstVisible (hTemp);
+					m_browser.SelectDropTarget (hTemp);
+					m_browser.Invalidate ();
+					
+				}
+			}
+			else
+			{
+				if (ScrollPos < m_browser.GetScrollLimit (SB_VERT))
+					m_browser.ScrollWindow (0,  - itemheight, 0, 0);
+					HTREEITEM hTemp = m_browser.GetNextVisibleItem(m_browser.GetFirstVisibleItem ());
+					m_browser.SelectSetFirstVisible (hTemp);
+
+					//NEED TO ADD A METHOD FOR FINDING THE LAST VISIBLE ITEM
+					//m_browser.SelectDropTarget (hCurrent);
+					m_browser.Invalidate ();
+			}
+			
+			//TEMPORARY - DELETE THESE TWO LINES LATER.
+			char buffer[100];sprintf (buffer, "%d", ScrollPos);
+			m_dllnameLabel.SetWindowText (buffer);
+		}
+
+
+		CDialog::OnTimer(nIDEvent);
+	}
+
 	NAMESPACE__END
 NAMESPACE__END
+
+
