@@ -1063,6 +1063,7 @@
 #define ID__DELETE                      32994
 #define ID__MOVETOTOPLEVEL              32995
 #define ID_Menu32996                    32996
+#define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1073,6 +1074,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        239
 #define _APS_NEXT_COMMAND_VALUE         32998
 #define _APS_NEXT_CONTROL_VALUE         1727
-#define _APS_NEXT_SYMED_VALUE           60
+#define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
