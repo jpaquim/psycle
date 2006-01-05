@@ -97,16 +97,25 @@ namespace psycle
 
 			void ITFilter::Update()
 			{
-				#define PI 3.1415926535897932384626433832795
+				double fc;
+				if ( iRes >0 || iCutoff < 127 )
+				{
+				
+					#define PI 3.1415926535897932384626433832795
 
-				//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/16.0);
-				double fc = 110.0 * pow(2.0, 0.25 + iCutoff/24.0f);
-				//double fc = 1000.0*pow(2.0, (iCutoff - 69.0)/16.0);
-				//double fc = 1000.0*pow(10.0, (iCutoff - 64.0)/64.0);
-				if (fc*2.0 >= iSampleRate) fc = (iSampleRate-1)/2.0;
+					//double fc = 440.0*pow(2.0, (iCutoff - 69.0)/12.0); // suggested
+					//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/12.0); // suggested, shifted one octave.
+					//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/16.0); // variation in 16th's, not in octaves..
+					fc = 110.0 * pow(2.0, 0.25 + iCutoff/24.0); // modplug. Most similar to IT.
+					//double fc = 100.0* (pow(2.0,(iCutoff+10)/24.0));
+				}
+				else { fc = iSampleRate/2.0; }
+
 				const double frequ = 2.0*sin(PI*min(0.25, fc/(iSampleRate*2)));  // the fs*2 is because it's double sampled
-				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.0078125, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));
+				//fCoeff[damp]  = min(2.0*(1.0 - pow(iRes/128.0, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));// original.
+				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.0072, 0.25)), min(2.0, 2.0/frequ - frequ*0.5)); // lowered Q a bit.
 				fCoeff[freq] = frequ;
+
 			}
 			void ITFilter::UpdateOld()
 			{

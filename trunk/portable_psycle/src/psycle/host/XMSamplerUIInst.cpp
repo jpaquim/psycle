@@ -156,6 +156,7 @@ void XMSamplerUIInst::AssignAmplitudeValues(XMInstrument& inst)
 }
 void XMSamplerUIInst::AssignPanningValues(XMInstrument& inst)
 {
+	m_cutoffPan.SetCheck(inst.PanEnabled());
 	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f)-64.0f);
 	m_SlSwing1Glide.SetPos(inst.RandomPanning()*100.0f);
 	m_SlNoteModNote.SetPos(inst.NoteModPanCenter());
@@ -183,14 +184,13 @@ void XMSamplerUIInst::AssignPanningValues(XMInstrument& inst)
 }
 void XMSamplerUIInst::AssignFilterValues(XMInstrument& inst)
 {
-	if ( inst.FilterCutoff()&0x80)
-	{
-		m_SlVolCutoffPan.SetPos(inst.FilterCutoff()&0x80);
-	} else {
-		m_SlVolCutoffPan.SetPos(inst.FilterCutoff());
-	}
+	m_SlVolCutoffPan.SetPos(inst.FilterCutoff()&0x7F);
+	if (inst.FilterCutoff()) m_cutoffPan.SetCheck(!(inst.FilterCutoff()&0x80));
+	else m_cutoffPan.SetCheck(0);
 
-	m_SlFadeoutRes.SetPos(inst.FilterResonance());
+	m_SlFadeoutRes.SetPos(inst.FilterResonance()&0x7F);
+	if (inst.FilterResonance()) m_Ressonance.SetCheck(!(inst.FilterResonance()&0x80));
+	else m_Ressonance.SetCheck(0);
 	m_SlSwing1Glide.SetPos(inst.RandomCutoff()*100.0f);
 	m_SlSwing2.SetPos(inst.RandomResonance()*100.0f);
 	//m_SlNoteModNote.SetPos(inst.NoteModFilterCenter());
