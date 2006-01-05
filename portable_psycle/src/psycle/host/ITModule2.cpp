@@ -669,13 +669,13 @@ Special:  Bit 0: On = song message attached.
 			} else {
 				for (j = 0; j < iLen; j++) {
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = (wNew<<8)+offset;
+					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset);
 				}
 				if (bstereo) {
 					Read(smpbuf,iLen);
 					for (j = 0; j < iLen; j++) {
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = (wNew<<8)+offset;
+						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset);
 					}
 				}
 			}
@@ -1061,7 +1061,9 @@ Special:  Bit 0: On = song message attached.
 							pent._cmd = XMSampler::CMD::EXTENDED;
 							if ( embeddedData)
 							{
-								pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xf)][5]-48);
+								//\todo: SFx is never initialized. I need to check why I did it this way also. Leaving the defaults for now.
+							//	pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xf)][5]-48);
+								pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (param & 0xf);
 							}
 							break;
 					}

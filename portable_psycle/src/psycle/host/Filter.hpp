@@ -180,13 +180,13 @@ namespace psycle
 				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
 				high  = notch - dLow[0];
 				dBand[0] = fCoeff[freq]*high + dBand[0];
-				//				out   = 0.5*(notch or low or high or band or peak);
-				dLow[0] = 0.5*dLow[0];
+//				out   = 0.5*(notch or low or high or band or peak);
+				out = 0.5*dLow[0];
 				notch = _fLeft - fCoeff[damp]*dBand[0];
 				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
 				high  = notch - dLow[0];
 				dBand[0] = fCoeff[freq]*high + dBand[0];
-				//				out  += 0.5*(same out as above);
+//				out  += 0.5*(same out as above);
 				out += 0.5*dLow[0];
 				_fLeft = out;
 
@@ -195,7 +195,7 @@ namespace psycle
 				high  = notch - dLow[1];
 				dBand[1] = fCoeff[freq]*high + dBand[1];
 				//				out   = 0.5*(notch or low or high or band or peak);
-				dLow[1] = 0.5*dLow[1];
+				out = 0.5*dLow[1];
 				notch = _fRight - fCoeff[damp]*dBand[1];
 				dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
 				high  = notch - dLow[1];

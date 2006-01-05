@@ -446,12 +446,29 @@ namespace psycle
 			{
 				CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
 			}
-			else*/ if (_inst.FilterCutoff() < 127 || _inst.FilterResonance() > 0)
+			else*/ if (_inst.FilterCutoff() < 127)
 			{
 				CutOff(_inst.FilterCutoff());
 				Ressonance(_inst.FilterResonance());
 				FilterType(_inst.FilterType());
-			} else if ( rChannel().Cutoff() < 127 || rChannel().Ressonance() > 0)
+			} else if ( rChannel().Cutoff() < 127)
+			{
+				FilterType(rChannel().FilterType());
+				CutOff(rChannel().Cutoff());
+				Ressonance(rChannel().Ressonance());
+			}
+
+			
+/*			if (_inst.RandomResonance())
+			{
+				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
+			}
+			else */ if (_inst.FilterResonance() > 0)
+			{
+				CutOff(_inst.FilterCutoff());
+				Ressonance(_inst.FilterResonance());
+				FilterType(_inst.FilterType());
+			} else if ( rChannel().Ressonance() > 0)
 			{
 				FilterType(rChannel().FilterType());
 				CutOff(rChannel().Cutoff());
@@ -461,19 +478,6 @@ namespace psycle
 			{
 				CutOff(127);Ressonance(0);
 			}
-
-			
-/*			if (_inst.RandomResonance())
-			{
-				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
-			}
-			else
-			{
-				m_Filter._q = _inst.FilterResonance();
-			}
-*/
-//			_coModify = (float)_inst.FilterEnvAmount()/128.0f;
-//			m_Filter.Update();
 
 			ResetEffects();
 			
@@ -1199,7 +1203,7 @@ panbrello, and S44 will be a slower panbrello.
 					PanFactor((parameter&0xf)/15.0f);
 					break;
 				case CMD_E::E_SET_MIDI_MACRO:
-					m_MIDI_Set = parameter;
+					m_MIDI_Set = parameter&0x0F;
 					//\todo : implement.
 					break;
 				case CMD_E::E_GLISSANDO_TYPE:
