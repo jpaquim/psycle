@@ -492,7 +492,7 @@ XMSampler::Channel::PerformFX().
 
 		// Do Auto Vibrato
 		void AutoVibrato();
-		bool IsAutoVibrato() { return m_AutoVibratoAmount!=0; };
+		bool IsAutoVibrato() { return m_AutoVibratoDepth && rWave().Wave().VibratoSpeed(); };
 		// Get Auto Vibrato Amount
 		const double AutoVibratoAmount(){return m_AutoVibratoAmount;};
 
@@ -657,6 +657,7 @@ XMSampler::Channel::PerformFX().
 		int m_PanbrelloDepth;
 		float m_PanbrelloAmount;
 		int m_PanbrelloPos;
+		int m_PanbrelloRandomCounter;
 
 		/// Tremor 
 		int m_TremorOnTicks;

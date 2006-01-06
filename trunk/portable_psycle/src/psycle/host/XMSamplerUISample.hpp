@@ -58,7 +58,7 @@ public:
 	afx_msg void OnNMCustomdrawGlobvolume(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCbnSelendokVibratotype();
-	afx_msg void OnNMCustomdrawVibratorate(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMCustomdrawVibratoAttack(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCbnSelendokLoop();

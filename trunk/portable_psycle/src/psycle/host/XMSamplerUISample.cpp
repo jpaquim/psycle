@@ -182,7 +182,7 @@ BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_GLOBVOLUME, OnNMCustomdrawGlobvolume)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PAN, OnNMCustomdrawPan)
 	ON_CBN_SELENDOK(IDC_VIBRATOTYPE, OnCbnSelendokVibratotype)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATORATE, OnNMCustomdrawVibratorate)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATOATTACK, OnNMCustomdrawVibratoAttack)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATOSPEED, OnNMCustomdrawVibratospeed)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATODEPTH, OnNMCustomdrawVibratodepth)
 	ON_CBN_SELENDOK(IDC_LOOP, OnCbnSelendokLoop)
@@ -216,7 +216,7 @@ BOOL XMSamplerUISample::OnSetActive()
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(26);
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE))->SetRangeMax(255);
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetRangeMax(255);
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetRangeMax(64);
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetRangeMax(32);
 	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->AddString("Sinus");
@@ -294,8 +294,8 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(-1*int(wave.WaveTune()));
 	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(int(wave.WaveFineTune()));
 
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE))->SetPos(wave.VibratoRate());
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSweep());
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetPos(wave.VibratoAttack());
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSpeed());
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetPos(wave.VibratoDepth());
 	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->SetCurSel((int)wave.VibratoType());
 
@@ -575,18 +575,18 @@ void XMSamplerUISample::OnCbnSelendokVibratotype()
 	rWave().VibratoType(XMInstrument::WaveData::WaveForms(cbox->GetCurSel()));
 }
 
-void XMSamplerUISample::OnNMCustomdrawVibratorate(NMHDR *pNMHDR, LRESULT *pResult)
+void XMSamplerUISample::OnNMCustomdrawVibratoAttack(NMHDR *pNMHDR, LRESULT *pResult)
 {
 //	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE);
+	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK);
 	if ( m_Init )
 	{
-		rWave().VibratoRate(slid->GetPos());
+		rWave().VibratoAttack(slid->GetPos());
 	}
 	char tmp[40];
 	if ( slid->GetPos()>0 ) sprintf(tmp,"%d",slid->GetPos());
 	else strcpy(tmp,"Disabled");
-	((CStatic*)GetDlgItem(IDC_LVIBRATORATE))->SetWindowText(tmp);
+	((CStatic*)GetDlgItem(IDC_LVIBRATOATTACK))->SetWindowText(tmp);
 	*pResult = 0;
 }
 
@@ -596,11 +596,11 @@ void XMSamplerUISample::OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResu
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED);
 	if ( m_Init )
 	{
-		rWave().VibratoSweep(slid->GetPos());
+		rWave().VibratoSpeed(slid->GetPos());
 	}
 	char tmp[40];
 	sprintf(tmp,"%d",slid->GetPos());
-	((CStatic*)GetDlgItem(IDC_LVIBRATOSWEEP))->SetWindowText(tmp);
+	((CStatic*)GetDlgItem(IDC_LVIBRATOSPEED))->SetWindowText(tmp);
 	*pResult = 0;
 }
 
