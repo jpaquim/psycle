@@ -84,8 +84,8 @@ namespace psycle
 				m_WaveStereo = false;
 				m_PanFactor = 0.5f;
 				m_PanEnabled = false;
-				m_VibratoRate = 0;
-				m_VibratoSweep = 0;
+				m_VibratoAttack = 0;
+				m_VibratoSpeed = 0;
 				m_VibratoDepth = 0;
 				m_VibratoType = 0;
 			};
@@ -130,8 +130,8 @@ namespace psycle
 				m_WaveTune = source.m_WaveTune;
 				m_WaveFineTune = source.m_WaveFineTune;	
 				m_WaveStereo = source.m_WaveStereo;
-				m_VibratoRate = source.m_VibratoRate;
-				m_VibratoSweep = source.m_VibratoSweep;
+				m_VibratoAttack = source.m_VibratoAttack;
+				m_VibratoSpeed = source.m_VibratoSpeed;
 				m_VibratoDepth = source.m_VibratoDepth;
 				m_VibratoType = source.m_VibratoType;
 
@@ -186,16 +186,16 @@ namespace psycle
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
 
 			const compiler::uint8 VibratoType(){return m_VibratoType;};
-			const compiler::uint8 VibratoSweep(){return m_VibratoSweep;};
+			const compiler::uint8 VibratoSpeed(){return m_VibratoSpeed;};
 			const compiler::uint8 VibratoDepth(){return m_VibratoDepth;};
-			const compiler::uint8 VibratoRate(){return m_VibratoRate;};
+			const compiler::uint8 VibratoAttack(){return m_VibratoAttack;};
 
 			void VibratoType(const compiler::uint8 value){m_VibratoType = value ;};
-			void VibratoSweep(const compiler::uint8 value){m_VibratoSweep = value ;};
+			void VibratoSpeed(const compiler::uint8 value){m_VibratoSpeed = value ;};
 			void VibratoDepth(const compiler::uint8 value){m_VibratoDepth = value ;};
-			void VibratoRate(const compiler::uint8 value){m_VibratoRate = value ;};
+			void VibratoAttack(const compiler::uint8 value){m_VibratoAttack = value ;};
 
-			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoRate;};
+			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoSpeed;};
 
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
@@ -226,8 +226,8 @@ namespace psycle
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
 			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right . > 1 == Surround!
-			compiler::uint8 m_VibratoRate;
-			compiler::uint8 m_VibratoSweep;
+			compiler::uint8 m_VibratoAttack;
+			compiler::uint8 m_VibratoSpeed;
 			compiler::uint8 m_VibratoDepth;
 			compiler::uint8 m_VibratoType;
 

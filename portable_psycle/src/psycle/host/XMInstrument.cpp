@@ -53,8 +53,8 @@ namespace psycle
 			riffFile->Read(m_PanEnabled);
 			riffFile->Read(m_PanFactor);
 
-			riffFile->Read(m_VibratoRate);
-			riffFile->Read(m_VibratoSweep);
+			riffFile->Read(m_VibratoAttack);
+			riffFile->Read(m_VibratoSpeed);
 			riffFile->Read(m_VibratoDepth);
 			riffFile->Read(m_VibratoType);
 
@@ -121,8 +121,8 @@ namespace psycle
 			riffFile->Write(m_PanEnabled);
 			riffFile->Write(m_PanFactor);
 
-			riffFile->Write(m_VibratoRate);
-			riffFile->Write(m_VibratoSweep);
+			riffFile->Write(m_VibratoAttack);
+			riffFile->Write(m_VibratoSpeed);
 			riffFile->Write(m_VibratoDepth);
 			riffFile->Write(m_VibratoType);
 

@@ -679,9 +679,11 @@ namespace host{
 		ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
 		Read(&_samph,sizeof(XMSAMPLEHEADER));
 		
-/*		sampler.rInstrument(idx).AutoVibratoDepth(_samph.vibdepth);
-		sampler.rInstrument(idx).AutoVibratoRate(_samph.vibrate);
-		sampler.rInstrument(idx).AutoVibratoSweep(_samph.vibsweep);
+/*		//\todo: Implement the following autovibrato (add to each sample of the instrument).
+		sampler.rInstrument(idx).AutoVibratoDepth(_samph.vibdepth);
+		sampler.rInstrument(idx).AutoVibratoRate(_samph.vibrate); -> Speed
+		// Attack needs to be converted with the following formula: attack = 255/ vibsweep
+		sampler.rInstrument(idx).AutoVibratoSweep(_samph.vibsweep); -> Attack
 		sampler.rInstrument(idx).AutoVibratoType(_samph.vibtype);
 */			
 

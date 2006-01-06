@@ -847,6 +847,7 @@
 #define IDC_PAN                         1634
 #define IDC_PANENABLED                  1635
 #define IDC_VIBRATORATE                 1636
+#define IDC_VIBRATOATTACK               1636
 #define IDC_VIBRATOTYPE                 1637
 #define IDC_SUSTAINSTART                1638
 #define IDC_SUSTAINEND                  1639
@@ -869,7 +870,9 @@
 #define IDC_LGLOBVOL                    1654
 #define IDC_LPAN                        1655
 #define IDC_LVIBRATORATE                1656
+#define IDC_LVIBRATOATTACK              1656
 #define IDC_LVIBRATOSWEEP               1657
+#define IDC_LVIBRATOSPEED               1657
 #define IDC_LVIBRATODEPTH               1658
 #define IDC_MACHINEGUI_BITMAP           1659
 #define IDC_LSAMPLENOTE                 1659

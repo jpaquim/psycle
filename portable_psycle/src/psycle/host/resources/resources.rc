@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -2011,10 +2011,10 @@ BEGIN
     CONTROL         "",IDC_PAN,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
                     WS_TABSTOP,243,71,70,11
     GROUPBOX        "Vibrato",IDC_STATIC,355,22,162,81
-    LTEXT           "Rate",IDC_STATIC,367,53,15,8
-    CONTROL         "",IDC_VIBRATORATE,"msctls_trackbar32",TBS_BOTH | 
+    LTEXT           "Speed",IDC_STATIC,367,71,22,8
+    CONTROL         "",IDC_VIBRATOATTACK,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,406,53,70,11
-    LTEXT           "Sweep",IDC_STATIC,367,71,23,8
+    LTEXT           "Attack",IDC_STATIC,367,53,23,8
     CONTROL         "",IDC_VIBRATOSPEED,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,406,71,70,11
     LTEXT           "Depth",IDC_STATIC,367,89,20,8
@@ -2045,9 +2045,9 @@ BEGIN
                     SS_SUNKEN
     CTEXT           "Estático",IDC_LPAN,314,69,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
-    CTEXT           "Estático",IDC_LVIBRATORATE,478,51,31,12,SS_CENTERIMAGE | 
-                    SS_SUNKEN
-    CTEXT           "Estático",IDC_LVIBRATOSWEEP,478,69,31,12,SS_CENTERIMAGE | 
+    CTEXT           "Estático",IDC_LVIBRATOATTACK,477,51,31,12,
+                    SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Estático",IDC_LVIBRATOSPEED,478,69,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     CTEXT           "Estático",IDC_LVIBRATODEPTH,478,87,31,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
@@ -2955,7 +2955,7 @@ BEGIN
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
