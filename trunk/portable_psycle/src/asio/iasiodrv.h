@@ -7,6 +7,7 @@
 
 #include "asiosys.h"
 #include "asio.h"
+#include <unknwn.h>
 namespace asio
 {
 	/* Forward Declarations */ 
