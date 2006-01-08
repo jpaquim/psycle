@@ -1,7 +1,10 @@
-#!/bin/sh
+#! /bin/bash
+# cygwin's sh not posix
+# !/bin/sh
 
 function main
 {
+	dirname $0 && # first test there's no space in the path
 	cd $(dirname $0) &&
 	for i in 7.1 8.0
 	do
