@@ -21,7 +21,7 @@
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
 #define PSYCLE__BRANCH "psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
+#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2006 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 9
@@ -77,6 +77,9 @@
 #if 0
 /*
 $Log$
+Revision 1.47  2006/01/08 03:28:19  johan-boule
+Happy New Year Psycle!
+
 Revision 1.46  2005/11/04 17:13:22  johan-boule
 not a stable release
 
