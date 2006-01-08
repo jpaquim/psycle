@@ -172,7 +172,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/read_write_mutex.hpp>
+//#include <boost/thread/read_write_mutex.hpp>
 #include <boost/thread/condition.hpp>
 // huge include! #include <boost/spirit.hpp>
 
