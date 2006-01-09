@@ -200,11 +200,11 @@ namespace psycle
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
 			
-			signed short WaveDataL(const compiler::sint32 index) const { return (*(m_pWaveDataL + index));};
-			signed short WaveDataR(const compiler::sint32 index) const { return (*(m_pWaveDataR + index));};
+			signed short WaveDataL(const compiler::uint32 index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataL + index));};
+			signed short WaveDataR(const compiler::uint32 index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataR + index));};
 			
-			void WaveDataL(const int index,const signed short value){ *(m_pWaveDataL + index) = value;};
-			void WaveDataR(const int index,const signed short value){ *(m_pWaveDataR + index) = value;};
+			void WaveDataL(const compiler::uint32 index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataL + index) = value;};
+			void WaveDataR(const compiler::uint32 index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataR + index) = value;};
 
 		private:
 

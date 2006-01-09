@@ -128,8 +128,6 @@ NAMESPACE__BEGIN(psycle)
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
 
-			// Show Machine view and init MIDI
-			OnMachineview();
 		}
 
 		CChildView::~CChildView()
@@ -1017,6 +1015,7 @@ NAMESPACE__BEGIN(psycle)
 				Repaint();
 				pParentMain->StatusBarIdle();
 			}
+			SetFocus();
 		}
 
 		void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 

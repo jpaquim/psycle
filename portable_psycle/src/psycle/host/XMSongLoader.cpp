@@ -678,14 +678,12 @@ namespace host{
 		XMSAMPLEHEADER _samph;
 		ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
 		Read(&_samph,sizeof(XMSAMPLEHEADER));
-		
-/*		//\todo: Implement the following autovibrato (add to each sample of the instrument).
-		sampler.rInstrument(idx).AutoVibratoDepth(_samph.vibdepth);
-		sampler.rInstrument(idx).AutoVibratoRate(_samph.vibrate); -> Speed
-		// Attack needs to be converted with the following formula: attack = 255/ vibsweep
-		sampler.rInstrument(idx).AutoVibratoSweep(_samph.vibsweep); -> Attack
-		sampler.rInstrument(idx).AutoVibratoType(_samph.vibtype);
-*/			
+
+		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
+			XMInstrument::WaveData::WaveForms::SQUARE,
+			XMInstrument::WaveData::WaveForms::SAWDOWN,
+			XMInstrument::WaveData::WaveForms::SAWUP
+		};		
 
 		SetEnvelopes(sampler.rInstrument(idx),_samph);
 
@@ -706,6 +704,13 @@ namespace host{
 			{
 				sampler.rInstrument(idx).IsEnabled(true);
 				iStart = LoadSampleData(sampler,iStart,idx,sRemap[i]);
+
+				//\todo : Improve autovibrato. (correct depth? fix for sweep?)
+				XMInstrument::WaveData& _wave = sampler.SampleData(sRemap[i]);
+				_wave.VibratoAttack(_samph.vibsweep!=0?255/_samph.vibsweep:255);
+				_wave.VibratoDepth(_samph.vibdepth<<1);
+				_wave.VibratoSpeed(_samph.vibrate);
+				_wave.VibratoType(exchwave[_samph.vibtype&3]);
 			}
 		}
 

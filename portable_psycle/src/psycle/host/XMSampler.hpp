@@ -672,9 +672,6 @@ XMSampler::Channel::PerformFX().
 		int m_AutoVibratoPos;
 
 		int m_RetrigTicks;
-		int m_RetrigVol;
-		int m_RetrigOperation;
-
 
 		static const int m_FineSineData[256];
 		static const int m_FineRampDownData[256];
@@ -738,7 +735,7 @@ XMSampler::Channel::PerformFX().
 		void Tremolo(int speed,int depth);
 		void Panbrello(int speed,int depth);
 		void Arpeggio(const int param);
-		void Retrigger(const int ticks,const int volumeModifier);
+		void Retrigger(const int param);
 		void NoteCut(const int ntick);
 		void DelayedNote(PatternEntry data);
 
@@ -882,7 +879,6 @@ XMSampler::Channel::PerformFX().
 		int m_TremoloType;
 		int m_PanbrelloType;
 
-
 		int m_EffectFlags;
 
 		int	m_PitchSlideSpeed;
@@ -893,12 +889,6 @@ XMSampler::Channel::PerformFX().
 		float m_ChanVolSlideSpeed;
 		float m_PanSlideSpeed;
 
-/*		int m_VibratoSpeed;
-		int m_VibratoDepth;
-		int m_VibratoPos;
-		double m_VibratoAmount;
-		double m_AutoVibratoAmount;
-*/
 		int m_TremoloSpeed;
 		int m_TremoloDepth;
 		float m_TremoloDelta;
@@ -917,6 +907,8 @@ XMSampler::Channel::PerformFX().
 		int m_NoteCutTick;
 		PatternEntry m_DelayedNote;
 
+		int m_RetrigOperation;
+		int m_RetrigVol;
 
 		int m_PanSlideMem;
 		int m_ChanVolSlideMem;
@@ -933,6 +925,7 @@ XMSampler::Channel::PerformFX().
 		int m_VolumeSlideMem;
 		int m_GlobalVolSlideMem;
 		int m_ArpeggioMem;
+		int m_RetrigMem;
 
 		int m_MIDI_Set;
 		int m_Cutoff;
