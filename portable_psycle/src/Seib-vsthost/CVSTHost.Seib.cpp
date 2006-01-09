@@ -510,7 +510,7 @@ namespace Seib {
 				if (sName)
 					strcpy(sName, name);
 		#ifdef WIN32
-				char *p = strrchr(name, '\\');
+				char const * const p = strrchr(name, '\\');
 				if (p)
 				{
 					sDir = new char[p - name + 1];
