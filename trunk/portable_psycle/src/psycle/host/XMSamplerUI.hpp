@@ -39,7 +39,7 @@ class XMSamplerUI : public CPropertySheet
 		// Generated message map functions
 	protected:
 		//{{AFX_MSG(XMSamplerUI)
-		afx_msg void OnClose();
+		afx_msg void OnDestroy();
 		//}}AFX_MSG
 		DECLARE_MESSAGE_MAP()
 	};

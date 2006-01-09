@@ -618,11 +618,10 @@ Special:  Bit 0: On = song message attached.
 				_wave.WaveName(sName);
 				_wave.PanEnabled(curH.dfp&0x80);
 				_wave.PanFactor((curH.dfp&0x7F)/64.0f);
-				//\todo: IT vibrato attack is  depth+= targetdepth * (rate/256); . If 0 -> no vibrato.
 				_wave.VibratoAttack(curH.vibR);
 				_wave.VibratoSpeed(curH.vibS);
 				_wave.VibratoDepth(curH.vibD);
-				_wave.VibratoType(exchwave[curH.vibT]);
+				_wave.VibratoType(exchwave[curH.vibT&3]);
 
 				if (curH.length == 0)
 					curH.flg &= ~SampleFlags::HAS_SAMPLE;

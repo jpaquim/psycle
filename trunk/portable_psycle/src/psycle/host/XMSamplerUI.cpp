@@ -27,14 +27,15 @@ XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 
 BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
 	//{{AFX_MSG_MAP(XMSamplerUI)
-		ON_WM_CLOSE()
+	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void XMSamplerUI::OnClose()
+///void XMSamplerUI::OnClose()
+void XMSamplerUI::OnDestroy()
 {
 	((CChildView*)m_pParentWnd)->XMSamplerMachineDialog = NULL;
-	CPropertySheet::OnClose();
+	CPropertySheet::OnDestroy();
 }
 
 

@@ -110,6 +110,8 @@ namespace psycle
 					//double fc = 100.0* (pow(2.0,(iCutoff+10)/24.0));
 				}
 				else { fc = iSampleRate/2.0; }
+				// Attempt at Self-filtered samples. It filters too much.
+//				else { fc = iSampleCurrentSpeed/2.0; }
 
 				const double frequ = 2.0*sin(PI*min(0.25, fc/(iSampleRate*2)));  // the fs*2 is because it's double sampled
 				//fCoeff[damp]  = min(2.0*(1.0 - pow(iRes/128.0, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));// original.

@@ -363,6 +363,8 @@ NAMESPACE__BEGIN(psycle)
 			// Finally initializing timer
 			
 			UpdateSequencer();
+			// Show Machine view and init MIDI
+			m_wndView.OnMachineview();
 			m_wndView.InitTimer();
 		//	m_wndView.Repaint();
 			m_wndView.SetFocus();
@@ -487,7 +489,7 @@ NAMESPACE__BEGIN(psycle)
 
 			m_wndView.RecalculateColourGrid();
 			m_wndView.Repaint();
-			m_wndView.SetFocus();
+//			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnCloseupTrackcombo() 
@@ -580,7 +582,7 @@ NAMESPACE__BEGIN(psycle)
 			_pSong->currentOctave=cc2->GetCurSel();
 			
 			m_wndView.Repaint();
-			m_wndView.SetFocus();
+//			m_wndView.SetFocus();
 		}
 
 		//////////////////////////////////////////////////////////////////////
@@ -741,7 +743,7 @@ NAMESPACE__BEGIN(psycle)
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
 			int sel=cc->GetCurSel();
 			m_wndView.patStep=sel;
-			m_wndView.SetFocus();
+//			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnCloseupSscombo2()	// OnCloseupPatternStep
@@ -2011,10 +2013,11 @@ NAMESPACE__BEGIN(psycle)
 						}
 						UpdateSequencer(m_wndView.editPosition);
 						m_wndView.Repaint(DMPattern);
-						m_wndView.SetFocus();
+
 					}
 				}
 			}
+			m_wndView.SetFocus();
 		}
 
 

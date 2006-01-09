@@ -97,14 +97,19 @@ namespace psycle
 
 		void Player::ExecuteLine(void)
 		{
+			ExecuteGlobalCommands();
+			NotifyNewLine();
+			ExecuteNotes();
+		}
+		// Initial Loop. Read new line and Interpret the Global commands.
+		void Player::ExecuteGlobalCommands(void)
+		{
 			Song* pSong = Global::_pSong;
-			_lineChanged = true;
 			_patternjump = -1;
 			_linejump = -1;
 			int mIndex = 0;
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
-			// Initial Loop. Check for Tracker Commands.
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
@@ -265,8 +270,12 @@ namespace psycle
 					}
 				}
 			}
+		}
 
-			// Notify all machines that a new Tick() comes.
+		// Notify all machines that a new Tick() comes.
+		void Player::NotifyNewLine(void)
+		{
+			Song* pSong = Global::_pSong;
 			for(int tc=0; tc<MAX_MACHINES; tc++)
 			{
 				if(pSong->_pMachine[tc])
@@ -276,7 +285,15 @@ namespace psycle
 				}
 			}
 
-			// Finally, loop again checking for Notes
+		}
+
+		/// Final Loop. Read new line for notes to send to the Machines
+		void Player::ExecuteNotes(void)
+		{
+			Song* pSong = Global::_pSong;
+			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
+
+
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
@@ -388,6 +405,7 @@ namespace psycle
 			}
 			// this is outside the if, so that _patternjump works
 			_playPattern = pSong->playOrder[_playPosition];
+			_lineChanged = true;
 		}
 
 		float * Player::Work(void* context, int & numSamples)
@@ -412,11 +430,22 @@ namespace psycle
 				// Tick handler function
 				if((pThis->_playing) && (amount >= pThis->_samplesRemaining)) amount = pThis->_samplesRemaining;
 				// Song play
-				if((pThis->_samplesRemaining <=0) && (pThis->_playing))
+				if((pThis->_samplesRemaining <=0))
 				{
-					// Advance position in the sequencer
-					pThis->AdvancePosition();
-					if (pThis->_playing) pThis->ExecuteLine();
+					if (pThis->_playing)
+					{
+						// Advance position in the sequencer
+						pThis->AdvancePosition();
+						// Global commands are executed first so that the values for BPM and alike
+						// are up-to-date when "NotifyNewLine()" is called.
+						pThis->ExecuteGlobalCommands();
+						pThis->NotifyNewLine();
+						pThis->ExecuteNotes();
+					}
+					else
+					{
+						pThis->NotifyNewLine();
+					}
 				}
 				// Processing plant
 				if(amount > 0)

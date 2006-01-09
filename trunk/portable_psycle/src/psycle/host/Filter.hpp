@@ -132,6 +132,7 @@ namespace psycle
 				ftFilter= F_NONE;
 				iCutoff=127;
 				iRes=0;
+				iSampleCurrentSpeed = iSampleRate;
 				dBand[0] = 0;
 				dBand[1] = 0;
 				dLow[0] = 0;
@@ -145,6 +146,7 @@ namespace psycle
 			void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }};
 			void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }};
 			void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }};
+			void SampleSpeed(int _iSampleSpeed) { if ( iSampleCurrentSpeed != _iSampleSpeed) {iSampleCurrentSpeed = _iSampleSpeed; Update(); }};
 			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }};
 			FilterType Type (void) { return ftFilter; };
 			
@@ -260,6 +262,7 @@ namespace psycle
 			int iSampleRate;
 			int iCutoff;
 			int iRes;
+			int iSampleCurrentSpeed;
 			FilterType ftFilter;
 			float fCoeff[4];
 			double dBand[2];

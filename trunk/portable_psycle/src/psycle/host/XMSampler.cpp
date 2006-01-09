@@ -416,8 +416,6 @@ namespace psycle
 			m_AutoVibratoDepth = 0; 
 
 			m_RetrigTicks=0;
-			m_RetrigVol=0;
-			m_RetrigOperation=0;
 
 		}
 		void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
@@ -656,6 +654,8 @@ namespace psycle
 			}
 			//Important, put it after m_PitchEnvelope.NoteOn(); (currently done inside ResetVolAndPan)
 			UpdateSpeed();
+			// Attempt at Self-filtered samples. It filters too much.
+			//if  (m_Filter.Type() == dsp::F_NONE && m_pSampler->UseFilters()) m_Filter.Type(dsp::F_LOWPASS12);
 
 			m_WaveDataController.Playing(true);
 			IsPlaying(true);
@@ -831,18 +831,18 @@ namespace psycle
 
 			if(rWave().Wave().VibratoAttack())
 			{
-				m_AutoVibratoDepth += rWave().Wave().VibratoAttack();
-				if((m_AutoVibratoDepth) > rWave().Wave().VibratoDepth())
+				m_AutoVibratoDepth += rWave().Wave().VibratoAttack()<<1;
+				if((m_AutoVibratoDepth) > rWave().Wave().VibratoDepth()<<8)
 				{
-					m_AutoVibratoDepth = rWave().Wave().VibratoDepth();
+					m_AutoVibratoDepth = rWave().Wave().VibratoDepth()<<8;
 				}
 			} else {
-				m_AutoVibratoDepth = rWave().Wave().VibratoDepth();
+				m_AutoVibratoDepth = rWave().Wave().VibratoDepth()<<8;
 			}
 
-			vdelta = vdelta * m_AutoVibratoDepth;
-			m_AutoVibratoAmount=(double)vdelta / 32.0f;
-			m_AutoVibratoPos = (m_AutoVibratoPos - (rWave().Wave().VibratoSpeed()<<1)) & 0xFF;
+			vdelta = vdelta * (m_AutoVibratoDepth>>8);
+			m_AutoVibratoAmount=(double)vdelta / 128.0;
+			m_AutoVibratoPos = (m_AutoVibratoPos - (rWave().Wave().VibratoSpeed())) & 0xFF;
 			UpdateSpeed();
 
 		}
@@ -852,7 +852,7 @@ namespace psycle
 			int vdelta = GetDelta(rChannel().VibratoType(),m_VibratoPos);
 
 			vdelta = vdelta * m_VibratoDepth;
-			m_VibratoAmount=(double)vdelta / 32.0f;
+			m_VibratoAmount=(double)vdelta / 32.0;
 			m_VibratoPos = (m_VibratoPos - m_VibratoSpeed) & 0xFF;
 			UpdateSpeed();
 
@@ -864,7 +864,7 @@ namespace psycle
 			int vdelta = GetDelta(rChannel().TremoloType(),m_TremoloPos);
 
 			vdelta = (vdelta * m_TremoloDepth);
-			m_TremoloAmount = vdelta / 2048.0f;
+			m_TremoloAmount = (double)vdelta / 2048.0;
 			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0xFF;
 
 
@@ -872,7 +872,6 @@ namespace psycle
 
 		void XMSampler::Voice::Panbrello()
 		{
-		//\todo :
 		//Yxy   Panbrello with speed x, depth y.
 		//The random pan position can be achieved by setting the
 		//waveform to 3 (ie. a S53 command). In this case *ONLY*, the
@@ -888,7 +887,7 @@ namespace psycle
 			{
 				m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0xFF;
 			}
-			else if (++m_PanbrelloRandomCounter > m_PanbrelloSpeed )
+			else if (++m_PanbrelloRandomCounter >= m_PanbrelloSpeed )
 			{
 				m_PanbrelloPos++;
 				m_PanbrelloRandomCounter = 0;
@@ -917,9 +916,9 @@ namespace psycle
 
 		void XMSampler::Voice::Retrig()
 		{
-			if ( pSampler()->CurrentTick() >= m_RetrigTicks ) 
+			if ( pSampler()->CurrentTick()%m_RetrigTicks == 0 ) 
 			{
-				NoteOn(m_Note);
+				NoteOn(m_Note,-1,false);
 			}
 		}
 
@@ -954,11 +953,15 @@ namespace psycle
 				int _note = PeriodToNote(_period);
 				_period = NoteToPeriod(_note);
 			}
-			_period = _period + AutoVibratoAmount() + VibratoAmount() - (m_PitchEnvelope.ModulationAmount()*1024.0f);
+			//\todo: Attention, AutoVibrato uses linear slides with IT. This needs to be fixed.
+			_period = _period + AutoVibratoAmount() +  VibratoAmount();
 			if ( _period > 65535) _period = 65535;
 			else if ( _period < 32 ) _period = 32;
 
-			rWave().Speed(PeriodToSpeed(_period));
+			const double speed=PeriodToSpeed(_period);
+			rWave().Speed(speed);
+			// Attempt at Self-filtered samples. It filters too much.
+//			m_Filter.SampleSpeed(speed*(double)Global::pPlayer->SampleRate());
 		}
 
 		double XMSampler::Voice::PeriodToSpeed(int period)
@@ -968,7 +971,7 @@ namespace psycle
 				// 14318181 = 7159090.5*2 (clockspeed*2)
 				// in xm-form.txt, there is 14317456 = 8363Hz* 1712(center-period),
 				// and in fs3mdoc there's the value 14317056 , which i assume wrong.
-				return ( 14318181  / period ) / (double)Global::pPlayer->SampleRate();
+				return ( 14318181  / period ) / (double)Global::pPlayer->SampleRate() * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0);
 			} else {
 				// Linear Frequency
 				// 8363*2^((5*12*64 - Period) / (12*64))
@@ -976,7 +979,8 @@ namespace psycle
 				// 12*64 = 12 notes * 64 finetune steps.
 				// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
 				return	pow(2.0,
-							(5376 - period ) /768.0
+							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
+							 /768.0)
 						)
 						* 8363 / (double)Global::pPlayer->SampleRate();
 			}
@@ -1070,6 +1074,7 @@ namespace psycle
 			m_PanbrelloSpeedMem = 0;
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
+			m_RetrigMem = 0;
 
 			m_EffectFlags = 0;
 
@@ -1080,12 +1085,6 @@ namespace psycle
 			m_ChanVolSlideSpeed = 0.0f;
 			m_PanSlideSpeed = 0.0f;
 
-/*			m_VibratoSpeed = 0;
-			m_VibratoDepth = 0;
-			m_VibratoPos = 0;
-			m_VibratoAmount = 0;
-			m_AutoVibratoAmount = 0;
-*/
 			m_TremoloSpeed = 0;
 			m_TremoloDepth = 0;
 			m_TremoloDelta = 0;
@@ -1095,6 +1094,9 @@ namespace psycle
 			m_PanbrelloDepth = 0;
 			m_PanbrelloDelta = 0;
 			m_PanbrelloPos = 0;
+
+			m_RetrigOperation = 0;
+			m_RetrigVol = 0;
 
 			m_ArpeggioPeriod[0] = 0.0;
 			m_ArpeggioPeriod[1] = 0.0;
@@ -1140,6 +1142,7 @@ namespace psycle
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
 			m_GlobalVolSlideMem = 0;
+			m_RetrigMem = 0;
 			m_Cutoff = m_DefaultCutoff;
 			m_Ressonance = m_DefaultRessonance;
 			m_FilterType = m_DefaultFilterType;
@@ -1415,7 +1418,7 @@ namespace psycle
 					Tremolo((parameter>> 4) & 0x0F,(parameter & 0x0F));
 					break;
 				case CMD::RETRIG:
-					Retrigger((parameter & 0x0F),(parameter>> 4) & 0x0F);
+					Retrigger(parameter);
 					break;
 				case CMD::PANBRELLO:
 					Panbrello((parameter>> 4) & 0x0F,(parameter & 0x0F));
@@ -1504,6 +1507,27 @@ namespace psycle
 				}
 				if(EffectFlags() & EffectFlag::RETRIG)
 				{
+					LastVoicePanFactor(ForegroundVoice()->PanFactor());
+
+					if ( m_RetrigOperation < 2)
+					{
+						int tmp = ForegroundVoice()->Volume()+m_RetrigVol;
+						if ( tmp <0 ) tmp =0;
+						else if ( tmp > 128 ) tmp=128;
+						LastVoiceVolume(tmp);
+					}
+					else //if ( m_RetrigOperation == 2)
+					{
+						int tmp = ForegroundVoice()->Volume()*m_RetrigVol;
+						if ( tmp <0 ) tmp =0;
+						else if ( tmp > 128 ) tmp=128;
+						LastVoiceVolume(tmp);
+					}
+
+					LastAmpEnvelopePos(ForegroundVoice()->AmplitudeEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					LastPanEnvelopePos(ForegroundVoice()->PanEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					LastFilterEnvelopePos(ForegroundVoice()->FilterEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					LastPitchEnvelopePos(ForegroundVoice()->PitchEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
 					ForegroundVoice()->Retrig();
 				}
 			}
@@ -1786,9 +1810,21 @@ namespace psycle
 			}
 			m_EffectFlags |= EffectFlag::ARPEGGIO;
 		};
-		void XMSampler::Channel::Retrigger(const int ticks,const int volumeModifier)
+		void XMSampler::Channel::Retrigger(const int parameter)
 		{
+			int ticks,volumeModifier;
 			int effretVol,effretMode;
+
+			if ( parameter == 0 )
+			{
+				ticks = (m_RetrigMem & 0x0F);
+				volumeModifier = (m_RetrigMem>> 4) & 0x0F;
+			}
+			else {
+				ticks = (parameter & 0x0F);
+				volumeModifier = (parameter>> 4) & 0x0F;
+				m_RetrigMem = parameter;
+			}
 			switch (volumeModifier) 
 			{
 			case 1:
@@ -1811,10 +1847,10 @@ namespace psycle
 			}
 			if ( ForegroundVoice())
 			{
-				ForegroundVoice()->m_RetrigTicks = ticks;
-				ForegroundVoice()->m_RetrigVol = effretVol;
-				ForegroundVoice()->m_RetrigOperation = effretMode;
+				ForegroundVoice()->m_RetrigTicks = ticks!=0?ticks:1;
 			}
+			m_RetrigVol = effretVol;
+			m_RetrigOperation = effretMode;
 			m_EffectFlags |= EffectFlag::RETRIG;
 		}
 		void XMSampler::Channel::NoteCut(const int ntick){
@@ -1952,7 +1988,7 @@ namespace psycle
 			m_DeltaTick = Global::pPlayer->SampleRate() * 60
 				/ (Global::pPlayer->bpm * 24/*ticksPerBeat*/);
 
-			NextSampleTick(m_DeltaTick);
+			NextSampleTick(m_DeltaTick+1);// +1 is to avoid one Tick too much at the end, because m_DeltaTick is rounded down.
 
 			for (int channel=0;channel<MAX_TRACKS;channel++)
 			{
@@ -1981,7 +2017,7 @@ namespace psycle
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != 255 )return; // Return in everything but commands!
 	#else
-				if ((pData->_cmd == 0 /* && pData->_volume == 255 ([bohan] no volume column) */) || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != 255 )return; // Return in everything but commands!
 	#endif
 #endif
 			}

@@ -79,7 +79,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 
 			for(c = 0; c < nWidth; c++)
 			{
-				long const offset = (long)(c * OffsetStep);
+				long const offset = (long)floorf(c * OffsetStep);
 
 				yLow = 0, yHi = 0;
 
