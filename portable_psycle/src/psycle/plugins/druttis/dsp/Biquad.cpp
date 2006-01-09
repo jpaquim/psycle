@@ -52,7 +52,7 @@ void Biquad::Init(int type, float dbGain, float freq, int sr, float bandwidth)
 	double omega = 2.0 * PI * (double) freq / (double) sr;
 	double sn = sin(omega);
 	double cs = cos(omega);
-	double alpha = sn * sinh(0.69314718055994530942 / 2.0 * (double) bandwidth * omega / sn);
+	double alpha = sn * sinh(LN / 2.0 * (double) bandwidth * omega / sn);
 	double beta;
 	if (bandwidth != 0.0f)
 	{
