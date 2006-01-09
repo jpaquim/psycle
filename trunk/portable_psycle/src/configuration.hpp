@@ -43,8 +43,15 @@
 #define PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS 0
 
 
-/// the compiler used to build ... should be autodetermined, but we don't have autoconf.
-#define PSYCLE__COMPILER__BUILD "msvc"
+/// the compiler used to build
+#if defined COMPILER__MICROSOFT
+	#define PSYCLE__COMPILER__BUILD  "msvc"  COMPILER__VERSION__MAJOR  COMPILER__VERSION__MINOR
+#elif defined COMPILER__GNU
+	#define PSYCLE__COMPILER__BUILD  "gcc"  COMPILER__VERSION__MAJOR  COMPILER__VERSION__MINOR  COMPILER__VERSION__PATCH
+#else
+	#define PSYCLE__COMPILER__BUILD  "no autoconf => no information"
+#endif
+
 
 
 /// string describing the configuration options.
