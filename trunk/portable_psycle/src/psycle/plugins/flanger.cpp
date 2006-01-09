@@ -104,7 +104,7 @@ protected:
 	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
 	virtual void samples_per_second_changed();
 	inline void process(math::Sin_Sequence & sin_sequence, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
-	inline resize(const Real & delay);
+	inline void resize(const Real & delay);
 	enum Channels { left, right, channels };
 	std::vector<Real> buffers_[channels];
 	int delay_in_samples_, writes_[channels];
@@ -163,7 +163,7 @@ void Flanger::parameter(const int & parameter)
 	}
 }
 
-inline Flanger::resize(const Real & delay)
+inline void Flanger::resize(const Real & delay)
 {
 	delay_in_samples_ = static_cast<int>(delay * samples_per_second());
 	weight = delay * samples_per_second() - floor(delay * samples_per_second()); //<Sartorius> for interpolation
@@ -189,7 +189,7 @@ inline void Flanger::process(math::Sin_Sequence & sin_sequence, std::vector<Real
 {
 
 //<Sartorius> linear interpolation
-			const size(buffer.size());
+			const int size(buffer.size());
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
 				const Real sin(sin_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient

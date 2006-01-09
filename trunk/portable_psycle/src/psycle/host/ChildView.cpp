@@ -2107,28 +2107,28 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
@@ -2354,7 +2354,8 @@ NAMESPACE__BEGIN(psycle)
 					CString sName, tmpPath;
 					sName = finder.GetFileName();
 					// ok so we have a .psm, does it have a valid matching .bmp?
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					char szOpenName[MAX_PATH];
 					sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
@@ -2985,7 +2986,8 @@ NAMESPACE__BEGIN(psycle)
 					CString sName, tmpPath;
 					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					char szOpenName[MAX_PATH];
 					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);

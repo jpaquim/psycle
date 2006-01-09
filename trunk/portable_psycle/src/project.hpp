@@ -335,17 +335,19 @@
 	#define COMPILER
 	#define COMPILER__MICROSOFT
 	#define COMPILER__FEATURE__PRE_COMPILATION
-	#if _MSC_VER < 1300 // msvc 6
+	#if _MSC_VER < 1300
 		#define COMPILER__VERSION__MAJOR 6
 		#define COMPILER__VERSION__MINOR 5 // service pack 5, we should detect this.
 		#define COMPILER__VERSION__PATCH 1 // processor pack after service pack 5, we should detect this.
-	#else
+	#elif _MSC_VER < 1310
 		#define COMPILER__VERSION__MAJOR 7
-		#if _MSC_VER < 1310 // msvc 7.0
-			#define COMPILER__VERSION__MINOR 0
-		#else // msvc 7.1
-			#define COMPILER__VERSION__MINOR 1
-		#endif
+		#define COMPILER__VERSION__MINOR 0
+	#elif _MSC_VER < 1400
+		#define COMPILER__VERSION__MAJOR 7
+		#define COMPILER__VERSION__MINOR 1
+	#else
+		#define COMPILER__VERSION__MAJOR 8
+		#define COMPILER__VERSION__MINOR 0
 	#endif
 	#if COMPILER__VERSION__MAJOR < 7 || (COMPILER__VERSION__MAJOR == 7 && COMPILER__VERSION__MINOR < 1)
 		// [bohan] bah. that compiler is too old. no recent source will fit.
@@ -749,12 +751,14 @@
 			// This is because run-time error checks are not valid in a release (optimized) build.
 			// [bohan] this means we must not have the /RTC option enabled to enable optimizations, even if we disable runtime checks here.
 		#pragma optimize("s", off) // favors small code
-		#pragma optimize("t", on) // favors fast code
-		#pragma optimize("p", off) // improves floating-point consistency (this is for iso conformance, slower and less precise)
-		#pragma optimize("a", on) // assumes no aliasing, see also: the restrict iso keyword
-		#pragma optimize("w", off) // assumes that aliasing can occur across function calls
+		#pragma optimize("t", on ) // favors fast code
+		#if COMPILER__VERSION__MAJOR < 8
+			#pragma optimize("p", off) // improves floating-point consistency (this is for iso conformance, slower and less precise)
+			#pragma optimize("a", on ) // assumes no aliasing, see also: the restrict iso keyword
+			#pragma optimize("w", off) // assumes that aliasing can occur across function calls
+		#endif
 		#pragma optimize("y", off) // generates frame pointers on the program stack
-		#pragma optimize("g", on) // global optimization
+		#pragma optimize("g", on )  // global optimization
 			// [bohan] note: there is a bug in msvc 6 concerning global optimization ... disable it locally where necessary
 			// [bohan] it hopefully generates a warning->error, otherwize, we would have a runtime bug
 			// [bohan] warning C4702: unreachable code

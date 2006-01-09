@@ -267,7 +267,8 @@ NAMESPACE__BEGIN(psycle)
 					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					char szBmpName[MAX_PATH];
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					sprintf(szBmpName,"%s\\%s.bmp",findDir,sName);
 					HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, szBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
@@ -289,7 +290,8 @@ NAMESPACE__BEGIN(psycle)
 					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					char szBmpName[MAX_PATH];
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					sprintf(szBmpName,"%s\\%s.bmp",findDir,sName);
 					HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, szBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
