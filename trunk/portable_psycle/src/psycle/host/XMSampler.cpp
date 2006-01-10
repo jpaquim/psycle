@@ -234,7 +234,6 @@ namespace psycle
 				m_pEnvelope = pEnvelope;
 			}
 			m_Samples = 0;
-			m_SustainEnd = false;
 //			m_Mode = EnvelopeMode::TICK;
 			m_PositionIndex = 0;
 			m_ModulationAmount = 0;
@@ -255,7 +254,6 @@ namespace psycle
 			m_PositionIndex = -1;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
-			m_SustainEnd = false;
 			RecalcDeviation();
 
 			// if there are no points, there is nothing to do.
@@ -321,22 +319,29 @@ namespace psycle
 			const XMInstrument::Envelope::ValueType xstep = (m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
 			RecalcDeviation();
 			m_NextEventSample = m_pEnvelope->GetTime(end)* SRateDeviation();
-			m_Step = ystep / (xstep * SRateDeviation());
+			m_Samples = m_pEnvelope->GetTime(start) * SRateDeviation();
+			m_ModulationAmount = m_pEnvelope->GetValue(start);
+			if ( xstep != 0) m_Step = ystep / (xstep * SRateDeviation());
 		}
-		void XMSampler::EnvelopeController::SetPositionInTicks(const int posi,const int samplesPerTick)
+		void XMSampler::EnvelopeController::SetPositionInSamples(const int samplePos)
 		{
-			int newSamplePos=posi*samplesPerTick;
-			int i;
-			for (i=0;m_pEnvelope->GetTime(i) != XMInstrument::Envelope::INVALID;i++)
+			int i=0;
+			while (m_pEnvelope->GetTime(i) != XMInstrument::Envelope::INVALID)
 			{
-				if (m_pEnvelope->GetTime(i)* SRateDeviation() >= newSamplePos ) break;
+				if (m_pEnvelope->GetTime(i)* SRateDeviation() > samplePos ) break;
+				i++;
 			}
-			m_PositionIndex=i-1;
-			m_Samples=m_NextEventSample;
+			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is always zero, and samplePos is positive.
+			m_PositionIndex=i-2;
+			m_Stage = EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); 
+			m_Samples=m_NextEventSample; // This forces a recalc when calling work()
+			Work();
+			m_Samples=samplePos;//and this sets the real position, once all vars are setup.
+			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetValue(m_PositionIndex));
 		}
-		int XMSampler::EnvelopeController::GetPositionInTicks(const int samplesPerTick)
+		int XMSampler::EnvelopeController::GetPositionInSamples()
 		{
-			return m_Samples/samplesPerTick;
+			return m_Samples;
 		}
 
 
@@ -515,18 +520,11 @@ namespace psycle
 				// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 
 				float volume = RealVolume() * rChannel().Volume();
-				if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
+				if(m_AmplitudeEnvelope.Envelope().IsEnabled())
+				{
 					m_AmplitudeEnvelope.Work();
 					volume *= m_AmplitudeEnvelope.ModulationAmount();
-					if ( m_VolumeFadeSpeed == 0)
-					{
-						if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF ||
-							m_AmplitudeEnvelope.HasSustainEnded())
-						{
-							IsStopping(true);
-							NoteFadeout();
-						}
-					}
+					if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF ) NoteOffFast();
 				}
 				// Volume Fade Out
 				if(m_VolumeFadeSpeed > 0.0f)
@@ -693,26 +691,26 @@ namespace psycle
 
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOn();
-				if (m_AmplitudeEnvelope.Envelope().IsCarry())
-					m_AmplitudeEnvelope.SetPositionInTicks(rChannel().LastAmpEnvelopePos(),m_pSampler->GetDeltaTick());
+				if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset)
+					m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
 			}
 
 			if(m_PanEnvelope.Envelope().IsEnabled()){
 				m_PanEnvelope.NoteOn();
-				if (m_PanEnvelope.Envelope().IsCarry())
-					m_PanEnvelope.SetPositionInTicks(rChannel().LastPanEnvelopePos(),m_pSampler->GetDeltaTick());
+				if (m_PanEnvelope.Envelope().IsCarry() || !reset)
+					m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
 			}
 
 			if(m_FilterEnvelope.Envelope().IsEnabled()){
 				m_FilterEnvelope.NoteOn();
-				if (m_FilterEnvelope.Envelope().IsCarry())
-					m_FilterEnvelope.SetPositionInTicks(rChannel().LastFilterEnvelopePos(),m_pSampler->GetDeltaTick());
+				if (m_FilterEnvelope.Envelope().IsCarry() || !reset)
+					m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
 			}
 
 			if(m_PitchEnvelope.Envelope().IsEnabled()){
 				m_PitchEnvelope.NoteOn();
-				if (m_PitchEnvelope.Envelope().IsCarry())
-					m_PitchEnvelope.SetPositionInTicks(rChannel().LastPitchEnvelopePos(),m_pSampler->GetDeltaTick());
+				if (m_PitchEnvelope.Envelope().IsCarry() || !reset)
+					m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
 			}
 
 		}
@@ -726,7 +724,7 @@ namespace psycle
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled())
 			{
 				m_AmplitudeEnvelope.NoteOff();
-				if ( m_AmplitudeEnvelope.Stage() & XMSampler::EnvelopeController::EnvelopeStage::HASLOOP)
+				if ( m_AmplitudeEnvelope.Stage() & EnvelopeController::EnvelopeStage::HASLOOP)
 				{
 					NoteFadeout();
 				}
@@ -975,6 +973,7 @@ namespace psycle
 				// 8363=Hz for Middle-C note
 				// 12*64 = 12 notes * 64 finetune steps.
 				// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
+				TRACE("%f\n",m_PitchEnvelope.ModulationAmount());
 				return	pow(2.0,
 							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
 							 /768.0)
@@ -1047,10 +1046,10 @@ namespace psycle
 			m_LastVoicePanFactor = 0.0f;
 			m_bSurround = false;
 
-			m_LastAmpEnvelopePos=0;
-			m_LastPanEnvelopePos=0;
-			m_LastFilterEnvelopePos=0;
-			m_LastPitchEnvelopePos=0;
+			m_LastAmpEnvelopePosInSamples=0;
+			m_LastPanEnvelopePosInSamples=0;
+			m_LastFilterEnvelopePosInSamples=0;
+			m_LastPitchEnvelopePosInSamples=0;
 
 			m_bGrissando = false;
 			m_VibratoType = XMInstrument::WaveData::WaveForms::SINUS;
@@ -1329,10 +1328,14 @@ namespace psycle
 					voice->Volume(parameter);
 					break;
 				case CMD::SET_ENV_POSITION:
-					voice->AmplitudeEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
-					voice->PanEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
-					voice->PitchEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
-					voice->FilterEnvelope().SetPositionInTicks(parameter,m_pSampler->GetDeltaTick());
+					if (voice->AmplitudeEnvelope().Envelope().IsEnabled())
+						voice->AmplitudeEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
+					if (voice->PanEnvelope().Envelope().IsEnabled())
+						voice->PanEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
+					if (voice->PitchEnvelope().Envelope().IsEnabled())
+						voice->PitchEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
+					if (voice->FilterEnvelope().Envelope().IsEnabled())
+						voice->FilterEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
 					break;
 				case CMD::EXTENDED:
 					switch(parameter&0xF0)
@@ -1521,10 +1524,14 @@ namespace psycle
 						LastVoiceVolume(tmp);
 					}
 
-					LastAmpEnvelopePos(ForegroundVoice()->AmplitudeEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
-					LastPanEnvelopePos(ForegroundVoice()->PanEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
-					LastFilterEnvelopePos(ForegroundVoice()->FilterEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
-					LastPitchEnvelopePos(ForegroundVoice()->PitchEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					if (ForegroundVoice()->AmplitudeEnvelope().Envelope().IsEnabled())
+						LastAmpEnvelopePosInSamples(ForegroundVoice()->AmplitudeEnvelope().GetPositionInSamples());
+					if (ForegroundVoice()->PanEnvelope().Envelope().IsEnabled())
+						LastPanEnvelopePosInSamples(ForegroundVoice()->PanEnvelope().GetPositionInSamples());
+					if (ForegroundVoice()->FilterEnvelope().Envelope().IsEnabled())
+						LastFilterEnvelopePosInSamples(ForegroundVoice()->FilterEnvelope().GetPositionInSamples());
+					if (ForegroundVoice()->PitchEnvelope().Envelope().IsEnabled())
+						LastPitchEnvelopePosInSamples(ForegroundVoice()->PitchEnvelope().GetPositionInSamples());
 					ForegroundVoice()->Retrig();
 				}
 			}
@@ -2137,10 +2144,24 @@ namespace psycle
 							{
 								thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
 								thisChannel.LastVoiceVolume(currentVoice->Volume());
-								thisChannel.LastAmpEnvelopePos(currentVoice->AmplitudeEnvelope().GetPositionInTicks(GetDeltaTick()));
-								thisChannel.LastPanEnvelopePos(currentVoice->PanEnvelope().GetPositionInTicks(GetDeltaTick()));
-								thisChannel.LastFilterEnvelopePos(currentVoice->FilterEnvelope().GetPositionInTicks(GetDeltaTick()));
-								thisChannel.LastPitchEnvelopePos(currentVoice->PitchEnvelope().GetPositionInTicks(GetDeltaTick()));
+
+								XMInstrument::Envelope *pEnv = &currentVoice->AmplitudeEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastAmpEnvelopePosInSamples(currentVoice->AmplitudeEnvelope().GetPositionInSamples());
+								else thisChannel.LastAmpEnvelopePosInSamples(0);
+								pEnv = &currentVoice->PanEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastPanEnvelopePosInSamples(currentVoice->PanEnvelope().GetPositionInSamples());
+								else thisChannel.LastPanEnvelopePosInSamples(0);
+								pEnv = &currentVoice->FilterEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastFilterEnvelopePosInSamples(currentVoice->FilterEnvelope().GetPositionInSamples());
+								else thisChannel.LastFilterEnvelopePosInSamples(0);
+								pEnv = &currentVoice->PitchEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastPitchEnvelopePosInSamples(currentVoice->PitchEnvelope().GetPositionInSamples());
+								else thisChannel.LastPitchEnvelopePosInSamples(0);
+
 							}
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
