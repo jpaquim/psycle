@@ -1492,7 +1492,7 @@ void XMSamplerUIInst::CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItem
 				dc.TextOut(7+i*_bmp.bmWidth,68,_tmp_str);
 				int _sample = m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second;
 				if ( _sample == 255 ) _tmp_str="--";
-				else _tmp_str.Format("%d",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second);
+				else _tmp_str.Format("%02X",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second);
 				dc.TextOut(7+i*_bmp.bmWidth,80,_tmp_str);
 				_index++;
 				if(_index == m_NaturalKeysPerOctave){
@@ -1514,7 +1514,7 @@ void XMSamplerUIInst::CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItem
 				
 				int _sample=m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second;
 				if ( _sample == 255 ) _tmp_str="--";
-				else  _tmp_str.Format("%d",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second);
+				else  _tmp_str.Format("%02X",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second);
 				dc.TextOut(m_SharpKey_Xpos[_index]-10+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,36,_tmp_str);
 				_index++;
 				if(_index == m_SharpKeysPerOctave){

@@ -328,55 +328,39 @@ XMSampler::Channel::PerformFX().
 				if(m_Samples++ >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
 				{
 					m_PositionIndex++;
-					if (m_PositionIndex == m_pEnvelope->SustainBegin() && m_Stage&EnvelopeStage::RELEASE && m_Stage&EnvelopeStage::HASSUSTAIN)
+					if (m_Stage&EnvelopeStage::HASSUSTAIN && !(m_Stage&EnvelopeStage::RELEASE))
 					{
-						if ( m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->SustainBegin() >= m_pEnvelope->LoopEnd())
+						if (m_PositionIndex == m_pEnvelope->SustainEnd())
 						{
-							m_PositionIndex = m_pEnvelope->LoopStart();
+							// if the begin==end, pause the envelope.
+							if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
+							{
+								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+							}
+							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
+						}
+					}
+					else if (m_Stage&EnvelopeStage::HASLOOP)
+					{
+						if ( m_PositionIndex >= m_pEnvelope->LoopEnd())
+						{
 							if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
 							{
 								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
 							}
+							else { m_PositionIndex = m_pEnvelope->LoopStart(); }
 						}
 					}
-					if (m_PositionIndex == m_pEnvelope->SustainEnd() && m_Stage&EnvelopeStage::HASSUSTAIN)
+					if (m_Stage & EnvelopeStage::DOSTEP) 
 					{
-						if (m_Stage&EnvelopeStage::RELEASE)
-						{ 
-							m_SustainEnd = true;
-							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::HASSUSTAIN);
-							if ( m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->SustainEnd() >= m_pEnvelope->LoopEnd())
-							{
-								m_PositionIndex = m_pEnvelope->LoopStart();
-								if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
-								{
-									m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-								}
-							}
-						}
-						// if the begin==end, pause the envelope.
-						else if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
+						if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
 						{
-							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+							m_Stage = EnvelopeStage::OFF;
+							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
 						}
-						else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
+						else CalcStep(m_PositionIndex,m_PositionIndex + 1);
 					}
-					if ( m_PositionIndex == m_pEnvelope->LoopEnd() && m_Stage&EnvelopeStage::HASLOOP )
-					{
-						m_PositionIndex = m_pEnvelope->LoopStart();
-						if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
-						{
-							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-						}
-					}
-					else if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
-					{
-						m_Stage = EnvelopeStage::OFF;
-						m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
-					}
-					m_Samples = m_pEnvelope->GetTime(m_PositionIndex) * SRateDeviation();
-					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-					if (m_Stage & EnvelopeStage::DOSTEP) CalcStep(m_PositionIndex,m_PositionIndex + 1);
+					else CalcStep(m_PositionIndex,m_PositionIndex);
 				}
 				else 
 				{
@@ -395,12 +379,11 @@ XMSampler::Channel::PerformFX().
 		void Stage(const EnvelopeStage value){m_Stage = value;};
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 		inline void CalcStep(const int start,const int  end);
-		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Samples= m_NextEventSample; };
+		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample; }; // m_Samples=m_NextEventSample only forces a recalc when entering Work().
 		int GetPosition(void) { return m_PositionIndex; };
-		void SetPositionInTicks(const int posi,const int samplesPerTick);
-		int GetPositionInTicks(const int samplesPerTick);
+		void SetPositionInSamples(const int samplePos);
+		int GetPositionInSamples();
 		void RecalcDeviation();
-		bool HasSustainEnded() { return m_SustainEnd; };
 	private:
 		inline float SRateDeviation() { return m_sRateDeviation; };
 
@@ -410,7 +393,6 @@ XMSampler::Channel::PerformFX().
 		int m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage m_Stage;
-		bool m_SustainEnd; // m_Sustain is used to detect when the sustain loop has ended.
 
 		XMInstrument::Envelope * m_pEnvelope;
 
@@ -499,7 +481,7 @@ XMSampler::Channel::PerformFX().
 		XMSampler::EnvelopeController& AmplitudeEnvelope(){return m_AmplitudeEnvelope;};
 		XMSampler::EnvelopeController& FilterEnvelope(){return m_FilterEnvelope;};
 		XMSampler::EnvelopeController& PitchEnvelope(){return m_PitchEnvelope;};
-		XMSampler::EnvelopeController& PanEnvelope(){return m_PitchEnvelope;};
+		XMSampler::EnvelopeController& PanEnvelope(){return m_PanEnvelope;};
 
 		WaveDataController& rWave(){return m_WaveDataController;};
 
@@ -512,10 +494,10 @@ XMSampler::Channel::PerformFX().
 				{
 					rChannel().LastVoicePanFactor(m_PanFactor);
 					rChannel().LastVoiceVolume(m_Volume);
-					rChannel().LastAmpEnvelopePos(AmplitudeEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
-					rChannel().LastPanEnvelopePos(PanEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
-					rChannel().LastFilterEnvelopePos(FilterEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
-					rChannel().LastPitchEnvelopePos(PitchEnvelope().GetPositionInTicks(m_pSampler->GetDeltaTick()));
+					rChannel().LastAmpEnvelopePosInSamples(0);
+					rChannel().LastPanEnvelopePosInSamples(0);
+					rChannel().LastFilterEnvelopePosInSamples(0);
+					rChannel().LastPitchEnvelopePosInSamples(0);
 					rChannel().ForegroundVoice(NULL);
 				}
 			}
@@ -783,17 +765,17 @@ XMSampler::Channel::PerformFX().
 		const float LastVoicePanFactor(){return m_LastVoicePanFactor;};
 		void LastVoicePanFactor(const float value){m_LastVoicePanFactor = value;};
 
-		const int LastAmpEnvelopePos() { return m_LastAmpEnvelopePos; };
-		void LastAmpEnvelopePos(const int value) { m_LastAmpEnvelopePos = value; };
+		const int LastAmpEnvelopePosInSamples() { return m_LastAmpEnvelopePosInSamples; };
+		void LastAmpEnvelopePosInSamples(const int value) { m_LastAmpEnvelopePosInSamples = value; };
 
-		const int LastPanEnvelopePos() { return m_LastPanEnvelopePos; };
-		void LastPanEnvelopePos(const int value) { m_LastPanEnvelopePos = value; };
+		const int LastPanEnvelopePosInSamples() { return m_LastPanEnvelopePosInSamples; };
+		void LastPanEnvelopePosInSamples(const int value) { m_LastPanEnvelopePosInSamples = value; };
 
-		const int LastFilterEnvelopePos() { return m_LastFilterEnvelopePos; };
-		void LastFilterEnvelopePos(const int value) { m_LastFilterEnvelopePos = value; };
+		const int LastFilterEnvelopePosInSamples() { return m_LastFilterEnvelopePosInSamples; };
+		void LastFilterEnvelopePosInSamples(const int value) { m_LastFilterEnvelopePosInSamples = value; };
 
-		const int LastPitchEnvelopePos() { return m_LastPitchEnvelopePos; };
-		void LastPitchEnvelopePos(const int value) { m_LastPitchEnvelopePos = value; };
+		const int LastPitchEnvelopePosInSamples() { return m_LastPitchEnvelopePosInSamples; };
+		void LastPitchEnvelopePosInSamples(const int value) { m_LastPitchEnvelopePosInSamples = value; };
 
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
@@ -854,10 +836,10 @@ XMSampler::Channel::PerformFX().
 		float m_LastVoicePanFactor;
 		bool m_bSurround;
 
-		int m_LastAmpEnvelopePos;
-		int m_LastPanEnvelopePos;
-		int m_LastFilterEnvelopePos;
-		int m_LastPitchEnvelopePos;
+		int m_LastAmpEnvelopePosInSamples;
+		int m_LastPanEnvelopePosInSamples;
+		int m_LastFilterEnvelopePosInSamples;
+		int m_LastPitchEnvelopePosInSamples;
 
 		bool m_bGrissando;
 		int m_VibratoType;///< vibrato type 
