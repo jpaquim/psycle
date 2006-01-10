@@ -25,7 +25,7 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 9
-#define PSYCLE__VERSION__PATCH 2
+#define PSYCLE__VERSION__PATCH 3
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
@@ -77,6 +77,10 @@
 #if 0
 /*
 $Log$
+Revision 1.50  2006/01/10 18:35:43  johan-boule
+version 1.9.3
+added dw's code for shadows on the wire arrows
+
 Revision 1.49  2006/01/10 00:27:40  johan-boule
 version 1.9.2
 

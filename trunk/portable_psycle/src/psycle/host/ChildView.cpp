@@ -3281,9 +3281,11 @@ NAMESPACE__BEGIN(psycle)
 			{ 
 				VISTRACKS = 1; 
 			}
-			triangle_size_tall = Global::pConfig->mv_triangle_size+((46*Global::pConfig->mv_wirewidth)/32);
+			triangle_size_tall = Global::pConfig->mv_triangle_size+((23*Global::pConfig->mv_wirewidth)/16);
+
 			triangle_size_center = triangle_size_tall/2;
-			triangle_size_wide = (triangle_size_tall*5)/8;
+			triangle_size_wide = triangle_size_tall/2;
+			triangle_size_indent = triangle_size_tall/6;
 		}
 
 		void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
