@@ -328,69 +328,55 @@ XMSampler::Channel::PerformFX().
 				if(m_Samples++ >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
 				{
 					m_PositionIndex++;
-					//  continue with the sustain loop.
-					if (m_PositionIndex == m_pEnvelope->SustainEnd() )
+					if (m_PositionIndex == m_pEnvelope->SustainBegin() && m_Stage&EnvelopeStage::RELEASE && m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
-						if (m_Stage&EnvelopeStage::HASSUSTAIN)
-						{
-							if ( m_NoteOff)
-							{ 
-								if ( m_Stage&EnvelopeStage::HASLOOP )
-								{
-									m_PositionIndex = m_pEnvelope->LoopStart();
-									if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
-									{
-										m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-										return;
-									}
-								}
-								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::HASSUSTAIN);
-								m_SustainEnd = false;
-							}
-							// if the begin==end, pause the envelope.
-							else if ( m_pEnvelope->SustainBegin() == m_PositionIndex )
-							{
-								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-								return;
-							}
-							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
-						}
-						else if (m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->LoopEnd() <= m_PositionIndex)
+						if ( m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->SustainBegin() >= m_pEnvelope->LoopEnd())
 						{
 							m_PositionIndex = m_pEnvelope->LoopStart();
 							if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
 							{
 								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-								return;
 							}
 						}
-						else if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
-						{
-							m_Stage = EnvelopeStage::OFF;
-							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
-							m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-							return;
-						}
 					}
-					else if( m_PositionIndex == m_pEnvelope->LoopEnd() && !(m_Stage&EnvelopeStage::HASSUSTAIN))
+					if (m_PositionIndex == m_pEnvelope->SustainEnd() && m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
-						if ( m_pEnvelope->LoopStart() == m_PositionIndex )
+						if (m_Stage&EnvelopeStage::RELEASE)
+						{ 
+							m_SustainEnd = true;
+							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::HASSUSTAIN);
+							if ( m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->SustainEnd() >= m_pEnvelope->LoopEnd())
+							{
+								m_PositionIndex = m_pEnvelope->LoopStart();
+								if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
+								{
+									m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+								}
+							}
+						}
+						// if the begin==end, pause the envelope.
+						else if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
 						{
 							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-							return;
 						}
-						else m_PositionIndex = m_pEnvelope->LoopStart();
+						else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
+					}
+					if ( m_PositionIndex == m_pEnvelope->LoopEnd() && m_Stage&EnvelopeStage::HASLOOP )
+					{
+						m_PositionIndex = m_pEnvelope->LoopStart();
+						if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
+						{
+							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+						}
 					}
 					else if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
 					{
 						m_Stage = EnvelopeStage::OFF;
 						m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
-						m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-						return;
 					}
 					m_Samples = m_pEnvelope->GetTime(m_PositionIndex) * SRateDeviation();
 					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-					CalcStep(m_PositionIndex,m_PositionIndex + 1);
+					if (m_Stage & EnvelopeStage::DOSTEP) CalcStep(m_PositionIndex,m_PositionIndex + 1);
 				}
 				else 
 				{
@@ -424,7 +410,6 @@ XMSampler::Channel::PerformFX().
 		int m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage m_Stage;
-		bool m_NoteOff;
 		bool m_SustainEnd; // m_Sustain is used to detect when the sustain loop has ended.
 
 		XMInstrument::Envelope * m_pEnvelope;
