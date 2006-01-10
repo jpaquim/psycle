@@ -26,4 +26,4 @@
 #DEFAULT (echo "" ; date --universal  ; id --user --name ; cat) >> $CVSROOT/CVSROOT/commitlog
 
 Psycle (date --universal ; id --user --name ; cat) | mail johan-boule -s "[cvs.sourceforge.net] [psycle] a commit was done in an old unused directory by `id --user --name`"
-DEFAULT (date --universal ; id --user --name ; cat) | mail johan-boule -b jaz001,sampler,alkenstein,sartorius,voskomo -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
+DEFAULT (date --universal ; id --user --name ; cat) | mail johan-boule -b jaz001,sampler,alkenstein,sartorius,voskomo,trancemyriad -s "[cvs.sourceforge.net] [psycle] a commit was done by `id --user --name`"
