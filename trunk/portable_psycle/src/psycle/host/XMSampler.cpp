@@ -234,7 +234,6 @@ namespace psycle
 				m_pEnvelope = pEnvelope;
 			}
 			m_Samples = 0;
-			m_NoteOff = false;
 			m_SustainEnd = false;
 //			m_Mode = EnvelopeMode::TICK;
 			m_PositionIndex = 0;
@@ -256,7 +255,6 @@ namespace psycle
 			m_PositionIndex = -1;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
-			m_NoteOff = false;
 			m_SustainEnd = false;
 			RecalcDeviation();
 
@@ -304,7 +302,6 @@ namespace psycle
 						m_PositionIndex--;
 					}
 				}
-				m_NoteOff = true;
 			}
 		}
 
