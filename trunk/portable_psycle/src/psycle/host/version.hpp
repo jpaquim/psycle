@@ -25,7 +25,7 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 9
-#define PSYCLE__VERSION__PATCH 1
+#define PSYCLE__VERSION__PATCH 2
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
@@ -77,6 +77,9 @@
 #if 0
 /*
 $Log$
+Revision 1.49  2006/01/10 00:27:40  johan-boule
+version 1.9.2
+
 Revision 1.48  2006/01/09 03:14:46  johan-boule
 version 1.9.1
 
