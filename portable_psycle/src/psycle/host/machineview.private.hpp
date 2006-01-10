@@ -96,10 +96,20 @@ NAMESPACE__BEGIN(psycle)
 
 			if (Global::pConfig->mv_wireaa)
 			{
+				
+				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
+				// polygon color stated in the config.
+				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
+				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
+				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
+			
 				CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour);
 				CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2); 
 				CPen linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+	 			CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
 				CPen *oldpen = devc->SelectObject(&linepen1);
+				CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
+
 				// Draw wire [connections]
 				for(int c=0;c<MAX_MACHINES;c++)
 				{
@@ -161,28 +171,96 @@ NAMESPACE__BEGIN(psycle)
 								
 								modX = modX/modT;
 								modY = modY/modT;
-										
-								CPoint pol[4];
-								
+								double slope = atan2(modY, modX);
+								double altslope;
+
+								int rtcol = 140+abs(dsp::F2I(slope*32));
+
+								altslope=slope;
+								if(altslope<-1.05)  altslope -= 2 * (altslope + 1.05);
+								if(altslope>2.10) altslope -= 2 * (altslope - 2.10);
+								int ltcol = 140 + abs(dsp::F2I((altslope - 2.10) * 32));
+
+								altslope=slope;
+								if(altslope>0.79)  altslope -= 2 * (altslope - 0.79);
+								if(altslope<-2.36)  altslope -= 2 * (altslope + 2.36);
+								int btcol = 240 - abs(dsp::F2I((altslope-0.79) * 32));
+
+								// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
+								CBrush rtBrush(RGB(max(0, min(255, rtcol * deltaColR)),
+									               max(0, min(255, rtcol * deltaColG)),
+												   max(0, min(255, rtcol * deltaColB))));
+								CBrush ltBrush(RGB(max(0, min(255, ltcol * deltaColR)),
+									               max(0, min(255, ltcol * deltaColG)),
+												   max(0, min(255, ltcol * deltaColB))));
+								CBrush btBrush(RGB(max(0, min(255, btcol * deltaColR)),
+									               max(0, min(255, btcol * deltaColG)),
+												   max(0, min(255, btcol * deltaColB))));
+
+
+								CPoint pol[5];
+								CPoint fillpoly[7];
+
 								pol[0].x = f1 - dsp::F2I(modX*triangle_size_center);
 								pol[0].y = f2 - dsp::F2I(modY*triangle_size_center);
 								pol[1].x = pol[0].x + dsp::F2I(modX*triangle_size_tall);
 								pol[1].y = pol[0].y + dsp::F2I(modY*triangle_size_tall);
 								pol[2].x = pol[0].x - dsp::F2I(modY*triangle_size_wide);
 								pol[2].y = pol[0].y + dsp::F2I(modX*triangle_size_wide);
-								pol[3].x = pol[0].x + dsp::F2I(modY*triangle_size_wide);
-								pol[3].y = pol[0].y - dsp::F2I(modX*triangle_size_wide);
+								pol[3].x = pol[0].x + dsp::F2I(modX*triangle_size_indent);
+								pol[3].y = pol[0].y + dsp::F2I(modY*triangle_size_indent);
+								pol[4].x = pol[0].x + dsp::F2I(modY*triangle_size_wide);
+								pol[4].y = pol[0].y - dsp::F2I(modX*triangle_size_wide);
 
 								devc->SelectObject(&linepen1);
 								amosDraw(devc, oriX, oriY, desX, desY);
-								devc->Polygon(&pol[1], 3);
+								devc->Polygon(&pol[1], 4);
 								devc->SelectObject(&linepen2);
 								amosDraw(devc, oriX, oriY, desX, desY);
-								devc->Polygon(&pol[1], 3);
+								devc->Polygon(&pol[1], 4);
 								devc->SelectObject(&linepen3);
 								amosDraw(devc, oriX, oriY, desX, desY);
-								devc->Polygon(&pol[1], 3);
+								devc->Polygon(&pol[1], 4);
 
+								fillpoly[2].x = pol[0].x + dsp::F2I(2*modX*triangle_size_indent);
+								fillpoly[2].y = pol[0].y + dsp::F2I(2*modY*triangle_size_indent);
+								fillpoly[6].x = fillpoly[2].x;    
+								fillpoly[6].y = fillpoly[2].y;    
+								fillpoly[1].x = pol[1].x;         
+								fillpoly[1].y = pol[1].y;         
+								fillpoly[0].x = pol[2].x;
+								fillpoly[0].y = pol[2].y; 
+								fillpoly[5].x = pol[2].x;
+								fillpoly[5].y = pol[2].y;
+								fillpoly[4].x = pol[3].x;
+								fillpoly[4].y = pol[3].y;
+								fillpoly[3].x = pol[4].x;
+								fillpoly[3].y = pol[4].y;
+
+								// fillpoly: (when pointed straight up)
+								// top - [1]
+								// bottom right corner - [0] and [5]
+								// center - [2] and [6] <-- where the three colors meet
+								// bottom left corner - [3]
+								
+								// so the three sides are defined as 0-1-2 (rt), 1-2-3 (lt), and 3-4-5-6 (bt)
+
+								devc->SelectObject(&polyInnardsPen);
+								devc->SelectObject(&rtBrush);
+								devc->Polygon(fillpoly, 3);
+								devc->SelectObject(&ltBrush);
+								devc->Polygon(&fillpoly[1], 3);
+								devc->SelectObject(&btBrush);
+								devc->Polygon(&fillpoly[3], 4);
+
+								devc->SelectObject(GetStockObject(NULL_BRUSH));
+								devc->SelectObject(&linepen3);
+								devc->Polygon(&pol[1], 4);
+
+								rtBrush.DeleteObject();
+								ltBrush.DeleteObject();
+								btBrush.DeleteObject();
+								
 								tmac->_connectionPoint[w].x = f1-triangle_size_center;
 								tmac->_connectionPoint[w].y = f2-triangle_size_center;
 							}
@@ -190,20 +268,37 @@ NAMESPACE__BEGIN(psycle)
 					}// Machine actived
 				}
 				devc->SelectObject(oldpen);
+				devc->SelectObject(oldbrush);
+
+				polyInnardsPen.DeleteObject();
 				linepen1.DeleteObject();
 				linepen2.DeleteObject();
 				linepen3.DeleteObject();
 			}
 			else
 			{
-				CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
-				CPen *oldpen = devc->SelectObject(&linepen);
+
+				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
+				// polygon color stated in the config.
+				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
+				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
+				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
+				
+
 				// Draw wire [connections]
+				
 				for(int c=0;c<MAX_MACHINES;c++)
 				{
 					Machine *tmac=_pSong->_pMachine[c];
 					if(tmac)
 					{
+
+						CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+						CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
+						CPen *oldpen = devc->SelectObject(&linepen);				
+						CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
+
+
 						int oriX=0;
 						int oriY=0;
 						switch (tmac->_mode)
@@ -261,28 +356,99 @@ NAMESPACE__BEGIN(psycle)
 								
 								modX = modX/modT;
 								modY = modY/modT;
-										
-								CPoint pol[4];
-								
+								double slope = atan2(modY, modX);
+								double altslope;
+
+								int rtcol = 140+abs(dsp::F2I(slope*32));
+
+								altslope=slope;
+								if(altslope<-1.05)  altslope -= 2 * (altslope + 1.05);
+								if(altslope>2.10) altslope -= 2 * (altslope - 2.10);
+								int ltcol = 140 + abs(dsp::F2I((altslope - 2.10) * 32));
+
+								altslope=slope;
+								if(altslope>0.79)  altslope -= 2 * (altslope - 0.79);
+								if(altslope<-2.36)  altslope -= 2 * (altslope + 2.36);
+								int btcol = 240 - abs(dsp::F2I((altslope-0.79) * 32));
+
+								// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
+								CBrush rtBrush(RGB(max(0, min(255, rtcol * deltaColR)),
+									               max(0, min(255, rtcol * deltaColG)),
+												   max(0, min(255, rtcol * deltaColB))));
+								CBrush ltBrush(RGB(max(0, min(255, ltcol * deltaColR)),
+									               max(0, min(255, ltcol * deltaColG)),
+												   max(0, min(255, ltcol * deltaColB))));
+								CBrush btBrush(RGB(max(0, min(255, btcol * deltaColR)),
+									               max(0, min(255, btcol * deltaColG)),
+												   max(0, min(255, btcol * deltaColB))));
+
+								CPoint pol[5];
+								CPoint fillpoly[7];
+
 								pol[0].x = f1 - dsp::F2I(modX*triangle_size_center);
 								pol[0].y = f2 - dsp::F2I(modY*triangle_size_center);
 								pol[1].x = pol[0].x + dsp::F2I(modX*triangle_size_tall);
 								pol[1].y = pol[0].y + dsp::F2I(modY*triangle_size_tall);
 								pol[2].x = pol[0].x - dsp::F2I(modY*triangle_size_wide);
 								pol[2].y = pol[0].y + dsp::F2I(modX*triangle_size_wide);
-								pol[3].x = pol[0].x + dsp::F2I(modY*triangle_size_wide);
-								pol[3].y = pol[0].y - dsp::F2I(modX*triangle_size_wide);
+								pol[3].x = pol[0].x + dsp::F2I(modX*triangle_size_indent);
+								pol[3].y = pol[0].y + dsp::F2I(modY*triangle_size_indent);
+								pol[4].x = pol[0].x + dsp::F2I(modY*triangle_size_wide);
+								pol[4].y = pol[0].y - dsp::F2I(modX*triangle_size_wide);										
 
-								devc->Polygon(&pol[1], 3);
+								devc->Polygon(&pol[1], 4);
 
+								fillpoly[2].x = pol[0].x + dsp::F2I(2*modX*triangle_size_indent);
+								fillpoly[2].y = pol[0].y + dsp::F2I(2*modY*triangle_size_indent);
+								fillpoly[6].x = fillpoly[2].x;
+								fillpoly[6].y = fillpoly[2].y;
+								fillpoly[1].x = pol[1].x;
+								fillpoly[1].y = pol[1].y;
+								fillpoly[0].x = pol[2].x;
+								fillpoly[0].y = pol[2].y;
+								fillpoly[5].x = pol[2].x;
+								fillpoly[5].y = pol[2].y;
+								fillpoly[4].x = pol[3].x;
+								fillpoly[4].y = pol[3].y;
+								fillpoly[3].x = pol[4].x;
+								fillpoly[3].y = pol[4].y;
+
+								// fillpoly: (when pointed straight up)
+								// top - [1]
+								// bottom right corner - [0] and [5]
+								// center - [2] and [6] <-- where the three colors meet
+								// bottom left corner - [3]
+								
+								// so the three sides are defined as 0-1-2 (rt), 1-2-3 (lt), and 3-4-5-6 (bt)
+
+								devc->SelectObject(&polyInnardsPen);
+								devc->SelectObject(&rtBrush);
+								devc->Polygon(fillpoly, 3);
+								devc->SelectObject(&ltBrush);
+								devc->Polygon(&fillpoly[1], 3);
+								devc->SelectObject(&btBrush);
+								devc->Polygon(&fillpoly[3], 4);
+
+								devc->SelectObject(GetStockObject(NULL_BRUSH));
+								devc->SelectObject(&linepen);
+								devc->Polygon(&pol[1], 4);
+
+								rtBrush.DeleteObject();
+								ltBrush.DeleteObject();
+								btBrush.DeleteObject();
+	
 								tmac->_connectionPoint[w].x = f1-triangle_size_center;
 								tmac->_connectionPoint[w].y = f2-triangle_size_center;
 							}
 						}
+						devc->SelectObject(oldpen);
+						devc->SelectObject(oldbrush);
+						polyInnardsPen.DeleteObject();
+	
+						linepen.DeleteObject();
+					
 					}// Machine actived
 				}
-				devc->SelectObject(oldpen);
-				linepen.DeleteObject();
 			}
 
 
