@@ -114,8 +114,8 @@ namespace psycle
 //				else { fc = iSampleCurrentSpeed/2.0; }
 
 				const double frequ = 2.0*sin(PI*min(0.25, fc/(iSampleRate*2)));  // the fs*2 is because it's double sampled
-				//fCoeff[damp]  = min(2.0*(1.0 - pow(iRes/128.0, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));// original.
-				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.0072, 0.25)), min(2.0, 2.0/frequ - frequ*0.5)); // lowered Q a bit.
+				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.007874, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));// original.
+//				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.0072, 0.25)), min(2.0, 2.0/frequ - frequ*0.5)); // lowered Q a bit.
 				fCoeff[freq] = frequ;
 
 			}
