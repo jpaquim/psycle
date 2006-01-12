@@ -250,7 +250,7 @@ namespace psycle
 		//  Second, if there are more points in the envelope, let's enable the joy!
 		void XMSampler::EnvelopeController::NoteOn()
 		{
-			m_Samples = 0;
+			m_Samples = -1;
 			m_PositionIndex = -1;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
@@ -296,7 +296,7 @@ namespace psycle
 					if ( m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
 						m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::DOSTEP);
-						m_Samples--;
+						m_Samples=m_NextEventSample-1;
 						m_PositionIndex--;
 					}
 				}
@@ -319,9 +319,10 @@ namespace psycle
 			const XMInstrument::Envelope::ValueType xstep = (m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
 			RecalcDeviation();
 			m_NextEventSample = m_pEnvelope->GetTime(end)* SRateDeviation();
-			m_Samples = m_pEnvelope->GetTime(start) * SRateDeviation();
+			m_Samples = m_pEnvelope->GetTime(start) * SRateDeviation()-1;
 			m_ModulationAmount = m_pEnvelope->GetValue(start);
 			if ( xstep != 0) m_Step = ystep / (xstep * SRateDeviation());
+			else m_Step=0;
 		}
 		void XMSampler::EnvelopeController::SetPositionInSamples(const int samplePos)
 		{
@@ -334,7 +335,7 @@ namespace psycle
 			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is always zero, and samplePos is positive.
 			m_PositionIndex=i-2;
 			m_Stage = EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); 
-			m_Samples=m_NextEventSample; // This forces a recalc when calling work()
+			m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
 			Work();
 			m_Samples=samplePos;//and this sets the real position, once all vars are setup.
 			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetValue(m_PositionIndex));
@@ -524,7 +525,11 @@ namespace psycle
 				{
 					m_AmplitudeEnvelope.Work();
 					volume *= m_AmplitudeEnvelope.ModulationAmount();
-					if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF ) NoteOffFast();
+					if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF)
+					{
+						if ( m_AmplitudeEnvelope.ModulationAmount() <= 0.0f){ IsPlaying(false); return; }
+						else if (m_VolumeFadeSpeed == 0.0f) NoteFadeout();
+					}
 				}
 				// Volume Fade Out
 				if(m_VolumeFadeSpeed > 0.0f)
@@ -724,6 +729,7 @@ namespace psycle
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled())
 			{
 				m_AmplitudeEnvelope.NoteOff();
+				// IT Type envelopes only do a fadeout() when it reaches the end of the envelope, except if it is looped.
 				if ( m_AmplitudeEnvelope.Stage() & EnvelopeController::EnvelopeStage::HASLOOP)
 				{
 					NoteFadeout();
@@ -2073,6 +2079,8 @@ namespace psycle
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
+						break;
+					default:
 						break;
 					}
 				

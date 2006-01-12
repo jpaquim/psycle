@@ -325,7 +325,7 @@ XMSampler::Channel::PerformFX().
 		{
 			if(m_Stage&EnvelopeStage::DOSTEP)
 			{
-				if(m_Samples++ >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
+				if(++m_Samples >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
 				{
 					m_PositionIndex++;
 					if (m_Stage&EnvelopeStage::HASSUSTAIN && !(m_Stage&EnvelopeStage::RELEASE))
@@ -356,7 +356,9 @@ XMSampler::Channel::PerformFX().
 						if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
 						{
 							m_Stage = EnvelopeStage::OFF;
+							//This ensures that the envelope is really inplace.
 							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
+							CalcStep(m_PositionIndex,m_PositionIndex);
 						}
 						else CalcStep(m_PositionIndex,m_PositionIndex + 1);
 					}
@@ -379,7 +381,7 @@ XMSampler::Channel::PerformFX().
 		void Stage(const EnvelopeStage value){m_Stage = value;};
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 		inline void CalcStep(const int start,const int  end);
-		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample; }; // m_Samples=m_NextEventSample only forces a recalc when entering Work().
+		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; }; // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
 		int GetPosition(void) { return m_PositionIndex; };
 		void SetPositionInSamples(const int samplePos);
 		int GetPositionInSamples();

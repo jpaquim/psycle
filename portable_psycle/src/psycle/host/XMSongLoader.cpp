@@ -873,13 +873,32 @@ namespace host{
 		if(sampleHeader.vtype & 1){// enable volume envelope
 			inst.AmpEnvelope()->IsEnabled(true);
 			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
-			// volumefadespeed in this case so that a check in play time is not needed.
+			// volumefadespeed in this case, so that a check during playback time is not needed.
 			inst.VolumeFadeSpeed
-				((float)sampleHeader.volfade / 65536.0f);
+				((float)sampleHeader.volfade / 32768.0f);
 			
+			int envelope_point_num = sampleHeader.vnum;
+			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.
+				envelope_point_num = 12;
+			}
+
+			// Format of FastTracker points is :
+			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
+			// Value : 0..64. , divide by 64 to use it as a multiplier.
+			for(int i = 0; i < envelope_point_num;i++){
+				inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
+			}
+
 			if(sampleHeader.vtype & 2){
 				inst.AmpEnvelope()->SustainBegin(sampleHeader.vsustain);
 				inst.AmpEnvelope()->SustainEnd(sampleHeader.vsustain);
+			}
+			else
+			{
+				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
+				// IT also sets the Sustain points to the end of the envelope, but i can't see a reason for this to be needed.
+//				inst.AmpEnvelope()->SustainBegin(inst.AmpEnvelope()->NumOfPoints()-1);
+//				inst.AmpEnvelope()->SustainEnd(inst.AmpEnvelope()->NumOfPoints()-1);
 			}
 
 			
@@ -887,27 +906,21 @@ namespace host{
 				if(sampleHeader.vloops < sampleHeader.vloope){
 					inst.AmpEnvelope()->LoopStart(sampleHeader.vloops);
 					inst.AmpEnvelope()->LoopEnd(sampleHeader.vloope);
-				} else if(sampleHeader.vloops > sampleHeader.vloope){
-					inst.AmpEnvelope()->LoopStart(sampleHeader.vloope);
-					inst.AmpEnvelope()->LoopEnd(sampleHeader.vloops);
-				}
-				// if loopstart == loopend, Fasttracker ignores the loop!
+				} 
+				// if loopstart >= loopend, Fasttracker ignores the loop!.
+				// We can't ignore them because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 				else {
-					inst.AmpEnvelope()->LoopStart(XMInstrument::Envelope::INVALID);
-					inst.AmpEnvelope()->LoopEnd(XMInstrument::Envelope::INVALID);
+//					inst.AmpEnvelope()->LoopStart(XMInstrument::Envelope::INVALID);
+//					inst.AmpEnvelope()->LoopEnd(XMInstrument::Envelope::INVALID);
+					inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
+					inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
 				}
 			}
-
-            int envelope_point_num = sampleHeader.vnum;
-			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.
-				envelope_point_num = 12;
-			}
-			
-			// Format of FastTracker points is :
-			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
-			// Value : 0..64. , divide by 64 to use it as a multiplier.
-			for(int i = 0; i < envelope_point_num;i++){
-				inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
+			else
+			{
+				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
+				inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
+				inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
 			}
 
 		} else {
@@ -1206,8 +1219,8 @@ namespace host{
 							e._parameter = 0;
 							break;
 						case XMCMD_E::E_PATTERN_LOOP:
-							e._cmd = PatternCmd::PATTERN_LOOP;
-							e._parameter = param & 0xf;
+							e._cmd = PatternCmd::EXTENDED;
+							e._parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
 							break;
 						case XMCMD_E::E_TREMOLO_WAVE:
 							e._cmd = XMSampler::CMD::EXTENDED;
@@ -1236,10 +1249,6 @@ namespace host{
 						case XMCMD_E::E_PATTERN_DELAY:
 							e._cmd = PatternCmd::EXTENDED;
 							e._parameter =  PatternCmd::PATTERN_DELAY | (param & 0xf);
-							break;
-						case XMCMD_E::E_SET_MIDI_MACRO:
-							e._cmd = XMSampler::CMD::EXTENDED;
-							e._parameter = XMCMD::MIDI_MACRO | (param & 0x0f);
 							break;
 						default:
 							e._cmd = XMSampler::CMD::NONE;
