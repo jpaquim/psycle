@@ -1337,8 +1337,15 @@ OFFSET              Count TYPE   Description
 			if (!packed) // Looks like the packed format never existed.
 			{
 				XMInstrument::WaveData& _wave =  sampler->SampleData(iSampleIdx);
-				char * smpbuf = new char[iLen];
-				Read(smpbuf,iLen);
+				char * smpbuf;
+				if(b16Bit)
+				{
+					smpbuf = new char[iLen*2];
+					Read(smpbuf,iLen*2);
+				} else 	{
+					smpbuf = new char[iLen];
+					Read(smpbuf,iLen);
+				}
 				signed short wNew;
 				signed short offset;
 				if ( s3mFileH.trackerInf==1) offset=0; // 1=[VERY OLD] signed samples, 2=unsigned samples
@@ -1347,25 +1354,25 @@ OFFSET              Count TYPE   Description
 				if(b16Bit) {
 					int out=0;
 					if (bstereo) { // \todo : The storage of stereo samples needs to be checked.
-						_wave.AllocWaveData(iLen/2,true);
+						_wave.AllocWaveData(iLen,true);
 						unsigned int j;
-						for(j=0;j<iLen;j+=2)
+						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
-						Read(smpbuf,iLen);
-						for(j=0;j<iLen;j+=2)
+						Read(smpbuf,iLen*2);
+						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
 							*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
 					} else {
-						_wave.AllocWaveData(iLen/2,false);
+						_wave.AllocWaveData(iLen,false);
 						unsigned int j;
-						for(j=0;j<iLen;j+=2)
+						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
@@ -1381,9 +1388,10 @@ OFFSET              Count TYPE   Description
 							wNew = (smpbuf[j]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
+						Read(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
-							wNew = (smpbuf[j+1]<<8)+offset;
+							wNew = (smpbuf[j]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					} else {
