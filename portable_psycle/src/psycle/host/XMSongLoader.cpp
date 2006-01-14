@@ -70,7 +70,7 @@ namespace host{
 			return;
 		}
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-		song.InsertConnection(0,MASTER_INDEX,0.5f);
+		song.InsertConnection(0,MASTER_INDEX,0.35f);
 		song.seqBus=0;
 		// build sampler
 		m_pSampler = (XMSampler *)(song._pMachine[0]);
@@ -280,23 +280,26 @@ namespace host{
 							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEUP|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_FINEVOLUMESLIDEDOWN:
-							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN|(vol&0x0F);
+							e._volume = XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_FINEVOLUMESLIDEUP:
-							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEUP|(vol&0x0F);
+							e._volume = XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_PANNING:
 							e._volume = XMSampler::CMD_VOL::VOL_PANNING|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDELEFT:
-							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|(vol&0x0F);
+							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
+							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|((vol&0x0F)>>2);
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDERIGHT:
-							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|(vol&0x0F);
+							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
+							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|((vol&0x0F)>>2);
 							break;
-						case XMVOL_CMD::XMV_VIBRATOSPEED:
-							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO_SPEED|(vol&0x0F);
-							break;
+// Ignoring this command for now.
+//						case XMVOL_CMD::XMV_VIBRATOSPEED:
+//							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO_SPEED|(vol&0x0F);
+//							break;
 						case XMVOL_CMD::XMV_VIBRATO:
 							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO|(vol&0x0F);
 							break;

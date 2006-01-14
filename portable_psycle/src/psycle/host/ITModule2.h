@@ -335,7 +335,7 @@ Ex/Fx.
 			bool LoadITInst(XMSampler *sampler,int iInstIdx);
 			bool LoadITSample(XMSampler *sampler,int iSampleIdx);
 			bool LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
-			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit);
+			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx);
 			void ParseEffect(PatternEntry&pent, int command,int param,int channel);
 		private:

@@ -1846,11 +1846,14 @@ BEGIN
     LTEXT           "Max Voices Playing",IDC_STATIC,290,63,50,8
     CONTROL         226,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,384,
                     217,133,62
-    GROUPBOX        "General Options",IDC_STATIC,274,2,243,109
+    GROUPBOX        "General Options",IDC_STATIC,274,2,243,126
     RTEXT           "Some bits based on Satoshi Fujiwara 'XMSampler'\nIT Filtering gathered from 'DUMB' and ModPlug.",
                     IDC_STATIC,354,279,163,22,SS_SUNKEN
     CONTROL         "Enable Filters",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,408,88,84,11
+    COMBOBOX        IDC_XMPANNINGMODE,375,103,93,43,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Panning Mode",IDC_STATIC,291,103,53,13
 END
 
 IDD_XMSAMPLERUIINST DIALOGEX 0, 0, 524, 304

@@ -5,6 +5,7 @@
 #include "XMSamplerUIGeneral.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
+#include ".\xmsampleruigeneral.hpp"
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
 
@@ -26,12 +27,14 @@ void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
 		DDX_Control(pDX, IDC_COMMANDINFO, m_ECommandInfo);
 		DDX_Control(pDX, IDC_CHECK1, m_bAmigaSlides);
 		DDX_Control(pDX, IDC_CHECK2, m_ckFilter);
+		DDX_Control(pDX, IDC_XMPANNINGMODE, m_cbPanningMode);
 	}
 BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
 	ON_BN_CLICKED(IDC_CHECK1, OnBnClickedCheck1)
 	ON_BN_CLICKED(IDC_CHECK2, OnBnClickedCheck2)
+	ON_CBN_SELENDOK(IDC_XMPANNINGMODE, OnCbnSelendokXmpanningmode)
 END_MESSAGE_MAP()
 
 XMSamplerUIGeneral::~XMSamplerUIGeneral()
@@ -107,19 +110,26 @@ Volume Column:\r\n\t\
 00..3F: Set volume to x*2\r\n\t\
 4x: Volume slide up\r\n\t\
 5x: Volume slide down\r\n\t\
-6x: Pitch slide up\r\n\t\
-7x: Pitch slide down\r\n\t\
+6x: Fine Volslide up\r\n\t\
+7x: Fine Volslide down\r\n\t\
 8x: Panning (0:Left, F:Right)\r\n\t\
 9x: PanSlide Left\r\n\t\
 Ax: PanSlide Right\r\n\t\
-Cx: Vibrato speed\r\n\t\
-Dx: Vibrato\r\n\t\
-Ex: TonePorta");
+Bx: Vibrato\r\n\t\
+Cx: TonePorta\r\n\t\
+Dx: Pitch slide up\r\n\t\
+Ex: Pitch slide down");
 
 	m_bInitialize=true;
 
 	m_bAmigaSlides.SetCheck(_pMachine->IsAmigaSlides()?1:0);
 	m_ckFilter.SetCheck(_pMachine->UseFilters()?1:0);
+
+	m_cbPanningMode.AddString(_T("Linear (Cross)"));
+	m_cbPanningMode.AddString(_T("Equal Power"));
+	m_cbPanningMode.AddString(_T("Logaritmic"));
+
+	m_cbPanningMode.SetCurSel(_pMachine->PanningMode());
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -157,6 +167,11 @@ void XMSamplerUIGeneral::OnBnClickedCheck2()
 	_pMachine->UseFilters(m_ckFilter.GetCheck()?true:false);
 }
 
-NAMESPACE__END
-NAMESPACE__END
+void XMSamplerUIGeneral::OnCbnSelendokXmpanningmode()
+{
+	_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
+}
 
+
+NAMESPACE__END
+NAMESPACE__END

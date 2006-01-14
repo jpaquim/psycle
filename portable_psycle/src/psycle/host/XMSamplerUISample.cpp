@@ -273,19 +273,20 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	}
 	else
 	{
+		const int panpos=wave.PanFactor()*128.0f;
 		((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
-		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(int(wave.PanFactor()*128.0f));
+		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
 		char tmp[40];
-		switch((int)(wave.PanFactor()*128.f))
+		switch(panpos)
 		{
-		case 0: sprintf(tmp,"||%02d  ",wave.PanFactor()*128.f); break;
-		case 64: sprintf(tmp," |%02d| ",wave.PanFactor()*128.f); break;
-		case 128: sprintf(tmp,"  %02d||",wave.PanFactor()*128.f); break;
+		case 0: sprintf(tmp,"||%02d  ",panpos); break;
+		case 64: sprintf(tmp," |%02d| ",panpos); break;
+		case 128: sprintf(tmp,"  %02d||",panpos); break;
 		default:
-			if ( wave.PanFactor()*128.f < 32) sprintf(tmp,"<<%02d  ",wave.PanFactor()*128.f);
-			else if ( wave.PanFactor()*128.f < 64) sprintf(tmp," <%02d< ",wave.PanFactor()*128.f);
-			else if ( wave.PanFactor()*128.f <= 96) sprintf(tmp," >%02d> ",wave.PanFactor()*128.f);
-			else sprintf(tmp,"  %02d>>",wave.PanFactor()*128.f);
+			if ( panpos < 32) sprintf(tmp,"<<%02d  ",panpos);
+			else if ( panpos < 64) sprintf(tmp," <%02d< ",panpos);
+			else if ( panpos <= 96) sprintf(tmp," >%02d> ",panpos);
+			else sprintf(tmp,"  %02d>>",panpos);
 			break;
 		}
 		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);

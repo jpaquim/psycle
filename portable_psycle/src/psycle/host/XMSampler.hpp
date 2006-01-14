@@ -120,15 +120,15 @@ XMSampler::Channel::PerformFX().
 		VOL_VOLUME3			=	0x30, // 0x30..0x3F (63)  ||
 		VOL_VOLSLIDEUP		=	0x40, // 0x40..0x4F (16)
 		VOL_VOLSLIDEDOWN	=	0x50, // 0x50..0x5F (16)
-		VOL_PITCH_SLIDE_UP	=	0x60, // 0x60..0x6F (16)
-		VOL_PITCH_SLIDE_DOWN=	0x70, // 0x70..0x7F (16)
+		VOL_FINEVOLSLIDEUP	=	0x60, // 0x60..0x6F (16)
+		VOL_FINEVOLSLIDEDOWN=	0x70, // 0x70..0x7F (16)
 		VOL_PANNING			=	0x80, // 0x80..0x8F (16)
 		VOL_PANSLIDELEFT	=	0x90, // 0x90..0x9F (16)
 		VOL_PANSLIDERIGHT	=	0xA0, // 0xA0..0xAF (16)
-							  //0xB0
-		VOL_VIBRATO_SPEED	=	0xC0, // 0xC0..0xCF (16) Linked to Vibrato Sx = 4xy
-		VOL_VIBRATO			=	0xD0, // 0xD0..0xDF (16) Linked to Vibrato Vy = 4xy 
-		VOL_TONEPORTAMENTO	=	0xE0 // 0xE0..0xEF (16) Linked to Porta2Note 
+		VOL_VIBRATO			=	0xB0, // 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy 
+		VOL_TONEPORTAMENTO	=	0xC0, // 0xC0..0xCF (16) Linked to Porta2Note 
+		VOL_PITCH_SLIDE_UP	=	0xD0, // 0xD0..0xDF (16)
+		VOL_PITCH_SLIDE_DOWN=	0xE0, // 0xE0..0xEF (16)
 								// 0xFF -> Blank.
 		};
 	};
@@ -910,6 +910,14 @@ XMSampler::Channel::PerformFX().
 	//////////////////////////////////////////////////////////////////////////
 	//  XMSampler Declaration
 
+	enum PanningMode
+	{
+		Linear=0,
+		EqualPower,
+		Logaritmic
+	};
+
+
 	XMSampler(int index);
 
 	virtual void Init(void);
@@ -1007,6 +1015,9 @@ XMSampler::Channel::PerformFX().
 	}
 	const bool UseFilters(void) { return m_UseFilters; };
 	void UseFilters(bool usefilters) { m_UseFilters = usefilters; };
+	int PanningMode() { return m_PanningMode;};
+	void PanningMode(const int value) { m_PanningMode= value;};
+
 	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; };
 	ZxxMacro GetMap(int index) { return zxxMap[index]; };
 
@@ -1044,6 +1055,7 @@ private:
 	bool m_bAmigaSlides;// Using Linear or Amiga Slides.
 	bool m_UseFilters;
 	int m_GlobalVolume;
+	int m_PanningMode;
 /*	int m_BPM;
 	int m_TicksPerRow;	// Tracker Ticks. Also called "speed".
 */
