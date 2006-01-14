@@ -318,8 +318,8 @@ namespace psycle
 			const XMInstrument::Envelope::ValueType ystep = (m_pEnvelope->GetValue(end) - m_pEnvelope->GetValue(start));
 			const XMInstrument::Envelope::ValueType xstep = (m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
 			RecalcDeviation();
+			m_Samples = m_pEnvelope->GetTime(start) * SRateDeviation();
 			m_NextEventSample = m_pEnvelope->GetTime(end)* SRateDeviation();
-			m_Samples = m_pEnvelope->GetTime(start) * SRateDeviation()-1;
 			m_ModulationAmount = m_pEnvelope->GetValue(start);
 			if ( xstep != 0) m_Step = ystep / (xstep * SRateDeviation());
 			else m_Step=0;
@@ -332,16 +332,22 @@ namespace psycle
 				if (m_pEnvelope->GetTime(i)* SRateDeviation() > samplePos ) break;
 				i++;
 			}
-			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is always zero, and samplePos is positive.
+			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is either zero or INVALID, and samplePos is positive.
 			m_PositionIndex=i-2;
 			m_Stage = EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); 
 			m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
 			Work();
 			m_Samples=samplePos;//and this sets the real position, once all vars are setup.
-			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetValue(m_PositionIndex));
+//			TRACE("ModAmount Before:%f.",m_ModulationAmount);
+			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
+//			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
+//			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
+
 		}
 		int XMSampler::EnvelopeController::GetPositionInSamples()
 		{
+			//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
+//			TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
 			return m_Samples;
 		}
 
@@ -542,7 +548,18 @@ namespace psycle
 				// Panning Envelope 
 				// (actually, the correct word for panning is panoramization. 
 				//  "panning" comes from the diminutive "pan")
-				float rvol =  m_PanFactor + m_PanbrelloAmount;
+				float rvol=0;
+				if ( m_pSampler->PanningMode()== PanningMode::Linear)
+				{
+					rvol = (m_PanFactor + m_PanbrelloAmount);
+
+				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+					rvol = min(1.0f, (m_PanFactor + m_PanbrelloAmount)*2.0f);
+				} else if ( m_pSampler->PanningMode()== PanningMode::Logaritmic) {
+					rvol = log((m_PanFactor + m_PanbrelloAmount)+1.0)/log(2.0);
+				}
+
+				
 				if(m_PanEnvelope.Envelope().IsEnabled()){
 					m_PanEnvelope.Work();
 
@@ -551,7 +568,15 @@ namespace psycle
 					rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 				}
 
-				float lvol = 1.0f - rvol;
+				float lvol=0;
+				if ( m_pSampler->PanningMode()== PanningMode::Linear)
+				{
+					lvol = (1.0f - rvol);
+				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+					lvol =  (1.0f, (1.0f - m_PanFactor - m_PanbrelloAmount)*2.0);
+				} else if ( m_pSampler->PanningMode()== PanningMode::Logaritmic) {
+					lvol = log((1.0f-m_PanFactor - m_PanbrelloAmount)+1.0)/log(2.0);
+				}
 
 				// Filter section
 				if (m_Filter.Type() != dsp::F_NONE)
@@ -979,7 +1004,6 @@ namespace psycle
 				// 8363=Hz for Middle-C note
 				// 12*64 = 12 notes * 64 finetune steps.
 				// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
-				TRACE("%f\n",m_PitchEnvelope.ModulationAmount());
 				return	pow(2.0,
 							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
 							 /768.0)
@@ -1162,9 +1186,11 @@ namespace psycle
 				PanFactor((volcmd&0x0F)/15.0f);
 				break;
 			case CMD_VOL::VOL_PANSLIDELEFT:
+				//this command is actually fine pan slide
 				PanningSlide((volcmd&0x0F)<<4);
 				break;
 			case CMD_VOL::VOL_PANSLIDERIGHT:
+				//this command is actually fine pan slide
 				PanningSlide(volcmd&0x0F);
 				break;
 			default:
@@ -1299,17 +1325,18 @@ namespace psycle
 				case CMD_VOL::VOL_VOLSLIDEDOWN:
 					VolumeSlide(volcmd&0x0F);
 					break;
-				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
-					// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
-					// up/down of x is equivalent to a normal slide by x*4
-					PitchSlide(false,(volcmd&0x0F)<<2);
+				case CMD_VOL::VOL_FINEVOLSLIDEUP:
+					voice->m_VolumeSlideSpeed = (volcmd & 0x0F)<<1;
+					voice->VolumeSlide();
 					break;
-				case CMD_VOL::VOL_PITCH_SLIDE_UP:
-					PitchSlide(true,(volcmd&0x0F)<<2);
+				case CMD_VOL::VOL_FINEVOLSLIDEDOWN:
+					voice->m_VolumeSlideSpeed = -((volcmd & 0x0F)<<1);
+					voice->VolumeSlide();
 					break;
-				case CMD_VOL::VOL_VIBRATO_SPEED:
+/*				case CMD_VOL::VOL_VIBRATO_SPEED:
 					Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
 					break;
+*/
 				case CMD_VOL::VOL_VIBRATO:
 					Vibrato(0,(volcmd & 0x0F)<<2);
 					break;
@@ -1322,6 +1349,14 @@ namespace psycle
 					else if ( volcmd&0x0F < 9) slidval=powf(2.0f,volcmd&0x0F);
 					else slidval=255;
 					PitchSlide(voice->Period()>voice->NoteToPeriod(Slide2NoteDestNote()),slidval,Slide2NoteDestNote());
+					break;
+				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
+					// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
+					// up/down of x is equivalent to a normal slide by x*4
+					PitchSlide(false,(volcmd&0x0F)<<2);
+					break;
+				case CMD_VOL::VOL_PITCH_SLIDE_UP:
+					PitchSlide(true,(volcmd&0x0F)<<2);
 					break;
 				default:
 					break;
@@ -1943,6 +1978,7 @@ namespace psycle
 			m_TickCount = 0;
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
+			m_PanningMode = PanningMode::Linear;
 
 			int i;
 			for (i = 0; i < XMSampler::MAX_POLYPHONY; i++)

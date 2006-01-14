@@ -754,6 +754,8 @@
 #define IDC_XMINTERPOL                  1545
 #define IDC_XMPOLY                      1546
 #define IDC_XMTEMPO                     1547
+#define IDC_XMINTERPOL2                 1547
+#define IDC_XMPANNINGMODE               1547
 #define IDC_XMSPEED                     1548
 #define IDC_XMPOLYLABEL                 1549
 #define IDC_NAVIGATION_IGNORES_STEP     1550
@@ -1076,7 +1078,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        239
 #define _APS_NEXT_COMMAND_VALUE         32998
-#define _APS_NEXT_CONTROL_VALUE         1727
+#define _APS_NEXT_CONTROL_VALUE         1728
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

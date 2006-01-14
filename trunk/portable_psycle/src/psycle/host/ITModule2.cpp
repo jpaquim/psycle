@@ -224,8 +224,6 @@ Special:  Bit 0: On = song message attached.
 						else if (mdata.Zxx[i][7] >= 'A' && mdata.Zxx[i][7] <= 'F')
 							tmp += (mdata.Zxx[i][7] - 'A' + 0xA);
 
-						// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-						//if ( mode == 0 && tmp != 127) tmp = int(tmp*100.0f/127.0f);
 						sampler->SetZxxMacro(i,mode,tmp);
 					}
 				}
@@ -387,20 +385,11 @@ Special:  Bit 0: On = song message attached.
 			{
 				xins.FilterType(dsp::F_LOWPASS12);
 				int fc = curH.inFC&0x7F;
-				// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-				//if ( fc != 127) fc = int((fc)*100.0f/127.0f);
 				xins.FilterCutoff(fc);
 			}
 			if ((curH.inFR&0x80) != 0)
 			{
-				if ( xins.FilterCutoff() == 127 )
-				{
-					xins.FilterType(dsp::F_LOWPASS12);
-					int fc = curH.inFC&0x7F;
-					// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-					//if ( fc != 127) fc = int((fc)*100.0f/127.0f);
-					xins.FilterCutoff(fc);
-				}
+				xins.FilterType(dsp::F_LOWPASS12);
 				xins.FilterResonance(curH.inFR&0x7F);
 			}
 
@@ -627,7 +616,7 @@ Special:  Bit 0: On = song message attached.
 					curH.flg &= ~SampleFlags::HAS_SAMPLE;
 				else {
 					Seek(curH.smpData);
-					if (bcompressed) LoadITCompressedData(sampler,iSampleIdx,curH.length,b16Bit);
+					if (bcompressed) LoadITCompressedData(sampler,iSampleIdx,curH.length,b16Bit,curH.cvt);
 					else LoadITSampleData(sampler,iSampleIdx,curH.length,bstereo,b16Bit,curH.cvt);
 				}
 			}
@@ -683,14 +672,14 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit)
+		bool ITModule2::LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
 			unsigned long topsize, val,j;
 			short d1, d2,wNew;
 			char d18,d28;
 
-			bool deltapack=(itFileH.ffv==0x215); // Impulse Tracker 2.15 added a delta packed compressed sample format
+			bool deltapack=(itFileH.ffv>=0x215 && convert&SampleConvert::IS_DELTA); // Impulse Tracker 2.15 added a delta packed compressed sample format
 			
 			if (b16Bit)	{
 				topsize=0x4000;		packsize=4;	maxbitsize=16;
@@ -863,11 +852,11 @@ Special:  Bit 0: On = song message attached.
 						}
 						else if (tmp<75)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-65);
+							pent._volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP | (tmp-65);
 						}
 						else if (tmp<85)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-75);
+							pent._volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN | (tmp-75);
 						}
 						else if (tmp<95)
 						{
@@ -1089,8 +1078,6 @@ Special:  Bit 0: On = song message attached.
 				case CMD::MIDI_MACRO:
 					if ( param < 127)
 					{
-						// 120.0f/127.0f is added because the filter range in Sampulse is bigger than in IT.
-					//	pent._parameter = int((param)*100.0f/127.0f);
 						pent._parameter = param;
 					}
 					pent._cmd = XMSampler::CMD::MIDI_MACRO;

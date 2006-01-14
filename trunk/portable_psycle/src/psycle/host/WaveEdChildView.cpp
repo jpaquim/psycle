@@ -304,7 +304,8 @@ NAMESPACE__BEGIN(psycle)
 				if ( blLength*8 < nWidth ) // Selection is too small, zoom to smallest possible
 				{
 					diLength=(unsigned long)(nWidth*0.125f);
-					if ( blStart+diLength > wdLength ) diStart = wdLength-diLength;
+					if ( diLength > wdLength ) { diStart=0; diLength=wdLength; }
+					else if ( blStart+diLength > wdLength ) diStart = wdLength-diLength;
 					else diStart = blStart;
 				}
 				else

@@ -52,9 +52,13 @@ protected:
 public:
 	CEdit m_ECommandInfo;
 	CButton m_bAmigaSlides;
+	CButton m_ckFilter;
+	CComboBox m_cbPanningMode;
+
 	afx_msg void OnBnClickedCheck1();
 	afx_msg void OnBnClickedCheck2();
-	CButton m_ckFilter;
+	afx_msg void OnBnClickedCheck3();
+	afx_msg void OnCbnSelendokXmpanningmode();
 };
 
 NAMESPACE__END

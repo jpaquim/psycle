@@ -95,7 +95,7 @@ namespace psycle
 				_coeff4 = _coeffs._coeffs[_type][_cutoff][_q][4];
 			}
 
-			void ITFilter::Update()
+			void ITFilter::UpdateNew()
 			{
 				double fc;
 				if ( iRes >0 || iCutoff < 127 )
@@ -119,7 +119,7 @@ namespace psycle
 				fCoeff[freq] = frequ;
 
 			}
-			void ITFilter::UpdateOld()
+			void ITFilter::Update()
 			{
 				double d,e;
 				if ( iRes >0 || iCutoff < 127 )
@@ -141,8 +141,19 @@ namespace psycle
 	
 	*/
 						
-	
-	//				const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
+// sample_freq*pow(0.5, 0.25 + cutoff*1/factor)*1/(2*pi*110.0)))
+// loss = exp(resonance*(-LOG10*1.2/128))
+
+//					fc = 110.0f * pow(2.0, 0.25f+((double)(pChn->nCutOff*(flt_modifier+256)))/(fx*512.0f));
+//					<@mrsbrisby> fc *= (double)(2.0*PI/fs);
+//					<@mrsbrisby> where pChn->nCutoff is the "cutoff" as set by channel
+//						<@mrsbrisby> and flt_modifier is the envelope value (after having -1 translated to 0x7C; although I think IT used 0x7F)
+//						<@mrsbrisby> fx is 0.21 in libmodplug's "extended filter range" and 0.24 for "it modules"
+//						<@mrsbrisby> but i think that's wrong, i think IT uses closer to 20.0 (but not exactly)
+
+
+
+					const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
 					const double dLoss = (float)exp(iRes*(-LOG10*1.2/128.0));
 	
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/96.0)-1.0;
@@ -153,11 +164,11 @@ namespace psycle
 	//				const double dLoss = pow (10.0 , -((3.0*iRes) / 320.0)); // approx [1...0]  | -(iRes/128.0) * (24.0/20.0)
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-0.93; // approx [60..0]
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-1.0; // approx [60..0]
-					const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
+	//				const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
 	//				const double dLoss = pow (2.0,(127.0-iCutoff)/127.0)-1.0;	// [1..0]
 				
 					e = dInvAngle* dInvAngle;
-					d = 1.4*( 1.0- dLoss) / dInvAngle;
+					d = 1.0*( 1.0- dLoss) / dInvAngle;
 					if (d > 2.0f) d = 2.0f;
 					d = (dLoss - d) * dInvAngle;
 	//				if ( d + e*2.0 < 0.0 ) d = -e*2.0;
