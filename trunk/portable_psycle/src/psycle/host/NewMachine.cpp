@@ -36,7 +36,7 @@ NAMESPACE__BEGIN(psycle)
 		const int IS_FOLDER=2000000000;
 		const int IS_INTERNAL_MACHINE=1000000000;
 
-		const int TIMER_INTERVAL = 600;
+		const int TIMER_INTERVAL = 100;
 
 		RECT UpPos;
 		bool bScrollUp;
@@ -136,6 +136,7 @@ NAMESPACE__BEGIN(psycle)
 			//}}AFX_MSG_MAP
 			
 			ON_WM_TIMER()
+			ON_NOTIFY(TVN_KEYDOWN, IDC_BROWSER, OnTvnKeydownBrowser)
 		END_MESSAGE_MAP()
 		
 		BOOL CNewMachine::OnInitDialog() 
@@ -274,9 +275,9 @@ NAMESPACE__BEGIN(psycle)
 						}
 						HTREEITEM newitem;
 						if(pluginName)
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), 0, 0, hitem, TVI_SORT);
+							newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 						else
-							newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), 0, 0, hitem, TVI_SORT);
+							newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 						//associate node with plugin number
 						m_browser.SetItemData (newitem, i);
 					}
@@ -1493,24 +1494,36 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnOK() 
 		{
-			if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
+			CEdit* pEdit = m_browser.GetEditControl();
+			if (pEdit != NULL)
 			{
-				
-				if (bCategoriesChanged)
+				// save folder name - set focus to make tree contrl send end label edit message
+				m_browser.SetFocus ();
+			}
+			else
+			{			
+				if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
 				{
-					SetPluginCategories(NULL, NULL);
+
+
+					//do normal closing/saving action
+					if (bCategoriesChanged)
+					{
+						SetPluginCategories(NULL, NULL);
+					}
+
+					if (bAllowChanged)
+						SaveCacheFile();
+
+					if (bCategoriesChanged)
+					{
+						SaveCategoriesFile();
+					}
+
+					if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
+					CDialog::OnOK();
+
 				}
-
-				if (bAllowChanged)
-					SaveCacheFile();
-
-				if (bCategoriesChanged)
-				{
-					SaveCategoriesFile();
-				}
-
-				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
-				CDialog::OnOK();
 			}
 		}
 
@@ -1810,25 +1823,19 @@ NAMESPACE__BEGIN(psycle)
     			CImageList::DragMove(pt);
     			CImageList::DragShowNolock(FALSE);
 			
-			    if (CWnd::WindowFromPoint(pt) != &m_browser)
+			    
+				if (CWnd::WindowFromPoint(pt) == &m_browser)
 				{
-					//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_NO));
-				}
-    			else
-    			{
-      			//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
-      			TVHITTESTINFO tvhti;
-      			tvhti.pt = pt;
-      			m_browser.ScreenToClient(&tvhti.pt);
-      			HTREEITEM hItemSel = m_browser.HitTest(&tvhti);
-      			m_browser.SelectDropTarget(tvhti.hItem);
+      				//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
+      				TVHITTESTINFO tvhti;
+      				tvhti.pt = pt;
+      				m_browser.ScreenToClient(&tvhti.pt);
+      				HTREEITEM hItemSel = m_browser.HitTest(&tvhti);
+      				m_browser.SelectDropTarget(tvhti.hItem);
     			}
 			
     			CImageList::DragShowNolock(TRUE);
   			}
-			
-			
-			//check if mouse is over the browser up/down labels
 
 			CPoint curpoint = point;
 			ClientToScreen (&curpoint);
@@ -1869,13 +1876,6 @@ NAMESPACE__BEGIN(psycle)
 					bScrolling = false;
 					
 				}
-				
-				/*if (bScrolling)
-				{
-					int ScrollPosition = m_browser.GetScrollPos (SB_VERT);
-                    if (bScrollUp)
-                        m_browser.SetScrollPos (SB_VERT, ScrollPosition - 5,0);
-				}*/
 				
 
 			}
@@ -1967,61 +1967,68 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnContextMenu(CWnd* pWnd, CPoint point)
 		{
-			UINT nFlags;
-			CPoint newpoint = point;
-			ScreenToClient (&newpoint);
-			newpoint.y = newpoint.y - 13;   //compensate for shift (not sure why this happens, but it does)
-			//  ^^  this number should be fixed to be something relative to the height of an 
-			//      item/title bar/something like that, so it's accurate on ALL windows themes.
-			
-			HTREEITEM hItem = m_browser.HitTest(newpoint, &nFlags);
-			if (hItem != NULL)
-				m_browser.SelectItem(hItem);
+			if (m_hItemDrag != NULL)
+				OnEndDrag(nFlags, point);
+			else
+			{
+				UINT nFlags;
+				CPoint newpoint = point;
+				ScreenToClient (&newpoint);
+				newpoint.y = newpoint.y - 13;   //compensate for shift (not sure why this happens, but it does)
+				//  ^^  this number should be fixed to be something relative to the height of an 
+				//      item/title bar/something like that, so it's accurate on ALL windows themes.
+				
+				HTREEITEM hItem = m_browser.HitTest(newpoint, &nFlags);
+				if (hItem != NULL)
+					m_browser.SelectItem(hItem);
 
-			if ((hItem != NULL) && (pluginOrder == 2)/*&& (TVHT_ONITEM & nFlags)*/)
-			{				
-				//check if selected item is a folder
-
-				CMenu popupmenu;
-				VERIFY(popupmenu.LoadMenu(IDR_NEWMACHINESPOPUP));
-		
-				// TO DO:  Delete/Add menu items depending on selection.
-				if (m_browser.GetItemData(hItem) == IS_FOLDER)
-				{
-					//Check if the "Uncategorised" folder has been selected
-					if (hItem == hNodes[0])
+				if ((hItem != NULL) && (pluginOrder == 2)/*&& (TVHT_ONITEM & nFlags)*/)
+				{				
+					//check if selected item is a folder
+					if (m_browser.GetParentItem (hItem) != hNodes[0])
 					{
-						//grey out items that can't be used.
-						popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
-						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
-						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
-						popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
-						popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
-					}
 
-					//check if selected item is a root folder
-					if (m_browser.GetParentItem (hItem) == NULL)
-					{
-						//prevent plugins from being moved to the root
-						//THIS SHOULD BE FIXED SO IT CAN WORK
-						popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
-						popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+						CMenu popupmenu;
+						VERIFY(popupmenu.LoadMenu(IDR_NEWMACHINESPOPUP));
+				
+						// TO DO:  Delete/Add menu items depending on selection.
+						if (m_browser.GetItemData(hItem) == IS_FOLDER)
+						{
+							//Check if the "Uncategorised" folder has been selected
+							if (hItem == hNodes[0])
+							{
+								//grey out items that can't be used.
+								popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
+								popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
+								popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
+								popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
+								popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+							}
+
+							//check if selected item is a root folder
+							if (m_browser.GetParentItem (hItem) == NULL)
+							{
+								//prevent plugins from being moved to the root
+								popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
+								popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+							}
+						}
+						else
+						{
+							popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
+							popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
+							popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
+							popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
+							popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+						}
+						CMenu* pPopup = popupmenu.GetSubMenu(0);
+						ASSERT(pPopup != NULL);
+				
+						pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, CNewMachine::GetActiveWindow());
+				
+						popupmenu.DestroyMenu();
 					}
 				}
-				else
-				{
-					popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
-					popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
-					popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
-					popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
-					popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
-				}
-				CMenu* pPopup = popupmenu.GetSubMenu(0);
-				ASSERT(pPopup != NULL);
-		
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, CNewMachine::GetActiveWindow());
-		
-				popupmenu.DestroyMenu();
 			}
 
 		}
@@ -2127,61 +2134,103 @@ NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnBnClickedCancel()
 		{
-			if (bCategoriesChanged)
+			CEdit* pEdit = m_browser.GetEditControl();
+			if (pEdit != NULL)
 			{
-				SetPluginCategories(NULL, NULL);
-			}
-			if (bAllowChanged)
-				SaveCacheFile();
-
-			if (bCategoriesChanged)
-				SaveCategoriesFile();
-
-			OnCancel();
-		}
-
-	void CNewMachine::OnTimer(UINT nIDEvent)
-	{
-		ScrollCount++;
-		if (ScrollCount > 0)
-		{
-			//scroll view, if possible
-			int ScrollPos;
-			ScrollPos = m_browser.GetScrollPos (SB_VERT);
-			if (bScrollUp)
-			{
-				if (ScrollPos > 0)
-				{
-					m_browser.ScrollWindow (0, itemheight, 0, 0);
-					HTREEITEM hTemp = m_browser.GetPrevVisibleItem(m_browser.GetFirstVisibleItem ());
-					m_browser.SelectSetFirstVisible (hTemp);
-					m_browser.SelectDropTarget (hTemp);
-					m_browser.Invalidate ();
-					
-				}
+				// save folder name - set focus to make tree contrl send end label edit message
+				HTREEITEM Sel = m_browser.GetSelectedItem ();
+				CString text = m_browser.GetItemText (Sel);
+				m_browser.SetFocus ();
+				m_browser.SetItemText (Sel, text);
 			}
 			else
 			{
-				if (ScrollPos < m_browser.GetScrollLimit (SB_VERT))
-					m_browser.ScrollWindow (0,  - itemheight, 0, 0);
-					HTREEITEM hTemp = m_browser.GetNextVisibleItem(m_browser.GetFirstVisibleItem ());
-					m_browser.SelectSetFirstVisible (hTemp);
+				if (bCategoriesChanged)
+				{
+					SetPluginCategories(NULL, NULL);
+				}
+				if (bAllowChanged)
+					SaveCacheFile();
 
-					//NEED TO ADD A METHOD FOR FINDING THE LAST VISIBLE ITEM
-					//m_browser.SelectDropTarget (hCurrent);
-					m_browser.Invalidate ();
+				if (bCategoriesChanged)
+					SaveCategoriesFile();
+
+				OnCancel();
 			}
+		}
+
+		void CNewMachine::OnTimer(UINT nIDEvent)
+		{
+			ScrollCount++;
+			if (ScrollCount > 0)
+			{
+				//scroll view, if possible
+				int ScrollPos;
+				ScrollPos = m_browser.GetScrollPos (SB_VERT);
+				if (bScrollUp)
+				{
+					if (ScrollPos > 0)
+					{
+						m_browser.ScrollWindow (0, itemheight, 0, 0);
+						HTREEITEM hTemp = m_browser.GetPrevVisibleItem(m_browser.GetFirstVisibleItem ());
+						m_browser.SelectSetFirstVisible (hTemp);
+						m_browser.SelectDropTarget (hTemp);
+						m_browser.Invalidate ();
+					}
+				}
+				else
+				{
+					if (ScrollPos < m_browser.GetScrollLimit (SB_VERT))
+						m_browser.ScrollWindow (0,  - itemheight, 0, 0);
+						HTREEITEM hTemp = m_browser.GetNextVisibleItem(m_browser.GetFirstVisibleItem ());
+						m_browser.SelectSetFirstVisible (hTemp);
+
+						//NEED TO ADD A METHOD FOR FINDING THE LAST VISIBLE ITEM
+						
+						//
+						
+						HTREEITEM hNext = m_browser.GetNextVisibleItem (hTemp);
+						HTREEITEM hCurrent;
+						for (int inttemp = 1; inttemp < m_browser.GetVisibleCount (); inttemp++)
+						{
+							hCurrent = hNext;
+							hNext = m_browser.GetNextVisibleItem (hCurrent);
+							m_versionLabel.SetWindowText (m_browser.GetItemText(hCurrent));
+						}
+						m_browser.SelectDropTarget (hCurrent);
+						m_browser.Invalidate ();
+				}
+				
+			}
+
+
+			CDialog::OnTimer(nIDEvent);
+		}
+	
+		void CNewMachine::OnTvnKeydownBrowser(NMHDR *pNMHDR, LRESULT *pResult)
+		{
+			LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
 			
-			//TEMPORARY - DELETE THESE TWO LINES LATER.
-			char buffer[100];sprintf (buffer, "%d", ScrollPos);
-			m_dllnameLabel.SetWindowText (buffer);
+			//THIS DOESN'T WORK - SOMETHING TO FIX ONE DAY
+           /* if (pTVKeyDown->wVKey == VK_APPS)
+			{
+				//deal with "right click " key on those modern fancy windows keyboards!
+				HTREEITEM hSelected = m_browser.GetSelectedItem();
+				if (hSelected != NULL)
+				{
+					RECT selrect;
+					m_browser.GetItemRect (hSelected, &selrect, 0);
+					CPoint point;  
+					point.x = int((selrect.left + selrect.right ) / 2);
+					point.y = int((selrect.bottom + selrect.top) / 2);
+					m_browser.OnContextMenu (0,point);
+				}
+			}*/
+
+			*pResult = 0;
 		}
 
 
-		CDialog::OnTimer(nIDEvent);
-	}
-
 	NAMESPACE__END
-NAMESPACE__END
-
+		NAMESPACE__END
 
