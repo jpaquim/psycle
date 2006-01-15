@@ -66,9 +66,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			InternalMachineInfo()
-				/*: mode(MACHMODE_UNDEFINED)
-				, type(MACH_UNDEFINED)
-				, allow(true)*/
 			{
 			}
 			~InternalMachineInfo() throw()
@@ -198,6 +195,7 @@ NAMESPACE__BEGIN(psycle)
 
 			afx_msg void OnBnClickedCancel();
 			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTvnKeydownBrowser(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 
