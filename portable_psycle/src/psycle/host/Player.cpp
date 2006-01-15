@@ -242,19 +242,21 @@ namespace psycle
 								{
 									// for native machines,
 									// use the value in the "instrument" field of the event as a voice number
-									int voice = pEntry->_inst;
-									pEntry->_inst = 0;
+									int voice(pEntry->_inst);
+									// make a copy of the pattern entry, because we're going to modify it.
+									PatternEntry entry(*pEntry);
+									entry._inst = 0;
 									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
 									if(voice < pSong->SONGTRACKS)
 									{
-										pMachine->Tick(voice, pEntry);
+										pMachine->Tick(voice, &entry);
 									}
 									else if(voice == 0xff)
 									{
 										// special voice value which means we want to send the same command to all voices
 										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
 										{
-											pMachine->Tick(voice, pEntry);
+											pMachine->Tick(voice, &entry);
 										}
 									}
 									else ; // probably an out of range voice value (with the classic tracker way, it's limited to the number of pattern tracks)
