@@ -332,7 +332,7 @@ NAMESPACE__BEGIN(psycle)
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
 				FILE* hfile;
-				if ((hfile=fopen(szFile,"rw")) == NULL )
+				if ((hfile=fopen(szFile,"r")) == NULL )
 				{
 					MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 					return;

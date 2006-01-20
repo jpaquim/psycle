@@ -756,7 +756,7 @@ NAMESPACE__BEGIN(psycle)
 			if(::GetOpenFileName(&ofn))
 			{
 				std::FILE * hfile;
-				if(!(hfile=std::fopen(szFile,"rw")))
+				if(!(hfile=std::fopen(szFile,"r")))
 				{
 					::MessageBox(0, "Couldn't open File for Reading. Operation Aborted", "File Open Error", MB_ICONERROR | MB_OK);
 					return;
