@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -231,7 +231,8 @@ BEGIN
         MENUITEM "Block S&witch/Swap",          ID_POP_BLOCKSWITCH
         MENUITEM "Block &Delete",               ID_POP_DELETE
         MENUITEM SEPARATOR
-        MENUITEM "&Interpolate Effect",         ID_POP_INTERPOLATE
+        MENUITEM "&Interpolate (Linear)",       ID_POP_INTERPOLATE
+        MENUITEM "Interpolate (&Curve)",        ID_POP_INTERPOLATE_CURVE
         MENUITEM "Change &Generator",           ID_POP_CHANGEGENERATOR
         MENUITEM "Change Ins&trument",          ID_POP_CHANGEINSTRUMENT
         MENUITEM SEPARATOR
@@ -479,24 +480,30 @@ BEGIN
     CTEXT           "",IDC_MEM_RESO4,93,65,80,10,SS_CENTERIMAGE | SS_SUNKEN
 END
 
-IDD_WIREDIALOG DIALOGEX 0, 0, 215, 161
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+IDD_WIREDIALOG DIALOGEX 0, 0, 216, 178
+STYLE DS_SETFONT | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
+    WS_THICKFRAME
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Mode",IDC_BUTTON,4,83,169,16,NOT WS_TABSTOP
-    CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,0,101,141,12
+    PUSHBUTTON      "Mode",IDC_BUTTON,4,100,169,16,NOT WS_TABSTOP
     CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS,0,115,141,12
-    PUSHBUTTON      "Hold",IDC_BUTTON2,143,102,30,24,NOT WS_TABSTOP
-    PUSHBUTTON      "Delete Connection",IDC_BUTTON1,4,129,169,29,NOT 
+                    TBS_NOTICKS,41,119,97,12
+    PUSHBUTTON      "Hold",IDC_SCOPE_HOLD,143,119,30,23,NOT WS_TABSTOP
+    PUSHBUTTON      "Delete Connection",IDC_BUTTON1,4,146,169,29,NOT 
                     WS_TABSTOP
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_VERT | TBS_BOTH | WS_TABSTOP,180,0,28,135
-    PUSHBUTTON      "db",IDC_VOLUME_DB,177,136,34,11,NOT WS_TABSTOP
-    PUSHBUTTON      "%",IDC_VOLUME_PER,177,147,34,11,NOT WS_TABSTOP
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,181,2,28,147
+    PUSHBUTTON      "dB",IDC_VOLUME_DB,178,153,34,11,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER,178,164,34,11,NOT WS_TABSTOP
+    CONTROL         "View Scope",IDC_VIEW_SCOPE,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE,4,5,82,13
+    CONTROL         "View Connections",IDC_VIEW_CONNECTIONS,"Button",
+                    BS_AUTORADIOBUTTON | BS_PUSHLIKE,91,5,82,13
+    LTEXT           "Frequency:",IDC_SCOPE_PARAM_2,5,134,36,9
+    LTEXT           "Static",IDC_SCOPE_PARAM_1,5,120,26,9
+    CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,41,133,97,12
 END
 
 IDD_MACPROP DIALOGEX 0, 0, 190, 73
@@ -2217,6 +2224,21 @@ BEGIN
                     WS_EX_STATICEDGE
 END
 
+IDD_INTERPOLATE_CURVE DIALOGEX 0, 0, 461, 275
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Interpolate Curve"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,276,253,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,404,253,50,14
+    EDITTEXT        IDC_VAL,163,232,75,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CURVE_TYPE,289,232,75,51,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_POS,41,232,75,12,ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2257,9 +2279,10 @@ BEGIN
     IDD_WIREDIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 208
+        RIGHTMARGIN, 209
         TOPMARGIN, 7
-        BOTTOMMARGIN, 154
+        BOTTOMMARGIN, 171
+        HORZGUIDE, 116
     END
 
     IDD_MACPROP, DIALOG
@@ -2532,6 +2555,14 @@ BEGIN
         LEFTMARGIN, 7
         TOPMARGIN, 7
         BOTTOMMARGIN, 16
+    END
+
+    IDD_INTERPOLATE_CURVE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 454
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2958,7 +2989,7 @@ BEGIN
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
