@@ -51,6 +51,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_LBUTTONDOWN()
 			ON_WM_RBUTTONDOWN()
 			ON_WM_PAINT()
+			ON_WM_SIZING()
 		END_MESSAGE_MAP()
 
 		BOOL CWireDlg::OnInitDialog() 
@@ -124,7 +125,7 @@ NAMESPACE__BEGIN(psycle)
 			numIns = 16; 
 			numOuts = 16; 
 
-			//set up inputs - later, this will have to be modified to make it match up stereo pairs by default.
+			//set up inputs - later, this will have to be modified to make it match up stereo pairs (if available) by default.
 			for (int i = 0; i < numIns; i++)
 			{
 				ins_node_used.push_back (0);
@@ -1545,8 +1546,19 @@ NAMESPACE__BEGIN(psycle)
 			// Do not call CDialog::OnPaint() for painting messages
 			if (bcurrentview) { DrawPoints(); }
 		}
+		void CWireDlg::OnSizing(UINT fwSide, LPRECT pRect)
+		{
+			CDialog::OnSizing(fwSide, pRect);
+
+			//reposition controls
+
+
+			//set drawing vars to account for resizing
+		}
+
 	NAMESPACE__END
 NAMESPACE__END
+
 
 
 

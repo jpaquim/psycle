@@ -133,6 +133,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnPaint();
+			afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
 };
 
 		//{{AFX_INSERT_LOCATION}}

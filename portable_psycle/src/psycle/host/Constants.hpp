@@ -43,7 +43,7 @@ namespace psycle
 		#define OLD_MAX_PLUGINS				256
 		/// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
 		#define LOCK_LATENCY			256
-		/// \todo changing this breaks file format
+		/// \todo changing this breaks file format.
 		#define MAX_SONG_POSITIONS		128
 		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
 		#define MAX_CONNECTIONS		12

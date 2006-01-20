@@ -103,6 +103,7 @@
 #define IDB_KEYS_SHARP                  232
 #define IDR_NEWMACHINESPOPUP            233
 #define IDB_KEYS_BACK                   234
+#define IDD_INTERPOLATE_CURVE           240
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -216,6 +217,8 @@
 #define IDC_STATIC18                    1090
 #define IDC_BUTTON1                     1091
 #define IDC_BUTTON2                     1092
+#define IDC_HOLD                        1092
+#define IDC_SCOPE_HOLD                  1092
 #define IDC_BUTTON3                     1093
 #define IDC_BUTTON4                     1094
 #define IDC_INS_DECOCTAVE               1094
@@ -938,6 +941,14 @@
 #define IDC_ENV_LOOPEND                 1721
 #define IDC_INS_NOTESCROLL              1724
 #define IDC_BROWSEDOWN                  1726
+#define IDC_INTERPOLATE_GRAPH           1729
+#define IDC_VAL                         1731
+#define IDC_CURVE_TYPE                  1732
+#define IDC_POS                         1733
+#define IDC_VIEW_CONNECTIONS            1735
+#define IDC_VIEW_SCOPE                  1736
+#define IDC_SCOPE_PARAM_1               1739
+#define IDC_SCOPE_PARAM_2               1740
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1068,6 +1079,7 @@
 #define ID__DELETE                      32994
 #define ID__MOVETOTOPLEVEL              32995
 #define ID_Menu32996                    32996
+#define ID_POP_INTERPOLATE_CURVE        32999
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1076,9 +1088,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        239
-#define _APS_NEXT_COMMAND_VALUE         32998
-#define _APS_NEXT_CONTROL_VALUE         1728
+#define _APS_NEXT_RESOURCE_VALUE        241
+#define _APS_NEXT_COMMAND_VALUE         33000
+#define _APS_NEXT_CONTROL_VALUE         1741
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
