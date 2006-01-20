@@ -3,6 +3,7 @@
 #pragma once
 #include "Machine.hpp"
 #include "constants.hpp"
+#include "afxwin.h"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		class CChildView;
@@ -46,6 +47,9 @@ NAMESPACE__BEGIN(psycle)
 
 			float pSamplesL[SCOPE_BUF_SIZE];
 			float pSamplesR[SCOPE_BUF_SIZE];
+
+			bool bcurrentview;
+
 		// Dialog Data
 			//{{AFX_DATA(CWireDlg)
 			enum { IDD = IDD_WIREDIALOG };
@@ -97,7 +101,39 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnVolumePer();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-		};
+		public:
+			CStatic m_param1;
+			CStatic m_param2;
+			afx_msg void OnBnClickedViewScope();
+			afx_msg void OnBnClickedViewConnections();
+
+			void DrawPoints();
+			int numIns, numOuts;
+			RECT conn_grapharea;
+
+			int conn_ins_spacing;
+			int conn_outs_spacing;
+			bool bOneSelected;
+			bool bSelectionType;
+			bool bLastSelectionType;
+
+			std::vector <bool> ins_node_used;
+			std::vector <bool> outs_node_used;
+
+			std::vector <std::string> ins_node_names;
+			std::vector <std::string> outs_node_names;
+
+			int conn_sel_in, conn_sel_out;
+
+			int connections[64][64]; //hopefully this is enough, shouldn't be more than 32 pairs of channels
+
+			RECT GetNodeRect(int node, bool bDirection);
+
+			void GraphClicked (bool bSelType, CPoint point);
+			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+			afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+			afx_msg void OnPaint();
+};
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.

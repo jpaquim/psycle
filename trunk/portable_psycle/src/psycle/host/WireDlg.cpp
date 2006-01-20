@@ -8,6 +8,7 @@
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
+#include ".\wiredlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
@@ -28,6 +29,8 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_SLIDER, m_slider);
 			DDX_Control(pDX, IDC_SLIDER2, m_slider2);
 			DDX_Control(pDX, IDC_BUTTON, m_mode);
+			DDX_Control(pDX, IDC_SCOPE_PARAM_1, m_param1);
+			DDX_Control(pDX, IDC_SCOPE_PARAM_2, m_param2);
 			//}}AFX_DATA_MAP
 		}
 
@@ -39,16 +42,21 @@ NAMESPACE__BEGIN(psycle)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
 			ON_BN_CLICKED(IDC_BUTTON, OnMode)
-			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
+			ON_BN_CLICKED(IDC_SCOPE_HOLD, OnHold)
 			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
 			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
+			ON_BN_CLICKED(IDC_VIEW_SCOPE, OnBnClickedViewScope)
+			ON_BN_CLICKED(IDC_VIEW_CONNECTIONS, OnBnClickedViewConnections)
 			//}}AFX_MSG_MAP
+			ON_WM_LBUTTONDOWN()
+			ON_WM_RBUTTONDOWN()
+			ON_WM_PAINT()
 		END_MESSAGE_MAP()
 
 		BOOL CWireDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			
+
 			scope_mode = 0;
 			scope_peak_rate = 20;
 			scope_osc_freq = 5;
@@ -69,7 +77,7 @@ NAMESPACE__BEGIN(psycle)
 			m_volslider.SetPos(256*4-t);
 
 			char buf[128];
-			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
+			sprintf(buf,"[%d] %s -> %s", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -78,8 +86,8 @@ NAMESPACE__BEGIN(psycle)
 			memset(pSamplesR,0,sizeof(pSamplesR));
 
 			CClientDC dc(this);
-			rc.top = 2;
-			rc.left = 2;
+			rc.top = 4;
+			rc.left = 30 + 2;
 			rc.bottom = 128+rc.top;
 			rc.right = 256+rc.left;
 			bufBM = new CBitmap;
@@ -100,6 +108,49 @@ NAMESPACE__BEGIN(psycle)
 			{
 				mult = 1.0f;
 			}	
+			//set labels
+			m_param1.SetWindowText ("Refresh:");
+			m_param2.SetWindowText ("");
+			
+			//hide second slider
+			m_slider.ShowWindow (SW_HIDE);
+			//select appropriate push radio button
+			if (bcurrentview)
+				((CButton*)GetDlgItem(IDC_VIEW_CONNECTIONS))->SetCheck(1);
+			else
+				((CButton*)GetDlgItem(IDC_VIEW_SCOPE))->SetCheck(1);
+			
+			// get values for connections - NEED TO BE MODIFIED TO WORK WITH "GetNumINputs()" etc
+			numIns = 16; 
+			numOuts = 16; 
+
+			//set up inputs - later, this will have to be modified to make it match up stereo pairs by default.
+			for (int i = 0; i < numIns; i++)
+			{
+				ins_node_used.push_back (0);
+			}
+			for (int i = 0; i < numOuts; i++)
+			{
+				outs_node_used.push_back (0);
+			}
+			
+
+			//channel names.
+			
+			//determine graphics parameters for connections view
+			conn_grapharea.left = 4;
+			conn_grapharea.right = conn_grapharea.left + 256;
+			conn_grapharea.top = 32;
+			conn_grapharea.bottom = conn_grapharea.top + 200;
+			
+			conn_ins_spacing = 200 / numIns;
+			conn_outs_spacing = 200 / numOuts;
+			
+			conn_sel_in = -1;  conn_sel_out = -1;  //no points are to be selected.
+			
+			
+
+
 			return TRUE;
 		}
 
@@ -885,6 +936,23 @@ NAMESPACE__BEGIN(psycle)
 			{
 				scope_mode = 0;
 			}
+			//alter sliders/text
+			switch (scope_mode)
+			{
+			case 0:
+                m_param2.SetWindowText (""); m_slider.ShowWindow (SW_HIDE);
+				break;
+			case 1:
+				m_param2.SetWindowText ("Frequency:"); m_slider.ShowWindow (SW_SHOW);
+				break;
+			case 2:
+				m_param2.SetWindowText ("Bands:"); m_slider.ShowWindow (SW_SHOW);
+				break;
+			case 3:
+				m_param2.SetWindowText (""); m_slider.ShowWindow (SW_HIDE);
+				break;
+			}
+
 			SetMode();
 		//	m_pParent->SetFocus();	
 		}
@@ -1193,5 +1261,294 @@ NAMESPACE__BEGIN(psycle)
 				m_volslider.SetPos(256*4-t);
 			}
 		}
+		void CWireDlg::OnBnClickedViewScope()
+		{
+			if (((CButton*)GetDlgItem(IDC_VIEW_SCOPE))->GetCheck ())
+			{
+				//button is down
+				m_param1.ShowWindow (SW_SHOW);
+				m_param2.ShowWindow (SW_SHOW);
+				m_slider.ShowWindow (SW_SHOW);
+				m_slider2.ShowWindow (SW_SHOW);
+				m_mode.ShowWindow (SW_SHOW);
+				((CButton*)GetDlgItem(IDC_SCOPE_HOLD))->ShowWindow (SW_SHOW);
+				Invalidate();
+				SetMode();
+			}
+
+		}
+
+		void CWireDlg::OnBnClickedViewConnections()
+		{
+			if (((CButton*)GetDlgItem(IDC_VIEW_CONNECTIONS))->GetCheck ())
+			{
+				//button is down
+				KillTimer(2304+this_index);
+				//hide dlg items
+				m_param1.ShowWindow (SW_HIDE);
+				m_param2.ShowWindow (SW_HIDE);
+				m_slider.ShowWindow (SW_HIDE);
+				m_slider2.ShowWindow (SW_HIDE);
+				m_mode.ShowWindow (SW_HIDE);
+				((CButton*)GetDlgItem(IDC_SCOPE_HOLD))->ShowWindow (SW_HIDE);
+				// link to function to draw points for machine connections
+				DrawPoints();
+
+			}
+
+		}
+
+		void CWireDlg::DrawPoints()
+		{
+			//draw all points
+
+			CClientDC dc(this);
+			//dc.SetDCBrushColor (0x00FFFFFF);
+			//dc.SetDCPenColor (0);
+			dc.FillSolidRect (&conn_grapharea, 0x00FFFFFF);
+			dc.Rectangle (&conn_grapharea);
+			RECT tempnode;
+			for (int j = 0; j < numIns; j++) 
+			{
+				tempnode = GetNodeRect (j, 0);
+				UINT colour = (ins_node_used[j]) ? 0 : 0x00BBBBBB;
+				dc.FillSolidRect (&tempnode, colour);
+				//draw numbers;
+				std::ostringstream oss; oss << j; std::string buffer (oss.str());
+				dc.SetBkColor (0x00FFFFFF); dc.SetTextColor (colour);
+				buffer  = buffer + ".";
+				dc.TextOut (tempnode.left - 20, tempnode.top - 5, buffer.c_str ());
+			}
+			
+			for (int j = 0; j < numOuts; j++) 
+			{
+				tempnode = GetNodeRect (j, 1);
+				UINT colour = (outs_node_used[j]) ? 0 : 0x00BBBBBB;
+				dc.FillSolidRect (&tempnode, colour);
+				//draw numbers;
+				std::ostringstream oss; oss << j; std::string buffer (oss.str());
+				dc.SetBkColor (0x00FFFFFF); dc.SetTextColor (colour);
+				buffer  = buffer + ".";
+				dc.TextOut (tempnode.left + 20, tempnode.top - 5, buffer.c_str ());
+			}
+			//draw lines;
+			for (int i = 0; i < numIns; i++)
+			{
+				for (int j = 0; j < numOuts; j++)
+				{
+					//  check if value is "1" for a line.
+					if (connections[i][j] == 1)
+					{
+						//draw line
+						RECT temprect = GetNodeRect(i, 0);
+						dc.MoveTo (temprect.left + 3, temprect.top + 3);
+						RECT temprect2 = GetNodeRect(j, 1);
+						dc.LineTo (temprect2.left + 3, temprect2.top + 3);
+						
+
+
+					}
+				}
+			}
+
+			//unselect points
+			if (!bOneSelected) {conn_sel_in = -1; conn_sel_out = -1;}
+
+			//draw selected items
+			//selected input
+			
+			if (conn_sel_in > -1)
+			{
+				RECT inrect;
+				inrect = GetNodeRect (conn_sel_in, 0);
+				dc.FillSolidRect (&inrect, (bSelectionType) ? 0x00FF0000 : 0x000000FF );
+			}
+			if (conn_sel_out > -1)
+			{
+				RECT outrect;
+				outrect = GetNodeRect (conn_sel_out, 1);
+				dc.FillSolidRect (&outrect, (bSelectionType) ? 0x00FF0000 : 0x000000FF);
+			}
+
+
+
+			dc.DeleteDC ();
+
+			
+
+		}
+
+		void CWireDlg::OnLButtonDown(UINT nFlags, CPoint point)
+		{
+			GraphClicked(0, point);
+			CDialog::OnLButtonDown(nFlags, point);
+		}
+
+		void CWireDlg::OnRButtonDown(UINT nFlags, CPoint point)
+		{
+			GraphClicked(1, point);			
+			CDialog::OnRButtonDown(nFlags, point);
+		}
+
+		void CWireDlg::GraphClicked (bool bSelType, CPoint point)
+		{
+			/*if (LastSelectionType != bSelectionType)
+			{
+				return;
+			} */
+			
+			//NEED TO ADD MORE OF THE ABOVE STUFF ELSEWHERE IN THIS CLASS
+			//check if user has clicked a point
+			RECT temprect; int i(0), h(0);
+			bool bPointClicked = false; bool bPointType;
+			if ((point.x > 36) && (point.x < 44))
+			{
+				while (i < numIns)
+				{
+					temprect = GetNodeRect(i, 0);
+					if (PtInRect(&temprect, point))	
+					{
+						conn_sel_in = i;
+						bPointClicked = true;
+						i = numIns + 2; //make loop end prematurely
+						bPointType = 0;
+					}
+					i++;
+				}
+			}
+			if (i != numIns + 2)
+			{
+				if ((point.x > 212) && (point.x < 220))
+				{
+					while (h < numOuts)
+					{
+						temprect = GetNodeRect(h, 1);
+						if (PtInRect(&temprect, point))	
+						{
+							conn_sel_out = h;
+							bPointClicked  = true;
+							h = numIns; //make loop end prematurely
+							bPointType = 1;
+						}
+						h++;
+					}
+				}
+			}
+			if (bPointClicked)
+			{
+				//STILL ERRORS HERE
+				if (bLastSelectionType == bSelType)
+				{
+					if (bOneSelected)
+					{
+						//one already selected, set the line between.
+						if (bSelectionType)
+						{
+							connections[conn_sel_in][conn_sel_out] = 0;
+							//check if both nodes are still being used 
+							int i = 0; bool bConnFound = false;
+							while (i < numOuts)
+							{
+								if (connections[conn_sel_in][i])
+								{
+									bConnFound = true;
+									i = numOuts;
+								}
+								i++;
+							}
+							if (!bConnFound)
+							{
+                                ins_node_used[conn_sel_in] = 0;
+							}
+							
+							i = 0; bConnFound = false;
+							while (i < numIns)
+							{
+								if (connections[i][conn_sel_out])
+								{
+									bConnFound = true;
+									i = numIns;
+								}
+								i++;
+							}
+							if (!bConnFound)
+							{
+                                outs_node_used[conn_sel_out] = 0;
+							}
+							
+						}
+						else
+						{
+							connections[conn_sel_in][conn_sel_out] = 1;
+							ins_node_used[conn_sel_in] = 1;
+							outs_node_used[conn_sel_out] = 1;
+						}
+						bOneSelected = false;
+					}
+					else
+					{
+						bOneSelected = true;
+					}
+					
+				}
+				else
+				{ 
+					bOneSelected = true;
+					if (bPointType)
+					{
+						conn_sel_in = -1;//conn_sel_out = -1;
+					}
+					else
+					{
+						conn_sel_out = -1;//conn_sel_in = -1;
+					}
+				}
+				bSelectionType = bSelType;
+				bLastSelectionType = bSelectionType;
+				
+			}
+			//bLastSelectionType = bSelectionType;
+			//char buffer[100]; sprintf (buffer, "%d", conn_sel_in);
+			//SetWindowText (buffer);
+			DrawPoints();
+
+
+		}
+		RECT CWireDlg::GetNodeRect (int node, bool bDirection)
+		{
+			RECT rect;
+			if (bDirection)
+			{
+				//an output
+				rect.left = 213;
+				rect.right = rect.left + 7;
+
+				rect.top = conn_grapharea.top + (node + 0.5) * conn_outs_spacing - 4;
+				rect.bottom = rect.top + 7;
+			}
+			else
+			{
+				//an input
+				rect.left = 37;
+				rect.right = rect.left + 7;
+
+				rect.top = conn_grapharea.top + (node + 0.5) * conn_ins_spacing - 4;
+				rect.bottom = rect.top + 7;
+			}
+			return rect;
+		}
+
+		void CWireDlg::OnPaint()
+		{
+			CPaintDC dc(this); // device context for painting
+			// TODO: Add your message handler code here
+			// Do not call CDialog::OnPaint() for painting messages
+			if (bcurrentview) { DrawPoints(); }
+		}
 	NAMESPACE__END
 NAMESPACE__END
+
+
+
+
+
