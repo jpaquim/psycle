@@ -738,8 +738,7 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::OnImportReg() 
 		{
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
-//			char szFile[1 << 10]; <- we are not working with bits. This is nonsense.
-			char szFile[1024];// buffer for file name
+			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
@@ -1424,7 +1423,7 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::OnExportReg() 
 		{
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
-			char szFile[1 << 10]; // buffer for file name
+			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
@@ -1444,8 +1443,7 @@ NAMESPACE__BEGIN(psycle)
 				::CString str2 = str.Right(4);
 				if(str2.CompareNoCase(".psv")) str.Insert(str.GetLength(),".psv");
 				std::sprintf(szFile,str);
-				::DeleteFile(szFile);
-				if(!(hfile=std::fopen(szFile,"wa"))) // file does not exist.
+				if(!(hfile=std::fopen(szFile,"wb")))
 				{
 					::MessageBox(0, "Couldn't open File for Writing. Operation Aborted", "File Save Error", MB_ICONERROR | MB_OK);
 					return;

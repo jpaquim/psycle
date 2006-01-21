@@ -2371,7 +2371,7 @@ NAMESPACE__BEGIN(psycle)
 							// load settings
 							FILE* hfile;
 							sprintf(szOpenName,"%s\\%s.psm",findDir,sName);
-							if ((hfile=fopen(szOpenName,"r")) == NULL )
+							if(!(hfile=fopen(szOpenName,"rb")))
 							{
 								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 								return;
@@ -3002,7 +3002,7 @@ NAMESPACE__BEGIN(psycle)
 							// load settings
 							FILE* hfile;
 							sprintf(szOpenName,"%s\\%s.psh",findDir,sName);
-							if ((hfile=fopen(szOpenName,"r")) == NULL )
+							if(!(hfile=fopen(szOpenName,"rb")))
 							{
 								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 								return;
