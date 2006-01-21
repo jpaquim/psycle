@@ -18,16 +18,12 @@ directory structure
 		psycle/:
 			host/: psycle host
 			plugins/: psycle plugins
-	make/: build systems for various compilers (only msvc 7.1 so far!)
+	make/: build systems for various compilers (only msvc so far!)
 		msvc_7.1/: solution and project files for msvc 7.1
+		msvc_8.0/: solution and project files for msvc 8.0
 			solution.sln: solution (.sln) file
 			projects/: project (.vcproj) files (note that these projects are set up so that pathes to source files and header files are relative to the solution file)
-			debug/: output files produced by the debug config of the projects (not included in the cvs)
-				intermediate_output/: intermediate files (.pch, .obj, .ilk, .idb, ...) produced during compilation (not included in the cvs)
+			output/*/: output files produced by the various config of the projects (not included in the cvs)
+				intermediate/: intermediate files (.pch, .obj, .ilk, .idb, ...) produced during compilation (not included in the cvs)
 				lib/: .lib and .exp files (not included in the cvs)
 				bin/: .dll and .exe (and .pdb) files (not included in the cvs)
-			release/: output files produced by the release config of the projects (not included in the cvs)
-				intermediate_output/: intermediate files (.pch, .obj, .ilk, .idb, ...) produced during compilation (not included in the cvs)
-				lib/: .lib and .exp files (not included in the cvs)
-				bin/: .dll and .exe (and .pdb) files (not included in the cvs)
-				
