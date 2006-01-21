@@ -313,7 +313,7 @@ NAMESPACE__BEGIN(psycle)
 		void CPresetsDlg::OnImport() 
 		{
 			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
+			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -348,7 +348,7 @@ NAMESPACE__BEGIN(psycle)
 					int numpresets;
 					int filenumpars;
 					FILE * hfile;
-					if((hfile=fopen(szFile,"rb")) == NULL )
+					if(!(hfile=fopen(szFile,"rb")))
 					{
 						MessageBox("Couldn't open File. Operation Aborted","File Open Error",MB_OK);
 						return;
@@ -580,7 +580,7 @@ NAMESPACE__BEGIN(psycle)
 				MessageBox("You have to select a preset first.","File Save Error",MB_OK);
 			}
 			OPENFILENAME ofn;       // common dialog box structure
-			char szFile[_MAX_PATH];       // buffer for file name
+			char szFile[MAX_PATH];       // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -617,17 +617,16 @@ NAMESPACE__BEGIN(psycle)
 				if ( str2.CompareNoCase(".prs") != 0 ) str.Insert(str.GetLength(),".prs");
 				sprintf(szFile,str);
 
-				if ((hfile=fopen(szFile,"r+b")) == NULL ) // file does not exist.
+				if(!(hfile=fopen(szFile,"r+b"))) // file does not exist.
 				{
-					if ((hfile=fopen(szFile,"a+b")) == NULL ) // file cannot be created
+					if(!(hfile=fopen(szFile,"a+b"))) // file cannot be created
 					{
 						MessageBox("Couldn't open File for Writing. Operation Aborted","File Save Error",MB_OK);
 						return;
 					}
 					fclose(hfile);
-					hfile=fopen(szFile,"r+b");
+					hfile=fopen(szFile,"r+b"); // read and write mode
 					// we have to create a new file
-
 				}
 				if ( fread(&filepresets,sizeof(int),1,hfile) != 1 ||
 					fread(&fileparams,sizeof(int),1,hfile) != 1 )
@@ -773,7 +772,7 @@ NAMESPACE__BEGIN(psycle)
 
 		//  PSYCLE .prs FILE
 
-			if ((hfile=fopen(fileName,"rb")) != NULL )
+			if(hfile=fopen(fileName,"rb"))
 			{
 				int numpresets;
 				int filenumpars;
@@ -955,7 +954,7 @@ NAMESPACE__BEGIN(psycle)
 			int numpresets=m_preslist.GetCount();
 
 			FILE* hfile;
-			if ((hfile=fopen(fileName,"wb")) == NULL )
+			if(!(hfile=fopen(fileName,"wb")))
 			{
 				MessageBox("The File couldn't be opened for Writing. Operation Aborted","File Save Error",MB_OK);
 				return;
