@@ -133,7 +133,6 @@ Special:  Bit 0: On = song message attached.
 */
 			bool stereo=itFileH.flags&Flags::STEREO;
 			int i,j;
-			int numchans=0;
 			for (i=0;i<64;i++)
 			{
 				if (stereo)
@@ -144,23 +143,17 @@ Special:  Bit 0: On = song message attached.
 						sampler->rChannel(i).DefaultPanFactor(32);
 					}
 					else sampler->rChannel(i).DefaultPanFactor(itFileH.chanPan[i]&0x7F);
-
 				}
 				else
 					sampler->rChannel(i).DefaultPanFactor(32);
 				
-				if ( !(itFileH.chanPan[i]&ChanFlags::IS_DISABLED) ) 
+				if ( (itFileH.chanPan[i]&ChanFlags::IS_DISABLED) ) 
 				{
-					numchans=i+1; // topmost used channel.
-				}
-				else
-				{
-					; //  Disable channel.
+					; //  Mute channel.
 				}
 				sampler->rChannel(i).DefaultVolume(itFileH.chanVol[i]);
 				sampler->rChannel(i).DefaultFilterType(dsp::F_LOWPASS12);
 			}
-			song->SONGTRACKS=numchans;
 
 
 			i=0;
@@ -267,6 +260,7 @@ Special:  Bit 0: On = song message attached.
 				Seek(pointerss[i]);
 				LoadITSample(sampler,i);
 			}
+			int numchans=0;
 			for (i=0;i<itFileH.patNum;i++)
 			{
 				if (pointersp[i]==0)
@@ -274,9 +268,10 @@ Special:  Bit 0: On = song message attached.
 					s->AllocNewPattern(i,"unnamed",64,false);
 				} else {
 					Seek(pointersp[i]);
-					LoadITPattern(i);
+					LoadITPattern(i,numchans);
 				}
 			}
+			song->SONGTRACKS=max(numchans+1,4);
 
 			zapArray(pointersi);
 			zapArray(pointerss);
@@ -333,15 +328,16 @@ Special:  Bit 0: On = song message attached.
 				}
 				if (ih.volflg & 1)
 				{
-				for (u = 0; u < ITENVCNT; u++)
-				if (ih.oldvoltick[d->volpts] != 0xff)
-				{
-				d->volenv[d->volpts].val = (ih.volnode[d->volpts] << 2);
-				d->volenv[d->volpts].pos = ih.oldvoltick[d->volpts];
-				d->volpts++;
-				}
-				else
-				break;
+					for (u = 0; u < ITENVCNT; u++)
+					{
+						if (ih.oldvoltick[d->volpts] != 0xff)
+						{
+							d->volenv[d->volpts].val = (ih.volnode[d->volpts] << 2);
+							d->volenv[d->volpts].pos = ih.oldvoltick[d->volpts];
+							d->volpts++;
+						}
+						else break;
+					}
 				}
  */
 
@@ -642,7 +638,7 @@ Special:  Bit 0: On = song message attached.
 				for (j = 0; j < iLen; j+=2) {
 					wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+wTmp:wTmp;
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
+					*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew ^65535;
 					out++;
 				}
 				if (bstereo) {
@@ -651,20 +647,20 @@ Special:  Bit 0: On = song message attached.
 					for (j = 0; j < iLen; j+=2) {
 						wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+wTmp:wTmp;
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew;
+						*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew ^65535;
 						out++;
 					}
 				}
 			} else {
 				for (j = 0; j < iLen; j++) {
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset);
+					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset) ^65535;
 				}
 				if (bstereo) {
 					Read(smpbuf,iLen);
 					for (j = 0; j < iLen; j++) {
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset);
+						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset) ^65535;
 					}
 				}
 			}
@@ -767,7 +763,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					//Store the decompressed value to Wave pointer.
-					*(const_cast<signed short*>(_wave.pWaveDataL()+j+blockpos)) = wNew;
+					*(const_cast<signed short*>(_wave.pWaveDataL()+j+blockpos)) = wNew ^ 65535;
 					
 					blockpos++;
 				}
@@ -775,7 +771,7 @@ Special:  Bit 0: On = song message attached.
 			}
 			return false;
 		}
-		bool ITModule2::LoadITPattern(int patIdx)
+		bool ITModule2::LoadITPattern(int patIdx, int &numchans)
 		{
 			unsigned char newEntry;
 			unsigned char lastnote[64];
@@ -807,8 +803,8 @@ Special:  Bit 0: On = song message attached.
 				Read(&newEntry,1);
 				while ( newEntry )
 				{
-					unsigned char channel=(newEntry-1)&63;
-					if (newEntry&128) mask[channel]=ReadChar();
+					unsigned char channel=(newEntry-1)&0x3F;
+					if (newEntry&0x80) mask[channel]=ReadChar();
 					if(mask[channel]&1)
 					{
 						unsigned char note=ReadChar();
@@ -824,11 +820,11 @@ Special:  Bit 0: On = song message attached.
 						pent._mach=0;
 						lastinst[channel]=pent._inst;
 					}
-					if (mask[channel]&4 || mask[channel]&64)
+					if (mask[channel]&4 || mask[channel]&0x40)
 					{
 						unsigned char tmp;
 						pent._mach=0;
-						if (mask[channel]&64 ) tmp=lastvol[channel];
+						if (mask[channel]&0x40 ) tmp=lastvol[channel];
 						else tmp=ReadChar();
 						lastvol[channel]=tmp;
 						// Volume ranges from 0->64
@@ -907,9 +903,9 @@ Special:  Bit 0: On = song message attached.
 						lasteff[channel]=pent._parameter;
 
 					}
-					if (mask[channel]&16) { pent._note=lastnote[channel]; pent._mach=0; }
-					if (mask[channel]&32) { pent._inst=lastinst[channel]; pent._mach=0; }
-					if ( mask[channel]&128 )
+					if (mask[channel]&0x10) { pent._note=lastnote[channel]; pent._mach=0; }
+					if (mask[channel]&0x20) { pent._inst=lastinst[channel]; pent._mach=0; }
+					if ( mask[channel]&0x80 )
 					{
 						pent._cmd = lastcom[channel];
 						pent._parameter = lasteff[channel];
@@ -919,6 +915,8 @@ Special:  Bit 0: On = song message attached.
 
 					*pData = pent;
 					pent=pempty;
+
+					numchans = max(channel,numchans);
 
 					Read(&newEntry,1);
 				}
@@ -1003,15 +1001,15 @@ Special:  Bit 0: On = song message attached.
 							break;
 						case CMD_S::S_SET_VIBRATO_WAVEFORM:
 							pent._cmd = XMSampler::CMD::EXTENDED;
-							pent._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[(param & 0xf)];
+							pent._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[(param & 0x3)];
 							break;
 						case CMD_S::S_SET_TREMOLO_WAVEFORM:
 							pent._cmd = XMSampler::CMD::EXTENDED;
-							pent._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[(param & 0xf)];
+							pent._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[(param & 0x3)];
 							break;
 						case CMD_S::S_SET_PANBRELLO_WAVEFORM: // IT
 							pent._cmd = XMSampler::CMD::EXTENDED;
-							pent._parameter = XMSampler::CMD_E::E_PANBRELLO_WAVE | exchwave[(param & 0xf)];
+							pent._parameter = XMSampler::CMD_E::E_PANBRELLO_WAVE | exchwave[(param & 0x3)];
 							break;
 						case CMD_S::S_FINE_PATTERN_DELAY: // IT
 							break;
@@ -1141,7 +1139,7 @@ Special:  Bit 0: On = song message attached.
 					if (s3mFileH.chanSet[i]&S3MChanType::ISRIGHTCHAN)
 						sampler->rChannel(i).DefaultPanFactor(48);
 					else if ( !(s3mFileH.chanSet[i]&S3MChanType::ISADLIBCHAN))
-						sampler->rChannel(i).DefaultPanFactor(12);
+						sampler->rChannel(i).DefaultPanFactor(16);
 					else 
 						sampler->rChannel(i).DefaultPanFactor(32);
 				}
@@ -1156,7 +1154,7 @@ Special:  Bit 0: On = song message attached.
 					; //  Disable channel.
 				}
 			}
-			s->SONGTRACKS=numchans;
+			s->SONGTRACKS=max(numchans,4);
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )

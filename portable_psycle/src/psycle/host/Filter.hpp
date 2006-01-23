@@ -119,7 +119,7 @@ namespace psycle
 
 		class ITFilter
 		{
-		#define LOG10 2.30258509299 // neperian log10
+		#define LN10 2.30258509299 // neperian-base log of 10
 		public:
 			ITFilter()
 				:  iSampleRate(44100)
@@ -150,7 +150,7 @@ namespace psycle
 			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }};
 			FilterType Type (void) { return ftFilter; };
 			
-			inline void WorkNew(float& _fSample)
+			inline void Work(float& _fSample)
 			{
 				// This filter code comes from the musicdsp.org archive,
 				// State Variable Filter (Double Sampled, Stable)
@@ -174,7 +174,7 @@ namespace psycle
 				_fSample = out;
 
 			}
-			inline void WorkStereoNew(float& _fLeft, float& _fRight)
+			inline void WorkStereo(float& _fLeft, float& _fRight)
 			{
 				double notch, high, out;
 
@@ -208,7 +208,7 @@ namespace psycle
 
 			}
 
-			inline void Work(float& _fSample)
+			inline void WorkOld(float& _fSample)
 			{
 				try
 				{
@@ -225,7 +225,7 @@ namespace psycle
 					default: throw;
 				}}
 			}
-			inline void WorkStereo(float& _fLeft, float& _fRight)
+			inline void WorkStereoOld(float& _fLeft, float& _fRight)
 			{
 				try
 				{
@@ -257,7 +257,7 @@ namespace psycle
 				freq
 			};
 			void Update(void);
-			void UpdateNew(void);
+			void UpdateOld(void);
 
 			int iSampleRate;
 			int iCutoff;

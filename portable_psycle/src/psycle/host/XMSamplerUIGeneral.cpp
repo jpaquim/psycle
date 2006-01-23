@@ -126,8 +126,8 @@ Ex: Pitch slide down");
 	m_ckFilter.SetCheck(_pMachine->UseFilters()?1:0);
 
 	m_cbPanningMode.AddString(_T("Linear (Cross)"));
+	m_cbPanningMode.AddString(_T("Two Sliders (FT2)"));
 	m_cbPanningMode.AddString(_T("Equal Power"));
-	m_cbPanningMode.AddString(_T("Logaritmic"));
 
 	m_cbPanningMode.SetCurSel(_pMachine->PanningMode());
 
