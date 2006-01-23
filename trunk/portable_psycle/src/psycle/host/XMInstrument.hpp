@@ -156,7 +156,7 @@ namespace psycle
 			const compiler::uint16 WaveVolume(){ return m_WaveDefVolume;};
 			void WaveVolume(const compiler::uint16 value){m_WaveDefVolume = value;};
 
-			const float PanFactor(){ return m_PanFactor;};
+			const float PanFactor(){ return m_PanFactor;};// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 			void PanFactor(const float value){m_PanFactor = value;};
 			bool PanEnabled(){ return m_PanEnabled;};
 			void PanEnabled(bool pan){ m_PanEnabled=pan;};
@@ -225,7 +225,7 @@ namespace psycle
 			signed short *m_pWaveDataL;
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
-			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right . > 1 == Surround!
+			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 			compiler::uint8 m_VibratoAttack;
 			compiler::uint8 m_VibratoSpeed;
 			compiler::uint8 m_VibratoDepth;
@@ -472,7 +472,7 @@ namespace psycle
 		const float VolumeFadeSpeed() { return m_VolumeFadeSpeed;};
 		void VolumeFadeSpeed(const float value){ m_VolumeFadeSpeed = value;};
 
-		const float Pan() { return m_InitPan;};
+		const float Pan() { return m_InitPan;};// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 		void Pan(const float pan) { m_InitPan = pan;};
 		const bool PanEnabled() { return m_PanEnabled;};
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
@@ -526,7 +526,7 @@ namespace psycle
 
 		// Paninng
 		bool m_PanEnabled;
-		float m_InitPan;					// Initial panFactor (if enabled) [-1..1]
+		float m_InitPan;					// Initial panFactor (if enabled) [-1..1] Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 		compiler::uint8 m_NoteModPanCenter;	// Note number for center pan position
 		compiler::sint8 m_NoteModPanSep;		// -32..32. 1/256th of panFactor change per seminote.
 

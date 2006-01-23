@@ -17,6 +17,7 @@ public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const compiler::uint32 VERSION = 0x00010000;
+	static const float SURROUND_THRESHOLD;
 
 /*
 * = remembers its last value when called with param 00.
@@ -46,7 +47,7 @@ XMSampler::Channel::PerformFX().
 		VOLUME				=	0x0C,// Set Volume
 		VOLUMESLIDE			=	0x0D,// Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx)	 (*t)
 		EXTENDED			=	0x0E,// Extend Command
-		MIDI_MACRO			=	0x0F,// see MIDI.TXT						(p)
+		MIDI_MACRO			=	0x0F,// Impulse Tracker MIDI macro			(p)
 		ARPEGGIO			=	0x10,//	Arpeggio							(*t)
 		RETRIG				=	0x11,// Retrigger Note						(*t)
 		SET_GLOBAL_VOLUME	=	0x12,// Sets Global Volume
@@ -56,7 +57,7 @@ XMSampler::Channel::PerformFX().
 							//0x16
 		TREMOR				=	0x17,// Tremor								(*t)
 		PANBRELLO			=	0x18,// Panbrello							(*t)
-		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (n)
+		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};
 	struct CMD_E
@@ -171,48 +172,59 @@ XMSampler::Channel::PerformFX().
 			}
 
 			// Update Position
-			if(CurrentLoopDirection() == LoopDirection::FORWARD){
-				m_Position.QuadPart+=Speed();
-			} else {
-				m_Position.QuadPart-=Speed();
-			}
-
-			// Loop handler
-			const int curIntPos = m_Position.HighPart;
-			switch(m_CurrentLoopType)
+			if(CurrentLoopDirection() == LoopDirection::FORWARD)
 			{
-			case XMInstrument::WaveData::LoopType::NORMAL:
-
-				if(curIntPos >= m_CurrentLoopEnd)
+				m_Position.QuadPart+=Speed();
+				const int curIntPos = m_Position.HighPart;
+				switch(m_CurrentLoopType)
 				{
-					Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
-				}
-				break;
-			case XMInstrument::WaveData::LoopType::BIDI:
+				case XMInstrument::WaveData::LoopType::NORMAL:
 
-				if(CurrentLoopDirection() == LoopDirection::FORWARD)
-				{
+					if(curIntPos >= m_CurrentLoopEnd)
+					{
+						Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
+					}
+					break;
+				case XMInstrument::WaveData::LoopType::BIDI:
+
 					if(curIntPos  >= m_CurrentLoopEnd)
 					{
 						Position(m_CurrentLoopEnd-(curIntPos-m_CurrentLoopEnd));
 						CurrentLoopDirection(LoopDirection::BACKWARD);
 					} 
-				} else {
+					break;
+				case XMInstrument::WaveData::LoopType::DO_NOT:
+
+					if (curIntPos >= Length()-1)
+					{
+						Playing(false);
+					}
+				default:
+					break;
+				}
+			} else {
+				m_Position.QuadPart-=Speed();
+				const int curIntPos = m_Position.HighPart;
+				switch(m_CurrentLoopType)
+				{
+				case XMInstrument::WaveData::LoopType::NORMAL:
+				case XMInstrument::WaveData::LoopType::BIDI:
+
 					if(curIntPos <= m_CurrentLoopStart)
 					{
 						Position(m_CurrentLoopStart+(m_CurrentLoopStart-curIntPos));
 						CurrentLoopDirection(LoopDirection::FORWARD);
 					} 
-				}
-				break;
-			case XMInstrument::WaveData::LoopType::DO_NOT:
+					break;
+				case XMInstrument::WaveData::LoopType::DO_NOT:
 
-				if (curIntPos >= Length()-1)
-				{
-					Playing(false);
+					if (curIntPos <= 0)
+					{
+						Playing(false);
+					}
+				default:
+					break;
 				}
-			default:
-				break;
 			}
 		};
 
@@ -740,7 +752,7 @@ XMSampler::Channel::PerformFX().
 		const int Note(){ return m_Note;};
 		void Note(const int note)
 		{	m_Note = note;
-			m_Period = ForegroundVoice()->NoteToPeriod(note);
+			if (ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
 		};
 		const double Period(){return m_Period;};
 		void Period(const double value){m_Period = value;};
@@ -761,7 +773,7 @@ XMSampler::Channel::PerformFX().
 		void DefaultPanFactor(const int value){
 			m_DefaultPanFactor = value; 
 			if (value == 80 ) IsSurround(true);
-			else if (value < 0x7F ) PanFactor(value/64.0f);
+			else if (value <= 0x40 ) PanFactor(value/64.0f);
 			//\todo : else  set mute.
 		};
 		const float LastVoicePanFactor(){return m_LastVoicePanFactor;};
@@ -778,6 +790,9 @@ XMSampler::Channel::PerformFX().
 
 		const int LastPitchEnvelopePosInSamples() { return m_LastPitchEnvelopePosInSamples; };
 		void LastPitchEnvelopePosInSamples(const int value) { m_LastPitchEnvelopePosInSamples = value; };
+
+		const int OffsetMem() { return m_OffsetMem; };
+		void OffsetMem(const int value) { m_OffsetMem=value; };
 
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
@@ -815,8 +830,6 @@ XMSampler::Channel::PerformFX().
 /*		void VibratoAmount(const double value){m_VibratoAmount = value;};
 		const double VibratoAmount(){return m_VibratoAmount;};
 */
-		void Slide2NoteDestNote(const int note) { m_Slide2NoteDestNote = note; };
-		const int Slide2NoteDestNote() { return m_Slide2NoteDestNote; };
 
 	private:
 
@@ -851,7 +864,6 @@ XMSampler::Channel::PerformFX().
 		int m_EffectFlags;
 
 		int	m_PitchSlideSpeed;
-		int m_Slide2NoteDestNote;
 
 		/// Global Volume Slide Speed
 		float m_GlobalVolSlideSpeed;
@@ -895,6 +907,7 @@ XMSampler::Channel::PerformFX().
 		int m_GlobalVolSlideMem;
 		int m_ArpeggioMem;
 		int m_RetrigMem;
+		int m_OffsetMem;
 
 		int m_MIDI_Set;
 		int m_Cutoff;
@@ -913,8 +926,8 @@ XMSampler::Channel::PerformFX().
 	enum PanningMode
 	{
 		Linear=0,
-		EqualPower,
-		Logaritmic
+		TwoWay,
+		EqualPower
 	};
 
 

@@ -130,7 +130,8 @@ namespace host{
 		Read(&m_Header,sizeof(XMFILEHEADER));
 
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
-		song.SONGTRACKS=m_Header.channels;
+		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
+		song.SONGTRACKS=max(m_Header.channels,4);
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
@@ -1024,6 +1025,7 @@ namespace host{
 		
 		m_pSampler->IsAmigaSlides(true);
 		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS=4; song.InsertConnection(0,MASTER_INDEX,0.75f); }
+		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS=4; song.InsertConnection(0,MASTER_INDEX,0.75f); }
 		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnection(0,MASTER_INDEX,0.5f); }
 		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnection(0,MASTER_INDEX,0.35f);}
 		song.BeatsPerMin(125);
@@ -1048,6 +1050,7 @@ namespace host{
 		char *pID = AllocReadStr(4,1080);
 
 		bIsValid = !stricmp(pID,"M.K.");
+		if ( !bIsValid ) bIsValid = !stricmp(pID,"M!K!");
 		if ( !bIsValid ) bIsValid = !stricmp(pID+1,"CHN");
 		if ( !bIsValid ) bIsValid = !stricmp(pID+2,"CH");
 
@@ -1334,9 +1337,9 @@ namespace host{
 		Read(m_Samples[iInstrIdx].sampleName,22);
 		m_Samples[iInstrIdx].sampleName[21]='\0';
 
-		smpLen[iInstrIdx] = (ReadUInt1()*256+ReadUInt1())*2; 
+		smpLen[iInstrIdx] = (ReadUInt1()*0x100+ReadUInt1())*2; 
 		m_Samples[iInstrIdx].sampleLength = smpLen[iInstrIdx];
-		m_Samples[iInstrIdx].finetune = ReadUInt1(); if (m_Samples[iInstrIdx].finetune > 7 ) m_Samples[iInstrIdx].finetune = 16 - m_Samples[iInstrIdx].finetune;
+		m_Samples[iInstrIdx].finetune = ReadUInt1();
 		m_Samples[iInstrIdx].volume = ReadUInt1();
 		m_Samples[iInstrIdx].loopStart =(ReadUInt1()*256+ReadUInt1())*2; 
 		m_Samples[iInstrIdx].loopLength = (ReadUInt1()*256+ReadUInt1())*2; 
@@ -1367,7 +1370,9 @@ namespace host{
 		}
 
 		_wave.WaveVolume(m_Samples[iInstrIdx].volume * 2);
-		_wave.WaveFineTune(m_Samples[iInstrIdx].finetune*32);
+		char tmpfine = (char)m_Samples[iInstrIdx].finetune;
+		if (tmpfine > 7 ) tmpfine -= 16;
+		_wave.WaveFineTune(tmpfine*32);
 		std::string sName = m_Samples[iInstrIdx].sampleName;
 		_wave.WaveName(sName);
 

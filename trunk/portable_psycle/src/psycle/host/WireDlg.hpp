@@ -8,7 +8,7 @@ NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		class CChildView;
 
-		#define MAX_SCOPE_BANDS 64
+		#define MAX_SCOPE_BANDS 128
 		#define SCOPE_BUF_SIZE 4096
 		#define SCOPE_SPEC_SAMPLES	256
 

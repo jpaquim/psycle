@@ -17,6 +17,7 @@ namespace psycle
 */
 
 		TCHAR* XMSampler::_psName = _T("Sampulse");
+		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -114,7 +115,7 @@ namespace psycle
 			856,	808,	763,	720,	679,	641,	605,	571,	539,	509,	480,	453,
 			428,	404,	381,	360,	340,	321,	303,	286,	270,	255,	240,	227,
 			214,	202,	191,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-			107,	101,	95,		90,		85,		80,		76,		71,		67,		63,		60,		57 
+			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		57 
 
 		};
 		// Original table
@@ -546,37 +547,46 @@ namespace psycle
 				}
 				
 				// Panning Envelope 
-				// (actually, the correct word for panning is panoramization. 
-				//  "panning" comes from the diminutive "pan")
-				float rvol=0;
-				if ( m_pSampler->PanningMode()== PanningMode::Linear)
-				{
-					rvol = (m_PanFactor + m_PanbrelloAmount);
-
-				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
-					rvol = min(1.0f, (m_PanFactor + m_PanbrelloAmount)*2.0f);
-				} else if ( m_pSampler->PanningMode()== PanningMode::Logaritmic) {
-					rvol = log((m_PanFactor + m_PanbrelloAmount)+1.0)/log(2.0);
-				}
-
+				// (actually, the correct word for panning is panoramization. "panning" comes from the diminutive "pan")
+				// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
+				float rvol = PanFactor() + m_PanbrelloAmount;
 				
 				if(m_PanEnvelope.Envelope().IsEnabled()){
 					m_PanEnvelope.Work();
-
-					// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
-					// PanRange() is a Range delimiter, which is set when at voice init and when a panning command comes in.
+					// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
 					rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 				}
 
 				float lvol=0;
-				if ( m_pSampler->PanningMode()== PanningMode::Linear)
-				{
+				if ( m_pSampler->PanningMode()== PanningMode::Linear) {
 					lvol = (1.0f - rvol);
+				} else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
+					lvol =  min(1.0f, (1.0f - rvol)*2.0);
 				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
-					lvol =  (1.0f, (1.0f - m_PanFactor - m_PanbrelloAmount)*2.0);
-				} else if ( m_pSampler->PanningMode()== PanningMode::Logaritmic) {
-					lvol = log((1.0f-m_PanFactor - m_PanbrelloAmount)+1.0)/log(2.0);
+					//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
+					lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
 				}
+
+				// PanningMode::Linear is already on rvol, so we omit the case.
+				if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
+					rvol = min(1.0f, rvol*2.0f);
+				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+					//rvol = powf(rvol, 0.5f);// This is the commonly used one
+					rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
+				}
+
+				try{
+					left_output *=  volume;
+					right_output *= volume;
+				} catch(operating_system::exceptions::translated const & e){switch(e.code())
+				{ 
+					case STATUS_FLOAT_DENORMAL_OPERAND:
+					case STATUS_FLOAT_INVALID_OPERATION:
+						left_output = 0;
+						right_output = 0;
+						break;
+					default: throw;
+				}}				
 
 				// Filter section
 				if (m_Filter.Type() != dsp::F_NONE)
@@ -606,32 +616,20 @@ namespace psycle
 					m_PitchEnvelope.Work();
 				}
 
-				
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 3: Add the processed data to the sampler's buffer.
-
-				// Monoaural output‚ copy left to right output.
 				if(!m_WaveDataController.IsStereo()){
+					// Monoaural output‚ copy left to right output.
 					right_output = left_output;
 				}
-				try{
-					left_output *= lvol * volume;
-					right_output *= rvol * volume;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
-				{ 
-					case STATUS_FLOAT_DENORMAL_OPERAND:
-					case STATUS_FLOAT_INVALID_OPERATION:
-						left_output = 0;
-						right_output = 0;
-						break;
-					default: throw;
-				}}				
-				*pSamplesL++ += left_output;
+
 				if(m_pChannel->IsSurround()){
+					*pSamplesL++ += left_output;
 					*pSamplesR++ -= right_output;
 				} else {
-					*pSamplesR++ += right_output;
+					*pSamplesL++ += left_output*lvol;
+					*pSamplesR++ += right_output*rvol;
 				}
 
 				if (!m_WaveDataController.Playing()) {
@@ -688,6 +686,7 @@ namespace psycle
 
 		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol,bool reset)
 		{
+			float fpan=0.5f;
 			if ( reset)
 			{
 				if ( playvol != -1)
@@ -700,24 +699,43 @@ namespace psycle
 				// a panning command is explicitely put in a channel.
 				// Note : m_pChannel->PanFactor() returns the panFactor of the last panning command (if any) or
 				// in its absence, the pan position of the channel.
-				if ( rWave().Wave().PanEnabled() ) m_PanFactor = rWave().Wave().PanFactor();
-				else if ( rInstrument().PanEnabled() ) m_PanFactor = rInstrument().Pan();
-				else m_PanFactor = m_pChannel->PanFactor();
+				if ( rWave().Wave().PanEnabled() ) fpan = rWave().Wave().PanFactor();
+				else if ( rInstrument().PanEnabled() ) fpan = rInstrument().Pan();
+				else fpan = m_pChannel->PanFactor();
+
+				if ( fpan > 1)
+				{
+				//\todo :
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//				Check the whole panning system. Concretely, what is related to surround.
+//				Question is about using a specific "IsSurround" for wave, instrument, channel and voice
+//				or use an extended range ( pan >= SURROUND ) in wave, instrument and channel, while using
+//				the IsSurround in Voice.
+//				Channel is the special case, because effects modify the m_PanFactor variable.
+//				Do not forget to check the IT loading when this is solved.
+//				In a related note, check range of Panbrello.
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+					
+
+				}
 
 				//NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
-				m_PanFactor += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
-				m_PanFactor += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
+				fpan += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
+				fpan += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
 
-				if ( m_PanFactor > 1.0f ) m_PanFactor = 1.0f;
-				else if ( m_PanFactor < 0.0f ) m_PanFactor = 0.0f;
+				if ( fpan > 1.0f ) fpan = 1.0f;
+				else if ( fpan < 0.0f ) fpan = 0.0f;
 			}
 			else
 			{
 				Volume(rChannel().LastVoiceVolume());
-				m_PanFactor = rChannel().LastVoicePanFactor();
+				fpan = rChannel().LastVoicePanFactor();
 			}
-
-			m_PanRange = 1.0f -(fabs(0.5-m_PanFactor)*2);
+			PanFactor(fpan);
 
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOn();
@@ -886,7 +904,7 @@ namespace psycle
 
 		void XMSampler::Voice::Tremolo()
 		{
-
+			//\todo: verify that final volume doesn't go out of range (Redo RealVolume() ?)
 			int vdelta = GetDelta(rChannel().TremoloType(),m_TremoloPos);
 
 			vdelta = (vdelta * m_TremoloDepth);
@@ -905,6 +923,7 @@ namespace psycle
 		//another random value is found. so Y14 will be a very QUICK
 		//panbrello, and Y44 will be a slower panbrello.
 
+			//\todo: verify that final pan doesn't go out of range (make a RealPan() similar to RealVolume() ?)
 			int vdelta = GetDelta(rChannel().PanbrelloType(),m_PanbrelloPos);
 
 			vdelta = vdelta * m_PanbrelloDepth;
@@ -1101,11 +1120,11 @@ namespace psycle
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
 			m_RetrigMem = 0;
+			m_OffsetMem = 0;
 
 			m_EffectFlags = 0;
 
 			m_PitchSlideSpeed = 0;
-			m_Slide2NoteDestNote = 0;
 
 			m_GlobalVolSlideSpeed = 0.0f;
 			m_ChanVolSlideSpeed = 0.0f;
@@ -1169,6 +1188,7 @@ namespace psycle
 			m_ArpeggioMem = 0;
 			m_GlobalVolSlideMem = 0;
 			m_RetrigMem = 0;
+			m_OffsetMem = 0;
 			m_Cutoff = m_DefaultCutoff;
 			m_Ressonance = m_DefaultRessonance;
 			m_FilterType = m_DefaultFilterType;
@@ -1348,7 +1368,7 @@ namespace psycle
 					else if ( volcmd&0x0F == 1)  slidval=1;
 					else if ( volcmd&0x0F < 9) slidval=powf(2.0f,volcmd&0x0F);
 					else slidval=255;
-					PitchSlide(voice->Period()>voice->NoteToPeriod(Slide2NoteDestNote()),slidval,Slide2NoteDestNote());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),slidval,Note());
 					break;
 				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
 					// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
@@ -1388,6 +1408,11 @@ namespace psycle
 							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::FORWARD);
 							break;
 						case CMD_E9::E9_PLAY_BACKWARD:
+							if (voice->rWave().LoopType() == XMInstrument::WaveData::LoopType::DO_NOT &&
+								voice->rWave().Position() == 0)
+							{
+								voice->rWave().Position(voice->rWave().Length());
+							}
 							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::BACKWARD);
 							break;
 						}
@@ -1433,14 +1458,14 @@ namespace psycle
 					PitchSlide(false,parameter);
 					break;
 				case CMD::PORTA2NOTE:
-					PitchSlide(voice->Period()>voice->NoteToPeriod(Slide2NoteDestNote()),parameter,Slide2NoteDestNote());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),parameter,Note());
 					break;
 				case CMD::VOLUMESLIDE:
 					VolumeSlide(parameter);
 					break;
 				case CMD::TONEPORTAVOL:
 					VolumeSlide(parameter);
-					PitchSlide(voice->PeriodToNote(voice->Period())<Slide2NoteDestNote(),0,Slide2NoteDestNote());
+					PitchSlide(voice->PeriodToNote(voice->Period())<Note(),0,Note());
 					break;
 				case CMD::VIBRATOVOL:
 					VolumeSlide(parameter);
@@ -1703,7 +1728,7 @@ namespace psycle
 					m_EffectFlags |= EffectFlag::SLIDE2NOTE;
 				}
 				else m_EffectFlags |= EffectFlag::PITCHSLIDE;
-			} else if ( speed < 0xF0 ) {
+			} else if ( speed < 0xF0) {
 				speed= speed&0xf;
 				if ( ForegroundVoice())
 				{
@@ -1901,7 +1926,10 @@ namespace psycle
 		void XMSampler::Channel::NoteCut(const int ntick){
 			m_NoteCutTick = ntick;
 			if(ntick == 0){
-				Volume(0);
+				if ( ForegroundVoice())
+				{
+					ForegroundVoice()->Volume(0);
+				}
 				return;
 			}
 			m_EffectFlags |= EffectFlag::NOTECUT;
@@ -2054,7 +2082,7 @@ namespace psycle
 
 			if (Global::_pSong->IsInvalided()) { return; }
 
-			// don't process twk , twf of Mcm Commands
+			// don't process twk , twf, Mcm Commands, or empty lines.
 			if ( pData->_note > 120 )
 			{
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
@@ -2086,7 +2114,14 @@ namespace psycle
 			Voice* currentVoice = NULL;
 			Voice* newVoice = NULL;
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
-			if(bInstrumentSet)	{	thisChannel.InstrumentNo(pData->_inst); }
+			if(bInstrumentSet)
+			{
+				if ( pData->_inst != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
+				{
+					bNoteOn=true;
+				}
+				thisChannel.InstrumentNo(pData->_inst); // Instrument is always set, even if no new note comes.
+			}
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
 			currentVoice = GetCurrentVoice(channelNum);
@@ -2148,7 +2183,7 @@ namespace psycle
 					{
 						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
 						//		  and the position reset to 0.
-						thisChannel.Slide2NoteDestNote(pData->_note);
+						thisChannel.Note(pData->_note);
 					}
 				}
 			}
@@ -2157,22 +2192,23 @@ namespace psycle
 				// If there is a Porta2Note command, but there is no voice playing, this is converted to a noteOn.
 				bPorta2Note=false; bNoteOn = true;
 			}
-			
+
 			// STEP B: Get a Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
-				thisChannel.Slide2NoteDestNote(pData->_note);
 				if (( pData->_cmd == CMD::EXTENDED) && ((pData->_parameter & 0xf0) == CMD_E::E_NOTE_DELAY))
 				{
 					thisChannel.DelayedNote(*pData);
 				}
 				else
 				{
+					if ( pData->_note != 255 ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
 					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{
 						if(thisChannel.InstrumentNo() == 255)
 						{	//this is a note to an undefined instrument. we can't continue.
+							//\todo : actually, we should check for commands!
 							return;
 						}
 
@@ -2181,7 +2217,6 @@ namespace psycle
 						int twlength = m_rWaveLayer[_layer].WaveLength();
 						if(twlength > 0)
 						{
-							//\todo: if the instrument is not set, some initializations do not take effect.
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
 							if (currentVoice)
@@ -2211,24 +2246,29 @@ namespace psycle
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-							if ( pData->_volume<0x40) newVoice->NoteOn(pData->_note,pData->_volume<<1,bInstrumentSet);
-							else newVoice->NoteOn(pData->_note,-1,bInstrumentSet);
+							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.Note(),pData->_volume<<1,bInstrumentSet);
+							else newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#else
-							newVoice->NoteOn(pData->_note,-1,bInstrumentSet);
+							newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#endif
 #endif
-							thisChannel.Note(pData->_note);
+							thisChannel.Note(thisChannel.Note()); //this forces a recalc of the m_Period.
 
 							// Add Here any command that is limited to the scope of the new note.
 							// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
-							if (pData->_cmd == CMD::OFFSET)
+							if ((pData->_cmd&0xF0) == CMD::OFFSET)
 							{
 								int offset = ((pData->_cmd&0x0F) << 16) +pData->_parameter<<8;
+								if ( offset != 0 )
+								{
+									thisChannel.OffsetMem(offset);
+								}
+								else offset = thisChannel.OffsetMem();
 								if ( offset < twlength)
 								{
 									newVoice->rWave().Position(offset);
 								}
-								else { newVoice->rWave().Position(0);	}
+								else { newVoice->rWave().Position(twlength);	}
 							}else{ newVoice->rWave().Position(0); }
 						}
 						else 
