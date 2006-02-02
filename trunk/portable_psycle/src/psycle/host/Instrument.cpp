@@ -164,7 +164,7 @@ namespace psycle
 						}
 						else
 						{
-							pData = new byte[size];
+							pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
 							pFile->Read(pData,size);
 							SoundDesquash(pData,&waveDataL);
 							zapArray(pData);
@@ -180,7 +180,7 @@ namespace psycle
 							}
 							else
 							{
-								pData = new byte[size];
+								pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
 								pFile->Read(pData,size);
 								SoundDesquash(pData,&waveDataR);
 								zapArray(pData);
