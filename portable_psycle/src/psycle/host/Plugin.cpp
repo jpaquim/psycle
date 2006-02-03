@@ -111,7 +111,7 @@ namespace psycle
 					{
 						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
 						path = path.branch_path();
-						if(loggers::trace()) loggers::trace("path: " + path.string());
+						/*if(loggers::trace())*/ loggers::trace("path: " + path.string());
 						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
@@ -124,7 +124,7 @@ namespace psycle
 				}
 				// set the new path env var
 				if(::putenv((path_env_var_name + ("="+ new_path.str())).c_str())) throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
-				if(loggers::trace()) loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
+				/*if(loggers::trace())*/ loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
