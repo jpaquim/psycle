@@ -160,6 +160,7 @@ namespace psycle
 				if(!main)
 				{	
 					std::ostringstream s; s
+						<< "library is not a VST plugin:" << std::endl
 						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::symbol_resolving_error(s.str());
@@ -792,7 +793,7 @@ namespace psycle
 							// from AEffectX.h
 							$(GetTime) $(SetTime)
 
-							$(OfflineStart) $(OfflineRead) $(OfflineWrite)$(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
+							$(OfflineStart) $(OfflineRead) $(OfflineWrite) $(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
 
 							$(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
 
@@ -845,7 +846,7 @@ namespace psycle
 								return s.str();
 							}
 						}
-						#undef I
+						#undef $
 					#endif
 				}
 			#endif
