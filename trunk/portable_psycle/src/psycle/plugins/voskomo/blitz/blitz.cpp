@@ -39,10 +39,10 @@ CMachineParameter const paraGlobalVolume =
 	128
 };
 
-CMachineParameter const paraGlobalCourse = 
+CMachineParameter const paraGlobalCoarse = 
 { 
-	"Course",
-	"Course",									// description
+	"Coarse",
+	"Coarse",									// description
 	-60,										// MinValue	
 	60,											// MaxValue
 	MPF_STATE,									// Flags
@@ -199,10 +199,10 @@ CMachineParameter const paraOsc1Volume =
 	128
 };
 
-CMachineParameter const paraOsc1Course = 
+CMachineParameter const paraOsc1Coarse = 
 { 
-	"Course",
-	"Course",									// description
+	"Coarse",
+	"Coarse",									// description
 	-60,										// MinValue	
 	60,											// MaxValue
 	MPF_STATE,									// Flags
@@ -359,10 +359,10 @@ CMachineParameter const paraOsc2Volume =
 	0
 };
 
-CMachineParameter const paraOsc2Course = 
+CMachineParameter const paraOsc2Coarse = 
 { 
-	"Course",
-	"Course",									// description
+	"Coarse",
+	"Coarse",									// description
 	-60,										// MinValue	
 	60,											// MaxValue
 	MPF_STATE,									// Flags
@@ -520,10 +520,10 @@ CMachineParameter const paraOsc3Volume =
 	0
 };
 
-CMachineParameter const paraOsc3Course = 
+CMachineParameter const paraOsc3Coarse = 
 { 
-	"Course",
-	"Course",									// description
+	"Coarse",
+	"Coarse",									// description
 	-60,										// MinValue	
 	60,											// MaxValue
 	MPF_STATE,									// Flags
@@ -681,10 +681,10 @@ CMachineParameter const paraOsc4Volume =
 	0
 };
 
-CMachineParameter const paraOsc4Course = 
+CMachineParameter const paraOsc4Coarse = 
 {
-	"Course",
-	"Course",									// description
+	"Coarse",
+	"Coarse",									// description
 	-60,										// MinValue	
 	60,											// MaxValue
 	MPF_STATE,									// Flags
@@ -1148,7 +1148,7 @@ CMachineParameter const *pParameters[] =
 	//00
 	&paraGlobal,
 	&paraGlobalVolume,
-	&paraGlobalCourse,
+	&paraGlobalCoarse,
 	&paraGlobalFine,
 	//04
 	&paraGlobalGlide,
@@ -1168,7 +1168,7 @@ CMachineParameter const *pParameters[] =
 	//16
 	&paraOsc1,
 	&paraOsc1Volume,
-	&paraOsc1Course,
+	&paraOsc1Coarse,
 	&paraOsc1Fine,
 	//20
 	&paraOsc1Waveform,
@@ -1188,7 +1188,7 @@ CMachineParameter const *pParameters[] =
 	//32
 	&paraOsc2,
 	&paraOsc2Volume,
-	&paraOsc2Course,
+	&paraOsc2Coarse,
 	&paraOsc2Fine,
 	//36
 	&paraOsc2Waveform,
@@ -1208,7 +1208,7 @@ CMachineParameter const *pParameters[] =
 	//48
 	&paraOsc3,
 	&paraOsc3Volume,
-	&paraOsc3Course,
+	&paraOsc3Coarse,
 	&paraOsc3Fine,
 	//52
 	&paraOsc3Waveform,
@@ -1228,7 +1228,7 @@ CMachineParameter const *pParameters[] =
 	//64
 	&paraOsc4,
 	&paraOsc4Volume,
-	&paraOsc4Course,
+	&paraOsc4Coarse,
 	&paraOsc4Fine,
 	//68
 	&paraOsc4Waveform,
@@ -1363,7 +1363,7 @@ void mi::ParameterTweak(int par, int val){
 
 	switch (par){
 		case 1: globals.globalVolume=val; break;
-		case 2: globals.globalCourse=val; break;
+		case 2: globals.globalCoarse=val; break;
 		case 3: globals.globalFine=val; break;
 		case 4: globals.globalGlide=val; break;
 		case 5: globals.globalStereo=val; if (globals.globalStereo) globals.stereoLR[0]=1.0f-(globals.globalStereo*0.00390625f); else globals.stereoLR[0]=1.0f; globals.stereoLR[1]=1.0f; break;
@@ -1376,7 +1376,7 @@ void mi::ParameterTweak(int par, int val){
 		case 14: globals.lfoSpeed=val; SyncViber.setSpeed(val); break;
 		case 15: globals.lfoDestination=val; break;
 		case 17: globals.oscVolume[0]=val; break;
-		case 18: globals.oscCourse[0]=val; break;
+		case 18: globals.oscCoarse[0]=val; break;
 		case 19: globals.oscFine[0]=val; break;
 		case 20: globals.oscWaveform[0]=val; updateOsc(0); break;
 		case 21: globals.oscFeedback[0]=(float)val*0.00025f; break;
@@ -1388,7 +1388,7 @@ void mi::ParameterTweak(int par, int val){
 		case 30: globals.oscSymLfoRange[0]=val; break;
 		case 31: globals.oscSymLfoSpeed[0]=val; break;
 		case 33: globals.oscVolume[1]=val; break;
-		case 34: globals.oscCourse[1]=val; break;
+		case 34: globals.oscCoarse[1]=val; break;
 		case 35: globals.oscFine[1]=val; break;
 		case 36: globals.oscWaveform[1]=val; updateOsc(1); break;
 		case 37: globals.oscFeedback[1]=(float)val*0.00025f; break;
@@ -1400,7 +1400,7 @@ void mi::ParameterTweak(int par, int val){
 		case 46: globals.oscSymLfoRange[1]=val; break;
 		case 47: globals.oscSymLfoSpeed[1]=val; break;
 		case 49: globals.oscVolume[2]=val; break;
-		case 50: globals.oscCourse[2]=val; break;
+		case 50: globals.oscCoarse[2]=val; break;
 		case 51: globals.oscFine[2]=val; break;
 		case 52: globals.oscWaveform[2]=val; updateOsc(2); break;
 		case 53: globals.oscFeedback[2]=(float)val*0.00025f; break;
@@ -1412,7 +1412,7 @@ void mi::ParameterTweak(int par, int val){
 		case 62: globals.oscSymLfoRange[2]=val; break;
 		case 63: globals.oscSymLfoSpeed[2]=val; break;
 		case 65: globals.oscVolume[3]=val; break;
-		case 66: globals.oscCourse[3]=val; break;
+		case 66: globals.oscCoarse[3]=val; break;
 		case 67: globals.oscFine[3]=val; break;
 		case 68: globals.oscWaveform[3]=val; updateOsc(3); break;
 		case 69: globals.oscFeedback[3]=(float)val*0.00025f; break;
