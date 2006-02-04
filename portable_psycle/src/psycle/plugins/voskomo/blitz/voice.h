@@ -59,7 +59,7 @@
 struct VOICEPAR
 {
 	int globalVolume;
-	int globalCourse;
+	int globalCoarse;
 	int globalFine;
 	int globalGlide;
 	int globalStereo;
@@ -75,7 +75,7 @@ struct VOICEPAR
 	int lfoDestination;
 
 	int oscVolume[4];
-	int oscCourse[4];
+	int oscCoarse[4];
 	int oscFine[4];
 	int oscWaveform[4];
 	float oscFeedback[4];

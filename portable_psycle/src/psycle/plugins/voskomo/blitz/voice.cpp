@@ -263,52 +263,52 @@ void CSynthTrack::updateTuning() {
 	}
 	switch (vpar->lfoDestination) {
 	case 0:	//all osc
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 1: // osc 2+3+4
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 2: // osc 2+3
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 3: // osc 2+4
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 4: // osc 3+4
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 5: // osc 2
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 6: // osc 3
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 7: // osc 4
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCourse+vpar->oscCourse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCourse+vpar->oscCourse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCourse+vpar->oscCourse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCourse+vpar->oscCourse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		break;
 	}
 	rdco1Pitch=freqChange(dco1Pitch);
