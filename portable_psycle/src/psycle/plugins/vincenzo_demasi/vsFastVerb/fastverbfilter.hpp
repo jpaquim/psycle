@@ -36,7 +36,7 @@ public:
 	FastverbFilter()
 	{
 		readout = writein = 0;
-		for(register i = 0; i < FASTVERB_FILTER_BUFFER_SIZE; ++i)
+		for(register int i = 0; i < FASTVERB_FILTER_BUFFER_SIZE; ++i)
 			buffer[i] = 0.0f;
 	}
 

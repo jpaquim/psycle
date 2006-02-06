@@ -35,7 +35,7 @@ public:
 	CombFilter()
 	{
 		readout = writein = 0;
-		for(register i = 0; i < COMB_FILTER_BUFFER_SIZE; ++i)
+		for(register int i = 0; i < COMB_FILTER_BUFFER_SIZE; ++i)
 			buffer[i] = 0.0f;
 	}
 
