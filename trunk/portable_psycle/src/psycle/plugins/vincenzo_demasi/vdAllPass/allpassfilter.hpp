@@ -35,7 +35,7 @@ public:
 	{
 		readout = writein = 0;
 		gain = 1.0f;
-		for(register i = 0; i < ALLPASS_FILTER_BUFFER_SIZE; ++i)
+		for(register int i = 0; i < ALLPASS_FILTER_BUFFER_SIZE; ++i)
 			buffer[i] = 0.0f;
 	}
 
