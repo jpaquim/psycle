@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\implementation universalis::compiler::detail::demangled
@@ -31,4 +32,3 @@ namespace universalis
 		}
 	}
 }
-// arch-tag: 2121acc8-0f63-4046-a148-e95abcc35efa
