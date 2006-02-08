@@ -1,3 +1,4 @@
+#if 0
 #include <ctime>
 #include <cerrno>
 #include <cstring>
@@ -165,3 +166,4 @@ int main_()
 	std:: cout << "clock resolution: " << result.tv_sec << "s + " << result.tv_nsec * 1e-9 << "s" << std::endl;
 	return 0;
 }
+#endif // 0

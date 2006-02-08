@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
-///\file
-///\implementation gets information from ellipsis exceptions
+///\implementation gets information from ellipsis exceptions: catch(...)
 #include PACKAGENERIC__PRE_COMPILED
 #include PACKAGENERIC
 #include <universalis/detail/project.private.hpp>
@@ -37,4 +37,3 @@ namespace universalis
 		}
 	}
 }
-// arch-tag: f0e20bb3-4baf-4064-9df9-4bf030a13f7c

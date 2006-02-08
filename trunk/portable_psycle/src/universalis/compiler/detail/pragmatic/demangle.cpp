@@ -2,7 +2,6 @@
 // Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
-///\file
 ///\implementation universalis::compiler::detail::demangled
 #include PACKAGENERIC__PRE_COMPILED
 #include PACKAGENERIC

@@ -2,7 +2,6 @@
 // Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
-///\file
 ///\interface universalis::compiler::detail::demangled
 #pragma once
 #include <universalis/detail/project.hpp>
