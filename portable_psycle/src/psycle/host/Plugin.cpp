@@ -233,7 +233,7 @@ namespace psycle
 					<< "Replacing with dummy." << std::endl
 					<< typeid(e).name() << std::endl
 					<< e.what();
-				::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
 			}
 			catch(...)
@@ -242,7 +242,7 @@ namespace psycle
 					<< "Exception while instanciating: " << sPath2 << std::endl
 					<< "Replacing with dummy." << std::endl
 					<< "Unkown type of exception";
-				::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
 			}
 			return true;
@@ -287,7 +287,7 @@ namespace psycle
 					std::ostringstream s; s
 						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
 						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
 				}
 				else
@@ -855,7 +855,7 @@ namespace psycle
 				{
 					char sError[_MAX_PATH];
 					sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-					::MessageBox(NULL,sError, "Error", MB_OK);
+					MessageBox(NULL,sError, "Error", MB_OK);
 					result = false;
 				}
 			}

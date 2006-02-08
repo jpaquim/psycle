@@ -44,7 +44,7 @@ namespace psycle
 
 		void ASIOInterface::Error(const char msg[])
 		{
-			::MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
 		}
 
 		ASIOInterface::ASIOInterface()

@@ -85,7 +85,7 @@ namespace psycle
 					host::loggers::exception(s.str());
 				}
 			}
-			::MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
+			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 		}
 
@@ -461,7 +461,7 @@ namespace psycle
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -481,7 +481,7 @@ namespace psycle
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -501,7 +501,7 @@ namespace psycle
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -511,7 +511,7 @@ namespace psycle
 				}
 				break;
 			default:
-				if (type != MACH_DUMMY ) ::MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
+				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
 				pMachine = new Dummy(index);
 				break;
 			}
@@ -546,7 +546,7 @@ namespace psycle
 			{
 				char sError[MAX_PATH + 100];
 				sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
-				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				MessageBox(NULL,sError, "Loading Error", MB_OK);
 				Machine* p = new Dummy(index);
 				p->Init();
 				p->_type=MACH_DUMMY;

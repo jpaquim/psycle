@@ -564,7 +564,7 @@ namespace psycle
 				_recording = false;
 				if(!bOk)
 				{
-					::MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
+					MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
 				}
 			}
 		}

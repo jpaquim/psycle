@@ -19,7 +19,7 @@ namespace psycle
 
 		void WaveOut::Error(char const msg[])
 		{
-			::MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
 		}
 
 		WaveOut::WaveOut()
