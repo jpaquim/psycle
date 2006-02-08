@@ -334,7 +334,7 @@ namespace psycle
 						std::ostringstream s; s
 							<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
 							<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 					pFile->Read(&_program, sizeof _program);
@@ -468,7 +468,7 @@ namespace psycle
 							<< "Replacing with dummy." << std::endl
 							<< typeid(e).name() << std::endl
 							<< e.what();
-						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 					catch(...)
@@ -477,7 +477,7 @@ namespace psycle
 							<< "Exception while instanciating:" << sPath2 << std::endl
 							<< "Replacing with dummy." << std::endl
 							<< "Unkown type of exception";
-						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 				}
@@ -486,7 +486,7 @@ namespace psycle
 					std::ostringstream s; s
 						<< "Missing:" << psFileName << std::endl
 						<< "Replacing with dummy.";
-					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
 				}
 				return true;
