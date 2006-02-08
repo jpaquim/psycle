@@ -2,7 +2,6 @@
 // Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
-///\file
 ///\interface universalis::exception
 #pragma once
 #include "compiler/location.hpp"
@@ -92,4 +91,3 @@ namespace universalis
 	}
 }
 #include <universalis/compiler/dynamic_link/end.hpp>
-// arch-tag: 7f6594a9-c6c9-475d-bb12-3257ad67f66e

@@ -1,13 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
-///\file
-///\brief implementation file for operating_system::library::resolver
+///\implementation universalis::operating_system::dynamic_link::resolver
 #include PACKAGENERIC__PRE_COMPILED
 #include PACKAGENERIC
 #include <universalis/detail/project.private.hpp>
 #include "resolver.hpp"
 #include <universalis/exception.hpp>
+#include <universalis/operating_system/operating_system.hpp>
 #include <universalis/operating_system/loggers.hpp>
 #include <sstream>
 #include <cassert>
@@ -17,7 +18,7 @@
 	#include <csignal>
 #elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
-	#include <operating_system/exceptions/code_description.hpp>
+	#include <universalis/operating_system/exceptions/code_description.hpp>
 #else
 	#include <glibmm/module.h>
 #endif
@@ -104,7 +105,7 @@ namespace universalis
 					// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
 					boost::filesystem::path const final_path(decorated_filename(path, version));
 					underlying_ = ::LoadLibraryEx(final_path.native_file_string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
-					if(!opened()) open_error(final_path, exceptions::microsoft_code_description());
+					if(!opened()) open_error(final_path, exceptions::code_description());
 				#else
 					assert(Glib::Module::get_supported());
 					boost::filesystem::path const final_path(decorated_filename(path, version));
@@ -137,7 +138,7 @@ namespace universalis
 				#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					if(::dlclose(underlying_)) close_error(std::string(::dlerror()));
 				#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					if(!::FreeLibrary(underlying_)) close_error(exceptions::microsoft_code_description());
+					if(!::FreeLibrary(underlying_)) close_error(exceptions::code_description());
 				#else
 					delete underlying_;
 				#endif
@@ -172,7 +173,7 @@ namespace universalis
 				#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					::PROC result(0);
 					result = ::GetProcAddress(underlying_, decorated_symbol(name).c_str());
-					if(!result) resolve_symbol_error(name, exceptions::microsoft_code_description());
+					if(!result) resolve_symbol_error(name, exceptions::code_description());
 				#else
 					void * result;
 					if(!underlying_->get_symbol(decorated_symbol(name), result)) resolve_symbol_error(name, Glib::Module::get_last_error());
@@ -223,4 +224,3 @@ namespace universalis
 		}
 	}
 }
-// arch-tag: 65df3eec-7aea-44e0-b4f0-f384341e2b35

@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\file
 /// memory alignment
@@ -16,5 +17,3 @@
 	///\see packed
 	#define UNIVERSALIS__COMPILER__ALIGNED(bytes)
 #endif
-
-// arch-tag: 190c2c2d-869e-45c7-a5cd-5be00089a7a5
