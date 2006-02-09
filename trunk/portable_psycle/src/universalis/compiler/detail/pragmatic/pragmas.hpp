@@ -5,11 +5,14 @@
 ///\file
 #pragma once
 #include <universalis/detail/project.hpp>
+//#region UNIVERSALIS
+	//#region COMPILER
+		#define UNIVERSALIS__COMPILER__PRAGMA(x) _Pragma(#x)
 
-#define UNIVERSALIS__COMPILER__PRAGMA(x) _Pragma(#x)
-
-#if defined DIVERSALIS__COMPILER__GNU
-	#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("GCC poison " #x)
-#else
-	#define UNIVERSALIS__COMPILER__POISON(x)
-#endif
+		#if defined DIVERSALIS__COMPILER__GNU
+			#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("GCC poison " #x)
+		#else
+			#define UNIVERSALIS__COMPILER__POISON(x)
+		#endif
+	//#endregion
+//#endregion
