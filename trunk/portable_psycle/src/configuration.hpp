@@ -37,9 +37,11 @@
 #define PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN 0
 
 /// Test for RMS Vu's
-//#defile PSYCLE__CONFIGURATION__RMS_VUS 1
+//#define PSYCLE__CONFIGURATION__RMS_VUS 1
 
 /// unmasks fpu exceptions
+/// [JAZ] : I have experienced crashes with this option enabled, which didn't seem to come from the code itself.
+/// [JAZ]   It could be that the exception code handling has a bug somewhere.
 #define PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS 0
 
 
