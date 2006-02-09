@@ -6,17 +6,17 @@
 ///\brief stringization
 #pragma once
 #include <universalis/detail/project.hpp>
-//#namespace UNIVERSALIS
-	//#namespace COMPILER
+//#region UNIVERSALIS
+	//#region COMPILER
 		/// Interprets argument as a string litteral.
 		/// The indirection in the call to # lets the macro expansion on the argument be done first.
 		#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
 
-		//#namespace DETAIL		
+		//#region DETAIL		
 			///\internal
 			/// Don't call this macro directly ; call UNIVERSALIS__COMPILER__STRINGIZED, which calls this macro after macro expansion is done on the argument.
 			///\relates UNIVERSALIS__COMPILER__STRINGIZED
 			#define UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
-		//#endnamespace
-	//#endnamespace
-//#endnamespace
+		//#endregion
+	//#endregion
+//#endregion

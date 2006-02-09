@@ -6,17 +6,17 @@
 ///\brief tokenization
 #pragma once
 #include <universalis/detail/project.hpp>
-//#namespace UNIVERSALIS
-	//#namespace COMPILER
+//#region UNIVERSALIS
+	//#region COMPILER
 		/// tokenize.
 		/// The indirection in the call lets the macro expansion on the argument be done first.
 		#define UNIVERSALIS__COMPILER__TOKEN(token) UNIVERSALIS__COMPILER__TOKEN__DETAIL__NO_EXPANSION(token)
 		
-		//#namespace DETAIL
+		//#region DETAIL
 			///\internal
 			/// Don't call this macro directly ; call UNIVERSALIS__COMPILER__TOKEN, which calls this macro after macro expansion is done on the argument.
 			///\relates UNIVERSALIS__COMPILER__TOKEN
 			#define UNIVERSALIS__COMPILER__TOKEN__DETAIL__NO_EXPANSION(token) token
-		//#endnamespace
-	//#endnamespace
-//#endnamespace
+		//#endregion
+	//#endregion
+//#endregion
