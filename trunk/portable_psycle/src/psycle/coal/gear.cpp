@@ -5,6 +5,7 @@
 #include PACKAGENERIC__PRE_COMPILED
 #include PACKAGENERIC
 #include "detail/project.private.hpp"
+#if defined PSYCLE__COAL__EXPERIMENTAL
 #include "gear.hpp"
 
 namespace psycle
@@ -20,3 +21,4 @@ namespace psycle
 		}
 	}
 }
+#endif
