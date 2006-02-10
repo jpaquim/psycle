@@ -2,6 +2,7 @@
 // Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
+
 ///\file
 #pragma once
 #include <universalis/detail/configuration.hpp>
@@ -21,6 +22,14 @@
 	#elif _M == c(x,M) && c(x,m)
 		...
 */
+
+/////////////////////////////////
+/////////////////////////////////
+//
+//\todo  DON'T LOOK AT THIS CODE!
+//
+/////////////////////////////////
+/////////////////////////////////
 
 #if defined UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 	#if !defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__BRANCH
