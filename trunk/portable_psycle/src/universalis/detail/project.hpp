@@ -6,5 +6,4 @@
 ///\file
 #pragma once
 #include <universalis/detail/configuration.hpp>
-#include <universalis/operating_system/detail/microsoft/packageneric.microsoft.never-hardcoded.hpp>
 #include <diversalis/diversalis.hpp>
