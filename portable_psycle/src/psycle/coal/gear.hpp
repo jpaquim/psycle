@@ -1,8 +1,12 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // Copyright (C) 2006 Psycledelics http://psycle.pastnotecut.org
 
+///\interface psycle::coal::gear
 #pragma once
+#include "detail/project.hpp"
 
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__COAL__GEAR
+#include <universalis/compiler/dynamic_link/begin.hpp>
 
 namespace psycle
 {
@@ -10,12 +14,12 @@ namespace psycle
 	{
 		class host;
 
-		class gear
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK gear
 		{
 		public:
 			//Members
 			gear(void);
-			virtual ~gear(void);
+			virtual ~gear(void) throw();
 
 			int addconnector(connector &newconnector);
 			void removeconnector(connector &thisconnector);
@@ -24,7 +28,7 @@ namespace psycle
 
 			// There should be a function (or variable) indicating that there is no input, so only update internal variables
 			// but don't need to process the input.
-			void generate()
+			void generate();
 
 			void load();
 			void save();
@@ -45,3 +49,5 @@ namespace psycle
 		};
 	}
 }
+
+#include <universalis/compiler/dynamic_link/end.hpp>
