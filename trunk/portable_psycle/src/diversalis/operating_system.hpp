@@ -9,8 +9,8 @@
 #define DIVERSALIS__OPERATING_SYSTEM__INCLUDED
 #pragma once
 #include "compiler.hpp"
-//#namespace DIVERSALIS
-	//#namespace OPERATING_SYSTEM
+//#region DIVERSALIS
+	//#region OPERATING_SYSTEM
 
 
 
@@ -68,14 +68,14 @@
 			#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT // was just defined to insert documentation.
 
 			/// microsoft's windows operating system branch.
-			#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
-			#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH // was just defined to insert documentation.
+			#define DIVERSALIS__OPERATING_SYSTEM__BRANCH
+			#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH // was just defined to insert documentation.
 			/// microsoft's windows operating system branch nt.
-			#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-			#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT // was just defined to insert documentation.
+			#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
+			#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT // was just defined to insert documentation.
 			/// microsoft's windows operating system branch msdos.
-			#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__DOS
-			#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__DOS // was just defined to insert documentation.
+			#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__DOS
+			#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH__DOS // was just defined to insert documentation.
 
 			/// operating system version, major number.
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
@@ -93,6 +93,10 @@
 			/// - the x window system on apple's macosx and cygwin instead of the operating system proprietary/specific gui api directly.\n
 			#define DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS
 			#undef DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS // was just defined to insert documentation.
+
+			/// The opposite of DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS
+			#define DIVERSALIS__OPERATING_SYSTEM__QUAQUAVERSALIS
+			#undef DIVERSALIS__OPERATING_SYSTEM__QUAQUAVERSALIS // was just defined to insert documentation.
 
 			/// the posix standard, autodetermined.
 			#define DIVERSALIS__OPERATING_SYSTEM__POSIX
@@ -196,106 +200,78 @@
 			#if defined _WINDOWS_ || defined WINVER || defined _WIN32_WINDOWS || defined _WIN32_WINNT || defined _WIN32_IE
 				#error "Please #include <diversalis/operating_system.hpp> before using any mswindows-specific code."
 			#endif
-			#if defined DIVERSALIS__COMPILER__RESOURCE //&& defined DIVERSALIS__COMPILER__MICROSOFT
-				// msvc7.1's resource compiler freaks out: warning RC4011: identifier truncated to 'DIVERSALIS__OPERATING_SYSTEM__XXXXXXXXXXXXX'
-			#else
-				//////////////////
-				// WINVER
-				// _WIN32_WINDOWS
-				// _WIN32_NT
-				//////////////////
-					// read the configuration
-						// patch => minor
-						#if		 defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__PATCH
-							#if	!defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MINOR
-								#error "if you set the patch number, you must also set the minor number."
-							#endif
+			//////////////////
+			// WINVER
+			// _WIN32_WINDOWS
+			// _WIN32_NT
+			//////////////////
+				// read the configuration
+					// patch => minor
+					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH
+						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
+							#error "if you set the patch number, you must also set the minor number."
 						#endif
-						// minor => major
-						#if		 defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MINOR
-							#if	!defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MAJOR
-								#error "if you set the minor number, you must also set the major number."
-							#endif
+					#endif
+					// minor => major
+					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
+						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
+							#error "if you set the minor number, you must also set the major number."
 						#endif
-					// set the compatibility selection macro accordingly
-						#if defined             DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MAJOR
-						      #define                                                   DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR  DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MAJOR
-						      #if defined       DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MINOR
-						            #define                                             DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR  DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__MINOR
-						            #if defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__PATCH
-						                  #define                                       DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH  DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__PATCH
-						                  #define WINVER \
-										( \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR * 0x100 + \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR * 0x10 + \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH \
-										)
-						            #else
-						                  #define WINVER \
-										( \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR * 0x100 + \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR * 0x10 \
-										)
-						            #endif
-						      #else
-						                  #define WINVER \
-										( \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR * 0x100 \
-										)
-						      #endif
-						      #define _WIN32_WINDOWS WINVER
-							#if !defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__BRANCH
-								#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
-								#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-							#endif
-							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-								#define _WIN32_WINNT   WINVER
-							#endif
+					#endif
+				// set the compatibility selection macro accordingly
+					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
+							#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR 0
 						#endif
-				/////////////////////////////////////////////
-				// _WIN32_IE (internet explorer extra layer)
-				/////////////////////////////////////////////
-					// read the configuration
-						// patch => minor
-						#if		 defined DIVERSALIS__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
-							#if	!defined DIVERSALIS__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
-								#error "if you set the patch number, you must also set the minor number."
-							#endif
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH
+							#define DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH 0
 						#endif
-						// minor => major
-						#if		 defined DIVERSALIS__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
-							#if	!defined DIVERSALIS__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
-								#error "if you set the minor number, you must also set the major number."
-							#endif
+						#define WINVER \
+							( \
+								DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR * 0x100 + \
+								DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR * 0x10 + \
+								DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH \
+							)
+						#define _WIN32_WINDOWS WINVER
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__BRANCH
+							#define DIVERSALIS__OPERATING_SYSTEM__BRANCH
+							#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
 						#endif
-					// set the compatibility selection macro accordingly
-						#if defined             DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
-						      #define                                                   DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR  DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
-						      #if defined       DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
-						            #define                                             DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR  DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
-						            #if defined DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
-						                  #define                                       DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH  DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__MICROSOFT__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
-						                  #define _WIN32_IE \
-										( \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR * 0x100 + \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR * 0x10 + \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH \
-										)
-						            #else
-						                  #define _WIN32_IE \
-										( \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR * 0x100 + \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR * 0x10 \
-										)
-						            #endif
-						      #else
-						                  #define _WIN32_IE \
-										( \
-											DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR * 0x100 \
-										)
-						      #endif
+						#if defined DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
+							#define _WIN32_WINNT WINVER
 						#endif
-			#endif
+					#endif
+			/////////////////////////////////////////////
+			// _WIN32_IE (internet explorer extra layer)
+			/////////////////////////////////////////////
+				// read the configuration
+					// patch => minor
+					#if	defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
+						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
+							#error "if you set the patch number, you must also set the minor number."
+						#endif
+					#endif
+					// minor => major
+					#if	defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
+						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
+							#error "if you set the minor number, you must also set the major number."
+						#endif
+					#endif
+				// set the compatibility selection macro accordingly
+					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
+							#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR 0
+						#endif
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
+							#define DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH 0
+						#endif
+						#define _WIN32_IE \
+							( \
+								DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR * 0x100 + \
+								DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR * 0x10 + \
+								DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH \
+							)
+					#endif
 
 
 
@@ -309,7 +285,7 @@
 		#else
 			/// We don't know the exact operating system, but we'll try to compile anyway, using crossplatform libraries.
 			#define DIVERSALIS__OPERATING_SYSTEM
-			#define DIVERSALIS__UNIVERSALIS
+			#define DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS
 		#endif
 
 		#if !defined DIVERSALIS__OPERATING_SYSTEM
@@ -349,6 +325,6 @@
 
 
 
-	//#endnamespace
-//#endnamespace
+	//#endregion
+//#endregion
 #endif

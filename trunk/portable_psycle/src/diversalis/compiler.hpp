@@ -9,8 +9,8 @@
 #define DIVERSALIS__COMPILER__INCLUDED
 #pragma once
 #include <diversalis/detail/project.hpp>
-//#namespace DIVERSALIS
-	//#namespace COMPILER
+//#region DIVERSALIS
+	//#region COMPILER
 
 
 
@@ -129,7 +129,7 @@
 		#elif defined DIVERSALIS__COMPILER__ECLIPSE
 			#define DIVERSALIS__COMPILER
 			#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-			#define DIVERSALIS__COMPILER__VERSION__MAJOR 2
+			#define DIVERSALIS__COMPILER__VERSION__MAJOR 2 // version of the cdt
 			#define DIVERSALIS__COMPILER__VERSION__MINOR 1
 			#define DIVERSALIS__COMPILER__VERSION__PATCH 0
 			#if !defined __cplusplus
@@ -155,8 +155,7 @@
 			#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
 			#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL
 			// check if version is recent enough__
-			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 2)
-				// [bohan] bah. that compiler is too old. no recent source will fit.
+			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 4)
 				#error "compiler too old... better giving up now."
 			#endif
 			// check if version supports pre-compilation.
@@ -202,9 +201,10 @@
 				#define DIVERSALIS__COMPILER__VERSION__MINOR 0
 				#define DIVERSALIS__COMPILER__VERSION__PATCH 0
 			#endif
-			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 8
-				// [bohan] bah. that compiler is too old. no recent source will fit.
-				#error "Ouch, shitty compiler... better giving up now."
+			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 7 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 7 && DIVERSALIS__COMPILER__VERSION__MINOR < 1)
+				#error "Compiler is too old ... better giving up now."
+			#elif DIVERSALIS__COMPILER__VERSION__MAJOR < 8
+				#pragma message(__FILE__ "(" DIVERSALIS__COMPILER__STRINGIZED(__LINE__)") : warning: compiler is too old ... some problems are to be expected.")
 			#endif
 			#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
 		#endif
@@ -228,6 +228,6 @@
 
 
 
-	//#endnamespace
-//#endnamespace
+	//#endregion
+//#endregion
 #endif

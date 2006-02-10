@@ -212,8 +212,8 @@
 		// processor endianess
 		///////////////////////
 
-		#if defined DIVERSALIS__CONFIGURATION__GNU_AUTOCONF
-			#if defined DIVERSALIS__CONFIGURATION__GNU_AUTOCONF__WORDS_BIGENDIAN
+		#if defined DIVERSALIS__WORDS_ENDIAN
+			#if defined DIVERSALIS__WORDS_BIGENDIAN
 				#define DIVERSALIS__PROCESSOR__ENDIAN
 				#define DIVERSALIS__PROCESSOR__ENDIAN__BIG
 			#else
