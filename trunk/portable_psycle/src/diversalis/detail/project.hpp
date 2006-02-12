@@ -5,18 +5,3 @@
 ///\file
 #pragma once
 #include <diversalis/detail/configuration.hpp>
-
-//#region DIVERSALIS
-	//#region COMPILER
-		/// Interprets argument as a string litteral.
-		/// The indirection in the call to # lets the macro expansion on the argument be done first.
-		#define DIVERSALIS__COMPILER__STRINGIZED(tokens) DIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
-
-		//#region DETAIL		
-			///\internal
-			/// Don't call this macro directly ; call UNIVERSALIS__COMPILER__STRINGIZED, which calls this macro after macro expansion is done on the argument.
-			///\relates UNIVERSALIS__COMPILER__STRINGIZED
-			#define DIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
-		//#endregion
-	//#endregion
-//#endregion
