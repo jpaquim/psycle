@@ -121,7 +121,7 @@ namespace psycle
 				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement)
 				{
 					assert(inputArrangement && outputArrangement);
-					return dispatcher(effSetSpeakerArrangement, 0, (long) inputArrangement, outputArrangement);
+					return dispatcher(effSetSpeakerArrangement, 0, /* will break on 64-bit system */ static_cast<long int>(inputArrangement), outputArrangement);
 				}
 				/// Gets the VST implementation's Version that the plugin uses. ( 1.0,2.0,2.1,2.2 or 2.3)
 				long int getVstVersion() {	return dispatcher(effGetVstVersion); }

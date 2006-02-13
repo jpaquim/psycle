@@ -5,7 +5,7 @@
 #include PACKAGENERIC__PRE_COMPILED
 #include PACKAGENERIC
 #include "detail/project.private.hpp"
-#if defined PSYCLE__COAL__EXPERIMENTAL
+#if 1 || defined PSYCLE__COAL__EXPERIMENTAL
 #include "host.hpp"
 
 namespace psycle
