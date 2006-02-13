@@ -11,6 +11,8 @@
 
 		#if defined DIVERSALIS__COMPILER__GNU
 			#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("GCC poison " #x)
+		#elif defined DIVERSALIS__COMPILER__MICROSOFT
+			#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("deprecated(\"#x\")")
 		#else
 			#define UNIVERSALIS__COMPILER__POISON(x)
 		#endif

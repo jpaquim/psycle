@@ -5,7 +5,4 @@
 ///\file
 ///\brief meta header
 #pragma once
-#include "compiler.hpp"
-#include "operating_system.hpp"
-#include "standard_library.hpp"
-#include "processor.hpp"
+#include "compiler/compiler.hpp"

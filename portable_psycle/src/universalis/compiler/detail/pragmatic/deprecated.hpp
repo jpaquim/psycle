@@ -10,10 +10,9 @@
 /// deprecated warning.
 /// declares a symbol as deprecated.
 #if defined DIVERSALIS__COMPILER__GNU
-	#define UNIVERSALIS__COMPILER__DEPRECATED UNIVERSALIS__COMPILER__ATTRIBUTE(deprecated)
+	#define UNIVERSALIS__COMPILER__DEPRECATED(message) UNIVERSALIS__COMPILER__ATTRIBUTE(deprecated)
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	// deprecated is a keyword, not an attribute?
-	#define UNIVERSALIS__COMPILER__DEPRECATED deprecated
+	#define UNIVERSALIS__COMPILER__DEPRECATED(message) UNIVERSALIS__COMPILER__ATTRIBUTE(deprecated(#message))
 #else
 	#define UNIVERSALIS__COMPILER__DEPRECATED
 #endif
