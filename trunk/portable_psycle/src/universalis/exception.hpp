@@ -10,14 +10,14 @@
 #if !defined NDEBUG
 	#include <typeinfo>
 #endif
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__EXCEPTION
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__EXCEPTION
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace universalis
 {
 	namespace exceptions
 	{
 		/// holds information about the location from where an exception was triggered.
-		class locatable
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK locatable
 		{
 			public:
 				inline locatable(compiler::location const & location) throw() : location_(location) {}
@@ -30,7 +30,7 @@ namespace universalis
 		};
 
 		/// holds information about nested exceptions
-		class causality
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK causality
 		{
 			public:
 				inline causality(void const * cause = 0) throw() : cause_(cause) {}
@@ -42,7 +42,7 @@ namespace universalis
 		};
 	}
 
-	class exception
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception
 	:
 		public std::exception,
 		public exceptions::locatable,
