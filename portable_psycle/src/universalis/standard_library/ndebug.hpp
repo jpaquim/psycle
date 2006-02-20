@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\file
 #pragma once
@@ -27,5 +28,3 @@
 	///\endcode
 	#define NDEBUG
 #endif
-
-// arch-tag: 3df9acc5-9c01-4ada-9cad-0f0b23f403c3
