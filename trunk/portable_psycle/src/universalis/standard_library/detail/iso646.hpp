@@ -3,8 +3,9 @@
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\file
-///\brief meta header
 #pragma once
-#include "stdc_secure_lib.hpp"
-#include "detail/iso646.hpp"
-#include <cassert>
+#include <universalis/detail/project.hpp>
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	// with regards to alternate keywords for operators, the compiler conforms with C1990 but not C++1998
+	#include <ciso646>
+#endif
