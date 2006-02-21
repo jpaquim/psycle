@@ -23,7 +23,7 @@ namespace universalis
 				inline locatable(compiler::location const & location) throw() : location_(location) {}
 
 			public:
-				inline operator compiler::location const        &         () const throw() { return  location(); }
+				inline operator compiler::location const        &         () const throw() { return  location_; }
 				                compiler::location const inline & location() const throw() { return *this      ; }
 			private:
 				                compiler::location                location_;
