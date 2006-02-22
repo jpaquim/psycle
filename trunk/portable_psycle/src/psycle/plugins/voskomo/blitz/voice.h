@@ -171,10 +171,17 @@ public:
 	int ampEnvStage;
 
 private:
+	float satClip;
+	float cmCtl[4];
 	float fbCtl[4];
-	float fmCtl[4];
+	float fmCtl[2][4];
+	float fmData1;
+	float fmData2;
+	float fmData3;
+	float fmData4;
 	int curBuf[4];
 	int nextBuf[4];
+	int oldBuf[4];
 	float nextVol;
 	float fastRelease;
 	float minFade;
