@@ -171,6 +171,8 @@ public:
 	int ampEnvStage;
 
 private:
+	float fbCtl[4];
+	float fmCtl[4];
 	int curBuf[4];
 	int nextBuf[4];
 	float nextVol;
