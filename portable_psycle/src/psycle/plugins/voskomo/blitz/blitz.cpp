@@ -264,7 +264,7 @@ CMachineParameter const paraOsc1FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	44,											// MaxValue
+	47,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -424,7 +424,7 @@ CMachineParameter const paraOsc2FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	44,											// MaxValue
+	47,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -585,7 +585,7 @@ CMachineParameter const paraOsc3FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	44,											// MaxValue
+	47,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -746,7 +746,7 @@ CMachineParameter const paraOsc4FuncType =
 	"Type",
 	"Type",										// description
 	0,											// MinValue	
-	44,											// MaxValue
+	47,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -1300,7 +1300,7 @@ CMachineInfo const MacInfo =
 #ifdef _DEBUG
 	"Blitz (Debug build)",					// name
 #else
-	"Blitz 1.0",							// name
+	"Blitz 1.1",							// name
 #endif
 	"Blitz",								// short name
 	"Jan-Marco Edelmann [voskomo]",			// author
@@ -1730,7 +1730,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 41:sprintf(txt,"RM to AM (Upright)");return true;break;
 			case 42:sprintf(txt,"RM to AM (Flipped)");return true;break;
 			case 43:sprintf(txt,"Feedback Control");return true;break;
-			case 44:sprintf(txt,"FM next Oscillator");return true;break;
+			case 44:sprintf(txt,"FM next Oscillator (+)");return true;break;
+			case 45:sprintf(txt,"FM next Oscillator (-)");return true;break;
+			case 46:sprintf(txt,"Filter Modulation");return true;break;
+			case 47:sprintf(txt,"Master Saturation");return true;break;
 		}
 	}
 
