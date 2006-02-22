@@ -244,7 +244,7 @@ CMachineParameter const paraOsc1Options =
 	"Options",
 	"Options",									// description
 	0,											// MinValue	
-	6,											// MaxValue
+	8,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -404,7 +404,7 @@ CMachineParameter const paraOsc2Options =
 	"Options",
 	"Options",									// description
 	0,											// MinValue	
-	6,											// MaxValue
+	8,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -565,7 +565,7 @@ CMachineParameter const paraOsc3Options =
 	"Options",
 	"Options",									// description
 	0,											// MinValue	
-	6,											// MaxValue
+	8,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -726,7 +726,7 @@ CMachineParameter const paraOsc4Options =
 	"Options",
 	"Options",									// description
 	0,											// MinValue	
-	6,											// MaxValue
+	8,											// MaxValue
 	MPF_STATE,									// Flags
 	0
 };
@@ -1372,8 +1372,12 @@ void mi::ParameterTweak(int par, int val){
 		case 9: globals.arpShuffle=val; break;
 		case 10: globals.arpRetrig=val; break;
 		case 12: globals.lfoDelay=val<<3; break;
-		case 13: globals.lfoDepth=val; SyncViber.setLevel(val); break;
-		case 14: globals.lfoSpeed=val; SyncViber.setSpeed(val); break;
+		case 13: globals.lfoDepth=val; SyncViber.setLevel(val);
+			for(int c=0;c<MAX_TRACKS;c++) track[c].changeLfoDepth(val);
+			break;
+		case 14: globals.lfoSpeed=val; SyncViber.setSpeed(val);
+			for(int c=0;c<MAX_TRACKS;c++) track[c].changeLfoSpeed(val);
+			break;
 		case 15: globals.lfoDestination=val; break;
 		case 17: globals.oscVolume[0]=val; break;
 		case 18: globals.oscCoarse[0]=val; break;
@@ -1655,6 +1659,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 4:sprintf(txt,"Arp Note 2");return true;break;
 			case 5:sprintf(txt,"Arp Note 3");return true;break;
 			case 6:sprintf(txt,"Arp Note 4");return true;break;
+			case 7:sprintf(txt,"No Track");return true;break;
+			case 8:sprintf(txt,"No Track + Sync");return true;break;
 		}
 	}
 

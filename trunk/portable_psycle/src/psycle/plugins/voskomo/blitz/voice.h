@@ -164,6 +164,8 @@ public:
 	void RealNoteOn();
 	void Retrig();
 	void NoteTie(int note);
+	void changeLfoDepth(int val);
+	void changeLfoSpeed(int val);
 	CSynthTrack();
 	virtual ~CSynthTrack();
 	int ampEnvStage;
@@ -183,6 +185,7 @@ private:
 	int fltEnvStage;
 	float basenote;
 	float rbasenote;
+	float dbasenote; //default (if no track)
 	float semitone;
 	float rsemitone;
 	bool stopRetrig;

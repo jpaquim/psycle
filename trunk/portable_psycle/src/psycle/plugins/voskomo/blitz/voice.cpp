@@ -28,6 +28,7 @@
 
 CSynthTrack::CSynthTrack()
 {
+	dbasenote=64+1.235f;;
 	updateCount=1;
 	timetocompute=FILTER_CALC_TIME;
 
@@ -155,6 +156,14 @@ void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity){
 	}
 }
 
+void CSynthTrack::changeLfoDepth(int val){
+	lfoViber.setLevel(vpar->lfoDepth);
+}
+
+void CSynthTrack::changeLfoSpeed(int val){
+	lfoViber.setSpeed(vpar->lfoSpeed);
+}
+
 void CSynthTrack::RealNoteOn(){
 	voiceVol=nextVol;
 	stopRetrig=false;
@@ -220,7 +229,7 @@ void CSynthTrack::RealNoteOn(){
 
 	arpShuffle=0;
 	arpCount=0;
-	arpLen=2;
+	arpLen=1;
 	arpIndex=-1;
 	curArp=0;
 	arpInput[1]=0;arpInput[2]=0;arpInput[3]=0;
@@ -263,52 +272,148 @@ void CSynthTrack::updateTuning() {
 	}
 	switch (vpar->lfoDestination) {
 	case 0:	//all osc
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 1: // osc 2+3+4
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 2: // osc 2+3
+		if (vpar->oscOptions[0] < 7)
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 3: // osc 2+4
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 4: // osc 3+4
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 5: // osc 2
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 6: // osc 3
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(rbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	case 7: // osc 4
+		if (vpar->oscOptions[0] < 7) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		else
+		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[1] < 7) 
 		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[2] < 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		else
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
+		if (vpar->oscOptions[3] < 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		else
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		break;
 	}
 	rdco1Pitch=freqChange(dco1Pitch);
@@ -397,7 +502,7 @@ void CSynthTrack::GetSample(float* slr)
 			arpCount--;
 			if (arpCount < 0){
 				arpCount = arpSpeed[arpShuffle];
-				if ((stopRetrig == false)&((vpar->arpRetrig == 1)||((vpar->arpRetrig == 2)&(arpShuffle == 0)))) Retrig();
+				if ((arpLen>1)&(stopRetrig == false)&((vpar->arpRetrig == 1)||((vpar->arpRetrig == 2)&(arpShuffle == 0)))) Retrig();
 				arpShuffle=1-arpShuffle;
 				arpIndex++;
 				if (arpIndex >= arpLen) arpIndex = 0;
@@ -408,7 +513,7 @@ void CSynthTrack::GetSample(float* slr)
 
 		if (tuningChange) updateTuning();
 		int c = 0;
-		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 ){
+		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 ){
 			if (vpar->oscFuncType[0]){
 				for (c=0; c<4; c++){
 					output1 += WaveBuffer[curBuf[0]][f2i(dco1Position+dco1Last)];
@@ -420,19 +525,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[0]^=4;
 							nextBuf[0]=0;
 						}
-						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
+						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
 							dco2Position=dco1Position;
 							if (nextBuf[1]){
 								curBuf[1]^=4;
 								nextBuf[1]=0;
 							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
+							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[1] == 8)){
 								dco3Position=dco1Position;
 								if (nextBuf[2]){
 									curBuf[2]^=4;
 									nextBuf[2]=0;
 								}
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
+								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[1] == 8)){
 									dco4Position=dco1Position;
 									if (nextBuf[3]){
 										curBuf[3]^=4;
@@ -454,19 +559,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[0]^=4;
 							nextBuf[0]=0;
 						}
-						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
+						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
 							dco2Position=dco1Position;
 							if (nextBuf[1]){
 								curBuf[1]^=4;
 								nextBuf[1]=0;
 							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
+							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[1] == 8)){
 								dco3Position=dco1Position;
 								if (nextBuf[2]){
 									curBuf[2]^=4;
 									nextBuf[2]=0;
 								}
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
+								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[1] == 8)){
 									dco4Position=dco1Position;
 									if (nextBuf[3]){
 										curBuf[3]^=4;
@@ -481,7 +586,7 @@ void CSynthTrack::GetSample(float* slr)
 			output1 *= 0.25f;
 		}
 
-		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2){
+		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8){
 			if (vpar->oscFuncType[1]){
 				for (c=0; c<4; c++){
 					output2 += WaveBuffer[1+curBuf[1]][f2i(dco2Position+dco2Last)];
@@ -493,19 +598,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[1]^=4;
 							nextBuf[1]=0;
 						}
-						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
+						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
 							dco3Position=dco2Position;
 							if (nextBuf[2]){
 								curBuf[2]^=4;
 								nextBuf[2]=0;
 							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
+							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[2] == 8)){
 								dco4Position=dco2Position;
 								if (nextBuf[3]){
 									curBuf[3]^=4;
 									nextBuf[3]=0;
 								}
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
+								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[2] == 8)){
 									dco1Position=dco2Position;
 									if (nextBuf[0]){
 										curBuf[0]^=4;
@@ -527,19 +632,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[1]^=4;
 							nextBuf[1]=0;
 						}
-						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
+						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
 							dco3Position=dco2Position;
 							if (nextBuf[2]){
 								curBuf[2]^=4;
 								nextBuf[2]=0;
 							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
+							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[2] == 8)){
 								dco4Position=dco2Position;
 								if (nextBuf[3]){
 									curBuf[3]^=4;
 									nextBuf[3]=0;
 								}
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
+								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[2] == 8)){
 									dco1Position=dco2Position;
 									if (nextBuf[0]){
 										curBuf[0]^=4;
@@ -554,7 +659,7 @@ void CSynthTrack::GetSample(float* slr)
 			output2 *= 0.25f;
 		}
 
-		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 ){
+		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8){
 			if (vpar->oscFuncType[2]){
 				for (c=0; c<4; c++){
 					output3 += WaveBuffer[2+curBuf[2]][f2i(dco3Position+dco3Last)];
@@ -566,19 +671,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[2]^=4;
 							nextBuf[2]=0;
 						}
-						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
+						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
 							dco4Position=dco3Position;
 							if (nextBuf[3]){
 								curBuf[3]^=4;
 								nextBuf[3]=0;
 							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
+							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[3] == 8)){
 								dco1Position=dco3Position;
 								if (nextBuf[0]){
 									curBuf[0]^=4;
 									nextBuf[0]=0;
 								}
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
+								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[3] == 8)){
 									dco2Position=dco3Position;
 									if (nextBuf[1]){
 										curBuf[1]^=4;
@@ -600,19 +705,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[2]^=4;
 							nextBuf[2]=0;
 						}
-						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)){
+						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
 							dco4Position=dco3Position;
 							if (nextBuf[3]){
 								curBuf[3]^=4;
 								nextBuf[3]=0;
 							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
+							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[3] == 8)){
 								dco1Position=dco3Position;
 								if (nextBuf[0]){
 									curBuf[0]^=4;
 									nextBuf[0]=0;
 								}
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
+								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[3] == 8)){
 									dco2Position=dco3Position;
 									if (nextBuf[1]){
 										curBuf[1]^=4;
@@ -627,7 +732,7 @@ void CSynthTrack::GetSample(float* slr)
 			output3 *= 0.25f;
 		}
 
-		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 ){
+		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 ){
 			if (vpar->oscFuncType[3]){
 				for (c=0; c<4; c++){
 					output4 += WaveBuffer[3+curBuf[3]][f2i(dco4Position+dco4Last)];
@@ -639,19 +744,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[3]^=4;
 							nextBuf[3]=0;
 						}
-						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
+						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
 							dco1Position=dco4Position;
 							if (nextBuf[0]){
 								curBuf[0]^=4;
 								nextBuf[0]=0;
 							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
+							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[0] == 8)){
 								dco2Position=dco4Position;
 								if (nextBuf[1]){
 									curBuf[1]^=4;
 									nextBuf[1]=0;
 								}
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
+								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[0] == 8)){
 									dco3Position=dco4Position;
 									if (nextBuf[2]){
 										curBuf[2]^=4;
@@ -673,19 +778,19 @@ void CSynthTrack::GetSample(float* slr)
 							curBuf[3]^=4;
 							nextBuf[3]=0;
 						}
-						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)){
+						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
 							dco1Position=dco4Position;
 							if (nextBuf[0]){
 								curBuf[0]^=4;
 								nextBuf[0]=0;
 							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)){
+							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[0] == 8)){
 								dco2Position=dco4Position;
 								if (nextBuf[1]){
 									curBuf[1]^=4;
 									nextBuf[1]=0;
 								}
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)){
+								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[0] == 8)){
 									dco3Position=dco4Position;
 									if (nextBuf[2]){
 										curBuf[2]^=4;
