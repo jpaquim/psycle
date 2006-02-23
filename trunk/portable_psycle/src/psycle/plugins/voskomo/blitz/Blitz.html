@@ -32,7 +32,7 @@ ul { list-style-type:circle }
 <ul>
 <li>4 Oscillators</li>
 <li>34 waveforms</li>
-<li>42 double buffered waveform modulation functions</li>
+<li>47 double buffered waveform modulation functions</li>
 <li>oversampling</li>
 <li>syncronizable</li>
 <li>variable phase feedback</li>
@@ -82,6 +82,9 @@ ul { list-style-type:circle }
 <tr><td class='a'>Arp Note 2</td><td class='c'>No arpeggio and use 2nd arp note as transpose.</td></tr>
 <tr><td class='b'>Arp Note 3</td><td class='d'>No arpeggio and use 3rd arp note as transpose.</td></tr>
 <tr><td class='a'>Arp Note 4</td><td class='c'>No arpeggio and use 4th arp note as transpose.</td></tr>
+<tr><td class='b'>No Track</td><td class='d'>Oscillator does not respond keyboard.</td></tr>
+<tr><td class='a'>No Track + Sync</td><td class='c'>As above but using Sync.</td></tr>
+
 </table>
 
 <h4>Functions</h4>
@@ -130,6 +133,11 @@ ul { list-style-type:circle }
 <tr><td class='a'>Clipper</td><td class='c'>Wave is Clipped and symmetry controls depth.</td></tr>
 <tr><td class='b'>RM to AM (Upright)</td><td class='d'>Changes the signal to make the ring modulator disfunction. The ring modulator will then only amplitude modulate the other oscillator. Symmetry regulates AM depth.</td></tr>
 <tr><td class='a'>RM to AM (Flipped)</td><td class='c'>Same as above but the signal is negated before it is changed.</td></tr>
+<tr><td class='b'>Feedback Control</td><td class='d'>Control the amount of feedback and allows inverted feedbacks too.</td></tr>
+<tr><td class='a'>FM next Oscillator (+)</td><td class='c'>Frequency Modulate the next Oscillator.</td></tr>
+<tr><td class='b'>FM next Oscillator (-)</td><td class='d'>As above but using inverted values.</td></tr>
+<tr><td class='a'>Filter Modulation</td><td class='c'>Modulate filter cutoff frequency with audio data.</td></tr>
+<tr><td class='b'>Master Saturation</td><td class='d'>Regulates the hidden Master Saturator (has nothing to do with the oscillators waveform).</td></tr>
 </table>
 
 
@@ -164,7 +172,7 @@ Bit 2 (Decimal 2) = Vibrato<br>
 Bit 3 (Decimal 4) = Sweep<br>
 If you want to reset all three then enter C807 (1+2+4=7)
 </td></tr>
-<tr><td class='a'>CCxx</td><td class='c'><b>Set Track Volume</b><br>Change Volume of current Track</td></tr>
+<tr><td class='a'>CCxx and 0Cxx</td><td class='c'><b>Set Track Volume</b><br>Change Volume of current Track</td></tr>
 <tr><td class='b'>Dxyy</td><td class='d'><b>Semi Portamento</b><br>Bend x tones down with rate yy</td></tr>
 <tr><td class='a'>Exyy</td><td class='c'><b>Semi Portamento</b><br>Bend x tones up with rate yy</td></tr>
 <tr><td class='b'>BFFF and lower</td><td class='d'>
