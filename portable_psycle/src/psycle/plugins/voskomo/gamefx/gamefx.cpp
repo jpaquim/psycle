@@ -1930,7 +1930,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Less than note off value??? == NoteON!
 	if(note<120) 
 	{
-		if ( cmd == 0x0C ) track[channel].NoteOn(note-24,&globals,val&0x3F);
+		if ( cmd == 0x0C ) track[channel].NoteOn(note-24,&globals,val);
 		else track[channel].NoteOn(note-24,&globals,60);
 	}
 
