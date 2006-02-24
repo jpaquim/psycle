@@ -1449,7 +1449,7 @@ CMachineInfo const MacInfo =
 	#ifndef NDEBUG
 		"GameFX (Debug build)",
 	#else
-		"GameFX 1.2",
+		"GameFX 1.3",
 	#endif
 	"GameFX",
 	"Jan-Marco Edelmann [voskomo]",
@@ -1885,7 +1885,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 3:sprintf(txt,"Inc Note");return true;break;
 			case 4:sprintf(txt,"Dec Note");return true;break;
 			case 5:sprintf(txt,"Set Pulse Width");return true;break;
-			case 15:sprintf(txt,"Stop Sound");return true;break;
+			case 6:sprintf(txt,"Inc Pulse Width");return true;break;
+			case 7:sprintf(txt,"Dec Pulse Width");return true;break;
+			case 10:sprintf(txt,"Set Osc Phase");return true;break;
+			case 15:sprintf(txt,"Gate Off (Release)");return true;break;
 			default: sprintf(txt,"Reserved");return true;break;
 		}
 	}

@@ -165,6 +165,9 @@ float CSynthTrack::GetSample()
 				case 3: cur_realnote=(cur_realnote+cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
 				case 4: cur_realnote=(cur_realnote-cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
 				case 5: cur_pw=cur_parameter<<2; break;
+				case 6: cur_pw=(cur_pw+(cur_parameter<<2))&2047; break;
+				case 7: cur_pw=(cur_pw-(cur_parameter<<2))&2047; break;
+				case 10: OSCPosition=cur_parameter<<4; break;
 				case 15: if(stopsend==false) { stopsend=true; NoteOff(); } break;
 			}
 			if (vpar->Speed[perf_index]) {
