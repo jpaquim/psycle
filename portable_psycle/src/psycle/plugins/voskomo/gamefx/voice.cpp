@@ -167,7 +167,7 @@ float CSynthTrack::GetSample()
 				case 5: cur_pw=cur_parameter<<2; break;
 				case 6: cur_pw=(cur_pw+(cur_parameter<<2))&2047; break;
 				case 7: cur_pw=(cur_pw-(cur_parameter<<2))&2047; break;
-				case 10: OSCPosition=cur_parameter<<4; break;
+				case 8: OSCPosition=cur_parameter<<4; break;
 				case 15: if(stopsend==false) { stopsend=true; NoteOff(); } break;
 			}
 			if (vpar->Speed[perf_index]) {
