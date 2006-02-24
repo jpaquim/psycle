@@ -1888,6 +1888,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 6:sprintf(txt,"Inc Pulse Width");return true;break;
 			case 7:sprintf(txt,"Dec Pulse Width");return true;break;
 			case 8:sprintf(txt,"Set Osc Phase");return true;break;
+			case 9:sprintf(txt,"Filter: Off");return true;break;
+			case 10:sprintf(txt,"Filter: Lowpass (Default)");return true;break;
+			case 11:sprintf(txt,"Filter: Highpass");return true;break;
 			case 15:sprintf(txt,"Gate Off (Release)");return true;break;
 			default: sprintf(txt,"Reserved");return true;break;
 		}

@@ -77,6 +77,7 @@ public:
 	filter m_filter;
 
 private:
+	int fltMode;
 	int nextNote;
 	int nextSpd;
 	short timetocompute;

@@ -5,7 +5,7 @@
 
 void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(564*powf(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<11) cf=(float)(11.0);
@@ -28,7 +28,7 @@ void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
 
 void filter::SetFilter_4PoleEQ1(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(564*powf(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
@@ -37,7 +37,7 @@ void filter::SetFilter_4PoleEQ1(int CurCutoff, int Resonance)
 
 void filter::SetFilter_4PoleEQ2(int CurCutoff, int Resonance)
 {
-	float CutoffFreq=(float)(564*powf(32,CurCutoff/240.0));
+	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
 	float cf=(float)CutoffFreq;
 	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
 	if (cf<33) cf=(float)(33.0);
