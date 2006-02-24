@@ -71,6 +71,7 @@ CSynthTrack::CSynthTrack()
 	VcfEnvStage=0;
 	VcfEnvValue=0.0f;
 
+	fltMode=1;
 	m_filter.init(44100);
 }
 
@@ -82,6 +83,7 @@ CSynthTrack::~CSynthTrack()
 void CSynthTrack::NoteOn(int note, PERFORMANCE *perf, int spd)
 {
 	vpar=perf;
+	fltMode=1;
 	nextNote=note;
 	nextSpd=spd;
 	trigger=true;
@@ -168,6 +170,9 @@ float CSynthTrack::GetSample()
 				case 6: cur_pw=(cur_pw+(cur_parameter<<2))&2047; break;
 				case 7: cur_pw=(cur_pw-(cur_parameter<<2))&2047; break;
 				case 8: OSCPosition=cur_parameter<<4; break;
+				case 9: fltMode=0; break;
+				case 10: fltMode=1; break;
+				case 11: fltMode=2; break;
 				case 15: if(stopsend==false) { stopsend=true; NoteOff(); } break;
 			}
 			if (vpar->Speed[perf_index]) {
@@ -203,14 +208,17 @@ float CSynthTrack::GetSample()
 
 	if(!timetocompute--)
 	{
-		int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
-		if(realcutoff<1)realcutoff=1;
-		if(realcutoff>250)realcutoff=250;
-		m_filter.setfilter(0,realcutoff,vpar->Resonance); // 0 means lowpass
-		timetocompute=FILTER_CALC_TIME;
+		if ((fltMode == 1) || (fltMode == 2)){
+			int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
+			if(realcutoff<1)realcutoff=1;
+			if(realcutoff>250)realcutoff=250;
+			m_filter.setfilter(fltMode-1,realcutoff,vpar->Resonance);
+			timetocompute=FILTER_CALC_TIME;
+		}
 	}
 	rcVol+=(((GetEnvAmp()*OSCVol*voicevol)-rcVol)*rcVolCutoff);
-	return m_filter.res(output)*rcVol;	
+	if (fltMode) return m_filter.res(output)*rcVol;
+	else return output*rcVol;
 }
 
 float CSynthTrack::GetEnvAmp()
