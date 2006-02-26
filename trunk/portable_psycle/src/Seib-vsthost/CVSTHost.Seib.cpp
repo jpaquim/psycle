@@ -4,22 +4,10 @@
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /*****************************************************************************/
 #include <project.private.hpp>
-
-#ifdef WIN32
-
-#include <windows.h>                    /* Windows header files              */
-
-#elif MAC
-
-#endif
-
-#include <stdio.h>                      /* file I/O prototypes               */
-#include <math.h>                       /* math prototypes                   */
-
 #include "./CVSTHost.Seib.hpp"                   /* private prototypes                */
 
-namespace Seib {
-	namespace vsthost {
+namespace seib {
+	namespace vst {
 		/*****************************************************************************/
 		/* Global Data                                                               */
 		/*****************************************************************************/
@@ -435,7 +423,7 @@ namespace Seib {
 		{
 			this->pHost = pHost;
 			pEffect = NULL;
-			sName = NULL;
+			sFileName = NULL;
 			bEditOpen = false;
 			bNeedIdle = false;
 			bWantMidi = false;
@@ -500,15 +488,15 @@ namespace Seib {
 
 			if (pMain)                              /* initialize effect                 */
 				pEffect = pMain(pHost->AudioMasterCallback);
-			/* check for correctness             */
+													/* check for correctness             */
 			if (pEffect && (pEffect->magic != kEffectMagic))
 				pEffect = NULL;
 
 			if (pEffect)
 			{
-				sName = new char[strlen(name) + 1];
-				if (sName)
-					strcpy(sName, name);
+				sFileName = new char[strlen(name) + 1];
+				if (sFileName)
+					strcpy(sFileName, name);
 		#ifdef WIN32
 				char const * const p = strrchr(name, '\\');
 				if (p)
@@ -545,7 +533,7 @@ namespace Seib {
 			if (!pHost)                             /* if no VST Host there              */
 				return false;
 
-			EffClose();                             /* make sure it's closed             */
+			Close();                             /* make sure it's closed             */
 			pEffect = NULL;                         /* and reset the pointer             */
 
 		#ifdef WIN32
@@ -568,10 +556,10 @@ namespace Seib {
 
 		#endif
 
-			if (sName)                              /* reset module name                 */
+			if (sFileName)                              /* reset module name                 */
 			{
-				delete[] sName;
-				sName = NULL;
+				delete[] sFileName;
+				sFileName = NULL;
 			}
 
 			return true;
@@ -627,7 +615,7 @@ namespace Seib {
 		/* EffDispatch : calls an effect's dispatcher                                */
 		/*****************************************************************************/
 
-		long CEffect::EffDispatch
+		long CEffect::Dispatch
 		(
 		long opCode,
 		long index,
@@ -646,7 +634,7 @@ namespace Seib {
 		/* EffProcess : calls an effect's process() function                        */
 		/*****************************************************************************/
 
-		void CEffect::EffProcess(float **inputs, float **outputs, long sampleframes)
+		void CEffect::Process(float **inputs, float **outputs, long sampleframes)
 		{
 			if (!pEffect)
 				return;
@@ -658,7 +646,7 @@ namespace Seib {
 		/* EffProcessReplacing : calls an effect's processReplacing() function       */
 		/*****************************************************************************/
 
-		void CEffect::EffProcessReplacing(float **inputs, float **outputs, long sampleframes)
+		void CEffect::ProcessReplacing(float **inputs, float **outputs, long sampleframes)
 		{
 			if ((!pEffect) ||
 				(!(pEffect->flags & effFlagsCanReplacing)))
@@ -672,7 +660,7 @@ namespace Seib {
 		/* EffSetParameter : calls an effect's setParameter() function               */
 		/*****************************************************************************/
 
-		void CEffect::EffSetParameter(long index, float parameter)
+		void CEffect::SetParameter(long index, float parameter)
 		{
 			if (!pEffect)
 				return;
@@ -684,7 +672,7 @@ namespace Seib {
 		/* EffGetParameter : calls an effect's getParameter() function               */
 		/*****************************************************************************/
 
-		float CEffect::EffGetParameter(long index)
+		float CEffect::GetParameter(long index)
 		{
 			if (!pEffect)
 				return 0.;
@@ -949,7 +937,7 @@ namespace Seib {
 		/* EffDispatch : calls an effect's dispatcher                                */
 		/*****************************************************************************/
 
-		long CVSTHost::EffDispatch
+		long CVSTHost::Dispatch
 		(
 		int nEffect,
 		long opCode,
@@ -962,55 +950,55 @@ namespace Seib {
 			CEffect *pEffect = GetAt(nEffect);
 			if (!pEffect)
 				return 0;
-			return pEffect->EffDispatch(opCode, index, value, ptr, opt);
+			return pEffect->Dispatch(opCode, index, value, ptr, opt);
 		}
 
 		/*****************************************************************************/
 		/* EffProcess : calles an effect's process() function                        */
 		/*****************************************************************************/
 
-		void CVSTHost::EffProcess(int nEffect, float **inputs, float **outputs, long sampleframes)
+		void CVSTHost::Process(int nEffect, float **inputs, float **outputs, long sampleframes)
 		{
 			CEffect *pEffect = GetAt(nEffect);
 			if (!pEffect)
 				return;
-			pEffect->EffProcess(inputs, outputs, sampleframes);
+			pEffect->Process(inputs, outputs, sampleframes);
 		}
 
 		/*****************************************************************************/
 		/* EffProcessReplacing : calls an effect's processReplacing() function       */
 		/*****************************************************************************/
 
-		void CVSTHost::EffProcessReplacing(int nEffect, float **inputs, float **outputs, long sampleframes)
+		void CVSTHost::ProcessReplacing(int nEffect, float **inputs, float **outputs, long sampleframes)
 		{
 			CEffect *pEffect = GetAt(nEffect);
 			if (!pEffect)
 				return;
-			pEffect->EffProcessReplacing(inputs, outputs, sampleframes);
+			pEffect->ProcessReplacing(inputs, outputs, sampleframes);
 		}
 
 		/*****************************************************************************/
 		/* EffSetParameter : calls an effect's setParameter() function               */
 		/*****************************************************************************/
 
-		void CVSTHost::EffSetParameter(int nEffect, long index, float parameter)
+		void CVSTHost::SetParameter(int nEffect, long index, float parameter)
 		{
 			CEffect *pEffect = GetAt(nEffect);
 			if (!pEffect)
 				return;
-			pEffect->EffSetParameter(index, parameter);
+			pEffect->SetParameter(index, parameter);
 		}
 
 		/*****************************************************************************/
 		/* EffGetParameter : calls an effect's getParameter() function               */
 		/*****************************************************************************/
 
-		float CVSTHost::EffGetParameter(int nEffect, long index)
+		float CVSTHost::GetParameter(int nEffect, long index)
 		{
 			CEffect *pEffect = GetAt(nEffect);
 			if (!pEffect)
 				return 0.;
-			return pEffect->EffGetParameter(index);
+			return pEffect->GetParameter(index);
 		}
 
 		/*****************************************************************************/
@@ -1043,7 +1031,7 @@ namespace Seib {
 		{
 			int j = GetSize();
 			for (int i = 0; i < j; i++)
-				EffEditIdle(i);
+				EditIdle(i);
 			return 0;
 		}
 
@@ -1059,7 +1047,7 @@ namespace Seib {
 			vstTimeInfo.sampleRate = fSampleRate;
 			int j = GetSize();                      /* inform all loaded plugins         */
 			for (int i = 0; i < j; i++)
-				EffSetSampleRate(i, fSampleRate);
+				SetSampleRate(i, fSampleRate);
 		}
 
 		/*****************************************************************************/
@@ -1074,8 +1062,8 @@ namespace Seib {
 			int j = GetSize();                      /* inform all loaded plugins         */
 			for (int i = 0; i < j; i++)
 			{
-				EffSetBlockSize(i, lBlockSize);       /* set new buffer size               */
-				EffMainsChanged(i, true);             /* then force resume.                */
+				SetBlockSize(i, lBlockSize);       /* set new buffer size               */
+				MainsChanged(i, true);             /* then force resume.                */
 			}
 		}
 
@@ -1122,14 +1110,14 @@ namespace Seib {
 			else                                    /* otherwise                         */
 				aEffects[nIndex] = pEffect;           /* put into free slot                */
 
-			pEffect->EffOpen();                     /* open the effect                   */
-			pEffect->EffSetSampleRate(fSampleRate); /* adjust its sample rate            */
+			pEffect->Open();                     /* open the effect                   */
+			pEffect->SetSampleRate(fSampleRate); /* adjust its sample rate            */
 			// this is a safety measure against some plugins that only set their buffers
 			// ONCE - this should ensure that they allocate a buffer that's large enough
-			pEffect->EffSetBlockSize(11025);
-			pEffect->EffMainsChanged(true);         /* then force resume.                */
-			pEffect->EffSetBlockSize(lBlockSize);   /* and block size                    */
-			pEffect->EffMainsChanged(true);         /* then force resume.                */
+			pEffect->SetBlockSize(11025);
+			pEffect->MainsChanged(true);         /* then force resume.                */
+			pEffect->SetBlockSize(lBlockSize);   /* and block size                    */
+			pEffect->MainsChanged(true);         /* then force resume.                */
 			return nIndex;                          /* return new effect's index         */
 		}
 
@@ -1174,7 +1162,7 @@ namespace Seib {
 		{
 			int j = GetSize();                      /* pass it on to all loaded effects  */
 			for (int i = 0; i < j; i++)
-				EffProcess(i, inputs, outputs, sampleframes);
+				Process(i, inputs, outputs, sampleframes);
 		}
 
 		/*****************************************************************************/
@@ -1188,7 +1176,7 @@ namespace Seib {
 		{
 			int j = GetSize();                      /* pass it on to all loaded effects  */
 			for (int i = 0; i < j; i++)
-				EffProcessReplacing(i, inputs, outputs, sampleframes);
+				ProcessReplacing(i, inputs, outputs, sampleframes);
 		}
 
 		/*****************************************************************************/
@@ -1329,7 +1317,7 @@ namespace Seib {
 		{
 			CEffect *pEffect = GetAt(nEffect);
 			if (pEffect)
-				pEffect->EffSetSampleRate(fSampleRate);
+				pEffect->SetSampleRate(fSampleRate);
 			return (long)fSampleRate;
 		}
 
@@ -1341,7 +1329,7 @@ namespace Seib {
 		{
 			CEffect *pEffect = GetAt(nEffect);
 			if (pEffect)
-				pEffect->EffSetBlockSize(lBlockSize);
+				pEffect->SetBlockSize(lBlockSize);
 			return lBlockSize;
 		}
 
