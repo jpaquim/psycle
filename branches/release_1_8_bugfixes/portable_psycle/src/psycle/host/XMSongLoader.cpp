@@ -4,6 +4,7 @@
  *  $Revision$
  */
 #include <project.private.hpp>
+#include <resources/resources.hpp>
 #include "ProgressDialog.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
