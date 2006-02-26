@@ -168,6 +168,7 @@ NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[1]->version = "V1.0";
 			_pInternalMachines[1]->machtype = true;
 			_pInternalMachines[1]->Outputmachine = MACH_DUMMY;
+			_pInternalMachines[0]->OutBus = false;
 			_pInternalMachines[1]->LastType0 = 0;
 			_pInternalMachines[1]->LastType1 = 1;
 			
@@ -190,6 +191,17 @@ NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[3]->OutBus = true;
 			_pInternalMachines[3]->LastType0 = 0;
 			_pInternalMachines[3]->LastType1 = 0;
+
+			_pInternalMachines[4] = new InternalMachineInfo;
+			_pInternalMachines[4]->name = "Send/Return Mixer";
+			_pInternalMachines[4]->desc = "Emulates a Mixer table with send Fx's.";
+			_pInternalMachines[4]->version = "V1.0";
+			_pInternalMachines[4]->machtype = true;
+			_pInternalMachines[4]->Outputmachine = MACH_MIXER;
+			_pInternalMachines[4]->OutBus = false;
+			_pInternalMachines[4]->LastType0 = 0;
+			_pInternalMachines[4]->LastType1 = 0;
+
 
 			LoadCategoriesFile();
 			UpdateList();
@@ -284,17 +296,12 @@ NAMESPACE__BEGIN(psycle)
 				}
 				HTREEITEM newitem;
 
-				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (hInt[0], IS_INTERNAL_MACHINE);
-
-				newitem = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 1);
-
-				newitem = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 2);
-
-				newitem = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 3);
+				for (int i(0);i<NUM_INTERNAL_MACHINES;i++)
+				{
+					newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hNodes[0], TVI_SORT);
+					if ( i==0 ) hInt[0]=newitem;
+					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+i);
+				}
 
 				m_browser.Select(hNodes[LastType0],TVGN_CARET);
 			break;
@@ -351,17 +358,11 @@ NAMESPACE__BEGIN(psycle)
 					}
 
 				}
-				newitem = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE);
-
-				newitem = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 1);
-
-				newitem = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 2);
-
-				newitem = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
-				m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE + 3);
+				for (int i(0);i<NUM_INTERNAL_MACHINES;i++)
+				{
+					newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype?hNodes[1]:hNodes[0], TVI_SORT);
+					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+i);
+				}
 
 				m_browser.Select(hNodes[LastType1],TVGN_CARET);
 			break;
@@ -444,8 +445,6 @@ NAMESPACE__BEGIN(psycle)
 								}
 							}
 
-
-
 							
 						}
 						// add plugin to appropriate node on tree
@@ -498,10 +497,7 @@ NAMESPACE__BEGIN(psycle)
 								curcategory = curcategory.TrimRight ("|");
 							}
 						}
-
-
-
-						
+					
 					}
 					// add internal machine to appropriate node on tree
 					hInt[i] = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
@@ -2191,7 +2187,7 @@ NAMESPACE__BEGIN(psycle)
 						
 						HTREEITEM hNext = m_browser.GetNextVisibleItem (hTemp);
 						HTREEITEM hCurrent;
-						for (int inttemp = 1; inttemp < m_browser.GetVisibleCount (); inttemp++)
+						for (unsigned int inttemp = 1; inttemp < m_browser.GetVisibleCount (); inttemp++)
 						{
 							hCurrent = hNext;
 							hNext = m_browser.GetNextVisibleItem (hCurrent);

@@ -1415,6 +1415,7 @@ NAMESPACE__BEGIN(psycle)
 						break;
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
+					case MACH_MIXER:
 						{
 							m_pWndMac[tmac] = new CFrameMachine(tmac);
 							((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];

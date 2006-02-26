@@ -25,6 +25,7 @@ namespace psycle
 		char* Master::_psName = "Master";
 		char* Dummy::_psName = "DummyPlug";
 		char* DuplicatorMac::_psName = "Dupe it!";
+		char* Mixer::_psName = "Mixer";
 
 		void Machine::crashed(std::exception const & e) throw()
 		{
@@ -108,6 +109,7 @@ namespace psycle
 			, _x(0)
 			, _y(0)
 			, _numPars(0)
+			, _nCols(1)
 			, _numInputs(0)
 			, _numOutputs(0)
 			, TWSSamples(0)
@@ -406,6 +408,33 @@ namespace psycle
 			_wireCost+=wcost;
 		}
 
+		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
+		void Machine::WorkNoMix(int numSamples)
+		{
+			_waitingForSound=true;
+			for (int i=0; i<MAX_CONNECTIONS; i++)
+			{
+				if (_inputCon[i])
+				{
+					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+					if (pInMachine)
+					{
+						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
+						{ 
+							{
+#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+								processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+#endif
+								pInMachine->Work(numSamples);
+							}
+							pInMachine->_waitingForSound = false;
+						}
+						if(!pInMachine->_stopped) _stopped = false;
+					}
+				}
+			}
+		}
+
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
@@ -657,7 +686,6 @@ namespace psycle
 		Dummy::Dummy(int index)
 		{
 			_macIndex = index;
-			_numPars = 0;
 			_type = MACH_DUMMY;
 			_mode = MACHMODE_FX;
 			sprintf(_editName, "Dummy");
@@ -699,6 +727,7 @@ namespace psycle
 		{
 			_macIndex = index;
 			_numPars = 16;
+			_nCols = 2;
 			_type = MACH_DUPLICATOR;
 			_mode = MACHMODE_GENERATOR;
 			bisTicking = false;
@@ -744,7 +773,12 @@ namespace psycle
 			} else if (numparam >=8 && numparam<16) {
 				sprintf(name,"Note Offset %d",numparam-8);
 			}
-			else name = "\0";
+			else name[0] = '\0';
+		}
+		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval)
+		{
+			if ( numparam < 8) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if ( numparam < 16) { minval = -48; maxval = 48; }
 		}
 		int DuplicatorMac::GetParamValue(int numparam)
 		{
@@ -770,7 +804,7 @@ namespace psycle
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-8]+60)%12],(noteOffset[numparam-8]+60)/12);
 			}
-			else parVal = "\0";
+			else parVal[0] = '\0';
 		}
 		bool DuplicatorMac::SetParameter(int numparam, int value)
 		{
@@ -801,7 +835,7 @@ namespace psycle
 		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile)
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset;
-			pFile->Write(&size, sizeof size); // size of this part params to load
+			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&macOutput,sizeof macOutput);
 			pFile->Write(&noteOffset,sizeof noteOffset);
 		}
@@ -819,7 +853,6 @@ namespace psycle
 		{
 			_macIndex = index;
 			sampleCount = 0;
-			_numPars = 0;
 			_outDry = 256;
 			decreaseOnClip=false;
 			_type = MACH_MASTER;
@@ -958,19 +991,308 @@ namespace psycle
 			UINT size;
 			pFile->Read(&size, sizeof size ); // size of this part params to load
 			pFile->Read(&_outDry,sizeof _outDry);
-			pFile->Read(&decreaseOnClip, sizeof decreaseOnClip); // numSubtracks
+			pFile->Read(&decreaseOnClip, sizeof decreaseOnClip);
 			return true;
 		};
 
 		void Master::SaveSpecificChunk(RiffFile* pFile)
 		{
 			UINT size = sizeof _outDry + sizeof decreaseOnClip;
-			pFile->Write(&size, sizeof size); // size of this part params to load
+			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&_outDry,sizeof _outDry);
 			pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
 		};
 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Mixer
 
+		Mixer::Mixer(int index)
+		{
+			_macIndex = index;
+			_numPars = 255;
+			_type = MACH_MIXER;
+			_mode = MACHMODE_FX;
+			sprintf(_editName, "Mixer");
+		}
+
+		void Mixer::Init(void)
+		{
+			Machine::Init();
+			for (int j=0;j<MAX_CONNECTIONS;j++)
+			{
+				_sendGrid[j][mix]=1.0f;
+				for (int i=send0;i<sendmax;i++)
+				{
+					_sendGrid[j][i]=0.0f;
+				}
+				_send[j]=0;
+				_sendVol[j]=1.0f;
+				_sendVolMulti[j]=1.0f;
+				_sendValid[j]=false;
+			}
+		}
+
+		void Mixer::Work(int numSamples)
+		{
+			// Step One, do the usual work, except mixing all the inputs to a single stream.
+			Machine::WorkNoMix(numSamples);
+			// Step Two, prepare input signals for the Send Fx, and make them work
+			FxSend(numSamples);
+			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
+			if(!_mute && !_stopped )
+			{
+				CPUCOST_INIT(cost);
+				Mix(numSamples);
+				Machine::SetVolumeCounter(numSamples);
+				if ( Global::pConfig->autoStopMachines )
+				{
+					if (_volumeCounter < 8.0f)
+					{
+						_volumeCounter = 0.0f;
+						_volumeDisplay = 0;
+						_stopped = true;
+					}
+					else _stopped = false;
+				}
+				CPUCOST_CALC(cost, numSamples);
+				_cpuCost += cost;
+			}
+
+			CPUCOST_INIT(wcost);
+			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			CPUCOST_CALC(wcost,numSamples);
+			_wireCost+=wcost;
+			_worked = true;
+		}
+
+		void Mixer::FxSend(int numSamples)
+		{
+			for (int i=0; i<MAX_CONNECTIONS; i++)
+			{
+				if (_sendValid[i])
+				{
+					Machine* pSendMachine = Global::_pSong->_pMachine[_send[i]];
+					if (pSendMachine)
+					{
+						if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
+						{ 
+							// Mix all the inputs and route them to the send fx.
+							CPUCOST_INIT(cost);
+							for (int j=0; j<MAX_CONNECTIONS; j++)
+							{
+								if (_inputCon[j])
+								{
+									Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[j]];
+									if (pInMachine)
+									{
+										if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
+										{
+											dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+											dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+										}
+									}
+								}
+							}
+							CPUCOST_CALC(cost, numSamples);
+							_cpuCost += cost;
+
+							// tell the FX to work, now that the input is ready.
+							{
+#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+								processor::fpu::exception_mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+#endif
+								pSendMachine->Work(numSamples);
+							}
+							CPUCOST_INIT(cost2);
+
+							pSendMachine->_waitingForSound = false;
+							dsp::Clear(_pSamplesL, numSamples);
+							dsp::Clear(_pSamplesR, numSamples);
+							CPUCOST_CALC(cost2, numSamples);
+							_cpuCost += cost2;
+
+						}
+						if(!pSendMachine->_stopped) _stopped = false;
+					}
+				}
+			}
+		}
+		void Mixer::Mix(int numSamples)
+		{
+			for (int i=0; i<MAX_CONNECTIONS; i++)
+			{
+				if (_sendValid[i])
+				{
+					Machine* pSendMachine = Global::_pSong->_pMachine[_send[i]];
+					if (pSendMachine)
+					{
+						if(!_mute && !_stopped)
+						{
+							dsp::Add(pSendMachine->_pSamplesL, _pSamplesL, numSamples, pSendMachine->_lVol*_sendVol[i]);
+							dsp::Add(pSendMachine->_pSamplesR, _pSamplesR, numSamples, pSendMachine->_rVol*_sendVol[i]);
+						}
+					}
+				}
+			}
+			for (int i=0; i<MAX_CONNECTIONS; i++)
+			{
+				if (_inputCon[i])
+				{
+					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+					if (pInMachine)
+					{
+						if(!_mute && !_stopped && _sendGrid[i][mix] != 0.0f)
+						{
+							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]*_sendGrid[i][mix]);
+							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]*_sendGrid[i][mix]);
+						}
+					}
+				}
+			}
+		}
+
+		int Mixer::GetNumCols()
+		{
+			int cols=0;
+			for (int i=0; i<MAX_CONNECTIONS; i++)
+			{
+				if (_inputCon[i]) cols++;
+			}
+			for (int i=0; i<MAX_CONNECTIONS; i++)
+			{
+				if (_sendValid[i]) cols++;
+			}
+			return cols==0?1:cols;
+		}
+
+		void Mixer::GetParamName(int numparam,char *name)
+		{
+			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
+			int send=numparam%16; // 0 is for channel mix, others are send.
+			if ( channel == 0) { name[0] = '\0'; return; }
+			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			{
+				channel--;
+				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				{
+					if ( send == mix )sprintf(name,"Channel %d - Mix",channel+1);
+					else sprintf(name,"Channel %d - Send %d",channel+1,send);
+				}
+				else name[0] = '\0';
+			}
+			else if  ( send == 0){ name[0] = '\0'; return; }
+			else
+			{
+				send-=send0;
+				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(name,"Input level Ch %d",send+send0);
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && _sendValid[send]) sprintf(name,"Input level Fx %d",send+send0);
+				else name[0] = '\0';
+			}
+		}
+		int Mixer::GetParamValue(int numparam)
+		{
+			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
+			int send=numparam%16; // 0 is for channel mix, others are send.
+			if ( channel == 0) return 0;
+			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			{
+				channel--;
+				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				{
+					return (int)(_sendGrid[channel][send]*100.0f);
+				}
+				else return 0;
+			}
+			else if  ( send == 0) return 0;
+			else
+			{
+				send-=send0;
+				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) return (int)(_inputConVol[send]*_wireMultiplier[send]*100.0f);
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && _sendValid[send]) return (int)(_sendVol[send]*_sendVolMulti[send]*100.0f);
+				else return 0;
+			}
+		}
+		void Mixer::GetParamValue(int numparam, char *parVal)
+		{
+			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
+			int send=numparam%16; // 0 is for channel mix, others are send.
+			if ( channel == 0) { parVal[0] = '\0'; return; }
+			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			{
+				channel--;
+				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				{
+					sprintf(parVal,"%.0f%%",_sendGrid[channel][send]*100.0f);
+				}
+				else  parVal[0] = '\0';
+			}
+			else if  ( send == 0) { parVal[0] = '\0'; return; }
+			else
+			{
+				send-=send0;
+				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(parVal,"%.0f%%",_inputConVol[send]*_wireMultiplier[send]*100.0f);
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && _sendValid[send]) sprintf(parVal,"%.0f%%",_sendVol[send]*_sendVolMulti[send]*100.0f);
+				else parVal[0] = '\0';
+			}
+		}
+		bool Mixer::SetParameter(int numparam, int value)
+		{
+			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
+			int send=numparam%16; // 0 is for channel mix, others are send.
+			if ( channel == 0) return false;
+			if ( value>100 ) value=100;
+			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			{
+				channel--;
+				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				{
+					_sendGrid[channel][send]=value/100.0f;
+					return true;
+				}
+				else return false;
+			}
+			else if  ( send == 0) return false;
+			else
+			{
+				send-=send0;
+				if ( channel == 0x0E && send < MAX_CONNECTIONS)
+				{
+					SetWireVolume(send,value/100.0f);
+					return true;
+				}
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS) 
+				{
+					_sendVol[send]= value / (_sendVolMulti[send] * 100.0f);
+					return true;
+				}
+				else return false;
+			}
+		}
+
+		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(size);
+			pFile->Read(&_sendGrid,sizeof(_sendGrid));
+			pFile->Read(&_send,sizeof(_send));
+			pFile->Read(&_sendVol,sizeof(_sendVol));
+			pFile->Read(&_sendVolMulti,sizeof(_sendVolMulti));
+			pFile->Read(&_sendValid,sizeof(_sendValid));
+			return true;
+		};
+
+		void Mixer::SaveSpecificChunk(RiffFile* pFile)
+		{
+			UINT size = sizeof(_sendGrid) + sizeof(_send) + sizeof(_sendVol) + sizeof(_sendVolMulti) + sizeof(_sendValid);
+			pFile->Write(size);
+			pFile->Write(&_sendGrid,sizeof(_sendGrid));
+			pFile->Write(&_send,sizeof(_send));
+			pFile->Write(&_sendVol,sizeof(_sendVol));
+			pFile->Write(&_sendVolMulti,sizeof(_sendVolMulti));
+			pFile->Write(&_sendValid,sizeof(_sendValid));
+		};
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

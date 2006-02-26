@@ -622,7 +622,18 @@ namespace psycle
 			else std::strcpy(name, "Out of Range");
 
 		}
-
+		void Plugin::GetParamRange(int numparam,int &minval,int &maxval)
+		{
+			if(GetInfo()->Parameters[numparam]->Flags & MPF_STATE)
+			{
+				minval = GetInfo()->Parameters[numparam]->MinValue;
+				maxval = GetInfo()->Parameters[numparam]->MaxValue;
+			}
+			else
+			{
+				minval = maxval = 0;
+			}
+		}
 		int Plugin::GetParamValue(int numparam)
 		{
 			if(numparam < _pInfo->numParameters)

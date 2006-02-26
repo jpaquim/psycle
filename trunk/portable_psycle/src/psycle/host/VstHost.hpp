@@ -170,6 +170,7 @@ namespace psycle
 
 				void Instance(std::string dllname, const bool overwriteName = true) throw(...);
 				void Free() throw(...);
+				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; };
 				virtual int GetNumParams()
 				{
 					try
@@ -210,7 +211,7 @@ namespace psycle
 					try
 					{
 						if(numparam < proxy().numParams())
-							return f2i(proxy().getParameter(numparam) * 65535);
+							return f2i(proxy().getParameter(numparam) * quantization);
 						else
 							return 0; /// \todo [bohan] ???
 					}
@@ -226,6 +227,10 @@ namespace psycle
 				#pragma warning(pop)
 
 				bool DescribeValue(int parameter, char * psTxt);
+				bool SetParameter(int parameter, float value);
+				bool SetParameter(int parameter, int value);
+				//void SetCurrentProgram(int prg);
+				//int GetCurrentProgram();
 				inline const long int & GetVersion() const throw() { return _version; }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
 				inline const bool & IsSynth() const throw() { return _isSynth; }
@@ -234,10 +239,6 @@ namespace psycle
 				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false);
 				inline void SendMidi();
 				inline proxy & proxy() throw() { return *proxy_; };
-				bool SetParameter(int parameter, float value);
-				bool SetParameter(int parameter, int value);
-				//void SetCurrentProgram(int prg);
-				//int GetCurrentProgram();
 
 				//\todo: this variable is just used in load/save. 
 				unsigned char _program;

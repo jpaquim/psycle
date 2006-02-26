@@ -52,11 +52,21 @@ NAMESPACE__BEGIN(psycle)
 			istweak=false;
 			tweakpar=0;
 			tweakbase=0;
+			minval=0;
+			maxval=0;
 			finetweak=false;
 			ultrafinetweak=false;
 			
 			b_font.CreatePointFont(80,"Tahoma");
-			b_font_bold.CreatePointFont(80,"Tahoma Bold");
+//			b_font_bold.CreatePointFont(80,"Tahoma Bold");
+			CString sFace("Tahoma");
+			LOGFONT lf = LOGFONT();
+			lf.lfWeight = FW_BOLD;
+			lf.lfHeight = 80;
+			lf.lfQuality = NONANTIALIASED_QUALITY;
+			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
+			if(!b_font_bold.CreatePointFontIndirect(&lf))
+
 
 			UpdateWindow();
 		}
@@ -64,32 +74,17 @@ NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::SelectMachine(Machine* pMachine)
 		{
 			_pMachine = pMachine;
-			me = true;
 
 			// Get NumParameters
-			ncol=1;
+			numParameters = _pMachine->GetNumParams();
+			ncol = _pMachine->GetNumCols();
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-				numParameters = ((Plugin*)_pMachine)->GetInfo()->numParameters;
-				ncol = ((Plugin*)_pMachine)->GetInfo()->numCols;
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-				try
-				{
-					numParameters = ((vst::plugin*)_pMachine)->proxy().numParams();
-				}
-				catch(const std::exception &)
-				{
-					numParameters = 0;
-				}
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
-			}
-			else if ( _pMachine->_type == MACH_DUPLICATOR)
-			{
-				numParameters = _pMachine->GetNumParams();
-				ncol = 2;
 			}
 			parspercol = numParameters/ncol;
 			if (parspercol>24)	// check for "too big" windows
@@ -204,78 +199,17 @@ NAMESPACE__BEGIN(psycle)
 			for (int c=0; c<numParameters; c++)
 			{
 				char buffer[128];
+				
+				bool bDrawKnob;
+				int min_v,max_v,val_v;
 
-				BOOL bDrawKnob = TRUE;
-				int min_v=1;
-				int max_v=1;
-				int val_v=1;
-				if( _pMachine->_type == MACH_PLUGIN )
-				{
-					Plugin & plugin(*static_cast<Plugin*>(_pMachine));
-					if(plugin.GetInfo()->Parameters[c]->Flags & MPF_STATE)
-					{
-						min_v = plugin.GetInfo()->Parameters[c]->MinValue;
-						max_v = plugin.GetInfo()->Parameters[c]->MaxValue;
-						try
-						{
-							val_v = plugin.proxy().Vals()[c];
-						}
-						catch(const std::exception &)
-						{
-							val_v = 0; // hmm
-						}
-						try
-						{
-							if(!plugin.proxy().DescribeValue(buffer, c, val_v))
-								std::sprintf(buffer,"%d",val_v);
-						}
-						catch(const std::exception &)
-						{
-							std::strcpy(buffer,"fucked up");
-						}
-					}
-					else
-					{
-						bDrawKnob = FALSE;
-					}
-					std::strcpy(parName, plugin.GetInfo()->Parameters[c]->Name);
-				}
-				else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					vst::plugin & plugin(*static_cast<vst::plugin*>(_pMachine));
-					min_v = 0;
-					max_v = vst::quantization;
-					try
-					{
-						val_v = f2i(plugin.proxy().getParameter(c) * vst::quantization);
-					}
-					catch(const std::exception &)
-					{
-						val_v = 0; // hmm
-					}
-					std::memset(buffer,0,sizeof(buffer));
-					if(!plugin.DescribeValue(c, buffer))
-					{
-						std::sprintf(buffer,"%d",val_v);
-					}
-					try
-					{
-						plugin.proxy().dispatcher(effGetParamName, c, 0, parName);
-					}
-					catch(const std::exception &)
-					{
-						std::strcpy(buffer,"fucked up");
-					}
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR)
-				{
-					if ( c < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
-					else if ( c < 16) { min_v = -48; max_v = 48; }
-					val_v = _pMachine->GetParamValue(c);
-					_pMachine->GetParamValue(c,buffer);
-					_pMachine->GetParamName(c,parName);
-				}
-				if(bDrawKnob && (max_v - min_v)>0)
+				_pMachine->GetParamName(c,parName);
+				_pMachine->GetParamRange(c,min_v,max_v);
+				val_v = _pMachine->GetParamValue(c);
+				_pMachine->GetParamValue(c,buffer);
+				bDrawKnob = (min_v==max_v)?false:true;
+
+				if(bDrawKnob)
 				{
 					int const amp_v = max_v - min_v;
 					int const rel_v = val_v - min_v;
@@ -403,33 +337,8 @@ NAMESPACE__BEGIN(psycle)
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				sourcepoint = point.y;
-
-				if ( _pMachine->_type == MACH_PLUGIN )
-				{
-					try
-					{
-						tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
-					}
-					catch(const std::exception &)
-					{
-						tweakbase = 0;
-					}
-				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					try
-					{
-						tweakbase = int(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
-					}
-					catch(const std::exception &)
-					{
-						tweakbase = 0;
-					}
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR )
-				{
-					tweakbase = tweakbase = _pMachine->GetParamValue(tweakpar);
-				}
+				tweakbase = _pMachine->GetParamValue(tweakpar);
+				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
 				SetCapture();
 			}
@@ -444,85 +353,17 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (istweak)
 			{
-				int min_v=1;
-				int max_v=1;
-				if ( _pMachine->_type == MACH_PLUGIN )
-				{
-					min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue;
-					max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MaxValue;
-				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					min_v = 0;
-					max_v = vst::quantization;
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR)
-				{
-					if ( tweakpar < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
-					else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
-				}
-
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
-					if ( _pMachine->_type == MACH_PLUGIN )
-					{
-						try
-						{
-							tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-					{
-						try
-						{
-							tweakbase=f2i(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						tweakbase = _pMachine->GetParamValue(tweakpar);
-					}
+					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
 				}
 				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
 					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
 				{
-					if ( _pMachine->_type == MACH_PLUGIN )
-					{
-						try
-						{
-							tweakbase = ((Plugin*)_pMachine)->proxy().Vals()[tweakpar];
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-					{
-						try
-						{
-							tweakbase=f2i(((vst::plugin*)_pMachine)->proxy().getParameter(tweakpar) * vst::quantization);
-						}
-						catch(const std::exception &)
-						{
-							tweakbase = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						tweakbase = _pMachine->GetParamValue(tweakpar);
-					}
+					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					finetweak=!finetweak;
 				}
@@ -530,84 +371,28 @@ NAMESPACE__BEGIN(psycle)
 				double freak;
 				int screenh = wndView->CH;
 				if ( ultrafinetweak ) freak = 0.5f;
-				else if (max_v-min_v < screenh/4) freak = (max_v-min_v)/float(screenh/4);
-				else if (max_v-min_v < screenh*2/3) freak = (max_v-min_v)/float(screenh/3);
-				else freak = (max_v-min_v)/float(screenh*3/5);
+				else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
+				else if (maxval-minval < screenh*2/3) freak = (maxval-minval)/float(screenh/3);
+				else freak = (maxval-minval)/float(screenh*3/5);
 				if (finetweak) freak/=5;
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 
-				if (nv < min_v)
-				{
-					nv = min_v;
-				}
-				if (nv > max_v)
-				{
-					nv=max_v;
-				}
+				if (nv < minval) nv = minval;
+				if (nv > maxval) nv = maxval;
 
 				wndView->AddMacViewUndo();
-				if ( _pMachine->_type == MACH_PLUGIN )
-				{
-					try
-					{
-						((Plugin*)_pMachine)->proxy().ParameterTweak(tweakpar, (int) nv);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					// well, this isn't so hard... just put the twk record here
-					if (Global::pConfig->_RecordTweaks)
-					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
-					}
-				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					try
-					{
-						((vst::plugin*)_pMachine)->proxy().setParameter(tweakpar,(float)(nv/(float)vst::quantization));
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					// well, this isn't so hard... just put the twk record here
-					if (Global::pConfig->_RecordTweaks)
-					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, (int)nv);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, (int)nv);
-						}
-					}
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR)
-				{
-					_pMachine->SetParameter(tweakpar,(int) nv);
+				_pMachine->SetParameter(tweakpar,(int) nv);
 
-					// well, this isn't so hard... just put the twk record here
-					if (Global::pConfig->_RecordTweaks)
+				if (Global::pConfig->_RecordTweaks)
+				{
+					if (Global::pConfig->_RecordMouseTweaksSmooth)
 					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
+						wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
+					}
+					else
+					{
+						wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-minval);
 					}
 				}
 
@@ -647,48 +432,10 @@ NAMESPACE__BEGIN(psycle)
 					memset(name,0,64);
 					CNewVal dlg;
 
-					if ( _pMachine->_type == MACH_PLUGIN )
-					{
-						min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MinValue;
-						max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MaxValue;
-						strcpy(name ,((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->Name);
-						try
-						{
-							dlg.m_Value = ((Plugin*)_pMachine)->proxy().Vals()[thispar];
-						}
-						catch(const std::exception &)
-						{
-							dlg.m_Value = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-					{
-						min_v = 0;
-						max_v = vst::quantization;
-						try
-						{
-							((vst::plugin*)_pMachine)->proxy().dispatcher(effGetParamName, thispar, 0, name);
-						}
-						catch(const std::exception &)
-						{
-							std::strcpy(name, "fucked up");
-						}
-						try
-						{
-							dlg.m_Value = f2i(((vst::plugin*)_pMachine)->proxy().getParameter(thispar) * vst::quantization);
-						}
-						catch(const std::exception &)
-						{
-							dlg.m_Value = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						if ( tweakpar < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
-						else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
-						_pMachine->GetParamName(thispar,name);
-						dlg.m_Value = _pMachine->GetParamValue(thispar);
-					}
+					_pMachine->GetParamName(thispar,name);
+					_pMachine->GetParamRange(thispar,min_v,max_v);
+					dlg.m_Value = _pMachine->GetParamValue(thispar);
+
 					std::sprintf
 						(
 							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
@@ -712,33 +459,7 @@ NAMESPACE__BEGIN(psycle)
 						nv = max_v;
 					}
 					wndView->AddMacViewUndo();
-					if ( _pMachine->_type == MACH_PLUGIN )
-					{
-						try
-						{
-							((Plugin*)_pMachine)->proxy().ParameterTweak(thispar, nv);
-						}
-						catch(const std::exception &)
-						{
-							// o_O`
-						}
-					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-					{
-						try
-						{
-							((vst::plugin*)_pMachine)->proxy().setParameter(thispar,(float)(nv/(float)vst::quantization));
-						}
-						catch(const std::exception &)
-						{
-							// o_O`
-						}
-						SetFocus();
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						_pMachine->SetParameter(thispar,(int)nv);
-					}
+					_pMachine->SetParameter(thispar,(int)nv);
 					Invalidate(false);
 				}
 			}
@@ -747,30 +468,18 @@ NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersRandomparameters() 
 		{
-			if ( _pMachine->_type == MACH_PLUGIN)
+			int numpars = _pMachine->GetNumParams();
+			for (int c=0; c<numpars; c++)
 			{
-				// Randomize controls
-				for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
-				{
-					int minran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
-					int maxran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
+				int minran,maxran;
+				_pMachine->GetParamRange(c,minran,maxran);
 
-					int dif = (maxran-minran);
+				int dif = (maxran-minran);
+				float randsem = (float)rand()*0.000030517578125f;
+				float roffset = randsem*(float)dif;
 
-					float randsem = (float)rand()*0.000030517578125f;
-
-					float roffset = randsem*(float)dif;
-
-					wndView->AddMacViewUndo();
-					try
-					{
-						((Plugin*)_pMachine)->proxy().ParameterTweak(c, minran+int(roffset));
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-				}
+				wndView->AddMacViewUndo();
+				_pMachine->SetParameter(c,minran+int(roffset));
 			}
 			Invalidate(false);
 		}
@@ -779,18 +488,12 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if ( _pMachine->_type == MACH_PLUGIN)
 			{
-				for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
+				int numpars = _pMachine->GetNumParams();
+				for (int c=0; c<numpars; c++)
 				{
 					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
 					wndView->AddMacViewUndo();
-					try
-					{
-						((Plugin*)_pMachine)->proxy().ParameterTweak(c,dv);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
+					_pMachine->SetParameter(c,dv);
 				}
 			}
 			if (istweak)

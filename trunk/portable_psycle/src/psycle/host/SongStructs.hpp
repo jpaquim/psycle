@@ -72,6 +72,7 @@ namespace psycle
 			MACH_SCOPE = 11,
 			MACH_XMSAMPLER = 12,
 			MACH_DUPLICATOR = 13,
+			MACH_MIXER = 14,
 			MACH_DUMMY = 255
 		};
 
