@@ -12,20 +12,24 @@ namespace psycle
 {
 	namespace coal
 	{
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK arranger
+		typedef enum 
+		{
+			
+		}eventtype;
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK event
 		{
 		public:
-			arranger(void);
-			virtual ~arranger(void) throw();
+			event(void);
+			virtual ~event(void) throw();
 
 
 		protected:
-			song* thesong
-			buffers (audio and events. they are dynamic)
-			connectors
-			sequence
-			patterns
-			guipatterns
+			int time;
+			eventtype type;
+			unsigned char track;
+			unsigned char machine;
+			unsigned char data1;
+			unsigned char data2;
 		};
 	}
 }

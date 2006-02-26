@@ -38,7 +38,7 @@ namespace psycle
 			void hoster(host &newhost) { m_hoster = &newhost }
 
 			eventlist &geteventlist() { return m_eventlist; }
-			void seteventlist(eventlist &neweventlist) { m_eventlist = neweventlist; }
+			void seteventlist(eventlist &neweventlist) { m_eventlist = &neweventlist; }
 
 
 
