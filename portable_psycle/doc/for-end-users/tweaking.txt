@@ -63,13 +63,13 @@
 	is the mode you would like to record.  If you want to record twk commands instead, 
 	uncheck it.
 
-	2) Make sure you have "record tweaks" checked in the right under the sequencer.
+	2) Make sure you have "record tweaks" checked on the left, under the sequence.
 
 	3) Open the gui for the machine you want to record tweaks from.
 
 	4) Go to the pattern editor and arm the track you want to record in.
 
-	5) Make sure the record button at the top is on.
+	5) Make sure the record button in the toolbar is on.
 
 	6) Press play and start tweaking.
 

@@ -308,6 +308,7 @@ NAMESPACE__BEGIN(psycle)
 
 		/// restores key config data.
 		///\return true on success, false on failure.
+		//\todo : "return" ?? it's void...
 		void CKeyConfigDlg::OnImportreg() 
 		{
 			OPENFILENAME ofn; // common dialog box structure

@@ -3,7 +3,7 @@
 #pragma once
 #include <cmath>
 #include <operating_system/exception.hpp>
-#include <operating_system/exceptions/code_description.hpp>
+//#include <operating_system/exceptions/code_description.hpp>
 #include <cfloat>
 namespace psycle
 {

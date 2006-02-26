@@ -229,9 +229,11 @@ NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			Inval = true;
 			_pSrcMachine->_connection[wireIndex] = false;
+			_pSrcMachine->_outputMachines[wireIndex]=-1;
 			_pSrcMachine->_numOutputs--;
 			
 			_pDstMachine->_inputCon[_dstWireIndex] = false;
+			_pDstMachine->_inputMachines[_dstWireIndex]=-1;
 			_pDstMachine->_numInputs--;
 
 
@@ -1413,7 +1415,7 @@ NAMESPACE__BEGIN(psycle)
 
 
 
-			dc.DeleteDC ();
+//			dc.DeleteDC ();
 
 			
 
