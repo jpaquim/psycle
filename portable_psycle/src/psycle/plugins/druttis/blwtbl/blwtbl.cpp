@@ -5,10 +5,10 @@
 //	druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
-#define __BLWTBL_EXPORT__
 #include <project.private.hpp>
-#include <windows.h>
+#define BLWTBL__SOURCE
 #include "blwtbl.h"
+#include <windows.h>
 //////////////////////////////////////////////////////////////////////
 //
 //	Simple data
@@ -385,7 +385,7 @@ bool CreateWaveform(WAVESPEC *pspec)
 //	EnableWaveform
 //
 //////////////////////////////////////////////////////////////////////
-DLL bool __cdecl EnableWaveform(int index)
+bool EnableWaveform(int index)
 {
 	if ((index < 0) || (index >= NUMWAVEFORMS))
 	{
@@ -403,7 +403,7 @@ DLL bool __cdecl EnableWaveform(int index)
 //	DisableWaveform
 //
 //////////////////////////////////////////////////////////////////////
-DLL bool __cdecl DisableWaveform(int index)
+bool DisableWaveform(int index)
 {
 	if ((index < 0) || (index >= NUMWAVEFORMS))
 	{
@@ -428,7 +428,7 @@ DLL bool __cdecl DisableWaveform(int index)
 //	GetFMTable
 //
 //////////////////////////////////////////////////////////////////////
-DLL float* __cdecl GetFMTable()
+float* GetFMTable()
 {
 	return pfmtable;
 }
@@ -437,7 +437,7 @@ DLL float* __cdecl GetFMTable()
 //	GetPMTable
 //
 //////////////////////////////////////////////////////////////////////
-DLL float* __cdecl GetPMTable()
+float* GetPMTable()
 {
 	return ppmtable;
 }
@@ -446,7 +446,7 @@ DLL float* __cdecl GetPMTable()
 //	GetWaveform
 //
 //////////////////////////////////////////////////////////////////////
-DLL bool __cdecl GetWaveform(int index, WAVEFORM *pwave)
+bool GetWaveform(int index, WAVEFORM *pwave)
 {
 	if (!pwave)
 	{
@@ -473,7 +473,7 @@ DLL bool __cdecl GetWaveform(int index, WAVEFORM *pwave)
 //	UpdateWaveforms
 //
 //////////////////////////////////////////////////////////////////////
-DLL bool __cdecl UpdateWaveforms(int sr)
+bool UpdateWaveforms(int sr)
 {
 	int		a;
 	int		b;
