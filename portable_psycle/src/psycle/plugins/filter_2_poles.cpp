@@ -86,11 +86,7 @@ protected:
 	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
 	virtual void samples_per_second_changed() { parameter(cutoff_frequency); }
 	virtual void sequencer_ticks_per_second_changed() { parameter(modulation_sequencer_ticks); }
-#	if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR < 7
-		enum Poles { poles = 2 };
-#	else
-		static const int poles = 2;
-#	endif
+	static const int poles = 2;
 	inline void update_coefficients();
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
@@ -179,6 +175,7 @@ void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 		l[sample] = static_cast<Sample>(process(l[sample], buffers_[left] , coefficients_[left]));
 		r[sample] = static_cast<Sample>(process(r[sample], buffers_[right], coefficients_[right]));
 	}
+
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
 	{
 		modulation_phase_ = math::remainder(modulation_phase_ + modulation_radians_per_sample_ * samples, math::pi * 2);
