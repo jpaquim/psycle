@@ -31,7 +31,7 @@ NAMESPACE__BEGIN(psycle)
 					if(!::LoadLibrary("unicows"))
 					{
 						std::runtime_error e("could not load library unicows: " + operating_system::exceptions::code_description());
-						::MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
+						MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
 						throw e;
 					}
 				#endif // 0
@@ -40,8 +40,6 @@ NAMESPACE__BEGIN(psycle)
 
 		CPsycleApp::~CPsycleApp()
 		{
-			Global::pLogWindow->DestroyWindow();
-			delete Global::pLogWindow;
 		}
 
 		CPsycleApp theApp; /// The one and only CPsycleApp object
@@ -184,10 +182,6 @@ NAMESPACE__BEGIN(psycle)
 			CMainFrame* pFrame = new CMainFrame;
 			m_pMainWnd = pFrame;
 
-			// Error Logging window
-			Global::pLogWindow = new CLoggingWindow(m_pMainWnd);
-			Global::pLogWindow->Create(IDD_ERRORLOGGER,m_pMainWnd);
-			//Global::pLogWindow->Validate();
 			host::loggers::info("build identifier: " EOL PSYCLE__BUILD__IDENTIFIER(EOL));
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged

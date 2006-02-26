@@ -16,7 +16,6 @@ namespace psycle
 		Player * Global::pPlayer(0);
 		dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
-		CLoggingWindow * Global::pLogWindow(0);
 		unsigned int Global::_cpuHz;
 		InputHandler * Global::pInputHandler(0);
 			
@@ -118,13 +117,6 @@ namespace psycle
 					ostream() << string << std::endl;
 					ostream().flush();
 					operating_system::console::log(level, string);
-
-					// turned off for now because it hangs when called from the
-					// processing thread. Perhaps due to dependency on the main
-					// thread's event loop? Perhaps it needs it's own event loop?
-
-					//if(Global::pLogWindow) Global::pLogWindow->AddEntry(level, string);
-					
 				}
 			}
 			catch(...)

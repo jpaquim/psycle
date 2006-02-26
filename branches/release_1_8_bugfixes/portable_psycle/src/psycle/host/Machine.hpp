@@ -276,6 +276,7 @@ namespace psycle
 			short macOutput[8];
 			short noteOffset[8];
 			static char* _psName;
+			bool bisTicking;
 		};
 
 

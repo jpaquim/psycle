@@ -1,8 +1,6 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
 #pragma once
-#include "psycle/host/resources/resources.hpp"
-#include "LoggingWindow.hpp"
 namespace psycle
 {
 	namespace host
@@ -22,7 +20,6 @@ namespace psycle
 		public:
 			Global();
 			virtual ~Global() throw();
-			static CLoggingWindow * pLogWindow;
 			static Song * _pSong;
 			static Player * pPlayer;
 			static Configuration * pConfig;

@@ -1,12 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
-#include "Machine.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 
-	class Song;
 	class CChildView;
+	class Machine;
 
 #define K_XSIZE				28
 #define K_YSIZE				28
@@ -31,7 +30,6 @@ NAMESPACE__BEGIN(psycle)
 
 		// Enviroment
 			int numParameters;
-			bool me;
 
 			bool istweak;
 			bool finetweak;

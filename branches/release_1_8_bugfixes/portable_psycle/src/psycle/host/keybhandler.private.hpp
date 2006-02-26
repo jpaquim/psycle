@@ -1565,13 +1565,13 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::DeleteBlock()
 		{
-			// UNDO CODE HERE CUT
 			if(blockSelected)
 			{
 				int ps=_pSong->playOrder[editPosition];
 				
 				PatternEntry blank;
 
+				// UNDO CODE HERE CUT
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1587,12 +1587,12 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::PasteBlock(int tx,int lx,bool mix)
 		{
-			// UNDO CODE PASTE AND MIX PASTE
 			if(isBlockCopied)
 			{
 				int ps=_pSong->playOrder[editPosition];
 				int nl = _pSong->patternLines[ps];
 
+				// UNDO CODE PASTE AND MIX PASTE
 				AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int ls=0;
@@ -1607,12 +1607,10 @@ NAMESPACE__BEGIN(psycle)
 					}
 				//end of added by sampler
 
-				for (int t=tx;t<tx+blockNTracks;t++)
+				for (int t=tx;t<tx+blockNTracks && t<_pSong->SONGTRACKS;t++)
 				{
 					ls=0;
-					for (int l=lx;l<lx+blockNLines;l++)
-					{
-						if(l<nl && t<_pSong->SONGTRACKS)
+					for (int l=lx;l<lx+blockNLines && l<nl;l++)
 						{
 							unsigned char* offset_source=blockBufferData+(ts*EVENT_SIZE+ls*MULTIPLY);
 							unsigned char* offset_target=_ptrackline(ps,t,l);
@@ -1628,7 +1626,6 @@ NAMESPACE__BEGIN(psycle)
 							{
 								memcpy(offset_target,offset_source,EVENT_SIZE);
 							}
-						}
 						++ls;
 					}
 					++ts;

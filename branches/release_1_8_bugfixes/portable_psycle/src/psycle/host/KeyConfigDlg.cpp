@@ -306,11 +306,11 @@ NAMESPACE__BEGIN(psycle)
 			CDialog::OnOK();
 		}
 
+		/// restores key config data.
+		///\return true on success, false on failure.
+		//\todo : "return" ?? it's void...
 		void CKeyConfigDlg::OnImportreg() 
 		{
-			// restore key config data
-			// returns true on success, false on fail 
-			// TODO: Add your control notification handler code here
 			OPENFILENAME ofn;       // common dialog box structure
 			char szFile[_MAX_PATH];       // buffer for file name
 			
@@ -332,7 +332,7 @@ NAMESPACE__BEGIN(psycle)
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
 				FILE* hfile;
-				if ((hfile=fopen(szFile,"rw")) == NULL )
+				if ((hfile=fopen(szFile,"r")) == NULL )
 				{
 					MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 					return;
@@ -407,9 +407,8 @@ NAMESPACE__BEGIN(psycle)
 				CString str2 = str.Right(4);
 				if ( str2.CompareNoCase(".psk") != 0 ) str.Insert(str.GetLength(),".psk");
 				sprintf(szFile,str);
-				DeleteFile(szFile);
 
-				if ((hfile=fopen(szFile,"wa")) == NULL ) // file does not exist.
+				if(!(hfile=fopen(szFile,"wb")))
 				{
 					MessageBox("Couldn't open File for Writing. Operation Aborted","File Save Error",MB_OK);
 					return;

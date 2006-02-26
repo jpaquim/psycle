@@ -3,7 +3,7 @@
 #pragma once
 #include <cmath>
 #include <operating_system/exception.hpp>
-#include <operating_system/exceptions/code_description.hpp>
+//#include <operating_system/exceptions/code_description.hpp>
 #include <cfloat>
 namespace psycle
 {
@@ -119,7 +119,7 @@ namespace psycle
 
 		class ITFilter
 		{
-		#define LOG10 2.30258509299 // neperian log10
+		#define LN10 2.30258509299 // neperian-base log of 10
 		public:
 			ITFilter()
 				:  iSampleRate(44100)

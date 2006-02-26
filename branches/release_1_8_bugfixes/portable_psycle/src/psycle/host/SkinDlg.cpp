@@ -267,7 +267,8 @@ NAMESPACE__BEGIN(psycle)
 					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					char szBmpName[MAX_PATH];
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					sprintf(szBmpName,"%s\\%s.bmp",findDir,sName);
 					HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, szBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
@@ -289,7 +290,8 @@ NAMESPACE__BEGIN(psycle)
 					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					char szBmpName[MAX_PATH];
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					sprintf(szBmpName,"%s\\%s.bmp",findDir,sName);
 					HBITMAP hBitmap = (HBITMAP)LoadImage(NULL, szBmpName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE);
@@ -736,8 +738,7 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::OnImportReg() 
 		{
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
-//			char szFile[1 << 10]; <- we are not working with bits. This is nonsense.
-			char szFile[1024];// buffer for file name
+			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
@@ -754,7 +755,7 @@ NAMESPACE__BEGIN(psycle)
 			if(::GetOpenFileName(&ofn))
 			{
 				std::FILE * hfile;
-				if(!(hfile=std::fopen(szFile,"rw")))
+				if(!(hfile=std::fopen(szFile,"r")))
 				{
 					::MessageBox(0, "Couldn't open File for Reading. Operation Aborted", "File Open Error", MB_ICONERROR | MB_OK);
 					return;
@@ -1422,7 +1423,7 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::OnExportReg() 
 		{
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
-			char szFile[1 << 10]; // buffer for file name
+			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
@@ -1442,8 +1443,7 @@ NAMESPACE__BEGIN(psycle)
 				::CString str2 = str.Right(4);
 				if(str2.CompareNoCase(".psv")) str.Insert(str.GetLength(),".psv");
 				std::sprintf(szFile,str);
-				::DeleteFile(szFile);
-				if(!(hfile=std::fopen(szFile,"wa"))) // file does not exist.
+				if(!(hfile=std::fopen(szFile,"wb")))
 				{
 					::MessageBox(0, "Couldn't open File for Writing. Operation Aborted", "File Save Error", MB_ICONERROR | MB_OK);
 					return;

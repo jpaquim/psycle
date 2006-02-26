@@ -987,11 +987,6 @@ namespace psycle
 				pMainFrame->ShowInstrumentEditor();
 				break;
 
-
-			case cdefErrorLog:
-				pMainFrame->ShowErrorLogger();
-				break;
-
 			case cdefAddMachine:
 				pChildView->OnNewmachine();
 				break;

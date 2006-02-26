@@ -160,6 +160,7 @@ namespace psycle
 				if(!main)
 				{	
 					std::ostringstream s; s
+						<< "library is not a VST plugin:" << std::endl
 						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::symbol_resolving_error(s.str());
@@ -333,7 +334,7 @@ namespace psycle
 						std::ostringstream s; s
 							<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
 							<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 					pFile->Read(&_program, sizeof _program);
@@ -467,7 +468,7 @@ namespace psycle
 							<< "Replacing with dummy." << std::endl
 							<< typeid(e).name() << std::endl
 							<< e.what();
-						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 					catch(...)
@@ -476,7 +477,7 @@ namespace psycle
 							<< "Exception while instanciating:" << sPath2 << std::endl
 							<< "Replacing with dummy." << std::endl
 							<< "Unkown type of exception";
-						::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 				}
@@ -485,7 +486,7 @@ namespace psycle
 					std::ostringstream s; s
 						<< "Missing:" << psFileName << std::endl
 						<< "Replacing with dummy.";
-					::MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
 				}
 				return true;
@@ -495,7 +496,13 @@ namespace psycle
 			{
 				try
 				{
-					if(numparam < proxy().numParams()) DescribeValue(numparam, parval);
+					if(numparam < proxy().numParams())
+					{
+						if(!DescribeValue(numparam, parval))
+						{
+							std::sprintf(parval,"%.0f",proxy().getParameter(numparam) * quantization);
+						}
+					}
 					else std::strcpy(parval,"Out of Range");
 				}
 				catch(const std::exception &)
@@ -792,7 +799,7 @@ namespace psycle
 							// from AEffectX.h
 							$(GetTime) $(SetTime)
 
-							$(OfflineStart) $(OfflineRead) $(OfflineWrite)$(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
+							$(OfflineStart) $(OfflineRead) $(OfflineWrite) $(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
 
 							$(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
 
@@ -845,7 +852,7 @@ namespace psycle
 								return s.str();
 							}
 						}
-						#undef I
+						#undef $
 					#endif
 				}
 			#endif

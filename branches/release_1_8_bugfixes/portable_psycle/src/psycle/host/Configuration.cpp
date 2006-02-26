@@ -490,7 +490,7 @@ namespace psycle
 
 		void Configuration::Error(std::string const & what)
 		{
-			::MessageBox(0, what.c_str(), "Psycle", MB_ICONERROR | MB_OK);
+			MessageBox(0, what.c_str(), "Psycle", MB_ICONERROR | MB_OK);
 		}
 
 		bool Configuration::CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic)

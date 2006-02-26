@@ -60,7 +60,15 @@ NAMESPACE__BEGIN(psycle)
 			else
 				wndView->machinedial.LoadBitmap(IDB_KNOB);
 			b_font.CreatePointFont(80,"Tahoma");
-			b_font_bold.CreatePointFont(80,"Tahoma Bold");
+//			b_font_bold.CreatePointFont(80,"Tahoma Bold");
+			CString sFace("Tahoma");
+			LOGFONT lf = LOGFONT();
+			lf.lfWeight = FW_BOLD;
+			lf.lfHeight = 80;
+			lf.lfQuality = NONANTIALIASED_QUALITY;
+			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
+			if(!b_font_bold.CreatePointFontIndirect(&lf))
+
 
 			UpdateWindow();
 		}
@@ -68,7 +76,6 @@ NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::SelectMachine(Machine* pMachine)
 		{
 			_pMachine = pMachine;
-			me = true;
 
 			// Get NumParameters
 			ncol=1;

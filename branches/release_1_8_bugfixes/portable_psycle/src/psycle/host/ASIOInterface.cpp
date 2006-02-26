@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::ASIOInterface.
 #include <project.private.hpp>
 #include "ASIOInterface.hpp"
-//#include "resources/resources.hpp"
+#include "resources/resources.hpp"
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
@@ -44,7 +44,7 @@ namespace psycle
 
 		void ASIOInterface::Error(const char msg[])
 		{
-			::MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
 		}
 
 		ASIOInterface::ASIOInterface()

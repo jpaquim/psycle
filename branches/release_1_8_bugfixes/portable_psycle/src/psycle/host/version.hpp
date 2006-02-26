@@ -21,11 +21,11 @@
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
 #define PSYCLE__BRANCH "psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2005 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
+#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2006 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 1
+#define PSYCLE__VERSION__PATCH 2
 #define PSYCLE__VERSION__QUALITY "Release with bugfixes"
 
 /// identifies what sources the build comes from.
@@ -77,6 +77,17 @@
 #if 0
 /*
 $Log$
+Revision 1.45.2.2  2006/02/26 19:39:14  jaz001
+! Fix for the Message window appearing in the background sometimes. (It seemed that psycle hung up)
++ Added Extended commands for machine mute and bypass
+! Fixed a compatibility problem opening files for read.
+! Fixed a bug introduced in 1.8.1 that deleted the instrument when there was an mcm command.
+! Arrows in the generators combobox didn't cycle correctly when reaching end.
++ Added customizable 3D arrows in machine view.
+! Fixed a possible hang bug in note duplicator.
+! Fixed a quite rare bug where Psycle would crash loading a sample from a song.
++ Updates to several plugins (blitz, gamefx, all of druttis, and some others)
+
 Revision 1.45.2.1  2005/11/05 15:36:15  johan-boule
 added new plugins
 

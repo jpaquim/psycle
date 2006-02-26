@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::WaveOut.
 #include <project.private.hpp>
 #include "WaveOut.hpp"
-//#include "resources/resources.hpp"
+#include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
@@ -19,7 +19,7 @@ namespace psycle
 
 		void WaveOut::Error(char const msg[])
 		{
-			::MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
 		}
 
 		WaveOut::WaveOut()

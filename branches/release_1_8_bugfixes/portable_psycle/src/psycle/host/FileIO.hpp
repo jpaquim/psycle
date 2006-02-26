@@ -96,7 +96,8 @@ namespace psycle
 			virtual BOOL Error();
 			virtual bool Read(void* pData, ULONG numBytes);
 
-			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t&int(pow(256,numbytes)-1);};
+			///\todo replace std::pow with bit-shifting.
+			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t&int(std::pow(256.,numbytes)-1);};
 			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
 			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
 			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};

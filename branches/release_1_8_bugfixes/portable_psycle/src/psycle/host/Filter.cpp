@@ -119,7 +119,7 @@ namespace psycle
 						
 	
 	//				const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
-					const double dLoss = (float)exp(iRes*(-LOG10*1.2/128.0));
+					const double dLoss = (float)exp(iRes*(-LN10*1.2/128.0));
 	
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/96.0)-1.0;
 	//				const double dLoss = pow(10.0f, -((float)iRes / 256.0f));

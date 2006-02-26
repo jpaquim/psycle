@@ -127,8 +127,6 @@ NAMESPACE__BEGIN(psycle)
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
 
-			// Show Machine view and init MIDI
-			OnMachineview();
 		}
 
 		CChildView::~CChildView()
@@ -193,7 +191,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
 			ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
-			ON_COMMAND(ID_VIEW_ERRORLOGGER, OnViewErrorLogger)
 			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
 			ON_COMMAND(ID_BUTTONPLAYSEQBLOCK, OnButtonplayseqblock)
 			ON_UPDATE_COMMAND_UI(ID_BUTTONPLAYSEQBLOCK, OnUpdateButtonplayseqblock)
@@ -350,6 +347,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				if (viewMode == VMMachine)
 				{
+					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
 /*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
 					{
 						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
@@ -1014,6 +1012,7 @@ NAMESPACE__BEGIN(psycle)
 				Repaint();
 				pParentMain->StatusBarIdle();
 			}
+			SetFocus();
 		}
 
 		void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 
@@ -1268,11 +1267,6 @@ NAMESPACE__BEGIN(psycle)
 			pParentMain->ShowInstrumentEditor();
 		}
 
-
-		void CChildView::OnViewErrorLogger()
-		{
-			pParentMain->ShowErrorLogger();
-		}
 
 		/// Show the CPU Performance dialog
 		void CChildView::OnHelpPsycleenviromentinfo() 
@@ -2082,34 +2076,35 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath);
+			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::LoadMachineSkin()
 		{
 			std::string szOld;
+			LoadMachineDial();
 			if (!Global::pConfig->machine_skin.empty())
 			{
 				szOld = Global::pConfig->machine_skin;
@@ -2328,7 +2323,8 @@ NAMESPACE__BEGIN(psycle)
 					CString sName, tmpPath;
 					sName = finder.GetFileName();
 					// ok so we have a .psm, does it have a valid matching .bmp?
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					char szOpenName[MAX_PATH];
 					sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
@@ -2345,7 +2341,7 @@ NAMESPACE__BEGIN(psycle)
 							// load settings
 							FILE* hfile;
 							sprintf(szOpenName,"%s\\%s.psm",findDir,sName);
-							if ((hfile=fopen(szOpenName,"rw")) == NULL )
+							if(!(hfile=fopen(szOpenName,"rb")))
 							{
 								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 								return;
@@ -2959,7 +2955,8 @@ NAMESPACE__BEGIN(psycle)
 					CString sName, tmpPath;
 					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
-					char* pExt = strrchr(sName,46);// last .
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
 					pExt[0]=0;
 					char szOpenName[MAX_PATH];
 					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
@@ -2975,7 +2972,7 @@ NAMESPACE__BEGIN(psycle)
 							// load settings
 							FILE* hfile;
 							sprintf(szOpenName,"%s\\%s.psh",findDir,sName);
-							if ((hfile=fopen(szOpenName,"rw")) == NULL )
+							if(!(hfile=fopen(szOpenName,"rb")))
 							{
 								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 								return;
@@ -3254,9 +3251,11 @@ NAMESPACE__BEGIN(psycle)
 			{ 
 				VISTRACKS = 1; 
 			}
-			triangle_size_tall = Global::pConfig->mv_triangle_size+((46*Global::pConfig->mv_wirewidth)/32);
+			triangle_size_tall = Global::pConfig->mv_triangle_size+((23*Global::pConfig->mv_wirewidth)/16);
+
 			triangle_size_center = triangle_size_tall/2;
-			triangle_size_wide = (triangle_size_tall*5)/8;
+			triangle_size_wide = triangle_size_tall/2;
+			triangle_size_indent = triangle_size_tall/6;
 		}
 
 		void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
@@ -3459,6 +3458,8 @@ NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
+			else 
+				machinedial.LoadBitmap(IDB_KNOB);
 		}
 
 

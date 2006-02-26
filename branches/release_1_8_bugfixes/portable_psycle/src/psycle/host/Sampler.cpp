@@ -710,14 +710,14 @@ namespace psycle
 							case 2:
 							case 3:
 							case 4:
-							case 5: pVoice->effretVol = (float)(pow(2,volmod-1)/64); pVoice->effretMode=1; break;
+							case 5: pVoice->effretVol = (float)(std::pow(2.,volmod-1)/64); pVoice->effretMode=1; break;
 							case 6: pVoice->effretVol = 0.66666666f;	 pVoice->effretMode=2; break;
 							case 7: pVoice->effretVol = 0.5f;			 pVoice->effretMode=2; break;
 							case 9:
 							case 10:
 							case 11:
 							case 12:
-							case 13: pVoice->effretVol = (float)(pow(2,volmod-9)*(-1))/64; pVoice->effretMode=1; break;
+							case 13: pVoice->effretVol = (float)(std::pow(2.,volmod-9)*(-1))/64; pVoice->effretMode=1; break;
 							case 14: pVoice->effretVol = 1.5f;					pVoice->effretMode=2; break;
 							case 15: pVoice->effretVol = 2.0f;					pVoice->effretMode=2; break;
 						}

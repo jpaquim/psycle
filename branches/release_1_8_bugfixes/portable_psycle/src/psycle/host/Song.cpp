@@ -230,7 +230,7 @@ namespace psycle
 							///\todo wtf? duplicate machine? could happen if loader messes up?
 							char buf[128];
 							std::sprintf(buf,"%d and %d have duplicate pointers", c, j);
-							::MessageBox(0, buf, "Duplicate Machine", 0);
+							MessageBox(0, buf, "Duplicate Machine", 0);
 							_pMachine[j] = 0;
 						}
 					}
@@ -322,13 +322,13 @@ namespace psycle
 			m_LinesPerBeat=4;
 //			LineCounter=0;
 //			LineChanged=false;
-			//::MessageBox(0, "Machines", 0, 0);
+			//MessageBox(0, "Machines", 0, 0);
 			// Clean up allocated machines.
 			DestroyAllMachines(true);
-			//::MessageBox(0, "Insts", 0, 0);
+			//MessageBox(0, "Insts", 0, 0);
 			// Cleaning instruments
 			DeleteInstruments();
-			//::MessageBox(0, "Pats", 0, 0);
+			//MessageBox(0, "Pats", 0, 0);
 			// Clear patterns
 			DeleteAllPatterns();
 			// Clear sequence
@@ -1026,7 +1026,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_INFO)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//::MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
+							//MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1044,7 +1044,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_SNGI)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//::MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
+							//MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1101,7 +1101,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_SEQD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//::MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
+							//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1124,7 +1124,7 @@ namespace psycle
 							}
 							else
 							{
-								//::MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
+								//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
 								pFile->Skip(size - sizeof index);
 							}
 						}
@@ -1137,7 +1137,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_PATD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//::MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
+							//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1170,7 +1170,7 @@ namespace psycle
 							}
 							else
 							{
-								//::MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
+								//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
 								pFile->Skip(size - sizeof index);
 							}
 						}
@@ -1188,7 +1188,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_MACD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//::MessageBox(0, "Machine section of File is from a newer version of psycle!", 0, 0);
+							//MessageBox(0, "Machine section of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1204,7 +1204,7 @@ namespace psycle
 							}
 							else
 							{
-								//::MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
 								pFile->Skip(size - sizeof index);
 							}
 						}
@@ -1217,7 +1217,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_INSD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//::MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+							//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1229,7 +1229,7 @@ namespace psycle
 							}
 							else
 							{
-								//::MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
 								pFile->Skip(size - sizeof index);
 							}
 						}
@@ -1313,7 +1313,7 @@ namespace psycle
 					s << "Error reading from file '" << pFile->szName << "'" << std::endl;
 					if(chunkcount) s << "some chunks were missing in the file";
 					else s << "could not close the file";
-					::MessageBox(0, s.str().c_str(), "File Error!!!", 0);
+					MessageBox(0, s.str().c_str(), "File Error!!!", 0);
 					return false;
 				}
 				return true;
@@ -1615,7 +1615,7 @@ namespace psycle
 									{
 										char sError[128];
 										sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-										::MessageBox(NULL,sError, "Loading Error", MB_OK);
+										MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 										Machine* pOldMachine = pMac[i];
 										pMac[i] = new Dummy(*((Dummy*)pOldMachine));
@@ -1637,7 +1637,7 @@ namespace psycle
 										{
 											char sError[128];
 											sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath2);
-											::MessageBox(NULL,sError, "Loading Error", MB_OK);
+											MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 											Machine* pOldMachine = pMac[i];
 											pMac[i] = new Dummy(*((Dummy*)pOldMachine));
@@ -1655,7 +1655,7 @@ namespace psycle
 								{
 									char sError[128];
 									sprintf(sError,"Missing VST plug-in \"%s\"",vstL[pVstPlugin->_instance].dllName);
-									::MessageBox(NULL,sError, "Loading Error", MB_OK);
+									MessageBox(NULL,sError, "Loading Error", MB_OK);
 
 									Machine* pOldMachine = pMac[i];
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
@@ -1692,7 +1692,7 @@ namespace psycle
 							{
 								char buf[MAX_PATH];
 								sprintf(buf,"unkown machine type: %i",type);
-								::MessageBox(0, buf, "Loading old song", MB_ICONERROR);
+								MessageBox(0, buf, "Loading old song", MB_ICONERROR);
 							}
 							pMac[i] = new Dummy(i);
 							pMac[i]->Init();
@@ -1847,7 +1847,7 @@ namespace psycle
 								// Since we don't know if the plugin saved it or not, 
 								// we're stuck on letting the loading crash/behave incorrectly.
 								// There should be a flag, like in the VST loading Section to be correct.
-								::MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
+								MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 							}
 						}
 						else if (( pMac[i]->_type == MACH_VST ) || 

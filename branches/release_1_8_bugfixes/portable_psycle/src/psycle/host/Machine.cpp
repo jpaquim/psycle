@@ -85,7 +85,7 @@ namespace psycle
 					host::loggers::exception(s.str());
 				}
 			}
-			::MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
+			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 		}
 
@@ -461,7 +461,7 @@ namespace psycle
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -481,7 +481,7 @@ namespace psycle
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -501,7 +501,7 @@ namespace psycle
 						{
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
-							::MessageBox(NULL,sError, "Loading Error", MB_OK);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -511,7 +511,7 @@ namespace psycle
 				}
 				break;
 			default:
-				if (type != MACH_DUMMY ) ::MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
+				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
 				pMachine = new Dummy(index);
 				break;
 			}
@@ -546,7 +546,7 @@ namespace psycle
 			{
 				char sError[MAX_PATH + 100];
 				sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
-				::MessageBox(NULL,sError, "Loading Error", MB_OK);
+				MessageBox(NULL,sError, "Loading Error", MB_OK);
 				Machine* p = new Dummy(index);
 				p->Init();
 				p->_type=MACH_DUMMY;
@@ -657,7 +657,6 @@ namespace psycle
 		Dummy::Dummy(int index)
 		{
 			_macIndex = index;
-			_numPars = 0;
 			_type = MACH_DUMMY;
 			_mode = MACHMODE_FX;
 			sprintf(_editName, "Dummy");
@@ -701,6 +700,7 @@ namespace psycle
 			_numPars = 16;
 			_type = MACH_DUPLICATOR;
 			_mode = MACHMODE_GENERATOR;
+			bisTicking = false;
 			strcpy(_editName, "Dupe it!");
 			for (int i=0;i<8;i++)
 			{
@@ -719,8 +719,9 @@ namespace psycle
 		}
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
-			if ( !_mute )
+			if ( !_mute && !bisTicking)
 			{
+				bisTicking=true;
 				for (int i=0;i<8;i++)
 				{
 					PatternEntry pTemp = *pData;
@@ -732,6 +733,7 @@ namespace psycle
 						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 				}
 			}
+			bisTicking=false;
 		}
 		void DuplicatorMac::GetParamName(int numparam,char *name)
 		{
@@ -741,7 +743,7 @@ namespace psycle
 			} else if (numparam >=8 && numparam<16) {
 				sprintf(name,"Note Offset %d",numparam-8);
 			}
-			else name = "\0";
+			else name[0] = '\0';
 		}
 		int DuplicatorMac::GetParamValue(int numparam)
 		{
@@ -767,7 +769,7 @@ namespace psycle
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-8]+60)%12],(noteOffset[numparam-8]+60)/12);
 			}
-			else parVal = "\0";
+			else parVal[0] = '\0';
 		}
 		bool DuplicatorMac::SetParameter(int numparam, int value)
 		{
@@ -784,20 +786,6 @@ namespace psycle
 
 		void DuplicatorMac::Work(int numSamples)
 		{
-/*			Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
-			Machine::SetVolumeCounter(numSamples);
-			if ( Global::pConfig->autoStopMachines )
-			{
-				if (_volumeCounter < 8.0f)	{
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					_stopped = true;
-				}
-			}
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
-*/
 			_worked = true;
 		}
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -812,7 +800,7 @@ namespace psycle
 		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile)
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset;
-			pFile->Write(&size, sizeof size); // size of this part params to load
+			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&macOutput,sizeof macOutput);
 			pFile->Write(&noteOffset,sizeof noteOffset);
 		}
@@ -830,7 +818,6 @@ namespace psycle
 		{
 			_macIndex = index;
 			sampleCount = 0;
-			_numPars = 0;
 			_outDry = 256;
 			decreaseOnClip=false;
 			_type = MACH_MASTER;
@@ -969,14 +956,14 @@ namespace psycle
 			UINT size;
 			pFile->Read(&size, sizeof size ); // size of this part params to load
 			pFile->Read(&_outDry,sizeof _outDry);
-			pFile->Read(&decreaseOnClip, sizeof decreaseOnClip); // numSubtracks
+			pFile->Read(&decreaseOnClip, sizeof decreaseOnClip);
 			return true;
 		};
 
 		void Master::SaveSpecificChunk(RiffFile* pFile)
 		{
 			UINT size = sizeof _outDry + sizeof decreaseOnClip;
-			pFile->Write(&size, sizeof size); // size of this part params to load
+			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&_outDry,sizeof _outDry);
 			pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
 		};

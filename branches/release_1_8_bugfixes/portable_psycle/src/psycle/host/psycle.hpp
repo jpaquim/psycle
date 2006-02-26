@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::CPsycleApp.
 #pragma once
 #include "resources/resources.hpp" // main symbols
+#include "psycle/host/global.hpp"
 #include <operating_system/logger.hpp>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)

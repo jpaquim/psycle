@@ -17,7 +17,7 @@ namespace psycle
 
 		void DirectSound::Error(const char msg[])
 		{
-			::MessageBox(0, msg, "DirectSound Output driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, "DirectSound Output driver", MB_OK | MB_ICONERROR);
 		}
 
 		DirectSound::DirectSound()
