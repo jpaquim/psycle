@@ -27,11 +27,12 @@ class Gainer : public Plugin
 
 		virtual void describe(std::ostream & out, const int & parameter) const
 		{
+			Real gain2 = (gain_==0)?0.00001:gain_;
 			switch(parameter)
 			{
 			case gain:
 				out << std::setprecision(3) << std::setw(6) << gain_;
-				out << " (" << std::setw(6) << 20 * std::log10(gain_) << " dB)";
+				out << " (" << std::setw(6) << (20 * std::log10(gain2)) << " dB)";
 				break;
 			default:
 				Plugin::describe(out, parameter);
@@ -70,10 +71,5 @@ class Gainer : public Plugin
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(Gainer)
-
-inline void Gainer::process(Sample & sample)
-{
-	sample *= (*this)(gain);
-}
 
 }}
