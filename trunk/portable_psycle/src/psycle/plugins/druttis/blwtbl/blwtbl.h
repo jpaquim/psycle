@@ -6,25 +6,25 @@
 //
 //////////////////////////////////////////////////////////////////////
 #pragma once
-#include "..\Dsp\Waveform.h"
+#include "../dsp/Waveform.h"
 //////////////////////////////////////////////////////////////////////
 //
 //	DLL - Macros
 //
 //////////////////////////////////////////////////////////////////////
-#ifdef __BLWTBL_EXPORT__
-#define DLL __declspec(dllexport)
+#ifdef BLWTBL__SOURCE
+#define BLWTBL__DYNAMIC_LINK __declspec(dllexport)
 #else
-#define DLL __declspec(dllimport)
+#define BLWTBL__DYNAMIC_LINK __declspec(dllimport)
 #endif
 //////////////////////////////////////////////////////////////////////
 //
 //	DLL - Functions
 //
 //////////////////////////////////////////////////////////////////////
-DLL bool __cdecl EnableWaveform(int index);
-DLL bool __cdecl DisableWaveform(int index);
-DLL bool __cdecl GetWaveform(int wavenum, WAVEFORM *pwave);
-DLL bool __cdecl UpdateWaveforms(int samplingrate);
-DLL float* __cdecl GetFMTable();
-DLL float* __cdecl GetPMTable();
+BLWTBL__DYNAMIC_LINK bool EnableWaveform(int index);
+BLWTBL__DYNAMIC_LINK bool DisableWaveform(int index);
+BLWTBL__DYNAMIC_LINK bool GetWaveform(int wavenum, WAVEFORM *pwave);
+BLWTBL__DYNAMIC_LINK bool UpdateWaveforms(int samplingrate);
+BLWTBL__DYNAMIC_LINK float* GetFMTable();
+BLWTBL__DYNAMIC_LINK float* GetPMTable();
