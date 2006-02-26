@@ -59,6 +59,7 @@ namespace psycle
 			Sampler* pSampler;
 			XMSampler* pXMSampler;
 			DuplicatorMac* pDuplicator;
+			Mixer* pMixer;
 			Plugin* pPlugin;
 			vst::plugin* pVstPlugin;
 			switch (type)
@@ -76,6 +77,9 @@ namespace psycle
 				break;
 			case MACH_DUPLICATOR:
 				pMachine = pDuplicator = new DuplicatorMac(index);
+				break;
+			case MACH_MIXER:
+				pMachine = pMixer = new Mixer(index);
 				break;
 			case MACH_PLUGIN:
 				{

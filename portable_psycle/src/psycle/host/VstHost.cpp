@@ -491,12 +491,17 @@ namespace psycle
 				}
 				return true;
 			};
-
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
 				try
 				{
-					if(numparam < proxy().numParams()) DescribeValue(numparam, parval);
+					if(numparam < proxy().numParams())
+					{
+						if(!DescribeValue(numparam, parval))
+						{
+							std::sprintf(parval,"%.0f",proxy().getParameter(numparam) * quantization);
+						}
+					}
 					else std::strcpy(parval,"Out of Range");
 				}
 				catch(const std::exception &)
@@ -585,7 +590,7 @@ namespace psycle
 
 			bool plugin::SetParameter(int parameter, int value)
 			{
-				return SetParameter(parameter, value / 65535.0f);
+				return SetParameter(parameter, (float)value / quantization);
 			}
 
 			/*
@@ -1160,7 +1165,7 @@ namespace psycle
 					}
 					else if(note == cdefTweakM || note == cdefTweakE) // Tweak Command
 					{
-						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
+						const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 						SetParameter(pData->_inst, value);
 						Global::pPlayer->Tweaker = true;
 					}
@@ -1175,7 +1180,7 @@ namespace psycle
 						else for(i = MAX_TWS - 1 ; i > 0 ; --i) TWSDelta[i] = 0;
 						if(i < MAX_TWS)
 						{
-							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
+							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / (float)quantization;
 							TWSInst[i] = pData->_inst;
 							try
 							{
@@ -1192,7 +1197,7 @@ namespace psycle
 						else
 						{
 							// we have used all our slots, just send a twk
-							const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
+							const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 							SetParameter(pData->_inst, value);
 						}
 						Global::pPlayer->Tweaker = true;
@@ -1513,7 +1518,7 @@ namespace psycle
 
 					else if(pData->_note == cdefTweakM || pData->_note == cdefTweakE) // Tweak command
 					{
-						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
+						const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 						SetParameter(pData->_inst, value);
 						Global::pPlayer->Tweaker = true;
 					}
@@ -1528,7 +1533,7 @@ namespace psycle
 						else for (i = MAX_TWS-1 ; i > 0 ; --i) TWSDelta[i] = 0;
 						if(i < MAX_TWS)
 						{
-							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
+							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / (float)quantization;
 							TWSInst[i] = pData->_inst;
 							try
 							{
@@ -1545,7 +1550,7 @@ namespace psycle
 						else
 						{
 							// we have used all our slots, just send a twk
-							const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
+							const float value(((pData->_cmd * 256) + pData->_parameter) / (float)quantization);
 							SetParameter(pData->_inst, value);
 						}
 						Global::pPlayer->Tweaker = true;

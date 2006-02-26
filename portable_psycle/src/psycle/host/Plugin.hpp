@@ -77,8 +77,10 @@ namespace psycle
 			virtual void Stop();
 			inline virtual const char * const GetDllName() const throw() { return _psDllName.c_str(); }
 			virtual char * GetName() { return (char *)_psName.c_str(); };
-			virtual int GetNumParams() { return GetInfo()->numParameters; }
+			virtual int GetNumParams() { return GetInfo()->numParameters; };
+			virtual int GetNumCols() { return GetInfo()->numCols; };
 			virtual void GetParamName(int numparam, char * name);
+			virtual void GetParamRange(int numparam,int &minval, int &maxval);
 			virtual int GetParamValue(int numparam);
 			virtual void GetParamValue(int numparam,char* parval);
 			virtual bool SetParameter(int numparam,int value);

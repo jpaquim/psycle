@@ -146,6 +146,7 @@ namespace psycle
 			virtual void Init();
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
+			virtual void WorkNoMix(int numSamples);
 			virtual void Tick() {};
 			virtual void Tick(int track, PatternEntry * pData) {};
 			virtual void Stop() {};
@@ -160,7 +161,9 @@ namespace psycle
 			virtual const char * const GetDllName() const throw() { return "built-in"; };
 			virtual char * GetName() = 0;
 			virtual int GetNumParams() { return _numPars; };
+			virtual int GetNumCols() { return _nCols; };
 			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
+			virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
 			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
 			virtual int GetParamValue(int numparam) { return 0; };
 			virtual bool SetParameter(int numparam, int value) { return false;}; 
@@ -198,6 +201,7 @@ namespace psycle
 			int _y;
 			char _editName[32];
 			int _numPars;
+			int _nCols;
 			/// Incoming connections Machine number
 			int _inputMachines[MAX_CONNECTIONS];	
 			/// Outgoing connections Machine number
@@ -266,6 +270,7 @@ namespace psycle
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
+			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
@@ -307,6 +312,48 @@ namespace psycle
 		protected:
 			static char* _psName;
 		};
+
+		/// master machine.
+		class Mixer : public Machine
+		{
+		public:
+			enum
+			{
+				mix=0,
+				send0,
+				sendmax=send0+MAX_CONNECTIONS
+			};
+			Mixer();
+			Mixer(int index);
+			virtual void Init(void);
+			virtual void Work(int numSamples);
+			void FxSend(int numSamples);
+			void Mix(int numSamples);
+			virtual char* GetName(void) { return _psName; };
+			virtual int GetNumCols();
+			virtual void GetParamName(int numparam,char *name);
+			virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
+			virtual void GetParamValue(int numparam,char *parVal);
+			virtual int GetParamValue(int numparam);
+			virtual bool SetParameter(int numparam,int value);
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+			
+		protected:
+			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
+			/// Incoming send, Machine number
+			int _send[MAX_CONNECTIONS];	
+			/// Incoming send, connection volume
+			float _sendVol[MAX_CONNECTIONS];	
+			/// Value to multiply _sendVol[] to have a 0.0..1.0 range
+			float _sendVolMulti[MAX_CONNECTIONS];
+			/// Incoming connections activated
+			bool _sendValid[MAX_CONNECTIONS];		
+
+			static char* _psName;
+		};
+
+
 
 		///\todo make that a naked inline function
 		#define CPUCOST_INIT(cost)	\

@@ -13,7 +13,7 @@ NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
-		const int NUM_INTERNAL_MACHINES = 4;
+		const int NUM_INTERNAL_MACHINES = 5;
 
 		class PluginInfo
 		{
@@ -128,7 +128,7 @@ NAMESPACE__BEGIN(psycle)
 			bool bAllowChanged;
 			bool bCategoriesChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
-			HTREEITEM hInt[4];
+			HTREEITEM hInt[NUM_INTERNAL_MACHINES];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 			HTREEITEM m_hItemDrag;
 			// Generated message map functions
