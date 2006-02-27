@@ -12,6 +12,7 @@
 #include <stk/Plucked.h>
 #include <stk/ADSR.h>
 #include <stdlib.h>
+#include <vector>
 
 #define NUMPARAMETERS 5
 
@@ -114,6 +115,7 @@ private:
 	Plucked track[MAX_TRACKS];
 	ADSR	adsr[MAX_TRACKS];
 	float	vol_ctrl[MAX_TRACKS];
+	std::vector<int> w_tracks;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -132,6 +134,10 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
+	
+	w_tracks.push_back( 0 ); // 
+	
+
 	Stk::setSampleRate((StkFloat)pCB->GetSamplingRate());
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
@@ -194,7 +200,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 	float sl=0;
 	float const vol=(float)Vals[0];
 
-	for(int c=0;c<tracks;c++)
+	for(std::vector<int>::iterator w_tracks_iter=w_tracks.begin();w_tracks_iter!=w_tracks.end();w_tracks_iter++)
 	{
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
@@ -203,18 +209,18 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 
 			int xnumsamples=numsamples;
 
-			Plucked *ptrack=&track[c];
-			ADSR	*padsr=&adsr[c];		
+			Plucked *ptrack=&track[*w_tracks_iter];
+			ADSR	*padsr=&adsr[*w_tracks_iter];		
 			do
 				{
 					sl=float(padsr->tick()*ptrack->tick())*vol;
 					if (sl<-vol)sl=-vol;
 					if (sl>vol)sl=vol;
 
-					sl*=vol_ctrl[c];
+					sl*=vol_ctrl[*w_tracks_iter];
 
-					*++xpsamplesleft+=sl*vol_ctrl[c];
-					*++xpsamplesright+=sl*vol_ctrl[c];
+					*++xpsamplesleft+=sl; //*vol_ctrl[w_tracks_iter];
+					*++xpsamplesright+=sl; //*vol_ctrl[w_tracks_iter];
 				} while(--xnumsamples);
 	}
 
@@ -236,14 +242,26 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Note Off			== 120
 	// Empty Note Row	== 255
 	// Less than note off value??? == NoteON!
-	
+
+	bool no_channel(true);
+
+	for(std::vector<int>::iterator w_tracks_iter=w_tracks.begin();w_tracks_iter!=w_tracks.end();w_tracks_iter++)
+	{
+		if (*w_tracks_iter == channel)
+		{
+			no_channel = false;
+			break;
+		}
+	}
+
+	if (no_channel) w_tracks.push_back(channel);
+
 	if(note!=255)
 	{
 		// Note off
 		if(note==120)
 		{
 			adsr[channel].keyOff();
-//			track[channel].noteOff(0.0);
 		}
 		else 
 		// Note on
