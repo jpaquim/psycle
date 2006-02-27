@@ -275,7 +275,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		noteonoff[channel]=false;
 	}
 
-	track[channel].tick();
+	//track[channel].tick();
 
 	if( cmd == 0x0C) vol_ctrl[channel] = val * .003921568627450980392156862745098f; // 1/255
 }
