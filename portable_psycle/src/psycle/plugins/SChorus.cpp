@@ -12,6 +12,7 @@
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 
 #define MAXIMUM_DELAY   40000
 
@@ -144,9 +145,9 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 private:
-	int *DM_l,*DM_r;
+	float *DM_l,*DM_r;
 	unsigned int buf_count;
-	double min_sweep,max_sweep,sweep,step,outval[2];
+	float min_sweep,max_sweep,sweep,step,outval[2];
 
 };
 
@@ -156,8 +157,12 @@ mi::mi()
 {
 	// The constructor zone
 	Vals = new int[NUMPARAMETERS];
-	DM_l = new int[MAXIMUM_DELAY];
-	DM_r = new int[MAXIMUM_DELAY];
+	DM_l = new float[MAXIMUM_DELAY];
+	DM_r = new float[MAXIMUM_DELAY];
+	for (int i=0;i<MAXIMUM_DELAY;i++)
+	{
+		DM_l[i] = DM_r[i] = 0;
+	}
 }
 
 mi::~mi()
@@ -172,10 +177,15 @@ void mi::Init()
 {
 // Initialize your stuff here
 	buf_count=0;
-	min_sweep = Vals[4] * 0.00029675445556640625;
-    max_sweep = Vals[5] * 0.00029675445556640625;
+	min_sweep = Vals[4] * .001 * pCB->GetSamplingRate();
+    max_sweep = Vals[5] * .001 * pCB->GetSamplingRate();
     step = Vals[6]*.001;
     sweep = min_sweep;
+	outval[0] = outval[1] = 0;
+	for (int i=0;i<MAXIMUM_DELAY;i++)
+	{
+		DM_l[i] = DM_r[i] = 0;
+	}
 }
 
 void mi::SequencerTick()
@@ -195,10 +205,15 @@ void mi::ParameterTweak(int par, int val)
 {
 	Vals[par]=val;
 
-	min_sweep = Vals[4] * 0.00029675445556640625;
-    max_sweep = Vals[5] * 0.00029675445556640625;
+	min_sweep = Vals[4] * .001 * pCB->GetSamplingRate();
+    max_sweep = Vals[5] * .001 * pCB->GetSamplingRate();
     step = Vals[6]*.001;
-    sweep = min_sweep;
+	if (step == 0)
+	{
+		sweep = 0;
+	}else{
+		sweep = min_sweep;
+	}
 
 }
 
@@ -206,7 +221,7 @@ void mi::ParameterTweak(int par, int val)
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	float const dry		=(float)(Vals[0])*0.00006103515625f;
-	float const wet		=(float)(Vals[1])*0.00006103515625f;
+	float const wet		=(float)(Vals[1])*0.000030517578125f;
 	float const fbl		=(float)(Vals[2])*0.000030517578125f;
 	float const fbr		=(float)(Vals[3])*0.000030517578125f;
 	int const del		=Vals[7];
@@ -216,28 +231,28 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			float sl = *psamplesleft;
 			float sr = *psamplesright; 
 
-	        outval[0] = sl*fbl + DM_l[(buf_count+del /*MAXIMUM_DELAY*/-(int)sweep) % del /*MAXIMUM_DELAY*/]*wet;
+			outval[0] = outval[0]*fbl + DM_l[(buf_count+del -(int)sweep) % del ]*wet;
 		    outval[0] += sl*dry;
-			outval[1] = sr*fbr + DM_r[(buf_count+del /*MAXIMUM_DELAY*/-(int)max_sweep+(int)sweep)%del /*MAXIMUM_DELAY*/]*wet;
+			outval[1] = outval[1]*fbr + DM_r[(buf_count+del -(int)(max_sweep-sweep)) % del ]*wet;
 			outval[1] += sr*dry;
 			
-			if(outval[0] > 32767.0)
-				sl = 32767;
-			else if(outval[0] < -32768.0)
-				sl = -32768;
-            else
-				sl = (float)outval[0];
-			if(outval[1] > 32767.0)
-				sr = 32767;
-			else if(outval[1] < -32768.0)
-				sr = -32768;
-            else
-				sr = (float)outval[1];
+			//if(outval[0] > 32767.f)
+			//	sl = 32767;
+			//else if(outval[0] < -32768.f)
+			//	sl = -32768;
+			//else
+				sl = outval[0];
+			//if(outval[1] > 32767.f)
+			//	sr = 32767.f;
+			//else if(outval[1] < -32768.f)
+			//	sr = -32768.f;
+			//else
+				sr = outval[1];
 
-			DM_l[buf_count] = (int)sl;
-			DM_r[buf_count] = (int)sr;
+			DM_l[buf_count] = sl;
+			DM_r[buf_count] = sr;
 			
-			buf_count = (buf_count + 1) % del /*MAXIMUM_DELAY*/;
+			buf_count = (buf_count + 1) % del ;
 
 			*psamplesleft=sl;
 			*psamplesright=sr;
@@ -263,9 +278,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	switch(param)
 	{
 		case 0:
-		case 1:
 			std::sprintf(txt,"%.6f",(float)value*0.00006103515625f);
 			return true;
+		case 1:
 		case 2:
 		case 3:
 			std::sprintf(txt,"%.6f",(float)value*0.000030517578125f);
