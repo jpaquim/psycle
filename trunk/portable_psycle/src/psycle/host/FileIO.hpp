@@ -77,7 +77,8 @@ namespace psycle
 			virtual long FileSize(void);
 			virtual bool ReadString(std::string &string);
 			virtual bool ReadString(char* pData, ULONG maxBytes);
-			const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const ULONG maxLength);
+			///\todo TCHAR may be char or wchar_t depending on "build settings"
+			const TCHAR * ReadStringA2T(TCHAR* pData, const ULONG maxLength);
 			virtual long GetPos(void);
 			virtual FILE* GetFile(void) { return NULL; };
 			static ULONG FourCC(char const *psName);
