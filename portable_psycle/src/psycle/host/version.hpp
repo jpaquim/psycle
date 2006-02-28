@@ -21,11 +21,11 @@
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
 #define PSYCLE__BRANCH "psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2006 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
+#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2006 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net) ; see the AUTHORS file"
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 9
-#define PSYCLE__VERSION__PATCH 3
+#define PSYCLE__VERSION__PATCH 4
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
@@ -77,6 +77,9 @@
 #if 0
 /*
 $Log$
+Revision 1.51  2006/02/28 11:44:35  johan-boule
+reference to the AUTHORS file
+
 Revision 1.50  2006/01/10 18:35:43  johan-boule
 version 1.9.3
 added dw's code for shadows on the wire arrows
