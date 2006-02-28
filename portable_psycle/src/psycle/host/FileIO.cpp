@@ -2,6 +2,21 @@
 ///\brief implementation file for psycle::host::RiffFile.
 #include <project.private.hpp>
 #include "FileIO.hpp"
+
+#include <diversalis/operating_system.hpp>
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(push)
+	#endif
+	#include <tchar.h> // because of microsoftisms: _tcscpy
+	#include <atlbase.h> // because of microsoftisms: CA2T
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(pop)
+	#endif
+#else
+	#error "this sorry file is not portable"
+#endif
+
 namespace psycle
 {
 	namespace host
