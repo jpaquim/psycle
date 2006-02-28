@@ -1,48 +1,45 @@
 
 Psycle is copyright 2000-2006 the following people:
 
-====
-code
-====
-
-Chris Share <cps@users.sourceforge.net>
-Daniel Peddle <bdzld@users.sourceforge.net>
-Daniel Arena <dubdub@users.sourceforge.net>
-Dmitry Kulikov <sartorius@users.sourceforge.net>
-Guido Vranken <guidovranken@users.sourceforge.net>
-James Redfern <alkenstein@users.sourceforge.net>
-Jan-Marco Edelmann <voskomo@users.sourceforge.net>
-Jeremy Evers <pooplog@users.sourceforge.net>
-Joakim Dahlstrom <druttis@users.sourceforge.net>
-Johan Boule <johan-boule@users.sourceforge.net>
-Jose Enrique <sampler@users.sourceforge.net>
+=============
+Active coders
+=============
 Josep Maria Antolin Segura <jaz001@users.sourceforge.net>
-Juan Antonio Arguelles Rius <arguru@users.sourceforge.net>
-Lukasz Langa "kSh" <lukasz_langa@users.sourceforge.net>
-Mats Hojlund <cbr@users.sourceforge.net>
-Martin Etnestad Johansen <lobywang@users.sourceforge.net>
-Magnus Jonsson <zealmange@users.sourceforge.net>
+Johan Boule <johan-boule@users.sourceforge.net>
+James Redfern <alkenstein@users.sourceforge.net>
+Jose Enrique <sampler@users.sourceforge.net>
+Guido Vranken <guidovranken@users.sourceforge.net>
 Patrick Haworth <trancemyriad@users.sourceforge.net>
-Satoshi Fujiwara <sfpg@users.sourceforge.jp>
+Magnus Jonsson <zealmange@users.sourceforge.net>
 D.W. <dw_aley@users.sourceforge.net>
 
-Marcin Kowalski "FideLoop" <mikowal@posejdon.wpk.p.lodz.pl>
+==============
+Retired coders
+==============
+Juan Antonio Arguelles Rius <arguru@users.sourceforge.net>
+Mats Hojlund <cbr@users.sourceforge.net>
+Daniel Arena <dubdub@users.sourceforge.net>
 Mark McCormack <mark_jj_mccormak@yahoo.co.uk>
+Marcin Kowalski "FideLoop" <mikowal@posejdon.wpk.p.lodz.pl>
+Lukasz Langa "kSh" <lukasz_langa@users.sourceforge.net>
+Jeremy Evers <pooplog@users.sourceforge.net>
+Martin Etnestad Johansen <lobywang@users.sourceforge.net>
 
-========
-graphics
-========
+=============
+plugin coders 
+=============
+Joakim Dahlstrom <druttis@users.sourceforge.net>
+Dmitry Kulikov <sartorius@users.sourceforge.net>
+Jan-Marco Edelmann <voskomo@users.sourceforge.net>
 
-Hamarr Heylen
-David Buist
-frown
-Mark
+Note: Some plugins contain source code from other sources, as noted in their
+respective README files.
 
-======
-unkown
-======
 
-Ali Ole <npx@users.sourceforge.net>
-James Skerritt <skerritt@users.sourceforge.net>
-Robin Davies <rerdavies@users.sourceforge.net>
-Roman Senn "psynapse" <smoln@users.sourceforge.net>
+=======================================================
+
+Psycle also uses source code or modifications of source code from other
+authors, as noted in each respective source file. The authors of those sources
+include:
+
+Satoshi Fujiwara <sfpg@users.sourceforge.jp>

@@ -162,9 +162,10 @@ NAMESPACE__BEGIN(psycle)
 		oldbmp=memDC.SelectObject(&wndView->machinedial);
 
 		int sends(0),cols(0);
+		std::string sendNames[MAX_CONNECTIONS];
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
-			if (_pMixer->_sendValid[i]) { cols++; sends++; }
+			if (_pMixer->_sendValid[i]) { sendNames[sends]= pMachine[_pMixer->_send[i]]->GetName(); sends++; }
 		}
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
@@ -172,22 +173,56 @@ NAMESPACE__BEGIN(psycle)
 		}
 		if (cols != numCols || sends != numSends)
 		{
+			int winh = InfoLabel::height + ((sends+1) * Knob::height) + GraphSlider::height;
+			int winw = InfoLabel::width + ((cols+1) * Knob::width ) + (sends * Knob::width);
+
 			MoveWindow
 				(
 				0,
 				0,
-				 * cols,
+				wihw,
 				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
 				false
 				);
 			numCols =cols;
 			numSends=sends;
 		}
+		int xoffset(0), yoffset(0);
+		// Column 0, Labels.
+		HeaderInfoLabel.Draw(&dc,xoffset,yoffset,"","");
+		for (int i=0; i <numSends) {
+			yoffset+=HeaderInfoLabel::height;
+			HeaderInfoLabel.Draw(&dc,xoffset,yoffset,sendNames[numSends-i-1].c_str(),"");
+		}
+		yoffset+=HeaderInfoLabel::height;
+		HeaderInfoLabel.Draw(&dc,xoffset,yoffset,"Dry Mix","");
+
+		yoffset+=GraphSlider::height;
+		HeaderInfoLabe.Draw(&dc,xoffset,yoffset,"Level","")
+		
+		xoffset+=label::width;
+		// Colums 1 onwards, controls
+		cols=1;
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
 			if (_pMixer->_inputCon[i])
 			{
+				HeaderInfoLabel.Draw(&dc,xoffset,yoffset,pMachine[_pMixer->_inputMachines[i]]->GetName(),"");
+
+				yoffset+=HeaderInfoLabel::height;
+				for (int i=0; i<numSends; i++)
+				{
+					Knob::Draw(&dc,xoffset,yoffset,)
+					yoffset+=Knob::height;
+				}
+
+				xoffset+=Knob::width+label::width;
 			}
+		}
+		for (int i=0; i<numSends; i++)
+		{
+			HeaderInfoLabel.Draw(&dc,xoffset,yoffset,sendNames[numSends-i-1].c_str(),"");
+
 		}
 
 		memDC2.SelectObject(oldbmp2);
