@@ -1,6 +1,24 @@
 ///\file
 ///\brief interface file for psycle::host::RiffFile.
 #pragma once
+
+#include <diversalis/operating_system.hpp>
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(push)
+	#endif
+	#include <windows.h> // because of microsoftisms: BOOL UINT ULONG
+	#include <tchar.h> // because of microsoftisms: TCHAR
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(pop)
+	#endif
+	#include <boost/static_assert.hpp>
+	BOOST_STATIC_ASSERT((sizeof(UINT ) == 4));
+	BOOST_STATIC_ASSERT((sizeof(ULONG) == 4));
+#else
+	#error "this sorry file is not portable"
+#endif
+
 namespace psycle
 {
 	namespace host
