@@ -5,3 +5,4 @@
 ///\file
 #pragma once
 #include <diversalis/detail/configuration.hpp>
+#include "stringized.hpp"

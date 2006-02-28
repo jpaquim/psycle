@@ -2,7 +2,7 @@
 // Copyright (C) 2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::coal::arranger
-#include PACKAGENERIC__PRE_COMPILED
+#include <packageneric/pre_compiled_headers.private.hpp>
 #include PACKAGENERIC
 #include "detail/project.private.hpp"
 #if defined PSYCLE__COAL__EXPERIMENTAL
