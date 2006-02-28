@@ -1,3 +1,5 @@
+// This file is part of Psycle, which is the legal property of its developers, whose names are too numerous to list here. Please refer to the AUTHORS file distributed with this source distribution.
+ 
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
 #define _WIN32_DCOM
