@@ -12,9 +12,6 @@ directory structure
 
 	include/: public headers of third party libraries
 	src/: sources (*.cpp), private headers (*.private.hpp), and public headers (*.hpp) of this package
-		project.private.hpp: private header #included by all source files (*.cpp) to centralize compiler tweaking
-		project.hpp: public version of the project.private.hpp private header that can be #included by other public headers.
-		precompiled_headers.private.hpp: private header included by project.private.hpp (and hence all source files) that #include what is precompiled
 		psycle/:
 			host/: psycle host
 			plugins/: psycle plugins
