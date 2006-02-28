@@ -694,8 +694,7 @@
 	// cast
 	////////
 	#pragma warning(disable:4800) // forcing value to bool 'true' or 'false' (performance warning)
-	#pragma warning(disable:4244) // conversion from 'int' to 'float', possible loss of data
-		// x-bit int to x-bit float conversions are not lossless, but in many cases we do not care about it
+	//#pragma warning(disable:4244) // conversion from 'numeric type A' to 'numeric type B', possible loss of data
 
 	//////////
 	// inline
