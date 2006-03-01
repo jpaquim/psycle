@@ -1,5 +1,4 @@
-///\file
-///\brief implementation file for beerz77-2 algorithm.
+///\implementation beerz77-2 algorithm.
 /// beerz77-2 algorithm by jeremy evers, loosely based on lz77 
 /// -2 designates the smaller window, faster compression version
 /// designed for decompression on gameboy advance
@@ -10,7 +9,7 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
 #include <project.private.hpp>
-#include "constants.hpp"
+#include "constants.hpp" // erm, just for the byte typedef
 #include <cstring>
 namespace psycle
 {
