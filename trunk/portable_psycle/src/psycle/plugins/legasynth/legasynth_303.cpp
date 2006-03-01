@@ -424,11 +424,11 @@ void mi::Init()
 		track[i].set_default_data(&track_def_data);
 		track[i].set_data(&track_data);
 
-		track[i].set_mix_frequency(44100);
+		track[i].set_mix_frequency(pCB->GetSamplingRate());
 		track[i].set_note_off(0);
 		track[i].set_sustain(false);
 	}
-	chorus.set_mixfreq(44100);
+	chorus.set_mixfreq(pCB->GetSamplingRate());
 }
 
 void mi::Stop()
