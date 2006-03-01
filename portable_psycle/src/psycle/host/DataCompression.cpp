@@ -9,6 +9,7 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
 #include <project.private.hpp>
+#include "DataCompression.hpp"
 #include "constants.hpp" // erm, just for the byte typedef
 #include <cstring>
 namespace psycle
