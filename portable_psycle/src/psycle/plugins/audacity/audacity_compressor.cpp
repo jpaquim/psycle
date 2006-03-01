@@ -141,7 +141,7 @@ void mi::Init()
 {
 // Initialize your stuff here
 	sl.setSampleRate(pCB->GetSamplingRate());
-	sl.setSampleRate(pCB->GetSamplingRate());
+	sr.setSampleRate(pCB->GetSamplingRate());
 }
 
 void mi::SequencerTick()
