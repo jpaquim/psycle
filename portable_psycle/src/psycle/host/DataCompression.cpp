@@ -26,7 +26,8 @@
 	#include <boost/static_assert.hpp>
 	BOOST_STATIC_ASSERT((sizeof( WORD) == 2));
 	BOOST_STATIC_ASSERT((sizeof(DWORD) == 4));
-	BOOST_STATIC_ASSERT((sizeof(short) == 2));
+	BOOST_STATIC_ASSERT((sizeof(short int) == 2));
+	BOOST_STATIC_ASSERT((sizeof(      int) == 4));
 #else
 	#error "file not portable"
 #endif
