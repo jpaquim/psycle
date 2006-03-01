@@ -36,8 +36,8 @@ namespace psycle
 		class RiffChunkHeader
 		{
 		public:
-			ULONG _id;
-			ULONG _size; // This one should be ULONGINV (it is, at least, in the files I([JAZ]) have tested)
+			ULONG _id; // 4-character string, hence big-endian.
+			ULONG _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
 		};
 
 		/// riff file format.
