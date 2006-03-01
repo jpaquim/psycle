@@ -5,6 +5,7 @@
 
 #include <diversalis/operating_system.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#include <diversalis/compiler.hpp>
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(push)
 	#endif
