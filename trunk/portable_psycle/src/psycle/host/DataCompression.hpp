@@ -1,6 +1,6 @@
 #pragma once
-///\file
-///\brief interface file for beerz77-2 algorithm.
+///\interface beerz77-2 algorithm.
+#include "constants.hpp" // erm, just for the byte typedef
 namespace psycle
 {
 	namespace host

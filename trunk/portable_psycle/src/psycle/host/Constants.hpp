@@ -1,5 +1,7 @@
 #pragma once
 #include "version.hpp"
+#include <universalis/compiler.hpp>
+#include <universalis/compiler/numeric.hpp>
 namespace psycle
 {
 	namespace host
@@ -73,11 +75,11 @@ namespace psycle
 
 		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE
 
-		/// \todo add real detection of type size
-		typedef unsigned char byte;
-		/// \todo add real detection of type size
-		typedef unsigned short word;
-		/// \todo add real detection of type size
-		typedef unsigned long dword;
+		/// \todo
+		typedef UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" ) universalis::compiler::numeric< 8>::unsigned_int byte;
+		/// \todo
+		typedef UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t") universalis::compiler::numeric<16>::unsigned_int word;
+		/// \todo
+		typedef UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") universalis::compiler::numeric<32>::unsigned_int dword;
 	}
 }
