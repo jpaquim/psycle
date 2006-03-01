@@ -176,6 +176,10 @@ namespace psycle
 				{
 					// get file size
 					int FileSize = *(DWORD*)pSourcePos;
+					#include <diversalis/processor.hpp>
+					#if defined DIVERSALIS__PROCESSOR__ENDIAN__BIG
+						#error ":("
+					#endif
 
 					pSourcePos+=4;
 
