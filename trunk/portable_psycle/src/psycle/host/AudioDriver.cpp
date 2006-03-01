@@ -1,5 +1,4 @@
-///\file
-///\brief implementation file for psycle::host::AudioDriver.
+///\implementation psycle::host::AudioDriver
 #include <project.private.hpp>
 #include "AudioDriver.hpp"
 #include "helpers.hpp"
