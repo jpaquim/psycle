@@ -12,6 +12,23 @@
 #include "DataCompression.hpp"
 #include "constants.hpp" // erm, just for the byte typedef
 #include <cstring>
+
+#include <diversalis/operating_system.hpp>
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(push)
+	#endif
+	#include <windows.h> // because of microsoftisms: WORD DWORD
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(pop)
+	#endif
+	#include <boost/static_assert.hpp>
+	BOOST_STATIC_ASSERT((sizeof( WORD) == 2));
+	BOOST_STATIC_ASSERT((sizeof(DWORD) == 4));
+#else
+	#error "file not portable"
+#endif
+
 namespace psycle
 {
 	namespace host
