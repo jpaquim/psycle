@@ -2,6 +2,11 @@
 ///\brief project-wide compiler, operating system, and processor specific tweaks.
 ///\meta generic
 #pragma once
+#include <diversalis/compiler.hpp>
+#if !defined DIVERSALIS__COMPILER__RESOURCE
+	#include <diversalis/operating_system.hpp>
+	#include <diversalis/processor.hpp>
+#endif
 
 
 
@@ -280,10 +285,6 @@
 
 
 
-#include <diversalis/compiler.hpp>
-
-
-
 // RC_INVOKED is defined by resource compilers (only relevant on microsoft's operating system).
 #if defined RC_INVOKED
 	//#define COMPILER
@@ -388,9 +389,6 @@
 
 
 
-#include <diversalis/operating_system.hpp>
-
-
 #if defined __linux__
 	#define OPERATING_SYSTEM
 	#define OPERATING_SYSTEM__LINUX
@@ -467,10 +465,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // processors
-
-
-
-#include <diversalis/processor.hpp>
 
 
 
@@ -705,7 +699,7 @@
 	// cast
 	////////
 	#pragma warning(disable:4800) // forcing value to bool 'true' or 'false' (performance warning)
-	//#pragma warning(disable:4244) // conversion from 'numeric type A' to 'numeric type B', possible loss of data
+	#pragma warning(disable:4244) // conversion from 'numeric type A' to 'numeric type B', possible loss of data
 
 	//////////
 	// inline
