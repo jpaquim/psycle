@@ -280,6 +280,10 @@
 
 
 
+#include <diversalis/compiler.hpp>
+
+
+
 // RC_INVOKED is defined by resource compilers (only relevant on microsoft's operating system).
 #if defined RC_INVOKED
 	//#define COMPILER
@@ -384,6 +388,9 @@
 
 
 
+#include <diversalis/operating_system.hpp>
+
+
 #if defined __linux__
 	#define OPERATING_SYSTEM
 	#define OPERATING_SYSTEM__LINUX
@@ -460,6 +467,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // processors
+
+
+
+#include <diversalis/processor.hpp>
 
 
 
