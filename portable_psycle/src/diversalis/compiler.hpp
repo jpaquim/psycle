@@ -204,7 +204,7 @@
 			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 7 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 7 && DIVERSALIS__COMPILER__VERSION__MINOR < 1)
 				#error "Compiler is too old ... better giving up now."
 			#elif DIVERSALIS__COMPILER__VERSION__MAJOR < 8
-				#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZED(__LINE__)") : warning: compiler is too old ... some problems are to be expected.")
+				//#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZED(__LINE__)") : warning: compiler is too old ... some problems are to be expected.")
 			#endif
 			#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
 		#endif
