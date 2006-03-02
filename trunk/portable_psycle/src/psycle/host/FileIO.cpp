@@ -22,22 +22,20 @@ namespace psycle
 {
 	namespace host
 	{
-		ULONG RiffFile::FourCC(char const *psName)
+		unsigned __int32 RiffFile::FourCC(char const * null_terminated_string)
 		{
-			long retbuf = 0x20202020; // four spaces (padding)
-			char *ps = ((char *)&retbuf);
-			// Remember, this is Intel format!
-			// The first character goes in the LSB
-			for(int i(0); i < 4 && psName[i]; ++i) *ps++ = psName[i];
-			return retbuf;
+			unsigned __int32 result(0x20202020); // four spaces (padding)
+			char * chars(reinterpret_cast<char *>(&result));
+			for(int i(0) ; i < 4 && null_terminated_string[i] ; ++i) *chars++ = null_terminated_string[i];
+			return result;
 		}
 
-		bool RiffFile::Open(std::string psFileName)
+		bool RiffFile::Open(std::string const & filename)
 		{
+			szName = filename;
 			DWORD bytesRead;
-			szName = psFileName;
 			_modified = false;
-			_handle = ::CreateFile(psFileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+			_handle = ::CreateFile(filename.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 			if(_handle == INVALID_HANDLE_VALUE) return false;
 			if(!ReadFile(_handle, &_header, sizeof(_header), &bytesRead, 0))
 			{
@@ -47,12 +45,12 @@ namespace psycle
 			return true;
 		}
 
-		bool RiffFile::Create(std::string psFileName, bool overwrite)
+		bool RiffFile::Create(std::string const & filename, bool const & overwrite)
 		{
+			szName = filename;
 			DWORD bytesWritten;
-			szName = psFileName;
 			_modified = false;
-			_handle = ::CreateFile(psFileName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, overwrite ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
+			_handle = ::CreateFile(filename.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, overwrite ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
 			if(_handle == INVALID_HANDLE_VALUE) return false;
 			_header._id = FourCC("RIFF");
 			_header._size = 0;
@@ -64,7 +62,7 @@ namespace psycle
 			return true;
 		}
 
-		BOOL RiffFile::Close()
+		bool RiffFile::Close()
 		{
 			DWORD bytesWritten;
 			if (_modified)
@@ -78,113 +76,112 @@ namespace psycle
 			return b;
 		}
 
-		bool RiffFile::Read(void* pData, ULONG numBytes)
+		bool RiffFile::Read(void * data, std::size_t const & bytes)
 		{
-			DWORD bytesRead;
-			if(!ReadFile(_handle, pData, numBytes, &bytesRead, 0)) return false;
-			return (bytesRead == numBytes);
+			DWORD bytes_read;
+			if(!ReadFile(_handle, data, bytes, &bytes_read, 0)) return false;
+			return bytes_read == bytes;
 		}
 
-		bool RiffFile::Write(const void * const pData, ULONG numBytes)
+		bool RiffFile::Write(void const * data, std::size_t const & bytes)
 		{
-			DWORD bytesWritten;
-			if(!WriteFile(_handle, pData, numBytes, &bytesWritten, 0)) return false;
+			DWORD bytes_written;
+			if(!WriteFile(_handle, data, bytes, &bytes_written, 0)) return false;
 			_modified = true;
-			_header._size += bytesWritten;
-			return (bytesWritten == numBytes);
+			_header._size += bytes_written;
+			return bytes_written == bytes;
 		}
 
-		bool RiffFile::Expect(void* pData, ULONG numBytes)
+		bool RiffFile::Expect(void * data, std::size_t const & bytes)
 		{
-			DWORD bytesRead;
-			unsigned char c;
-			while(numBytes-- != 0)
+			char * chars(reinterpret_cast<char*>(data));
+			std::size_t count(bytes);
+			while(count--)
 			{
-				if(!ReadFile(_handle, &c, sizeof(c), &bytesRead, 0)) return false;
-				if(c != *((char*)pData)) return false;
-				pData = (char*)pData + 1;
+				unsigned char c;
+				DWORD bytes_read;
+				if(!ReadFile(_handle, &c, sizeof(c), &bytes_read, 0)) return false;
+				if(c != *chars) return false;
+				++chars;
 			}
 			return true;
 		}
 
-		long RiffFile::Seek(long offset)
+		std::ptrdiff_t RiffFile::Seek(std::ptrdiff_t const & bytes)
 		{
-			return SetFilePointer(_handle, offset, 0, FILE_BEGIN);
+			return SetFilePointer(_handle, bytes, 0, FILE_BEGIN);
 		}
 
-		long RiffFile::Skip(long numBytes)
+		std::ptrdiff_t RiffFile::Skip(std::ptrdiff_t const & bytes)
 		{
-			return SetFilePointer(_handle, numBytes, 0, FILE_CURRENT); 
+			return SetFilePointer(_handle, bytes, 0, FILE_CURRENT); 
 		}
 
 		bool RiffFile::Eof()
 		{
-			return false;
+			return GetPos() < FileSize();
 		}
 
-		long RiffFile::GetPos()
+		std::size_t RiffFile::GetPos()
 		{
 			return SetFilePointer(_handle, 0, 0, FILE_CURRENT);
 		}
 
-		long RiffFile::FileSize()
+		std::size_t RiffFile::FileSize()
 		{
-			const long init = GetPos();
-			const long end = SetFilePointer(_handle,0,0,FILE_END);
-			SetFilePointer(_handle,init,0,FILE_BEGIN);
+			std::size_t const save(GetPos());
+			std::size_t const end(SetFilePointer(_handle,0,0,FILE_END));
+			Seek(save);
 			return end;
 		}
 
-		bool RiffFile::ReadString(std::string &result)
+		bool RiffFile::ReadString(std::string & result)
 		{
 			result="";
-			char c;
-			while(true)
+			for(;;)
 			{
-				if (Read(&c, sizeof(c)))
-				{
-					if(c == 0) {
-						return true;
-					}
-					result+=c;
-				}
-				else return false;
+				char c;
+				if(!Read(&c, sizeof c)) return false;
+				if(!c) return true;
+				result += c;
 			}
 		}
 
-		bool RiffFile::ReadString(char* pData, ULONG maxBytes)
+		bool RiffFile::ReadString(char * data, std::size_t const & max_length)
 		{
-			if(maxBytes > 0)
+			if(max_length > 0)
 			{
-				memset(pData,0,maxBytes);
-
-				char c;
-				for(ULONG index = 0; index < maxBytes; index++)
+				std::memset(data, 0, max_length);
+				for(std::size_t index(0) ; index < max_length ; ++index)
 				{
-					if (Read(&c, sizeof(c)))
+					char c;
+					if(!Read(&c, sizeof c)) return false;
 					{
-						pData[index] = c;
-						if(c == 0) return true;
+						data[index] = c;
+						if(!c) return true;
 					}
-					else return false;
 				}
-				do
 				{
-					if(!Read(&c, sizeof(c))) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
-				} while(c != 0);
+					char c;
+					do
+					{
+						if(!Read(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
+					} while(c);
+				}
 				return true;
 			}
 			return false;
 		}
 
-		const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const ULONG maxLength)
+		TCHAR * RiffFile::ReadStringA2T(TCHAR * data, std::size_t const & max_length)
 		{
-			char* _buffer = new char[maxLength];
-			ReadString(_buffer,maxLength);
-			_tcscpy(pData,CA2T(_buffer));
-			delete [] _buffer;
-			return pData;
+			char * buffer = new char[max_length];
+			ReadString(buffer, max_length);
+			_tcscpy(data, CA2T(buffer));
+			delete [] buffer;
+			return data;
 		}
+
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,99 +191,97 @@ namespace psycle
 
 
 
-		bool OldPsyFile::Open(std::string psFileName)
+		bool OldPsyFile::Open(std::string const & filename)
 		{
-			szName = psFileName;
-			_file = fopen(psFileName.c_str(), "rb");
-			return (_file != 0);
+			szName = filename;
+			return _file = std::fopen(filename.c_str(), "rb");
 		}
 
-		bool OldPsyFile::Create(std::string psFileName, bool overwrite)
+		bool OldPsyFile::Create(std::string const & filename, bool const & overwrite)
 		{
-			szName = psFileName;
-			_file = fopen(psFileName.c_str(), "rb");
-			if(_file != 0)
+			szName = filename;
+			_file = std::fopen(filename.c_str(), "rb");
+			if(_file)
 			{
-				fclose(_file);
+				std::fclose(_file);
 				if(!overwrite) return false;
 			}
-			_file = fopen(psFileName.c_str(), "wb");
-			return (_file != 0);
+			return _file = std::fopen(filename.c_str(), "wb");
 		}
 
-		BOOL OldPsyFile::Close()
+		bool OldPsyFile::Close()
 		{
-			if( _file != 0)
+			if(!_file)
 			{
-				fflush(_file);
-				BOOL b = !ferror(_file);
-				fclose(_file);
+				std::fflush(_file);
+				bool const result(Error());
+				std::fclose(_file);
 				_file = 0;
-				return b;
+				return result;
 			}
 			return true;
 		}
 
-		BOOL OldPsyFile::Error()
+		bool OldPsyFile::Error()
 		{
-			BOOL b = !ferror(_file);
-			return b;
+			return !/*std::*/ferror(_file);
 		}
 
-		bool OldPsyFile::Read(void* pData, ULONG numBytes)
+		bool OldPsyFile::Read(void * data, std::size_t const & bytes)
 		{
-			DWORD bytesRead = fread(pData, sizeof(char), numBytes, _file);
-			return (bytesRead == numBytes);
+			return std::fread(data, sizeof(char), bytes, _file) == bytes;
 		}
 
-		bool OldPsyFile::Write(const void* pData, ULONG numBytes)
+		bool OldPsyFile::Write(void const * data, std::size_t const & bytes)
 		{
-			fflush(_file);
-			DWORD bytesWritten = fwrite(pData, sizeof(char), numBytes, _file);
-			return (bytesWritten == numBytes);
+			///\todo why flushing?
+			std::fflush(_file);
+			return std::fwrite(data, sizeof(char), bytes, _file) == bytes;
 		}
 
-		bool OldPsyFile::Expect(void* pData, ULONG numBytes)
+		bool OldPsyFile::Expect(void * data, std::size_t const & bytes)
 		{
-			UCHAR c;
-			while (numBytes-- != 0)
+			char * chars(reinterpret_cast<char*>(data));
+			std::size_t count(bytes);
+			while(count--)
 			{
-				if(fread(&c, sizeof(c), 1, _file) != 1) return false;
-				if(c != *((char*)pData)) return false;
-				pData = (char*)pData + 1;
+				unsigned char c;
+				if(std::fread(&c, sizeof c, 1, _file) != 1) return false;
+				if(c != *chars) return false;
+				++chars;
 			}
 			return true;
 		}
 
-		long OldPsyFile::Seek(long offset)
+		std::ptrdiff_t OldPsyFile::Seek(std::ptrdiff_t const & bytes)
 		{
-			if(fseek(_file, offset, SEEK_SET) != 0) return -1;
-			return ftell(_file);
+			if(std::fseek(_file, bytes, SEEK_SET)) return -1;
+			return std::ftell(_file);
 		}
 
-		long OldPsyFile::Skip(long numBytes)
+		std::ptrdiff_t OldPsyFile::Skip(std::ptrdiff_t const & bytes)
 		{
-			if(fseek(_file, numBytes, SEEK_CUR) != 0) return -1;
-			return ftell(_file);
+			if(std::fseek(_file, bytes, SEEK_CUR)) return -1;
+			return std::ftell(_file);
 		}
 
 		bool OldPsyFile::Eof()
 		{
-			return static_cast<bool>(feof(_file));
+			return static_cast<bool>(/*std::*/feof(_file));
 		}
 
-		long OldPsyFile::FileSize()
+		std::size_t OldPsyFile::FileSize()
 		{
-			int init(ftell(_file));
-			fseek(_file, 0, SEEK_END);
-			int end(ftell(_file));
-			fseek(_file, init, SEEK_SET);
+			std::size_t const save(std::ftell(_file));
+			std::fseek(_file, 0, SEEK_END);
+			std::size_t const end(std::ftell(_file));
+			std::fseek(_file, save, SEEK_SET);
 			return end;
 		}
 
-		long OldPsyFile::GetPos()
+		std::size_t OldPsyFile::GetPos()
 		{
-			return ftell(_file);
+			return std::ftell(_file);
 		}
 	}
 }

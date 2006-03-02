@@ -656,7 +656,7 @@ namespace psycle
 			m_FilterEnvelope.RecalcDeviation();
 		}
 
-		void XMSampler::Voice::NoteOn(const compiler::uint8 note,const compiler::sint16 playvol,bool reset)
+		void XMSampler::Voice::NoteOn(const universalis::compiler::numeric<8>::unsigned_int note,const universalis::compiler::numeric<16>::signed_int playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
 			if ( pSampler()->SampleData(wavelayer).WaveLength() == 0 ) return;
@@ -684,7 +684,7 @@ namespace psycle
 			IsPlaying(true);
 		}
 
-		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol,bool reset)
+		void XMSampler::Voice::ResetVolAndPan(universalis::compiler::numeric<16>::signed_int playvol,bool reset)
 		{
 			float fpan=0.5f;
 			if ( reset)

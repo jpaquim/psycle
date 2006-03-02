@@ -2,17 +2,12 @@
 #include <iostream>
 #include <boost/thread/mutex.hpp>
 #include "exception.hpp"
-#if defined OPERATING_SYSTEM__LOGGER
-	#include LIBRARY__EXPORT
-#else
-	#include LIBRARY__IMPORT
-#endif
 ///\file
 ///\brief logger.
 namespace operating_system
 {
 	/// logger.
-	class LIBRARY logger
+	class logger
 	{
 	public:
 		static logger & default_logger() throw() { return default_logger_; }
@@ -42,7 +37,7 @@ namespace operating_system
 		boost::mutex mutex_;
 	};
 
-	class LIBRARY console
+	class console
 	{
 	public:
 		static void open() throw(exception);

@@ -40,8 +40,8 @@
 			// [bohan] so, if you experience any weird bug,
 			// [bohan] first thing to try is to disable this /GL option in the command line to cl, or
 			// [bohan] in the project settings, it's hidden under General Properties / Whole Program Optimization.
-		#pragma inline_depth(255)
-		#pragma inline_recursion(on)
-		#define inline __forceinline
+		//#pragma inline_depth(255)
+		//#pragma inline_recursion(on)
+		//#define inline __forceinline
 	#endif
 #endif

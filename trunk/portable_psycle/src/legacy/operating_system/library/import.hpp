@@ -3,7 +3,7 @@
 #undef LIBRARY
 #if defined OPERATING_SYSTEM__MICROSOFT && !defined COMPILER__GNU // gcc handles dll transparently :-)
 	// the microsoft dll horror show system begins...
-#	define LIBRARY IMPORT
+#	define LIBRARY __declspec(dllimport)
 #else
 	// everything is nice and simple
 #	define LIBRARY

@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::RiffFile.
 #pragma once
+#include <universalis/compiler/numeric.hpp>
 
 #include <diversalis/operating_system.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -8,14 +9,11 @@
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(push)
 	#endif
-	#include <windows.h> // because of microsoftisms: BOOL UINT ULONG
+	#include <windows.h> // because of microsoftisms: HANDLE
 	#include <tchar.h> // because of microsoftisms: TCHAR
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(pop)
 	#endif
-	#include <boost/static_assert.hpp>
-	BOOST_STATIC_ASSERT((sizeof(UINT ) == 4));
-	BOOST_STATIC_ASSERT((sizeof(ULONG) == 4));
 #else
 	#error "this sorry file is not portable"
 #endif
@@ -37,8 +35,8 @@ namespace psycle
 		class RiffChunkHeader
 		{
 		public:
-			ULONG _id; // 4-character string, hence big-endian.
-			ULONG _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
+			unsigned __int32 _id; // 4-character string, hence big-endian.
+			unsigned __int32 _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
 		};
 
 		/// riff file format.
@@ -46,91 +44,94 @@ namespace psycle
 		/// that use the Motorola integer byte-ordering format rather than the Intel format.
 		/// A RIFX file is the same as a RIFF file, except that the first four bytes are "RIFX" instead of "RIFF",
 		/// and integer byte ordering is represented in Motorola format.
-		/// <bohan> haha... now the problem is...
-		/// <bohan> " the first four bytes are "RIFX" instead of "RIFF" ",
-		/// <bohan> so, on x86 cpus, should we read "XFIR"?
 		class RiffFile
 		{
 		public:
 			RiffChunkHeader _header;
-			virtual bool Open(std::string psFileName);
-			virtual bool Create(std::string psFileName, bool overwrite);
-			virtual BOOL Close(void);
 
-			virtual bool Read(void* pData, ULONG numBytes);
-			virtual void Read(int &value){int _t;Read(&_t,sizeof(int));value =  _t;};
-			virtual void Read(char &value){char _t;Read(&_t,sizeof(char));value =  _t;};
-			virtual void Read(unsigned char &value){unsigned char _t;Read(&_t,sizeof(unsigned char));value =  _t;};
-			virtual void Read(short &value){int _t;Read(&_t,sizeof(short));value =  _t;};
-			virtual void Read(unsigned short &value){int _t;Read(&_t,sizeof(unsigned short));value =  _t;};
-			virtual void Read(bool &value){bool _t;Read(&_t,sizeof(bool));value =  _t;};
-			virtual void Read(UINT &value){UINT _t;Read(&_t,sizeof(UINT));value =  _t;};
-			virtual void Read(float &value){float _t;Read(&_t,sizeof(float));value =  _t;};
-			virtual void Read(double &value){double _t;Read(&_t,sizeof(double));value =  _t;};
+			virtual bool Open  (std::string const & filename);
+			virtual bool Create(std::string const & filename, bool const & overwrite);
+			virtual bool Close();
+			virtual bool Eof();
+			virtual std::size_t FileSize();
+			virtual std::size_t GetPos();
+			virtual std::ptrdiff_t Seek(std::ptrdiff_t const & bytes);
+			virtual std::ptrdiff_t Skip(std::ptrdiff_t const & bytes);
+			///\todo wtf
+			virtual FILE * GetFile() { return 0; };
 
-			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t;};
-			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
-			virtual const unsigned char ReadUChar(){ unsigned char _t;Read(&_t,sizeof(unsigned char));return _t;};
-			virtual const short ReadShort(){ short _t;Read(&_t,sizeof(short));return _t;};
-			virtual const unsigned short ReadUShort(){unsigned short _t;Read(&_t,sizeof(unsigned short));return _t;};
-			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
-			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};
-			virtual const float ReadFloat(){float _t;Read(&_t,sizeof(float));return _t;};
-			virtual const double ReadDouble(){double _t;Read(&_t,sizeof(double));return _t;};
+			bool virtual Write (void const *, std::size_t const &);
+			bool virtual Read  (void       *, std::size_t const &);
+			bool virtual Expect(void       *, std::size_t const &);
 
-			virtual bool Write(const void * pData, ULONG numBytes);
-			virtual void Write(const int value){Write((void *)(&value),sizeof(int));};
-			virtual void Write(const char value){Write((void *)(&value),sizeof(char));};
-			virtual void Write(const unsigned char value){Write((void *)(&value),sizeof(unsigned char));};
-			virtual void Write(const short value){Write((void *)(&value),sizeof(short));};
-			virtual void Write(const unsigned short value){Write((void *)(&value),sizeof(unsigned short));};
-			virtual void Write(const bool value){Write((void *)(&value),sizeof(bool));};
-			virtual void Write(const UINT value){Write((void *)(&value),sizeof(UINT));};
-			virtual void Write(const float value){Write((void *)(&value),sizeof(float));};
-			virtual void Write(const double value){Write((void *)(&value),sizeof(double));};
+			template<typename X>
+			void inline Write(X const & x) { Write(&x, sizeof x); }
+			template<typename X>
+			void inline  Read(X       & x) {  Read(&x, sizeof x); }
 
-			virtual bool Expect(void* pData, ULONG numBytes);
-			virtual long Seek(long offset);
-			virtual long Skip(long numBytes);
-			virtual bool Eof(void);
-			virtual long FileSize(void);
-			virtual bool ReadString(std::string &string);
-			virtual bool ReadString(char* pData, ULONG maxBytes);
+			int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); Read(&tmp, bytes); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			bool               virtual inline ReadBool()   {               bool tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			unsigned      char virtual inline ReadUChar()  { unsigned      char tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			  signed      char virtual inline ReadChar()   {   signed      char tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			unsigned short int virtual inline ReadUShort() { unsigned short int tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			  signed short int virtual inline ReadShort()  {   signed short int tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			UINT               virtual inline ReadUINT()   {               UINT tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			float              virtual inline ReadFloat()  {              float tmp; Read(tmp); return tmp; }
+
+			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+			double             virtual inline ReadDouble() {             double tmp; Read(tmp); return tmp; }
+
+			bool               virtual ReadString(std::string &);
+			bool               virtual ReadString(char *, std::size_t const & max_length);
+
 			///\todo TCHAR may be char or wchar_t depending on "build settings"
-			const TCHAR * ReadStringA2T(TCHAR* pData, const ULONG maxLength);
-			virtual long GetPos(void);
-			virtual FILE* GetFile(void) { return NULL; };
-			static ULONG FourCC(char const *psName);
+			UNIVERSALIS__COMPILER__DEPRECATED("not portable.. either use unicode explicitely or glib's utf8")
+			TCHAR * ReadStringA2T(TCHAR *, std::size_t const & max_length_in_chars);
+
+			/// pad the string with spaces
+			UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")
+			static unsigned __int32 FourCC(char const * null_terminated_string);
+
 			std::string szName;
 		protected:
 			HANDLE _handle;
 			bool _modified;
 		};
 
+		///\todo this class is a reimplementation of the base class
+		///\todo but with the standard c library instead of mswindows api.
+		///\todo we should simply use it instead of the base class, and get rid of the inheritance and virtual functions
 		class OldPsyFile : public RiffFile
 		{
 		public:
-			virtual bool Open(std::string psFileName);
-			virtual bool Create(std::string psFileName, bool overwrite);
-			virtual BOOL Close(void);
-			virtual BOOL Error();
-			virtual bool Read(void* pData, ULONG numBytes);
+			virtual bool Open  (std::string const &);
+			virtual bool Create(std::string const &, bool const & overwrite);
+			virtual bool Close(void);
+			virtual bool Error();
+			virtual bool Eof();
+			virtual std::size_t FileSize();
+			virtual std::size_t GetPos();
+			virtual std::ptrdiff_t Seek(std::ptrdiff_t const & bytes);
+			virtual std::ptrdiff_t Skip(std::ptrdiff_t const & bytes);
+			virtual FILE * GetFile() { return _file; };
 
-			///\todo replace std::pow with bit-shifting.
-			virtual const int ReadInt(int numbytes=sizeof(int)){int _t;Read(&_t,numbytes);return _t&int(std::pow(256.,numbytes)-1);};
-			virtual const char ReadChar(){char _t;Read(&_t,sizeof(char));return _t;};
-			virtual const bool ReadBool(){bool _t;Read(&_t,sizeof(bool));return _t;};
-			virtual const UINT ReadUINT(){UINT _t;Read(&_t,sizeof(UINT));return _t;};
-			virtual const float ReadFloat(){float _t;Read(&_t,sizeof(float));return _t;};
-
-			virtual bool Write(const void* pData, ULONG numBytes);
-			virtual bool Expect(void* pData, ULONG numBytes);
-			virtual long Seek(long offset);
-			virtual long Skip(long numBytes);
-			virtual bool Eof(void);
-			virtual long FileSize(void);
-			virtual long GetPos(void);
-			virtual FILE* GetFile(void) { return _file; };
+			virtual bool Write (void const *, std::size_t const &);
+			virtual bool Read  (void       *, std::size_t const &);
+			virtual bool Expect(void       *, std::size_t const &);
 		protected:
 			FILE* _file;
 		};

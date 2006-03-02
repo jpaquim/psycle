@@ -25,7 +25,7 @@ namespace psycle
 
 		void XMInstrument::WaveData::Load(RiffFile* riffFile)
 		{	
-			compiler::uint32 size1,size2;
+			universalis::compiler::numeric<32>::unsigned_int size1,size2;
 			
 			//\todo: add version
 			//riffFile->Read(version);
@@ -468,7 +468,7 @@ namespace psycle
 			riffFile->Read(m_InitPan);
 			riffFile->Read(m_PanEnabled);
 			riffFile->Read(m_NoteModPanCenter);
-			riffFile->Read(&m_NoteModPanSep,sizeof(compiler::sint8));
+			riffFile->Read(&m_NoteModPanSep,sizeof(universalis::compiler::numeric<8>::signed_int));
 
 			riffFile->Read(m_FilterCutoff);
 			riffFile->Read(m_FilterResonance);

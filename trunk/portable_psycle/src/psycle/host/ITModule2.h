@@ -1,6 +1,7 @@
 #pragma once
 #include "SongStructs.hpp"
 #include "FileIO.hpp"
+#include <universalis/compiler/numeric.hpp>
 
 class Song;
 
@@ -243,7 +244,7 @@ Ex/Fx.
 		typedef std::pair<char,char> ITNotePair;
 		typedef std::pair<char,char> ITNodePair1x;
 //		typedef std::pair<short,char> ITNodePair;
-		class ITNodePair { public: compiler::sint8 first; compiler::uint8 secondlo; compiler::uint8 secondhi; };
+		class ITNodePair { public: universalis::compiler::numeric<8>::signed_int first; universalis::compiler::numeric<8>::unsigned_int secondlo; universalis::compiler::numeric<8>::unsigned_int secondhi; };
 
 		typedef struct {
 			unsigned long tag;

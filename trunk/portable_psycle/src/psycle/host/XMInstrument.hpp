@@ -2,6 +2,7 @@
 #include "Constants.hpp"
 #include "FileIO.hpp"
 #include "Filter.hpp"
+#include <universalis/compiler/numeric.hpp>
 
 namespace psycle
 {
@@ -148,88 +149,88 @@ namespace psycle
 			const std::string WaveName(){ return m_WaveName;};
 			void WaveName(std::string newname){ m_WaveName = newname;};
 
-			const compiler::uint32 WaveLength(){ return m_WaveLength;};
-			void WaveLength (const compiler::uint32 value){m_WaveLength = value;};
+			const universalis::compiler::numeric<32>::unsigned_int WaveLength(){ return m_WaveLength;};
+			void WaveLength (const universalis::compiler::numeric<32>::unsigned_int value){m_WaveLength = value;};
 
 			const float WaveGlobVolume()const{ return m_WaveGlobVolume;};
 			void WaveGlobVolume(const float value){m_WaveGlobVolume = value;};
-			const compiler::uint16 WaveVolume(){ return m_WaveDefVolume;};
-			void WaveVolume(const compiler::uint16 value){m_WaveDefVolume = value;};
+			const universalis::compiler::numeric<16>::unsigned_int WaveVolume(){ return m_WaveDefVolume;};
+			void WaveVolume(const universalis::compiler::numeric<16>::unsigned_int value){m_WaveDefVolume = value;};
 
 			const float PanFactor(){ return m_PanFactor;};// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 			void PanFactor(const float value){m_PanFactor = value;};
 			bool PanEnabled(){ return m_PanEnabled;};
 			void PanEnabled(bool pan){ m_PanEnabled=pan;};
 
-			const compiler::uint32 WaveLoopStart(){ return m_WaveLoopStart;};
-			void WaveLoopStart(const compiler::uint32 value){m_WaveLoopStart = value;};
-			const compiler::uint32 WaveLoopEnd(){ return m_WaveLoopEnd;};
-			void WaveLoopEnd(const compiler::uint32 value){m_WaveLoopEnd = value;};
+			const universalis::compiler::numeric<32>::unsigned_int WaveLoopStart(){ return m_WaveLoopStart;};
+			void WaveLoopStart(const universalis::compiler::numeric<32>::unsigned_int value){m_WaveLoopStart = value;};
+			const universalis::compiler::numeric<32>::unsigned_int WaveLoopEnd(){ return m_WaveLoopEnd;};
+			void WaveLoopEnd(const universalis::compiler::numeric<32>::unsigned_int value){m_WaveLoopEnd = value;};
 			const LoopType WaveLoopType(){ return m_WaveLoopType;};
 			void WaveLoopType(const LoopType value){ m_WaveLoopType = value;};
 
-			const compiler::uint32 WaveSusLoopStart(){ return m_WaveSusLoopStart;};
-			void WaveSusLoopStart(const compiler::uint32 value){m_WaveSusLoopStart = value;};
-			const compiler::uint32 WaveSusLoopEnd(){ return m_WaveSusLoopEnd;};
-			void WaveSusLoopEnd(const compiler::uint32 value){m_WaveSusLoopEnd = value;};
+			const universalis::compiler::numeric<32>::unsigned_int WaveSusLoopStart(){ return m_WaveSusLoopStart;};
+			void WaveSusLoopStart(const universalis::compiler::numeric<32>::unsigned_int value){m_WaveSusLoopStart = value;};
+			const universalis::compiler::numeric<32>::unsigned_int WaveSusLoopEnd(){ return m_WaveSusLoopEnd;};
+			void WaveSusLoopEnd(const universalis::compiler::numeric<32>::unsigned_int value){m_WaveSusLoopEnd = value;};
 			const LoopType WaveSusLoopType(){ return m_WaveSusLoopType;};
 			void WaveSusLoopType(const LoopType value){ m_WaveSusLoopType = value;};
 
-			const compiler::sint16 WaveTune(){return m_WaveTune;};
-			void WaveTune(const compiler::sint16 value){m_WaveTune = value;};
-			const compiler::sint16 WaveFineTune(){return m_WaveFineTune;};
-			void WaveFineTune(const compiler::sint16 value){m_WaveFineTune = value;};
-			const compiler::uint32 WaveSampleRate(){return m_WaveSampleRate;};
-			void WaveSampleRate(const compiler::uint32 value){m_WaveSampleRate = value;};
+			const universalis::compiler::numeric<16>::signed_int WaveTune(){return m_WaveTune;};
+			void WaveTune(const universalis::compiler::numeric<16>::signed_int value){m_WaveTune = value;};
+			const universalis::compiler::numeric<16>::signed_int WaveFineTune(){return m_WaveFineTune;};
+			void WaveFineTune(const universalis::compiler::numeric<16>::signed_int value){m_WaveFineTune = value;};
+			const universalis::compiler::numeric<32>::unsigned_int WaveSampleRate(){return m_WaveSampleRate;};
+			void WaveSampleRate(const universalis::compiler::numeric<32>::unsigned_int value){m_WaveSampleRate = value;};
 
 			const bool IsWaveStereo(){ return m_WaveStereo;};
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
 
-			const compiler::uint8 VibratoType(){return m_VibratoType;};
-			const compiler::uint8 VibratoSpeed(){return m_VibratoSpeed;};
-			const compiler::uint8 VibratoDepth(){return m_VibratoDepth;};
-			const compiler::uint8 VibratoAttack(){return m_VibratoAttack;};
+			const universalis::compiler::numeric<8>::unsigned_int VibratoType(){return m_VibratoType;};
+			const universalis::compiler::numeric<8>::unsigned_int VibratoSpeed(){return m_VibratoSpeed;};
+			const universalis::compiler::numeric<8>::unsigned_int VibratoDepth(){return m_VibratoDepth;};
+			const universalis::compiler::numeric<8>::unsigned_int VibratoAttack(){return m_VibratoAttack;};
 
-			void VibratoType(const compiler::uint8 value){m_VibratoType = value ;};
-			void VibratoSpeed(const compiler::uint8 value){m_VibratoSpeed = value ;};
-			void VibratoDepth(const compiler::uint8 value){m_VibratoDepth = value ;};
-			void VibratoAttack(const compiler::uint8 value){m_VibratoAttack = value ;};
+			void VibratoType(const universalis::compiler::numeric<8>::unsigned_int value){m_VibratoType = value ;};
+			void VibratoSpeed(const universalis::compiler::numeric<8>::unsigned_int value){m_VibratoSpeed = value ;};
+			void VibratoDepth(const universalis::compiler::numeric<8>::unsigned_int value){m_VibratoDepth = value ;};
+			void VibratoAttack(const universalis::compiler::numeric<8>::unsigned_int value){m_VibratoAttack = value ;};
 
 			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoSpeed;};
 
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
 			
-			signed short WaveDataL(const compiler::uint32 index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataL + index));};
-			signed short WaveDataR(const compiler::uint32 index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataR + index));};
+			signed short WaveDataL(const universalis::compiler::numeric<32>::unsigned_int index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataL + index));};
+			signed short WaveDataR(const universalis::compiler::numeric<32>::unsigned_int index) const { ASSERT(index<m_WaveLength); return (*(m_pWaveDataR + index));};
 			
-			void WaveDataL(const compiler::uint32 index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataL + index) = value;};
-			void WaveDataR(const compiler::uint32 index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataR + index) = value;};
+			void WaveDataL(const universalis::compiler::numeric<32>::unsigned_int index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataL + index) = value;};
+			void WaveDataR(const universalis::compiler::numeric<32>::unsigned_int index,const signed short value){ ASSERT(index<m_WaveLength); *(m_pWaveDataR + index) = value;};
 
 		private:
 
 			std::string m_WaveName;
-			compiler::uint32 m_WaveLength;		// Wave length in Samples.
+			universalis::compiler::numeric<32>::unsigned_int m_WaveLength;		// Wave length in Samples.
 			float m_WaveGlobVolume;
-			compiler::uint16 m_WaveDefVolume;
-			compiler::uint32 m_WaveLoopStart;
-			compiler::uint32 m_WaveLoopEnd;
+			universalis::compiler::numeric<16>::unsigned_int m_WaveDefVolume;
+			universalis::compiler::numeric<32>::unsigned_int m_WaveLoopStart;
+			universalis::compiler::numeric<32>::unsigned_int m_WaveLoopEnd;
 			LoopType m_WaveLoopType;
-			compiler::uint32 m_WaveSusLoopStart;
-			compiler::uint32 m_WaveSusLoopEnd;
+			universalis::compiler::numeric<32>::unsigned_int m_WaveSusLoopStart;
+			universalis::compiler::numeric<32>::unsigned_int m_WaveSusLoopEnd;
 			LoopType m_WaveSusLoopType;
-			compiler::uint32 m_WaveSampleRate;    // SampleRate of the sample. \\todo . We will have to rework NotetoPeriod,PeriodtoNote and PeriodtoSpeed.
-			compiler::sint16 m_WaveTune;
-			compiler::sint16 m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
+			universalis::compiler::numeric<32>::unsigned_int m_WaveSampleRate;    // SampleRate of the sample. \\todo . We will have to rework NotetoPeriod,PeriodtoNote and PeriodtoSpeed.
+			universalis::compiler::numeric<16>::signed_int m_WaveTune;
+			universalis::compiler::numeric<16>::signed_int m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			bool m_WaveStereo;
 			signed short *m_pWaveDataL;
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
 			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
-			compiler::uint8 m_VibratoAttack;
-			compiler::uint8 m_VibratoSpeed;
-			compiler::uint8 m_VibratoDepth;
-			compiler::uint8 m_VibratoType;
+			universalis::compiler::numeric<8>::unsigned_int m_VibratoAttack;
+			universalis::compiler::numeric<8>::unsigned_int m_VibratoSpeed;
+			universalis::compiler::numeric<8>::unsigned_int m_VibratoDepth;
+			universalis::compiler::numeric<8>::unsigned_int m_VibratoType;
 
 		};// WaveData()
 
@@ -459,8 +460,8 @@ namespace psycle
 		std::string& Name(){return m_Name;};
 		void Name(const std::string& name) { m_Name= name; }
 
-		const compiler::uint16 Lines(){ return m_Lines;};
-		void Lines(const compiler::uint16 value){ m_Lines = value;};
+		const universalis::compiler::numeric<16>::unsigned_int Lines(){ return m_Lines;};
+		void Lines(const universalis::compiler::numeric<16>::unsigned_int value){ m_Lines = value;};
 
 		Envelope* const AmpEnvelope(){ return &m_AmpEnvelope;};
 		Envelope* const PanEnvelope(){return &m_PanEnvelope;};
@@ -476,17 +477,17 @@ namespace psycle
 		void Pan(const float pan) { m_InitPan = pan;};
 		const bool PanEnabled() { return m_PanEnabled;};
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
-		const compiler::uint8 NoteModPanCenter() { return m_NoteModPanCenter;};
-		void NoteModPanCenter(const compiler::uint8 pan) { m_NoteModPanCenter = pan;};
-		const compiler::sint8 NoteModPanSep() { return m_NoteModPanSep;};
-		void NoteModPanSep(const compiler::sint8 pan) { m_NoteModPanSep = pan;};
+		const universalis::compiler::numeric<8>::unsigned_int NoteModPanCenter() { return m_NoteModPanCenter;};
+		void NoteModPanCenter(const universalis::compiler::numeric<8>::unsigned_int pan) { m_NoteModPanCenter = pan;};
+		const universalis::compiler::numeric<8>::signed_int NoteModPanSep() { return m_NoteModPanSep;};
+		void NoteModPanSep(const universalis::compiler::numeric<8>::signed_int pan) { m_NoteModPanSep = pan;};
 
-		const compiler::uint8 FilterCutoff(){ return m_FilterCutoff;};
-		void FilterCutoff(const compiler::uint8 value){m_FilterCutoff = value;};
-		const compiler::uint8 FilterResonance() { return m_FilterResonance;};
-		void FilterResonance(const compiler::uint8 value){m_FilterResonance = value;};
-		const compiler::sint16 FilterEnvAmount() { return m_FilterEnvAmount;};
-		void FilterEnvAmount(const compiler::sint16 value){ m_FilterEnvAmount = value;};
+		const universalis::compiler::numeric<8>::unsigned_int FilterCutoff(){ return m_FilterCutoff;};
+		void FilterCutoff(const universalis::compiler::numeric<8>::unsigned_int value){m_FilterCutoff = value;};
+		const universalis::compiler::numeric<8>::unsigned_int FilterResonance() { return m_FilterResonance;};
+		void FilterResonance(const universalis::compiler::numeric<8>::unsigned_int value){m_FilterResonance = value;};
+		const universalis::compiler::numeric<16>::signed_int FilterEnvAmount() { return m_FilterEnvAmount;};
+		void FilterEnvAmount(const universalis::compiler::numeric<16>::signed_int value){ m_FilterEnvAmount = value;};
 		const dsp::FilterType FilterType(){ return m_FilterType;};
 		void FilterType(const dsp::FilterType value){ m_FilterType = value;};
 
@@ -514,7 +515,7 @@ namespace psycle
 
 		std::string m_Name;
 
-		compiler::uint16 m_Lines;			// If m_Lines > 0 use samplelen/(tickduration*m_Lines) to determine the wave speed instead of the note.
+		universalis::compiler::numeric<16>::unsigned_int m_Lines;			// If m_Lines > 0 use samplelen/(tickduration*m_Lines) to determine the wave speed instead of the note.
 
 		Envelope m_AmpEnvelope;				// envelope range = [0.0f..1.0f]
 		Envelope m_PanEnvelope;				// envelope range = [-1.0f..1.0f]
@@ -527,12 +528,12 @@ namespace psycle
 		// Paninng
 		bool m_PanEnabled;
 		float m_InitPan;					// Initial panFactor (if enabled) [-1..1] Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
-		compiler::uint8 m_NoteModPanCenter;	// Note number for center pan position
-		compiler::sint8 m_NoteModPanSep;		// -32..32. 1/256th of panFactor change per seminote.
+		universalis::compiler::numeric<8>::unsigned_int m_NoteModPanCenter;	// Note number for center pan position
+		universalis::compiler::numeric<8>::signed_int m_NoteModPanSep;		// -32..32. 1/256th of panFactor change per seminote.
 
-		compiler::uint8 m_FilterCutoff;		// Cutoff Frequency [0..127] If the value is higher than 127, it is disabled.
-		compiler::uint8 m_FilterResonance;	// Resonance [0..127] If the value is higher than 127, it is disabled.
-		compiler::sint16 m_FilterEnvAmount;	// EnvAmount [-128..128]
+		universalis::compiler::numeric<8>::unsigned_int m_FilterCutoff;		// Cutoff Frequency [0..127] If the value is higher than 127, it is disabled.
+		universalis::compiler::numeric<8>::unsigned_int m_FilterResonance;	// Resonance [0..127] If the value is higher than 127, it is disabled.
+		universalis::compiler::numeric<16>::signed_int m_FilterEnvAmount;	// EnvAmount [-128..128]
 		dsp::FilterType m_FilterType;		// Filter Type [0..4]
 
 		// Randomness. Applies on new notes.
