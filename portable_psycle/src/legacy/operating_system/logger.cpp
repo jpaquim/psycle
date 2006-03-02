@@ -1,22 +1,11 @@
 ///\file
 ///\brief
 #include <project.private.hpp>
-#define OPERATING_SYSTEM__LOGGER
 #include "logger.hpp"
 #include "exceptions/code_description.hpp"
 #if defined OPERATING_SYSTEM__MICROSOFT
 	#include <io.h>
 	#include <fcntl.h>
-	/*
-	#if !defined WINVER
-		/// mswin2k
-		#define WINVER 0x0500
-	#endif
-	#if !defined _WIN32_WINNT
-		/// mswin2k
-		#define _WIN32_WINNT 0x0500
-	#endif
-	*/
 #endif
 namespace operating_system
 {

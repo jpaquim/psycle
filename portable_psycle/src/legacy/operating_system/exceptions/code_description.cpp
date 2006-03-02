@@ -1,7 +1,6 @@
 ///\file
 ///\brief
 #include <project.private.hpp>
-#define OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION
 #include "code_description.hpp"
 #include <string>
 #include <sstream>

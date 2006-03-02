@@ -1,8 +1,8 @@
 #pragma once
 #if defined ASIO
-	#include LIBRARY__EXPORT
+	#include <operating_system/library/export.hpp>
 #else
-	#include LIBRARY__IMPORT
+	#include <operating_system/library/import.hpp>
 #endif
 #include "ginclude.h"
 #if MAC

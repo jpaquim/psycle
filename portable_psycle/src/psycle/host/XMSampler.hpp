@@ -5,6 +5,7 @@
 #include "Filter.hpp"
 #include "XMInstrument.hpp"
 //#include "../../../include/xdsp/xdsp.h"
+#include <universalis/compiler/numeric.hpp>
 
 namespace psycle
 {
@@ -16,7 +17,7 @@ public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const int MAX_INSTRUMENT = 255;///< max instrument
-	static const compiler::uint32 VERSION = 0x00010000;
+	static const universalis::compiler::numeric<32>::unsigned_int VERSION = 0x00010000;
 	static const float SURROUND_THRESHOLD;
 
 /*
@@ -442,7 +443,7 @@ XMSampler::Channel::PerformFX().
 		// This one is Psycle's "Tick"
 		void NewLine();
 
-		void NoteOn(const compiler::uint8 note,const compiler::sint16 playvol=-1,bool reset=true);
+		void NoteOn(const universalis::compiler::numeric<8>::unsigned_int note,const universalis::compiler::numeric<16>::signed_int playvol=-1,bool reset=true);
 		void NoteOff();
 		void NoteOffFast();
 		void NoteFadeout();
@@ -450,7 +451,7 @@ XMSampler::Channel::PerformFX().
 		const XMInstrument::NewNoteAction NNA() { return m_NNA;};
 		void NNA(const XMInstrument::NewNoteAction value){ m_NNA = value;};
 		
-		void ResetVolAndPan(compiler::sint16 playvol,bool reset=true);
+		void ResetVolAndPan(universalis::compiler::numeric<16>::signed_int playvol,bool reset=true);
 		void UpdateSpeed();
 		double PeriodToSpeed(int period);
 
@@ -525,8 +526,8 @@ XMSampler::Channel::PerformFX().
 		void IsStopping(const bool stop) { m_Stopping = stop; };
 
 		// Volume of the current note.
-		const compiler::uint16 Volume() { return m_Volume; };
-		void Volume(const compiler::uint16 vol)
+		const universalis::compiler::numeric<16>::unsigned_int Volume() { return m_Volume; };
+		void Volume(const universalis::compiler::numeric<16>::unsigned_int vol)
 		{
 			m_Volume = vol;
 			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/128.0f);

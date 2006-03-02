@@ -1390,14 +1390,13 @@ NAMESPACE__BEGIN(psycle)
 
 				for	(int c=editcur.line*EVENT_SIZE*MAX_TRACKS;c<length;c+=EVENT_SIZE)
 				{
-					int not=*(soffset+c);
+					int note=*(soffset+c);
 					
-					if(not<120)
+					if(note<120)
 					{
-						not+=trp;
-						if(not<0)not=0;
-						if(not>119)not=119;
-						soffset[c]=static_cast<unsigned char>(not);
+						note+=trp;
+						if(note<0) note=0; else if(note>119) note=119;
+						soffset[c]=static_cast<unsigned char>(note);
 					}
 				}
 				NewPatternDraw(0,_pSong->SONGTRACKS,editcur.line,pLines-1);
@@ -1968,14 +1967,13 @@ NAMESPACE__BEGIN(psycle)
 					{
 						unsigned char *toffset=_ptrackline(ps,t,l);
 						
-						int not=*(toffset);
+						int note=*(toffset);
 					
-						if(not<120)
+						if(note<120)
 						{
-							not+=trp;
-							if(not<0)not=0;
-							if(not>119)not=119;
-							*toffset=static_cast<unsigned char>(not);
+							note+=trp;
+							if(note<0) note=0; else if(note>119) note=119;
+							*toffset=static_cast<unsigned char>(note);
 						}
 					}
 				}

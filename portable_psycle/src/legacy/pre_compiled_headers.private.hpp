@@ -165,8 +165,9 @@
 // boost http://boost.org
 //////////////////////////
 
-#include <boost/cstdint.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>

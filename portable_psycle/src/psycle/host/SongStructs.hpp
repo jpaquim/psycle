@@ -25,20 +25,20 @@ namespace psycle
 					_parameter(0)
 				{
 				}
-				compiler::uint8 _note;
-				compiler::uint8 _inst;
+				unsigned char _note;
+				unsigned char _inst;
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-				compiler::uint8 _volume;
-				compiler::uint8 _cmd;
-				compiler::uint8 _parameter;
-				compiler::uint8 _mach;
+				unsigned char _volume;
+				unsigned char _cmd;
+				unsigned char _parameter;
+				unsigned char _mach;
 	#else
-				compiler::uint8 _mach;
-				compiler::uint8 _cmd;
-				compiler::uint8 _parameter;
+				unsigned char _mach;
+				unsigned char _cmd;
+				unsigned char _parameter;
 	#endif
 #endif
 		};
