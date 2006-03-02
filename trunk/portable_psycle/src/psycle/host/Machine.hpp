@@ -160,6 +160,7 @@ namespace psycle
 			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return "built-in"; };
 			virtual char * GetName() = 0;
+			virtual char * GetEditName() { return _editName; }
 			virtual int GetNumParams() { return _numPars; };
 			virtual int GetNumCols() { return _nCols; };
 			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
@@ -336,6 +337,8 @@ namespace psycle
 			virtual void GetParamValue(int numparam,char *parVal);
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
+			virtual int GetSend(int i){ ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
+			virtual bool SendValid(int i) { ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			

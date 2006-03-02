@@ -66,7 +66,9 @@ NAMESPACE__BEGIN(psycle)
 			lf.lfQuality = NONANTIALIASED_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
 			if(!b_font_bold.CreatePointFontIndirect(&lf))
-
+			{
+				b_font_bold.CreatePointFont(80,"Tahoma Bold");
+			}
 
 			UpdateWindow();
 		}

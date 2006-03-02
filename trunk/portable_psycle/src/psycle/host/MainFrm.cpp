@@ -8,6 +8,7 @@
 #include "gearTracker.hpp"
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
+#include "FrameMixerMachine.hpp"
 #include "VstEditorDlg.hpp"
 #include "Helpers.hpp"
 #include "WireDlg.hpp"
@@ -1415,7 +1416,6 @@ NAMESPACE__BEGIN(psycle)
 						break;
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
-					case MACH_MIXER:
 						{
 							m_pWndMac[tmac] = new CFrameMachine(tmac);
 							((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
@@ -1430,8 +1430,29 @@ NAMESPACE__BEGIN(psycle)
 							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 							char winname[32];
 							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
-													,ma->_editName);
+								,ma->_editName);
 							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+							isguiopen[tmac] = true;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						}
+						break;
+					case MACH_MIXER:
+						{
+							m_pWndMac[tmac] = new CFrameMixerMachine(tmac);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							((CFrameMixerMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
+							((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+
+							m_pWndMac[tmac]->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate();
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+							char winname[32];
+							sprintf(winname,"%.2X : %s",((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex
+													,ma->_editName);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
