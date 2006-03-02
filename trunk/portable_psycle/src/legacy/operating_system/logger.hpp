@@ -2,12 +2,13 @@
 #include <iostream>
 #include <boost/thread/mutex.hpp>
 #include "exception.hpp"
+#include <universalis/compiler.hpp>
 ///\file
 ///\brief logger.
 namespace operating_system
 {
 	/// logger.
-	class logger
+	class UNIVERSALIS__COMPILER__DEPRECATED("universalis") logger
 	{
 	public:
 		static logger & default_logger() throw() { return default_logger_; }
@@ -37,7 +38,7 @@ namespace operating_system
 		boost::mutex mutex_;
 	};
 
-	class console
+	class UNIVERSALIS__COMPILER__DEPRECATED("universalis") console
 	{
 	public:
 		static void open() throw(exception);

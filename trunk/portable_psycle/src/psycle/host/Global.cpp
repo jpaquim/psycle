@@ -16,7 +16,7 @@ namespace psycle
 		Player * Global::pPlayer(0);
 		dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
-		unsigned int Global::_cpuHz;
+		unsigned __int64 Global::_cpuHz;
 		InputHandler * Global::pInputHandler(0);
 			
 		Global::Global()
@@ -34,11 +34,11 @@ namespace psycle
 
 		Global::~Global()
 		{
-			zapObject(_pSong);
-			zapObject(pPlayer);
-			zapObject(pResampler);
-			zapObject(pConfig);
-			zapObject(pInputHandler);
+			delete _pSong;
+			delete pPlayer;
+			delete pResampler;
+			delete pConfig;
+			delete pInputHandler;
 			#ifndef NDEBUG
 				operating_system::console::close();
 			#endif

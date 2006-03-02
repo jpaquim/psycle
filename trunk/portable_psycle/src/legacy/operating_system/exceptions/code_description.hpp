@@ -1,12 +1,13 @@
 #pragma once
 #include <string>
+#include <universalis/compiler.hpp>
 ///\file
 ///\brief
 namespace operating_system
 {
 	namespace exceptions
 	{
-		const std::string code_description
+		const std::string UNIVERSALIS__COMPILER__DEPRECATED("universalis") code_description
 			(
 				#if defined OPERATING_SYSTEM__POSIX
 				#elif defined OPERATING_SYSTEM__MICROSOFT
