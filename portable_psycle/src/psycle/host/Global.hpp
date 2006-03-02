@@ -1,8 +1,34 @@
-///\file
-///\brief interface file for psycle::host::Global.
+///\interface psycle::host::Global
 #pragma once
+#include <universalis/compiler.hpp>
+#include <universalis/compiler/numeric.hpp>
 namespace psycle
 {
+	/// \todo
+	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
+	typedef universalis::compiler::numeric< 8>::unsigned_int byte;
+	/// \todo
+//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
+//	typedef ::UCHAR UCHAR;
+	/// \todo
+	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
+	typedef universalis::compiler::numeric<16>::unsigned_int word;
+	/// \todo
+//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
+//	typedef ::WORD WORD;
+	/// \todo
+	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+	typedef universalis::compiler::numeric<32>::unsigned_int dword;
+	/// \todo
+//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+//	typedef ::DWORD DWORD;
+	/// \todo
+//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+//	typedef ::UINT UINT;
+	/// \todo
+//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+//	typedef ::ULONG ULONG;
+
 	namespace host
 	{
 		class Song;
@@ -16,16 +42,28 @@ namespace psycle
 
 		class Global
 		{
-		private:
-		public:
-			Global();
-			virtual ~Global() throw();
-			static Song * _pSong;
-			static Player * pPlayer;
-			static Configuration * pConfig;
-			static dsp::Resampler * pResampler;
-			static unsigned int _cpuHz;
-			static InputHandler* pInputHandler;
+			public:
+				Global();
+				~Global() throw();
+
+				///\todo use singleton pattern instead of static public vars
+				//Global static inline & singleton() { static Global instance; return instance; }
+
+				Song             static inline & song         () throw() { return *_pSong; }
+				Player           static inline & player       () throw() { return *pPlayer; }
+				Configuration    static inline & configuration() throw() { return *pConfig; }
+				dsp::Resampler   static inline & resampler    () throw() { return *pResampler; }
+				unsigned __int64 static inline   cpu_frequency() throw() { return _cpuHz; }
+				InputHandler     static inline & input_handler() throw() { return *pInputHandler; }
+
+			public:// should be private, not static
+				static Song * _pSong;
+				static Player * pPlayer;
+				static Configuration * pConfig;
+				static dsp::Resampler * pResampler;
+				UNIVERSALIS__COMPILER__DEPRECATED("check this usage. mustn't be used with 32-bit computations")
+				static unsigned __int64 _cpuHz;
+				static InputHandler* pInputHandler;
 		};
 
 		namespace loggers

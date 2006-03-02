@@ -1,6 +1,7 @@
 #pragma once
 #include <exception>
 #include <string>
+#include <universalis/compiler.hpp>
 ///\file
 ///\brief interface file for operating_system::exception
 
@@ -10,7 +11,7 @@
 namespace operating_system
 {
 	/// generic exception thrown by functions of the namespace operating_system.
-	class exception : public std::runtime_error
+	class UNIVERSALIS__COMPILER__DEPRECATED("universalis") exception : public std::runtime_error
 	{
 		public:
 			exception(std::string const &) throw();
@@ -22,7 +23,7 @@ namespace operating_system
 	namespace exceptions
 	{
 		/// external cpu/os exception translated into a c++ one, with deferred querying of the human-readable message.
-		class translated : public std::exception
+		class UNIVERSALIS__COMPILER__DEPRECATED("universalis") translated : public std::exception
 		{
 			public:
 				/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
