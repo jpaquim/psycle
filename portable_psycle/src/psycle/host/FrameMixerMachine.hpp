@@ -14,10 +14,10 @@ NAMESPACE__BEGIN(psycle)
 		class Knob
 		{
 		public:
-			Knob();
-			virtual ~Knob();
+			Knob(){};
+			virtual ~Knob(){};
 			
-			void Draw(CDC* dc,int x_knob,int y_knob,float value);
+			static void Draw(CDC* dc,int x_knob,int y_knob,float value);
 			void OnLButtonDown(UINT nFlags, CPoint point);
 			void OnMouseMove(UINT nFlags, CPoint point);
 			void OnLButtonUp(UINT nFlags, CPoint point);
@@ -25,16 +25,18 @@ NAMESPACE__BEGIN(psycle)
 			static int width;
 			static int height;
 			static int numFrames;
-			static CDC* pKnobDC;
+			static CDC knobDC;
 		};
 
 		class InfoLabel
 		{
 		public:
-			InfoLabel();
-			virtual ~InfoLabel();
+			InfoLabel(){};
+			virtual ~InfoLabel(){};
 
-			virtual void Draw(CDC *dc, int x, int y,char *parName, char *parValue);
+			static void Draw(CDC *dc, int x, int y,const char *parName, const char *parValue);
+			static void DrawHLight(CDC *dc, int x, int y,const char *parName, const char *parValue);
+			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
 
 			static int xoffset;
 			static int width;
@@ -43,38 +45,38 @@ NAMESPACE__BEGIN(psycle)
 			static CFont font_bold;
 		};
 
-		class HLightInfoLabel : public InfoLabel
+/*		class HLightInfoLabel : public InfoLabel
 		{
 		public:
-			HLightInfoLabel();
-			virtual ~HLightInfoLabel();
+			HLightInfoLabel(){};
+			virtual ~HLightInfoLabel(){};
 
-			virtual void Draw(CDC *dc, int x, int y,char *parName, char *parValue);
+			virtual void Draw(CDC *dc, int x, int y,const char *parName, const char *parValue);
 		};
 		class HeaderInfoLabel : public InfoLabel
 		{
 		public:
-			HeaderInfoLabel();
-			virtual ~HeaderInfoLabel();
+			HeaderInfoLabel(){};
+			virtual ~HeaderInfoLabel(){};
 
-			virtual void Draw(CDC *dc, int x, int y,char *parName, char *parValue);
+			virtual void Draw(CDC *dc, int x, int y,const char *parName, const char *parValue);
 		};
 
-		class GraphSlider
+*/		class GraphSlider
 		{
 		public:
-			GraphSlider();
-			virtual ~GraphSlider();
+			GraphSlider(){};
+			virtual ~GraphSlider(){};
 
-			virtual void Draw(CDC *dc,int x, int y, float value);
+			static void Draw(CDC *dc,int x, int y, float value);
 
 			static int width;
 			static int height;
 			static int knobheight;
 			static int knobwidth;
 			static int xoffset;
-			static CDC* pBackDC;
-			static CDC* pKnobDC;
+			static CDC backDC;
+			static CDC knobDC;
 		};
 
 		DECLARE_DYNCREATE(CFrameMixerMachine)
@@ -82,7 +84,7 @@ NAMESPACE__BEGIN(psycle)
 		CFrameMixerMachine(); // protected constructor used by dynamic creation
 		// Attributes
 	public:
-		CFrameMixerMachine(int dum){MachineIndex = dum;};
+		CFrameMixerMachine(int dum);
 	private:
 		Mixer* _pMixer;
 		CBitmap m_sliderback;
@@ -93,6 +95,8 @@ NAMESPACE__BEGIN(psycle)
 		GraphSlider m_slider;
 		int numSends;
 		int numChannels;
+		std::string sendNames[MAX_CONNECTIONS];
+
 
 		// Operations
 	public:
