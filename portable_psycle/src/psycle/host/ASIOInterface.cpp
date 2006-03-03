@@ -15,10 +15,7 @@ namespace psycle
 	namespace host
 	{
 		using namespace asio;
-
-		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
-
-		//\todo: what is this (the unnamed namespace and its content)?
+		// file-local variables and functions
 		namespace
 		{
 			#define ALLOW_NON_ASIO
@@ -29,7 +26,7 @@ namespace psycle
 			void sampleRateChanged(ASIOSampleRate sRate);
 			long asioMessages(long selector, long value, void* message, double* opt);
 
-			void * ASIObuffers[2][2];
+			void * ASIObuffers[2][2]; // pointers to output buffers, [stereo][double_buffer]
 
 			ASIOCallbacks asioCallbacks;
 			ASIOSampleType asioSample;
@@ -37,15 +34,15 @@ namespace psycle
 			void* _pASIOcallbackContext;
 			int _ASIObufferSize;
 			bool asiopostOutput;
+
+			void Error(const char msg[])
+			{
+				MessageBox(0, msg, "ASIO 2.1 Output driver", MB_OK | MB_ICONERROR);
+			}
 		}
 
-		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.0 Output" };
+		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.1 Output" };
 		CCriticalSection ASIOInterface::_lock;
-
-		void ASIOInterface::Error(const char msg[])
-		{
-			MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
-		}
 
 		ASIOInterface::ASIOInterface()
 		{
@@ -87,29 +84,29 @@ namespace psycle
 								switch(channelInfo.type)
 								{
 								case ASIOSTInt16LSB:
-								case ASIOSTInt32LSB16:		// 32 bit data with 18 bit alignment
+								case ASIOSTInt32LSB16:		// 32 bit data with 16 bit alignment
 								case ASIOSTInt16MSB:
-								case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
-									std::strcat(szFullName[drivercount]," : 16 bit");
+								case ASIOSTInt32MSB16:		// 32 bit data with 16 bit alignment
+									std::strcat(szFullName[drivercount]," : 16 bit int");
 									break;
 								case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
 								case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
-									std::strcat(szFullName[drivercount]," : 18 bit");
+									std::strcat(szFullName[drivercount]," : 18 bit int");
 									break;
 
 								case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
 								case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
-									std::strcat(szFullName[drivercount]," : 20 bit");
+									std::strcat(szFullName[drivercount]," : 20 bit int");
 									break;
 								case ASIOSTInt24LSB:		// used for 20 bits as well
 								case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
 								case ASIOSTInt24MSB:		// used for 20 bits as well
 								case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
-									std::strcat(szFullName[drivercount]," : 24 bit");
+									std::strcat(szFullName[drivercount]," : 24 bit int");
 									break;
 								case ASIOSTInt32LSB:
 								case ASIOSTInt32MSB:
-									std::strcat(szFullName[drivercount],": 32 bit");
+									std::strcat(szFullName[drivercount],": 32 bit int");
 									break;
 								case ASIOSTFloat32LSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 									std::strcat(szFullName[drivercount],": 32 bit float");
@@ -119,13 +116,15 @@ namespace psycle
 									break;
 								case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 								case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
+									///\todo not yet implemented
 									std::strcat(szFullName[drivercount]," : unsupported MSB float bitorder");
-									continue;
+									continue; // skips this driver
 									break;
 								}
 								++drivercount;
 							}
 						}
+						// asio drivers will us their preferred settings with : ASIOGetBufferSize
 						if(ASIOGetBufferSize(&minSamples[i], &maxSamples[i], &prefSamples[i], &Granularity[i]) != ASE_OK)
 						{
 							minSamples[i] = maxSamples[i] = prefSamples[i] = 2048;
@@ -138,7 +137,7 @@ namespace psycle
 			}
 		}
 
-		void ASIOInterface::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context)
+		void ASIOInterface::Initialize(HWND hwnd, ASIOInterface::WorkFunction pCallback, void* context)
 		{
 			_pASIOcallbackContext = context;
 			_pASIOCallback = pCallback;
@@ -169,7 +168,6 @@ namespace psycle
 				_running = false;
 				return false;
 			}
-			// BEGIN -  Code 
 			asioDrivers.removeCurrentDriver();
 			ASIODriverInfo driverInfo;
 			driverInfo.sysRef = 0;
@@ -248,7 +246,6 @@ namespace psycle
 				_running = false;
 				return false;
 			}
-			// END -  CODE
 			_running = true;
 			CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
 			return true;
@@ -275,7 +272,7 @@ namespace psycle
 			_driverID=0;
 			_ASIObufferSize = 1024;
 			_channelmode = 3; // always stereo
-			_bitDepth = 16; // asio don't care about bit depth
+			_bitDepth = 16; // asio doesn't care about bit depth
 			Registry reg;
 			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
 			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS) // settings in version 1.8
@@ -367,14 +364,14 @@ namespace psycle
 
 		int ASIOInterface::GetWritePos()
 		{
-			// Not yet implemted
+			///\todo not yet implemented
 			if(!_running) return 0;
 			return GetPlayPos();
 		}
 
 		int ASIOInterface::GetPlayPos()
 		{
-			// Not yet implemted
+			///\todo not yet implemented
 			if(!_running) return 0;
 			int playPos = 0;//int(Pa_StreamTime(stream));
 			return playPos;
@@ -421,34 +418,42 @@ namespace psycle
 			}
 		}
 
-		// <bohan> This looks like code copied as is from steinberg's asio sdk
 		namespace
 		{
-			// conversion from 64 bit ASIOSample/ASIOTimeStamp to double float
-			#if NATIVE_INT64
-				#define ASIO64toDouble(a)  (a)
-			#else
-				const double twoRaisedTo32 = 4294967296.;
-				#define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
-			#endif
+			///\todo unused
+				// conversion from 64 bit ASIOSample/ASIOTimeStamp to double float
+				#if NATIVE_INT64
+					#define ASIO64toDouble(a)  (a)
+				#else
+					const double twoRaisedTo32 = 4294967296.;
+					#define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
+				#endif
 
+			///\todo the asio sdk provides sample conversion functions that are portable (endianess)
 			#define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
+			///\todo the asio sdk provides sample conversion functions that are portable (endianess)
 			#define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
 
 			ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 			{
+				// the actual processing callback.
+				// Beware that this is normally in a seperate thread, hence be sure that you take care
+				// about thread synchronization.
+
 				if(!structured_exception_translator_set)
 				{
 					operating_system::exceptions::translated::new_thread("asio");
 					structured_exception_translator_set = true;
 				}
-				// the actual processing callback.
-				// Beware that this is normally in a seperate thread, hence be sure that you take care
-				// about thread synchronization. This is omitted here for simplicity.
+
 				float *pBuf = _pASIOCallback(_pASIOcallbackContext, _ASIObufferSize);
 				int i;
 				switch (asioSample)
 				{
+
+				///\todo the asio sdk provides sample conversion functions that are portable (endianess)
+				///\todo "WORD"!
+
 				case ASIOSTInt16LSB:
 					{
 						WORD* outl;
@@ -679,10 +684,12 @@ namespace psycle
 					}
 					break;
 				case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
+					///\todo not yet implemented
 					memset (ASIObuffers[0][index], 0, _ASIObufferSize * 4);
 					memset (ASIObuffers[1][index], 0, _ASIObufferSize * 4);
 					break;
 				case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
+					///\todo not yet implemented
 					memset (ASIObuffers[0][index], 0, _ASIObufferSize * 8);
 					memset (ASIObuffers[1][index], 0, _ASIObufferSize * 8);
 					break;
@@ -700,7 +707,7 @@ namespace psycle
 
 				// as this is a "back door" into the bufferSwitchTimeInfo a timeInfo needs to be created
 				// though it will only set the timeInfo.samplePosition and timeInfo.systemTime fields and the according flags
-				ASIOTime  timeInfo;
+				ASIOTime timeInfo;
 				std::memset(&timeInfo, 0, sizeof timeInfo);
 
 				// get the time stamp of the buffer, not necessary if no
@@ -714,6 +721,8 @@ namespace psycle
 
 			void sampleRateChanged(ASIOSampleRate sRate)
 			{
+				///\todo not yet implemented
+
 				// do whatever you need to do if the sample rate changed
 				// usually this only happens during external sync.
 				// Audio processing is not stopped by the driver, actual sample rate

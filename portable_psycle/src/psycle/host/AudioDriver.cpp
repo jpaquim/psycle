@@ -7,20 +7,27 @@ namespace psycle
 {
 	namespace host
 	{
-		#define SHORT_MIN	-32768
-		#define SHORT_MAX	32767
 
 		AudioDriverInfo AudioDriver::_info = { "Silent" };
 
-		// returns random value between 0 and 1
-		// i got the magic numbers from csound so they should be ok but 
-		// I haven't checked them myself
-		inline double frand()
+		namespace
 		{
-			static long stat = 0x16BA2118;
-			stat = (stat * 1103515245 + 12345) & 0x7fffffff;
-			return (double)stat * (1.0 / 0x7fffffff);
+			///\todo use std::numeric_limits<std::int16_t> instead
+			int const SHORT_MIN = -32768;
+			int const SHORT_MAX =  32767;
+
+			// returns random value between 0 and 1
+			// the magic numbers come from csound so they should be ok
+			inline double frand()
+			{
+				///\todo sizeof(signed long int) has to match "0x7fffffff" (32-bit)
+
+				static signed long int stat = 0x16BA2118;
+				stat = (stat * 1103515245 + 12345) & 0x7fffffff;
+				return (double)stat * (1.0 / 0x7fffffff);
+			}
 		}
+
 		AudioDriver::AudioDriver()
 			: _samplesPerSec(44100)
 			, _bitDepth(16)
@@ -31,11 +38,14 @@ namespace psycle
 
 		void AudioDriver::QuantizeWithDither(float *pin, int *piout, int c)
 		{
+			///\todo sizeof *piout has to be 32-bit
+
 			double const d2i = (1.5 * (1 << 26) * (1 << 26));
 			
 			do
 			{
 				double res = ((double)pin[1] + frand()) + d2i;
+
 				int r = *(int *)&res;
 
 				if (r < SHORT_MIN)
@@ -46,7 +56,9 @@ namespace psycle
 				{
 					r = SHORT_MAX;
 				}
+
 				res = ((double)pin[0] + frand()) + d2i;
+
 				int l = *(int *)&res;
 
 				if (l < SHORT_MIN)
@@ -57,7 +69,8 @@ namespace psycle
 				{
 					l = SHORT_MAX;
 				}
-				*piout++ = (r << 16) | (word)l;
+
+				*piout++ = (r << 16) | (word)l; ///\todo use std::uint16_t for "word"
 				pin += 2;
 			}
 			while(--c);
@@ -65,12 +78,8 @@ namespace psycle
 
 		void AudioDriver::Quantize(float *pin, int *piout, int c)
 		{
-		//	double const d2i = (1.5 * (1 << 26) * (1 << 26));
-			
 			do
 			{
-		//		double res = ((double)pin[1]) + d2i;
-		//		int r = *(int *)&res;
 				int r = f2i(pin[1]);
 
 				if (r < SHORT_MIN)
@@ -81,8 +90,7 @@ namespace psycle
 				{
 					r = SHORT_MAX;
 				}
-		//		res = ((double)pin[0]) + d2i;
-		//		int l = *(int *)&res;
+
 				int l = f2i(pin[0]);
 
 				if (l < SHORT_MIN)
@@ -93,7 +101,8 @@ namespace psycle
 				{
 					l = SHORT_MAX;
 				}
-				*piout++ = (r << 16) | (word)l;
+
+				*piout++ = (r << 16) | (word)l; ///\todo use std::uint16_t for "word"
 				pin += 2;
 			}
 			while(--c);
