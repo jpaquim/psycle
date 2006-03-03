@@ -19,7 +19,7 @@ namespace psycle
 		{
 			delete embeddedData;
 		}
-		bool ITModule2::BitsBlock::ReadBlock(OldPsyFile *pFile)
+		bool ITModule2::BitsBlock::ReadBlock(RiffFile *pFile)
 		{
 			int size;
 			size=pFile->ReadInt(2);  // block layout : word size, <size> bytes data
@@ -78,7 +78,7 @@ namespace psycle
 			strcpy(s->Name,itFileH.songName);
 			strcpy(s->Author,"");
 			strcpy(s->Comment,"Imported from Impulse Tracker Module: ");
-			strcat(s->Comment,szName.c_str());
+			strcat(s->Comment,file_name().c_str());
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
 			s->InsertConnection(0,MASTER_INDEX,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
@@ -1100,7 +1100,7 @@ Special:  Bit 0: On = song message attached.
 			strcpy(s->Name,s3mFileH.songName);
 			strcpy(s->Author,"");
 			strcpy(s->Comment,"Imported from Scream Tracker 3 Module: ");
-			strcat(s->Comment,szName.c_str());
+			strcat(s->Comment,file_name().c_str());
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
 			s->InsertConnection(0,MASTER_INDEX,(s3mFileH.mVol&0x7F)/128.0f);

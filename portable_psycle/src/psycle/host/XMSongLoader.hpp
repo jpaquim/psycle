@@ -9,7 +9,7 @@ class XMInstrument;
 
 namespace psycle{
 namespace host{
-	class XMSongLoader : public OldPsyFile
+	class XMSongLoader : public RiffFile
 	{
 	public:
 		XMSongLoader(void);
@@ -85,7 +85,7 @@ namespace host{
 		unsigned short loopLength;
 	};
 
-	class MODSongLoader : public OldPsyFile
+	class MODSongLoader : public RiffFile
 	{
 	public:
 		MODSongLoader(void);

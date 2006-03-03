@@ -3,21 +3,6 @@
 #pragma once
 #include <universalis/compiler/numeric.hpp>
 
-#include <diversalis/operating_system.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#include <diversalis/compiler.hpp>
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(push)
-	#endif
-	#include <windows.h> // because of microsoftisms: HANDLE
-	#include <tchar.h> // because of microsoftisms: TCHAR
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(pop)
-	#endif
-#else
-	#error "this sorry file is not portable"
-#endif
-
 namespace psycle
 {
 	namespace host
@@ -46,94 +31,71 @@ namespace psycle
 		/// and integer byte ordering is represented in Motorola format.
 		class RiffFile
 		{
-		public:
-			RiffChunkHeader _header;
+			private:
+				std::string file_name_;
+			public:
+				std::string const inline & file_name() const throw() { return file_name_; }
 
-			virtual bool Open  (std::string const & filename);
-			virtual bool Create(std::string const & filename, bool const & overwrite);
-			virtual bool Close();
-			virtual bool Eof();
-			virtual std::size_t FileSize();
-			virtual std::size_t GetPos();
-			virtual std::ptrdiff_t Seek(std::ptrdiff_t const & bytes);
-			virtual std::ptrdiff_t Skip(std::ptrdiff_t const & bytes);
-			///\todo wtf
-			virtual FILE * GetFile() { return 0; };
+			private:
+				FILE* file_;
+			public:
+				FILE inline * GetFile() throw() { return file_; }
 
-			bool virtual Write (void const *, std::size_t const &);
-			bool virtual Read  (void       *, std::size_t const &);
-			bool virtual Expect(void       *, std::size_t const &);
+			public:
+				///\todo shouldn't be public
+				RiffChunkHeader _header;
 
-			template<typename X>
-			void inline Write(X const & x) { Write(&x, sizeof x); }
-			template<typename X>
-			void inline  Read(X       & x) {  Read(&x, sizeof x); }
+				bool Open  (std::string const &);
+				bool Create(std::string const &, bool const & overwrite);
+				bool Close(void);
+				bool Error();
+				bool Eof();
+				std::size_t FileSize();
+				std::size_t GetPos();
+				std::ptrdiff_t Seek(std::ptrdiff_t const & bytes);
+				std::ptrdiff_t Skip(std::ptrdiff_t const & bytes);
 
-			int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); Read(&tmp, bytes); return tmp; }
+				bool Write (void const *, std::size_t const &);
+				bool Read  (void       *, std::size_t const &);
+				bool Expect(void       *, std::size_t const &);
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			bool               virtual inline ReadBool()   {               bool tmp; Read(tmp); return tmp; }
+				template<typename X>
+				void inline Write(X const & x) { Write(&x, sizeof x); }
+				template<typename X>
+				void inline  Read(X       & x) {  Read(&x, sizeof x); }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			unsigned      char virtual inline ReadUChar()  { unsigned      char tmp; Read(tmp); return tmp; }
+				int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); Read(&tmp, bytes); return tmp; }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			  signed      char virtual inline ReadChar()   {   signed      char tmp; Read(tmp); return tmp; }
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				bool               virtual inline ReadBool()   {               bool tmp; Read(tmp); return tmp; }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			unsigned short int virtual inline ReadUShort() { unsigned short int tmp; Read(tmp); return tmp; }
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				unsigned      char virtual inline ReadUChar()  { unsigned      char tmp; Read(tmp); return tmp; }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			  signed short int virtual inline ReadShort()  {   signed short int tmp; Read(tmp); return tmp; }
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				signed      char virtual inline ReadChar()   {   signed      char tmp; Read(tmp); return tmp; }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			UINT               virtual inline ReadUINT()   {               UINT tmp; Read(tmp); return tmp; }
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				unsigned short int virtual inline ReadUShort() { unsigned short int tmp; Read(tmp); return tmp; }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			float              virtual inline ReadFloat()  {              float tmp; Read(tmp); return tmp; }
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				signed short int virtual inline ReadShort()  {   signed short int tmp; Read(tmp); return tmp; }
 
-			UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-			double             virtual inline ReadDouble() {             double tmp; Read(tmp); return tmp; }
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				UINT               virtual inline ReadUINT()   {               UINT tmp; Read(tmp); return tmp; }
 
-			bool               virtual ReadString(std::string &);
-			bool               virtual ReadString(char *, std::size_t const & max_length);
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				float              virtual inline ReadFloat()  {              float tmp; Read(tmp); return tmp; }
 
-			///\todo TCHAR may be char or wchar_t depending on "build settings"
-			UNIVERSALIS__COMPILER__DEPRECATED("not portable.. either use unicode explicitely or glib's utf8")
-			TCHAR * ReadStringA2T(TCHAR *, std::size_t const & max_length_in_chars);
+				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
+				double             virtual inline ReadDouble() {             double tmp; Read(tmp); return tmp; }
 
-			/// pad the string with spaces
-			UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")
-			static unsigned __int32 FourCC(char const * null_terminated_string);
+				bool               virtual ReadString(std::string &);
+				bool               virtual ReadString(char *, std::size_t const & max_length);
 
-			std::string szName;
-		protected:
-			HANDLE _handle;
-			bool _modified;
-		};
-
-		///\todo this class is a reimplementation of the base class
-		///\todo but with the standard c library instead of mswindows api.
-		///\todo we should simply use it instead of the base class, and get rid of the inheritance and virtual functions
-		class OldPsyFile : public RiffFile
-		{
-		public:
-			virtual bool Open  (std::string const &);
-			virtual bool Create(std::string const &, bool const & overwrite);
-			virtual bool Close(void);
-			virtual bool Error();
-			virtual bool Eof();
-			virtual std::size_t FileSize();
-			virtual std::size_t GetPos();
-			virtual std::ptrdiff_t Seek(std::ptrdiff_t const & bytes);
-			virtual std::ptrdiff_t Skip(std::ptrdiff_t const & bytes);
-			virtual FILE * GetFile() { return _file; };
-
-			virtual bool Write (void const *, std::size_t const &);
-			virtual bool Read  (void       *, std::size_t const &);
-			virtual bool Expect(void       *, std::size_t const &);
-		protected:
-			FILE* _file;
+				/// pad the string with spaces
+				UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")
+				static unsigned __int32 FourCC(char const * null_terminated_string);
 		};
 	}
 }

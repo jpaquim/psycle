@@ -1314,7 +1314,7 @@ namespace psycle
 				if((!pFile->Close()) || (chunkcount))
 				{
 					std::ostringstream s;
-					s << "Error reading from file '" << pFile->szName << "'" << std::endl;
+					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
 					if(chunkcount) s << "some chunks were missing in the file";
 					else s << "could not close the file";
 					MessageBox(0, s.str().c_str(), "File Error!!!", 0);
@@ -2127,7 +2127,7 @@ namespace psycle
 				if (!pFile->Close())
 				{
 					char error[MAX_PATH];
-					sprintf(error,"Error reading from \"%s\"!!!",pFile->szName);
+					sprintf(error,"Error reading from \"%s\"!!!",pFile->file_name());
 					MessageBox(NULL,error,"File Error!!!",0);
 					return false;
 				}
@@ -2462,7 +2462,7 @@ namespace psycle
 			if (!pFile->Close())
 			{
 				char error[MAX_PATH];
-				sprintf(error,"Error writing to \"%s\"!!!",pFile->szName);
+				sprintf(error,"Error writing to \"%s\"!!!",pFile->file_name());
 				MessageBox(NULL,error,"File Error!!!",0);
 				return false;
 			}
@@ -2552,7 +2552,7 @@ namespace psycle
 			CString filepath = Global::pConfig->GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
-			OldPsyFile file;
+			RiffFile file;
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{
 				return false;
@@ -2753,7 +2753,7 @@ namespace psycle
 			CString filepath = Global::pConfig->GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
-			OldPsyFile file;
+			RiffFile file;
 			if (!file.Create(filepath.GetBuffer(1), true))
 			{
 				return false;

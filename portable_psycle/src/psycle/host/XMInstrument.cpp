@@ -30,9 +30,7 @@ namespace psycle
 			//\todo: add version
 			//riffFile->Read(version);
 
-			CT2A _wave_name("");
-			riffFile->ReadStringA2T(_wave_name,32);
-			m_WaveName=_wave_name;
+			riffFile->ReadString(m_WaveName);
 
 			riffFile->Read(m_WaveLength);
 			riffFile->Read(m_WaveGlobVolume);
@@ -456,9 +454,7 @@ namespace psycle
 			//\todo: add version
 			//riffFile->Read(version);
 
-			CT2A _name("");
-			riffFile->ReadStringA2T(_name,32);
-			m_Name=_name;
+			riffFile->ReadString(m_Name);
 
 			riffFile->Read(m_Lines);
 
