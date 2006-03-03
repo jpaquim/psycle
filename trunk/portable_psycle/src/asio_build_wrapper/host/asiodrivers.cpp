@@ -5,6 +5,6 @@
 #include <packageneric/pre_compiled_headers.private.hpp>
 #include PACKAGENERIC
 
-#include <asio/asio.hpp>
+#include <asio_build_wrapper/asio.hpp>
 
 #include <asiodrivers.cpp>

@@ -5,7 +5,7 @@
 #include <packageneric/pre_compiled_headers.private.hpp>
 #include PACKAGENERIC
 
-#include <asio/asio.hpp>
+#include <asio_build_wrapper/asio.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)

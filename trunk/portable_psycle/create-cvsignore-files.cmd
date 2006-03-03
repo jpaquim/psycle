@@ -10,6 +10,7 @@ for %%i in (7.1 8.0) do (
 
 echo .cvsignore> include\.cvsignore
 echo boost>> include\.cvsignore
+echo asio>> include\.cvsignore
 
 echo .cvsignore> doc/.cvsignore
 echo doxygen.mfc>> doc/.cvsignore
