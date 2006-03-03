@@ -11,7 +11,7 @@ namespace psycle
 		{
 		class XMSampler;
 
-		class ITModule2 : public OldPsyFile
+		class ITModule2 : public RiffFile
 		{
 		public:
 			// Extra class for Reading of IT compressed samples.
@@ -19,7 +19,7 @@ namespace psycle
 			public:
 				BitsBlock(){ pdata=NULL;rpos=NULL;rend=NULL;rembits=0; };
 				~BitsBlock(){ zapArray(pdata); };
-				bool ReadBlock(OldPsyFile* pFile);
+				bool ReadBlock(RiffFile* pFile);
 				unsigned long ReadBits(unsigned char bitwidth);
 			private:
 				unsigned char* pdata; // pointer to data

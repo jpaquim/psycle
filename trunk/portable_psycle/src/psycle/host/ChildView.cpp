@@ -423,7 +423,7 @@ NAMESPACE__BEGIN(psycle)
 				//return;
 				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
-				OldPsyFile file;
+				RiffFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
 				_pSong->Save(&file,true);
 				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
@@ -655,7 +655,7 @@ NAMESPACE__BEGIN(psycle)
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					
-					OldPsyFile file;
+					RiffFile file;
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
@@ -744,7 +744,7 @@ NAMESPACE__BEGIN(psycle)
 					CString str2 = str.Right(4);
 					if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
 					int index = str.ReverseFind('\\');
-					OldPsyFile file;
+					RiffFile file;
 
 					if (index != -1)
 					{
@@ -952,7 +952,7 @@ NAMESPACE__BEGIN(psycle)
 					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
-					OldPsyFile file;
+					RiffFile file;
 					std::ostringstream szText;
 					szText << "Save changes to \"" << Global::_pSong->fileName
 						<< "\"?";
@@ -2003,7 +2003,7 @@ NAMESPACE__BEGIN(psycle)
 			Global::pConfig->_pMidiInput->Close();
 			Sleep(LOCK_LATENCY);
 			
-			OldPsyFile file;
+			RiffFile file;
 			if (!file.Open(fName.c_str()))
 			{
 				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);

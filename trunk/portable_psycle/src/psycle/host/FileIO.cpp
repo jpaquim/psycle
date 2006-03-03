@@ -3,21 +3,6 @@
 #include <project.private.hpp>
 #include "FileIO.hpp"
 
-#include <diversalis/operating_system.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#include <diversalis/compiler.hpp>
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(push)
-	#endif
-	#include <tchar.h> // because of microsoftisms: _tcscpy
-	#include <atlbase.h> // because of microsoftisms: CA2T
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(pop)
-	#endif
-#else
-	#error "this sorry file is not portable"
-#endif
-
 namespace psycle
 {
 	namespace host
@@ -28,111 +13,6 @@ namespace psycle
 			char * chars(reinterpret_cast<char *>(&result));
 			for(int i(0) ; i < 4 && null_terminated_string[i] ; ++i) *chars++ = null_terminated_string[i];
 			return result;
-		}
-
-		bool RiffFile::Open(std::string const & filename)
-		{
-			szName = filename;
-			DWORD bytesRead;
-			_modified = false;
-			_handle = ::CreateFile(filename.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-			if(_handle == INVALID_HANDLE_VALUE) return false;
-			if(!ReadFile(_handle, &_header, sizeof(_header), &bytesRead, 0))
-			{
-				CloseHandle(_handle);
-				return false;
-			}
-			return true;
-		}
-
-		bool RiffFile::Create(std::string const & filename, bool const & overwrite)
-		{
-			szName = filename;
-			DWORD bytesWritten;
-			_modified = false;
-			_handle = ::CreateFile(filename.c_str(), GENERIC_READ | GENERIC_WRITE, 0, 0, overwrite ? CREATE_ALWAYS : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
-			if(_handle == INVALID_HANDLE_VALUE) return false;
-			_header._id = FourCC("RIFF");
-			_header._size = 0;
-			if(!WriteFile(_handle, &_header, sizeof(_header), &bytesWritten, 0))
-			{
-				CloseHandle(_handle);
-				return false;
-			}
-			return true;
-		}
-
-		bool RiffFile::Close()
-		{
-			DWORD bytesWritten;
-			if (_modified)
-			{
-				Seek(0);
-				WriteFile(_handle, &_header, sizeof(_header), &bytesWritten, 0);
-				_modified = false;
-			}
-			BOOL b = CloseHandle(_handle);
-			_handle = INVALID_HANDLE_VALUE;
-			return b;
-		}
-
-		bool RiffFile::Read(void * data, std::size_t const & bytes)
-		{
-			DWORD bytes_read;
-			if(!ReadFile(_handle, data, bytes, &bytes_read, 0)) return false;
-			return bytes_read == bytes;
-		}
-
-		bool RiffFile::Write(void const * data, std::size_t const & bytes)
-		{
-			DWORD bytes_written;
-			if(!WriteFile(_handle, data, bytes, &bytes_written, 0)) return false;
-			_modified = true;
-			_header._size += bytes_written;
-			return bytes_written == bytes;
-		}
-
-		bool RiffFile::Expect(void * data, std::size_t const & bytes)
-		{
-			char * chars(reinterpret_cast<char*>(data));
-			std::size_t count(bytes);
-			while(count--)
-			{
-				unsigned char c;
-				DWORD bytes_read;
-				if(!ReadFile(_handle, &c, sizeof(c), &bytes_read, 0)) return false;
-				if(c != *chars) return false;
-				++chars;
-			}
-			return true;
-		}
-
-		std::ptrdiff_t RiffFile::Seek(std::ptrdiff_t const & bytes)
-		{
-			return SetFilePointer(_handle, bytes, 0, FILE_BEGIN);
-		}
-
-		std::ptrdiff_t RiffFile::Skip(std::ptrdiff_t const & bytes)
-		{
-			return SetFilePointer(_handle, bytes, 0, FILE_CURRENT); 
-		}
-
-		bool RiffFile::Eof()
-		{
-			return GetPos() < FileSize();
-		}
-
-		std::size_t RiffFile::GetPos()
-		{
-			return SetFilePointer(_handle, 0, 0, FILE_CURRENT);
-		}
-
-		std::size_t RiffFile::FileSize()
-		{
-			std::size_t const save(GetPos());
-			std::size_t const end(SetFilePointer(_handle,0,0,FILE_END));
-			Seek(save);
-			return end;
 		}
 
 		bool RiffFile::ReadString(std::string & result)
@@ -173,115 +53,97 @@ namespace psycle
 			return false;
 		}
 
-		TCHAR * RiffFile::ReadStringA2T(TCHAR * data, std::size_t const & max_length)
+		bool RiffFile::Open(std::string const & filename)
 		{
-			char * buffer = new char[max_length];
-			ReadString(buffer, max_length);
-			_tcscpy(data, CA2T(buffer));
-			delete [] buffer;
-			return data;
+			file_name_ = filename;
+			return file_ = std::fopen(filename.c_str(), "rb");
 		}
 
-
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// OldPsyFile
-
-
-
-		bool OldPsyFile::Open(std::string const & filename)
+		bool RiffFile::Create(std::string const & filename, bool const & overwrite)
 		{
-			szName = filename;
-			return _file = std::fopen(filename.c_str(), "rb");
-		}
-
-		bool OldPsyFile::Create(std::string const & filename, bool const & overwrite)
-		{
-			szName = filename;
-			_file = std::fopen(filename.c_str(), "rb");
-			if(_file)
+			file_name_ = filename;
+			file_ = std::fopen(filename.c_str(), "rb");
+			if(file_)
 			{
-				std::fclose(_file);
+				std::fclose(file_);
 				if(!overwrite) return false;
 			}
-			return _file = std::fopen(filename.c_str(), "wb");
+			return file_ = std::fopen(filename.c_str(), "wb");
 		}
 
-		bool OldPsyFile::Close()
+		bool RiffFile::Close()
 		{
-			if(!_file)
+			if(!file_)
 			{
-				std::fflush(_file);
+				std::fflush(file_);
 				bool const result(Error());
-				std::fclose(_file);
-				_file = 0;
+				std::fclose(file_);
+				file_ = 0;
 				return result;
 			}
 			return true;
 		}
 
-		bool OldPsyFile::Error()
+		bool RiffFile::Error()
 		{
-			return !/*std::*/ferror(_file);
+			return !/*std::*/ferror(file_);
 		}
 
-		bool OldPsyFile::Read(void * data, std::size_t const & bytes)
+		bool RiffFile::Read(void * data, std::size_t const & bytes)
 		{
-			return std::fread(data, sizeof(char), bytes, _file) == bytes;
+			return std::fread(data, sizeof(char), bytes, file_) == bytes;
 		}
 
-		bool OldPsyFile::Write(void const * data, std::size_t const & bytes)
+		bool RiffFile::Write(void const * data, std::size_t const & bytes)
 		{
 			///\todo why flushing?
-			std::fflush(_file);
-			return std::fwrite(data, sizeof(char), bytes, _file) == bytes;
+			std::fflush(file_);
+			return std::fwrite(data, sizeof(char), bytes, file_) == bytes;
 		}
 
-		bool OldPsyFile::Expect(void * data, std::size_t const & bytes)
+		bool RiffFile::Expect(void * data, std::size_t const & bytes)
 		{
 			char * chars(reinterpret_cast<char*>(data));
 			std::size_t count(bytes);
 			while(count--)
 			{
 				unsigned char c;
-				if(std::fread(&c, sizeof c, 1, _file) != 1) return false;
+				if(std::fread(&c, sizeof c, 1, file_) != 1) return false;
 				if(c != *chars) return false;
 				++chars;
 			}
 			return true;
 		}
 
-		std::ptrdiff_t OldPsyFile::Seek(std::ptrdiff_t const & bytes)
+		std::ptrdiff_t RiffFile::Seek(std::ptrdiff_t const & bytes)
 		{
-			if(std::fseek(_file, bytes, SEEK_SET)) return -1;
-			return std::ftell(_file);
+			if(std::fseek(file_, bytes, SEEK_SET)) return -1;
+			return std::ftell(file_);
 		}
 
-		std::ptrdiff_t OldPsyFile::Skip(std::ptrdiff_t const & bytes)
+		std::ptrdiff_t RiffFile::Skip(std::ptrdiff_t const & bytes)
 		{
-			if(std::fseek(_file, bytes, SEEK_CUR)) return -1;
-			return std::ftell(_file);
+			if(std::fseek(file_, bytes, SEEK_CUR)) return -1;
+			return std::ftell(file_);
 		}
 
-		bool OldPsyFile::Eof()
+		bool RiffFile::Eof()
 		{
-			return static_cast<bool>(/*std::*/feof(_file));
+			return static_cast<bool>(/*std::*/feof(file_));
 		}
 
-		std::size_t OldPsyFile::FileSize()
+		std::size_t RiffFile::FileSize()
 		{
-			std::size_t const save(std::ftell(_file));
-			std::fseek(_file, 0, SEEK_END);
-			std::size_t const end(std::ftell(_file));
-			std::fseek(_file, save, SEEK_SET);
+			std::size_t const save(std::ftell(file_));
+			std::fseek(file_, 0, SEEK_END);
+			std::size_t const end(std::ftell(file_));
+			std::fseek(file_, save, SEEK_SET);
 			return end;
 		}
 
-		std::size_t OldPsyFile::GetPos()
+		std::size_t RiffFile::GetPos()
 		{
-			return std::ftell(_file);
+			return std::ftell(file_);
 		}
 	}
 }

@@ -84,7 +84,7 @@ namespace host{
 		strcpy(song.Name,pSongName);
 		strcpy(song.Author,"");
 		strcpy(song.Comment,"Imported from FastTracker II Module: ");
-		strcat(song.Comment,szName.c_str());
+		strcat(song.Comment,file_name().c_str());
 		zapArray(pSongName);
 
 		LONG iInstrStart = LoadPatterns(song);
@@ -1010,7 +1010,7 @@ namespace host{
 		strcpy(song.Name,pSongName);
 		strcpy(song.Author,"");
 		strcpy(song.Comment,"Imported from MOD Module: ");
-		strcat(song.Comment,szName.c_str());
+		strcat(song.Comment,file_name().c_str());
 		zapArray(pSongName);
 
 		// get data
