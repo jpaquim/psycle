@@ -17,17 +17,17 @@ NAMESPACE__BEGIN(psycle)
 	int CFrameMixerMachine::Knob::numFrames(64);
 	CDC CFrameMixerMachine::Knob::knobDC;
 
-	int CFrameMixerMachine::InfoLabel::xoffset(8);
-	int CFrameMixerMachine::InfoLabel::width(64);
+	int CFrameMixerMachine::InfoLabel::xoffset(4);
+	int CFrameMixerMachine::InfoLabel::width(28);
 	int CFrameMixerMachine::InfoLabel::height(28);
 	CFont CFrameMixerMachine::InfoLabel::font;
 	CFont CFrameMixerMachine::InfoLabel::font_bold;
 
 	int CFrameMixerMachine::GraphSlider::height(128);
-	int CFrameMixerMachine::GraphSlider::width(20);
+	int CFrameMixerMachine::GraphSlider::width(28);
 	int CFrameMixerMachine::GraphSlider::knobheight(22);
 	int CFrameMixerMachine::GraphSlider::knobwidth(15);
-	int CFrameMixerMachine::GraphSlider::xoffset(2);
+	int CFrameMixerMachine::GraphSlider::xoffset(6);
 	CDC CFrameMixerMachine::GraphSlider::backDC;
 	CDC CFrameMixerMachine::GraphSlider::knobDC;
 
@@ -37,20 +37,22 @@ NAMESPACE__BEGIN(psycle)
 	{
 		int pixel = numFrames*width*value;
 		dc->BitBlt(x_knob,y_knob,width,height,&knobDC,pixel,0,SRCCOPY);
+//		dc->Draw3dRect(x_knob,y_knob,width,1,RGB(20,20,20),RGB(20,20,20));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// InfoLabel class
 	void CFrameMixerMachine::InfoLabel::Draw(CDC* dc, int x, int y,const char *parName, const char *parValue)
 	{
+		dc->Draw3dRect(x,y-1,width,height+1,RGB(20,20,20),RGB(20,20,20));
 		const int half = height/2;
 		dc->SetBkColor(Global::pConfig->machineGUITopColor);
 		dc->SetTextColor(Global::pConfig->machineGUIFontTopColor);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE, CRect(x, y, x+width, y+half), CString(parName), 0);
+		dc->ExtTextOut(x+1, y, ETO_OPAQUE, CRect(x, y, x+width-1, y+half), CString(parName), 0);
 
 		dc->SetBkColor(Global::pConfig->machineGUIBottomColor);
 		dc->SetTextColor(Global::pConfig->machineGUIFontBottomColor);
-		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE, CRect(x, y+half, x+width, y+height), CString(parValue), 0);
+		dc->ExtTextOut(x+1, y+half, ETO_OPAQUE, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -58,13 +60,20 @@ NAMESPACE__BEGIN(psycle)
 	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, int x, int y,const char *parName, const char *parValue)
 	{
 		const int half = height/2;
-		dc->SetBkColor(Global::pConfig->machineGUIHTopColor);
-		dc->SetTextColor(Global::pConfig->machineGUIHFontTopColor);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE |ETO_CLIPPED, CRect(x, y, x+width, x+half), CString(parName), 0);
+		const int mywidth = width + Knob::width;
+		dc->FillSolidRect(x, y, mywidth, half,Global::pConfig->machineGUITitleColor);
+		dc->FillSolidRect(x, y+half, mywidth, half,Global::pConfig->machineGUIBottomColor);
+		dc->SetBkMode(TRANSPARENT);
+//		dc->SetBkColor(Global::pConfig->machineGUITitleColor);
+		dc->SetTextColor(Global::pConfig->machineGUITitleFontColor);
+		dc->SelectObject(&font_bold);
+		dc->ExtTextOut(x+xoffset, y, ETO_CLIPPED, CRect(x+1, y, x+mywidth-1, y+half), CString(parName), 0);
+		dc->SelectObject(&font);
 
-		dc->SetBkColor(Global::pConfig->machineGUIHBottomColor);
-		dc->SetTextColor(Global::pConfig->machineGUIHFontBottomColor);
-		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width, x+height), CString(parValue), 0);
+//		dc->SetBkColor(Global::pConfig->machineGUIBottomColor);
+		dc->SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+		dc->ExtTextOut(x+xoffset, y+half, ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
+		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,RGB(20,20,20),RGB(20,20,20));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -81,8 +90,9 @@ NAMESPACE__BEGIN(psycle)
 		dc->SetTextColor(Global::pConfig->machineGUITitleFontColor);
 
 		dc->SelectObject(&font_bold);
-		dc->ExtTextOut(x + xoffset+3, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+3, y + quarter, x+mywidth-6, y+half+quarter), CString(parName), 0);
+		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
 		dc->SelectObject(&font);
+		dc->Draw3dRect(x-1,y-1,width+Knob::width+1,height+1,RGB(20,20,20),RGB(20,20,20));
 
 	}
 
@@ -93,6 +103,8 @@ NAMESPACE__BEGIN(psycle)
 		int ypos = (1-value)*(height-knobheight);
 		dc->BitBlt(x,y,width,height,&backDC,0,0,SRCCOPY);
 		dc->BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
+//		dc->FillSolidRect(x+width, y, InfoLabel::width, height-InfoLabel::height,Global::pConfig->machineGUITopColor);
+		dc->Draw3dRect(x-1,y-1,width+1,height+1,RGB(20,20,20),RGB(20,20,20));
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -147,17 +159,36 @@ NAMESPACE__BEGIN(psycle)
 	void CFrameMixerMachine::SelectMachine(Machine* pMachine)
 	{
 		_pMixer=(Mixer*)pMachine;
+
+		int sends(0),cols(0);
+		for (int i=0; i<MAX_CONNECTIONS; i++)
+		{
+			if (_pMixer->SendValid(i)) {
+				sendNames[sends]=Global::_pSong->_pMachine[_pMixer->GetSend(i)]->GetEditName();
+				sends++;
+			}
+		}
+		for (int i=0; i<MAX_CONNECTIONS; i++)
+		{
+			if (_pMixer->_inputCon[i]) cols++;
+		}
+		int winh = InfoLabel::height + ((sends+1) * Knob::height) + GraphSlider::height;
+		int winw = (cols+sends+1) * (Knob::width+InfoLabel::width);
+
 		CWnd *dsk = GetDesktopWindow();
 		CRect rClient;
 		dsk->GetClientRect(&rClient);
 		MoveWindow
 			(
-			rClient.Width() / 2 - 300,
-			rClient.Height() / 2 - 150,
-			300,
-			150 + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
+			0,
+			0,
+			winw + 2*GetSystemMetrics(SM_CXDLGFRAME)+2*GetSystemMetrics(SM_CXEDGE),
+			winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + 2*GetSystemMetrics(SM_CYDLGFRAME)+2*GetSystemMetrics(SM_CXEDGE),
 			false
 			);
+		numChannels =cols;
+		numSends=sends;
+
 		ShowWindow(SW_SHOW);
 
 	}
@@ -186,7 +217,10 @@ NAMESPACE__BEGIN(psycle)
 			int sends(0),cols(0);
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
-				if (_pMixer->SendValid(i)) { sendNames[sends]= Global::_pSong->_pMachine[_pMixer->GetSend(i)]->GetEditName(); sends++; }
+				if (_pMixer->SendValid(i)) {
+					sendNames[sends]=Global::_pSong->_pMachine[_pMixer->GetSend(i)]->GetEditName();
+					sends++;
+				}
 			}
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
@@ -224,21 +258,24 @@ NAMESPACE__BEGIN(psycle)
 		CBitmap* oldbmp,*oldbmp2,*oldbmp3;
 		
 		int xoffset(0), yoffset(0);
-		dc.FillSolidRect(0,0,1200,1024,RGB(0,0,0));
-
+		//dc.FillSolidRect(0,0,1200,1024,RGB(0x90,0x90,0x90));
+		dc.FillSolidRect(0,0,1200,1024,Global::pConfig->machineGUIBottomColor);
 		// Column 0, Labels.
 		dc.SelectObject(&InfoLabel::font);
 //		InfoLabel::Draw(&dc,xoffset,yoffset,"","");
 		for (int i=0; i <numSends;i++)
 		{
 			yoffset+=InfoLabel::height;
-			InfoLabel::DrawHeader(&dc,xoffset,yoffset,sendNames[numSends-i-1].c_str(),"");
+			std::string sendtxt = "Send ";
+			sendtxt += ('0'+i+1);
+			InfoLabel::DrawHLight(&dc,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 		}
 		yoffset+=InfoLabel::height;
 		InfoLabel::DrawHeader(&dc,xoffset,yoffset,"Dry Mix","");
 
 		yoffset+=GraphSlider::height;
-		InfoLabel::DrawHeader(&dc,xoffset,yoffset,"Level","");
+		InfoLabel::DrawHeader(&dc,xoffset,yoffset,"Ch. Input","");
+//		dc.Draw3dRect(xoffset,0,Knob::width+InfoLabel::width,yoffset+InfoLabel::height,RGB(20,20,20),RGB(20,20,20));
 		
 
 		// Colums 1 onwards, controls
@@ -261,12 +298,12 @@ NAMESPACE__BEGIN(psycle)
 				for (int i=0; i<numSends; i++)
 				{
 					Knob::Draw(&dc,xoffset,yoffset,0.0f);
-					InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset,"Val:","");
+					InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset,"Send","");
 					yoffset+=Knob::height;
 				}
 				Knob::Draw(&dc,xoffset,yoffset,0.0f);
-				InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset,"Val:","");
-				InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset+GraphSlider::height,"Val:","");
+				InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset,"Mix","");
+				InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset+GraphSlider::height,"Level","");
 				yoffset+=Knob::width;
 				GraphSlider::Draw(&dc,xoffset,yoffset,0);
 				
@@ -276,11 +313,12 @@ NAMESPACE__BEGIN(psycle)
 		for (int i=0; i<numSends; i++)
 		{
 			yoffset=0;
-			InfoLabel::DrawHeader(&dc,xoffset,yoffset,sendNames[numSends-i-1].c_str(),"");
+			InfoLabel::DrawHeader(&dc,xoffset,yoffset,sendNames[i].c_str(),"");
 			yoffset+=(numSends+1)*InfoLabel::height;
-			InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset+GraphSlider::height,"Val:","");
+			InfoLabel::Draw(&dc,xoffset+Knob::width,yoffset+GraphSlider::height,"Level","");
 			yoffset+=InfoLabel::height;
 			GraphSlider::Draw(&dc,xoffset,yoffset,0);
+			dc.Draw3dRect(xoffset-1,0-1,Knob::width+InfoLabel::width+1,yoffset+1,RGB(20,20,20),RGB(20,20,20));
 			xoffset+=Knob::width+InfoLabel::width;
 		}
 
