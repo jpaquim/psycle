@@ -16,6 +16,10 @@
 #include "convert_internal_machines.hpp"
 #include "Riff.hpp" // for Wave file loading.
 
+#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+	#error "sorry, only works on little endian machines"
+#endif
+
 namespace psycle
 {
 	namespace host
