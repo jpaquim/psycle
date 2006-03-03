@@ -5,7 +5,7 @@
 #include <packageneric/pre_compiled_headers.private.hpp>
 #include PACKAGENERIC
 
-#include <asio/asio.hpp>
+#include <asio_build_wrapper/asio.hpp>
 
 // Note: It's not totally clear whether test makes sense for macOSX/Darwin on the PC architecture.
 #if defined DIVERSALIS__OPERATING_SYSTEM__APPLE

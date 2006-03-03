@@ -19,6 +19,7 @@ function main
 	(
 		echo .cvsignore
 		echo boost
+		echo asio
 	) > include\.cvsignore &&
 	(
 		echo .cvsignore
