@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::RiffFile.
 #pragma once
 #include <universalis/compiler/numeric.hpp>
+#include <cstdio>
 
 namespace psycle
 {
