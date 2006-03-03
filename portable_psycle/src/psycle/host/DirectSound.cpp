@@ -34,7 +34,7 @@ namespace psycle
 		{
 		}
 
-		void DirectSound::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
+		void DirectSound::Initialize(HWND hwnd, WorkFunction pCallback, void * context)
 		{
 			_callbackContext = context;
 			_pCallback = pCallback;

@@ -19,7 +19,7 @@ namespace psycle
 		public:
 			WaveOut();
 			virtual ~WaveOut() throw();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
+			virtual void Initialize(HWND hwnd, WorkFunction pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);	
 			virtual int GetWritePos();
@@ -54,7 +54,7 @@ namespace psycle
 			bool _stopPolling;
 			CBlock _blocks[MAX_WAVEOUT_BLOCKS];
 			void* _callbackContext;
-			AUDIODRIVERWORKFN _pCallback;
+			WorkFunction _pCallback;
 
 			static void PollerThread(void *pWaveOut);
 			void ReadConfig();

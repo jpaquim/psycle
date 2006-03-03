@@ -30,7 +30,7 @@ namespace psycle
 
 			ASIOCallbacks asioCallbacks;
 			ASIOSampleType asioSample;
-			AUDIODRIVERWORKFN _pASIOCallback;
+			AudioDriver::WorkFunction _pASIOCallback;
 			void* _pASIOcallbackContext;
 			int _ASIObufferSize;
 			bool asiopostOutput;

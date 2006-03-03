@@ -30,7 +30,7 @@ namespace psycle
 		{
 		}
 
-		void WaveOut::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
+		void WaveOut::Initialize(HWND hwnd, WorkFunction pCallback, void * context)
 		{
 			_callbackContext = context;
 			_pCallback = pCallback;
