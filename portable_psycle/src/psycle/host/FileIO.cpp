@@ -9,7 +9,7 @@ namespace psycle
 	{
 		universalis::compiler::numeric<32>::unsigned_int RiffFile::FourCC(char const * null_terminated_string)
 		{
-			unsigned __int32 result(0x20202020); // four spaces (padding)
+			universalis::compiler::numeric<32>::unsigned_int result(0x20202020); // four spaces (padding)
 			char * chars(reinterpret_cast<char *>(&result));
 			for(int i(0) ; i < 4 && null_terminated_string[i] ; ++i) *chars++ = null_terminated_string[i];
 			return result;
