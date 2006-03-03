@@ -66,32 +66,8 @@ namespace psycle
 
 				int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); Read(&tmp, bytes); return tmp; }
 
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				bool               virtual inline ReadBool()   {               bool tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				unsigned      char virtual inline ReadUChar()  { unsigned      char tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				signed      char virtual inline ReadChar()   {   signed      char tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				unsigned short int virtual inline ReadUShort() { unsigned short int tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				signed short int virtual inline ReadShort()  {   signed short int tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				UINT               virtual inline ReadUINT()   {               UINT tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				float              virtual inline ReadFloat()  {              float tmp; Read(tmp); return tmp; }
-
-				UNIVERSALIS__COMPILER__DEPRECATED("use explicit size instead")
-				double             virtual inline ReadDouble() {             double tmp; Read(tmp); return tmp; }
-
-				bool               virtual ReadString(std::string &);
-				bool               virtual ReadString(char *, std::size_t const & max_length);
+				bool               ReadString(std::string &);
+				bool               ReadString(char *, std::size_t const & max_length);
 
 				/// pad the string with spaces
 				UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")

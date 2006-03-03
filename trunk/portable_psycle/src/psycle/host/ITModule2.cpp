@@ -804,10 +804,10 @@ Special:  Bit 0: On = song message attached.
 				while ( newEntry )
 				{
 					unsigned char channel=(newEntry-1)&0x3F;
-					if (newEntry&0x80) mask[channel]=ReadChar();
+					if (newEntry&0x80) Read(mask[channel]);
 					if(mask[channel]&1)
 					{
-						unsigned char note=ReadChar();
+						unsigned char note; Read(note);
 						if (note==255) pent._note = 120;
 						else if (note==254) pent._note=120; //\todo: Attention ! Psycle doesn't have a note-cut note.
 						else pent._note = note;
@@ -816,7 +816,7 @@ Special:  Bit 0: On = song message attached.
 					}
 					if (mask[channel]&2)
 					{
-						pent._inst=ReadChar()-1;
+						Read(pent._inst); --pent._inst;
 						pent._mach=0;
 						lastinst[channel]=pent._inst;
 					}
@@ -825,7 +825,7 @@ Special:  Bit 0: On = song message attached.
 						unsigned char tmp;
 						pent._mach=0;
 						if (mask[channel]&0x40 ) tmp=lastvol[channel];
-						else tmp=ReadChar();
+						else Read(tmp);
 						lastvol[channel]=tmp;
 						// Volume ranges from 0->64
 						// Panning ranges from 0->64, mapped onto 128->192
