@@ -479,6 +479,10 @@ namespace psycle
 				if ( !fullopen ) pMachine = new Dummy(index);
 				else pMachine = new DuplicatorMac(index);
 				break;
+			case MACH_MIXER:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new Mixer(index);
+				break;
 			case MACH_PLUGIN:
 				{
 					if(!fullopen) pMachine = new Dummy(index);
