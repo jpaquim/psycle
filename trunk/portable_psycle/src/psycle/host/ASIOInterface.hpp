@@ -20,7 +20,7 @@ namespace psycle
 		public:
 			ASIOInterface();
 			virtual ~ASIOInterface() throw();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context);
+			virtual void Initialize(HWND hwnd, WorkFunction pCallback, void* context);
 			virtual void Configure();
 			inline virtual bool Initialized() { return _initialized; };
 			inline virtual bool Configured() { return _configured; };
@@ -45,7 +45,6 @@ namespace psycle
 			int currentSamples[MAX_ASIO_DRIVERS];
 
 		private:
-			void Error(const char msg[]);
 			void ReadConfig();
 			void WriteConfig();
 			bool Start();

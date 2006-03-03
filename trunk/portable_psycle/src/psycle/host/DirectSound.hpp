@@ -19,7 +19,7 @@ namespace psycle
 		public:
 			DirectSound();
 			virtual ~DirectSound() throw();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
+			virtual void Initialize(HWND hwnd, WorkFunction pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);
 			virtual int GetWritePos();
@@ -58,7 +58,7 @@ namespace psycle
 			LPDIRECTSOUND _pDs;
 			LPDIRECTSOUNDBUFFER _pBuffer;
 			void* _callbackContext;
-			AUDIODRIVERWORKFN _pCallback;
+			WorkFunction _pCallback;
 
 			static void PollerThread(void* pDirectSound);
 		//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
