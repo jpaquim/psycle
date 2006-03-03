@@ -7,6 +7,11 @@
 #include "VSTHost.hpp"
 #include "FrameMachine.hpp"
 #include "FileIO.hpp"
+
+#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+	#error "sorry, only works on little endian machines"
+#endif
+
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CPreset::CPreset()
