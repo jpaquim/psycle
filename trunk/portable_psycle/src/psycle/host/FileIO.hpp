@@ -20,8 +20,8 @@ namespace psycle
 		class RiffChunkHeader
 		{
 		public:
-			unsigned __int32 _id; // 4-character string, hence big-endian.
-			unsigned __int32 _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
+			universalis::compiler::numeric<32>::unsigned_int _id; // 4-character string, hence big-endian.
+			universalis::compiler::numeric<32>::unsigned_int _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
 		};
 
 		/// riff file format.
@@ -95,7 +95,7 @@ namespace psycle
 
 				/// pad the string with spaces
 				UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")
-				static unsigned __int32 FourCC(char const * null_terminated_string);
+				static universalis::compiler::numeric<32>::unsigned_int FourCC(char const * null_terminated_string);
 		};
 	}
 }
