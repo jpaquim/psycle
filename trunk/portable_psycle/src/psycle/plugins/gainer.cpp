@@ -7,10 +7,10 @@ namespace psycle { namespace plugin {
 class Gainer : public Plugin
 {
 	public:
+
 		virtual void help(std::ostream & out) const throw()
 		{
 			out << "just a multiplier" << std::endl;
-			out << "it's of course compatible with original psycle 1 arguru's gainer" << std::endl;
 		}
 
 		enum Parameters { gain };
@@ -27,15 +27,14 @@ class Gainer : public Plugin
 
 		virtual void describe(std::ostream & out, const int & parameter) const
 		{
-			Real gain2 = (gain_==0)?0.00001:gain_;
 			switch(parameter)
 			{
-			case gain:
-				out << std::setprecision(3) << std::setw(6) << gain_;
-				out << " (" << std::setw(6) << (20 * std::log10(gain2)) << " dB)";
-				break;
-			default:
-				Plugin::describe(out, parameter);
+				case gain:
+					out << std::setprecision(3) << std::setw(6) << gain_;
+					if(gain_) out << " (" << std::setw(6) << 20 * std::log10(gain_) << " dB)";
+					break;
+				default:
+					Plugin::describe(out, parameter);
 			}
 		};
 

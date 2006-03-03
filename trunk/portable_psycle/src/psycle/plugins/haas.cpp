@@ -97,59 +97,59 @@ public:
 	{
 		switch(parameter)
 		{
-		case direct_delay_stereo_delta:
-		case early_reflection_delay_stereo_delta:
-			if(std::fabs((*this)(parameter)) < 1e-6)
-			{
-				out << 0;
+			case direct_delay_stereo_delta:
+			case early_reflection_delay_stereo_delta:
+				if(std::fabs((*this)(parameter)) < 1e-6)
+				{
+					out << 0;
+					break;
+				}
+			case early_reflection_delay:
+			case late_reflection_delay:
+				out << (*this)(parameter) * 1000 << " ms";
 				break;
-			}
-		case early_reflection_delay:
-		case late_reflection_delay:
-			out << (*this)(parameter) * 1000 << " ms";
-			break;
-		case overall_dry_wet:
-			out
-				<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
-				<< " ("
-				<< std::setw(6) << 20 * std::log10(1 - (*this)(parameter))
-				<< ", "
-				<< std::setw(6) << 20 * std::log10((*this)(parameter))
-				<< " dB)";
-			break;
-		case overall_gain:
-		case direct_gain:
-		case early_reflection_gain:
-		case late_reflection_gain:
-			out << std::setprecision(3) << std::setw(6) << (*this)(parameter);
-			out << " (" << std::setw(6) << 20 * std::log10((*this)(parameter)) << " dB)";
-			break;
-		case channel_mix:
-			switch((*this)[parameter])
-			{
-			case normal:
-				out << "normal";
+			case overall_dry_wet:
+				out
+					<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
+					<< " ("
+					<< std::setw(6) << 20 * std::log10(1 - (*this)(parameter))
+					<< ", "
+					<< std::setw(6) << 20 * std::log10((*this)(parameter))
+					<< " dB)";
 				break;
-			case swapped:
-				out << "swapped";
+			case overall_gain:
+			case direct_gain:
+			case early_reflection_gain:
+			case late_reflection_gain:
+				out << std::setprecision(3) << std::setw(6) << (*this)(parameter);
+				out << " (" << std::setw(6) << 20 * std::log10((*this)(parameter)) << " dB)";
 				break;
-			case mono:
-				out << "mono";
+			case channel_mix:
+				switch((*this)[parameter])
+				{
+					case normal:
+						out << "normal";
+						break;
+					case swapped:
+						out << "swapped";
+						break;
+					case mono:
+						out << "mono";
+						break;
+					default:
+						out << "???";
+				}
 				break;
+			case direct_pan:
+			case early_reflection_pan:
+			case late_reflection_pan:
+				if(std::fabs((*this)(parameter)) < 2e-5)
+				{
+					out << 0;
+					break;
+				}
 			default:
-				out << "???";
-			}
-			break;
-		case direct_pan:
-		case early_reflection_pan:
-		case late_reflection_pan:
-			if(std::fabs((*this)(parameter)) < 2e-5)
-			{
-				out << 0;
-				break;
-			}
-		default:
-			Plugin::describe(out, parameter);
+				Plugin::describe(out, parameter);
 		}
 	};
 
