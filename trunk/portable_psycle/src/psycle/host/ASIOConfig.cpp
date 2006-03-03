@@ -5,41 +5,41 @@
 #include "ASIOConfig.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		#define MIN_NUMBUF 1
-		#define MAX_NUMBUF 16
 
-		#define MIN_BUFSIZE 256
-		#define MAX_BUFSIZE 32768
-
-		CASIOConfig::CASIOConfig(CWnd* pParent) : CDialog(CASIOConfig::IDD, pParent)
+		namespace
 		{
-			//{{AFX_DATA_INIT(CASIOConfig)
-			m_bufferSize = 1024;
-			m_driverIndex = -1;
-			//}}AFX_DATA_INIT
+			int const MIN_NUMBUF = 1;
+			int const MAX_NUMBUF = 16;
+
+			int const MIN_BUFSIZE = 256;
+			int const MAX_BUFSIZE = 32768;
+		}
+
+		CASIOConfig::CASIOConfig(CWnd* pParent)
+		:
+			CDialog(CASIOConfig::IDD, pParent),
+			m_bufferSize(1024),
+			m_driverIndex(-1)
+		{
 		}
 
 		void CASIOConfig::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CASIOConfig)
 			DDX_Control(pDX, IDC_ASIO_DRIVER, m_driverComboBox);
-			DDX_Control(pDX, IDC_ASIO_LATENCY, m_latency);
-			DDX_Control(pDX, IDC_ASIO_SAMPLERATE_COMBO, m_sampleRateCombo);
 			DDX_CBIndex(pDX, IDC_ASIO_DRIVER, m_driverIndex);
+			DDX_Control(pDX, IDC_ASIO_SAMPLERATE_COMBO, m_sampleRateCombo);
 			DDX_Control(pDX, IDC_ASIO_BUFFERSIZE_COMBO, m_bufferSizeCombo);
-			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_ASIO_LATENCY, m_latency);
 		}
 
 		BEGIN_MESSAGE_MAP(CASIOConfig, CDialog)
-			//{{AFX_MSG_MAP(CASIOConfig)
 			ON_CBN_SELENDOK(IDC_ASIO_SAMPLERATE_COMBO, OnSelendokSamplerate)
 			ON_CBN_SELENDOK(IDC_ASIO_BUFFERSIZE_COMBO, OnSelendokBuffersize)
 			ON_WM_DESTROY()
 			ON_BN_CLICKED(IDC_CONTROL_PANEL, OnControlPanel)
 			ON_CBN_SELCHANGE(IDC_ASIO_DRIVER, OnSelchangeAsioDriver)
 			ON_BN_CLICKED(IDOK, OnBnClickedOk)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		void CASIOConfig::RecalcLatency()
@@ -64,15 +64,11 @@ NAMESPACE__BEGIN(psycle)
 				m_driverComboBox.AddString(pASIO->szFullName[i]);
 			}
 
-			if (m_driverIndex < 0)
+			if (m_driverIndex < 0 || m_driverIndex >= m_driverComboBox.GetCount())
 			{
 				m_driverIndex = 0;
 			}
 
-			else if (m_driverIndex >= m_driverComboBox.GetCount())
-			{
-				m_driverIndex = 0;
-			}
 			m_driverComboBox.SetCurSel(m_driverIndex);
 
 			// Sample rate
@@ -88,15 +84,12 @@ NAMESPACE__BEGIN(psycle)
 			FillBufferBox();
 
 			return TRUE;
-			// return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
 		void CASIOConfig::OnOK() 
 		{
 			if (m_driverComboBox.GetCount() > 0)
 			{
-
 				CString str;
 				m_sampleRateCombo.GetWindowText(str);
 				m_sampleRate = atoi(str);
@@ -143,6 +136,7 @@ NAMESPACE__BEGIN(psycle)
 			m_driverIndex = m_driverComboBox.GetCurSel();
 			pASIO->ControlPanel(m_driverIndex);
 		}
+
 		void CASIOConfig::FillBufferBox()
 		{
 			// hmm we had better recalc our buffer options
@@ -196,7 +190,7 @@ NAMESPACE__BEGIN(psycle)
 			m_driverIndex = m_driverComboBox.GetCurSel();
 
 			FillBufferBox();
-
 		}
+
 	NAMESPACE__END
 NAMESPACE__END

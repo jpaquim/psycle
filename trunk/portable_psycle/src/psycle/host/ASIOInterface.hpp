@@ -9,12 +9,14 @@ namespace psycle
 {
 	namespace host
 	{
-		#define MAX_ASIO_DRIVERS 32
-		#define MAX_ASIO_OUTPUTS 128
 
 		/// output device interface implemented by asio.
 		class ASIOInterface : public AudioDriver
 		{
+		public:
+			int const static MAX_ASIO_DRIVERS = 32;
+			int const static MAX_ASIO_OUTPUTS = 128;
+
 		public:
 			ASIOInterface();
 			virtual ~ASIOInterface() throw();

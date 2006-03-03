@@ -12,8 +12,8 @@ namespace universalis
 	namespace compiler
 	{
 		/// gets the compiler symbol string of any type.
-		template<typename x>
-		std::string inline typenameof(x const &);
+		template<typename X>
+		std::string inline typenameof(X const &);
 	}
 }
 namespace universalis
