@@ -18,12 +18,36 @@
 	\endverbatim
 */
 #pragma once
-#include "ddc.hpp"
 namespace psycle
 {
 	namespace host
 	{
-		#pragma pack(push, 1)
+		enum DDCRET
+		{
+		DDC_SUCCESS,           // The operation succeded
+		DDC_FAILURE,           // The operation failed for unspecified reasons
+		DDC_OUT_OF_MEMORY,     // Operation failed due to running out of memory
+		DDC_FILE_ERROR,        // Operation encountered file I/O error
+		DDC_INVALID_CALL,      // Operation was called with invalid parameters
+		DDC_USER_ABORT,        // Operation was aborted by the user
+		DDC_INVALID_FILE       // File format does not match
+		};
+
+		#define  TRUE     1
+		#define  FALSE    0
+
+		typedef int dBOOLEAN;
+
+		typedef unsigned char BYTE;
+
+		typedef unsigned char        UINT8;
+		typedef signed   char        INT8;
+
+		typedef unsigned short int   UINT16;
+		typedef signed   short int   INT16;
+		//typedef unsigned long  int   UINT32;
+		//typedef signed   long  int   INT32;
+
 		unsigned long FourCC(const char * ChunkName);
 
 		enum ExtRiffFileMode
@@ -201,7 +225,5 @@ namespace psycle
 				return ExtRiffFile::CurrentFilePosition();
 			}
 		};
-
-		#pragma pack(pop)
 	}
 }
