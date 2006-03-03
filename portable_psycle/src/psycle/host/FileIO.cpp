@@ -73,7 +73,7 @@ namespace psycle
 
 		bool RiffFile::Close()
 		{
-			if(!file_)
+			if(file_)
 			{
 				std::fflush(file_);
 				bool const result(Error());
