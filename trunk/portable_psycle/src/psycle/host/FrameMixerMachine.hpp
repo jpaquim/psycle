@@ -34,15 +34,15 @@ NAMESPACE__BEGIN(psycle)
 			InfoLabel(){};
 			virtual ~InfoLabel(){};
 
-			static void Draw(CDC *dc, int x, int y,const char *parName, const char *parValue);
-			static void DrawHLight(CDC *dc, int x, int y,const char *parName, const char *parValue);
-			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
+			static void Draw(CDC *dc, int x, int y,const char *parName,const char *parValue);
+			static void DrawValue(CDC *dc, int x, int y,const char *parValue);
+			static void DrawHLight(CDC *dc, int x, int y,const char *parName,const char *parValue);
+			static void DrawHLightValue(CDC *dc, int x, int y,const char *parValue);
+//			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
 
 			static int xoffset;
 			static int width;
 			static int height;
-			static CFont font;
-			static CFont font_bold;
 		};
 
 /*		class HLightInfoLabel : public InfoLabel
@@ -68,7 +68,8 @@ NAMESPACE__BEGIN(psycle)
 			GraphSlider(){};
 			virtual ~GraphSlider(){};
 
-			static void Draw(CDC *dc,int x, int y, float value);
+			static void Draw(CDC *dc,int x, int y,float);
+			static void DrawKnob(CDC *dc,int x, int y, float value);
 
 			static int width;
 			static int height;
@@ -77,6 +78,19 @@ NAMESPACE__BEGIN(psycle)
 			static int xoffset;
 			static CDC backDC;
 			static CDC knobDC;
+		};
+		class VuMeter
+		{
+		public:
+			VuMeter(){};
+			virtual ~VuMeter(){};
+
+			static void Draw(CDC *dc,int x, int y, float value);
+
+			static int width;
+			static int height;
+			static CDC VuOff;
+			static CDC VuOn;
 		};
 
 		DECLARE_DYNCREATE(CFrameMixerMachine)
@@ -87,27 +101,34 @@ NAMESPACE__BEGIN(psycle)
 		CFrameMixerMachine(int dum);
 	private:
 		Mixer* _pMixer;
-		CBitmap m_sliderback;
-		CBitmap m_sliderknob;
-
-		Knob m_knob;
-		InfoLabel m_infolabel;
-		GraphSlider m_slider;
+		int numChans;
 		int numSends;
-		int numChannels;
-		std::string sendNames[MAX_CONNECTIONS];
+		bool updateBuffer;
+		static CFont font;
+		static CFont font_bold;
 
+		CBitmap m_sliderback;
+		CBitmap m_vumeteroff;
+		CBitmap m_sliderknob;
+		CBitmap m_vumeteron;
+		CBitmap *bmpDC;
+
+		std::string sendNames[MAX_CONNECTIONS];
 
 		// Operations
 	public:
 		void SelectMachine(Machine* pMachine);
-		void Generate();
+		void Generate(){};
 		// Overrides
 		// ClassWizard generated virtual function overrides
 		//{{AFX_VIRTUAL(CFrameMixerMachine)
 		//}}AFX_VIRTUAL
 		// Implementation
 	protected:
+		void Generate(CDC& dc);
+		bool UpdateSendsandChans();
+		int GetColumn(int x);
+		int GetRow(int y);
 		virtual ~CFrameMixerMachine();
 		// Generated message map functions
 		//{{AFX_MSG(CFrameMixerMachine)

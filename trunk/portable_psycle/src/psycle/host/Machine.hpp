@@ -327,6 +327,7 @@ namespace psycle
 			Mixer();
 			Mixer(int index);
 			virtual void Init(void);
+			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
@@ -342,6 +343,9 @@ namespace psycle
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			
+
+			virtual float VuChan(int idx);
+			virtual float VuSend(int idx);
 		protected:
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
 			/// Incoming send, Machine number
@@ -388,6 +392,7 @@ namespace psycle
 			int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
 			// prevent downward jerkiness
 			if(temp > 97) temp = 97;
+			else if (temp <0) temp=0;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
 			--_volumeDisplay;
 		};
