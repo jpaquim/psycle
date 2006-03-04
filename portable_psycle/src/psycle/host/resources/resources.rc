@@ -297,6 +297,8 @@ IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
 IDB_KEYS_BACK           BITMAP                  "keys_bac.bmp"
 IDB_SLIDERBACK          BITMAP                  "Slider\\sliderP.bmp"
 IDB_SLIDERKNOB          BITMAP                  "Slider\\sliderB.bmp"
+IDB_VUMETEROFF          BITMAP                  "Slider\\VuOff.bmp"
+IDB_VUMETERON           BITMAP                  "Slider\\VuOn.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

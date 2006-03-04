@@ -1037,7 +1037,19 @@ namespace psycle
 				_sendValid[j]=false;
 			}
 		}
-
+		void Mixer::Tick( int channel,PatternEntry* pData)
+		{
+			if(pData->_note == cdefTweakM)
+			{
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				SetParameter(pData->_inst,nv);
+				Global::pPlayer->Tweaker = true;
+			}
+			else if(pData->_note == cdefTweakS)
+			{
+				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
+			}
+		}
 		void Mixer::Work(int numSamples)
 		{
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
@@ -1297,6 +1309,19 @@ namespace psycle
 			pFile->Write(&_sendVolMulti,sizeof(_sendVolMulti));
 			pFile->Write(&_sendValid,sizeof(_sendValid));
 		};
+		float Mixer::VuChan(int idx)
+		{
+			float vol;
+			GetWireVolume(idx,vol);
+			if ( _inputCon[idx] ) return (Global::_pSong->_pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
+			return 0.0f;
+		}
+		float Mixer::VuSend(int idx)
+		{
+			float vol = _sendVol[idx] * _sendVolMulti[idx];
+			if ( _sendValid[idx] ) return (Global::_pSong->_pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
+			return 0.0f;
+		}
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

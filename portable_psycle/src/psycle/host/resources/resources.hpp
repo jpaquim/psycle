@@ -107,6 +107,9 @@
 #define IDB_SLIDERBACK                  241
 #define IDB_BITMAP3                     242
 #define IDB_SLIDERKNOB                  242
+#define IDB_VUMETEOFF                   243
+#define IDB_VUMETEROFF                  243
+#define IDB_VUMETERON                   244
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1091,7 +1094,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        243
+#define _APS_NEXT_RESOURCE_VALUE        245
 #define _APS_NEXT_COMMAND_VALUE         33000
 #define _APS_NEXT_CONTROL_VALUE         1741
 #define _APS_NEXT_SYMED_VALUE           61

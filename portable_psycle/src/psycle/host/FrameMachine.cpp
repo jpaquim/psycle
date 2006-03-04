@@ -157,6 +157,8 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if ( _pActive != NULL ) *_pActive = false;
 			KillTimer(2104+MachineIndex);
+			b_font.DeleteObject();
+			b_font_bold.DeleteObject();
 			CFrameWnd::OnDestroy();
 		}
 
@@ -178,7 +180,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CPaintDC dc(this); // device context for painting
 
-			dc.SelectObject(&b_font);
+			CFont* oldfont=dc.SelectObject(&b_font);
 
 			CRect rect;
 			GetClientRect(&rect);
@@ -331,6 +333,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 			memDC.SelectObject(oldbmp);
 			memDC.DeleteDC();
+			dc.SelectObject(oldfont);
 		}
 
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
