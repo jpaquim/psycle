@@ -28,6 +28,9 @@ namespace psycle
 	/// \todo
 //	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
 //	typedef ::ULONG ULONG;
+	/// \todo
+	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uintXX_t")
+	typedef ::ULONGLONG ULONGLONG;
 
 	namespace host
 	{
