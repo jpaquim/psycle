@@ -273,7 +273,7 @@ namespace psycle
 
 		void Song::Reset()
 		{
-			cpuIdle=0;
+			cpu_idle(0);
 			_sampCount=0;
 			// Cleaning pattern allocation info
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;

@@ -66,7 +66,7 @@ namespace psycle
 			int numSamples)
 		{
 
-			CPUCOST_INIT(cost);
+			PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute)
 			{
 				for (int voice=0; voice<_numVoices; voice++)
@@ -185,8 +185,8 @@ namespace psycle
 				}
 			}
 
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}
 

@@ -3,48 +3,31 @@
 #pragma once
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-class Song;
-
+		class Song;
 		/// info window.
 		class CInfoDlg : public CDialog
 		{
-		public:
-			void UpdateInfo();
-			CInfoDlg(CWnd* pParent = 0);
-			Song* _pSong;
-			void InitTimer();
-			int itemcount;
-		// Dialog Data
-			//{{AFX_DATA(CInfoDlg)
-			enum { IDD = IDD_INFO };
-			CStatic	m_mem_virtual;
-			CStatic	m_mem_pagefile;
-			CStatic	m_mem_phy;
-			CStatic	m_mem_reso;
-			CStatic	m_cpurout;
-			CStatic	m_machscpu;
-			CStatic	m_processor_label;
-			CStatic	m_cpuidlelabel;
-			CListCtrl	m_machlist;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CInfoDlg)
+			public:
+				void UpdateInfo();
+				CInfoDlg(CWnd* pParent = 0);
+				Song* _pSong;
+				void InitTimer();
+				int itemcount;
+				enum { IDD = IDD_INFO };
+				CStatic	m_mem_virtual;
+				CStatic	m_mem_pagefile;
+				CStatic	m_mem_phy;
+				CStatic	m_mem_reso;
+				CStatic	m_cpurout;
+				CStatic	m_machscpu;
+				CStatic	m_processor_label;
+				CStatic	m_cpuidlelabel;
+				CListCtrl	m_machlist;
 			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CInfoDlg)
-			virtual BOOL OnInitDialog();
-			afx_msg void OnTimer(UINT nIDEvent);
-			//}}AFX_MSG
+				virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+				virtual BOOL OnInitDialog();
+				afx_msg void OnTimer(UINT nIDEvent);
 			DECLARE_MESSAGE_MAP()
-		public:
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	NAMESPACE__END
 NAMESPACE__END

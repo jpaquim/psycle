@@ -23,7 +23,6 @@ NAMESPACE__BEGIN(psycle)
 			Global _global;
 			afx_msg void OnAppAbout();
 		private:
-			void GetNaiveCPUFreq();
 			void ProcessCmdLine(CMainFrame*);
 			void LoadRecent(CMainFrame*);
 			void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;

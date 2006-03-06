@@ -5,6 +5,7 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
+#include <cstdint>
 
 
 
@@ -30,6 +31,16 @@ namespace psycle
 		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
 		class Song
 		{
+			public:
+				void             inline cpu_idle(cpu::cycles_type const & value)       throw() { cpu_idle_ = value; }
+				cpu::cycles_type inline cpu_idle(                              ) const throw() { return cpu_idle_; }
+			private:
+				cpu::cycles_type        cpu_idle_;
+			public:
+				/// Number of samples processed since all cpu cost counters were reset.
+				/// We accumulate this sample count along with cpu costs until we compute the percentages, for example, every second.
+				unsigned int _sampCount;
+
 		public:
 			/// constructor.
 			Song();
@@ -41,8 +52,6 @@ namespace psycle
 			char Author[64];
 			/// the comments on the song
 			char Comment[256];
-			unsigned cpuIdle;
-			unsigned _sampCount;
 			bool Invalided;
 			/// the initial beats per minute (BPM) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.

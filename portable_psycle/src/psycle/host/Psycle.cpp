@@ -12,10 +12,6 @@
 #include "NewMachine.hpp"
 #include <operating_system/exception.hpp>
 #include <sstream>
-#include <comdef.h>
-#include <Wbemidl.h>
-
-# pragma comment(lib, "wbemuuid.lib")
 
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
@@ -48,134 +44,10 @@ NAMESPACE__BEGIN(psycle)
 
 		BOOL CPsycleApp::InitInstance()
 		{
-			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
-			
-			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
-			
-			// CPU Frequency setup
-			// redone by kSh
-			// based on the WMI; doesn't work on Win9x but falls back to the old method then
-			HRESULT hres;
-
-			hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-			if (FAILED(hres))
 			{
-				GetNaiveCPUFreq();
-			}
-			else
-			{
-				hres = CoInitializeSecurity(
-					NULL, -1, NULL,	NULL, RPC_C_AUTHN_LEVEL_DEFAULT,
-					RPC_C_IMP_LEVEL_IMPERSONATE, NULL,	EOAC_NONE, NULL
-				);
-
-				if (FAILED(hres))
-				{
-					GetNaiveCPUFreq();
-					CoUninitialize();
-				}
-				else
-				{
-					IWbemLocator *pLoc = NULL;
-
-					hres = CoCreateInstance(
-						CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
-						IID_IWbemLocator, (LPVOID *) &pLoc
-					);
-
-					if (FAILED(hres))
-					{
-						GetNaiveCPUFreq();
-						CoUninitialize();
-					}
-					else
-					{
-						IWbemServices *pSvc = NULL;
-
-						hres = pLoc->ConnectServer(
-							_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0,
-							NULL, 0, 0, &pSvc
-						);
-
-						if (FAILED(hres))
-						{
-							GetNaiveCPUFreq();
-							pLoc->Release();
-							CoUninitialize();
-						}
-						else
-						{
-							hres = CoSetProxyBlanket(
-								pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
-								NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE,
-								NULL, EOAC_NONE
-							);
-
-							if (FAILED(hres))
-							{
-								GetNaiveCPUFreq();
-								pSvc->Release();
-								pLoc->Release();
-								CoUninitialize();
-							}
-							else
-							{
-								IEnumWbemClassObject* pEnumerator = NULL;
-								hres = pSvc->ExecQuery(
-									bstr_t("WQL"),
-									bstr_t("SELECT * FROM Win32_Processor"),
-									WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-									NULL, &pEnumerator
-								);
-
-								if (FAILED(hres))
-								{
-									GetNaiveCPUFreq();
-									pSvc->Release();
-									pLoc->Release();
-									CoUninitialize();
-								}
-								else
-								{
-									IWbemClassObject *pclsObj=0;
-									ULONG uReturn = 0;
-
-									Global::_cpuHz = 0;
-									while (pEnumerator)
-									{
-										HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-										
-										if (0 == uReturn)
-										{
-											break;
-										}
-										
-										VARIANT vtProp;
-										VariantInit(&vtProp);
-
-										hr = pclsObj->Get(L"CurrentClockSpeed", 0, &vtProp, 0, 0);
-										if (!FAILED(hr))
-										{
-											Global::_cpuHz = 1000000 * vtProp.intVal;
-										}
-										VariantClear(&vtProp);
-									}
-
-									if (0 >= Global::_cpuHz)
-									{
-										GetNaiveCPUFreq();
-									}
-									
-									pSvc->Release();
-									pLoc->Release();
-									pEnumerator->Release();
-									pclsObj->Release();
-									CoUninitialize();
-								}
-							}
-						}
-					}
-				}
+				///\todo check this
+				SetRegistryKey(PSYCLE__PATH__REGISTRY__ROOT "\\" PSYCLE__PATH__REGISTRY__CONFIGKEY); // Change the registry key under which our settings are stored.
+				LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 			}
 			
 			// To create the main window, this code creates a new frame window
@@ -261,70 +133,38 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
-		// CPsycleApp naive method to get the CPU frequency
-
-
-		void CPsycleApp::GetNaiveCPUFreq()
-		{
-			ULONG cpuHz;
-			__asm rdtsc ///< read time stamp to EAX
-			__asm mov cpuHz, eax
-			Sleep(1000);
-			__asm rdtsc
-			__asm sub eax, cpuHz ///< Find the difference
-			__asm mov cpuHz, eax
-			Global::_cpuHz = cpuHz;
-		}
-
-		/////////////////////////////////////////////////////////////////////////////
 		// CAboutDlg dialog used for App About
 
 		class CAboutDlg : public CDialog
 		{
-		public:
-			CAboutDlg();
-
-		// Dialog Data
-			//{{AFX_DATA(CAboutDlg)
-			enum { IDD = IDD_ABOUTBOX };
-			CStatic	m_asio;
-			CEdit	m_sourceforge;
-			CEdit	m_psycledelics;
-			CStatic	m_steincopyright;
-			CStatic	m_headerdlg;
-			CButton	m_showabout;
-			CStatic	m_headercontrib;
-			CStatic	m_aboutbmp;
-			CEdit	m_contrib;
-			CStatic m_versioninfo;
-			//}}AFX_DATA
-
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CAboutDlg)
+			public:
+				CAboutDlg();
+				enum { IDD = IDD_ABOUTBOX };
+				CStatic	m_asio;
+				CEdit	m_sourceforge;
+				CEdit	m_psycledelics;
+				CStatic	m_steincopyright;
+				CStatic	m_headerdlg;
+				CButton	m_showabout;
+				CStatic	m_headercontrib;
+				CStatic	m_aboutbmp;
+				CEdit	m_contrib;
+				CStatic m_versioninfo;
 			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-
-		// Implementation
-		protected:
-			//{{AFX_MSG(CAboutDlg)
-			afx_msg void OnContributors();
-			virtual BOOL OnInitDialog();
-			afx_msg void OnShowatstartup();
-			//}}AFX_MSG
+				virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+				afx_msg void OnContributors();
+				virtual BOOL OnInitDialog();
+				afx_msg void OnShowatstartup();
 			DECLARE_MESSAGE_MAP()
 		};
 
 		CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 		{
-			//{{AFX_DATA_INIT(CAboutDlg)
-			//}}AFX_DATA_INIT
 		}
 
 		void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CAboutDlg)
 			DDX_Control(pDX, IDC_ASIO, m_asio);
 			DDX_Control(pDX, IDC_EDIT5, m_sourceforge);
 			DDX_Control(pDX, IDC_EDIT2, m_psycledelics);
@@ -335,14 +175,11 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
 			DDX_Control(pDX, IDC_EDIT1, m_contrib);
 			DDX_Control(pDX, IDC_VERSION_INFO_MULTI_LINE, m_versioninfo);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-			//{{AFX_MSG_MAP(CAboutDlg)
 			ON_BN_CLICKED(IDC_BUTTON1, OnContributors)
 			ON_BN_CLICKED(IDC_SHOWATSTARTUP, OnShowatstartup)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 
@@ -564,80 +401,3 @@ NAMESPACE__BEGIN(psycle)
 		}
 	NAMESPACE__END
 NAMESPACE__END
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// new gui ... just a test, anyone can freely throw this code away
-#if 0
-
-/*
-	in main class constructor add:
-
-			#if defined OPERATING_SYSTEM__CROSSPLATFORM
-			{
-				#if !defined NDEBUG
-					operating_system::terminal terminal;
-				#endif
-				(*new psycle::front_ends::gui::gui).start(); // starts the new gui in parallel with the mfc one, each in their own thread
-			}
-			#endif
-*/
-
-#undef OPERATING_SYSTEM__CROSSPLATFORM
-#if defined OPERATING_SYSTEM__CROSSPLATFORM
-	#include <operating_system/logger.hpp>
-	#include <psycle/front_ends/gui/gui.hpp>
-	#include <boost/thread/thread.hpp>
-	#include <boost/thread/mutex.hpp>
-	namespace psycle
-	{
-		namespace front_ends
-		{
-			namespace gui
-			{
-				class gui
-				{
-				public:
-					gui();
-					void start() throw(boost::thread_resource_error);
-					void operator()() throw();
-				private:
-					boost::thread * thread_;
-				};
-
-				gui::gui() : thread_(0) {}
-
-				void gui::operator()() throw()
-				{
-					softsynth::gui::main();
-				}
-
-				void gui::start() throw(boost::thread_resource_error)
-				{
-					if(thread_) return;
-					try
-					{
-						template<typename Functor> class thread
-						{
-						public:
-							inline thread(Functor & functor) : functor_(functor) {}
-							inline void operator()() throw() { functor_(); }
-						private:
-							Functor & functor_;
-						};
-						thread_ = new boost::thread(thread<gui>(*this));
-					}
-					catch(const boost::thread_resource_error & e)
-					{
-						std::cerr << typeid(e).name() << ": " << e.what() << std::endl;;
-						throw;
-					}
-				}
-			}
-		}
-	}
-#endif
-#endif // 0

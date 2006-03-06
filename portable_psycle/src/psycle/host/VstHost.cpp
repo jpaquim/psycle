@@ -1230,7 +1230,7 @@ namespace psycle
 
 			void instrument::Work(int numSamples)
 			{
-				CPUCOST_INIT(cost);
+				PSYCLE__CPU_COST__INIT(cost);
 				if(!_mute && instantiated)
 				{
 					if(wantidle) 
@@ -1435,8 +1435,8 @@ namespace psycle
 						}
 					}
 				}
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
+				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+				work_cpu_cost(work_cpu_cost() + cost);
 				_worked = true;
 			}
 
@@ -1561,7 +1561,7 @@ namespace psycle
 			void fx::Work(int numSamples)
 			{
 				Machine::Work(numSamples);
-				CPUCOST_INIT(cost);
+				PSYCLE__CPU_COST__INIT(cost);
 				if((!_mute) && (!_stopped) && (!_bypass))
 				{
 					if(instantiated)
@@ -1773,8 +1773,8 @@ namespace psycle
 						}
 					}
 				}
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
+				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+				work_cpu_cost(work_cpu_cost() + cost);
 				_worked = true;
 			}
 
