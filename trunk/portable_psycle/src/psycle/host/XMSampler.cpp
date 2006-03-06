@@ -2303,7 +2303,7 @@ namespace psycle
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
 
-			CPUCOST_INIT(cost);
+			PSYCLE__CPU_COST__INIT(cost);
 			int i;
 
 			if (!_mute)
@@ -2450,8 +2450,8 @@ namespace psycle
 				}
 			}
 
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}// XMSampler::Work()
 

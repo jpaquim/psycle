@@ -367,7 +367,7 @@ namespace psycle
 		void Plugin::Work(int numSamples)
 		{
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
+			PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
@@ -594,8 +594,8 @@ namespace psycle
 					}
 				}
 			}
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}
 

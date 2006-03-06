@@ -1,24 +1,24 @@
 ///\interface psycle::host::Global
 #pragma once
 #include <universalis/compiler.hpp>
-#include <universalis/compiler/numeric.hpp>
+#include <cstdint>
 namespace psycle
 {
 	/// \todo
 	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
-	typedef universalis::compiler::numeric< 8>::unsigned_int byte;
+	typedef std::uint8_t byte;
 	/// \todo
 //	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
 //	typedef ::UCHAR UCHAR;
 	/// \todo
 	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
-	typedef universalis::compiler::numeric<16>::unsigned_int word;
+	typedef std::uint16_t word;
 	/// \todo
 //	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
 //	typedef ::WORD WORD;
 	/// \todo
 	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-	typedef universalis::compiler::numeric<32>::unsigned_int dword;
+	typedef std::uint32_t dword;
 	/// \todo
 //	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
 //	typedef ::DWORD DWORD;
@@ -29,7 +29,7 @@ namespace psycle
 //	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
 //	typedef ::ULONG ULONG;
 	/// \todo
-	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uintXX_t")
+	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t")
 	typedef ::ULONGLONG ULONGLONG;
 
 	namespace host
@@ -41,6 +41,37 @@ namespace psycle
 		namespace dsp
 		{
 			class Resampler;
+		}
+
+		namespace cpu
+		{
+			typedef std::int64_t cycles_type;
+			cycles_type inline cycles()
+			{
+				#if !defined DIVERSALIS__PROCESSOR__X86
+					#error "sorry, contains x86-specific asm code"
+				#endif
+
+				#if !defined DIVERSALIS__COMPILER__MICROSOFT // or intel?
+					#error "sorry, asm code is not written in at&t syntax"
+				#endif
+
+				union result_type
+				{
+					std::uint64_t value;
+					struct split_type
+					{
+						std::uint32_t lo, hi;
+					} split;
+				} result;
+				__asm
+				{
+					rdtsc; // copies the x86 64-bit cpu cycle time stamp counter to edx and eax
+					mov result.split.hi, edx;
+					mov result.split.lo, eax;
+				}
+				return result.value;
+			}
 		}
 
 		class Global
@@ -56,7 +87,6 @@ namespace psycle
 				Player           static inline & player       () throw() { return *pPlayer; }
 				Configuration    static inline & configuration() throw() { return *pConfig; }
 				dsp::Resampler   static inline & resampler    () throw() { return *pResampler; }
-				unsigned __int64 static inline   cpu_frequency() throw() { return _cpuHz; }
 				InputHandler     static inline & input_handler() throw() { return *pInputHandler; }
 
 			public:// should be private, not static
@@ -64,9 +94,13 @@ namespace psycle
 				static Player * pPlayer;
 				static Configuration * pConfig;
 				static dsp::Resampler * pResampler;
-				UNIVERSALIS__COMPILER__DEPRECATED("check this usage. mustn't be used with 32-bit computations")
-				static unsigned __int64 _cpuHz;
 				static InputHandler* pInputHandler;
+
+			public:
+				cpu::cycles_type static inline cpu_frequency(                              ) /*const*/ throw() { return cpu_frequency_; }
+				void             static inline cpu_frequency(cpu::cycles_type const & value)           throw() { cpu_frequency_ = value; }
+			private:
+				cpu::cycles_type static        cpu_frequency_;
 		};
 
 		namespace loggers

@@ -421,7 +421,7 @@ namespace psycle
 				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 			#else
 				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-			boost::read_write_mutex::scoped_read_write_lock lock(pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
+					boost::read_write_mutex::scoped_read_write_lock lock(pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
 				#else // original implementation
 					CSingleLock crit(&Global::_pSong->door, TRUE);
 				#endif
@@ -454,7 +454,7 @@ namespace psycle
 				{
 
 
-					CPUCOST_INIT(idletime);
+					PSYCLE__CPU_COST__INIT(idletime);
 					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
 					{
 						pSong->_sampCount =0;
@@ -462,8 +462,8 @@ namespace psycle
 						{
 							if(pSong->_pMachine[c])
 							{
-								pSong->_pMachine[c]->_wireCost = 0;
-								pSong->_pMachine[c]->_cpuCost = 0;
+								pSong->_pMachine[c]->wire_cpu_cost(0);
+								pSong->_pMachine[c]->work_cpu_cost(0);
 							}
 						}
 					}
@@ -484,8 +484,8 @@ namespace psycle
 						// Master machine initiates work
 						pSong->_pMachine[MASTER_INDEX]->Work(amount);
 					}
-					CPUCOST_CALC(idletime, amount);
-					pSong->cpuIdle = idletime;
+					PSYCLE__CPU_COST__CALCULATE(idletime, amount);
+					pSong->cpu_idle(idletime);
 					pSong->_sampCount += amount;
 					if((pThis->_playing) && (pThis->_recording))
 					{

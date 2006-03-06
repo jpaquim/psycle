@@ -4,5 +4,4 @@
 ///\file
 ///\brief meta header
 #pragma once
-
 #include "detail/microsoft/max_path.hpp"

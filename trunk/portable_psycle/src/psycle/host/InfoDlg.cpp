@@ -6,21 +6,19 @@
 #include "Song.hpp"
 #include "InfoDlg.hpp"
 #include "Machine.hpp"
-#include ".\infodlg.hpp"
+#include "infodlg.hpp"
+#include <sstream>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
+
 		CInfoDlg::CInfoDlg(CWnd* pParent)
 		: CDialog(CInfoDlg::IDD, pParent)
 		{
-			//{{AFX_DATA_INIT(CInfoDlg)
-			// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
 		}
 
 		void CInfoDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CInfoDlg)
 			DDX_Control(pDX, IDC_MEM_RESO4, m_mem_virtual);
 			DDX_Control(pDX, IDC_MEM_RESO3, m_mem_pagefile);
 			DDX_Control(pDX, IDC_MEM_RESO2, m_mem_phy);
@@ -30,13 +28,10 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_CPUL, m_processor_label);
 			DDX_Control(pDX, IDC_CPUIDLE_LABEL, m_cpuidlelabel);
 			DDX_Control(pDX, IDC_MACHINELIST, m_machlist);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CInfoDlg, CDialog)
-		//{{AFX_MSG_MAP(CInfoDlg)
-		ON_WM_TIMER()
-		//}}AFX_MSG_MAP
+			ON_WM_TIMER()
 		END_MESSAGE_MAP()
 
 		BOOL CInfoDlg::OnInitDialog() 
@@ -50,9 +45,11 @@ NAMESPACE__BEGIN(psycle)
 			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
 			m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 			
-			char buffer[128];
-			sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
-			m_processor_label.SetWindowText(buffer);
+			{
+				std::ostringstream s;
+				s << static_cast<cpu::cycles_type>(Global::cpu_frequency() * 1e-6) << " MHz";
+				m_processor_label.SetWindowText(s.str().c_str());
+			}
 			
 			UpdateInfo();
 			
@@ -88,9 +85,9 @@ NAMESPACE__BEGIN(psycle)
 					{
 						float machCPU=0;
 		//				float masterCPU=0;
-		//				machCPU = (float)tmac->_cpuCost*0.1f;
-		//				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * 100;
-						machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+		//				machCPU = (float)tmac->work_cpu_cost()*0.1f;
+		//				machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * 100;
+						machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 		/*				if (!c)
 						{
 							masterCPU = machCPU;
@@ -99,8 +96,8 @@ NAMESPACE__BEGIN(psycle)
 						m_machlist.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
 						n++;
 						machsCPU += machCPU;
-		//				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz)*100;
-						wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+		//				wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency())*100;
+						wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency()) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 					}
 				}
 				if (itemcount != n)
@@ -110,8 +107,8 @@ NAMESPACE__BEGIN(psycle)
 				
 		//		totalCPU = _pSong->cpuIdle*0.1f+masterCPU;
 		//		totalCPU = ((float)_pSong->cpuIdle/Global::_cpuHz)*100+machsCPU;
-		//		totalCPU = machsCPU + wiresCPU+((float)_pSong->cpuIdle/Global::_cpuHz)*100;
-				totalCPU = machsCPU + wiresCPU+ ((float)_pSong->cpuIdle/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+		//		totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency())*100;
+				totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency()) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 				
 				sprintf(buffer,"%.1f%%",totalCPU);
 				m_cpuidlelabel.SetWindowText(buffer);
@@ -119,8 +116,8 @@ NAMESPACE__BEGIN(psycle)
 				sprintf(buffer,"%.1f%%",machsCPU);
 				m_machscpu.SetWindowText(buffer);
 				
-		//		sprintf(buffer,"%.1f%%",((float)_pSong->cpuIdle/Global::_cpuHz)*100);
-		//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->_wireCost/Global::_cpuHz)*100);
+		//		sprintf(buffer,"%.1f%%",((float)_pSong->cpu_idle()/Global::cpu_frequency())*100);
+		//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->wire_cpu_cost()/Global::cpu_frequency())*100);
 				sprintf(buffer,"%.1f%%",wiresCPU);
 				m_cpurout.SetWindowText(buffer);
 				

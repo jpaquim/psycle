@@ -1408,7 +1408,7 @@ namespace psycle {
 
 			void plugin::Work(int numSamples)
 			{
-				CPUCOST_INIT(cost);
+				PSYCLE__CPU_COST__INIT(cost);
 				if(!_mute && instantiated)
 				{
 					if(wantidle) 
@@ -1613,7 +1613,7 @@ namespace psycle {
 						}
 					}
 				}
-				CPUCOST_CALC(cost, numSamples);
+				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 				_cpuCost += cost;
 				_worked = true;
 			}

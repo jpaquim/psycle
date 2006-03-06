@@ -8,10 +8,16 @@
 #include "FileIO.hpp"
 #include <processor/fpu.hpp>
 #include <stdexcept>
+#include <cstdint>
 namespace psycle
 {
 	namespace host
 	{
+		/// we don't really need a macro for just one little expression...
+		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
+		/// we don't really need a macro for just one little expression...
+		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
+
 		class Machine; // forward declaration
 		class RiffFile; // forward declaration
 
@@ -237,15 +243,54 @@ namespace psycle
 			int _volumeMaxDisplay;
 			/// output peak level for display
 			int _volumeMaxCounterLife;
-			unsigned long int _cpuCost;
-			unsigned long int _wireCost;
+
 			int _scopePrevNumSamples;
 			int	_scopeBufferIndex;
 			float *_pScopeBufferL;
 			float *_pScopeBufferR;
 			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
 			CPoint _connectionPoint[MAX_CONNECTIONS];
+
+			public:
+				void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
+				cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+			private:
+				cpu::cycles_type        work_cpu_cost_;
+
+			public:
+				void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
+				cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
+			private:
+				cpu::cycles_type        wire_cpu_cost_;
 		};
+
+		inline void Machine::SetVolumeCounter(int numSamples)
+		{
+			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+			if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
+			int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
+			// prevent downward jerkiness
+			if(temp > 97) temp = 97;
+			else if (temp <0) temp=0;
+			if(temp > _volumeDisplay) _volumeDisplay = temp;
+			--_volumeDisplay;
+		};
+
+		/*
+		inline void Machine::SetVolumeCounterAccurate(int numSamples)
+		{
+			_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
+		};
+		*/
+
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// internal machines
+
+
 
 		/// dummy machine.
 		class Dummy : public Machine
@@ -261,6 +306,7 @@ namespace psycle
 			static char * _psName;
 		};
 
+		/// note duplicator machine.
 		class DuplicatorMac : public Machine
 		{
 		public:
@@ -314,7 +360,7 @@ namespace psycle
 			static char* _psName;
 		};
 
-		/// master machine.
+		/// mixer machine.
 		class Mixer : public Machine
 		{
 		public:
@@ -359,49 +405,5 @@ namespace psycle
 
 			static char* _psName;
 		};
-
-
-
-		///\todo make that a naked inline function
-		#define CPUCOST_INIT(cost)	\
-			ULONG cost;				\
-			__asm rdtsc				\
-			__asm mov cost, eax
-		/*
-		///\todo make that a naked inline function
-		#define CPUCOST_CALC(cost, numSamples)	\
-			__asm {								\
-			__asm rdtsc							\
-			__asm sub eax, cost					\
-			__asm mov cost, eax					\
-			}									\
-			cost = cost* Global::pConfig->_pOutputDriver->_samplesPerSec/ numSamples
-		//	cost = (cost*1000)/(numSamples*(Global::_cpuHz/Global::pConfig->_pOutputDriver->_samplesPerSec));
-		*/
-		///\todo make that a naked inline function
-		#define CPUCOST_CALC(cost, numSamples)	\
-			__asm rdtsc							\
-			__asm sub eax, cost					\
-			__asm mov cost, eax
-
-
-		inline void Machine::SetVolumeCounter(int numSamples)
-		{
-			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
-			if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-			int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
-			// prevent downward jerkiness
-			if(temp > 97) temp = 97;
-			else if (temp <0) temp=0;
-			if(temp > _volumeDisplay) _volumeDisplay = temp;
-			--_volumeDisplay;
-		};
-
-		/*
-		inline void Machine::SetVolumeCounterAccurate(int numSamples)
-		{
-			_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
-		};
-		*/
 	}
 }

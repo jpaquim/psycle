@@ -167,8 +167,8 @@ namespace psycle
 		void Machine::Init()
 		{
 			// Standard gear initalization
-			_cpuCost = 0;
-			_wireCost = 0;
+			work_cpu_cost(0);
+			wire_cpu_cost(0);
 			_mute = false;
 			_stopped = false;
 			_bypass = false;
@@ -318,7 +318,7 @@ namespace psycle
 		{
 			_worked = false;
 			_waitingForSound= false;
-			CPUCOST_INIT(cost);
+			PSYCLE__CPU_COST__INIT(cost);
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
 				float *pSamplesL = _pSamplesL;   
@@ -347,9 +347,8 @@ namespace psycle
 			_scopePrevNumSamples=numSamples;
 			dsp::Clear(_pSamplesL, numSamples);
 			dsp::Clear(_pSamplesR, numSamples);
-			CPUCOST_CALC(cost, numSamples);
-			//_cpuCost = cost;
-			_wireCost+= cost;
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			wire_cpu_cost(wire_cpu_cost() + cost);
 		}
 
 		/// Each machine is expected to produce its output in its own
@@ -393,19 +392,21 @@ namespace psycle
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
 						{
-							CPUCOST_INIT(wcost);
+							PSYCLE__CPU_COST__INIT(wcost);
 							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-							CPUCOST_CALC(wcost,numSamples);
-							_wireCost+=wcost;
+							PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+							wire_cpu_cost(wire_cpu_cost() + wcost);
 						}
 					}
 				}
 			}
-			CPUCOST_INIT(wcost);
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			CPUCOST_CALC(wcost,numSamples);
-			_wireCost+=wcost;
+			{
+				PSYCLE__CPU_COST__INIT(wcost);
+					dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+				PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+				wire_cpu_cost(wire_cpu_cost() + wcost);
+			}
 		}
 
 		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
@@ -422,9 +423,9 @@ namespace psycle
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
 							{
-#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-								processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+									processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
 								pInMachine->Work(numSamples);
 							}
 							pInMachine->_waitingForSound = false;
@@ -697,7 +698,7 @@ namespace psycle
 		void Dummy::Work(int numSamples)
 		{
 			Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
+			PSYCLE__CPU_COST__INIT(cost);
 			Machine::SetVolumeCounter(numSamples);
 			if ( Global::pConfig->autoStopMachines )
 			{
@@ -709,8 +710,8 @@ namespace psycle
 				}
 			}
 			//else Machine::SetVolumeCounter(numSamples);
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}
 
@@ -723,10 +724,14 @@ namespace psycle
 		};
 		
 
+
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
+
+
+
 		DuplicatorMac::DuplicatorMac(int index)
 		{
 			_macIndex = index;
@@ -884,7 +889,7 @@ namespace psycle
 				processor::fpu::exception_mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 			#endif
 			Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
+			PSYCLE__CPU_COST__INIT(cost);
 			//if(!_mute)
 			//{
 				float mv = CValueMapper::Map_255_1(_outDry);
@@ -985,8 +990,8 @@ namespace psycle
 				if( _rMax > currentpeak ) currentpeak = _rMax;
 			//}
 			sampleCount+=numSamples;
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 		}
 
@@ -1059,27 +1064,30 @@ namespace psycle
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 			if(!_mute && !_stopped )
 			{
-				CPUCOST_INIT(cost);
-				Mix(numSamples);
-				Machine::SetVolumeCounter(numSamples);
-				if ( Global::pConfig->autoStopMachines )
-				{
-					if (_volumeCounter < 8.0f)
+				PSYCLE__CPU_COST__INIT(cost);
+					Mix(numSamples);
+					Machine::SetVolumeCounter(numSamples);
+					if ( Global::pConfig->autoStopMachines )
 					{
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						_stopped = true;
+						if (_volumeCounter < 8.0f)
+						{
+							_volumeCounter = 0.0f;
+							_volumeDisplay = 0;
+							_stopped = true;
+						}
+						else _stopped = false;
 					}
-					else _stopped = false;
-				}
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
+				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+				work_cpu_cost(work_cpu_cost() + cost);
 			}
 
-			CPUCOST_INIT(wcost);
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			CPUCOST_CALC(wcost,numSamples);
-			_wireCost+=wcost;
+			{
+				PSYCLE__CPU_COST__INIT(wcost);
+					dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+				PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+				wire_cpu_cost(wire_cpu_cost() + wcost);
+			}
+
 			_worked = true;
 		}
 
@@ -1095,39 +1103,43 @@ namespace psycle
 						if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
 						{ 
 							// Mix all the inputs and route them to the send fx.
-							CPUCOST_INIT(cost);
-							for (int j=0; j<MAX_CONNECTIONS; j++)
 							{
-								if (_inputCon[j])
-								{
-									Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[j]];
-									if (pInMachine)
+								PSYCLE__CPU_COST__INIT(cost);
+									for (int j=0; j<MAX_CONNECTIONS; j++)
 									{
-										if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
+										if (_inputCon[j])
 										{
-											dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
-											dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+											Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[j]];
+											if (pInMachine)
+											{
+												if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
+												{
+													dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+													dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+												}
+											}
 										}
 									}
-								}
+								PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+								work_cpu_cost(work_cpu_cost() + cost);
 							}
-							CPUCOST_CALC(cost, numSamples);
-							_cpuCost += cost;
 
 							// tell the FX to work, now that the input is ready.
 							{
-#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-								processor::fpu::exception_mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+									processor::fpu::exception_mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
 								pSendMachine->Work(numSamples);
 							}
-							CPUCOST_INIT(cost2);
 
-							pSendMachine->_waitingForSound = false;
-							dsp::Clear(_pSamplesL, numSamples);
-							dsp::Clear(_pSamplesR, numSamples);
-							CPUCOST_CALC(cost2, numSamples);
-							_cpuCost += cost2;
+							{
+								PSYCLE__CPU_COST__INIT(cost);
+									pSendMachine->_waitingForSound = false;
+									dsp::Clear(_pSamplesL, numSamples);
+									dsp::Clear(_pSamplesR, numSamples);
+								PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+								work_cpu_cost(work_cpu_cost() + cost);
+							}
 
 						}
 						if(!pSendMachine->_stopped) _stopped = false;
