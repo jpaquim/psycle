@@ -2,8 +2,8 @@
 #include "constants.hpp"
 #include "afxwin.h"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIGeneral dialog
@@ -61,5 +61,5 @@ public:
 	afx_msg void OnCbnSelendokXmpanningmode();
 };
 
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

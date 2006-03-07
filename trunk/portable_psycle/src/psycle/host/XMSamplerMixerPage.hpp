@@ -1,7 +1,7 @@
 #pragma once
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 // Cuadro de diálogo de XMSamplerMixerPage
 
 class XMSampler;
@@ -104,5 +104,5 @@ public:
 	void pMachine(XMSampler* mac) { sampler = mac; };
 private:
 };
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

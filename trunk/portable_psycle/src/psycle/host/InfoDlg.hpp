@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CInfoDlg.
 #pragma once
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class Song;
 		/// info window.
 		class CInfoDlg : public CDialog
@@ -29,5 +29,5 @@ NAMESPACE__BEGIN(psycle)
 				afx_msg void OnTimer(UINT nIDEvent);
 			DECLARE_MESSAGE_MAP()
 		};
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

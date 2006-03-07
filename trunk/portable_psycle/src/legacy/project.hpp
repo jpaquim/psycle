@@ -2,22 +2,14 @@
 ///\brief project-wide compiler, operating system, and processor specific tweaks.
 ///\meta generic
 #pragma once
-#include <diversalis/compiler.hpp>
-#if !defined DIVERSALIS__COMPILER__RESOURCE
-	#include <diversalis/diversalis.hpp>
-	#include <universalis/universalis.hpp>
-#endif
-
-
+#include <psycle/host/detail/project.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// public configuration header
 
 
 
-// includes the public configuration header.
-#include "configuration.hpp"
+// following is old legacy stuff that's superseeded by universalis
 
 
 
@@ -293,20 +285,6 @@
 
 #if !defined PROCESSOR__ENDIAN && !defined COMPILER__FEATURE__NOT_CONCRETE
 	#error "Unkown byte sex."
-#endif
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-// value to show in the string describing the configuration options.
-#if defined NDEBUG
-	#define PSYCLE__CONFIGURATION__OPTION__ENABLE__DEBUG "off"
-#else
-	#define PSYCLE__CONFIGURATION__OPTION__ENABLE__DEBUG "on"
 #endif
 
 

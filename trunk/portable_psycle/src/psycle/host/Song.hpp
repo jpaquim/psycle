@@ -5,14 +5,15 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
+#include "global.hpp"
 #include <cstdint>
 
 
 
-#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-	#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+	#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+	#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 		#include <boost/thread/read_write_mutex.hpp>
 	#else // original implementation
 		class CCriticalSection;
@@ -238,22 +239,18 @@ namespace psycle
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
 
-
-
-#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-#else
-#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-				private:
-					boost::read_write_mutex mutable  read_write_mutex_;
-				public:
-					boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
-#else // original implementation
-			CCriticalSection mutable door;
-#endif
-#endif
-
-
+			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#else
+				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+					private:
+						boost::read_write_mutex mutable  read_write_mutex_;
+					public:
+						boost::read_write_mutex inline & read_write_mutex() const { return this->read_write_mutex_; }
+				#else // original implementation
+					CCriticalSection mutable door;
+				#endif
+			#endif
 		};
 	}
 }

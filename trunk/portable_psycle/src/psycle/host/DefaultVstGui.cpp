@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CDefaultVstGui.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "DefaultVstGui.hpp"
 #include "Helpers.hpp"
 #include "ChildView.hpp"
 #include "configuration.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 
 		CDefaultVstGui::CDefaultVstGui() : CFormView(CDefaultVstGui::IDD)
@@ -278,5 +278,5 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 			if(CFormView::OnCreate(lpCreateStruct) == -1) return -1;
 			return 0;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

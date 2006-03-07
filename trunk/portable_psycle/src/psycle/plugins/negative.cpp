@@ -1,6 +1,6 @@
 /// \file
 /// \brief just a negative
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
 namespace psycle { namespace plugin {
 

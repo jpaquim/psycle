@@ -2,8 +2,8 @@
 #include "afxwin.h"
 #include "XMInstrument.hpp"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 class XMSampler;
 class CWaveScopeCtrl : public CStatic
@@ -89,5 +89,5 @@ protected:
 };
 
 
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

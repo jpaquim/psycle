@@ -3,7 +3,7 @@
 //	CEnvelope.cpp
 //
 //============================================================================
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "CEnvelope.h"
 //============================================================================
 //

@@ -1,6 +1,6 @@
 /// \file
 /// \brief a crash on purpose plugin
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
 #include <exception>
 namespace psycle { namespace plugin {

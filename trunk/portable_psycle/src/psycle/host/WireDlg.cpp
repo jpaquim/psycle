@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWireDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "Machine.hpp"
 #include "WireDlg.hpp"
@@ -10,8 +10,8 @@
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
 #include ".\wiredlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -1598,8 +1598,8 @@ NAMESPACE__BEGIN(psycle)
 			//set drawing vars to account for resizing
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
 
 
 

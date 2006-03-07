@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
@@ -26,8 +26,8 @@
 #include "PatDlg.hpp"
 #include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMainFrame		*pParentMain;
 		//\todo: Investigate this variable ( and especially pSong->cpuIdle ). See if it is doing what it is supposed to.
 		unsigned idletime = 0;
@@ -318,10 +318,10 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (nIDEvent == 31)
 			{
-				#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-					#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+				#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+					#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 				#else
-					#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+					#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 						boost::read_write_mutex::scoped_read_write_lock lock(Global::_pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
 					#else // original implementation
 						//\todo : IMPORTANT! change this lock to a more flexible one
@@ -3520,8 +3520,8 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
 
 // graphics operations, private headers
 #include "machineview.private.hpp"

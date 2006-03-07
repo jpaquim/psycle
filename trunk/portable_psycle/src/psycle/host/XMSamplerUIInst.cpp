@@ -1,12 +1,12 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
 #include ".\xmsampleruiinst.hpp"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 //////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIInst -----------------------------------------------------------
@@ -1658,5 +1658,5 @@ void XMSamplerUIInst::CSampleAssignEditor::OnHScroll(UINT nSBCode, UINT nPos, CS
 }
 
 
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -3,8 +3,8 @@
 #pragma once
 #include "Sampler.hpp"
 #include "constants.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class CChildView;
 
 		/// gear tracker window.
@@ -43,5 +43,5 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

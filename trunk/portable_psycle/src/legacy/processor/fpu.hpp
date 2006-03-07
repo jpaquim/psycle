@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for processor::fpu
 #pragma once
+#include <diversalis/diversalis.hpp>
 #include <cfloat>
 namespace processor
 {
@@ -13,7 +14,7 @@ namespace processor
 			public:
 				void static inline clear() throw()
 				{
-					#if defined OPERATING_SYSTEM__MICROSOFT
+					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						::_clearfp();
 					#else
 						#error todo
@@ -24,7 +25,7 @@ namespace processor
 		/// fpu exception mask
 		class exception_mask
 		{
-			#if defined COMPILER__MICROSOFT
+			#if defined DIVERSALIS__COMPILER__MICROSOFT
 				// see the optimization section for #pragma optimize("p", off)
 			#endif
 			public:
@@ -32,7 +33,7 @@ namespace processor
 				{
 					private:
 						typedef
-							#if defined PROCESSOR__X86
+							#if defined DIVERSALIS__PROCESSOR__X86
 								unsigned int // or a bit field?
 							#else
 								#error todo
@@ -48,7 +49,7 @@ namespace processor
 					private:
 						bool inline mask(underlying const & mask) const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return value & mask;
 							#else
 								#error todo
@@ -56,7 +57,7 @@ namespace processor
 						}
 						void inline mask(underlying const & mask, bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								value &= ~mask; if(b) value |= mask;
 							#else
 								#error todo
@@ -65,7 +66,7 @@ namespace processor
 					public:
 						bool inline denormal() const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return mask(_EM_DENORMAL);
 							#else
 								#error todo
@@ -73,7 +74,7 @@ namespace processor
 						}
 						void inline denormal(bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_DENORMAL, b);
 							#else
 								#error todo
@@ -81,7 +82,7 @@ namespace processor
 						}
 						bool inline inexact() const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return mask(_EM_INEXACT);
 							#else
 								#error todo
@@ -89,7 +90,7 @@ namespace processor
 						}
 						void inline inexact(bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_INEXACT, b);
 							#else
 								#error todo
@@ -97,7 +98,7 @@ namespace processor
 						}
 						bool inline divide_by_0() const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return mask(_EM_ZERODIVIDE);
 							#else
 								#error todo
@@ -105,7 +106,7 @@ namespace processor
 						}
 						void inline divide_by_0(bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_ZERODIVIDE, b);
 							#else
 								#error todo
@@ -113,7 +114,7 @@ namespace processor
 						}
 						bool inline overflow() const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return mask(_EM_OVERFLOW);
 							#else
 								#error todo
@@ -121,7 +122,7 @@ namespace processor
 						}
 						void inline overflow(bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_OVERFLOW, b);
 							#else
 								#error todo
@@ -129,7 +130,7 @@ namespace processor
 						}
 						bool inline underflow() const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return mask(_EM_UNDERFLOW);
 							#else
 								#error todo
@@ -137,7 +138,7 @@ namespace processor
 						}
 						void inline underflow(bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_UNDERFLOW, b);
 							#else
 								#error todo
@@ -145,7 +146,7 @@ namespace processor
 						}
 						bool inline invalid() const throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								return mask(_EM_INVALID);
 							#else
 								#error todo
@@ -153,7 +154,7 @@ namespace processor
 						}
 						void inline invalid(bool b) throw()
 						{
-							#if defined OPERATING_SYSTEM__MICROSOFT
+							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 								mask(_EM_INVALID, b);
 							#else
 								#error todo
@@ -163,7 +164,7 @@ namespace processor
 
 				type static inline current() throw()
 				{
-					#if defined PROCESSOR__X86 && defined OPERATING_SYSTEM__MICROSOFT
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						return ::_control87(0, 0);
 					#else
 						#error todo
@@ -171,7 +172,7 @@ namespace processor
 				}
 
 				inline exception_mask(type const & mask)
-					#if defined PROCESSOR__X86 && defined OPERATING_SYSTEM__MICROSOFT
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					:
 						save
 						(
@@ -193,7 +194,7 @@ namespace processor
 
 				inline ~exception_mask() throw()
 				{
-					#if defined PROCESSOR__X86 && defined OPERATING_SYSTEM__MICROSOFT
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						::_control87(save, ~0U);
 					#else
 						#error todo

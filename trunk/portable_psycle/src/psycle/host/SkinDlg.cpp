@@ -1,21 +1,19 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "SkinDlg.hpp"
 #include "Helpers.hpp"
 #include "Configuration.hpp"
 #include ".\skindlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define MAX_FONTS 256
 
 		IMPLEMENT_DYNCREATE(CSkinDlg, CPropertyPage)
 
 		CSkinDlg::CSkinDlg() : CPropertyPage(CSkinDlg::IDD)
 		{
-			//{{AFX_DATA_INIT(CSkinDlg)
-			//}}AFX_DATA_INIT
 		}
 
 		CSkinDlg::~CSkinDlg()
@@ -25,7 +23,6 @@ NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CPropertyPage::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CSkinDlg)
 			DDX_Control(pDX, IDC_MACHINE_BITMAP, m_machine_background_bitmap);
 			DDX_Control(pDX, IDC_MACHINEGUI_BITMAP, m_machine_GUI_bitmap);
 			DDX_Control(pDX, IDC_TRIANGLESIZE, m_triangle_size);
@@ -48,11 +45,9 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_DRAW_EMPTY_DATA, m_pattern_draw_empty_data);
 			DDX_Control(pDX, IDC_DRAW_MAC_INDEX, m_draw_mac_index);
 			DDX_Control(pDX, IDC_WIREAA, m_wireaa);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
-			//{{AFX_MSG_MAP(CSkinDlg)
 			ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
 			ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
 			ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
@@ -110,7 +105,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_DRAW_MAC_INDEX, OnDrawMacIndex)
 			ON_BN_CLICKED(IDC_MACHINE_BITMAP, OnMachineBitmap)
 			ON_CBN_SELCHANGE(IDC_TRIANGLESIZE, OnSelchangeTrianglesize)
-			//}}AFX_MSG_MAP
 			ON_BN_CLICKED(IDC_MACHINEGUI_TOPFONTC, OnBnClickedMachineguiFontc)
 			ON_BN_CLICKED(IDC_MACHINEGUI_TOPC, OnBnClickedMachineguiTopc)
 			ON_BN_CLICKED(IDC_MACHINEGUI_BOTTOMC, OnBnClickedMachineguiBottomc)
@@ -767,7 +761,7 @@ NAMESPACE__BEGIN(psycle)
 				char buf[1 << 10];
 				while(std::fgets(buf, sizeof buf, hfile))
 				{
-					#if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR <= 7
+					#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
 						// msvc 7.1 crashes because of the number of 'else if' statements
 						// so, we can't use 'else'
 						#define else
@@ -1365,7 +1359,7 @@ NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _effect_font_point);
 						}
 					}
-					#if defined else // this is the case for COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR <= 7
+					#if defined else // this is the case for DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
 						// msvc 7.1 crashes because of the number of 'else if' statements
 						// so, we can't use 'else'
 						#undef else
@@ -1929,5 +1923,5 @@ NAMESPACE__BEGIN(psycle)
 		{
 			_triangle_size=m_triangle_size.GetCurSel()+8;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CFileXM.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "FileXM.hpp"
 #include "song.hpp"
 namespace psycle

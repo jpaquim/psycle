@@ -2,8 +2,7 @@
  
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
-#define _WIN32_DCOM
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "version.hpp"
 #include "ConfigDlg.hpp"
@@ -13,8 +12,8 @@
 #include <operating_system/exception.hpp>
 #include <sstream>
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
@@ -399,5 +398,5 @@ NAMESPACE__BEGIN(psycle)
 				::RegCloseKey(RegKey);
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -28,5 +28,5 @@
 // Psycle Headers to Precompile.
 
 #if defined _AFXDLL // when mfc is used
-	#include "psycle/host/global.hpp"
+	#include <psycle/host/global.hpp>
 #endif

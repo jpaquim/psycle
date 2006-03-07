@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNAMIC(CConfigDlg, CPropertySheet)
@@ -287,5 +287,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 			return retVal;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

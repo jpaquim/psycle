@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 
 // Configure the Foobar2000 SDK $PATH before compiling 
 #include <foobarSDK/foobar2000/SDK/foobar2000.h>

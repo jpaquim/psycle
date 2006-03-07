@@ -1,6 +1,6 @@
 ///\file
 ///\brief
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "FileIT.hpp"
 #include "Song.hpp"
 namespace psycle

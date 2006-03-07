@@ -1,6 +1,6 @@
 ///\file
 ///\implementation psycle::host::Configuration.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Configuration.hpp"
 #include "Registry.hpp"
 #include "WaveOut.hpp"

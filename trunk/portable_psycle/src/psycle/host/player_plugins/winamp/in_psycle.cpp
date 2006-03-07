@@ -6,7 +6,7 @@
 
 */
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/host/configuration.hpp>
 #include <psycle/host/song.hpp>
 #include <psycle/host/player.hpp>

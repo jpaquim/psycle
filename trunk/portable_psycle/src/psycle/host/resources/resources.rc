@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -297,8 +297,6 @@ IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
 IDB_KEYS_BACK           BITMAP                  "keys_bac.bmp"
 IDB_SLIDERBACK          BITMAP                  "Slider\\sliderP.bmp"
 IDB_SLIDERKNOB          BITMAP                  "Slider\\sliderB.bmp"
-IDB_VUMETEROFF          BITMAP                  "Slider\\VuOff.bmp"
-IDB_VUMETERON           BITMAP                  "Slider\\VuOn.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2788,7 +2786,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""./resources.rc2""\r\n"
+    "#include ""resources.rc2""\r\n"
     "#include <afxres.rc>\r\n"
     "#endif\r\n"
     "\0"
@@ -2993,7 +2991,7 @@ BEGIN
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -3013,7 +3011,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "./resources.rc2"
+#include "resources.rc2"
 #include <afxres.rc>
 #endif
 

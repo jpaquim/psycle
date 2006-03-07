@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "NewMachine.hpp"
 #include "Plugin.hpp"
@@ -15,8 +15,8 @@
 #include <cctype>	// std::tolower
 #include ".\newmachine.hpp"
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		int CNewMachine::pluginOrder = 2;
 		bool CNewMachine::pluginName = true;
 		int CNewMachine::_numPlugins = -1;
@@ -2227,6 +2227,6 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 
-	NAMESPACE__END
-		NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+		UNIVERSALIS__COMPILER__NAMESPACE__END
 

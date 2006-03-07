@@ -1,9 +1,8 @@
 ///\interface psycle::host::AudioDriver
 #pragma once
+#include "detail/project.hpp"
 
-#include <diversalis/operating_system.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#include <diversalis/compiler.hpp>
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(push)
 	#endif
@@ -12,7 +11,7 @@
 		#pragma warning(pop)
 	#endif
 #else
-	#error "file not portable"
+	#error "sorry"
 #endif
 
 namespace psycle

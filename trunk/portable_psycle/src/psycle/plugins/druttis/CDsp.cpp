@@ -4,7 +4,7 @@
 //	Digital Signal Processing Library using Floating Point
 //	by Joakim Dahlström a.k.a. Druttis
 //============================================================================
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "CDsp.h"
 //============================================================================
 //	CreateWavetable

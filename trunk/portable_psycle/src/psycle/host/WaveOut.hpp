@@ -1,18 +1,29 @@
 ///\file
 ///\brief interface file for psycle::host::WaveOut.
 #pragma once
-#pragma warning(push)
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#include <mmsystem.h>
-	#pragma comment(lib, "winmm")
-#pragma warning(pop)
 #include "AudioDriver.hpp"
+
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#include "windows.h"
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(push)
+		#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#endif
+	#include <mmsystem.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(pop)
+	#endif
+#else
+	#error "sorry"
+#endif
+
 namespace psycle
 {
 	namespace host
 	{
-		#define MAX_WAVEOUT_BLOCKS 8
-
 		/// output device interface implemented by mme.
 		class WaveOut : public AudioDriver
 		{
@@ -52,6 +63,7 @@ namespace psycle
 			int _dither;
 			bool _running;
 			bool _stopPolling;
+			int const static MAX_WAVEOUT_BLOCKS = 8;
 			CBlock _blocks[MAX_WAVEOUT_BLOCKS];
 			void* _callbackContext;
 			WorkFunction _pCallback;

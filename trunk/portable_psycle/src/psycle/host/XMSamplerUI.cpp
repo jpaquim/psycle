@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "XMSamplerUI.hpp"
 #include "XMSampler.hpp"
@@ -7,8 +7,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 extern CPsycleApp theApp;
 
 IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)
@@ -58,5 +58,5 @@ void XMSamplerUI::UpdateUI(void)
 	if (GetActivePage() == &m_Mixer ) m_Mixer.UpdateAllChannels();
 }
 
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

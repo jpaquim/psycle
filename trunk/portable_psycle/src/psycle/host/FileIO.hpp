@@ -1,8 +1,10 @@
-///\file
-///\brief interface file for psycle::host::RiffFile.
+///\interface psycle::host::RiffFile
 #pragma once
-#include <universalis/compiler/numeric.hpp>
+#include "detail/project.hpp"
 #include <cstdio>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
 namespace psycle
 {
@@ -12,17 +14,17 @@ namespace psycle
 		class ULONGINV
 		{
 		public:
-			unsigned char hihi;
-			unsigned char hilo;
-			unsigned char lohi;
-			unsigned char lolo;
+			std::uint8_t hihi;
+			std::uint8_t hilo;
+			std::uint8_t lohi;
+			std::uint8_t lolo;
 		};
 
 		class RiffChunkHeader
 		{
 		public:
-			universalis::compiler::numeric<32>::unsigned_int _id; // 4-character string, hence big-endian.
-			universalis::compiler::numeric<32>::unsigned_int _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
+			std::uint32_t _id; // 4-character string, hence big-endian.
+			std::uint32_t _size; // This one should be big-endian (it is, at least, in the files I([JAZ]) have tested)
 		};
 
 		/// riff file format.
@@ -38,9 +40,9 @@ namespace psycle
 				std::string const inline & file_name() const throw() { return file_name_; }
 
 			private:
-				FILE* file_;
+				std::FILE* file_;
 			public:
-				FILE inline * GetFile() throw() { return file_; }
+				std::FILE inline * GetFile() throw() { return file_; }
 
 			public:
 				///\todo shouldn't be public
@@ -72,7 +74,7 @@ namespace psycle
 
 				/// pad the string with spaces
 				UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")
-				static universalis::compiler::numeric<32>::unsigned_int FourCC(char const * null_terminated_string);
+				static std::uint32_t FourCC(char const * null_terminated_string);
 		};
 	}
 }

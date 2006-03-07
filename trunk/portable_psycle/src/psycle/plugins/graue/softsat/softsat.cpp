@@ -34,7 +34,7 @@
 
 // version 0.2 - threshold now defaults to 32768 rather than to 512
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <string.h>
 #include <stdlib.h>

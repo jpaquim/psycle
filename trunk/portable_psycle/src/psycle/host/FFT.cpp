@@ -23,7 +23,7 @@
   calculate a real FFT and a real power spectrum.
 
 **********************************************************************/
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 
 #include <stdlib.h>
 #include <stdio.h>

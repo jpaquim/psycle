@@ -1,5 +1,6 @@
 #pragma once
 #include "version.hpp"
+#include <cstdint>
 namespace psycle
 {
 	namespace host
@@ -27,10 +28,10 @@ namespace psycle
 		/// harcoded maximal number of lines per pattern
 		int const MAX_LINES = 256;
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
-		#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-			#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+		#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+			#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 		#else
-			#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+			#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 				int const EVENT_SIZE = 6;
 			#else
 				int const EVENT_SIZE = 5;
@@ -64,16 +65,16 @@ namespace psycle
 		/// format: 0xAABB
 		/// A = Major version. It can't be loaded, skip the whole chunk.
 		/// B = minor version. It can be loaded with the existing loader, but not all information will be avaiable.
-		int const CURRENT_FILE_VERSION	= 0x0000;
-		int const CURRENT_FILE_VERSION_INFO	= 0x0000;
-		int const CURRENT_FILE_VERSION_SNGI	= 0x0000;
-		int const CURRENT_FILE_VERSION_SEQD	= 0x0000;
-		int const CURRENT_FILE_VERSION_PATD	= 0x0000;
-		int const CURRENT_FILE_VERSION_MACD	= 0x0000;
-		int const CURRENT_FILE_VERSION_INSD	= 0x0000;
-		int const CURRENT_FILE_VERSION_WAVE	= 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION      = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_INFO = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_SNGI = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_SEQD = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_PATD = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_MACD = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_INSD = 0x0000;
+		std::uint32_t const CURRENT_FILE_VERSION_WAVE = 0x0000;
 
-		int const CURRENT_CACHE_MAP_VERSION = 1;
+		std::uint32_t const CURRENT_CACHE_MAP_VERSION = 1;
 
 	}
 }

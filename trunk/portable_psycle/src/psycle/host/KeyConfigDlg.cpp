@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "KeyConfigDlg.hpp"
 #include "inputhandler.hpp"
 #include "Configuration.hpp"
 #include ".\keyconfigdlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
 
 		CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
@@ -478,5 +478,5 @@ NAMESPACE__BEGIN(psycle)
 				m_textlines.SetWindowText(buffer);
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

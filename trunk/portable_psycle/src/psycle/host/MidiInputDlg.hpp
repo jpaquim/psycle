@@ -3,8 +3,8 @@
 #pragma once
 #include "AudioDriver.hpp"
 #include <vector>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// midi input config window.
 		class CMidiInputDlg : public CPropertyPage
 		{
@@ -42,5 +42,5 @@ NAMESPACE__BEGIN(psycle)
 			groups_type groups;
 			CButton raw;
 		};
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -1,10 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "DirectoryDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CDirectoryDlg, CPropertyPage)
 
 		CDirectoryDlg::CDirectoryDlg() : CPropertyPage(CDirectoryDlg::IDD)
@@ -216,5 +216,5 @@ NAMESPACE__BEGIN(psycle)
 				_skinPathBuf=temp;
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

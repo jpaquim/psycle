@@ -4,8 +4,8 @@
 #include "VSTHost.hpp"
 #include "ChildView.hpp"
 #include <afxext.h>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 /// default vst gui window.
 		class CDefaultVstGui : public CFormView
 		{
@@ -68,5 +68,5 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

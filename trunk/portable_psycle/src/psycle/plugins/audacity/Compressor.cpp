@@ -10,7 +10,7 @@
   GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
 
 **********************************************************************/
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <cmath>
 
 #include "Compressor.h"

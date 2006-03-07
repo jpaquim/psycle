@@ -2,7 +2,7 @@
 // Copyright (C) 2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::coal::host
-#include <packageneric/pre_compiled_headers.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "detail/project.private.hpp"
 #if 1 || defined PSYCLE__COAL__EXPERIMENTAL

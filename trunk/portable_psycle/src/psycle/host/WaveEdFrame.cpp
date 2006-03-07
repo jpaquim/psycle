@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "WaveEdFrame.hpp"
 #include "MainFrm.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
@@ -135,5 +135,5 @@ NAMESPACE__BEGIN(psycle)
 			wavview.SetViewData(_pSong->instSelected);
 			AdjustStatusBar(_pSong->instSelected);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

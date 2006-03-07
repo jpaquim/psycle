@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include "SynthTrack.hpp"
 #include <stdlib.h> ///\todo should be <cstdlib>

@@ -1,10 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CASIOConfig.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "ASIOConfig.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 		namespace
 		{
@@ -192,5 +192,5 @@ NAMESPACE__BEGIN(psycle)
 			FillBufferBox();
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

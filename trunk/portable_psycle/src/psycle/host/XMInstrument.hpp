@@ -98,8 +98,9 @@ namespace psycle
 
 			//	Object Functions
 			void DeleteWaveData(){
-				zapArray(m_pWaveDataL);
-				zapArray(m_pWaveDataR);
+				delete[] m_pWaveDataL;
+				delete[] m_pWaveDataR;
+				m_WaveLength = 0;
 			};
 
 			void AllocWaveData(const int iLen,const bool bStereo)

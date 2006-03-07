@@ -3,7 +3,7 @@
  *  $Date$
  *  $Revision$
  */
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "resources/resources.hpp"
 #include "ProgressDialog.hpp"
 #include "Song.hpp"
@@ -131,6 +131,8 @@ namespace host{
 
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
+		//using std::max;
+		#define max UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MAX
 		song.SONGTRACKS=max(m_Header.channels,4);
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
@@ -260,10 +262,10 @@ namespace host{
 					// translate
 					e._inst = instr;	
 					e._mach = 0;
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 					e._volume = 255;
 
 					// volume/command
@@ -618,10 +620,10 @@ namespace host{
 							break;	// transpose
 					}
 
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
 	#else
 					if ((e._note == 255) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))

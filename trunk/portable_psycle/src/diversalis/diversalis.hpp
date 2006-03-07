@@ -7,9 +7,11 @@
 ///\meta generic
 #ifndef DIVERSALIS__INCLUDED
 #define DIVERSALIS__INCLUDED
-#pragma once
-#include "compiler.hpp"
-#include "operating_system.hpp"
-#include "processor.hpp"
-#include "standard_library.hpp"
+	#pragma once
+	#include "compiler.hpp"
+	#if !defined DIVERSALIS__COMPILER__RESOURCE
+		#include "operating_system.hpp"
+		#include "processor.hpp"
+		#include "standard_library.hpp"
+	#endif
 #endif

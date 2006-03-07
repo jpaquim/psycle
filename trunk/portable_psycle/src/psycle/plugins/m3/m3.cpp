@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 // Here It goes the "mi" declaration. It has been moved to track.hpp due to some compiling requirements.
 #include "track.hpp"
 #include <string.h>

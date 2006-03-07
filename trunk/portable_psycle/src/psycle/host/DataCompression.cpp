@@ -8,54 +8,34 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "DataCompression.hpp"
-#include "constants.hpp" // erm, just for the byte typedef
 #include <cstring>
-
-#include <diversalis/operating_system.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#include <diversalis/compiler.hpp>
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(push)
-	#endif
-	#include <windows.h> // because of microsoftisms: WORD DWORD
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(pop)
-	#endif
-	#include <boost/static_assert.hpp>
-	BOOST_STATIC_ASSERT((sizeof( WORD) == 2));
-	BOOST_STATIC_ASSERT((sizeof(DWORD) == 4));
-	BOOST_STATIC_ASSERT((sizeof(short int) == 2));
-	BOOST_STATIC_ASSERT((sizeof(      int) == 4));
-#else
-	#error "file not portable"
-#endif
 
 namespace psycle
 {
 	namespace host
 	{
-		#define MIN_REDUNDANT_BYTES_2 3
+		int const MIN_REDUNDANT_BYTES_2 = 3;
 
-		int BEERZ77Comp2(byte * pSource, byte ** pDestination, int size)
+		std::ptrdiff_t BEERZ77Comp2(std::uint8_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size)
 		{
 			// remember to delete your destination when done
 			if (pSource)
 			{
-				byte * pDestPos = *pDestination = new byte[(size*9/8)+5];//worst case
-				memset(pDestPos, 0, (size*9/8)+5);
-				*pDestPos++ = (byte)0x04; // file version
-				*pDestPos++ = (byte)(size & 0xff);
-				*pDestPos++ = (byte)((size>>8) & 0xff);
-				*pDestPos++ = (byte)((size>>16) & 0xff);
-				*pDestPos++ = (byte)((size>>24) & 0xff);
+				std::uint8_t * pDestPos = *pDestination = new std::uint8_t[size * 9 / 8 + 5]; // worst case
+				std::memset(pDestPos, 0, size * 9 / 8 + 5);
+				*pDestPos++ = static_cast<std::uint8_t>(0x04); // file version
+				*pDestPos++ = static_cast<std::uint8_t>((size      ) & 0xff);
+				*pDestPos++ = static_cast<std::uint8_t>((size >>  8) & 0xff);
+				*pDestPos++ = static_cast<std::uint8_t>((size >> 16) & 0xff);
+				*pDestPos++ = static_cast<std::uint8_t>((size >> 24) & 0xff);
 
 				// we will compress pSource into pDest
-				byte * pSlidingWindow = pSource;
-				byte * pCurrentPos = pSource;
-				byte * pTestPos;
-				byte * pUncompressedCounter = 0;
+				std::uint8_t const * pSlidingWindow = pSource;
+				std::uint8_t const * pCurrentPos = pSource;
+				std::uint8_t const * pTestPos;
+				std::uint8_t       * pUncompressedCounter(0);
 
 				while (pCurrentPos < pSource+size)
 				{
@@ -68,7 +48,7 @@ namespace psycle
 					}
 
 					// check our current position against our sliding window
-					byte * pBestMatch = pCurrentPos;
+					std::uint8_t const * pBestMatch = pCurrentPos;
 					int BestMatchLength = 0;
 
 					// now to find the best match in our string
@@ -78,8 +58,8 @@ namespace psycle
 						if (*pTestPos == *pCurrentPos)
 						{
 							// set our pointers
-							byte* pMatchPosEnd = pCurrentPos;
-							byte* pMatchPosStart;
+							std::uint8_t const * pMatchPosEnd = pCurrentPos;
+							std::uint8_t const * pMatchPosStart;
 							for (pMatchPosStart = pTestPos; pMatchPosStart < pTestPos+255+MIN_REDUNDANT_BYTES_2; pMatchPosStart++)
 							{
 								// check for pointer overflow
@@ -114,7 +94,7 @@ namespace psycle
 						}
 					}
 					// now to see what we need to write -
-					// either a new byte or an offset/length to a string
+					// either a new std::uint8_t or an offset/length to a string
 
 					if (BestMatchLength >= MIN_REDUNDANT_BYTES_2)
 					{
@@ -125,7 +105,7 @@ namespace psycle
 						// first, our LENGTH
 						*pDestPos++ = (BestMatchLength - MIN_REDUNDANT_BYTES_2);
 						// second, our OFFSET
-						WORD Output = (pCurrentPos - pBestMatch);
+						std::uint16_t Output = (pCurrentPos - pBestMatch);
 						*pDestPos++ = Output&0xff;
 						// update the pointer
 						pCurrentPos += BestMatchLength;
@@ -134,7 +114,7 @@ namespace psycle
 					else
 					{
 						BestMatchLength = 1;
-						// we have an uncompressed byte
+						// we have an uncompressed std::uint8_t
 						// add it to our uncompressed string
 						// if we have one
 						if (pUncompressedCounter)
@@ -151,11 +131,11 @@ namespace psycle
 						{
 							// we need to start a new string
 							pUncompressedCounter = pDestPos;
-							// we write a byte
+							// we write a std::uint8_t
 							// write our flag
 							*pDestPos++ = 1;
 						}
-						// now we write our byte
+						// now we write our std::uint8_t
 						// and update the pointer
 						*pDestPos++ = *pCurrentPos++;
 					}
@@ -167,7 +147,7 @@ namespace psycle
 			return -1;
 		}
 
-		bool BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination)
+		bool BEERZ77Decomp2(std::uint8_t const * pSourcePos, std::uint8_t ** pDestination)
 		{
 			// remember to delete your destination when done
 			if (pSourcePos) 
@@ -175,8 +155,7 @@ namespace psycle
 				if (*pSourcePos++ == 0x04)
 				{
 					// get file size
-					int FileSize = *(DWORD*)pSourcePos;
-					#include <diversalis/processor.hpp>
+					std::ptrdiff_t FileSize(*reinterpret_cast<std::uint32_t const *>(pSourcePos));
 					#if defined DIVERSALIS__PROCESSOR__ENDIAN__BIG
 						#error ":("
 					#endif
@@ -184,19 +163,19 @@ namespace psycle
 					pSourcePos+=4;
 
 					//ok, now we can start decompressing
-					byte* pWindowPos;
-					byte* pDestPos = *pDestination = new byte[FileSize];
+					std::uint8_t* pWindowPos;
+					std::uint8_t* pDestPos = *pDestination = new std::uint8_t[FileSize];
 
-					WORD Offset;
-					WORD Length;
+					std::uint16_t Offset;
+					std::uint16_t Length;
 
-					while (FileSize > 0)
+					while(FileSize > 0)
 					{
 						// get our flag
 						if (Length = *pSourcePos++)
 						{
 							// we have an unique string to copy
-							memcpy(pDestPos,pSourcePos,Length);
+							std::memcpy(pDestPos,pSourcePos,Length);
 
 							pSourcePos += Length;
 							pDestPos += Length;
@@ -210,7 +189,7 @@ namespace psycle
 							Offset  = (*pSourcePos++);
 
 							pWindowPos = pDestPos - Offset - Length;
-							memcpy(pDestPos,pWindowPos,Length);
+							std::memcpy(pDestPos,pWindowPos,Length);
 
 							pDestPos += Length;
 							FileSize -= Length;
@@ -226,31 +205,32 @@ namespace psycle
 		//
 		/////////////////////////////
 
-		int SoundSquash(signed short * pSource, byte ** pDestination, int size)
+		std::ptrdiff_t SoundSquash(std::int16_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size_)
 		{
+			std::size_t size(size_);
 			if (pSource)
 			{
-				byte * pDestPos = *pDestination = new byte[(size*12/4)+5];//worst case-remember words are 2 bytes
+				std::uint8_t * pDestPos = *pDestination = new std::uint8_t[size * 12 / 4 + 5]; // worst case ; remember we use words of 2 bytes
 
-				memset(pDestPos, 0, (size*12/4)+5);
-				*pDestPos++ = 0x01; // file version
-				*pDestPos++ = (byte)(size & 0xff); // size
-				*pDestPos++ = (byte)((size>>8) & 0xff);
-				*pDestPos++ = (byte)((size>>16) & 0xff);
-				*pDestPos++ = (byte)((size>>24) & 0xff);
+				std::memset(pDestPos, 0, size * 12 / 4 + 5);
+				*pDestPos++ = static_cast<std::uint8_t>(0x01); // file version
+				*pDestPos++ = static_cast<std::uint8_t>((size      ) & 0xff);
+				*pDestPos++ = static_cast<std::uint8_t>((size >>  8) & 0xff);
+				*pDestPos++ = static_cast<std::uint8_t>((size >> 16) & 0xff);
+				*pDestPos++ = static_cast<std::uint8_t>((size >> 24) & 0xff);
 
 				// init predictor
-				signed short prevprev = 0;
-				signed short prev = 0;
+				std::int16_t prevprev = 0;
+				std::int16_t prev = 0;
 				// init bitpos for encoder
 				int bitpos = 0;
 
-				while (size > 0)
+				while(size > 0)
 				{
 					// predict that this sample should be last sample + (last sample - previous last sample)
 					// and calculate the deviation from that as our error value to store
-					signed short t = *pSource++;
-					signed short error = (t - (prev+(prev-prevprev))) & 0xFFFF;
+					std::int16_t t = *pSource++;
+					std::int16_t error = (t - (prev+(prev-prevprev))) & 0xFFFF;
 					// shuffle our previous values for next value
 					prevprev = prev;
 					prev = t;
@@ -464,33 +444,27 @@ namespace psycle
 					}
 					// calculate what bit to merge at next time
 					bitpos = (8+bits)&0x7;
-					// rewind our pointer if we ended mid-byte
-					if (bitpos)
-					{
-						pDestPos--;
-					}
+					// rewind our pointer if we ended mid-std::uint8_t
+					if(bitpos) --pDestPos;
 					// let's do it again, it was fun!
-					size--;
+					--size;
 				}
-				// remember to count that last half-written byte
-				if (bitpos)
-				{
-					pDestPos++;
-				}
+				// remember to count that last half-written std::uint8_t
+				if(bitpos) ++pDestPos;
 				return pDestPos - *pDestination;
 			}
 			// gimme some data, dummy
 			return -1;
 		}
 
-		bool SoundDesquash(byte * pSourcePos, signed short ** pDestination)
+		bool SoundDesquash(std::uint8_t const * pSourcePos, std::int16_t ** pDestination)
 		{
 			// check validity of data
 			if (pSourcePos) 
 			{
 				if (*pSourcePos++ == 0x01) // version 1 is pretty simple
 				{
-					const signed short mask[16] = {
+					const std::int16_t mask[16] = {
 						0x0000,
 						0x0001,
 						0x0003,
@@ -509,28 +483,27 @@ namespace psycle
 						0x7fff};
 
 					// get file size
-					int FileSize = *(DWORD*)pSourcePos;
-					#include <diversalis/processor.hpp>
+					std::ptrdiff_t FileSize(*reinterpret_cast<std::uint32_t const *>(pSourcePos));
 					#if defined DIVERSALIS__PROCESSOR__ENDIAN__BIG
 						#error ":("
 					#endif
 
 					pSourcePos+=4;
 					//ok, now we can start decompressing
-					signed short* pDestPos = *pDestination = new signed short[FileSize];
+					std::int16_t* pDestPos = *pDestination = new std::int16_t[FileSize];
 
 					// init our predictor
-					signed short prevprev = 0;
-					signed short prev = 0;
+					std::int16_t prevprev = 0;
+					std::int16_t prev = 0;
 					// bit counter for decoder
 					int bitpos = 0;
 
-					while (FileSize)
+					while(FileSize)
 					{
-						// read a full DWORD because that is 32 bits.  in our worst case we will need
+						// read a full std::uint32_t because that is 32 bits.  in our worst case we will need
 						// 7+5+15 bits, 27, which is easily contained in 32 bits.
 
-						DWORD bits = *(DWORD*)pSourcePos;
+						std::uint32_t bits(*reinterpret_cast<std::uint32_t const *>(pSourcePos));
 
 						// now shift for our bit position to get the next bit we require
 
@@ -538,25 +511,25 @@ namespace psycle
 						// low 4 bits are number of valid bits count
 						int numbits =bits & 0x0f;
 						// next bit is the sign flag
-						DWORD sign = bits & 0x010;
+						std::uint32_t sign = bits & 0x010;
 						// the remaining bits are our value
 						bits>>=5;
 
 						// mask out only the bits that are relevant
-						signed short error = (signed short)(bits & mask[numbits]);
+						std::int16_t error = static_cast<std::int16_t>(bits & mask[numbits]);
 
 						// check for negative values
 						if (sign)
 						{
 							// we need to convert to negative
-							signed short error2 = (0xffff << numbits) & 0xffff;
+							std::int16_t error2 = (0xffff << numbits) & 0xffff;
 							error = error | error2;
 						}
 
 						// and then apply our error value to the prediction
 						// sample = last + (last - prev last)
 
-						signed short t = (prev+(prev-prevprev))+error & 0xffff;
+						std::int16_t t = (prev+(prev-prevprev))+error & 0xffff;
 						// store our sample
 						*pDestPos++ = t;
 						// shuffle our previous values for next value
@@ -572,7 +545,7 @@ namespace psycle
 						}
 
 						// and let's do it again!
-						FileSize--;
+						--FileSize;
 
 					}
 					return true;

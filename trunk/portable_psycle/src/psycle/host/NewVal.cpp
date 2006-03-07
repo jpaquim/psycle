@@ -1,10 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewVal.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "NewVal.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CNewVal::CNewVal(CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)
 		{
@@ -70,5 +70,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 			m_text.SetWindowText(buffer);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

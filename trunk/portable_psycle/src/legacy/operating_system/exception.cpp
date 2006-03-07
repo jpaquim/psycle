@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for operating_system::exception
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "exception.hpp"
 #include "logger.hpp"
 #include <processor/fpu.hpp>

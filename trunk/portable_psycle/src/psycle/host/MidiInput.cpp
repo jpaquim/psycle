@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <cassert>
 #include "MidiInput.hpp"
 #include "Psycle.hpp"

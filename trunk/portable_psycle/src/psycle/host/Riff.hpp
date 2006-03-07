@@ -18,6 +18,7 @@
 	\endverbatim
 */
 #pragma once
+#include "detail/project.hpp"
 namespace psycle
 {
 	namespace host
@@ -70,6 +71,7 @@ namespace psycle
 		};
 
 		/// riff file format.
+		UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
 		class ExtRiffFile
 		{
 		private:
@@ -162,6 +164,7 @@ namespace psycle
 
 		/// riff wave file format.
 		/// MODIFIED BY [JAZ]. It was "private ExtRiffFile".
+		UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
 		class WaveFile: public ExtRiffFile
 		{
 			WaveFormat_Chunk   wave_format;

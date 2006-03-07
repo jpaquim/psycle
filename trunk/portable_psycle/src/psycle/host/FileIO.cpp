@@ -1,15 +1,14 @@
-///\file
-///\brief implementation file for psycle::host::RiffFile.
-#include <project.private.hpp>
+///\implementation psycle::host::RiffFile
+#include <packageneric/pre-compiled.private.hpp>
 #include "FileIO.hpp"
 
 namespace psycle
 {
 	namespace host
 	{
-		universalis::compiler::numeric<32>::unsigned_int RiffFile::FourCC(char const * null_terminated_string)
+		std::uint32_t RiffFile::FourCC(char const * null_terminated_string)
 		{
-			universalis::compiler::numeric<32>::unsigned_int result(0x20202020); // four spaces (padding)
+			std::uint32_t result(0x20202020); // four spaces (padding)
 			char * chars(reinterpret_cast<char *>(&result));
 			for(int i(0) ; i < 4 && null_terminated_string[i] ; ++i) *chars++ = null_terminated_string[i];
 			return result;

@@ -1,14 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstGui.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "VstGui.hpp"
 #include "inputhandler.hpp"
 #include "MainFrm.hpp"
 #include "Machine.hpp"
 #include <Vst/AEffEditor.h>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CVstGui, CFrameWnd)
@@ -136,5 +136,5 @@ NAMESPACE__BEGIN(psycle)
 			this->SetFocus();
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

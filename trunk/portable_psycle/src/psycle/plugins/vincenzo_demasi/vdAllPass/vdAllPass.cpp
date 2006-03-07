@@ -17,7 +17,7 @@
         Vincenzo Demasi. E-Mail: <v.demasi@tiscali.it>
 */
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "vdAllPass.hpp"
 #include <stdio.h>
 

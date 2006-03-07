@@ -1,4 +1,5 @@
-#include "../../project.hpp"
+#include "detail/project.hpp"
+#include <universalis/compiler/stringized.hpp>
 
 ///\file
 ///\brief the version number of the psycle host application.
@@ -31,52 +32,57 @@
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
 	PSYCLE__BRANCH " " \
-	STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
-	STRINGIZED(PSYCLE__VERSION__MINOR) "." \
-	STRINGIZED(PSYCLE__VERSION__PATCH) " " \
+	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
+	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR) "." \
+	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__PATCH) " " \
 	PSYCLE__VERSION__QUALITY 
 
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
 	"version: " PSYCLE__VERSION EOL \
-	"build configuration options:" EOL PSYCLE__CONFIGURATION__OPTIONS(EOL) EOL \
+	"build configuration options:" EOL PSYCLE__CONFIGURATION__DESCRIPTION(EOL) EOL \
 	"built on: " PSYCLE__BUILD__DATE
 
-#if defined COMPILER__RESOURCE
-	/// __DATE__ and __TIME__ doesn't seem to work with msvc's resource compiler
+#if defined DIVERSALIS__COMPILER__RESOURCE && !defined DIVERSALIS__COMPILER__GNU // fine with gcc/mingw's winres compiler, which uses gcc's preprocessor
+	/// __DATE__ and __TIME__ doesn't work with msvc's resource compiler
 	#define PSYCLE__BUILD__DATE "a sunny day"
 #else
 	#define PSYCLE__BUILD__DATE __DATE__ ", " __TIME__
 #endif
 
-#if defined COMPILER__RESOURCE
+#if defined DIVERSALIS__COMPILER__RESOURCE
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 
-	#define RC__CompanyName PSYCLE__BRANCH
-	#define RC__LegalCopyright PSYCLE__COPYRIGHT
-	#define RC__License PSYCLE__LICENSE
+	#define RC__CompanyName      PSYCLE__BRANCH
+	#define RC__LegalCopyright   PSYCLE__COPYRIGHT
+	#define RC__License          PSYCLE__LICENSE
 
-	#define RC__InternalName PSYCLE__TAR_NAME
-	#define RC__ProductName PSYCLE__NAME
-	#define RC__ProductVersion PSYCLE__VERSION EOL "$Revision$" EOL "$Date$"
+	#define RC__InternalName     PSYCLE__TAR_NAME
+	#define RC__ProductName      PSYCLE__NAME
+	#define RC__ProductVersion   PSYCLE__VERSION
 
-	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
+	#define RC__OriginalFilename PSYCLE__TAR_NAME
 	#define RC__FileDescription RC__ProductName " - Host"
 	#define RC__FileVersion RC__ProductVersion
 
-	#define RC__SpecialBuild PSYCLE__CONFIGURATION__OPTIONS(EOL)
+	#define RC__SpecialBuild PSYCLE__CONFIGURATION__DESCRIPTION(EOL)
 	#define RC__PrivateBuild PSYCLE__BUILD__DATE
 
-	// Actual resource version info code is in resources.rc.
-	// Using msvc's resource compiler, #including this file from it doesn't create the version info.
+	// Actual resource version info code (VS_VERSION_INFO) is in resources.rc2.
+	// Using msvc's resource compiler, putting VS_VERSION_INFO in the file and #including it from resources.rc2 doesn't create the version info.
 	// There's no reason this wouldn't work, it's weird.
 	// Anyway, all the version information is set via the above parameters,
-	// so that there's no need to change the resources.rc file.
+	// so that there's no need to change the resources.rc2 file.
 #endif
 
 #if 0
 /*
 $Log$
+Revision 1.52  2006/03/07 14:09:14  johan-boule
+replaced some ms numeric types with std types
+some global changes concerning #includes
+other fixes here and there for portability
+
 Revision 1.51  2006/02/28 11:44:35  johan-boule
 reference to the AUTHORS file
 

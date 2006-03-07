@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "fs_sf2_ui.hpp"
 
 IMPLEMENT_DYNAMIC(FS_SF2_UI, CDialog)

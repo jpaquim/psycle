@@ -1,10 +1,10 @@
 #pragma once
+#include <universalis/compiler.hpp>
 #if defined ASIO
-	#include <operating_system/library/export.hpp>
+	#define LIBRARY UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
 #else
-	#include <operating_system/library/import.hpp>
+	#define LIBRARY UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
 #endif
-
 #include "asiosys.h"
 #include "asio.h"
 #include <unknwn.h>

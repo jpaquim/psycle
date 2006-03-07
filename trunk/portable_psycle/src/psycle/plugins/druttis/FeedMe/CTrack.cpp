@@ -5,7 +5,7 @@
 //	druttis@darkface.pp.se
 //
 //============================================================================
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <memory.h>
 #include "CTrack.h"
 //============================================================================

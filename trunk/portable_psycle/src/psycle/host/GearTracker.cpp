@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "GearTracker.hpp"
 #include "ChildView.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CGearTracker::CGearTracker(CChildView* pParent)
 			: CDialog(CGearTracker::IDD, pParent)
 		{
@@ -91,5 +91,5 @@ NAMESPACE__BEGIN(psycle)
 			DestroyWindow();
 			delete this;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

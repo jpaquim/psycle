@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "FrameMachine.hpp"
 #include "Childview.hpp"
@@ -12,8 +12,8 @@
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
 #include "Machine.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
@@ -610,5 +610,5 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnSetFocus(pOldWnd);
 			Invalidate(false);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

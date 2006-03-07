@@ -3,12 +3,13 @@
 #include <boost/thread/mutex.hpp>
 #include "exception.hpp"
 #include <universalis/compiler.hpp>
+#include <psycle/host/global.hpp>
 ///\file
 ///\brief logger.
 namespace operating_system
 {
 	/// logger.
-	class UNIVERSALIS__COMPILER__DEPRECATED("universalis") logger
+	class /*UNIVERSALIS__COMPILER__DEPRECATED("universalis")*/ logger
 	{
 	public:
 		static logger & default_logger() throw() { return default_logger_; }
@@ -38,7 +39,7 @@ namespace operating_system
 		boost::mutex mutex_;
 	};
 
-	class UNIVERSALIS__COMPILER__DEPRECATED("universalis") console
+	class /*UNIVERSALIS__COMPILER__DEPRECATED("universalis")*/ console
 	{
 	public:
 		static void open() throw(exception);

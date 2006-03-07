@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "PsycleSource.hpp"
 #include <Wasabi_SDK/studio/bfc/std.h>
 #include <Wasabi_SDK/studio/bfc/memblock.h>

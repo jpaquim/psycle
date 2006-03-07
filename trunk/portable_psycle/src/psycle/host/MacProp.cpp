@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CMacProp.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "MacProp.hpp"
 #include "MainFrm.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;
 
 		CMacProp::CMacProp(CWnd* pParent)
@@ -194,5 +194,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 			OnCancel();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

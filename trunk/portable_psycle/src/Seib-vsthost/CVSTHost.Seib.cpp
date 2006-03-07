@@ -3,7 +3,7 @@
 /* Work Derived from vsthost. Copyright (c) H. Seib, 2002-2005               */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /*****************************************************************************/
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "./CVSTHost.Seib.hpp"                   /* private prototypes                */
 
 namespace seib {

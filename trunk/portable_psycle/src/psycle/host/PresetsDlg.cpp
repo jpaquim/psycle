@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"
@@ -12,8 +12,8 @@
 	#error "sorry, only works on little endian machines"
 #endif
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CPreset::CPreset()
 		{
 			params=NULL;
@@ -1114,5 +1114,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 			presets[i2]=preset;;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

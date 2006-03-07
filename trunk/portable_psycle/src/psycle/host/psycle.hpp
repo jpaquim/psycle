@@ -4,8 +4,8 @@
 #include "resources/resources.hpp" // main symbols
 #include "psycle/host/global.hpp"
 #include <operating_system/logger.hpp>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 		class CMainFrame; // forward declaration
 
@@ -28,5 +28,5 @@ NAMESPACE__BEGIN(psycle)
 			void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;
 		};
 
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
