@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Machine.hpp"
 #include "Song.hpp"
 #include "Dsp.hpp"
@@ -372,7 +372,7 @@ namespace psycle
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
 							{
-								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
 								pInMachine->Work(numSamples);
@@ -423,7 +423,7 @@ namespace psycle
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
 							{
-								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
 								pInMachine->Work(numSamples);
@@ -885,7 +885,7 @@ namespace psycle
 
 		void Master::Work(int numSamples)
 		{
-			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+			#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 				processor::fpu::exception_mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 			#endif
 			Machine::Work(numSamples);
@@ -1126,7 +1126,7 @@ namespace psycle
 
 							// tell the FX to work, now that the input is ready.
 							{
-								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									processor::fpu::exception_mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
 								pSendMachine->Work(numSamples);

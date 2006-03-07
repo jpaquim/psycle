@@ -7,8 +7,8 @@
 #include "MidiInputDlg.hpp"
 #include "Configuration.hpp"
 #include "KeyConfigDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// config window.
 		class CConfigDlg : public CPropertySheet
 		{
@@ -46,5 +46,5 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

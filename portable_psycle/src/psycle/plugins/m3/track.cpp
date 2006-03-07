@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "track.hpp"
 
 // CTrack Definition file (M3Track.cpp)

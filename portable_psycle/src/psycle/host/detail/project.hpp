@@ -4,3 +4,9 @@
 ///\file
 ///\brief global public include for header files of the psycle::host project
 #pragma once
+#include <diversalis/compiler.hpp>
+#if !defined DIVERSALIS__COMPILER__RESOURCE
+	#include <diversalis/diversalis.hpp>
+	#include <universalis/universalis.hpp>
+#endif
+#include "configuration.hpp"

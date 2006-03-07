@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CWavFileDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "WavFileDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 		CWavFileDlg::CWavFileDlg(
@@ -60,5 +60,5 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 			CFileDialog::OnFileNameChange();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

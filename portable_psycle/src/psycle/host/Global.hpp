@@ -1,6 +1,6 @@
 ///\interface psycle::host::Global
 #pragma once
-#include <universalis/compiler.hpp>
+#include "detail/project.hpp"
 #include <cstdint>
 namespace psycle
 {

@@ -8,3 +8,10 @@
 #include "stdc_secure_lib.hpp"
 #include "detail/iso646.hpp"
 #include <cassert>
+
+
+
+/// same as std::min, but without type checking
+#define UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MIN(a, b) ((a) < (b) ? (a) : (b))
+/// same as std::max, but without type checking
+#define UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MAX(a, b) ((a) > (b) ? (a) : (b))

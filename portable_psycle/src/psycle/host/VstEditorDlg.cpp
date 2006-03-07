@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "VstEditorDlg.hpp"
 #include "FrameMachine.hpp"
@@ -9,8 +9,8 @@
 #include "inputhandler.hpp"
 #include "MainFrm.hpp"
 #include <Vst/AEffEditor.h>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define VST_PARAMETRIC_WIDTH 228
 		#define VST_PARAMETRIC_HEIGHT 338
 		#define VST_PARAM_PANE 1
@@ -244,5 +244,5 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnClose();
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.SetFocus();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

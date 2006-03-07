@@ -20,7 +20,7 @@
 //  0.11 - memory leak fixes (thanks to christopher micali)
 //         fixed sample loading bug
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <stdio.h>
 #include "it.hpp"
 namespace psycle

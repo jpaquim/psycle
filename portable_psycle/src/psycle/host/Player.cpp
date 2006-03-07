@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Player.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -417,10 +417,10 @@ namespace psycle
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = pThis->_pBuffer;
 			int numSamplex = numSamples;
-			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 			#else
-				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 					boost::read_write_mutex::scoped_read_write_lock lock(pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
 				#else // original implementation
 					CSingleLock crit(&Global::_pSong->door, TRUE);

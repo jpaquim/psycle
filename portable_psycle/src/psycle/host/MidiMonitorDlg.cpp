@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
 #include "song.hpp"
 #include "machine.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
@@ -418,5 +418,5 @@ NAMESPACE__BEGIN(psycle)
 				m_channelMap.InsertItem( ch, txtBuffer, NULL );
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CEnvDialog.
 #pragma once
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		class Song;
 
 		/// enveloppe window.
@@ -71,5 +71,5 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

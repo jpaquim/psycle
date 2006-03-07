@@ -1,7 +1,7 @@
 ///\file
 ///\brief machine view graphic operations for psycle::host::CChildView, private header
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
 			if (Global::pConfig->draw_vus)
@@ -186,6 +186,11 @@ NAMESPACE__BEGIN(psycle)
 								if(altslope<-2.36)  altslope -= 2 * (altslope + 2.36);
 								int btcol = 240 - abs(dsp::F2I((altslope-0.79) * 32));
 
+								//using std::min;
+								//using std::max;
+								#define min UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MIN
+								#define max UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MAX
+
 								// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
 								CBrush rtBrush(RGB(max(0, min(255, rtcol * deltaColR)),
 									               max(0, min(255, rtcol * deltaColG)),
@@ -197,6 +202,8 @@ NAMESPACE__BEGIN(psycle)
 									               max(0, min(255, btcol * deltaColG)),
 												   max(0, min(255, btcol * deltaColB))));
 
+								#undef min
+								#undef max
 
 								CPoint pol[5];
 								CPoint fillpoly[7];
@@ -371,6 +378,11 @@ NAMESPACE__BEGIN(psycle)
 								if(altslope<-2.36)  altslope -= 2 * (altslope + 2.36);
 								int btcol = 240 - abs(dsp::F2I((altslope-0.79) * 32));
 
+								//using std::min;
+								//using std::max;
+								#define min UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MIN
+								#define max UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MAX
+
 								// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
 								CBrush rtBrush(RGB(max(0, min(255, rtcol * deltaColR)),
 									               max(0, min(255, rtcol * deltaColG)),
@@ -381,6 +393,9 @@ NAMESPACE__BEGIN(psycle)
 								CBrush btBrush(RGB(max(0, min(255, btcol * deltaColR)),
 									               max(0, min(255, btcol * deltaColG)),
 												   max(0, min(255, btcol * deltaColB))));
+
+								#undef min
+								#undef max
 
 								CPoint pol[5];
 								CPoint fillpoly[7];
@@ -1336,5 +1351,5 @@ NAMESPACE__BEGIN(psycle)
 			wiresource = -1;
 			return -1;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

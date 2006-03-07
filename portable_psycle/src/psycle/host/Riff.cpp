@@ -30,12 +30,11 @@
 		==========================================================================
 	\endverbatim
 */
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "riff.hpp"
-#include <io.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 namespace psycle
 {
 	namespace host

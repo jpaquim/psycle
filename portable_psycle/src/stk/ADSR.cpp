@@ -14,7 +14,7 @@
     by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "ADSR.h"
 
 ADSR :: ADSR() : Envelope()

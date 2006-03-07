@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "SynthTrack.hpp"
 #include <math.h> ///\todo should be <cmath>
 ///\file SynthTrack.cpp

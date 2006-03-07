@@ -2,9 +2,17 @@
 ///\brief interface file for psycle::host::ASIOInterface.
 #pragma once
 #include "AudioDriver.hpp"
-#include <asio/asiodrivers.h>
-#include <asio/asio.h>
-#pragma comment(lib, "asio")
+
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#include <asio/asiodrivers.h>
+	#include <asio/asio.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "asio")
+	#endif
+#else
+	#error "sorry"
+#endif
+
 namespace psycle
 {
 	namespace host

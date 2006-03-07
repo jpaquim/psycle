@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "MainFrm.hpp"
 #include "WavFileDlg.hpp"
@@ -23,8 +23,8 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define WM_SETMESSAGESTRING 0x0362
 
 		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
@@ -2620,5 +2620,5 @@ NAMESPACE__BEGIN(psycle)
 				pGearRackDialog->RedrawList();
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

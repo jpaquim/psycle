@@ -1,6 +1,6 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "DSoundConfig.hpp"
 #pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
@@ -10,8 +10,8 @@
 #include <dsound.h>
 #pragma comment(lib, "dsound")
 #include <iomanip>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 		CDSoundConfig::CDSoundConfig(CWnd* pParent)
 		:
@@ -205,5 +205,5 @@ NAMESPACE__BEGIN(psycle)
 			CDialog::OnDestroy();
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

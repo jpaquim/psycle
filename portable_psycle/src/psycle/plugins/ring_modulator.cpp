@@ -1,6 +1,6 @@
 /// \file
 /// \brief ring modulator with frequency modulation of the amplitude modulation
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
 namespace psycle { namespace plugin {
 

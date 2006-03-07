@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "comb.hpp"
 
 // Comb filter implementation

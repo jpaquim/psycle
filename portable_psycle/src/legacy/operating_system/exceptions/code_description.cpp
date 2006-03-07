@@ -1,6 +1,6 @@
 ///\file
 ///\brief
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "code_description.hpp"
 #include <string>
 #include <sstream>

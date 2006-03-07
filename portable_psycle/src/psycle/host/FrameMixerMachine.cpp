@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "Constants.hpp"
 #include "ChildView.hpp"
@@ -7,8 +7,8 @@
 #include "Machine.hpp"
 #include "FrameMixerMachine.hpp"
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameWnd)
 
@@ -492,5 +492,5 @@ NAMESPACE__BEGIN(psycle)
 		Invalidate(false);
 	}
 
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

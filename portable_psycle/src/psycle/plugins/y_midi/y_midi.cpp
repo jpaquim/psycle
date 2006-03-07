@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "y_midi.hpp"
 
 DWORD midichannel::BuildEvent2(const int eventtype, const int channel, const int p1, const int p2)

@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "filter.hpp"
 ///\file filter.cpp
 ///\brief implementation of the filter class.

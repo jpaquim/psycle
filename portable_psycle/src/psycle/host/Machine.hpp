@@ -6,6 +6,7 @@
 #include "Helpers.hpp"
 #include "Constants.hpp"
 #include "FileIO.hpp"
+#include "global.hpp"
 #include <processor/fpu.hpp>
 #include <stdexcept>
 #include <cstdint>

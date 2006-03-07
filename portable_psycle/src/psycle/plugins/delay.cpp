@@ -1,10 +1,11 @@
 /// \file
 /// \brief delay
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
+
 
 class Delay : public Plugin
 {

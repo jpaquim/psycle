@@ -1,70 +1,95 @@
 ///\file
 ///\brief interface file for psycle::host::CValueMapper.
 #pragma once
+#include "detail/project.hpp"
+#include <cmath>
+#include <universalis/compiler/numeric.hpp>
+#include <boost/static_assert.hpp>
 namespace psycle
 {
 	namespace host
 	{
-		#define F_PI 3.14159265358979323846f
+		float const F_PI =
+			#if defined M_PI
+				static_cast<float>(M_PI)
+			#else
+				3.14159265358979323846f
+			#endif
+			;
 
-		template<typename x> void hexstring_to_integer(std::string const &, x &);
+		template<typename X>
+		void hexstring_to_integer(std::string const &, X &);
 
 		/// linearly maps a byte (0 to 255) to a float (0 to 1).
+		///\todo check if the table lookup is actually faster than calculating.
+		///\todo needs some explanation about why the tables have a length of 257.
 		class CValueMapper
 		{
-		public:
-			/// contructor.
-			CValueMapper();
-			/// destructor.
-			virtual ~CValueMapper() throw();
-			/// maps a byte (0 to 255) to a float (0 to 1).
-			static inline float Map_255_1(int iByte)
-			{	
-				if(iByte>=0&&iByte<=256)
-					return CValueMapper::fMap_255_1[iByte];
-				else	
-					return iByte * 0.00390625f;
-			}
-			/// maps a byte (0 to 255) to a float (O to 100).
-			static inline float Map_255_100(int iByte)
-			{
-				if(iByte>=0&&iByte<=256)
-					return CValueMapper::fMap_255_100[iByte];
-				else	
-					return iByte*0.390625f;
-			}
-		private:
-			static float fMap_255_1[257];
-			static float fMap_255_100[257];
+			public:
+				CValueMapper();
+				~CValueMapper();
+				/// maps a byte (0 to 255) to a float (0 to 1).
+				static inline float Map_255_1(int iByte)
+				{	
+					if(iByte >=0 && iByte <= 256)
+						return CValueMapper::fMap_255_1[iByte];
+					else	
+						return iByte * 0.00390625f;
+				}
+				/// maps a byte (0 to 255) to a float (O to 100).
+				static inline float Map_255_100(int iByte)
+				{
+					if(iByte >= 0 && iByte <= 256)
+						return CValueMapper::fMap_255_100[iByte];
+					else	
+						return iByte * 0.390625f;
+				}
+			private:
+				static float fMap_255_1[257];
+				static float fMap_255_100[257];
 		};
-
 
 		inline float fast_log2(float f) 
 		{ 
-			//assert( f > 0. ); 
-			//assert( sizeof(f) == sizeof(int) ); 
-			//assert( sizeof(f) == 4 ); 
+			BOOST_STATIC_ASSERT((sizeof f == 4));
+			BOOST_STATIC_ASSERT((sizeof f == sizeof(int)));
+			//assert(f > 0); 
 			int i = (*(int *)&f); 
 			return (((i&0x7f800000)>>23)-0x7f)+(i&0x007fffff)/(float)0x800000; 
-		} 
+		}
 
 		/// converts a floating point number to an integer.
-		///\todo this is not portable
-		inline int f2i(float flt) 
+		inline int f2i(float f) 
 		{ 
-			int i; 
-			static const double half = 0.5f; 
-			_asm 
-			{ 
-				fld flt 
-				fsub half 
-				fistp i 
-			} 
-			return i;
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // or intel?
+				///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
+				int i;
+				double const half(0.5);
+				_asm
+				{ 
+					fld f;
+					fsub half;
+					fistp i;
+				} 
+				return i;
+			#else
+				///\todo specify the rounding mode
+				return static_cast<int>(f);
+			#endif
 		}
 		
 		/// clipping.
-		///\todo use a single template function that accept any type.
+		template<unsigned int const bits>
+		typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)
+		{
+			typedef typename universalis::compiler::numeric<bits>::signed_int result_type;
+			typedef std::numeric_limits<result_type> type_traits;
+			if(f < type_traits::min) return type_traits::min;
+			if(f > type_traits::max) return type_traits::max;
+			return static_cast<result_type>(f);
+		}
+
+		/// clipping.
 		inline int f2iclip16(float flt) 
 		{ 
 			if (flt <-32767.0f)

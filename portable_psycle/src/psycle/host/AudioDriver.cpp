@@ -1,8 +1,9 @@
 ///\implementation psycle::host::AudioDriver
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "AudioDriver.hpp"
 #include "helpers.hpp"
 #include "constants.hpp"
+#include <cstdint>
 namespace psycle
 {
 	namespace host
@@ -70,7 +71,7 @@ namespace psycle
 					l = SHORT_MAX;
 				}
 
-				*piout++ = (r << 16) | (word)l; ///\todo use std::uint16_t for "word"
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);
@@ -102,7 +103,7 @@ namespace psycle
 					l = SHORT_MAX;
 				}
 
-				*piout++ = (r << 16) | (word)l; ///\todo use std::uint16_t for "word"
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);

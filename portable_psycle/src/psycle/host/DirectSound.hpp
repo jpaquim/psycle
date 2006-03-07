@@ -1,14 +1,29 @@
 ///\file
 ///\interface psycle::host::DirectSound.
 #pragma once
-#pragma warning(push)
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#include <mmsystem.h>
-	#pragma comment(lib, "winmm")
-#pragma warning(pop)
-#include <dsound.h>
-#pragma comment(lib, "dsound")
 #include "AudioDriver.hpp"
+
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#include "windows.h"
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(push)
+		#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+	#endif
+	#include <mmsystem.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
+	#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#pragma warning(pop)
+	#endif
+	#include <dsound.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "dsound")
+	#endif
+#else
+	#error "sorry"
+#endif
+
 namespace psycle
 {
 	namespace host

@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CMasterDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "ChildView.hpp"
 #include "MasterDlg.hpp"
 #include "Dsp.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMasterDlg::CMasterDlg(CChildView* pParent) : CDialog(CMasterDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -494,5 +494,5 @@ NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnStnClickedMixerview()
 		{
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

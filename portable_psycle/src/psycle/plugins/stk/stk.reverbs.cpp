@@ -6,7 +6,7 @@
 // By Perry R. Cook and Gary P. Scavone, 1995-2004.
 // http://ccrma.stanford.edu/software/stk/
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <stk/stk.h>
 #include <stk/Effect.h>

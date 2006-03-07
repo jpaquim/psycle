@@ -1,6 +1,6 @@
 /// \file
 /// \brief filter in the frequency domain using 2 poles
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
 namespace psycle { namespace plugin {
 

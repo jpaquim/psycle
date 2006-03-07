@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "WaveOutDialog.hpp"
 #pragma warning(push)
@@ -8,8 +8,8 @@
 	#include <mmsystem.h>
 	#pragma comment(lib, "winmm")
 #pragma warning(pop)
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CWaveOutDialog)
@@ -183,5 +183,5 @@ NAMESPACE__BEGIN(psycle)
 			
 			RecalcLatency();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

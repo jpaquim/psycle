@@ -19,7 +19,7 @@
 
     */
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 //#include <stdio.h>
 #include <cstdlib>
 #include <malloc.h>

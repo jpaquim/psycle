@@ -1,14 +1,14 @@
 // XMSamplerMixerPage.cpp: archivo de implementación
 //
 
-#include "project.private.hpp"
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "XMSamplerMixerPage.hpp"
 #include "XMSampler.hpp"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 // Cuadro de diálogo de XMSamplerMixerPage
 
 const int XMSamplerMixerPage::dlgName[8] = {
@@ -390,5 +390,5 @@ void XMSamplerMixerPage::OnNMCustomdrawSlChannels(NMHDR *pNMHDR, LRESULT *pResul
 	m_ChannelOffset = slid->GetPos();
 	*pResult = 0;
 }
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -1,6 +1,6 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Instrument.hpp"
 #include "DataCompression.hpp"
 #include "filter.hpp"
@@ -19,8 +19,8 @@ namespace psycle
 
 		Instrument::~Instrument()
 		{
-			zapArray(waveDataL);
-			zapArray(waveDataR);
+			delete[] waveDataL;
+			delete[] waveDataR;
 			waveLength = 0;
 		}
 
@@ -61,8 +61,8 @@ namespace psycle
 		{
 			sprintf(waveName,"empty");
 			
-			zapArray(waveDataL);
-			zapArray(waveDataR);
+			delete[] waveDataL;
+			delete[] waveDataR;
 			waveLength = 0;
 			waveStereo=false;
 			waveLoopStart=0;
@@ -167,7 +167,7 @@ namespace psycle
 							pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
 							pFile->Read(pData,size);
 							SoundDesquash(pData,&waveDataL);
-							zapArray(pData);
+							delete[] pData;
 						}
 
 						if (waveStereo)
@@ -176,14 +176,15 @@ namespace psycle
 							if ( !fullopen )
 							{
 								pFile->Skip(size);
-								zapArray(waveDataR,new signed short[2]);
+								delete[] waveDataR;
+								waveDataR = new signed short[2];
 							}
 							else
 							{
 								pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
 								pFile->Read(pData,size);
 								SoundDesquash(pData,&waveDataR);
-								zapArray(pData);
+								delete[] pData;
 							}
 						}
 					}
@@ -276,13 +277,13 @@ namespace psycle
 
 				pFile->Write(&size1,sizeof(size1));
 				pFile->Write(pData1,size1);
-				zapArray(pData1);
+				delete[] pData1;
 				if (waveStereo)
 				{
 					pFile->Write(&size2,sizeof(size2));
 					pFile->Write(pData2,size2);
 				}
-				zapArray(pData2);
+				delete[] pData2;
 			}
 		}
 	}

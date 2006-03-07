@@ -1,11 +1,11 @@
-#include "project.private.hpp"
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSampler.hpp"
 #include "WavFileDlg.hpp"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
 // CWaveScopeCtrl
 CWaveScopeCtrl::CWaveScopeCtrl()
@@ -750,6 +750,6 @@ void XMSamplerUISample::DrawScope()
 	m_WaveScope.Invalidate();
 }
 
-NAMESPACE__END
-NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
 

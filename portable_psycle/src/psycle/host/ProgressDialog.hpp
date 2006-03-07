@@ -1,8 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CProgressDialog.
 #pragma once
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "detail/project.hpp"
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// progress meter window.
 		class CProgressDialog : public CDialog
 		{
@@ -34,5 +35,5 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

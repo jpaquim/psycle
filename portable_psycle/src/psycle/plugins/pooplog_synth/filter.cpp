@@ -1,7 +1,7 @@
 // filter.cpp: implementation of the filter class.
 //
 //////////////////////////////////////////////////////////////////////
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "filter.h"
 
 #define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))

@@ -1,11 +1,12 @@
 ///\file
 ///\interface psycle::host::CDSoundConfig
 #pragma once
+#include "detail/project.hpp"
+#include "resources/resources.hpp"
 #include <afxwin.h>
 #include <afxcmn.h> // CSpinButtonCtrl
-#include "resources/resources.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
@@ -48,5 +49,5 @@ NAMESPACE__BEGIN(psycle)
 			private:
 				void RecalcLatency();
 		};
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

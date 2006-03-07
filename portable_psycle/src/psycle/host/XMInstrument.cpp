@@ -4,7 +4,7 @@
  *  $Revision$
  */
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Configuration.hpp"
 //#include "IPsySongLoader.h"
 //#include "IPsySongSaver.h"

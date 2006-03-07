@@ -1,14 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearRackDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "MainFrm.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		int CGearRackDlg::DisplayMode = 0;
 
 		CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain)
@@ -784,5 +784,5 @@ NAMESPACE__BEGIN(psycle)
 			
 			pParentMain->RedrawGearRackList();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

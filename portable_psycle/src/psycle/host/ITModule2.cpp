@@ -1,4 +1,4 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "ITModule2.h"
 #include "Configuration.hpp"
 #include "Song.hpp"
@@ -19,25 +19,25 @@ namespace psycle
 		{
 			delete embeddedData;
 		}
+
 		bool ITModule2::BitsBlock::ReadBlock(RiffFile *pFile)
 		{
-			int size;
-			size=pFile->ReadInt(2);  // block layout : word size, <size> bytes data
-
+			// block layout : uint16 size, <size> bytes data
+			std::uint16_t size;
+			pFile->Read(size);
 			pdata = new unsigned char[size];
-			if (!pdata)
-				return false;
+			if (!pdata) return false;
 			if (!pFile->Read(pdata,size))
 			{
-				zapArray(pdata);
+				delete[] pdata;
 				return false;
 			}
 			rpos=pdata;
 			rend=pdata+size;
 			rembits=8;
-
 			return true;
 		}
+
 		unsigned long ITModule2::BitsBlock::ReadBits(unsigned char bitwidth)
 		{
 			unsigned long val = 0;
@@ -72,8 +72,8 @@ namespace psycle
 		bool ITModule2::LoadITModule(Song *song)
 		{
 			s=song;
-			if (Read(&itFileH,sizeof(itFileH))==0 ) return 0;
-			if (itFileH.tag != IMPM_ID ) return 0;
+			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
+			if (itFileH.tag != IMPM_ID ) return false;
 
 			strcpy(s->Name,itFileH.songName);
 			strcpy(s->Author,"");
@@ -177,22 +177,22 @@ Special:  Bit 0: On = song message attached.
 				s->playOrder[0]=0;
 			}
 
-			unsigned long *pointersi = new unsigned long[itFileH.insNum];
-			Read(pointersi,itFileH.insNum*sizeof(unsigned long));
-			unsigned long * pointerss = new unsigned long[itFileH.sampNum];
-			Read(pointerss,itFileH.sampNum*sizeof(unsigned long));
-			unsigned long * pointersp = new unsigned long[itFileH.patNum];
-			Read(pointersp,itFileH.patNum*sizeof(unsigned long));
+			std::uint32_t *pointersi = new std::uint32_t[itFileH.insNum];
+			Read(pointersi,itFileH.insNum*sizeof(std::uint32_t));
+			std::uint32_t * pointerss = new std::uint32_t[itFileH.sampNum];
+			Read(pointerss,itFileH.sampNum*sizeof(std::uint32_t));
+			std::uint32_t * pointersp = new std::uint32_t[itFileH.patNum];
+			Read(pointersp,itFileH.patNum*sizeof(std::uint32_t));
 
 			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
 			{
 				embeddedData = new EmbeddedMIDIData;
 				EmbeddedMIDIData mdata;
-				short skipnum;
-				Read(&skipnum,sizeof(short));
+				std::int16_t skipnum;
+				Read(skipnum);
 				Skip(skipnum*8); // This is some strange data. It is not documented.
 
-				Read(&mdata,sizeof(mdata));
+				Read(mdata);
 
 				for ( int i=0; i<128; i++ )
 				{
@@ -273,9 +273,9 @@ Special:  Bit 0: On = song message attached.
 			}
 			song->SONGTRACKS=max(numchans+1,4);
 
-			zapArray(pointersi);
-			zapArray(pointerss);
-			zapArray(pointersp);
+			delete[] pointersi;
+			delete[] pointerss;
+			delete[] pointersp;
 			
 			return true;
 		}
@@ -284,7 +284,7 @@ Special:  Bit 0: On = song message attached.
 		{
 			itInsHeader1x curH;
 			XMInstrument &xins = sampler->rInstrument(iInstIdx);
-			Read(&curH,sizeof(curH));
+			Read(curH);
 
 			std::string itname(curH.sName);
 			xins.Name(itname);
@@ -353,7 +353,7 @@ Special:  Bit 0: On = song message attached.
 			itInsHeader2x curH;
 			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 
-            Read(&curH,sizeof(curH));
+			Read(curH);
 
 			std::string itname(curH.sName);
 			xins.Name(itname);
@@ -619,6 +619,7 @@ Special:  Bit 0: On = song message attached.
 
 			return true;
 		}
+
 		bool ITModule2::LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
 			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
@@ -771,6 +772,7 @@ Special:  Bit 0: On = song message attached.
 			}
 			return false;
 		}
+
 		bool ITModule2::LoadITPattern(int patIdx, int &numchans)
 		{
 			unsigned char newEntry;
@@ -838,10 +840,10 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
 							pent._volume=tmp<64?tmp:63;
@@ -916,7 +918,10 @@ Special:  Bit 0: On = song message attached.
 					*pData = pent;
 					pent=pempty;
 
+					//using std::max;
+					#define max UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MAX
 					numchans = max(channel,numchans);
+					#undef max
 
 					Read(&newEntry,1);
 				}
@@ -1252,6 +1257,7 @@ OFFSET              Count TYPE   Description
 			}
 			return false;
 		}
+
 		bool ITModule2::LoadS3MSampleX(XMSampler *sampler,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx)
 		{
 
@@ -1426,10 +1432,10 @@ OFFSET              Count TYPE   Description
 					if(newEntry&64)
 					{
 						int tmp=ReadInt(1);
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
 							pent._mach =0;

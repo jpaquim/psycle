@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
@@ -192,10 +192,10 @@ namespace psycle
 		}
 
 		Song::Song()
-		#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-			#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+			#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 		#else
-			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 				: read_write_mutex_(boost::read_write_scheduling_policy::alternating_single_read) // see: http://boost.org/doc/html/threads/concepts.html#threads.concepts.read-write-scheduling-policies.inter-class
 			#else // original implementation
 				// nothing
@@ -307,10 +307,10 @@ namespace psycle
 
 		void Song::New()
 		{
-			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 			#else
-				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
 				#else // original implementation
 					CSingleLock lock(&door,TRUE);
@@ -470,10 +470,10 @@ namespace psycle
 
 		void Song::DestroyMachine(int mac, bool write_locked)
 		{
-			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 			#else
-				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
+				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
 				#else // original implementation
 					CSingleLock lock(&door, TRUE);
@@ -989,23 +989,23 @@ namespace psycle
 				Progress.Create();
 				Progress.SetWindowText("Loading...");
 				Progress.ShowWindow(SW_SHOW);
-				UINT version = 0;
-				UINT size = 0;
-				UINT index = 0;
-				int temp;
-				int solo(0);
-				int chunkcount=0;
+				std::uint32_t version = 0;
+				std::uint32_t size = 0;
+				std::uint32_t index = 0;
+				std::uint32_t temp;
+				std::uint32_t solo(0);
+				std::uint32_t chunkcount=0;
 				Header[4]=0;
-				long filesize = pFile->FileSize();
-				pFile->Read(&version,sizeof(version));
-				pFile->Read(&size,sizeof(size));
+				std::fpos_t filesize = pFile->FileSize();
+				pFile->Read(version);
+				pFile->Read(size);
 				if(version > CURRENT_FILE_VERSION)
 				{
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 				}
 				if (size == 4) // Since "version" is used for File version, we use size as version identifier
 				{
-					pFile->Read(&chunkcount,sizeof(chunkcount));
+					pFile->Read(chunkcount);
 				}
 				/*
 				if (size == )
@@ -1029,8 +1029,8 @@ namespace psycle
 					if(std::strcmp(Header,"INFO") == 0)
 					{
 						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						if(version > CURRENT_FILE_VERSION_INFO)
 						{
 							// there is an error, this file is newer than this build of psycle
@@ -1040,15 +1040,15 @@ namespace psycle
 						else
 						{
 							pFile->ReadString(Name, sizeof Name);
-							pFile->ReadString(Author, sizeof Author);
-							pFile->ReadString(Comment,sizeof Comment);
+							pFile->ReadString(Author, sizeof Name);
+							pFile->ReadString(Comment, sizeof Name);
 						}
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
 					{
 						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						if(version > CURRENT_FILE_VERSION_SNGI)
 						{
 							// there is an error, this file is newer than this build of psycle
@@ -1059,37 +1059,37 @@ namespace psycle
 						{
 							// why all these temps?  to make sure if someone changes the defs of
 							// any of these members, the rest of the file reads ok.  assume 
-							// everything is an int, when we write we do the same thing.
+							// everything is 32-bit, when we write we do the same thing.
 
 							// # of tracks for whole song
-							pFile->Read(&temp, sizeof temp);
+							pFile->Read(temp);
 							SONGTRACKS = temp;
 							// bpm
-							pFile->Read(&temp, sizeof temp);
+							pFile->Read(temp);
 							m_BeatsPerMin = temp;
 							// tpb
-							pFile->Read(&temp, sizeof temp);
+							pFile->Read(temp);
 							m_LinesPerBeat = temp;
 							// current octave
-							pFile->Read(&temp, sizeof temp);
+							pFile->Read(temp);
 							currentOctave = temp;
 							// machineSoloed
 							// we need to buffer this because destroy machine will clear it
-							pFile->Read(&temp, sizeof temp);
+							pFile->Read(temp);
 							solo = temp;
 							// trackSoloed
-							pFile->Read(&temp, sizeof temp);
+							pFile->Read(temp);
 							_trackSoloed = temp;
-							pFile->Read(&temp, sizeof temp);  
+							pFile->Read(temp);
 							seqBus = temp;
-							pFile->Read(&temp, sizeof temp);  
+							pFile->Read(temp);
 							midiSelected = temp;
-							pFile->Read(&temp, sizeof temp);  
+							pFile->Read(temp);
 							auxcolSelected = temp;
-							pFile->Read(&temp, sizeof temp);  
+							pFile->Read(temp);
 							instSelected = temp;
 							// sequence width, for multipattern
-							pFile->Read(&temp,sizeof(temp));
+							pFile->Read(temp);
 							_trackArmedCount = 0;
 							for(int i(0) ; i < SONGTRACKS; ++i)
 							{
@@ -1104,8 +1104,8 @@ namespace psycle
 					else if(std::strcmp(Header,"SEQD")==0)
 					{
 						--chunkcount;
-						pFile->Read(&version,sizeof version);
-						pFile->Read(&size,sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						if(version > CURRENT_FILE_VERSION_SEQD)
 						{
 							// there is an error, this file is newer than this build of psycle
@@ -1120,13 +1120,13 @@ namespace psycle
 							{
 								char pTemp[256];
 								// play length for this sequence
-								pFile->Read(&temp, sizeof temp);
+								pFile->Read(temp);
 								playLength = temp;
 								// name, for multipattern, for now unused
 								pFile->ReadString(pTemp, sizeof pTemp);
 								for (int i(0) ; i < playLength; ++i)
 								{
-									pFile->Read(&temp, sizeof temp);
+									pFile->Read(temp);
 									playOrder[i] = temp;
 								}
 							}
@@ -1140,8 +1140,8 @@ namespace psycle
 					else if(std::strcmp(Header,"PATD") == 0)
 					{
 						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						if(version > CURRENT_FILE_VERSION_PATD)
 						{
 							// there is an error, this file is newer than this build of psycle
@@ -1151,18 +1151,18 @@ namespace psycle
 						else
 						{
 							// index
-							pFile->Read(&index, sizeof index);
+							pFile->Read(index);
 							if(index < MAX_PATTERNS)
 							{
 								// num lines
-								pFile->Read(&temp, sizeof temp );
+								pFile->Read(temp);
 								// clear it out if it already exists
 								RemovePattern(index);
 								patternLines[index] = temp;
 								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
-								pFile->Read(&temp, sizeof temp );
+								pFile->Read(temp);
 								pFile->ReadString(patternName[index], sizeof *patternName);
-								pFile->Read(&size, sizeof size);
+								pFile->Read(size);
 								byte* pSource = new byte[size];
 								pFile->Read(pSource, size);
 								byte* pDest;
@@ -1186,8 +1186,8 @@ namespace psycle
 					else if(std::strcmp(Header,"MACD") == 0)
 					{
 						int curpos(0);
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						--chunkcount;
 						if(!fullopen)
 						{
@@ -1201,7 +1201,7 @@ namespace psycle
 						}
 						else
 						{
-							pFile->Read(&index, sizeof index);
+							pFile->Read(index);
 							if(index < MAX_MACHINES)
 							{
 								// we had better load it
@@ -1219,8 +1219,8 @@ namespace psycle
 					}
 					else if(std::strcmp(Header,"INSD") == 0)
 					{
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						--chunkcount;
 						if(version > CURRENT_FILE_VERSION_INSD)
 						{
@@ -1230,7 +1230,7 @@ namespace psycle
 						}
 						else
 						{
-							pFile->Read(&index, sizeof index);
+							pFile->Read(index);
 							if(index < MAX_INSTRUMENTS)
 							{
 								_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
@@ -1338,11 +1338,11 @@ namespace psycle
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
 				New();
-				pFile->Read(&Name, 32);
-				pFile->Read(&Author, 32);
-				pFile->Read(&Comment, 128);
-				pFile->Read(&m_BeatsPerMin, sizeof m_BeatsPerMin);
-				pFile->Read(&sampR, sizeof sampR);
+				pFile->Read(Name, 32);
+				pFile->Read(Author, 32);
+				pFile->Read(Comment, 128);
+				pFile->Read(m_BeatsPerMin);
+				pFile->Read(sampR);
 				if( sampR <= 0)
 				{
 					// Shouldn't happen but has happened.
@@ -1353,16 +1353,16 @@ namespace psycle
 				Global::pPlayer->tpb = m_LinesPerBeat;
 				// The old format assumes we output at 44100 samples/sec, so...
 				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
-				pFile->Read(&currentOctave, sizeof currentOctave);
-				pFile->Read(&busMachine[0], sizeof busMachine);
-				pFile->Read(&playOrder, sizeof playOrder);
-				pFile->Read(&playLength, sizeof playLength);
-				pFile->Read(&SONGTRACKS, sizeof SONGTRACKS);
+				pFile->Read(currentOctave);
+				pFile->Read(busMachine);
+				pFile->Read(playOrder);
+				pFile->Read(playLength);
+				pFile->Read(SONGTRACKS);
 				// Patterns
-				pFile->Read(&num, sizeof num);
+				pFile->Read(num);
 				for(i =0 ; i < num; ++i)
 				{
-					pFile->Read(&patternLines[i], sizeof *patternLines);
+					pFile->Read(patternLines[i]);
 					pFile->Read(&patternName[i][0], sizeof *patternName);
 					if(patternLines[i] > 0)
 					{

@@ -20,7 +20,7 @@ v0.01b
 
 /////////////////////////////////////////////////////////////////////
  */
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <string.h>
 #include <stdlib.h>

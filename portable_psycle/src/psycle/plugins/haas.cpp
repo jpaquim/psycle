@@ -1,6 +1,6 @@
 /// \file
 /// \brief Haas stereo time delay spatial localization
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
 #include <cassert>
 #include <vector>

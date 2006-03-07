@@ -1,14 +1,14 @@
 ///\file
 ///\implementation psycle::host::CMidiInputDlg.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
 #include "MidiInputDlg.hpp"
 #include "Helpers.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 
 		CMidiInputDlg::CMidiInputDlg()
@@ -136,5 +136,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 			CPropertyPage::OnOK();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

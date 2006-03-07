@@ -13,7 +13,7 @@
 /* $Workfile::                                                             $ */
 /*                                                                           */
 /*****************************************************************************/
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "ImplVSTHost.hpp"
 #include <vst/vstsysex.h>
 

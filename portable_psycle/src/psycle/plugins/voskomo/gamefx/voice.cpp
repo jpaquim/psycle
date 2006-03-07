@@ -17,7 +17,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include <cmath>
 
 #include "voice.h"

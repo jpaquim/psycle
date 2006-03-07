@@ -1,16 +1,16 @@
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-#pragma unmanaged
 
 namespace psycle
 {
 	namespace host
 	{
+
 /*		__declspec(align(32)) static float xdspFloatBuffer[20960];
 		static CXPreparedResamplerFilter *pFilter = NULL;
 		static CXResampler *pResampler = NULL;
@@ -561,7 +561,10 @@ namespace psycle
 				if ( m_pSampler->PanningMode()== PanningMode::Linear) {
 					lvol = (1.0f - rvol);
 				} else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
-					lvol =  min(1.0f, (1.0f - rvol)*2.0);
+					//using std::min;
+					#define min UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MIN
+					lvol = min(1.0f, (1.0f - rvol)*2.0);
+					#undef min
 				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
 					//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
 					lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
@@ -2085,10 +2088,10 @@ namespace psycle
 			// don't process twk , twf, Mcm Commands, or empty lines.
 			if ( pData->_note > 120 )
 			{
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != 255 )return; // Return in everything but commands!
 	#else
 				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != 255 )return; // Return in everything but commands!
@@ -2098,10 +2101,10 @@ namespace psycle
 
 			// define some variables to ease the case checking.
 			bool bInstrumentSet = (pData->_inst < 255);
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 			bool bPortaEffect = ((pData->_cmd == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
 	#else
 			bool bPortaEffect = (pData->_cmd == CMD::PORTA2NOTE);
@@ -2242,10 +2245,10 @@ namespace psycle
 								else thisChannel.LastPitchEnvelopePosInSamples(0);
 
 							}
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.Note(),pData->_volume<<1,bInstrumentSet);
 							else newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#else
@@ -2288,10 +2291,10 @@ namespace psycle
 			}
 			if ( newVoice == NULL ) newVoice = currentVoice;
 			// Effect Command
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 			thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
 	#else
 			thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);

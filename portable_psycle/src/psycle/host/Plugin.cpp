@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "FileIO.hpp"
 #include "Plugin.hpp"
 #include "InputHandler.hpp"
@@ -45,7 +45,7 @@ namespace psycle
 			Free();
 		}
 
-		#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 			namespace boost
 			{
 				namespace filesystem
@@ -74,9 +74,9 @@ namespace psycle
 		{
 			char const static path_env_var_name[] =
 			{
-				#if defined OPERATING_SYSTEM__LINUX
+				#if defined DIVERSALIS__OPERATING_SYSTEM__LINUX
 					"LD_LIBRARY_PATH"
-				#elif defined OPERATING_SYSTEM__MICROSOFT
+				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					"PATH"
 				#else
 					#error unknown dynamic linker

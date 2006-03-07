@@ -1,8 +1,9 @@
 #pragma once
+#include <universalis/compiler.hpp>
 #if defined ASIO
-	#include LIBRARY__EXPORT
+	#define LIBRARY UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
 #else
-	#include LIBRARY__IMPORT
+	#define LIBRARY UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
 #endif
 namespace asio
 {

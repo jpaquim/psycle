@@ -3,7 +3,7 @@
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\implementation gets information from ellipsis exceptions: catch(...)
-#include PACKAGENERIC__PRE_COMPILED
+#include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include <universalis/detail/project.private.hpp>
 #include "ellipsis.hpp"

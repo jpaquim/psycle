@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "psycle.hpp"
 #include "WaveEdChildView.hpp"
 #include "MainFrm.hpp"
 #include <mmreg.h>
 #include <math.h>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWaveEdChildView::CWaveEdChildView()
 		{
 			cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
@@ -1144,5 +1144,5 @@ NAMESPACE__BEGIN(psycle)
 		{
 			pParent = parent;
 		}	
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END

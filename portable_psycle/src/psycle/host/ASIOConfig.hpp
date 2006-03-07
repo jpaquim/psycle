@@ -1,8 +1,8 @@
 ///\interface psycle::host::CASIOConfig
 #pragma once
 #include "ASIOInterface.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
+	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// asio config window.
 		class CASIOConfig : public CDialog
 		{
@@ -37,5 +37,5 @@ NAMESPACE__BEGIN(psycle)
 				int m_sampleRate;
 				int m_bufferSize;
 		};
-	NAMESPACE__END
-NAMESPACE__END
+	UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
