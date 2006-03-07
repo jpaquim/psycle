@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'PsycleWTLScript'
+		'PsycleWTLScript.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

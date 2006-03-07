@@ -1,0 +1,58 @@
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\prsht.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\mshtml.idl";
+import "c:\program files\microsoft visual studio .net 2003\vc7\platformsdk\include\dimm.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\mshtmhst.idl";
+import "c:\program files\microsoft visual studio .net 2003\vc7\platformsdk\include\docobj.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\exdisp.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\objsafe.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\activscp.idl";
+
+[
+	object,
+	uuid(146B45AB-51B9-4A22-9B60-3787FEBDF439),
+	dual,
+	helpstring("IScriptHost Interface"),
+	pointer_default(unique)
+] 
+#line 14 "c:\\my documents\\visual studio projects\\psyclewtl\\psyclewtlscript\\scripthost.h"
+interface IScriptHost : IDispatch {
+#line 16 "c:\\my documents\\visual studio projects\\psyclewtl\\psyclewtlscript\\scripthost.h"
+	[id(1),helpstring("Create Script Engine")] HRESULT  CreateEngine([in]BSTR pstrProgID);
+	[id(2),helpstring("Create COM object")] HRESULT  CreateObject([in] BSTR strProgID, [out,retval] LPDISPATCH *ppObject );
+	[id(3),helpstring("Add a Script Item")] HRESULT  AddScriptItem([in] BSTR pstrNamedItem, [in] LPUNKNOWN lpUnknown);
+	[id(4),helpstring("Add Script code")] HRESULT  AddScriptCode([in] BSTR pstrScriptCode);
+	[id(5),helpstring("Add Scriptlet (with Event)")] HRESULT  AddScriptlet([in] BSTR pstrDefaultName, [in] BSTR pstrCode, [in] BSTR pstrItemName, [in] BSTR pstrEventName);
+	[id(6),helpstring("Display MessageBox with provide text")] HRESULT  Display([in]BSTR strText);
+};
+
+
+[ version(1.0), uuid(68303424-1505-4612-91E5-87B96A7DA04F), helpstring("PsycleWTLScript 1.0 Type Library") ]
+library PsycleWTLScript
+{
+	importlib("stdole2.tlb");
+	importlib("olepro32.dll");
+
+	[
+		uuid(13E8EF20-EBC4-4833-9093-47B56D3249C3),
+		helpstring("_IScriptHostEvents インターフェイス")
+	] 
+#line 33 "c:\\my documents\\visual studio projects\\psyclewtl\\psyclewtlscript\\scripthost.h"
+	dispinterface _IScriptHostEvents {
+	properties:
+
+	methods:
+	};
+
+	[
+		version(1.0),
+		uuid(484F364C-E070-4FEF-8AD8-3AF6DE9942E8),
+		helpstring("ScriptHost Class")
+	] 
+#line 50 "c:\\my documents\\visual studio projects\\psyclewtl\\psyclewtlscript\\scripthost.h"
+	coclass CScriptHost {
+		interface IScriptHost;
+		[default, source]	interface _IScriptHostEvents;
+	};
+
+}
+
