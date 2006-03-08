@@ -1,0 +1,305 @@
+Fileformat Documentation of .psy Files
+
+Psycle Version : 1.7+
+Document Version: 1.3
+Date:01-Jul-2005
+
+This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle >= 1.7
+It is Riff-like, with independant versioning for each chunk, and a "total" version number for
+the entire file (major and minor).  Each chunk is HEADER followed immediately by DATA
+
+
+chunk header format:
+
+FOURCC id; // eg "PSY3"
+UINT	version; // version of this chunk type
+UINT	size; // size of chunk NOT including header
+
+
+
+
+Here are the structures of each chunk:
+
+===================
+FILE HEADER
+===================
+id[8] = "PSY3SONG"; // Attention!!! This is the only exception where "ID" is 8bytes instead of 4
+version; 	// "total" version of all chunk versions. see CURRENT_FILE_VERSION in constants.h
+size = 4;		// Size of extra information data of the File Header. Note: It is used as version too.
+
+DATA:
+int chunkcount;		// Number of chunks in the file, not counting the File Header.
+
+
+===================
+SONG INFO TEXT
+===================
+HEADER:
+id = "INFO"; 
+version = 0;
+size = strlen(Name)+strlen(Author)+strlen(Comment)+3;   //( +3 because of the NULL's )
+
+DATA:
+char name[]; // null terminated string, so read until you find NULL.
+char author[]; // null terminated string, so read until you find NULL
+char comment[]; // null terminated string, so read until you find NULL
+
+
+===================
+SONG PROPERTIES 
+===================
+HEADER:
+id = "SNGI"; 
+version = 0;
+size = (11*sizeof(int))+(SONGTRACKS*(sizeof(bool)+sizeof(bool))); // Warning! .psy's previous to 1.8 saved this value as 6*sizeof(int)
+
+DATA:
+int numTracks; // Contains the number of tracks that the song has. In multipattern it would be total tracks	Values: from 4 to 64
+int bpm; 			// bpm of song (0-255) - int incase of future expansion?
+int lpb; 			// lines per beat of song (1-256) - int incase of future expansion?
+int currentoctave; // curent octave on keyboard (0-9)
+int machineSoloed; // The index of the Soloed machine. -1 if none
+int trackSoloed;	 // index of the Soloed track. -1 if none
+int seqBus;			// index of the selected machine for editing
+int midiSelected; // index of the MIDI channel selected for editing. It is stored separately from auxcol for switching.
+int auxcolSelected; // index of the selected aux data for editing
+int instSelected;  // index of the sampler instrument selected for editig. It is stored separately from auxcol for switching.
+int sequenceWidth; // number of sequence columns for multipattern. currently 1.
+
+bool trackMuted[numTracks] // Array with the value which sets the "mute" state of the tracks.
+bool trackArmed[numTracks] // Array with the value which sets the "Record" state of the tracks.
+
+===================
+SEQUENCE DATA
+===================
+HEADER:
+id = "SEQD"; 
+version = 0;
+size = (sequenceLength*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
+
+DATA:
+int index; // column index for multipattern stuff
+int lenght; // lenght of the sequence.
+char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, It will be trucated on load.
+int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in 
+	// position 3, it plays the pattern 5th. (zero based)
+
+===================
+PATTERN DATA
+===================
+HEADER:
+id = "PATD"; 
+version = 0;
+size = sizez77+(4*sizeof(int))+strlen(patternName)+1; // where sizez77 is the size of the compressed pattern. Warning! versions prior to 1.8 saved one less sizeof(int)
+
+DATA:
+int index; // which pattern we are loading
+int numlines; // how many lines in this pattern (1-512)
+int patterntracks; // how many tracks in this pattern * for multipattern
+char patternName[]; // null terminated string, should be less than 32 chars long, It will be truncated on load.
+unsigned int sizez77;		// size of the compressed data.
+unsigned char z77data[];	// array with the compressed pattern data.
+
+
+*Pattern compression uses a variant of the Z77 algorithm. See sources for details.
+*Patterns are uncompressed to the following structure:
+
+PatternEntry pe[numlines*patterntracks];
+typedef struct PatternEntry
+{
+	UCHAR _note;
+	UCHAR _inst; // Aux column.  Instrument for sampler.
+	UCHAR _mach;
+	UCHAR _cmd;
+	UCHAR _parameter;
+}
+PatternEntry;
+
+
+===================
+MACHINES DATA
+===================
+HEADER:
+id = "MACD"; 
+version = 0;
+size = ...  // depends for each machine.
+
+* Types 1,2,4,5,6 and 7 are only valid in old .psy's. They were converted to native Plugins later on, so you shouldn't find them in this fileformat.
+
+enum MachineType
+{
+	MACH_UNDEFINED = -1,
+	MACH_MASTER = 0,
+		MACH_SINE = 1,		// Old
+		MACH_DIST = 2,		// Old
+	MACH_SAMPLER = 3,
+		MACH_DELAY = 4,	// Old
+		MACH_2PFILTER = 5,// Old
+		MACH_GAIN = 6,		// Old
+		MACH_FLANGER = 7,	// Old
+	MACH_PLUGIN = 8,
+	MACH_VST = 9,
+	MACH_VSTFX = 10,
+		MACH_SCOPE = 11,	// Old
+	MACH_XMSAMPLER = 12,
+	MACH_DUPLICATOR = 13,
+	MACH_DUMMY	= 255
+};
+
+DATA:
+int index; 			// which machine we are loading
+int type; 			// The MachineType of the machine being loaded
+char dllname[]; 	// NULL terminated .dll name of the plugin (MACH_PLUGIN, MACH_VST, MACH:VSTFX). NULL in any other case. (truncated to 256)
+bool bypass; 		// Indicates if the machine has the bypassed status on. (only valid for effects).
+bool mute; 			// Indicates if the machine has the muted status on.
+int pan; 			// Indicates the value of the panning in the machine box. It affects all output wires.
+						// Values: 0 top left, 64center 128 top right.
+int x; 				// top-left x position of the machine in the machine view
+int y; 				// top-left y position of the machine in the machine view
+int numInputs;		// Number of input wires for this machine (only valid for effects).
+int numOutputs;	// Number of output wires for this machine.
+
+*for each connection up to MAX_CONNECTIONS (currently this value is 12)
+{
+	int inputmachine; 	// index of the machine that connects to this input wire. -1 if none.
+	int outputmachine 	// index of the machine that connects to this output wire. -1 if none.
+	float inputConVol; 	// volume value for the current input wire.
+	float wireMultiplier;  // value to multiply inputConVol to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
+	bool connection;		// true if this is a valid output wire.
+	bool inputCon;			// true if this is a valid input wire.
+}
+
+char editname[]; // null terminated string, truncated to 32
+uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain
+byte MachineSpecificData[datasize]; // data depends on type member
+
+
+
+===================
+MACHINE SPECIFIC DATA(MACH_MASTER)
+size: sizeof(bool)+sizeof(int);
+===================
+
+int outDry;		//The volume value for master output. range from 0..1024. 256 equals 0db. 1024 equals +12db.
+bool decreaseOnClip;	// Indicates if the function that reduces the master volume is enabled or not.
+
+
+===================
+MACHINE SPECIFIC DATA(MACH_SAMPLER)
+size = 2*sizeof(int);
+===================
+
+int numVoices;		// Max number of simultaneous voices that the sampler will allow to play. values from 2 to 16.
+int antialias;		// Resampling model to use.
+						// Values:  0 None (Square), 1 Linear, 2 Cubic Interpolation.
+
+===================
+MACHINE SPECIFIC DATA(MACH_PLUGIN)
+size: numParams*sizeof(int)+2*sizeof(int)+chunksize;
+===================
+int numParams; // Indicates the number of parameters that are stored for this plugin.
+int parameter[numParams]; // array with the parameters.
+
+*if this plugin has extradata, then this follows:
+byte ExtraData[chunksize]; // extra data chunk
+
+
+To detect if there is extradata, just check if the loader is at the end of the chunk.
+
+===================
+MACHINE SPECIFIC DATA(MACH_VST and MACH_VSTFX)
+size: 3*sizeof(int) + chunksize
+===================
+int program;
+int numParams;
+int parameter[numParams];
+
+*if this plugin has extradata, then this follows:
+byte ExtraData[chunksize]; // extra data chunk
+
+
+To detect if there is extradata, just check if the loader is at the end of the chunk.
+
+===================
+MACHINE SPECIFIC DATA(MACH_XMSAMPLER)
+===================
+
+// Incomplete.
+
+===================
+MACHINE SPECIFIC DATA(MACH_DUPLICATOR)
+size = 2*12*sizeof(short int)
+===================
+
+int macOutput[12]; // Array with the machine index to send events to.
+int noteOffset[12]; // Array of the noteOffsets for the current machine.
+
+===================
+MACHINE SPECIFIC DATA(MACH_DUMMY)
+size = 0
+===================
+// none
+
+
+
+
+
+===================
+INSTRUMENT DATA
+===================
+HEADER:
+id = "INSD"; 
+version = 0;
+size = variable, depends on the samples.
+
+DATA:
+
+bool loop;		// Indicates if the loop mode is enabled. Loop Mode plays the wave so that it plays for the specified number of tracker lines
+int lines;		// Number of lines for the sample to play.
+unsigned char NNA;	// NNA (New Note Action) Type. Values are : 0: NoteCut, 1: NoteOff, 2: Continue (do nothing)
+int envAttack;		// Envelope attack time (in samples)
+int envDecayTime;	// Envelope decay time (in samples)
+int envSusLevel;	// Envelope sustain level (0..100)
+int envRelTime;	// Envelope release time (in samples)
+int fenvAttack;	// Filter Envelope attack time (in smaples)
+int fenvDecayTime;	// Filter Envelope decay time (in samples)
+int fenvSusLevel;	// Filter Envelope sustain level (0..128)
+int fenvRelTime;	// Filter Envelope release time (in samples)
+int fenvCutOff;	// Filter Cutoff ( 0..127 )
+int fenvResso;		// Filter Ressonance ( 0..127)
+int fenvAmount;	// Filter amount (  -128..128 )
+int fenvType;		// Filter type  0 lowpass 1 highpass, 2 bandpass, 3 notchband, 4 none,
+int panning;		// Pan value. 0 left, 128 centre, 256 right.
+bool randomPan;	// Enables random pan on note on
+bool randomCutOff;// Enables random filter cutoff on note on
+bool randomRes;	// Enables random filter ressonance on note on
+char sName[];		// Null terminated Instrument name. truncated to 32.
+
+int numwaves;		// Number of waves that this instrument uses. (Psycle sampler has always supported only one)
+
+*So, now, for each wave, the following data is stored:
+unsigned int version;		// Version of this chunk ( yes, this is actually a name-less chunk)
+unsigned int size;			// size of this chunk.
+
+unsigned int index;			// sample index. (Non-used samples are not stored, so the index lets us know which one we are storing)
+unsigned int waveLenght;	// sample lenght, in samples.
+unsigned short waveVolume;	// sample volume. values from 0 onwards. 100 = 0db Psycle supports upto 512
+unsigned int waveLoopStart;// loop start point (in samples), if enabled.
+unsigned int waveLoopEnd;	// loop end point (in samples), if enabled.
+
+int waveTune;					// Tuning for the centre note. values from -60 to 59. 0 = C-5
+int waveFinetune;				// Finetuning. range from -256 to 256. 256 = next seminote
+bool waveLoopType;			// Loop type. if enabled forward loop. else, no loop
+bool waveStereo;				// Indicates that this wave is a stereo wave.
+char waveName[];				// Null terminated name for the wave ( filename usually ), truncated to 32.
+
+unsigned size1;			// Size for the compressed wavedata.
+byte data1;					// compressed data.
+
+*now, if the wave is stereo, this data follows:
+unsigned size2;			// Size of the right channel's compressed wavedata.
+byte data2;					// compressed data
+
+
+*the compression used for waves is a form of delta packing. check the sources for details.
+The unpacked data is an array of type short, with values ranging from -32768 to 32767.

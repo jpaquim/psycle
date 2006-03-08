@@ -1,0 +1,52 @@
+#pragma once
+#include <universalis/compiler.hpp>
+#if defined ASIO
+	#define LIBRARY UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
+#else
+	#define LIBRARY UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
+#endif
+namespace asio
+{
+	#define DRVERR			-5000
+	#define DRVERR_INVALID_PARAM		DRVERR-1
+	#define DRVERR_DEVICE_ALREADY_OPEN	DRVERR-2
+	#define DRVERR_DEVICE_NOT_FOUND		DRVERR-3
+
+	#define MAXPATHLEN			512
+	#define MAXDRVNAMELEN		128
+
+	struct asiodrvstruct
+	{
+		int						drvID;
+		CLSID					clsid;
+		char					dllpath[MAXPATHLEN];
+		char					drvname[MAXDRVNAMELEN];
+		LPVOID					asiodrv;
+		struct asiodrvstruct	*next;
+	};
+
+	typedef struct asiodrvstruct ASIODRVSTRUCT;
+	typedef ASIODRVSTRUCT	*LPASIODRVSTRUCT;
+
+	class LIBRARY AsioDriverList
+	{
+	public:
+		AsioDriverList();
+		~AsioDriverList();
+		
+		LONG asioOpenDriver (int,VOID **);
+		LONG asioCloseDriver (int);
+
+		// nice to have
+		LONG asioGetNumDev (VOID);
+		LONG asioGetDriverName (int,char *,int);		
+		LONG asioGetDriverPath (int,char *,int);
+		LONG asioGetDriverCLSID (int,CLSID *);
+
+		// or use directly access
+		LPASIODRVSTRUCT	lpdrvlist;
+		int				numdrv;
+	};
+
+	typedef class AsioDriverList *LPASIODRIVERLIST;
+}
