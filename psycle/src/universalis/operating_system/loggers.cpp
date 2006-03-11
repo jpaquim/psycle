@@ -13,8 +13,12 @@ namespace universalis
 	{
 		void logger::log(int const & level, std::string const & string) throw()
 		{
-			boost::mutex::scoped_lock lock(mutex());
-			do_log(level, string);
+			#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7
+				//\todo this is crashing here at runtime with msvc7.1
+				// some static var doesn't seem to get initialized properly
+				boost::mutex::scoped_lock lock(mutex());
+				do_log(level, string);
+			#endif
 		}
 
 		namespace loggers

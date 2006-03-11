@@ -156,6 +156,7 @@ namespace psycle
 					};
 				};
 
+
 				/*
 				The following effects 'memorise' their previous values:
 				(D/K/L), (E/F/G), (HU), I, J, N, O, S, T, W
@@ -188,6 +189,7 @@ namespace psycle
 				//  115->124 = Pitch Slide up
 				//  193->202 = Portamento to
 				//  203->212 = Vibrato
+
 				In all cases, if x is 0, then the effect memory is used (as
 				explained in (4)
 

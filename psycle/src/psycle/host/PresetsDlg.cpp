@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"
@@ -529,16 +530,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						fxb.Skip(8); // VST ID + VSTVersion
 
-						ULONGINV numpresets;
+						endian::big::uint32_t numpresets;
 						fxb.Read(&numpresets,4);
 						int intpresets = (numpresets.lohi*256) + numpresets.lolo;
 
-						ULONGINV filenumpars;
+						endian::big::uint32_t filenumpars;
 						fxb.Skip(128);
 						fxb.Read(&filenumpars,0);
 
 						int i=0;
-		//				int init=m_preslist.GetCount();
+						//int init=m_preslist.GetCount();
 						char cbuf[29]; cbuf[28]='\0';
 						float* fbuf;
 						fbuf= new float[numParameters];
@@ -910,13 +911,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				else if( tmp._id == fxb.FourCC("FxBk"))
 				{
 					fxb.Skip(8); // VST ID + VSTVersion
-					ULONGINV numpresets;
+					endian::big::uint32_t numpresets;
 					fxb.Read(&numpresets,4);
 					int intpresets = (numpresets.lohi*256) + numpresets.lolo;
 					// well, I don't expect any file with more than 65535 presets.
 					fxb.Skip(128);
 
-					ULONGINV filenumpars;
+					endian::big::uint32_t filenumpars;
 					fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another cause problems.
 
 					char cbuf[29]; cbuf[28]='\0';

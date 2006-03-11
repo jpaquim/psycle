@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "SkinDlg.hpp"
 #include "Helpers.hpp"

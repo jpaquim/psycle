@@ -4,6 +4,7 @@
  *  $Revision$
  */
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "resources/resources.hpp"
 #include "ProgressDialog.hpp"
 #include "Song.hpp"

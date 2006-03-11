@@ -24,12 +24,11 @@
 
 **********************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
+#include PACKAGENERIC
 #include "FFT.hpp"
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
 
 namespace psycle
 {

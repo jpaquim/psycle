@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CGreetDialog.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "GreetDialog.hpp"
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)

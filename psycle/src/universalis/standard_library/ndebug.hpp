@@ -4,6 +4,7 @@
 
 ///\file
 #pragma once
+#define UNIVERSALIS__STANDARD_LIBRARY__NDEBUG__INCLUDED
 #include <universalis/detail/project.hpp>
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	// microsoft uses its own vendor #define _DEBUG (for debug), instead of the iso #define NDEBUG (for no debug)
@@ -13,10 +14,14 @@
 			#error "We have both ISO #define NDEBUG (no debug) and microsoft's vendor #define _DEBUG (debug) ... Is this intended?"
 		#endif
 	#elif defined _DEBUG
-		//#pragma message(__FILE__ ": debug")
+	#if defined UNIVERSALIS__COMPILER__VERBOSE
+		#pragma message("universalis::standard_library:: debug ; ("__FILE__ ")")
+	#endif
 	#else
 		#define NDEBUG
-		//#pragma message(__FILE__ ": no debug")
+	#endif
+	#if defined UNIVERSALIS__COMPILER__VERBOSE && defined NDEBUG
+		#pragma message("universalis::standard_library:: no debug (NDEBUG) ; ("__FILE__ ")")
 	#endif
 #elif defined DIVERSALIS__COMPILER__DOXYGEN
 	/// parts of the source code that contain instructions only useful for debugging purpose

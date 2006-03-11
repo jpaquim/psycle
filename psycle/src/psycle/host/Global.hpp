@@ -134,6 +134,7 @@ namespace psycle
 				};
 			}
 		}
+
 		/// Safer version of delete that clears the pointer automatically. Don't use it for arrays!
 		/// \param pointer pointer to single object to be deleted.
 		/// \param new_value the new value pointer will be set to. By default it is null.

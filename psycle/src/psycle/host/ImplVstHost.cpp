@@ -14,6 +14,7 @@
 /*                                                                           */
 /*****************************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "ImplVSTHost.hpp"
 #include <vst/vstsysex.h>
 

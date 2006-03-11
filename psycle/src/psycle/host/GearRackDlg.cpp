@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearRackDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"

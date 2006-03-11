@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "FileIO.hpp"
 #include "Plugin.hpp"
 #include "InputHandler.hpp"
@@ -111,7 +112,7 @@ namespace psycle
 					{
 						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
 						path = path.branch_path();
-						/*if(loggers::trace())*/ loggers::trace("path: " + path.string());
+						/*if(loggers::trace()())*/ loggers::trace("path: " + path.string());
 						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
@@ -124,7 +125,7 @@ namespace psycle
 				}
 				// set the new path env var
 				if(::putenv((path_env_var_name + ("="+ new_path.str())).c_str())) throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
-				/*if(loggers::trace())*/ loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
+				/*if(loggers::trace()())*/ loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
@@ -277,8 +278,8 @@ namespace psycle
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(&size,sizeof(size)); // size of whole structure
+			std::uint32_t size;
+			pFile->Read(size); // size of whole structure
 			if(size)
 			{
 				if(version > CURRENT_FILE_VERSION_MACD)
@@ -300,22 +301,22 @@ namespace psycle
 						pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
 					}
 					*/
-					for (UINT i = 0; i < count; i++)
+					for(unsigned int i(0) ; i < count ; ++i)
 					{
-						int temp;
-						pFile->Read(&temp,sizeof(temp));
-						SetParameter(i,temp);
+						std::uint32_t temp;
+						pFile->Read(temp);
+						SetParameter(i, temp);
 					}
-					size -= sizeof(count) + sizeof(int)*count;
+					size -= sizeof(count) + sizeof(std::uint32_t) * count;
 					if(size)
 					{
-						byte* pData = new byte[size];
+						char * pData = new char[size];
 						pFile->Read(pData, size); // Number of parameters
 						try
 						{
 							proxy().PutData(pData); // Internal load
 						}
-						catch(const std::exception &)
+						catch(std::exception const &)
 						{
 							return false;
 						}
@@ -328,39 +329,34 @@ namespace psycle
 
 		void Plugin::SaveSpecificChunk(RiffFile* pFile)
 		{
-			UINT count = GetNumParams();
-			UINT size2(0);
+			std::uint32_t count = GetNumParams();
+			std::uint32_t size2(0);
 			try
 			{
 				size2 = proxy().GetDataSize();
 			}
-			catch(const std::exception &)
+			catch(std::exception const &)
 			{
 				// data won't be saved
 			}
-			UINT size = size2 + sizeof(count) + sizeof(int)*count;
-			pFile->Write(&size,sizeof(size));
-			pFile->Write(&count,sizeof(count));
-			//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-			for (UINT i = 0; i < count; i++)
-			{
-				int temp = GetParamValue(i);
-				pFile->Write(&temp,sizeof temp);
-			}
+			std::uint32_t size = size2 + sizeof count  + sizeof(std::uint32_t) * count;
+			pFile->Write(size);
+			pFile->Write(count);
+			for(unsigned int i(0) ; i < count ; ++i) pFile->Write<std::uint32_t>(GetParamValue(i));
 			if(size2)
 			{
-				byte * pData = new byte[size2];
+				char * pData = new char[size2];
 				try
 				{
 					proxy().GetData(pData); // Internal save
 				}
-				catch(const std::exception &)
+				catch(std::exception const &)
 				{
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
 				}
 				pFile->Write(pData, size2); // Number of parameters
-				zapArray(pData);
+				delete[] pData;
 			}
 		};
 
@@ -914,7 +910,7 @@ namespace psycle
 					//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
 					if(size)
 					{
-						byte* pData = new byte[size];
+						char * pData = new char[size];
 						pFile->Read(pData, size); // Number of parameters
 						try
 						{
@@ -923,10 +919,10 @@ namespace psycle
 						catch(const std::exception &)
 						{
 						}
-						zapArray(pData);
+						delete[] pData;
 					}
 				}
-				catch(const std::exception &)
+				catch(std::exception const &)
 				{
 				}
 				if(wasAS1) // Patch to replace Synth1 by Arguru Synth 2f
@@ -952,22 +948,14 @@ namespace psycle
 					{
 					}
 				}
-				zapArray(Vals);
+				delete[] Vals;
 			}
 			else
 			{
 				for (int i=0; i<numParameters; i++)
 				{
-					pFile->Read(&junk[0], sizeof(int));			
+					pFile->Read(&junk[0], 4);
 				}
-				/*int size;		// This SHOULD be done, but it breaks the fileformat.
-				pFile->Read(&size,sizeof(int));
-				if (size)
-				{
-					byte* pData = new byte[size];
-					pFile->Read(pData, size); // Number of parameters
-					zapArray(pData);
-				}*/
 			}
 
 			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
@@ -981,35 +969,35 @@ namespace psycle
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-			pFile->Read(&junk[0], sizeof(int)); // numSubtracks
-			pFile->Read(&junk[0], sizeof(int)); // interpol
+			pFile->Read(&junk[0], 4*8); // SubTrack[]
+			pFile->Read(&junk[0], 4); // numSubtracks
+			pFile->Read(&junk[0], 4); // interpol
 
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-			pFile->Read(&junk[0], sizeof(int)); // outdry
+			pFile->Read(&junk[0], 4); // outwet
+			pFile->Read(&junk[0], 4); // outdry
 
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
+			pFile->Read(&junk[0], 4); // distPosThreshold
+			pFile->Read(&junk[0], 4); // distPosClamp
+			pFile->Read(&junk[0], 4); // distNegThreshold
+			pFile->Read(&junk[0], 4); // distNegClamp
 
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
+			pFile->Read(&junk[0], 1); // sinespeed
+			pFile->Read(&junk[0], 1); // sineglide
+			pFile->Read(&junk[0], 1); // sinevolume
+			pFile->Read(&junk[0], 1); // sinelfospeed
+			pFile->Read(&junk[0], 1); // sinelfoamp
 
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
+			pFile->Read(&junk[0], 4); // delayTimeL
+			pFile->Read(&junk[0], 4); // delayTimeR
+			pFile->Read(&junk[0], 4); // delayFeedbackL
+			pFile->Read(&junk[0], 4); // delayFeedbackR
 
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
+			pFile->Read(&junk[0], 4); // filterCutoff
+			pFile->Read(&junk[0], 4); // filterResonance
+			pFile->Read(&junk[0], 4); // filterLfospeed
+			pFile->Read(&junk[0], 4); // filterLfoamp
+			pFile->Read(&junk[0], 4); // filterLfophase
+			pFile->Read(&junk[0], 4); // filterMode
 
 			return result;
 		}

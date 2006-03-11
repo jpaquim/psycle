@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "XMSamplerUIGeneral.hpp"
 #include "XMInstrument.hpp"

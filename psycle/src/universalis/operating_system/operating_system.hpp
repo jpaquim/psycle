@@ -5,3 +5,13 @@
 ///\brief meta header
 #pragma once
 #include "detail/microsoft/max_path.hpp"
+
+
+/// end-of-line character sequence on the platform.
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r\n"
+#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE && DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR < 10 // before bsd-unix (darwin)
+	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n\r"
+#else
+	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n"
+#endif

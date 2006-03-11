@@ -131,7 +131,7 @@ namespace psycle
 				public:
 					midi_type() : groups_(16), velocity_(0x0c), pitch_(1), raw_()
 					{
-						for(std::size_t i(0) ; i < groups().size() ; ++i) group(i).message() = group(i).command() = i + 1;
+						for(unsigned int i(0) ; i < groups().size() ; ++i) group(i).message() = group(i).command() = i + 1;
 					}
 
 				public:

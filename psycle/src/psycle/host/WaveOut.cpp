@@ -1,13 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "WaveOut.hpp"
 #include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <process.h>
 namespace psycle
 {
@@ -77,8 +78,8 @@ namespace psycle
 			// allocate blocks
 			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 			{
-				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSize);
-				pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
+				pBlock->Handle = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSize);
+				pBlock->pData = reinterpret_cast<unsigned char *>(::GlobalLock(pBlock->Handle));
 			}
 
 			// allocate block headers
@@ -106,7 +107,7 @@ namespace psycle
 
 		void WaveOut::PollerThread(void * pWaveOut)
 		{
-			operating_system::exceptions::translated::new_thread("mme wave out");
+			universalis::processor::exception::new_thread("mme wave out");
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			while(!pThis->_stopPolling)

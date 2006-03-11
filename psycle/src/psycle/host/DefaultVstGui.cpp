@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CDefaultVstGui.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "DefaultVstGui.hpp"
 #include "Helpers.hpp"

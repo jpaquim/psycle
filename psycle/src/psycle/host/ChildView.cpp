@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
@@ -461,7 +462,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 				// Test to use RMS values for Vumeters.
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 				dsp::numRMSSamples=pOut->_samplesPerSec*0.05f;
 				dsp::countRMSSamples=0;
 				dsp::RMSAccumulatedLeft=0;

@@ -5,16 +5,12 @@
  */
 
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Configuration.hpp"
-//#include "IPsySongLoader.h"
-//#include "IPsySongSaver.h"
 #include "XMInstrument.hpp"
 #include "Filter.hpp"
 #include "DataCompression.hpp"
 #include "FileIO.hpp"
-
-// constructor
-#pragma unmanaged
 
 namespace psycle
 {

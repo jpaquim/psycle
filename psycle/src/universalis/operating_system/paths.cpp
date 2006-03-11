@@ -5,6 +5,7 @@
 ///\implementation universalis::operating_system::paths
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
+#include "paths.hpp"
 #include "paths/implementation.hpp"
 namespace universalis
 {

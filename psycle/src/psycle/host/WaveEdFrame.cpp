@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "Song.hpp"
 #include "WaveEdFrame.hpp"

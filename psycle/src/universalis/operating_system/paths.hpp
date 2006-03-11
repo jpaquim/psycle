@@ -5,10 +5,8 @@
 ///\interface universalis::operating_system::paths
 #pragma once
 #include <universalis/detail/project.hpp>
-#include <boost/filesystem/path.hpp>
-#include <string>
 #include "paths/interface.hpp"
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__UNIVERSALIS__OPERATING_SYSTEM__PATHS
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__PATHS
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace universalis
 {

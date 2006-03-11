@@ -2,8 +2,7 @@
 ///\brief interface file for psycle::host::Filter.
 #pragma once
 #include <cmath>
-#include <operating_system/exception.hpp>
-//#include <operating_system/exceptions/code_description.hpp>
+#include <universalis/operating_system/exception.hpp>
 #include <cfloat>
 namespace psycle
 {
@@ -119,14 +118,16 @@ namespace psycle
 
 		class ITFilter
 		{
-		#define LN10 2.30258509299 // neperian-base log of 10
+			#define LN10 2.30258509299 // neperian-base log of 10
 		public:
 			ITFilter()
-				:  iSampleRate(44100)
 			{
+				SampleRate(44100);
 				Reset();
 			};
-			virtual ~ITFilter(){};
+
+			virtual inline ~ITFilter() throw() {}
+
 			void Reset(void)
 			{
 				ftFilter= F_NONE;
@@ -150,7 +151,7 @@ namespace psycle
 			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }};
 			FilterType Type (void) { return ftFilter; };
 			
-			inline void Work(float& _fSample)
+			inline void Work(float & sample)
 			{
 				// This filter code comes from the musicdsp.org archive,
 				// State Variable Filter (Double Sampled, Stable)
@@ -159,95 +160,104 @@ namespace psycle
 
 				double notch, high, out;
 
-				notch = _fSample - fCoeff[damp]*dBand[0];
+				notch = sample - fCoeff[damp]*dBand[0];
 				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
 				high = notch - dLow[0];
 				dBand[0] = fCoeff[freq]*high + dBand[0];
-//				out   = 0.5*(notch or low or high or band or peak);
+				//out = 0.5*(notch or low or high or band or peak);
 				out = 0.5*dLow[0];
-				notch = _fSample - fCoeff[damp]*dBand[0];
+				notch = sample - fCoeff[damp]*dBand[0];
 				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
 				high = notch - dLow[0];
 				dBand[0] = fCoeff[freq]*high + dBand[0];
-//				out  += 0.5*(same out as above);
+				//out += 0.5*(same out as above);
 				out += 0.5*dLow[0];
-				_fSample = out;
+				sample = out;
 
 			}
-			inline void WorkStereo(float& _fLeft, float& _fRight)
+
+			inline void WorkStereo(float & left, float & right)
 			{
 				double notch, high, out;
 
-				notch = _fLeft - fCoeff[damp]*dBand[0];
+				notch = left - fCoeff[damp]*dBand[0];
 				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
 				high  = notch - dLow[0];
 				dBand[0] = fCoeff[freq]*high + dBand[0];
-//				out   = 0.5*(notch or low or high or band or peak);
+				//out   = 0.5*(notch or low or high or band or peak);
 				out = 0.5*dLow[0];
-				notch = _fLeft - fCoeff[damp]*dBand[0];
+				notch = left - fCoeff[damp]*dBand[0];
 				dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
 				high  = notch - dLow[0];
 				dBand[0] = fCoeff[freq]*high + dBand[0];
-//				out  += 0.5*(same out as above);
+				//out  += 0.5*(same out as above);
 				out += 0.5*dLow[0];
-				_fLeft = out;
+				left = out;
 
-				notch = _fRight - fCoeff[damp]*dBand[1];
+				notch = right - fCoeff[damp]*dBand[1];
 				dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
 				high  = notch - dLow[1];
 				dBand[1] = fCoeff[freq]*high + dBand[1];
-				//				out   = 0.5*(notch or low or high or band or peak);
+				//out   = 0.5*(notch or low or high or band or peak);
 				out = 0.5*dLow[1];
-				notch = _fRight - fCoeff[damp]*dBand[1];
+				notch = right - fCoeff[damp]*dBand[1];
 				dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
 				high  = notch - dLow[1];
 				dBand[1] = fCoeff[freq]*high + dBand[1];
-				//				out  += 0.5*(same out as above);
+				//out  += 0.5*(same out as above);
 				out += 0.5*dLow[1];
-				_fRight = out;
+				right = out;
 
 			}
 
-			inline void WorkOld(float& _fSample)
+			inline void WorkOld(float & sample)
 			{
 				try
 				{
-					const float fy = (_fSample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+					const float fy = (sample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
 					fLastSampleLeft[0] = fLastSampleLeft[1];
-					fLastSampleLeft[1] = fy - (_fSample * fCoeff[3]);
-					_fSample = fy;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
-				{ 
-					case STATUS_FLOAT_DENORMAL_OPERAND:
-					case STATUS_FLOAT_INVALID_OPERATION:
-						fLastSampleLeft[1] = fLastSampleLeft[0]=0;
-						break;
-					default: throw;
-				}}
+					fLastSampleLeft[1] = fy - (sample * fCoeff[3]);
+					sample = fy;
+				}
+				catch(universalis::operating_system::exception const & e)
+				{
+					switch(e.code())
+					{
+						case STATUS_FLOAT_DENORMAL_OPERAND:
+						case STATUS_FLOAT_INVALID_OPERATION:
+							fLastSampleLeft[1] = fLastSampleLeft[0] = 0;
+							break;
+						default: throw;
+					}
+				}
 			}
-			inline void WorkStereoOld(float& _fLeft, float& _fRight)
+
+			inline void WorkStereoOld(float& left, float& right)
 			{
 				try
 				{
-					const float fyL = (_fLeft * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+					const float fyL = (left * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
 					fLastSampleLeft[0] = fLastSampleLeft[1];
-					fLastSampleLeft[1] = fyL - (_fLeft * fCoeff[3]);
-					_fLeft = fyL;
+					fLastSampleLeft[1] = fyL - (left * fCoeff[3]);
+					left = fyL;
 
-					const float fyR = (_fRight * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
+					const float fyR = (right * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
 					fLastSampleRight[0] = fLastSampleRight[1];
-					fLastSampleRight[1] = fyR - (_fRight * fCoeff[3]);
-					_fRight = fyR;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
-				{ 
-					case STATUS_FLOAT_DENORMAL_OPERAND:
-						fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
-						_fLeft = _fLeft * fCoeff[0];
-						_fRight = _fRight * fCoeff[0];
-						break;
-					default: throw;
-
-				}}
+					fLastSampleRight[1] = fyR - (right * fCoeff[3]);
+					right = fyR;
+				}
+				catch(universalis::operating_system::exception const & e)
+				{
+					switch(e.code())
+					{ 
+						case STATUS_FLOAT_DENORMAL_OPERAND:
+							fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
+							left *= fCoeff[0];
+							right *= fCoeff[0];
+							break;
+						default: throw;
+					}
+				}
 			}
 		protected:
 			enum coeffNames

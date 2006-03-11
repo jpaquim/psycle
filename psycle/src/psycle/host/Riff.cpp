@@ -31,6 +31,7 @@
 	\endverbatim
 */
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "riff.hpp"
 #include <cstdio>
 #include <cstdlib>

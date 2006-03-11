@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::CMidiInputDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"

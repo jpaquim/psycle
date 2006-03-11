@@ -1,12 +1,13 @@
 ///\file
 ///\implementation psycle::host::DirectSound.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "DirectSound.hpp"
 //#include "resources/resources.hpp"
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <process.h>
 namespace psycle
 {
@@ -157,7 +158,7 @@ namespace psycle
 
 		void DirectSound::PollerThread(void * pDirectSound)
 		{
-			operating_system::exceptions::translated::new_thread("direct sound");
+			universalis::processor::exception::new_thread("direct sound");
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			while(pThis->_timerActive)

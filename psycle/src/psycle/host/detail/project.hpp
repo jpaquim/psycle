@@ -6,7 +6,21 @@
 #pragma once
 #include <diversalis/compiler.hpp>
 #if !defined DIVERSALIS__COMPILER__RESOURCE
+
 	#include <diversalis/diversalis.hpp>
 	#include <universalis/universalis.hpp>
+
+	// psycle still makes some asumptions about the size of the compiler's numeric types
+	// so we check everything here first
+	#include <boost/static_assert.hpp>
+	BOOST_STATIC_ASSERT((sizeof(         char) == 1)); // probably always true
+	BOOST_STATIC_ASSERT((sizeof(    short int) == 2));
+	BOOST_STATIC_ASSERT((sizeof(          int) == 4));
+	BOOST_STATIC_ASSERT((sizeof(     long int) == 4));
+	BOOST_STATIC_ASSERT((sizeof(long long int) == 8));
+	BOOST_STATIC_ASSERT((sizeof(        float) == 4)); // probably always true (ieee754)
+	BOOST_STATIC_ASSERT((sizeof(       double) == 8)); // probably always true (ieee754)
+//	BOOST_STATIC_ASSERT((sizeof(  long double) == 10));
+
 #endif
 #include "configuration.hpp"

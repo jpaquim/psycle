@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__UNIVERSALIS__OPERATING_SYSTEM__LOGGERS
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__LOGGERS
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace universalis
 {

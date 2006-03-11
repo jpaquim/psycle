@@ -25,13 +25,13 @@ namespace psycle
 	{
 		enum DDCRET
 		{
-		DDC_SUCCESS,           // The operation succeded
-		DDC_FAILURE,           // The operation failed for unspecified reasons
-		DDC_OUT_OF_MEMORY,     // Operation failed due to running out of memory
-		DDC_FILE_ERROR,        // Operation encountered file I/O error
-		DDC_INVALID_CALL,      // Operation was called with invalid parameters
-		DDC_USER_ABORT,        // Operation was aborted by the user
-		DDC_INVALID_FILE       // File format does not match
+			DDC_SUCCESS,           // The operation succeded
+			DDC_FAILURE,           // The operation failed for unspecified reasons
+			DDC_OUT_OF_MEMORY,     // Operation failed due to running out of memory
+			DDC_FILE_ERROR,        // Operation encountered file I/O error
+			DDC_INVALID_CALL,      // Operation was called with invalid parameters
+			DDC_USER_ABORT,        // Operation was aborted by the user
+			DDC_INVALID_FILE       // File format does not match
 		};
 
 		#define  TRUE     1
@@ -88,16 +88,23 @@ namespace psycle
 			~ExtRiffFile();
 			ExtRiffFileMode CurrentFileMode() const   {return fmode;}
 			DDCRET Open ( const char *Filename, ExtRiffFileMode NewMode );
-			DDCRET Write  ( const void *Data, unsigned NumBytes );
-			DDCRET Read   (       void *Data, unsigned NumBytes );
-			DDCRET Expect ( const void *Data, unsigned NumBytes );
-			/// Added by [JAZ]
-			DDCRET Skip   ( unsigned NumBytes );
 			DDCRET Close();
-			long    CurrentFilePosition() const;
-			DDCRET  Backpatch ( long FileOffset,
-								const void *Data,
-								unsigned NumBytes );
+
+			long CurrentFilePosition() const;
+
+			template<typename X>
+			DDCRET inline Read (X       & x) { return Read (&x, sizeof x); }
+			template<typename X>
+			DDCRET inline Write(X const & x) { return Write(&x, sizeof x); }
+
+			DDCRET Read ( void       *, unsigned int bytes);
+			DDCRET Write( void const *, unsigned int bytes);
+			DDCRET Expect(void const *, unsigned int bytes);
+
+			/// Added by [JAZ]
+			DDCRET Skip  (unsigned NumBytes);
+
+			DDCRET Backpatch(long FileOffset, const void *Data, unsigned NumBytes);
 		};
 
 		class WaveFormat_ChunkData

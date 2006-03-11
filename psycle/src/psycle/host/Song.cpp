@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
@@ -15,6 +16,8 @@
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
 #include "Riff.hpp" // for Wave file loading.
+#include <cstdint>
+#include <cassert>
 
 #if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 	#error "sorry, only works on little endian machines"
@@ -27,17 +30,18 @@ namespace psycle
 		extern CPsycleApp theApp;
 
 		/// the riff WAVE/fmt chunk.
+		///\todo this is already defined elsewhere
 		class WavHeader
 		{
 		public:
 			char chunkID[4];
-			long chunkSize;
-			short wFormatTag;
-			unsigned short wChannels;
-			unsigned long  dwSamplesPerSec;
-			unsigned long  dwAvgBytesPerSec;
-			unsigned short wBlockAlign;
-			unsigned short wBitsPerSample;
+			std::uint32_t chunkSize;
+			std::uint16_t wFormatTag;
+			std::uint16_t wChannels;
+			std::uint32_t  dwSamplesPerSec;
+			std::uint32_t  dwAvgBytesPerSec;
+			std::uint16_t wBlockAlign;
+			std::uint16_t wBitsPerSample;
 		};
 	}
 }
@@ -376,39 +380,11 @@ namespace psycle
 
 		bool Song::InsertConnection(int src, int dst, float value)
 		{
-			int freebus=-1;
-			int dfreebus=-1;
-			bool error=false;
+			int wIndex=0;
 			Machine *srcMac = _pMachine[src];
 			Machine *dstMac = _pMachine[dst];
 			if(!srcMac || !dstMac) return false;
-			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
-			// Get a free output slot on the source machine
-			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-			{
-				if(!srcMac->_connection[c]) freebus = c;
-				// Checking that there's not an slot to the dest. machine already
-				else if(srcMac->_outputMachines[c] == dst) error = true;
-			}
-			if(freebus == -1 || error) return false;
-			// Get a free input slot on the destination machine
-			error=false;
-			for(int c=MAX_CONNECTIONS-1; c>=0; c--)
-			{
-				if(!dstMac->_inputCon[c]) dfreebus = c;
-				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				else if(dstMac->_outputMachines[c] == src) error = true;
-			}
-			if(dfreebus == -1 || error) return false;
-			// Calibrating in/out properties
-			srcMac->_outputMachines[freebus] = dst;
-			srcMac->_connection[freebus] = true;
-			srcMac->_numOutputs++;
-			dstMac->_inputMachines[dfreebus] = src;
-			dstMac->_inputCon[dfreebus] = true;
-			dstMac->_numInputs++;
-			dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
-			return true;
+			return srcMac->Connect(dstMac,wIndex);
 		}
 		int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
 		{
@@ -425,10 +401,12 @@ namespace psycle
 					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
-						_pMachine[wiresource]->_connection[wireindex] = FALSE;
+						_pMachine[wiresource]->_connection[wireindex] = false;
+						_pMachine[wiresource]->_outputMachines[wireindex] = -1;
 						_pMachine[wiresource]->_numOutputs--;
 
-						dmac->_inputCon[w] = FALSE;
+						dmac->_inputCon[w] = false;
+						dmac->_inputMachines[w] = -1;
 						dmac->_numInputs--;
 					}
 /*						else
@@ -453,10 +431,13 @@ namespace psycle
 					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
-						smac->_connection[smac->FindOutputWire(wiredest)] = FALSE;
+						int wire = smac->FindOutputWire(wiredest);
+						smac->_connection[wire] = FALSE;
+						smac->_outputMachines[wire] = 255;
 						smac->_numOutputs--;
 
 						_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
+						_pMachine[wiredest]->_inputMachines[wireindex] = 255;
 						_pMachine[wiredest]->_numInputs--;
 					}
 /*						else
@@ -499,6 +480,7 @@ namespace psycle
 									if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
 									{
 										iMac2->_connection[x] = false;
+										iMac2->_outputMachines[x]=-1;
 										iMac2->_numOutputs--;
 										break;
 									}
@@ -519,6 +501,7 @@ namespace psycle
 									if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
 									{
 										iMac2->_inputCon[x] = false;
+										iMac2->_inputMachines[x]=-1;
 										iMac2->_numInputs--;
 										break;
 									}
@@ -744,8 +727,8 @@ namespace psycle
 			}
 			RiffFile file;
 			RiffChunkHeader hd;
-			ULONG data;
-			ULONGINV tmp;
+			std::uint32_t data;
+			endian::big::uint32_t tmp;
 			int bits = 0;
 			// opens the file and reads the "FORM" header.
 			if(!file.Open(const_cast<char*>(str)))
@@ -754,26 +737,23 @@ namespace psycle
 				return 0;
 			}
 			DeleteLayer(instrument);
-			file.Read(&data,4);
+			file.Read(data);
 			if( data == file.FourCC("16SV")) bits = 16;
 			else if(data == file.FourCC("8SVX")) bits = 8;
-			file.Read(&hd,sizeof hd);
+			file.Read(hd);
 			if(hd._id == file.FourCC("NAME"))
 			{
 				file.Read(_pInstrument[instrument]->waveName, 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
-				strncpy(_pInstrument[instrument]->_sName,str,31);
+				strncpy(_pInstrument[instrument]->_sName,str, 31);
 				_pInstrument[instrument]->_sName[31]='\0';
-				file.Read(&hd,sizeof hd);
+				file.Read(hd);
 			}
 			if ( hd._id == file.FourCC("VHDR"))
 			{
-				unsigned int Datalen, ls, le;
-				file.Read(&tmp,sizeof tmp);
-				Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				file.Read(&tmp,sizeof tmp);
-				ls = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				file.Read(&tmp,sizeof tmp);
-				le = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				std::uint32_t Datalen, ls, le;
+				file.Read(tmp); Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				file.Read(tmp); ls = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				file.Read(tmp); le = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
 				if(bits == 16)
 				{
 					Datalen >>= 1;
@@ -788,14 +768,14 @@ namespace psycle
 					_pInstrument[instrument]->waveLoopType = true;
 				}
 				file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
-				file.Read(&hd,sizeof hd);
+				file.Read(hd);
 			}
 			if(hd._id == file.FourCC("BODY"))
 			{
-				short * csamples;
-				const unsigned int Datalen(_pInstrument[instrument]->waveLength);
+				std::int16_t * csamples;
+				std::uint32_t const Datalen(_pInstrument[instrument]->waveLength);
 				_pInstrument[instrument]->waveStereo = false;
-				_pInstrument[instrument]->waveDataL = new signed short[Datalen];
+				_pInstrument[instrument]->waveDataL = new std::int16_t[Datalen];
 				csamples = _pInstrument[instrument]->waveDataL;
 				if(bits == 16)
 				{
@@ -823,8 +803,7 @@ namespace psycle
 
 		int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
 		{
-			///\todo what is ASSERT? some msicrosoft thingie?
-			ASSERT(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
+			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
 			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
 			if(bStereo)
@@ -843,12 +822,11 @@ namespace psycle
 
 		int Song::WavAlloc(int instrument,const char * Wavfile)
 		{ 
-			///\todo what is ASSERT? some msicrosoft thingie?
-			ASSERT(Wavfile != 0);
+			assert(Wavfile != 0);
 			WaveFile file;
 			ExtRiffChunkHeader hd;
 			// opens the file and read the format Header.
-			DDCRET retcode(file.OpenForRead((char*)Wavfile));
+			DDCRET retcode(file.OpenForRead(const_cast<char*>(Wavfile)));
 			if(retcode != DDC_SUCCESS) 
 			{
 				Invalided = false;
@@ -865,21 +843,21 @@ namespace psycle
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-			short * sampL(_pInstrument[instrument]->waveDataL);
+			std::int16_t * sampL(_pInstrument[instrument]->waveDataL);
 
 			///\todo use template code for all this semi-repetitive code.
 
-			long io; ///< \todo why is this declared here?
+			std::int32_t io; /// \todo why is this declared here?
 			// mono
 			if(st_type == 1)
 			{
-				UINT8 smp8;
+				std::uint8_t smp8;
 				switch(bits)
 				{
 					case 8:
 						for(io = 0 ; io < Datalen ; ++io)
 						{
-							file.ReadData(&smp8, 1);
+							file.Read(smp8);
 							*sampL = (smp8 << 8) - 32768;
 							++sampL;
 						}
@@ -890,29 +868,29 @@ namespace psycle
 					case 24:
 						for(io = 0 ; io < Datalen ; ++io)
 						{
-							file.ReadData(&smp8, 1);
+							file.Read(smp8); ///\todo [bohan] is the lsb just discarded?
 							file.ReadData(sampL, 1);
 							++sampL;
 						}
 						break;
 					default:
-						break;
+						break; ///\todo should throw an exception
 				}
 			}
 			// stereo
 			else
 			{
 				short *sampR(_pInstrument[instrument]->waveDataR);
-				UINT8 smp8;
+				std::uint8_t smp8;
 				switch(bits)
 				{
 					case 8:
 						for(io = 0 ; io < Datalen ; ++io)
 						{
-							file.ReadData(&smp8, 1);
+							file.Read(smp8);
 							*sampL = (smp8 << 8) - 32768;
 							++sampL;
-							file.ReadData(&smp8, 1);
+							file.Read(smp8);
 							*sampR = (smp8 << 8) - 32768;
 							++sampR;
 						}
@@ -929,33 +907,31 @@ namespace psycle
 					case 24:
 						for(io = 0 ; io < Datalen ; ++io)
 						{
-							file.ReadData(&smp8, 1);
+							file.Read(smp8); ///\todo [bohan] is the lsb just discarded?
 							file.ReadData(sampL, 1);
 							++sampL;
-							file.ReadData(&smp8, 1);
+							file.Read(smp8); ///\todo [bohan] is the lsb just discarded?
 							file.ReadData(sampR, 1);
 							++sampR;
 						}
 						break;
 					default:
-						break; ///< \todo should throw an exception
+						break; ///\todo should throw an exception
 				}
 			}
-			retcode = file.Read(static_cast<void*>(&hd), 8);
+			retcode = file.Read(static_cast<void*>(&hd), 8); ///\todo bloergh!
 			while(retcode == DDC_SUCCESS)
 			{
 				if(hd.ckID == FourCC("smpl"))
 				{
-					char pl(0);
 					file.Skip(28);
-					file.Read(static_cast<void*>(&pl), 1);
+					char pl;
+					file.Read(pl);
 					if(pl == 1)
 					{
 						file.Skip(15);
-						unsigned int ls(0);
-						unsigned int le(0);
-						file.Read(static_cast<void*>(&ls), 4);
-						file.Read(static_cast<void*>(&le), 4);
+						std::uint32_t ls; file.Read(ls);
+						std::uint32_t le; file.Read(le);
 						_pInstrument[instrument]->waveLoopStart = ls;
 						_pInstrument[instrument]->waveLoopEnd = le;
 						// only for my bad sample collection
@@ -970,7 +946,7 @@ namespace psycle
 					file.Skip(hd.ckSize);
 				else
 					file.Skip(1);
-				retcode = file.Read(static_cast<void*>(&hd), 8);
+				retcode = file.Read(static_cast<void*>(&hd), 8); ///\todo bloergh!
 			}
 			file.Close();
 			Invalided = false;
@@ -1040,8 +1016,8 @@ namespace psycle
 						else
 						{
 							pFile->ReadString(Name, sizeof Name);
-							pFile->ReadString(Author, sizeof Name);
-							pFile->ReadString(Comment, sizeof Name);
+							pFile->ReadString(Author, sizeof Author);
+							pFile->ReadString(Comment, sizeof Comment);
 						}
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
@@ -1093,9 +1069,9 @@ namespace psycle
 							_trackArmedCount = 0;
 							for(int i(0) ; i < SONGTRACKS; ++i)
 							{
-								pFile->Read(&_trackMuted[i],sizeof(_trackMuted[i]));
+								pFile->Read(_trackMuted[i]);
 								// remember to count them
-								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
+								pFile->Read(_trackArmed[i]);
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
 							Global::pPlayer->SetBPM(m_BeatsPerMin,m_LinesPerBeat);
@@ -1115,7 +1091,7 @@ namespace psycle
 						else
 						{
 							// index, for multipattern - for now always 0
-							pFile->Read(&index, sizeof index);
+							pFile->Read(index);
 							if (index < MAX_SEQUENCES)
 							{
 								char pTemp[256];
@@ -1163,9 +1139,9 @@ namespace psycle
 								pFile->Read(temp);
 								pFile->ReadString(patternName[index], sizeof *patternName);
 								pFile->Read(size);
-								byte* pSource = new byte[size];
+								unsigned char * pSource = new unsigned char[size];
 								pFile->Read(pSource, size);
-								byte* pDest;
+								unsigned char * pDest;
 								BEERZ77Decomp2(pSource, &pDest);
 								zapArray(pSource,pDest);
 								for(int y(0) ; y < patternLines[index] ; ++y)
@@ -1266,13 +1242,13 @@ namespace psycle
 							{
 								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 								{
-									_pMachine[i]->_connection[c] = FALSE;
-									_pMachine[i]->_outputMachines[c] = 255;
+									_pMachine[i]->_connection[c] = false;
+									_pMachine[i]->_outputMachines[c] = -1;
 								}
 								else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
 								{
-									_pMachine[i]->_connection[c] = FALSE;
-									_pMachine[i]->_outputMachines[c] = 255;
+									_pMachine[i]->_connection[c] = false;
+									_pMachine[i]->_outputMachines[c] = -1;
 								}
 								else 
 								{
@@ -1281,20 +1257,20 @@ namespace psycle
 							}
 							else
 							{
-								_pMachine[i]->_outputMachines[c] = 255;
+								_pMachine[i]->_outputMachines[c] = -1;
 							}
 
 							if (_pMachine[i]->_inputCon[c])
 							{
 								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
 								{
-									_pMachine[i]->_inputCon[c] = FALSE;
-									_pMachine[i]->_inputMachines[c] = 255;
+									_pMachine[i]->_inputCon[c] = false;
+									_pMachine[i]->_inputMachines[c] = -1;
 								}
 								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
 								{
-									_pMachine[i]->_inputCon[c] = FALSE;
-									_pMachine[i]->_inputMachines[c] = 255;
+									_pMachine[i]->_inputCon[c] = false;
+									_pMachine[i]->_inputMachines[c] = -1;
 								}
 								else
 								{
@@ -1303,7 +1279,7 @@ namespace psycle
 							}
 							else
 							{
-								_pMachine[i]->_inputMachines[c] = 255;
+								_pMachine[i]->_inputMachines[c] = -1;
 							}
 						}
 					}
@@ -1328,12 +1304,13 @@ namespace psycle
 			}
 			else if(std::strcmp(Header, "PSY2SONG") == 0)
 			{
+				// this is the old fileformat, good luck to read the code!
+
 				CProgressDialog Progress;
 				Progress.Create();
 				Progress.SetWindowText("Loading old format...");
 				Progress.ShowWindow(SW_SHOW);
-				int i;
-				int num,sampR;
+				std::int32_t num,sampR;
 				bool _machineActive[128];
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
@@ -1356,10 +1333,11 @@ namespace psycle
 				pFile->Read(currentOctave);
 				pFile->Read(busMachine);
 				pFile->Read(playOrder);
-				pFile->Read(playLength);
-				pFile->Read(SONGTRACKS);
+				{ std::int32_t tmp; pFile->Read(tmp); playLength = tmp; }
+				{ std::int32_t tmp; pFile->Read(tmp); SONGTRACKS = tmp; }
 				// Patterns
 				pFile->Read(num);
+				int i;
 				for(i =0 ; i < num; ++i)
 				{
 					pFile->Read(patternLines[i]);
@@ -1382,127 +1360,127 @@ namespace psycle
 				Progress.m_Progress.SetPos(2048);
 				::Sleep(1); ///< ???
 				// Instruments
-				pFile->Read(&instSelected, sizeof instSelected);
+				pFile->Read(instSelected);
 				for(i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
-					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
+					pFile->Read(_pInstrument[i]->_sName);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_NNA, sizeof(_pInstrument[0]->_NNA));
+					pFile->Read(_pInstrument[i]->_NNA);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_AT, sizeof(_pInstrument[0]->ENV_AT));
+					pFile->Read(_pInstrument[i]->ENV_AT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_DT, sizeof(_pInstrument[0]->ENV_DT));
+					pFile->Read(_pInstrument[i]->ENV_DT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_SL, sizeof(_pInstrument[0]->ENV_SL));
+					pFile->Read(_pInstrument[i]->ENV_SL);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_RT, sizeof(_pInstrument[0]->ENV_RT));
+					pFile->Read(_pInstrument[i]->ENV_RT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_AT, sizeof(_pInstrument[0]->ENV_F_AT));
+					pFile->Read(_pInstrument[i]->ENV_F_AT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_DT, sizeof(_pInstrument[0]->ENV_F_DT));
+					pFile->Read(_pInstrument[i]->ENV_F_DT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_SL, sizeof(_pInstrument[0]->ENV_F_SL));
+					pFile->Read(_pInstrument[i]->ENV_F_SL);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_RT, sizeof(_pInstrument[0]->ENV_F_RT));
+					pFile->Read(_pInstrument[i]->ENV_F_RT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_CO, sizeof(_pInstrument[0]->ENV_F_CO));
+					pFile->Read(_pInstrument[i]->ENV_F_CO);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_RQ, sizeof(_pInstrument[0]->ENV_F_RQ));
+					pFile->Read(_pInstrument[i]->ENV_F_RQ);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_EA, sizeof(_pInstrument[0]->ENV_F_EA));
+					pFile->Read(_pInstrument[i]->ENV_F_EA);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_TP, sizeof(_pInstrument[0]->ENV_F_TP));
+					pFile->Read(_pInstrument[i]->ENV_F_TP);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_pan, sizeof(_pInstrument[0]->_pan));
+					pFile->Read(_pInstrument[i]->_pan);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_RPAN, sizeof(_pInstrument[0]->_RPAN));
+					pFile->Read(_pInstrument[i]->_RPAN);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_RCUT, sizeof(_pInstrument[0]->_RCUT));
+					pFile->Read(_pInstrument[i]->_RCUT);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_RRES, sizeof(_pInstrument[0]->_RRES));
+					pFile->Read(_pInstrument[i]->_RRES);
 				}
 				
 				Progress.m_Progress.SetPos(4096);
 				::Sleep(1);
 				// Waves
 				//
-				int tmpwvsl;
-				pFile->Read(&tmpwvsl, sizeof(int));
+				std::int32_t tmpwvsl;
+				pFile->Read(tmpwvsl);
 
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
 					for (int w=0; w<OLD_MAX_WAVES; w++)
 					{
-						int wltemp;
-						pFile->Read(&wltemp, sizeof(_pInstrument[0]->waveLength));
+						std::uint32_t wltemp;
+						pFile->Read(wltemp);
 						if (wltemp > 0)
 						{
 							if ( w == 0 )
 							{
-								short tmpFineTune;
+								std::int16_t tmpFineTune;
 								_pInstrument[i]->waveLength=wltemp;
 								pFile->Read(&_pInstrument[i]->waveName, 32);
-								pFile->Read(&_pInstrument[i]->waveVolume, sizeof(_pInstrument[0]->waveVolume));
-								pFile->Read(&tmpFineTune, sizeof(short));
-								_pInstrument[i]->waveFinetune=(int)tmpFineTune;
-								pFile->Read(&_pInstrument[i]->waveLoopStart, sizeof(_pInstrument[0]->waveLoopStart));
-								pFile->Read(&_pInstrument[i]->waveLoopEnd, sizeof(_pInstrument[0]->waveLoopEnd));
-								pFile->Read(&_pInstrument[i]->waveLoopType, sizeof(_pInstrument[0]->waveLoopType));
-								pFile->Read(&_pInstrument[i]->waveStereo, sizeof(_pInstrument[0]->waveStereo));
-								_pInstrument[i]->waveDataL = new signed short[_pInstrument[i]->waveLength];
-								pFile->Read(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength*sizeof(short));
+								pFile->Read(_pInstrument[i]->waveVolume);
+								pFile->Read(tmpFineTune);
+								_pInstrument[i]->waveFinetune=tmpFineTune;
+								pFile->Read(_pInstrument[i]->waveLoopStart);
+								pFile->Read(_pInstrument[i]->waveLoopEnd);
+								pFile->Read(_pInstrument[i]->waveLoopType);
+								pFile->Read(_pInstrument[i]->waveStereo);
+								_pInstrument[i]->waveDataL = new std::int16_t[_pInstrument[i]->waveLength];
+								pFile->Read(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength * sizeof(std::int16_t));
 								if (_pInstrument[i]->waveStereo)
 								{
-									_pInstrument[i]->waveDataR = new signed short[_pInstrument[i]->waveLength];
-									pFile->Read(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength*sizeof(short));
+									_pInstrument[i]->waveDataR = new std::int16_t[_pInstrument[i]->waveLength];
+									pFile->Read(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength * sizeof(std::int16_t));
 								}
 							}
 							else 
 							{
-								bool stereo;
 								char *junk =new char[42+sizeof(bool)];
-								pFile->Read(junk,sizeof(junk));
+								pFile->Read(junk,sizeof junk);
 								delete junk;
-								pFile->Read(&stereo,sizeof(bool));
-								short *junk2 = new signed short[wltemp];
-								pFile->Read(junk2, sizeof(junk2));
+								bool stereo;
+								pFile->Read(stereo);
+								std::int16_t *junk2 = new std::int16_t[wltemp];
+								pFile->Read(junk2, sizeof junk2);
 								if ( stereo )
 								{
-									pFile->Read(junk2, sizeof(junk2));
+									pFile->Read(junk2, sizeof junk2);
 								}
 								delete junk2;
 							}
@@ -1539,9 +1517,9 @@ namespace psycle
 				//
 				_machineLock = true;
 
-				pFile->Read(&_machineActive[0], sizeof(_machineActive));
+				pFile->Read(_machineActive);
 				Machine* pMac[128];
-				memset(pMac,0,sizeof(pMac));
+				std::memset(pMac,0,sizeof pMac);
 
 				convert_internal_machines::Converter converter;
 
@@ -1551,16 +1529,16 @@ namespace psycle
 					XMSampler* pXMSampler;
 					Plugin* pPlugin;
 					vst::plugin * pVstPlugin(0);
-					int x,y,type;
+					std::int32_t x,y,type;
 					if (_machineActive[i])
 					{
 						Progress.m_Progress.SetPos(8192+i*(4096/128));
 						::Sleep(1);
 
-						pFile->Read(&x, sizeof(x));
-						pFile->Read(&y, sizeof(y));
+						pFile->Read(x);
+						pFile->Read(y);
 
-						pFile->Read(&type, sizeof(type));
+						pFile->Read(type);
 
 						if(converter.plugin_names().exists(type))
 							pMac[i] = &converter.redirect(i, type, *pFile);
@@ -1787,11 +1765,11 @@ namespace psycle
 				::Sleep(1);
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_loop, sizeof(_pInstrument[0]->_loop));
+					pFile->Read(_pInstrument[i]->_loop);
 				}
 				for (i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_lines, sizeof(_pInstrument[0]->_lines));
+					pFile->Read(_pInstrument[i]->_lines);
 				}
 
 				if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false ) // Patch 1: BusEffects (twf)
@@ -2081,13 +2059,13 @@ namespace psycle
 							{
 								if (_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 								{
-									_pMachine[i]->_connection[c]=FALSE;
-									_pMachine[i]->_outputMachines[c]=255;
+									_pMachine[i]->_connection[c]=false;
+									_pMachine[i]->_outputMachines[c]=-1;
 								}
 								else if (!_pMachine[_pMachine[i]->_outputMachines[c]])
 								{
-									_pMachine[i]->_connection[c]=FALSE;
-									_pMachine[i]->_outputMachines[c]=255;
+									_pMachine[i]->_connection[c]=false;
+									_pMachine[i]->_outputMachines[c]=-1;
 								}
 								else 
 								{
@@ -2103,13 +2081,13 @@ namespace psycle
 							{
 								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
 								{
-									_pMachine[i]->_inputCon[c]=FALSE;
-									_pMachine[i]->_inputMachines[c]=255;
+									_pMachine[i]->_inputCon[c]=false;
+									_pMachine[i]->_inputMachines[c]=-1;
 								}
 								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
 								{
-									_pMachine[i]->_inputCon[c]=FALSE;
-									_pMachine[i]->_inputMachines[c]=255;
+									_pMachine[i]->_inputCon[c]=false;
+									_pMachine[i]->_inputMachines[c]=-1;
 								}
 								else
 								{
@@ -2203,14 +2181,14 @@ namespace psycle
 
 			pFile->Write("PSY3SONG", 8);
 
-			UINT version = CURRENT_FILE_VERSION;
-			UINT size = sizeof(chunkcount);
-			UINT index = 0;
-			int temp;
+			std::uint32_t version = CURRENT_FILE_VERSION;
+			std::uint32_t size = sizeof chunkcount;
+			std::uint32_t index = 0;
+			std::uint32_t temp;
 
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
-			pFile->Write(&chunkcount,sizeof(chunkcount));
+			pFile->Write(version);
+			pFile->Write(size);
+			pFile->Write(chunkcount);
 
 			if ( !autosave ) 
 			{
@@ -2342,25 +2320,25 @@ namespace psycle
 				if (IsPatternUsed(i))
 				{
 					// ok save it
-					byte* pSource=new byte[SONGTRACKS*patternLines[i]*EVENT_SIZE];
-					byte* pCopy = pSource;
+					unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[i]*EVENT_SIZE];
+					unsigned char * pCopy = pSource;
 
 					for (int y = 0; y < patternLines[i]; y++)
 					{
-						unsigned char* pData = ppPatternData[i]+(y*MULTIPLY);
-						memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
+						unsigned char * pData = ppPatternData[i]+(y*MULTIPLY);
+						std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
 						pCopy+=EVENT_SIZE*SONGTRACKS;
 					}
 					
-					int sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
-					zapArray(pSource);
+					std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
+					delete[] pSource;
 
 					pFile->Write("PATD",4);
 					version = CURRENT_FILE_VERSION_PATD;
 
-					pFile->Write(&version,sizeof(version));
-					size = sizez77+(4*sizeof(temp))+strlen(patternName[i])+1;
-					pFile->Write(&size,sizeof(size));
+					pFile->Write(version);
+					size = sizez77 + 4 * sizeof temp + strlen(patternName[i]) + 1;
+					pFile->Write(size);
 
 					index = i; // index
 					pFile->Write(&index,sizeof(index));
@@ -2373,7 +2351,7 @@ namespace psycle
 
 					pFile->Write(&sizez77,sizeof(sizez77));
 					pFile->Write(pCopy,sizez77);
-					zapArray(pCopy);
+					delete[] pCopy;
 
 					if ( !autosave ) 
 					{
@@ -2679,13 +2657,13 @@ namespace psycle
 				if (_pMachine[dst]->_connection[i])
 				{
 					_pMachine[dst]->_connection[i] = false;
-					_pMachine[dst]->_outputMachines[i] = 255;
+					_pMachine[dst]->_outputMachines[i] = -1;
 				}
 
 				if (_pMachine[dst]->_inputCon[i])
 				{
 					_pMachine[dst]->_inputCon[i] = false;
-					_pMachine[dst]->_inputMachines[i] = 255;
+					_pMachine[dst]->_inputMachines[i] = -1;
 				}
 			}
 
