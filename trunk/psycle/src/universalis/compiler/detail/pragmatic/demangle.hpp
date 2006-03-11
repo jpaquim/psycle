@@ -7,7 +7,7 @@
 #include <universalis/detail/project.hpp>
 #include <typeinfo>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace universalis
 {

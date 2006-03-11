@@ -203,16 +203,28 @@ namespace package
 	
 	boost::filesystem::path const & share()
 	{
+		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
+			using namespace paths; // work around msvc7.1 name lookup bug
+		#endif
 		class once
 		{
 			public:
 				boost::filesystem::path const static path() throw(std::exception)
 				{
 					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage()) return paths::share();
+						if(stage())
+							return
+								#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7 // work around msvc7.1 name lookup bug
+									paths::
+								#endif
+								share();
 						else
 					#endif
-					return paths::share() / name();
+					return
+						#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7 // work around msvc7.1 name lookup bug
+							paths::
+						#endif
+						share() / name();
 				}
 		};
 		boost::filesystem::path const static once(once::path());
@@ -221,6 +233,9 @@ namespace package
 	
 	boost::filesystem::path const & pixmaps()
 	{
+		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
+			using namespace paths; // work around msvc7.1 name lookup bug
+		#endif
 		class once
 		{
 			public:
@@ -228,10 +243,19 @@ namespace package
 				{
 					char const pixmaps [] = {"pixmaps"};
 					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage()) return paths::share() / pixmaps;
+						if(stage())
+							return
+								#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7 // work around msvc7.1 name lookup bug
+									paths::
+								#endif
+								share() / pixmaps;
 						else
 					#endif
-					return paths::share() / pixmaps / name();
+					return
+						#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7 // work around msvc7.1 name lookup bug
+							paths::
+						#endif
+						share() / pixmaps / name();
 				}
 		};
 		boost::filesystem::path const static once(once::path());
@@ -240,6 +264,9 @@ namespace package
 
 	boost::filesystem::path const & doc()
 	{
+		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
+			using namespace paths; // work around msvc7.1 name lookup bug
+		#endif
 		class once
 		{
 			public:
@@ -247,10 +274,19 @@ namespace package
 				{
 					char const doc [] = {"doc"};
 					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage()) return paths::share() / doc;
+						if(stage())
+							return
+								#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7 // work around msvc7.1 name lookup bug
+									paths::
+								#endif
+								share() / doc;
 						else
 					#endif
-					return paths::share() / doc / name(); ///\todo name().string() + "-doc"
+					return
+						#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7 // work around msvc7.1 name lookup bug
+							paths::
+						#endif
+						share() / doc / name(); ///\todo name().string() + "-doc"
 				}
 		};
 		boost::filesystem::path const static once(once::path());

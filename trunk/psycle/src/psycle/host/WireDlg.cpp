@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CWireDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "Machine.hpp"
 #include "WireDlg.hpp"

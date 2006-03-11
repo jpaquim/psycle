@@ -37,7 +37,7 @@ public:
 			Information::Parameter::linear("feedback left", -1, 0, 1),
 			Information::Parameter::linear("delay right", 0, 0, delay_maximum),
 			Information::Parameter::linear("feedback right", -1, 0, 1),
-			Information::Parameter::discrete("snap to", factors - 1, factors - 1)
+			Information::Parameter::discrete("snap to", 0, factors - 1)
 		};
 		static const Information information(Information::Type::effect, "ayeternal Dalay Delay", "Dalay Delay", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
 		return information;

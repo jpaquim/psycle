@@ -1,6 +1,7 @@
 ///\file
 ///\brief
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "logger.hpp"
 #include "exceptions/code_description.hpp"
 #if defined OPERATING_SYSTEM__MICROSOFT

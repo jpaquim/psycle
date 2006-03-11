@@ -206,6 +206,9 @@
 			// _WIN32_NT
 			//////////////////
 				// read the configuration
+					#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
+						#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+					#endif
 					// patch => minor
 					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH
 						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR

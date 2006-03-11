@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "configuration.hpp"
 #include "Song.hpp"

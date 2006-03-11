@@ -1,4 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSampler.hpp"

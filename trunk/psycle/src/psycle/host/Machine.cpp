@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Machine.hpp"
 #include "Song.hpp"
 #include "Dsp.hpp"
@@ -9,6 +10,8 @@
 #include "WireDlg.hpp"
 #include "MainFrm.hpp"
 #include "InputHandler.hpp"
+#include <universalis/processor/exception.hpp>
+
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
@@ -35,7 +38,7 @@ namespace psycle
 				exceptions::function_error const * const function_error(dynamic_cast<exceptions::function_error const * const>(&e));
 				if(function_error)
 				{
-					operating_system::exceptions::translated const * const translated(dynamic_cast<operating_system::exceptions::translated const * const>(function_error->exception()));
+					universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
 					if(translated)
 					{
 						crash = true;
@@ -180,8 +183,10 @@ namespace psycle
 			{
 				_inputConVol[i] = 1.0f;
 				_wireMultiplier[i] = 1.0f;
-				_connection[i] = false;
+				_inputMachines[i]=-1;
+				_outputMachines[i]=-1;
 				_inputCon[i] = false;
+				_connection[i] = false;
 			}
 			_numInputs = 0;
 			_numOutputs = 0;
@@ -208,6 +213,48 @@ namespace psycle
 				_rVol = 1.0f;
 			}
 			_panning = newPan;
+		}
+
+		bool Machine::Connect(Machine* dstMac,int &wire,float volume)
+		{
+			ASSERT(dstMac);
+			if (dstMac->_type == MACHMODE_GENERATOR) return false;
+
+			int freebus=-1;
+			int dfreebus=-1;
+			bool error=false;
+
+			// Get a free output slot on the source machine
+			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+			{
+				if(!_connection[c]) freebus = c;
+				// Checking that there's not an slot to the dest. machine already
+				else if(_outputMachines[c] == dstMac->_macIndex) error = true;
+			}
+			if(freebus == -1 || error) return false;
+			// Get a free input slot on the destination machine
+			error=false;
+			for(int c=MAX_CONNECTIONS-1; c>=0; c--)
+			{
+				if(!dstMac->_inputCon[c]) dfreebus = c;
+				// Checking if the destination machine is connected with the source machine to avoid a loop.
+				else if(dstMac->_outputMachines[c] == _macIndex) error = true;
+			}
+			if(dfreebus == -1 || error) return false;
+
+			// Calibrating in/out properties
+			_outputMachines[freebus] = dstMac->_macIndex;
+			_connection[freebus] = true;
+			_numOutputs++;
+			dstMac->_inputMachines[dfreebus] = _macIndex;
+			dstMac->_inputCon[dfreebus] = true;
+			dstMac->_numInputs++;
+			dstMac->InitWireVolume(_type,dfreebus,volume);
+			return true;
+		}
+		bool Machine::Disconnect(Machine* dstMac)
+		{
+			return false;
 		}
 
 		void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
@@ -1179,6 +1226,13 @@ namespace psycle
 					}
 				}
 			}
+		}
+		bool Mixer::Connect(Machine* dstMac,int &wire,float volume)
+		{
+			//
+			//
+			//
+			return Machine::Connect(dstMac,wire,volume);
 		}
 
 		int Mixer::GetNumCols()

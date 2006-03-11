@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CInstrumentEditor.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "MainFrm.hpp"
 #include "InstrumentEditor.hpp"

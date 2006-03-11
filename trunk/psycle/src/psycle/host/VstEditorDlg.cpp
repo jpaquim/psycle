@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "VstEditorDlg.hpp"
 #include "FrameMachine.hpp"

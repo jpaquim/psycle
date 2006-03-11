@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Cubic.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Dsp.hpp"
 namespace psycle
 {
@@ -8,7 +9,7 @@ namespace psycle
 	{
 		namespace dsp
 			{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS	
+#if PSYCLE__CONFIGURATION__RMS_VUS	
 			int numRMSSamples=1;
 			int countRMSSamples=0;
 			double RMSAccumulatedLeft=0;

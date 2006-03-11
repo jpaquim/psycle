@@ -9,7 +9,7 @@ namespace psycle
 	{
 		namespace dsp
 		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			extern int numRMSSamples;
 			extern int countRMSSamples;
 			extern double RMSAccumulatedLeft;
@@ -75,7 +75,7 @@ namespace psycle
 		/// finds the maximum amplitude in a signal buffer.
 		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			// This is just a test to get RMS dB values.
 			// Doesn't look that better, and uses more CPU. 
 			float *pL = pSamplesL;

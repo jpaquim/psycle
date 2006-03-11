@@ -21,12 +21,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CFrameMachine(); // protected constructor used by dynamic creation
 		// Attributes
 		public:
-			CFrameMachine(int dum){MachineIndex = dum;};
-		private:
+			CFrameMachine(int dum){ MachineIndex = dum;};
+		protected:
 			Machine* _pMachine;
-			//CBitmap b_knob;
-			CFont	b_font;
-			CFont	b_font_bold;
+			CFont	font;
+			CFont	font_bold;
 
 		// Enviroment
 			int numParameters;
@@ -44,8 +43,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int parspercol;
 		// Operations
 		public:
-			void SelectMachine(Machine* pMachine);
-			void Generate();
+			virtual void SelectMachine(Machine* pMachine);
+			virtual void Generate();
+			virtual int ConvertXYtoParam(int x, int y);
 			CChildView *wndView;
 			UINT MachineIndex;
 			bool* _pActive;

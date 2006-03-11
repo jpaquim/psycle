@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiLearn.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"

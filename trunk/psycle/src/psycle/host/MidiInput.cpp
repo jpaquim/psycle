@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
 #include <packageneric/pre-compiled.private.hpp>
-#include <cassert>
+#include PACKAGENERIC
 #include "MidiInput.hpp"
 #include "Psycle.hpp"
 #include "Song.hpp"
@@ -14,6 +14,7 @@
 #include "MainFrm.hpp"
 #include "Helpers.hpp"
 #include "InputHandler.hpp"
+#include <cassert>
 namespace psycle
 {
 	namespace host

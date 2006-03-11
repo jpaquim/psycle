@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "ASIOInterface.hpp"
 #include "resources/resources.hpp"
 #include "Registry.hpp"
@@ -8,7 +9,7 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include "helpers.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <asio/asiosys.h>
 namespace psycle
 {
@@ -442,7 +443,7 @@ namespace psycle
 
 				if(!structured_exception_translator_set)
 				{
-					operating_system::exceptions::translated::new_thread("asio");
+					universalis::processor::exception::new_thread("asio");
 					structured_exception_translator_set = true;
 				}
 

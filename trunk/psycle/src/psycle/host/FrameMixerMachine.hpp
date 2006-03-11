@@ -11,6 +11,53 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	/// mixer window.
 	class CFrameMixerMachine : public CFrameMachine
 	{
+		enum
+		{
+			collabels=0,
+			chan1,
+			chan2,
+			chan3,
+			chan4,
+			chan5,
+			chan6,
+			chan7,
+			chan8,
+			chan9,
+			chan10,
+			chan11,
+			chan12,
+			return1,
+			return2,
+			return3,
+			return4,
+			return5,
+			return6,
+			return7,
+			return8,
+			return9,
+			return10,
+			return11,
+			return12
+		};
+		enum
+		{
+			rowlabels=0,
+			send1,
+			send2,
+			send3,
+			send4,
+			send5,
+			send6,
+			send7,
+			send8,
+			send9,
+			send10,
+			send11,
+			send12,
+			dry,
+			//some other buttons.
+			slider,
+		};
 		class Knob
 		{
 		public:
@@ -18,9 +65,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual ~Knob(){};
 			
 			static void Draw(CDC* dc,int x_knob,int y_knob,float value);
-			void OnLButtonDown(UINT nFlags, CPoint point);
-			void OnMouseMove(UINT nFlags, CPoint point);
-			void OnLButtonUp(UINT nFlags, CPoint point);
+			static bool LButtonDown(UINT nFlags, int x, int y);
+			static void MouseMove(UINT nFlags, int x, int y);
+			static bool LButtonUp(UINT nFlags,int x, int y);
 			
 			static int width;
 			static int height;
@@ -36,7 +83,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			static void Draw(CDC *dc, int x, int y,const char *parName,const char *parValue);
 			static void DrawValue(CDC *dc, int x, int y,const char *parValue);
-			static void DrawHLight(CDC *dc, int x, int y,const char *parName,const char *parValue);
+			static void DrawHLight(CDC *dc,CFont *font_bold, int x, int y,const char *parName,const char *parValue);
 			static void DrawHLightValue(CDC *dc, int x, int y,const char *parValue);
 //			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
 
@@ -70,6 +117,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			static void Draw(CDC *dc,int x, int y,float);
 			static void DrawKnob(CDC *dc,int x, int y, float value);
+			static bool LButtonDown(UINT nFlags, int x, int y);
+			static void MouseMove(UINT nFlags, int x, int y);
+			static bool LButtonUp(UINT nFlags,int x, int y);
 
 			static int width;
 			static int height;
@@ -103,9 +153,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		Mixer* _pMixer;
 		int numChans;
 		int numSends;
+
+
+		// graphics
 		bool updateBuffer;
-		static CFont font;
-		static CFont font_bold;
 
 		CBitmap m_sliderback;
 		CBitmap m_vumeteroff;
@@ -117,8 +168,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		// Operations
 	public:
-		void SelectMachine(Machine* pMachine);
-		void Generate(){};
+		virtual void SelectMachine(Machine* pMachine);
+		virtual void Generate(){};
+		virtual int ConvertXYtoParam(int x, int y);
 		// Overrides
 		// ClassWizard generated virtual function overrides
 		//{{AFX_VIRTUAL(CFrameMixerMachine)
@@ -127,8 +179,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	protected:
 		void Generate(CDC& dc);
 		bool UpdateSendsandChans();
-		int GetColumn(int x);
-		int GetRow(int y);
+		int GetColumn(int x,int &xoffset);
+		int GetRow(int y,int &yoffset);
+		int GetParamFromPos(int col,int row);
 		virtual ~CFrameMixerMachine();
 		// Generated message map functions
 		//{{AFX_MSG(CFrameMixerMachine)
@@ -139,10 +192,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnDestroy();
-		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		afx_msg void OnSetFocus(CWnd* pOldWnd);
 		afx_msg void OnTimer(UINT nIDEvent);
+		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		//}}AFX_MSG
 		DECLARE_MESSAGE_MAP()
 	};

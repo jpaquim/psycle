@@ -3,13 +3,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
 #include "midiinput.hpp"
 #include "NewMachine.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <sstream>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
@@ -21,13 +22,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		CPsycleApp::CPsycleApp()
 		{
-			operating_system::exceptions::translated::new_thread("mfc gui");
+			universalis::processor::exception::new_thread("mfc gui");
 			// support for unicode characters on mswin98
 			{
 				#if 0
 					if(!::LoadLibrary("unicows"))
 					{
-						std::runtime_error e("could not load library unicows: " + operating_system::exceptions::code_description());
+						std::runtime_error e("could not load library unicows: " + universalis::operating_system::exceptions::code_description());
 						MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
 						throw e;
 					}
@@ -55,7 +56,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CMainFrame* pFrame = new CMainFrame;
 			m_pMainWnd = pFrame;
 
-			host::loggers::info("build identifier: " EOL PSYCLE__BUILD__IDENTIFIER(EOL));
+			{
+				std::ostringstream s;
+				s << "build identifier: " << std::endl << PSYCLE__BUILD__IDENTIFIER;
+				host::loggers::info(s.str());
+			}
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
@@ -104,8 +109,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CNewMachine::LoadPluginInfo();
 
 			// Show splash screen
-			// If has been commented out for BETA builds..
-			if (Global::pConfig->_showAboutAtStart)
+			// If has been commented out for non-stable builds..
+			//if (Global::pConfig->_showAboutAtStart)
 			{
 				OnAppAbout();
 			}
@@ -248,7 +253,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
-			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER(EOL));
+			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER);
 
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE

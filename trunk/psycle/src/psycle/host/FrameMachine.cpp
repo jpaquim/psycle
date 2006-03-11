@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "FrameMachine.hpp"
 #include "Childview.hpp"
@@ -17,14 +18,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
-
-		CFrameMachine::CFrameMachine()
-		{
-		}
-
-		CFrameMachine::~CFrameMachine()
-		{
-		}
 
 		BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 			//{{AFX_MSG_MAP(CFrameMachine)
@@ -47,8 +40,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-		void CFrameMachine::Generate()
+		CFrameMachine::CFrameMachine()
 		{
+			//do not use! Use OnCreate Instead.
+		}
+
+		CFrameMachine::~CFrameMachine()
+		{
+			//do not use! Use OnDestroy Instead.
+		}
+
+		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+		{
+			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+			{
+				return -1;
+			}
 			istweak=false;
 			tweakpar=0;
 			tweakbase=0;
@@ -56,20 +63,52 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			maxval=0;
 			finetweak=false;
 			ultrafinetweak=false;
-			
-			b_font.CreatePointFont(80,"Tahoma");
-//			b_font_bold.CreatePointFont(80,"Tahoma Bold");
+			numParameters=0;
+			ncol=0;
+			parspercol=0;
+
+			font.CreatePointFont(80,"Tahoma");
+			//			font_bold.CreatePointFont(80,"Tahoma Bold");
 			CString sFace("Tahoma");
 			LOGFONT lf = LOGFONT();
 			lf.lfWeight = FW_BOLD;
 			lf.lfHeight = 80;
 			lf.lfQuality = NONANTIALIASED_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
-			if(!b_font_bold.CreatePointFontIndirect(&lf))
+			if(!font_bold.CreatePointFontIndirect(&lf))
 			{
-				b_font_bold.CreatePointFont(80,"Tahoma Bold");
+				font_bold.CreatePointFont(80,"Tahoma Bold");
 			}
 
+			SetTimer(2104+MachineIndex,100,0);
+			return 0;
+		}
+
+		void CFrameMachine::OnDestroy() 
+			{
+			if ( _pActive != NULL ) *_pActive = false;
+			font.DeleteObject();
+			font_bold.DeleteObject();
+			KillTimer(2104+MachineIndex);
+			CFrameWnd::OnDestroy();
+			}
+
+		void CFrameMachine::OnTimer(UINT nIDEvent) 
+		{
+			if ( nIDEvent == 2104+MachineIndex )
+			{
+				Invalidate(false);
+			}
+			CFrameWnd::OnTimer(nIDEvent);
+		}
+
+		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
+		{
+			CFrameWnd::OnSetFocus(pOldWnd);
+			Invalidate(false);
+		}
+		void CFrameMachine::Generate()
+		{
 			UpdateWindow();
 		}
 
@@ -153,24 +192,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				);
 		}
 
-		void CFrameMachine::OnDestroy() 
-		{
-			if ( _pActive != NULL ) *_pActive = false;
-			KillTimer(2104+MachineIndex);
-			b_font.DeleteObject();
-			b_font_bold.DeleteObject();
-			CFrameWnd::OnDestroy();
-		}
-
-		void CFrameMachine::OnTimer(UINT nIDEvent) 
-		{
-			if ( nIDEvent == 2104+MachineIndex )
-			{
-				Invalidate(false);
-			}
-			CFrameWnd::OnTimer(nIDEvent);
-		}
-
 
 		///////////////////////////////////////////////////////////////////////
 		// PAINT GUI HERE
@@ -180,7 +201,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CPaintDC dc(this); // device context for painting
 
-			CFont* oldfont=dc.SelectObject(&b_font);
+			CFont* oldfont=dc.SelectObject(&font);
 
 			CRect rect;
 			GetClientRect(&rect);
@@ -290,9 +311,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						dc.SetBkColor(Global::pConfig->machineGUITitleColor);
 						dc.SetTextColor(Global::pConfig->machineGUITitleFontColor);
 
-						dc.SelectObject(&b_font_bold);
+						dc.SelectObject(&font_bold);
 						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
-						dc.SelectObject(&b_font);
+						dc.SelectObject(&font);
 
 						//dc.SetBkColor(0x00687D83);
 						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
@@ -336,15 +357,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			dc.SelectObject(oldfont);
 		}
 
+		int CFrameMachine::ConvertXYtoParam(int x, int y)
+		{
+			if ((y/K_YSIZE) >= parspercol ) return -1; //this if for VST's that use the native gui.
+			return (y/K_YSIZE) + ((x/150)*parspercol);
+		}
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
-			tweakpar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
+			tweakpar = ConvertXYtoParam(point.x,point.y);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				sourcepoint = point.y;
 				tweakbase = _pMachine->GetParamValue(tweakpar);
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
+				wndView->AddMacViewUndo();
 				SetCapture();
 			}
 			else
@@ -386,7 +413,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (nv < minval) nv = minval;
 				if (nv > maxval) nv = maxval;
 
-				wndView->AddMacViewUndo();
 				_pMachine->SetParameter(tweakpar,(int) nv);
 
 				if (Global::pConfig->_RecordTweaks)
@@ -416,7 +442,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 		{
-			tweakpar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
+			tweakpar = ConvertXYtoParam(point.x,point.y);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				if (nFlags & MK_CONTROL)
@@ -429,22 +455,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 				}
 				else 
-				{		
-					int const thispar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
+				{	
 					int min_v=1;
 					int max_v=1;
 					char name[64];
 					memset(name,0,64);
 					CNewVal dlg;
 
-					_pMachine->GetParamName(thispar,name);
-					_pMachine->GetParamRange(thispar,min_v,max_v);
-					dlg.m_Value = _pMachine->GetParamValue(thispar);
+					_pMachine->GetParamName(tweakpar,name);
+					_pMachine->GetParamRange(tweakpar,min_v,max_v);
+					dlg.m_Value = _pMachine->GetParamValue(tweakpar);
 
 					std::sprintf
 						(
 							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
-							thispar,
+							tweakpar,
 							name,
 							min_v,
 							max_v
@@ -453,7 +478,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					dlg.max = max_v;
 					dlg.macindex = MachineIndex;
 					dlg.paramindex = tweakpar;
-					dlg.DoModal();
+					if ( dlg.DoModal() == IDOK)
+					{
 					int nv = dlg.m_Value;
 					if (nv < min_v)
 					{
@@ -464,11 +490,59 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						nv = max_v;
 					}
 					wndView->AddMacViewUndo();
-					_pMachine->SetParameter(thispar,(int)nv);
+						_pMachine->SetParameter(tweakpar,(int)nv);
+					}
 					Invalidate(false);
 				}
 			}
 			CFrameWnd::OnRButtonUp(nFlags, point);
+		}
+
+		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+		{
+			// ignore repeats: nFlags&0x4000
+			const BOOL bRepeat = nFlags&0x4000;
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			if(!bRepeat && cmd.IsValid())
+			{
+				switch(cmd.GetType())
+				{
+				case CT_Note:
+					{
+						const int outnote = cmd.GetNote();
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+						else
+							Global::pInputHandler->PlayNote(outnote,127,true, 0);
+					}
+					break;
+
+				case CT_Immediate:
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					break;
+				}
+			}
+
+			//wndView->KeyDown(nChar,nRepCnt,nFlags);
+			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
+		}
+
+		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+		{
+
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			const int outnote = cmd.GetNote();
+			if(outnote>=0)
+			{
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+				{
+					Global::pInputHandler->StopNote(outnote,true,_pMachine);
+				}
+				else Global::pInputHandler->StopNote(outnote,true,NULL);
+			}
+
+			//wndView->KeyUp(nChar, nRepCnt, nFlags);
+			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CFrameMachine::OnParametersRandomparameters() 
@@ -540,62 +614,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-		{
-			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
-			{
-				return -1;
-			}
-			SetTimer(2104+MachineIndex,100,0);
-			return 0;
-		}
-
-		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
-			// ignore repeats: nFlags&0x4000
-			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(!bRepeat && cmd.IsValid())
-			{
-				switch(cmd.GetType())
-				{
-				case CT_Note:
-					{
-						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
-						else
-							Global::pInputHandler->PlayNote(outnote,127,true, 0);
-					}
-					break;
-
-				case CT_Immediate:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-					break;
-				}
-			}
-
-			//wndView->KeyDown(nChar,nRepCnt,nFlags);
-			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
-		}
-
-		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
-
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			const int outnote = cmd.GetNote();
-			if(outnote>=0)
-			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
-				{
-					Global::pInputHandler->StopNote(outnote,true,_pMachine);
-				}
-				else Global::pInputHandler->StopNote(outnote,true,NULL);
-			}
-
-			//wndView->KeyUp(nChar, nRepCnt, nFlags);
-			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
-		}
 
 		void CFrameMachine::OnParametersShowpreset() 
 		{
@@ -605,10 +623,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			dlg.DoModal();
 		}
 
-		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
-		{
-			CFrameWnd::OnSetFocus(pOldWnd);
-			Invalidate(false);
-		}
+
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END
+

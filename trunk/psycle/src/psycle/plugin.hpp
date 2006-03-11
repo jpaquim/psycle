@@ -2,11 +2,11 @@
 /// \brief yet another psycle plugin interface api by bohan
 /// This one is more object-oriented than the original plugin_interface.hpp one.
 #pragma once
+#include "scale.hpp"
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <exception>
-#include "scale.hpp"
 namespace psycle
 {
 	namespace plugin
@@ -79,11 +79,8 @@ namespace psycle
 									maximum_value(0)
 								{}
 							public:
-							#if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR < 7
-								enum { inmput_maximum_value = 0xffff };
-							#else
-								static int const input_maximum_value = 0xffff;
-							#endif
+							int const static input_minimum_value = 0;
+							int const static input_maximum_value = 0xffff;
 							private:
 								Parameter(char const name[], Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
 								:
@@ -91,8 +88,19 @@ namespace psycle
 									name(name),
 									unused_name(name),
 									scale(scale),
-									minimum_value(0),
-									default_value(static_cast<int>(scale.apply_inverse(default_value))),
+									minimum_value(input_minimum_value),
+									default_value
+									(
+										std::min
+										(
+											std::max
+											(
+												input_minimum_value,
+												static_cast<int>(scale.apply_inverse(default_value))
+											),
+											input_maximum_value
+										)
+									),
 									maximum_value(input_maximum_value)
 								{}
 							public:
@@ -159,6 +167,9 @@ namespace psycle
 
 		class Plugin : protected Host_Plugin
 		{
+			protected:
+				Information const & information;
+				Real * scaled_parameters_;
 			public:
 				virtual ~Plugin() throw() { delete [] parameters_; delete [] scaled_parameters_; }
 			protected:
@@ -172,17 +183,20 @@ namespace psycle
 				{
 					parameters_ = new int[information.parameter_count];
 					scaled_parameters_ = new Real[information.parameter_count];
+					for(int parameter(0) ; parameter < information.parameter_count ; ++parameter)
+						parameter_internal(parameter, information.parameter(parameter).default_value);
 				}
 				inline int const & operator[](int const & parameter) const throw() { return parameters_[parameter]; }
 				inline Real const & operator()(int const & parameter) const throw() { return scaled_parameters_[parameter]; }
-			protected:
-				Information const & information;
-				Real * scaled_parameters_;
 			private:
-				virtual void parameter(int const parameter, int const value)
+				void parameter_internal(int const parameter, int const value)
 				{
 					this->parameters_[parameter] = value;
 					this->scaled_parameters_[parameter] = information.parameter(parameter).scale.apply(static_cast<Real>(value));
+				}
+				void parameter(int const parameter, int const value)
+				{
+					parameter_internal(parameter, value);
 					this->parameter(parameter);
 				}
 			protected:
@@ -193,7 +207,7 @@ namespace psycle
 					out << (*this)(parameter);
 				}
 			private:
-				virtual bool describe(char out[], int const parameter, int const) const
+				bool describe(char out[], int const parameter, int const) const
 				{
 					std::stringstream s;
 					describe(s, parameter);
@@ -253,7 +267,7 @@ namespace psycle
 			protected:
 				virtual void help(std::ostream & out) const throw() { out << "no help available"; }
 			private:
-				virtual void help() const throw()
+				void help() const throw()
 				{
 					std::ostringstream message;
 					/*

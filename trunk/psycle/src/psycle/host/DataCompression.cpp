@@ -9,6 +9,7 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "DataCompression.hpp"
 #include <cstring>
 

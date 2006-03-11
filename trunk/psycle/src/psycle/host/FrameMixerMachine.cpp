@@ -1,4 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "Constants.hpp"
 #include "ChildView.hpp"
@@ -34,8 +35,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	CDC CFrameMixerMachine::VuMeter::VuOff;
 	CDC CFrameMixerMachine::VuMeter::VuOn;
 
-	CFont CFrameMixerMachine::font;
-	CFont CFrameMixerMachine::font_bold;
 	//////////////////////////////////////////////////////////////////////////
 	// Knob class
 	void CFrameMixerMachine::Knob::Draw(CDC* dc,int x_knob,int y_knob,float value)
@@ -45,6 +44,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		pixel*=width;
 		dc->BitBlt(x_knob,y_knob,width,height,&knobDC,pixel,0,SRCCOPY);
 		dc->Draw3dRect(x_knob,y_knob+height-1,width,1,RGB(20,20,20),RGB(20,20,20));
+	}
+	bool  CFrameMixerMachine::Knob::LButtonDown(UINT nFlags,int x,int y)
+	{
+		return false;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -72,7 +75,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	//////////////////////////////////////////////////////////////////////////
 	// HLightInfoLabel class
-	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, int x, int y,const char *parName,const char *parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, CFont* font_bold,int x, int y,const char *parName,const char *parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
@@ -81,7 +84,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		dc->SetBkColor(Global::pConfig->machineGUITitleColor);
 		dc->SetTextColor(Global::pConfig->machineGUITitleFontColor);
-		CFont *oldfont =dc->SelectObject(&CFrameMixerMachine::font_bold);
+		CFont *oldfont =dc->SelectObject(font_bold);
 		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
 		dc->SelectObject(oldfont);
 
@@ -131,6 +134,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		int ypos = (1.0-value)*(height-knobheight);
 		dc->BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
 	}
+	bool  CFrameMixerMachine::GraphSlider::LButtonDown(UINT nFlags,int x,int y)
+	{
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// Vumeter class
 	void CFrameMixerMachine::VuMeter::Draw(CDC *dc,int x, int y, float value)
 	{
 		int ypos = (1-value)*height;
@@ -151,14 +161,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		ON_WM_TIMER()
 		ON_WM_CREATE()
 		ON_WM_DESTROY()
+		ON_WM_SETFOCUS()
 		ON_WM_KEYDOWN()
 		ON_WM_KEYUP()
-		ON_WM_SETFOCUS()
 		//}}AFX_MSG_MAP
 	END_MESSAGE_MAP()
 
 	CFrameMixerMachine::CFrameMixerMachine()
 	{
+		//do not use. use CFrameMixerMachine(int dum)
 	}
 	CFrameMixerMachine::CFrameMixerMachine(int dum) :
 		_pMixer(0)
@@ -172,41 +183,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		m_vumeteroff.LoadBitmap(IDB_VUMETEROFF);
 		m_sliderknob.LoadBitmap(IDB_SLIDERKNOB);
 		m_vumeteron.LoadBitmap(IDB_VUMETERON);
-		font.CreatePointFont(80,"Tahoma");
-		CString sFace("Tahoma");
-		LOGFONT lf = LOGFONT();
-		lf.lfWeight = FW_BOLD;
-		lf.lfHeight = 80;
-		lf.lfQuality = NONANTIALIASED_QUALITY;
-		std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
-		if(!font_bold.CreatePointFontIndirect(&lf))
-		{
-			font_bold.CreatePointFont(80,"Tahoma Bold");
-		}
 	}
 	CFrameMixerMachine::~CFrameMixerMachine()
 	{
+		if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }
 	}
 
 	int CFrameMixerMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 	{
-
-		if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
-		{
-			return -1;
-		}
-		SetTimer(2104+MachineIndex,100,0);
-		return 0;
+		return CFrameMachine::OnCreate(lpCreateStruct);
 	}
 
 	void CFrameMixerMachine::OnDestroy() 
 	{
-		if ( _pActive != NULL ) *_pActive = false;
-		KillTimer(2104+MachineIndex);
-		font.DeleteObject();
-		font_bold.DeleteObject();
-		if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }
-		CFrameWnd::OnDestroy();
+		CFrameMachine::OnDestroy();
 	}
 
 	bool CFrameMixerMachine::UpdateSendsandChans()
@@ -232,8 +222,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	}
 	void CFrameMixerMachine::SelectMachine(Machine* pMachine)
 	{
-		_pMixer=(Mixer*)pMachine;
-
+		_pMixer=(Mixer*)(_pMachine = pMachine);
+		numParameters = 255;
 		UpdateSendsandChans();
 
 		int winh = InfoLabel::height + ((numSends+1) * Knob::height) + GraphSlider::height;
@@ -262,13 +252,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			yoffset+=InfoLabel::height;
 			std::string sendtxt = "Send ";
 			sendtxt += ('0'+i+1);
-			InfoLabel::DrawHLight(&bufferDC,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+			InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 		}
 		yoffset+=InfoLabel::height;
-		InfoLabel::DrawHLight(&bufferDC,xoffset,yoffset,"Dry Mix","");
+		InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,"Dry Mix","");
 
 		yoffset+=GraphSlider::height;
-		InfoLabel::DrawHLight(&bufferDC,xoffset,yoffset,"Ch. Input","");
+		InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,"Ch. Input","");
 
 		// Colums 1 onwards, controls
 		xoffset+=InfoLabel::width+Knob::width;
@@ -280,7 +270,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				std::string chantxt = "Input ";
 				chantxt += ('0'+i+1);
-				InfoLabel::DrawHLight(&bufferDC,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName());
+				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName());
 
 				yoffset+=InfoLabel::height;
 				for (int j=0; j<numSends; j++)
@@ -301,7 +291,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			yoffset=0;
 			std::string sendtxt = "Return ";
 			sendtxt += ('0'+i+1);
-			InfoLabel::DrawHLight(&bufferDC,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+			InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 			yoffset+=(numSends+1)*InfoLabel::height;
 			InfoLabel::Draw(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,"Level","");
 			yoffset+=InfoLabel::height;
@@ -434,62 +424,128 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		bufferDC.DeleteDC();
 
 	}
-	int CFrameMixerMachine::GetColumn(int x)
+	int CFrameMixerMachine::GetColumn(int x, int &xoffset)
 	{
-		return x/(Knob::width+InfoLabel::width);
+		int col=x/(Knob::width+InfoLabel::width);
+		xoffset=x%(Knob::width+InfoLabel::width);
+		if ( col == 0) return collabels;
+		else if ( col <= numChans)
+		{
+			col-=chan1;
+			return chan1+col;
+		}
+		else
+		{
+			col-=numChans+chan1;
+			return return1+col;
 	}
-	int CFrameMixerMachine::GetRow(int y)
+	}
+	int CFrameMixerMachine::GetRow(int y,int &yoffset)
 	{
-		return y/InfoLabel::height;
+		int row = y/InfoLabel::height;
+		yoffset=y%InfoLabel::height;
+		if ( row == 0) return rowlabels;
+		else if ( row <= numSends)
+	{
+			row-=send1;
+			return send1+row;
 	}
-
+		else
+		{
+			row-=numSends+send1;
+			if (row == 0 ) return dry;
+			else
+			{
+				return slider;
+			}
+		}
+	}
+	int CFrameMixerMachine::GetParamFromPos(int col,int row)
+	{
+		if ( col < chan12)
+		{
+			if (row < dry) return (col-chan1+1)*0x10+(row-send1+1);
+			else if ( row==dry) return (col-chan1+1)*0x10;
+			else return 0xE0+(col-chan1+1);
+		}
+		else 
+		{
+			if (row > dry) return 0xF0+(col-return1+1);
+		}
+		return -1;
+	}
+	int CFrameMixerMachine::ConvertXYtoParam(int x, int y)
+	{
+		int xoffset(0),yoffset(0);
+		return GetParamFromPos(GetColumn(x,xoffset),GetRow(y,yoffset));
+	}
 	void CFrameMixerMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 	{
-		const int col=GetColumn(point.x);
-		const int row=GetRow(point.y);
-		if (col <0 || row <=0)  return;
-		else if ( col == 0)
-		{
-			if ( row > numSends+1) {}
+		CFrameMachine::OnLButtonDown(nFlags,point);
+
+/*		int xoffset(0),yoffset(0);
+		const int col=GetColumn(point.x,xoffset);
+		const int row=GetRow(point.y,yoffset);
+
+		if (row == rowlabels)  return;
+		else if ( col == collabels)
+	{
+			if ( row >=slider) {
+				//mute all
+				//unmute all
+				//mute returns
+				//mute dry
+			}
 		}
-		else if ( col <= numChans )
+		else if ( col <= chan12 )
 		{
-			if ( row > numSends+1) {}
+			if ( row <= dry)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else { istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset); }
 		}
-		else if ( col <= numChans+numSends)
+		else
 		{
+			if ( row > dry)	{ istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset); }
+		}
+
+		if (istweak)
+		{
+			SetCapture();
+			sourcepoint=point.y;
+			tweakpar=GetParamFromPos(col,row); 
+			tweakbase = _pMachine->GetParamValue(tweakpar);
+			_pMachine->GetParamRange(tweakpar,minval,maxval);
 		}
 		CFrameWnd::OnLButtonDown(nFlags, point);
+*/
 	}
 	void CFrameMixerMachine::OnMouseMove(UINT nFlags, CPoint point) 
 	{
-		CFrameWnd::OnMouseMove(nFlags, point);
+		CFrameMachine::OnMouseMove(nFlags,point);
 	}
 	void CFrameMixerMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 	{
-/*		istweak = false;
+		istweak = false;
 		Invalidate(false);	
 		ReleaseCapture();
-*/
 		CFrameWnd::OnLButtonUp(nFlags, point);
 	}
 
 	void CFrameMixerMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 	{
-		CFrameWnd::OnRButtonUp(nFlags, point);
+		CFrameMachine::OnRButtonUp(nFlags, point);
 	}
+
 	void CFrameMixerMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 	{
-		CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+		CFrameMachine::OnKeyDown(nChar, nRepCnt, nFlags);
     }
 	void CFrameMixerMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 	{
-		CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
+		CFrameMachine::OnKeyUp(nChar, nRepCnt, nFlags);
 	}
 	void CFrameMixerMachine::OnSetFocus(CWnd* pOldWnd) 
 	{
-		CFrameWnd::OnSetFocus(pOldWnd);
-		Invalidate(false);
+		CFrameMachine::OnSetFocus(pOldWnd);
 	}
 
 	UNIVERSALIS__COMPILER__NAMESPACE__END

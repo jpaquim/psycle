@@ -13,18 +13,14 @@
 	int const NOTE_NO = 120;
 	int const NOTE_OFF = 255;
 
-#if !defined MAX_TRACKS
-#define MAX_TRACKS 64
-#endif
+	#if !defined MAX_TRACKS
+		#define MAX_TRACKS 64
+	#endif
 
-	// todo use #include <inttypes.h> for that!
-	typedef unsigned char uint8;
-	typedef unsigned short int uint16;
-	typedef unsigned long int uint32;
-//<Sartorius> Druttis's plugins
-#ifndef PI
-	double const PI = 3.14159265358979323846;
-#endif
+	// <Sartorius> Druttis's plugins
+	#ifndef PI
+		double const PI = 3.14159265358979323846;
+	#endif
 
 	/// in number of samples (per channel).
 	int const MAX_BUFFER_LENGTH = 256;
@@ -34,6 +30,11 @@
 
 	/// CMachineParameter flags.
 	int const MPF_STATE = 2;
+
+	///\todo use #include <cstdint> for that!
+	typedef /* std::uint8_t  */ unsigned char      uint8;
+	typedef /* std::uint16_t */ unsigned short int uint16;
+	typedef /* std::uint32_t */ unsigned long int  uint32;
 //}
 
 class CMachineParameter
@@ -103,8 +104,8 @@ public:
 
 	///\name Export / Import
 	///\{
-	virtual void PutData(uint8 * pData) {}
-	virtual void GetData(uint8 * pData) {}
+	virtual void PutData(void * pData) {}
+	virtual void GetData(void * pData) {}
 	virtual int GetDataSize() { return 0; }
 	///\}
 

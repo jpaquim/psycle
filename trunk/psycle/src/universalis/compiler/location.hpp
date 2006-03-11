@@ -1,10 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\interface universalis::operating_system::loggers
 #pragma once
-#include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/stringized.hpp>
 #include <boost/thread/mutex.hpp>
 #include <iostream>
@@ -12,7 +12,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include PACKAGENERIC
+#if !defined DIVERSALIS__COMPILER__GNU
+	// only gcc is able to include the name of the current class implicitly
+	// see UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION and UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
+	#include <universalis/compiler/typenameof.hpp>
+	#include <boost/current_function.hpp>
+#endif
 namespace universalis
 {
 	namespace compiler
@@ -33,14 +38,21 @@ namespace universalis
 		#define UNIVERSALIS__COMPILER__LOCATION__NO_CLASS  universalis::compiler::location(UNIVERSALIS__COMPILER__LOCATION__DETAIL(UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS))
 
 		///\internal
-		//#namespace DETAIL
+		//#region DETAIL
 			///\internal
-			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR " # "
-			///\internal
-			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START "\033[34m# "
-			///\internal
-			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__END "\033[0m"
-		//#endnamespace
+			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR   " # "
+			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				///\internal
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START "# "
+				///\internal
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__END   ""
+			#else
+				///\internal
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START "\033[34m# "
+				///\internal
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__END   "\033[0m"
+			#endif
+		//#endregion
 #else
 		class location
 		{
@@ -76,12 +88,18 @@ namespace universalis
 		};
 #endif
 		///\internal
-		//#namespace DETAIL
+		//#region DETAIL
+			#if defined PACKAGENERIC
+				#include PACKAGENERIC
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE  PACKAGENERIC__MODULE__NAME " " PACKAGENERIC__PACKAGE__VERSION " " PACKAGENERIC__MODULE__VERSION
+			#else
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE  "(unkown)"
+			#endif
 #if 1
 			///\internal
 			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL(function) \
 				UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START \
-				PACKAGENERIC__MODULE__NAME  " " PACKAGENERIC__PACKAGE__VERSION  " " PACKAGENERIC__MODULE__VERSION \
+				UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE \
 				UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR \
 				function \
 				UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR \
@@ -94,7 +112,7 @@ namespace universalis
 			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL(function) \
 				location \
 				( \
-					PACKAGENERIC__MODULE__NAME " " PACKAGENERIC__PACKAGE__VERSION " " PACKAGENERIC__MODULE__VERSION, \
+					UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE, \
 					function, \
 					__FILE__, \
 					__LINE__ \
@@ -103,20 +121,15 @@ namespace universalis
 
 			///\internal
 			#if defined DIVERSALIS__COMPILER__GNU
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION + std::string(__PRETTY_FUNCTION__) +
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION
+				// gcc is able to include the name of the current class implicitly
+				// so we use the same definition in both cases
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION            __PRETTY_FUNCTION__
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  __PRETTY_FUNCTION__
 			#else
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION + universalis::compiler::typenameof(*this) + UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
-				#if defined DIVERSALIS__COMPILER__MICROSOFT
-					#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  UNIVERSALIS__COMPILER__STRINGIZED(__FUNCSIG__)
-				#else
-					// __func__ is standard
-					#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  std::string(__func__)
-					// see also: <boost/current_function.hpp>
-				#endif
+				// include the name of the current class explicitly using rtti on the "this" pointer
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION + universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  BOOST_CURRENT_FUNCTION
 			#endif
-		//#endnamespace
+		//#endregion
 	}
 }
-
-// arch-tag: 24f649a6-6e0a-488e-b717-f2fe4e66c463

@@ -44,7 +44,7 @@ namespace psycle
 			{
 			public:
 				HANDLE Handle;
-				byte *pData;
+				unsigned char *pData;
 				WAVEHDR *pHeader;
 				HANDLE HeaderHandle;
 				bool Prepared;

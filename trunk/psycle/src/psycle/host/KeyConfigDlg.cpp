@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "KeyConfigDlg.hpp"
 #include "inputhandler.hpp"

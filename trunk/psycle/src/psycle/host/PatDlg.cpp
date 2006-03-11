@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CPatDlg.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "Psycle.hpp"
 #include "constants.hpp"
 #include "PatDlg.hpp"

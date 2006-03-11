@@ -8,6 +8,7 @@
 #include "FileIO.hpp"
 #include "global.hpp"
 #include <processor/fpu.hpp>
+#include <universalis/compiler/location.hpp>
 #include <stdexcept>
 #include <cstdint>
 namespace psycle
@@ -100,6 +101,23 @@ namespace psycle
 					rethrow(machine, function, e, e);
 				}
 
+				#define PSYCLE__HOST__CATCH_ALL \
+					catch(          std::exception const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(                 wchar_t const e[]) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(                  char   const e[]) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed          char   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned          char   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed     short int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned     short int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed           int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned           int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed      long int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned      long int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed long long int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned long long int   const & e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(            void const * const   e) { host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(               ...                ) { host::exceptions::function_errors::rethrow<void*>(host(), UNIVERSALIS__COMPILER__LOCATION    ); }
+
 				/// Exception caused by a bad returned value from a library function.
 				class bad_returned_value : public function_error
 				{
@@ -147,7 +165,6 @@ namespace psycle
 			///\}
 
 		public:
-			static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
 			Machine();
 			virtual ~Machine() throw();
 			virtual void Init();
@@ -157,7 +174,16 @@ namespace psycle
 			virtual void Tick() {};
 			virtual void Tick(int track, PatternEntry * pData) {};
 			virtual void Stop() {};
+			virtual bool Load(RiffFile * pFile);
+			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+			static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
+			virtual void SaveFileChunk(RiffFile * pFile);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveDllName(RiffFile * pFile);
+			virtual void SetSampleRate(int sr) {};
 			virtual void SetPan(int newpan);
+			virtual bool Connect(Machine* dstMac,int &wire,float volume=1.0f);
+			virtual bool Disconnect(Machine* dstMac);
 			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
 			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
@@ -175,13 +201,6 @@ namespace psycle
 			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
 			virtual int GetParamValue(int numparam) { return 0; };
 			virtual bool SetParameter(int numparam, int value) { return false;}; 
-			virtual void SetSampleRate(int sr) {};
-			virtual bool Load(RiffFile * pFile);
-			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-
-			virtual void SaveFileChunk(RiffFile * pFile);
-			virtual void SaveSpecificChunk(RiffFile * pFile);
-			virtual void SaveDllName(RiffFile * pFile);
 		protected:
 			void SetVolumeCounter(int numSamples);
 			//void SetVolumeCounterAccurate(int numSamples);
@@ -198,34 +217,37 @@ namespace psycle
 			/// left data
 			float *_pSamplesL;
 			/// right data
-			float *_pSamplesR;						
+			float *_pSamplesR;
 			/// left chan volume
-			float _lVol;							
+			float _lVol;
 			/// right chan volume
-			float _rVol;							
+			float _rVol;
 			/// numerical value of panning.
-			int _panning;							
+			int _panning;
 			int _x;
 			int _y;
 			char _editName[32];
 			int _numPars;
 			int _nCols;
 			/// Incoming connections Machine number
-			int _inputMachines[MAX_CONNECTIONS];	
+			int _inputMachines[MAX_CONNECTIONS];
 			/// Outgoing connections Machine number
-			int _outputMachines[MAX_CONNECTIONS];	
+			int _outputMachines[MAX_CONNECTIONS];
 			/// Incoming connections Machine vol
-			float _inputConVol[MAX_CONNECTIONS];	
+			float _inputConVol[MAX_CONNECTIONS];
 			/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-			float _wireMultiplier[MAX_CONNECTIONS];	
+			float _wireMultiplier[MAX_CONNECTIONS];
 			/// Outgoing connections activated
-			bool _connection[MAX_CONNECTIONS];      
+			bool _connection[MAX_CONNECTIONS];
 			/// Incoming connections activated
-			bool _inputCon[MAX_CONNECTIONS];		
+			bool _inputCon[MAX_CONNECTIONS];
 			/// number of Incoming connections
-			int _numInputs;							
+			int _numInputs;
 			/// number of Outgoing connections
-			int _numOutputs;						
+			int _numOutputs;
+			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
+			CPoint _connectionPoint[MAX_CONNECTIONS];
+
 			PatternEntry TriggerDelay[MAX_TRACKS];
 			int TriggerDelayCounter[MAX_TRACKS];
 			int RetriggerRate[MAX_TRACKS];
@@ -249,8 +271,6 @@ namespace psycle
 			int	_scopeBufferIndex;
 			float *_pScopeBufferL;
 			float *_pScopeBufferR;
-			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
-			CPoint _connectionPoint[MAX_CONNECTIONS];
 
 			public:
 				void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
@@ -385,6 +405,7 @@ namespace psycle
 			virtual void GetParamValue(int numparam,char *parVal);
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
+			virtual bool Connect(Machine* dstMac,int &wire,float volume=1.0f);
 			virtual int GetSend(int i){ ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
@@ -408,3 +429,4 @@ namespace psycle
 		};
 	}
 }
+

@@ -26,7 +26,7 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 9
-#define PSYCLE__VERSION__PATCH 4
+#define PSYCLE__VERSION__PATCH 6
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
@@ -38,10 +38,10 @@
 	PSYCLE__VERSION__QUALITY 
 
 /// identifies both what sources the build comes from, and what build options were used.
-#define PSYCLE__BUILD__IDENTIFIER(EOL) \
-	"version: " PSYCLE__VERSION EOL \
-	"build configuration options:" EOL PSYCLE__CONFIGURATION__DESCRIPTION(EOL) EOL \
-	"built on: " PSYCLE__BUILD__DATE
+#define PSYCLE__BUILD__IDENTIFIER \
+	"version: "  PSYCLE__VERSION  UNIVERSALIS__OPERATING_SYSTEM__EOL \
+	"build configuration options:"  UNIVERSALIS__OPERATING_SYSTEM__EOL  PSYCLE__CONFIGURATION__DESCRIPTION  UNIVERSALIS__OPERATING_SYSTEM__EOL \
+	"built on: "  PSYCLE__BUILD__DATE
 
 #if defined DIVERSALIS__COMPILER__RESOURCE && !defined DIVERSALIS__COMPILER__GNU // fine with gcc/mingw's winres compiler, which uses gcc's preprocessor
 	/// __DATE__ and __TIME__ doesn't work with msvc's resource compiler
@@ -65,7 +65,7 @@
 	#define RC__FileDescription RC__ProductName " - Host"
 	#define RC__FileVersion RC__ProductVersion
 
-	#define RC__SpecialBuild PSYCLE__CONFIGURATION__DESCRIPTION(EOL)
+	#define RC__SpecialBuild PSYCLE__CONFIGURATION__DESCRIPTION
 	#define RC__PrivateBuild PSYCLE__BUILD__DATE
 
 	// Actual resource version info code (VS_VERSION_INFO) is in resources.rc2.
@@ -77,7 +77,16 @@
 
 #if 0
 /*
-$Log$
+$Log: version.hpp,v $
+Revision 1.55  2006/03/09 18:44:10  johan-boule
+increasing version after tagging
+
+Revision 1.54  2006/03/09 18:41:53  johan-boule
+increasing version and tagging
+
+Revision 1.53  2006/03/09 17:56:43  johan-boule
+more work on portability
+
 Revision 1.52  2006/03/07 14:09:14  johan-boule
 replaced some ms numeric types with std types
 some global changes concerning #includes

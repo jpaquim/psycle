@@ -19,14 +19,14 @@ namespace universalis
 				inline exception(int const & code, compiler::location const & location) throw() : universalis::exception(location), code_(code) {}
 
 			public:
-				unsigned int const inline & code() const throw() { return code_; }
+				int const inline & code() const throw() { return code_; }
 			private:
-				unsigned int const          code_;
+				int const          code_;
 
 			public:
-				       char const UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES * what() const throw();
+				char const UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES * what() const throw();
 			protected:
-				std::string const mutable                                   * what_;
+				std::string const mutable                            * what_;
 		};
 
 		namespace exceptions
@@ -34,7 +34,7 @@ namespace universalis
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK runtime_error : public universalis::exceptions::runtime_error
 			{
 				public:
-					runtime_error(std::string const & what, compiler::location const & location, void const * cause = 0) throw();
+					runtime_error(std::string const & what, compiler::location const &, void const * cause = 0) throw();
 			};
 		}
 	}

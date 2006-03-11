@@ -1,5 +1,6 @@
 ///\implementation psycle::host::AudioDriver
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "AudioDriver.hpp"
 #include "helpers.hpp"
 #include "constants.hpp"

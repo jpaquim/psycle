@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::plugin
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "MainFrm.hpp"
 #include "VstEditorDlg.hpp"
@@ -151,15 +152,14 @@ namespace psycle
 				instantiated = false;
 				if(!(h_dll = ::LoadLibrary(_sDllName.c_str())))
 				{
-					std::ostringstream s; s
-						<< "could not load library: " << dllname << std::endl
-						<< operating_system::exceptions::code_description();
+					std::ostringstream s; s << "could not load library: " << dllname << std::endl << operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::loading_error(s.str());
 				}
 				PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
 				if(!main)
 				{	
-					std::ostringstream s; s
+					std::ostringstream s;
+					s
 						<< "library is not a VST plugin:" << std::endl
 						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
 						<< operating_system::exceptions::code_description();
@@ -184,7 +184,9 @@ namespace psycle
 					else s << "returned value is a null pointer";
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
-				TRACE("VST plugin: instanciated.");
+				#if defined DIVERSALIS__COMPILER__MICROSOFT
+					TRACE("VST plugin: instanciated.");
+				#endif
 				// 2: Host to Plug, setSampleRate ( 44100.000000 )
 				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 				// 3: Host to Plug, setBlockSize ( 512 ) 
@@ -268,12 +270,16 @@ namespace psycle
 
 			void plugin::Free() throw(...) // called also in destructor
 			{
-				TRACE("VST plugin: freeing ...");
+				#if defined DIVERSALIS__COMPILER__MICROSOFT
+					TRACE("VST plugin: freeing ...");
+				#endif
 				const std::exception * exception(0);
 				if(proxy()())
 				{
 					assert(h_dll);
-					TRACE("VST plugin: freeing ... dispatcher");
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
+						TRACE("VST plugin: freeing ... dispatcher");
+					#endif
 					try
 					{
 						proxy().mainsChanged(false);
@@ -306,7 +312,9 @@ namespace psycle
 				if(h_dll)
 				{
 					assert(!proxy()());
-					TRACE("VST plugin: freeing ... library");
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
+						TRACE("VST plugin: freeing ... library");
+					#endif
 					try
 					{
 						::FreeLibrary(h_dll);
@@ -324,8 +332,8 @@ namespace psycle
 			
 			bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 			{
-				UINT size;
-				pFile->Read(&size, sizeof size );
+				std::uint32_t size;
+				pFile->Read(size);
 				if(size)
 				{
 					if(version > CURRENT_FILE_VERSION_MACD)
@@ -337,7 +345,7 @@ namespace psycle
 						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
-					pFile->Read(&_program, sizeof _program);
+					pFile->Read(_program);
 					// set the program
 					try
 					{
@@ -347,12 +355,12 @@ namespace psycle
 					{
 						// o_O`
 					}
-					UINT count;
-					pFile->Read(&count, sizeof count);
-					for(UINT i(0) ; i < count ; ++i)
+					std::uint32_t count;
+					pFile->Read(count);
+					for(unsigned int i(0) ; i < count ; ++i)
 					{
 						float temp;
-						pFile->Read(&temp, sizeof temp);
+						pFile->Read(temp);
 						SetParameter(i, temp);
 					}
 					size -= sizeof _program + sizeof count + sizeof(float) * count;
@@ -371,10 +379,10 @@ namespace psycle
 							catch(...)
 							{
 								// [bohan] hmm, so, data just gets lost?
-								zapArray(data);
+								delete[] data;
 								return false;
 							}
-							zapArray(data);
+							delete[] data;
 						}
 						else
 						{
@@ -399,8 +407,8 @@ namespace psycle
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
 			{
-				UINT count(GetNumParams());
-				UINT size(sizeof _program + sizeof count + sizeof(float) * count);
+				std::uint32_t count(GetNumParams());
+				std::uint32_t size(sizeof _program + sizeof count + sizeof(float) * count);
 				char * pData(0);
 				bool b;
 				try
@@ -425,11 +433,11 @@ namespace psycle
 						size = sizeof _program  + sizeof count  + sizeof(float) * count;
 					}
 				}
-				pFile->Write(&size, sizeof size);
+				pFile->Write(size);
 				_program = proxy().getProgram();
-				pFile->Write(&_program, sizeof _program);
-				pFile->Write(&count, sizeof count);
-				for(UINT i(0); i < count; ++i)
+				pFile->Write(_program);
+				pFile->Write(count);
+				for(unsigned int i(0); i < count; ++i)
 				{
 					float temp;
 					try
@@ -440,7 +448,7 @@ namespace psycle
 					{
 						temp = 0; // hmm
 					}
-					pFile->Write(&temp, sizeof temp);
+					pFile->Write(temp);
 				}
 				size -= sizeof _program + sizeof count + sizeof(float) * count;
 				if(size > 0)
@@ -629,7 +637,8 @@ namespace psycle
 			}
 			*/
 
-			VstMidiEvent* plugin::reserveVstMidiEvent() {
+			VstMidiEvent* plugin::reserveVstMidiEvent()
+			{
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
 					loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
@@ -638,7 +647,8 @@ namespace psycle
 				return &midievent[queue_size++];
 			}
 			
-			VstMidiEvent* plugin::reserveVstMidiEventAtFront() {
+			VstMidiEvent* plugin::reserveVstMidiEventAtFront()
+			{
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
 					loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
@@ -671,6 +681,7 @@ namespace psycle
 				pevent->midiData[3] = 0;
 				return true;
 			}
+
 			bool plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel)
 			{
 				if(instantiated)
@@ -709,8 +720,7 @@ namespace psycle
 				{
 					pevent = reserveVstMidiEvent();
 				}
-				if(!pevent)
-					return false;
+				if(!pevent) return false;
 				pevent->type = kVstMidiType;
 				pevent->byteSize = 24;
 				pevent->deltaFrames = 0;
@@ -741,31 +751,32 @@ namespace psycle
 					// Prepare MIDI events and free queue dispatching all events
 					mevents.numEvents = queue_size;
 					mevents.reserved = 0;
-					for(int q(0) ; q < queue_size ; ++q) {
-#ifndef NDEBUG
+					for(int q(0) ; q < queue_size ; ++q)
+					{
+						#ifndef NDEBUG
+							// assert that events are sent in order.
+							// although the standard doesn't require this,
+							// many synths rely on this.
+							if(q>0)
+							{
+								assert(midievent[q-1].deltaFrames <= midievent[q].deltaFrames);
+							}
 
-						// assert that events are sent in order.
-						// although the standard doesn't require this,
-						// many synths rely on this.
-						if(q>0) {
-							assert(midievent[q-1].deltaFrames <= 
-								midievent[q].deltaFrames);
-						}
-
-						// assert that the note sequence is well-formed,
-						// which means, no note-offs happen without a
-						// corresponding preceding note-on.
-						switch(midievent[q].midiData[0]&0xf0) {
-						case 0x90: // note-on
-							note_checker_.note_on(midievent[q].midiData[1],
-								midievent[q].midiData[0]&0x0f);
-							break;
-						case 0x80: // note-off
-							note_checker_.note_off(midievent[q].midiData[1],
-								midievent[q].midiData[0]&0x0f);
-							break;
-						}
-#endif
+							// assert that the note sequence is well-formed,
+							// which means, no note-offs happen without a
+							// corresponding preceding note-on.
+							switch(midievent[q].midiData[0]&0xf0)
+							{
+								case 0x90: // note-on
+									note_checker_.note_on(midievent[q].midiData[1],
+										midievent[q].midiData[0]&0x0f);
+									break;
+								case 0x80: // note-off
+									note_checker_.note_off(midievent[q].midiData[1],
+										midievent[q].midiData[0]&0x0f);
+									break;
+							}
+						#endif
 						mevents.events[q] = (VstEvent*) &midievent[q];
 					}
 
@@ -1470,8 +1481,8 @@ namespace psycle
 
 			fx::~fx()
 			{
-				zapArray(_pOutSamplesL);
-				zapArray(_pOutSamplesR);
+				delete[] _pOutSamplesL;
+				delete[] _pOutSamplesR;
 			}
 
 			void fx::Tick(int channel, PatternEntry * pData)
@@ -1825,143 +1836,63 @@ namespace psycle
 				std::memset(&junkdata, 0, sizeof(junkdata));
 				Machine::Init();
 
-			/*  This part is read when loading the song to detect the machine type.
-				Might change in the new fileformat (i.e. Moving this to Machine::Load(RiffFile* pFile).
-
-				pFile->Read(&_x, sizeof(_x));
-				pFile->Read(&_y, sizeof(_y));
-				pFile->Read(&_type, sizeof(_type));
-			*/
-
-			/*  Enable this when changing the File Format.
-
-				CString sPath;
-				char sPath2[_MAX_PATH];
-				char dllName[128];
-				pFile->Read(dllName,sizeof(dllName));
-				_strlwr(dllName);
-
-				if ( CNewMachine::dllNames.Lookup(dllName,sPath) ) 
-				{
-					strcpy(sPath2,sPath);
-					if ( Instance(sPath2) != VSTINSTANCE_NOERROR )
-					{
-						CString error;
-						sprintf(error,"Error. '%s' is Missing or Corrupted,tempName);
-						MessageBox(error,"VST Plugin Loading Error",MB_OK | MB_ICONERROR);
-					}
-				}
-				else
-				{
-					CString error;
-					sprintf(error,"Error. '%s' is Missing or Corrupted,tempName);
-					MessageBox(error,"VST Plugin Loading Error",MB_OK | MB_ICONERROR);
-				}
-
-				Init();
-				pFile->Read(&_editName, sizeof(_editName));
-
-				int num;
-				pFile->Read(&num,sizeof(int));
-
-				if ( !instantiated ) 
-				{
-					for (int p=0;p<num;p++ ) pFile->Read(&junkdata,sizeof(float));
-					pFile->Read(&junkdata,sizeof(int));
-
-					if(_pEffect->flags & effFlagsProgramChunks)
-					{
-						long chunk_size;
-						pFile->Read(&chunk_size,sizeof(long));
-						
-						// Read chunk
-						char *chunk=new char[chunk_size];
-						pFile->Read(chunk,chunk_size);
-						zapArray(chunk);
-					}
-				}
-				else 
-				{
-					float value;
-					for(int p=0;p<num;p++)
-					{
-						pFile->Write(&value,sizeof(float));
-						_pEffect->setParameter(_pEffect,p,value);
-					}
-					int cprog;
-					pFile->Read(&cprog,sizeof(int));
-					Dispatch(effSetProgram,0,cprog,NULL,0.0f);
-
-					if(_pEffect->flags & effFlagsProgramChunks)
-					{
-						long chunk_size;
-						pFile->Read(&chunk_size,sizeof(long));
-						
-						// Read chunk
-						char *chunk=new char[chunk_size];	
-						pFile->Read(chunk,chunk_size);
-						Dispatch(effSetChunk,0,chunk_size, chunk ,0.0f);
-						zapArray(chunk);
-					}
-
-				}
-
-			*/
-				pFile->Read(&_editName, 16);	//Remove when changing the fileformat.
+				pFile->Read(&_editName, 16); // Remove when changing the fileformat.
 				_editName[15]='\0';
-				pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
-				pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
-				pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
-				pFile->Read(&_connection[0], sizeof(_connection));
-				pFile->Read(&_inputCon[0], sizeof(_inputCon));
-				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-				pFile->Read(&_numInputs, sizeof(_numInputs));
-				pFile->Read(&_numOutputs, sizeof(_numOutputs));
 
-				pFile->Read(&_panning, sizeof(_panning));
+				pFile->Read(_inputMachines);
+				pFile->Read(_outputMachines);
+				pFile->Read(_inputConVol);
+				pFile->Read(_connection);
+				pFile->Read(_inputCon);
+				pFile->Read(_connectionPoint);
+				pFile->Read(_numInputs);
+				pFile->Read(_numOutputs);
+
+				pFile->Read(_panning);
 				Machine::SetPan(_panning);
-				pFile->Read(&junkdata[0], 8*sizeof(int)); // SubTrack[]
-				pFile->Read(&junkdata[0], sizeof(int)); // numSubtracks
-				pFile->Read(&junkdata[0], sizeof(int)); // interpol
 
-				pFile->Read(&junk[0], sizeof(int)); // outwet
-				pFile->Read(&junk[0], sizeof(int)); // outdry
+				pFile->Read(&junkdata[0], 4*8); // SubTrack[]
+				pFile->Read(&junkdata[0], 4); // numSubtracks
+				pFile->Read(&junkdata[0], 4); // interpol
 
-				pFile->Read(&junkdata[0], sizeof(int)); // distPosThreshold
-				pFile->Read(&junkdata[0], sizeof(int)); // distPosClamp
-				pFile->Read(&junkdata[0], sizeof(int)); // distNegThreshold
-				pFile->Read(&junkdata[0], sizeof(int)); // distNegClamp
+				pFile->Read(&junk[0], 4); // outwet
+				pFile->Read(&junk[0], 4); // outdry
 
-				pFile->Read(&junkdata[0], sizeof(char)); // sinespeed
-				pFile->Read(&junkdata[0], sizeof(char)); // sineglide
-				pFile->Read(&junkdata[0], sizeof(char)); // sinevolume
-				pFile->Read(&junkdata[0], sizeof(char)); // sinelfospeed
-				pFile->Read(&junkdata[0], sizeof(char)); // sinelfoamp
+				pFile->Read(&junkdata[0], 4); // distPosThreshold
+				pFile->Read(&junkdata[0], 4); // distPosClamp
+				pFile->Read(&junkdata[0], 4); // distNegThreshold
+				pFile->Read(&junkdata[0], 4); // distNegClamp
 
-				pFile->Read(&junkdata[0], sizeof(int)); // delayTimeL
-				pFile->Read(&junkdata[0], sizeof(int)); // delayTimeR
-				pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackL
-				pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackR
+				pFile->Read(&junkdata[0], 1); // sinespeed
+				pFile->Read(&junkdata[0], 1); // sineglide
+				pFile->Read(&junkdata[0], 1); // sinevolume
+				pFile->Read(&junkdata[0], 1); // sinelfospeed
+				pFile->Read(&junkdata[0], 1); // sinelfoamp
 
-				pFile->Read(&junkdata[0], sizeof(int)); // filterCutoff
-				pFile->Read(&junkdata[0], sizeof(int)); // filterResonance
-				pFile->Read(&junkdata[0], sizeof(int)); // filterLfospeed
-				pFile->Read(&junkdata[0], sizeof(int)); // filterLfoamp
-				pFile->Read(&junkdata[0], sizeof(int)); // filterLfophase
-				pFile->Read(&junkdata[0], sizeof(int)); // filterMode
+				pFile->Read(&junkdata[0], 4); // delayTimeL
+				pFile->Read(&junkdata[0], 4); // delayTimeR
+				pFile->Read(&junkdata[0], 4); // delayFeedbackL
+				pFile->Read(&junkdata[0], 4); // delayFeedbackR
+
+				pFile->Read(&junkdata[0], 4); // filterCutoff
+				pFile->Read(&junkdata[0], 4); // filterResonance
+				pFile->Read(&junkdata[0], 4); // filterLfospeed
+				pFile->Read(&junkdata[0], 4); // filterLfoamp
+				pFile->Read(&junkdata[0], 4); // filterLfophase
+				pFile->Read(&junkdata[0], 4); // filterMode
 
 				bool old;
-				pFile->Read(&old, sizeof old); // old format
-				pFile->Read(&_instance, sizeof _instance); // ovst.instance
+				pFile->Read(old); // old format
+				pFile->Read(_instance); // ovst.instance
 				if(old)
 				{
 					char mch;
-					pFile->Read(&mch, sizeof mch);
+					pFile->Read(mch);
 					_program = 0;
 				}
 				else
 				{
-					pFile->Read(&_program, sizeof _program);
+					pFile->Read(_program);
 				}
 				return true;
 			}

@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "psycle.hpp"
 #include "NewMachine.hpp"
 #include "Plugin.hpp"
@@ -11,19 +12,19 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <algorithm> //std::transform
-#include <cctype>	// std::tolower
-#include ".\newmachine.hpp"
-
+#include <algorithm> // std::transform
+#include <cctype>	   // std::tolower
+#include "newmachine.hpp"
+#include <cstdint>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+
 		int CNewMachine::pluginOrder = 2;
 		bool CNewMachine::pluginName = true;
 		int CNewMachine::_numPlugins = -1;
 		int CNewMachine::LastType0=0;
 		int CNewMachine::LastType1=0;
 		int CNewMachine::NumPlugsInCategories = 0;
-
 
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
 		InternalMachineInfo * CNewMachine::_pInternalMachines[NUM_INTERNAL_MACHINES];
@@ -33,8 +34,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		int numCustCategories(1);
 		CString CustomFolderName;
 		CString tempCustomFolderName;
-		const int IS_FOLDER=2000000000;
-		const int IS_INTERNAL_MACHINE=1000000000;
+
+		const int IS_FOLDER           = 2000000000;
+		const int IS_INTERNAL_MACHINE = 1000000000;
 
 		const int TIMER_INTERVAL = 100;
 
@@ -46,32 +48,32 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		bool bDragging = false;
 		CPoint MousePt;
 
-
-		
+		///\todo is it for debugging?
 		void ShowMessage (int var, CString title)
 		{
 			char buffer[100];  sprintf (buffer, "%d", var); MessageBox (0,buffer, title,0);
 		}
+
+		///\todo is it for debugging?
 		void ShowMessage (CString var, CString title)
 		{
 			MessageBox (0,var, title,0);
 		}
+
 		void CNewMachine::learnDllName(const std::string & fullname)
 		{
 			std::string str=fullname;
 			// strip off path
 			std::string::size_type pos=str.rfind('\\');
-			if(pos != std::string::npos)
-				str=str.substr(pos+1);
-
+			if(pos != std::string::npos) str=str.substr(pos+1);
 			// transform string to lower case
 			std::transform(str.begin(),str.end(),str.begin(),std::tolower);
-
 			dllNames[str]=fullname;
 		}
-		//\todo : Important: There can exists dlls with the same name (there is a phantom.dll which is a VST).
-		//        what about adding a new parameter indicating if we want a VST or a Psycle plugin?
-		//		  or maybe if found more than one entry, ask the user which one he wants to use?
+
+		///\todo Important: There can exists dlls with the same name (there is a phantom.dll which is a VST).
+		///      what about adding a new parameter indicating if we want a VST or a Psycle plugin?
+		///      or maybe if found more than one entry, ask the user which one he wants to use?
 		bool CNewMachine::lookupDllName(const std::string & name, std::string & result)
 		{
 			std::map<std::string,std::string>::iterator iterator
@@ -84,8 +86,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			return false;
 		}
 
-		CNewMachine::CNewMachine(CWnd* pParent)
-			: CDialog(CNewMachine::IDD, pParent)
+		CNewMachine::CNewMachine(CWnd* pParent) : CDialog(CNewMachine::IDD, pParent)
 		{
 			OutBus = false;
 		}
@@ -97,7 +98,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CNewMachine::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CNewMachine)
 			DDX_Control(pDX, IDC_CHECK_ALLOW, m_Allow);
 			DDX_Control(pDX, IDC_NAMELABEL, m_nameLabel);
 			DDX_Control(pDX, IDC_BROWSER, m_browser);
@@ -106,11 +106,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_DLLNAMELABEL, m_dllnameLabel);
 			DDX_Control(pDX, IDC_LISTSTYLE, comboListStyle);
 			DDX_Control(pDX, IDC_NAMESTYLE, comboNameStyle);
-			//}}AFX_DATA_MAP			
 		}
 
 		BEGIN_MESSAGE_MAP(CNewMachine, CDialog)
-			//{{AFX_MSG_MAP(CNewMachine)
 			ON_NOTIFY(TVN_SELCHANGED, IDC_BROWSER, OnSelchangedBrowser)
 			ON_BN_CLICKED(IDC_REFRESH, OnRefresh)
 			ON_NOTIFY(NM_DBLCLK, IDC_BROWSER, OnDblclkBrowser)
@@ -132,9 +130,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_BROWSER, BeginLabelEdit)
 			ON_NOTIFY(TVN_ENDLABELEDIT, IDC_BROWSER, EndLabelEdit)
 			ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
-			
-			//}}AFX_MSG_MAP
-			
 			ON_WM_TIMER()
 			ON_NOTIFY(TVN_KEYDOWN, IDC_BROWSER, OnTvnKeydownBrowser)
 		END_MESSAGE_MAP()
@@ -152,6 +147,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			LoadPluginInfo();
 
 
+			// set internal machine properties
+			// THESE PROPERTIES SHOULD BE MOVED TO THE ACTUAL INTERNAL MACHINE CLASSES
 			_pInternalMachines[0] = new InternalMachineInfo;
 			_pInternalMachines[0]->name = "Sampler";
 			_pInternalMachines[0]->desc = "Stereo Sampler Unit. Inserts new sampler.";
@@ -168,7 +165,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[1]->version = "V1.0";
 			_pInternalMachines[1]->machtype = true;
 			_pInternalMachines[1]->Outputmachine = MACH_DUMMY;
-			_pInternalMachines[0]->OutBus = false;
+			_pInternalMachines[1]->OutBus = false;
 			_pInternalMachines[1]->LastType0 = 0;
 			_pInternalMachines[1]->LastType1 = 1;
 			
@@ -205,7 +202,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			LoadCategoriesFile();
 			UpdateList();
-			//fill combo boxes
+
+			// fill combo boxes
 			comboListStyle.AddString ("Type of Plugin");
 			comboListStyle.AddString ("Class of Machine");
 			comboListStyle.AddString ("Custom Categories");
@@ -213,15 +211,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			comboNameStyle.AddString ("Filename and Path");
 			comboNameStyle.AddString ("Plugin Name");
-            comboNameStyle.SetCurSel ((int)pluginName);
+			comboNameStyle.SetCurSel ((int)pluginName);
+
 			numCustCategories = 1;
 
 			itemheight = m_browser.GetItemHeight ();
 			
-			// set internal machine properties
-			// THESE PROPERTIES SHOULD BE MOVED TO THE ACTUAL INTERNAL MACHINE CLASSES
-
-			//more properties
 			return TRUE;
 
 		}
@@ -234,7 +229,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::UpdateList(bool bInit)
 		{
-			//int nodeindex;
 			m_browser.DeleteAllItems();
 			HTREEITEM intFxNode;
 			switch(pluginOrder)
@@ -942,8 +936,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							}
 							catch(...)
 							{
-								std::ostringstream s; s
-									<< "Type of exception is unknown, cannot display any further information." << std::endl;
+								std::ostringstream s;
+								s << "Type of exception is unknown, cannot display any further information." << std::endl;
 								_pPlugsInfo[currentPlugsCount]->error = s.str();
 							}
 							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
@@ -990,7 +984,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							}
 							catch(const std::exception & e)
 							{
-								std::stringstream s; s
+								std::stringstream s;
+								s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< typeid(e).name() << std::endl;
@@ -1000,13 +995,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									<< "### ERRONEOUS ###" << std::endl
 									<< s.str().c_str();
 								out.flush();
-								std::stringstream title; title
-									<< "Machine crashed: " << fileName;
+								std::stringstream title; title << "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
-								std::stringstream s; s
+								std::stringstream s;
+								s
 									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
 									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
 									<< "Type of exception is unknown, no further information available.";
@@ -1015,8 +1010,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									<< "### ERRONEOUS ###" << std::endl
 									<< s.str().c_str();
 								out.flush();
-								std::stringstream title; title
-									<< "Machine crashed: " << fileName;
+								std::stringstream title; title << "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
@@ -1084,7 +1078,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							try
 							{
 								vstPlug.Free();
-								// [bohan] phatmatik crashes here...
+								// <bohan> phatmatik crashes here...
 								// <magnus> so does PSP Easyverb, in FreeLibrary
 							}
 							catch(const std::exception & e)
@@ -1099,8 +1093,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									<< "### ERRONEOUS ###" << std::endl
 									<< s.str().c_str();
 								out.flush();
-								std::stringstream title; title
-									<< "Machine crashed: " << fileName;
+								std::stringstream title; title << "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
@@ -1114,23 +1107,26 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									<< "### ERRONEOUS ###" << std::endl
 									<< s.str().c_str();
 								out.flush();
-								std::stringstream title; title
-									<< "Machine crashed: " << fileName;
+								std::stringstream title; title << "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
 					}
 					catch(const std::exception & e)
 					{
-						std::stringstream s; s
-							<< std::endl
-							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
-							<< typeid(e).name() << std::endl;
+						{
+							std::stringstream s;
+							s << std::endl << "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl;
+							out << s.str().c_str(); out.flush();
+							host::loggers::crash(s.str());
+						}
+						{
+							std::stringstream s;
+							s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-						out
-							<< s.str().c_str();
-						out.flush();
-						host::loggers::crash(s.str());
+							out << s.str().c_str(); out.flush();
+							host::loggers::crash(s.str());
+						}
 					}
 					catch(...)
 					{
@@ -1138,9 +1134,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							<< std::endl
 							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
 							<< "Type of exception is unknown, no further information available.";
-						out
-							<< s.str().c_str();
-						out.flush();
+						out << s.str().c_str(); out.flush();
 						host::loggers::crash(s.str());
 					}
 				}
@@ -1346,7 +1340,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			file.Close();
 			return true;
-
 		}
 
 		bool CNewMachine::SaveCacheFile()
@@ -1354,34 +1347,30 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			char cache[_MAX_PATH];
 			GetModuleFileName(NULL,cache,_MAX_PATH);
 			char * last = strrchr(cache,'\\');
-			strcpy(last,"\\psycle.plugin-scan.cache");
+			std::strcpy(last,"\\psycle.plugin-scan.cache");
 			DeleteFile(cache);
 			RiffFile file;
-			if (!file.Create(cache,true)) 
-			{
-				return false;
-			}
+			if(!file.Create(cache,true)) return false;
 			file.Write("PSYCACHE",8);
-			UINT version = CURRENT_CACHE_MAP_VERSION;
-			file.Write(&version,sizeof(version));
-			file.Write(&_numPlugins,sizeof(_numPlugins));
+			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
+			file.Write(version);
+			file.Write(_numPlugins);
 			for (int i=0; i<_numPlugins; i++ )
 			{
 				file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
-				file.Write(&_pPlugsInfo[i]->FileTime,sizeof(_pPlugsInfo[i]->FileTime));
+				file.Write(_pPlugsInfo[i]->FileTime);
 				{
 					const std::string error(_pPlugsInfo[i]->error);
-					UINT size(error.size());
-					file.Write(&size, sizeof size);
+					std::uint32_t size(error.size());
+					file.Write(size);
 					if(size) file.Write(error.data(), size);
 				}
-				file.Write(&_pPlugsInfo[i]->allow,sizeof(_pPlugsInfo[i]->allow));
-				file.Write(&_pPlugsInfo[i]->mode,sizeof(_pPlugsInfo[i]->mode));
-				file.Write(&_pPlugsInfo[i]->type,sizeof(_pPlugsInfo[i]->type));
+				file.Write(_pPlugsInfo[i]->allow);
+				file.Write(_pPlugsInfo[i]->mode);
+				file.Write(_pPlugsInfo[i]->type);
 				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
 				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
 				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
-				//file.Write(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
 			}
 			file.Close();
 			return true;
@@ -1392,7 +1381,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			char cache[_MAX_PATH];
 			GetModuleFileName(NULL,cache,_MAX_PATH);
 			char * last = strrchr(cache,'\\');
-			strcpy(last,"\\psycle.custom-categories.cache");
+			std::strcpy(last,"\\psycle.custom-categories.cache");
 			DeleteFile(cache);
 			RiffFile file;
 			if (!file.Create(cache,true)) 
@@ -1400,19 +1389,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return false;
 			}
 			file.Write("PSYCATEGORIES",13);
-			UINT version = CURRENT_CACHE_MAP_VERSION;
-			file.Write(&version,sizeof(version));
+			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
+			file.Write(version);
 	
 			//write categories of internal machines
-			for (int h=0; h < NUM_INTERNAL_MACHINES;h++)
+			for (std::uint32_t h=0; h < NUM_INTERNAL_MACHINES;h++)
 			{
-				file.Write (&h, sizeof(h));
+				file.Write (h);
 				file.Write (_pInternalMachines[h]->category.c_str (), _pInternalMachines[h]->category.length()+1);
 			}
 			
-			file.Write (&NumPlugsInCategories, sizeof(NumPlugsInCategories));
+			file.Write(NumPlugsInCategories);
 			
-
 			for (int i=0; i<_numPlugins; i++ )
 			{
 				if (_pPlugsInfo[i]->category != "")
@@ -1429,7 +1417,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			//traverse plugin tree recursively, saving plugin categories to _pPlugsInfo[i]
 			// call this function with hItem = NULL to start right from the highest level
-			if (hItem == NULL)
+			if(!hItem)
 			{
 				//deal with "Uncategorised" folder
 				HTREEITEM hChild = m_browser.GetChildItem (hNodes[0]);
@@ -1453,7 +1441,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				CString NewCategory;
 				while (hChild != NULL)
 				{
-                    if (m_browser.GetItemData (hChild) == IS_FOLDER)
+					if (m_browser.GetItemData (hChild) == IS_FOLDER)
 					{
 						//continue recursion since it's a folder
 						NewCategory = Category + m_browser.GetItemText (hChild) + "|";
@@ -1481,17 +1469,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					hChild = m_browser.GetNextSiblingItem (hChild);
 				}
-
-				//everything else, recursive searching
+				// everything else, recursive searching
 			}
-			
-			
 		}
 
 		void CNewMachine::OnOK() 
 		{
 			CEdit* pEdit = m_browser.GetEditControl();
-			if (pEdit != NULL)
+			if(pEdit)
 			{
 				// save folder name - set focus to make tree contrl send end label edit message
 				m_browser.SetFocus ();
@@ -1500,22 +1485,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{			
 				if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
 				{
-
-
 					//do normal closing/saving action
-					if (bCategoriesChanged)
-					{
-						SetPluginCategories(NULL, NULL);
-					}
-
-					if (bAllowChanged)
-						SaveCacheFile();
-
-					if (bCategoriesChanged)
-					{
-						SaveCategoriesFile();
-					}
-
+					if (bCategoriesChanged) SetPluginCategories(NULL, NULL);
+					if (bAllowChanged) SaveCacheFile();
+					if (bCategoriesChanged) SaveCategoriesFile();
 					if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
 					CDialog::OnOK();
 
@@ -1556,48 +1529,36 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CNewMachine::BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
-
-			//edit folder name
-
+			// edit folder name
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem ();
-			
-		
 			//make sure item is a folder that is allowed to be edited
 			if ((m_browser.GetItemData (hSelectedItem) >= IS_FOLDER) && (m_browser.GetSelectedItem () != hNodes[0]))
 			{			
 				bEditing = true;
-
 				*pResult = 0;
 			}
-			else
-				*pResult = true;
-
+			else *pResult = true;
 		}
 
 		void CNewMachine::EndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
 			CEdit* pEdit = m_browser.GetEditControl();
-			
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem ();
 			int intNameCount = 0;
-
-			if (pEdit != NULL)
+			if(pEdit)
 			{	
 				CString tempstring;
 				CString currenttext = m_browser.GetItemText (hSelectedItem);
 				pEdit->GetWindowText(tempstring);
 				*pResult = false;
 				m_browser.SetItemText (hSelectedItem, tempstring);
-
-				//make sure user has entered a category name			
+				// make sure user has entered a category name			
 				if (tempstring != "")
 				{
-					//make sure category name doesn't exist
-
+					// make sure category name doesn't exist
 					HTREEITEM hParent = m_browser.GetParentItem (hSelectedItem);
 					HTREEITEM hChild = m_browser.GetChildItem (hParent);
-
 					while ((hChild != NULL) && (intNameCount < 3))
 					{
 						if (tempstring == m_browser.GetItemText (hChild))
@@ -1605,13 +1566,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						hChild = m_browser.GetNextSiblingItem (hChild);
 						
 					}
-					
 					if (intNameCount >= 2)
 					{
-						//user has entered an invalid name
+						// user has entered an invalid name
 						MessageBox ("This folder already exists!", "Error!");
 						intNameCount = 0;
-						//let user continue editing
+						// let user continue editing
 						m_browser.EditLabel (hSelectedItem);
 						CEdit* pEdit2 = m_browser.GetEditControl();
 						pEdit2->SetWindowText(tempstring);
@@ -1619,9 +1579,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					else
 					{
-                        if ((tempstring.Find("\\") == -1) && (tempstring.Find("/",0) == -1) && (tempstring.Find(":",0) == -1) && (tempstring.Find("*",0) == -1) && (tempstring.Find("\?",0) == -1) && (tempstring.Find("\"",0) == -1) && (tempstring.Find("\'",0) == -1) && (tempstring.Find("<",0) == -1)  && (tempstring.Find(">",0) == -1)  && (tempstring.Find("|",0) == -1))
+						if ((tempstring.Find("\\") == -1) && (tempstring.Find("/",0) == -1) && (tempstring.Find(":",0) == -1) && (tempstring.Find("*",0) == -1) && (tempstring.Find("\?",0) == -1) && (tempstring.Find("\"",0) == -1) && (tempstring.Find("\'",0) == -1) && (tempstring.Find("<",0) == -1)  && (tempstring.Find(">",0) == -1)  && (tempstring.Find("|",0) == -1))
 						{
-							//set folder name
+							// set folder name
 							m_browser.SetItemText (hSelectedItem, tempstring);
 							bEditing = false;
 							bCategoriesChanged = true;
@@ -1648,7 +1608,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else 
 				*pResult = false;
-
 		}
 
 		void CNewMachine::BeginDrag(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1662,8 +1621,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				POINT ptOffset;
 				RECT rcItem;
 				  
-				if ((piml = m_browser.CreateDragImage(lpnmtv->itemNew.hItem)) == NULL)
-					return;
+				if ((piml = m_browser.CreateDragImage(lpnmtv->itemNew.hItem)) == NULL) return;
 				
 				/* get the bounding rectangle of the item being dragged (rel to top-left of control) */
 				if (m_browser.GetItemRect(lpnmtv->itemNew.hItem, &rcItem, TRUE))
@@ -1702,14 +1660,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 				delete piml;
 				
-				/* set the focus here, so we get a WM_CANCELMODE if needed */
+				// set the focus here, so we get a WM_CANCELMODE if needed
 				SetFocus();
 				
-				/* redraw item being dragged, otherwise it remains (looking) selected */
+				// redraw item being dragged, otherwise it remains (looking) selected
 				InvalidateRect(&rcItem, TRUE);
 				UpdateWindow();
 				
-				/* Hide the mouse cursor, and direct mouse input to this window */
+				// Hide the mouse cursor, and direct mouse input to this window
 				SetCapture(); 
 				m_hItemDrag = lpnmtv->itemNew.hItem;
 				bDragging = true;
@@ -1721,34 +1679,25 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		HTREEITEM CNewMachine::MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos,  bool bAllowReplace)
 		{		
-  			//check if destination is a plugin, if so, make parent folder the destination
+  			// check if destination is a plugin, if so, make parent folder the destination
 			if (hItemTo != TVI_ROOT)
 			{
 				if (m_browser.GetItemData (hItemTo) != IS_FOLDER)
 					hItemTo = m_browser.GetParentItem (hItemTo);	
 			}
-
-
-			
-			if (hItem == NULL || hItemTo == NULL)
-    			return NULL;
+			if (hItem == NULL || hItemTo == NULL) return NULL;
 			if (!bAllowReplace)
-                if (hItem == hItemTo || hItemTo == m_browser.GetParentItem(hItem))
-	    			return hItem;
+			if (hItem == hItemTo || hItemTo == m_browser.GetParentItem(hItem)) return hItem;
+
   			// check we're not trying to move to a descendant
 			HTREEITEM hItemParent = hItemTo;
-  			
 			if (hItemParent != TVI_ROOT)
 			{
 				while (hItemParent != TVI_ROOT && (hItemParent = m_browser.GetParentItem(hItemParent)) != NULL)
-	    			if (hItemParent == hItem)
-      					return NULL;
-
+	    			if (hItemParent == hItem) return NULL;
 			}
 			
-			
 			HTREEITEM hItemNew;
-
 			
 			//check if item already exists
 			bool bExists = false;
@@ -1781,7 +1730,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
   				tvis.hInsertAfter = hItemPos;
   				// if we're only copying, then ask for new data
   				//if (bCopyOnly && pfnCopyData != NULL)
-	    		//	tvis.item.lParam = pfnCopyData(tree, hItem, tvis.item.lParam);
+	    			//tvis.item.lParam = pfnCopyData(tree, hItem, tvis.item.lParam);
   				hItemNew = m_browser.InsertItem(&tvis);
 				m_browser.SetItemData (hItemNew, itemdata);
   				m_browser.SetItemText(hItemNew, sText);
@@ -1792,33 +1741,30 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
  			while (hItemChild != NULL)
   			{
 	   			HTREEITEM hItemNextChild = m_browser.GetNextSiblingItem(hItemChild);
-    			MoveTreeItem(hItemChild, hItemNew, TVI_SORT, false);
-    			hItemChild = hItemNextChild;
+				MoveTreeItem(hItemChild, hItemNew, TVI_SORT, false);
+				hItemChild = hItemNextChild;
   			}
 			
 			// clear old item data
-    		m_browser.SetItemData(hItem, 0);
-    		// no (more) children, so we can safely delete top item
-    		m_browser.DeleteItem(hItem);
+			m_browser.SetItemData(hItem, 0);
+			// no (more) children, so we can safely delete top item
+			m_browser.DeleteItem(hItem);
 			
   			return hItemNew; 
 		}
 
-
-
 		void CNewMachine::OnMouseMove(UINT nFlags, CPoint point)
 		{
-			if (m_hItemDrag != NULL)
+			if (m_hItemDrag)
 			{
 				CPoint pt;
 			
-    			/* drag the item to the current position */
-    			pt = point;
-    			ClientToScreen(&pt);
-			
-    			CImageList::DragMove(pt);
-    			CImageList::DragShowNolock(FALSE);
-			
+    				// drag the item to the current position
+    				pt = point;
+    				ClientToScreen(&pt);
+
+    				CImageList::DragMove(pt);
+    				CImageList::DragShowNolock(FALSE);			
 			    
 				if (CWnd::WindowFromPoint(pt) == &m_browser)
 				{
@@ -1828,17 +1774,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
       				m_browser.ScreenToClient(&tvhti.pt);
       				HTREEITEM hItemSel = m_browser.HitTest(&tvhti);
       				m_browser.SelectDropTarget(tvhti.hItem);
-    			}
-			
-    			CImageList::DragShowNolock(TRUE);
+    				}
+
+    				CImageList::DragShowNolock(TRUE);
   			}
 
 			CPoint curpoint = point;
 			ClientToScreen (&curpoint);
 			m_browser.GetWindowRect (&UpPos);
 			
-			
-			//sometime, fix this code to do automatic scrolling when user is dragging.
+			// sometime, fix this code to do automatic scrolling when user is dragging.
 			MousePt = point;
 			ClientToScreen (&MousePt);
 			if ((UpPos.left < curpoint.x) && (UpPos.right > curpoint.x))
@@ -1852,12 +1797,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						bScrolling = true;
 						ScrollCount = 0;
 					}
-
 				}
 				else if (((UpPos.bottom - 20) < curpoint.y) && (UpPos.bottom > curpoint.y))
 				{
 					bScrollUp = false;
-
 					if (!bScrolling)
 					{
 						SetTimer (IDT_NEW_MACHINES_BROWSER_TIMER, TIMER_INTERVAL,NULL);
@@ -1880,28 +1823,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				bScrolling = false;
 				KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
 			}
-			
-				
 			CDialog::OnMouseMove(nFlags, point);
 		}
 
 		void CNewMachine::OnCancelMode()
 		{
 			CDialog::OnCancelMode();
-
-			if (m_hItemDrag != NULL)
-			OnEndDrag(nFlags, point);
-			else
-			CDialog::OnLButtonUp(nFlags, point);
+			if (m_hItemDrag) OnEndDrag(nFlags, point);
+			else CDialog::OnLButtonUp(nFlags, point);
 		}
 
 		void CNewMachine::OnLButtonUp(UINT nFlags, CPoint point)
 		{
-			if (m_hItemDrag != NULL)
-			OnEndDrag(nFlags, point);
-			else
-			CDialog::OnLButtonUp(nFlags, point);
-
+			if (m_hItemDrag) OnEndDrag(nFlags, point);
+			else CDialog::OnLButtonUp(nFlags, point);
 		}
 
 		void CNewMachine::OnEndDrag(UINT nFlags, CPoint point)
@@ -1909,8 +1844,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			bDragging = false;
 			bScrolling = false;
 			KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
-			if (m_hItemDrag == NULL)
-			return;
+			if (!m_hItemDrag) return;
 
 			CPoint pt;
 
@@ -1925,7 +1859,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
   			m_browser.SelectDropTarget(NULL);
   			
-			if (hItemDrop != NULL)
+			if (hItemDrop)
 			{
 				if (!((m_hItemDrag == hNodes[0]) || ((m_browser.GetItemData(m_hItemDrag) == IS_FOLDER) &&((hItemDrop != hNodes[0]) || (m_browser.GetParentItem (hItemDrop) != hNodes[0])))))
 				{
@@ -1933,10 +1867,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					MoveTreeItem (m_hItemDrag, hItemDrop == NULL ? TVI_ROOT : hItemDrop, TVI_SORT, false);
 				
 					bCategoriesChanged = true;
-					if (m_browser.GetItemData (hItemDropped) == IS_FOLDER)
-						SortChildren(hItemDropped);
-					else
-						SortChildren(m_browser.GetParentItem (hItemDropped));
+					if (m_browser.GetItemData (hItemDropped) == IS_FOLDER) SortChildren(hItemDropped);
+					else SortChildren(m_browser.GetParentItem (hItemDropped));
 				}
 			}
 
@@ -1947,24 +1879,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::FinishDragging(BOOL bDraggingImageList)
 		{
-  			if (m_hItemDrag != NULL)
+  			if (m_hItemDrag)
   			{
-    			if (bDraggingImageList)
-    			{
-      			CImageList::DragLeave(NULL);
-      			CImageList::EndDrag();
-    			}
-    			ReleaseCapture();
-    			ShowCursor(TRUE);
-    			m_hItemDrag = NULL;
-    			m_browser.SelectDropTarget(NULL);
+    				if (bDraggingImageList)
+    				{
+      				CImageList::DragLeave(NULL);
+      				CImageList::EndDrag();
+    				}
+    				ReleaseCapture();
+    				ShowCursor(TRUE);
+    				m_hItemDrag = NULL;
+    				m_browser.SelectDropTarget(NULL);
   			}
 		}
 
 		void CNewMachine::OnContextMenu(CWnd* pWnd, CPoint point)
 		{
-			if (m_hItemDrag != NULL)
-				OnEndDrag(nFlags, point);
+			if (m_hItemDrag) OnEndDrag(nFlags, point);
 			else
 			{
 				UINT nFlags;
@@ -1975,10 +1906,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				//      item/title bar/something like that, so it's accurate on ALL windows themes.
 				
 				HTREEITEM hItem = m_browser.HitTest(newpoint, &nFlags);
-				if (hItem != NULL)
-					m_browser.SelectItem(hItem);
+				if (hItem) m_browser.SelectItem(hItem);
 
-				if ((hItem != NULL) && (pluginOrder == 2)/*&& (TVHT_ONITEM & nFlags)*/)
+				if (hItem && (pluginOrder == 2)/*&& (TVHT_ONITEM & nFlags)*/)
 				{				
 					//check if selected item is a folder
 					if (m_browser.GetParentItem (hItem) != hNodes[0])
@@ -2018,7 +1948,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
 						}
 						CMenu* pPopup = popupmenu.GetSubMenu(0);
-						ASSERT(pPopup != NULL);
+						ASSERT(pPopup);
 				
 						pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, CNewMachine::GetActiveWindow());
 				
@@ -2028,7 +1958,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 
 		}
-
 
 		void CNewMachine::NMPOPUP_AddSubFolder()
 		{
@@ -2043,7 +1972,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem ());
 			numCustCategories++;
 			bEditing = true;
-
 		}
 
 
@@ -2053,20 +1981,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem();
 			HTREEITEM hParent = m_browser.GetParentItem (hSelectedItem);
 			hNodes[numCustCategories] = m_browser.InsertItem ("A New Category", 6,6,hParent, TVI_SORT);
-
 			m_browser.SelectItem (hNodes[numCustCategories]);
 			m_browser.SetItemData (hNodes[numCustCategories], IS_FOLDER);
 			m_browser.SetItemState (hNodes[numCustCategories], TVIS_BOLD, TVIS_BOLD);
 			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem ());
 			numCustCategories++;
 			bEditing = true;
-
 		}
 
 		void CNewMachine::NMPOPUP_RenameFolder()
 		{	
 			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem());
 		}
+
 		void CNewMachine::NMPOPUP_DeleteMoveToParent()
 		{
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem();
@@ -2075,7 +2002,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// ask the user when to move plugins or not.
 			HTREEITEM hParent = m_browser.GetParentItem (hSelectedItem);
 			HTREEITEM hChild = m_browser.GetChildItem (hSelectedItem);
-			while (hChild != NULL)
+			while (hChild)
 			{
 				//Add code to check if item already exists.
 				MoveTreeItem (hChild, hParent, TVI_SORT, false);
@@ -2108,7 +2035,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CNewMachine::DeleteMoveUncat (HTREEITEM hParent)
 		{
 			HTREEITEM hChild = m_browser.GetChildItem (hParent);
-			while (hChild != NULL)
+			while (hChild)
 			{
 				if (m_browser.GetItemData (hChild) == IS_FOLDER)
 				{
@@ -2125,13 +2052,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_browser.DeleteItem (hParent);
 		}
 
-
-	
-
 		void CNewMachine::OnBnClickedCancel()
 		{
 			CEdit* pEdit = m_browser.GetEditControl();
-			if (pEdit != NULL)
+			if (pEdit)
 			{
 				// save folder name - set focus to make tree contrl send end label edit message
 				HTREEITEM Sel = m_browser.GetSelectedItem ();
@@ -2196,37 +2120,31 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						m_browser.SelectDropTarget (hCurrent);
 						m_browser.Invalidate ();
 				}
-				
 			}
-
-
 			CDialog::OnTimer(nIDEvent);
 		}
 	
 		void CNewMachine::OnTvnKeydownBrowser(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
-			
-			//THIS DOESN'T WORK - SOMETHING TO FIX ONE DAY
-           /* if (pTVKeyDown->wVKey == VK_APPS)
-			{
-				//deal with "right click " key on those modern fancy windows keyboards!
-				HTREEITEM hSelected = m_browser.GetSelectedItem();
-				if (hSelected != NULL)
+			#if 0 ///\todo THIS DOESN'T WORK - SOMETHING TO FIX ONE DAY
+				if (pTVKeyDown->wVKey == VK_APPS)
 				{
-					RECT selrect;
-					m_browser.GetItemRect (hSelected, &selrect, 0);
-					CPoint point;  
-					point.x = int((selrect.left + selrect.right ) / 2);
-					point.y = int((selrect.bottom + selrect.top) / 2);
-					m_browser.OnContextMenu (0,point);
+					//deal with "right click " key on those modern fancy windows keyboards!
+					HTREEITEM hSelected = m_browser.GetSelectedItem();
+					if (hSelected != NULL)
+					{
+						RECT selrect;
+						m_browser.GetItemRect (hSelected, &selrect, 0);
+						CPoint point;  
+						point.x = int((selrect.left + selrect.right ) / 2);
+						point.y = int((selrect.bottom + selrect.top) / 2);
+						m_browser.OnContextMenu (0,point);
+					}
 				}
-			}*/
-
+			#endif
 			*pResult = 0;
 		}
-
-
 	UNIVERSALIS__COMPILER__NAMESPACE__END
-		UNIVERSALIS__COMPILER__NAMESPACE__END
+UNIVERSALIS__COMPILER__NAMESPACE__END
 

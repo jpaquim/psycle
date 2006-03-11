@@ -3,14 +3,9 @@
 // Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
 
 ///\implementation universalis::operating_system::paths
-//#include <universalis/detail/project.private.hpp>
-#include "../paths.hpp"
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
+#include <universalis/operating_system/detail/microsoft/max_path.hpp>
 #include <cstdlib> // std::getenv for user's home dir
 #include <sstream>
 #include <iostream>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#include <windows.h>
-	#include <universalis/operating_system/detail/microsoft/max_path.hpp>
-#endif

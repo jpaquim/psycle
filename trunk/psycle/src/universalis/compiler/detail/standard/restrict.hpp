@@ -11,13 +11,18 @@
 	/// here the compiler is told that &r1 != &r2 != p1 != p2
 #pragma once
 #include <universalis/detail/project.hpp>
+///\todo test __STDC_VERSION
 #if defined DIVERSALIS__COMPILER__GNU
 	// restrict is a keyword
 	#define restrict __restrict__
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	#define restrict
-	// unsupported?
-	// see also: #pragma optimize("a", on) // assumes no aliasing
+	#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 8
+		// restrict is a keyword
+	#else
+		// unsupported?
+		// see also: #pragma optimize("a", on) // assumes no aliasing
+		#define restrict
+	#endif
 #else
 	#define restrict
 #endif

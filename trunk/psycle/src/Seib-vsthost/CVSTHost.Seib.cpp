@@ -4,7 +4,8 @@
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /*****************************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
-#include "./CVSTHost.Seib.hpp"                   /* private prototypes                */
+#include PACKAGENERIC
+#include "CVSTHost.Seib.hpp"                   /* private prototypes                */
 
 namespace seib {
 	namespace vst {

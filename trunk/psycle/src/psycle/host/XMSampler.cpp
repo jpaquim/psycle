@@ -1,11 +1,12 @@
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-
+#include <universalis/processor/exception.hpp>
 namespace psycle
 {
 	namespace host
@@ -578,18 +579,23 @@ namespace psycle
 					rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
 				}
 
-				try{
+				try
+				{
 					left_output *=  volume;
 					right_output *= volume;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
-				{ 
-					case STATUS_FLOAT_DENORMAL_OPERAND:
-					case STATUS_FLOAT_INVALID_OPERATION:
-						left_output = 0;
-						right_output = 0;
-						break;
-					default: throw;
-				}}				
+				}
+				catch(universalis::processor::exception const & e)
+				{
+					switch(e.code())
+					{ 
+						case STATUS_FLOAT_DENORMAL_OPERAND:
+						case STATUS_FLOAT_INVALID_OPERATION:
+							left_output = 0;
+							right_output = 0;
+							break;
+						default: throw;
+					}
+				}
 
 				// Filter section
 				if (m_Filter.Type() != dsp::F_NONE)

@@ -1,5 +1,4 @@
 #pragma once
-#pragma unmanaged
 /** @file
  *  @brief 
  *  $Date$

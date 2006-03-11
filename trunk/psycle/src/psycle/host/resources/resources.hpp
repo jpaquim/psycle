@@ -46,6 +46,7 @@
 #define IDD_MIDI_MONITOR                139
 #define IDD_ABOUTBOX                    141
 #define IDB_SPLASH                      142
+#define IDB_BETASPLASH                  208
 #define IDD_GREETS                      144
 #define IDR_WAVEFRAME                   146
 #define IDD_WAVED_AMPLIFY               147
@@ -90,7 +91,6 @@
 #define IDD_SAVEWAVDLG                  203
 #define IDD_PROGRESS_DIALOG             204
 #define IDB_BITMAP1                     207
-#define IDB_BETASPLASH                  208
 #define IDD_XM_SAMPLER                  214
 #define IDD_XM_GENERAL                  215
 #define IDD_XMSAMPLERUIINST             217
@@ -110,6 +110,7 @@
 #define IDB_VUMETEOFF                   243
 #define IDB_VUMETEROFF                  243
 #define IDB_VUMETERON                   244
+#define IDB_VU                          246
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1094,9 +1095,10 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        245
+#define _APS_NEXT_RESOURCE_VALUE        247
 #define _APS_NEXT_COMMAND_VALUE         33000
 #define _APS_NEXT_CONTROL_VALUE         1741
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
+

@@ -1,5 +1,6 @@
 ///\implementation psycle::host::RiffFile
 #include <packageneric/pre-compiled.private.hpp>
+#include PACKAGENERIC
 #include "FileIO.hpp"
 
 namespace psycle
@@ -114,16 +115,16 @@ namespace psycle
 			return true;
 		}
 
-		std::ptrdiff_t RiffFile::Seek(std::ptrdiff_t const & bytes)
+		std::fpos_t RiffFile::Seek(std::fpos_t const & bytes)
 		{
-			if(std::fseek(file_, bytes, SEEK_SET)) return -1;
-			return std::ftell(file_);
+			if(std::fsetpos(file_, &bytes)) return -1;
+			return GetPos();
 		}
 
-		std::ptrdiff_t RiffFile::Skip(std::ptrdiff_t const & bytes)
+		std::fpos_t RiffFile::Skip(std::ptrdiff_t const & bytes)
 		{
 			if(std::fseek(file_, bytes, SEEK_CUR)) return -1;
-			return std::ftell(file_);
+			return GetPos();
 		}
 
 		bool RiffFile::Eof()
@@ -131,18 +132,20 @@ namespace psycle
 			return static_cast<bool>(/*std::*/feof(file_));
 		}
 
-		std::size_t RiffFile::FileSize()
+		std::fpos_t RiffFile::FileSize()
 		{
-			std::size_t const save(std::ftell(file_));
+			std::fpos_t const save(GetPos());
 			std::fseek(file_, 0, SEEK_END);
-			std::size_t const end(std::ftell(file_));
-			std::fseek(file_, save, SEEK_SET);
+			std::fpos_t const  end(GetPos());
+			std::fsetpos(file_, &save);
 			return end;
 		}
 
-		std::size_t RiffFile::GetPos()
+		std::fpos_t RiffFile::GetPos()
 		{
-			return std::ftell(file_);
+			std::fpos_t result;
+			std::fgetpos(file_, &result);
+			return result;
 		}
 	}
 }

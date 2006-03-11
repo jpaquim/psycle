@@ -22,7 +22,7 @@
 #define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
 /// Test for RMS Vu's
-//#define PSYCLE__CONFIGURATION__RMS_VUS 1
+#define PSYCLE__CONFIGURATION__RMS_VUS 0
 
 /// unmasks fpu exceptions
 /// [JAZ] : I have experienced crashes with this option enabled, which didn't seem to come from the code itself.
@@ -32,11 +32,11 @@
 
 
 /// string describing the configuration options.
-#define PSYCLE__CONFIGURATION__DESCRIPTION(EOL) \
-	"read_write_mutex = "          UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__READ_WRITE_MUTEX) EOL \
-	"fpu exceptions = "            UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__FPU_EXCEPTIONS)   EOL \
-	"volume column = "             UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__VOLUME_COLUMN)    EOL \
-	"rms vus = "                   UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__RMS_VUS)          EOL \
+#define PSYCLE__CONFIGURATION__DESCRIPTION \
+	"read_write_mutex = "          UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__READ_WRITE_MUTEX) UNIVERSALIS__OPERATING_SYSTEM__EOL \
+	"fpu exceptions = "            UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__FPU_EXCEPTIONS)   UNIVERSALIS__OPERATING_SYSTEM__EOL \
+	"volume column = "             UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__VOLUME_COLUMN)    UNIVERSALIS__OPERATING_SYSTEM__EOL \
+	"rms vus = "                   UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__RMS_VUS)          UNIVERSALIS__OPERATING_SYSTEM__EOL \
 	"debugging = "                                                   PSYCLE__CONFIGURATION__DEBUG
 
 /// value to show in the string describing the configuration options (PSYCLE__CONFIGURATION__DESCRIPTION).
@@ -48,7 +48,15 @@
 #endif
 
 /// end-of-line character sequence on the platform.
-///\todo get this definition from universalis
-#define EOL "\r\n"
+///\todo get this definition from universalis after a work around for msvc's resource compiler parsing bug is setup.
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__EOL
+	#ifdef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r\n"
+//	#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE && DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR < 10 // before bsd-unix (darwin)
+//			#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n\r"
+	#else
+		#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n"
+	#endif
+#endif
 
 #include <universalis/compiler/stringized.hpp>
