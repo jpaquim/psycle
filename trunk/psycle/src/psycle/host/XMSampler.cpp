@@ -7,11 +7,11 @@
 #include "FileIO.hpp"
 #include "Configuration.hpp"
 #include <universalis/processor/exception.hpp>
+
 namespace psycle
 {
 	namespace host
 	{
-
 /*		__declspec(align(32)) static float xdspFloatBuffer[20960];
 		static CXPreparedResamplerFilter *pFilter = NULL;
 		static CXResampler *pResampler = NULL;

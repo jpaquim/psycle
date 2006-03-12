@@ -78,6 +78,9 @@
 #if 0
 /*
 $Log: version.hpp,v $
+Revision 1.56  2006/03/12 20:11:17  jaz001
+* fixed wrong EOL coming from recent commits.
+
 Revision 1.55  2006/03/09 18:44:10  johan-boule
 increasing version after tagging
 
