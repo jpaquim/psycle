@@ -1845,7 +1845,7 @@ namespace psycle
 				pFile->Read(_connection);
 				pFile->Read(_inputCon);
 				pFile->Read(_connectionPoint);
-				pFile->Read(_numInputs);
+				pFile->Read(_connectedInputs);
 				pFile->Read(_numOutputs);
 
 				pFile->Read(_panning);
@@ -1899,3 +1899,4 @@ namespace psycle
 		}
 	}
 }
+

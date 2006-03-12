@@ -249,7 +249,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 //============================================================================
 void mi::SequencerTick()
 {
-	//	Code here if this machine is an effect
+	//
+	//	Update some stuf
+	globals.srate = pCB->GetSamplingRate();
 }
 //============================================================================
 //	SequencerTick
@@ -257,9 +259,6 @@ void mi::SequencerTick()
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	int vol = 254;
-	//
-	//	Update some stuf
-	globals.srate = pCB->GetSamplingRate();
 	//
 	//	Handle commands
 	switch (cmd)

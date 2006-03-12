@@ -171,11 +171,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// Input numbers
-					sprintf(buffer,"%d",tmac->_numInputs);
+					sprintf(buffer,"%d",tmac->_connectedInputs);
 					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// OutPut numbers
-					sprintf(buffer,"%d",tmac->_numOutputs);
+					sprintf(buffer,"%d",tmac->_connectedOutputs);
 					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 					n++;
 				}
@@ -184,3 +184,4 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END
+

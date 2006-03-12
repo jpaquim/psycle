@@ -235,8 +235,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						bool connection[MAX_CONNECTIONS];
 						bool inputCon[MAX_CONNECTIONS];
 
-						int numOutputs = mac->_numOutputs;
-						int numInputs = mac->_numInputs;
+						int numOutputs = mac->_connectedOutputs;
+						int numInputs = mac->_connectedInputs;
 
 						for (int i = 0; i < MAX_CONNECTIONS; i++)
 						{
@@ -262,8 +262,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						Machine * mac = Global::_pSong->_pMachine[tmac];
 						if (mac)
 						{
-							mac->_numOutputs = numOutputs;
-							mac->_numInputs = numInputs;
+							mac->_connectedOutputs = numOutputs;
+							mac->_connectedInputs = numInputs;
 
 							for (int i = 0; i < MAX_CONNECTIONS; i++)
 							{
@@ -563,13 +563,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					
 				}
 				
-				temp = tmp1->_numOutputs;
-				tmp1->_numOutputs = tmp2->_numOutputs;
-				tmp2->_numOutputs = temp;
+				temp = tmp1->_connectedOutputs;
+				tmp1->_connectedOutputs = tmp2->_connectedOutputs;
+				tmp2->_connectedOutputs = temp;
 				
-				temp = tmp1->_numInputs;
-				tmp1->_numInputs = tmp2->_numInputs;
-				tmp2->_numInputs = temp;
+				temp = tmp1->_connectedInputs;
+				tmp1->_connectedInputs = tmp2->_connectedInputs;
+				tmp2->_connectedInputs = temp;
 
 				// Exchange the Machine number.
 				Global::_pSong->_pMachine[one] = tmp2;
@@ -787,3 +787,4 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END
+

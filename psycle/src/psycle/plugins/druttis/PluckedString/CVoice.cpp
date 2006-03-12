@@ -26,6 +26,7 @@ CVoice::~CVoice()
 void CVoice::Init()
 {
 	float lowestFreq = 20.0f;
+	currentFreq = -1.0f;
 	length = (int) (globals->srate / lowestFreq + 1.0f);
 	lastLength = (float) length;
 	lastFreq = lowestFreq;
