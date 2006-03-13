@@ -1,5 +1,4 @@
-///\file
-///\interface psycle::host::Configuration.
+///\interface psycle::host::Configuration
 #pragma once
 #include "AudioDriver.hpp"
 #include "version.hpp"
@@ -8,12 +7,17 @@ namespace psycle
 {
 	namespace host
 	{
-		#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-		#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR)
-		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
-		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
+		#if defined PSYCLE__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT // make use of windows registry database
+			#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
+			#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR)
+		#else
+			#error todo
+		#endif
 
-		class CMidiInput; // MIDI IMPLEMENTATION 
+		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
+		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN        "Psycle Default (internal)"
+
+		class CMidiInput;
 
 		/// configuration.
 		class Configuration
@@ -22,59 +26,75 @@ namespace psycle
 			Configuration();
 			~Configuration() throw();
 
-			void CreateFonts();
-			bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic);
+			#if defined PSYCLE__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT // make use of mfc
+				void CreateFonts();
+				bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic);
+				CFont seqFont;
+				CFont generatorFont;
+				CFont effectFont;
+			#else
+				#error todo
+			#endif
 			
 			bool autoStopMachines;
-			COLORREF mv_colour;
-			COLORREF mv_wirecolour;
-			COLORREF mv_wireaacolour;
-			COLORREF mv_wireaacolour2;
-			COLORREF mv_polycolour;
-			COLORREF mv_generator_fontcolour;
-			COLORREF mv_effect_fontcolour;
 
-			COLORREF pvc_separator;
-			COLORREF pvc_separator2;
-			COLORREF pvc_background;
-			COLORREF pvc_background2;
-			COLORREF pvc_row4beat;
-			COLORREF pvc_row4beat2;
-			COLORREF pvc_rowbeat;
-			COLORREF pvc_rowbeat2;
-			COLORREF pvc_row;
-			COLORREF pvc_row2;
-			COLORREF pvc_font;
-			COLORREF pvc_font2;
-			COLORREF pvc_fontPlay;
-			COLORREF pvc_fontPlay2;
-			COLORREF pvc_fontCur;
-			COLORREF pvc_fontCur2;
-			COLORREF pvc_fontSel;
-			COLORREF pvc_fontSel2;
-			COLORREF pvc_selection;
-			COLORREF pvc_selection2;
-			COLORREF pvc_playbar;
-			COLORREF pvc_playbar2;
-			COLORREF pvc_cursor;
-			COLORREF pvc_cursor2;
+			typedef
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					COLORREF
+				#else
+					std::uint32_t
+				#endif
+				color_type;
 
-			COLORREF vu1;
-			COLORREF vu2;
-			COLORREF vu3;
+			color_type mv_colour;
+			color_type mv_wirecolour;
+			color_type mv_wireaacolour;
+			color_type mv_wireaacolour2;
+			color_type mv_polycolour;
+			color_type mv_generator_fontcolour;
+			color_type mv_effect_fontcolour;
 
-			COLORREF machineGUITopColor;
-			COLORREF machineGUIFontTopColor;
-			COLORREF machineGUIBottomColor;
-			COLORREF machineGUIFontBottomColor;
+			color_type pvc_separator;
+			color_type pvc_separator2;
+			color_type pvc_background;
+			color_type pvc_background2;
+			color_type pvc_row4beat;
+			color_type pvc_row4beat2;
+			color_type pvc_rowbeat;
+			color_type pvc_rowbeat2;
+			color_type pvc_row;
+			color_type pvc_row2;
+			color_type pvc_font;
+			color_type pvc_font2;
+			color_type pvc_fontPlay;
+			color_type pvc_fontPlay2;
+			color_type pvc_fontCur;
+			color_type pvc_fontCur2;
+			color_type pvc_fontSel;
+			color_type pvc_fontSel2;
+			color_type pvc_selection;
+			color_type pvc_selection2;
+			color_type pvc_playbar;
+			color_type pvc_playbar2;
+			color_type pvc_cursor;
+			color_type pvc_cursor2;
 
-			COLORREF machineGUIHTopColor;
-			COLORREF machineGUIHFontTopColor;
-			COLORREF machineGUIHBottomColor;
-			COLORREF machineGUIHFontBottomColor;
+			color_type vu1;
+			color_type vu2;
+			color_type vu3;
 
-			COLORREF machineGUITitleColor;
-			COLORREF machineGUITitleFontColor;
+			color_type machineGUITopColor;
+			color_type machineGUIFontTopColor;
+			color_type machineGUIBottomColor;
+			color_type machineGUIFontBottomColor;
+
+			color_type machineGUIHTopColor;
+			color_type machineGUIHFontTopColor;
+			color_type machineGUIHBottomColor;
+			color_type machineGUIHFontBottomColor;
+
+			color_type machineGUITitleColor;
+			color_type machineGUITitleFontColor;
 
 			bool mv_wireaa;
 			int  mv_wirewidth;
@@ -105,9 +125,9 @@ namespace psycle
 			int pattern_font_x;
 			int pattern_font_y;
 
-			UINT pattern_font_flags;
-			UINT generator_font_flags;
-			UINT effect_font_flags;
+			std::uint32_t pattern_font_flags;
+			std::uint32_t generator_font_flags;
+			std::uint32_t effect_font_flags;
 
 			bool pattern_draw_empty_data;
 			bool draw_mac_index;
@@ -119,11 +139,6 @@ namespace psycle
 			int effect_font_point;
 
 			std::string machine_skin;
-
-			CFont seqFont;
-			CFont generatorFont;
-			CFont effectFont;
-
 
 		public:
 			class midi_type
