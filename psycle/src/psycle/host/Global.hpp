@@ -4,33 +4,36 @@
 #include <cstdint>
 namespace psycle
 {
-	/// \todo
-	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
-	typedef std::uint8_t byte;
-	/// \todo
-//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
-//	typedef ::UCHAR UCHAR;
-	/// \todo
-	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
-	typedef std::uint16_t word;
-	/// \todo
-//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
-//	typedef ::WORD WORD;
-	/// \todo
-	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-	typedef std::uint32_t dword;
-	/// \todo
-//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-//	typedef ::DWORD DWORD;
-	/// \todo
-//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-//	typedef ::UINT UINT;
-	/// \todo
-//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-//	typedef ::ULONG ULONG;
-	/// \todo
-	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t")
-	typedef ::ULONGLONG ULONGLONG;
+	///\name depecate a bunch of ms types
+	///{
+		/// \todo
+		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
+		typedef std::uint8_t byte;
+		/// \todo
+	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
+	//	typedef ::UCHAR UCHAR;
+		/// \todo
+		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
+		typedef std::uint16_t word;
+		/// \todo
+	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
+	//	typedef ::WORD WORD;
+		/// \todo
+		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+		typedef std::uint32_t dword;
+		/// \todo
+	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+	//	typedef ::DWORD DWORD;
+		/// \todo
+	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+	//	typedef ::UINT UINT;
+		/// \todo
+	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
+	//	typedef ::ULONG ULONG;
+		/// \todo
+		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t")
+		typedef ::ULONGLONG ULONGLONG;
+	///\}
 
 	namespace host
 	{
@@ -51,11 +54,9 @@ namespace psycle
 				#if !defined DIVERSALIS__PROCESSOR__X86
 					#error "sorry, contains x86-specific asm code"
 				#endif
-
 				#if !defined DIVERSALIS__COMPILER__MICROSOFT // or intel?
 					#error "sorry, asm code is not written in at&t syntax"
 				#endif
-
 				union result_type
 				{
 					std::uint64_t value;
