@@ -123,8 +123,8 @@ namespace universalis
 			#if defined DIVERSALIS__COMPILER__GNU
 				// gcc is able to include the name of the current class implicitly
 				// so we use the same definition in both cases
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION            __PRETTY_FUNCTION__
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  __PRETTY_FUNCTION__
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION            UNIVERSALIS__COMPILER__STRINGIZED(__PRETTY_FUNCTION__) //\todo use direct stringizaton ; report this to boost authors
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  UNIVERSALIS__COMPILER__STRINGIZED(__PRETTY_FUNCTION__) //\todo use direct stringizaton ; report this to boost authors
 			#else
 				// include the name of the current class explicitly using rtti on the "this" pointer
 				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION + universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
