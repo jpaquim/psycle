@@ -380,11 +380,10 @@ namespace psycle
 
 		bool Song::InsertConnection(int src, int dst, float value)
 		{
-			int wIndex=0;
 			Machine *srcMac = _pMachine[src];
 			Machine *dstMac = _pMachine[dst];
 			if(!srcMac || !dstMac) return false;
-			return srcMac->Connect(dstMac,wIndex);
+			return srcMac->ConnectTo(dstMac,0,0,value);
 		}
 		int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
 		{
@@ -403,11 +402,11 @@ namespace psycle
 						// delete the old wire
 						_pMachine[wiresource]->_connection[wireindex] = false;
 						_pMachine[wiresource]->_outputMachines[wireindex] = -1;
-						_pMachine[wiresource]->_numOutputs--;
+						_pMachine[wiresource]->_connectedOutputs--;
 
 						dmac->_inputCon[w] = false;
 						dmac->_inputMachines[w] = -1;
-						dmac->_numInputs--;
+						dmac->_connectedInputs--;
 					}
 /*						else
 					{
@@ -434,11 +433,11 @@ namespace psycle
 						int wire = smac->FindOutputWire(wiredest);
 						smac->_connection[wire] = FALSE;
 						smac->_outputMachines[wire] = 255;
-						smac->_numOutputs--;
+						smac->_connectedOutputs--;
 
 						_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
 						_pMachine[wiredest]->_inputMachines[wireindex] = 255;
-						_pMachine[wiredest]->_numInputs--;
+						_pMachine[wiredest]->_connectedInputs--;
 					}
 /*						else
 					{
@@ -481,7 +480,7 @@ namespace psycle
 									{
 										iMac2->_connection[x] = false;
 										iMac2->_outputMachines[x]=-1;
-										iMac2->_numOutputs--;
+										iMac2->_connectedOutputs--;
 										break;
 									}
 								}
@@ -502,7 +501,7 @@ namespace psycle
 									{
 										iMac2->_inputCon[x] = false;
 										iMac2->_inputMachines[x]=-1;
-										iMac2->_numInputs--;
+										iMac2->_connectedInputs--;
 										break;
 									}
 								}
@@ -1234,8 +1233,8 @@ namespace psycle
 				{
 					if(_pMachine[i])
 					{
-						_pMachine[i]->_numInputs = 0;
-						_pMachine[i]->_numOutputs = 0;
+						_pMachine[i]->_connectedInputs = 0;
+						_pMachine[i]->_connectedOutputs = 0;
 						for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
 						{
 							if(_pMachine[i]->_connection[c])
@@ -1252,7 +1251,7 @@ namespace psycle
 								}
 								else 
 								{
-									_pMachine[i]->_numOutputs++;
+									_pMachine[i]->_connectedOutputs++;
 								}
 							}
 							else
@@ -1274,7 +1273,7 @@ namespace psycle
 								}
 								else
 								{
-									_pMachine[i]->_numInputs++;
+									_pMachine[i]->_connectedInputs++;
 								}
 							}
 							else
@@ -2050,8 +2049,8 @@ namespace psycle
 				{
 					if (_pMachine[i])
 					{
-						_pMachine[i]->_numInputs = 0;
-						_pMachine[i]->_numOutputs = 0;
+						_pMachine[i]->_connectedInputs = 0;
+						_pMachine[i]->_connectedOutputs = 0;
 
 						for (int c = 0; c < MAX_CONNECTIONS; c++)
 						{
@@ -2069,7 +2068,7 @@ namespace psycle
 								}
 								else 
 								{
-									_pMachine[i]->_numOutputs++;
+									_pMachine[i]->_connectedOutputs++;
 								}
 							}
 							else
@@ -2091,7 +2090,7 @@ namespace psycle
 								}
 								else
 								{
-									_pMachine[i]->_numInputs++;
+									_pMachine[i]->_connectedInputs++;
 								}
 							}
 							else
@@ -2649,8 +2648,8 @@ namespace psycle
 
 			// oh and delete all connections
 
-			_pMachine[dst]->_numInputs = 0;
-			_pMachine[dst]->_numOutputs = 0;
+			_pMachine[dst]->_connectedInputs = 0;
+			_pMachine[dst]->_connectedOutputs = 0;
 
 			for (int i = 0; i < MAX_CONNECTIONS; i++)
 			{

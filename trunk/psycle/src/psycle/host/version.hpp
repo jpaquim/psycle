@@ -78,6 +78,9 @@
 #if 0
 /*
 $Log: version.hpp,v $
+Revision 1.57  2006/03/13 20:35:04  jaz001
+* Fix for EOL (now for sure, windiff says it)
+
 Revision 1.56  2006/03/12 20:11:17  jaz001
 * fixed wrong EOL coming from recent commits.
 

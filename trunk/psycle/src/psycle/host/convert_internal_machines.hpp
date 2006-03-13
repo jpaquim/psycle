@@ -54,8 +54,8 @@ namespace psycle
 						#else
 							riff.Read(machine._connectionPoint, sizeof machine._connectionPoint);
 						#endif
-						riff.Read(&machine._numInputs, sizeof machine._numInputs);
-						riff.Read(&machine._numOutputs, sizeof machine._numOutputs);
+						riff.Read(&machine._connectedInputs, sizeof machine._connectedInputs);
+						riff.Read(&machine._connectedOutputs, sizeof machine._connectedOutputs);
 						riff.Read(&machine._panning, sizeof machine._panning);
 						machine.SetPan(machine._panning);
 						riff.Skip(40); // skips shiatz

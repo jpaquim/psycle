@@ -1846,7 +1846,7 @@ namespace psycle
 				pFile->Read(_inputCon);
 				pFile->Read(_connectionPoint);
 				pFile->Read(_connectedInputs);
-				pFile->Read(_numOutputs);
+				pFile->Read(_connectedOutputs);
 
 				pFile->Read(_panning);
 				Machine::SetPan(_panning);

@@ -13,34 +13,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		enum
 		{
-			collabels=0,
-			chan1,
-			chan2,
-			chan3,
-			chan4,
-			chan5,
-			chan6,
-			chan7,
-			chan8,
-			chan9,
-			chan10,
-			chan11,
-			chan12,
-			return1,
-			return2,
-			return3,
-			return4,
-			return5,
-			return6,
-			return7,
-			return8,
-			return9,
-			return10,
-			return11,
-			return12
-		};
-		enum
-		{
 			rowlabels=0,
 			send1,
 			send2,

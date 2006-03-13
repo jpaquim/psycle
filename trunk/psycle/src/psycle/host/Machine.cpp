@@ -113,8 +113,8 @@ namespace psycle
 			, _y(0)
 			, _numPars(0)
 			, _nCols(1)
-			, _numInputs(0)
-			, _numOutputs(0)
+			, _connectedInputs(0)
+			, _connectedOutputs(0)
 			, TWSSamples(0)
 			, TWSActive(false)
 			, _volumeCounter(0.0f)
@@ -188,8 +188,8 @@ namespace psycle
 				_inputCon[i] = false;
 				_connection[i] = false;
 			}
-			_numInputs = 0;
-			_numOutputs = 0;
+			_connectedInputs = 0;
+			_connectedOutputs = 0;
 		}
 
 		void Machine::SetPan(int newPan)
@@ -215,7 +215,7 @@ namespace psycle
 			_panning = newPan;
 		}
 
-		bool Machine::Connect(Machine* dstMac,int &wire,float volume)
+		bool Machine::ConnectTo(Machine* dstMac,int dstport,int outport,float volume)
 		{
 			ASSERT(dstMac);
 			if (dstMac->_type == MACHMODE_GENERATOR) return false;
@@ -228,7 +228,7 @@ namespace psycle
 			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 			{
 				if(!_connection[c]) freebus = c;
-				// Checking that there's not an slot to the dest. machine already
+				// Checking that there's not a slot to the dest. machine already
 				else if(_outputMachines[c] == dstMac->_macIndex) error = true;
 			}
 			if(freebus == -1 || error) return false;
@@ -245,10 +245,10 @@ namespace psycle
 			// Calibrating in/out properties
 			_outputMachines[freebus] = dstMac->_macIndex;
 			_connection[freebus] = true;
-			_numOutputs++;
+			_connectedOutputs++;
 			dstMac->_inputMachines[dfreebus] = _macIndex;
 			dstMac->_inputCon[dfreebus] = true;
-			dstMac->_numInputs++;
+			dstMac->_connectedInputs++;
 			dstMac->InitWireVolume(_type,dfreebus,volume);
 			return true;
 		}
@@ -603,8 +603,8 @@ namespace psycle
 			pFile->Read(&pMachine->_panning,sizeof(pMachine->_panning));
 			pFile->Read(&pMachine->_x,sizeof(pMachine->_x));
 			pFile->Read(&pMachine->_y,sizeof(pMachine->_y));
-			pFile->Read(&pMachine->_numInputs,sizeof(pMachine->_numInputs));							// number of Incoming connections
-			pFile->Read(&pMachine->_numOutputs,sizeof(pMachine->_numOutputs));						// number of Outgoing connections
+			pFile->Read(&pMachine->_connectedInputs,sizeof(pMachine->_connectedInputs));							// number of Incoming connections
+			pFile->Read(&pMachine->_connectedOutputs,sizeof(pMachine->_connectedOutputs));						// number of Outgoing connections
 			for(int i = 0; i < MAX_CONNECTIONS; i++)
 			{
 				pFile->Read(&pMachine->_inputMachines[i],sizeof(pMachine->_inputMachines[i]));	// Incoming connections Machine number
@@ -637,8 +637,8 @@ namespace psycle
 				p->_panning=pMachine->_panning;
 				p->_x=pMachine->_x;
 				p->_y=pMachine->_y;
-				p->_numInputs=pMachine->_numInputs;							// number of Incoming connections
-				p->_numOutputs=pMachine->_numOutputs;						// number of Outgoing connections
+				p->_connectedInputs=pMachine->_connectedInputs;							// number of Incoming connections
+				p->_connectedOutputs=pMachine->_connectedOutputs;						// number of Outgoing connections
 				for(int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					p->_inputMachines[i]=pMachine->_inputMachines[i];
@@ -692,8 +692,8 @@ namespace psycle
 			pFile->Write(&_panning,sizeof(_panning));
 			pFile->Write(&_x,sizeof(_x));
 			pFile->Write(&_y,sizeof(_y));
-			pFile->Write(&_numInputs,sizeof(_numInputs));							// number of Incoming connections
-			pFile->Write(&_numOutputs,sizeof(_numOutputs));						// number of Outgoing connections
+			pFile->Write(&_connectedInputs,sizeof(_connectedInputs));							// number of Incoming connections
+			pFile->Write(&_connectedOutputs,sizeof(_connectedOutputs));						// number of Outgoing connections
 			for(int i = 0; i < MAX_CONNECTIONS; i++)
 			{
 				pFile->Write(&_inputMachines[i],sizeof(_inputMachines[i]));	// Incoming connections Machine number
@@ -1227,12 +1227,29 @@ namespace psycle
 				}
 			}
 		}
-		bool Mixer::Connect(Machine* dstMac,int &wire,float volume)
+		bool Mixer::ConnectTo(Machine* dstMac,int dstport,int outport,float volume)
 		{
 			//
 			//
 			//
-			return Machine::Connect(dstMac,wire,volume);
+			return Machine::ConnectTo(dstMac,dstport,outport,volume);
+		}
+		std::string Mixer::GetAudioInputName(int port) {
+			std::string rettxt;
+			if (port < return1 )
+			{	
+				rettxt = "Input ";
+				rettxt += ('0'+port-chan1);
+				return rettxt;
+			}
+			else if ( port <= return12)
+			{
+				rettxt = "Return ";
+				rettxt += ('0'+port-return1);
+				return rettxt;
+			}
+			rettxt = "-";
+			return rettxt;
 		}
 
 		int Mixer::GetNumCols()
@@ -1409,8 +1426,8 @@ namespace psycle
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
 			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			pFile->Read(&_numInputs, sizeof(_numInputs));
-			pFile->Read(&_numOutputs, sizeof(_numOutputs));
+			pFile->Read(&_connectedInputs, sizeof(_connectedInputs));
+			pFile->Read(&_connectedOutputs, sizeof(_connectedOutputs));
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
@@ -1462,8 +1479,8 @@ namespace psycle
 			pFile->Read(&_connection[0], sizeof(_connection));
 			pFile->Read(&_inputCon[0], sizeof(_inputCon));
 			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			pFile->Read(&_numInputs, sizeof(_numInputs));
-			pFile->Read(&_numOutputs, sizeof(_numOutputs));
+			pFile->Read(&_connectedInputs, sizeof(_connectedInputs));
+			pFile->Read(&_connectedOutputs, sizeof(_connectedOutputs));
 			
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
