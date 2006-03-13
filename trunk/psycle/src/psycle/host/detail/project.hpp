@@ -21,6 +21,7 @@
 	BOOST_STATIC_ASSERT((sizeof(        float) == 4)); // probably always true (ieee754)
 	BOOST_STATIC_ASSERT((sizeof(       double) == 8)); // probably always true (ieee754)
 //	BOOST_STATIC_ASSERT((sizeof(  long double) == 10));
+//	BOOST_STATIC_ASSERT((sizeof(  long double) == 12));
 
 #endif
 #include "configuration.hpp"
