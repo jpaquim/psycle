@@ -3,60 +3,102 @@
 
 #pragma once
 
-/// [bohan] implementation of psycle::host::Song's lock using boost 1.3's read_write_mutex.
-/// [bohan]
-/// [bohan] I used a temporary #define (to be removed) to enable this new implementation of the gui<->audio thread synchronization.
-/// [bohan] Once the new implementation is known to work well,
-/// [bohan] we can remove this #define, which will trigger some #error in the places of the code that are concerned.
-/// [bohan] Where the #error occurred, we can removed the old implementation.
-/// [bohan]
-/// [bohan] to enable this new implementation,
-/// [bohan] #define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 1
-/// [bohan]
-/// [bohan] to disable this new implementation, do not undefine the preprocessor symbol (which will triggers the #error's), but rather
-/// [bohan] #define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
-#define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
+///////////////////////////////////////
+///\name configuration feature options
+/// in autoconf's terminology, these are "feature" options, that you set using "--enable" or "--disable" on configure's command line.
+///\{
 
-/// JAZ: Define to 1 to enable the volume column for XMSampler. It will also make the machine column in the pattern to show
-///      the values of the volume column instead.
-#define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
+	/// [bohan] implementation of psycle::host::Song's lock using boost 1.3's read_write_mutex.
+	/// [bohan]
+	/// [bohan] I used a temporary #define (to be removed) to enable this new implementation of the gui<->audio thread synchronization.
+	/// [bohan] Once the new implementation is known to work well,
+	/// [bohan] we can remove this #define, which will trigger some #error in the places of the code that are concerned.
+	/// [bohan] Where the #error occurred, we can removed the old implementation.
+	/// [bohan]
+	/// [bohan] to enable this new implementation,
+	/// [bohan] #define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 1
+	/// [bohan]
+	/// [bohan] to disable this new implementation, do not undefine the preprocessor symbol (which will triggers the #error's), but rather
+	/// [bohan] #define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
+	/// [bohan]
+	/// [bohan] Note: boost::thread::read_write_mutex has been removed from boost.thread in the version 1.33.1
+	#define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
 
-/// Test for RMS Vu's
-#define PSYCLE__CONFIGURATION__RMS_VUS 0
+	/// JAZ: Define to 1 to enable the volume column for XMSampler. It will also make the machine column in the pattern to show
+	///      the values of the volume column instead.
+	#define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
-/// unmasks fpu exceptions
-/// [JAZ] : I have experienced crashes with this option enabled, which didn't seem to come from the code itself.
-/// [JAZ]   It could be that the exception code handling has a bug somewhere.
-#define PSYCLE__CONFIGURATION__FPU_EXCEPTIONS 0
+	/// Test for RMS Vu's
+	#define PSYCLE__CONFIGURATION__RMS_VUS 0
+
+	/// unmasks fpu exceptions
+	/// [JAZ] : I have experienced crashes with this option enabled, which didn't seem to come from the code itself.
+	/// [JAZ]   It could be that the exception code handling has a bug somewhere.
+	#define PSYCLE__CONFIGURATION__FPU_EXCEPTIONS 0
+
+///\}
 
 
 
-/// string describing the configuration options.
-#define PSYCLE__CONFIGURATION__DESCRIPTION \
-	"read_write_mutex = "          UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__READ_WRITE_MUTEX) UNIVERSALIS__OPERATING_SYSTEM__EOL \
-	"fpu exceptions = "            UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__FPU_EXCEPTIONS)   UNIVERSALIS__OPERATING_SYSTEM__EOL \
-	"volume column = "             UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__VOLUME_COLUMN)    UNIVERSALIS__OPERATING_SYSTEM__EOL \
-	"rms vus = "                   UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__RMS_VUS)          UNIVERSALIS__OPERATING_SYSTEM__EOL \
-	"debugging = "                                                   PSYCLE__CONFIGURATION__DEBUG
+///////////////////////////////////////
+///\name configuration package options
+/// in autoconf's terminology, these are "package" options, that you set using "--with" or "--without" on configure's command line.
+///\{
 
-/// value to show in the string describing the configuration options (PSYCLE__CONFIGURATION__DESCRIPTION).
-///\see PSYCLE__CONFIGURATION__DESCRIPTION
-#if defined NDEBUG
-	#define PSYCLE__CONFIGURATION__DEBUG "off"
-#else
-	#define PSYCLE__CONFIGURATION__DEBUG "on"
-#endif
+	/// enables platform-specific code.
+	///
+	/// quaquaversalis means providing, on each diversalis direction, a specific implementation, as opposed to the unique universalis one.
+	/// in other words:
+	/// - when defined, psycle's preprocessor conditions will sometimes select source code which is specific to the platform.
+	/// - when undefined, psycle's preprocessor conditions will always select source code with is portable, if possible.
+	///
+	/// quaquaversalis is configurable at several layers:
+	/// for example if PSYCLE__QUAQUAVERSALIS is undefined, the sources will prefer to make use of universalis rather than platform-specific code directly,
+	/// but universalis itself may use platform-specific code if UNIVERSALIS__QUAQUAVERSALIS is defined.
+	///
+	#define PSYCLE__QUAQUAVERSALIS 1
 
-/// end-of-line character sequence on the platform.
-///\todo get this definition from universalis after a work around for msvc's resource compiler parsing bug is setup.
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__EOL
-	#ifdef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r\n"
-//	#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE && DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR < 10 // before bsd-unix (darwin)
-//			#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n\r"
+///\}
+
+
+
+/////////////////////////////////////////////////////
+///\name string describing the configuration options
+///\{
+
+	/// string describing the configuration options.
+	#define PSYCLE__CONFIGURATION__DESCRIPTION \
+		/* feature options */ \
+		"read_write_mutex = "          UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__READ_WRITE_MUTEX) UNIVERSALIS__OPERATING_SYSTEM__EOL \
+		"fpu exceptions = "            UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__FPU_EXCEPTIONS  ) UNIVERSALIS__OPERATING_SYSTEM__EOL \
+		"volume column = "             UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__VOLUME_COLUMN   ) UNIVERSALIS__OPERATING_SYSTEM__EOL \
+		"rms vus = "                   UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__RMS_VUS         ) UNIVERSALIS__OPERATING_SYSTEM__EOL \
+		/* package options */ \
+		"platform-specific code = "    UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__QUAQUAVERSALIS                 ) UNIVERSALIS__OPERATING_SYSTEM__EOL \
+		"debugging = "                                                   PSYCLE__CONFIGURATION__DEBUG             UNIVERSALIS__OPERATING_SYSTEM__EOL \
+		//
+
+	/// value to show in the string describing the configuration options (PSYCLE__CONFIGURATION__DESCRIPTION).
+	///\see PSYCLE__CONFIGURATION__DESCRIPTION
+	/// this is needed because NDEBUG might be #defined, but not to a non-zero value.
+	#if defined NDEBUG
+		#define PSYCLE__CONFIGURATION__DEBUG "off"
 	#else
-		#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n"
+		#define PSYCLE__CONFIGURATION__DEBUG "on"
 	#endif
-#endif
 
-#include <universalis/compiler/stringized.hpp>
+	/// end-of-line character sequence on the platform.
+	///\todo get this definition from universalis after a work around for msvc's resource compiler parsing bug is setup.
+	#ifndef UNIVERSALIS__OPERATING_SYSTEM__EOL
+		#ifdef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r\n"
+	//	#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE && DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR < 10 // before bsd-unix (darwin)
+	//			#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n\r"
+		#else
+			#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n"
+		#endif
+	#endif
+
+	#include <universalis/compiler/stringized.hpp>
+
+///\}
