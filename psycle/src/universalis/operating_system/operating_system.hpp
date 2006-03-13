@@ -7,7 +7,7 @@
 #include "detail/microsoft/max_path.hpp"
 
 
-/// end-of-line character sequence on the platform.
+/// end-of-line character sequence on the host platform.
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r\n"
