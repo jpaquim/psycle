@@ -182,7 +182,11 @@ namespace psycle
 			virtual void SaveDllName(RiffFile * pFile);
 			virtual void SetSampleRate(int sr) {};
 			virtual void SetPan(int newpan);
-			virtual bool Connect(Machine* dstMac,int &wire,float volume=1.0f);
+			virtual int GetAudioInputs() { return 1; };
+			virtual int GetAudioOutputs() { return 1; };
+			virtual std::string GetAudioInputName(int port) { std::string in="Stereo Input"; return in;}
+			virtual std::string GetAutioOutputName(int port) { std::string out="Stereo Output"; return out; }
+			virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
 			virtual bool Disconnect(Machine* dstMac);
 			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
 			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
@@ -242,9 +246,9 @@ namespace psycle
 			/// Incoming connections activated
 			bool _inputCon[MAX_CONNECTIONS];
 			/// number of Incoming connections
-			int _numInputs;
+			int _connectedInputs;
 			/// number of Outgoing connections
-			int _numOutputs;
+			int _connectedOutputs;
 			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
 			CPoint _connectionPoint[MAX_CONNECTIONS];
 
@@ -391,6 +395,34 @@ namespace psycle
 				send0,
 				sendmax=send0+MAX_CONNECTIONS
 			};
+			enum 
+			{
+				collabels=0,
+				chan1,
+				chan2,
+				chan3,
+				chan4,
+				chan5,
+				chan6,
+				chan7,
+				chan8,
+				chan9,
+				chan10,
+				chan11,
+				chan12,
+				return1,
+				return2,
+				return3,
+				return4,
+				return5,
+				return6,
+				return7,
+				return8,
+				return9,
+				return10,
+				return11,
+				return12
+			};
 			Mixer();
 			Mixer(int index);
 			virtual void Init(void);
@@ -405,7 +437,11 @@ namespace psycle
 			virtual void GetParamValue(int numparam,char *parVal);
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
-			virtual bool Connect(Machine* dstMac,int &wire,float volume=1.0f);
+			virtual int GetAudioInputs() { return 24; };
+			virtual int GetAudioOutputs() { return 1; };
+			virtual std::string GetAudioInputName(int port);
+			virtual std::string GetAutioOutputName(int port) { std::string rettxt = "Stereo Output"; return rettxt; };
+			virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
 			virtual int GetSend(int i){ ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);

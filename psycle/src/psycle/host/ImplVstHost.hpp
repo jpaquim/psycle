@@ -103,7 +103,7 @@ namespace psycle {
 				long int Magic() { assert(pEffect!=NULL); return pEffect->magic; }
 				long int NumPrograms() { assert(pEffect!=NULL); return pEffect->numPrograms; }
 				long int NumParams() { assert(pEffect!=NULL); return pEffect->numParams; }
-				long int NumInputs() { assert(pEffect!=NULL); return pEffect->numInputs; }
+				long int AudioInputs() { assert(pEffect!=NULL); return pEffect->numInputs; }
 				long int NumOutputs() { assert(pEffect!=NULL); return pEffect->numOutputs;	}
 				long int Flags(int flag=-1) { assert(pEffect!=NULL); return pEffect->flags & flag; }
 				long int UniqueId() { assert(pEffect!=NULL); return pEffect->uniqueID; }

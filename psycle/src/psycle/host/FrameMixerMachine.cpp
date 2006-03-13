@@ -268,8 +268,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			yoffset=0;
 			if (_pMixer->_inputCon[i])
 			{
-				std::string chantxt = "Input ";
-				chantxt += ('0'+i+1);
+				std::string chantxt = _pMixer->GetAudioInputName(i+Mixer::chan1);
 				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName());
 
 				yoffset+=InfoLabel::height;
@@ -289,8 +288,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		for (int i=0; i<numSends; i++)
 		{
 			yoffset=0;
-			std::string sendtxt = "Return ";
-			sendtxt += ('0'+i+1);
+			std::string sendtxt = _pMixer->GetAudioInputName(i+Mixer::return1);
 			InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 			yoffset+=(numSends+1)*InfoLabel::height;
 			InfoLabel::Draw(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,"Level","");
@@ -428,16 +426,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	{
 		int col=x/(Knob::width+InfoLabel::width);
 		xoffset=x%(Knob::width+InfoLabel::width);
-		if ( col == 0) return collabels;
+		if ( col == 0) return Mixer::collabels;
 		else if ( col <= numChans)
 		{
-			col-=chan1;
-			return chan1+col;
+			col-=Mixer::chan1;
+			return Mixer::chan1+col;
 		}
 		else
 		{
-			col-=numChans+chan1;
-			return return1+col;
+			col-=numChans+Mixer::chan1;
+			return Mixer::return1+col;
 	}
 	}
 	int CFrameMixerMachine::GetRow(int y,int &yoffset)
@@ -462,15 +460,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	}
 	int CFrameMixerMachine::GetParamFromPos(int col,int row)
 	{
-		if ( col < chan12)
+		if ( col < Mixer::chan12)
 		{
-			if (row < dry) return (col-chan1+1)*0x10+(row-send1+1);
-			else if ( row==dry) return (col-chan1+1)*0x10;
-			else return 0xE0+(col-chan1+1);
+			if (row < dry) return (col-Mixer::chan1+1)*0x10+(row-send1+1);
+			else if ( row==dry) return (col-Mixer::chan1+1)*0x10;
+			else return 0xE0+(col-Mixer::chan1+1);
 		}
 		else 
 		{
-			if (row > dry) return 0xF0+(col-return1+1);
+			if (row > dry) return 0xF0+(col-Mixer::return1+1);
 		}
 		return -1;
 	}

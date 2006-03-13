@@ -1212,7 +1212,7 @@ namespace seib {
 			int i = nEffect - 1;
 			if (i >= GetSize())
 				i = GetSize() - 1;
-			for (; i >= 0; i++)
+			for (; i >= 0; i--)
 				if (GetAt(i))
 					return reinterpret_cast<int>(GetAt(i));
 			return -1;
