@@ -24,4 +24,14 @@
 //	BOOST_STATIC_ASSERT((sizeof(  long double) == 12));
 
 #endif
+
 #include "configuration.hpp"
+
+#if !defined DIVERSALIS__COMPILER__RESOURCE
+	#if defined PSYCLE__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		// include <windows.h> here so we don't have to deal with this again everywhere
+		//\todo for mfx apps, inclusions of <afxwin.h> is currently only handled thanks to <packageneric/pre-compiled.private.hpp>
+		//\todo this should be moved to a file that is always included whether or not we're using some pre-compiled headers that does it.
+		#include <windows.h>
+	#endif
+#endif
