@@ -1,6 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "ITModule2.h"
+#include "ITModule2.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "Player.hpp"

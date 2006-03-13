@@ -17,7 +17,7 @@
 #include "SaveWavDlg.hpp"
 #include "SongpDlg.hpp"
 #include "XMSongLoader.hpp"
-#include "ITModule2.h"
+#include "ITModule2.hpp"
 #include "MasterDlg.hpp"
 #include "XMSamplerUI.hpp"
 #include "VstEditorDlg.hpp"
