@@ -293,8 +293,8 @@ namespace psycle
 				}
 				else
 				{
-					UINT count;
-					pFile->Read(&count,sizeof(count));  // size of vars
+					std::uint32_t count;
+					pFile->Read(count);  // size of vars
 					/*
 					if (count)
 					{
