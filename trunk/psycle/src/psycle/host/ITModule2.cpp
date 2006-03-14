@@ -5,6 +5,7 @@
 #include "Song.hpp"
 #include "Player.hpp"
 #include "XMSampler.hpp"
+#include <cstdint>
 
 namespace psycle
 {
@@ -301,8 +302,8 @@ Special:  Bit 0: On = song message attached.
 			XMInstrument::NotePair npair;
 			int i;
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-				npair.first=short(curH.notes[i].first);
-				npair.second=short(curH.notes[i].second)-1;
+				npair.first=std::int16_t(curH.notes[i].first);
+				npair.second=std::int16_t(curH.notes[i].second)-1;
 				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
 			xins.AmpEnvelope()->Init();
@@ -421,7 +422,7 @@ Special:  Bit 0: On = song message attached.
 				}
 
 				for(int i = 0; i < envelope_point_num;i++){
-					short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
+					std::int16_t envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
 					xins.AmpEnvelope()->Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
 				}
 
@@ -451,7 +452,7 @@ Special:  Bit 0: On = song message attached.
 				}
 
 				for(int i = 0; i < envelope_point_num;i++){
-					short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
+					std::int16_t pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
 					xins.PanEnvelope()->Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
 				}
 
@@ -485,7 +486,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+						std::int16_t pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
 						xins.FilterEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
 					}
 					if ( xins.FilterCutoff() < 127 )
@@ -507,7 +508,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+						std::int16_t pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
 						xins.PitchEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
 					}
 				}
@@ -625,7 +626,7 @@ Special:  Bit 0: On = song message attached.
 		{
 			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
-			signed short wNew,wTmp;
+			std::int16_t wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
 			int lobit=(convert & SampleConvert::IS_MOTOROLA)?8:0;
 			int hibit=8-lobit;
@@ -640,7 +641,7 @@ Special:  Bit 0: On = song message attached.
 				for (j = 0; j < iLen; j+=2) {
 					wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+wTmp:wTmp;
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew ^65535;
+					*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew ^65535;
 					out++;
 				}
 				if (bstereo) {
@@ -649,20 +650,20 @@ Special:  Bit 0: On = song message attached.
 					for (j = 0; j < iLen; j+=2) {
 						wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+wTmp:wTmp;
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew ^65535;
+						*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + out) = wNew ^65535;
 						out++;
 					}
 				}
 			} else {
 				for (j = 0; j < iLen; j++) {
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset) ^65535;
+					*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset) ^65535;
 				}
 				if (bstereo) {
 					Read(smpbuf,iLen);
 					for (j = 0; j < iLen; j++) {
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset) ^65535;
+						*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset) ^65535;
 					}
 				}
 			}
@@ -674,7 +675,7 @@ Special:  Bit 0: On = song message attached.
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
 			unsigned long topsize, val,j;
-			short d1, d2,wNew;
+			std::int16_t d1, d2,wNew;
 			char d18,d28;
 
 			bool deltapack=(itFileH.ffv>=0x215 && convert&SampleConvert::IS_DELTA); // Impulse Tracker 2.15 added a delta packed compressed sample format
@@ -712,7 +713,7 @@ Special:  Bit 0: On = song message attached.
 							continue;
 						}
 					} else if (bitwidth < maxbitsize+1) { //Method 2
-						unsigned short border = (((1<<maxbitsize)-1) >> (maxbitsize+1 - bitwidth)) - (maxbitsize/2);
+						std::uint16_t border = (((1<<maxbitsize)-1) >> (maxbitsize+1 - bitwidth)) - (maxbitsize/2);
 
 						if ((val > border) && (val <= unsigned(border + maxbitsize))) {
 							val -= border;
@@ -732,14 +733,14 @@ Special:  Bit 0: On = song message attached.
 					{
 						if (b16Bit) 
 						{	
-							short v; //The sample value:
+							std::int16_t v; //The sample value:
 							if (bitwidth < maxbitsize) {
 								unsigned char shift = maxbitsize - bitwidth;
-								v = (short)(val << shift);
+								v = (std::int16_t)(val << shift);
 								v >>= shift;
 							}
 							else
-								v = (short)val;
+								v = (std::int16_t)val;
 
 							//And integrate the sample value
 							d1 += v;
@@ -765,7 +766,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					//Store the decompressed value to Wave pointer.
-					*(const_cast<signed short*>(_wave.pWaveDataL()+j+blockpos)) = wNew ^ 65535;
+					*(const_cast<std::int16_t*>(_wave.pWaveDataL()+j+blockpos)) = wNew ^ 65535;
 					
 					blockpos++;
 				}
@@ -1131,10 +1132,10 @@ Special:  Bit 0: On = song message attached.
 				s->playOrder[0]=0;
 			}
 
-			unsigned short *pointersi = new unsigned short[s3mFileH.insNum];
-			Read(pointersi,s3mFileH.insNum*sizeof(unsigned short));
-			unsigned short * pointersp = new unsigned short[s3mFileH.patNum];
-			Read(pointersp,s3mFileH.patNum*sizeof(unsigned short));
+			std::uint16_t *pointersi = new std::uint16_t[s3mFileH.insNum];
+			Read(pointersi,s3mFileH.insNum*sizeof(std::uint16_t));
+			std::uint16_t * pointersp = new std::uint16_t[s3mFileH.patNum];
+			Read(pointersp,s3mFileH.patNum*sizeof(std::uint16_t));
 
 			bool stereo=s3mFileH.mVol&0x80;
 			int numchans=0;
@@ -1338,8 +1339,8 @@ OFFSET              Count TYPE   Description
 					smpbuf = new char[iLen];
 					Read(smpbuf,iLen);
 				}
-				signed short wNew;
-				signed short offset;
+				std::int16_t wNew;
+				std::int16_t offset;
 				if ( s3mFileH.trackerInf==1) offset=0; // 1=[VERY OLD] signed samples, 2=unsigned samples
 				else offset=-32768;
 
@@ -1351,14 +1352,14 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
 						Read(smpbuf,iLen*2);
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
-							*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
 					} else {
@@ -1367,7 +1368,7 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 							out++;
 						}
 					}
@@ -1378,13 +1379,13 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 						Read(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					} else {
 						_wave.AllocWaveData(iLen,false);
@@ -1392,7 +1393,7 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					}
 				}
