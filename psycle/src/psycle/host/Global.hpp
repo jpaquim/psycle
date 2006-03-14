@@ -2,37 +2,28 @@
 #pragma once
 #include "detail/project.hpp"
 #include <cstdint>
+#include <boost/strong_typedef.hpp>
 namespace psycle
 {
 	///\name depecate a bunch of ms types
 	///{
-		/// \todo
-		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
-		typedef std::uint8_t byte;
-		/// \todo
-	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" )
-	//	typedef ::UCHAR UCHAR;
-		/// \todo
-		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
-		typedef std::uint16_t word;
-		/// \todo
-	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t")
-	//	typedef ::WORD WORD;
-		/// \todo
-		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-		typedef std::uint32_t dword;
-		/// \todo
-	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-	//	typedef ::DWORD DWORD;
-		/// \todo
-	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-	//	typedef ::UINT UINT;
-		/// \todo
-	//	UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t")
-	//	typedef ::ULONG ULONG;
-		/// \todo
-		UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t")
-		typedef ::ULONGLONG ULONGLONG;
+		///\todo
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" ) typedef ::UCHAR UCHAR;
+
+		///\todo
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t") typedef ::WORD WORD;
+
+		///\todo
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::DWORD DWORD;
+
+		///\todo
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::UINT UINT;
+
+		///\todo
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::ULONG ULONG;
+
+		///\todo
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t") typedef ::ULONGLONG ULONGLONG;
 	///\}
 
 	namespace host
