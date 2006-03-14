@@ -74,7 +74,8 @@ namespace psycle
 				template<typename X>
 				void inline  Read(X       & x) {  Read(&x, sizeof x); }
 
-				int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); assert(bytes <= sizeof tmp); Read(&tmp, bytes); return tmp; }
+				/// only useful for reading 24-bit numbers
+				void inline Read24(std::int32_t & x) { x = 0; Read(&x, 3); }
 
 				bool               ReadString(std::string &);
 				bool               ReadString(char *, std::size_t const & max_length);

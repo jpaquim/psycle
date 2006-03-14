@@ -161,7 +161,7 @@ Special:  Bit 0: On = song message attached.
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
 			{
-				s->playOrder[i]=ReadInt(1); // 254 = ++ (skip), 255 = --- (end of tune).
+				Read(s->playOrder[i]); // 254 = ++ (skip), 255 = --- (end of tune).
 				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
 			}
 			Skip(itFileH.ordNum-j);
@@ -784,27 +784,27 @@ Special:  Bit 0: On = song message attached.
 			unsigned char lastcom[64];
 			unsigned char lasteff[64];
 			unsigned char mask[64];
-			memset(lastnote,255,sizeof(char)*64);
-			memset(lastinst,255,sizeof(char)*64);
-			memset(lastvol,255,sizeof(char)*64);
-			memset(lastcom,255,sizeof(char)*64);
-			memset(lasteff,255,sizeof(char)*64);
-			memset(mask,255,sizeof(char)*64);
+			std::memset(lastnote,255,sizeof(char)*64);
+			std::memset(lastinst,255,sizeof(char)*64);
+			std::memset(lastvol,255,sizeof(char)*64);
+			std::memset(lastcom,255,sizeof(char)*64);
+			std::memset(lasteff,255,sizeof(char)*64);
+			std::memset(mask,255,sizeof(char)*64);
 
 			PatternEntry pempty;
 			pempty._note=255; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
-			Skip(2);//int packedSize=ReadInt(2);
-			int rowCount=ReadInt(2);
-			Skip(4);//int unused=ReadInt();
+			Skip(2); // packedSize
+			std::int16_t rowCount; Read(rowCount);
+			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
-//			char* packedpattern = new char[packedSize];
-//			Read(packedpattern,packedSize);
+			//char* packedpattern = new char[packedSize];
+			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
 			{
-				Read(&newEntry,1);
+				Read(newEntry);
 				while ( newEntry )
 				{
 					unsigned char channel=(newEntry-1)&0x3F;
@@ -899,8 +899,8 @@ Special:  Bit 0: On = song message attached.
 					if(mask[channel]&8)
 					{
 						pent._mach=0;
-						unsigned char command=ReadInt(1);
-						unsigned char param=ReadInt(1);
+						unsigned char command; Read(command);
+						unsigned char param; Read(param);
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
 						lastcom[channel]=pent._cmd;
@@ -1122,7 +1122,7 @@ Special:  Bit 0: On = song message attached.
 			int j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
 			{
-				s->playOrder[i]=ReadInt(1); // 254 = ++ (skip), 255 = --- (end of tune).
+				Read(s->playOrder[i]); // 254 = ++ (skip), 255 = --- (end of tune).
 				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
 			}
 			s->playLength=i;
@@ -1418,46 +1418,48 @@ OFFSET              Count TYPE   Description
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
 			{
-				Read(&newEntry,1);
+				Read(newEntry);
 				while ( newEntry )
 				{
 					char channel=newEntry&31;
 					if(newEntry&32)
 					{
-						int note=ReadInt(1);  // hi=oct, lo=note, 255=empty note,	254=key off
+						std::uint8_t note; Read(note); // hi=oct, lo=note, 255=empty note, 254=key off
 						if (note==254) pent._note = 120;
 						else if (note==255) pent._note=255;
-						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psycle's C-5
-						pent._inst=ReadInt(1)-1;
+						else pent._note = ((note/16)*12+(note%16)+12); // +12 since ST3 C-4 is Psycle's C-5
+						Read(pent._inst); --pent._inst;
 						pent._mach=0;
 					}
 					if(newEntry&64)
 					{
-						int tmp=ReadInt(1);
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-						if ( tmp<=64)
-						{
-							pent._mach =0;
-							pent._volume=(tmp<64)?tmp:63;
-						}
-	#else
-						if ( tmp<=64)
-						{
-							pent._mach =0;
-							pent._cmd = 0x0C;
-							pent._parameter = tmp*2;
-						}
-	#endif
-#endif
+						std::uint8_t tmp; Read(tmp);
+						#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+							#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+						#else
+							#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+								if ( tmp<=64)
+								{
+									pent._mach =0;
+									pent._volume=(tmp<64)?tmp:63;
+								}
+								else loggers::warning("volume too loud");
+							#else
+								if ( tmp<=64)
+								{
+									pent._mach =0;
+									pent._cmd = 0x0C;
+									pent._parameter = tmp*2;
+								}
+								else loggers::warning("parameter value too big");
+							#endif
+						#endif
 					}
 					if(newEntry&128)
 					{
 						pent._mach=0;
-						unsigned char command=ReadInt(1);
-						unsigned char param=ReadInt(1);
+						unsigned char command; Read(command);
+						unsigned char param; Read(param);
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
 						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )
