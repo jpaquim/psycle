@@ -68,19 +68,25 @@ namespace psycle
 				bool Read  (void       *, std::size_t const &);
 				bool Expect(void       *, std::size_t const &);
 
+			public://private: \todo to allow endian conversion, the template should be private and only functions with numeric types made public
 				template<typename X>
 				void inline Write(X const & x) { Write(&x, sizeof x); }
 				template<typename X>
 				void inline  Read(X       & x) {  Read(&x, sizeof x); }
 
-				int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); Read(&tmp, bytes); return tmp; }
+				int inline ReadInt(int const & bytes = sizeof(int)) { int tmp(0); assert(bytes <= sizeof tmp); Read(&tmp, bytes); return tmp; }
 
 				bool               ReadString(std::string &);
 				bool               ReadString(char *, std::size_t const & max_length);
 
+				/// just a usless reinterpret_cast
+				///\todo disabled because the compiler accepts arguments of different size!
+				//static std::uint32_t inline FourCC(char const four_cc[4]) throw() { return *reinterpret_cast<std::uint32_t const *>(four_cc); }
+
 				/// pad the string with spaces
-				UNIVERSALIS__COMPILER__DEPRECATED("where is this function used?")
-				static std::uint32_t FourCC(char const * null_terminated_string);
+				///\todo is it really used with null terminated strings?
+				//UNIVERSALIS__COMPILER__DEPRECATED("use the char const [4] overload instead")
+				static std::uint32_t          FourCC(char const * null_terminated_string);
 
 			private:
 				std::FILE        * file_;
