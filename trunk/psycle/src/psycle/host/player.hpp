@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::Player.
 #pragma once
 #include "constants.hpp"
-#include "Riff.hpp"
+#include "riff.hpp"
 namespace psycle
 {
 	namespace host

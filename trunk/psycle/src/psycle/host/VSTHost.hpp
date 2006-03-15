@@ -1,11 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::VSTPlugin
 #pragma once
-#include "Constants.hpp"
-#include "Helpers.hpp"
+#include "constants.hpp"
+#include "helpers.hpp"
 #include <operating_system/exception.hpp>
 #include <operating_system/exceptions/code_description.hpp>
-#include "Machine.hpp"
+#include "machine.hpp"
 #include <vst/AEffectx.h>
 namespace psycle
 {

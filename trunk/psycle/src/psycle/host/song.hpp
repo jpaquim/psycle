@@ -1,10 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::Song
 #pragma once
-#include "Constants.hpp"
+#include "constants.hpp"
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
-#include "Instrument.hpp"
+#include "instrument.hpp"
 #include "global.hpp"
 #include <cstdint>
 

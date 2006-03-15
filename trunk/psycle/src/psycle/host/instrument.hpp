@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
 #pragma once
-#include "Constants.hpp"
+#include "constants.hpp"
 #include "FileIO.hpp"
 namespace psycle
 {

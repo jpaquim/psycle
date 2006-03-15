@@ -7,15 +7,15 @@
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include "ProgressDialog.hpp"
-#include "Song.hpp"
-#include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
-#include "Sampler.hpp"
+#include "song.hpp"
+#include "machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
+#include "sampler.hpp"
 #include "XMSampler.hpp"
-#include "Plugin.hpp"
+#include "plugin.hpp"
 #include "VSTHost.hpp"
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
-#include "Riff.hpp" // for Wave file loading.
+#include "riff.hpp" // for Wave file loading.
 #include <cstdint>
 #include <cassert>
 

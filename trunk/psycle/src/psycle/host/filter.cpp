@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::Filter.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "Player.hpp"
-#include "Filter.hpp"
+#include "player.hpp"
+#include "filter.hpp"
 #include "global.hpp"
 namespace psycle
 {

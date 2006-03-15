@@ -3,10 +3,10 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "global.hpp"
-#include "Dsp.hpp"
-#include "Song.hpp"
-#include "Player.hpp"
-#include "Configuration.hpp"
+#include "dsp.hpp"
+#include "song.hpp"
+#include "player.hpp"
+#include "configuration.hpp"
 #include <operating_system/logger.hpp>
 #include "InputHandler.hpp"
 

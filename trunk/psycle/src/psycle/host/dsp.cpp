@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::Cubic.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "Dsp.hpp"
+#include "dsp.hpp"
 namespace psycle
 {
 	namespace host

@@ -3,13 +3,11 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "FileIO.hpp"
-#include "Plugin.hpp"
+#include "plugin.hpp"
 #include "InputHandler.hpp"
 #include <operating_system/exceptions/code_description.hpp>
-#include "Song.hpp"
-//#include <algorithm>
+#include "song.hpp"
 #include <cctype>
-//#include "psycle.hpp"
 #include "NewMachine.hpp"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
