@@ -1,5 +1,5 @@
 #pragma once
-#include "Constants.hpp"
+#include "constants.hpp"
 #include "FileIO.hpp"
 #include "Filter.hpp"
 #include <universalis/compiler/numeric.hpp>

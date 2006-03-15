@@ -3,7 +3,7 @@
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
 #pragma once
 #include "constants.hpp"
-#include "songstructs.hpp"
+#include "SongStructs.hpp"
 #pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#include <mmsystem.h>

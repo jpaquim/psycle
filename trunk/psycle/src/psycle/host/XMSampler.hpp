@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::XMSampler.
 #pragma once
-#include "Machine.hpp"
-#include "Filter.hpp"
+#include "machine.hpp"
+#include "filter.hpp"
 #include "XMInstrument.hpp"
 //#include "../../../include/xdsp/xdsp.h"
 #include <universalis/compiler/numeric.hpp>

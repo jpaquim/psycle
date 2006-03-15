@@ -4,10 +4,10 @@
 #include PACKAGENERIC
 #include "InputHandler.hpp"
 #include "version.hpp"
-#include "mainfrm.hpp"
+#include "MainFrm.hpp"
 #include "machine.hpp"
-#include "Player.hpp"
-#include "childview.hpp"
+#include "player.hpp"
+#include "ChildView.hpp"
 namespace psycle
 {
 	namespace host

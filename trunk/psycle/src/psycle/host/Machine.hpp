@@ -2,9 +2,9 @@
 ///\brief interface file for psycle::host::Machine
 #pragma once
 #include "SongStructs.hpp"
-#include "Dsp.hpp"
-#include "Helpers.hpp"
-#include "Constants.hpp"
+#include "dsp.hpp"
+#include "helpers.hpp"
+#include "constants.hpp"
 #include "FileIO.hpp"
 #include "global.hpp"
 #include <processor/fpu.hpp>

@@ -5,8 +5,8 @@
 #include "WaveOut.hpp"
 #include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
-#include "Registry.hpp"
-#include "Configuration.hpp"
+#include "registry.hpp"
+#include "configuration.hpp"
 #include "MidiInput.hpp"
 #include <universalis/processor/exception.hpp>
 #include <process.h>

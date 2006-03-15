@@ -7,12 +7,12 @@
 #include PACKAGENERIC
 #include "resources/resources.hpp"
 #include "ProgressDialog.hpp"
-#include "Song.hpp"
-#include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
+#include "song.hpp"
+#include "machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "XMSongLoader.hpp"
-#include "Player.hpp"
+#include "player.hpp"
 
 namespace psycle{
 namespace host{

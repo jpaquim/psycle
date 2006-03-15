@@ -4,10 +4,10 @@
 #include PACKAGENERIC
 #include <psycle/host/machine.hpp>
 #include <psycle/host/plugin.hpp>
-#include <psycle/host/vsthost.hpp>
+#include <psycle/host/VSTHost.hpp>
 
 ///\todo bad coupling with the gui
-#include <psycle/host/newmachine.hpp>
+#include <psycle/host/NewMachine.hpp>
 
 #include <cstdint>
 namespace psycle
