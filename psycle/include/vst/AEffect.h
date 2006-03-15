@@ -67,12 +67,12 @@ struct AEffect
 	long magic;			// must be kEffectMagic ('VstP')
 
 	long (VSTCALLBACK *dispatcher)(AEffect *effect, long opCode, long index, long value,
-		void *ptr, float opt) throw(...);
+		void *ptr, float opt);
 	
-	void (VSTCALLBACK *process)(AEffect *effect, float **inputs, float **outputs, long sampleframes) throw(...);
+	void (VSTCALLBACK *process)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
 	
-	void (VSTCALLBACK *setParameter)(AEffect *effect, long index, float parameter) throw(...);
-	float (VSTCALLBACK *getParameter)(AEffect *effect, long index) throw(...);
+	void (VSTCALLBACK *setParameter)(AEffect *effect, long index, float parameter);
+	float (VSTCALLBACK *getParameter)(AEffect *effect, long index);
 
 	long numPrograms;   // number of Programs
 	long numParams;		// all programs are assumed to have numParams parameters
@@ -97,7 +97,7 @@ struct AEffect
 						// this is used to identify an effect for save+load
 	long version;		// (example 1100 for version 1.1.0.0)
 
-	void (VSTCALLBACK *processReplacing)(AEffect *effect, float **inputs, float **outputs, long sampleframes) throw(...);
+	void (VSTCALLBACK *processReplacing)(AEffect *effect, float **inputs, float **outputs, long sampleframes);
 
 	char future[60];	// pls zero
 };
