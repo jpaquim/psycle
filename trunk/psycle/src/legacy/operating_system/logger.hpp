@@ -1,13 +1,15 @@
 #pragma once
 #include <iostream>
 #include <boost/thread/mutex.hpp>
-#include "exception.hpp"
 #include <universalis/compiler.hpp>
+#include <universalis/exception.hpp>
 #include <psycle/host/global.hpp>
 ///\file
 ///\brief logger.
 namespace operating_system
 {
+	using universalis::exception;
+
 	/// logger.
 	class /*UNIVERSALIS__COMPILER__DEPRECATED("universalis")*/ logger
 	{

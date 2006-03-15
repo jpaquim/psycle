@@ -1,13 +1,9 @@
 ///\file
 ///\brief
 #include <packageneric/pre-compiled.private.hpp>
-#include PACKAGENERIC
+#include <packageneric/translation-unit.private.hpp>
 #include "logger.hpp"
-#include "exceptions/code_description.hpp"
-#if defined OPERATING_SYSTEM__MICROSOFT
-	#include <io.h>
-	#include <fcntl.h>
-#endif
+#include <universalis/operating_system/exceptions/code_description.hpp>
 namespace operating_system
 {
 	logger::logger(const int & threshold_level, std::ostream & ostream) : threshold_level_(threshold_level), ostream_(ostream) {}
