@@ -83,13 +83,14 @@ namespace psycle
 			virtual int GetParamValue(int numparam);
 			virtual void GetParamValue(int numparam,char* parval);
 			virtual bool SetParameter(int numparam,int value);
-			virtual bool Load(RiffFile * pFile);
+			/// Loader for old psycle fileformat.
+			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			virtual void SaveDllName(RiffFile * pFile);
 
-			void Instance(std::string file_name) throw(...);
-			void Free() throw(...);
+			void Instance(std::string file_name);
+			void Free();
 			bool LoadDll(std::string psFileName);
 			inline std::string GetShortName() throw() { return _psShortName; }
 			inline std::string GetAuthor() throw() { return _psAuthor; }

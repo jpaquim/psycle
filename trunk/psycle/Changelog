@@ -1,0 +1,292 @@
+for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=log
+
+2006-03-15 psycle 1.9.6 bohan
+
+	* moved changlog from src/psycle/host/version.hpp to a newly created Changelog file
+	  and also added files NEWS and TODO, with just a little text referring to the corresponding files of the doc dir.
+	* microsofism->std: in function signatures, removed "throw(...)" which is implicit anyway.
+	* microsofism->std: corrected a few syntactic problems where the name of a variable was the same as its type.
+	* microsofism->std: removed some unused MFC CString in the VST host that was already replaced with std::string.
+	* microsofism->std: replaced microsoft's _strlwr with std::tolower in psycle::host::Plugin::LoadOldFileFormat(RiffFile*)
+	* old fileformat loaders: changed compiler numeric types to std::*int_t and moved code to psycle/host/legacy/old_file_format.cpp.
+	* changed a bit the initialization of the static psycle::host::logger::default_logger_ostream() in psycle/host/global.cpp
+
+2006/03/13 20:35:04  jaz001
+
+	* Fix for EOL (now for sure, windiff says it)
+
+2006/03/12 20:11:17  jaz001
+
+	* fixed wrong EOL coming from recent commits.
+
+2006/03/09 18:44:10  johan-boule
+
+	* increasing version after tagging
+
+2006/03/09 18:41:53  johan-boule
+
+	* increasing version and tagging
+
+2006/03/09 17:56:43  johan-boule
+
+	* more work on portability
+
+2006/03/07 14:09:14  johan-boule
+
+	* replaced some ms numeric types with std types
+	* some global changes concerning #includes
+	* other fixes here and there for portability
+
+2006/02/28 11:44:35  johan-boule
+
+	* reference to the AUTHORS file
+
+2006/01/10 18:35:43 psycle 1.9.3 johan-boule
+
+	* added dw's code for shadows on the wire arrows
+
+2006/01/10 00:27:40 psycle 1.9.2 johan-boule
+
+	* version 1.9.2
+
+2006/01/09 03:14:46 psycle 1.9.1 johan-boule
+
+	* version 1.9.1
+
+2006/01/08 03:28:19  johan-boule
+
+	* Happy New Year Psycle! (added to copyrights)
+
+2005/11/04 17:13:22  johan-boule
+
+	* not a stable release
+
+2005/07/24 16:59:02  jaz001
+
+	* fixed baground bitmap bug.
+	* changed default colours for new release
+	* rearranged the skin dialog buttons
+	* fixed but with skin vu-meters.
+	* muting note duplicator stops sending events.
+
+2005/07/17 03:51:09  johan-boule
+
+	* bugfix for midi controllers config dialog
+
+2005/07/11 01:22:01  johan-boule
+
+	* various little cleanup for 1.8 release
+
+2005/07/10 21:08:20  jaz001
+
+	* New defaults for machine parameters
+	* New skin for machine parameters' knobs.
+	* Importing configuration from older psycle's and psycle alpha.
+	* removing unimplemented alk's mixer.
+	* added comments about unfinished features.
+	* fixed small but in "recent files".
+	* Note: this is labeled 1.8.-1, since configuration will be saved as 1.8, but it might have still small changes for the official 1.8
+
+2005/06/29 22:26:51  johan-boule
+
+	* closes bug: sourceforge bug tracker [ 1229490 ] Velocity / volume data with MIDI keyboard
+
+2005/06/27 15:52:39 psycle 1.7.58 johan-boule
+
+	* version 1.7.58
+	* <alk> moved the checkbox for move cursor when pasting to the sequencer panel
+
+2005/06/26 11:08:29 psycle 1.8RC1.1 jaz001
+
+	* 1.8 RC1.1
+
+2005/06/19 21:04:29 psycle 1.7.56 (pre-release 1 of 1.8) johan-boule
+
+	* Version 1.7.56 (pre-release 1 of 1.8)
+	* [jaz] fix bugs with Note Duplicator (load/save and deadlock).
+	* [jaz] fix bug with render to wav, where in some specific situations where playing some instruments incorrectly.
+
+2005/06/09 22:49:00 psycle 1.7.55 (alpha) johan-boule
+
+	* Version 1.7.55 (alpha)
+	* just increasing the version number to reflect the presence of a bug fix concerning loading of skins
+
+2005/06/07 18:16:55 psycle 1.7.54 (alpha) johan-boule
+
+	* Version 1.7.54 (alpha)
+	* oops, fix for bug introduced in 1.7.53 concerning midi device selection in the configuration
+
+2005/06/04 00:20:25  johan-boule
+
+	* closing sourceforge bug #1087788.
+	* rearranged the midi variables which had the channel
+	* number appended to their names into arrays, and replaced the
+	* related repetitive code with loops.
+
+	* The interface of the registry class used to require we
+	  specify the type and size of the each value we read or
+	  write. I've changed it to use function overloading for types
+	  like bool, all variants of int, and std::string, and to use
+	  a template for other types so they just use REG_BINARY
+	  (which means any type). So we can simply pass the variable
+	  to load/save and its type and size are implicit ; it's less
+	  error prone and looks nicer.
+
+	  It works correctly, but i've noticed problems loading my
+	  existing registry settings because some of the types used to
+	  be REG_BINARY for values that should have been REG_DWORD
+	  (and iirc vice-versa), and the registry class complains
+	  about type missmatch. To work around it i've changed the
+	  path of the "root" key to software/psycle/psycledelics-1.7
+	  (it's actually determined from the values in
+	  version.hpp).... the drawback is that people "loose" their
+	  old settings.
+
+2005/05/30 05:13:43 psycle 1.7.51 (alpha) johan-boule
+
+	* Version 1.7.51 (alpha)
+	* change to let plugins find other .dll files that are in any intermediate dir between their own dir and the configured root dir for plugins
+
+2005/05/29 23:21:23 psycle 1.7.50 (alpha) johan-boule
+
+	* Version 1.7.50 (alpha)
+	* change to let plugins find other .dll files that are in the same dir as their own .dll
+	  for example, blwtbl.dll can be put along with druttis plugins instead of psycle.exe's dir.
+
+2005/05/29 00:34:58  johan-boule
+
+	* cvs $File -> $Id
+
+2005/05/25 20:20:35 psycle 1.7.49 (alpha) johan-boule
+
+	* Version 1.7.49 (alpha)
+	* removed scary pointer and index stuff from the directsound config
+	  (the device index value in the registry can be deleted as it's not used anymore)
+
+2005/05/25 04:02:17 psycle 1.7.48 (alpha) johan-boule
+
+	* Version 1.7.48 (alpha)
+	* fixed bug for fingersoup's directsound driver (null GUID)
+
+2005/05/24 01:09:17  johan-boule
+
+	* bug fix + special 0xff voice to send the same command to all voices
+
+2005/05/23 23:41:23  johan-boule
+
+	* to be tested...
+	  change that allows the player to send commands (Machine::Tick function) from any pattern track with a given channel (or "voice") number:
+
+	  if the machine is not a vst, and if the note is a "mcm" (hmm, poor name if it's not related with midi),
+	  then, the fields in the event are interpreted as <channel> <machine> <command> <parameter>.
+	  for example, 1122334444, means:
+	  11 is the channel (or "voice"),
+	  22 is the machine,
+	  33 is the command, and
+	  4444 is the parameter
+	  The player calls the Machine::Tick function with those values, and the instrument value set to 0.
+
+2005/05/18 06:55:47  johan-boule
+
+	* releasing voskomo's blitz plugin
+
+2005/05/14 15:32:57  johan-boule
+
+	* bug fix: operating_system::exceptions::translated::what() returned the address of a temporary stack object
+
+2005/05/12 22:18:39  johan-boule
+
+	* increased version number for alpha release
+	* includes jaz's bug fixes
+	* fpu exceptions disabled in the configuration "by default" as it's only useful for crazy debugging hell
+
+2005/05/12 14:55:49  johan-boule
+
+	* Added handling of fpu exceptions.
+	  It's a build configuration option, so it can be disabled.
+	  It only catches fpu exceptions in the machines' work functions, but this could be extended to other functions as well.
+	  Each exception type is reported only once per machine it occurs, by growing the fpu exception mask.
+	  "Inexact result" fpu exceptions are initially already masked.
+
+	* Also, made exceptions which happen in machines appear not only in the lof, but also in a message box, because many people wondered why some machines were automagically set to bypassed/muted (The message box wouldn't be needed if the MFC logging window worked.)
+
+2005/05/01 14:10:59  jaz001
+
+	* More Work on Sampulse (IT Filtering, improving commands, bugfixing).
+	* Removed an cleaned (a bit) old sample sources (removed the never used sample layers)
+	* Added a new internal machine "Note Duplicator". It just resends the Tick comand to the specificed machines
+	* Some other small changes ( Changed the way interpolation is modified, and others)
+
+2005/04/18 02:00:41  johan-boule
+
+	* added src/configuration.hpp to psycle.vcproj
+
+2005/04/10 20:11:37 psycle 1.7.39 (alpha) johan-boule
+
+	 * releasing alpha version 1.7.39 -- with voskomo's gamefx plugin
+
+2005/04/06 04:32:03  johan-boule
+
+	* Attempt to use boost::read_write_mutex instead of an exclusive mutex for Song's lock.
+	  Curiously, it dead-locks.
+	  So, i made it a build option that can be enabled/disabled in src/configuration.hpp
+	  
+	* The version info and the about box is modified to show what build options were used (multiline text).
+
+2005/04/02 21:48:37 psycle 1.7.37 (alpha) johan-boule
+
+	* releasing alpha version 1.7.37
+
+2005/03/29 19:57:53  johan-boule
+
+	* full rebuild fixes problem with sampler machine (was prolly a wrong file date)
+
+2005/03/26 13:31:05  johan-boule
+
+	* fixed an error in the description of the versioning scheme in <psycle/host/version.hpp>
+
+2005/03/24 16:22:52  johan-boule
+
+	* added special handling of labels in the machine parameter combo box for native plugins
+
+2005/03/22 01:23:57  johan-boule
+
+	* increased version patch number and released alpha build
+	  (alk's fix for karlkox surround)
+
+2005/03/12 02:37:02  johan-boule
+
+	* increased version patch number and released alpha build
+	  (sampler's keyboard handler fix)
+
+2005/02/19 20:51:13  jaz001
+
+	* fix bug in song.hpp "_ptrack" and "_ptrackline" functions where it didn't return the correct value
+	* fix bug in XMSampler/XMInstrument where "&" and  "|" were being used erroneously in place of "&&"and "||".
+	* Added IT loader
+	* Converted XMSampler "Layers (waves) per instrument" to independent sample bank and instrument bank.
+	* Work in progress -> Convert XMSampler to the default Psycle sampler. (Psampler)
+
+2005/02/07 10:48:20  johan-boule
+
+	* bug fix
+
+2005/01/29 18:25:43  johan-boule
+
+	* fixing problems for msvc's resource editor
+
+2005/01/24 17:36:22  johan-boule
+
+	* there was a nasty backslash at the end of a line preventing the psycle namespace to close and creating a nested psycle namespace inside the psycle namespace itself.
+	  new alpha version 1.7.26 released.
+
+2005/01/24 15:54:03  johan-boule
+
+	* path for resources.rc
+
+2005/01/07 22:27:47  johan-boule
+	* std::ostringstream.clear missuses fixed (3 occurences)
+
+2004/12/22 22:43:41  johan-boule
+
+	* fix closing bug [ 1087782 ] psycle MFC's version number is spread in several places

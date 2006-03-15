@@ -143,7 +143,7 @@ namespace psycle
 				zapObject(proxy_);
 			}
 
-			void plugin::Instance(std::string dllname, bool overwriteName) throw(...)
+			void plugin::Instance(std::string dllname, bool overwriteName)
 			{
 				Free();
 				_sDllName=dllname;
@@ -268,7 +268,7 @@ namespace psycle
 				TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
 			}
 
-			void plugin::Free() throw(...) // called also in destructor
+			void plugin::Free() // called also in destructor
 			{
 				#if defined DIVERSALIS__COMPILER__MICROSOFT
 					TRACE("VST plugin: freeing ...");
@@ -394,7 +394,7 @@ namespace psycle
 
 				}
 				return true;
-			};
+			}
 
 
 			void plugin::SaveDllName(RiffFile * pFile) 
@@ -403,7 +403,7 @@ namespace psycle
 				char str2[1 << 10];
 				std::strcpy(str2, str.Mid(str.ReverseFind('\\') + 1));
 				pFile->Write(str2, std::strlen(str2) + 1);
-			};
+			}
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
 			{
@@ -455,24 +455,23 @@ namespace psycle
 				{
 					pFile->Write(pData, size);
 				}
-			};
+			}
 
 			bool plugin::LoadDll(std::string psFileName)
 			{
 				std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
-				std::string sPath2;
-				::CString sPath;
-				if(CNewMachine::lookupDllName(psFileName, sPath2))
+				std::string sPath;
+				if(CNewMachine::lookupDllName(psFileName, sPath))
 				{
-					if(!CNewMachine::TestFilename(sPath2)) return false;
+					if(!CNewMachine::TestFilename(sPath)) return false;
 					try
 					{
-						Instance(sPath2.c_str(), false);
+						Instance(sPath.c_str(), false);
 					}
 					catch(const std::exception & e)
 					{
 						std::ostringstream s; s
-							<< "Exception while instanciating:" << sPath2 << std::endl
+							<< "Exception while instanciating:" << sPath << std::endl
 							<< "Replacing with dummy." << std::endl
 							<< typeid(e).name() << std::endl
 							<< e.what();
@@ -482,7 +481,7 @@ namespace psycle
 					catch(...)
 					{
 						std::ostringstream s; s
-							<< "Exception while instanciating:" << sPath2 << std::endl
+							<< "Exception while instanciating:" << sPath << std::endl
 							<< "Replacing with dummy." << std::endl
 							<< "Unkown type of exception";
 						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
@@ -498,7 +497,8 @@ namespace psycle
 					return false;
 				}
 				return true;
-			};
+			}
+
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
 				try
@@ -600,42 +600,6 @@ namespace psycle
 			{
 				return SetParameter(parameter, (float)value / quantization);
 			}
-
-			/*
-			int plugin::GetCurrentProgram()
-			{
-				if(instantiated)
-				{
-					try
-					{
-						return proxy().dispatcher(effGetProgram);
-					}
-					catch(const std::exception &)
-					{
-						return 0; // [bohan] well, what to return if it fails? 0 is wrong..
-					}
-				}
-				else
-				{
-					return 0;
-				}
-			}
-
-			void plugin::SetCurrentProgram(int prg)
-			{
-				if(instantiated)
-				{
-					try
-					{
-						proxy().dispatcher(effSetProgram, 0, prg);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-				}
-			}
-			*/
 
 			VstMidiEvent* plugin::reserveVstMidiEvent()
 			{
@@ -742,6 +706,7 @@ namespace psycle
 				trackNote[channel] = thisnote;
 				return true;
 			}
+
 			void plugin::SendMidi()
 			{
 				assert(queue_size >= 0 && queue_size <= MAX_VST_EVENTS);
@@ -1787,114 +1752,6 @@ namespace psycle
 				PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 				work_cpu_cost(work_cpu_cost() + cost);
 				_worked = true;
-			}
-
-
-
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// old file format vomit, don't look at it.
-
-			// Load for Old Psycle fileformat
-			bool plugin::LoadChunk(RiffFile * pFile)
-			{
-				bool b;
-				try
-				{
-					b = proxy().flags() & effFlagsProgramChunks;
-				}
-				catch(const std::exception &)
-				{
-					b = false;
-				}
-				if(!b) return false;
-				// read chunk size
-				long chunk_size;
-				pFile->Read(&chunk_size, sizeof chunk_size);
-				// read chunk data
-				char * chunk(new char[chunk_size]);
-				pFile->Read(chunk, chunk_size);
-				try
-				{
-					proxy().dispatcher(effSetChunk, 0, chunk_size, chunk);
-				}
-				catch(const std::exception &)
-				{
-					// [bohan] hmm, so, data just gets lost?
-					zapArray(chunk);
-					return false;
-				}
-				zapArray(chunk);
-				return true;
-			}
-
-			/// old file format vomit, don't look at it.
-			bool plugin::Load(RiffFile * pFile)
-			{
-				char junkdata[256];
-				std::memset(&junkdata, 0, sizeof(junkdata));
-				Machine::Init();
-
-				pFile->Read(&_editName, 16); // Remove when changing the fileformat.
-				_editName[15]='\0';
-
-				pFile->Read(_inputMachines);
-				pFile->Read(_outputMachines);
-				pFile->Read(_inputConVol);
-				pFile->Read(_connection);
-				pFile->Read(_inputCon);
-				pFile->Read(_connectionPoint);
-				pFile->Read(_connectedInputs);
-				pFile->Read(_connectedOutputs);
-
-				pFile->Read(_panning);
-				Machine::SetPan(_panning);
-
-				pFile->Read(&junkdata[0], 4*8); // SubTrack[]
-				pFile->Read(&junkdata[0], 4); // numSubtracks
-				pFile->Read(&junkdata[0], 4); // interpol
-
-				pFile->Read(&junk[0], 4); // outwet
-				pFile->Read(&junk[0], 4); // outdry
-
-				pFile->Read(&junkdata[0], 4); // distPosThreshold
-				pFile->Read(&junkdata[0], 4); // distPosClamp
-				pFile->Read(&junkdata[0], 4); // distNegThreshold
-				pFile->Read(&junkdata[0], 4); // distNegClamp
-
-				pFile->Read(&junkdata[0], 1); // sinespeed
-				pFile->Read(&junkdata[0], 1); // sineglide
-				pFile->Read(&junkdata[0], 1); // sinevolume
-				pFile->Read(&junkdata[0], 1); // sinelfospeed
-				pFile->Read(&junkdata[0], 1); // sinelfoamp
-
-				pFile->Read(&junkdata[0], 4); // delayTimeL
-				pFile->Read(&junkdata[0], 4); // delayTimeR
-				pFile->Read(&junkdata[0], 4); // delayFeedbackL
-				pFile->Read(&junkdata[0], 4); // delayFeedbackR
-
-				pFile->Read(&junkdata[0], 4); // filterCutoff
-				pFile->Read(&junkdata[0], 4); // filterResonance
-				pFile->Read(&junkdata[0], 4); // filterLfospeed
-				pFile->Read(&junkdata[0], 4); // filterLfoamp
-				pFile->Read(&junkdata[0], 4); // filterLfophase
-				pFile->Read(&junkdata[0], 4); // filterMode
-
-				bool old;
-				pFile->Read(old); // old format
-				pFile->Read(_instance); // ovst.instance
-				if(old)
-				{
-					char mch;
-					pFile->Read(mch);
-					_program = 0;
-				}
-				else
-				{
-					pFile->Read(_program);
-				}
-				return true;
 			}
 		}
 	}

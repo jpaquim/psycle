@@ -13,10 +13,13 @@ Version | Date | Type of release             | Authors
 1.7.4   | 2003 | stable                      | pooplog & [JAZ]
 1.7.5   |      | beta                        | pooplog & [JAZ]
 1.7.6   |      | stable                      | alk
-1.7.6.1 |      | bug fix                     | alk
-1.7.6.2 | 2004 | bug fix (w98 compatibility) | alk & bohan
+1.7.6.1 |      | bugfix                      | alk
+1.7.6.2 | 2004 | bugfix (w98 compatibility)  | alk & bohan
 1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
 1.8     |      | stable                      | psycledelics combined effort :-)
+1.8.1   |      | bugfix                      | 
+1.9.x   |      | alpha                       | 
+1.8.2   |      | bugfix                      | 
 ----------------------------------------------------------------------------------------------------
 
 
@@ -34,6 +37,7 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+
 v1.8.2
 ------
 ! Fix for the Message window appearing in the background sometimes. (It seemed that psycle hung up)
@@ -45,9 +49,8 @@ v1.8.2
 ! Fixed a possible hang bug in note duplicator.
 ! Fixed a quite rare bug where Psycle would crash loading a sample from a song.
 
-v1.8
-----
-
+v1.8.0
+------
 + added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
 + added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
 + added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)

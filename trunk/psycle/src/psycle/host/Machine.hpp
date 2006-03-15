@@ -74,12 +74,12 @@ namespace psycle
 			{
 				namespace
 				{
-					template<typename e> const std::string string(e const & e) { std::ostringstream s; s << e; return s.str(); }
+					template<typename E> const std::string string(E const & e) { std::ostringstream s; s << e; return s.str(); }
 					template<> const std::string string<std::exception>(std::exception const & e) { return e.what(); }
 					template<> const std::string string<void const *>(void const * const &) { return "Type of exception is unkown, cannot display any further information."; }
 				}
 
-				template<typename e> void rethrow(Machine & machine, std::string const & function, e const * const e, std::exception const * const standard) throw(function_error)
+				template<typename E> void rethrow(Machine & machine, std::string const & function, E const * const e, std::exception const * const standard) throw(function_error)
 				{
 					std::ostringstream s;
 					s
