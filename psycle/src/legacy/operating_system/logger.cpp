@@ -3,6 +3,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/translation-unit.private.hpp>
 #include "logger.hpp"
+#include <universalis/operating_system/exception.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
 namespace operating_system
 {
@@ -23,7 +24,7 @@ namespace operating_system
 
 	void console::close()
 	{
-		#if defined OPERATING_SYSTEM__MICROSOFT
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			if(got_a_console_window_) ::FreeConsole();
 			got_a_console_window_ = false;
 		#endif
@@ -39,15 +40,15 @@ namespace operating_system
 		assert(!got_a_console_window_);
 		close();
 
-		#if !defined OPERATING_SYSTEM__MICROSOFT
+		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			// nothing to do when the operating system is not microsoft's
 		#else
 		{
 			::HANDLE output_handle(0);
 			if(!AllocConsole() || !(output_handle = ::GetStdHandle(STD_OUTPUT_HANDLE))) {
 				std::ostringstream s;
-				s << "could not allocate a console at the operating system layer: " << operating_system::exceptions::code_description();
-				throw operating_system::exception(s.str());
+				s << "could not allocate a console at the operating system layer: " << universalis::operating_system::exceptions::code_description();
+				throw universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			got_a_console_window_ = true;
 
