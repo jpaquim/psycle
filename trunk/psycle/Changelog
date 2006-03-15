@@ -11,6 +11,7 @@ for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=
 	* old fileformat loaders: changed compiler numeric types to std::*int_t and moved code to psycle/host/legacy/old_file_format.cpp.
 	* changed a bit the initialization of the static psycle::host::logger::default_logger_ostream() in psycle/host/global.cpp.
 	* plugin dir: temporary work around for msvc8 manifests.
+	* replaced most of src/legacy with src/universalis ; only src/legacy/loggers.{c,h}pp left.
 
 2006/03/13 20:35:04  jaz001
 
