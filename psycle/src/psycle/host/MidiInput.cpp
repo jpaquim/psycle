@@ -113,7 +113,7 @@ namespace psycle
 			if( !m_midiInHandle[ DRIVER_MIDI ] && m_devId[ DRIVER_MIDI ] != -1 )
 			{
 				// open
-				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], reinterpret_cast<DWORD_PTR>(fnMidiCallbackStatic), 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
 					problem |= 0x01;
@@ -129,7 +129,7 @@ namespace psycle
 				!m_midiInHandle[ DRIVER_SYNC ] && m_devId[ DRIVER_SYNC ] != -1 )
 			{
 				// open
-				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], reinterpret_cast<DWORD_PTR>(fnMidiCallbackStatic), 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
 					problem |= 0x02;

@@ -121,7 +121,20 @@ namespace psycle
 				long int setSpeakerArrangement(VstSpeakerArrangement* inputArrangement, VstSpeakerArrangement* outputArrangement)
 				{
 					assert(inputArrangement && outputArrangement);
-					return dispatcher(effSetSpeakerArrangement, 0, /* will break on 64-bit system */ reinterpret_cast<long int>(inputArrangement), outputArrangement);
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
+						#pragma warning(push)
+						#pragma warning(disable:4311) // 'reinterpret_cast' : pointer truncation from 'VstSpeakerArrangement *' to 'long'
+					#endif
+					BOOST_STATIC_ASSERT(sizeof(void*) == sizeof(long int)); // will break on 64-bit system ; the problem lies in steinberg's code itself ; can't fix
+					return dispatcher
+						(
+							effSetSpeakerArrangement, 0,
+							reinterpret_cast<long int>(inputArrangement), // will break on 64-bit system ; the problem lies in steinberg's code itself ; can't fix
+							outputArrangement
+						);
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
+						#pragma warning(pop)
+					#endif
 				}
 				/// Gets the VST implementation's Version that the plugin uses. ( 1.0,2.0,2.1,2.2 or 2.3)
 				long int getVstVersion() {	return dispatcher(effGetVstVersion); }

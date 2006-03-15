@@ -136,14 +136,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->SetChildView(NULL);
 			KillRedo();
 			KillUndo();
-
-			if ( bmpDC != NULL )
+			if(bmpDC)
 			{
-				char buf[100];
-				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
-				TRACE(buf);
+				std::ostringstream s;
+				s << "CChildView::~CChildView(). Deleted bmpDC (was " << bmpDC << ")";
+				loggers::trace(s.str());
 				bmpDC->DeleteObject();
-				zapObject(bmpDC);
+				delete bmpDC; bmpDC = 0;
 			}
 			patternheader.DeleteObject();
 			DeleteObject(hbmPatHeader);
@@ -462,13 +461,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 				// Test to use RMS values for Vumeters.
-#if PSYCLE__CONFIGURATION__RMS_VUS
-				dsp::numRMSSamples=pOut->_samplesPerSec*0.05f;
-				dsp::countRMSSamples=0;
-				dsp::RMSAccumulatedLeft=0;
-				dsp::RMSAccumulatedRight=0;
-#endif
-
+				#if PSYCLE__CONFIGURATION__RMS_VUS
+					dsp::numRMSSamples=pOut->_samplesPerSec*0.05f;
+					dsp::countRMSSamples=0;
+					dsp::RMSAccumulatedLeft=0;
+					dsp::RMSAccumulatedRight=0;
+				#endif
 			}
 		}
 
@@ -493,24 +491,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 			CPaintDC dc(this);
-
-			if ( bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
+			if(bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
 			{
 				CRect rc;
 				GetClientRect(&rc);
 				bmpDC = new CBitmap;
 				bmpDC->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
-				char buf[100];
-				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%.8X\n",(int)bmpDC);
-				TRACE(buf);
+				{
+					std::ostringstream s;
+					s << "CChildView::OnPaint(). Initialized bmpDC to " << bmpDC;
+					loggers::trace(s.str());
+				}
 			}
 			else if ( bmpDC != NULL && !Global::pConfig->useDoubleBuffer ) // buffer deletion
 			{
-				char buf[100];
-				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
-				TRACE(buf);
+				{
+					std::ostringstream s;
+					s << "CChildView::OnPaint(). Deleted bmpDC (was " << bmpDC << ")";
+					loggers::trace(s.str());
+				}
 				bmpDC->DeleteObject();
-				zapObject(bmpDC);
+				delete bmpDC; bmpDC = 0;
 			}
 			if ( Global::pConfig->useDoubleBuffer )
 			{
@@ -1943,7 +1944,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
 			hNewItemInfo.fType		= MFT_STRING;
 			hNewItemInfo.wID		= ids[0];
-			hNewItemInfo.cch		= fName.length();
+			hNewItemInfo.cch		= static_cast<UINT>(fName.length()); ///\todo recheck this on a 64-bit platform
 			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
 			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
 			// Update identifiers.
