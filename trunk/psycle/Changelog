@@ -1,6 +1,6 @@
 for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=log
 
-2006-03-15 psycle 1.9.6 bohan
+2006-03-15 psycle 1.9.7 bohan
 
 	* moved changlog from src/psycle/host/version.hpp to a newly created Changelog file
 	  and also added files NEWS and TODO, with just a little text referring to the corresponding files of the doc dir.
