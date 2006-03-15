@@ -7,9 +7,10 @@ for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=
 	* microsofism->std: in function signatures, removed "throw(...)" which is implicit anyway.
 	* microsofism->std: corrected a few syntactic problems where the name of a variable was the same as its type.
 	* microsofism->std: removed some unused MFC CString in the VST host that was already replaced with std::string.
-	* microsofism->std: replaced microsoft's _strlwr with std::tolower in psycle::host::Plugin::LoadOldFileFormat(RiffFile*)
+	* microsofism->std: replaced microsoft's _strlwr with std::tolower in psycle::host::Plugin::LoadOldFileFormat(RiffFile*).
 	* old fileformat loaders: changed compiler numeric types to std::*int_t and moved code to psycle/host/legacy/old_file_format.cpp.
-	* changed a bit the initialization of the static psycle::host::logger::default_logger_ostream() in psycle/host/global.cpp
+	* changed a bit the initialization of the static psycle::host::logger::default_logger_ostream() in psycle/host/global.cpp.
+	* plugin dir: temporary work around for msvc8 manifests.
 
 2006/03/13 20:35:04  jaz001
 

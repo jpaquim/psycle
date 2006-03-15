@@ -96,7 +96,14 @@ namespace psycle
 					SetSongDir(appPath()+"songs");
 					SetCurrentSongDir(GetSongDir());
 					SetSkinDir(appPath()+"skins");
-					SetPluginDir(appPath()+"PsyclePlugins");
+					SetPluginDir
+						(
+							appPath()
+							///\todo problem with manifests on msvc8 ; all plugins put along with the executable and other dll for now
+							#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR < 8
+								+"PsyclePlugins"
+							#endif
+						);
 					SetVstDir(appPath()+"VstPlugins");
 				}
 			}
