@@ -5,7 +5,7 @@
 #include "FileIO.hpp"
 #include "plugin.hpp"
 #include "InputHandler.hpp"
-#include <operating_system/exceptions/code_description.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
 #include "song.hpp"
 #include <cctype>
 #include "NewMachine.hpp"
@@ -133,7 +133,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not load library: " << file_name << std::endl
-					<< operating_system::exceptions::code_description();
+					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
 			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
@@ -142,7 +142,7 @@ namespace psycle
 				std::ostringstream s; s
 					<< "library is not a psycle native plugin:" << std::endl
 					<< "could not resolve symbol 'GetInfo' in library: " << file_name << std::endl
-					<< operating_system::exceptions::code_description();
+					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -166,7 +166,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-					<< operating_system::exceptions::code_description();
+					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try

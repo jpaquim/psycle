@@ -3,8 +3,8 @@
 #pragma once
 #include "constants.hpp"
 #include "helpers.hpp"
-#include <operating_system/exception.hpp>
-#include <operating_system/exceptions/code_description.hpp>
+#include <universalis/operating_system/exception.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
 #include "machine.hpp"
 #include <vst/AEffectx.h>
 namespace psycle

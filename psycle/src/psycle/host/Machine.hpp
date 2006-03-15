@@ -7,7 +7,7 @@
 #include "constants.hpp"
 #include "FileIO.hpp"
 #include "global.hpp"
-#include <processor/fpu.hpp>
+#include <universalis/processor/exceptions/fpu.hpp>
 #include <universalis/compiler/location.hpp>
 #include <stdexcept>
 #include <cstdint>
@@ -158,10 +158,10 @@ namespace psycle
 					bool                crashed_;
 
 				public:
-					processor::fpu::exception_mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-					processor::fpu::exception_mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+					universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+					universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
 				private:
-					processor::fpu::exception_mask::type                fpu_exception_mask_;
+					universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;
 			///\}
 
 		public:
