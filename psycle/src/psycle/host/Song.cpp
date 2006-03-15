@@ -1842,7 +1842,7 @@ namespace psycle
 							try
 							{
 								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
-								if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
+								if(chunkpresent) chunkread = plugin.LoadChunkOldFileFormat(pFile);
 								plugin.proxy().dispatcher(effSetProgram, 0, plugin._program);
 							}
 							catch(const std::exception &)

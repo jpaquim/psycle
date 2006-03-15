@@ -280,9 +280,7 @@ namespace psycle
 				class once
 				{
 				public:
-					// [bohan] hmm, someone told me it is disallowed to have static functions in local classes, although msvc7.1 seems to allow it.
-					//static std::ostream & instanciate() throw(...)
-					std::ostream & instanciate() throw(...)
+					static std::ostream & instanciate()
 					{
 						std::string module_directory;
 						{
@@ -291,18 +289,10 @@ namespace psycle
 							module_directory = module_file_name;
 							module_directory = module_directory.substr(0, module_directory.rfind('\\'));
 						}
-						// this overwrites the file if it already exists.
-						//\todo : devpartner says this "new" leaks.
 						return *new std::ofstream((module_directory + "/psycle.log.txt").c_str());
 					}
 				};
-
-				// <bohan> hmm, someone told me it is disallowed to have static functions in local classes.
-				//static std::ofstream instance = once::instanciate();
-
-				static once once;
-				static std::ostream & instance = once.instanciate();
-
+				static std::ostream & instance(once::instanciate());
 				return instance;
 			}
 			catch(...)

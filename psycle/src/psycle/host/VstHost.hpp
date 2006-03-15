@@ -158,18 +158,18 @@ namespace psycle
 				plugin();
 				virtual ~plugin() throw();
 				virtual bool Load(RiffFile * pFile);
+				/// Loader for old psycle fileformat.
+				bool LoadChunkOldFileFormat(RiffFile* pFile);
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile* pFile) ;
 				virtual void SaveDllName(RiffFile* pFile);
 				bool LoadDll(std::string psFileName);
-				// Loader for old psycle fileformat.
-				bool LoadChunk(RiffFile* pFile);
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				virtual void SetSampleRate(int sr)	{	proxy().setSampleRate((float)sr); };
 
-				void Instance(std::string dllname, const bool overwriteName = true) throw(...);
-				void Free() throw(...);
+				void Instance(std::string dllname, const bool overwriteName = true);
+				void Free();
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; };
 				virtual int GetNumParams()
 				{
@@ -240,9 +240,9 @@ namespace psycle
 				inline void SendMidi();
 				inline proxy & proxy() throw() { return *proxy_; };
 
-				//\todo: this variable is just used in load/save. 
+				///\todo: this variable is just used in load/save. 
 				unsigned char _program;
-				//\todo: Having exception checking, this variable could be removed.
+				///\todo: Having exception checking, this variable could be removed.
 				bool instantiated;
 				///\todo Remove when Changing the FileFormat.
 				///      It is used in song load only. Probably it comes from an old fileformat ( 0.x )
@@ -262,7 +262,8 @@ namespace psycle
 				/// reserves space for a new midi event in the queue.
 				/// \return midi event to be filled in, or null if queue is full.
 				VstMidiEvent* reserveVstMidiEvent();
-				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
+				///\todo ugly hack
+				VstMidiEvent* reserveVstMidiEventAtFront();
 
 				float * inputs[max_io];
 				float * outputs[max_io];
@@ -275,7 +276,10 @@ namespace psycle
 				std::string _sVendorName;
 				long _version;
 				bool _isSynth;
+
+				///\todo what is this?
 				float junk[STREAM_SIZE];
+
 				static VstTimeInfo _timeInfo;
 				VstEvents mevents;
 				vst::proxy * proxy_;
@@ -329,10 +333,7 @@ namespace psycle
 			class instrument : public plugin
 			{
 			public:
-				///\name functions which calls code in the plugin itself
-				///\{
 				virtual void Work(int numSamples);
-				///\}
 				instrument(int index);
 				virtual void Tick(int channel, PatternEntry * pEntry);
 				virtual void Stop(void);
@@ -346,10 +347,7 @@ namespace psycle
 			class fx : public plugin
 			{
 			public:
-				///\name functions which calls code in the plugin itself
-				///\{
 				virtual void Work(int numSamples);
-				///\}
 				fx(int index);
 				virtual ~fx() throw();
 				virtual void Tick(int channel, PatternEntry * pEntry);
