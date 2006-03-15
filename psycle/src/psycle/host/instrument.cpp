@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::Filter.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "Instrument.hpp"
+#include "instrument.hpp"
 #include "DataCompression.hpp"
 #include "filter.hpp"
 #include <cstdint>

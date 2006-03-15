@@ -4,11 +4,11 @@
 #include PACKAGENERIC
 #include "psycle.hpp"
 #include "MainFrm.hpp"
-#include "VstEditorDlg.hpp"
-#include "VstHost.hpp"
+#include "VSTEditorDlg.hpp"
+#include "VSTHost.hpp"
 #include "song.hpp"
 //#include "Configuration.hpp"
-#include "Player.hpp"
+#include "player.hpp"
 #include "InputHandler.hpp"
 #include "NewMachine.hpp"
 #include <algorithm>

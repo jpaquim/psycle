@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
 #pragma once
+#include "detail/project.hpp"
 #include <cmath>
 #include <universalis/operating_system/exception.hpp>
 #include <cfloat>

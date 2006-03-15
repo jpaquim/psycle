@@ -3,9 +3,9 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "player.hpp"
-#include "Song.hpp"
-#include "Machine.hpp"
-#include "Configuration.hpp"
+#include "song.hpp"
+#include "machine.hpp"
+#include "configuration.hpp"
 #include "MidiInput.hpp"
 #include "InputHandler.hpp"
 namespace psycle

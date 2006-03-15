@@ -1,9 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::Plugin
 #pragma once
-#include "Machine.hpp"
-#include "Configuration.hpp"
-#include "Player.hpp"
+#include "machine.hpp"
+#include "configuration.hpp"
+#include "player.hpp"
 #include <psycle/plugin_interface.hpp>
 #include <cstdint>
 namespace psycle

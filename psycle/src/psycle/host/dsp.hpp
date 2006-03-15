@@ -2,7 +2,7 @@
 ///\brief various signal processing utility functions and classes, psycle::host::Cubic amongst others.
 #pragma once
 #include <cmath>
-#include "Helpers.hpp"
+#include "helpers.hpp"
 namespace psycle
 {
 	namespace host
