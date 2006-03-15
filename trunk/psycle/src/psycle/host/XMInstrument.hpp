@@ -342,7 +342,7 @@ namespace psycle
 			// value has to be an existing point!
 			void LoopEnd(const int value){m_LoopEnd = value;};
 
-			const int NumOfPoints(){ return m_Points.size();};
+			std::size_t const NumOfPoints(){ return m_Points.size();};
 
 			void Load(RiffFile* riffFile,const UINT version);
 			void Save(RiffFile* riffFile,const UINT version);

@@ -45,8 +45,8 @@ public:
 		/**  */
 		const int GetEnvelopePointIndexAtPoint(const int x,const int y)
 		{
-			const int _points = m_pEnvelope->NumOfPoints();
-			for(int i = 0;i < _points ;i++)
+			std::size_t const _points = m_pEnvelope->NumOfPoints();
+			for(unsigned int i = 0;i < _points ;i++)
 			{
 				CPoint _pt_env;
 				_pt_env.y = (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
