@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::Machine
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "Machine.hpp"
-#include "Song.hpp"
-#include "Dsp.hpp"
-#include "Configuration.hpp"
+#include "machine.hpp"
+#include "song.hpp"
+#include "dsp.hpp"
+#include "configuration.hpp"
 #include "psycle.hpp"
 #include "WireDlg.hpp"
 #include "MainFrm.hpp"

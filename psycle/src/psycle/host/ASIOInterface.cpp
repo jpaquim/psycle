@@ -4,9 +4,9 @@
 #include PACKAGENERIC
 #include "ASIOInterface.hpp"
 #include "resources/resources.hpp"
-#include "Registry.hpp"
+#include "registry.hpp"
 #include "ASIOConfig.hpp"
-#include "Configuration.hpp"
+#include "configuration.hpp"
 #include "MidiInput.hpp"
 #include "helpers.hpp"
 #include <universalis/processor/exception.hpp>

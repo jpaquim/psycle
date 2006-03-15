@@ -6,9 +6,9 @@
 
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "Configuration.hpp"
+#include "configuration.hpp"
 #include "XMInstrument.hpp"
-#include "Filter.hpp"
+#include "filter.hpp"
 #include "DataCompression.hpp"
 #include "FileIO.hpp"
 

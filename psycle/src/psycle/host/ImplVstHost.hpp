@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "Constants.hpp"
-#include "Machine.hpp"
+#include "constants.hpp"
+#include "machine.hpp"
 #include <Seib-vsthost/CVSTHost.Seib.hpp>
 
 namespace psycle {

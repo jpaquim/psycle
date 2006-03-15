@@ -2,10 +2,10 @@
 #include PACKAGENERIC
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-#include "Player.hpp"
-#include "Song.hpp"
+#include "player.hpp"
+#include "song.hpp"
 #include "FileIO.hpp"
-#include "Configuration.hpp"
+#include "configuration.hpp"
 #include <universalis/processor/exception.hpp>
 
 namespace psycle

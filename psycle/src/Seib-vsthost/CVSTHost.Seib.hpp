@@ -14,7 +14,7 @@
 /*****************************************************************************/
 
 #pragma once
-#include <vst/aeffectx.h>               /* VST header files                  */
+#include <vst/AEffectx.h>               /* VST header files                  */
 #define VST_2_1_EXTENSIONS 1
 #define VST_2_2_EXTENSIONS 1
 #define VST_2_3_EXTENSIONS 1
