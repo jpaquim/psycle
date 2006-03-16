@@ -2128,326 +2128,353 @@ namespace psycle
 			// this is much more flexible, making maintenance a breeze compared to that old hell.
 			// now you can just update one module without breaking the whole thing.
 
-			// header, this has to be at the top of the file
-
-			CProgressDialog Progress;
-			if ( !autosave ) 
+			try
 			{
-				Progress.Create();
-				Progress.SetWindowText("Saving...");
-				Progress.ShowWindow(SW_SHOW);
-			}
-
-			int chunkcount = 3; // 3 chunks plus:
-			for (int i = 0; i < MAX_PATTERNS; i++)
-			{
-				// check every pattern for validity
-				if (IsPatternUsed(i))
+				CProgressDialog Progress;
+				if ( !autosave ) 
 				{
-					chunkcount++;
+					Progress.Create();
+					Progress.SetWindowText("Saving...");
+					Progress.ShowWindow(SW_SHOW);
 				}
-			}
 
-			for (int i = 0; i < MAX_MACHINES; i++)
-			{
-				// check every pattern for validity
-				if (_pMachine[i])
+				std::uint32_t version, size, temp, chunkcount;
+
+				/*
+				===================
+				FILE HEADER
+				===================
+				id = "PSY3SONG"; // PSY2 was 1.66
+				*/
+				// header, this has to be at the top of the file
 				{
-					chunkcount++;
-				}
-			}
-
-			for (int i = 0; i < MAX_INSTRUMENTS; i++)
-			{
-				if (!_pInstrument[i]->Empty())
-				{
-					chunkcount++;
-				}
-			}
-
-			if ( !autosave ) 
-			{
-				Progress.m_Progress.SetRange(0,chunkcount);
-				Progress.m_Progress.SetStep(1);
-			}
-
-			/*
-			===================
-			FILE HEADER
-			===================
-			id = "PSY3SONG"; // PSY2 was 1.66
-			*/
-
-			pFile->Write("PSY3SONG", 8);
-
-			std::uint32_t version = CURRENT_FILE_VERSION;
-			std::uint32_t size = sizeof chunkcount;
-			std::uint32_t index = 0;
-			std::uint32_t temp;
-
-			pFile->Write(version);
-			pFile->Write(size);
-			pFile->Write(chunkcount);
-
-			if ( !autosave ) 
-			{
-				Progress.m_Progress.StepIt();
-				::Sleep(1);
-			}
-
-			// the rest of the modules can be arranged in any order
-
-			/*
-			===================
-			SONG INFO TEXT
-			===================
-			id = "INFO"; 
-			*/
-
-			pFile->Write("INFO",4);
-			version = CURRENT_FILE_VERSION_INFO;
-			size = strlen(Name)+strlen(Author)+strlen(Comment)+3;
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
-
-			pFile->Write(&Name,strlen(Name)+1);
-			pFile->Write(&Author,strlen(Author)+1);
-			pFile->Write(&Comment,strlen(Comment)+1);
-
-			if ( !autosave ) 
-			{
-				Progress.m_Progress.StepIt();
-				::Sleep(1);
-			}
-
-			/*
-			===================
-			SONG INFO
-			===================
-			id = "SNGI"; 
-			*/
-
-			pFile->Write("SNGI",4);
-			version = CURRENT_FILE_VERSION_SNGI;
-			size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
-
-			temp = SONGTRACKS;
-			pFile->Write(&temp,sizeof(temp));
-			temp = m_BeatsPerMin;
-			pFile->Write(&temp,sizeof(temp));
-			temp = m_LinesPerBeat;
-			pFile->Write(&temp,sizeof(temp));
-			temp = currentOctave;
-			pFile->Write(&temp,sizeof(temp));
-			temp = machineSoloed;
-			pFile->Write(&temp,sizeof(temp));
-			temp = _trackSoloed;
-			pFile->Write(&temp,sizeof(temp));
-
-			temp = seqBus;
-			pFile->Write(&temp,sizeof(temp));
-
-			temp = midiSelected;
-			pFile->Write(&temp,sizeof(temp));
-			temp = auxcolSelected;
-			pFile->Write(&temp,sizeof(temp));
-			temp = instSelected;
-			pFile->Write(&temp,sizeof(temp));
-
-			temp = 1; // sequence width
-			pFile->Write(&temp,sizeof(temp));
-
-			for (int i = 0; i < SONGTRACKS; i++)
-			{
-				pFile->Write(&_trackMuted[i],sizeof(_trackMuted[i]));
-				pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
-			}
-
-			if ( !autosave ) 
-			{
-				Progress.m_Progress.StepIt();
-				::Sleep(1);
-			}
-
-			/*
-			===================
-			SEQUENCE DATA
-			===================
-			id = "SEQD"; 
-			*/
-			index = 0; // index
-			for (index=0;index<MAX_SEQUENCES;index++)
-			{
-				char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
-
-				pFile->Write("SEQD",4);
-				version = CURRENT_FILE_VERSION_SEQD;
-				size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
-				pFile->Write(&version,sizeof(version));
-				pFile->Write(&size,sizeof(size));
-				
-				pFile->Write(&index,sizeof(index)); // Sequence Track number
-				temp = playLength;
-				pFile->Write(&temp,sizeof(temp)); // Sequence length
-
-				pFile->Write(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
-
-				for (int i = 0; i < playLength; i++)
-				{
-					temp = playOrder[i];
-					pFile->Write(&temp,sizeof(temp));	// Sequence data.
-				}
-			}
-			if ( !autosave ) 
-			{
-				Progress.m_Progress.StepIt();
-				::Sleep(1);
-			}
-
-			/*
-			===================
-			PATTERN DATA
-			===================
-			id = "PATD"; 
-			*/
-
-			for (int i = 0; i < MAX_PATTERNS; i++)
-			{
-				// check every pattern for validity
-				if (IsPatternUsed(i))
-				{
-					// ok save it
-					unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[i]*EVENT_SIZE];
-					unsigned char * pCopy = pSource;
-
-					for (int y = 0; y < patternLines[i]; y++)
-					{
-						unsigned char * pData = ppPatternData[i]+(y*MULTIPLY);
-						std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
-						pCopy+=EVENT_SIZE*SONGTRACKS;
-					}
-					
-					std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
-					delete[] pSource;
-
-					pFile->Write("PATD",4);
-					version = CURRENT_FILE_VERSION_PATD;
-
-					pFile->Write(version);
-					size = sizez77 + 4 * sizeof temp + strlen(patternName[i]) + 1;
-					pFile->Write(size);
-
-					index = i; // index
-					pFile->Write(&index,sizeof(index));
-					temp = patternLines[i];
-					pFile->Write(&temp,sizeof(temp));
-					temp = SONGTRACKS; // eventually this may be variable per pattern
-					pFile->Write(&temp,sizeof(temp));
-
-					pFile->Write(&patternName[i],strlen(patternName[i])+1);
-
-					pFile->Write(&sizez77,sizeof(sizez77));
-					pFile->Write(pCopy,sizez77);
-					delete[] pCopy;
+					chunkcount = 3; // 3 chunks plus:
+					for(unsigned int i(0) ; i < MAX_PATTERNS    ; ++i) if(IsPatternUsed(i))          ++chunkcount; // check every pattern for validity
+					for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i) if(_pMachine[i])              ++chunkcount;
+					for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i) if(!_pInstrument[i]->Empty()) ++chunkcount;
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
-						::Sleep(1);
+						Progress.m_Progress.SetRange(0,chunkcount);
+						Progress.m_Progress.SetStep(1);
 					}
-				}
-			}
-			/*
-			===================
-			MACHINE DATA
-			===================
-			id = "MACD"; 
-			*/
-			// machine and instruments handle their save and load in their respective classes
 
-			for (int i = 0; i < MAX_MACHINES; i++)
-			{
-				if (_pMachine[i])
-				{
-					pFile->Write("MACD",4);
-					version = CURRENT_FILE_VERSION_MACD;
-					pFile->Write(&version,sizeof(version));
-					long pos = pFile->GetPos();
-					size = 0;
-					pFile->Write(&size,sizeof(size));
-
-					index = i; // index
-					pFile->Write(&index,sizeof(index));
-
-					_pMachine[i]->SaveFileChunk(pFile);
-
-					long pos2 = pFile->GetPos(); 
-					size = pos2-pos-sizeof(size);
-					pFile->Seek(pos);
-					pFile->Write(&size,sizeof(size));
-					pFile->Seek(pos2);
-
-					if ( !autosave ) 
+					// chunk header
 					{
-						Progress.m_Progress.StepIt();
-						::Sleep(1);
+						pFile->Write("PSY3SONG", 8);
+
+						version = CURRENT_FILE_VERSION;
+						pFile->Write(version);
+
+						size = sizeof chunkcount;
+						pFile->Write(size);
 					}
-				}
-			}
-			/*
-			===================
-			Instrument DATA
-			===================
-			id = "INSD"; 
-			*/
-			for (int i = 0; i < MAX_INSTRUMENTS; i++)
-			{
-				if (!_pInstrument[i]->Empty())
-				{
-					pFile->Write("INSD",4);
-					version = CURRENT_FILE_VERSION_INSD;
-					pFile->Write(&version,sizeof(version));
-					long pos = pFile->GetPos();
-					size = 0;
-					pFile->Write(&size,sizeof(size));
-
-					index = i; // index
-					pFile->Write(&index,sizeof(index));
-
-					_pInstrument[i]->SaveFileChunk(pFile);
-
-					long pos2 = pFile->GetPos(); 
-					size = pos2-pos-sizeof(size);
-					pFile->Seek(pos);
-					pFile->Write(&size,sizeof(size));
-					pFile->Seek(pos2);
-
-					if ( !autosave ) 
+					// chunk data
 					{
-						Progress.m_Progress.StepIt();
-						::Sleep(1);
+						pFile->Write(chunkcount);
 					}
 				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				// the rest of the modules can be arranged in any order
+
+				/*
+				===================
+				SONG INFO TEXT
+				===================
+				id = "INFO"; 
+				*/
+				{
+					// chunk header
+					{
+						pFile->Write("INFO",4);
+
+						version = CURRENT_FILE_VERSION_INFO;
+						pFile->Write(version);
+
+						size = strlen(Name)+strlen(Author)+strlen(Comment)+3; // [bohan] since those are variable length, we could change from fixed size arrays to std::string
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						pFile->Write(&Name,strlen(Name)+1);
+						pFile->Write(&Author,strlen(Author)+1);
+						pFile->Write(&Comment,strlen(Comment)+1);
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				/*
+				===================
+				SONG INFO
+				===================
+				id = "SNGI"; 
+				*/
+				{
+					// chunk header
+					{
+						pFile->Write("SNGI",4);
+
+						version = CURRENT_FILE_VERSION_SNGI;
+						pFile->Write(version);
+
+						size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						temp = SONGTRACKS;     pFile->Write(temp);
+						temp = m_BeatsPerMin;  pFile->Write(temp);
+						temp = m_LinesPerBeat; pFile->Write(temp);
+						temp = currentOctave;  pFile->Write(temp);
+						temp = machineSoloed;  pFile->Write(temp);
+						temp = _trackSoloed;   pFile->Write(temp);
+
+						temp = seqBus; pFile->Write(temp);
+
+						temp = midiSelected; pFile->Write(temp);
+						temp = auxcolSelected; pFile->Write(temp);
+						temp = instSelected; pFile->Write(temp);
+
+						temp = 1;  pFile->Write(temp); // sequence width
+
+						for(unsigned int i = 0; i < SONGTRACKS; i++)
+						{
+							pFile->Write(_trackMuted[i]);
+							pFile->Write(_trackArmed[i]); // remember to count them
+						}
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				/*
+				===================
+				SEQUENCE DATA
+				===================
+				id = "SEQD"; 
+				*/
+				for(std::uint32_t index(0) ; index < MAX_SEQUENCES ; ++index)
+				{
+					char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
+
+					// chunk header
+					{
+						pFile->Write("SEQD",4);
+
+						version = CURRENT_FILE_VERSION_SEQD;
+						pFile->Write(version);
+
+						size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
+						pFile->Write(size);
+					}
+					// chunk data
+					{
+						pFile->Write(index); // Sequence Track number
+						temp = playLength; pFile->Write(temp); // Sequence length
+						
+						pFile->Write(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
+
+						for (unsigned int i = 0; i < playLength; i++)
+						{
+							temp = playOrder[i]; pFile->Write(temp); // Sequence data.
+						}
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				/*
+				===================
+				PATTERN DATA
+				===================
+				id = "PATD"; 
+				*/
+				for(std::uint32_t index(0) ; index < MAX_PATTERNS; ++index)
+				{
+					// check every pattern for validity
+					if (IsPatternUsed(index))
+					{
+						// ok save it
+
+						unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[index]*EVENT_SIZE];
+						unsigned char * pCopy = pSource;
+
+						for (int y = 0; y < patternLines[index]; y++)
+						{
+							unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
+							std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
+							pCopy+=EVENT_SIZE*SONGTRACKS;
+						}
+						
+						std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[index]*EVENT_SIZE);
+						delete[] pSource;
+
+						// chunk header
+						{
+							pFile->Write("PATD",4);
+
+							version = CURRENT_FILE_VERSION_PATD;
+							pFile->Write(version);
+
+							size = sizez77 + 4 * sizeof temp + strlen(patternName[index]) + 1;
+							pFile->Write(size);
+						}
+						// chunk data
+						{
+							pFile->Write(index);
+							temp = patternLines[index]; pFile->Write(temp);
+							temp = SONGTRACKS; pFile->Write(temp); // eventually this may be variable per pattern
+
+							pFile->Write(&patternName[index],strlen(patternName[index])+1);
+
+							pFile->Write(sizez77);
+							pFile->Write(pCopy,sizez77);
+						}
+
+						delete[] pCopy;
+					}
+				}
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
+				}
+
+				/*
+				===================
+				MACHINE DATA
+				===================
+				id = "MACD"; 
+				*/
+				// machine and instruments handle their save and load in their respective classes
+				for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
+				{
+					if (_pMachine[index])
+					{
+						std::fpos_t pos;
+
+						// chunk header
+						{
+							pFile->Write("MACD",4);
+
+							version = CURRENT_FILE_VERSION_MACD;
+							pFile->Write(version);
+
+							pos = pFile->GetPos();
+
+							size = 0;
+							pFile->Write(size);
+						}
+						// chunk data
+						{
+							pFile->Write(index);
+							_pMachine[index]->SaveFileChunk(pFile);
+						}
+						// chunk size in header
+						{
+							std::fpos_t const pos2(pFile->GetPos());
+							size = pos2 - pos - sizeof size;
+							pFile->Seek(pos);
+							pFile->Write(size);
+							pFile->Seek(pos2);
+						}
+
+						if ( !autosave ) 
+						{
+							Progress.m_Progress.StepIt();
+							::Sleep(1);
+						}
+					}
+				}
+
+				/*
+				===================
+				Instrument DATA
+				===================
+				id = "INSD"; 
+				*/
+				for(std::uint32_t index(0) ; index < MAX_INSTRUMENTS; ++index)
+				{
+					if (!_pInstrument[index]->Empty())
+					{
+						std::fpos_t pos;
+
+						// chunk header
+						{
+							pFile->Write("INSD",4);
+
+							version = CURRENT_FILE_VERSION_INSD;
+							pFile->Write(version);
+
+							pos = pFile->GetPos();
+
+							size = 0;
+							pFile->Write(size);
+						}
+						// chunk data
+						{
+							pFile->Write(index);
+							_pInstrument[index]->SaveFileChunk(pFile);
+						}
+						// chunk size in header
+						{
+							std::fpos_t const pos2(pFile->GetPos());
+							size = pos2 - pos - sizeof size;
+							pFile->Seek(pos);
+							pFile->Write(size);
+							pFile->Seek(pos2);
+						}
+
+						if ( !autosave ) 
+						{
+							Progress.m_Progress.StepIt();
+							::Sleep(1);
+						}
+					}
+				}
+
+				/*
+				===
+				end
+				===
+				*/
+
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.SetPos(chunkcount);
+					::Sleep(1);
+					Progress.OnCancel();
+				}
+
+				if (!pFile->Close()) throw std::runtime_error("couldn't close file");
 			}
-
-			if ( !autosave ) 
+			catch(...)
 			{
-				Progress.m_Progress.SetPos(chunkcount);
-				::Sleep(1);
-
-				Progress.OnCancel();
-			}
-
-			if (!pFile->Close())
-			{
-				char error[MAX_PATH];
-				sprintf(error,"Error writing to \"%s\"!!!",pFile->file_name());
-				MessageBox(NULL,error,"File Error!!!",0);
+				std::ostringstream s;
+				s << "Error writing to " << pFile->file_name() << " !!!";
+				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
 				return false;
 			}
-
 			return true;
 		}
 
