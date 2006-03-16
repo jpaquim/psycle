@@ -10,7 +10,6 @@
 #include "concatenated.hpp"
 #include "token.hpp"
 #if !defined DIVERSALIS__COMPILER__RESOURCE
-	#include "numeric.hpp"
 	#include "detail/standard/restrict.hpp"
 	#include "detail/standard/wchar_t.hpp"
 	#include "detail/pragmatic/pragmas.hpp"
