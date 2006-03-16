@@ -1,5 +1,9 @@
 for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=log
 
+2006-03-16 psycle 1.9.7 bohan
+
+	* reviewed numeric type sizes in psycle::host::Song::Save and prettified it
+	
 2006-03-15 psycle 1.9.7 bohan
 
 	* moved changlog from src/psycle/host/version.hpp to a newly created Changelog file

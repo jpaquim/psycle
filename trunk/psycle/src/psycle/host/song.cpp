@@ -18,6 +18,7 @@
 #include "riff.hpp" // for Wave file loading.
 #include <cstdint>
 #include <cassert>
+#include <sstream>
 
 #if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 	#error "sorry, only works on little endian machines"
