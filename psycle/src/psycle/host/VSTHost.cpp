@@ -971,12 +971,12 @@ namespace psycle
 						_timeInfo.timeSigNumerator = 4;
 						_timeInfo.timeSigDenominator = 4;
 					}
-					// will break on 64-bit system ; the problem lies in steinberg's code itself ; can't fix
 					#if defined DIVERSALIS__COMPILER__MICROSOFT
 						#pragma warning(push)
 						#pragma warning(disable:4311) // 'reinterpret_cast' : pointer truncation from 'VstTimeInfo *__w64 ' to 'long'
 					#endif
-					return reinterpret_cast<long int>(&_timeInfo);
+					BOOST_STATIC_ASSERT(sizeof(void*) == sizeof(long int));
+					return reinterpret_cast<long int>(&_timeInfo); // will break on 64-bit system ; the problem lies in steinberg's code itself ; can't fix
 					#if defined DIVERSALIS__COMPILER__MICROSOFT
 						#pragma warning(pop)
 					#endif

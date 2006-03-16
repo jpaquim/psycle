@@ -125,7 +125,7 @@ namespace psycle
 						#pragma warning(push)
 						#pragma warning(disable:4311) // 'reinterpret_cast' : pointer truncation from 'VstSpeakerArrangement *' to 'long'
 					#endif
-					BOOST_STATIC_ASSERT(sizeof(void*) == sizeof(long int)); // will break on 64-bit system ; the problem lies in steinberg's code itself ; can't fix
+					BOOST_STATIC_ASSERT(sizeof(void*) == sizeof(long int));
 					return dispatcher
 						(
 							effSetSpeakerArrangement, 0,
