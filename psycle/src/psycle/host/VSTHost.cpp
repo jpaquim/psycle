@@ -749,78 +749,75 @@ namespace psycle
 				}
 			}
 
-			#if !defined NDEBUG
-				static std::string audioMaster_opcode_to_string(long opcode)
+			static std::string audioMaster_opcode_to_string(long opcode)
+			{
+				#if defined $
+					#error "macro clash"
+				#endif
+				#define $(code) case audioMaster##code: return "audioMaster"#code;
+				switch(opcode)
 				{
-					#if defined $
-						#error "macro clash"
-					#else
-						#define $(code) case audioMaster##code: return "audioMaster"#code;
-						switch(opcode)
-						{
-							// from AEffect.h
-							$(Automate) $(Version) $(CurrentId) $(Idle) $(PinConnected)
+					// from AEffect.h
+					$(Automate) $(Version) $(CurrentId) $(Idle) $(PinConnected)
 
-							// from AEffectX.h
-							$(GetTime) $(SetTime)
+					// from AEffectX.h
+					$(GetTime) $(SetTime)
 
-							$(OfflineStart) $(OfflineRead) $(OfflineWrite) $(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
+					$(OfflineStart) $(OfflineRead) $(OfflineWrite) $(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
 
-							$(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
+					$(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
 
-							$(OpenWindow) $(CloseWindow)
+					$(OpenWindow) $(CloseWindow)
 
-							$(SetOutputSampleRate)
-							$(GetSampleRate)
-							$(GetBlockSize)
-							$(GetInputLatency) $(GetOutputLatency)
+					$(SetOutputSampleRate)
+					$(GetSampleRate)
+					$(GetBlockSize)
+					$(GetInputLatency) $(GetOutputLatency)
 
-							$(GetParameterQuantization)
+					$(GetParameterQuantization)
 
-							$(GetOutputSpeakerArrangement)
+					$(GetOutputSpeakerArrangement)
 
-							$(GetPreviousPlug) $(GetNextPlug)
+					$(GetPreviousPlug) $(GetNextPlug)
 
-							$(WantMidi)
-							$(ProcessEvents)
-							$(TempoAt)
-							$(GetNumAutomatableParameters)
-							$(IOChanged)
-							$(NeedIdle)
-							$(SizeWindow)
-							$(WillReplaceOrAccumulate)
-							$(GetCurrentProcessLevel)
-							$(GetAutomationState)
-							$(SetIcon)
-							$(CanDo)
-							$(GetLanguage)
-							$(GetDirectory)
-							$(UpdateDisplay)
+					$(WantMidi)
+					$(ProcessEvents)
+					$(TempoAt)
+					$(GetNumAutomatableParameters)
+					$(IOChanged)
+					$(NeedIdle)
+					$(SizeWindow)
+					$(WillReplaceOrAccumulate)
+					$(GetCurrentProcessLevel)
+					$(GetAutomationState)
+					$(SetIcon)
+					$(CanDo)
+					$(GetLanguage)
+					$(GetDirectory)
+					$(UpdateDisplay)
 
-							// vst 2.1
+					// vst 2.1
 
-							$(BeginEdit) $(EndEdit)
-							$(OpenFileSelector)
+					$(BeginEdit) $(EndEdit)
+					$(OpenFileSelector)
 
-							// vst 2.2
+					// vst 2.2
 
-							$(CloseFileSelector)
-							$(EditFile)
-							$(GetChunkFile)
+					$(CloseFileSelector)
+					$(EditFile)
+					$(GetChunkFile)
 
-							// vst 2.3
-							$(GetInputSpeakerArrangement)
-						default:
-							{
-								std::ostringstream s;
-								s << "unknown opcode " << opcode;
-								return s.str();
-							}
-						}
-						#undef $
-					#endif
+					// vst 2.3
+					$(GetInputSpeakerArrangement)
+				default:
+					{
+						std::ostringstream s;
+						s << "unknown opcode " << opcode;
+						return s.str();
+					}
 				}
-			#endif
+				#undef $
+			}
 
 			long int plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
@@ -938,13 +935,12 @@ namespace psycle
 					else _timeInfo.samplePos = 0;
 					_timeInfo.sampleRate = Global::pConfig->GetSamplesPerSec();
 					
-					/* WTF?! error C3861: 'timeGetTime': identifier not found, even with argument-dependent lookup
 					if(value & kVstNanosValid)
 					{
 						_timeInfo.flags |= kVstNanosValid;
-						_timeInfo.nanoSeconds = timeGetTime();
+						_timeInfo.nanoSeconds = cpu::cycles() / Global::cpu_frequency() * 1e9; //::GetTickCount(); ::timeGetTime(); // error C3861: 'timeGetTime': identifier not found, even with argument-dependent lookup
 					}
-					*/
+
 					if(value & kVstPpqPosValid)
 					{
 						_timeInfo.flags |= kVstPpqPosValid;
@@ -975,7 +971,15 @@ namespace psycle
 						_timeInfo.timeSigNumerator = 4;
 						_timeInfo.timeSigDenominator = 4;
 					}
-					return (long) &_timeInfo;
+					// will break on 64-bit system ; the problem lies in steinberg's code itself ; can't fix
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
+						#pragma warning(push)
+						#pragma warning(disable:4311) // 'reinterpret_cast' : pointer truncation from 'VstTimeInfo *__w64 ' to 'long'
+					#endif
+					return reinterpret_cast<long int>(&_timeInfo);
+					#if defined DIVERSALIS__COMPILER__MICROSOFT
+						#pragma warning(pop)
+					#endif
 				case audioMasterProcessEvents:		
 					return 0; // Support of vst events to host is not available
 				case audioMasterSetTime:
@@ -1072,7 +1076,7 @@ namespace psycle
 				default: 
 					{
 						std::ostringstream s;
-						s << "VST master dispatcher: undefined: " << opcode;
+						s << "VST master dispatcher: unhandled opcode: " << opcode << ": " << audioMaster_opcode_to_string(opcode);
 						loggers::warning(s.str());
 					}
 				}

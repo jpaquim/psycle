@@ -59,67 +59,88 @@ namespace psycle
 	{
 		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index)
 		{
-			Machine* pMachine;
-			Master* pMaster;
-			Sampler* pSampler;
-			XMSampler* pXMSampler;
-			DuplicatorMac* pDuplicator;
-			Mixer* pMixer;
-			Plugin* pPlugin;
-			vst::plugin* pVstPlugin;
+			Machine * machine(0);
 			switch (type)
 			{
-			case MACH_MASTER:
-				if(_pMachine[MASTER_INDEX]) return false;
-				pMachine = pMaster = new Master(index);
-				index = MASTER_INDEX;
-				break;
-			case MACH_SAMPLER:
-				pMachine = pSampler = new Sampler(index);
-				break;
-			case MACH_XMSAMPLER:
-				pMachine = pXMSampler = new XMSampler(index);
-				break;
-			case MACH_DUPLICATOR:
-				pMachine = pDuplicator = new DuplicatorMac(index);
-				break;
-			case MACH_MIXER:
-				pMachine = pMixer = new Mixer(index);
-				break;
-			case MACH_DUMMY:
-				pMachine = new Dummy(index);
-				break;
-			case MACH_PLUGIN:
-				pMachine = pPlugin = new Plugin(index);
-			case MACH_VST:
-				pMachine = pVstPlugin = new vst::instrument(index);
-			case MACH_VSTFX:
-				pMachine = pVstPlugin = new vst::fx(index);
-				if(!CNewMachine::TestFilename(psPluginDll))
+				case MACH_MASTER:
+					if(_pMachine[MASTER_INDEX]) return false;
+					machine = new Master(index);
+					index = MASTER_INDEX;
+					break;
+				case MACH_SAMPLER:
+					machine = new Sampler(index);
+					break;
+				case MACH_XMSAMPLER:
+					machine = new XMSampler(index);
+					break;
+				case MACH_DUPLICATOR:
+					machine = new DuplicatorMac(index);
+					break;
+				case MACH_MIXER:
+					machine = new Mixer(index);
+					break;
+				case MACH_DUMMY:
+					machine = new Dummy(index);
+					break;
+				case MACH_PLUGIN:
+					{
+						Plugin & plugin(*new Plugin(index));
+						machine = &plugin;
+						if(!CNewMachine::TestFilename(psPluginDll))
+						{
+							delete &plugin;
+							return false;
+						}
+						try
+						{
+							plugin.Instance(psPluginDll);
+						}
+						catch(std::exception const & e)
+						{
+							loggers::exception(e.what());
+							delete &plugin;
+							return false;
+						}
+						catch(...)
+						{
+							delete &plugin;
+							return false;
+						}
+					}
+					break;
 				{
-					delete pMachine;
+					vst::plugin * plugin;
+					case MACH_VST:
+						machine = plugin = new vst::instrument(index);
+					case MACH_VSTFX:
+						machine = plugin = new vst::fx(index);
+						if(!CNewMachine::TestFilename(psPluginDll))
+						{
+							delete plugin;
+							return false;
+						}
+						try
+						{
+							plugin->Instance(psPluginDll);
+						}
+						catch(std::exception const & e)
+						{
+							loggers::exception(e.what());
+							delete plugin;
+							return false;
+						}
+						catch(...)
+						{
+							delete plugin;
+							return false;
+						}
+						break;
+				}
+				default:
+					loggers::warning("failed to create requested machine type");
 					return false;
-				}
-				try
-				{
-					pPlugin->Instance(psPluginDll);
-				}
-				catch(std::exception const & e)
-				{
-					loggers::exception(e.what());
-					delete pMachine;
-					return false;
-				}
-				catch(...)
-				{
-					delete pMachine;
-					return false;
-				}
-				break;
-			default:
-				loggers::warning("failed to create requested machine type");
-				return false; ///< hmm?
 			}
+
 			if(index < 0)
 			{
 				index =	GetFreeMachine();
@@ -133,19 +154,20 @@ namespace psycle
 			
 			///\todo init problem
 			{
-				if(pMachine->_type == MACH_VSTFX || pMachine->_type == MACH_VST )
+				if(machine->_type == MACH_VSTFX || machine->_type == MACH_VST )
 				{
 					
 					// Do not call VST Init() function after Instance.
-					pMachine->Machine::Init();
+					machine->Machine::Init();
 				}
-				else pMachine->Init();
+				else machine->Init();
 			}
 
-			pMachine->_x = x;
-			pMachine->_y = y;
+			machine->_x = x;
+			machine->_y = y;
+
 			// Finally, activate the machine
-			_pMachine[index] = pMachine;
+			_pMachine[index] = machine;
 			return true;
 		}
 
