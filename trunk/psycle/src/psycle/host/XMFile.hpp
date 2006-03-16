@@ -121,7 +121,8 @@ namespace psycle
 			#error todo
 		#endif
 
-		struct XMFILEHEADER // UNIVERSALIS__COMPILER__ALIGN(1)
+		UNIVERSALIS__COMPILER__ALIGNED(1)
+		struct XMFILEHEADER
 		{
 			std::uint32_t size;
 			std::uint16_t norder;
@@ -136,7 +137,8 @@ namespace psycle
 		};
 
 
-		struct XMINSTRUMENTHEADER // UNIVERSALIS__COMPILER__ALIGN(1)
+		UNIVERSALIS__COMPILER__ALIGNED(1)
+		struct XMINSTRUMENTHEADER
 		{
 			std::uint32_t size;
 			char          name[22];
@@ -145,7 +147,8 @@ namespace psycle
 			std::uint8_t  samplesh;
 		};
 
-		struct XMSAMPLEHEADER // UNIVERSALIS__COMPILER__ALIGN(1)
+		UNIVERSALIS__COMPILER__ALIGNED(1)
+		struct XMSAMPLEHEADER
 		{
 			std::uint32_t shsize;
 			std::uint8_t  snum[96];
@@ -160,7 +163,8 @@ namespace psycle
 			std::uint8_t  reserved1[20];
 		};
 
-		struct XMSAMPLESTRUCT // UNIVERSALIS__COMPILER__ALIGN(1)
+		UNIVERSALIS__COMPILER__ALIGNED(1)
+		struct XMSAMPLESTRUCT
 		{
 			std::uint32_t samplen;
 			std::uint32_t loopstart;
