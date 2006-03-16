@@ -14,8 +14,20 @@
 #include "XMSongLoader.hpp"
 #include "player.hpp"
 
-namespace psycle{
-namespace host{
+
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
+	///\todo this is disabled because of the annoying warning flood, but should prolly be fixed
+	#pragma warning(disable:4482) // nonstandard extension used: enum 'xxxxx::yyyyy' used in qualified name
+#endif
+
+
+
+namespace psycle
+{
+	namespace host
+	{
 
 	const short MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
 	{
@@ -1411,3 +1423,9 @@ namespace host{
 
 }
 }
+
+
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif

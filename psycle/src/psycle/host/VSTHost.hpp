@@ -181,7 +181,7 @@ namespace psycle
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				virtual void SetSampleRate(int sr)	{	proxy().setSampleRate((float)sr); };
 
-				void Instance(std::string dllname, const bool overwriteName = true);
+				void Instance(std::string const & dllname, const bool overwriteName = true);
 				void Free();
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; };
 				virtual int GetNumParams()

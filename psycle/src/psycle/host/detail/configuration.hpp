@@ -36,6 +36,9 @@
 	/// [JAZ]   It could be that the exception code handling has a bug somewhere.
 	#define PSYCLE__CONFIGURATION__FPU_EXCEPTIONS 0
 
+	/// [bohan] just testing boost.serialization a bit
+	#define PSYCLE__CONFIGURATION__SERIALIZATION 0
+
 ///\}
 
 

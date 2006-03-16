@@ -11,6 +11,7 @@
 #include "filter.hpp"
 #include "DataCompression.hpp"
 #include "FileIO.hpp"
+#include <cassert>
 
 namespace psycle
 {
@@ -142,10 +143,10 @@ namespace psycle
 		* @param value		: Desired point Value.
 		* @return			: New point index.
 		*/
-		const int  XMInstrument::Envelope::SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal)
+		const int  XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 		{
-			ASSERT(pointIndex < (int)m_Points.size());
-			if(pointIndex < (int)m_Points.size())
+			assert(pointIndex < m_Points.size());
+			if(pointIndex < m_Points.size())
 			{
 				int prevtime,nextime;
 				m_Points[pointIndex].first = pointTime;
@@ -258,7 +259,7 @@ namespace psycle
 		* @param value		: Point Value.
 		* @return			: New point index.
 		*/
-		const int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
+		const int XMInstrument::Envelope::Insert(const unsigned int pointTime,const ValueType pointVal)
 		{
 			int _new_index;
 			for(_new_index = 0;_new_index < (int)m_Points.size();_new_index++)
@@ -304,10 +305,10 @@ namespace psycle
 		/** 
 		* @param pointIndex : point index to be deleted.
 		*/
-		void XMInstrument::Envelope::Delete(const int pointIndex)
+		void XMInstrument::Envelope::Delete(const unsigned int pointIndex)
 		{
-			ASSERT(pointIndex < (int)m_Points.size());
-			if(pointIndex < (int)m_Points.size())
+			assert(pointIndex < m_Points.size());
+			if(pointIndex < m_Points.size())
 			{
 				m_Points.erase(m_Points.begin() + pointIndex);
 				if(pointIndex == m_SustainBegin || pointIndex == m_SustainEnd)
@@ -345,7 +346,7 @@ namespace psycle
 		}
 	
 		// Loading Procedure
-		void XMInstrument::Envelope::Load(RiffFile* riffFile,const UINT version)
+		void XMInstrument::Envelope::Load(RiffFile* riffFile, std::uint32_t const version)
 		{
 			riffFile->Read(m_Enabled);
 			riffFile->Read(m_Carry);
@@ -366,7 +367,7 @@ namespace psycle
 			}
 		}
 		// Saving Procedure
-		void XMInstrument::Envelope::Save(RiffFile* riffFile, const UINT version)
+		void XMInstrument::Envelope::Save(RiffFile* riffFile, std::uint32_t const version)
 		{
 			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 			riffFile->Write(m_Enabled);

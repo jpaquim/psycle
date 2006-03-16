@@ -3,6 +3,7 @@ for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=
 2006-03-16 psycle 1.9.7 bohan
 
 	* reviewed numeric type sizes in psycle::host::Song::Save and prettified it
+	* old fileformat loaders: moved remaining code to psycle/host/legacy/old_file_format.cpp.
 	
 2006-03-15 psycle 1.9.7 bohan
 

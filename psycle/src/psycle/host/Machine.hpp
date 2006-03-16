@@ -174,7 +174,8 @@ namespace psycle
 			virtual void Tick() {};
 			virtual void Tick(int track, PatternEntry * pData) {};
 			virtual void Stop() {};
-			virtual bool Load(RiffFile * pFile);
+			/// Loader for old psycle fileformat.
+			virtual bool LoadOldFileFormat(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
 			virtual void SaveFileChunk(RiffFile * pFile);
@@ -184,8 +185,8 @@ namespace psycle
 			virtual void SetPan(int newpan);
 			virtual int GetAudioInputs() { return 1; };
 			virtual int GetAudioOutputs() { return 1; };
-			virtual std::string GetAudioInputName(int port) { std::string in="Stereo Input"; return in;}
-			virtual std::string GetAutioOutputName(int port) { std::string out="Stereo Output"; return out; }
+			virtual std::string /* const & */ GetAudioInputName(int port) { return "Stereo Input"; }
+			virtual std::string /* const & */ GetAutioOutputName(int port) { return "Stereo Output"; }
 			virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
 			virtual bool Disconnect(Machine* dstMac);
 			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
