@@ -5,8 +5,13 @@ namespace psycle
 {
 	namespace host
 	{
-		#pragma pack(push, 1)
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma pack(push, 1)
+		#else
+			#error todo
+		#endif
 
+		UNIVERSALIS__COMPILER__ALIGNED(1)
 		class PatternEntry
 		{
 			public:
@@ -47,15 +52,20 @@ namespace psycle
 		// Patterns are organized in rows.
 		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEntry) bytes
 		// belong to the first line.
-		#pragma warning(push)
-		#pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma warning(push)
+			#pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+		#endif
+		UNIVERSALIS__COMPILER__ALIGNED(1)
 		class Pattern
 		{
 			public:
 				PatternEntry _data[];
 				///\todo make it object-oriented
 		};
-		#pragma warning(pop)
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma warning(pop)
+		#endif
 
 		enum MachineType
 		{
@@ -112,6 +122,10 @@ namespace psycle
 			};
 		};
 
-		#pragma pack(pop)
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma pack(pop)
+		#else
+			#error todo
+		#endif
 	}
 }
