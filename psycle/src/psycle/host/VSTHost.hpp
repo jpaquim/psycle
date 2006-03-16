@@ -438,16 +438,22 @@ namespace psycle
 			inline long int proxy::dispatcher(long int operation, long int index, long int value, void * ptr, float opt) throw(host::exceptions::function_error)
 			{
 				#ifndef NDEBUG
-				{
-					std::ostringstream s; s
-						<< "VST plugin: call to plugin dispatcher: plugin address: " << &plugin()
-						<< ", opcode: " << exceptions::dispatch_errors::operation_description(operation)
-						<< ", index: " << index
-						<< ", value = " << value
-						<< ", ptr = " << ptr
-						<< ", opt = " << opt;
-					host::loggers::trace(s.str());
-				}
+					switch(operation)
+					{
+						case effEditIdle: break; // floods
+						default:
+							{
+								std::ostringstream s;
+								s
+									<< "VST: host call to plugin dispatcher: plugin address: " << &plugin()
+									<< ", opcode: " << exceptions::dispatch_errors::operation_description(operation)
+									<< ", index: " << index
+									<< ", value = " << value
+									<< ", ptr = " << ptr
+									<< ", opt = " << opt;
+								host::loggers::trace(s.str());
+							}
+					}
 				#endif
 				assert((*this)()); try { return plugin().dispatcher(&plugin(), operation, index, value, ptr, opt); } PSYCLE__HOST__CATCH_ALL return 0; /* dummy return to avoid warning */
 			}

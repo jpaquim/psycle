@@ -822,16 +822,21 @@ namespace psycle
 			long int plugin::AudioMaster(AEffect * effect, long opcode, long index, long value, void *ptr, float opt)
 			{
 				#if !defined NDEBUG
-					if(opcode!=audioMasterGetTime)
+					switch(opcode)
 					{
-						std::ostringstream s;
-						s<< "VST plugin: call to host dispatcher: Eff: " << effect
-						<< " Opcode = " << audioMaster_opcode_to_string(opcode)
-						<< " Index = " << index
-						<< " Value = " << value
-						<< " Ptr = " << ptr
-						<< " Opt = " << opt;
-						host::loggers::trace(s.str());
+						default:
+							if(opcode!=audioMasterGetTime)
+							{
+								std::ostringstream s;
+								s
+									<< "VST: plugin call to host dispatcher: plugin address: " << effect
+									<< " Opcode = " << audioMaster_opcode_to_string(opcode)
+									<< " Index = " << index
+									<< " Value = " << value
+									<< " Ptr = " << ptr
+									<< " Opt = " << opt;
+									host::loggers::trace(s.str());
+							}
 					}
 				#endif
 				
@@ -849,7 +854,7 @@ namespace psycle
 						if(index<0 || index >= effect->numParams) {
 							host::loggers::info("error audioMasterAutomate: index<0 || index >= effect->numParams");
 						}
-						if(Global::pConfig->_RecordTweaks)  
+						if(Global::pConfig->_RecordTweaks)
 						{
 							if(Global::pConfig->_RecordMouseTweaksSmooth)
 								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->_macIndex, index, f2i(opt * vst::quantization));
@@ -1076,7 +1081,7 @@ namespace psycle
 				default: 
 					{
 						std::ostringstream s;
-						s << "VST master dispatcher: unhandled opcode: " << opcode << ": " << audioMaster_opcode_to_string(opcode);
+						s << "VST: plugin call to host dispatcher: unhandled opcode: " << opcode << ": " << audioMaster_opcode_to_string(opcode);
 						loggers::warning(s.str());
 					}
 				}
