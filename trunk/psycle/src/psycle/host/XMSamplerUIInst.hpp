@@ -69,7 +69,7 @@ public:
 		int m_WindowWidth;
 
 		bool m_bPointEditing;///< EnvelopePoint 
-		int m_EditPoint;///< ***** Envelope Point Index
+		unsigned int m_EditPoint;///< ***** Envelope Point Index
 		int m_EditPointX;///< Envelope Point
 		int m_EditPointY;///< Envelope Point
 

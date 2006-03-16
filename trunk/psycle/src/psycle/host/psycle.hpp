@@ -28,5 +28,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;
 		};
 
+		extern CPsycleApp theApp;
+
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

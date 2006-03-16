@@ -275,28 +275,26 @@ namespace psycle
 			// Object Functions.
 
 			// Gets the time at which the pointIndex point is located.
-			const int GetTime(const int pointIndex)
+			const int GetTime(const unsigned int pointIndex)
 			{	
-				if(pointIndex >= 0 && pointIndex < (int)m_Points.size()){
-					return m_Points[pointIndex].first;
-				}
+				if(pointIndex >= 0 && pointIndex < m_Points.size()) return m_Points[pointIndex].first;
 				return INVALID;
 			}
 			// Sets a new time for an existing pointIndex point.
-			const int SetTime(const int pointIndex,const int pointTime)
+			const int SetTime(const unsigned int pointIndex,const int pointTime)
 			{ 
 				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				m_Points[pointIndex].first = pointTime;
 				return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
 			}
 			// Gets the value of the pointIndex point.
-			const ValueType GetValue(const int pointIndex)
+			const ValueType GetValue(const unsigned int pointIndex)
 			{ 
 				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				return m_Points[pointIndex].second;
 			}
 			// Sets the value pointVal to pointIndex point.
-			void SetValue(const int pointIndex,const ValueType pointVal)
+			void SetValue(const unsigned int pointIndex,const ValueType pointVal)
 			{
 				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				m_Points[pointIndex].second = pointVal;
@@ -312,13 +310,13 @@ namespace psycle
 			};
 
 			/// Helper to set a new time for an existing index.
-			const int SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal);
+			const int SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal);
 
 			/// Inserts a new point to the points Array.
-			const int Insert(const int pointIndex,const ValueType pointVal);
+			const int Insert(const unsigned int pointIndex,const ValueType pointVal);
 
 			/// Removes a point from the points Array.
-			void Delete(const int pointIndex);
+			void Delete(const unsigned int pointIndex);
 
 			/// Clears the points Array
 			void Clear()
@@ -326,26 +324,26 @@ namespace psycle
 				m_Points.clear();
 			};
 			// Set or Get the point Index for Sustain and Loop.
-			const int SustainBegin(){ return m_SustainBegin;};
+			const unsigned int SustainBegin(){ return m_SustainBegin;};
 			// value has to be an existing point!
-			void SustainBegin(const int value){m_SustainBegin = value;};
+			void SustainBegin(const unsigned int value){m_SustainBegin = value;};
 
-			const int SustainEnd(){ return m_SustainEnd;};
+			const unsigned int SustainEnd(){ return m_SustainEnd;};
 			// value has to be an existing point!
-			void SustainEnd(const int value){m_SustainEnd = value;};
+			void SustainEnd(const unsigned int value){m_SustainEnd = value;};
 
-			const int LoopStart(){return m_LoopStart;};
+			const unsigned int LoopStart(){return m_LoopStart;};
 			// value has to be an existing point!
-			void LoopStart(const int value){m_LoopStart = value;};
+			void LoopStart(const unsigned int value){m_LoopStart = value;};
 
-			const int LoopEnd(){return m_LoopEnd;};
+			const unsigned int LoopEnd(){return m_LoopEnd;};
 			// value has to be an existing point!
-			void LoopEnd(const int value){m_LoopEnd = value;};
+			void LoopEnd(const unsigned int value){m_LoopEnd = value;};
 
 			std::size_t const NumOfPoints(){ return m_Points.size();};
 
-			void Load(RiffFile* riffFile,const UINT version);
-			void Save(RiffFile* riffFile,const UINT version);
+			void Load(RiffFile* riffFile,const std::uint32_t version);
+			void Save(RiffFile* riffFile,const std::uint32_t version);
 
 			// overloaded copy function
 			Envelope& operator=(const Envelope& other)

@@ -143,11 +143,10 @@ namespace psycle
 				zapObject(proxy_);
 			}
 
-			void plugin::Instance(std::string dllname, bool overwriteName)
+			void plugin::Instance(std::string const & dllname, bool overwriteName)
 			{
 				Free();
-				_sDllName=dllname;
-				TRACE("VST plugin: library file name: %s\n", _sDllName.c_str());
+				this->_sDllName = dllname;
 				proxy()(0);
 				instantiated = false;
 				if(!(h_dll = ::LoadLibrary(_sDllName.c_str())))
@@ -184,9 +183,6 @@ namespace psycle
 					else s << "returned value is a null pointer";
 					throw host::exceptions::function_errors::bad_returned_value(s.str());
 				}
-				#if defined DIVERSALIS__COMPILER__MICROSOFT
-					TRACE("VST plugin: instanciated.");
-				#endif
 				// 2: Host to Plug, setSampleRate ( 44100.000000 )
 				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 				// 3: Host to Plug, setBlockSize ( 512 ) 
@@ -265,21 +261,19 @@ namespace psycle
 				}
 				_isSynth = proxy().flags() & effFlagsIsSynth;
 				instantiated = true;
-				TRACE("VST plugin: successfully instanciated. inputs: %d, outputs: %d\n", proxy().numInputs(), proxy().numOutputs());
+				{
+					std::ostringstream s;
+					s << "VST plugin: successfully instanciated. inputs: " << proxy().numInputs() << ", outputs: " << proxy().numOutputs();
+					loggers::trace(s.str());
+				}
 			}
 
 			void plugin::Free() // called also in destructor
 			{
-				#if defined DIVERSALIS__COMPILER__MICROSOFT
-					TRACE("VST plugin: freeing ...");
-				#endif
 				const std::exception * exception(0);
 				if(proxy()())
 				{
 					assert(h_dll);
-					#if defined DIVERSALIS__COMPILER__MICROSOFT
-						TRACE("VST plugin: freeing ... dispatcher");
-					#endif
 					try
 					{
 						proxy().mainsChanged(false);
@@ -312,9 +306,6 @@ namespace psycle
 				if(h_dll)
 				{
 					assert(!proxy()());
-					#if defined DIVERSALIS__COMPILER__MICROSOFT
-						TRACE("VST plugin: freeing ... library");
-					#endif
 					try
 					{
 						::FreeLibrary(h_dll);
@@ -396,13 +387,12 @@ namespace psycle
 				return true;
 			}
 
-
 			void plugin::SaveDllName(RiffFile * pFile) 
 			{
-				::CString str = GetDllName();
-				char str2[1 << 10];
-				std::strcpy(str2, str.Mid(str.ReverseFind('\\') + 1));
-				pFile->Write(str2, std::strlen(str2) + 1);
+				boost::filesystem::path path(GetDllName(), boost::filesystem::native);
+				path = path.leaf();
+				std::string const s(path.string());
+				pFile->Write(s.c_str(), s.length() + 1);
 			}
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
@@ -1080,9 +1070,12 @@ namespace psycle
 					return -1;
 					break;
 				default: 
-					TRACE("VST master dispatcher: undefed: %d\n",opcode);
-					break;
-				}	
+					{
+						std::ostringstream s;
+						s << "VST master dispatcher: undefined: " << opcode;
+						loggers::warning(s.str());
+					}
+				}
 				return 0;
 			}
 	

@@ -8,6 +8,16 @@
 #include "configuration.hpp"
 #include <universalis/processor/exception.hpp>
 
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
+	///\todo this is disabled because of the annoying warning flood, but should prolly be fixed
+	#pragma warning(disable:4482) // nonstandard extension used: enum 'xxxxx::yyyyy' used in qualified name
+#endif
+
+
+
+
 namespace psycle
 {
 	namespace host
@@ -2643,3 +2653,9 @@ namespace psycle
 		}
 	}
 }
+
+
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif

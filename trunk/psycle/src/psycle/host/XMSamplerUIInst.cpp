@@ -621,7 +621,7 @@ void XMSamplerUIInst::OnCbnSelendokFiltertype()
 
 void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
@@ -665,7 +665,7 @@ void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult
 }
 void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
@@ -692,7 +692,7 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 }
 void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 
@@ -725,7 +725,7 @@ void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 
 void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 
@@ -742,18 +742,18 @@ void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
 
 void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SLNOTEMODNOTE);
 
-
-/*	if ()
+	/*
+	if ()
 	{
 	}
 	else
 	{
 	}
-*/
+	*/
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 	sprintf(tmp,"%s",notes[slid->GetPos()%12]);
@@ -766,8 +766,10 @@ void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
 
 void XMSamplerUIInst::OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	/*	if ()
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+
+	/*
+	if ()
 	{
 	}
 	else
@@ -784,53 +786,53 @@ void XMSamplerUIInst::OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult)
 }
 void XMSamplerUIInst::OnBnClickedEnvcheck()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedEnvadsr()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedEnvfreeform()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnNMCustomdrawADSRBase(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquí su código de controlador de notificación de control
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRMod(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquí su código de controlador de notificación de control
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRAttack(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquí su código de controlador de notificación de control
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRDecay(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquí su código de controlador de notificación de control
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRSustain(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquí su código de controlador de notificación de control
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRRelease(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquí su código de controlador de notificación de control
 	*pResult = 0;
 }
 
@@ -858,37 +860,37 @@ void XMSamplerUIInst::OnEnChangeInsName()
 
 void XMSamplerUIInst::OnCbnSelendokInsNnacombo()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnCbnSelendokInsDctcombo()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnCbnSelendokInsDcacombo()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedLoadins()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedSaveins()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedDupeins()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedDeleteins()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	///\todo Agregue aquí su código de controlador de notificación de control
 }
 void XMSamplerUIInst::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {

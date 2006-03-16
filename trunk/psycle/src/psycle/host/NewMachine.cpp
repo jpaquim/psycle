@@ -779,12 +779,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
 				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
 
-				int plugin_count = nativePlugs.size() + vstPlugs.size();
+				std::size_t plugin_count = nativePlugs.size() + vstPlugs.size();
 
 				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
 				host::loggers::info(s.str());
 				if(progressOpen) {
-					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
+					Progress.m_Progress.SetStep(static_cast<int>(16384 / std::max(std::size_t(1), plugin_count)));
 					Progress.SetWindowText(s.str().c_str());
 				}
 				std::ofstream out;
@@ -1361,7 +1361,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				file.Write(_pPlugsInfo[i]->FileTime);
 				{
 					const std::string error(_pPlugsInfo[i]->error);
-					std::uint32_t size(error.size());
+					std::uint32_t size(static_cast<int>(error.size()));
 					file.Write(size);
 					if(size) file.Write(error.data(), size);
 				}
@@ -1528,7 +1528,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 		{
-			LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
+			//LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
 			// edit folder name
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem ();
 			//make sure item is a folder that is allowed to be edited
@@ -1542,7 +1542,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::EndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 		{
-			LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
+			//LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
 			CEdit* pEdit = m_browser.GetEditControl();
 			HTREEITEM hSelectedItem = m_browser.GetSelectedItem ();
 			int intNameCount = 0;
@@ -1741,6 +1741,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
  			while (hItemChild != NULL)
   			{
 	   			HTREEITEM hItemNextChild = m_browser.GetNextSiblingItem(hItemChild);
+				///\todo warning C4701: potentially uninitialized local variable 'hItemNew' used
 				MoveTreeItem(hItemChild, hItemNew, TVI_SORT, false);
 				hItemChild = hItemNextChild;
   			}
@@ -1772,7 +1773,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
       				TVHITTESTINFO tvhti;
       				tvhti.pt = pt;
       				m_browser.ScreenToClient(&tvhti.pt);
-      				HTREEITEM hItemSel = m_browser.HitTest(&tvhti);
+      				/*HTREEITEM hItemSel =*/ m_browser.HitTest(&tvhti);
       				m_browser.SelectDropTarget(tvhti.hItem);
     				}
 
@@ -1851,7 +1852,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pt = point;
 			ClientToScreen(&pt);
 
-			BOOL bCopy = (GetKeyState(VK_CONTROL) & 0x10000000);
+			/*BOOL bCopy =*/ (GetKeyState(VK_CONTROL) & 0x10000000);
 
   			// do drop
 
@@ -1969,7 +1970,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_browser.SetItemData (hNodes[numCustCategories], IS_FOLDER);
 			m_browser.SetItemState (hNodes[numCustCategories], TVIS_BOLD, TVIS_BOLD);
 			//let user edit the name of the new category
-			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem ());
+			/*CEdit* EditNewFolder =*/ m_browser.EditLabel (m_browser.GetSelectedItem ());
 			numCustCategories++;
 			bEditing = true;
 		}
@@ -1984,14 +1985,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_browser.SelectItem (hNodes[numCustCategories]);
 			m_browser.SetItemData (hNodes[numCustCategories], IS_FOLDER);
 			m_browser.SetItemState (hNodes[numCustCategories], TVIS_BOLD, TVIS_BOLD);
-			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem ());
+			/*CEdit* EditNewFolder =*/ m_browser.EditLabel (m_browser.GetSelectedItem ());
 			numCustCategories++;
 			bEditing = true;
 		}
 
 		void CNewMachine::NMPOPUP_RenameFolder()
 		{	
-			CEdit* EditNewFolder = m_browser.EditLabel (m_browser.GetSelectedItem());
+			/*CEdit* EditNewFolder =*/ m_browser.EditLabel (m_browser.GetSelectedItem());
 		}
 
 		void CNewMachine::NMPOPUP_DeleteMoveToParent()
@@ -2117,6 +2118,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							hNext = m_browser.GetNextVisibleItem (hCurrent);
 							m_versionLabel.SetWindowText (m_browser.GetItemText(hCurrent));
 						}
+						///\todo warning C4701: potentially uninitialized local variable 'hCurrent' used
 						m_browser.SelectDropTarget (hCurrent);
 						m_browser.Invalidate ();
 				}
@@ -2126,8 +2128,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	
 		void CNewMachine::OnTvnKeydownBrowser(NMHDR *pNMHDR, LRESULT *pResult)
 		{
-			LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
 			#if 0 ///\todo THIS DOESN'T WORK - SOMETHING TO FIX ONE DAY
+				LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
 				if (pTVKeyDown->wVKey == VK_APPS)
 				{
 					//deal with "right click " key on those modern fancy windows keyboards!

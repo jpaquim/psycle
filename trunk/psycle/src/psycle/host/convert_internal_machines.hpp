@@ -1,8 +1,14 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
+#include "song.hpp"
+#include "machine.hpp"
+#include "plugin.hpp"
+#include "InputHandler.hpp"
+#include <psycle/scale.hpp>
 #include <string>
 #include <exception>
 #include <map>
-#include "../scale.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -163,7 +169,7 @@ namespace psycle
 					// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
 					for(int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
 					{
-						if(!song.ppPatternData[pattern]) continue;
+						if(!song.IsPatternUsed(pattern)) continue;
 						PatternEntry * const lines(reinterpret_cast<PatternEntry*>(song.ppPatternData[pattern]));
 						for(int line = 0 ; line < song.patternLines[pattern] ; ++line)
 						{
