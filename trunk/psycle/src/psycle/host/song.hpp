@@ -13,7 +13,8 @@
 #if !defined PSYCLE__CONFIGURATION__SERIALIZATION
 	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
 #elif PSYCLE__CONFIGURATION__SERIALIZATION
-	#include <boost/archive/text_oarchive.hpp>
+	#include <boost/archive/xml_oarchive.hpp>
+	#include <boost/serialization/nvp.hpp>
 	#include <boost/serialization/string.hpp>
 #endif
 
@@ -55,7 +56,7 @@ namespace psycle
 			/// constructor.
 			Song();
 			/// destructor.
-			virtual ~Song() throw();
+			/*virtual*/ ~Song() throw();
 			/// the name of the song.
 			char Name[64];
 			/// the author of the song.
@@ -279,97 +280,10 @@ namespace psycle
 			#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
 				#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
 			#elif PSYCLE__CONFIGURATION__SERIALIZATION
-			private:
-				friend class boost::serialization::access;
-				template<typename Archive>
-				void serialize(Archive & archive, unsigned int const version)
-				{
-					try
-					{
-					#if 1
-						int const i(1);
-						archive & i;
-					#else
-						archive & std::string(Name);
-						archive & std::string(Author);
-						archive & std::string(Comment);
-
-						archive & (m_LinesPerBeat * m_BeatsPerMin / 60.);
-
-						// sequence
-						{
-							archive & playLength;
-							for(unsigned int i(0); i < playLength; ++i) archive & playOrder[i];
-						}
-
-						// patterns
-						{
-							{
-								unsigned int patterns(0);
-								for(unsigned int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern) if(IsPatternUsed(pattern)) ++patterns;
-								archive & patterns;
-							}
-							for(unsigned int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
-							{
-								if(!IsPatternUsed(pattern)) continue;
-								archive & pattern;
-								archive & patternName;
-								PatternEntry * const lines(reinterpret_cast<PatternEntry*>(song.ppPatternData[pattern]));
-								archive & patternLines[pattern];
-								for(unsigned int line(0) ; line < patternLines[pattern] ; ++line)
-								{
-									archive & SONGTRACKS;
-									PatternEntry * const events(lines + line * MAX_TRACKS);
-									for(unsigned int track(0); track < song.SONGTRACKS ; ++track)
-									{
-										archive & track;
-										PatternEntry & event(events[track]);
-										archive & event._cmd;
-										archive & event._inst;
-										archive & event._mach;
-										archive & event._note;
-										archive & event._parameter;
-									}
-								}
-							}
-						}
-
-						// machines
-						{
-							{
-								unsigned int machines(0);
-								for(unsigned int i(0) ; i < MAX_MACHINES; ++i) if(_pMachine[index]) ++machines;
-								archive & machines;
-							}
-							for(unsigned int i(0) ; i < MAX_MACHINES; ++i)
-							{
-								if(!_pMachine[index]) continue;
-								archive & i;
-								//archive & *_pMachine[i];
-							}
-						}
-
-						// instruments
-						{
-							{
-								unsigned int instruments(0);
-								for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i) if(!_pInstrument[index]->Empty()) ++instruments;
-								archive & instruments;
-							}
-							for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i)
-							{
-								if(_pInstrument[i]->Empty()) continue;
-								archive & i;
-								//archive & *_pInstrument[i];
-							}
-						}
-					#endif
-					}
-					catch(...)
-					{
-						throw;
-					}
-				}
+				private:
+					friend class boost::serialization::access;
+					template<typename Archive>
+					void serialize(Archive & archive, unsigned int const version);
 			#endif
 		};
 	}
