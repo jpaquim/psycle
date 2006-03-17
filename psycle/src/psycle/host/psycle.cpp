@@ -98,7 +98,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			// The one and only window has been initialized, so show and update it.
 
-			pFrame->ShowWindow(SW_MAXIMIZE);
+			pFrame->ShowWindow
+				(
+					#if defined NDEBUG // boring when developping
+						SW_MAXIMIZE
+					#else
+						SW_NORMAL
+					#endif
+				);
 			
 			// center master machine
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
@@ -108,12 +115,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			CNewMachine::LoadPluginInfo();
 
-			// Show splash screen
-			// If has been commented out for non-stable builds..
-			//if (Global::pConfig->_showAboutAtStart)
-			{
-				OnAppAbout();
-			}
+			#if defined NDEBUG // boring when developping
+				// Show splash screen
+				// If has been commented out for non-stable builds..
+				//if (Global::pConfig->_showAboutAtStart)
+					OnAppAbout();
+			#endif
 			
 			ProcessCmdLine(pFrame); // Process Command Line
 
