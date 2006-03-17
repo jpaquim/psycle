@@ -23,7 +23,17 @@
 	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
 #elif PSYCLE__CONFIGURATION__SERIALIZATION
 	#include <fstream>
-	#include <boost/archive/text_oarchive.hpp>
+	#include <boost/archive/xml_oarchive.hpp>
+	#include <boost/serialization/nvp.hpp>
+//	#include <boost/serialization/level.hpp>
+//	BOOST_CLASS_IMPLEMENTATION(psycle::host::Song, boost::serialization::object_serializable)
+//	#include <boost/serialization/version.hpp>
+//	BOOST_CLASS_VERSION(psycle::host::Song, 0)
+//	#include <boost/serialization/tracking.hpp>
+//	BOOST_CLASS_TRACKING(psycle::host::Song, boost::serialization::track_never)
+//	#include <boost/serialization/export.hpp>
+//	BOOST_CLASS_EXPORT_GUID(psycle::host::Song, "song")
+//	#include <boost/serialization/binary_object.hpp>
 #endif
 
 #if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
@@ -34,10 +44,10 @@ namespace psycle
 {
 	namespace host
 	{
-		extern CPsycleApp theApp;
-
 		/// the riff WAVE/fmt chunk.
 		///\todo this is already defined elsewhere
+		///\todo is this used for file i/o ? if so we'd need byte-alignment
+		//UNIVERSALIS__COMPILER__ALIGNED(1)
 		class WavHeader
 		{
 		public:
@@ -45,8 +55,8 @@ namespace psycle
 			std::uint32_t chunkSize;
 			std::uint16_t wFormatTag;
 			std::uint16_t wChannels;
-			std::uint32_t  dwSamplesPerSec;
-			std::uint32_t  dwAvgBytesPerSec;
+			std::uint32_t dwSamplesPerSec;
+			std::uint32_t dwAvgBytesPerSec;
 			std::uint16_t wBlockAlign;
 			std::uint16_t wBitsPerSample;
 		};
@@ -222,9 +232,11 @@ namespace psycle
 						if(_pMachine[c] == _pMachine[j])
 						{
 							///\todo wtf? duplicate machine? could happen if loader messes up?
-							char buf[128];
-							std::sprintf(buf,"%d and %d have duplicate pointers", c, j);
-							MessageBox(0, buf, "Duplicate Machine", 0);
+							{
+								std::ostringstream s;
+								s << c << " and " << j << " have duplicate pointers";
+								MessageBox(0, s.str().c_str(), "Duplicate Machine", 0);
+							}
 							_pMachine[j] = 0;
 						}
 					}
@@ -247,7 +259,11 @@ namespace psycle
 
 		void Song::DestroyAllInstruments()
 		{
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) zapObject(_pInstrument[i]);
+			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i)
+			{
+				delete _pInstrument[i];
+				_pInstrument[i] = 0;
+			}
 		}
 
 		void Song::DeleteInstrument(int i)
@@ -265,7 +281,8 @@ namespace psycle
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
-					zapObject(_pMachine[i]);
+					delete _pMachine[i];
+					_pMachine[i] = 0;
 			}
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
 			{
@@ -304,9 +321,9 @@ namespace psycle
 			#endif
 			seqBus=0;
 			// Song reset
-			std::memset(&Name, 0, sizeof Name);
-			std::memset(&Author, 0, sizeof Author);
-			std::memset(&Comment, 0, sizeof Comment);
+			std::memset(Name, 0, sizeof Name);
+			std::memset(Author, 0, sizeof Author);
+			std::memset(Comment, 0, sizeof Comment);
 			std::sprintf(Name, "Untitled");
 			std::sprintf(Author, "Unnamed");
 			std::sprintf(Comment, "No Comments");
@@ -359,7 +376,6 @@ namespace psycle
 			}
 		}
 
-
 		bool Song::InsertConnection(int src, int dst, float value)
 		{
 			Machine *srcMac = _pMachine[src];
@@ -367,6 +383,7 @@ namespace psycle
 			if(!srcMac || !dstMac) return false;
 			return srcMac->ConnectTo(dstMac,0,0,value);
 		}
+
 		int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
 		{
 			int w;
@@ -390,14 +407,17 @@ namespace psycle
 						dmac->_inputMachines[w] = -1;
 						dmac->_connectedInputs--;
 					}
-/*						else
+					/*
+					else
 					{
 						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					}*/
+					}
+					*/
 				}
 			}
 			return 0;
 		}
+
 		int Song::ChangeWireSourceMac(int wiresource,int wiredest, int wireindex)
 		{
 			float volume = 1.0f;
@@ -421,10 +441,12 @@ namespace psycle
 						_pMachine[wiredest]->_inputMachines[wireindex] = 255;
 						_pMachine[wiredest]->_connectedInputs--;
 					}
-/*						else
+					/*
+					else
 					{
 						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					}*/
+					}
+					*/
 				}
 			}
 			return 0;
@@ -597,7 +619,6 @@ namespace psycle
 			if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
 			return rval;
 		}
-
 
 		int Song::GetBlankPatternUnused(int rval)
 		{
@@ -786,9 +807,9 @@ namespace psycle
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
-			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
+			_pInstrument[iInstr]->waveDataL = new std::int16_t[iSamplesPerChan];
 			if(bStereo)
-			{	_pInstrument[iInstr]->waveDataR = new signed short[iSamplesPerChan];
+			{	_pInstrument[iInstr]->waveDataR = new std::int16_t[iSamplesPerChan];
 				_pInstrument[iInstr]->waveStereo = true;
 			} else {
 				_pInstrument[iInstr]->waveStereo = false;
@@ -818,7 +839,7 @@ namespace psycle
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
-			long Datalen(file.NumSamples());
+			long int Datalen(file.NumSamples());
 			// Initializes the layer.
 			WavAlloc(instrument, st_type == 2, Datalen, Wavfile);
 			// Reading of Wave data.
@@ -861,7 +882,7 @@ namespace psycle
 			// stereo
 			else
 			{
-				short *sampR(_pInstrument[instrument]->waveDataR);
+				std::int16_t *sampR(_pInstrument[instrument]->waveDataR);
 				std::uint8_t smp8;
 				switch(bits)
 				{
@@ -1294,21 +1315,114 @@ namespace psycle
 		}
 
 
+		#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+			#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+		#elif PSYCLE__CONFIGURATION__SERIALIZATION
+			template<typename Archive>
+			void Song::serialize(Archive & archive, unsigned int const version)
+			{
+				try
+				{
+				#if 1
+					archive & boost::serialization::make_nvp("name"   , std::string(Name   ));
+					archive & boost::serialization::make_nvp("author" , std::string(Author ));
+					archive & boost::serialization::make_nvp("comment", std::string(Comment));
+
+					// speed
+					{
+						double const hertz(m_LinesPerBeat * m_BeatsPerMin / 60.);
+						archive & BOOST_SERIALIZATION_NVP(hertz);
+					}
+
+					// sequence
+					{
+						archive & boost::serialization::make_nvp("sequence-length", playLength);
+						for(unsigned int i(0); i < playLength; ++i) archive & boost::serialization::make_nvp("pattern", playOrder[i]);
+					}
+
+					// patterns
+					{
+						{
+							unsigned int patterns(0);
+							for(unsigned int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern) if(IsPatternUsed(pattern)) ++patterns;
+							archive & BOOST_SERIALIZATION_NVP(patterns);
+						}
+						for(unsigned int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
+						{
+							if(!IsPatternUsed(pattern)) continue;
+							archive & BOOST_SERIALIZATION_NVP(pattern);
+							archive & boost::serialization::make_nvp("name", std::string(patternName[pattern]));
+							PatternEntry * const lines(reinterpret_cast<PatternEntry*>(ppPatternData[pattern]));
+							archive & boost::serialization::make_nvp("lines", patternLines[pattern]);
+							archive & boost::serialization::make_nvp("tracks", SONGTRACKS);
+							archive & boost::serialization::make_nvp("pattern-as-binary", boost::serialization::make_binary_object(ppPatternData[pattern], patternLines[pattern] * SONGTRACKS * EVENT_SIZE));
+							for(unsigned int line(0) ; line < patternLines[pattern] ; ++line)
+							{
+								archive & BOOST_SERIALIZATION_NVP(line);
+								PatternEntry * const events(lines + line * MAX_TRACKS);
+								for(unsigned int track(0); track < SONGTRACKS ; ++track)
+								{
+									archive & BOOST_SERIALIZATION_NVP(track);
+									PatternEntry & event(events[track]);
+									archive & boost::serialization::make_nvp("command"    , event._cmd      );
+									archive & boost::serialization::make_nvp("instrument" , event._inst     );
+									archive & boost::serialization::make_nvp("machine"    , event._mach     );
+									archive & boost::serialization::make_nvp("note"       , event._note     );
+									archive & boost::serialization::make_nvp("parameter"  , event._parameter);
+								}
+							}
+						}
+					}
+
+					// machines
+					{
+						{
+							unsigned int machines(0);
+							for(unsigned int i(0) ; i < MAX_MACHINES; ++i) if(_pMachine[i]) ++machines;
+							archive & BOOST_SERIALIZATION_NVP(machines);
+						}
+						for(unsigned int i(0) ; i < MAX_MACHINES; ++i)
+						{
+							if(!_pMachine[i]) continue;
+							archive & boost::serialization::make_nvp("id", i);
+							//archive & *_pMachine[i];
+						}
+					}
+
+					// instruments
+					{
+						{
+							unsigned int instruments(0);
+							for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i) if(!_pInstrument[i]->Empty()) ++instruments;
+							archive & BOOST_SERIALIZATION_NVP(instruments);
+						}
+						for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i)
+						{
+							if(_pInstrument[i]->Empty()) continue;
+							archive & boost::serialization::make_nvp("id", i);
+							//archive & *_pInstrument[i];
+						}
+					}
+				#endif
+				}
+				catch(...)
+				{
+					throw;
+				}
+			}
+		#endif
+
 		bool Song::Save(RiffFile* pFile,bool autosave)
 		{
 			#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
 				#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
 			#elif PSYCLE__CONFIGURATION__SERIALIZATION
 				{
-					std::string name(pFile->file_name() + ".txt");
+					std::string name(pFile->file_name() + ".xml");
 					std::ofstream ostream(name.c_str());
-					boost::archive::text_oarchive archive(ostream);
-					#if 1
-						int const i(1);
-						archive << i;
-					#else
-						archive << *this;
-					#endif
+					boost::archive::xml_oarchive archive(ostream);
+					Song const & song(*this);
+					archive << BOOST_SERIALIZATION_NVP(song);
 				}
 			#endif
 
@@ -1686,12 +1800,12 @@ namespace psycle
 			--pSamplesL;
 			--pSamplesR;
 			
-			signed short *wl=_pInstrument[PREV_WAV_INS]->waveDataL;
-			signed short *wr=_pInstrument[PREV_WAV_INS]->waveDataR;
+			std::int16_t *wl=_pInstrument[PREV_WAV_INS]->waveDataL;
+			std::int16_t *wr=_pInstrument[PREV_WAV_INS]->waveDataR;
 			bool const stereo=_pInstrument[PREV_WAV_INS]->waveStereo;
 			float ld=0;
 			float rd=0;
-				
+			
 			do
 			{
 				ld=(*(wl+PW_Phase))*preview_vol;
@@ -1710,9 +1824,10 @@ namespace psycle
 					return;
 				}
 				
-			}while(--numSamples);
+			} while(--numSamples);
 		}
 
+		///\todo mfc+winapi->std
 		bool Song::CloneMac(int src,int dst)
 		{
 			// src has to be occupied and dst must be empty
@@ -1755,21 +1870,21 @@ namespace psycle
 			}
 
 			file.Write("MACD",4);
-			UINT version = CURRENT_FILE_VERSION_MACD;
-			file.Write(&version,sizeof(version));
-			long pos = file.GetPos();
-			UINT size = 0;
-			file.Write(&size,sizeof(size));
+			std::uint32_t version = CURRENT_FILE_VERSION_MACD;
+			file.Write(version);
+			std::fpos_t pos = file.GetPos();
+			std::uint32_t size = 0;
+			file.Write(size);
 
-			int index = dst; // index
-			file.Write(&index,sizeof(index));
+			std::uint32_t index = dst; // index
+			file.Write(index);
 
 			_pMachine[src]->SaveFileChunk(&file);
 
-			long pos2 = file.GetPos(); 
-			size = pos2-pos-sizeof(size);
+			std::fpos_t pos2 = file.GetPos(); 
+			size = pos2 - pos - sizeof size;
 			file.Seek(pos);
-			file.Write(&size,sizeof(size));
+			file.Write(size);
 			file.Close();
 
 			// now load it
@@ -1784,8 +1899,8 @@ namespace psycle
 			Header[4] = 0;
 			if (strcmp(Header,"MACD")==0)
 			{
-				file.Read(&version,sizeof(version));
-				file.Read(&size,sizeof(size));
+				file.Read(version);
+				file.Read(size);
 				if (version > CURRENT_FILE_VERSION_MACD)
 				{
 					// there is an error, this file is newer than this build of psycle
@@ -1795,7 +1910,7 @@ namespace psycle
 				}
 				else
 				{
-					file.Read(&index,sizeof(index));
+					file.Read(index);
 					index = dst;
 					if (index < MAX_MACHINES)
 					{
@@ -1922,7 +2037,7 @@ namespace psycle
 			return true;
 		}
 
-
+		///\todo mfc+winapi->std
 		bool Song::CloneIns(int src,int dst)
 		{
 			// src has to be occupied and dst must be empty
@@ -1956,21 +2071,21 @@ namespace psycle
 			}
 
 			file.Write("INSD",4);
-			UINT version = CURRENT_FILE_VERSION_INSD;
-			file.Write(&version,sizeof(version));
-			long pos = file.GetPos();
-			UINT size = 0;
-			file.Write(&size,sizeof(size));
+			std::uint32_t version = CURRENT_FILE_VERSION_INSD;
+			file.Write(version);
+			std::fpos_t pos = file.GetPos();
+			std::uint32_t size = 0;
+			file.Write(size);
 
-			int index = dst; // index
-			file.Write(&index,sizeof(index));
+			std::uint32_t index = dst; // index
+			file.Write(index);
 
 			_pInstrument[src]->SaveFileChunk(&file);
 
-			long pos2 = file.GetPos(); 
-			size = pos2-pos-sizeof(size);
+			std::fpos_t pos2 = file.GetPos(); 
+			size = pos2 - pos - sizeof size;
 			file.Seek(pos);
-			file.Write(&size,sizeof(size));
+			file.Write(size);
 
 			file.Close();
 
@@ -1987,8 +2102,8 @@ namespace psycle
 
 			if (strcmp(Header,"INSD")==0)
 			{
-				file.Read(&version,sizeof(version));
-				file.Read(&size,sizeof(size));
+				file.Read(version);
+				file.Read(size);
 				if (version > CURRENT_FILE_VERSION_INSD)
 				{
 					// there is an error, this file is newer than this build of psycle
@@ -1998,7 +2113,7 @@ namespace psycle
 				}
 				else
 				{
-					file.Read(&index,sizeof(index));
+					file.Read(index);
 					index = dst;
 					if (index < MAX_INSTRUMENTS)
 					{
@@ -2026,36 +2141,20 @@ namespace psycle
 
 		bool Song::IsPatternUsed(int i)
 		{
-			bool bUsed = FALSE;
-			if (ppPatternData[i])
-			{
-				// we could also check to see if pattern is unused AND blank.
-				for (int j = 0; j < playLength; j++)
-				{
-					if (playOrder[j] == i)
-					{
-						bUsed = TRUE;
-						break;
-					}
-				}
+			if(!ppPatternData[i]) return false;
 
-				if (!bUsed)
-				{
-					// check to see if it is empty
-					PatternEntry blank;
-					unsigned char * pData = ppPatternData[i];
-					for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
-					{
-						if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
-						{
-							bUsed = TRUE;
-							j = MULTIPLY2;
-							break;
-						}
-					}
-				}
+			for (int j = 0; j < playLength; j++) if (playOrder[j] == i) return true;
+
+			// check to see if it is empty
+			{
+				PatternEntry blank;
+				unsigned char * pData = ppPatternData[i];
+				for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
+					if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
+						return true;
 			}
-			return bUsed;
+
+			return false;
 		}
 	}
 }
