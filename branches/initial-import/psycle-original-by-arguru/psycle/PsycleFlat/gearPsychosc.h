@@ -1,0 +1,59 @@
+#if !defined(AFX_GEARPSYCHOSC_H__FE0D36FE_E90A_11D3_8913_9F3AED8AB763__INCLUDED_)
+#define AFX_GEARPSYCHOSC_H__FE0D36FE_E90A_11D3_8913_9F3AED8AB763__INCLUDED_
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+// gearPsychosc.h : header file
+//
+/////////////////////////////////////////////////////////////////////////////
+// gearPsychosc dialog
+
+class gearPsychosc : public CDialog
+{
+// Construction
+public:
+	gearPsychosc(CWnd* pParent = NULL);   // standard constructor
+	psyGear *machineRef;
+	bool doit;
+
+	// Dialog Data
+	//{{AFX_DATA(gearPsychosc)
+	enum { IDD = IDD_GEAR_PSYCHOSC };
+	CStatic	m_label4;
+	CStatic	m_label2;
+	CStatic	m_label3;
+	CStatic	m_label1;
+	CSliderCtrl	m_lfoamplitude;
+	CSliderCtrl	m_lfofrequency;
+	CSliderCtrl	m_glidespeed;
+	CSliderCtrl	m_oscspeed;
+	//}}AFX_DATA
+
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(gearPsychosc)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(gearPsychosc)
+	afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSlider3(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnCustomdrawSlider4(NMHDR* pNMHDR, LRESULT* pResult);
+	virtual BOOL OnInitDialog();
+	
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+//{{AFX_INSERT_LOCATION}}
+// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
+#endif // !defined(AFX_GEARPSYCHOSC_H__FE0D36FE_E90A_11D3_8913_9F3AED8AB763__INCLUDED_)
