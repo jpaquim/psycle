@@ -1314,16 +1314,24 @@ namespace psycle
 			return false;
 		}
 
-
 		#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
 			#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
 		#elif PSYCLE__CONFIGURATION__SERIALIZATION
+			void Song::SaveXML(std::string const & file_name) throw(std::exception)
+			{
+				std::ofstream ostream(file_name.c_str());
+				boost::archive::xml_oarchive archive(ostream);
+				Song const & song(*this); // archive needs a const reference
+				archive << boost::serialization::make_nvp("psycle", song);
+			}
+
 			template<typename Archive>
 			void Song::serialize(Archive & archive, unsigned int const version)
 			{
 				try
 				{
 				#if 1
+					archive & boost::serialization::make_nvp("type"   , std::string("PSY3SONG"));
 					archive & boost::serialization::make_nvp("name"   , std::string(Name   ));
 					archive & boost::serialization::make_nvp("author" , std::string(Author ));
 					archive & boost::serialization::make_nvp("comment", std::string(Comment));
@@ -1355,22 +1363,25 @@ namespace psycle
 							PatternEntry * const lines(reinterpret_cast<PatternEntry*>(ppPatternData[pattern]));
 							archive & boost::serialization::make_nvp("lines", patternLines[pattern]);
 							archive & boost::serialization::make_nvp("tracks", SONGTRACKS);
-							archive & boost::serialization::make_nvp("pattern-as-binary", boost::serialization::make_binary_object(ppPatternData[pattern], patternLines[pattern] * SONGTRACKS * EVENT_SIZE));
-							for(unsigned int line(0) ; line < patternLines[pattern] ; ++line)
-							{
-								archive & BOOST_SERIALIZATION_NVP(line);
-								PatternEntry * const events(lines + line * MAX_TRACKS);
-								for(unsigned int track(0); track < SONGTRACKS ; ++track)
+							#if 0
+								archive & boost::serialization::make_nvp("pattern-as-binary", boost::serialization::make_binary_object(ppPatternData[pattern], patternLines[pattern] * SONGTRACKS * EVENT_SIZE));
+							#else
+								for(unsigned int line(0) ; line < patternLines[pattern] ; ++line)
 								{
-									archive & BOOST_SERIALIZATION_NVP(track);
-									PatternEntry & event(events[track]);
-									archive & boost::serialization::make_nvp("command"    , event._cmd      );
-									archive & boost::serialization::make_nvp("instrument" , event._inst     );
-									archive & boost::serialization::make_nvp("machine"    , event._mach     );
-									archive & boost::serialization::make_nvp("note"       , event._note     );
-									archive & boost::serialization::make_nvp("parameter"  , event._parameter);
+									archive & BOOST_SERIALIZATION_NVP(line);
+									PatternEntry * const events(lines + line * MAX_TRACKS);
+									for(unsigned int track(0); track < SONGTRACKS ; ++track)
+									{
+										archive & BOOST_SERIALIZATION_NVP(track);
+										PatternEntry & event(events[track]);
+										archive & boost::serialization::make_nvp("command"    , event._cmd      );
+										archive & boost::serialization::make_nvp("instrument" , event._inst     );
+										archive & boost::serialization::make_nvp("machine"    , event._mach     );
+										archive & boost::serialization::make_nvp("note"       , event._note     );
+										archive & boost::serialization::make_nvp("parameter"  , event._parameter);
+									}
 								}
-							}
+							#endif
 						}
 					}
 
@@ -1421,8 +1432,8 @@ namespace psycle
 					std::string name(pFile->file_name() + ".xml");
 					std::ofstream ostream(name.c_str());
 					boost::archive::xml_oarchive archive(ostream);
-					Song const & song(*this);
-					archive << BOOST_SERIALIZATION_NVP(song);
+					Song const & song(*this); // archive needs a const reference
+					archive << boost::serialization::make_nvp("psycle", song);
 				}
 			#endif
 

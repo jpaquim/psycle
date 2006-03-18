@@ -6,10 +6,8 @@
 #include "Psycle.hpp"
 #include "Configuration.hpp"
 #include "Player.hpp"
-//#include "Helpers.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
-//#include "Bitmap.hpp"
 #include "Inputhandler.hpp"
 #include "MidiInput.hpp"
 #include "ConfigDlg.hpp"
@@ -25,11 +23,15 @@
 #include "MacProp.hpp"
 #include "NewMachine.hpp"
 #include "PatDlg.hpp"
-#include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
+#include <cmath> // SwingFill
+#include <cderr.h>
+
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+
 		CMainFrame		*pParentMain;
+
 		//\todo: Investigate this variable ( and especially pSong->cpuIdle ). See if it is doing what it is supposed to.
 		unsigned idletime = 0;
 
@@ -155,7 +157,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
-			//{{AFX_MSG_MAP(CChildView)
 			ON_WM_PAINT()
 			ON_WM_LBUTTONDOWN()
 			ON_WM_RBUTTONDOWN()
@@ -260,10 +261,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
 			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
-			//}}AFX_MSG_MAP
 			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
 			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
-			END_MESSAGE_MAP()
+		END_MESSAGE_MAP()
 
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
 		{
@@ -646,8 +646,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// "Save Song" Function
 		BOOL CChildView::OnFileSave(UINT id) 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
+			#if defined PSYCLE__CONFIGURATION__SAVE_BROKEN
+				MessageBox("Sorry, saving is not functional in this experimental build.");
+				return false;
+			#endif
 			BOOL bResult = TRUE;
 			if ( Global::_pSong->_saved )
 			{
@@ -701,8 +703,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		BOOL CChildView::OnFileSaveAs(UINT id) 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
+			#if defined PSYCLE__CONFIGURATION__SAVE_BROKEN
+				MessageBox("Sorry, saving is not functional in this experimental build.");
+				return false;
+			#endif
 			OPENFILENAME ofn; // common dialog box structure
 			std::string ifile = Global::_pSong->fileName;
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
@@ -718,7 +722,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+			ofn.lpstrFilter =
+				"Psycle Song (*.psy)"               "\0" "*.psy"        "\0"
+				#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+					#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+				#elif PSYCLE__CONFIGURATION__SERIALIZATION
+					"Psycle Song as XML (*.psycle.xml)" "\0" "*.psycle.xml" "\0"
+				#endif
+				"Psycle Pattern (*.psb)"            "\0" "*.psb"        "\0"
+				"All (*)"                           "\0" "*"            "\0"
+				;
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -731,24 +744,36 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (GetSaveFileName(&ofn) == TRUE)
 			{
 				CString str = ofn.lpstrFile;
+
 				if ( ofn.nFilterIndex == 2 ) 
+				#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+					#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+				#elif PSYCLE__CONFIGURATION__SERIALIZATION
+				{
+					std::string extension(".psycle.xml");
+					CString str2 = str.Right(extension.length());
+					if ( str2.CompareNoCase(extension.c_str()) != 0 ) str.Insert(str.GetLength(),extension.c_str()); ///\todo remove ".psy" first
+					sprintf(szFile,str);
+					_pSong->SaveXML(szFile);
+				}
+				else if ( ofn.nFilterIndex == 3 ) 
+				#endif
 				{
 					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb");
+					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb"); ///\todo remove ".psy" first
 					sprintf(szFile,str);
 					FILE* hFile=fopen(szFile,"wb");
 					SaveBlock(hFile);
 					fflush(hFile);
 					fclose(hFile);
 				}
-				else 
+				else
 				{ 
 					CString str2 = str.Right(4);
 					if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
+					
 					int index = str.ReverseFind('\\');
-					RiffFile file;
-
-					if (index != -1)
+					if (index >= 0)
 					{
 						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 						Global::_pSong->fileName = str.Mid(index+1);
@@ -758,6 +783,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						Global::_pSong->fileName = str;
 					}
 					
+					RiffFile file;
 					if (!file.Create(str.GetBuffer(1), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
@@ -794,8 +820,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			return bResult;
 		}
 
-		#include <cderr.h>
-
 		void CChildView::OnFileLoadsong()
 		{
 			OPENFILENAME ofn; // common dialog box structure
@@ -808,7 +832,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+			ofn.lpstrFilter =
+				"Psycle Songs (*.psy)"    "\0" "*.psy" "\0"
+				"Psycle Patterns (*.psb)" "\0" "*.psb" "\0"
+				"All (*)"                 "\0"  "*"    "\0"
+				;
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -1757,7 +1785,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Module Songs\0*.xm;*.it;*.s3m;*.mod\0FastTracker II Songs\0*.xm\0Impulse Tracker Songs\0*.it\0Scream Tracker Songs\0*.s3m\0Original .Mod Songs\0*.mod\0All\0*.*\0";
+			ofn.lpstrFilter =
+				"All Module Songs (*.xm *.it *.s3m *.mod)" "\0" "*.xm;*.it;*.s3m;*.mod" "\0"
+				"FastTracker II Songs (*.xm)"              "\0" "*.xm"                  "\0"
+				"Impulse Tracker Songs (*.it)"             "\0" "*.it"                  "\0"
+				"Scream Tracker Songs (*.s3m)"             "\0" "*.s3m"                 "\0"
+				"Original Mod Format Songs (*.mod)"        "\0" "*.mod"                 "\0"
+				"All (*)"                                  "\0" "*"                     "\0"
+				;
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;

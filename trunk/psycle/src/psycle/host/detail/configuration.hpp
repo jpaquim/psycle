@@ -19,11 +19,13 @@
 	/// implementation of psycle::host::Song's lock using boost 1.3's read_write_mutex.
 	#define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
 		// boost::thread::read_write_mutex has been removed from boost.thread around version 1.33.1
-		#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-			#include <boost/version.hpp>
-			#if BOOST_VERSION != 103200
-				#undef  PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-				#define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
+		#ifndef DIVERSALIS__COMPILER__RESOURCE // workaround msvc's resource compiler's boggus preprocessor
+			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+				#include <boost/version.hpp>
+				#if BOOST_VERSION != 103200
+					#undef  PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+					#define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
+				#endif
 			#endif
 		#endif
 
@@ -55,11 +57,13 @@
 			#define PSYCLE__CONFIGURATION__SERIALIZATION 0
 		#endif
 		// no serialization on boost version 1.32 and below
-		#if PSYCLE__CONFIGURATION__SERIALIZATION
-			#include <boost/version.hpp>
-			#if BOOST_VERSION < 103301
-				#undef  PSYCLE__CONFIGURATION__SERIALIZATION
-				#define PSYCLE__CONFIGURATION__SERIALIZATION 0
+		#ifndef DIVERSALIS__COMPILER__RESOURCE // workaround msvc's resource compiler's boggus preprocessor
+			#if PSYCLE__CONFIGURATION__SERIALIZATION
+				#include <boost/version.hpp>
+				#if BOOST_VERSION < 103301
+					#undef  PSYCLE__CONFIGURATION__SERIALIZATION
+					#define PSYCLE__CONFIGURATION__SERIALIZATION 0
+				#endif
 			#endif
 		#endif
 
