@@ -3,6 +3,7 @@ for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=
 2006-03-18 psycle 1.9.7 bohan
 
 	* boost serialization test added to the menu item "File" -> "Save as...", as a new type option.
+	* boost serialization test code entirely moved to serialization.private.hpp.
 	
 2006-03-17 psycle 1.9.7 bohan
 

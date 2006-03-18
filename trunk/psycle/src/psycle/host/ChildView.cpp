@@ -754,7 +754,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					CString str2 = str.Right(extension.length());
 					if ( str2.CompareNoCase(extension.c_str()) != 0 ) str.Insert(str.GetLength(),extension.c_str()); ///\todo remove ".psy" first
 					sprintf(szFile,str);
-					_pSong->SaveXML(szFile);
+					try
+					{
+						_pSong->SaveXML(szFile);
+					}
+					catch(...)
+					{
+						MessageBox("Error creating file!", "Error!", MB_OK);
+						return FALSE;
+					}
 				}
 				else if ( ofn.nFilterIndex == 3 ) 
 				#endif

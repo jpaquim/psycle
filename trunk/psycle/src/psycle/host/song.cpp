@@ -22,18 +22,7 @@
 #if !defined PSYCLE__CONFIGURATION__SERIALIZATION
 	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
 #elif PSYCLE__CONFIGURATION__SERIALIZATION
-	#include <fstream>
-	#include <boost/archive/xml_oarchive.hpp>
-	#include <boost/serialization/nvp.hpp>
-//	#include <boost/serialization/level.hpp>
-//	BOOST_CLASS_IMPLEMENTATION(psycle::host::Song, boost::serialization::object_serializable)
-//	#include <boost/serialization/version.hpp>
-//	BOOST_CLASS_VERSION(psycle::host::Song, 0)
-//	#include <boost/serialization/tracking.hpp>
-//	BOOST_CLASS_TRACKING(psycle::host::Song, boost::serialization::track_never)
-//	#include <boost/serialization/export.hpp>
-//	BOOST_CLASS_EXPORT_GUID(psycle::host::Song, "song")
-//	#include <boost/serialization/binary_object.hpp>
+	#include "serialization.private.hpp"
 #endif
 
 #if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
@@ -1314,129 +1303,8 @@ namespace psycle
 			return false;
 		}
 
-		#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-			#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-		#elif PSYCLE__CONFIGURATION__SERIALIZATION
-			void Song::SaveXML(std::string const & file_name) throw(std::exception)
-			{
-				std::ofstream ostream(file_name.c_str());
-				boost::archive::xml_oarchive archive(ostream);
-				Song const & song(*this); // archive needs a const reference
-				archive << boost::serialization::make_nvp("psycle", song);
-			}
-
-			template<typename Archive>
-			void Song::serialize(Archive & archive, unsigned int const version)
-			{
-				try
-				{
-				#if 1
-					archive & boost::serialization::make_nvp("type"   , std::string("PSY3SONG"));
-					archive & boost::serialization::make_nvp("name"   , std::string(Name   ));
-					archive & boost::serialization::make_nvp("author" , std::string(Author ));
-					archive & boost::serialization::make_nvp("comment", std::string(Comment));
-
-					// speed
-					{
-						double const hertz(m_LinesPerBeat * m_BeatsPerMin / 60.);
-						archive & BOOST_SERIALIZATION_NVP(hertz);
-					}
-
-					// sequence
-					{
-						archive & boost::serialization::make_nvp("sequence-length", playLength);
-						for(unsigned int i(0); i < playLength; ++i) archive & boost::serialization::make_nvp("pattern", playOrder[i]);
-					}
-
-					// patterns
-					{
-						{
-							unsigned int patterns(0);
-							for(unsigned int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern) if(IsPatternUsed(pattern)) ++patterns;
-							archive & BOOST_SERIALIZATION_NVP(patterns);
-						}
-						for(unsigned int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
-						{
-							if(!IsPatternUsed(pattern)) continue;
-							archive & BOOST_SERIALIZATION_NVP(pattern);
-							archive & boost::serialization::make_nvp("name", std::string(patternName[pattern]));
-							PatternEntry * const lines(reinterpret_cast<PatternEntry*>(ppPatternData[pattern]));
-							archive & boost::serialization::make_nvp("lines", patternLines[pattern]);
-							archive & boost::serialization::make_nvp("tracks", SONGTRACKS);
-							#if 0
-								archive & boost::serialization::make_nvp("pattern-as-binary", boost::serialization::make_binary_object(ppPatternData[pattern], patternLines[pattern] * SONGTRACKS * EVENT_SIZE));
-							#else
-								for(unsigned int line(0) ; line < patternLines[pattern] ; ++line)
-								{
-									archive & BOOST_SERIALIZATION_NVP(line);
-									PatternEntry * const events(lines + line * MAX_TRACKS);
-									for(unsigned int track(0); track < SONGTRACKS ; ++track)
-									{
-										archive & BOOST_SERIALIZATION_NVP(track);
-										PatternEntry & event(events[track]);
-										archive & boost::serialization::make_nvp("command"    , event._cmd      );
-										archive & boost::serialization::make_nvp("instrument" , event._inst     );
-										archive & boost::serialization::make_nvp("machine"    , event._mach     );
-										archive & boost::serialization::make_nvp("note"       , event._note     );
-										archive & boost::serialization::make_nvp("parameter"  , event._parameter);
-									}
-								}
-							#endif
-						}
-					}
-
-					// machines
-					{
-						{
-							unsigned int machines(0);
-							for(unsigned int i(0) ; i < MAX_MACHINES; ++i) if(_pMachine[i]) ++machines;
-							archive & BOOST_SERIALIZATION_NVP(machines);
-						}
-						for(unsigned int i(0) ; i < MAX_MACHINES; ++i)
-						{
-							if(!_pMachine[i]) continue;
-							archive & boost::serialization::make_nvp("id", i);
-							//archive & *_pMachine[i];
-						}
-					}
-
-					// instruments
-					{
-						{
-							unsigned int instruments(0);
-							for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i) if(!_pInstrument[i]->Empty()) ++instruments;
-							archive & BOOST_SERIALIZATION_NVP(instruments);
-						}
-						for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i)
-						{
-							if(_pInstrument[i]->Empty()) continue;
-							archive & boost::serialization::make_nvp("id", i);
-							//archive & *_pInstrument[i];
-						}
-					}
-				#endif
-				}
-				catch(...)
-				{
-					throw;
-				}
-			}
-		#endif
-
 		bool Song::Save(RiffFile* pFile,bool autosave)
 		{
-			#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-				#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-			#elif PSYCLE__CONFIGURATION__SERIALIZATION
-				{
-					std::string name(pFile->file_name() + ".xml");
-					std::ofstream ostream(name.c_str());
-					boost::archive::xml_oarchive archive(ostream);
-					Song const & song(*this); // archive needs a const reference
-					archive << boost::serialization::make_nvp("psycle", song);
-				}
-			#endif
-
 			// NEW FILE FORMAT!!!
 			// this is much more flexible, making maintenance a breeze compared to that old hell.
 			// now you can just update one module without breaking the whole thing.
