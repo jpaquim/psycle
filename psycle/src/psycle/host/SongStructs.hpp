@@ -52,20 +52,13 @@ namespace psycle
 		// Patterns are organized in rows.
 		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEntry) bytes
 		// belong to the first line.
-		#if defined DIVERSALIS__COMPILER__MICROSOFT
-			#pragma warning(push)
-			#pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
-		#endif
 		UNIVERSALIS__COMPILER__ALIGNED(1)
 		class Pattern
 		{
 			public:
-				PatternEntry _data[];
+				PatternEntry * _data;
 				///\todo make it object-oriented
 		};
-		#if defined DIVERSALIS__COMPILER__MICROSOFT
-			#pragma warning(pop)
-		#endif
 
 		enum MachineType
 		{

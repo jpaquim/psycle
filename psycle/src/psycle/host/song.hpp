@@ -10,16 +10,6 @@
 
 
 
-#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-	#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__SERIALIZATION
-	#include <boost/archive/xml_oarchive.hpp>
-	#include <boost/serialization/nvp.hpp>
-	#include <boost/serialization/string.hpp>
-#endif
-
-
-
 #if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
 	#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 #else
@@ -179,12 +169,6 @@ namespace psycle
 			bool Load(RiffFile* pFile, bool fullopen=true);
 			/// saves this song to a file.
 			bool Save(RiffFile* pFile,bool autosave=false);
-			#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-				#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-			#elif PSYCLE__CONFIGURATION__SERIALIZATION
-				/// saves this song to a file, as XML.
-				void SaveXML(std::string const & file_name) throw(std::exception);
-			#endif
 			/// Used to detect if an especific pattern index contains any data.
 			bool IsPatternUsed(int i);
 			///\name previews waving
@@ -283,14 +267,16 @@ namespace psycle
 				/// Loader for old psycle fileformat.
 				bool LoadOldFileFormat(RiffFile* pFile, bool fullopen);
 
-			#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-				#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-			#elif PSYCLE__CONFIGURATION__SERIALIZATION
-				private:
-					friend class boost::serialization::access;
-					template<typename Archive>
-					void serialize(Archive & archive, unsigned int const version);
-			#endif
+			///\name serialization
+			///\{
+				#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+					#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+				#elif PSYCLE__CONFIGURATION__SERIALIZATION
+					public:
+						/// saves this song to a file, as XML.
+						void SaveXML(std::string const & file_name) throw(std::exception);
+				#endif
+			///\}
 		};
 	}
 }
