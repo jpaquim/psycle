@@ -27,7 +27,7 @@ namespace psycle
 				std::string name_;
 
 			public:
-				unsigned int const inline & lines() const throw() { return entries.size(); }
+				unsigned int const inline & lines() const throw() { return size(); }
 				void lines(unsigned int const & value)
 				{
 					resize(lines);
