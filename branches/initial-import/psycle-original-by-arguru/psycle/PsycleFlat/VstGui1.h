@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CVstGui frame
-#include "d:\vst\vst.h"
+#include "..\vst\vst.h"
 
 class CVstGui : public CFrameWnd
 {

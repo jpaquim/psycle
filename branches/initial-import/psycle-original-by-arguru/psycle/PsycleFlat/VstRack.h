@@ -9,7 +9,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CVstRack dialog
-#include "d:\vst\Vst.h"
+#include "..\vst\Vst.h"
 
 class CVstRack : public CDialog
 {

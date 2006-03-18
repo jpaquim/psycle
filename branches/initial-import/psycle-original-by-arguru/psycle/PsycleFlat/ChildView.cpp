@@ -200,6 +200,7 @@ void dspClear(float *sSamples,int numSamples)
 
 void machwork(int numSamples)
 {
+	CSingleLock crit(&SONG->door,TRUE);
 	idletime=0;
 
 	__asm	rdtsc				// Read time stamp to EAX

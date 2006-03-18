@@ -871,6 +871,7 @@ void psySong::DestroyMachine(int mac)
 {
 // Delete and destroy the MACHINE!
 // Lets search machines with connection to this one...
+	CSingleLock lock(&door,TRUE);
 	for (int c=0;c<MAX_MACHINES;c++)
 	{
 		if(Activemachine[c])

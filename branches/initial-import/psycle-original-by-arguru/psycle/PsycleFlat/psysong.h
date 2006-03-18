@@ -4,6 +4,8 @@
 class psySong
 {
 public:
+	CCriticalSection door;
+	
 	psySong();
 	~psySong();
 	void newSong();	

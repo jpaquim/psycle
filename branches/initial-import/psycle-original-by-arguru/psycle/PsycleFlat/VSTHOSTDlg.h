@@ -7,7 +7,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CVSTHOSTDlg dialog
-#include "d:\vst\vst.h"
+#include "..\vst\vst.h"
 #include "vstgui1.h"
 
 class CVSTHOSTDlg : public CDialog

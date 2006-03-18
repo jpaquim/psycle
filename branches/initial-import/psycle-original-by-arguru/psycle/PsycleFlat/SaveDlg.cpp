@@ -573,8 +573,8 @@ void CSaveDlg::LoadSong()
 	
 		if(FailedMac>0)
 		{
-		for(int n=0;n<FailedMac;n++)
-		GetParent()->MessageBox(fbuffer[n],"Failed machines");
+		//for(int n=0;n<FailedMac;n++)
+			AfxMessageBox("Failed loading some machines");
 		}
 
 	}

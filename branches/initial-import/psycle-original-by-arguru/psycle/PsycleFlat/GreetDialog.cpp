@@ -63,6 +63,8 @@ BOOL CGreetDialog::OnInitDialog()
 	m_greetz.AddString("Mulder3");
 	m_greetz.AddString("HexDump");
 	m_greetz.AddString("Robotico");
+	m_greetz.AddString("Krzysztof Foltman [FSM]");
+
 	m_greetz.AddString("All #track at Irc-Hispano");
 	
 	return TRUE;

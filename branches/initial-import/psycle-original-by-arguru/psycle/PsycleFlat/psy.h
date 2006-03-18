@@ -13,7 +13,7 @@
 #include "machineinterface.h"
 #include "math.h"
 #include "filter.h"
-#include "d:\vst\Vst.h"
+#include "..\vst\Vst.h"
 #define undenormalise(sample) if(((*(unsigned int*)&sample)&0x7f800000)==0) sample=0.0f
 #include "riff.h"
 	
@@ -348,6 +348,8 @@ public:
 class psySong
 {
 public:
+	CCriticalSection door;
+
 	fxCB micb;
 	bool Tweaker;
 	CVst m_Vst;

@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "d:\ventana\ventana.h"
+// #include "d:\ventana\ventana.h"
 #include "Vst.h"
 
 #ifdef _DEBUG
