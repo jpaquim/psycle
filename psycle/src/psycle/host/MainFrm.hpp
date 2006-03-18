@@ -25,26 +25,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CMainFrame();
 		protected: 
 			DECLARE_DYNAMIC(CMainFrame)
-		// Attributes
 		public:
 			Song* _pSong;
 			int vuprevL;
 			int vuprevR;
 
-		// Operations
 		public:
 			void SetAppSongBpm(int x);
 			void SetAppSongTpb(int x);
 			void UpdatePlayOrder(bool mode);
 			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CMainFrame)
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-			//}}AFX_VIRTUAL
 			friend class InputHandler;
-		// Implementation
 		public:
 			void UpdateSequencer(int bottom = -1);
 			bool isguiopen[MAX_MACHINES];
@@ -121,8 +114,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //			ULONG_PTR gdiplusToken; // GDI+ stuff
 
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CMainFrame)
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnBarButton1();
@@ -203,11 +194,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnNotestoeffects();
 			afx_msg void OnMoveCursorPaste();
 			afx_msg void OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult);
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

@@ -179,6 +179,12 @@ namespace psycle
 			bool Load(RiffFile* pFile, bool fullopen=true);
 			/// saves this song to a file.
 			bool Save(RiffFile* pFile,bool autosave=false);
+			#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
+				#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
+			#elif PSYCLE__CONFIGURATION__SERIALIZATION
+				/// saves this song to a file, as XML.
+				void SaveXML(std::string const & file_name) throw(std::exception);
+			#endif
 			/// Used to detect if an especific pattern index contains any data.
 			bool IsPatternUsed(int i);
 			///\name previews waving

@@ -1,12 +1,19 @@
 for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=log
 
+2006-03-18 psycle 1.9.7 bohan
+
+	* boost serialization test added to the menu item "File" -> "Save as...", as a new type option.
+	
+2006-03-17 psycle 1.9.7 bohan
+
+	* some portability fixes
+	* boost serialization test
+	
 2006-03-16 psycle 1.9.7 bohan
 
 	* reviewed numeric type sizes in psycle::host::Song::Save and prettified it
 	* old fileformat loaders: moved remaining code to psycle/host/legacy/old_file_format.cpp.
 	* vst: removed debug logging of the effEditIdle opcode
-	* some portability fixes
-	* boost serialization test
 	
 2006-03-15 psycle 1.9.7 bohan
 
