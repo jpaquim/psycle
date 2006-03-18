@@ -40,10 +40,12 @@ namespace psycle
 		template<typename Archive>
 		void serialize(Archive & archive, Song & instance, unsigned int const version)
 		{
-			archive & boost::serialization::make_nvp("type"   , std::string("PSY3SONG"));
-			archive & boost::serialization::make_nvp("name"   , std::string(instance.Name   ));
-			archive & boost::serialization::make_nvp("author" , std::string(instance.Author ));
-			archive & boost::serialization::make_nvp("comment", std::string(instance.Comment));
+			using boost::serialization::make_nvp;
+
+			archive & make_nvp("type"   , std::string("PSY3SONG"));
+			archive & make_nvp("name"   , std::string(instance.Name   ));
+			archive & make_nvp("author" , std::string(instance.Author ));
+			archive & make_nvp("comment", std::string(instance.Comment));
 
 			// speed
 			{
@@ -53,8 +55,8 @@ namespace psycle
 
 			// sequence
 			{
-				archive & boost::serialization::make_nvp("sequence-length", instance.playLength);
-				for(unsigned int i(0); i < instance.playLength; ++i) archive & boost::serialization::make_nvp("pattern", instance.playOrder[i]);
+				archive & make_nvp("sequence-length", instance.playLength);
+				for(unsigned int i(0); i < instance.playLength; ++i) archive & make_nvp("pattern", instance.playOrder[i]);
 			}
 
 			// patterns
@@ -68,10 +70,10 @@ namespace psycle
 				{
 					if(!instance.IsPatternUsed(pattern)) continue;
 					archive & BOOST_SERIALIZATION_NVP(pattern);
-					archive & boost::serialization::make_nvp("name", std::string(instance.patternName[pattern]));
+					archive & make_nvp("name", std::string(instance.patternName[pattern]));
 					PatternEntry * const lines(reinterpret_cast<PatternEntry*>(instance.ppPatternData[pattern]));
-					archive & boost::serialization::make_nvp("lines", instance.patternLines[pattern]);
-					archive & boost::serialization::make_nvp("tracks", instance.SONGTRACKS);
+					archive & make_nvp("lines", instance.patternLines[pattern]);
+					archive & make_nvp("tracks", instance.SONGTRACKS);
 					for(unsigned int line(0) ; line < instance.patternLines[pattern] ; ++line)
 					{
 						archive & BOOST_SERIALIZATION_NVP(line);
@@ -80,11 +82,11 @@ namespace psycle
 						{
 							archive & BOOST_SERIALIZATION_NVP(track);
 							PatternEntry & event(events[track]);
-							archive & boost::serialization::make_nvp("command"    , event._cmd      );
-							archive & boost::serialization::make_nvp("instrument" , event._inst     );
-							archive & boost::serialization::make_nvp("machine"    , event._mach     );
-							archive & boost::serialization::make_nvp("note"       , event._note     );
-							archive & boost::serialization::make_nvp("parameter"  , event._parameter);
+							archive & make_nvp("command"    , event._cmd      );
+							archive & make_nvp("instrument" , event._inst     );
+							archive & make_nvp("machine"    , event._mach     );
+							archive & make_nvp("note"       , event._note     );
+							archive & make_nvp("parameter"  , event._parameter);
 						}
 					}
 				}
@@ -100,7 +102,7 @@ namespace psycle
 				for(unsigned int i(0) ; i < MAX_MACHINES; ++i)
 				{
 					if(!instance._pMachine[i]) continue;
-					archive & boost::serialization::make_nvp("id", i);
+					archive & make_nvp("id", i);
 				//	archive & *instance._pMachine[i];
 				}
 			}
@@ -115,7 +117,7 @@ namespace psycle
 				for(unsigned int i(0) ; i < MAX_INSTRUMENTS; ++i)
 				{
 					if(instance._pInstrument[i]->Empty()) continue;
-					archive & boost::serialization::make_nvp("id", i);
+					archive & make_nvp("id", i);
 				//	archive & *instance._pInstrument[i];
 				}
 			}

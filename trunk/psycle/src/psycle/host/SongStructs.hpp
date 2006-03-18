@@ -49,39 +49,6 @@ namespace psycle
 				#endif
 		};
 
-		// Patterns are organized in rows.
-		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEntry) bytes
-		// belong to the first line.
-		UNIVERSALIS__COMPILER__ALIGNED(1)
-		class Pattern
-		{
-			public:
-				PatternEntry * _data;
-
-			public:
-				inline Pattern(unsigned int const & id) : id_(id) {}
-
-			public:
-				unsigned int const inline & id() const throw() { return id_; }
-			private:
-				unsigned int const          id_;
-
-#if 0
-			public:
-				///\todo setter has to be more complex
-			//	void        inline name(std::string const & value)                   throw() {        Global::song().patternName[id()]  = value; }
-				std::string inline name(                         )             const throw() { return Global::song().patternName[id()]         ; }
-
-				///\todo setter has to be more complex
-			//	void               inline    lines(unsigned int const & value)       throw() {        Global::song().patternLines[id()] = value; }
-				unsigned int const inline &  lines(                          ) const throw() { return Global::song().patternLines[id()]        ; }
-
-				///\todo setter has to be more complex
-			//	void               inline   tracks(unsigned int const & value)       throw() {        Global::song().SONGTRACKS         = value; }
-				unsigned int const inline & tracks(                          ) const throw() { return Global::song().SONGTRACKS                ; }
-#endif
-		};
-
 		enum MachineType
 		{
 			MACH_UNDEFINED = -1,
