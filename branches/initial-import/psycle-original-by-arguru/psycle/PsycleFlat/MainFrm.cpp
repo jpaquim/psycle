@@ -285,7 +285,7 @@ void CMainFrame::UpdatePlayOrder(bool mode)
 
 CMainFrame::ConfigAudio()
 {
-	m_wndView.ConfigAudio();
+	m_wndView.ConfigAudio(false);
 }
 
 
@@ -701,7 +701,7 @@ CMainFrame::WaveEditorBackUpdate()
 
 void CMainFrame::OnClose() 
 {
-	if(MessageBox("Sure to leave?","Quit Psycle",MB_YESNO)==IDYES)
+	if(MessageBox("Are you sure?","Quit Psycle",MB_YESNO)==IDYES)
 	CFrameWnd::OnClose();
 }
 

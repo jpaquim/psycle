@@ -46,7 +46,7 @@ public:
 public:
 
 	void InitTimer();
-	void ConfigAudio();
+	void ConfigAudio(bool forceConfig);
 	void ShowSplash();
 	void UpdateIBrowseDlg();
 	void UpdateSBrowseDlg();

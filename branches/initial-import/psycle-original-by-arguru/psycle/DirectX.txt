@@ -1,0 +1,19 @@
+Brief DirectX driver help
+
+The DirectX driver can be used in two modes; exclusive and non-exclusive.
+These are selected by checking and unchecking the "exclusive" box.
+In exclusive mode, the driver assumes exclusive control of the
+primary Direct Sound buffer. This means that Direct Sound's internal
+mixing routines are bypassed, and that some overhead is lost, thus
+resulting in lower latency. It also means that no other application
+can use any sound until Psycle is terminated, another driver is
+selected, or the "exclusive" box is unchecked.
+
+I had some problems on my computer with high-frequency noise when
+using the non-exclusive mode (probably because of Direct Sound's
+internal mixer), so always try the exclusive mode if you
+encounter similar problems.
+
+Oh, and you'll need at least DirectX 7.
+
+/Cyber/

@@ -10,6 +10,8 @@
 
 #include "stdafx.h"
 #include "Psycle2.h"
+#include "Registry.h"
+#include "Configuration.h"
 
 #include "ChildView.h"
 #include "Bitmap.cpp"
@@ -38,9 +40,7 @@
 #include "SkinDlg.h"
 #include "SongpDlg.h"
 #include "MasterDlg.h"
-
-// Other aux codes
-#include "Waveout.cpp"
+#include "OutputDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -97,75 +97,83 @@ float *dSamples=new float[65536];
 float sx=0;
 float speed=1.0f;
 int framed=0;
-ad Driver;
+AudioDriver* pAudioDriver;
 
 inline int f2i(double d)
 {
-  const double magic = 6755399441055744.0; // 2^51 + 2^52
-  double tmp = (d-0.5) + magic;
-  return *(int*) &tmp;
+	const double magic = 6755399441055744.0; // 2^51 + 2^52
+	double tmp = (d-0.5) + magic;
+	return *(int*) &tmp;
 };
 
 void WaveToFile(float *data,int ns)
 {
 	do
 	{
-	short pl=f2i(*data);
-	++data;
-	short pr=f2i(*data);
-	++data;
-
-	SONG->m_WaveFile.WriteStereoSample(pl,pr);
-	}while(--ns);
+		short pl=f2i(*data);
+		++data;
+		short pr=f2i(*data);
+		++data;
+		SONG->m_WaveFile.WriteStereoSample(pl,pr);
+	}
+	while(--ns);
 }
 
 float *myfunc(int& nsamples)
-{	
+{
 	float *pSamplesm=dSamples;
 	int numSamplex=nsamples;
 	do
 	{
-	if(numSamplex>255)
-		amount=256;
-	else
-		amount=numSamplex;
-
-//////////////////////////////////////////////////////////////////////
-// Tick handler function
-
-if(SONG->PlayMode && amount>=SONG->TicksRemaining)
-amount=SONG->TicksRemaining;
-
-//////////////////////////////////////////////////////////////////////
-//	Song play
-
-	SONG->ExecuteLine();
-
-//////////////////////////////////////////////////////////////////////
-// Processing plant
-
-	// Clearing 'MASTER' machine samples buffers
-	if(amount>0)
-	{
-	dspClear(SONG->machine[0]->samplesLeft,amount);
-	dspClear(SONG->machine[0]->samplesRight,amount);
-
-	SONG->PW_Work(SONG->machine[0]->samplesLeft,SONG->machine[0]->samplesRight,amount);
-
-	machwork(amount);
-	SONG->machine[0]->Work(pSamplesm,NULL,amount,0);
-	
-	if(SONG->m_WaveStage)
-	WaveToFile(pSamplesm,amount);
-
-	pSamplesm+=amount*2;
-	numSamplex-=amount;
+		if (numSamplex>255)
+		{
+			amount=256;
+		}
+		else
+		{
+			amount=numSamplex;
+		}
+		
+		//////////////////////////////////////////////////////////////////////
+		// Tick handler function
+		
+		if (SONG->PlayMode && amount>=SONG->TicksRemaining)
+		{
+			amount=SONG->TicksRemaining;
+		}
+		
+		//////////////////////////////////////////////////////////////////////
+		//	Song play
+		
+		SONG->ExecuteLine();
+		
+		//////////////////////////////////////////////////////////////////////
+		// Processing plant
+		
+		// Clearing 'MASTER' machine samples buffers
+		if (amount>0)
+		{
+			dspClear(SONG->machine[0]->samplesLeft,amount);
+			dspClear(SONG->machine[0]->samplesRight,amount);
+			
+			SONG->PW_Work(SONG->machine[0]->samplesLeft,SONG->machine[0]->samplesRight,amount);
+			
+			machwork(amount);
+			SONG->machine[0]->Work(pSamplesm,NULL,amount,0);
+			
+			if (SONG->m_WaveStage)
+			{
+				WaveToFile(pSamplesm,amount);
+			}
+			pSamplesm+=amount*2;
+			numSamplex-=amount;
+		}
+		if (SONG->PlayMode)
+		{
+			SONG->TicksRemaining-=amount;
+		}
 	}
-
-	if(SONG->PlayMode)
-	SONG->TicksRemaining-=amount;
-	
-	}while(numSamplex);
+	while(numSamplex);
 	
 	return dSamples;
 }
@@ -181,18 +189,22 @@ void dspAdd(float *sSamples,float *dSamples, int numSamples, float vol)
 {
 	--sSamples;
 	--dSamples;
-
-	do{
-	*++dSamples+=*++sSamples*vol;
-	}while(--numSamples);
+	
+	do
+	{
+		*++dSamples += *++sSamples*vol;
+	}
+	while(--numSamples);
 }
 
 void dspClear(float *sSamples,int numSamples)
 {
 	--sSamples;
-	do{
-	*++sSamples=0;
-	}while(--numSamples);
+	do
+	{
+		*++sSamples=0;
+	}
+	while(--numSamples);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -202,73 +214,73 @@ void machwork(int numSamples)
 {
 	CSingleLock crit(&SONG->door,TRUE);
 	idletime=0;
-
+	
 	__asm	rdtsc				// Read time stamp to EAX
-	__asm	mov		idletime, eax
-
-	// Reset all machines
-	bool doloop;
-
+		__asm	mov		idletime, eax
+		
+		// Reset all machines
+		bool doloop;
+	
 	for(int c=1;c<MAX_MACHINES;c++)
 	{
-		if(SONG->Activemachine[c])SONG->machine[c]->Worked=false;
+		if (SONG->Activemachine[c])SONG->machine[c]->Worked=false;
 	}
-
+	
 	do{
-	doloop=false;
-	
-	for(c=1;c<MAX_MACHINES;c++)
-	{
-		if(SONG->Activemachine[c]){
-		psyGear *tmach=SONG->machine[c];
+		doloop=false;
 		
-		if(!tmach->Worked)
-		  { // Machine without working found
-			bool doitm=true; // Let's supposse that it will work now...
-
-			for(int w=0;w<MAX_CONNECTIONS;w++)
-			{   // Checking if all stuff plugged worked.
-				if(tmach->inCon[w] && !SONG->machine[tmach->inputSource[w]]->Worked)
-				{	// Some of your parents not worked, so, you'll have to wait 
-					// to the next loop!
-					doloop=true;
-					doitm=false;
-				}
-			}//Input conection bucle
-			
-			// Ok, everybody behind you worked, now, work you...
-			if(doitm)
-			{
-			tmach->Work(tmach->samplesLeft,tmach->samplesRight,numSamples,SONG->SONGTRACKS);
-
-			for (w=0;w<MAX_CONNECTIONS;w++)
-			{
-				// Now, feed your samples to your childs...
-				if(tmach->conection[w])
-				{
-				int destIndex=tmach->outputDest[w];
-				dspAdd(tmach->samplesRight,SONG->machine[destIndex]->samplesRight,numSamples,tmach->rVol*tmach->connectionVol[w]);
-				dspAdd(tmach->samplesLeft,SONG->machine[destIndex]->samplesLeft,numSamples,tmach->lVol*tmach->connectionVol[w]);
-				}// Exist connection
-			}// Connection bucle
-
-				tmach->Worked=true;
-
-				dspClear(tmach->samplesLeft,amount);
-				dspClear(tmach->samplesRight,amount);
+		for(c=1;c<MAX_MACHINES;c++)
+		{
+			if (SONG->Activemachine[c]){
+				psyGear *tmach=SONG->machine[c];
 				
-				}// Machine that worked
-			}// Machine without working found
-		}// Machine is activated on the song
-	}// For bucle
-}while(doloop);
-
-
-	__asm	rdtsc				
-	__asm	sub		eax, idletime	// Find the difference
-	__asm	mov		idletime, eax
+				if (!tmach->Worked)
+				{ // Machine without working found
+					bool doitm=true; // Let's supposse that it will work now...
+					
+					for(int w=0;w<MAX_CONNECTIONS;w++)
+					{   // Checking if all stuff plugged worked.
+						if (tmach->inCon[w] && !SONG->machine[tmach->inputSource[w]]->Worked)
+						{	// Some of your parents not worked, so, you'll have to wait 
+							// to the next loop!
+							doloop=true;
+							doitm=false;
+						}
+					}//Input conection bucle
+					
+					// Ok, everybody behind you worked, now, work you...
+					if (doitm)
+					{
+						tmach->Work(tmach->samplesLeft,tmach->samplesRight,numSamples,SONG->SONGTRACKS);
+						
+						for (w=0;w<MAX_CONNECTIONS;w++)
+						{
+							// Now, feed your samples to your childs...
+							if (tmach->conection[w])
+							{
+								int destIndex=tmach->outputDest[w];
+								dspAdd(tmach->samplesRight,SONG->machine[destIndex]->samplesRight,numSamples,tmach->rVol*tmach->connectionVol[w]);
+								dspAdd(tmach->samplesLeft,SONG->machine[destIndex]->samplesLeft,numSamples,tmach->lVol*tmach->connectionVol[w]);
+							}// Exist connection
+						}// Connection bucle
+						
+						tmach->Worked=true;
+						
+						dspClear(tmach->samplesLeft,amount);
+						dspClear(tmach->samplesRight,amount);
+						
+					}// Machine that worked
+				}// Machine without working found
+			}// Machine is activated on the song
+		}// For bucle
+	}while(doloop);
 	
-	unsigned cpudspz=numSamples*(SONG->CPUHZ/44100);
+	
+	__asm	rdtsc				
+		__asm	sub		eax, idletime	// Find the difference
+		__asm	mov		idletime, eax
+		
+		unsigned cpudspz=numSamples*(SONG->CPUHZ/44100);
 	SONG->cpuIdle=(idletime*1000)/cpudspz;
 }
 
@@ -293,14 +305,14 @@ CChildView::CChildView()
 	showIBOnPatview=true;
 	patBufferCopy=false;
 	OFilter.MakeCoefs();
-
+	
 	blockLineStart=0;
 	blockLineEnd=0;
 	blockTrackStart=0;
 	blockTrackEnd=0;
-
+	
 	_getcwd(m_appdir,_MAX_PATH);
-
+	
 	stuffbmp.LoadBitmap(IDB_STUFF);
 	
 	InitConfig();
@@ -310,19 +322,22 @@ CChildView::CChildView()
 	// Creates a new song object. The application SONG.
 	SONG->Reset();
 	char buffer[_MAX_PATH];
-
+	
 	sprintf(buffer,"%s/plugins",m_appdir);
 	SONG->ReadBuzzfx(buffer);
 	_chdir(m_appdir);
-
+	
 	SONG->newSong();
-
+	
 	// Referencing the childView song pointer to the
 	// Main SONG object [The application SONG]
 	childSong=SONG;
-		
-	for(int c=0;c<256;c++)FLATSIZES[c]=8;
-
+	
+	for(int c=0;c<256;c++)
+	{
+		FLATSIZES[c]=8;
+	}
+	
 	// Initializing enviroment data
 	seqOffset=0;
 	seqStep=16;
@@ -334,60 +349,64 @@ CChildView::CChildView()
 	patLine=0;
 	mcd_x=0;
 	mcd_y=0;
-
+	
+	// Silent audio driver as default
+	//
+	pAudioDriver = new AudioDriver;
 }
 
 CChildView::~CChildView()
 {
-	if(recordDlg && ::IsWindow(recordDlg->m_hWnd))
-	recordDlg->DestroyWindow();
-
+	if (recordDlg && ::IsWindow(recordDlg->m_hWnd))
+		recordDlg->DestroyWindow();
+	
 	WriteConfig();
 	SONG->Stop();
-	Driver.Stop();
+	pAudioDriver->Enable(false);
 	Sleep(LOCK_LATENCY);
 	pParentMain->CloseAllMacGuis();
 	delete SONG;	// Delete the song created
 	delete dSamples;
+	delete pAudioDriver;
 }
 
 BEGIN_MESSAGE_MAP(CChildView,CWnd )
-	//{{AFX_MSG_MAP(CChildView)
-	ON_WM_PAINT()
-	ON_COMMAND(ID_CONFIGURATION_AUDIODRIVER, OnConfigurationAudiodriver)
-	ON_WM_LBUTTONDOWN()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONDBLCLK()
-	ON_COMMAND(ID_HELP_PSYCLEENVIROMENTINFO, OnHelpPsycleenviromentinfo)
-	ON_WM_DESTROY()
-	ON_COMMAND(ID_APP_EXIT, OnAppExit)
-	ON_COMMAND(ID_MACHINEVIEW, OnMachineview)
-	ON_WM_KEYDOWN()
-	ON_COMMAND(ID_PATTERNVIEW, OnPatternView)	
-	ON_COMMAND(ID_BARPLAY, OnBarplay)
-	ON_COMMAND(ID_BARSTOP, OnBarstop)
-	ON_WM_TIMER()
-	ON_COMMAND(ID_SHOWIED, OnShowied)
-	ON_COMMAND(ID_RECORDB, OnRecordb)
-	ON_COMMAND(ID_FILE_SAVESONG, OnFileSavesong)
-	ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
-	ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
-	ON_COMMAND(ID_CONFIGURATION_SETTINGS_BACKGROUNDSKIN, OnConfigurationSettingsBackgroundskin)
-	ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
-	ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
-	ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
-	ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
-	ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
-	ON_COMMAND(ID_FILE_NEW, OnFileNew)
-	ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
-	ON_COMMAND(ID_CONFIGURATION_KEYBOARDLAYOUT_FRENCH, OnConfigurationKeyboardlayoutFrench)
-	ON_COMMAND(ID_CONFIGURATION_KEYBOARDLAYOUT_STANDARD, OnConfigurationKeyboardlayoutStandard)
-	ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_KEYBOARDLAYOUT_FRENCH, OnUpdateConfigurationKeyboardlayoutFrench)
-	ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_KEYBOARDLAYOUT_STANDARD, OnUpdateConfigurationKeyboardlayoutStandard)
-	ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordb)
-	//}}AFX_MSG_MAP
+//{{AFX_MSG_MAP(CChildView)
+ON_WM_PAINT()
+ON_COMMAND(ID_CONFIGURATION_AUDIODRIVER, OnConfigurationAudiodriver)
+ON_WM_LBUTTONDOWN()
+ON_WM_RBUTTONDOWN()
+ON_WM_LBUTTONUP()
+ON_WM_MOUSEMOVE()
+ON_WM_LBUTTONDBLCLK()
+ON_COMMAND(ID_HELP_PSYCLEENVIROMENTINFO, OnHelpPsycleenviromentinfo)
+ON_WM_DESTROY()
+ON_COMMAND(ID_APP_EXIT, OnAppExit)
+ON_COMMAND(ID_MACHINEVIEW, OnMachineview)
+ON_WM_KEYDOWN()
+ON_COMMAND(ID_PATTERNVIEW, OnPatternView)	
+ON_COMMAND(ID_BARPLAY, OnBarplay)
+ON_COMMAND(ID_BARSTOP, OnBarstop)
+ON_WM_TIMER()
+ON_COMMAND(ID_SHOWIED, OnShowied)
+ON_COMMAND(ID_RECORDB, OnRecordb)
+ON_COMMAND(ID_FILE_SAVESONG, OnFileSavesong)
+ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
+ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
+ON_COMMAND(ID_CONFIGURATION_SETTINGS_BACKGROUNDSKIN, OnConfigurationSettingsBackgroundskin)
+ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
+ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
+ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
+ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
+ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
+ON_COMMAND(ID_FILE_NEW, OnFileNew)
+ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
+ON_COMMAND(ID_CONFIGURATION_KEYBOARDLAYOUT_FRENCH, OnConfigurationKeyboardlayoutFrench)
+ON_COMMAND(ID_CONFIGURATION_KEYBOARDLAYOUT_STANDARD, OnConfigurationKeyboardlayoutStandard)
+ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_KEYBOARDLAYOUT_FRENCH, OnUpdateConfigurationKeyboardlayoutFrench)
+ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_KEYBOARDLAYOUT_STANDARD, OnUpdateConfigurationKeyboardlayoutStandard)
+ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordb)
+//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -397,12 +416,12 @@ BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
-
+	
 	cs.dwExStyle |= WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
 		::LoadCursor(NULL, IDC_ARROW), HBRUSH(COLOR_WINDOW+1), NULL);
-
+	
 	return TRUE;
 }
 
@@ -412,69 +431,119 @@ void CChildView::OnPaint()
 	CRect rClient;
 	
 	bool do_skin=false;
-	if(appConfig.mv_skin && viewMode==0)do_skin=true;
-	if(appConfig.pv_skin && viewMode==2)do_skin=true;
+	if (appConfig.mv_skin && viewMode==0)do_skin=true;
+	if (appConfig.pv_skin && viewMode==2)do_skin=true;
 	
-	if(updateMode==0)
+	if (updateMode==0)
 	{
-		if(do_skin)
+		if (do_skin)
 		{
-		Draw_BackSkin();
+			Draw_BackSkin();
 		}
 		else
 		{
-		GetClientRect(&rClient);
-		
-		switch(viewMode)
-		{
+			GetClientRect(&rClient);
+			
+			switch(viewMode)
+			{
 			case 0:SetBkColor(dc,appConfig.mv_colour);break;
 			case 2:SetBkColor(dc,appConfig.pv_colour);break;
-		}
-
-		dc.ExtTextOut(0,0,ETO_OPAQUE,&rClient,0,0,0);
+			}
+			
+			dc.ExtTextOut(0,0,ETO_OPAQUE,&rClient,0,0,0);
 		}
 	}
-
+	
 	//////////////////////////////////////////////////////////////////
 	// Machine view paint handler
 	
-	if(viewMode==0)
+	if (viewMode==0)
 	{
 		switch (updateMode)
 		{
 		case 0:
-		DrawMachineEditor(&dc);
-		break;
+			DrawMachineEditor(&dc);
+			break;
 		case 1:
-		psyGear *ptMac=SONG->machine[updatePar];
-		DrawMachine(ptMac->x,ptMac->y,ptMac->editName,&dc,ptMac->panning,ptMac->type);
-		updateMode=0;
-		break;
+			psyGear *ptMac=SONG->machine[updatePar];
+			DrawMachine(ptMac->x,ptMac->y,ptMac->editName,&dc,ptMac->panning,ptMac->type);
+			updateMode=0;
+			break;
 		}
 	}
-
+	
 	//////////////////////////////////////////////////////////////////
 	// Pattern view paint handler
-
-	if(viewMode==2)
+	
+	if (viewMode==2)
 	{
-	DrawPatEditor(&dc);
-	updateMode=0;
+		DrawPatEditor(&dc);
+		updateMode=0;
 	}
-
+	
 }
 
 void CChildView::OnConfigurationAudiodriver() 
 {
-	ConfigAudio();
+	ConfigAudio(true);
 }
 
-void CChildView::ConfigAudio() 
+void CChildView::ConfigAudio(
+	bool forceConfig) 
 {
-	if(!Driver.Initialized)
-	Driver.Initialize(dword(this),myfunc);
+	DWORD size;
+	DWORD type;
+	Registry reg;
+	COutputDlg dlg;
+	bool configured = false;
+	
+	if (pAudioDriver != NULL)
+	{
+		delete pAudioDriver;
+		pAudioDriver = NULL;
+	}
+	
+	dlg.m_driverIndex = 0;
+	if (reg.OpenRootKey(HKEY_CURRENT_USER, SOFTWARE_ROOT_KEY) == ERROR_SUCCESS)
+	{
+		if (reg.OpenKey(CONFIG_KEY) == ERROR_SUCCESS)
+		{
+			size = sizeof(dlg.m_driverIndex);
+			if (reg.QueryValue("OutputDriver", &type, (BYTE*)&dlg.m_driverIndex, &size) == ERROR_SUCCESS)
+			{
+				configured = true;
+			}
+			reg.CloseKey();
+		}
+		reg.CloseRootKey();
+	}
+	
+	if (forceConfig || !configured)
+	{
+		dlg.DoModal();
+		
+		if (reg.OpenRootKey(HKEY_CURRENT_USER, SOFTWARE_ROOT_KEY) == ERROR_SUCCESS)
+		{
+			if (reg.OpenKey(CONFIG_KEY) == ERROR_SUCCESS)
+			{
+				reg.SetValue("OutputDriver", REG_DWORD, (BYTE*)&dlg.m_driverIndex, sizeof(dlg.m_driverIndex));
+				reg.CloseKey();
+			}
+			reg.CloseRootKey();
+		}
 
-	Driver.Configure();
+	}
+	
+	pAudioDriver = dlg.m_pDrivers[dlg.m_driverIndex];
+
+	if (!pAudioDriver->Initialized())
+	{
+		pAudioDriver->Initialize(m_hWnd, myfunc);
+	}
+	if (!pAudioDriver->Configured())
+	{
+		pAudioDriver->Configure();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -482,7 +551,7 @@ void CChildView::ConfigAudio()
 
 void CChildView::InitTimer()
 {
-if(!SetTimer(31,10,NULL))MessageBox("Couldnt initializate timer","Psycle ERROR!", MB_ICONERROR);
+	if (!SetTimer(31,10,NULL))MessageBox("Couldn't initializate timer","Psycle ERROR!", MB_ICONERROR);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -490,10 +559,16 @@ if(!SetTimer(31,10,NULL))MessageBox("Couldnt initializate timer","Psycle ERROR!"
 
 void CChildView::amosDraw(CPaintDC *devc, int oX,int oY,int dX,int dY)
 {
-if(oX==dX)oX++;
-if(oY==dY)oY++;
-devc->MoveTo(oX,oY);
-devc->LineTo(dX,dY);			
+	if (oX==dX)
+	{
+		oX++;
+	}
+	if (oY==dY)
+	{
+		oY++;
+	}
+	devc->MoveTo(oX,oY);
+	devc->LineTo(dX,dY);			
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -507,40 +582,40 @@ devc->LineTo(dX,dY);
 
 void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 {	
-	if(viewMode==0)
+	if (viewMode==0)
 	{
 		// Check for right pressed connection
 		int propMac=GetMachine(point);
-
-		if(propMac>0)
+		
+		if (propMac>0)
 		{
 			// Shows machine properties dialog
 			CMacProp dlg;
 			dlg.machineRef=SONG->machine[propMac];
 			dlg.songRef=SONG;
 			dlg.thisMac=propMac;
-
-			if(dlg.DoModal()==IDOK)
+			
+			if (dlg.DoModal()==IDOK)
 			{
 				sprintf(dlg.songRef->machine[propMac]->editName,dlg.txt);
 				pParentMain->StatusBarText(dlg.txt);
 				pParentMain->UpdateEnvInfo();
 				UpdateSBrowseDlg();
 			}
-
-			if(dlg.deleted)
+			
+			if (dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
 				SONG->DestroyMachine(propMac);
 				pParentMain->UpdateEnvInfo();
 				UpdateSBrowseDlg();
 			}
-
+			
 			Repaint();
 		}
 	}
-
-	if(viewMode==2)
+	
+	if (viewMode==2)
 	{
 		CPatDlg dlg2;
 		dlg2.songRef=SONG;
@@ -552,216 +627,240 @@ void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 
 void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 {
-
+	
 	SetCapture();
-
-switch(viewMode)
-{
-	int c;
-
-case 0: // User is in machine view mode
-	smac=-1;
-	smacmode=0;
-
-	wiresource=-1;
-	wiredest=-1;
-
-	if(nFlags==5)
+	
+	switch(viewMode)
 	{
-	wiresource=GetMachine(point);
-
-		if(wiresource>0)
-		{
-		wireSX=SONG->machine[wiresource]->x+74;
-		wireSY=SONG->machine[wiresource]->y+24;
-		}
-		else
+		int c;
+		
+	case 0: // User is in machine view mode
+		smac=-1;
+		smacmode=0;
+		
 		wiresource=-1;
-	}
-
-	if(nFlags==1)
-	{
-	for(c=0;c<MAX_MACHINES;c++)
-	{
-		if(SONG->Activemachine[c])
+		wiredest=-1;
+		
+		if (nFlags==5)
 		{
-			int x1=SONG->machine[c]->x;
-			int y1=SONG->machine[c]->y;
-			int x2=SONG->machine[c]->x+148;
-			int y2=SONG->machine[c]->y+48;
+			wiresource=GetMachine(point);
 			
-			if(point.x>x1 && point.x<x2 && point.y>y1 && point.y<y2)
+			if (wiresource>0)
 			{
-				smac=c;
-				mcd_x=SONG->machine[c]->x-point.x;
-				mcd_y=SONG->machine[c]->y-point.y;
-				if(point.y>y1+34 && point.y<y1+46)smacmode=1;
+				wireSX=SONG->machine[wiresource]->x+74;
+				wireSY=SONG->machine[wiresource]->y+24;
+			}
+			else
+			{
+				wiresource=-1;
 			}
 		}
-	}
-	}// No Shift
-
-	OnMouseMove(nFlags,point);
-
-	// Check for pressed connection
-
-	for(c=0;c<MAX_MACHINES;c++)
-	{
-		if(SONG->Activemachine[c])
+		
+		if (nFlags==1)
 		{
-			psyGear *tmac=SONG->machine[c];
-
-			for(int w=0;w<MAX_CONNECTIONS;w++)
+			for (c=0;c<MAX_MACHINES;c++)
 			{
-				if(tmac->conection[w])
+				if (SONG->Activemachine[c])
 				{
-					int xt=tmac->connectionPoint[w].x;
-					int yt=tmac->connectionPoint[w].y;
-
-					if(point.x>xt && point.x<xt+20 && point.y>yt && point.y<yt+20)
+					int x1=SONG->machine[c]->x;
+					int y1=SONG->machine[c]->y;
+					int x2=SONG->machine[c]->x+148;
+					int y2=SONG->machine[c]->y+48;
+					
+					if (point.x>x1 && point.x<x2 && point.y>y1 && point.y<y2)
 					{
-						CWireDlg dlg;
-						dlg.wireIndex=w;
-						dlg.songRef=SONG;
-						dlg.isrcMac=c;
-						dlg.macRef=tmac;
-						sprintf(dlg.destName,"%s",SONG->machine[tmac->outputDest[w]]->editName);
-						dlg.DoModal();
-						Repaint();
+						smac=c;
+						mcd_x=SONG->machine[c]->x-point.x;
+						mcd_y=SONG->machine[c]->y-point.y;
+						if (point.y>y1+34 && point.y<y1+46)
+						{
+							smacmode=1;
+						}
+					}
+				}
+			}
+		}// No Shift
+		
+		OnMouseMove(nFlags,point);
+		
+		// Check for pressed connection
+		
+		for(c=0;c<MAX_MACHINES;c++)
+		{
+			if (SONG->Activemachine[c])
+			{
+				psyGear *tmac=SONG->machine[c];
+				
+				for (int w=0;w<MAX_CONNECTIONS;w++)
+				{
+					if (tmac->conection[w])
+					{
+						int xt=tmac->connectionPoint[w].x;
+						int yt=tmac->connectionPoint[w].y;
+						
+						if (point.x>xt && point.x<xt+20 && point.y>yt && point.y<yt+20)
+						{
+							CWireDlg dlg;
+							dlg.wireIndex=w;
+							dlg.songRef=SONG;
+							dlg.isrcMac=c;
+							dlg.macRef=tmac;
+							sprintf(dlg.destName,"%s",SONG->machine[tmac->outputDest[w]]->editName);
+							dlg.DoModal();
+							Repaint();
+						}
 					}
 				}
 			}
 		}
-	}
-break;
-
-case 2:
-
-	CRect rClient;
-	GetClientRect(&rClient);
-	int CW=rClient.Width();
-	int WIDEROWS=CW/111;
-	int snt=SONG->SONGTRACKS;
-	if(--WIDEROWS<2)WIDEROWS=2;
-	
-	int to=SONG->patTrack-(WIDEROWS/2);
-
-	if(to>snt-WIDEROWS)
-	to=snt-WIDEROWS;
-	if(to<0)to=0;
-
-	int ttm=((point.x-44)/111)+to;
-
-	if(ttm<0)ttm=0;
-	if(ttm>=MAX_TRACKS)ttm=MAX_TRACKS-1;
-
-	SONG->track_st[ttm]=!SONG->track_st[ttm];
-	updateMode=1;				
-	Invalidate(false);
-break;
-
-}//<-- End LBUTTONPRESING/VIEWMODE switch statement
-
+		break;
+		
+	case 2:
+		
+		CRect rClient;
+		GetClientRect(&rClient);
+		int CW = rClient.Width();
+		int WIDEROWS = CW/111;
+		int snt = SONG->SONGTRACKS;
+		if (--WIDEROWS < 2)
+		{
+			WIDEROWS=2;
+		}
+		
+		int to = SONG->patTrack-(WIDEROWS/2);
+		
+		if (to > snt-WIDEROWS)
+		{
+			to = snt-WIDEROWS;
+		}
+		if (to < 0)
+		{
+			to=0;
+		}
+		
+		int ttm = ((point.x-44)/111)+to;
+		
+		if (ttm < 0)
+		{
+			ttm = 0;
+		}
+		if (ttm >= MAX_TRACKS)
+		{
+			ttm=MAX_TRACKS-1;
+		}
+		SONG->track_st[ttm] = !SONG->track_st[ttm];
+		updateMode = 1;
+		Invalidate(false);
+		break;
+		
+	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 }
 
 void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 {
 	ReleaseCapture();
-
-switch(viewMode)
-{
-case 0: // User is in machine view mode
-
-	if(wiresource!=-1)
+	
+	switch (viewMode)
 	{
-		wiredest=GetMachine(point);
+	case 0: // User is in machine view mode
 		
-		if(wiredest!=-1 && wiredest!=wiresource) 
+		if (wiresource != -1)
 		{
-		if(!SONG->InsertConnection(wiresource,wiredest))
-		MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+			wiredest=GetMachine(point);
+			if (wiredest!=-1 && wiredest!=wiresource) 
+			{
+				if (!SONG->InsertConnection(wiresource,wiredest))
+				{
+					MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+				}
+			}
+			wiresource=-1;
+			Repaint();
 		}
-
-		wiresource=-1;
-		Repaint();
-	}
-break;
-
-}//<-- End LBUTTONPRESING/VIEWMODE switch statement
-
+		break;
+	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 }
 
 void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 {
-switch(viewMode)
-{
-case 0: // User is in machine view mode
-
-	if(smac>-1 && nFlags==1)
+	switch(viewMode)
 	{
-		if(smacmode==0)
-		{
-		SONG->machine[smac]->x=point.x+mcd_x;
-		SONG->machine[smac]->y=point.y+mcd_y;
-		updateMode=0;
-		char buffer[64];
-		sprintf(buffer,"%s (%d,%d)",SONG->machine[smac]->editName,SONG->machine[smac]->x,SONG->machine[smac]->y);
-		pParentMain->StatusBarText(buffer);
-		}
-		else if(smacmode==1)
-		{
-		int newpan=point.x-SONG->machine[smac]->x-9;
-		if(newpan<0)newpan=0;
-		if(newpan>128)newpan=128;
-		SONG->machine[smac]->changePan(newpan);
-		char buffer[64];
+	case 0: // User is in machine view mode
 		
-		if(newpan!=64)
-		sprintf(buffer,"%s pan: %.0f%% Left / %.0f%% Right",SONG->machine[smac]->editName,100.0f-((float)newpan*0.78125f),(float)newpan*0.78125f);
-		else
-		sprintf(buffer,"%s pan: Center",SONG->machine[smac]->editName);
-		
-		pParentMain->StatusBarText(buffer);
-		updateMode=1;
-		updatePar=smac;
+		if (smac>-1 && nFlags==1)
+		{
+			if (smacmode==0)
+			{
+				SONG->machine[smac]->x = point.x+mcd_x;
+				SONG->machine[smac]->y = point.y+mcd_y;
+				updateMode = 0;
+				char buffer[64];
+				sprintf(buffer,"%s (%d,%d)",SONG->machine[smac]->editName,SONG->machine[smac]->x,SONG->machine[smac]->y);
+				pParentMain->StatusBarText(buffer);
+			}
+			else if (smacmode==1)
+			{
+				int newpan = point.x-SONG->machine[smac]->x-9;
+				if (newpan < 0)
+				{
+					newpan = 0;
+				}
+				if (newpan > 128)
+				{
+					newpan = 128;
+				}
+				SONG->machine[smac]->changePan(newpan);
+				char buffer[64];
+				
+				if (newpan!=64)
+				{
+					sprintf(buffer,"%s pan: %.0f%% Left / %.0f%% Right",SONG->machine[smac]->editName,100.0f-((float)newpan*0.78125f),(float)newpan*0.78125f);
+				}
+				else
+				{
+					sprintf(buffer,"%s pan: Center",SONG->machine[smac]->editName);
+				}
+				
+				pParentMain->StatusBarText(buffer);
+				updateMode = 1;
+				updatePar = smac;
+			}
+			Invalidate(false);
 		}
-
-	Invalidate(false);
-	}
-
-	if(nFlags==5 && wiresource!=-1)
-	{
-		wireDX=point.x;
-		wireDY=point.y;
-		Invalidate(false);
-	}
-break;
-
-}//<-- End LBUTTONPRESING/VIEWMODE switch statement
-	
+		
+		if ((nFlags == 5) && (wiresource != -1))
+		{
+			wireDX = point.x;
+			wireDY = point.y;
+			Invalidate(false);
+		}
+		break;
+	}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 }
 
 #include "dblClickHandler.cpp"
 
 int CChildView::GetMachine(CPoint point)
 {
-int tmac=-1;
-
-for(int c=0;c<MAX_MACHINES;c++)
-{
-if(SONG->Activemachine[c])
-{
-
-int x1=SONG->machine[c]->x;
-int y1=SONG->machine[c]->y;
-int x2=SONG->machine[c]->x+148;
-int y2=SONG->machine[c]->y+48;
-		
-if(point.x>x1 && point.x<x2 && point.y>y1 && point.y<y2){tmac=c;}
-}
-}
-
-return tmac;
+	int tmac=-1;
+	
+	for(int c=0;c<MAX_MACHINES;c++)
+	{
+		if (SONG->Activemachine[c])
+		{
+			int x1=SONG->machine[c]->x;
+			int y1=SONG->machine[c]->y;
+			int x2=SONG->machine[c]->x+148;
+			int y2=SONG->machine[c]->y+48;
+			
+			if (point.x>x1 && point.x<x2 && point.y>y1 && point.y<y2)
+			{
+				tmac=c;
+			}
+		}
+	}
+	
+	return tmac;
 }
 
 void CChildView::OnHelpPsycleenviromentinfo() 
@@ -774,8 +873,10 @@ void CChildView::OnHelpPsycleenviromentinfo()
 
 void CChildView::OnDestroy()
 {
-	if(Driver.Initialized)
-		Driver.Reset();
+	if (pAudioDriver->Initialized())
+	{
+		pAudioDriver->Reset();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -788,10 +889,10 @@ void CChildView::OnAppExit()
 
 void CChildView::OnMachineview() 
 {
-	if(viewMode!=0)
+	if (viewMode!=0)
 	{
-	viewMode=0;
-	Repaint();
+		viewMode=0;
+		Repaint();
 	}
 }
 
@@ -799,20 +900,18 @@ void CChildView::OnMachineview()
 
 void CChildView::OnPatternView() 
 {
-	if(viewMode!=2)
+	if (viewMode!=2)
 	{
-	viewMode=2;
-
-		if(showIBOnPatview)
+		viewMode=2;
+		
+		if (showIBOnPatview)
 		{
-//		ShowIBrowseDlg();
-		GetParent()->SetActiveWindow();
+			//		ShowIBrowseDlg();
+			GetParent()->SetActiveWindow();
 		}
-
-	
-	Repaint();
+		Repaint();
 	}
-
+	
 }
 
 //#include "winuser.h"
@@ -822,10 +921,12 @@ void CChildView::ShowPatternDlg(void)
 {
 	CPatDlg dlg;
 	dlg.songRef=SONG;
-
-	if(dlg.DoModal()==IDOK)
-	Invalidate(false);
-
+	
+	if (dlg.DoModal()==IDOK)
+	{
+		Invalidate(false);
+	}
+	
 }
 
 void CChildView::OnBarstop()
@@ -844,58 +945,58 @@ void CChildView::OnBarplay()
 
 void CChildView::OnTimer( UINT nIDEvent )
 {
-	if(nIDEvent==31)
+	if (nIDEvent==31)
 	{
 		bool const twk=SONG->Tweaker;
-
-		if(twk)
+		
+		if (twk)
 		{
 			for(int c=0;c<MAX_MACHINES;c++)
 			{
-				if(pParentMain->isguiopen[c])
+				if (pParentMain->isguiopen[c])
 				{
-				pParentMain->m_pWndMac[c]->Invalidate(false);
+					pParentMain->m_pWndMac[c]->Invalidate(false);
 				}
 			}
-
+			
 			SONG->Tweaker=false;
 		}
-
+		
 		pParentMain->UpdateVumeters(
-					SONG->machine[0]->LMAX,SONG->machine[0]->RMAX,
-					appConfig.vu1,
-					appConfig.vu2,
-					appConfig.vu3,
-					SONG->machine[0]->clip
-					);
-
-		if(viewMode==0)
+			SONG->machine[0]->LMAX,SONG->machine[0]->RMAX,
+			appConfig.vu1,
+			appConfig.vu2,
+			appConfig.vu3,
+			SONG->machine[0]->clip
+			);
+		
+		if (viewMode==0)
 		{
 			CClientDC dc(this);
 			DrawMachineVumeters(&dc);
 		}
-
-		if(SONG->PlayMode)
+		
+		if (SONG->PlayMode)
 		{
-			 if(SONG->LineChanged)
-			 {
+			if (SONG->LineChanged)
+			{
 				char buf[80];
 				sprintf(buf,"[Playing] Pos: %.2X   Pat: %.2X   Lin: %d",
 					SONG->playPosition,
 					SONG->playPattern,
 					SONG->LineCounter);
-
+				
 				pParentMain->StatusBarText(buf);
-				if(viewMode==2)
+				if (viewMode==2)
 				{
-				SONG->LineChanged=false;
-				updateMode=5;
-				Invalidate(false);
+					SONG->LineChanged=false;
+					updateMode=5;
+					Invalidate(false);
 				}
 			}	
 		}
-
-
+		
+		
 	}
 }
 
@@ -912,21 +1013,23 @@ void CChildView::OnShowied()
 
 void CChildView::ShowSplash() 
 {
-
+	
 }
 
 void CChildView::OnRecordb() 
 {
-	if(SONG->m_WaveStage==0)
+	if (SONG->m_WaveStage==0)
 	{
-	static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-	
-	CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
-	dlg.DoModal();
-	SONG->StartRecord(dlg.GetFileName().GetBuffer(4));
+		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
+		
+		CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+		dlg.DoModal();
+		SONG->StartRecord(dlg.GetFileName().GetBuffer(4));
 	}
 	else
-	SONG->StopRecord();
+	{
+		SONG->StopRecord();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -934,90 +1037,90 @@ void CChildView::OnRecordb()
 
 void CChildView::OnFileSavesong() 
 {
-OPENFILENAME ofn;       // common dialog box structure
-char szFile[_MAX_PATH];       // buffer for file name
-
-sprintf(szFile,"%s.psy",SONG->Name);
-
-// Initialize OPENFILENAME
-ZeroMemory(&ofn, sizeof(OPENFILENAME));
-ofn.lStructSize = sizeof(OPENFILENAME);
-ofn.hwndOwner = GetParent()->m_hWnd;
-ofn.lpstrFile = szFile;
-ofn.nMaxFile = sizeof(szFile);
-ofn.lpstrFilter = "Songs\0*.psy\0All\0*.*\0";
-ofn.nFilterIndex = 1;
-ofn.lpstrFileTitle = NULL;
-ofn.nMaxFileTitle = 0;
-ofn.lpstrInitialDir = NULL;
-ofn.Flags = OFN_PATHMUSTEXIST;
-
-// Display the Open dialog box. 
-if (GetSaveFileName(&ofn)==TRUE)
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	
+	sprintf(szFile,"%s.psy",SONG->Name);
+	
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Songs\0*.psy\0All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_PATHMUSTEXIST;
+	
+	// Display the Open dialog box. 
+	if (GetSaveFileName(&ofn)==TRUE)
 	{
-	CSaveDlg dlg;
-	dlg.songRef=SONG;
-	sprintf(dlg.szFile,szFile);
-	dlg.SaveSong();
+		CSaveDlg dlg;
+		dlg.songRef=SONG;
+		sprintf(dlg.szFile,szFile);
+		dlg.SaveSong();
 	}
-Repaint();
+	Repaint();
 }
 
 void CChildView::UpdateIBrowseDlg()
 {
-pParentMain->UpdateComboIns();
+	pParentMain->UpdateComboIns();
 }
 
 void CChildView::UpdateSBrowseDlg()
 {
-pParentMain->UpdateComboGen();
+	pParentMain->UpdateComboGen();
 }
 
 void CChildView::OnFileLoadsong() 
 {
-OPENFILENAME ofn;       // common dialog box structure
-char szFile[_MAX_PATH];       // buffer for file name
-
-sprintf(szFile,"%s.psy",SONG->Name);
-
-// Initialize OPENFILENAME
-ZeroMemory(&ofn, sizeof(OPENFILENAME));
-ofn.lStructSize = sizeof(OPENFILENAME);
-ofn.hwndOwner = GetParent()->m_hWnd;
-ofn.lpstrFile = szFile;
-ofn.nMaxFile = sizeof(szFile);
-ofn.lpstrFilter = "Songs\0*.psy\0All\0*.*\0";
-ofn.nFilterIndex = 1;
-ofn.lpstrFileTitle = NULL;
-ofn.nMaxFileTitle = 0;
-ofn.lpstrInitialDir = NULL;
-ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-// Display the Open dialog box. 
-
+	OPENFILENAME ofn;       // common dialog box structure
+	char szFile[_MAX_PATH];       // buffer for file name
+	
+	sprintf(szFile,"%s.psy",SONG->Name);
+	
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Songs\0*.psy\0All\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = NULL;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	
+	// Display the Open dialog box. 
+	
 	if (GetOpenFileName(&ofn)==TRUE)
 	{
-	pParentMain->CloseAllMacGuis();
-	SONG->Stop();
-	Sleep(LOCK_LATENCY);
-	Driver.Stop();
-	Sleep(LOCK_LATENCY);
-	
-	CSaveDlg dlg;
-	dlg.songRef=SONG;
-	sprintf(dlg.szFile,szFile);
-	dlg.LoadSong();
-
-	SONG->seqBus=0;
-	seqRow=0;
-	Driver.Start();
-	Repaint();
-	UpdateIBrowseDlg();
-	UpdateSBrowseDlg();
-	pParentMain->SetAppSongBpm(0);
-	pParentMain->WaveEditorBackUpdate();
-	pParentMain->UpdateSequencer();
-	pParentMain->UpdatePlayOrder(false);
+		pParentMain->CloseAllMacGuis();
+		SONG->Stop();
+		Sleep(LOCK_LATENCY);
+		pAudioDriver->Enable(false);
+		Sleep(LOCK_LATENCY);
+		
+		CSaveDlg dlg;
+		dlg.songRef=SONG;
+		sprintf(dlg.szFile,szFile);
+		dlg.LoadSong();
+		
+		SONG->seqBus=0;
+		seqRow=0;
+		pAudioDriver->Enable(true);
+		Repaint();
+		UpdateIBrowseDlg();
+		UpdateSBrowseDlg();
+		pParentMain->SetAppSongBpm(0);
+		pParentMain->WaveEditorBackUpdate();
+		pParentMain->UpdateSequencer();
+		pParentMain->UpdatePlayOrder(false);
 	}
 }
 
@@ -1031,12 +1134,12 @@ void CChildView::OnHelpSaludos()
 int CChildView::SongIncBpm(int x)
 {
 	SONG->BeatsPerMin+=x;
-
-	if(SONG->BeatsPerMin<33)SONG->BeatsPerMin=33;
-	if(SONG->BeatsPerMin>999)SONG->BeatsPerMin=999;
+	
+	if (SONG->BeatsPerMin<33)SONG->BeatsPerMin=33;
+	if (SONG->BeatsPerMin>999)SONG->BeatsPerMin=999;
 	
 	SONG->SetBPM(SONG->BeatsPerMin,44100);
-
+	
 	return SONG->BeatsPerMin;
 }
 
@@ -1049,8 +1152,8 @@ int CChildView::SongIncBpm(int x)
 
 void CChildView::ValidateParent()
 {
-pParentMain=(CMainFrame *)pParentFrame;
-pParentMain->songRef=SONG;
+	pParentMain=(CMainFrame *)pParentFrame;
+	pParentMain->songRef=SONG;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1077,7 +1180,7 @@ void CChildView::OnConfigurationSettingsBackgroundskin()
 	dlg.vuc_c=appConfig.vu3;
 	
 	
-	if(dlg.DoModal()==IDOK)
+	if (dlg.DoModal()==IDOK)
 	{
 		sprintf(appConfig.mv_skin_path,dlg.mv_pathbuf);
 		sprintf(appConfig.pv_skin_path,dlg.pv_pathbuf);
@@ -1092,17 +1195,17 @@ void CChildView::OnConfigurationSettingsBackgroundskin()
 		appConfig.vu1=dlg.vub_c;
 		appConfig.vu2=dlg.vug_c;
 		appConfig.vu3=dlg.vuc_c;
-
+		
 		UpdateConfig();
 	}
-
+	
 	Repaint();
 }
 
 void CChildView::UpdateConfig()
 {
-	if(appConfig.mv_skin)mv_bg.Load(appConfig.mv_skin_path);
-	if(appConfig.pv_skin)pv_bg.Load(appConfig.pv_skin_path);
+	if (appConfig.mv_skin)mv_bg.Load(appConfig.mv_skin_path);
+	if (appConfig.pv_skin)pv_bg.Load(appConfig.pv_skin_path);
 }
 
 CChildView::InitConfig()
@@ -1128,12 +1231,12 @@ CChildView::ReadConfig()
 {
 	char buffer[_MAX_PATH];
 	sprintf(buffer,"%s/psy.cfg",m_appdir);
-
+	
 	FILE* hFile;
-
+	
 	hFile=fopen(buffer,"rb");
 	
-	if(hFile!=NULL)
+	if (hFile!=NULL)
 	{
 		fread(&appConfig,sizeof(PSYCONFIG),1,hFile);
 		fclose(hFile);
@@ -1144,12 +1247,12 @@ CChildView::WriteConfig()
 {
 	char buffer[_MAX_PATH];
 	sprintf(buffer,"%s/psy.cfg",m_appdir);
-
+	
 	FILE* hFile;
-
+	
 	hFile=fopen(buffer,"wb");
 	
-	if(hFile!=NULL)
+	if (hFile!=NULL)
 	{
 		fwrite(&appConfig,sizeof(PSYCONFIG),1,hFile);
 		fclose(hFile);
@@ -1161,26 +1264,38 @@ CChildView::WriteConfig()
 
 void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) 
 {
-	if(viewMode==2)
-	pCmdUI->SetCheck(1);
+	if (viewMode==2)
+	{
+		pCmdUI->SetCheck(1);
+	}
 	else
-	pCmdUI->SetCheck(0);
+	{
+		pCmdUI->SetCheck(0);
+	}
 }
 
 void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 
 {
-	if(viewMode==0)
-	pCmdUI->SetCheck(1);
+	if (viewMode==0)
+	{
+		pCmdUI->SetCheck(1);
+	}
 	else
-	pCmdUI->SetCheck(0);	
+	{
+		pCmdUI->SetCheck(0);
+	}
 }
 
 void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 {
-	if(SONG->PlayMode)
-	pCmdUI->SetCheck(1);
+	if (SONG->PlayMode)
+	{
+		pCmdUI->SetCheck(1);
+	}
 	else
-	pCmdUI->SetCheck(0);
+	{
+		pCmdUI->SetCheck(0);
+	}
 }
 
 CChildView::UpdateChecks(){}
@@ -1203,102 +1318,115 @@ void CChildView::OnViewInstrumenteditor() {OnShowied();}
 
 CChildView::SetPatStep(int stp)
 {
-patStep=stp;
-if(viewMode==1)
-Repaint();
+	patStep=stp;
+	if (viewMode==1)
+	{
+		Repaint();
+	}
 }
 
 void CChildView::OnFileNew() 
 {
-	// Revienta la cancion
-	if(MessageBox("Are your sure?","New song",MB_YESNO | MB_ICONWARNING)==IDYES)
+	if (MessageBox("Are your sure?","New song",MB_YESNO | MB_ICONWARNING)==IDYES)
 	{
-	pParentMain->CloseAllMacGuis();
-	SONG->Stop();
-	Sleep(LOCK_LATENCY);
-	Driver.Stop();
-	Sleep(LOCK_LATENCY);
-	SONG->newSong();
-	SONG->seqBus=0;
-	seqRow=0;
-	Driver.Start();
-	Repaint();
-	UpdateIBrowseDlg();
-	UpdateSBrowseDlg();
-	pParentMain->SetAppSongBpm(0);
-	pParentMain->UpdatePlayOrder(false);
-	pParentMain->WaveEditorBackUpdate();
-	pParentMain->UpdateSequencer();
+		pParentMain->CloseAllMacGuis();
+		SONG->Stop();
+		Sleep(LOCK_LATENCY);
+		pAudioDriver->Enable(false);
+		Sleep(LOCK_LATENCY);
+		SONG->newSong();
+		SONG->seqBus=0;
+		seqRow=0;
+		pAudioDriver->Enable(true);
+		Repaint();
+		UpdateIBrowseDlg();
+		UpdateSBrowseDlg();
+		pParentMain->SetAppSongBpm(0);
+		pParentMain->UpdatePlayOrder(false);
+		pParentMain->WaveEditorBackUpdate();
+		pParentMain->UpdateSequencer();
 	}
 }
 
 void CChildView::OnNewmachine() 
 {
 	// Show new machine dialog
-		CNewMachine dlg;
-		dlg.songRef=SONG;
-		dlg.xLoc=rand()/64;
-		dlg.yLoc=rand()/80;
-		dlg.Outputdll=-1;
-
-		if(dlg.DoModal()==IDOK)
+	CNewMachine dlg;
+	dlg.songRef=SONG;
+	dlg.xLoc=rand()/64;
+	dlg.yLoc=rand()/80;
+	dlg.Outputdll=-1;
+	
+	if (dlg.DoModal()==IDOK)
+	{
+		// Stop driver to handle possible conflicts
+		// between threads.
+		
+		pAudioDriver->Enable(false);
+		
+		if (!SONG->CreateMachine(dlg.Outputmachine,dlg.xLoc,dlg.yLoc,-1,dlg.Outputdll))
 		{
-			// Stop driver to handle possible conflicts
-			// between threads.
-
-			Driver.Stop();
-
-			if(!SONG->CreateMachine(dlg.Outputmachine,dlg.xLoc,dlg.yLoc,-1,dlg.Outputdll))
-			{
 			MessageBox("Error!","Machine Creation Failed",MB_OK);
-			}
-			else if(dlg.OutBus)
-			{
+		}
+		else if (dlg.OutBus)
+		{
 			SONG->seqBus=SONG->GetFreeBus();
 			SONG->busMachine[SONG->seqBus]=lbc;
 			UpdateSBrowseDlg();
-			}
-
-			// Restarting the driver...
-			pParentMain->UpdateEnvInfo();
-			Driver.Start();
 		}
+		
+		// Restarting the driver...
+		pParentMain->UpdateEnvInfo();
+		pAudioDriver->Enable(true);
+	}
 	
-		updateMode=0;
-		Invalidate(false);	
+	updateMode=0;
+	Invalidate(false);	
 }
 
 
 void CChildView::OnConfigurationKeyboardlayoutStandard() 
 {
-appConfig.KEYBOARDMODE=0;	
+	appConfig.KEYBOARDMODE=0;	
 }
 
 void CChildView::OnConfigurationKeyboardlayoutFrench() 
 {
-appConfig.KEYBOARDMODE=1;	
+	appConfig.KEYBOARDMODE=1;	
 }
 
 void CChildView::OnUpdateConfigurationKeyboardlayoutStandard(CCmdUI* pCmdUI) 
 {
-	if(appConfig.KEYBOARDMODE==0)
-	pCmdUI->SetCheck(true);
+	if (appConfig.KEYBOARDMODE==0)
+	{
+		pCmdUI->SetCheck(true);
+	}
 	else
-	pCmdUI->SetCheck(false);
+	{
+		pCmdUI->SetCheck(false);
+	}
 }
 
 void CChildView::OnUpdateConfigurationKeyboardlayoutFrench(CCmdUI* pCmdUI) 
 {
-	if(appConfig.KEYBOARDMODE==1)
-	pCmdUI->SetCheck(true);
+	if (appConfig.KEYBOARDMODE==1)
+	{
+		pCmdUI->SetCheck(true);
+	}
 	else
-	pCmdUI->SetCheck(false);
+	{
+		pCmdUI->SetCheck(false);
+	}
 }
 
 void CChildView::OnUpdateRecordb(CCmdUI* pCmdUI) 
 {
-	if(SONG->m_WaveStage)
-	pCmdUI->SetCheck(1);
+	if (SONG->m_WaveStage)
+	{
+		pCmdUI->SetCheck(1);
+	}
 	else
-	pCmdUI->SetCheck(0);
+	{
+		pCmdUI->SetCheck(0);
+	}
 }

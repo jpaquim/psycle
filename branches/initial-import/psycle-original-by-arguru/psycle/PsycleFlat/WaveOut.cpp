@@ -1,418 +1,335 @@
 // waveout stuff based on buzz code
-#include "mmsystem.h"
-#include "AudioDriver.h"
+
+#include "stdafx.h"
+#include "WaveOut.h"
+#include "resource.h"
+#include "WaveOutDialog.h"
+#include "Registry.h"
+#include "Configuration.h"
 #include <process.h>
 
-#define MAX_WAVEOUT_BLOCKS		8
-#define BYTES_PER_SAMPLE		4	// 2 * 16bits
+#define BYTES_PER_SAMPLE 4	// 2 * 16bits
 
-class CBlock
+AudioDriverInfo WaveOut::_info = { "Windows WaveOut MME" };
+
+WaveOut::WaveOut()
 {
-public:
-	HANDLE Handle;
-	byte *pData;
-	WAVEHDR *pHeader;
-	HANDLE HeaderHandle;
-	bool Prepared;
-};
-
-class ad : public CAudioDriver
-{
-public:
-	ad();
-	virtual ~ad();
-	virtual void Initialize(dword hwnd, float *(*pcallback)(int &numsamples));
-	virtual void Reset();
-	virtual bool Enable(bool e);	
-	virtual int GetWritePos();
-	virtual int GetPlayPos();
-	virtual void Configure();
-
-	void DoBlocks();
-
-	bool Start();	
-	bool Stop();
-
-	private:
-
-	void ReadConfig();
-	void WriteConfig();
-	void Error(char const *msg);
-
-public:
-	HWAVEOUT Handle;
-	int DeviceID;
-	int numBlocks;
-	int BlockSize;
-	int CurrentBlock;
-	int WritePos;
-	int PollSleep;
-	int Dither;
-	CBlock Blocks[MAX_WAVEOUT_BLOCKS];
-	float *(*pCallback)(int &numsamples);
-	bool Initialized;
-	bool Running;
-	bool StopPolling;
-
-};
-
-static void __cdecl PollerThread(void *poo)
-{
-	ad *pad = (ad *)poo;
-
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-
-	pad->StopPolling = false;
-	
-	while(!pad->StopPolling)
-	{
-		pad->DoBlocks();
-		Sleep(pad->PollSleep);
-	}
-
-	pad->StopPolling = false;
-
-	_endthread();
-}
-
-ad::ad()
-{
-	Initialized = false;
+	_initialized = false;
+	_configured = false;
+	_running = false;
 }
 
 
-ad::~ad()
+WaveOut::~WaveOut()
 {
 	Reset();
 }
 
-void ad::Error(char const *msg)
+void WaveOut::Error(char const *msg)
 {
 	MessageBox(NULL, msg, "WaveOut driver", MB_OK);
 }
 
-bool ad::Start()
+bool WaveOut::Start()
 {
-	if (Running)
+	if (_running)
 		return true;
 
 	WAVEFORMATEX format;
 	format.wFormatTag = WAVE_FORMAT_PCM;
-	format.nChannels = (Flags & ADF_STEREO) ? 2 : 1;
+	format.nChannels = (_flags & ADF_STEREO) ? 2 : 1;
 	format.wBitsPerSample = 16;
-	format.nSamplesPerSec = SamplesPerSec;
+	format.nSamplesPerSec = _samplesPerSec;
 	format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 	format.cbSize = 0;
 
-	if (waveOutOpen(&Handle, DeviceID, &format, NULL, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)
+	if (waveOutOpen(&_handle, _deviceID, &format, NULL, 0, CALLBACK_NULL) != MMSYSERR_NOERROR)
 	{
 		Error("waveOutOpen() failed");
 		return false;
 	}
 
-	CurrentBlock = 0;
-	WritePos = 0;
+	_currentBlock = 0;
+	_writePos = 0;
 
 	// allocate blocks
-	for (CBlock *pBlock = Blocks; pBlock < Blocks + numBlocks; pBlock++)
+	for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 	{
-		pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, BlockSize);
+		pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSize);
 		pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
 	}
 
 	// allocate block headers
-	for (pBlock = Blocks; pBlock < Blocks + numBlocks; pBlock++)
+	for (pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 	{
 		pBlock->HeaderHandle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, sizeof(WAVEHDR));
 		pBlock->pHeader = (WAVEHDR *)GlobalLock(pBlock->HeaderHandle);
 
 		WAVEHDR *ph = pBlock->pHeader;
 		ph->lpData = (char *)pBlock->pData;
-		ph->dwBufferLength = BlockSize;
+		ph->dwBufferLength = _blockSize;
 		ph->dwFlags = WHDR_DONE;
 		ph->dwLoops = 0;
 
 		pBlock->Prepared = false;
 	}
 	
-	HANDLE h = (HANDLE)_beginthread(PollerThread, 0, this);
+	_beginthread(PollerThread, 0, this);
 
-	/*
-	BOOL ret = SetThreadPriority(h, THREAD_PRIORITY_ABOVE_NORMAL);
-	assert(ret);
-*/	
-
-	Running = true;
+	_running = true;
 	return true;
 }
 
-bool ad::Stop()
+bool WaveOut::Stop()
 {
-	if (!Running)
+	if (!_running)
+	{
 		return true;
+	}
 
-	StopPolling = true;
-	while(StopPolling)
-		Sleep(PollSleep);
+	_stopPolling = true;
+	while (_stopPolling)
+	{
+		Sleep(_pollSleep);
+	}
 
-	if (waveOutReset(Handle) != MMSYSERR_NOERROR)
+	if (waveOutReset(_handle) != MMSYSERR_NOERROR)
 	{
 		Error("waveOutReset() failed");
 		return false;
 	}
 
-	while(1)
+	while (1)
 	{
 		bool alldone = true;
 
-		for (CBlock *pBlock = Blocks; pBlock < Blocks + numBlocks; pBlock++)
+		for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 		{
 			if ((pBlock->pHeader->dwFlags & WHDR_DONE) == 0)
+			{
 				alldone = false;
+			}
 		}
-	
 		if (alldone)
+		{
 			break;
-
+		}
 		Sleep(20);
 	}
-
-	for (CBlock *pBlock = Blocks; pBlock < Blocks + numBlocks; pBlock++)
+	for (CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 	{
 		if (pBlock->Prepared)
 		{
-			if (waveOutUnprepareHeader(Handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+			if (waveOutUnprepareHeader(_handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 			{
 				Error("waveOutUnprepareHeader() failed");
 			}
 		}
 	}
-
-	if (waveOutClose(Handle) != MMSYSERR_NOERROR)
+	if (waveOutClose(_handle) != MMSYSERR_NOERROR)
 	{
 		Error("waveOutClose() failed");
 		return false;
 	}
-
-	for (pBlock = Blocks; pBlock < Blocks + numBlocks; pBlock++)
+	for (pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 	{
 		GlobalUnlock(pBlock->Handle);
 		GlobalFree(pBlock->Handle);
 		GlobalUnlock(pBlock->HeaderHandle);
 		GlobalFree(pBlock->HeaderHandle);
 	}
-	
-	Running = false;
+	_running = false;
 	return true;
 }
 
-#define SHORT_MIN	-32768
-#define SHORT_MAX	32767
-
-// returns random value between 0 and 1
-// i got the magic numbers from csound so they should be ok but 
-// I haven't checked them myself
-inline double frand()
+void WaveOut::DoBlocks()
 {
-	static long stat = 0x16BA2118;
-	stat = (stat * 1103515245 + 12345) & 0x7fffffff;
-	return (double)stat * (1.0 / 0x7fffffff);
-}
-
-static void QuantizeWithDither(float *pin, int *piout, int c)
-{
-	double const d2i = (1.5 * (1 << 26) * (1 << 26));
-	
-	do
-	{
-		double res = ((double)pin[1] + frand()) + d2i;
-
-		int r = *(int *)&res;
-
-		if (r < SHORT_MIN)
-			r = SHORT_MIN;
-		else if (r > SHORT_MAX)
-			r = SHORT_MAX;
-
-		res = ((double)pin[0] + frand()) + d2i;
-		int l = *(int *)&res;
-
-		if (l < SHORT_MIN)
-			l = SHORT_MIN;
-		else if (l > SHORT_MAX)
-			l = SHORT_MAX;
-
-		*piout++ = (r << 16) | (word)l;
-		pin += 2;
-	} while(--c);
-}
-
-static void Quantize(float *pin, int *piout, int c)
-{
-	double const d2i = (1.5 * (1 << 26) * (1 << 26));
-	
-	do
-	{
-		double res = ((double)pin[1]) + d2i;
-
-		int r = *(int *)&res;
-
-		if (r < SHORT_MIN)
-			r = SHORT_MIN;
-		else if (r > SHORT_MAX)
-			r = SHORT_MAX;
-
-		res = ((double)pin[0]) + d2i;
-		int l = *(int *)&res;
-
-		if (l < SHORT_MIN)
-			l = SHORT_MIN;
-		else if (l > SHORT_MAX)
-			l = SHORT_MAX;
-
-		*piout++ = (r << 16) | (word)l;
-		pin += 2;
-	} while(--c);
-}
-
-void ad::DoBlocks()
-{
-	CBlock *pb = Blocks + CurrentBlock;
+	CBlock *pb = _blocks + _currentBlock;
 
 	while(pb->pHeader->dwFlags & WHDR_DONE)
 	{
 		if (pb->Prepared)
 		{
-			if (waveOutUnprepareHeader(Handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+			if (waveOutUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+			{
 				Error("waveOutUnprepareHeader() failed");
-
+			}
 			pb->Prepared = false;
 		}
+		int *pOut = (int *)pb->pData;
+		int bs = _blockSize / BYTES_PER_SAMPLE;
 
-		int *pout = (int *)pb->pData;
-		int bs = BlockSize / BYTES_PER_SAMPLE;
-		
 		do
 		{
 			int n = bs;
-			float *pbuf = pCallback(n);
-			if (Dither)
-				QuantizeWithDither(pbuf, pout, n);
+			float *pBuf = _pCallback(n);
+			if (_dither)
+				QuantizeWithDither(pBuf, pOut, n);
 			else
-				Quantize(pbuf, pout, n);
-			pout += n;
+				Quantize(pBuf, pOut, n);
+			pOut += n;
 			bs -= n;
-		} while(bs > 0);
+		}
+		while (bs > 0);
 		
 
-		WritePos += BlockSize/BYTES_PER_SAMPLE;
+		_writePos += _blockSize/BYTES_PER_SAMPLE;
 
 		pb->pHeader->dwFlags = 0;
 		pb->pHeader->lpData = (char *)pb->pData;
-		pb->pHeader->dwBufferLength = BlockSize;
+		pb->pHeader->dwBufferLength = _blockSize;
 		pb->pHeader->dwFlags = 0;
 		pb->pHeader->dwLoops = 0;
 
-		if (waveOutPrepareHeader(Handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+		if (waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+		{
 			Error("waveOutPrepareHeader() failed");
-
+		}
 		pb->Prepared = true;
 
-		if (waveOutWrite(Handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+		if (waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+		{
 			Error("waveOutWrite() failed");
-
+		}
 		pb++;
-		if (pb== Blocks + numBlocks)
-			pb = Blocks;
+		if (pb== _blocks + _numBlocks)
+			pb = _blocks;
 
 	}
-
-	CurrentBlock = pb - Blocks;
+	_currentBlock = pb - _blocks;
 }
 
-void ad::ReadConfig()
+void WaveOut::ReadConfig()
 {
-	SamplesPerSec=44100;
-	DeviceID=0;
-	numBlocks = 4;
-	BlockSize = 8192;
-	PollSleep = 20;
-	Dither = 0;
-	Flags = ADF_STEREO;
+	bool configured;
+	DWORD type;
+	DWORD numData;
+	Registry reg;
+
+	// Default configuration
+	//
+	_samplesPerSec=44100;
+	_deviceID=0;
+	_numBlocks = 4;
+	_blockSize = 8192;
+	_pollSleep = 20;
+	_dither = 0;
+	_flags = ADF_STEREO;
+
+	if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+	{
+		return;
+	}
+	if (reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+	{
+		return;
+	}
+	configured = true;
+	numData = sizeof(_numBlocks);
+	configured &= (reg.QueryValue("NumBlocks", &type, (BYTE*)&_numBlocks, &numData) == ERROR_SUCCESS);
+	numData = sizeof(_blockSize);
+	configured &= (reg.QueryValue("BlockSize", &type, (BYTE*)&_blockSize, &numData) == ERROR_SUCCESS);
+	numData = sizeof(_deviceID);
+	configured &= (reg.QueryValue("DeviceID", &type, (BYTE*)&_deviceID, &numData) == ERROR_SUCCESS);
+	numData = sizeof(_pollSleep);
+	configured &= (reg.QueryValue("PollSleep", &type, (BYTE*)&_pollSleep, &numData) == ERROR_SUCCESS);
+	numData = sizeof(_dither);
+	configured &= (reg.QueryValue("Dither", &type, (BYTE*)&_dither, &numData) == ERROR_SUCCESS);
+	numData = sizeof(_samplesPerSec);
+	configured &= (reg.QueryValue("SamplesPerSec", &type, (BYTE*)&_samplesPerSec, &numData) == ERROR_SUCCESS);
+	reg.CloseKey();
+	reg.CloseRootKey();
+	_configured = configured;
 }
 
-void ad::WriteConfig()
+void WaveOut::WriteConfig()
 {
-/*
-	WriteProfileInt("SamplesPerSec", SamplesPerSec);
-	WriteProfileInt("DeviceID", DeviceID);
-	WriteProfileInt("numBlocks", numBlocks);
-	WriteProfileInt("BlockSize", BlockSize);
-	WriteProfileInt("PollSleep", PollSleep);
-	WriteProfileInt("Dither", Dither);
-*/
+	Registry reg;
+	if (reg.OpenRootKey(HKEY_CURRENT_USER, CONFIG_ROOT_KEY) != ERROR_SUCCESS)
+	{
+		Error("Unable to write configuration to the registry");
+		return;
+	}
+	if (reg.OpenKey("WaveOut") != ERROR_SUCCESS)
+	{
+		if (reg.CreateKey("WaveOut") != ERROR_SUCCESS)
+		{
+			Error("Unable to write configuration to the registry");
+			return;
+		}
+	}
+	reg.SetValue("NumBlocks", REG_DWORD, (BYTE*)&_numBlocks, sizeof(_numBlocks));
+	reg.SetValue("BlockSize", REG_DWORD, (BYTE*)&_blockSize, sizeof(_blockSize));
+	reg.SetValue("DeviceID", REG_DWORD, (BYTE*)&_deviceID, sizeof(_deviceID));
+	reg.SetValue("PollSleep", REG_DWORD, (BYTE*)&_pollSleep, sizeof(_pollSleep));
+	reg.SetValue("Dither", REG_DWORD, (BYTE*)&_dither, sizeof(_dither));
+	reg.SetValue("SamplesPerSec", REG_DWORD, (BYTE*)&_samplesPerSec, sizeof(_samplesPerSec));
+	reg.CloseKey();
+	reg.CloseRootKey();
 }
 
 
-void ad::Initialize(dword hwnd, float *(*pcallback)(int &numsamples))
+void WaveOut::Initialize(HWND hwnd, float *(*pcallback)(int &numsamples))
 {
-	pCallback = pcallback;
-	Running = false;
+	_pCallback = pcallback;
+	_running = false;
 	ReadConfig();
-
-	Initialized = true;
+	_initialized = true;
 	Start();
 }
 
-void ad::Reset()
+void WaveOut::Reset()
 {
 	Stop();
 }
 
-void ad::Configure()
+void WaveOut::Configure()
 {
-	CADriverDialog dlg;
-	dlg.m_BufNum = numBlocks;
-	dlg.m_BufSize = BlockSize;
-	dlg.m_Device = DeviceID;
-	dlg.m_Dither = Dither;
-	dlg.m_SampleRate = SamplesPerSec;
+	ReadConfig();
 
-	//{
-	//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+	CWaveOutDialog dlg;
+	dlg.m_BufNum = _numBlocks;
+	dlg.m_BufSize = _blockSize;
+	dlg.m_Device = _deviceID;
+	dlg.m_Dither = _dither;
+	dlg.m_SampleRate = _samplesPerSec;
+
 	if (dlg.DoModal() != IDOK)
-	return;
-	//}
+	{
+		return;
+	}
 	
-	int oldnb = numBlocks;
-	int oldbs = BlockSize;
-	int olddid = DeviceID;
-	int olddither = Dither;
-	int oldsps = SamplesPerSec;
+	int oldnb = _numBlocks;
+	int oldbs = _blockSize;
+	int olddid = _deviceID;
+	int olddither = _dither;
+	int oldsps = _samplesPerSec;
 
-	if (Initialized)Stop();
+	if (_initialized)
+	{
+		Stop();
+	}
 
-	numBlocks = dlg.m_BufNum;
-	BlockSize = dlg.m_BufSize;
-	DeviceID = dlg.m_Device;
-	Dither = dlg.m_Dither;
-	SamplesPerSec = dlg.m_SampleRate;
+	_numBlocks = dlg.m_BufNum;
+	_blockSize = dlg.m_BufSize;
+	_deviceID = dlg.m_Device;
+	_dither = dlg.m_Dither;
+	_samplesPerSec = dlg.m_SampleRate;
 
-	if (Initialized)
+	if (_initialized)
 	{
 		if (Start())
 		{
-		WriteConfig();
+			WriteConfig();
 		}
 		else
 		{
-			numBlocks = oldnb;
-			BlockSize = oldbs;
-			DeviceID = olddid;
-			Dither = olddither;
-			SamplesPerSec = oldsps;
+			_numBlocks = oldnb;
+			_blockSize = oldbs;
+			_deviceID = olddid;
+			_dither = olddither;
+			_samplesPerSec = oldsps;
 
 			Start();
 		}
@@ -424,60 +341,54 @@ void ad::Configure()
 	
 }
 
-int ad::GetPlayPos()
+int WaveOut::GetPlayPos()
 {
-	if (!Running)
+	if (!_running)
+	{
 		return 0;
-
+	}
 	MMTIME time;
 	time.wType = TIME_SAMPLES;
 
-	if (waveOutGetPosition(Handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
+	if (waveOutGetPosition(_handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
+	{
 		Error("waveOutGetPosition() failed");
-
+	}
 	if (time.wType != TIME_SAMPLES)
+	{
 		Error("waveOutGetPosition() doesn't support TIME_SAMPLES");
-
-	return time.u.sample & ((1 << 23) - 1);
-
+	}
+	return (time.u.sample & ((1 << 23) - 1));
 }
 
-int ad::GetWritePos()
+int WaveOut::GetWritePos()
 {
-	if (!Running)
-		return 0;	
-
-	return WritePos & ((1 << 23) - 1);
+	if (!_running)
+	{
+		return 0;
+	}
+	return (_writePos & ((1 << 23) - 1));
 }
 
-bool ad::Enable(bool e)
+bool WaveOut::Enable(bool e)
 {
-	if (e)
-		return Start();
-	else
-		return Stop();
-}
-/*
-CAudioDriverInfo info = { 
-#ifdef _DEBUG
-	"Windows Waveform Audio (debug build)"
-#else
-	"Windows Waveform Audio"
-#endif
-};
-
-extern "C"
-{
-__declspec(dllexport) CAudioDriver * __cdecl NewAD()
-{
-	return new ad;
+	return e ? Start() : Stop();
 }
 
-__declspec(dllexport) CAudioDriverInfo const * __cdecl GetADInfo()
+void
+WaveOut::PollerThread(
+	void *pWaveOut)
 {
-	return &info;
-}
-}
+	WaveOut* pThis = (WaveOut*)pWaveOut;
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+	pThis->_stopPolling = false;
 
-CWinApp App;	
-*/
+	while (!pThis->_stopPolling)
+	{
+		pThis->DoBlocks();
+		Sleep(pThis->_pollSleep);
+	}
+
+	pThis->_stopPolling = false;
+	_endthread();
+}

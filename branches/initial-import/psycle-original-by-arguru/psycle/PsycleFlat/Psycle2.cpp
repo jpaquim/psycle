@@ -82,7 +82,7 @@ BOOL CPsycle2App::InitInstance()
 	
 	// Show splash screen
 	if (SPLASHSCREEN)OnAboutpsycle();
-	
+
 	pFrame->ConfigAudio();
 
 	return TRUE;

@@ -8,16 +8,16 @@
 //
 
 /////////////////////////////////////////////////////////////////////////////
-// CADriverDialog dialog
+// CWaveOutDialog dialog
 
-class CADriverDialog : public CDialog
+class CWaveOutDialog : public CDialog
 {
 // Construction
 public:
-	CADriverDialog(CWnd* pParent = NULL);   // standard constructor
+	CWaveOutDialog(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
-	//{{AFX_DATA(CADriverDialog)
+	//{{AFX_DATA(CWaveOutDialog)
 	enum { IDD = IDD_WAVEOUTCONFIG };
 	CStatic	m_Latency;
 	CSpinButtonCtrl	m_BufSizeSpin;
@@ -38,7 +38,7 @@ public:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CADriverDialog)
+	//{{AFX_VIRTUAL(CWaveOutDialog)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -47,7 +47,7 @@ public:
 protected:
 
 	// Generated message map functions
-	//{{AFX_MSG(CADriverDialog)
+	//{{AFX_MSG(CWaveOutDialog)
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	afx_msg void OnChangeConfigBufnum();

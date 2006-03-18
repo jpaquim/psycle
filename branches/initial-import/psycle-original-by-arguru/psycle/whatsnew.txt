@@ -1,3 +1,11 @@
+V1.02
+-----
+
+*Added DirectX (DirectSound) output driver
+*Added output driver selection dialog
+*Audio drivers now use the registry to store configuration
+*Internal reorganizations
+
 v1.0
 -----
 Wav Recorder implemented.

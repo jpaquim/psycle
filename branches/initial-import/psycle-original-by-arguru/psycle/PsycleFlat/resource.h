@@ -10,7 +10,7 @@
 #define IDD_PSYBAR                      103
 #define IDR_MAINFRAME                   128
 #define IDR_PSYCLETYPE                  129
-#define IDD_AUDIOCONFIG                 130
+#define IDD_WAVEOUTCONFIG               130
 #define IDD_GEAR_PSYCHOSC               132
 #define IDB_PSYCHOSC                    133
 #define IDD_INFO                        134
@@ -57,6 +57,9 @@
 #define IDR_VSTFRAME                    202
 #define IDD_GEARVST                     204
 #define IDB_STUFF                       205
+#define IDD_DSOUNDCONFIG                208
+#define IDB_DIRECTX                     210
+#define IDD_OUTPUT                      211
 #define IDC_CONFIG_DEVICE               1000
 #define IDC_SLIDER1                     1000
 #define IDC_CONFIG_SAMPLERATE           1001
@@ -274,6 +277,17 @@
 #define IDC_DECLEN                      1185
 #define IDC_INCLEN                      1186
 #define IDC_SEQSLEN                     1187
+#define IDC_DSOUND_DEVICE               1187
+#define IDC_DSOUND_BUFNUM_EDIT          1188
+#define IDC_DSOUND_BUFSIZE_SPIN         1189
+#define IDC_DSOUND_BUFSIZE_EDIT         1190
+#define IDC_DSOUND_BUFNUM_SPIN          1191
+#define IDC_DSOUND_LATENCY              1192
+#define IDC_DSOUND_SAMPLERATE_COMBO     1193
+#define IDC_DSOUND_DITHER               1194
+#define IDC_DRIVER                      1196
+#define IDC_CONFIG                      1197
+#define IDC_EXCLUSIVE                   1198
 #define ID_CONFIGURATION_AUDIODRIVER    32771
 #define ID_CONFIGURATION_FREEAUDIO      32772
 #define ID_HELP_PSYCLEENVIROMENTINFO    32773
@@ -329,9 +343,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        208
+#define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         32838
-#define _APS_NEXT_CONTROL_VALUE         1187
+#define _APS_NEXT_CONTROL_VALUE         1199
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

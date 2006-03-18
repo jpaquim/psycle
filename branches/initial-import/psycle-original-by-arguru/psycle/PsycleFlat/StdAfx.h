@@ -10,6 +10,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#define WIN32_MEAN_AND_LEAN
+
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 
 #include <afxwin.h>         // MFC core and standard components

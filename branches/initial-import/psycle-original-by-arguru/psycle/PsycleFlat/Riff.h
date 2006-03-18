@@ -12,7 +12,7 @@
 
 ===========================================================================*/
 
-#include <ddc.h>
+#include "ddc.h"
 
 #ifndef __DDC_RIFF_H
 #define __DDC_RIFF_H

@@ -127,7 +127,7 @@ case 0: // User is in machine view mode
 			// Stop driver to handle possible conflicts
 			// between threads.
 
-			Driver.Stop();
+			pAudioDriver->Enable(false);
 
 			if(!SONG->CreateMachine(dlg.Outputmachine,dlg.xLoc,dlg.yLoc,-1,dlg.Outputdll))
 			{
@@ -142,7 +142,7 @@ case 0: // User is in machine view mode
 
 			// Restarting the driver...
 			pParentMain->UpdateEnvInfo();
-			Driver.Start();
+			pAudioDriver->Enable(true);
 		}
 	}
 
