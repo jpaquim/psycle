@@ -57,7 +57,29 @@ namespace psycle
 		{
 			public:
 				PatternEntry * _data;
-				///\todo make it object-oriented
+
+			public:
+				inline Pattern(unsigned int const & id) : id_(id) {}
+
+			public:
+				unsigned int const inline & id() const throw() { return id_; }
+			private:
+				unsigned int const          id_;
+
+#if 0
+			public:
+				///\todo setter has to be more complex
+			//	void        inline name(std::string const & value)                   throw() {        Global::song().patternName[id()]  = value; }
+				std::string inline name(                         )             const throw() { return Global::song().patternName[id()]         ; }
+
+				///\todo setter has to be more complex
+			//	void               inline    lines(unsigned int const & value)       throw() {        Global::song().patternLines[id()] = value; }
+				unsigned int const inline &  lines(                          ) const throw() { return Global::song().patternLines[id()]        ; }
+
+				///\todo setter has to be more complex
+			//	void               inline   tracks(unsigned int const & value)       throw() {        Global::song().SONGTRACKS         = value; }
+				unsigned int const inline & tracks(                          ) const throw() { return Global::song().SONGTRACKS                ; }
+#endif
 		};
 
 		enum MachineType

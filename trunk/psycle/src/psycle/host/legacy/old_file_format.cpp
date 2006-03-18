@@ -29,7 +29,6 @@ namespace psycle
 		{
 			try
 			{
-				char Header[9];
 				CProgressDialog Progress;
 				Progress.Create();
 				Progress.SetWindowText("Loading old format...");

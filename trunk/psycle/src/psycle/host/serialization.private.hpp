@@ -18,6 +18,26 @@ namespace psycle
 	namespace host
 	{
 		template<typename Archive>
+		void serialize(Archive & archive, PatternEntry & instance, unsigned int const version)
+		{
+		}
+
+		template<typename Archive>
+		void serialize(Archive & archive, Pattern & instance, unsigned int const version)
+		{
+		}
+
+		template<typename Archive>
+		void serialize(Archive & archive, Machine & instance, unsigned int const version)
+		{
+		}
+
+		template<typename Archive>
+		void serialize(Archive & archive, Instrument & instance, unsigned int const version)
+		{
+		}
+
+		template<typename Archive>
 		void serialize(Archive & archive, Song & instance, unsigned int const version)
 		{
 			archive & boost::serialization::make_nvp("type"   , std::string("PSY3SONG"));
@@ -81,7 +101,7 @@ namespace psycle
 				{
 					if(!instance._pMachine[i]) continue;
 					archive & boost::serialization::make_nvp("id", i);
-					//archive & *instance._pMachine[i];
+				//	archive & *instance._pMachine[i];
 				}
 			}
 
@@ -96,24 +116,9 @@ namespace psycle
 				{
 					if(instance._pInstrument[i]->Empty()) continue;
 					archive & boost::serialization::make_nvp("id", i);
-					//archive & *instance._pInstrument[i];
+				//	archive & *instance._pInstrument[i];
 				}
 			}
-		}
-
-		template<typename Archive>
-		void serialize(Archive & archive, PatternEntry & instance, unsigned int const version)
-		{
-		}
-
-		template<typename Archive>
-		void serialize(Archive & archive, Machine & instance, unsigned int const version)
-		{
-		}
-
-		template<typename Archive>
-		void serialize(Archive & archive, Instrument & instance, unsigned int const version)
-		{
 		}
 	}
 }
