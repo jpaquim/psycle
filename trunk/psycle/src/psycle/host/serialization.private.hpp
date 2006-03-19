@@ -29,6 +29,17 @@ namespace psycle
 		template<typename Archive>
 		void serialize(Archive & archive, Machine & instance, unsigned int const version)
 		{
+			using boost::serialization::make_nvp;
+
+			archive & make_nvp("type", std::string(instance.GetDllName()));
+			archive & make_nvp("name", std::string(instance.GetEditName()));
+			unsigned int const parameters(instance.GetNumParams());
+			archive & BOOST_SERIALIZATION_NVP(parameters);
+			for(unsigned int parameter(0) ; parameter < parameters ; ++parameter)
+			{
+				int const & value(instance.GetParamValue(parameter));
+				archive & make_nvp("parameter-value", value);
+			}
 		}
 
 		template<typename Archive>
@@ -98,7 +109,8 @@ namespace psycle
 				{
 					if(!instance._pMachine[i]) continue;
 					archive & make_nvp("id", i);
-				//	archive & *instance._pMachine[i];
+					Machine const & machine(*instance._pMachine[i]);
+					archive & BOOST_SERIALIZATION_NVP(machine);
 				}
 			}
 
@@ -113,7 +125,8 @@ namespace psycle
 				{
 					if(instance._pInstrument[i]->Empty()) continue;
 					archive & make_nvp("id", i);
-				//	archive & *instance._pInstrument[i];
+					Instrument const & instrument(*instance._pInstrument[i]);
+					archive & BOOST_SERIALIZATION_NVP(instrument);
 				}
 			}
 		}
@@ -129,9 +142,14 @@ namespace psycle
 //#include <boost/serialization/export.hpp>
 //BOOST_CLASS_EXPORT_GUID(psycle::host::Song, "song")
 
-#include <boost/serialization/level.hpp>
-BOOST_CLASS_IMPLEMENTATION(psycle::host::Song, boost::serialization::object_serializable)
-BOOST_CLASS_IMPLEMENTATION(psycle::host::PatternEntry, boost::serialization::object_serializable)
+#if 0
+	#include <boost/serialization/level.hpp>
+	BOOST_CLASS_IMPLEMENTATION(psycle::host::Song                 , boost::serialization::object_serializable)
+	BOOST_CLASS_IMPLEMENTATION(psycle::host::PatternEntry         , boost::serialization::object_serializable)
+	BOOST_CLASS_IMPLEMENTATION(psycle::host::Pattern<PatternEntry>, boost::serialization::object_serializable)
+	BOOST_CLASS_IMPLEMENTATION(psycle::host::Machine              , boost::serialization::object_serializable)
+	BOOST_CLASS_IMPLEMENTATION(psycle::host::Instrument           , boost::serialization::object_serializable)
+#endif
 
 namespace psycle
 {
@@ -143,8 +161,8 @@ namespace psycle
 			{
 				std::ofstream ostream(file_name.c_str());
 				boost::archive::xml_oarchive archive(ostream);
-				Song const & const_reference(*this); // archive needs a const reference
-				archive << boost::serialization::make_nvp("psycle", const_reference);
+				Song const & psycle(*this);
+				archive << BOOST_SERIALIZATION_NVP(psycle);
 			}
 			catch(...)
 			{
