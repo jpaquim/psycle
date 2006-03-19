@@ -1,13 +1,13 @@
 #pragma once
 #include "detail/project.hpp"
-#include <vector>
+#include "boost/multi_array.hpp"
 namespace psycle
 {
 	namespace host
 	{
 		///\todo this class is unfortunatly not used
 		template<typename Entry>
-		class pattern : protected std::vector< std::vector<Entry> > // anything more direct for matrices?
+		class pattern : public boost::multi_array<Entry, 2>
 		{
 			public:
 				typedef Entry entry;
@@ -15,9 +15,8 @@ namespace psycle
 			public:
 				pattern(unsigned int const & lines, unsigned int const & columns)
 				:
-					columns_(columns)
+					boost::array<Entry, 2>(lines, columns)
 				{
-					this->lines(lines);
 				}
 
 			public:
@@ -26,23 +25,25 @@ namespace psycle
 			private:
 				std::string name_;
 
-			public:
-				unsigned int const inline & lines() const throw() { return size(); }
-				void lines(unsigned int const & value)
-				{
-					resize(lines);
-					for(iterator i(begin()) ; i != end() ; ++i) *i.resize(columns);
-				}
+			#if 0 // std::vector
+				public:
+					unsigned int const inline & lines() const throw() { return size(); }
+					void lines(unsigned int const & value)
+					{
+						resize(lines);
+						for(iterator i(begin()) ; i != end() ; ++i) *i.resize(columns);
+					}
 
-			public:
-				unsigned int const inline & columns() const throw() { return column_; }
-				void columns(unsigned int const & value)
-				{
-					columns_ = value;
-					for(iterator i(begin()) ; i != end() ; ++i) *i.resize(columns);
-				}
-			private:
-				unsigned int columns_;
+				public:
+					unsigned int const inline & columns() const throw() { return column_; }
+					void columns(unsigned int const & value)
+					{
+						columns_ = value;
+						for(iterator i(begin()) ; i != end() ; ++i) *i.resize(columns);
+					}
+				private:
+					unsigned int columns_;
+			#endif
 		};
 	}
 }
