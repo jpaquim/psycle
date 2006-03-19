@@ -4,14 +4,6 @@
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/string.hpp>
-//#include <boost/serialization/level.hpp>
-//BOOST_CLASS_IMPLEMENTATION(psycle::host::Song, boost::serialization::object_serializable)
-//#include <boost/serialization/version.hpp>
-//BOOST_CLASS_VERSION(psycle::host::Song, 0)
-//#include <boost/serialization/tracking.hpp>
-//BOOST_CLASS_TRACKING(psycle::host::Song, boost::serialization::track_never)
-//#include <boost/serialization/export.hpp>
-//BOOST_CLASS_EXPORT_GUID(psycle::host::Song, "song")
 //#include <boost/serialization/binary_object.hpp>
 namespace psycle
 {
@@ -20,10 +12,17 @@ namespace psycle
 		template<typename Archive>
 		void serialize(Archive & archive, PatternEntry & instance, unsigned int const version)
 		{
+			using boost::serialization::make_nvp;
+
+			archive & make_nvp("command"   , instance._cmd      );
+			archive & make_nvp("instrument", instance._inst     );
+			archive & make_nvp("machine"   , instance._mach     );
+			archive & make_nvp("note"      , instance._note     );
+			archive & make_nvp("parameter" , instance._parameter);
 		}
 
 		template<typename Archive>
-		void serialize(Archive & archive, Pattern & instance, unsigned int const version)
+		void serialize(Archive & archive, pattern<PatternEntry> & instance, unsigned int const version)
 		{
 		}
 
@@ -81,12 +80,8 @@ namespace psycle
 						for(unsigned int track(0); track < instance.SONGTRACKS ; ++track)
 						{
 							archive & BOOST_SERIALIZATION_NVP(track);
-							PatternEntry & event(events[track]);
-							archive & make_nvp("command"    , event._cmd      );
-							archive & make_nvp("instrument" , event._inst     );
-							archive & make_nvp("machine"    , event._mach     );
-							archive & make_nvp("note"       , event._note     );
-							archive & make_nvp("parameter"  , event._parameter);
+							PatternEntry const & event(events[track]);
+							archive & BOOST_SERIALIZATION_NVP(event);
 						}
 					}
 				}
@@ -124,6 +119,19 @@ namespace psycle
 		}
 	}
 }
+
+//#include <boost/serialization/version.hpp>
+//BOOST_CLASS_VERSION(psycle::host::Song, 0)
+
+//#include <boost/serialization/tracking.hpp>
+//BOOST_CLASS_TRACKING(psycle::host::Song, boost::serialization::track_never)
+
+//#include <boost/serialization/export.hpp>
+//BOOST_CLASS_EXPORT_GUID(psycle::host::Song, "song")
+
+#include <boost/serialization/level.hpp>
+BOOST_CLASS_IMPLEMENTATION(psycle::host::Song, boost::serialization::object_serializable)
+BOOST_CLASS_IMPLEMENTATION(psycle::host::PatternEntry, boost::serialization::object_serializable)
 
 namespace psycle
 {
