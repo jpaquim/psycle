@@ -15,7 +15,7 @@ namespace psycle
 			public:
 				pattern(unsigned int const & lines, unsigned int const & columns)
 				:
-					boost::array<Entry, 2>(lines, columns)
+					boost::multi_array<Entry, 2>(lines, columns)
 				{
 				}
 
