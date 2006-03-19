@@ -289,19 +289,19 @@ namespace psycle
 				}; // class Exception
 		}; // class Plugin
 
-		#if !defined _WINDOWS
-			#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT
-			#define PSYCLE__PLUGIN__CALLING_CONVENTION
-		#else
-			#define PSYCLE__PLUGIN__EXPORT __declspec(dllexport)
-			#define PSYCLE__PLUGIN__CALLING_CONVENTION __cdecl
-		#endif
 		#define PSYCLE__PLUGIN__INSTANCIATOR(typename_) \
 			extern "C" \
 			{ \
-				PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT Host_Plugin::Information const & PSYCLE__PLUGIN__CALLING_CONVENTION GetInfo() { return typename_::information(); } \
-				PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         PSYCLE__PLUGIN__CALLING_CONVENTION CreateMachine() { return * new typename_; } \
-				PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT void                             PSYCLE__PLUGIN__CALLING_CONVENTION DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
+				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT Host_Plugin::Information const & PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION GetInfo() { return typename_::information(); } \
+				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return * new typename_; } \
+				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT void                             PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 			}
+		#if !defined _WINDOWS
+			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
+			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
+		#else
+			#define PSYCLE__PLUGIN__DETAIL__EXPORT __declspec(dllexport)
+			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
+		#endif
 	} // namespace plugin
 } // namespace psycle
