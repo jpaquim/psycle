@@ -1,5 +1,5 @@
 #pragma once
-#include "detail/project.hpp"
+#include "pattern.hpp"
 #include <cstdint>
 namespace psycle
 {

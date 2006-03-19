@@ -1,13 +1,13 @@
 #pragma once
 #include "detail/project.hpp"
-#include <cstdint>
+#include <vector>
 namespace psycle
 {
 	namespace host
 	{
 		///\todo this class is unfortunatly not used
 		template<typename Entry>
-		class pattern : protected std::vector< std::vector<Entries> > // anything more direct for matrices?
+		class pattern : protected std::vector< std::vector<Entry> > // anything more direct for matrices?
 		{
 			public:
 				typedef Entry entry;
