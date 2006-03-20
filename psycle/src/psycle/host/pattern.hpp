@@ -1,6 +1,6 @@
 #pragma once
 #include "detail/project.hpp"
-#if 0
+#if 0 ///\todo this class is unfortunatly not used
 #include "boost/multi_array.hpp"
 namespace psycle
 {

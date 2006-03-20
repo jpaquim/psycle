@@ -82,7 +82,7 @@
 			///
 			/// attributes: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_pluslang_Extended_Attribute_Syntax.asp
 			///
-			/// #pragma: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_predir_pragma_directives.asp
+			/// pragma: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_predir_pragma_directives.asp
 			///
 			/// exception handling: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_core_exception_handling_topics_.28.c.2b2b29.asp
 			#define DIVERSALIS__COMPILER__MICROSOFT

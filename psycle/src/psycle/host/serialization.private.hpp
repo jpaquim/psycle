@@ -21,7 +21,7 @@ namespace psycle
 			archive & make_nvp("parameter" , instance._parameter);
 		}
 
-		#if 0
+		#if 0 // no pattern class in psycle :-(
 		template<typename Archive>
 		void serialize(Archive & archive, pattern<PatternEntry> & instance, unsigned int const version)
 		{
