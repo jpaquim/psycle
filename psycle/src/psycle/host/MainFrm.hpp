@@ -129,7 +129,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClipbut();
 			afx_msg void OnSelchangeTrackcombo();
 			afx_msg void OnCloseupTrackcombo();
+
+			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+				#pragma comment(lib, "HTMLHelp")
+			#endif
 			afx_msg void OnPsyhelp();
+
 			afx_msg void OnSavewave();
 			afx_msg void OnEditwave();
 			afx_msg void OnGearRack();
