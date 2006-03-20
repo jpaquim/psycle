@@ -21,10 +21,12 @@ namespace psycle
 			archive & make_nvp("parameter" , instance._parameter);
 		}
 
+		#if 0
 		template<typename Archive>
 		void serialize(Archive & archive, pattern<PatternEntry> & instance, unsigned int const version)
 		{
 		}
+		#endif
 
 		template<typename Archive>
 		void serialize(Archive & archive, Machine & instance, unsigned int const version)
