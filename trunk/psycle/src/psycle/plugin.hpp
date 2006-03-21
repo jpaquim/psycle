@@ -7,7 +7,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <exception>
+#include <stdexcept>
 namespace psycle
 {
 	namespace plugin
