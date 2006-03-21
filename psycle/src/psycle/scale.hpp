@@ -10,6 +10,7 @@ namespace psycle
 		Scale(const Real & input_maximum, const Real & output_minimum, const Real & output_maximum)
 		: input_maximum_(input_maximum), output_minimum_(output_minimum), output_maximum_(output_maximum)
 		{}
+		virtual inline ~Scale() throw() {}
 		virtual const Real apply(const Real & sample) const = 0;
 		virtual const Real apply_inverse(const Real & sample) const = 0;
 		inline const Real & input_maximum() const throw() { return input_maximum_; }

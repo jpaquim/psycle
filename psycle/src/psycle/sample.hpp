@@ -5,6 +5,9 @@
 #include <cmath>
 #include <vector>
 #include <cfloat>
+#include <cstdint>
+#include <diversalis/processor.hpp>
+#include <diversalis/compiler.hpp>
 namespace psycle
 {
 	
@@ -51,36 +54,39 @@ namespace psycle
 			/// when Real is 64-bit
 			inline const int truncated(const Real & x)
 			{
-				const Real result(x - 0.5 + 6755399441055744); // 2^51 + 2^52
+				BOOST_STATIC_ASSERT(sizeof x == 8);
+				const Real result(x - 0.5 + 6755399441055744ULL); // 2^51 + 2^52
 				return *reinterpret_cast<const int *>(&result);
 			};
 		#endif
 
-		/// for 32-bit (does it also work with 64-bit ?)
-		/// beware: only works with positive numbers
-		inline const int truncated(const Sample & x) 
-		{ 
-			const double half(0.5); 
-			int i; 
-			__asm // shit, this is not be portable!
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			/// for 32-bit (does it also work with 64-bit ?)
+			/// beware: only works with positive numbers
+			inline const int truncated(const Sample & x) 
 			{ 
-				fld x
-				fsub half
-				fistp i
+				const double half(0.5); 
+				int i; 
+				__asm // shit, this is not be portable!
+				{ 
+					fld x
+					fsub half
+					fistp i
+				}
+				return i;
 			}
-			return i;
-		}
+		#endif
 
 		#if 0
-		/// for 32-bit
-		inline const Sample log(const Sample & x) /// <bohan> i don't remember from where i got that bit of crunching... looks weird.
-		{ 
-			const int i(*reinterpret_cast<const int *>(&x));
-			return
-				( (i & 0x7f800000) >> 23 )
-				+ (i & 0x007fffff) / Sample(0x800000)
-				- 0x7f;
-		}
+			/// for 32-bit
+			inline const Sample log(const Sample & x) /// <bohan> i don't remember from where i got that bit of crunching... looks weird.
+			{ 
+				const int i(*reinterpret_cast<const int *>(&x));
+				return
+					( (i & 0x7f800000) >> 23 )
+					+ (i & 0x007fffff) / Sample(0x800000)
+					- 0x7f;
+			}
 		#endif
 
 		#if PSYCLE__MATH__REAL == 8
@@ -161,8 +167,8 @@ namespace psycle
 
 
 
-/////////////////////// todo //////////////////////////
-/*
+#if 0 /////////////////////// todo //////////////////////////
+
 class Interpolator
 {
 public:
@@ -245,7 +251,7 @@ protected:
 			tables[3][index] * sample2;
 	}
 private:
-	/* static const int *//* enum { resolution = 2048 };
+	int const static resolution = 2048;
 	static const float tables[4][resolution], linear_table[resolution];
 };
 
@@ -284,4 +290,5 @@ template<typename Sample> class Interpolated_Circular_Buffer : private::vector<S
 {
 	
 };
-*/
+
+#endif // todo
