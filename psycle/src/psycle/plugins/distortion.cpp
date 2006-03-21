@@ -38,7 +38,7 @@ public:
 			Information::Parameter::linear("negative clamp", 0, +amplitude, +amplitude),
 			Information::Parameter::discrete("symmetric", no, yes)
 		};
-		static const Information information(Information::Type::effect, "ayeternal Dist! Distortion", "Dist!ortion", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Types::effect, "ayeternal Dist! Distortion", "Dist!ortion", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 
