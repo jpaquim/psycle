@@ -1,13 +1,14 @@
 /// \file
 /// \brief
 #pragma once
+#include <diversalis/processor.hpp>
+#include <diversalis/compiler.hpp>
 #include <limits>
 #include <cmath>
 #include <vector>
 #include <cfloat>
 #include <cstdint>
-#include <diversalis/processor.hpp>
-#include <diversalis/compiler.hpp>
+#include <boost/static_assert.hpp>
 namespace psycle
 {
 	
