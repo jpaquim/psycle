@@ -155,7 +155,7 @@
 			#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
 			#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL
 			// check if version is recent enough__
-			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 4)
+			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 3)
 				#error "compiler too old... better giving up now."
 			#endif
 			// check if version supports pre-compilation.
