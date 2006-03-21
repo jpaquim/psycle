@@ -15,7 +15,7 @@ public:
 
 	static const Information & information() throw()
 	{
-		static const Information information(Information::Type::effect, "crasher", "crasher", "bohan", 1, 0, 0);
+		static const Information information(Information::Types::effect, "crasher", "crasher", "bohan", 1, 0, 0);
 		return information;
 	}
 

@@ -41,7 +41,7 @@ public:
 			Information::Parameter::linear("feedback left", -1, 0, 1),
 			Information::Parameter::linear("feedback right", -1, 0, 1),
 		};
-		static const Information information(Information::Type::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Types::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 

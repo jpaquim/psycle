@@ -38,7 +38,7 @@ public:
 			Information::Parameter::linear("mod. amplitude", 0, 0, 1),
 			Information::Parameter::linear("mod. stereodephase", 0, 0, math::pi)
 		};
-		static const Information information(Information::Type::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Types::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 
