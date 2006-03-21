@@ -3,6 +3,7 @@
 /// This one is more object-oriented than the original plugin_interface.hpp one.
 #pragma once
 #include "scale.hpp"
+#include <universalis/compiler.hpp>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -19,8 +20,8 @@ namespace psycle
 				{
 					public:
 						int const interface_version;
-						enum Type { effect = 0, generator = 3 };
-						int /*Type*/ const type;
+						struct Types { enum Type { effect = 0, generator = 3 }; };
+						int /*Types::Type*/ const type;
 						int const parameter_count;
 						class Parameter;
 					private:
@@ -34,7 +35,7 @@ namespace psycle
 						int const columns;
 						Information
 						(
-							Type const & type,
+							Types::Type const & type,
 							char const description[],
 							char const name[],
 							char const author[],
@@ -59,18 +60,18 @@ namespace psycle
 						class Parameter
 						{
 							public:
+								struct Types { enum Type { null = 0, state = 2 }; };
+								int /*Types::Type*/ const type;
 								char const * const name;
 								char const * const unused_name;
-								int const minimum_value;
-								int const maximum_value;
-								enum Type { null = 0, state = 2 };
-								int /*Type*/ const type;
-								int const default_value;
 								Scale const & scale;
+								int const minimum_value;
+								int const default_value;
+								int const maximum_value;
 							public:
 								Parameter(char const name[] = "")
 								:
-									type(Type::null),
+									type(Types::null),
 									name(name),
 									unused_name(name),
 									scale(* new scale::Discrete(0)),
@@ -84,7 +85,7 @@ namespace psycle
 							private:
 								Parameter(char const name[], Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
 								:
-									type(Type::state),
+									type(Types::state),
 									name(name),
 									unused_name(name),
 									scale(scale),
@@ -153,15 +154,16 @@ namespace psycle
 			protected:
 				class Host
 				{
-				public:
-					virtual void message(char const message[], char const caption[], unsigned int type = 0) const {}
-					virtual int const unused__raw(int const, int const, int const, int const) const { return 0; }
-					virtual float const * const unused__wave_data_left(int, int) const { return 0; }
-					virtual float const * const unused__wave_data_right(int, int) const { return 0; }
-					virtual int const samples_per_tick() const { return 0; }
-					virtual int const samples_per_second() const { return 0; }
-					virtual int const sequencer_beats_per_minute() const { return 0; }
-					virtual int const sequencer_ticks_per_sequencer_beat() const { return 0; }
+					public:
+						virtual inline ~Host() throw() {}
+						virtual void message(char const message[], char const caption[], unsigned int type = 0) const {}
+						virtual int const unused__raw(int const, int const, int const, int const) const { return 0; }
+						virtual float const * const unused__wave_data_left(int, int) const { return 0; }
+						virtual float const * const unused__wave_data_right(int, int) const { return 0; }
+						virtual int const samples_per_tick() const { return 0; }
+						virtual int const samples_per_second() const { return 0; }
+						virtual int const sequencer_beats_per_minute() const { return 0; }
+						virtual int const sequencer_ticks_per_sequencer_beat() const { return 0; }
 				} const * host_;
 		}; // class Host_Plugin
 
@@ -223,11 +225,9 @@ namespace psycle
 				}
 				virtual void init() {}
 			private:
-				Real
-					samples_per_second_, seconds_per_sample_,
-					sequencer_ticks_per_seconds_;
-				int sequencer_ticks_per_sequencer_beat_, sequencer_beats_per_minute_;
 				bool initialized_;
+				Real samples_per_second_, seconds_per_sample_, sequencer_ticks_per_seconds_;
+				int sequencer_ticks_per_sequencer_beat_, sequencer_beats_per_minute_;
 			protected:
 				virtual void sequencer_tick_event()
 				{
@@ -289,19 +289,12 @@ namespace psycle
 				}; // class Exception
 		}; // class Plugin
 
-		#define PSYCLE__PLUGIN__INSTANCIATOR(typename_) \
+		#define PSYCLE__PLUGIN__INSTANCIATOR(typename) \
 			extern "C" \
 			{ \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT Host_Plugin::Information const & PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION GetInfo() { return typename_::information(); } \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return * new typename_; } \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT void                             PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
+				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT Host_Plugin::Information const & UNIVERSALIS__COMPILER__CALLING_CONVENTION__C GetInfo() { return typename::information(); } \
+				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         UNIVERSALIS__COMPILER__CALLING_CONVENTION__C CreateMachine() { return * new typename; } \
+				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 			}
-		#if !defined _WINDOWS
-			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
-			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
-		#else
-			#define PSYCLE__PLUGIN__DETAIL__EXPORT __declspec(dllexport)
-			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
-		#endif
 	} // namespace plugin
 } // namespace psycle

@@ -78,6 +78,7 @@ public:
 class CFxCallback
 {
 public:
+	virtual inline ~CFxCallback() throw() {}
 	virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
 	virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
 	virtual float *GetWaveLData(int inst,int wave){return 0;} ///\todo USELESS if you cannot get the length!
@@ -137,11 +138,11 @@ public:
 };
 
 
-#define PSYCLE__PLUGIN__INSTANCIATOR(typename_, info) \
+#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) \
 	extern "C" \
 	{ \
 		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInfo const * const PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION GetInfo() { return &info; } \
-		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInterface *        PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return new typename_; } \
+		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInterface *        PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return new typename; } \
 		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT void                         PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
 	}
 #if !defined _WINDOWS

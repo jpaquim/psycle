@@ -13,7 +13,7 @@ public:
 	}
 	static const Information & information() throw()
 	{
-		static const Information information(Information::Type::effect, "Negative", "Negative", "who cares", 1, 0, 0);
+		static const Information information(Information::Types::effect, "Negative", "Negative", "who cares", 1, 0, 0);
 		return information;
 	}
 	Negative() : Plugin(information()) {}

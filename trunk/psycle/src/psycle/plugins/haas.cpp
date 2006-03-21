@@ -88,7 +88,7 @@ public:
 			/* separator                           = */ Information::Parameter(),
 			/* channel_mix                         = */ Information::Parameter::discrete("channel mix", normal, mono)
 		};
-		static const Information information(Information::Type::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Types::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 
@@ -174,7 +174,7 @@ public:
 		late_reflection_gain_left(1),
 		late_reflection_gain_right(1)
 	{}
-
+	virtual inline ~Haas() throw() {}
 	virtual void init();
 	virtual void process(Sample l [], Sample r [], int samples, int);
 	virtual void parameter(const int &);

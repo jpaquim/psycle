@@ -21,7 +21,7 @@ class Gainer : public Plugin
 			{
 				Information::Parameter::exponential("gain", std::exp(-4.), 1, std::exp(+4.))
 			};
-			static const Information information(Information::Type::effect, "ayeternal Gainer", "Gainer", "bohan", 1, parameters, sizeof parameters / sizeof *parameters);
+			static const Information information(Information::Types::effect, "ayeternal Gainer", "Gainer", "bohan", 1, parameters, sizeof parameters / sizeof *parameters);
 			return information;
 		}
 
