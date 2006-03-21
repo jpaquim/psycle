@@ -6,6 +6,8 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <universalis/operating_system/paths.hpp>
 #include <universalis/operating_system/terminal.hpp>
+#include <boost/static_assert.hpp>
+#include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <string>
 namespace psycle
@@ -15,7 +17,7 @@ namespace psycle
 	}
 }
 
-int main()
+int main(unsigned int const argument_count, char * const arguments[])
 {
 	universalis::operating_system::terminal terminal;
 	std::cout << "package name...... " << universalis::operating_system::paths::package::name() << std::endl;
@@ -26,8 +28,10 @@ int main()
 	std::cout << "var............... " << universalis::operating_system::paths::var().string() << std::endl;
 	std::cout << "etc............... " << universalis::operating_system::paths::etc().string() << std::endl;
 	std::cout << "home.............. " << universalis::operating_system::paths::home().string() << std::endl;
-	std::cout <<  std::endl;
-	std::cout << "This program does nothing. Type anything to quit." << std::endl << std::endl;
-	std::string s;
-	std::cin >> s;
+
+	if(argument_count == 1) return 0;
+
+	std::string file_string(arguments[0]);
+	boost::filesystem::path file_path(file_string, boost::filesystem::native);
+	std::cout << file_path.string() << std::endl;
 }
