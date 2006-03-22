@@ -2,6 +2,7 @@
 /// \brief delay modulated by a sine
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
+#include <cassert>
 namespace psycle { namespace plugin {
 
 class Flanger : public Plugin
