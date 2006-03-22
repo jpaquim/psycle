@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include "allpass.hpp"
+#include "AllPass.hpp"
 
 // Allpass filter implementation
 //

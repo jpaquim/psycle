@@ -1,10 +1,10 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include "revmodel.hpp"
-#include <string.h> // should be <cstring>
-#include <stdlib.h> // should be <cstdlib>
-#include <assert.h> // should be <cassert>
-#include <math.h> // should be <cmath>
+#include "RevModel.hpp"
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
 
 /////////////////////////////////////////////////////////////////////
 // Arguru's psycle port of Yezar freeverb
