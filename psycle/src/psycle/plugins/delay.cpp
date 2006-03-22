@@ -70,6 +70,7 @@ public:
 	};
 
 	Delay() : Plugin(information()) {}
+	virtual inline ~Delay() throw() {}
 	virtual void init();
 	virtual void process(Sample l [], Sample r [], int samples, int);
 	virtual void parameter(const int &);
