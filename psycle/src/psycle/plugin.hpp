@@ -19,7 +19,7 @@ namespace psycle
 				class Information
 				{
 					public:
-						int const interface_version;
+						int const static interface_version = 11;
 						struct Types { enum Type { effect = 0, generator = 3 }; };
 						int /*Types::Type*/ const type;
 						int const parameter_count;
@@ -44,7 +44,6 @@ namespace psycle
 							int const & parameter_count
 						)
 						:
-							interface_version(11),
 							type(type),
 							parameter_count(parameter_count),
 							parameters(new Parameter const * [parameter_count]),
@@ -296,5 +295,9 @@ namespace psycle
 				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         UNIVERSALIS__COMPILER__CALLING_CONVENTION__C CreateMachine() { return * new typename; } \
 				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 			}
+			
+		psycle::plugin::Host_Plugin::Information::interface_version;
+		psycle::plugin::Host_Plugin::Information::Parameter::input_minimum_value;
+		psycle::plugin::Host_Plugin::Information::Parameter::input_maximum_value;
 	} // namespace plugin
 } // namespace psycle
