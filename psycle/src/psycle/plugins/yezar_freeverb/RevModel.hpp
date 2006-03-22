@@ -1,7 +1,7 @@
 #pragma once
 
 #include "comb.hpp"
-#include "allpass.hpp"
+#include "AllPass.hpp"
 #include "tuning.hpp"
 
 // Reverb model declaration
