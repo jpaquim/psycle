@@ -296,8 +296,8 @@ namespace psycle
 				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 			}
 			
-		psycle::plugin::Host_Plugin::Information::interface_version;
-		psycle::plugin::Host_Plugin::Information::Parameter::input_minimum_value;
-		psycle::plugin::Host_Plugin::Information::Parameter::input_maximum_value;
+		int const Host_Plugin::Information::interface_version;
+		int const Host_Plugin::Information::Parameter::input_minimum_value;
+		int const Host_Plugin::Information::Parameter::input_maximum_value;
 	} // namespace plugin
 } // namespace psycle
