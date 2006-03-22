@@ -3,10 +3,10 @@
 #include "AllPass.hpp"
 #include "CombFilter.hpp"
 #include "LowPass.hpp"
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
 
 /////////////////////////////////////////////////////////////////////
 // Arguru reverb plugin for PSYCLE
