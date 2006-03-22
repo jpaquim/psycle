@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include "revmodel.hpp"
+#include "RevModel.hpp"
 
 // Reverb model implementation
 //
