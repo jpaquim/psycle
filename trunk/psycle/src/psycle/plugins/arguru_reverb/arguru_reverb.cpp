@@ -300,3 +300,4 @@ void mi::SetAll(int delay)
 	all[c].Initialize(delay*(c+1)+(c*c),int(float(c)*1.3f));
 	}
 }
+
