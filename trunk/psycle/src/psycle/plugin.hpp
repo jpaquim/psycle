@@ -19,7 +19,7 @@ namespace psycle
 				class Information
 				{
 					public:
-						int const static interface_version = 11;
+						int const interface_version;
 						struct Types { enum Type { effect = 0, generator = 3 }; };
 						int /*Types::Type*/ const type;
 						int const parameter_count;
@@ -44,6 +44,7 @@ namespace psycle
 							int const & parameter_count
 						)
 						:
+							interface_version(11),
 							type(type),
 							parameter_count(parameter_count),
 							parameters(new Parameter const * [parameter_count]),
@@ -59,24 +60,24 @@ namespace psycle
 						class Parameter
 						{
 							public:
-								struct Types { enum Type { null = 0, state = 2 }; };
-								int /*Types::Type*/ const type;
 								char const * const name;
 								char const * const unused_name;
-								Scale const & scale;
+								struct Types { enum Type { null = 0, state = 2 }; };
+								int /*Types::Type*/ const type;
 								int const minimum_value;
-								int const default_value;
 								int const maximum_value;
+								int const default_value;
+								Scale const & scale;
 							public:
 								Parameter(char const name[] = "")
 								:
-									type(Types::null),
 									name(name),
 									unused_name(name),
-									scale(* new scale::Discrete(0)),
+									type(Types::null),
 									minimum_value(0),
+									maximum_value(0),
 									default_value(0),
-									maximum_value(0)
+									scale(* new scale::Discrete(0))
 								{}
 							public:
 							int const static input_minimum_value = 0;
@@ -84,11 +85,11 @@ namespace psycle
 							private:
 								Parameter(char const name[], Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
 								:
-									type(Types::state),
 									name(name),
 									unused_name(name),
-									scale(scale),
+									type(Types::state),
 									minimum_value(input_minimum_value),
+									maximum_value(input_maximum_value),
 									default_value
 									(
 										std::min
@@ -101,7 +102,7 @@ namespace psycle
 											input_maximum_value
 										)
 									),
-									maximum_value(input_maximum_value)
+									scale(scale)
 								{}
 							public:
 								static const Parameter & discrete(char const name[], int const & default_value, int const & maximum_value)
@@ -296,7 +297,6 @@ namespace psycle
 				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 			}
 			
-		int const Host_Plugin::Information::interface_version;
 		int const Host_Plugin::Information::Parameter::input_minimum_value;
 		int const Host_Plugin::Information::Parameter::input_maximum_value;
 	} // namespace plugin
