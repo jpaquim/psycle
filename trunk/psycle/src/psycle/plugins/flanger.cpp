@@ -92,11 +92,10 @@ public:
 
 	Flanger() : Plugin(information()), modulation_phase_(0)
 	{
-//		processor::fpu::set_mode();
 		for(int channel(0) ; channel < channels ; ++channel)
 			writes_[channel] = 0;
 	}
-
+	virtual inline ~Flanger() throw() {}
 	virtual void init();
 	virtual void process(Sample l [], Sample r [], int samples, int);
 	virtual void parameter(const int &);
