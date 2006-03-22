@@ -2,7 +2,7 @@
 /// \brief a crash on purpose plugin
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin.hpp>
-#include <exception>
+#include <stdexcept>
 namespace psycle { namespace plugin {
 
 class Crasher : public Plugin
@@ -30,7 +30,7 @@ public:
 	virtual void process(Sample l[], Sample r[], int samples, int);
 protected:
 	inline void process(Sample &);
-	void crash() throw(...)
+	void crash()
 	{
 		// c++ exception:
 		//throw "crash on purpose!";
