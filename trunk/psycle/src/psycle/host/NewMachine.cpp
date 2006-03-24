@@ -456,7 +456,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				for(int i = 0 ; i < NUM_INTERNAL_MACHINES ; i++)
 				{
 					//determine internal machine folder
-					if (_pInternalMachines[i]->category == "")
+					if (!_pInternalMachines[i]->category.length())
 					{
 						hCategory = hNodes[0];
 					}
