@@ -1,0 +1,46 @@
+#!/bin/bash
+
+##############################################################################
+#
+# This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2 of the License, or (at your option) any later version.
+# Copyright (C) 2004-2005 Johan Boule <bohan.dyndns.org>
+#
+# \meta package-specific
+# \meta standard gnu
+#
+##############################################################################
+
+function update-date
+{
+	local page=$1 &&
+	local tag=$2 &&
+	local file=$3 &&
+	local date=$(date --universal +"%Z %Y %B %d %A %T" --reference=$file) &&
+	local tmp=/tmp/$(basename $0).$(basename $page).$(basename $file) &&
+	sed "s/<\!-- date $tag -->.*$/<\!-- date $tag --> $date/" < $page > $tmp &&
+	mv --force $tmp $page &&
+	chmod ug=rw,o=r $page
+} &&
+
+function main
+{
+	local page=$1 &&
+	local tag=$2 &&
+	local file=$3 &&
+	cd $(dirname $0) &&
+	if test -n "$file"
+	then
+		update-date $page $tag $file "by $(id --user --name)"
+	else
+		update-date index.xml source packages/standard-source-tarball/psycle.tar.gz
+		update-date index.xml bin packages/microsoft/psycle.bin.7z
+		update-date index.xml bin.mfc packages/microsoft/psycle.mfc.bin.zip
+#		update-date index.xml bin.mfc.release-candidate packages/microsoft/psycle.mfc.bin.release_candidate.7z
+		update-date index.xml bin.mfc.release-candidate packages/microsoft/psycle.mfc.bin.release_1_8_bugfixes.tar.gz
+		update-date index.xml cvs psycle.cvs.sticky-tag.HEAD.tar.bz2
+		update-date index.xml doxygen doxygen/html/index.html
+		update-date index.xml doxygen.mfc doxygen.mfc/html/index.html
+	fi
+} &&
+
+main "$@"
