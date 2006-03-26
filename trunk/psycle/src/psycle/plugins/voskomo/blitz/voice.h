@@ -285,9 +285,7 @@ private:
 	
 	inline int f2i(double d)
 	{
-		const double magic = 6755399441055744.0; // 2^51 + 2^52
-		double tmp = (d-0.5) + magic;
-		return 2047 & (int)tmp;
+		 return ((int)d) & 2047;
 	};
 
 	inline float freqChange(float freq)
