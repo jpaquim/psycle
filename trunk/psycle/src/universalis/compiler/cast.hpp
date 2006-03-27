@@ -112,16 +112,6 @@ namespace universalis
 					typename Base_Wrapper::underlying_type
 				>
 			{
-				private:
-					void init()
-					{
-						if(operating_system::loggers::trace()())
-						{
-							std::ostringstream s;
-							s << "underlying wrapper: " << this;
-							operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						}
-					}
 				public:
 					#include <boost/preprocessor/repetition/repeat.hpp>
 					#include <boost/preprocessor/control/expr_if.hpp>
@@ -135,11 +125,7 @@ namespace universalis
 					#define constructor(_, count, __) \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						underlying_wrapper(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
-						: \
-							Base_Wrapper(BOOST_PP_ENUM_PARAMS(count, xtra)) \
-						{ \
-							init(); \
-						}
+						: Base_Wrapper(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
 						BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
 					#undef constructor
 				protected:
