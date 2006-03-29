@@ -1,6 +1,6 @@
 ///\interface psycle::host::Global
 #pragma once
-#include "detail/project.hpp"
+#include <psycle/host/detail/project.hpp>
 #include <cstdint>
 #include <boost/strong_typedef.hpp>
 namespace psycle

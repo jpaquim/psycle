@@ -2,14 +2,14 @@
 ///\implementation psycle::host::Configuration.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "configuration.hpp"
-#include "registry.hpp"
-#include "WaveOut.hpp"
-#include "DirectSound.hpp"
-#include "ASIOInterface.hpp"
-#include "MidiInput.hpp"
-#include "song.hpp"
-#include "NewMachine.hpp"
+#include <psycle/host/configuration.hpp>
+#include <psycle/host/engine/registry.hpp>
+#include <psycle/host/audiodrivers/WaveOut.hpp>
+#include <psycle/host/audiodrivers/DirectSound.hpp>
+#include <psycle/host/audiodrivers/ASIOInterface.hpp>
+#include <psycle/host/engine/MidiInput.hpp>
+#include <psycle/host/engine/song.hpp>
+#include <psycle/host/gui/NewMachine.hpp>
 
 namespace psycle
 {

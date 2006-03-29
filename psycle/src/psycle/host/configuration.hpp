@@ -1,7 +1,7 @@
 ///\interface psycle::host::Configuration
 #pragma once
-#include "AudioDriver.hpp"
-#include "version.hpp"
+#include <psycle/host/audiodrivers/AudioDriver.hpp>
+#include <psycle/host/version.hpp>
 #include <cstddef>
 namespace psycle
 {

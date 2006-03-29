@@ -2,13 +2,13 @@
 ///\brief implementation file for psycle::host::Global.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include "global.hpp"
-#include "dsp.hpp"
-#include "song.hpp"
-#include "player.hpp"
-#include "configuration.hpp"
+#include <psycle/host/global.hpp>
+#include <psycle/host/engine/dsp.hpp>
+#include <psycle/host/engine/song.hpp>
+#include <psycle/host/engine/player.hpp>
+#include <psycle/host/configuration.hpp>
 #include <operating_system/logger.hpp>
-#include "InputHandler.hpp"
+#include <psycle/host/gui/InputHandler.hpp>
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
