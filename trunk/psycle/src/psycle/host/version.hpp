@@ -1,4 +1,4 @@
-#include "detail/project.hpp"
+#include <psycle/host/detail/project.hpp>
 #include <universalis/compiler/stringized.hpp>
 
 ///\file
