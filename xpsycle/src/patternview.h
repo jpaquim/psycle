@@ -145,11 +145,16 @@ class PatternView : public NPage
     void onPopupBlockCopy(NButtonEvent* ev);
     void onPopupBlockCut(NButtonEvent* ev);
     void onPopupBlockPaste(NButtonEvent* ev);
+    void onPopupTranspose1(NButtonEvent* ev);
+    void onPopupTranspose12(NButtonEvent* ev);
+    void onPopupTranspose_1(NButtonEvent* ev);
+    void onPopupTranspose_12(NButtonEvent* ev);
     void onPopupPattern(NButtonEvent* ev);
 
 
     void copyBlock(bool cutit);
     void pasteBlock(int tx,int lx,bool mix,bool save = true);
+    void blockTranspose(int trp);
 
     unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
   };
