@@ -1,0 +1,5 @@
+nkeyaccelerator.lo nkeyaccelerator.o:  \
+ /home/natti/ngrs3/src/nkeyaccelerator.cpp \
+  /home/natti/ngrs3/src/nkeyaccelerator.h
+
+/home/natti/ngrs3/src/nkeyaccelerator.h:

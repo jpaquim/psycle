@@ -1,0 +1,4 @@
+nvisitor.lo nvisitor.o: /home/natti/ngrs3/src/nvisitor.cpp \
+  /home/natti/ngrs3/src/nvisitor.h
+
+/home/natti/ngrs3/src/nvisitor.h:
