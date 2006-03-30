@@ -1,0 +1,27 @@
+# This is a sorted list, top priority at the top!
+
+*	generic::port::connect move to generic::base::port
+
+*	generic::wrappers::node find port by name functions
+
+*	om-synth at savannah
+
+*	make psycleMFC's src/psycle/plugin.hpp more readable by
+	defining the nested classes outside their enclosing class,
+	leaving only a forward declaration in the enclosing class.
+	as in:
+		class enclosing
+		{
+			class nested;
+		};
+		class enclosing::nested
+		{
+			...
+		};
+	I've tested it on gcc, i hope msvc7.1 won't choke on it.
+	-- bohan
+
+*	Remember to update the TODO file.
+	-- bohan
+
+*	X server dpi, again.
