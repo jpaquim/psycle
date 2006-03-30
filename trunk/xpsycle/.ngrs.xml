@@ -1,0 +1,55 @@
+<!-- ngrs configuration file -->
+<ngrs>
+<vcskin id='pane'>
+    <font name='Suse sans' size='12' color='0:0:0'></font>
+    <bgcolor r='200' g='200' b='200'></bgcolor>
+</vcskin>
+<vcskin id='mbar'>
+    <gradient start='230:230:230' mid='250:250:250' end='240:240:240' dir='ver' percent='10' style='1'>
+    </gradient>
+</vcskin>	
+<vcskin id='btnup'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<gradient start='230:230:230' mid='240:240:240' end='140:140:140' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+<vcskin id='btnover'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<gradient start='240:240:240' mid='250:250:250' end='180:180:180' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+<vcskin id='mbtnover'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<gradient start='130:130:130' mid='150:150:150' end='140:140:140' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+<vcskin id="filedlgpane">
+     <bgcolor r='200' g='200' b='200'></bgcolor>
+     <font name='Suse sans' size='8' color='0:0:0'></font>
+</vcskin>	
+<vcskin id="toolbar">
+	<font name='Suse sans' size='8' color='100:100:100'></font>
+</vcskin>
+<vcskin id="sbar_pane">
+	<gradient start='230:230:230' mid='200:200:200' end='230:230:230' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+<vcskin id='tabup'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<gradient start='230:230:230' mid='240:240:240' end='200:200:200' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+<vcskin id='tabnone'>
+	<font name='Suse Sans' size='8' color='100:100:100'></font>
+	<gradient start='200:200:200' mid='210:210:210' end='180:180:180' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+<vcskin id='edit'>
+	<font name='Suse Sans' size='8' color='230:230:230'></font>
+	<gradient start='230:230:230' mid='50:50:50' end='100:100:100' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
+</ngrs>
+
+
+<!-- <bitmap src='/usr/X11R6/include/X11/pixmaps/back.xpm' style='1'></bitmap> -->

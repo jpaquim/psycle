@@ -1,0 +1,15 @@
+<!-- xpsycle configuration file -->
+<xpsycle>
+<path id='icondir' src='~/xpsycle/icons/'></path>
+<path id='plugindir' src='/home/natti/psycle/trunk/psycle/make/gnu_autotools/++packageneric/build/.libs/'></path>
+<vcskin id ='seqbar'>
+  <bitmap src = '/home/natti/black.xpm' style='1'></bitmap>
+  <font name = "Suse sans" size = '8' color = '100:100:100'></font>
+</vcskin>	
+<vcskin id ='playbar'>
+	<bgcolor r='200' g='200' b='200'></bgcolor>
+	<font name = "Suse sans" size = '8' color = '100:100:100'></font>
+</vcskin>
+</xpsycle>
+
+
