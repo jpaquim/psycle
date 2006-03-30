@@ -56,6 +56,7 @@ public:
     virtual void destroyRegion();
     virtual void destroySpacingRegion();
 
+    int d2i(double d);
 
 private:
 

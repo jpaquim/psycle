@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "nlineshape.h"
 
+
 NLineShape::NLineShape()
  : NShape()
 {
@@ -61,11 +62,11 @@ void NLineShape::resize( int width, int height )
   int w = rectArea().width();
   int h = rectArea().height();
 
-  p1_.setX( (int) round( ((width) / double ( w) ) * (p1_.x() - x) + x));
-  p1_.setY( (int) round( ((height) / double ( h) ) * (p1_.y() - y) + y));
+  p1_.setX( (int) d2i( ((width) / double ( w) ) * (p1_.x() - x) + x));
+  p1_.setY( (int) d2i( ((height) / double ( h) ) * (p1_.y() - y) + y));
 
-  p2_.setX( (int) round( ((width) / double ( w) ) * (p2_.x() - x) + x));
-  p2_.setY( (int) round( ((height) / double ( h) ) * (p2_.y() - y) + y));
+  p2_.setX( (int) d2i( ((width) / double ( w) ) * (p2_.x() - x) + x));
+  p2_.setY( (int) d2i( ((height) / double ( h) ) * (p2_.y() - y) + y));
 
 }
 
@@ -229,6 +230,10 @@ void NLineShape::destroySpacingRegion( )
   region_ = 0;
 }
 
+int NLineShape::d2i(double d)
+ {
+   return (int) ( d<0?d-.5:d+.5);
+ }
 
 
 

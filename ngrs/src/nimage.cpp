@@ -57,12 +57,12 @@ void NImage::paint( NGraphics * g )
 
     switch (halign_) {
       case nAlCenter :
-        xp =(int) round((spacingWidth() - pBmp->width()) / 2.0f);
+        xp =(int) d2i((spacingWidth() - pBmp->width()) / 2.0f);
       break;
     }
     switch (valign_) {
       case nAlCenter :
-        yp = (int) round((spacingHeight() - pBmp->height()) / 2.0f);
+        yp = (int) d2i((spacingHeight() - pBmp->height()) / 2.0f);
       break;
     }
 

@@ -125,6 +125,9 @@ NRuntime * NRuntime::parent( ) const
   return parent_;
 }
 
-
+int NRuntime::d2i(double d)
+ {
+   return (int) ( d<0?d-.5:d+.5);
+ }
 
 
