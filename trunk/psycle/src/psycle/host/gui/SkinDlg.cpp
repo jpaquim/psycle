@@ -2,11 +2,10 @@
 ///\brief implementation file for psycle::host::CSkinDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/gui/SkinDlg.hpp>
-#include <psycle/host/gui/Helpers.hpp>
-#include <psycle/host/gui/Configuration.hpp>
-#include ".\skindlg.hpp" // Hmm?
+#include "psycle.hpp"
+#include "SkinDlg.hpp"
+#include <psycle/host/configuration.hpp>
+#include <psycle/host/engine/helpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define MAX_FONTS 256

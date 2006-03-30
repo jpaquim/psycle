@@ -1,9 +1,9 @@
 #pragma once
-#include <psycle/host/constants.hpp>
-#include <psycle/host/gui/XMSamplerUIGeneral.hpp>
-#include <psycle/host/gui/XMSamplerUIInst.hpp>
-#include <psycle/host/gui/XMSamplerUISample.hpp>
-#include <psycle/host/gui/XMSamplerMixerPage.hpp>
+#include "XMSamplerUIGeneral.hpp"
+#include "XMSamplerUIInst.hpp"
+#include "XMSamplerUISample.hpp"
+#include "XMSamplerMixerPage.hpp"
+#include <psycle/host/engine/constants.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

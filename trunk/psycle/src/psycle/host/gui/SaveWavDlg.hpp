@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CSaveWavDlg.
 #pragma once
-#include <psycle/host/constants.hpp>
+#include <psycle/host/engine/constants.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		/// save wave dialog window.

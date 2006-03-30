@@ -1,12 +1,11 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/engine/Constants.hpp>
-#include <psycle/host/gui/ChildView.hpp>
-#include <psycle/host/Configuration.hpp>
-#include <psycle/host/gui/Song.hpp>
-#include <psycle/host/engine/Machine.hpp>
-#include <psycle/host/gui/FrameMixerMachine.hpp>
+#include "FrameMixerMachine.hpp"
+#include "psycle.hpp"
+#include "ChildView.hpp"
+#include <psycle/host/configuration.hpp>
+#include <psycle/host/engine/song.hpp>
+#include <psycle/host/engine/machine.hpp>
 
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

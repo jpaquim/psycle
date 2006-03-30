@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CWaveEdAmplifyDialog.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/WaveEdAmplifyDialog.hpp>
-#include <psycle/host/gui/Helpers.hpp>
+#include "WaveEdAmplifyDialog.hpp"
+#include "psycle.hpp"
+#include <psycle/host/engine/helpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWaveEdAmplifyDialog::CWaveEdAmplifyDialog(CWnd* pParent)
