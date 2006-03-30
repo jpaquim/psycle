@@ -1,0 +1,103 @@
+/***************************************************************************
+ *   Copyright (C) 2006 by Stefan   *
+ *   natti@linux   *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+#ifndef MACHINEVIEW_H
+#define MACHINEVIEW_H
+
+#include <npage.h>
+#include <nscrollbox.h>
+#include <nautoscrolllayout.h>
+#include "wiregui.h"
+#include <nlabel.h>
+#include <wiredlg.h>
+
+
+class Machine;
+class MachineGUI;
+
+/**
+@author Stefan
+*/
+
+
+class Wire : public WireGUI {
+public :
+   Wire() {
+     dlg = new WireDlg();
+     dlg->setLine(this);
+     add(dlg);
+   }
+   ~Wire() {
+   }
+
+    virtual void onMousePress  (int x, int y, int button) {
+       if (window()!=0) window()->checkForRemove(0);
+       dlg->setVisible(true);
+    }
+
+    WireDlg* dialog() { return dlg;}
+
+private:
+
+  WireDlg* dlg;
+
+};
+
+
+
+class MachineView : public NPage
+{
+public:
+    MachineView();
+
+    ~MachineView();
+
+    void createGUIMachines();
+    void addMachine(Machine* mac);
+    void removeMachines();
+
+
+    void resize();
+
+    void update();
+
+private:
+
+   Wire* line;
+   MachineGUI* startGUI;
+
+
+   void init();
+   NPanel* scrollArea;
+   NScrollBox* scrollBox_;
+
+   void onCreateMachine(Machine* mac);
+   void onDestroyMachine(Machine* mac);
+
+   void onNewConnection(MachineGUI* sender);
+   void onLineMousePressed(NButtonEvent* sender);
+
+   void onWireDelete(WireDlg* dlg);
+
+   MachineGUI* findByMachine(Machine* mac);
+
+   std::vector<MachineGUI*> machineGUIs;
+};
+
+#endif
