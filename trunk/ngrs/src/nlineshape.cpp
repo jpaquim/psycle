@@ -74,7 +74,7 @@ void NLineShape::calculateRectArea( )
 {
    double  ankathede    = (p1().x() - p2().x());
    double  gegenkathede = (p1().y() - p2().y());
-   double  hypetenuse   = sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
+   double  hypetenuse   = std::sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
 
    double cos = ankathede    / hypetenuse;
    double sin = gegenkathede / hypetenuse;
