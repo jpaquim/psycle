@@ -1,7 +1,7 @@
 ///\file
 ///\interface psycle::host::Registry.
 #pragma once
-#include "global.hpp"
+#include <psycle/host/global.hpp>
 #include <string>
 #include <boost/static_assert.hpp>
 namespace psycle

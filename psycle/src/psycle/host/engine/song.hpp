@@ -5,7 +5,7 @@
 #include <psycle/host/engine/FileIO.hpp>
 #include <psycle/host/engine/SongStructs.hpp>
 #include <psycle/host/engine/instrument.hpp>
-#include <psycle/host/engine/global.hpp>
+#include <psycle/host/global.hpp>
 #include <cstdint>
 
 

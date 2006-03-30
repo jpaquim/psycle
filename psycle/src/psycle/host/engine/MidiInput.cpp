@@ -3,17 +3,17 @@
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/gui/psycle.hpp>
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/player.hpp>
+#include "MidiInput.hpp"
+#include "song.hpp>
+#include "player.hpp>
+#include "plugin.hpp"
+#include "VSTHost.hpp"
+#include "helpers.hpp"
 #include <psycle/host/configuration.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
+#include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/ChildView.hpp>
 #include <psycle/host/gui/MainFrm.hpp>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/engine/gui/InputHandler.hpp>
+#include <psycle/host/gui/InputHandler.hpp>
 #include <cassert>
 namespace psycle
 {

@@ -2,12 +2,12 @@
 ///\implementation psycle::host::CMidiInputDlg.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/OutputDlg.hpp>
+#include "psycle.hpp"
+#include "OutputDlg.hpp"
+#include "MidiInputDlg.hpp"
+#include <psycle/host/configuration.hpp>
+#include <psycle/host/engine/helpers.hpp>
 #include <psycle/host/engine/MidiInput.hpp>
-#include <psycle/host/Configuration.hpp>
-#include <psycle/host/gui/MidiInputDlg.hpp>
-#include <psycle/host/engineHelpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)

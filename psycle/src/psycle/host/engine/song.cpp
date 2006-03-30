@@ -2,19 +2,19 @@
 ///\brief implementation file for psycle::host::Song.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/psycle.hpp>
+#include "song.hpp"
+#include "machine.hpp"
+#include "sampler.hpp"
+#include "XMSampler.hpp"
+#include "plugin.hpp"
+#include "VSTHost.hpp"
+#include "DataCompression.hpp"
+#include "riff.hpp" // for Wave file loading.
+#include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/NewMachine.hpp> // Is this needed?
 #include <psycle/host/gui/MainFrm.hpp> // Is this needed?
 #include <psycle/host/gui/ChildView.hpp> // Is this needed?
 #include <psycle/host/gui/ProgressDialog.hpp> // Is this needed?
-#include <psycle/host/engine/song.hpp>
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/sampler.hpp>
-#include <psycle/host/engine/XMSampler.hpp>
-#include <psycle/host/engine/plugin.hpp>
-#include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/engine/DataCompression.hpp>
-#include <psycle/host/engine/riff.hpp> // for Wave file loading.
 #include <cstdint>
 #include <cassert>
 #include <sstream>

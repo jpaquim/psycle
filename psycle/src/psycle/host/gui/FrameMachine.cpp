@@ -2,17 +2,17 @@
 ///\brief implementation file for psycle::host::CFrameMachine.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/Psycle.hpp>
-#include <psycle/host/gui/FrameMachine.hpp>
-#include <psycle/host/gui/Childview.hpp>
-#include <psycle/host/gui/NewVal.hpp>
-#include <psycle/host/gui/PresetsDlg.hpp>
-#include <psycle/host/gui/Plugin.hpp>
+#include "FrameMachine.hpp"
+#include "psycle.hpp"
+#include "Childview.hpp"
+#include "NewVal.hpp"
+#include "PresetsDlg.hpp"
+#include "InputHandler.hpp"
+#include "MainFrm.hpp"
+#include <psycle/host/engine/machine.hpp>
+#include <psycle/host/engine/plugin.hpp>
 #include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/gui/InputHandler.hpp>
-#include <psycle/host/engine/Helpers.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
-#include <psycle/host/engine/Machine.hpp>
+#include <psycle/host/engine/helpers.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		extern CPsycleApp theApp;

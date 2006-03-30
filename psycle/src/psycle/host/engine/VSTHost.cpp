@@ -2,13 +2,12 @@
 ///\brief implementation file for psycle::host::plugin
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/engine/psycle.hpp>
+#include "VSTHost.hpp"
+#include "song.hpp"
+#include "player.hpp"
+#include <psycle/host/gui/psycle.hpp>
 #include <psycle/host/gui/MainFrm.hpp> // Is this needed?
 #include <psycle/host/gui/VSTEditorDlg.hpp> // Is this needed?
-#include <psycle/host/engine/VSTHost.hpp>
-#include <psycle/host/engine/song.hpp>
-//#include "Configuration.hpp"
-#include <psycle/host/engine/player.hpp>
 #include <psycle/host/gui/InputHandler.hpp> // Is this needed?
 #include <psycle/host/gui/NewMachine.hpp> // Is this needed?
 #include <algorithm>

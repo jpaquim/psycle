@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdAmplifyDialog.
 #pragma once
+#include "resources/resources.hpp"
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		#define AMP_DIALOG_CANCEL -10000
