@@ -31,6 +31,7 @@
 #include "ngroupbox.h"
 #include "nframeborder.h"
 #include "nborderlayout.h"
+#include "nspinbutton.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -48,10 +49,7 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  NEdit* edit = new NEdit();
-    edit->setPosition(10,10,200,20);
-  pane()->add(edit);
-
+  testSpinButton();
  // testBorderLayout();
  // testFrameBorder();
     //testLine();
@@ -477,6 +475,22 @@ void NTestWindow::testMenu( )
   NMenuItem* item = new NMenuItem("open");
   menu1->add(item);
   item->click.connect(this,&NTestWindow::onOpen);
+}
+
+void NTestWindow::testSpinButton( )
+{
+   NSpinButton* btn = new NSpinButton();
+     std::cout << btn->preferredWidth() << std::endl;
+     btn->setPosition(10,10,btn->preferredWidth(),btn->preferredHeight());
+   pane()->add(btn);
+}
+
+void NTestWindow::testEdit( )
+{
+  NEdit* edit = new NEdit();
+    edit->setPosition(10,10,200,20);
+  pane()->add(edit);
+
 }
 
 
