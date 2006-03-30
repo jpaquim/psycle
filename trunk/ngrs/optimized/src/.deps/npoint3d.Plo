@@ -1,4 +1,0 @@
-npoint3d.lo npoint3d.o: /home/natti/ngrs3/src/npoint3d.cpp \
-  /home/natti/ngrs3/src/npoint3d.h
-
-/home/natti/ngrs3/src/npoint3d.h:
