@@ -66,3 +66,17 @@ void NSpinEdit::onDecBtnClicked( NButtonEvent * ev )
 }
 
 
+int NSpinEdit::preferredHeight( ) const
+{
+  NFontMetrics metrics;
+  metrics.setFont(font());
+  return metrics.textHeight();// + spacing().top()+spacing().bottom()+borderTop()+borderBottom();
+}
+
+
+int NSpinEdit::preferredWidth( ) const
+{ 
+  NFontMetrics metrics;
+  metrics.setFont(font());
+  return width() + spinBtn_->preferredWidth();
+}
