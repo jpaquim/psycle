@@ -1,0 +1,4 @@
+nmoveable.lo nmoveable.o: /home/natti/ngrs3/src/nmoveable.cpp \
+  /home/natti/ngrs3/src/nmoveable.h
+
+/home/natti/ngrs3/src/nmoveable.h:

@@ -1,0 +1,4 @@
+nmoveevent.lo nmoveevent.o: /home/natti/ngrs3/src/nmoveevent.cpp \
+  /home/natti/ngrs3/src/nmoveevent.h
+
+/home/natti/ngrs3/src/nmoveevent.h:

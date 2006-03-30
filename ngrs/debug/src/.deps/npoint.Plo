@@ -1,0 +1,4 @@
+npoint.lo npoint.o: /home/natti/ngrs3/src/npoint.cpp \
+  /home/natti/ngrs3/src/npoint.h
+
+/home/natti/ngrs3/src/npoint.h:
