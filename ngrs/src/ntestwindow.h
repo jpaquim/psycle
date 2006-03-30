@@ -77,6 +77,7 @@ private:
     NFileListBox* fileBox;
     NFileDialog* fDialog;
 
+    void testSpinButton();
     void testBorderLayout();
     void testFrameBorder();
     void testLine();

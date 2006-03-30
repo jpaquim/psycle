@@ -77,13 +77,13 @@ void NImage::loadFromFile( std::string filename )
   setWidth(bitmap24bpp_.width());
 }
 
-int NImage::preferredWidth( )
+int NImage::preferredWidth( ) const
 {
   if (pBitmap_!=0) return pBitmap_->width()+1;
   return bitmap24bpp_.width()+1;
 }
 
-int NImage::preferredHeight( )
+int NImage::preferredHeight( ) const
 {
   if (pBitmap_!=0) return pBitmap_->height()+1;
   return bitmap24bpp_.height()+1;

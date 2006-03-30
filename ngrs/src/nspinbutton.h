@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,47 +17,46 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NIMAGE_H
-#define NIMAGE_H
+#ifndef NSPINBUTTON_H
+#define NSPINBUTTON_H
 
 #include <npanel.h>
-#include <nbitmap.h>
-#include <nimgfilter.h>
+
+class NButton;
+class NImage;
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
-class NImage : public NPanel
+
+class NSpinButton : public NPanel
 {
 public:
-    NImage();
-    NImage(std::string fileName);
+    NSpinButton();
 
-    ~NImage();
+    ~NSpinButton();
 
-    virtual void paint(NGraphics* g);
+    virtual void resize();
 
-    void loadFromFile(std::string filename);
-    void createFromXpmData(const char** data);
-
-    void setBitmap(const NBitmap & bitmap);
-
-    void setSharedBitmap(NBitmap* bitmap);
-
-    virtual void setHAlign(int align);
-    virtual void setVAlign(int align);
-
-    virtual int preferredWidth()  const;
+    virtual int preferredWidth() const;
     virtual int preferredHeight() const;
 
+    signal1<NButtonEvent*> onIncClicked;
+    signal1<NButtonEvent*> onDecClicked;
 
 private:
 
-    NBitmap bitmap24bpp_;
-    NBitmap* pBitmap_;
+    NButton* incBtn_;
+    NButton* decBtn_;
 
-    int halign_;
-    int valign_;
+    NImage* incImg_;
+    NImage* decImg_;
+
+    NBitmap incBit_;
+    NBitmap decBit_;
+
+    void onIncBtnClicked(NButtonEvent* ev);
+    void onDecBtnClicked(NButtonEvent* ev);
 
 };
 
