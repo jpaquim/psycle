@@ -199,7 +199,7 @@ void NScrollBar::onSliderMove( )
            dy = (int)( (( control_->clientHeight() - control_->spacingHeight()) / ((double) sliderArea_->spacingHeight() - slider_->height())) * slider_->top());
            scrollComponent(control_,control_->scrollDx(),dy);
          }
-         dy = (int) round(((range_ /((double) (sliderArea_->clientHeight()-slider_->height()))) * dy));
+         dy = (int) d2i(((range_ /((double) (sliderArea_->clientHeight()-slider_->height()))) * dy));
          posChange.emit(this,dy);
       }
       break;

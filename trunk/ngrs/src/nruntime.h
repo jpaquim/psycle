@@ -59,6 +59,8 @@ public:
 
    int componentSize();
 
+   int d2i(double d);
+
 private:
 
    NRuntime* parent_;

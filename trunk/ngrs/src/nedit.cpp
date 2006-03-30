@@ -20,9 +20,10 @@
 #include "nedit.h"
 #include "napp.h"
 #include "nconfig.h"
-#include <cmath>
+
 
 using namespace std;
+
 
 NEdit::NEdit()
  : NPanel(), valign_(nAlLeft),halign_(nAlCenter),dx(0),pos_(0), selStartIdx_(0), selEndIdx_(0)
@@ -97,8 +98,8 @@ int NEdit::computeDx( NGraphics* g, const std::string & text )
           if (screenPos.x()+w > spacingWidth()) dx = w-wa;
       break;
       case nAlCenter:
-          if (screenPos.x()+w > spacingWidth()) dx =   ((int) round((spacingWidth() - wa ) / 2.0) + w - spacingWidth());
-          if (screenPos.x()+w < 0) dx = ((int) round((spacingWidth() - wa ) / 2.0) + w );
+          if (screenPos.x()+w > spacingWidth()) dx =   ((int) d2i((spacingWidth() - wa ) / 2.0) + w - spacingWidth());
+          if (screenPos.x()+w < 0) dx = ((int) d2i((spacingWidth() - wa ) / 2.0) + w );
       break;
   }
 
@@ -131,7 +132,7 @@ NPoint NEdit::getScreenPos(NGraphics* g, const std::string & text )
   int h = g->textAscent()+g->textDescent();
 
   switch (valign_) {
-    case nAlCenter : yp = (int) round( (spacingHeight()+g->textAscent()) / 2); break;
+    case nAlCenter : yp = d2i( (spacingHeight()+g->textAscent()) / 2); break;
     case nAlTop    : yp = h;                  break;
     case nAlBottom : yp = (int) spacingHeight()- g->textDescent();         break;
     default        : yp = h;                  break;
@@ -139,7 +140,7 @@ NPoint NEdit::getScreenPos(NGraphics* g, const std::string & text )
 
   int w = g->textWidth(text.c_str());
   switch (halign_) {
-    case nAlCenter : xp = (int) round((spacingWidth() - w ) / 2.0) - dx;  break;
+    case nAlCenter : xp = d2i((spacingWidth() - w ) / 2.0) - dx;  break;
     case nAlLeft   : xp = -dx;                  break;
     case nAlRight  : xp = spacingWidth() - w -dx;          break;
     default        : xp = 0;                  break;
