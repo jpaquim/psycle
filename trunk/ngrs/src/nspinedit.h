@@ -43,6 +43,8 @@ public:
     signal1<NButtonEvent*> incClicked;
     signal1<NButtonEvent*> decClicked;
 
+    int preferredWidth( ) const;
+    int preferredHeight( ) const;
 
 private:
 
