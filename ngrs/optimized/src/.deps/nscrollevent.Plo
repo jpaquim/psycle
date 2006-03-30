@@ -1,4 +1,0 @@
-nscrollevent.lo nscrollevent.o: /home/natti/ngrs3/src/nscrollevent.cpp \
-  /home/natti/ngrs3/src/nscrollevent.h
-
-/home/natti/ngrs3/src/nscrollevent.h:
