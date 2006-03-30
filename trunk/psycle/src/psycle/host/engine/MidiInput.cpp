@@ -4,7 +4,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
 #include "MidiInput.hpp"
-#include "song.hpp>
+#include "song.hpp"
 #include "player.hpp>
 #include "plugin.hpp"
 #include "VSTHost.hpp"
