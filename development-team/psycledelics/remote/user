@@ -50,6 +50,7 @@ function packageneric--remote--user
 				( erodix@* | jpero@linde.tky.hut.fi ) echo erodix ;;
 				( jaz@* | josepma@* ) echo jaz001 ;;
 				( magnus*@* | zealmange@* ) echo zealmange ;;
+				( natti*@* | prodos@* ) echo natti__ ;;
 				( sampler@* | Administrador@PC ) echo sampler ;;
 			esac
 		;;
