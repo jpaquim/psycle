@@ -145,10 +145,12 @@ public:
 		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInterface *        PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return new typename; } \
 		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT void                         PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
 	}
-#if !defined _WINDOWS
+#if !defined _WIN32 && !defined _WIN64
 	#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
 	#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
-#else
+#elif defined _MSC_VER
 	#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
 	#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
+#else
+	#error please add definition for your compiler
 #endif
