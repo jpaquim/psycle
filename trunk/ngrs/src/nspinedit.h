@@ -17,43 +17,37 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSPINBUTTON_H
-#define NSPINBUTTON_H
+#ifndef NSPINEDIT_H
+#define NSPINEDIT_H
 
 #include <npanel.h>
 
-class NButton;
-class NImage;
+#include "nspinbutton.h"
+#include "nedit.h"
 
 /**
 @author Stefan Nattkemper
 */
-
-class NSpinButton : public NPanel
+class NSpinEdit : public NPanel
 {
 public:
-    NSpinButton();
+    NSpinEdit();
 
-    ~NSpinButton();
+    ~NSpinEdit();
 
     virtual void resize();
 
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
+    void setText(const std::string & text);
+    std::string text() const;
 
     signal1<NButtonEvent*> incClicked;
     signal1<NButtonEvent*> decClicked;
 
+
 private:
 
-    NButton* incBtn_;
-    NButton* decBtn_;
-
-    NImage* incImg_;
-    NImage* decImg_;
-
-    NBitmap incBit_;
-    NBitmap decBit_;
+    NSpinButton* spinBtn_ ;
+    NEdit*       edit_;
 
     void onIncBtnClicked(NButtonEvent* ev);
     void onDecBtnClicked(NButtonEvent* ev);

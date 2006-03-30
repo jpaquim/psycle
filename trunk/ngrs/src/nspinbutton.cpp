@@ -94,12 +94,12 @@ int NSpinButton::preferredHeight( ) const
 
 void NSpinButton::onIncBtnClicked( NButtonEvent * ev )
 {
-  onIncClicked.emit(ev);
+  incClicked.emit(ev);
 }
 
 void NSpinButton::onDecBtnClicked( NButtonEvent * ev )
 {
-  onDecClicked.emit(ev);
+  decClicked.emit(ev);
 }
 
 
