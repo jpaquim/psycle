@@ -1290,6 +1290,8 @@ void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
    //AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
    Global::pSong()->AllocNewPattern(patNum,"",patDlg->lineNumber(),patDlg->adaptSize()?true:false);
    if (pView->cursor().y() > patDlg->lineNumber()) pView->setCursor(NPoint3D(pView->cursor().x(),patDlg->lineNumber()-1,pView->cursor().z()));
+   int count = (clientHeight()-pView->headerHeight()) / pView->rowHeight();
+   pView->vBar->setRange((pView->lineNumber()-count)*pView->rowHeight());
    repaint();
   }
 }
