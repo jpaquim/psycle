@@ -497,11 +497,25 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_
     editPopup_->add(new NMenuItem("Change Generator"));
     editPopup_->add(new NMenuItem("Change Instrument"));
     editPopup_->add(new NMenuSeperator());
-    editPopup_->add(new NMenuItem("Transpose+1"));
-    editPopup_->add(new NMenuItem("Transpose-1"));
-    editPopup_->add(new NMenuItem("Transpose+12"));
-    editPopup_->add(new NMenuItem("Transpose-12"));
+
+    NMenuItem* blockT1Item = new NMenuItem("Transpose+1");
+       blockT1Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose1);
+    editPopup_->add(blockT1Item);
+
+    NMenuItem* blockT_1Item = new NMenuItem("Transpose-1");
+       blockT_1Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose_1);
+    editPopup_->add(blockT_1Item);
+
+    NMenuItem* blockT12Item = new NMenuItem("Transpose12");
+       blockT12Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose12);
+    editPopup_->add(blockT12Item);
+
+    NMenuItem* blockT_12Item = new NMenuItem("Transpose-12");
+       blockT_12Item->click.connect(this,&PatternView::PatternDraw::onPopupTranspose_12);
+    editPopup_->add(blockT_12Item);
+
     editPopup_->add(new NMenuSeperator());
+
     editPopup_->add(new NMenuItem("Block Swing Fill"));
     editPopup_->add(new NMenuItem("Block Track Fill"));
     editPopup_->add(new NMenuSeperator());
@@ -1165,6 +1179,37 @@ void PatternView::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachin
      }
 }
 
+
+
+void PatternView::PatternDraw::blockTranspose(int trp)
+{
+   // UNDO CODE TRANSPOSE
+//   if ( blockSelected == true ) 
+   {
+       int ps = Global::pSong()->playOrder[pView->editPosition()];
+
+       //AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+
+     for (int t=selection_.left(); t < selection_.right() ; t++) {
+       for (int l=selection_.top(); l < selection_.bottom() ; l++) {
+         unsigned char *toffset= Global::pSong()->_ptrackline(ps,t,l);
+
+         int note =*(toffset);
+
+         if(note < 120){
+           note+=trp;
+           if(note < 0)  note = 0;
+           if(note > 119)note = 119;
+           *toffset=static_cast<unsigned char>(note);
+         }
+       }
+     }
+
+     window()->repaint(repaintTrackArea(selection_.top(),selection_.bottom(),selection_.left(),selection_.right()));
+    }
+}
+
+
 void PatternView::noteOffAny()
 {
   const int ps = Global::pSong()->playOrder[editPosition()];
@@ -1246,6 +1291,26 @@ void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
    Global::pSong()->AllocNewPattern(patNum,"",patDlg->lineNumber(),patDlg->adaptSize()?true:false);
    repaint();
   }
+}
+
+void PatternView::PatternDraw::onPopupTranspose1( NButtonEvent * ev )
+{
+  blockTranspose(1);
+}
+
+void PatternView::PatternDraw::onPopupTranspose12( NButtonEvent * ev )
+{
+  blockTranspose(12);
+}
+
+void PatternView::PatternDraw::onPopupTranspose_1( NButtonEvent * ev )
+{
+  blockTranspose(-1);
+}
+
+void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
+{
+  blockTranspose(-12);
 }
 
 
