@@ -20,6 +20,7 @@
 #include "nedit.h"
 #include "napp.h"
 #include "nconfig.h"
+#include <cmath>
 
 using namespace std;
 
