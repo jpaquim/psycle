@@ -1,0 +1,129 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.engine", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.engine.vcproj", "{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF8B7F95-2B29-4476-9D32-61052382B5E9} = {AF8B7F95-2B29-4476-9D32-61052382B5E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.host", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.host.vcproj", "{E71D87A1-C180-4214-AB17-5AF8208CCD26}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85} = {F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.text", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.text.vcproj", "{02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E71D87A1-C180-4214-AB17-5AF8208CCD26} = {E71D87A1-C180-4214-AB17-5AF8208CCD26}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.gui", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.gui.vcproj", "{342B3751-6AAB-4B5E-91F3-AB9031BCF10A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E71D87A1-C180-4214-AB17-5AF8208CCD26} = {E71D87A1-C180-4214-AB17-5AF8208CCD26}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-universalis", "@nested-source-packages\universalis\src\+hardcoded\unknown-microsoft-unknown\module.lib.universalis.vcproj", "{AF8B7F95-2B29-4476-9D32-61052382B5E9}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.plugin.additioner", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.plugin.additioner.vcproj", "{1C80A694-671B-45BF-A6B5-74D63B009A29}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6D39588E-DB05-4C69-8928-A417918C0E1D} = {6D39588E-DB05-4C69-8928-A417918C0E1D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.plugin.bipolar-filter", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.plugin.bipolar-filter.vcproj", "{6D39588E-DB05-4C69-8928-A417918C0E1D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85} = {F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.plugin.multiplier", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.plugin.multiplier.vcproj", "{477300C4-9C78-4466-8AF5-C5B2EF9D0448}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6D39588E-DB05-4C69-8928-A417918C0E1D} = {6D39588E-DB05-4C69-8928-A417918C0E1D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.plugin.output.default", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.plugin.output.default.vcproj", "{89BDBD06-563A-4888-9B92-F82E23F20DE3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85} = {F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.plugin.output.direct-sound", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.plugin.output.direct-sound.vcproj", "{9A2D41E7-2BE3-4532-8967-83B019AF1E69}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85} = {F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-psycle.plugin.sine", "src\+hardcoded\unknown-microsoft-unknown\module.lib.psycle.plugin.sine.vcproj", "{283C7777-823E-4D08-BF2F-43BD2EC139EE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85} = {F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psycle.gui", "src\+hardcoded\unknown-microsoft-unknown\module.bin.psycle.gui.vcproj", "{BDD3C3A0-5454-43DF-9AE8-A33A1701330D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{342B3751-6AAB-4B5E-91F3-AB9031BCF10A} = {342B3751-6AAB-4B5E-91F3-AB9031BCF10A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psycle.text", "src\+hardcoded\unknown-microsoft-unknown\module.bin.psycle.text.vcproj", "{251D4D88-7DF3-40B4-93A0-F915001CF391}"
+	ProjectSection(ProjectDependencies) = postProject
+		{02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3} = {02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		debug = debug
+		release = release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}.debug.ActiveCfg = debug|Win32
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}.debug.Build.0 = debug|Win32
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}.release.ActiveCfg = release|Win32
+		{F2C71C18-5E89-433E-A3C8-0A2FC4D22C85}.release.Build.0 = release|Win32
+		{E71D87A1-C180-4214-AB17-5AF8208CCD26}.debug.ActiveCfg = debug|Win32
+		{E71D87A1-C180-4214-AB17-5AF8208CCD26}.debug.Build.0 = debug|Win32
+		{E71D87A1-C180-4214-AB17-5AF8208CCD26}.release.ActiveCfg = release|Win32
+		{E71D87A1-C180-4214-AB17-5AF8208CCD26}.release.Build.0 = release|Win32
+		{02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3}.debug.ActiveCfg = debug|Win32
+		{02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3}.debug.Build.0 = debug|Win32
+		{02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3}.release.ActiveCfg = release|Win32
+		{02F17E0A-2E98-49B7-A3C1-2FE8ED1E29D3}.release.Build.0 = release|Win32
+		{342B3751-6AAB-4B5E-91F3-AB9031BCF10A}.debug.ActiveCfg = debug|Win32
+		{342B3751-6AAB-4B5E-91F3-AB9031BCF10A}.debug.Build.0 = debug|Win32
+		{342B3751-6AAB-4B5E-91F3-AB9031BCF10A}.release.ActiveCfg = release|Win32
+		{342B3751-6AAB-4B5E-91F3-AB9031BCF10A}.release.Build.0 = release|Win32
+		{AF8B7F95-2B29-4476-9D32-61052382B5E9}.debug.ActiveCfg = debug|Win32
+		{AF8B7F95-2B29-4476-9D32-61052382B5E9}.debug.Build.0 = debug|Win32
+		{AF8B7F95-2B29-4476-9D32-61052382B5E9}.release.ActiveCfg = release|Win32
+		{AF8B7F95-2B29-4476-9D32-61052382B5E9}.release.Build.0 = release|Win32
+		{1C80A694-671B-45BF-A6B5-74D63B009A29}.debug.ActiveCfg = debug|Win32
+		{1C80A694-671B-45BF-A6B5-74D63B009A29}.debug.Build.0 = debug|Win32
+		{1C80A694-671B-45BF-A6B5-74D63B009A29}.release.ActiveCfg = release|Win32
+		{1C80A694-671B-45BF-A6B5-74D63B009A29}.release.Build.0 = release|Win32
+		{6D39588E-DB05-4C69-8928-A417918C0E1D}.debug.ActiveCfg = debug|Win32
+		{6D39588E-DB05-4C69-8928-A417918C0E1D}.debug.Build.0 = debug|Win32
+		{6D39588E-DB05-4C69-8928-A417918C0E1D}.release.ActiveCfg = release|Win32
+		{6D39588E-DB05-4C69-8928-A417918C0E1D}.release.Build.0 = release|Win32
+		{477300C4-9C78-4466-8AF5-C5B2EF9D0448}.debug.ActiveCfg = debug|Win32
+		{477300C4-9C78-4466-8AF5-C5B2EF9D0448}.debug.Build.0 = debug|Win32
+		{477300C4-9C78-4466-8AF5-C5B2EF9D0448}.release.ActiveCfg = release|Win32
+		{477300C4-9C78-4466-8AF5-C5B2EF9D0448}.release.Build.0 = release|Win32
+		{89BDBD06-563A-4888-9B92-F82E23F20DE3}.debug.ActiveCfg = debug|Win32
+		{89BDBD06-563A-4888-9B92-F82E23F20DE3}.debug.Build.0 = debug|Win32
+		{89BDBD06-563A-4888-9B92-F82E23F20DE3}.release.ActiveCfg = release|Win32
+		{89BDBD06-563A-4888-9B92-F82E23F20DE3}.release.Build.0 = release|Win32
+		{9A2D41E7-2BE3-4532-8967-83B019AF1E69}.debug.ActiveCfg = debug|Win32
+		{9A2D41E7-2BE3-4532-8967-83B019AF1E69}.debug.Build.0 = debug|Win32
+		{9A2D41E7-2BE3-4532-8967-83B019AF1E69}.release.ActiveCfg = release|Win32
+		{9A2D41E7-2BE3-4532-8967-83B019AF1E69}.release.Build.0 = release|Win32
+		{283C7777-823E-4D08-BF2F-43BD2EC139EE}.debug.ActiveCfg = debug|Win32
+		{283C7777-823E-4D08-BF2F-43BD2EC139EE}.debug.Build.0 = debug|Win32
+		{283C7777-823E-4D08-BF2F-43BD2EC139EE}.release.ActiveCfg = release|Win32
+		{283C7777-823E-4D08-BF2F-43BD2EC139EE}.release.Build.0 = release|Win32
+		{BDD3C3A0-5454-43DF-9AE8-A33A1701330D}.debug.ActiveCfg = debug|Win32
+		{BDD3C3A0-5454-43DF-9AE8-A33A1701330D}.debug.Build.0 = debug|Win32
+		{BDD3C3A0-5454-43DF-9AE8-A33A1701330D}.release.ActiveCfg = release|Win32
+		{BDD3C3A0-5454-43DF-9AE8-A33A1701330D}.release.Build.0 = release|Win32
+		{251D4D88-7DF3-40B4-93A0-F915001CF391}.debug.ActiveCfg = debug|Win32
+		{251D4D88-7DF3-40B4-93A0-F915001CF391}.debug.Build.0 = debug|Win32
+		{251D4D88-7DF3-40B4-93A0-F915001CF391}.release.ActiveCfg = release|Win32
+		{251D4D88-7DF3-40B4-93A0-F915001CF391}.release.Build.0 = release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

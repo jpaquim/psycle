@@ -1,0 +1,88 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// Copyright (C) 1999-2006 Johan Boule <bohan@jabber.org>
+// Copyright (C) 2004-2006 Psycledelics http://psycle.pastnotecut.org
+
+///\interface psycle::host::scheduler
+#pragma once
+#include "forward_declarations.hpp"
+#include <psycle/engine.hpp>
+#include <list>
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__PSYCLE__HOST__SCHEDULER
+#include <universalis/compiler/dynamic_link/begin.hpp>
+
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+#if defined PSYCLE__EXPERIMENTAL
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+namespace psycle
+{
+	namespace host
+	{
+		namespace underlying = engine;
+		typedef underlying::exception exception;
+		
+		/// simply, a "player".
+		template<typename Graph>
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler
+		{
+			protected:
+				scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create(graph)) {}
+			public:
+				virtual ~scheduler() throw() {}
+				void inline started(bool const & started) { if(started) start(); else stop(); }
+				void virtual start() throw(exception) = 0;
+				void virtual stop() = 0;
+			protected:
+				typedef Graph graph_type;
+				Graph const inline & graph() const throw() { return graph_; }
+				Graph       inline & graph()       throw() { return graph_; }
+			private:
+				Graph & graph_; ///\todo remove reference
+		};
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+#else // !defined PSYCLE__EXPERIMENTAL
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+namespace psycle
+{
+	namespace host
+	{
+		namespace underlying = engine;
+		typedef underlying::exception exception;
+		
+		/// simply, a "player".
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler
+		{
+			public:
+				scheduler(underlying::graph & graph) throw(std::exception) : graph_(graph) {}
+				virtual ~scheduler() throw() {}
+				void inline started(bool const & started) { if(started) start(); else stop(); }
+				void virtual start() throw(exception) = 0;
+				void virtual stop() = 0;
+				underlying::graph inline & graph() const throw() { return graph_; }
+			private:
+				underlying::graph & graph_;
+		};
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+#endif // !defined PSYCLE__EXPERIMENTAL
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+#include <universalis/compiler/dynamic_link/end.hpp>
