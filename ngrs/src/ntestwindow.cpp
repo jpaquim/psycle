@@ -32,6 +32,7 @@
 #include "nframeborder.h"
 #include "nborderlayout.h"
 #include "nspinbutton.h"
+#include "nspinedit.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -49,7 +50,7 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  testSpinButton();
+  testSpinEdit();
  // testBorderLayout();
  // testFrameBorder();
     //testLine();
@@ -491,6 +492,13 @@ void NTestWindow::testEdit( )
     edit->setPosition(10,10,200,20);
   pane()->add(edit);
 
+}
+
+void NTestWindow::testSpinEdit( )
+{
+  NSpinEdit* edit = new NSpinEdit();
+    edit->setPosition(10,10,200,20);
+  pane()->add(edit);
 }
 
 

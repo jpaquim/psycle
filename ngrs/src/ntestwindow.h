@@ -83,6 +83,7 @@ private:
     void testLine();
     void testMenu();
     void testEdit();
+    void testSpinEdit();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);

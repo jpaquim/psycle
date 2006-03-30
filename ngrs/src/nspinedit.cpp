@@ -17,47 +17,52 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NSPINBUTTON_H
-#define NSPINBUTTON_H
+#include "nspinedit.h"
 
-#include <npanel.h>
-
-class NButton;
-class NImage;
-
-/**
-@author Stefan Nattkemper
-*/
-
-class NSpinButton : public NPanel
+NSpinEdit::NSpinEdit()
+ : NPanel()
 {
-public:
-    NSpinButton();
+  add( edit_ = new NEdit() );
+  add( spinBtn_  = new NSpinButton() );
 
-    ~NSpinButton();
+  spinBtn_->decClicked.connect(this,&NSpinEdit::onDecBtnClicked);
+  spinBtn_->incClicked.connect(this,&NSpinEdit::onIncBtnClicked);
+}
 
-    virtual void resize();
 
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
+NSpinEdit::~NSpinEdit()
+{
+}
 
-    signal1<NButtonEvent*> incClicked;
-    signal1<NButtonEvent*> decClicked;
+void NSpinEdit::resize( )
+{
+  int cw = clientWidth();
+  int ch = clientHeight();
 
-private:
+  int prefBtnW = spinBtn_->preferredWidth();
 
-    NButton* incBtn_;
-    NButton* decBtn_;
+  edit_->setPosition(0,0,cw-prefBtnW,ch);
+  spinBtn_->setPosition(cw-prefBtnW,0,prefBtnW,ch);
+}
 
-    NImage* incImg_;
-    NImage* decImg_;
+void NSpinEdit::setText( const std::string & text )
+{
+  edit_->setText(text);
+}
 
-    NBitmap incBit_;
-    NBitmap decBit_;
+std::string NSpinEdit::text( ) const
+{
+  return edit_->text();
+}
 
-    void onIncBtnClicked(NButtonEvent* ev);
-    void onDecBtnClicked(NButtonEvent* ev);
+void NSpinEdit::onIncBtnClicked( NButtonEvent * ev )
+{
+  incClicked.emit(ev);
+}
 
-};
+void NSpinEdit::onDecBtnClicked( NButtonEvent * ev )
+{
+  decClicked.emit(ev);
+}
 
-#endif
+
