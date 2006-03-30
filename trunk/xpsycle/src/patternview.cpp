@@ -540,6 +540,7 @@ void PatternView::PatternDraw::paint( NGraphics * g )
   g->setForeground(Global::pConfig()->pvc_rowbeat);
 
   int trackWidth = ((endTrack+1) * pView->colWidth()) - dx();
+  int lineHeight = ((endLine) * pView->rowHeight()) - dy();
 
   for (int y = startLine; y < endLine; y++) {
     if (!(y == pView->playPos())) {
@@ -567,11 +568,11 @@ void PatternView::PatternDraw::paint( NGraphics * g )
     g->drawLine(0,y*pView->rowHeight() - dy_,trackWidth,y*pView->rowHeight()-dy_);
 
   for (int i = startTrack; i <= endTrack; i++) // 3px space at begin of trackCol
-     g->fillRect(i*pView->colWidth()-dx_,0,3,clientHeight());
+     g->fillRect(i*pView->colWidth()-dx_,0,3,lineHeight);
 
   g->setForeground(pView->separatorColor());
   for (int i = startTrack; i <= endTrack; i++)  // col separators
-      g->drawLine(i*pView->colWidth()-dx_,0,i*pView->colWidth()-dx_,clientHeight());
+      g->drawLine(i*pView->colWidth()-dx_,0,i*pView->colWidth()-dx_,lineHeight);
 
   g->setForeground(pView->foreground());
 
@@ -580,11 +581,11 @@ void PatternView::PatternDraw::paint( NGraphics * g )
      for (std::vector<int>::iterator it = pView->eventSize.begin(); it < pView->eventSize.end(); it++) {
       switch (*it) {
       case 1:
-           g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,clientHeight());
+           g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,lineHeight);
            COL+=2 * pView->cellWidth();
       break;
       case 2:
-           g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,clientHeight());
+           g->drawLine(x*pView->colWidth()+COL-dx_,0,x*pView->colWidth()+COL-dx_,lineHeight);
            COL+=4 * pView->cellWidth();
       break;
      }
