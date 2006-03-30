@@ -1083,7 +1083,7 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
 
 void PatternView::updatePlayBar( )
 {
-  if (Global::pPlayer()->_lineChanged)
+  if ((visible()) && (Global::pPlayer()->_lineChanged))
   {
      int trackCount  = clientWidth() / colWidth();
      int startTrack  = drawArea->dx() / colWidth();
@@ -1289,6 +1289,7 @@ void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
    //AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
    //AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
    Global::pSong()->AllocNewPattern(patNum,"",patDlg->lineNumber(),patDlg->adaptSize()?true:false);
+   if (pView->cursor().y() > patDlg->lineNumber()) pView->setCursor(NPoint3D(pView->cursor().x(),patDlg->lineNumber()-1,pView->cursor().z()));
    repaint();
   }
 }
@@ -1312,6 +1313,3 @@ void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
 {
   blockTranspose(-12);
 }
-
-
-

@@ -23,7 +23,7 @@
 #include <nwindow.h>
 
 class NButton;
-class NEdit;
+class NSpinEdit;
 
 /**
 @author Stefan
@@ -49,10 +49,13 @@ private:
     int lineNumber_;
     bool do_Execute;
 
-    NEdit* lineNumEdit;
+    NSpinEdit* lineNumEdit_;
 
     void onOkBtn(NButtonEvent* sender);
     void onCancelBtn(NButtonEvent* sender);
+
+    void onIncBtnClicked(NButtonEvent* ev);
+    void onDecBtnClicked(NButtonEvent* ev);
 
 };
 

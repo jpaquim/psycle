@@ -19,23 +19,29 @@
  ***************************************************************************/
 #include "patdlg.h"
 
-#include "nedit.h"
+#include "nspinedit.h"
 #include "nbutton.h"
 #include "npanel.h"
 #include "nflowlayout.h"
+#include "Constants.h"
 
 PatDlg::PatDlg()
  : NWindow()
 {
+  setPosition(0,0,200,100);
+  setTitle("Pattern Lines");
+
   lineNumber_ = 0;
-  lineNumEdit = new NEdit();
-    lineNumEdit->setPosition(10,10,100,lineNumEdit->preferredHeight());
-  pane()->add(lineNumEdit);
+  lineNumEdit_ = new NSpinEdit();
+    lineNumEdit_->setPosition(10,10,100,lineNumEdit_->preferredHeight());
+    lineNumEdit_->decClicked.connect(this,&PatDlg::onDecBtnClicked);
+    lineNumEdit_->incClicked.connect(this,&PatDlg::onIncBtnClicked);
+  pane()->add(lineNumEdit_);
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
     bPnl->setLayout(new NFlowLayout(nAlRight));
-    NButton* okBtn = new NButton("Open");
+    NButton* okBtn = new NButton("Change");
       okBtn->clicked.connect(this,&PatDlg::onOkBtn);
       okBtn->setFlat(false);
     bPnl->add(okBtn);
@@ -56,7 +62,7 @@ PatDlg::~PatDlg()
 int PatDlg::onClose( )
 {
   std::stringstream str; 
-  str << lineNumEdit->text();
+  str << lineNumEdit_->text();
   str >> lineNumber_;
 
   setVisible(false);
@@ -91,9 +97,33 @@ void PatDlg::onCancelBtn( NButtonEvent * sender )
 
 void PatDlg::setLineNumber(int lineNumber )
 {
-  lineNumber_ = lineNumber;
+  if (lineNumber_ > MAX_LINES && lineNumber_ < 0) lineNumber = 0;
+
+  lineNumEdit_->setText(stringify(lineNumber));
+  lineNumEdit_->repaint();
 }
 
 bool PatDlg::adaptSize() {
   return false;
 }
+
+void PatDlg::onIncBtnClicked( NButtonEvent * ev )
+{
+  std::stringstream str; 
+  str << lineNumEdit_->text();
+  str >> lineNumber_;
+  if (lineNumber_ < MAX_LINES) lineNumber_++;
+  lineNumEdit_->setText(stringify(lineNumber_));
+  lineNumEdit_->repaint();
+}
+
+void PatDlg::onDecBtnClicked( NButtonEvent * ev )
+{
+  std::stringstream str; 
+  str << lineNumEdit_->text();
+  str >> lineNumber_;
+  if (lineNumber_ > 0) lineNumber_--;
+  lineNumEdit_->setText(stringify(lineNumber_));
+  lineNumEdit_->repaint();
+}
+
