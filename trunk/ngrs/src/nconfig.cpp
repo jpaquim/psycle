@@ -710,6 +710,9 @@ int NConfig::loadXmlConfig(const std::string & configName )
   }
 
   const char* xmlFile = NFile::replaceTilde(configName).c_str();
+
+  std::cout << xmlFile << std::endl;
+
   SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
 
   MySAX2Handler* defaultHandler = new MySAX2Handler();
