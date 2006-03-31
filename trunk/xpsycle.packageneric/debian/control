@@ -12,8 +12,8 @@ Architecture: any
 Description: psycle for X window
  _
 
-Package:  psycle-0-doc
+Package:  xpsycle-0-doc
 Architecture: all
-Description: documentation for psycle
+Description: documentation for xpsycle
  -
 

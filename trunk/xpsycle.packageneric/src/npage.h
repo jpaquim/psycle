@@ -1,1 +1,0 @@
-../../ngrs/src/npage.h
