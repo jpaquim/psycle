@@ -1,5 +1,5 @@
 #! /usr/bin/autoconf
 
+PACKAGENERIC__INCLUDE(packageneric/generic/autotools/autoconf/pool/modules/alsa.ac)
 PACKAGENERIC__MODULE__EXTERNAL(NGRS, ngrs >= 0.0.3)
-
 PACKAGENERIC__MODULE__INTERNAL(bin, xpsycle, 0:0:0, NGRS, xpsycle - psycle for X window)
