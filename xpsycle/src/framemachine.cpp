@@ -22,6 +22,7 @@
 #include "global.h"
 #include "configuration.h"
 #include "napp.h"
+#include "defaultbitmaps.h"
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
@@ -108,7 +109,13 @@ void FrameMachine::initParameterGUI( )
 
 Knob::Knob(int param )  : max_range(100), min_range(0), value_(0), istweak(0), finetweak(1), ultrafinetweak(0), sourcepoint(0)  {
   param_ = param;
-  if (c==0) kbitmap.loadFromFile(Global::pConfig()->iconPath+"TbMainKnob.xpm");
+
+ if (c==0) {
+    if (Global::pConfig()->iconPath=="") 
+       kbitmap = Global::pBitmaps()->tbmainknob(); 
+    else
+       kbitmap.loadFromFile(Global::pConfig()->iconPath+ "TbMainKnob.xpm");
+  }
   c++;
   add( label = new NLabel());
   add( vLabel = new NLabel()); // the label that shows the value in %

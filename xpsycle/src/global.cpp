@@ -21,6 +21,8 @@
 #include "song.h"
 #include "player.h"
 #include "configuration.h"
+#include "defaultbitmaps.h"
+
 
 Song* Global::pSong() {
   static Song* s = new Song();
@@ -36,6 +38,12 @@ Player * Global::pPlayer() {
   static Player* p = new Player();
   return p;
 }
+
+DefaultBitmaps * Global::pBitmaps() {
+  static DefaultBitmaps* p = new DefaultBitmaps();
+  return p;
+}
+
 
 Global::Global()
 {

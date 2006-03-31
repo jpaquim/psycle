@@ -26,6 +26,7 @@
 #include "configuration.h"
 #include "patternview.h"
 #include "nframeborder.h"
+#include "defaultbitmaps.h"
 
 #include <napp.h>
 #include <nconfig.h>
@@ -70,10 +71,28 @@ void SequencerBar::init( )
     gr->setVgap(5);
     gr->setHgap(5);
     btnBar->setLayout(gr);
-     btnBar->add( incshort_     = new NButton( new NImage(Global::pConfig()->iconPath+"plus.xpm")));
-     btnBar->add( decshort_     = new NButton( new NImage(Global::pConfig()->iconPath+"minus.xpm")));
-     btnBar->add( inclong_      = new NButton( new NImage(Global::pConfig()->iconPath+"plus1.xpm")));
-     btnBar->add( declong_      = new NButton( new NImage(Global::pConfig()->iconPath+"minus1.xpm")));
+
+    NImage* img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "plus.xpm");
+    btnBar->add( incshort_     = new NButton(img));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->minus()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "minus.xpm");
+    btnBar->add( decshort_     = new NButton( img));
+
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus1()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "plus1.xpm");
+    btnBar->add( inclong_     = new NButton( img));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->minus1()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "minus1.xpm");
+    btnBar->add( declong_     = new NButton( img));
+
     btnBar->add( seqnew_       = new NButton("New"));
     btnBar->add( seqduplicate_ = new NButton("Close"));
     btnBar->add( seqins_       = new NButton("Ins"));
@@ -121,9 +140,18 @@ void SequencerBar::init( )
   NPanel* lenPanel = new NPanel();
    lenPanel->setLayout(new NFlowLayout(nAlLeft,5,0));
    lenPanel->add( new NLabel("Len"));
-   lenPanel->add( declen_ = new NButton( new NImage(Global::pConfig()->iconPath+"less.xpm"),40,10) );
-   lenPanel->add( new NLabel("00"));
-    lenPanel->add( inclem_ = new NButton( new NImage(Global::pConfig()->iconPath+"more.xpm"),40,10) );
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+    lenPanel->add( declong_     = new NButton( img,40,10));
+
+    lenPanel->add( new NLabel("00"));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+    lenPanel->add( declong_     = new NButton( img,40,10));
    lenPanel->resize();
   add(lenPanel);
 

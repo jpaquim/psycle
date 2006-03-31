@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "masterdlg.h"
 #include "global.h"
+#include "defaultbitmaps.h"
 #include "configuration.h"
 #include "machine.h"
 #include "dsp.h"
@@ -28,8 +29,13 @@ MasterDlg::MasterDlg(Machine* master)
 {
   pMaster = master;
 
-  pane()->skin_.bitmap.loadFromFile(Global::pConfig()->iconPath+"masterbk.xpm");
+  if (Global::pConfig()->iconPath=="") 
+       pane()->skin_.bitmap = Global::pBitmaps()->masterbk();
+    else
+       pane()->skin_.bitmap.loadFromFile(Global::pConfig()->iconPath+ "masterbk.xpm");
+
   pane()->skin_.bitmapBgStyle = 1;
+
   if (pane()->skin_.bitmap.X11data()!=0) setPosition(0,0,pane()->skin_.bitmap.width(),pane()->skin_.bitmap.height());
 
   init();
