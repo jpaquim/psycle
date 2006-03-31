@@ -1,0 +1,1 @@
+../../ngrs/src/nalignlayout.h

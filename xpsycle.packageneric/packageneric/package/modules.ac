@@ -1,0 +1,10 @@
+#! /usr/bin/autoconf
+
+#dnl# PACKAGENERIC__INCLUDE(packageneric/generic/autotools/autoconf/pool/modules/x-window.ac)
+AC_PATH_X
+AC_PATH_XTRA
+PACKAGENERIC__MODULE__EXTERNAL__DEFINE(X_WINDOW, $X_PRE_LIBS $X_LIBS -lX11 $X_EXTRA_LIBS, $X_CFLAGS, >= 11.6)
+
+PACKAGENERIC__MODULE__EXTERNAL(NGRS__DEPENDENCIES, xft >= 0 xcursor >= 0)
+
+PACKAGENERIC__MODULE__INTERNAL(lib, ngrs, 0:0:0, X_WINDOW NGRS__DEPENDENCIES, ngrs - X Window toolkit)
