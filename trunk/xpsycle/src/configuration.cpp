@@ -23,6 +23,7 @@
 #include "alsaout.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nfile.h"
 
 
 Configuration::Configuration()
@@ -107,7 +108,11 @@ void Configuration::setSkinDefaults( )
 
 void Configuration::loadConfig( )
 {
-  NApp::config()->loadXmlConfig("~/.xpsycle.xml");
+  std::string oldDir = NFile::workingDir();
+  NFile::cdHome();
+  NApp::config()->loadXmlConfig(".xpsycle.xml");
+  NFile::cd(oldDir);
+
   iconPath   = NApp::config()->findPath("icondir");
   pluginPath = NApp::config()->findPath("plugindir");
 }
