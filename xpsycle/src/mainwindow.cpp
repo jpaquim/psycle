@@ -34,7 +34,7 @@ MainWindow::MainWindow()
   initDialogs();
   initBars();
   initViews();
-  initSignals();
+//  initSignals();
 }
 
 
