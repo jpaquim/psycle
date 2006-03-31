@@ -146,7 +146,7 @@ void MasterGUI::setSkin( )
 
 void MasterGUI::paint( NGraphics * g )
 {
-  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
 }
 
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
@@ -161,7 +161,7 @@ GeneratorGUI::~ GeneratorGUI( )
 
 void GeneratorGUI::paint( NGraphics * g )
 {
-  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), stringify(pMac()->_macIndex)+":"+pMac()->_editName);
 }
 
@@ -189,7 +189,7 @@ EffektGUI::~ EffektGUI( )
 
 void EffektGUI::paint( NGraphics * g )
 {
-  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
 }
 
