@@ -23,6 +23,7 @@
 #include "napp.h"
 #include "nitem.h"
 #include "player.h"
+#include "defaultbitmaps.h"
 
 MainWindow::MainWindow()
  : NWindow()
@@ -134,41 +135,135 @@ void MainWindow::initToolBar( )
 
   toolBarPanel_->add(toolBar1_);
     toolBar1_->setName("test1");
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+ "new.xpm"),20,20));
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"open.xpm"),20,20));
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"save.xpm"),20,20));
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"saveaudio.xpm"),20,20));
+    NImage* img;
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newfile()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "new.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->open()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "open.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "save.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save_audio()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "saveaudio.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordwav()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "recordwav.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+
     toolBar1_->add(new NToolBarSeparator());
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"recordwav.xpm"),20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->undo()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "undo.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->redo()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "redo.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordnotes()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "recordnotes.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
     toolBar1_->add(new NToolBarSeparator());
-     toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"undo.xpm"),20,20));
-     toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"redo.xpm"),20,20));
-     toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"recordnotes.xpm"),20,20));
-     toolBar1_->add(new NToolBarSeparator());
-     toolBar1_->add(barPlayFromStartBtn_ = new NButton(new NImage(Global::pConfig()->iconPath+"playstart.xpm"),20,20));
-     toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"play.xpm"),20,20));
-     toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"playselpattern.xpm"),20,20));
-     NButton* stopBtn_ = new NButton(new  NImage(Global::pConfig()->iconPath+"stop.xpm"),20,20);
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playstart()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "recordnotes.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playstart()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
+    toolBar1_->add(barPlayFromStartBtn_ = new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->play()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "play.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playselpattern()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "playselpattern.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->stop()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "stop.xpm");
+    NButton* stopBtn_ = new NButton(img,20,20);
        stopBtn_->click.connect(this,&MainWindow::onBarStop);
-     toolBar1_->add(stopBtn_);
-     toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"autostop.xpm"),20,20));
+    toolBar1_->add(stopBtn_);
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->autoStop()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "autostop.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
     toolBar1_->add(new NToolBarSeparator());
-    NButton* macBtn_ = new NButton(new NImage(Global::pConfig()->iconPath+"machines.xpm"),20,20);
+
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->machines()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "machines.xpm");
+    NButton* macBtn_ = new NButton(img,20,20);
       macBtn_->setFlat(false);
       macBtn_->setToggle(true);
     toolBar1_->add(macBtn_);
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->patterns()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "patterns.xpm");
     NButton* patBtn_ = new NButton(new NImage(Global::pConfig()->iconPath+"patterns.xpm"),20,20);
        patBtn_->setFlat(false);
        patBtn_->setToggle(true);
     toolBar1_->add(patBtn_);
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"sequencer.xpm"),20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->sequencer()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "sequencer.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
     toolBar1_->add(new NToolBarSeparator());
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"newmachine.xpm"),20,20));
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"openeditor.xpm"),20,20));
+
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newmachine()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "newmachine.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->openeditor()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "openeditor.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
     toolBar1_->add(new NToolBarSeparator());
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"p.xpm"),20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->p()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "p.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
     toolBar1_->add(new NToolBarSeparator());
-    toolBar1_->add(new NButton(new NImage(Global::pConfig()->iconPath+"help.xpm"),20,20));
+
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->help()); else
+                                         img->loadFromFile(Global::pConfig()->iconPath+ "help.xpm");
+    toolBar1_->add(new NButton(img,20,20));
+
   toolBar1_->resize();
 
   psycleControlBar_ = new NToolBar();
@@ -184,15 +279,38 @@ void MainWindow::initToolBar( )
        trackCombo_->add(new NItem(s));
       }
     psycleControlBar_->add(new NLabel("Tempo"));
-     psycleControlBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"lessless.xpm"),20,20));
-     psycleControlBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"less.xpm"),20,20));
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->lessless()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "lessless.xpm");
+     psycleControlBar_->add(new NButton(img,20,20));
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+     psycleControlBar_->add(new NButton(img,20,20));
     psycleControlBar_->add(new NLabel("125"));
-     psycleControlBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"more.xpm"),20,20));
-     psycleControlBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"moremore.xpm"),20,20));
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+     psycleControlBar_->add(new NButton(img,20,20));
+
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->moremore()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "moremore.xpm");
+     psycleControlBar_->add(new NButton(img,20,20));
+
     psycleControlBar_->add(new NLabel("Lines per beat"));
-     psycleControlBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"less.xpm"),20,20));
+    img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+     psycleControlBar_->add(new NButton(img,20,20));
     psycleControlBar_->add(new NLabel("4"));
-     psycleControlBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"more.xpm"),20,20));
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+     psycleControlBar_->add(new NButton(img,20,20));
     psycleControlBar_->add(new NLabel("Octave"));
     octaveCombo_ = new NComboBox();
       for (int i=0; i<9; i++) octaveCombo_->add(new NItem(stringify(i)));
@@ -228,8 +346,17 @@ void MainWindow::initToolBar( )
        genCombo_->setHeight(20);
        updateComboGen();
      psycleToolBar_->add(genCombo_);
-      psycleToolBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"littleleft.xpm"),20,20));
-      psycleToolBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"littleright.xpm"),20,20));
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
+     psycleToolBar_->add(new NButton(img,20,20));
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
+     psycleToolBar_->add(new NButton(img,20,20));
+
      psycleToolBar_->add(new NButton("Gear Rack"));
      psycleToolBar_->add(new NToolBarSeparator());
      auxSelectCombo_ = new NComboBox();
@@ -240,8 +367,17 @@ void MainWindow::initToolBar( )
      insCombo_->setWidth(158);
      insCombo_->setHeight(20);
      psycleToolBar_->add(insCombo_);
-     psycleToolBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"littleleft.xpm"),20,20));
-     psycleToolBar_->add(new NButton(new NImage(Global::pConfig()->iconPath+"littleright.xpm"),20,20));
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
+     psycleToolBar_->add(new NButton(img,20,20));
+
+     img = new NImage();
+     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
+                                           img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
+     psycleToolBar_->add(new NButton(img,20,20));
+
      psycleToolBar_->add(new NButton("Load"));
      psycleToolBar_->add(new NButton("Save"));
      psycleToolBar_->add(new NButton("Edit"));

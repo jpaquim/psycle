@@ -27,6 +27,7 @@
 #include "masterdlg.h"
 #include "global.h"
 #include "configuration.h"
+#include "defaultbitmaps.h"
 
 
 NBitmap MachineGUI::bitmap;
@@ -39,7 +40,12 @@ MachineGUI::MachineGUI(Machine* mac)
   mac_ = mac;
   setMoveable(NMoveable(nMvHorizontal | nMvVertical));
   setPosition(mac->_x,mac_->_y,200,30);
-  if (c==0) bitmap.loadFromFile(Global::pConfig()->iconPath+"machine_skin.xpm");
+  if (c==0) {
+    if (Global::pConfig()->iconPath=="") 
+       bitmap = Global::pBitmaps()->machine_skin(); 
+    else
+       bitmap.loadFromFile(Global::pConfig()->iconPath+ "machine_skin.xpm");
+  }
   c++;
   setFont(NFont("Suse sans",6, nMedium | nStraight | nAntiAlias));
 }
@@ -189,7 +195,7 @@ EffektGUI::~ EffektGUI( )
 
 void EffektGUI::paint( NGraphics * g )
 {
-  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
 }
 

@@ -24,22 +24,13 @@
 #include "napp.h"
 #include "nconfig.h"
 
+
 Configuration::Configuration()
 {
   setSkinDefaults();
 
   defaultPatLines = 64;
 
-  /* Magnus: commenting this out
-     because it causes a cyclic dependency between song and configuration
-
-  // pattern height
-    defaultPatLines = 64;
-    for(int c(0) ; c < MAX_PATTERNS; ++c) {
-     // All pattern reset
-     Global::pSong()->patternLines[c] = defaultPatLines;
-    }
-  */
 }
 
 
@@ -107,7 +98,7 @@ void Configuration::setSkinDefaults( )
   _outputDriverIndex = 0;
   _pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 
-  iconPath   = "~/xpsycle/icons/";
+  iconPath   = "";
   pluginPath = "~/xpsycle/plugins/";
 
   mv_wirewidth = 1;
