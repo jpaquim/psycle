@@ -17,31 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef NXMLPARSER_H
+#define NXMLPARSER_H
 
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-
-#include <iostream>
-#include <sstream>
 #include <string>
-#include <cstdlib>
 
-#include "napp.h"
-#include "ntestwindow.h"
+/**
+@author Stefan Nattkemper
+*/
+class NXmlParser{
+public:
+    NXmlParser();
 
+    ~NXmlParser();
 
-using namespace std;
+    void parse(const std::string & text);
 
-int main(int argc, char *argv[])
-{
-  NApp app;
+private:
 
-  NWindow* myMainWindow = new NTestWindow();
-  app.setMainWindow(myMainWindow);
-  app.run();
+    std::string comment;
+    int commentCounter;
 
-  return EXIT_SUCCESS;
-}
+    bool commentStart(char c);
+    int commentSkip(const std::string & text, int actualPos);
+};
+
+#endif

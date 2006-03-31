@@ -17,31 +17,50 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "nxmlparser.h"
 
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cstdlib>
-
-#include "napp.h"
-#include "ntestwindow.h"
-
-
-using namespace std;
-
-int main(int argc, char *argv[])
+NXmlParser::NXmlParser()
 {
-  NApp app;
-
-  NWindow* myMainWindow = new NTestWindow();
-  app.setMainWindow(myMainWindow);
-  app.run();
-
-  return EXIT_SUCCESS;
 }
+
+
+NXmlParser::~NXmlParser()
+{
+}
+
+void NXmlParser::parse( const std::string & text )
+{
+  int pos = 0;
+  for (std::string::const_iterator i = text.begin(); i < text.end() ; i++) {
+     char c = *i;
+       if (commentStart(c)) pos = commentSkip(text,pos);
+  }
+}
+
+
+ // [15]  Comment  ::=  <!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
+
+bool NXmlParser::commentStart(char c)
+{
+  // test here for <!--
+
+  comment.push_back(c);
+
+  if (comment.length() == 4) {
+      if (comment == "<!--") {
+         comment = "";
+         return true;
+      } else comment = "";
+  }
+  return false;
+
+}
+
+int NXmlParser::commentSkip( const std::string & text, int actualPos )
+{
+  int newPos = text.find("-->", actualPos);
+    // if (newPos == text.string::npos) this is an error of xml file ..
+  return newPos;
+}
+
+

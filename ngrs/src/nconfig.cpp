@@ -201,9 +201,10 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
 void MySAX2Handler::fatalError(const SAXParseException& exception)
 {
     char* message = XMLString::transcode(exception.getMessage());
-    cout << "Fatal Error: " << message
+    cout << "xml error: " << message
          << " at line: " << exception.getLineNumber()
          << endl;
+    cout << "using instead defaults" << endl;
 }
 
 
@@ -508,7 +509,10 @@ const char *chipset2[] = {
 
 NConfig::NConfig()
 {
-  loadXmlConfig("~/.ngrs.xml");
+  std::string oldDir = NFile::workingDir();
+  NFile::cdHome();
+  loadXmlConfig(".ngrs.xml");
+  NFile::cd(oldDir);
 }
 
 
@@ -709,10 +713,6 @@ int NConfig::loadXmlConfig(const std::string & configName )
 //    return 1;
   }
 
-  const char* xmlFile = NFile::replaceTilde(configName).c_str();
-
-  std::cout << xmlFile << std::endl;
-
   SAX2XMLReader* parser = XMLReaderFactory::createXMLReader();
 
   MySAX2Handler* defaultHandler = new MySAX2Handler();
@@ -720,7 +720,7 @@ int NConfig::loadXmlConfig(const std::string & configName )
   parser->setContentHandler(defaultHandler);
   parser->setErrorHandler(defaultHandler);
   try {
-    parser->parse(xmlFile);
+    parser->parse(configName.c_str());
   }
         catch (const XMLException& toCatch) {
             char* message = XMLString::transcode(toCatch.getMessage());
