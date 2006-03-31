@@ -47,7 +47,7 @@ MachineGUI::MachineGUI(Machine* mac)
 
 MachineGUI::~MachineGUI()
 {
-
+  //delete myBorder_;
 }
 
 Machine * MachineGUI::pMac( )
@@ -189,7 +189,7 @@ EffektGUI::~ EffektGUI( )
 
 void EffektGUI::paint( NGraphics * g )
 {
-  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
 }
 
