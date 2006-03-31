@@ -330,7 +330,7 @@ int PatternView::editOctave( )
 /// The Header Panel Class
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
-  bitmap.loadFromFile("/home/natti/xpsycle/icons/pattern_header_skin.xpm");
+  bitmap.loadFromFile(Global::pConfig()->iconPath+"pattern_header_skin.xpm");
   setSkin();
   setHeight(bgCoords.height());
   skinColWidth_ = bgCoords.width();
