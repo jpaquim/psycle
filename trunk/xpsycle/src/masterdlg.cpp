@@ -30,7 +30,7 @@ MasterDlg::MasterDlg(Machine* master)
 
   pane()->skin_.bitmap.loadFromFile(Global::pConfig()->iconPath+"masterbk.xpm");
   pane()->skin_.bitmapBgStyle = 1;
-  setPosition(0,0,pane()->skin_.bitmap.width(),pane()->skin_.bitmap.height());
+  if (pane()->skin_.bitmap.X11data()!=0) setPosition(0,0,pane()->skin_.bitmap.width(),pane()->skin_.bitmap.height());
 
   init();
 }
