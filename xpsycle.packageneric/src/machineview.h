@@ -1,0 +1,1 @@
+../../xpsycle/src/machineview.h

@@ -1,0 +1,1 @@
+../../xpsycle/src/mainwindow.h
