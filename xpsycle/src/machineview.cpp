@@ -79,9 +79,9 @@ void MachineView::onCreateMachine( Machine * mac )
      break;
      case MACHMODE_MASTER: {
         MachineGUI* macGui = new MasterGUI(mac);
-   //       macGui->newConnection.connect(this,&MachineView::onNewConnection);
-   //     scrollArea->add(macGui);
-   //     machineGUIs.push_back(macGui);
+          macGui->newConnection.connect(this,&MachineView::onNewConnection);
+          scrollArea->add(macGui);
+         machineGUIs.push_back(macGui);
       }
      break;
   }
