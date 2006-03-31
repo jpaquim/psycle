@@ -282,6 +282,9 @@ char ** NSystem::getFontList(Display* dpy, string pattern, int* count)
 
 void NSystem::setWindowPosition(Window win, int left, int top, int width, int height )
 {
+  if (width  <= 0) width  = 1;
+  if (height <= 0) height = 1;
+
   XWindowAttributes attrib;
   XGetWindowAttributes( dpy(), win, &attrib );
 
