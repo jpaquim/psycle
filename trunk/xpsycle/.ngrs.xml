@@ -8,6 +8,11 @@
     <gradient start='230:230:230' mid='250:250:250' end='240:240:240' dir='ver' percent='10' style='1'>
     </gradient>
 </vcskin>	
+<vcskin id='btnflat'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>
+	<gradient start='230:230:230' mid='240:240:240' end='140:140:140' dir='ver' percent='10' style='1'>
+	</gradient>
+</vcskin>
 <vcskin id='btnup'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
 	<gradient start='230:230:230' mid='240:240:240' end='140:140:140' dir='ver' percent='10' style='1'>
@@ -17,6 +22,9 @@
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
 	<gradient start='240:240:240' mid='250:250:250' end='180:180:180' dir='ver' percent='10' style='1'>
 	</gradient>
+</vcskin>
+<vcskin id='mbtnnone'>
+	<font name='Suse Sans' size='8' color='0:0:0'></font>	
 </vcskin>
 <vcskin id='mbtnover'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>

@@ -182,16 +182,26 @@ void SequencerBar::setPatternView( PatternView * patternView )
   patternView_ = patternView;
 }
 
-void SequencerBar::updateSequencer( )
+void SequencerBar::updateSequencer()
 {
-  seqList_->removeChilds();
+  char buf[16];
 
-  char buf[20];
+  //int top = cc->GetTopIndex();
+  seqList_->removeChilds();  // delete all items of the ListBox
+
+
   for(int n=0;n<Global::pSong()->playLength;n++)
   {
-     sprintf(buf,"%.2X: %.2X",n,Global::pSong()->playOrder[n]);
-     seqList_->add(new NItem(buf));
+    sprintf(buf,"%.2X: %.2X",n,Global::pSong()->playOrder[n]);
+    seqList_->add(new NItem(buf));
   }
+
+  //cc->SelItemRange(false,0,cc->GetCount()-1);
+  for (int i=0; i<MAX_SONG_POSITIONS;i++)
+  {
+//     if ( Global::pSong()->playOrderSel[i]) cc->SetSel(i,true);
+  }
+
 }
 
 NListBox * SequencerBar::seqList( )
@@ -243,7 +253,7 @@ void SequencerBar::onSeqNew( NButtonEvent * ev )
 
       Global::pSong()->AllocNewPattern(Global::pSong()->playOrder[editPosition],"",Global::pConfig()->defaultPatLines,false);
 
-   //  UpdatePlayOrder(true);
+      updatePlayOrder(true);
       updateSequencer();
       seqList_->repaint();
    //  m_wndView.Repaint(DMPattern);
@@ -267,9 +277,77 @@ void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
   }
 }
 
+
 void SequencerBar::updatePlayOrder(bool mode)
 {
- // todo
+/*  CStatic *ll_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ3);
+  CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+  CStatic *pLength = (CStatic*)m_wndSeq.GetDlgItem(IDC_LENGTH);*/
+
+  int ll = Global::pSong()->playLength;
+  char buffer[16];
+
+  // Update Labels
+
+  sprintf(buffer,"%.2X",ll);
+  //ll_l->SetWindowText(buffer);
+
+  // take ff and fe commands into account
+
+  float songLength = 0;
+  int bpm = Global::pSong()->BeatsPerMin();
+  int tpb = Global::pSong()->LinesPerBeat();
+
+  for (int i=0; i <ll; i++)
+  {
+      int pattern = Global::pSong()->playOrder[i];
+      // this should parse each line for ffxx commands if you want it to be truly accurate
+      unsigned char* const plineOffset = Global::pSong()->_ppattern(pattern);
+
+      for (int l = 0; l < Global::pSong()->patternLines[pattern]*MULTIPLY; l+=MULTIPLY) {
+        for (int t = 0; t < Global::pSong()->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE) {
+           PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
+           switch (pEntry->_cmd) {
+              case 0xFF:
+                if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+                {
+                   bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+                }
+              break;
+
+              case 0xFE:
+                if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+                {
+                    tpb=pEntry->_parameter;
+                }
+              break;
+           }
+        }
+        songLength += (60.0f/(bpm * tpb));
+     }
+  }
+
+  sprintf(buffer, "%02d:%02d", (int)(songLength / 60), (int)(songLength) % 60);
+  //pLength->SetWindowText(buffer);
+
+  // Update sequencer line
+
+  if (mode) {
+    const int ls= patternView_->editPosition();
+    const int le=Global::pSong()->playOrder[ls];
+//    pls->DeleteString(ls);
+    sprintf(buffer,"%.2X: %.2X",ls,le);
+ //   pls->InsertString(ls,buffer);
+    // Update sequencer selection   
+  //  pls->SelItemRange(false,0,pls->GetCount()-1);
+  //  pls->SetSel(ls,true);
+    memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+    Global::pSong()->playOrderSel[ls] = true;
+  } else {
+//    pls->SelItemRange(false,0,pls->GetCount()-1);
+    for (int i=0;i<MAX_SONG_POSITIONS;i++ )
+    {
+//      if (Global::pSong()->playOrderSel[i]) pls->SetSel(i,true);
+    }
+  }
 }
-
-
