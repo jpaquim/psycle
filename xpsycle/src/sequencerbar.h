@@ -61,6 +61,7 @@ private:
 
    NPanel* seqPanel_;
    NListBox* seqList_;
+   NLabel* lenLabel_;
 
    NButton* incshort_;
    NButton* decshort_;
@@ -76,7 +77,7 @@ private:
    NButton* seqclr_;
    NButton* seqsrt_;
    NButton* declen_;
-   NButton* inclem_;
+   NButton* inclen_;
 
    NCheckBox* follow_;
    NCheckBox* multichannel_audition_;
@@ -98,6 +99,8 @@ private:
    void onSeqCut(NButtonEvent* ev);
    void onSeqClone(NButtonEvent* ev);
    void onSeqClear(NButtonEvent* ev);
+   void onDecLen(NButtonEvent* ev);
+   void onIncLen(NButtonEvent* ev);
 
    std::vector<int> seqCopyBuffer;
 
