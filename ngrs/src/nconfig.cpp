@@ -543,18 +543,29 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->bitmapBgStyle = xmlSkin->bitmapBgStyle;
   } else
   if (identifier == "edit") {
-    skin->bgColor = NColor(230,230,230);
-    skin->fgColor = NColor(0,0,0);
+    skin->gradStartColor.setRGB(230,230,230);
+    skin->gradMidColor.setRGB(50,50,50);
+    skin->gradEndColor.setRGB(100,100,100);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
+    skin->gradientOrientation = nVertical;
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
     skin->font.setTextColor(NColor(230,230,230));
+
     skin->useParentBgColor = false;
     skin->useParentFgColor = false;
     skin->useParentFont    = false;
     skin->transparent      = false;
-    skin->border = 0;
-    skin->bitmap.createFromXpmData(chipset2);
-    skin->bitmapBgStyle = 1;
   } else
+  if (identifier == "filedlgpane") {
+    skin->bgColor = NColor(200,200,200);
+    skin->useParentBgColor = false;
+    skin->useParentFgColor = false;
+    skin->useParentFont    = false;
+    skin->transparent      = false;
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
+  } else
+
   if (identifier == "pane") {
     skin->bgColor = NColor(200,200,200);
     skin->useParentBgColor = false;
@@ -566,16 +577,15 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
 
   if (identifier == "mitemover") {
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(230,230,250));
-    skin->fgColor = NColor(230,230,230);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
+    skin->font.setTextColor(NColor(0,0,0));
+
+    skin->gradStartColor.setRGB(130,130,130);
+    skin->gradMidColor.setRGB(150,150,150);
+    skin->gradEndColor.setRGB(140,140,140);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
     skin->useParentFont    = false;
-    skin->transparent      = false;
-    skin->translucent = 100;
-    skin->bgColor.setRGB(150,150,150);
-    skin->transColor.setRGB(200,200,200);
-    skin->border = 0;
+
   } else
   if (identifier == "mitemnone") {
     skin->fgColor = NColor(50,50,150);
@@ -606,39 +616,24 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
   } else
   if (identifier == "mbtnover") {
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(230,230,230));
-    skin->fgColor = NColor(230,230,230);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
+    skin->font.setTextColor(NColor(0,0,0));
+
+    skin->gradStartColor.setRGB(130,130,130);
+    skin->gradMidColor.setRGB(150,150,150);
+    skin->gradEndColor.setRGB(140,140,140);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
     skin->useParentFont    = false;
-    skin->transparent      = true;
-    skin->translucent = 80;
-    skin->transColor.setRGB(200,200,200);
-    skin->border = 0;
   } else
   if (identifier == "mbtnnone") {
-    skin->fgColor = NColor(230,230,250);
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = true;
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(150,150,180));
-    skin->translucent = 100;
-    skin->border = 0;
   } else
   if (identifier == "mbar") {
-    skin->bgColor = NColor(230,230,230);
-    skin->fgColor = NColor(0,0,0);
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(230,230,230));
-    skin->useParentBgColor = false;
-    skin->useParentFgColor = false;
-    skin->useParentFont    = false;
-    skin->transparent      = false;
-    skin->border = 0;
-    skin->bitmap.createFromXpmData(chipset2);
-    skin->bitmapBgStyle = 1;
+    skin->gradStartColor.setRGB(230,230,230);
+    skin->gradMidColor.setRGB(250,250,250);
+    skin->gradEndColor.setRGB(240,240,240);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
+    skin->gradientOrientation = nVertical;
   } else
   if (identifier == "clbox") {
     skin->bitmapBgStyle = 0;
@@ -651,58 +646,63 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->transparent      = false;
   } else
   if (identifier == "btnup") {
-    skin->gradientStyle = 1;
-    skin->gradientOrientation = nVertical;
-    skin->gradStartColor.setRGB(10,10,10);
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
+
+    skin->gradStartColor.setRGB(230,230,230);
     skin->gradMidColor.setRGB(240,240,240);
-    skin->gradEndColor.setRGB(10,10,10);
-    skin->font = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(100,100,100));
-    skin->bitmapBgStyle = 0;
-    skin->useParentBgColor = true;
-    skin->useParentFgColor = true;
+    skin->gradEndColor.setRGB(180,180,180);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
+    skin->gradientOrientation = nVertical;
     skin->useParentFont    = false;
-    skin->transparent      = true;
-    skin->border = new NBevelBorder(nNone,nRaised);
-    skin->border->setSpacing(NSize(0,0,0,0));
+
   } else 
   if (identifier == "btnover") {
-    skin->bitmapBgStyle = 0;
-    skin->gradientStyle = 1;
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
+
+    skin->gradStartColor.setRGB(240,240,240);
+    skin->gradMidColor.setRGB(250,250,250);
+    skin->gradEndColor.setRGB(180,180,180);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
     skin->gradientOrientation = nVertical;
-    skin->gradStartColor.setRGB(10,10,10);
-    skin->gradMidColor.setRGB(240,240,240);
-    skin->gradEndColor.setRGB(10,10,10);
-    skin->useParentBgColor = true;
-    skin->useParentFgColor = true;
-    skin->useParentFont    = true;
-    skin->transparent      = false;
-    skin->border = new NBevelBorder(nNone,nRaised);
-    skin->border->setSpacing(NSize(0,0,0,0));
+    skin->useParentFont    = false;
   } else 
   if (identifier == "btndown") {
-    skin->gradientStyle = 1;
+    skin->gradStartColor.setRGB(200,200,200);
+    skin->gradMidColor.setRGB(210,210,210);
+    skin->gradEndColor.setRGB(180,180,180);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
     skin->gradientOrientation = nVertical;
-    skin->gradStartColor.setRGB(10,10,10);
-    skin->gradMidColor.setRGB(240,240,240);
-    skin->gradEndColor.setRGB(10,10,10);
-    skin->bitmapBgStyle = 0;
-    skin->useParentBgColor = true;
-    skin->useParentFgColor = true;
-    skin->useParentFont    = true;
-    skin->transparent      = false;
-    skin->border = new NBevelBorder(nNone,nLowered);
-    skin->border->setSpacing(NSize(0,0,0,0));
+    skin->useParentFont    = false;
   } else
   if (identifier == "btnflat") {
-    skin->bitmapBgStyle = 0;
+    skin->transparent = true;
+  } else
+  if (identifier == "tabup") {
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
+    skin->font.setTextColor(NColor(0,0,0));
+
+    skin->gradStartColor.setRGB(230,230,230);
+    skin->gradMidColor.setRGB(240,240,240);
+    skin->gradEndColor.setRGB(200,200,200);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
     skin->gradientOrientation = nVertical;
-    skin->useParentBgColor = true;
-    skin->useParentFgColor = true;
-    skin->useParentFont    = true;
-    skin->transparent      = true;
-    skin->border = new NBevelBorder(nNone,nRaised);
-    skin->border->setSpacing(NSize(0,0,0,0));
+    skin->useParentFont    = false;
+  } else
+  if (identifier == "tabnone") {
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
+    skin->font.setTextColor(NColor(0,0,0));
+
+    skin->gradStartColor.setRGB(200,200,200);
+    skin->gradMidColor.setRGB(210,210,210);
+    skin->gradEndColor.setRGB(180,180,180);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
+    skin->gradientOrientation = nVertical;
+    skin->useParentFont    = false;
   }
 }
 
