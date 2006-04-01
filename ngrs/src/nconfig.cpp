@@ -556,10 +556,12 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->bitmapBgStyle = 1;
   } else
   if (identifier == "pane") {
-    skin->bgColor = NColor(100,100,100);
-    skin->fgColor = NColor(230,230,230);
+    skin->bgColor = NColor(200,200,200);
+    skin->useParentBgColor = false;
+    skin->useParentFgColor = false;
+    skin->useParentFont    = false;
+    skin->transparent      = false;
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(230,230,230));
   } else
 
   if (identifier == "mitemover") {
@@ -699,7 +701,8 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->useParentFgColor = true;
     skin->useParentFont    = true;
     skin->transparent      = true;
-    skin->border = 0;
+    skin->border = new NBevelBorder(nNone,nRaised);
+    skin->border->setSpacing(NSize(0,0,0,0));
   }
 }
 
