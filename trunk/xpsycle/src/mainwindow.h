@@ -39,6 +39,8 @@
 #include "newmachine.h"
 
 
+class GreetDlg;
+
 /**
 @author Stefan
 */
@@ -83,6 +85,9 @@ private:
     NFlowLayout* toolBarPanelLayout;
     NFlowLayout* statusBarPanelLayout;
 
+    GreetDlg* greetDlg;
+
+
     void initMenu();
     void initDialogs();
     void initViews();
@@ -98,10 +103,12 @@ private:
 
     void onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
     void onViewMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
+    void onHelpMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
 
     void onSongLoadProgress(int chunkCount, int max, const std::string & header);
     void onOctaveChange(NItemEvent* ev);
     void onTrackChange(NItemEvent* ev);
+    void onGreeting(NButtonEvent* ev);
     void onNewMachine(NButtonEvent* ev);
 
     void updateComboGen();
