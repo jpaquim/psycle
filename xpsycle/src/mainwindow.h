@@ -79,6 +79,10 @@ private:
     NMenu* performanceMenu_;
     NMenu* helpMenu_;
 
+
+    NFlowLayout* toolBarPanelLayout;
+    NFlowLayout* statusBarPanelLayout;
+
     void initMenu();
     void initDialogs();
     void initViews();
