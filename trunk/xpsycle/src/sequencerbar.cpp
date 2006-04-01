@@ -119,6 +119,7 @@ void SequencerBar::init( )
     seqins_->setFlat(false);
     seqins_->clicked.connect(this,&SequencerBar::onSeqIns);
     seqcut_->setFlat(false);
+    seqcut_->clicked.connect(this,&SequencerBar::onSeqCut);
     seqcopy_->setFlat(false);
     seqcopy_->clicked.connect(this,&SequencerBar::onSeqCopy);
     seqpaste_->setFlat(false);
@@ -615,6 +616,12 @@ void SequencerBar::onSeqDelete( NButtonEvent * ev )
     seqList_->repaint();
     patternView_->repaint();
   }
+}
+
+void SequencerBar::onSeqCut( NButtonEvent * ev )
+{
+  onSeqCopy(0);
+  onSeqDelete(0); // double repaint not really nice
 }
 
 
