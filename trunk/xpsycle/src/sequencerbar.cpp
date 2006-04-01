@@ -124,6 +124,7 @@ void SequencerBar::init( )
     seqpaste_->setFlat(false);
     seqpaste_->clicked.connect(this,&SequencerBar::onSeqPaste);
     seqdelete_->setFlat(false);
+    seqdelete_->clicked.connect(this,&SequencerBar::onSeqDelete);
     seqclr_->setFlat(false);
     seqsrt_->setFlat(false);
     seqsrt_->clicked.connect(this,&SequencerBar::onSeqSort);
@@ -588,6 +589,32 @@ void SequencerBar::onSeqSort( NButtonEvent * ev )
      seqList_->repaint();
      patternView_->repaint();
     //m_wndView.SetFocus();
+}
+
+void SequencerBar::onSeqDelete( NButtonEvent * ev )
+{
+  // get selList of ListBox
+  std::vector<int> sel = seqList_->selIndexList();
+  // check first is something to do (size>0) and second check that one item is always there
+  if (sel.size()>0 && Global::pSong()->playLength > sel.size()) {
+    // sort here the list, cause selIndexList is not sorted
+    std::sort( sel.begin(), sel.end());
+    // get Position that after delete will be used
+    int newEditPosition = *(sel.begin());
+    // do the delete and decrease playOrder number and playLength for each selItem
+    for ( std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++ ) {
+      Global::pSong()->playOrder[*it] = Global::pSong()->playOrder[ *it + 1];
+      Global::pSong()->playOrder[Global::pSong()->playLength-1] = 0;
+      Global::pSong()->playLength--;
+    }
+    // set new editposition, if it was last element, set it to playlength -1
+    patternView_->setEditPosition(std::min(newEditPosition,Global::pSong()->playLength-1));
+    // update all
+    updatePlayOrder(true);
+    updateSequencer();
+    seqList_->repaint();
+    patternView_->repaint();
+  }
 }
 
 
