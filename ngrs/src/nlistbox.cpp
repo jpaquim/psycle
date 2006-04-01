@@ -51,6 +51,16 @@ void NListBox::add( NCustomItem * component , bool align)
   if (align) listBoxPane_->resize();
 }
 
+void NListBox::insert( NCustomItem * component, int index , bool align )
+{
+  listBoxPane_->insert(component,index);
+  component->mousePress.connect(this,&NListBox::onItemPress);
+  component->setTransparent(true);
+  component->setBackground(itemBg);
+  if (align) listBoxPane_->resize();
+}
+
+
 void NListBox::add( NCustomItem * component )
 {
   add(component,true);
@@ -69,6 +79,7 @@ void NListBox::onItemPress( NButtonEvent * ev)
 
 void NListBox::onItemSelected( NCustomItem * item )
 {
+  if (!multiSelect_) deSelectItems();
   selItems_.push_back(item);
   NItemEvent ev(item,item->text());
   itemSelected.emit(&ev);
@@ -94,7 +105,7 @@ void NListBox::deSelectItems( )
 
 int NListBox::itemCount( )
 {
-  return listBoxPane_->componentSize();
+  return listBoxPane_->visualComponents().size();
 }
 
 int NListBox::selIndex( )
@@ -124,11 +135,15 @@ void NListBox::setIndex( int i )
 {
   deSelectItems();
   if (i>=0 && i < listBoxPane_->visualComponents().size()) {
-     NVisualComponent* item = listBoxPane_->componentByZOrder(i);
+     NCustomItem* item = (NCustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
+     if (!multiSelect_) deSelectItems();
+     selItems_.push_back(item);
      item->setTransparent(false);
-     onItemSelected((NCustomItem*) item);
+     item->repaint();
   }
 }
+
+
 
 
 
