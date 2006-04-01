@@ -25,6 +25,7 @@
 #include "configuration.h"
 #include "patternview.h"
 #include "defaultbitmaps.h"
+#include "player.h"
 
 #include <napp.h>
 #include <nconfig.h>
@@ -128,13 +129,14 @@ void SequencerBar::init( )
 
 
   seqList_ = new NListBox();
-  seqList_->setHScrollBarPolicy(nNoneVisible);
-  seqList_->setHeight(btnBar->preferredHeight());
-  NFontMetrics metrics;
-  metrics.setFont(font());
-  seqList_->setWidth(metrics.textWidth("11: 11")+20);
+    seqList_->setHScrollBarPolicy(nNoneVisible);
+    seqList_->setHeight(btnBar->preferredHeight());
+    NFontMetrics metrics;
+    metrics.setFont(font());
+    seqList_->setWidth(metrics.textWidth("11: 11")+20);
+    seqList_->itemSelected.connect(this,&SequencerBar::onSelChangeSeqList);
   btnBar->setLeft(seqList_->left()+seqList_->width()+2);
-  seqPanel_->setWidth(btnBar->left()+btnBar->width()+2);
+    seqPanel_->setWidth(btnBar->left()+btnBar->width()+2);
   seqPanel_->add(seqList_);
   
 
@@ -199,7 +201,7 @@ void SequencerBar::updateSequencer()
   //cc->SelItemRange(false,0,cc->GetCount()-1);
   for (int i=0; i<MAX_SONG_POSITIONS;i++)
   {
-//     if ( Global::pSong()->playOrderSel[i]) cc->SetSel(i,true);
+      if ( Global::pSong()->playOrderSel[i]) seqList_->setIndex(i);
   }
 
 }
@@ -256,26 +258,11 @@ void SequencerBar::onSeqNew( NButtonEvent * ev )
       updatePlayOrder(true);
       updateSequencer();
       seqList_->repaint();
-   //  m_wndView.Repaint(DMPattern);
+      patternView_->repaint();
    }
 //   m_wndView.SetFocus();
 }
 
-void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
-{
-  if (patternView_!=0) {
-    int maxitems = seqList()->itemCount();
-    int const ep = seqList()->selIndex();
-
-    memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-
-    if((ep!=patternView_->editPosition()))// && ( cc->GetSelCount() == 1))
-    {
-      patternView_->setEditPosition(ep);
-      patternView_->repaint();
-    }
-  }
-}
 
 
 void SequencerBar::updatePlayOrder(bool mode)
@@ -337,17 +324,60 @@ void SequencerBar::updatePlayOrder(bool mode)
     const int le=Global::pSong()->playOrder[ls];
 //    pls->DeleteString(ls);
     sprintf(buffer,"%.2X: %.2X",ls,le);
- //   pls->InsertString(ls,buffer);
+    seqList_->insert(new NItem(buffer),ls);
     // Update sequencer selection   
   //  pls->SelItemRange(false,0,pls->GetCount()-1);
-  //  pls->SetSel(ls,true);
+    seqList_->setIndex(ls);
     memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
     Global::pSong()->playOrderSel[ls] = true;
   } else {
 //    pls->SelItemRange(false,0,pls->GetCount()-1);
     for (int i=0;i<MAX_SONG_POSITIONS;i++ )
     {
-//      if (Global::pSong()->playOrderSel[i]) pls->SetSel(i,true);
+        if (Global::pSong()->playOrderSel[i]) {
+          seqList_->setIndex(i);//pls->SetSel(i,true);
+        }
     }
   }
+}
+
+void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
+{
+  int maxitems= seqList_->itemCount();
+
+  int const ep=seqList_->selIndex();
+
+  int const cpid=Global::pSong()->playOrder[patternView_->editPosition()];
+
+  // clear selection to 0
+
+  memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+
+  // set new selection from listbox selection of the SequencerList
+  std::vector<int> sel = seqList_->selIndexList();
+
+  for (std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++) {
+    int c = *it;
+    Global::pSong()->playOrderSel[c]=1;
+  }
+
+  if((ep!=patternView_->editPosition())) {
+      if ((Global::pPlayer()->_playing) && (Global::pConfig()->_followSong)) {
+         bool b = Global::pPlayer()->_playBlock;
+         Global::pPlayer()->Start(ep,0);
+         Global::pPlayer()->_playBlock = b;
+      }
+      patternView_->setEditPosition(ep);
+      patternView_->setPrevEditPosition(ep);
+      updatePlayOrder(false);
+
+      if(cpid!=Global::pSong()->playOrder[ep]) {
+        patternView_->repaint();
+        if (Global::pPlayer()->_playing) {
+          //patternViewm_wndView.Repaint(DMPlayback); ??
+        }
+      }
+  }
+  //StatusBarIdle();
+  //m_wndView.SetFocus();
 }
