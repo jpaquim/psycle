@@ -24,6 +24,7 @@
 #include "nitem.h"
 #include "player.h"
 #include "defaultbitmaps.h"
+#include "greetdlg.h"
 
 MainWindow::MainWindow()
  : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)
@@ -36,6 +37,8 @@ MainWindow::MainWindow()
   initBars();
   initViews();
   initSignals();
+
+  greetDlg =  new GreetDlg();
 }
 
 
@@ -395,6 +398,7 @@ void MainWindow::initToolBar( )
 void MainWindow::initSignals( )
 {
   fileMenu_->itemClicked.connect(this, &MainWindow::onFileMenuItemClicked);
+  helpMenu_->itemClicked.connect(this, &MainWindow::onHelpMenuItemClicked);
   viewMenu_->itemClicked.connect(this, &MainWindow::onViewMenuItemClicked);
   childView_->newSongLoaded.connect(sequencerBar_,&SequencerBar::updateSequencer);
   barPlayFromStartBtn_->click.connect(this,&MainWindow::onBarPlayFromStart);
@@ -601,5 +605,17 @@ void MainWindow::appNew( )
   pane()->repaint();
 
 }
-  //cb->SetCurSel(selected);
 
+
+void MainWindow::onGreeting( NButtonEvent * ev )
+{
+  greetDlg->setVisible(true);
+}
+
+void MainWindow::onHelpMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
+{
+  if (itemEv->text()=="Greetings") {
+    greetDlg->setVisible(true);
+  }
+
+}
