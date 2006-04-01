@@ -180,7 +180,7 @@ string NSystem::getFontPattern( const NFont & font )
     if (count==0) {
       // nothing found 
        // try get a non-scalable font
-       char sz[20]; sprintf(sz,"%d\0",font.size());
+       char sz[20]; sprintf(sz,"%d",font.size());
        string xfntname = "-*-"+std::string(font.name())+"-"+"*"+"-"+"*"+"-*-*-"+string(sz) +"-*-*-*-*-*-*-*";
        char** myFonts = getFontList(dpy(),xfntname.c_str(),&count); 
        if (count==0) {

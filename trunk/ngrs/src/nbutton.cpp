@@ -92,7 +92,7 @@ void NButton::onMouseExit( )
 {
   if (!down()) {
      if (flat_) {
-       setSkin(btnFlat_);
+        setSkin(btnFlat_);
      } else setSkin(btnUp_);
   }
 

@@ -50,7 +50,8 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  testSpinEdit();
+  toolBarTest();
+ // testSpinEdit();
  // testBorderLayout();
  // testFrameBorder();
     //testLine();
@@ -499,6 +500,46 @@ void NTestWindow::testSpinEdit( )
   NSpinEdit* edit = new NSpinEdit();
     edit->setPosition(10,10,200,20);
   pane()->add(edit);
+}
+
+void NTestWindow::toolBarTest( )
+{
+
+  std::string iconPath = "~/xpsycle/icons/";
+
+  /*NPanel* toolBarPanel_ = new NPanel();
+  NFlowLayout* fl = new NFlowLayout(nAlLeft,0,0);
+    toolBarPanel_->setLayout(fl);
+    toolBarPanel_->setWidth(500);
+    toolBarPanel_->setAlign(nAlTop);*/
+
+  NToolBar* toolBar1_ = new NToolBar();
+  pane()->add(toolBar1_,nAlTop); //toolBar1_->add(lb);
+
+    NButton* lb = new NButton("Hallo");
+    std::cout << "this" << lb->preferredHeight() << std::endl;
+    toolBar1_->add(lb);
+    std::cout << "after" << lb->preferredHeight() << std::endl; 
+
+    std::cout << toolBar1_->preferredHeight() << std::endl;
+    std::cout << "y" << lb->preferredHeight() << std::endl;
+   /* NImage* img;
+    img = new NImage();
+    img->loadFromFile(iconPath+ "new.xpm");
+    toolBar1_->add(new NButton(img));
+
+    img = new NImage();
+    img->loadFromFile(iconPath+ "new.xpm");
+    toolBar1_->add(new NButton(img));
+
+    img = new NImage();
+    img->loadFromFile(iconPath+ "new.xpm");
+    toolBar1_->add(new NButton(img));*/
+   //toolBarPanel_->add(toolBar1_);
+   //toolBar1_->resize();
+  
+  //pane()->add(toolBarPanel_);
+  pane()->resize();
 }
 
 

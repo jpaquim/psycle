@@ -25,7 +25,7 @@
 NToolBar::NToolBar()
  : NTogglePanel()
 {
-  fl = new NFlowLayout(nAlLeft,5,2);
+  fl = new NFlowLayout(nAlLeft,3,2);
   bv = new NBevelBorder();
   setBorder(bv);
   setLayout(fl);
@@ -59,7 +59,6 @@ void NToolBar::add( NRuntime * component )
 
 void NToolBar::add( NButton * button )
 {
-  button->setSpacing(2,2,2,2);
   NPanel::add(button);
 }
 
