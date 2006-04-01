@@ -615,9 +615,6 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
       skin->gradEndColor.setRGB(200,200,200);
   } else
   if (identifier == "mbtnover") {
-    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(0,0,0));
-
     skin->gradStartColor.setRGB(130,130,130);
     skin->gradMidColor.setRGB(150,150,150);
     skin->gradEndColor.setRGB(140,140,140);
