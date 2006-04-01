@@ -117,6 +117,7 @@ void SequencerBar::init( )
     seqnew_->clicked.connect(this,&SequencerBar::onSeqNew);
     seqduplicate_->setFlat(false);
     seqins_->setFlat(false);
+    seqins_->clicked.connect(this,&SequencerBar::onSeqIns);
     seqcut_->setFlat(false);
     seqcopy_->setFlat(false);
     seqpaste_->setFlat(false);
@@ -437,6 +438,27 @@ void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
       }
   }
   //StatusBarIdle();
+  //m_wndView.SetFocus();
+}
+
+void SequencerBar::onSeqIns( NButtonEvent * ev )
+{
+  if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
+     //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+     ++Global::pSong()->playLength;
+
+     patternView_->setEditPosition(patternView_->editPosition()+1);
+     int const pop=patternView_->editPosition();
+     for(int c=(Global::pSong()->playLength-1);c>=pop;c--) {
+        Global::pSong()->playOrder[c]=Global::pSong()->playOrder[c-1];
+     }
+
+     updatePlayOrder(true);
+     updateSequencer();
+     seqList_->repaint();
+
+     patternView_->repaint();
+  }
   //m_wndView.SetFocus();
 }
 

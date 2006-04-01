@@ -90,6 +90,7 @@ private:
    void onIncLong(NButtonEvent* ev);
    void onDecLong(NButtonEvent* ev);
    void onSeqNew(NButtonEvent* ev);
+   void onSeqIns(NButtonEvent* ev);
 
    void updatePlayOrder(bool mode);
 
