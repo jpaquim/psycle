@@ -108,6 +108,7 @@ void SequencerBar::init( )
     incshort_->setFlat(false);
     incshort_->clicked.connect(this,&SequencerBar::onIncShort);
     decshort_->setFlat(false);
+    decshort_->clicked.connect(this,&SequencerBar::onDecShort);
     inclong_->setFlat(false);
     declong_->setFlat(false);
     seqnew_->setFlat(false);
@@ -230,6 +231,24 @@ void SequencerBar::onIncShort( NButtonEvent * ev )
   patternView_->repaint();
   //m_wndView.SetFocus();*/
 }
+
+void SequencerBar::onDecShort( NButtonEvent * ev )
+{
+  std::vector<int> sel = seqList_->selIndexList();
+
+  for (std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++) {
+    int i = *it;
+    if(Global::pSong()->playOrder[i]>0) {
+      Global::pSong()->playOrder[i]--;
+    }
+  }
+
+  updatePlayOrder(false);
+  updateSequencer();
+  seqList_->repaint();
+  patternView_->repaint();
+}
+
 
 void SequencerBar::onSeqNew( NButtonEvent * ev )
 {
@@ -382,3 +401,5 @@ void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
   //StatusBarIdle();
   //m_wndView.SetFocus();
 }
+
+
