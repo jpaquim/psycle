@@ -91,6 +91,10 @@ private:
    void onDecLong(NButtonEvent* ev);
    void onSeqNew(NButtonEvent* ev);
    void onSeqIns(NButtonEvent* ev);
+   void onSeqCopy(NButtonEvent* ev);
+   void onSeqPaste(NButtonEvent* ev);
+
+   std::vector<int> seqCopyBuffer;
 
    void updatePlayOrder(bool mode);
 

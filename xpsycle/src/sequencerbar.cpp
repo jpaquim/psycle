@@ -65,7 +65,7 @@ void SequencerBar::init( )
   NApp::config()->setSkin(&skin_,"seqbar");
 
   seqPanel_ = new NPanel();
-  seqPanel_->setWidth(90);
+  seqPanel_->setWidth(100);
   add(seqPanel_);
 
   NPanel* btnBar = new NPanel();
@@ -96,12 +96,12 @@ void SequencerBar::init( )
     btnBar->add( declong_     = new NButton( img));
 
     btnBar->add( seqnew_       = new NButton("New"));
-    btnBar->add( seqduplicate_ = new NButton("Close"));
+    btnBar->add( seqduplicate_ = new NButton("Clone"));
     btnBar->add( seqins_       = new NButton("Ins"));
-    btnBar->add( seqcut_       = new NButton("Del"));
-    btnBar->add( seqcopy_      = new NButton("Cut"));
-    btnBar->add( seqpaste_     = new NButton("Copy"));
-    btnBar->add( seqdelete_    = new NButton("Paste"));
+    btnBar->add( seqcut_       = new NButton("Cut"));
+    btnBar->add( seqcopy_      = new NButton("Copy"));
+    btnBar->add( seqpaste_     = new NButton("Paste"));
+    btnBar->add( seqdelete_    = new NButton("Delete"));
     btnBar->add( seqclr_       = new NButton("Clear"));
     btnBar->add( seqsrt_       = new NButton("Sort"));
 
@@ -120,14 +120,16 @@ void SequencerBar::init( )
     seqins_->clicked.connect(this,&SequencerBar::onSeqIns);
     seqcut_->setFlat(false);
     seqcopy_->setFlat(false);
+    seqcopy_->clicked.connect(this,&SequencerBar::onSeqCopy);
     seqpaste_->setFlat(false);
+    seqpaste_->clicked.connect(this,&SequencerBar::onSeqPaste);
     seqdelete_->setFlat(false);
     seqclr_->setFlat(false);
     seqsrt_->setFlat(false);
 
     btnBar->setLeft(50);
     btnBar->setHeight(btnBar->preferredHeight());
-    btnBar->setWidth(50);
+    btnBar->setWidth(btnBar->preferredWidth());
   seqPanel_->add(btnBar);
   seqPanel_->setHeight(btnBar->preferredHeight());
 
@@ -460,6 +462,47 @@ void SequencerBar::onSeqIns( NButtonEvent * ev )
      patternView_->repaint();
   }
   //m_wndView.SetFocus();
+}
+
+void SequencerBar::onSeqCopy( NButtonEvent * ev )
+{
+   seqCopyBuffer = seqList_->selIndexList();
+
+   std::sort( seqCopyBuffer.begin(), seqCopyBuffer.end());
+
+   for (std::vector<int>::iterator it = seqCopyBuffer.begin(); it < seqCopyBuffer.end(); it++)
+     *it = Global::pSong()->playOrder[*it];
+
+}
+
+void SequencerBar::onSeqPaste( NButtonEvent * ev )
+{
+  int pastedcount = 0;
+  for (std::vector<int>::iterator it = seqCopyBuffer.begin(); it < seqCopyBuffer.end(); it++)
+  {
+    if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
+      ++Global::pSong()->playLength;
+
+      patternView_->setEditPosition(patternView_->editPosition()+1);
+      pastedcount++;
+      int c;
+      for(c = Global::pSong()->playLength - 1 ; c >= patternView_->editPosition() ; --c) {
+        Global::pSong()->playOrder[c] = Global::pSong()->playOrder[c-1];
+      }
+      Global::pSong()->playOrder[c+1] = *it;
+    }
+  }
+
+  if (pastedcount>0) {
+    updatePlayOrder(true);
+    for(int i(patternView_->editPosition() + 1 - pastedcount) ; i < patternView_->editPosition() ; ++i)
+    {
+       Global::pSong()->playOrderSel[i] = true;
+    }
+    updateSequencer();
+    seqList_->repaint();
+    patternView_->repaint();
+  }
 }
 
 
