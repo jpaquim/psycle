@@ -21,7 +21,7 @@
 #include "nbutton.h"
 
 /* XPM */
-const char * arrow_dec_xpm[] = {
+const char * arrow_inc_xpm[] = {
 "12 6 2 1",
 " 	c None",
 ".	c black",
@@ -33,7 +33,7 @@ const char * arrow_dec_xpm[] = {
 "            "};
 
 /* XPM */
-const char * arrow_inc_xpm[] = {
+const char * arrow_dec_xpm[] = {
 "12 6 2 1",
 " 	c None",
 ".	c black",
@@ -78,8 +78,8 @@ void NSpinButton::resize( )
   int cw = clientWidth();
   int ch = clientHeight();
 
-  decBtn_->setPosition(0,0,cw,ch/2);
-  incBtn_->setPosition(0,ch/2,cw,ch/2);
+  decBtn_->setPosition(0,ch/2,cw,ch/2);
+  incBtn_->setPosition(0,0,cw,ch/2);
 }
 
 int NSpinButton::preferredWidth( ) const
