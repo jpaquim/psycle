@@ -26,7 +26,7 @@
 #include "defaultbitmaps.h"
 
 MainWindow::MainWindow()
- : NWindow()
+ : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)
 {
   setPosition(0,0,1024,768);
 
@@ -41,6 +41,8 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+  delete toolBarPanelLayout;
+  delete statusBarPanelLayout;
 }
 
 void MainWindow::initMenu( )
@@ -102,8 +104,8 @@ void MainWindow::initViews( )
 void MainWindow::initBars( )
 {
   toolBarPanel_ = new NPanel();
-  NFlowLayout* fl = new NFlowLayout(nAlLeft,0,2);
-  toolBarPanel_->setLayout(fl);
+  toolBarPanelLayout = new NFlowLayout(nAlLeft,0,2);
+  toolBarPanel_->setLayout(toolBarPanelLayout);
   toolBarPanel_->setWidth(500);
   toolBarPanel_->setAlign(nAlTop);
   pane()->add(toolBarPanel_);
@@ -111,7 +113,8 @@ void MainWindow::initBars( )
   initToolBar();
 
   statusBar_ = new NPanel();
-    statusBar_->setLayout(new NFlowLayout(nAlLeft));
+    statusBarPanelLayout = new NFlowLayout(nAlLeft);
+    statusBar_->setLayout(statusBarPanelLayout);
     statusBar_->setAlign(nAlBottom);
       progressBar_ = new NProgressBar();
       progressBar_->setValue(0);
