@@ -40,6 +40,7 @@
 
 
 class GreetDlg;
+class AboutDlg;
 
 /**
 @author Stefan
@@ -86,7 +87,7 @@ private:
     NFlowLayout* statusBarPanelLayout;
 
     GreetDlg* greetDlg;
-
+    AboutDlg* aboutDlg;
 
     void initMenu();
     void initDialogs();
@@ -108,7 +109,6 @@ private:
     void onSongLoadProgress(int chunkCount, int max, const std::string & header);
     void onOctaveChange(NItemEvent* ev);
     void onTrackChange(NItemEvent* ev);
-    void onGreeting(NButtonEvent* ev);
     void onNewMachine(NButtonEvent* ev);
 
     void updateComboGen();

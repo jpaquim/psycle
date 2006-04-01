@@ -25,6 +25,7 @@
 #include "player.h"
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
+#include "aboutdlg.h"
 
 MainWindow::MainWindow()
  : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)
@@ -39,6 +40,9 @@ MainWindow::MainWindow()
   initSignals();
 
   greetDlg =  new GreetDlg();
+    add(greetDlg);
+  aboutDlg =  new AboutDlg();
+    add(aboutDlg);
 }
 
 
@@ -607,15 +611,13 @@ void MainWindow::appNew( )
 }
 
 
-void MainWindow::onGreeting( NButtonEvent * ev )
-{
-  greetDlg->setVisible(true);
-}
-
 void MainWindow::onHelpMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
   if (itemEv->text()=="Greetings") {
     greetDlg->setVisible(true);
+  } else 
+  if (itemEv->text()=="About") {
+    aboutDlg->setVisible(true);
   }
-
 }
+
