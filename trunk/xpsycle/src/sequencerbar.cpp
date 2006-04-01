@@ -116,6 +116,7 @@ void SequencerBar::init( )
     seqnew_->setFlat(false);
     seqnew_->clicked.connect(this,&SequencerBar::onSeqNew);
     seqduplicate_->setFlat(false);
+    seqduplicate_->clicked.connect(this,&SequencerBar::onSeqClone);
     seqins_->setFlat(false);
     seqins_->clicked.connect(this,&SequencerBar::onSeqIns);
     seqcut_->setFlat(false);
@@ -622,6 +623,55 @@ void SequencerBar::onSeqCut( NButtonEvent * ev )
 {
   onSeqCopy(0);
   onSeqDelete(0); // double repaint not really nice
+}
+
+void SequencerBar::onSeqClone( NButtonEvent * ev )
+{
+  std::vector<int> sel = seqList_->selIndexList();
+
+  if (sel.size() > 0) {
+    if ( Global::pSong()->playLength+sel.size() >= MAX_SONG_POSITIONS)
+    {
+      //MessageBox("Cannot clone the pattern(s). The maximum sequence length would be exceeded.","Clone Patterns");
+      return;
+    }
+
+    // Moves all patterns after the selection, to make space.
+    int maxSel = sel.back();
+    for (int i = Global::pSong()->playLength-1 ; i >= maxSel; --i) {
+      Global::pSong()->playOrder[i+sel.size()]= Global::pSong()->playOrder[i];
+    }
+
+    int i = 0; int counter=0;
+    for (std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++, i++) {
+      int newpat = Global::pSong()->GetBlankPatternUnused();
+      if (newpat < MAX_PATTERNS-1) {
+        patternView_->setEditPosition(*it);
+
+        //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+        int oldpat = Global::pSong()->playOrder[*it];
+        // now we copy the data
+        // we don't really need to be able to undo this, since it's a new pattern anyway.
+        //              m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+        Global::pSong()->AllocNewPattern(newpat,Global::pSong()->patternName[oldpat],Global::pSong()->patternLines[oldpat],false);
+
+        memcpy(Global::pSong()->_ppattern(newpat),Global::pSong()->_ppattern(oldpat),MULTIPLY2);
+
+        ++Global::pSong()->playLength;
+        Global::pSong()->playOrder[sel.back()+i+1]=newpat;
+        counter++;
+      } else {
+       Global::pSong()->playOrder[sel.back()+i+1]=0;
+      }
+    }
+    if(counter > 0)
+    {
+      updatePlayOrder(true);
+      updateSequencer();
+      seqList_->repaint();
+      patternView_->repaint();
+    }
+  }
 }
 
 
