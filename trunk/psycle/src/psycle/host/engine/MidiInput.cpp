@@ -5,7 +5,7 @@
 #include PACKAGENERIC
 #include "MidiInput.hpp"
 #include "song.hpp"
-#include "player.hpp>
+#include "player.hpp"
 #include "plugin.hpp"
 #include "VSTHost.hpp"
 #include "helpers.hpp"
