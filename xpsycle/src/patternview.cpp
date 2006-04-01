@@ -31,6 +31,7 @@
 #include "player.h"
 #include "machine.h"
 #include "nframeborder.h"
+#include "defaultbitmaps.h"
 
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
@@ -330,7 +331,11 @@ int PatternView::editOctave( )
 /// The Header Panel Class
 PatternView::Header::Header( PatternView * pPatternView ) : pView(pPatternView) , NPanel()
 {
-  bitmap.loadFromFile(Global::pConfig()->iconPath+"pattern_header_skin.xpm");
+  if (Global::pConfig()->iconPath=="") 
+    bitmap = Global::pBitmaps()->pattern_header_skin();
+  else
+    bitmap.loadFromFile(Global::pConfig()->iconPath+ "pattern_header_skin.xpm");
+
   setSkin();
   setHeight(bgCoords.height());
   skinColWidth_ = bgCoords.width();
