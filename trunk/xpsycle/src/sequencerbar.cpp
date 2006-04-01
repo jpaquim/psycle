@@ -128,6 +128,7 @@ void SequencerBar::init( )
     seqdelete_->setFlat(false);
     seqdelete_->clicked.connect(this,&SequencerBar::onSeqDelete);
     seqclr_->setFlat(false);
+    seqclr_->clicked.connect(this,&SequencerBar::onSeqClear);
     seqsrt_->setFlat(false);
     seqsrt_->clicked.connect(this,&SequencerBar::onSeqSort);
 
@@ -672,6 +673,32 @@ void SequencerBar::onSeqClone( NButtonEvent * ev )
       patternView_->repaint();
     }
   }
+}
+
+void SequencerBar::onSeqClear( NButtonEvent * ev )
+{
+   // if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
+  {
+     //m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+  // clear sequence
+   for(int c=0;c<MAX_SONG_POSITIONS;c++) {
+     Global::pSong()->playOrder[c]=0;
+   }
+   // clear pattern data
+   Global::pSong()->DeleteAllPatterns();
+   // init a pattern for #0
+   Global::pSong()->_ppattern(0);
+
+   Global::pSong()->playLength=1;
+
+   patternView_->setEditPosition(0);
+   updatePlayOrder(true);
+   updateSequencer();
+
+   seqList_->repaint();
+   patternView_->repaint();
+   //m_wndView.SetFocus();
+ }
 }
 
 
