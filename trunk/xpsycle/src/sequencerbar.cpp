@@ -215,18 +215,19 @@ void SequencerBar::onIncShort( NButtonEvent * ev )
 {
   //m_wndView.AddUndoSequence(pSong()->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 
-  int const num = seqList_->selIndex();
-  std::vector<int> indexes = seqList_->selIndexList();
+  std::vector<int> sel = seqList_->selIndexList();
 
-  for (int i = 0; i < num; i++) {
-    if(Global::pSong()->playOrder[indexes[i]]<(MAX_PATTERNS-1)) {
-      Global::pSong()->playOrder[indexes[i]]++;
+  for (std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++) {
+    int i = *it;
+    if(Global::pSong()->playOrder[i]<(MAX_PATTERNS-1)) {
+      Global::pSong()->playOrder[i]++;
     }
   }
+
+  updatePlayOrder(false);
   updateSequencer();
   seqList_->repaint();
-  //UpdatePlayOrder(false);
-  //m_wndView.Repaint(DMPattern);
+  patternView_->repaint();
   //m_wndView.SetFocus();*/
 }
 
