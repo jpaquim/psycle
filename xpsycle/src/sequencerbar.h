@@ -86,6 +86,7 @@ private:
    NCheckBox* movecirsorpaste_;
 
    void onIncShort(NButtonEvent* ev);
+   void onDecShort(NButtonEvent* ev);
    void onSeqNew(NButtonEvent* ev);
 
    void updatePlayOrder(bool mode);
