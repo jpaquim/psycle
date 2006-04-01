@@ -50,12 +50,13 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  toolBarTest();
+ 
+  //toolBarTest();
  // testSpinEdit();
  // testBorderLayout();
  // testFrameBorder();
     //testLine();
-    //testMenu();
+    testMenu();
   
   /*NPanel* pnl = new NPanel();
     pnl->setTransparent(false);

@@ -130,6 +130,7 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
       if (skin != 0) {
          skin->bgColor = attrsToColor(attrs);
          skin->useParentBgColor = false;
+         skin->transparent = false;
       }
     } else
     if (tagName == "fgcolor") {
@@ -537,7 +538,7 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->gradientPercent = xmlSkin->gradientPercent;
     skin->translucent = xmlSkin->translucent;
     skin->transColor  = xmlSkin->transColor;
-    skin->transparent = false;
+    skin->transparent = xmlSkin->transparent;
     skin->spacing = xmlSkin->spacing;
     skin->bitmap = xmlSkin->bitmap;
     skin->bitmapBgStyle = xmlSkin->bitmapBgStyle;
