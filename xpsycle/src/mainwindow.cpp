@@ -102,7 +102,7 @@ void MainWindow::initViews( )
 void MainWindow::initBars( )
 {
   toolBarPanel_ = new NPanel();
-  NFlowLayout* fl = new NFlowLayout(nAlLeft,0,0);
+  NFlowLayout* fl = new NFlowLayout(nAlLeft,0,2);
   toolBarPanel_->setLayout(fl);
   toolBarPanel_->setWidth(500);
   toolBarPanel_->setAlign(nAlTop);
