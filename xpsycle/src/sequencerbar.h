@@ -97,6 +97,7 @@ private:
    void onSeqDelete(NButtonEvent* ev);
    void onSeqCut(NButtonEvent* ev);
    void onSeqClone(NButtonEvent* ev);
+   void onSeqClear(NButtonEvent* ev);
 
    std::vector<int> seqCopyBuffer;
 
