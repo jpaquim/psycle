@@ -457,9 +457,9 @@
 						<a href='#build'>Building from a GNU system for the same GNU system</a>.
 						<br/>
 						<br/>
-						<a href='./images/eclipse.png'/>
+						<!--a href='./images/eclipse.png'/>
 						<br/>
-						<br/>
+						<br/-->
 						<!--object
 							classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 							codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"
@@ -485,7 +485,7 @@
 						</object-->
 					</part>
 					<part caption='Cross-compiling from another GNU system'>
-						From GNU systems (even cygwin), you can use the mingw32 tool-chain package to cross-compile
+						From GNU systems (even cygwin, uwin, sfu), you can use the mingw32 tool-chain package to cross-compile
 						and produce binaries relying on msvc's C runtime lib (msvc<b>r</b>71.dll).
 						Note that the c++ runtime needs to be distributed (either statically compiled or as a shared lib)
 						with the compiled binaries, as mingw doesn't use msvc's c++ runtime lib (msvc<b>p</b>*.dll).
