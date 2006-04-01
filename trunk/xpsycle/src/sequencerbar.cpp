@@ -22,10 +22,8 @@
 #include "song.h"
 #include "nlabel.h"
 #include "nitem.h"
-#include "ngridlayout.h"
 #include "configuration.h"
 #include "patternview.h"
-#include "nframeborder.h"
 #include "defaultbitmaps.h"
 
 #include <napp.h>
@@ -45,17 +43,20 @@ SequencerBar::SequencerBar( PatternView * patternView )
 
 SequencerBar::~SequencerBar()
 {
+  delete frBorder;
+  delete listLayout;
+  delete gridLayout;
 }
 
 void SequencerBar::init( )
 {
-  NFrameBorder* br = new NFrameBorder();
-    br->setOval();
-    br->setLineCount(2,4,4);
-    
-  setBorder(br);
+  frBorder = new NFrameBorder();
+    frBorder->setOval();
+    frBorder->setLineCount(2,4,4);
+  setBorder(frBorder);
 
-  setLayout(new NListLayout());
+  listLayout = new NListLayout();
+  setLayout(listLayout);
   setWidth(90);
 
   patternView_ = 0;
@@ -67,10 +68,10 @@ void SequencerBar::init( )
   add(seqPanel_);
 
   NPanel* btnBar = new NPanel();
-    NGridLayout* gr = new NGridLayout();
-    gr->setVgap(5);
-    gr->setHgap(5);
-    btnBar->setLayout(gr);
+    gridLayout = new NGridLayout();
+    gridLayout->setVgap(5);
+    gridLayout->setHgap(5);
+    btnBar->setLayout(gridLayout);
 
     NImage* img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus()); else

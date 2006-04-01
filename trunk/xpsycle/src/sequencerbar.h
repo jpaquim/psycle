@@ -26,6 +26,8 @@
 #include <nlistbox.h>
 #include <nalignlayout.h>
 #include <nflowlayout.h>
+#include <nframeborder.h>
+#include <ngridlayout.h>
 #include <nimage.h>
 #include <ngroupbox.h>
 
@@ -88,6 +90,9 @@ private:
 
    void updatePlayOrder(bool mode);
 
+   NFrameBorder* frBorder;
+   NLayout* listLayout;
+   NGridLayout* gridLayout;
 };
 
 #endif
