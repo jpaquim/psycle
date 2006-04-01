@@ -126,6 +126,7 @@ void SequencerBar::init( )
     seqdelete_->setFlat(false);
     seqclr_->setFlat(false);
     seqsrt_->setFlat(false);
+    seqsrt_->clicked.connect(this,&SequencerBar::onSeqSort);
 
     btnBar->setLeft(50);
     btnBar->setHeight(btnBar->preferredHeight());
@@ -503,6 +504,90 @@ void SequencerBar::onSeqPaste( NButtonEvent * ev )
     seqList_->repaint();
     patternView_->repaint();
   }
+}
+
+void SequencerBar::onSeqSort( NButtonEvent * ev )
+{
+   //m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+   unsigned char oldtonew[MAX_PATTERNS];
+   unsigned char newtoold[MAX_PATTERNS];
+   memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
+   memset(newtoold,255,MAX_PATTERNS*sizeof(char));
+
+   // Part one, Read patterns from sequence and assign them a new ordered number.
+   unsigned char freep=0;
+   for ( int i=0 ; i<Global::pSong()->playLength ; i++ ) {
+      const char cp= Global::pSong()->playOrder[i];
+      if ( oldtonew[cp] == 255 ) // else, we have processed it already
+      {
+        oldtonew[cp]=freep;
+        newtoold[freep]=cp;
+        freep++;
+      }
+   }
+   // Part one and a half. End filling the order numbers.
+   for(int i(0) ; i < MAX_PATTERNS ; ++i)
+   {
+       if ( oldtonew[i] == 255 )
+       {
+         oldtonew[i] = freep;
+         newtoold[freep] = i;
+         freep++;
+       }
+   }
+   // Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
+   // When we have to put the first read one back, do it and find next candidate.
+
+   int patl; // first one is initial one, next one is temp one
+   char patn[32]; // ""
+   unsigned char * pData; // ""
+
+   int idx=0;
+   int idx2=0;
+
+   for(int i(0) ; i < MAX_PATTERNS ; ++i) {
+     if ( newtoold[i] != i ) // check if this place belongs to another pattern
+     {
+        pData = Global::pSong()->ppPatternData[i];
+        memcpy(&patl,&Global::pSong()->patternLines[i],sizeof(int));
+        memcpy(patn,&Global::pSong()->patternName[i],sizeof(char)*32);
+
+        idx = i;
+        while ( newtoold[idx] != i ) // Start moving patterns while it is not the stored one.
+        {
+           idx2 = newtoold[idx]; // get pattern that goes here and move.
+
+           Global::pSong()->ppPatternData[idx] = Global::pSong()->ppPatternData[idx2];
+           memcpy(&Global::pSong()->patternLines[idx],&Global::pSong()->patternLines[idx2],sizeof(int));
+           memcpy(&Global::pSong()->patternName[idx],&Global::pSong()->patternName[idx2],sizeof(char)*32);
+
+           newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+           idx = idx2;
+        }
+
+        // Put pattern back.
+
+        Global::pSong()->ppPatternData[idx] = pData;
+        memcpy(&Global::pSong()->patternLines[idx],&patl,sizeof(int));
+        memcpy(Global::pSong()->patternName[idx],patn,sizeof(char)*32);
+
+        newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+      }
+    }
+    // Part three. Update the sequence
+
+    for(int i(0) ; i < Global::pSong()->playLength ; ++i)
+    {
+       Global::pSong()->playOrder[i]=oldtonew[Global::pSong()->playOrder[i]];
+    }
+
+    // Part four. All the needed things.
+
+     seqCopyBuffer.clear();
+     updateSequencer();
+     seqList_->repaint();
+     patternView_->repaint();
+    //m_wndView.SetFocus();
 }
 
 
