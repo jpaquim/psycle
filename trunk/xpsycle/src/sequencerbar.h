@@ -93,6 +93,7 @@ private:
    void onSeqIns(NButtonEvent* ev);
    void onSeqCopy(NButtonEvent* ev);
    void onSeqPaste(NButtonEvent* ev);
+   void onSeqSort(NButtonEvent* ev);
 
    std::vector<int> seqCopyBuffer;
 
