@@ -87,6 +87,8 @@ private:
 
    void onIncShort(NButtonEvent* ev);
    void onDecShort(NButtonEvent* ev);
+   void onIncLong(NButtonEvent* ev);
+   void onDecLong(NButtonEvent* ev);
    void onSeqNew(NButtonEvent* ev);
 
    void updatePlayOrder(bool mode);

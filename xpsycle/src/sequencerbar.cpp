@@ -110,7 +110,9 @@ void SequencerBar::init( )
     decshort_->setFlat(false);
     decshort_->clicked.connect(this,&SequencerBar::onDecShort);
     inclong_->setFlat(false);
+    inclong_->clicked.connect(this,&SequencerBar::onIncLong);
     declong_->setFlat(false);
+    declong_->clicked.connect(this,&SequencerBar::onDecLong);
     seqnew_->setFlat(false);
     seqnew_->clicked.connect(this,&SequencerBar::onSeqNew);
     seqduplicate_->setFlat(false);
@@ -231,6 +233,42 @@ void SequencerBar::onIncShort( NButtonEvent * ev )
   patternView_->repaint();
   //m_wndView.SetFocus();*/
 }
+
+void SequencerBar::onIncLong( NButtonEvent * ev )
+{
+  std::vector<int> sel = seqList_->selIndexList();
+
+  for (std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++) {
+    int i = *it;
+    if(Global::pSong()->playOrder[i]<(MAX_PATTERNS-16)) {
+      Global::pSong()->playOrder[i]+=16;
+    }
+  }
+
+  updatePlayOrder(false);
+  updateSequencer();
+  seqList_->repaint();
+  patternView_->repaint();
+}
+
+void SequencerBar::onDecLong( NButtonEvent * ev )
+{
+  std::vector<int> sel = seqList_->selIndexList();
+
+  for (std::vector<int>::iterator it = sel.begin(); it < sel.end(); it++) {
+    int i = *it;
+    if(Global::pSong()->playOrder[i]>=16) {
+      Global::pSong()->playOrder[i]-=16;
+    }
+  }
+
+  updatePlayOrder(false);
+  updateSequencer();
+  seqList_->repaint();
+  patternView_->repaint();
+}
+
+
 
 void SequencerBar::onDecShort( NButtonEvent * ev )
 {
@@ -401,5 +439,7 @@ void SequencerBar::onSelChangeSeqList( NItemEvent * sender )
   //StatusBarIdle();
   //m_wndView.SetFocus();
 }
+
+
 
 
