@@ -158,14 +158,17 @@ void SequencerBar::init( )
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
-    lenPanel->add( declong_     = new NButton( img,40,10));
-
-    lenPanel->add( new NLabel("00"));
+    lenPanel->add( declen_     = new NButton( img,40,10));
+    declen_->clicked.connect(this,&SequencerBar::onDecLen);
+    char buffer[30];
+    sprintf(buffer, "%02d:%02d", (int)(Global::pSong()->playLength / 60), (int)(Global::pSong()->playLength % 60));
+    lenPanel->add( lenLabel_ = new NLabel(buffer));
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
-    lenPanel->add( declong_     = new NButton( img,40,10));
+    lenPanel->add( inclen_     = new NButton( img,40,10));
+    inclen_->clicked.connect(this,&SequencerBar::onIncLen);
    lenPanel->resize();
   add(lenPanel);
 
@@ -381,7 +384,8 @@ void SequencerBar::updatePlayOrder(bool mode)
   }
 
   sprintf(buffer, "%02d:%02d", (int)(songLength / 60), (int)(songLength) % 60);
-  //pLength->SetWindowText(buffer);
+  lenLabel_->setText(buffer);
+  lenLabel_->repaint();
 
   // Update sequencer line
 
@@ -701,6 +705,30 @@ void SequencerBar::onSeqClear( NButtonEvent * ev )
  }
 }
 
+void SequencerBar::onDecLen( NButtonEvent * ev )
+{
+  //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+  if(Global::pSong()->playLength>1) {
+     --Global::pSong()->playLength;
+     Global::pSong()->playOrder[Global::pSong()->playLength]=0;
+     updatePlayOrder(false);
+     updateSequencer();
+     seqList_->repaint();
+  }
+  //m_wndView.SetFocus();
+}
+
+void SequencerBar::onIncLen( NButtonEvent * ev )
+{
+  //m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+  if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
+     ++Global::pSong()->playLength;
+     updatePlayOrder(false);
+     updateSequencer();
+     seqList_->repaint();
+  }
+  //m_wndView.SetFocus();
+}
 
 
 
