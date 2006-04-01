@@ -39,6 +39,7 @@ public:
 
     void add(NCustomItem* item);
     void add(NCustomItem* item, bool align);
+    void insert(NCustomItem* item, int index, bool align = true);
 
     virtual void onItemSelected(NCustomItem * item);
     virtual void removeChilds();
