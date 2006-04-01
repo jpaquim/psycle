@@ -666,6 +666,7 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->useParentFont    = false;
   } else 
   if (identifier == "btndown") {
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
     skin->gradStartColor.setRGB(200,200,200);
     skin->gradMidColor.setRGB(210,210,210);
     skin->gradEndColor.setRGB(180,180,180);
@@ -675,6 +676,7 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->useParentFont    = false;
   } else
   if (identifier == "btnflat") {
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
     skin->transparent = true;
   } else
   if (identifier == "tabup") {
