@@ -292,24 +292,39 @@ void MainWindow::initToolBar( )
      img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->lessless()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "lessless.xpm");
-     psycleControlBar_->add(new NButton(img,20,20));
+
+     NButton* lesslessBmp = new NButton(img,20,20);
+       lesslessBmp->clicked.connect(this,&MainWindow::onBpmDecTen);
+     psycleControlBar_->add(lesslessBmp);
+
 
      img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
-     psycleControlBar_->add(new NButton(img,20,20));
-    psycleControlBar_->add(new NLabel("125"));
+     NButton* lessBmp = new NButton(img,20,20);
+     lessBmp->clicked.connect(this,&MainWindow::onBpmDecOne);
+     psycleControlBar_->add(lessBmp);
+
+     bpmLabel_ = new NLabel("125");
+     psycleControlBar_->add(bpmLabel_);
 
      img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
-     psycleControlBar_->add(new NButton(img,20,20));
+
+     NButton* moreBmp = new NButton(img,20,20);
+       moreBmp->clicked.connect(this,&MainWindow::onBpmIncOne);
+     psycleControlBar_->add(moreBmp);
 
 
      img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->moremore()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "moremore.xpm");
-     psycleControlBar_->add(new NButton(img,20,20));
+
+     NButton* moremoreBmp = new NButton(img,20,20);
+       moremoreBmp->clicked.connect(this,&MainWindow::onBpmAddTen);
+     psycleControlBar_->add(moremoreBmp);
+
 
     psycleControlBar_->add(new NLabel("Lines per beat"));
     img = new NImage();
@@ -621,3 +636,38 @@ void MainWindow::onHelpMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
   }
 }
 
+void MainWindow::onBpmIncOne(NButtonEvent* ev)  // OnBpmAddOne
+{
+  setAppSongBpm(1);
+}
+
+void MainWindow::onBpmAddTen(NButtonEvent* ev)
+{
+  setAppSongBpm(10);
+}
+
+void MainWindow::onBpmDecOne(NButtonEvent* ev)
+{
+  setAppSongBpm(-1);
+}
+
+void MainWindow::onBpmDecTen(NButtonEvent* ev)
+{
+  setAppSongBpm(-10);
+}
+
+void MainWindow::setAppSongBpm(int x)
+{
+   char buffer[16];
+   if ( x != 0 ) {
+     if (Global::pPlayer()->_playing )  {
+        Global::pSong()->BeatsPerMin(Global::pPlayer()->bpm+x);
+     } else Global::pSong()->BeatsPerMin(Global::pSong()->BeatsPerMin()+x);
+     Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(),Global::pSong()->LinesPerBeat());
+     sprintf(buffer,"%d",Global::pSong()->BeatsPerMin());
+   }
+   else sprintf(buffer,"%d",Global::pPlayer()->bpm);
+
+   bpmLabel_->setText(buffer);
+   bpmLabel_->repaint();
+}

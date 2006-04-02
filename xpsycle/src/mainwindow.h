@@ -82,6 +82,7 @@ private:
     NMenu* performanceMenu_;
     NMenu* helpMenu_;
 
+    NLabel* bpmLabel_;
 
     NFlowLayout* toolBarPanelLayout;
     NFlowLayout* statusBarPanelLayout;
@@ -110,6 +111,12 @@ private:
     void onOctaveChange(NItemEvent* ev);
     void onTrackChange(NItemEvent* ev);
     void onNewMachine(NButtonEvent* ev);
+
+    void setAppSongBpm(int x);
+    void onBpmIncOne(NButtonEvent* ev);
+    void onBpmAddTen(NButtonEvent* ev);
+    void onBpmDecOne(NButtonEvent* ev);
+    void onBpmDecTen(NButtonEvent* ev);
 
     void updateComboGen();
     void appNew();
