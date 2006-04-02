@@ -731,8 +731,10 @@ void NVisualComponent::onMoveEnd( const NMoveEvent & moveEvent )
 
 void NVisualComponent::insert( NVisualComponent * component, int index )
 {
-  NRuntime::insert(component,index);
-  visualComponents_.insert(visualComponents_.begin()+index,component);
+  if (index <= visualComponents_.size()) {
+    NRuntime::insert(component,index);
+    visualComponents_.insert(visualComponents_.begin()+index,component);
+  } else add(component);
 }
 
 void NVisualComponent::add( NVisualComponent * component, int align )
