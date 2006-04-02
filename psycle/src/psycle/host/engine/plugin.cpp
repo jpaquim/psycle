@@ -35,6 +35,7 @@ namespace psycle
 				, _psName("")
 			{
 				_macIndex = index;
+				_audiorange=32768.0f;
 				_type = MACH_PLUGIN;
 				_mode = MACHMODE_FX;
 				std::sprintf(_editName, "native plugin");
@@ -154,8 +155,19 @@ namespace psycle
 			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetInfo"); }
 			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
+
 			_isSynth = _pInfo->Flags & 3; //dw00t //this was an == instead of an &, but the newgui uses the Flags field to identify itself
-			if(_isSynth) _mode = MACHMODE_GENERATOR;
+			
+			if(_isSynth)
+			{
+				DefineStereoOutput(1);
+				_mode = MACHMODE_GENERATOR;
+			}
+			else
+			{
+				DefineStereoInput(1);
+				DefineStereoOutput(1);
+			}
 			strncpy(_psShortName,_pInfo->ShortName,15);
 			_psShortName[15]='\0';
 			strncpy(_editName, _pInfo->ShortName,31);
@@ -163,29 +175,30 @@ namespace psycle
 			_psAuthor = _pInfo->Author;
 			_psName = _pInfo->Name;
 			_psDllName = file_name;
-			//dw00t
-			if(_pInfo->Flags & 16)
+
+			CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress(_dll, "CreateMachine");
+			if(!GetInterface)
 			{
-				CREATEGMACHINE GetInterface = (CREATEGMACHINE) GetProcAddress(_dll, "CreateMachine");
-				if(!GetInterface)
-				{
-					std::ostringstream s; s
-						<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-						<< universalis::operating_system::exceptions::code_description();
-					throw exceptions::library_errors::symbol_resolving_error(s.str());
-				}
-				try
-				{
-					proxy()(GetInterface(_macIndex));
-				}
-				catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-				catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
-			
+				std::ostringstream s; s
+					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
+					<< universalis::operating_system::exceptions::code_description();
+				throw exceptions::library_errors::symbol_resolving_error(s.str());
+			}
+			try
+			{
+				proxy()(GetInterface());
+			}
+			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
+			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
+
+			//dw00t
+			if(_pInfo->Flags & CUSTOMGUI)
+			{
 				GETPARAMS GetParams = (GETPARAMS) GetProcAddress(_dll, "GetParams");
 				if(!GetParams)
 				{
 					std::ostringstream s; s
-						<< "could not resolve symbol 'GetParams' in library: " << _psDllName << std::endl
+						<< "could not resolve symbol 'GetParams' in library: " << file_name << std::endl
 						<< universalis::operating_system::exceptions::code_description();
 					throw exceptions::library_errors::symbol_resolving_error(s.str());
 				}
@@ -196,23 +209,6 @@ namespace psycle
 				catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetParams", &e); }
 				catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetParams"); }
 			}
-			else
-			{//\dw00t
-				CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress(_dll, "CreateMachine");
-				if(!GetInterface)
-				{
-					std::ostringstream s; s
-						<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-						<< universalis::operating_system::exceptions::code_description();
-					throw exceptions::library_errors::symbol_resolving_error(s.str());
-				}
-				try
-				{
-					proxy()(GetInterface());
-				}
-				catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-				catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
-			}//dw00t
 		}
 
 		void Plugin::Init()

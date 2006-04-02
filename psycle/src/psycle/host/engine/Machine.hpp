@@ -21,7 +21,7 @@ namespace psycle
 		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
-		class RiffFile; // forward declaration
+//		class RiffFile; // forward declaration
 
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
@@ -127,7 +127,7 @@ namespace psycle
 			}
 		}
 
-		/// Internal Machines' Parameters' Class.
+		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
 		{
 		public:
@@ -139,7 +139,108 @@ namespace psycle
 			int maxValue;
 		};
 
-		/// well, what to say?
+		class AudioPort;
+		// A wire is what interconnects two AudioPorts. Appart from being the graphically representable element,
+		//	the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
+		class Wire
+		{
+		public:
+			Wire()
+				:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
+				,index(0),senderport(0),receiverport(0){};
+			virtual ~Wire()
+			{
+				if (senderport) Disconnect(senderport);
+				if (receiverport) Disconnect(receiverport);
+			}
+			virtual void Connect(AudioPort *senderp,AudioPort *receiverp);
+			virtual void ChangeSource(AudioPort* newsource);
+			virtual void ChangeDestination(AudioPort* newdest);
+			virtual void CollectData(int numSamples);
+			virtual void SetVolume(float newvol);
+			virtual void SetPan(float newpan);
+			virtual inline int GetIndex() { return index; };
+			virtual inline int SetIndex(int idx) { index = idx; };
+			
+		protected:
+			virtual void Disconnect(AudioPort* port);
+			virtual inline float RVol() { return rvol; };
+			virtual inline float LVol() { return lvol; };
+			float volume;
+			float pan;
+			float multiplier;
+			float rvol;
+			float lvol;
+			int index;
+			AudioPort *senderport;
+			AudioPort *receiverport;
+		};
+
+		// Class which allows the setup (as in shape) of the machines' connectors.
+		// An Audio port is synonim of a channel. In other words, it is an element that defines
+		//	the characteristics of one or more individual inputs that are used in conjunction.
+		//	From this definition, we could have one Stereo Audio Port (one channel, two inputs or outputs),
+		//  a 5.1 Port, or several Stereo Ports (in the case of a mixer table), between others..
+		// Note that several wires can be connected to the same AudioPort.
+		class AudioPort
+		{
+		protected:
+			AudioPort(){};
+		public:
+			//\todo: Port creation, assign buffers to it (passed via ctor? they might be shared). 
+			//\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
+			AudioPort(Machine* powner,int arrangement,std::string name)
+			{
+				pParent=powner;
+				portName=name;
+				portArrangement=arrangement;
+			}
+			virtual ~AudioPort(){};
+			virtual void CollectData(int numSamples){};
+			virtual void Connected(Wire *wire);
+			virtual void Disconnected(Wire *wire);
+			virtual inline Wire* GetWire(unsigned int index){ assert(index<wires.size()); return wires[index]; };
+			virtual inline bool NumberOfWires() { return wires.size(); };
+			virtual inline int Arrangement() { return portArrangement; };
+			virtual inline Machine * GetMachine() { return pParent; };
+			//\todo : should change arrangement/name be allowed? (Mutating Port?)
+			virtual inline void ChangeArrangement(int arrangement) { portArrangement = arrangement; };
+			virtual inline std::string  Name() { return portName; };
+			virtual inline void ChangeName(std::string name) { portName = name; };
+		protected:
+			int portArrangement;
+			std::string portName;
+			std::vector<Wire*> wires;
+			Machine* pParent;
+		};
+
+		class InPort : public AudioPort
+		{
+		protected:
+			InPort(){};
+		public:
+			InPort(Machine* powner,int arrangement,std::string name)
+			{
+				AudioPort(powner,arrangement,name);
+			}
+			virtual ~InPort(){};
+			virtual void CollectData(int numSamples);
+		};
+
+		class OutPort : public AudioPort
+		{
+		protected:
+			OutPort(){};
+		public:
+			OutPort(Machine* powner,int arrangement,std::string name)
+			{
+				AudioPort(powner,arrangement,name);
+			}
+			virtual ~OutPort(){};
+			virtual void CollectData(int numSamples);
+		};
+
+		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
 			///\name crash handling
@@ -165,8 +266,44 @@ namespace psycle
 			///\}
 
 		public:
+			// Draft for a new Machine Specification.
+			// A machine is created via pMachine = new Machine;
+			// Creation does not give a ready to use Machine. "The machine is over the table, but the power is off!"
+			// Use LoadDll(std::string) to load a specific plugin to operate this machine. The function does a loadlibrary, and
+			//	the basic information becomes accessible (name, parameters...). Note that this call will only return "true" 
+			// [ there is another option, which would be a constructor that gets the std::string, and LoadDll() be protected and called from within ]
+			//	for Plugin or vst::plugin, since any other machine do not use an external dll.
+			// Use UnloadDll() to undo the previous action. Else, the destructor will do it for you.
+			// Use SwitchOn() to obtain a ready-to-use machine. This will return false for Plugin and vst::plugin if
+			//	OpenDll() has not been called, or if it has returned false.
+			// Use Reset() to reinitialize the machine status and recall all default values for the parameters.
+			// Use SwitchOff() to stop using this machine. Else, the destructor will do it for you.
+			// Use StandBy(bool) to set or unset the machine to a stopped state. ("suspend" in vst terminology).
+			//	"Process()" will still be called in order for the machine to update state, but will return with no data
+			//	Everything else works as usual.
+			//	This function can be used as an "audio-only" reset. (Panic button)
+			// Bypass(bool) un/sets the Bypass flag, and calls to StandBy() accordingly.
+			// Process() Call it to start the processing of input buffers and generate the output.
+			// AddEvent(timestampedEvent)
+			// MasterChanged(changetype)
+			// SaveState(ofstream)
+			// LoadState(ifstream)
+			// several "Get" for Information (name, params...)
+			// several "Set" for Information (name, params...)
+			// Automation... calling, or being called? ( calling automata.work() or automata calling machine.work())
+			// Use the concept of "Ports" to define inputs/outputs.
+			
+
+			// bool IsDllLoaded()
+			// bool IsPowered()
+			// bool IsBypass()
+			// bool IsStandBy()
+			// GetDllName()
 			Machine();
 			virtual ~Machine() throw();
+			//////////////////////////////////////////////////////////////////////////
+			// Actions
+
 			virtual void Init();
 			virtual void PreWork(int numSamples);
 			virtual void Work(int numSamples);
@@ -181,21 +318,27 @@ namespace psycle
 			virtual void SaveFileChunk(RiffFile * pFile);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			virtual void SaveDllName(RiffFile * pFile);
-			virtual void SetSampleRate(int sr) {};
-			virtual void SetPan(int newpan);
-			virtual int GetAudioInputs() { return 1; };
-			virtual int GetAudioOutputs() { return 1; };
-			virtual std::string /* const & */ GetAudioInputName(int port) { return "Stereo Input"; }
-			virtual std::string /* const & */ GetAutioOutputName(int port) { return "Stereo Output"; }
 			virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
 			virtual bool Disconnect(Machine* dstMac);
+			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
+			virtual int FindInputWire(int macIndex);
+			virtual int FindOutputWire(int macIndex);
+			void DefineStereoInput(int numins);
+			void DefineStereoOutput(int numouts);
+			//////////////////////////////////////////////////////////////////////////
+			// Properties
+
+			virtual void SetSampleRate(int sr) {};
+			virtual void SetPan(int newpan);
+			virtual int GetInPorts() { return numInPorts; };
+			virtual int GetOutPorts() { return numOutPorts; };
+			virtual AudioPort& GetInPort(unsigned int i) { assert(i<numInPorts); return inports[i]; };
+			virtual AudioPort& GetOutPort(unsigned int i) { assert(i<numOutPorts); return inports[i]; };
+			virtual float GetAudioRange() { return _audiorange; }
 			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
 			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
 			virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
-			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
-			virtual int FindInputWire(int macIndex);
-			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return "built-in"; };
 			virtual char * GetName() = 0;
 			virtual char * GetEditName() { return _editName; }
@@ -211,6 +354,10 @@ namespace psycle
 			//void SetVolumeCounterAccurate(int numSamples);
 
 		public:
+			InPort *inports;
+			OutPort *outports;
+			int numInPorts;
+			int numOutPorts;
 			int _macIndex;
 			MachineType _type;
 			MachineMode _mode;
@@ -219,6 +366,7 @@ namespace psycle
 			bool _waitingForSound;
 			bool _stopped;
 			bool _worked;
+			float _audiorange;
 			/// left data
 			float *_pSamplesL;
 			/// right data

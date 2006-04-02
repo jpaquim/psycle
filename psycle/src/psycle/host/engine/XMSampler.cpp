@@ -2011,8 +2011,10 @@ namespace psycle
 
 		XMSampler::XMSampler(int index)
 		{
+			DefineStereoOutput(1);
+			_audiorange=32768.0f;
+			_numPars=0;
 			_macIndex = index;
-			_numPars = 0;
 			_type = MACH_XMSAMPLER;
 			_mode = MACHMODE_GENERATOR;
 			_stprintf(_editName, _T(_psName));

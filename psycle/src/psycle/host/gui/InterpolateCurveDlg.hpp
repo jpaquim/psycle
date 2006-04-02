@@ -1,7 +1,5 @@
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
-#include "afxwin.h"
-#include "afxcmn.h"
 #include <psycle/host/engine/constants.hpp>
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)

@@ -15,8 +15,10 @@ namespace psycle
 
 		Sampler::Sampler(int index)
 		{
-			_macIndex = index;
+			_audiorange= 32768.0f;
 			_numPars=0;
+			DefineStereoOutput(1);
+			_macIndex = index;
 			_type = MACH_SAMPLER;
 			_mode = MACHMODE_GENERATOR;
 			sprintf(_editName, "Sampler");

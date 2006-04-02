@@ -2190,17 +2190,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else if (!bRepeat) // This prevents adding patterns when only trying to reach the end.
 				{
-		//			editPosition = 0;
-					++editPosition;
-					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition-1);
-					int const ep=_pSong->GetBlankPatternUnused();
-					_pSong->playLength=editPosition+1;
-					_pSong->playOrder[editPosition]=ep;
-					if (_pSong->patternLines[editPosition]!=Global::pConfig->defaultPatLines)
+					if ( _pSong->playLength+1 > MAX_SONG_POSITIONS) return;
+
+					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
+					int patternum=_pSong->GetBlankPatternUnused();
+					if ( patternum>= MAX_PATTERNS )
 					{
-						AddUndoLength(editPosition,_pSong->patternLines[editPosition],editcur.track,editcur.line,editcur.col,editPosition);
-						_pSong->patternLines[editPosition]=Global::pConfig->defaultPatLines;
+						patternum=MAX_PATTERNS-1;
 					}
+					else 
+					{
+						_pSong->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,FALSE);
+					}
+
+					++_pSong->playLength;
+					++editPosition;
+					_pSong->playOrder[editPosition]=patternum;
 					
 					pParentMain->UpdateSequencer();
 				}

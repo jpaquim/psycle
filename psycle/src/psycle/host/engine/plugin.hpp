@@ -6,6 +6,7 @@
 #include <psycle/host/configuration.hpp>
 //#include <psycle/plugin_interface.hpp>
 #include <psycle/plugin_gui.hpp>
+#include <psycle/plugin_gui.hpp>
 #include <cstdint>
 namespace psycle
 {
@@ -83,6 +84,7 @@ namespace psycle
 			virtual void GetParamRange(int numparam,int &minval, int &maxval);
 			virtual int GetParamValue(int numparam);
 			virtual void GetParamValue(int numparam,char* parval);
+			CMachineGuiParameter* Plugin::GetParam(int num);
 			virtual bool SetParameter(int numparam,int value);
 			/// Loader for old psycle fileformat.
 			virtual bool LoadOldFileFormat(RiffFile * pFile);

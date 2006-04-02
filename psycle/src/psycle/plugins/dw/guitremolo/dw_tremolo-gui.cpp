@@ -10,6 +10,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 //#include <psycle/plugin_interface.hpp> //plugin_gui.hpp includes plugin_interface, so it's no longer necessary
 #include <psycle/plugin_gui.hpp>
+#include "resources.hpp"
 
 
 #define MAGIC_COLOR 0x00859296
@@ -122,8 +123,7 @@ CMachineInfo const MacInfo =
 class mi : public CMachineInterface
 {
 public:
-	mi() {}
-	mi(int index);	// <-- don't forget to declare your overloaded constructor!
+	mi(){};
 	virtual ~mi();
 	virtual void Init();
 	virtual void SequencerTick();
@@ -147,20 +147,18 @@ protected:
 										//  in case (we'll init it to 1.0f later)
 	int disp_counter;
 
-
+/*
 	CMachineGuiParameter *Params[num_params];	//this is the array of params we'll copy into InstMap in the constructor.
 	int machineIndex;
 	CMachineDisplay *Display;					//since we're using functions the display class has that aren't in
 												//CMachineGuiParameter, this pointer is initialized as a casted alias for
 												//Params[prm_display].  we could've just casted it every time we call one
-												//of those functions, also.
-
-	CBitmap *bgr;		//background bitmap
-
+*/												//of those functions, also.
 };
 
 
-PSYCLE__GUIPLUGIN__INSTANCIATOR(mi, MacInfo, InstMap)	//note that it's GUIPLUGIN, not PLUGIN, and our instance map is the third parameter
+//PSYCLE__GUIPLUGIN__INSTANCIATOR(mi, MacInfo, InstMap)	//note that it's GUIPLUGIN, not PLUGIN, and our instance map is the third parameter
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi(int index)
 {
@@ -170,8 +168,7 @@ mi::mi(int index)
 
 	//load the background bitmap..
 	bgr = new CBitmap;
-	bgr->LoadBitmap(IDB_TREMOLOBG);
-
+	bgr->LoadBitmap(IDB_TREMOLOBGR);
 	//initialize our parameters..
 	Params[0] = new CMachineVSlider		(paramDepth,		187,	30,		84);
 	Params[1] = new CMachineComboBox	(paramWaveform,		55,		135,	40);
