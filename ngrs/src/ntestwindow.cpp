@@ -50,18 +50,22 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
- /* fDialog = new NFileDialog();
-   add(fDialog);
+  NScrollBox* bx = new NScrollBox();
+     bx->setPosition(10,10,200,200);
+  pane()->add(bx);
 
-   testListBox();*/
+ /* fDialog = new NFileDialog();
+   add(fDialog);*/
+
+   //testListBox();
    /*Tpnl* tPnl = new Tpnl();
       tPnl->setPosition(10,10,200,200);
    pane()->add(tPnl);*/
 
-   NButton* btn = new NButton("hallO");
+   /*NButton* btn = new NButton("hallO");
      btn->setFlat(false);
      btn->setPosition(100,100,200,20);
-   pane()->add(btn);
+   pane()->add(btn);*/
 
   //toolBarTest();
  // testSpinEdit();
@@ -69,6 +73,7 @@ NTestWindow::NTestWindow()
  // testFrameBorder();
     //testLine();
     //testMenu();
+//    testComboBox();
   
   /*NPanel* pnl = new NPanel();
     pnl->setTransparent(false);

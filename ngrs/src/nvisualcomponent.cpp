@@ -70,7 +70,9 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
    XIntersectRegion(oldRegion,region,region);
    if (!XEmptyRegion(region)) {
     g->setRepaintArea(repaintArea);
-    bool clip_ = !(transparent() && (translucent()==100) && skin_.gradientStyle == 0 && skin_.bitmapBgStyle == 0);
+    bool clip_ = !(transparent() && (translucent()==100) && skin_.gradientStyle == 0 );
+    if (skin_.bitmapBgStyle!=0) clip_ = true;
+
     g->setRegion(region, clip_);
 
     int gTx = g->xTranslation();
@@ -102,6 +104,15 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
           g->putBitmap(left()+xp,top()+yp,w,h,skin_.bitmap,0,0);
        }
       }
+    } else
+
+    if (skin_.bitmapBgStyle == 2) {
+      int w = skin_.bitmap.width();
+      int h = skin_.bitmap.height();
+
+      int xp =(int)  d2i((spacingWidth()  - skin_.bitmap.width())  / 2.0f);
+      int yp = (int) d2i((spacingHeight() - skin_.bitmap.height()) / 2.0f);
+      g->putBitmap(left()+xp,top()+yp,skin_.bitmap);
     }
 
     if (moveable().style() & nMvRectPicker) geometry()->drawRectPicker(g);
