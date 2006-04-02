@@ -131,9 +131,11 @@ void NScrollBar::init( )
     NApp::config()->setSkin(&sliderArea_->skin_,"sbar_pane");
   add(sliderArea_);
 
+  NApp::config()->setSkin(&vSlSkin,"sbar_vsl");
+  NApp::config()->setSkin(&hSlSkin,"sbar_hsl");
+
   slider_ = new Slider(this);
-    slider_->setTransparent(true);
-    slider_->setHeight(20);
+     slider_->setSkin(vSlSkin);
   sliderArea_->add(slider_);
 
   slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit + nMvRepaint));
@@ -166,6 +168,7 @@ void NScrollBar::setOrientation( int orientation )
   if (orientation_==nHorizontal) {
      sliderArea_->setGradientOrientation(nVertical);
      slider_->setWidth(20);
+     slider_->setSkin(hSlSkin);
      scrollPolicy_ = nDx;
      inc->setBitmap(right);
      dec->setBitmap(left);
@@ -173,6 +176,7 @@ void NScrollBar::setOrientation( int orientation )
   else
    {
      slider_->setHeight(20);
+     slider_->setSkin(vSlSkin);
      sliderArea_->setGradientOrientation(nHorizontal);
      scrollPolicy_ = nDy;
    }
@@ -235,13 +239,10 @@ void NScrollBar::onSliderMove( )
 NScrollBar::Slider::Slider( NScrollBar * sl )
 {
   sl_ = sl;
-  bd_ = new NBevelBorder();
-  setBorder(bd_);
 }
 
 NScrollBar::Slider::~ Slider( )
 {
-  delete bd_;
 }
 
 void NScrollBar::Slider::onMove( const NMoveEvent & moveEvent )

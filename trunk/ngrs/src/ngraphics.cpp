@@ -335,7 +335,9 @@ void NGraphics::putBitmap( int x, int y, NBitmap & bitmap )
   if (bitmap.X11data() != 0) {
 
       if (dblBuffer_) {
-            if (bitmap.X11ClpData()==0) XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.X11data(),0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height()); else
+            if (bitmap.X11ClpData()==0) {
+               XPutImage(NApp::system().dpy(), doubleBufferPixmap_, gcp,bitmap.X11data(),0, 0, x+dx_,y+dy_, bitmap.width(),bitmap.height());
+            } else
            {
              // transparent bitmap;
              XImage* clp = bitmap.X11ClpData();

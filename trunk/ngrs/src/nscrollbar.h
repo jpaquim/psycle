@@ -56,11 +56,11 @@ public:
    signal2<NObject*,int> posChange;
 
    virtual void resize();
+
    void setOrientation(int orientation);
    int orientation();
 
    void setControl(NVisualComponent* control, int scrollPolicy);
-
    void onSliderMove();
 
    void setRange(int range);
@@ -76,6 +76,9 @@ private:
    NBitmap left;
    NBitmap right;
 
+
+   NSkin vSlSkin;
+   NSkin hSlSkin;
 
    int orientation_;
    int scrollPolicy_;

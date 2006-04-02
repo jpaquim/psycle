@@ -83,7 +83,6 @@ public:
     virtual int scrollDx() const;
     virtual int scrollDy() const;
 
-
     void setSpacing(int left, int top, int right, int bottom);
     void setSpacing(const NSize & spacing);
 
@@ -169,7 +168,6 @@ public:
     void add(NVisualComponent* component);
     void add(NVisualComponent* component, int align);
     void insert(NVisualComponent* component, int index);
-
 
     NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area);
 
