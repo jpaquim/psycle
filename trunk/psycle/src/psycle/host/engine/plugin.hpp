@@ -4,7 +4,8 @@
 #include "machine.hpp"
 #include "player.hpp"
 #include <psycle/host/configuration.hpp>
-#include <psycle/plugin_interface.hpp>
+//#include <psycle/plugin_interface.hpp>
+#include <psycle/plugin_gui.hpp>
 #include <cstdint>
 namespace psycle
 {
@@ -88,6 +89,7 @@ namespace psycle
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			virtual void SaveDllName(RiffFile * pFile);
+			virtual CMachineGuiParameter* GetParam(int num);	//dw00t
 
 			void Instance(std::string file_name);
 			void Free();
@@ -105,6 +107,7 @@ namespace psycle
 			std::string _psName;
 			bool _isSynth;
 			CMachineInfo * _pInfo;
+			CMachineGuiParameter ** _pParams;	//dw00t
 			host::proxy proxy_;
 		};
 
