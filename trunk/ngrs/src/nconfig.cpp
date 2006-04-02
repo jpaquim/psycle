@@ -20,6 +20,7 @@
 
 #include "nconfig.h"
 #include "nbevelborder.h"
+#include "nframeborder.h"
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/sax2/SAX2XMLReader.hpp>
 #include <xercesc/sax2/XMLReaderFactory.hpp>
@@ -48,13 +49,17 @@ public:
     void setCfg(NConfig* cfg) { pCfg = cfg;};
 
     std::string getValue(const std::string & name, const Attributes& attrs) {
+       std::string erg;
+       try {
        XMLCh* str = XMLString::transcode(name.c_str());
        const XMLCh* strCh = attrs.getValue(str);
        char* id = XMLString::transcode(strCh);
-       std::string erg = std::string(id);
+       erg = std::string(id);
        XMLString::release(&id);
        XMLString::release(&str);
-       return erg;
+       
+       } catch (std::exception e) { return ""; }
+      return erg;
     }
 
     NColor attrsToColor(const Attributes& attrs) {
@@ -125,6 +130,41 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          skin->font.setTextColor(NColor(color));
       }
     } else
+    if (tagName == "frmborder") {
+     NSkin* skin = pCfg->findSkin(lastId);
+      if (skin != 0) {
+         NFrameBorder* fr = new NFrameBorder();
+         skin->border = fr;
+
+         std::string styleStr = getValue("style",attrs);
+         if (styleStr != "") {
+           std::stringstream str; str << styleStr;
+           int style  = 0;
+           str >> style;
+           fr->setOval(style);
+         }
+
+         std::string arcw  = getValue("arcw",attrs);
+         std::string arch  = getValue("arch",attrs);
+
+         if (arcw!="") {
+           int arc  = 0;
+           std::stringstream str3;
+           str3 << arcw;
+           str3 >> arc;
+           fr->setOval(fr->oval(),arc,fr->arcHeight());
+         }
+
+         if (arch!="") {
+           int arc  = 0;
+           std::stringstream str3;
+           str3 << arch;
+           str3 >> arc;
+           fr->setOval(fr->oval(),fr->arcWidth(),arc);
+         }
+      }
+    } else
+
     if (tagName == "bgcolor") {
       NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
@@ -161,6 +201,8 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          std::string styleStr   = getValue("style",attrs);
          std::string percentStr = getValue("percent",attrs);
          std::string direction  = getValue("dir",attrs);
+         std::string arcw  = getValue("arcw",attrs);
+         std::string arch  = getValue("arch",attrs);
          std::stringstream str; str << styleStr;
          int style  = 0;
          str >> style;
@@ -173,8 +215,26 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          skin->gradEndColor   = NColor(end);
          skin->gradientStyle   = style;
          skin->gradientPercent = percent;
+
          if (direction == "hor") skin->gradientOrientation = nHorizontal;
                              else skin->gradientOrientation = nVertical;
+
+         if (arcw!="") {
+           int arc  = 0;
+           std::stringstream str3;
+           str3 << arcw;
+           str3 >> arc;
+           skin->arcWidth  = arc;
+         }
+
+         if (arch!="") {
+           int arc  = 0;
+           std::stringstream str3;
+           str3 << arch;
+           str3 >> arc;
+           skin->arcHeight  = arc;
+         }
+
       }
     } else
     if (tagName == "spacing") {
@@ -535,12 +595,15 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->gradEndColor    = xmlSkin->gradEndColor;
     skin->gradientStyle   = xmlSkin->gradientStyle;
     skin->gradientOrientation = xmlSkin->gradientOrientation;
+    skin->arcWidth = xmlSkin->arcWidth;
+    skin->arcHeight = xmlSkin->arcHeight;
     skin->gradientPercent = xmlSkin->gradientPercent;
     skin->translucent = xmlSkin->translucent;
     skin->transColor  = xmlSkin->transColor;
     skin->transparent = xmlSkin->transparent;
     skin->spacing = xmlSkin->spacing;
     skin->bitmap = xmlSkin->bitmap;
+    skin->border = xmlSkin->border;
     skin->bitmapBgStyle = xmlSkin->bitmapBgStyle;
   } else
   if (identifier == "edit") {

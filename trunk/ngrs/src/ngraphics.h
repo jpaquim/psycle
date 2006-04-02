@@ -44,9 +44,16 @@ public:
     void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
     void drawRect( const NRect & rect );
     void drawArc(int x, int y, int width, int height, int angle1, int angle2);
+    void fillArc(int x, int y, int width, int height, int angle1, int angle2);
     void fillRect(int x, int y, int width, int height);
+    void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
     void fillRect(const NRect & rect);
     void fillGradient(int x, int y, int width, int height, const NColor & start, const NColor & end , int direction);
+    void fillGradient(int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end , int direction, int percent);
+    void fillRoundGradient(int x, int y, int width, int height, const NColor & start, const NColor & end , int direction , int arcWidth, int arcHeight);
+    void fillRoundGradient(int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end , int direction , int percent, int arcWidth, int arcHeight);
+
+
 
     void setTranslation( long dx, long dy );
     void resize(int width, int height);

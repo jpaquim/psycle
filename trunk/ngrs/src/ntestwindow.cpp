@@ -50,10 +50,19 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  fDialog = new NFileDialog();
+ /* fDialog = new NFileDialog();
    add(fDialog);
 
-   testListBox();
+   testListBox();*/
+   /*Tpnl* tPnl = new Tpnl();
+      tPnl->setPosition(10,10,200,200);
+   pane()->add(tPnl);*/
+
+   NButton* btn = new NButton("hallO");
+     btn->setFlat(false);
+     btn->setPosition(100,100,200,20);
+   pane()->add(btn);
+
   //toolBarTest();
  // testSpinEdit();
  // testBorderLayout();

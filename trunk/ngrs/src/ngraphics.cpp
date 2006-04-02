@@ -65,13 +65,16 @@ void NGraphics::createGraphicHandles( )
     gcp = XCreateGC(NApp::system().dpy(),doubleBufferPixmap_,0,0);
     dblWidth_  = attr.width;
     dblHeight_ = attr.height;
+    XSetForeground( NApp::system().dpy(), gcp, oldColor.colorValue() );
   } else
   {
     doubleBufferPixmap_=0;
     gcp = 0;
+    XSetForeground( NApp::system().dpy(), gc_, oldColor.colorValue() );
   }
   if (dblBuffer_)
      draw = XftDrawCreate(NApp::system().dpy(), doubleBufferPixmap_, NApp::system().visual(), NApp::system().colormap());
+
 
 }
 
@@ -429,6 +432,7 @@ void NGraphics::fillGradient(int x, int y, int width, int height, const NColor &
   double dg = (g2-g1) / (double) middle;
   double db = (b2-b1) / (double) middle;
 
+
   if (direction == nHorizontal)
     for (int i = 0; i < middle; i++) {
       setForeground(NColor((int) (r1 + i*dr),(int) (g1 + i*dg),(int) (b1 + i*db)));
@@ -528,4 +532,202 @@ void NGraphics::fillRect( const NRect & rect )
   fillRect(rect.left(),rect.top(),rect.width(),rect.height());
 }
 
+void NGraphics::fillRoundRect( int x, int y, int width, int height, int arcWidth, int arcHeight )
+{
+ int nx = x;
+ int ny = y;
+ int nw = width;
+ int nh = height;
+ int naw = arcWidth;
+ int nah = arcHeight;
 
+  if (nw < 0) { 
+    nw = 0 - nw;
+    nx = nx - nw;
+  }
+  if (nh < 0) {
+    nh = 0 - nh;
+    ny = ny - nh;
+  }
+  if (naw < 0)  naw = 0 - naw;
+  if (nah < 0)  nah = 0 - nah;
+
+  int naw2 = naw / 2;
+  int nah2 = nah / 2;
+
+  if (nw > naw) {
+                if (nh > nah) {
+                        fillArc(nx, ny, naw, nah, 5760, 5760);
+                        fillArc(nx + nw - naw, ny, naw, nah, 0, 5760);
+                        fillArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280,5760);
+                        fillArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
+                        fillRect(nx,ny+nah2,nw,nh- 2*nah2);
+                        fillRect(nx+naw2,ny,nw-2*naw2,nah2);
+                        fillRect(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2);
+                } else {
+                        fillArc(nx, ny, naw, nh, 5760, 11520);
+                        fillArc(nx + nw - naw, ny, naw, nh, 17280, 11520);
+                        fillRect(nx+naw2,ny,nw-2*naw2,nah2);
+                }
+        } else {
+                if (nh > nah) {
+                        fillArc(nx, ny, nw, nah, 0, 11520);
+                        fillArc(nx, ny + nh - nah, nw, nah, 11520, 11520);
+                        fillRect(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2);
+                } else {
+                        fillArc(nx, ny, nw, nh, 0, 23040);
+                }
+        }
+}
+
+void NGraphics::fillArc( int x, int y, int width, int height, int angle1, int angle2 )
+{
+   if (dblBuffer_)
+     XFillArc(NApp::system().dpy(),doubleBufferPixmap_,gcp,x+dx_,y+dy_,width,height,angle1,angle2);
+  else
+     XFillArc(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height,angle1,angle2);
+}
+
+void NGraphics::fillRoundGradient( int x, int y, int width, int height, const NColor & start, const NColor & end, int direction, int arcWidth, int arcHeight )
+{
+  int nx = x;
+  int ny = y;
+  int nw = width;
+  int nh = height;
+  int naw = arcWidth;
+  int nah = arcHeight;
+
+  if (nw < 0) { 
+    nw = 0 - nw;
+    nx = nx - nw;
+  }
+  if (nh < 0) {
+    nh = 0 - nh;
+    ny = ny - nh;
+  }
+  if (naw < 0)  naw = 0 - naw;
+  if (nah < 0)  nah = 0 - nah;
+
+  int naw2 = naw / 2;
+  int nah2 = nah / 2;
+
+  if (nw > naw) {
+                if (nh > nah) {
+                        if (direction == nHorizontal) {
+                          setForeground(start);
+                          fillArc(nx, ny, naw, nah, 5760, 5760);
+                          fillArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
+                          setForeground(end);
+                          fillArc(nx + nw - naw, ny, naw, nah, 0, 5760);
+                          fillArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280,5760);
+                        } else {
+                          fillArc(nx, ny, naw, nah, 5760, 5760);
+                          fillArc(nx + nw - naw, ny, naw, nah, 0, 5760);
+                          setForeground(end);
+                          fillArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
+                          fillArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280,5760);
+                        }
+                        fillGradient(nx,ny+nah2,nw,nh- 2*nah2,start,end,direction);
+                        fillGradient(nx+naw2,ny,nw-2*naw2,nah2,start,end,direction);
+                        fillGradient(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2,start,end,direction);
+                } else {
+                        fillArc(nx, ny, naw, nh, 5760, 11520);
+                        fillArc(nx + nw - naw, ny, naw, nh, 17280, 11520);
+                        fillGradient(nx+naw2,ny,nw-2*naw2,nah2,start,end,direction);
+                }
+        } else {
+                if (nh > nah) {
+                        fillArc(nx, ny, nw, nah, 0, 11520);
+                        fillArc(nx, ny + nh - nah, nw, nah, 11520, 11520);
+                        fillGradient(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2,start,end,direction);
+                } else {
+                        fillArc(nx, ny, nw, nh, 0, 23040);
+                }
+        }
+}
+
+
+void NGraphics::fillGradient( int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end, int direction, int percent )
+{
+        int middle  = 0;
+        int length  = 0;
+        if (direction == nHorizontal) {
+            middle = (int) (width  * percent/100.0f);
+            length = width  - middle;
+        } else {
+            middle = (int) (height * (percent/100.0f));
+            length = height - middle;
+        }
+        //frist part to middle
+        if (direction == nHorizontal)
+             fillGradient(x,y,middle,height, start,mid,nHorizontal);
+        else 
+            fillGradient(x,y,width,middle,start,mid,nVertical);
+        // second part from middle to end
+        if (direction == nHorizontal)
+            fillGradient(x+middle,y,width-middle,height,mid,end,nHorizontal);
+        else
+            fillGradient(x,y+middle,width,height-middle,mid,end,nVertical);
+
+}
+
+void NGraphics::fillRoundGradient( int x, int y, int width, int height, const NColor & start, const NColor & mid, const NColor & end, int direction, int percent , int arcWidth, int arcHeight)
+{
+  int nx = x;
+  int ny = y;
+  int nw = width;
+  int nh = height;
+  int naw = arcWidth;
+  int nah = arcHeight;
+
+  if (nw < 0) { 
+    nw = 0 - nw;
+    nx = nx - nw;
+  }
+  if (nh < 0) {
+    nh = 0 - nh;
+    ny = ny - nh;
+  }
+  if (naw < 0)  naw = 0 - naw;
+  if (nah < 0)  nah = 0 - nah;
+
+  int naw2 = naw / 2;
+  int nah2 = nah / 2;
+
+  if (nw > naw) {
+                if (nh > nah) {
+                        if (direction == nHorizontal) {
+                          setForeground(start);
+                          fillArc(nx, ny, naw, nah, 5760, 5760);
+                          fillArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
+                          setForeground(end);
+                          fillArc(nx + nw - naw, ny, naw, nah, 0, 5760);
+                          fillArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280,5760);
+                          fillGradient(nx+naw2,ny,nw-2*naw2,nah2,start,mid,end,direction,percent);
+                          fillGradient(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2,start,mid,end,direction,percent);
+                        } else {
+                          setForeground(start);
+                          fillArc(nx, ny, naw, nah, 5760, 5760);
+                          fillArc(nx + nw - naw, ny, naw, nah, 0, 5760);
+                          fillRect(nx+naw2,ny,nw-2*naw2,nah2);
+                          setForeground(end);
+                          fillArc(nx, ny + nh - nah, naw, nah, 11520, 5760);
+                          fillArc(nx + nw - naw, ny + nh - nah, naw, nah, 17280,5760);
+                          fillRect(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2);
+                        }
+                        fillGradient(nx,ny+nah2,nw,nh- 2*nah2,start,mid,end,direction,percent);
+                } else {
+                        fillArc(nx, ny, naw, nh, 5760, 11520);
+                        fillArc(nx + nw - naw, ny, naw, nh, 17280, 11520);
+                        fillGradient(nx+naw2,ny,nw-2*naw2,nah2,start,mid,end,direction,percent);
+                }
+        } else {
+                if (nh > nah) {
+                        fillArc(nx, ny, nw, nah, 0, 11520);
+                        fillArc(nx, ny + nh - nah, nw, nah, 11520, 11520);
+                        fillGradient(nx+naw2,ny+nh-nah2,nw-2*naw2,nah2,start,mid,end,direction,percent);
+                } else {
+                        fillArc(nx, ny, nw, nh, 0, 23040);
+                }
+        }
+}

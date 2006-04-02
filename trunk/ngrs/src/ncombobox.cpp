@@ -67,8 +67,6 @@ void NComboBox::init( )
     downBtn_->click.connect(this,&NComboBox::onDownBtnClicked);
   NPanel::add(downBtn_);
 
-  setBorder(new NFrameBorder());
-
   popup = new NWindow();
     popup->setDecoration(false);
     NApp::addPopupWindow(popup);
