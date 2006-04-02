@@ -50,13 +50,16 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
- 
+  fDialog = new NFileDialog();
+   add(fDialog);
+
+   testListBox();
   //toolBarTest();
  // testSpinEdit();
  // testBorderLayout();
  // testFrameBorder();
     //testLine();
-    testMenu();
+    //testMenu();
   
   /*NPanel* pnl = new NPanel();
     pnl->setTransparent(false);
@@ -166,11 +169,6 @@ NTestWindow::NTestWindow()
    pane()->add(img);*/
 
 
-  /* fDialog = new NFileDialog();
-   add(fDialog);
-
-   NMenuBar* menuBar_ = new NMenuBar();
-   pane()->add(menuBar_);*/
    
    /*NMenu* fileMenu_ = new NMenu("File",'i'
       ,"New,Open,Import Module,Save,Save as,Render as Wav,|,Song properties,|,revert to Saved,recent Files,Exit");
@@ -541,6 +539,17 @@ void NTestWindow::toolBarTest( )
   
   //pane()->add(toolBarPanel_);
   pane()->resize();
+}
+
+void NTestWindow::testListBox( )
+{
+  NListBox* lbox = new NListBox();
+     lbox->setMultiSelect(true);
+     lbox->setPosition(10,10,200,200);
+     for (int i = 0; i < 100; i++) {
+        lbox->add(new NItem(stringify(i)));
+     }
+  pane()->add(lbox);
 }
 
 

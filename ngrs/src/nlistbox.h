@@ -48,6 +48,10 @@ public:
     void setIndex(int i);
     int selIndex();
     std::vector<int> selIndexList();
+    void selClear();
+
+    void setMultiSelect(bool on);
+
 
 private:
 

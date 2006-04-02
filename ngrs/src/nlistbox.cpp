@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "nlistbox.h"
 #include "nbuttonevent.h"
+#include "napp.h"
 
 NListBox::NListBox()
  : NScrollBox()
@@ -69,7 +70,8 @@ void NListBox::add( NCustomItem * component )
 void NListBox::onItemPress( NButtonEvent * ev)
 {
   NVisualComponent* item = static_cast<NVisualComponent*>(ev->sender());
-  if (!multiSelect_) deSelectItems();
+
+  if (!multiSelect_ || !(NApp::system().keyState() & ControlMask)) deSelectItems();
 
   item->setTransparent(false);
   item->repaint();
@@ -133,14 +135,23 @@ std::vector< int > NListBox::selIndexList( )
 
 void NListBox::setIndex( int i )
 {
-  deSelectItems();
+  if (!multiSelect_) deSelectItems();
   if (i>=0 && i < listBoxPane_->visualComponents().size()) {
      NCustomItem* item = (NCustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
-     if (!multiSelect_) deSelectItems();
      selItems_.push_back(item);
      item->setTransparent(false);
      item->repaint();
   }
+}
+
+void NListBox::setMultiSelect( bool on )
+{
+  multiSelect_ = on;
+}
+
+void NListBox::selClear( )
+{
+  deSelectItems();
 }
 
 
