@@ -83,29 +83,16 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
     if (transparent() && (translucent()<100))
          g->fillTranslucent(left(),top(),width(),height(),skin_.transColor, translucent());
 
-    if (skin_.gradientStyle > 0) {
-        int middle  = 0;
-        int length  = 0;
-        if (skin_.gradientOrientation == nHorizontal) {
-            middle = (int) (spacingWidth()  * skin_.gradientPercent/100.0f);
-            length = spacingWidth()  - middle;
-        } else {
-            middle = (int) (spacingHeight() * (skin_.gradientPercent/100.0f));
-            length = spacingHeight() - middle;
-        }
-  //      frist part to middle
-        if (skin_.gradientOrientation == nHorizontal)
-            g->fillGradient(left(),top(),middle,spacingHeight(), skin_.gradStartColor,skin_.gradMidColor,nHorizontal);
-        else 
-           g->fillGradient(left(),top(),spacingWidth(),middle,skin_.gradStartColor,skin_.gradMidColor,nVertical);
-        // second part from middle to end
-        if (skin_.gradientOrientation == nHorizontal)
-          g->fillGradient(left()+middle,top(),spacingWidth()-middle,spacingHeight(),skin_.gradMidColor,skin_.gradEndColor,nHorizontal);
-        else
-          g->fillGradient(left(),top()+middle,spacingWidth(),spacingHeight()-middle,skin_.gradMidColor,skin_.gradEndColor,nVertical);
+    if (skin_.gradientStyle == 1) {
+         g->fillGradient(left(),top(),spacingWidth(),spacingHeight(),
+            skin_.gradStartColor,skin_.gradMidColor,skin_.gradEndColor,
+            skin_.gradientOrientation,skin_.gradientOrientation);
+    } else
+    if (skin_.gradientStyle == 2) {
+         g->fillRoundGradient(left(),top(),spacingWidth(),spacingHeight(),
+            skin_.gradStartColor,skin_.gradMidColor,skin_.gradEndColor,
+            skin_.gradientOrientation,skin_.gradientOrientation,skin_.arcWidth,skin_.arcHeight);
     }
-
-
 
     if (skin_.bitmapBgStyle == 1) {
       int w = skin_.bitmap.width();

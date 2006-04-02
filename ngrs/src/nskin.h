@@ -47,6 +47,7 @@ public:
      gradientOrientation = nHorizontal;
      gradientPercent = 50;
      border = 0;
+     arcWidth = arcHeight = 10;
    }
 
    NBorder* border;
@@ -72,6 +73,8 @@ public:
    int gradientOrientation;
 
    int bitmapBgStyle;
+   int arcWidth;
+   int arcHeight;
 };
 
 #endif

@@ -44,7 +44,7 @@
 class Tpnl : public NPanel {
 
    virtual void paint(NGraphics* g) {
-      XPoint pol[5];
+/*      XPoint pol[5];
 
       pol[0].x = 0;
       pol[0].y = 0;
@@ -53,9 +53,12 @@ class Tpnl : public NPanel {
       pol[2].x = 10;
       pol[2].y = 10;
       pol[3].x = 0;
-      pol[3].y = 10;
+      pol[3].y = 10;*/
 
-      g->drawPolygon(pol,4);
+      g->setForeground(NColor(255,255,255));
+      g->fillRoundGradient(0,0,clientWidth(),clientHeight(),NColor(200,200,200),NColor(210,210,210),NColor(180,180,180),nHorizontal,10,10,10);
+
+      //g->drawPolygon(pol,4);
 
    }
 

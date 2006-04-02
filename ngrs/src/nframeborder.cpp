@@ -64,4 +64,19 @@ void NFrameBorder::setLineCount( int count, int dWidth, int dHeight )
   setSpacing(NSize( lcount_*dx_,lcount_*dy_,lcount_*dx_,lcount_*dy_));
 }
 
+bool NFrameBorder::oval( ) const
+{
+  return oval_;
+}
+
+int NFrameBorder::arcWidth( ) const
+{
+  return arcWidth_;
+}
+
+int NFrameBorder::arcHeight( ) const
+{
+  return arcHeight_;
+}
+
 
