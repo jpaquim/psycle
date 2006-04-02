@@ -92,6 +92,85 @@ namespace psycle
 			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 		}
+		void Wire::Connect(AudioPort *senderp,AudioPort *receiverp)
+		{
+			senderport=senderp;
+			receiverport=receiverp;
+			multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+			SetVolume(volume);
+			senderport->Connected(this);
+			receiverport->Connected(this);
+			//\todo : need a way get a wire index.
+		}
+		void Wire::ChangeSource(AudioPort* newsource)
+		{
+			assert(senderport); Disconnect(senderport);
+			senderport=newsource;
+			multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+			SetVolume(volume);
+			senderport->Connected(this);
+		}
+		void Wire::ChangeDestination(AudioPort* newdest)
+		{
+			assert(receiverport); Disconnect(receiverport);
+			receiverport=newdest;
+			multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+			SetVolume(volume);
+			receiverport->Connected(this);
+		}
+		void Wire::CollectData(int numSamples)
+		{
+			senderport->CollectData(numSamples);
+			//\todo : apply volume, panning and mapping.
+		}
+		void Wire::SetVolume(float newvol)
+		{
+			volume=newvol;
+			rvol=volume*pan*multiplier;
+			lvol=volume*(1.0f-pan)*multiplier;
+		}
+		void Wire::SetPan(float newpan)
+		{
+			pan=newpan;
+			SetVolume(volume);
+		}
+
+		void Wire::Disconnect(AudioPort* port)
+		{
+			if ( port == senderport ) { senderport=0; }
+			else { receiverport=0; }
+			port->Disconnected(this);
+			//\todo : need a way to indicate to the main Machine that this wire index is now free.
+		}
+
+		void AudioPort::Connected(Wire *wire)
+		{
+			wires.push_back(wire);
+		}
+		void AudioPort::Disconnected(Wire *wire)
+		{
+			for (unsigned int i(0);i<wires.size();i++)
+			{
+				if (wires[i]==wire) 
+				{
+					wires.erase(wires.begin()+i);
+					return;
+				}
+			}
+		}
+
+		void InPort::CollectData(int numSamples)
+		{
+			//\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
+			for (unsigned int i(0);i<wires.size();i++)
+			{
+				GetWire(i)->CollectData(numSamples);
+			}
+		}
+		void OutPort::CollectData(int numSamples)
+		{
+			pParent->Work(numSamples);
+		}
 
 		Machine::Machine()
 			: crashed_()
@@ -104,6 +183,7 @@ namespace psycle
 			, _waitingForSound(false)
 			, _stopped(false)
 			, _worked(false)
+			, _audiorange(1.0f)
 			, _pSamplesL(0)
 			, _pSamplesR(0)
 			, _lVol(0)
@@ -114,6 +194,8 @@ namespace psycle
 			, _numPars(0)
 			, _nCols(1)
 			, _connectedInputs(0)
+			, numInPorts(0)
+			, numOutPorts(0)
 			, _connectedOutputs(0)
 			, TWSSamples(0)
 			, TWSActive(false)
@@ -482,6 +564,16 @@ namespace psycle
 				}
 			}
 		}
+		void Machine::DefineStereoInput(int numinputs)
+		{
+			numInPorts=numinputs;
+			inports = new InPort(this,0,"Stereo In");
+		}
+		void Machine::DefineStereoOutput(int numoutputs)
+		{
+			numOutPorts=numoutputs;
+			outports = new OutPort(this,0,"Stereo Out");
+		}
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -737,6 +829,8 @@ namespace psycle
 
 		Dummy::Dummy(int index)
 		{
+			DefineStereoInput(1);
+			DefineStereoOutput(1);
 			_macIndex = index;
 			_type = MACH_DUMMY;
 			_mode = MACHMODE_FX;
@@ -906,11 +1000,14 @@ namespace psycle
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(int index)
+			: sampleCount(0)
+			, _outDry(256)
+			, decreaseOnClip(false)
 		{
+			_audiorange=32768.0f;
+
+			DefineStereoInput(1);
 			_macIndex = index;
-			sampleCount = 0;
-			_outDry = 256;
-			decreaseOnClip=false;
 			_type = MACH_MASTER;
 			_mode = MACHMODE_MASTER;
 			sprintf(_editName, "Master");
@@ -1068,6 +1165,8 @@ namespace psycle
 		{
 			_macIndex = index;
 			_numPars = 255;
+			DefineStereoInput(24);
+			DefineStereoOutput(1);
 			_type = MACH_MIXER;
 			_mode = MACHMODE_FX;
 			sprintf(_editName, "Mixer");

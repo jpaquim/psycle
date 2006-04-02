@@ -153,7 +153,7 @@ namespace psycle
 				m_Points[pointIndex].second = pointVal;
 
 				prevtime=(pointIndex == 0)?m_Points[pointIndex].first:m_Points[pointIndex-1].first;
-				nextime=(pointIndex == (int)(m_Points.size())-1 )?m_Points[pointIndex].first:m_Points[pointIndex+1].first;
+				nextime=(pointIndex == (unsigned int)(m_Points.size())-1 )?m_Points[pointIndex].first:m_Points[pointIndex+1].first;
 					
 				// Initialization done. Check if we have to move the point to a new index:
 
@@ -165,7 +165,7 @@ namespace psycle
 				}
 
 				// Else, we have some work to do.
-				int	new_index = pointIndex;
+				unsigned int	new_index = pointIndex;
 
 				// If we have to move it backwards:
 				if (pointTime < prevtime)

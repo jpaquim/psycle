@@ -265,6 +265,17 @@ namespace psycle
 					s << "VST plugin: successfully instanciated. inputs: " << proxy().numInputs() << ", outputs: " << proxy().numOutputs();
 					loggers::trace(s.str());
 				}
+				if ( _isSynth )
+				{
+					//\todo : set the real outputs of vst's
+					DefineStereoOutput(1);
+				}
+				else
+				{
+					//\todo : set the real in/outputs of vst's
+					DefineStereoInput(1);
+					DefineStereoOutput(1);
+				}
 			}
 
 			void plugin::Free() // called also in destructor

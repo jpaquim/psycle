@@ -197,7 +197,6 @@ namespace psycle
 			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
-			CreateNewPattern(0);
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
 			Reset();
 		}
@@ -280,6 +279,7 @@ namespace psycle
 				else patternLines[i]=64;
 				std::sprintf(patternName[i], "Untitled"); 
 			}
+			CreateNewPattern(0);
 			_trackArmedCount = 0;
 			for(int i(0) ; i < MAX_TRACKS; ++i)
 			{

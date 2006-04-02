@@ -1813,16 +1813,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				++_pSong->playLength;
 
 				m_wndView.editPosition++;
-				int const pop=m_wndView.editPosition;
-				for(int c=(_pSong->playLength-1);c>=pop;c--)
+				int const edpos=m_wndView.editPosition;
+				for(int c=(_pSong->playLength-1);c>=edpos;c--)
 				{
 					_pSong->playOrder[c]=_pSong->playOrder[c-1];
 				}
-				_pSong->playOrder[m_wndView.editPosition]=_pSong->GetBlankPatternUnused();
+				_pSong->playOrder[edpos]=_pSong->GetBlankPatternUnused();
 				
-				if ( _pSong->playOrder[m_wndView.editPosition]>= MAX_PATTERNS )
+				if ( _pSong->playOrder[edpos]>= MAX_PATTERNS )
 				{
-					_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
+					_pSong->playOrder[edpos]=MAX_PATTERNS-1;
 				}
 
 				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::pConfig->defaultPatLines,FALSE);

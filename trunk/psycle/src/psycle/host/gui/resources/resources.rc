@@ -305,7 +305,7 @@ IDB_SLIDERKNOBV         BITMAP                  "Slider\\sliderB-gray.bmp"
 IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP-gray.bmp"
 IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
 IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
-IDB_TREMOLOBG           BITMAP                  "..\\..\\..\\plugins\\dw\\guitremolo\\tremolo-bgr.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
