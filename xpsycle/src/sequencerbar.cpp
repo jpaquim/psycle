@@ -140,6 +140,7 @@ void SequencerBar::init( )
 
 
   seqList_ = new NListBox();
+    seqList_->setMultiSelect(true);
     seqList_->setHScrollBarPolicy(nNoneVisible);
     seqList_->setHeight(btnBar->preferredHeight());
     NFontMetrics metrics;
@@ -202,7 +203,6 @@ void SequencerBar::updateSequencer()
 {
   char buf[16];
 
-  //int top = cc->GetTopIndex();
   seqList_->removeChilds();  // delete all items of the ListBox
 
 
@@ -212,7 +212,8 @@ void SequencerBar::updateSequencer()
     seqList_->add(new NItem(buf));
   }
 
-  //cc->SelItemRange(false,0,cc->GetCount()-1);
+  seqList_->selClear(); // delete old selection
+
   for (int i=0; i<MAX_SONG_POSITIONS;i++)
   {
       if ( Global::pSong()->playOrderSel[i]) seqList_->setIndex(i);
@@ -395,13 +396,13 @@ void SequencerBar::updatePlayOrder(bool mode)
 //    pls->DeleteString(ls);
     sprintf(buffer,"%.2X: %.2X",ls,le);
     seqList_->insert(new NItem(buffer),ls);
-    // Update sequencer selection   
-  //  pls->SelItemRange(false,0,pls->GetCount()-1);
+    // Update sequencer selection
+    seqList_->selClear();
     seqList_->setIndex(ls);
     memset(Global::pSong()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
     Global::pSong()->playOrderSel[ls] = true;
   } else {
-//    pls->SelItemRange(false,0,pls->GetCount()-1);
+    seqList_->selClear();
     for (int i=0;i<MAX_SONG_POSITIONS;i++ )
     {
         if (Global::pSong()->playOrderSel[i]) {
@@ -487,6 +488,7 @@ void SequencerBar::onSeqCopy( NButtonEvent * ev )
 void SequencerBar::onSeqPaste( NButtonEvent * ev )
 {
   int pastedcount = 0;
+  if(Global::pSong()->playLength < (MAX_SONG_POSITIONS-1) )
   for (std::vector<int>::iterator it = seqCopyBuffer.begin(); it < seqCopyBuffer.end(); it++)
   {
     if(Global::pSong()->playLength<(MAX_SONG_POSITIONS-1)) {
