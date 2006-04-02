@@ -51,6 +51,8 @@ SequencerBar::~SequencerBar()
 
 void SequencerBar::init( )
 {
+  NApp::config()->setSkin(&skin_,"seqbar");
+
   frBorder = new NFrameBorder();
     frBorder->setOval();
     frBorder->setLineCount(2,4,4);
@@ -62,7 +64,6 @@ void SequencerBar::init( )
 
   patternView_ = 0;
 
-  NApp::config()->setSkin(&skin_,"seqbar");
 
   seqPanel_ = new NPanel();
   seqPanel_->setWidth(100);
@@ -406,7 +407,7 @@ void SequencerBar::updatePlayOrder(bool mode)
     for (int i=0;i<MAX_SONG_POSITIONS;i++ )
     {
         if (Global::pSong()->playOrderSel[i]) {
-          seqList_->setIndex(i);//pls->SetSel(i,true);
+          seqList_->setIndex(i);
         }
     }
   }

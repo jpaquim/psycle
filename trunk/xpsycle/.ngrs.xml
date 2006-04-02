@@ -10,18 +10,18 @@
 </vcskin>	
 <vcskin id='btnflat'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
-	<gradient start='230:230:230' mid='240:240:240' end='140:140:140' dir='ver' percent='10' style='1'>
-	</gradient>
 </vcskin>
 <vcskin id='btnup'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
-	<gradient start='230:230:230' mid='240:240:240' end='140:140:140' dir='ver' percent='10' style='1'>
+	<gradient start='230:230:230' mid='240:240:240' end='140:140:140' dir='ver' percent='10' style='2' arcw='5' arch='5'>
 	</gradient>
+	<frmborder style='2' arcw = '5' arch ='5'></frmborder>
 </vcskin>
 <vcskin id='btnover'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>
-	<gradient start='240:240:240' mid='250:250:250' end='180:180:180' dir='ver' percent='10' style='1'>
+	<gradient start='240:240:240' mid='250:250:250' end='180:180:180' dir='ver' percent='10' style='2' arcw='5' arch='5'>
 	</gradient>
+	<frmborder style='2' arcw = '5' arch ='5'></frmborder>
 </vcskin>
 <vcskin id='mbtnnone'>
 	<font name='Suse Sans' size='8' color='0:0:0'></font>	
@@ -54,7 +54,7 @@
 </vcskin>
 <vcskin id='edit'>
 	<font name='Suse Sans' size='8' color='230:230:230'></font>
-	<gradient start='230:230:230' mid='50:50:50' end='100:100:100' dir='ver' percent='10' style='1'>
+	<gradient start='100:100:100' mid='50:50:50' end='100:100:100' dir='ver' percent='10' style='1'>
 	</gradient>
 </vcskin>
 </ngrs>
