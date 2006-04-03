@@ -300,7 +300,7 @@ namespace psycle
 		bool Machine::ConnectTo(Machine* dstMac,int dstport,int outport,float volume)
 		{
 			ASSERT(dstMac);
-			if (dstMac->_type == MACHMODE_GENERATOR) return false;
+			if (dstMac->_mode == MACHMODE_GENERATOR) return false;
 
 			int freebus=-1;
 			int dfreebus=-1;
