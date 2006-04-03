@@ -475,12 +475,14 @@ void NSystem::matchVisual( )
     visual_ = visualList[0].visual;
     isTrueColor_ = true;
 
+    colormap_ = XCreateColormap (dpy(), rootWindow(),visualList[0].visual, AllocNone);
   }
 
    red_mask   = visual_->red_mask;
    green_mask = visual_->green_mask;
    blue_mask  = visual_->blue_mask;
 
+  XFree(visualList);
 }
 
 bool NSystem::isTrueColor()
