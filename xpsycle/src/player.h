@@ -112,7 +112,7 @@ public:
     /// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
     float _pBuffer[MAX_DELAY_BUFFER];
     /// file to which to output signal.
-    //WaveFile _outputWaveFile;
+   // WaveFile _outputWaveFile;
 
     /// samples per row. (Number of samples that are produced for each line(row) of pattern)
     /// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()

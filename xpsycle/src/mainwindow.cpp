@@ -327,14 +327,28 @@ void MainWindow::initToolBar( )
 
 
     psycleControlBar_->add(new NLabel("Lines per beat"));
+
     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
-     psycleControlBar_->add(new NButton(img,20,20));
-    psycleControlBar_->add(new NLabel("4"));
-     img = new NImage();
+    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); 
+       else
+    img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
+
+    NButton* lessTpbButton = new NButton(img,20,20);
+       lessTpbButton->clicked.connect(this,&MainWindow::onTpbDecOne);
+    psycleControlBar_->add(lessTpbButton);
+
+     tpbLabel_ = new NLabel("4");
+    psycleControlBar_->add(tpbLabel_);
+
+   img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+
+    NButton* moreTpbButton = new NButton(img,20,20);
+       moreTpbButton->clicked.connect(this,&MainWindow::onTpbIncOne);
+    psycleControlBar_->add(moreTpbButton);
+
+
      psycleControlBar_->add(new NButton(img,20,20));
     psycleControlBar_->add(new NLabel("Octave"));
     octaveCombo_ = new NComboBox();
@@ -669,5 +683,38 @@ void MainWindow::setAppSongBpm(int x)
    else sprintf(buffer,"%d",Global::pPlayer()->bpm);
 
    bpmLabel_->setText(buffer);
-   bpmLabel_->repaint();
+   psycleControlBar_->resize();
+   psycleControlBar_->repaint();
 }
+
+void MainWindow::setAppSongTpb(int x)
+{
+  char buffer[16];
+  if ( x != 0)
+  {
+     if (Global::pPlayer()->_playing )
+       Global::pSong()->LinesPerBeat(Global::pPlayer()->tpb+x);
+     else 
+       Global::pSong()->LinesPerBeat(Global::pSong()->LinesPerBeat()+x);
+       Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(), Global::pSong()->LinesPerBeat());
+       sprintf(buffer,"%d",Global::pSong()->LinesPerBeat());
+  } else sprintf(buffer, "%d", Global::pPlayer()->tpb);
+
+  tpbLabel_->setText(buffer);
+  psycleControlBar_->resize();
+  psycleControlBar_->repaint();
+}
+
+
+void MainWindow::onTpbDecOne(NButtonEvent* ev)
+{
+  setAppSongTpb(-1);
+  childView_->patternView()->repaint();
+}
+
+void MainWindow::onTpbIncOne(NButtonEvent* ev)
+{
+  setAppSongTpb(1);
+  childView_->patternView()->repaint();
+}
+
