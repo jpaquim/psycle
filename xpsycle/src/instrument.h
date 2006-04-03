@@ -20,6 +20,8 @@
 #ifndef INSTRUMENT_H
 #define INSTRUMENT_H
 
+#include "deserializer.h"
+
 /**
 @author Stefan
 */
@@ -31,7 +33,7 @@ public:
 
    void Delete();
    void DeleteLayer(void);
-//   void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);
+   void LoadFileChunk(DeSerializer* pFile,int version,bool fullopen=true);
 //   void SaveFileChunk(RiffFile* pFile);
    bool Empty();
 

@@ -20,6 +20,8 @@
 #include "instrument.h"
 #include "filter.h"
 #include <cstdio>
+#include <Constants.h>
+#include <datacompression.h>
 
 
 template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
@@ -103,107 +105,107 @@ bool Instrument::Empty()
 
 
 
-/*void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
+void Instrument::LoadFileChunk(DeSerializer* pFile,int version,bool fullopen)
 		{
 			Delete();
 			// assume version 0 for now
-			pFile->Read(&_loop,sizeof(_loop));
-			pFile->Read(&_lines,sizeof(_lines));
-			pFile->Read(&_NNA,sizeof(_NNA));
+			pFile->read(&_loop,sizeof(_loop));
+			pFile->read(&_lines,sizeof(_lines));
+			pFile->read(&_NNA,sizeof(_NNA));
 
-			pFile->Read(&ENV_AT,sizeof(ENV_AT));
-			pFile->Read(&ENV_DT,sizeof(ENV_DT));
-			pFile->Read(&ENV_SL,sizeof(ENV_SL));
-			pFile->Read(&ENV_RT,sizeof(ENV_RT));
+			pFile->read(&ENV_AT,sizeof(ENV_AT));
+			pFile->read(&ENV_DT,sizeof(ENV_DT));
+			pFile->read(&ENV_SL,sizeof(ENV_SL));
+			pFile->read(&ENV_RT,sizeof(ENV_RT));
 			
-			pFile->Read(&ENV_F_AT,sizeof(ENV_F_AT));
-			pFile->Read(&ENV_F_DT,sizeof(ENV_F_DT));
-			pFile->Read(&ENV_F_SL,sizeof(ENV_F_SL));
-			pFile->Read(&ENV_F_RT,sizeof(ENV_F_RT));
+			pFile->read(&ENV_F_AT,sizeof(ENV_F_AT));
+			pFile->read(&ENV_F_DT,sizeof(ENV_F_DT));
+			pFile->read(&ENV_F_SL,sizeof(ENV_F_SL));
+			pFile->read(&ENV_F_RT,sizeof(ENV_F_RT));
 
-			pFile->Read(&ENV_F_CO,sizeof(ENV_F_CO));
-			pFile->Read(&ENV_F_RQ,sizeof(ENV_F_RQ));
-			pFile->Read(&ENV_F_EA,sizeof(ENV_F_EA));
-			pFile->Read(&ENV_F_TP,sizeof(ENV_F_TP));
+			pFile->read(&ENV_F_CO,sizeof(ENV_F_CO));
+			pFile->read(&ENV_F_RQ,sizeof(ENV_F_RQ));
+			pFile->read(&ENV_F_EA,sizeof(ENV_F_EA));
+			pFile->read(&ENV_F_TP,sizeof(ENV_F_TP));
 
-			pFile->Read(&_pan,sizeof(_pan));
-			pFile->Read(&_RPAN,sizeof(_RPAN));
-			pFile->Read(&_RCUT,sizeof(_RCUT));
-			pFile->Read(&_RRES,sizeof(_RRES));
+			pFile->read(&_pan,sizeof(_pan));
+			pFile->read(&_RPAN,sizeof(_RPAN));
+			pFile->read(&_RCUT,sizeof(_RCUT));
+			pFile->read(&_RRES,sizeof(_RRES));
 
-			pFile->ReadString(_sName,sizeof(_sName));
+			pFile->readString(_sName,sizeof(_sName));
 
 			// now we have to read waves
 
 			int numwaves;
-			pFile->Read(&numwaves, sizeof(numwaves));
+			pFile->read(&numwaves, sizeof(numwaves));
 			for (int i = 0; i < numwaves; i++)
 			{
 				char Header[5];
 
-				pFile->Read(&Header,4);
+				pFile->read(Header,4);
 				Header[4] = 0;
-				UINT version;
-				UINT size;
+				int version;
+				int size;
 
 				if (strcmp(Header,"WAVE")==0)
 				{
 
-					pFile->Read(&version,sizeof(version));
-					pFile->Read(&size,sizeof(size));
+					pFile->read(&version,sizeof(version));
+					pFile->read(&size,sizeof(size));
 					//fileformat supports several waves, but sampler only supports one.
 					if (version > CURRENT_FILE_VERSION_WAVE || i > 0)
 					{
 						// there is an error, this file is newer than this build of psycle
 						//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
-						pFile->Skip(size);
+						pFile->skip(size);
 					}
 					else
 					{
-						UINT index;
-						pFile->Read(&index,sizeof(index));
+						int index;
+						pFile->read(&index,sizeof(index));
 
-						pFile->Read(&waveLength,sizeof(waveLength));
-						pFile->Read(&waveVolume,sizeof(waveVolume));
-						pFile->Read(&waveLoopStart,sizeof(waveLoopStart));
-						pFile->Read(&waveLoopEnd,sizeof(waveLoopEnd));
+						pFile->read((char*)&waveLength,sizeof(waveLength));
+						pFile->read((char*)&waveVolume,sizeof(waveVolume));
+						pFile->read((char*)&waveLoopStart,sizeof(waveLoopStart));
+						pFile->read((char*)&waveLoopEnd,sizeof(waveLoopEnd));
 						
-						pFile->Read(&waveTune,sizeof(waveTune));
-						pFile->Read(&waveFinetune,sizeof(waveFinetune));
-						pFile->Read(&waveLoopType,sizeof(waveLoopType));
-						pFile->Read(&waveStereo,sizeof(waveStereo));
+						pFile->read(&waveTune,sizeof(waveTune));
+						pFile->read(&waveFinetune,sizeof(waveFinetune));
+						pFile->read(&waveLoopType,sizeof(waveLoopType));
+						pFile->read(&waveStereo,sizeof(waveStereo));
 						
-						pFile->ReadString(waveName,sizeof(waveName));
+						pFile->readString(waveName,sizeof(waveName));
 						
-						pFile->Read(&size,sizeof(size));
+						pFile->read(&size,sizeof(size));
 						byte* pData;
 						
 						if ( !fullopen )
 						{
-							pFile->Skip(size);
+							pFile->skip(size);
 							waveDataL=new signed short[2];
 						}
 						else
 						{
 							pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
-							pFile->Read(pData,size);
-							SoundDesquash(pData,&waveDataL);
+							pFile->read(pData,size);
+							DataCompression::SoundDesquash(pData,&waveDataL);
 							zapArray(pData);
 						}
 
 						if (waveStereo)
 						{
-							pFile->Read(&size,sizeof(size));
+							pFile->read(&size,sizeof(size));
 							if ( !fullopen )
 							{
-								pFile->Skip(size);
+								pFile->skip(size);
 								zapArray(waveDataR,new signed short[2]);
 							}
 							else
 							{
 								pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
-								pFile->Read(pData,size);
-								SoundDesquash(pData,&waveDataR);
+								pFile->read(pData,size);
+								DataCompression::SoundDesquash(pData,&waveDataR);
 								zapArray(pData);
 							}
 						}
@@ -211,16 +213,16 @@ bool Instrument::Empty()
 				}
 				else
 				{
-					pFile->Read(&version,sizeof(version));
-					pFile->Read(&size,sizeof(size));
+					pFile->read(&version,sizeof(version));
+					pFile->read(&size,sizeof(size));
 					// there is an error, this file is newer than this build of psycle
 					//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
-					pFile->Skip(size);
+					pFile->skip(size);
 				}
 			}
 		}
 
-		void Instrument::SaveFileChunk(RiffFile* pFile)
+		/*void Instrument::SaveFileChunk(RiffFile* pFile)
 		{
 			pFile->Write(&_loop,sizeof(_loop));
 			pFile->Write(&_lines,sizeof(_lines));
