@@ -83,6 +83,7 @@ private:
     NMenu* helpMenu_;
 
     NLabel* bpmLabel_;
+    NLabel* tpbLabel_;
 
     NFlowLayout* toolBarPanelLayout;
     NFlowLayout* statusBarPanelLayout;
@@ -113,10 +114,15 @@ private:
     void onNewMachine(NButtonEvent* ev);
 
     void setAppSongBpm(int x);
+    void setAppSongTpb(int x);
+
     void onBpmIncOne(NButtonEvent* ev);
     void onBpmAddTen(NButtonEvent* ev);
     void onBpmDecOne(NButtonEvent* ev);
     void onBpmDecTen(NButtonEvent* ev);
+
+    void onTpbDecOne(NButtonEvent* ev);
+    void onTpbIncOne(NButtonEvent* ev);
 
     void updateComboGen();
     void appNew();
