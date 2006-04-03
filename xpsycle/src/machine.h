@@ -80,7 +80,7 @@ public:
     virtual int GetParamValue(int numparam) { return 0; };
     virtual void SetSampleRate(int sr) {};
     virtual bool SetParameter(int numparam, int value) { return false;};
-
+    virtual bool Load(DeSerializer * pFile);
 
     virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
     virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };

@@ -24,6 +24,7 @@
 #include "deserializer.h"
 #include "serializer.h"
 #include "plugin.h"
+#include "sampler.h"
 
 
 char* Master::_psName = "Master";
@@ -998,8 +999,7 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
         if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new Master(index);
      break;
      case MACH_SAMPLER:
-         pMachine = new Dummy(index);
-         //if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new Sampler(index);
+         if ( !fullopen ) pMachine = new Dummy(index); else pMachine = new Sampler(index);
      break;
      case MACH_XMSAMPLER:
         pMachine = new Dummy(index);
@@ -1240,5 +1240,55 @@ void Mixer::SaveSpecificChunk(Serializer* pFile)
 void Machine::SaveDllName( Serializer * pFile )
 {
   pFile->PutBool(0);
+}
+
+bool Machine::Load( DeSerializer * pFile )
+{
+  char junk[256];
+			std::memset(&junk, 0, sizeof(junk));
+			pFile->read(_editName,16);
+			_editName[15] = 0;
+			pFile->read(&_inputMachines[0], sizeof(_inputMachines));
+			pFile->read(&_outputMachines[0], sizeof(_outputMachines));
+			pFile->read(&_inputConVol[0], sizeof(_inputConVol));
+			pFile->read(&_connection[0], sizeof(_connection));
+			pFile->read(&_inputCon[0], sizeof(_inputCon));
+			pFile->read((char*)&_connectionPoint[0], sizeof(_connectionPoint));
+			pFile->read(&_numInputs, sizeof(_numInputs));
+			pFile->read(&_numOutputs, sizeof(_numOutputs));
+
+			pFile->read(&_panning, sizeof(_panning));
+			Machine::SetPan(_panning);
+			pFile->read(&junk[0], 8*sizeof(int)); // SubTrack[]
+			pFile->read(&junk[0], sizeof(int)); // numSubtracks
+			pFile->read(&junk[0], sizeof(int)); // interpol
+
+			pFile->read(&junk[0], sizeof(int)); // outdry
+			pFile->read(&junk[0], sizeof(int)); // outwet
+
+			pFile->read(&junk[0], sizeof(int)); // distPosThreshold
+			pFile->read(&junk[0], sizeof(int)); // distPosClamp
+			pFile->read(&junk[0], sizeof(int)); // distNegThreshold
+			pFile->read(&junk[0], sizeof(int)); // distNegClamp
+
+			pFile->read(&junk[0], sizeof(char)); // sinespeed
+			pFile->read(&junk[0], sizeof(char)); // sineglide
+			pFile->read(&junk[0], sizeof(char)); // sinevolume
+			pFile->read(&junk[0], sizeof(char)); // sinelfospeed
+			pFile->read(&junk[0], sizeof(char)); // sinelfoamp
+
+			pFile->read(&junk[0], sizeof(int)); // delayTimeL
+			pFile->read(&junk[0], sizeof(int)); // delayTimeR
+			pFile->read(&junk[0], sizeof(int)); // delayFeedbackL
+			pFile->read(&junk[0], sizeof(int)); // delayFeedbackR
+
+			pFile->read(&junk[0], sizeof(int)); // filterCutoff
+			pFile->read(&junk[0], sizeof(int)); // filterResonance
+			pFile->read(&junk[0], sizeof(int)); // filterLfospeed
+			pFile->read(&junk[0], sizeof(int)); // filterLfoamp
+			pFile->read(&junk[0], sizeof(int)); // filterLfophase
+			pFile->read(&junk[0], sizeof(int)); // filterMode
+
+			return true;
 }
 
