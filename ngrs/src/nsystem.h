@@ -68,11 +68,20 @@ public:
     int windowTop(Window win);
     unsigned long getXColorValue(int r, int g, int b);
 
+    bool isTrueColor();
+
+
 private:
+
+    bool isTrueColor_;
 
     int depth_;
     int screen_;
     int keyState_;
+
+    long red_mask;
+    long green_mask;
+    long blue_mask;
 
     Display* dpy_;
     Window rootWindow_;
@@ -84,6 +93,7 @@ private:
     std::map<unsigned long,unsigned long> colorCache;
 
     void initX();
+    void matchVisual();
     std::string getFontPattern(const NFont & font);
     static bool isWellFormedFont(std::string name);
     static bool isScalableFont(std::string name);

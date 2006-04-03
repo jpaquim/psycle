@@ -20,7 +20,6 @@
 #ifndef NAPP_H
 #define NAPP_H
 
-#include "nsystem.h"
 #include <map>
 #include "nkeyaccelerator.h"
 #include "nxpmfilter.h"
@@ -28,6 +27,7 @@
 #include <sys/select.h>
 
 
+class NSystem;
 class NWindow;
 class NConfig;
 class NSplashScreen;
