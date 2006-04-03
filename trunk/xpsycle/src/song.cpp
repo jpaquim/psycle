@@ -22,7 +22,7 @@
 #include "configuration.h"
 #include "datacompression.h"
 #include "machine.h"
-//#include "sampler.h"
+#include "sampler.h"
 #include "xmsampler.h"
 #include "plugin.h"
 #include "deserializer.h"
@@ -49,7 +49,7 @@ bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll
 {
   Machine* pMachine;
   Master* pMaster;
-  //Sampler* pSampler;
+  Sampler* pSampler;
   XMSampler* pXMSampler;
   DuplicatorMac* pDuplicator;
   Mixer* pMixer;
@@ -63,7 +63,7 @@ bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll
        index = MASTER_INDEX;
     break;
     case MACH_SAMPLER:
-//       pMachine = pSampler = new Sampler(index);
+         pMachine = pSampler = new Sampler(index);
     break;
     case MACH_XMSAMPLER:
 //       pMachine = pXMSampler = new XMSampler(index);
@@ -418,6 +418,18 @@ bool Song::load( const std::string & fName )
            //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
 //                      pFile->Skip(size - sizeof index);
                   }
+          } else 
+          if (header== "INSD") {
+            if (f.checkVersion(CURRENT_FILE_VERSION_INSD)) {
+               int index = f.getInt();
+               if(index < MAX_INSTRUMENTS) {
+                 _pInstrument[index]->LoadFileChunk(&f, CURRENT_FILE_VERSION_INSD, true);
+               } else
+               {
+                 //MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+                 //pFile->skip(size - sizeof index);
+               }
+            }
           }
 
         }
