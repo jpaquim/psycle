@@ -111,6 +111,8 @@ void NSystem::initX( )
   visual_     = DefaultVisual(dpy_, screen_);
   depth_      = DefaultDepth(dpy_, screen_);
 
+  matchVisual();
+
   wm_delete_window = XInternAtom(dpy_, "WM_DELETE_WINDOW", False);
   keyState_ = 0;
 }
@@ -432,6 +434,11 @@ void NSystem::setStayAbove( Window win )
 
 unsigned long NSystem::getXColorValue(int r, int g, int b )
 {
+ if (isTrueColor()) {
+   unsigned long value = ((r << 16) & red_mask)  | ((g << 8) & green_mask) | (b & blue_mask);
+   return value;
+ }
+
  unsigned long key = (r << 16) | (g << 8) | (b);
  unsigned long value = 0;
  std::map<unsigned long, unsigned long>::iterator itr;
@@ -446,6 +453,41 @@ unsigned long NSystem::getXColorValue(int r, int g, int b )
  } else value = itr->second;
  return value;
 }
+
+
+void NSystem::matchVisual( )
+{
+  isTrueColor_ = false;
+
+  int visualsMatched;       // Number of visuals that match
+  XVisualInfo vTemplate;    // Template of the visual we want
+  XVisualInfo *visualList;  // List of XVisualInfo structs that match
+
+
+  vTemplate.depth   = depth();
+  vTemplate.screen  = screen();
+  vTemplate.c_class = TrueColor;
+
+  visualList = XGetVisualInfo( dpy(), VisualDepthMask | VisualScreenMask | VisualClassMask, &vTemplate, &visualsMatched);
+
+  if (visualsMatched != 0) {
+    // set to TrueColor
+    visual_ = visualList[0].visual;
+    isTrueColor_ = true;
+
+  }
+
+   red_mask   = visual_->red_mask;
+   green_mask = visual_->green_mask;
+   blue_mask  = visual_->blue_mask;
+
+}
+
+bool NSystem::isTrueColor()
+{
+  return isTrueColor_;
+}
+
 
 
 
