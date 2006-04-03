@@ -472,6 +472,7 @@ void NSystem::matchVisual( )
 
   if (visualsMatched != 0) {
     // set to TrueColor
+    std::cout << "using truecolor" << std::endl;
     visual_ = visualList[0].visual;
     isTrueColor_ = true;
 
