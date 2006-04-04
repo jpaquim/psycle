@@ -1,1 +1,0 @@
-../../xpsycle/src/alsaout.h
