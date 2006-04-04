@@ -43,6 +43,8 @@ MainWindow::MainWindow()
     add(greetDlg);
   aboutDlg =  new AboutDlg();
     add(aboutDlg);
+  wavRecFileDlg = new NFileDialog();
+    add(wavRecFileDlg);
 }
 
 
@@ -169,7 +171,12 @@ void MainWindow::initToolBar( )
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordwav()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "recordwav.xpm");
-    toolBar1_->add(new NButton(img,20,20));
+
+    NButton* recWav = new NButton(img,20,20);
+       recWav->setToggle(true);
+       recWav->setFlat(false);
+       recWav->clicked.connect(this, &MainWindow::onRecordWav);
+    toolBar1_->add(recWav);
 
 
     toolBar1_->add(new NToolBarSeparator());
@@ -184,10 +191,16 @@ void MainWindow::initToolBar( )
                                          img->loadFromFile(Global::pConfig()->iconPath+ "redo.xpm");
     toolBar1_->add(new NButton(img,20,20));
 
+    toolBar1_->add(new NToolBarSeparator());
+
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->recordnotes()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "recordnotes.xpm");
-    toolBar1_->add(new NButton(img,20,20));
+
+
+    NButton* recNotes = new NButton(img,20,20);
+    toolBar1_->add(recNotes);
+
 
     toolBar1_->add(new NToolBarSeparator());
 
@@ -709,5 +722,23 @@ void MainWindow::onTpbIncOne(NButtonEvent* ev)
 {
   setAppSongTpb(1);
   childView_->patternView()->repaint();
+}
+
+void MainWindow::onRecordWav( NButtonEvent * ev )
+{
+  if (!Global::pPlayer()->_recording)
+  {
+     if (wavRecFileDlg->execute()) {
+        Global::pPlayer()->StartRecording(wavRecFileDlg->fileName());
+      }
+      if ( Global::pConfig()->autoStopMachines )
+      {
+        //OnAutostop();
+      }
+  }
+  else
+  {
+     Global::pPlayer()->StopRecording();
+  }
 }
 
