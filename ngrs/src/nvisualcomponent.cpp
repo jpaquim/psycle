@@ -174,7 +174,7 @@ bool NVisualComponent::transparent( ) const
   return skin_.transparent;
 }
 
-bool NVisualComponent::setTransparent( bool on )
+void NVisualComponent::setTransparent( bool on )
 {
   skin_.transparent = on;
 }
@@ -494,7 +494,7 @@ bool NVisualComponent::events( ) const
   return events_;
 }
 
-bool NVisualComponent::setTranslucent( NColor color, int percent )
+void NVisualComponent::setTranslucent( NColor color, int percent )
 {
   skin_.translucent = percent;
   skin_.transColor  = color;

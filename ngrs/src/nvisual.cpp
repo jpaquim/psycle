@@ -22,10 +22,6 @@
 NVisual::NVisual()
  : visible_(true),geometry_(0),minWidth_(10),minHeight_(10), NRuntime()
 {
-  visible_   = true;
-  geometry_  = 0;
-  minWidth_  = 10;
-  minHeight_ = 10;
 }
 
 
@@ -122,10 +118,12 @@ void NVisual::onMouseOver( int x, int y )
 
 int NVisual::absoluteLeft( ) const
 {
+  return 0;
 }
 
 int NVisual::absoluteTop( ) const
 {
+  return 0;
 }
 
 int NVisual::width( ) const

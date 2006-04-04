@@ -61,8 +61,8 @@ public:
     virtual bool visit(NVisitor* v);
 
     bool transparent() const;
-    bool setTransparent(bool on);
-    bool setTranslucent(NColor color, int percent);
+    void setTransparent(bool on);
+    void setTranslucent(NColor color, int percent);
     int translucent() const;
     const NColor & translucentColor();
 
