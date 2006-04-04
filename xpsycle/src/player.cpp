@@ -42,6 +42,7 @@ Player::Player()
  m_SamplesPerRow=(44100*60)/(125*4);
  tpb=4;
  bpm=125;
+ _outputWaveFile = 0;
  for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 
 }
@@ -443,7 +444,7 @@ float * Player::Work( void * context, int & numSamples )
          //CPUCOST_CALC(idletime, amount);
          pSong->cpuIdle = idletime;
          pSong->_sampCount += amount;
-/*       if((pThis->_playing) && (pThis->_recording))
+         if((pThis->_playing) && (pThis->_recording))
          {
            float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
            float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
@@ -453,29 +454,45 @@ float * Player::Work( void * context, int & numSamples )
              case 0: // mono mix
                for(i=0; i<amount; i++)
                {
-                 if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
+                 try {
+                   pThis->_outputWaveFile->WriteMonoSample(((*pL++)+(*pR++))/2);
+                 } catch (std::exception) {
+                   pThis->StopRecording(false);
+                 }
                }
              break;
              case 1: // mono L
                for(i=0; i<amount; i++)
                {
-                 if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->StopRecording(false);
+                try {
+                 pThis->_outputWaveFile->WriteMonoSample((*pL++));
+                } catch (std::exception) {
+                  pThis->StopRecording(false);
+                }
                }
              break;
              case 2: // mono R
                for(i=0; i<amount; i++)
                {
-                 if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+                 try {
+                   pThis->_outputWaveFile->WriteMonoSample((*pR++));
+                 } catch (std::exception e) {
+                   pThis->StopRecording(false);
+                 }
                }
              break;
              default: // stereo
                 for(i=0; i<amount; i++)
                 {
-                  if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+                  try {
+                    pThis->_outputWaveFile->WriteStereoSample((*pL++),(*pR++));
+                  } catch (std::exception e) {
+                     pThis->StopRecording(false);
+                  }
                 }
                 break;
            }
-         }*/
+         }
          Master::_pMasterSamples += amount * 2;
          numSamplex -= amount;
        }
@@ -526,3 +543,52 @@ void Player::AdvancePosition( )
   _lineChanged = true;
 }
 
+void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
+{
+  backup_rate = Global::pConfig()->_pOutputDriver->_samplesPerSec;
+  backup_bits = Global::pConfig()->_pOutputDriver->_bitDepth;
+  backup_channelmode = Global::pConfig()->_pOutputDriver->_channelmode;
+
+  if(samplerate > 0) {
+     SampleRate(samplerate);
+     Global::pConfig()->_pOutputDriver->_samplesPerSec = samplerate;
+  }
+
+  if(bitdepth > 0) Global::pConfig()->_pOutputDriver->_bitDepth = bitdepth;
+
+  if(channelmode >= 0) Global::pConfig()->_pOutputDriver->_channelmode = channelmode;
+
+  int channels = 2;
+
+  if(Global::pConfig()->_pOutputDriver->_channelmode != 3) channels = 1;
+
+  Stop();
+
+  _recording = true;
+
+  try {
+    _outputWaveFile = new Serializer(psFilename,Global::pConfig()->_pOutputDriver->_samplesPerSec, Global::pConfig()->_pOutputDriver->_bitDepth, channels);
+  } catch (std::exception) {
+    StopRecording(false);
+  }
+
+
+}
+
+void Player::StopRecording( bool bOk )
+{
+  if(_recording)
+  {
+     Global::pConfig()->_pOutputDriver->_samplesPerSec = backup_rate;
+     SampleRate(backup_rate);
+     Global::pConfig()->_pOutputDriver->_bitDepth = backup_bits;
+     Global::pConfig()->_pOutputDriver->_channelmode = backup_channelmode;
+     delete _outputWaveFile;
+     _outputWaveFile = 0;
+     _recording = false;
+     if(!bOk) {
+        std::cerr << "Wav recording failed." << std::endl;
+         //MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
+     }
+  }
+}

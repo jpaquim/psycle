@@ -19,3 +19,12 @@
  ***************************************************************************/
 #include "deserializer.h"
 
+unsigned long FourCC( const char *ChunkName)
+{
+   long retbuf = 0x20202020;   // four spaces (padding)
+   char *p = ((char *)&retbuf);
+   // Remember, this is Intel format!
+   // The first character goes in the LSB
+   for( int i(0) ; i < 4 && ChunkName[i]; ++i) *p++ = ChunkName[i];
+   return retbuf;
+}

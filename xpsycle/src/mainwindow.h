@@ -37,7 +37,7 @@
 #include <nbevelborder.h>
 #include <nprogressbar.h>
 #include "newmachine.h"
-
+#include <nfiledialog.h>
 
 class GreetDlg;
 class AboutDlg;
@@ -90,6 +90,7 @@ private:
 
     GreetDlg* greetDlg;
     AboutDlg* aboutDlg;
+    NFileDialog* wavRecFileDlg;
 
     void initMenu();
     void initDialogs();
@@ -112,6 +113,8 @@ private:
     void onOctaveChange(NItemEvent* ev);
     void onTrackChange(NItemEvent* ev);
     void onNewMachine(NButtonEvent* ev);
+
+    void onRecordWav(NButtonEvent* ev);
 
     void setAppSongBpm(int x);
     void setAppSongTpb(int x);

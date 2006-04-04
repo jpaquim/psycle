@@ -24,6 +24,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
+#include <inttypes.h>
 
 
 /// \todo add real detection of type size
@@ -47,9 +48,9 @@ public:
 
     std::size_t fileSize() {
       std::size_t curPos = getPos();
-      _stream.seekg(0, std::ios::end);              // goto end of file
+      _stream.seekg(0, std::ios::end);         // goto end of file
       std::size_t fileSize = _stream.tellg();  // read the filesize
-      _stream.seekg(curPos);             // go back to begin of file
+      _stream.seekg(curPos);                   // go back to begin of file
       return fileSize;
     }
 
@@ -202,4 +203,7 @@ public:
     private:
     std::ifstream _stream;
 };
+
+
+
 #endif
