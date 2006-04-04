@@ -26,6 +26,7 @@
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
 #include "aboutdlg.h"
+#include "vumeter.h"
 
 MainWindow::MainWindow()
  : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)
@@ -38,6 +39,8 @@ MainWindow::MainWindow()
   initBars();
   initViews();
   initSignals();
+
+  childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
 
   greetDlg =  new GreetDlg();
     add(greetDlg);
@@ -366,10 +369,9 @@ void MainWindow::initToolBar( )
     psycleControlBar_->add(new NLabel("VU"));
     NPanel* vuPanel = new NPanel();
     vuPanel->setPosition(0,0,100,22);
-       NPanel* blackSS = new NPanel();
-       blackSS->setPosition(0,2,100,7);
-       blackSS->setBackground(NColor(0,0,0));
-       vuPanel->add(blackSS);
+       vuMeter_ = new VuMeter();
+       vuPanel->add(vuMeter_);
+       vuMeter_->setPosition(0,0,100,10);
 
        masterSlider_ = new NSlider();
        masterSlider_->setOrientation(nHorizontal);
@@ -742,5 +744,12 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
   {
      Global::pPlayer()->StopRecording();
   }
+}
+
+void MainWindow::onTimer( )
+{
+  vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
+Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
+  vuMeter_->repaint();
 }
 

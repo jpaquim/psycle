@@ -41,6 +41,7 @@
 
 class GreetDlg;
 class AboutDlg;
+class VuMeter;
 
 /**
 @author Stefan
@@ -92,6 +93,8 @@ private:
     AboutDlg* aboutDlg;
     NFileDialog* wavRecFileDlg;
 
+    VuMeter* vuMeter_;
+
     void initMenu();
     void initDialogs();
     void initViews();
@@ -131,6 +134,8 @@ private:
     void appNew();
 
     void closePsycle();  // last but not least, all has an end
+
+    void onTimer();
 };
 
 #endif
