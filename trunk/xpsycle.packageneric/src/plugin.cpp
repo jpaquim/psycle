@@ -1,1 +1,0 @@
-../../xpsycle/src/plugin.cpp
