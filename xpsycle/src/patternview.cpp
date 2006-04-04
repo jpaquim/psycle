@@ -423,6 +423,8 @@ int PatternView::Header::skinColWidth( )
 
   void PatternView::LineNumber::paint( NGraphics * g )
   {
+    /// todo wrap this like patternDraw to start and endline or make new method for compution
+
     int startLine = dy_ / pView->rowHeight();
     int rDiff   = g->repaintArea().top() - absoluteTop() + pView->headerHeight();
     int offT = rDiff / pView->rowHeight();
@@ -740,31 +742,33 @@ void PatternView::PatternDraw::onMouseOver( int x, int y )
   if (doDrag_) {
     doSelect_=true;
     NPoint3D p = intersectCell(x,y);
-    if (p.x() < selStartPoint_.x()) selection_.setLeft(p.x()); else
+    if (p.x() < selStartPoint_.x()) selection_.setLeft(std::max(p.x(),0)); else
     if (p.x() == selStartPoint_.x()) {
-      selection_.setLeft (p.x());
-      selection_.setRight(p.x()+1);
+      selection_.setLeft (std::max(p.x(),0));
+      selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
     } else
     if (p.x() > selStartPoint_.x()) {
-        selection_.setRight(p.x()+1);
+        selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
         int startTrack  = dx_ / pView->colWidth();
         int trackCount  = clientWidth() / pView->colWidth();
         if (selection_.right() > startTrack + trackCount) {
            pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
         }
     }
-    if (p.y() < selStartPoint_.y()) selection_.setTop(p.y()); else
+    if (p.y() < selStartPoint_.y()) {
+       selection_.setTop(std::max(p.y(),0));
+    } else
     if (p.y() == selStartPoint_.y()) {
       selection_.setTop (p.y());
       selection_.setBottom(p.y()+1);
     } else
     if (p.y() > selStartPoint_.y()) {
-         selection_.setBottom(p.y()+1);
+         selection_.setBottom(std::min(p.y()+1,pView->lineNumber()));
          int startLine  = dy_ / pView->rowHeight();
          int lineCount  = clientHeight() / pView->rowHeight();
          if (selection_.bottom() > startLine + lineCount) {
-           pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
-        }
+           pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
+         }
     }
 
     if (oldSelection_ != selection_) {
