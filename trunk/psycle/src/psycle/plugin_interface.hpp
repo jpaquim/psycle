@@ -13,9 +13,8 @@
 	int const NOTE_MAX = 119;
 	int const NOTE_NO = 120;
 	int const NOTE_OFF = 255;
-
-	int const USEGUI = 16;		//NOTE: the fact that USEGUI is 16 is assumed in Plugin.cpp. if you change it for some reason, don't forget to
-								//change Plugin.cpp as well
+	int const USEGUI = 16;
+	int const CUSTOMGUI = 16;
 
 	#if !defined MAX_TRACKS
 		#define MAX_TRACKS 64
