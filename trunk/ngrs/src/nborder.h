@@ -31,7 +31,7 @@ class NBorder{
 public:
     NBorder();
 
-    ~NBorder();
+    virtual ~NBorder();
 
     virtual void paint(NGraphics* g, const NShape & geometry);
     void setSpacing(NSize size);
