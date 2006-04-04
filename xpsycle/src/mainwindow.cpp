@@ -193,11 +193,6 @@ void MainWindow::initToolBar( )
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playstart()); else
-                                         img->loadFromFile(Global::pConfig()->iconPath+ "recordnotes.xpm");
-    toolBar1_->add(new NButton(img,20,20));
-
-    img = new NImage();
-    if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->playstart()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "playstart.xpm");
     toolBar1_->add(barPlayFromStartBtn_ = new NButton(img,20,20));
 
@@ -348,8 +343,6 @@ void MainWindow::initToolBar( )
        moreTpbButton->clicked.connect(this,&MainWindow::onTpbIncOne);
     psycleControlBar_->add(moreTpbButton);
 
-
-     psycleControlBar_->add(new NButton(img,20,20));
     psycleControlBar_->add(new NLabel("Octave"));
     octaveCombo_ = new NComboBox();
       for (int i=0; i<9; i++) octaveCombo_->add(new NItem(stringify(i)));
