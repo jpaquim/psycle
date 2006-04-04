@@ -583,9 +583,9 @@ void Player::StopRecording( bool bOk )
      SampleRate(backup_rate);
      Global::pConfig()->_pOutputDriver->_bitDepth = backup_bits;
      Global::pConfig()->_pOutputDriver->_channelmode = backup_channelmode;
-     delete _outputWaveFile;
-     _outputWaveFile = 0;
      _recording = false;
+     if (_outputWaveFile) delete _outputWaveFile;
+     _outputWaveFile = 0;
      if(!bOk) {
         std::cerr << "Wav recording failed." << std::endl;
          //MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);

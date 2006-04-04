@@ -499,7 +499,11 @@ PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_
       blockPasteItem_->click.connect(this,&PatternView::PatternDraw::onPopupBlockPaste);
     editPopup_->add(blockPasteItem_);
     editPopup_->add(new NMenuItem("Block mix paste"));
-    editPopup_->add(new NMenuItem("Block delete"));
+
+    NMenuItem* blockDelItem = new NMenuItem("Block delete");
+       blockDelItem->click.connect(this,&PatternView::PatternDraw::onPopupBlockDelete);
+    editPopup_->add(blockDelItem);
+
     editPopup_->add(new NMenuSeperator());
     editPopup_->add(new NMenuItem("Interpolate Effect"));
     editPopup_->add(new NMenuItem("Change Generator"));
@@ -1325,4 +1329,18 @@ void PatternView::PatternDraw::onPopupTranspose_1( NButtonEvent * ev )
 void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
 {
   blockTranspose(-12);
+}
+
+void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
+{
+  PatternEntry blank;
+  // UNDO CODE HERE CUT
+  //AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+
+  int ps=Global::pSong()->playOrder[pView->editPosition()];
+
+  for (int t=selection_.left(); t < selection_.right();t++)
+    for (int l=selection_.top(); l< selection_.bottom();l++)
+            memcpy(Global::pSong()->_ptrackline(ps,t,l),&blank,EVENT_SIZE);
+
 }

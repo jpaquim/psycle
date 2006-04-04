@@ -634,6 +634,8 @@ void MainWindow::appNew( )
   childView_->setTitleBarText();
   childView_->patternView()->setEditPosition(0);
   Global::pSong()->seqBus=0;
+  sequencerBar_->updateSequencer();
+  childView_->machineView()->createGUIMachines();
   //pParentMain->PsybarsUpdate(); // Updates all values of the bars
 //  pParentMain->WaveEditorBackUpdate();
 //  pParentMain->m_wndInst.WaveUpdate();
