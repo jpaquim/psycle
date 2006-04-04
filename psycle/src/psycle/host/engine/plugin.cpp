@@ -191,7 +191,6 @@ namespace psycle
 			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
 
-			//dw00t
 			if(_pInfo->Flags & CUSTOMGUI)
 			{
 				GETPARAMS GetParams = (GETPARAMS) GetProcAddress(_dll, "GetParams");
