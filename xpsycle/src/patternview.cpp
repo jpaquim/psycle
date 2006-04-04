@@ -50,6 +50,7 @@ PatternView::PatternView()
   vBar = new NScrollBar();
     vBar->setAlign(nAlRight);
     vBar->setWidth(15);
+    vBar->setOrientation(nVertical);
     vBar->posChange.connect(this,&PatternView::onVScrollBar);
   add(vBar);
 
