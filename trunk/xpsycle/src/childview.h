@@ -59,9 +59,9 @@ public:
     void playFromStart();
     void enableSound();
 
-private:
-
     NTimer timer;
+
+private:
 
     Song* _pSong;
 

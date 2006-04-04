@@ -55,10 +55,10 @@ ChildView::ChildView()
   getSaveFileName_ = new NFileDialog();
   add(getSaveFileName_);
 
-  //enableSound();
+  enableSound();
   machineView_->createGUIMachines();
 
-  timer.setIntervalTime(100);
+  timer.setIntervalTime(10);
   timer.timerEvent.connect(this,&ChildView::onTimer);
   timer.enableTimer();
 }

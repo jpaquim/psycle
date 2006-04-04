@@ -98,6 +98,8 @@ public:
     bool _waitingForSound;
     bool _stopped;
     bool _worked;
+    float _lMax;
+    float _rMax;
     /// left data
     float *_pSamplesL;
     /// right data
@@ -220,8 +222,6 @@ class Master : public Machine
     static float* _pMasterSamples;
     int peaktime;
     float currentpeak;
-    float _lMax;
-    float _rMax;
     bool vuupdated;
     protected:
        static char* _psName;
