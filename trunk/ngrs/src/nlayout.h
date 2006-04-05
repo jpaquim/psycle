@@ -41,8 +41,8 @@ public:
     virtual ~NLayout() = 0; //{};
 
     virtual void align(class NVisualComponent* parent);
-    virtual int preferredWidth(const class NVisualComponent* target) const;
-    virtual int preferredHeight(const class NVisualComponent* target) const;
+    virtual int preferredWidth(const class NVisualComponent* target) const = 0;
+    virtual int preferredHeight(const class NVisualComponent* target) const = 0;
 
     void setParent(class NVisualComponent* parent);
     class NVisualComponent* parent() const;

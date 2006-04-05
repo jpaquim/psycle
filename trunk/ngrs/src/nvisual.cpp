@@ -20,7 +20,7 @@
 #include "nvisual.h"
 
 NVisual::NVisual()
- : visible_(true),geometry_(0),minWidth_(10),minHeight_(10), NRuntime()
+ : NRuntime(), geometry_(0),visible_(true),minWidth_(10),minHeight_(10)
 {
 }
 
