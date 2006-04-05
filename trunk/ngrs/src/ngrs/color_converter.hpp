@@ -95,6 +95,15 @@ namespace ngrs
 				for(unsigned i(0); i < Channel_Count; ++i) this->channels[i] = channel(masks[i]);
 			}
 			
+			/// converts a client color to a server one.
+			///\return the server value
+			value_type inline operator()(value_type const values[Channel_Count]) const throw()
+			{
+				value_type result(0);
+				for(unsigned i(0); i < Channel_Count; ++i) result |= channels[i](values[i]);
+				return result;
+			}
+			
 			/// converts a client value to a server one.
 			/// floating point numeric values in the range [0, 1].
 			/// 4 channels, or 3 channels with default value for alpha
@@ -103,15 +112,6 @@ namespace ngrs
 			{
 				value_type result(0);
 				for(unsigned i(0); i < Channel_Count; ++i) result |= channels[i](values[i] * client_max_value);
-				return result;
-			}
-			
-			/// converts a client color to a server one.
-			///\return the server value
-			value_type inline operator()(value_type const values[Channel_Count]) const throw()
-			{
-				value_type result(0);
-				for(unsigned i(0); i < Channel_Count; ++i) result |= channels[i](values[i]);
 				return result;
 			}
 	};
@@ -158,25 +158,6 @@ namespace ngrs
 				this->channels[3] = channel(alpha);
 			}
 			
-			/// converts a client value to a server one.
-			/// floating point numeric values in the range [0, 1].
-			/// 4 channels, or 3 channels with default value for alpha
-			template<typename Floating_Point_Numeric>
-			value_type inline real
-			(
-				Floating_Point_Numeric const red,
-				Floating_Point_Numeric const green,
-				Floating_Point_Numeric const blue,
-				Floating_Point_Numeric const alpha = Opaque_Value
-			) const throw()
-			{
-				return
-					this->channels[0](red   * this->client_max_value) |
-					this->channels[1](green * this->client_max_value) |
-					this->channels[2](blue  * this->client_max_value) |
-					this->channels[3](alpha * this->client_max_value);
-			}
-			
 			/// converts a client color to a server one.
 			/// integral numeric values in the range [0, client_max_value].
 			/// 4 channels, or 3 channels with default value for alpha
@@ -193,6 +174,28 @@ namespace ngrs
 					this->channels[1](green) |
 					this->channels[2](blue ) |
 					this->channels[3](alpha);
+			}
+			
+			/// converts a client value to a server one.
+			/// floating point numeric values in the range [0, 1].
+			/// 4 channels, or 3 channels with default value for alpha
+			template<typename Floating_Point_Numeric>
+			value_type inline real
+			(
+				Floating_Point_Numeric const red,
+				Floating_Point_Numeric const green,
+				Floating_Point_Numeric const blue,
+				Floating_Point_Numeric const alpha = Opaque_Value
+			) const throw()
+			{
+				return
+					(*this)
+					(
+						red   * this->client_max_value,
+						green * this->client_max_value,
+						blue  * this->client_max_value,
+						alpha * this->client_max_value
+					);
 			}
 	};
 }
