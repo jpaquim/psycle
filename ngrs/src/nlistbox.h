@@ -51,7 +51,7 @@ public:
     void selClear();
 
     void setMultiSelect(bool on);
-
+    NCustomItem* itemAt(unsigned int index);
 
 private:
 

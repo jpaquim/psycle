@@ -21,7 +21,7 @@
 /* XPM */
 const char * group_xpm[] = {
 "16 16 10 1",
-" 	c gray",
+" 	c None",
 ".	c #020204",
 "+	c #826E54",
 "@	c #9A8A76",
@@ -62,16 +62,23 @@ NFileListBox::NFileListBox()
   setTransparent(false);
   setBackground(NColor(255,255,255));
   sharedDirIcon_.createFromXpmData(group_xpm);
+  activeFilter = 0;
 }
 
 
 NFileListBox::~NFileListBox()
 {
+ std::map<std::string,NRegExp*>::iterator itr;
+ for (itr = filterMap.begin(); itr != filterMap.end(); itr++) {
+    NRegExp* exp = itr->second;
+    delete exp;
+ }
 }
 
 
 void NFileListBox::setDirectory( std::string directory )
 {
+  dir_ = directory;
   std::string oldDir = NFile::workingDir();
 
   removeChilds();
@@ -81,10 +88,12 @@ void NFileListBox::setDirectory( std::string directory )
       list = fSystem.fileList(directory);
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
-        NItem* item = new NItem();
-        item->setText(entry);
-        item->mousePress.connect(this,&NFileListBox::onFileItemSelected);
-        add (item, false);
+        if (activeFilter==0  || (activeFilter && activeFilter->accept(entry))) {
+          NItem* item = new NItem();
+          item->setText(entry);
+          item->mousePress.connect(this,&NFileListBox::onFileItemSelected);
+          add (item, false);
+        }
       }
   }
   if (mode_ & nDirs) {
@@ -139,7 +148,22 @@ void NFileListBox::onFileItemSelected( NButtonEvent * ev )
   isDirItem_ = false;
 }
 
+void NFileListBox::addFilter( const std::string & name, const std::string & regexp )
+{
+  NRegExp* exp = new NRegExp();
+  exp->setRegExp(regexp);
+  filterMap[name] = exp;
+}
 
-
-
+void NFileListBox::setActiveFilter( const std::string & name )
+{
+  std::map<std::string,NRegExp*>::iterator itr;
+  if ( (itr = filterMap.find(name)) != filterMap.end())
+  {
+    activeFilter = itr->second;
+  } else {
+    activeFilter = 0;
+  }
+  setDirectory(dir_);
+}
 

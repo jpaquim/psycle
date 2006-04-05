@@ -50,10 +50,7 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  NButton* btn = new NButton("Hallo");
-     btn->setFlat(false);
-     btn->setPosition(10,10,200,20);
-  pane()->add(btn);
+  testMenu();
 }
 
 
@@ -128,6 +125,9 @@ void NTestWindow::testLine( )
 
 void NTestWindow::testMenu( )
 {
+  fDialog = new NFileDialog();
+    fDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
+  add(fDialog);
 
   NMenuBar* menuBar_ = new NMenuBar();
   pane()->add(menuBar_);
