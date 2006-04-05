@@ -39,11 +39,12 @@ NLineShape::~NLineShape()
 
 NPoint NLineShape::pickerAt( int i )
 {
-  if (i == 0) return p1_; else p2_;
+  if (i == 0) return p1_; else return p2_;
 }
 
 int NLineShape::pickerSize( )
 {
+  return 5;
 }
 
 void NLineShape::setPosition( int left, int top, int width, int height )

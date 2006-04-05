@@ -101,7 +101,6 @@ std::string NCheckBox::text( )
 
 int NCheckBox::preferredWidth( ) const
 {
-  int dx = 5;
   return 20 + label_->preferredWidth() + spacing().left()+spacing().right()+borderLeft()+borderRight();
 }
 

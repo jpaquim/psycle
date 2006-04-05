@@ -91,13 +91,13 @@ void NColor::setRGB( const std::string & rgbStr )
   int g = 0;
   int b = 0;
 
-  int i = 0;
+  unsigned int i = 0;
   int start = 0;
   std::string substr;
   int c = 0;
   do {
     i = rgbStr.find(':', i);
-    if (i != -1) {
+    if (i != std::string::npos) {
        substr = rgbStr.substr(start,i-start);
        i+=1;
        start = i;

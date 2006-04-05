@@ -57,6 +57,7 @@ NPoint NRectShape::pickerAt( int i )
     default:;
 
   }
+  return NPoint(-1,1);
 }
 
 int NRectShape::pickerSize( )

@@ -164,7 +164,7 @@ std::vector< std::string > NFile::dirList( const std::string path )
 
 std::string NFile::replaceTilde( std::string  path )
 {
- int pos = path.find("~");
+ unsigned int pos = path.find("~");
   if (pos!=std::string::npos) {
     char home[8000]; 
     strncpy(home,getenv("HOME"),7999);

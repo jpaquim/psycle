@@ -537,7 +537,7 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
   }
 }
 
-int NConfig::loadXmlConfig(const std::string & configName )
+void NConfig::loadXmlConfig(const std::string & configName )
 {
   try {
     XMLPlatformUtils::Initialize();

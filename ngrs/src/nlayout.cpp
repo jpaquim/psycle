@@ -46,13 +46,7 @@ class NVisualComponent * NLayout::parent( ) const
   return parent_;
 }
 
-int NLayout::preferredHeight( const NVisualComponent * target ) const
-{
-}
 
-int NLayout::preferredWidth( const class NVisualComponent * target ) const
-{
-}
 
 void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRect & repaintArea  )
 {
