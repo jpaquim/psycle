@@ -135,6 +135,7 @@ void SequencerBar::init( )
     btnBar->setLeft(50);
     btnBar->setHeight(btnBar->preferredHeight());
     btnBar->setWidth(btnBar->preferredWidth());
+
   seqPanel_->add(btnBar);
   seqPanel_->setHeight(btnBar->preferredHeight());
 

@@ -753,3 +753,8 @@ Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
   vuMeter_->repaint();
 }
 
+void MainWindow::updateBars( )
+{
+
+}
+
