@@ -17,32 +17,51 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef NREGEXP_H
+#define NREGEXP_H
 
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-
-#include <iostream>
-#include <sstream>
+#include <stack>
+#include <vector>
 #include <string>
-#include <cstdlib>
 
-#include "napp.h"
-#include "ntestwindow.h"
-#include "nregexp.h"
+class NNfa;
+class NState;
 
+const char nRegUnion  = '+';
+const char nRegConcat = '_';
+const char nRegStar   = '*';
+const char nRegOpenParanthesis  = '(';
+const char nRegCloseParanthesis = ')';
+const char nRegNumber = 'N';
+const char nRegAlphabet = 'A';
+const char nRegSigma = 'S';
+const char nRegPlaceHolderBegin = '{';
+const char nRegPlaceHolderEnd = '}';
 
-using namespace std;
+/**
+@author Stefan Nattkemper
+*/
+class NRegExp{
+public:
+    NRegExp();
 
-int main(int argc, char *argv[])
-{
-  NApp app;
+    ~NRegExp();
 
-  NWindow* myMainWindow = new NTestWindow();
-  app.setMainWindow(myMainWindow);
-  app.run();
+    void setRegExp(const std::string & regExp);
+    bool accept( const std::string & input );
 
-  return EXIT_SUCCESS;
-}
+private:
+
+   bool inSigma(char c);
+   int priority(char op);
+
+   std::stack<char>  opStack;
+   std::stack<NNfa*> nfaStack;
+
+   void addChar(char c, NNfa * nfa);
+   void unite(NNfa* nfa1, NNfa* nfa2);
+
+   std::vector<NState*> deleteList;
+};
+
+#endif
