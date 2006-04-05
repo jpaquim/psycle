@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nsystem.h"
-
+#include <stdexcept>
 
 using namespace std;
 
@@ -105,6 +105,13 @@ void NSystem::initX( )
   XInitThreads();
 
   dpy_        = XOpenDisplay(NULL);
+  if(!dpy_)
+  {
+    std::ostringstream s;
+    s << "ngrs: failed to open default display. is the DISPLAY environment variable set to some available display?";
+    std::cerr << s << std::endl;
+    throw std::runtime_error(s.str().c_str());
+  }
   screen_     = DefaultScreen(dpy_);
   rootWindow_ = RootWindow(dpy_, screen_);
   colormap_   = DefaultColormap(dpy_, screen_);
@@ -454,7 +461,6 @@ unsigned long NSystem::getXColorValue(int r, int g, int b )
  return value;
 }
 
-
 void NSystem::matchVisual( )
 {
   isTrueColor_ = false;
@@ -471,18 +477,22 @@ void NSystem::matchVisual( )
   visualList = XGetVisualInfo( dpy(), VisualDepthMask | VisualScreenMask | VisualClassMask, &vTemplate, &visualsMatched);
 
   if (visualsMatched != 0) {
-    // set to TrueColor
-    std::cout << "using truecolor" << std::endl;
+    // we found at least one TrueColor visual on the screen, with the required depth.
+    std::cout << "ngrs: visual class: true-color, bypassing color map" << std::endl;
     visual_ = visualList[0].visual;
     isTrueColor_ = true;
-
     colormap_ = XCreateColormap (dpy(), rootWindow(),visualList[0].visual, AllocNone);
   }
+  else
+  {
+    // use colormap
+    std::cout << "ngrs: visual class: not true-color, using color map" << std::endl;
+  }
 
-   red_mask   = visual_->red_mask;
-   green_mask = visual_->green_mask;
-   blue_mask  = visual_->blue_mask;
-
+  red_mask   = visual_->red_mask;
+  green_mask = visual_->green_mask;
+  blue_mask  = visual_->blue_mask;
+   
   XFree(visualList);
 }
 
@@ -490,7 +500,3 @@ bool NSystem::isTrueColor()
 {
   return isTrueColor_;
 }
-
-
-
-
