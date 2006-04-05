@@ -50,9 +50,11 @@ ChildView::ChildView()
   setActivePage(machineView_);
 
   getOpenFileName_ = new NFileDialog();
+    getOpenFileName_->addFilter("*.psy [psy3 song format]","!S*.psy");
   add(getOpenFileName_);
 
   getSaveFileName_ = new NFileDialog();
+    getSaveFileName_->addFilter("*.psy [psy3 song format]","!S*.psy");
   add(getSaveFileName_);
 
   //enableSound();
