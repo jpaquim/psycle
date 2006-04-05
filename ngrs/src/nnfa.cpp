@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "nnfa.h"
 #include "nstate.h"
-
+#include <iostream>
 
 
 using namespace std;
@@ -59,44 +59,16 @@ bool NNfa::accept( const std::string & input )
 {
   runningStates.push_back(s0);
 
-  // test for acceptStates
-
-  for (vector<NState*>::iterator it = runningStates.begin(); it < runningStates.end(); it++) {
-       NState* state = *it;
-       vector<NState*>::iterator fIt = find(A.begin(),A.end(),state);
-       if (fIt < A.end()) return true;
-    }
-
-  // iterate over transition table
-
-  vector<NState*> eFollows = epsilonFollows(runningStates);
-
   for (std::string::const_iterator in = input.begin(); in < input.end(); in++)
   {
     char c = *in;
-    vector<NState*> newRunningStates;
+    runningStates = getEpsilonStates(runningStates);
+    runningStates = getFollowStates(runningStates,c);
 
-    vector<NState*> eFollows = epsilonFollows(runningStates);
-    runningStates.insert( runningStates.end(), eFollows.begin(), eFollows.end() );
-
-    // test follow State except epsilon
-    for (vector<NState*>::iterator it = runningStates.begin(); it < runningStates.end(); it++) {
-      NState* state = *it;
-      vector<NState*> sequenceT = state->T(c);
-      newRunningStates.insert( newRunningStates.end(), sequenceT.begin(), sequenceT.end() );
-    }
-
-    // test for acceptStates
-
-    for (vector<NState*>::iterator it = newRunningStates.begin(); it < newRunningStates.end(); it++) {
-       NState* state = *it;
-       vector<NState*>::iterator fIt = find(A.begin(),A.end(),state);
-       if (fIt < A.end()) return true;
-    }
-
-    runningStates = newRunningStates;
+    if (runningStates.size()==0) return false;
   }
-  return false;
+
+  return testAccept(runningStates);
 }
 
 std::vector< NState* > NNfa::epsilonFollows( const std::vector< NState * > states )
@@ -109,4 +81,90 @@ std::vector< NState* > NNfa::epsilonFollows( const std::vector< NState * > state
   }
 
  return newStates;
+}
+
+void NNfa::concat( NNfa * nfa )
+{
+  for (vector<NState*>::iterator it = A.begin(); it < A.end(); it++) {
+    NState* state = *it;
+    state->addEpsilon(nfa->startState());
+  }
+  A = nfa->acceptStates();
+}
+
+NState * NNfa::startState( )
+{
+  return  s0;
+}
+
+std::vector< NState * > & NNfa::acceptStates( )
+{
+  return A;
+}
+
+void NNfa::star( )
+{
+  for (vector<NState*>::iterator it = A.begin(); it < A.end(); it++) {
+   NState* state = *it;
+    s0->addEpsilon(state);
+    state->addEpsilon(s0);
+  }
+}
+
+
+vector< NState * > & NNfa::getEpsilonStates( std::vector< NState * > & actualStates )
+{
+  closure.clear();
+  for (std::vector<NState*>::iterator it = actualStates.begin(); it < actualStates.end(); it++) {
+     epsilonClosure(*it,closure);
+  }
+  return closure;
+}
+
+void NNfa::epsilonClosure( NState * state, std::vector< NState * > & eClosure )
+{
+  // test if its already inserted else break;
+  if (find(eClosure.begin(), eClosure.end(), state)==eClosure.end()) eClosure.push_back(state); else return;
+
+  // test if state has an epsilon move
+  vector<NState*> states = state->E();
+  for (vector<NState*>::iterator it = states.begin(); it < states.end(); it++) {
+    NState* state = *it;
+    epsilonClosure(state,eClosure);
+  }
+}
+
+std::vector<NState*> & NNfa::getFollowStates( std::vector< NState*> & actualStates, char input )
+{
+  followStates.clear();
+  for (std::vector<NState*>::iterator it = actualStates.begin(); it < actualStates.end(); it++) {
+     NState* state = *it;
+     vector<NState*> fStates = state->T(input);
+     if (fStates.size()>0) {
+       for (std::vector<NState*>::iterator it = fStates.begin(); it < fStates.end(); it++) {
+         NState* state = *it;
+         followStates = addToActual(state,followStates);
+       }
+     }
+  }
+  return followStates;
+}
+
+
+std::vector<NState*> const &NNfa::addToActual( NState * state, std::vector< NState * > & actualStates)
+{
+  std::vector<NState*>::iterator it = find(actualStates.begin(), actualStates.end(), state);
+  if (it == actualStates.end()) actualStates.push_back(state);
+  return actualStates;
+}
+
+
+bool NNfa::testAccept( std::vector< NState * > & actualStates )
+{
+ for (std::vector<NState*>::iterator it = actualStates.begin(); it<actualStates.end(); it++) {
+   for (std::vector<NState*>::iterator it1 = A.begin(); it1<A.end(); it1++) {
+       if (*it1==*it) return true;
+      }
+  }
+  return false;
 }

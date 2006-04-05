@@ -40,13 +40,28 @@ public:
     void addA (NState* acceptState);
 
     NState* state(int i);
+    NState* startState();
+    std::vector<NState*> & acceptStates();
+
 
     bool accept(const std::string & input);
 
+    void concat( NNfa * nfa );
+    void star();
+
 private:
 
+    std::vector<NState*> closure;
+    std::vector<NState*> followStates;
+
+    std::vector< NState * > & getEpsilonStates( std::vector< NState * > & actualStates );
+    void epsilonClosure( NState * state, std::vector< NState * > & eClosure );
 
     std::vector<NState*> epsilonFollows(const std::vector<NState*> states);
+    std::vector<NState*> & getFollowStates( std::vector< NState * >& actualStates, char input);
+    std::vector<NState*> const & addToActual( NState * state, std::vector< NState * > & actualStates);
+    bool testAccept( std::vector< NState * > & actualStates );
+
 
     NState* s0;               // startState
     std::vector<NState*> S;   // a finite set of states (S)

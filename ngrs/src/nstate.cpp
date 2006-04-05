@@ -32,13 +32,14 @@ NState::~NState()
 
 const std::vector< NState* > & NState::T( const char input )
 {
-  std::map<char,std::vector<NState*> >::iterator itr;
-  if ( (itr = TMap.find(input)) != TMap.end() ) {
-     return itr->second;
-  } else 
-  {
-    return ndef;
-  }
+  std::map<char, vector<NState*> >::iterator itr;
+
+  if ( (itr = TMap.find('\1')) != TMap.end()) return itr->second;  else
+  if ( (((((unsigned char)input >64) && ((unsigned char) input <90))) || (((unsigned char) input > 96) && ((unsigned char) input < 123)))  &&
+     (itr = TMap.find('\2')) != TMap.end()) return itr->second; else  
+  if ( (((unsigned char) input > 47) && (unsigned char) input < 58 ) && (itr = TMap.find('\3')) != TMap.end()) return itr->second;  else                   
+  if ( (itr = TMap.find(input)) != TMap.end()) return itr->second; 
+   else return ndef;
 }
 
 void NState::setSequence( const char label, const std::vector< NState* > & sequence )
@@ -71,7 +72,7 @@ void NState::addEpsilon( NState * state )
 
 const std::vector< NState * > & NState::E( )
 {
-  return epsilonSequence; 
+  return epsilonSequence;
 }
 
 
