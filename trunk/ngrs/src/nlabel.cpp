@@ -99,7 +99,7 @@ void NLabel::paint( NGraphics * g )
       }
     }
     yp_ = yp_ + g->textHeight();
-  } while (i != string::npos);
+  } while (i != (int) string::npos);
 }
 
 void NLabel::setText( const std::string & text )
@@ -121,7 +121,6 @@ int NLabel::preferredHeight( ) const
   NFontMetrics metrics;
   metrics.setFont(font());
   int i = 0;
-  int start = 0;
   int yp_ = metrics.textHeight() ;
   do {
     i = text_.find("\n", i);
@@ -129,7 +128,7 @@ int NLabel::preferredHeight( ) const
        i+=1;
        yp_ = yp_ + metrics.textHeight();
     }
-  } while (i != string::npos);
+  } while (i != (int) string::npos);
 
   return yp_ + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
 }
@@ -137,14 +136,14 @@ int NLabel::preferredHeight( ) const
 int NLabel::preferredWidth( ) const
 {
   NFontMetrics metrics(font());
-  int i = 0;
+  unsigned int i = 0;
   int start = 0;
-  int yp_ = metrics.textHeight() ;
+
   string substr;
   int xmax = 0;
   do {
     i = text_.find("\n", i);
-    if (i != -1) {
+    if (i != std::string::npos) {
        i+=1;
        substr = text_.substr(start,i-start+1);
        start = i;

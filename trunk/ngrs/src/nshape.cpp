@@ -85,6 +85,7 @@ void NShape::setLeft( int left )
 
 NPoint NShape::pickerAt( int i )
 {
+  return NPoint(-1,-1);
 }
 
 int NShape::pickerSize( )

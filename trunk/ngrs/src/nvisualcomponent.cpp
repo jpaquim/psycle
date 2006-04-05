@@ -107,8 +107,6 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
     } else
 
     if (skin_.bitmapBgStyle == 2) {
-      int w = skin_.bitmap.width();
-      int h = skin_.bitmap.height();
 
       int xp =(int)  d2i((spacingWidth()  - skin_.bitmap.width())  / 2.0f);
       int yp = (int) d2i((spacingHeight() - skin_.bitmap.height()) / 2.0f);
@@ -727,7 +725,7 @@ void NVisualComponent::onMoveEnd( const NMoveEvent & moveEvent )
 {
 }
 
-void NVisualComponent::insert( NVisualComponent * component, int index )
+void NVisualComponent::insert( NVisualComponent * component, unsigned int index )
 {
   if (index <= visualComponents_.size()) {
     NRuntime::insert(component,index);

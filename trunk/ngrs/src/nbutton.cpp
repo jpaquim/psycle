@@ -23,12 +23,12 @@
 
 using namespace std;
 
-NButton::NButton( ) : icon_(0), flat_(1), NCustomButton()
+NButton::NButton( ) : NCustomButton(), flat_(1), icon_(0)
 {
   init();
 }
 
-NButton::NButton( const std::string & text ) : icon_(0), flat_(1), NCustomButton(text)
+NButton::NButton( const std::string & text ) : NCustomButton(text), flat_(1), icon_(0)
 {
   init();
 }
@@ -37,7 +37,7 @@ NButton::~ NButton( )
 {
 }
 
-NButton::NButton( const std::string & text, int minWidth, int minHeight ) : icon_(0), flat_(1), NCustomButton(text)
+NButton::NButton( const std::string & text, int minWidth, int minHeight ) : NCustomButton(text), flat_(1), icon_(0)
 {
   setMinimumWidth(minWidth);
   //setMinimumHeight(minHeight);
@@ -54,7 +54,7 @@ NButton::NButton( NImage * icon )
 }
 
 
-NButton::NButton( NImage * icon , int minWidth, int minHeight) : flat_(1), NCustomButton()
+NButton::NButton( NImage * icon , int minWidth, int minHeight) : NCustomButton(), flat_(1)
 {
   icon_ = icon;
   icon_->setHAlign(nAlCenter);

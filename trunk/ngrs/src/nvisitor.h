@@ -27,9 +27,9 @@ Visitor interface für sicheres casten
 */
 class NVisitor{
 public:
-    NVisitor();
+   NVisitor();
 
-    ~NVisitor();
+   virtual ~NVisitor();
 
    virtual bool visit_window(class NWindow*)=0;
    virtual bool visit_visualcomponent(class NVisualComponent*)=0;

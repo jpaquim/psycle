@@ -55,7 +55,7 @@ const char * group_xpm[] = {
 #include "nitem.h"
 
 NFileListBox::NFileListBox()
- : fName_(""), NListBox()
+ :  NListBox()
 {
   isDirItem_ = false;
   mode_ = nFiles | nDirs;

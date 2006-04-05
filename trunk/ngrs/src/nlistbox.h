@@ -45,7 +45,7 @@ public:
     virtual void removeChilds();
 
     int itemCount();
-    void setIndex(int i);
+    void setIndex(unsigned int i);
     int selIndex();
     std::vector<int> selIndexList();
     void selClear();

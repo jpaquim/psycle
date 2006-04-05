@@ -443,9 +443,9 @@ unsigned long NSystem::getXColorValue(int r, int g, int b )
  unsigned long value = 0;
  std::map<unsigned long, unsigned long>::iterator itr;
  if ( (itr = colorCache.find(key)) == colorCache.end()) {
-  char rs[5]; sprintf(rs,"%.2x\0",r);
-  char gs[5]; sprintf(gs,"%.2x\0",g);
-  char bs[5]; sprintf(bs,"%.2x\0",b);
+  char rs[5]; sprintf(rs,"%.2x",r);
+  char gs[5]; sprintf(gs,"%.2x",g);
+  char bs[5]; sprintf(bs,"%.2x",b);
   std::string colorName = string("rgb:")+string(rs)+string("/")+string(gs)+string("/")+string(bs);
   XColor near_color, true_color;
   XAllocNamedColor( dpy(), colormap(), colorName.c_str(), &near_color, &true_color );

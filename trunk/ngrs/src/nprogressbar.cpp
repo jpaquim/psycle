@@ -23,7 +23,7 @@
 
 
 NProgressBar::NProgressBar()
- : progress_(50) , min_(0),max_(100), step_(10), orientation_(nVertical), NPanel()
+ : NPanel(), progress_(50) , min_(0),max_(100), step_(10), orientation_(nVertical)
 {
   setBorder(border_ = new NFrameBorder());
     border()->setSpacing(NSize(0,0,0,0));

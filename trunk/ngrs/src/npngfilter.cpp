@@ -31,6 +31,7 @@ NPngFilter::~NPngFilter()
 
 NBitmap NPngFilter::loadFromFile( std::string filename )
 {
+  return NBitmap();
 }
 
 

@@ -140,17 +140,17 @@ void NMenu::onItemSelected( NButtonEvent * ev )
 
 NObject * NMenu::selectedItem( )
 {
-  selectedItem_;
+  return selectedItem_;
 }
 
 void NMenu::add( std::string create )
 {
-  int i = 0;
+  unsigned int i = 0;
   int start = 0;
   std::string substr;
   do {
     i = create.find(del, i);
-    if (i != -1) {
+    if (i != std::string::npos) {
        substr = create.substr(start,i-start);
        i+=1;
        start = i;

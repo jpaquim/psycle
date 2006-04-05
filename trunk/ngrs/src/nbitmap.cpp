@@ -22,12 +22,12 @@
 #include "nfile.h"
 
 NBitmap::NBitmap()
- : data_(0),depth_(24),width_(0),height_(0),xi(0), clp(0), NObject()
+ : NObject(), depth_(24),width_(0),height_(0), data_(0), xi(0), clp(0)
 {
 
 }
 
-NBitmap::NBitmap( const std::string & filename ) :data_(0),depth_(24),width_(0),height_(0),xi(0), clp(0), NObject()
+NBitmap::NBitmap( const std::string & filename ) : NObject(), depth_(24),width_(0),height_(0),data_(0),xi(0), clp(0)
 {
   loadFromFile(filename);
 }
@@ -110,7 +110,7 @@ XImage * NBitmap::X11data( ) const
   return xi;
 }
 
-NBitmap::NBitmap( const NBitmap & src ) : data_(0),depth_(24),width_(0),height_(0),xi(0)
+NBitmap::NBitmap( const NBitmap & src ) : depth_(24),width_(0),height_(0),data_(0),xi(0),clp(0)
 {
   xi = src.X11data();
   clp = src.X11ClpData();

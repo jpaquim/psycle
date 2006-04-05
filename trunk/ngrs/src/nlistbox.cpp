@@ -120,12 +120,12 @@ int NListBox::selIndex( )
      }
      c++;
   }
+  return -1;
 }
 
 std::vector< int > NListBox::selIndexList( )
 {
   std::vector<int> indexList;
-  int c = 0;
   for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
      NCustomItem* item = *it;
      indexList.push_back(item->zOrder());
@@ -133,7 +133,7 @@ std::vector< int > NListBox::selIndexList( )
   return indexList;
 }
 
-void NListBox::setIndex( int i )
+void NListBox::setIndex( unsigned int i )
 {
   if (!multiSelect_) deSelectItems();
   if (i>=0 && i < listBoxPane_->visualComponents().size()) {

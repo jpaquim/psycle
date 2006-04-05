@@ -254,7 +254,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
          break;
     case KeyPress:
             {
-              int count = XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
+              XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
               if (buffer!=NULL) {
                   if (mykeysym<0xF000) {
                     NObject* acellNotify = findAcceleratorNotifier(NKeyAccelerator(NApp::system().keyState(),mykeysym));
@@ -267,7 +267,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
             }
           break;
     case ClientMessage:
-            if(event->xclient.data.l[0] == NApp::system().wm_delete_window) exitloop = win->onClose();
+            if(event->xclient.data.l[0] == (int) NApp::system().wm_delete_window) exitloop = win->onClose();
          break;
 
     default : ;

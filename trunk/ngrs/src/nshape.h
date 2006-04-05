@@ -32,7 +32,7 @@ class NShape{
 public:
     NShape();
 
-    ~NShape();
+    virtual ~NShape();
 
     virtual void setPosition(int left, int top, int width, int height);
     virtual void setLeft(int left);

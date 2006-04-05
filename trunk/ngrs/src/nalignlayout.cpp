@@ -38,7 +38,7 @@ void NAlignLayout::align( NVisualComponent * parent )
   NVisualComponent* lastRight  = 0;
   NVisualComponent* lastBottom = 0;
   std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
-  int yp = 0;
+
   for (;itr < parent->visualComponents().end(); itr++) {
      NVisualComponent* visualChild = *itr;
      if (visualChild->visible()) {

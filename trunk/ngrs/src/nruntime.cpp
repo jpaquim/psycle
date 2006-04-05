@@ -61,6 +61,7 @@ void NRuntime::setParent( NRuntime * parent )
 
 bool NRuntime::visit( NVisitor * v )
 {
+  return false;
 }
 
 std::string NRuntime::stringify( double x )

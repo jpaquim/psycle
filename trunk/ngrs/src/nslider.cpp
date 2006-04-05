@@ -21,7 +21,7 @@
 #include "nframeborder.h"
 
 NSlider::NSlider()
- : orientation_(nVertical), trackLine_(true), min_(0), max_(100), pos_(0), NPanel()
+ : NPanel(), trackLine_(true), pos_(0) , min_(0), max_(100), orientation_(nVertical)
 {
   slider_ = new Slider(this);
   add(slider_);
@@ -38,11 +38,9 @@ NSlider::~NSlider()
 void NSlider::resize( )
 {
   if (orientation_ == nVertical) {
-    int d = 2;
     slider_->setLeft(0);
     slider_->setWidth(clientWidth());
   } else {
-    int d = 2;
     slider_->setTop(0);
     slider_->setHeight(clientHeight());
   }

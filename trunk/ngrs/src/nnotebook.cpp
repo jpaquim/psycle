@@ -20,7 +20,7 @@
 #include "nnotebook.h"
 
 NNoteBook::NNoteBook()
- : visiblePage_(0), NPanel()
+ :  NPanel(), visiblePage_(0)
 {
   setTransparent(true);
 }

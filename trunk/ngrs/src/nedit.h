@@ -34,8 +34,8 @@ public:
 
     ~NEdit();
 
-    void setText(std::string text);
-    std::string text();
+    void setText(const std::string & text);
+    const std::string & text() const;
 
     virtual void paint(NGraphics* g);
     virtual void onKeyPress(const NKeyEvent & keyevent);
@@ -51,13 +51,13 @@ public:
     int vAlign() const;
     int hAlign() const;
 
-    int pos() const;
+    unsigned int pos() const;
 
 private:
 
     int valign_, halign_;
     int dx;
-    int pos_;
+    unsigned int pos_;
     int selStartIdx_;
     int selEndIdx_;
 
