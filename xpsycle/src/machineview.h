@@ -47,7 +47,6 @@ public :
    }
 
     virtual void onMousePress  (int x, int y, int button) {
-       if (window()!=0) window()->checkForRemove(0);
        dlg->setVisible(true);
     }
 

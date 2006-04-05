@@ -755,6 +755,7 @@ Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
 
 void MainWindow::updateBars( )
 {
-
+ int p[] = {1, 2, 3, 4, 5};
+ std::vector<int> a(p, p+5);
 }
 
