@@ -18,16 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "machinegui.h"
-#include "nframeborder.h"
-#include "nlabel.h"
 #include "machine.h"
-#include "nline.h"
-#include "nwindow.h"
 #include "framemachine.h"
 #include "masterdlg.h"
 #include "global.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
+#include <nframeborder.h>
+#include <nlabel.h>
+#include <nline.h>
+#include <nwindow.h>
 
 
 NBitmap MachineGUI::bitmap;

@@ -20,7 +20,7 @@
 #include "childview.h"
 #include "configuration.h"
 #include "player.h"
-#include "napp.h"
+#include <napp.h>
 #include <inttypes.h>
 
 const std::string PSYCLE__VERSION="X";

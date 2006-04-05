@@ -21,8 +21,8 @@
 #include "machine.h"
 #include "global.h"
 #include "configuration.h"
-#include "napp.h"
 #include "defaultbitmaps.h"
+#include <napp.h>
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;

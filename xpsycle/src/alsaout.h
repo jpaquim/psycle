@@ -20,7 +20,7 @@
 #ifndef ALSAOUT_H
 #define ALSAOUT_H
 
-#include <audiodriver.h>
+#include "audiodriver.h"
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 

@@ -18,14 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "plugin.h"
+#include "inputhandler.h"
+#include "serializer.h"
+#include "deserializer.h"
+#include <nfile.h>
 #include <dlfcn.h>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <inputhandler.h>
-#include <serializer.h>
-#include <deserializer.h>
-#include <nfile.h>
 #include <inttypes.h>
 
 typedef CMachineInfo * (* GETINFO) ();

@@ -20,7 +20,7 @@
 #ifndef AUDIODRIVER_H
 #define AUDIODRIVER_H
 
-#include "nobject.h"
+#include <nobject.h>
 
 /**
 @author Stefan

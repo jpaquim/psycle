@@ -20,12 +20,12 @@
 #ifndef MACHINEVIEW_H
 #define MACHINEVIEW_H
 
+#include "wiregui.h"
+#include "wiredlg.h"
 #include <npage.h>
 #include <nscrollbox.h>
 #include <nautoscrolllayout.h>
-#include "wiregui.h"
 #include <nlabel.h>
-#include <wiredlg.h>
 
 
 class Machine;

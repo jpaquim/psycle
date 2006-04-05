@@ -20,13 +20,13 @@
 #include "mainwindow.h"
 #include "configuration.h"
 #include "song.h"
-#include "napp.h"
-#include "nitem.h"
 #include "player.h"
 #include "defaultbitmaps.h"
 #include "greetdlg.h"
 #include "aboutdlg.h"
 #include "vumeter.h"
+#include <napp.h>
+#include <nitem.h>
 
 MainWindow::MainWindow()
  : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)

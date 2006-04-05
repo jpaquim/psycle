@@ -25,7 +25,7 @@
 #include "player.h"
 #include "global.h"
 #include "configuration.h"
-#include "assert.h"
+#include <cassert>
 
 /**
 @author Stefan

@@ -20,10 +20,10 @@
 #ifndef WIREDLG_H
 #define WIREDLG_H
 
+#include "analyzer.h"
 #include <nwindow.h>
 #include <nbutton.h>
 #include <nslider.h>
-#include <analyzer.h>
 #include <nline.h>
 
 /**

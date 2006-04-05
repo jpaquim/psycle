@@ -20,13 +20,12 @@
 #include "sequencerbar.h"
 #include "global.h"
 #include "song.h"
-#include "nlabel.h"
-#include "nitem.h"
 #include "configuration.h"
 #include "patternview.h"
 #include "defaultbitmaps.h"
 #include "player.h"
-
+#include <nlabel.h>
+#include <nitem.h>
 #include <napp.h>
 #include <nconfig.h>
 

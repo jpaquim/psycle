@@ -20,8 +20,8 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#include <ncolor.h>
 #include "audiodriver.h"
+#include <ncolor.h>
 #include <vector>
 
 /**

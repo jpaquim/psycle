@@ -20,15 +20,15 @@
 #ifndef SONG_H
 #define SONG_H
 
-#include <Constants.h>
+#include "constants.h"
+#include "instrument.h"
+#include "songstructs.h"
+#include <nobject.h>
+#include <npoint.h>
 #include <string>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
-#include <npoint.h>
-#include "instrument.h"
-#include "songstructs.h"
-#include "nobject.h"
 
 /**
 @author Stefan

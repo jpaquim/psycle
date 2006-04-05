@@ -20,13 +20,12 @@
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
+#include "patdlg.h"
+#include "song.h"
 #include <npage.h>
 #include <nbitmap.h>
 #include <npoint3d.h>
 #include <npopupmenu.h>
-#include <patdlg.h>
-
-#include <song.h>
 #include <nscrollbar.h>
 #include <map>
 

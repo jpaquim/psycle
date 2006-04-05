@@ -20,12 +20,12 @@
 #ifndef CHILDVIEW_H
 #define CHILDVIEW_H
 
+#include "machineview.h"
+#include "patternview.h"
+#include "song.h"
+#include "global.h"
 #include <ntabbook.h>
-#include <machineview.h>
-#include <patternview.h>
-#include <song.h>
 #include <nfiledialog.h>
-#include <global.h>
 #include <ntimer.h>
 
 /**

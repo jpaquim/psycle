@@ -18,12 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patdlg.h"
-
-#include "nspinedit.h"
-#include "nbutton.h"
-#include "npanel.h"
-#include "nflowlayout.h"
-#include "Constants.h"
+#include "constants.h"
+#include <nspinedit.h>
+#include <nbutton.h>
+#include <npanel.h>
+#include <nflowlayout.h>
 
 PatDlg::PatDlg()
  : NWindow()
