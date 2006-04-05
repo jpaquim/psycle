@@ -308,7 +308,7 @@ private:
 
 	std::vector<GrainLayer*> layers;
 	int counter, dispCounter;
-	int lfo1counter, lfo2counter;
+	float lfo1counter, lfo2counter;
 	float randvals1[NUM_RANDS];
 	float randvals2[NUM_RANDS];
 };
@@ -439,17 +439,18 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	int limitAmtR=0;
 
 	int randFreq;
-
 	int i;
+	float srMultiplyer = pCB->GetSamplingRate()/44100.0f;		//this stuff should  maybe be moved somewhere where it's checked a bit less frequently
+	float srDivider = 1.0f / (srMultiplyer==0? 1.0f: srMultiplyer);
 
 	do{
 		outDataL=0;
 		outDataR=0;
 		limitAmtL=0;
 		limitAmtR=0;
+
 		if(counter<=0)
 		{
-
 			randFreq = rand() % (MAX_FREQ-MIN_FREQ);
 			counter = Vals[PRM_FREQ]+ (Vals[PRM_RANDFREQ]==0? 0: (randFreq-Vals[PRM_FREQ]) * (Vals[PRM_RANDFREQ]/100.0));
 
@@ -460,6 +461,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			
 			if(counter>MAX_FREQ) counter=MAX_FREQ;	
 			else if(counter<MIN_FREQ)	counter=MIN_FREQ;
+
+			counter *= srMultiplyer;
 
 			StartLayer();
 		}
@@ -547,8 +550,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		++psamplesright;			
 		--counter;
 		--dispCounter;
-		++lfo1counter;
-		++lfo2counter;
+		lfo1counter+=srDivider;
+		lfo2counter+=srDivider;
 
 	} while(--numsamples);
  
@@ -581,10 +584,12 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 
 		case PRM_SIZE:
 		case PRM_ATTACK:		// fall through..
-		case PRM_DECAY:		sprintf(txt, "%.1fms", value / (pCB->GetSamplingRate() / 1000.0) );
+		case PRM_DECAY:		//sprintf(txt, "%.1fms", value / (pCB->GetSamplingRate() / 1000.0) );
+							sprintf(txt, "%.1fms", value / 44.1f );	//compensate for sr elsewhere--speed should be maintained when sr changes.
 							return true;
 
-		case PRM_FREQ:		/*float*/ freqinsecs = value / (float) pCB->GetSamplingRate();
+		case PRM_FREQ:		///*float*/ freqinsecs = value / (float) pCB->GetSamplingRate();
+							freqinsecs = value / 44100.0f;				//ditto
 							if(freqinsecs>0.006)
 								sprintf(txt, "1/%.1fms (%.2fgpm)", freqinsecs * 1000, 60.0/freqinsecs );
 							else
@@ -656,7 +661,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 							return true;
 
 		case PRM_LFO1SPEED:
-		case PRM_LFO2SPEED:	sprintf(txt, "%.3f seconds", (value * LSPEED_MULTIPLYER) / (float) pCB->GetSamplingRate()  );
+		case PRM_LFO2SPEED:	sprintf(txt, "%.3f seconds", (value * LSPEED_MULTIPLYER) / 44100.0f  );
 							return true;
 
 		case PRM_LFOSYNC:	switch(value)
@@ -692,15 +697,12 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 void mi::StartLayer()
 {
 	int next;
-//	for(next = 0; next < MAX_LAYERS && layers[next]->in_use; ++next);  // i'm saving this in case i decide to get rid of the max-layers knob
 
 	for(next = 0; next < Vals[PRM_MAXGRAINS] && layers[next]->in_use; ++next);
-
-//	if(next==MAX_LAYERS) return;					//out of layers-- just ignore the request, and avoid a big mess
-	
-	if(next==Vals[PRM_MAXGRAINS]) return;
+	if(next==Vals[PRM_MAXGRAINS]) return;	//out of layers-- just ignore the request, and avoid a big mess
 
 	int i;
+	float srMultiplyer = pCB->GetSamplingRate()/44100.0f;
 	float splineX;
 
 
@@ -751,16 +753,20 @@ void mi::StartLayer()
 		{pend +=   ((MAX_PITCH-MIN_PITCH)/2)   * (GetLFO(LFO2) * ((Vals[PRM_L2TOPEND]-100)/100.0));	}
 
 	
-if(length>MAX_LENGTH) 	length=MAX_LENGTH;	
-else if(length<MIN_LENGTH)	length=MIN_LENGTH;
-if(attack>MAX_ATTACK)	attack=MAX_ATTACK;	
-else if(attack<MIN_ATTACK)	attack=MIN_ATTACK;	
-if(decay>MAX_DECAY)		decay =MAX_DECAY;		
-else if(decay<MIN_DECAY)	decay=MIN_DECAY;	
-if(pstart>MAX_PITCH)	pstart=MAX_PITCH;		
-else if(pstart<MIN_PITCH)	pstart=MIN_PITCH;	
-if(pend>MAX_PITCH)		pend=MAX_PITCH;		
-else if(pend<MIN_PITCH)		pend=MIN_PITCH;		
+	if(length>MAX_LENGTH) 	length=MAX_LENGTH;	
+	else if(length<MIN_LENGTH)	length=MIN_LENGTH;
+	if(attack>MAX_ATTACK)	attack=MAX_ATTACK;	
+	else if(attack<MIN_ATTACK)	attack=MIN_ATTACK;	
+	if(decay>MAX_DECAY)		decay =MAX_DECAY;		
+	else if(decay<MIN_DECAY)	decay=MIN_DECAY;	
+	if(pstart>MAX_PITCH)	pstart=MAX_PITCH;		
+	else if(pstart<MIN_PITCH)	pstart=MIN_PITCH;	
+	if(pend>MAX_PITCH)		pend=MAX_PITCH;		
+	else if(pend<MIN_PITCH)		pend=MIN_PITCH;		
+
+	length*=srMultiplyer;
+	attack*=srMultiplyer;
+	decay*=srMultiplyer;
 
 	if(layers[next]->in_use==false)
 	{
@@ -774,7 +780,6 @@ else if(pend<MIN_PITCH)		pend=MIN_PITCH;
 		layers[next]->decay			= (int)(decay);
 
 		//	generate splines for attack/release envelopes (this function is completely arbitrary, but it sounds much better than linear..)
-//		layers[next]->attackBuf.resize((int)(attack+1));
 		for(i=0;i<(int)(attack);++i)	
 		{
 			splineX = (float)i / attack;												// 0 <= x <= 1
@@ -782,7 +787,6 @@ else if(pend<MIN_PITCH)		pend=MIN_PITCH;
 			else if(splineX>0.6)layers[next]->attackBuf[i] = 1 - ((splineX - 1) * (splineX - 1));	// x > .6:		1 - (x - 1)^2
 			else				layers[next]->attackBuf[i] = 3.4 * splineX - 1.2;					// .4<=x<=.6:	3.4x - 1.2
 		}
-//		layers[next]->decayBuf.resize((int)(attack+1));
 		for(i=0;i<(int)(decay);++i)
 		{
 			splineX = (float)i / decay;													// 0 <= x <= 1
@@ -791,13 +795,8 @@ else if(pend<MIN_PITCH)		pend=MIN_PITCH;
 			else				layers[next]->decayBuf[i] = 3.4 * (1-splineX) - 1.2;		// .4<=x<=.6:	3.4(1-x) - 1.2
 		}
 
-
-////these are artifacts from when i used linear amp envelopes		
-//		layers[next]->attackStep	= 1.0	/ layers[next]->attack;
-//		layers[next]->decayStep		= 1.0	/ layers[next]->decay;
 		layers[next]->pitchCurrent	= (pstart / (float)MAX_PITCH);
 		layers[next]->pitchEnd		= (pend	/ (float)MAX_PITCH);
-
 		layers[next]->pitchStep		= (layers[next]->pitchEnd - layers[next]->pitchCurrent) /(length!=0 ? length : 0.0001);
 	}
 	
