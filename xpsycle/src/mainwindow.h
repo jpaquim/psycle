@@ -103,6 +103,8 @@ private:
     void initSignals();
     void initMachineView();
 
+    void updateBars();
+
     void showSongpDlg(NObject* sender);
 
     void onBarPlayFromStart(NButtonEvent* ev);
