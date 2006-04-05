@@ -46,13 +46,13 @@ void NEdit::init( )
 }
 
 
-void NEdit::setText( string text )
+void NEdit::setText( const std::string & text )
 {
   text_ = text;
   pos_ = 0;
 }
 
-string NEdit::text( )
+const std::string & NEdit::text( ) const
 {
   return text_;
 }
@@ -169,7 +169,7 @@ int NEdit::hAlign( ) const
   return halign_;
 }
 
-int NEdit::pos( ) const
+unsigned int NEdit::pos( ) const
 {
   return pos_;
 }
@@ -195,7 +195,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                   repaint();
                 break;
     case XK_Right:
-                  if (pos_<(int) text_.length()) {
+                  if (pos_< text_.length()) {
                     pos_++;
                       if (NApp::system().keyState() & ShiftMask) {
                         if (selStartIdx_==selEndIdx_) {
@@ -255,7 +255,7 @@ void NEdit::onKeyPress( const NKeyEvent & keyEvent )
                 break;
     case XK_Delete:
                 if (pos_<text_.length()) {
-                   bool flag = true;
+                   //bool flag = true;
                    //if (pattern_!=NULL) pattern_->accept(text_.c_str(),text_.length());
                    //if (flag) {
                     int count = 1;

@@ -52,7 +52,7 @@ void NNfa::addA( NState * acceptState )
 
 NState * NNfa::state( int i )
 {
-  S.at(i);
+  return S.at(i);
 }
 
 bool NNfa::accept( const std::string & input )

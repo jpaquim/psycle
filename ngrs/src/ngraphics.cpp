@@ -132,7 +132,7 @@ void NGraphics::setForeground( const NColor & color )
 
 void NGraphics::setClipRect( const NRect & rec )
 {
-  Region region;
+  Region region = XCreateRegion();
   XRectangle rectangle;
   rectangle.x= (short) rec.left();
   rectangle.y= (short) rec.top();
@@ -141,6 +141,7 @@ void NGraphics::setClipRect( const NRect & rec )
   XUnionRectWithRegion(&rectangle,region,region);
   XSetRegion(NApp::system().dpy(), gcp,region);
   XftDrawSetClip(draw,region);
+  XDestroyRegion(region);
 }
 
 void NGraphics::setFont( const NFont & font )
@@ -311,6 +312,7 @@ int NGraphics::textAscent( )
 
 int NGraphics::textDescent( )
 {
+  return 0;
 }
 
 void NGraphics::setRectRegion( int left, int top, int width, int height )

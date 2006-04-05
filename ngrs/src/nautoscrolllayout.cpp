@@ -35,7 +35,7 @@ void NAutoScrollLayout::align( NVisualComponent * parent )
   maxX_ = 0;
   maxY_ = 0;
   std::vector<NRuntime*>::iterator itr = parent->components.begin();
-  int yp = 0;
+
   for (;itr < parent->components.end(); itr++) {
     NRuntime* child = *itr;
     //if (child->visit(NVisualComponent::isVisualComponent)) {
