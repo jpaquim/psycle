@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "datacompression.h"
-#include <string.h>
+#include <cstring>
 
 #define MIN_REDUNDANT_BYTES_2 3
 

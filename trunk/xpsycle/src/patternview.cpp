@@ -18,20 +18,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "patternview.h"
-#include "nfontmetrics.h"
 #include "configuration.h"
 #include "global.h"
 #include "song.h"
 #include "inputhandler.h"
-#include "napp.h"
-#include "nalignlayout.h"
-#include "nwindow.h"
-#include "nmenuitem.h"
-#include "nmenuseperator.h"
 #include "player.h"
 #include "machine.h"
-#include "nframeborder.h"
 #include "defaultbitmaps.h"
+#include <napp.h>
+#include <nalignlayout.h>
+#include <nwindow.h>
+#include <nmenuitem.h>
+#include <nmenuseperator.h>
+#include <nframeborder.h>
+#include <nfontmetrics.h>
 
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw

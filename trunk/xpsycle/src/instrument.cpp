@@ -17,11 +17,11 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "constants.h"
 #include "instrument.h"
 #include "filter.h"
+#include "datacompression.h"
 #include <cstdio>
-#include <Constants.h>
-#include <datacompression.h>
 
 
 template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)

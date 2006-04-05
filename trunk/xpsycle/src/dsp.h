@@ -2,9 +2,9 @@
 ///\brief various signal processing utility functions and classes, psycle::host::Cubic amongst others.
 
 #pragma once
+#include "helpers.h"
 #include <cmath>
 #include <cstring>
-#include "helpers.h"
 
 /*
 extern int numRMSSamples;

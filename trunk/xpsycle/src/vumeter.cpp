@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "vumeter.h"
+#include <cmath>
 
 VuMeter::VuMeter()
  : NPanel(), l_(1),r_(1)
@@ -33,8 +34,8 @@ VuMeter::~VuMeter()
 
 void VuMeter::paint( NGraphics * g )
 {
-  int log_l=(int) (100*log10f(l_));
-  int log_r=(int) (100*log10f(r_));
+  int log_l=(int) (100*std::log10(l_));
+  int log_r=(int) (100*std::log10(r_));
   log_l=log_l;
   if ( log_l < 0 )log_l=0;
   log_r=log_r;

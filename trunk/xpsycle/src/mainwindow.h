@@ -20,15 +20,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "songpdlg.h"
+#include "childview.h"
+#include "sequencerbar.h"
+#include "newmachine.h"
 #include <nwindow.h>
 #include <nmenubar.h>
 #include <nmenu.h>
 #include <nmenuitem.h>
 #include <nmenuseperator.h>
-#include <songpdlg.h>
 #include <ntabbook.h>
-#include <childview.h>
-#include <sequencerbar.h>
 #include <ntoolbar.h>
 #include <nframeborder.h>
 #include <ntoolbarseparator.h>
@@ -36,7 +37,6 @@
 #include <nslider.h>
 #include <nbevelborder.h>
 #include <nprogressbar.h>
-#include "newmachine.h"
 #include <nfiledialog.h>
 
 class GreetDlg;

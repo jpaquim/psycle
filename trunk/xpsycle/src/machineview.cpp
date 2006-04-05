@@ -23,7 +23,7 @@
 #include "machinegui.h"
 #include "global.h"
 #include "plugin.h"
-#include "napp.h"
+#include <napp.h>
 
 
 

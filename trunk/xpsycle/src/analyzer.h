@@ -20,8 +20,8 @@
 #ifndef ANALYZER_H
 #define ANALYZER_H
 
+#include "machine.h"
 #include <npanel.h>
-#include <machine.h>
 #include <ntimer.h>
 
 

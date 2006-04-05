@@ -27,7 +27,7 @@
 #include "plugin.h"
 #include "deserializer.h"
 #include "serializer.h"
-#include "inttypes.h"
+#include <inttypes.h>
 
 /// Safer version of delete that clears the pointer automatically. Don't use it for arrays!
 /// \param pointer pointer to single object to be deleted.

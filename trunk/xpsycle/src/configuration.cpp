@@ -21,9 +21,9 @@
 #include "song.h"
 #include "global.h"
 #include "alsaout.h"
-#include "napp.h"
-#include "nconfig.h"
-#include "nfile.h"
+#include <napp.h>
+#include <nconfig.h>
+#include <nfile.h>
 
 
 Configuration::Configuration()

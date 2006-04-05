@@ -20,7 +20,7 @@
 #ifndef INPUTHANDLER_H
 #define INPUTHANDLER_H
 
-#include "assert.h"
+#include <cassert>
 
 /**
 @author Stefan

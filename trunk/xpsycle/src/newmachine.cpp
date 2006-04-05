@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "newmachine.h"
-#include "nlabel.h"
-#include "nborderlayout.h"
 #include "plugin.h"
+#include <nborderlayout.h>
+#include <nlabel.h>
 
 NewMachine::NewMachine()
  : NWindow()

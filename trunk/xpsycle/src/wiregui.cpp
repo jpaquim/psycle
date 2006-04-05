@@ -21,7 +21,7 @@
 #include "global.h"
 #include "configuration.h"
 #include <cmath>
-#include <stdio.h>
+#include <cstdio>
 
 template<typename X, typename Y>
 inline double min (X x,Y y) {

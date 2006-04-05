@@ -23,13 +23,14 @@
 //#include <config.h>
 #endif
 
+#include "mainwindow.h"
+#include "song.h"
+#include "plugin.h"
+#include <nsplashscreen.h>
+#include <napp.h>
 #include <iostream>
 #include <cstdlib>
-#include <napp.h>
-#include <mainwindow.h>
-#include <song.h>
-#include <nsplashscreen.h>
-#include "plugin.h"
+
 using namespace std;
 
 /*inline int f2i(double d) { 

@@ -20,9 +20,9 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "song.h"
+#include "serializer.h"
 #include <string>
-#include <song.h>
-#include <serializer.h>
 
 
 /**
