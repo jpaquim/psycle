@@ -56,8 +56,13 @@ namespace ngrs
 				public:
 					channel(value_type mask) : mask(mask)
 					{
-						// we expect at least one bit is on!
-						if(!mask) throw std::runtime_error("ngrs: all bits are off in the channel mask");
+						// would make an endless loop is no bit is on
+						if(!mask)
+						{
+							decrease_bits = client_bits;
+							shift = 0;
+							return;
+						}
 
 						// we know the mask has all its bits contiguous,
 						// i.e., we cannot have something like this in one mask: 0011001100.
@@ -144,13 +149,13 @@ namespace ngrs
 				value_type const red,
 				value_type const green,
 				value_type const blue,
-				value_type const alpha = 1 // we use a dummy all-bits-on that overlaps with all other channels
+				value_type const alpha = 0
 			)
 			{
-				assert("no mask must be zero" && red  ); this->channels[0] = channel(red  );
-				assert("no mask must be zero" && green); this->channels[1] = channel(green);
-				assert("no mask must be zero" && blue ); this->channels[2] = channel(blue );
-				assert("no mask must be zero" && alpha); this->channels[3] = channel(alpha);
+				this->channels[0] = channel(red  );
+				this->channels[1] = channel(green);
+				this->channels[2] = channel(blue );
+				this->channels[3] = channel(alpha);
 			}
 			
 			/// converts a client value to a server one.
