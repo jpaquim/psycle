@@ -22,6 +22,7 @@
 #include "ngroupbox.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nitem.h"
 
 /* XPM */
 const char* left_nav[] = {
@@ -366,6 +367,14 @@ void NFileDialog::onLeftBtnPressed( NButtonEvent * sender )
 
 void NFileDialog::onRightBtnPressed( NButtonEvent * sender ) {
 
+}
+
+void NFileDialog::addFilter( const std::string & name, const std::string & regexp )
+{
+  fBox_->addFilter(name,regexp);
+  fiNameCtrl->add(new NItem(name));
+  fBox_->setActiveFilter(name);
+  fiNameCtrl->setIndex(fiNameCtrl->itemCount()-1);
 }
 
 

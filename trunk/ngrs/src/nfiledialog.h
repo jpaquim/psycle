@@ -26,6 +26,7 @@
 #include "nedit.h"
 #include "nlabel.h"
 #include "ncombobox.h"
+#include "nregexp.h"
 
 /**
 @author Stefan
@@ -47,6 +48,8 @@ public:
    void setDirectory(const std::string & dir);
 
    virtual void setVisible(bool on);
+
+   void addFilter(const std::string & name ,const std::string & regexp);
 
 private:
 

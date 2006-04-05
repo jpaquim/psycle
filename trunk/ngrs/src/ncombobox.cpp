@@ -120,6 +120,15 @@ void NComboBox::onItemClicked( NItemEvent * ev)
 void NComboBox::setIndex( int i )
 {
   lbox->setIndex(i);
+  NCustomItem* item = lbox->itemAt(i);
+  if (item!=0) {
+    edit_->setText(item->text());
+  }
+}
+
+int NComboBox::itemCount( )
+{
+  return lbox->itemCount();
 }
 
 

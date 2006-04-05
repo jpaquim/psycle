@@ -154,6 +154,14 @@ void NListBox::selClear( )
   deSelectItems();
 }
 
+NCustomItem * NListBox::itemAt( unsigned int index )
+{
+  if (index >= 0 && index < listBoxPane_->visualComponents().size())
+    return (NCustomItem*) listBoxPane_->visualComponents().at(index);
+  else
+    return 0;
+}
+
 
 
 

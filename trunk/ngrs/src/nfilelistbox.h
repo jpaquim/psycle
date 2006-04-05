@@ -22,6 +22,7 @@
 
 #include <nlistbox.h>
 #include <nfile.h>
+#include <nregexp.h>
 
 const int nFiles = 1;
 const int nDirs  = 2;
@@ -46,6 +47,9 @@ public:
 
     bool isDirItem();
 
+    void setActiveFilter(const std::string & name);
+    void addFilter(const std::string & name ,const std::string & regexp);
+
 private:
 
     bool isDirItem_;
@@ -56,6 +60,11 @@ private:
 
     void onDirItemSelected(NButtonEvent* ev);
     void onFileItemSelected(NButtonEvent* ev);
+
+    NRegExp* activeFilter;
+    std::map<std::string,NRegExp*> filterMap;
+
+    std::string dir_;
 };
 
 #endif
