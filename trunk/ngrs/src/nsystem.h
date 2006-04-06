@@ -80,14 +80,8 @@ private:
     int screen_;
     int keyState_;
 
-    #if defined NGRS__COLOR_CONVERTER
-      typedef ngrs::color_converter<8, unsigned long int> color_converter;
-      ngrs::color_converter<> color_converter_;
-    #else
-      long red_mask;
-      long green_mask;
-      long blue_mask;
-    #endif
+    typedef ngrs::color_converter<8, unsigned long int> color_converter;
+    ngrs::color_converter<> color_converter_;
 
     Display* dpy_;
     Window rootWindow_;

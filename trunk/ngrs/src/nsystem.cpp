@@ -442,12 +442,7 @@ void NSystem::setStayAbove( Window win )
 unsigned long NSystem::getXColorValue(int r, int g, int b )
 {
  if (isTrueColor()) {
-   #if defined NGRS__COLOR_CONVERTER
-     return color_converter_(r, g, b);
-   #else
-     unsigned long value = ((r << 16) & red_mask)  | ((g << 8) & green_mask) | (b & blue_mask);
-     return value;
-   #endif
+   return color_converter_(r, g, b);
  }
 
  unsigned long key = (r << 16) | (g << 8) | (b);
@@ -487,7 +482,6 @@ void NSystem::matchVisual( )
     #endif
     visual_ = visualList[0].visual;
     isTrueColor_ = true;
-    #if defined NGRS__COLOR_CONVERTER
       #if !defined NDEBUG
         std::cout << "ngrs: visual class: initializing color converter ... ";
       #endif
@@ -495,7 +489,7 @@ void NSystem::matchVisual( )
       #if !defined NDEBUG
         std::cout << "ok." << std::endl;
       #endif
-    #endif
+
     colormap_ = XCreateColormap (dpy(), rootWindow(),visualList[0].visual, AllocNone);
   }
   else
@@ -506,12 +500,6 @@ void NSystem::matchVisual( )
     #endif
   }
 
-  #if !defined NGRS__COLOR_CONVERTER
-    red_mask   = visual_->red_mask;
-    green_mask = visual_->green_mask;
-    blue_mask  = visual_->blue_mask;
-  #endif
-  
   XFree(visualList);
 }
 
