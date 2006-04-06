@@ -2,7 +2,6 @@
 // copyright 2006 johan boule <bohan@jabber.org>
 // copyright 2006 psycledelics development team <http://psycle.sourceforge.net>
 
-#include <stdexcept>
 #include <cassert>
 
 namespace ngrs
