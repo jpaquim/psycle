@@ -23,7 +23,7 @@
 #include <string>
 #include "nfont.h"
 #include "nfontstructure.h"
-#include "ngrs/x_window/color_converter.hpp"
+#include "ngrs/color_converter.hpp"
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
@@ -81,7 +81,8 @@ private:
     int keyState_;
 
     #if defined NGRS__COLOR_CONVERTER
-      ngrs::x_window::color_converter color_converter_;
+      typedef ngrs::color_converter<8, unsigned long int> color_converter;
+      ngrs::color_converter<> color_converter_;
     #else
       long red_mask;
       long green_mask;

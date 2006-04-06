@@ -120,7 +120,7 @@ namespace ngrs
 	template
 	<
 		unsigned char Client_Bits = 8,
-		typename Value_Type = unsigned int,
+		typename Value_Type = unsigned long int,
 		Value_Type const Opaque_Value = 0,
 		unsigned char Channel_Count = 4
 	>
