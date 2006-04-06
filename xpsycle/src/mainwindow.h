@@ -139,6 +139,8 @@ private:
 
     void onTimer();
 
+    int close();
+
 };
 
 #endif

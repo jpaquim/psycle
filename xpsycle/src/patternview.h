@@ -178,6 +178,7 @@ public:
     int trackNumber();
 
     void addEvent( int byteLength );
+    int colStartFromEvent(int event);
     int eventFromCol(int col);
     int eventLength(int event);
     std::vector<int> eventSize;

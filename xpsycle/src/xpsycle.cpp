@@ -46,14 +46,14 @@ int f2i(double q) { return ((int)q)&2047; }
 int main(int argc, char *argv[])
 {
 
-  try {
     NApp app;
     Global gl;
     Global::pConfig()->loadConfig();
     NWindow* mainWin = new MainWindow();
     app.setMainWindow(mainWin);
     app.run();
-  } catch (std::exception e) { exit(0); };
+    return EXIT_SUCCESS;
+
 
  /* NSplashScreen* splash = new NSplashScreen();
     splash->loadImageFromFile("/home/natti/xpsycle/icons/splash.xpm");
@@ -64,5 +64,5 @@ int main(int argc, char *argv[])
 
   song.load("/home/natti/lastfuture.picknick.psy");*/
 
-  return EXIT_SUCCESS;
+
 }

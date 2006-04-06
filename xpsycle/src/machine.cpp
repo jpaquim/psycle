@@ -1172,7 +1172,7 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
 
 void Machine::SaveFileChunk(Serializer * pFile) {
   pFile->PutPChar(reinterpret_cast<char*>(&_type),sizeof(_type));
-  //SaveDllName(pFile);
+  SaveDllName(pFile);
   pFile->PutBool(_bypass);
   pFile->PutBool(_mute);
   pFile->PutInt(_panning);
@@ -1191,7 +1191,7 @@ void Machine::SaveFileChunk(Serializer * pFile) {
      pFile->PutBool(_inputCon[i]);         // Incoming connections activated
   }
   pFile->PutString(_editName);
-  //SaveSpecificChunk(pFile);
+  SaveSpecificChunk(pFile);
 }
 
 

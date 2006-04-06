@@ -760,3 +760,8 @@ void MainWindow::updateBars( )
  std::vector<int> a(p, p+5);
 }
 
+int MainWindow::close( )
+{
+  closePsycle();
+}
+
