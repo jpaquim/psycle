@@ -85,6 +85,8 @@ const char * arrow_left_xpm[] = {
 "            "};
 
 
+/// todo scrollbar shouldnt implement the logic , but a more advanced component like scrollbox
+
 NScrollBar::NScrollBar()
  : NPanel()
 {
@@ -110,6 +112,9 @@ void NScrollBar::init( )
   dec->setBitmap(up);
 
   range_ = 0;
+  step_ =  16;
+  pos_  =  0;
+
   control_ = 0;
   scrollPolicy_ = nDy;
 
@@ -117,8 +122,10 @@ void NScrollBar::init( )
 
   setBorder(0);
   incBtn = new NButton(inc,12,12);//up,10,10);
+  incBtn->clicked.connect(this,&NScrollBar::onIncBtnClicked);
   incBtn->setFlat(false);
   decBtn = new NButton(dec,12,12);
+  decBtn->clicked.connect(this,&NScrollBar::onDecBtnClicked);
   decBtn->setFlat(false);
 
   add(incBtn);
@@ -201,9 +208,11 @@ void NScrollBar::onSliderMove( )
          if (control_!=0) {
            dy = (int)( (( control_->clientHeight() - control_->spacingHeight()) / ((double) sliderArea_->spacingHeight() - slider_->height())) * slider_->top());
            scrollComponent(control_,control_->scrollDx(),dy);
+           pos_ = dy;
+         } else {
+            dy = (int) d2i(((range_ /((double) (sliderArea_->clientHeight()-slider_->height()))) * dy));
+            posChange.emit(this,dy);
          }
-         dy = (int) d2i(((range_ /((double) (sliderArea_->clientHeight()-slider_->height()))) * dy));
-         posChange.emit(this,dy);
       }
       break;
       case nDx : {
@@ -319,31 +328,32 @@ void NScrollBar::setRange( int range )
   range_ = range;
 }
 
+int NScrollBar::range( ) const
+{
+  return range_;
+}
+
 void NScrollBar::Slider::onMousePress( int x, int y, int button )
 {
-  /*unsigned int mask = ExposureMask | KeyPressMask | KeyReleaseMask  |
-                    ButtonPressMask|ButtonReleaseMask | PointerMotionHintMask
-                    |PropertyChangeMask | NoEventMask | StructureNotifyMask | SubstructureRedirectMask | GravityNotify;
-  XSetWindowAttributes attr;
-  attr.event_mask = mask;
-  XChangeWindowAttributes(NApp::system().dpy(), window()->win(), CWEventMask, &attr);*/
+
 }
 
 void NScrollBar::Slider::onMousePressed( int x, int y, int button )
 {
-/*  XSetWindowAttributes attr;
-  attr.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonMotionMask |
-                    ButtonPressMask|ButtonReleaseMask | PointerMotionMask
-                    |PropertyChangeMask | NoEventMask | StructureNotifyMask | SubstructureRedirectMask | GravityNotify;
-  XChangeWindowAttributes(NApp::system().dpy(), window()->win(), CWEventMask, &attr);
-  XSync(NApp::system().dpy(),true);*/
+
 }
 
 void NScrollBar::setPos( int value )
 {
+  pos_ = value;
   switch ( scrollPolicy_) {
       case nDy : {
-         int sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) range_ );
+         int sliderTop = 0;
+         if (control_==0)
+           sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) range_ );
+         else
+           sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) (control_->clientHeight() - control_->spacingHeight()) );
+
          slider_->setTop(sliderTop);
          sliderArea_->repaint();
          onSliderMove();
@@ -358,6 +368,33 @@ void NScrollBar::setPos( int value )
       break;
   }
 }
+
+void NScrollBar::setStep( int step )
+{
+  step_ = step;
+}
+
+int NScrollBar::step( ) const
+{
+  return step_;
+}
+
+void NScrollBar::onDecBtnClicked( NButtonEvent * ev )
+{
+  setPos(pos()-step());
+}
+
+void NScrollBar::onIncBtnClicked( NButtonEvent * ev )
+{
+  setPos(pos()+step());
+}
+
+int NScrollBar::pos( ) const
+{
+  return pos_;
+}
+
+
 
 
 

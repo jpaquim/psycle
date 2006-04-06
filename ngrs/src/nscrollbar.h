@@ -60,11 +60,17 @@ public:
    void setOrientation(int orientation);
    int orientation();
 
+   void setStep(int step);
+   int step() const;
+
    void setControl(NVisualComponent* control, int scrollPolicy);
    void onSliderMove();
 
    void setRange(int range);
+   int range() const;
+
    void setPos(int value);
+   int pos() const;
 
 private:
 
@@ -83,6 +89,8 @@ private:
    int orientation_;
    int scrollPolicy_;
    int range_;
+   int step_;
+   int pos_;
 
    NButton* incBtn;
    NButton* decBtn;
@@ -93,6 +101,9 @@ private:
    void init();
 
    void scrollComponent(NVisualComponent* control, int dx, int dy);
+
+   void onDecBtnClicked(NButtonEvent* ev);
+   void onIncBtnClicked(NButtonEvent* ev);
 
 };
 
