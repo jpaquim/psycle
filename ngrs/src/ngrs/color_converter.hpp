@@ -31,8 +31,8 @@ namespace ngrs
 			///\{
 				/// number of bits per channel used by clients
 				unsigned char const static client_channel_bits = Client_Channel_Bits;
-				/// max value corresponding to client_bits
-				value_type const static client_channel_max_value = (1 << client_channel_bits) - 1;
+				/// max value corresponding to client_channel_bits
+				value_type const static client_channel_max_value = (1 << Client_Channel_Bits) - 1;
 			///\}
 			
 		protected:
