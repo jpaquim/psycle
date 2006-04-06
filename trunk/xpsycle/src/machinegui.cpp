@@ -115,6 +115,11 @@ void MachineGUI::onMove( const NMoveEvent & moveEvent )
 
     oldDrag = newDrag;
   }
+
+  if (pMac()) {
+    pMac()->_x = left();
+    pMac()->_y = top();
+  }
 }
 
 void MachineGUI::resize( )

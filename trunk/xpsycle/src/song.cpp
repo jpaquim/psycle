@@ -983,7 +983,7 @@ bool Song::save(const std::string & fileName)
         f.PutInt(size);
         // chunk data
         f.PutInt(index);
-        //_pMachine[index]->SaveFileChunk(f);
+          _pMachine[index]->SaveFileChunk(&f);
         // chunk size in header
           std::size_t const pos2(f.GetPos());
           size = pos2 - pos - sizeof size;

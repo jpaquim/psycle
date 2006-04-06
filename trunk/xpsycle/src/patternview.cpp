@@ -857,18 +857,51 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
          if (pView->cursor().z()==0) {
            note += pView->editOctave()*12;
            *patOffset = note;
-           repaint();
            Machine* tmac = Global::pSong()->_pMachine[0];
-           pView->PlayNote(24,127,false,tmac);
+           //pView->PlayNote(24,127,false,tmac);
+
+           int startLine  = dy_ / pView->rowHeight();
+           int lineCount  = clientHeight() / pView->rowHeight();
+           int oldLine = pView->cursor().y();
+           pView->moveCursor(0,1,0);
+           int newLine = pView->cursor().y();
+           if (newLine > startLine + lineCount-1) {
+             pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+           }
+           window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
          } else  {
            int off = (pView->cursor().z()+1) / 2;
            patOffset +=off;
-           char newByte;
+           unsigned char newByte;
            if (pView->cursor().z() % 2 == 1) newByte = (*patOffset & 0x0F) | (0xF0 & (hex_value(event.scancode()) << 4));
                                         else newByte = (*patOffset & 0xF0) | (0x0F & (hex_value(event.scancode())));
+
+
+           if (*patOffset == 255) {
+              // set to 0
+               newByte = (*patOffset & 0x00) | (0xF0 & (hex_value(event.scancode()) << 4));
+           }
            *patOffset = newByte;
+
+           int eventIdx      =  pView->eventFromCol(pView->cursor().z());
+           int eventLen      =  pView->eventLength(eventIdx);
+           int eventColStart =  pView->colStartFromEvent(eventIdx);
+
+           int startLine  = dy_ / pView->rowHeight();
+           int lineCount  = clientHeight() / pView->rowHeight();
+           int oldLine = pView->cursor().y();
+
+           if (pView->cursor().z() - eventColStart >= 2*eventLen - 1) {
+              pView->moveCursor(0,1,0);
+              pView->setCursor(NPoint3D(pView->cursor().x(),pView->cursor().y(),eventColStart));
+           } else pView->moveCursor(0,0,1);
+
+           int newLine = pView->cursor().y();
+           if (newLine > startLine + lineCount-1) {
+             pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+           }
+           window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
          }
-         repaint();
        }
      }
      break;
@@ -1287,6 +1320,22 @@ int PatternView::eventFromCol(int col) {
 }
 
 
+int PatternView::colStartFromEvent( int event )
+{
+  int col = 1; 
+  int count = 0;
+  for (std::vector<int>::iterator it = eventSize.begin(); it < eventSize.end(); it++) {
+    if (count >= event) return col;
+    switch (*it) {
+        case 1  : col+=2; break;
+        case 2  : col+=4; break;
+    }
+   count++;
+ }
+ return -1;  // out of range
+}
+
+
 int PatternView::eventLength(int event) {
   if (event >= 0 && event < eventSize.size()) return eventSize.at(event); else return -1;
 }
@@ -1344,3 +1393,4 @@ void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
             memcpy(Global::pSong()->_ptrackline(ps,t,l),&blank,EVENT_SIZE);
 
 }
+
