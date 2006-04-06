@@ -20,7 +20,6 @@
 #include "nsystem.h"
 #include <stdexcept>
 
-
 using namespace std;
 
 NSystem::NSystem()
@@ -492,7 +491,7 @@ void NSystem::matchVisual( )
       #if !defined NDEBUG
         std::cout << "ngrs: visual class: initializing color converter ... ";
       #endif
-      color_converter_ = ngrs::x_window::color_converter(visual_->red_mask, visual_->green_mask, visual_->blue_mask);
+      color_converter_ = color_converter(visual_->red_mask, visual_->green_mask, visual_->blue_mask);
       #if !defined NDEBUG
         std::cout << "ok." << std::endl;
       #endif
@@ -506,7 +505,7 @@ void NSystem::matchVisual( )
       std::cout << "ngrs: visual class: not true-color, using color map" << std::endl;
     #endif
   }
-  
+
   #if !defined NGRS__COLOR_CONVERTER
     red_mask   = visual_->red_mask;
     green_mask = visual_->green_mask;
