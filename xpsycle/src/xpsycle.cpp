@@ -45,18 +45,21 @@ int f2i(double q) { return ((int)q)&2047; }
 
 int main(int argc, char *argv[])
 {
-  NApp app;
+
+  try {
+    NApp app;
+    Global gl;
+    Global::pConfig()->loadConfig();
+    NWindow* mainWin = new MainWindow();
+    app.setMainWindow(mainWin);
+    app.run();
+  } catch (std::exception e) { exit(0); };
 
  /* NSplashScreen* splash = new NSplashScreen();
     splash->loadImageFromFile("/home/natti/xpsycle/icons/splash.xpm");
   app.setSplashScreen(splash);*/
 
-  Global gl;
-  Global::pConfig()->loadConfig();
-  NWindow* mainWin = new MainWindow();
-  app.setMainWindow(mainWin);
-  app.run();
-
+  
   /*Song song;
 
   song.load("/home/natti/lastfuture.picknick.psy");*/

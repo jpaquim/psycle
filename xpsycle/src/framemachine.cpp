@@ -211,7 +211,7 @@ void Knob::setValueAsText( const std::string & text )
 void Knob::onMousePress( int x, int y, int button )
 {
   int CH = clientHeight();
-  if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).insidePoint(NPoint(x,y))) {
+  if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y)) {
     istweak = true;
     sourcepoint = y;
   }
