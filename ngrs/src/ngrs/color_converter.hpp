@@ -97,6 +97,7 @@ namespace ngrs
 			}
 			
 			/// converts a client color to a server one.
+			/// integral numeric values in the range [0, client_max_value].
 			///\return the server value
 			value_type inline operator()(value_type const values[Channel_Count]) const throw()
 			{
