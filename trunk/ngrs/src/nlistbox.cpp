@@ -20,6 +20,7 @@
 #include "nlistbox.h"
 #include "nbuttonevent.h"
 #include "napp.h"
+#include "nconfig.h"
 
 NListBox::NListBox()
  : NScrollBox()
@@ -32,10 +33,12 @@ NListBox::NListBox()
   listBoxPane_->setLayout(new NListLayout());
   listBoxPane_->setClientSizePolicy(nVertical + nHorizontal);
 
-  itemBg.setRGB(0,0,255);
   multiSelect_ = false;
 
   setHScrollBarPolicy(nNoneVisible);
+
+  NApp::config()->setSkin(&itemBg,"lbitemsel");
+  NApp::config()->setSkin(&itemFg,"lbitemnone");
 }
 
 
@@ -48,7 +51,6 @@ void NListBox::add( NCustomItem * component , bool align)
   listBoxPane_->add(component);
   component->mousePress.connect(this,&NListBox::onItemPress);
   component->setTransparent(true);
-  component->setBackground(itemBg);
   if (align) listBoxPane_->resize();
 }
 
@@ -57,7 +59,6 @@ void NListBox::insert( NCustomItem * component, int index , bool align )
   listBoxPane_->insert(component,index);
   component->mousePress.connect(this,&NListBox::onItemPress);
   component->setTransparent(true);
-  component->setBackground(itemBg);
   if (align) listBoxPane_->resize();
 }
 
@@ -73,7 +74,7 @@ void NListBox::onItemPress( NButtonEvent * ev)
 
   if (!multiSelect_ || !(NApp::system().keyState() & ControlMask)) deSelectItems();
 
-  item->setTransparent(false);
+  item->setSkin(itemBg);
   item->repaint();
 
   onItemSelected((NCustomItem*) (ev->sender()));
@@ -99,7 +100,7 @@ void NListBox::deSelectItems( )
 {
   for (std::vector<NCustomItem*>::iterator it = selItems_.begin(); it < selItems_.end(); it++) {
     NCustomItem* item = *it;
-    item->setTransparent(true);
+    item->setSkin(itemFg);
     item->repaint();
   }
   selItems_.clear();
@@ -139,7 +140,7 @@ void NListBox::setIndex( unsigned int i )
   if (i>=0 && i < listBoxPane_->visualComponents().size()) {
      NCustomItem* item = (NCustomItem*) listBoxPane_->componentByZOrder(i); ///todo avoid cast
      selItems_.push_back(item);
-     item->setTransparent(false);
+     item->setSkin(itemBg);
      item->repaint();
   }
 }

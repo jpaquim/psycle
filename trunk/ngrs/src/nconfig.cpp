@@ -165,7 +165,6 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          }
       }
     } else
-
     if (tagName == "bgcolor") {
       NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
@@ -388,7 +387,20 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
     skin->transparent      = false;
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
   } else
+  if (identifier == "lbitemsel") {
+    skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
+    skin->font.setTextColor(NColor(0,0,0));
+    skin->gradStartColor.setRGB(130,130,130);
+    skin->gradMidColor.setRGB(150,150,150);
+    skin->gradEndColor.setRGB(140,140,140);
+    skin->gradientStyle   = 1;
+    skin->gradientPercent = 10;
+    skin->useParentFont    = false;
 
+  } else
+  if (identifier == "lbitemnone") {
+
+  } else
   if (identifier == "mitemover") {
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
     skin->font.setTextColor(NColor(0,0,0));

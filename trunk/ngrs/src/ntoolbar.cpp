@@ -57,9 +57,10 @@ void NToolBar::add( NRuntime * component )
   NPanel::add(component);
 }
 
-void NToolBar::add( NButton * button )
+NButton* NToolBar::add( NButton * button )
 {
   NPanel::add(button);
+  return button;
 }
 
 void NToolBar::add( NVisualComponent * comp )
