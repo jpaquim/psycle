@@ -111,6 +111,7 @@ namespace ngrs
 			
 			/// converts a client color to a server one.
 			/// floating point numeric channel values in the range [0, 1].
+			///\return the server value
 			template<typename Floating_Point_Numeric>
 			value_type inline real(Floating_Point_Numeric const channel_values[Channel_Count]) const throw()
 			{
@@ -171,6 +172,7 @@ namespace ngrs
 			/// converts a client color to a server one.
 			/// integral numeric channel values in the range [0, client_max_value].
 			/// 4 channels, or 3 channels with default value for alpha
+			///\return the server value
 			value_type inline operator()
 			(
 				value_type const red,
@@ -189,6 +191,7 @@ namespace ngrs
 			/// converts a client color to a server one.
 			/// floating point numeric channel values in the range [0, 1].
 			/// 4 channels, or 3 channels with default value for alpha
+			///\return the server value
 			template<typename Floating_Point_Numeric>
 			value_type inline real
 			(
