@@ -156,7 +156,7 @@ namespace ngrs
 				value_type const red,
 				value_type const green,
 				value_type const blue,
-				value_type const alpha = Opaque_Value
+				value_type const alpha = 0
 			)
 			{
 				this->channels[0] = channel(red  );
