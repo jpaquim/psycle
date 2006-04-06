@@ -36,7 +36,7 @@ public:
 
     virtual void paint(NGraphics* g);
     virtual void add(NRuntime* component);
-    virtual void add(NButton*  button);
+    virtual NButton* add(NButton*  button);
     virtual void add(NVisualComponent* comp);
 
 

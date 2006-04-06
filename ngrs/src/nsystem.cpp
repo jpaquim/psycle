@@ -20,6 +20,7 @@
 #include "nsystem.h"
 #include <stdexcept>
 
+
 using namespace std;
 
 NSystem::NSystem()
@@ -442,6 +443,7 @@ void NSystem::setStayAbove( Window win )
 unsigned long NSystem::getXColorValue(int r, int g, int b )
 {
  if (isTrueColor()) {
+
    unsigned long value = ((r << 16) & red_mask)  | ((g << 8) & green_mask) | (b & blue_mask);
    return value;
  }
@@ -492,7 +494,7 @@ void NSystem::matchVisual( )
   red_mask   = visual_->red_mask;
   green_mask = visual_->green_mask;
   blue_mask  = visual_->blue_mask;
-   
+
   XFree(visualList);
 }
 

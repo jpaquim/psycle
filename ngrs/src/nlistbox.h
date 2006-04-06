@@ -56,16 +56,15 @@ public:
 private:
 
     NPanel* listBoxPane_;
-
     bool multiSelect_;
-
     std::vector<NCustomItem*> selItems_;
 
-    NColor  itemBg;
+    NSkin itemBg;
+    NSkin itemFg;
 
     void onItemPress(NButtonEvent * ev);
-
     void deSelectItems();
+
 
 };
 
