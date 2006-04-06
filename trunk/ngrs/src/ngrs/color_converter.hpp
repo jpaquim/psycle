@@ -49,7 +49,7 @@ namespace ngrs
 				
 					/// convert a client channel value to a server one.
 					///\return the server value
-					value_type inline operator()(value_type client_value) const throw()
+					value_type inline operator()(value_type const client_value) const throw()
 					{
 						assert(client_value <= client_channel_max_value);
 						return client_value >> decrease_bits << shift;
