@@ -92,8 +92,6 @@ public:
 
     virtual NRect clipBox() const;
 
-    bool mausin(int x,int y,const NRect & a) const;
-
 
 private:
 

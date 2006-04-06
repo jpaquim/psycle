@@ -117,7 +117,6 @@ void NScrollBar::init( )
 
   setBorder(0);
   incBtn = new NButton(inc,12,12);//up,10,10);
-  incBtn->setActiveGradient(false);
   incBtn->setFlat(false);
   decBtn = new NButton(dec,12,12);
   decBtn->setFlat(false);

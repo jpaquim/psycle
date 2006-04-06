@@ -158,8 +158,8 @@ void NLineShape::setPoints( NPoint p1, NPoint p2 )
 
 int NLineShape::overPicker( int x, int y )
 {
-  if (NRect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).insidePoint(NPoint(x,y))) return 0;
-  if (NRect(p2_.x()-pickWidth_/2,p2_.y()-pickHeight_/2,pickWidth_,pickHeight_).insidePoint(NPoint(x,y))) return 1;
+  if (NRect(p1_.x()-pickWidth_/2,p1_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 0;
+  if (NRect(p2_.x()-pickWidth_/2,p2_.y()-pickHeight_/2,pickWidth_,pickHeight_).intersects(x,y)) return 1;
   return -1;
 }
 

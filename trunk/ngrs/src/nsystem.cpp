@@ -279,7 +279,7 @@ string NSystem::getFontPatternWithSizeStyle(Display* dpy, int screen, const char
         }
     }
     newname[j] = '\0';
-    /* if there aren't 14 hyphens, it isn't a well formed name */    
+    /* if there aren't 14 hyphens, it isn't a well formed name */
     if (field != 14) return NULL;
     return string(newname);
 }

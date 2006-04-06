@@ -63,7 +63,6 @@ void NComboBox::init( )
   downBtn_ = new NButton(downImg,12,6);
     downBtn_->setWidth(15);
     downBtn_->setFlat(false);
-    downBtn_->setActiveGradient(false);
     downBtn_->click.connect(this,&NComboBox::onDownBtnClicked);
   NPanel::add(downBtn_);
 

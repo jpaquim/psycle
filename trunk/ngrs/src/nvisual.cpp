@@ -184,12 +184,6 @@ void NVisual::onKeyPress( const NKeyEvent & event )
 {
 }
 
-bool NVisual::mausin( int x, int y, const NRect & a ) const
-{
-  if ((a.left() <= x) && (a.width()+a.left() >= x) && (a.top()  <= y) 
-                       && (a.height()+a.top() >= y)) return true; else return false;
-}
-
 void NVisual::setMinimumWidth( int minWidth )
 {
   minWidth_ = minWidth;
