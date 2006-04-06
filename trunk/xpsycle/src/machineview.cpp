@@ -171,7 +171,7 @@ void MachineView::onLineMousePressed( NButtonEvent * ev )
   bool found = false;
   for (std::vector<MachineGUI*>::iterator it = machineGUIs.begin() ; it < machineGUIs.end(); it++) {
     MachineGUI* machineGUI = *it;
-    if (machineGUI->clipBox().insidePoint(NPoint(line->left()+ev->x(),line->top()+ev->y()))) {
+    if (machineGUI->clipBox().intersects(line->left()+ev->x(),line->top()+ev->y())) {
       Global::pSong()->InsertConnection(startGUI->pMac()->_macIndex , machineGUI->pMac()->_macIndex, 1.0f);
       startGUI->attachLine(line,0);
       machineGUI->attachLine(line,1);

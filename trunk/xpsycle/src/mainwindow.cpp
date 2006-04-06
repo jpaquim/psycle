@@ -300,32 +300,33 @@ void MainWindow::initToolBar( )
        trackCombo_->add(new NItem(s));
       }
     psycleControlBar_->add(new NLabel("Tempo"));
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->lessless()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "lessless.xpm");
 
-     NButton* lesslessBmp = new NButton(img,20,20);
-       lesslessBmp->clicked.connect(this,&MainWindow::onBpmDecTen);
-     psycleControlBar_->add(lesslessBmp);
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") 
+      img->setSharedBitmap(&Global::pBitmaps()->lessless());
+    else
+      img->loadFromFile(Global::pConfig()->iconPath+ "lessless.xpm");
 
+    psycleControlBar_->add(new NButton(img,20,20))->clicked.connect(this,&MainWindow::onBpmDecTen);
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->less()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
-     NButton* lessBmp = new NButton(img,20,20);
-     lessBmp->clicked.connect(this,&MainWindow::onBpmDecOne);
-     psycleControlBar_->add(lessBmp);
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") 
+       img->setSharedBitmap(&Global::pBitmaps()->less()); 
+    else
+       img->loadFromFile(Global::pConfig()->iconPath+ "less.xpm");
 
-     bpmLabel_ = new NLabel("125");
-     psycleControlBar_->add(bpmLabel_);
+    psycleControlBar_->add(new NButton(img,20,20))->clicked.connect(this,&MainWindow::onBpmDecOne);
 
-     img = new NImage();
-     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
-                                           img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+    bpmLabel_ = new NLabel("125");
+    psycleControlBar_->add(bpmLabel_);
 
-     NButton* moreBmp = new NButton(img,20,20);
-       moreBmp->clicked.connect(this,&MainWindow::onBpmIncOne);
-     psycleControlBar_->add(moreBmp);
+    img = new NImage();
+    if (Global::pConfig()->iconPath=="") 
+       img->setSharedBitmap(&Global::pBitmaps()->more()); 
+    else
+       img->loadFromFile(Global::pConfig()->iconPath+ "more.xpm");
+
+    psycleControlBar_->add(new NButton(img,20,20))->clicked.connect(this,&MainWindow::onBpmIncOne);
 
 
      img = new NImage();
