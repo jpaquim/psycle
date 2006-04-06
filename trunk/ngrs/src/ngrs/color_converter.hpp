@@ -21,7 +21,7 @@ namespace ngrs
 			/// number of channels a color comprises
 			unsigned char const static channel_count = Channel_Count;
 			
-			/// server-side pixel value
+			/// type used for client-side pixel value and masks
 			typedef Value_Type value_type;
 			
 			///\name client-side channel configuration, same for all channels
@@ -90,9 +90,10 @@ namespace ngrs
 			inline basic_color_converter() {}
 			
 		public:
+			
 			basic_color_converter(value_type const masks[Channel_Count])
 			{
-				for(unsigned i(0); i < Channel_Count; ++i) this->channels[i] = channel(masks[i]);
+				for(unsigned int i(0); i < Channel_Count; ++i) this->channels[i] = channel(masks[i]);
 			}
 			
 			/// converts a client color to a server one.
@@ -100,7 +101,7 @@ namespace ngrs
 			value_type inline operator()(value_type const values[Channel_Count]) const throw()
 			{
 				value_type result(0);
-				for(unsigned i(0); i < Channel_Count; ++i) result |= channels[i](values[i]);
+				for(unsigned int i(0); i < Channel_Count; ++i) result |= channels[i](values[i]);
 				return result;
 			}
 			
@@ -111,7 +112,7 @@ namespace ngrs
 			value_type inline real(Floating_Point_Numeric const values[Channel_Count]) const throw()
 			{
 				value_type result(0);
-				for(unsigned i(0); i < Channel_Count; ++i) result |= channels[i](values[i] * client_max_value);
+				for(unsigned int i(0); i < Channel_Count; ++i) result |= channels[i](values[i] * client_max_value);
 				return result;
 			}
 	};
@@ -143,13 +144,19 @@ namespace ngrs
 		public:
 			typedef typename color_converter::value_type value_type;
 			
+			/// default initialization
+			color_converter()
+			{
+				for(unsigned int i(0); i < this->channel_count; ++i) this->channels[i] = channel(0);
+			}
+			
 			/// 4 channels, or 3 channels with default value for alpha
 			color_converter
 			(
 				value_type const red,
 				value_type const green,
 				value_type const blue,
-				value_type const alpha = 0
+				value_type const alpha = Opaque_Value
 			)
 			{
 				this->channels[0] = channel(red  );
