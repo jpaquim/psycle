@@ -107,7 +107,6 @@ namespace ngrs
 			
 			/// converts a client color to a server one.
 			/// floating point numeric values in the range [0, 1].
-			/// 4 channels, or 3 channels with default value for alpha
 			template<typename Floating_Point_Numeric>
 			value_type inline real(Floating_Point_Numeric const values[Channel_Count]) const throw()
 			{
