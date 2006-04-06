@@ -10,28 +10,31 @@ namespace ngrs
 	/// converts a color from client to server
 	template
 	<
-		unsigned char Client_Bits,
+		unsigned char Client_Channel_Bits,
 		typename Value_Type,
-		Value_Type const Opaque_Value,
+		Value_Type Opaque_Value,
 		unsigned char Channel_Count
 	>
 	class basic_color_converter
 	{
 		public:
+			/// type used for client-side color values, channel values, and channel masks
+			typedef Value_Type value_type;
+				
+			/// value to give to the alpha channel (if any) for opacity
+			value_type const static opaque_value = Opaque_Value;
+			
 			/// number of channels a color comprises
 			unsigned char const static channel_count = Channel_Count;
-			
-			/// type used for client-side pixel value and masks
-			typedef Value_Type value_type;
-			
+				
 			///\name client-side channel configuration, same for all channels
 			///\{
 				/// number of bits per channel used by clients
-				unsigned char const static client_bits = Client_Bits;
+				unsigned char const static client_channel_bits = Client_Channel_Bits;
 				/// max value corresponding to client_bits
-				value_type const static client_max_value = (1 << client_bits) - 1;
+				value_type const static client_channel_max_value = (1 << client_channel_bits) - 1;
 			///\}
-
+			
 		protected:
 			class channel
 			{
@@ -40,32 +43,32 @@ namespace ngrs
 					private:
 						value_type mask;
 						unsigned char decrease_bits, shift;
-					public:
-						value_type const static opaque_value = Opaque_Value;
 				///\}
 
 				public:
-					/// convert a client value to a server value.
+				
+					/// convert a client channel value to a server one.
 					///\return the server value
 					value_type inline operator()(value_type client_value) const throw()
 					{
-						assert(client_value <= client_max_value);
+						assert(client_value <= client_channel_max_value);
 						return client_value >> decrease_bits << shift;
 					}
 					
-				public:
+					/// configures the bitshifts according to the mask
 					channel(value_type mask) : mask(mask)
 					{
 						// would make an endless loop is no bit is on
 						if(!mask)
 						{
-							decrease_bits = client_bits;
+							decrease_bits = client_channel_bits;
 							shift = 0;
 							return;
 						}
 
 						// we know the mask has all its bits contiguous,
 						// i.e., we cannot have something like this in one mask: 0011001100.
+						
 						// skip the bits that are off.
 						for(shift = 0; !(mask & 1); mask >>= 1) ++shift;
 
@@ -73,16 +76,16 @@ namespace ngrs
 						unsigned char bits(0); for(; mask & 1; mask >>= 1) ++bits;
 						
 						// difference between client and server bits
-						assert(client_bits >= bits); decrease_bits = client_bits - bits;
+						assert(client_channel_bits >= bits); decrease_bits = client_channel_bits - bits;
 
 						// assert that we computed it right
-						assert((*this)(client_max_value) == this->mask);
+						assert((*this)(client_channel_max_value) == this->mask);
 					}
 
 				private: friend class basic_color_converter;
 					/// uninitialized storage used by the enclosing class only
 					inline channel() {} 
-				};
+			};
 
 			channel channels[Channel_Count];
 
@@ -97,47 +100,47 @@ namespace ngrs
 			}
 			
 			/// converts a client color to a server one.
-			/// integral numeric values in the range [0, client_max_value].
+			/// integral numeric channel values in the range [0, client_max_value].
 			///\return the server value
-			value_type inline operator()(value_type const values[Channel_Count]) const throw()
+			value_type inline operator()(value_type const channel_values[Channel_Count]) const throw()
 			{
 				value_type result(0);
-				for(unsigned int i(0); i < Channel_Count; ++i) result |= channels[i](values[i]);
+				for(unsigned int i(0); i < Channel_Count; ++i) result |= channels[i](channel_values[i]);
 				return result;
 			}
 			
 			/// converts a client color to a server one.
-			/// floating point numeric values in the range [0, 1].
+			/// floating point numeric channel values in the range [0, 1].
 			template<typename Floating_Point_Numeric>
-			value_type inline real(Floating_Point_Numeric const values[Channel_Count]) const throw()
+			value_type inline real(Floating_Point_Numeric const channel_values[Channel_Count]) const throw()
 			{
 				value_type result(0);
-				for(unsigned int i(0); i < Channel_Count; ++i) result |= channels[i](values[i] * client_max_value);
+				for(unsigned int i(0); i < Channel_Count; ++i) result |= channels[i](channel_values[i] * client_channel_max_value);
 				return result;
 			}
 	};
 
 	template
 	<
-		unsigned char Client_Bits = 8,
+		unsigned char Client_Channel_Bits = 8,
 		typename Value_Type = unsigned long int,
-		Value_Type const Opaque_Value = 0,
+		Value_Type Opaque_Value = 0,
 		unsigned char Channel_Count = 4
 	>
-	class color_converter : public  basic_color_converter<Client_Bits, Value_Type, Opaque_Value, Channel_Count>
+	class color_converter : public  basic_color_converter<Client_Channel_Bits, Value_Type, Opaque_Value, Channel_Count>
 	{
 		public:
-			color_converter(typename color_converter::value_type const masks[Channel_Count]) : basic_color_converter<Client_Bits, Value_Type, Opaque_Value, Channel_Count>(masks) {}
+			color_converter(typename color_converter::value_type const masks[Channel_Count]) : basic_color_converter<Client_Channel_Bits, Value_Type, Opaque_Value, Channel_Count>(masks) {}
 	};
 	
-	/// template specialization for 4 channels
+	/// template specialization for 4 channels, or 3 channels with default value for alpha
 	template
 	<
-		unsigned char Client_Bits,
+		unsigned char Client_Channel_Bits,
 		typename Value_Type,
-		Value_Type const Opaque_Value
+		Value_Type Opaque_Value
 	>
-	class color_converter<Client_Bits, Value_Type, Opaque_Value> : public  basic_color_converter<Client_Bits, Value_Type, Opaque_Value, 4>
+	class color_converter<Client_Channel_Bits, Value_Type, Opaque_Value> : public  basic_color_converter<Client_Channel_Bits, Value_Type, Opaque_Value, 4>
 	{
 		protected:
 			typedef typename color_converter::channel channel;
@@ -153,20 +156,20 @@ namespace ngrs
 			/// 4 channels, or 3 channels with default value for alpha
 			color_converter
 			(
-				value_type const red,
-				value_type const green,
-				value_type const blue,
-				value_type const alpha = 0
+				value_type const   red_mask,
+				value_type const green_mask,
+				value_type const  blue_mask,
+				value_type const alpha_mask = 0
 			)
 			{
-				this->channels[0] = channel(red  );
-				this->channels[1] = channel(green);
-				this->channels[2] = channel(blue );
-				this->channels[3] = channel(alpha);
+				this->channels[0] = channel(  red_mask);
+				this->channels[1] = channel(green_mask);
+				this->channels[2] = channel( blue_mask);
+				this->channels[3] = channel(alpha_mask);
 			}
 			
 			/// converts a client color to a server one.
-			/// integral numeric values in the range [0, client_max_value].
+			/// integral numeric channel values in the range [0, client_max_value].
 			/// 4 channels, or 3 channels with default value for alpha
 			value_type inline operator()
 			(
@@ -184,7 +187,7 @@ namespace ngrs
 			}
 			
 			/// converts a client color to a server one.
-			/// floating point numeric values in the range [0, 1].
+			/// floating point numeric channel values in the range [0, 1].
 			/// 4 channels, or 3 channels with default value for alpha
 			template<typename Floating_Point_Numeric>
 			value_type inline real
@@ -198,10 +201,10 @@ namespace ngrs
 				return
 					(*this)
 					(
-						red   * this->client_max_value,
-						green * this->client_max_value,
-						blue  * this->client_max_value,
-						alpha * this->client_max_value
+						red   * this->client_channel_max_value,
+						green * this->client_channel_max_value,
+						blue  * this->client_channel_max_value,
+						alpha * this->client_channel_max_value
 					);
 			}
 	};
