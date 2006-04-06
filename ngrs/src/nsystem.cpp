@@ -443,9 +443,12 @@ void NSystem::setStayAbove( Window win )
 unsigned long NSystem::getXColorValue(int r, int g, int b )
 {
  if (isTrueColor()) {
-
-   unsigned long value = ((r << 16) & red_mask)  | ((g << 8) & green_mask) | (b & blue_mask);
-   return value;
+   #if defined NGRS__COLOR_CONVERTER
+     return color_converter_(r, g, b);
+   #else
+     unsigned long value = ((r << 16) & red_mask)  | ((g << 8) & green_mask) | (b & blue_mask);
+     return value;
+   #endif
  }
 
  unsigned long key = (r << 16) | (g << 8) | (b);
@@ -480,21 +483,36 @@ void NSystem::matchVisual( )
 
   if (visualsMatched != 0) {
     // we found at least one TrueColor visual on the screen, with the required depth.
-    std::cout << "ngrs: visual class: true-color, bypassing color map" << std::endl;
+    #if !defined NDEBUG
+      std::cout << "ngrs: visual class: true-color, bypassing color map" << std::endl;
+    #endif
     visual_ = visualList[0].visual;
     isTrueColor_ = true;
+    #if defined NGRS__COLOR_CONVERTER
+      #if !defined NDEBUG
+        std::cout << "ngrs: visual class: initializing color converter ... ";
+      #endif
+      color_converter_ = ngrs::x_window::color_converter(visual_->red_mask, visual_->green_mask, visual_->blue_mask);
+      #if !defined NDEBUG
+        std::cout << "ok." << std::endl;
+      #endif
+    #endif
     colormap_ = XCreateColormap (dpy(), rootWindow(),visualList[0].visual, AllocNone);
   }
   else
   {
     // use colormap
-    std::cout << "ngrs: visual class: not true-color, using color map" << std::endl;
+    #if !defined NDEBUG
+      std::cout << "ngrs: visual class: not true-color, using color map" << std::endl;
+    #endif
   }
-
-  red_mask   = visual_->red_mask;
-  green_mask = visual_->green_mask;
-  blue_mask  = visual_->blue_mask;
-
+  
+  #if !defined NGRS__COLOR_CONVERTER
+    red_mask   = visual_->red_mask;
+    green_mask = visual_->green_mask;
+    blue_mask  = visual_->blue_mask;
+  #endif
+  
   XFree(visualList);
 }
 

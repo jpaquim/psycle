@@ -23,6 +23,7 @@
 #include <string>
 #include "nfont.h"
 #include "nfontstructure.h"
+#include "ngrs/x_window/color_converter.hpp"
 
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
@@ -79,9 +80,13 @@ private:
     int screen_;
     int keyState_;
 
-    long red_mask;
-    long green_mask;
-    long blue_mask;
+    #if defined NGRS__COLOR_CONVERTER
+      ngrs::x_window::color_converter color_converter_;
+    #else
+      long red_mask;
+      long green_mask;
+      long blue_mask;
+    #endif
 
     Display* dpy_;
     Window rootWindow_;
