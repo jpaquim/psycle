@@ -73,7 +73,7 @@ namespace ngrs
 						unsigned char bits(0); for(; mask & 1; mask >>= 1) ++bits;
 						
 						// difference between client and server bits
-						assert(client_bits > bits); decrease_bits = client_bits - bits;
+						assert(client_bits >= bits); decrease_bits = client_bits - bits;
 
 						// assert that we computed it right
 						assert((*this)(client_max_value) == this->mask);
