@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 #include <cassert>
-//#include <boost/utility/enable_if.hpp>
+
 namespace ngrs
 {
 	/// converts a color from client to server
