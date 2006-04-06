@@ -84,14 +84,14 @@ void NRect::setLeft( long left )
   left_ = left;
 }
 
-bool NRect::insidePoint( const NPoint & p )
+bool NRect::intersects( const NPoint & p )
 {
   if ((left() <= p.x()) && (width()+ left() >= p.x()) && (top()  <= p.y())
                         && (height()+top()  >= p.y())) return true; else return false;
 }
 
 
-void NRect::interSects( const NRect & r2, NRect & result ) const
+void NRect::intersects( const NRect & r2, NRect & result ) const
 {
     int ymin = std::max(top(),  r2.top());
     int ymax = std::min(top() + height(), r2.top() + r2.height());
@@ -115,6 +115,15 @@ bool NRect::operator ==( const NRect & rhs ) const
 bool NRect::operator !=( const NRect & rhs ) const
 {
  return !(*this == rhs);
+}
+
+bool NRect::intersects( long x, long y )
+{
+   if ((left() <= x) && (width()+ left() >= x) && (top()  <= y)
+                        && (height()+top()  >= y))
+      return true;
+   else 
+      return false;
 }
 
 

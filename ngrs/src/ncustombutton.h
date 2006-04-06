@@ -56,14 +56,9 @@ public:
    signal1<NButtonEvent*> click;
    signal1<NButtonEvent*> clicked;
 
-   
-
    void setToggle(bool on);
    bool toggle() const;
    bool down() const;
-
-   void setActiveGradient(bool on);
-   void setGradientStyle(const NColor & startCl, NColor & midCl, NColor & endCl, int percent = 50);
 
    virtual void setDown(bool on);
    virtual void onCustomMessage(NEvent* ev);

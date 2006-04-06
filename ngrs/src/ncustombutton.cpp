@@ -102,7 +102,7 @@ void NCustomButton::onMousePressed( int x, int y, int button )
   if (!toggle_) {
     setDown(false);
   }
-  if (mausin(x,y,NRect(0,0,width(),height()))) {
+  if (NRect(0,0,width(),height()).intersects(x,y)) {
     NButtonEvent ev(this,x,y,button);
     clicked.emit(&ev);
   }
@@ -139,20 +139,6 @@ void NCustomButton::setToggle( bool on )
 {
   toggle_ = on;
 }
-
-void NCustomButton::setActiveGradient( bool on )
-{
-  gradient_->setActive(on);
-}
-
-void NCustomButton::setGradientStyle( const NColor & startCl, NColor & midCl, NColor & endCl , int percent )
-{
-  gradient_->setColor_1(startCl);
-  gradient_->setColor_2(midCl);
-  gradient_->setColor_3(endCl);
-  gradient_->setPercent(percent);
-}
-
 
 void NCustomButton::setDown( bool on )
 {

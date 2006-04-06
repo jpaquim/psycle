@@ -67,7 +67,7 @@ void NCheckBox::onMousePress( int x, int y, int button )
 {
   dx = 5;
   dy = 3;
-  if (mausin(x,y,NRect(0+dx,0+dy,10,10))) {
+  if (NRect(0+dx,0+dy,10,10).intersects(NPoint(x,y))) {
     checked_ = !checked_;
     repaint();
   }

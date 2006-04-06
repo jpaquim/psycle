@@ -426,14 +426,14 @@ int NVisualComponent::overRectPickPoint( int x, int y )
    int pickHeight = 4;
    x = x - absoluteLeft();
    y = y - absoluteTop();
-   if (mausin(x,y,NRect(0,0,pickWidth,pickHeight)))                      return nUpperLeftCorner;
-   if (mausin(x,y,NRect(width()/2-pickWidth/2,0,pickWidth,pickHeight)))  return nUpperMiddleCorner;
-   if (mausin(x,y,NRect(width()-pickWidth,0,pickWidth,pickHeight)))      return nUpperRightCorner;
-   if (mausin(x,y,NRect(width()-pickWidth,height()/2 - pickHeight/2,pickWidth,pickHeight))) return nRightMiddleCorner;
-   if (mausin(x,y,NRect(width()-pickHeight,height()-pickHeight,pickWidth,pickHeight)))      return nLowerRightCorner;
-   if (mausin(x,y,NRect(width()/2 -pickWidth/2,height()-pickHeight,pickWidth,pickHeight))) return nLowerMiddleCorner;
-   if (mausin(x,y,NRect(0,height()-pickHeight,pickWidth,pickHeight))) return nLowerLeftCorner;
-   if (mausin(x,y,NRect(0,height()/2 - pickHeight/2,pickWidth,pickHeight))) return nLeftMiddleCorner;
+   if (NRect(0,0,pickWidth,pickHeight).intersects(x,y))                      return nUpperLeftCorner;
+   if (NRect(width()/2-pickWidth/2,0,pickWidth,pickHeight).intersects(x,y))  return nUpperMiddleCorner;
+   if (NRect(width()-pickWidth,0,pickWidth,pickHeight).intersects(x,y))      return nUpperRightCorner;
+   if (NRect(width()-pickWidth,height()/2 - pickHeight/2,pickWidth,pickHeight).intersects(x,y)) return nRightMiddleCorner;
+   if (NRect(width()-pickHeight,height()-pickHeight,pickWidth,pickHeight).intersects(x,y)) return nLowerRightCorner;
+   if (NRect(width()/2 -pickWidth/2,height()-pickHeight,pickWidth,pickHeight).intersects(x,y)) return nLowerMiddleCorner;
+   if (NRect(0,height()-pickHeight,pickWidth,pickHeight).intersects(x,y)) return nLowerLeftCorner;
+   if (NRect(0,height()/2 - pickHeight/2,pickWidth,pickHeight).intersects(x,y)) return nLeftMiddleCorner;
  }
  return 0;
 }
