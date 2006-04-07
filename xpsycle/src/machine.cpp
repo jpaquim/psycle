@@ -991,6 +991,7 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
    MachineType type;//,oldtype;
    char dllName[256];
    pFile->read(reinterpret_cast<char*>(&type),sizeof(type));
+   std::cout << type << std::endl;
    pFile->readString(dllName,256);
 
    switch (type)
@@ -1011,8 +1012,6 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
      case MACH_PLUGIN: {
         if(!fullopen) pMachine = new Dummy(index); else
         {
-          pMachine = new Dummy(index);
-          type = MACH_DUMMY;
           Plugin * p;
           pMachine = p = new Plugin(index);
           if(!p->LoadDll(dllName)) {
@@ -1171,7 +1170,8 @@ Machine * Machine::LoadFileChunk( DeSerializer * pFile, int index, int version, 
 
 
 void Machine::SaveFileChunk(Serializer * pFile) {
-  pFile->PutPChar(reinterpret_cast<char*>(&_type),sizeof(_type));
+  std::cout << _type << std::endl;
+  pFile->PutPChar((char*)(&_type),sizeof(_type));
   SaveDllName(pFile);
   pFile->PutBool(_bypass);
   pFile->PutBool(_mute);

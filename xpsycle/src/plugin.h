@@ -119,6 +119,7 @@ public:
     bool LoadDll(std::string psFileName);
     virtual void SaveDllName(Serializer * pFile);
     virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
+    virtual void SaveSpecificChunk(Serializer* pFile);
 
     inline CMachineInfo * GetInfo() throw() { return _pInfo; };
 
@@ -173,5 +174,8 @@ inline void Proxy::PutData(byte * pData) throw()
 { assert((*this)()); plugin().PutData(pData);  }
 inline void Proxy::GetData(byte* pData) throw()
 { assert((*this)()); plugin().GetData(pData); }
+inline int Proxy::GetDataSize() throw()
+{ assert((*this)()); return plugin().GetDataSize(); }
+
 
 #endif
