@@ -1414,6 +1414,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
 //						m_wndView.XMSamplerMachineDialog->ShowWindow(SW_SHOW);
 						break;
+					case MACH_LFO:	//temp!#!!@#$
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
 						{
@@ -1457,6 +1458,28 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
 						break;
+/*					case MACH_LFO:
+						{
+							m_pWndMac[tmac] = new CFrameLFO(tmac);
+							((CFrameLFO*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							((CFrameLFO*)m_pWndMac[tmac])->wndView = &m_wndView;
+							((CFrameLFO*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+
+							m_pWndMac[tmac]->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							((CFrameLFO*)m_pWndMac[tmac])->Generate();
+							((CFrameLFO*)m_pWndMac[tmac])->SelectMachine(ma);
+							char winname[32];
+							sprintf(winname,"%.2X : %s",((CFrameLFO*)m_pWndMac[tmac])->MachineIndex
+													,ma->_editName);
+							((CFrameLFO*)m_pWndMac[tmac])->SetWindowText(winname);
+							isguiopen[tmac] = true;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						}
+						break;
+*/
 					case MACH_VST:
 					case MACH_VSTFX:
 						{

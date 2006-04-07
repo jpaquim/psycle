@@ -198,6 +198,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[4]->LastType0 = 0;
 			_pInternalMachines[4]->LastType1 = 0;
 
+			_pInternalMachines[5] = new InternalMachineInfo;
+			_pInternalMachines[5]->name = "Global LFO";
+			_pInternalMachines[5]->desc = "Modulates selected parameters by an LFO.";
+			_pInternalMachines[5]->version = "V0.1";
+			_pInternalMachines[5]->machtype = true;
+			_pInternalMachines[5]->Outputmachine = MACH_LFO;
+			_pInternalMachines[5]->OutBus = false;
+			_pInternalMachines[5]->LastType0 = 0;
+			_pInternalMachines[5]->LastType1 = 0;
 
 			LoadCategoriesFile();
 			UpdateList();
