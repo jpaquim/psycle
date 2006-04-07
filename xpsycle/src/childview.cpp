@@ -55,13 +55,13 @@ ChildView::ChildView()
 
   getSaveFileName_ = new NFileDialog();
     getSaveFileName_->addFilter("*.psy [psy3 song format]","!S*.psy");
+    getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
   //enableSound();
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(10);
-  timer.timerEvent.connect(this,&ChildView::onTimer);
   timer.enableTimer();
 }
 
@@ -183,10 +183,6 @@ MachineView * ChildView::machineView( )
   return machineView_;
 }
 
-void ChildView::onTimer( )
-{
-  patternView_->updatePlayBar();
-}
 
 
 

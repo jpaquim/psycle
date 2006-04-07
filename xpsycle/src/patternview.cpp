@@ -54,8 +54,6 @@ PatternView::PatternView()
     vBar->posChange.connect(this,&PatternView::onVScrollBar);
   add(vBar);
 
-  lNumber_ = 255;
-
   lineNumber_ = new LineNumber(this);
     setBorder(new NFrameBorder());
     lineNumber_->setAlign(nAlLeft);
@@ -1128,7 +1126,7 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
    }
 }
 
-void PatternView::updatePlayBar( )
+void PatternView::updatePlayBar(bool followSong)
 {
   if ((visible()) && (Global::pPlayer()->_lineChanged))
   {

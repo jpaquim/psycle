@@ -75,9 +75,11 @@ NewMachine::NewMachine()
     NPage* generatorPage = new NPage();
        generatorPage->setLayout(new NAlignLayout());
          generatorfBox_ = new NFileListBox();
+           generatorfBox_->addFilter(".so","lib-psycle.plugin.!S*.so");
            generatorfBox_->setMode(nFiles);
            generatorfBox_->setAlign(nAlClient);
            generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
+           generatorfBox_->setActiveFilter(".so");
            generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
        generatorPage->add(generatorfBox_);
     NPage* effectPage = new NPage();

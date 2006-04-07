@@ -189,7 +189,7 @@ public:
     int prevEditPosition();
     int playPos();
 
-    void updatePlayBar();
+    void updatePlayBar(bool followSong);
 
     void setEditOctave(int octave);
     int editOctave();
@@ -207,7 +207,6 @@ public:
 
 private:
 
-  int lNumber_;
   int editPosition_, prevEditPosition_;
   int playPos_;
   int editOctave_;
