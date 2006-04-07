@@ -114,6 +114,12 @@ void NCheckBox::resize( )
   label_->setPosition(20,0,spacingWidth()-20,spacingHeight());
 }
 
+void NCheckBox::onMousePressed( int x, int y, int button )
+{
+  NButtonEvent ev(this,x,y,button);
+  clicked.emit(&ev);
+}
+
 
 
 

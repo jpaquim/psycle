@@ -172,6 +172,10 @@ const char *up_nav[] = {
 NFileDialog::NFileDialog()
  : NWindow()
 {
+  mode_ = nLoad;
+
+  setTitle("Load");
+
   NFile::cdHome();
 
   pane()->setSpacing(5,5,5,5);
@@ -218,11 +222,11 @@ NFileDialog::NFileDialog()
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
     bPnl->setLayout(new NFlowLayout(nAlRight));
-    NButton* okBtn = new NButton("Open");
-      okBtn->clicked.connect(this,&NFileDialog::onOkBtn);
-      okBtn->setFlat(false);
-    bPnl->add(okBtn);
-    NButton* cancelBtn = new NButton("Cancel");
+    okBtn_ = new NButton("open");
+      okBtn_->clicked.connect(this,&NFileDialog::onOkBtn);
+      okBtn_->setFlat(false);
+    bPnl->add(okBtn_);
+    NButton* cancelBtn = new NButton("cancel");
       cancelBtn->clicked.connect(this,&NFileDialog::onCancelBtn);
       cancelBtn->setFlat(false);
     bPnl->add(cancelBtn);
@@ -375,6 +379,18 @@ void NFileDialog::addFilter( const std::string & name, const std::string & regex
   fiNameCtrl->add(new NItem(name));
   fBox_->setActiveFilter(name);
   fiNameCtrl->setIndex(fiNameCtrl->itemCount()-1);
+}
+
+void NFileDialog::setMode( int mode )
+{
+  mode_ = mode;
+  if (mode == nLoad) {
+    okBtn_->setText("load");
+    setTitle("Load");
+  } else {
+    okBtn_->setText("save");
+    setTitle("Save");
+  }
 }
 
 
