@@ -558,9 +558,10 @@ bool Plugin::SetParameter(int numparam,int value)
 void Plugin::SaveDllName( Serializer * pFile )
 {
   const char* str  = _psDllName.c_str();
-  char str2[256];
-//  strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-  //pFile->PutString(str2);
+  std::cout << _psDllName << std::endl;
+  //char str2[256];
+  //strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+  pFile->PutString(str);
 }
 
 bool Plugin::LoadSpecificChunk( DeSerializer * pFile, int version )
@@ -602,4 +603,41 @@ bool Plugin::LoadSpecificChunk( DeSerializer * pFile, int version )
 }
 
 
+void Plugin::SaveSpecificChunk(Serializer* pFile)
+{
+  int count = GetNumParams();
+  int size2(0);
+  try
+  {
+     size2 = proxy().GetDataSize();
+  }
+  catch(const std::exception &)
+  {
+    // data won't be saved
+  }
+  int size = size2 + sizeof(count) + sizeof(int)*count;
+  pFile->PutInt(size);
+  pFile->PutInt(count);
+  //pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+  for (int i = 0; i < count; i++)
+  {
+    int temp = GetParamValue(i);
+    pFile->PutInt(temp);
+  }
+  if(size2)
+  {
+    byte * pData = new byte[size2];
+    try
+    {
+       proxy().GetData(pData); // Internal save
+    }
+    catch(const std::exception &)
+    {
+        // this sucks because we already wrote the size,
+       // so now we have to write the data, even if they are corrupted.
+    }
+    pFile->PutPChar((char*)pData, size2); // Number of parameters
+    delete pData; pData = 0;
+  }
+};
 

@@ -250,12 +250,12 @@ MainWindow::MainWindow()
   add(wavRecFileDlg);
 
 
-  NImage* img = new NImage();
+ /* NImage* img = new NImage();
      img->createFromXpmData(kitty_xpm);
      img->setEvents(true);
      img->setPosition(0,0,img->preferredWidth(),img->preferredHeight());
      img->setMoveable(NMoveable(nMvHorizontal | nMvVertical));
-  pane()->add(img);
+  pane()->add(img);*/
 }
 
 

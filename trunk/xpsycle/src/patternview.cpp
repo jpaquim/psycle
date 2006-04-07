@@ -911,7 +911,7 @@ void PatternView::PatternDraw::initKeyMap( )
 {
   // octave 0
 
-  keyMap_['z'] = 0;
+  keyMap_['y'] = 0;
   keyMap_['s'] = 1;
   keyMap_['x'] = 2;
   keyMap_['d'] = 3;
@@ -935,7 +935,7 @@ void PatternView::PatternDraw::initKeyMap( )
   keyMap_['5'] = 6  + 12;
   keyMap_['t'] = 7  + 12;
   keyMap_['6'] = 8  + 12;
-  keyMap_['y'] = 9  + 12;
+  keyMap_['z'] = 9  + 12;
   keyMap_['7'] = 10 + 12;
   keyMap_['u'] = 11 + 12;
 
