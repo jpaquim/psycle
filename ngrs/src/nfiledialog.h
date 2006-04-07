@@ -28,6 +28,9 @@
 #include "ncombobox.h"
 #include "nregexp.h"
 
+const int nSave = 1;
+const int nLoad = 2;
+
 /**
 @author Stefan
 */
@@ -51,7 +54,11 @@ public:
 
    void addFilter(const std::string & name ,const std::string & regexp);
 
+   void setMode(int mode); // save/load
+
 private:
+
+   int mode_;
 
    NPanel* toolPanel;
 
@@ -61,6 +68,8 @@ private:
    NEdit* fNameCtrl;
    NEdit* dNameCtrl;
    NComboBox* fiNameCtrl;
+
+   NButton* okBtn_;
 
    void onItemSelected(NItemEvent* ev);
    void onParentDirItemSelected(NItemEvent* ev);

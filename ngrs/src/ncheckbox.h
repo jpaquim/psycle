@@ -42,6 +42,7 @@ public:
    virtual void paint(NGraphics* g);
 
    virtual void onMousePress(int x, int y, int button);
+   virtual void onMousePressed (int x, int y, int button);
 
    bool checked();
 
@@ -49,6 +50,8 @@ public:
    virtual int preferredHeight() const;
 
    virtual void resize();
+
+   signal1<NButtonEvent*> clicked;
 
 private:
 
