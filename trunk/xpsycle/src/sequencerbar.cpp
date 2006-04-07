@@ -733,5 +733,11 @@ void SequencerBar::onIncLen( NButtonEvent * ev )
   //m_wndView.SetFocus();
 }
 
+bool SequencerBar::followSong( )
+{
+  return follow_->checked();
+}
+
+
 
 

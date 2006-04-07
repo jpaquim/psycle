@@ -47,7 +47,8 @@ MainWindow::MainWindow()
   aboutDlg =  new AboutDlg();
     add(aboutDlg);
   wavRecFileDlg = new NFileDialog();
-    add(wavRecFileDlg);
+    wavRecFileDlg->setMode(nSave);
+  add(wavRecFileDlg);
 }
 
 
@@ -749,8 +750,10 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 
 void MainWindow::onTimer( )
 {
+  childView_->patternView()->updatePlayBar(true);
+
   vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
-Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
+  Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
   vuMeter_->repaint();
 }
 

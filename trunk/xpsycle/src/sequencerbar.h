@@ -46,6 +46,7 @@ public:
     ~SequencerBar();
 
     void setPatternView(PatternView* patternView);
+    bool followSong();
 
     void updateSequencer();
 
