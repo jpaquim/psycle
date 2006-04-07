@@ -1,7 +1,7 @@
 Source: ngrs
 Section: libs
 Priority: optional
-Build-Depends: cdbs (>= 0.4.26), debhelper (>= 4.2.30), autotools-dev, pkg-config (>= 0.15), make (>= 3.80), doxygen (>= 1.4.1), graphviz (>= 2.2), g++ (>= 3.3.5), libfontconfig1-dev (>= 2.3.2)
+Build-Depends: cdbs (>= 0.4.26), debhelper (>= 4.2.30), autotools-dev, pkg-config (>= 0.15), make (>= 3.80), doxygen (>= 1.4.1), graphviz (>= 2.2), g++ (>= 3.3.5), libfontconfig1-dev (>= 2.3.1), libxft2-dev, libxcursor-dev, libxpm4-dev, libxerces27-dev | libxerces26-dev
 Maintainer: prodos <natti__@users.sourceforge.net>
 Standards-Version: 3.6.1
 
@@ -15,7 +15,7 @@ Description: ngrs library
 Package:    lib-ngrs-0-dev
 Provides:   lib-ngrs-dev
 Recommends: lib-ngrs-0-doc
-Depends:    lib-ngrs-0 (= ${Source-Version}), libfontconfig1-dev (>= 2.3.2), ${misc:Depends}, pkg-config (>= 0.15)
+Depends:    lib-ngrs-0 (= ${Source-Version}), libfontconfig1-dev (>= 2.3.1), libxft2-dev, libxcursor-dev, libxpm4-dev, libxerces27-dev | libxerces26-dev, ${misc:Depends}, pkg-config (>= 0.15)
 Architecture: any
 Description: development files for the ngrs library
  _
