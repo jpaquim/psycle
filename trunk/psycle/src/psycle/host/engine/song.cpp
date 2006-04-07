@@ -78,6 +78,9 @@ namespace psycle
 				case MACH_MIXER:
 					machine = new Mixer(index);
 					break;
+				case MACH_LFO:
+					machine = new LFO(index);
+					break;
 				case MACH_DUMMY:
 					machine = new Dummy(index);
 					break;

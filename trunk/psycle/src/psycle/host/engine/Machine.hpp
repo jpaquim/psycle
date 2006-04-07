@@ -612,6 +612,63 @@ namespace psycle
 
 			static char* _psName;
 		};
+
+		/// LFO machine
+		class LFO : public Machine
+		{
+		public:
+			LFO();
+			LFO(int index);
+			virtual void Init(void);
+			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Work(int numSamples);
+			virtual char* GetName(void) { return _psName; };
+			virtual void GetParamName(int numparam,char *name);
+			virtual void GetParamRange(int numparam,int &minval,int &maxval);
+			virtual void GetParamValue(int numparam,char *parVal);
+			virtual int GetParamValue(int numparam);
+			virtual bool SetParameter(int numparam,int value);
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile * pFile);
+
+		protected:
+			//constants
+			int const static LFO_SIZE = 2048;
+			int const static MAX_PHASE = LFO_SIZE;
+			int const static MAX_SPEED = 10000;
+			int const static MAX_DEPTH = 100;
+			enum
+			{
+				lt_sine=0, lt_tri, lt_sawup, lt_sawdown, lt_square
+			};
+
+			//parameter settings
+			short waveform;	
+			int	baseline;
+			int lSpeed;
+			short macOutput[5];
+			short paramOutput[5];
+			int phase[5];
+			int level[5];
+
+			//internal state vars
+			float lfoPos;				//position in our lfo
+			float waveTable[LFO_SIZE];	//our lfo
+			int prevVal[5];				//value of knob when last seen-- used to compensate for outside changes
+			int centerVal[5];			//where knob should be at lfo==0
+
+			//protected member funcs
+			void FillTable();
+			void ResetState(int which);
+
+
+			static char* _psName;
+			bool bisTicking;
+
+		};
+
+
 	}
 }
+
 

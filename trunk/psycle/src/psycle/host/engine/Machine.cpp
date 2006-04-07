@@ -29,6 +29,7 @@ namespace psycle
 		char* Dummy::_psName = "DummyPlug";
 		char* DuplicatorMac::_psName = "Dupe it!";
 		char* Mixer::_psName = "Mixer";
+		char* LFO::_psName = "LFO";
 
 		void Machine::crashed(std::exception const & e) throw()
 		{
@@ -622,6 +623,10 @@ namespace psycle
 			case MACH_MIXER:
 				if ( !fullopen ) pMachine = new Dummy(index);
 				else pMachine = new Mixer(index);
+				break;
+			case MACH_LFO:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new LFO(index);
 				break;
 			case MACH_PLUGIN:
 				{
@@ -1504,5 +1509,361 @@ namespace psycle
 			if ( _sendValid[idx] ) return (Global::_pSong->_pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
+
+
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// LFO
+
+
+		//		todo:
+		//	- proper parameter reset when an output is disabled (perhaps as an option?)
+		//	- lfo retriggering from pattern
+		//  - prettify gui
+		//  - currently, machine must be connected to something to function.. any work-around for this?
+		//  - currently, modulation is updated every single sample (as in, control rate == sampling rate) -- this is
+		//		almost definitely excessive, and i'm sure we can lower the control rate substantially before there's an
+		//		audible difference, saving us loads of cpu cycles
+		//  - timing assumes 44.1khz sr..  changing samprate will change lfo speed
+		//	- implement baseline control, or at least decide if we actually want it
+		//  - pulse width for sq. wave
+		//  - adjust knob ranges to taste (speed doesn't go fast enough to be any fun at present)
+		//  - vst support??
+
+
+		LFO::LFO(int index)
+		{
+			_macIndex = index;
+			_numPars = 24;
+			_nCols = 3;
+			_type = MACH_LFO;
+			_mode = MACHMODE_GENERATOR;
+			bisTicking = false;
+			strcpy(_editName, "LFO");
+			for (int i=0;i<5;i++)
+			{
+				macOutput[i]=-1;
+				paramOutput[i]=-1;
+				level[i]=100;
+				phase[i]=MAX_PHASE/2.0f;
+				prevVal[i]=centerVal[i]=0.0;
+			}
+			lfoPos=0.0;
+			lSpeed=MAX_SPEED/6;
+			waveform=lt_sine;
+			baseline=100;
+			FillTable();
+		}
+		void LFO::Init()
+		{
+			Machine::Init();
+			for (int i=0;i<5;i++)
+			{
+				macOutput[i]=-1;
+				paramOutput[i]=-1;
+				level[i]=100;
+				phase[i]=MAX_PHASE/2.0f;
+				prevVal[i]=centerVal[i]=0.0;
+			}
+			lfoPos=0.0;
+			lSpeed=MAX_SPEED/6;
+			waveform=lt_sine;
+			baseline=100;
+			FillTable();
+		}
+		void LFO::Tick( int channel,PatternEntry* pData)
+		{
+			if ( !_mute && !bisTicking)
+			{
+				bisTicking=true;
+/*				for (int i=0;i<8;i++)
+				{
+					PatternEntry pTemp = *pData;
+					if ( pTemp._note < 120 )
+					{
+						pTemp._note+=noteOffset[i];
+					}
+					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
+						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
+				}
+*/			}
+			bisTicking=false;
+		}
+		void LFO::GetParamName(int numparam,char *name)
+		{
+			if(numparam==0)
+				sprintf(name,"Waveform");
+			else if(numparam==1)
+				sprintf(name,"Baseline");
+			else if(numparam==2)
+				sprintf(name,"Speed");
+			else if (numparam<8)
+				sprintf(name,"Output Machine %d",numparam-3);
+			else if (numparam<13)
+				sprintf(name,"Output Param %d",numparam-8);
+			else if (numparam<18)
+				sprintf(name,"Output Level %d",numparam-13);
+			else if (numparam<23)
+				sprintf(name,"Output Phase %d",numparam-18);
+			else if (numparam==23)
+				sprintf(name,"LFO Position");
+			else name[0] = '\0';
+		}
+		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
+		{
+			if(numparam==0) { minval = 0; maxval = 4;}
+			else if (numparam==1) {minval = 0; maxval = 200;}
+			else if (numparam==2) {minval = 0; maxval = MAX_SPEED;}
+			else if (numparam <8) {minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if (numparam <13){minval = -1; maxval = 128;}	//totally arbitrary.. better ideas?
+			else if (numparam <18){minval = 0; maxval = MAX_DEPTH*2;}
+			else if (numparam <23){minval = 0; maxval = MAX_PHASE; }
+			else if (numparam==23){minval=0;maxval=LFO_SIZE; }
+			else {minval=0;maxval=0; }
+		}
+		int LFO::GetParamValue(int numparam)
+		{
+			if(numparam==0)			return waveform;
+			else if(numparam==1)	return baseline;
+			else if(numparam==2)	return lSpeed;
+			else if(numparam <8)	return macOutput[numparam-3];
+			else if(numparam <13)	return paramOutput[numparam-8];
+			else if(numparam <18)	return level[numparam-13];
+			else if(numparam <23)	return phase[numparam-18];
+			else if(numparam==23)   return (int)lfoPos;
+			else return 0;
+		}
+		void LFO::GetParamValue(int numparam, char *parVal)
+		{
+			if(numparam==0)
+			{
+				switch(waveform)
+				{
+				case lt_sine: sprintf(parVal, "sine"); break;
+				case lt_tri: sprintf(parVal, "triangle"); break;
+				case lt_sawup: sprintf(parVal, "saw up"); break;
+				case lt_sawdown: sprintf(parVal, "saw down"); break;
+				case lt_square: sprintf(parVal, "square"); break;
+				}
+			} else if(numparam==1) {
+				sprintf(parVal, "%i", baseline-100);
+			} else if(numparam==2) {
+				if(lSpeed==0)
+					sprintf(parVal, "inf.");
+				else
+					sprintf(parVal, "%.1f ms", LFO_SIZE/(float)(lSpeed/(float)MAX_SPEED)/44.1f * LFO_SIZE/360.0f);
+			} else if(numparam<8) {
+				if ((macOutput[numparam-3] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-3]] != NULL))
+					sprintf(parVal,"%X -%s",macOutput[numparam-3],Global::_pSong->_pMachine[macOutput[numparam-3]]->_editName);
+				else if (macOutput[numparam-3] != -1)
+					sprintf(parVal,"%X (none)",macOutput[numparam-3]);
+				else 
+					sprintf(parVal,"(disabled)");
+			} else if(numparam<13) {
+				if(		(macOutput[numparam-8] != -1) 
+					&&	(Global::_pSong->_pMachine[macOutput[numparam-8]] != NULL)
+					&&  (paramOutput[numparam-8] >= 0)	)
+				{
+					if		(paramOutput[numparam-8] < Global::_pSong->_pMachine[macOutput[numparam-8]]->GetNumParams())
+					{
+						char name[128];
+						Global::_pSong->_pMachine[macOutput[numparam-8]]->GetParamName(paramOutput[numparam-8], name);
+						sprintf(parVal,"%X -%s", paramOutput[numparam-8], name);
+					} else
+						sprintf(parVal,"%X -none", paramOutput[numparam-8]);					
+				} else 
+					sprintf(parVal,"(disabled)");
+				
+			} else if(numparam<18)
+				sprintf(parVal,"%i%%", level[numparam-13]-MAX_DEPTH);
+			else if(numparam<23)
+				sprintf(parVal,"%.1f deg.", (phase[numparam-18]-MAX_PHASE/2.0f)/float(MAX_PHASE/2.0f) * 180.0f);
+			else if(numparam==23)
+				sprintf(parVal,"%.1f%%", lfoPos/(float)LFO_SIZE * 100);
+			else
+				parVal[0] = '\0';
+		}
+		bool LFO::SetParameter(int numparam, int value)
+		{
+			if(numparam==0)
+			{
+				waveform = value;
+				FillTable();
+				return true;
+			}
+			else if(numparam==1)	
+			{
+				baseline = value;
+				return true;
+			}
+			else if(numparam==2)
+			{
+				lSpeed = value;
+				return true;
+			}
+			else if(numparam <8)
+			{
+				macOutput[numparam-3] = value;
+				ResetState(value);
+				return true;
+			}
+			else if(numparam <13)
+			{
+				paramOutput[numparam-8] = value;
+				ResetState(value);
+				return true;
+			}
+			else if(numparam <18)
+			{
+				level[numparam-13] = value;
+				return true;
+			}
+			else if(numparam <23)
+			{
+				phase[numparam-18] = value;
+				return true;
+			}
+			else return false;
+		}
+
+
+		void LFO::Work(int numSamples)
+		{
+			PSYCLE__CPU_COST__INIT(cost);
+			int i(numSamples);
+
+			int maxVal=0, minVal=0;
+			int curVal=0, newVal=0;
+			float curLFO=0.0;
+			float lfoAmt=0.0;
+			do 
+			{
+				for(int j(0);j<5;++j)
+				{
+					if	(	macOutput[j] != -1		&&	Global::_pSong->_pMachine[macOutput[j]] != NULL
+						&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::_pSong->_pMachine[macOutput[j]]->GetNumParams())
+					{
+						Global::_pSong->_pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
+						curVal = Global::_pSong->_pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
+
+						curLFO = waveTable[	int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
+						lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
+
+						centerVal[j] -= prevVal[j] - curVal;  //compensate for external movement
+
+						newVal = curLFO * ((maxVal-minVal)/2.0f) * lfoAmt + centerVal[j];
+
+						if(newVal>maxVal) newVal=maxVal;
+						else if(newVal<minVal) newVal=minVal;
+
+						Global::_pSong->_pMachine[macOutput[j]]->SetParameter(paramOutput[j], newVal);	//make it happen!
+
+						prevVal[j] = newVal;
+					}
+				}
+				lfoPos += lSpeed / float(MAX_SPEED * (LFO_SIZE/360.0f) );
+				if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
+			} while(--i);
+
+			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			work_cpu_cost(work_cpu_cost() + cost);
+//			_worked = true;
+
+		}
+		bool LFO::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(&size,			sizeof size); // size of this part params to load
+			pFile->Read(&waveform,		sizeof waveform);
+			pFile->Read(&lSpeed,		sizeof lSpeed);
+			pFile->Read(&baseline,		sizeof baseline);
+			pFile->Read(&macOutput,		sizeof macOutput);
+			pFile->Read(&paramOutput,	sizeof paramOutput);
+			pFile->Read(&level,			sizeof level);
+			pFile->Read(&phase,			sizeof phase);
+			return true;
+		}
+
+		void LFO::SaveSpecificChunk(RiffFile* pFile)
+		{
+			UINT size	= sizeof waveform	+ sizeof lSpeed +	sizeof baseline 
+						+ sizeof macOutput	+ sizeof paramOutput
+						+ sizeof level		+ sizeof phase;
+			pFile->Write(&size, sizeof size); // size of this part params to save
+			pFile->Write(&waveform,		sizeof waveform);
+			pFile->Write(&lSpeed,		sizeof lSpeed);
+			pFile->Write(&baseline,		sizeof baseline);
+			pFile->Write(&macOutput,	sizeof macOutput);
+			pFile->Write(&paramOutput,	sizeof paramOutput);
+			pFile->Write(&level,		sizeof level);
+			pFile->Write(&phase,		sizeof phase);
+		}
+
+		void LFO::FillTable()
+		{
+			switch(waveform)
+			{
+			case lt_sine:	for (int i(0);i<LFO_SIZE;++i)	//todo: i think some of these waveforms never actually reach 1.0
+							{								// (change LFO_SIZE in formulas to LFO_SIZE-1? )
+								waveTable[i]=sin(i/float(LFO_SIZE) * /*(M_PI*2)*/ 6.2831853071795864769252);	//no M_PI?
+							}
+							break;
+			case lt_tri:	for (int i(0);i<LFO_SIZE/2;++i)
+							{
+								waveTable[i] = waveTable[LFO_SIZE-i-1] = i/float(LFO_SIZE/4) - 1;
+							}
+							break;
+			case lt_sawup:	for (int i(0);i<LFO_SIZE;++i)
+							{
+								waveTable[i] = i/float(LFO_SIZE/2) - 1;
+							}
+							break;
+			case lt_sawdown: for(int i(0);i<LFO_SIZE;++i)
+							{
+								waveTable[i] = (LFO_SIZE-i)/float(LFO_SIZE/2) - 1;
+							}
+							break;
+			case lt_square:	for (int i(0);i<LFO_SIZE/2;++i)
+							{
+								waveTable[i] = 1;
+								waveTable[LFO_SIZE-1-i]=-1;
+							}
+							break;
+			default:		for(int i(0);i<LFO_SIZE;++i)	//????
+							{
+								waveTable[i] = 0;
+							}
+							break;
+			}
+		}
+
+		void LFO::ResetState(int which)
+		{
+			if(which<0 || which>4) return;  //jic
+
+			if	(	macOutput[which]	!= -1	&&	Global::_pSong->_pMachine[macOutput[which]] != NULL
+				&&  paramOutput[which]	!= -1	&&	paramOutput[which] < Global::_pSong->_pMachine[macOutput[which]]->_numPars)
+			{
+				int minVal, maxVal;
+				float curLFO, lfoAmt;
+
+				Global::_pSong->_pMachine[macOutput[which]]->GetParamRange(paramOutput[which], minVal, maxVal);
+				curLFO = waveTable[	int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
+				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
+
+				prevVal[which] = Global::_pSong->_pMachine[macOutput[which]]->GetParamValue(paramOutput[which]);
+				centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
+			}
+			else
+			{
+				prevVal[which]=0;
+				centerVal[which]=0;
+			}
+		}
+
+
 	}
 }
