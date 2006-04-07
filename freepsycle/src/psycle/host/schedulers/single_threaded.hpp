@@ -190,6 +190,7 @@ namespace psycle
 						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES stop();
 						void operator()();
 					private:
+						/// Flyweight pattern [Gamma95].
 						/// a pool of buffers that can be used for input and output ports of the nodes of the graph.
 						class buffer_pool : protected std::list<buffer*>
 						{
