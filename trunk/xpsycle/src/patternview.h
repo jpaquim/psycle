@@ -102,6 +102,7 @@ class PatternView : public NPage
      virtual void onMousePressed(int x, int y, int button);
      virtual void onMouseOver(int x, int y);
      virtual void onKeyPress(const NKeyEvent & event);
+     virtual void onKeyRelease(const NKeyEvent & event);
 
      NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack);
 
@@ -115,10 +116,12 @@ class PatternView : public NPage
 
     bool doDrag_;
     bool doSelect_;
+    bool doShiftSel_;
 
     NSize selection_;
     NSize oldSelection_; // we cut motionButton Events, so not every mousemotion is recognized
     NPoint3D selStartPoint_;
+    NPoint3D selCursor; // for keyboard drag
 
     void drawText(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
     void drawData(NGraphics* g, int track, int line, int eventOffset, const std::string & text);
@@ -141,6 +144,10 @@ class PatternView : public NPage
     int blockNLines;
     NSize blockLastOrigin;
 
+    void startSel(const NPoint3D & p);
+    void doSel(const NPoint3D & p);
+    void endSel();
+ 
     void onPopupBlockCopy(NButtonEvent* ev);
     void onPopupBlockCut(NButtonEvent* ev);
     void onPopupBlockPaste(NButtonEvent* ev);

@@ -316,6 +316,7 @@ void MainWindow::initViews( )
   sequencerBar_->setPatternView(childView_->patternView());
 
   octaveCombo_->setIndex(4);
+  childView_->patternView()->setEditOctave(4);
   trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
 }
 
@@ -573,6 +574,7 @@ void MainWindow::initToolBar( )
       octaveCombo_->setWidth(40);
       octaveCombo_->setHeight(20);
     psycleControlBar_->add(octaveCombo_);
+
     psycleControlBar_->add(new NLabel("VU"));
     NPanel* vuPanel = new NPanel();
     vuPanel->setPosition(0,0,100,22);
@@ -757,8 +759,6 @@ void MainWindow::onBarStop(NButtonEvent* ev)
 
 void MainWindow::closePsycle()
 {
-  // hopefully nobody wants to close it
-
   exit(0);
 }
 
