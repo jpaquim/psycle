@@ -263,7 +263,7 @@ int NApp::processEvent( NWindow * win, XEvent * event )
                     }
                   }
                   win->onKeyPress(NKeyEvent(buffer,mykeysym));
-              }
+              } else win->onKeyPress(NKeyEvent(buffer,mykeysym));
             }
           break;
         case KeyRelease:
