@@ -72,6 +72,7 @@ public:
     virtual void onFocus();
 
     virtual void onKeyPress(const NKeyEvent & event);
+    virtual void onKeyRelease(const NKeyEvent & event);
 
     NShape* geometry();
     NShape* geometry() const;

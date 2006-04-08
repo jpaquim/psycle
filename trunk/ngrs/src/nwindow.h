@@ -54,6 +54,7 @@ public:
     virtual void onMouseDoublePress(int x, int y, int button);
     virtual void onMouseOver(int x, int y);
     virtual void onKeyPress( const NKeyEvent & keyEvent );
+    virtual void onKeyRelease(const NKeyEvent & event);
     virtual void add(NWindow* window);
     virtual void add( NRuntime * component );
 

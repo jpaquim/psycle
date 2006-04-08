@@ -225,6 +225,10 @@ void NVisual::onFocus( )
 {
 }
 
+void NVisual::onKeyRelease( const NKeyEvent & event )
+{
+}
+
 
 
 

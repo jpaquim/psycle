@@ -303,6 +303,12 @@ void NWindow::onKeyPress( const NKeyEvent & keyEvent )
   if (selectedBase_ != NULL) selectedBase_->onKeyPress(keyEvent);
 }
 
+void NWindow::onKeyRelease( const NKeyEvent & keyEvent )
+{
+  if (selectedBase_ != NULL) selectedBase_->onKeyRelease(keyEvent);
+}
+
+
 void NWindow::setPosition( int x, int y, int width, int height )
 {
   NApp::system().setWindowPosition(win_,x,y,width,height);
@@ -497,5 +503,6 @@ NVisualComponent* NWindow::selectedBase( ) const
 {
   return selectedBase_;
 }
+
 
 
