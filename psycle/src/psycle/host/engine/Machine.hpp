@@ -659,7 +659,8 @@ namespace psycle
 
 			//protected member funcs
 			void FillTable();
-			void ResetState(int which);
+			void ParamStart(int which);
+			void ParamEnd(int which);
 
 
 			static char* _psName;

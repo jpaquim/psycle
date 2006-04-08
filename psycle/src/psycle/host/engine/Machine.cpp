@@ -1520,8 +1520,6 @@ namespace psycle
 
 
 		//		todo:
-		//	- proper parameter reset when an output is disabled (perhaps as an option?)
-		//	- lfo retriggering from pattern
 		//  - prettify gui
 		//  - currently, machine must be connected to something to function.. any work-around for this?
 		//  - currently, modulation is updated every single sample (as in, control rate == sampling rate) -- this is
@@ -1532,6 +1530,12 @@ namespace psycle
 		//  - pulse width for sq. wave
 		//  - adjust knob ranges to taste (speed doesn't go fast enough to be any fun at present)
 		//  - vst support??
+		//  - manual tweaking during an lfo.. it works, but only if you're quick.  due to the way mouse control works
+		//		in CFrameMachine, plugin mouse tweaks are relative to the control's position -when the button was pressed-,
+		//		and are completely ignorant of external movement.  (i.e., automate a knob to move from 128 to 0.. grab
+		//		the knob right as it starts decreasing, and hold the mouse still until the automation finishes. now, 
+		//		moving even a pixel jerks the knob instantly back up to around 128.)  so, for this sort of automation
+		//		to work as well as we all want it to, we'll need to make CFrameMachine pay a bit more attention.
 
 
 		LFO::LFO(int index)
@@ -1576,20 +1580,12 @@ namespace psycle
 		}
 		void LFO::Tick( int channel,PatternEntry* pData)
 		{
-			if ( !_mute && !bisTicking)
+			if(!bisTicking)
 			{
 				bisTicking=true;
-/*				for (int i=0;i<8;i++)
-				{
-					PatternEntry pTemp = *pData;
-					if ( pTemp._note < 120 )
-					{
-						pTemp._note+=noteOffset[i];
-					}
-					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
-						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
-				}
-*/			}
+				if(pData->_cmd==0x01)	// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
+					lfoPos=0.0;			// against any established practices or something, let me know
+			}
 			bisTicking=false;
 		}
 		void LFO::GetParamName(int numparam,char *name)
@@ -1706,14 +1702,22 @@ namespace psycle
 			}
 			else if(numparam <8)
 			{
-				macOutput[numparam-3] = value;
-				ResetState(value);
+				if(macOutput[numparam-3] != value)	//afaik this if is only necessary when ctrl and shift are both down..
+				{									// so keep an eye on it, it may stop being needed once we stop using
+					ParamEnd(numparam-3);			// CFrameMachine for our gui
+					macOutput[numparam-3] = value;
+					ParamStart(numparam-3);
+				}
 				return true;
 			}
 			else if(numparam <13)
 			{
-				paramOutput[numparam-8] = value;
-				ResetState(value);
+				if(paramOutput[numparam-8] != value)
+				{
+					ParamEnd(numparam-8);
+					paramOutput[numparam-8] = value;
+					ParamStart(numparam-8);
+				}
 				return true;
 			}
 			else if(numparam <18)
@@ -1744,7 +1748,7 @@ namespace psycle
 				for(int j(0);j<5;++j)
 				{
 					if	(	macOutput[j] != -1		&&	Global::_pSong->_pMachine[macOutput[j]] != NULL
-						&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::_pSong->_pMachine[macOutput[j]]->GetNumParams())
+						&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::_pSong->_pMachine[macOutput[j]]->GetNumParams() )
 					{
 						Global::_pSong->_pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
 						curVal = Global::_pSong->_pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
@@ -1840,27 +1844,64 @@ namespace psycle
 			}
 		}
 
-		void LFO::ResetState(int which)
+		void LFO::ParamStart(int which)
 		{
 			if(which<0 || which>4) return;  //jic
+			int destMac = macOutput[which];
+			int destParam = paramOutput[which];
 
-			if	(	macOutput[which]	!= -1	&&	Global::_pSong->_pMachine[macOutput[which]] != NULL
-				&&  paramOutput[which]	!= -1	&&	paramOutput[which] < Global::_pSong->_pMachine[macOutput[which]]->_numPars)
+			if	(	destMac		!= -1	&&	Global::_pSong->_pMachine[destMac] != NULL
+				&&  destParam	!= -1	&&	destParam < Global::_pSong->_pMachine[destMac]->GetNumParams())
 			{
 				int minVal, maxVal;
 				float curLFO, lfoAmt;
 
-				Global::_pSong->_pMachine[macOutput[which]]->GetParamRange(paramOutput[which], minVal, maxVal);
+				Global::_pSong->_pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
 				curLFO = waveTable[	int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
-				prevVal[which] = Global::_pSong->_pMachine[macOutput[which]]->GetParamValue(paramOutput[which]);
-				centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
+				//bad! bad!
+				//prevVal[which] = Global::_pSong->_pMachine[macOutput[which]]->GetParamValue(paramOutput[which]);
+				//centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
+
+				centerVal[which] = Global::_pSong->_pMachine[destMac]->GetParamValue(destParam);
+				prevVal[which] = centerVal[which];
+				
+				// the way i've set this up, a control will 'jump' if the lfo is at a peak or dip when a control is first selected.
+				// that may seem like a bad thing, but it means that the center of the lfo does -not- depend on the lfo position
+				// when a control is selected.. and i think that this would be the preferred behavior.
+
 			}
 			else
 			{
 				prevVal[which]=0;
 				centerVal[which]=0;
+			}
+		}
+
+
+		//currently, this function resets the value of an output parameter to where it would be at lfo==0.  this behavior deserves
+		// some consideration, because it is conceivable that some people would want turning off an output to leave the parameter where it is
+		// instead of jerking it back to its original position..  on the other hand, without this code, sweeping through a list of parameters
+		// carelessly can wreak havoc on an entire plugin's settings.  i may decide just to let the user choose which s/he prefers..
+		void LFO::ParamEnd(int which)
+		{
+			if(which<0 || which>4) return;
+			int destMac = macOutput[which];
+			int destParam = paramOutput[which];
+
+			if	(	destMac		!= -1	&&	Global::_pSong->_pMachine[destMac] != NULL
+				&&  destParam	!= -1	&&	destParam < Global::_pSong->_pMachine[destMac]->GetNumParams())
+			{
+				int minVal, maxVal;
+				int newVal;
+				Global::_pSong->_pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
+				newVal = centerVal[which];
+				if(newVal<minVal) newVal=minVal;
+				else if(newVal>maxVal) newVal=maxVal;
+
+				if(destMac != _macIndex)	//craziness may ensue without this check.. folks routing the lfo to itself are on their own
+					Global::_pSong->_pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
 
