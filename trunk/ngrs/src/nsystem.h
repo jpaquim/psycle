@@ -81,7 +81,7 @@ private:
     int keyState_;
 
     typedef ngrs::color_converter<8, unsigned long int> color_converter;
-    ngrs::color_converter<> color_converter_;
+    color_converter color_converter_;
 
     Display* dpy_;
     Window rootWindow_;
