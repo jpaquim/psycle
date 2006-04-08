@@ -53,6 +53,8 @@ void NVisual::onMousePressed( int x, int y, int button )
 
 void NVisual::onMouseDoublePress( int x, int y, int button )
 {
+  NButtonEvent ev(this,x,y,button);
+  mouseDoublePress.emit(&ev);
 }
 
 void NVisual::setPosition( int x, int y, int width, int height )

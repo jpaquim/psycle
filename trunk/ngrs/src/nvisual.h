@@ -56,6 +56,7 @@ public:
 
     signal1<NButtonEvent* > mousePress;
     signal1<NButtonEvent* > mousePressed;
+    signal1<NButtonEvent* > mouseDoublePress;
     signal1<NEvent* > mouseEnter;
     signal1<NEvent* > mouseExit;
 
