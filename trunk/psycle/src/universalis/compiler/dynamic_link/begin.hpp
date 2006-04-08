@@ -27,3 +27,12 @@
 	#endif
 #endif
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK__DETAIL__DEFINED
+
+#if 0 // alternative
+	#define UNIVERSALIS__COMPILER__DYNAMIC_LINK(x) a(b, x)
+	#define a(b, x) b##x
+	#define b0 <.../begin/import.hpp>
+	#define b1 <.../begin/export.hpp>
+        // usage:
+	#include UNIVERSALIS__COMPILER__DYNAMIC_LINK(FOO__BAR)
+#endif

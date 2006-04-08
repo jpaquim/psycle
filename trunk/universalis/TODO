@@ -1,24 +1,10 @@
 # This is a sorted list, top priority at the top!
 
-*	test std::exception::what for null pointer!
-			catch(std::exception const & e)
-			{
-				if(loggers::exception())
-				{
-					std::ostringstream s;
-					s << LOCATION << (e.what() ? e.what() : "no message");
-					loggers::exception()(s.str());
-				}
-			}
-	[bohan] not sure about this. test-case with a null pointer needed.
-
 *	ms (microsoft):
 	ms: gthread-2.0.lib
-	ms: __FUNCSIG__ UNIVERSALIS__COMPILER__LOCATION__NO_CLASS
 	ms: DIVERSALIS__PACKAGENERIC__CONFIGURATION__OPERATING_SYSTEM__VERSION
 	ms: --without-nested-source-packages PACKAGENERIC__EXTERNAL_PATH__INCLUDES
 	ms: universalis::operating_system::terminal updates from psyclemfc
 	ms: vcproj pre_compiled_headers
 	ms: */detail/project.private.hpp #if defined HAVE_CONFIG_H #include "configuration.private.hpp" (<>?) PACKAGENERIC__CONFIGURATION__OPTION__ENABLE__PRE_COMPILED_HEADERS
-	ms: for winapi vs stl clash of min and max, use <algorithm> and/or __cpp_min/max, instead of defining our own implementation.
 	-- bohan (sorry, it's cryptic)
