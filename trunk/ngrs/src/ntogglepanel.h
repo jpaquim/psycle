@@ -36,6 +36,8 @@ public:
 
     void add(NCustomButton* toogleComponent);
 
+    void setDown(NCustomButton* btn);
+
 private:
 
    void onClick(NButtonEvent* ev);

@@ -53,4 +53,19 @@ void NTogglePanel::onClick( NButtonEvent * ev )
   repaint();
 }
 
+void NTogglePanel::setDown( NCustomButton * btn )
+{
+  for (std::vector<NRuntime*>::iterator it=components.begin(); it<components.end(); it++) {
+    NRuntime* msgClient = *it;
+    if (msgClient != btn) {
+      NEvent toggleEvent(btn,"toggle:'up'");
+      msgClient->onCustomMessage(&toggleEvent);
+    } else {
+       btn->setDown(true);
+    }
+  }
+  resize();
+  repaint();
+}
+
 

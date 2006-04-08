@@ -147,7 +147,7 @@ void NCustomButton::setDown( bool on )
 
 void NCustomButton::onCustomMessage( NEvent * ev )
 {
-  if (ev->text() == "toggle:'up'") {
+  if (toggle() && ev->text() == "toggle:'up'") {
     setDown(false);
   }
 }
