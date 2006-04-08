@@ -729,58 +729,15 @@ void PatternView::PatternDraw::onMousePress( int x, int y, int button )
   } else {
     clearOldSelection();
     NPoint3D p = intersectCell(x,y);
-     selStartPoint_ = p;
-     selection_.setLeft(p.x());
-     selection_.setTop(p.y());
-     selection_.setRight(p.x());
-     selection_.setBottom(p.y());
-     oldSelection_ = selection_;
-     doDrag_ = true;
-     doSelect_ = false;
+    startSel(p);
   }
 }
 
 void PatternView::PatternDraw::onMouseOver( int x, int y )
 {
   if (doDrag_) {
-    doSelect_=true;
-    NPoint3D p = intersectCell(x,y);
-    if (p.x() < selStartPoint_.x()) selection_.setLeft(std::max(p.x(),0)); else
-    if (p.x() == selStartPoint_.x()) {
-      selection_.setLeft (std::max(p.x(),0));
-      selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
-    } else
-    if (p.x() > selStartPoint_.x()) {
-        selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
-        int startTrack  = dx_ / pView->colWidth();
-        int trackCount  = clientWidth() / pView->colWidth();
-        if (selection_.right() > startTrack + trackCount) {
-           pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
-        }
-    }
-    if (p.y() < selStartPoint_.y()) {
-       selection_.setTop(std::max(p.y(),0));
-    } else
-    if (p.y() == selStartPoint_.y()) {
-      selection_.setTop (p.y());
-      selection_.setBottom(p.y()+1);
-    } else
-    if (p.y() > selStartPoint_.y()) {
-         selection_.setBottom(std::min(p.y()+1,pView->lineNumber()));
-         int startLine  = dy_ / pView->rowHeight();
-         int lineCount  = clientHeight() / pView->rowHeight();
-         if (selection_.bottom() > startLine + lineCount) {
-           pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
-         }
-    }
-
-    if (oldSelection_ != selection_) {
-      // these is totally unoptimized todo repaint only new area
-      NSize clipBox = selection_.clipBox(oldSelection_);
-      NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-      window()->repaint(r);
-      oldSelection_ = selection_;
-    }
+   NPoint3D p = intersectCell(x,y);
+   doSel(p);
   }
 }
 
@@ -790,54 +747,99 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 {
   if (!doSelect_) pView->setCursor(intersectCell(x,y));
   repaint();
-  doDrag_ = false;
-  doSelect_ = false;
+  endSel();
 }
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
+  if (doDrag_ != (NApp::system().keyState() & ShiftMask)) {
+     if (!doDrag_) {
+       clearOldSelection();
+       startSel(pView->cursor());
+       selCursor = pView->cursor();
+       selCursor.setZ(0);
+     }
+  }
+
   switch (event.scancode()) {
     case XK_BackSpace :
        pView->clearCursorPos();
     break;
     case XK_Left: {
-        int oldTrack = pView->cursor().x();
-        pView->moveCursor(0,0,-1);
-        int newTrack = pView->cursor().x();
-        int startTrack  = dx_ / pView->colWidth();
-        if (newTrack < startTrack) {
-           pView->hScrBar()->setPos( (newTrack) * pView->colWidth());
-        }
+        if (NApp::system().keyState() & ShiftMask) {
+          // selMode
+          selCursor.setX(std::max(selCursor.x()-1,0));
+          doSel(selCursor);
+        } else {
+          int oldTrack = pView->cursor().x();
+          pView->moveCursor(0,0,-1);
+          int newTrack = pView->cursor().x();
+          int startTrack  = dx_ / pView->colWidth();
+          if (newTrack < startTrack) {
+             pView->hScrBar()->setPos( (newTrack) * pView->colWidth());
+          }
         window()->repaint(repaintTrackArea(pView->cursor().y(),pView->cursor().y(),newTrack,oldTrack));
+        }
     }
     break;
     case XK_Right: {
-        int oldTrack = pView->cursor().x();
-        pView->moveCursor(0,0,1);
-        int newTrack    = pView->cursor().x();
-        int trackCount  = clientWidth() / pView->colWidth();
-        int startTrack  = dx_ / pView->colWidth();
-        if (newTrack > startTrack + trackCount -1) {
-           pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
+        if (NApp::system().keyState() & ShiftMask) {
+          // selMode
+          selCursor.setX(std::min(selCursor.x()+1,pView->trackNumber()-1));
+          doSel(selCursor);
+        } else {
+          int oldTrack = pView->cursor().x();
+          pView->moveCursor(0,0,1);
+          int newTrack    = pView->cursor().x();
+          int trackCount  = clientWidth() / pView->colWidth();
+          int startTrack  = dx_ / pView->colWidth();
+          if (newTrack > startTrack + trackCount -1) {
+            pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
+          }
+          window()->repaint(repaintTrackArea(pView->cursor().y(),pView->cursor().y(),oldTrack,newTrack));
         }
-        window()->repaint(repaintTrackArea(pView->cursor().y(),pView->cursor().y(),oldTrack,newTrack));
      }
      break;
      case XK_Down : {
-        int startLine  = dy_ / pView->rowHeight();
-        int lineCount  = clientHeight() / pView->rowHeight();
-        int oldLine = pView->cursor().y();
-        pView->moveCursor(0,1,0);
-        int newLine = pView->cursor().y();
-        if (newLine > startLine + lineCount-1) {
-           pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+        if (NApp::system().keyState() & ShiftMask) {
+          // selMode
+          selCursor.setY(std::min(selCursor.y()+1,pView->lineNumber()-1));
+          doSel(selCursor);
+        } else {
+          int startLine  = dy_ / pView->rowHeight();
+          int lineCount  = clientHeight() / pView->rowHeight();
+          int oldLine = pView->cursor().y();
+          pView->moveCursor(0,1,0);
+          int newLine = pView->cursor().y();
+          if (newLine > startLine + lineCount-1) {
+            pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+          }
+          window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
         }
-        window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
      }
      break;
      case XK_Up: {
+        if (NApp::system().keyState() & ShiftMask) {
+          // selMode
+          selCursor.setY(std::max(selCursor.y()-1,0));
+          doSel(selCursor);
+        } else {
+          int oldLine = pView->cursor().y();
+          pView->moveCursor(0,-1,0);
+          int startLine  = dy_ / pView->rowHeight();
+          int newLine = pView->cursor().y();
+          if (newLine <= startLine) {
+            pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
+          }
+          window()->repaint(repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+        }
+     }
+     break;
+     case XK_Page_Up: {
+        int lines = (Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
+
         int oldLine = pView->cursor().y();
-        pView->moveCursor(0,-1,0);
+        pView->moveCursor(0,-lines,0);
         int startLine  = dy_ / pView->rowHeight();
         int newLine = pView->cursor().y();
         if (newLine <= startLine) {
@@ -846,7 +848,34 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
         window()->repaint(repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
      }
      break;
-     default:
+     case XK_Page_Down:{
+        int lines = (Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig);
+
+        int startLine  = dy_ / pView->rowHeight();
+        int lineCount  = clientHeight() / pView->rowHeight();
+        int oldLine = pView->cursor().y();
+        pView->moveCursor(0,lines,0);
+        int newLine = pView->cursor().y();
+        if (newLine > startLine + lineCount-1) {
+           pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
+        }
+        window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+     }
+     break;
+     default: {
+       if (NApp::system().keyState() & ControlMask ) {
+          switch (event.scancode()) {
+            case 'c' :
+               copyBlock(false);
+            break;
+            case 'v' :
+               pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
+            break;
+          }
+
+       } else
+
+       if (event.buffer()!="") {
        int note = charToNote(event.scancode());
        if (note == cdefKeyStop && pView->cursor().z()==0) pView->noteOffAny(); else {
        {
@@ -901,7 +930,8 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
            window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
          }
        }
-     }
+      }
+     }}
      break;
   }
 
@@ -1392,3 +1422,65 @@ void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 
 }
 
+void PatternView::PatternDraw::startSel(const NPoint3D & p)
+{
+  selStartPoint_ = p;
+  selection_.setLeft(p.x());
+  selection_.setTop(p.y());
+  selection_.setRight(p.x());
+  selection_.setBottom(p.y());
+  oldSelection_ = selection_;
+  doDrag_ = true;
+  doSelect_ = false;
+}
+
+void PatternView::PatternDraw::endSel( )
+{
+  doDrag_ = false;
+  doSelect_ = false;
+}
+
+void PatternView::PatternDraw::doSel(const NPoint3D & p )
+{
+  doSelect_=true;
+    if (p.x() < selStartPoint_.x()) selection_.setLeft(std::max(p.x(),0)); else
+    if (p.x() == selStartPoint_.x()) {
+      selection_.setLeft (std::max(p.x(),0));
+      selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
+    } else
+    if (p.x() > selStartPoint_.x()) {
+        selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
+        int startTrack  = dx_ / pView->colWidth();
+        int trackCount  = clientWidth() / pView->colWidth();
+        if (selection_.right() > startTrack + trackCount) {
+           pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
+        }
+    }
+    if (p.y() < selStartPoint_.y()) {
+       selection_.setTop(std::max(p.y(),0));
+    } else
+    if (p.y() == selStartPoint_.y()) {
+      selection_.setTop (p.y());
+      selection_.setBottom(p.y()+1);
+    } else
+    if (p.y() > selStartPoint_.y()) {
+         selection_.setBottom(std::min(p.y()+1,pView->lineNumber()));
+         int startLine  = dy_ / pView->rowHeight();
+         int lineCount  = clientHeight() / pView->rowHeight();
+         if (selection_.bottom() > startLine + lineCount) {
+           pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
+         }
+    }
+
+    if (oldSelection_ != selection_) {
+      // these is totally unoptimized todo repaint only new area
+      NSize clipBox = selection_.clipBox(oldSelection_);
+      NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
+      window()->repaint(r);
+      oldSelection_ = selection_;
+    }
+}
+
+void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
+  if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
+}
