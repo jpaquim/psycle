@@ -28,6 +28,8 @@
 #include <nfiledialog.h>
 #include <ntimer.h>
 
+class NewMachine;
+
 /**
 @author Stefan
 */
@@ -59,11 +61,14 @@ public:
     void playFromStart();
     void enableSound();
 
+    NewMachine* newMachineDlg();
+
     NTimer timer;
 
 private:
 
     Song* _pSong;
+    NewMachine* newMachineDlg_;
 
     NFileDialog* getOpenFileName_;
     NFileDialog* getSaveFileName_;
@@ -72,6 +77,7 @@ private:
     PatternView* patternView_;
 
     void OnFileLoadSongNamed(std::string fName, int fType);
+    void onMachineViewDblClick(NButtonEvent* ev);
 
     void onTimer();
 

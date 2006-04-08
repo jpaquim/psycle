@@ -20,8 +20,10 @@
 #include "childview.h"
 #include "configuration.h"
 #include "player.h"
+#include "newmachine.h"
 #include <napp.h>
 #include <inttypes.h>
+
 
 const std::string PSYCLE__VERSION="X";
 
@@ -29,9 +31,14 @@ const std::string PSYCLE__VERSION="X";
 ChildView::ChildView()
  : NTabBook()
 {
+  // reset the song global ..
   _pSong = Global::pSong();
   Global::pSong()->New();
   Global::pSong()->seqBus=0;
+  // end of strange main psycle code
+
+  newMachineDlg_ = new NewMachine();
+  add(newMachineDlg_);
 
   setTabBarAlign(nAlBottom);
   setAlign(nAlClient);
@@ -39,13 +46,14 @@ ChildView::ChildView()
   machineView_ = new MachineView();
   patternView_ = new PatternView();
 
-
   patternView_->setBackground(Global::pConfig()->pvc_row);
   patternView_->setForeground(Global::pConfig()->pvc_background);
   patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
 
   addPage(machineView_,"Machine View");
   addPage(patternView_,"Pattern View");
+
+  machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
 
   setActivePage(machineView_);
 
@@ -58,7 +66,7 @@ ChildView::ChildView()
     getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
-  enableSound();
+  //enableSound();
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(10);
@@ -181,6 +189,25 @@ void ChildView::enableSound( )
 MachineView * ChildView::machineView( )
 {
   return machineView_;
+}
+
+NewMachine * ChildView::newMachineDlg( )
+{
+  return newMachineDlg_;
+}
+
+void ChildView::onMachineViewDblClick( NButtonEvent * ev )
+{
+  if (newMachineDlg()->execute()) {
+    if (newMachineDlg()->outBus()) {
+        // Generator selected
+        int x = 10; int y = 10;
+        int fb = Global::pSong()->GetFreeBus();
+        Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName().c_str(),fb);
+        machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+        machineView()->repaint();
+    }
+   }
 }
 
 

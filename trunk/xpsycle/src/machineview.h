@@ -71,10 +71,10 @@ public:
     void addMachine(Machine* mac);
     void removeMachines();
 
-
     void resize();
-
     void update();
+
+    NPanel* scrollArea();
 
 private:
 
@@ -83,7 +83,7 @@ private:
 
 
    void init();
-   NPanel* scrollArea;
+   NPanel* scrollArea_;
    NScrollBox* scrollBox_;
 
    void onCreateMachine(Machine* mac);

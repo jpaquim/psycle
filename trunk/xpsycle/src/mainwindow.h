@@ -55,7 +55,6 @@ public:
 
 private:
 
-    NewMachine* newMachineDlg_;
     ChildView* childView_;
     NWindow* songpDlg_;
     NTabBook* tabBook_;
