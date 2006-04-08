@@ -45,6 +45,7 @@ public:
    void setNoteBook(NNoteBook* noteBook);
 
    void setOrientation(int orientation);
+   void setActiveTab(NPage* page);
 
 private:
 

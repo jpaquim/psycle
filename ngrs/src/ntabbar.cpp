@@ -83,4 +83,15 @@ void NTabBar::setOrientation( int orientation )
   }
 }
 
+void NTabBar::setActiveTab( NPage * page )
+{
+  std::map<NObject*,NPage*>::iterator itr = pageMap_.begin();
+  for ( ; itr != pageMap_.end(); itr++) {
+    if (itr->second == page) {
+       setDown((NCustomButton*)itr->first);
+    }
+  }
+  repaint();
+}
+
 

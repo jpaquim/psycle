@@ -64,6 +64,7 @@ void NTabBook::addPage( NPage * page, std::string tabName )
 void NTabBook::setActivePage( NPage * page )
 {
   book_->setActivePage(page);
+  tabBar_->setActiveTab(page);
 }
 
 void NTabBook::setTabBarAlign( int align )
