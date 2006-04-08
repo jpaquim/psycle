@@ -35,12 +35,12 @@ MachineView::MachineView()
   scrollBox_ = new NScrollBox();
   scrollBox_->setTransparent(true);
 
-  scrollArea = new NPanel();
-  scrollArea->setTransparent(true);
-  scrollArea->setLayout(new NAutoScrollLayout);
-  scrollBox_->setScrollPane(scrollArea);
+  scrollArea_ = new NPanel();
+  scrollArea_->setTransparent(true);
+  scrollArea_->setLayout(new NAutoScrollLayout);
+  scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_);
-  scrollArea->setClientSizePolicy(nVertical + nHorizontal);
+  scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
 }
 
 
@@ -66,21 +66,21 @@ void MachineView::onCreateMachine( Machine * mac )
      case MACHMODE_GENERATOR: {
         MachineGUI* macGui = new GeneratorGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
-        scrollArea->add(macGui);
+        scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
         }
      break;
      case MACHMODE_FX: {
         MachineGUI* macGui = new EffektGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
-        scrollArea->add(macGui);
+        scrollArea_->add(macGui);
         machineGUIs.push_back(macGui);
       }
      break;
      case MACHMODE_MASTER: {
         MachineGUI* macGui = new MasterGUI(mac);
           macGui->newConnection.connect(this,&MachineView::onNewConnection);
-          scrollArea->add(macGui);
+          scrollArea_->add(macGui);
          machineGUIs.push_back(macGui);
       }
      break;
@@ -121,7 +121,7 @@ void MachineView::createGUIMachines( )
                if (to != 0) {
                  Wire* line = new Wire();
                  line->setPoints(NPoint(10,10),NPoint(100,100));
-                 scrollArea->insert(line,0);
+                 scrollArea_->insert(line,0);
                  from->attachLine(line,0);
                  to->attachLine(line,1);
                  line->dialog()->setMachines(tmac,pout);
@@ -136,7 +136,7 @@ void MachineView::createGUIMachines( )
 void MachineView::update( )
 {
   machineGUIs.clear();
-  scrollArea->removeChilds();
+  scrollArea_->removeChilds();
   createGUIMachines();
 }
 
@@ -159,7 +159,7 @@ void MachineView::onNewConnection( MachineGUI * sender )
 
   line = new Wire();
   line->setPoints(NPoint(sender->left()+midW,sender->top()+midH),NPoint(sender->left()+midW,sender->top()+midH));
-  scrollArea->insert(line,0);
+  scrollArea_->insert(line,0);
   line->setMoveable(NMoveable(nMvVertical | nMvHorizontal | nMvPolygonPicker));
   repaint();
   line->setMoveFocus(0);
@@ -184,7 +184,7 @@ void MachineView::onLineMousePressed( NButtonEvent * ev )
     }
   }
   if (!found) {
-    scrollArea->removeChild(line);
+    scrollArea_->removeChild(line);
     repaint();
   }
 }
@@ -212,14 +212,20 @@ void MachineView::onWireDelete( WireDlg * dlg )
   dlg->line()->setVisible(false);
   NApp::flushEventQueue();
   if (window()!=0) window()->checkForRemove(0);
-  scrollArea->removeChild(dlg->line());
+  scrollArea_->removeChild(dlg->line());
   repaint();
 }
 
 void MachineView::removeMachines( )
 {
-  scrollArea->removeChilds();
+  scrollArea_->removeChilds();
 }
+
+NPanel * MachineView::scrollArea( )
+{
+  return scrollArea_;
+}
+
 
 
 

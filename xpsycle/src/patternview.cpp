@@ -687,7 +687,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   char tbuf[16];
   for (int y = startLine; y < endLine; y++) {
      unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
-    for (int x = startTrack; x < endTrack; x++) {
+    for (int x = startTrack; x <= endTrack; x++) {
       drawText(g, x,y,0,pView->noteToString(*patOffset));
      patOffset++;
      int COL = pView->noteCellWidth();

@@ -299,8 +299,6 @@ void MainWindow::initDialogs( )
 {
   songpDlg_ = new SongpDlg();
   add(songpDlg_);
-  newMachineDlg_ = new NewMachine();
-  add(newMachineDlg_);
 }
 
 // events from menuItems
@@ -691,12 +689,12 @@ void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
 void MainWindow::onViewMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
   if (itemEv->text()=="Add machine") {
-     if (newMachineDlg_->execute()) {
-         if (newMachineDlg_->outBus()) {
+     if (childView_->newMachineDlg()->execute()) {
+         if (childView_->newMachineDlg()->outBus()) {
            // Generator selected
            int x = 10; int y = 10;
            int fb = Global::pSong()->GetFreeBus();
-           Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg_->getDllName().c_str(),fb);
+           Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, childView_->newMachineDlg()->getDllName().c_str(),fb);
            childView_->machineView()->addMachine(Global::pSong()->_pMachine[fb]);
            childView_->machineView()->repaint();
          }
