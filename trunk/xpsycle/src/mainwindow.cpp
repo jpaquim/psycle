@@ -448,6 +448,7 @@ void MainWindow::initToolBar( )
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->machines()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "machines.xpm");
     NButton* macBtn_ = new NButton(img,20,20);
+      macBtn_->clicked.connect(this,&MainWindow::onMachineView);
       macBtn_->setFlat(false);
       macBtn_->setToggle(true);
     toolBar1_->add(macBtn_);
@@ -455,7 +456,8 @@ void MainWindow::initToolBar( )
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->patterns()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "patterns.xpm");
-    NButton* patBtn_ = new NButton(new NImage(Global::pConfig()->iconPath+"patterns.xpm"),20,20);
+    NButton* patBtn_ = new NButton(img,20,20);
+       patBtn_->clicked.connect(this,&MainWindow::onPatternView);
        patBtn_->setFlat(false);
        patBtn_->setToggle(true);
     toolBar1_->add(patBtn_);
@@ -973,3 +975,12 @@ int MainWindow::close( )
   closePsycle();
 }
 
+void MainWindow::onMachineView(NButtonEvent* ev) {
+  childView_->setActivePage(childView_->machineView());
+  childView_->repaint();
+}
+
+void MainWindow::onPatternView(NButtonEvent* ev) {
+  childView_->setActivePage(childView_->patternView());
+  childView_->repaint();
+}
