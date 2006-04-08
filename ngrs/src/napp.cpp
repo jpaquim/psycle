@@ -266,6 +266,21 @@ int NApp::processEvent( NWindow * win, XEvent * event )
               }
             }
           break;
+        case KeyRelease:
+            {
+              XLookupString(&event->xkey, buffer,15, &mykeysym, &compose);
+              if (buffer!=NULL) {
+                  if (mykeysym<0xF000) {
+                    NObject* acellNotify = findAcceleratorNotifier(NKeyAccelerator(NApp::system().keyState(),mykeysym));
+                    if (acellNotify!=0) {
+                        acellNotify->onKeyAcceleratorNotify(NKeyAccelerator(NApp::system().keyState(),mykeysym));
+                    }
+                  }
+                  win->onKeyRelease(NKeyEvent(buffer,mykeysym));
+              } else win->onKeyRelease(NKeyEvent(buffer,mykeysym));
+            }
+          break;
+
     case ClientMessage:
             if(event->xclient.data.l[0] == (int) NApp::system().wm_delete_window) exitloop = win->onClose();
          break;
