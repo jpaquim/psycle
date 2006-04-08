@@ -752,7 +752,8 @@ void PatternView::PatternDraw::onMousePressed( int x, int y, int button )
 
 void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
 {
-  if (doDrag_ != (NApp::system().keyState() & ShiftMask)) {
+  if (doDrag_ != (NApp::system().keyState() & ShiftMask) && 
+                  !(NApp::system().keyState() & ControlMask)) {
      if (!doDrag_) {
        clearOldSelection();
        startSel(pView->cursor());
@@ -863,13 +864,28 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
      }
      break;
      default: {
-       if (NApp::system().keyState() & ControlMask ) {
+       if (NApp::system().keyState() & (ControlMask|ShiftMask)) {
           switch (event.scancode()) {
             case 'c' :
                copyBlock(false);
             break;
             case 'v' :
                pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
+            break;
+            case '+':
+               if (NApp::system().keyState() & (ControlMask|ShiftMask) == (ControlMask|ShiftMask))
+                  blockTranspose(12);
+               else
+                  blockTranspose(1);
+            break;
+            case '-':
+               blockTranspose(-1);
+            break;
+            case '*':
+               blockTranspose(12);
+            break;
+            case '_':
+               blockTranspose(-12);
             break;
           }
 
