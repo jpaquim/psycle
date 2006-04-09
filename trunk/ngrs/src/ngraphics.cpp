@@ -273,7 +273,7 @@ void NGraphics::fillTranslucent( int x, int y, int width, int height, NColor col
   XDestroyImage(xi);
 }
 
-int NGraphics::textWidth( const std::string & text )
+int NGraphics::textWidth( const std::string & text ) const
 {
    const char* s = text.c_str();
    if (!fntStruct.antialias) {
@@ -734,4 +734,112 @@ void NGraphics::fillRoundGradient( int x, int y, int width, int height, const NC
                         fillArc(nx, ny, nw, nh, 0, 23040);
                 }
         }
+}
+
+
+int NGraphics::textWidth( const NFntString & text ) const
+{
+   NFontStructure newFntStruct = fntStruct;
+   int pos = 0; int w = 0;
+   std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
+   for (std::vector<int>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
+     int old = pos;
+     pos = *it;
+
+     const char* s = text.textsubstr(old,pos-old).c_str();
+     if (!newFntStruct.antialias)
+       w+=XTextWidth(newFntStruct.xFnt,s,strlen(s));
+     else {
+       XGlyphInfo info;
+       XftTextExtents8(NApp::system().dpy(),newFntStruct.xftFnt
+       ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
+       w+= info.xOff;
+     }
+
+     newFntStruct = (*fntIt).systemFont();
+     fntIt++;
+   }
+   const char* s = text.textsubstr(pos).c_str();
+
+   if (!newFntStruct.antialias)
+       w+=XTextWidth(newFntStruct.xFnt,s,strlen(s));
+     else {
+       XGlyphInfo info;
+       XftTextExtents8(NApp::system().dpy(),newFntStruct.xftFnt
+       ,reinterpret_cast<const FcChar8 *>(s),strlen(s),&info);
+       w+= info.xOff;
+     }
+
+   return w;
+}
+
+void NGraphics::drawText( int x, int y, const NFntString & text )
+{
+  int pos = 0; 
+  int w = 0;
+   std::vector<NFont>::const_iterator fntIt = text.fonts().begin();
+   for (std::vector<int>::const_iterator it = text.positions().begin(); it < text.positions().end(); it++) {
+     int old = pos;
+     pos = *it;
+     drawText(x+w,y,text.textsubstr(old,pos-old));
+     w += textWidth(text.textsubstr(old,pos-old));
+     NFont fnt = *fntIt;
+     setFont(fnt);
+     fntIt++;
+   }
+   drawText(x+w,y,text.textsubstr(pos));
+}
+
+
+int NGraphics::findWidthMax(long width, const std::string & data, bool wbreak) const
+{
+  int Low = 0; int High = data.length();  int Mid=High;
+  while( Low <= High ) {
+    Mid = ( Low + High ) / 2;
+    std::string s     = data.substr(0,Mid);
+    std::string snext;
+    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
+    int w     = textWidth(s);
+    if(  w < width  ) {
+                        int wnext = textWidth(snext);
+                        if (wnext  >= width ) break;
+                        Low = Mid + 1;
+                      } else
+                      {
+                        High = Mid - 1;
+                      }
+  }
+  if (!wbreak || data.substr(0,Mid).find(" ")==std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
+  {
+    int p = data.rfind(" ",Mid);
+    if (p!=std::string::npos ) return p+1;
+  }
+  return Mid;
+}
+
+int NGraphics::findWidthMax(long width, const NFntString & data, bool wbreak) const
+{
+  int Low = 0; int High = data.length();  int Mid=High;
+  while( Low <= High ) {
+    Mid = ( Low + High ) / 2;
+    NFntString s     = data.substr(0,Mid);
+    NFntString snext;
+    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
+    int w     = textWidth(s);
+    if(  w < width  ) {
+                        int wnext = textWidth(snext);
+                        if (wnext  >= width ) break;
+                        Low = Mid + 1; 
+                      } else
+                      {
+                        High = Mid - 1;
+                      }
+  }
+  if (!wbreak || data.textsubstr(0,Mid).find(" ")==std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
+  {
+    int p = data.rfind(" ",Mid);
+    if (p!=std::string::npos ) return p+1;
+  }
+  return Mid;
+
 }

@@ -44,6 +44,7 @@ void NLabel::init( )
   valign_=nAlTop;
   orientation_ = nHorizontal;
   setEvents(false);
+  wbreak_ = false;
 }
 
 
@@ -66,39 +67,52 @@ void NLabel::paint( NGraphics * g )
        i+=1;
     } else substr = text_.substr(start);
 
-    int xp_ = 0;
+    if (!wbreak_) {
 
-    switch (halign_) {
-       case nAlCenter : xp_ = (clientWidth() - g->textWidth(substr)) / 2;
-       break;
-       default:
-       ;
-    }
+      int xp_ = 0;
 
-    switch (valign_) {
-       case nAlCenter : yp_ = (clientHeight() + g->textHeight() /2 ) / 2;
-       break;
-       case nAlBottom : yp_ = clientHeight() - g->textDescent();
-       break;
-       default:
-       ;
-    }
-
-//  metrics.setFont(font());
-//  yp_ = metrics.textAscent();
-
-    g->drawText(xp_, yp_, substr);
-
-    if (mnemonic_!='\0') {
-      std::string::size_type pos = substr.find((char) ((int)mnemonic_-32) );
-      if (pos==std::string::npos) pos =  substr.find(mnemonic_);
-      if (pos!=std::string::npos) {
-         int w  = g->textWidth(substr.substr(0,pos));
-         int w1 = g->textWidth(substr.substr(0,pos+1));
-         g->drawLine(w,yp_+2,w1,yp_+2);
+      switch (halign_) {
+        case nAlCenter : xp_ = (clientWidth() - g->textWidth(substr)) / 2;
+        break;
+        default:
+        ;
       }
+
+      switch (valign_) {
+        case nAlCenter : yp_ = (clientHeight() + g->textHeight() /2 ) / 2;
+        break;
+        case nAlBottom : yp_ = clientHeight() - g->textDescent();
+        break;
+        default:
+        ;
+      }
+      g->drawText(xp_, yp_, substr);
+
+      if (mnemonic_!='\0') {
+        std::string::size_type pos = substr.find((char) ((int)mnemonic_-32) );
+        if (pos==std::string::npos) pos =  substr.find(mnemonic_);
+        if (pos!=std::string::npos) {
+           int w  = g->textWidth(substr.substr(0,pos));
+           int w1 = g->textWidth(substr.substr(0,pos+1));
+           g->drawLine(w,yp_+2,w1,yp_+2);
+        }
+      }
+      yp_ = yp_ + g->textHeight();
+    } else {  // multiline wordbreak;
+       int xp = 0;
+       int yp = g->textAscent();
+
+       int pos = 0;
+
+       for (std::vector<int>::iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+          int lineEnd = *it;
+          g->drawText(xp,yp,text_.substr(pos,lineEnd-pos));
+          yp+=g->textHeight();
+          pos = lineEnd;
+       }
+       g->drawText(xp,yp,text_.substr(pos));
     }
-    yp_ = yp_ + g->textHeight();
+
   } while (i != (int) string::npos);
 }
 
@@ -118,19 +132,31 @@ const std::string & NLabel::text( ) const
 
 int NLabel::preferredHeight( ) const
 {
-  NFontMetrics metrics;
-  metrics.setFont(font());
-  int i = 0;
-  int yp_ = metrics.textHeight() ;
-  do {
-    i = text_.find("\n", i);
-    if (i != -1) {
-       i+=1;
-       yp_ = yp_ + metrics.textHeight();
-    }
-  } while (i != (int) string::npos);
+  if (!wbreak_) {
+    NFontMetrics metrics(font());
+    int i = 0;
+    int yp_ = metrics.textHeight() ;
+    do {
+      i = text_.find("\n", i);
+      if (i != -1) {
+        i+=1;
+        yp_ = yp_ + metrics.textHeight();
+      }
+    } while (i != (int) string::npos);
+    return yp_ + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+  } else {
+     int yp =  0;
+     int pos = 0;
 
-  return yp_ + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
+     NFontMetrics metrics(font());
+
+     for (std::vector<int>::const_iterator it = breakPoints.begin(); it < breakPoints.end(); it++) {
+       int lineEnd = *it;
+       yp+=metrics.textHeight();
+     }
+     yp+=metrics.textHeight();
+     return yp;
+  }
 }
 
 int NLabel::preferredWidth( ) const
@@ -190,3 +216,62 @@ void NLabel::setTextOrientation( int orientation )
   orientation_ = orientation;
 }
 
+void NLabel::computeBreakPoints( )
+{
+  breakPoints.clear();  // clear old breakpoints
+
+  std::string part = text_;
+
+  int last = 0;
+  unsigned int pos  = 0;
+  while ( (pos = findWidthMax(spacingWidth(),part,true)) < part.length() && (pos!=0)) {
+     part = part.substr(pos);
+     last  += pos;
+     breakPoints.push_back(last);
+  }
+}
+
+
+
+int NLabel::findWidthMax(long width, const std::string & data, bool wbreak)
+{
+  NFontMetrics metrics(font());
+
+  int Low = 0; int High = data.length();  int Mid=High;
+  while( Low <= High ) {
+    Mid = ( Low + High ) / 2;
+    std::string s     = data.substr(0,Mid);
+    std::string snext;
+    if (Mid>0) snext  = data.substr(0,Mid+1); else snext = s;
+    int w     = metrics.textWidth(s);
+    if(  w < width  ) {
+                        int wnext = metrics.textWidth(snext);
+                        if (wnext  >= width ) break;
+                        Low = Mid + 1;
+                      } else
+                      {
+                        High = Mid - 1;
+                      }
+  }
+  if (!wbreak || data.substr(0,Mid).find(" ")==std::string::npos || Mid == 0 || Mid>=data.length()) return Mid; else
+  {
+    unsigned int p = data.rfind(" ",Mid);
+    if (p!=std::string::npos ) return p+1;
+  }
+  return Mid;
+}
+
+void NLabel::resize( )
+{
+  if (wbreak_) computeBreakPoints();
+}
+
+void NLabel::setWordbreak( bool on )
+{
+  wbreak_ = on;
+}
+
+bool NLabel::wordBreak( ) const
+{
+  return wbreak_;
+}

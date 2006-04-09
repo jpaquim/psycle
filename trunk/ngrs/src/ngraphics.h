@@ -25,6 +25,7 @@
 #include "ncolor.h"
 #include <stack>
 #include "nbitmap.h"
+#include "nfntstring.h"
 
 
 /**
@@ -65,8 +66,12 @@ public:
     Region pushIntersectRegion(Region region);
     void setFont(const NFont & font);
     void drawText(int x, int y, const std::string & text);
+    void drawText(int x, int y, const NFntString & text);
     Region region();
-    int textWidth(const std::string & text);
+    int textWidth(const std::string & text) const;
+    int textWidth( const NFntString & text ) const;
+    int findWidthMax(long width, const std::string & data, bool wbreak) const;
+    int findWidthMax(long width, const NFntString & data, bool wbreak) const;
     int textHeight();
     int textAscent();
     int textDescent();
