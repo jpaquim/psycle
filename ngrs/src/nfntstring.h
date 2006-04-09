@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2006 by Stefan Nattkemper   *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,71 +17,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NTESTWINDOW_H
-#define NTESTWINDOW_H
+#ifndef NFNTSTRING_H
+#define NFNTSTRING_H
 
-#include <nwindow.h>
-#include "nmenubar.h"
-#include "nmenuitem.h"
-#include "nscrollbox.h"
-#include "nedit.h"
-#include "nfile.h"
-#include "nprogressbar.h"
-#include "nslider.h"
-#include "nimage.h"
-#include "nslider.h"
-#include "nnotebook.h"
-#include "npage.h"
-#include "ntabbook.h"
-#include "ncheckbox.h"
-#include "nfilelistbox.h"
-#include "nfiledialog.h"
+#include <vector>
+#include <string>
+
+#include "nfont.h"
+
 
 /**
-@author Stefan
+@author Stefan Nattkemper
 */
 
-class Tpnl : public NPanel {
-
-   virtual void paint(NGraphics* g) {
-      NFntString str;
-      str.setText("Hallo");
-      str.setFont(NFont("Suse Sans",8,nMedium | nStraight | nAntiAlias));
-      str.append("Hier");
-      g->drawText(10,10,str.substr(5,1));
-   }
-
-};
-
-
-class NTestWindow : public NWindow
-{
+class NFntString : public std::string {
 public:
-    NTestWindow();
+    NFntString();
 
-    ~NTestWindow();
+    ~NFntString();
+
+    void setText(const std::string & text);
+    void append(const std::string & text);
+    void append(const NFntString & text);
+
+    NFntString substr(int pos, int size) const;
+    NFntString substr(int last) const;
+
+    std::string textsubstr(int pos, int size) const;
+    std::string textsubstr(int last) const;
+
+    void setFont(const NFont & font);
+
+    const std::vector<int> & positions() const;
+    const std::vector<NFont> & fonts() const;
 
 private:
 
-    NProgressBar* pBar;
-    NSlider* slider;
-    NWindow* scrollWin;
-    NFileListBox* fileBox;
-    NFileDialog* fDialog;
+   std::vector<int>   positions_;
+   std::vector<NFont> fonts_;
 
-    void testListBox();
-    void toolBarTest();
-    void testSpinButton();
-    void testBorderLayout();
-    void testFrameBorder();
-    void testLine();
-    void testMenu();
-    void testEdit();
-    void testSpinEdit();
-
-    void onOpen(NButtonEvent* ev);
-    void onSliderPosChanged(double v);
-    void onQuit(NObject* sender);
 };
 
 #endif

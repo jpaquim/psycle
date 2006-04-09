@@ -96,7 +96,7 @@ void NApp::eventLoop( )
   }
   system().flush();
   XEvent event;
-  int n;
+  int n = 0;
   int fd = ConnectionNumber(system().dpy());
   fd_set readfds;
   timeval timeout;
@@ -143,7 +143,7 @@ void NApp::eventLoop( )
         NWindow* window = itr->second;
 //        if (window->visible()) {
         exitLoop = processEvent(window, & event);
-        if (event.xany.window != mainWin_->win()) {
+        if (window->win() != mainWin_->win()) {
         if (exitLoop==nDestroyWindow) {
           delete window;
           exitLoop = 0;

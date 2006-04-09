@@ -54,17 +54,29 @@ public:
    int vAlign();
    int hAlign();
 
+   void resize();
+
+   void setWordbreak(bool on);
+   bool wordBreak() const;
+
 private:
 
    int valign_, halign_;
    int orientation_;
 
+   bool wbreak_;
+
    NBitmap rotateBmp;
    std::string text_;
    NFontMetrics metrics;
 
+   std::vector<int> breakPoints;
+
    void init();
    char mnemonic_;
+
+   void computeBreakPoints();
+   int findWidthMax(long width, const std::string & data, bool wbreak);
 };
 
 #endif

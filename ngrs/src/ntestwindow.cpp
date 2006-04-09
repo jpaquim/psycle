@@ -50,11 +50,11 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  testMenu();
+  NLabel* label = new NLabel("Hallo this is the end of earth and we are testing for an start");
+    label->setWordbreak(true);
+    label->setAlign(nAlTop);
+  pane()->add(label);
 
-  /*NCheckMenuItem* item1 = new NCheckMenuItem();
-  item1->setPosition(10,10,100,100);
-  pane()->add(item1);*/
 }
 
 
