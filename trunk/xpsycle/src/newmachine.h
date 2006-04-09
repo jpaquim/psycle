@@ -34,17 +34,25 @@ public:
    InfoLine(const std::string & info) {
      add( infoLb = new NLabel(info) );
      add( textLb = new NLabel() );
+     textLb->setWordbreak(true);
+   }
+
+   ~InfoLine() {
+      delete bv;
    }
 
    void setText(const std::string & info) { textLb->setText(info);}
 
    virtual int preferredWidth () const { return 200;}
-   virtual int preferredHeight() const { return textLb->preferredHeight();}
+   virtual int preferredHeight() const {
+      return textLb->preferredHeight();
+   }
 
    virtual void resize() {
      infoLb->setPosition(0,0,100,clientHeight());
+     textLb->setSpacing(2,2,2,2);
      textLb->setPosition(100,0,clientWidth()-100,clientHeight());
-     textLb->setBorder(new NBevelBorder(nNone,nLowered));
+     textLb->setBorder(bv = new NBevelBorder(nNone,nLowered));
    }
 
 private:
@@ -52,7 +60,7 @@ private:
    NLabel* infoLb;
    NLabel* textLb;
 
-
+   NBorder* bv;
 };
 
 /**

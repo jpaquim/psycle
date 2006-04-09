@@ -163,6 +163,7 @@ void MasterGUI::paint( NGraphics * g )
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 {
   vuSlider_ = new NSlider();
+    vuSlider_->posChanged.connect(this,&GeneratorGUI::onPosChanged);
   add(vuSlider_);
 
   setSkin();
@@ -189,16 +190,26 @@ void GeneratorGUI::setSkin( )
 
   vuSlider_->setPosition(45,23,96,10);
   vuSlider_->setOrientation(nHorizontal);
-  vuSlider_->setPos(pMac()->_volumeDisplay);
-  std::cout << pMac()->_volumeMaxDisplay << std::endl;
+  vuSlider_->setRange(0,127);
+  vuSlider_->setPos( pMac()->_panning );
 
 }
 
+void GeneratorGUI::onPosChanged(NSlider* sender, double value )
+{
+  if (pMac()) {
+    pMac()->SetPan( (int) vuSlider_->pos());
+  }
+}
 
 
 
 EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 {
+  vuSlider_ = new NSlider();
+    vuSlider_->posChanged.connect(this,&EffektGUI::onPosChanged);
+  add(vuSlider_);
+
   setSkin();
   frameMachine = new FrameMachine(pMac());
 }
@@ -220,7 +231,23 @@ void EffektGUI::setSkin( )
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
   setTransparent(true);
+
+  vuSlider_->setPosition(45,23,96,10);
+  vuSlider_->setOrientation(nHorizontal);
+  vuSlider_->setRange(0,127);
+  vuSlider_->setPos( pMac()->_panning );
+
 }
+
+
+void EffektGUI::onPosChanged(NSlider* sender, double value )
+{
+  if (pMac()) {
+    std::cout << vuSlider_->pos() << std::endl;
+    pMac()->SetPan( (int) vuSlider_->pos());
+  }
+}
+
 
 void MachineGUI::onMousePress( int x, int y, int button )
 {
@@ -259,6 +286,7 @@ void EffektGUI::onMouseDoublePress( int x, int y, int button )
 {
   frameMachine->setVisible(true);
 }
+
 
 
 

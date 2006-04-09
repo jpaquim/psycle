@@ -50,6 +50,7 @@ NewMachine::NewMachine()
   NPanel* properties = new NPanel();
     properties->setWidth(210);
     properties->setAlign(nAlRight);
+    properties->setLayout(new NAlignLayout());
     macProperty = new NGroupBox();
       macProperty->setAlign(nAlTop);
       macProperty->setHeaderText("Machine Properties");
@@ -108,9 +109,10 @@ void NewMachine::onGeneratorItemSelected( NItemEvent * ev )
     name->setText(plugin.GetName());
   //libName->setText(plugin.GetDllName());
     dllName_ = plugin.GetDllName();
-    description->setText(std::string("Psycle Instrument by \n")+ std::string(plugin.GetInfo()->Author));
+    description->setText(std::string("Psycle Instrument by ")+ std::string(plugin.GetInfo()->Author));
     apiVersion->setText(stringify(plugin.GetInfo()->Version));
-    macProperty->resize();
+
+    pane()->resize();
     pane()->repaint();
   }
 }
