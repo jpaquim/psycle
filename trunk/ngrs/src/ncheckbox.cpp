@@ -23,27 +23,25 @@
 NCheckBox::NCheckBox()
  : NPanel()
 {
-  label_ = new NLabel();
   init();
 }
 
 
-NCheckBox::NCheckBox( std::string text ) : NPanel()
+NCheckBox::NCheckBox( const std::string & text ) : NPanel()
 {
-  label_ = new NLabel();
   init();
   label_->setText(text);
 }
 
 void NCheckBox::init( )
 {
+  label_ = new NLabel();
+  add(label_);
+
   dx=dy=10;
   setWidth(100);
   setHeight(20);
   checked_=false;
-  setBorder(0);
-  setTransparent(true);
-  add(label_);
 }
 
 
@@ -84,17 +82,23 @@ void NCheckBox::drawCheck(NGraphics* g)
 
 }
 
-bool NCheckBox::checked( )
+
+void NCheckBox::setChecked( bool on )
+{
+  checked_ = on;
+}
+
+bool NCheckBox::checked( ) const
 {
   return checked_;
 }
 
-void NCheckBox::setText( std::string text )
+void NCheckBox::setText( const std::string & text )
 {
   label_->setText(text);
 }
 
-std::string NCheckBox::text( )
+const std::string &  NCheckBox::text( ) const
 {
   return label_->text();
 }
@@ -119,6 +123,8 @@ void NCheckBox::onMousePressed( int x, int y, int button )
   NButtonEvent ev(this,x,y,button);
   clicked.emit(&ev);
 }
+
+
 
 
 

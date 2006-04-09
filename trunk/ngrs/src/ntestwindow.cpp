@@ -51,6 +51,10 @@ NTestWindow::NTestWindow()
   setPosition(0,0,1000,700);
 
   testMenu();
+
+  /*NCheckMenuItem* item1 = new NCheckMenuItem();
+  item1->setPosition(10,10,100,100);
+  pane()->add(item1);*/
 }
 
 
@@ -137,6 +141,9 @@ void NTestWindow::testMenu( )
   NMenuItem* item = new NMenuItem("open");
   menu1->add(item);
   item->click.connect(this,&NTestWindow::onOpen);
+
+  NCheckMenuItem* item1 = new NCheckMenuItem("test");
+  menu1->add(item1);
 }
 
 void NTestWindow::testSpinButton( )

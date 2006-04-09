@@ -21,6 +21,7 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "nmenuitem.h"
+#include "ncheckmenuitem.h"
 #include "nmenuseperator.h"
 #include "nbevelborder.h"
 
@@ -158,9 +159,14 @@ void NMenu::add( std::string create )
     if (substr=="|") {
       add(new NMenuSeperator());
     } else {
-      NMenuItem *item = new NMenuItem(substr);
-      item->setText(substr);
-      add(item);
+      if (substr.substr(0,2)=="&&") {
+        substr.erase(0,2);
+        NCheckMenuItem *item = new NCheckMenuItem(substr);
+        add(item);
+      } else {
+        NMenuItem *item = new NMenuItem(substr);
+        add(item);
+      }
     }
   } while (i != std::string::npos);
 }

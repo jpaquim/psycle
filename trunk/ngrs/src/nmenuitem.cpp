@@ -55,9 +55,6 @@ void NMenuItem::init( )
   caption_->setWidth(caption_->preferredWidth());
   menu_ = 0;
 
-  border_ = new NBevelBorder(nRaised,nLowered);
-  setBorder(0);
-
   shortCut_ = new NLabel();
   shortCut_->setEvents(false);
   add(shortCut_);
@@ -75,7 +72,6 @@ void NMenuItem::init( )
 
 NMenuItem::~NMenuItem()
 {
-  delete border_;
 }
 
 void NMenuItem::setText( std::string text )
@@ -96,7 +92,6 @@ void NMenuItem::onMouseEnter( )
 {
   NCustomMenuItem::onMouseEnter();
   setSkin(itemOver);
-  setBorder(border_);
   repaint();
   if (menu_!=0 && !menu_->popupMenu()->mapped()) {
      menu_->popupMenu()->setPosition(window()->left()+window()->width(), window()->top()+absoluteTop(),100,100);

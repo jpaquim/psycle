@@ -26,13 +26,11 @@ NPopupMenu::NPopupMenu()
  : NWindow()
 {
   setDecoration(false);
-  pane()->setBorder(new NFrameBorder());
-  pane()->setBackground(NColor(255,255,255));
   NFont fnt = pane()->font();
   fnt.setSize(10);
   pane()->setFont(fnt);
   NVisual::setVisible(false);
-  NListLayout* nl = new NListLayout();
+  nl = new NListLayout();
   pane()->setLayout(nl);
   NApp::config()->setSkin(&pane()->skin_,"popmnubg");
   selItemIndex_ = -1;
@@ -43,7 +41,6 @@ NPopupMenu::NPopupMenu()
 
 NPopupMenu::~NPopupMenu()
 {
-  delete pane()->border();
   delete nl;
 }
 
