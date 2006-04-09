@@ -27,6 +27,7 @@
 #include "vumeter.h"
 #include <napp.h>
 #include <nitem.h>
+#include <ncheckmenuitem.h>
 
 
 /* XPM */
@@ -280,7 +281,7 @@ void MainWindow::initMenu( )
    menuBar_->add(editMenu_);
 
    viewMenu_ = new NMenu("View",'v',
-       "Toolbar,MachineBar,SequencerBar,StatusBar,|,MachineView,PatternEditor,PatternSequencer,|,Add machine,Instrument Editor");
+       "&&Toolbar,&&MachineBar,&&SequencerBar,&&StatusBar,|,MachineView,PatternEditor,PatternSequencer,|,Add machine,Instrument Editor");
    menuBar_->add(viewMenu_);
 
    configurationMenu_ = new NMenu("Configuration",'c',
@@ -692,6 +693,26 @@ void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
 
 void MainWindow::onViewMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
+  if (itemEv->text()=="Toolbar") {
+     toolBar1_->setVisible(!toolBar1_->visible());
+     pane()->resize();
+     pane()->repaint();
+  } else
+  if (itemEv->text()=="MachineBar") {
+     psycleToolBar_->setVisible(!psycleToolBar_->visible());
+     pane()->resize();
+     pane()->repaint();
+  } else
+  if (itemEv->text()=="SequencerBar") {
+     sequencerBar_->setVisible(!sequencerBar_->visible());
+     pane()->resize();
+     pane()->repaint();
+  } else
+  if (itemEv->text()=="StatusBar") {
+     statusBar_->setVisible(!statusBar_->visible());
+     pane()->resize();
+     pane()->repaint();
+  } else
   if (itemEv->text()=="Add machine") {
      if (childView_->newMachineDlg()->execute()) {
          if (childView_->newMachineDlg()->outBus()) {
