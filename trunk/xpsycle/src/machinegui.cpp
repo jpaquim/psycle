@@ -28,7 +28,7 @@
 #include <nlabel.h>
 #include <nline.h>
 #include <nwindow.h>
-
+#include <nslider.h>
 
 NBitmap MachineGUI::bitmap;
 int MachineGUI::c = 0;
@@ -162,6 +162,9 @@ void MasterGUI::paint( NGraphics * g )
 
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 {
+  vuSlider_ = new NSlider();
+  add(vuSlider_);
+
   setSkin();
   frameMachine = new FrameMachine(pMac());
 }
@@ -183,6 +186,12 @@ void GeneratorGUI::setSkin( )
   setTransparent(true);
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
+
+  vuSlider_->setPosition(45,23,96,10);
+  vuSlider_->setOrientation(nHorizontal);
+  vuSlider_->setPos(pMac()->_volumeDisplay);
+  std::cout << pMac()->_volumeMaxDisplay << std::endl;
+
 }
 
 

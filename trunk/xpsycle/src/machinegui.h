@@ -26,6 +26,7 @@ class NLine;
 class Machine;
 class FrameMachine;
 class MasterDlg;
+class NSlider;
 
 /**
 @author Stefan
@@ -106,6 +107,7 @@ public:
 
 private:
 
+   NSlider* vuSlider_;
 
    NRect bgCoords;
    NPoint dNameCoords;
