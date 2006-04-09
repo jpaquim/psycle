@@ -1606,6 +1606,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					case MACH_XMSAMPLER:
 						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
 						break;
+					case MACH_DUPLICATOR:
+					case MACH_LFO:
+					case MACH_MIXER:
 					case MACH_PLUGIN:
 					case MACH_VST:
 					case MACH_VSTFX:

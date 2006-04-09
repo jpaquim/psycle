@@ -37,11 +37,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								case MACHMODE_FX:
 									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
 									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+									wireSX = point.x;
+									wireSY = point.y;
 									break;
 
 								case MACHMODE_MASTER:
 									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
 									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+									wireSX = point.x;
+									wireSY = point.y;
 									break;
 								}		
 							wiresource=-1;
@@ -63,16 +67,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						case MACHMODE_GENERATOR:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in master
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
 							break;
 */							
+						default:
+							wiresource=-1;			//don't pretend we're drawing a wire if we're not..
+							break;
 						}
 //						OnMouseMove(nFlags,point);
 					}
@@ -230,11 +241,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							case MACHMODE_FX:
 								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
 								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+								wireSX = point.x;
+								wireSY = point.y;
 								break;
 
 							case MACHMODE_MASTER:
 								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
 								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+								wireSX = point.x;
+								wireSY = point.y;
 								break;
 							}		
 							wiresource=-1;
@@ -256,16 +271,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						case MACHMODE_GENERATOR:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in Master.
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
 							break;
 */							
+						default:
+							wiresource=-1;
 						}
 //						OnMouseMove(nFlags,point);
 					}
