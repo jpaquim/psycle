@@ -155,7 +155,7 @@ int NLabel::preferredHeight( ) const
        yp+=metrics.textHeight();
      }
      yp+=metrics.textHeight();
-     return yp;
+     return yp + spacing().top()+spacing().bottom() +borderTop()+borderBottom();
   }
 }
 

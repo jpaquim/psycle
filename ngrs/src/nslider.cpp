@@ -65,7 +65,10 @@ void NSlider::Slider::onMove( const NMoveEvent & moveEvent )
 void NSlider::onSliderMove( )
 {
    double range = max_ - min_;
-   pos_ = ( range / (clientHeight()-slider_->height()) ) * slider_->top();
+   if (orientation_ == nVertical)
+     pos_ = ( range / (clientHeight()- slider_->height()) ) * slider_->top();
+   else
+     pos_ = ( range / (clientWidth() - slider_->width())  ) * slider_->left();
    posChanged.emit(this,pos_);
 }
 
@@ -106,7 +109,10 @@ void NSlider::setRange( double min, double max )
 void NSlider::setPos( double pos )
 {
   double range = max_ - min_;
-  slider_->setTop( (int) (pos  / ((range / (clientHeight()-slider_->height()))) ));
+  if (orientation_ == nVertical)
+     slider_->setTop(  (int) (pos  / ((range / (clientHeight()- slider_->height()))) ));
+  else
+     slider_->setLeft( (int) (pos  / ((range / (clientWidth() - slider_->width()))) ));
   pos_ = pos;
 }
 
