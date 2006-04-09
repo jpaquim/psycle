@@ -45,8 +45,9 @@ public:
     void setShortCut(int keyMask, char c, std::string description );
 
 
-    void onMouseEnter();
-    void onMouseExit();
+    virtual void onMouseEnter();
+    virtual void onMouseExit();
+
     virtual void add(NRuntime* comp);
     void add(NMenu* menu);
 
@@ -60,7 +61,7 @@ public:
 
     virtual void setIconSize(int size);
     virtual void setCaptionSize(int size);
-    void setShortCutSize(int size);
+    virtual void setShortCutSize(int size);
     virtual void setMnemonic(char c);
     virtual void setHintSize(int size);
 
@@ -76,7 +77,6 @@ private:
 
     int gap_;
 
-    NBorder* border_;
     NPanel* iconField_;
     NLabel* caption_;
     NLabel* shortCut_;

@@ -26,6 +26,7 @@
 class NCheckBox;
 class NLabel;
 class NMenu;
+class NButton;
 
 
 /**
@@ -35,23 +36,9 @@ class NCheckMenuItem : public NCustomMenuItem
 {
 public:
     NCheckMenuItem();
-    NCheckMenuItem(std::string text);
-    NCheckMenuItem(std::string text, int keyMask, char c, std::string description );
-
+    NCheckMenuItem(const std::string & text);
 
     ~NCheckMenuItem();
-    void setText(std::string text);
-    std::string text();
-    void setShortCut(int keyMask, char c, std::string description );
-
-
-    void onMouseEnter();
-    void onMouseExit();
-    virtual void add(NRuntime* comp);
-    void add(NMenu* menu);
-
-    virtual int preferredWidth() const;
-    virtual int preferredHeight() const;
 
     virtual int maxIconSize();
     virtual int maxCaptionSize();
@@ -60,30 +47,30 @@ public:
 
     virtual void setIconSize(int size);
     virtual void setCaptionSize(int size);
-    void setShortCutSize(int size);
-    virtual void setMnemonic(char c);
+    virtual void setShortCutSize(int size);
     virtual void setHintSize(int size);
 
-    virtual void setHeight(int height);
-    virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
+    virtual int preferredWidth() const;
+    virtual int preferredHeight() const;
 
-    void setGap(int gap);
+    virtual void setHeight( int height );
 
-    virtual void onMousePress(int x, int y, int button);
-
+    virtual void onMouseEnter();
+    virtual void onMouseExit();
 
 private:
 
-    int gap_;
+    NCheckBox* checkBox_;
+    NLabel*    caption_;
 
-    NBorder* border_;
-    NPanel* iconField_;
-    NCheckBox* caption_;
-    NLabel* shortCut_;
-    NLabel* subMenuHint_;
-    NMenu* menu_;
+    NSkin itemNone;
+    NSkin itemOver;
 
     void init();
+    void onCheckBoxClicked(NButtonEvent* ev);
+
+    void onCheckBoxMouseEnter(NEvent* ev);
+    void onCheckBoxMouseExit(NEvent* ev);
 
 };
 

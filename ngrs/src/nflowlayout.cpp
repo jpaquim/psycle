@@ -55,7 +55,7 @@ void NFlowLayout::align( NVisualComponent * parent )
 
   for (;itr < parent->visualComponents().end(); itr++) {
     NVisualComponent* visualChild = *itr;
-
+    if (visualChild->visible()) {
     if ((xp + visualChild->preferredWidth() + hgap_ <= parent->clientWidth()) || (!lineBrk_) ) {
           visualChild->setPosition(xp,yp,visualChild->preferredWidth(),visualChild->preferredHeight());
           xp = xp + visualChild->preferredWidth() + hgap_;
@@ -78,8 +78,8 @@ void NFlowLayout::align( NVisualComponent * parent )
           xp = visualChild->preferredWidth() + 2*hgap_;
           start = itr;
        }
+    }
   }
-
   if (itr != start) {
     std::vector<NVisualComponent*>::const_iterator itrH = start;
     for (;itrH < parent->visualComponents().end() ; itrH++) {

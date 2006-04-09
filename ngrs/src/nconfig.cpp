@@ -427,7 +427,7 @@ void NConfig::setSkin( NSkin * skin, const std::string & identifier )
   if (identifier == "popmnubg") {
     skin->fgColor = NColor(230,230,230);
     skin->font    = NFont("Suse sans",8,nMedium | nStraight | nAntiAlias);
-    skin->font.setTextColor(NColor(230,230,230));
+    skin->font.setTextColor(NColor(0,0,0));
     skin->useParentBgColor = false;
     skin->useParentFgColor = false;
     skin->useParentFont    = false;

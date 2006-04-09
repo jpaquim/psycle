@@ -82,3 +82,5 @@ void NCustomMenuItem::setMnemonic(char c)
 {
   mnemonic_ = c;
 }
+
+

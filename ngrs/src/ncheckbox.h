@@ -32,19 +32,20 @@ class NCheckBox : public NPanel
 {
 public:
     NCheckBox();
-    NCheckBox(std::string text);
+    NCheckBox(const std::string & text);
 
     ~NCheckBox();
 
-   void setText(std::string text);
-   std::string text();
+   void setText(const std::string & text);
+   const std::string & text() const;
 
    virtual void paint(NGraphics* g);
 
    virtual void onMousePress(int x, int y, int button);
    virtual void onMousePressed (int x, int y, int button);
 
-   bool checked();
+   void setChecked(bool on);
+   bool checked() const;
 
    virtual int preferredWidth() const;
    virtual int preferredHeight() const;
