@@ -28,8 +28,10 @@ GreetDlg::GreetDlg()
 {
   lBox = new NListBox();
 
-  pane()->add(new NLabel("Psyceledics Community, wants to thank the following people"),nAlTop);
-  pane()->add(new NLabel("for their contributions in the developement of Psycle"),nAlTop);
+  NLabel* greetings = new NLabel();
+    greetings->setText("Psyceledics Community, wants to thank the following people for their contributions in the developement of Psycle");
+    greetings->setWordbreak(true);
+  pane()->add(greetings,nAlTop);
 
   pane()->add(lBox, nAlClient);
 
