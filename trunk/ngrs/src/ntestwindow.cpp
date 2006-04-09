@@ -50,11 +50,18 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  NLabel* label = new NLabel("Hallo this is the end of earth and we are testing for an start");
-    label->setWordbreak(true);
-    label->setAlign(nAlTop);
-  pane()->add(label);
+  NPanel* prop = new NPanel();
+    prop->setWidth(210);
+    NGroupBox* macProp = new NGroupBox();
+    prop->add(macProp,nAlTop);
+  pane()->add(prop,nAlRight);
 
+
+
+  NListBox* box = new NListBox();
+  pane()->add(box,nAlClient);
+
+ 
 }
 
 
