@@ -40,6 +40,7 @@ MachineGUI::MachineGUI(Machine* mac)
   mac_ = mac;
   setMoveable(NMoveable(nMvHorizontal | nMvVertical));
   setPosition(mac->_x,mac_->_y,200,30);
+
   if (c==0) {
     if (Global::pConfig()->iconPath=="") 
        bitmap = Global::pBitmaps()->machine_skin(); 
@@ -141,6 +142,8 @@ MasterGUI::MasterGUI(Machine* mac) : MachineGUI(mac)
 {
   setSkin();
   masterDlg = new MasterDlg(mac);
+  setBackground(NColor(0,0,200));
+  setTransparent(false);
 }
 
 MasterGUI::~ MasterGUI( )
@@ -153,11 +156,13 @@ void MasterGUI::setSkin( )
   setTransparent(true);
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
+  setBackground(NColor(0,200,0));
+  setTransparent(false);
 }
 
 void MasterGUI::paint( NGraphics * g )
 {
-  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
 }
 
 GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
@@ -168,6 +173,8 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
+  setBackground(NColor(0,0,200));
+  setTransparent(false);
 }
 
 GeneratorGUI::~ GeneratorGUI( )
@@ -176,7 +183,7 @@ GeneratorGUI::~ GeneratorGUI( )
 
 void GeneratorGUI::paint( NGraphics * g )
 {
-  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), stringify(pMac()->_macIndex)+":"+pMac()->_editName);
 }
 
@@ -212,6 +219,8 @@ EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
+    setBackground(NColor(0,200,200));
+  setTransparent(false);
 }
 
 EffektGUI::~ EffektGUI( )
@@ -220,7 +229,7 @@ EffektGUI::~ EffektGUI( )
 
 void EffektGUI::paint( NGraphics * g )
 {
-  g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
+  //g->putBitmap(0,0,bgCoords.width(),bgCoords.height(), bitmap, bgCoords.left(), bgCoords.top());
   g->drawText(dNameCoords.x(),dNameCoords.y()+g->textAscent(), pMac()->_editName);
 }
 
@@ -269,7 +278,7 @@ void MachineGUI::detachLine( NLine * line )
 
 void MachineGUI::onMouseDoublePress( int x, int y, int button )
 {
-  
+
 }
 
 void GeneratorGUI::onMouseDoublePress( int x, int y, int button )
