@@ -1520,22 +1520,16 @@ namespace psycle
 
 
 		//		todo:
+		//	- as is, control rate is proportional to STREAM_SIZE.. we update in work, which (at the moment) means once every 256
+		//      samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
+		//		means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
+		//		if we want to take the idea of modulation machines much further, we should probably put together some kind of
+		//		standard place in the processing chain where these machines will work, preferably -before- any audio
+		//		processing.  this should also eliminate the need for the lfo to be connected to something to work.
 		//  - prettify gui
-		//  - currently, machine must be connected to something to function.. any work-around for this?
-		//  - currently, modulation is updated every single sample (as in, control rate == sampling rate) -- this is
-		//		almost definitely excessive, and i'm sure we can lower the control rate substantially before there's an
-		//		audible difference, saving us loads of cpu cycles
-		//  - timing assumes 44.1khz sr..  changing samprate will change lfo speed
 		//	- implement baseline control, or at least decide if we actually want it
 		//  - pulse width for sq. wave
-		//  - adjust knob ranges to taste (speed doesn't go fast enough to be any fun at present)
 		//  - vst support??
-		//  - manual tweaking during an lfo.. it works, but only if you're quick.  due to the way mouse control works
-		//		in CFrameMachine, plugin mouse tweaks are relative to the control's position -when the button was pressed-,
-		//		and are completely ignorant of external movement.  (i.e., automate a knob to move from 128 to 0.. grab
-		//		the knob right as it starts decreasing, and hold the mouse still until the automation finishes. now, 
-		//		moving even a pixel jerks the knob instantly back up to around 128.)  so, for this sort of automation
-		//		to work as well as we all want it to, we'll need to make CFrameMachine pay a bit more attention.
 
 
 		LFO::LFO(int index)
@@ -1650,7 +1644,9 @@ namespace psycle
 				if(lSpeed==0)
 					sprintf(parVal, "inf.");
 				else
-					sprintf(parVal, "%.1f ms", LFO_SIZE/(float)(lSpeed/(float)MAX_SPEED)/44.1f * LFO_SIZE/360.0f);
+				{
+					sprintf(  parVal, "%.1f ms", 100 / float(lSpeed/float(MAX_SPEED))  );		
+				}
 			} else if(numparam<8) {
 				if ((macOutput[numparam-3] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-3]] != NULL))
 					sprintf(parVal,"%X -%s",macOutput[numparam-3],Global::_pSong->_pMachine[macOutput[numparam-3]]->_editName);
@@ -1737,46 +1733,48 @@ namespace psycle
 		void LFO::Work(int numSamples)
 		{
 			PSYCLE__CPU_COST__INIT(cost);
-			int i(numSamples);
 
 			int maxVal=0, minVal=0;
 			int curVal=0, newVal=0;
 			float curLFO=0.0;
 			float lfoAmt=0.0;
-			do 
+			bool bRedraw=false;
+
+			for(int j(0);j<5;++j)
 			{
-				for(int j(0);j<5;++j)
+				if	(	macOutput[j] != -1		&&	Global::_pSong->_pMachine[macOutput[j]] != NULL
+					&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::_pSong->_pMachine[macOutput[j]]->GetNumParams() )
 				{
-					if	(	macOutput[j] != -1		&&	Global::_pSong->_pMachine[macOutput[j]] != NULL
-						&&  paramOutput[j] != -1	&&	paramOutput[j] < Global::_pSong->_pMachine[macOutput[j]]->GetNumParams() )
-					{
-						Global::_pSong->_pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
-						curVal = Global::_pSong->_pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
+					Global::_pSong->_pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
+					curVal = Global::_pSong->_pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
+					curLFO = waveTable[	int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
+					lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
 
-						curLFO = waveTable[	int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
-						lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
+					centerVal[j] -= prevVal[j] - curVal;  //compensate for external movement
 
-						centerVal[j] -= prevVal[j] - curVal;  //compensate for external movement
+					newVal = curLFO * ((maxVal-minVal)/2.0f) * lfoAmt + centerVal[j];
 
-						newVal = curLFO * ((maxVal-minVal)/2.0f) * lfoAmt + centerVal[j];
+					if(newVal>maxVal) newVal=maxVal;
+					else if(newVal<minVal) newVal=minVal;
 
-						if(newVal>maxVal) newVal=maxVal;
-						else if(newVal<minVal) newVal=minVal;
-
-						Global::_pSong->_pMachine[macOutput[j]]->SetParameter(paramOutput[j], newVal);	//make it happen!
-
-						prevVal[j] = newVal;
-					}
+					Global::_pSong->_pMachine[macOutput[j]]->SetParameter(paramOutput[j], newVal);	//make it happen!
+					bRedraw=true;
+					prevVal[j] = newVal;
 				}
-				lfoPos += lSpeed / float(MAX_SPEED * (LFO_SIZE/360.0f) );
-				if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
-			} while(--i);
+			}
+
+			if(bRedraw)
+				Global::pPlayer->Tweaker=true;
+			bRedraw=false;
+
+			float minms = Global::pConfig->GetSamplesPerSec()/1000.0f * 100.0f;	//100ms in samples
+			lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
+			if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
 			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 			work_cpu_cost(work_cpu_cost() + cost);
-//			_worked = true;
-
 		}
+
 		bool LFO::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
@@ -1810,9 +1808,9 @@ namespace psycle
 		{
 			switch(waveform)
 			{
-			case lt_sine:	for (int i(0);i<LFO_SIZE;++i)	//todo: i think some of these waveforms never actually reach 1.0
-							{								// (change LFO_SIZE in formulas to LFO_SIZE-1? )
-								waveTable[i]=sin(i/float(LFO_SIZE) * /*(M_PI*2)*/ 6.2831853071795864769252);	//no M_PI?
+			case lt_sine:	for (int i(0);i<LFO_SIZE;++i)
+							{
+								waveTable[i]=sin(i/float(LFO_SIZE-1) * 6.2831853071795864769252);
 							}
 							break;
 			case lt_tri:	for (int i(0);i<LFO_SIZE/2;++i)
@@ -1822,12 +1820,12 @@ namespace psycle
 							break;
 			case lt_sawup:	for (int i(0);i<LFO_SIZE;++i)
 							{
-								waveTable[i] = i/float(LFO_SIZE/2) - 1;
+								waveTable[i] = i/float((LFO_SIZE-1)/2) - 1;
 							}
 							break;
 			case lt_sawdown: for(int i(0);i<LFO_SIZE;++i)
 							{
-								waveTable[i] = (LFO_SIZE-i)/float(LFO_SIZE/2) - 1;
+								waveTable[i] = (LFO_SIZE-i)/float((LFO_SIZE-1)/2) - 1;
 							}
 							break;
 			case lt_square:	for (int i(0);i<LFO_SIZE/2;++i)

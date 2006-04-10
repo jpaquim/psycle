@@ -62,6 +62,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			tweakbase=0;
 			minval=0;
 			maxval=0;
+			prevval=0;
 			finetweak=false;
 			ultrafinetweak=false;
 			numParameters=0;
@@ -424,6 +425,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					sourcepoint = point.y;
 					tweakbase = _pMachine->GetParamValue(tweakpar);
+					prevval = tweakbase;
 					_pMachine->GetParamRange(tweakpar,minval,maxval);
 					istweak = true;
 					wndView->AddMacViewUndo();
@@ -479,49 +481,58 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
-			if(_pMachine->_type == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & USEGUI)
+			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				int newval;
-				int c=0;
-				while(	c<numParameters && !((Plugin*)_pMachine)->GetParam(c)->PointInParam(point.x,point.y))
+				if( !(((Plugin*)_pMachine)->GetInfo()->Flags & USEGUI) )
 				{
-					++c;
-				}
-				tweakpar=c;
-				if(tweakpar<numParameters && tweakpar>=0)
-				{
-					if(((Plugin*)_pMachine)->GetParam(tweakpar)->bClickable || ((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-
+					int par = ConvertXYtoParam(point.x,point.y);
+					if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
 					{
-						if(((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonDown(point.x, point.y, newval))
-						{
-							wndView->AddMacViewUndo();
-							_pMachine->SetParameter(tweakpar,newval);
-							if (Global::pConfig->_RecordTweaks)
-							{
-								if (Global::pConfig->_RecordMouseTweaksSmooth)
-								{
-									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-								}
-								else
-								{
-									wndView->MousePatternTweak(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-								}
-							}
-						}
-					}
-					if(((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-
-					{
-						istweak = true;
-						SetCapture();
+						wndView->AddMacViewUndo();
+						_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
 					}
 				}
 				else
-					istweak = false;	//not sure why this is necessary on mousedown, but everybody else is doing it, so whatever
+				{
+					int newval;
+					int c=0;
+					while(	c<numParameters && !((Plugin*)_pMachine)->GetParam(c)->PointInParam(point.x,point.y))
+					{
+						++c;
+					}
+					tweakpar=c;
+					if(tweakpar<numParameters && tweakpar>=0)
+					{
+						if(((Plugin*)_pMachine)->GetParam(tweakpar)->bClickable || ((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
 
-				//todo: i originally added the dblclick function to make the comboboxes for the new gui work more smoothly.. but
-				//	i'd like to make double-clicking -any- parameter, new-gui or otherwise, reset that control to its default.
+						{
+							if(((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonDown(point.x, point.y, newval))
+							{
+								wndView->AddMacViewUndo();
+								_pMachine->SetParameter(tweakpar,newval);
+								if (Global::pConfig->_RecordTweaks)
+								{
+									if (Global::pConfig->_RecordMouseTweaksSmooth)
+									{
+										wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
+									}
+									else
+									{
+										wndView->MousePatternTweak(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
+									}
+								}
+							}
+						}
+						if(((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
+
+						{
+							istweak = true;
+							SetCapture();
+						}
+					}
+					else
+						istweak = false;	//not sure why this is necessary on mousedown, but everybody else is doing it, so whatever
+				}
 			}
 			Invalidate(false);
 
@@ -533,6 +544,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (istweak)
 			{
+				int curval = _pMachine->GetParamValue(tweakpar);
+				tweakbase -= prevval-curval;					//adjust base for tweaks from somewhere else
+				if(tweakbase<minval) tweakbase=minval;
+				if(tweakbase>maxval) tweakbase=maxval;
+
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
@@ -572,6 +588,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if (nv > maxval) nv = maxval;
 
 					_pMachine->SetParameter(tweakpar,(int) nv);
+					prevval=(int)nv;
 
 					if (Global::pConfig->_RecordTweaks)
 					{

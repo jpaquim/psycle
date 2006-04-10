@@ -38,6 +38,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int minval;
 			int maxval;
 			int sourcepoint;
+			int prevval;
 			
 			int ncol;
 			int parspercol;
