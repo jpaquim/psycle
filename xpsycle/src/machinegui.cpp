@@ -111,7 +111,7 @@ void MachineGUI::onMove( const NMoveEvent & moveEvent )
     int parentAbsLeft = ((NVisualComponent*) parent())->absoluteLeft();
     int parentAbsTop  = ((NVisualComponent*) parent())->absoluteTop();
 
-    window()->repaint(parentAbsLeft+repaintArea.left(),parentAbsTop+repaintArea.top(),repaintArea.right()-repaintArea.left(),repaintArea.bottom()-repaintArea.top());
+    window()->repaint(window()->pane(),parentAbsLeft+repaintArea.left(),parentAbsTop+repaintArea.top(),repaintArea.right()-repaintArea.left(),repaintArea.bottom()-repaintArea.top());
 
     oldDrag = newDrag;
   }
