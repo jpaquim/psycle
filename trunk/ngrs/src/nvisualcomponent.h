@@ -55,7 +55,7 @@ public:
 
     ~NVisualComponent();
 
-    void draw(NGraphics* g, const NRect & repaintArea, NVisualComponent* sender);
+    void draw(NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender);
 
 
     virtual bool visit(NVisitor* v);
@@ -190,7 +190,7 @@ private:
 
    bool clipping_;
    bool events_;
-   void drawChildren(NGraphics* g, const NRect & repaintArea, NVisualComponent* sender);
+   void drawChildren(NGraphics* g, const NRegion & repaintArea, NVisualComponent* sender);
 
    int scrollDx_, scrollDy_;
 

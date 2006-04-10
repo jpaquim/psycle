@@ -21,6 +21,7 @@
 #define NLAYOUT_H
 
 #include "ngraphics.h"
+#include "nregion.h"
 
 const short nAlNone   = 0;
 const short nAlLeft   = 1;
@@ -47,7 +48,7 @@ public:
     void setParent(class NVisualComponent* parent);
     class NVisualComponent* parent() const;
 
-    virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRect & repaintArea, NVisualComponent* sender);
+    virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRegion & repaintArea, NVisualComponent* sender);
 
 private:
 

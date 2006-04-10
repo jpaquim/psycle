@@ -39,7 +39,7 @@ const NRect & NShape::rectArea( ) const
   return rectArea_;
 }
 
-void NShape::fill( NGraphics * g, const NRect & repaintArea )
+void NShape::fill( NGraphics * g, const NRegion & repaintArea )
 {
 }
 

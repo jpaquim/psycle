@@ -61,7 +61,7 @@ NVisualComponent::~NVisualComponent()
 }
 
 
-void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea , NVisualComponent* sender)
+void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender)
 {
   if (visible()) {
    if (sender == this) NWindow::paintFlag = true;
@@ -155,7 +155,7 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea , NVisualC
   }
 }
 
-void NVisualComponent::drawChildren( NGraphics * g, const NRect & repaintArea , NVisualComponent* sender )
+void NVisualComponent::drawChildren( NGraphics * g, const NRegion & repaintArea , NVisualComponent* sender )
 {
   if (layout_ == 0) {
     std::vector<NRuntime*>::iterator itr = components.begin();

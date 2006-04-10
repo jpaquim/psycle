@@ -24,6 +24,7 @@
 #include <npanel.h>
 #include <nalignlayout.h>
 #include <niswindow.h>
+#include <nregion.h>
 
 #define nDestroyWindow 1
 #define nHideWindow    2
@@ -67,6 +68,7 @@ public:
 
     void repaint(NVisualComponent* sender, int x, int y, int w, int h  , bool swap = true);
     void repaint(NVisualComponent* sender, const NRect & repaintArea, bool swap = true);
+    void repaint(NVisualComponent* sender, const NRegion & repaintArea, bool swap = true);
 
     int width()  const;
     int height() const;

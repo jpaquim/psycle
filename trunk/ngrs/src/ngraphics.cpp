@@ -451,14 +451,14 @@ void NGraphics::fillGradient(int x, int y, int width, int height, const NColor &
 }
 
 
-const NRect & NGraphics::repaintArea( )
+const NRegion & NGraphics::repaintArea( )
 {
   return repaintArea_;
 }
 
-void NGraphics::setRepaintArea( const NRect & rect )
+void NGraphics::setRepaintArea( const NRegion & region )
 {
-  repaintArea_ = rect;
+  repaintArea_ = region;
 }
 
 int NGraphics::dblWidth( ) const

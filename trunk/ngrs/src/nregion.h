@@ -41,14 +41,14 @@ public:
     void setRect(const NRect & rect);
     void setPolygon(XPoint*  pts , int size);
     bool isEmpty() const;
-    NRect rectClipBox();
+    NRect rectClipBox() const;
 
     Region xRegion() const;  // warning this pointer can change
 
-    NRegion operator&(const NRegion & rhs);
-    NRegion operator|(const NRegion & rhs);
-    NRegion operator-(const NRegion & rhs);
-    NRegion operator^(const NRegion & rhs);
+    NRegion operator*(const NRegion & lhs , const NRegion & rhs);
+    NRegion operator|(const NRegion & lhs , const NRegion & rhs);
+    NRegion operator-(const NRegion & lhs , const NRegion & rhs);
+    NRegion operator^(const NRegion & lhs , const NRegion & rhs);
 
 private:
 

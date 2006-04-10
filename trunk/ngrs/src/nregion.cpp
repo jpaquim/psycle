@@ -26,7 +26,13 @@ NRegion::NRegion()
 
 NRegion::NRegion( const NRect & rect )
 {
-  setRect(rect);
+  region_ = XCreateRegion();
+  XRectangle rectangle;
+  rectangle.x= (short) rect.left();
+  rectangle.y= (short) rect.top();
+  rectangle.width=(unsigned short)  rect.width();
+  rectangle.height=(unsigned short) rect.height();
+  XUnionRectWithRegion(&rectangle,region_,region_);
 }
 
 NRegion::~NRegion()
@@ -75,31 +81,31 @@ const NRegion & NRegion::operator =( const NRegion & rhs )
 }
 
 
-NRegion NRegion::operator &( const NRegion & rhs )
+NRegion NRegion::operator *( const NRegion & lhs , const NRegion & rhs )
 {
   NRegion region;
-  XIntersectRegion(region_, rhs.xRegion(), region.xRegion());
+  XIntersectRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
   return region;
 }
 
-NRegion NRegion::operator |( const NRegion & rhs )
+NRegion NRegion::operator |(const NRegion & lhs, const NRegion & rhs )
 {
   NRegion region;
-  XUnionRegion(region_, rhs.xRegion(), region.xRegion());
+  XUnionRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
   return region;
 }
 
-NRegion NRegion::operator -( const NRegion & rhs )
+NRegion NRegion::operator -(const NRegion & lhs, const NRegion & rhs )
 {
   NRegion region;
-  XSubtractRegion(region_, rhs.xRegion(), region.xRegion());
+  XSubtractRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
   return region;
 }
 
-NRegion NRegion::operator ^( const NRegion & rhs )
+NRegion NRegion::operator ^( const NRegion & lhs , const NRegion & rhs )
 {
   NRegion region;
-  XXorRegion(region_, rhs.xRegion(), region.xRegion());
+  XXorRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
   return region;
 }
 
@@ -118,7 +124,7 @@ void NRegion::shrink( int dx, int dy )
   XShrinkRegion(region_, dx, dy);
 }
 
-NRect NRegion::rectClipBox( )
+NRect NRegion::rectClipBox( ) const
 {
   XRectangle r;
   XClipBox(region_, &r);
