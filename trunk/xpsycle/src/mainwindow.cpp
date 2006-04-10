@@ -239,7 +239,7 @@ MainWindow::MainWindow()
   initDialogs();
   initBars();
   initViews();
-  /*initSignals();
+  initSignals();
 
   childView_->timer.timerEvent.connect(this,&MainWindow::onTimer);
 
@@ -249,7 +249,7 @@ MainWindow::MainWindow()
     add(aboutDlg);
   wavRecFileDlg = new NFileDialog();
     wavRecFileDlg->setMode(nSave);
-  add(wavRecFileDlg);*/
+  add(wavRecFileDlg);
 
 
  /* NImage* img = new NImage();
@@ -314,12 +314,12 @@ void MainWindow::initViews( )
 {
   childView_ = new ChildView();
   pane()->add(childView_);
-  /*childView_->setTitleBarText();
+  childView_->setTitleBarText();
   sequencerBar_->setPatternView(childView_->patternView());
 
-  //octaveCombo_->setIndex(4);
+  octaveCombo_->setIndex(4);
   childView_->patternView()->setEditOctave(4);
-  //trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16*/
+  trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16*/
 }
 
 void MainWindow::initBars( )
