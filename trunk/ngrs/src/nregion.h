@@ -43,9 +43,31 @@ public:
     bool isEmpty() const;
     const NRect & rectClipBox() const;
 
-    Region xRegion() const;  // warning this pointer can change
+    /// intersection
+    inline NRegion & operator &= (const NRegion &);
+    
+    /// union
+    inline NRegion & operator |= (const NRegion &);
+    
+    /// difference
+    inline NRegion & operator -= (const NRegion &);
 
+    /// symetric difference
+    inline NRegion & operator ^= (const NRegion &);
 
+public:    
+    ///\name specific to X Window implementation
+    ///\{
+        /// warning: this pointer can change
+        inline Region xRegion() const throw() { return region_; }
+        
+        /// implicit conversion to X const Region.
+        inline operator const Region () const throw() { return region_; }
+
+        /// implicit conversion to X Region.
+        inline operator Region () throw() { return region_; }
+   ///\}
+    
 private:
 
     Region region_;
@@ -54,33 +76,56 @@ private:
 
 };
 
-inline NRegion operator &( const NRegion & lhs , const NRegion & rhs )
+inline NRegion & NRegion::operator &= (const NRegion & that)
+{
+  XIntersectRegion(*this, that, *this);
+  return *this;
+}
+
+inline NRegion operator & (const NRegion & lhs , const NRegion & rhs)
 {
   NRegion nrv(lhs);
-  XIntersectRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  nrv &= rhs;
   return nrv;
 }
 
-inline NRegion operator |(const NRegion & lhs, const NRegion & rhs )
+inline NRegion & NRegion::operator |= (const NRegion & that)
+{
+  XUnionRegion(*this, that, *this);
+  return *this;  
+}
+
+inline NRegion operator | (const NRegion & lhs, const NRegion & rhs)
 {
   NRegion nrv(lhs);
-  XUnionRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  nrv |= rhs;
   return nrv;
 }
 
-inline NRegion operator -(const NRegion & lhs, const NRegion & rhs )
+inline NRegion & NRegion::operator -= (const NRegion & that)
+{
+  XSubtractRegion(*this, that, *this);
+  return *this;  
+}
+
+inline NRegion operator - (const NRegion & lhs, const NRegion & rhs)
 {
   NRegion nrv(lhs);
-  XSubtractRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  nrv -= rhs;
   return nrv;
 }
 
-inline NRegion operator ^( const NRegion & lhs , const NRegion & rhs )
+inline NRegion & NRegion::operator ^= (const NRegion & that)
 {
-  NRegion nrv(lhs);
-  XXorRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
-  return nrv;
+  XXorRegion(*this, that, *this);
+  return *this;
 }
 
+inline NRegion operator ^ (const NRegion & lhs , const NRegion & rhs)
+{
+  NRegion nrv(lhs);
+  nrv ^= rhs;
+  return nrv;
+}
 
 #endif
