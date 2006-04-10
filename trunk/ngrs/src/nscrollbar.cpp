@@ -286,14 +286,14 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
                  compLeft  , compTop             // destX, destY
        );
        g->swap(NRect(compLeft,compTop, compWidth, compHeight - diffY));
-       win->repaint(compLeft,compTop + compHeight - diffY,compWidth,diffY);
+       win->repaint(comp,compLeft,compTop + compHeight - diffY,compWidth,diffY);
      } else {
        g->copyArea(compLeft  , compTop, // src_x, sry_y
                    compWidth , compHeight + diffY, // width, height
                    compLeft  , compTop    - diffY             // destX, destY
        );
        g->swap(NRect(compLeft,compTop - diffY, compWidth, compHeight + diffY));
-       win->repaint(compLeft,compTop,compWidth,-diffY);
+       win->repaint(comp,compLeft,compTop,compWidth,-diffY);
        }
      }
    }
@@ -310,14 +310,14 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
                  compLeft  , compTop             // destX, destY
        );
        g->swap(NRect(compLeft,compTop, compWidth - diffX, compHeight));
-       win->repaint(compLeft + compWidth - diffX,compTop,diffX,compHeight);
+       win->repaint(comp,compLeft + compWidth - diffX,compTop,diffX,compHeight);
      } else {
        g->copyArea(compLeft  , compTop, // src_x, sry_y
                    compWidth + diffX , compHeight, // width, height
                    compLeft - diffX  , compTop            // destX, destY
        );
        g->swap(NRect(compLeft - diffX,compTop, compWidth + diffX, compHeight));
-       win->repaint(compLeft,compTop,-diffX,compHeight);
+       win->repaint(comp,compLeft,compTop,-diffX,compHeight);
        }
      }
    }

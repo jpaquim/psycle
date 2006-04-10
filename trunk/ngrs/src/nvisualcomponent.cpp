@@ -61,9 +61,11 @@ NVisualComponent::~NVisualComponent()
 }
 
 
-void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
+void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea , NVisualComponent* sender)
 {
   if (visible()) {
+   if (sender == this) NWindow::paintFlag = true;
+
    Region oldRegion = g->region();
    Region region = geometry()->region();
    XOffsetRegion(region,g->xTranslation(),g->yTranslation());
@@ -78,9 +80,10 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
     int gTx = g->xTranslation();
     int gTy = g->yTranslation();
 
-    if (!transparent() && (translucent() ==100)) {
+    if (!transparent() && (translucent() ==100) && NWindow::paintFlag) {
       g->setForeground(background());
       geometry()->fill(g,repaintArea);
+      //std::cout << "j:" << name() << std::endl;
     }
     if (transparent() && (translucent()<100))
          g->fillTranslucent(left(),top(),width(),height(),skin_.transColor, translucent());
@@ -131,10 +134,15 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
         g->setTranslation(g->xTranslation()+left()-scrollDx_,g->yTranslation()-scrollDy_+top());
         if (!clip_) g->setRegion(region,true);
     }
-    g->setForeground(foreground());
-    g->setFont(font());
-    paint(g);
-    drawChildren(g,repaintArea);
+
+    if (NWindow::paintFlag) {
+      g->setForeground(foreground());
+      g->setFont(font());
+      paint(g);
+    }
+
+    drawChildren(g,repaintArea,sender);   // the container children will be drawn
+
     g->setTranslation(gTx,gTy);
     if ((skin_.border!=0)) {
         g->setRegion(region, true);
@@ -147,7 +155,7 @@ void NVisualComponent::draw( NGraphics * g, const NRect & repaintArea )
   }
 }
 
-void NVisualComponent::drawChildren( NGraphics * g, const NRect & repaintArea )
+void NVisualComponent::drawChildren( NGraphics * g, const NRect & repaintArea , NVisualComponent* sender )
 {
   if (layout_ == 0) {
     std::vector<NRuntime*>::iterator itr = components.begin();
@@ -156,10 +164,10 @@ void NVisualComponent::drawChildren( NGraphics * g, const NRect & repaintArea )
       if (child->visit(isVisualComponent)) {
        // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
         NVisualComponent* visualChild = (NVisualComponent*) child;
-        visualChild->draw(g,repaintArea);
+        visualChild->draw(g,repaintArea,sender);
       }
     }
-  } else layout_->drawComponents(this,g,repaintArea);
+  } else layout_->drawComponents(this,g,repaintArea,sender);
 }
 
 bool NVisualComponent::visit( NVisitor * v )
@@ -385,7 +393,7 @@ void NVisualComponent::onMove( const NMoveEvent & moveEvent )
 void NVisualComponent::repaint(bool swap )
 {
   NWindow* win = window();
-  if (win != 0) win->repaint(absoluteLeft(),absoluteTop(), width(), height(),swap);
+  if (win != 0) win->repaint(this,absoluteLeft(),absoluteTop(), width(), height(),swap);
 }
 
 void NVisualComponent::setWindow( class NWindow * win )

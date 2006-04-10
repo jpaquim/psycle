@@ -65,8 +65,8 @@ public:
     NGraphics* graphics();
     NGraphics* graphics(NVisualComponent* comp);
 
-    void repaint(int x, int y, int w, int h, bool swap = true);
-    void repaint(const NRect & repaintArea, bool swap = true);
+    void repaint(NVisualComponent* sender, int x, int y, int w, int h  , bool swap = true);
+    void repaint(NVisualComponent* sender, const NRect & repaintArea, bool swap = true);
 
     int width()  const;
     int height() const;
@@ -107,6 +107,8 @@ public:
     void setMoveFocus(NVisualComponent* moveable, int pickPoint);
 
     NVisualComponent* selectedBase() const;
+
+    static bool paintFlag;
 
 private:
 

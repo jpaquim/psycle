@@ -72,7 +72,7 @@ int NListLayout::preferredWidth( const NVisualComponent * target ) const
   return maxX_;
 }
 
-void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, const NRect & repaintArea )
+void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, const NRect & repaintArea,NVisualComponent* sender )
 {
   int start = findVerticalStart(target->scrollDy(), target);
   std::vector<NRuntime*>::iterator itr = target->components.begin() + start;
@@ -81,7 +81,7 @@ void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, cons
       if (child->visit(NVisualComponent::isVisualComponent)) {
        // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
         NVisualComponent* visualChild = static_cast<NVisualComponent*> (child);
-        visualChild->draw(g,repaintArea);
+        visualChild->draw(g,repaintArea,sender);
         if (visualChild->top()+visualChild->height()-target->scrollDy()>target->height()) break;
       }
     }

@@ -260,7 +260,7 @@ void NFlowLayout::setLineBreak( bool on )
 
 
 
-void NFlowLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRect & repaintArea  )
+void NFlowLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRect & repaintArea ,NVisualComponent* sender)
 {
   if (!lineBrk_) {
   std::vector<NRuntime*>::iterator itr = target->components.begin();
@@ -270,12 +270,12 @@ void NFlowLayout::drawComponents( NVisualComponent * target, NGraphics* g, const
       if (child->visit(NVisualComponent::isVisualComponent)) {
        // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
         NVisualComponent* visualChild = (NVisualComponent*) child; i++;
-        visualChild->draw(g,repaintArea);
+        visualChild->draw(g,repaintArea,sender);
         if(visualChild->width()+visualChild->left()>repaintArea.left()+repaintArea.width()) {
         }
       }
     }
-  } else NLayout::drawComponents(target,g,repaintArea);
+  } else NLayout::drawComponents(target,g,repaintArea,sender);
 }
 
 NFlowLayout::NFlowLayout( int align, int hgap, int vgap ) : NLayout()
