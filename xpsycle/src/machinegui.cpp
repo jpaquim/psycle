@@ -156,7 +156,7 @@ void MasterGUI::setSkin( )
   setTransparent(true);
   setHeight(bgCoords.height());
   setWidth(bgCoords.width());
-  setBackground(NColor(0,200,0));
+  setBackground(NColor(0,0,200));
   setTransparent(false);
 }
 
@@ -173,8 +173,6 @@ GeneratorGUI::GeneratorGUI(Machine* mac) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
-  setBackground(NColor(0,0,200));
-  setTransparent(false);
 }
 
 GeneratorGUI::~ GeneratorGUI( )
@@ -219,8 +217,6 @@ EffektGUI::EffektGUI(Machine* mac ) : MachineGUI(mac)
 
   setSkin();
   frameMachine = new FrameMachine(pMac());
-    setBackground(NColor(0,200,200));
-  setTransparent(false);
 }
 
 EffektGUI::~ EffektGUI( )
