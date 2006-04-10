@@ -94,18 +94,18 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     if (transparent() && (translucent()<100))
          g->fillTranslucent(left(),top(),width(),height(),skin_.transColor, translucent());
 
-    if (skin_.gradientStyle == 1) {
+    if (skin_.gradientStyle == 1 && NWindow::paintFlag) {
          g->fillGradient(left(),top(),spacingWidth(),spacingHeight(),
             skin_.gradStartColor,skin_.gradMidColor,skin_.gradEndColor,
             skin_.gradientOrientation,skin_.gradientOrientation);
     } else
-    if (skin_.gradientStyle == 2) {
+    if (skin_.gradientStyle == 2 && NWindow::paintFlag) {
          g->fillRoundGradient(left(),top(),spacingWidth(),spacingHeight(),
             skin_.gradStartColor,skin_.gradMidColor,skin_.gradEndColor,
             skin_.gradientOrientation,skin_.gradientOrientation,skin_.arcWidth,skin_.arcHeight);
     }
 
-    if (skin_.bitmapBgStyle == 1) {
+    if (skin_.bitmapBgStyle == 1 && NWindow::paintFlag) {
       int w = skin_.bitmap.width();
       int h = skin_.bitmap.height();
       for (int yp = 0; yp < spacingHeight(); yp+=h) {
@@ -115,7 +115,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
       }
     } else
 
-    if (skin_.bitmapBgStyle == 2) {
+    if (skin_.bitmapBgStyle == 2 && NWindow::paintFlag) {
 
       int xp =(int)  d2i((spacingWidth()  - skin_.bitmap.width())  / 2.0f);
       int yp = (int) d2i((spacingHeight() - skin_.bitmap.height()) / 2.0f);
