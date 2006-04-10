@@ -20,6 +20,7 @@
 #include "nwindow.h"
 #include "napp.h"
 #include "nconfig.h"
+
 //#include <X11/extensions/Xinerama.h>
 
 NIsWindow* NWindow::isWindow = new NIsWindow();
@@ -123,6 +124,25 @@ void NWindow::repaint( NVisualComponent* sender, const NRect & repaintArea, bool
   graphics_->setRectRegion(repaintArea);
   pane_->draw(graphics_,repaintArea,sender);
   if (dblBuffer_ && swap) graphics()->swap(repaintArea);
+}
+
+void NWindow::repaint( NVisualComponent * sender, const NRegion & repaintArea, bool swap )
+{
+  paintFlag = false;
+
+  if (sender->transparent()) {
+     // find last non transparent ..
+
+     while (sender->transparent() && sender->skin_.gradientStyle==0 && sender !=pane() && sender->parent() != 0) {
+       sender = static_cast<NVisualComponent*> (sender->parent());
+     }
+  }
+
+  if (pane_->width() !=width() || pane_->height() !=height())
+    pane_->setPosition(0,0,width(),height());
+  graphics_->setRegion(repaintArea.xRegion(),true);
+  pane_->draw(graphics_,repaintArea,sender);
+  if (dblBuffer_ && swap) graphics()->swap(repaintArea.rectClipBox());
 }
 
 
@@ -523,6 +543,8 @@ NVisualComponent* NWindow::selectedBase( ) const
 {
   return selectedBase_;
 }
+
+
 
 
 

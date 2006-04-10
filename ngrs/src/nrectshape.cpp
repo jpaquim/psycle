@@ -30,7 +30,7 @@ NRectShape::~NRectShape()
 {
 }
 
-void NRectShape::fill( NGraphics * g, const NRect & repaintArea )
+void NRectShape::fill( NGraphics * g, const NRegion & repaintArea )
 {
   g->fillRect(rectArea().left(),rectArea().top(),rectArea().width(),rectArea().height());
 }

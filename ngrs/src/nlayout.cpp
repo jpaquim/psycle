@@ -48,7 +48,7 @@ class NVisualComponent * NLayout::parent( ) const
 
 
 
-void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRect & repaintArea , NVisualComponent* sender)
+void NLayout::drawComponents( NVisualComponent * target, NGraphics* g, const NRegion & repaintArea , NVisualComponent* sender)
 {
   std::vector<NVisualComponent*>::const_iterator itr = target->visualComponents().begin();
   for (;itr < target->visualComponents().end(); itr++) {

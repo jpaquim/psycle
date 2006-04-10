@@ -24,6 +24,7 @@
 #include "ngraphics.h"
 #include "nsize.h"
 #include "npoint.h"
+#include "nregion.h"
 
 /**
 @author Stefan
@@ -41,7 +42,7 @@ public:
     virtual void setHeight(int height);
     const NRect & rectArea() const;
 
-    virtual void fill(NGraphics* g, const NRect & repaintArea);
+    virtual void fill(NGraphics* g, const NRegion & repaintArea);
     virtual void drawRectPicker(NGraphics* g);
     virtual void drawPicker(NGraphics* g);
     virtual int  overPicker(int x, int y);

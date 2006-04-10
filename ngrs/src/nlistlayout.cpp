@@ -72,7 +72,7 @@ int NListLayout::preferredWidth( const NVisualComponent * target ) const
   return maxX_;
 }
 
-void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, const NRect & repaintArea,NVisualComponent* sender )
+void NListLayout::drawComponents( NVisualComponent * target, NGraphics * g, const NRegion & repaintArea,NVisualComponent* sender )
 {
   int start = findVerticalStart(target->scrollDy(), target);
   std::vector<NRuntime*>::iterator itr = target->components.begin() + start;

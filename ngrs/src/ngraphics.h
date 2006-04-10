@@ -26,6 +26,7 @@
 #include <stack>
 #include "nbitmap.h"
 #include "nfntstring.h"
+#include "nregion.h"
 
 
 /**
@@ -37,8 +38,8 @@ public:
 
     ~NGraphics();
 
-    void setRepaintArea(const NRect & rect);
-    const NRect & repaintArea();
+    void setRepaintArea(const NRegion & rect);
+    const NRegion & repaintArea();
 
     void drawLine(long x,long y,long x1, long y1);
     void drawRect( int x, int y, int width, int height );
@@ -102,7 +103,7 @@ public:
 private:
 
    NColor old;
-   NRect repaintArea_;
+   NRegion repaintArea_;
    NColor oldColor;
    NFont fnt;
    long dx_;

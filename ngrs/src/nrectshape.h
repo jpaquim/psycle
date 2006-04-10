@@ -32,7 +32,7 @@ public:
 
     ~NRectShape();
 
-    virtual void fill(NGraphics* g, const NRect & repaintArea);
+    virtual void fill(NGraphics* g, const NRegion & repaintArea);
     virtual void drawPicker(NGraphics* g);
 
     virtual NPoint pickerAt(int i);
