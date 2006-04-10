@@ -71,7 +71,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
    NRegion region = geometry()->region();             // get component geometry
    region.move(g->xTranslation(),g->yTranslation());  // move offset left , top
 
-   region = region & oldRegion;   // do intersection
+   region = oldRegion & region;   // do intersection
 
    if (!region.isEmpty()) {
 
@@ -82,6 +82,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     if (skin_.bitmapBgStyle!=0) clip_ = true;
 
     if (clip_) g->setClipping(region);    //  setClipping
+    g->setRegion(region);
 
     int gTx = g->xTranslation();          // store old graphics translation
     int gTy = g->yTranslation();
