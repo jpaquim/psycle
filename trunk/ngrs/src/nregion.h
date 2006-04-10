@@ -29,6 +29,7 @@
 class NRegion{
 public:
     NRegion();
+    NRegion(const NRect & rect);
 
     ~NRegion();
 
@@ -40,6 +41,7 @@ public:
     void setRect(const NRect & rect);
     void setPolygon(XPoint*  pts , int size);
     bool isEmpty() const;
+    NRect rectClipBox();
 
     Region xRegion() const;  // warning this pointer can change
 
