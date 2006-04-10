@@ -39,6 +39,8 @@ PatternView::PatternView()
  : NPage()
 {
   setLayout(new NAlignLayout());
+  setName("debug::patview");
+
 
   hBar = new NScrollBar();
     hBar->setOrientation(nHorizontal);
@@ -99,10 +101,10 @@ void PatternView::onHScrollBar( NObject * sender, int pos )
     if (diffX < drawArea->clientWidth()) {
       NRect rect = drawArea->blitMove(diffX,0, drawArea->absoluteSpacingGeometry());
       drawArea->setDx(newPos);
-      window()->repaint(rect);
+      window()->repaint(drawArea,rect);
     } else {
       drawArea->setDx(newPos);
-      drawArea->repaint();
+      drawArea->repaint(drawArea);
     }
   }
 }
@@ -118,10 +120,10 @@ void PatternView::onVScrollBar( NObject * sender, int pos )
        NRect rect = lineNumber_->blitMove(0,diffY,NRect(lineNumber_->absoluteSpacingLeft(),lineNumber_->absoluteSpacingTop()+headerHeight(),lineNumber_->spacingWidth(),lineNumber_->spacingHeight()-headerHeight()));
        lineNumber_->setDy(newPos);
        if (diffY < 0) rect.setHeight(rect.height()+headerHeight());
-       window()->repaint(rect);
+       window()->repaint(lineNumber_,rect);
        rect = drawArea->blitMove(0,diffY,drawArea->absoluteSpacingGeometry());
        drawArea->setDy(newPos);
-       window()->repaint(rect);
+       window()->repaint(drawArea,rect);
     } else {
        lineNumber_->setDy(newPos);
        drawArea->setDy(newPos);
@@ -481,6 +483,7 @@ int PatternView::Header::skinColWidth( )
 
 PatternView::PatternDraw::PatternDraw( PatternView * pPatternView ) : dx_(0),dy_(0),doDrag_(0),doSelect_(0),NPanel()
 {
+  setName("debug::patternDraw");
   pView = pPatternView;
   editPopup_ = new NPopupMenu();
   add(editPopup_);
@@ -779,7 +782,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           if (newTrack < startTrack) {
              pView->hScrBar()->setPos( (newTrack) * pView->colWidth());
           }
-        window()->repaint(repaintTrackArea(pView->cursor().y(),pView->cursor().y(),newTrack,oldTrack));
+        window()->repaint(this,repaintTrackArea(pView->cursor().y(),pView->cursor().y(),newTrack,oldTrack));
         }
     }
     break;
@@ -797,7 +800,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           if (newTrack > startTrack + trackCount -1) {
             pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
           }
-          window()->repaint(repaintTrackArea(pView->cursor().y(),pView->cursor().y(),oldTrack,newTrack));
+          window()->repaint(this,repaintTrackArea(pView->cursor().y(),pView->cursor().y(),oldTrack,newTrack));
         }
      }
      break;
@@ -815,7 +818,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           if (newLine > startLine + lineCount-1) {
             pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
           }
-          window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+          window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
         }
      }
      break;
@@ -832,7 +835,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           if (newLine <= startLine) {
             pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
           }
-          window()->repaint(repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+          window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
         }
      }
      break;
@@ -846,7 +849,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
         if (newLine <= startLine) {
            pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
         }
-        window()->repaint(repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
+        window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
      }
      break;
      case XK_Page_Down:{
@@ -860,7 +863,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
         if (newLine > startLine + lineCount-1) {
            pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
         }
-        window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+        window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
      }
      break;
      default: {
@@ -911,7 +914,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
            if (newLine > startLine + lineCount-1) {
              pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
            }
-           window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+           window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
          } else  {
            int off = (pView->cursor().z()+1) / 2;
            patOffset +=off;
@@ -943,14 +946,13 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
            if (newLine > startLine + lineCount-1) {
              pView->vScrBar()->setPos( (startLine+2) * pView->rowHeight());
            }
-           window()->repaint(repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
+           window()->repaint(this,repaintTrackArea(oldLine,newLine,pView->cursor().x(),pView->cursor().x()));
          }
        }
       }
      }}
      break;
   }
-
 }
 
 void PatternView::PatternDraw::initKeyMap( )
@@ -1018,7 +1020,12 @@ NRect PatternView::PatternDraw::repaintTrackArea( int startLine, int endLine, in
   int left   = startTrack   * pView->colWidth()   + absoluteLeft() - dx_;
   int right  = (endTrack+1) * pView->colWidth()   + absoluteLeft() - dx_;
 
-  return NRect(left,top,right - left,bottom - top);
+  left   = std::max(left,absoluteLeft());
+  top    = std::max(top,absoluteTop());
+  right  = std::max(right,absoluteLeft()+spacingWidth());
+  bottom = std::max(bottom,absoluteTop()+spacingHeight());
+
+  return NRect(left,top,std::max(right - left,0),std::max(0,bottom - top));
 }
 
 int PatternView::cellCount( )
@@ -1062,7 +1069,7 @@ void PatternView::PatternDraw::clearOldSelection( )
 {
   NRect r = repaintTrackArea(selection_.top(),selection_.bottom(),selection_.left(),selection_.right());
   selection_.setSize(0,0,0,0);
-  window()->repaint(r);
+  window()->repaint(this,r);
 }
 
 void PatternView::PatternDraw::onPopupBlockCopy( NButtonEvent * ev )
@@ -1181,7 +1188,7 @@ void PatternView::updatePlayBar(bool followSong)
 
      int oldPlayPos = playPos_;
      playPos_ = Global::pPlayer()->_lineCounter;
-     window()->repaint(drawArea->repaintTrackArea(oldPlayPos,playPos_,startTrack,trackCount+startTrack));
+     window()->repaint(drawArea,drawArea->repaintTrackArea(oldPlayPos,playPos_,startTrack,trackCount+startTrack));
   }
 }
 
@@ -1296,7 +1303,7 @@ void PatternView::PatternDraw::blockTranspose(int trp)
        }
      }
 
-     window()->repaint(repaintTrackArea(selection_.top(),selection_.bottom(),selection_.left(),selection_.right()));
+     window()->repaint(this,repaintTrackArea(selection_.top(),selection_.bottom(),selection_.left(),selection_.right()));
     }
 }
 
@@ -1321,7 +1328,7 @@ void PatternView::noteOffAny()
   entry->_note = 120;
   notetrack[cursor_.x()]=120;
 
-  window()->repaint(drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
+  window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
 }
 
 
@@ -1346,7 +1353,7 @@ void PatternView::clearCursorPos( )
     *(toffset+(cursor().z()+1)/2)= 0; 
   }
 
-  window()->repaint(drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
+  window()->repaint(drawArea,drawArea->repaintTrackArea(cursor().y(),cursor().y(),cursor().x(),cursor().x()));
 }
 
 
@@ -1492,7 +1499,7 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
       // these is totally unoptimized todo repaint only new area
       NSize clipBox = selection_.clipBox(oldSelection_);
       NRect r = repaintTrackArea(clipBox.top(),clipBox.bottom(),clipBox.left(),clipBox.right());
-      window()->repaint(r);
+      window()->repaint(this,r);
       oldSelection_ = selection_;
     }
 }

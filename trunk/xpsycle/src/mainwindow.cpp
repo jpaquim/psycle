@@ -232,6 +232,7 @@ MainWindow::MainWindow()
  : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)
 {
   setPosition(0,0,1024,768);
+  pane()->setName("pane");
 
   setTitle("Psycle Modular Music Creation Studio (nattisoft xport 0.001 port of psycledelcis 1.8.1 Releases with bugfixes)");
   initMenu();
@@ -316,9 +317,9 @@ void MainWindow::initViews( )
   childView_->setTitleBarText();
   sequencerBar_->setPatternView(childView_->patternView());
 
-  octaveCombo_->setIndex(4);
+  //octaveCombo_->setIndex(4);
   childView_->patternView()->setEditOctave(4);
-  trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
+  //trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16
 }
 
 void MainWindow::initBars( )
@@ -674,14 +675,14 @@ void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
      childView_->onFileLoadSong(0);
      progressBar_->setVisible(false);
      updateComboGen();
-     repaint(0,0,width(),height());
+     pane()->repaint();
   } else
   if (itemEv->text()=="Save") {
      usleep(200); // ugly hack but works
      progressBar_->setVisible(true);
      childView_->onFileSaveSong(0);
      progressBar_->setVisible(false);
-     repaint(0,0,width(),height());
+     pane()->repaint();
   } else
   if (itemEv->text()=="Song properties") {
      songpDlg_->setVisible(true);
