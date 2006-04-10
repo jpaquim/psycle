@@ -427,11 +427,11 @@ int PatternView::Header::skinColWidth( )
     /// todo wrap this like patternDraw to start and endline or make new method for compution
 
     int startLine = dy_ / pView->rowHeight();
-    int rDiff   = g->repaintArea().top() - absoluteTop() + pView->headerHeight();
+    int rDiff   = g->repaintArea().rectClipBox().top() - absoluteTop() + pView->headerHeight();
     int offT = rDiff / pView->rowHeight();
     if (offT < 0) offT = 0;
     offT = 0;
-    int offB = (rDiff+g->repaintArea().height()) / pView->rowHeight();
+    int offB = (rDiff+g->repaintArea().rectClipBox().height()) / pView->rowHeight();
     if (offB < 0) offB = 0;
     int count = std::min(clientHeight() / pView->rowHeight(),offB);
 
@@ -552,11 +552,11 @@ void PatternView::PatternDraw::paint( NGraphics * g )
 
   // check for repaintArea
 
-  int startLineOffset = std::max(((g->repaintArea().top() - absoluteTop()) / pView->rowHeight()),(long)0);
-  int endLineOffset   = std::max((clientHeight()-(g->repaintArea().top() + g->repaintArea().height() - absoluteTop())) / pView->rowHeight(),(long)0);
+  int startLineOffset = std::max(((g->repaintArea().rectClipBox().top() - absoluteTop()) / pView->rowHeight()),(long)0);
+  int endLineOffset   = std::max((clientHeight()-(g->repaintArea().rectClipBox().top() + g->repaintArea().rectClipBox().height() - absoluteTop())) / pView->rowHeight(),(long)0);
 
-  int startTrackOffset = std::max((g->repaintArea().left() - absoluteLeft()) / pView->colWidth(),(long)0);
-  int endTrackOffset   = std::max((clientWidth()-(g->repaintArea().left() + g->repaintArea().width() - absoluteLeft())) / pView->colWidth() -1,(long)0);
+  int startTrackOffset = std::max((g->repaintArea().rectClipBox().left() - absoluteLeft()) / pView->colWidth(),(long)0);
+  int endTrackOffset   = std::max((clientWidth()-(g->repaintArea().rectClipBox().left() + g->repaintArea().rectClipBox().width() - absoluteLeft())) / pView->colWidth() -1,(long)0);
 
   startLine  = startLine  + startLineOffset;
   startTrack = startTrack + startTrackOffset;
