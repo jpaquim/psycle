@@ -159,6 +159,18 @@ namespace psycle
 				{
 					class test
 					{
+						typedef node::underlying_type xnode_base;
+						class xnode : public xnode_base
+						{
+							protected: friend class generic_access;
+								xnode(parent_type & parent, underlying_type & underlying) : xnode_base(parent, underlying)
+								{
+									typenames::underlying::underlying::ports::output::create(*this);
+									typenames::underlying::underlying::ports::inputs::single::create(*this);
+									typenames::underlying::underlying::ports::inputs::multiple::create(*this);
+								}
+						};
+						
 						test()
 						{
 						//	typenames::underlying::underlying::graph g;
@@ -174,20 +186,8 @@ namespace psycle
 						//	node                                     nnn(ggg, nn, "n"); // implicit!
 							node                                   & nnn(node::create(ggg, nn, "n")); // implicit!
 							
-							typedef node::underlying_type xnode_base;
-							class xnode : public xnode_base
-							{
-								protected: friend class generic_access;
-									xnode(parent_type & parent, underlying_type & underlying) : xnode_base(parent, underlying)
-									{
-										typenames::underlying::underlying::ports::output::create(*this);
-										typenames::underlying::underlying::ports::inputs::single::create(*this);
-										typenames::underlying::underlying::ports::inputs::multiple::create(*this);
-									}
-							};
-							
 						//	xnode   xx(ggg.underlying(), n);
-							xnode & xx(xnode::create_<xnode, typenames::underlying::graph, node::underlying_type::underlying_type>(ggg.underlying(), n));
+							xnode & xx(xnode::create<xnode>(ggg.underlying(), n));
 						//	node   xxx(ggg, xx, "x"); // implicit!
 							node & xxx(node::create(ggg, xx, "x")); // implicit!
 
