@@ -81,34 +81,6 @@ const NRegion & NRegion::operator =( const NRegion & rhs )
 }
 
 
-NRegion NRegion::operator *( const NRegion & lhs , const NRegion & rhs )
-{
-  NRegion region;
-  XIntersectRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
-  return region;
-}
-
-NRegion NRegion::operator |(const NRegion & lhs, const NRegion & rhs )
-{
-  NRegion region;
-  XUnionRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
-  return region;
-}
-
-NRegion NRegion::operator -(const NRegion & lhs, const NRegion & rhs )
-{
-  NRegion region;
-  XSubtractRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
-  return region;
-}
-
-NRegion NRegion::operator ^( const NRegion & lhs , const NRegion & rhs )
-{
-  NRegion region;
-  XXorRegion(lhs.xRegion(), rhs.xRegion(), region.xRegion());
-  return region;
-}
-
 bool NRegion::isEmpty( ) const
 {
   return XEmptyRegion(region_);

@@ -45,15 +45,40 @@ public:
 
     Region xRegion() const;  // warning this pointer can change
 
-    NRegion operator*(const NRegion & lhs , const NRegion & rhs);
-    NRegion operator|(const NRegion & lhs , const NRegion & rhs);
-    NRegion operator-(const NRegion & lhs , const NRegion & rhs);
-    NRegion operator^(const NRegion & lhs , const NRegion & rhs);
 
 private:
 
     Region region_;
 
 };
+
+inline NRegion operator &( const NRegion & lhs , const NRegion & rhs )
+{
+  NRegion nrv(lhs);
+  XIntersectRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  return nrv;
+}
+
+inline NRegion operator |(const NRegion & lhs, const NRegion & rhs )
+{
+  NRegion nrv(lhs);
+  XUnionRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  return nrv;
+}
+
+inline NRegion operator -(const NRegion & lhs, const NRegion & rhs )
+{
+  NRegion nrv(lhs);
+  XSubtractRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  return nrv;
+}
+
+inline NRegion operator ^( const NRegion & lhs , const NRegion & rhs )
+{
+  NRegion nrv(lhs);
+  XXorRegion(lhs.xRegion(), rhs.xRegion(), nrv.xRegion());
+  return nrv;
+}
+
 
 #endif
