@@ -151,9 +151,10 @@ namespace psycle
 							template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
 							Type static & create_(typename Typenames::graph & graph BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 							{ \
-								Type & instance(*new Type(graph BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra))); \
+								/*Type & instance(*new Type(graph BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra))); \
 								instance.init(); \
-								return instance; \
+								return instance; */\
+								return *reinterpret_cast<Type*>(0); \
 							}
 							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
 						#undef constructor
@@ -172,7 +173,7 @@ namespace psycle
 					template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
 					Type static & create_(typename Typenames::graph & graph BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 					{ \
-						return generic_access::template create_<Type>(graph BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)); \
+						return generic_access::template create_<Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra)>(graph BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)); \
 					}
 					BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
 				#undef constructor
