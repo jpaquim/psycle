@@ -24,6 +24,10 @@ NRegion::NRegion()
   region_ = XCreateRegion();
 }
 
+NRegion::NRegion( const NRect & rect )
+{
+  setRect(rect);
+}
 
 NRegion::~NRegion()
 {
@@ -51,6 +55,7 @@ void NRegion::setRect( const NRect & rect )
 // shouldnt be XPoint
 void NRegion::setPolygon(XPoint*  pts , int size)
 {
+  XDestroyRegion(region_);
   region_ = XPolygonRegion(pts,4,WindingRule);
 }
 
@@ -112,6 +117,15 @@ void NRegion::shrink( int dx, int dy )
 {
   XShrinkRegion(region_, dx, dy);
 }
+
+NRect NRegion::rectClipBox( )
+{
+  XRectangle r;
+  XClipBox(region_, &r);
+  NRect rect(r.x,r.y,r.width,r.height);
+  return rect;
+}
+
 
 
 
