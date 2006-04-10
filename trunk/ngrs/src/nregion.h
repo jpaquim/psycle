@@ -41,7 +41,7 @@ public:
     void setRect(const NRect & rect);
     void setPolygon(XPoint*  pts , int size);
     bool isEmpty() const;
-    NRect rectClipBox() const;
+    const NRect & rectClipBox() const;
 
     Region xRegion() const;  // warning this pointer can change
 
@@ -49,6 +49,8 @@ public:
 private:
 
     Region region_;
+    mutable NRect clipBox;
+    mutable bool update;
 
 };
 

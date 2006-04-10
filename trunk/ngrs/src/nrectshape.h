@@ -38,17 +38,13 @@ public:
     virtual NPoint pickerAt(int i);
     virtual int pickerSize();
 
-    virtual Region region();
-    virtual Region spacingRegion(const NSize & spacing);
-    virtual void destroyRegion();
-    virtual void destroySpacingRegion();
+    virtual NRegion region();
+    virtual NRegion spacingRegion(const NSize & spacing);
 
 
 private:
 
     XRectangle rectangle;
-    Region region_;
-    Region spacingRegion_;
 };
 
 #endif

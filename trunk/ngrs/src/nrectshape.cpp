@@ -22,7 +22,7 @@
 NRectShape::NRectShape()
  : NShape()
 {
-  region_ = 0;
+
 }
 
 
@@ -65,39 +65,20 @@ int NRectShape::pickerSize( )
   return 4;
 }
 
-Region NRectShape::region( )
+NRegion NRectShape::region( )
 {
-  region_ = XCreateRegion();
-  rectangle.x= (short) rectArea().left();
-  rectangle.y= (short) rectArea().top();
-  rectangle.width=(unsigned short)  rectArea().width();
-  rectangle.height=(unsigned short) rectArea().height();
-  XUnionRectWithRegion(&rectangle,region_,region_);
-  return region_;
+  return NRegion(rectArea());
 }
 
-Region NRectShape::spacingRegion( const NSize & spacing )
+NRegion NRectShape::spacingRegion( const NSize & spacing )
 {
-  spacingRegion_ = XCreateRegion();
-  rectangle.x= (short) rectArea().left()+spacing.left();
-  rectangle.y= (short) rectArea().top()+spacing.top();
-  rectangle.width=(unsigned short)  rectArea().width()  - (spacing.left()+spacing.right());
-  rectangle.height=(unsigned short) rectArea().height() - (spacing.top()+spacing.bottom());
-  XUnionRectWithRegion(&rectangle,spacingRegion_,spacingRegion_);
-  return spacingRegion_;
+  return NRegion(NRect(rectArea().left()+ spacing.left(),
+                       rectArea().top() + spacing.top(),
+                       rectArea().width()  - (spacing.right()+spacing.left()),
+                       rectArea().height() - (spacing.top()+spacing.bottom())
+          ));
 }
 
-void NRectShape::destroyRegion( )
-{
-  if (region_!=0) XDestroyRegion(region_);
-  region_ = 0;
-}
-
-void NRectShape::destroySpacingRegion( )
-{
-  if (spacingRegion_!=0) XDestroyRegion(spacingRegion_);
-  spacingRegion_ = 0;
-}
 
 
 

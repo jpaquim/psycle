@@ -124,25 +124,16 @@ void NShape::setPicker( int index, int x, int y )
 {
 }
 
-Region NShape::region( )
+NRegion NShape::region( )
 {
-  return 0;
+  return NRegion();
 }
 
-Region NShape::spacingRegion(const NSize & spacing )
+NRegion NShape::spacingRegion(const NSize & spacing )
 {
-  return 0;
+  return NRegion();
 }
 
-void NShape::destroyRegion( )
-{
-
-}
-
-void NShape::destroySpacingRegion( )
-{
-
-}
 
 
 

@@ -41,6 +41,11 @@ public:
     void setRepaintArea(const NRegion & rect);
     const NRegion & repaintArea();
 
+    void setClipping(const NRegion & region);
+
+    void setRegion(const NRegion & region);
+    NRegion region();
+
     void drawLine(long x,long y,long x1, long y1);
     void drawRect( int x, int y, int width, int height );
     void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight);
@@ -63,12 +68,10 @@ public:
     long xTranslation();
     long yTranslation();
     void setForeground(const NColor & color);
-    void setClipRect(const NRect & rec);
-    Region pushIntersectRegion(Region region);
+
     void setFont(const NFont & font);
     void drawText(int x, int y, const std::string & text);
     void drawText(int x, int y, const NFntString & text);
-    Region region();
     int textWidth(const std::string & text) const;
     int textWidth( const NFntString & text ) const;
     int findWidthMax(long width, const std::string & data, bool wbreak) const;
@@ -79,9 +82,6 @@ public:
 
     void drawPolygon(XPoint* pts, int n);
     void fillPolygon(XPoint* pts, int n);
-    void setRegion(Region region, bool clip);
-    void setRectRegion(const NRect & rect);
-    void setRectRegion(int left, int top, int width, int height);
 
     void fillTranslucent(int x, int y, int width, int height, NColor color, int percent);
 
@@ -128,7 +128,7 @@ private:
    XftColor fFtColor;
    XftDraw* draw;
 
-   Region region_;
+   NRegion region_;
 
 
 };
