@@ -42,11 +42,6 @@ NRegion::~NRegion()
   XDestroyRegion(region_);
 }
 
-Region NRegion::xRegion( ) const
-{
-  return region_;
-}
-
 void NRegion::setRect( const NRect & rect )
 {
   XDestroyRegion(region_);
@@ -114,9 +109,3 @@ const NRect & NRegion::rectClipBox( ) const
   }
   return clipBox;
 }
-
-
-
-
-
-

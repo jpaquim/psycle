@@ -75,25 +75,25 @@ void MachineGUI::attachLine( NLine * line, int point )
 
 }
 
-NRegion MachineGUI::linesClipBox( )
+NRegion MachineGUI::linesRegion( )
 {
   NRegion region(geometry()->rectArea());
 
   for (std::vector<LineAttachment>::iterator itr = attachedLines.begin(); itr < attachedLines.end(); itr++) {
     LineAttachment lineAttach = *itr;
-    region = region | lineAttach.line->geometry()->region();
+    region |= lineAttach.line->geometry()->region();
   }
   return region;
 }
 
 void MachineGUI::onMoveStart( const NMoveEvent & moveEvent )
 {
-  oldDrag = linesClipBox();
+  oldDrag = linesRegion();
 }
 
 void MachineGUI::onMove( const NMoveEvent & moveEvent )
 {
-  NRegion newDrag = linesClipBox();
+  NRegion newDrag = linesRegion();
   NRegion repaintArea = newDrag | oldDrag;
 
   int parentAbsLeft = ((NVisualComponent*) parent())->absoluteLeft() - ((NVisualComponent*) parent())->scrollDx();
