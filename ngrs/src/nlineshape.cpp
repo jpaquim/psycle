@@ -175,7 +175,7 @@ void NLineShape::setPicker( int index, int x, int y )
   }
 }
 
-Region NLineShape::lineToRegion( )
+NRegion NLineShape::lineToRegion( )
 {
    double  ankathede    = (p1().x() - p2().x());
    double  gegenkathede = (p1().y() - p2().y());
@@ -198,7 +198,8 @@ Region NLineShape::lineToRegion( )
    pts[3].x = p1_.x()-dx;
    pts[3].y = p1_.y()+dy;
 
-   Region region = XPolygonRegion(pts,4,WindingRule);
+   NRegion region;
+   region.setPolygon(pts,4);
 
    return region;
 }
@@ -208,29 +209,16 @@ void NLineShape::setClippingDistance( int d )
   distance_ = d;
 }
 
-Region NLineShape::region( )
+NRegion NLineShape::region( )
 {
-  region_ = lineToRegion();
-  return region_;
+  return lineToRegion();
 }
 
-Region NLineShape::spacingRegion( const NSize & spacing )
+NRegion NLineShape::spacingRegion( const NSize & spacing )
 {
-  region_ = lineToRegion();
-  return region_;
+  return lineToRegion();
 }
 
-void NLineShape::destroyRegion( )
-{
-  if (region_!=0) XDestroyRegion(region_);
-  region_ = 0;
-}
-
-void NLineShape::destroySpacingRegion( )
-{
-  if (region_!=0) XDestroyRegion(region_);
-  region_ = 0;
-}
 
 int NLineShape::d2i(double d)
  {

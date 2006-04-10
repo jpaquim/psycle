@@ -144,7 +144,7 @@ void NScrollBar::init( )
      slider_->setSkin(vSlSkin);
   sliderArea_->add(slider_);
 
-  slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit + nMvRepaint));
+  slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit));
 }
 
 void NScrollBar::resize( )
@@ -278,8 +278,8 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
   if (diffY!=0) {
     comp->setScrollDy(dy);
     if ( abs(diffY) > compHeight) { comp->repaint(); } else {
-    g->setRectRegion(NRect(compLeft,compTop, compWidth, compHeight));
-    g->setRegion(g->region(),true);
+    g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+    g->setClipping(g->region());
     if (diffY > 0) {
        g->copyArea(compLeft  , compTop    + diffY, // src_x, sry_y
                  compWidth , compHeight - diffY, // width, height
@@ -302,8 +302,8 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
    if (diffX !=0) {
     comp->setScrollDx(dx);
     if ( abs(diffX) > compWidth) { comp->repaint(); } else {
-    g->setRectRegion(NRect(compLeft,compTop, compWidth, compHeight));
-    g->setRegion(g->region(),true);
+    g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+    g->setClipping(g->region());
     if (diffX > 0) {
        g->copyArea(compLeft  + diffX, compTop, // src_x, sry_y
                  compWidth - diffX, compHeight, // width, height

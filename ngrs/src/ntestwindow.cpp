@@ -59,6 +59,8 @@ NTestWindow::NTestWindow()
 
 
   NListBox* box = new NListBox();
+     for (int i = 0; i < 200; i++)
+       box->add(new NItem("hkjdsahk kjdsh kjdsa"));
   pane()->add(box,nAlClient);
 
  

@@ -37,7 +37,6 @@ NGraphics::NGraphics(Window winID)
   setFont(fnt);
   setForeground(oldColor);
 
-  region_ = 0;
 }
 
 
@@ -128,20 +127,6 @@ void NGraphics::setForeground( const NColor & color )
                else XSetForeground( NApp::system().dpy(), gc_, color.colorValue() );
     oldColor.setRGB(color.red(),color.green(),color.blue());
   }
-}
-
-void NGraphics::setClipRect( const NRect & rec )
-{
-  Region region = XCreateRegion();
-  XRectangle rectangle;
-  rectangle.x= (short) rec.left();
-  rectangle.y= (short) rec.top();
-  rectangle.width=(unsigned short)  rec.width();
-  rectangle.height=(unsigned short) rec.height();
-  XUnionRectWithRegion(&rectangle,region,region);
-  XSetRegion(NApp::system().dpy(), gcp,region);
-  XftDrawSetClip(draw,region);
-  XDestroyRegion(region);
 }
 
 void NGraphics::setFont( const NFont & font )
@@ -236,21 +221,23 @@ void NGraphics::fillPolygon( XPoint * pts, int n )
      XFillPolygon(NApp::system().dpy(),win,gc_,pt,n,Complex,CoordModeOrigin);
 }
 
-Region NGraphics::region( )
+NRegion NGraphics::region( )
 {
   return region_;
 }
 
-void NGraphics::setRegion( Region region, bool clip )
+void NGraphics::setRegion( const NRegion & region )
 {
-  if (clip) {
-    if (dblBuffer_)
-       XSetRegion(NApp::system().dpy(), gcp,region);
-    else
-       XSetRegion(NApp::system().dpy(), gc_,region);
-    XftDrawSetClip(draw,region);
-  }
   region_ = region;
+}
+
+void NGraphics::setClipping( const NRegion & region )
+{
+  if (dblBuffer_)
+    XSetRegion(NApp::system().dpy(), gcp,region.xRegion());
+  else
+    XSetRegion(NApp::system().dpy(), gc_,region.xRegion());
+  XftDrawSetClip(draw,region.xRegion());
 }
 
 void NGraphics::fillTranslucent( int x, int y, int width, int height, NColor color, int percent )
@@ -315,22 +302,6 @@ int NGraphics::textDescent( )
   return 0;
 }
 
-void NGraphics::setRectRegion( int left, int top, int width, int height )
-{
-  if (region_!=0)  XDestroyRegion(region_);
-  region_ = XCreateRegion();
-  XRectangle rectangle;
-  rectangle.x= (short) left;
-  rectangle.y= (short) top;
-  rectangle.width=(unsigned short)  width;
-  rectangle.height=(unsigned short) height;
-  XUnionRectWithRegion(&rectangle,region_,region_);
-}
-
-void NGraphics::setRectRegion( const NRect & rect )
-{
-  setRectRegion(rect.left(),rect.top(),rect.width(),rect.height());
-}
 
 void NGraphics::putBitmap( int x, int y, NBitmap & bitmap )
 {
@@ -843,3 +814,4 @@ int NGraphics::findWidthMax(long width, const NFntString & data, bool wbreak) co
   return Mid;
 
 }
+

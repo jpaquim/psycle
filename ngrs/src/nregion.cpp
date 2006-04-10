@@ -22,6 +22,7 @@
 NRegion::NRegion()
 {
   region_ = XCreateRegion();
+  update = true;
 }
 
 NRegion::NRegion( const NRect & rect )
@@ -33,6 +34,7 @@ NRegion::NRegion( const NRect & rect )
   rectangle.width=(unsigned short)  rect.width();
   rectangle.height=(unsigned short) rect.height();
   XUnionRectWithRegion(&rectangle,region_,region_);
+  update = true;
 }
 
 NRegion::~NRegion()
@@ -55,6 +57,7 @@ void NRegion::setRect( const NRect & rect )
   rectangle.width=(unsigned short)  rect.width();
   rectangle.height=(unsigned short) rect.height();
   XUnionRectWithRegion(&rectangle,region_,region_);
+  update = true;
 }
 
 
@@ -63,6 +66,7 @@ void NRegion::setPolygon(XPoint*  pts , int size)
 {
   XDestroyRegion(region_);
   region_ = XPolygonRegion(pts,4,WindingRule);
+  update = true;
 }
 
 
@@ -70,6 +74,7 @@ NRegion::NRegion( const NRegion & src )
 {
   region_ = XCreateRegion();
   XUnionRegion(region_, src.xRegion(), region_);
+  update = true;
 }
 
 const NRegion & NRegion::operator =( const NRegion & rhs )
@@ -77,6 +82,7 @@ const NRegion & NRegion::operator =( const NRegion & rhs )
   XDestroyRegion(region_);
   region_ = XCreateRegion();
   XUnionRegion(region_, rhs.xRegion(), region_);
+  update = true;
   return *this;
 }
 
@@ -89,19 +95,24 @@ bool NRegion::isEmpty( ) const
 void NRegion::move( int dx, int dy )
 {
   XOffsetRegion(region_, dx, dy);
+  update = true;
 }
 
 void NRegion::shrink( int dx, int dy )
 {
   XShrinkRegion(region_, dx, dy);
+  update = true;
 }
 
-NRect NRegion::rectClipBox( ) const
+const NRect & NRegion::rectClipBox( ) const
 {
-  XRectangle r;
-  XClipBox(region_, &r);
-  NRect rect(r.x,r.y,r.width,r.height);
-  return rect;
+  if (update) {
+    XRectangle r;
+    XClipBox(region_, &r);
+    clipBox.setPosition(r.x,r.y,r.width,r.height);
+    update = false;
+  }
+  return clipBox;
 }
 
 

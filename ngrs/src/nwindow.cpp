@@ -102,8 +102,9 @@ void NWindow::repaint( NVisualComponent* sender, int x, int y, int w, int h , bo
   NRect repaintArea(x,y,w,h);
   if (pane_->width() !=width() || pane_->height() !=height())
     pane_->setPosition(0,0,width(),height());
-  graphics_->setRectRegion(repaintArea);
-  pane_->draw(graphics_,repaintArea,sender);
+  NRegion region(repaintArea);
+  graphics_->setRegion(region);
+  pane_->draw(graphics_,region,sender);
   if (dblBuffer_ && swap) graphics()->swap(repaintArea);
 }
 
@@ -121,8 +122,9 @@ void NWindow::repaint( NVisualComponent* sender, const NRect & repaintArea, bool
 
   if (pane_->width() !=width() || pane_->height() !=height())
     pane_->setPosition(0,0,width(),height());
-  graphics_->setRectRegion(repaintArea);
-  pane_->draw(graphics_,repaintArea,sender);
+  NRegion region(repaintArea);
+  graphics_->setRegion(region);
+  pane_->draw(graphics_,region,sender);
   if (dblBuffer_ && swap) graphics()->swap(repaintArea);
 }
 
@@ -140,7 +142,7 @@ void NWindow::repaint( NVisualComponent * sender, const NRegion & repaintArea, b
 
   if (pane_->width() !=width() || pane_->height() !=height())
     pane_->setPosition(0,0,width(),height());
-  graphics_->setRegion(repaintArea.xRegion(),true);
+  graphics_->setRegion(repaintArea);
   pane_->draw(graphics_,repaintArea,sender);
   if (dblBuffer_ && swap) graphics()->swap(repaintArea.rectClipBox());
 }
@@ -167,7 +169,7 @@ int NWindow::height( ) const
 
 void NWindow::onMousePress( int x, int y, int button )
 {
-  graphics_->setRectRegion(NRect(0,0,width(),height()));
+  graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
   if (obj!=NULL) {
     if (obj!=pane_ && (mapped())) {
@@ -189,7 +191,7 @@ void NWindow::onMousePressed( int x, int y, int button )
 
 void NWindow::onMouseOver( int x, int y )
 {
-  graphics_->setRectRegion(0,0,width(),height());
+  graphics_->setRegion(NRect(0,0,width(),height()));
   if (dragBase_!=NULL) {
     NApp::mouseOverWindow();
     if (dragBase_->moveable().style()!=0) doDrag(dragBase_,x,y);
@@ -262,10 +264,9 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
              dragBase->setTop(dragBaseParent->spacingHeight()-dragBase_->height());
          } else dragBase_->setTop(newTop);
     } else vary=0;
-    //if (dragBase_->moveable().style() & nMvRepaint) {
-       //repaint(0,0,width(),height());
+    if (!(dragBase_->moveable().style() & nMvNoneRepaint)) {
        repaint(pane(),dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
-    //}
+    }
     dragBase->onMove(NMoveEvent());
      }
    }
@@ -332,7 +333,7 @@ void NWindow::dragRectPicker( NVisualComponent * dragBase, int x, int y, int var
                                   dragBase->setLeft(x+dragOffset.left() - dragBaseParent->absoluteSpacingLeft()+dragBaseParent->scrollDx());
                                   break;
      }
-     if (dragBase_->moveable().style() & nMvRepaint) {
+     if (!(dragBase_->moveable().style() & nMvNoneRepaint)) {
         repaint(pane(),dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
      }
    }
@@ -525,16 +526,17 @@ void NWindow::setMoveFocus( NVisualComponent * moveable, int pickPoint )
 
 NGraphics * NWindow::graphics( NVisualComponent * comp )
 {
-  Region region = comp->geometry()->region();
-  XOffsetRegion(region,comp->absoluteLeft()-comp->left(),comp->absoluteTop()-comp->top());
-  graphics_->setRegion(region,true);
+  NRegion region = comp->geometry()->region();
+  region.move(comp->absoluteLeft()-comp->left(),comp->absoluteTop()-comp->top());
+  graphics_->setRegion(region);
+  graphics_->setClipping(region);
   graphics_->setTranslation(comp->absoluteLeft()-comp->scrollDx(),comp->absoluteTop()-comp->scrollDy());
   return graphics_;
 }
 
 void NWindow::onMouseDoublePress( int x, int y, int button )
 {
-  graphics_->setRectRegion(NRect(0,0,width(),height()));
+  graphics_->setRegion(NRect(0,0,width(),height()));
   NVisualComponent* obj = pane()->overObject(graphics(),x,y);
   if (obj) obj->onMouseDoublePress(x - obj->absoluteSpacingLeft(), y - obj->absoluteSpacingTop(), button);
 }

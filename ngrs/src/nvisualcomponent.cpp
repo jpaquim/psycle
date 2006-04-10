@@ -66,18 +66,24 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
   if (visible()) {
    if (sender == this) NWindow::paintFlag = true;
 
-   Region oldRegion = g->region();
-   Region region = geometry()->region();
-   XOffsetRegion(region,g->xTranslation(),g->yTranslation());
-   XIntersectRegion(oldRegion,region,region);
-   if (!XEmptyRegion(region)) {
-    g->setRepaintArea(repaintArea);
+   NRegion oldRegion = g->region();                   // save old region
+
+   NRegion region = geometry()->region();             // get component geometry
+   region.move(g->xTranslation(),g->yTranslation());  // move offset left , top
+
+   region = region & oldRegion;   // do intersection
+
+   if (!region.isEmpty()) {
+
+    g->setRepaintArea(repaintArea);  // set repaintArea to graphics
+
     bool clip_ = !(transparent() && (translucent()==100) && skin_.gradientStyle == 0 );
+
     if (skin_.bitmapBgStyle!=0) clip_ = true;
 
-    g->setRegion(region, clip_);
+    if (clip_) g->setClipping(region);    //  setClipping
 
-    int gTx = g->xTranslation();
+    int gTx = g->xTranslation();          // store old graphics translation
     int gTy = g->yTranslation();
 
     if (!transparent() && (translucent() ==100) && NWindow::paintFlag) {
@@ -122,17 +128,23 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
     bool spacingClip_ = (!(spacing().left() == 0 && spacing().top() ==0 && spacing().bottom()==0 && spacing().right() == 0 && borderTop()==0 && borderLeft()==0 && borderBottom()==0 && borderRight()==0));
 
     if (spacingClip_) {
-       Region spacingRegion = geometry()->spacingRegion(NSize(spacing().left()+borderLeft(),spacing().top()+borderTop(),spacing().right()+borderRight(),spacing().bottom()+borderBottom()));
+       NRegion spacingRegion = geometry()->spacingRegion(NSize(spacing().left()+borderLeft(),spacing().top()+borderTop(),spacing().right()+borderRight(),spacing().bottom()+borderBottom()));
 
-       XOffsetRegion(spacingRegion,g->xTranslation(),g->yTranslation());
-       XIntersectRegion(region,spacingRegion,spacingRegion);
+
+       spacingRegion.move(g->xTranslation(),g->yTranslation());
+       spacingRegion = region & spacingRegion;
 
        g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
 
-       g->setRegion(spacingRegion, true);
+       g->setClipping(spacingRegion);
+       g->setRegion(spacingRegion);
+
     } else {
         g->setTranslation(g->xTranslation()+left()-scrollDx_,g->yTranslation()-scrollDy_+top());
-        if (!clip_) g->setRegion(region,true);
+        if (!clip_) {
+          g->setRegion(region);
+          g->setClipping(region);
+        }
     }
 
     if (NWindow::paintFlag) {
@@ -143,14 +155,13 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
 
     drawChildren(g,repaintArea,sender);   // the container children will be drawn
 
-    g->setTranslation(gTx,gTy);
+    g->setTranslation(gTx,gTy);           // set back to old translation
     if ((skin_.border!=0)) {
-        g->setRegion(region, true);
+        g->setClipping(region);
         skin_.border->paint(g,*geometry());
     }
-    g->setRegion(oldRegion, false);
-    geometry()->destroyRegion();
-    if (spacingClip_) geometry()->destroySpacingRegion();
+    g->setRegion(oldRegion);              // restore old region
+
    }
   }
 }
@@ -229,15 +240,15 @@ const NFont & NVisualComponent::font( ) const
 
 NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long absY )
 {
-  Region oldRegion = g->region();
-  Region region = geometry()->region();
-  XOffsetRegion(region,g->xTranslation(),g->yTranslation());
-  XIntersectRegion(oldRegion,region,region);
+  NRegion oldRegion = g->region();        // save old region
+  NRegion region = geometry()->region();  // get component geometry
+  region.move(g->xTranslation(),g->yTranslation());
+  region = oldRegion & region;            // intersection
 
   g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
 
-  if (!XEmptyRegion(region) && XPointInRegion(region,absX,absY) && events()) {
-       g->setRegion(region, false);
+  if (!region.isEmpty() && XPointInRegion(region.xRegion(),absX,absY) && events()) {
+       g->setRegion(region);
        if (visualComponents_.size()>0)
          for( vector<NVisualComponent*>::iterator itr = visualComponents_.end()-1; itr >= visualComponents_.begin(); itr--) {
             NVisualComponent* visualChild = *itr;
@@ -245,20 +256,19 @@ NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long a
               NVisualComponent* found = visualChild->overObject(g,absX, absY);
               if (found!=NULL) {
                      g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-                    g->setRegion(oldRegion, false);
-                    geometry()->destroyRegion();
+                    g->setRegion(oldRegion);
                    return found;
              }
             }
           }
            g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-          g->setRegion(oldRegion, false);
-          geometry()->destroyRegion();
+          g->setRegion(oldRegion);
+
          return this;
   }
     g->setTranslation(g->xTranslation()-left()-spacing().left()-borderLeft()+scrollDx_,g->yTranslation()-top()+scrollDy_-spacing().top()-borderTop());
-  g->setRegion(oldRegion, false);
-  geometry()->destroyRegion();
+  g->setRegion(oldRegion);
+
   return NULL;
 }
 
@@ -601,7 +611,6 @@ NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area)
    int compWidth  = area.width();
    int compHeight = area.height();
 
-   NRect repaintArea();
    NRect rect;
 
    NWindow* win = comp->window();
@@ -609,8 +618,8 @@ NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area)
 
    if (dy !=0) {
     int diffY = dy;
-    g->setRectRegion(NRect(compLeft,compTop, compWidth, compHeight));
-    g->setRegion(g->region(),true);
+    g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+    g->setClipping(g->region());
     if (diffY > 0) {
        g->copyArea(compLeft  , compTop    + diffY, // src_x, sry_y
                  compWidth , compHeight - diffY, // width, height
@@ -630,8 +639,8 @@ NRect NVisualComponent::blitMove(int dx, int dy, const NRect & area)
 
    if (dx !=0) {
     int diffX = dx;
-    g->setRectRegion(NRect(compLeft,compTop, compWidth, compHeight));
-    g->setRegion(g->region(),true);
+    g->setRegion(NRect(compLeft,compTop, compWidth, compHeight));
+    g->setClipping(g->region());
     if (diffX > 0) {
        g->copyArea(compLeft  + diffX, compTop, // src_x, sry_y
                  compWidth - diffX, compHeight, // width, height

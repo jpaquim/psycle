@@ -50,11 +50,8 @@ public:
     virtual int overPicker(int x, int y);
     virtual void setPicker(int index, int x, int y);
 
-    virtual Region region();
-    virtual Region spacingRegion(const NSize & spacing);
-
-    virtual void destroyRegion();
-    virtual void destroySpacingRegion();
+    virtual NRegion region();
+    virtual NRegion spacingRegion(const NSize & spacing);
 
     int d2i(double d);
 
@@ -70,7 +67,7 @@ private:
    int pickWidth_ ;
    int pickHeight_;
 
-   Region lineToRegion();
+   NRegion lineToRegion();
 
    int distance_;
 

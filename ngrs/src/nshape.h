@@ -56,11 +56,9 @@ public:
     virtual int pickerSize();
     virtual void setPicker(int index, int x, int y);
 
-    virtual Region region();
-    virtual Region spacingRegion(const NSize & spacing);
+    virtual NRegion region();
+    virtual NRegion spacingRegion(const NSize & spacing);
 
-    virtual void destroyRegion();
-    virtual void destroySpacingRegion();
 
 private:
 
