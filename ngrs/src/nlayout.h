@@ -47,7 +47,7 @@ public:
     void setParent(class NVisualComponent* parent);
     class NVisualComponent* parent() const;
 
-    virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRect & repaintArea);
+    virtual void drawComponents(class NVisualComponent* target, NGraphics* g , const NRect & repaintArea, NVisualComponent* sender);
 
 private:
 

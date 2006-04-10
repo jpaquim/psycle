@@ -23,6 +23,7 @@
 //#include <X11/extensions/Xinerama.h>
 
 NIsWindow* NWindow::isWindow = new NIsWindow();
+bool NWindow::paintFlag = true;
 
 NWindow::NWindow()
  : NVisual()
@@ -57,7 +58,7 @@ void NWindow::setVisible( bool on )
   NVisual::setVisible(on);
   if (on) {
       pane_->resize();
-      repaint(0,0,width(),height());
+      repaint(pane(),0,0,width(),height());
       if (modal_) {
          //NApp::system().setStayAbove(win());
          XMapWindow(NApp::system().dpy(),win_);
@@ -87,21 +88,40 @@ NPanel * NWindow::pane( )
   return pane_;
 }
 
-void NWindow::repaint( int x, int y, int w, int h , bool swap)
+void NWindow::repaint( NVisualComponent* sender, int x, int y, int w, int h , bool swap)
 {
+  paintFlag = false;
+
+  if (sender->transparent()) {
+     while (sender->transparent() && sender->skin_.gradientStyle==0 && sender !=pane() && sender->parent()!=0 ) {
+       sender = static_cast<NVisualComponent*> (sender->parent());
+     }
+  }
+
   NRect repaintArea(x,y,w,h);
   if (pane_->width() !=width() || pane_->height() !=height())
     pane_->setPosition(0,0,width(),height());
   graphics_->setRectRegion(repaintArea);
-  pane_->draw(graphics_,repaintArea);
+  pane_->draw(graphics_,repaintArea,sender);
   if (dblBuffer_ && swap) graphics()->swap(repaintArea);
 }
 
-void NWindow::repaint( const NRect & repaintArea, bool swap  )
+void NWindow::repaint( NVisualComponent* sender, const NRect & repaintArea, bool swap  )
 {
-  if (pane_->width() !=width() || pane_->height() !=height()) pane_->setPosition(0,0,width(),height());
+  paintFlag = false;
+
+  if (sender->transparent()) {
+     // find last non transparent ..
+
+     while (sender->transparent() && sender->skin_.gradientStyle==0 && sender !=pane() && sender->parent() != 0) {
+       sender = static_cast<NVisualComponent*> (sender->parent());
+     }
+  }
+
+  if (pane_->width() !=width() || pane_->height() !=height())
+    pane_->setPosition(0,0,width(),height());
   graphics_->setRectRegion(repaintArea);
-  pane_->draw(graphics_,repaintArea);
+  pane_->draw(graphics_,repaintArea,sender);
   if (dblBuffer_ && swap) graphics()->swap(repaintArea);
 }
 
@@ -200,7 +220,7 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
 
      if (dragPoint != -1) {
          dragBase_->geometry()->setPicker(dragPoint, x - dragBaseParent->absoluteSpacingLeft() + dragBaseParent->scrollDx(), y - dragBaseParent->absoluteSpacingTop() + dragBaseParent->scrollDy());
-         repaint(dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
+         repaint(pane(),dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
      } else {
 
      if (dragBase->moveable().style() & nMvHorizontal)  {
@@ -224,7 +244,7 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
     } else vary=0;
     //if (dragBase_->moveable().style() & nMvRepaint) {
        //repaint(0,0,width(),height());
-       repaint(dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
+       repaint(pane(),dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
     //}
     dragBase->onMove(NMoveEvent());
      }
@@ -293,7 +313,7 @@ void NWindow::dragRectPicker( NVisualComponent * dragBase, int x, int y, int var
                                   break;
      }
      if (dragBase_->moveable().style() & nMvRepaint) {
-        repaint(dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
+        repaint(pane(),dragBase->absoluteLeft()-varx,dragBase->absoluteTop()-vary,dragBase->width()+2*varx,dragBase->height()+2*vary);
      }
    }
 }

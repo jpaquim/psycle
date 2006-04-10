@@ -124,7 +124,7 @@ void NApp::eventLoop( )
           for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
              NWindow* win = *it;
              win->graphics()->resize(win->width(),win->height());
-             win->repaint(0,0,win->width(),win->height());
+             win->repaint(win->pane(),0,0,win->width(),win->height());
           }
           repaintWin_.clear();
        }
@@ -179,7 +179,7 @@ void NApp::modalEventLoop( )
           for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
              NWindow* win = *it;
              win->graphics()->resize(win->width(),win->height());
-             win->repaint(0,0,win->width(),win->height());
+             win->repaint(win->pane(),0,0,win->width(),win->height());
           }
           repaintWin_.clear();
        }
@@ -368,7 +368,7 @@ void NApp::setSplashScreen(NSplashScreen * splashScreen )
   if (splashScreen_!=0) {
      NApp::system().mapWindow(splashScreen_->win());
      splashScreen_->graphics()->resize(splashScreen_->width(),splashScreen_->height());
-     splashScreen_->repaint(0,0,splashScreen_->width(),splashScreen_->height());
+     splashScreen_->repaint(splashScreen->pane(),0,0,splashScreen_->width(),splashScreen_->height());
      splashScreen_->graphics()->swap(NRect(0,0,splashScreen_->width(),splashScreen_->height()));
   }
 }
@@ -410,7 +410,7 @@ void NApp::clearEventQueue( )
           for (std::vector<NWindow*>::iterator it = repaintWin_.begin(); it < repaintWin_.end(); it++) {
              NWindow* win = *it;
              win->graphics()->resize(win->width(),win->height());
-             win->repaint(0,0,win->width(),win->height());
+             win->repaint(win->pane(),0,0,win->width(),win->height());
           }
           repaintWin_.clear();
        }
