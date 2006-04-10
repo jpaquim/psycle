@@ -48,6 +48,8 @@ namespace psycle
 							ports::inputs::single & sip(ports::inputs::single::create(n));
 							//ports::inputs::multiple mip(n);
 							ports::inputs::multiple & mip(ports::inputs::multiple::create(n));
+
+							delete &g; delete &n; delete &op; delete &sip; delete &mip;
 						}
 					};
 				}
@@ -92,6 +94,8 @@ namespace psycle
 							node::underlying_type & n(node::underlying_type::create(g));
 							//node nn(gg, n); // implicit!
 							node & nn(node::create(gg, n)); // implicit!
+
+							delete &g; delete &gg; delete &n; delete &nn;
 						}
 					};
 				}
@@ -173,7 +177,7 @@ namespace psycle
 							typedef node::underlying_type xnode_base;
 							class xnode : public xnode_base
 							{
-								protected:
+								protected: friend class generic_access;
 									xnode(parent_type & parent, underlying_type & underlying) : xnode_base(parent, underlying)
 									{
 										typenames::underlying::underlying::ports::output::create(*this);
@@ -183,9 +187,11 @@ namespace psycle
 							};
 							
 						//	xnode   xx(ggg.underlying(), n);
-							xnode & xx(xnode::create_<xnode>(ggg.underlying(), n));
+							xnode & xx(xnode::create_<xnode, typenames::underlying::graph, node::underlying_type::underlying_type>(ggg.underlying(), n));
 						//	node   xxx(ggg, xx, "x"); // implicit!
 							node & xxx(node::create(ggg, xx, "x")); // implicit!
+
+							delete &g; delete &gg; delete &ggg; delete &n; delete &nn; delete &nnn; delete &xx; delete &xxx;
 						}
 					};
 				}
