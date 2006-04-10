@@ -71,7 +71,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
    NRegion region = geometry()->region();             // get component geometry
    region.move(g->xTranslation(),g->yTranslation());  // move offset left , top
 
-   region = oldRegion & region;   // do intersection
+   region &= oldRegion;   // do intersection
 
    if (!region.isEmpty()) {
 
