@@ -67,8 +67,8 @@ private:
     static int c;
     NBorder* myBorder_;
 
-    NSize oldDrag;
-    NSize linesClipBox();
+    NRegion oldDrag;
+    NRegion linesClipBox();
 
     Machine* mac_;
     std::vector<LineAttachment> attachedLines;

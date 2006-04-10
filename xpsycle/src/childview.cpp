@@ -70,7 +70,7 @@ ChildView::ChildView()
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(10);
-  timer.enableTimer();
+  //timer.enableTimer();
 }
 
 
