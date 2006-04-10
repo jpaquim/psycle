@@ -96,8 +96,8 @@ void MachineGUI::onMove( const NMoveEvent & moveEvent )
   NRegion newDrag = linesClipBox();
   NRegion repaintArea = newDrag | oldDrag;
 
-  int parentAbsLeft = ((NVisualComponent*) parent())->absoluteLeft();
-  int parentAbsTop  = ((NVisualComponent*) parent())->absoluteTop();
+  int parentAbsLeft = ((NVisualComponent*) parent())->absoluteLeft() - ((NVisualComponent*) parent())->scrollDx();
+  int parentAbsTop  = ((NVisualComponent*) parent())->absoluteTop() - ((NVisualComponent*) parent())->scrollDy();;
 
   repaintArea.move(parentAbsLeft, parentAbsTop);
 
