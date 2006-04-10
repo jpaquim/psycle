@@ -552,6 +552,7 @@ void PatternView::PatternDraw::paint( NGraphics * g )
 
   // check for repaintArea
 
+
   int startLineOffset = std::max(((g->repaintArea().rectClipBox().top() - absoluteTop()) / pView->rowHeight()),(long)0);
   int endLineOffset   = std::max((clientHeight()-(g->repaintArea().rectClipBox().top() + g->repaintArea().rectClipBox().height() - absoluteTop())) / pView->rowHeight(),(long)0);
 
@@ -1020,12 +1021,7 @@ NRect PatternView::PatternDraw::repaintTrackArea( int startLine, int endLine, in
   int left   = startTrack   * pView->colWidth()   + absoluteLeft() - dx_;
   int right  = (endTrack+1) * pView->colWidth()   + absoluteLeft() - dx_;
 
-  left   = std::max(left,absoluteLeft());
-  top    = std::max(top,absoluteTop());
-  right  = std::max(right,absoluteLeft()+spacingWidth());
-  bottom = std::max(bottom,absoluteTop()+spacingHeight());
-
-  return NRect(left,top,std::max(right - left,0),std::max(0,bottom - top));
+  return NRect(left,top,right - left,bottom - top);
 }
 
 int PatternView::cellCount( )
