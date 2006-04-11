@@ -2329,7 +2329,7 @@ namespace psycle
 
 			if (!_mute)
 			{
-				int _songtracks = Global::_pSong->SongTracks();
+				int _songtracks = Global::_pSong->tracks();
 				int ns = numSamples;
 				int nextevent;
 

@@ -637,9 +637,6 @@ namespace psycle
 						pMachine = p = new Plugin(index);
 						if(!p->LoadDll(dllName))
 						{
-							char sError[MAX_PATH + 100];
-							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
-							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -657,9 +654,6 @@ namespace psycle
 						pMachine = p = new vst::instrument(index);
 						if(!p->LoadDll(dllName))
 						{
-							char sError[MAX_PATH + 100];
-							sprintf(sError,"Replacing VST Generator plug-in \"%s\" with Dummy.",dllName);
-							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -677,9 +671,6 @@ namespace psycle
 						pMachine = p = new vst::fx(index);
 						if(!p->LoadDll(dllName))
 						{
-							char sError[MAX_PATH + 100];
-							sprintf(sError,"Replacing VST Effect plug-in \"%s\" with Dummy.",dllName);
-							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
 							type = MACH_DUMMY;
 							delete p;
@@ -711,20 +702,23 @@ namespace psycle
 				pFile->Read(&pMachine->_connection[i],sizeof(pMachine->_connection[i]));      // Outgoing connections activated
 				pFile->Read(&pMachine->_inputCon[i],sizeof(pMachine->_inputCon[i]));		// Incoming connections activated
 			}
-			pFile->ReadString(pMachine->_editName,32);
+			///\todo hardcoded limits and wastes
+			pFile->ReadString(pMachine->_editName,32); // whoa, it's null-terminated but we always save 32 chars?
 			if(bDeleted)
 			{
-				char buf[34];
+				char buf[2 + sizeof pMachine->_editName]; // it's because of the "X " below, but then we possibly truncate the machine name
 				sprintf(buf,"X %s",pMachine->_editName);
-				buf[31]=0;
+				buf[- 1 +  + sizeof pMachine->_editName]=0; // great, see above
 				strcpy(pMachine->_editName,buf);
 			}
 			if(!fullopen) return pMachine;
 			if(!pMachine->LoadSpecificChunk(pFile,version))
 			{
-				char sError[MAX_PATH + 100];
-				sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
-				MessageBox(NULL,sError, "Loading Error", MB_OK);
+				{
+					std::ostringstream s;
+					s << "Missing or Corrupted Machine Specific Chunk " << dllName << std::endl << "Replacing with Dummy.";
+					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+				}
 				Machine* p = new Dummy(index);
 				p->Init();
 				p->_type=MACH_DUMMY;

@@ -513,7 +513,7 @@ namespace psycle
 
 		void Song::DeleteAllPatterns()
 		{
-			SONGTRACKS = 16;
+			tracks(16);
 			for(int i=0; i<MAX_PATTERNS; i++) RemovePattern(i);
 		}
 
@@ -546,7 +546,7 @@ namespace psycle
 				if( patternLines[pattern] > lines ) 
 				{
 					step= (float)patternLines[pattern]/lines;
-					for(int t=0;t<SONGTRACKS;t++)
+					for(int t=0;t<tracks();t++)
 					{
 						toffset=_ptrack(pattern,t);
 						int l;
@@ -567,7 +567,7 @@ namespace psycle
 				{
 					step= (float)lines/patternLines[pattern];
 					int nl= patternLines[pattern];
-					for(int t=0;t<SONGTRACKS;t++)
+					for(int t=0;t<tracks();t++)
 					{
 						toffset=_ptrack(pattern,t);
 						for(int l=nl-1;l>0;l--)
@@ -590,7 +590,7 @@ namespace psycle
 				while(l < lines)
 				{
 					// This wouldn't be necessary if we really allocate a new pattern.
-					for(int t(0) ; t < SONGTRACKS ; ++t)
+					for(int t(0) ; t < tracks() ; ++t)
 					{
 						toffset=_ptrackline(pattern,t,l);
 						memcpy(toffset,&blank,EVENT_SIZE);
@@ -955,9 +955,10 @@ namespace psycle
 
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
+				loggers::trace("file header: PSY3SONG");
 				CProgressDialog Progress;
 				Progress.Create();
-				Progress.SetWindowText("Loading...");
+				Progress.SetWindowText("Loading... psycle song fileformat version 3...");
 				Progress.ShowWindow(SW_SHOW);
 				std::uint32_t version = 0;
 				std::uint32_t size = 0;
@@ -991,6 +992,8 @@ namespace psycle
 				DeleteInstruments();
 				DeleteAllPatterns();
 				Reset(); //added by sampler mainly to reset current pattern showed.
+				bool zero_size_foreign_chunk(false);
+				/* chunk_loop: */
 				while(pFile->Read(&Header, 4))
 				{
 					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
@@ -998,6 +1001,8 @@ namespace psycle
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
 					{
+						loggers::trace("chunk: INFO");
+						Progress.SetWindowText("Loading... fileformat version information...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1016,6 +1021,8 @@ namespace psycle
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
 					{
+						loggers::trace("chunk: SNGI");
+						Progress.SetWindowText("Loading... authorship information...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1033,7 +1040,7 @@ namespace psycle
 
 							// # of tracks for whole song
 							pFile->Read(temp);
-							SONGTRACKS = temp;
+							tracks(temp);
 							// bpm
 							pFile->Read(temp);
 							m_BeatsPerMin = temp;
@@ -1061,7 +1068,7 @@ namespace psycle
 							// sequence width, for multipattern
 							pFile->Read(temp);
 							_trackArmedCount = 0;
-							for(int i(0) ; i < SONGTRACKS; ++i)
+							for(int i(0) ; i < tracks(); ++i)
 							{
 								pFile->Read(_trackMuted[i]);
 								// remember to count them
@@ -1073,6 +1080,8 @@ namespace psycle
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
 					{
+						loggers::trace("chunk: SEQD");
+						Progress.SetWindowText("Loading... sequence...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1109,6 +1118,8 @@ namespace psycle
 					}
 					else if(std::strcmp(Header,"PATD") == 0)
 					{
+						loggers::trace("chunk: PATD");
+						Progress.SetWindowText("Loading... patterns...");
 						--chunkcount;
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1141,8 +1152,8 @@ namespace psycle
 								for(int y(0) ; y < patternLines[index] ; ++y)
 								{
 									unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
-									std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
-									pSource += SONGTRACKS * EVENT_SIZE;
+									std::memcpy(pData, pSource, tracks() * EVENT_SIZE);
+									pSource += tracks() * EVENT_SIZE;
 								}
 								zapArray(pDest);
 							}
@@ -1155,6 +1166,8 @@ namespace psycle
 					}
 					else if(std::strcmp(Header,"MACD") == 0)
 					{
+						loggers::trace("chunk: MACD");
+						Progress.SetWindowText("Loading... machines...");
 						int curpos(0);
 						pFile->Read(version);
 						pFile->Read(size);
@@ -1189,6 +1202,8 @@ namespace psycle
 					}
 					else if(std::strcmp(Header,"INSD") == 0)
 					{
+						loggers::trace("chunk: INSD");
+						Progress.SetWindowText("Loading... instruments...");
 						pFile->Read(version);
 						pFile->Read(size);
 						--chunkcount;
@@ -1214,12 +1229,33 @@ namespace psycle
 					}
 					else 
 					{
-						loggers::warning("foreign chunk found. skipping it.");
+						if(!zero_size_foreign_chunk)
+						{
+							loggers::warning("foreign chunk found. skipping it.");
+							Progress.SetWindowText("Loading... foreign chunk found. skipping it...");
+						}
 						pFile->Read(version);
 						pFile->Read(size);
-						pFile->Skip(size);
+						if(size)
+						{
+							std::ostringstream s;
+							s << "foreign chunk: version: " << version << ", size: " << size;
+							loggers::trace(s.str());
+						}
+						else if(!zero_size_foreign_chunk)
+						{
+							loggers::warning("foreign chunk: size is zero. supressing messages until non zero-sized chunk is found.");
+						}
+						zero_size_foreign_chunk = !size;
+						if(pFile->Skip(size) < 0)
+						{
+							loggers::exception("foreign chunk is actually random/corrupted data. not reading further data.");
+							//break chunk_loop;
+							goto quit_chunk_loop;
+						}
 					}
 				}
+				quit_chunk_loop:
 				// now that we have loaded all the modules, time to prepare them.
 				Progress.m_Progress.SetPos(16384);
 				::Sleep(1); ///< ???
@@ -1291,18 +1327,19 @@ namespace psycle
 					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
 					if(chunkcount) s << "some chunks were missing in the file";
 					else s << "could not close the file";
-					MessageBox(0, s.str().c_str(), "File Error!!!", 0);
+					MessageBox(0, s.str().c_str(), "Loading Error", 0);
 					return false;
 				}
 				return true;
 			}
 			else if(std::strcmp(Header, "PSY2SONG") == 0)
 			{
+				loggers::trace("chunk: PSY2SONG");
 				return LoadOldFileFormat(pFile, fullopen);
 			}
 
 			// load did not work
-			MessageBox(NULL,"Incorrect file format","Error",MB_OK);
+			MessageBox(0, "Incorrect file format", "Loading Error", MB_ICONERROR | MB_OK);
 			return false;
 		}
 
@@ -1412,12 +1449,12 @@ namespace psycle
 						version = CURRENT_FILE_VERSION_SNGI;
 						pFile->Write(version);
 
-						size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
+						size = (11*sizeof(temp))+(tracks()*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
 						pFile->Write(size);
 					}
 					// chunk data
 					{
-						temp = SONGTRACKS;     pFile->Write(temp);
+						temp = tracks();     pFile->Write(temp);
 						temp = m_BeatsPerMin;  pFile->Write(temp);
 						temp = m_LinesPerBeat; pFile->Write(temp);
 						temp = currentOctave;  pFile->Write(temp);
@@ -1432,7 +1469,7 @@ namespace psycle
 
 						temp = 1;  pFile->Write(temp); // sequence width
 
-						for(unsigned int i = 0; i < SONGTRACKS; i++)
+						for(unsigned int i = 0; i < tracks(); i++)
 						{
 							pFile->Write(_trackMuted[i]);
 							pFile->Write(_trackArmed[i]); // remember to count them
@@ -1499,17 +1536,17 @@ namespace psycle
 					{
 						// ok save it
 
-						unsigned char * pSource = new unsigned char[SONGTRACKS*patternLines[index]*EVENT_SIZE];
+						unsigned char * pSource = new unsigned char[tracks()*patternLines[index]*EVENT_SIZE];
 						unsigned char * pCopy = pSource;
 
 						for (int y = 0; y < patternLines[index]; y++)
 						{
 							unsigned char * pData = ppPatternData[index]+(y*MULTIPLY);
-							std::memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
-							pCopy+=EVENT_SIZE*SONGTRACKS;
+							std::memcpy(pCopy,pData,EVENT_SIZE*tracks());
+							pCopy+=EVENT_SIZE*tracks();
 						}
 						
-						std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[index]*EVENT_SIZE);
+						std::uint32_t sizez77 = BEERZ77Comp2(pSource, &pCopy, tracks()*patternLines[index]*EVENT_SIZE);
 						delete[] pSource;
 
 						// chunk header
@@ -1526,7 +1563,7 @@ namespace psycle
 						{
 							pFile->Write(index);
 							temp = patternLines[index]; pFile->Write(temp);
-							temp = SONGTRACKS; pFile->Write(temp); // eventually this may be variable per pattern
+							temp = tracks(); pFile->Write(temp); // eventually this may be variable per pattern
 
 							pFile->Write(&patternName[index],strlen(patternName[index])+1);
 

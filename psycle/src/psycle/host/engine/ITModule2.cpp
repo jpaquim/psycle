@@ -283,7 +283,7 @@ Special:  Bit 0: On = song message attached.
 					LoadITPattern(i,numchans);
 				}
 			}
-			song->SONGTRACKS=max(numchans+1,4);
+			song->tracks(max(numchans+1,4));
 
 			delete[] pointersi;
 			delete[] pointerss;
@@ -1171,7 +1171,7 @@ Special:  Bit 0: On = song message attached.
 					; //  Disable channel.
 				}
 			}
-			s->SONGTRACKS=max(numchans,4);
+			s->tracks(max(numchans,4));
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )

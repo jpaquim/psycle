@@ -6,39 +6,50 @@
 
 //namespace psycle
 //{
+	/// machine interface version
 	int const MI_VERSION = 11;
-	int const SEQUENCER = 1;
-	int const EFFECT = 0;
-	int const GENERATOR = 3;
-	int const NOTE_MAX = 119;
-	int const NOTE_NO = 120;
-	int const NOTE_OFF = 255;
-	int const USEGUI = 16;
-	int const CUSTOMGUI = 16;
 
+	///\todo ???
+	int const SEQUENCER = 1;
+
+	///\name note values
+	///\{
+		int const NOTE_MAX = 119;
+		int const NOTE_NO = 120;
+		int const NOTE_OFF = 255;
+	///\}
+
+	/// ...
 	#if !defined MAX_TRACKS
 		#define MAX_TRACKS 64
 	#endif
 
 	// <Sartorius> Druttis's plugins
-	#ifndef PI
-		double const PI = 3.14159265358979323846;
+	#if !defined PI
+		double const PI = 
+			#if defined M_PI
+				M_PI
+			#else
+				3.14159265358979323846
+			#endif
+		;
 	#endif
 
 	/// in number of samples (per channel).
+	///\todo more explanations welcome... is it the max value that can be requested in the Work() function?
 	int const MAX_BUFFER_LENGTH = 256;
-
-	/// CMachineParameter flags.
-	int const MPF_LABEL = 0;
-
-	/// CMachineParameter flags.
-	int const MPF_STATE = 2;
 
 	///\todo use #include <cstdint> for that!
 	typedef /* std::uint8_t  */ unsigned char      uint8;
 	typedef /* std::uint16_t */ unsigned short int uint16;
 	typedef /* std::uint32_t */ unsigned long int  uint32;
 //}
+
+///\name CMachineParameter flags.
+///\{
+	int const MPF_LABEL = 0;
+	int const MPF_STATE = 2;
+///\}
 
 class CMachineParameter
 {
@@ -57,6 +68,13 @@ public:
 	/// default value for params that have MPF_STATE flag set
 	int DefValue;
 };
+
+///\name CMachineInfo flags.
+///\{
+	int const EFFECT = 0;
+	int const GENERATOR = 3;
+	int const CUSTOM_GUI = 16;
+///\}
 
 class CMachineInfo
 {
@@ -83,8 +101,10 @@ public:
 	virtual inline ~CFxCallback() throw() {}
 	virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
 	virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
-	virtual float *GetWaveLData(int inst,int wave){return 0;} ///\todo USELESS if you cannot get the length!
-	virtual float *GetWaveRData(int inst,int wave){return 0;} ///\todo USELESS if you cannot get the length!
+	/// unused slot kept for binary compatibility.
+	virtual float * unused0(int, int){return 0;}
+	/// unused slot kept for binary compatibility.
+	virtual float * unused1(int, int){return 0;}
 	virtual int GetTickLength(){return 2048;}
 	virtual int GetSamplingRate(){return 44100;}
 	virtual int GetBPM(){return 125;}
@@ -96,7 +116,7 @@ public:
 class CMachineInterface
 {
 public:
-	virtual ~CMachineInterface() {}
+	virtual inline ~CMachineInterface() {}
 	virtual void Init() {}
 	virtual void SequencerTick() {}
 	virtual void ParameterTweak(int par, int val) {}
@@ -108,9 +128,9 @@ public:
 
 	///\name Export / Import
 	///\{
-	virtual void PutData(void * pData) {}
-	virtual void GetData(void * pData) {}
-	virtual int GetDataSize() { return 0; }
+		virtual void PutData(void * pData) {}
+		virtual void GetData(void * pData) {}
+		virtual int GetDataSize() { return 0; }
 	///\}
 
 	virtual void Command() {}
@@ -129,7 +149,7 @@ public:
 	virtual void StopWave() {} 	/// Not used (prolly never)
 
 public:
-	// initialize these members in the constructor
+	/// initialize these members in the constructor
 	int *Vals;
 
 	/// Callback.

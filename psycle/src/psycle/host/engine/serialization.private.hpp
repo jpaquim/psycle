@@ -85,12 +85,12 @@ namespace psycle
 					archive & make_nvp("name", std::string(instance.patternName[pattern]));
 					PatternEntry * const lines(reinterpret_cast<PatternEntry*>(instance.ppPatternData[pattern]));
 					archive & make_nvp("lines", instance.patternLines[pattern]);
-					archive & make_nvp("tracks", instance.SONGTRACKS);
+				//	archive & make_nvp("tracks", instance.tracks_);
 					for(unsigned int line(0) ; line < instance.patternLines[pattern] ; ++line)
 					{
 						archive & BOOST_SERIALIZATION_NVP(line);
 						PatternEntry * const events(lines + line * MAX_TRACKS);
-						for(unsigned int track(0); track < instance.SONGTRACKS ; ++track)
+						for(unsigned int track(0); track < instance.tracks() ; ++track)
 						{
 							archive & BOOST_SERIALIZATION_NVP(track);
 							PatternEntry const & event(events[track]);

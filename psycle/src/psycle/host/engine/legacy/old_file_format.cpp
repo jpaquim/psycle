@@ -31,7 +31,7 @@ namespace psycle
 			{
 				CProgressDialog Progress;
 				Progress.Create();
-				Progress.SetWindowText("Loading old format...");
+				Progress.SetWindowText("Loading old song... psycle song fileformat version 2...");
 				Progress.ShowWindow(SW_SHOW);
 				std::int32_t num,sampR;
 				bool _machineActive[128];
@@ -57,7 +57,7 @@ namespace psycle
 				pFile->Read(busMachine);
 				pFile->Read(playOrder);
 				{ std::int32_t tmp; pFile->Read(tmp); playLength = tmp; }
-				{ std::int32_t tmp; pFile->Read(tmp); SONGTRACKS = tmp; }
+				{ std::int32_t tmp; pFile->Read(tmp); tracks(tmp); }
 				// Patterns
 				pFile->Read(num);
 				int i;
@@ -296,7 +296,7 @@ namespace psycle
 									if(!CNewMachine::TestFilename(path))
 									{
 										std::ostringstream s;
-										s << "Missing or Corrupted VST plug-in " << path << " - replacing with Dummy.";
+										s << "Missing or Corrupted VST plug-in: " << path << " - replacing with Dummy.";
 										MessageBox(NULL,s.str().c_str(), "Loading Error", MB_OK);
 
 										Machine* pOldMachine = pMac[i];

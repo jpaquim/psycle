@@ -82,7 +82,7 @@ namespace psycle
 				while (ns)
 				{
 					int nextevent = ns+1;
-					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+					for (int i=0; i < Global::_pSong->tracks(); i++)
 					{
 						if (TriggerDelay[i]._cmd)
 						{
@@ -94,7 +94,7 @@ namespace psycle
 					}
 					if (nextevent > ns)
 					{
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::_pSong->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i]._cmd)
@@ -118,7 +118,7 @@ namespace psycle
 								VoiceWork(nextevent, voice);
 							}
 						}
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::_pSong->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -286,7 +286,7 @@ namespace psycle
 
 			pVoice->_sampleCounter += numsamples;
 
-			if (Global::_pSong->Invalided)
+			if (Global::_pSong->IsInvalided())
 			{
 				pVoice->_envelope._stage = ENV_OFF;
 				return;
@@ -534,7 +534,7 @@ namespace psycle
 			int triggered = 0;
 			unsigned __int64 w_offset = 0;
 
-			if (Global::_pSong->Invalided) return 0;
+			if (Global::_pSong->IsInvalided()) return 0;
 
 			pVoice->_sampleCounter=0;
 			pVoice->effCmd=pEntry->_cmd;

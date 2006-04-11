@@ -669,7 +669,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if (velocity == 0)
 					{
 						int i;
-						for (i = 0; i < _pSong->SONGTRACKS; i++)
+						for (i = 0; i < _pSong->tracks(); i++)
 						{
 							if (_pSong->_trackArmed[i])
 							{
@@ -680,7 +680,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								}
 							}
 						}
-						if (i == _pSong->SONGTRACKS)
+						if (i == _pSong->tracks())
 						{
 							Global::pInputHandler->StopNote(note,false);
 							return;
@@ -763,7 +763,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						ChordModeLine = editcur.line;
 						ChordModeTrack = editcur.track;
 					}
-					editcur.track = (ChordModeTrack+ChordModeOffs)%_pSong->SONGTRACKS;
+					editcur.track = (ChordModeTrack+ChordModeOffs)%_pSong->tracks();
 					editcur.line = line = ChordModeLine;
 					toffset = _ptrackline(ps, editcur.track, line);
 					ChordModeOffs++;
@@ -1065,7 +1065,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			PatternEntry* pEntry = (PatternEntry*)_ptrackline(_ps(),0,editcur.line);
 
-			for (int i=0; i<_pSong->SONGTRACKS;i++)
+			for (int i=0; i<_pSong->tracks();i++)
 			{
 				if (pEntry->_mach < MAX_MACHINES && !_pSong->_trackMuted[i])
 				{
@@ -1118,7 +1118,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (editcur.track == 0)
 				{
 					if ( wrap ) 
-						editcur.track = _pSong->SONGTRACKS-1;
+						editcur.track = _pSong->tracks()-1;
 					else 
 						editcur.col=0;
 				}
@@ -1140,7 +1140,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				editcur.col = 0;
 				pParentMain->StatusBarIdle();
-				if (editcur.track == _pSong->SONGTRACKS-1)
+				if (editcur.track == _pSong->tracks()-1)
 				{
 					if ( wrap ) 
 						editcur.track = 0;
@@ -1191,7 +1191,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
 				editcur.track+=1;
-				if (editcur.track >= _pSong->SONGTRACKS)
+				if (editcur.track >= _pSong->tracks())
 				{
 					editcur.track=0;
 					editcur.line+=1;
@@ -1224,10 +1224,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			editcur.track+=x;
 			editcur.col=0;
 			
-			if(editcur.track>= _pSong->SONGTRACKS)
+			if(editcur.track>= _pSong->tracks())
 			{
 				if ( wrap ) editcur.track=0;
-				else editcur.track=_pSong->SONGTRACKS-1;
+				else editcur.track=_pSong->tracks()-1;
 			}
 			
 			pParentMain->StatusBarIdle();
@@ -1244,7 +1244,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			if(editcur.track<0)
 			{
-				if (wrap) editcur.track=_pSong->SONGTRACKS-1;
+				if (wrap) editcur.track=_pSong->tracks()-1;
 				else editcur.track=0;
 			}
 			
@@ -1278,7 +1278,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				patBufferCopy = true;
 
-				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+				NewPatternDraw(0,_pSong->tracks(),0,patBufferLines-1);
 				Repaint(DMData);
 			}
 		}
@@ -1370,7 +1370,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					soffset+=EVENT_SIZE;
 				}
 
-				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+				NewPatternDraw(0,_pSong->tracks(),0,patBufferLines-1);
 				Repaint(DMData);
 			}
 		}
@@ -1399,7 +1399,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						soffset[c]=static_cast<unsigned char>(note);
 					}
 				}
-				NewPatternDraw(0,_pSong->SONGTRACKS,editcur.line,pLines-1);
+				NewPatternDraw(0,_pSong->tracks(),editcur.line,pLines-1);
 
 				Repaint(DMData);
 			}
@@ -1607,7 +1607,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				//end of added by sampler
 
-				for (int t=tx;t<tx+blockNTracks && t<_pSong->SONGTRACKS;t++)
+				for (int t=tx;t<tx+blockNTracks && t<_pSong->tracks();t++)
 				{
 					ls=0;
 					for (int l=lx;l<lx+blockNLines && l<nl;l++)
@@ -1665,7 +1665,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (blockSelected) CopyBlock(false);
 
 				// We backup the data of the whole block.
-				AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				AddUndo(ps,0,0,_pSong->tracks(),nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				// Detect Block sizes and see if they overlap, 
 				if (abs(blockLastOrigin.start.track-tx) < blockNTracks	&& abs(blockLastOrigin.start.line-lx) < blockNLines )
@@ -1730,7 +1730,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								}
 							}
 							ts = startWT2;
-							for (int t=startRT2;t<stopT2 && t<_pSong->SONGTRACKS;t++)
+							for (int t=startRT2;t<stopT2 && t<_pSong->tracks();t++)
 							{
 								ls=startWL2;
 								for (int l=startRL2;l<stopL2 && l<nl;l++)
@@ -1774,7 +1774,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				// do Swap "inplace".
 				ts = startWT;
-				for (int t=startRT;t<stopT && t<_pSong->SONGTRACKS;t++)
+				for (int t=startRT;t<stopT && t<_pSong->tracks();t++)
 				{
 					ls=startWL;
 					for (int l=startRL;l<stopL && l<nl;l++)
@@ -1792,7 +1792,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// Finally, paste the Original selected block on the freed space.
 				PasteBlock(tx, lx, false,false);
 				
-				NewPatternDraw(0,_pSong->SONGTRACKS-1,0,nl-1);
+				NewPatternDraw(0,_pSong->tracks()-1,0,nl-1);
 				Repaint(DMData);
 			}
 		}
@@ -1802,12 +1802,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 
 			int ps = _ps();
-			int nlines = _pSong->patternLines[ps];
 
-			fwrite(&_pSong->SONGTRACKS, sizeof(int), 1, file);
-			fwrite(&nlines, sizeof(int), 1, file);
+			{
+				std::uint32_t tmp;
+				tmp = _pSong->tracks();
+				fwrite(&tmp, sizeof tmp, 1, file);
+			}
 
-			for (int t=0;t<_pSong->SONGTRACKS;t++)
+			std::uint32_t nlines = _pSong->patternLines[ps];
+			fwrite(&nlines, sizeof nlines, 1, file);
+
+			for (int t=0;t<_pSong->tracks();t++)
 			{
 				for (int l=0;l<nlines;l++)
 				{
@@ -1882,7 +1887,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else 
 			{
 				st=0;		
-				et=_pSong->SONGTRACKS;		
+				et=_pSong->tracks();		
 				sl=0;
 				nl= _pSong->patternLines[ps]/2;	
 				el=_pSong->patternLines[ps]-1;
@@ -1925,7 +1930,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else 
 			{
 				st=0;	
-				et=_pSong->SONGTRACKS;		
+				et=_pSong->tracks();		
 				sl=0;
 				nl=_pSong->patternLines[ps];	
 				el=_pSong->patternLines[ps]/2;
@@ -2258,9 +2263,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pNew->pattern = pattern;
 			pNew->x = x;
 			pNew->y = y;
-			if (tracks+x > _pSong->SONGTRACKS)
+			if (tracks+x > _pSong->tracks())
 			{
-				tracks = _pSong->SONGTRACKS-x;
+				tracks = _pSong->tracks()-x;
 			}
 			pNew->tracks = tracks;
 						
@@ -2311,9 +2316,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pNew->pattern = pattern;
 			pNew->x = x;
 			pNew->y = y;
-			if (tracks+x > _pSong->SONGTRACKS)
+			if (tracks+x > _pSong->tracks())
 			{
-				tracks = _pSong->SONGTRACKS-x;
+				tracks = _pSong->tracks()-x;
 			}
 			pNew->tracks = tracks;
 			const int nl = _pSong->patternLines[pattern];
@@ -2861,7 +2866,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::SelectNextTrack()
 		{
 			int i;
-			for (i = editcur.track+1; i < _pSong->SONGTRACKS; i++)
+			for (i = editcur.track+1; i < _pSong->tracks(); i++)
 			{
 				if (_pSong->_trackArmed[i])
 				{
@@ -2871,7 +2876,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
-			if (i >= _pSong->SONGTRACKS)
+			if (i >= _pSong->tracks())
 			{
 				for (i = 0; i <= editcur.track; i++)
 				{
@@ -2887,7 +2892,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			editcur.track = i;
 			while(_pSong->_trackArmed[editcur.track] == 0)
 			{
-				if(++editcur.track >= _pSong->SONGTRACKS)
+				if(++editcur.track >= _pSong->tracks())
 					editcur.track=0;
 			}
 			editcur.col = 0;
