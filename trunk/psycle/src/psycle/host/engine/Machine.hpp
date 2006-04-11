@@ -21,7 +21,6 @@ namespace psycle
 		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
-//		class RiffFile; // forward declaration
 
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
@@ -251,18 +250,36 @@ namespace psycle
 					/// and it will be disabled.
 					///\param e the exception that occured, converted to a std::exception if needed.
 					void crashed(std::exception const & e) throw();
-
 				public:
 					/// Tells wether this machine has crashed.
 					bool const inline & crashed() const throw() { return crashed_; }
 				private:
 					bool                crashed_;
-
+			///\}
+			///\name crash handling ... fpu exception mask
+			///\{
 				public:
 					universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
 					universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
 				private:
 					universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;
+			///\}
+
+			///\name cpu cost measurement ... for the time spent in the machine's processing function
+			///\{
+				public:
+					void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
+					cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+				private:
+					cpu::cycles_type        work_cpu_cost_;
+			///\}
+			///\name cpu cost measurement ... for the time spent routing audio
+			///\{
+				public:
+					void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
+					cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
+				private:
+					cpu::cycles_type        wire_cpu_cost_;
 			///\}
 
 		public:
@@ -301,59 +318,105 @@ namespace psycle
 			// GetDllName()
 			Machine();
 			virtual ~Machine() throw();
+
 			//////////////////////////////////////////////////////////////////////////
 			// Actions
 
-			virtual void Init();
-			virtual void PreWork(int numSamples);
-			virtual void Work(int numSamples);
-			virtual void WorkNoMix(int numSamples);
-			virtual void Tick() {};
-			virtual void Tick(int track, PatternEntry * pData) {};
-			virtual void Stop() {};
-			/// Loader for old psycle fileformat.
-			virtual bool LoadOldFileFormat(RiffFile * pFile);
-			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-			static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
-			virtual void SaveFileChunk(RiffFile * pFile);
-			virtual void SaveSpecificChunk(RiffFile * pFile);
-			virtual void SaveDllName(RiffFile * pFile);
-			virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
-			virtual bool Disconnect(Machine* dstMac);
-			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
-			virtual int FindInputWire(int macIndex);
-			virtual int FindOutputWire(int macIndex);
-			void DefineStereoInput(int numins);
-			void DefineStereoOutput(int numouts);
+			///\name the life cycle of a mahine
+			///\{
+				virtual void Init();
+				virtual void PreWork(int numSamples);
+				virtual void Work(int numSamples);
+				virtual void WorkNoMix(int numSamples);
+				virtual void Tick() {};
+				virtual void Tick(int track, PatternEntry * pData) {};
+				virtual void Stop() {};
+			///\}
+
+			///\name (de)serialization
+			///\{
+				virtual void SaveDllName(RiffFile * pFile);
+				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+				static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
+				virtual void SaveFileChunk(RiffFile * pFile);
+				virtual void SaveSpecificChunk(RiffFile * pFile);
+				/// Loader for psycle fileformat version 2.
+				virtual bool LoadOldFileFormat(RiffFile * pFile);
+			///\}
+
+			///\name connections
+			///\{
+				virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
+				virtual bool Disconnect(Machine* dstMac);
+			///\}
+
+			///\name ...
+			///\{
+				virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
+				virtual int FindInputWire(int macIndex);
+				virtual int FindOutputWire(int macIndex);
+			///\}
+
+			///\name multichannel
+			///\{
+				void DefineStereoInput(int numins);
+				void DefineStereoOutput(int numouts);
+			///\}
+
 			//////////////////////////////////////////////////////////////////////////
 			// Properties
 
 			virtual void SetSampleRate(int sr) {};
+
+			///\todo 3 dimensional?
 			virtual void SetPan(int newpan);
-			virtual int GetInPorts() { return numInPorts; };
-			virtual int GetOutPorts() { return numOutPorts; };
-			virtual AudioPort& GetInPort(unsigned int i) { assert(i<numInPorts); return inports[i]; };
-			virtual AudioPort& GetOutPort(unsigned int i) { assert(i<numOutPorts); return inports[i]; };
+
+			///\name ports
+			///\{
+				virtual int GetInPorts() { return numInPorts; };
+				virtual int GetOutPorts() { return numOutPorts; };
+				virtual AudioPort& GetInPort(unsigned int i) { assert(i<numInPorts); return inports[i]; };
+				virtual AudioPort& GetOutPort(unsigned int i) { assert(i<numOutPorts); return inports[i]; };
+			///\}
+
 			virtual float GetAudioRange() { return _audiorange; }
-			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
-			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
-			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
-			virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
-			virtual const char * const GetDllName() const throw() { return "built-in"; };
-			virtual char * GetName() = 0;
-			virtual char * GetEditName() { return _editName; }
-			virtual int GetNumParams() { return _numPars; };
-			virtual int GetNumCols() { return _nCols; };
-			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
-			virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
-			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
-			virtual int GetParamValue(int numparam) { return 0; };
-			virtual bool SetParameter(int numparam, int value) { return false;}; 
+
+			///\name amplification of the signal in connections/wires
+			///\{
+				virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
+				virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
+				virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
+				virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
+			///\}
+
+			///\name name
+			///\{
+				virtual const char * const GetDllName() const throw() { return "built-in"; };
+				virtual char * GetName() = 0;
+				virtual char * GetEditName() { return _editName; }
+			///\}
+
+			///\name parameters
+			///\{
+				virtual int GetNumCols() { return _nCols; };
+				virtual int GetNumParams() { return _numPars; };
+				virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
+				virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
+				virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
+				virtual int GetParamValue(int numparam) { return 0; };
+				virtual bool SetParameter(int numparam, int value) { return false;}; 
+			///\}
 		protected:
 			void SetVolumeCounter(int numSamples);
 			//void SetVolumeCounterAccurate(int numSamples);
 
-		public:
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//\todo below are unencapsulated data members
+
+		/* private: */ public:
+
 			InPort *inports;
 			OutPort *outports;
 			int numInPorts;
@@ -385,75 +448,87 @@ namespace psycle
 			char _editName[32];
 			int _numPars;
 			int _nCols;
-			/// Incoming connections Machine number
-			///\todo hardcoded limits and wastes
-			int _inputMachines[MAX_CONNECTIONS];
-			/// Outgoing connections Machine number
-			///\todo hardcoded limits and wastes
-			int _outputMachines[MAX_CONNECTIONS];
-			/// Incoming connections Machine vol
-			///\todo hardcoded limits and wastes
-			float _inputConVol[MAX_CONNECTIONS];
-			/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-			///\todo hardcoded limits and wastes
-			float _wireMultiplier[MAX_CONNECTIONS];
-			/// Outgoing connections activated
-			///\todo hardcoded limits and wastes
-			bool _connection[MAX_CONNECTIONS];
-			/// Incoming connections activated
-			///\todo hardcoded limits and wastes
-			bool _inputCon[MAX_CONNECTIONS];
-			/// number of Incoming connections
-			int _connectedInputs;
-			/// number of Outgoing connections
-			int _connectedOutputs;
-			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
-			///\todo hardcoded limits and wastes
-			CPoint _connectionPoint[MAX_CONNECTIONS];
 
-			///\todo hardcoded limits and wastes
-			PatternEntry TriggerDelay[MAX_TRACKS];
-			///\todo hardcoded limits and wastes
-			int TriggerDelayCounter[MAX_TRACKS];
-			///\todo hardcoded limits and wastes
-			int RetriggerRate[MAX_TRACKS];
-			///\todo hardcoded limits and wastes
-			int ArpeggioCount[MAX_TRACKS];
-			bool TWSActive;
-			///\todo hardcoded limits and wastes
-			int TWSInst[MAX_TWS];
-			int TWSSamples;
-			///\todo hardcoded limits and wastes
-			float TWSDelta[MAX_TWS];
-			///\todo hardcoded limits and wastes
-			float TWSCurrent[MAX_TWS];
-			///\todo hardcoded limits and wastes
-			float TWSDestination[MAX_TWS];
-			/// output peak level for DSP
-			float _volumeCounter;					
-			/// output peak level for display
-			int _volumeDisplay;	
-			/// output peak level for display
-			int _volumeMaxDisplay;
-			/// output peak level for display
-			int _volumeMaxCounterLife;
+			///\name input ports
+			///\{
+				/// number of Incoming connections
+				int _connectedInputs;
+				/// Incoming connections Machine number
+				///\todo hardcoded limits and wastes
+				int _inputMachines[MAX_CONNECTIONS];
+				/// Incoming connections activated
+				///\todo hardcoded limits and wastes
+				bool _inputCon[MAX_CONNECTIONS];
+				/// Incoming connections Machine vol
+				///\todo hardcoded limits and wastes
+				float _inputConVol[MAX_CONNECTIONS];
+				/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				///\todo hardcoded limits and wastes
+				float _wireMultiplier[MAX_CONNECTIONS];
+			///\}
 
-			int _scopePrevNumSamples;
-			int	_scopeBufferIndex;
-			float *_pScopeBufferL;
-			float *_pScopeBufferR;
+			///\name output ports
+			///\{
+				/// number of Outgoing connections
+				int _connectedOutputs;
+				/// Outgoing connections Machine number
+				///\todo hardcoded limits and wastes
+				int _outputMachines[MAX_CONNECTIONS];
+				/// Outgoing connections activated
+				///\todo hardcoded limits and wastes
+				bool _connection[MAX_CONNECTIONS];
+			///\}
 
-			public:
-				void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
-				cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
-			private:
-				cpu::cycles_type        work_cpu_cost_;
+			///\name misplaced gui stuff
+			///\{
+				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
+				///\todo hardcoded limits and wastes
+				CPoint _connectionPoint[MAX_CONNECTIONS];
+			///\}
 
-			public:
-				void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
-				cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
-			private:
-				cpu::cycles_type        wire_cpu_cost_;
+			///\name signal measurements, perhaps can be considered misplaced gui stuff
+			///\{
+				/// output peak level for DSP
+				float _volumeCounter;					
+				/// output peak level for display
+				int _volumeDisplay;	
+				/// output peak level for display
+				int _volumeMaxDisplay;
+				/// output peak level for display
+				int _volumeMaxCounterLife;
+				///\todo doc
+				int _scopePrevNumSamples;
+				///\todo doc
+				int	_scopeBufferIndex;
+				///\todo doc
+				float *_pScopeBufferL;
+				///\todo doc
+				float *_pScopeBufferR;
+			///\}
+
+			///\ various player-related states
+			///\{
+				///\todo hardcoded limits and wastes
+				PatternEntry TriggerDelay[MAX_TRACKS];
+				///\todo hardcoded limits and wastes
+				int TriggerDelayCounter[MAX_TRACKS];
+				///\todo hardcoded limits and wastes
+				int RetriggerRate[MAX_TRACKS];
+				///\todo hardcoded limits and wastes
+				int ArpeggioCount[MAX_TRACKS];
+				///\todo doc
+				bool TWSActive;
+				///\todo hardcoded limits and wastes
+				int TWSInst[MAX_TWS];
+				///\todo doc
+				int TWSSamples;
+				///\todo hardcoded limits and wastes
+				float TWSDelta[MAX_TWS];
+				///\todo hardcoded limits and wastes
+				float TWSCurrent[MAX_TWS];
+				///\todo hardcoded limits and wastes
+				float TWSDestination[MAX_TWS];
+			///\}
 		};
 
 		inline void Machine::SetVolumeCounter(int numSamples)
@@ -631,7 +706,22 @@ namespace psycle
 			float _sendVolMulti[MAX_CONNECTIONS];
 			/// Incoming connections activated
 			///\todo hardcoded limits and wastes
-			bool _sendValid[MAX_CONNECTIONS];		
+			bool _sendValid[MAX_CONNECTIONS];
+
+			#if 0 // more lightweight
+				class send
+				{
+					private:
+						float grid;
+						/// Incoming send, Machine number
+						int incoming;
+						/// Incoming send, connection volume
+						float volume;
+						/// Value to multiply volume to have a 0.0..1.0 range
+						float normalize;
+				};
+				std::vector<send> sends;
+			#endif
 
 			static char* _psName;
 		};

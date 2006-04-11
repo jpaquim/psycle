@@ -83,9 +83,11 @@ namespace psycle
 			///\{
 				public:
 					/// The number of tracks in each pattern of this song.
-					unsigned int inline tracks() const throw() { return tracks_; }
+					///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
+					/* unsigned */ int inline tracks() const throw() { return tracks_; }
 					/// The number of tracks in each pattern of this song.
-					void inline tracks(unsigned int const tracks) throw() { this->tracks_ = tracks_; }
+					///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
+					void inline tracks(/* unsigned */  int const tracks) throw() { assert(tracks >= 0 && tracks < MAX_TRACKS); this->tracks_ = tracks_; }
 				private:
 					unsigned int tracks_;
 			///\}
@@ -286,6 +288,17 @@ namespace psycle
 					/// Array of Pattern data.
 					///\todo hardcoded limits and wastes
 					unsigned char * ppPatternData[MAX_PATTERNS];
+
+					#if 0 // more lightweight
+						class pattern
+						{
+							private:
+								std::string name;
+								unsigned int lines, tracks;
+								std::vector<PatternEntries> entries;
+						};
+						std::vector<pattern> patterns;
+					#endif
 				///\}
 
 				///\name pattern sequence
@@ -309,6 +322,7 @@ namespace psycle
 					bool _machineLock;
 					/// the array of machines.
 					///\todo hardcoded limits and wastes
+					///\todo more lightweight with a std::vector<Machine*>
 					Machine* _pMachine[MAX_MACHINES];
 					/// Current selected machine number in the GUI
 					/// \todo This is a gui thing... should not be here.
