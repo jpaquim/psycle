@@ -14,8 +14,8 @@ namespace psycle
 			:
 				resource(plugin_library_reference, graph, name)
 			{
-				new engine::ports::inputs::single(*this, "in");
-				new engine::ports::inputs::single(*this, "amplification", 1);
+				engine::ports::inputs::single::create(*this, "in");
+				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
 			}
 
 			void asio::do_open() throw(engine::exception)

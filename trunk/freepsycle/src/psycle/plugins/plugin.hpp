@@ -2,6 +2,7 @@
 ///\brief interface file containing the declarations needed by psycle::plugins.
 #pragma once
 #include <psycle/engine/engine.hpp>
+#include <boost/ref.hpp>
 #include <cmath>
 
 ///\internal

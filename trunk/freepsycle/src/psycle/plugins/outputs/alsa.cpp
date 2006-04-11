@@ -17,8 +17,8 @@ namespace psycle
 				pcm_hw_params_(0),
 				pcm_(0)
 			{
-				new engine::ports::inputs::single(*this, "in");
-				new engine::ports::inputs::single(*this, "amplification", 1);
+				engine::ports::inputs::single::create(*this, "in");
+				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
 			}
 
 			void alsa::do_open() throw(engine::exception)

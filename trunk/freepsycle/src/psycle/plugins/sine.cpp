@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// Copyright © 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+// copyright 1999-2006 johan boule <bohan@jabber.org>
+// copyright 2004-2006 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\brief \implementation psycle::plugins::sine
@@ -20,9 +21,9 @@ namespace psycle
 			step_(0),
 			frequency_to_step_(0)
 		{
-			engine::ports::output::create(*this, "out", 1);
-			engine::ports::inputs::single::create(*this, "frequency", 1);
-			engine::ports::inputs::single::create(*this, "phase", 1);
+			engine::ports::output::create(*this, "out", boost::cref(1));
+			engine::ports::inputs::single::create(*this, "frequency", boost::cref(1));
+			engine::ports::inputs::single::create(*this, "phase", boost::cref(1));
 		}
 
 		namespace
