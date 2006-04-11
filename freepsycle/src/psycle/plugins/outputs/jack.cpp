@@ -17,8 +17,8 @@ namespace psycle
 				client_(0),
 				output_port_(0)
 			{
-				new engine::ports::inputs::single(*this, "in");
-				new engine::ports::inputs::single(*this, "amplification", 1);
+				engine::ports::inputs::single::create(*this, "in");
+				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
 			}
 
 			namespace
