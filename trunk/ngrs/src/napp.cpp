@@ -66,6 +66,7 @@ NApp::NApp()
 NApp::~NApp()
 {
   delete xpmFilter_;
+  delete config_;
 }
 
 // here you find all public methods
