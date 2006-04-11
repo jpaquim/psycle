@@ -105,8 +105,6 @@ void NWindow::repaint( NVisualComponent * sender, const NRegion & repaintArea, b
       }
     }
 
-    sender = pane_;
-
     if (pane_->width() !=width() || pane_->height() !=height())
       pane_->setPosition(0,0,width(),height());
     graphics_->setRegion(repaintArea);
