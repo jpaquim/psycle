@@ -1436,14 +1436,14 @@ namespace psycle {
 					{
 						int nextevent;
 						if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-						for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+						for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 						{
 							if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 						}
 						if(nextevent > ns)
 						{
 							if(TWSActive) TWSSamples -= ns;
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 							{
 								// come back to this
 								if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -1513,7 +1513,7 @@ namespace psycle {
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 							{
 								// come back to this
 								if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)

@@ -111,7 +111,7 @@ namespace psycle
 			int mIndex = 0;
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
-			for(int track=0; track<pSong->SONGTRACKS; track++)
+			for(int track=0; track<pSong->tracks(); track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
 				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
@@ -248,14 +248,14 @@ namespace psycle
 									PatternEntry entry(*pEntry);
 									entry._inst = 0;
 									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
-									if(voice < pSong->SONGTRACKS)
+									if(voice < pSong->tracks())
 									{
 										pMachine->Tick(voice, &entry);
 									}
 									else if(voice == 0xff)
 									{
 										// special voice value which means we want to send the same command to all voices
-										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
+										for(int voice(0) ; voice < pSong->tracks() ; ++voice)
 										{
 											pMachine->Tick(voice, &entry);
 										}
@@ -297,7 +297,7 @@ namespace psycle
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
 
-			for(int track=0; track<pSong->SONGTRACKS; track++)
+			for(int track=0; track<pSong->tracks(); track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
 				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?

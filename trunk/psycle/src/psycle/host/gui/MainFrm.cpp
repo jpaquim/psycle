@@ -285,7 +285,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				_snprintf(s,4,"%i",i);
 				cc2->AddString(s);
 			}
-			cc2->SetCurSel(_pSong->SONGTRACKS-4);
+			cc2->SetCurSel(_pSong->tracks()-4);
 
 		//	SetAppSongBpm(0);
 		//	SetAppSongTpb(0);
@@ -468,7 +468,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			cc2->SetCurSel(m_wndView.patStep);
 			
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-			cc2->SetCurSel(_pSong->SONGTRACKS-4);
+			cc2->SetCurSel(_pSong->tracks()-4);
 
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
 			cc2->SetCurSel(_pSong->currentOctave);
@@ -484,9 +484,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSelchangeTrackcombo() 
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-			_pSong->SONGTRACKS=cc2->GetCurSel()+4;
-			if (m_wndView.editcur.track >= _pSong->SONGTRACKS )
-				m_wndView.editcur.track= _pSong->SONGTRACKS-1;
+			_pSong->tracks(cc2->GetCurSel()+4);
+			if (m_wndView.editcur.track >= _pSong->tracks() )
+				m_wndView.editcur.track= _pSong->tracks()-1;
 
 			m_wndView.RecalculateColourGrid();
 			m_wndView.Repaint();
@@ -1212,13 +1212,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if(_pSong->PW_Stage)
 				{
 					_pSong->PW_Stage=0;
-					_pSong->Invalided=true;
+					_pSong->IsInvalided(true);
 					Sleep(LOCK_LATENCY);
 				}
 
 				//Delete it.
 				_pSong->DeleteLayer(PREV_WAV_INS);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 
 
@@ -2310,7 +2310,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				unsigned char* const plineOffset = _pSong->_ppattern(pattern);
 				for (int l = 0; l < _pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
 				{
-					for (int t = 0; t < _pSong->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE)
+					for (int t = 0; t < _pSong->tracks()*EVENT_SIZE; t+=EVENT_SIZE)
 					{
 						PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
 						switch (pEntry->_cmd)

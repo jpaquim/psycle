@@ -83,7 +83,7 @@ namespace psycle
 			virtual void GetParamRange(int numparam,int &minval, int &maxval);
 			virtual int GetParamValue(int numparam);
 			virtual void GetParamValue(int numparam,char* parval);
-			virtual CMachineGuiParameter* GetParam(int num);	//dw00t
+			virtual CMachineGuiParameter* GetParam(int num); // dw00t
 			virtual bool SetParameter(int numparam,int value);
 			/// Loader for old psycle fileformat.
 			virtual bool LoadOldFileFormat(RiffFile * pFile);

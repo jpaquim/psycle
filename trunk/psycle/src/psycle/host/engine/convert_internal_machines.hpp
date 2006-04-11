@@ -174,7 +174,7 @@ namespace psycle
 						for(int line = 0 ; line < song.patternLines[pattern] ; ++line)
 						{
 							PatternEntry * const events(lines + line * MAX_TRACKS);
-							for(int track(0); track < song.SONGTRACKS ; ++track)
+							for(int track(0); track < song.tracks() ; ++track)
 							{
 								PatternEntry & event(events[track]);
 								if(event._note == cdefTweakE)

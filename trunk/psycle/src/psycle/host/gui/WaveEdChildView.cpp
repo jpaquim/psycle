@@ -343,7 +343,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if ( nFlags & MK_CONTROL )
 				{
 					pParent->m_wndView.AddMacViewUndo();
-					_pSong->Invalided=true;
+					_pSong->IsInvalided(true);
 					Sleep(LOCK_LATENCY);
 
 					CRect rect;
@@ -359,7 +359,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						wdLoop=true;
 						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
-					_pSong->Invalided=false;
+					_pSong->IsInvalided(false);
 					drawwave=true;
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					Invalidate();
@@ -385,7 +385,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if ( nFlags & MK_CONTROL )
 				{
 					pParent->m_wndView.AddMacViewUndo();
-					_pSong->Invalided=true;
+					_pSong->IsInvalided(true);
 					Sleep(LOCK_LATENCY);
 
 					CRect rect;
@@ -401,7 +401,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						wdLoop=true;
 						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
-					_pSong->Invalided=false;
+					_pSong->IsInvalided(false);
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					drawwave=true;
 					Invalidate();
@@ -483,7 +483,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 				double fpass=1.0/blLength;
@@ -505,7 +505,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				
 				Invalidate(true);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -516,7 +516,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 				double fpass=1.0/blLength;
@@ -539,7 +539,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				
 				Invalidate(true);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -553,7 +553,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 				for (c = 0 ; c < wdLength ; c++)
@@ -603,7 +603,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 
 				Invalidate(true);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -617,7 +617,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 				for (c=0; c<wdLength; c++)
@@ -666,7 +666,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 					}
 				}
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 				Invalidate(true);
 			}
 		}
@@ -685,7 +685,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pos = AmpDialog.DoModal();
 				if (pos != AMP_DIALOG_CANCEL)
 				{
-					_pSong->Invalided=true;
+					_pSong->IsInvalided(true);
 					Sleep(LOCK_LATENCY);
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 				
@@ -719,7 +719,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							}
 						}
 					}
-					_pSong->Invalided=false;
+					_pSong->IsInvalided(false);
 					Invalidate(true);
 				}
 			}
@@ -734,7 +734,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 				halved = (int) floor(blLength/2.0);
@@ -754,7 +754,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				}
 				Invalidate(true);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -771,7 +771,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 		//		SetUndo(4, wdLeft, wdRight, wdLength); 
@@ -784,7 +784,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				wdStereo = false;
 				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR);
 				Invalidate(true);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -798,7 +798,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->Invalided=true;
+				_pSong->IsInvalided(true);
 				Sleep(LOCK_LATENCY);
 
 				datalen = (wdLength - blLength);
@@ -846,7 +846,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 
 				Invalidate(true);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1033,7 +1033,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			lData = *(DWORD*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
-			_pSong->Invalided=true;
+			_pSong->IsInvalided(true);
 			Sleep(LOCK_LATENCY);
 
 			if (!wdWave)
@@ -1107,7 +1107,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
-			_pSong->Invalided=false;
+			_pSong->IsInvalided(false);
 		}
 
 		void CWaveEdChildView::OnUpdateEditUndo(CCmdUI* pCmdUI) 

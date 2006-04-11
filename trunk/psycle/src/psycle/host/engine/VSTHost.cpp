@@ -471,29 +471,29 @@ namespace psycle
 					catch(const std::exception & e)
 					{
 						std::ostringstream s; s
-							<< "Exception while instanciating:" << sPath << std::endl
+							<< "Exception while instanciating plugin: " << sPath << std::endl
 							<< "Replacing with dummy." << std::endl
 							<< typeid(e).name() << std::endl
 							<< e.what();
-						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 					catch(...)
 					{
 						std::ostringstream s; s
-							<< "Exception while instanciating:" << sPath << std::endl
+							<< "Exception while instanciating plugin: " << sPath << std::endl
 							<< "Replacing with dummy." << std::endl
 							<< "Unkown type of exception";
-						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+						MessageBox(0, s.str().c_str(), "Plugin Instanciation Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
 				}
 				else
 				{
 					std::ostringstream s; s
-						<< "Missing:" << psFileName << std::endl
+						<< "Missing plugin: " << psFileName << std::endl
 						<< "Replacing with dummy.";
-					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					MessageBox(0, s.str().c_str(), "Plugin Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
 				}
 				return true;
@@ -1245,14 +1245,14 @@ namespace psycle
 					{
 						int nextevent;
 						if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-						for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+						for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 						{
 							if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 						}
 						if(nextevent > ns)
 						{
 							if(TWSActive) TWSSamples -= ns;
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 							{
 								// come back to this
 								if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -1322,7 +1322,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 							{
 								// come back to this
 								if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -1603,14 +1603,14 @@ namespace psycle
 						{
 							int nextevent;
 							if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+							for(int i(0) ; i < Global::_pSong->tracks() ; ++i)
 							{
 								if(TriggerDelay[i]._cmd) if(TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 							}
 							if(nextevent > ns)
 							{
 								if(TWSActive) TWSSamples -= ns;
-								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
+								for(int i(0) ; i < Global::_pSong->tracks(); ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -1675,7 +1675,7 @@ namespace psycle
 										if(activecount == 0) TWSActive = false;
 									}
 								}
-								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
+								for(int i(0) ; i < Global::_pSong->tracks(); ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)

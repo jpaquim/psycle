@@ -191,7 +191,7 @@ namespace psycle
 			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
 
-			if(_pInfo->Flags & CUSTOMGUI)
+			if(_pInfo->Flags & CUSTOM_GUI)
 			{
 				GETPARAMS GetParams = (GETPARAMS) GetProcAddress(_dll, "GetParams");
 				if(!GetParams)
@@ -404,7 +404,7 @@ namespace psycle
 					while (ns)
 					{
 						int nextevent = (TWSActive)?TWSSamples:ns+1;
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::_pSong->tracks(); i++)
 						{
 							if (TriggerDelay[i]._cmd)
 							{
@@ -420,7 +420,7 @@ namespace psycle
 							{
 								TWSSamples -= ns;
 							}
-							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+							for (int i=0; i < Global::_pSong->tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd)
@@ -430,7 +430,7 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->tracks());
 							}
 							catch(const std::exception &)
 							{
@@ -444,7 +444,7 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->tracks());
 								}
 								catch(const std::exception &)
 								{
@@ -485,7 +485,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+							for (int i=0; i < Global::_pSong->tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)

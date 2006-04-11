@@ -16,7 +16,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			CRect rect;	
 			updateMode=drawMode;					// this is ununsed for patterns
-			const int snt = _pSong->SONGTRACKS;
+			const int snt = _pSong->tracks();
 			const int plines = _pSong->patternLines[_pSong->playOrder[editPosition]];
 			if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
 			{							// Else, there is a problem.
@@ -340,7 +340,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							rect.bottom=rect.top+ROWHEIGHT;	// left never changes and is set at ChildView init.
 							rect.left = 0;
 							rect.right=CW;
-							NewPatternDraw(0, _pSong->SONGTRACKS, pos, pos);
+							NewPatternDraw(0, _pSong->tracks(), pos, pos);
 							updatePar |= DRAW_DATA;
 							InvalidateRect(rect,false);
 							if ((playpos >= 0) && (playpos != newplaypos))
@@ -349,7 +349,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								rect.bottom = rect.top+ROWHEIGHT;
 								rect.left = 0;
 								rect.right = CW;
-								NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
+								NewPatternDraw(0, _pSong->tracks(), playpos, playpos);
 								updatePar |= DRAW_DATA;
 								playpos =-1;
 								InvalidateRect(rect,false);
@@ -365,7 +365,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							rect.bottom = rect.top+ROWHEIGHT;
 							rect.left = 0;
 							rect.right = CW;
-							NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
+							NewPatternDraw(0, _pSong->tracks(), playpos, playpos);
 							updatePar |= DRAW_DATA;
 							playpos = -1;
 							InvalidateRect(rect,false);
@@ -874,7 +874,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				rect.bottom = rect.top+ROWHEIGHT;
 				rect.left = 0;
 				rect.right = XOFFSET+(maxt)*ROWWIDTH;
-				NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
+				NewPatternDraw(0, _pSong->tracks(), playpos, playpos);
 				playpos =-1;
 				updatePar |= DRAW_DATA;
 				InvalidateRect(rect,false);
@@ -2606,7 +2606,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			float d1 = float((source2>>8)&0xff);
 			float d2 = float(source2&0xff);
 
-			int len = _pSong->SONGTRACKS+1;
+			int len = _pSong->tracks()+1;
 
 			float a0=(d0-p0)/(len);
 			float a1=(d1-p1)/(len);

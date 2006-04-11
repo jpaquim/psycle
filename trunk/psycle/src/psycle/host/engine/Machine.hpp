@@ -379,37 +379,55 @@ namespace psycle
 			int _panning;
 			int _x;
 			int _y;
+			///\todo hardcoded limits and wastes
+			///\todo that's a fixed char[] cause it makes it "easier" to load/save with the currently hardcoded-to-32-char fileformat or what?
+			/// it's null terminated. or at least, seems so.
 			char _editName[32];
 			int _numPars;
 			int _nCols;
 			/// Incoming connections Machine number
+			///\todo hardcoded limits and wastes
 			int _inputMachines[MAX_CONNECTIONS];
 			/// Outgoing connections Machine number
+			///\todo hardcoded limits and wastes
 			int _outputMachines[MAX_CONNECTIONS];
 			/// Incoming connections Machine vol
+			///\todo hardcoded limits and wastes
 			float _inputConVol[MAX_CONNECTIONS];
 			/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+			///\todo hardcoded limits and wastes
 			float _wireMultiplier[MAX_CONNECTIONS];
 			/// Outgoing connections activated
+			///\todo hardcoded limits and wastes
 			bool _connection[MAX_CONNECTIONS];
 			/// Incoming connections activated
+			///\todo hardcoded limits and wastes
 			bool _inputCon[MAX_CONNECTIONS];
 			/// number of Incoming connections
 			int _connectedInputs;
 			/// number of Outgoing connections
 			int _connectedOutputs;
 			/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
+			///\todo hardcoded limits and wastes
 			CPoint _connectionPoint[MAX_CONNECTIONS];
 
+			///\todo hardcoded limits and wastes
 			PatternEntry TriggerDelay[MAX_TRACKS];
+			///\todo hardcoded limits and wastes
 			int TriggerDelayCounter[MAX_TRACKS];
+			///\todo hardcoded limits and wastes
 			int RetriggerRate[MAX_TRACKS];
+			///\todo hardcoded limits and wastes
 			int ArpeggioCount[MAX_TRACKS];
 			bool TWSActive;
+			///\todo hardcoded limits and wastes
 			int TWSInst[MAX_TWS];
 			int TWSSamples;
+			///\todo hardcoded limits and wastes
 			float TWSDelta[MAX_TWS];
+			///\todo hardcoded limits and wastes
 			float TWSCurrent[MAX_TWS];
+			///\todo hardcoded limits and wastes
 			float TWSDestination[MAX_TWS];
 			/// output peak level for DSP
 			float _volumeCounter;					
@@ -600,14 +618,19 @@ namespace psycle
 			virtual float VuChan(int idx);
 			virtual float VuSend(int idx);
 		protected:
+			///\todo hardcoded limits and wastes
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
 			/// Incoming send, Machine number
+			///\todo hardcoded limits and wastes
 			int _send[MAX_CONNECTIONS];	
 			/// Incoming send, connection volume
+			///\todo hardcoded limits and wastes
 			float _sendVol[MAX_CONNECTIONS];	
 			/// Value to multiply _sendVol[] to have a 0.0..1.0 range
+			///\todo hardcoded limits and wastes
 			float _sendVolMulti[MAX_CONNECTIONS];
 			/// Incoming connections activated
+			///\todo hardcoded limits and wastes
 			bool _sendValid[MAX_CONNECTIONS];		
 
 			static char* _psName;
@@ -671,5 +694,3 @@ namespace psycle
 
 	}
 }
-
-

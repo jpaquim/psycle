@@ -146,7 +146,7 @@ namespace psycle
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
 		#define max UNIVERSALIS__STANDARD_LIBRARY__LOOSE_MAX
-		song.SONGTRACKS=max(m_Header.channels,4);
+		song.tracks(max(m_Header.channels,4));
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
@@ -1039,14 +1039,14 @@ namespace psycle
 		
 		
 		m_pSampler->IsAmigaSlides(true);
-		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS=4; song.InsertConnection(0,MASTER_INDEX,0.75f); }
-		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS=4; song.InsertConnection(0,MASTER_INDEX,0.75f); }
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnection(0,MASTER_INDEX,0.5f); }
-		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnection(0,MASTER_INDEX,0.35f);}
+		if ( !stricmp(pID,"M.K.")) { song.tracks(4); song.InsertConnection(0,MASTER_INDEX,0.75f); }
+		else if ( !stricmp(pID,"M!K!")) { song.tracks(4); song.InsertConnection(0,MASTER_INDEX,0.75f); }
+		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.tracks(atoi(tmp));  song.InsertConnection(0,MASTER_INDEX,0.5f); }
+		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.tracks(atoi(tmp)); song.InsertConnection(0,MASTER_INDEX,0.35f);}
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
 
-		for (int i = 0; i< song.SONGTRACKS; i++ )
+		for (int i = 0; i< song.tracks(); i++ )
 		{
 			if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactor(12);
 			else m_pSampler->rChannel(i).DefaultPanFactor(48);
@@ -1096,7 +1096,7 @@ namespace psycle
 		// get pattern data
 		Seek(1084);
 		for(int j = 0;j < npatterns ;j++){
-			LoadSinglePattern(song,j,song.SONGTRACKS);
+			LoadSinglePattern(song,j,song.tracks());
 		}
 	}
 

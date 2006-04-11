@@ -709,8 +709,8 @@ namespace psycle
 				{		
 					if (pChildView->editcur.col != 8) 
 						pChildView->editcur.col = 8;
-					else if ( pChildView->editcur.track != Global::_pSong->SONGTRACKS-1 ) 
-						pChildView->editcur.track = Global::_pSong->SONGTRACKS-1;
+					else if ( pChildView->editcur.track != Global::_pSong->tracks()-1 ) 
+						pChildView->editcur.track = Global::_pSong->tracks()-1;
 					else 
 						pChildView->editcur.line = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
 				}
@@ -758,7 +758,7 @@ namespace psycle
 				{
 					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
 					pChildView->StartBlock(0,0,0);
-					pChildView->EndBlock(Global::_pSong->SONGTRACKS-1,nl-1,8);
+					pChildView->EndBlock(Global::_pSong->tracks()-1,nl-1,8);
 				}
 				break;
 				
@@ -1118,7 +1118,7 @@ namespace psycle
 				}
 			}
 
-			for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
+			for(int i=0;i<Global::_pSong->tracks();i++)
 			{
 				if(notetrack[i]==note)
 				{
@@ -1204,14 +1204,14 @@ namespace psycle
 				if(bMultiKey)
 				{
 					int i;
-					for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
+					for (i = outtrack+1; i < Global::_pSong->tracks(); i++)
 					{
 						if (notetrack[i] == 120)
 						{
 							break;
 						}
 					}
-					if (i >= Global::_pSong->SONGTRACKS)
+					if (i >= Global::_pSong->tracks())
 					{
 						for (i = 0; i <= outtrack; i++)
 						{

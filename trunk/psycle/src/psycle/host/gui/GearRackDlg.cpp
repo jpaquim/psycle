@@ -500,10 +500,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 2:
-				Global::_pSong->Invalided=true;
+				Global::_pSong->IsInvalided(true);
 				ExchangeIns(sel[0],sel[1]);
 				
-				Global::_pSong->Invalided=false;
+				Global::_pSong->IsInvalided(false);
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -757,7 +757,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 2:
-				Global::_pSong->Invalided=true;
+				Global::_pSong->IsInvalided(true);
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
@@ -778,7 +778,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				
-				Global::_pSong->Invalided=false;
+				Global::_pSong->IsInvalided(false);
 				pParentMain->UpdateComboIns(true);
 				break;
 			}

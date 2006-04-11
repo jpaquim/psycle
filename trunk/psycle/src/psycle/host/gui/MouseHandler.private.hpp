@@ -407,7 +407,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else if ( viewMode==VMPattern)
 			{			
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
-				if ( ttm >= _pSong->SONGTRACKS ) ttm = _pSong->SONGTRACKS-1;
+				if ( ttm >= _pSong->tracks() ) ttm = _pSong->tracks()-1;
 				else if ( ttm < 0 ) ttm = 0;
 				
 				if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
@@ -553,7 +553,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
 				{
 					editcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
-		//			if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
+		//			if ( editcur.track >= _pSong->tracks() ) editcur.track = _pSong->tracks()-1;
 		//			else if ( editcur.track < 0 ) editcur.track = 0;
 
 		//			int plines = _pSong->patternLines[_ps()];
@@ -689,9 +689,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
 						ccm=8;
-						if ( ttm >= _pSong->SONGTRACKS ) // Out of Range
+						if ( ttm >= _pSong->tracks() ) // Out of Range
 						{	
-							ttm = _pSong->SONGTRACKS-1;
+							ttm = _pSong->tracks()-1;
 							if ( tOff != ttm-VISTRACKS ) 
 							{ 
 								ntOff = ttm-VISTRACKS+1; 
@@ -843,8 +843,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							if (nPos < 0)
 								ntOff= 0;
-							else if (nPos>_pSong->SONGTRACKS-VISTRACKS)
-								ntOff=_pSong->SONGTRACKS-VISTRACKS;
+							else if (nPos>_pSong->tracks()-VISTRACKS)
+								ntOff=_pSong->tracks()-VISTRACKS;
 							else
 								ntOff=nPos;
 							bScrollDetatch=true;
@@ -856,8 +856,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							if (nPos < 0)
 								ntOff= 0;
-							else if (nPos>_pSong->SONGTRACKS-VISTRACKS)
-								ntOff=_pSong->SONGTRACKS-VISTRACKS;
+							else if (nPos>_pSong->tracks()-VISTRACKS)
+								ntOff=_pSong->tracks()-VISTRACKS;
 							else
 								ntOff=nPos;
 							bScrollDetatch=true;
@@ -1199,7 +1199,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					case SB_LINERIGHT:
 					case SB_PAGERIGHT:
-						if ( tOff<_pSong->SONGTRACKS-VISTRACKS)
+						if ( tOff<_pSong->tracks()-VISTRACKS)
 						{
 							ntOff=tOff+1;
 //	Disabled, since people find it as a bug, not as a feature.
@@ -1230,7 +1230,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					case SB_THUMBTRACK:
 						if (ntOff!=(int)nPos)
 						{
-							const int nt = _pSong->SONGTRACKS;
+							const int nt = _pSong->tracks();
 							ntOff=(int)nPos;
 							if (ntOff >= nt)
 							{
