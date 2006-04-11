@@ -48,8 +48,7 @@ public:
     virtual void onMouseEnter();
     virtual void onMouseExit();
 
-    virtual void add(NRuntime* comp);
-    void add(NMenu* menu);
+    virtual void add(NMenu* menu);
 
     virtual int preferredWidth() const;
     virtual int preferredHeight() const;

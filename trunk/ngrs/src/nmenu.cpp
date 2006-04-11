@@ -171,3 +171,8 @@ void NMenu::add( std::string create )
   } while (i != std::string::npos);
 }
 
+NCustomMenuItem * NMenu::itemByName( const std::string & name )
+{
+  return popupMenu_->itemByName(name);
+}
+

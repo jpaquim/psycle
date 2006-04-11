@@ -111,6 +111,7 @@ private:
 
    pthread_mutex_t m_Mutex;
    static bool in_thread_;
+
 };
 
 #endif

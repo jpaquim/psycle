@@ -100,6 +100,8 @@ public:
     int dblWidth() const;
     int dblHeight() const;
 
+    void setVisible(bool on);
+
 private:
 
    NColor old;
@@ -119,18 +121,19 @@ private:
 
    Pixmap doubleBufferPixmap_;
 
-   void createGraphicHandles();
-   void destroyGraphicHandles();
+   void createDblBufferHandles();
+   void destroyDblBufferHandles();
    void copyDblBuffer(const NRect &  repaintArea);
    void drawXftString(int x, int y, const char* s);
 
    NFontStructure fntStruct;
    XftColor fFtColor;
-   XftDraw* draw;
+   XftDraw* drawDbl;
+   XftDraw* drawWin;
 
    NRegion region_;
 
-
+   bool visible_;
 };
 
 #endif

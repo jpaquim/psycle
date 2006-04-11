@@ -109,3 +109,8 @@ const NRect & NRegion::rectClipBox( ) const
   }
   return clipBox;
 }
+
+bool NRegion::intersects( int x, int y )
+{
+  return XPointInRegion(region_,x,y);
+}

@@ -66,8 +66,6 @@ public:
     NGraphics* graphics();
     NGraphics* graphics(NVisualComponent* comp);
 
-    void repaint(NVisualComponent* sender, int x, int y, int w, int h  , bool swap = true);
-    void repaint(NVisualComponent* sender, const NRect & repaintArea, bool swap = true);
     void repaint(NVisualComponent* sender, const NRegion & repaintArea, bool swap = true);
 
     int width()  const;

@@ -25,14 +25,22 @@ NGraphics::NGraphics(Window winID)
 {
   dx_=dy_=0;
   dblWidth_ = 0; dblHeight_ = 0;
-  dblBuffer_=true;
+  dblBuffer_=false;
   fFtColor.color.red   = 0x0000;
   fFtColor.color.green = 0x0000;
   fFtColor.color.blue  = 0x0000;
   fFtColor.color.alpha = 0xFFFF; // Alpha blending
   win = winID;
-  gc_   = XCreateGC(NApp::system().dpy(),winID,0,0);
-  createGraphicHandles();
+
+  gc_     = XCreateGC(NApp::system().dpy(),winID,0,0);
+  drawWin = XftDrawCreate(NApp::system().dpy(), win, NApp::system().visual(),NApp::system().colormap());
+  
+  doubleBufferPixmap_=0;
+  gcp = 0;
+  drawDbl = 0;
+
+
+  visible_ = false;
 
   setFont(fnt);
   setForeground(oldColor);
@@ -42,8 +50,9 @@ NGraphics::NGraphics(Window winID)
 
 NGraphics::~NGraphics()
 {
-  if (!dblBuffer_) {
-    XftDrawDestroy(draw);
+  XftDrawDestroy(drawWin);
+  if (dblBuffer_) {
+     destroyDblBufferHandles();
   }
 }
 
@@ -55,34 +64,34 @@ void NGraphics::fillRect( int x, int y, int width, int height )
      XFillRectangle(NApp::system().dpy(),win,gc_,x+dx_,y+dy_,width,height);
 }
 
-void NGraphics::createGraphicHandles( )
+void NGraphics::createDblBufferHandles( )
 {
   XWindowAttributes attr;
   XGetWindowAttributes( NApp::system().dpy(), win, &attr );
+
   if (dblBuffer_) {
-    doubleBufferPixmap_ = XCreatePixmap(NApp::system().dpy(), win, attr.width, attr.height, NApp::system().depth());
-    gcp = XCreateGC(NApp::system().dpy(),doubleBufferPixmap_,0,0);
-    dblWidth_  = attr.width;
-    dblHeight_ = attr.height;
-    XSetForeground( NApp::system().dpy(), gcp, oldColor.colorValue() );
+      doubleBufferPixmap_ = XCreatePixmap(NApp::system().dpy(), win, attr.width, attr.height, NApp::system().depth());
+      gcp = XCreateGC(NApp::system().dpy(),doubleBufferPixmap_,0,0);
+      dblWidth_  = attr.width;
+      dblHeight_ = attr.height;
+      XSetForeground( NApp::system().dpy(), gcp, oldColor.colorValue() );
+      drawDbl = XftDrawCreate(NApp::system().dpy(), doubleBufferPixmap_, NApp::system().visual(), NApp::system().colormap());
   } else
   {
     doubleBufferPixmap_=0;
     gcp = 0;
+    drawDbl = 0;
     XSetForeground( NApp::system().dpy(), gc_, oldColor.colorValue() );
   }
-  if (dblBuffer_)
-     draw = XftDrawCreate(NApp::system().dpy(), doubleBufferPixmap_, NApp::system().visual(), NApp::system().colormap());
-
 
 }
 
-void NGraphics::destroyGraphicHandles( )
+void NGraphics::destroyDblBufferHandles( )
 {
   if (dblBuffer_) {
     XFreeGC(NApp::system().dpy(), gcp);
     XFreePixmap(NApp::system().dpy(), doubleBufferPixmap_);
-    XftDrawDestroy(draw);
+    XftDrawDestroy(drawDbl);
   }
 }
 
@@ -95,8 +104,8 @@ void NGraphics::setTranslation( long dx, long dy )
 void NGraphics::resize(int width, int height )
 {
   if (dblBuffer_) {
-    destroyGraphicHandles();
-    createGraphicHandles();
+    destroyDblBufferHandles();
+    createDblBufferHandles();
   }
 }
 
@@ -107,7 +116,7 @@ void NGraphics::copyDblBuffer( const NRect & repaintArea )
 
 void NGraphics::swap(const NRect & repaintArea )
 {
-  copyDblBuffer(repaintArea);
+  if (dblBuffer_) copyDblBuffer(repaintArea);
 }
 
 long NGraphics::xTranslation( )
@@ -137,7 +146,10 @@ void NGraphics::setFont( const NFont & font )
 
 void NGraphics::drawXftString( int x, int y, const char * s )
 {
-   XftDrawString8(draw, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
+   if (dblBuffer_)
+      XftDrawString8(drawDbl, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
+   else
+     XftDrawString8(drawWin, &fFtColor, fntStruct.xftFnt , x, y,reinterpret_cast<const FcChar8 *>(s), strlen(s));
 }
 
 void NGraphics::drawText( int x, int y, const std::string & text )
@@ -233,11 +245,14 @@ void NGraphics::setRegion( const NRegion & region )
 
 void NGraphics::setClipping( const NRegion & region )
 {
-  if (dblBuffer_)
+  if (dblBuffer_) {
     XSetRegion(NApp::system().dpy(), gcp,region.xRegion());
-  else
+    XftDrawSetClip(drawDbl,region.xRegion());
+  }
+  else {
     XSetRegion(NApp::system().dpy(), gc_,region.xRegion());
-  XftDrawSetClip(draw,region.xRegion());
+    XftDrawSetClip(drawWin,region.xRegion());
+  }
 }
 
 void NGraphics::fillTranslucent( int x, int y, int width, int height, NColor color, int percent )
@@ -353,14 +368,10 @@ void NGraphics::setDoubleBuffer( bool on )
 {
   if (dblBuffer_ == on) return;
   if (dblBuffer_ && !on) {
-       destroyGraphicHandles();
        dblBuffer_ = on;
-       draw = XftDrawCreate(NApp::system().dpy(), win, NApp::system().visual(), NApp::system().colormap());
   } else
   if (!dblBuffer_ && on) {
-     XftDrawDestroy(draw);
       dblBuffer_ = on;
-      createGraphicHandles();
   }
 }
 
@@ -813,5 +824,17 @@ int NGraphics::findWidthMax(long width, const NFntString & data, bool wbreak) co
   }
   return Mid;
 
+}
+
+void NGraphics::setVisible( bool on )
+{
+  visible_ = on;
+  if (!on) {
+    destroyDblBufferHandles();
+    dblBuffer_ = false;
+  } else {
+    dblBuffer_ = true;
+    createDblBufferHandles();
+  }
 }
 

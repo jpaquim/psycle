@@ -24,6 +24,7 @@
 #include "nlistlayout.h"
 #include "nmenuseperator.h"
 
+
 /**
 @author Stefan
 */
@@ -50,6 +51,8 @@ public:
 
     void onSubMenuMapped(NObject* sender);
 
+    NCustomMenuItem* itemByName(const std::string & name);
+
 private:
 
    NListLayout* nl;
@@ -59,6 +62,7 @@ private:
 
    void onItemEnter(NEvent * ev);
 
+   std::vector<NCustomMenuItem*> items;
 };
 
 #endif

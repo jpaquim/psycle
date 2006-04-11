@@ -74,6 +74,7 @@ void NVisualComponent::draw( NGraphics * g, const NRegion & repaintArea , NVisua
    region &= oldRegion;   // do intersection
 
    if (!region.isEmpty()) {
+    //std::cout << name() << std::endl;
 
     g->setRepaintArea(repaintArea);  // set repaintArea to graphics
 
@@ -248,7 +249,7 @@ NVisualComponent * NVisualComponent::overObject( NGraphics* g, long absX, long a
 
   g->setTranslation(g->xTranslation()+left()-scrollDx_+spacing().left()+borderLeft(),g->yTranslation()+top()-scrollDy_+spacing().top()+borderTop());
 
-  if (!region.isEmpty() && XPointInRegion(region.xRegion(),absX,absY) && events()) {
+  if (!region.isEmpty() && region.intersects(absX,absY) && events()) {
        g->setRegion(region);
        if (visualComponents_.size()>0)
          for( vector<NVisualComponent*>::iterator itr = visualComponents_.end()-1; itr >= visualComponents_.begin(); itr--) {
@@ -404,7 +405,7 @@ void NVisualComponent::onMove( const NMoveEvent & moveEvent )
 void NVisualComponent::repaint(bool swap )
 {
   NWindow* win = window();
-  if (win != 0) win->repaint(this,absoluteLeft(),absoluteTop(), width(), height(),swap);
+  if (win != 0) win->repaint(this,NRect(absoluteLeft(),absoluteTop(), width(), height()),swap);
 }
 
 void NVisualComponent::setWindow( class NWindow * win )
