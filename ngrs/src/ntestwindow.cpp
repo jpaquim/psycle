@@ -50,6 +50,8 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
+  testMenu();
+
   NPanel* prop = new NPanel();
     prop->setWidth(210);
     NGroupBox* macProp = new NGroupBox();
@@ -57,13 +59,11 @@ NTestWindow::NTestWindow()
   pane()->add(prop,nAlRight);
 
 
-
   NListBox* box = new NListBox();
      for (int i = 0; i < 200; i++)
        box->add(new NItem("hkjdsahk kjdsh kjdsa"));
   pane()->add(box,nAlClient);
 
- 
 }
 
 
@@ -138,21 +138,38 @@ void NTestWindow::testLine( )
 
 void NTestWindow::testMenu( )
 {
-  fDialog = new NFileDialog();
+ /* fDialog = new NFileDialog();
     fDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
-  add(fDialog);
+  add(fDialog);*/
+
+ // NWindow* popupMenu_ = new NWindow();
+
+  //NWindow* win1 = new NWindow();
 
   NMenuBar* menuBar_ = new NMenuBar();
+  menuBar_->setName("menuBar_");
   pane()->add(menuBar_);
   NMenu* menu1 = new NMenu("Bearbeiten",'b');
   menuBar_->add(menu1);
 
-  NMenuItem* item = new NMenuItem("open");
+  /*NPanel* test = test = new NPanel();
+    test->skin_.gradientStyle=1;
+    test->skin_.gradStartColor = NColor(200,200,200);
+    test->setHeight(20);
+    test->setLayout(new NFlowLayout(nAlLeft));
+  pane()->add(test, nAlTop);
+  test->add(new NButton("Hallo"));*/
+
+
+
+  /*NMenuItem* item = new NMenuItem("open");
+    NMenu* menu = new NMenu();
+    item->add(menu);
   menu1->add(item);
   item->click.connect(this,&NTestWindow::onOpen);
 
   NCheckMenuItem* item1 = new NCheckMenuItem("test");
-  menu1->add(item1);
+  menu1->add(item1);*/
 }
 
 void NTestWindow::testSpinButton( )

@@ -277,7 +277,7 @@ NFileDialog::NFileDialog()
 
   do_Execute = false;
 
-  setWidth(500);
+  setPosition(0,0,500,500);
 }
 
 

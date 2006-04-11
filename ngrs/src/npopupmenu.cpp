@@ -173,6 +173,8 @@ void NPopupMenu::add( NCustomMenuItem * item )
   pane()->add(item);
   item->mouseEnter.connect(this,&NPopupMenu::onItemEnter);
   item->subMenuMapped.connect(this, &NPopupMenu::onSubMenuMapped);
+
+  items.push_back(item);
 }
 
 void NPopupMenu::onItemEnter( NEvent * ev )
@@ -184,5 +186,15 @@ void NPopupMenu::onItemEnter( NEvent * ev )
 void NPopupMenu::onSubMenuMapped( NObject * sender)
 {
   subMenuItem_ = static_cast<NCustomMenuItem*>(sender);
+}
+
+NCustomMenuItem * NPopupMenu::itemByName( const std::string & name )
+{
+  for (std::vector<NCustomMenuItem*>::iterator it = items.begin(); it < items.end(); it++) {
+     NCustomMenuItem* item = *it;
+     if (item->text() == name) return item;
+  }
+
+  return 0;
 }
 

@@ -20,7 +20,7 @@
 #include "ncustommenuitem.h"
 
 NCustomMenuItem::NCustomMenuItem()
- : NPanel()
+ : NCustomItem()
 {
   setTransparent(true);
   setBorder(0);
@@ -81,6 +81,15 @@ char NCustomMenuItem::mnemonic()
 void NCustomMenuItem::setMnemonic(char c)
 {
   mnemonic_ = c;
+}
+
+void NCustomMenuItem::add( NMenu * menu )
+{
+}
+
+void NCustomMenuItem::add( NRuntime * comp )
+{
+  NVisualComponent::add(comp);
 }
 
 

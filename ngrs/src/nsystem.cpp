@@ -89,7 +89,7 @@ Window NSystem::registerWindow(Window parent )
                     ButtonPressMask| ButtonReleaseMask | PointerMotionMask
                     |PropertyChangeMask | NoEventMask | StructureNotifyMask |  GravityNotify;
   win_ = XCreateWindow(dpy(), parent,
-                        0, 0, 400, 400,
+                        0, 0, 10, 10,
                         0, depth(), InputOutput, visual(),
                         CWBackPixel | CWColormap | CWEventMask  | CWWinGravity | CWBitGravity ,
                         &attr) ;

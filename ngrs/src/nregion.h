@@ -42,32 +42,33 @@ public:
     void setPolygon(XPoint*  pts , int size);
     bool isEmpty() const;
     const NRect & rectClipBox() const;
+    bool intersects(int x, int y);
 
     /// intersection
     inline NRegion & operator &= (const NRegion &);
-    
+
     /// union
     inline NRegion & operator |= (const NRegion &);
-    
+
     /// difference
     inline NRegion & operator -= (const NRegion &);
 
     /// symetric difference
     inline NRegion & operator ^= (const NRegion &);
 
-public:    
+public:
     ///\name specific to X Window implementation
     ///\{
         /// warning: this pointer can change
         inline Region xRegion() const throw() { return region_; }
-        
+
         /// implicit conversion to X const Region.
         inline operator const Region () const throw() { return region_; }
 
         /// implicit conversion to X Region.
         inline operator Region () throw() { return region_; }
    ///\}
-    
+
 private:
 
     Region region_;
@@ -92,7 +93,7 @@ inline NRegion operator & (const NRegion & lhs , const NRegion & rhs)
 inline NRegion & NRegion::operator |= (const NRegion & that)
 {
   XUnionRegion(*this, that, *this);
-  return *this;  
+  return *this;
 }
 
 inline NRegion operator | (const NRegion & lhs, const NRegion & rhs)

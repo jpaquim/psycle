@@ -60,6 +60,8 @@ public:
 
    NObject* selectedItem();
 
+   NCustomMenuItem* itemByName(const std::string & name);
+
 private:
 
     NSkin btnOver_;

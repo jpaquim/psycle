@@ -20,13 +20,13 @@
 #ifndef NCUSTOMMENUITEM_H
 #define NCUSTOMMENUITEM_H
 
-#include <npanel.h>
+#include <ncustomitem.h>
 #include "nalignlayout.h"
 
 /**
 @author Stefan
 */
-class NCustomMenuItem : public NPanel
+class NCustomMenuItem : public NCustomItem
 {
 public:
     NCustomMenuItem();
@@ -44,6 +44,9 @@ public:
     virtual int maxCaptionSize();
     virtual int maxShortCutSize();
     virtual int maxHintSize();
+
+    virtual void add(class NMenu* menu);
+    virtual void add(NRuntime* comp);
 
     signal1<NButtonEvent*> click;
 

@@ -48,18 +48,18 @@ void NMenuItem::init( )
   iconField_->setWidth(20);
   iconField_->setBorder(0);
   iconField_->setTransparent(true);
-  add(iconField_);
+  NCustomMenuItem::add(iconField_);
   caption_ = new NLabel();
   caption_->setEvents(false);
-  add(caption_);
+  NCustomMenuItem::add(caption_);
   caption_->setWidth(caption_->preferredWidth());
   menu_ = 0;
 
   shortCut_ = new NLabel();
   shortCut_->setEvents(false);
-  add(shortCut_);
+  NCustomMenuItem::add(shortCut_);
   subMenuHint_ = new NLabel();
-  add(subMenuHint_);
+  NCustomMenuItem::add(subMenuHint_);
   subMenuHint_->setEvents(false);
 
   gap_ = 10;
@@ -122,10 +122,6 @@ void NMenuItem::add( NMenu * menu )
   subMenuHint_->setText(">");
 }
 
-void NMenuItem::add( NRuntime* comp )
-{
-  NVisualComponent::add(comp);
-}
 
 NMenuItem::NMenuItem( std::string text )
 {
