@@ -76,6 +76,7 @@ private:
 
     NMenuBar* menuBar_;
     NMenu* fileMenu_;
+    NMenu* recentFileMenu_;
     NMenu* editMenu_;
     NMenu* viewMenu_;
     NMenu* configurationMenu_;
