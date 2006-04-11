@@ -277,6 +277,9 @@ void MainWindow::initMenu( )
       ,"New,Open,Import Module,Save,Save as,Render as Wav,|,Song properties,|,revert to Saved,recent Files,Exit");
    menuBar_->add(fileMenu_);
 
+//   recentFileMenu_ = new NMenu();
+//   fileMenu_->itemByName("recent Files")->add(recentFileMenu_);
+
    editMenu_ = new NMenu("Edit",'e',
        "Undo,Redo,Pattern Cut,Pattern Copy,Pattern Paste,Pattern Mix Paster,Pattern Delete,|,Block Cut,Block Copy,Block Paste,Block Mix Paste,Block Delete,|,Sequence Cut,Sequence Copy,Sequence Delete");
    menuBar_->add(editMenu_);
