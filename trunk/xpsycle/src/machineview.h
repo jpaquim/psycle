@@ -26,6 +26,7 @@
 #include <nscrollbox.h>
 #include <nautoscrolllayout.h>
 #include <nlabel.h>
+#include <ndockpanel.h>
 
 
 class Machine;
@@ -60,7 +61,7 @@ private:
 
 
 
-class MachineView : public NPage
+class MachineView : public NDockPanel
 {
 public:
     MachineView();
@@ -71,7 +72,6 @@ public:
     void addMachine(Machine* mac);
     void removeMachines();
 
-    void resize();
     void update();
 
     NPanel* scrollArea();
@@ -97,6 +97,8 @@ private:
    MachineGUI* findByMachine(Machine* mac);
 
    std::vector<MachineGUI*> machineGUIs;
+
+   NLayout* alignLayout;
 };
 
 #endif

@@ -551,8 +551,10 @@ void MainWindow::initToolBar( )
     bpmDecBtnOne->setFlat(false);
     psycleControlBar_->add(bpmDecBtnOne)->clicked.connect(this,&MainWindow::onBpmDecOne);
 
-    bpmLabel_ = new NLabel("125");
-    psycleControlBar_->add(bpmLabel_);
+    bpmDisplay_ = new N7SegDisplay(3);
+      bpmDisplay_->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      bpmDisplay_->setNumber(125);
+    psycleControlBar_->add(bpmDisplay_);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") 
@@ -588,8 +590,10 @@ void MainWindow::initToolBar( )
        lessTpbButton->clicked.connect(this,&MainWindow::onTpbDecOne);
     psycleControlBar_->add(lessTpbButton);
 
-     tpbLabel_ = new NLabel("4");
-    psycleControlBar_->add(tpbLabel_);
+    tpbDisplay_ = new N7SegDisplay(2);
+      tpbDisplay_->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      tpbDisplay_->setNumber(4);
+    psycleControlBar_->add(tpbDisplay_);
 
    img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
@@ -946,24 +950,25 @@ void MainWindow::onBpmDecTen(NButtonEvent* ev)
 
 void MainWindow::setAppSongBpm(int x)
 {
-   char buffer[16];
+   int bpm = 0;
    if ( x != 0 ) {
      if (Global::pPlayer()->_playing )  {
         Global::pSong()->BeatsPerMin(Global::pPlayer()->bpm+x);
      } else Global::pSong()->BeatsPerMin(Global::pSong()->BeatsPerMin()+x);
      Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(),Global::pSong()->LinesPerBeat());
-     sprintf(buffer,"%d",Global::pSong()->BeatsPerMin());
+     bpm = Global::pSong()->BeatsPerMin();
    }
-   else sprintf(buffer,"%d",Global::pPlayer()->bpm);
+   else bpm = Global::pPlayer()->bpm;
 
-   bpmLabel_->setText(buffer);
-   psycleControlBar_->resize();
-   psycleControlBar_->repaint();
+   bpmDisplay_->setNumber(Global::pPlayer()->bpm);
+
+   bpmDisplay_->repaint();
 }
 
 void MainWindow::setAppSongTpb(int x)
 {
-  char buffer[16];
+  int tpb = 0;
+
   if ( x != 0)
   {
      if (Global::pPlayer()->_playing )
@@ -971,11 +976,11 @@ void MainWindow::setAppSongTpb(int x)
      else 
        Global::pSong()->LinesPerBeat(Global::pSong()->LinesPerBeat()+x);
        Global::pPlayer()->SetBPM(Global::pSong()->BeatsPerMin(), Global::pSong()->LinesPerBeat());
-       sprintf(buffer,"%d",Global::pSong()->LinesPerBeat());
-  } else sprintf(buffer, "%d", Global::pPlayer()->tpb);
+       tpb = Global::pSong()->LinesPerBeat();
+  } else tpb = Global::pPlayer()->tpb;
 
-  tpbLabel_->setText(buffer);
-  psycleControlBar_->resize();
+  tpbDisplay_->setNumber(tpb);
+
   psycleControlBar_->repaint();
 }
 
