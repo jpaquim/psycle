@@ -1455,7 +1455,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				Global::pConfig->_pMidiInput->Close();
 				*/
 
-				if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb))
+				if ( fb == -1 || !Global::_pSong->CreateMachine(dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(), fb))
 				{
 					MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}

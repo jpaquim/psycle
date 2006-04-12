@@ -4,12 +4,12 @@
 ///\brief implementation file for psycle::host::CPsycleApp.
 #include <packageneric/pre-compiled.private.hpp>
 #include PACKAGENERIC
-#include <psycle/host/gui/psycle.hpp>
+#include "psycle.hpp"
+#include "ConfigDlg.hpp"
+#include "MainFrm.hpp"
+#include "NewMachine.hpp"
 #include <psycle/host/version.hpp>
-#include <psycle/host/gui/ConfigDlg.hpp>
-#include <psycle/host/gui/MainFrm.hpp>
 #include <psycle/host/engine/midiinput.hpp>
-#include <psycle/host/gui/NewMachine.hpp>
 #include <universalis/processor/exception.hpp>
 #include <sstream>
 

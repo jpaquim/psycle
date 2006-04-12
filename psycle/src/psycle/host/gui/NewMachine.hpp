@@ -77,11 +77,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			std::string desc;
 			std::string version;
 			std::string category;
-			int Outputmachine;
-			int OutBus;
-			int LastType0;
-			int LastType1;
-			bool machtype; //false = generator, true = effect
+			///\todo [bohan] please someone check this type and document
+			Machine::type_type Outputmachine;
+			///\todo [bohan] please someone check this type and document
+			Machine::id_type OutBus;
+			///\todo [bohan] please someone check this type and document
+			Machine::type_type LastType0;
+			///\todo [bohan] please someone check this type and document
+			Machine::type_type LastType1;
+			///\todo [bohan] please someone check this type and document
+			bool machtype; //false = generator, true = effect ... erm.
 		};
 
 		/// new machine dialog window.
@@ -92,7 +97,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			~CNewMachine();
 			CImageList imgList;
 			HTREEITEM tHand;
-			int Outputmachine;
+			Machine::type_type Outputmachine;
 			std::string psOutputDll;
 			int OutBus;
 			static int pluginOrder;

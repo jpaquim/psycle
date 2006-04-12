@@ -410,7 +410,7 @@ namespace psycle
 
 		float * Player::Work(void* context, int & numSamples)
 		{
-			return reinterpret_cast<Player&>(context).Work(numSamples);
+			return reinterpret_cast<Player*>(context)->Work(numSamples);
 		}
 
 		float * Player::Work(int & numSamples)

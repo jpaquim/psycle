@@ -1,5 +1,6 @@
 #pragma once
 #include <psycle/host/version.hpp>
+#include <psycle/plugin_interface.hpp>
 #include <cstdint>
 namespace psycle
 {
@@ -19,8 +20,8 @@ namespace psycle
 		int const MAX_SEQUENCES = 1;
 		/// harcoded maximal number different patterns.
 		int const MAX_PATTERNS = 256;
-		/// Max number of pattern tracks
-		int const MAX_TRACKS = 64;
+		/// Max number of pattern tracks, as defined in <psycle/plugin_interface.hpp>
+		using psycle::plugin_interface::MAX_TRACKS;
 		/// harcoded maximal number of lines per pattern
 		int const MAX_LINES = 256;
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.

@@ -155,8 +155,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[0]->machtype = false;
 			_pInternalMachines[0]->Outputmachine = MACH_SAMPLER;
 			_pInternalMachines[0]->OutBus = true;
-			_pInternalMachines[0]->LastType0 = 0;
-			_pInternalMachines[0]->LastType1 = 0;
+			_pInternalMachines[0]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[0]->LastType1 = Machine::type_type(0);
 			
 			_pInternalMachines[1] = new InternalMachineInfo;
 			_pInternalMachines[1]->name = "Dummy";
@@ -165,8 +165,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[1]->machtype = true;
 			_pInternalMachines[1]->Outputmachine = MACH_DUMMY;
 			_pInternalMachines[1]->OutBus = false;
-			_pInternalMachines[1]->LastType0 = 0;
-			_pInternalMachines[1]->LastType1 = 1;
+			_pInternalMachines[1]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[1]->LastType1 = Machine::type_type(1);
 			
 			_pInternalMachines[2] = new InternalMachineInfo;
 			_pInternalMachines[2]->name = "Sampulse Sampler V2";
@@ -175,8 +175,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[2]->machtype = false;
 			_pInternalMachines[2]->Outputmachine = MACH_XMSAMPLER;
 			_pInternalMachines[2]->OutBus = true;
-			_pInternalMachines[2]->LastType0 = 0;
-			_pInternalMachines[2]->LastType1 = 0;
+			_pInternalMachines[2]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[2]->LastType1 = Machine::type_type(0);
 			
 			_pInternalMachines[3] = new InternalMachineInfo;
 			_pInternalMachines[3]->name = "Note Duplicator";
@@ -185,8 +185,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[3]->machtype = false;
 			_pInternalMachines[3]->Outputmachine = MACH_DUPLICATOR;
 			_pInternalMachines[3]->OutBus = true;
-			_pInternalMachines[3]->LastType0 = 0;
-			_pInternalMachines[3]->LastType1 = 0;
+			_pInternalMachines[3]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[3]->LastType1 = Machine::type_type(0);
 
 			_pInternalMachines[4] = new InternalMachineInfo;
 			_pInternalMachines[4]->name = "Send/Return Mixer";
@@ -195,8 +195,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[4]->machtype = true;
 			_pInternalMachines[4]->Outputmachine = MACH_MIXER;
 			_pInternalMachines[4]->OutBus = false;
-			_pInternalMachines[4]->LastType0 = 0;
-			_pInternalMachines[4]->LastType1 = 0;
+			_pInternalMachines[4]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[4]->LastType1 = Machine::type_type(0);
 
 			_pInternalMachines[5] = new InternalMachineInfo;
 			_pInternalMachines[5]->name = "Global LFO";
@@ -205,8 +205,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pInternalMachines[5]->machtype = true;
 			_pInternalMachines[5]->Outputmachine = MACH_LFO;
 			_pInternalMachines[5]->OutBus = false;
-			_pInternalMachines[5]->LastType0 = 0;
-			_pInternalMachines[5]->LastType1 = 0;
+			_pInternalMachines[5]->LastType0 = Machine::type_type(0);
+			_pInternalMachines[5]->LastType1 = Machine::type_type(0);
 
 			LoadCategoriesFile();
 			UpdateList();
@@ -511,7 +511,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				RemoveCatSpaces(NULL);
 			break;
 			}
-			Outputmachine = -1;
+			Outputmachine = Machine::type_type(-1);
 		}
 
 		HTREEITEM CNewMachine::CategoryExists (HTREEITEM hParent, CString category)
@@ -592,7 +592,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
-			Outputmachine = -1;
+			Outputmachine = Machine::type_type(-1);
 			OutBus = false;
 			int i = m_browser.GetItemData (tHand);
 			
