@@ -141,7 +141,12 @@ void NGraphics::setForeground( const NColor & color )
 void NGraphics::setFont( const NFont & font )
 {
   fntStruct = font.systemFont();
-  if (!fntStruct.antialias) XSetFont(NApp::system().dpy(),gcp,fntStruct.xFnt->fid);
+  if (!fntStruct.antialias) {
+    if (dblBuffer_)
+       XSetFont(NApp::system().dpy(),gcp,fntStruct.xFnt->fid);
+    else
+       XSetFont(NApp::system().dpy(),gc_,fntStruct.xFnt->fid);
+  }
 }
 
 void NGraphics::drawXftString( int x, int y, const char * s )
