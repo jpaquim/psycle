@@ -1,11 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::Machine
 #pragma once
-#include <psycle/host/engine/SongStructs.hpp>
-#include <psycle/host/engine/dsp.hpp>
-#include <psycle/host/engine/helpers.hpp>
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/engine/FileIO.hpp>
+#include "SongStructs.hpp"
+#include "dsp.hpp"
+#include "helpers.hpp"
+#include "constants.hpp"
+#include "FileIO.hpp"
 #include <psycle/host/global.hpp>
 #include <universalis/processor/exceptions/fpu.hpp>
 #include <universalis/compiler/location.hpp>
@@ -129,21 +129,24 @@ namespace psycle
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
 		{
-		public:
-			/// Short name
-			const char * name;		
-			/// >= 0
-			int minValue;
-			/// <= 65535
-			int maxValue;
+			public:
+				/// Short name
+				const char * name;		
+				/// >= 0
+				int minValue;
+				/// <= 65535
+				int maxValue;
 		};
 
 		class AudioPort;
+
 		// A wire is what interconnects two AudioPorts. Appart from being the graphically representable element,
 		//	the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
 		class Wire
 		{
 		public:
+			PSYCLE__STRONG_TYPEDEF(int, id_type);
+
 			Wire()
 				:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
 				,index(0),senderport(0),receiverport(0){};
@@ -218,6 +221,7 @@ namespace psycle
 		protected:
 			InPort(){};
 		public:
+			PSYCLE__STRONG_TYPEDEF(int, id_type);
 			InPort(Machine* powner,int arrangement,std::string name)
 			{
 				AudioPort(powner,arrangement,name);
@@ -231,12 +235,43 @@ namespace psycle
 		protected:
 			OutPort(){};
 		public:
+			PSYCLE__STRONG_TYPEDEF(int, id_type);
 			OutPort(Machine* powner,int arrangement,std::string name)
 			{
 				AudioPort(powner,arrangement,name);
 			}
 			virtual ~OutPort(){};
 			virtual void CollectData(int numSamples);
+		};
+
+		enum MachineType
+		{
+			MACH_UNDEFINED = -1, //< :-(
+			MACH_MASTER = 0,
+			MACH_SINE = 1, //< for psycle old fileformat version 2
+			MACH_DIST = 2, //< for psycle old fileformat version 2
+			MACH_SAMPLER = 3,
+			MACH_DELAY = 4, //< for psycle old fileformat version 2
+			MACH_2PFILTER = 5, //< for psycle old fileformat version 2
+			MACH_GAIN = 6, //< for psycle old fileformat version 2
+			MACH_FLANGER = 7, //< for psycle old fileformat version 2
+			MACH_PLUGIN = 8,
+			MACH_VST = 9,
+			MACH_VSTFX = 10,
+			MACH_SCOPE = 11,
+			MACH_XMSAMPLER = 12,
+			MACH_DUPLICATOR = 13,
+			MACH_MIXER = 14,
+			MACH_LFO = 15,
+			MACH_DUMMY = 255
+		};
+
+		enum MachineMode
+		{
+			MACHMODE_UNDEFINED = -1, //< :-(
+			MACHMODE_GENERATOR = 0,
+			MACHMODE_FX = 1,
+			MACHMODE_MASTER = 2,
 		};
 
 		/// Base class for "Machines", the audio producing elements.
@@ -282,7 +317,9 @@ namespace psycle
 					cpu::cycles_type        wire_cpu_cost_;
 			///\}
 
-		public:
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
 			// Draft for a new Machine Specification.
 			// A machine is created via pMachine = new Machine;
 			// Creation does not give a ready to use Machine. "The machine is over the table, but the power is off!"
@@ -309,102 +346,147 @@ namespace psycle
 			// several "Set" for Information (name, params...)
 			// Automation... calling, or being called? ( calling automata.work() or automata calling machine.work())
 			// Use the concept of "Ports" to define inputs/outputs.
-			
-
+			//
 			// bool IsDllLoaded()
 			// bool IsPowered()
 			// bool IsBypass()
 			// bool IsStandBy()
-			// GetDllName()
-			Machine();
-			virtual ~Machine() throw();
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+
+			///\name each machine has a type attribute so that we can make yummy switch statements
+			///\{
+				public:
+					///\see enum MachineType which defined somewhere outside
+					typedef MachineType type_type;
+					Machine::type_type inline type() const throw() { return _type; }
+				PSYCLE__PRIVATE:
+					type_type _type;
+			///\}
+
+			///\name each machine has a mode attribute so that we can make yummy switch statements
+			///\{
+				public:
+					///\see enum MachineMode which defined somewhere outside
+					typedef MachineMode mode_type;
+					mode_type inline mode() const throw() { return _mode; }
+				PSYCLE__PRIVATE:
+					mode_type _mode;
+			///\}
+
+			///\name machine's numeric identifier used in the patterns and gui display
+			///\{
+				public:
+					///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
+					PSYCLE__STRONG_TYPEDEF(int, id_type);
+					id_type id() const throw() { return _macIndex; }
+				PSYCLE__PRIVATE:
+					/// it's currently actually used as an array index, but that shouldn't be part of the interface
+					id_type _macIndex;
+			///\}
+
+			public:
+				Machine(type_type type, mode_type mode, id_type id);
+				virtual ~Machine() throw();
 
 			//////////////////////////////////////////////////////////////////////////
 			// Actions
 
 			///\name the life cycle of a mahine
 			///\{
-				virtual void Init();
-				virtual void PreWork(int numSamples);
-				virtual void Work(int numSamples);
-				virtual void WorkNoMix(int numSamples);
-				virtual void Tick() {};
-				virtual void Tick(int track, PatternEntry * pData) {};
-				virtual void Stop() {};
+				public:
+					virtual void Init();
+					virtual void PreWork(int numSamples);
+					virtual void Work(int numSamples);
+					virtual void WorkNoMix(int numSamples);
+					virtual void Tick() {};
+					virtual void Tick(int track, PatternEntry * pData) {};
+					virtual void Stop() {};
 			///\}
 
 			///\name (de)serialization
 			///\{
-				virtual void SaveDllName(RiffFile * pFile);
-				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-				static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
-				virtual void SaveFileChunk(RiffFile * pFile);
-				virtual void SaveSpecificChunk(RiffFile * pFile);
-				/// Loader for psycle fileformat version 2.
-				virtual bool LoadOldFileFormat(RiffFile * pFile);
+				public:
+					virtual void SaveDllName(RiffFile * pFile);
+					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+					static Machine * LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
+					virtual void SaveFileChunk(RiffFile * pFile);
+					virtual void SaveSpecificChunk(RiffFile * pFile);
+				protected: friend class Song;
+					/// Loader for psycle fileformat version 2.
+					virtual bool LoadOldFileFormat(RiffFile * pFile);
 			///\}
 
-			///\name connections
+			///\name connections ... ports
 			///\{
-				virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
-				virtual bool Disconnect(Machine* dstMac);
+				public:
+					virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
+					virtual bool Disconnect(Machine & dst);
 			///\}
 
-			///\name ...
+			///\name connections ... wires
 			///\{
-				virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
-				virtual int FindInputWire(int macIndex);
-				virtual int FindOutputWire(int macIndex);
+				public:
+					virtual void InitWireVolume(type_type, Wire::id_type, float value);
+					virtual Wire::id_type FindInputWire(id_type);
+					virtual Wire::id_type FindOutputWire(id_type);
 			///\}
 
 			///\name multichannel
 			///\{
-				void DefineStereoInput(int numins);
-				void DefineStereoOutput(int numouts);
+				public:
+					void DefineStereoInput(int numins);
+					void DefineStereoOutput(int numouts);
 			///\}
 
 			//////////////////////////////////////////////////////////////////////////
 			// Properties
 
-			virtual void SetSampleRate(int sr) {};
+			public:
+				virtual void SetSampleRate(int hertz) { /* \todo should this be a pure virtual function? */ };
 
-			///\todo 3 dimensional?
-			virtual void SetPan(int newpan);
+				///\todo 3 dimensional?
+				virtual void SetPan(int newpan);
 
 			///\name ports
 			///\{
-				virtual int GetInPorts() { return numInPorts; };
-				virtual int GetOutPorts() { return numOutPorts; };
-				virtual AudioPort& GetInPort(unsigned int i) { assert(i<numInPorts); return inports[i]; };
-				virtual AudioPort& GetOutPort(unsigned int i) { assert(i<numOutPorts); return inports[i]; };
+				public:
+					virtual unsigned int GetInPorts() { return numInPorts; };
+					virtual unsigned int GetOutPorts() { return numOutPorts; };
+					virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; };
+					virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; };
 			///\}
 
 			virtual float GetAudioRange() { return _audiorange; }
 
 			///\name amplification of the signal in connections/wires
 			///\{
-				virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
-				virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
-				virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
-				virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
+				public:
+					virtual void GetWireVolume(Wire::id_type wire, float & result) { result = _inputConVol[wire] * _wireMultiplier[wire]; };
+					virtual void SetWireVolume(Wire::id_type wire, float value) { _inputConVol[wire] = value / _wireMultiplier[wire]; };
+					virtual bool GetDestWireVolume(id_type src, Wire::id_type, float & result);
+					virtual bool SetDestWireVolume(id_type src, Wire::id_type, float value);
 			///\}
 
 			///\name name
 			///\{
-				virtual const char * const GetDllName() const throw() { return "built-in"; };
-				virtual char * GetName() = 0;
-				virtual char * GetEditName() { return _editName; }
+				public:
+					virtual const char * const GetDllName() const throw() { return "built-in"; };
+					virtual char * GetName() = 0;
+					virtual char * GetEditName() { return _editName; }
 			///\}
 
 			///\name parameters
 			///\{
-				virtual int GetNumCols() { return _nCols; };
-				virtual int GetNumParams() { return _numPars; };
-				virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
-				virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
-				virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
-				virtual int GetParamValue(int numparam) { return 0; };
-				virtual bool SetParameter(int numparam, int value) { return false;}; 
+				public:
+					virtual int GetNumCols() { return _nCols; };
+					virtual int GetNumParams() { return _numPars; };
+					virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
+					virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
+					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
+					virtual int GetParamValue(int numparam) { return 0; };
+					virtual bool SetParameter(int numparam, int value) { return false;}; 
 			///\}
 		protected:
 			void SetVolumeCounter(int numSamples);
@@ -415,15 +497,12 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//\todo below are unencapsulated data members
 
-		/* private: */ public:
+		PSYCLE__PRIVATE:
 
 			InPort *inports;
 			OutPort *outports;
 			int numInPorts;
 			int numOutPorts;
-			int _macIndex;
-			MachineType _type;
-			MachineMode _mode;
 			bool _bypass;
 			bool _mute;
 			bool _waitingForSound;
@@ -453,13 +532,13 @@ namespace psycle
 			///\{
 				/// number of Incoming connections
 				int _connectedInputs;
-				/// Incoming connections Machine number
+				/// Incoming connections Machine numbers
 				///\todo hardcoded limits and wastes
-				int _inputMachines[MAX_CONNECTIONS];
+				Machine::id_type _inputMachines[MAX_CONNECTIONS];
 				/// Incoming connections activated
 				///\todo hardcoded limits and wastes
 				bool _inputCon[MAX_CONNECTIONS];
-				/// Incoming connections Machine vol
+				/// Incoming connections Machine volumes
 				///\todo hardcoded limits and wastes
 				float _inputConVol[MAX_CONNECTIONS];
 				/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
@@ -471,9 +550,9 @@ namespace psycle
 			///\{
 				/// number of Outgoing connections
 				int _connectedOutputs;
-				/// Outgoing connections Machine number
+				/// Outgoing connections Machine numbers
 				///\todo hardcoded limits and wastes
-				int _outputMachines[MAX_CONNECTIONS];
+				Machine::id_type _outputMachines[MAX_CONNECTIONS];
 				/// Outgoing connections activated
 				///\todo hardcoded limits and wastes
 				bool _connection[MAX_CONNECTIONS];
@@ -563,7 +642,7 @@ namespace psycle
 		class Dummy : public Machine
 		{
 		public:
-			Dummy(int index);
+			Dummy(id_type index);
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
@@ -578,7 +657,7 @@ namespace psycle
 		{
 		public:
 			DuplicatorMac();
-			DuplicatorMac(int index);
+			DuplicatorMac(id_type index);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -599,12 +678,15 @@ namespace psycle
 		};
 
 
+		/// Index of MasterMachine
+		Machine::id_type const MASTER_INDEX(128);
+
 		/// master machine.
 		class Master : public Machine
 		{
 		public:
 			Master();
-			Master(int index);
+			Master(id_type index);
 			virtual void Init(void);
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
@@ -666,7 +748,7 @@ namespace psycle
 				return12
 			};
 			Mixer();
-			Mixer(int index);
+			Mixer(id_type index);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -681,23 +763,23 @@ namespace psycle
 			virtual bool SetParameter(int numparam,int value);
 			virtual int GetAudioInputs() { return 24; };
 			virtual int GetAudioOutputs() { return 1; };
-			virtual std::string GetAudioInputName(int port);
-			virtual std::string GetAutioOutputName(int port) { std::string rettxt = "Stereo Output"; return rettxt; };
-			virtual bool ConnectTo(Machine* dstMac,int dstport=0,int outport=0,float volume=1.0f);
+			virtual std::string GetAudioInputName(InPort::id_type port);
+			virtual std::string GetAutioOutputName(OutPort::id_type port) { std::string rettxt = "Stereo Output"; return rettxt; };
+			virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
 			virtual int GetSend(int i){ ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { ASSERT(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 			
 
-			virtual float VuChan(int idx);
-			virtual float VuSend(int idx);
+			virtual float VuChan(Wire::id_type idx);
+			virtual float VuSend(Wire::id_type idx);
 		protected:
 			///\todo hardcoded limits and wastes
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
 			/// Incoming send, Machine number
 			///\todo hardcoded limits and wastes
-			int _send[MAX_CONNECTIONS];	
+			id_type _send[MAX_CONNECTIONS];	
 			/// Incoming send, connection volume
 			///\todo hardcoded limits and wastes
 			float _sendVol[MAX_CONNECTIONS];	
@@ -714,7 +796,7 @@ namespace psycle
 					private:
 						float grid;
 						/// Incoming send, Machine number
-						int incoming;
+						Machine::id_type incoming;
 						/// Incoming send, connection volume
 						float volume;
 						/// Value to multiply volume to have a 0.0..1.0 range
@@ -731,7 +813,7 @@ namespace psycle
 		{
 		public:
 			LFO();
-			LFO(int index);
+			LFO(id_type index);
 			virtual void Init(void);
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
@@ -780,7 +862,5 @@ namespace psycle
 			bool bisTicking;
 
 		};
-
-
 	}
 }

@@ -1,11 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::Song
 #pragma once
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/engine/FileIO.hpp>
-#include <psycle/host/engine/SongStructs.hpp>
-#include <psycle/host/engine/instrument.hpp>
+#include "SongStructs.hpp"
+#include "instrument.hpp"
+#include "machine.hpp"
+#include "constants.hpp" // for the bloat-sized arrays and many other stuffs that should actually be moved in this file
 #include <psycle/host/global.hpp>
+#include "FileIO.hpp"
 #include <cstdint>
 
 
@@ -26,8 +27,6 @@ namespace psycle
 {
 	namespace host
 	{
-		class Machine; // forward declaration
-
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
 		class Song
@@ -97,19 +96,22 @@ namespace psycle
 				public: // <-- argh!
 					/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 					/// This function now is the same as doing &pPatternData[ps]
-					inline unsigned char * _ppattern(int ps){
+					inline unsigned char * _ppattern(int ps)
+					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps);
 						return ppPatternData[ps];
 					};
 					/// Returns the start offset of the requested track of pattern ps in the
 					/// pPatternData Array and creates one if none exists.
-					inline unsigned char * _ptrack(int ps, int track){
+					inline unsigned char * _ptrack(int ps, int track)
+					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
 						return ppPatternData[ps] + (track*EVENT_SIZE);
 					};
 					/// Returns the start offset of the requested line of the track of pattern ps in
 					/// the pPatternData Array and creates one if none exists.
-					inline unsigned char * _ptrackline(int ps, int track, int line){
+					inline unsigned char * _ptrackline(int ps, int track, int line)
+					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
 						return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
 					};
@@ -121,61 +123,92 @@ namespace psycle
 			///\name machines
 			///\{
 				public:
-					/// Gets the first free slot in the pMachine[] Array
-					int GetFreeMachine();
 					/// creates a new machine in this song.
-					bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index);
+					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name) throw(std::exception)
+					{
+						Machine::id_type const array_index(GetFreeMachine());
+						if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
+						if(!CreateMachine(type, x, y, plugin_name, array_index))
+							throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
+						return *_pMachine[array_index];
+					}
+
+					/// creates a new machine in this song.
+					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);
+
+					/// Gets the first free slot in the pMachine[] Array
+					///\todo it's low-level.. should be private.
+					/// we have higer-level CreateMachine and CloneMachine functions already
+					//UNIVERSALIS__COMPILER__DEPRECATED("low-level")
+					Machine::id_type GetFreeMachine();
+
 					/// destroy a machine of this song.
-					void DestroyMachine(int mac, bool write_locked = false);
+					void DestroyMachine(Machine & machine, bool write_locked = false) { DestroyMachine(machine.id()); /* stupid circonvolution */ }
+
+					/// destroy a machine of this song.
+					void DestroyMachine(Machine::id_type mac, bool write_locked = false);
+
 					/// destroys all the machines of this song.
 					void DestroyAllMachines(bool write_locked = false);
+
 					/// clones a machine.
-					bool CloneMac(int src,int dst);
+					bool CloneMac(Machine & src, Machine & dst) { CloneMac(src.id(), dst.id()); /* stupid circonvolution */ }
+
+					/// clones a machine.
+					bool CloneMac(Machine::id_type src, Machine::id_type dst);
 			///\}
 
 			///\name machine connections
 			///\{
 				public:
 					/// creates a new connection between two machines.
-					bool InsertConnection(int src,int dst,float value = 1.0f);
-					/// Changes the destination of a wire connection. wiresource= source mac index, wiredest= new dest mac index, wireindex= index of the wire in wiresource to change.
-					int ChangeWireDestMac(int wiresource, int wiredest, int wireindex);
-					/// Changes the destination of a wire connection. wiredest= dest mac index, wiresource= new source mac index, wireindex= index of the wire in wiredest to change.
-					int ChangeWireSourceMac(int wiresource, int wiredest, int wireindex);
+					///\todo kinda useless since machines can connect themselves with their ConnectTo function
+					bool InsertConnection(Machine::id_type src, Machine::id_type dst, float volume = 1.0f);
+
+					/// Changes the destination of a wire connection.
+					///\param wiresource source mac index
+					///\param wiredest new dest mac index
+					///\param wireindex index of the wire in wiresource to change
+					int ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex);
+
+					/// Changes the destination of a wire connection.
+					///\param wiredest dest mac index
+					///\param wiresource new source mac index
+					///\param wireindex index of the wire in wiredest to change
+					int ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex);
+
 					/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 					int GetFreeBus();
 					/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
 					int GetFreeFxBus();
 					/// Returns the Bus index out of a pMachine index.
-					int FindBusFromIndex(int smac);
+					Machine::id_type FindBusFromIndex(Machine::id_type smac);
 			///\}
 
 			///\name instruments
 			///\{
 				public:
 					/// clones an instrument.
-					bool CloneIns(int src,int dst);
-					/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses.
-					void DeleteInstrument(int i);
-					/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses. (all instruments)
-					/// \todo doc ... What does this function really do?
-					void DeleteInstruments();
-					/// destroy all instruments in this song.
-					/// \todo doc ... What does this function really do?
-					void DestroyAllInstruments();
-					// Removes the sample/layer of the instrument "instrument"
-					void DeleteLayer(int instrument);
+					bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
+					/// resets the instrument and delete each sample/layer that it uses.
+					void /*Reset*/DeleteInstrument(Instrument::id_type id) { Invalided=true; _pInstrument[id]->Delete(); Invalided=false; }
+					/// resets the instrument and delete each sample/layer that it uses. (all instruments)
+					void /*Reset*/DeleteInstruments() { Invalided=true; for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) _pInstrument[id]->Delete(); Invalided=false; }
+					/// delete all instruments in this song.
+					void /*Delete*/DestroyAllInstruments() { for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) { delete _pInstrument[id]; _pInstrument[id] = 0; } }
+					// Removes the sample/layer of the instrument
+					void DeleteLayer(Instrument::id_type id) { _pInstrument[id]->DeleteLayer(); }
 			///\}
 
 			///\name wavetable
 			///\{
 				public:
 					/// ???
-					int WavAlloc(int iInstr,const char * str);
+					bool WavAlloc(Instrument::id_type, const char * str);
 					/// ???
-					int WavAlloc(int iInstr,bool bStereo,long iSamplesPerChan,const char * sName);
+					bool WavAlloc(Instrument::id_type, bool bStereo, long int iSamplesPerChan, const char * sName);
 					/// ???
-					int IffAlloc(int instrument,const char * str);
+					bool IffAlloc(Instrument::id_type, const char * str);
 			///\}
 
 			///\name wave file previewing
@@ -260,7 +293,7 @@ namespace psycle
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//\todo below are unencapsulated data members
 
-			/* private: */ public:
+			PSYCLE__PRIVATE:
 
 				///\name authorship
 				///\{
@@ -326,13 +359,13 @@ namespace psycle
 					Machine* _pMachine[MAX_MACHINES];
 					/// Current selected machine number in the GUI
 					/// \todo This is a gui thing... should not be here.
-					int seqBus;
+					Machine::id_type seqBus;
 				///\}
 
 				///\name instruments
 				///\{
 					///\todo doc
-					int instSelected;
+					Instrument::id_type instSelected;
 					///\todo doc
 					///\todo hardcoded limits and wastes
 					Instrument * _pInstrument[MAX_INSTRUMENTS];
@@ -368,7 +401,7 @@ namespace psycle
 					bool _trackArmed[MAX_TRACKS];
 					/// The index of the machine which plays in solo.
 					///\todo ok it's saved in psycle "song" files, but that belongs to the player.
-					int machineSoloed;
+					Machine::id_type machineSoloed;
 					/// The index of the track which plays in solo.
 					///\todo ok it's saved in psycle "song" files, but that belongs to the player.
 					int _trackSoloed;

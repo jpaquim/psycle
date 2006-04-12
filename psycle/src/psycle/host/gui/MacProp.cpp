@@ -152,13 +152,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMacProp::OnClone() 
 		{
-			int src = pMachine->_macIndex;
-			int dst = -1;
+			Machine::id_type src(pMachine->id());
+			Machine::id_type dst(-1);
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
 				// we need to find an empty slot
-				for (int i = 0; i < MAX_BUSES; i++)
+				for (Machine::id_type i(0); i < MAX_BUSES; i++)
 				{
 					if (!Global::_pSong->_pMachine[i])
 					{
@@ -169,7 +169,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				for (int i = MAX_BUSES; i < MAX_BUSES*2; i++)
+				for (Machine::id_type i(MAX_BUSES); i < MAX_BUSES*2; i++)
 				{
 					if (!Global::_pSong->_pMachine[i])
 					{

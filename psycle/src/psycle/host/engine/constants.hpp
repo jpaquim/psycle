@@ -13,12 +13,8 @@ namespace psycle
 		int const MAX_BUSES = 64;
 		/// Max number of machines+1 (master)
 		int const MAX_MACHINES = 129;
-		/// Index of MasterMachine
-		int const MASTER_INDEX = 128;
 		/// Max number of instruments.
 		int const MAX_INSTRUMENTS = 256;
-		/// Instrument index of the wave preview.
-		int const PREV_WAV_INS = 255;
 		/// Number of tracks of the sequence (psycle just support one sequence now). Modify this, CURRENT_FILE_VERSION_SEQD and add the appropiated load and save code.
 		int const MAX_SEQUENCES = 1;
 		/// harcoded maximal number different patterns.
@@ -47,7 +43,10 @@ namespace psycle
 		/// \todo changing this breaks file format.
 		int const MAX_SONG_POSITIONS = 128;
 		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
-		int const MAX_CONNECTIONS = 12;
+		/// [bohan] note: this is a preprocessor macro because it's used in a preprocessor loop in the master machine mixer gui (thanks to fucking mfc resource system)
+		#define PSYCLE__MAX_CONNECTIONS 12
+		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
+		int const MAX_CONNECTIONS = PSYCLE__MAX_CONNECTIONS;
 
 		/// Miscellaneous offset data.
 		int const MULTIPLY = MAX_TRACKS * EVENT_SIZE;

@@ -168,7 +168,7 @@ namespace psycle
 				/// Host callback dispatcher.
 				static long int AudioMaster(AEffect * effect, long int opcode, long int index, long int value, void * ptr, float opt);
 			public:
-				plugin();
+				plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id);
 				virtual ~plugin() throw();
 				virtual bool Load(RiffFile * pFile);
 				/// Loader for old psycle fileformat.
@@ -347,7 +347,7 @@ namespace psycle
 			{
 			public:
 				virtual void Work(int numSamples);
-				instrument(int index);
+				instrument(Machine::id_type index);
 				virtual void Tick(int channel, PatternEntry * pEntry);
 				virtual void Stop(void);
 			};
@@ -361,7 +361,7 @@ namespace psycle
 			{
 			public:
 				virtual void Work(int numSamples);
-				fx(int index);
+				fx(Machine::id_type index);
 				virtual ~fx() throw();
 				virtual void Tick(int channel, PatternEntry * pEntry);
 			protected:

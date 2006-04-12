@@ -994,7 +994,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
 				//			}
 				//			else {
-							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
 				//			}
 
 
@@ -1078,7 +1078,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
 				//			}
 				//			else {
-							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
 				//			}
 
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
@@ -1168,7 +1168,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
 				//			}
 				//			else {
-							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
 				//			}
 
 
@@ -1240,7 +1240,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
 				//			}
 				//			else {
-							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
+							sprintf(name,"%.2X:%s",mac->id(),mac->_editName);
 				//			}
 
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
@@ -1287,11 +1287,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			devc->LineTo(dX,dY);	
 		}
 
-		int CChildView::GetMachine(CPoint point)
+		Machine::id_type CChildView::GetMachine(CPoint point)
 		{
-			int tmac = -1;
+			Machine::id_type tmac(-1);
 			
-			for (int c=MAX_MACHINES-1; c>=0; c--)
+			for (Machine::id_type c(MAX_MACHINES-1); c>=0; c--)
 			{
 				Machine* pMac = Global::_pSong->_pMachine[c];
 				if (pMac)
@@ -1325,14 +1325,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			return tmac;
 		}
-		int CChildView::GetWire(CPoint point,int& wiresource)
+
+		Wire::id_type CChildView::GetWire(CPoint point,Machine::id_type& wiresource /* \todo is it a result too? */)
 		{
-			for (int c=0; c<MAX_MACHINES; c++)
+			for (Machine::id_type c(0); c<MAX_MACHINES; c++)
 			{
 				Machine *tmac = Global::_pSong->_pMachine[c];
 				if (tmac)
 				{
-					for (int w = 0; w<MAX_CONNECTIONS; w++)
+					for (Wire::id_type w(0); w<MAX_CONNECTIONS; w++)
 					{
 						if (tmac->_connection[w])
 						{
@@ -1348,8 +1349,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
-			wiresource = -1;
-			return -1;
+			wiresource = Machine::id_type(-1);
+			return Wire::id_type(-1);
 		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

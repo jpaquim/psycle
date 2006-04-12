@@ -2009,14 +2009,13 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 ///    XMSampler 
 
-		XMSampler::XMSampler(int index)
+		XMSampler::XMSampler(Machine::id_type id)
+		:
+			Machine(MACH_XMSAMPLER, MACHMODE_GENERATOR, id)
 		{
 			DefineStereoOutput(1);
 			_audiorange=32768.0f;
 			_numPars=0;
-			_macIndex = index;
-			_type = MACH_XMSAMPLER;
-			_mode = MACHMODE_GENERATOR;
 			_stprintf(_editName, _T(_psName));
 
 			_resampler.SetQuality(dsp::R_LINEAR);

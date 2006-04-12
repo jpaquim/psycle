@@ -60,7 +60,7 @@ namespace psycle
 				{ std::int32_t tmp; pFile->Read(tmp); tracks(tmp); }
 				// Patterns
 				pFile->Read(num);
-				int i;
+				Machine::id_type i;
 				for(i =0 ; i < num; ++i)
 				{
 					pFile->Read(patternLines[i]);

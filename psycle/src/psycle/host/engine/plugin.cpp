@@ -27,17 +27,16 @@ namespace psycle
 
 		#pragma warning(push)
 			#pragma warning(disable:4355) // 'this' : used in base member initializer list
-			Plugin::Plugin(int index)
-				: _dll(0)
-				, proxy_(*this)
-				, _psAuthor("")
-				, _psDllName("")
-				, _psName("")
+			Plugin::Plugin(Machine::id_type id)
+			:
+				Machine(MACH_PLUGIN, MACHMODE_FX, id),
+				_dll(0),
+				proxy_(*this),
+				_psAuthor(""),
+				_psDllName(""),
+				_psName("")
 			{
-				_macIndex = index;
 				_audiorange=32768.0f;
-				_type = MACH_PLUGIN;
-				_mode = MACHMODE_FX;
 				std::sprintf(_editName, "native plugin");
 			}
 		#pragma warning(pop)
@@ -203,7 +202,7 @@ namespace psycle
 				}
 				try
 				{
-					_pParams = GetParams(_macIndex);
+					_pParams = GetParams(id());
 				}
 				catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetParams", &e); }
 				catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetParams"); }

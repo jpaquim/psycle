@@ -36,90 +36,78 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		unsigned idletime = 0;
 
 		CChildView::CChildView()
-		{
-			// Set Gui Environment data
+		:
+			smac(-1),
+			smacmode(0 /* \todo wtf is zero? */),
+			wiresource(-1),
+			wiredest(-1),
+			wiremove(-1),
+			wireSX(0),
+			wireSY(0),
+			wireDX(0),
+			wireDY(0),
+			maxView(false),
+			textLeftEdge(2),
+			bmpDC(0),
+			viewMode(VMMachine),
+			MasterMachineDialog(0),
+			SamplerMachineDialog(0),
+			XMSamplerMachineDialog(0),
+			updateMode(0),
+			updatePar(0),
+			//multiPattern(true), // Long way till it can be finished!
+			patStep(1),
+			editPosition(0),
+			prevEditPosition(0),
+			bEditMode(true),
 
-			// Enviroment variables
-			smac=-1;
-			smacmode=0;
-			wiresource=-1;
-			wiredest=-1;
-			wiremove=-1;
-			wireSX=0;
-			wireSY=0;
-			wireDX=0;
-			wireDY=0;
+			blockSelected(false),
+			blockswitch(false),
+			isBlockCopied(false),
+			patBufferCopy(false),
+			blockNTracks(0),
+			blockNLines(0),
+			bScrollDetatch(false),
 
-			maxView = false;
-			textLeftEdge = 2;
+			blockSelectBarState(1),
 
-			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
-			bmpDC = NULL;
+			pUndoList(0),
+			pRedoList(0),
 
-			viewMode=VMMachine;
-			MasterMachineDialog = NULL;
-			SamplerMachineDialog = NULL;
-			XMSamplerMachineDialog = NULL;
+			UndoCounter(0),
+			UndoSaved(0),
 
-			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
-			{
-				WireDialog[c] = NULL;
-			}
+			UndoMacCounter(0),
+			UndoMacSaved(0),
 
-			updateMode=0;
-			updatePar=0;
-			//multiPattern=true; // Long way till it can be finished!
+			//editcur.track(0), // Not needed to initialize, since the class does it already.
+			//editcur.col(0),
+			//editcur.line(0),
+			playpos(-1),
+			newplaypos(-1),
+			numPatternDraw(0),
 
-			patStep=1;
-			editPosition=0;
-			prevEditPosition=0;
-			bEditMode = true;
+			//scrollT(0),
+			//scrollL(0),
+			tOff(0),
+			lOff(0),
+			ntOff(0),
+			nlOff(0),
 
-			blockSelected=false;
-			blockswitch=false;
-			isBlockCopied=false;
-			patBufferCopy=false;
-			blockNTracks=0;
-			blockNLines=0;
-			bScrollDetatch=false;
+			ChordModeOffs(0),
 
-			blockSelectBarState = 1;
-
-			pUndoList=NULL;
-			pRedoList=NULL;
-
-			UndoCounter=0;
-			UndoSaved=0;
-
-			UndoMacCounter=0;
-			UndoMacSaved=0;
-
-			//editcur.track=0; // Not needed to initialize, since the class does it already.
-			//editcur.col=0;
-			//editcur.line=0;
-			playpos=-1;
-			newplaypos=-1; 
-			selpos.bottom=0;
-			newselpos.bottom=0;
-			numPatternDraw=0;
-
-			//scrollT=0;
-			//scrollL=0;
-			tOff=0;
-			lOff=0;
-			ntOff=0;
-			nlOff=0;
-
-			ChordModeOffs = 0;
-
-			Global::pInputHandler->SetChildView(this);
-			Global::pResampler->SetQuality(dsp::R_LINEAR);
-			_outputActive = false;
+			_outputActive(false),
 
 			// just give arbitrary values so OnSize doesn't give /0 error
 			// they will be filled in correctly when we switch to pattern view
-			VISLINES = 2;
-			VISTRACKS = 8;
+			VISLINES(2),
+			VISTRACKS(8)
+		{
+			for (int c=0; c<256; c++) FLATSIZES[c]=8;
+			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c) WireDialog[c] = 0;
+
+			Global::pInputHandler->SetChildView(this);
+			Global::pResampler->SetQuality(dsp::R_LINEAR);
 
 			//_getcwd(m_appdir,_MAX_PATH);
 			
@@ -131,6 +119,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
 
+			selpos.bottom = 0;
+			newselpos.bottom = 0;
 		}
 
 		CChildView::~CChildView()
@@ -1362,7 +1352,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 
 		/// Show new machine dialog
-		void CChildView::NewMachine(int x, int y, int mac) 
+		void CChildView::NewMachine(int x, int y, Machine::id_type mac) 
 		{
 			CNewMachine dlg;
 			if(mac >= 0)
@@ -1378,7 +1368,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
 			{
-				int fb,xs,ys;
+				Machine::id_type fb;
+				int xs,ys;
 				if (mac < 0)
 				{
 					if (dlg.OutBus) 
@@ -3464,7 +3455,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CChildView::DoMacPropDialog(int propMac)
+		void CChildView::DoMacPropDialog(Machine::id_type propMac)
 		{
 			if((propMac < 0 ) || (propMac >= MAX_MACHINES-1)) return;
 			CMacProp dlg;

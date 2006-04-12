@@ -173,41 +173,42 @@ namespace psycle
 			pParent->Work(numSamples);
 		}
 
-		Machine::Machine()
-			: crashed_()
-			, fpu_exception_mask_()
-			, _macIndex(0)
-			, _type(MACH_UNDEFINED)
-			, _mode(MACHMODE_UNDEFINED)
-			, _bypass(false)
-			, _mute(false)
-			, _waitingForSound(false)
-			, _stopped(false)
-			, _worked(false)
-			, _audiorange(1.0f)
-			, _pSamplesL(0)
-			, _pSamplesR(0)
-			, _lVol(0)
-			, _rVol(0)
-			, _panning(0)
-			, _x(0)
-			, _y(0)
-			, _numPars(0)
-			, _nCols(1)
-			, _connectedInputs(0)
-			, numInPorts(0)
-			, numOutPorts(0)
-			, _connectedOutputs(0)
-			, TWSSamples(0)
-			, TWSActive(false)
-			, _volumeCounter(0.0f)
-			, _volumeDisplay(0)
-			, _volumeMaxDisplay(0)
-			, _volumeMaxCounterLife(0)
-			, _pScopeBufferL(0)
-			, _pScopeBufferR(0)
-			, _scopeBufferIndex(0)
-			, _scopePrevNumSamples(0)
+		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
+		:
+			_type(type),
+			_mode(mode),
+			_macIndex(id),
+			crashed_(),
+			fpu_exception_mask_(),
+			_bypass(false),
+			_mute(false),
+			_waitingForSound(false),
+			_stopped(false),
+			_worked(false),
+			_audiorange(1.0f),
+			_pSamplesL(0),
+			_pSamplesR(0),
+			_lVol(0),
+			_rVol(0),
+			_panning(0),
+			_x(0),
+			_y(0),
+			_numPars(0),
+			_nCols(1),
+			_connectedInputs(0),
+			numInPorts(0),
+			numOutPorts(0),
+			_connectedOutputs(0),
+			TWSSamples(0),
+			TWSActive(false),
+			_volumeCounter(0.0f),
+			_volumeDisplay(0),
+			_volumeMaxDisplay(0),
+			_volumeMaxCounterLife(0),
+			_pScopeBufferL(0),
+			_pScopeBufferR(0),
+			_scopeBufferIndex(0),
+			_scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
 			_pSamplesL = new float[STREAM_SIZE];
@@ -298,72 +299,84 @@ namespace psycle
 			_panning = newPan;
 		}
 
-		bool Machine::ConnectTo(Machine* dstMac,int dstport,int outport,float volume)
+		bool Machine::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
 		{
-			ASSERT(dstMac);
-			if (dstMac->_mode == MACHMODE_GENERATOR) return false;
-
-			int freebus=-1;
-			int dfreebus=-1;
-			bool error=false;
+			if(dst_machine._mode == MACHMODE_GENERATOR)
+			{
+				std::ostringstream s;
+				s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
+				loggers::warning(s.str());
+				return false;
+			}
 
 			// Get a free output slot on the source machine
-			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+			Wire::id_type freebus(-1);
 			{
-				if(!_connection[c]) freebus = c;
-				// Checking that there's not a slot to the dest. machine already
-				else if(_outputMachines[c] == dstMac->_macIndex) error = true;
+				bool error = false;
+				for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
+				{
+					if(!_connection[c]) freebus = c;
+					// Checking that there's not a slot to the dest. machine already
+					else if(_outputMachines[c] == dst_machine.id()) error = true;
+				}
+				// lamely abandon
+				if(freebus == -1 || error) return false;
 			}
-			if(freebus == -1 || error) return false;
+
 			// Get a free input slot on the destination machine
-			error=false;
-			for(int c=MAX_CONNECTIONS-1; c>=0; c--)
+			Wire::id_type dfreebus(-1);
 			{
-				if(!dstMac->_inputCon[c]) dfreebus = c;
-				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				else if(dstMac->_outputMachines[c] == _macIndex) error = true;
+				bool error = false;
+				for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
+				{
+					if(!dst_machine._inputCon[c]) dfreebus = c;
+					// Checking if the destination machine is connected with the source machine to avoid a loop.
+					else if(dst_machine._outputMachines[c] == this->id()) error = true;
+				}
+				// lamely abandon
+				if(dfreebus == -1 || error) return false;
 			}
-			if(dfreebus == -1 || error) return false;
 
 			// Calibrating in/out properties
-			_outputMachines[freebus] = dstMac->_macIndex;
-			_connection[freebus] = true;
-			_connectedOutputs++;
-			dstMac->_inputMachines[dfreebus] = _macIndex;
-			dstMac->_inputCon[dfreebus] = true;
-			dstMac->_connectedInputs++;
-			dstMac->InitWireVolume(_type,dfreebus,volume);
+			this->_outputMachines[freebus] = dst_machine.id();
+			this->_connection[freebus] = true;
+			this->_connectedOutputs++;
+			dst_machine._inputMachines[dfreebus] = this->id();
+			dst_machine._inputCon[dfreebus] = true;
+			dst_machine._connectedInputs++;
+			dst_machine.InitWireVolume(_type, dfreebus, volume);
 			return true;
 		}
-		bool Machine::Disconnect(Machine* dstMac)
+
+		bool Machine::Disconnect(Machine& dst_machine)
 		{
-			return false;
+			return false; // \todo o_O`
 		}
 
-		void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
+		void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)
 		{
-			if ( mType == MACH_VST || mType == MACH_VSTFX )
+			if (type == MACH_VST || type == MACH_VSTFX )
 			{
-				if (_type == MACH_VST || _type == MACH_VSTFX ) // VST to VST, no need to convert.
+				if (this->_type == MACH_VST || this->_type == MACH_VSTFX ) // VST to VST, no need to convert.
 				{
-					_inputConVol[wireIndex] = value;
-					_wireMultiplier[wireIndex] = 1.0f;
+					_inputConVol[wire] = value;
+					_wireMultiplier[wire] = 1.0f;
 				}
 				else											// VST to native, multiply
 				{
-					_inputConVol[wireIndex] = value*32768.0f;
-					_wireMultiplier[wireIndex] = 0.000030517578125f;
+					_inputConVol[wire] = value * 32768.0f;
+					_wireMultiplier[wire] = 0.000030517578125f; // what is it?
 				}
 			}
-			else if ( _type == MACH_VST || _type == MACH_VSTFX ) // native to VST, divide.
+			else if (this->_type == MACH_VST || this->_type == MACH_VSTFX ) // native to VST, divide.
 			{
-				_inputConVol[wireIndex] = value*0.000030517578125f;
-				_wireMultiplier[wireIndex] = 32768.0f;
+				_inputConVol[wire] = value * 0.000030517578125f; // what is it?
+				_wireMultiplier[wire] = 32768.0f;
 			}
 			else												// native to native, no need to convert.
 			{
-				_inputConVol[wireIndex] = value;
-				_wireMultiplier[wireIndex] = 1.0f;
+				_inputConVol[wire] = value;
+				_wireMultiplier[wire] = 1.0f;
 			}	
 			// The reason of the conversions in the case of MACH_VST is because VST's output wave data
 			// in the range -1.0 to +1.0, while native and internal output at -32768.0 to +32768.0
@@ -372,49 +385,33 @@ namespace psycle
 			// that extra conversion and use directly the volume to do so.
 		}
 
-		int Machine::FindInputWire(int macIndex)
+		Wire::id_type Machine::FindInputWire(Machine::id_type id)
 		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if (_inputCon[c])
-				{
-					if (_inputMachines[c] == macIndex)
-					{
+			for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
+				if(_inputCon[c])
+					if(_inputMachines[c] == id)
 						return c;
-					}
-				}
-			}
-			return -1;
+			return Wire::id_type(-1);
 		}
 
-		int Machine::FindOutputWire(int macIndex)
+		Wire::id_type Machine::FindOutputWire(Machine::id_type id)
 		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if (_connection[c])
-				{
-					if (_outputMachines[c] == macIndex)
-					{
+			for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
+				if(_connection[c])
+					if(_outputMachines[c] == id)
 						return c;
-					}
-				}
-			}
-			return -1;
+			return Wire::id_type(-1);
 		}
 
-		bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,float value)
+		bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
 			Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
-
 			if (_pDstMachine)
 			{
-				//if ( value == 255 ) value =256; // FF = 255
-				//const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
-				
-				int c;
-				if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+				Wire::id_type c;
+				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 				{
 					_pDstMachine->SetWireVolume(c,value);
 					return true;
@@ -423,16 +420,15 @@ namespace psycle
 			return false;
 		}
 
-		bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,float &value)
+		bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float &value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
 			Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
-			
 			if (_pDstMachine)
 			{
-				int c;
-				if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+				Wire::id_type c;
+				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 				{
 					//float val;
 					_pDstMachine->GetWireVolume(c,value);
@@ -440,7 +436,6 @@ namespace psycle
 					return true;
 				}
 			}
-			
 			return false;
 		}
 
@@ -592,7 +587,7 @@ namespace psycle
 			return true;
 		};
 
-		Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen)
+		Machine* Machine::LoadFileChunk(RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
 			bool bDeleted(false);
@@ -708,7 +703,7 @@ namespace psycle
 			{
 				char buf[2 + sizeof pMachine->_editName]; // it's because of the "X " below, but then we possibly truncate the machine name
 				sprintf(buf,"X %s",pMachine->_editName);
-				buf[- 1 +  + sizeof pMachine->_editName]=0; // great, see above
+				buf[sizeof pMachine->_editName - 1]=0; // great, see above
 				strcpy(pMachine->_editName,buf);
 			}
 			if(!fullopen) return pMachine;
@@ -826,15 +821,15 @@ namespace psycle
 
 
 
-		Dummy::Dummy(int index)
+		Dummy::Dummy(Machine::id_type id)
+		:
+			Machine(MACH_DUMMY, MACHMODE_FX, id)
 		{
 			DefineStereoInput(1);
 			DefineStereoOutput(1);
-			_macIndex = index;
-			_type = MACH_DUMMY;
-			_mode = MACHMODE_FX;
 			sprintf(_editName, "Dummy");
 		}
+
 		void Dummy::Work(int numSamples)
 		{
 			Machine::Work(numSamples);
@@ -872,13 +867,12 @@ namespace psycle
 
 
 
-		DuplicatorMac::DuplicatorMac(int index)
+		DuplicatorMac::DuplicatorMac(Machine::id_type id)
+		:
+			Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id)
 		{
-			_macIndex = index;
 			_numPars = 16;
 			_nCols = 2;
-			_type = MACH_DUPLICATOR;
-			_mode = MACHMODE_GENERATOR;
 			bisTicking = false;
 			strcpy(_editName, "Dupe it!");
 			for (int i=0;i<8;i++)
@@ -887,6 +881,7 @@ namespace psycle
 				noteOffset[i]=0;
 			}
 		}
+
 		void DuplicatorMac::Init()
 		{
 			Machine::Init();
@@ -896,6 +891,7 @@ namespace psycle
 				noteOffset[i]=0;
 			}
 		}
+
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
 			if ( !_mute && !bisTicking)
@@ -914,6 +910,7 @@ namespace psycle
 			}
 			bisTicking=false;
 		}
+
 		void DuplicatorMac::GetParamName(int numparam,char *name)
 		{
 			if (numparam >=0 && numparam<8)
@@ -924,11 +921,13 @@ namespace psycle
 			}
 			else name[0] = '\0';
 		}
+
 		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval)
 		{
 			if ( numparam < 8) { minval = -1; maxval = (MAX_BUSES*2)-1;}
 			else if ( numparam < 16) { minval = -48; maxval = 48; }
 		}
+
 		int DuplicatorMac::GetParamValue(int numparam)
 		{
 			if (numparam >=0 && numparam<8)
@@ -939,6 +938,7 @@ namespace psycle
 			}
 			else return 0;
 		}
+
 		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
 		{
 			if (numparam >=0 && numparam <8)
@@ -955,6 +955,7 @@ namespace psycle
 			}
 			else parVal[0] = '\0';
 		}
+
 		bool DuplicatorMac::SetParameter(int numparam, int value)
 		{
 			if (numparam >=0 && numparam<8)
@@ -972,6 +973,7 @@ namespace psycle
 		{
 			_worked = true;
 		}
+
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;
@@ -998,21 +1000,19 @@ namespace psycle
 
 		float * Master::_pMasterSamples = 0;
 
-		Master::Master(int index)
-			: sampleCount(0)
-			, _outDry(256)
-			, decreaseOnClip(false)
+		Master::Master(Machine::id_type id)
+		:
+			Machine(MACH_MASTER, MACHMODE_MASTER, id),
+			sampleCount(0),
+			_outDry(256),
+			decreaseOnClip(false)
 		{
 			_audiorange=32768.0f;
-
 			DefineStereoInput(1);
-			_macIndex = index;
-			_type = MACH_MASTER;
-			_mode = MACHMODE_MASTER;
 			sprintf(_editName, "Master");
 		}
 
-		void Master::Init(void)
+		void Master::Init()
 		{
 			Machine::Init();
 			sampleCount = 0;
@@ -1160,18 +1160,17 @@ namespace psycle
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer
 
-		Mixer::Mixer(int index)
+		Mixer::Mixer(Machine::id_type id)
+		:
+			Machine(MACH_MIXER, MACHMODE_FX, id)
 		{
-			_macIndex = index;
 			_numPars = 255;
 			DefineStereoInput(24);
 			DefineStereoOutput(1);
-			_type = MACH_MIXER;
-			_mode = MACHMODE_FX;
 			sprintf(_editName, "Mixer");
 		}
 
-		void Mixer::Init(void)
+		void Mixer::Init()
 		{
 			Machine::Init();
 			for (int j=0;j<MAX_CONNECTIONS;j++)
@@ -1187,6 +1186,7 @@ namespace psycle
 				_sendValid[j]=false;
 			}
 		}
+
 		void Mixer::Tick( int channel,PatternEntry* pData)
 		{
 			if(pData->_note == cdefTweakM)
@@ -1200,6 +1200,7 @@ namespace psycle
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 			}
 		}
+
 		void Mixer::Work(int numSamples)
 		{
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
@@ -1292,6 +1293,7 @@ namespace psycle
 				}
 			}
 		}
+
 		void Mixer::Mix(int numSamples)
 		{
 			for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -1325,14 +1327,17 @@ namespace psycle
 				}
 			}
 		}
-		bool Mixer::ConnectTo(Machine* dstMac,int dstport,int outport,float volume)
+
+		bool Mixer::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
 		{
 			//
+			// \todo ?
 			//
-			//
-			return Machine::ConnectTo(dstMac,dstport,outport,volume);
+			return Machine::ConnectTo(dst_machine,dstport,outport,volume);
 		}
-		std::string Mixer::GetAudioInputName(int port) {
+
+		std::string Mixer::GetAudioInputName(InPort::id_type port)
+		{
 			std::string rettxt;
 			if (port < return1 )
 			{	
@@ -1388,6 +1393,7 @@ namespace psycle
 				else name[0] = '\0';
 			}
 		}
+
 		int Mixer::GetParamValue(int numparam)
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
@@ -1411,6 +1417,7 @@ namespace psycle
 				else return 0;
 			}
 		}
+
 		void Mixer::GetParamValue(int numparam, char *parVal)
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
@@ -1434,10 +1441,11 @@ namespace psycle
 				else parVal[0] = '\0';
 			}
 		}
+
 		bool Mixer::SetParameter(int numparam, int value)
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
-			int send=numparam%16; // 0 is for channel mix, others are send.
+			Wire::id_type send(numparam % 16); // 0 is for channel mix, others are send.
 			if ( channel == 0) return false;
 			if ( value>100 ) value=100;
 			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
@@ -1470,7 +1478,7 @@ namespace psycle
 
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
+			std::uint32_t size;
 			pFile->Read(size);
 			pFile->Read(&_sendGrid,sizeof(_sendGrid));
 			pFile->Read(&_send,sizeof(_send));
@@ -1478,26 +1486,28 @@ namespace psycle
 			pFile->Read(&_sendVolMulti,sizeof(_sendVolMulti));
 			pFile->Read(&_sendValid,sizeof(_sendValid));
 			return true;
-		};
+		}
 
 		void Mixer::SaveSpecificChunk(RiffFile* pFile)
 		{
-			UINT size = sizeof(_sendGrid) + sizeof(_send) + sizeof(_sendVol) + sizeof(_sendVolMulti) + sizeof(_sendValid);
+			std::uint32_t size = sizeof(_sendGrid) + sizeof(_send) + sizeof(_sendVol) + sizeof(_sendVolMulti) + sizeof(_sendValid);
 			pFile->Write(size);
 			pFile->Write(&_sendGrid,sizeof(_sendGrid));
 			pFile->Write(&_send,sizeof(_send));
 			pFile->Write(&_sendVol,sizeof(_sendVol));
 			pFile->Write(&_sendVolMulti,sizeof(_sendVolMulti));
 			pFile->Write(&_sendValid,sizeof(_sendValid));
-		};
-		float Mixer::VuChan(int idx)
+		}
+
+		float Mixer::VuChan(Wire::id_type idx)
 		{
 			float vol;
 			GetWireVolume(idx,vol);
 			if ( _inputCon[idx] ) return (Global::_pSong->_pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
-		float Mixer::VuSend(int idx)
+
+		float Mixer::VuSend(Wire::id_type idx)
 		{
 			float vol = _sendVol[idx] * _sendVolMulti[idx];
 			if ( _sendValid[idx] ) return (Global::_pSong->_pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
@@ -1526,13 +1536,12 @@ namespace psycle
 		//  - vst support??
 
 
-		LFO::LFO(int index)
+		LFO::LFO(Machine::id_type id)
+		:
+			Machine(MACH_LFO, MACHMODE_GENERATOR, id)
 		{
-			_macIndex = index;
 			_numPars = 24;
 			_nCols = 3;
-			_type = MACH_LFO;
-			_mode = MACHMODE_GENERATOR;
 			bisTicking = false;
 			strcpy(_editName, "LFO");
 			for (int i=0;i<5;i++)
@@ -1549,6 +1558,7 @@ namespace psycle
 			baseline=100;
 			FillTable();
 		}
+
 		void LFO::Init()
 		{
 			Machine::Init();
@@ -1566,6 +1576,7 @@ namespace psycle
 			baseline=100;
 			FillTable();
 		}
+
 		void LFO::Tick( int channel,PatternEntry* pData)
 		{
 			if(!bisTicking)
@@ -1576,6 +1587,7 @@ namespace psycle
 			}
 			bisTicking=false;
 		}
+
 		void LFO::GetParamName(int numparam,char *name)
 		{
 			if(numparam==0)
@@ -1596,6 +1608,7 @@ namespace psycle
 				sprintf(name,"LFO Position");
 			else name[0] = '\0';
 		}
+
 		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
 		{
 			if(numparam==0) { minval = 0; maxval = 4;}
@@ -1608,6 +1621,7 @@ namespace psycle
 			else if (numparam==23){minval=0;maxval=LFO_SIZE; }
 			else {minval=0;maxval=0; }
 		}
+
 		int LFO::GetParamValue(int numparam)
 		{
 			if(numparam==0)			return waveform;
@@ -1620,6 +1634,7 @@ namespace psycle
 			else if(numparam==23)   return (int)lfoPos;
 			else return 0;
 		}
+
 		void LFO::GetParamValue(int numparam, char *parVal)
 		{
 			if(numparam==0)
@@ -1672,6 +1687,7 @@ namespace psycle
 			else
 				parVal[0] = '\0';
 		}
+
 		bool LFO::SetParameter(int numparam, int value)
 		{
 			if(numparam==0)
@@ -1722,7 +1738,6 @@ namespace psycle
 			}
 			else return false;
 		}
-
 
 		void LFO::Work(int numSamples)
 		{
@@ -1879,7 +1894,7 @@ namespace psycle
 		void LFO::ParamEnd(int which)
 		{
 			if(which<0 || which>4) return;
-			int destMac = macOutput[which];
+			id_type destMac(macOutput[which]);
 			int destParam = paramOutput[which];
 
 			if	(	destMac		!= -1	&&	Global::_pSong->_pMachine[destMac] != NULL
@@ -1892,7 +1907,7 @@ namespace psycle
 				if(newVal<minVal) newVal=minVal;
 				else if(newVal>maxVal) newVal=maxVal;
 
-				if(destMac != _macIndex)	//craziness may ensue without this check.. folks routing the lfo to itself are on their own
+				if(destMac != this->id()) // craziness may ensue without this check.. folks routing the lfo to itself are on their own
 					Global::_pSong->_pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}

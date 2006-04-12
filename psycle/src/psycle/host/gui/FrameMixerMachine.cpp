@@ -267,7 +267,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			yoffset=0;
 			if (_pMixer->_inputCon[i])
 			{
-				std::string chantxt = _pMixer->GetAudioInputName(i+Mixer::chan1);
+				std::string chantxt = _pMixer->GetAudioInputName(InPort::id_type(i+Mixer::chan1));
 				InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,chantxt.c_str(),Global::_pSong->_pMachine[_pMixer->_inputMachines[i]]->GetEditName());
 
 				yoffset+=InfoLabel::height;
@@ -287,7 +287,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		for (int i=0; i<numSends; i++)
 		{
 			yoffset=0;
-			std::string sendtxt = _pMixer->GetAudioInputName(i+Mixer::return1);
+			std::string sendtxt = _pMixer->GetAudioInputName(InPort::id_type(i+Mixer::return1));
 			InfoLabel::DrawHLight(&bufferDC,&font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 			yoffset+=(numSends+1)*InfoLabel::height;
 			InfoLabel::Draw(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,"Level","");
@@ -365,7 +365,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		// Colums 1 onwards, controls
 		int xoffset(InfoLabel::width+Knob::width), yoffset(0);
 		char value[48];
-		for (int i=0; i<MAX_CONNECTIONS; i++)
+		for (Wire::id_type i(0); i<MAX_CONNECTIONS; i++)
 		{
 			if (_pMixer->_inputCon[i])
 			{
@@ -391,7 +391,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				xoffset+=Knob::width+InfoLabel::width;
 			}
 		}
-		for (int i=0; i<numSends; i++)
+		for (Wire::id_type i(0); i<numSends; i++)
 		{
 			int param =0xF0+i+1;
 			yoffset=(numSends+1)*InfoLabel::height;

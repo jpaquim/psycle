@@ -8,8 +8,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		class CGearRackDlg : public CDialog
 		{
 		public:
-			void ExchangeIns(int one,int two);
-			void ExchangeMacs(int one,int two);
+			void ExchangeIns(Instrument::id_type, Instrument::id_type);
+			void ExchangeMacs(Machine::id_type, Machine::id_type);
 			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
 			CChildView* m_pParent;
 			CMainFrame* pParentMain;

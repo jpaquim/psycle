@@ -16,6 +16,16 @@
 
 
 
+	/// turn on type-safe compilation.
+	/// for example, it makes some of the typedefs "strong",
+	/// i.e. wrapped by a class with a implicit convertion operator to the pointee type so it can be used as is by the lower layer,
+	/// but which has an explicit constructor, so higher layer has to know the semantic of the type.
+	#define PSYCLE__CONFIGURATION__TYPE_SAFE 0
+
+	/// turn on tight access control of member data in classes.
+	/// ... getting rid of every public data member and low-level interface.
+	#define PSYCLE__CONFIGURATION__TIGHT_MEMBER_ACCESS_CONTROL 0
+
 	/// implementation of psycle::host::Song's lock using boost 1.3's read_write_mutex.
 	#define PSYCLE__CONFIGURATION__READ_WRITE_MUTEX 0
 		// boost::thread::read_write_mutex has been removed from boost.thread around version 1.33.1

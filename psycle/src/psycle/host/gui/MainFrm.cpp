@@ -27,7 +27,7 @@
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 
-		#define WM_SETMESSAGESTRING 0x0362
+		#define WM_SETMESSAGESTRING 0x0362 // \todo what type is that?
 
 		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 
@@ -1166,7 +1166,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				m_wndView.AddMacViewUndo();
 
-				int si = _pSong->instSelected;
+				Instrument::id_type si(_pSong->instSelected);
 				
 				//added by sampler
 				if ( _pSong->_pInstrument[si]->waveLength != 0)
@@ -1342,7 +1342,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
 
-		void CMainFrame::ShowMachineGui(int tmac, CPoint point)
+		void CMainFrame::ShowMachineGui(Machine::id_type tmac, CPoint point)
 		{
 			Machine *ma = _pSong->_pMachine[tmac];
 
@@ -1571,13 +1571,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					m_wndView.WireDialog[i]->OnCancel();
 				}
 			}
-			for (int c=0; c<MAX_MACHINES; c++)
+			for (Machine::id_type c(0); c<MAX_MACHINES; c++)
 			{
 				if ( _pSong->_pMachine[c] ) CloseMacGui(c,false);
 			}
 		}
 
-		void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
+		void CMainFrame::CloseMacGui(Machine::id_type mac,bool closewiredialogs)
 		{
 			if (closewiredialogs ) 
 			{

@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
 #pragma once
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/engine/FileIO.hpp>
+#include "constants.hpp"
+#include "FileIO.hpp"
 namespace psycle
 {
 	namespace host
@@ -11,6 +11,8 @@ namespace psycle
 		class Instrument
 		{
 		public:
+			PSYCLE__STRONG_TYPEDEF(int, id_type);
+
 			Instrument();
 			~Instrument();
 			void Delete();
@@ -88,7 +90,9 @@ namespace psycle
 			signed short *waveDataL;
 			signed short *waveDataR;
 			///\}
-
 		};
+
+		/// Instrument index of the wave preview.
+		Instrument::id_type const PREV_WAV_INS(255);
 	}
 }
