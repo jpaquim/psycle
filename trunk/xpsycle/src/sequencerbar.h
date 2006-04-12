@@ -31,6 +31,8 @@
 #include <nimage.h>
 #include <ngroupbox.h>
 
+class N7SegDisplay;
+
 /**
 @author Stefan
 */
@@ -62,7 +64,8 @@ private:
 
    NPanel* seqPanel_;
    NListBox* seqList_;
-   NLabel* lenLabel_;
+   N7SegDisplay* lenSeg1;
+   N7SegDisplay* lenSeg2;
 
    NButton* incshort_;
    NButton* decshort_;

@@ -28,6 +28,8 @@
 #include <nitem.h>
 #include <napp.h>
 #include <nconfig.h>
+#include <n7segdisplay.h>
+
 
 SequencerBar::SequencerBar()
  : NPanel()
@@ -163,8 +165,14 @@ void SequencerBar::init( )
     lenPanel->add( declen_     = new NButton( img,40,10));
     declen_->clicked.connect(this,&SequencerBar::onDecLen);
     char buffer[30];
-    sprintf(buffer, "%02d:%02d", (int)(Global::pSong()->playLength / 60), (int)(Global::pSong()->playLength % 60));
-    lenPanel->add( lenLabel_ = new NLabel(buffer));
+
+    lenSeg1 = new N7SegDisplay(2);
+    lenSeg1->setNumber((int)(Global::pSong()->playLength / 60));
+    lenSeg2 = new N7SegDisplay(2);
+    lenSeg2->setNumber((int)(Global::pSong()->playLength % 60));
+
+    lenPanel->add( lenSeg1);
+    lenPanel->add( lenSeg2);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->more()); else
@@ -385,9 +393,11 @@ void SequencerBar::updatePlayOrder(bool mode)
      }
   }
 
-  sprintf(buffer, "%02d:%02d", (int)(songLength / 60), (int)(songLength) % 60);
-  lenLabel_->setText(buffer);
-  lenLabel_->repaint();
+  lenSeg1->setNumber((int)(songLength / 60));
+  lenSeg2->setNumber((int)(songLength) % 60);
+
+  lenSeg1->repaint();
+  lenSeg2->repaint();
 
   // Update sequencer line
 
