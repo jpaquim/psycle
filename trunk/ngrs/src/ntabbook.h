@@ -23,7 +23,7 @@
 #include <npanel.h>
 #include "nnotebook.h"
 #include "ntabbar.h"
-#include "nalignlayout.h"
+
 
 
 class NTabBar;
@@ -38,16 +38,20 @@ public:
 
     ~NTabBook();
 
-    NPage* addNewPage(std::string tabName);
-    void addPage(NPage* page, std::string tabName);
+    NPanel* addNewPage(const std::string & tabName);
+    void addPage(NPanel* page, const std::string & tabName);
 
-    void setActivePage(NPage* page);
+    void setActivePage(NPanel* page);
     void setTabBarAlign(int align);
+
+    NCustomButton* tab(NPanel* page);
 
 private:
 
    NTabBar* tabBar_;
    NNoteBook* book_;
+
+   NLayout* alignLayout;
 
 };
 

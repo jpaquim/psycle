@@ -39,7 +39,7 @@ NTabBar::~NTabBar()
   delete fl;
 }
 
-void NTabBar::addTab( NTab * tab, NPage* page )
+void NTabBar::addTab( NTab * tab, NPanel* page )
 {
   NTogglePanel::add(tab);
 
@@ -58,7 +58,7 @@ void NTabBar::setNoteBook( NNoteBook * noteBook )
 void NTabBar::onTabClick( NButtonEvent * ev )
 {
  if (noteBook_!=0) {
-   std::map<NObject*,NPage*>::iterator itr;
+   std::map<NObject*,NPanel*>::iterator itr;
    if ( (itr = pageMap_.find(ev->sender())) == pageMap_.end())
    {
        // not my Tab
@@ -83,15 +83,26 @@ void NTabBar::setOrientation( int orientation )
   }
 }
 
-void NTabBar::setActiveTab( NPage * page )
+void NTabBar::setActiveTab( NPanel * page )
 {
-  std::map<NObject*,NPage*>::iterator itr = pageMap_.begin();
+  std::map<NObject*,NPanel*>::iterator itr = pageMap_.begin();
   for ( ; itr != pageMap_.end(); itr++) {
     if (itr->second == page) {
        setDown((NCustomButton*)itr->first);
     }
   }
   repaint();
+}
+
+NCustomButton * NTabBar::tab( NPanel * page )
+{
+  std::map<NObject*,NPanel*>::iterator itr = pageMap_.begin();
+  for ( ; itr != pageMap_.end(); itr++) {
+    if (itr->second == page) {
+       return (NCustomButton*) itr->first;
+    }
+  }
+  return 0;
 }
 
 

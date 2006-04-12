@@ -131,4 +131,11 @@ int NRuntime::d2i(double d)
    return (int) ( d<0?d-.5:d+.5);
  }
 
+void NRuntime::erase( NRuntime * child )
+{
+ child->setParent(NULL);
+  std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
+  components.erase(itr);
+}
+
 

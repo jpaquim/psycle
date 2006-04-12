@@ -17,36 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef N7SEGDISPLAY_H
-#define N7SEGDISPLAY_H
+#ifndef NDOCKPANEL_H
+#define NDOCKPANEL_H
 
 #include <npanel.h>
-
-class N7Segment;
 
 /**
 @author Stefan Nattkemper
 */
-class N7SegDisplay : public NPanel
+class NDockPanel : public NPanel
 {
 public:
-    N7SegDisplay();
-    N7SegDisplay(int segmentCount);
+    NDockPanel();
 
-    ~N7SegDisplay();
+    ~NDockPanel();
 
-    void setNumber(int number);
-    void setColors(const NColor & bg ,const NColor & on,const NColor & off);
+    virtual void add(NVisualComponent* comp);
+    virtual void setLayout(NLayout* layout);
+
+
+    void onDockWindow();
 
 private:
 
-    int segCount;
+    NPanel* dockBar_;
+    NPanel* area_;
 
-    NLayout* fl;
-    void initSegDisplay();
+    NLayout* alignLayout;
+    NLayout* flowLayout;
 
-    std::vector<N7Segment*> segs;
+    NLayout* oldAreaLayout_;
 
+    NWindow* undockedWindow;
+
+    void onUndockWindow(NButtonEvent* ev);
 };
 
 #endif

@@ -20,6 +20,7 @@
 #include "nwindow.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "ndockpanel.h"
 
 //#include <X11/extensions/Xinerama.h>
 
@@ -44,6 +45,7 @@ NWindow::NWindow()
   selectedBase_ = lastOver_ = 0;
   modal_ = false;
   NVisual::setVisible(false);
+  dock_ = 0;
 }
 
 
@@ -257,6 +259,9 @@ std::string NWindow::title( )
 
 int NWindow::onClose( )
 {
+  if (dock_!=0) {
+     return nDockWindow;
+  }
   exitLoop_ = nDestroyWindow;
   setVisible(false);
   return nDestroyWindow;
@@ -512,7 +517,14 @@ NVisualComponent* NWindow::selectedBase( ) const
   return selectedBase_;
 }
 
+void NWindow::setDock( NDockPanel * dock )
+{
+  dock_ = dock;
+}
 
-
+NDockPanel * NWindow::dock( )
+{
+  return dock_;
+}
 
 

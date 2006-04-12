@@ -28,6 +28,9 @@
 
 #define nDestroyWindow 1
 #define nHideWindow    2
+#define nDockWindow    3
+
+class NDockPanel;
 
 /**
 @author Stefan
@@ -110,6 +113,11 @@ public:
 
     static bool paintFlag;
 
+    friend class NDockPanel;
+
+    void setDock(NDockPanel* dock);
+    NDockPanel* dock();
+
 private:
 
    bool modal_;
@@ -138,6 +146,8 @@ private:
 
    int oldWidth;
    int oldHeight;
+
+   NDockPanel* dock_;
 
 };
 

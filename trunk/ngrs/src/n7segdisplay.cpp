@@ -77,4 +77,14 @@ void N7SegDisplay::initSegDisplay( )
  setHeight(preferredHeight());
 }
 
+void N7SegDisplay::setColors(const NColor & bg, const NColor & on, const NColor & off )
+{
+  for (std::vector<N7Segment*>::iterator it =  segs.begin(); it < segs.end(); it++)
+  {
+    N7Segment* segment = *it;
+    segment->setColors(on,off);
+    segment->setBackground(bg);
+  }
+}
+
 

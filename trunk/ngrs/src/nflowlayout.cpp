@@ -96,8 +96,8 @@ void NFlowLayout::align( NVisualComponent * parent )
                  visual->setTop(yp);
                }
          } else 
-         if (baseLine_ == nAlClient) {
-            visual->setTop(yp);
+         if (baseLine_ == nAlCenter) {
+            visual->setTop(yp+(ymax-visual->preferredHeight())/2);
          }
     }
   }
@@ -283,12 +283,13 @@ void NFlowLayout::drawComponents( NVisualComponent * target, NGraphics* g, const
   } else NLayout::drawComponents(target,g,repaintArea,sender);
 }
 
-NFlowLayout::NFlowLayout( int align, int hgap, int vgap ) : NLayout()
+NFlowLayout::NFlowLayout( int align, int hgap, int vgap, int baseLine  ) : NLayout()
 {
   init();
   align_ = align;
   hgap_ = hgap;
   vgap_ = vgap;
+  baseLine_ = nAlCenter;
 }
 
 void NFlowLayout::setBaseLine( int line )

@@ -23,6 +23,7 @@
 #include "nconfig.h"
 #include "nwindow.h"
 #include "ntimer.h"
+#include "ndockpanel.h"
 
 
 NSystem* NApp::system_ = 0;
@@ -148,6 +149,11 @@ void NApp::eventLoop( )
         if (exitLoop==nDestroyWindow) {
           delete window;
           exitLoop = 0;
+        } else 
+        if (exitLoop==nDockWindow) {
+           window->dock()->onDockWindow();
+           exitLoop=0;
+           lastOverWin_ = 0;
         } else exitLoop=0;
   //      }
        }

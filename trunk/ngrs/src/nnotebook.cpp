@@ -30,7 +30,7 @@ NNoteBook::~NNoteBook()
 {
 }
 
-void NNoteBook::add( NPage * page )
+void NNoteBook::add( NPanel * page )
 {
   NPanel::add(page);
   if (visiblePage_!=0) {
@@ -47,7 +47,7 @@ void NNoteBook::resize( )
   }
 }
 
-void NNoteBook::setActivePage( NPage * page )
+void NNoteBook::setActivePage( NPanel * page )
 {
   if (page != 0) {
     std::vector<NRuntime*>::iterator it = find(components.begin(), components.end(), page);
@@ -58,7 +58,7 @@ void NNoteBook::setActivePage( NPage * page )
       if (visiblePage_!=0) {
         visiblePage_->setVisible(false);
       }
-      visiblePage_ = static_cast<NPage*> (*it);
+      visiblePage_ = static_cast<NPanel*> (*it);
       page->setVisible(true);
       resize();
     }

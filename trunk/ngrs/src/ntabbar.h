@@ -23,7 +23,6 @@
 #include <npanel.h>
 #include "nflowlayout.h"
 #include "ntab.h"
-#include "npage.h"
 #include "nnotebook.h"
 #include "ntogglepanel.h"
 
@@ -41,18 +40,19 @@ public:
 
     ~NTabBar();
 
-   void addTab(NTab* tab, NPage* page);
+   void addTab(NTab* tab, NPanel* page);
    void setNoteBook(NNoteBook* noteBook);
+   NCustomButton* tab(NPanel* page);
 
    void setOrientation(int orientation);
-   void setActiveTab(NPage* page);
+   void setActiveTab(NPanel* page);
 
 private:
 
    int orientation_;
 
    NFlowLayout* fl;
-   std::map<NObject*,NPage*> pageMap_;
+   std::map<NObject*,NPanel*> pageMap_;
    NNoteBook* noteBook_;
 
    void onTabClick(NButtonEvent* sender);

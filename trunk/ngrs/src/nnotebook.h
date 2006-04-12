@@ -21,7 +21,6 @@
 #define NNOTEBOOK_H
 
 #include "npanel.h"
-#include "npage.h"
 
 /**
 @author Stefan
@@ -33,14 +32,14 @@ public:
 
     ~NNoteBook();
 
-    void add(NPage* page);
-    void setActivePage(NPage* page);
+    void add(NPanel* page);
+    void setActivePage(NPanel* page);
 
     virtual void resize();
 
 private:
 
-    NPage* visiblePage_;
+    NPanel* visiblePage_;
 
 };
 
