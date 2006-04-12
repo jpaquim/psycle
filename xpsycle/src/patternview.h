@@ -28,12 +28,13 @@
 #include <npopupmenu.h>
 #include <nscrollbar.h>
 #include <map>
+#include <ndockpanel.h>
 
 /**
 @author Stefan
 */
 
-class PatternView : public NPage
+class PatternView : public NDockPanel
 {
    class Header: public NPanel {
    public:

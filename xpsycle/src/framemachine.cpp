@@ -58,6 +58,7 @@ void FrameMachine::init( )
     knobPanel->setLayout(gridLayout);
   pane()->add(knobPanel,nAlClient);
   setTitle(stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
+
 }
 
 
@@ -213,6 +214,7 @@ void Knob::onMousePress( int x, int y, int button )
   int CH = clientHeight();
   if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y)) {
     istweak = true;
+    std::cout << "yes" << std::endl;
     sourcepoint = y;
   }
 }
@@ -220,11 +222,27 @@ void Knob::onMousePress( int x, int y, int button )
 void Knob::onMouseOver( int x, int y )
 {
   if (istweak) {
+     if (( ultrafinetweak && !(NApp::system().keyState() & ShiftMask )) || //shift-key has been left.
+         ( !ultrafinetweak && (NApp::system().keyState() & ShiftMask))) //shift-key has just been pressed
+     {
+        sourcepoint=y;
+        ultrafinetweak=!ultrafinetweak;
+     }
+     else if (( finetweak && !(NApp::system().keyState() & ControlMask )) || //control-key has been left.
+     ( !finetweak && (NApp::system().keyState() & ControlMask))) //control-key has just been pressed
+     {
+        sourcepoint = y;
+        finetweak=!finetweak;
+     }
+
+
+
+
     int maxval = max_range;
     int minval = min_range;
     int tweakbase = value_;
 
-    int screenh = NApp::system().screenHeight();
+    int screenh = window()->height();
     double freak = 0.5;
     if ( ultrafinetweak ) freak = 0.5f;
     else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
