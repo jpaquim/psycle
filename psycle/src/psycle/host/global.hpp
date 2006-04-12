@@ -59,7 +59,7 @@ namespace psycle
 				dsp::Resampler   static inline & resampler    () throw() { return *pResampler; }
 				InputHandler     static inline & input_handler() throw() { return *pInputHandler; }
 
-			public:// should be private, not static
+			PSYCLE__PRIVATE:// shouldn't be static either
 				static Song * _pSong;
 				static Player * pPlayer;
 				static Configuration * pConfig;
