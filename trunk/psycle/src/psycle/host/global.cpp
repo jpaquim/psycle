@@ -146,7 +146,7 @@ namespace psycle
 				operating_system::console::open();
 			#endif
 			_pSong = new Song;
-			pPlayer = new Player;
+			pPlayer = new Player(*_pSong); // [bohan] afaik song is never deleted/recreated from the gui, so we don't even have to care about updating the player's reference.
 			pConfig = new Configuration;
 			pResampler = new dsp::Cubic;
 			pResampler->SetQuality(dsp::R_LINEAR);

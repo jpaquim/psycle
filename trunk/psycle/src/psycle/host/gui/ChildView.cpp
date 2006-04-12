@@ -32,7 +32,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		CMainFrame		*pParentMain;
 
-		//\todo: Investigate this variable ( and especially pSong->cpuIdle ). See if it is doing what it is supposed to.
+		//\todo: Investigate this variable ( and especially song().cpuIdle ). See if it is doing what it is supposed to.
 		unsigned idletime = 0;
 
 		CChildView::CChildView()
@@ -3460,8 +3460,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if((propMac < 0 ) || (propMac >= MAX_MACHINES-1)) return;
 			CMacProp dlg;
 			dlg.m_view=this;
-			dlg.pMachine = Global::_pSong->_pMachine[propMac];
-			dlg.pSong = Global::_pSong;
+			dlg.pMachine = Global::song()._pMachine[propMac];
+			dlg.pSong = &Global::song();
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
@@ -3477,7 +3477,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
-				Global::_pSong->DestroyMachine(propMac);
+				Global::song().DestroyMachine(propMac);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (pParentMain->pGearRackDialog)

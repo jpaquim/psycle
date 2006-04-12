@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
 #pragma once
-#include <psycle/host/engine/constants.hpp>
-#include <psycle/host/engine/riff.hpp>
+#include "song.hpp"
+#include "riff.hpp"
 namespace psycle
 {
 	namespace host
@@ -14,19 +14,29 @@ namespace psycle
 		{
 		public:
 			/// constructor.
-			Player();
+			Player(Song &);
 			/// destructor.
 			virtual ~Player() throw();
+
+		public:
+			Song inline & song() throw() { return *song_; }
+			void song(Song & song) { this-> song_ = &song; }
+		private:
+			Song * song_;
+
+		public:
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
 			/// Initial Loop. Read new line and Interpretate the Global commands.
-			void ExecuteGlobalCommands(void);
+			void ExecuteGlobalCommands();
 			/// Notify all machines that a new Tick() comes.
-			void NotifyNewLine(void);
+			void NotifyNewLine();
 			/// Final Loop. Read new line for notes to send to the Machines
-			void ExecuteNotes(void);
+			void ExecuteNotes();
 			/// Function to englobe all the three functions above.
 			void ExecuteLine();
+
+		PSYCLE__PRIVATE:
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
 			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
@@ -58,36 +68,47 @@ namespace psycle
 			bool _playBlock;
 			/// wheter this player should play the song/block in loop.
 			bool _loopSong;
+
+		public:
 			/// stops playing.
 			void Stop();
 			/// work function. (Entrance for the callback function (audiodriver)
+			float * Work(int & nsamples);
+		//private:
 			static float * Work(void* context, int& nsamples);
-			
+
+		public:
+			/// ...
 			void SetBPM(int _bpm,int _tpb=0);
 
-			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
-
-			/// Returns the number of samples that it takes for each row of the pattern to be played
-			const int SamplesPerRow(){ return m_SamplesPerRow;};
-			/// Sets the number of samples that it takes for each row of the pattern to be played
-			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
-			const int SampleRate() { return m_SampleRate; }
-			void SampleRate(const int sampleRate);
+			///\name sample rate
+			///\{
+				/// ...
+				void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
+				/// Returns the number of samples that it takes for each row of the pattern to be played
+				const int SamplesPerRow(){ return m_SamplesPerRow;};
+				/// Sets the number of samples that it takes for each row of the pattern to be played
+				void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
+				const int SampleRate() { return m_SampleRate; }
+				void SampleRate(const int sampleRate);
+			///\}
 
 			/// used by the plugins to indicate that they need redraw.
 			bool Tweaker;
+
 			///\name secondary output device, write to a file
 			///\{
-			/// starts the recording output device.
-			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
-			/// stops the recording output device.
-			void StopRecording(bool bOk = true);
-			/// wether the recording device has been started.
-			bool _recording;
+				/// starts the recording output device.
+				void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
+				/// stops the recording output device.
+				void StopRecording(bool bOk = true);
+				/// wether the recording device has been started.
+				bool _recording;
 			///\}
-		protected:
+
+		private:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
-			int prevMachines[MAX_TRACKS];
+			Machine::id_type prevMachines[MAX_TRACKS];
 			/// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
 			int backup_rate;
 			/// Stores the bitdepth of playback when recording to wave offline (non-realtime), since it can be changed.
