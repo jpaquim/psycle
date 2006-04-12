@@ -167,8 +167,10 @@ void SequencerBar::init( )
     char buffer[30];
 
     lenSeg1 = new N7SegDisplay(2);
-    lenSeg1->setNumber((int)(Global::pSong()->playLength / 60));
+      lenSeg1->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
+      lenSeg1->setNumber((int)(Global::pSong()->playLength / 60));
     lenSeg2 = new N7SegDisplay(2);
+      lenSeg2->setColors(NColor(0,0,80),NColor(40,70,255),NColor(0,0,130));
     lenSeg2->setNumber((int)(Global::pSong()->playLength % 60));
 
     lenPanel->add( lenSeg1);

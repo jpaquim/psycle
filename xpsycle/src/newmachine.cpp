@@ -73,7 +73,7 @@ NewMachine::NewMachine()
 
   tabBook_ = new NTabBook();
     tabBook_->setAlign(nAlClient);
-    NPage* generatorPage = new NPage();
+    NPanel* generatorPage = new NPanel();
        generatorPage->setLayout(new NAlignLayout());
          generatorfBox_ = new NFileListBox();
            generatorfBox_->addFilter(".so","lib-psycle.plugin.!S*.so");
@@ -83,7 +83,7 @@ NewMachine::NewMachine()
            generatorfBox_->setActiveFilter(".so");
            generatorfBox_->itemSelected.connect(this,&NewMachine::onGeneratorItemSelected);
        generatorPage->add(generatorfBox_);
-    NPage* effectPage = new NPage();
+    NPanel* effectPage = new NPanel();
     tabBook_->addPage(effectPage,"Effects");
     tabBook_->addPage(generatorPage,"Generators");
   pane()->add(tabBook_);

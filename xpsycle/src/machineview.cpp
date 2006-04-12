@@ -28,36 +28,35 @@
 
 
 MachineView::MachineView()
- : NPage()
+ : NDockPanel()
 {
-  init();
+  setLayout(alignLayout = new NAlignLayout());
 
   scrollBox_ = new NScrollBox();
-  scrollBox_->setTransparent(true);
-
-  scrollArea_ = new NPanel();
-  scrollArea_->setTransparent(true);
-  scrollArea_->setLayout(new NAutoScrollLayout);
-  scrollBox_->setScrollPane(scrollArea_);
+    scrollBox_->setAlign(nAlClient);
+    scrollBox_->setTransparent(true);
+    scrollArea_ = new NPanel();
+      scrollArea_->setTransparent(true);
+      scrollArea_->setLayout(new NAutoScrollLayout);
+      scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
+    scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_);
-  scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
+
+  init();
 }
 
 
 MachineView::~MachineView()
 {
+  delete alignLayout;
 }
 
 void MachineView::init( )
 {
-  setBackground(NColor(150,150,180));
-  setTransparent(false);
+  scrollArea_->setBackground(NColor(150,150,180));
+  scrollArea_->setTransparent(false);
 }
 
-void MachineView::resize( )
-{
-  scrollBox_->setPosition(0,0,clientWidth(), clientHeight());
-}
 
 void MachineView::onCreateMachine( Machine * mac )
 {

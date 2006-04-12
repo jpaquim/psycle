@@ -38,6 +38,7 @@
 #include <nbevelborder.h>
 #include <nprogressbar.h>
 #include <nfiledialog.h>
+#include <n7segdisplay.h>
 
 class GreetDlg;
 class AboutDlg;
@@ -83,8 +84,8 @@ private:
     NMenu* performanceMenu_;
     NMenu* helpMenu_;
 
-    NLabel* bpmLabel_;
-    NLabel* tpbLabel_;
+    N7SegDisplay* bpmDisplay_;
+    N7SegDisplay* tpbDisplay_;
 
     NFlowLayout* toolBarPanelLayout;
     NFlowLayout* statusBarPanelLayout;
