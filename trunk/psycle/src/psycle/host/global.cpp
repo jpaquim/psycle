@@ -142,6 +142,7 @@ namespace psycle
 			
 		Global::Global()
 		{
+			loggers::trace("Global::Global() ...");
 			#ifndef NDEBUG
 				operating_system::console::open();
 			#endif
@@ -152,6 +153,7 @@ namespace psycle
 			pResampler->SetQuality(dsp::R_LINEAR);
 			pInputHandler = new InputHandler;
 			cpu_frequency_ = GetCPUFreq();
+			loggers::trace("Global::Global() ... initialized static objects.");
 		}
 
 		Global::~Global()

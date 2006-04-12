@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace host
 	{
-		class PluginFxCallback : public CFxCallback
+		class PluginFxCallback : public plugin_interface::CFxCallback
 		{
 		public:
 			HWND hWnd;
@@ -29,12 +29,12 @@ namespace psycle
 		{
 		private:
 			Plugin & host_;
-			CMachineInterface * plugin_;
+			plugin_interface::CMachineInterface * plugin_;
 		private:
 			inline Plugin & host() throw();
 			inline const Plugin & host() const throw();
-			inline CMachineInterface & plugin() throw();
-			inline const CMachineInterface & plugin() const throw();
+			inline plugin_interface::CMachineInterface & plugin() throw();
+			inline const plugin_interface::CMachineInterface & plugin() const throw();
 		public:
 			inline proxy(Plugin & host, CMachineInterface * plugin = 0);
 			inline ~proxy() throw();
@@ -113,12 +113,12 @@ namespace psycle
 
 		inline Plugin & proxy::host() throw() { return host_; }
 		inline const Plugin & proxy::host() const throw() { return host_; }
-		inline CMachineInterface & proxy::plugin() throw() { return *plugin_; }
-		inline const CMachineInterface & proxy::plugin() const throw() { return *plugin_; }
-		inline proxy::proxy(Plugin & host, CMachineInterface * plugin) : host_(host), plugin_(0) { (*this)(plugin); }
+		inline plugin_interface::CMachineInterface & proxy::plugin() throw() { return *plugin_; }
+		inline const plugin_interface::CMachineInterface & proxy::plugin() const throw() { return *plugin_; }
+		inline proxy::proxy(Plugin & host, plugin_interface::CMachineInterface * plugin) : host_(host), plugin_(0) { (*this)(plugin); }
 		inline proxy::~proxy() throw() { (*this)(0); }
 		inline const bool proxy::operator()() const throw() { return plugin_; }
-		inline void proxy::operator()(CMachineInterface * plugin) throw(exceptions::function_error)
+		inline void proxy::operator()(plugin_interface::CMachineInterface * plugin) throw(exceptions::function_error)
 		{
 			zapObject(this->plugin_,plugin);
 			//if((*this)())

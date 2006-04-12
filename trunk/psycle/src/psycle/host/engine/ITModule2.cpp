@@ -92,7 +92,7 @@ namespace psycle
 			strcpy(s->Comment,"Imported from Impulse Tracker Module: ");
 			strcat(s->Comment,file_name().c_str());
 
-			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "it module sampler");
+			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse");
 			s->InsertConnection(Machine::id_type(0), MASTER_INDEX,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
@@ -1119,7 +1119,7 @@ Special:  Bit 0: On = song message attached.
 			strcpy(s->Comment,"Imported from Scream Tracker 3 Module: ");
 			strcat(s->Comment,file_name().c_str());
 
-			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "it module sampler");
+			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse");
 			s->InsertConnection(Machine::id_type(0),MASTER_INDEX,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);

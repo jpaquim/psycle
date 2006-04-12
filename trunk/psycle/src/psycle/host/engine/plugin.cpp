@@ -153,7 +153,7 @@ namespace psycle
 			}
 			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetInfo"); }
-			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
+			if(_pInfo->Version < plugin_interface::MI_VERSION) throw std::runtime_error("plugin format is too old");
 
 			_isSynth = _pInfo->Flags & 3; //dw00t //this was an == instead of an &, but the newgui uses the Flags field to identify itself
 			
@@ -190,7 +190,7 @@ namespace psycle
 			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
 			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
 
-			if(_pInfo->Flags & CUSTOM_GUI)
+			if(_pInfo->Flags & plugin_interface::CUSTOM_GUI)
 			{
 				GETPARAMS GetParams = (GETPARAMS) GetProcAddress(_dll, "GetParams");
 				if(!GetParams)

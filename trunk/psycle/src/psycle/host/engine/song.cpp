@@ -191,6 +191,7 @@ namespace psycle
 			#endif
 		#endif
 		{
+			tracks_= MAX_TRACKS;
 			_machineLock = false;
 			Invalided = false;
 			PW_Phase = 0;
@@ -331,13 +332,13 @@ namespace psycle
 						MACH_MASTER, 
 						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
 						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
-						0,
+						"master",
 						MASTER_INDEX
 					);
 			}
 			else
 			{
-				CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
+				CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
 			}
 		}
 
@@ -1019,7 +1020,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_SNGI)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
+							MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1078,7 +1079,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_SEQD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
+							MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
 						else
@@ -1101,7 +1102,7 @@ namespace psycle
 							}
 							else
 							{
-								//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
+								loggers::warning("Sequence section of File is from a newer version of psycle!");
 								pFile->Skip(size - sizeof index);
 							}
 						}
@@ -1116,7 +1117,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_PATD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
+							loggers::warning("Pattern section of File is from a newer version of psycle!");
 							pFile->Skip(size);
 						}
 						else
@@ -1169,7 +1170,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_MACD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Machine section of File is from a newer version of psycle!", 0, 0);
+							loggers::warning("Machine section of File is from a newer version of psycle!");
 							pFile->Skip(size);
 						}
 						else
@@ -1201,7 +1202,7 @@ namespace psycle
 						if(version > CURRENT_FILE_VERSION_INSD)
 						{
 							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
+							loggers::warning("Instrument section of File is from a newer version of psycle!");
 							pFile->Skip(size);
 						}
 						else

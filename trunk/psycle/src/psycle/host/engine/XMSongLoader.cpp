@@ -82,7 +82,7 @@ namespace psycle
 		if(!IsValid()){
 			return;
 		}
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "xm module sampler");
+		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse");
 		song.InsertConnection(Machine::id_type(0),MASTER_INDEX,0.35f);
 		song.seqBus=0;
 		// build sampler
@@ -1011,7 +1011,7 @@ namespace psycle
 		if(!IsValid()){
 			return;
 		}
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "oldschool module sampler");
+		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse");
 //		song.InsertConnection(0,MASTER_INDEX,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=0;
 		// build sampler

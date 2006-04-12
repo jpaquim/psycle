@@ -86,7 +86,7 @@ namespace psycle
 					/* unsigned */ int inline tracks() const throw() { return tracks_; }
 					/// The number of tracks in each pattern of this song.
 					///\todo it should be unsigned but there's somewhere a piece of code that messes negative integers with this value
-					void inline tracks(/* unsigned */  int const tracks) throw() { assert(tracks >= 0 && tracks < MAX_TRACKS); this->tracks_ = tracks_; }
+					void inline tracks(/* unsigned */  int const tracks) throw() { assert(tracks >= 0); assert(tracks < MAX_TRACKS); this->tracks_ = tracks; }
 				private:
 					unsigned int tracks_;
 			///\}
@@ -124,7 +124,7 @@ namespace psycle
 			///\{
 				public:
 					/// creates a new machine in this song.
-					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name) throw(std::exception)
+					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy") throw(std::exception)
 					{
 						Machine::id_type const array_index(GetFreeMachine());
 						if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
