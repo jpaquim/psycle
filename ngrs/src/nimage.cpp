@@ -79,12 +79,16 @@ void NImage::loadFromFile( std::string filename )
 
 int NImage::preferredWidth( ) const
 {
+  if (ownerSize()) return NVisualComponent::preferredWidth();
+
   if (pBitmap_!=0) return pBitmap_->width()+1;
   return bitmap24bpp_.width()+1;
 }
 
 int NImage::preferredHeight( ) const
 {
+  if (ownerSize()) return NVisualComponent::preferredHeight();
+
   if (pBitmap_!=0) return pBitmap_->height()+1;
   return bitmap24bpp_.height()+1;
 }

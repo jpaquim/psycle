@@ -33,6 +33,8 @@
 #include "nborderlayout.h"
 #include "nspinbutton.h"
 #include "nspinedit.h"
+#include "n7segment.h"
+#include "n7segdisplay.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -50,20 +52,9 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  testMenu();
-
-  NPanel* prop = new NPanel();
-    prop->setWidth(210);
-    NGroupBox* macProp = new NGroupBox();
-    prop->add(macProp,nAlTop);
-  pane()->add(prop,nAlRight);
-
-
-  NListBox* box = new NListBox();
-     for (int i = 0; i < 200; i++)
-       box->add(new NItem("hkjdsahk kjdsh kjdsa"));
-  pane()->add(box,nAlClient);
-
+  N7SegDisplay* dpy = new N7SegDisplay();
+  dpy->setNumber(10);
+  pane()->add(dpy);
 }
 
 
@@ -216,9 +207,11 @@ void NTestWindow::toolBarTest( )
 
     std::cout << toolBar1_->preferredHeight() << std::endl;
     std::cout << "y" << lb->preferredHeight() << std::endl;
-   /* NImage* img;
+
+    NImage* img;
     img = new NImage();
     img->loadFromFile(iconPath+ "new.xpm");
+    img->setPreferredSize(40,80);
     toolBar1_->add(new NButton(img));
 
     img = new NImage();
@@ -227,7 +220,7 @@ void NTestWindow::toolBarTest( )
 
     img = new NImage();
     img->loadFromFile(iconPath+ "new.xpm");
-    toolBar1_->add(new NButton(img));*/
+    toolBar1_->add(new NButton(img));
    //toolBarPanel_->add(toolBar1_);
    //toolBar1_->resize();
   

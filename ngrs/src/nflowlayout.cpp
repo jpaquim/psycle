@@ -91,9 +91,14 @@ void NFlowLayout::align( NVisualComponent * parent )
          if (baseLine_ == nAlBottom) {
                  visual->setTop(yp+ymax-visual->preferredHeight());
                } else
+         if (baseLine_ == nAlTop) {
                if (baseLine_ == nAlTop) {
                  visual->setTop(yp);
                }
+         } else 
+         if (baseLine_ == nAlClient) {
+            visual->setTop(yp);
+         }
     }
   }
 
