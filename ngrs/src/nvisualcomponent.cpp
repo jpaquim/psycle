@@ -696,6 +696,16 @@ void NVisualComponent::removeChild( NVisualComponent * child )
   if (window()!=0) window()->checkForRemove(0);
 }
 
+void NVisualComponent::erase( NVisualComponent * child )
+{
+  std::vector<NRuntime*>::iterator itr = find(components.begin(),components.end(),child);
+  components.erase(itr);
+  child->setParent(0);
+  std::vector<NVisualComponent*>::iterator vItr = find(visualComponents_.begin(),visualComponents_.end(),child);
+  visualComponents_.erase(vItr);
+  if (window()!=0) window()->checkForRemove(0);
+}
+
 const std::vector< NVisualComponent * > & NVisualComponent::visualComponents( )
 {
   return visualComponents_;
@@ -802,5 +812,7 @@ int NVisualComponent::ownerHeight( ) const
 {
   return ownerPreferredHeight_;
 }
+
+
 
 

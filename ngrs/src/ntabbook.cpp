@@ -19,11 +19,13 @@
  ***************************************************************************/
 #include "ntabbook.h"
 #include "ntabbar.h"
+#include "nalignlayout.h"
 
 NTabBook::NTabBook()
  : NPanel()
 {
-   setLayout(new NAlignLayout());
+   alignLayout = new NAlignLayout();
+   setLayout(alignLayout);
 
    tabBar_ = new NTabBar();
    tabBar_->setAlign(nAlTop);
@@ -41,19 +43,20 @@ NTabBook::NTabBook()
 
 NTabBook::~NTabBook()
 {
+  delete alignLayout;
 }
 
-NPage * NTabBook::addNewPage( std::string tabName )
+NPanel * NTabBook::addNewPage( const std::string & tabName )
 {
   NTab* tab = new NTab();
   tab->setText(tabName);
-  NPage* page = new NPage();
+  NPanel* page = new NPanel();
   tabBar_->addTab(tab, page);
   book_->add(page);
   return page;
 }
 
-void NTabBook::addPage( NPage * page, std::string tabName )
+void NTabBook::addPage( NPanel * page, const std::string & tabName )
 {
   NTab* tab = new NTab();
   tab->setText(tabName);
@@ -61,7 +64,7 @@ void NTabBook::addPage( NPage * page, std::string tabName )
   book_->add(page);
 }
 
-void NTabBook::setActivePage( NPage * page )
+void NTabBook::setActivePage( NPanel * page )
 {
   book_->setActivePage(page);
   tabBar_->setActiveTab(page);
@@ -72,6 +75,11 @@ void NTabBook::setTabBarAlign( int align )
   tabBar_->setAlign(align);
   tabBar_->setOrientation(align);
   updateAlign();
+}
+
+NCustomButton * NTabBook::tab( NPanel * page )
+{
+  return tabBar_->tab(page);
 }
 
 

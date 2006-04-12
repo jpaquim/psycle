@@ -34,7 +34,7 @@ class NFlowLayout : public NLayout
 public:
     NFlowLayout();
     NFlowLayout(int align);
-    NFlowLayout(int align, int hgap, int vgap);
+    NFlowLayout(int align, int hgap, int vgap, int baseLine = nAlCenter);
 
     ~NFlowLayout();
 

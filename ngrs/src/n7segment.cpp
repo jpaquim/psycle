@@ -143,3 +143,9 @@ void N7Segment::resetSeg( )
 {
   seg1_=seg2_=seg3_=seg4_=seg5_=seg6_=seg7_=false;
 }
+
+void N7Segment::setColors( const NColor & on, const NColor & off )
+{
+  onColor  = on;
+  offColor = off;
+}

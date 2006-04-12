@@ -45,7 +45,7 @@ public:
    void insert(NRuntime* component, int index);
    virtual void removeChild(NRuntime* child);
    virtual void removeChilds();
-   void erase(NRuntime* child);
+   virtual void erase(NRuntime* child);
 
    void setParent(NRuntime* parent);
    NRuntime* parent();

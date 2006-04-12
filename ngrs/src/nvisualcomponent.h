@@ -61,13 +61,13 @@ public:
     virtual bool visit(NVisitor* v);
 
     bool transparent() const;
-    void setTransparent(bool on);
+    virtual void setTransparent(bool on);
     void setTranslucent(NColor color, int percent);
     int translucent() const;
     const NColor & translucentColor();
 
-    void setBackground(const NColor & background);
-    void setParentBackground(bool on);
+    virtual void setBackground(const NColor & background);
+    virtual void setParentBackground(bool on);
     const NColor & background();
 
     void setForeground(const NColor & foreground);
@@ -173,6 +173,7 @@ public:
 
     virtual void removeChilds();
     virtual void removeChild( NVisualComponent * child );
+    virtual void erase(NVisualComponent* child);
 
     const std::vector<NVisualComponent*> & visualComponents();
 

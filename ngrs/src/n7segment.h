@@ -39,6 +39,8 @@ public:
 
     void setNumber(int z);
 
+    void setColors(const NColor & on, const NColor & off);
+
 private:
 
     NColor onColor;

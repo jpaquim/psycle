@@ -35,6 +35,7 @@
 #include "nspinedit.h"
 #include "n7segment.h"
 #include "n7segdisplay.h"
+#include "ndockpanel.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -51,10 +52,20 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
   setPosition(0,0,1000,700);
+ 
+  NTabBook* book = new NTabBook();
 
-  N7SegDisplay* dpy = new N7SegDisplay();
-  dpy->setNumber(10);
-  pane()->add(dpy);
+  pane()->add(new NButton("t"),nAlRight);
+
+  NDockPanel* panel = new NDockPanel();
+    panel->setLayout(new NAlignLayout());
+    NListBox* hallo = new NListBox();
+      hallo->setAlign(nAlClient);
+    panel->add(hallo);
+
+  book->addPage(panel,"page");
+
+  pane()->add(book,nAlClient);
 }
 
 
