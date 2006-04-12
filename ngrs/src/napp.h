@@ -73,6 +73,8 @@ public:
    static void enterThread();
    static void leaveThread();
 
+   static NWindow* lastOverWin_;
+
 private:
 
    static NConfig* config_;
@@ -101,8 +103,6 @@ private:
 
    static NObject* findAcceleratorNotifier(const NKeyAccelerator & acc);
    static std::vector<NWindow*> popups_;
-
-   static NWindow* lastOverWin_;
 
    static std::vector<NRuntime*> removePipe;
    static void callRemovePipe( );

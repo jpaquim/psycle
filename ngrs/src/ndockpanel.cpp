@@ -27,7 +27,7 @@
 #include "nconfig.h"
 
 /* XPM */
-const char * winbtn_xpm[] = {
+const char * winundock_xpm[] = {
 "16 13 2 1",
 " 	c None",
 ".	c #003063",
@@ -46,6 +46,25 @@ const char * winbtn_xpm[] = {
 "................"};
 
 
+const char * windock_xpm[] = {
+"16 13 2 1",
+" 	c None",
+".	c #003063",
+"................",
+".              .",
+".              .",
+"................",
+".              .",
+".              .",
+".              .",
+".            . .",
+".         . .  .",
+".         ..   .",
+".         ...  .",
+".              .",
+"................"};
+
+
 NDockPanel::NDockPanel()
  : NPanel()
 {
@@ -56,16 +75,19 @@ NDockPanel::NDockPanel()
     dockBar_->setLayout( flowLayout = new NFlowLayout(nAlRight,0,0));
   NPanel::add(dockBar_,nAlTop);
 
-    NImage* img = new NImage();
-      img->createFromXpmData(winbtn_xpm);
-      img->setPreferredSize(20,17);
-    NButton* unCoupleBtn = new NButton(img);
+  dockBmp.createFromXpmData(windock_xpm);
+  undockBmp.createFromXpmData(winundock_xpm);
+
+    dockImg = new NImage();
+      dockImg->setSharedBitmap(&undockBmp);
+      dockImg->setPreferredSize(20,17);
+    NButton* unCoupleBtn = new NButton(dockImg);
       unCoupleBtn->clicked.connect(this,&NDockPanel::onUndockWindow);
   dockBar_->add(unCoupleBtn);
 
   dockBar_->setBackground(NColor(210,210,210));
   dockBar_->setTransparent(false);
-  
+
 
   area_ = new NPanel();
 
@@ -86,39 +108,43 @@ void NDockPanel::add( NVisualComponent * comp )
 
 void NDockPanel::onUndockWindow( NButtonEvent * ev )
 {
-  undockedWindow = new NWindow();
-  NPanel::add(undockedWindow);
+  if (undockedWindow!=0) {
+    undockedWindow->setVisible(false);
+    NApp::lastOverWin_ = 0;
+    onDockWindow();
+  } else {
+    undockedWindow = new NWindow();
+    NPanel::add(undockedWindow);
 
-  undockedWindow->setDock(this);
+    undockedWindow->setDock(this);
 
-  undockedWindow->erase(undockedWindow->pane_);
-  delete undockedWindow->pane_;
+    int undockWinWidth  = area_->width();
+    int undockWinHeight = area_->height() + dockBar_->height();
 
-  erase(area_);
+    erase(area_);
+    erase(dockBar_);
 
-  oldAreaLayout_ = area_->layout();
-  area_->setLayout(0);
-  undockedWindow->pane_ = area_;
-  undockedWindow->pane_->setLayout(new NAlignLayout());
+    undockedWindow->pane()->add(dockBar_,nAlTop);
+    undockedWindow->pane()->add(area_,nAlClient);
 
-  NApp::config()->setSkin(&undockedWindow->pane_->skin_,"pane");
-  undockedWindow->add(undockedWindow->pane_);
+    dockImg->setSharedBitmap(&dockBmp);
 
-  window()->resize();
-  window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
+    window()->resize();
+    window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
 
-  undockedWindow->setPosition(0,0,area_->width(),area_->height());
-  area_->setPosition(0,0,area_->width(),area_->height());
-  undockedWindow->pane()->resize();
-  undockedWindow->setVisible(true);
+    undockedWindow->setPosition(0,0,undockWinWidth,undockWinHeight);
+    undockedWindow->setVisible(true);
+  }
 }
 
 void NDockPanel::onDockWindow( )
 {
-  undockedWindow->erase(undockedWindow->pane_);
-  area_ = undockedWindow->pane_;
-  area_->setLayout(oldAreaLayout_);
+  undockedWindow->pane()->erase(dockBar_);
+  undockedWindow->pane()->erase(area_);
+
+  NPanel::add(dockBar_,nAlTop);
   NPanel::add(area_,nAlClient);
+
   delete undockedWindow;
   undockedWindow = 0;
 
@@ -130,6 +156,21 @@ void NDockPanel::onDockWindow( )
 void NDockPanel::setLayout( NLayout * layout )
 {
   area_->setLayout(layout);
+}
+
+void NDockPanel::setFont( const NFont & font )
+{
+  area_->setFont(font);
+}
+
+void NDockPanel::setBackground( const NColor & background )
+{
+  area_->setBackground(background);
+}
+
+void NDockPanel::setTransparent( bool on )
+{
+  area_->setTransparent(on);
 }
 
 
