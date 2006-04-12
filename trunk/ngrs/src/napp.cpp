@@ -149,6 +149,7 @@ void NApp::eventLoop( )
         if (exitLoop==nDestroyWindow) {
           delete window;
           exitLoop = 0;
+          lastOverWin_ = 0;
         } else 
         if (exitLoop==nDockWindow) {
            window->dock()->onDockWindow();

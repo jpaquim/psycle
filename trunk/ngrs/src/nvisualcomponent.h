@@ -99,7 +99,7 @@ public:
 
     virtual void paint(NGraphics* g);
 
-    void setFont(const NFont & font);
+    virtual void setFont(const NFont & font);
     void setParentFont(bool on);
     const NFont & font() const;
 

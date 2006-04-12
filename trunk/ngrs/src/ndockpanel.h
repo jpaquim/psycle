@@ -22,6 +22,8 @@
 
 #include <npanel.h>
 
+class NImage;
+
 /**
 @author Stefan Nattkemper
 */
@@ -34,14 +36,21 @@ public:
 
     virtual void add(NVisualComponent* comp);
     virtual void setLayout(NLayout* layout);
-
+    virtual void setFont(const NFont & font);
+    virtual void setBackground(const NColor & background);
+    virtual void setTransparent(bool on);
 
     void onDockWindow();
 
 private:
 
+    NBitmap undockBmp;
+    NBitmap dockBmp;
+
     NPanel* dockBar_;
     NPanel* area_;
+
+    NImage* dockImg;
 
     NLayout* alignLayout;
     NLayout* flowLayout;
