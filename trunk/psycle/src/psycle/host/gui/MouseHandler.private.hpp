@@ -12,7 +12,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_machineLock) return;
 				
-				smac = -1; 		smacmode = 0;
+				smac = Machine::id_type(-1);
+				smacmode = Machine::mode_type(0 /* \todo wtf is zero? */);
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
 				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
@@ -21,7 +22,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if ( smac == -1 )
 						{
 */
-						int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
+						Wire::id_type w(GetWire(point,wiresource)); // wiresource = origin machine *index*. w = wire connection point in origin machine
 						if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
 							{
 							wiredest = _pSong->_pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
@@ -98,7 +99,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			if (viewMode == VMMachine)
 			{
-				int propMac = GetMachine(point);
+				Machine::id_type propMac = GetMachine(point);
 
 				if (propMac != -1) // Is the mouse pointer over a machine?
 				{
@@ -128,7 +129,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{					
-					int w = GetWire(point,wiresource);
+					Wire::id_type w(GetWire(point,wiresource));
 					if ( w != -1 )	// Are we over a wire?
 					{
 						Machine *tmac = _pSong->_pMachine[wiresource];
@@ -168,12 +169,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						{
 							MessageBox("Cannot show the wire dialog. Too many of them opened!","Error!", MB_ICONERROR);
 						}
-					}			
+					}
 				}
 			}
-			wiresource = -1;
-			wiredest = -1;
-			wiremove = -1;
+			wiresource = Wire::id_type(-1);
+			wiredest = Wire::id_type(-1);
+			wiremove = Wire::id_type(-1);
 			Repaint();
 			CWnd::OnRButtonUp(nFlags,point);
 		}
@@ -202,7 +203,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_machineLock) return;
 
-				smac = -1;		smacmode = 0;
+				smac = Machine::id_type(-1);
+				smacmode = Machine::mode_type(0 /* \todo wtf is zero? */);
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 
@@ -489,7 +491,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			if (viewMode == VMMachine )
 			{
-				int propMac = GetMachine(point);
+				Machine::id_type propMac(GetMachine(point));
 				if ( propMac != -1)
 				{
 					if (wiremove >= 0) // are we moving a wire?

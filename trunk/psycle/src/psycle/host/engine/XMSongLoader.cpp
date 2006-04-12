@@ -82,8 +82,8 @@ namespace psycle
 		if(!IsValid()){
 			return;
 		}
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
-		song.InsertConnection(0,MASTER_INDEX,0.35f);
+		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "xm module sampler");
+		song.InsertConnection(Machine::id_type(0),MASTER_INDEX,0.35f);
 		song.seqBus=0;
 		// build sampler
 		m_pSampler = (XMSampler *)(song._pMachine[0]);
@@ -1011,7 +1011,7 @@ namespace psycle
 		if(!IsValid()){
 			return;
 		}
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, _T(""),0);
+		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "oldschool module sampler");
 //		song.InsertConnection(0,MASTER_INDEX,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=0;
 		// build sampler
@@ -1039,10 +1039,10 @@ namespace psycle
 		
 		
 		m_pSampler->IsAmigaSlides(true);
-		if ( !stricmp(pID,"M.K.")) { song.tracks(4); song.InsertConnection(0,MASTER_INDEX,0.75f); }
-		else if ( !stricmp(pID,"M!K!")) { song.tracks(4); song.InsertConnection(0,MASTER_INDEX,0.75f); }
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.tracks(atoi(tmp));  song.InsertConnection(0,MASTER_INDEX,0.5f); }
-		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.tracks(atoi(tmp)); song.InsertConnection(0,MASTER_INDEX,0.35f);}
+		if ( !stricmp(pID,"M.K.")) { song.tracks(4); song.InsertConnection(Machine::id_type(0),MASTER_INDEX,0.75f); }
+		else if ( !stricmp(pID,"M!K!")) { song.tracks(4); song.InsertConnection(Machine::id_type(0),MASTER_INDEX,0.75f); }
+		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.tracks(atoi(tmp));  song.InsertConnection(Machine::id_type(0),MASTER_INDEX,0.5f); }
+		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.tracks(atoi(tmp)); song.InsertConnection(Machine::id_type(0),MASTER_INDEX,0.35f);}
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
 

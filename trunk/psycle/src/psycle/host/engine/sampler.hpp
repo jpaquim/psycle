@@ -1,8 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::Sampler.
 #pragma once
-#include <psycle/host/engine/machine.hpp>
-#include <psycle/host/engine/filter.hpp>
+#include "machine.hpp"
+#include "instrument.hpp"
+#include "filter.hpp"
 namespace psycle
 {
 	namespace host
@@ -94,17 +95,17 @@ namespace psycle
 		{
 		public:
 			void Tick();
-			Sampler(int index);
-			virtual void Init(void);
+			Sampler(Machine::id_type id);
+			virtual void Init();
 			virtual void Work(int numSamples);
-			virtual void Stop(void);
+			virtual void Stop();
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual char* GetName(void) { return _psName; };
 			virtual bool Load(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
-				UINT size;
-				pFile->Read(&size,sizeof(size));
+				std::uint32_t size;
+				pFile->Read(size);
 				if (size)
 				{
 					if (version > CURRENT_FILE_VERSION_MACD)
@@ -115,10 +116,10 @@ namespace psycle
 					}
 					else
 					{
-						int temp;
-						pFile->Read(&temp, sizeof(temp)); // numSubtracks
+						std::int32_t temp;
+						pFile->Read(temp); // numSubtracks
 						_numVoices=temp;
-						pFile->Read(&temp, sizeof(temp)); // quality
+						pFile->Read(temp); // quality
 
 						switch (temp)
 						{
@@ -140,11 +141,11 @@ namespace psycle
 
 			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
 			{
-				UINT temp;
-				UINT size = 2*sizeof(temp);
-				pFile->Write(&size,sizeof(size));
+				std::int32_t temp;
+				std::uint32_t size = 2 * sizeof temp;
+				pFile->Write(size);
 				temp = _numVoices;
-				pFile->Write(&temp, sizeof(temp)); // numSubtracks
+				pFile->Write(temp); // numSubtracks
 				switch (_resampler.GetQuality())
 				{
 					case dsp::R_NONE:
@@ -157,7 +158,7 @@ namespace psycle
 						temp = 2;
 						break;
 				}
-				pFile->Write(&temp, sizeof(temp)); // quality
+				pFile->Write(temp); // quality
 			};
 
 			void Update(void);
@@ -177,11 +178,11 @@ namespace psycle
 			int VoiceTick(int channel, PatternEntry* pData);
 			inline void TickEnvelope(int voice);
 			inline void TickFilterEnvelope(int voice);
-			unsigned char lastInstrument[MAX_TRACKS];
+			Instrument::id_type lastInstrument[MAX_TRACKS];
 			static inline int alteRand(int x)
 			{
 				return (x*rand())/32768;
-			};
+			}
 		};
 	}
 }

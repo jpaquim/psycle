@@ -6,6 +6,8 @@
 #include <psycle/host/gui/ChildView.hpp>
 #include <psycle/host/gui/MasterDlg.hpp>
 #include <psycle/host/engine/Dsp.hpp>
+#include <boost/preprocessor/arithmetic/inc.hpp>
+
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CMasterDlg::CMasterDlg(CChildView* pParent) : CDialog(CMasterDlg::IDD, pParent)
@@ -22,43 +24,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//{{AFX_DATA_MAP(CMasterDlg)
 			DDX_Control(pDX, IDC_MASTERPEAK, m_masterpeak);
 			DDX_Control(pDX, IDC_SLIDERMASTER, m_slidermaster);
-			DDX_Control(pDX, IDC_SLIDERM9, m_sliderm9);
-			DDX_Control(pDX, IDC_SLIDERM8, m_sliderm8);
-			DDX_Control(pDX, IDC_SLIDERM7, m_sliderm7);
-			DDX_Control(pDX, IDC_SLIDERM6, m_sliderm6);
-			DDX_Control(pDX, IDC_SLIDERM5, m_sliderm5);
-			DDX_Control(pDX, IDC_SLIDERM4, m_sliderm4);
-			DDX_Control(pDX, IDC_SLIDERM3, m_sliderm3);
-			DDX_Control(pDX, IDC_SLIDERM2, m_sliderm2);
-			DDX_Control(pDX, IDC_SLIDERM12, m_sliderm12);
-			DDX_Control(pDX, IDC_SLIDERM11, m_sliderm11);
-			DDX_Control(pDX, IDC_SLIDERM10, m_sliderm10);
-			DDX_Control(pDX, IDC_SLIDERM1, m_sliderm1);
+			#define sad_tools(_, count, __) DDX_Control(pDX, BOOST_PP_CAT(IDC_SLIDERM, BOOST_PP_INC(count)), m_sliderm[count]);
+				BOOST_PP_REPEAT(PSYCLE__MAX_CONNECTIONS, sad_tools, ~)
+			#undef sad_tools
 			DDX_Control(pDX, IDC_MIXERVIEW, m_mixerview);
 			DDX_Control(pDX, IDC_AUTODEC, m_autodec);
 			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
-			//{{AFX_MSG_MAP(CMasterDlg)
 			ON_BN_CLICKED(IDC_AUTODEC, OnAutodec)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERMASTER, OnCustomdrawSlidermaster)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM1, OnCustomdrawSliderm1)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM10, OnCustomdrawSliderm10)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM11, OnCustomdrawSliderm11)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM12, OnCustomdrawSliderm12)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM2, OnCustomdrawSliderm2)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM3, OnCustomdrawSliderm3)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM4, OnCustomdrawSliderm4)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM5, OnCustomdrawSliderm5)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM6, OnCustomdrawSliderm6)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM7, OnCustomdrawSliderm7)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM8, OnCustomdrawSliderm8)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM9, OnCustomdrawSliderm9)
+			#define sad_tools(_, count, __) ON_NOTIFY(NM_CUSTOMDRAW, BOOST_PP_CAT(IDC_SLIDERM, BOOST_PP_INC(count)), OnCustomdrawSliderm##count)
+				BOOST_PP_REPEAT(PSYCLE__MAX_CONNECTIONS, sad_tools, ~)
+			#undef sad_tools
 			ON_WM_PAINT()
-			//}}AFX_MSG_MAP
 			ON_STN_CLICKED(IDC_MIXERVIEW, OnStnClickedMixerview)
 		END_MESSAGE_MAP()
+
+		void CMasterDlg::OnStnClickedMixerview()
+		{
+		}
 
 		BOOL CMasterDlg::OnInitDialog() 
 		{
@@ -68,32 +54,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
 			
 			m_slidermaster.SetRange(0, 208);
-			m_sliderm1.SetRange(0, 208);
-			m_sliderm2.SetRange(0, 208);
-			m_sliderm3.SetRange(0, 208);
-			m_sliderm4.SetRange(0, 208);
-			m_sliderm5.SetRange(0, 208);
-			m_sliderm6.SetRange(0, 208);
-			m_sliderm7.SetRange(0, 208);
-			m_sliderm8.SetRange(0, 208);
-			m_sliderm9.SetRange(0, 208);
-			m_sliderm10.SetRange(0, 208);
-			m_sliderm11.SetRange(0, 208);
-			m_sliderm12.SetRange(0, 208);
-			
 			m_slidermaster.SetPageSize(16);
-			m_sliderm1.SetPageSize(16);
-			m_sliderm2.SetPageSize(16);
-			m_sliderm3.SetPageSize(16);
-			m_sliderm4.SetPageSize(16);
-			m_sliderm5.SetPageSize(16);
-			m_sliderm6.SetPageSize(16);
-			m_sliderm7.SetPageSize(16);
-			m_sliderm8.SetPageSize(16);
-			m_sliderm9.SetPageSize(16);
-			m_sliderm10.SetPageSize(16);
-			m_sliderm11.SetPageSize(16);
-			m_sliderm12.SetPageSize(16);
+
+			for(int i(0); i < MAX_CONNECTIONS; ++i)
+			{
+				m_sliderm[i].SetRange(0, 208);
+				m_sliderm[i].SetPageSize(16);
+			}
 
 			SetSliderValues();
 			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
@@ -107,100 +74,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			float db = dsp::dB(_pMachine->_outDry/256.0f);
 			m_slidermaster.SetPos(208-(int)((db+40.0f)*4.0f));
 
-			if (_pMachine->_inputCon[0])
+			for(int i(0); i < MAX_CONNECTIONS; ++i)
 			{
-				_pMachine->GetWireVolume(0,val);
-				m_sliderm1.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm1.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[1])
-			{
-				_pMachine->GetWireVolume(1,val);
-				m_sliderm2.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm2.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[2])
-			{
-				_pMachine->GetWireVolume(2,val);
-				m_sliderm3.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm3.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[3])
-			{
-				_pMachine->GetWireVolume(3,val);
-				m_sliderm4.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm4.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[4])
-			{
-				_pMachine->GetWireVolume(4,val);
-				m_sliderm5.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm5.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[5])
-			{
-				_pMachine->GetWireVolume(5,val);
-				m_sliderm6.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm6.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[6])
-			{
-				_pMachine->GetWireVolume(6,val);
-				m_sliderm7.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm7.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[7])
-			{
-				_pMachine->GetWireVolume(7,val);
-				m_sliderm8.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm8.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[8])
-			{
-				_pMachine->GetWireVolume(8,val);
-				m_sliderm9.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm9.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[9])
-			{
-				_pMachine->GetWireVolume(9,val);
-				m_sliderm10.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm10.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[10])
-			{
-				_pMachine->GetWireVolume(10,val);
-				m_sliderm11.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm11.SetPos(208);
-			}
-
-			if (_pMachine->_inputCon[11])
-			{
-				_pMachine->GetWireVolume(11,val);
-				m_sliderm12.SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
-			} else {
-				m_sliderm12.SetPos(208);
+				if (_pMachine->_inputCon[i])
+				{
+					_pMachine->GetWireVolume(Wire::id_type(i),val);
+					m_sliderm[i].SetPos(208-(int)((dsp::dB(val)+40.0f)*4.0f));
+				}
+				else
+				{
+					m_sliderm[i].SetPos(208);
+				}
 			}
 		}
 
@@ -232,7 +116,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-
 		BOOL CMasterDlg::Create()
 		{
 			return CDialog::Create(IDD, m_pParent);
@@ -244,7 +127,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DestroyWindow();
 			delete this;
 		}
-
 
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
@@ -281,7 +163,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if ( val < 0 ) sprintf(valtxt,"%.01f",val);
 				else sprintf(valtxt," %.01f",val);
-			} else {
+			}
+			else
+			{
 				if ( val < -39.5f) strcpy(valtxt,"-99 ");
 				else if ( val < 0) sprintf(valtxt,"%.0f ",val);
 				else sprintf(valtxt," %.0f ",val);
@@ -301,133 +185,47 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			dc->SelectObject(oldfont);
 		}
 
-		
-		void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm1.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(0,dsp::dB2Amp(db));
-			PaintNumbers(db,92,142);
-			
-			*pResult = 0;
-		}
+		#define sad_tools(_, count, __) \
+			void CMasterDlg::OnCustomdrawSliderm##count(NMHDR* pNMHDR, LRESULT* pResult) \
+			{ \
+				float db = ((208-m_sliderm[count].GetPos())/4.0f)-40.0f; \
+				_pMachine->SetWireVolume(Wire::id_type(count),dsp::dB2Amp(db)); \
+				PaintNumbers(db, 92 + 20 * count, 142); \
+				if(count == MAX_CONNECTIONS - 1) \
+				{ \
+					/* <some-anonymous-person-wrote> I know the following is Ugly, but it is the only solution I've found, because first, */ \
+					/* OnPaint is called, after the bitmap is drawn, and finally the sliders are redrawn. */ \
+					paint_names_in_grid(); \
+				} \
+				*pResult = 0; \
+			}
+			BOOST_PP_REPEAT(PSYCLE__MAX_CONNECTIONS, sad_tools, ~)
+		#undef sad_tools
 
-		void CMasterDlg::OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CMasterDlg::paint_names_in_grid()
 		{
-			float db = ((208-m_sliderm10.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(9,dsp::dB2Amp(db));
-			PaintNumbers(db,272,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm11.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(10,dsp::dB2Amp(db));
-			PaintNumbers(db,292,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm12.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(11,dsp::dB2Amp(db));
-			PaintNumbers(db,312,142);
-
-		// I know the following is Ugly, but it is the only solution I've found, because first,
-		// OnPaint is called, after the bitmap is drawn, and finally the sliders are redrawn.
 			CDC *dcm = m_mixerview.GetDC();
 			CFont* oldfont = dcm->SelectObject(&namesFont);
 			dcm->SetTextColor(0x00FFFFFF); // White
 			dcm->SetBkColor(0x00000000); // Black
-			dcm->TextOut(353,24,macname[0]);
-			dcm->TextOut(428,24,macname[1]);
-			dcm->TextOut(353,46,macname[2]);
-			dcm->TextOut(428,46,macname[3]);
-			dcm->TextOut(353,68,macname[4]);
-			dcm->TextOut(428,68,macname[5]);
-			dcm->TextOut(353,90,macname[6]);
-			dcm->TextOut(428,90,macname[7]);
-			dcm->TextOut(353,112,macname[8]);
-			dcm->TextOut(428,112,macname[9]);
-			dcm->TextOut(353,134,macname[10]);
-			dcm->TextOut(428,134,macname[11]);
-			dcm->SelectObject(oldfont);	
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm2.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(1,dsp::dB2Amp(db));
-			PaintNumbers(db,112,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm3.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(2,dsp::dB2Amp(db));
-			PaintNumbers(db,132,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm4.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(3,dsp::dB2Amp(db));
-			PaintNumbers(db,152,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm5.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(4,dsp::dB2Amp(db));
-			PaintNumbers(db,172,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm6.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(5,dsp::dB2Amp(db));
-			PaintNumbers(db,192,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm7.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(6,dsp::dB2Amp(db));
-			PaintNumbers(db,212,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm8.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(7,dsp::dB2Amp(db));
-			PaintNumbers(db,232,142);
-			
-			*pResult = 0;
-		}
-
-		void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			float db = ((208-m_sliderm9.GetPos())/4.0f)-40.0f;
-			_pMachine->SetWireVolume(8,dsp::dB2Amp(db));
-			PaintNumbers(db,252,142);
-			
-			*pResult = 0;
+			int const xo(253);
+			int const dx(75);
+			int const yo(24);
+			int const dy(12);
+			int const columns(2);
+			int y(yo);
+			int i(0);
+			while(i < MAX_CONNECTIONS)
+			{
+				int x(xo);
+				for(int column(0); column < columns && i < MAX_CONNECTIONS; ++column, ++i)
+				{
+					dcm->TextOut(x, y, macname[i]);
+					x += dx;
+				}
+				y += dy;
+			}
+			dcm->SelectObject(oldfont);
 		}
 
 		void CMasterDlg::OnPaint() 
@@ -443,41 +241,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //				oldbmp = memDC.SelectObject(&m_numbers);
 				
 				PaintNumbersDC(dcm,&memDC,((208-m_slidermaster.GetPos())/4.0f)-40.0f,32,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm1.GetPos())/4.0f)-40.0f,92,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm2.GetPos())/4.0f)-40.0f,112,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm3.GetPos())/4.0f)-40.0f,132,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm4.GetPos())/4.0f)-40.0f,152,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm5.GetPos())/4.0f)-40.0f,172,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm6.GetPos())/4.0f)-40.0f,192,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm7.GetPos())/4.0f)-40.0f,212,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm8.GetPos())/4.0f)-40.0f,232,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm9.GetPos())/4.0f)-40.0f,252,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm10.GetPos())/4.0f)-40.0f,272,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm11.GetPos())/4.0f)-40.0f,292,142);
-				PaintNumbersDC(dcm,&memDC,((208-m_sliderm12.GetPos())/4.0f)-40.0f,312,142);
+				for(int i(0); i < MAX_CONNECTIONS; ++i)
+					PaintNumbersDC(dcm,&memDC,((208-m_sliderm[i].GetPos())/4.0f)-40.0f,92,142);
 		
 //				memDC.SelectObject(oldbmp);
 //				memDC.DeleteDC();
 			}
 			if ( dc.m_ps.rcPaint.bottom >=25 && dc.m_ps.rcPaint.top<=155 && dc.m_ps.rcPaint.right >=350)
 			{
-				CDC *dcm = m_mixerview.GetDC();
-				CFont* oldfont = dcm->SelectObject(&namesFont);
-				dcm->SetTextColor(0x00FFFFFF); // White
-				dcm->SetBkColor(0x00000000); // Black
-				dcm->TextOut(353,24,macname[0]);
-				dcm->TextOut(428,24,macname[1]);
-				dcm->TextOut(353,46,macname[2]);
-				dcm->TextOut(428,46,macname[3]);
-				dcm->TextOut(353,68,macname[4]);
-				dcm->TextOut(428,68,macname[5]);
-				dcm->TextOut(353,90,macname[6]);
-				dcm->TextOut(428,90,macname[7]);
-				dcm->TextOut(353,112,macname[8]);
-				dcm->TextOut(428,112,macname[9]);
-				dcm->TextOut(353,134,macname[10]);
-				dcm->TextOut(428,134,macname[11]);
-				dcm->SelectObject(oldfont);
+				paint_names_in_grid();
 			}
 			// Do not call CDialog::OnPaint() for painting messages
 		}
@@ -492,8 +264,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			return CDialog::PreTranslateMessage(pMsg);
 		}
 
-		void CMasterDlg::OnStnClickedMixerview()
-		{
-		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

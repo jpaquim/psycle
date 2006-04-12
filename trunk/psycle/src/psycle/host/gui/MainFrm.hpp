@@ -48,9 +48,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			void ClosePsycle();
 			void WaveEditorBackUpdate();
-			void CloseMacGui(int mac,bool closewiredialogs=true);
+			void CloseMacGui(Machine::id_type mac,bool closewiredialogs=true);
 			void CloseAllMacGuis();
-			void ShowMachineGui(int tmac, CPoint point);
+			void ShowMachineGui(Machine::id_type tmac, CPoint point);
 			void UpdateEnvInfo();
 			void HidePerformanceDlg();
 			void ShowPerformanceDlg();

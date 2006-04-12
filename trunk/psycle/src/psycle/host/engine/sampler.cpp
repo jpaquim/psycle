@@ -13,14 +13,13 @@ namespace psycle
 	{
 		char* Sampler::_psName = "Sampler";
 
-		Sampler::Sampler(int index)
+		Sampler::Sampler(Machine::id_type id)
+		:
+			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id)
 		{
 			_audiorange= 32768.0f;
 			_numPars=0;
 			DefineStereoOutput(1);
-			_macIndex = index;
-			_type = MACH_SAMPLER;
-			_mode = MACHMODE_GENERATOR;
 			sprintf(_editName, "Sampler");
 
 			_resampler.SetQuality(dsp::R_LINEAR);
@@ -41,10 +40,7 @@ namespace psycle
 
 				_voices[i].effCmd = SAMPLER_CMD_NONE;
 			}
-			for (int i = 0; i < MAX_TRACKS; i++)
-			{
-				lastInstrument[i]=255;
-			}
+			for (Instrument::id_type i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 		}
 
 		void Sampler::Init(void)

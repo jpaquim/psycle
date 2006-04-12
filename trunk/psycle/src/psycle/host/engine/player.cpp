@@ -209,10 +209,11 @@ namespace psycle
 						}
 						else 
 						{
-							int mIndex = pEntry->_mach;
+							Machine::id_type mIndex(pEntry->_mach);
 							if(mIndex < MAX_MACHINES)
 							{
-								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,CValueMapper::Map_255_1(pEntry->_parameter));
+								Wire::id_type wire(pEntry->_inst);
+								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1(pEntry->_parameter));
 							}
 						}
 						break;

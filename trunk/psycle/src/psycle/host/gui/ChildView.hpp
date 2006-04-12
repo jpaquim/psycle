@@ -271,8 +271,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void patTrackRecord();
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
-			void NewMachine(int x = -1, int y = -1, int mac = -1);
-			void DoMacPropDialog(int propMac);
+			void NewMachine(int x = -1, int y = -1, Machine::id_type mac = Machine::id_type(-1));
+			void DoMacPropDialog(Machine::id_type propMac);
 			void FileLoadsongNamed(std::string fName);
 			
 		public:
@@ -373,8 +373,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void DrawMachine(int macnum, CDC *devc);
 			void ClearMachineSpace(int macnum, CDC *devc);
 			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
-			int GetMachine(CPoint point);
-			int GetWire(CPoint point,int&wiresource);
+			Machine::id_type GetMachine(CPoint point);
+			Wire::id_type GetWire(CPoint point,Machine::id_type&wiresource);
 			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
@@ -433,11 +433,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int numPatternDraw;
 
 			// Enviroment variables
-			int smac;
-			int smacmode;
-			int wiresource;
-			int wiredest;
-			int wiremove;
+			Machine::id_type smac;
+			/* Machine::mode_type ? */ int smacmode;
+			Machine::id_type wiresource;
+			Machine::id_type wiredest;
+			Wire::id_type wiremove;
 			int wireSX;
 			int wireSY;
 			int wireDX;

@@ -68,7 +68,7 @@ namespace psycle
 		public:
 			inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
 		public:
-			Plugin(int index);
+			Plugin(Machine::id_type id);
 			virtual ~Plugin() throw();
 			virtual void Init();
 			virtual void Work(int numSamples);

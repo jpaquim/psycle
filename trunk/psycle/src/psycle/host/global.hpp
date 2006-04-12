@@ -2,30 +2,8 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include <cstdint>
-#include <boost/strong_typedef.hpp>
 namespace psycle
 {
-	///\name depecate a bunch of ms types
-	///{
-		///\todo
-		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" ) typedef ::UCHAR UCHAR;
-
-		///\todo
-		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t") typedef ::WORD WORD;
-
-		///\todo
-		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::DWORD DWORD;
-
-		///\todo
-		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::UINT UINT;
-
-		///\todo
-		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::ULONG ULONG;
-
-		///\todo
-		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t") typedef ::ULONGLONG ULONGLONG;
-	///\}
-
 	namespace host
 	{
 		class Song;

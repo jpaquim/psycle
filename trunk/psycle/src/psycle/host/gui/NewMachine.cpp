@@ -1025,7 +1025,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						else if(type == MACH_VST)
 						{
 							_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
-							vst::plugin vstPlug;
+							vst::plugin vstPlug(MACH_VST, MACHMODE_UNDEFINED, Machine::id_type());
 							try
 							{
 								 vstPlug.Instance(fileName);

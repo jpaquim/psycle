@@ -28,10 +28,40 @@
 #include "configuration.hpp"
 
 #if !defined DIVERSALIS__COMPILER__RESOURCE
+
 	#if defined PSYCLE__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		// include <windows.h> here so we don't have to deal with this again everywhere
 		//\todo for mfx apps, inclusions of <afxwin.h> is currently only handled thanks to <packageneric/pre-compiled.private.hpp>
 		//\todo this should be moved to a file that is always included whether or not we're using some pre-compiled headers that does it.
 		#include <windows.h>
 	#endif
+
+	///\name depecate a bunch of ms types
+	/// this is mostly finished appart from mfc code of course
+	///{
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint8_t" ) typedef ::UCHAR UCHAR;
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint16_t") typedef ::WORD WORD;
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::DWORD DWORD;
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::UINT UINT;
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint32_t") typedef ::ULONG ULONG;
+		//UNIVERSALIS__COMPILER__DEPRECATED("same as std::uint64_t") typedef ::ULONGLONG ULONGLONG;
+	///\}
+
+	#if PSYCLE__CONFIGURATION__TYPE_SAFE
+		#define PSYCLE__STRONG_TYPEDEF(type, name) BOOST_STRONG_TYPEDEF(type, name);
+		#include <boost/strong_typedef.hpp>
+	#else
+		#define PSYCLE__STRONG_TYPEDEF(type, name) typedef type name;
+	#endif
+
+	#if PSYCLE__CONFIGURATION__TIGHT_MEMBER_ACCESS_CONTROL
+		#define PSYCLE__PRIVATE private
+		#define PSYCLE__PROTECTED protected
+		#define PSYCLE__DEPRECATED(message) UNIVERSALIS__COMPILER__DEPRECATED(message)
+	#else
+		#define PSYCLE__PRIVATE public
+		#define PSYCLE__PROTECTED public
+		#define PSYCLE__DEPRECATED(message)
+	#endif
+
 #endif

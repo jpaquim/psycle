@@ -211,7 +211,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::OnCreate() 
 		{
-			int tmac = m_list.GetCurSel();
+			Machine::id_type tmac(m_list.GetCurSel());
 			switch (DisplayMode)
 			{
 			case 1:
@@ -238,7 +238,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						int numOutputs = mac->_connectedOutputs;
 						int numInputs = mac->_connectedInputs;
 
-						for (int i = 0; i < MAX_CONNECTIONS; i++)
+						for (Wire::id_type i(0); i < MAX_CONNECTIONS; i++)
 						{
 							outputMachines[i] = mac->_outputMachines[i];
 							inputMachines[i] = mac->_inputMachines[i];
@@ -248,7 +248,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							// store volumes coming back this way, they get destroyed by new machine
 							if (connection[i])
 							{
-								int j = Global::_pSong->_pMachine[outputMachines[i]]->FindInputWire(tmac);
+								Wire::id_type j(Global::_pSong->_pMachine[outputMachines[i]]->FindInputWire(tmac));
 								if (j >= 0)
 								{
 									Global::_pSong->_pMachine[outputMachines[i]]->GetWireVolume(j, outputConVol[i]);
@@ -265,7 +265,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							mac->_connectedOutputs = numOutputs;
 							mac->_connectedInputs = numInputs;
 
-							for (int i = 0; i < MAX_CONNECTIONS; i++)
+							for (Wire::id_type i(0); i < MAX_CONNECTIONS; i++)
 							{
 								// restore input connections
 								if (inputCon[i])
@@ -310,7 +310,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::OnDelete() 
 		{
-			int tmac = m_list.GetCurSel();
+			Machine::id_type tmac(m_list.GetCurSel());
 			m_pParent->AddMacViewUndo();
 			switch (DisplayMode)
 			{
@@ -369,7 +369,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::OnProperties() 
 		{
-			int tmac = m_list.GetCurSel();
+			Machine::id_type tmac(m_list.GetCurSel());
 			switch (DisplayMode)
 			{
 			case 0:
@@ -416,7 +416,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			POINT point;
 			GetCursorPos(&point);
-			int tmac = m_list.GetCurSel();
+			Machine::id_type tmac(m_list.GetCurSel());
 			switch (DisplayMode)
 			{
 			case 0:
@@ -511,7 +511,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pParentMain->RedrawGearRackList();
 		}
 
-		void CGearRackDlg::ExchangeMacs(int one,int two)
+		void CGearRackDlg::ExchangeMacs(Machine::id_type one, Machine::id_type two)
 		{
 			Machine * tmp1 = Global::_pSong->_pMachine[one];
 			Machine * tmp2 = Global::_pSong->_pMachine[two];
@@ -536,7 +536,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 				float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
 				
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				for (Wire::id_type i(0); i < MAX_CONNECTIONS; i++)
 				{
 					// Store the volumes of each wire and exchange.
 					if (tmp1->_connection[i]) {	tmp1->GetDestWireVolume(one,i,tmp1ovol[i]);	}
@@ -654,7 +654,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CGearRackDlg::ExchangeIns(int one,int two)
+		void CGearRackDlg::ExchangeIns(Instrument::id_type one, Instrument::id_type two)
 		{
 			Song* pSong = Global::_pSong;
 			Instrument * tmpins;

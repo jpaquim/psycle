@@ -56,7 +56,7 @@ namespace psycle
 {
 	namespace host
 	{
-		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index)
+		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index)
 		{
 			Machine * machine(0);
 			switch (type)
@@ -88,14 +88,14 @@ namespace psycle
 					{
 						Plugin & plugin(*new Plugin(index));
 						machine = &plugin;
-						if(!CNewMachine::TestFilename(psPluginDll))
+						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
 						{
 							delete &plugin;
 							return false;
 						}
 						try
 						{
-							plugin.Instance(psPluginDll);
+							plugin.Instance(plugin_name);
 						}
 						catch(std::exception const & e)
 						{
@@ -116,14 +116,14 @@ namespace psycle
 						machine = plugin = new vst::instrument(index);
 					case MACH_VSTFX:
 						machine = plugin = new vst::fx(index);
-						if(!CNewMachine::TestFilename(psPluginDll))
+						if(!CNewMachine::TestFilename(plugin_name)) //\todo that's a call to the GUI stuff :-(
 						{
 							delete plugin;
 							return false;
 						}
 						try
 						{
-							plugin->Instance(psPluginDll);
+							plugin->Instance(plugin_name);
 						}
 						catch(std::exception const & e)
 						{
@@ -152,6 +152,7 @@ namespace psycle
 					return false;
 				}
 			}
+
 			if(_pMachine[index]) DestroyMachine(index);
 			
 			///\todo init problem
@@ -173,9 +174,9 @@ namespace psycle
 			return true;
 		}
 
-		int Song::FindBusFromIndex(int smac)
+		Machine::id_type Song::FindBusFromIndex(Machine::id_type smac)
 		{
-			if(!_pMachine[smac])  return 255;
+			if(!_pMachine[smac]) return Machine::id_type(255);
 			return smac;
 		}
 
@@ -214,11 +215,11 @@ namespace psycle
 		void Song::DestroyAllMachines(bool write_locked)
 		{
 			_machineLock = true;
-			for(int c(0) ;  c < MAX_MACHINES; ++c)
+			for(Machine::id_type c(0); c < MAX_MACHINES; ++c)
 			{
 				if(_pMachine[c])
 				{
-					for(int j(c + 1) ; j < MAX_MACHINES; ++j)
+					for(Machine::id_type j(c + 1); j < MAX_MACHINES; ++j)
 					{
 						if(_pMachine[c] == _pMachine[j])
 						{
@@ -236,32 +237,6 @@ namespace psycle
 				_pMachine[c] = 0;
 			}
 			_machineLock = false;
-		}
-
-		void Song::DeleteLayer(int i)
-		{
-			_pInstrument[i]->DeleteLayer();
-		}
-
-		void Song::DeleteInstruments()
-		{
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) DeleteInstrument(i);
-		}
-
-		void Song::DestroyAllInstruments()
-		{
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i)
-			{
-				delete _pInstrument[i];
-				_pInstrument[i] = 0;
-			}
-		}
-
-		void Song::DeleteInstrument(int i)
-		{
-			Invalided=true;
-			_pInstrument[i]->Delete();
-			Invalided=false;
 		}
 
 		void Song::Reset()
@@ -311,37 +286,45 @@ namespace psycle
 					CSingleLock lock(&door,TRUE);
 				#endif
 			#endif
+
 			seqBus=0;
-			// Song reset
-			std::memset(Name, 0, sizeof Name);
-			std::memset(Author, 0, sizeof Author);
-			std::memset(Comment, 0, sizeof Comment);
-			std::sprintf(Name, "Untitled");
-			std::sprintf(Author, "Unnamed");
-			std::sprintf(Comment, "No Comments");
+
+			///\todo std::string
+			{
+				std::memset(Name, 0, sizeof Name);
+				std::memset(Author, 0, sizeof Author);
+				std::memset(Comment, 0, sizeof Comment);
+				std::sprintf(Name, "Untitled");
+				std::sprintf(Author, "Unnamed");
+				std::sprintf(Comment, "No Comments");
+			}
+
+			/// gui stuff
 			currentOctave=4;
+
 			// General properties
-			m_BeatsPerMin=125;
-			m_LinesPerBeat=4;
-//			LineCounter=0;
-//			LineChanged=false;
-			//MessageBox(0, "Machines", 0, 0);
+			{
+				m_BeatsPerMin=125;
+				m_LinesPerBeat=4;
+			}
 			// Clean up allocated machines.
 			DestroyAllMachines(true);
-			//MessageBox(0, "Insts", 0, 0);
 			// Cleaning instruments
 			DeleteInstruments();
-			//MessageBox(0, "Pats", 0, 0);
 			// Clear patterns
 			DeleteAllPatterns();
+			
 			// Clear sequence
 			Reset();
+
 			instSelected = 0;
 			midiSelected = 0;
 			auxcolSelected = 0;
+
 			_saved=false;
-			fileName ="Untitled.psy";
-			if((CMainFrame *)theApp.m_pMainWnd)
+			fileName = "Untitled.psy";
+			
+			if((CMainFrame *)theApp.m_pMainWnd) /// gui :-(
 			{
 				CreateMachine
 					(
@@ -358,27 +341,34 @@ namespace psycle
 			}
 		}
 
-		int Song::GetFreeMachine()
+		Machine::id_type Song::GetFreeMachine()
 		{
-			int tmac = 0;
+			Machine::id_type tmac(0);
 			for(;;)
 			{
 				if(!_pMachine[tmac]) return tmac;
-				if(tmac++ >= MAX_MACHINES) return -1;
+				if(tmac++ >= MAX_MACHINES) return Machine::id_type(-1); // that's why ids can't be unsigned :-(
 			}
 		}
 
-		bool Song::InsertConnection(int src, int dst, float value)
+		bool Song::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
 		{
 			Machine *srcMac = _pMachine[src];
 			Machine *dstMac = _pMachine[dst];
-			if(!srcMac || !dstMac) return false;
-			return srcMac->ConnectTo(dstMac,0,0,value);
+			if(!srcMac || !dstMac)
+			{
+				std::ostringstream s;
+				s << "attempted to use a null machine pointer when connecting machines ids: src: " << src << ", dst: " << dst << std::endl;
+				s << "src pointer is " << srcMac << ", dst pointer is: " << dstMac;
+				loggers::warning(s.str());
+				return false;
+			}
+			return srcMac->ConnectTo(*dstMac, InPort::id_type(0), OutPort::id_type(0), volume);
 		}
 
-		int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
+		int Song::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
 		{
-			int w;
+			Wire::id_type w;
 			float volume = 1.0f;
 			if (_pMachine[wiresource])
 			{
@@ -410,7 +400,7 @@ namespace psycle
 			return 0;
 		}
 
-		int Song::ChangeWireSourceMac(int wiresource,int wiredest, int wireindex)
+		int Song::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
 		{
 			float volume = 1.0f;
 
@@ -444,7 +434,7 @@ namespace psycle
 			return 0;
 		}
 
-		void Song::DestroyMachine(int mac, bool write_locked)
+		void Song::DestroyMachine(Machine::id_type mac, bool write_locked)
 		{
 			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
 				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
@@ -712,7 +702,7 @@ namespace psycle
 
 		*/
 
-		int Song::IffAlloc(int instrument,const char * str)
+		bool Song::IffAlloc(Instrument::id_type instrument,const char * str)
 		{
 			if(instrument != PREV_WAV_INS)
 			{
@@ -728,7 +718,7 @@ namespace psycle
 			if(!file.Open(const_cast<char*>(str)))
 			{
 				Invalided = false;
-				return 0;
+				return false;
 			}
 			DeleteLayer(instrument);
 			file.Read(data);
@@ -792,10 +782,10 @@ namespace psycle
 			}
 			file.Close();
 			Invalided = false;
-			return 1;
+			return true;
 		}
 
-		int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
+		bool Song::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
@@ -814,7 +804,7 @@ namespace psycle
 			return true;
 		}
 
-		int Song::WavAlloc(int instrument,const char * Wavfile)
+		bool Song::WavAlloc(Instrument::id_type instrument,const char * Wavfile)
 		{ 
 			assert(Wavfile != 0);
 			WaveFile file;
@@ -824,7 +814,7 @@ namespace psycle
 			if(retcode != DDC_SUCCESS) 
 			{
 				Invalided = false;
-				return 0; 
+				return false; 
 			}
 			Invalided = true;
 			::Sleep(LOCK_LATENCY); ///< ???
@@ -944,7 +934,7 @@ namespace psycle
 			}
 			file.Close();
 			Invalided = false;
-			return 1;
+			return true;
 		}
 
 		bool Song::Load(RiffFile* pFile, bool fullopen)
@@ -1187,9 +1177,10 @@ namespace psycle
 							pFile->Read(index);
 							if(index < MAX_MACHINES)
 							{
+								Machine::id_type const id(index);
 								// we had better load it
-								DestroyMachine(index);
-								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
+								DestroyMachine(id);
+								_pMachine[index] = Machine::LoadFileChunk(pFile, id, version, fullopen);
 								// skips specific chunk.
 								if(!fullopen) pFile->Seek(curpos + size);
 							}
@@ -1747,7 +1738,7 @@ namespace psycle
 		}
 
 		///\todo mfc+winapi->std
-		bool Song::CloneMac(int src,int dst)
+		bool Song::CloneMac(Machine::id_type src, Machine::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
 			if (_pMachine[src] && _pMachine[dst])
@@ -1833,9 +1824,10 @@ namespace psycle
 					index = dst;
 					if (index < MAX_MACHINES)
 					{
+						Machine::id_type id(index);
 						// we had better load it
-						DestroyMachine(index);
-						_pMachine[index] = Machine::LoadFileChunk(&file,index,version);
+						DestroyMachine(id);
+						_pMachine[index] = Machine::LoadFileChunk(&file,id,version);
 					}
 					else
 					{
@@ -1957,7 +1949,7 @@ namespace psycle
 		}
 
 		///\todo mfc+winapi->std
-		bool Song::CloneIns(int src,int dst)
+		bool Song::CloneIns(Instrument::id_type src, Instrument::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
 			if (!Global::_pSong->_pInstrument[src]->Empty() && !Global::_pSong->_pInstrument[dst]->Empty())

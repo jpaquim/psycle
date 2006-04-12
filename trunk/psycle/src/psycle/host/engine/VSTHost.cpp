@@ -106,9 +106,11 @@ namespace psycle
 
 			VstTimeInfo plugin::_timeInfo;
 
-			plugin::plugin()
-				: queue_size(0), wantidle(false), _sDllName(""), h_dll(0), _program(0), instantiated(false), _instance(0)
-				, requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0), editorWnd(0)
+			plugin::plugin(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
+			:
+				Machine(type, mode, id),
+				queue_size(0), wantidle(false), _sDllName(""), h_dll(0), _program(0), instantiated(false), _instance(0),
+				requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0), editorWnd(0)
 			{
 				proxy_ = new vst::proxy(*this);
 				std::memset(junk, 0, STREAM_SIZE * sizeof(float));
@@ -867,9 +869,9 @@ namespace psycle
 						if(Global::pConfig->_RecordTweaks)
 						{
 							if(Global::pConfig->_RecordMouseTweaksSmooth)
-								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->_macIndex, index, f2i(opt * vst::quantization));
+								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(host->id(), index, f2i(opt * vst::quantization));
 							else
-								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->_macIndex, index, f2i(opt * vst::quantization));
+								((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(host->id(), index, f2i(opt * vst::quantization));
 						}
 						if(host->editorWnd)
 							((CVstEditorDlg *) host->editorWnd)->Refresh(index, opt);
@@ -1107,11 +1109,10 @@ namespace psycle
 
 
 
-			instrument::instrument(int index)
+			instrument::instrument(Machine::id_type id)
+			:
+				plugin(MACH_VST, MACHMODE_GENERATOR, id)
 			{
-				_macIndex = index;
-				_type = MACH_VST;
-				_mode = MACHMODE_GENERATOR;
 				std::sprintf(_editName, "Vst2 Instr.");
 				_program = 0;
 			}
@@ -1437,13 +1438,11 @@ namespace psycle
 
 
 
-			fx::fx(int index)
+			fx::fx(Machine::id_type id)
+			:
+				plugin(MACH_VSTFX, MACHMODE_FX, id)
 			{
-				_macIndex = index;
-				for(int i(0) ; i < MAX_CONNECTIONS; ++i) _inputConVol[i] = 1.f / 32767; // VST plugins use the range -1.0 .. +1.0
-				plugin::plugin();
-				_type = MACH_VSTFX;
-				_mode = MACHMODE_FX;
+				for(Wire::id_type i(0) ; i < MAX_CONNECTIONS; ++i) _inputConVol[i] = 1.f / 32767; // VST plugins use the range -1.0 .. +1.0
 				std::sprintf(_editName, "Vst2 Fx");
 				_pOutSamplesL = new float[STREAM_SIZE];
 				_pOutSamplesR = new float[STREAM_SIZE];
