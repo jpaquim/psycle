@@ -111,7 +111,21 @@ void NDockPanel::onUndockWindow( NButtonEvent * ev )
   if (undockedWindow!=0) {
     undockedWindow->setVisible(false);
     NApp::lastOverWin_ = 0;
-    onDockWindow();
+    undockedWindow->pane()->erase(dockBar_);
+    undockedWindow->pane()->erase(area_);
+
+    NPanel::add(dockBar_,nAlTop);
+    NPanel::add(area_,nAlClient);
+
+    NApp::addRemovePipe(undockedWindow);
+
+    undockedWindow = 0;
+
+    dockImg->setSharedBitmap(&undockBmp);
+
+    window()->resize();
+    window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
+    window()->checkForRemove(0);
   } else {
     undockedWindow = new NWindow();
     NPanel::add(undockedWindow);
@@ -147,6 +161,8 @@ void NDockPanel::onDockWindow( )
 
   delete undockedWindow;
   undockedWindow = 0;
+
+  dockImg->setSharedBitmap(&undockBmp);
 
   window()->resize();
   window()->repaint(window()->pane(),NRect(0,0,window()->width(),window()->height()));
