@@ -36,7 +36,7 @@
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView()
- : NPage()
+ : NDockPanel()
 {
   setLayout(new NAlignLayout());
   setName("debug::patview");
