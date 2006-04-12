@@ -793,4 +793,14 @@ NWindow * NVisualComponent::window( ) const
   return 0;
 }
 
+int NVisualComponent::ownerWidth( ) const
+{
+  return ownerPreferredWidth_;
+}
+
+int NVisualComponent::ownerHeight( ) const
+{
+  return ownerPreferredHeight_;
+}
+
 

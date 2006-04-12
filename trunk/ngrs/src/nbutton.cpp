@@ -49,6 +49,7 @@ NButton::NButton( NImage * icon )
   icon_ = icon;
   icon_->setHAlign(nAlCenter);
   icon_->setVAlign(nAlCenter);
+  setPreferredSize(icon->preferredWidth(),icon->preferredHeight());
   add(icon);
   init();
 }

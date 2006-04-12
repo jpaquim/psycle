@@ -181,6 +181,8 @@ public:
     NSkin skin_;
 
     bool ownerSize() const;
+    int  ownerWidth() const;
+    int  ownerHeight() const;
 
     virtual bool focus() const;
 
