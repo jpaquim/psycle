@@ -86,17 +86,17 @@ namespace psycle
 								char const * const name;
 								/// useless field, set to the same value as name.
 								char const * const unused_name;
-								/// type of parameter, either null (label), or state.
-								struct Types { enum Type { null = 0, state = 2 }; };
-								/// type of parameter, either null (label), or state.
-								/// declared as int rather than enum for binary compatibility.
-								int /*Types::Type*/ const type;
 								/// the lower bound the parameter's range.
 								/// If using a non-discrete scale (i.e. real), you can't chose this, it's always the minimum value possible.
 								int const minimum_value;
 								/// the upper bound of the parameter's range.
 								/// If using a non-discrete scale (i.e. real), you can't chose this, it's always the maximum value possible.
 								int const maximum_value;
+								/// type of parameter, either null (label), or state.
+								struct Types { enum Type { null = 0, state = 2 }; };
+								/// type of parameter, either null (label), or state.
+								/// declared as int rather than enum for binary compatibility.
+								int /*Types::Type*/ const type;
 								int const default_value;
 								Scale const & scale;
 							public:
