@@ -552,6 +552,8 @@ void PatternView::PatternDraw::paint( NGraphics * g )
   int startLine = lineArea.x();
   int endLine   = lineArea.y();
 
+  std::cout << startLine << "," << endLine << std::endl;
+
   NPoint trackArea = tracksFromRepaint(g->repaintArea());
   int startTrack = trackArea.x();
   int endTrack   = trackArea.y();
@@ -680,7 +682,7 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
   drawCellBg(g,pView->cursor().x(),pView->cursor().y(),pView->cursor().z(),Global::pConfig()->pvc_cursor );
 
   char tbuf[16];
-  for (int y = startLine; y < endLine; y++) {
+  for (int y = startLine; y <= endLine; y++) {
      unsigned char *patOffset = Global::pSong()->_ppattern(Global::pSong()->playOrder[pView->editPosition_]) + (y*MULTIPLY) + (startTrack)*5;
     for (int x = startTrack; x <= endTrack; x++) {
       drawText(g, x,y,0,pView->noteToString(*patOffset));
