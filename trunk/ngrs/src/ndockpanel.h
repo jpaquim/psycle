@@ -31,14 +31,11 @@ class NDockPanel : public NPanel
 {
 public:
     NDockPanel();
+    NDockPanel(NVisualComponent* clientComponent);
 
     ~NDockPanel();
 
-    virtual void add(NVisualComponent* comp);
-    virtual void setLayout(NLayout* layout);
-    virtual void setFont(const NFont & font);
-    virtual void setBackground(const NColor & background);
-    virtual void setTransparent(bool on);
+    NPanel* pane();
 
     void onDockWindow();
 
@@ -46,20 +43,22 @@ private:
 
     NBitmap undockBmp;
     NBitmap dockBmp;
+    NImage* dockImg;
 
     NPanel* dockBar_;
     NPanel* area_;
 
-    NImage* dockImg;
-
     NLayout* alignLayout;
+    NLayout* alignLayoutArea;
     NLayout* flowLayout;
-
     NLayout* oldAreaLayout_;
 
     NWindow* undockedWindow;
 
+    void init();
+
     void onUndockWindow(NButtonEvent* ev);
+    void dockWindow();
 };
 
 #endif
