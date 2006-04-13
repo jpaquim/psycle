@@ -63,6 +63,7 @@ NFileListBox::NFileListBox()
   setBackground(NColor(255,255,255));
   sharedDirIcon_.createFromXpmData(group_xpm);
   activeFilter = 0;
+  showHiddenFiles_ = false;
 }
 
 
@@ -88,7 +89,10 @@ void NFileListBox::setDirectory( std::string directory )
       list = fSystem.fileList(directory);
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
-        if (activeFilter==0  || (activeFilter && activeFilter->accept(entry))) {
+
+        if ( (!showHiddenFiles_ && entry!="" && entry[0]=='.') ||
+             (showHiddenFiles_ && (activeFilter==0  || (activeFilter && activeFilter->accept(entry))))
+           ) {
           NItem* item = new NItem();
           item->setText(entry);
           item->mousePress.connect(this,&NFileListBox::onFileItemSelected);
@@ -100,13 +104,15 @@ void NFileListBox::setDirectory( std::string directory )
       std::vector<std::string> list = fSystem.dirList(directory);
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
-        NItem* item = new NItem();
-          item->setText(entry);
-          NImage* icon = new NImage();
-            icon->setSharedBitmap(&sharedDirIcon_);
-          item->add(icon);
-          item->mousePress.connect(this,&NFileListBox::onDirItemSelected);
-        add (item, false);
+        if ((showHiddenFiles_) || (!showHiddenFiles_ && entry!="" && entry[0]!='.')) {
+          NItem* item = new NItem();
+            item->setText(entry);
+            NImage* icon = new NImage();
+              icon->setSharedBitmap(&sharedDirIcon_);
+            item->add(icon);
+            item->mousePress.connect(this,&NFileListBox::onDirItemSelected);
+          add (item, false);
+        }
       }
   }
 
@@ -164,6 +170,12 @@ void NFileListBox::setActiveFilter( const std::string & name )
   } else {
     activeFilter = 0;
   }
+  setDirectory(dir_);
+}
+
+void NFileListBox::setShowHiddenFiles( bool on )
+{
+  showHiddenFiles_ = on;
   setDirectory(dir_);
 }
 

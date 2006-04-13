@@ -45,6 +45,10 @@ NRuntime::~NRuntime()
 
 void NRuntime::add( NRuntime * component )
 {
+  if (component == this) {
+    std::cerr << "Runtime Error: not possible to add circular components" << std::endl;
+    return;
+  }
   components.push_back(component);
   component->setParent(this);
 }

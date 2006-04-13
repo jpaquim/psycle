@@ -50,9 +50,13 @@ public:
     void setActiveFilter(const std::string & name);
     void addFilter(const std::string & name ,const std::string & regexp);
 
+    void setShowHiddenFiles(bool on);
+
 private:
 
     bool isDirItem_;
+    bool showHiddenFiles_;
+
     int mode_;
     NFile fSystem;
     std::string fName_;

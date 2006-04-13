@@ -52,14 +52,8 @@ NTestWindow::NTestWindow()
  : NWindow()
 {
   setPosition(0,0,1000,700);
- 
-  NTabBook* book = new NTabBook();
 
-  pane()->add(new NButton("t"),nAlRight);
-
-  book->addPage(new NDockPanel(new NPanel()),"page");
-
-  pane()->add(book,nAlClient);
+  testMenu(); 
 }
 
 
@@ -134,9 +128,9 @@ void NTestWindow::testLine( )
 
 void NTestWindow::testMenu( )
 {
- /* fDialog = new NFileDialog();
+  fDialog = new NFileDialog();
     fDialog->addFilter("*.psy [psy3 song format]","!S*.psy");
-  add(fDialog);*/
+  add(fDialog);
 
  // NWindow* popupMenu_ = new NWindow();
 
@@ -158,14 +152,14 @@ void NTestWindow::testMenu( )
 
 
 
-  /*NMenuItem* item = new NMenuItem("open");
-    NMenu* menu = new NMenu();
-    item->add(menu);
+  NMenuItem* item = new NMenuItem("open");
+    //NMenu* menu = new NMenu();
+    //item->add(menu);
   menu1->add(item);
   item->click.connect(this,&NTestWindow::onOpen);
 
   NCheckMenuItem* item1 = new NCheckMenuItem("test");
-  menu1->add(item1);*/
+  menu1->add(item1);
 }
 
 void NTestWindow::testSpinButton( )

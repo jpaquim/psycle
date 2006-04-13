@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005 by Stefan Nattkemper                               *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,6 +31,7 @@ class NAlignLayout : public NLayout
 {
 public:
     NAlignLayout();
+    NAlignLayout(int hgap, int vgap);
 
     ~NAlignLayout();
 
@@ -38,11 +39,16 @@ public:
     virtual int preferredWidth(const NVisualComponent* target) const;
     virtual int preferredHeight(const NVisualComponent* target) const;
 
+    void setHgap(int hgap);
+    void setVgap(int vgap);
+
+
 private:
 
     int maxX_;
     int maxY_;
 
+    int hgap_,vgap_;
 
 };
 

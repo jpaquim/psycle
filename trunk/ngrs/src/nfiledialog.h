@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005 by Stefan Nattkemper  *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -23,13 +23,15 @@
 #include <nwindow.h>
 #include "nfilelistbox.h"
 #include "nflowlayout.h"
-#include "nedit.h"
-#include "nlabel.h"
-#include "ncombobox.h"
 #include "nregexp.h"
 
 const int nSave = 1;
 const int nLoad = 2;
+
+class NCheckBox;
+class NLabel;
+class NEdit;
+class NComboBox;
 
 /**
 @author Stefan
@@ -68,6 +70,7 @@ private:
    NEdit* fNameCtrl;
    NEdit* dNameCtrl;
    NComboBox* fiNameCtrl;
+   NCheckBox* hBox;
 
    NButton* okBtn_;
 
@@ -80,6 +83,8 @@ private:
    void onUpBtnPressed(NButtonEvent* sender);
    void onLeftBtnPressed(NButtonEvent* sender);
    void onRightBtnPressed(NButtonEvent* sender);
+
+   void onHiddenCheckBoxClicked(NButtonEvent* ev);
 
    std::vector<std::string> history;
 };

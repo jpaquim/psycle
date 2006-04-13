@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Stefan   *
+ *   Copyright (C) 2005 by Stefan Nattkemper                               *
  *   natti@linux   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,8 +24,15 @@ NAlignLayout::NAlignLayout()
  : NLayout()
 {
   maxX_ = maxY_ = 0;
+  hgap_ = vgap_ = 0;
 }
 
+NAlignLayout::NAlignLayout( int hgap, int vgap )
+{
+  maxX_ = maxY_ = 0;
+  hgap_ = hgap;
+  vgap_ = vgap;
+}
 
 NAlignLayout::~NAlignLayout()
 {
@@ -44,9 +51,9 @@ void NAlignLayout::align( NVisualComponent * parent )
      if (visualChild->visible()) {
       switch (visualChild->align()) {
            case nAlRight: {
-                  int topOff     = (lastTop  == 0) ? 0 : lastTop->top()   + lastTop->height() ;
-                  int bottomOff  = (lastBottom == 0) ? 0 : parent->clientHeight() - lastBottom->top() ;
-                  visualChild->setLeft(parent->clientWidth()-visualChild->preferredWidth());
+                  int topOff     = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() +vgap_  ;
+                  int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() - vgap_;
+                  visualChild->setLeft(parent->clientWidth()-visualChild->preferredWidth()+hgap_);
                   visualChild->setTop ( topOff );
                   visualChild->setWidth(visualChild->preferredWidth());
                   visualChild->setHeight(parent->clientHeight() - topOff - bottomOff );
@@ -54,9 +61,9 @@ void NAlignLayout::align( NVisualComponent * parent )
                 }
                 break;
            case nAlLeft: {
-                  int leftOff    = (lastLeft == 0) ? 0 : lastLeft->left()  + lastLeft->width() ;
-                  int topOff     = (lastTop  == 0) ? 0 : lastTop->top()   + lastTop->height() ;
-                  int bottomOff  = (lastBottom == 0) ? 0 : parent->clientHeight() - lastBottom->top() ;
+                  int leftOff    = (lastLeft == 0) ? hgap_ : lastLeft->left()  + lastLeft->width() + hgap_ ;
+                  int topOff     = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() +vgap_ ;
+                  int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() - vgap_ ;
                   visualChild->setLeft(leftOff);
                   visualChild->setTop ( topOff );
                   visualChild->setWidth(visualChild->preferredWidth());
@@ -65,9 +72,9 @@ void NAlignLayout::align( NVisualComponent * parent )
                 }
                 break;
            case nAlTop : {
-                 int rightOff  = (lastRight == 0) ? 0 : parent->clientWidth() - lastRight->left() ;
-                 int leftOff = (lastLeft == 0) ? 0 : lastLeft->left()   + lastLeft->width() ;
-                 int topOff  = (lastTop  == 0) ? 0 : lastTop->top()   + lastTop->height() ;
+                 int rightOff  = (lastRight == 0) ? hgap_ : parent->clientWidth() - lastRight->left() - vgap_ ;
+                 int leftOff = (lastLeft == 0) ? vgap_ : lastLeft->left()   + lastLeft->width() + vgap_;
+                 int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
                  visualChild->setLeft(leftOff);
                  visualChild->setTop ( topOff );
                  visualChild->setWidth(parent->clientWidth() - leftOff - rightOff);
@@ -76,8 +83,8 @@ void NAlignLayout::align( NVisualComponent * parent )
                 }
                 break;
            case nAlBottom : {
-                  int leftOff    = (lastLeft == 0) ? 0 : lastLeft->left()  + lastLeft->width() ;
-                  int bottomOff  = (lastBottom  == 0) ? parent->clientHeight() : lastBottom->top();
+                  int leftOff = (lastLeft == 0) ? hgap_ : lastLeft->left() + lastLeft->width() + hgap_;
+                  int bottomOff = (lastBottom  == 0) ? parent->clientHeight() - vgap_ : lastBottom->top() - vgap_;
                   visualChild->setLeft(leftOff);
                   visualChild->setWidth(parent->clientWidth()-leftOff);
                   visualChild->setHeight(visualChild->preferredHeight());
@@ -86,10 +93,10 @@ void NAlignLayout::align( NVisualComponent * parent )
                 }
                 break;
            case nAlClient : {
-                 int leftOff = (lastLeft == 0) ? 0 : lastLeft->left() + lastLeft->width() ;
-                 int topOff  = (lastTop  == 0) ? 0 : lastTop->top()   + lastTop->height() ;
-                 int bottomOff  = (lastBottom == 0) ? 0 : parent->clientHeight() - lastBottom->top() ;
-                 int rightOff  = (lastRight == 0) ? 0 : parent->clientWidth() - lastRight->left() ;
+                 int leftOff = (lastLeft == 0) ? hgap_ : lastLeft->left() + lastLeft->width() + hgap_ ;
+                 int topOff  = (lastTop  == 0) ? vgap_ : lastTop->top()   + lastTop->height() + vgap_;
+                 int bottomOff  = (lastBottom == 0) ? vgap_ : parent->clientHeight() - lastBottom->top() + vgap_ ;
+                 int rightOff  = (lastRight == 0) ? hgap_ : parent->clientWidth() - lastRight->left() - hgap_;
                  maxX_ = visualChild->preferredWidth()  + leftOff;
                  maxY_ = visualChild->preferredHeight() + topOff + bottomOff;
                  visualChild->setPosition(leftOff,topOff,parent->clientWidth() - leftOff-rightOff,parent->clientHeight() - topOff - bottomOff);
@@ -136,5 +143,17 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
 
  return yp;
 }
+
+void NAlignLayout::setHgap( int hgap )
+{
+  hgap_ = hgap;
+}
+
+void NAlignLayout::setVgap( int vgap )
+{
+  vgap_ = vgap;
+}
+
+
 
 

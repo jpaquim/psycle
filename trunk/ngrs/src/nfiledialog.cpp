@@ -23,6 +23,10 @@
 #include "napp.h"
 #include "nconfig.h"
 #include "nitem.h"
+#include "ncheckbox.h"
+#include "nlabel.h"
+#include "nedit.h"
+#include "ncombobox.h"
 
 /* XPM */
 const char* left_nav[] = {
@@ -174,6 +178,8 @@ NFileDialog::NFileDialog()
 {
   mode_ = nLoad;
 
+  pane()->setLayout(new NAlignLayout(5,5));
+
   setTitle("Load");
 
   NFile::cdHome();
@@ -234,31 +240,40 @@ NFileDialog::NFileDialog()
 
   NPanel* fiPnl = new NPanel();
     fiPnl->setAlign(nAlBottom);
-    fiPnl->setLayout(new NFlowLayout(nAlLeft));
-    fiPnl->add(new NLabel("Filters"));
+    fiPnl->setLayout(new NAlignLayout(5,0));
+    fiPnl->add(new NLabel("Filters"),nAlLeft);
     fiNameCtrl = new NComboBox();
     fiNameCtrl->setWidth(200);
-    fiPnl->add(fiNameCtrl);
+    fiPnl->add(fiNameCtrl,nAlClient);
   pane()->add(fiPnl);
 
 
   NPanel* fPnl = new NPanel();
     fPnl->setAlign(nAlBottom);
-    fPnl->setLayout(new NFlowLayout(nAlLeft));
-    fPnl->add(new NLabel("File"));
+    fPnl->setLayout(new NAlignLayout(5,0));
+    fPnl->add(new NLabel("File"),nAlLeft);
     fNameCtrl = new NEdit();
     fNameCtrl->setWidth(200);
-    fPnl->add(fNameCtrl);
+    fPnl->add(fNameCtrl,nAlClient);
   pane()->add(fPnl);
 
   NPanel* dPnl = new NPanel();
     dPnl->setAlign(nAlBottom);
-    dPnl->setLayout(new NFlowLayout(nAlLeft));
-    dPnl->add(new NLabel("Dir"));
+    dPnl->setLayout(new NAlignLayout(5,0));
+    dPnl->add(new NLabel("Dir"),nAlLeft);
     dNameCtrl = new NEdit();
     dNameCtrl->setWidth(200);
-    dPnl->add(dNameCtrl);
+    dPnl->add(dNameCtrl,nAlClient);
   pane()->add(dPnl);
+
+  NPanel* hPnl = new NPanel();
+    hPnl->setAlign(nAlBottom);
+    hPnl->setLayout(new NAlignLayout(5,0));
+    hBox = new NCheckBox("show hidden Files");
+      hBox->clicked.connect(this,&NFileDialog::onHiddenCheckBoxClicked);
+    hPnl->add(hBox,nAlClient);
+  pane()->add(hPnl);
+
 
   NGroupBox* filePanel = new NGroupBox();
   filePanel->setAlign(nAlClient);
@@ -391,6 +406,12 @@ void NFileDialog::setMode( int mode )
     okBtn_->setText("save");
     setTitle("Save");
   }
+}
+
+void NFileDialog::onHiddenCheckBoxClicked( NButtonEvent * ev )
+{
+  fBox_->setShowHiddenFiles(hBox->checked());
+  pane()->repaint();
 }
 
 
