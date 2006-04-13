@@ -36,7 +36,7 @@
 
 /// The pattern Main Class , a container for the inner classes LineNumber, Header, and PatternDraw
 PatternView::PatternView()
- : NDockPanel()
+ : NPanel()
 {
   setLayout(new NAlignLayout());
   setName("debug::patview");
@@ -45,25 +45,20 @@ PatternView::PatternView()
   hBar = new NScrollBar();
     hBar->setOrientation(nHorizontal);
     hBar->setHeight(15);
-    hBar->setAlign(nAlBottom);
     hBar->posChange.connect(this,&PatternView::onHScrollBar);
-  add(hBar);
+  add(hBar, nAlBottom);
 
   vBar = new NScrollBar();
-    vBar->setAlign(nAlRight);
     vBar->setWidth(15);
     vBar->setOrientation(nVertical);
     vBar->posChange.connect(this,&PatternView::onVScrollBar);
-  add(vBar);
+  add(vBar, nAlRight);
 
   lineNumber_ = new LineNumber(this);
     setBorder(new NFrameBorder());
-    lineNumber_->setAlign(nAlLeft);
-  add(lineNumber_);
+  add(lineNumber_, nAlLeft);
 
-  header = new Header(this);
-    header->setAlign(nAlTop);
-  add(header);
+  add(header = new Header(this), nAlTop);
 
   drawArea = new PatternDraw(this);
     drawArea->setAlign(nAlClient);
@@ -1024,6 +1019,10 @@ NRect PatternView::PatternDraw::repaintTrackArea( int startLine, int endLine, in
   return NRect(left,top,right - left,bottom - top);
 }
 
+NRect PatternView::PatternDraw::trackAreaFromRepaint( const NRegion & repaintArea )
+{
+}
+
 int PatternView::cellCount( )
 {
   int count = 1;
@@ -1503,3 +1502,5 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
   if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
 }
+
+

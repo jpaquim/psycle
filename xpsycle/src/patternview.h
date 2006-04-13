@@ -28,13 +28,12 @@
 #include <npopupmenu.h>
 #include <nscrollbar.h>
 #include <map>
-#include <ndockpanel.h>
 
 /**
 @author Stefan
 */
 
-class PatternView : public NDockPanel
+class PatternView : public NPanel
 {
    class Header: public NPanel {
    public:
@@ -105,7 +104,8 @@ class PatternView : public NDockPanel
      virtual void onKeyPress(const NKeyEvent & event);
      virtual void onKeyRelease(const NKeyEvent & event);
 
-     NRect repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack);
+     NRect repaintTrackArea    (int startLine,int endLine,int startTrack, int endTrack);
+     NRect trackAreaFromRepaint(const NRegion & repaintArea);
 
 
    private:

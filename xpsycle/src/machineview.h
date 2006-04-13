@@ -26,7 +26,6 @@
 #include <nscrollbox.h>
 #include <nautoscrolllayout.h>
 #include <nlabel.h>
-#include <ndockpanel.h>
 
 
 class Machine;
@@ -61,7 +60,7 @@ private:
 
 
 
-class MachineView : public NDockPanel
+class MachineView : public NPanel
 {
 public:
     MachineView();
