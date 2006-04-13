@@ -57,13 +57,7 @@ NTestWindow::NTestWindow()
 
   pane()->add(new NButton("t"),nAlRight);
 
-  NDockPanel* panel = new NDockPanel();
-    panel->setLayout(new NAlignLayout());
-    NListBox* hallo = new NListBox();
-      hallo->setAlign(nAlClient);
-    panel->add(hallo);
-
-  book->addPage(panel,"page");
+  book->addPage(new NDockPanel(new NPanel()),"page");
 
   pane()->add(book,nAlClient);
 }

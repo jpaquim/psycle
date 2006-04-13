@@ -353,15 +353,14 @@ void NScrollBar::setPos( int value )
            sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) range_ );
          else
            sliderTop =(int)( (value * (sliderArea_->clientHeight()-slider_->height())) / (double) (control_->clientHeight() - control_->spacingHeight()) );
-
-         slider_->setTop(sliderTop);
+         slider_->setTop(std::min(sliderTop,sliderArea_->clientHeight()-slider_->height()));
          sliderArea_->repaint();
          onSliderMove();
       }
       break;
       case nDx : {
          int sliderLeft =(int)( (value * (sliderArea_->clientWidth()-slider_->width())) / (double) range_ );
-         slider_->setLeft(sliderLeft);
+         slider_->setLeft(std::min(sliderLeft,sliderArea_->clientWidth()-slider_->width()));
          sliderArea_->repaint();
          onSliderMove();
       }

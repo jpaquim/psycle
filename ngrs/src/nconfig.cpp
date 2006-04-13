@@ -57,7 +57,6 @@ public:
        erg = std::string(id);
        XMLString::release(&id);
        XMLString::release(&str);
-       
        } catch (std::exception e) { return ""; }
       return erg;
     }
