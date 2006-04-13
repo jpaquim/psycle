@@ -6,6 +6,19 @@ namespace psycle
 {
 	namespace host
 	{
+		using plugin_interface::MAX_TRACKS;
+		using plugin_interface::MAX_BUFFER_LENGTH;
+
+		/// Size of audio blocks which are work'd together (max value).
+		UNIVERSALIS__COMPILER__DEPRECATED("use MAX_BUFFER_LENGTH instead")
+		int const STREAM_SIZE = MAX_BUFFER_LENGTH;
+
+		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
+		int const MAX_DELAY_BUFFER = 65536;
+
+		/// Sampler
+		int const OVERLAPTIME = 128;
+
 		/// number of samples per tweak slide update
 		int const TWEAK_SLIDE_SAMPLES = 64;
 		/// number of tws commands that can be active on one machine
@@ -20,11 +33,10 @@ namespace psycle
 		int const MAX_SEQUENCES = 1;
 		/// harcoded maximal number different patterns.
 		int const MAX_PATTERNS = 256;
-		/// Max number of pattern tracks, as defined in <psycle/plugin_interface.hpp>
-		using psycle::plugin_interface::MAX_TRACKS;
 		/// harcoded maximal number of lines per pattern
 		int const MAX_LINES = 256;
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
+		UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
 		#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 			#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 		#else
@@ -50,16 +62,12 @@ namespace psycle
 		int const MAX_CONNECTIONS = PSYCLE__MAX_CONNECTIONS;
 
 		/// Miscellaneous offset data.
+		UNIVERSALIS__COMPILER__DEPRECATED("sux")
 		int const MULTIPLY = MAX_TRACKS * EVENT_SIZE;
+		UNIVERSALIS__COMPILER__DEPRECATED("sux")
 		int const MULTIPLY2 = MULTIPLY * MAX_LINES;
+		UNIVERSALIS__COMPILER__DEPRECATED("sux")
 		int const MAX_PATTERN_BUFFER_LEN = MULTIPLY2 * MAX_PATTERNS;
-
-		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-		int const MAX_DELAY_BUFFER = 65536;
-		/// Sampler
-		int const OVERLAPTIME = 128;
-		/// \todo Size of audio blocks which are work'd together (max value). If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, appropiatedly.
-		int const STREAM_SIZE = 256;
 
 		/// Current version of the Song file and its chunks.
 		/// format: 0xAABB
