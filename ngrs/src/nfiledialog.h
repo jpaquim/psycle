@@ -66,6 +66,7 @@ private:
 
    bool do_Execute;
    NFileListBox* fBox_;
+   NFileListBox* pdBox_;
    NFileListBox* dBox_;
    NEdit* fNameCtrl;
    NEdit* dNameCtrl;
@@ -75,6 +76,7 @@ private:
    NButton* okBtn_;
 
    void onItemSelected(NItemEvent* ev);
+   void onDirItemSelected(NItemEvent* ev);
    void onParentDirItemSelected(NItemEvent* ev);
 
    void onOkBtn(NButtonEvent* sender);

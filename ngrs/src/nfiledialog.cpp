@@ -27,6 +27,7 @@
 #include "nlabel.h"
 #include "nedit.h"
 #include "ncombobox.h"
+#include "nframeborder.h"
 
 /* XPM */
 const char* left_nav[] = {
@@ -212,18 +213,26 @@ NFileDialog::NFileDialog()
     navPanel->add(new NButton("Home"));
   pane()->add(navPanel);
 
-  NGroupBox* dirPanel = new NGroupBox();
-  dirPanel->setHeaderText("Parent Dir");
-  dirPanel->setLayout(new NAlignLayout());
-  dirPanel->setAlign(nAlLeft);
-  dirPanel->setWidth(150);    
-    dBox_ = new NFileListBox();
-     dBox_->setMode(nDirs);
-     dBox_->setDirectory(NFile::parentWorkingDir());
-     dBox_->setAlign(nAlClient);
-     dBox_->itemSelected.connect(this,&NFileDialog::onParentDirItemSelected);
-    dirPanel->add(dBox_);
-  pane()->add(dirPanel);
+  NPanel* dirPanel = new NPanel();
+    dirPanel->setLayout(new NAlignLayout());
+      dirPanel->setPreferredSize(150,100);
+      dirPanel->add(new NLabel("Parentdir"),nAlTop);
+      pdBox_ = new NFileListBox();
+        pdBox_->setBorder(new NFrameBorder());
+        pdBox_->setMode(nDirs);
+        pdBox_->setHeight(100);
+        pdBox_->setDirectory(NFile::parentWorkingDir());
+        pdBox_->setAlign(nAlTop);
+        pdBox_->itemSelected.connect(this,&NFileDialog::onParentDirItemSelected);
+      dirPanel->add(pdBox_);
+      dirPanel->add(new NLabel("Workingdir"),nAlTop);
+      dBox_ = new NFileListBox();
+        dBox_->setBorder(new NFrameBorder());
+        dBox_->setMode(nDirs);
+        dBox_->setDirectory(NFile::workingDir());
+        dBox_->itemSelected.connect(this,&NFileDialog::onDirItemSelected);
+      dirPanel->add(dBox_, nAlClient);
+  pane()->add(dirPanel,nAlLeft);
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
@@ -281,7 +290,7 @@ NFileDialog::NFileDialog()
      filePanel->setLayout(new NAlignLayout());
      filePanel->setAlign(nAlClient);
         fBox_ = new NFileListBox();
-        fBox_->setMode(nFiles | nDirs);
+        fBox_->setMode(nFiles);
         fBox_->setDirectory(NFile::workingDir());
         fBox_->itemSelected.connect(this,&NFileDialog::onItemSelected);
         fBox_->setAlign(nAlClient);
@@ -311,22 +320,26 @@ void NFileDialog::onItemSelected( NItemEvent * ev )
   if (!fBox_->isDirItem()) {
     fNameCtrl->setText(fBox_->fileName());
     fNameCtrl->repaint();
-  } else {
-     NFile::cd(NFile::workingDir());
-     NFile::cd(fBox_->fileName());
-     setDirectory(NFile::workingDir());
   }
+  setDirectory(NFile::workingDir());
+}
+
+void NFileDialog::onDirItemSelected( NItemEvent * ev )
+{
+  NFile::cd(NFile::workingDir());
+  NFile::cd(dBox_->fileName());
+  setDirectory(NFile::workingDir());
 }
 
 void NFileDialog::onParentDirItemSelected( NItemEvent * ev )
 {
-  if (dBox_->fileName()=="..") {
+  if (pdBox_->fileName()=="..") {
     setDirectory(NFile::parentWorkingDir());
   } else {
-    dNameCtrl->setText(dBox_->fileName());
+    dNameCtrl->setText(pdBox_->fileName());
     fNameCtrl->repaint();
     NFile::cd(NFile::parentWorkingDir());
-    NFile::cd(dBox_->fileName());
+    NFile::cd(pdBox_->fileName());
     fBox_->setDirectory(NFile::workingDir());
     fBox_->repaint();
   }
@@ -368,8 +381,10 @@ void NFileDialog::setDirectory( const std::string & dir )
   history.push_back(dir);
   NFile::cd(dir);
   fBox_->setDirectory(NFile::workingDir());
-  dBox_->setDirectory(NFile::parentWorkingDir());
+  pdBox_->setDirectory(NFile::parentWorkingDir());
+  dBox_->setDirectory(NFile::workingDir());
   dBox_->repaint();
+  pdBox_->repaint();
   fBox_->repaint();
 }
 
@@ -411,8 +426,12 @@ void NFileDialog::setMode( int mode )
 void NFileDialog::onHiddenCheckBoxClicked( NButtonEvent * ev )
 {
   fBox_->setShowHiddenFiles(hBox->checked());
+  dBox_->setShowHiddenFiles(hBox->checked());
+  pdBox_->setShowHiddenFiles(hBox->checked());
   pane()->repaint();
 }
+
+
 
 
 

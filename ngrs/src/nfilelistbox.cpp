@@ -90,13 +90,14 @@ void NFileListBox::setDirectory( std::string directory )
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
 
-        if ( (!showHiddenFiles_ && entry!="" && entry[0]=='.') ||
-             (showHiddenFiles_ && (activeFilter==0  || (activeFilter && activeFilter->accept(entry))))
-           ) {
-          NItem* item = new NItem();
-          item->setText(entry);
-          item->mousePress.connect(this,&NFileListBox::onFileItemSelected);
-          add (item, false);
+        if (activeFilter==0  || (activeFilter && activeFilter->accept(entry)))
+        {
+          if (!showHiddenFiles_ && entry!="" && (entry[0]!='.') || showHiddenFiles_) {
+            NItem* item = new NItem();
+            item->setText(entry);
+            item->mousePress.connect(this,&NFileListBox::onFileItemSelected);
+            add (item, false);
+          }
         }
       }
   }
@@ -104,7 +105,7 @@ void NFileListBox::setDirectory( std::string directory )
       std::vector<std::string> list = fSystem.dirList(directory);
       for (std::vector<std::string>::iterator it = list.begin(); it < list.end(); it++) {
         std::string entry = *it;
-        if ((showHiddenFiles_) || (!showHiddenFiles_ && entry!="" && entry[0]!='.')) {
+        if ((showHiddenFiles_) || (!showHiddenFiles_ && entry!="" && ((entry[0]!='.') || entry.find("..")==0))) {
           NItem* item = new NItem();
             item->setText(entry);
             NImage* icon = new NImage();
