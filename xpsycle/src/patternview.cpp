@@ -1509,7 +1509,14 @@ void PatternView::PatternDraw::endSel( )
 void PatternView::PatternDraw::doSel(const NPoint3D & p )
 {
   doSelect_=true;
-    if (p.x() < selStartPoint_.x()) selection_.setLeft(std::max(p.x(),0)); else
+    if (p.x() < selStartPoint_.x()) {
+       selection_.setLeft(std::max(p.x(),0)); 
+       int startTrack  = dx_ / pView->colWidth();
+       if (selection_.left() < startTrack && startTrack > 0) {
+           pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
+       }
+    }
+    else
     if (p.x() == selStartPoint_.x()) {
       selection_.setLeft (std::max(p.x(),0));
       selection_.setRight(std::min(p.x()+1,pView->trackNumber()));
@@ -1520,10 +1527,17 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
         int trackCount  = clientWidth() / pView->colWidth();
         if (selection_.right() > startTrack + trackCount) {
            pView->hScrBar()->setPos( (startTrack+2) * pView->colWidth());
+        } else
+        if (selection_.right() < startTrack && startTrack > 0) {
+           pView->hScrBar()->setPos( (startTrack-1)* pView->colWidth());
         }
     }
     if (p.y() < selStartPoint_.y()) {
        selection_.setTop(std::max(p.y(),0));
+       int startLine  = dy_ / pView->rowHeight();
+       if (selection_.top() < startLine && startLine >0) {
+           pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
+         }
     } else
     if (p.y() == selStartPoint_.y()) {
       selection_.setTop (p.y());
@@ -1535,6 +1549,9 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
          int lineCount  = clientHeight() / pView->rowHeight();
          if (selection_.bottom() > startLine + lineCount) {
            pView->vScrBar()->setPos( (startLine+1) * pView->rowHeight());
+         } else
+         if (selection_.bottom() < startLine && startLine >0) {
+           pView->vScrBar()->setPos( (startLine-1) * pView->rowHeight());
          }
     }
 
