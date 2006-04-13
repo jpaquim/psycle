@@ -23,6 +23,7 @@
 #include "nsize.h"
 #include "ngraphics.h"
 #include "nshape.h"
+#include "ncolor.h"
 
 /**
 @author Stefan
@@ -38,8 +39,12 @@ public:
 
     const NSize & spacing();
 
+    void setColor(const NColor & color);
+    const NColor & color();
+
 private:
 
+   NColor color_;
    NSize sizing_;
 
 };

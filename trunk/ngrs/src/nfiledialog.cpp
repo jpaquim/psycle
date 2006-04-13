@@ -193,7 +193,9 @@ NFileDialog::NFileDialog()
   pane()->setSkin(paneSkin);
 
   NPanel* navPanel = new NPanel();
-    navPanel->setLayout(new NFlowLayout(nAlLeft));
+    navLayout = new NFlowLayout(nAlLeft);
+    navLayout->setBaseLine(nAlCenter);
+    navPanel->setLayout(navLayout);
     navPanel->setAlign(nAlTop);
     NImage* leftXpm  = new NImage();
        leftXpm->createFromXpmData(left_nav);
@@ -215,7 +217,10 @@ NFileDialog::NFileDialog()
 
   NPanel* dirPanel = new NPanel();
     dirPanel->setLayout(new NAlignLayout());
-      dirPanel->setPreferredSize(150,100);
+    dirPanel->setBorder(dirPanelBorder = new NFrameBorder());
+      dirPanelBorder->setOval(true,5,5);
+      dirPanelBorder->setColor(NColor(220,220,220));
+      dirPanel->setPreferredSize(180,100);
       dirPanel->add(new NLabel("Parentdir"),nAlTop);
       pdBox_ = new NFileListBox();
         pdBox_->setBorder(new NFrameBorder());
@@ -301,12 +306,14 @@ NFileDialog::NFileDialog()
 
   do_Execute = false;
 
-  setPosition(0,0,500,500);
+  setPosition(0,0,550,400);
 }
 
 
 NFileDialog::~NFileDialog()
 {
+  delete navLayout;
+  delete dirPanelBorder;
 }
 
 bool NFileDialog::execute( )
@@ -321,7 +328,6 @@ void NFileDialog::onItemSelected( NItemEvent * ev )
     fNameCtrl->setText(fBox_->fileName());
     fNameCtrl->repaint();
   }
-  setDirectory(NFile::workingDir());
 }
 
 void NFileDialog::onDirItemSelected( NItemEvent * ev )
@@ -341,7 +347,9 @@ void NFileDialog::onParentDirItemSelected( NItemEvent * ev )
     NFile::cd(NFile::parentWorkingDir());
     NFile::cd(pdBox_->fileName());
     fBox_->setDirectory(NFile::workingDir());
+    dBox_->setDirectory(NFile::workingDir());
     fBox_->repaint();
+    dBox_->repaint();
   }
 }
 

@@ -21,6 +21,7 @@
 
 NBorder::NBorder()
 {
+  color_ = NColor(150,150,150);
 }
 
 
@@ -40,5 +41,15 @@ void NBorder::setSpacing( NSize size )
 const NSize & NBorder::spacing( )
 {
   return sizing_;
+}
+
+void NBorder::setColor( const NColor & color )
+{
+  color_ = color;
+}
+
+const NColor & NBorder::color( )
+{
+  return color_;
 }
 

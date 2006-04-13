@@ -24,7 +24,6 @@ NFrameBorder::NFrameBorder()
  : NBorder()
 {
   setSpacing(NSize(1,1,1,1));
-  color = NColor(150,150,150);
   lcount_ = 1;
   dx_ = 2; dy_ = 2;
   arcWidth_  = 5;
@@ -39,7 +38,7 @@ NFrameBorder::~NFrameBorder()
 
 void NFrameBorder::paint( NGraphics * g, const NShape & geometry )
 {
-  g->setForeground(color);
+  g->setForeground(color());
   NRect r = geometry.rectArea();
   for (int i = 0; i < lcount_; i++) {
     if (oval_) 
