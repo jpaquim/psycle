@@ -55,6 +55,7 @@ public:
     NListBox* seqList();
 
     void onSelChangeSeqList(NItemEvent* sender);
+    void updatePlayOrder(bool mode);
 
 private:
 
@@ -107,8 +108,6 @@ private:
    void onIncLen(NButtonEvent* ev);
 
    std::vector<int> seqCopyBuffer;
-
-   void updatePlayOrder(bool mode);
 
    NFrameBorder* frBorder;
    NLayout* listLayout;

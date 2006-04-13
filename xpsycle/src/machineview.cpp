@@ -134,6 +134,7 @@ void MachineView::update( )
   machineGUIs.clear();
   scrollArea_->removeChilds();
   createGUIMachines();
+  repaint();
 }
 
 MachineGUI * MachineView::findByMachine( Machine * mac )
