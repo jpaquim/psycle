@@ -79,7 +79,7 @@ CMachineInfo const MacInfo =
 	"YMidi - Midi Out "
 		"v. " YMIDI_VERSION
 		#if !defined NDEBUG
-			" (debug)",
+			" (debug)"
 		#endif
 		,
 	"YMidi" YMIDI_VERSION,
