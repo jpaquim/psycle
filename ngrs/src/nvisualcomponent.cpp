@@ -600,6 +600,8 @@ void NVisualComponent::add( NRuntime * component )
 void NVisualComponent::add( NVisualComponent * component )
 {
   NVisual::add(component);
+  if (component == this) return;
+
   visualComponents_.push_back(component);
   if (layout_!=0) layout_->align(this);
 }
@@ -756,6 +758,7 @@ void NVisualComponent::onMoveEnd( const NMoveEvent & moveEvent )
 
 void NVisualComponent::insert( NVisualComponent * component, unsigned int index )
 {
+  if (component == this) return;
   if (index <= visualComponents_.size()) {
     NRuntime::insert(component,index);
     visualComponents_.insert(visualComponents_.begin()+index,component);
@@ -764,6 +767,7 @@ void NVisualComponent::insert( NVisualComponent * component, unsigned int index 
 
 void NVisualComponent::add( NVisualComponent * component, int align )
 {
+  if (component == this) return;
   component->setAlign(align);
   add(component);
 }
