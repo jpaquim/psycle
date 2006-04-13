@@ -28,19 +28,16 @@
 
 
 MachineView::MachineView()
- : NDockPanel()
+ : NPanel()
 {
   setLayout(alignLayout = new NAlignLayout());
 
   scrollBox_ = new NScrollBox();
-    scrollBox_->setAlign(nAlClient);
-    scrollBox_->setTransparent(true);
     scrollArea_ = new NPanel();
-      scrollArea_->setTransparent(true);
       scrollArea_->setLayout(new NAutoScrollLayout);
       scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
     scrollBox_->setScrollPane(scrollArea_);
-  add(scrollBox_);
+  add(scrollBox_, nAlClient);
 
   init();
 }

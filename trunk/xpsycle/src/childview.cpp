@@ -23,7 +23,7 @@
 #include "newmachine.h"
 #include <napp.h>
 #include <inttypes.h>
-
+#include <ndockpanel.h>
 
 const std::string PSYCLE__VERSION="X";
 
@@ -50,8 +50,8 @@ ChildView::ChildView()
   patternView_->setForeground(Global::pConfig()->pvc_background);
   patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
 
-  addPage(machineView_,"Machine View");
-  addPage(patternView_,"Pattern View");
+  addPage(new NDockPanel(machineView_),"Machine View");
+  addPage(new NDockPanel(patternView_),"Pattern View");
 
   machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
 
