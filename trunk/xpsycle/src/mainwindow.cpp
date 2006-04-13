@@ -1017,11 +1017,20 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 
 void MainWindow::onTimer( )
 {
-  childView_->patternView()->updatePlayBar(true);
+  if (Global::pPlayer()->_playing) {
 
-  vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
-  Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
-  vuMeter_->repaint();
+    int oldPos = childView_->patternView()->editPosition();
+    childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
+
+    if (sequencerBar_->followSong() && oldPos != Global::pPlayer()->_playPosition) {
+       sequencerBar_->updatePlayOrder(true);
+       sequencerBar_->updateSequencer();
+    }
+
+    vuMeter_->setPegel(Global::pSong()->_pMachine[MASTER_INDEX]->_lMax,
+    Global::pSong()->_pMachine[MASTER_INDEX]->_rMax );
+    vuMeter_->repaint();
+  }
 }
 
 void MainWindow::updateBars( )

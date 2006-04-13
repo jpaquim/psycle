@@ -562,7 +562,7 @@ void PatternView::PatternDraw::paint( NGraphics * g )
   int lineHeight = ((endLine +1) * pView->rowHeight()) - dy();
 
   for (int y = startLine; y <= endLine; y++) {
-    if (!(y == pView->playPos())) {
+    if (!(y == pView->playPos()) && pView->editPosition() == Global::pPlayer()->_playPosition) {
       if ( !(y % Global::pSong()->LinesPerBeat())) {
         if (!(y%(Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig))) {
            g->setForeground(Global::pConfig()->pvc_row4beat);
@@ -1224,14 +1224,53 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
 
 void PatternView::updatePlayBar(bool followSong)
 {
-  if ((visible()) && (Global::pPlayer()->_lineChanged))
+  if ((visible()) && (Global::pPlayer()->_lineChanged) && (editPosition() == Global::pPlayer()->_playPosition) && !followSong )
   {
      int trackCount  = clientWidth() / colWidth();
      int startTrack  = drawArea->dx() / colWidth();
 
      int oldPlayPos = playPos_;
      playPos_ = Global::pPlayer()->_lineCounter;
-     window()->repaint(drawArea,drawArea->repaintTrackArea(oldPlayPos,playPos_,startTrack,trackCount+startTrack));
+     if (oldPlayPos < playPos_)
+       window()->repaint(drawArea,drawArea->repaintTrackArea(oldPlayPos,playPos_,startTrack,trackCount+startTrack));
+     else if (oldPlayPos > playPos_) {
+       window()->repaint(drawArea,drawArea->repaintTrackArea(oldPlayPos,oldPlayPos,startTrack,trackCount+startTrack));
+       window()->repaint(drawArea,drawArea->repaintTrackArea(playPos_,playPos_,startTrack,trackCount+startTrack));
+     }
+  } else 
+  if (visible() && followSong) {
+
+    if (editPosition() != Global::pPlayer()->_playPosition) {
+      setEditPosition(Global::pPlayer()->_playPosition);
+      playPos_ = Global::pPlayer()->_lineCounter;
+      int startLine  = playPos_;
+      vScrBar()->posChange.disconnect_all();
+      vScrBar()->setPos( (startLine) * rowHeight());
+      vBar->posChange.connect(this,&PatternView::onVScrollBar);
+      drawArea->setDy(startLine * rowHeight());
+      lineNumber_->setDy(startLine * rowHeight());
+      repaint();
+    } else
+    if ((Global::pPlayer()->_lineChanged) && editPosition() == Global::pPlayer()->_playPosition) {
+      int startLine  = drawArea->dy() / rowHeight();
+      int lineCount  = drawArea->clientHeight() / rowHeight();
+      int oldLine = playPos_;
+      playPos_ = Global::pPlayer()->_lineCounter;
+
+      if (oldLine < playPos_) {
+        int newLine = playPos_;
+        if (newLine > startLine + lineCount-1) {
+          vScrBar()->setPos( (startLine+1) * rowHeight());
+        }
+        int trackCount  = drawArea->clientWidth() / colWidth();
+        int startTrack  = drawArea->dx() / colWidth();
+
+        window()->repaint(this,drawArea->repaintTrackArea(oldLine,newLine,startTrack,trackCount+startTrack));
+     } else if (playPos_ < oldLine) {
+        vScrBar()->setPos(0);
+     }
+    }
+
   }
 }
 
