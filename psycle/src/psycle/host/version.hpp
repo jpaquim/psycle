@@ -26,7 +26,7 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 9
-#define PSYCLE__VERSION__PATCH 7
+#define PSYCLE__VERSION__PATCH 8
 #define PSYCLE__VERSION__QUALITY "alpha"
 
 /// identifies what sources the build comes from.
