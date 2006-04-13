@@ -76,11 +76,12 @@ CMachineInfo const MacInfo =
 	GENERATOR,
 	NUMPARAMETERS,
 	pParameters,
-#ifdef _DEBUG
-	"YMidi - Midi Out v." YMIDI_VERSION " (Debug)",
-#else
-	"YMidi - Midi Out v." YMIDI_VERSION,
-#endif
+	"YMidi - Midi Out "
+		"v. " YMIDI_VERSION
+		#if !defined NDEBUG
+			" (debug)",
+		#endif
+		,
 	"YMidi" YMIDI_VERSION,
 	"YanniS on " __DATE__,
 	"Command Help",
