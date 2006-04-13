@@ -105,7 +105,8 @@ class PatternView : public NPanel
      virtual void onKeyRelease(const NKeyEvent & event);
 
      NRect repaintTrackArea    (int startLine,int endLine,int startTrack, int endTrack);
-     NRect trackAreaFromRepaint(const NRegion & repaintArea);
+     NPoint linesFromRepaint(const NRegion & repaintArea);
+     NPoint tracksFromRepaint(const NRegion & repaintArea);
 
 
    private:
@@ -214,6 +215,8 @@ public:
     void clearCursorPos();
 
 private:
+
+  NLayout* alignLayout;
 
   int editPosition_, prevEditPosition_;
   int playPos_;

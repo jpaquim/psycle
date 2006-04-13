@@ -38,10 +38,9 @@
 PatternView::PatternView()
  : NPanel()
 {
-  setLayout(new NAlignLayout());
-  setName("debug::patview");
+  setLayout(alignLayout = new NAlignLayout());
 
-
+  // create scrollBars
   hBar = new NScrollBar();
     hBar->setOrientation(nHorizontal);
     hBar->setHeight(15);
@@ -54,15 +53,13 @@ PatternView::PatternView()
     vBar->posChange.connect(this,&PatternView::onVScrollBar);
   add(vBar, nAlRight);
 
-  lineNumber_ = new LineNumber(this);
-    setBorder(new NFrameBorder());
-  add(lineNumber_, nAlLeft);
 
-  add(header = new Header(this), nAlTop);
-
-  drawArea = new PatternDraw(this);
-    drawArea->setAlign(nAlClient);
-  add(drawArea);
+  // create the left linenumber panel
+  add(lineNumber_ = new LineNumber(this), nAlLeft);
+  // create the headertrack panel
+  add(header      = new Header(this), nAlTop);
+  // create the pattern panel
+  add(drawArea    = new PatternDraw(this), nAlClient);
 
   setFont(NFont("System",8,nMedium | nStraight ));
 
@@ -70,18 +67,17 @@ PatternView::PatternView()
   addEvent(1); // add one byte event to trackerline
   addEvent(2); // add two byte event to trackerline
 
-  editPosition_ = 0;
-  prevEditPosition_ = 0;
-  playPos_ = 0;
-  editOctave_ = 0;
-  outtrack = 0;
+  editPosition_ = prevEditPosition_ = playPos_ = editOctave_ = outtrack = 0;
+
   for(int i=0;i<MAX_TRACKS;i++) notetrack[i]=120;
+
   setTransparent(false);
 }
 
 
 PatternView::~PatternView()
 {
+  delete alignLayout;
 }
 
 void PatternView::onHScrollBar( NObject * sender, int pos )
@@ -106,7 +102,7 @@ void PatternView::onHScrollBar( NObject * sender, int pos )
 
 void PatternView::onVScrollBar( NObject * sender, int pos )
 {
-  if (pos > 0) {
+  if (pos >= 0) {
   int newPos = (pos / rowHeight()) * rowHeight();
 
   if (newPos != drawArea->dy()) {
@@ -131,10 +127,12 @@ void PatternView::onVScrollBar( NObject * sender, int pos )
 
 void PatternView::resize( )
 {
-  NPanel::resize(); // we use a layout manager!
+  // calls the AlignLayout to reorder scroll-,-header,-linenumber- and patternpanels
+  NPanel::resize();
+  // set the Range to the new headerwidth
   hBar->setRange(header->preferredWidth() - clientWidth());
   int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
-  vBar->setRange((lineNumber()-count)*rowHeight());
+  vBar->setRange((lineNumber()-1-count)*rowHeight());
 }
 
 void PatternView::setSeparatorColor( const NColor & separatorColor )
@@ -224,18 +222,29 @@ void PatternView::setCursor( const NPoint3D & cursor )
 
 void PatternView::moveCursor( int dx, int dy, int dz )
 {
-  int newX = std::min(std::max(cursor_.x()+dx,0),trackNumber());
-  int newY = std::min(std::max(0,cursor_.y()+dy),lineNumber());
+  int newX = std::min(std::max(cursor_.x()+dx,0),trackNumber()-1);
+  int newY = std::min(std::max(0,cursor_.y()+dy),lineNumber()-1);
+
   int newZ = cursor_.z()+dz;
 
   if (newZ >= cellCount() ) {
      newX++;
-     newZ=0;
+     if (newX > trackNumber()-1) {
+       newX = trackNumber()-1;
+       newZ = cursor_.z();
+     }
+     else 
+       newZ=0;
   } else
 
   if (newZ < 0 ) {
      newX--;
-     newZ= cellCount()-1;
+     if (newX < 0) {
+       newX = 0;
+       newZ = 0;
+     }
+     else
+       newZ= cellCount()-1;
   }
 
   cursor_.setXYZ(newX,newY,newZ);
@@ -250,7 +259,7 @@ void PatternView::setEditPosition( int pos )
 {
   editPosition_ = pos;
   int count = (drawArea->clientHeight()-headerHeight()) / rowHeight();
-  vBar->setRange((lineNumber()-count)*rowHeight());
+  vBar->setRange((lineNumber()-1-count)*rowHeight());
 }
 
 int PatternView::editPosition( )
@@ -408,6 +417,7 @@ int PatternView::Header::skinColWidth( )
 ///
   PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : dy_(0), NPanel()
   {
+    setBorder(new NFrameBorder());
     pView = pPatternView;
     setTransparent(true);
     setWidth(40);
@@ -540,32 +550,20 @@ PatternView::PatternDraw::~ PatternDraw( )
 
 void PatternView::PatternDraw::paint( NGraphics * g )
 {
-  int startLine  = dy_ / pView->rowHeight();
-  int startTrack = dx_ / pView->colWidth();
-  int lineCount  = clientHeight() / pView->rowHeight();
-  int trackCount = clientWidth()  / pView->colWidth();
+  NPoint lineArea = linesFromRepaint(g->repaintArea());
+  int startLine = lineArea.x();
+  int endLine   = lineArea.y();
 
-  // check for repaintArea
-
-
-  int startLineOffset = std::max(((g->repaintArea().rectClipBox().top() - absoluteTop()) / pView->rowHeight()),(long)0);
-  int endLineOffset   = std::max((clientHeight()-(g->repaintArea().rectClipBox().top() + g->repaintArea().rectClipBox().height() - absoluteTop())) / pView->rowHeight(),(long)0);
-
-  int startTrackOffset = std::max((g->repaintArea().rectClipBox().left() - absoluteLeft()) / pView->colWidth(),(long)0);
-  int endTrackOffset   = std::max((clientWidth()-(g->repaintArea().rectClipBox().left() + g->repaintArea().rectClipBox().width() - absoluteLeft())) / pView->colWidth() -1,(long)0);
-
-  startLine  = startLine  + startLineOffset;
-  startTrack = startTrack + startTrackOffset;
-  int endLine  =  std::min(startLine  + (lineCount  - startLineOffset - endLineOffset)+1 , pView->lineNumber());
-  int endTrack = std::min(startTrack + (trackCount - startTrackOffset - endTrackOffset) , pView->trackNumber()-1 );
-
+  NPoint trackArea = tracksFromRepaint(g->repaintArea());
+  int startTrack = trackArea.x();
+  int endTrack   = trackArea.y();
 
   g->setForeground(Global::pConfig()->pvc_rowbeat);
 
   int trackWidth = ((endTrack+1) * pView->colWidth()) - dx();
-  int lineHeight = ((endLine) * pView->rowHeight()) - dy();
+  int lineHeight = ((endLine +1) * pView->rowHeight()) - dy();
 
-  for (int y = startLine; y < endLine; y++) {
+  for (int y = startLine; y <= endLine; y++) {
     if (!(y == pView->playPos())) {
       if ( !(y % Global::pSong()->LinesPerBeat())) {
         if (!(y%(Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig))) {
@@ -615,7 +613,7 @@ void PatternView::PatternDraw::paint( NGraphics * g )
    }
   }
 
-  drawPattern(g,std::min(startLine,pView->lineNumber()),std::min(endLine,pView->lineNumber()),startTrack,endTrack);
+  drawPattern(g,startLine,endLine,startTrack,endTrack);
 }
 
 void PatternView::PatternDraw::setDy( int dy )
@@ -828,7 +826,7 @@ void PatternView::PatternDraw::onKeyPress( const NKeyEvent & event )
           pView->moveCursor(0,-1,0);
           int startLine  = dy_ / pView->rowHeight();
           int newLine = pView->cursor().y();
-          if (newLine <= startLine) {
+          if (newLine < startLine) {
             pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
           }
           window()->repaint(this,repaintTrackArea(newLine,oldLine,pView->cursor().x(),pView->cursor().x()));
@@ -1019,8 +1017,60 @@ NRect PatternView::PatternDraw::repaintTrackArea( int startLine, int endLine, in
   return NRect(left,top,right - left,bottom - top);
 }
 
-NRect PatternView::PatternDraw::trackAreaFromRepaint( const NRegion & repaintArea )
+NPoint PatternView::PatternDraw::linesFromRepaint( const NRegion & repaintArea )
 {
+  // p.x = startLine,  // p.y = endLine (including endline number)
+
+  NRect repaintRect = repaintArea.rectClipBox();
+
+  int absTop  = absoluteTop();
+  int ch      = clientHeight();
+
+  // the start for whole repaint
+  int start    = dy_ / pView->rowHeight();
+  // the offset for the repaint expose request
+  int startOff = std::max((repaintRect.top() - absTop) / pView->rowHeight(),(long)0);
+  // the start
+  start        = std::min(start + startOff, pView->lineNumber()-1);
+
+
+  // the endline for whole repaint
+  int end     = (dy_ + ch) / pView->rowHeight();
+  // the offset for the repaint expose request
+  int endOff  = std::max((ch-(repaintRect.top()-absTop + repaintRect.height())) / pView->rowHeight()
+                        ,(long)0);
+  // the end
+  end         = std::min(end - endOff, pView->lineNumber()-1);
+
+  return NPoint(start,end);
+}
+
+NPoint PatternView::PatternDraw::tracksFromRepaint( const NRegion & repaintArea )
+{
+  // p.x = startTrack,  // p.y = endTrack (including endline number)
+
+  NRect repaintRect = repaintArea.rectClipBox();
+
+  int absLeft = absoluteLeft();
+  int cw      = clientWidth();
+
+  // the start for whole repaint
+  int start    = dx_ / pView->colWidth();
+  // the offset for the repaint expose request
+  int startOff = std::max((repaintRect.left() - absLeft) / pView->colWidth(),(long)0);
+  // the start
+  start        = std::min(start + startOff, pView->trackNumber()-1);
+
+
+  // the endtrack for whole repaint
+  int end     = (dx_ + cw) / pView->colWidth();
+  // the offset for the repaint expose request
+  int endOff  = std::max((cw-(repaintRect.left()-absLeft + repaintRect.width())) / pView->colWidth()
+                        ,(long)0);
+  // the end
+  end         = std::min(end - endOff, pView->trackNumber()-1);
+
+  return NPoint(start,end);
 }
 
 int PatternView::cellCount( )
@@ -1400,7 +1450,7 @@ void PatternView::PatternDraw::onPopupPattern( NButtonEvent * ev )
      Global::pSong()->AllocNewPattern(patNum,"",patDlg->lineNumber(),patDlg->adaptSize()?true:false);
      if (pView->cursor().y() > patDlg->lineNumber()) pView->setCursor(NPoint3D(pView->cursor().x(),patDlg->lineNumber()-1,pView->cursor().z()));
      int count = (clientHeight()-pView->headerHeight()) / pView->rowHeight();
-     pView->vBar->setRange((pView->lineNumber()-count)*pView->rowHeight());
+     pView->vBar->setRange((pView->lineNumber()-1-count)*pView->rowHeight());
      repaint();
    }
   }
@@ -1502,5 +1552,6 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
   if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
 }
+
 
 
