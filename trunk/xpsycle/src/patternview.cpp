@@ -562,7 +562,7 @@ void PatternView::PatternDraw::paint( NGraphics * g )
   int lineHeight = ((endLine +1) * pView->rowHeight()) - dy();
 
   for (int y = startLine; y <= endLine; y++) {
-    if (!(y == pView->playPos()) && pView->editPosition() == Global::pPlayer()->_playPosition) {
+    if (!(y == pView->playPos()) || pView->editPosition() != Global::pPlayer()->_playPosition) {
       if ( !(y % Global::pSong()->LinesPerBeat())) {
         if (!(y%(Global::pSong()->LinesPerBeat()*Global::pConfig()->pv_timesig))) {
            g->setForeground(Global::pConfig()->pvc_row4beat);
@@ -572,7 +572,7 @@ void PatternView::PatternDraw::paint( NGraphics * g )
           g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
         }
       }
-    } else {
+    } else  {
       g->setForeground(Global::pConfig()->pvc_playbar);
       g->fillRect(0,y*pView->rowHeight() - dy_,trackWidth,pView->rowHeight());
       g->setForeground(Global::pConfig()->pvc_rowbeat);
