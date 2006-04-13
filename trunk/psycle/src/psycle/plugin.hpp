@@ -105,9 +105,9 @@ namespace psycle
 								:
 									name(name),
 									unused_name(name),
-									type(Types::null),
 									minimum_value(0),
 									maximum_value(0),
+									type(Types::null),
 									default_value(0),
 									scale(* new scale::Discrete(0))
 								{}
@@ -122,7 +122,6 @@ namespace psycle
 								:
 									name(name),
 									unused_name(name),
-									type(Types::state),
 									minimum_value(input_minimum_value),
 									maximum_value(input_maximum_value),
 									default_value
@@ -137,6 +136,7 @@ namespace psycle
 											input_maximum_value
 										)
 									),
+									type(Types::state),
 									scale(scale)
 								{}
 							public:
