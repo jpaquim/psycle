@@ -43,8 +43,6 @@ public:
 
 private:
 
-   NColor color;
-
    int lcount_;  // number of frame lines
    int dx_;      // dx space between lines
    int dy_;      // dy space between lines

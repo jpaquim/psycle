@@ -53,7 +53,7 @@ void NGroupBox::GBorder::paint( NGraphics * g, const NShape & geometry )
 {
   g->setForeground(NColor(220,220,220));
   NRect r = geometry.rectArea();
-  g->drawRect(r.left(),r.top(),r.width()-1,r.height()-1);
+  g->drawRoundRect(r.left(),r.top(),r.width()-1,r.height()-1,5,5);
   g->drawText(r.left() +spacing().left() ,r.top() + g->textAscent(),headerText_);
 }
 
