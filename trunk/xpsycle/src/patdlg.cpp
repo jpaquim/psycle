@@ -82,6 +82,10 @@ bool PatDlg::execute( )
 
 void PatDlg::onOkBtn( NButtonEvent * sender )
 {
+  std::stringstream str; 
+  str << lineNumEdit_->text();
+  str >> lineNumber_;
+
   do_Execute = true;
   setVisible(false);
   setExitLoop(nDestroyWindow);
