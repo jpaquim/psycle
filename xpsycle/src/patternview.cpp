@@ -429,8 +429,6 @@ int PatternView::Header::skinColWidth( )
 
   void PatternView::LineNumber::paint( NGraphics * g )
   {
-    /// todo wrap this like patternDraw to start and endline or make new method for compution
-
     int startLine = dy_ / pView->rowHeight();
     int rDiff   = g->repaintArea().rectClipBox().top() - absoluteTop() + pView->headerHeight();
     int offT = rDiff / pView->rowHeight();
