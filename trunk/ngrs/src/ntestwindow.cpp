@@ -36,6 +36,7 @@
 #include "n7segment.h"
 #include "n7segdisplay.h"
 #include "ndockpanel.h"
+#include "nsplitbar.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -53,7 +54,23 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
+  NPanel* left = new NPanel();
+    left->setBackground(NColor(100,100,100));
+    left->setTransparent(false);
+    left->setWidth(100);
+  pane()->add(left,nAlLeft);
+
+  NSplitBar* bar = new NSplitBar();
+  pane()->add(bar,nAlLeft);
+
+  NPanel* client = new NPanel();
+    client->setBackground(NColor(150,150,150));
+    client->setTransparent(false);
+
+  pane()->add(client,nAlClient);
+
   testMenu(); 
+
 }
 
 

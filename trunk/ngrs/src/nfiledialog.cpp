@@ -28,6 +28,7 @@
 #include "nedit.h"
 #include "ncombobox.h"
 #include "nframeborder.h"
+#include "nsplitbar.h"
 
 /* XPM */
 const char* left_nav[] = {
@@ -238,6 +239,9 @@ NFileDialog::NFileDialog()
         dBox_->itemSelected.connect(this,&NFileDialog::onDirItemSelected);
       dirPanel->add(dBox_, nAlClient);
   pane()->add(dirPanel,nAlLeft);
+
+  NSplitBar* splitBar = new NSplitBar();
+  pane()->add(splitBar,nAlLeft);
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
