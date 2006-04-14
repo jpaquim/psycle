@@ -29,14 +29,19 @@ class NSplitBar : public NPanel
 {
 public:
     NSplitBar();
+    NSplitBar(int orientation);
 
     ~NSplitBar();
+
+    void setOrientation(int orientation);
 
     virtual void onMove(const NMoveEvent & moveEvent);
 
 private:
 
-    NBorder* splitBorder;
+   int orientation_;
+
+   void init();
 
 };
 

@@ -30,6 +30,7 @@
 #include "nframeborder.h"
 #include "nsplitbar.h"
 
+
 /* XPM */
 const char* left_nav[] = {
 /* width height num_colors chars_per_pixel */
@@ -180,7 +181,7 @@ NFileDialog::NFileDialog()
 {
   mode_ = nLoad;
 
-  pane()->setLayout(new NAlignLayout(5,5));
+  pane()->setLayout(new NAlignLayout(5,5),true);
 
   setTitle("Load");
 
@@ -193,11 +194,11 @@ NFileDialog::NFileDialog()
   NApp::config()->setSkin(&paneSkin,"filedlgpane");
   pane()->setSkin(paneSkin);
 
+
   NPanel* navPanel = new NPanel();
     navLayout = new NFlowLayout(nAlLeft);
     navLayout->setBaseLine(nAlCenter);
-    navPanel->setLayout(navLayout);
-    navPanel->setAlign(nAlTop);
+    navPanel->setLayout(navLayout,true);
     NImage* leftXpm  = new NImage();
        leftXpm->createFromXpmData(left_nav);
     NImage* rightXpm = new NImage();
@@ -214,10 +215,13 @@ NFileDialog::NFileDialog()
     navPanel->add(new NButton("Del"));
     navPanel->add(new NToolBarSeparator());
     navPanel->add(new NButton("Home"));
-  pane()->add(navPanel);
+  pane()->add(navPanel,nAlTop);
+
+  NPanel* mainPnl = new NPanel();
+  mainPnl->setLayout(new NAlignLayout(5,5),true);
 
   NPanel* dirPanel = new NPanel();
-    dirPanel->setLayout(new NAlignLayout());
+    dirPanel->setLayout(new NAlignLayout(),true);
     dirPanel->setBorder(dirPanelBorder = new NFrameBorder());
       dirPanelBorder->setOval(true,5,5);
       dirPanelBorder->setColor(NColor(220,220,220));
@@ -231,6 +235,8 @@ NFileDialog::NFileDialog()
         pdBox_->setAlign(nAlTop);
         pdBox_->itemSelected.connect(this,&NFileDialog::onParentDirItemSelected);
       dirPanel->add(pdBox_);
+      NSplitBar* splitBar = new NSplitBar(nHorizontal);
+      dirPanel->add(splitBar,nAlTop);
       dirPanel->add(new NLabel("Workingdir"),nAlTop);
       dBox_ = new NFileListBox();
         dBox_->setBorder(new NFrameBorder());
@@ -238,14 +244,14 @@ NFileDialog::NFileDialog()
         dBox_->setDirectory(NFile::workingDir());
         dBox_->itemSelected.connect(this,&NFileDialog::onDirItemSelected);
       dirPanel->add(dBox_, nAlClient);
-  pane()->add(dirPanel,nAlLeft);
+  mainPnl->add(dirPanel,nAlLeft);
 
-  NSplitBar* splitBar = new NSplitBar();
-  pane()->add(splitBar,nAlLeft);
+  splitBar = new NSplitBar();
+  mainPnl->add(splitBar,nAlLeft);
 
   NPanel* bPnl = new NPanel();
     bPnl->setAlign(nAlBottom);
-    bPnl->setLayout(new NFlowLayout(nAlRight));
+    bPnl->setLayout(new NFlowLayout(nAlRight),true);
     okBtn_ = new NButton("open");
       okBtn_->clicked.connect(this,&NFileDialog::onOkBtn);
       okBtn_->setFlat(false);
@@ -254,57 +260,52 @@ NFileDialog::NFileDialog()
       cancelBtn->clicked.connect(this,&NFileDialog::onCancelBtn);
       cancelBtn->setFlat(false);
     bPnl->add(cancelBtn);
-  pane()->add(bPnl);
+  mainPnl->add(bPnl);
 
   NPanel* fiPnl = new NPanel();
-    fiPnl->setAlign(nAlBottom);
-    fiPnl->setLayout(new NAlignLayout(5,0));
+    fiPnl->setLayout(new NAlignLayout(5,0),true);
     fiPnl->add(new NLabel("Filters"),nAlLeft);
     fiNameCtrl = new NComboBox();
     fiNameCtrl->setWidth(200);
     fiPnl->add(fiNameCtrl,nAlClient);
-  pane()->add(fiPnl);
-
+  mainPnl->add(fiPnl,nAlBottom);
 
   NPanel* fPnl = new NPanel();
-    fPnl->setAlign(nAlBottom);
-    fPnl->setLayout(new NAlignLayout(5,0));
+    fPnl->setLayout(new NAlignLayout(5,0),true);
     fPnl->add(new NLabel("File"),nAlLeft);
     fNameCtrl = new NEdit();
     fNameCtrl->setWidth(200);
     fPnl->add(fNameCtrl,nAlClient);
-  pane()->add(fPnl);
+  mainPnl->add(fPnl,nAlBottom);
 
   NPanel* dPnl = new NPanel();
-    dPnl->setAlign(nAlBottom);
-    dPnl->setLayout(new NAlignLayout(5,0));
+    dPnl->setLayout(new NAlignLayout(5,0),true);
     dPnl->add(new NLabel("Dir"),nAlLeft);
     dNameCtrl = new NEdit();
     dNameCtrl->setWidth(200);
     dPnl->add(dNameCtrl,nAlClient);
-  pane()->add(dPnl);
+  mainPnl->add(dPnl,nAlBottom);
 
   NPanel* hPnl = new NPanel();
-    hPnl->setAlign(nAlBottom);
-    hPnl->setLayout(new NAlignLayout(5,0));
+    hPnl->setLayout(new NAlignLayout(5,0),true);
     hBox = new NCheckBox("show hidden Files");
       hBox->clicked.connect(this,&NFileDialog::onHiddenCheckBoxClicked);
     hPnl->add(hBox,nAlClient);
-  pane()->add(hPnl);
+  mainPnl->add(hPnl,nAlBottom);
 
 
   NGroupBox* filePanel = new NGroupBox();
-  filePanel->setAlign(nAlClient);
   filePanel->setHeaderText("Files");
-     filePanel->setLayout(new NAlignLayout());
-     filePanel->setAlign(nAlClient);
+     filePanel->setLayout(new NAlignLayout(),true);
         fBox_ = new NFileListBox();
         fBox_->setMode(nFiles);
         fBox_->setDirectory(NFile::workingDir());
         fBox_->itemSelected.connect(this,&NFileDialog::onItemSelected);
         fBox_->setAlign(nAlClient);
-     filePanel->add(fBox_);
-  pane()->add(filePanel);
+     filePanel->add(fBox_,nAlClient);
+  mainPnl->add(filePanel,nAlClient);
+
+  pane()->add(mainPnl,nAlClient);
 
   pane()->resize();
 
@@ -316,7 +317,6 @@ NFileDialog::NFileDialog()
 
 NFileDialog::~NFileDialog()
 {
-  delete navLayout;
   delete dirPanelBorder;
 }
 

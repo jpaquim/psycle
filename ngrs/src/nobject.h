@@ -29,6 +29,7 @@ class NEvent;
 
 using namespace sigslot;
 
+
 /**
 @author Stefan
 */

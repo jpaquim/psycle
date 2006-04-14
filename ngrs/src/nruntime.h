@@ -27,6 +27,18 @@
 
 class NVisitor;
 
+
+template<class T> inline T str(const std::string &  value) {
+   T result;
+
+   std::stringstream str;
+   str << value;
+   str >> result;
+
+   return result;
+}
+
+
 /**
 @author Stefan
 */
