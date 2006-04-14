@@ -89,6 +89,7 @@ public:
     virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
     virtual int FindInputWire(int macIndex);
     virtual int FindOutputWire(int macIndex);
+    virtual const char * const GetDllName() const throw() { return "built-in"; };
 
     int _macIndex;
     MachineType _type;

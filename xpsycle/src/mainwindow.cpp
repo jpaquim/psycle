@@ -1020,6 +1020,7 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 
 void MainWindow::onTimer( )
 {
+
   if (Global::pPlayer()->_playing) {
 
     int oldPos = childView_->patternView()->editPosition();
