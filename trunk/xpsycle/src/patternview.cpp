@@ -552,8 +552,6 @@ void PatternView::PatternDraw::paint( NGraphics * g )
   int startLine = lineArea.x();
   int endLine   = lineArea.y();
 
-  std::cout << startLine << "," << endLine << std::endl;
-
   NPoint trackArea = tracksFromRepaint(g->repaintArea());
   int startTrack = trackArea.x();
   int endTrack   = trackArea.y();

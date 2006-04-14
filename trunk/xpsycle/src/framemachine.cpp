@@ -23,6 +23,8 @@
 #include "configuration.h"
 #include "defaultbitmaps.h"
 #include <napp.h>
+#include <nmenubar.h>
+#include <presetsdlg.h>
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
@@ -50,6 +52,16 @@ int FrameMachine::onClose( )
 
 void FrameMachine::init( )
 {
+  NMenuBar* bar = new NMenuBar();
+  pane()->add(bar);
+  NMenu* aboutMenu = new NMenu("About",'a',"Help,|,About this machine");
+  aboutMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
+  bar->add(aboutMenu);
+  NMenu* parameterMenu = new NMenu("Parameters",'p',"Reset,Random,Presets");
+  parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
+  bar->add(parameterMenu);
+
+
   NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITopColor);
   pane()->setFont(font);
@@ -214,7 +226,6 @@ void Knob::onMousePress( int x, int y, int button )
   int CH = clientHeight();
   if (NRect(0,(CH - K_YSIZE)/2,K_XSIZE,K_YSIZE).intersects(x,y)) {
     istweak = true;
-    std::cout << "yes" << std::endl;
     sourcepoint = y;
   }
 }
@@ -234,8 +245,6 @@ void Knob::onMouseOver( int x, int y )
         sourcepoint = y;
         finetweak=!finetweak;
      }
-
-
 
 
     int maxval = max_range;
@@ -274,4 +283,15 @@ void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
   int val_v = pMachine_->GetParamValue(param);
   sender->setValue(val_v);
   sender->repaint();
+}
+
+
+void FrameMachine::onItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
+{
+  if (itemEv->text() == "Presets") {
+     PresetsDlg* dlg = new PresetsDlg(pMachine_);
+     add(dlg);
+     dlg->execute();
+     NApp::addRemovePipe(dlg);
+  }
 }

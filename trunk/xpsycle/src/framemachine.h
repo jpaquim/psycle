@@ -137,6 +137,7 @@ private:
    NPanel* knobPanel;
    NGridLayout* gridLayout;
 
+   void onItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
    void init();
    void initParameterGUI();
 
