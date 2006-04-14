@@ -209,22 +209,22 @@ void dw_eq::process(Sample l[], Sample r[], int samples, int)
 		if(active[0])
 		{
 			*l = band1.Process(*l, chan_left);
-			*r = band1.Process(*r, chan_left);
+			*r = band1.Process(*r, chan_right);
 		}
 		if(active[1])
 		{
 			*l = band2.Process(*l, chan_left);
-			*r = band2.Process(*r, chan_left);
+			*r = band2.Process(*r, chan_right);
 		}
 		if(active[2])
 		{
 			*l = band3.Process(*l, chan_left);
-			*r = band3.Process(*r, chan_left);
+			*r = band3.Process(*r, chan_right);
 		}
 		if(active[3])
 		{
 			*l = band4.Process(*l, chan_left);
-			*r = band4.Process(*r, chan_left);
+			*r = band4.Process(*r, chan_right);
 		}
 		++l;
 		++r;
