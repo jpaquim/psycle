@@ -44,6 +44,12 @@ NButton::NButton( const std::string & text, int minWidth, int minHeight ) : NCus
   init();
 }
 
+NButton::NButton( const std::string & text, bool flat ) : NCustomButton(text), icon_(0)
+{
+  init();
+  setFlat(flat);
+}
+
 NButton::NButton( NImage * icon )
 {
   icon_ = icon;
@@ -136,6 +142,8 @@ void NButton::setDown( bool on )
     repaint();
   }
 }
+
+
 
 
 

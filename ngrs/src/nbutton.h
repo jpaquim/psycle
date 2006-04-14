@@ -34,6 +34,7 @@ public:
     NButton(NImage* icon,int minWidth, int minHeight);
     NButton(NImage* icon);
     NButton(const std::string & text);
+    NButton(const std::string & text, bool flat);
     NButton(const std::string & text, int minWidth, int minHeight);
 
     ~NButton();
