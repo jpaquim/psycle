@@ -19,43 +19,93 @@
  ***************************************************************************/
 #include "nsplitbar.h"
 #include "nbevelborder.h"
+#include "napp.h"
+#include "nconfig.h"
 
 NSplitBar::NSplitBar()
  : NPanel()
 {
-  setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint));
-  splitBorder = new NBevelBorder(nRaised,nLowered);
-  setBorder(splitBorder);
-  setWidth(5);
+  init();
+  setOrientation(nVertical);
 }
 
+NSplitBar::NSplitBar( int orientation )
+{
+  init();
+  setOrientation(orientation);
+}
 
 NSplitBar::~NSplitBar()
 {
-  delete splitBorder;
 }
 
+void NSplitBar::init( )
+{
+  setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
+  setWidth(5);
+  NApp::config()->setSkin(&skin_,"splitbar");
+  
+}
 
 void NSplitBar::onMove( const NMoveEvent & moveEvent )
 {
-  NVisualComponent* leftVc = 0;
+  if (orientation_ == nVertical) {
+    NVisualComponent* leftVc = 0;
+    NVisualComponent* p = (NVisualComponent*) parent();
 
-  NVisualComponent* p = (NVisualComponent*) parent();
+    std::vector<NVisualComponent*>::const_iterator itr;
 
-  std::vector<NVisualComponent*>::const_iterator itr;
+    itr = find(p->visualComponents().begin(),p->visualComponents().end(),this);
 
-  itr = find(p->visualComponents().begin(),p->visualComponents().end(),this);
+    if (itr > p->visualComponents().begin()) {
+      itr--;
+      leftVc = *itr;
+    }
 
-  if (itr > p->visualComponents().begin()) {
-    itr--;
-    leftVc = *itr;
-  }
+    if (leftVc!=0) {
+      leftVc->setPreferredSize( left() - leftVc->left(), leftVc->height());
+      p->resize();
+      p->repaint();
+    }
+  } else
+  if (orientation_ == nHorizontal) {
+    NVisualComponent* topVc = 0;
+    NVisualComponent* p = (NVisualComponent*) parent();
 
-  if (leftVc!=0) {
-     leftVc->setPreferredSize( left() - leftVc->left(), leftVc->height());
-     p->resize();
-     p->repaint();
+    std::vector<NVisualComponent*>::const_iterator itr;
+
+    itr = find(p->visualComponents().begin(),p->visualComponents().end(),this);
+
+    if (itr > p->visualComponents().begin()) {
+      itr--;
+      topVc = *itr;
+    }
+
+    if (topVc!=0) {
+      topVc->setPreferredSize( topVc->width(), top() - topVc->top());
+      p->resize();
+      p->repaint();
+    }
+
   }
 }
+
+void NSplitBar::setOrientation( int orientation )
+{
+  setGradientOrientation(!orientation);
+  orientation_ = orientation;
+  if (orientation == nVertical) {
+     setWidth(5);
+     setMoveable(NMoveable(nMvHorizontal | nMvNoneRepaint | nMvParentLimit));
+  } else
+  if (orientation == nHorizontal) {
+     setHeight(5);
+     setMoveable(NMoveable(nMvVertical | nMvNoneRepaint | nMvParentLimit));
+  }
+}
+
+
+
+
 
 

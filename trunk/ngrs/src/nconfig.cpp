@@ -81,6 +81,7 @@ private:
 };
 
 
+
 void MySAX2Handler::startElement(const   XMLCh* const    uri,
                             const   XMLCh* const    localname,
                             const   XMLCh* const    qname,
@@ -92,7 +93,7 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
 
 
   ///todo   NBorder* border;
- 
+
     if (tagName == "path") {
       std::string id   = getValue("id",attrs);
       std::string path = getValue("src",attrs);
@@ -144,23 +145,28 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
            fr->setOval(style);
          }
 
-         std::string arcw  = getValue("arcw",attrs);
-         std::string arch  = getValue("arch",attrs);
 
-         if (arcw!="") {
-           int arc  = 0;
-           std::stringstream str3;
-           str3 << arcw;
-           str3 >> arc;
-           fr->setOval(fr->oval(),arc,fr->arcHeight());
+         std::string lcount  = getValue("lines",attrs);
+
+         std::string arcw    = getValue("arcw",attrs);
+         std::string arch    = getValue("arch",attrs);
+
+         if (lcount!="") {
+            int lines = str<int>(lcount);
+            std::string dwidth    = getValue("linedistw",attrs);
+            int dw = 0;
+            if (dwidth!="")  dw = str<int>(dwidth);
+             std::string dheight  = getValue("linedistw",attrs);
+            int dh = 0;
+            if (dheight!="") dh = str<int>(dheight);
+            fr->setOval(lines,dw,dh);
          }
 
-         if (arch!="") {
-           int arc  = 0;
-           std::stringstream str3;
-           str3 << arch;
-           str3 >> arc;
-           fr->setOval(fr->oval(),fr->arcWidth(),arc);
+         int arcH = 0;
+         if (arch!="") arcH = str<int>(arch);
+         int arcW = 0; arcW = str<int>(arcw);
+         if (arcw!="" || arch!="") {
+           fr->setOval(fr->oval(),arcH,arcW);
          }
       }
     } else

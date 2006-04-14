@@ -32,7 +32,7 @@
 #include "napp.h"
 #include "ntestwindow.h"
 #include "nregexp.h"
-
+#include "nruntime.h"
 
 using namespace std;
 

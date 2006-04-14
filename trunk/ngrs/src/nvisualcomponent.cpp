@@ -52,12 +52,15 @@ NVisualComponent::NVisualComponent()
   ownerSizeSet_ = false;
   ownerPreferredWidth_  = 0;
   ownerPreferredHeight_ = 0;
+
+  layoutDeleteFlag_ = false;
 }
 
 
 NVisualComponent::~NVisualComponent()
 {
   if (layout_!=0) layout_->setParent(0);
+  if (layoutDeleteFlag_ && layout_!=0) delete layout_;
 }
 
 
@@ -303,10 +306,10 @@ const NColor & NVisualComponent::foreground( )
   return skin_.fgColor;
 }
 
-void NVisualComponent::setLayout(NLayout* layout) {
+void NVisualComponent::setLayout(NLayout* layout, bool deleteFlag) {
    layout_ = layout;
    if (layout_!=0) layout_->setParent(this);
-
+   layoutDeleteFlag_ = deleteFlag;
 }
 
 void NVisualComponent::updateAlign( )

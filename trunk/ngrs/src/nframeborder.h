@@ -36,8 +36,14 @@ public:
    void setLineCount(int count, int dWidth = 3, int dHeight = 3);
    void setOval(bool on = true, int arcWidth = 5, int arcHeight = 5);
    bool oval() const;
+
+   int lineCount() const;
+
    int arcWidth() const;
    int arcHeight() const;
+
+   int dWidth() const;
+   int dHeight() const;
 
    virtual void paint(NGraphics* g, const NShape & geometry);
 

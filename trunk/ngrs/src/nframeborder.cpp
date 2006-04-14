@@ -78,4 +78,19 @@ int NFrameBorder::arcHeight( ) const
   return arcHeight_;
 }
 
+int NFrameBorder::lineCount( ) const
+{
+  return lcount_;
+}
+
+int NFrameBorder::dWidth( ) const
+{
+  return dx_;
+}
+
+int NFrameBorder::dHeight( ) const
+{
+  return dy_;
+}
+
 
