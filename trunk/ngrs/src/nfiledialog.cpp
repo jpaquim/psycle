@@ -367,6 +367,8 @@ void NFileDialog::onOkBtn( NButtonEvent * sender )
 
 int NFileDialog::onClose( )
 {
+  do_Execute = false;
+  setVisible(false);
   return nDestroyWindow;
 }
 

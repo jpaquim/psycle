@@ -44,37 +44,32 @@ public:
     const NRect & rectClipBox() const;
     bool intersects(int x, int y);
 
-    /// intersection
-    inline NRegion & operator &= (const NRegion &);
 
-    /// union
-    inline NRegion & operator |= (const NRegion &);
+    inline NRegion & operator &= (const NRegion &); // intersection
 
-    /// difference
-    inline NRegion & operator -= (const NRegion &);
+    inline NRegion & operator |= (const NRegion &); // union
 
-    /// symetric difference
-    inline NRegion & operator ^= (const NRegion &);
+    inline NRegion & operator -= (const NRegion &); // difference
 
-public:
-    ///\name specific to X Window implementation
-    ///\{
-        /// warning: this pointer can change
-        inline Region xRegion() const throw() { return region_; }
+    inline NRegion & operator ^= (const NRegion &); // symetric difference
 
-        /// implicit conversion to X const Region.
-        inline operator const Region () const throw() { return region_; }
 
-        /// implicit conversion to X Region.
-        inline operator Region () throw() { return region_; }
-   ///\}
+      // warning: this pointer can change
+    inline Region xRegion() const throw() { return region_; }
+
+    // implicit conversion to X const Region.
+    inline operator const Region () const throw() { return region_; }
+
+    // implicit conversion to X Region.
+    inline operator Region () throw() { return region_; }
+
 
 private:
+
 
     Region region_;
     mutable NRect clipBox;
     mutable bool update;
-
 };
 
 inline NRegion & NRegion::operator &= (const NRegion & that)
@@ -106,7 +101,7 @@ inline NRegion operator | (const NRegion & lhs, const NRegion & rhs)
 inline NRegion & NRegion::operator -= (const NRegion & that)
 {
   XSubtractRegion(*this, that, *this);
-  return *this;  
+  return *this;
 }
 
 inline NRegion operator - (const NRegion & lhs, const NRegion & rhs)

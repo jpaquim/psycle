@@ -51,6 +51,7 @@ NWindow::NWindow()
 
 NWindow::~NWindow()
 {
+  if (mapped()) NApp::system().unmapWindow(win_);
   delete graphics_;
   NApp::removeWindow(win_);
   NApp::system().destroyWindow(win_);

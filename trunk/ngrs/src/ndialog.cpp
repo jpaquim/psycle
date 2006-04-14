@@ -39,6 +39,8 @@ bool NDialog::execute( )
 
 int NDialog::onClose()
 {
+  do_execute = false;
+  setVisible(false);
   return nDestroyWindow;
 }
 
