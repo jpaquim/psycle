@@ -285,6 +285,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//{{AFX_MSG_MAP(CFrameLFOMachine)
 		ON_WM_PAINT()
 		ON_WM_LBUTTONDOWN()
+		ON_WM_LBUTTONDBLCLK()
 		ON_WM_MOUSEMOVE()
 		ON_WM_LBUTTONUP()
 		ON_WM_RBUTTONUP()
@@ -307,9 +308,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		MachineIndex = dum;
 
 		d_pParams[prm_waveform] = new ComboBox(WIN_CX/5-35-ComboBox::s_width,	30, 0, 4, 50, "Waveform");
-
+		d_pParams[prm_waveform]->d_bDblClkReset=false;
 		d_pParams[prm_pwidth]   = new Knob(2 * WIN_CX/5-Knob::s_width/2,	20, 0, 200, "Pulse Width");
+		d_pParams[prm_pwidth]->d_defValue=100;
 		d_pParams[prm_speed]	= new Knob(3 * WIN_CX/5-Knob::s_width/2,	20, 0, LFO::MAX_SPEED, "LFO Speed");
+		d_pParams[prm_speed]->d_defValue=LFO::MAX_SPEED/6;
 		d_pParams[prm_lfopos]   = new Knob(4 * WIN_CX/5-Knob::s_width/2,	20, 0, LFO::LFO_SIZE, "Position");
 
 		char temp[64];
@@ -320,6 +323,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			d_pParams[prm_prmout0+i] = new Knob(    WIN_CX/4-Knob::s_width/2+5, 115+95*i, -1, 128, "Param");
 			d_pParams[prm_level0+i]  = new Knob(2 * WIN_CX/4-Knob::s_width/2+25, 115+95*i,  0, LFO::MAX_DEPTH*2, "Depth");
 			d_pParams[prm_phase0+i]  = new Knob(3 * WIN_CX/4-Knob::s_width/2+25, 115+95*i,  0, LFO::MAX_PHASE, "Phase");
+			d_pParams[prm_macout0+i]->d_bDblClkReset=false;
+			d_pParams[prm_prmout0+i]->d_defValue=-1;
+			d_pParams[prm_level0+i]->d_defValue=LFO::MAX_DEPTH;
+			d_pParams[prm_phase0+i]->d_defValue=LFO::MAX_PHASE/2;
 		}
 
 		m_combobox.LoadBitmap(IDB_COMBOBOX);
@@ -476,6 +483,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	
 		CFrameWnd::OnLButtonDown(nFlags,point);
 
+	}
+
+	void CFrameLFOMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
+	{
+		tweakpar = ConvertXYtoParam(point.x, point.y);
+		if(tweakpar>-1 && tweakpar<num_params)
+		{
+			if(d_pParams[tweakpar]->d_bDblClkReset)
+				d_pLFO->SetParameter(tweakpar, d_pParams[tweakpar]->d_defValue);
+			else
+			{
+				int value = d_pLFO->GetParamValue(tweakpar);
+				if(d_pParams[tweakpar]->LButtonDown(nFlags, point.x, point.y, value))
+					d_pLFO->SetParameter(tweakpar, value);
+				istweak = true;
+				SetCapture();
+			}
+		}
+		Invalidate(false);
+
+		CFrameWnd::OnLButtonDblClk(nFlags,point);
 	}
 	void CFrameLFOMachine::OnMouseMove(UINT nFlags, CPoint point) 
 	{

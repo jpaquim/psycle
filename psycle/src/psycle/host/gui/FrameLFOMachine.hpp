@@ -21,7 +21,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		class LFOControl
 		{
 		public:
-			LFOControl(int x, int y, int minVal, int maxVal) : d_x(x), d_y(y), d_minValue(minVal), d_maxValue(maxVal) {};
+			LFOControl(int x, int y, int minVal, int maxVal)
+				: d_x(x)
+				, d_y(y)
+				, d_minValue(minVal)
+				, d_maxValue(maxVal)
+				, d_defValue(0)
+				, d_bDblClkReset(true) 
+				{};
 			virtual ~LFOControl() {};
 			
 			virtual void Paint(CDC* dc,int value, char* valString)=0;
@@ -34,10 +41,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int d_y;
 			int d_minValue;
 			int d_maxValue;
+			int d_defValue;
 			int d_twkSrc_x;
 			int d_twkSrc_y;
 			int d_tweakBase;
 
+			bool d_bDblClkReset;
 			char d_lblString[128];
 			ShowText d_showValue;
 			ShowText d_showLabel;
@@ -143,6 +152,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//{{AFX_MSG(CFrameLFOMachine)
 		afx_msg void OnPaint();
 		afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+		afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 		afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 		afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 		afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
