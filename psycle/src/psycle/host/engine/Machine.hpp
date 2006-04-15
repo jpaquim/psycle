@@ -808,6 +808,7 @@ namespace psycle
 			static char* _psName;
 		};
 
+
 		/// LFO machine
 		class LFO : public Machine
 		{
@@ -826,36 +827,50 @@ namespace psycle
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
-		protected:
+			
 			//constants
 			int const static LFO_SIZE = 2048;
 			int const static MAX_PHASE = LFO_SIZE;
 			int const static MAX_SPEED = 10000;
 			int const static MAX_DEPTH = 100;
-			enum
+			int const static NUM_CHANS = 4;
+			enum	//lfo types
 			{
 				lt_sine=0, lt_tri, lt_sawup, lt_sawdown, lt_square
 			};
 
+			enum prm	//our parameter indices
+			{
+				wave=0, pwidth, speed,
+				mac0,	mac1,	mac2,	mac3,
+				prm0,	prm1,	prm2,	prm3,
+				level0,	level1,	level2,	level3,
+				phase0,	phase1,	phase2,	phase3,
+				display,
+				num_params
+			};
+
+
+		protected:
+			//protected member funcs
+			virtual void FillTable();				//fills the lfo table based on the value of waveform
+			virtual void ParamStart(int which);		//initializes data to start modulating the param given by 'which'
+			virtual void ParamEnd(int which);		//resets a parameter that's no longer being modulated
+
 			//parameter settings
 			short waveform;	
-			int	baseline;
+			int	pWidth;
 			int lSpeed;
-			short macOutput[5];
-			short paramOutput[5];
-			int phase[5];
-			int level[5];
+			short macOutput[NUM_CHANS];
+			short paramOutput[NUM_CHANS];
+			int phase[NUM_CHANS];
+			int level[NUM_CHANS];
 
 			//internal state vars
 			float lfoPos;				//position in our lfo
 			float waveTable[LFO_SIZE];	//our lfo
-			int prevVal[5];				//value of knob when last seen-- used to compensate for outside changes
-			int centerVal[5];			//where knob should be at lfo==0
-
-			//protected member funcs
-			void FillTable();
-			void ParamStart(int which);
-			void ParamEnd(int which);
+			int prevVal[NUM_CHANS];				//value of knob when last seen-- used to compensate for outside changes
+			int centerVal[NUM_CHANS];			//where knob should be at lfo==0
 
 
 			static char* _psName;
