@@ -110,9 +110,9 @@ namespace psycle
 		
 				public:
 					/// called by schedulers, reset the state of this node so that it prepares for the next call to visit_and_process()
-					void inline    reset();
-				private:
-					void inline do_reset(); // [bohan] note: msvc6 crashes when this function is inlined.
+					void inline     reset();
+				protected:
+					void virtual do_reset() {}
 			///\}
 
 			///\name stop
@@ -190,10 +190,6 @@ namespace psycle
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 			do_reset();
-		}
-
-		void node::do_reset()
-		{
 		}
 	}
 }

@@ -78,6 +78,7 @@ namespace psycle
 				{
 					protected:
 						graph(underlying_type &); friend class generic_access;
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init();
 
 					///\name signal slots
 					///\{
@@ -156,6 +157,7 @@ namespace psycle
 				{
 					protected:
 						node(parent_type &, underlying_type &); friend class generic_access;
+						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init(); friend class graph; // init code moved to graph since it deals with connections
 						
 					///\name signal slots
 					///\{					
@@ -173,8 +175,9 @@ namespace psycle
 						public:  int inline const & output_port_count() const throw() { return output_port_count_; }
 						private: int                output_port_count_;
 						
-						public:  void inline UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES reset() throw() { assert(processed()); processed_= false; }
-						public:  void inline mark_as_processed() throw() { processed_= true; assert(processed()); }
+						public:  void inline UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES reset() throw() { assert(processed()); processed(false); underlying().reset(); }
+						public:  void inline mark_as_processed() throw() { processed(true); }
+						public:  void inline         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
 						public:  bool inline const & processed() const throw() { return processed_; }
 						private: bool                processed_;
 					///\}

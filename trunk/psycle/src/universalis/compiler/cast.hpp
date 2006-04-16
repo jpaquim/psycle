@@ -26,7 +26,7 @@ namespace universalis
 				#endif
 			{
 				BOOST_STATIC_ASSERT((boost::is_base_and_derived<Base, Derived>::value));
-				#if !defined NDEBUG
+				#if 0 && !defined NDEBUG
 					if(operating_system::loggers::trace()())
 					{
 						std::ostringstream s;
@@ -59,7 +59,7 @@ namespace universalis
 				public:
 					inline operator Derived_Underlying const & () const throw()
 					{
-						#if !defined NDEBUG
+						#if 0 && !defined NDEBUG
 							if(operating_system::loggers::trace()())
 							{
 								std::ostringstream s;
@@ -80,7 +80,7 @@ namespace universalis
 					}
 					inline operator Derived_Underlying       & ()       throw()
 					{
-						#if !defined NDEBUG
+						#if 0 && !defined NDEBUG
 							if(operating_system::loggers::trace()())
 							{
 								std::ostringstream s;
@@ -117,16 +117,16 @@ namespace universalis
 					#include <boost/preprocessor/control/expr_if.hpp>
 					#include <boost/preprocessor/repetition/enum_params.hpp>
 					#include <boost/preprocessor/repetition/enum_binary_params.hpp>
-					#define UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT__MINIMUM 10
-					#if UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT < UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT__MINIMUM
-						#undef  UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT
-						#define UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT__MINIMUM
+					#define UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM  10
+					#if UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY < UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
+						#undef  UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY
+						#define UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY  UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY__MINIMUM
 					#endif
 					#define constructor(_, count, __) \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						underlying_wrapper(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						: Base_Wrapper(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
-						BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
+						BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__CAST__UNDERLYING_WRAPPER__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
 					#undef constructor
 				protected:
 					typedef underlying_wrapper underlying_wrapper_type;
@@ -151,12 +151,14 @@ namespace universalis
 					typedef underlying_wrapper underlying_wrapper_type;
 					inline  underlying_wrapper(Underlying & underlying) : underlying_(underlying)
 					{
-						if(operating_system::loggers::trace()())
-						{
-							std::ostringstream s;
-							s << "underlying wrapper: " << this << " -> " << &underlying;
-							operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						}
+						#if 0 && !defined NDEBUG
+							if(operating_system::loggers::trace()())
+							{
+								std::ostringstream s;
+								s << "underlying wrapper: " << this << " -> " << &underlying;
+								operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+							}
+						#endif
 					}
 			};
 		}

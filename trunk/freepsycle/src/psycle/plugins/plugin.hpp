@@ -33,7 +33,7 @@ namespace psycle
 				) \
 				throw(psycle::engine::exception) \
 				{ \
-					return * new typename(plugin_library_reference, graph, name); \
+					return psycle::engine::node::create<typename>(plugin_library_reference, graph, name); \
 				} \
 				\
 				void PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(delete)(psycle::engine::node * const node) \
