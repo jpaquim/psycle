@@ -30,8 +30,10 @@ namespace psycle
 							public:
 								instance(instanciator &, engine::graph &, std::string const & name) throw(engine::exception);
 								virtual ~instance() throw();
-								inline operator engine::node & () throw() { return *node_; }
-								inline engine::node & node() throw() { return *node_; }
+								inline operator engine::node const & () const throw() { return *node_; }
+								inline operator engine::node       & ()       throw() { return *node_; }
+								inline engine::node const & node() const throw() { return *node_; }
+								inline engine::node       & node()       throw() { return *node_; }
 							private:
 								engine::node * const node_;
 						};
@@ -39,8 +41,8 @@ namespace psycle
 						instanciator(plugin_resolver &, std::string const & name) throw(engine::exception);
 						virtual ~instanciator() throw();
 						instance & operator()(engine::graph &, std::string const & name);
-						std::string const                name() const throw();
-						std::string const           full_name() const throw();
+						std::string                      name() const throw();
+						std::string                 full_name() const throw();
 						std::string const inline & short_name() const throw() { return plugin_library_reference::name(); }
 					protected:
 						virtual instanciator & operator--() throw();

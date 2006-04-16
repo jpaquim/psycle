@@ -34,9 +34,44 @@ namespace psycle
 					new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
 				}
 
+				void graph::init()
+				{
+					graph_base::init();
+					for(const_iterator i(begin()) ; i != end() ; ++i)
+					{
+						loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ sched graph::init node");
+						typenames::node & node(**i);
+						if(node.multiple_input_port())
+						{
+							/// note: the best algorithm would be to order the inputs with a recursive evaluation on the graph.
+							// find the output port which has the minimum number of connections.
+							{
+								std::size_t minimum_size(std::numeric_limits<std::size_t>::max());
+								ports::inputs::multiple::output_ports_type::const_iterator i(node.multiple_input_port()->output_ports().begin());
+								for( ; i != node.multiple_input_port()->output_ports().end() ; ++i)
+								{
+									ports::output & output_port(**i);
+									if(output_port.input_ports().size() < minimum_size)
+									{
+										minimum_size = output_port.input_ports().size();
+										node.multiple_input_port_first_output_port_to_process_ = &output_port;
+										if(minimum_size == 1) break; // it's already an ideal case, we can't find a better one.
+									}
+								}
+								assert(!node.multiple_input_port()->output_ports().size() || node.multiple_input_port_first_output_port_to_process_);
+							}
+						}
+						// count the number of output ports that are connected.
+						for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i)
+						{
+							if((**i).input_ports().size()) ++node.output_port_count_;
+std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count " << node.output_port_count_ << std::endl;
+						}
+					}
+				}
+
 				void graph::on_new_node(typenames::node & underlying_node)
 				{
-std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched graph::on_new_node" << std::endl;
 				}
 				
 				node::node(node::parent_type & parent, underlying_type & underlying)
@@ -49,41 +84,21 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched graph::on_new_node" << std::endl;
 					new_output_port_signal()        .connect(boost::bind(&node::on_new_output_port        , this, _1));
 					new_single_input_port_signal()  .connect(boost::bind(&node::on_new_single_input_port  , this, _1));
 					new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
-					if(multiple_input_port())
-					{
-						/// note: the best algorithm would be to order the inputs with a recursive evaluation on the graph.
-						// find the output port which has the minimum number of connections.
-						{
-							std::size_t minimum_size(std::numeric_limits<std::size_t>::max());
-							ports::inputs::multiple::output_ports_type::const_iterator i(multiple_input_port()->output_ports().begin());
-							for( ; i != multiple_input_port()->output_ports().end() ; ++i)
-							{
-								ports::output & output_port(**i);
-								if(output_port.input_ports().size() < minimum_size)
-								{
-									minimum_size = output_port.input_ports().size();
-									this->multiple_input_port_first_output_port_to_process_ = &output_port;
-									if(minimum_size == 1) break; // it's already an ideal case, we can't find a better one.
-								}
-							}
-							assert(!multiple_input_port()->output_ports().size() || this->multiple_input_port_first_output_port_to_process_);
-						}
-					}
-					// count the number of output ports that are connected.
-					for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i)
-					{
-						if((**i).input_ports().size()) ++output_port_count_;
-std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::node " << output_port_count_ << std::endl;
-					}
 				}
-						
+
+				void node::init()
+				{
+					node_base::init();
+				}
+
 				void node::on_new_output_port(typenames::ports::output & output_port)
 				{
-std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::on_new_output_port" << std::endl;
 				}
+
 				void node::on_new_single_input_port(typenames::ports::inputs::single & single_input_port)
 				{
 				}
+
 				void node::on_new_multiple_input_port(typenames::ports::inputs::multiple & multiple_input_port)
 				{
 				}
@@ -309,7 +324,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::on_new_output_port" << std::endl
 							for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i)
 							{
 								node & node(**i);
-								if(node.processed()) node.underlying().reset();
+								if(node.processed()) node.reset();
 							}
 							for(terminal_nodes_type::iterator i(terminal_nodes_.begin()) ; i != terminal_nodes_.end() ; ++i)
 							{

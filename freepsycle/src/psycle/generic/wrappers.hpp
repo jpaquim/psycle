@@ -44,10 +44,23 @@ namespace psycle
 
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
 					{
+						generic::graph<Typenames>::init();
 						for(typename graph::underlying_type::const_iterator i(this->underlying().begin()) ; i != this->underlying().end() ; ++i) on_new_node(**i);
 						for(typename graph::const_iterator i(this->begin()) ; i != this->end() ; ++i)
 						{
-							; ///\todo node connections
+							loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ generic wrappers graph::init node");
+							typename Typenames::node & node(**i);
+							for(typename Typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i)
+							{
+							loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ generic wrappers graph::init port");
+								typename Typenames::ports::output & output_port(**i);
+								for(typename Typenames::ports::output::underlying_type::input_ports_type::const_iterator i(output_port.underlying().input_ports().begin()) ; i != output_port.underlying().input_ports().end() ; ++i)
+								{
+									typename Typenames::ports::input & input_port(underlying_wrapper(**i));
+									loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ generic wrappers graph::init connection");
+									output_port.connect(input_port);
+								}
+							}
 						}
 					}
 				public:
@@ -130,6 +143,7 @@ namespace psycle
 
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES init()
 					{
+						generic::node<Typenames>::init();
 						for(typename node::underlying_type::      output_ports_type::const_iterator i(this->underlying().      output_ports().begin()) ; i != this->underlying().      output_ports().end() ; ++i) on_new_output_port      (**i);
 						for(typename node::underlying_type::single_input_ports_type::const_iterator i(this->underlying().single_input_ports().begin()) ; i != this->underlying().single_input_ports().end() ; ++i) on_new_single_input_port(**i);
 						if(this->underlying().multiple_input_port()) on_new_multiple_input_port(*this->underlying().multiple_input_port());
@@ -223,7 +237,7 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							output(typename output::parent_type & parent, typename output::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: output::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
 						#undef constructor
 				};
 
@@ -235,7 +249,7 @@ namespace psycle
 							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							input(typename input::parent_type & parent, typename input::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: input::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
+							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
 						#undef constructor
 				};
 				
@@ -249,7 +263,7 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								single(typename single::parent_type & parent, typename single::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 								: single::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
 							#undef constructor
 					};
 
@@ -261,7 +275,7 @@ namespace psycle
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 								multiple(typename multiple::parent_type & parent, typename multiple::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
 								: multiple::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_LIMIT, constructor, ~)
+								BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS_ARITY, constructor, ~)
 							#undef constructor
 					};
 				}

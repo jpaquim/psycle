@@ -31,10 +31,10 @@ namespace psycle
 			{
 				friend class node;
 				
-				public:
-					virtual ~input() throw();
 				protected:
 					input(parent_type &, name_type const &, int const & channels = 0); friend class generic_access;
+				public:
+					virtual ~input() throw();
 	
 				public:
 					void    connect(typenames::ports::output &) throw(exception);

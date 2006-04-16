@@ -13,32 +13,67 @@ namespace psycle
 {
 	namespace host
 	{
-		plugin_resolver::instanciator::instance::instance(plugin_resolver::instanciator & instanciator, engine::graph & graph, const std::string & name) throw(engine::exception)
-		:
-			node_(&instanciator.node_instanciator_(instanciator, graph, name))
+		///////////////////////////////////////////////////////////////
+		// plugin_resolver
+
+		plugin_resolver::plugin_resolver()
 		{
-			if(loggers::information()())
+			if(loggers::trace()())
 			{
 				std::ostringstream s;
-				s << node().qualified_name() << " new node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << instanciator.name();
-				loggers::information()(s.str());
+				s << "new plugin resolver";
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			++node().plugin_library_reference_instance();
 		}
 	
-		plugin_resolver::instanciator::instance::~instance() throw()
+		plugin_resolver::~plugin_resolver() throw()
 		{
-			if(loggers::information()())
+			if(loggers::trace()())
 			{
 				std::ostringstream s;
-				s << node().qualified_name() << " delete node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << node().plugin_library_reference_instance().name();
-				loggers::information()(s.str());
+				s << "delete plugin resolver";
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			engine::reference_counter & reference_counter(node().plugin_library_reference_instance());
-			delete &node();
-			--reference_counter;
+			for(map::const_iterator i(map_.begin()) ; i != map_.end() ; ++i) delete i->second;
+		}
+
+		plugin_resolver::instanciator & plugin_resolver::operator[](const std::string & name) throw(engine::exception)
+		{
+			if(loggers::trace()())
+			{
+				std::ostringstream s;
+				s << "resolving plugin " << name << " ... ";
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			map::const_iterator i(map_.find(name));
+			if(i != map_.end())
+			{
+				if(loggers::trace()())
+				{
+					loggers::trace()("in cache.", UNIVERSALIS__COMPILER__LOCATION);
+				}
+				return *i->second;
+			}
+			else
+			{
+				if(loggers::trace()())
+				{
+					loggers::trace()("not in cache, resolving library ...", UNIVERSALIS__COMPILER__LOCATION);
+				}
+				instanciator & instanciator_(*new instanciator(*this, name));
+				map_[name] = &instanciator_;
+				return instanciator_;
+			}
 		}
 	
+		plugin_resolver::instanciator::instance & plugin_resolver::operator()(const std::string & plugin_name, engine::graph & graph, const std::string & node_name) throw(engine::exception)
+		{
+			return (*this)[plugin_name](graph, node_name);
+		}
+	
+		///////////////////////////////////////////////////////////////
+		// plugin_resolver::instanciator
+
 		plugin_resolver::instanciator::instanciator(plugin_resolver & plugin_resolver, const std::string & name) throw(engine::exception)
 		#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__MICROSOFT__VERSION__MAJOR >= 8
 			try
@@ -71,12 +106,12 @@ namespace psycle
 			}
 		#endif
 	
-		const std::string plugin_resolver::instanciator::name() const throw()
+		std::string plugin_resolver::instanciator::name() const throw()
 		{
 			return short_name() /* + " (" + full_name() + ")" */;
 		}
 	
-		const std::string plugin_resolver::instanciator::full_name() const throw()
+		std::string plugin_resolver::instanciator::full_name() const throw()
 		{
 			return library_resolver_.path().string();
 		}
@@ -128,59 +163,34 @@ namespace psycle
 			}
 		}
 	
-		plugin_resolver::plugin_resolver()
+		///////////////////////////////////////////////////////////////
+		// plugin_resolver::instanciator::instance
+
+		plugin_resolver::instanciator::instance::instance(plugin_resolver::instanciator & instanciator, engine::graph & graph, const std::string & name) throw(engine::exception)
+		:
+			node_(&instanciator.node_instanciator_(instanciator, graph, name))
 		{
-			if(loggers::trace()())
+			if(loggers::information()())
 			{
 				std::ostringstream s;
-				s << "new plugin resolver";
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				s << node().qualified_name() << " new node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << instanciator.name();
+				loggers::information()(s.str());
 			}
+			++node().plugin_library_reference_instance();
 		}
 	
-		plugin_resolver::instanciator & plugin_resolver::operator[](const std::string & name) throw(engine::exception)
+		plugin_resolver::instanciator::instance::~instance() throw()
 		{
-			if(loggers::trace()())
+			if(loggers::information()())
 			{
 				std::ostringstream s;
-				s << "resolving plugin " << name << " ... ";
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				s << node().qualified_name() << " delete node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << node().plugin_library_reference_instance().name();
+				loggers::information()(s.str());
 			}
-			map::const_iterator i(map_.find(name));
-			if(i != map_.end())
-			{
-				if(loggers::trace()())
-				{
-					loggers::trace()("in cache.", UNIVERSALIS__COMPILER__LOCATION);
-				}
-				return *i->second;
-			}
-			else
-			{
-				if(loggers::trace()())
-				{
-					loggers::trace()("not in cache, resolving library ...", UNIVERSALIS__COMPILER__LOCATION);
-				}
-				instanciator & instanciator_(*new instanciator(*this, name));
-				map_[name] = &instanciator_;
-				return instanciator_;
-			}
+			engine::reference_counter & reference_counter(node().plugin_library_reference_instance());
+			delete &node();
+			--reference_counter;
 		}
 	
-		plugin_resolver::instanciator::instance & plugin_resolver::operator()(const std::string & plugin_name, engine::graph & graph, const std::string & node_name) throw(engine::exception)
-		{
-			return (*this)[plugin_name](graph, node_name);
-		}
-	
-		plugin_resolver::~plugin_resolver() throw()
-		{
-			if(loggers::trace()())
-			{
-				std::ostringstream s;
-				s << "delete plugin resolver";
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			for(map::const_iterator i(map_.begin()) ; i != map_.end() ; ++i) delete i->second;
-		}
 	}
 }
