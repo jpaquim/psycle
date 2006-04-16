@@ -89,80 +89,100 @@ bool dwfilter::SetMode(int _mode)
 {
 	if(_mode<0 || _mode>=NUM_MODES)
 		return false;
-	mode = (filtmode)_mode;	CoefUpdate();
-		return true;
+	else if(mode==_mode)
+		return false;
+	mode = (filtmode)_mode;
+	CoefUpdate();
+	return true;
 }
 
 bool dwfilter::SetFreq(double _freq)
 {
 	if(_freq>=0.0 && _freq<=nyquist)
 	{
-		freq = _freq;
-		CoefUpdate();	
-		return true; 
+		if(_freq!=freq)
+		{
+			int dif=freq-_freq;
+			freq = _freq;
+			CoefUpdate();	
+
+			if(abs(dif)>800)			//empty buffers every freq change, and twses crackle..
+				emptybuffers();			//don't empty buffers ever, and large jumps pop.
+			return true;				//this compromise appears to work well enough..
+		}
 	} 
-	else 
-		return false; 
+	return false; 
 }
 
 bool dwfilter::SetGain(double _gain)
 {
 	if(_gain>=FILT_MIN_GAIN && _gain<=FILT_MAX_GAIN)
 	{
-		gain = _gain;
-		CoefUpdate();
-		return true;
+		if(gain!=_gain)
+		{
+			gain = _gain;
+			CoefUpdate();
+			return true;
+		}
 	}
-	else 
-		return false; 
+	return false; 
 }
 
 bool dwfilter::SetBW(double _bw)
 {
 	if(_bw>=FILT_MIN_BW && _bw<=FILT_MAX_BW)
 	{
-		bandwidth = _bw;
-		CoefUpdate();
-		return true; 
+		if(bandwidth!=_bw)
+		{
+			bandwidth = _bw;
+			CoefUpdate();
+			return true; 
+		}
 	}
-	else 
-		return false;
+	return false;
 }
 
 bool dwfilter::SetSlope(double _slope)
 {
 	if(_slope>=FILT_MIN_SLOPE && _slope<=FILT_MAX_SLOPE)
 	{
-		slope = _slope;	
-		CoefUpdate();	
-		return true; 
+		if(slope!=_slope)
+		{
+			slope = _slope;	
+			CoefUpdate();	
+			return true; 
+		}
 	}
-	else
-		return false; 
+	return false; 
 }
 
 bool dwfilter::SetQ(double _q)
 {
 	if(_q>=FILT_MIN_Q && _q<=FILT_MAX_Q)
 	{
-		q = _q;
-		CoefUpdate();
-		return true;
+		if(q!=_q)
+		{
+			q = _q;
+			CoefUpdate();
+			return true;
+		}
 	}
-	else 
-		return false;
+	return false;
 }
 
 bool dwfilter::SetSampleRate(int samprate)
 {
 	if(samprate>=11025 && samprate<=192000)		/* who knows, maybe some day... */
 	{
-		nyquist = samprate/2.0;
-		CoefUpdate();
-		return true;
+		int newNyq=samprate/2.0;
+		if(nyquist!=newNyq)
+		{
+			nyquist = newNyq;
+			CoefUpdate();
+			return true;
+		}
 	}
-	else 
-		return false;
+	return false;
 }
 
 
@@ -216,7 +236,6 @@ void dwfilter::CoefUpdate()
 						break;
 
 	}
-	emptybuffers();
 }
 
 
