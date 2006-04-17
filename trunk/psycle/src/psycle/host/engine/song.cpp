@@ -305,7 +305,7 @@ namespace psycle
 
 			// General properties
 			{
-				m_BeatsPerMin=125;
+				m_BeatsPerMin=125.0;
 				m_LinesPerBeat=4;
 			}
 			// Clean up allocated machines.
@@ -955,6 +955,7 @@ namespace psycle
 				std::uint32_t size = 0;
 				std::uint32_t index = 0;
 				std::uint32_t temp;
+				std::uint16_t temp16;
 				std::uint32_t solo(0);
 				std::uint32_t chunkcount=0;
 				Header[4]=0;
@@ -1033,8 +1034,10 @@ namespace psycle
 							pFile->Read(temp);
 							tracks(temp);
 							// bpm
-							pFile->Read(temp);
-							m_BeatsPerMin = temp;
+							pFile->Read(temp16);
+							int BPMCoarse = temp16;
+							pFile->Read(temp16);
+							m_BeatsPerMin = BPMCoarse + temp16/100.0f;
 							// tpb
 							pFile->Read(temp);
 							m_LinesPerBeat = temp;
@@ -1352,6 +1355,7 @@ namespace psycle
 				}
 
 				std::uint32_t version, size, temp, chunkcount;
+				std::uint16_t temp16;
 
 				/*
 				===================
@@ -1447,7 +1451,8 @@ namespace psycle
 					// chunk data
 					{
 						temp = tracks();     pFile->Write(temp);
-						temp = m_BeatsPerMin;  pFile->Write(temp);
+						temp16 = int(floor(m_BeatsPerMin));							pFile->Write(temp16);
+						temp16 = int((m_BeatsPerMin-floor(m_BeatsPerMin))*100);		pFile->Write(temp16);
 						temp = m_LinesPerBeat; pFile->Write(temp);
 						temp = currentOctave;  pFile->Write(temp);
 						temp = machineSoloed;  pFile->Write(temp);
