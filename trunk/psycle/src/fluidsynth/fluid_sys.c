@@ -192,7 +192,7 @@ fluid_error()
  *  fluid_is_midifile
  */ 
 int
-fluid_is_midifile(char* filename)
+fluid_is_midifile(const char* filename)
 {
   FILE* fp = fopen(filename, "rb");
   char id[4];
@@ -214,7 +214,7 @@ fluid_is_midifile(char* filename)
  * 
  */ 
 int
-fluid_is_soundfont(char* filename)
+fluid_is_soundfont(const char* filename)
 {
   FILE* fp = fopen(filename, "rb");
   char id[4];

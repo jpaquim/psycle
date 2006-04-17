@@ -1764,7 +1764,7 @@ fluid_synth_one_block(fluid_synth_t* synth, int do_not_mix_fx_to_out)
   double prof_ref = fluid_profile_ref();
 
 /*   fluid_mutex_lock(synth->busy); /\* Here comes the audio thread. Lock the synth. *\/ */
-  
+
   fluid_check_fpe("??? Just starting up ???");  
 
   /* clean the audio buffers */
