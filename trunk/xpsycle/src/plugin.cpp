@@ -589,7 +589,7 @@ bool Plugin::LoadSpecificChunk( DeSerializer * pFile, int version )
            pFile->read(pData, size); // Number of parameters
            try
            {
-              proxy().PutData((byte*)pData); // Internal load
+              proxy().PutData(pData); // Internal load
            }
            catch(std::exception const &)
            {
