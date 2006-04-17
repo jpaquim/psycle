@@ -5,7 +5,7 @@
 ///\file
 #pragma once
 #include <universalis/detail/project.hpp>
-#if !defined DIVERSALIS__COMPILER__MICROSOFT
+#if 0 && !defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <cstdint>
 	// some unix systems had the equivalent inttypes.h for a long time
 	//#include <inttypes.h>
