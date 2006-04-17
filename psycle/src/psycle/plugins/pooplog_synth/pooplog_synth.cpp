@@ -1685,8 +1685,8 @@ public:
 	void UpdateInertia();
 	void InitWaveTable();
 
-	virtual void PutData(byte * pData);
-	virtual void GetData(byte * pData);
+	virtual void PutData(void * pData);
+	virtual void GetData(void * pData);
 
 	virtual int GetDataSize() { return sizeof(SYNPAR); }
 
@@ -1885,7 +1885,7 @@ void mi::Stop()
 	track[c].NoteOff();
 }
 
-void mi::PutData(byte* pData)
+void mi::PutData(void * pData)
 {
 	int i;
 	if ((pData == NULL) || (((SYNPAR*)pData)->version != FILEVERSION))
@@ -1987,7 +1987,7 @@ void mi::PutData(byte* pData)
 	Vals[e_paraVCFlfospeed]= globalpar.gVcfp[globalpar.curVcf].vcflfospeed;
 }
 
-void mi::GetData(byte* pData)
+void mi::GetData(void * pData)
 {
 	if (pData)
 	{

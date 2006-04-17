@@ -371,8 +371,8 @@ public:
 	virtual void SequencerTick();
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks);
-	virtual void PutData(uint8* pData);
-	virtual void GetData(uint8* pData);
+	virtual void PutData(void * pData);
+	virtual void GetData(void * pData);
 	virtual int GetDataSize();
 
 	// Returns the sampling rate
@@ -510,7 +510,7 @@ void mi::SetProgramNr(int nr)
 //	PutData
 //
 //////////////////////////////////////////////////////////////////////
-void mi::PutData(uint8* pData)
+void mi::PutData(void * pData)
 {
 	memcpy(m_programs, pData, sizeof(PROG) * 16);
 	int nr = (int) (m_programs[0].length & 0xff00) >> 8;
@@ -523,7 +523,7 @@ void mi::PutData(uint8* pData)
 //	GetData
 //
 //////////////////////////////////////////////////////////////////////
-void mi::GetData(uint8* pData)
+void mi::GetData(void * pData)
 {
 	m_programs[0].length |= (short) (Vals[PARAM_PROGRAM_NR] << 8);
 	memcpy(pData, m_programs, sizeof(PROG) * 16);
