@@ -121,8 +121,8 @@
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 
-#define DSOUND_SUPPORT 1
-#define WINMIDI_SUPPORT 1
+#define DSOUND_SUPPORT 0
+#define WINMIDI_SUPPORT 0
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
@@ -238,7 +238,7 @@ typedef struct _fluid_server_socket_t fluid_server_socket_t;
  *                      CONSTANTS 
  */
 
-#define FLUID_BUFSIZE                64
+#define FLUID_BUFSIZE               64
 
 #ifndef PI
 #define PI                          3.141592654

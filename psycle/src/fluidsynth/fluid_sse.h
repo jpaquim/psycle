@@ -27,36 +27,38 @@
 
 #ifndef FLUID_SSE_H
 #define FLUID_SSE_H
-typedef	union {
+
+#define __asm__ __asm
+typedef	__declspec(align(16)) union sse_s {
 	float			sf[4];	/* Single-precision (32-bit) value */
-} __attribute__ ((aligned(16))) sse_t;	/* On a 16 byte (128-bit) boundary */
+} sse_t;	/* On a 16 byte (128-bit) boundary */
 
 
 #define	sse_i2r(op, imm, reg) \
-	__asm__ __volatile__ (#op " %0, %%" #reg \
+	__asm__ __volatile__ (op " %0, %%" #reg \
 			      : /* nothing */ \
 			      : "X" (imm) )
 
 #define	sse_m2r(op, mem, reg) \
-	__asm__ __volatile__ (#op " %0, %%" #reg \
+	__asm__ __volatile__ (op " %0, %%" #reg \
 			      : /* nothing */ \
 			      : "X" (mem))
 
 #define	sse_r2m(op, reg, mem) \
-	__asm__ __volatile__ (#op " %%" #reg ", %0" \
+	__asm__ __volatile__ (op " %%" #reg ", %0" \
 			      : "=X" (mem) \
 			      : /* nothing */ )
 
 #define	sse_r2r(op, regs, regd) \
-	__asm__ __volatile__ (#op " %" #regs ", %" #regd)
+	__asm__ __volatile__ (op " %" #regs ", %" #regd)
 
 #define	sse_r2ri(op, regs, regd, imm) \
-	__asm__ __volatile__ (#op " %0, %%" #regs ", %%" #regd \
+	__asm__ __ volatile __ (op " %0, %%" #regs ", %%" #regd \
 			      : /* nothing */ \
 			      : "X" (imm) )
 
 #define	sse_m2ri(op, mem, reg, subop) \
-	__asm__ __volatile__ (#op " %0, %%" #reg ", " #subop \
+	__asm__ __volatile__ (op " %0, %%" #reg ", " #subop \
 			      : /* nothing */ \
 			      : "X" (mem))
 

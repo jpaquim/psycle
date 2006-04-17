@@ -20,9 +20,11 @@
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
+#ifndef WIN32
+#define WIN32  1
+#endif
 
-
-#define WITH_PROFILING 0
+#define WITH_PROFILING 1
 
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4101)
