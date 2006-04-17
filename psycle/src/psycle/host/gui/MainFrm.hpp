@@ -31,7 +31,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int vuprevR;
 
 		public:
-			void SetAppSongBpm(int x);
+			void SetAppSongBpm(float x);
 			void SetAppSongTpb(int x);
 			void UpdatePlayOrder(bool mode);
 			void CenterWindowOnPoint(CWnd* pWnd, POINT point);

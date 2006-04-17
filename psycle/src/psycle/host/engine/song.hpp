@@ -44,11 +44,11 @@ namespace psycle
 			///\name initial values for player-related stuff
 			///\{
 				public:
-					const int BeatsPerMin(){return m_BeatsPerMin;};
-					void BeatsPerMin(const int value)
+					const float BeatsPerMin(){return m_BeatsPerMin;};
+					void BeatsPerMin(const float value)
 					{ 
-						if ( value < 32 ) m_BeatsPerMin = 32;
-						else if ( value > 999 ) m_BeatsPerMin = 999;
+						if ( value < 32.0 ) m_BeatsPerMin = 32.0;
+						else if ( value > 999.99 ) m_BeatsPerMin = 999.99;
 						else m_BeatsPerMin = value;
 					};
 
@@ -380,7 +380,7 @@ namespace psycle
 				///\{
 					/// the initial beats per minute (BPM) when the song is started playing.
 					/// This can be changed in patterns using a command, but this value will not be affected.
-					int m_BeatsPerMin;
+					float m_BeatsPerMin;
 
 					/// the initial ticks per beat (TPB) when the song is started playing.
 					/// This can be changed in patterns using a command, but this value will not be affected.

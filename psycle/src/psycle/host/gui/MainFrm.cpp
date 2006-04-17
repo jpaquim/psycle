@@ -501,25 +501,37 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnBarButton1()  // OnBpmAddOne
 		{
-			SetAppSongBpm(1);
+			if(::GetKeyState(VK_CONTROL) < 0)
+				SetAppSongBpm(0.01);
+			else
+				SetAppSongBpm(1);
 			m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmAddTen() 
 		{
-			SetAppSongBpm(10);
+			if(::GetKeyState(VK_CONTROL) < 0)
+				SetAppSongBpm(0.1);
+			else
+				SetAppSongBpm(10);
 			m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmDecOne() 
 		{
-			SetAppSongBpm(-1);
+			if(::GetKeyState(VK_CONTROL) < 0)
+				SetAppSongBpm(-0.01);
+			else
+				SetAppSongBpm(-1);
 			m_wndView.SetFocus();	
 		}
 
 		void CMainFrame::OnBpmDecTen() 
 		{
-			SetAppSongBpm(-10);
+			if(::GetKeyState(VK_CONTROL) < 0)
+				SetAppSongBpm(-0.1);
+			else
+				SetAppSongBpm(-10);
 			m_wndView.SetFocus();	
 		}
 
@@ -537,10 +549,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_wndView.Repaint();
 		}
 
-		void CMainFrame::SetAppSongBpm(int x) 
+		void CMainFrame::SetAppSongBpm(float x) 
 		{
 			char buffer[16];
-			if ( x != 0 )
+			if ( x != 0.0 )
 			{
 				if (Global::pPlayer->_playing ) 
 				{
@@ -548,9 +560,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
 				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
-				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin());
+				sprintf(buffer,"%0.2f",Global::_pSong->BeatsPerMin());
 			}
-			else sprintf(buffer,"%d",Global::pPlayer->bpm);
+			else sprintf(buffer,"%0.2f",Global::pPlayer->bpm);
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL))->SetWindowText(buffer);
 		}
@@ -2301,7 +2313,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// take ff and fe commands into account
 
 			float songLength = 0;
-			int bpm = _pSong->BeatsPerMin();
+			float bpm = _pSong->BeatsPerMin();
 			int tpb = _pSong->LinesPerBeat();
 			for (int i=0; i <ll; i++)
 			{
@@ -2318,7 +2330,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						case 0xFF:
 							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
 							{
-								bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+								float bpmFine = _pSong->BeatsPerMin() - floor(_pSong->BeatsPerMin());
+								//bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+								bpm = pEntry->_parameter + bpmFine;
 							}
 							break;
 							

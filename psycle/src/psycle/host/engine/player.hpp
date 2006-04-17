@@ -54,7 +54,7 @@ namespace psycle
 			int _playTimem;
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
-			int bpm;
+			float bpm;
 			/// the current ticks per beat at which to play the song.
 			/// can be changed from the song itself using commands.
 			int tpb;
@@ -79,7 +79,7 @@ namespace psycle
 
 		public:
 			/// ...
-			void SetBPM(int _bpm,int _tpb=0);
+			void SetBPM(float _bpm,int _tpb=0);
 
 			///\name sample rate
 			///\{

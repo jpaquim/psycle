@@ -90,7 +90,7 @@ namespace psycle
 				}
 			}
 		}
-		void Player::SetBPM(int _bpm,int _tpb)
+		void Player::SetBPM(float _bpm,int _tpb)
 		{
 			if ( _tpb != 0) tpb=_tpb;
 			if ( _bpm != 0) bpm=_bpm;
@@ -123,7 +123,8 @@ namespace psycle
 						if(pEntry->_parameter != 0)
 						{	//\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
-							bpm = pEntry->_parameter;
+							float bpmFine = song().BeatsPerMin() -floor(song().BeatsPerMin());
+							bpm = pEntry->_parameter + bpmFine;
 							RecalcSPR();
 						}
 						break;
