@@ -70,8 +70,8 @@ public:
     inline void ParameterTweak(int par, int val) throw(); //exceptions::function_error);
     inline void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(); //exceptions::function_error);
     inline void Stop() throw(); //exceptions::function_error);
-    inline void PutData(byte * pData) throw(); //exceptions::function_error);
-    inline void GetData(byte * pData) throw(); //exceptions::function_error);
+    inline void PutData(void * pData) throw(); //exceptions::function_error);
+    inline void GetData(void * pData) throw(); //exceptions::function_error);
     inline int GetDataSize() throw(); //exceptions::function_error);
     inline void Command() throw(); //exceptions::function_error);
     inline void MuteTrack(const int i) throw(); //exceptions::function_error);
@@ -170,9 +170,9 @@ inline void Proxy::Stop() throw()
 { assert((*this)()); plugin().Stop();  }
 inline bool Proxy::DescribeValue(char * txt, const int param, const int value) throw()
 { assert((*this)()); plugin().DescribeValue(txt, param, value); }
-inline void Proxy::PutData(byte * pData) throw()
+inline void Proxy::PutData(void * pData) throw()
 { assert((*this)()); plugin().PutData(pData);  }
-inline void Proxy::GetData(byte* pData) throw()
+inline void Proxy::GetData(void * pData) throw()
 { assert((*this)()); plugin().GetData(pData); }
 inline int Proxy::GetDataSize() throw()
 { assert((*this)()); return plugin().GetDataSize(); }
