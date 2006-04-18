@@ -462,21 +462,21 @@ bool Plugin::LoadDll( std::string psFileName )
     int i = psFileName.find(".dll");
     std::string withoutSuffix = psFileName.substr(0,i);
     std::string soName = withoutSuffix + ".so";
-    psFileName = "lib-psycle.plugin."+soName;
+    psFileName = "lib-xpsycle.plugin."+soName;
     psFileName = Global::pConfig()->pluginPath + psFileName;
     int pos;
     while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
   } else {
-      int i = psFileName.find("lib-psycle.plugin.");
+      int i = psFileName.find("lib-xpsycle.plugin.");
       if (i!=std::string::npos) {
          int j = psFileName.find(".so");
          if (j!=0) {
             _psDllName = psFileName.substr(0,j);
-            _psDllName.erase(0,std::string("lib-psycle.plugin.").length());
+            _psDllName.erase(0,std::string("lib-xpsycle.plugin.").length());
             _psDllName = _psDllName + ".dll";
          } else {
             _psDllName = psFileName;
-            _psDllName.erase(0,std::string("lib-psycle.plugin.").length());
+            _psDllName.erase(0,std::string("lib-xpsycle.plugin.").length());
             _psDllName = _psDllName + ".dll";
          }
       } else _psDllName = psFileName;
