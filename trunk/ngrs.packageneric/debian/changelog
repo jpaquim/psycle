@@ -1,3 +1,9 @@
+ngrs (0.3.1) unstable; urgency=low
+
+  * bumping version
+
+ -- Johan Boule <bohan@retropaganda.info>  Tue, 18 Apr 2006 18:36:54 +0000
+
 ngrs (0.0.3) unstable; urgency=low
 
   * packageneric
