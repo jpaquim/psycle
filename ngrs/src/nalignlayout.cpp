@@ -112,15 +112,23 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 {
   int xp = 0;
 
+  int topMax = 0;
+
   std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
 
   for (;itr < parent()->visualComponents().end(); itr++) {
      NVisualComponent* visualChild = *itr;
      switch (visualChild->align()) {
-       case nAlTop    : xp = xp + visualChild->preferredWidth();  break;
-       case nAlLeft   : xp = xp + visualChild->preferredWidth();  break;
-       case nAlRight  : xp = xp + visualChild->preferredWidth();  break;
-       case nAlClient : xp = xp + visualChild->preferredWidth();  break;
+       case nAlTop    : topMax = std::max(visualChild->preferredWidth(),topMax);
+       break;
+       case nAlLeft   : xp = xp + visualChild->preferredWidth();
+       break;
+       case nAlRight  : xp = xp + visualChild->preferredWidth();
+       break;
+       case nAlClient : 
+          xp = xp + std::max(topMax,visualChild->preferredWidth());
+
+       break;
       }
   }
 
@@ -130,6 +138,8 @@ int NAlignLayout::preferredWidth( const NVisualComponent * target ) const
 int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
 {
   int yp = 0;
+  int topMax = 0;
+
   std::vector<NVisualComponent*>::const_iterator itr = parent()->visualComponents().begin();
 
   for (;itr < parent()->visualComponents().end(); itr++) {
