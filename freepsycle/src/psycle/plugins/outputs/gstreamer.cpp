@@ -36,7 +36,7 @@ namespace psycle
 
 			::GstElement & gstreamer::instanciate(std::string const & type, std::string const & name)
 			{
-				::GstElementFactory * factory(0);
+				::GstElementFactory * factory;
 				if(!(factory = ::gst_element_factory_find(type.c_str())))
 				{
 					std::ostringstream s;
@@ -53,7 +53,7 @@ namespace psycle
 						<< ::gst_element_factory_get_description(factory);
 					loggers::information()(s.str());
 				}
-				::GstElement * element(0);
+				::GstElement * element;
 				if(!(element = ::gst_element_factory_create(factory, name.c_str())))
 				{
 					std::ostringstream s;
@@ -162,13 +162,17 @@ namespace psycle
 					//::GstPad * source_pad(::gst_element_get_pad(source_, "src" );
 					//::GstPad *   sink_pad(::gst_element_get_pad(  sink_, "sink");
 					if(!::gst_element_link_pads(source_, "src", sink_, "sink")) throw engine::exceptions::runtime_error("could not link source and sink", UNIVERSALIS__COMPILER__LOCATION);
+
+					::g_object_set(G_OBJECT(source), "data", /*FAKE_SRC_DATA_SUBBUFFER*/ 2, 0); // data allocation method
+					::g_object_set(G_OBJECT(source), "parentsize", 16384, 0);
+					::g_object_set(G_OBJECT(source), "sizemax", 8192, 0);
+					::g_object_set(G_OBJECT(source), "sizetype", /*FAKE_SRC_SIZETYPE_FIXED*/ 2, 0); // fixed to sizemax
+
+					::g_object_set(G_OBJECT(source), "filltype", /*FAKE_SRC_FILLTYPE_RANDOM*/ 3, 0);
+					//::g_object_set(G_OBJECT(source), "filltype", /*FAKE_SRC_FILLTYPE_NOTHING*/ 3, 0);
+
 					::g_object_set(G_OBJECT(source_), "signal-handoffs", true, 0);
-					::g_object_set(G_OBJECT(source_), "data", 2, 0); // subbuffers
-					::g_object_set(G_OBJECT(source_), "sizetype", 2, 0); // fixed to sizemax
-					::g_object_set(G_OBJECT(source_), "sizemax", 8192, 0);
-					::g_object_set(G_OBJECT(source_), "parentsize", 16384, 0);
-					::g_object_set(G_OBJECT(source_), "filltype", 3, 0); // random
-//					if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(process_gstreamer), this)) throw engine::exceptions::runtime_error(UNIVERSALIS__COMPILER__LOCATION, "could not connect handoff signal");
+					//if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(process_gstreamer), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
 				}
 				catch(...)
 				{
