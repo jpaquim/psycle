@@ -17,12 +17,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_WM_CREATE()
 			ON_WM_SHOWWINDOW()
 			ON_UPDATE_COMMAND_UI ( ID_INDICATOR_MODE, OnUpdateStatusBar )
+			ON_UPDATE_COMMAND_UI ( ID_INDICATOR_SEL,  OnUpdateSelection )
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		static UINT indicators[] =
 		{
 			ID_SEPARATOR,           // status line indicator
+			ID_INDICATOR_SEL,
 			ID_INDICATOR_SIZE,
 			ID_INDICATOR_MODE
 		};
@@ -60,9 +62,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			statusbar.Create(this);
 			statusbar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
-			statusbar.SetPaneStyle(0, SBPS_NORMAL);
-			statusbar.SetPaneInfo(1, ID_INDICATOR_SIZE, SBPS_NORMAL, 100);
-			statusbar.SetPaneInfo(2, ID_INDICATOR_MODE, SBPS_NORMAL, 70);
+			statusbar.SetPaneStyle(0, /*SBPS_NORMAL*/ SBPS_STRETCH);
+			statusbar.SetPaneInfo(1, ID_INDICATOR_SEL, SBPS_NORMAL, 180);
+			statusbar.SetPaneInfo(2, ID_INDICATOR_SIZE, SBPS_NORMAL, 180);
+			statusbar.SetPaneInfo(3, ID_INDICATOR_MODE, SBPS_NORMAL, 70);
 			
 			wavview.Create(NULL, "Psycle wave editor", AFX_WS_DEFAULT_VIEW,
 			CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
@@ -107,19 +110,36 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pCmdUI->Enable ();  
 		}
 
+		void CWaveEdFrame::OnUpdateSelection(CCmdUI *pCmdUI)
+		{
+			pCmdUI->Enable();
+
+			char buff[48];
+			int sl=wavview.GetSelectionLength();
+			if(sl==0 || _pSong->_pInstrument[_pSong->instSelected]==NULL)
+				sprintf(buff, "No Data in Selection.");
+			else
+			{
+				float slInSecs = sl / float(Global::configuration().GetSamplesPerSec());
+				sprintf(buff, "Selection: %u (%0.3f secs.)", sl, slInSecs);
+			}
+			statusbar.SetPaneText(1, buff, TRUE);
+		}
+
 		void CWaveEdFrame::AdjustStatusBar(int ins)
 		{
-			char buff[32];
+			char buff[48];
 			int	wl=_pSong->_pInstrument[ins]->waveLength;
-			sprintf(buff, "Size: %u", wl);
-			statusbar.SetPaneText(1, buff, TRUE);
+			float wlInSecs = wl / float(Global::configuration().GetSamplesPerSec());
+			sprintf(buff, "Size: %u (%0.3f secs.)", wl, wlInSecs);
+			statusbar.SetPaneText(2, buff, TRUE);
 
 			if (wl)
 			{
-				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(2, "Mode: Stereo", TRUE);
-				else statusbar.SetPaneText(2, "Mode: Mono", TRUE);
+				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", TRUE);
+				else statusbar.SetPaneText(3, "Mode: Mono", TRUE);
 			}
-			else statusbar.SetPaneText(2, "Mode: Empty", TRUE);
+			else statusbar.SetPaneText(3, "Mode: Empty", TRUE);
 		}
 
 		void CWaveEdFrame::OnShowWindow(BOOL bShow, UINT nStatus) 
