@@ -76,7 +76,7 @@ NewMachine::NewMachine()
     NPanel* generatorPage = new NPanel();
        generatorPage->setLayout(new NAlignLayout());
          generatorfBox_ = new NFileListBox();
-           generatorfBox_->addFilter(".so","lib-psycle.plugin.!S*.so");
+           generatorfBox_->addFilter(".so","lib-xpsycle.plugin.!S*.so");
            generatorfBox_->setMode(nFiles);
            generatorfBox_->setAlign(nAlClient);
            generatorfBox_->setDirectory(Global::pConfig()->pluginPath);
