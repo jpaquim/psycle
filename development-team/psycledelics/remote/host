@@ -74,7 +74,7 @@ function packageneric--remote--path
 	case $remote__host in
 		( shell.sourceforge.net | shell.sf.net )
 			case $package__name in
-				( *versalis | mnu | mjoo )
+				( *versalis | xpsycle | mnu | mjoo )
 					local group=psycle
 				;;
 				( * )
