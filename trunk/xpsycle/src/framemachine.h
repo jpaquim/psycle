@@ -131,6 +131,9 @@ public:
 
     virtual int onClose();
 
+    Machine* pMac();
+    void updateValues();
+
 private:
 
    Machine* pMachine_;

@@ -22,9 +22,9 @@
 #include "global.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
-//#include "presetsdlg.h"
 #include <napp.h>
 #include <nmenubar.h>
+#include <presetsdlg.h>
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
@@ -61,14 +61,9 @@ void FrameMachine::init( )
   parameterMenu->itemClicked.connect(this, &FrameMachine::onItemClicked);
   bar->add(parameterMenu);
 
-
   NFont font("Suse sans",6,nMedium | nStraight | nAntiAlias);
     font.setTextColor(Global::pConfig()->machineGUITopColor);
   pane()->setFont(font);
-  knobPanel = new NPanel();
-    gridLayout = new NGridLayout();
-    knobPanel->setLayout(gridLayout);
-  pane()->add(knobPanel,nAlClient);
   setTitle(stringify(pMachine_->_macIndex)+std::string(" : ")+pMachine_->GetName());
 
 }
@@ -80,6 +75,12 @@ inline int format(int c, int maxcols, int maxrows) {
 
 void FrameMachine::initParameterGUI( )
 {
+  knobPanel = new NPanel();
+    gridLayout = new NGridLayout();
+    knobPanel->setLayout(gridLayout);
+  pane()->add(knobPanel,nAlClient);
+
+
   int numParameters = pMachine_->GetNumParams();
   int cols = pMachine_->GetNumCols();
   int rows = numParameters/cols;
@@ -289,9 +290,21 @@ void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
 void FrameMachine::onItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
   if (itemEv->text() == "Presets") {
-     //PresetsDlg* dlg = new PresetsDlg(pMachine_);
-     //add(dlg);
-     //dlg->execute();
-     //NApp::addRemovePipe(dlg);
+     PresetsDlg* dlg = new PresetsDlg(this);
+     add(dlg);
+     dlg->execute();
+     NApp::addRemovePipe(dlg);
   }
+}
+
+Machine * FrameMachine::pMac( )
+{
+  return pMachine_;
+}
+
+void FrameMachine::updateValues( )
+{
+  knobPanel->removeChilds();
+  initParameterGUI();
+  knobPanel->repaint();
 }

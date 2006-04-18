@@ -38,11 +38,10 @@ typedef unsigned long dword;
 class DeSerializer
 {
 public:
-    DeSerializer (std::string const & nameFile)
+    DeSerializer (std::string const & nameFile) throw (const char *)
         : _stream (nameFile.c_str (), std::ios_base::in | std::ios_base::binary)
     {
-        if (!_stream.is_open ())
-            throw "couldn't open file";
+       if (!_stream.is_open ()) throw "couldn't open file";
         _stream.seekg (0, std::ios::beg);
     }
 
