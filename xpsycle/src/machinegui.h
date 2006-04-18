@@ -105,11 +105,17 @@ public:
 
     FrameMachine* frameMachine;
 
+    virtual void onMousePress(int x, int y, int button);
+
 private:
 
    NSlider* vuSlider_;
 
    NRect bgCoords;
+   NRect muteCoords;
+   NRect soloCoords;
+   NRect dSoloCoords;
+   NRect dMuteCoords;
    NPoint dNameCoords;
 
    virtual void onMouseDoublePress(int x, int y, int button);

@@ -115,6 +115,11 @@ private:
     void onViewMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
     void onHelpMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
 
+    void onFileNew(NButtonEvent* ev);
+    void onFileOpen(NButtonEvent* ev);
+    void onFileSave(NButtonEvent* ev);
+    void onFileSaveAs(NButtonEvent* ev);
+
     void onMachineView(NButtonEvent* ev);
     void onPatternView(NButtonEvent* ev);
 

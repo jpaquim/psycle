@@ -44,18 +44,17 @@ ChildView::ChildView()
   setAlign(nAlClient);
 
   machineView_ = new MachineView();
+    machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
   patternView_ = new PatternView();
+    patternView_->setBackground(Global::pConfig()->pvc_row);
+    patternView_->setForeground(Global::pConfig()->pvc_background);
+    patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
 
-  patternView_->setBackground(Global::pConfig()->pvc_row);
-  patternView_->setForeground(Global::pConfig()->pvc_background);
-  patternView_->setSeparatorColor(Global::pConfig()->pvc_separator);
-
-  addPage(new NDockPanel(machineView_),"Machine View");
-  addPage(new NDockPanel(patternView_),"Pattern View");
-
-  machineView_->scrollArea()->mouseDoublePress.connect(this,&ChildView::onMachineViewDblClick);
-
-  setActivePage(machineView_);
+  NDockPanel* macDock = new NDockPanel(machineView_);
+  addPage(macDock,"Machine View");
+  NDockPanel* patDock = new NDockPanel(patternView_);
+  addPage(patDock,"Pattern View");
+  setActivePage(macDock);
 
   getOpenFileName_ = new NFileDialog();
     getOpenFileName_->addFilter("*.psy [psy3 song format]","!S*.psy");
@@ -66,7 +65,7 @@ ChildView::ChildView()
     getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
-  //enableSound();
+  enableSound();
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(10);

@@ -276,6 +276,9 @@ void MainWindow::initMenu( )
       ,"New,Open,Import Module,Save,Save as,Render as Wav,|,Song properties,|,revert to Saved,recent Files,Exit");
    menuBar_->add(fileMenu_);
 
+   fileMenu_->itemByName("New")->click.connect(this,&MainWindow::onFileNew);
+   fileMenu_->itemByName("Open")->click.connect(this,&MainWindow::onFileOpen);
+   fileMenu_->itemByName("Save as")->click.connect(this,&MainWindow::onFileSaveAs);
 //   recentFileMenu_ = new NMenu();
 //   fileMenu_->itemByName("recent Files")->add(recentFileMenu_);
 
@@ -365,19 +368,19 @@ void MainWindow::initToolBar( )
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newfile()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "new.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onFileNew);;
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->open()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "open.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onFileOpen);;
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "save.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    toolBar1_->add(new NButton(img))->clicked.connect(this,&MainWindow::onFileSaveAs);;
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->save_audio()); else
@@ -700,27 +703,36 @@ void MainWindow::onBarPlayFromStart( NButtonEvent * ev )
   childView_->playFromStart();
 }
 
+void MainWindow::onFileNew( NButtonEvent * ev )
+{
+  appNew();
+}
+
+void MainWindow::onFileOpen( NButtonEvent * ev )
+{
+  usleep(200); // ugly hack but works
+  progressBar_->setVisible(true);
+  childView_->onFileLoadSong(0);
+  progressBar_->setVisible(false);
+  updateComboGen();
+  pane()->repaint();
+}
+
+void MainWindow::onFileSave( NButtonEvent * ev )
+{
+}
+
+void MainWindow::onFileSaveAs( NButtonEvent * ev )
+{
+  usleep(200); // ugly hack but works
+  progressBar_->setVisible(true);
+  childView_->onFileSaveSong(0);
+  progressBar_->setVisible(false);
+  pane()->repaint();
+}
+
 void MainWindow::onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv)
 {
-  if (itemEv->text()=="New") {
-    appNew();
-  }
-
-  if (itemEv->text()=="Open") {
-     usleep(200); // ugly hack but works
-     progressBar_->setVisible(true);
-     childView_->onFileLoadSong(0);
-     progressBar_->setVisible(false);
-     updateComboGen();
-     pane()->repaint();
-  } else
-  if (itemEv->text()=="Save") {
-     usleep(200); // ugly hack but works
-     progressBar_->setVisible(true);
-     childView_->onFileSaveSong(0);
-     progressBar_->setVisible(false);
-     pane()->repaint();
-  } else
   if (itemEv->text()=="Song properties") {
      songpDlg_->setVisible(true);
   } else
@@ -1057,3 +1069,8 @@ void MainWindow::onPatternView(NButtonEvent* ev) {
   childView_->setActivePage(childView_->patternView());
   childView_->repaint();
 }
+
+
+
+
+
