@@ -6,7 +6,7 @@
 //
 // simple audio output test with gtreamer
 //
-// compile with: g++ $(pkg-config --cflags --libs gstreamer-0.10) test-gstreamer-output.cpp
+// compile with: c++ $(pkg-config --cflags --libs gstreamer-0.10) test-gstreamer-output.cpp
 //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
