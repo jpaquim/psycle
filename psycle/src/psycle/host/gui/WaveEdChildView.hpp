@@ -17,6 +17,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual ~CWaveEdChildView();
 			void GenerateAndShow();
 			void SetViewData(int ins);
+
+			unsigned long GetSelectionLength();
 		// Overrides
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CWaveEdChildView)
@@ -77,6 +79,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CPen cpen_lo;
 			CPen cpen_me;
 			CPen cpen_hi;
+
+			HCURSOR hResizeLR;
+			HCURSOR hIBeam;
 
 			//Clipboard
 			char*	pClipboardData;

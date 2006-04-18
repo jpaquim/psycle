@@ -40,6 +40,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//{{AFX_MSG(CWaveEdFrame)
 			afx_msg void OnClose();
 			afx_msg void OnUpdateStatusBar(CCmdUI *pCmdUI);
+			afx_msg void OnUpdateSelection(CCmdUI *pCmdUI);
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 			afx_msg void OnEditCut();

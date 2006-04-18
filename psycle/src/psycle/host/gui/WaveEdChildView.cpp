@@ -15,6 +15,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			cpen_me.CreatePen(PS_SOLID,0,0xCCCCCC);
 			cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
 
+			hResizeLR = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
+			hIBeam = AfxGetApp()->LoadStandardCursor(IDC_IBEAM);
+
 			drawwave=true;
 			SelStart=0;
 			
@@ -406,17 +409,34 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					drawwave=true;
 					Invalidate();
 				}
-				else if ( nFlags == 1 )
+				else if ( nFlags == MK_LBUTTON )
 				{
-					blSelection=false;
-					
 					CRect rect;
 					GetClientRect(&rect);
 					int const nWidth=rect.Width();
-					
-					blStart=diStart+((x*diLength)/nWidth);
-					blLength=1;
-					SelStart = x; //!!! new variable!
+
+					//the casts are to resolve ambiguity with abs()
+					if		( blSelection	&&	diLength!=0		/*jic..*/	&&
+							abs(int(x - (blStart-diStart)			* nWidth / diLength)) < 10 )	//mouse down on block start
+					{
+						SelStart = (blStart+blLength-diStart)*nWidth/diLength;			//set SelStart to the end we're -not- moving
+					}
+					else if ( blSelection	&&	diLength!=0		/*jic..*/	&&
+							abs(int(x - (blStart+blLength-diStart)	* nWidth / diLength)) < 10 )	//mouse down on block end
+					{
+						SelStart = (blStart-diStart)*nWidth/diLength;					//set SelStart to the end we're -not- moving
+					}
+					else
+					{
+						blSelection=false;
+						
+						blStart=diStart+((x*diLength)/nWidth);
+						blLength=0;
+						SelStart = x; //!!! new variable!
+
+					}
+
+					::SetCursor(hResizeLR);
 					
 					drawwave=false;
 				
@@ -429,6 +449,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		{
+			//todo: any ideas what this is for? blSelection gets turned off on the first LButtonDown unless control or
+			//		shift is down..  but if control is down on a dblclk, the display is changed into monochromatic modern art.
+			//		plus, it appears to set the selection to only the visible portion of the wave.  is it meant to be a 
+			//		shortcut to OnEditSelectAll()?
 			if(blSelection)
 			{
 				blStart=diStart;
@@ -440,12 +464,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnMouseMove(UINT nFlags, CPoint point) //Fideloop's
 		{
+			int x=point.x;
+			CRect rect;
+			GetClientRect(&rect);
+			int const nWidth=rect.Width();
+
+			if	(		blSelection		&&		diLength!=0		/*jic..*/	&&
+					(	abs ( int( x - ( blStart-diStart )			* nWidth / diLength))  < 10	||
+						abs ( int( x - ( blStart+blLength-diStart)	* nWidth / diLength))  < 10	)
+				)
+				::SetCursor(hResizeLR);
+			else
+				::SetCursor(hIBeam);
+
 			if(nFlags == MK_LBUTTON && wdWave)
 			{
-				int x=point.x;
-				CRect rect;
-				GetClientRect(&rect);
-				int const nWidth=rect.Width();
 				float diRatio = (float) diLength/nWidth;
 				
 				if (x >= (long) SelStart)
@@ -473,6 +506,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnLButtonUp(UINT nFlags, CPoint point) 
 		{
+			if(blLength==0)
+				blSelection=false;
 			ReleaseCapture();
 			CWnd::OnLButtonUp(nFlags, point);
 		}
@@ -1145,5 +1180,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			pParent = parent;
 		}	
+		unsigned long CWaveEdChildView::GetSelectionLength()
+		{
+			if(wdWave)
+				return blLength;
+			else
+				return 0;
+		}
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END

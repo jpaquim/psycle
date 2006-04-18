@@ -2936,6 +2936,7 @@ BEGIN
     ID_CONVERT_STEREO       "Split channels to stereo"
     ID_INDICATOR_SIZE       "Size:"
     ID_INDICATOR_MODE       "Mode:"
+    ID_INDICATOR_SEL        "Selection:"
 END
 
 STRINGTABLE 

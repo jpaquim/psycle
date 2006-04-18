@@ -1018,6 +1018,7 @@
 #define ID_CONVERT_STEREO               32851
 #define ID_INDICATOR_SIZE               32853
 #define ID_INDICATOR_MODE               32854
+#define ID_INDICATOR_SEL                32855
 #define IDS_COULDNT_INITIALIZE_TIMER    32880
 #define IDS_SONG_SAVED                  32881
 #define IDS_ARE_YOU_SURE                32882
