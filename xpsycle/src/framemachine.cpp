@@ -22,9 +22,9 @@
 #include "global.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
+//#include "presetsdlg.h"
 #include <napp.h>
 #include <nmenubar.h>
-#include <presetsdlg.h>
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
@@ -289,9 +289,9 @@ void FrameMachine::onKnobValueChange( Knob* sender,int value , int param )
 void FrameMachine::onItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
 {
   if (itemEv->text() == "Presets") {
-     PresetsDlg* dlg = new PresetsDlg(pMachine_);
-     add(dlg);
-     dlg->execute();
-     NApp::addRemovePipe(dlg);
+     //PresetsDlg* dlg = new PresetsDlg(pMachine_);
+     //add(dlg);
+     //dlg->execute();
+     //NApp::addRemovePipe(dlg);
   }
 }
