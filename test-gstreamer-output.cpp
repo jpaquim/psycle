@@ -135,8 +135,8 @@ namespace test
 
 					if(!::gst_element_set_state(pipeline, ::GST_STATE_PLAYING)) throw std::runtime_error("could not set the whole pipeline state to playing");
 
-					::GMainLoop * const loop(g_main_loop_new(0, false));
-					::g_main_loop_run(loop);
+					//::GMainLoop * const loop(g_main_loop_new(0, false));
+					//::g_main_loop_run(loop);
 					
 					std::cout << "sleeping ... " << std::endl;
 					{
