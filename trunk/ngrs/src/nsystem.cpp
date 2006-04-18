@@ -478,16 +478,16 @@ void NSystem::matchVisual( )
   if (visualsMatched != 0) {
     // we found at least one TrueColor visual on the screen, with the required depth.
     #if !defined NDEBUG
-      std::cout << "ngrs: visual class: true-color, bypassing color map" << std::endl;
+      //std::cout << "ngrs: visual class: true-color, bypassing color map" << std::endl;
     #endif
     visual_ = visualList[0].visual;
     isTrueColor_ = true;
       #if !defined NDEBUG
-        std::cout << "ngrs: visual class: initializing color converter ... ";
+        //std::cout << "ngrs: visual class: initializing color converter ... ";
       #endif
       color_converter_ = color_converter(visual_->red_mask, visual_->green_mask, visual_->blue_mask);
       #if !defined NDEBUG
-        std::cout << "ok." << std::endl;
+        //std::cout << "ok." << std::endl;
       #endif
 
     colormap_ = XCreateColormap (dpy(), rootWindow(),visualList[0].visual, AllocNone);

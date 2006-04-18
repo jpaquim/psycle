@@ -53,7 +53,7 @@ NVisualComponent::NVisualComponent()
   ownerPreferredWidth_  = 0;
   ownerPreferredHeight_ = 0;
 
-  layoutDeleteFlag_ = false;
+  layoutDeleteFlag_ = borderDeleteFlag_ = false;
 }
 
 
@@ -61,6 +61,7 @@ NVisualComponent::~NVisualComponent()
 {
   if (layout_!=0) layout_->setParent(0);
   if (layoutDeleteFlag_ && layout_!=0) delete layout_;
+  if (borderDeleteFlag_ && layout_!=0) delete layout_;
 }
 
 
@@ -287,9 +288,10 @@ int NVisualComponent::spacingHeight( ) const
   return (skin_.border==0) ?  geometry()->height() - ( spacing().top()+spacing().bottom()) : geometry()->height() - ( spacing().top()+spacing().bottom() + skin_.border->spacing().top() + skin_.border->spacing().bottom());
 }
 
-void NVisualComponent::setBorder( NBorder * border )
+void NVisualComponent::setBorder( NBorder * border , bool deleteFlag)
 {
   skin_.border = border;
+  borderDeleteFlag_ = deleteFlag;
 }
 
 void NVisualComponent::setForeground( const NColor & foreground )

@@ -37,6 +37,10 @@
 #include "n7segdisplay.h"
 #include "ndockpanel.h"
 #include "nsplitbar.h"
+#include "nflipbox.h"
+#include "ncustomtreeview.h"
+#include "ntreenode.h"
+#include "nlabel.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -54,22 +58,20 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  NPanel* left = new NPanel();
-    left->setBackground(NColor(100,100,100));
-    left->setTransparent(false);
-    left->setWidth(100);
-  pane()->add(left,nAlLeft);
+  NCustomTreeView* view = new NCustomTreeView();
+    NLabel* lb = new NLabel("Test");
+    view->rootNode()->pane()->add(lb,nAlClient);
 
-  NSplitBar* bar = new NSplitBar();
-  pane()->add(bar,nAlLeft);
+      for (int i = 0; i < 10; i++) {
+        NTreeNode* tr = new NTreeNode();
+        tr->pane()->add(new NLabel("sub"),nAlClient);
+        view->rootNode()->childNodePane()->add(tr,nAlTop);
+      }
+  pane()->add(view);
 
-  NPanel* client = new NPanel();
-    client->setBackground(NColor(150,150,150));
-    client->setTransparent(false);
+  view->setPosition(10,50,200,200);
 
-  pane()->add(client,nAlClient);
-
-  testMenu(); 
+  testMenu();
 
 }
 
