@@ -45,9 +45,6 @@ SequencerBar::SequencerBar( PatternView * patternView )
 
 SequencerBar::~SequencerBar()
 {
-  delete frBorder;
-  delete listLayout;
-  delete gridLayout;
 }
 
 void SequencerBar::init( )
@@ -57,10 +54,9 @@ void SequencerBar::init( )
   frBorder = new NFrameBorder();
     frBorder->setOval();
     frBorder->setLineCount(2,4,4);
-  setBorder(frBorder);
+  setBorder(frBorder,true);
 
-  listLayout = new NListLayout();
-  setLayout(listLayout);
+  setLayout(new NListLayout(),true);
   setWidth(90);
 
   patternView_ = 0;
@@ -74,7 +70,7 @@ void SequencerBar::init( )
     gridLayout = new NGridLayout();
     gridLayout->setVgap(5);
     gridLayout->setHgap(5);
-    btnBar->setLayout(gridLayout);
+    btnBar->setLayout(gridLayout,true);
 
     NImage* img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->plus()); else
@@ -156,7 +152,7 @@ void SequencerBar::init( )
   
 
   NPanel* lenPanel = new NPanel();
-   lenPanel->setLayout(new NFlowLayout(nAlLeft,5,0));
+   lenPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
    lenPanel->add( new NLabel("Len"));
 
     img = new NImage();
@@ -185,13 +181,13 @@ void SequencerBar::init( )
   add(lenPanel);
 
   NPanel* lengthPanel = new NPanel();
-    lengthPanel->setLayout(new NFlowLayout(nAlLeft,5,0));
+    lengthPanel->setLayout(new NFlowLayout(nAlLeft,5,0),true);
     lengthPanel->add(new NLabel("Length"));
     lengthPanel->add(new NLabel("00:07"));
   add(lengthPanel);
 
   NPanel* checkPanel = new NPanel();
-    checkPanel->setLayout(new NListLayout());
+    checkPanel->setLayout(new NListLayout(),true);
     checkPanel->add( follow_                = new NCheckBox("Follow song"));
     checkPanel->add( multichannel_audition_ = new NCheckBox("Multichannel\nAudition"));
     checkPanel->add( record_noteoff_        = new NCheckBox("Record NoteOffs"));

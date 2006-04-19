@@ -87,9 +87,6 @@ private:
     N7SegDisplay* bpmDisplay_;
     N7SegDisplay* tpbDisplay_;
 
-    NFlowLayout* toolBarPanelLayout;
-    NFlowLayout* statusBarPanelLayout;
-
     GreetDlg* greetDlg;
     AboutDlg* aboutDlg;
     NFileDialog* wavRecFileDlg;

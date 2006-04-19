@@ -42,7 +42,7 @@ class Machine;
 class Cell : public NPanel {
 public:
    Cell::Cell() {
-     setBorder(new NFrameBorder());
+     setBorder(new NFrameBorder(),true);
    }
 
    virtual void paint(NGraphics* g);

@@ -229,7 +229,7 @@ const char * kitty_xpm[] = {
 
 
 MainWindow::MainWindow()
- : NWindow(), toolBarPanelLayout(0), statusBarPanelLayout(0)
+ : NWindow()
 {
   setPosition(0,0,1024,768);
   pane()->setName("pane");
@@ -262,8 +262,6 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-  delete toolBarPanelLayout;
-  delete statusBarPanelLayout;
 }
 
 void MainWindow::initMenu( )
@@ -330,8 +328,7 @@ void MainWindow::initViews( )
 void MainWindow::initBars( )
 {
   toolBarPanel_ = new NPanel();
-  toolBarPanelLayout = new NFlowLayout(nAlLeft,0,2);
-  toolBarPanel_->setLayout(toolBarPanelLayout);
+  toolBarPanel_->setLayout(new NFlowLayout(nAlLeft,0,2), true);
   toolBarPanel_->setWidth(500);
   toolBarPanel_->setAlign(nAlTop);
   pane()->add(toolBarPanel_);
@@ -339,8 +336,7 @@ void MainWindow::initBars( )
   initToolBar();
 
   statusBar_ = new NPanel();
-    statusBarPanelLayout = new NFlowLayout(nAlLeft);
-    statusBar_->setLayout(statusBarPanelLayout);
+    statusBar_->setLayout(new NFlowLayout(nAlLeft),true);
     statusBar_->setAlign(nAlBottom);
       progressBar_ = new NProgressBar();
       progressBar_->setValue(0);
