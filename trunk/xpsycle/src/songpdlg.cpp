@@ -37,7 +37,7 @@ void SongpDlg::init( )
 {
   setTitle("Song properties");
 
-  pane()->setLayout(new NListLayout());
+  pane()->setLayout(new NListLayout(),true);
 
   NLabel* songTitleLb_ = new NLabel("Song Title");
   pane()->add(songTitleLb_);

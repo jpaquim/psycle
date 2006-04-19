@@ -35,10 +35,10 @@ public:
      add( infoLb = new NLabel(info) );
      add( textLb = new NLabel() );
      textLb->setWordbreak(true);
+     textLb->setBorder(new NBevelBorder(nNone,nLowered),true);
    }
 
    ~InfoLine() {
-      delete bv;
    }
 
    void setText(const std::string & info) { textLb->setText(info);}
@@ -52,7 +52,6 @@ public:
      infoLb->setPosition(0,0,100,clientHeight());
      textLb->setSpacing(2,2,2,2);
      textLb->setPosition(100,0,clientWidth()-100,clientHeight());
-     textLb->setBorder(bv = new NBevelBorder(nNone,nLowered));
    }
 
 private:
@@ -60,7 +59,6 @@ private:
    NLabel* infoLb;
    NLabel* textLb;
 
-   NBorder* bv;
 };
 
 /**

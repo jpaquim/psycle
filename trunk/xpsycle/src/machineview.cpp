@@ -30,11 +30,11 @@
 MachineView::MachineView()
  : NPanel()
 {
-  setLayout(alignLayout = new NAlignLayout());
+  setLayout(new NAlignLayout(),true);
 
   scrollBox_ = new NScrollBox();
     scrollArea_ = new NPanel();
-      scrollArea_->setLayout(new NAutoScrollLayout);
+      scrollArea_->setLayout(new NAutoScrollLayout(),true);
       scrollArea_->setClientSizePolicy(nVertical + nHorizontal);
     scrollBox_->setScrollPane(scrollArea_);
   add(scrollBox_, nAlClient);
@@ -45,7 +45,6 @@ MachineView::MachineView()
 
 MachineView::~MachineView()
 {
-  delete alignLayout;
 }
 
 void MachineView::init( )

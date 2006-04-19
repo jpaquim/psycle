@@ -97,7 +97,6 @@ private:
 
    std::vector<MachineGUI*> machineGUIs;
 
-   NLayout* alignLayout;
 };
 
 #endif

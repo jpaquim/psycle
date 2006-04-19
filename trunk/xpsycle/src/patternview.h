@@ -216,8 +216,6 @@ public:
 
 private:
 
-  NLayout* alignLayout;
-
   int editPosition_, prevEditPosition_;
   int playPos_;
   int editOctave_;

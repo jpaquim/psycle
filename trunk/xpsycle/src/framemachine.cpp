@@ -77,7 +77,7 @@ void FrameMachine::initParameterGUI( )
 {
   knobPanel = new NPanel();
     gridLayout = new NGridLayout();
-    knobPanel->setLayout(gridLayout);
+    knobPanel->setLayout(gridLayout,true);
   pane()->add(knobPanel,nAlClient);
 
 

@@ -27,12 +27,12 @@ WireDlg::WireDlg()
   _pSrcMachine = _pDstMachine = 0;
 
   NPanel* btnPnl = new NPanel();
-    btnPnl->setLayout(new NListLayout());
+    btnPnl->setLayout(new NListLayout(),true);
     modeBtn = new NButton("Scope Mode");
       modeBtn->setFlat(false);
     btnPnl->add(modeBtn);
     NPanel* sliderPnl = new NPanel();
-      sliderPnl->setLayout(new NAlignLayout());
+      sliderPnl->setLayout(new NAlignLayout(),true);
       holdBtn = new NButton("Hold");
         holdBtn->setFlat(false);
       sliderPnl->add(holdBtn,nAlRight);

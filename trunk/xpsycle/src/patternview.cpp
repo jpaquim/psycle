@@ -38,7 +38,7 @@
 PatternView::PatternView()
  : NPanel()
 {
-  setLayout(alignLayout = new NAlignLayout());
+  setLayout(new NAlignLayout(),true);
 
   // create scrollBars
   hBar = new NScrollBar();
@@ -77,7 +77,6 @@ PatternView::PatternView()
 
 PatternView::~PatternView()
 {
-  delete alignLayout;
 }
 
 void PatternView::onHScrollBar( NObject * sender, int pos )
@@ -417,9 +416,8 @@ int PatternView::Header::skinColWidth( )
 ///
   PatternView::LineNumber::LineNumber( PatternView * pPatternView ) : dy_(0), NPanel()
   {
-    setBorder(new NFrameBorder());
+    setBorder(new NFrameBorder(),true);
     pView = pPatternView;
-    setTransparent(true);
     setWidth(40);
   }
 
