@@ -30,8 +30,7 @@ NPopupMenu::NPopupMenu()
   fnt.setSize(10);
   pane()->setFont(fnt);
   NVisual::setVisible(false);
-  nl = new NListLayout();
-  pane()->setLayout(nl);
+  pane()->setLayout(new NListLayout(),true);
   NApp::config()->setSkin(&pane()->skin_,"popmnubg");
   selItemIndex_ = -1;
   subMenuItem_ = 0;
@@ -41,7 +40,6 @@ NPopupMenu::NPopupMenu()
 
 NPopupMenu::~NPopupMenu()
 {
-  delete nl;
 }
 
 void NPopupMenu::setVisible( bool on )

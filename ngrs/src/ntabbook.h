@@ -51,8 +51,6 @@ private:
    NTabBar* tabBar_;
    NNoteBook* book_;
 
-   NLayout* alignLayout;
-
 };
 
 #endif

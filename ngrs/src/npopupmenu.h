@@ -55,8 +55,6 @@ public:
 
 private:
 
-   NListLayout* nl;
-
    NCustomMenuItem* subMenuItem_;
    int selItemIndex_;
 

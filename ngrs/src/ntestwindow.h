@@ -78,6 +78,7 @@ private:
     void testMenu();
     void testEdit();
     void testSpinEdit();
+    void testSegDisplay();
 
     void onOpen(NButtonEvent* ev);
     void onSliderPosChanged(double v);

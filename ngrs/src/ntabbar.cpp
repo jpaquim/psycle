@@ -27,7 +27,7 @@ NTabBar::NTabBar()
 {
   fl = new NFlowLayout(nAlLeft);
   fl->setBaseLine(nAlBottom);
-  setLayout(fl);
+  setLayout(fl,true);
   noteBook_ = 0;
   setTransparent(true);
   orientation_ = nAlTop;
@@ -36,7 +36,6 @@ NTabBar::NTabBar()
 
 NTabBar::~NTabBar()
 {
-  delete fl;
 }
 
 void NTabBar::addTab( NTab * tab, NPanel* page )

@@ -24,7 +24,7 @@
 
 NTreeNode::NodePanel::NodePanel( NTreeNode * node ) : node_(node)
 {
-  setLayout(new NAlignLayout());
+  setLayout(new NAlignLayout(),true);
 
   pane_ = new NPanel();
      pane_->setLayout(new NAlignLayout(),true);

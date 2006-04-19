@@ -120,7 +120,6 @@ void NScrollBar::init( )
 
   orientation_ = nVertical;
 
-  setBorder(0);
   incBtn = new NButton(inc,12,12);//up,10,10);
   incBtn->clicked.connect(this,&NScrollBar::onIncBtnClicked);
   incBtn->setFlat(false);
@@ -130,8 +129,6 @@ void NScrollBar::init( )
 
   add(incBtn);
   add(decBtn);
-
-  setTransparent(true);
 
   sliderArea_ = new NPanel();
     NApp::config()->setSkin(&sliderArea_->skin_,"sbar_pane");

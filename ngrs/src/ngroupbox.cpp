@@ -25,13 +25,13 @@ NGroupBox::NGroupBox()
 {
   gBorder = new GBorder(this);
   gBorder->setHeaderText("GroupBox");
-  setBorder(gBorder);
+  setBorder(gBorder,true);
 }
 
 
 NGroupBox::~NGroupBox()
 {
-  delete gBorder;
+
 }
 
 

@@ -25,10 +25,8 @@
 NToolBar::NToolBar()
  : NTogglePanel()
 {
-  fl = new NFlowLayout(nAlLeft,3,2);
-  bv = new NBevelBorder();
-  setBorder(bv);
-  setLayout(fl);
+
+  setLayout( fl = new NFlowLayout(nAlLeft,3,2),true);
   fl->setLineBreak(false);
 
   spacer_ = new NPanel();
@@ -42,8 +40,6 @@ NToolBar::NToolBar()
 
 NToolBar::~NToolBar()
 {
-  delete fl;
-  delete bv;
 }
 
 void NToolBar::paint( NGraphics * g )
