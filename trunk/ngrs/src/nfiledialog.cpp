@@ -222,13 +222,13 @@ NFileDialog::NFileDialog()
 
   NPanel* dirPanel = new NPanel();
     dirPanel->setLayout(new NAlignLayout(),true);
-    dirPanel->setBorder(dirPanelBorder = new NFrameBorder());
+    dirPanel->setBorder(dirPanelBorder = new NFrameBorder(),true);
       dirPanelBorder->setOval(true,5,5);
       dirPanelBorder->setColor(NColor(220,220,220));
       dirPanel->setPreferredSize(180,100);
       dirPanel->add(new NLabel("Parentdir"),nAlTop);
       pdBox_ = new NFileListBox();
-        pdBox_->setBorder(new NFrameBorder());
+        pdBox_->setBorder(new NFrameBorder(),true);
         pdBox_->setMode(nDirs);
         pdBox_->setHeight(100);
         pdBox_->setDirectory(NFile::parentWorkingDir());
@@ -239,7 +239,7 @@ NFileDialog::NFileDialog()
       dirPanel->add(splitBar,nAlTop);
       dirPanel->add(new NLabel("Workingdir"),nAlTop);
       dBox_ = new NFileListBox();
-        dBox_->setBorder(new NFrameBorder());
+        dBox_->setBorder(new NFrameBorder(),true);
         dBox_->setMode(nDirs);
         dBox_->setDirectory(NFile::workingDir());
         dBox_->itemSelected.connect(this,&NFileDialog::onDirItemSelected);

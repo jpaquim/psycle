@@ -58,7 +58,7 @@ NTestWindow::NTestWindow()
 {
   setPosition(0,0,1000,700);
 
-  NCustomTreeView* view = new NCustomTreeView();
+  /*NCustomTreeView* view = new NCustomTreeView();
     NLabel* lb = new NLabel("Test");
     view->rootNode()->pane()->add(lb,nAlClient);
 
@@ -69,9 +69,11 @@ NTestWindow::NTestWindow()
       }
   pane()->add(view);
 
-  view->setPosition(10,50,200,200);
+  view->setPosition(10,50,200,200);*/
 
-  testMenu();
+
+  //testMenu();
+  testSegDisplay();
 
 }
 
@@ -104,7 +106,7 @@ void NTestWindow::onOpen( NButtonEvent * ev )
 
 void NTestWindow::testBorderLayout( )
 {
-  pane()->setLayout(new NBorderLayout());
+  pane()->setLayout(new NBorderLayout(),true);
 
   NButton* button = new NButton("Button 1 (PAGE_START)");
   pane()->add(button, nAlTop);
@@ -131,7 +133,7 @@ void NTestWindow::testFrameBorder( )
     pnl->setPosition(10,10,200,200);
     NFrameBorder* fr = new NFrameBorder();
     fr->setOval();
-    pnl->setBorder(fr);
+    pnl->setBorder(fr,true);
   pane()->add(pnl);
 }
 
@@ -255,6 +257,13 @@ void NTestWindow::testListBox( )
         lbox->add(new NItem(stringify(i)));
      }
   pane()->add(lbox);
+}
+
+void NTestWindow::testSegDisplay( )
+{
+  N7SegDisplay* disp = new N7SegDisplay();
+   pane()->setPosition(0,0,200,200);
+  pane()->add(disp);
 }
 
 

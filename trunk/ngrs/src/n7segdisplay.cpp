@@ -38,7 +38,7 @@ N7SegDisplay::N7SegDisplay(int segmentCount)
 
 N7SegDisplay::~N7SegDisplay()
 {
-  delete fl;
+
 }
 
 void N7SegDisplay::setNumber( int number )
@@ -64,8 +64,7 @@ void N7SegDisplay::setNumber( int number )
 
 void N7SegDisplay::initSegDisplay( )
 {
- fl = new NFlowLayout(nAlLeft,0,0);
- setLayout(fl);
+ setLayout(new NFlowLayout(nAlLeft,0,0),true);
 
  for (int i=0; i<segCount; i++) {
    N7Segment* seg = new N7Segment();

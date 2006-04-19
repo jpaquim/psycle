@@ -46,8 +46,6 @@ void NMenuItem::init( )
   iconField_ = new NPanel();
   iconField_->setEvents(false);
   iconField_->setWidth(20);
-  iconField_->setBorder(0);
-  iconField_->setTransparent(true);
   NCustomMenuItem::add(iconField_);
   caption_ = new NLabel();
   caption_->setEvents(false);

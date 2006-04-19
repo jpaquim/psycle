@@ -34,10 +34,6 @@ public:
 
     void loadImageFromFile( const std::string & fileName );
 
-private:
-
-   NBorder* border_;
-
 };
 
 #endif

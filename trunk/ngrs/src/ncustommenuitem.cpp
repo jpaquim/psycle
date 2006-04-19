@@ -22,8 +22,6 @@
 NCustomMenuItem::NCustomMenuItem()
  : NCustomItem()
 {
-  setTransparent(true);
-  setBorder(0);
   iconSize_ = captionSize_ = shortCutSize_ = hintSize_ =0;
   mnemonic_ = '\0';
 }

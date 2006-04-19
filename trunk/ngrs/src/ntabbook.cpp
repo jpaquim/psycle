@@ -24,8 +24,7 @@
 NTabBook::NTabBook()
  : NPanel()
 {
-   alignLayout = new NAlignLayout();
-   setLayout(alignLayout);
+   setLayout(new NAlignLayout(),true);
 
    tabBar_ = new NTabBar();
    tabBar_->setAlign(nAlTop);
@@ -36,14 +35,11 @@ NTabBook::NTabBook()
    book_->setAlign(nAlClient);
 
    tabBar_->setNoteBook(book_);
-
-   setTransparent(true);
 }
 
 
 NTabBook::~NTabBook()
 {
-  delete alignLayout;
 }
 
 NPanel * NTabBook::addNewPage( const std::string & tabName )

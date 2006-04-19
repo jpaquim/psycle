@@ -26,13 +26,12 @@ NMenuBar::NMenuBar()
 {
   NFlowLayout* flow = new NFlowLayout(nAlLeft);
   flow->setVgap(2);
-  setLayout(flow);
+  setLayout(flow,true);
   setAlign(nAlTop);
   aMenuMapped_ = false;
   NFont fnt = font();
   fnt.setSize(10);
   setFont(fnt);
-  setBorder(0);
   lastMenu_ = 0;
   lastUnmapMenu_ = 0;
 

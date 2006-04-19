@@ -41,11 +41,10 @@ public:
 private:
 
     int segCount;
+    std::vector<N7Segment*> segs;
 
-    NLayout* fl;
     void initSegDisplay();
 
-    std::vector<N7Segment*> segs;
 
 };
 

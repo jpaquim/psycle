@@ -26,7 +26,6 @@ NSlider::NSlider()
   slider_ = new Slider(this);
   add(slider_);
   slider_->setMoveable(NMoveable(nMvVertical + nMvParentLimit));
-  setBorder(0);
   setTransparent(true);
 }
 
@@ -49,7 +48,7 @@ void NSlider::resize( )
 NSlider::Slider::Slider( NSlider* sl)
 {
   setTransparent(false);
-  setBorder(new NFrameBorder());
+  setBorder(new NFrameBorder(),true);
   sl_ = sl;
 }
 

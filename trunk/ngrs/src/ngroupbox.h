@@ -21,7 +21,7 @@
 #define NGROUPBOX_H
 
 #include <npanel.h>
-#include <nborder.h>
+
 
 /**
 @author Stefan
