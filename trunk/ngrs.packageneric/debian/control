@@ -14,16 +14,6 @@ Architecture: any
 Description: ngrs library, runtime
  _
 
-Package:  lib-ngrs-0-dbg
-Depends:  lib-ngrs-0 (= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
-Suggests: lib-ngrs-0-dev (= ${Source-Version})
-Recommends: gdb
-Section: libdevel
-Priority: extra
-Architecture: any
-Description: nrgs library, debugging symbols
- _
-
 Package:    lib-ngrs-0-dev
 Provides:   lib-ngrs-dev
 Recommends: lib-ngrs-0-doc
