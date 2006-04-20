@@ -43,6 +43,8 @@
 class GreetDlg;
 class AboutDlg;
 class VuMeter;
+class InstrumentEditor;
+
 
 /**
 @author Stefan
@@ -93,6 +95,8 @@ private:
 
     VuMeter* vuMeter_;
 
+    InstrumentEditor* instrumentEditor;
+
     void initMenu();
     void initDialogs();
     void initViews();
@@ -118,6 +122,7 @@ private:
     void onFileSaveAs(NButtonEvent* ev);
 
     void onLoadWave(NButtonEvent* ev);
+    void onEditInstrument(NButtonEvent* ev);
 
     void onMachineView(NButtonEvent* ev);
     void onPatternView(NButtonEvent* ev);

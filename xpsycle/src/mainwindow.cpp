@@ -25,9 +25,11 @@
 #include "greetdlg.h"
 #include "aboutdlg.h"
 #include "vumeter.h"
+#include "instrumenteditor.h"
 #include <napp.h>
 #include <nitem.h>
 #include <ncheckmenuitem.h>
+
 
 
 /* XPM */
@@ -304,6 +306,8 @@ void MainWindow::initDialogs( )
 {
   songpDlg_ = new SongpDlg();
   add(songpDlg_);
+  instrumentEditor = new InstrumentEditor();
+  add(instrumentEditor);
 }
 
 // events from menuItems
@@ -676,7 +680,7 @@ void MainWindow::initToolBar( )
 
      psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
      psycleToolBar_->add(new NButton("Save"));
-     psycleToolBar_->add(new NButton("Edit"));
+     psycleToolBar_->add(new NButton("Edit"))->clicked.connect(this,&MainWindow::onEditInstrument);
      psycleToolBar_->add(new NButton("Wave Ed"));
      psycleToolBar_->resize();
 
@@ -1109,6 +1113,11 @@ void MainWindow::updateComboIns( bool updatelist )
       Global::pSong()->auxcolSelected = 0;
     }
   }
+}
+
+void MainWindow::onEditInstrument( NButtonEvent * ev )
+{
+  instrumentEditor->setVisible(true);
 }
 
 
