@@ -22,9 +22,9 @@
 #include "global.h"
 #include "configuration.h"
 #include "defaultbitmaps.h"
+#include "presetsdlg.h"
 #include <napp.h>
 #include <nmenubar.h>
-#include <presetsdlg.h>
 
 NBitmap Knob::kbitmap;
 int Knob::c = 0;
