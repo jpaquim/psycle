@@ -2,8 +2,8 @@ Source: xpsycle
 Section: libs
 Priority: optional
 Build-Depends: cdbs (>= 0.4.26), debhelper (>= 4.2.30), autotools-dev, pkg-config (>= 0.18), make (>= 3.80), doxygen (>= 1.4.1), graphviz (>= 2.2), g++ (>= 3.3.5), lib-ngrs-0-dev (>= 0.0.3), libasound2-dev
-Maintainer: prodos <natti__@users.sourceforge.net>
-Uploaders:  prodos <natti__@users.sourceforge.net>, bohan <johan-boule@users.sourceforge.net>
+Maintainer: Stefan Nattkemper <natti__@users.sourceforge.net>
+Uploaders:  Stefan Nattkemper <natti__@users.sourceforge.net>, bohan <johan-boule@users.sourceforge.net>
 Standards-Version: 3.6.1
 
 Package:  xpsycle-0
