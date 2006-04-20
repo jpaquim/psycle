@@ -20,8 +20,8 @@
 #ifndef PRESETSDLG_H
 #define PRESETSDLG_H
 
+#include "plugin.h"
 #include <ndialog.h>
-#include <plugin.h>
 
 class NListBox;
 class Machine;
