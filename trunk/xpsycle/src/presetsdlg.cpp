@@ -165,14 +165,11 @@ void PresetsDlg::loadPresets( )
 
          if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) return;
 
-         int i=0;
-
-         while (i< numpresets && !f.eof() ) {
+         while (!f.eof() ) {
            Preset newPreset(numParameters, sizeDataStruct);
            newPreset.loadFromFile(&f);
            presetMap[newPreset.name()] = newPreset;
            lBox->add(new NItem(newPreset.name()));
-           i++;
          }
        }
      }

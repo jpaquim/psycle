@@ -21,10 +21,14 @@
 #include "plugin.h"
 #include <nborderlayout.h>
 #include <nlabel.h>
+#include <nlistbox.h>
+#include <nitem.h>
 
 NewMachine::NewMachine()
  : NWindow()
 {
+  sampler_ = false;
+
   setPosition(100,100,500,500);
   NFont fnt("Suse sans",8,nStraight | nMedium | nAntiAlias);
   pane()->setFont(fnt);
@@ -86,6 +90,10 @@ NewMachine::NewMachine()
     NPanel* effectPage = new NPanel();
     tabBook_->addPage(effectPage,"Effects");
     tabBook_->addPage(generatorPage,"Generators");
+    NListBox* internalPage_ = new NListBox();
+       internalPage_->add(new NItem("Sampler"));
+       internalPage_->itemSelected.connect(this,&NewMachine::onInternalItemSelected);
+    tabBook_->addPage(internalPage_,"Internal");
   pane()->add(tabBook_);
 
 }
@@ -145,6 +153,16 @@ std::string NewMachine::getDllName( )
 bool NewMachine::outBus( )
 {
   return true;   // true = Generator, false = Effect
+}
+
+bool NewMachine::sampler( )
+{
+  return sampler_;
+}
+
+void NewMachine::onInternalItemSelected( NItemEvent * ev )
+{
+  if (ev->text() == "Sampler") sampler_=true; else sampler_=false;
 }
 
 
