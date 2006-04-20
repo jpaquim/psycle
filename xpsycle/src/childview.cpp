@@ -65,7 +65,7 @@ ChildView::ChildView()
     getSaveFileName_->setMode(nSave);
   add(getSaveFileName_);
 
- // enableSound();
+  enableSound();
   machineView_->createGUIMachines();
 
   timer.setIntervalTime(10);
@@ -202,9 +202,15 @@ void ChildView::onMachineViewDblClick( NButtonEvent * ev )
         // Generator selected
         int x = 10; int y = 10;
         int fb = Global::pSong()->GetFreeBus();
-        Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName().c_str(),fb);
-        machineView()->addMachine(Global::pSong()->_pMachine[fb]);
-        machineView()->repaint();
+        if (newMachineDlg()->sampler()) {
+          Global::pSong()->CreateMachine(MACH_SAMPLER, x, y, 0, fb);
+          machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+          machineView()->repaint();
+        } else {
+          Global::pSong()->CreateMachine(MACH_PLUGIN, x, y, newMachineDlg()->getDllName().c_str(),fb);
+          machineView()->addMachine(Global::pSong()->_pMachine[fb]);
+          machineView()->repaint();
+        }
     }
    }
 }

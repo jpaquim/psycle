@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <inttypes.h>
+#include <serializer.h>
 
 
 /// \todo add real detection of type size
@@ -200,10 +201,87 @@ public:
       _stream.close();
     }
 
+    unsigned long FourCC( const char *ChunkName);
+
     private:
     std::ifstream _stream;
 };
 
+class WaveDeSerializer : public DeSerializer {
+
+public:
+
+  WaveDeSerializer (const std::string & nameFile) : DeSerializer(nameFile) {
+
+    ExtRiff_header.ckID = FourCC("RIFF");
+    ExtRiff_header.ckSize = 0;
+
+    pcm_data.ckID = FourCC("data");
+    pcm_data.ckSize = 0;
+    num_samples = 0;
+
+    // Try to read the ExtRiff header...
+    try {
+      read( (char*) &ExtRiff_header, sizeof(ExtRiff_header));
+      read ( (char*) &wave_format.header, sizeof(wave_format.header) );
+
+      while(wave_format.header.ckID != FourCC("fmt "))
+      {
+        //Skip (wave_format.header.ckSize);// read each block until we find the correct one
+                                           // we didn't find our header, so move back and try again
+        skip(1 - sizeof wave_format.header);
+        read ((char*) &wave_format.header, sizeof(wave_format.header) );
+      }
+
+      read ( (char*) &wave_format.data, sizeof(wave_format.data) );
+
+      if(!wave_format.VerifyValidity())
+      {
+           // This isn't standard PCM, so we don't know what it is!
+           throw "DDC_FILE_ERROR";
+      }
+      pcm_data_offset = getPos();
+      read ((char*) &pcm_data, sizeof(pcm_data) );
+      while( pcm_data.ckID != FourCC("data") || pcm_data.ckSize == 0)
+      {
+          // Skip (pcm_data.ckSize);// read each block until we find the correct one
+          // this is not our block, so move back and search for our header
+          skip(1 - sizeof pcm_data);
+          pcm_data_offset = getPos();
+          read((char*)&pcm_data, sizeof pcm_data);
+      }
+      num_samples = pcm_data.ckSize;
+        //num_samples = filelength(fileno(file)) - CurrentFilePosition();
+      num_samples /= NumChannels();
+      num_samples /= (BitsPerSample() / 8);
+    } catch (const char* e) {
+       throw "RFM_UNKNOWN";
+    }
+  }
+
+  uint32_t  SamplingRate()   const;
+  uint16_t  BitsPerSample()  const;
+  uint16_t  NumChannels()    const;
+  uint32_t  NumSamples()     const;
+
+  void ReadData  ( uint8_t *data, uint32_t numData ) {
+    read(data,numData );
+  }
+
+  void ReadData  ( int16_t *data, uint32_t numData ) {
+    read(reinterpret_cast<char*>(data),numData*sizeof(int16_t) );
+  }
+
+private:
+
+  ExtRiffChunkHeader   ExtRiff_header;
+  WaveFormat_Chunk   wave_format;
+  ExtRiffChunkHeader    pcm_data;
+  /// offset of 'pcm_data' in output file
+  long               pcm_data_offset;
+  uint32_t           num_samples;
+
+};
 
 
 #endif

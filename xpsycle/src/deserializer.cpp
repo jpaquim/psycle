@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "deserializer.h"
 
-unsigned long FourCC( const char *ChunkName)
+unsigned long DeSerializer::FourCC( const char *ChunkName)
 {
    long retbuf = 0x20202020;   // four spaces (padding)
    char *p = ((char *)&retbuf);
@@ -27,4 +27,24 @@ unsigned long FourCC( const char *ChunkName)
    // The first character goes in the LSB
    for( int i(0) ; i < 4 && ChunkName[i]; ++i) *p++ = ChunkName[i];
    return retbuf;
+}
+
+uint32_t WaveDeSerializer::SamplingRate( ) const
+{
+  return wave_format.data.nSamplesPerSec;
+}
+
+uint16_t WaveDeSerializer::BitsPerSample( ) const
+{
+  return wave_format.data.nBitsPerSample;
+}
+
+uint16_t WaveDeSerializer::NumChannels( ) const
+{
+  return wave_format.data.nChannels;
+}
+
+uint32_t WaveDeSerializer::NumSamples( ) const
+{
+  return num_samples;
 }

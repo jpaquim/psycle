@@ -251,6 +251,7 @@ class Song : public NObject {
 
   signal3<int,int,const std::string &> loadProgress;
 
+  unsigned long FourCC( const char *ChunkName);
 };
 
 #endif

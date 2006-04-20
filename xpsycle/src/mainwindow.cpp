@@ -674,7 +674,7 @@ void MainWindow::initToolBar( )
      img->setPreferredSize(25,25);
      psycleToolBar_->add(new NButton(img));
 
-     psycleToolBar_->add(new NButton("Load"));
+     psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
      psycleToolBar_->add(new NButton("Save"));
      psycleToolBar_->add(new NButton("Edit"));
      psycleToolBar_->add(new NButton("Wave Ed"));
@@ -1064,6 +1064,51 @@ void MainWindow::onMachineView(NButtonEvent* ev) {
 void MainWindow::onPatternView(NButtonEvent* ev) {
   childView_->setActivePage(childView_->patternView());
   childView_->repaint();
+}
+
+void MainWindow::onLoadWave( NButtonEvent * ev )
+{
+  NFileDialog* dialog = new NFileDialog();
+  add(dialog);
+
+  dialog->addFilter("Wav Files(*.wav)","!S*.wav");
+
+  if (dialog->execute()) {
+    int si = Global::pSong()->instSelected;
+    //added by sampler
+    if ( Global::pSong()->_pInstrument[si]->waveLength != 0)
+    {
+       //if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
+    }
+
+    if (Global::pSong()->WavAlloc(si,dialog->fileName().c_str()))
+    {
+      updateComboIns(true);
+     //m_wndStatusBar.SetWindowText("New wave loaded");
+     //WaveEditorBackUpdate();
+     //m_wndInst.WaveUpdate();
+    }
+  }
+
+  NApp::addRemovePipe(dialog);
+}
+
+void MainWindow::updateComboIns( bool updatelist )
+{
+  if (updatelist)  {
+    insCombo_->removeChilds();
+    char buffer[64];
+    int listlen = 0;
+    for (int i=0;i<PREV_WAV_INS;i++)
+    {
+      sprintf(buffer, "%.2X: %s", i, Global::pSong()->_pInstrument[i]->_sName);
+      insCombo_->add(new NItem(buffer));
+      listlen++;
+    }
+    if (Global::pSong()->auxcolSelected >= listlen) {
+      Global::pSong()->auxcolSelected = 0;
+    }
+  }
 }
 
 

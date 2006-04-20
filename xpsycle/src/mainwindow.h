@@ -117,6 +117,8 @@ private:
     void onFileSave(NButtonEvent* ev);
     void onFileSaveAs(NButtonEvent* ev);
 
+    void onLoadWave(NButtonEvent* ev);
+
     void onMachineView(NButtonEvent* ev);
     void onPatternView(NButtonEvent* ev);
 
@@ -146,7 +148,7 @@ private:
     void onTimer();
 
     int close();
-
+    void updateComboIns(bool updatelist);
 };
 
 #endif

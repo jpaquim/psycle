@@ -1032,3 +1032,165 @@ bool Song::save(const std::string & fileName)
    f.close();
 }
 
+int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
+		{
+			///\todo what is ASSERT? some msicrosoft thingie?
+			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
+			DeleteLayer(iInstr);
+			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
+			if(bStereo)
+			{	_pInstrument[iInstr]->waveDataR = new signed short[iSamplesPerChan];
+				_pInstrument[iInstr]->waveStereo = true;
+			} else {
+				_pInstrument[iInstr]->waveStereo = false;
+			}
+			_pInstrument[iInstr]->waveLength = iSamplesPerChan;
+			std::strncpy(_pInstrument[iInstr]->waveName, sName, 31);
+			_pInstrument[iInstr]->waveName[31] = '\0';
+			std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
+			_pInstrument[iInstr]->_sName[31]='\0';
+			return true;
+		}
+
+unsigned long Song::FourCC( const char *ChunkName)
+{
+   long retbuf = 0x20202020;   // four spaces (padding)
+   char *p = ((char *)&retbuf);
+   // Remember, this is Intel format!
+   // The first character goes in the LSB
+   for( int i(0) ; i < 4 && ChunkName[i]; ++i) *p++ = ChunkName[i];
+   return retbuf;
+}
+
+
+
+int Song::WavAlloc(int instrument,const char * Wavfile)
+{
+  try {
+    WaveDeSerializer file(Wavfile);
+    ExtRiffChunkHeader hd;
+    Invalided = true;
+
+    // sample type	
+    int st_type(file.NumChannels());
+    int bits(file.BitsPerSample());
+    long Datalen(file.NumSamples());
+
+    // Initializes the layer.
+    WavAlloc(instrument, st_type == 2, Datalen, Wavfile);
+
+    // Reading of Wave data.
+    // We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
+    // We need to convert 8bits to 16bits, and stereo channels are in different arrays.
+
+    short * sampL(_pInstrument[instrument]->waveDataL);
+
+    ///\todo use template code for all this semi-repetitive code.
+
+    long io;
+
+   // mono
+   if(st_type == 1) {
+     uint8_t smp8;
+     switch(bits) {
+        case 8:
+           for(io = 0 ; io < Datalen ; ++io) {
+             file.ReadData(&smp8, 1);
+             *sampL = (smp8 << 8) - 32768;
+             ++sampL;
+           }
+        break;
+        case 16:
+           file.ReadData(sampL, Datalen);
+        break;
+        case 24:
+           for(io = 0 ; io < Datalen ; ++io) {
+             file.ReadData(&smp8, 1);
+             file.ReadData(sampL, 1);
+             ++sampL;
+           }
+        break;
+        default:
+        break;
+     }
+   }
+   // stereo
+   else {
+     short *sampR(_pInstrument[instrument]->waveDataR);
+     uint8_t smp8;
+     switch(bits) {
+        case 8:
+           for(io = 0 ; io < Datalen ; ++io) {
+             file.ReadData(&smp8, 1);
+             *sampL = (smp8 << 8) - 32768;
+             ++sampL;
+             file.ReadData(&smp8, 1);
+             *sampR = (smp8 << 8) - 32768;
+             ++sampR;
+           }
+        break;
+        case 16:
+          for(io = 0 ; io < Datalen ; ++io) {
+            file.ReadData(sampL, 1);
+            file.ReadData(sampR, 1);
+            ++sampL;
+            ++sampR;
+          }
+        break;
+        case 24:
+          for(io = 0 ; io < Datalen ; ++io) {
+            file.ReadData(&smp8, 1);
+            file.ReadData(sampL, 1);
+            ++sampL;
+            file.ReadData(&smp8, 1);
+            file.ReadData(sampR, 1);
+            ++sampR;
+          }
+        break;
+        default:
+           throw "something wrong";
+        break;
+      }
+    }
+    while (!file.eof()) {
+      file.read((char*)(&hd), 8);
+      if(hd.ckID == FourCC("smpl")) {
+         char pl(0);
+         file.skip(28);
+         file.read(&pl, 1);
+         if(pl == 1) {
+           file.skip(15);
+           unsigned int ls(0);
+           unsigned int le(0);
+           file.read((char*)&ls, 4);
+           file.read((char*)&le, 4);
+           _pInstrument[instrument]->waveLoopStart = ls;
+           _pInstrument[instrument]->waveLoopEnd = le;
+           // only for my bad sample collection
+           //if(!((ls <= 0) && (le >= Datalen - 1)))
+           {
+             _pInstrument[instrument]->waveLoopType = true;
+           }
+         }
+         file.skip(9);
+       } else if(hd.ckSize > 0)
+                file.skip(hd.ckSize);
+              else
+                file.skip(1);
+        try {
+          file.read((char*)(&hd), 8);
+        }
+        catch (const char*) {}
+    }
+    Invalided = false;
+    return 1;
+  } catch (const char*) {
+    Invalided = false;
+    return 0;
+  }
+}
+
+void Song::DeleteLayer(int i)
+		{
+			_pInstrument[i]->DeleteLayer();
+		}

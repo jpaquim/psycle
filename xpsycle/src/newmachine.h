@@ -77,12 +77,14 @@ public:
 
    std::string getDllName();
    bool outBus();
+   bool sampler();
 
 private:
 
   std::string dllName_;
 
   bool do_Execute;
+  bool sampler_;
 
   InfoLine* name;
   InfoLine* libName;
@@ -96,10 +98,10 @@ private:
   NFileListBox* effectfBox_;
 
   void onGeneratorItemSelected(NItemEvent* ev);
+  void onInternalItemSelected(NItemEvent* ev);
 
   void onOkBtn(NButtonEvent* sender);
   void onCancelBtn(NButtonEvent* sender);
-
 
 };
 
