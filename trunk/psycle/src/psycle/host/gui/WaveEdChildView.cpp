@@ -139,7 +139,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					// Draw preliminary stuff
 					
-					CPen *oldpen= pDC->SelectObject(&cpen_me);
+					CPen *oldpen= memDC.SelectObject(&cpen_me);
 					
 					// Left channel 0 amplitude line
 					memDC.MoveTo(0,wrHeight+nHeadHeight);
