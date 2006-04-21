@@ -83,7 +83,7 @@ void NCheckBox::drawCheck(NGraphics* g)
 }
 
 
-void NCheckBox::setChecked( bool on )
+void NCheckBox::setCheck( bool on )
 {
   checked_ = on;
 }

@@ -44,7 +44,7 @@ public:
    virtual void onMousePress(int x, int y, int button);
    virtual void onMousePressed (int x, int y, int button);
 
-   void setChecked(bool on);
+   void setCheck(bool on);
    bool checked() const;
 
    virtual int preferredWidth() const;
