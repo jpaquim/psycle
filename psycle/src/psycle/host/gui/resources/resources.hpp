@@ -1091,6 +1091,8 @@
 #define ID__MOVETOTOPLEVEL              32995
 #define ID_Menu32996                    32996
 #define ID_POP_INTERPOLATE_CURVE        32999
+#define ID_SELECCION_ZOOMIN             33000
+#define ID_SELECTION_ZOOMSEL            33002
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1100,9 +1102,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         33000
+#define _APS_NEXT_COMMAND_VALUE         33003
 #define _APS_NEXT_CONTROL_VALUE         1741
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
-

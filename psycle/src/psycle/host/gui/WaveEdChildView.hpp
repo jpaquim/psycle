@@ -36,7 +36,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnLButtonDblClk( UINT nFlags, CPoint point );
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			afx_msg void OnSelectionZoom();
+			afx_msg void OnSelectionZoomIn();
+			afx_msg void OnSelectionZoomSel();
 			afx_msg void OnSelectionZoomOut();
 			afx_msg void OnSelectionFadeIn();
 			afx_msg void OnSelectionFadeOut();	
@@ -51,8 +52,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateSelectionFadeout(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateSelectionNormalize(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateSelectionRemovedc(CCmdUI* pCmdUI);
-			afx_msg void OnUpdateSeleccionZoom(CCmdUI* pCmdUI);
-			afx_msg void OnUpdateSeleccionZoomout(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateSeleccionZoomIn(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateSelectionZoomSel(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateSeleccionZoomOut(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateSelectionShowall(CCmdUI* pCmdUI);
 			afx_msg void OnEditCopy();
 			afx_msg void OnUpdateEditCopy(CCmdUI* pCmdUI);
