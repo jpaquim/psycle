@@ -46,7 +46,7 @@ public:
 
     int itemCount();
     void setIndex(unsigned int i);
-    int selIndex();
+    int selIndex() const;
     std::vector<int> selIndexList();
     void selClear();
 

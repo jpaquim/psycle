@@ -111,11 +111,11 @@ int NListBox::itemCount( )
   return listBoxPane_->visualComponents().size();
 }
 
-int NListBox::selIndex( )
+int NListBox::selIndex( ) const
 {
   int c = 0;
   if (selItems_.size()==0) return -1;
-  for (std::vector<NRuntime*>::iterator it = listBoxPane_->components.begin(); it < listBoxPane_->components.end(); it++) {
+  for (std::vector<NVisualComponent*>::const_iterator it = listBoxPane_->visualComponents().begin(); it < listBoxPane_->visualComponents().end(); it++) {
      if (*it == selItems_.at(0)) {
         return c;
      }
