@@ -47,7 +47,7 @@ NCheckMenuItem::~NCheckMenuItem()
 void NCheckMenuItem::init( )
 {
   checkBox_ = new NCheckBox();
-  checkBox_->setChecked(true);
+  checkBox_->setCheck(true);
   checkBox_->clicked.connect(this,&NCheckMenuItem::onCheckBoxClicked);
   checkBox_->mouseEnter.connect(this,&NCheckMenuItem::onCheckBoxMouseEnter);
   checkBox_->mouseExit.connect(this,&NCheckMenuItem::onCheckBoxMouseExit);
