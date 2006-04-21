@@ -1,4 +1,3 @@
 usr/lib/pkgconfig/ngrs.pc
-usr/lib/lib-ngrs.la
-usr/lib/lib-ngrs.so
+usr/lib/lib-ngrs.{la,so}
 usr/include/ngrs-*/
