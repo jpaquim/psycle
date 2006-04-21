@@ -39,6 +39,8 @@ public:
 
     ~InstrumentEditor();
 
+    void setInstrument(int index);
+
     virtual int onClose();
 
 private:
@@ -70,7 +72,7 @@ private:
     NLabel*    lenLbl;
 
     void init();
-
+    std::string noteToString( int value );
 };
 
 #endif

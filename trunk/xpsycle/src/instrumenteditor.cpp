@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "instrumenteditor.h"
+#include "global.h"
+#include "song.h"
 #include <nalignlayout.h>
 #include <nflowlayout.h>
 #include <nlabel.h>
@@ -51,7 +53,8 @@ void InstrumentEditor::init( )
     header->setLayout(new NFlowLayout(nAlLeft,5,5),true);
     header->add(new NLabel("Instrument"), nAlLeft);
     instNumberLbl = new NLabel("   ");
-    instNumberLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+       instNumberLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+       instNumberLbl->border()->setSpacing(NSize(2,2,2,2));
     header->add(instNumberLbl,nAlLeft);
     decInstBtn = new NButton("<");
       decInstBtn->setFlat(false);
@@ -88,9 +91,11 @@ void InstrumentEditor::init( )
           panningSlider->setOrientation(nHorizontal);
           panningSlider->setWidth(150);
           panningSlider->setHeight(20);
+          panningSlider->setRange(0,256);
         panningPnl->add(panningSlider,nAlLeft);
         panningLbl = new NLabel("   ");
            panningLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           panningLbl->border()->setSpacing(NSize(2,2,2,2));
         panningPnl->add(panningLbl,nAlLeft);
      properties->add(panningPnl,nAlTop);
      rndPanningCbx = new NCheckBox("Random panning");
@@ -107,6 +112,7 @@ void InstrumentEditor::init( )
         tempoGrpBox->add(playSampleFitCbx);
         patRowLbl = new NLabel("   ");
            patRowLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           patRowLbl->border()->setSpacing(NSize(2,2,2,2));
         tempoGrpBox->add(patRowLbl,nAlLeft);
         tempoGrpBox->add(new NLabel("Pattern rows"),nAlLeft);
      properties->add(tempoGrpBox,nAlTop);
@@ -121,9 +127,11 @@ void InstrumentEditor::init( )
           volumeSlider->setOrientation(nHorizontal);
           volumeSlider->setWidth(150);
           volumeSlider->setHeight(20);
+          volumeSlider->setRange(0,512);
         volumePnl->add(volumeSlider,nAlLeft);
         volumeLbl = new NLabel("   ");
            volumeLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           volumeLbl->border()->setSpacing(NSize(2,2,2,2));
         volumePnl->add(volumeLbl,nAlLeft);
         waveLayerGrpBox->add(volumePnl,nAlTop);
         NPanel* fineTunePnl = new NPanel();
@@ -133,9 +141,11 @@ void InstrumentEditor::init( )
           fineTuneSlider->setOrientation(nHorizontal);
           fineTuneSlider->setWidth(150);
           fineTuneSlider->setHeight(20);
+          fineTuneSlider->setRange(0,256);
         fineTunePnl->add(fineTuneSlider,nAlLeft);
         fineTuneLbl = new NLabel("   ");
            fineTuneLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+           fineTuneLbl->border()->setSpacing(NSize(2,2,2,2));
         fineTunePnl->add(fineTuneLbl,nAlLeft);
         waveLayerGrpBox->add(fineTunePnl,nAlTop);
         NPanel* tunePnl = new NPanel();
@@ -155,6 +165,7 @@ void InstrumentEditor::init( )
            tunePnl->add(octIncBtn);
            octLbl   = new NLabel("  ");
              octLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             octLbl->border()->setSpacing(NSize(2,2,2,2));
            tunePnl->add(octLbl);
         waveLayerGrpBox->add(tunePnl,nAlTop);
         NPanel* loopPnl = new NPanel();
@@ -168,6 +179,7 @@ void InstrumentEditor::init( )
            loopPnl->add(forwardBtn);
            loopLbl   = new NLabel("  ");
              loopLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             loopLbl->border()->setSpacing(NSize(2,2,2,2));
            loopPnl->add(loopLbl);
         waveLayerGrpBox->add(loopPnl,nAlTop);
         NPanel* loopAtPnl = new NPanel();
@@ -175,14 +187,17 @@ void InstrumentEditor::init( )
            loopAtPnl->add(new NLabel("Loop At"),nAlLeft);
            loopAtFromLbl = new NLabel("  ");
              loopAtFromLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             loopAtFromLbl->border()->setSpacing(NSize(2,2,2,2));
            loopAtPnl->add(loopAtFromLbl,nAlLeft);
            loopAtPnl->add(new NLabel("to"),nAlLeft);
            loopAtToLbl   = new NLabel("  ");
              loopAtToLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             loopAtToLbl->border()->setSpacing(NSize(2,2,2,2));
            loopAtPnl->add(loopAtToLbl,nAlLeft);
            loopAtPnl->add(new NLabel("Length"),nAlLeft);
            lenLbl   = new NLabel("  ");
              lenLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
+             lenLbl->border()->setSpacing(NSize(2,2,2,2));
            loopAtPnl->add(lenLbl,nAlLeft);
         waveLayerGrpBox->add(loopAtPnl,nAlTop);
         NButton* amplitudeBtn = new NButton("Amplitudes/Filter Envelopes");
@@ -201,4 +216,72 @@ int InstrumentEditor::onClose( )
   return nHideWindow;
 }
 
+void InstrumentEditor::setInstrument( int index )
+{
+  Global::pSong()->instSelected=   index;
+  Global::pSong()->auxcolSelected= index;
 
+  char buf[64]; sprintf(buf,"%.2X",index);
+  instNumberLbl->setText(buf);
+
+  instNameEd->setText(Global::pSong()->_pInstrument[index]->_sName);
+
+  newNoteActionCb->setIndex(Global::pSong()->_pInstrument[index]->_NNA);
+
+  // Volume bar
+  volumeSlider->setPos(Global::pSong()->_pInstrument[index]->waveVolume);
+  fineTuneSlider->setPos(Global::pSong()->_pInstrument[index]->waveFinetune+256);
+
+  panningSlider->setPos(Global::pSong()->_pInstrument[index]->_pan);
+  rndPanningCbx->setCheck(Global::pSong()->_pInstrument[index]->_RPAN);
+  rndVCFCutCbx->setCheck(Global::pSong()->_pInstrument[index]->_RCUT);
+  rndVCFResoCbx->setCheck(Global::pSong()->_pInstrument[index]->_RRES);
+
+  panningLbl->setText(stringify(Global::pSong()->_pInstrument[index]->_pan));
+
+  octLbl->setText(noteToString((Global::pSong()->_pInstrument[index]->waveTune+48)));
+
+  bool const ils = Global::pSong()->_pInstrument[index]->_loop;
+
+  playSampleFitCbx->setCheck(ils);
+  patRowLbl->setText(stringify(Global::pSong()->_pInstrument[index]->_lines));
+
+  // Set looptype
+  if(Global::pSong()->_pInstrument[index]->waveLoopType)
+     loopLbl->setText("Forward");
+  else
+     loopLbl->setText("Off");
+
+  // Display Loop Points & Wave Length	
+
+  loopAtFromLbl->setText(stringify((int)Global::pSong()->_pInstrument[index]->waveLoopStart));
+  loopAtToLbl->setText(stringify((int)Global::pSong()->_pInstrument[index]->waveLoopEnd));
+  lenLbl->setText(stringify((int)Global::pSong()->_pInstrument[index]->waveLength));
+
+  fineTuneLbl->setText(stringify(Global::pSong()->_pInstrument[index]->waveFinetune));
+  volumeLbl->setText(stringify(Global::pSong()->_pInstrument[index]->waveVolume)+"%");
+
+  pane()->resize();
+
+}
+
+std::string InstrumentEditor::noteToString( int value )
+{
+  int octave = value / 12;
+
+  switch (value % 12) {
+     case 0:   return "C-" + stringify(octave); break;
+     case 1:   return "C#" + stringify(octave); break;
+     case 2:   return "D-" + stringify(octave); break;
+     case 3:   return "D#" + stringify(octave); break;
+     case 4:   return "E-" + stringify(octave); break;
+     case 5:   return "F-" + stringify(octave); break;
+     case 6:   return "F#" + stringify(octave); break;
+     case 7:   return "G-" + stringify(octave); break;
+     case 8:   return "G#" + stringify(octave); break;
+     case 9:   return "A-" + stringify(octave); break;
+     case 10:  return "A#" + stringify(octave); break;
+     case 11:  return "B-" + stringify(octave); break;
+  }
+  return "err";
+}

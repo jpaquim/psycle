@@ -1117,6 +1117,7 @@ void MainWindow::updateComboIns( bool updatelist )
 
 void MainWindow::onEditInstrument( NButtonEvent * ev )
 {
+  instrumentEditor->setInstrument(0);
   instrumentEditor->setVisible(true);
 }
 
