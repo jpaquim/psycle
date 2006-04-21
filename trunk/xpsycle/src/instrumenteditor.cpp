@@ -32,6 +32,7 @@
 #include <nitem.h>
 #include <nslider.h>
 #include <ncheckbox.h>
+#include <nitemevent.h>
 
 InstrumentEditor::InstrumentEditor()
  : NWindow()
@@ -57,16 +58,19 @@ void InstrumentEditor::init( )
        instNumberLbl->border()->setSpacing(NSize(2,2,2,2));
     header->add(instNumberLbl,nAlLeft);
     decInstBtn = new NButton("<");
+      decInstBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
       decInstBtn->setFlat(false);
     header->add(decInstBtn,nAlLeft);
     incInstBtn = new NButton(">");
       incInstBtn->setFlat(false);
+      incInstBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
     header->add(incInstBtn,nAlLeft);
     instNameEd = new NEdit();
       instNameEd->setWidth(100);
       instNameEd->setHeight(instNameEd->preferredHeight());
     header->add(instNameEd,nAlLeft);
-    NButton* killBtn = new NButton("Kill...");
+    killBtn = new NButton("Kill...");
+      killBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
       killBtn->setFlat(false);
     header->add(killBtn, nAlLeft);
   pane()->add(header, nAlTop);
@@ -83,6 +87,7 @@ void InstrumentEditor::init( )
           newNoteActionCb->add(new NItem("Note Cut"));
           newNoteActionCb->add(new NItem("Note Release"));
           newNoteActionCb->add(new NItem("None"));
+          newNoteActionCb->itemSelected.connect(this,&InstrumentEditor::onComboSelected);
         noteActionPnl->add(newNoteActionCb,nAlTop);
      properties->add(noteActionPnl,nAlTop);
      NPanel* panningPnl = new NPanel();
@@ -92,6 +97,7 @@ void InstrumentEditor::init( )
           panningSlider->setWidth(150);
           panningSlider->setHeight(20);
           panningSlider->setRange(0,256);
+          panningSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         panningPnl->add(panningSlider,nAlLeft);
         panningLbl = new NLabel("   ");
            panningLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
@@ -99,10 +105,13 @@ void InstrumentEditor::init( )
         panningPnl->add(panningLbl,nAlLeft);
      properties->add(panningPnl,nAlTop);
      rndPanningCbx = new NCheckBox("Random panning");
+        rndPanningCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
      properties->add(rndPanningCbx,nAlTop);
      rndVCFCutCbx  = new NCheckBox("Random VCF Cutoff");
+        rndVCFCutCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
      properties->add(rndVCFCutCbx,nAlTop);
      rndVCFResoCbx = new NCheckBox("Random VCF Reso/Bw.");
+        rndVCFResoCbx->clicked.connect(this,&InstrumentEditor::onBtnPress);
      properties->add(rndVCFResoCbx,nAlTop);
 
      NGroupBox* tempoGrpBox = new NGroupBox();
@@ -128,6 +137,7 @@ void InstrumentEditor::init( )
           volumeSlider->setWidth(150);
           volumeSlider->setHeight(20);
           volumeSlider->setRange(0,512);
+          volumeSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         volumePnl->add(volumeSlider,nAlLeft);
         volumeLbl = new NLabel("   ");
            volumeLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
@@ -142,6 +152,7 @@ void InstrumentEditor::init( )
           fineTuneSlider->setWidth(150);
           fineTuneSlider->setHeight(20);
           fineTuneSlider->setRange(0,256);
+          fineTuneSlider->posChanged.connect(this,&InstrumentEditor::onSliderMove);
         fineTunePnl->add(fineTuneSlider,nAlLeft);
         fineTuneLbl = new NLabel("   ");
            fineTuneLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
@@ -153,15 +164,19 @@ void InstrumentEditor::init( )
            tunePnl->add(new NLabel("Tune"));
            octDecBtn = new NButton("Oct-");
              octDecBtn->setFlat(false);
+             octDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
            tunePnl->add(octDecBtn);
            noteDecBtn = new NButton("Note-");
              noteDecBtn->setFlat(false);
+             noteDecBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
            tunePnl->add(noteDecBtn);
            noteIncBtn = new NButton("Note+");
              noteIncBtn->setFlat(false);
+             noteIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
            tunePnl->add(noteIncBtn);
            octIncBtn  = new NButton("Oct+");
              octIncBtn->setFlat(false);
+             octIncBtn->clicked.connect(this,&InstrumentEditor::onBtnPress);
            tunePnl->add(octIncBtn);
            octLbl   = new NLabel("  ");
              octLbl->setBorder(new NBevelBorder(nNone,nLowered),true);
@@ -284,4 +299,91 @@ std::string InstrumentEditor::noteToString( int value )
      case 11:  return "B-" + stringify(octave); break;
   }
   return "err";
+}
+
+void InstrumentEditor::onBtnPress( NButtonEvent * ev )
+{
+  if (ev->sender() == decInstBtn && instrumentIndex() > 0) {
+     setInstrument(instrumentIndex()-1);
+     pane()->repaint();
+  } else
+  if (ev->sender() == incInstBtn) {
+     setInstrument(instrumentIndex()+1);
+     pane()->resize();
+     pane()->repaint();
+  } else
+  if (ev->sender() == killBtn) {
+    Global::pSong()->DeleteInstrument(instrumentIndex());
+    setInstrument(instrumentIndex());
+    pane()->resize();
+    pane()->repaint();
+  } else
+  if (ev->sender() == rndPanningCbx) {
+    Global::pSong()->_pInstrument[instrumentIndex()]->_RPAN = rndPanningCbx->checked();
+  } else
+  if (ev->sender() == rndVCFCutCbx) {
+    Global::pSong()->_pInstrument[instrumentIndex()]->_RCUT = rndVCFCutCbx->checked();
+  } else
+  if (ev->sender() == rndVCFResoCbx) {
+    Global::pSong()->_pInstrument[instrumentIndex()]->_RRES = rndVCFResoCbx->checked();
+  } else
+  if (ev->sender() == octDecBtn) {
+     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-37)
+       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=12;
+     else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
+     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+     octLbl->repaint();
+  } else
+  if (ev->sender() == octIncBtn) {
+     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 60)
+       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=12;
+     else 
+       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
+     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+     octLbl->repaint();
+  } else
+  if (ev->sender() == noteDecBtn) {
+     if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune>-47)
+        Global::pSong()->_pInstrument[instrumentIndex()]->waveTune-=1;
+     else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=-48;
+     octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+     octLbl->repaint();
+  } else
+  if (ev->sender() == noteIncBtn) {
+    if ( Global::pSong()->_pInstrument[instrumentIndex()]->waveTune < 71)
+       Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+=1;
+    else Global::pSong()->_pInstrument[instrumentIndex()]->waveTune=71;
+    octLbl->setText(noteToString((Global::pSong()->_pInstrument[instrumentIndex()]->waveTune+48)));
+    octLbl->repaint();
+  }
+}
+
+int InstrumentEditor::instrumentIndex( )
+{
+   return Global::pSong()->instSelected;
+}
+
+void InstrumentEditor::onComboSelected( NItemEvent * ev )
+{
+  if (newNoteActionCb->selIndex()!=-1)
+    Global::pSong()->_pInstrument[instrumentIndex()]->_NNA = newNoteActionCb->selIndex();
+}
+
+void InstrumentEditor::onSliderMove( NSlider * sender, double pos )
+{
+  if (sender == panningSlider) {
+    Global::pSong()->_pInstrument[instrumentIndex()]->_pan = (int) pos;
+    panningLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->_pan));
+    panningLbl->repaint();
+  } else
+  if (sender == volumeSlider) {
+    Global::pSong()->_pInstrument[instrumentIndex()]->waveVolume = (int) pos;
+    volumeLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->waveVolume)+"%");
+    volumeLbl->repaint();
+  } else
+  if (sender == fineTuneSlider) {
+    Global::pSong()->_pInstrument[instrumentIndex()]->waveFinetune=(int) pos - 256;
+    fineTuneLbl->setText(stringify(Global::pSong()->_pInstrument[instrumentIndex()]->waveFinetune));
+    fineTuneLbl->repaint();
+  }
 }

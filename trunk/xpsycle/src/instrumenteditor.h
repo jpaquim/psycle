@@ -28,6 +28,7 @@ class NEdit;
 class NComboBox;
 class NSlider;
 class NCheckBox;
+class NItemEvent;
 
 /**
 @author Stefan Nattkemper
@@ -40,6 +41,7 @@ public:
     ~InstrumentEditor();
 
     void setInstrument(int index);
+    int instrumentIndex();
 
     virtual int onClose();
 
@@ -49,6 +51,7 @@ private:
     NButton*   incInstBtn;
     NButton*   decInstBtn;
     NEdit*     instNameEd;
+    NButton*   killBtn;
     NComboBox* newNoteActionCb;
     NSlider*   panningSlider;
     NLabel*    panningLbl;
@@ -73,6 +76,11 @@ private:
 
     void init();
     std::string noteToString( int value );
+
+    void onBtnPress(NButtonEvent* ev);
+    void onComboSelected(NItemEvent* ev);
+    void onSliderMove(NSlider* sender, double pos);
+
 };
 
 #endif
