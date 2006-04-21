@@ -88,8 +88,9 @@ BEGIN
     END
     POPUP "View"
     BEGIN
-        MENUITEM "Zoom In\t+ [Kpd]",            ID_SELECCION_ZOOM
+        MENUITEM "Zoom In\t+ [Kpd]",            ID_SELECCION_ZOOMIN
         MENUITEM "Zoom Out\t- [Kpd]",           ID_SELECCION_ZOOMOUT
+        MENUITEM "Zoom Selection",              ID_SELECTION_ZOOMSEL
         MENUITEM "Show All",                    ID_SELECTION_SHOWALL
     END
     POPUP "Convert"
@@ -306,7 +307,6 @@ IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP-gray.bmp"
 IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
 IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
@@ -335,10 +335,11 @@ END
 IDR_WAVEFRAME ACCELERATORS 
 BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_EDIT_CROP,           VIRTKEY, CONTROL, NOINVERT
     "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      ID_EDIT_DELETE,         VIRTKEY, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
-    VK_ADD,         ID_SELECCION_ZOOM,      VIRTKEY, NOINVERT
+    VK_ADD,         ID_SELECCION_ZOOMIN,    VIRTKEY, NOINVERT
     VK_SUBTRACT,    ID_SELECCION_ZOOMOUT,   VIRTKEY, NOINVERT
     "M",            ID_SELECTION_AMPLIFY,   VIRTKEY, CONTROL, NOINVERT
     "I",            ID_SELECTION_FADEIN,    VIRTKEY, CONTROL, NOINVERT
@@ -347,7 +348,6 @@ BEGIN
     "D",            ID_SELECTION_REMOVEDC,  VIRTKEY, CONTROL, NOINVERT
     "R",            ID_SELECTION_REVERSE,   VIRTKEY, CONTROL, NOINVERT
     "A",            ID_SELECTION_SHOWALL,   VIRTKEY, CONTROL, NOINVERT
-    "P",            ID_EDIT_CROP,           VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -2912,7 +2912,6 @@ BEGIN
     ID_SELECTION_FADEOUT    "Linear fade out"
     ID_SELECTION_NORMALIZE  "Maximize peak samples value"
     ID_SELECTION_REMOVEDC   "Remove DC"
-    ID_SELECCION_ZOOM       "Zoom in view"
     ID_SELECCION_ZOOMOUT    "Zoom out view"
     ID_SELECTION_SHOWALL    "Show entire wave"
 END
@@ -2999,6 +2998,12 @@ BEGIN
     ID_EDIT_CROP            "Cut everything but selection"
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_SELECCION_ZOOMIN     "Zoom In"
+    ID_SELECTION_ZOOMSEL    "Zoom to Selection"
 END
 
 #endif    // Neutral (Default) resources

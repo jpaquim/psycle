@@ -44,8 +44,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_WM_LBUTTONDBLCLK()
 			ON_WM_MOUSEMOVE()
 			ON_WM_LBUTTONUP()
-			ON_COMMAND(ID_SELECCION_ZOOM, OnSelectionZoom)
+			ON_COMMAND(ID_SELECCION_ZOOMIN, OnSelectionZoomIn)
 			ON_COMMAND(ID_SELECCION_ZOOMOUT, OnSelectionZoomOut)
+			ON_COMMAND(ID_SELECTION_ZOOMSEL, OnSelectionZoomSel)
 			ON_COMMAND(ID_SELECTION_FADEIN, OnSelectionFadeIn)
 			ON_COMMAND(ID_SELECTION_FADEOUT, OnSelectionFadeOut)
 			ON_COMMAND(ID_SELECTION_NORMALIZE, OnSelectionNormalize)
@@ -59,9 +60,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_SELECTION_FADEOUT, OnUpdateSelectionFadeout)
 			ON_UPDATE_COMMAND_UI(ID_SELECTION_NORMALIZE, OnUpdateSelectionNormalize)
 			ON_UPDATE_COMMAND_UI(ID_SELECTION_REMOVEDC, OnUpdateSelectionRemovedc)
-			ON_UPDATE_COMMAND_UI(ID_SELECCION_ZOOM, OnUpdateSeleccionZoom)
-			ON_UPDATE_COMMAND_UI(ID_SELECCION_ZOOMOUT, OnUpdateSeleccionZoomout)
+			ON_UPDATE_COMMAND_UI(ID_SELECCION_ZOOMIN, OnUpdateSeleccionZoomIn)
+			ON_UPDATE_COMMAND_UI(ID_SELECCION_ZOOMOUT, OnUpdateSeleccionZoomOut)
 			ON_UPDATE_COMMAND_UI(ID_SELECTION_SHOWALL, OnUpdateSelectionShowall)
+			ON_UPDATE_COMMAND_UI(ID_SELECTION_ZOOMSEL, OnUpdateSelectionZoomSel)
 			ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
 			ON_COMMAND(ID_EDIT_CUT, OnEditCut)
@@ -415,7 +417,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				SCROLLINFO si;
 				si.cbSize = sizeof(si);
 				si.fMask=SIF_RANGE|SIF_PAGE|SIF_POS;//|SIF_DISABLENOSCROLL;
-				si.nMin=0; si.nMax=1;
+				si.nMin=0; si.nMax=0;
 				si.nPage = 1;
 				si.nPos = 0;
 				hScroll.SetScrollInfo(&si);
@@ -433,26 +435,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if ( (blStart + blLength) > wdLength) blLength = wdLength - blStart;
 		}*/
 
-		void CWaveEdChildView::OnSelectionZoom()
+		void CWaveEdChildView::OnSelectionZoomIn()
 		{
-			if(blSelection && wdWave)
+			if(wdWave)
 			{
 				CRect rect;
 				GetClientRect(&rect);
 				unsigned long const nWidth=rect.Width();
-
-				if ( blLength*8 < nWidth ) // Selection is too small, zoom to smallest possible
-				{
-					diLength=(unsigned long)(nWidth*0.125f);
-					if ( diLength > wdLength ) { diStart=0; diLength=wdLength; }
-					else if ( blStart+diLength > wdLength ) diStart = wdLength-diLength;
-					else diStart = blStart;
-				}
-				else
-				{
-					diStart= blStart;
-					diLength = blLength;
-				}
+				
+				diLength /= 3;
+				diStart+=diLength;
 
 				SCROLLINFO si;
 				si.cbSize=sizeof(si);
@@ -477,6 +469,39 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				diLength=diLength*3;
 				if(diLength+diStart>wdLength) diLength=wdLength-diStart;
 				
+				SCROLLINFO si;
+				si.cbSize=sizeof(si);
+				si.fMask=SIF_PAGE|SIF_POS;
+				si.nPage=diLength;
+				si.nPos=diStart;
+				hScroll.SetScrollInfo(&si);
+
+				Invalidate();
+			}
+		}
+
+		void CWaveEdChildView::OnSelectionZoomSel()
+		{
+			if(blSelection && wdWave)
+			{
+				CRect rect;
+				GetClientRect(&rect);
+				unsigned long const nWidth=rect.Width();
+
+//				if ( blLength*8 < nWidth ) // Selection is too small, zoom to smallest possible
+				if ( blLength*20< nWidth ) //	[too small for what??]
+				{
+					diLength=(unsigned long)(nWidth*0.05f);
+					if ( diLength > wdLength ) { diStart=0; diLength=wdLength; }
+					else if ( blStart+diLength > wdLength ) diStart = wdLength-diLength;
+					else diStart = blStart;
+				}
+				else
+				{
+					diStart= blStart;
+					diLength = blLength;
+				}
+
 				SCROLLINFO si;
 				si.cbSize=sizeof(si);
 				si.fMask=SIF_PAGE|SIF_POS;
@@ -521,7 +546,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if (blSelection) OnSelectionZoom();
+					if (blSelection) OnSelectionZoomSel();
 					else OnSelectionZoomOut();
 				}
 			}
@@ -535,6 +560,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(wdWave)
 			{
 				int const x=point.x;
+				int const y=point.y;
 
 				if ( nFlags & MK_CONTROL )
 				{
@@ -565,28 +591,55 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					CRect rect;
 					GetClientRect(&rect);
 					int const nWidth=rect.Width();
+					int const nHeadHeight = rect.Height()/10;
 
-					//the casts are to resolve ambiguity with abs()
-					if		( blSelection	&&	diLength!=0		/*jic..*/	&&
-							abs(int(x - (blStart-diStart)			* nWidth / diLength)) < 10 )	//mouse down on block start
-					{
-						SelStart = x * diLength/nWidth + diStart + blLength;			//set SelStart to the end we're -not- moving
-					}
-					else if ( blSelection	&&	diLength!=0		/*jic..*/	&&
-							abs(int(x - (blStart+blLength-diStart)	* nWidth / diLength)) < 10 )	//mouse down on block end
-					{
-						SelStart = x * diLength/nWidth + diStart - blLength;			//set SelStart to the end we're -not- moving
-					}
-					else
-					{
-						blSelection=false;
-						
-						blStart=diStart+((x*diLength)/nWidth);
-						blLength=0;
-						SelStart = blStart;
 
-					}
+					if(y>nHeadHeight)		//we're clicking on the main body
+					{
+						//the casts are to resolve ambiguity with abs()
+						if		( blSelection	&&	diLength!=0		/*jic..*/	&&
+								abs(int(x - (blStart-diStart)			* nWidth / diLength)) < 10 )	//mouse down on block start
+						{
+							SelStart = x * diLength/nWidth + diStart + blLength;			//set SelStart to the end we're -not- moving
+						}
+						else if ( blSelection	&&	diLength!=0		/*jic..*/	&&
+								abs(int(x - (blStart+blLength-diStart)	* nWidth / diLength)) < 10 )	//mouse down on block end
+						{
+							SelStart = x * diLength/nWidth + diStart - blLength;			//set SelStart to the end we're -not- moving
+						}
+						else
+						{
+							blSelection=false;
+							
+							blStart=diStart+((x*diLength)/nWidth);
+							blLength=0;
+							SelStart = blStart;
 
+						}
+					}
+					else					//we're clicking on the header
+					{
+						//the casts are to resolve ambiguity with abs()
+						if		( blSelection		&&
+								abs( int(x - blStart			*nWidth/wdLength) ) < 10 )	//mouse down on block start
+						{
+							SelStart = blStart+blLength;
+						}
+						else if ( blSelection		&&
+								abs( int(x - (blStart+blLength)	*nWidth/wdLength) ) < 10 )	//mouse down on block end
+						{
+							SelStart = blStart;
+						}
+						else
+						{
+							blSelection=false;
+							
+							blStart = ((x*wdLength)/nWidth);
+							blLength=0;
+							SelStart = blStart;
+
+						}
+					}
 					::SetCursor(hResizeLR);
 					
 //					drawwave=false;
@@ -616,37 +669,71 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CWaveEdChildView::OnMouseMove(UINT nFlags, CPoint point) //Fideloop's
 		{
 			int x=point.x;
+			int y=point.y;
 			CRect rect;
 			GetClientRect(&rect);
 			int const nWidth=rect.Width();
+			int const nHeadHeight = rect.Height()/10;
 			int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
 
 
-			if	(		blSelection		&&		diLength!=0		/*jic..*/	&&
-					(	abs ( int( x - ( blStart-diStart )			* nWidth / diLength))  < 10	||
-						abs ( int( x - ( blStart+blLength-diStart)	* nWidth / diLength))  < 10	)
-				)
-				::SetCursor(hResizeLR);
-			else
-				::SetCursor(hIBeam);
+			if(y>nHeadHeight)		//mouse is over body
+			{
+				if	(		blSelection		&&		diLength!=0		/*jic..*/	&&
+						(	abs ( int( x - ( blStart-diStart )			* nWidth / diLength))  < 10	||
+							abs ( int( x - ( blStart+blLength-diStart)	* nWidth / diLength))  < 10	)
+					)
+					::SetCursor(hResizeLR);
+				else
+					::SetCursor(hIBeam);
+			}
+			else					//mouse is over header
+			{
+				if (		blSelection		&&
+						(	abs ( int( x -   blStart			*nWidth/wdLength))	< 10 ||
+							abs ( int( x - ( blStart+blLength)	*nWidth/wdLength))	< 10 )
+					)
+					::SetCursor(hResizeLR);
+				else
+					::SetCursor(hIBeam);
+			}
 
 			if(nFlags == MK_LBUTTON && wdWave)
 			{
-				float diRatio = (float) diLength/nWidth;
-				int newpos =  x * diRatio + diStart;
-				if (newpos >= (long) SelStart)
+				if(y>nHeadHeight)		//mouse is over body
 				{
-					if (newpos > wdLength)	{ newpos = wdLength; }
-					blStart = (long) (SelStart);
-					blLength = (long)(newpos - blStart);
+					float diRatio = (float) diLength/nWidth;
+					int newpos =  x * diRatio + diStart;
+					if (newpos >= (long) SelStart)
+					{
+						if (newpos > wdLength)	{ newpos = wdLength; }
+						blStart = (long) (SelStart);
+						blLength = (long)(newpos - blStart);
 
+					}
+					else
+					{
+						if (newpos < 0) { newpos = 0; }
+						blStart = (long) ( newpos);
+						blLength = (long) (SelStart - blStart);
+					}
 				}
-								
-				else
+				else					//mouse is over header
 				{
-					if (newpos < 0) { newpos = 0; }
-					blStart = (long) ( newpos);
-					blLength = (long) (SelStart - blStart);
+					float diRatio = (float) wdLength/nWidth;
+					int newpos = x * diRatio;
+					if (newpos >= (long) SelStart)
+					{
+						if (newpos > wdLength)	{ newpos = wdLength;	}
+						blStart = (long) SelStart;
+						blLength = (long)(newpos - blStart);
+					}
+					else
+					{
+						if (newpos < 0) { newpos = 0; }
+						blStart = (long)newpos;
+						blLength = long(SelStart-blStart);
+					}
 				}
 				blSelection=true;
 //					drawwave=false;
@@ -1089,14 +1176,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pCmdUI->Enable(wdWave);	
 		}
 
-		void CWaveEdChildView::OnUpdateSeleccionZoom(CCmdUI* pCmdUI) 
+		void CWaveEdChildView::OnUpdateSeleccionZoomIn(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->Enable(wdWave && blSelection);
+			pCmdUI->Enable(wdWave && (diLength > 16));
 		}
 
-		void CWaveEdChildView::OnUpdateSeleccionZoomout(CCmdUI* pCmdUI) 
+		void CWaveEdChildView::OnUpdateSeleccionZoomOut(CCmdUI* pCmdUI) 
 		{
 			pCmdUI->Enable(wdWave && (diLength < wdLength) );
+		}
+
+		void CWaveEdChildView::OnUpdateSelectionZoomSel(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(wdWave && blSelection);
 		}
 
 		void CWaveEdChildView::OnUpdateSelectionShowall(CCmdUI* pCmdUI) 
@@ -1389,7 +1481,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	void CWaveEdChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 		CRect client;
-		int nWidth;
+		int nWidth, delta;
 
 		switch (nSBCode)
 		{
@@ -1409,13 +1501,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			break;
 		case SB_LINELEFT:
 			GetClientRect(&client);					//how many samples needed to scroll 10 pixels:
-			nWidth = client.Width();				//n samps / 10 pix  =  diLength samps / nWidth pix
-			diStart -= 10 * diLength/nWidth;		//n = 10 * diLength/nWidth
+			nWidth = client.Width();				//n samps / 20 pix  =  diLength samps / nWidth pix
+			delta = 20 * diLength/nWidth;			//n = 20 * diLength/nWidth
+			if(delta<1) delta=1;			//in case we're zoomed in reeeally far
+			diStart -= delta;
 			break;
 		case SB_LINERIGHT:
 			GetClientRect(&client);
 			nWidth = client.Width();
-			diStart += 10 * diLength/nWidth;
+			delta = 20 * diLength/nWidth;
+			if(delta<1) delta=1;
+			diStart += delta;
 			break;
 		case SB_PAGELEFT:
 			diStart -= diLength;
