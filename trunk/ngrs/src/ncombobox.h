@@ -48,6 +48,7 @@ public:
     virtual void removeChilds();
 
     void setIndex(int i);
+    int selIndex() const;
     int itemCount();
 
 private:
