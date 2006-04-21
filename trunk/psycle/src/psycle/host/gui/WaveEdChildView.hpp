@@ -70,6 +70,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnEditSelectAll();
 			afx_msg void OnUpdateEditSelectAll(CCmdUI* pCmdUI);
 			afx_msg void OnDestroyClipboard();
+			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+			afx_msg void OnSize(UINT nType, int cx, int cy);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -79,9 +82,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CPen cpen_lo;
 			CPen cpen_me;
 			CPen cpen_hi;
+			CPen cpen_white;
 
-			HCURSOR hResizeLR;
-			HCURSOR hIBeam;
+			HCURSOR hResizeLR;		//left/right arrows cursor for sizing selection
+			HCURSOR hIBeam;			//i beam cursor
 
 			//Clipboard
 			char*	pClipboardData;
@@ -97,12 +101,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			bool wdLoop;
 
 			// Display data
-			unsigned long diStart;
-			unsigned long diLength;
-			unsigned long blStart;
-			unsigned long blLength;
-			bool blSelection;
-			bool wdWave;
+			unsigned long diStart;		//first sample in current window
+			unsigned long diLength;		//number of samples in window
+			unsigned long blStart;		//first sample of selection
+			unsigned long blLength;		//number of samples selected
+			bool blSelection;			//whether data is selected currently
+			bool wdWave;				//whether we have a wave to display
 
 			unsigned long selx, selx2;
 
@@ -110,9 +114,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			bool drawwave;
 
-			unsigned long SelStart; // Selection start (point where left clicked);
+			unsigned long SelStart;		//the end of the selection -not- being moved 
 
 			CWaveEdAmplifyDialog AmpDialog;
+
+			CScrollBar hScroll;
 
 			CMainFrame* pParent;
 		};

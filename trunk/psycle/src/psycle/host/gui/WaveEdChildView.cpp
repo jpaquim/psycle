@@ -7,6 +7,7 @@
 #include <psycle/host/gui/MainFrm.hpp>
 #include <mmreg.h>
 #include <math.h>
+
 UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
 		CWaveEdChildView::CWaveEdChildView()
@@ -14,6 +15,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
 			cpen_me.CreatePen(PS_SOLID,0,0xCCCCCC);
 			cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
+			cpen_white.CreatePen(PS_SOLID,0,0xEEEEEE);
 
 			hResizeLR = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
 			hIBeam = AfxGetApp()->LoadStandardCursor(IDC_IBEAM);
@@ -24,7 +26,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			wdWave=false;
 			wsInstrument=-1;
 
-			selx=0;selx2=0;
 		}
 
 		CWaveEdChildView::~CWaveEdChildView()
@@ -32,6 +33,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			cpen_lo.DeleteObject();
 			cpen_me.DeleteObject();
 			cpen_hi.DeleteObject();
+			cpen_white.DeleteObject();
 		}
 
 		BEGIN_MESSAGE_MAP(CWaveEdChildView, CWnd)
@@ -77,6 +79,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_SELECT_ALL, OnUpdateEditSelectAll)
 			ON_WM_DESTROYCLIPBOARD()
 			//}}AFX_MSG_MAP
+			ON_WM_CREATE()
+			ON_WM_HSCROLL()
+			ON_WM_SIZE()
 		END_MESSAGE_MAP()
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -89,22 +94,45 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		//	int wrHeight = 0, wrHeight_R = 0, yLow = 0, yHi = 0, absBuf = 0, abs_yBuf = 0;
 			int wrHeight = 0, yLow = 0, yHi = 0;
+			int wrHeadHeight=0;
 			double OffsetStep = 0;
+			double HeaderStep = 0;
 			__int32 c, d;
 		//	LOGPEN _pen;
+
+			int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
 				
 			if(wdWave)
 			{
 				CRect rect;
 				GetClientRect(&rect);
+				CBitmap* bmpBuffer = new CBitmap;
+				CBitmap* oldbmp;
+				bmpBuffer->CreateCompatibleBitmap(pDC, rect.right-rect.left, rect.bottom-rect.top);
+
+				CDC memDC;
 				
+				memDC.CreateCompatibleDC(pDC);
+				oldbmp = memDC.SelectObject(bmpBuffer);
+				
+				int const nHeadHeight=rect.Height()/10;
 				int const nWidth=rect.Width();
-				int const nHeight=rect.Height();
+				int const nHeight=rect.Height()-cyHScroll-nHeadHeight;
+
 				int const my=nHeight/2;
-				
-				if(wdStereo) wrHeight=my/2;
-				else wrHeight=my;
-				
+				int const myHead = nHeadHeight/2;
+
+				if(wdStereo)
+				{
+					wrHeight=my/2;
+					wrHeadHeight=myHead/2;
+				}
+				else 
+				{
+					wrHeight=my;
+					wrHeadHeight=myHead;
+				}
+
 				if(drawwave)
 				{
 					// Draw preliminary stuff
@@ -112,27 +140,42 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					CPen *oldpen= pDC->SelectObject(&cpen_me);
 					
 					// Left channel 0 amplitude line
-					pDC->MoveTo(0,wrHeight);
-					pDC->LineTo(nWidth,wrHeight);
+					memDC.MoveTo(0,wrHeight+nHeadHeight);
+					memDC.LineTo(nWidth,wrHeight+nHeadHeight);
+					// Left Header 0 amplitude line
+					memDC.MoveTo(0,wrHeadHeight);
+					memDC.LineTo(nWidth,wrHeadHeight);
 					
 					int const wrHeight_R = my + wrHeight;
+					int const wrHeadHeight_R = myHead + wrHeadHeight;
 					
+					memDC.SelectObject(&cpen_white);
+					// Header/Body divider
+					memDC.MoveTo(0, nHeadHeight);
+					memDC.LineTo(nWidth, nHeadHeight);
 					if(wdStereo)
 					{
 						// Stereo channels separator line
-						pDC->SelectObject(&cpen_lo);
-						pDC->MoveTo(0,my);
-						pDC->LineTo(nWidth,my);
+						memDC.SelectObject(&cpen_lo);
+						memDC.MoveTo(0,my+nHeadHeight);
+						memDC.LineTo(nWidth,my+nHeadHeight);
+						// Stereo channels Header Separator
+						memDC.MoveTo(0, myHead);
+						memDC.LineTo(nWidth,myHead);
 						
 						// Right channel 0 amplitude line
-						pDC->SelectObject(&cpen_me);
-						pDC->MoveTo(0,wrHeight_R);
-						pDC->LineTo(nWidth,wrHeight_R);
+						memDC.SelectObject(&cpen_me);
+						memDC.MoveTo(0,wrHeight_R+nHeadHeight);
+						memDC.LineTo(nWidth,wrHeight_R+nHeadHeight);
+						// Right Header 0 amplitude line
+						memDC.MoveTo(0,wrHeadHeight_R);
+						memDC.LineTo(nWidth, wrHeadHeight_R);
+
 					}
 					
 					// Draw samples in channels (Fideloop's)
 
-					pDC->SelectObject(&cpen_hi);
+					memDC.SelectObject(&cpen_hi);
 		//			cpen_hi.GetLogPen(&_pen);
 
 					OffsetStep = (double) diLength / nWidth;
@@ -152,12 +195,35 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						int const ryLow = (wrHeight * yLow)/32768; // 32767...
 						int const ryHi = (wrHeight * yHi)/32768;
 						
-						pDC->MoveTo(c,wrHeight - ryLow);
-						pDC->LineTo(c,wrHeight - ryHi);
+						memDC.MoveTo(c,wrHeight - ryLow + nHeadHeight);
+						memDC.LineTo(c,wrHeight - ryHi  + nHeadHeight);
 					}
+
+
+					// draw left channel of header
+					// todo: very low-volume samples tend to disappear.. we should round up instead of down
+					HeaderStep = (double) wdLength / nWidth;
+					for(c = 0; c < nWidth; c++)
+					{
+						long const offset = long(c * HeaderStep);
+						yLow = 0; yHi = 0;
+
+						for ( d = offset; d < offset + (HeaderStep<1? 1: HeaderStep); d++)
+						{
+							if (yLow > *(wdLeft+d)) yLow = *(wdLeft+d);
+							if (yHi <  *(wdLeft+d)) yHi  = *(wdLeft+d);
+						}
+						int const ryLow = (wrHeadHeight * yLow)/32767;
+						int const ryHi  = (wrHeadHeight * yHi) /32767;
+
+						memDC.MoveTo(c, wrHeadHeight-ryLow);
+						memDC.LineTo(c, wrHeadHeight-ryHi );
+					}
+
 
 					if(wdStereo)
 					{
+						//draw right channel wave data
 						for(c = 0; c < nWidth; c++)
 						{
 							long const offset = diStart + (long)(c * OffsetStep);
@@ -173,45 +239,99 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							int const ryLow = (wrHeight * yLow)/32768; // 32767...
 							int const ryHi = (wrHeight * yHi)/32768;
 							
-							pDC->MoveTo(c,wrHeight_R - ryLow);
-							pDC->LineTo(c,wrHeight_R - ryHi);
+							memDC.MoveTo(c,wrHeight_R - ryLow + nHeadHeight);
+							memDC.LineTo(c,wrHeight_R - ryHi  + nHeadHeight);
+						}
+						//draw right channel wave data in header
+						for(c = 0; c < nWidth; c++)
+						{
+							long const offset = long(c * HeaderStep);
+							yLow = 0; yHi = 0;
+
+							for ( d = offset; d < offset + (HeaderStep<1? 1: HeaderStep); d++)
+							{
+								if (yLow > *(wdRight+d)) yLow = *(wdRight+d);
+								if (yHi <  *(wdRight+d)) yHi  = *(wdRight+d);
+							}
+							int const ryLow = (wrHeadHeight * yLow)/32767;
+							int const ryHi  = (wrHeadHeight * yHi) /32767;
+
+							memDC.MoveTo(c, wrHeadHeight_R-ryLow);
+							memDC.LineTo(c, wrHeadHeight_R-ryHi );
 						}
 					}
 
+					//draw loop points
 					if ( wdLoop )
 					{
-						pDC->SelectObject(&cpen_lo);
+						memDC.SelectObject(&cpen_lo);
 						if ( wdLoopS >= diStart && wdLoopS < diStart+diLength)
 						{
 							int ls = ((wdLoopS-diStart)*nWidth)/diLength;
-							pDC->MoveTo(ls,0);
-							pDC->LineTo(ls,nHeight);
-							pDC->TextOut(ls,0,"Start");
+							memDC.MoveTo(ls,nHeadHeight);
+							memDC.LineTo(ls,nHeight+nHeadHeight);
+							memDC.TextOut(ls,nHeadHeight,"Start");
 						}
 						if ( wdLoopE >= diStart && wdLoopE < diStart+diLength)
 						{
 							int le = ((wdLoopE-diStart)*nWidth)/diLength;
-							pDC->MoveTo(le,0);
-							pDC->LineTo(le,nHeight);
-							pDC->TextOut(le-8,nHeight-16,"End");
+							memDC.MoveTo(le,nHeadHeight);
+							memDC.LineTo(le,nHeight+nHeadHeight);
+							memDC.TextOut(le-8,nHeight+nHeadHeight-16,"End");
 						}
 
+						//draw loop points in header
+						int ls = wdLoopS * nWidth / wdLength;
+						int le = wdLoopE * nWidth / wdLength;
+
+						memDC.MoveTo(ls, 0);
+						memDC.LineTo(ls, nHeadHeight);
+
+						memDC.MoveTo(le, 0);
+						memDC.LineTo(le, nHeadHeight);
 					}
-					pDC->SelectObject(oldpen);
-					
+
+					//draw screen size on header
+					memDC.SelectObject(&cpen_white);
+					int screenx =  diStart           * nWidth/wdLength;
+					int screenx2 =(diStart+diLength) * nWidth/wdLength;
+					memDC.MoveTo(screenx, 0);
+					memDC.LineTo(screenx, nHeadHeight-1);
+					memDC.LineTo(screenx2,nHeadHeight-1);
+					memDC.LineTo(screenx2,0);
+					memDC.LineTo(screenx, 0);
+
+					memDC.SelectObject(oldpen);
 				}// Draw wave
 				
-				pDC->SetROP2(R2_NOT);
-				
-				if(!drawwave)
+				memDC.SetROP2(R2_NOT);
+
+				selx =blStart;
+				selx2=blStart+blLength;
+
+				int HeadSelX = selx * nWidth/wdLength;
+				int HeadSelX2= selx2* nWidth/wdLength;
+				memDC.Rectangle(HeadSelX,0,		HeadSelX2,nHeadHeight);
+
+				if(selx<diStart) selx=diStart;
+				if(selx2>diStart+diLength) selx2=diStart+diLength;
+				//if the selected block is entirely off the screen, the above statements will flip the order
+				if(selx<selx2)					//if not, it will just clip the drawing
 				{
-					// Unmark selection
-					pDC->Rectangle(selx,0,selx2,nHeight);
+					selx = ((selx-diStart)*nWidth)/diLength;
+					selx2=((selx2-diStart)*nWidth)/diLength;
+					memDC.Rectangle(selx,nHeadHeight,selx2,nHeight+nHeadHeight);
 				}
-				
-				selx=((blStart-diStart)*nWidth)/diLength;
-				selx2=(((blStart+blLength)-diStart)*nWidth)/diLength;
-				pDC->Rectangle(selx,0,selx2,nHeight);
+
+
+
+
+				pDC->BitBlt(0, 0, nWidth, nHeight+nHeadHeight, &memDC, 0, 0, SRCCOPY);
+				memDC.SelectObject(oldbmp);
+				memDC.DeleteDC();
+				bmpBuffer->DeleteObject();
+				delete bmpBuffer;
+
 			}
 			else
 			{
@@ -228,22 +348,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		BOOL CWaveEdChildView::PreCreateWindow(CREATESTRUCT& cs) 
 		{
-			LOGBRUSH LogB;
-			HBRUSH	hBrush;
+			//LOGBRUSH LogB;
+			//HBRUSH	hBrush;
 
-			LogB.lbColor = 0x00000000;
-			LogB.lbStyle = BS_SOLID;
+			//LogB.lbColor = 0x00000000;
+			//LogB.lbStyle = BS_SOLID;
 
-			hBrush = CreateBrushIndirect(&LogB);
+			//hBrush = CreateBrushIndirect(&LogB);
 			
 			if (!CWnd::PreCreateWindow(cs)) return FALSE;
 
 			cs.dwExStyle |= WS_EX_CLIENTEDGE;
 			cs.style &= ~WS_BORDER;
 			cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
-			::LoadCursor(NULL, IDC_ARROW), hBrush, NULL);
+			//::LoadCursor(NULL, IDC_ARROW), hBrush, NULL);
+			::LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(WHITE_BRUSH), NULL);
 
-			DeleteObject(hBrush);
+			//DeleteObject(hBrush);
 
 			return TRUE;
 			
@@ -278,11 +399,26 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				diLength=wl;
 				blStart=0;
 				blLength=0;
+
+				SCROLLINFO si;
+				si.cbSize = sizeof(si);
+				si.fMask=SIF_RANGE|SIF_PAGE|SIF_POS;//|SIF_DISABLENOSCROLL;	//SIF_DISABLENOSCROLL doesn't appear to make a difference..
+				si.nMin=0; si.nMax=wdLength;
+				si.nPage = diLength;
+				si.nPos = 0;
+				hScroll.SetScrollInfo(&si);
 				Invalidate();
 			}
 			else
 			{
 				wdWave=false;
+				SCROLLINFO si;
+				si.cbSize = sizeof(si);
+				si.fMask=SIF_RANGE|SIF_PAGE|SIF_POS;//|SIF_DISABLENOSCROLL;
+				si.nMin=0; si.nMax=1;
+				si.nPage = 1;
+				si.nPos = 0;
+				hScroll.SetScrollInfo(&si);
 				
 				SetWindowText("Wave Editor [No Data]");
 				Invalidate(true);
@@ -317,6 +453,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					diStart= blStart;
 					diLength = blLength;
 				}
+
+				SCROLLINFO si;
+				si.cbSize=sizeof(si);
+				si.fMask=SIF_PAGE|SIF_POS;
+				si.nPage=diLength;
+				si.nPos=diStart;
+				hScroll.SetScrollInfo(&si);
+
 				Invalidate();
 			}
 		}
@@ -333,6 +477,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				diLength=diLength*3;
 				if(diLength+diStart>wdLength) diLength=wdLength-diStart;
 				
+				SCROLLINFO si;
+				si.cbSize=sizeof(si);
+				si.fMask=SIF_PAGE|SIF_POS;
+				si.nPage=diLength;
+				si.nPos=diStart;
+				hScroll.SetScrollInfo(&si);
+
 				Invalidate();
 			}
 		}
@@ -419,12 +570,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					if		( blSelection	&&	diLength!=0		/*jic..*/	&&
 							abs(int(x - (blStart-diStart)			* nWidth / diLength)) < 10 )	//mouse down on block start
 					{
-						SelStart = (blStart+blLength-diStart)*nWidth/diLength;			//set SelStart to the end we're -not- moving
+						SelStart = x * diLength/nWidth + diStart + blLength;			//set SelStart to the end we're -not- moving
 					}
 					else if ( blSelection	&&	diLength!=0		/*jic..*/	&&
 							abs(int(x - (blStart+blLength-diStart)	* nWidth / diLength)) < 10 )	//mouse down on block end
 					{
-						SelStart = (blStart-diStart)*nWidth/diLength;					//set SelStart to the end we're -not- moving
+						SelStart = x * diLength/nWidth + diStart - blLength;			//set SelStart to the end we're -not- moving
 					}
 					else
 					{
@@ -432,13 +583,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						
 						blStart=diStart+((x*diLength)/nWidth);
 						blLength=0;
-						SelStart = x; //!!! new variable!
+						SelStart = blStart;
 
 					}
 
 					::SetCursor(hResizeLR);
 					
-					drawwave=false;
+//					drawwave=false;
 				
 					Invalidate(false);
 				}
@@ -457,7 +608,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				blStart=diStart;
 				blLength=diLength;
-				drawwave=false;
+//				drawwave=false;
 				Invalidate(false);
 			}
 		}
@@ -468,6 +619,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CRect rect;
 			GetClientRect(&rect);
 			int const nWidth=rect.Width();
+			int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
+
 
 			if	(		blSelection		&&		diLength!=0		/*jic..*/	&&
 					(	abs ( int( x - ( blStart-diStart )			* nWidth / diLength))  < 10	||
@@ -480,23 +633,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(nFlags == MK_LBUTTON && wdWave)
 			{
 				float diRatio = (float) diLength/nWidth;
-				
-				if (x >= (long) SelStart)
+				int newpos =  x * diRatio + diStart;
+				if (newpos >= (long) SelStart)
 				{
-					if (x > nWidth)	{ x = nWidth; }
-					blStart = (long) (SelStart*diRatio + diStart);
-					blLength = (long)(x*diRatio + diStart - blStart);
+					if (newpos > wdLength)	{ newpos = wdLength; }
+					blStart = (long) (SelStart);
+					blLength = (long)(newpos - blStart);
 
 				}
 								
 				else
 				{
-					if (x < 0) { x = 0; }
-					blStart = (long) ( x*diRatio + diStart);
-					blLength = (long) (SelStart*diRatio + diStart - blStart);
+					if (newpos < 0) { newpos = 0; }
+					blStart = (long) ( newpos);
+					blLength = (long) (SelStart - blStart);
 				}
 				blSelection=true;
-				drawwave=false;
+//					drawwave=false;
 				Invalidate(false);
 			}
 			
@@ -797,6 +950,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			diStart = 0;
 			diLength = wdLength;
+
+			SCROLLINFO si;
+			si.cbSize = sizeof(si);
+			si.fMask=SIF_PAGE|SIF_POS;
+			si.nPage = diLength;
+			si.nPos = 0;
+			hScroll.SetScrollInfo(&si);
+
 			Invalidate(true);
 		}
 
@@ -878,6 +1039,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				blSelection = false;
 				blLength  = 0;
 				blStart   = 0;
+
+				SCROLLINFO si;
+				si.cbSize = sizeof(si);
+				si.fMask=SIF_RANGE|SIF_POS;
+				si.nPos=diStart;
+				si.nMin=0;	si.nMax=wdLength;
+				hScroll.SetScrollInfo(&si);
+
+
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 
 				Invalidate(true);
@@ -1140,6 +1310,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CloseClipboard();
 			OnSelectionShowall();
 
+			SCROLLINFO si;
+			si.cbSize = sizeof(si);
+			si.fMask=SIF_RANGE;
+			si.nMin=0;	si.nMax=wdLength;
+			hScroll.SetScrollInfo(&si);
+
 			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
 			_pSong->IsInvalided(false);
@@ -1158,6 +1334,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			diLength = wdLength;
 			blLength = wdLength;
 			blSelection = true;
+
+			SCROLLINFO si;
+			si.cbSize = sizeof(si);
+			si.fMask=SIF_PAGE|SIF_POS;
+			si.nPage = diLength;
+			si.nPos = 0;
+			hScroll.SetScrollInfo(&si);
+
 			Invalidate(true);
 		}
 
@@ -1187,5 +1371,78 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else
 				return 0;
 		}
+
+
+	int CWaveEdChildView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+	{
+		if (CWnd::OnCreate(lpCreateStruct) == -1)
+			return -1;
+
+		hScroll.Create(WS_VISIBLE|WS_CHILD|SBS_HORZ, CRect(0,0,10,50), this, AFX_IDW_HSCROLL_FIRST);
+
+		return 0;
+	}
+
+
+	//todo: use some sort of multiplier to prevent scrolling from being limited for waves with more samples than can be expressed
+	//		in a signed 32-bit int.
+	void CWaveEdChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+	{
+		CRect client;
+		int nWidth;
+
+		switch (nSBCode)
+		{
+		case SB_LEFT:
+			diStart=0;
+			break;
+		case SB_RIGHT:
+			diStart=wdLength;
+			break;
+		case SB_ENDSCROLL:
+			break;
+		case SB_THUMBTRACK:
+		case SB_THUMBPOSITION:
+			SCROLLINFO si;
+			hScroll.GetScrollInfo(&si, SIF_TRACKPOS);	//this is necessary because the nPos arg to OnHScroll is
+			diStart=si.nTrackPos;						//transparently restricted to 16 bits
+			break;
+		case SB_LINELEFT:
+			GetClientRect(&client);					//how many samples needed to scroll 10 pixels:
+			nWidth = client.Width();				//n samps / 10 pix  =  diLength samps / nWidth pix
+			diStart -= 10 * diLength/nWidth;		//n = 10 * diLength/nWidth
+			break;
+		case SB_LINERIGHT:
+			GetClientRect(&client);
+			nWidth = client.Width();
+			diStart += 10 * diLength/nWidth;
+			break;
+		case SB_PAGELEFT:
+			diStart -= diLength;
+			break;
+		case SB_PAGERIGHT:
+			diStart+= diLength;
+			break;
+		}
+
+		hScroll.SetScrollPos(diStart);
+		diStart = hScroll.GetScrollPos();		//petzold's let-windows-do-the-boundary-checking method
+
+		drawwave=true;
+		Invalidate(false);
+		CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
+	}
+
+	void CWaveEdChildView::OnSize(UINT nType, int cx, int cy)
+	{
+		CWnd::OnSize(nType, cx, cy);
+		CRect client;
+		GetClientRect(client);
+		int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
+
+		hScroll.MoveWindow(0, client.bottom-cyHScroll, client.right-40, cyHScroll);
+		Invalidate(true);
+	}
+
 	UNIVERSALIS__COMPILER__NAMESPACE__END
 UNIVERSALIS__COMPILER__NAMESPACE__END
