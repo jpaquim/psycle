@@ -96,7 +96,7 @@ public:
     ///\name secondary output device, write to a file
     ///\{
     /// starts the recording output device.
-    void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
+    void StartRecording(std::string const & psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1);
     /// stops the recording output device.
     void StopRecording(bool bOk = true);
     /// wether the recording device has been started.

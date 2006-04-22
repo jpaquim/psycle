@@ -94,11 +94,11 @@ void ChildView::onFileSaveSong( NObject * sender )
   }
 }
 
-void ChildView::FileSaveSongNamed(std::string fName) {
+void ChildView::FileSaveSongNamed(std::string const & fName) {
   _pSong->save(fName);
 }
 
-void ChildView::OnFileLoadSongNamed( std::string fName, int fType )
+void ChildView::OnFileLoadSongNamed( std::string const & fName, int fType )
 {
   if( fType == 2 )
   {
@@ -114,7 +114,7 @@ void ChildView::OnFileLoadSongNamed( std::string fName, int fType )
   }
 }
 
-void ChildView::FileLoadSongNamed( std::string fName )
+void ChildView::FileLoadSongNamed( std::string const & fName )
 {
   // stop player
   Global::pPlayer()->Stop();

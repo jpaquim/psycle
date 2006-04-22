@@ -115,8 +115,8 @@ public:
 
     inline Proxy & proxy() throw() { return proxy_; };
 
-    bool Instance(std::string file_name) throw();
-    bool LoadDll(std::string psFileName);
+    bool Instance(std::string const & file_name);
+    bool LoadDll(std::string const & psFileName);
     virtual void SaveDllName(Serializer * pFile);
     virtual bool LoadSpecificChunk(DeSerializer * pFile, int version);
     virtual void SaveSpecificChunk(Serializer* pFile);
