@@ -133,6 +133,7 @@ void MachineView::update( )
   machineGUIs.clear();
   scrollArea_->removeChilds();
   createGUIMachines();
+  scrollArea_->resize(); // update scroll client area
   repaint();
 }
 
