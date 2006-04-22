@@ -1,3 +1,45 @@
+<html>
+<head>
+
+<title>
+ngrs introduction
+</title>
+
+<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+<meta name='title' content='NattiSoft'>
+<meta name='author' content='NattiSoft'>
+<meta name='copyright' content='NattiSoft'>
+<meta name='description' content='NattiSoft'>
+
+<style type='text/css'>
+html, th, div, p, h1, h2, .def { font-family: Verdana, Tahoma, Arial; color:#ffffff; font-size:15px; }
+h1 { font-size:24px; }
+h2 { font-size:18px; }
+table { border-collapse:collapse; }
+td { font-family: Verdana, Tahoma, Arial; color:#ffffff; font-size:13px; vertical-align:top; }
+p { padding:8; }
+a:link { color:#FBC800; text-decoration:none; }
+a:visited { color:#FBC800; text-decoration:none; }
+a:hover { color:#FBC800; text-decoration:underline; }
+a.menu:link { color:#416247; text-decoration:none; font-family: Helvetica; font-size:17px; }
+a.menu:visited { color:#416247; text-decoration:none; font-family: Helvetica; font-size:17px; }
+a.menu:hover { color:#FBC800; text-decoration:none; font-family: Helvetica; font-size:17px;  }
+a.bottom:link { color:#416247; text-decoration:none; font-size:13px; }
+a.bottom:visited { color:#416247; text-decoration:none; font-size:13px; }
+a.bottom:hover { color:#FBC800; text-decoration:underline; font-size:13px; }
+.t10 { background-color:#707070; color:#ffffff; }
+.t11 { background-color:#585858; color:#d0d0d0; }
+.t12 { background-color:#505050; color:#d0d0d0; }
+.cgi { font-size:14px; }
+span.topic { font-family: Verdana, Tahoma, Arial; color:#ffffff; font-size:18px; vertical-align:top; }
+span.menu_text { font-family: Helvetica; font-size:17px; color:#000000; }
+span.tail { font-family:  Verdana, Tahoma, Arial; font-size:12px; color:#000000; }
+</style>
+
+</head>
+
+<body bgcolor='#556C5A' text='#ffffff'>
+
 <h2>NGRS Programming introduction</h2>
 <h5>(c) 2004,2005,2006 Nattisoft www.nattisoft.de</h5>
 
@@ -107,3 +149,53 @@ Example (1.5) : adding a signal to a menuitem
       exit(0);
    }    
 </pre>
+
+<p>Some gui elements</p>
+How to use <h2 align="center"> <img src="nbutton.png" width="108" height="28" border="0" alt="" align="left"> NButton Overview</h2>
+<hr>
+<h3>Common usage</h3>
+<ul>
+	<li>A single button will wait for a click, and then call the connected clicked event Method.</li>
+	<li>A single (toggle)button is acting as on/off-switch and will remain in status down till you press the button again </li>
+	<li>Several buttons working in a group as on/off-switch together. Pressing a button in this group, will switch up the previous selected button in that group.</li>
+</ul>
+<h3>Get it to working</h3>
+You can create a Button in two ways. <p>
+NButton* btn = new NButton(); or <br>
+NButton* btn = new NButton("press me");
+<p>
+The button text can now be changed using setText()<p>
+btn->setText("click me!");<br>
+<p>
+If you are working in a form use pane->add(btn) or if you are working in a component class use add(btn);<br>
+You can connect a method to the clicked signal of the button. If you connecting a method outside the class, you have to replace the this with an instance pointer of the class that implements the method<p>
+<pre>
+btn->clicked.connect(this,&amp;myClass::btnPressed);
+
+void myClass::btnPressed(NButtonEvent* ev) {
+   // do all you want when the button was pressed.
+}
+</pre>
+
+How to use <h2 align="center"> <img src="nedit.png" width="108" height="28" border="0" alt="" align="left"> NEdit Overview</h2>
+<hr>
+<h3>Common usage</h3>
+<ul>
+	<li>An nedit is a one line input box, which allows you to enter text with one Font.</li>	
+</ul>
+
+<h3>Get it working</h3>
+First you should create an edit. <p>
+NEdit* edt = new NEdit();
+NEdit* edt = new NEdit("Hallo");
+
+<p>
+If you are working in a form use pane->add(edt) or if you are working in a component class use add(edt);<br>
+You can connect a method to the keyPressed signal of the nedit. If you connecting a method outside the class, you have to replace the this with an instance pointer of the class that implements the method
+<p>
+
+<pre>
+
+</pre>
+</body>
+</html>
