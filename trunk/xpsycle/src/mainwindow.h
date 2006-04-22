@@ -145,6 +145,9 @@ private:
     void onTpbDecOne(NButtonEvent* ev);
     void onTpbIncOne(NButtonEvent* ev);
 
+    void onDecInsBtn(NButtonEvent* ev);
+    void onIncInsBtn(NButtonEvent* ev);
+
     void updateComboGen();
     void appNew();
 

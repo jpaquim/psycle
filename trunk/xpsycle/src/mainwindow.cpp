@@ -356,6 +356,8 @@ void MainWindow::initBars( )
   pane()->add(sequencerBar_);
 
   sequencerBar_->updateSequencer();
+  updateComboIns(true);
+  insCombo_->setIndex(0);
 }
 
 void MainWindow::initToolBar( )
@@ -670,13 +672,13 @@ void MainWindow::initToolBar( )
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleleft()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "littleleft.xpm");
      img->setPreferredSize(25,25);
-     psycleToolBar_->add(new NButton(img));
+     psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onDecInsBtn);
 
      img = new NImage();
      if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->littleright()); else
                                            img->loadFromFile(Global::pConfig()->iconPath+ "littleright.xpm");
      img->setPreferredSize(25,25);
-     psycleToolBar_->add(new NButton(img));
+     psycleToolBar_->add(new NButton(img))->clicked.connect(this,&MainWindow::onIncInsBtn);
 
      psycleToolBar_->add(new NButton("Load"))->clicked.connect(this,&MainWindow::onLoadWave);
      psycleToolBar_->add(new NButton("Save"));
@@ -1034,7 +1036,6 @@ void MainWindow::onTimer( )
 {
 
   if (Global::pPlayer()->_playing) {
-
     int oldPos = childView_->patternView()->editPosition();
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
 
@@ -1117,9 +1118,35 @@ void MainWindow::updateComboIns( bool updatelist )
 
 void MainWindow::onEditInstrument( NButtonEvent * ev )
 {
-  instrumentEditor->setInstrument(0);
+  instrumentEditor->setInstrument(Global::pSong()->instSelected);
   instrumentEditor->setVisible(true);
 }
+
+void MainWindow::onDecInsBtn( NButtonEvent * ev )
+{
+  int index = Global::pSong()->instSelected -1;
+  if (index >=0 ) {
+    Global::pSong()->instSelected=   index;
+    Global::pSong()->auxcolSelected= index;
+
+    insCombo_->setIndex(index);
+    insCombo_->repaint();
+  }
+}
+
+void MainWindow::onIncInsBtn( NButtonEvent * ev )
+{
+  int index = Global::pSong()->instSelected +1;
+  if (index <= 255) {
+    Global::pSong()->instSelected=   index;
+    Global::pSong()->auxcolSelected= index;
+
+    insCombo_->setIndex(index);
+    insCombo_->repaint();
+  }
+}
+
+
 
 
 
