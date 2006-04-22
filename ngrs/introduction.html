@@ -1,0 +1,109 @@
+<h2>NGRS Programming introduction</h2>
+<h5>(c) 2004,2005,2006 Nattisoft www.nattisoft.de</h5>
+
+<h2>Quick start</h2>
+Each ngrs app runs in an own xlib gui thread, using internally a select main loop.
+To start writing an ngrs app, you need 3 steps todo:
+<p>
+1. create a NApp app object<br>
+2. create a main window dereived from NWindow and assign it to the NApp object<br>
+3. start the mainloop with app.run()<br>
+</p>
+<p>
+Example (1.1) : displaying a window
+<pre>
+#include "napp.h"
+#include "nwindow.h"
+
+int main(int argc, char *argv[])
+{
+  NApp app;
+
+  NWindow* myMainWindow = new NWindow();
+  app.setMainWindow(myMainWindow);
+  app.run();
+
+  return EXIT_SUCCESS;
+}
+</pre>
+<p>Writing an App</p>
+<p>
+Each ngrs app needs a mainwindow, that will be act as parent for every gui element, and closing this window,will delete every childwindow and element in it.
+So your first step will be, to create a derevided class of NWindow.<p>
+Example (1.2) : deriving a window
+<pre>
+#include "nwindow.h"
+
+class MainWindow : public NWindow {
+public:
+  MainWindow() {};
+  ~MainWindow() {};
+};
+
+#include "napp.h"
+#include "mainwindow.h"
+
+int main(int argc, char *argv[])
+{
+  NApp app;
+
+  NWindow* myMainWindow = new MainWindow();
+  app.setMainWindow(myMainWindow);
+  app.run();
+
+  return EXIT_SUCCESS;
+}
+</pre>
+</p>
+
+After having a derived class, you can now fill the window content in this ctor.<br>
+Example (1.3) : setting up the window content in the ctor using example 1.2
+
+<pre>
+    MainWindow() {
+       setTitle("My program");
+       setPosition(10,10,500,500);    
+    };
+</pre>
+
+</p>
+<p>Adding a menu</p>
+Now you can go further e.g adding an Menu. An main menu is created with a menuBar, and menu`s you add to the bar. The menu`s itself contain menuitems.<br>
+Example (1.4) : adding a menubar with some entries.
+
+<pre>
+    #include "nmenubar.h"
+    #include "nmenu.h"
+    #include "nmenuitem.h"
+
+    MainWindow() {
+1       setTitle("My program");
+2       setPosition(10,10,500,500);    
+3       NMenuBar* menuBar = new NMenuBar();
+4          NMenu* fileMenu = new NMenu("File"); 
+5             NMenuItem* exitItem = new NMenuItem("quit");
+6             fileMenu->add(exitItem);
+7          menuBar->add(fileMenu);
+8       pane()->add(menuBar);
+    };
+</pre>
+
+"pane()" gets a ptr to the root window container, that can contain visualcomponents (like menubar`s , buttons, label, etc ..)
+In line 8 we add the menuBar to the pane. Due to the nested structure of visualcomponents, we can now add like in the pane, to the menuBar a menu. and a menu will then again contain menuitems. The method is always add.
+
+<p>
+Using signals
+</p>
+ngrs uses a callback technique called signals. E.g a menuItem has a signal "clicked", wich will be emit an signal, if somebody selected this item. To react on such a signal you need a socalled callback function, that will connect to the signal, and will then be called by the signal.
+Example (1.5) : adding a signal to a menuitem
+
+<pre>
+   NMenuItem* exitItem = new NMenuItem("quit");
+      exitItem->clicked.connect(this,&MainWindow::onMenuItemClicked);
+      
+  
+  
+   MainWindow::onMenuItemClicked(NButtonEvent* ev) {
+      exit(0);
+   }    
+</pre>
