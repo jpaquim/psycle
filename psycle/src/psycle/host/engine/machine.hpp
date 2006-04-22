@@ -90,7 +90,7 @@ namespace psycle
 					throw function_error;
 				}
 
-				template<typename e> void inline rethrow(Machine & machine, std::string const & function, e const * const e = 0) throw(function_error)
+				template<typename E> void inline rethrow(Machine & machine, std::string const & function, E const * const e = 0) throw(function_error)
 				{
 					rethrow(machine, function, e, 0);
 				}
