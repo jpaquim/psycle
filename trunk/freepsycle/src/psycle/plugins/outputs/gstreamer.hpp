@@ -4,6 +4,7 @@
 #include <psycle/detail/project.hpp>
 #include "../resource.hpp"
 #include <gst/gstelement.h>
+#include <cstdint>
 namespace psycle
 {
 	namespace plugins
@@ -26,8 +27,10 @@ namespace psycle
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop() throw(engine::exception);
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close() throw(engine::exception);
 				private:
-					::GstElement static & instanciate(std::string const & type, std::string const & name);
 					::GstElement * pipeline_, * source_, * sink_;
+					::GstCaps * caps_;
+					void static handoff_static(::GstElement *, ::GstBuffer *, GstPad *, gstreamer *);
+					void handoff(::GstBuffer &);
 			};
 		}
 	}
