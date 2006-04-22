@@ -215,7 +215,8 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
      } else {
 
      if (dragBase->moveable().style() & nMvHorizontal)  {
-        if (dragBase->moveable().style() & nMvParentLimit && newLeft<0) {
+        if ((dragBase->moveable().style() & nMvParentLimit && newLeft<0) ||
+            (dragBase->moveable().style() & nMvLeftLimit && newLeft<0)) {
            if (dragBase->left()!=0) dragBase->setLeft(0);
          } else
          if (dragBase->moveable().style() & nMvParentLimit && newLeft > dragBaseParent->spacingWidth()-dragBase->width()) {
@@ -225,7 +226,8 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
        } else varx=0;
 
        if (dragBase->moveable().style() & nMvVertical )  {
-       if (dragBase->moveable().style() & nMvParentLimit && newTop<0) {
+       if ((dragBase->moveable().style() & nMvParentLimit && newTop<0) ||
+           (dragBase->moveable().style() & nMvTopLimit && newTop<0)) {
            if (dragBase->top()!=0) dragBase->setTop(0);
          } else 
          if (dragBase->moveable().style() & nMvParentLimit && newTop > dragBaseParent->spacingHeight()-dragBase_->height()) {
@@ -244,6 +246,7 @@ void NWindow::doDrag( NVisualComponent *, int x, int y )
 
 void NWindow::endDrag( NVisualComponent *, int x, int y )
 {
+   if (dragBase_!=0) dragBase_->onMoveEnd(NMoveEvent());
    dragBase_ = NULL;
 }
 
