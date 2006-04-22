@@ -85,51 +85,51 @@ namespace psycle
 				// but we use a different rethrow function
 
 				///\internal
-				namespace
+				namespace detail
 				{
 					template<typename E> std::string string                (             E const & e) { std::ostringstream s; s << e; return s.str(); }
 					template<          > std::string string<std::exception>(std::exception const & e) { return e.what(); }
 					template<          > std::string string<void const *>  (  void const * const &  ) { return universalis::compiler::exception::ellipsis(); }
-				}
 
-				template<typename E> void rethrow(Machine & machine, compiler::location const & function, E const * const e, std::exception const * const standard) throw(function_error)
-				{
-					std::ostringstream s;
-					s
-						<< "Machine had an exception in function '" << function << "'." << std::endl
-						<< universalis::compiler::typenameof(*e) << std::endl
-						<< string(*e);
-					function_error const function_error(s.str(), standard);
-					machine.crashed(function_error);
-					throw function_error;
-				}
+					template<typename E> void rethrow(Machine & machine, compiler::location const & function, E const * const e, std::exception const * const standard) throw(function_error)
+					{
+						std::ostringstream s;
+						s
+							<< "Machine had an exception in function '" << function << "'." << std::endl
+							<< universalis::compiler::typenameof(*e) << std::endl
+							<< string(*e);
+						function_error const function_error(s.str(), standard);
+						machine.crashed(function_error);
+						throw function_error;
+					}
 
-				template<typename E> void inline rethrow(Machine & machine, compiler::location const & function, E const * const e = 0) throw(function_error)
-				{
-					rethrow(machine, function, e, 0);
-				}
+					template<typename E> void inline rethrow(Machine & machine, compiler::location const & function, E const * const e = 0) throw(function_error)
+					{
+						rethrow(machine, function, e, 0);
+					}
 
-				template<> void inline rethrow<std::exception>(Machine & machine, compiler::location const & function, std::exception const * const e) throw(function_error)
-				{
-					rethrow(machine, function, e, e);
+					template<> void inline rethrow<std::exception>(Machine & machine, compiler::location const & function, std::exception const * const e) throw(function_error)
+					{
+						rethrow(machine, function, e, e);
+					}
 				}
 
 				#define PSYCLE__HOST__CATCH_ALL \
-					catch(          std::exception const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(                 wchar_t const e[]) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(                  char   const e[]) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed          char   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned          char   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed     short int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned     short int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed           int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned           int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed      long int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned      long int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed long long int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned long long int   const & e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(            void const * const   e) { psycle::host::exceptions::function_errors::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(               ...                ) { psycle::host::exceptions::function_errors::rethrow<void*>(host(), UNIVERSALIS__COMPILER__LOCATION    ); }
+					catch(          std::exception const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(                 wchar_t const e[]) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(                  char   const e[]) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed          char   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned          char   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed     short int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned     short int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed           int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned           int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed      long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned      long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(  signed long long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(unsigned long long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(            void const * const   e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
+					catch(               ...                ) { psycle::host::exceptions::function_errors::detail::rethrow<void*>(host(), UNIVERSALIS__COMPILER__LOCATION    ); }
 			}
 		}
 
