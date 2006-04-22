@@ -94,11 +94,11 @@ void ChildView::onFileSaveSong( NObject * sender )
   }
 }
 
-void ChildView::FileSaveSongNamed(std::string const & fName) {
+void ChildView::FileSaveSongNamed(const std::string & fName) {
   _pSong->save(fName);
 }
 
-void ChildView::OnFileLoadSongNamed( std::string const & fName, int fType )
+void ChildView::OnFileLoadSongNamed( const std::string & fName, int fType )
 {
   if( fType == 2 )
   {

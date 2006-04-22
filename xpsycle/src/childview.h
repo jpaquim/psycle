@@ -42,8 +42,8 @@ public:
 
     ~ChildView();
 
-    void FileLoadSongNamed(std::string const & fName);
-    void FileSaveSongNamed(std::string const & fName);
+    void FileLoadSongNamed(const std::string & fName);
+    void FileSaveSongNamed(const std::string & fName);
 
     void setTitleBarText( );
 
@@ -76,7 +76,7 @@ private:
     MachineView* machineView_;
     PatternView* patternView_;
 
-    void OnFileLoadSongNamed(std::string fName, int fType);
+    void OnFileLoadSongNamed(const std::string & fName, int fType);
     void onMachineViewDblClick(NButtonEvent* ev);
 
     void onTimer();
