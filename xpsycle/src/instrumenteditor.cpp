@@ -76,7 +76,7 @@ void InstrumentEditor::init( )
   pane()->add(header, nAlTop);
 
   NGroupBox* properties = new NGroupBox();
-     properties->setLayout(new NAlignLayout(),true);
+     properties->setLayout(new NAlignLayout(5,5),true);
      properties->setHeaderText("Instrument Properties");
      NPanel* noteActionPnl = new NPanel();
         noteActionPnl->setLayout(new NFlowLayout(nAlLeft,5,5),true);
