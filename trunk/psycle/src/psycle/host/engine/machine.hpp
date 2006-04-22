@@ -9,7 +9,6 @@
 #include <psycle/host/global.hpp>
 #include <universalis/processor/exceptions/fpu.hpp>
 #include <universalis/exception.hpp>
-#include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/compiler/location.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <stdexcept>
@@ -84,31 +83,30 @@ namespace psycle
 				///\internal
 				namespace detail
 				{
-					template<typename E> void rethrow(Machine & machine, compiler::location const & location, E const * const e, std::exception const * const standard) throw(function_error)
-					{
-						std::ostringstream s;
-						s
-							<< "Machine had an exception in function '" << location << "'." << std::endl
-							<< universalis::compiler::typenameof(*e) << std::endl
-							<< universalis::exceptions::string(*e);
-						function_error const function_error(s.str(), standard);
-						machine.crashed(function_error);
-						throw function_error;
-					}
-
 					class rethrow_functor
 					{
 						public:
 							rethrow_functor(Machine & machine) : machine_(machine) {}
-							template<typename E> void rethrow                ()(compiler::location const & location,              E const * const e = 0) const throw() { detail::rethrow(machine_, location, e, 0); }
-							template<          > void rethrow<std::exception>()(compiler::location const & location, std::exception const * const e    ) const throw() { detail::rethrow(machine_, location, e, e); }
+							template<typename E> void operator_                (universalis::compiler::location const & location,              E const * const e = 0) const throw(function_error) { rethrow(location, e, 0); }
+							template<          > void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e    ) const throw(function_error) { rethrow(location, e, e); }
 						private:
+							template<typename E> void rethrow                  (universalis::compiler::location const & location,              E const * const e, std::exception const * const standard) const throw(function_error)
+							{
+								std::ostringstream s;
+								s
+									<< "Machine had an exception in function '" << location << "'." << std::endl
+									<< universalis::compiler::typenameof(*e) << std::endl
+									<< universalis::exceptions::string(*e);
+								function_error const function_error(s.str(), standard);
+								machine_.crashed(function_error);
+								throw function_error;
+							}
 							Machine & machine_;
 					};
 				}
-				#define PSYCLE__HOST__CATCH_ALL \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor(host()))
-				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &host(), _1, _2, _3))
+				#define PSYCLE__HOST__CATCH_ALL(machine) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor f(machine); f)
+				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
 			}
 		}
 
@@ -181,19 +179,20 @@ namespace psycle
 				virtual void CollectData(int numSamples) {}
 				virtual void Connected(Wire * wire);
 				virtual void Disconnected(Wire * wire);
-				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires.size()); return wires[index]; }
-				virtual inline bool NumberOfWires() { return wires.size(); }
-				virtual inline int Arrangement() throw() { return arrangement; }
+				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
+				virtual inline bool NumberOfWires() { return wires_.size(); }
+				virtual inline int Arrangement() throw() { return arrangement_; }
 				virtual inline Machine * GetMachine() throw() { return &parent_; }
 				//\todo : should change arrangement/name be allowed? (Mutating Port?)
 				virtual inline void ChangeArrangement(int arrangement) { this->arrangement_ = arrangement; }
 				virtual inline std::string const & Name() const throw() { return name_; }
 				virtual inline void ChangeName(std::string const & name) { this->name_ = name; }
-			private:
+			protected:
 				Machine & parent_;
 				int arrangement_;
 				std::string name_;
-				std::vector<Wire*> wires_;
+				typedef std::vector<Wire*> wires_type;
+				wires_type wires_;
 		};
 
 		class InPort : public AudioPort
@@ -801,28 +800,37 @@ namespace psycle
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 			
-			//constants
-			int const static LFO_SIZE = 2048;
-			int const static MAX_PHASE = LFO_SIZE;
-			int const static MAX_SPEED = 10000;
-			int const static MAX_DEPTH = 100;
-			int const static NUM_CHANS = 4;
-			enum	//lfo types
+			///\name constants
+			///\{
+				int const static LFO_SIZE = 2048;
+				int const static MAX_PHASE = LFO_SIZE;
+				int const static MAX_SPEED = 10000;
+				int const static MAX_DEPTH = 100;
+				int const static NUM_CHANS = 4;
+			///\}
+
+			struct lfo_types
 			{
-				lt_sine=0, lt_tri, lt_sawup, lt_sawdown, lt_square
+				enum lfo_type
+				{
+					sine=0, tri, sawup, sawdown, square
+				};
 			};
 
-			enum prm	//our parameter indices
+			struct prms
 			{
-				wave=0, pwidth, speed,
-				mac0,	mac1,	mac2,	mac3,
-				prm0,	prm1,	prm2,	prm3,
-				level0,	level1,	level2,	level3,
-				phase0,	phase1,	phase2,	phase3,
-				display,
-				num_params
+				/// our parameter indices
+				enum prm
+				{
+					wave=0, pwidth, speed,
+					mac0,	mac1,	mac2,	mac3,
+					prm0,	prm1,	prm2,	prm3,
+					level0,	level1,	level2,	level3,
+					phase0,	phase1,	phase2,	phase3,
+					display,
+					num_params
+				};
 			};
-
 
 		protected:
 			//protected member funcs

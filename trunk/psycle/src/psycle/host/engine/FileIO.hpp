@@ -86,7 +86,7 @@ namespace psycle
 
 				/// pad the string with spaces
 				///\todo is it really used with null terminated strings?
-				//UNIVERSALIS__COMPILER__DEPRECATED("use the char const [4] overload instead")
+				PSYCLE__DEPRECATED("use the char const [4] overload instead")
 				static std::uint32_t          FourCC(char const * null_terminated_string);
 
 			private:

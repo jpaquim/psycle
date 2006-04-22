@@ -44,11 +44,12 @@ namespace psycle
 			///\name initial values for player-related stuff
 			///\{
 				public:
-					const float BeatsPerMin(){return m_BeatsPerMin;};
-					void BeatsPerMin(const float value)
+					typedef float BeatsPerMinType;
+					const BeatsPerMinType BeatsPerMin(){return m_BeatsPerMin;};
+					void BeatsPerMin(const BeatsPerMinType value)
 					{ 
-						if ( value < 32.0 ) m_BeatsPerMin = 32.0;
-						else if ( value > 999.99 ) m_BeatsPerMin = 999.99;
+						if ( value < BeatsPerMinType(32) ) m_BeatsPerMin = BeatsPerMinType(32);
+						else if ( value > BeatsPerMinType(999.99) ) m_BeatsPerMin = BeatsPerMinType(999.99);
 						else m_BeatsPerMin = value;
 					};
 
@@ -96,7 +97,7 @@ namespace psycle
 				public: // <-- argh!
 					/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 					/// This function now is the same as doing &pPatternData[ps]
-					UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
+					PSYCLE__DEPRECATED("This sux.")
 					inline unsigned char * _ppattern(int ps)
 					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps);
@@ -104,7 +105,7 @@ namespace psycle
 					};
 					/// Returns the start offset of the requested track of pattern ps in the
 					/// pPatternData Array and creates one if none exists.
-					UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
+					PSYCLE__DEPRECATED("This sux.")
 					inline unsigned char * _ptrack(int ps, int track)
 					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
@@ -112,7 +113,7 @@ namespace psycle
 					};
 					/// Returns the start offset of the requested line of the track of pattern ps in
 					/// the pPatternData Array and creates one if none exists.
-					UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
+					PSYCLE__DEPRECATED("This sux.")
 					inline unsigned char * _ptrackline(int ps, int track, int line)
 					{
 						if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
@@ -120,7 +121,7 @@ namespace psycle
 					};
 					/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
 					///\todo doc ... how does this differs from bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-					UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
+					PSYCLE__DEPRECATED("This sux.")
 					unsigned char * CreateNewPattern(int ps);
 			///\}
 
@@ -143,7 +144,7 @@ namespace psycle
 					/// Gets the first free slot in the pMachine[] Array
 					///\todo it's low-level.. should be private.
 					/// we have higer-level CreateMachine and CloneMachine functions already
-					//UNIVERSALIS__COMPILER__DEPRECATED("low-level")
+					//PSYCLE__DEPRECATED("low-level")
 					Machine::id_type GetFreeMachine();
 
 					/// destroy a machine of this song.
@@ -324,7 +325,7 @@ namespace psycle
 
 					/// Array of Pattern data.
 					///\todo hardcoded limits and wastes
-					UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
+					PSYCLE__DEPRECATED("This sux.")
 					unsigned char * ppPatternData[MAX_PATTERNS];
 
 					#if 0 // more lightweight

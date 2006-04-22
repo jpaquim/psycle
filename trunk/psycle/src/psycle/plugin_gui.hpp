@@ -1,9 +1,8 @@
 #pragma once
-//#include <afxwin.h>
-#include <map>
 #include "host/gui/resources/resources.hpp"
 #include "plugin_interface.hpp"
-
+#include <map>
+//#include <afxwin.h>
 
 enum ShowText
 {

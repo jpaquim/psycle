@@ -9,10 +9,6 @@ namespace psycle
 		using plugin_interface::MAX_TRACKS;
 		using plugin_interface::MAX_BUFFER_LENGTH;
 
-		/// Size of audio blocks which are work'd together (max value).
-		UNIVERSALIS__COMPILER__DEPRECATED("use MAX_BUFFER_LENGTH instead")
-		int const STREAM_SIZE = MAX_BUFFER_LENGTH;
-
 		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 		int const MAX_DELAY_BUFFER = 65536;
 
@@ -36,7 +32,7 @@ namespace psycle
 		/// harcoded maximal number of lines per pattern
 		int const MAX_LINES = 256;
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
-		UNIVERSALIS__COMPILER__DEPRECATED("This sux.")
+		//PSYCLE__DEPRECATED("This sux.")
 		#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 			#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 		#else
@@ -62,11 +58,11 @@ namespace psycle
 		int const MAX_CONNECTIONS = PSYCLE__MAX_CONNECTIONS;
 
 		/// Miscellaneous offset data.
-		UNIVERSALIS__COMPILER__DEPRECATED("sux")
+		//PSYCLE__DEPRECATED("sux")
 		int const MULTIPLY = MAX_TRACKS * EVENT_SIZE;
-		UNIVERSALIS__COMPILER__DEPRECATED("sux")
+		//PSYCLE__DEPRECATED("sux")
 		int const MULTIPLY2 = MULTIPLY * MAX_LINES;
-		UNIVERSALIS__COMPILER__DEPRECATED("sux")
+		//PSYCLE__DEPRECATED("sux")
 		int const MAX_PATTERN_BUFFER_LEN = MULTIPLY2 * MAX_PATTERNS;
 
 		/// Current version of the Song file and its chunks.

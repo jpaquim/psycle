@@ -216,6 +216,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				textX = d_x + s_width*2 + d_length + 10;
 				textY = d_y + s_height/2 - lblTextSize.cy/2;
 				break;
+			default:
+				throw;
 			}
 			dc->SetBkColor(d_lblBkColor);
 			dc->SetTextColor(d_lblTextColor);

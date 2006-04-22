@@ -437,24 +437,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnSelectionZoomIn()
 		{
-			if(wdWave)
-			{
-				CRect rect;
-				GetClientRect(&rect);
-				unsigned long const nWidth=rect.Width();
-				
-				diLength /= 3;
-				diStart+=diLength;
-
-				SCROLLINFO si;
-				si.cbSize=sizeof(si);
-				si.fMask=SIF_PAGE|SIF_POS;
-				si.nPage=diLength;
-				si.nPos=diStart;
-				hScroll.SetScrollInfo(&si);
-
-				Invalidate();
-			}
+			if(!wdWave) return;
+			CRect rect;
+			GetClientRect(&rect);
+			diLength /= 3;
+			diStart+=diLength;
+			SCROLLINFO si;
+			si.cbSize=sizeof(si);
+			si.fMask=SIF_PAGE|SIF_POS;
+			si.nPage=diLength;
+			si.nPos=diStart;
+			hScroll.SetScrollInfo(&si);
+			Invalidate();
 		}
 
 		void CWaveEdChildView::OnSelectionZoomOut()
@@ -674,8 +668,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			GetClientRect(&rect);
 			int const nWidth=rect.Width();
 			int const nHeadHeight = rect.Height()/10;
-			int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
-
 
 			if(y>nHeadHeight)		//mouse is over body
 			{

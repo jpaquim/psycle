@@ -11,6 +11,7 @@
 #include <psycle/host/gui/MainFrm.hpp> // Can this be removed?
 #include <psycle/host/gui/InputHandler.hpp> // Can this be removed?
 #include <universalis/processor/exception.hpp>
+#include <algorithm>
 
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
@@ -19,6 +20,7 @@
 #include <psycle/host/engine/XMSampler.hpp>
 #include <psycle/host/engine/plugin.hpp>
 #include <psycle/host/engine/VSTHost.hpp>
+
 namespace psycle
 {
 	namespace host
@@ -77,8 +79,7 @@ namespace psycle
 			else
 			{
 				s
-					<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash."
-					<< std::endl
+					<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash." << std::endl
 					<< "You should save your work to a new file, and restart the host.";
 				if(crash)
 				{
@@ -93,6 +94,7 @@ namespace psycle
 			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 		}
+
 		void Wire::Connect(AudioPort *senderp,AudioPort *receiverp)
 		{
 			senderport=senderp;
@@ -103,6 +105,7 @@ namespace psycle
 			receiverport->Connected(this);
 			//\todo : need a way get a wire index.
 		}
+
 		void Wire::ChangeSource(AudioPort* newsource)
 		{
 			assert(senderport); Disconnect(senderport);
@@ -111,6 +114,7 @@ namespace psycle
 			SetVolume(volume);
 			senderport->Connected(this);
 		}
+
 		void Wire::ChangeDestination(AudioPort* newdest)
 		{
 			assert(receiverport); Disconnect(receiverport);
@@ -119,17 +123,20 @@ namespace psycle
 			SetVolume(volume);
 			receiverport->Connected(this);
 		}
+
 		void Wire::CollectData(int numSamples)
 		{
 			senderport->CollectData(numSamples);
 			//\todo : apply volume, panning and mapping.
 		}
+
 		void Wire::SetVolume(float newvol)
 		{
 			volume=newvol;
 			rvol=volume*pan*multiplier;
 			lvol=volume*(1.0f-pan)*multiplier;
 		}
+
 		void Wire::SetPan(float newpan)
 		{
 			pan=newpan;
@@ -138,39 +145,35 @@ namespace psycle
 
 		void Wire::Disconnect(AudioPort* port)
 		{
-			if ( port == senderport ) { senderport=0; }
-			else { receiverport=0; }
+			if ( port == senderport ) senderport=0; else receiverport=0;
 			port->Disconnected(this);
 			//\todo : need a way to indicate to the main Machine that this wire index is now free.
 		}
 
 		void AudioPort::Connected(Wire *wire)
 		{
-			wires.push_back(wire);
+			wires_.push_back(wire);
 		}
+
 		void AudioPort::Disconnected(Wire *wire)
 		{
-			for (unsigned int i(0);i<wires.size();i++)
-			{
-				if (wires[i]==wire) 
-				{
-					wires.erase(wires.begin()+i);
-					return;
-				}
-			}
+			wires_type::iterator i(std::find(wires_.begin(), wires_.end(), wire));
+			assert(i != wires_.end());
+			wires_.erase(i);
 		}
 
 		void InPort::CollectData(int numSamples)
 		{
 			//\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
-			for (unsigned int i(0);i<wires.size();i++)
+			for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i)
 			{
-				GetWire(i)->CollectData(numSamples);
+				(**i).CollectData(numSamples);
 			}
 		}
+
 		void OutPort::CollectData(int numSamples)
 		{
-			pParent->Work(numSamples);
+			parent_.Work(numSamples);
 		}
 
 		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id)
@@ -211,10 +214,10 @@ namespace psycle
 			_scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
-			_pSamplesL = new float[STREAM_SIZE];
-			_pSamplesR = new float[STREAM_SIZE];
+			_pSamplesL = new float[MAX_BUFFER_LENGTH];
+			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
-			for (int c=0; c<STREAM_SIZE; c++)
+			for (int c=0; c<MAX_BUFFER_LENGTH; c++)
 			{
 				_pSamplesL[c] = 0;
 				_pSamplesR[c] = 0;
@@ -560,15 +563,17 @@ namespace psycle
 				}
 			}
 		}
+
 		void Machine::DefineStereoInput(int numinputs)
 		{
 			numInPorts=numinputs;
-			inports = new InPort(this,0,"Stereo In");
+			inports = new InPort(*this,0,"Stereo In");
 		}
+
 		void Machine::DefineStereoOutput(int numoutputs)
 		{
 			numOutPorts=numoutputs;
-			outports = new OutPort(this,0,"Stereo Out");
+			outports = new OutPort(*this,0,"Stereo Out");
 		}
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -1524,7 +1529,7 @@ namespace psycle
 
 
 		//		todo:
-		//	- as is, control rate is proportional to STREAM_SIZE.. we update in work, which (at the moment) means once every 256
+		//	- as is, control rate is proportional to MAX_BUFFER_LENGTH.. we update in work, which (at the moment) means once every 256
 		//      samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
 		//		means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
 		//		if we want to take the idea of modulation machines much further, we should probably put together some kind of
@@ -1540,7 +1545,7 @@ namespace psycle
 		:
 			Machine(MACH_LFO, MACHMODE_GENERATOR, id)
 		{
-			_numPars = prm::num_params;
+			_numPars = prms::num_params;
 			_nCols = 3;
 			bisTicking = false;
 			strcpy(_editName, "LFO");
@@ -1554,7 +1559,7 @@ namespace psycle
 			}
 			lfoPos=0.0;
 			lSpeed=MAX_SPEED/6;
-			waveform=lt_sine;
+			waveform=lfo_types::sine;
 			pWidth=100;
 			FillTable();
 		}
@@ -1572,7 +1577,7 @@ namespace psycle
 			}
 			lfoPos=0.0;
 			lSpeed=MAX_SPEED/6;
-			waveform=lt_sine;
+			waveform=lfo_types::sine;
 			pWidth=100;
 			FillTable();
 		}
@@ -1590,78 +1595,79 @@ namespace psycle
 
 		void LFO::GetParamName(int numparam,char *name)
 		{
-			if(numparam==prm::wave)
+			if(numparam==prms::wave)
 				sprintf(name,"Waveform");
-			else if(numparam==prm::pwidth)
+			else if(numparam==prms::pwidth)
 				sprintf(name,"Pulse Width");
-			else if(numparam==prm::speed)
+			else if(numparam==prms::speed)
 				sprintf(name,"Speed");
-			else if (numparam<prm::prm0)
-				sprintf(name,"Output Machine %d",numparam-prm::mac0);
-			else if (numparam<prm::level0)
-				sprintf(name,"Output Param %d",numparam-prm::prm0);
-			else if (numparam<prm::phase0)
-				sprintf(name,"Output Level %d",numparam-prm::level0);
-			else if (numparam<prm::display)
-				sprintf(name,"Output Phase %d",numparam-prm::phase0);
-			else if (numparam==prm::display)
+			else if (numparam<prms::prm0)
+				sprintf(name,"Output Machine %d",numparam-prms::mac0);
+			else if (numparam<prms::level0)
+				sprintf(name,"Output Param %d",numparam-prms::prm0);
+			else if (numparam<prms::phase0)
+				sprintf(name,"Output Level %d",numparam-prms::level0);
+			else if (numparam<prms::display)
+				sprintf(name,"Output Phase %d",numparam-prms::phase0);
+			else if (numparam==prms::display)
 				sprintf(name,"LFO Position");
 			else name[0] = '\0';
 		}
 
 		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if(numparam==prm::wave) { minval = 0; maxval = 4;}
-			else if (numparam==prm::pwidth) {minval = 0; maxval = 200;}
-			else if (numparam==prm::speed) {minval = 0; maxval = MAX_SPEED;}
-			else if (numparam <prm::prm0) {minval = -1; maxval = (MAX_BUSES*2)-1;}
-			else if (numparam <prm::level0)
+			if(numparam==prms::wave) { minval = 0; maxval = 4;}
+			else if (numparam==prms::pwidth) {minval = 0; maxval = 200;}
+			else if (numparam==prms::speed) {minval = 0; maxval = MAX_SPEED;}
+			else if (numparam <prms::prm0) {minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if (numparam <prms::level0)
 			{
 				minval = -1;
-				if(macOutput[numparam-prm::prm0]==-1 || Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]] == NULL)
+				if(macOutput[numparam-prms::prm0]==-1 || Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]] == NULL)
 					maxval = -1;
 				else
-					maxval =  Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]]->GetNumParams()-1;
+					maxval =  Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
 			}
 
-			else if (numparam <prm::phase0){minval = 0; maxval = MAX_DEPTH*2;}
-			else if (numparam <prm::display){minval = 0; maxval = MAX_PHASE; }
-			else if (numparam==prm::display){minval=0;maxval=LFO_SIZE; }
+			else if (numparam <prms::phase0){minval = 0; maxval = MAX_DEPTH*2;}
+			else if (numparam <prms::display){minval = 0; maxval = MAX_PHASE; }
+			else if (numparam==prms::display){minval=0;maxval=LFO_SIZE; }
 			else {minval=0;maxval=0; }
 
 		}
 
 		int LFO::GetParamValue(int numparam)
 		{
-			if(numparam==prm::wave)			return waveform;
-			else if(numparam==prm::pwidth)	return pWidth;
-			else if(numparam==prm::speed)	return lSpeed;
-			else if(numparam <prm::prm0)	return macOutput[numparam-prm::mac0];
-			else if(numparam <prm::level0)	return paramOutput[numparam-prm::prm0];
-			else if(numparam <prm::phase0)	return level[numparam-prm::level0];
-			else if(numparam <prm::display)	return phase[numparam-prm::phase0];
-			else if(numparam==prm::display)   return (int)lfoPos;
+			if(numparam==prms::wave)			return waveform;
+			else if(numparam==prms::pwidth)	return pWidth;
+			else if(numparam==prms::speed)	return lSpeed;
+			else if(numparam <prms::prm0)	return macOutput[numparam-prms::mac0];
+			else if(numparam <prms::level0)	return paramOutput[numparam-prms::prm0];
+			else if(numparam <prms::phase0)	return level[numparam-prms::level0];
+			else if(numparam <prms::display)	return phase[numparam-prms::phase0];
+			else if(numparam==prms::display)   return (int)lfoPos;
 			else return 0;
 		}
 
 		void LFO::GetParamValue(int numparam, char *parVal)
 		{
-			if(numparam==prm::wave)
+			if(numparam==prms::wave)
 			{
 				switch(waveform)
 				{
-				case lt_sine: sprintf(parVal, "sine"); break;
-				case lt_tri: sprintf(parVal, "triangle"); break;
-				case lt_sawup: sprintf(parVal, "saw up"); break;
-				case lt_sawdown: sprintf(parVal, "saw down"); break;
-				case lt_square: sprintf(parVal, "square"); break;
+				case lfo_types::sine: sprintf(parVal, "sine"); break;
+				case lfo_types::tri: sprintf(parVal, "triangle"); break;
+				case lfo_types::sawup: sprintf(parVal, "saw up"); break;
+				case lfo_types::sawdown: sprintf(parVal, "saw down"); break;
+				case lfo_types::square: sprintf(parVal, "square"); break;
+				default: throw;
 				}
 			} 
-			else if(numparam==prm::pwidth)
+			else if(numparam==prms::pwidth)
 			{
 				sprintf(parVal, "%i", pWidth-100);
 			}
-			else if(numparam==prm::speed)
+			else if(numparam==prms::speed)
 			{
 				if(lSpeed==0)
 					sprintf(parVal, "inf.");
@@ -1670,39 +1676,39 @@ namespace psycle
 					sprintf(  parVal, "%.1f ms", 100 / float(lSpeed/float(MAX_SPEED))  );		
 				}
 			} 
-			else if(numparam<prm::prm0)
+			else if(numparam<prms::prm0)
 			{
-				if ((macOutput[numparam-prm::mac0] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-prm::mac0]] != NULL))
-					sprintf(parVal,"%X -%s",macOutput[numparam-prm::mac0],Global::_pSong->_pMachine[macOutput[numparam-prm::mac0]]->_editName);
-				else if (macOutput[numparam-prm::mac0] != -1)
-					sprintf(parVal,"%X (none)",macOutput[numparam-prm::mac0]);
+				if ((macOutput[numparam-prms::mac0] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]] != NULL))
+					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],Global::_pSong->_pMachine[macOutput[numparam-prms::mac0]]->_editName);
+				else if (macOutput[numparam-prms::mac0] != -1)
+					sprintf(parVal,"%X (none)",macOutput[numparam-prms::mac0]);
 				else 
 					sprintf(parVal,"(disabled)");
 			}
-			else if(numparam<prm::level0)
+			else if(numparam<prms::level0)
 			{
-				if(		(macOutput[numparam-prm::prm0] != -1) 
-					&&	(Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]] != NULL)
-					&&  (paramOutput[numparam-prm::prm0] >= 0)	)
+				if(		(macOutput[numparam-prms::prm0] != -1) 
+					&&	(Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]] != NULL)
+					&&  (paramOutput[numparam-prms::prm0] >= 0)	)
 				{
-					if		(paramOutput[numparam-prm::prm0] < Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]]->GetNumParams())
+					if		(paramOutput[numparam-prms::prm0] < Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
 					{
 						char name[128];
-						Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]]->GetParamName(paramOutput[numparam-prm::prm0], name);
-						sprintf(parVal,"%X -%s", paramOutput[numparam-prm::prm0], name);
+						Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetParamName(paramOutput[numparam-prms::prm0], name);
+						sprintf(parVal,"%X -%s", paramOutput[numparam-prms::prm0], name);
 					}
 					else
-						sprintf(parVal,"%X -none", paramOutput[numparam-prm::prm0]);					
+						sprintf(parVal,"%X -none", paramOutput[numparam-prms::prm0]);					
 				} 
 				else 
 					sprintf(parVal,"(disabled)");
 				
 			}
-			else if(numparam<prm::phase0)
-				sprintf(parVal,"%i%%", level[numparam-prm::level0]-MAX_DEPTH);
-			else if(numparam<prm::display)
-				sprintf(parVal,"%.1f deg.", (phase[numparam-prm::phase0]-MAX_PHASE/2.0f)/float(MAX_PHASE/2.0f) * 180.0f);
-			else if(numparam==prm::display)
+			else if(numparam<prms::phase0)
+				sprintf(parVal,"%i%%", level[numparam-prms::level0]-MAX_DEPTH);
+			else if(numparam<prms::display)
+				sprintf(parVal,"%.1f deg.", (phase[numparam-prms::phase0]-MAX_PHASE/2.0f)/float(MAX_PHASE/2.0f) * 180.0f);
+			else if(numparam==prms::display)
 				sprintf(parVal,"%.1f%%", lfoPos/(float)LFO_SIZE * 100);
 			else
 				parVal[0] = '\0';
@@ -1710,77 +1716,77 @@ namespace psycle
 
 		bool LFO::SetParameter(int numparam, int value)
 		{
-			if(numparam==prm::wave)
+			if(numparam==prms::wave)
 			{
 				waveform = value;
 				FillTable();
 				return true;
 			}
-			else if(numparam==prm::pwidth)	
+			else if(numparam==prms::pwidth)	
 			{
 				pWidth = value;
 				return true;
 			}
-			else if(numparam==prm::speed)
+			else if(numparam==prms::speed)
 			{
 				lSpeed = value;
 				return true;
 			}
-			else if(numparam <prm::prm0)
+			else if(numparam <prms::prm0)
 			{
-				if(value!=macOutput[numparam-prm::mac0])
+				if(value!=macOutput[numparam-prms::mac0])
 				{
 					int newMac(0);
 					
 					//if we're increasing, increase until we hit an active machine
-					if(value>macOutput[numparam-prm::mac0])
+					if(value>macOutput[numparam-prms::mac0])
 					{
 						for(newMac=value; newMac<MAX_MACHINES && Global::_pSong->_pMachine[newMac]==NULL; ++newMac)
 							;
 					}
 					//if we're decreasing, or if we're increasing but didn't find anything, decrease until we find an active machine
-					if(value<macOutput[numparam-prm::mac0] || newMac>=MAX_MACHINES)
+					if(value<macOutput[numparam-prms::mac0] || newMac>=MAX_MACHINES)
 					{
 						for(newMac=value;newMac>-1 && Global::_pSong->_pMachine[newMac]==NULL; --newMac)
 							;
 					}
 						
-					ParamEnd(numparam-prm::mac0);
-					macOutput[numparam-prm::mac0] = newMac;
-					paramOutput[numparam-prm::mac0] = -1;
+					ParamEnd(numparam-prms::mac0);
+					macOutput[numparam-prms::mac0] = newMac;
+					paramOutput[numparam-prms::mac0] = -1;
 				}
 				return true;
 			}
-			else if(numparam <prm::level0)
+			else if(numparam <prms::level0)
 			{
-				if( macOutput[numparam-prm::prm0]>-1 && Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]] )
+				if( macOutput[numparam-prms::prm0]>-1 && Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]] )
 				{
-					if(value<Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]]->GetNumParams())
+					if(value<Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
 					{
-						ParamEnd(numparam-prm::prm0);
-						paramOutput[numparam-prm::prm0] = value;
-						ParamStart(numparam-prm::prm0);
+						ParamEnd(numparam-prms::prm0);
+						paramOutput[numparam-prms::prm0] = value;
+						ParamStart(numparam-prms::prm0);
 					}
 					else
 					{
-						ParamEnd(numparam-prm::prm0);
-						paramOutput[numparam-prm::prm0] = Global::_pSong->_pMachine[macOutput[numparam-prm::prm0]]->GetNumParams()-1;
-						ParamStart(numparam-prm::prm0);
+						ParamEnd(numparam-prms::prm0);
+						paramOutput[numparam-prms::prm0] = Global::_pSong->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
+						ParamStart(numparam-prms::prm0);
 					}
 				}
 				else
-					paramOutput[numparam-prm::prm0] = -1;
+					paramOutput[numparam-prms::prm0] = -1;
 
 				return true;
 			}
-			else if(numparam <prm::phase0)
+			else if(numparam <prms::phase0)
 			{
-				level[numparam-prm::level0] = value;
+				level[numparam-prms::level0] = value;
 				return true;
 			}
-			else if(numparam <prm::display)
+			else if(numparam <prms::display)
 			{
-				phase[numparam-prm::phase0] = value;
+				phase[numparam-prms::phase0] = value;
 				return true;
 			}
 			else return false;
@@ -1864,37 +1870,43 @@ namespace psycle
 		{
 			switch(waveform)
 			{
-			case lt_sine:	for (int i(0);i<LFO_SIZE;++i)
-							{
-								waveTable[i]=sin(i/float(LFO_SIZE-1) * 6.2831853071795864769252);
-							}
-							break;
-			case lt_tri:	for (int i(0);i<LFO_SIZE/2;++i)
-							{
-								waveTable[i] = waveTable[LFO_SIZE-i-1] = i/float(LFO_SIZE/4) - 1;
-							}
-							break;
-			case lt_sawup:	for (int i(0);i<LFO_SIZE;++i)
-							{
-								waveTable[i] = i/float((LFO_SIZE-1)/2) - 1;
-							}
-							break;
-			case lt_sawdown: for(int i(0);i<LFO_SIZE;++i)
-							{
-								waveTable[i] = (LFO_SIZE-i)/float((LFO_SIZE-1)/2) - 1;
-							}
-							break;
-			case lt_square:	for (int i(0);i<LFO_SIZE/2;++i)
-							{
-								waveTable[i] = 1;
-								waveTable[LFO_SIZE-1-i]=-1;
-							}
-							break;
-			default:		for(int i(0);i<LFO_SIZE;++i)	//????
-							{
-								waveTable[i] = 0;
-							}
-							break;
+			case lfo_types::sine:
+				for (int i(0);i<LFO_SIZE;++i)
+				{
+					waveTable[i]=sin(i/float(LFO_SIZE-1) * 6.2831853071795864769252);
+				}
+				break;
+			case lfo_types::tri:
+				for (int i(0);i<LFO_SIZE/2;++i)
+				{
+					waveTable[i] = waveTable[LFO_SIZE-i-1] = i/float(LFO_SIZE/4) - 1;
+				}
+				break;
+			case lfo_types::sawup:
+				for (int i(0);i<LFO_SIZE;++i)
+				{
+					waveTable[i] = i/float((LFO_SIZE-1)/2) - 1;
+				}
+				break;
+			case lfo_types::sawdown:
+				for(int i(0);i<LFO_SIZE;++i)
+				{
+					waveTable[i] = (LFO_SIZE-i)/float((LFO_SIZE-1)/2) - 1;
+				}
+				break;
+			case lfo_types::square:
+				for (int i(0);i<LFO_SIZE/2;++i)
+				{
+					waveTable[i] = 1;
+					waveTable[LFO_SIZE-1-i]=-1;
+				}
+				break;
+			default:
+				for(int i(0);i<LFO_SIZE;++i)	//????
+				{
+					waveTable[i] = 0;
+				}
+				break;
 			}
 		}
 
@@ -1959,6 +1971,11 @@ namespace psycle
 			}
 		}
 
+		int const static LFO_SIZE;
+		int const static MAX_PHASE;
+		int const static MAX_SPEED;
+		int const static MAX_DEPTH;
+		int const static NUM_CHANS;
 
 	}
 }

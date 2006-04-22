@@ -113,7 +113,7 @@ namespace psycle
 				requiresProcess(false), requiresRepl(false), _version(0), _isSynth(false), proxy_(0), editorWnd(0)
 			{
 				proxy_ = new vst::proxy(*this);
-				std::memset(junk, 0, STREAM_SIZE * sizeof(float));
+				std::memset(junk, 0, MAX_BUFFER_LENGTH * sizeof(float));
 				for(int i(0) ; i < vst::max_io ; ++i)
 				{
 					inputs[i]=junk;
@@ -172,8 +172,7 @@ namespace psycle
 					{
 						effect=main(reinterpret_cast<audioMasterCallback>(&AudioMaster));
 					}
-					catch(std::exception const & e) { host::exceptions::function_errors::rethrow(*this, "main", &e); }
-					catch(...) { host::exceptions::function_errors::rethrow<void*>(*this, "main"); }
+					PSYCLE__HOST__CATCH_ALL(*this)
 					proxy()(effect);
 				}
 				if(!proxy()() || proxy().magic() != kEffectMagic)
@@ -187,7 +186,7 @@ namespace psycle
 				// 2: Host to Plug, setSampleRate ( 44100.000000 )
 				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 				// 3: Host to Plug, setBlockSize ( 512 ) 
-				proxy().setBlockSize(STREAM_SIZE);
+				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 4: Host to Plug, open
 				{
 					//init plugin (probably a call to "Init()" function should be done here)
@@ -207,13 +206,13 @@ namespace psycle
 				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
 				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 				// 7: Host to Plug, setBlockSize ( 512 ) 
-				proxy().setBlockSize(STREAM_SIZE);
+				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 8: Host to Plug, setSpeakerArrangement returned: false 
 				proxy().setSpeakerArrangement(&VSTsa,&VSTsa);
 				// 9: Host to Plug, setSampleRate ( 44100.000000 ) 
 				proxy().setSampleRate((float) Global::pConfig->GetSamplesPerSec());
 				// 10: Host to Plug, setBlockSize ( 512 ) 
-				proxy().setBlockSize(STREAM_SIZE);
+				proxy().setBlockSize(MAX_BUFFER_LENGTH);
 				// 11: Host to Plug, getProgram returned: 0 
 				
 				long int program = proxy().getProgram();
@@ -459,7 +458,7 @@ namespace psycle
 				}
 			}
 
-			bool plugin::LoadDll(std::string psFileName)
+			bool plugin::LoadDll(std::string const & psFileName)
 			{
 				std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
 				std::string sPath;
@@ -1045,9 +1044,9 @@ namespace psycle
 				case audioMasterGetBlockSize:
 					if(effect && host)
 					{
-						host->proxy().setBlockSize(STREAM_SIZE);
+						host->proxy().setBlockSize(MAX_BUFFER_LENGTH);
 					}
-					return STREAM_SIZE;
+					return MAX_BUFFER_LENGTH;
 				case audioMasterGetVendorString:
 					// Just fooling version string
 					// [bohan] why? do we have to fool some plugins to make them work with psycle's host?
@@ -1444,10 +1443,10 @@ namespace psycle
 			{
 				for(Wire::id_type i(0) ; i < MAX_CONNECTIONS; ++i) _inputConVol[i] = 1.f / 32767; // VST plugins use the range -1.0 .. +1.0
 				std::sprintf(_editName, "Vst2 Fx");
-				_pOutSamplesL = new float[STREAM_SIZE];
-				_pOutSamplesR = new float[STREAM_SIZE];
-				dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-				dsp::Clear(_pOutSamplesR, STREAM_SIZE);
+				_pOutSamplesL = new float[MAX_BUFFER_LENGTH];
+				_pOutSamplesR = new float[MAX_BUFFER_LENGTH];
+				dsp::Clear(_pOutSamplesL, MAX_BUFFER_LENGTH);
+				dsp::Clear(_pOutSamplesR, MAX_BUFFER_LENGTH);
 				inputs[0] = _pSamplesL;
 				inputs[1] = _pSamplesR;
 				outputs[0] = _pOutSamplesL;
