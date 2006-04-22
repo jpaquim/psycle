@@ -1222,7 +1222,7 @@ void PatternView::PatternDraw::pasteBlock(int tx,int lx,bool mix,bool save)
 
 void PatternView::updatePlayBar(bool followSong)
 {
-  if ((visible()) && (Global::pPlayer()->_lineChanged) && (editPosition() == Global::pPlayer()->_playPosition) && !followSong )
+  if ( ((NVisualComponent*) parent())->visible() && (Global::pPlayer()->_lineChanged) && (editPosition() == Global::pPlayer()->_playPosition) && !followSong )
   {
      int trackCount  = clientWidth() / colWidth();
      int startTrack  = drawArea->dx() / colWidth();
