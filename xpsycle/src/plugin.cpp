@@ -50,7 +50,7 @@ Plugin::~ Plugin( )
 {
 }
 
-bool Plugin::Instance(std::string file_name) throw()
+bool Plugin::Instance(std::string const & file_name)
 {
   _dll = dlopen(file_name.c_str(), RTLD_LAZY);
    if (!_dll) {
@@ -454,7 +454,7 @@ struct ToLower
      char operator() (char c) const  { return std::tolower(c); }
    };
 
-bool Plugin::LoadDll( std::string psFileName )
+bool Plugin::LoadDll( std::string const & psFileName )
 {
   std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
   if (psFileName.find(".so")== std::string::npos) {

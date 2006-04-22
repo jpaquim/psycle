@@ -543,7 +543,7 @@ void Player::AdvancePosition( )
   _lineChanged = true;
 }
 
-void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
+void Player::StartRecording(std::string const & psFilename, int bitdepth, int samplerate, int channelmode)
 {
   backup_rate = Global::pConfig()->_pOutputDriver->_samplesPerSec;
   backup_bits = Global::pConfig()->_pOutputDriver->_bitDepth;

@@ -42,8 +42,8 @@ public:
 
     ~ChildView();
 
-    void FileLoadSongNamed(std::string fName);
-    void FileSaveSongNamed(std::string fName);
+    void FileLoadSongNamed(std::string const & fName);
+    void FileSaveSongNamed(std::string const & fName);
 
     void setTitleBarText( );
 
