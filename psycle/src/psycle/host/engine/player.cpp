@@ -430,7 +430,7 @@ namespace psycle
 			#endif
 			do
 			{
-				if(numSamplex > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamplex;
+				if(numSamplex > MAX_BUFFER_LENGTH) amount = MAX_BUFFER_LENGTH; else amount = numSamplex;
 				// Tick handler function
 				if((_playing) && (amount >= _samplesRemaining)) amount = _samplesRemaining;
 				// Song play

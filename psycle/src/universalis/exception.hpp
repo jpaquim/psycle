@@ -4,6 +4,7 @@
 
 ///\interface universalis::exception
 #pragma once
+#include "compiler/exceptions/ellipsis.hpp"
 #include "compiler/location.hpp"
 #include <stdexcept>
 #include <string>
@@ -89,9 +90,9 @@ namespace universalis
 			};
 		#endif
 
-		template<typename E> std::string string                (             E const & e) { std::ostringstream s; s << e; return s.str(); }
-		template<          > std::string string<std::exception>(std::exception const & e) { return e.what(); }
-		template<          > std::string string<void const *>  (  void const * const &  ) { return universalis::compiler::exception::ellipsis(); }
+		template<typename E> std::string inline string                (             E const & e) { std::ostringstream s; s << e; return s.str(); }
+		template<          > std::string inline string<std::exception>(std::exception const & e) { return e.what(); }
+		template<          > std::string inline string<void const *>  (  void const * const &  ) { return compiler::exceptions::ellipsis(); }
 
 		///\internal
 		namespace detail
@@ -99,39 +100,39 @@ namespace universalis
 			class rethrow_functor
 			{
 				public:
-					template<typename E> void rethrow()(compiler::location const & location, E const * const e = 0) const throw() { throw runtime_error(string(*e), location, e); }
+					template<typename E> void operator_(compiler::location const & location, E const * const e = 0) const throw(runtime_error) { throw runtime_error(string(*e), location, e); }
 			};
 		}
 
 		#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW \
-			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__DETAL(universalis::exceptions::detail::rethrow_functor, UNIVERSALIS__COMPILER__LOCATION)
+			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAIL(universalis::exceptions::detail::rethrow_functor(), UNIVERSALIS__COMPILER__LOCATION)
 
 		#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__NO_CLASS \
-			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__DETAL(universalis::exceptions::detail::rethrow_functor, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
+			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAIL(universalis::exceptions::detail::rethrow_functor(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
 
 		#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(rethrow_functor) \
-			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW____DETAL(rethrow_functor, UNIVERSALIS__COMPILER__LOCATION)
+			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAIL(rethrow_functor, UNIVERSALIS__COMPILER__LOCATION)
 
 		#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(rethrow_functor) \
-			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAL(rethrow_functor, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
+			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAIL(rethrow_functor, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
 
 		///\internal
-		#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAL(rethrow_functor, location) \
-			catch(          std::exception const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(                 wchar_t const e[]) { rethrow_functor.rethrow       (location, &e); } \
-			catch(                  char   const e[]) { rethrow_functor.rethrow       (location, &e); } \
-			catch(  signed          char   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(unsigned          char   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(  signed     short int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(unsigned     short int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(  signed           int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(unsigned           int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(  signed      long int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(unsigned      long int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(  signed long long int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(unsigned long long int   const & e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(            void const * const   e) { rethrow_functor.rethrow       (location, &e); } \
-			catch(               ...                ) { rethrow_functor.rethrow<void*>(location,   ); }
+		#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__DETAIL(rethrow_functor, location) \
+			catch(          std::exception const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(                 wchar_t const e[]) { rethrow_functor.operator_       (location, &e); } \
+			catch(                  char   const e[]) { rethrow_functor.operator_       (location, &e); } \
+			catch(  signed          char   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(unsigned          char   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(  signed     short int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(unsigned     short int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(  signed           int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(unsigned           int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(  signed      long int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(unsigned      long int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(  signed long long int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(unsigned long long int   const & e) { rethrow_functor.operator_       (location, &e); } \
+			catch(            void const * const   e) { rethrow_functor.operator_       (location, &e); } \
+			catch(               ...                ) { rethrow_functor.operator_<void*>(location    ); }
 	}
 }
 #include <universalis/compiler/dynamic_link/end.hpp>

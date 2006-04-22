@@ -417,7 +417,7 @@ XMSampler::Channel::PerformFX().
 		int m_Samples;
 		float m_sRateDeviation;
 		int m_Mode;
-		int m_PositionIndex;
+		int unsigned m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage m_Stage;
 

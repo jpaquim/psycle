@@ -23,10 +23,13 @@ namespace psycle
 		typedef CMachineInterface * (* CREATEGMACHINE) (int);	//dw00t
 		typedef CMachineGuiParameter ** (* GETPARAMS) (int);	//dw00t
 
-		PluginFxCallback Plugin::_callback;
+		PluginFxCallback Plugin::callback_;
 
-		#pragma warning(push)
-			#pragma warning(disable:4355) // 'this' : used in base member initializer list
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma warning(push)
+				#pragma warning(disable:4355) // 'this' : used in base member initializer list
+		#endif
+
 			Plugin::Plugin(Machine::id_type id)
 			:
 				Machine(MACH_PLUGIN, MACHMODE_FX, id),
@@ -39,7 +42,10 @@ namespace psycle
 				_audiorange=32768.0f;
 				std::sprintf(_editName, "native plugin");
 			}
-		#pragma warning(pop)
+
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma warning(pop)
+		#endif
 
 		Plugin::~Plugin() throw()
 		{
@@ -71,7 +77,7 @@ namespace psycle
 			}
 		#endif
 
-		void Plugin::Instance(std::string file_name)
+		void Plugin::Instance(std::string const & file_name)
 		{
 			char const static path_env_var_name[] =
 			{
@@ -151,8 +157,7 @@ namespace psycle
 			{
 				_pInfo = GetInfo();
 			}
-			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
-			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetInfo"); }
+			PSYCLE__HOST__CATCH_ALL(*this)
 			if(_pInfo->Version < plugin_interface::MI_VERSION) throw std::runtime_error("plugin format is too old");
 
 			_isSynth = _pInfo->Flags & 3; //dw00t //this was an == instead of an &, but the newgui uses the Flags field to identify itself
@@ -187,8 +192,7 @@ namespace psycle
 			{
 				proxy()(GetInterface());
 			}
-			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
+			PSYCLE__HOST__CATCH_ALL(*this)
 
 			if(_pInfo->Flags & plugin_interface::CUSTOM_GUI)
 			{
@@ -204,8 +208,7 @@ namespace psycle
 				{
 					_pParams = GetParams(id());
 				}
-				catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetParams", &e); }
-				catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetParams"); }
+				PSYCLE__HOST__CATCH_ALL(*this)
 			}
 		}
 
@@ -236,33 +239,32 @@ namespace psycle
 			}
 		}
 
-		bool Plugin::LoadDll(std::string psFileName)
+		bool Plugin::LoadDll(std::string const & base_name_)
 		{
-			std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
-			std::string sPath2;
-			std::string sPath;
-			if(!CNewMachine::lookupDllName(psFileName,sPath)) 
+			std::string base_name;
+			std::transform(base_name_.begin(), base_name_.end(), base_name.begin(), std::tolower);
+			std::string path;
+			if(!CNewMachine::lookupDllName(base_name,path)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
-				//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
-				sPath = psFileName;
+				//GetCompatible(base_name,path) // If no one found, it will return a null string.
+				path = base_name;
 			}
-
-			if(!CNewMachine::TestFilename(sPath) ) 
+			if(!CNewMachine::TestFilename(path) ) 
 			{
 				return false;
 			}
 			try
 			{
-				Instance(sPath.c_str());
+				Instance(path);
 			}
-			catch(const std::exception & e)
+			catch(std::exception const & e)
 			{
 				std::ostringstream s; s
-					<< "Exception while instanciating: " << sPath << std::endl
+					<< "Exception while instanciating: " << path << std::endl
 					<< "Replacing with dummy." << std::endl
-					<< typeid(e).name() << std::endl
+					<< universalis::compiler::typenameof(e) << std::endl
 					<< e.what();
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
@@ -270,9 +272,10 @@ namespace psycle
 			catch(...)
 			{
 				std::ostringstream s; s
-					<< "Exception while instanciating: " << sPath2 << std::endl
+					<< "Exception while instanciating: " << path << std::endl
 					<< "Replacing with dummy." << std::endl
-					<< "Unkown type of exception";
+					<< "Unkown type of exception" << std::endl
+					<< universalis::compiler::exceptions::ellipsis();
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
 			}
@@ -286,7 +289,7 @@ namespace psycle
 			{
 				proxy()(0);
 			}
-			catch(const std::exception & e)
+			catch(std::exception const & e)
 			{
 				if(!exception) exception = &e;
 			}
@@ -300,11 +303,14 @@ namespace psycle
 
 		void Plugin::SaveDllName(RiffFile * pFile) 
 		{
-			CString str = _psDllName.c_str();
-			char str2[256];
-			strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-			pFile->Write(&str2,strlen(str2)+1);
-		};
+			boost::filesystem::path path(this->GetDllName(); boost::filesystem::native);
+			path = path.leaf();
+			std::string s = path.string();
+			///\todo hardcoded limits and wastes
+			char c[/* limit */ 256];
+			std::strcpy(c,s);
+			pFile->Write(&c, /* waste */ s.length() + 1);
+		}
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
