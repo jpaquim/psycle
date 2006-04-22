@@ -81,55 +81,34 @@ namespace psycle
 						bad_returned_value(std::string const & what) : function_error(what) {}
 				};
 
-				// following code is like UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW declared in <universalis/exception.hpp>
-				// but we use a different rethrow function
-
 				///\internal
 				namespace detail
 				{
-					template<typename E> std::string string                (             E const & e) { std::ostringstream s; s << e; return s.str(); }
-					template<          > std::string string<std::exception>(std::exception const & e) { return e.what(); }
-					template<          > std::string string<void const *>  (  void const * const &  ) { return universalis::compiler::exception::ellipsis(); }
-
-					template<typename E> void rethrow(Machine & machine, compiler::location const & function, E const * const e, std::exception const * const standard) throw(function_error)
+					template<typename E> void rethrow(Machine & machine, compiler::location const & location, E const * const e, std::exception const * const standard) throw(function_error)
 					{
 						std::ostringstream s;
 						s
-							<< "Machine had an exception in function '" << function << "'." << std::endl
+							<< "Machine had an exception in function '" << location << "'." << std::endl
 							<< universalis::compiler::typenameof(*e) << std::endl
-							<< string(*e);
+							<< universalis::exceptions::string(*e);
 						function_error const function_error(s.str(), standard);
 						machine.crashed(function_error);
 						throw function_error;
 					}
 
-					template<typename E> void inline rethrow(Machine & machine, compiler::location const & function, E const * const e = 0) throw(function_error)
+					class rethrow_functor
 					{
-						rethrow(machine, function, e, 0);
-					}
-
-					template<> void inline rethrow<std::exception>(Machine & machine, compiler::location const & function, std::exception const * const e) throw(function_error)
-					{
-						rethrow(machine, function, e, e);
-					}
+						public:
+							rethrow_functor(Machine & machine) : machine_(machine) {}
+							template<typename E> void rethrow                ()(compiler::location const & location,              E const * const e = 0) const throw() { detail::rethrow(machine_, location, e, 0); }
+							template<          > void rethrow<std::exception>()(compiler::location const & location, std::exception const * const e    ) const throw() { detail::rethrow(machine_, location, e, e); }
+						private:
+							Machine & machine_;
+					};
 				}
-
 				#define PSYCLE__HOST__CATCH_ALL \
-					catch(          std::exception const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(                 wchar_t const e[]) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(                  char   const e[]) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed          char   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned          char   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed     short int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned     short int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed           int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned           int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed      long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned      long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(  signed long long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(unsigned long long int   const & e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(            void const * const   e) { psycle::host::exceptions::function_errors::detail::rethrow       (host(), UNIVERSALIS__COMPILER__LOCATION, &e); } \
-					catch(               ...                ) { psycle::host::exceptions::function_errors::detail::rethrow<void*>(host(), UNIVERSALIS__COMPILER__LOCATION    ); }
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor(host()))
+				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &host(), _1, _2, _3))
 			}
 		}
 
@@ -148,107 +127,93 @@ namespace psycle
 		class AudioPort;
 
 		// A wire is what interconnects two AudioPorts. Appart from being the graphically representable element,
-		//	the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
+		// the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
 		class Wire
 		{
-		public:
-			PSYCLE__STRONG_TYPEDEF(int, id_type);
+			public:
+				/// legacy
+				PSYCLE__STRONG_TYPEDEF(int, id_type);
 
-			Wire()
-				:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
-				,index(0),senderport(0),receiverport(0){};
-			virtual ~Wire()
-			{
-				if (senderport) Disconnect(senderport);
-				if (receiverport) Disconnect(receiverport);
-			}
-			virtual void Connect(AudioPort *senderp,AudioPort *receiverp);
-			virtual void ChangeSource(AudioPort* newsource);
-			virtual void ChangeDestination(AudioPort* newdest);
-			virtual void CollectData(int numSamples);
-			virtual void SetVolume(float newvol);
-			virtual void SetPan(float newpan);
-			virtual inline int GetIndex() { return index; };
-			virtual inline int SetIndex(int idx) { index = idx; };
-			
-		protected:
-			virtual void Disconnect(AudioPort* port);
-			virtual inline float RVol() { return rvol; };
-			virtual inline float LVol() { return lvol; };
-			float volume;
-			float pan;
-			float multiplier;
-			float rvol;
-			float lvol;
-			int index;
-			AudioPort *senderport;
-			AudioPort *receiverport;
+				Wire()
+					:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
+					,index(0),senderport(0),receiverport(0){}
+				virtual ~Wire()
+				{
+					if (senderport) Disconnect(senderport);
+					if (receiverport) Disconnect(receiverport);
+				}
+				virtual void Connect(AudioPort *senderp,AudioPort *receiverp);
+				virtual void ChangeSource(AudioPort* newsource);
+				virtual void ChangeDestination(AudioPort* newdest);
+				virtual void CollectData(int numSamples);
+				virtual void SetVolume(float newvol);
+				virtual void SetPan(float newpan);
+				virtual inline int GetIndex() { return index; }
+				virtual inline int SetIndex(int idx) { index = idx; }
+				
+			protected:
+				virtual void Disconnect(AudioPort* port);
+				virtual inline float RVol() { return rvol; }
+				virtual inline float LVol() { return lvol; }
+				float volume;
+				float pan;
+				float multiplier;
+				float rvol;
+				float lvol;
+				int index;
+				AudioPort *senderport;
+				AudioPort *receiverport;
 		};
 
 		// Class which allows the setup (as in shape) of the machines' connectors.
-		// An Audio port is synonim of a channel. In other words, it is an element that defines
-		//	the characteristics of one or more individual inputs that are used in conjunction.
-		//	From this definition, we could have one Stereo Audio Port (one channel, two inputs or outputs),
-		//  a 5.1 Port, or several Stereo Ports (in the case of a mixer table), between others..
-		// Note that several wires can be connected to the same AudioPort.
+		// An Audio port is synonym of a multiplexed channel. In other words, it is an element that defines
+		// the characteristics of one or more individual inputs that are used in conjunction.
+		// From this definition, we could have one Stereo Audio Port (one channel, two inputs or outputs),
+		// a 5.1 Port, or several Stereo Ports (in the case of a mixer table), between others..
+		// Note that several wires can be connected to the same AudioPort (automatic mixing in the case of an input port?).
 		class AudioPort
 		{
-		protected:
-			AudioPort(){};
-		public:
-			//\todo: Port creation, assign buffers to it (passed via ctor? they might be shared). 
-			//\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
-			AudioPort(Machine* powner,int arrangement,std::string name)
-			{
-				pParent=powner;
-				portName=name;
-				portArrangement=arrangement;
-			}
-			virtual ~AudioPort(){};
-			virtual void CollectData(int numSamples){};
-			virtual void Connected(Wire *wire);
-			virtual void Disconnected(Wire *wire);
-			virtual inline Wire* GetWire(unsigned int index){ assert(index<wires.size()); return wires[index]; };
-			virtual inline bool NumberOfWires() { return wires.size(); };
-			virtual inline int Arrangement() { return portArrangement; };
-			virtual inline Machine * GetMachine() { return pParent; };
-			//\todo : should change arrangement/name be allowed? (Mutating Port?)
-			virtual inline void ChangeArrangement(int arrangement) { portArrangement = arrangement; };
-			virtual inline std::string  Name() { return portName; };
-			virtual inline void ChangeName(std::string name) { portName = name; };
-		protected:
-			int portArrangement;
-			std::string portName;
-			std::vector<Wire*> wires;
-			Machine* pParent;
+			public:
+				//\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
+				//\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
+				AudioPort(Machine & parent, int arrangement, std::string const & name) : parent_(parent), name_(name), arrangement_(arrangement) {}
+				virtual ~AudioPort() {}
+				virtual void CollectData(int numSamples) {}
+				virtual void Connected(Wire * wire);
+				virtual void Disconnected(Wire * wire);
+				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires.size()); return wires[index]; }
+				virtual inline bool NumberOfWires() { return wires.size(); }
+				virtual inline int Arrangement() throw() { return arrangement; }
+				virtual inline Machine * GetMachine() throw() { return &parent_; }
+				//\todo : should change arrangement/name be allowed? (Mutating Port?)
+				virtual inline void ChangeArrangement(int arrangement) { this->arrangement_ = arrangement; }
+				virtual inline std::string const & Name() const throw() { return name_; }
+				virtual inline void ChangeName(std::string const & name) { this->name_ = name; }
+			private:
+				Machine & parent_;
+				int arrangement_;
+				std::string name_;
+				std::vector<Wire*> wires_;
 		};
 
 		class InPort : public AudioPort
 		{
-		protected:
-			InPort(){};
-		public:
-			PSYCLE__STRONG_TYPEDEF(int, id_type);
-			InPort(Machine* powner,int arrangement,std::string name)
-			{
-				AudioPort(powner,arrangement,name);
-			}
-			virtual ~InPort(){};
-			virtual void CollectData(int numSamples);
+			public:
+				/// legacy
+				PSYCLE__STRONG_TYPEDEF(int, id_type);
+				InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
+				virtual ~InPort(){};
+				virtual void CollectData(int numSamples);
 		};
 
 		class OutPort : public AudioPort
 		{
-		protected:
-			OutPort(){};
-		public:
-			PSYCLE__STRONG_TYPEDEF(int, id_type);
-			OutPort(Machine* powner,int arrangement,std::string name)
-			{
-				AudioPort(powner,arrangement,name);
-			}
-			virtual ~OutPort(){};
-			virtual void CollectData(int numSamples);
+			public:
+				/// legacy
+				PSYCLE__STRONG_TYPEDEF(int, id_type);
+				OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
+				virtual ~OutPort() {}
+				virtual void CollectData(int numSamples);
 		};
 
 		enum MachineType
@@ -375,7 +340,7 @@ namespace psycle
 			///\name each machine has a mode attribute so that we can make yummy switch statements
 			///\{
 				public:
-					///\see enum MachineMode which defined somewhere outside
+					///\see enum MachineMode which is defined somewhere outside
 					typedef MachineMode mode_type;
 					mode_type inline mode() const throw() { return _mode; }
 				PSYCLE__PRIVATE:
@@ -385,6 +350,7 @@ namespace psycle
 			///\name machine's numeric identifier used in the patterns and gui display
 			///\{
 				public:
+					/// legacy
 					///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
 					PSYCLE__STRONG_TYPEDEF(int, id_type);
 					id_type id() const throw() { return _macIndex; }
