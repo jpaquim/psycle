@@ -20,7 +20,7 @@
 #ifndef NMOVEABLE_H
 #define NMOVEABLE_H
 
-enum NMoveType{ nMvHorizontal = 1, nMvVertical = 2, nMvParentLimit = 4, nMvRectPicker = 8, nMvPolygonPicker = 16, nMvBorder=32, nMvNoneRepaint = 64};
+enum NMoveType{ nMvHorizontal = 1, nMvVertical = 2, nMvParentLimit = 4, nMvTopLimit = 128, nMvLeftLimit = 256, nMvRectPicker = 8, nMvPolygonPicker = 16, nMvBorder=32, nMvNoneRepaint = 64};
 
 /**
 @author Stefan Nattkemper

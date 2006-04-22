@@ -34,19 +34,16 @@ void NAutoScrollLayout::align( NVisualComponent * parent )
 {
   maxX_ = 0;
   maxY_ = 0;
-  std::vector<NRuntime*>::iterator itr = parent->components.begin();
+  std::vector<NVisualComponent*>::const_iterator itr = parent->visualComponents().begin();
 
-  for (;itr < parent->components.end(); itr++) {
-    NRuntime* child = *itr;
-    //if (child->visit(NVisualComponent::isVisualComponent)) {
-       // we know that the Component is a visual Component and can type safe cast due to the visitor pattern
-       NVisualComponent* visualChild = static_cast<NVisualComponent*> (child);
+  for (;itr < parent->visualComponents().end(); itr++) {
+    NVisualComponent* visualChild = *itr;
        if (visualChild->visible()) {
         if (visualChild->width()+visualChild->left() > maxX_) {
            maxX_ = visualChild->width()+visualChild->left();
         }
         if (visualChild->height()+visualChild->top() > maxY_) {
-           maxY_ = visualChild->width()+visualChild->left();
+           maxY_ = visualChild->height()+visualChild->top();
         }
        }
   }

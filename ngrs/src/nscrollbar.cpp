@@ -295,6 +295,8 @@ void NScrollBar::scrollComponent( NVisualComponent * comp , int dx, int dy )
      }
    }
 
+   if (dx<0) dx = 0;
+
    int diffX = (dx - comp->scrollDx());
    if (diffX !=0) {
     comp->setScrollDx(dx);
