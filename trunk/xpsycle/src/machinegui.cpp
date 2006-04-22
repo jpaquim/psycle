@@ -38,7 +38,7 @@ MachineGUI::MachineGUI(Machine* mac)
 {
   line = 0;
   mac_ = mac;
-  setMoveable(NMoveable(nMvHorizontal | nMvVertical | nMvNoneRepaint));
+  setMoveable(NMoveable(nMvHorizontal | nMvVertical | nMvNoneRepaint | nMvTopLimit | nMvLeftLimit));
   setPosition(mac->_x,mac_->_y,200,30);
 
   if (c==0) {
@@ -330,6 +330,11 @@ void MasterGUI::onMouseDoublePress( int x, int y, int button )
 void EffektGUI::onMouseDoublePress( int x, int y, int button )
 {
   frameMachine->setVisible(true);
+}
+
+void MachineGUI::onMoveEnd( const NMoveEvent & moveEvent )
+{
+  ((NVisualComponent*) parent())->resize();
 }
 
 
