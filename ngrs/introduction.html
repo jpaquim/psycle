@@ -12,8 +12,8 @@ To start writing an ngrs app, you need 3 steps todo:
 <p>
 Example (1.1) : displaying a window
 <pre>
-#include "napp.h"
-#include "nwindow.h"
+#include &lt;napp.h&gt;
+#include &lt;nwindow.h&gt;
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +32,7 @@ Each ngrs app needs a mainwindow, that will be act as parent for every gui eleme
 So your first step will be, to create a derevided class of NWindow.<p>
 Example (1.2) : deriving a window
 <pre>
-#include "nwindow.h"
+#include &lt;nwindow.h&gt;
 
 class MainWindow : public NWindow {
 public:
@@ -40,8 +40,8 @@ public:
   ~MainWindow() {};
 };
 
-#include "napp.h"
-#include "mainwindow.h"
+#include &lt;napp.h&gt;
+#include &lt;mainwindow.h&gt;
 
 int main(int argc, char *argv[])
 {
@@ -72,9 +72,9 @@ Now you can go further e.g adding an Menu. An main menu is created with a menuBa
 Example (1.4) : adding a menubar with some entries.
 
 <pre>
-    #include "nmenubar.h"
-    #include "nmenu.h"
-    #include "nmenuitem.h"
+    #include &lt;nmenubar.h&gt;
+    #include &lt;nmenu.h&gt;
+    #include &lt;nmenuitem.h&gt;
 
     MainWindow() {
 1       setTitle("My program");

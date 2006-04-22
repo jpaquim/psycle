@@ -145,7 +145,7 @@ int NAlignLayout::preferredHeight( const NVisualComponent * target ) const
   for (;itr < parent()->visualComponents().end(); itr++) {
      NVisualComponent* visualChild = *itr;
      switch (visualChild->align()) {
-       case nAlLeft   : yp = std::max(yp,visualChild->preferredHeight());  break;
+       case nAlLeft   : yp = std::max(topMax,visualChild->preferredHeight());  break;
        case nAlTop    : yp = yp + visualChild->preferredHeight();  break;
        case nAlBottom : yp = yp + visualChild->preferredHeight();  break;
        case nAlClient : yp = yp + visualChild->preferredHeight();  break;
