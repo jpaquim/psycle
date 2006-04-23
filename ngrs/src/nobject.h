@@ -23,6 +23,7 @@
 #include "sigslot.h"
 #include "nkeyaccelerator.h"
 #include <string>
+#include <vector>
 
 class NEvent;
 
@@ -42,12 +43,16 @@ public:
     void setName(const std::string & name);
     const std::string & name() const;
 
+    void sendMessage(NEvent* ev);
+    void addMessageListener(NObject* obj);
+
     virtual void onKeyAcceleratorNotify(NKeyAccelerator accelerator);
     virtual void onCustomMessage(NEvent* event);
 
 private:
 
    std::string name_;
+   std::vector<NObject*> msgListener;
 };
 
 #endif

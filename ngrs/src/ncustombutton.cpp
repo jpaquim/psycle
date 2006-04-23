@@ -92,8 +92,9 @@ int NCustomButton::preferredHeight( ) const
 void NCustomButton::onMousePress( int x, int y, int button )
 {
   setDown(!down_);
-  NButtonEvent ev(this,x,y,button);
+  NButtonEvent ev(this,x,y,button,"btnpress");
   click.emit(&ev);
+  sendMessage(&ev);
 }
 
 void NCustomButton::onMousePressed( int x, int y, int button )
@@ -103,8 +104,9 @@ void NCustomButton::onMousePressed( int x, int y, int button )
     setDown(false);
   }
   if (NRect(0,0,width(),height()).intersects(x,y)) {
-    NButtonEvent ev(this,x,y,button);
+    NButtonEvent ev(this,x,y,button,"btnpressed");
     clicked.emit(&ev);
+    sendMessage(&ev);
   }
 }
 

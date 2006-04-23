@@ -209,6 +209,7 @@ void NMenuItem::onMousePress( int x, int y, int button )
   NApp::unmapPopupWindows();
   NButtonEvent ev(this,x,y,button,text());
   click.emit(&ev);
+  sendMessage(&ev);
 }
 
 void NMenuItem::setMnemonic( char c )

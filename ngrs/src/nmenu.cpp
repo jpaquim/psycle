@@ -163,9 +163,11 @@ void NMenu::add( std::string create )
         substr.erase(0,2);
         NCheckMenuItem *item = new NCheckMenuItem(substr);
         add(item);
+        item->setName(substr);
       } else {
         NMenuItem *item = new NMenuItem(substr);
         add(item);
+        item->setName(substr);
       }
     }
   } while (i != std::string::npos);
