@@ -76,6 +76,18 @@ namespace psycle
 							#pragma warning(push)
 							#pragma warning(disable:4702) // unreachable code
 						#endif
+
+						//////////////////////
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// ***** TODO ****
+						/// put back the inline implementation after the class definition like it was before
+						//////////////////////
 						long int inline magic()                                                                      throw(host::exceptions::function_error) { assert((*this)()); try { return plugin().magic;                                               } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
 						void inline     process(float * * inputs, float * * outputs, long int sampleframes)          throw(host::exceptions::function_error) { assert((*this)()); try { plugin().process(&plugin(), inputs, outputs, sampleframes);          } PSYCLE__HOST__CATCH_ALL(host()) }
 						void inline     processReplacing(float * * inputs, float * * outputs, long int sampleframes) throw(host::exceptions::function_error) { assert((*this)()); try { plugin().processReplacing(&plugin(), inputs, outputs, sampleframes); } PSYCLE__HOST__CATCH_ALL(host()) }
