@@ -29,7 +29,7 @@
 #include <napp.h>
 #include <nitem.h>
 #include <ncheckmenuitem.h>
-
+#include <nmessagebox.h>
 
 
 /* XPM */
@@ -892,6 +892,7 @@ void MainWindow::updateComboGen() {
 
 void MainWindow::appNew( )
 {
+  if (checkUnsavedSong())
   //if (CheckUnsavedSong("New Song"))
   {
     //KillUndo();
@@ -1199,6 +1200,20 @@ void MainWindow::onIncInsBtn( NButtonEvent * ev )
     insCombo_->setIndex(index);
     insCombo_->repaint();
   }
+}
+
+bool MainWindow::checkUnsavedSong( )
+{
+  NMessageBox* box = new NMessageBox("Save changes of : "+Global::pSong()->fileName+" ?");
+  box->setTitle("New Song");
+  box->setButtonText("Yes","No","Abort");
+  add(box);
+  bool result = box->execute();
+  if (result == true) {
+     childView_->onFileSaveSong(0);
+  }
+  NApp::addRemovePipe(box);
+  return result;
 }
 
 

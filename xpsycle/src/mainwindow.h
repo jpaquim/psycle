@@ -156,6 +156,8 @@ private:
 
     void onTimer();
 
+    bool checkUnsavedSong();
+
     int close();
     void updateComboIns(bool updatelist);
 };
