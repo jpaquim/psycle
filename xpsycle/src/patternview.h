@@ -108,6 +108,10 @@ class PatternView : public NPanel
      NPoint linesFromRepaint(const NRegion & repaintArea);
      NPoint tracksFromRepaint(const NRegion & repaintArea);
 
+     void copyBlock(bool cutit);
+     void pasteBlock(int tx,int lx,bool mix,bool save = true);
+     void blockTranspose(int trp);
+     void deleteBlock();
 
    private:
 
@@ -160,11 +164,6 @@ class PatternView : public NPanel
     void onPopupTranspose_12(NButtonEvent* ev);
     void onPopupPattern(NButtonEvent* ev);
 
-
-    void copyBlock(bool cutit);
-    void pasteBlock(int tx,int lx,bool mix,bool save = true);
-    void blockTranspose(int trp);
-
     unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
   };
 
@@ -213,6 +212,11 @@ public:
     void PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine);
     void noteOffAny();
     void clearCursorPos();
+
+    void copyBlock(bool cutit);
+    void pasteBlock(int tx,int lx,bool mix,bool save = true);
+    void blockTranspose(int trp);
+    void deleteBlock();
 
 private:
 

@@ -115,6 +115,7 @@ private:
     void onFileMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
     void onViewMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
     void onHelpMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
+    void onEditMenuItemClicked(NEvent* menuEv, NButtonEvent* itemEv);
 
     void onFileNew(NButtonEvent* ev);
     void onFileOpen(NButtonEvent* ev);
