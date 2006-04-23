@@ -716,6 +716,20 @@ void PatternView::PatternDraw::drawPattern( NGraphics * g, int startLine, int en
 
 void PatternView::PatternDraw::onMousePress( int x, int y, int button )
 {
+  if (button == 4) {
+     // wheel mouse scroll up
+     int startLine  = dy_ / pView->rowHeight();
+     int newLine = std::max(0,startLine-1);
+     pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
+  } else
+  if (button == 5) {
+    // wheel mouse scrolling down
+     int startLine  = dy_ / pView->rowHeight();
+     int lineCount  = clientHeight() / pView->rowHeight();
+     int newLine = std::max(0,std::min(pView->lineNumber()-lineCount,startLine+1));
+     pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
+  }
+
   if (button == 3) {
      editPopup_->setPosition(x + absoluteLeft(), y + 10 + absoluteTop(),100,100);
      editPopup_->setVisible(true);
