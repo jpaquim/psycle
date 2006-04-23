@@ -137,6 +137,7 @@ void NMenu::onItemSelected( NButtonEvent * ev )
   selectedItem_ = ev->sender();
   NEvent ev_menu(this,text());
   itemClicked.emit(&ev_menu,ev);
+  sendMessage(&ev_menu);
 }
 
 NObject * NMenu::selectedItem( )
