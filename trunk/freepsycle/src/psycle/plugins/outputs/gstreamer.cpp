@@ -295,13 +295,51 @@ namespace psycle
 			void gstreamer::do_start() throw(engine::exception)
 			{
 				resource::do_start();
-				if(!::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING)) throw engine::exceptions::runtime_error("could not set the whole pipeline state to playing", UNIVERSALIS__COMPILER__LOCATION);
+				::GstStateChangeReturn const result(::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING));
+				switch(result)
+				{
+					case ::GST_STATE_CHANGE_SUCCESS: goto success;
+					case ::GST_STATE_CHANGE_ASYNC:
+						{
+							::GstClockTime timeout_total_nanoseconds(0);
+							::GstClockTime timeout_nanoseconds(1e9);
+							for(;;)
+							{
+								{
+									std::ostringstream s; s << "waiting for the whole pipeline state to asynchronously change to playing state (waited a total of " << timeout_total_nanoseconds * 1e-9 << ")";
+									universalis::operating_system::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+								}
+								{
+									::GstState state, pending;
+									::GstStateChangeReturn const result(::gst_element_get_state(pipeline_, &state, &pending, timeout_nanoseconds));
+									switch(result)
+									{
+										case ::GST_STATE_CHANGE_SUCCESS: goto success;
+										case ::GST_STATE_CHANGE_ASYNC: break;
+										default: goto failed;
+									}
+								}
+								timeout_total_nanoseconds += timeout_nanoseconds;
+								if(timeout_total_nanoseconds > 60e9) break;
+								timeout_nanoseconds *= 2;
+							}
+						}
+					default:
+					failed:
+						{
+							std::ostringstream s; s << "could not set the whole pipeline state to playing";
+							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+				}
+				success: ;
 			}
 		
 			bool gstreamer::started() const
 			{
 				if(!opened()) return false;
-				return ::gst_element_get_state(pipeline_) == ::GST_STATE_PLAYING;
+				::GstState state, pending;
+				::GstClockTime timeout(0);
+				return ::gst_element_get_state(pipeline_, &state, &pending, timeout) == ::GST_STATE_PLAYING;
 			}
 		
 			void gstreamer::handoff_static(::GstElement * source, ::GstBuffer * buffer, GstPad * pad, gstreamer * instance)
@@ -318,14 +356,14 @@ namespace psycle
 						
 			void gstreamer::handoff(::GstBuffer & buffer)
 			{
-				if(true)///\todo
+				if(true)///\todo caps_set_
 				{
 					if(loggers::trace())
 					{
 						loggers::trace()("caps not set on buffer ; setting them", UNIVERSALIS__COMPILER__LOCATION);
 					}
 					::gst_buffer_set_caps(&buffer, caps_);
-					caps_set_ = true;
+					//caps_set_ = true;
 				}
 				std::size_t const size(GST_BUFFER_SIZE(&buffer));
 				if(loggers::trace())
@@ -376,5 +414,6 @@ namespace psycle
 			{
 				close();
 			}
-	};
+		}
+	}
 }
