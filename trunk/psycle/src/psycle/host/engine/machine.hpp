@@ -104,8 +104,21 @@ namespace psycle
 							Machine & machine_;
 					};
 				}
+				//////////////////////
+				/// ***** TODO ****
+				/// ***** TODO ****
+				/// ***** TODO ****
+				/// ***** TODO ****
+				/// ***** TODO ****
+				/// ***** TODO ****
+				/// ***** TODO ****
+				/// ***** TODO ****
+				//////////////////////
+				///\todo VERY IMPORTANT: exception handling has been semi-disabled for now (see //__WITH_FUNCTOR) in the definition below)
+				///\todo VERY IMPORTANT: the reason is there's a circular dependency between proxy and plugin classes.
+				///\todo VERY IMPORTANT: we need to put back the inlined implementation after the class definition like it was before.
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor f(machine); f)
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW//__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor f(machine); f)
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
 			}
 		}

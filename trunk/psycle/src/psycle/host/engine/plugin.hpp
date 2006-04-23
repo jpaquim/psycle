@@ -73,6 +73,17 @@ namespace psycle
 						#pragma warning(disable:4702) // unreachable code
 					#endif
 
+					//////////////////////
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// ***** TODO ****
+					/// put back the inline implementation after the class definition like it was before
+					//////////////////////
 					void inline Init()                                                                         throw(exceptions::function_error) { assert((*this)()); try { plugin().Init();                                                        } PSYCLE__HOST__CATCH_ALL(host()) }
 					void inline SequencerTick()                                                                throw(exceptions::function_error) { assert((*this)()); try { plugin().SequencerTick();                                               } PSYCLE__HOST__CATCH_ALL(host()) }
 					void inline ParameterTweak(int par, int val)                                               throw(exceptions::function_error) { assert((*this)()); try { plugin().ParameterTweak(par, val);                                      } PSYCLE__HOST__CATCH_ALL(host()) }
