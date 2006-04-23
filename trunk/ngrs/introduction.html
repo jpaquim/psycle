@@ -197,5 +197,37 @@ You can connect a method to the keyPressed signal of the nedit. If you connectin
 <pre>
 
 </pre>
+<p>
+<img src="filedialog.png"  border="0" alt="" align="left"> <br clear="all">
+<p>
+<h3>Get it to work</h3>
+A NFileDialog is a window wich will be created with new NFileDialog(). With "add" you add the dialog to another window. 
+<p>
+<pre>
+NFileDialog* dialog;
+
+// somewhere in the constructor
+dialog = new NFileDialog(); 
+add(dialog);
+</pre>
+
+<p>
+<pre>
+Lets create a button that will open the filedialog
+NButton* btn = new NButton();
+pane->add(btn);
+btn->clicked.connect(this,&amp;myClass::btnPressed);
+
+void myClass::btnPressed(NButtonEvent* ev) {
+  if (dialog->execute()) { /*loadFile for e.g */ } else { //do nothing }
+}
+</pre>
+
+<p>
+  dialog->execute() will start the dialog, stop the rest of the program, will wait till ok or cancel was pressed and return true or false depending if the ok or cancel button was pressed.
+  <p>
+in future:
+With  dialog->dir() you get the dir, with dialog->filename() you get the filename without dir and with dialog->dirFilename() you get the filename including the full path.
+atm : fileName() has the full dir path..
 </body>
 </html>
