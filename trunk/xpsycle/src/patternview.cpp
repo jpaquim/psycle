@@ -728,8 +728,10 @@ void PatternView::PatternDraw::onMousePress( int x, int y, int button )
      int lineCount  = clientHeight() / pView->rowHeight();
      int newLine = std::max(0,std::min(pView->lineNumber()-lineCount,startLine+1));
      pView->vScrBar()->setPos( (newLine) * pView->rowHeight());
-  }
-
+  } else 
+  if (button == 2) {
+    // todo linux paste
+  } else
   if (button == 3) {
      editPopup_->setPosition(x + absoluteLeft(), y + 10 + absoluteTop(),100,100);
      editPopup_->setVisible(true);
