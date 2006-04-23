@@ -41,6 +41,7 @@
 #include "ncustomtreeview.h"
 #include "ntreenode.h"
 #include "nlabel.h"
+#include "nmessagebox.h"
 
 const char * a_xpm[] = {
 "12 6 2 1",
@@ -72,8 +73,8 @@ NTestWindow::NTestWindow()
   view->setPosition(10,50,200,200);*/
 
 
-  //testMenu();
-  testSegDisplay();
+  testMenu();
+  //testSegDisplay();
 
 }
 
@@ -101,7 +102,13 @@ void NTestWindow::onSliderPosChanged( double v )
 
 void NTestWindow::onOpen( NButtonEvent * ev )
 {
-  fDialog->execute();
+
+  NMessageBox* msg = new NMessageBox("Daten gehen verloren!");
+  add(msg);
+  msg->execute();
+  NApp::addRemovePipe(msg);
+  
+  //fDialog->execute();
 }
 
 void NTestWindow::testBorderLayout( )

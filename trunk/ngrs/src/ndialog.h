@@ -35,6 +35,8 @@ public:
     bool execute();
     int onClose( );
 
+    void doClose(bool flag);
+
 private:
 
     bool do_execute;

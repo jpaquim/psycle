@@ -44,3 +44,10 @@ int NDialog::onClose()
   return nDestroyWindow;
 }
 
+void NDialog::doClose( bool flag )
+{
+  do_execute = flag;
+  setVisible(false);
+  setExitLoop(nDestroyWindow);
+}
+
