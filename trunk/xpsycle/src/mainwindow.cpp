@@ -284,6 +284,7 @@ void MainWindow::initMenu( )
 
    editMenu_ = new NMenu("Edit",'e',
        "Undo,Redo,Pattern Cut,Pattern Copy,Pattern Paste,Pattern Mix Paster,Pattern Delete,|,Block Cut,Block Copy,Block Paste,Block Mix Paste,Block Delete,|,Sequence Cut,Sequence Copy,Sequence Delete");
+       editMenu_->itemClicked.connect(this, &MainWindow::onEditMenuItemClicked);
    menuBar_->add(editMenu_);
 
    viewMenu_ = new NMenu("View",'v',
@@ -945,6 +946,60 @@ void MainWindow::onHelpMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
   }
 }
 
+void MainWindow::onEditMenuItemClicked( NEvent * menuEv, NButtonEvent * itemEv )
+{
+  if (itemEv->text()=="Undo") {
+
+  } else
+  if (itemEv->text()=="Redo") {
+
+  } else
+  if (itemEv->text()=="Pattern Cut") {
+
+  } else 
+  if (itemEv->text()=="Pattern Copy") {
+
+  } else
+  if (itemEv->text()=="Pattern Paste") {
+
+  } else
+  if (itemEv->text()=="Pattern Mix Paster") {
+
+  } else
+  if (itemEv->text()=="Pattern Delete") {
+
+  } else
+  if (itemEv->text()=="Block Cut") {
+    childView_->patternView()->copyBlock(true);
+    childView_->patternView()->repaint();
+  } else
+  if (itemEv->text()=="Block Copy") {
+    childView_->patternView()->copyBlock(false);
+    childView_->patternView()->repaint();
+  } else
+  if (itemEv->text()=="Block Paste") {
+    PatternView* pView = childView_->patternView();
+    pView->pasteBlock(pView->cursor().x(),pView->cursor().y(),false);
+    childView_->patternView()->repaint();
+  } else
+  if (itemEv->text()=="Block Mix Paste") {
+
+  } else
+  if (itemEv->text()=="Block Delete") {
+    childView_->patternView()->deleteBlock();
+    childView_->patternView()->repaint();
+  } else
+  if (itemEv->text()=="Sequence Cut") {
+
+  } else
+  if (itemEv->text()=="Sequence Copy") {
+
+  } else
+  if (itemEv->text()=="Sequence Delete") {
+
+  }
+}
+
 void MainWindow::onBpmIncOne(NButtonEvent* ev)  // OnBpmAddOne
 {
   setAppSongBpm(1);
@@ -1145,6 +1200,8 @@ void MainWindow::onIncInsBtn( NButtonEvent * ev )
     insCombo_->repaint();
   }
 }
+
+
 
 
 

@@ -1513,16 +1513,7 @@ void PatternView::PatternDraw::onPopupTranspose_12( NButtonEvent * ev )
 
 void PatternView::PatternDraw::onPopupBlockDelete( NButtonEvent * ev )
 {
-  PatternEntry blank;
-  // UNDO CODE HERE CUT
-  //AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
-
-  int ps=Global::pSong()->playOrder[pView->editPosition()];
-
-  for (int t=selection_.left(); t < selection_.right();t++)
-    for (int l=selection_.top(); l< selection_.bottom();l++)
-            memcpy(Global::pSong()->_ptrackline(ps,t,l),&blank,EVENT_SIZE);
-
+  
 }
 
 void PatternView::PatternDraw::startSel(const NPoint3D & p)
@@ -1603,6 +1594,40 @@ void PatternView::PatternDraw::doSel(const NPoint3D & p )
 
 void PatternView::PatternDraw::onKeyRelease(const NKeyEvent & event) {
   if ( event.scancode() == XK_Shift_L || event.scancode() == XK_Shift_R ) endSel();
+}
+
+void PatternView::copyBlock( bool cutit )
+{
+  drawArea->copyBlock(cutit);
+}
+
+void PatternView::pasteBlock( int tx, int lx, bool mix, bool save )
+{
+  drawArea->pasteBlock(tx,lx,mix,save);
+}
+
+void PatternView::blockTranspose( int trp )
+{
+  drawArea->blockTranspose(trp);
+}
+
+void PatternView::PatternDraw::deleteBlock( )
+{
+  PatternEntry blank;
+  // UNDO CODE HERE CUT
+  //AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+
+  int ps=Global::pSong()->playOrder[pView->editPosition()];
+
+  for (int t=selection_.left(); t < selection_.right();t++)
+    for (int l=selection_.top(); l< selection_.bottom();l++)
+            memcpy(Global::pSong()->_ptrackline(ps,t,l),&blank,EVENT_SIZE);
+
+}
+
+void PatternView::deleteBlock( )
+{
+  drawArea->deleteBlock();
 }
 
 
