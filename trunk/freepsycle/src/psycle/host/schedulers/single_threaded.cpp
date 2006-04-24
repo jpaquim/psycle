@@ -160,13 +160,13 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				{
 					if(loggers::information()())
 					{
-						loggers::information()("starting scheduler thread on graph " + graph().underlying().name() + " ...");
+						loggers::information()("starting scheduler thread on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 					}
 					if(thread_)
 					{
 						if(loggers::information()())
 						{
-							loggers::information()("thread is already running");
+							loggers::information()("thread is already running", UNIVERSALIS__COMPILER__LOCATION);
 						}
 						return;
 					}
@@ -176,6 +176,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 					}
 					catch(boost::thread_resource_error const & e)
 					{
+						loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
 						std::ostringstream s; s << universalis::compiler::typenameof(e) << ": " << e.what();
 						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
@@ -185,13 +186,13 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				{
 					if(loggers::information()())
 					{
-						loggers::information()("terminating and joining scheduler thread on graph " + graph().underlying().name() + " ...");
+						loggers::information()("terminating and joining scheduler thread on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 					}
 					if(!thread_)
 					{
 						if(loggers::information()())
 						{
-							loggers::information()("scheduler thread was not running");
+							loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
 						}
 						return;
 					}
@@ -202,7 +203,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 					thread_->join();
 					if(loggers::information()())
 					{
-						loggers::information()("scheduler thread on graph " + graph().underlying().name() + " joined");
+						loggers::information()("scheduler thread on graph " + graph().underlying().name() + " joined", UNIVERSALIS__COMPILER__LOCATION);
 					}
 					delete thread_; thread_ = 0;
 				}
@@ -215,7 +216,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 			
 				void scheduler::operator()()
 				{
-					loggers::information()("scheduler thread started on graph " + graph().underlying().name());
+					loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 					universalis::processor::exception::new_thread(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
 					try
 					{
@@ -227,7 +228,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 							}
 							catch(...)
 							{
-								loggers::exception()("exception in scheduler thread");
+								loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
 								throw;
 							}
 						}
@@ -260,7 +261,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 						}
 						throw;
 					}
-					loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated");
+					loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 					{
 						boost::mutex::scoped_lock lock(mutex_);
 						stop_requested_ = false;
@@ -314,12 +315,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 						allocate();
 						while(!stop_requested())
 						{
-							if(loggers::trace()())
-							{
-								std::ostringstream s;
-								s << "process loop";
-								loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-							}
+							loggers::trace()("process loop", UNIVERSALIS__COMPILER__LOCATION);
 							boost::mutex::scoped_lock lock(graph().underlying().mutex());
 							for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i)
 							{
@@ -335,6 +331,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 					}
 					catch(...)
 					{
+						loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
 						free();
 						throw;
 					}

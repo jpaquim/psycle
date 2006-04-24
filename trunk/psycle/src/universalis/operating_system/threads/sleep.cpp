@@ -7,7 +7,7 @@
 #include PACKAGENERIC
 #include <universalis/detail/project.private.hpp>
 #include "sleep.hpp"
-#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if /* boost::thread::sleep returns on interruptions */ /*defined UNIVERSALIS__QUAQUAVERSALIS &&*/ defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	#include <universalis/operating_system/exceptions/code_description.hpp>
 	#include <ctime> // posix 1003.1b ::nanosleep, ::timespec
 	#include <cerrno>
@@ -27,9 +27,9 @@ namespace universalis
 		{
 			void sleep(compiler::numeric<>::floating_point const & seconds) throw(exception)
 			{
-				#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+				#if /* boost::thread::sleep returns on interruptions */ /*defined UNIVERSALIS__QUAQUAVERSALIS &&*/ defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					::timespec requested, remains;
-					requested.tv_sec = static_cast<::timespec>(seconds);
+					requested.tv_sec = static_cast< ::time_t >(seconds);
 					compiler::numeric<>::floating_point const fractional(seconds - requested.tv_sec);
 					requested.tv_nsec = static_cast</*un*/signed long int>(fractional * 1e9);
 					while(::nanosleep(&requested, &remains))
@@ -38,7 +38,7 @@ namespace universalis
 						{
 							std::ostringstream s;
 							s << "failed to sleep: " << exceptions::code_description();
-							throw exception(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 						}
 						// We have been interrupted before the period has completed.
 						requested = remains;
@@ -52,19 +52,14 @@ namespace universalis
 					boost::xtime xtime;
 					// get the current date.
 					boost::xtime_clock_types const clock(boost::TIME_UTC);
-					if(!boost::xtime_get(&xtime, clock))
-					{
-						std::ostringstream s;
-						s << "failed to get current time";
-						throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-					}
+					if(!boost::xtime_get(&xtime, clock)) throw exceptions::runtime_error("failed to get current time", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					boost::xtime::xtime_sec_t const integral(static_cast<boost::xtime::xtime_sec_t>(seconds));
 					boost::xtime::xtime_nsec_t const fractional(static_cast<boost::xtime::xtime_nsec_t>((seconds - integral) * 1e9));
 					// add the delta
 					xtime.sec += integral;
 					xtime.nsec += fractional;
 					// sleep until absolute date
-					boost::thread::sleep(xtime);
+					boost::thread::sleep(xtime); //\todo returns on interruptions
 				#endif
 			}
 		}

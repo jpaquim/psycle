@@ -87,6 +87,7 @@ namespace psycle
 						return *element;
 					}
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__NO_CLASS
+					return *static_cast< ::GstElement* >(0); // dummy return to avoid warning
 				}
 			}
 
@@ -115,7 +116,6 @@ namespace psycle
 				}
 
 				// create a pipeline
-				::GstElement * pipeline;
 				if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw engine::exceptions::runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
 				try
 				{
@@ -242,7 +242,7 @@ namespace psycle
 							}
 
 							// get the sink element's sink pad
-							::GstPad * sink_pad(::gst_element_get_pad(source_, "sink" ));
+							::GstPad * sink_pad(::gst_element_get_pad(sink_, "sink"));
 							if(!sink_pad) throw engine::exceptions::runtime_error("no sink pad found on sink element", UNIVERSALIS__COMPILER__LOCATION);
 							try
 							{
@@ -295,28 +295,74 @@ namespace psycle
 			void gstreamer::do_start() throw(engine::exception)
 			{
 				resource::do_start();
-				::GstStateChangeReturn const result(::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING));
+				GstStateChangeReturn const result(::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING));
 				switch(result)
 				{
-					case ::GST_STATE_CHANGE_SUCCESS: goto success;
+					case ::GST_STATE_CHANGE_NO_PREROLL:
+						universalis::operating_system::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION);
+					case ::GST_STATE_CHANGE_SUCCESS:
+						return;
 					case ::GST_STATE_CHANGE_ASYNC:
+						if(started()) return;
+					case ::GST_STATE_CHANGE_FAILURE:
 						{
-							::GstClockTime timeout_total_nanoseconds(0);
-							::GstClockTime timeout_nanoseconds(1e9);
+							std::ostringstream s; s << "could not set the whole pipeline state to playing";
+							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+					default:
+						{
+							std::ostringstream s; s << "uknown state change: " << result;
+							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+				}
+			}
+		
+			bool gstreamer::started() const
+			{
+				if(!opened()) return false;
+				::GstState state, pending_state;
+				::GstClockTime timeout_nanoseconds(static_cast<GstClockTime>(0.1e9));
+				GstStateChangeReturn result(::gst_element_get_state(pipeline_, &state, &pending_state, timeout_nanoseconds));
+				switch(result)
+				{
+					case ::GST_STATE_CHANGE_NO_PREROLL:
+						universalis::operating_system::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION);
+					case ::GST_STATE_CHANGE_SUCCESS:
+						return state == ::GST_STATE_PLAYING;
+					case ::GST_STATE_CHANGE_ASYNC:
+						if(pending_state != ::GST_STATE_PLAYING) return false;
+						else
+						{
+							::GstClockTime timeout_total_nanoseconds(timeout_nanoseconds);
+							timeout_nanoseconds += static_cast<GstClockTime>(0.5e9);
 							for(;;)
 							{
 								{
-									std::ostringstream s; s << "waiting for the whole pipeline state to asynchronously change to playing state (waited a total of " << timeout_total_nanoseconds * 1e-9 << ")";
+									std::ostringstream s; s << "waiting for the whole pipeline state to asynchronously change (waited a total of " << timeout_total_nanoseconds * 1e-9 << " seconds)";
 									universalis::operating_system::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 								}
 								{
-									::GstState state, pending;
-									::GstStateChangeReturn const result(::gst_element_get_state(pipeline_, &state, &pending, timeout_nanoseconds));
+									result = ::gst_element_get_state(pipeline_, &state, &pending_state, timeout_nanoseconds);
 									switch(result)
 									{
-										case ::GST_STATE_CHANGE_SUCCESS: goto success;
-										case ::GST_STATE_CHANGE_ASYNC: break;
-										default: goto failed;
+										case ::GST_STATE_CHANGE_ASYNC:
+											if(pending_state != ::GST_STATE_PLAYING) return false;
+											else break;
+										case ::GST_STATE_CHANGE_NO_PREROLL:
+											universalis::operating_system::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION);
+										case ::GST_STATE_CHANGE_SUCCESS:
+											return state == ::GST_STATE_PLAYING;
+										case ::GST_STATE_CHANGE_FAILURE:
+											{
+												std::ostringstream s;
+													s
+														<< "could not get the whole pipeline state: "
+														<< "state change: " << result << ", "
+														<< "state: " << state << ", "
+														<< "pending state: " << pending_state;
+												throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+											}
+										default: goto unkown;
 									}
 								}
 								timeout_total_nanoseconds += timeout_nanoseconds;
@@ -324,22 +370,19 @@ namespace psycle
 								timeout_nanoseconds *= 2;
 							}
 						}
+					case ::GST_STATE_CHANGE_FAILURE:
+						return false;
 					default:
-					failed:
+					unkown:
 						{
-							std::ostringstream s; s << "could not set the whole pipeline state to playing";
+							std::ostringstream s;
+								s
+									<< "uknown state change: " << result << ", "
+									<< "state: " << state << ", "
+									<< "pending state: " << pending_state;
 							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 						}
 				}
-				success: ;
-			}
-		
-			bool gstreamer::started() const
-			{
-				if(!opened()) return false;
-				::GstState state, pending;
-				::GstClockTime timeout(0);
-				return ::gst_element_get_state(pipeline_, &state, &pending, timeout) == ::GST_STATE_PLAYING;
 			}
 		
 			void gstreamer::handoff_static(::GstElement * source, ::GstBuffer * buffer, GstPad * pad, gstreamer * instance)
@@ -347,23 +390,19 @@ namespace psycle
 				instance->handoff(*buffer);
 			}
 
-			namespace
-			{
-				void process_gstreamer(::GstElement & object, ::GstBuffer & buffer, ::GstPad & pad, gstreamer & gstreamer)
-				{
-				}
-			}
-						
 			void gstreamer::handoff(::GstBuffer & buffer)
 			{
-				if(true)///\todo caps_set_
+				static bool caps_set_(false);
+				if(!caps_set_)
 				{
+					loggers::trace()("sleeping 1 second ...", UNIVERSALIS__COMPILER__LOCATION);
+					::sleep(1);
 					if(loggers::trace())
 					{
 						loggers::trace()("caps not set on buffer ; setting them", UNIVERSALIS__COMPILER__LOCATION);
 					}
 					::gst_buffer_set_caps(&buffer, caps_);
-					//caps_set_ = true;
+					caps_set_ = true;
 				}
 				std::size_t const size(GST_BUFFER_SIZE(&buffer));
 				if(loggers::trace())
@@ -383,6 +422,8 @@ namespace psycle
 
 			void gstreamer::do_process() throw(engine::exception)
 			{
+				loggers::trace()("sleeping 1 second ...", UNIVERSALIS__COMPILER__LOCATION);
+				::sleep(1);
 			}
 			
 			void gstreamer::do_stop() throw(engine::exception)
