@@ -170,6 +170,32 @@ void MySAX2Handler::startElement(const   XMLCh* const    uri,
          }
       }
     } else
+    if (tagName == "bvlborder") {
+     NSkin* skin = pCfg->findSkin(lastId);
+      if (skin != 0) {
+         NBevelBorder* br = new NBevelBorder();
+         br->setSpacing(NSize(0,0,0,0));
+         skin->border = br;
+
+         int outerStyle = nNone;
+
+         std::string styleStr = getValue("outer",attrs);
+         if (styleStr != "") {
+           if (styleStr == "raised")  outerStyle = nRaised; else
+           if (styleStr == "lowered") outerStyle = nLowered;
+         }
+
+         int innerStyle = nNone;
+
+         styleStr = getValue("inner",attrs);
+         if (styleStr != "") {
+           if (styleStr == "raised")  innerStyle = nRaised; else
+           if (styleStr == "lowered") innerStyle = nLowered;
+         }
+
+         br->setStyle(outerStyle,innerStyle,2);
+       }
+    } else
     if (tagName == "bgcolor") {
       NSkin* skin = pCfg->findSkin(lastId);
       if (skin != 0) {
