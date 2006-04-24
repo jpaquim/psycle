@@ -66,6 +66,12 @@ void NTabBook::setActivePage( NPanel * page )
   tabBar_->setActiveTab(page);
 }
 
+void NTabBook::setActivePage( int index )
+{
+  book_->setActivePage(index);
+  tabBar_->setActiveTab(index);
+}
+
 void NTabBook::setTabBarAlign( int align )
 {
   tabBar_->setAlign(align);
@@ -77,5 +83,7 @@ NCustomButton * NTabBook::tab( NPanel * page )
 {
   return tabBar_->tab(page);
 }
+
+
 
 

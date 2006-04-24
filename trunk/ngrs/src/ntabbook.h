@@ -42,6 +42,7 @@ public:
     void addPage(NPanel* page, const std::string & tabName);
 
     void setActivePage(NPanel* page);
+    void setActivePage(int index);
     void setTabBarAlign(int align);
 
     NCustomButton* tab(NPanel* page);

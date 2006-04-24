@@ -46,6 +46,7 @@ public:
 
    void setOrientation(int orientation);
    void setActiveTab(NPanel* page);
+   void setActiveTab(unsigned int index);
 
 private:
 

@@ -65,4 +65,16 @@ void NNoteBook::setActivePage( NPanel * page )
   }
 }
 
+void NNoteBook::setActivePage( unsigned int index )
+{
+  if (index < visualComponents().size() && index >= 0) {
+     if (visiblePage_!=0) {
+        visiblePage_->setVisible(false);
+      }
+     visiblePage_ = static_cast<NPanel*> (visualComponents().at(index));
+     visiblePage_->setVisible(true);
+     resize();
+  }
+}
+
 

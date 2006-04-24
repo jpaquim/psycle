@@ -34,6 +34,7 @@ public:
 
     void add(NPanel* page);
     void setActivePage(NPanel* page);
+    void setActivePage(unsigned int index);
 
     virtual void resize();
 
