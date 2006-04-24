@@ -127,6 +127,7 @@ private:
 
     void onMachineView(NButtonEvent* ev);
     void onPatternView(NButtonEvent* ev);
+    void onSequencerView(NButtonEvent* ev);
 
     void onSongLoadProgress(int chunkCount, int max, const std::string & header);
     void onOctaveChange(NItemEvent* ev);

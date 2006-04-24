@@ -32,6 +32,7 @@
 #include <nmessagebox.h>
 
 
+
 /* XPM */
 const char * kitty_xpm[] = {
 "302 186 7 1",
@@ -238,6 +239,7 @@ MainWindow::MainWindow()
 
   initMenu();
   initDialogs();
+  childView_ = new ChildView();
   initBars();
   initViews();
   initSignals();
@@ -321,14 +323,9 @@ void MainWindow::showSongpDlg( NObject * sender )
 
 void MainWindow::initViews( )
 {
-  childView_ = new ChildView();
   pane()->add(childView_);
   childView_->setTitleBarText();
   sequencerBar_->setPatternView(childView_->patternView());
-
-  octaveCombo_->setIndex(4);
-  childView_->patternView()->setEditOctave(4);
-  trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16*/
 }
 
 void MainWindow::initBars( )
@@ -360,6 +357,10 @@ void MainWindow::initBars( )
   sequencerBar_->updateSequencer();
   updateComboIns(true);
   insCombo_->setIndex(0);
+
+  octaveCombo_->setIndex(4);
+  childView_->patternView()->setEditOctave(4);
+  trackCombo_->setIndex(12);  // starts at 4 .. so 16 - 4 = 12 ^= 16*/
 }
 
 void MainWindow::initToolBar( )
@@ -482,9 +483,10 @@ void MainWindow::initToolBar( )
                                          img->loadFromFile(Global::pConfig()->iconPath+ "machines.xpm");
     img->setPreferredSize(25,25);
     NButton* macBtn_ = new NButton(img);
-      macBtn_->clicked.connect(this,&MainWindow::onMachineView);
       macBtn_->setFlat(false);
       macBtn_->setToggle(true);
+      macBtn_->setHint("Machines");
+      macBtn_->clicked.connect(this,&MainWindow::onMachineView);
     toolBar1_->add(macBtn_);
 
     img = new NImage();
@@ -495,13 +497,16 @@ void MainWindow::initToolBar( )
        patBtn_->clicked.connect(this,&MainWindow::onPatternView);
        patBtn_->setFlat(false);
        patBtn_->setToggle(true);
+       patBtn_->setHint("Patterns");
     toolBar1_->add(patBtn_);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->sequencer()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "sequencer.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    NButton* seqBtn = new NButton(img);
+       seqBtn->setHint("Sequencer");
+    toolBar1_->add(seqBtn)->clicked.connect(this,&MainWindow::onSequencerView);
 
     toolBar1_->add(new NToolBarSeparator());
 
@@ -510,13 +515,17 @@ void MainWindow::initToolBar( )
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->newmachine()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "newmachine.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    NButton* newMacBtn = new NButton(img);
+      newMacBtn->setHint("New Machine");
+    toolBar1_->add(newMacBtn)->clicked.connect(childView_,&ChildView::onMachineViewDblClick);
 
     img = new NImage();
     if (Global::pConfig()->iconPath=="") img->setSharedBitmap(&Global::pBitmaps()->openeditor()); else
                                          img->loadFromFile(Global::pConfig()->iconPath+ "openeditor.xpm");
     img->setPreferredSize(25,25);
-    toolBar1_->add(new NButton(img));
+    NButton* editInsBtn = new NButton(img);
+      editInsBtn->setHint("Edit Instrument");
+    toolBar1_->add(editInsBtn)->clicked.connect(this,&MainWindow::onEditInstrument);
 
     toolBar1_->add(new NToolBarSeparator());
 
@@ -1107,7 +1116,6 @@ void MainWindow::onRecordWav( NButtonEvent * ev )
 
 void MainWindow::onTimer( )
 {
-
   if (Global::pPlayer()->_playing) {
     int oldPos = childView_->patternView()->editPosition();
     childView_->patternView()->updatePlayBar(sequencerBar_->followSong());
@@ -1135,12 +1143,12 @@ int MainWindow::close( )
 }
 
 void MainWindow::onMachineView(NButtonEvent* ev) {
-  childView_->setActivePage(childView_->machineView());
+  childView_->setActivePage(0);
   childView_->repaint();
 }
 
 void MainWindow::onPatternView(NButtonEvent* ev) {
-  childView_->setActivePage(childView_->patternView());
+  childView_->setActivePage(1);
   childView_->repaint();
 }
 
@@ -1238,6 +1246,15 @@ void MainWindow::onPatternStepChange( NItemEvent * ev )
   if (patternCombo_->selIndex()!=-1) {
      childView_->patternView()->setPatternStep(patternCombo_->selIndex()+1);
   }
+}
+
+void MainWindow::onSequencerView( NButtonEvent * ev )
+{
+  NMessageBox* box = new NMessageBox("This feature is unimplemented in this release. Use the left side sequence now");
+  box->setTitle("Psycle Notice");
+  box->setButtons(nMsgOkBtn);
+  box->execute();
+  NApp::addRemovePipe(box);
 }
 
 
