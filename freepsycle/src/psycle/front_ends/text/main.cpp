@@ -105,7 +105,7 @@ namespace psycle
 					loggers::information()("############################################## schedule ########################################################");
 					{
 						host::schedulers::single_threaded::scheduler scheduler(graph);
-						universalis::compiler::numeric<64>::floating_point const seconds(4);
+						universalis::compiler::numeric<64>::floating_point const seconds(15);
 						if(loggers::information()())
 						{
 							std::ostringstream s;
