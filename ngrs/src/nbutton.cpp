@@ -20,6 +20,9 @@
 #include "nbutton.h"
 #include "napp.h"
 #include "nconfig.h"
+#include "nwindow.h"
+#include "nlabel.h"
+#include "nframeborder.h"
 
 using namespace std;
 
@@ -102,14 +105,19 @@ void NButton::onMouseExit( )
         setSkin(btnFlat_);
      } else setSkin(btnUp_);
   }
-
   repaint();
+  if (hint!=0 && hint->mapped()) hint->setVisible(false);
 }
 
 void NButton::onMouseEnter( )
 {
   if (!down()) setSkin(btnOver_);
   repaint();
+  if (hint!=0 && !hint->mapped()) {
+     hint->setPosition(window()->left()+ absoluteLeft() + (int) ((3*spacingWidth())/4), window()->top()+absoluteTop() + spacingHeight(),100,100);
+     hint->pack();
+     hint->setVisible(true);
+  }
 }
 
 void NButton::setFlat( bool on )
@@ -128,6 +136,9 @@ void NButton::init( )
   NApp::config()->setSkin(&btnFlat_,"btnflat");
 
   setSkin(btnFlat_);
+
+  hint = 0;
+  hintLbl = 0;
 }
 
 void NButton::setDown( bool on )
@@ -141,6 +152,21 @@ void NButton::setDown( bool on )
     setSkin(btnUp_);
     repaint();
   }
+}
+
+void NButton::setHint( const std::string & text )
+{
+  if (hint==0) {
+     hint = new NWindow();
+       hintLbl = new NLabel();
+         hint->pane()->setBackground(NColor(0xFF,0xFF,0xD0));
+         hint->pane()->setBorder(new NFrameBorder(),true);
+         hint->pane()->setSpacing(NSize(2,2,2,2));
+         hint->setDecoration(false);
+       hint->pane()->add(hintLbl, nAlClient);
+     add(hint);
+  }
+  hintLbl->setText(text);
 }
 
 

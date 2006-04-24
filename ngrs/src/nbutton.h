@@ -24,6 +24,9 @@
 #include "nimage.h"
 #include "nbevelborder.h"
 
+class NWindow;
+class NLabel;
+
 /**
 @author Stefan
 */
@@ -41,6 +44,7 @@ public:
 
 
     void setFlat(bool on);
+    void setHint(const std::string & text);
 
     virtual void onMouseExit();
     virtual void onMouseEnter();
@@ -64,6 +68,9 @@ private:
     NImage* icon_;
 
     void init();
+
+    NWindow* hint;
+    NLabel* hintLbl;
 
 };
 

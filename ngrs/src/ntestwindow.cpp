@@ -72,8 +72,12 @@ NTestWindow::NTestWindow()
 
   view->setPosition(10,50,200,200);*/
 
-
-  testMenu();
+  NButton* btn = new NButton("hallo");
+    btn->setPosition(100,100,100,20);
+    btn->setFlat(false);
+    btn->setHint("Button zum drücken");
+  pane()->add(btn);
+  //testMenu();
   //testSegDisplay();
 
 }

@@ -322,7 +322,7 @@ void NVisualComponent::updateAlign( )
 int NVisualComponent::clientWidth( ) const
 {
   if (layout_ == 0||(clSzPolicy &nHorizontal)!=nHorizontal) return spacingWidth();
-  return layout_->preferredWidth(this);
+  return layout_->preferredWidth(this) ;
 }
 
 int NVisualComponent::clientHeight( ) const
