@@ -65,6 +65,8 @@ public:
 
     NTimer timer;
 
+    void onMachineViewDblClick(NButtonEvent* ev);
+
 private:
 
     Song* _pSong;
@@ -77,7 +79,6 @@ private:
     PatternView* patternView_;
 
     void OnFileLoadSongNamed(const std::string & fName, int fType);
-    void onMachineViewDblClick(NButtonEvent* ev);
 
     void onTimer();
 
