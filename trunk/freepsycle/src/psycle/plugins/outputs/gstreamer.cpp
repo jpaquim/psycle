@@ -411,12 +411,13 @@ namespace psycle
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 				///\todo hardcoded to std::int16_t
-				std::int16_t * data(reinterpret_cast<std::int16_t*>(GST_BUFFER_DATA(&buffer)));
-				for(std::size_t i(0) ; i < size ; ++i)
+				typedef std::int16_t numeric_type;
+				numeric_type * data(reinterpret_cast<numeric_type*>(GST_BUFFER_DATA(&buffer)));
+				for(std::size_t i(0) ; i < size / sizeof *data ; ++i)
 				{
 					static double t(0);
-					*data++ = static_cast<std::int16_t>(std::sin(t));
-					t = t + 0.0001;
+					*data++ = static_cast<numeric_type>(std::numeric_limits<numeric_type>::min() * std::sin(t));
+					t += 0.01;
 				}
 			}
 
