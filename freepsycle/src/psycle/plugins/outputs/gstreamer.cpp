@@ -104,7 +104,7 @@ namespace psycle
 					{
 						once = true;
 						int * argument_count(0);
-                        char *** arguments = 0;
+						char *** arguments = 0;
 						::GError * error(0);
 						if(!::gst_init_check(argument_count, arguments, &error))
 						{
